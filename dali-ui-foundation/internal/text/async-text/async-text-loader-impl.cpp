@@ -519,11 +519,11 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                                                              parameters.text,
                                                                              *mTextModel->mLogicalModel);
     // ApplySnapshotToLogicalModel updates logicalModel.mText; utf32Characters is a reference to it.
-    numberOfCharacters = utf32Characters.Count();
+    numberOfCharacters = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
   }
   else
   {
-    textSize = parameters.text.size();
+    textSize = static_cast<Dali::Ui::Text::Length>(parameters.text.size());
 
     // This is a bit horrible but std::string returns a (signed) char*
     utf8 = reinterpret_cast<const uint8_t*>(parameters.text.c_str());
@@ -560,7 +560,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     {
       processingSource = projectedSourceStorage.source;
       ApplyTextProcessingSource(processingSource, *mTextModel->mLogicalModel);
-      numberOfCharacters               = utf32Characters.Count();
+      numberOfCharacters               = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
       replacementState.processingModel = mTextModel;
     }
   }
@@ -681,7 +681,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   mTextModel->mLayoutDirectionMode = parameters.layoutDirectionPolicy;
 
   mIsTextMirrored                 = false;
-  const Length numberOfParagraphs = mTextModel->mLogicalModel->mParagraphInfo.Count();
+  const Length numberOfParagraphs = static_cast<Dali::Ui::Text::Length>(mTextModel->mLogicalModel->mParagraphInfo.Count());
 
   bidirectionalInfo.Reserve(numberOfParagraphs);
 
@@ -718,7 +718,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   Vector<GlyphIndex> newParagraphGlyphs;
   newParagraphGlyphs.Reserve(numberOfParagraphs);
 
-  const Length currentNumberOfGlyphs = glyphs.Count();
+  const Length currentNumberOfGlyphs = static_cast<Dali::Ui::Text::Length>(glyphs.Count());
 
   const Vector<Character>& textToShape = mIsTextMirrored ? mirroredUtf32Characters : utf32Characters;
 
@@ -1000,7 +1000,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
     (numberOfCharacters > 0u)
       ? *(charactersToGlyphBuffer + lastIndex) + *(glyphsPerCharacterBuffer + lastIndex) - startGlyphIndex
       : 0u;
-  const Length totalNumberOfGlyphs = mTextModel->mVisualModel->mGlyphs.Count();
+  const Length totalNumberOfGlyphs = static_cast<Dali::Ui::Text::Length>(mTextModel->mVisualModel->mGlyphs.Count());
 
   if(0u == totalNumberOfGlyphs)
   {
@@ -1324,7 +1324,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   renderInfo.textLogicalBounds = CalculateGradientContentBounds(layoutSize,
                                                                 renderModel->mVisualModel->GetLayoutSize(),
                                                                 renderModel->mVisualModel->mLines.Begin(),
-                                                                renderModel->mVisualModel->mLines.Count(),
+                                                                static_cast<Dali::Ui::Text::Length>(renderModel->mVisualModel->mLines.Count()),
                                                                 parameters.verticalAlignment);
   const Text::ReplacementProjection* activeProjection =
     (replacementState && replacementState->processingModel && replacementState->projection.HasReplacements())
@@ -1790,8 +1790,8 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
 #endif
 
     // Calculate the actual gap before scrolling wraps.
-    int textPadding     = std::max(controlSize.x - textNaturalSize.x, 0.0f);
-    wrapGap             = std::max(parameters.marqueeGap, textPadding);
+    int textPadding     = static_cast<int>(std::max(controlSize.x - textNaturalSize.x, 0.0f));
+    wrapGap             = static_cast<float>(std::max(parameters.marqueeGap, textPadding));
     Vector2 textureSize = textNaturalSize + Vector2(wrapGap, 0.0f); // Add the gap as a part of the texture.
 
     // Calculate a size of texture for text scrolling
@@ -1856,8 +1856,8 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
     textHeight = useCachedHeight ? textHeight : ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
 
     // Calculate the actual gap before scrolling wraps.
-    int textPadding = std::max(controlSize.y - textHeight, 0.0f);
-    wrapGap         = std::max(parameters.marqueeGap, textPadding);
+    int textPadding = static_cast<int>(std::max(controlSize.y - textHeight, 0.0f));
+    wrapGap         = static_cast<float>(std::max(parameters.marqueeGap, textPadding));
     Vector2 textureSize(controlSize.width, textHeight + wrapGap); // Add the gap as a part of the texture
 
     // Calculate a size of texture for text scrolling
@@ -1899,7 +1899,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
     CalculateMarqueeGradientViewportBounds(controlSize,
                                            mTextModel->mVisualModel->GetLayoutSize(),
                                            mTextModel->mVisualModel->mLines.Begin(),
-                                           mTextModel->mVisualModel->mLines.Count(),
+                                           static_cast<Dali::Ui::Text::Length>(mTextModel->mVisualModel->mLines.Count()),
                                            parameters.horizontalAlignment,
                                            parameters.verticalAlignment);
 

@@ -62,6 +62,7 @@ LIST(APPEND LIBRARY_SOURCES ${BUILT_IN_SHADER_GEN_CPP})
 #    Only these files should be parsed by tcheadgen.sh.
 # ---------------------------------------------------------
 SET(TC_SOURCES
+    utc-Dali-FocusManager-internal.cpp
     utc-Dali-InteractiveTrait-internal.cpp
     utc-Dali-InteractiveView-internal.cpp
     utc-Dali-SelectableTrait-internal.cpp

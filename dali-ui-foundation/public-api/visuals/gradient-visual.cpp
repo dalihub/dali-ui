@@ -148,8 +148,8 @@ void GradientVisual::SetStopNodes(const Dali::Vector<Ui::Gradient::StopNode>& st
   Dali::Property::Array offsetArray;
   Dali::Property::Array colorArray;
 
-  offsetArray.Reserve(stopNodes.Count());
-  colorArray.Reserve(stopNodes.Count());
+  offsetArray.Reserve(static_cast<Dali::Property::Array::SizeType>(stopNodes.Count()));
+  colorArray.Reserve(static_cast<Dali::Property::Array::SizeType>(stopNodes.Count()));
   for(uint32_t i = 0; i < stopNodes.Count(); ++i)
   {
     offsetArray.PushBack(stopNodes[i].GetOffset());

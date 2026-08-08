@@ -156,7 +156,7 @@ private:
    *
    * @param[in] index index of the queue.
    */
-  TextureManager::TextureId GetCachedTextureId(int index) const;
+  TextureManager::TextureId GetCachedTextureId(uint32_t index) const;
 
   /**
    * @brief Make the loaded frame ready and notify it to the texture upload observer

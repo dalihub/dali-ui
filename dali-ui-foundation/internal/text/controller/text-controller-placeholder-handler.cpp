@@ -538,20 +538,20 @@ void Controller::PlaceholderHandler::ShowPlaceholderText(Controller::Impl& impl)
     decorator->SetHandleActive(RIGHT_SELECTION_HANDLE, false);
 
     const char* text(EMPTY_STRING);
-    size_t      size(0u);
+    uint32_t    size(0u);
 
     if((EventData::INACTIVE != eventData->mState))
     {
       if(eventData->mShowPlaceholderOnFocus)
       {
         text = eventData->mPlaceholderTextActive.c_str();
-        size = eventData->mPlaceholderTextActive.size();
+        size = static_cast<uint32_t>(eventData->mPlaceholderTextActive.size());
       }
     }
     else
     {
       text = eventData->mPlaceholderTextInactive.c_str();
-      size = eventData->mPlaceholderTextInactive.size();
+      size = static_cast<uint32_t>(eventData->mPlaceholderTextInactive.size());
     }
 
     TextUpdateInfo& textUpdateInfo             = impl.mTextUpdateInfo;

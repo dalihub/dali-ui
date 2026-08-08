@@ -428,7 +428,7 @@ bool JsonParserState::ParseWhiteSpace()
 
 bool JsonParserState::ParseSymbol(const std::string& symbol)
 {
-  if(AtLeast(symbol.size()))
+  if(AtLeast(static_cast<int32_t>(symbol.size())))
   {
     for(int i = 0; i < static_cast<int>(symbol.size()); ++i)
     {
@@ -677,7 +677,7 @@ char* JsonParserState::EncodeString()
     return nullptr;
   }
 
-  mNumberOfParsedChars += last - first;
+  mNumberOfParsedChars = static_cast<int32_t>(mNumberOfParsedChars + (last - first));
   mNumberOfParsedChars += 1; // null terminator
 
   mCurrent.SetSubstitution(substitution > 1);

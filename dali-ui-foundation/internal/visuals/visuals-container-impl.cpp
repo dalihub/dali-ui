@@ -144,7 +144,7 @@ bool VisualsContainer::AddVisualBase(Dali::Ui::VisualBase visualObject, Dali::Ui
 
       // Add to this container.
       visualObjectImpl.AttachToContainerInternal(self);
-      visualObjectImpl.SetSiblingOrderInternal(mVisualBases.size());
+      visualObjectImpl.SetSiblingOrderInternal(static_cast<uint32_t>(mVisualBases.size()));
       visualObjectImpl.SetShadowType(shadowType);
 
       ReplaceVisualBase(visualObjectImpl);

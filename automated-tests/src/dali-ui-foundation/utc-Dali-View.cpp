@@ -1137,6 +1137,15 @@ int UtcDaliViewGetPaddingP(void)
   END_TEST;
 }
 
+int UtcDaliInsetsHorizontalVerticalConstructorP(void)
+{
+  UiTestApplication application;
+
+  const Insets insets(12.5f, 7.5f);
+  DALI_TEST_EQUALS(insets, Insets(12.5f, 12.5f, 7.5f, 7.5f), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliViewMarginHelpersP(void)
 {
   UiTestApplication application;

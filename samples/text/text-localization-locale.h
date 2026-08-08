@@ -19,8 +19,9 @@
 
 #include <clocale>
 #include <cstdlib>
+#include <string>
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
 // Avoid including windows.h in this shared sample header because its global
 // macros collide with DALi enum values such as ABSOLUTE.
 extern "C" __declspec(dllimport) int __stdcall SetEnvironmentVariableA(const char* name, const char* value);
@@ -40,7 +41,7 @@ inline bool SetMessageLocale(const char* locale)
     return false;
   }
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
   // libintl is a DLL, so update both the Win32 process environment and the
   // executable's CRT environment before refreshing localization bindings.
   const bool processEnvironmentSet = SetEnvironmentVariableA("LANGUAGE", locale) != 0;
@@ -53,8 +54,19 @@ inline bool SetMessageLocale(const char* locale)
 
 inline const char* GetMessageLocale()
 {
-#if defined(_WIN32)
-  const char* locale = std::getenv("LANGUAGE");
+#if defined(_MSC_VER)
+  thread_local std::string localeValue;
+  char*                    environmentVariableValue = nullptr;
+  std::size_t              valueLength              = 0u;
+  if(_dupenv_s(&environmentVariableValue, &valueLength, "LANGUAGE") != 0 || environmentVariableValue == nullptr)
+  {
+    localeValue.clear();
+    return "(null)";
+  }
+
+  localeValue.assign(environmentVariableValue);
+  std::free(environmentVariableValue);
+  const char* locale = localeValue.c_str();
 #else
   const char* locale = std::setlocale(LC_MESSAGES, nullptr);
 #endif

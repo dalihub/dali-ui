@@ -1,9 +1,12 @@
 name: Repo sync
 
 on:
-  schedule:
-    # 3시간마다 실행
-    - cron: '0 */3 * * *'
+  push:
+    branches:
+      - devel
+      - wiki
+    tags:
+      - '**'
   workflow_dispatch:
     inputs:
       source_branch:
@@ -17,8 +20,8 @@ on:
 
 jobs:
   repo-sync:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'NUI/dali-ui' }}
-    runs-on: [ code-linux, code-large ]
+    if: ${{ github.repository == 'NUI/dali-ui' }}
+    runs-on: code-linux
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -98,5 +101,4 @@ jobs:
         env:
           PUBLIC_PAT: ${{ secrets.PAT_TOKEN }}
         run: |
-          REMOTE_URL="https://rabbitfor:${{ secrets.PAT_TOKEN }}@github.com/dalihub/dali-ui.git"
-          git push "$REMOTE_URL" --tags --force
+          git push public --prune 'refs/tags/*:refs/tags/*'

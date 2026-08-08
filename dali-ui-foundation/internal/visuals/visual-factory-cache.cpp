@@ -121,7 +121,7 @@ Dali::Geometry CreateGridGeometry(Dali::Uint16Pair gridSize, bool normalized)
   VertexBuffer vertexBuffer = VertexBuffer::New(vertexFormat);
   if(vertices.Size() > 0)
   {
-    vertexBuffer.SetData(&vertices[0], vertices.Size());
+    vertexBuffer.SetData(&vertices[0], static_cast<uint32_t>(vertices.Size()));
   }
 
   // Create the geometry object
@@ -129,7 +129,7 @@ Dali::Geometry CreateGridGeometry(Dali::Uint16Pair gridSize, bool normalized)
   geometry.AddVertexBuffer(vertexBuffer);
   if(indices.Size() > 0)
   {
-    geometry.SetIndexBuffer(&indices[0], indices.Size());
+    geometry.SetIndexBuffer(&indices[0], static_cast<uint32_t>(indices.Size()));
   }
 
   geometry.SetType(Geometry::TRIANGLE_STRIP);
@@ -216,7 +216,7 @@ VisualFactoryCache::ExternalShaderId VisualFactoryCache::RegisterExternalShader(
   ExternalShaderId externalShaderId = INVALID_EXTERNAL_SHADER_ID;
   if(DALI_LIKELY(externalShader))
   {
-    externalShaderId = mExternalShaders.size();
+    externalShaderId = static_cast<Dali::Ui::Internal::VisualFactoryCache::ExternalShaderId>(mExternalShaders.size());
     mExternalShaders.emplace_back(externalShader);
   }
   return externalShaderId;
@@ -441,7 +441,7 @@ Geometry VisualFactoryCache::GetNPatchGeometry(int index)
     }
     else if(data->GetStretchPixelsX().Size() > 0 || data->GetStretchPixelsY().Size() > 0)
     {
-      Uint16Pair gridSize(2 * data->GetStretchPixelsX().Size() + 1, 2 * data->GetStretchPixelsY().Size() + 1);
+      Uint16Pair gridSize(static_cast<uint32_t>(2u * data->GetStretchPixelsX().Size() + 1u), static_cast<uint32_t>(2u * data->GetStretchPixelsY().Size() + 1u));
       geometry = VisualFactoryCache::CreateGridGeometry(gridSize, false);
     }
   }

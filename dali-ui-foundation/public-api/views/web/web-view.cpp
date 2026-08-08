@@ -274,6 +274,16 @@ float WebView::GetScaleFactor() const
   return GetImpl(*this).GetScaleFactor();
 }
 
+WebProfile WebView::GetProfile() const
+{
+  return GetImpl(*this).GetProfile();
+}
+
+WebSettings WebView::GetSettings() const
+{
+  return GetImpl(*this).GetSettings();
+}
+
 Dali::Ui::ImageView WebView::GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)
 {
   return GetImpl(*this).GetScreenshot(viewArea, scaleFactor);
@@ -387,6 +397,11 @@ void WebView::EvaluateJavaScript(const Dali::String& script, JavaScriptCallback 
 void WebView::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, JavaScriptCallback callback)
 {
   GetImpl(*this).AddJavaScriptMessageHandler(exposedObjectName, std::move(callback));
+}
+
+void WebView::RemoveJavaScriptMessageHandler(const Dali::String& exposedObjectName)
+{
+  GetImpl(*this).RemoveJavaScriptMessageHandler(exposedObjectName);
 }
 
 void WebView::RegisterJavaScriptAlertCallback(JavaScriptAlertCallback callback)

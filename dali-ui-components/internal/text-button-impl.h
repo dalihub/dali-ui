@@ -57,6 +57,7 @@ public:
 
 protected:
   void         OnInitialize() override;
+  bool         OnAccessibilityRequestDefaultName(Dali::String& value) override;
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
   LayoutRect   OnArrange(const LayoutRect& bounds) override;
 
@@ -66,6 +67,7 @@ protected:
 private:
   void ApplyInitialStyle(TextButtonStyle style);
   void ApplyAlignment();
+  void OnViewStateChanged(Ui::View view, StateEvent event);
 
 private:
   Ui::Label       mLabel;

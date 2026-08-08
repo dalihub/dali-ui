@@ -1332,10 +1332,10 @@ void ImageVisual::ComputeTextureSize()
           Texture maskTexture = textureSet.GetTexture(1);
           if(maskTexture)
           {
-            mTextureSize.x = std::min(static_cast<uint32_t>(mTextureSize.x * mMaskingData->mContentScaleFactor),
-                                      maskTexture.GetWidth());
-            mTextureSize.y = std::min(static_cast<uint32_t>(mTextureSize.y * mMaskingData->mContentScaleFactor),
-                                      maskTexture.GetHeight());
+            mTextureSize.x = static_cast<float>(std::min(static_cast<uint32_t>(mTextureSize.x * mMaskingData->mContentScaleFactor),
+                                                         maskTexture.GetWidth()));
+            mTextureSize.y = static_cast<float>(std::min(static_cast<uint32_t>(mTextureSize.y * mMaskingData->mContentScaleFactor),
+                                                         maskTexture.GetHeight()));
           }
         }
       }

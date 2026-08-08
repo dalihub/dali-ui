@@ -100,7 +100,7 @@ Bounds TextViewAccessible::GetRangeExtents(std::size_t startOffset, std::size_t 
   }
 
   auto controller   = GetTextController();
-  auto rect         = controller->GetTextBoundingRectangle(startOffset, endOffset - 1);
+  auto rect         = controller->GetTextBoundingRectangle(static_cast<Dali::Ui::Text::CharacterIndex>(startOffset), static_cast<Dali::Ui::Text::CharacterIndex>(endOffset - 1u));
   auto layoutOffset = controller->GetLayoutOffsetWithPadding();
   auto extents      = GetExtents(type);
 
@@ -171,8 +171,8 @@ Dali::Devel::Accessibility::Range TextViewAccessible::GetTextAtOffset(
       if(offset < textSize)
       {
         range.content     = GetText(offset, offset + 1u);
-        range.startOffset = offset;
-        range.endOffset   = offset + 1;
+        range.startOffset = static_cast<int32_t>(offset);
+        range.endOffset   = static_cast<int32_t>(offset + 1u);
       }
       break;
     }
@@ -236,8 +236,8 @@ Dali::Devel::Accessibility::Range TextViewAccessible::GetTextAtOffset(
         {
           auto endOffset    = std::min(index + 1u, textSize);
           range.content     = GetText(start, endOffset);
-          range.startOffset = start;
-          range.endOffset   = endOffset;
+          range.startOffset = static_cast<int32_t>(start);
+          range.endOffset   = static_cast<int32_t>(endOffset);
         }
 
         if(boundary == Dali::Devel::Accessibility::TextBoundary::LINE) // LCOV_EXCL_LINE

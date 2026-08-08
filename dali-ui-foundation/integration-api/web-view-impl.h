@@ -302,6 +302,11 @@ public: // API — JavaScript
   void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, WebView::JavaScriptCallback callback);
 
   /**
+   * @copydoc Dali::Ui::WebView::RemoveJavaScriptMessageHandler
+   */
+  void RemoveJavaScriptMessageHandler(const Dali::String& exposedObjectName);
+
+  /**
    * @copydoc Dali::Ui::WebView::RegisterJavaScriptAlertCallback
    */
   void RegisterJavaScriptAlertCallback(WebView::JavaScriptAlertCallback callback);
@@ -372,6 +377,17 @@ public: // API — Screenshot
    * @copydoc Dali::Ui::WebView::GetScreenshotAsynchronously
    */
   bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback);
+
+public: // API — Profile & Settings
+  /**
+   * @copydoc Dali::Ui::WebView::GetProfile
+   */
+  WebProfile GetProfile() const;
+
+  /**
+   * @copydoc Dali::Ui::WebView::GetSettings
+   */
+  WebSettings GetSettings() const;
 
 public: // API — Page Info
   /**
@@ -649,8 +665,10 @@ public: // Signal members (accessible by WebView for signal emission)
   WebView::GeolocationPermissionSignalType mGeolocationPermissionSignal;
   WebView::WebProcessCrashedSignalType     mWebProcessCrashedSignal;
 
-private:                      // Data — Engine
-  Dali::WebEngine mWebEngine; ///< The underlying dali-adaptor web engine instance
+private:                          // Data — Engine
+  Dali::WebEngine     mWebEngine; ///< The underlying dali-adaptor web engine instance
+  mutable WebProfile  mWebProfile;
+  mutable WebSettings mWebSettings;
 
   // One-shot screenshot callback — replaced on each GetScreenshotAsynchronously() call.
   std::function<void(Dali::Ui::ImageView)> mPendingScreenshotCallback;

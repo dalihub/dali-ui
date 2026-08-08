@@ -748,7 +748,7 @@ void ControllerImplEventHandler::OnSelectAllEvent(Controller::Impl& impl)
       uint32_t oldEnd   = eventData.mRightSelectionPosition;
 
       eventData.mLeftSelectionPosition  = 0u;
-      eventData.mRightSelectionPosition = model->mLogicalModel->mText.Count();
+      eventData.mRightSelectionPosition = static_cast<Dali::Ui::Text::CharacterIndex>(model->mLogicalModel->mText.Count());
       eventData.mPrimaryCursorPosition  = eventData.mRightSelectionPosition;
 
       if(impl.mSelectableControlInterface != nullptr)

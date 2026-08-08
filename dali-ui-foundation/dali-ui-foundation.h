@@ -41,6 +41,7 @@
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/types/inner-shadow.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
@@ -69,6 +70,9 @@
 #include <dali-ui-foundation/public-api/views/view.h>
 
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-navigation-callback.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-navigation-context.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-navigation-result.h>
 
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-detector.h>
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-types.h>

@@ -23,7 +23,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: [ code-large ]
+    runs-on: code-linux
     permissions:
       contents: write
     steps:
@@ -125,7 +125,7 @@ jobs:
 #        cp ~/GBS_ROOT/Unified/local/repos/tizen_unified/armv7l/RPMS/*.rpm rpms
 #        rm rpms/*debug*
 
-    - name: Commit changes
+    - name: Prepare and publish release
       env:
         VERSION: ${{ steps.version.outputs.version }}
         SOURCE_BRANCH: ${{ github.event.inputs.source_branch }}
@@ -136,7 +136,12 @@ jobs:
       run: |
         set -euo pipefail
 
-        # Push release commit
+        if [ "$SOURCE_BRANCH" = "$DESTINATION_BRANCH" ]; then
+          echo "::error::Source and destination branches must be different"
+          exit 1
+        fi
+
+        # Prepare release commit without updating the remote source branch
         git add .
         if [ -e rpms ]; then
           git restore --staged rpms
@@ -146,17 +151,21 @@ jobs:
           -m "Dependencies:" \
           -m "dali-core: $DALI_CORE_COMMIT" \
           -m "dali-adaptor: $DALI_ADAPTOR_COMMIT"
-        git push origin HEAD:$SOURCE_BRANCH
+        RELEASE_COMMIT=$(git rev-parse HEAD)
 
-        # Sync to destination branch and keep destination-only patches on top
+        # Merge the release into the destination branch without rewriting history
         git fetch origin \
           "+refs/heads/$SOURCE_BRANCH:refs/remotes/origin/$SOURCE_BRANCH" \
           "+refs/heads/$DESTINATION_BRANCH:refs/remotes/origin/$DESTINATION_BRANCH"
         git checkout -B "$DESTINATION_BRANCH" "origin/$DESTINATION_BRANCH"
-        git rebase "origin/$SOURCE_BRANCH"
-        git tag -fa "v$VERSION" -m "Release $VERSION"
-        git push origin HEAD:$DESTINATION_BRANCH --force-with-lease
-        git push origin "v$VERSION" --force
+        git merge --no-ff "$RELEASE_COMMIT" -m "Merge release $VERSION into $DESTINATION_BRANCH"
+        git tag -a "v$VERSION" -m "Release $VERSION"
+
+        # Publish the source, destination, and tag together or not at all
+        git push --atomic origin \
+          "$RELEASE_COMMIT:refs/heads/$SOURCE_BRANCH" \
+          "HEAD:refs/heads/$DESTINATION_BRANCH" \
+          "refs/tags/v$VERSION:refs/tags/v$VERSION"
 
     - name: Create Release
       uses: code-actions/softprops-action-gh-release@v2

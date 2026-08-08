@@ -119,6 +119,18 @@ LabelAnimationSpec& LabelAnimationSpec::BackgroundColorBy(const UiColor& relativ
   return *this;
 }
 
+LabelAnimationSpec& LabelAnimationSpec::BackgroundGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BackgroundGradientStartOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::BackgroundGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BackgroundGradientStartOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationSpec& LabelAnimationSpec::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::ShadowBlurRadius(target, duration, alpha, delay);

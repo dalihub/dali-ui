@@ -269,12 +269,12 @@ private:
     else if(event.GetKeyName() == "C" || event.GetKeyName() == "c")
     {
       DALI_LOG_RELEASE_INFO("[WebViewSample] ClearCache\n");
-      mWebView.ClearCache();
+      mWebView.GetProfile().ClearCache();
     }
     else if(event.GetKeyName() == "K" || event.GetKeyName() == "k")
     {
-      DALI_LOG_RELEASE_INFO("[WebViewSample] ClearCookies\n");
-      mWebView.ClearCookies();
+      DALI_LOG_RELEASE_INFO("[WebViewSample] ClearAllCookies\n");
+      mWebView.GetProfile().GetCookieManager().ClearAllCookies();
     }
   }
 

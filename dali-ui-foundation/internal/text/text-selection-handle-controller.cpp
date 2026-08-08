@@ -535,8 +535,8 @@ void SelectionHandleController::Reposition(Controller::Impl& impl, float visualX
 
   ModelPtr        model          = impl.GetEditableGeometryModel();
   VisualModelPtr& visualModel    = model->mVisualModel;
-  const Length    numberOfGlyphs = visualModel->mGlyphs.Count();
-  const Length    numberOfLines  = visualModel->mLines.Count();
+  const Length    numberOfGlyphs = static_cast<Dali::Ui::Text::Length>(visualModel->mGlyphs.Count());
+  const Length    numberOfLines  = static_cast<Dali::Ui::Text::Length>(visualModel->mLines.Count());
   if((0 == numberOfGlyphs) || (0 == numberOfLines))
   {
     // Nothing to do if there is no text.

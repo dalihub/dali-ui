@@ -162,7 +162,11 @@ bool ParseProcMetricKb(const char* line, const char* key, long& value)
   }
 
   long parsedValue = 0;
+#if defined(_MSC_VER)
+  if(sscanf_s(line + keyLength, "%ld", &parsedValue) == 1)
+#else
   if(std::sscanf(line + keyLength, "%ld", &parsedValue) == 1)
+#endif
   {
     value = parsedValue;
     return true;
@@ -173,7 +177,13 @@ bool ParseProcMetricKb(const char* line, const char* key, long& value)
 MemorySnapshot ReadProcessMemorySnapshot()
 {
   MemorySnapshot snapshot;
-  if(FILE* file = std::fopen("/proc/self/status", "r"))
+  FILE*          statusFile = nullptr;
+#if defined(_MSC_VER)
+  fopen_s(&statusFile, "/proc/self/status", "r");
+#else
+  statusFile = std::fopen("/proc/self/status", "r");
+#endif
+  if(FILE* file = statusFile)
   {
     char line[128];
     while(std::fgets(line, sizeof(line), file))
@@ -183,7 +193,13 @@ MemorySnapshot ReadProcessMemorySnapshot()
     std::fclose(file);
   }
 
-  if(FILE* file = std::fopen("/proc/self/smaps_rollup", "r"))
+  FILE* smapsFile = nullptr;
+#if defined(_MSC_VER)
+  fopen_s(&smapsFile, "/proc/self/smaps_rollup", "r");
+#else
+  smapsFile = std::fopen("/proc/self/smaps_rollup", "r");
+#endif
+  if(FILE* file = smapsFile)
   {
     char line[128];
     while(std::fgets(line, sizeof(line), file))

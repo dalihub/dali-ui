@@ -53,7 +53,8 @@ public:
   {
     Ui::FocusDevice device = Ui::FocusDevice::UNKNOWN;
     Dali::String    deviceName;
-    Ui::InputEvent  inputEvent     = Ui::InputEvent::Programmatic();
+    Ui::InputEvent  inputEvent = Ui::InputEvent::Programmatic();
+    Window          window;
     bool            focusIndicated = false;
   };
 
@@ -103,6 +104,11 @@ public:
    * @brief Move the focus with device information
    */
   bool MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context);
+
+  /**
+   * @copydoc Ui::FocusManager::SetFocusNavigationFallback
+   */
+  void SetFocusNavigationFallback(FocusNavigationCallback callback);
 
   /**
    * @copydoc Ui::FocusManager::ClearFocus
@@ -226,8 +232,7 @@ private:
 
   struct ParentNavigationResult
   {
-    View candidate;
-    View focusGroupBoundary;
+    FocusNavigationResult result = FocusNavigationResult::NotHandled();
   };
 
   /**
@@ -247,21 +252,36 @@ private:
   void GetConfiguration();
 
   /**
-   * Step 1: Find next focus from explicit directional properties.
+   * Finds an explicitly configured directional target.
    */
-  View FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction);
+  FocusNavigationResult FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction);
 
   /**
-   * Step 2: Find next focus by propagating up the parent chain.
-   * Stops at FocusGroup boundary and records it when encountered.
+   * Propagates navigation through the parent chain, including the Focus Group
+   * View itself, and stops before policies outside that boundary.
    */
-  ParentNavigationResult FindNextFocusByParentNavigation(View currentFocusView, Ui::FocusDirection direction);
+  ParentNavigationResult FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context);
 
   /**
-   * Step 3: Find next focus using FocusFinder (geometry or linear ordering).
-   * Uses focusGroup as search root if present.
+   * Finds the framework fallback using geometry or linear ordering.
+   * Uses focusGroup as the search root when present.
    */
-  View FindNextFocusByFinder(View currentFocusView, View focusGroup, Ui::FocusDirection direction);
+  View FindNextFocusByFinder(View currentFocusView, FocusNavigationContext context);
+
+  /**
+   * Creates the immutable public context shared by all policies for one request.
+   */
+  FocusNavigationContext CreateFocusNavigationContext(View currentFocusView, Ui::FocusDirection direction, const FocusChangeContext& context);
+
+  /**
+   * Resolves and validates a handled navigation result, then commits a move.
+   */
+  bool ApplyFocusNavigationResult(const FocusNavigationResult& result, View originalFocusView, FocusNavigationContext context, const FocusChangeContext& changeContext);
+
+  /**
+   * Checks whether a candidate remains in the request's Window and Focus Group.
+   */
+  bool IsValidNavigationCandidate(View candidate, FocusNavigationContext context) const;
 
   /**
    * Commit the focus change to the specified view. No validation is performed —
@@ -400,8 +420,11 @@ private:
 
   Extension::FocusIndicationPolicy::Function mFocusIndicationPolicy; ///< Extension policy for automatic focus indication changes.
 
-  uint32_t mCurrentWindowId;    ///< The current native window id
-  int32_t  mTouchFocusDeviceId; ///< The device id for the pending touch focus candidate
+  FocusNavigationCallback mFocusNavigationFallback; ///< Application-wide policy invoked before FocusFinder.
+
+  uint32_t mCurrentWindowId;      ///< The current native window id
+  int32_t  mTouchFocusDeviceId;   ///< The device id for the pending touch focus candidate
+  bool     mNavigationInProgress; ///< Prevents focus mutation and nested navigation from policy callbacks.
 
   bool mDefaultFocusIndicatorEnabled : 1; ///< Whether FocusManager's default focus indicator is enabled.
   bool mClearFocusIndicationOnTouch : 1;  ///< Whether touch outside the focused view clears focus indication.

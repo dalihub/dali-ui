@@ -158,7 +158,7 @@ const Ui::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
   for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
       fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
   {
-    mMetrics.mGlyphCount += fontGlyphRecordIt->mGlyphRecords.Size();
+    mMetrics.mGlyphCount += static_cast<uint32_t>(fontGlyphRecordIt->mGlyphRecords.Size());
 
     verboseMetrics << "[FontId " << fontGlyphRecordIt->mFontId << " Glyph ";
     for(Vector<GlyphRecordEntry>::Iterator glyphRecordEntryIt = fontGlyphRecordIt->mGlyphRecords.Begin();

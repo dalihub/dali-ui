@@ -119,7 +119,7 @@ NPatchData::NPatchDataId NPatchLoader::Load(TextureManager& textureManager, Text
 
 int32_t NPatchLoader::GetCacheIndexFromId(const NPatchData::NPatchDataId id)
 {
-  const unsigned int size = mCache.size();
+  const uint32_t size = static_cast<uint32_t>(mCache.size());
 
   for(unsigned int i = 0; i < size; ++i)
   {

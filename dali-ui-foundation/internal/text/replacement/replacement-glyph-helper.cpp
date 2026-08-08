@@ -75,7 +75,7 @@ void ConvertCharacterStyleRuns(const Vector<CharacterStyleRun>& characterRuns,
     glyphRun.glyphRun.glyphIndex     = visualModel.mCharactersToGlyph[characterIndex];
     glyphRun.glyphRun.numberOfGlyphs = 0u;
     const CharacterIndex end         = std::min<CharacterIndex>(characterIndex + numberOfCharacters,
-                                                                visualModel.mGlyphsPerCharacter.Count());
+                                                                static_cast<CharacterIndex>(visualModel.mGlyphsPerCharacter.Count()));
     for(CharacterIndex index = characterIndex; index < end; ++index)
     {
       glyphRun.glyphRun.numberOfGlyphs += visualModel.mGlyphsPerCharacter[index];
@@ -116,7 +116,7 @@ void ValidateFontsForProcessingSource(MultilanguageSupport&                   mu
   }
 
   const CharacterIndex end = startIndex + numberOfCharacters;
-  ForEachProcessingSegment(source.text->Count(),
+  ForEachProcessingSegment(static_cast<Dali::Ui::Text::Length>(source.text->Count()),
                            *source.replacementRuns,
                            [&](CharacterIndex segmentStart, Length segmentLength)
   {
@@ -179,7 +179,7 @@ void ShapeTextForProcessingSource(TextAbstraction::Shaping&    shaping,
   }
 
   const CharacterIndex end = startIndex + numberOfCharacters;
-  ForEachProcessingSegment(source.text->Count(),
+  ForEachProcessingSegment(static_cast<Dali::Ui::Text::Length>(source.text->Count()),
                            *source.replacementRuns,
                            [&](CharacterIndex segmentStart, Length segmentLength)
   {
@@ -195,7 +195,7 @@ void ShapeTextForProcessingSource(TextAbstraction::Shaping&    shaping,
                 scripts,
                 validFonts,
                 clippedStart,
-                visualModel.mGlyphs.Count(),
+                static_cast<Dali::Ui::Text::GlyphIndex>(visualModel.mGlyphs.Count()),
                 clippedEnd - clippedStart,
                 visualModel.mGlyphs,
                 visualModel.mGlyphsToCharacters,
@@ -225,7 +225,7 @@ void GetGlyphMetricsForProcessingSource(Metrics&                    metrics,
   }
   else
   {
-    const GlyphIndex end           = std::min<GlyphIndex>(startGlyphIndex + numberOfGlyphs, glyphs.Count());
+    const GlyphIndex end           = std::min<GlyphIndex>(startGlyphIndex + numberOfGlyphs, static_cast<GlyphIndex>(glyphs.Count()));
     GlyphIndex       ordinaryStart = startGlyphIndex;
     for(GlyphIndex index = startGlyphIndex; index <= end; ++index)
     {

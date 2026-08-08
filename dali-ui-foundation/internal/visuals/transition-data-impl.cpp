@@ -75,7 +75,7 @@ void ParseArray(TransitionData::Animator* animator, const Property::Array* array
   Vector4 controlPoints;
   if(array && array->Count() >= 4)
   {
-    for(size_t vecIdx = 0; vecIdx < 4; ++vecIdx)
+    for(Property::Array::SizeType vecIdx = 0u; vecIdx < 4u; ++vecIdx)
     {
       const Property::Value& v = array->GetElementAt(vecIdx);
       if(v.GetType() == Property::FLOAT)
@@ -262,7 +262,7 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
     {
       animator->animate         = true;
       Property::Map animatorMap = value.Get<Property::Map>();
-      for(size_t animatorMapIdx = 0; animatorMapIdx < animatorMap.Count(); ++animatorMapIdx)
+      for(Property::Map::SizeType animatorMapIdx = 0u; animatorMapIdx < animatorMap.Count(); ++animatorMapIdx)
       {
         const KeyValuePair pair(animatorMap.GetKeyValue(animatorMapIdx));
 
@@ -299,7 +299,7 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
         else if(key == TOKEN_TIME_PERIOD)
         {
           Property::Map timeMap = value.Get<Property::Map>();
-          for(size_t timeMapIdx = 0; timeMapIdx < timeMap.Count(); ++timeMapIdx)
+          for(Property::Map::SizeType timeMapIdx = 0u; timeMapIdx < timeMap.Count(); ++timeMapIdx)
           {
             const KeyValuePair pair(timeMap.GetKeyValue(timeMapIdx));
             if(pair.first.type == Property::Key::INDEX)

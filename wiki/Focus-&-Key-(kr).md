@@ -123,7 +123,14 @@ next.SetBackwardFocusableView(viewA);
 focusMgr.SetAsFocusGroup(container, true);  // 이 subtree 안에 focus 이동을 제한
 ```
 
-`FocusGroup`은 containment boundary입니다. 포커스가 `FocusGroup` 내부에 있을 때 기본 키 포커스 이동은 해당 subtree 안으로 제한됩니다. 패널, 다이얼로그, 팝업, 컴포넌트 내부처럼 arrow key나 Tab / Shift+Tab으로 focus가 밖으로 빠져나가면 안 되는 영역에 사용하세요.
+`FocusGroup`은 사용자 navigation의 containment boundary입니다. View policy,
+명시적 이웃, application fallback, 기본 finder가 선택한 candidate는 모두 가장
+가까운 Focus Group subtree 안에 있어야 합니다. Focus Group View 자체의 local
+policy까지 호출하지만 그 바깥 ancestor policy는 호출하지 않습니다.
+
+`RequestFocus()`와 `SetCurrentFocusView()`는 명시적인 programmatic operation이므로
+Focus Group 밖으로 이동할 수 있습니다. 따라서 dialog나 popup을 닫고 다른 곳에
+focus를 복원하기 위한 별도 escape API는 필요하지 않습니다.
 
 <br/>
 
@@ -208,20 +215,120 @@ focusMgr.FocusChangedSignal().Connect(&tracker, [](View oldFocus, View newFocus)
 
 ### 커스텀 포커스 네비게이션
 
-View subtree의 focus navigation을 직접 제어하려면 focus navigation callback을 설정합니다:
+규칙을 소유하는 가장 좁은 범위의 확장 방법을 선택하세요:
+
+| 요구사항 | API | 범위와 우선순위 |
+|---|---|---|
+| 소수 View 사이의 고정 관계 | 방향별 focusable View setter | View local policy 다음 |
+| 기존 container 인스턴스의 정책 | `View::SetFocusNavigationCallback()` | 해당 container subtree |
+| custom View 클래스가 구현하는 정책 | `ViewImpl::OnFocusNavigationRequested()` | 해당 View 종류. 인스턴스 callback이 없을 때만 사용 |
+| 앱 전역 알고리즘 또는 첫 focus 선택 | `FocusManager::SetFocusNavigationFallback()` | local policy와 명시 target 다음, `FocusFinder` 이전 |
+| 일반적인 geometry/linear 탐색 | framework `FocusFinder` | 최종 fallback |
+
+View local callback과 application callback은 같은 signature를 사용합니다:
 
 ```cpp
-View MyFocusNavigation(View currentFocusedView, FocusDirection direction)
+FocusNavigationResult GetNextFocusableView(
+  View current,
+  FocusNavigationContext context);
+```
+
+`FocusNavigationResult`는 처리 결과를 명확히 구분합니다:
+
+- `NotHandled()`: 다음 policy로 진행합니다.
+- `MoveTo(view)`: policy 탐색을 종료하고 framework가 candidate를 검증하고
+  resolve한 뒤 focus를 설정합니다. candidate가 invalid라면 요청이 실패하며 더
+  낮은 우선순위로 조용히 fallback하지 않습니다.
+- `Stay()`: focus를 이동하지 않고 요청을 소비합니다. 따라서 `MoveFocus()`는
+  `false`를 반환합니다.
+
+immutable context에서는 direction, device 종류, device name, 원본 `InputEvent`,
+source `Window`, 가장 가까운 Focus Group을 조회할 수 있습니다. Policy는 focus를
+직접 변경하거나 navigation API를 재귀 호출하지 말고 결과만 반환해야 합니다.
+
+#### Container policy
+
+```cpp
+FocusNavigationResult NavigatePanel(View current, FocusNavigationContext context)
 {
-  if(direction == FocusDirection::RIGHT)
+  if(context.GetDirection() == FocusDirection::RIGHT)
   {
-    return FindCustomRightTarget(currentFocusedView);
+    if(View candidate = FindCustomRightTarget(current))
+    {
+      return FocusNavigationResult::MoveTo(candidate);
+    }
+    return FocusNavigationResult::Stay();
   }
-  return View(); // 빈 handle을 반환하면 parent/default navigation이 이어서 처리합니다.
+  return FocusNavigationResult::NotHandled();
 }
 
-view.SetFocusNavigationCallback(FocusNavigationCallback::New(&MyFocusNavigation));
+panel.SetFocusNavigationCallback(FocusNavigationCallback::New(&NavigatePanel));
 ```
+
+callback 설정은 해당 인스턴스의 virtual policy를 대체하며, 빈 callback을 설정하면
+virtual policy를 다시 사용합니다. Callback은 target의 lifetime을 연장하지 않으므로
+member-function target이 파괴되기 전에 callback을 해제해야 합니다.
+
+#### Application fallback과 첫 focus
+
+```cpp
+class ApplicationNavigation
+{
+public:
+  FocusNavigationResult GetNextFocusableView(
+    View current,
+    FocusNavigationContext context)
+  {
+    if(!current)
+    {
+      return FocusNavigationResult::MoveTo(FindEntryView(context.GetWindow()));
+    }
+
+    if(View candidate = FindApplicationCandidate(current, context))
+    {
+      return FocusNavigationResult::MoveTo(candidate);
+    }
+    return FocusNavigationResult::NotHandled();
+  }
+};
+
+manager.SetFocusNavigationFallback(
+  FocusNavigationCallback::New(&algorithm, &ApplicationNavigation::GetNextFocusableView));
+```
+
+Application fallback은 하나만 저장됩니다. 새 callback은 기존 callback을 교체하고,
+빈 callback은 이를 해제합니다. Framework default algorithm이 꺼져 있어도 fallback은
+호출됩니다. Current focus가 없으면 navigation Window를 결정할 수 있는 경우에
+fallback부터 호출하고, `NotHandled()`일 때 default finder가 활성화되어 있으면 finder로
+진행합니다. Programmatic `MoveFocus()`는 current focus의 Window 또는 마지막으로 focus된
+Window를 사용하며, 둘 다 없으면 fallback을 호출하지 않고 실패합니다. 입력으로 시작된
+navigation은 input source Window를 사용할 수 있습니다.
+
+전체 우선순위는 다음과 같습니다:
+
+1. 가장 가까운 container부터 바깥쪽으로 View local policy 호출. 가장 가까운 Focus
+   Group View 자체까지 포함
+2. 명시적 방향 target
+3. application fallback
+4. framework `FocusFinder`
+
+`OnFocusRequested()`의 역할은 다릅니다. Policy가 `MoveTo()`로 container를 선택한
+뒤 그 container를 실제 focusable View로 resolve하는 hook이며, navigation algorithm
+확장 지점이 아닙니다.
+
+#### dali-toolkit에서 이전
+
+`DevelKeyboardFocusManager::CustomAlgorithmInterface` 사용 코드는 다음처럼 나눕니다:
+
+- component 또는 특정 영역의 규칙은 owning container callback이나
+  `OnFocusNavigationRequested()` override로 이동
+- 앱 전체 공통 규칙은 `SetFocusNavigationFallback()`에 등록
+- 같은 fallback에서 빈 `current`를 처리하여 첫 focus 선택
+- 기본 탐색을 중단하려면 `Stay()`, 위임하려면 `NotHandled()` 반환
+
+기존 raw algorithm pointer와 달리 manager는 callback object를 소유하고,
+input/window/scope context와 명시적인 결과 타입을 제공합니다. 단, member-function
+callback의 target object는 여전히 호출자가 lifetime을 관리해야 합니다.
 
 <br/>
 
@@ -265,7 +372,7 @@ interactive.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event
 |---|---|
 | `SetKeyClickPolicy` | 기본 키 클릭 발동 시점 (ON_RELEASE / ON_PRESS / DISABLED) |
 | `SetExecutionKeyPredicate` | 클릭/롱프레스를 트리거하는 키 판별 함수 (기본값: "Return") |
-| `SetKeyLongPressThreshold` | 키를 롱프레스로 인식하기 위한 최소 임계값 (키 pressed 이벤트 발생 횟수) |
+| `SetLongPressKeyEventMinimumCount` | 키를 롱프레스로 인식하기 위한 최소 키 pressed 이벤트 개수 (최초 key down 포함) |
 
 ```cpp
 bool MyKeyPredicate(const Dali::String& keyName)
@@ -276,7 +383,7 @@ bool MyKeyPredicate(const Dali::String& keyName)
 UiConfig config = UiConfig::New();
 config.SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);   // 키를 뗄 때 클릭 시그널 발동
 config.SetExecutionKeyPredicate(MyKeyPredicate);        // Return, KP_Enter를 클릭 키로 인식
-config.SetKeyLongPressThreshold(3);                     // 키 pressed 이벤트가 3회 이상 연속 감지되면 롱프레스로 인식
+config.SetLongPressKeyEventMinimumCount(3);             // 키 pressed 이벤트가 3회 이상 연속 감지되면 롱프레스로 인식
 config.Apply();
 ```
 

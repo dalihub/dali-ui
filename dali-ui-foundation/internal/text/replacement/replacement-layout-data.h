@@ -65,7 +65,7 @@ struct ReplacementLayoutData
     }
 
     uint32_t first = 0u;
-    uint32_t last  = runs->Count();
+    uint32_t last  = static_cast<uint32_t>(runs->Count());
     while(first < last)
     {
       const uint32_t                 middle = first + (last - first) / 2u;

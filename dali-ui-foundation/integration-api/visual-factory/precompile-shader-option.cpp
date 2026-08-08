@@ -132,7 +132,7 @@ void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
     else if(key == TOKEN_OPTION)
     {
       Property::Map optionMap = value.Get<Property::Map>();
-      for(size_t optionMapIdx = 0; optionMapIdx < optionMap.Count(); ++optionMapIdx)
+      for(Property::Map::SizeType optionMapIdx = 0u; optionMapIdx < optionMap.Count(); ++optionMapIdx)
       {
         const KeyValuePair optionPair(optionMap.GetKeyValue(optionMapIdx));
 

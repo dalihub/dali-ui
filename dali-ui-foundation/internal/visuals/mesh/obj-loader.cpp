@@ -66,8 +66,8 @@ bool ObjLoader::IsMaterialLoaded()
 void ObjLoader::CalculateHardFaceNormals(const Dali::Vector<Vector3>& vertices, Dali::Vector<TriIndex>& triangles,
                                          Dali::Vector<Vector3>& normals)
 {
-  int numFaceVertices = 3 * triangles.Size(); // Vertex per face, as each point has different normals for each face.
-  int normalIndex     = 0;                    // Tracks progress through the array of normals.
+  int32_t numFaceVertices = static_cast<int32_t>(3u * triangles.Size()); // Vertex per face, as each point has different normals for each face.
+  int32_t normalIndex     = 0;                                           // Tracks progress through the array of normals.
 
   normals.Clear();
   normals.Resize(numFaceVertices);
@@ -267,8 +267,8 @@ void ObjLoader::CreateGeometryArray(Dali::Vector<Vertex>& vertices, Dali::Vector
   // Check the number of points textures and normals
   if(mapsCorrespond)
   {
-    int numPoints  = mPoints.Size();
-    int numIndices = 3 * mTriangles.Size();
+    int32_t numPoints  = static_cast<int32_t>(mPoints.Size());
+    int32_t numIndices = static_cast<int32_t>(3u * mTriangles.Size());
     vertices.Resize(numPoints);
     textures.Resize(numPoints);
     verticesExt.Resize(numPoints);
@@ -311,7 +311,7 @@ void ObjLoader::CreateGeometryArray(Dali::Vector<Vertex>& vertices, Dali::Vector
   }
   else
   {
-    int numVertices = 3 * mTriangles.Size();
+    int32_t numVertices = static_cast<int32_t>(3u * mTriangles.Size());
     vertices.Resize(numVertices);
     textures.Resize(numVertices);
     verticesExt.Resize(numVertices);
@@ -642,7 +642,7 @@ Geometry ObjLoader::CreateGeometry(int objectProperties, bool useSoftNormals)
   vertexFormat["aPosition"]    = Property::VECTOR3;
   vertexFormat["aNormal"]      = Property::VECTOR3;
   VertexBuffer surfaceVertices = VertexBuffer::New(vertexFormat);
-  surfaceVertices.SetData(&vertices[0], vertices.Size());
+  surfaceVertices.SetData(&vertices[0], static_cast<uint32_t>(vertices.Size()));
   surface.AddVertexBuffer(surfaceVertices);
 
   // Some need texture coordinates
@@ -651,7 +651,7 @@ Geometry ObjLoader::CreateGeometry(int objectProperties, bool useSoftNormals)
     Property::Map textureFormat;
     textureFormat["aTexCoord"] = Property::VECTOR2;
     VertexBuffer extraVertices = VertexBuffer::New(textureFormat);
-    extraVertices.SetData(&textures[0], textures.Size());
+    extraVertices.SetData(&textures[0], static_cast<uint32_t>(textures.Size()));
 
     surface.AddVertexBuffer(extraVertices);
   }
@@ -663,7 +663,7 @@ Geometry ObjLoader::CreateGeometry(int objectProperties, bool useSoftNormals)
     vertexExtFormat["aTangent"]  = Property::VECTOR3;
     vertexExtFormat["aBiNormal"] = Property::VECTOR3;
     VertexBuffer extraVertices   = VertexBuffer::New(vertexExtFormat);
-    extraVertices.SetData(&verticesExt[0], verticesExt.Size());
+    extraVertices.SetData(&verticesExt[0], static_cast<uint32_t>(verticesExt.Size()));
 
     surface.AddVertexBuffer(extraVertices);
   }
@@ -671,7 +671,7 @@ Geometry ObjLoader::CreateGeometry(int objectProperties, bool useSoftNormals)
   // If indices are required, we set them.
   if(indices.Size())
   {
-    surface.SetIndexBuffer(&indices[0], indices.Size());
+    surface.SetIndexBuffer(&indices[0], static_cast<uint32_t>(indices.Size()));
   }
 
   return surface;

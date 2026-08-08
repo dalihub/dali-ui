@@ -466,12 +466,12 @@ void PrimitiveVisual::CreateGeometry()
   vertexFormat[POSITION]       = Property::VECTOR3;
   vertexFormat[NORMAL]         = Property::VECTOR3;
   VertexBuffer surfaceVertices = VertexBuffer::New(vertexFormat);
-  surfaceVertices.SetData(&vertices[0], vertices.Size());
+  surfaceVertices.SetData(&vertices[0], static_cast<uint32_t>(vertices.Size()));
 
   mGeometry.AddVertexBuffer(surfaceVertices);
 
   // Indices for triangle formulation
-  mGeometry.SetIndexBuffer(&indices[0], indices.Size());
+  mGeometry.SetIndexBuffer(&indices[0], static_cast<uint32_t>(indices.Size()));
 }
 
 void PrimitiveVisual::CreateSphere(Vector<Vertex>& vertices, Vector<unsigned short>& indices, int slices, int stacks)

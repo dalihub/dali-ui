@@ -76,7 +76,7 @@ public:
     mMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL),
     mTextLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT),
     mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
-    mKeyLongPressThreshold(3),
+    mLongPressKeyEventMinimumCount(3),
     mAmbiguousPressDelay(100u),
     mAmbiguousPressDuration(64u),
     mWebEngineType(WebEngineType::CHROMIUM),
@@ -116,7 +116,7 @@ public:
   Text::MarqueeOrientation        mMarqueeOrientation;
   Text::LayoutDirectionMode       mTextLayoutDirectionMode;
   KeyClickPolicy                  mKeyClickPolicy;
-  uint32_t                        mKeyLongPressThreshold;
+  uint32_t                        mLongPressKeyEventMinimumCount;
   std::optional<uint32_t>         mLongPressGestureMinimumHoldingTime;
   std::optional<uint32_t>         mTapGestureMaximumMultiTapInterval;
   std::optional<uint32_t>         mTapGestureMaximumHoldingTime;
@@ -235,15 +235,15 @@ ExecutionKeyPredicate UiConfigImpl::GetExecutionKeyPredicate() const
   return mImpl->mExecutionKeyPredicate;
 }
 
-void UiConfigImpl::SetKeyLongPressThreshold(uint32_t count)
+void UiConfigImpl::SetLongPressKeyEventMinimumCount(uint32_t count)
 {
   DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mImpl->mKeyLongPressThreshold = count;
+  mImpl->mLongPressKeyEventMinimumCount = count;
 }
 
-uint32_t UiConfigImpl::GetKeyLongPressThreshold() const
+uint32_t UiConfigImpl::GetLongPressKeyEventMinimumCount() const
 {
-  return mImpl->mKeyLongPressThreshold;
+  return mImpl->mLongPressKeyEventMinimumCount;
 }
 
 void UiConfigImpl::SetLongPressGestureMinimumHoldingTime(uint32_t timeMs)

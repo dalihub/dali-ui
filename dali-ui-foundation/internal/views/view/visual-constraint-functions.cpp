@@ -79,7 +79,7 @@ void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputCont
   // - Transform::OFFSET_POLICY are ABSOLUTE
   // - Transform::SIZE_POLICY are RELATIVE
   // - Transform::SIZE is Vector2::ONE
-  // - Visual::BORDERLINE_OFFSET is 1.0f
+  // - Visual::BORDERLINE_OFFSET is -1.0f
 
   Vector4 viewCornerRadius = inputs[0]->GetVector4();
 

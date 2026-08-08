@@ -132,10 +132,10 @@ void CreateQuad(SizeType imageWidth, SizeType imageHeight, SizeType block, const
 
 void AppendMesh(Ui::AtlasManager::Mesh2D& first, const Ui::AtlasManager::Mesh2D& second)
 {
-  const uint32_t verticesCount = first.mVertices.Size();
+  const uint32_t verticesCount = static_cast<uint32_t>(first.mVertices.Size());
   first.mVertices.Insert(first.mVertices.End(), second.mVertices.Begin(), second.mVertices.End());
 
-  const uint32_t indicesCount = first.mIndices.Size();
+  const uint32_t indicesCount = static_cast<uint32_t>(first.mIndices.Size());
   first.mIndices.Insert(first.mIndices.End(), second.mIndices.Begin(), second.mIndices.End());
 
   for(Vector<uint32_t>::Iterator it = first.mIndices.Begin() + indicesCount, endIt = first.mIndices.End(); it != endIt;

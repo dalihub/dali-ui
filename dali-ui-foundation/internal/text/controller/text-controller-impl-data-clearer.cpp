@@ -131,7 +131,7 @@ void ControllerImplDataClearer::ClearCharacterModelData(Controller::Impl& impl, 
   {
     if(Controller::NO_OPERATION != (Controller::BIDI_INFO & operations))
     {
-      uint32_t startRemoveIndex = model->mLogicalModel->mBidirectionalParagraphInfo.Count();
+      uint32_t startRemoveIndex = static_cast<uint32_t>(model->mLogicalModel->mBidirectionalParagraphInfo.Count());
       uint32_t endRemoveIndex   = startRemoveIndex;
 
       // Clear the bidirectional paragraph info.
@@ -163,7 +163,7 @@ void ControllerImplDataClearer::ClearCharacterModelData(Controller::Impl& impl, 
 
     if(Controller::NO_OPERATION != (Controller::REORDER & operations))
     {
-      uint32_t startRemoveIndex = model->mLogicalModel->mBidirectionalLineInfo.Count();
+      uint32_t startRemoveIndex = static_cast<uint32_t>(model->mLogicalModel->mBidirectionalLineInfo.Count());
       uint32_t endRemoveIndex   = startRemoveIndex;
       ClearCharacterRuns(startIndex, endIndex, model->mLogicalModel->mBidirectionalLineInfo, startRemoveIndex,
                          endRemoveIndex);
@@ -265,12 +265,12 @@ void ControllerImplDataClearer::ClearGlyphModelData(Controller::Impl& impl, Char
   if(Controller::NO_OPERATION != (Controller::LAYOUT & operations))
   {
     // Clear the lines.
-    uint32_t startRemoveIndex = model->mVisualModel->mLines.Count();
+    uint32_t startRemoveIndex = static_cast<uint32_t>(model->mVisualModel->mLines.Count());
     uint32_t endRemoveIndex   = startRemoveIndex;
     ClearCharacterRuns(startIndex, endIndex, model->mVisualModel->mLines, startRemoveIndex, endRemoveIndex);
 
     // Will update the glyph runs.
-    startRemoveIndex = model->mVisualModel->mLines.Count();
+    startRemoveIndex = static_cast<uint32_t>(model->mVisualModel->mLines.Count());
     endRemoveIndex   = startRemoveIndex;
     ClearGlyphRuns(textUpdateInfo.mStartGlyphIndex, endGlyphIndexPlusOne - 1u, model->mVisualModel->mLines,
                    startRemoveIndex, endRemoveIndex);
@@ -322,7 +322,7 @@ void ControllerImplDataClearer::ClearModelData(Controller::Impl& impl, Character
 
   // The estimated number of lines. Used to avoid reallocations when layouting.
   textUpdateInfo.mEstimatedNumberOfLines =
-    std::max(model->mVisualModel->mLines.Count(), model->mLogicalModel->mParagraphInfo.Count());
+      static_cast<Length>(std::max(model->mVisualModel->mLines.Count(), model->mLogicalModel->mParagraphInfo.Count()));
 
   model->mVisualModel->ClearCaches();
 }

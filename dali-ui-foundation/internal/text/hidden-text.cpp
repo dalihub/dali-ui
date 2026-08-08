@@ -110,7 +110,7 @@ uint32_t HiddenText::GetSubstituteCount() const
 
 void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& destination, Length cursorPos)
 {
-  const Length characterCount = source.Count();
+  const Length characterCount = static_cast<Dali::Ui::Text::Length>(source.Count());
 
   destination.Resize(characterCount);
 

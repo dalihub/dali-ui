@@ -84,6 +84,18 @@ void EditableInlineReplacementData::PlaceVisualLayer(Actor          contentParen
     contentParent.Add(visualLayer);
   }
   visualLayer.SetProperty(Actor::Property::POSITION, Vector2::ZERO);
+
+  // visualLayer participates in View size negotiation. Keep its requested size
+  // aligned with the arranged content size so a later layout pass cannot
+  // overwrite its explicitly placed actor geometry.
+  if(visualLayer.GetRequestedWidth() != contentSize.x)
+  {
+    visualLayer.SetRequestedWidth(contentSize.x);
+  }
+  if(visualLayer.GetRequestedHeight() != contentSize.y)
+  {
+    visualLayer.SetRequestedHeight(contentSize.y);
+  }
   visualLayer.SetProperty(Actor::Property::SIZE, contentSize);
 
   if(textActor && textActor.GetParent() == contentParent)

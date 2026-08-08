@@ -17,9 +17,12 @@
 
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-components/dali-ui-components.h>
+#include <dali/devel-api/atspi-interfaces/accessible.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+namespace UiAccessibility = Dali::Ui::Accessibility;
 
 void utc_dali_text_button_startup(void)
 {
@@ -310,5 +313,64 @@ int UtcDaliTextButtonStyleDefaultKeyP(void)
   DALI_TEST_EQUALS(style.GetFontSize(), 16.0f, TEST_LOCATION);
   DALI_TEST_CHECK(style.GetStateEffect());
   DALI_TEST_CHECK(!style.GetStateEffect().IsNone());
+  END_TEST;
+}
+
+int UtcDaliTextButtonAccessibilityP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  TextButton        button = TextButton::New("Apply");
+
+  // Rendering a TextButton alone does not make TV Screen Reader recognize it as a button.
+  // Verify that the component provides the default role and highlighting policy, and that its
+  // internal visual Label is hidden from the accessibility tree to prevent duplicate announcements.
+  DALI_TEST_CHECK(button.GetAccessibilityRole() == UiAccessibility::Role::BUTTON);
+  DALI_TEST_CHECK(button.IsAccessibilityHighlightable());
+  DALI_TEST_CHECK(button.HasAccessibilityState(UiAccessibility::State::ENABLED));
+  DALI_TEST_EQUALS(button.GetChildCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(button.GetChildViewAt(0u).IsAccessibilityHidden());
+
+  auto* accessible = Dali::Accessibility::Accessible::Get(button);
+  DALI_TEST_CHECK(accessible);
+
+  // Without an explicit name, the currently displayed text must become the name and reflect
+  // SetText() changes immediately on the next query. Conversely, an application-provided name
+  // must take precedence over displayed text.
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Apply"), TEST_LOCATION);
+  button.SetText("Apply changes");
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Apply changes"), TEST_LOCATION);
+  button.SetAccessibilityName("Confirm settings");
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Confirm settings"), TEST_LOCATION);
+
+  int            clickCount       = 0;
+  InputEventType lastEventType    = InputEventType::NONE;
+  bool           wasProgrammatic  = true;
+  bool           receivedSameView = true;
+  button.ClickedSignal().Connect(&application, [&clickCount, &lastEventType, &wasProgrammatic, &receivedSameView, button](View view, InputEvent event)
+  {
+    ++clickCount;
+    lastEventType    = event.GetInputEventType();
+    wasProgrammatic  = event.IsProgrammatic();
+    receivedSameView = receivedSameView && view == button;
+  });
+
+  Property::Map attributes;
+
+  // AT-SPI activation must join the existing ClickedSignal through the foundation's default
+  // interactive path so it runs the same business logic as touch and remote-control callbacks.
+  // Accessibility input must preserve a source distinct from ordinary programmatic changes.
+  DALI_TEST_CHECK(button.DoAction("activate", attributes));
+  DALI_TEST_EQUALS(clickCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(lastEventType == InputEventType::ACCESSIBILITY_ACTIVATION);
+  DALI_TEST_CHECK(!wasProgrammatic);
+  DALI_TEST_CHECK(receivedSameView);
+
+  // A disabled button must not be allowed to click only through the Screen Reader path.
+  // DoAction's return value can also include a default focus-request result, so determine
+  // action rejection by verifying that no additional ClickedSignal is emitted.
+  button.SetEnabled(false);
+  DALI_TEST_CHECK(!button.HasAccessibilityState(UiAccessibility::State::ENABLED));
+  button.DoAction("activate", attributes);
+  DALI_TEST_EQUALS(clickCount, 1, TEST_LOCATION);
   END_TEST;
 }

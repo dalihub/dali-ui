@@ -43,7 +43,7 @@ void ClearCharacterRuns(CharacterIndex startIndex, CharacterIndex endIndex, Vect
   T* runsBuffer = runs.Begin();
   T* run        = runsBuffer;
 
-  const Length length = runs.Count();
+  const Length length = static_cast<Dali::Ui::Text::Length>(runs.Count());
   Length       index  = 0u;
   for(index = 0u; index < length; ++index)
   {
@@ -99,7 +99,7 @@ void ClearCharacterRuns(CharacterIndex startIndex, CharacterIndex endIndex, Vect
 template<typename T>
 void ClearCharacterRuns(CharacterIndex startIndex, CharacterIndex endIndex, Vector<T>& runs)
 {
-  uint32_t startRemoveIndex = runs.Count();
+  uint32_t startRemoveIndex = static_cast<uint32_t>(runs.Count());
   uint32_t endRemoveIndex   = startRemoveIndex;
   ClearCharacterRuns(startIndex, endIndex, runs, startRemoveIndex, endRemoveIndex);
 
@@ -263,7 +263,7 @@ void ClearGlyphRuns(GlyphIndex startIndex, GlyphIndex endIndex, Vector<T>& runs,
   T* runsBuffer = runs.Begin();
   T* run        = runsBuffer;
 
-  const Length length = runs.Count();
+  const Length length = static_cast<Dali::Ui::Text::Length>(runs.Count());
   Length       index  = 0u;
   for(index = 0u; index < length; ++index)
   {

@@ -1,0 +1,192 @@
+name: "Windows build test"
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+    - devel
+  workflow_dispatch:
+    inputs:
+      dali_core_change:
+        description: 'dali-core Gerrit change number, or default'
+        required: false
+        default: 'default'
+      dali_adaptor_change:
+        description: 'dali-adaptor Gerrit change number, or default'
+        required: false
+        default: 'default'
+
+jobs:
+  build:
+    runs-on:
+      group: code-windows
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+    - name: Checkout dali-ui
+      uses: code-actions/checkout@v4
+      with:
+        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+        allow-unsafe-pr-checkout: true
+
+    - name: Setup SSH
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Clone DALi dependencies
+      working-directory: ${{ github.workspace }}
+      env:
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        PR_BODY: ${{ github.event.pull_request.body }}
+        DALI_CORE_CHANGE_INPUT: ${{ github.event.inputs.dali_core_change }}
+        DALI_ADAPTOR_CHANGE_INPUT: ${{ github.event.inputs.dali_adaptor_change }}
+      run: |
+        $SshDirectory = Join-Path $env:USERPROFILE ".ssh"
+        $KnownHosts = Join-Path $SshDirectory "known_hosts"
+        New-Item -ItemType Directory -Path $SshDirectory -Force | Out-Null
+        if($env:SSH_KNOWN_HOSTS)
+        {
+          Set-Content -LiteralPath $KnownHosts -Value $env:SSH_KNOWN_HOSTS
+        }
+        Push-Location ..
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        if($LASTEXITCODE -ne 0) { throw "Failed to clone dali-core." }
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+        if($LASTEXITCODE -ne 0) { throw "Failed to clone dali-adaptor." }
+        git clone https://github.com/dalihub/windows-dependencies.git
+        if($LASTEXITCODE -ne 0) { throw "Failed to clone windows-dependencies." }
+        Pop-Location
+
+        function Get-DependencyChange
+        {
+          param(
+            [string]$Name,
+            [string]$ManualValue
+          )
+
+          if($env:GITHUB_EVENT_NAME -ne "pull_request_target")
+          {
+            return $(if($ManualValue) { $ManualValue } else { "default" })
+          }
+
+          $InDependencies = $false
+          $Values = @()
+          $NamePattern = [regex]::Escape($Name)
+          foreach($Line in ($env:PR_BODY -split "`r?`n"))
+          {
+            if($Line -match '^##\s+Test Dependencies \(optional\)\s*$')
+            {
+              $InDependencies = $true
+              continue
+            }
+            if($InDependencies -and $Line -match '^##\s+')
+            {
+              break
+            }
+            if($InDependencies -and $Line -match "^\s*-\s*${NamePattern}:\s*(\S+)\s*$")
+            {
+              $Values += $Matches[1]
+            }
+          }
+
+          if($Values.Count -eq 0)
+          {
+            return "default"
+          }
+          if($Values.Count -eq 1)
+          {
+            return $Values[0]
+          }
+          throw "PR description contains multiple $Name dependency values."
+        }
+
+        function Resolve-Dependency
+        {
+          param(
+            [string]$Name,
+            [string]$Directory,
+            [string]$Repository,
+            [string]$Change
+          )
+
+          if($Change -eq "default")
+          {
+            $Commit = (& git -C $Directory rev-parse HEAD).Trim()
+            if($LASTEXITCODE -ne 0) { throw "Failed to resolve the default $Name commit." }
+            $Result = "- ${Name}: devel/master latest, change default, patch set default, commit $Commit"
+          }
+          else
+          {
+            if(-not [regex]::IsMatch($Change, '^[1-9][0-9]*$'))
+            {
+              throw "$Name dependency must be 'default' or a positive Gerrit change number, got '$Change'."
+            }
+
+            $Bucket = "{0:D2}" -f (([long]$Change) % 100)
+            $RemoteRefs = & git ls-remote $Repository "refs/changes/$Bucket/$Change/*"
+            if($LASTEXITCODE -ne 0) { throw "Unable to query Gerrit change $Change for $Name." }
+            $Candidates = @(
+              $RemoteRefs | ForEach-Object {
+                $Fields = $_ -split '\s+'
+                if($Fields.Count -ge 2 -and $Fields[1] -match "^refs/changes/$Bucket/$Change/([0-9]+)$")
+                {
+                  [pscustomobject]@{ Ref = $Fields[1]; PatchSet = [long]$Matches[1] }
+                }
+              }
+            )
+            if($Candidates.Count -eq 0)
+            {
+              throw "Unable to find Gerrit change $Change for $Name."
+            }
+
+            $Selected = $Candidates | Sort-Object PatchSet | Select-Object -Last 1
+            & git -C $Directory fetch origin $Selected.Ref
+            if($LASTEXITCODE -ne 0) { throw "Failed to fetch Gerrit change $Change for $Name." }
+            & git -C $Directory checkout --detach FETCH_HEAD
+            if($LASTEXITCODE -ne 0) { throw "Failed to checkout Gerrit change $Change for $Name." }
+            $Commit = (& git -C $Directory rev-parse HEAD).Trim()
+            if($LASTEXITCODE -ne 0) { throw "Failed to resolve the checked out $Name commit." }
+            $Result = "- ${Name}: change $Change, patch set $($Selected.PatchSet), commit $Commit"
+          }
+
+          Write-Host $Result
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $Result
+        }
+
+        $DaliCoreChange = Get-DependencyChange -Name "dali-core" -ManualValue $env:DALI_CORE_CHANGE_INPUT
+        $DaliAdaptorChange = Get-DependencyChange -Name "dali-adaptor" -ManualValue $env:DALI_ADAPTOR_CHANGE_INPUT
+        Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "## Test dependencies"
+        Resolve-Dependency -Name "dali-core" -Directory (Join-Path (Split-Path -Parent $env:GITHUB_WORKSPACE) "dali-core") -Repository "ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git" -Change $DaliCoreChange
+        Resolve-Dependency -Name "dali-adaptor" -Directory (Join-Path (Split-Path -Parent $env:GITHUB_WORKSPACE) "dali-adaptor") -Repository "ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git" -Change $DaliAdaptorChange
+
+    - name: Install dependencies and build DALi
+      working-directory: ${{ github.workspace }}
+      run: |
+        $WorkspaceRoot = Split-Path -Parent $env:GITHUB_WORKSPACE
+
+        Push-Location "$WorkspaceRoot\windows-dependencies"
+        .\install.ps1
+        Pop-Location
+
+        Push-Location "$WorkspaceRoot\dali-env"
+        . .\setenv.ps1
+        Pop-Location
+
+        & "$WorkspaceRoot\dali-core\build\windows\build.ps1"
+        & "$WorkspaceRoot\dali-adaptor\build\windows\build.ps1"
+
+    - name: Build dali-ui
+      working-directory: ${{ github.workspace }}
+      run: |
+        . ..\dali-env\setenv.ps1
+        .\build\windows\build.ps1
+
+    - name: Build dali-ui samples
+      working-directory: ${{ github.workspace }}\samples
+      run: |
+        . ..\..\dali-env\setenv.ps1
+        .\build.ps1

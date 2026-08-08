@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/public-api/focus-manager/focus-navigation-result.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/views/view.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+FocusNavigationResult::FocusNavigationResult()
+: mType(FocusNavigationResultType::NOT_HANDLED),
+  mCandidate()
+{
+}
+
+FocusNavigationResult FocusNavigationResult::NotHandled()
+{
+  return FocusNavigationResult(FocusNavigationResultType::NOT_HANDLED, View());
+}
+
+FocusNavigationResult FocusNavigationResult::MoveTo(View candidate)
+{
+  return FocusNavigationResult(FocusNavigationResultType::MOVE, candidate);
+}
+
+FocusNavigationResult FocusNavigationResult::Stay()
+{
+  return FocusNavigationResult(FocusNavigationResultType::STAY, View());
+}
+
+FocusNavigationResultType FocusNavigationResult::GetType() const
+{
+  return mType;
+}
+
+View FocusNavigationResult::GetCandidate() const
+{
+  return mType == FocusNavigationResultType::MOVE ? View::DownCast(mCandidate) : View();
+}
+
+FocusNavigationResult::FocusNavigationResult(FocusNavigationResultType type, View candidate)
+: mType(type),
+  mCandidate(candidate)
+{
+}
+
+} // namespace Ui
+} // namespace Dali

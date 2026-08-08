@@ -69,7 +69,7 @@ config.Apply();
 | Default Text Color | `SetDefaultTextColor(Vector4)` | `Color::BLACK` | 텍스트 요소의 기본 색상 |
 | Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Clicked 이벤트 발생이 key press 시점인지 release 시점인지 설정 |
 | Execution Key Predicate | `SetExecutionKeyPredicate(fn)` | `"Return"` | 클릭 실행으로 인식할 키를 결정하는 함수 |
-| Min Long Press Key Count | `SetKeyLongPressThreshold(uint32_t)` | — | 롱프레스로 인식할 최소 키 반복 횟수 |
+| Min Long Press Key Count | `SetLongPressKeyEventMinimumCount(uint32_t)` | `3` | 롱프레스로 인식할 최소 키 이벤트 개수 (최초 key down 포함) |
 | Long Press Minimum Holding Time | `SetLongPressGestureMinimumHoldingTime(uint32_t)` | `500` | 롱프레스로 인식할 최소 누름 시간 (ms) |
 | Tap Maximum Multi Tap Interval | `SetTapGestureMaximumMultiTapInterval(uint32_t)` | `330` | 멀티탭으로 인식할 탭 사이 최대 시간 간격 (ms) |
 | Tap Maximum Holding Time | `SetTapGestureMaximumHoldingTime(uint32_t)` | `330` | 탭으로 인식할 최대 누름 시간 (touch down~up, ms) |

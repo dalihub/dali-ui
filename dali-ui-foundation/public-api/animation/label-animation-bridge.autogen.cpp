@@ -48,6 +48,18 @@ LabelAnimationBridge& LabelAnimationBridge::BackgroundColorBy(const UiColor& rel
   return *this;
 }
 
+LabelAnimationBridge& LabelAnimationBridge::BackgroundGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BackgroundGradientStartOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::BackgroundGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BackgroundGradientStartOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationBridge& LabelAnimationBridge::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::ShadowBlurRadius(target, duration, alpha, delay);

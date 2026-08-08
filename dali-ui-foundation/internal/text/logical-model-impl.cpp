@@ -72,7 +72,7 @@ Script LogicalModel::GetScript(CharacterIndex characterIndex) const
   // If this operation is too slow, consider a binary search.
 
   const ScriptRun* const scriptRunBuffer = mScriptRuns.Begin();
-  for(Length index = 0u, length = mScriptRuns.Count(); index < length; ++index)
+  for(Length index = 0u, length = static_cast<Dali::Ui::Text::Length>(mScriptRuns.Count()); index < length; ++index)
   {
     const ScriptRun* const scriptRun = scriptRunBuffer + index;
 
@@ -219,7 +219,7 @@ CharacterIndex LogicalModel::GetLogicalCharacterIndex(CharacterIndex visualChara
 bool LogicalModel::FetchBidirectionalLineInfo(CharacterIndex characterIndex)
 {
   // The number of bidirectional lines.
-  const Length numberOfBidirectionalLines = mBidirectionalLineInfo.Count();
+  const Length numberOfBidirectionalLines = static_cast<Dali::Ui::Text::Length>(mBidirectionalLineInfo.Count());
 
   if(0u == numberOfBidirectionalLines)
   {
@@ -299,7 +299,7 @@ BidirectionalLineRunIndex LogicalModel::GetBidirectionalLineInfo() const
 
 void LogicalModel::UpdateTextStyleRuns(CharacterIndex index, int numberOfCharacters)
 {
-  const Length totalNumberOfCharacters = mText.Count();
+  const Length totalNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(mText.Count());
 
   // Process the color runs.
   Vector<ColorRun> removedColorRuns;
@@ -487,7 +487,7 @@ void LogicalModel::ClearUnderlineRuns()
 
 void LogicalModel::CreateParagraphInfo(CharacterIndex startIndex, Length numberOfCharacters)
 {
-  const Length totalNumberOfCharacters = mLineBreakInfo.Count();
+  const Length totalNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(mLineBreakInfo.Count());
 
   // Count the number of LINE_MUST_BREAK to reserve some space for the vector of paragraph's info.
   Vector<CharacterIndex> paragraphs;
@@ -506,8 +506,8 @@ void LogicalModel::CreateParagraphInfo(CharacterIndex startIndex, Length numberO
   const bool updateCurrentParagraphs = numberOfCharacters < totalNumberOfCharacters;
 
   // Reserve space for current paragraphs plus new ones.
-  const Length numberOfNewParagraphs   = paragraphs.Count();
-  const Length totalNumberOfParagraphs = mParagraphInfo.Count() + numberOfNewParagraphs;
+  const Length numberOfNewParagraphs   = static_cast<Dali::Ui::Text::Length>(paragraphs.Count());
+  const Length totalNumberOfParagraphs = static_cast<Length>(mParagraphInfo.Count() + numberOfNewParagraphs);
   mParagraphInfo.Resize(totalNumberOfParagraphs);
 
   ParagraphRun*        paragraphInfoBuffer = NULL;
@@ -602,7 +602,7 @@ void LogicalModel::FindParagraphs(CharacterIndex index, Length numberOfCharacter
 
 Length LogicalModel::GetNumberOfBoundedParagraphRuns() const
 {
-  return mBoundedParagraphRuns.Count();
+  return static_cast<Dali::Ui::Text::Length>(mBoundedParagraphRuns.Count());
 }
 
 const Vector<BoundedParagraphRun>& LogicalModel::GetBoundedParagraphRuns() const
@@ -612,7 +612,7 @@ const Vector<BoundedParagraphRun>& LogicalModel::GetBoundedParagraphRuns() const
 
 Length LogicalModel::GetNumberOfCharacterSpacingCharacterRuns() const
 {
-  return mCharacterSpacingCharacterRuns.Count();
+  return static_cast<Dali::Ui::Text::Length>(mCharacterSpacingCharacterRuns.Count());
 }
 
 const Vector<CharacterSpacingCharacterRun>& LogicalModel::GetCharacterSpacingCharacterRuns() const

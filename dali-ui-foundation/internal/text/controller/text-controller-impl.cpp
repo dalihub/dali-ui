@@ -650,7 +650,7 @@ Length Controller::Impl::GetNumberOfWhiteSpaces(CharacterIndex index) const
   // Get the buffer to the text.
   Character* utf32CharacterBuffer = mModel->mLogicalModel->mText.Begin();
 
-  const Length totalNumberOfCharacters = mModel->mLogicalModel->mText.Count();
+  const Length totalNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
   for(; index < totalNumberOfCharacters; ++index, ++numberOfWhiteSpaces)
   {
     if(!TextAbstraction::IsWhiteSpace(*(utf32CharacterBuffer + index)))
@@ -692,7 +692,7 @@ Length Controller::Impl::GetNumberOfCharacters() const
 void Controller::Impl::GetText(CharacterIndex index, std::string& text) const
 {
   // Get the total number of characters.
-  Length numberOfCharacters = mModel->mLogicalModel->mText.Count();
+  Length numberOfCharacters = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
 
   // Retrieve the text.
   if(0u != numberOfCharacters)
@@ -726,7 +726,7 @@ Direction Controller::Impl::GetTextDirection()
 
     // Set the update info to relayout the whole text.
     mTextUpdateInfo.mParagraphCharacterIndex     = 0u;
-    mTextUpdateInfo.mRequestedNumberOfCharacters = mModel->mLogicalModel->mText.Count();
+    mTextUpdateInfo.mRequestedNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
 
     // Make sure the model is up-to-date before layouting
     UpdateModel(onlyOnceOperations);
@@ -758,7 +758,7 @@ void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)
   mTextUpdateInfo.mStartLineIndex          = 0u;
   numberOfCharacters                       = 0u;
 
-  const Length numberOfParagraphs = mModel->mLogicalModel->mParagraphInfo.Count();
+  const Length numberOfParagraphs = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mParagraphInfo.Count());
   if(0u == numberOfParagraphs)
   {
     mTextUpdateInfo.mParagraphCharacterIndex = 0u;
@@ -772,7 +772,7 @@ void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)
 
   if(mTextUpdateInfo.mFullRelayoutNeeded)
   {
-    const Length currentNumberOfCharacters = mModel->mLogicalModel->mText.Count();
+    const Length currentNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
 
     // A full relayout must rebuild the update range from the beginning.
     // Do not use mCharacterIndex here because it may still point to the last
@@ -801,9 +801,9 @@ void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)
       mTextUpdateInfo.mRequestedNumberOfCharacters =
         mTextUpdateInfo.mNumberOfCharactersToAdd - mTextUpdateInfo.mNumberOfCharactersToRemove;
 
-      mTextUpdateInfo.mStartGlyphIndex = mModel->mVisualModel->mGlyphs.Count();
+      mTextUpdateInfo.mStartGlyphIndex = static_cast<Dali::Ui::Text::GlyphIndex>(mModel->mVisualModel->mGlyphs.Count());
       mTextUpdateInfo.mStartLineIndex =
-        (mModel->mVisualModel->mLines.Count() > 0u) ? mModel->mVisualModel->mLines.Count() - 1u : 0u;
+        static_cast<LineIndex>((mModel->mVisualModel->mLines.Count() > 0u) ? mModel->mVisualModel->mLines.Count() - 1u : 0u);
 
       return;
     }
@@ -939,7 +939,7 @@ void Controller::Impl::RequestDecoratorUpdate()
   if(hasSelection)
   {
     // Collapse selection to avoid state mismatch when text geometry changes.
-    const CharacterIndex textLength        = mModel->mLogicalModel->mText.Count();
+    const CharacterIndex textLength        = static_cast<Dali::Ui::Text::CharacterIndex>(mModel->mLogicalModel->mText.Count());
     const CharacterIndex collapsedPosition = std::min(mEventData->mPrimaryCursorPosition, textLength);
     const uint32_t       oldStart          = mEventData->mLeftSelectionPosition;
     const uint32_t       oldEnd            = mEventData->mRightSelectionPosition;
@@ -1233,7 +1233,7 @@ void Controller::Impl::RetrieveSelection(std::string& selectedText, bool deleteA
     (handlesCrossed ? mEventData->mLeftSelectionPosition : mEventData->mRightSelectionPosition) - startOfSelectedText;
 
   Vector<Character>& utf32Characters    = mModel->mLogicalModel->mText;
-  const Length       numberOfCharacters = utf32Characters.Count();
+  const Length       numberOfCharacters = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
 
   // Validate the start and end selection points
   if((startOfSelectedText + lengthOfSelectedText) <= numberOfCharacters)
@@ -1608,7 +1608,7 @@ CharacterIndex Controller::Impl::CalculateNewCursorIndex(CharacterIndex index) c
   }
   else
   {
-    Length textLength   = geometryModel->mVisualModel->mCharactersToGlyph.Count();
+    Length textLength   = static_cast<Dali::Ui::Text::Length>(geometryModel->mVisualModel->mCharactersToGlyph.Count());
     geometryCursorIndex = geometryCursorIndex + numberOfCharacters > textLength
                             ? textLength
                             : geometryCursorIndex + numberOfCharacters;
@@ -1843,7 +1843,7 @@ std::pair<float, float> Controller::Impl::CalculateScrollTarget(const CursorInfo
   float visibleBottom = visibleTop + info.lineHeight;
 
   ModelPtr     geometryModel = GetEditableGeometryModel();
-  const Length lineCount     = geometryModel->mVisualModel->mLines.Count();
+  const Length lineCount     = static_cast<Dali::Ui::Text::Length>(geometryModel->mVisualModel->mLines.Count());
   if(lineCount > 0u)
   {
     // Find the line index by comparing line offsets with cursor's lineOffset.
@@ -1961,7 +1961,7 @@ void Controller::Impl::RelayoutAllCharacters()
   // relayout all characters
   mTextUpdateInfo.mCharacterIndex             = 0;
   mTextUpdateInfo.mNumberOfCharactersToRemove = mTextUpdateInfo.mPreviousNumberOfCharacters;
-  mTextUpdateInfo.mNumberOfCharactersToAdd    = mModel->mLogicalModel->mText.Count();
+  mTextUpdateInfo.mNumberOfCharactersToAdd    = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
   mOperationsPending                          = static_cast<OperationsMask>(mOperationsPending | LAYOUT);
 
   mTextUpdateInfo.mFullRelayoutNeeded = true;
@@ -2151,7 +2151,7 @@ int32_t Controller::Impl::GetAnchorIndex(size_t characterOffset) const
     it++;
   }
 
-  return it == mModel->mLogicalModel->mAnchors.End() ? -1 : it - mModel->mLogicalModel->mAnchors.Begin();
+  return it == mModel->mLogicalModel->mAnchors.End() ? -1 : static_cast<int32_t>(it - mModel->mLogicalModel->mAnchors.Begin());
 }
 
 bool Controller::Impl::ShouldClearFocusOnEscape() const
@@ -2420,7 +2420,7 @@ void Controller::Impl::SetLineWrapMode(LineWrapMode lineWrapMode)
 
     mTextUpdateInfo.mCharacterIndex             = 0u;
     mTextUpdateInfo.mNumberOfCharactersToRemove = mTextUpdateInfo.mPreviousNumberOfCharacters;
-    mTextUpdateInfo.mNumberOfCharactersToAdd    = mModel->mLogicalModel->mText.Count();
+    mTextUpdateInfo.mNumberOfCharactersToAdd    = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
 
     // Request relayout
     RequestRelayout();
@@ -2626,7 +2626,7 @@ void Controller::Impl::ClearFontData()
   // Set flags to update the model.
   mTextUpdateInfo.mCharacterIndex             = 0u;
   mTextUpdateInfo.mNumberOfCharactersToRemove = mTextUpdateInfo.mPreviousNumberOfCharacters;
-  mTextUpdateInfo.mNumberOfCharactersToAdd    = mModel->mLogicalModel->mText.Count();
+  mTextUpdateInfo.mNumberOfCharactersToAdd    = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
 
   mTextUpdateInfo.mClearAll           = true;
   mTextUpdateInfo.mFullRelayoutNeeded = true;

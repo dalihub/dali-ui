@@ -310,7 +310,7 @@ private:
     visual.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);
     visual.SetCornerRadius(GetRandomFloat() * 0.5f);
     visual.SetCornerRadiusPolicyRelative();
-    visual.SetResourceUrl(Dali::StringView(IMAGE_PATH[imageIndex].data(), IMAGE_PATH[imageIndex].size()));
+    visual.SetResourceUrl(Dali::StringView(IMAGE_PATH[imageIndex].data(), static_cast<uint32_t>(IMAGE_PATH[imageIndex].size())));
 
     mView.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
 

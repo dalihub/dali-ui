@@ -236,9 +236,9 @@ private:
   {
     Dali::Ui::Integration::ViewAccessibility::SetAccessibleObjectCreator(
       *this,
-      [](Dali::Actor actor) -> ViewAccessible*
+      [](Dali::Ui::View view) -> ViewAccessible*
     {
-      return new TestAccessibilityViewAccessible(actor);
+      return new TestAccessibilityViewAccessible(view);
     });
   }
 
@@ -266,6 +266,27 @@ View CreateTestAccessibilityView(TestAccessibilityViewImpl*& implementation)
   impl->Initialize();
   return view;
 }
+
+class AccessibilityActivateCallbackHandler
+{
+public:
+  bool OnActivate(View view)
+  {
+    ++callbackCount;
+    receivedExpectedView = receivedExpectedView && view == expectedView;
+    if(clearWhileExecuting)
+    {
+      Extension::View::SetAccessibilityActivateCallback(view, {});
+    }
+    return result;
+  }
+
+  View expectedView;
+  int callbackCount{0};
+  bool receivedExpectedView{true};
+  bool clearWhileExecuting{false};
+  bool result{false};
+};
 
 BaseHandle CreateRegisteredTestAccessibilityView()
 {
@@ -777,6 +798,45 @@ int UtcDaliViewAccessibilityHighlightCommandsP(void)
   accessible->clearHighlightResult = false;
   DALI_TEST_CHECK(!Extension::View::ClearAccessibilityHighlight(view));
   DALI_TEST_EQUALS(accessible->clearHighlightCount, 2, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityActivateCallbackP(void)
+{
+  UiTestApplication application;
+
+  TestAccessibilityViewImpl* implementation = nullptr;
+  View view = CreateTestAccessibilityView(implementation);
+  auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+
+  DALI_TEST_CHECK(viewData.DispatchAccessibilityActivate());
+  DALI_TEST_EQUALS(implementation->activateCount, 1, TEST_LOCATION);
+
+  AccessibilityActivateCallbackHandler handler;
+  handler.expectedView = view;
+  Extension::View::SetAccessibilityActivateCallback(
+    view,
+    Ui::Callback<bool(View)>::New(&handler, &AccessibilityActivateCallbackHandler::OnActivate));
+
+  DALI_TEST_CHECK(!viewData.DispatchAccessibilityActivate());
+  DALI_TEST_EQUALS(handler.callbackCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->activateCount, 1, TEST_LOCATION);
+
+  handler.result = true;
+  DALI_TEST_CHECK(viewData.DispatchAccessibilityActivate());
+  DALI_TEST_EQUALS(handler.callbackCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->activateCount, 1, TEST_LOCATION);
+
+  handler.clearWhileExecuting = true;
+  DALI_TEST_CHECK(viewData.DispatchAccessibilityActivate());
+  DALI_TEST_EQUALS(handler.callbackCount, 3, TEST_LOCATION);
+  DALI_TEST_CHECK(handler.receivedExpectedView);
+  DALI_TEST_EQUALS(implementation->activateCount, 1, TEST_LOCATION);
+
+  DALI_TEST_CHECK(viewData.DispatchAccessibilityActivate());
+  DALI_TEST_EQUALS(handler.callbackCount, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->activateCount, 2, TEST_LOCATION);
 
   END_TEST;
 }

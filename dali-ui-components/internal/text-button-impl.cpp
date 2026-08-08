@@ -148,10 +148,52 @@ void TextButtonImpl::OnInitialize()
 {
   Dali::Ui::Extension::InteractiveViewImpl::OnInitialize();
 
+  Ui::View self = Ui::View::DownCast(Self());
+
+  // A TextButton must be exposed as an actual button to Screen Reader, not merely look
+  // like one. Since a View with role NONE is not accessibility-highlightable by default,
+  // the component provides BUTTON on creation. Applications can still explicitly set a
+  // different role later when needed.
+  self.SetAccessibilityRole(Accessibility::Role::BUTTON);
+
   mLabel = Ui::Label::New();
-  Self().Add(mLabel);
+
+  // The internal Label is a visual implementation detail of TextButton. Because the root
+  // TextButton represents the name, role, and action, retaining the Label in the accessibility
+  // tree would announce the same text twice, as a button and as text. Hide only the subtree
+  // from accessibility, without affecting rendering.
+  mLabel.SetAccessibilityHidden(true);
+  self.Add(mLabel);
+
+  // The visual DISABLED state produced by View::SetEnabled() and the accessibility ENABLED
+  // state use separate storage. Update the accessibility state in the same transition to
+  // prevent a mismatch where the control looks disabled but Screen Reader announces it as enabled.
+  self.StateChangedSignal().Connect(this, &TextButtonImpl::OnViewStateChanged);
 
   ApplyAlignment();
+}
+
+bool TextButtonImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
+{
+  // The framework invokes the default-name hook only when the value explicitly set with
+  // SetAccessibilityName() is empty. The component therefore need not check the explicit
+  // name itself, and its displayed text does not override an application value. After SetText(),
+  // the next query returns the current Label text. Return false for empty text so the framework
+  // can continue to use its next fallback, such as the Actor name.
+  value = mLabel.GetText();
+  return !value.Empty();
+}
+
+void TextButtonImpl::OnViewStateChanged(Ui::View view, StateEvent event)
+{
+  if(event.Added(ViewState::DISABLED))
+  {
+    view.RemoveAccessibilityState(Accessibility::State::ENABLED);
+  }
+  else if(event.Removed(ViewState::DISABLED))
+  {
+    view.AddAccessibilityState(Accessibility::State::ENABLED);
+  }
 }
 
 void TextButtonImpl::ApplyInitialStyle(TextButtonStyle style)

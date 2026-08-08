@@ -114,7 +114,7 @@ private:
   class VisualData;
 
 public:
-  using AccessibleObjectCreator = ViewAccessible* (*)(Dali::Actor);
+  using AccessibleObjectCreator = ViewAccessible* (*)(Dali::Ui::View);
 
   /**
    * @brief Retrieves the implementation of the internal view class.
@@ -188,8 +188,8 @@ public:
   void               SetShadow(const Shadow& shadow);
   void               SetShadow(const ShadowStack& shadowStack);
 
-  void                          SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback);
-  View                          RequestFocusNavigation(View currentFocusedView, FocusDirection direction);
+  void                          SetFocusNavigationCallback(FocusNavigationCallback callback);
+  FocusNavigationResult         RequestFocusNavigation(View currentFocusedView, FocusNavigationContext context);
   View                          RequestFocus();
   bool                          IsFocusGroup() const;
   void                          SetAsFocusGroup(bool isFocusGroup);
@@ -521,6 +521,9 @@ public:
    */
   [[nodiscard]] AccessibilityData* GetAccessibilityData() const;
 
+  void SetAccessibilityActivateCallback(Callback<bool(View)> callback);
+  bool DispatchAccessibilityActivate();
+
   void                SetAccessibilityName(StringView name);
   Dali::String        GetAccessibilityName() const;
   void                SetAccessibilityDescription(StringView description);
@@ -656,9 +659,21 @@ public:
   void SetInnerShadow(const Property::Map& map);
 
   /**
+   * @brief Sets the inner shadow with an InnerShadow value.
+   * @param[in] innerShadow The inner shadow value
+   */
+  void SetInnerShadow(const Ui::InnerShadow& innerShadow);
+
+  /**
    * @brief Clear the inner shadow.
    */
   void ClearInnerShadow();
+
+  /**
+   * @brief Registers an inner shadow visual and connects its corner radius.
+   * @param[in] visual The inner shadow visual
+   */
+  void RegisterInnerShadowVisual(Ui::Integration::Visual::Base visual);
 
   /**
    * @brief Sets the borderline with a property map.

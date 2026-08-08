@@ -330,7 +330,7 @@ void AnimatedImageVisual::CreateImageCache(TextureManager::ReloadPolicy reloadPo
   {
     // Ensure the batch size and cache size are no bigger than the number of URLs,
     // and that the cache is at least as big as the batch size.
-    uint16_t numUrls   = mImageUrls->size();
+    uint16_t numUrls   = static_cast<uint16_t>(mImageUrls->size());
     uint16_t batchSize = std::max(std::min(mBatchSize, numUrls), MINIMUM_CACHESIZE);
     uint16_t cacheSize = std::max(std::min(std::max(batchSize, mCacheSize), numUrls), MINIMUM_CACHESIZE);
 

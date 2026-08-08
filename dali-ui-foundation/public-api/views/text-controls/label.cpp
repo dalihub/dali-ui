@@ -101,6 +101,11 @@ Label Label::DownCast(BaseHandle handle)
   return Ui::View::DownCast<Label, Integration::LabelImpl>(handle);
 }
 
+float Label::GetHeightForWidth(float width)
+{
+  return GetImpl(*this).GetHeightForWidth(width);
+}
+
 Label::Label(Integration::LabelImpl& implementation)
 : View(implementation)
 {

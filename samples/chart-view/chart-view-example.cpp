@@ -119,8 +119,8 @@ public:
   void Create(Application application)
   {
     Window  window     = application.GetWindow();
-    auto    posSize    = window.GetPositionSize();
-    Vector2 windowSize = Vector2(posSize.width, posSize.height);
+    auto    positionSize = window.GetPositionSize();
+    Vector2 windowSize   = Vector2(static_cast<float>(positionSize.width), static_cast<float>(positionSize.height));
     window.SetBackgroundColor(Color::LIGHT_GRAY);
     window.KeyEventSignal().Connect(this, &ChartViewController::OnKeyEvent);
 

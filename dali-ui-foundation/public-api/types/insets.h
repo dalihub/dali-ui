@@ -32,6 +32,14 @@ struct DALI_UI_API Insets
 
   bool operator!=(const Insets& rhs) const;
 
+  /**
+   * @brief Creates insets with symmetric horizontal and vertical values.
+   *
+   * @param[in] horizontal The value assigned to the start and end edges
+   * @param[in] vertical The value assigned to the top and bottom edges
+   */
+  Insets(float horizontal, float vertical);
+
   float start;
   float end;
   float top;

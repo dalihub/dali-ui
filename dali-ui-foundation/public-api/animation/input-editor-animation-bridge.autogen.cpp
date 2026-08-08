@@ -48,6 +48,18 @@ InputEditorAnimationBridge& InputEditorAnimationBridge::BackgroundColorBy(const 
   return *this;
 }
 
+InputEditorAnimationBridge& InputEditorAnimationBridge::BackgroundGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BackgroundGradientStartOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::BackgroundGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BackgroundGradientStartOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputEditorAnimationBridge& InputEditorAnimationBridge::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::ShadowBlurRadius(target, duration, alpha, delay);

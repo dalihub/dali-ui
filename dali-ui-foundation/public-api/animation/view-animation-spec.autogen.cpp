@@ -79,6 +79,18 @@ ViewAnimationSpec& ViewAnimationSpec::BackgroundColorBy(const UiColor& relative,
   return *this;
 }
 
+ViewAnimationSpec& ViewAnimationSpec::BackgroundGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyBackgroundGradientStartOffsetTo);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::BackgroundGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyBackgroundGradientStartOffsetBy);
+  return *this;
+}
+
 ViewAnimationSpec& ViewAnimationSpec::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyShadowBlurRadiusTo);

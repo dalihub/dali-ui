@@ -41,6 +41,14 @@ Insets::Insets(float start, float end, float top, float bottom)
 {
 }
 
+Insets::Insets(float horizontal, float vertical)
+: start(horizontal),
+  end(horizontal),
+  top(vertical),
+  bottom(vertical)
+{
+}
+
 Insets::Insets(const Dali::Extents& extents)
 : start(static_cast<float>(extents.start)),
   end(static_cast<float>(extents.end)),

@@ -30,6 +30,7 @@
 
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
@@ -163,6 +164,26 @@ void ViewAnimationSpecImpl::ApplyBackgroundColorTo(Animation& animation, View vi
 void ViewAnimationSpecImpl::ApplyBackgroundColorBy(Animation& animation, View view, const Entry& entry)
 {
   Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, Ui::VisualBasePropertyIndex::MIX_COLOR);
+  if(visualProperty.propertyIndex != Property::INVALID_INDEX)
+  {
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateBy(visualProperty, entry.value, entry.alpha, period);
+  }
+}
+
+void ViewAnimationSpecImpl::ApplyBackgroundGradientStartOffsetTo(Animation& animation, View view, const Entry& entry)
+{
+  Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, Ui::GradientVisualPropertyIndex::START_OFFSET);
+  if(visualProperty.propertyIndex != Property::INVALID_INDEX)
+  {
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateTo(visualProperty, entry.value, entry.alpha, period);
+  }
+}
+
+void ViewAnimationSpecImpl::ApplyBackgroundGradientStartOffsetBy(Animation& animation, View view, const Entry& entry)
+{
+  Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, Ui::GradientVisualPropertyIndex::START_OFFSET);
   if(visualProperty.propertyIndex != Property::INVALID_INDEX)
   {
     TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());

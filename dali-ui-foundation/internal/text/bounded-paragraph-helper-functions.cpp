@@ -45,14 +45,14 @@ void MergeBoundedParagraphRunsWhenRemoveCharacters(const Vector<Character>& text
   }
 
   const Length          numberOfRemovedCharacters     = (Length)(-1 * numberOfCharacters);
-  const Length          totalNumberOfCharacters       = text.Count();
+  const Length          totalNumberOfCharacters       = static_cast<Dali::Ui::Text::Length>(text.Count());
   const CharacterIndex& firstIndexOfRemovedCharacters = index;
   const CharacterIndex  lastIndexOfRemovedCharacters =
     ((firstIndexOfRemovedCharacters + numberOfRemovedCharacters) > 0u)
        ? (firstIndexOfRemovedCharacters + numberOfRemovedCharacters - 1u)
        : firstIndexOfRemovedCharacters; // Note: Length is uint32. Extra validation to avoid  a potential defects.
 
-  Length numberOfRuns          = boundedParagraphRuns.Count();
+  Length numberOfRuns          = static_cast<Dali::Ui::Text::Length>(boundedParagraphRuns.Count());
   Length firstRunIndexToUpdate = 0;
   Length lastRunIndexToUpdate  = 0;
   bool   noNeedToMerge         = false;

@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   rules-review:
-    runs-on: [ code-linux, code-large ]
+    runs-on: code-linux
 
     env:
       CLINE_MODEL: ${{ vars.CLINE_MODEL || 'GaussO4.1' }}

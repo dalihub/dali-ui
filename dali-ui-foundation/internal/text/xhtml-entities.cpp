@@ -16,6 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <cstdint>
 #include <cstring> // for strlen()
 
 // FILE HEADER
@@ -320,9 +321,9 @@ const std::size_t XHTMLENTITY_LEGACY_LOOPKUP_COUNT =
 const char* const NamedEntityToUtf8(const char* const markupText, unsigned int len)
 {
   // finding if given XHTML named entity is supported or not
-  for(size_t i = 0; i < XHTMLENTITY_LOOKUP_COUNT; ++i)
+  for(uint32_t i = 0u; i < XHTMLENTITY_LOOKUP_COUNT; ++i)
   {
-    unsigned int entityLen = strlen(XHTMLEntityLookupTable[i].entityName);
+    uint32_t entityLen = static_cast<uint32_t>(strlen(XHTMLEntityLookupTable[i].entityName));
     if(len == entityLen)
     {
       if(strncmp(markupText, XHTMLEntityLookupTable[i].entityName, len) == 0) // if named Entity found in table
@@ -333,9 +334,9 @@ const char* const NamedEntityToUtf8(const char* const markupText, unsigned int l
   }
 
   // finding in legacy lookup table which was supported in EFL.
-  for(size_t i = 0; i < XHTMLENTITY_LEGACY_LOOPKUP_COUNT; ++i)
+  for(uint32_t i = 0u; i < XHTMLENTITY_LEGACY_LOOPKUP_COUNT; ++i)
   {
-    unsigned int entityLen = strlen(XHTMLEntityLegacyLookupTable[i].entityName);
+    uint32_t entityLen = static_cast<uint32_t>(strlen(XHTMLEntityLegacyLookupTable[i].entityName));
     if(len == entityLen)
     {
       if(strncmp(markupText, XHTMLEntityLegacyLookupTable[i].entityName, len) == 0) // if named Entity found in table

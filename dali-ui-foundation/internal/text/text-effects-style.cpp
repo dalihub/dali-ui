@@ -75,7 +75,7 @@ bool ParseShadowProperties(const Property::Map& shadowPropertiesMap, bool& color
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string colorStr = ToStdString(valueGet.second);
-        Text::ColorStringToVector4(colorStr.c_str(), colorStr.size(), color);
+        Text::ColorStringToVector4(colorStr.c_str(), static_cast<Dali::Ui::Text::Length>(colorStr.size()), color);
       }
       else
       {
@@ -91,7 +91,7 @@ bool ParseShadowProperties(const Property::Map& shadowPropertiesMap, bool& color
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string offsetStr = ToStdString(valueGet.second);
-        StringToVector2(offsetStr.c_str(), offsetStr.size(), offset);
+        StringToVector2(offsetStr.c_str(), static_cast<Dali::Ui::Text::Length>(offsetStr.size()), offset);
       }
       else
       {
@@ -135,7 +135,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string enableStr = ToStdString(valueGet.second);
-        enabled                     = Text::TokenComparison(TRUE_TOKEN, enableStr.c_str(), enableStr.size());
+        enabled                     = Text::TokenComparison(TRUE_TOKEN, enableStr.c_str(), static_cast<Dali::Ui::Text::Length>(enableStr.size()));
       }
       else
       {
@@ -151,7 +151,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string directionStr = ToStdString(valueGet.second);
-        StringToVector2(directionStr.c_str(), directionStr.size(), direction);
+        StringToVector2(directionStr.c_str(), static_cast<Dali::Ui::Text::Length>(directionStr.size()), direction);
       }
       else
       {
@@ -183,7 +183,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string lightColorStr = ToStdString(valueGet.second);
-        Text::ColorStringToVector4(lightColorStr.c_str(), lightColorStr.size(), lightColor);
+        Text::ColorStringToVector4(lightColorStr.c_str(), static_cast<Dali::Ui::Text::Length>(lightColorStr.size()), lightColor);
       }
       else
       {
@@ -199,7 +199,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string shadowColorStr = ToStdString(valueGet.second);
-        Text::ColorStringToVector4(shadowColorStr.c_str(), shadowColorStr.size(), shadowColor);
+        Text::ColorStringToVector4(shadowColorStr.c_str(), static_cast<Dali::Ui::Text::Length>(shadowColorStr.size()), shadowColor);
       }
       else
       {
@@ -229,7 +229,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string enableStr = ToStdString(valueGet.second);
-        enabled                     = Text::TokenComparison(TRUE_TOKEN, enableStr.c_str(), enableStr.size());
+        enabled                     = Text::TokenComparison(TRUE_TOKEN, enableStr.c_str(), static_cast<Dali::Ui::Text::Length>(enableStr.size()));
       }
       else
       {
@@ -245,7 +245,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string colorStr = ToStdString(valueGet.second);
-        Text::ColorStringToVector4(colorStr.c_str(), colorStr.size(), color);
+        Text::ColorStringToVector4(colorStr.c_str(), static_cast<Dali::Ui::Text::Length>(colorStr.size()), color);
       }
       else
       {
@@ -277,7 +277,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string typeStr = ToStdString(valueGet.second);
-        Text::UnderlineTypeStringToTypeValue(typeStr.c_str(), typeStr.size(), type);
+        Text::UnderlineTypeStringToTypeValue(typeStr.c_str(), static_cast<Dali::Ui::Text::Length>(typeStr.size()), type);
       }
       else
       {
@@ -354,7 +354,7 @@ bool ParseOutlineProperties(const Property::Map& underlinePropertiesMap, bool& c
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string offsetStr = ToStdString(valueGet.second);
-        StringToVector2(offsetStr.c_str(), offsetStr.size(), offset);
+        StringToVector2(offsetStr.c_str(), static_cast<Dali::Ui::Text::Length>(offsetStr.size()), offset);
       }
       else
       {
@@ -427,7 +427,7 @@ bool ParseStrikethroughProperties(const Property::Map& strikethroughPropertiesMa
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string enableStr = ToStdString(valueGet.second);
-        enabled                     = Text::TokenComparison(TRUE_TOKEN, enableStr.c_str(), enableStr.size());
+        enabled                     = Text::TokenComparison(TRUE_TOKEN, enableStr.c_str(), static_cast<Dali::Ui::Text::Length>(enableStr.size()));
       }
       else
       {
@@ -443,7 +443,7 @@ bool ParseStrikethroughProperties(const Property::Map& strikethroughPropertiesMa
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
         const std::string colorStr = ToStdString(valueGet.second);
-        Text::ColorStringToVector4(colorStr.c_str(), colorStr.size(), color);
+        Text::ColorStringToVector4(colorStr.c_str(), static_cast<Dali::Ui::Text::Length>(colorStr.size()), color);
       }
       else
       {

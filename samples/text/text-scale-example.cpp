@@ -16,6 +16,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 #include <cstdlib>
+#include <string>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -67,12 +68,32 @@ Label CreateHeaderLabel(const char* text)
   return label;
 }
 
-void SetEnvironmentVariable(const char* name, const char* value)
+const char* GetEnvironmentVariableValue(const char* variableName)
 {
-#if defined(_WIN32)
-  _putenv_s(name, value);
+#if defined(_MSC_VER)
+  thread_local std::string value;
+  char*                    environmentVariableValue = nullptr;
+  std::size_t              valueLength              = 0u;
+  if(_dupenv_s(&environmentVariableValue, &valueLength, variableName) != 0 || environmentVariableValue == nullptr)
+  {
+    value.clear();
+    return nullptr;
+  }
+
+  value.assign(environmentVariableValue);
+  std::free(environmentVariableValue);
+  return value.c_str();
 #else
-  setenv(name, value, 1);
+  return std::getenv(variableName);
+#endif
+}
+
+void SetEnvironmentVariable(const char* variableName, const char* value)
+{
+#if defined(_MSC_VER)
+  _putenv_s(variableName, value);
+#else
+  setenv(variableName, value, 1);
 #endif
 }
 
@@ -221,10 +242,10 @@ private:
 
     Dali::String status;
 
-    const char* envFontSize = std::getenv(FONT_SIZE_ENV);
+    const char* environmentFontSize = GetEnvironmentVariableValue(FONT_SIZE_ENV);
 
     status += "[System Font Env]\n";
-    status += envFontSize ? envFontSize : "(null)";
+    status += environmentFontSize ? environmentFontSize : "(null)";
     status += "\nScale updates after X backend watch tick.";
     status += "\n\n";
 

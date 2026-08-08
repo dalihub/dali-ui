@@ -49,19 +49,19 @@ static int MajorAxisDistanceRaw(Dali::Ui::FocusDirection direction, Dali::Bounds
   {
     case Dali::Ui::FocusDirection::LEFT:
     {
-      return source.Left() - dest.Right();
+      return static_cast<int>(source.Left() - dest.Right());
     }
     case Dali::Ui::FocusDirection::RIGHT:
     {
-      return dest.Left() - source.Right();
+      return static_cast<int>(dest.Left() - source.Right());
     }
     case Dali::Ui::FocusDirection::UP:
     {
-      return source.Top() - dest.Bottom();
+      return static_cast<int>(source.Top() - dest.Bottom());
     }
     case Dali::Ui::FocusDirection::DOWN:
     {
-      return dest.Top() - source.Bottom();
+      return static_cast<int>(dest.Top() - source.Bottom());
     }
     default:
     {
@@ -86,19 +86,19 @@ static int MajorAxisDistanceToFarEdgeRaw(Dali::Ui::FocusDirection direction, Dal
   {
     case Dali::Ui::FocusDirection::LEFT:
     {
-      return source.Left() - dest.Left();
+      return static_cast<int>(source.Left() - dest.Left());
     }
     case Dali::Ui::FocusDirection::RIGHT:
     {
-      return dest.Right() - source.Right();
+      return static_cast<int>(dest.Right() - source.Right());
     }
     case Dali::Ui::FocusDirection::UP:
     {
-      return source.Top() - dest.Top();
+      return static_cast<int>(source.Top() - dest.Top());
     }
     case Dali::Ui::FocusDirection::DOWN:
     {
-      return dest.Bottom() - source.Bottom();
+      return static_cast<int>(dest.Bottom() - source.Bottom());
     }
     default:
     {

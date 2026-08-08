@@ -93,7 +93,7 @@ ReplacementCaretMetric ResolveBoundaryCaretMetric(const VisualModel&            
     lineEnd   = std::max(lineEnd,
                          line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs);
   }
-  lineEnd = std::min<GlyphIndex>(lineEnd, visual.mGlyphs.Count());
+  lineEnd = std::min<GlyphIndex>(lineEnd, static_cast<GlyphIndex>(visual.mGlyphs.Count()));
 
   const auto findPrevious = [&]()
   {
@@ -138,7 +138,7 @@ void IncludeGlyphMetrics(const VisualModel&           visual,
   FontId                       lastFontId = 0u;
   TextAbstraction::FontMetrics fontMetrics;
   const GlyphIndex             end =
-    std::min<GlyphIndex>(glyphRun.glyphIndex + glyphRun.numberOfGlyphs, visual.mGlyphs.Count());
+    std::min<GlyphIndex>(glyphRun.glyphIndex + glyphRun.numberOfGlyphs, static_cast<GlyphIndex>(visual.mGlyphs.Count()));
   for(GlyphIndex glyphIndex = glyphRun.glyphIndex; glyphIndex < end; ++glyphIndex)
   {
     const GlyphInfo& glyph = visual.mGlyphs[glyphIndex];

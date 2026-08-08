@@ -231,7 +231,7 @@ bool Visual::Base::IsUsingCustomShader() const
 void Visual::Base::SetProperties(const Property::Map& propertyMap)
 {
   bool needUpdateShader = false;
-  for(size_t i = 0; i < propertyMap.Count(); ++i)
+  for(Property::Map::SizeType i = 0u; i < propertyMap.Count(); ++i)
   {
     const KeyValuePair&    pair  = propertyMap.GetKeyValue(i);
     const Property::Key&   key   = pair.first;
@@ -579,7 +579,7 @@ void Visual::Base::SetTransformAndSize(const Property::Map& transform, Size cont
   oss.imbue(std::locale::classic());
   oss << transform;
   DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General,
-                "Visual::Base::SetTransformAndSize(%s) - [\e[1;32mtransform: %s  controlSize: (%3.1f, %3.1f) effectiveScale: %3.1f]\e[0m\n",
+                "Visual::Base::SetTransformAndSize(%s) - [\x1b[1;32mtransform: %s  controlSize: (%3.1f, %3.1f) effectiveScale: %3.1f]\x1b[0m\n",
                 GetName().c_str(), oss.str().c_str(), controlSize.x, controlSize.y, effectiveScale);
 #endif
 

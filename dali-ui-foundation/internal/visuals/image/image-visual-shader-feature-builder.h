@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <cstdint>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali/devel-api/rendering/texture-devel.h>
 #include <dali/public-api/rendering/texture.h>
@@ -52,7 +53,7 @@ namespace RoundedCorner
 /**
  * @brief Whether use rounded corner, or squircle corner, or not
  */
-enum Type
+enum Type : uint32_t
 {
   DISABLED = 0,   ///< Image visual doesn't use rounded corner
   ROUNDED_CORNER, ///< Image visual uses rounded corner

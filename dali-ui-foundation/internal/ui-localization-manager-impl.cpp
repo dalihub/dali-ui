@@ -183,7 +183,7 @@ Dali::String UiLocalizationManagerImpl::GetLocalizedStringInternal(StringView re
     StringView effectiveDomainView;
     if(!effectiveDomain.empty())
     {
-      effectiveDomainView = StringView(effectiveDomain.c_str(), effectiveDomain.size());
+      effectiveDomainView = StringView(effectiveDomain.c_str(), static_cast<uint32_t>(effectiveDomain.size()));
     }
 
     if(mLocalizedStringOverride(resourceIdView, effectiveDomainView, overridden))
@@ -530,12 +530,12 @@ void UiLocalizationManagerImpl::ApplyBinding(BaseHandle target, BindingInfo& inf
   }
   else
   {
-    StringView resourceView(info.resourceId.c_str(), info.resourceId.size());
+    StringView resourceView(info.resourceId.c_str(), static_cast<uint32_t>(info.resourceId.size()));
 
     StringView domainView;
     if(!info.domain.empty())
     {
-      domainView = StringView(info.domain.c_str(), info.domain.size());
+      domainView = StringView(info.domain.c_str(), static_cast<uint32_t>(info.domain.size()));
     }
 
     localized = GetLocalizedStringInternal(resourceView, domainView);

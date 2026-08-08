@@ -408,7 +408,7 @@ int UtcDaliWebViewClearAllTilesResourcesP(void)
   END_TEST;
 }
 
-int UtcDaliWebViewClearCacheP(void)
+int UtcDaliWebViewClearCacheShortcutP(void)
 {
   UiTestApplication application;
   WebView view = WebView::New();
@@ -417,12 +417,64 @@ int UtcDaliWebViewClearCacheP(void)
   END_TEST;
 }
 
-int UtcDaliWebViewClearCookiesP(void)
+int UtcDaliWebViewClearCookiesShortcutP(void)
 {
   UiTestApplication application;
   WebView view = WebView::New();
   view.ClearCookies();
   DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewGetProfileP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  WebView otherView = WebView::New();
+
+  WebProfile profile = view.GetProfile();
+  WebProfile sameProfile = view.GetProfile();
+  WebProfile equivalentProfile = otherView.GetProfile();
+  WebProfile emptyProfile;
+
+  DALI_TEST_CHECK(profile);
+  DALI_TEST_CHECK(profile == sameProfile);
+  DALI_TEST_CHECK(profile == equivalentProfile);
+  DALI_TEST_CHECK(profile != emptyProfile);
+  profile.ClearCache();
+  END_TEST;
+}
+
+int UtcDaliWebProfileGetCookieManagerP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+
+  WebCookieManager manager = view.GetProfile().GetCookieManager();
+  WebCookieManager sameManager = view.GetProfile().GetCookieManager();
+  WebCookieManager emptyManager;
+
+  DALI_TEST_CHECK(manager);
+  DALI_TEST_CHECK(manager == sameManager);
+  DALI_TEST_CHECK(manager != emptyManager);
+  manager.ClearAllCookies();
+  END_TEST;
+}
+
+int UtcDaliWebViewGetSettingsP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+
+  WebSettings settings = view.GetSettings();
+  WebSettings sameSettings = view.GetSettings();
+  WebSettings emptySettings;
+
+  DALI_TEST_CHECK(settings);
+  DALI_TEST_CHECK(settings == sameSettings);
+  DALI_TEST_CHECK(settings != emptySettings);
+  settings.SetExtraFeatureValue(Dali::String("testFeature"), Dali::String("testValue"));
+  settings.GetExtraFeatureValue(Dali::String("testFeature"));
   END_TEST;
 }
 
@@ -464,6 +516,15 @@ int UtcDaliWebViewAddJavaScriptMessageHandlerP(void)
   WebView view = WebView::New();
   auto callback = WebView::JavaScriptCallback::New(OnJavaScriptCallback);
   view.AddJavaScriptMessageHandler(Dali::String("testObject"), std::move(callback));
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewRemoveJavaScriptMessageHandlerP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.RemoveJavaScriptMessageHandler(Dali::String("testObject"));
   DALI_TEST_CHECK(view);
   END_TEST;
 }

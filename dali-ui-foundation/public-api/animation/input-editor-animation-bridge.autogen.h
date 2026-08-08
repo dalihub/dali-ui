@@ -69,6 +69,25 @@ public:
   InputEditorAnimationBridge& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
 
   /**
+   * @brief Animates the background gradient start offset.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  InputEditorAnimationBridge& BackgroundGradientStartOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the background gradient start offset by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  InputEditorAnimationBridge& BackgroundGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
    * @brief Animates the first shadow blur radius.
    *
    * @param[in] target The target value

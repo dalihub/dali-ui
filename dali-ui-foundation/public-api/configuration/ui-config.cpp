@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/lifecycle-controller.h>
 #include <dali/devel-api/common/singleton-service.h>
+#include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/public-api/common/dali-common.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/connection-tracker.h>
@@ -184,6 +185,11 @@ BaseHandle GetRuntime()
   return runtime;
 }
 
+// Move a UiConfigRuntime created before Core initialization into SingletonService
+// and connect it to PreInitSignal before the application InitSignal is emitted.
+DALI_TYPE_REGISTRATION_BEGIN_CREATE(UiConfigRuntime, Dali::BaseHandle, GetRuntime, true)
+DALI_TYPE_REGISTRATION_END()
+
 } // unnamed namespace
 
 UiConfig::UiConfig(Extension::UiConfigImpl* impl)
@@ -286,14 +292,14 @@ ExecutionKeyPredicate UiConfig::GetExecutionKeyPredicate() const
   return GetImpl(*this).GetExecutionKeyPredicate();
 }
 
-void UiConfig::SetKeyLongPressThreshold(uint32_t count)
+void UiConfig::SetLongPressKeyEventMinimumCount(uint32_t count)
 {
-  GetImpl(*this).SetKeyLongPressThreshold(count);
+  GetImpl(*this).SetLongPressKeyEventMinimumCount(count);
 }
 
-uint32_t UiConfig::GetKeyLongPressThreshold() const
+uint32_t UiConfig::GetLongPressKeyEventMinimumCount() const
 {
-  return GetImpl(*this).GetKeyLongPressThreshold();
+  return GetImpl(*this).GetLongPressKeyEventMinimumCount();
 }
 
 void UiConfig::SetLongPressGestureMinimumHoldingTime(uint32_t timeMs)

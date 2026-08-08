@@ -88,7 +88,7 @@ Dali::Vector<Dali::String> AnimatedImageVisual::GetResourceUrlList() const
 void AnimatedImageVisual::SetResourceUrlList(const Dali::Vector<Dali::String>& resourceUrlList)
 {
   Dali::Property::Array array;
-  array.Reserve(resourceUrlList.Count());
+  array.Reserve(static_cast<Dali::Property::Array::SizeType>(resourceUrlList.Count()));
   for(const auto& resourceUrl : resourceUrlList)
   {
     array.PushBack(resourceUrl);

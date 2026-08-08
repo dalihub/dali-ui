@@ -64,7 +64,7 @@ void Gradient::ClearStop()
 
 void Gradient::ApplyStops(const Vector<float>& offsets, const Vector<Vector4>& colors)
 {
-  uint32_t numStops = std::max(mGradientStops.Count(), std::max(offsets.Count(), colors.Count()));
+  uint32_t numStops = static_cast<uint32_t>(std::max(mGradientStops.Count(), std::max(offsets.Count(), colors.Count())));
   mGradientStops.Resize(numStops);
 
   for(uint32_t i = 0; i < offsets.Count(); ++i)
@@ -114,7 +114,7 @@ const Matrix3& Gradient::GetAlignmentTransform() const
  */
 Dali::Texture Gradient::GenerateLookupTexture()
 {
-  uint32_t numStops = mGradientStops.Count();
+  uint32_t numStops = static_cast<uint32_t>(mGradientStops.Count());
   if(DALI_UNLIKELY(numStops <= 0))
   {
     return Dali::Texture();

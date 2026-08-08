@@ -78,6 +78,7 @@
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
+#include <dali-ui-foundation/internal/views/view/inner-shadow.h>
 #include <dali-ui-foundation/internal/views/view/view-gradient-color-binding.h>
 #include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
@@ -153,6 +154,28 @@ constexpr char         ACCESSIBILITY_DESCRIPTION_BINDING_ID[] = "Ui.View.Accessi
 constexpr char         INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-highlight";
 constexpr char         COLLECTION_CONTAINER_ATTRIBUTE[]       = "collection_container";
 constexpr char         COLLECTION_INDEX_ATTRIBUTE[]           = "collection_index";
+
+const TraitId ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID = TraitId::Alloc();
+
+class AccessibilityActivateCallbackObject final : public TraitObject
+{
+public:
+  explicit AccessibilityActivateCallbackObject(Callback<bool(View)> callback)
+  : mCallback(std::move(callback))
+  {
+  }
+
+  bool Invoke(View view)
+  {
+    return mCallback.Invoke(view);
+  }
+
+protected:
+  ~AccessibilityActivateCallbackObject() override = default;
+
+private:
+  Callback<bool(View)> mCallback;
+};
 
 bool IsValidAccessibilityRole(Accessibility::Role role)
 {
@@ -459,7 +482,7 @@ bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName)
   bool  success  = false;
   if(actionName == ACTION_ACCESSIBILITY_ACTIVATE)
   {
-    success = viewImpl.OnAccessibilityActivate();
+    success = ViewDataImpl::Get(viewImpl).DispatchAccessibilityActivate();
   }
   else if(actionName == ACTION_ACCESSIBILITY_ESCAPE)
   {
@@ -1306,7 +1329,7 @@ bool ViewDataImpl::IsGroupSelectable() const
   return traitObject && traitObject->GetGroupSelectableTraitImpl();
 }
 
-void ViewDataImpl::SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback)
+void ViewDataImpl::SetFocusNavigationCallback(FocusNavigationCallback callback)
 {
   if(callback || mFocusNavigationData)
   {
@@ -1314,13 +1337,13 @@ void ViewDataImpl::SetFocusNavigationCallback(Callback<View(View, FocusDirection
   }
 }
 
-View ViewDataImpl::RequestFocusNavigation(View currentFocusedView, FocusDirection direction)
+FocusNavigationResult ViewDataImpl::RequestFocusNavigation(View currentFocusedView, FocusNavigationContext context)
 {
   if(mFocusNavigationData && mFocusNavigationData->callback)
   {
-    return mFocusNavigationData->callback.Invoke(currentFocusedView, direction);
+    return mFocusNavigationData->callback.Invoke(currentFocusedView, context);
   }
-  return mViewImpl.OnFocusNavigationRequested(currentFocusedView, direction);
+  return mViewImpl.OnFocusNavigationRequested(currentFocusedView, context);
 }
 
 View ViewDataImpl::RequestFocus()
@@ -1420,13 +1443,38 @@ bool ViewDataImpl::ActivateAccessibilityDefault()
   return focused || clicked;
 }
 
+void ViewDataImpl::SetAccessibilityActivateCallback(Callback<bool(View)> callback)
+{
+  if(!callback)
+  {
+    RemoveTrait(ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID);
+    return;
+  }
+
+  IntrusivePtr<TraitObject> object(new AccessibilityActivateCallbackObject(std::move(callback)));
+  SetTrait(ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID, object);
+}
+
+bool ViewDataImpl::DispatchAccessibilityActivate()
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityActivateCallbackObject*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()));
+  }
+
+  return mViewImpl.OnAccessibilityActivate();
+}
+
 ViewAccessible* ViewDataImpl::CreateAccessibleObject()
 {
+  Ui::View view(mViewImpl.GetOwner());
   if(mAccessibleObjectCreator)
   {
-    return mAccessibleObjectCreator(mViewImpl.Self());
+    return mAccessibleObjectCreator(view);
   }
-  return new ViewAccessible(mViewImpl.Self());
+  return new ViewAccessible(view);
 }
 
 void ViewDataImpl::SetRequestedX(float x)
@@ -5477,9 +5525,24 @@ void ViewDataImpl::ClearShadow()
 
 void ViewDataImpl::SetInnerShadow(const Property::Map& map)
 {
+  RegisterInnerShadowVisual(Ui::Integration::VisualFactory::Get().CreateVisual(map));
+}
+
+void ViewDataImpl::SetInnerShadow(const Ui::InnerShadow& innerShadow)
+{
+  if(innerShadow == Ui::InnerShadow::None())
+  {
+    ClearInnerShadow();
+    return;
+  }
+
+  SetInnerShadow(Dali::Ui::Internal::InnerShadow::CreatePropertyMap(innerShadow));
+}
+
+void ViewDataImpl::RegisterInnerShadowVisual(Ui::Integration::Visual::Base visual)
+{
   if(DALI_LIKELY(mVisualData))
   {
-    Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
     visual.SetName("innerShadow");
 
     if(visual)

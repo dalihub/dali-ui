@@ -20,7 +20,7 @@ Component 개발자 | 접근성 기본 개념 → TV UX 명세 → Component 개
 
 먼저 기억할 원칙은 다음과 같습니다.
 
-1. Screen Reader의 On/Off 여부와 관계없이 semantic을 항상 설정합니다.
+1. Screen Reader가 켜져 있는지와 관계없이 Name, Role, State, Value, Description 등의 접근성 정보를 항상 설정합니다.
 2. Name에는 대상의 짧은 이름만 넣고 Role, State, Value를 중복해서 합치지 않습니다.
 3. TV remote의 keyboard focus와 accessibility highlight를 같은 상태로 취급하지 않습니다.
 4. Application은 화면 문맥과 content semantic을, Component는 기본 semantic과 action contract를 책임집니다.

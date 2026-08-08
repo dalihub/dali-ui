@@ -112,7 +112,7 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
     LogicalModelPtr& logicalModel = model->mLogicalModel;
     model->mVisualModel->SetTextColor(impl.mTextColor);
 
-    const Length   textSize = text.size();
+    const Length   textSize = static_cast<Dali::Ui::Text::Length>(text.size());
     const uint8_t* utf8     = reinterpret_cast<const uint8_t*>(text.c_str());
 
     //  Convert text into UTF-32
@@ -129,7 +129,7 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
                   textSize, logicalModel->mText.Count());
 
     // The characters to be added.
-    impl.mTextUpdateInfo.mNumberOfCharactersToAdd = logicalModel->mText.Count();
+    impl.mTextUpdateInfo.mNumberOfCharactersToAdd = static_cast<Dali::Ui::Text::Length>(logicalModel->mText.Count());
 
     // To reset the cursor position
     lastCursorIndex = characterCount;
@@ -245,7 +245,7 @@ void Controller::TextUpdater::SetStyledText(Controller& controller, const Styled
                                                                                      impl.mAnchorColor,
                                                                                      impl.mAnchorClickedColor);
 
-    const Length characterCount = logicalModel->mText.Count();
+    const Length characterCount = static_cast<Dali::Ui::Text::Length>(logicalModel->mText.Count());
 
     // The characters to be added.
     impl.mTextUpdateInfo.mNumberOfCharactersToAdd = characterCount;
@@ -387,7 +387,7 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
 
     // Transform a text array encoded in utf8 into an array encoded in utf32.
     // It returns the actual number of characters.
-    characterCount = Utf8ToUtf32(utf8, redefinedText.size(), utf32Characters.Begin());
+    characterCount = Utf8ToUtf32(utf8, static_cast<uint32_t>(redefinedText.size()), utf32Characters.Begin());
     utf32Characters.Resize(characterCount);
 
     DALI_ASSERT_DEBUG(redefinedText.size() >= utf32Characters.Count() && "Invalid UTF32 conversion length");
@@ -421,14 +421,14 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
         eventData->mPreEditStartPosition = eventData->mPrimaryCursorPosition;
       }
 
-      eventData->mPreEditLength = utf32Characters.Count();
+      eventData->mPreEditLength = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
       eventData->mPreEditFlag   = true;
 
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "mPreEditStartPosition %d mPreEditLength %d\n",
                     eventData->mPreEditStartPosition, eventData->mPreEditLength);
     }
 
-    const Length numberOfCharactersInModel = logicalModel->mText.Count();
+    const Length numberOfCharactersInModel = static_cast<Dali::Ui::Text::Length>(logicalModel->mText.Count());
 
     // Restrict new text to fit within Maximum characters setting.
     Length temp_length      = (impl.mMaximumNumberOfCharacters > numberOfCharactersInModel
@@ -490,7 +490,7 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
 
       if(addFontNameRun)
       {
-        fontDescriptionRun.familyLength = inputStyle.familyName.size();
+        fontDescriptionRun.familyLength = static_cast<Dali::Ui::Text::Length>(inputStyle.familyName.size());
         fontDescriptionRun.familyName   = new char[fontDescriptionRun.familyLength];
         memcpy(fontDescriptionRun.familyName, inputStyle.familyName.c_str(), fontDescriptionRun.familyLength);
         fontDescriptionRun.familyDefined = true;
@@ -668,7 +668,7 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
       CharacterRun normalized = ReplacementEditNormalizer::NormalizeDeletion(
         impl.GetReplacementSourceSnapshot().runs,
         CharacterRun{cursorIndex, static_cast<Length>(std::max(numberOfCharacters, 0))},
-        currentText.Count());
+        static_cast<Dali::Ui::Text::Length>(currentText.Count()));
       cursorIndex        = normalized.characterIndex;
       numberOfCharacters = static_cast<int>(normalized.numberOfCharacters);
     }
@@ -706,7 +706,7 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
 
     if((cursorIndex + numberOfCharacters) > currentText.Count())
     {
-      numberOfCharacters = currentText.Count() - cursorIndex;
+      numberOfCharacters = static_cast<int32_t>(currentText.Count() - cursorIndex);
     }
 
     if((cursorIndex == 0) && (currentText.Count() - numberOfCharacters == 0))

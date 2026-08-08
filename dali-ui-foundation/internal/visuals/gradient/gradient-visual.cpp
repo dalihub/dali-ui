@@ -315,8 +315,8 @@ void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
     const Vector<Gradient::GradientStop>& stops(mGradient->GetStops());
     Property::Array                       offsets;
     Property::Array                       colors;
-    offsets.Reserve(stops.Count());
-    colors.Reserve(stops.Count());
+    offsets.Reserve(static_cast<Dali::Property::Array::SizeType>(stops.Count()));
+    colors.Reserve(static_cast<Dali::Property::Array::SizeType>(stops.Count()));
     for(unsigned int i = 0; i < stops.Count(); i++)
     {
       offsets.PushBack(stops[i].mOffset);

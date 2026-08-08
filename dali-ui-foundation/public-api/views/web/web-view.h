@@ -19,6 +19,8 @@
 #include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view.h>
+#include <dali-ui-foundation/public-api/views/web/web-profile.h>
+#include <dali-ui-foundation/public-api/views/web/web-settings.h>
 #include <dali-ui-foundation/public-api/views/web/web-view-types.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/events/key-event.h>
@@ -381,6 +383,24 @@ public: // Getters
    */
   float GetScaleFactor() const;
 
+  /**
+   * @brief Gets the browsing profile used by this WebView.
+   *
+   * WebViews using the same browsing context return profiles that compare equal.
+   * The returned handle remains initialized when the backend does not implement
+   * a browsing context; its operations then do nothing.
+   *
+   * @return The browsing profile associated with this WebView
+   */
+  WebProfile GetProfile() const;
+
+  /**
+   * @brief Gets the settings associated with this WebView.
+   *
+   * @return The settings for this WebView
+   */
+  WebSettings GetSettings() const;
+
 public: // Query methods
   /**
    * @brief Checks if forward navigation is possible.
@@ -471,17 +491,20 @@ public: // Actions
   void ClearAllTilesResources();
 
   /**
-   * @brief Clears the web engine's resource cache.
+   * @brief Clears the resource cache for this WebView's profile.
    *
-   * The cache is shared by all WebViews that use the same browsing context, so
-   * this affects every page loaded in that context.
+   * This is a convenience shortcut for @c GetProfile().ClearCache(). The cache
+   * is shared by every WebView using the same profile, so those WebViews are
+   * affected as well.
    */
   void ClearCache();
 
   /**
-   * @brief Clears all cookies stored by the web engine.
+   * @brief Clears all cookies for this WebView's profile.
    *
-   * The cookie store is shared by all WebViews that use the same browsing context.
+   * This is a convenience shortcut for
+   * @c GetProfile().GetCookieManager().ClearAllCookies(). The cookie store is
+   * shared by every WebView using the same profile.
    */
   void ClearCookies();
 
@@ -600,6 +623,13 @@ public: // JavaScript
    * @param[in] callback The callback to handle messages
    */
   void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, JavaScriptCallback callback);
+
+  /**
+   * @brief Removes a JavaScript message handler.
+   *
+   * @param[in] exposedObjectName The exposed object name to remove
+   */
+  void RemoveJavaScriptMessageHandler(const Dali::String& exposedObjectName);
 
   /**
    * @brief Registers a JavaScript alert callback.

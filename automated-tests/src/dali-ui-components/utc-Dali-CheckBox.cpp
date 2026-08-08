@@ -21,11 +21,14 @@
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/view.h>
+#include <dali/devel-api/atspi-interfaces/accessible.h>
 
 #include <string>
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+namespace UiAccessibility = Dali::Ui::Accessibility;
 
 void utc_dali_check_box_startup(void)
 {
@@ -385,5 +388,96 @@ int UtcDaliCheckBoxStyleDefaultKeyOverrideP(void)
   DALI_TEST_CHECK(style);
   DALI_TEST_EQUALS(style.GetIconWidth(), 99.0f, TEST_LOCATION);  // resolved from the override
   DALI_TEST_EQUALS(style.GetIconHeight(), 99.0f, TEST_LOCATION); // resolved from the override
+  END_TEST;
+}
+
+int UtcDaliCheckBoxAccessibilityP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  CheckBox          checkBox = CheckBox::New("Receive notifications");
+
+  // The CheckBox root must represent the label, Lottie icon, and selection state. Verify
+  // the initial accessibility-tree contract: the root is discoverable as CHECK_BOX and its
+  // internal visual children are not announced as separate items.
+  DALI_TEST_CHECK(checkBox.GetAccessibilityRole() == UiAccessibility::Role::CHECK_BOX);
+  DALI_TEST_CHECK(checkBox.IsAccessibilityHighlightable());
+  DALI_TEST_EQUALS(checkBox.GetChildCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(checkBox.GetChildViewAt(0u).IsAccessibilityHidden());
+  DALI_TEST_CHECK(checkBox.GetChildViewAt(1u).IsAccessibilityHidden());
+  DALI_TEST_CHECK(checkBox.HasAccessibilityState(UiAccessibility::State::ENABLED));
+  DALI_TEST_CHECK(!checkBox.HasAccessibilityState(UiAccessibility::State::CHECKED));
+
+  auto* accessible = Dali::Accessibility::Accessible::Get(checkBox);
+  DALI_TEST_CHECK(accessible);
+
+  // Use label text as a dynamic fallback only when no explicit name exists. The explicit
+  // accessibility name must remain unchanged after the application updates displayed text.
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Receive notifications"), TEST_LOCATION);
+  checkBox.SetAccessibilityName("Notification preference");
+  checkBox.SetText("Marketing notifications");
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Notification preference"), TEST_LOCATION);
+
+  int            selectionCount   = 0;
+  int            clickCount       = 0;
+  InputEventType lastEventType    = InputEventType::NONE;
+  bool           lastSelected     = false;
+  bool           wasProgrammatic  = true;
+  bool           receivedSameView = true;
+  checkBox.SelectionChangedSignal().Connect(&application, [&selectionCount, &lastEventType, &lastSelected, &wasProgrammatic, &receivedSameView, checkBox](View view, bool selected, InputEvent event)
+  {
+    ++selectionCount;
+    lastEventType    = event.GetInputEventType();
+    lastSelected     = selected;
+    wasProgrammatic  = event.IsProgrammatic();
+    receivedSameView = receivedSameView && view == checkBox;
+  });
+  checkBox.ClickedSignal().Connect(&application, [&clickCount](View, InputEvent)
+  {
+    ++clickCount;
+  });
+
+  Property::Map attributes;
+
+  // Screen Reader activation must use the existing SelectableTrait toggle policy through
+  // ClickedSignal on the foundation's default interactive path. Verify that logical selection
+  // and the AT-SPI CHECKED state change together and preserve the accessibility input source.
+  DALI_TEST_CHECK(checkBox.DoAction("activate", attributes));
+  DALI_TEST_CHECK(checkBox.IsSelected());
+  DALI_TEST_CHECK(checkBox.HasAccessibilityState(UiAccessibility::State::CHECKED));
+  DALI_TEST_EQUALS(selectionCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(lastSelected);
+  DALI_TEST_CHECK(lastEventType == InputEventType::ACCESSIBILITY_ACTIVATION);
+  DALI_TEST_CHECK(!wasProgrammatic);
+  DALI_TEST_CHECK(receivedSameView);
+
+  DALI_TEST_CHECK(checkBox.DoAction("activate", attributes));
+  DALI_TEST_CHECK(!checkBox.IsSelected());
+  DALI_TEST_CHECK(!checkBox.HasAccessibilityState(UiAccessibility::State::CHECKED));
+  DALI_TEST_EQUALS(selectionCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickCount, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(!lastSelected);
+
+  // Disabling toggle-by-click stops only automatic selection; the InteractiveTrait click
+  // contract remains. A Screen Reader double tap must reach the application click callback
+  // without changing selection or CHECKED as a side effect.
+  checkBox.SetToggleByClickEnabled(false);
+  DALI_TEST_CHECK(checkBox.DoAction("activate", attributes));
+  DALI_TEST_CHECK(!checkBox.IsSelected());
+  DALI_TEST_EQUALS(selectionCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickCount, 3, TEST_LOCATION);
+
+  // SetClickable(false) is the actual click-blocking policy and must not invoke the application
+  // callback. DoAction's return value can include successful focus requests, so verify the signal count.
+  checkBox.SetClickable(false);
+  checkBox.DoAction("activate", attributes);
+  DALI_TEST_EQUALS(clickCount, 3, TEST_LOCATION);
+
+  // Verify that inherited SetEnabled() and the accessibility ENABLED state stay synchronized
+  // in both directions during the same transition.
+  checkBox.SetEnabled(false);
+  DALI_TEST_CHECK(!checkBox.HasAccessibilityState(UiAccessibility::State::ENABLED));
+  checkBox.SetEnabled(true);
+  DALI_TEST_CHECK(checkBox.HasAccessibilityState(UiAccessibility::State::ENABLED));
   END_TEST;
 }

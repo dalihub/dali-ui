@@ -91,6 +91,11 @@ InputEditor InputEditor::DownCast(BaseHandle handle)
   return Ui::View::DownCast<InputEditor, Integration::InputEditorImpl>(handle);
 }
 
+float InputEditor::GetHeightForWidth(float width)
+{
+  return GetImpl(*this).GetHeightForWidth(width);
+}
+
 InputEditor::InputEditor(Integration::InputEditorImpl& implementation)
 : View(implementation)
 {

@@ -18,6 +18,7 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/focus-manager/focus-navigation-callback.h>
 #include <dali-ui-foundation/public-api/views/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -117,6 +118,12 @@ public:
    * chain in the given direction (according to the focus traversal
    * order).
    *
+   * The request is offered to containing View policies, an explicit
+   * directional target, the application fallback, and finally FocusFinder.
+   * If there is no current focus and a navigation Window can be determined,
+   * processing starts at the application fallback. A Stay() result consumes
+   * the request but returns false because no focus movement occurred.
+   *
    * @param direction The direction of focus movement
    * @return true if the movement was successful
    * @pre The FocusManager has been initialized.
@@ -145,9 +152,9 @@ public:
   /**
    * @brief Sets whether a view is a focus group (focus trap).
    *
-   * When a view is set as a focus group, keyboard focus cannot leave
-   * the view's subtree. All focus movement (arrow keys, Tab, programmatic)
-   * is contained within the focus group boundary.
+   * When a view is set as a focus group, user-initiated focus navigation
+   * cannot leave the view's subtree. Explicit programmatic calls such as
+   * RequestFocus() and SetCurrentFocusView() may move focus outside it.
    *
    * @param view The view to be set as a focus group
    * @param isFocusGroup Whether to set the view as a focus group or not
@@ -272,6 +279,25 @@ public:
    * @return True if hover outside the focused view proposes clearing focus indication
    */
   bool IsClearFocusIndicationOnHoverEnabled() const;
+
+  /**
+   * @brief Sets the application-wide fallback for focus navigation.
+   *
+   * The fallback is invoked after View-local navigation policies and an
+   * explicit directional target have not handled the request, and before the
+   * framework FocusFinder. It is also the first policy invoked when there is
+   * no current focus and a navigation Window can be determined. Return
+   * NotHandled() to use FocusFinder, MoveTo() to select a candidate, or Stay()
+   * to consume the request without moving focus.
+   *
+   * Only one fallback is stored. Setting a new callback replaces the previous
+   * one, and passing an empty callback clears it. The callback target must
+   * remain alive until the callback is replaced or cleared. The callback must
+   * return a result instead of changing focus directly.
+   *
+   * @param[in] callback The move-only fallback callback
+   */
+  void SetFocusNavigationFallback(FocusNavigationCallback callback);
 
 public: // Signals
   /**

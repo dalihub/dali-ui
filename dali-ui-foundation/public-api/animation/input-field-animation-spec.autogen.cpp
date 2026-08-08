@@ -101,6 +101,18 @@ InputFieldAnimationSpec& InputFieldAnimationSpec::BackgroundColorBy(const UiColo
   return *this;
 }
 
+InputFieldAnimationSpec& InputFieldAnimationSpec::BackgroundGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BackgroundGradientStartOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::BackgroundGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BackgroundGradientStartOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputFieldAnimationSpec& InputFieldAnimationSpec::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::ShadowBlurRadius(target, duration, alpha, delay);

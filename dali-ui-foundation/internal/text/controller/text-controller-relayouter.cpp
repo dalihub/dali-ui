@@ -94,7 +94,7 @@ namespace
 float CalculateLineHeightSum(const Vector<LineRun>& lines)
 {
   float lineHeightSum = 0.0f;
-  for(LineIndex index = 0u, count = lines.Count(); index < count; ++index)
+  for(LineIndex index = 0u, count = static_cast<Dali::Ui::Text::LineIndex>(lines.Count()); index < count; ++index)
   {
     const bool isLastLine = (index + 1u == count);
     lineHeightSum += GetLineHeight(lines[index], isLastLine);
@@ -130,7 +130,7 @@ float GetEffectiveEditableLayoutHeight(Controller::Impl& impl, float layoutHeigh
     return layoutHeight;
   }
 
-  const LineIndex lineCount = visualModel->mLines.Count();
+  const LineIndex lineCount = static_cast<Dali::Ui::Text::LineIndex>(visualModel->mLines.Count());
   const LineRun&  lastLine  = visualModel->mLines[lineCount - 1u];
   const bool      hasTrailingEmptyLine =
     lastLine.characterRun.numberOfCharacters == 0u &&
@@ -251,7 +251,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
                                      updateOperations);
 
   VisualModel& projectedVisual = *result.processingModel->mVisualModel;
-  const Length glyphCount      = projectedVisual.mGlyphs.Count();
+  const Length glyphCount      = static_cast<Dali::Ui::Text::Length>(projectedVisual.mGlyphs.Count());
   projectedVisual.mGlyphPositions.Resize(glyphCount);
   result.processingModel->mElideEnabled = IsReplacementElideEnabled(impl) && !useReplacementClipFallback;
   projectedVisual.SetTextElideEnabled(result.processingModel->mElideEnabled);
@@ -291,7 +291,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   float alignmentOffset = 0.0f;
   impl.mLayoutEngine.Align(contentSize,
                            0u,
-                           processingText.Count(),
+                           static_cast<Dali::Ui::Text::Length>(processingText.Count()),
                            result.processingModel->mHorizontalAlignment,
                            projectedVisual.mLines,
                            alignmentOffset,
@@ -340,10 +340,10 @@ Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Control
      ((visualModel->mControlSize.width < Math::MACHINE_EPSILON_1000) ||
       (visualModel->mControlSize.height < Math::MACHINE_EPSILON_1000)))
   {
-    textUpdateInfo.mNumberOfCharactersToAdd = model->mLogicalModel->mText.Count();
+    textUpdateInfo.mNumberOfCharactersToAdd = static_cast<Dali::Ui::Text::Length>(model->mLogicalModel->mText.Count());
   }
   textUpdateInfo.mParagraphCharacterIndex     = 0u;
-  textUpdateInfo.mRequestedNumberOfCharacters = model->mLogicalModel->mText.Count();
+  textUpdateInfo.mRequestedNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(model->mLogicalModel->mText.Count());
 
   // Get a reference to the pending operations member
   OperationsMask& operationsPending = impl.mOperationsPending;
@@ -503,7 +503,7 @@ bool Controller::Relayouter::CheckForTextFit(Controller& controller, float point
     CONVERT_TO_UTF32 | GET_SCRIPTS | VALIDATE_FONTS | GET_LINE_BREAKS | BIDI_INFO | SHAPE_TEXT | GET_GLYPH_METRICS);
 
   textUpdateInfo.mParagraphCharacterIndex     = 0u;
-  textUpdateInfo.mRequestedNumberOfCharacters = impl.mModel->mLogicalModel->mText.Count();
+  textUpdateInfo.mRequestedNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(impl.mModel->mLogicalModel->mText.Count());
 
   // Make sure the model is up-to-date before layouting
   impl.UpdateModel(onlyOnceOperations);
@@ -737,7 +737,7 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
         impl.ClearFontData();
 
         textUpdateInfo.mParagraphCharacterIndex     = 0u;
-        textUpdateInfo.mRequestedNumberOfCharacters = impl.mModel->mLogicalModel->mText.Count();
+        textUpdateInfo.mRequestedNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(impl.mModel->mLogicalModel->mText.Count());
 
         // Make sure the model is up-to-date before layouting
         impl.UpdateModel(onlyOnceOperations);
@@ -945,7 +945,7 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
        ((visualModel->mControlSize.width < Math::MACHINE_EPSILON_1000) ||
         (visualModel->mControlSize.height < Math::MACHINE_EPSILON_1000)))
     {
-      textUpdateInfo.mNumberOfCharactersToAdd = model->mLogicalModel->mText.Count();
+      textUpdateInfo.mNumberOfCharactersToAdd = static_cast<Dali::Ui::Text::Length>(model->mLogicalModel->mText.Count());
     }
 
     // Layout operations that need to be done if the size changes.
@@ -1173,7 +1173,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
       (requestedNumberOfCharacters > 0u)
         ? *(charactersToGlyphBuffer + lastIndex) + *(glyphsPerCharacterBuffer + lastIndex) - startGlyphIndex
         : 0u;
-    const Length totalNumberOfGlyphs = visualModel->mGlyphs.Count();
+    const Length totalNumberOfGlyphs = static_cast<Dali::Ui::Text::Length>(visualModel->mGlyphs.Count());
 
     if(0u == totalNumberOfGlyphs)
     {
@@ -1325,7 +1325,7 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
   if(impl.mEventData && impl.mEventData->mUpdateAlignment)
   {
     alignStartIndex                   = 0u;
-    alignRequestedNumberOfCharacters  = impl.mModel->mLogicalModel->mText.Count();
+    alignRequestedNumberOfCharacters  = static_cast<Dali::Ui::Text::Length>(impl.mModel->mLogicalModel->mText.Count());
     impl.mEventData->mUpdateAlignment = false;
   }
 
@@ -1505,7 +1505,7 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
   if(needRecalc)
   {
     // Update glyphPositions according to recalculation.
-    const Length     positionCount  = visualModel->mGlyphPositions.Count();
+    const Length     positionCount  = static_cast<Dali::Ui::Text::Length>(visualModel->mGlyphPositions.Count());
     Vector<Vector2>& glyphPositions = visualModel->mGlyphPositions;
     for(Length index = 0u; index < positionCount; index++)
     {

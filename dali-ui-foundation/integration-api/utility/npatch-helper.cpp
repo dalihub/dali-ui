@@ -53,7 +53,7 @@ Geometry GenerateGeometry(const Vector<Vector2>& vertices, const Vector<uint16_t
   VertexBuffer vertexBuffer = VertexBuffer::New(vertexFormat);
   if(vertices.Size() > 0)
   {
-    vertexBuffer.SetData(&vertices[0], vertices.Size());
+    vertexBuffer.SetData(&vertices[0], static_cast<uint32_t>(vertices.Size()));
   }
 
   // Create the geometry object
@@ -61,7 +61,7 @@ Geometry GenerateGeometry(const Vector<Vector2>& vertices, const Vector<uint16_t
   geometry.AddVertexBuffer(vertexBuffer);
   if(indices.Size() > 0)
   {
-    geometry.SetIndexBuffer(&indices[0], indices.Size());
+    geometry.SetIndexBuffer(&indices[0], static_cast<uint32_t>(indices.Size()));
   }
 
   return geometry;

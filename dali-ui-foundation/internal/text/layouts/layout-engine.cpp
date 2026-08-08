@@ -431,12 +431,12 @@ struct Engine::Impl
     input.text                    = parameters.textModel->mLogicalModel->mText.Begin();
     input.glyphToCharacterMap     = visualModel.mGlyphsToCharacters.Begin();
     input.characterSpacingRuns    = &characterSpacingRuns;
-    input.numberOfGlyphs          = visualModel.mGlyphs.Count();
+    input.numberOfGlyphs          = static_cast<Dali::Ui::Text::Length>(visualModel.mGlyphs.Count());
     input.glyphPositionStartIndex = parameters.startGlyphIndex;
     input.numberOfGlyphPositions  = parameters.numberOfGlyphs;
-    input.numberOfCharacters      = parameters.textModel->mLogicalModel->mText.Count();
+    input.numberOfCharacters      = static_cast<Dali::Ui::Text::Length>(parameters.textModel->mLogicalModel->mText.Count());
     input.startIndex              = std::min<GlyphIndex>(lineLayout.glyphIndex + lineLayout.numberOfGlyphs,
-                                                         visualModel.mGlyphs.Count()) -
+                                                         static_cast<GlyphIndex>(visualModel.mGlyphs.Count())) -
                        1u;
     input.lineWidth             = lineLayout.length;
     input.positionOffset        = alignmentLine.alignmentOffset;
@@ -514,7 +514,7 @@ struct Engine::Impl
 
     auto includeReplacementRun = [&](GlyphIndex glyphIndex, Length numberOfGlyphs)
     {
-      const GlyphIndex end = std::min<GlyphIndex>(glyphIndex + numberOfGlyphs, visualModel.mGlyphs.Count());
+  const GlyphIndex end = std::min<GlyphIndex>(glyphIndex + numberOfGlyphs, static_cast<GlyphIndex>(visualModel.mGlyphs.Count()));
       for(GlyphIndex index = glyphIndex; index < end; ++index)
       {
         const GlyphInfo& glyph = visualModel.mGlyphs[index];
@@ -1057,7 +1057,7 @@ struct Engine::Impl
 
     const float outlineWidth =
       parameters.textModel->IsOutlineEnabled() ? static_cast<float>(parameters.textModel->GetOutlineWidth()) : 0.0f;
-    const Length totalNumberOfGlyphs = parameters.textModel->mVisualModel->mGlyphs.Count();
+    const Length totalNumberOfGlyphs = static_cast<Dali::Ui::Text::Length>(parameters.textModel->mVisualModel->mGlyphs.Count());
 
     const bool isMultiline = !enforceEllipsisInSingleLine && (mLayout == MULTI_LINE_BOX);
     const bool isWordLaidOut =
@@ -1749,13 +1749,13 @@ struct Engine::Impl
          layoutHeightBeforeEllipsisLine + recomposedLineHeight > layoutParameters.boundingBox.height)
       {
         const VisualModel& visualModel              = *layoutParameters.textModel->mVisualModel;
-        GlyphIndex         firstNewReplacementGlyph = visualModel.mGlyphs.Count();
+        GlyphIndex         firstNewReplacementGlyph = static_cast<Dali::Ui::Text::GlyphIndex>(visualModel.mGlyphs.Count());
         const GlyphIndex   recomposedEnd =
           std::min<GlyphIndex>(ellipsisLayout.glyphIndex + ellipsisLayout.numberOfGlyphs,
-                               visualModel.mGlyphs.Count());
+                               static_cast<GlyphIndex>(visualModel.mGlyphs.Count()));
         const GlyphIndex replacementSearchEnd =
           std::min<GlyphIndex>(recomposedEnd + (recomposedEnd < visualModel.mGlyphs.Count() ? 1u : 0u),
-                               visualModel.mGlyphs.Count());
+                               static_cast<GlyphIndex>(visualModel.mGlyphs.Count()));
         for(GlyphIndex glyphIndex = std::max(previousEllipsisLineGlyphEnd, ellipsisLayout.glyphIndex);
             glyphIndex < replacementSearchEnd;
             ++glyphIndex)
@@ -2119,7 +2119,7 @@ struct Engine::Impl
       // characters.
       if(layoutParameters.isLastNewParagraph)
       {
-        Length numberOfLines = lines.Count();
+        Length numberOfLines = static_cast<Dali::Ui::Text::Length>(lines.Count());
         if(0u != numberOfLines)
         {
           const LineRun& lastLine = *(lines.End() - 1u);
@@ -2150,7 +2150,7 @@ struct Engine::Impl
     }
 
     const GlyphIndex lastGlyphPlusOne    = layoutParameters.startGlyphIndex + layoutParameters.numberOfGlyphs;
-    const Length     totalNumberOfGlyphs = layoutParameters.textModel->mVisualModel->mGlyphs.Count();
+    const Length     totalNumberOfGlyphs = static_cast<Dali::Ui::Text::Length>(layoutParameters.textModel->mVisualModel->mGlyphs.Count());
     Vector<Vector2>& glyphPositions      = layoutParameters.textModel->mVisualModel->mGlyphPositions;
 
     // In a previous layout, an extra line with no characters may have been added if the text ended with a new paragraph
@@ -2347,7 +2347,7 @@ struct Engine::Impl
 
         // clear hyphen from ellipsis line
         const Length* hyphenIndices = layoutParameters.textModel->mVisualModel->mHyphen.index.Begin();
-        Length        hyphensCount  = layoutParameters.textModel->mVisualModel->mHyphen.glyph.Size();
+        Length        hyphensCount  = static_cast<Dali::Ui::Text::Length>(layoutParameters.textModel->mVisualModel->mHyphen.glyph.Size());
 
         while(hyphenIndices && hyphensCount > 0 && hyphenIndices[hyphensCount - 1] >= layout.glyphIndex)
         {

@@ -210,7 +210,7 @@ Length ViewModel::GetNumberOfGlyphs() const
 {
   if(mIsTextElided && mModel->IsTextElideEnabled())
   {
-    return mFinalElisionResult ? mFinalElisionResult->glyphs.Count() : mElidedGlyphs.Count();
+  return mFinalElisionResult ? static_cast<Length>(mFinalElisionResult->glyphs.Count()) : static_cast<Length>(mElidedGlyphs.Count());
   }
   else
   {

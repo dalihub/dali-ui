@@ -281,7 +281,7 @@ EncodedImageBuffer TextureCacheManager::GetEncodedImageBuffer(const VisualUrl& u
 std::string TextureCacheManager::AddExternalTexture(const TextureSet& textureSet, const bool preMultiplied)
 {
   TextureId textureId = GenerateTextureId(
-    TextureCacheIndex(TextureCacheIndexType::TEXTURE_CACHE_INDEX_TYPE_TEXTURE, mExternalTextures.size()));
+    TextureCacheIndex(TextureCacheIndexType::TEXTURE_CACHE_INDEX_TYPE_TEXTURE, static_cast<uint32_t>(mExternalTextures.size())));
 
   TextureCacheManager::ExternalTextureInfo textureInfo(textureId, textureSet, preMultiplied);
   mExternalTextures.emplace_back(textureInfo);
@@ -314,7 +314,7 @@ std::string TextureCacheManager::AddEncodedImageBuffer(const EncodedImageBuffer&
   }
 
   TextureId bufferId = GenerateTextureId(
-    TextureCacheIndex(TextureCacheIndexType::TEXTURE_CACHE_INDEX_TYPE_BUFFER, mEncodedImageBuffers.size()));
+    TextureCacheIndex(TextureCacheIndexType::TEXTURE_CACHE_INDEX_TYPE_BUFFER, static_cast<uint32_t>(mEncodedImageBuffers.size())));
 
   TextureCacheManager::EncodedImageBufferInfo info(bufferId, bufferHash, encodedImageBuffer);
   mEncodedImageBuffers.emplace_back(info);
@@ -686,7 +686,7 @@ TextureCacheManager::TextureCacheIndex TextureCacheManager::AppendCache(
 
   // Insert TextureInfo back of mTextureInfoContainer.
   TextureCacheIndex cacheIndex =
-    TextureCacheIndex(TextureCacheIndexType::TEXTURE_CACHE_INDEX_TYPE_LOCAL, mTextureInfoContainer.size());
+    TextureCacheIndex(TextureCacheIndexType::TEXTURE_CACHE_INDEX_TYPE_LOCAL, static_cast<uint32_t>(mTextureInfoContainer.size()));
   mTextureInfoContainer.emplace_back(textureInfo);
 
   // Add converter id --> cacheIndex

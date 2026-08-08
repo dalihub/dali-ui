@@ -65,7 +65,7 @@ const char* END_HORIZONTAL_ALIGNMENT("end");
 
 bool TokenComparison(const std::string& string1, const char* const stringBuffer2, Length length)
 {
-  const Length stringSize = string1.size();
+  const Length stringSize = static_cast<Dali::Ui::Text::Length>(string1.size());
   if(stringSize != length)
   {
     // Early return. Strings have different sizes.

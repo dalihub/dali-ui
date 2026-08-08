@@ -154,6 +154,14 @@ void CheckBoxImpl::OnInitialize()
 {
   Ui::Extension::SelectableViewImpl::OnInitialize(); // base first (attaches the SelectableTrait)
 
+  Ui::View self = Ui::View::DownCast(Self());
+
+  // The CheckBox root represents the checkbox name, state, and actions. Without an
+  // explicit role, the default NONE excludes it from Screen Reader highlighting, so the
+  // component provides CHECK_BOX by default. When AsGroupSelectable() is applied, that
+  // trait changes the role to RADIO_BUTTON and restores CHECK_BOX when the group is removed.
+  self.SetAccessibilityRole(Accessibility::Role::CHECK_BOX);
+
   // Clip children to the control box.
   Self().SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);
 
@@ -164,10 +172,20 @@ void CheckBoxImpl::OnInitialize()
   // Optional trailing label (empty until SetText()), vertically centered against the icon.
   mLabel = Ui::Label::New();
   mLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
-  Self().Add(mLabel);
+
+  // The displayed Label is an internal child used to render the root CheckBox. The root
+  // supplies its text as a name fallback, so exposing the Label in the tree would cause
+  // the same item to be announced twice, as TEXT and CHECK_BOX. Hide it only from accessibility.
+  mLabel.SetAccessibilityHidden(true);
+  self.Add(mLabel);
 
   // React to selection changes (no virtual OnSelectedChanged hook exists on the base).
   SelectionChangedSignal().Connect(this, &CheckBoxImpl::OnSelectionChanged);
+
+  // The visual DISABLED state updated by View::SetEnabled() and the accessibility ENABLED
+  // state are not connected automatically. Observe state transitions and update both so
+  // they share the same source of truth, including through the component's inherited enabled API.
+  self.StateChangedSignal().Connect(this, &CheckBoxImpl::OnViewStateChanged);
   UiThemeManager::Get().ThemeChangedSignal().Connect(this, &CheckBoxImpl::OnThemeChanged);
 }
 
@@ -192,6 +210,11 @@ void CheckBoxImpl::ApplyInitialStyle(CheckBoxStyle style)
   mIcon = style.CreateIcon();
   DALI_ASSERT_ALWAYS(mIcon && "CheckBox icon generator returned an empty SelectableImageInterface");
   Ui::View iconView = mIcon.GetView();
+
+  // The Lottie icon is also an internal implementation detail that represents the checkbox's
+  // visual state. Do not expose it as a separate accessibility target; convey its meaning
+  // through the root's CHECKED state.
+  iconView.SetAccessibilityHidden(true);
   Self().Add(iconView);
   mIcon.TransitionFinishedSignal().Connect(this, &CheckBoxImpl::OnAnimationFinished);
 
@@ -216,6 +239,44 @@ void CheckBoxImpl::OnSelectionChanged(View /*view*/, bool selected, InputEvent e
 {
   // Selection authority stays here; the glyph view only renders the requested state.
   mIcon.SetSelected(selected, IsSelectionAnimationRequired(event));
+
+  Ui::View self = Ui::View::DownCast(Self());
+
+  // Update the logical selection and accessibility CHECKED state in the same commit. If
+  // only the visual icon changes, Screen Reader continues to announce the item as unchecked.
+  // The Add/Remove APIs also deliver state-change events through ViewAccessible and avoid
+  // duplicate changes when a radio group has already applied the same value.
+  if(selected)
+  {
+    self.AddAccessibilityState(Accessibility::State::CHECKED);
+  }
+  else
+  {
+    self.RemoveAccessibilityState(Accessibility::State::CHECKED);
+  }
+}
+
+void CheckBoxImpl::OnViewStateChanged(Ui::View view, StateEvent event)
+{
+  if(event.Added(ViewState::DISABLED))
+  {
+    view.RemoveAccessibilityState(Accessibility::State::ENABLED);
+  }
+  else if(event.Removed(ViewState::DISABLED))
+  {
+    view.AddAccessibilityState(Accessibility::State::ENABLED);
+  }
+}
+
+bool CheckBoxImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
+{
+  // The default-name hook is invoked only when the application has not set an explicit
+  // value with SetAccessibilityName(). This preserves the component contract: the displayed
+  // checkbox text is the default name, but a more specific application-provided name wins.
+  // After SetText(), the next Screen Reader query uses the current mText. For an unlabeled
+  // checkbox, return false to allow the framework's next fallback or an application-supplied name.
+  value = mText;
+  return !value.Empty();
 }
 
 bool CheckBoxImpl::IsSelectionAnimationRequired(const InputEvent& event) const

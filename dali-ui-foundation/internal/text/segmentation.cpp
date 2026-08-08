@@ -46,7 +46,7 @@ namespace Text
 void SetLineBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<Character>& text,
                       CharacterIndex startIndex, Length numberOfCharacters, Vector<LineBreakInfo>& lineBreakInfo)
 {
-  const Length totalNumberOfCharacters = text.Count();
+  const Length totalNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(text.Count());
 
   if(0u == totalNumberOfCharacters)
   {
@@ -105,7 +105,7 @@ void SetLineBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<
 void SetWordBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<Character>& text,
                       CharacterIndex startIndex, Length numberOfCharacters, Vector<WordBreakInfo>& wordBreakInfo)
 {
-  const Length totalNumberOfCharacters = text.Count();
+  const Length totalNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(text.Count());
 
   if(0u == totalNumberOfCharacters)
   {

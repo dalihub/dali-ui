@@ -420,9 +420,9 @@ Dali::Devel::Accessibility::Attributes ViewAccessible::GetAttributes() const
   Ui::View                               view           = Ui::View::DownCast(Self());
   const auto*                            data           = GetViewImplementation(view).GetAccessibilityData();
   const Dali::Property::Map*             attributeMap   = DALI_LIKELY(data) ? &data->mAccessibilityProps.extraAttributes : nullptr;
-  std::size_t                            attributeCount = attributeMap ? attributeMap->Count() : 0U;
+  Dali::Property::Map::SizeType          attributeCount = attributeMap ? attributeMap->Count() : 0u;
 
-  for(std::size_t i = 0; i < attributeCount; i++)
+  for(Dali::Property::Map::SizeType i = 0u; i < attributeCount; ++i)
   {
     Dali::Property::Key mapKey = attributeMap->GetKeyAt(i);
     std::string         mapValue;

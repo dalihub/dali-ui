@@ -73,8 +73,8 @@ bool GetPolicyFromValue(const Property::Value& value, Vector2& policy)
          Scripting::GetEnumerationProperty<Ui::Visual::Transform::Policy::Type>(array->GetElementAt(1), POLICY_TABLE,
                                                                                 POLICY_TABLE_COUNT, yPolicy))
       {
-        policy.x = xPolicy;
-        policy.y = yPolicy;
+        policy.x = static_cast<float>(xPolicy);
+        policy.y = static_cast<float>(yPolicy);
         success  = true;
       }
     }

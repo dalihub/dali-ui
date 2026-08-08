@@ -65,6 +65,7 @@ public:
 
 protected:
   void         OnInitialize() override;
+  bool         OnAccessibilityRequestDefaultName(Dali::String& value) override;
   void         OnSceneConnection(int depth) override;
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
   LayoutRect   OnArrange(const LayoutRect& bounds) override;
@@ -75,6 +76,7 @@ protected:
 private:
   void ApplyInitialStyle(CheckBoxStyle style);
   void OnSelectionChanged(View view, bool selected, InputEvent event);
+  void OnViewStateChanged(Ui::View view, StateEvent event);
   void OnThemeChanged();
   void OnAnimationFinished(View view);
 

@@ -43,6 +43,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-navigation-context-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -172,8 +173,10 @@ FocusManager::FocusManager()
   mCurrentFocusedWindow(),
   mLastFocusChangeContext(),
   mFocusIndicationPolicy(&Extension::FocusIndicationPolicy::Default),
+  mFocusNavigationFallback(),
   mCurrentWindowId(0),
   mTouchFocusDeviceId(-1),
+  mNavigationInProgress(false),
   mDefaultFocusIndicatorEnabled(true),
   mClearFocusIndicationOnTouch(true),
   mClearFocusIndicationOnHover(false),
@@ -250,11 +253,22 @@ bool FocusManager::SetCurrentFocusView(View view)
 
 bool FocusManager::SetCurrentFocusView(View view, InputEvent cause)
 {
+  if(mNavigationInProgress)
+  {
+    DALI_LOG_WARNING("Focus cannot be changed from a focus navigation callback\n");
+    return false;
+  }
   return view && !view.HasAncestorBlockingFocus() && DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, "", cause});
 }
 
 bool FocusManager::RequestFocus(View view)
 {
+  if(mNavigationInProgress)
+  {
+    DALI_LOG_WARNING("Focus cannot be changed from a focus navigation callback\n");
+    return false;
+  }
+
   if(!view)
   {
     return false;
@@ -467,43 +481,75 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const Dali::String& d
 
 bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context)
 {
-  View currentFocusView = GetCurrentFocusView();
-
-  // Step 1: Parent chain navigation
-  // User can stop chaining by overriding ViewImpl::OnFocusNavigationRequested
-  ParentNavigationResult parentNavigation = FindNextFocusByParentNavigation(currentFocusView, direction);
-  View                   candidate        = parentNavigation.candidate;
-
-  // Step 2: Directional Properties (explicit next-focus)
-  if(!candidate)
+  if(mNavigationInProgress)
   {
-    candidate = FindNextFocusByProperty(currentFocusView, direction);
+    DALI_LOG_WARNING("Nested focus navigation is not allowed from a focus navigation callback\n");
+    return false;
   }
 
-  // Step 3: FocusFinder (geometry or linear ordering, scoped to FocusGroup)
-  if(!candidate && mEnableDefaultAlgorithm)
+  struct NavigationGuard
   {
-    candidate = FindNextFocusByFinder(currentFocusView, parentNavigation.focusGroupBoundary, direction);
-  }
-
-  // Apply: resolve through RequestFocus (child delegation) then commit
-  if(candidate)
-  {
-    View resolved = ViewDataImpl::Get(GetImpl(candidate)).RequestFocus();
-    if(resolved && !resolved.HasAncestorBlockingFocus())
+    explicit NavigationGuard(bool& inProgress)
+    : flag(inProgress)
     {
-      return DoSetCurrentFocusView(resolved, context);
+      flag = true;
+    }
+
+    ~NavigationGuard()
+    {
+      flag = false;
+    }
+
+    bool& flag;
+  } guard(mNavigationInProgress);
+
+  View                   currentFocusView  = GetCurrentFocusView();
+  FocusNavigationContext navigationContext = CreateFocusNavigationContext(currentFocusView, direction, context);
+  if(!navigationContext)
+  {
+    DALI_LOG_WARNING("Focus navigation failed because its Window could not be determined\n");
+    return false;
+  }
+
+  FocusNavigationResult result = FindNextFocusByParentNavigation(currentFocusView, navigationContext).result;
+
+  if(result.GetType() == FocusNavigationResultType::NOT_HANDLED)
+  {
+    result = FindNextFocusByProperty(currentFocusView, direction);
+  }
+
+  if(result.GetType() == FocusNavigationResultType::NOT_HANDLED && mFocusNavigationFallback)
+  {
+    result = mFocusNavigationFallback.Invoke(currentFocusView, navigationContext);
+  }
+
+  if(result.GetType() == FocusNavigationResultType::NOT_HANDLED && mEnableDefaultAlgorithm)
+  {
+    View candidate = FindNextFocusByFinder(currentFocusView, navigationContext);
+    if(candidate)
+    {
+      result = FocusNavigationResult::MoveTo(candidate);
     }
   }
 
-  return false;
+  return ApplyFocusNavigationResult(result, currentFocusView, navigationContext, context);
 }
 
-View FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction)
+void FocusManager::SetFocusNavigationFallback(FocusNavigationCallback callback)
+{
+  if(mNavigationInProgress)
+  {
+    DALI_LOG_WARNING("The focus navigation fallback cannot be replaced while it is running\n");
+    return;
+  }
+  mFocusNavigationFallback = std::move(callback);
+}
+
+FocusNavigationResult FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction)
 {
   if(!currentFocusView)
   {
-    return View();
+    return FocusNavigationResult::NotHandled();
   }
 
   Property::Index index = Property::INVALID_INDEX;
@@ -555,13 +601,13 @@ View FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirec
           found = View::DownCast(window.GetRootLayer().FindChildById(viewId));
         }
       }
-      return found;
+      return FocusNavigationResult::MoveTo(found);
     }
   }
-  return View();
+  return FocusNavigationResult::NotHandled();
 }
 
-FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigation(View currentFocusView, Ui::FocusDirection direction)
+FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context)
 {
   ParentNavigationResult result;
 
@@ -574,18 +620,17 @@ FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigati
   while(parent)
   {
     View parentView = View::DownCast(parent);
-    if(parentView && IsFocusGroup(parentView))
-    {
-      result.focusGroupBoundary = parentView;
-      break;
-    }
-
     if(parentView)
     {
-      result.candidate = ViewDataImpl::Get(GetImpl(parentView)).RequestFocusNavigation(currentFocusView, direction);
-      if(result.candidate)
+      result.result = ViewDataImpl::Get(GetImpl(parentView)).RequestFocusNavigation(currentFocusView, context);
+      if(result.result.GetType() != FocusNavigationResultType::NOT_HANDLED)
       {
         return result;
+      }
+
+      if(parentView == context.GetFocusGroup())
+      {
+        break;
       }
     }
     parent = parent.GetParent();
@@ -593,9 +638,106 @@ FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigati
   return result;
 }
 
-View FocusManager::FindNextFocusByFinder(View currentFocusView, View focusGroup, Ui::FocusDirection direction)
+FocusNavigationContext FocusManager::CreateFocusNavigationContext(View currentFocusView, Ui::FocusDirection direction, const FocusChangeContext& context)
 {
-  Actor rootActor = focusGroup ? Actor(focusGroup) : Actor();
+  Window window = context.window;
+  if(!window && currentFocusView)
+  {
+    window = Window::DownCast(Dali::Integration::SceneHolder::Get(currentFocusView));
+  }
+  if(!window && mCurrentFocusedWindow.GetHandle())
+  {
+    window = Window::DownCast(Dali::Integration::SceneHolder::Get(mCurrentFocusedWindow.GetHandle()));
+  }
+  if(!window)
+  {
+    return FocusNavigationContext();
+  }
+
+  FocusNavigationContextImplPtr impl(new FocusNavigationContextImpl(direction,
+                                                                    context.device,
+                                                                    context.deviceName,
+                                                                    context.inputEvent,
+                                                                    window,
+                                                                    GetFocusGroup(currentFocusView)));
+  return FocusNavigationContext(impl.Get());
+}
+
+bool FocusManager::ApplyFocusNavigationResult(const FocusNavigationResult& result, View originalFocusView, FocusNavigationContext context, const FocusChangeContext& changeContext)
+{
+  if(result.GetType() == FocusNavigationResultType::NOT_HANDLED ||
+     result.GetType() == FocusNavigationResultType::STAY)
+  {
+    return false;
+  }
+
+  if(GetCurrentFocusView() != originalFocusView)
+  {
+    DALI_LOG_WARNING("Focus changed while a focus navigation policy was running\n");
+    return false;
+  }
+
+  View candidate = result.GetCandidate();
+  if(!IsValidNavigationCandidate(candidate, context))
+  {
+    DALI_LOG_WARNING("A focus navigation policy returned a candidate outside its allowed scope\n");
+    return false;
+  }
+
+  View resolved = ViewDataImpl::Get(GetImpl(candidate)).RequestFocus();
+  if(!IsValidNavigationCandidate(resolved, context) || resolved.HasAncestorBlockingFocus())
+  {
+    DALI_LOG_WARNING("A focus navigation candidate could not resolve to a valid focusable View\n");
+    return false;
+  }
+
+  if(resolved == originalFocusView)
+  {
+    return false;
+  }
+
+  // FocusChangedSignal handlers retain their existing ability to issue a new
+  // focus request after this navigation decision has been fully resolved.
+  mNavigationInProgress = false;
+  return DoSetCurrentFocusView(resolved, changeContext);
+}
+
+bool FocusManager::IsValidNavigationCandidate(View candidate, FocusNavigationContext context) const
+{
+  if(!candidate || !candidate.IsConnectedToScene())
+  {
+    return false;
+  }
+
+  Dali::Integration::SceneHolder candidateScene   = Dali::Integration::SceneHolder::Get(candidate);
+  Window                         candidateWindow  = Window::DownCast(candidateScene);
+  Window                         navigationWindow = context.GetWindow();
+  if(!candidateWindow || !navigationWindow || candidateWindow.GetRootLayer() != navigationWindow.GetRootLayer())
+  {
+    return false;
+  }
+
+  View focusGroup = context.GetFocusGroup();
+  if(focusGroup)
+  {
+    Actor actor = candidate;
+    while(actor && actor != focusGroup)
+    {
+      actor = actor.GetParent();
+    }
+    if(actor != focusGroup)
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+View FocusManager::FindNextFocusByFinder(View currentFocusView, FocusNavigationContext context)
+{
+  View  focusGroup = context.GetFocusGroup();
+  Actor rootActor  = focusGroup ? Actor(focusGroup) : Actor();
   if(!rootActor)
   {
     if(currentFocusView)
@@ -608,12 +750,13 @@ View FocusManager::FindNextFocusByFinder(View currentFocusView, View focusGroup,
     }
     else
     {
-      rootActor = mCurrentFocusedWindow.GetHandle();
+      rootActor = context.GetWindow().GetRootLayer();
     }
   }
 
   if(rootActor)
   {
+    Ui::FocusDirection direction = context.GetDirection();
     if(direction == Ui::FocusDirection::FORWARD || direction == Ui::FocusDirection::BACKWARD)
     {
       return FocusFinder::GetNextFocusableViewInOrder(rootActor, currentFocusView, direction);
@@ -793,7 +936,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
   const Dali::String& keyName        = event.GetKeyName();
   const Dali::String& logicalKeyName = event.GetLogicalKey();
   Ui::FocusDevice     device         = Ui::FocusDevice::KEYBOARD;
-  FocusChangeContext  context        = {device, event.GetDeviceName(), Ui::InputEvent::New(event)};
+  FocusChangeContext  context        = {device, event.GetDeviceName(), Ui::InputEvent::New(event), Window::DownCast(sceneHolder)};
 
   if(!mConfigurationLoaded)
   {
@@ -801,6 +944,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
   }
 
   bool isFocusStartableKey = false;
+  bool navigationRequested = false;
   View focusViewBeforeKey  = GetCurrentFocusView();
 
   if(event.GetState() == KeyEvent::DOWN)
@@ -811,6 +955,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
       MoveFocus(Ui::FocusDirection::LEFT, context);
 
       isFocusStartableKey = true;
+      navigationRequested = true;
     }
     else if(keyName == KEY_NAME_RIGHT || logicalKeyName == LOGICAL_KEY_NAME_KP_RIGHT)
     {
@@ -818,6 +963,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
       MoveFocus(Ui::FocusDirection::RIGHT, context);
 
       isFocusStartableKey = true;
+      navigationRequested = true;
     }
     else if(keyName == KEY_NAME_UP || logicalKeyName == LOGICAL_KEY_NAME_KP_UP)
     {
@@ -825,6 +971,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
       MoveFocus(Ui::FocusDirection::UP, context);
 
       isFocusStartableKey = true;
+      navigationRequested = true;
     }
     else if(keyName == KEY_NAME_DOWN || logicalKeyName == LOGICAL_KEY_NAME_KP_DOWN)
     {
@@ -832,6 +979,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
       MoveFocus(Ui::FocusDirection::DOWN, context);
 
       isFocusStartableKey = true;
+      navigationRequested = true;
     }
     else if(keyName == KEY_NAME_PRIOR || logicalKeyName == LOGICAL_KEY_NAME_KP_PRIOR)
     {
@@ -839,6 +987,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
       MoveFocus(Ui::FocusDirection::PAGE_UP, context);
 
       isFocusStartableKey = true;
+      navigationRequested = true;
     }
     else if(keyName == KEY_NAME_NEXT || logicalKeyName == LOGICAL_KEY_NAME_KP_NEXT)
     {
@@ -846,6 +995,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
       MoveFocus(Ui::FocusDirection::PAGE_DOWN, context);
 
       isFocusStartableKey = true;
+      navigationRequested = true;
     }
     else if(keyName == KEY_NAME_TAB)
     {
@@ -854,6 +1004,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
       MoveFocus(event.IsShiftModifier() ? Ui::FocusDirection::BACKWARD : Ui::FocusDirection::FORWARD, context);
 
       isFocusStartableKey = true;
+      navigationRequested = true;
     }
     else if(keyName == KEY_NAME_SPACE)
     {
@@ -892,7 +1043,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
         SetFocusIndicationWithPolicy(focusedView, true, device, context.inputEvent);
       }
     }
-    else if(!mEnableDefaultAlgorithm)
+    else if(!navigationRequested && !mEnableDefaultAlgorithm)
     {
       // No view is focused but keyboard focus is activated by the key press
       // Let's try to move the initial focus
@@ -1000,7 +1151,7 @@ void FocusManager::OnWheelEvent(Dali::Integration::SceneHolder sceneHolder, Whee
   {
     Ui::FocusDirection direction = (event.GetDelta() > 0) ? Ui::FocusDirection::CLOCKWISE : Ui::FocusDirection::COUNTER_CLOCKWISE;
     // Move the focus
-    MoveFocus(direction, {Ui::FocusDevice::WHEEL, "", Ui::InputEvent::New(event)});
+    MoveFocus(direction, {Ui::FocusDevice::WHEEL, "", Ui::InputEvent::New(event), Window::DownCast(sceneHolder)});
   }
 }
 

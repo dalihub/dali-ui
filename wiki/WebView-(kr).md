@@ -155,7 +155,7 @@ webView.AddJavaScriptMessageHandler(
   [](const Dali::String& message) {
     Dali::DALI_LOG_INFO("Message from JS: %s", message.c_str());
   }
-);
+  );
 ```
 
 웹 페이지의 JavaScript에서는 다음과 같이 메시지를 보낼 수 있습니다.
@@ -198,6 +198,9 @@ webView.RegisterJavaScriptPromptCallback(
     return true;
   }
 );
+
+// 더 이상 필요하지 않은 handler 삭제
+webView.RemoveJavaScriptMessageHandler("nativeObject");
 ```
 
 ---
@@ -485,7 +488,10 @@ webView.TextFoundSignal().Connect(
 ### 캐시 관리
 
 ```cpp
-// 같은 context의 모든 WebView가 공유하는 리소스 캐시 삭제
+// 같은 profile의 모든 WebView가 공유하는 리소스 캐시 삭제
+webView.GetProfile().ClearCache();
+
+// 같은 동작을 수행하는 편의 shortcut
 webView.ClearCache();
 
 // 캐시를 사용하지 않고 다시 로드
@@ -495,7 +501,10 @@ webView.ReloadWithoutCache();
 ### 쿠키 관리
 
 ```cpp
-// 같은 context의 모든 WebView가 공유하는 쿠키 삭제
+// 같은 profile의 모든 WebView가 공유하는 쿠키 삭제
+webView.GetProfile().GetCookieManager().ClearAllCookies();
+
+// 같은 동작을 수행하는 편의 shortcut
 webView.ClearCookies();
 ```
 
@@ -506,6 +515,16 @@ webView.ClearCookies();
 ```cpp
 webView.AddCustomHeader("X-Custom-Header", "CustomValue");
 webView.RemoveCustomHeader("X-Custom-Header");
+```
+
+### 추가 기능 설정
+
+전용 API가 없는 기능은 범용 string 설정 경로를 사용합니다.
+
+```cpp
+WebSettings settings = webView.GetSettings();
+settings.SetExtraFeatureValue("featureName", "featureValue");
+Dali::String value = settings.GetExtraFeatureValue("featureName");
 ```
 
 ---

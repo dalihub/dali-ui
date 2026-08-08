@@ -53,7 +53,7 @@ constexpr auto GetShaderExtensionMaxSize()
   {
     if(extension.size() > maxSize)
     {
-      maxSize = extension.size();
+      maxSize = static_cast<uint32_t>(extension.size());
     }
   }
   return maxSize;
