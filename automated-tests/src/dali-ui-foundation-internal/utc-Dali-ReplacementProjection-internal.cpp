@@ -3048,34 +3048,35 @@ int UtcDaliReplacementProductionSyncAsyncParityP(void)
 
   Text::AsyncTextLoader               asyncLoader = Text::AsyncTextLoader::New();
   const Text::AsyncTextRenderInfo     asyncInfo   = asyncLoader.GetHeightForWidth(parameters);
-  const Text::ReplacementRenderState* async =
+
+  const Text::ReplacementRenderState* asyncRenderState =
     Text::GetImplementation(asyncLoader).GetReplacementRenderState();
 
-  DALI_TEST_CHECK(async);
-  DALI_TEST_CHECK(async->attempted);
-  DALI_TEST_EQUALS(async->sourceRevision, sync.sourceRevision, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->layoutGeneration, 77u, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->projection.GetMode(), sync.projection.GetMode(), TEST_LOCATION);
-  DALI_TEST_EQUALS(async->projection.GetProcessingCharacterCount(),
+  DALI_TEST_CHECK(asyncRenderState);
+  DALI_TEST_CHECK(asyncRenderState->attempted);
+  DALI_TEST_EQUALS(asyncRenderState->sourceRevision, sync.sourceRevision, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncRenderState->layoutGeneration, 77u, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncRenderState->projection.GetMode(), sync.projection.GetMode(), TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncRenderState->projection.GetProcessingCharacterCount(),
                    sync.projection.GetProcessingCharacterCount(), TEST_LOCATION);
-  DALI_TEST_EQUALS(CountSyntheticGlyphs(*async), CountSyntheticGlyphs(sync), TEST_LOCATION);
-  DALI_TEST_EQUALS(async->processingModel->mVisualModel->mLines.Count(),
+  DALI_TEST_EQUALS(CountSyntheticGlyphs(*asyncRenderState), CountSyntheticGlyphs(sync), TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncRenderState->processingModel->mVisualModel->mLines.Count(),
                    sync.processingModel->mVisualModel->mLines.Count(), TEST_LOCATION);
-  DALI_TEST_EQUALS(async->placements.Count(), sync.placements.Count(), TEST_LOCATION);
-  DALI_TEST_EQUALS(async->placements[0u].logicalCharacterRange.characterIndex,
+  DALI_TEST_EQUALS(asyncRenderState->placements.Count(), sync.placements.Count(), TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncRenderState->placements[0u].logicalCharacterRange.characterIndex,
                    sync.placements[0u].logicalCharacterRange.characterIndex, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->placements[0u].logicalCharacterRange.numberOfCharacters,
+  DALI_TEST_EQUALS(asyncRenderState->placements[0u].logicalCharacterRange.numberOfCharacters,
                    sync.placements[0u].logicalCharacterRange.numberOfCharacters, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->placements[0u].size, sync.placements[0u].size, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->placements[0u].position.x, sync.placements[0u].position.x,
+  DALI_TEST_EQUALS(asyncRenderState->placements[0u].size, sync.placements[0u].size, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncRenderState->placements[0u].position.x, sync.placements[0u].position.x,
                    Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->placements[0u].position.y, sync.placements[0u].position.y,
+  DALI_TEST_EQUALS(asyncRenderState->placements[0u].position.y, sync.placements[0u].position.y,
                    Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->placements[0u].lineIndex, sync.placements[0u].lineIndex, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->placements[0u].visible, sync.placements[0u].visible, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->placements[0u].elided, sync.placements[0u].elided, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncRenderState->placements[0u].lineIndex, sync.placements[0u].lineIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncRenderState->placements[0u].visible, sync.placements[0u].visible, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncRenderState->placements[0u].elided, sync.placements[0u].elided, TEST_LOCATION);
   const Text::FinalElisionResult& syncFinal  = sync.finalElision;
-  const Text::FinalElisionResult& asyncFinal = async->finalElision;
+  const Text::FinalElisionResult& asyncFinal = asyncRenderState->finalElision;
   DALI_TEST_EQUALS(asyncFinal.textElided, syncFinal.textElided, TEST_LOCATION);
   DALI_TEST_EQUALS(asyncFinal.applied, syncFinal.applied, TEST_LOCATION);
   DALI_TEST_EQUALS(asyncFinal.ellipsisUnitCount, syncFinal.ellipsisUnitCount, TEST_LOCATION);
@@ -3084,10 +3085,10 @@ int UtcDaliReplacementProductionSyncAsyncParityP(void)
   DALI_TEST_EQUALS(asyncInfo.replacementLayoutGeneration, 77u, TEST_LOCATION);
   DALI_TEST_EQUALS(asyncInfo.replacementPlacements.Count(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(asyncInfo.lineCount,
-                   static_cast<int>(async->processingModel->GetNumberOfLines()),
+                   static_cast<int>(asyncRenderState->processingModel->GetNumberOfLines()),
                    TEST_LOCATION);
   DALI_TEST_EQUALS(asyncInfo.isTextDirectionRTL,
-                   async->processingModel->mVisualModel->mLines[0u].direction,
+                   asyncRenderState->processingModel->mVisualModel->mLines[0u].direction,
                    TEST_LOCATION);
 
   // Natural-size requests also replace the final placement state from their final Layout() call.
@@ -3095,17 +3096,21 @@ int UtcDaliReplacementProductionSyncAsyncParityP(void)
   const Size syncNaturalLayoutSize          = sync.layoutSize;
   parameters.replacementLayoutGeneration    = 78u;
   const Text::AsyncTextRenderInfo newerInfo = asyncLoader.GetNaturalSize(parameters);
-  DALI_TEST_EQUALS(async->layoutSize.width, syncNaturalLayoutSize.width,
+
+  // Previous asyncRenderState is invalidated. Get new render state.
+  const Text::ReplacementRenderState* newAsyncRenderState =
+    Text::GetImplementation(asyncLoader).GetReplacementRenderState();
+  DALI_TEST_EQUALS(newAsyncRenderState->layoutSize.width, syncNaturalLayoutSize.width,
                    Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-  DALI_TEST_EQUALS(async->layoutSize.height, syncNaturalLayoutSize.height,
+  DALI_TEST_EQUALS(newAsyncRenderState->layoutSize.height, syncNaturalLayoutSize.height,
                    Math::MACHINE_EPSILON_1000, TEST_LOCATION);
   DALI_TEST_EQUALS(newerInfo.replacementPlacements.Count(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(newerInfo.replacementLayoutGeneration, 78u, TEST_LOCATION);
   DALI_TEST_EQUALS(newerInfo.lineCount,
-                   static_cast<int>(async->processingModel->GetNumberOfLines()),
+                   static_cast<int>(newAsyncRenderState->processingModel->GetNumberOfLines()),
                    TEST_LOCATION);
   DALI_TEST_EQUALS(newerInfo.isTextDirectionRTL,
-                   async->processingModel->mVisualModel->mLines[0u].direction,
+                   newAsyncRenderState->processingModel->mVisualModel->mLines[0u].direction,
                    TEST_LOCATION);
 
   // Sync and async removal both clear the newer generation without invoking projection.
