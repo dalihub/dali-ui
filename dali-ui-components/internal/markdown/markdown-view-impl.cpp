@@ -119,6 +119,7 @@ bool SemanticPrefixEqual(const MarkdownRenderNode& previous, const MarkdownRende
   {
     return lhs.start == rhs.start &&
            lhs.end == rhs.end &&
+           lhs.urlSuffixOrder == rhs.urlSuffixOrder &&
            lhs.href == rhs.href &&
            lhs.title == rhs.title &&
            lhs.isAutolink == rhs.isAutolink;
@@ -128,6 +129,7 @@ bool SemanticPrefixEqual(const MarkdownRenderNode& previous, const MarkdownRende
     return lhs.type == rhs.type &&
            lhs.position == rhs.position &&
            lhs.length == rhs.length &&
+           lhs.urlSuffixOrder == rhs.urlSuffixOrder &&
            lhs.sourceUrl == rhs.sourceUrl &&
            lhs.title == rhs.title &&
            lhs.altText == rhs.altText;
@@ -153,6 +155,10 @@ MarkdownViewImpl::MarkdownViewImpl(const MarkdownViewStyle& style)
 : ViewImpl(),
   mStyle(style)
 {
+  mTaskSelectionChanged = [this](uint32_t markerOffset, bool selected)
+  {
+    return UpdateTaskSelection(markerOffset, selected);
+  };
 }
 
 MarkdownViewImpl::~MarkdownViewImpl() = default;
@@ -316,7 +322,7 @@ std::unique_ptr<MarkdownViewImpl::ComponentNode> MarkdownViewImpl::CreateCompone
   componentNode->role          = node.role;
   componentNode->snapshotIndex = node.index;
   componentNode->subtreeHash   = node.subtreeHash;
-  componentNode->component     = CreateMarkdownComponent(node, mStyle);
+  componentNode->component     = CreateMarkdownComponent(node, mStyle, mTaskSelectionChanged);
 
   Ui::View contentHost = componentNode->component ? componentNode->component->GetContentHost() : Ui::View();
   if(contentHost && node.index < mChildrenByParent.size())
@@ -412,6 +418,42 @@ MarkdownTextUpdate MarkdownViewImpl::CalculateTextUpdate(const MarkdownRenderNod
   update.type                  = MarkdownTextUpdate::Type::REPLACE_ALL;
   update.removedCharacterCount = previous.utf32Length;
   return update;
+}
+
+bool MarkdownViewImpl::UpdateTaskSelection(uint32_t markerOffset, bool selected)
+{
+  if(markerOffset >= mMarkdown.Size())
+  {
+    return false;
+  }
+
+  const char currentMarker = mMarkdown[markerOffset];
+  if(currentMarker != ' ' && currentMarker != 'x' && currentMarker != 'X')
+  {
+    return false;
+  }
+
+  const bool currentlySelected = currentMarker == 'x' || currentMarker == 'X';
+  if(currentlySelected == selected)
+  {
+    return true;
+  }
+
+  mMarkdown[markerOffset] = selected ? 'x' : ' ';
+  auto snapshot           = mParser.Parse(mMarkdown, ++mRevision);
+
+  const auto matchingTask = std::find_if(snapshot.nodes.begin(), snapshot.nodes.end(), [markerOffset, selected](const MarkdownRenderNode& node)
+  {
+    return node.taskListItem && node.taskMarkerOffset == markerOffset && node.taskChecked == selected;
+  });
+  if(!snapshot.parseSucceeded || matchingTask == snapshot.nodes.end())
+  {
+    mMarkdown[markerOffset] = currentMarker;
+    return false;
+  }
+
+  ApplySnapshot(std::move(snapshot));
+  return true;
 }
 
 Ui::View MarkdownViewImpl::GetSelfView() const

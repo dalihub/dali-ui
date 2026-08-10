@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/styles/markdown-view-style-impl.h>
+#include <dali-ui-components/public-api/styles/check-box-style.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
@@ -108,6 +109,32 @@ DALI_MARKDOWN_STYLE_GETTER(UiColor, ThematicBreakColor)
 DALI_MARKDOWN_STYLE_GETTER(UiColor, TableRuleColor)
 #undef DALI_MARKDOWN_STYLE_GETTER
 
+SelectableImageInterface MarkdownViewStyle::CreateTaskCheckBoxIcon() const
+{
+  const Internal::MarkdownViewStyleImpl& impl = GetImpl(*this);
+  SelectableImageInterface               icon = impl.HasTaskCheckBoxIconGenerator()
+                                                  ? impl.CreateTaskCheckBoxIcon()
+                                                  : CheckBoxStyle::Default().CreateIcon();
+  DALI_ASSERT_ALWAYS(icon && "Task checkbox icon generator returned an empty SelectableImageInterface");
+  return icon;
+}
+
+UiColor MarkdownViewStyle::GetTaskCheckBoxIconColor() const
+{
+  const Internal::MarkdownViewStyleImpl& impl = GetImpl(*this);
+  return impl.HasTaskCheckBoxIconColor()
+           ? impl.GetTaskCheckBoxIconColor()
+           : CheckBoxStyle::Default().GetIconColor();
+}
+
+UiColor MarkdownViewStyle::GetTaskCheckBoxSelectedIconColor() const
+{
+  const Internal::MarkdownViewStyleImpl& impl = GetImpl(*this);
+  return impl.HasTaskCheckBoxSelectedIconColor()
+           ? impl.GetTaskCheckBoxSelectedIconColor()
+           : CheckBoxStyle::Default().GetSelectedIconColor();
+}
+
 MarkdownViewStyle::MarkdownViewStyle(Internal::MarkdownViewStyleImpl* impl)
 : UiStyle(impl)
 {
@@ -186,7 +213,24 @@ DALI_MARKDOWN_STYLE_COLOR_SETTER(CodeBlockTitleBackgroundColor)
 DALI_MARKDOWN_STYLE_COLOR_SETTER(QuoteBarColor)
 DALI_MARKDOWN_STYLE_COLOR_SETTER(ThematicBreakColor)
 DALI_MARKDOWN_STYLE_COLOR_SETTER(TableRuleColor)
+DALI_MARKDOWN_STYLE_COLOR_SETTER(TaskCheckBoxIconColor)
+DALI_MARKDOWN_STYLE_COLOR_SETTER(TaskCheckBoxSelectedIconColor)
 #undef DALI_MARKDOWN_STYLE_COLOR_SETTER
+
+MarkdownViewStyle::Builder& MarkdownViewStyle::Builder::SetTaskCheckBoxIconGenerator(
+  Ui::Callback<SelectableImageInterface()>&& generator) &
+{
+  DALI_ASSERT_ALWAYS(generator && "Task checkbox icon generator must be initialized");
+  mImpl->SetTaskCheckBoxIconGenerator(std::move(generator));
+  return *this;
+}
+
+MarkdownViewStyle::Builder&& MarkdownViewStyle::Builder::SetTaskCheckBoxIconGenerator(
+  Ui::Callback<SelectableImageInterface()>&& generator) &&
+{
+  SetTaskCheckBoxIconGenerator(std::move(generator));
+  return std::move(*this);
+}
 
 MarkdownViewStyle MarkdownViewStyle::Builder::Build() &&
 {

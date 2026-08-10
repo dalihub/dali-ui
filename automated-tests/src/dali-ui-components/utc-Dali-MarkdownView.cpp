@@ -27,6 +27,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
 #include <algorithm>
@@ -43,6 +44,7 @@ namespace
 
 bool gUseAlternateMarkdownColors       = false;
 int  gMarkdownStyleOverrideCreateCount = 0;
+int  gTaskCheckBoxIconCreateCount      = 0;
 
 } // namespace
 
@@ -55,6 +57,7 @@ void utc_dali_markdown_view_cleanup(void)
 {
   gUseAlternateMarkdownColors       = false;
   gMarkdownStyleOverrideCreateCount = 0;
+  gTaskCheckBoxIconCreateCount      = 0;
   test_return_value = TET_PASS;
 }
 
@@ -68,6 +71,19 @@ UiStyle CreateMarkdownStyleOverride()
     .SetTextFontSize(31.0f)
     .SetTextColor(UiColor("MarkdownDefaultText"))
     .Build();
+}
+
+SelectableImageInterface CreateTaskCheckBoxIcon()
+{
+  ++gTaskCheckBoxIconCreateCount;
+  using FrameRange = SelectableLottieImage::FrameRange;
+  return SelectableLottieAnimationView::New(
+    SelectableLottieImage("i_check_box.json", FrameRange(0, 0), FrameRange(0, 0)));
+}
+
+SelectableImageInterface CreateEmptyTaskCheckBoxIcon()
+{
+  return SelectableImageInterface();
 }
 
 bool OverrideMarkdownColors(StringView colorId, Vector4& outColor)
@@ -325,12 +341,25 @@ View GetListItemTaskRow(View listItem)
   return firstChild && !Label::DownCast(firstChild) ? firstChild : View();
 }
 
-Label GetListItemTaskMarker(View listItem)
+CheckBox GetListItemTaskCheckBox(View listItem)
 {
   View taskRow = GetListItemTaskRow(listItem);
   return taskRow && taskRow.GetChildViewCount() > 0u
-           ? Label::DownCast(taskRow.GetChildViewAt(0u))
-           : Label();
+           ? CheckBox::DownCast(taskRow.GetChildViewAt(0u))
+           : CheckBox();
+}
+
+View GetCheckBoxIconView(CheckBox checkBox)
+{
+  for(uint32_t index = 0u; checkBox && index < checkBox.GetChildViewCount(); ++index)
+  {
+    View child = checkBox.GetChildViewAt(index);
+    if(child && !Label::DownCast(child))
+    {
+      return child;
+    }
+  }
+  return View();
 }
 
 Label GetListItemTextLabel(View listItem)
@@ -479,30 +508,33 @@ void CheckResponsiveListMarkerGeometry(float fontSize)
   MarkdownView task = MarkdownView::New(style);
   task.SetMarkdown("- [x] task");
   ArrangeMarkdownView(task, 1000.0f);
-  View  taskItem   = GetListItemAtDepth(task, 1u);
-  View  taskHost   = GetListItemMarkerHost(taskItem);
-  View  taskBullet = GetShapeMarker(taskItem);
-  View  taskRow    = GetListItemTaskRow(taskItem);
-  Label taskMarker = GetListItemTaskMarker(taskItem);
-  Label taskText   = GetListItemTextLabel(taskItem);
+  View     taskItem     = GetListItemAtDepth(task, 1u);
+  View     taskHost     = GetListItemMarkerHost(taskItem);
+  View     taskBullet   = GetShapeMarker(taskItem);
+  View     taskRow      = GetListItemTaskRow(taskItem);
+  CheckBox taskCheckBox = GetListItemTaskCheckBox(taskItem);
+  Label    taskText     = GetListItemTextLabel(taskItem);
   DALI_TEST_CHECK(taskBullet);
   DALI_TEST_CHECK(!Label::DownCast(taskBullet));
   DALI_TEST_CHECK(taskRow);
-  DALI_TEST_CHECK(taskMarker);
+  DALI_TEST_CHECK(taskCheckBox);
   DALI_TEST_CHECK(taskText);
-  const Vector3 taskNaturalSize = taskMarker.GetNaturalSize();
   DALI_TEST_EQUALS(taskBullet.GetMargin().start + taskBullet.GetRequestedWidth(), markerColumnWidth, 0.01f, TEST_LOCATION);
-  DALI_TEST_EQUALS(taskMarker.GetRequestedWidth(), taskNaturalSize.width, 0.01f, TEST_LOCATION);
-  DALI_TEST_EQUALS(taskMarker.GetRequestedHeight(), std::max(lineHeight, taskNaturalSize.height), 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetIconWidth(), fontSize, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetIconHeight(), fontSize, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetRequestedWidth(), fontSize, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetRequestedHeight(), lineHeight, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetPadding(), Insets(), TEST_LOCATION);
   DALI_TEST_EQUALS(taskHost.GetRequestedWidth(), markerColumnWidth, 0.01f, TEST_LOCATION);
   DALI_TEST_EQUALS(taskHost.GetRequestedHeight(), lineHeight, 0.01f, TEST_LOCATION);
-  DALI_TEST_CHECK(taskMarker.GetSize().width + 0.01f >= taskNaturalSize.width);
-  DALI_TEST_CHECK(taskMarker.GetSize().height + 0.01f >= taskNaturalSize.height);
-  View taskContentHost = taskItem.GetChildViewAt(1u);
+  DALI_TEST_EQUALS(taskCheckBox.GetSize().width, fontSize, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetSize().height, lineHeight, 0.01f, TEST_LOCATION);
+  DALI_TEST_CHECK(taskCheckBox.IsSelected());
+  DALI_TEST_EQUALS(taskCheckBox.GetAccessibilityName(), Dali::String("task"), TEST_LOCATION);
+  View taskContentHost      = taskItem.GetChildViewAt(1u);
   View unorderedContentHost = unorderedItem.GetChildViewAt(1u);
   DALI_TEST_EQUALS(taskContentHost.GetPositionX(), unorderedContentHost.GetPositionX(), 0.01f, TEST_LOCATION);
-  DALI_TEST_CHECK(taskMarker.GetPositionX() + taskMarker.GetSize().width + 12.0f <= taskText.GetPositionX() + 0.01f);
-  DALI_TEST_CHECK(!taskMarker.IsSystemFontSizeScaleEnabled());
+  DALI_TEST_CHECK(taskCheckBox.GetPositionX() + taskCheckBox.GetSize().width + 12.0f <= taskText.GetPositionX() + 0.01f);
   CheckShapeMarkerFirstLineAlignment(taskItem, lineHeight);
 
   MarkdownView normalNested = MarkdownView::New(style);
@@ -560,7 +592,7 @@ Text::StyledText CheckStyledLinkPresentation(Label label)
   return styledText;
 }
 
-void CheckRenderedLinkText(MarkdownView view, const char* markdown, const char* expected)
+void CheckRenderedUrlText(MarkdownView view, const char* markdown, const char* expected)
 {
   view.SetMarkdown(markdown);
   Label label = GetOnlyRenderedLabel(view);
@@ -923,10 +955,10 @@ int UtcDaliMarkdownParserPlainTextModeIsolationP(void)
   DALI_TEST_CHECK(HasPlainTextLineBreakMetadata(plainTextSnapshot));
   CheckPlainTextLineBreakEvents(plainTextSnapshot);
 
-  // Link metadata is also retained for rendering so an empty label can still
-  // project its URL. Plain-text-only line-break and image metadata stay isolated.
+  // Link and image metadata are retained for rendering so an empty label can
+  // still project its URL. Plain-text-only line-break metadata stays isolated.
   DALI_TEST_EQUALS(CountZeroLengthLinks(defaultSnapshot), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(CountZeroLengthInlineObjects(defaultSnapshot), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(CountZeroLengthInlineObjects(defaultSnapshot) > 0u);
   DALI_TEST_CHECK(CountZeroLengthLinks(plainTextSnapshot) > 0u);
   DALI_TEST_CHECK(CountZeroLengthInlineObjects(plainTextSnapshot) > 0u);
 
@@ -1067,6 +1099,13 @@ int UtcDaliMarkdownViewStyleDefaultAndBuilderP(void)
   DALI_TEST_CHECK(style.GetThematicBreakColor() == UiColor(0xDFDFDF));
   DALI_TEST_CHECK(style.GetTableRuleColor() == UiColor(0x000000));
 
+  const CheckBoxStyle defaultCheckBoxStyle = CheckBoxStyle::Default();
+  DALI_TEST_CHECK(style.GetTaskCheckBoxIconColor() == defaultCheckBoxStyle.GetIconColor());
+  DALI_TEST_CHECK(style.GetTaskCheckBoxSelectedIconColor() == defaultCheckBoxStyle.GetSelectedIconColor());
+  SelectableImageInterface defaultTaskCheckBoxIcon = style.CreateTaskCheckBoxIcon();
+  DALI_TEST_CHECK(defaultTaskCheckBoxIcon);
+  defaultTaskCheckBoxIcon.Reset();
+
   const UiColor customTextColor(UiColor::None());
   const UiColor customHeadingColor(0x102030u, 0.25f);
   const UiColor customQuoteColor(UiColor::PRIMARY);
@@ -1078,6 +1117,17 @@ int UtcDaliMarkdownViewStyleDefaultAndBuilderP(void)
   const UiColor customQuoteBar(UiColor::OUTLINE);
   const UiColor customThematicBreak(0x304050u, 0.45f);
   const UiColor customTableRule(UiColor("MarkdownTableRule").ScaleAlpha(0.55f));
+  const UiColor customTaskCheckBoxIconColor(0x102030);
+  const UiColor customTaskCheckBoxSelectedIconColor(0x405060);
+
+  MarkdownViewStyle iconColorOnlyStyle = style.Configure()
+                                           .SetTaskCheckBoxIconColor(customTaskCheckBoxIconColor)
+                                           .Build();
+  DALI_TEST_CHECK(iconColorOnlyStyle.GetTaskCheckBoxIconColor() == customTaskCheckBoxIconColor);
+  DALI_TEST_CHECK(iconColorOnlyStyle.GetTaskCheckBoxSelectedIconColor() == defaultCheckBoxStyle.GetSelectedIconColor());
+  SelectableImageInterface inheritedTaskCheckBoxIcon = iconColorOnlyStyle.CreateTaskCheckBoxIcon();
+  DALI_TEST_CHECK(inheritedTaskCheckBoxIcon);
+  inheritedTaskCheckBoxIcon.Reset();
 
   MarkdownViewStyle configured = style.Configure()
                                    .SetTextFontFamily("BodyFamily")
@@ -1103,6 +1153,10 @@ int UtcDaliMarkdownViewStyleDefaultAndBuilderP(void)
                                    .SetQuoteBarColor(customQuoteBar)
                                    .SetThematicBreakColor(customThematicBreak)
                                    .SetTableRuleColor(customTableRule)
+                                   .SetTaskCheckBoxIconGenerator(
+                                     Ui::Callback<SelectableImageInterface()>::New(&CreateTaskCheckBoxIcon))
+                                   .SetTaskCheckBoxIconColor(customTaskCheckBoxIconColor)
+                                   .SetTaskCheckBoxSelectedIconColor(customTaskCheckBoxSelectedIconColor)
                                    .Build();
 
   DALI_TEST_EQUALS(configured.GetTextFontFamily(), Dali::String("BodyFamily"), TEST_LOCATION);
@@ -1128,10 +1182,25 @@ int UtcDaliMarkdownViewStyleDefaultAndBuilderP(void)
   DALI_TEST_CHECK(configured.GetQuoteBarColor() == customQuoteBar);
   DALI_TEST_CHECK(configured.GetThematicBreakColor() == customThematicBreak);
   DALI_TEST_CHECK(configured.GetTableRuleColor() == customTableRule);
+  DALI_TEST_CHECK(configured.GetTaskCheckBoxIconColor() == customTaskCheckBoxIconColor);
+  DALI_TEST_CHECK(configured.GetTaskCheckBoxSelectedIconColor() == customTaskCheckBoxSelectedIconColor);
+
+  Test::ObjectDestructionTracker customTaskCheckBoxIconTracker(application.GetCore().GetObjectRegistry());
+  SelectableImageInterface customTaskCheckBoxIcon = configured.CreateTaskCheckBoxIcon();
+  DALI_TEST_CHECK(customTaskCheckBoxIcon);
+  View customTaskCheckBoxIconView = customTaskCheckBoxIcon.GetView();
+  DALI_TEST_CHECK(customTaskCheckBoxIconView);
+  customTaskCheckBoxIconTracker.Start(customTaskCheckBoxIconView);
+  DALI_TEST_EQUALS(gTaskCheckBoxIconCreateCount, 1, TEST_LOCATION);
+  customTaskCheckBoxIcon.Reset();
+  customTaskCheckBoxIconView.Reset();
+  DALI_TEST_CHECK(customTaskCheckBoxIconTracker.IsDestroyed());
 
   MarkdownViewStyle configuredCopy = configured;
   DALI_TEST_CHECK(configuredCopy.GetCodeTextColor() == customCodeColor);
   DALI_TEST_CHECK(configuredCopy.GetTableRuleColor() == customTableRule);
+  DALI_TEST_CHECK(configuredCopy.GetTaskCheckBoxIconColor() == customTaskCheckBoxIconColor);
+  DALI_TEST_CHECK(configuredCopy.GetTaskCheckBoxSelectedIconColor() == customTaskCheckBoxSelectedIconColor);
 
   MarkdownViewStyle changedConfigured = configured.Configure()
                                           .SetTextFontFamily("ChangedBodyFamily")
@@ -1143,11 +1212,30 @@ int UtcDaliMarkdownViewStyleDefaultAndBuilderP(void)
   DALI_TEST_EQUALS(configured.GetTextFontFamily(), Dali::String("BodyFamily"), TEST_LOCATION);
   DALI_TEST_EQUALS(configured.GetTextFontSize(), 30.0f, TEST_LOCATION);
   DALI_TEST_CHECK(configured.GetCodeTextColor() == customCodeColor);
+  DALI_TEST_CHECK(changedConfigured.GetTaskCheckBoxIconColor() == customTaskCheckBoxIconColor);
+  DALI_TEST_CHECK(changedConfigured.GetTaskCheckBoxSelectedIconColor() == customTaskCheckBoxSelectedIconColor);
   DALI_TEST_EQUALS(style.GetTextFontSize(), 20.0f, TEST_LOCATION);
   DALI_TEST_CHECK(style.GetTextColor() == UiColor(0x000000));
 
+  gTaskCheckBoxIconCreateCount = 0;
+  MarkdownView styledTaskView = MarkdownView::New(configured);
+  styledTaskView.SetMarkdown("- [ ] task");
+  DALI_TEST_EQUALS(gTaskCheckBoxIconCreateCount, 1, TEST_LOCATION);
+  CheckBox styledTaskCheckBox = GetListItemTaskCheckBox(GetListItemAtDepth(styledTaskView, 1u));
+  DALI_TEST_CHECK(styledTaskCheckBox);
+  DALI_TEST_EQUALS(styledTaskCheckBox.GetIconWidth(), configured.GetTextFontSize(), TEST_LOCATION);
+  DALI_TEST_EQUALS(styledTaskCheckBox.GetIconHeight(), configured.GetTextFontSize(), TEST_LOCATION);
+
   DALI_TEST_ASSERTION(MarkdownViewStyle::Builder().SetTextFontSize(0.0f), "finite and greater than zero");
   DALI_TEST_ASSERTION(MarkdownViewStyle::Builder().SetHeading1FontSize(std::numeric_limits<float>::infinity()), "finite and greater than zero");
+  DALI_TEST_ASSERTION(MarkdownViewStyle::Builder().SetTaskCheckBoxIconGenerator(
+                        Ui::Callback<SelectableImageInterface()>()),
+                      "must be initialized");
+  MarkdownViewStyle emptyIconStyle = MarkdownViewStyle::Builder()
+                                       .SetTaskCheckBoxIconGenerator(
+                                         Ui::Callback<SelectableImageInterface()>::New(&CreateEmptyTaskCheckBoxIcon))
+                                       .Build();
+  DALI_TEST_ASSERTION(emptyIconStyle.CreateTaskCheckBoxIcon(), "returned an empty SelectableImageInterface");
   DALI_TEST_ASSERTION(MarkdownView::New(MarkdownViewStyle()), "MarkdownViewStyle must be initialized");
 
   MarkdownViewStyle::Builder consumedBuilder;
@@ -1478,17 +1566,13 @@ int UtcDaliMarkdownViewCustomListMarkerStyleP(void)
   View taskBullet = GetShapeMarker(orderedItem);
   DALI_TEST_CHECK(taskBullet);
   DALI_TEST_CHECK(!Label::DownCast(taskBullet));
-  Label taskMarker = GetListItemTaskMarker(orderedItem);
-  DALI_TEST_CHECK(taskMarker);
-  DALI_TEST_CHECK(taskMarker != orderedMarker);
-  DALI_TEST_EQUALS(taskMarker.GetText(), Dali::String("[ ]"), TEST_LOCATION);
-  DALI_TEST_EQUALS(taskMarker.GetFontFamily(), Dali::String("SamsungOneUI_400"), TEST_LOCATION);
-  DALI_TEST_EQUALS(taskMarker.GetFontSize(), 30.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(taskMarker.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
-  DALI_TEST_EQUALS(taskMarker.GetLineHeight(), 1.6f, TEST_LOCATION);
-  DALI_TEST_CHECK(!taskMarker.IsSystemFontSizeScaleEnabled());
-  DALI_TEST_CHECK(taskMarker.GetTextColor() == markerToken);
-  DALI_TEST_EQUALS(taskMarker.GetRequestedWidth(), taskMarker.GetNaturalSize().width, 0.01f, TEST_LOCATION);
+  CheckBox taskCheckBox = GetListItemTaskCheckBox(orderedItem);
+  DALI_TEST_CHECK(taskCheckBox);
+  DALI_TEST_CHECK(!taskCheckBox.IsSelected());
+  DALI_TEST_EQUALS(taskCheckBox.GetIconWidth(), 30.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetIconHeight(), 30.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetRequestedWidth(), 30.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetRequestedHeight(), 48.0f, 0.01f, TEST_LOCATION);
   DALI_TEST_EQUALS(orderedHost.GetRequestedWidth(), 48.0f, 0.01f, TEST_LOCATION);
 
   ordered.SetMarkdown("- unordered");
@@ -1671,31 +1755,189 @@ int UtcDaliMarkdownViewSetGetClearP(void)
   END_TEST;
 }
 
-int UtcDaliMarkdownViewClearDestroysImageSubtreeP(void)
+int UtcDaliMarkdownViewTaskCheckBoxUpdatesSourceP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("1. [ ] first\n2. [X] second");
+  View list = view.GetChildViewAt(0u);
+  DALI_TEST_CHECK(list);
+  DALI_TEST_EQUALS(list.GetChildViewCount(), 2u, TEST_LOCATION);
+
+  CheckBox first  = GetListItemTaskCheckBox(list.GetChildViewAt(0u));
+  CheckBox second = GetListItemTaskCheckBox(list.GetChildViewAt(1u));
+  DALI_TEST_CHECK(first);
+  DALI_TEST_CHECK(second);
+  DALI_TEST_CHECK(!first.IsSelected());
+  DALI_TEST_CHECK(second.IsSelected());
+
+  Property::Map actionAttributes;
+  DALI_TEST_CHECK(first.DoAction("activate", actionAttributes));
+  DALI_TEST_EQUALS(view.GetMarkdown(), Dali::String("1. [x] first\n2. [X] second"), TEST_LOCATION);
+  DALI_TEST_EQUALS(MarkdownView::ToPlainText(view.GetMarkdown()), Dali::String("1. [x] first\n2. [x] second"), TEST_LOCATION);
+  DALI_TEST_CHECK(GetListItemTaskCheckBox(list.GetChildViewAt(0u)) == first);
+
+  DALI_TEST_CHECK(second.DoAction("activate", actionAttributes));
+  DALI_TEST_EQUALS(view.GetMarkdown(), Dali::String("1. [x] first\n2. [ ] second"), TEST_LOCATION);
+  DALI_TEST_EQUALS(MarkdownView::ToPlainText(view.GetMarkdown()), Dali::String("1. [x] first\n2. [ ] second"), TEST_LOCATION);
+  DALI_TEST_CHECK(GetListItemTaskCheckBox(list.GetChildViewAt(1u)) == second);
+
+  // Moving unchanged rendered content must refresh each checkbox's source offset.
+  view.SetMarkdown("1.  [x] first\n2.  [ ] second");
+  list = view.GetChildViewAt(0u);
+  DALI_TEST_CHECK(GetListItemTaskCheckBox(list.GetChildViewAt(0u)) == first);
+  first.SetSelected(false);
+  DALI_TEST_EQUALS(view.GetMarkdown(), Dali::String("1.  [ ] first\n2.  [ ] second"), TEST_LOCATION);
+
+  view.SetMarkdown("- [ ] parent\n  1. [ ] child");
+  CheckBox nested = GetListItemTaskCheckBox(GetListItemAtDepth(view, 2u));
+  DALI_TEST_CHECK(nested);
+  DALI_TEST_CHECK(nested.DoAction("activate", actionAttributes));
+  DALI_TEST_EQUALS(view.GetMarkdown(), Dali::String("- [ ] parent\n  1. [x] child"), TEST_LOCATION);
+
+  view.Clear();
+  DALI_TEST_CHECK(nested.DoAction("activate", actionAttributes));
+  DALI_TEST_CHECK(view.GetMarkdown().Empty());
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewTaskCheckBoxLifecycleP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownViewStyle markdownStyle = MarkdownViewStyle::Default()
+                                      .Configure()
+                                      .SetTaskCheckBoxIconGenerator(
+                                        Ui::Callback<SelectableImageInterface()>::New(&CreateTaskCheckBoxIcon))
+                                      .Build();
+  MarkdownView view = MarkdownView::New(markdownStyle);
+
+  gTaskCheckBoxIconCreateCount = 0;
+
+  // A task-list icon is stateful, so each simultaneously rendered task item must
+  // receive and release its own generator result.
+  view.SetMarkdown("- [ ] first\n- [x] second");
+  View list = view.GetChildViewAt(0u);
+  DALI_TEST_CHECK(list);
+  DALI_TEST_EQUALS(list.GetChildViewCount(), 2u, TEST_LOCATION);
+
+  CheckBox firstCheckBox  = GetListItemTaskCheckBox(list.GetChildViewAt(0u));
+  CheckBox secondCheckBox = GetListItemTaskCheckBox(list.GetChildViewAt(1u));
+  View     firstIcon      = GetCheckBoxIconView(firstCheckBox);
+  View     secondIcon     = GetCheckBoxIconView(secondCheckBox);
+  DALI_TEST_CHECK(firstCheckBox);
+  DALI_TEST_CHECK(secondCheckBox);
+  DALI_TEST_CHECK(firstIcon);
+  DALI_TEST_CHECK(secondIcon);
+  DALI_TEST_CHECK(firstIcon != secondIcon);
+  DALI_TEST_EQUALS(gTaskCheckBoxIconCreateCount, 2, TEST_LOCATION);
+
+  Test::ObjectDestructionTracker firstCheckBoxTracker(application.GetCore().GetObjectRegistry());
+  Test::ObjectDestructionTracker secondCheckBoxTracker(application.GetCore().GetObjectRegistry());
+  Test::ObjectDestructionTracker firstIconTracker(application.GetCore().GetObjectRegistry());
+  Test::ObjectDestructionTracker secondIconTracker(application.GetCore().GetObjectRegistry());
+  firstCheckBoxTracker.Start(firstCheckBox);
+  secondCheckBoxTracker.Start(secondCheckBox);
+  firstIconTracker.Start(firstIcon);
+  secondIconTracker.Start(secondIcon);
+
+  view.Clear();
+  list.Reset();
+  firstCheckBox.Reset();
+  secondCheckBox.Reset();
+  firstIcon.Reset();
+  secondIcon.Reset();
+  DALI_TEST_CHECK(firstCheckBoxTracker.IsDestroyed());
+  DALI_TEST_CHECK(secondCheckBoxTracker.IsDestroyed());
+  DALI_TEST_CHECK(firstIconTracker.IsDestroyed());
+  DALI_TEST_CHECK(secondIconTracker.IsDestroyed());
+
+  gTaskCheckBoxIconCreateCount = 0;
+
+  constexpr uint32_t REPEAT_COUNT = 64u;
+  for(uint32_t iteration = 0u; iteration < REPEAT_COUNT; ++iteration)
+  {
+    Test::ObjectDestructionTracker checkBoxTracker(application.GetCore().GetObjectRegistry());
+    Test::ObjectDestructionTracker iconViewTracker(application.GetCore().GetObjectRegistry());
+
+    view.SetMarkdown((iteration % 2u == 0u) ? "- [ ] task" : "- [x] task");
+    CheckBox checkBox = GetListItemTaskCheckBox(GetListItemAtDepth(view, 1u));
+    View     iconView = GetCheckBoxIconView(checkBox);
+    DALI_TEST_CHECK(checkBox);
+    DALI_TEST_CHECK(iconView);
+    checkBoxTracker.Start(checkBox);
+    iconViewTracker.Start(iconView);
+
+    view.Clear();
+    DALI_TEST_EQUALS(view.GetChildViewCount(), 0u, TEST_LOCATION);
+
+    checkBox.Reset();
+    iconView.Reset();
+    DALI_TEST_CHECK(checkBoxTracker.IsDestroyed());
+    DALI_TEST_CHECK(iconViewTracker.IsDestroyed());
+    DALI_TEST_EQUALS(gTaskCheckBoxIconCreateCount, static_cast<int>(iteration + 1u), TEST_LOCATION);
+  }
+
+  DALI_TEST_EQUALS(gTaskCheckBoxIconCreateCount, static_cast<int>(REPEAT_COUNT), TEST_LOCATION);
+
+  // Also cover the production Lottie icon used by the default CheckBoxStyle. If its
+  // SelectableImageInterface remained alive, it would retain the icon view as well.
+  Test::ObjectDestructionTracker defaultCheckBoxTracker(application.GetCore().GetObjectRegistry());
+  Test::ObjectDestructionTracker defaultIconViewTracker(application.GetCore().GetObjectRegistry());
+  MarkdownView                   defaultIconView = MarkdownView::New();
+  defaultIconView.SetMarkdown("- [ ] task");
+  CheckBox defaultCheckBox = GetListItemTaskCheckBox(GetListItemAtDepth(defaultIconView, 1u));
+  View     defaultIcon     = GetCheckBoxIconView(defaultCheckBox);
+  DALI_TEST_CHECK(defaultCheckBox);
+  DALI_TEST_CHECK(defaultIcon);
+  defaultCheckBoxTracker.Start(defaultCheckBox);
+  defaultIconViewTracker.Start(defaultIcon);
+
+  defaultIconView.Clear();
+  defaultCheckBox.Reset();
+  defaultIcon.Reset();
+  DALI_TEST_CHECK(defaultCheckBoxTracker.IsDestroyed());
+  DALI_TEST_CHECK(defaultIconViewTracker.IsDestroyed());
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewImageTextSubtreeLifecycleP(void)
 {
   UiTestApplication              application(Components::UiConfig::New());
   Test::ObjectDestructionTracker rootTracker(application.GetCore().GetObjectRegistry());
-  Test::ObjectDestructionTracker imageTracker(application.GetCore().GetObjectRegistry());
+  Test::ObjectDestructionTracker labelTracker(application.GetCore().GetObjectRegistry());
   MarkdownView                   view = MarkdownView::New();
 
-  view.SetMarkdown("![alt](image.png)");
+  view.SetMarkdown("![alt](one.png)");
   DALI_TEST_EQUALS(view.GetChildViewCount(), 1u, TEST_LOCATION);
 
   View imageRoot = view.GetChildViewAt(0u);
   DALI_TEST_EQUALS(imageRoot.GetChildViewCount(), 1u, TEST_LOCATION);
 
-  ImageView image = ImageView::DownCast(imageRoot.GetChildViewAt(0u));
-  DALI_TEST_CHECK(image);
+  Label imageLabel = Label::DownCast(imageRoot.GetChildViewAt(0u));
+  DALI_TEST_CHECK(imageLabel);
+  DALI_TEST_EQUALS(imageLabel.GetText(), "alt [one.png]", TEST_LOCATION);
+  DALI_TEST_CHECK(!ImageView::DownCast(imageRoot.GetChildViewAt(0u)));
   rootTracker.Start(imageRoot);
-  imageTracker.Start(image);
+  labelTracker.Start(imageLabel);
+
+  view.SetMarkdown("![alt](two.png)");
+  DALI_TEST_CHECK(view.GetChildViewAt(0u) == imageRoot);
+  DALI_TEST_CHECK(Label::DownCast(imageRoot.GetChildViewAt(0u)) == imageLabel);
+  DALI_TEST_EQUALS(imageLabel.GetText(), "alt [two.png]", TEST_LOCATION);
+
+  view.SetMarkdown("![next](two.png)");
+  DALI_TEST_CHECK(view.GetChildViewAt(0u) == imageRoot);
+  DALI_TEST_CHECK(Label::DownCast(imageRoot.GetChildViewAt(0u)) == imageLabel);
+  DALI_TEST_EQUALS(imageLabel.GetText(), "next [two.png]", TEST_LOCATION);
 
   view.Clear();
   DALI_TEST_EQUALS(view.GetChildViewCount(), 0u, TEST_LOCATION);
 
-  image.Reset();
+  imageLabel.Reset();
   imageRoot.Reset();
   DALI_TEST_CHECK(rootTracker.IsDestroyed());
-  DALI_TEST_CHECK(imageTracker.IsDestroyed());
+  DALI_TEST_CHECK(labelTracker.IsDestroyed());
   END_TEST;
 }
 
@@ -1909,12 +2151,12 @@ int UtcDaliMarkdownViewUnorderedListMarkerLifecycleP(void)
   DALI_TEST_CHECK(secondTaskMarker);
   DALI_TEST_EQUALS(firstTaskMarker.GetText(), Dali::String("1."), TEST_LOCATION);
   DALI_TEST_EQUALS(secondTaskMarker.GetText(), Dali::String("2."), TEST_LOCATION);
-  Label firstTaskCheckbox  = GetListItemTaskMarker(firstTaskItem);
-  Label secondTaskCheckbox = GetListItemTaskMarker(secondTaskItem);
+  CheckBox firstTaskCheckbox  = GetListItemTaskCheckBox(firstTaskItem);
+  CheckBox secondTaskCheckbox = GetListItemTaskCheckBox(secondTaskItem);
   DALI_TEST_CHECK(firstTaskCheckbox);
   DALI_TEST_CHECK(secondTaskCheckbox);
-  DALI_TEST_EQUALS(firstTaskCheckbox.GetText(), Dali::String("[ ]"), TEST_LOCATION);
-  DALI_TEST_EQUALS(secondTaskCheckbox.GetText(), Dali::String("[x]"), TEST_LOCATION);
+  DALI_TEST_CHECK(!firstTaskCheckbox.IsSelected());
+  DALI_TEST_CHECK(secondTaskCheckbox.IsSelected());
   Label firstTaskText  = GetListItemTextLabel(firstTaskItem);
   Label secondTaskText = GetListItemTextLabel(secondTaskItem);
   DALI_TEST_CHECK(firstTaskText);
@@ -1927,8 +2169,8 @@ int UtcDaliMarkdownViewUnorderedListMarkerLifecycleP(void)
   view.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
   DALI_TEST_EQUALS(firstTaskMarker.GetText(), Dali::String(".1"), TEST_LOCATION);
   DALI_TEST_EQUALS(secondTaskMarker.GetText(), Dali::String(".2"), TEST_LOCATION);
-  DALI_TEST_EQUALS(firstTaskCheckbox.GetText(), Dali::String("[ ]"), TEST_LOCATION);
-  DALI_TEST_EQUALS(secondTaskCheckbox.GetText(), Dali::String("[x]"), TEST_LOCATION);
+  DALI_TEST_CHECK(!firstTaskCheckbox.IsSelected());
+  DALI_TEST_CHECK(secondTaskCheckbox.IsSelected());
   view.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
   DALI_TEST_EQUALS(firstTaskMarker.GetText(), Dali::String("1."), TEST_LOCATION);
   DALI_TEST_EQUALS(secondTaskMarker.GetText(), Dali::String("2."), TEST_LOCATION);
@@ -1939,10 +2181,11 @@ int UtcDaliMarkdownViewUnorderedListMarkerLifecycleP(void)
   View taskBullet = GetShapeMarker(listItem);
   DALI_TEST_CHECK(taskBullet);
   DALI_TEST_CHECK(!Label::DownCast(taskBullet));
-  Label taskMarker = GetListItemTaskMarker(listItem);
-  DALI_TEST_CHECK(taskMarker);
-  DALI_TEST_EQUALS(taskMarker.GetText(), Dali::String("[ ]"), TEST_LOCATION);
-  DALI_TEST_EQUALS(taskMarker.GetRequestedWidth(), taskMarker.GetNaturalSize().width, 0.01f, TEST_LOCATION);
+  CheckBox taskCheckBox = GetListItemTaskCheckBox(listItem);
+  DALI_TEST_CHECK(taskCheckBox);
+  DALI_TEST_CHECK(!taskCheckBox.IsSelected());
+  DALI_TEST_EQUALS(taskCheckBox.GetRequestedWidth(), 20.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskCheckBox.GetRequestedHeight(), 32.0f, 0.01f, TEST_LOCATION);
   DALI_TEST_EQUALS(markerHost.GetRequestedWidth(), 32.0f, 0.01f, TEST_LOCATION);
 
   View  taskRow  = GetListItemTaskRow(listItem);
@@ -1952,16 +2195,17 @@ int UtcDaliMarkdownViewUnorderedListMarkerLifecycleP(void)
   DALI_TEST_CHECK(GetListItemMarkerHost(listItem) == markerHost);
   DALI_TEST_CHECK(GetShapeMarker(listItem) == taskBullet);
   DALI_TEST_CHECK(GetListItemTaskRow(listItem) == taskRow);
-  DALI_TEST_CHECK(GetListItemTaskMarker(listItem) == taskMarker);
+  DALI_TEST_CHECK(GetListItemTaskCheckBox(listItem) == taskCheckBox);
   DALI_TEST_CHECK(GetListItemTextLabel(listItem) == taskText);
-  DALI_TEST_EQUALS(taskMarker.GetText(), Dali::String("[x]"), TEST_LOCATION);
+  DALI_TEST_CHECK(taskCheckBox.IsSelected());
+  DALI_TEST_CHECK(taskText.IsAccessibilityHidden());
 
   view.SetMarkdown("- [ ]\n  - nested");
   listItem = GetListItemAtDepth(view, 1u);
   taskRow  = GetListItemTaskRow(listItem);
   DALI_TEST_CHECK(taskRow);
   DALI_TEST_EQUALS(taskRow.GetChildViewCount(), 1u, TEST_LOCATION);
-  DALI_TEST_CHECK(GetListItemTaskMarker(listItem));
+  DALI_TEST_CHECK(GetListItemTaskCheckBox(listItem));
   DALI_TEST_CHECK(!GetListItemTextLabel(listItem));
   View taskContentHost = listItem.GetChildViewAt(1u);
   DALI_TEST_EQUALS(taskContentHost.GetChildViewCount(), 2u, TEST_LOCATION);
@@ -1972,6 +2216,7 @@ int UtcDaliMarkdownViewUnorderedListMarkerLifecycleP(void)
   listItem = GetListItemAtDepth(view, 1u);
   DALI_TEST_CHECK(GetShapeMarker(listItem));
   DALI_TEST_CHECK(!Label::DownCast(GetShapeMarker(listItem)));
+  DALI_TEST_CHECK(!GetListItemTextLabel(listItem).IsAccessibilityHidden());
   END_TEST;
 }
 
@@ -1995,8 +2240,57 @@ int UtcDaliMarkdownViewLinkTextProjectionP(void)
 
   for(const auto& testCase : cases)
   {
-    CheckRenderedLinkText(view, testCase.first, testCase.second);
+    CheckRenderedUrlText(view, testCase.first, testCase.second);
   }
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewImageTextProjectionP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  const std::vector<std::pair<const char*, const char*>> cases = {
+    {"![diagram](diagram.png)", "diagram [diagram.png]"},
+    {"Text ![icon](icon.png) continues", "Text icon [icon.png] continues"},
+    {"![one](one.png) ![two](two.png)", "one [one.png] two [two.png]"},
+    {"![](empty.png)", " [empty.png]"},
+    {"![empty]()", "empty []"},
+    {"[![diagram](diagram.png)](page.html)", "diagram [diagram.png] [page.html]"},
+    {"x[](link)![](image)", "x [link] [image]"},
+    {"x![](image)[](link)", "x [image] [link]"},
+    {"한글 ![그림](이미지.png) 끝", "한글 그림 [이미지.png] 끝"},
+  };
+
+  for(const auto& testCase : cases)
+  {
+    CheckRenderedUrlText(view, testCase.first, testCase.second);
+  }
+
+  view.SetMarkdown("Before ![*icon*](icon.png) after");
+  Label label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "Before icon [icon.png] after", TEST_LOCATION);
+  const Text::StyledText styledText = label.GetStyledText();
+  DALI_TEST_CHECK(styledText);
+  DALI_TEST_CHECK(HasFontSpanRange(styledText, 7u, 11u));
+  DALI_TEST_CHECK(!HasFontSpanRange(styledText, 11u, 22u));
+
+  view.SetMarkdown("Before ![icon](one.png) after");
+  View  inlineRoot  = view.GetChildViewAt(0u);
+  Label inlineLabel = GetOnlyRenderedLabel(view);
+  view.SetMarkdown("Before ![icon](two.png) after");
+  DALI_TEST_CHECK(view.GetChildViewAt(0u) == inlineRoot);
+  DALI_TEST_CHECK(GetOnlyRenderedLabel(view) == inlineLabel);
+  DALI_TEST_EQUALS(inlineLabel.GetText(), "Before icon [two.png] after", TEST_LOCATION);
+
+  view.SetMarkdown("- ![](list.png)\n\n| Image |\n|---|\n| ![](cell.png) |");
+  std::vector<Label> labels;
+  CollectLabels(view, labels);
+  DALI_TEST_CHECK(HasLabelText(labels, " [list.png]"));
+  DALI_TEST_CHECK(HasLabelText(labels, " [cell.png]"));
+
+  DALI_TEST_EQUALS(MarkdownView::ToPlainText("x[](link)![](image)"), Dali::String("x [link] [image]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(MarkdownView::ToPlainText("x![](image)[](link)"), Dali::String("x [image] [link]"), TEST_LOCATION);
   END_TEST;
 }
 

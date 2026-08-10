@@ -30,7 +30,8 @@ namespace Ui
 namespace Internal
 {
 
-constexpr uint32_t MARKDOWN_INVALID_NODE_INDEX = std::numeric_limits<uint32_t>::max();
+constexpr uint32_t MARKDOWN_INVALID_NODE_INDEX    = std::numeric_limits<uint32_t>::max();
+constexpr uint32_t MARKDOWN_INVALID_SOURCE_OFFSET = std::numeric_limits<uint32_t>::max();
 
 /**
  * @brief Defines the default seed used by Markdown render hashing.
@@ -128,6 +129,7 @@ struct MarkdownLinkRange
   std::string href;
   std::string title;
   bool        isAutolink{false};
+  uint32_t    urlSuffixOrder{0u};
 };
 
 /**
@@ -140,6 +142,7 @@ struct MarkdownInlineObject
   MarkdownInlineObjectType type{MarkdownInlineObjectType::IMAGE};
   uint32_t                 position{0u};
   uint32_t                 length{0u};
+  uint32_t                 urlSuffixOrder{0u};
   std::string              sourceUrl;
   std::string              title;
   std::string              altText;
@@ -187,6 +190,7 @@ struct MarkdownRenderNode
   bool             tightList{false};
   bool             taskListItem{false};
   bool             taskChecked{false};
+  uint32_t         taskMarkerOffset{MARKDOWN_INVALID_SOURCE_OFFSET};
 
   MarkdownTableAlignment tableAlignment{MarkdownTableAlignment::DEFAULT};
 

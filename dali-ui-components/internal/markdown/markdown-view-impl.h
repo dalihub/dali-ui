@@ -170,6 +170,15 @@ private:
   MarkdownTextUpdate CalculateTextUpdate(const MarkdownRenderNode& previous, const MarkdownRenderNode& next) const;
 
   /**
+   * @brief Synchronizes an interactive task checkbox with the Markdown source.
+   *
+   * @param[in] markerOffset Byte offset of the character between '[' and ']'.
+   * @param[in] selected The new checkbox state.
+   * @return @c true if the source already matched or was updated successfully.
+   */
+  bool UpdateTaskSelection(uint32_t markerOffset, bool selected);
+
+  /**
    * @brief Returns the public view handle for this implementation.
    *
    * @return The MarkdownView as a View.
@@ -183,6 +192,8 @@ private:
 
   MarkdownParser         mParser;
   MarkdownRenderSnapshot mSnapshot;
+
+  MarkdownTaskSelectionChangedCallback mTaskSelectionChanged;
 
   std::vector<std::unique_ptr<ComponentNode>> mComponentChildren;
   std::vector<std::vector<uint32_t>>          mChildrenByParent;

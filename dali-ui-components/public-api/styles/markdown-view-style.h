@@ -25,7 +25,9 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
+#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 
 namespace Dali
 {
@@ -38,10 +40,7 @@ class MarkdownViewStyleImpl;
 }
 
 /**
- * @brief Style values used to initialize MarkdownView typography and colors.
- *
- * Font sizes are in pixels and must be finite and greater than zero.
- * MarkdownView does not apply system font-size scaling.
+ * @brief Defines the style used by MarkdownView.
  */
 class DALI_UI_COMPONENTS_API MarkdownViewStyle : public UiStyle
 {
@@ -96,6 +95,10 @@ public:
   UiColor GetQuoteBarColor() const;
   UiColor GetThematicBreakColor() const;
   UiColor GetTableRuleColor() const;
+
+  SelectableImageInterface CreateTaskCheckBoxIcon() const;
+  UiColor                  GetTaskCheckBoxIconColor() const;
+  UiColor                  GetTaskCheckBoxSelectedIconColor() const;
 
 public: // Not intended for application developers
   /// @cond internal
@@ -166,6 +169,16 @@ public:
   Builder&& SetThematicBreakColor(const UiColor& value) &&;
   Builder&  SetTableRuleColor(const UiColor& value) &;
   Builder&& SetTableRuleColor(const UiColor& value) &&;
+
+  Builder& SetTaskCheckBoxIconGenerator(
+    Ui::Callback<SelectableImageInterface()>&& generator) &;
+  Builder&& SetTaskCheckBoxIconGenerator(
+    Ui::Callback<SelectableImageInterface()>&& generator) &&;
+
+  Builder&  SetTaskCheckBoxIconColor(const UiColor& color) &;
+  Builder&& SetTaskCheckBoxIconColor(const UiColor& color) &&;
+  Builder&  SetTaskCheckBoxSelectedIconColor(const UiColor& color) &;
+  Builder&& SetTaskCheckBoxSelectedIconColor(const UiColor& color) &&;
 
   MarkdownViewStyle Build() &&;
 

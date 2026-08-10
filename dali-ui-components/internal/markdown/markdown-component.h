@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/views/view.h>
+#include <functional>
 #include <memory>
 
 // INTERNAL INCLUDES
@@ -69,14 +70,19 @@ public:
                       const MarkdownTextUpdate& textUpdate) = 0;
 };
 
+using MarkdownTaskSelectionChangedCallback = std::function<bool(uint32_t, bool)>;
+
 /**
  * @brief Creates a component for the specified render node.
  *
  * @param[in] node The render node.
  * @param[in] style The Markdown style to apply.
+ * @param[in] taskSelectionChanged Called when a rendered task checkbox changes.
  * @return The created component.
  */
-std::unique_ptr<MarkdownComponent> CreateMarkdownComponent(const MarkdownRenderNode& node, const MarkdownViewStyle& style);
+std::unique_ptr<MarkdownComponent> CreateMarkdownComponent(const MarkdownRenderNode&                   node,
+                                                           const MarkdownViewStyle&                    style,
+                                                           const MarkdownTaskSelectionChangedCallback& taskSelectionChanged);
 
 } // namespace Internal
 } // namespace Ui

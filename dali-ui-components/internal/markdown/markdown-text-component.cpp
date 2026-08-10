@@ -150,6 +150,11 @@ bool HasStyledRanges(const MarkdownRenderNode& node)
   return !node.styleRuns.empty() || !node.linkRanges.empty();
 }
 
+bool NeedsStyledText(const MarkdownRenderNode& node)
+{
+  return HasStyledRanges(node) || !node.inlineObjects.empty();
+}
+
 struct ResolvedTextRun
 {
   uint32_t start{0u};
@@ -158,7 +163,7 @@ struct ResolvedTextRun
   int32_t  linkIndex{-1};
 };
 
-struct MarkdownLinkSuffixEvent
+struct MarkdownUrlSuffixEvent
 {
   uint32_t    position{0u};
   uint32_t    order{0u};
@@ -307,29 +312,37 @@ MarkdownTextProjection ProjectTextWithUrls(const MarkdownRenderNode& node)
 {
   MarkdownTextProjection projection;
 
-  std::vector<MarkdownLinkSuffixEvent> suffixEvents;
-  suffixEvents.reserve(node.linkRanges.size());
+  std::vector<MarkdownUrlSuffixEvent> suffixEvents;
+  suffixEvents.reserve(node.inlineObjects.size() + node.linkRanges.size());
 
   std::size_t projectedByteLength = node.text.size();
   std::size_t mergeBarrierCount   = 0u;
-  uint32_t    suffixOrder         = 0u;
-  for(const auto& link : node.linkRanges)
+  auto        addUrlSuffix        = [&](uint32_t position, uint32_t length, uint32_t order, const std::string& url)
   {
-    MarkdownLinkSuffixEvent event;
-    event.position       = std::min(link.end, node.utf32Length);
-    event.order          = suffixOrder++;
-    event.blocksRunMerge = link.start == link.end;
+    MarkdownUrlSuffixEvent event;
+    event.position       = std::min(position + length, node.utf32Length);
+    event.order          = order;
+    event.blocksRunMerge = length == 0u;
     mergeBarrierCount += event.blocksRunMerge ? 1u : 0u;
     event.suffix = " [";
-    event.suffix += link.href;
+    event.suffix += url;
     event.suffix += "]";
-    event.utf32Length = 3u + Utf8CharacterCount(link.href);
+    event.utf32Length = 3u + Utf8CharacterCount(url);
 
     projectedByteLength += event.suffix.size();
     suffixEvents.push_back(std::move(event));
+  };
+
+  for(const auto& object : node.inlineObjects)
+  {
+    addUrlSuffix(object.position, object.length, object.urlSuffixOrder, object.sourceUrl);
+  }
+  for(const auto& link : node.linkRanges)
+  {
+    addUrlSuffix(link.start, link.end - link.start, link.urlSuffixOrder, link.href);
   }
 
-  std::sort(suffixEvents.begin(), suffixEvents.end(), [](const MarkdownLinkSuffixEvent& lhs, const MarkdownLinkSuffixEvent& rhs)
+  std::sort(suffixEvents.begin(), suffixEvents.end(), [](const MarkdownUrlSuffixEvent& lhs, const MarkdownUrlSuffixEvent& rhs)
   {
     if(lhs.position != rhs.position)
     {
@@ -460,9 +473,10 @@ Text::StyledText BuildStyledText(const MarkdownRenderNode& node, MarkdownLinkPre
   MarkdownTextProjection       projection;
   const std::string*           displayText = &node.text;
   std::vector<ResolvedTextRun> resolvedRuns;
-  const bool                   projectLinks = linkPresentation == MarkdownLinkPresentation::TEXT_WITH_URL && !node.linkRanges.empty();
+  const bool                   projectUrls = linkPresentation == MarkdownLinkPresentation::TEXT_WITH_URL &&
+                           (!node.inlineObjects.empty() || !node.linkRanges.empty());
 
-  if(projectLinks)
+  if(projectUrls)
   {
     projection  = ProjectTextWithUrls(node);
     displayText = &projection.text;
@@ -472,7 +486,7 @@ Text::StyledText BuildStyledText(const MarkdownRenderNode& node, MarkdownLinkPre
     resolvedRuns = ResolveTextRuns(node);
   }
 
-  const std::vector<ResolvedTextRun>& runs    = projectLinks ? projection.resolvedRuns : resolvedRuns;
+  const std::vector<ResolvedTextRun>& runs    = projectUrls ? projection.resolvedRuns : resolvedRuns;
   Text::StyledTextBuilder             builder = Text::StyledTextBuilder::New(Dali::String(displayText->c_str()));
 
   for(const auto& run : runs)
@@ -558,7 +572,7 @@ public:
   {
     ApplyStaticTextProperties(node);
 
-    if(HasStyledRanges(node))
+    if(NeedsStyledText(node))
     {
       Text::StyledText styledText = BuildStyledText(node, DEFAULT_LINK_PRESENTATION, mStyle);
       mLabel.SetStyledText(styledText);

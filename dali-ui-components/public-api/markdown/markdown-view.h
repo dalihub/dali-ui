@@ -85,7 +85,7 @@ public:
   /**
    * @brief Gets the current Markdown source.
    *
-   * @return The original Markdown source currently assigned to the view.
+   * @return The Markdown source.
    */
   Dali::String GetMarkdown() const;
 

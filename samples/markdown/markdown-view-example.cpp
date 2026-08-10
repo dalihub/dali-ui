@@ -47,6 +47,9 @@ constexpr int      MIN_STREAM_INTERVAL_MS  = 1;
 constexpr int      STREAM_INTERVAL_STEP_MS = 10;
 constexpr uint32_t AUTO_TEST_DELAY_MS      = 1000u;
 
+constexpr uint32_t TASK_CHECK_BOX_COLOR          = 0x838B97;
+constexpr uint32_t TASK_CHECK_BOX_SELECTED_COLOR = 0x2F67D4;
+
 constexpr std::array<float, 5u> UI_SCALES{{0.8f, 1.0f, 1.2f, 1.5f, 2.0f}};
 
 double ElapsedMs(std::chrono::steady_clock::time_point start, std::chrono::steady_clock::time_point end)
@@ -186,6 +189,8 @@ MarkdownViewStyle CreateMarkdownViewExampleStyle()
     .SetQuoteBarColor(UiColor(0xDFDFDF))
     .SetThematicBreakColor(UiColor(0xDFDFDF))
     .SetTableRuleColor(UiColor(0xFFFFFF))
+    .SetTaskCheckBoxIconColor(UiColor(TASK_CHECK_BOX_COLOR))
+    .SetTaskCheckBoxSelectedIconColor(UiColor(TASK_CHECK_BOX_SELECTED_COLOR))
     .Build();
 }
 
@@ -306,6 +311,14 @@ private:
     }
     panel.Add(scaleRow);
 
+    panel.Add(NewPanelLabel("MARKDOWN API", 22.0f, 12.0f));
+    StackLayout markdownApiRow = NewMenuRow();
+    mGetMarkdownButton         = NewMenuButton("GetMarkdown");
+    mMarkdownToPlainTextButton = NewMenuButton("MarkdownToPlainText");
+    markdownApiRow.Add(mGetMarkdownButton);
+    markdownApiRow.Add(mMarkdownToPlainTextButton);
+    panel.Add(markdownApiRow);
+
     panel.Add(NewPanelLabel("AUTO TEST", 22.0f, 12.0f));
     mAutoTestButton = NewMenuButton("Start Auto Test");
     panel.Add(mAutoTestButton);
@@ -393,6 +406,14 @@ private:
     mAutoTestButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     {
       ToggleAutoTest();
+    });
+    mGetMarkdownButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      LogCurrentMarkdown();
+    });
+    mMarkdownToPlainTextButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      LogCurrentPlainText();
     });
   }
 
@@ -507,23 +528,37 @@ private:
                  CurrentMarkdown().size(),
                  mIntervalMs,
                  ChunkModeText());
-    LogPlainTextSummary();
+    LogCurrentPlainText();
     CompleteAutoTestRun();
     RefreshPanel();
   }
 
-  void LogPlainTextSummary()
+  void LogCurrentMarkdown()
   {
-    const std::string& markdown      = CurrentMarkdown();
-    const Dali::String plainText     = MarkdownView::ToPlainText(Dali::String(markdown.c_str()));
-    const std::size_t  plainTextSize = plainText.Size();
+    const Dali::String markdown = mMarkdownView.GetMarkdown();
 
     std::fprintf(stderr,
-                 "MarkdownView plain text: case=%zu/%zu, source=%zu bytes, plain=%zu bytes\n",
+                 "MarkdownView GetMarkdown: case=%zu/%zu, source=%zu bytes\n"
+                 "----- markdown begin -----\n%s\n----- markdown end -----\n",
                  mCaseIndex + 1u,
                  Cases().size(),
-                 markdown.size(),
-                 plainTextSize);
+                 static_cast<std::size_t>(markdown.Size()),
+                 markdown.CStr());
+  }
+
+  void LogCurrentPlainText()
+  {
+    const Dali::String markdown  = mMarkdownView.GetMarkdown();
+    const Dali::String plainText = MarkdownView::ToPlainText(markdown);
+
+    std::fprintf(stderr,
+                 "MarkdownView plain text: case=%zu/%zu, source=%zu bytes, plain=%zu bytes\n"
+                 "----- plain text begin -----\n%s\n----- plain text end -----\n",
+                 mCaseIndex + 1u,
+                 Cases().size(),
+                 static_cast<std::size_t>(markdown.Size()),
+                 static_cast<std::size_t>(plainText.Size()),
+                 plainText.CStr());
   }
 
   bool CompleteStreamingIfNeeded()
@@ -688,6 +723,9 @@ private:
                     index == mUiScaleIndex ? UiColor(0x93C5FD) : UiColor(0x475569),
                     index == mUiScaleIndex ? UiColor(0xF8FAFC) : UiColor(0xCBD5E1));
     }
+
+    SetMenuActionButton(mGetMarkdownButton, "GetMarkdown");
+    SetMenuActionButton(mMarkdownToPlainTextButton, "MarkdownToPlainText");
 
     SetMenuButton(mAutoTestButton,
                   mAutoTestRunning ? "Stop Auto Test" : "Start Auto Test",
@@ -1034,6 +1072,8 @@ private:
   Label                 mLtrButton;
   Label                 mRtlButton;
   std::array<Label, 5u> mScaleButtons;
+  Label                 mGetMarkdownButton;
+  Label                 mMarkdownToPlainTextButton;
   Label                 mAutoTestButton;
   Label                 mMetrics;
   Timer                 mTimer;

@@ -31,6 +31,8 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/markdown/markdown-text-component.h>
 #include <dali-ui-components/internal/markdown/markdown-view-defaults.h>
+#include <dali-ui-components/internal/styles/markdown-view-style-impl.h>
+#include <dali-ui-components/public-api/check-box.h>
 
 namespace Dali
 {
@@ -51,6 +53,14 @@ constexpr float LIST_HOLLOW_BULLET_WIDTH_MAX     = 2.5f;
 constexpr float LIST_HOLLOW_BULLET_WIDTH_DIVISOR = 16.0f;
 constexpr float QUOTE_CONTENT_GAP                = 18.0f;
 constexpr float BLOCK_IMAGE_HEIGHT               = 160.0f;
+
+enum class MarkdownImagePresentation : uint8_t
+{
+  TEXT_WITH_URL,
+  IMAGE
+};
+
+constexpr MarkdownImagePresentation DEFAULT_IMAGE_PRESENTATION = MarkdownImagePresentation::TEXT_WITH_URL;
 
 void SetStackFill(Ui::View view)
 {
@@ -138,14 +148,14 @@ std::string ListMarkerText(const MarkdownRenderNode& node, bool isRtl)
   return std::string();
 }
 
-std::string TaskMarkerText(const MarkdownRenderNode& node)
-{
-  return node.taskChecked ? "[x]" : "[ ]";
-}
-
 bool UseBulletMarker(const MarkdownRenderNode& node)
 {
   return node.listKind == MarkdownListKind::UNORDERED;
+}
+
+bool HasRenderableText(const MarkdownRenderNode& node)
+{
+  return !node.text.empty() || !node.linkRanges.empty() || !node.inlineObjects.empty();
 }
 
 Ui::View NewBulletMarker(uint32_t depth, float fontSize, float markerSize, float lineHeight, float markerColumnWidth, const UiColor& color)
@@ -273,8 +283,11 @@ private:
 class ListItemComponent : public BaseComponent, public ConnectionTracker
 {
 public:
-  ListItemComponent(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
-  : mStyle(style)
+  ListItemComponent(const MarkdownRenderNode&                   node,
+                    const MarkdownViewStyle&                    style,
+                    const MarkdownTaskSelectionChangedCallback& taskSelectionChanged)
+  : mStyle(style),
+    mTaskSelectionChanged(taskSelectionChanged)
   {
     mItem = NewStack(StackOrientation::HORIZONTAL, 0.0f);
     ApplyItemMargin(node);
@@ -284,6 +297,7 @@ public:
     mListMarkerColumnLength = node.listMarkerColumnLength;
     mTaskListItem           = node.taskListItem;
     mTaskChecked            = node.taskChecked;
+    mTaskMarkerOffset       = node.taskMarkerOffset;
 
     mMarkerHost = NewStack(StackOrientation::HORIZONTAL, 0.0f);
     mMarkerHost.SetMargin(Extents(0, static_cast<int16_t>(LIST_CONTENT_GAP), 0, 0));
@@ -324,12 +338,10 @@ public:
       ApplyMarkerPresentation(current);
     }
 
-    if(mTaskListItem != current.taskListItem || mTaskChecked != current.taskChecked)
-    {
-      mTaskListItem = current.taskListItem;
-      mTaskChecked  = current.taskChecked;
-      ApplyTaskPresentation(current);
-    }
+    mTaskListItem     = current.taskListItem;
+    mTaskChecked      = current.taskChecked;
+    mTaskMarkerOffset = current.taskMarkerOffset;
+    ApplyTaskPresentation(current);
     UpdateTightText(previous, current, textUpdate);
   }
 
@@ -418,22 +430,17 @@ private:
     if(!node.taskListItem)
     {
       DetachTaskRow();
-      mTaskMarkerText.clear();
       return;
     }
 
-    EnsureTaskRow();
-    const std::string marker = TaskMarkerText(node);
-    if(marker != mTaskMarkerText)
+    EnsureTaskRow(node);
+    mTaskCheckBox.SetAccessibilityName(Dali::String(node.text.c_str()));
+    if(mTaskCheckBox.IsSelected() != node.taskChecked)
     {
-      mTaskMarkerLabel.SetText(Dali::String(marker.c_str()));
-      mTaskMarkerText = marker;
+      mApplyingTaskSelection = true;
+      mTaskCheckBox.SetSelected(node.taskChecked);
+      mApplyingTaskSelection = false;
     }
-
-    const Vector3 markerNaturalSize = mTaskMarkerLabel.GetNaturalSize();
-    mTaskMarkerLabel.SetRequestedWidth(markerNaturalSize.width);
-    mTaskMarkerLabel.SetRequestedHeight(std::max(mStyle.GetTextFontSize() * MarkdownViewDefaults::BODY_LINE_HEIGHT_RATIO,
-                                                 markerNaturalSize.height));
 
     if(mTaskRowAttached)
     {
@@ -445,6 +452,9 @@ private:
       Ui::View textView = mTextComponent->GetView();
       mContentHost.Remove(textView, RemovePolicy::IMMEDIATE);
       SetStackWeightFill(textView);
+      // The checkbox exposes the task text as its accessibility name. Keep the
+      // visual label hidden from accessibility to avoid announcing it twice.
+      textView.SetAccessibilityHidden(true);
     }
 
     mContentHost.Insert(0u, mTaskRow);
@@ -455,23 +465,83 @@ private:
     }
   }
 
-  void EnsureTaskRow()
+  void EnsureTaskRow(const MarkdownRenderNode& node)
   {
     if(mTaskRow)
     {
       return;
     }
 
-    mTaskRow         = NewStack(StackOrientation::HORIZONTAL, LIST_CONTENT_GAP);
-    mTaskMarkerLabel = NewLabel(Dali::String(),
-                                mStyle.GetTextFontFamily(),
-                                mStyle.GetTextFontSize(),
-                                mStyle.GetTextColor());
-    mTaskMarkerLabel.SetMultiLine(false);
-    mTaskMarkerLabel.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
-    mTaskMarkerLabel.SetLineHeight(MarkdownViewDefaults::BODY_LINE_HEIGHT_RATIO);
-    mTaskMarkerLabel.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
-    mTaskRow.Add(mTaskMarkerLabel);
+    const float fontSize   = mStyle.GetTextFontSize();
+    const float lineHeight = fontSize * MarkdownViewDefaults::BODY_LINE_HEIGHT_RATIO;
+
+    const MarkdownViewStyleImpl& markdownStyleImpl = GetImpl(mStyle);
+    CheckBoxStyle                taskCheckBoxStyle = CheckBoxStyle::Default();
+
+    if(markdownStyleImpl.HasTaskCheckBoxIconGenerator() ||
+       markdownStyleImpl.HasTaskCheckBoxIconColor() ||
+       markdownStyleImpl.HasTaskCheckBoxSelectedIconColor())
+    {
+      CheckBoxStyle::Builder taskCheckBoxStyleBuilder = taskCheckBoxStyle.Configure();
+      if(markdownStyleImpl.HasTaskCheckBoxIconGenerator())
+      {
+        // CheckBox invokes the generator synchronously in New(). Binding it to
+        // this list item keeps icon injection on the existing style extension point.
+        taskCheckBoxStyleBuilder.SetIconGenerator(
+          CheckBoxStyle::IconGenerator::New(this, &ListItemComponent::CreateTaskCheckBoxIcon));
+      }
+      if(markdownStyleImpl.HasTaskCheckBoxIconColor())
+      {
+        taskCheckBoxStyleBuilder.SetIconColor(markdownStyleImpl.GetTaskCheckBoxIconColor());
+      }
+      if(markdownStyleImpl.HasTaskCheckBoxSelectedIconColor())
+      {
+        taskCheckBoxStyleBuilder.SetSelectedIconColor(markdownStyleImpl.GetTaskCheckBoxSelectedIconColor());
+      }
+      taskCheckBoxStyle = std::move(taskCheckBoxStyleBuilder).Build();
+    }
+
+    mTaskRow      = NewStack(StackOrientation::HORIZONTAL, LIST_CONTENT_GAP);
+    mTaskCheckBox = Ui::CheckBox::New(taskCheckBoxStyle);
+    mTaskCheckBox.SetPadding(Insets());
+    mTaskCheckBox.SetMinimumWidth(0.0f);
+    mTaskCheckBox.SetMinimumHeight(0.0f);
+    mTaskCheckBox.SetIconWidth(fontSize);
+    mTaskCheckBox.SetIconHeight(fontSize);
+    mTaskCheckBox.SetRequestedWidth(fontSize);
+    mTaskCheckBox.SetRequestedHeight(lineHeight);
+    mTaskCheckBox.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
+    mTaskCheckBox.SetAccessibilityName(Dali::String(node.text.c_str()));
+    mTaskCheckBox.SetSelected(node.taskChecked);
+    mTaskCheckBox.SelectionChangedSignal().Connect(this, &ListItemComponent::OnTaskSelectionChanged);
+    mTaskRow.Add(mTaskCheckBox);
+  }
+
+  SelectableImageInterface CreateTaskCheckBoxIcon()
+  {
+    return GetImpl(mStyle).CreateTaskCheckBoxIcon();
+  }
+
+  void OnTaskSelectionChanged(View, bool selected, InputEvent)
+  {
+    if(mApplyingTaskSelection || !mTaskListItem || !mTaskSelectionChanged)
+    {
+      return;
+    }
+
+    const bool sourceBackedSelection = mTaskChecked;
+    mTaskChecked                     = selected;
+    if(mTaskSelectionChanged(mTaskMarkerOffset, selected))
+    {
+      return;
+    }
+
+    // A stale or invalid source binding must not leave the visual state out of
+    // sync with GetMarkdown(). Restore the last source-backed state immediately.
+    mTaskChecked           = sourceBackedSelection;
+    mApplyingTaskSelection = true;
+    mTaskCheckBox.SetSelected(mTaskChecked);
+    mApplyingTaskSelection = false;
   }
 
   void DetachTaskRow()
@@ -486,6 +556,7 @@ private:
       Ui::View textView = mTextComponent->GetView();
       mTaskRow.Remove(textView, RemovePolicy::IMMEDIATE);
       SetStackFill(textView);
+      textView.SetAccessibilityHidden(false);
     }
 
     mContentHost.Remove(mTaskRow, RemovePolicy::IMMEDIATE);
@@ -529,7 +600,7 @@ private:
 
   void UpdateTightText(const MarkdownRenderNode* previous, const MarkdownRenderNode& current, const MarkdownTextUpdate& textUpdate)
   {
-    if(current.text.empty())
+    if(!HasRenderableText(current))
     {
       if(mTextComponent)
       {
@@ -548,12 +619,20 @@ private:
       if(mTaskRowAttached)
       {
         SetStackWeightFill(mTextComponent->GetView());
+        mTextComponent->GetView().SetAccessibilityHidden(true);
         mTaskRow.Add(mTextComponent->GetView());
       }
       else
       {
         mContentHost.Insert(0u, mTextComponent->GetView());
       }
+      return;
+    }
+
+    // List marker and task selection changes are component attributes, not
+    // text changes. Avoid rebuilding an unchanged label when only those change.
+    if(previous && previous->contentHash == current.contentHash)
+    {
       return;
     }
 
@@ -577,19 +656,21 @@ private:
   Ui::Label                              mMarkerLabel;
   Ui::View                               mBulletMarker;
   Ui::StackLayout                        mTaskRow;
-  Ui::Label                              mTaskMarkerLabel;
+  Ui::CheckBox                           mTaskCheckBox;
   std::string                            mMarkerText;
-  std::string                            mTaskMarkerText;
   MarkdownListKind                       mListKind{MarkdownListKind::NONE};
   uint32_t                               mListOrdinal{0u};
   uint32_t                               mListDepth{0u};
   uint32_t                               mListMarkerColumnLength{0u};
+  uint32_t                               mTaskMarkerOffset{MARKDOWN_INVALID_SOURCE_OFFSET};
   bool                                   mTaskListItem{false};
   bool                                   mTaskChecked{false};
+  bool                                   mApplyingTaskSelection{false};
   bool                                   mIsRtl{false};
   bool                                   mMarkerLabelAttached{false};
   bool                                   mBulletMarkerAttached{false};
   bool                                   mTaskRowAttached{false};
+  MarkdownTaskSelectionChangedCallback   mTaskSelectionChanged;
   std::unique_ptr<MarkdownTextComponent> mTextComponent;
 };
 
@@ -817,7 +898,7 @@ public:
 private:
   void UpdateCellText(const MarkdownRenderNode* previous, const MarkdownRenderNode& current, const MarkdownTextUpdate& textUpdate)
   {
-    if(current.text.empty())
+    if(!HasRenderableText(current))
     {
       if(mTextComponent)
       {
@@ -877,10 +958,24 @@ public:
     return Ui::View();
   }
 
-  void Update(const MarkdownRenderNode* previous, const MarkdownRenderNode& current, const MarkdownTextUpdate&) override
+  void Update(const MarkdownRenderNode* previous, const MarkdownRenderNode& current, const MarkdownTextUpdate& textUpdate) override
   {
-    if(previous && previous->sourceUrl == current.sourceUrl && previous->altText == current.altText)
+    if(DEFAULT_IMAGE_PRESENTATION == MarkdownImagePresentation::TEXT_WITH_URL)
     {
+      MarkdownRenderNode fallback = current;
+      fallback.role               = MarkdownRenderRole::PARAGRAPH;
+
+      if(!mTextComponent)
+      {
+        mTextComponent = CreateMarkdownLabelTextComponent(mStyle);
+        mTextComponent->SetTextContent(fallback);
+        mRenderedChild = mTextComponent->GetView();
+        mRoot.Add(mRenderedChild);
+      }
+      else if(!previous || textUpdate.type != MarkdownTextUpdate::Type::UNCHANGED)
+      {
+        mTextComponent->UpdateTextContent(fallback, textUpdate);
+      }
       return;
     }
 
@@ -906,7 +1001,8 @@ public:
       fallback.role               = MarkdownRenderRole::PARAGRAPH;
       fallback.text               = current.altText;
       fallback.utf32Length        = MarkdownUtf8Length(fallback.text);
-      mTextComponent              = CreateMarkdownLabelTextComponent(mStyle);
+      fallback.inlineObjects.clear();
+      mTextComponent = CreateMarkdownLabelTextComponent(mStyle);
       mTextComponent->SetTextContent(fallback);
       mRenderedChild = mTextComponent->GetView();
     }
@@ -948,14 +1044,16 @@ public:
 
 } // namespace
 
-std::unique_ptr<MarkdownComponent> CreateMarkdownComponent(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
+std::unique_ptr<MarkdownComponent> CreateMarkdownComponent(const MarkdownRenderNode&                   node,
+                                                           const MarkdownViewStyle&                    style,
+                                                           const MarkdownTaskSelectionChangedCallback& taskSelectionChanged)
 {
   switch(node.role)
   {
     case MarkdownRenderRole::LIST:
       return std::unique_ptr<MarkdownComponent>(new StackComponent(StackOrientation::VERTICAL, 0.0f));
     case MarkdownRenderRole::LIST_ITEM:
-      return std::unique_ptr<MarkdownComponent>(new ListItemComponent(node, style));
+      return std::unique_ptr<MarkdownComponent>(new ListItemComponent(node, style, taskSelectionChanged));
     case MarkdownRenderRole::QUOTE:
       return std::unique_ptr<MarkdownComponent>(new QuoteComponent(style));
     case MarkdownRenderRole::CODE_BLOCK:

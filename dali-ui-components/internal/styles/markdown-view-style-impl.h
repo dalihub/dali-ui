@@ -22,6 +22,10 @@
 #include <dali-ui-components/public-api/styles/markdown-view-style.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 
+// EXTERNAL INCLUDES
+#include <memory>
+#include <utility>
+
 namespace Dali
 {
 namespace Ui
@@ -56,7 +60,12 @@ public:
     mCodeBlockTitleBackgroundColor(rhs.mCodeBlockTitleBackgroundColor),
     mQuoteBarColor(rhs.mQuoteBarColor),
     mThematicBreakColor(rhs.mThematicBreakColor),
-    mTableRuleColor(rhs.mTableRuleColor)
+    mTableRuleColor(rhs.mTableRuleColor),
+    mTaskCheckBoxIconGenerator(rhs.mTaskCheckBoxIconGenerator),
+    mTaskCheckBoxIconColor(rhs.mTaskCheckBoxIconColor),
+    mTaskCheckBoxSelectedIconColor(rhs.mTaskCheckBoxSelectedIconColor),
+    mHasTaskCheckBoxIconColor(rhs.mHasTaskCheckBoxIconColor),
+    mHasTaskCheckBoxSelectedIconColor(rhs.mHasTaskCheckBoxSelectedIconColor)
   {
   }
 
@@ -119,6 +128,54 @@ public:
   DALI_MARKDOWN_STYLE_COLOR_PROPERTY(TableRuleColor)
 #undef DALI_MARKDOWN_STYLE_COLOR_PROPERTY
 
+  void SetTaskCheckBoxIconGenerator(Ui::Callback<SelectableImageInterface()>&& generator)
+  {
+    mTaskCheckBoxIconGenerator = std::make_shared<Ui::Callback<SelectableImageInterface()>>(std::move(generator));
+  }
+
+  bool HasTaskCheckBoxIconGenerator() const
+  {
+    return static_cast<bool>(mTaskCheckBoxIconGenerator);
+  }
+
+  SelectableImageInterface CreateTaskCheckBoxIcon() const
+  {
+    DALI_ASSERT_ALWAYS(mTaskCheckBoxIconGenerator && "Task checkbox icon generator is not configured");
+    return mTaskCheckBoxIconGenerator->Invoke();
+  }
+
+  void SetTaskCheckBoxIconColor(const UiColor& color)
+  {
+    mTaskCheckBoxIconColor    = color;
+    mHasTaskCheckBoxIconColor = true;
+  }
+
+  bool HasTaskCheckBoxIconColor() const
+  {
+    return mHasTaskCheckBoxIconColor;
+  }
+
+  UiColor GetTaskCheckBoxIconColor() const
+  {
+    return mTaskCheckBoxIconColor;
+  }
+
+  void SetTaskCheckBoxSelectedIconColor(const UiColor& color)
+  {
+    mTaskCheckBoxSelectedIconColor    = color;
+    mHasTaskCheckBoxSelectedIconColor = true;
+  }
+
+  bool HasTaskCheckBoxSelectedIconColor() const
+  {
+    return mHasTaskCheckBoxSelectedIconColor;
+  }
+
+  UiColor GetTaskCheckBoxSelectedIconColor() const
+  {
+    return mTaskCheckBoxSelectedIconColor;
+  }
+
 protected:
   ~MarkdownViewStyleImpl() override = default;
 
@@ -151,6 +208,12 @@ private:
   UiColor mQuoteBarColor{MarkdownViewDefaults::QUOTE_BAR_COLOR};
   UiColor mThematicBreakColor{MarkdownViewDefaults::THEMATIC_BREAK_COLOR};
   UiColor mTableRuleColor{MarkdownViewDefaults::TABLE_RULE_COLOR};
+
+  std::shared_ptr<Ui::Callback<SelectableImageInterface()>> mTaskCheckBoxIconGenerator;
+  UiColor                                                   mTaskCheckBoxIconColor;
+  UiColor                                                   mTaskCheckBoxSelectedIconColor;
+  bool                                                      mHasTaskCheckBoxIconColor{false};
+  bool                                                      mHasTaskCheckBoxSelectedIconColor{false};
 };
 
 } // namespace Internal

@@ -217,6 +217,7 @@ uint64_t HashLinkRanges(const std::vector<MarkdownLinkRange>& links, uint64_t se
   {
     hash = MarkdownHashBytes(&link.start, static_cast<uint32_t>(sizeof(link.start)), hash);
     hash = MarkdownHashBytes(&link.end, static_cast<uint32_t>(sizeof(link.end)), hash);
+    hash = MarkdownHashBytes(&link.urlSuffixOrder, static_cast<uint32_t>(sizeof(link.urlSuffixOrder)), hash);
     hash = MarkdownHashString(link.href, hash);
     hash = MarkdownHashString(link.title, hash);
     hash = MarkdownHashBytes(&link.isAutolink, static_cast<uint32_t>(sizeof(link.isAutolink)), hash);
@@ -233,6 +234,7 @@ uint64_t HashInlineObjects(const std::vector<MarkdownInlineObject>& objects, uin
     hash            = MarkdownHashBytes(&type, static_cast<uint32_t>(sizeof(type)), hash);
     hash            = MarkdownHashBytes(&object.position, static_cast<uint32_t>(sizeof(object.position)), hash);
     hash            = MarkdownHashBytes(&object.length, static_cast<uint32_t>(sizeof(object.length)), hash);
+    hash            = MarkdownHashBytes(&object.urlSuffixOrder, static_cast<uint32_t>(sizeof(object.urlSuffixOrder)), hash);
     hash            = MarkdownHashString(object.sourceUrl, hash);
     hash            = MarkdownHashString(object.title, hash);
     hash            = MarkdownHashString(object.altText, hash);
@@ -439,20 +441,25 @@ public:
         const bool     hasText = end > span.start;
         if(type == MD_SPAN_A)
         {
-          node->linkRanges.push_back({span.start, end, span.href, span.title, span.isAutolink});
+          MarkdownLinkRange link;
+          link.start          = span.start;
+          link.end            = end;
+          link.urlSuffixOrder = static_cast<uint32_t>(node->linkRanges.size() + node->inlineObjects.size());
+          link.href           = span.href;
+          link.title          = span.title;
+          link.isAutolink     = span.isAutolink;
+          node->linkRanges.push_back(std::move(link));
         }
         else if(type == MD_SPAN_IMG)
         {
-          if(hasText || mPlainTextMode)
-          {
-            MarkdownInlineObject image;
-            image.position  = span.start;
-            image.length    = end - span.start;
-            image.sourceUrl = span.sourceUrl;
-            image.title     = span.title;
-            image.altText   = ExtractUtf8Range(node->text, span.start, end);
-            node->inlineObjects.push_back(std::move(image));
-          }
+          MarkdownInlineObject image;
+          image.position       = span.start;
+          image.length         = end - span.start;
+          image.urlSuffixOrder = static_cast<uint32_t>(node->linkRanges.size() + node->inlineObjects.size());
+          image.sourceUrl      = span.sourceUrl;
+          image.title          = span.title;
+          image.altText        = ExtractUtf8Range(node->text, span.start, end);
+          node->inlineObjects.push_back(std::move(image));
         }
         else if(hasText && span.flags != MARKDOWN_TEXT_STYLE_NONE)
         {
@@ -613,8 +620,9 @@ private:
         const auto* li = static_cast<const MD_BLOCK_LI_DETAIL*>(detail);
         if(li && li->is_task)
         {
-          node.taskListItem = true;
-          node.taskChecked  = li->task_mark == 'x' || li->task_mark == 'X';
+          node.taskListItem     = true;
+          node.taskChecked      = li->task_mark == 'x' || li->task_mark == 'X';
+          node.taskMarkerOffset = static_cast<uint32_t>(li->task_mark_offset);
         }
         if(node.parentIndex != MARKDOWN_INVALID_NODE_INDEX)
         {
@@ -795,7 +803,14 @@ private:
     uint64_t subtreeHash = contentHash;
     subtreeHash          = HashUint64Value(attrHash, subtreeHash);
     subtreeHash          = HashUint64Value(node.styleHash, subtreeHash);
-    subtreeHash          = HashUint64Value(static_cast<uint64_t>(childIndices[node.index].size()), subtreeHash);
+    // Keep source bindings current even when two task items render identically.
+    // The offset is intentionally excluded from attributeHash so moving otherwise
+    // unchanged source does not force its text component to rebuild.
+    if(node.taskListItem)
+    {
+      subtreeHash = HashUint64Value(static_cast<uint64_t>(node.taskMarkerOffset), subtreeHash);
+    }
+    subtreeHash = HashUint64Value(static_cast<uint64_t>(childIndices[node.index].size()), subtreeHash);
     for(uint32_t childIndex : childIndices[node.index])
     {
       subtreeHash = HashUint64Value(snapshot.nodes[childIndex].subtreeHash, subtreeHash);
@@ -1224,13 +1239,12 @@ private:
     std::vector<PlainTextSuffixEvent> suffixEvents;
     suffixEvents.reserve(node.inlineObjects.size() + node.linkRanges.size());
 
-    uint32_t suffixOrder = 0u;
     for(const auto& object : node.inlineObjects)
     {
       const uint32_t       suffixPosition = std::min(node.utf32Length, object.position + object.length);
       PlainTextSuffixEvent event;
       event.position = suffixPosition;
-      event.order    = suffixOrder++;
+      event.order    = object.urlSuffixOrder;
       event.suffix   = " [";
       event.suffix += object.sourceUrl;
       event.suffix += "]";
@@ -1241,7 +1255,7 @@ private:
       const uint32_t       suffixPosition = std::min(node.utf32Length, link.end);
       PlainTextSuffixEvent event;
       event.position = suffixPosition;
-      event.order    = suffixOrder++;
+      event.order    = link.urlSuffixOrder;
       event.suffix   = " [";
       event.suffix += link.href;
       event.suffix += "]";
