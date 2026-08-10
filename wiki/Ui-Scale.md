@@ -57,6 +57,23 @@ Calling `SetScale()` does three things atomically:
 
 <br/>
 
+### Global master switch
+
+`UiScaleManager` also exposes a process-wide **master switch** that turns dynamic scaling on or off for the whole application.
+
+```cpp
+bool enabled = UiScaleManager::Get().IsScalable();  // default: true
+
+UiScaleManager::Get().SetScalable(false);  // every view renders unscaled
+UiScaleManager::Get().SetScalable(true);   // restores the stored scale
+```
+
+While scaling is disabled, every view's effective scale resolves to `1.0` regardless of its `UiScalePolicy` (`ENABLED`, `INHERIT`, or `DISABLED`) or its position in the tree. The value set via `SetScale()` is preserved while disabled and re-applied the moment scaling is re-enabled. Flipping the switch invalidates all registered layout roots and triggers a full re-layout, exactly like `SetScale()`.
+
+> **Note:** Calling `SetScale()` while scaling is disabled stores the new value but does not re-layout; the deferred value takes effect on the next `SetScalable(true)`.
+
+<br/>
+
 ## UiScalePolicy
 
 Each `View` can override how it participates in the scale propagation via `SetUiScalePolicy()`.
@@ -167,6 +184,8 @@ For views that cache values outside the layout pass, subscribe to property chang
 |---|---|
 | Apply system-wide scale change | `UiScaleManager::Get().SetScale(newScale)` |
 | Read the current system scale | `UiScaleManager::Get().GetScale()` |
+| Turn dynamic scaling on/off globally | `UiScaleManager::Get().SetScalable(enable)` |
+| Query whether scaling is enabled | `UiScaleManager::Get().IsScalable()` |
 | Opt a subtree out of scaling | `view.SetUiScalePolicy(UiScalePolicy::DISABLED)` |
 | Force a view to always track system scale | `view.SetUiScalePolicy(UiScalePolicy::ENABLED)` |
 | Reset to default inherited behavior | `view.SetUiScalePolicy(UiScalePolicy::INHERIT)` |

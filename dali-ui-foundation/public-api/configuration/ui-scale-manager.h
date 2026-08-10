@@ -123,6 +123,26 @@ public:
    */
   void SetScale(float scale);
 
+  /**
+   * @brief Returns whether UI scaling is currently enabled.
+   *
+   * @return true if scaling is enabled (default), false if globally disabled
+   */
+  bool IsScalable() const;
+
+  /**
+   * @brief Enables or disables UI scaling globally.
+   *
+   * A process-wide master switch. When disabled, every view's effective scale
+   * resolves to 1.0 regardless of its UiScalePolicy or the value set via
+   * SetScale(); the stored scale is preserved and re-applied when re-enabled.
+   * Flipping the switch invalidates all registered layout roots and triggers
+   * a full re-layout.
+   *
+   * @param[in] enable true to enable scaling, false to disable
+   */
+  void SetScalable(bool enable);
+
 public: // Not intended for Application developers
   /// @cond internal
   explicit UiScaleManager(Internal::UiScaleManagerImpl* impl);

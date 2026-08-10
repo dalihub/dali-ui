@@ -67,6 +67,16 @@ public:
   void SetScale(float scale);
 
   /**
+   * @copydoc Dali::Ui::UiScaleManager::IsScalable
+   */
+  bool IsScalable() const;
+
+  /**
+   * @copydoc Dali::Ui::UiScaleManager::SetScalable
+   */
+  void SetScalable(bool enable);
+
+  /**
    * @brief Registers a layout root view to be invalidated on scale change.
    *
    * Called when a view becomes a layout root (no parent layout/view).
@@ -92,8 +102,13 @@ private:
   UiScaleManagerImpl& operator=(const UiScaleManagerImpl&) = delete;
   UiScaleManagerImpl& operator=(UiScaleManagerImpl&&)      = delete;
 
+  // Drops the cached scale + layout caches of every registered layout root's
+  // subtree and re-triggers layout. Shared by SetScale and SetScalable.
+  void InvalidateAllLayoutRoots();
+
 private:
   float                               mScale{1.0f};
+  bool                                mIsScalable{true};
   std::vector<WeakHandle<BaseHandle>> mLayoutRoots;
 };
 

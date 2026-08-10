@@ -55,6 +55,23 @@ UiScaleManager::Get().SetScale(1.5f);
 
 <br/>
 
+### 전역 마스터 스위치
+
+`UiScaleManager`는 애플리케이션 전체의 동적 스케일을 켜고 끄는 프로세스 전역 **마스터 스위치**도 제공합니다.
+
+```cpp
+bool enabled = UiScaleManager::Get().IsScalable();  // 기본값: true
+
+UiScaleManager::Get().SetScalable(false);  // 모든 뷰가 비스케일로 렌더링
+UiScaleManager::Get().SetScalable(true);   // 저장된 스케일 재적용
+```
+
+스케일이 꺼져 있는 동안에는 모든 뷰의 유효 스케일이 `UiScalePolicy`(`ENABLED`, `INHERIT`, `DISABLED`)나 트리 내 위치와 무관하게 `1.0`으로 결정됩니다. `SetScale()`로 설정한 값은 꺼진 동안에도 보존되며, 스케일을 다시 켜는 즉시 재적용됩니다. 스위치를 전환하면 `SetScale()`과 동일하게 등록된 모든 레이아웃 루트가 무효화되고 전체 재레이아웃이 트리거됩니다.
+
+> **참고:** 스케일이 꺼진 상태에서 `SetScale()`을 호출하면 새 값은 저장되지만 재레이아웃은 하지 않습니다. 지연된 값은 다음 `SetScalable(true)` 호출 시 반영됩니다.
+
+<br/>
+
 ## UiScalePolicy
 
 각 `View`는 `SetUiScalePolicy()`를 통해 스케일 전파에 참여하는 방식을 직접 지정할 수 있습니다.
@@ -165,6 +182,8 @@ UiScaleManager scale = 2.0
 |---|---|
 | 전체 시스템 스케일 변경 적용 | `UiScaleManager::Get().SetScale(newScale)` |
 | 현재 시스템 스케일 읽기 | `UiScaleManager::Get().GetScale()` |
+| 전역 동적 스케일 on/off | `UiScaleManager::Get().SetScalable(enable)` |
+| 스케일 활성화 여부 조회 | `UiScaleManager::Get().IsScalable()` |
 | 서브트리 스케일 해제 | `view.SetUiScalePolicy(UiScalePolicy::DISABLED)` |
 | 특정 뷰를 항상 시스템 스케일에 추적 | `view.SetUiScalePolicy(UiScalePolicy::ENABLED)` |
 | 기본 상속 동작으로 초기화 | `view.SetUiScalePolicy(UiScalePolicy::INHERIT)` |

@@ -485,6 +485,26 @@ inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
   return std::abs(a - b) < epsilon;
 }
 
+// THE single place the global UI-scale master switch is read. Every scale that
+// enters the layout system does so through one of the two calls to this function
+// in ComputeEffectiveScale() -- every other Measure/Arrange site, every
+// measure-cache key (mLastMeasureScale) and the actor-side VIEW_EFFECTIVE_SCALE
+// push obtain the scale via GetEffectiveScale(), which memoizes what
+// ComputeEffectiveScale() returns. So collapsing the system scale to 1.0f here
+// is what makes the whole system behave as unscaled, with no change at any call
+// site. The scale stored in UiScaleManager is left untouched and is re-applied
+// as soon as scaling is re-enabled.
+//
+// Reading the switch HERE rather than at the top of ComputeEffectiveScale() is
+// what keeps the two policies that never consult the system scale -- DISABLED,
+// and INHERIT with a parent -- free of the handle's refcount touch, exactly as
+// they were before the switch existed.
+inline float GetSystemScale()
+{
+  UiScaleManager manager = UiScaleManager::Get();
+  return manager.IsScalable() ? manager.GetScale() : 1.0f;
+}
+
 // Sanitize size property inputs. RequestedWidth/Height accept any
 // non-negative value plus the special values WRAP_CONTENT (-1.0f) and
 // MATCH_PARENT (-2.0f). NaN/Inf and other negative values are rejected.
@@ -4842,7 +4862,7 @@ float ViewDataImpl::ComputeEffectiveScale() const
   }
   if(mScalePolicy == UiScalePolicy::ENABLED)
   {
-    return UiScaleManager::Get().GetScale();
+    return GetSystemScale();
   }
 
   // INHERIT: walk up the parent chain (Layout first, consistent with InvalidateMeasure)
@@ -4858,8 +4878,12 @@ float ViewDataImpl::ComputeEffectiveScale() const
     return GetImpl(parentView).GetEffectiveScale();
   }
 
-  // Root: inherit from UiScaleManager
-  return UiScaleManager::Get().GetScale();
+  // Root: inherit from UiScaleManager. Every INHERIT chain terminates either
+  // here or at a DISABLED/ENABLED ancestor, so the switch read inside
+  // GetSystemScale() reaches every node in the tree exactly as a gate at the top
+  // of this function would -- an INHERIT node just resolves to 1.0f through its
+  // ancestor's already-memoized scale instead of returning it directly.
+  return GetSystemScale();
 }
 
 void ViewDataImpl::DropCachedEffectiveScale()

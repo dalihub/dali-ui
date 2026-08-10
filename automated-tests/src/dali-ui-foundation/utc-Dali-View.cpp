@@ -5759,6 +5759,52 @@ int UtcDaliViewOffSceneRootReconnectAfterScaleChangeRelayoutsP(void)
   END_TEST;
 }
 
+// The global master switch, observed through geometry. With a non-unit global
+// scale in force, turning scaling off must re-arrange the whole tree at 1.0, and
+// turning it back on must restore the stored scale. Both flips restore/re-apply
+// the same stored value (SetScale is never called while off), so the switch, not
+// the scale, is what moves the geometry here.
+int UtcDaliViewUnscaledWhenNotScalableP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale    = UiScaleManager::Get().GetScale();
+  const bool  originalScalable = UiScaleManager::Get().IsScalable();
+  UiScaleManager::Get().SetScalable(true);
+  UiScaleManager::Get().SetScale(2.0f);
+
+  View root = View::New(); // INHERIT -> global scale
+  root.SetRequestedWidth(50.0f);
+  root.SetRequestedHeight(50.0f);
+  window.Add(root);
+
+  application.SendNotification();
+  application.SendNotification();
+
+  // Scaling on, global 2.0: 50 x 2.0 = 100.
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 100.0f, TEST_LOCATION);
+
+  // Master switch off: the tree re-arranges unscaled despite the stored 2.0.
+  UiScaleManager::Get().SetScalable(false);
+  application.SendNotification();
+  application.SendNotification();
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 50.0f, TEST_LOCATION);
+
+  // Master switch back on: the preserved 2.0 is re-applied.
+  UiScaleManager::Get().SetScalable(true);
+  application.SendNotification();
+  application.SendNotification();
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 100.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  UiScaleManager::Get().SetScalable(originalScalable);
+  END_TEST;
+}
+
 // Phase 4c (C4-B1 forward pin). ApplySelfBoundsIfChanged is an UNCONDITIONAL
 // per-pass reconciliation, not a one-time apply: a re-Arrange restores a child
 // whose actor geometry was clobbered externally -- e.g. via the sanctioned

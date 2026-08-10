@@ -557,3 +557,191 @@ int UtcDaliUiScaleMeasureCacheKeyRepublishedAtNewScaleP(void)
   UiScaleManager::Get().SetScale(originalScale);
   END_TEST;
 }
+
+// ---------------------------------------------------------------------------
+// The global master switch: UiScaleManager::IsScalable / SetScalable.
+//
+// ComputeEffectiveScale is the single choke point that reads the switch, so when
+// scaling is off every view resolves to 1.0 regardless of its UiScalePolicy. The
+// stored scale is preserved so re-enabling re-applies it. These tests exercise
+// the switch through the same white-box bits the rest of this file pins.
+//
+// The switch lives in the same process-wide singleton as the scale, so each test
+// records BOTH on entry and restores BOTH before returning.
+// ---------------------------------------------------------------------------
+
+// The switch defaults to on: an untouched process scales normally.
+int UtcDaliUiScaleScalableFlagDefaultTrueP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UI scaling is enabled by default");
+
+  DALI_TEST_CHECK(UiScaleManager::Get().IsScalable());
+  END_TEST;
+}
+
+// With scaling off, every policy collapses to 1.0; re-enabling restores the
+// stored scale on both an INHERIT root and an ENABLED view.
+int UtcDaliUiScaleSetScalableFalseCollapsesEffectiveScaleP(void)
+{
+  UiTestApplication application;
+  tet_infoline("SetScalable(false) collapses every view's effective scale to 1.0 regardless of policy");
+
+  const float originalScale    = UiScaleManager::Get().GetScale();
+  const bool  originalScalable = UiScaleManager::Get().IsScalable();
+  UiScaleManager::Get().SetScalable(true);
+  UiScaleManager::Get().SetScale(2.0f);
+
+  View inheritView = View::New(); // INHERIT (default): a root inherits the global scale
+  inheritView.SetRequestedWidth(100.0f);
+  inheritView.SetRequestedHeight(100.0f);
+
+  View enabledView = View::New();
+  enabledView.SetUiScalePolicy(UiScalePolicy::ENABLED); // always tracks the global scale
+  enabledView.SetRequestedWidth(100.0f);
+  enabledView.SetRequestedHeight(100.0f);
+
+  application.GetScene().Add(inheritView);
+  application.GetScene().Add(enabledView);
+  Settle(application);
+
+  // Baseline: the switch is on, so the stored 2.0 reaches both.
+  DALI_TEST_EQUALS(GetImpl(inheritView).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(enabledView).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
+
+  // Switch off: both collapse to 1.0 even though the stored scale is still 2.0.
+  UiScaleManager::Get().SetScalable(false);
+  DALI_TEST_EQUALS(GetImpl(inheritView).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(enabledView).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
+
+  // Switch back on: the preserved 2.0 is re-applied.
+  UiScaleManager::Get().SetScalable(true);
+  DALI_TEST_EQUALS(GetImpl(inheritView).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(enabledView).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  UiScaleManager::Get().SetScalable(originalScalable);
+  END_TEST;
+}
+
+// Flipping the switch invalidates the WHOLE subtree, not just the layout root: it
+// runs the same subtree reset SetScale does. No layout pass is run in between --
+// the flip itself must clear the caches.
+int UtcDaliUiScaleSetScalableInvalidatesSubtreeCachesP(void)
+{
+  UiTestApplication application;
+  tet_infoline("SetScalable(false) alone drops the arrange cache of the whole subtree");
+
+  const float originalScale    = UiScaleManager::Get().GetScale();
+  const bool  originalScalable = UiScaleManager::Get().IsScalable();
+  UiScaleManager::Get().SetScalable(true);
+  UiScaleManager::Get().SetScale(2.0f);
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  root.Add(child);
+
+  application.GetScene().Add(root);
+  Settle(application);
+
+  DALI_TEST_CHECK(DataOf(root).IsArrangeCacheValid());
+  DALI_TEST_CHECK(DataOf(child).IsArrangeCacheValid());
+
+  // No layout pass afterwards: flipping the switch itself must clear the caches.
+  UiScaleManager::Get().SetScalable(false);
+
+  DALI_TEST_CHECK(!DataOf(root).IsArrangeCacheValid());
+  DALI_TEST_CHECK(!DataOf(child).IsArrangeCacheValid());
+
+  UiScaleManager::Get().SetScale(originalScale);
+  UiScaleManager::Get().SetScalable(originalScalable);
+  END_TEST;
+}
+
+// Re-asserting the current switch value is a no-op: it must not run the subtree
+// reset and so must leave a settled tree's caches intact.
+int UtcDaliUiScaleSetScalableNoOpWhenUnchangedP(void)
+{
+  UiTestApplication application;
+  tet_infoline("SetScalable with the current value is a no-op and preserves the layout caches");
+
+  const float originalScale    = UiScaleManager::Get().GetScale();
+  const bool  originalScalable = UiScaleManager::Get().IsScalable();
+  UiScaleManager::Get().SetScalable(true);
+  UiScaleManager::Get().SetScale(1.0f);
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  root.Add(child);
+
+  application.GetScene().Add(root);
+  Settle(application);
+
+  DALI_TEST_CHECK(DataOf(root).IsArrangeCacheValid());
+  DALI_TEST_CHECK(DataOf(child).IsArrangeCacheValid());
+
+  // Re-asserting the value the switch already holds invalidates nothing.
+  DALI_TEST_CHECK(UiScaleManager::Get().IsScalable());
+  UiScaleManager::Get().SetScalable(true);
+
+  DALI_TEST_CHECK(DataOf(root).IsArrangeCacheValid());
+  DALI_TEST_CHECK(DataOf(child).IsArrangeCacheValid());
+
+  UiScaleManager::Get().SetScale(originalScale);
+  UiScaleManager::Get().SetScalable(originalScalable);
+  END_TEST;
+}
+
+// While disabled, SetScale stores the value (GetScale reads it back) but defers
+// both the effect and the relayout: nothing moves and no cache is dropped until
+// the switch is turned back on, which then applies the stored value.
+int UtcDaliUiScaleSetScaleWhileDisabledStoresButDefersP(void)
+{
+  UiTestApplication application;
+  tet_infoline("SetScale while disabled stores the value but defers effect and relayout until re-enabled");
+
+  const float originalScale    = UiScaleManager::Get().GetScale();
+  const bool  originalScalable = UiScaleManager::Get().IsScalable();
+  UiScaleManager::Get().SetScalable(true);
+  UiScaleManager::Get().SetScale(1.0f);
+
+  View view = View::New(); // INHERIT root
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+
+  application.GetScene().Add(view);
+  Settle(application);
+
+  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
+
+  // Disabling drops the cache; re-settling re-publishes it at the unscaled result.
+  UiScaleManager::Get().SetScalable(false);
+  DALI_TEST_CHECK(!DataOf(view).IsArrangeCacheValid());
+  Settle(application);
+  DALI_TEST_CHECK(DataOf(view).IsArrangeCacheValid());
+
+  // Change the stored scale while disabled: the value is recorded (I5)...
+  UiScaleManager::Get().SetScale(2.0f);
+  DALI_TEST_EQUALS(UiScaleManager::Get().GetScale(), 2.0f, 0.001f, TEST_LOCATION);
+  // ...but with the switch off the view stays unscaled and its cache is untouched.
+  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(DataOf(view).IsArrangeCacheValid());
+
+  // Re-enabling applies the deferred 2.0.
+  UiScaleManager::Get().SetScalable(true);
+  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  UiScaleManager::Get().SetScalable(originalScalable);
+  END_TEST;
+}

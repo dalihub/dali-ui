@@ -166,7 +166,11 @@ reasoning applies to the arrange cache, with the input bounds and the effective
 layout direction as the keyed inputs.
 
 The effective scale is part of the measure cache key, so a scale change alone
-forces a re-measure.
+forces a re-measure. The effective scale is resolved in one place,
+`ViewDataImpl::ComputeEffectiveScale()`; when the process-wide UI-scale master
+switch (`UiScaleManager::SetScalable(false)`) is off it returns `1.0` for every
+view regardless of the view's `UiScalePolicy`, so the whole tree behaves as
+unscaled.
 
 The **arrange cache** uses `ArrangePolicy::IF_CHANGED` by default.
 `View::Arrange()` may serve a stored result when the input bounds, effective layout

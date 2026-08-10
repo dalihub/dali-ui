@@ -71,6 +71,38 @@ void UiScaleManagerImpl::SetScale(float scale)
 
   mScale = scale;
 
+  // While scaling is disabled the stored scale has no effect on any view's
+  // effective scale (ComputeEffectiveScale collapses to 1.0f), so applying it
+  // now would relayout the whole tree for no visible change. Store it and defer
+  // the relayout to SetScalable(true), which re-applies the stored scale.
+  if(mIsScalable)
+  {
+    InvalidateAllLayoutRoots();
+  }
+}
+
+bool UiScaleManagerImpl::IsScalable() const
+{
+  return mIsScalable;
+}
+
+void UiScaleManagerImpl::SetScalable(bool enable)
+{
+  if(mIsScalable == enable)
+  {
+    return;
+  }
+
+  mIsScalable = enable;
+
+  // Both directions move every scaled view's effective scale (enable: 1.0 ->
+  // mScale, disable: mScale -> 1.0), so a full subtree reset plus a re-layout is
+  // required either way.
+  InvalidateAllLayoutRoots();
+}
+
+void UiScaleManagerImpl::InvalidateAllLayoutRoots()
+{
   // Invalidate and re-trigger layout for all registered roots
   auto it = mLayoutRoots.begin();
   while(it != mLayoutRoots.end())
