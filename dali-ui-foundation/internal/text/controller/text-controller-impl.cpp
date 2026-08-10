@@ -609,7 +609,7 @@ void Controller::Impl::InvalidateLayoutDirectionData()
 {
   mTextUpdateInfo.mCharacterIndex             = 0u;
   mTextUpdateInfo.mNumberOfCharactersToRemove = mTextUpdateInfo.mPreviousNumberOfCharacters;
-  mTextUpdateInfo.mNumberOfCharactersToAdd    = mModel->mLogicalModel->mText.Count();
+  mTextUpdateInfo.mNumberOfCharactersToAdd    = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
 
   mTextUpdateInfo.mClearAll           = true;
   mTextUpdateInfo.mFullRelayoutNeeded = true;
