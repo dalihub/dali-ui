@@ -20,99 +20,9 @@
 namespace
 {
 
-std::string MakeCommonMarkCoverageSample(const std::string& imagePath)
-{
-  return std::string(
-           "# MarkdownView\n"
-           "\n"
-           "Setext heading\n"
-           "--------------\n"
-           "\n"
-           "This paragraph has **strong**, *emphasis*, ***nested strong emphasis***, ~~strike~~, `inline code`, entities &copy; &ndash; &hellip; &rarr;, and a hard break.  \n"
-           "The soft break between source lines should render as a space.\n"
-           "\n"
-           "- item\n"
-           "- [x] checked task\n"
-           "- [ ] unchecked task\n"
-           "  - nested item\n"
-           "    1. ordered inner\n"
-           "    2. second inner\n"
-           "\n"
-           "3. three\n"
-           "4. four\n"
-           "\n"
-           "> Quote text with **style**\n"
-           "> - list inside quote\n"
-           "\n"
-           "---\n"
-           "\n"
-           "```cpp\n"
-           "int value = 42;\n"
-           "return value;\n"
-           "```\n"
-           "\n"
-           "[DALi](https://www.tizen.org) and [second link](https://example.com)\n"
-           "\n"
-           "![local flag](") +
-         imagePath + std::string(
-                       ")\n"
-                       "\n"
-                       "Inline image fallback: icon ![alt icon](") +
-         imagePath + std::string(
-                       ") continues.\n"
-                       "\n"
-                       "| Align Left | Center | Right |\n"
-                       "|:-----------|:------:|------:|\n"
-                       "| A          | B      | C     |\n"
-                       "| 1          | 2      | 3     |\n"
-                       "\n"
-                       "Korean: 안녕하세요 MarkdownView.\n"
-                       "Emoji/ZWJ: 👩‍💻 works with text ranges.\n"
-                       "Arabic/Hebrew mixed: مرحبا DALi שלום.\n"
-                       "\n"
-                       "<b>raw html disabled</b>\n");
-}
-
-std::vector<MarkdownSampleCase> CreateMarkdownSampleCases(const std::string& imagePath)
+std::vector<MarkdownSampleCase> CreateMarkdownSampleCases()
 {
   return {
-    {"CommonMark + GFM coverage",
-     MakeCommonMarkCoverageSample(imagePath)},
-    {"Streaming style completion",
-     "Hello\n"
-     "Hello **\n"
-     "Hello **world\n"
-     "Hello **world**\n"
-     "\n"
-     "Title\n"
-     "Title\n"
-     "-----\n"
-     "\n"
-     "Text ![alt](inline.png) continues\n"},
-    {"Table completion",
-     "| A | B |\n"
-     "| A | B |\n"
-     "|---|---|\n"
-     "| 1 | 2 |\n"
-     "| 3 | 4 |\n"},
-    {"Fence completion",
-     "```cpp\n"
-     "```cpp\n"
-     "int value;\n"
-     "```cpp\n"
-     "int value;\n"
-     "```\n"},
-    {"Malformed and bidi",
-     "Open **strong text\n"
-     "\n"
-     "[missing destination]\n"
-     "\n"
-     "- outer\n"
-     "  - inner\n"
-     "\n"
-     "> اقتباس عربي مع English\n"
-     "\n"
-     "שלום DALi مرحبا\n"},
     {"hell_tpk sample 01: 🇰🇷 손흥민 (Son Heung-min)",
      "## 🇰🇷 손흥민 (Son Heung-min)\n"
      "\n"
@@ -1688,14 +1598,28 @@ std::vector<MarkdownSampleCase> CreateMarkdownSampleCases(const std::string& ima
      "\n"
      "---\n"
      "\n"
-     "- [ ] 할 일1\n"
+     "- [ ] 할 일 1\n"
+     "  1. [ ] 순서가 있는 하위 할 일\n"
+     "  2. [x] 순서가 있는 하위 완료된 일\n"
      "- [x] 완료된 일\n"
+     "\n"
+     "1. [ ] 순서가 있는 할 일 1\n"
+     "   - [ ] 하위 할 일\n"
+     "   - [x] 하위 완료된 일\n"
+     "2. [x] 순서가 있는 완료된 일\n"
      "\n"
      "---\n"
      "\n"
      "```Markdown\n"
-     "- [ ] 할 일1\n"
+     "- [ ] 할 일 1\n"
+     "  1. [ ] 순서가 있는 하위 할 일\n"
+     "  2. [x] 순서가 있는 하위 완료된 일\n"
      "- [x] 완료된 일\n"
+     "\n"
+     "1. [ ] 순서가 있는 할 일 1\n"
+     "   - [ ] 하위 할 일\n"
+     "   - [x] 하위 완료된 일\n"
+     "2. [x] 순서가 있는 완료된 일\n"
      "```\n"},
     {"hell_tpk reference 06: 🔗 링크 & 이미지",
      "\n"
@@ -1818,8 +1742,8 @@ std::vector<MarkdownSampleCase> CreateMarkdownSampleCases(const std::string& ima
 
 } // namespace
 
-const std::vector<MarkdownSampleCase>& GetMarkdownSampleCases(const std::string& imagePath)
+const std::vector<MarkdownSampleCase>& GetMarkdownSampleCases()
 {
-  static const std::vector<MarkdownSampleCase> cases = CreateMarkdownSampleCases(imagePath);
+  static const std::vector<MarkdownSampleCase> cases = CreateMarkdownSampleCases();
   return cases;
 }

@@ -34,9 +34,7 @@ DALi UI Markdown sample application.
 %define app_ro_dir       %TZ_SYS_RO_APP/%{name}/
 %define xml_file_dir     %TZ_SYS_RO_PACKAGES
 
-%define app_res_dir      %{app_ro_dir}/res/
 %define app_exe_dir      %{app_ro_dir}/bin/
-%define locale_dir       %{app_res_dir}/locale
 
 ##############################
 # Build
@@ -74,12 +72,6 @@ cd %{_builddir}/%{name}-%{version}/%{app_root_dir}
 mkdir -p %{buildroot}%{xml_file_dir}
 cp -f %{_builddir}/%{name}-%{version}/%{app_root_dir}/%{name}.xml %{buildroot}%{xml_file_dir}
 
-mkdir -p %{buildroot}%{app_res_dir}
-cp -a %{_builddir}/%{name}-%{version}/%{app_root_dir}/res/. %{buildroot}%{app_res_dir}
-
-# Source PO files are not needed at runtime. Runtime uses generated MO files.
-rm -rf %{buildroot}%{app_res_dir}/po
-
 ##############################
 # Post Install
 ##############################
@@ -101,5 +93,4 @@ exit 0
 %manifest %{app_root_dir}/%{name}.manifest
 %defattr(-,root,root,-)
 %{app_exe_dir}/markdown-view.example
-%{app_res_dir}/*
 %{xml_file_dir}/%{name}.xml

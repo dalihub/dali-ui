@@ -78,7 +78,7 @@ int NextSlowerInterval(int currentIntervalMs)
 
 const std::vector<MarkdownSampleCase>& Cases()
 {
-  return GetMarkdownSampleCases(RESOURCES_DIR "markdown_flag_kr.png");
+  return GetMarkdownSampleCases();
 }
 
 std::size_t NextUtf8CharacterEnd(const std::string& text, std::size_t offset)

@@ -27,6 +27,6 @@ struct MarkdownSampleCase
   std::string markdown;
 };
 
-const std::vector<MarkdownSampleCase>& GetMarkdownSampleCases(const std::string& imagePath);
+const std::vector<MarkdownSampleCase>& GetMarkdownSampleCases();
 
 #endif // DALI_UI_SAMPLES_MARKDOWN_SAMPLES_H
