@@ -989,6 +989,31 @@ int UtcDaliWebViewFindOptionEnumP(void)
   END_TEST;
 }
 
+int UtcDaliWebViewFindOptionBitwiseOperatorsP(void)
+{
+  // operator|
+  WebViewFindOption combined = WebViewFindOption::CASE_INSENSITIVE | WebViewFindOption::SHOW_HIGHLIGHT;
+  DALI_TEST_EQUALS(static_cast<uint32_t>(combined), (1u << 0) | (1u << 7), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::NONE | WebViewFindOption::BACKWARDS), 1u << 3, TEST_LOCATION);
+
+  // operator|=
+  WebViewFindOption accumulated = WebViewFindOption::NONE;
+  accumulated |= WebViewFindOption::AT_WORD_STARTS;
+  accumulated |= WebViewFindOption::WRAP_AROUND;
+  DALI_TEST_EQUALS(static_cast<uint32_t>(accumulated), (1u << 1) | (1u << 4), TEST_LOCATION);
+
+  // operator& : set bit remains, unset bit yields NONE
+  DALI_TEST_EQUALS(static_cast<uint32_t>(combined & WebViewFindOption::SHOW_HIGHLIGHT), 1u << 7, TEST_LOCATION);
+  DALI_TEST_CHECK((combined & WebViewFindOption::CASE_INSENSITIVE) == WebViewFindOption::CASE_INSENSITIVE);
+  DALI_TEST_CHECK((combined & WebViewFindOption::BACKWARDS) == WebViewFindOption::NONE);
+
+  // operator~ : masking out a single flag keeps the others
+  DALI_TEST_EQUALS(static_cast<uint32_t>(combined & ~WebViewFindOption::CASE_INSENSITIVE), 1u << 7, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(~WebViewFindOption::NONE), ~0u, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliWebViewPageLoadErrorCodeEnumP(void)
 {
   DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorCode::UNKNOWN), 0, TEST_LOCATION);

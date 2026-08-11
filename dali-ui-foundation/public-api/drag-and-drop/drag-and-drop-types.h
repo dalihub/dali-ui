@@ -455,21 +455,44 @@ public:
    */
   ~DragActivationEvent();
 
-  /** @brief Returns the candidate drag source. */
+  /**
+   * @brief Returns the candidate drag source.
+   */
   Dali::Ui::View GetSource() const;
-  /** @brief Returns the built-in activation mode. */
+
+  /**
+   * @brief Returns the built-in activation mode.
+   */
   DragActivationMode GetMode() const;
-  /** @brief Returns the input device class. */
+
+  /**
+   * @brief Returns the input device class.
+   */
   Device::Class::Type GetDeviceClass() const;
-  /** @brief Returns the activation origin in screen coordinates. */
+
+  /**
+   * @brief Returns the activation origin in screen coordinates.
+   */
   const Vector2& GetInitialScreenPosition() const;
-  /** @brief Returns the current pointer position in screen coordinates. */
+
+  /**
+   * @brief Returns the current pointer position in screen coordinates.
+   */
   const Vector2& GetScreenPosition() const;
-  /** @brief Returns the current pointer position in source coordinates. */
+
+  /**
+   * @brief Returns the current pointer position in source coordinates.
+   */
   const Vector2& GetSourceLocalPosition() const;
-  /** @brief Returns the current position minus the activation origin. */
+
+  /**
+   * @brief Returns the current position minus the activation origin.
+   */
   const Vector2& GetScreenDisplacement() const;
-  /** @brief Returns the payload proposed for the drag session. */
+
+  /**
+   * @brief Returns the payload proposed for the drag session.
+   */
   const DragPayload& GetPayload() const;
 
 private:
@@ -529,6 +552,7 @@ public:
 
   /** @brief Returns the source that started the drag. */
   Dali::Ui::View GetSource() const;
+
   /**
    * @brief Returns the accepted current or finishing target, or an empty handle.
    *
@@ -537,30 +561,59 @@ public:
    * evaluated.
    */
   Dali::Ui::View GetTarget() const;
+
   /**
    * @brief Returns the target being evaluated or represented by feedback.
    *
    * DropProposalCallback should use this getter to identify its candidate.
    */
   Dali::Ui::View GetCandidateTarget() const;
-  /** @brief Returns the input device class that owns the session. */
+
+  /**
+   * @brief Returns the input device class that owns the session.
+   */
   Device::Class::Type GetDeviceClass() const;
-  /** @brief Returns how the drag session was created. */
+
+  /**
+   * @brief Returns how the drag session was created.
+   */
   DragSessionOrigin GetSessionOrigin() const;
-  /** @brief Returns the current pointer position in screen coordinates. */
+
+  /**
+   * @brief Returns the current pointer position in screen coordinates.
+   */
   const Vector2& GetScreenPosition() const;
-  /** @brief Returns the drag-start pointer offset in source coordinates. */
+
+  /**
+   * @brief Returns the drag-start pointer offset in source coordinates.
+   */
   const Vector2& GetSourceGrabPosition() const;
-  /** @brief Returns the pointer position in source-parent coordinates. */
+
+  /**
+   * @brief Returns the pointer position in source-parent coordinates.
+   */
   const Vector2& GetSourceParentPosition() const;
-  /** @brief Returns the pointer position in target or candidate coordinates. */
+
+  /**
+   * @brief Returns the pointer position in target or candidate coordinates.
+   */
   const Vector2& GetTargetLocalPosition() const;
-  /** @brief Returns the pointer position in preview-parent coordinates. */
+
+  /**
+   * @brief Returns the pointer position in preview-parent coordinates.
+   */
   const Vector2& GetPreviewLocalPosition() const;
-  /** @brief Returns the normalized drag-start point within the source. */
+
+  /**
+   * @brief Returns the normalized drag-start point within the source.
+   */
   const Vector2& GetSourceAnchor() const;
-  /** @brief Returns the payload captured when the drag started. */
+
+  /**
+   * @brief Returns the payload captured when the drag started.
+   */
   const DragPayload& GetPayload() const;
+
   /**
    * @brief Returns the target's concrete selection, or a rejected proposal.
    *
@@ -569,6 +622,7 @@ public:
    * mutating application data.
    */
   const DropProposal& GetDropProposal() const;
+
   /**
    * @brief Copies the data selected by the accepted drop proposal.
    *
@@ -577,11 +631,20 @@ public:
    * exists in the payload. The output is unchanged when false is returned.
    */
   bool GetSelectedRepresentationData(Property::Value& data) const;
-  /** @brief Returns the current target feedback status. */
+
+  /**
+   * @brief Returns the current target feedback status.
+   */
   DragAndDropTargetStatus GetTargetStatus() const;
-  /** @brief Returns the current or terminal session result. */
+
+  /**
+   * @brief Returns the current or terminal session result.
+   */
   DragAndDropResult GetResult() const;
-  /** @brief Returns the cancellation reason, or NONE. */
+
+  /**
+   * @brief Returns the cancellation reason, or NONE.
+   */
   DragCancelReason GetCancelReason() const;
 
 private:
@@ -655,13 +718,24 @@ public:
    */
   ~DragAutoScrollConfiguration();
 
-  /** @brief Returns the View whose bounds define the edge zones. */
+  /**
+   * @brief Returns the View whose bounds define the edge zones.
+   */
   Dali::Ui::View GetViewport() const;
-  /** @brief Returns the horizontal and vertical edge-zone widths. */
+
+  /**
+   * @brief Returns the horizontal and vertical edge-zone widths.
+   */
   const Vector2& GetEdgeThreshold() const;
-  /** @brief Returns the maximum horizontal and vertical scroll speed. */
+
+  /**
+   * @brief Returns the maximum horizontal and vertical scroll speed.
+   */
   const Vector2& GetMaxSpeed() const;
-  /** @brief Returns the callback interval in milliseconds. */
+
+  /**
+   * @brief Returns the callback interval in milliseconds.
+   */
   uint32_t GetTickIntervalMilliseconds() const;
 
 private:
@@ -705,15 +779,29 @@ public:
    */
   ~DragAutoScrollEvent();
 
-  /** @brief Returns the current drag session snapshot. */
+  /**
+   * @brief Returns the current drag session snapshot.
+   */
   const DragAndDropEvent& GetDragEvent() const;
-  /** @brief Returns the configured viewport. */
+
+  /**
+   * @brief Returns the configured viewport.
+   */
   Dali::Ui::View GetViewport() const;
-  /** @brief Returns the per-axis edge proximity in the range [-1, 1]. */
+
+  /**
+   * @brief Returns the per-axis edge proximity in the range [-1, 1].
+   */
   const Vector2& GetEdgeIntensity() const;
-  /** @brief Returns the suggested content delta for this tick. */
+
+  /**
+   * @brief Returns the suggested content delta for this tick.
+   */
   const Vector2& GetSuggestedDelta() const;
-  /** @brief Returns the nominal tick interval in seconds. */
+
+  /**
+   * @brief Returns the nominal tick interval in seconds.
+   */
   float GetDeltaSeconds() const;
 
 private:
