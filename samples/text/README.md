@@ -18,6 +18,7 @@ This sample demonstrates DALi UI text features.
 - Typing style
 - Localization with override callback
 - Localization with PO/MO resources
+- Application-side formatting of localized PO/MO strings
 - Custom component localization
 - Localized TextGradient markup ranges
 
@@ -46,6 +47,7 @@ This sample demonstrates DALi UI text features.
 | `text-typing-style.example` | Typing style sample |
 | `text-localization.example` | Localization sample using override callback |
 | `text-localization-po.example` | Localization sample using PO/MO resources |
+| `text-formatted-localization.example` | Positional printf formatting and gettext plural lookup using localized PO/MO strings |
 | `text-localization-custom-component.example` | Custom component localization sample |
 | `text-gradient-localization.example` | Localized markup ranges with TextGradient |
 
@@ -62,6 +64,10 @@ res/po/alternate/en_US.po
 res/po/alternate/ko_KR.po
 res/po/alternate/ar_AE.po
 
+res/po/formatted/en_US.po
+res/po/formatted/ko_KR.po
+res/po/formatted/pl_PL.po
+
 res/po/gradient/en_US.po
 res/po/gradient/ko_KR.po
 res/po/gradient/ar_AE.po
@@ -77,6 +83,10 @@ res/locale/default/ar_AE/LC_MESSAGES/text-localization-po.mo
 res/locale/alternate/en_US/LC_MESSAGES/text-localization-po-alt.mo
 res/locale/alternate/ko_KR/LC_MESSAGES/text-localization-po-alt.mo
 res/locale/alternate/ar_AE/LC_MESSAGES/text-localization-po-alt.mo
+
+res/locale/formatted/en_US/LC_MESSAGES/text-formatted-localization.mo
+res/locale/formatted/ko_KR/LC_MESSAGES/text-formatted-localization.mo
+res/locale/formatted/pl_PL/LC_MESSAGES/text-formatted-localization.mo
 
 res/locale/gradient/en_US/LC_MESSAGES/text-gradient-localization-po.mo
 res/locale/gradient/ko_KR/LC_MESSAGES/text-gradient-localization-po.mo
@@ -111,6 +121,7 @@ Run localization samples:
 ~~~bash
 ./bin/text-localization.example
 ./bin/text-localization-po.example
+./bin/text-formatted-localization.example
 ./bin/text-localization-custom-component.example
 ./bin/text-gradient-localization.example
 ~~~
@@ -130,16 +141,19 @@ cmake -S .\samples -B C:\work\DALi\out\dali-ui-samples `
 
 cmake --build C:\work\DALi\out\dali-ui-samples --target `
   text-localization-po.example `
+  text-formatted-localization.example `
   text-localization-custom-component.example `
   text-gradient-localization.example
 
 $env:PATH = "C:\work\DALi\dali-env\bin;C:\Tools\DALI_VCPKG\vcpkg\installed\x64-windows\bin;$env:PATH"
 .\samples\text\bin\text-localization-po.example.exe
+.\samples\text\bin\text-formatted-localization.example.exe
 ~~~
 
-The Windows samples update gettext's `LANGUAGE` environment variable and call
-`RefreshBindings()`. Press `1`, `2`, or `3` to select `en_US`, `ko_KR`, or
-`ar_AE`.
+For host-side manual testing, the Windows samples update gettext's `LANGUAGE`
+environment variable. The formatted-localization sample uses `1`, `2`, and `3`
+for `en_US`, `ko_KR`, and `pl_PL`; samples that include `ar_AE` use `3`. This
+key-driven locale setup is not the locale-management pattern for Tizen devices.
 
 ### GBS build (Tizen)
 

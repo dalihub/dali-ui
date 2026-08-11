@@ -301,6 +301,126 @@ int UtcDaliUiLocalizationManagerGetLocalizedStringEmptyP(void)
   END_TEST;
 }
 
+// === GetLocalizedPluralString ===
+
+int UtcDaliUiLocalizationManagerGetLocalizedPluralStringNoDomainP(void)
+{
+  UiTestApplication application;
+
+  UiLocalizationManager manager = UiLocalizationManager::Get();
+  CleanupManager(manager);
+
+  // Without an effective domain, plural rules are not applied.
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 1u), Dali::String("IDS_MESSAGE"), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 2u), Dali::String("IDS_MESSAGE"), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 5u), Dali::String("IDS_MESSAGE"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiLocalizationManagerGetLocalizedPluralStringDefaultDomainP(void)
+{
+  UiTestApplication application;
+
+  UiLocalizationManager manager = UiLocalizationManager::Get();
+  CleanupManager(manager);
+
+  // A missing catalog lets dngettext provide its documented source-string
+  // fallback while still exercising default-domain resolution.
+  manager.SetDefaultDomain("dali-ui-plural-test-missing-default-domain");
+
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 1u), Dali::String("IDS_MESSAGE"), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 2u), Dali::String("IDS_PLURAL_MESSAGE"), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 5u), Dali::String("IDS_PLURAL_MESSAGE"), TEST_LOCATION);
+
+  CleanupManager(manager);
+  END_TEST;
+}
+
+int UtcDaliUiLocalizationManagerGetLocalizedPluralStringExplicitDomainP(void)
+{
+  UiTestApplication application;
+
+  UiLocalizationManager manager = UiLocalizationManager::Get();
+  CleanupManager(manager);
+  manager.SetDefaultDomain("dali-ui-plural-test-unused-default-domain");
+
+  constexpr const char* explicitDomain = "dali-ui-plural-test-missing-explicit-domain";
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 1u, explicitDomain), Dali::String("IDS_MESSAGE"), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 2u, explicitDomain), Dali::String("IDS_PLURAL_MESSAGE"), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 5u, explicitDomain), Dali::String("IDS_PLURAL_MESSAGE"), TEST_LOCATION);
+
+  CleanupManager(manager);
+  END_TEST;
+}
+
+int UtcDaliUiLocalizationManagerGetLocalizedPluralStringNonNullTerminatedP(void)
+{
+  UiTestApplication application;
+
+  UiLocalizationManager manager = UiLocalizationManager::Get();
+  CleanupManager(manager);
+
+  constexpr char resourceIdStorage[]       = "IDS_MESSAGE_TRAILING";
+  constexpr char pluralResourceIdStorage[] = "IDS_PLURAL_MESSAGE_TRAILING";
+  StringView     resourceId(resourceIdStorage, sizeof("IDS_MESSAGE") - 1u);
+  StringView     pluralResourceId(pluralResourceIdStorage, sizeof("IDS_PLURAL_MESSAGE") - 1u);
+
+  Dali::String result = manager.GetLocalizedPluralString(resourceId,
+                                                         pluralResourceId,
+                                                         2u,
+                                                         "dali-ui-plural-test-missing-domain");
+  DALI_TEST_EQUALS(result, Dali::String("IDS_PLURAL_MESSAGE"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiLocalizationManagerGetLocalizedPluralStringEmptyP(void)
+{
+  UiTestApplication application;
+
+  UiLocalizationManager manager = UiLocalizationManager::Get();
+  CleanupManager(manager);
+
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("", "IDS_PLURAL_MESSAGE", 2u), Dali::String(), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "", 2u), Dali::String(), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiLocalizationManagerGetLocalizedPluralStringBypassP(void)
+{
+  UiTestApplication application;
+
+  UiLocalizationManager manager = UiLocalizationManager::Get();
+  CleanupManager(manager);
+  manager.SetDefaultDomain("dali-ui-plural-test-missing-domain");
+  manager.SetBypassEnabled(true);
+
+  // Bypass returns the primary resource id without selecting a plural form.
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 1u), Dali::String("IDS_MESSAGE"), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 5u), Dali::String("IDS_MESSAGE"), TEST_LOCATION);
+
+  CleanupManager(manager);
+  END_TEST;
+}
+
+int UtcDaliUiLocalizationManagerGetLocalizedPluralStringDoesNotUseOverrideP(void)
+{
+  UiTestApplication application;
+
+  UiLocalizationManager manager = UiLocalizationManager::Get();
+  CleanupManager(manager);
+  manager.SetDefaultDomain("dali-ui-plural-test-missing-domain");
+  manager.SetLocalizedStringOverride(OverrideAll);
+
+  // The existing override cannot receive pluralResourceId or quantity.
+  DALI_TEST_EQUALS(manager.GetLocalizedPluralString("IDS_MESSAGE", "IDS_PLURAL_MESSAGE", 2u), Dali::String("IDS_PLURAL_MESSAGE"), TEST_LOCATION);
+
+  CleanupManager(manager);
+  END_TEST;
+}
+
 // === Bypass ===
 
 int UtcDaliUiLocalizationManagerBypassP(void)

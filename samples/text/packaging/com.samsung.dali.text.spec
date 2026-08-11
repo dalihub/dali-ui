@@ -31,11 +31,11 @@ DALi UI Text sample application.
 %setup -q
 
 %define app_root_dir     samples/text/
-%define app_ro_dir       %TZ_SYS_RO_APP/%{name}/
+%define app_ro_dir       %TZ_SYS_RO_APP/%{name}
 %define xml_file_dir     %TZ_SYS_RO_PACKAGES
 
-%define app_res_dir      %{app_ro_dir}/res/
-%define app_exe_dir      %{app_ro_dir}/bin/
+%define app_res_dir      %{app_ro_dir}/res
+%define app_exe_dir      %{app_ro_dir}/bin
 %define locale_dir       %{app_res_dir}/locale
 
 ##############################
@@ -73,9 +73,6 @@ cd %{_builddir}/%{name}-%{version}/%{app_root_dir}
 
 mkdir -p %{buildroot}%{xml_file_dir}
 cp -f %{_builddir}/%{name}-%{version}/%{app_root_dir}/%{name}.xml %{buildroot}%{xml_file_dir}
-
-mkdir -p %{buildroot}%{app_res_dir}
-cp -a %{_builddir}/%{name}-%{version}/%{app_root_dir}/res/. %{buildroot}%{app_res_dir}
 
 # Source PO files are not needed at runtime. Runtime uses generated MO files.
 rm -rf %{buildroot}%{app_res_dir}/po
@@ -134,8 +131,9 @@ exit 0
 %{app_exe_dir}/text-input-method-context.example
 %{app_exe_dir}/text-localization.example
 %{app_exe_dir}/text-localization-po.example
+%{app_exe_dir}/text-formatted-localization.example
 %{app_exe_dir}/text-localization-custom-component.example
 %{app_exe_dir}/text-gradient-localization.example
 %{app_exe_dir}/text-windows.example
-%{app_res_dir}/*
+%{app_res_dir}
 %{xml_file_dir}/%{name}.xml

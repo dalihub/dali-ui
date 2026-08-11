@@ -71,6 +71,21 @@ Dali::String UiLocalizationManager::GetLocalizedString(StringView resourceId, St
   return GetImpl(*this).GetLocalizedString(resourceId, domain);
 }
 
+Dali::String UiLocalizationManager::GetLocalizedPluralString(StringView resourceId,
+                                                             StringView pluralResourceId,
+                                                             uint32_t   quantity) const
+{
+  return GetImpl(*this).GetLocalizedPluralString(resourceId, pluralResourceId, quantity);
+}
+
+Dali::String UiLocalizationManager::GetLocalizedPluralString(StringView resourceId,
+                                                             StringView pluralResourceId,
+                                                             uint32_t   quantity,
+                                                             StringView domain) const
+{
+  return GetImpl(*this).GetLocalizedPluralString(resourceId, pluralResourceId, quantity, domain);
+}
+
 void UiLocalizationManager::SetBindingResource(BaseHandle              target,
                                                StringView              bindingId,
                                                StringView              resourceId,
