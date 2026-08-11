@@ -13,7 +13,7 @@
 ```cpp
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
