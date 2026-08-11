@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 
+// EXTERNAL INCLUDES
+#include <dali/devel-api/actors/actor-enumerations-devel.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 

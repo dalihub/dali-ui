@@ -45,7 +45,9 @@ DALI_TYPE_REGISTRATION_END()
 
 LayoutImplPtr LayoutImpl::New()
 {
-  return LayoutImplPtr(new LayoutImpl());
+  LayoutImplPtr impl(new LayoutImpl());
+
+  return impl;
 }
 
 LayoutImpl::LayoutImpl()

@@ -183,6 +183,7 @@ WebViewImpl::WebViewImpl()
   mMouseEventsEnabled(true),
   mKeyEventsEnabled(true)
 {
+  SetArrangePolicy(ArrangePolicy::ALWAYS);
   // WebEngine instance is created in the factory (New()), not here,
   // so that the caller can choose type/argc/argv.
 }
@@ -201,6 +202,34 @@ WebViewImpl::~WebViewImpl()
 
 WebViewImplPtr WebViewImpl::New()
 {
+  WebViewImplPtr impl = CreateWithEngine();
+  if(impl->mWebEngine)
+  {
+    impl->mWebEngine.Create(
+      static_cast<uint32_t>(impl->mWebViewSize.width),
+      static_cast<uint32_t>(impl->mWebViewSize.height),
+      /*locale=*/"",
+      /*timezoneId=*/"");
+  }
+  return impl;
+}
+
+WebViewImplPtr WebViewImpl::New(uint32_t argc, char** argv)
+{
+  WebViewImplPtr impl = CreateWithEngine();
+  if(impl->mWebEngine)
+  {
+    impl->mWebEngine.Create(
+      static_cast<uint32_t>(impl->mWebViewSize.width),
+      static_cast<uint32_t>(impl->mWebViewSize.height),
+      argc,
+      argv);
+  }
+  return impl;
+}
+
+WebViewImplPtr WebViewImpl::CreateWithEngine()
+{
   DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "UiConfig::Apply() must be called before WebView::New()");
 
   const WebEngineType webEngineType = UiConfig::GetCurrent().GetWebEngineType();
@@ -214,14 +243,6 @@ WebViewImplPtr WebViewImpl::New()
 
   auto* impl       = new WebViewImpl();
   impl->mWebEngine = Dali::WebEngine::New(static_cast<int32_t>(webEngineType));
-  if(impl->mWebEngine)
-  {
-    impl->mWebEngine.Create(
-      static_cast<uint32_t>(impl->mWebViewSize.width),
-      static_cast<uint32_t>(impl->mWebViewSize.height),
-      /*locale=*/"",
-      /*timezoneId=*/"");
-  }
   return impl;
 }
 
@@ -426,10 +447,6 @@ void WebViewImpl::OnInitialize()
   self.SetProperty(Actor::Property::FOCUSABLE, true);
   self.SetProperty(Actor::Property::FOCUS_ON_TOUCH, true);
 
-  // Key events are now handled via OnKeyEvent() virtual override.
-  // Touch events are handled via signal connection.
-  self.TouchEventSignal().Connect(this, &WebViewImpl::OnTouchEvent);
-
   // --- Property notifications for display-area tracking ---
   // Fire when world position, size, or scale change by at least 1 unit / 0.1 scale step.
   mPositionUpdateNotification = self.AddPropertyNotification(Actor::Property::WORLD_POSITION, StepCondition(1.0f, 1.0f));
@@ -511,6 +528,15 @@ MeasuredSize WebViewImpl::OnMeasure(float widthConstraint, float heightConstrain
   return MeasuredSize(w, h);
 }
 
+// ArrangePolicy::ALWAYS is required here and is set in the constructor. CalculateDisplayArea() reads
+// Actor::Property::SCREEN_POSITION, a function of the whole ancestor chain, and
+// SetDisplayArea() pushes it to a surface outside the actor tree
+// (mWebEngine.UpdateDisplayArea). Neither input is in the arrange cache key, and an
+// ancestor move invalidates nothing here, so serving this view a cached arrange would
+// strand the web engine's surface at a stale offset. The WORLD_POSITION
+// StepCondition(1.0f, 1.0f) notification is a coarse backstop, not an equivalent: it
+// cannot see sub-pixel-per-frame drift.
+// Pinned by UtcDaliArrangeCacheHitAlwaysFirstPartyLeavesNeverCacheP.
 LayoutRect WebViewImpl::OnArrange(const LayoutRect& bounds)
 {
   DALI_LOG_DEBUG_INFO("[WebViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f)\n",
@@ -1362,7 +1388,12 @@ bool WebViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
   return false;
 }
 
-bool WebViewImpl::OnTouchEvent(Dali::Actor /*actor*/, Dali::TouchEvent touch)
+bool WebViewImpl::HasIntrinsicTouchHandling() const
+{
+  return true;
+}
+
+bool WebViewImpl::OnTouchEvent(const Dali::TouchEvent& touch)
 {
   if(mMouseEventsEnabled && mWebEngine)
   {

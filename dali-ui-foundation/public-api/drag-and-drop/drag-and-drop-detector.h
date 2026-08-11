@@ -553,10 +553,14 @@ public:
    */
   Dali::Ui::View GetDragTarget() const;
 
-  /** @brief Returns the number of registered drag sources. */
+  /**
+   * @brief Returns the number of registered drag sources.
+   */
   uint32_t GetAttachedSourceCount() const;
 
-  /** @brief Returns the number of registered drop targets. */
+  /**
+   * @brief Returns the number of registered drop targets.
+   */
   uint32_t GetAttachedTargetCount() const;
 
   /**

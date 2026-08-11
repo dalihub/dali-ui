@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali/devel-api/object/type-registry.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -266,5 +267,122 @@ int UtcDaliViewInsertReordersMChildrenInternalP(void)
   DALI_TEST_EQUALS(LogicalIndexOf(parent, c), 0, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 2, TEST_LOCATION);
+  END_TEST;
+}
+
+// INC-I / N5. ViewImpl::OnInitialize() is virtual, so a third-party subclass that
+// overrides it without up-calling used to silently lose the child-order-changed hook:
+// the connection was made from inside OnInitialize(). It now lives in the non-virtual
+// Initialize(), alongside the layout-direction connection that was moved there earlier
+// for exactly this reason.
+//
+// Losing the hook is worse than a stale mChildren order. OnChildOrderChanged also
+// invalidates measure, so without it the measure and arrange caches stay valid and the
+// settled subtree is replayed at the OLD order instead of being laid out again.
+namespace
+{
+// The third-party mistake, reproduced exactly: OnInitialize overridden, base NOT called.
+class NonChainingViewImpl : public ViewImpl
+{
+public:
+  static IntrusivePtr<NonChainingViewImpl> New()
+  {
+    return IntrusivePtr<NonChainingViewImpl>(new NonChainingViewImpl());
+  }
+
+  int measureCount{0};
+
+protected:
+  NonChainingViewImpl()
+  : ViewImpl()
+  {
+  }
+
+  void OnInitialize() override
+  {
+    // Deliberately empty, and deliberately does NOT call ViewImpl::OnInitialize().
+  }
+
+  MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override
+  {
+    ++measureCount;
+    return ViewImpl::OnMeasure(widthConstraint, heightConstraint);
+  }
+};
+
+Dali::TypeRegistration nonChainingViewTypeReg(typeid(NonChainingViewImpl), typeid(ViewImpl), nullptr);
+
+// Mirrors View::New() exactly, including the explicit second-phase Initialize() that
+// wraps the impl in a handle first -- that call is what a third-party factory makes,
+// and it is where the hook under test is now connected.
+View CreateNonChainingView()
+{
+  IntrusivePtr<NonChainingViewImpl> impl = NonChainingViewImpl::New();
+  View                              handle(*impl);
+  impl->Initialize();
+  return handle;
+}
+
+NonChainingViewImpl& NonChainingImplOf(View view)
+{
+  return static_cast<NonChainingViewImpl&>(GetImpl(view));
+}
+} // namespace
+
+int UtcDaliViewChildOrderHookSurvivesNonChainingOnInitializeInternalP(void)
+{
+  UiTestApplication application;
+
+  View  parent     = CreateNonChainingView();
+  auto* parentImpl = &NonChainingImplOf(parent);
+  parent.SetRequestedWidth(WRAP_CONTENT);
+  parent.SetRequestedHeight(WRAP_CONTENT);
+
+  View a = View::New();
+  View b = View::New();
+  View c = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, c), 2, TEST_LOCATION);
+
+  // Settle the measure cache, then confirm it really is a cache.
+  parent.Measure(1000.0f, 1000.0f);
+  const int settledCount = parentImpl->measureCount;
+  parent.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(parentImpl->measureCount, settledCount, TEST_LOCATION);
+
+  // Reorder at the ACTOR level, bypassing the View sibling-order API. This is the only
+  // path that depends on the child-order-changed connection.
+  Dali::Actor(a).RaiseToTop();
+
+  // The logical order followed the actor order...
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, c), 1, TEST_LOCATION);
+
+  // ...and the measure cache was invalidated with it, so the next measure is real work
+  // rather than a replay of the old order.
+  parent.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(parentImpl->measureCount, settledCount + 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The same guarantee for a plain View, so the test above is comparing against a known
+// baseline rather than describing behaviour unique to the subclass.
+int UtcDaliViewChildOrderHookOnPlainViewInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  Dali::Actor(f.a).RaiseToTop();
+
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.a), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 1, TEST_LOCATION);
+
   END_TEST;
 }

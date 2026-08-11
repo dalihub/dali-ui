@@ -164,6 +164,25 @@ PendingPressManager::PendingPressManager()
   ScrollStateObserver::Get().DragStartedSignal().Connect(this, &PendingPressManager::OnDragStarted);
 }
 
+PendingPressManager::~PendingPressManager()
+{
+  // Ensure to stop timer first.
+  if(mPendingPressTimer)
+  {
+    mPendingPressTimer.Stop();
+    mPendingPressTimer.Reset();
+  }
+  if(mPendingReleaseTimer)
+  {
+    mPendingReleaseTimer.Stop();
+    mPendingReleaseTimer.Reset();
+  }
+
+  // Reset input data after timer stopped.
+  mPendingPressEvent.Reset();
+  mPendingReleaseEvent.Reset();
+}
+
 void PendingPressManager::StartPendingPressTimer()
 {
   if(!mPendingPressTimer)

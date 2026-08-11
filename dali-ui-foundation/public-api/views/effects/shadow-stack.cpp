@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <cstdint>
 #include <new>
 #include <type_traits>
 #include <vector>
@@ -35,8 +36,6 @@ namespace Ui
 class ShadowStack::Impl
 {
 public:
-  using ShadowStorage = std::aligned_storage<sizeof(Shadow), alignof(Shadow)>::type;
-
   Impl() = default;
 
   Impl(const Impl& rhs)
@@ -103,21 +102,22 @@ public:
 private:
   void ConstructFirstShadow(const Shadow& shadow)
   {
-    new(&mFirstShadowStorage) Shadow(shadow);
+    new(&mFirstShadowStorage[0]) Shadow(shadow);
     mHasFirstShadow = true;
   }
 
   Shadow& GetFirstShadow()
   {
-    return *reinterpret_cast<Shadow*>(&mFirstShadowStorage);
+    return *reinterpret_cast<Shadow*>(&mFirstShadowStorage[0]);
   }
 
   const Shadow& GetFirstShadow() const
   {
-    return *reinterpret_cast<const Shadow*>(&mFirstShadowStorage);
+    return *reinterpret_cast<const Shadow*>(&mFirstShadowStorage[0]);
   }
 
-  ShadowStorage       mFirstShadowStorage{};
+  alignas(Shadow) uint8_t mFirstShadowStorage[sizeof(Shadow)];
+
   std::vector<Shadow> mAdditionalShadows;
   bool                mHasFirstShadow{false};
 };

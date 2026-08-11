@@ -101,7 +101,9 @@ CanvasViewImpl::~CanvasViewImpl()
 
 CanvasViewImplPtr CanvasViewImpl::New(const Vector2& viewBox)
 {
-  return new CanvasViewImpl(viewBox);
+  CanvasViewImplPtr impl(new CanvasViewImpl(viewBox));
+
+  return impl;
 }
 
 // ---------------------------------------------------------------------------
@@ -378,7 +380,7 @@ void CanvasViewImpl::ApplyRasterizedImage(CanvasViewRasterizingTaskPtr task)
 // Drawable management
 // ---------------------------------------------------------------------------
 
-bool CanvasViewImpl::AddDrawable(Dali::CanvasRenderer::Drawable& drawable)
+bool CanvasViewImpl::AddDrawable(Dali::CanvasRenderer::Drawable drawable)
 {
   if(DALI_LIKELY(mCanvasRenderer))
   {
@@ -387,7 +389,7 @@ bool CanvasViewImpl::AddDrawable(Dali::CanvasRenderer::Drawable& drawable)
   return false;
 }
 
-bool CanvasViewImpl::RemoveDrawable(Dali::CanvasRenderer::Drawable& drawable)
+bool CanvasViewImpl::RemoveDrawable(Dali::CanvasRenderer::Drawable drawable)
 {
   if(DALI_LIKELY(mCanvasRenderer))
   {

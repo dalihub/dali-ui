@@ -186,7 +186,24 @@ private:
   void UpdateScaleLabel()
   {
     std::string text = "System Scale: " + Fmt(UiScaleManager::Get().GetScale());
+    text += UiScaleManager::Get().IsScalable() ? "  (scaling ON)" : "  (scaling OFF)";
     mScaleLabel.SetText(text.c_str());
+  }
+
+  // Global master switch handlers
+
+  void OnToggleScalable()
+  {
+    UiScaleManager::Get().SetScalable(!UiScaleManager::Get().IsScalable());
+    UpdateScalableButton();
+    UpdateScaleLabel();
+  }
+
+  void UpdateScalableButton()
+  {
+    const bool enabled = UiScaleManager::Get().IsScalable();
+    mScalableBtnLabel.SetText(enabled ? "Scaling: ON (tap to disable)" : "Scaling: OFF (tap to enable)");
+    mScalableBtn.SetBackgroundColor(UiColor(enabled ? 0x2E7D32 : 0xC62828));
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -268,6 +285,30 @@ private:
     inputRow.Add(mScaleInput);
     inputRow.Add(applyBtn);
     panel.Add(inputRow);
+
+    // Global master switch: enable/disable UI scaling process-wide. When OFF,
+    // every view renders at 1.0 regardless of its UiScalePolicy; the stored scale
+    // is preserved and re-applied when scaling is turned back ON.
+    mScalableBtn = InteractiveView::New();
+    mScalableBtn.SetRequestedWidth(MATCH_PARENT);
+    mScalableBtn.SetRequestedHeight(BTN_HEIGHT);
+    mScalableBtn.SetCornerRadius(Vector4(BTN_RADIUS, BTN_RADIUS, BTN_RADIUS, BTN_RADIUS));
+    mScalableBtn.SetPadding(Extents(12, 12, 6, 6));
+
+    mScalableBtnLabel = Label::New();
+    mScalableBtnLabel.SetRequestedWidth(MATCH_PARENT);
+    mScalableBtnLabel.SetRequestedHeight(MATCH_PARENT);
+    mScalableBtnLabel.SetFontSize(15.0f);
+    mScalableBtnLabel.SetTextColor(UiColor(C_WHITE));
+    mScalableBtnLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mScalableBtnLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mScalableBtn.Add(mScalableBtnLabel);
+
+    mScalableBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+      OnToggleScalable();
+    });
+    panel.Add(mScalableBtn);
+    UpdateScalableButton();
 
     return panel;
   }
@@ -1513,9 +1554,11 @@ private:
   }
 
 private:
-  Application& mApplication;
-  Label        mScaleLabel;  // updated on every ApplyScale()
-  InputField   mScaleInput;
+  Application&    mApplication;
+  Label           mScaleLabel;  // updated on every ApplyScale()
+  InputField      mScaleInput;
+  InteractiveView mScalableBtn;      // global master switch toggle
+  Label           mScalableBtnLabel; // toggle button caption (ON/OFF)
 
   // Zone G: reparent between DISABLED / INHERIT parents
   StackLayout mDisabledSlot;

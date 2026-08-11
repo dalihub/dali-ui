@@ -9,6 +9,7 @@ SET(TC_SOURCES
         utc-Dali-UniqueAny.cpp
         utc-Dali-UiStyle.cpp
         utc-Dali-ScrollView.cpp
+        utc-Dali-RecyclerView.cpp
         utc-Dali-ScrollBar.cpp
         utc-Dali-AnimatedImageVisual.cpp
         utc-Dali-BorderVisual.cpp

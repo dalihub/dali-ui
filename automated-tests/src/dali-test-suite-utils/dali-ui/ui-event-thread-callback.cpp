@@ -19,14 +19,16 @@
 
 // EXTERNAL INCLUDES
 #include <math.h>
-#include <semaphore.h>
-#include <unistd.h>
 #include <algorithm>
+#include <chrono>
 #include <climits>
+#include <condition_variable>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <ctime>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 namespace
@@ -42,14 +44,15 @@ namespace Dali
 struct EventThreadCallback::Impl
 {
   std::unique_ptr<CallbackBase> callback;
-  sem_t                         mySemaphore;
+  std::mutex                    mutex;
+  std::condition_variable       condition;
+  uint32_t                      pendingTriggers{0u};
 };
 
 EventThreadCallback::EventThreadCallback(CallbackBase* callback)
 : mImpl(new Impl())
 {
   mImpl->callback.reset(callback);
-  sem_init(&(mImpl->mySemaphore), 0, 0);
 
   gEventThreadCallbacks.push_back(this);
 }
@@ -67,24 +70,26 @@ EventThreadCallback::~EventThreadCallback()
 
 void EventThreadCallback::Trigger()
 {
-  sem_post(&(mImpl->mySemaphore));
+  {
+    std::lock_guard<std::mutex> lock(mImpl->mutex);
+    ++mImpl->pendingTriggers;
+  }
+  mImpl->condition.notify_one();
 }
 
 // returns true if timed out rather than triggered
 bool EventThreadCallback::WaitingForTrigger()
 {
-  struct timespec now;
-  clock_gettime(CLOCK_REALTIME, &now);
-  if(now.tv_nsec < 999900000) // 999, 900, 000
-    now.tv_nsec += 1000;
-  else
+  std::unique_lock<std::mutex> lock(mImpl->mutex);
+  const bool triggered = mImpl->condition.wait_for(lock, std::chrono::microseconds(1), [this]
   {
-    now.tv_sec += 1;
-    now.tv_nsec = 0;
+    return mImpl->pendingTriggers > 0u;
+  });
+  if(triggered)
+  {
+    --mImpl->pendingTriggers;
   }
-
-  int error = sem_timedwait(&(mImpl->mySemaphore), &now);
-  return error != 0; // true if timeout
+  return !triggered;
 }
 
 CallbackBase* EventThreadCallback::GetCallback()
@@ -100,7 +105,7 @@ bool WaitForEventThreadTrigger(int triggerCount, int timeoutInSeconds, int execu
 {
   struct timespec startTime;
   struct timespec now;
-  clock_gettime(CLOCK_REALTIME, &startTime);
+  timespec_get(&startTime, TIME_UTC);
   now.tv_sec  = startTime.tv_sec;
   now.tv_nsec = startTime.tv_nsec;
 
@@ -131,7 +136,7 @@ bool WaitForEventThreadTrigger(int triggerCount, int timeoutInSeconds, int execu
         }
       }
     }
-    clock_gettime(CLOCK_REALTIME, &now);
+    timespec_get(&now, TIME_UTC);
     if(now.tv_sec - startTime.tv_sec > timeoutInSeconds)
     {
       // Ensure we break out of the loop if elapsed time has passed
@@ -139,10 +144,12 @@ bool WaitForEventThreadTrigger(int triggerCount, int timeoutInSeconds, int execu
     }
   }
 
-  clock_gettime(CLOCK_REALTIME, &now);
+  timespec_get(&now, TIME_UTC);
   if(now.tv_sec > startTime.tv_sec + 1)
   {
-    fprintf(stderr, "WaitForEventThreadTrigger took %ld seconds\n", now.tv_sec - startTime.tv_sec);
+    fprintf(stderr,
+            "WaitForEventThreadTrigger took %lld seconds\n",
+            static_cast<long long>(now.tv_sec - startTime.tv_sec));
   }
   return triggerCount == 0;
 }

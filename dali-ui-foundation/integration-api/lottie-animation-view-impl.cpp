@@ -122,7 +122,9 @@ LottieAnimationViewImpl::~LottieAnimationViewImpl() = default;
 
 LottieAnimationViewImplPtr LottieAnimationViewImpl::New()
 {
-  return new LottieAnimationViewImpl();
+  LottieAnimationViewImplPtr impl(new LottieAnimationViewImpl());
+
+  return impl;
 }
 
 void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value)

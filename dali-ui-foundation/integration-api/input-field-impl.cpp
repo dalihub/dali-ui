@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
+#include <dali/devel-api/actors/actor-enumerations-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
@@ -309,7 +310,9 @@ float ClampWithMinPriority(float value, float minValue, float maxValue)
 
 InputFieldImplPtr InputFieldImpl::New()
 {
-  return InputFieldImplPtr(new InputFieldImpl());
+  InputFieldImplPtr impl(new InputFieldImpl());
+
+  return impl;
 }
 
 InputFieldImpl::InputFieldImpl()

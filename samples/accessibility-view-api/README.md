@@ -1,13 +1,16 @@
 # Accessibility View API
 
 `accessibility-view-api.example` is a self-checking sample for the direct
-accessibility API on `Dali::Ui::View` and the accessibility behavior hooks on
-`Dali::Ui::ViewImpl`. It displays a pass/fail report and writes every virtual
-action and reading-status dispatch to stdout.
+accessibility API on `Dali::Ui::View`, the accessibility behavior hooks on
+`Dali::Ui::ViewImpl`, and per-instance accessibility callbacks. It displays a
+pass/fail report and writes virtual, callback, and reading-status dispatch to
+stdout.
 
-The View implementation uses only UI public/extension APIs. It neither includes
-nor subclasses `ViewAccessible`. The assertion code queries DALi's generic
-platform `Accessible` interface only to observe the final AT-SPI-facing value.
+The sample callback subject is a plain `View`, demonstrating customization
+without subclassing `ViewImpl`. The assertion code normally queries DALi's
+generic platform `Accessible` interface. It downcasts to the integration
+`ViewAccessible` type only to drive the scroll-to-child request because that
+operation is not exposed by the generic `Accessible` interface.
 
 ## Name Resolution Contract
 
@@ -61,6 +64,13 @@ The sample checks:
   handled-empty defaults, and the legacy raw-description fallback.
 - Direct virtual dispatch for activate, escape, increment, decrement,
   scroll-to-child, pan, and zoom.
+- Per-instance activate, escape, value-change, scroll-to-child, name,
+  default-name, description, default-description, and value callbacks on a
+  plain `View` that does not use a custom `ViewImpl` subclass.
+- Callback argument forwarding, dynamic/default request behavior, and restoring
+  the existing virtual/property paths by setting empty callbacks.
+- Pan and zoom callback setters are not exercised because `dali-ui` does not
+  currently expose production accessibility entry points for those dispatchers.
 - All five reading lifecycle events through one
   `AccessibilityReadingStatusChangedSignal()` and their exact enum order.
 - The existing bool-based accessibility highlight Signal.
@@ -73,13 +83,19 @@ The sample checks:
 Every displayed result row must begin with `PASS`, and the final report status must be `Overall: PASS`.
 The stdout log must contain `virtual activate`, `virtual escape`, both value
 change directions, `virtual scroll to child`, and reading status values
-`0, 1, 2, 3, 4` in order.
+`0, 1, 2, 3, 4` in order. It must also contain `callback activate`,
+`callback escape`, both callback value-change directions, and
+`callback scroll to child`.
 
 ## Runtime Result
 
-Verified on 2026-08-04 with the Ubuntu DALi desktop environment at 480x800.
-The rendered report contained 24 `PASS` rows and `Overall: PASS`.
-The stdout sequence also confirmed all action virtuals, reading statuses 0
+The checked-in screenshot and concise output were verified on 2026-08-04 with
+the Ubuntu DALi desktop environment at 480x800, before the per-instance callback
+checks were added. That baseline report contains 24 `PASS` rows. The current
+source adds four callback rows, so a current run should contain 28 `PASS` rows
+and `Overall: PASS`.
+
+The baseline stdout sequence confirmed all action virtuals, reading statuses 0
 through 4 in order, both highlight signal states, and the focus-triggered
 highlight request. The baseline run reported an inactive accessibility bridge,
 so no visual highlight overlay was added. The screenshot below was captured

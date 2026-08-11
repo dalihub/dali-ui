@@ -32,7 +32,7 @@
 #include <dali-ui-components/public-api/chart/line-series.h>
 #include <dali-ui-components/public-api/chart/pie-series.h>
 #include <dali-ui-components/public-api/chart/scatter-series.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
 
 // EXTERNAL INCLUDES
 #include <algorithm>

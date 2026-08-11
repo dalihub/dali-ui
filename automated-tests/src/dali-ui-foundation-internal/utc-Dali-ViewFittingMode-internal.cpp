@@ -46,6 +46,12 @@ public:
   int     applyCount{0};
   Vector2 lastControlSize{Vector2::ZERO};
 
+  // When set, OnApplyFittingMode raises a NEW fitting request from INSIDE the
+  // processor run, for the first `reRequestLimit` applies. Used to pin that such a
+  // request is not swallowed by the processor's own "already registered" guard.
+  Dali::Ui::Internal::ViewDataImpl* reRequestTarget{nullptr};
+  int                               reRequestLimit{0};
+
 protected:
   FittingModeTestVisual(Dali::Ui::Internal::VisualFactoryCache& factoryCache,
                         Dali::Ui::Integration::InternalVisualType type)
@@ -84,6 +90,11 @@ protected:
   {
     ++applyCount;
     lastControlSize = controlSize;
+
+    if(reRequestTarget && applyCount <= reRequestLimit)
+    {
+      reRequestTarget->RegisterProcessorOnce();
+    }
   }
 };
 } // namespace
@@ -165,6 +176,95 @@ int UtcDaliViewFittingModeAfterLayoutSkipsText(void)
 
   DALI_TEST_EQUALS(fittingImageVisual->applyCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(fittingTextVisual->applyCount, 0, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// INC-B. The fitting processor consumes its "registered" flag BEFORE running, so a
+// fitting request raised from inside the run (ApplyFittingMode calls into arbitrary
+// visual code) re-registers and is honoured on the next pass. With the flag cleared
+// AFTER the work, RegisterProcessorOnce's guard swallowed that request and the fitting
+// stayed one step behind until some unrelated size or scale change came along.
+//
+// dali-core double-buffers its once-processor list (it swaps buffers before running
+// them), so a registration raised during the run is queued for the NEXT run, never
+// re-entered into this one. The only thing that can lose it is this view's own flag.
+int UtcDaliViewFittingModeRequestDuringProcessingIsHonoured(void)
+{
+  UiTestApplication application;
+
+  View view = View::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+
+  auto  factory      = Dali::Ui::Integration::VisualFactory::Get();
+  auto& factoryCache = Dali::Ui::GetImplementation(factory).GetFactoryCache();
+
+  auto                                fittingVisual = FittingModeTestVisual::New(factoryCache);
+  Dali::Ui::Integration::Visual::Base visual(fittingVisual.Get());
+
+  auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
+  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+
+  // Kept off-scene deliberately: no layout pass runs, so the LayoutFinished-driven
+  // fitting path cannot contribute an apply and every count below comes from the
+  // processor alone.
+  fittingVisual->reRequestTarget = &viewData;
+  fittingVisual->reRequestLimit  = 1;
+
+  // Seed the first registration.
+  viewData.SizeOrUiScaleChanged();
+  DALI_TEST_EQUALS(fittingVisual->applyCount, 0, TEST_LOCATION);
+
+  // Run #1: applies once, and raises a re-request from inside the apply.
+  application.SendNotification();
+  DALI_TEST_EQUALS(fittingVisual->applyCount, 1, TEST_LOCATION);
+
+  // Run #2: the re-request survived. Without the fix this stays at 1 forever.
+  application.SendNotification();
+  DALI_TEST_EQUALS(fittingVisual->applyCount, 2, TEST_LOCATION);
+
+  // ...and it terminates: apply #2 raised nothing, so nothing runs after it.
+  application.SendNotification();
+  application.SendNotification();
+  DALI_TEST_EQUALS(fittingVisual->applyCount, 2, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Companion to the above: with no re-request raised, one seeded request yields exactly
+// one apply. This is what makes the "2" above attributable to the re-request rather
+// than to the processor simply running on every notification.
+int UtcDaliViewFittingModeProcessorRunsOncePerRequest(void)
+{
+  UiTestApplication application;
+
+  View view = View::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+
+  auto  factory      = Dali::Ui::Integration::VisualFactory::Get();
+  auto& factoryCache = Dali::Ui::GetImplementation(factory).GetFactoryCache();
+
+  auto                                fittingVisual = FittingModeTestVisual::New(factoryCache);
+  Dali::Ui::Integration::Visual::Base visual(fittingVisual.Get());
+
+  auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
+  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+
+  viewData.SizeOrUiScaleChanged();
+
+  application.SendNotification();
+  DALI_TEST_EQUALS(fittingVisual->applyCount, 1, TEST_LOCATION);
+
+  application.SendNotification();
+  application.SendNotification();
+  DALI_TEST_EQUALS(fittingVisual->applyCount, 1, TEST_LOCATION);
+
+  // A fresh request after the run registers again and applies again.
+  viewData.SizeOrUiScaleChanged();
+  application.SendNotification();
+  DALI_TEST_EQUALS(fittingVisual->applyCount, 2, TEST_LOCATION);
 
   END_TEST;
 }

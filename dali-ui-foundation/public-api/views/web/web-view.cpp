@@ -73,6 +73,14 @@ WebView WebView::New(const Dali::String& url)
   return view;
 }
 
+WebView WebView::New(uint32_t argc, char** argv)
+{
+  Integration::WebViewImplPtr impl = Integration::WebViewImpl::New(argc, argv);
+  WebView                     view(*impl);
+  impl->Initialize();
+  return view;
+}
+
 WebView WebView::DownCast(BaseHandle handle)
 {
   return Ui::View::DownCast<WebView, Ui::Integration::WebViewImpl>(handle);

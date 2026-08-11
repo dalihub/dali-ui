@@ -54,6 +54,16 @@ void UiScaleManager::SetScale(float scale)
   GetImpl(*this).SetScale(scale);
 }
 
+bool UiScaleManager::IsScalable() const
+{
+  return GetImpl(*this).IsScalable();
+}
+
+void UiScaleManager::SetScalable(bool enable)
+{
+  GetImpl(*this).SetScalable(enable);
+}
+
 void UiScaleManager::RegisterLayoutRoot(View root)
 {
   GetImpl(*this).RegisterLayoutRoot(root);

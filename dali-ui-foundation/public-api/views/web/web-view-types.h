@@ -19,7 +19,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali/devel-api/common/bitwise-enum.h>
 #include <dali/public-api/common/dali-string.h>
 
 namespace Dali
@@ -64,6 +63,39 @@ enum class WebViewFindOption : uint32_t
   SHOW_FIND_INDICATOR                = 1 << 6,
   SHOW_HIGHLIGHT                     = 1 << 7,
 };
+
+/**
+ * @brief Bitwise OR operator for WebViewFindOption.
+ */
+inline WebViewFindOption operator|(WebViewFindOption lhs, WebViewFindOption rhs)
+{
+  return static_cast<WebViewFindOption>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+}
+
+/**
+ * @brief Bitwise OR assignment operator for WebViewFindOption.
+ */
+inline WebViewFindOption& operator|=(WebViewFindOption& lhs, WebViewFindOption rhs)
+{
+  lhs = lhs | rhs;
+  return lhs;
+}
+
+/**
+ * @brief Bitwise AND operator for WebViewFindOption.
+ */
+inline WebViewFindOption operator&(WebViewFindOption lhs, WebViewFindOption rhs)
+{
+  return static_cast<WebViewFindOption>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+}
+
+/**
+ * @brief Bitwise NOT operator for WebViewFindOption.
+ */
+inline WebViewFindOption operator~(WebViewFindOption option)
+{
+  return static_cast<WebViewFindOption>(~static_cast<uint32_t>(option));
+}
 
 /**
  * @brief Enumeration for the error code of a page load failure.
@@ -116,13 +148,5 @@ struct WebViewPageLoadError
 };
 
 } // namespace Ui
-
-// Enable bitwise OR/AND so WebViewFindOption flags can be combined.
-// (EnableBitMaskOperators must be specialized in namespace Dali.)
-template<>
-struct EnableBitMaskOperators<Dali::Ui::WebViewFindOption>
-{
-  static const bool ENABLE = true;
-};
 
 } // namespace Dali

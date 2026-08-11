@@ -184,11 +184,13 @@ public:
 
   bool OnAccessibilityRequestName(Dali::String& value) override
   {
+    ++requestNameCount;
     return ResolveRequestedValue(value, "Requested name");
   }
 
   bool OnAccessibilityRequestDefaultName(Dali::String& value) override
   {
+    ++requestDefaultNameCount;
     if(mDefaultNameMode == DefaultNameMode::FALLBACK)
     {
       value = "Ignored default name";
@@ -200,11 +202,13 @@ public:
 
   bool OnAccessibilityRequestDescription(Dali::String& value) override
   {
+    ++requestDescriptionCount;
     return ResolveRequestedValue(value, "Requested description");
   }
 
   bool OnAccessibilityRequestDefaultDescription(Dali::String& value) override
   {
+    ++requestDefaultDescriptionCount;
     if(mDefaultDescriptionMode == DefaultDescriptionMode::FALLBACK)
     {
       value = "Ignored default description";
@@ -216,6 +220,7 @@ public:
 
   bool OnAccessibilityRequestValue(Dali::String& value) override
   {
+    ++requestValueCount;
     return ResolveRequestedValue(value, "Requested value");
   }
 
@@ -226,6 +231,11 @@ public:
   int  scrollToChildCount{0};
   int  panCount{0};
   int  zoomCount{0};
+  int  requestNameCount{0};
+  int  requestDefaultNameCount{0};
+  int  requestDescriptionCount{0};
+  int  requestDefaultDescriptionCount{0};
+  int  requestValueCount{0};
   View lastScrolledChild;
 
 protected:
@@ -282,10 +292,106 @@ public:
   }
 
   View expectedView;
-  int callbackCount{0};
+  int  callbackCount{0};
   bool receivedExpectedView{true};
   bool clearWhileExecuting{false};
   bool result{false};
+};
+
+class AccessibilityCallbacksHandler
+{
+public:
+  bool OnEscape(View view)
+  {
+    RecordView(view);
+    ++escapeCount;
+    return result;
+  }
+
+  bool OnPan(View view, PanGesture /*gesture*/)
+  {
+    RecordView(view);
+    ++panCount;
+    return result;
+  }
+
+  bool OnValueChange(View view, bool isIncreased)
+  {
+    RecordView(view);
+    ++valueChangeCount;
+    valueChangeBalance += isIncreased ? 1 : -1;
+    return result;
+  }
+
+  bool OnScrollToChild(View view, View child)
+  {
+    RecordView(view);
+    ++scrollToChildCount;
+    lastScrolledChild = child;
+    return result;
+  }
+
+  bool OnZoom(View view)
+  {
+    RecordView(view);
+    ++zoomCount;
+    return result;
+  }
+
+  bool OnRequestName(View view, Dali::String& value)
+  {
+    return ResolveValue(view, value, "Callback name", requestNameCount);
+  }
+
+  bool OnRequestDefaultName(View view, Dali::String& value)
+  {
+    return ResolveValue(view, value, "Callback default name", requestDefaultNameCount);
+  }
+
+  bool OnRequestDescription(View view, Dali::String& value)
+  {
+    return ResolveValue(view, value, "Callback description", requestDescriptionCount);
+  }
+
+  bool OnRequestDefaultDescription(View view, Dali::String& value)
+  {
+    return ResolveValue(view, value, "Callback default description", requestDefaultDescriptionCount);
+  }
+
+  bool OnRequestValue(View view, Dali::String& value)
+  {
+    return ResolveValue(view, value, "Callback value", requestValueCount);
+  }
+
+  View expectedView;
+  View lastScrolledChild;
+  int  escapeCount{0};
+  int  panCount{0};
+  int  valueChangeCount{0};
+  int  valueChangeBalance{0};
+  int  scrollToChildCount{0};
+  int  zoomCount{0};
+  int  requestNameCount{0};
+  int  requestDefaultNameCount{0};
+  int  requestDescriptionCount{0};
+  int  requestDefaultDescriptionCount{0};
+  int  requestValueCount{0};
+  bool receivedExpectedView{true};
+  bool result{false};
+
+private:
+  void RecordView(View view)
+  {
+    receivedExpectedView = receivedExpectedView && view == expectedView;
+  }
+
+  bool ResolveValue(View view, Dali::String& value, const char* callbackValue, int& count)
+  {
+    RecordView(view);
+    ++count;
+    value = callbackValue;
+    return result;
+  }
 };
 
 BaseHandle CreateRegisteredTestAccessibilityView()
@@ -807,10 +913,10 @@ int UtcDaliViewAccessibilityActivateCallbackP(void)
   UiTestApplication application;
 
   TestAccessibilityViewImpl* implementation = nullptr;
-  View view = CreateTestAccessibilityView(implementation);
-  auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  View                       view           = CreateTestAccessibilityView(implementation);
+  Property::Map              actionAttributes;
 
-  DALI_TEST_CHECK(viewData.DispatchAccessibilityActivate());
+  DALI_TEST_CHECK(view.DoAction("activate", actionAttributes));
   DALI_TEST_EQUALS(implementation->activateCount, 1, TEST_LOCATION);
 
   AccessibilityActivateCallbackHandler handler;
@@ -819,24 +925,173 @@ int UtcDaliViewAccessibilityActivateCallbackP(void)
     view,
     Ui::Callback<bool(View)>::New(&handler, &AccessibilityActivateCallbackHandler::OnActivate));
 
-  DALI_TEST_CHECK(!viewData.DispatchAccessibilityActivate());
+  DALI_TEST_CHECK(!view.DoAction("activate", actionAttributes));
   DALI_TEST_EQUALS(handler.callbackCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(implementation->activateCount, 1, TEST_LOCATION);
 
   handler.result = true;
-  DALI_TEST_CHECK(viewData.DispatchAccessibilityActivate());
+  DALI_TEST_CHECK(view.DoAction("activate", actionAttributes));
   DALI_TEST_EQUALS(handler.callbackCount, 2, TEST_LOCATION);
   DALI_TEST_EQUALS(implementation->activateCount, 1, TEST_LOCATION);
 
   handler.clearWhileExecuting = true;
-  DALI_TEST_CHECK(viewData.DispatchAccessibilityActivate());
+  DALI_TEST_CHECK(view.DoAction("activate", actionAttributes));
   DALI_TEST_EQUALS(handler.callbackCount, 3, TEST_LOCATION);
   DALI_TEST_CHECK(handler.receivedExpectedView);
   DALI_TEST_EQUALS(implementation->activateCount, 1, TEST_LOCATION);
 
-  DALI_TEST_CHECK(viewData.DispatchAccessibilityActivate());
+  DALI_TEST_CHECK(view.DoAction("activate", actionAttributes));
   DALI_TEST_EQUALS(handler.callbackCount, 3, TEST_LOCATION);
   DALI_TEST_EQUALS(implementation->activateCount, 2, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityActionCallbacksP(void)
+{
+  UiTestApplication application;
+
+  TestAccessibilityViewImpl* implementation = nullptr;
+  View                       view           = CreateTestAccessibilityView(implementation);
+  View                       child          = View::New();
+  auto&                      viewData       = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  auto*                      accessible     = dynamic_cast<ViewAccessible*>(Dali::Accessibility::Accessible::Get(view));
+  DALI_TEST_CHECK(accessible);
+
+  AccessibilityCallbacksHandler handler;
+  handler.expectedView = view;
+  Extension::View::SetAccessibilityEscapeCallback(
+    view,
+    Ui::Callback<bool(View)>::New(&handler, &AccessibilityCallbacksHandler::OnEscape));
+  Extension::View::SetAccessibilityPanCallback(
+    view,
+    Ui::Callback<bool(View, PanGesture)>::New(&handler, &AccessibilityCallbacksHandler::OnPan));
+  Extension::View::SetAccessibilityValueChangeCallback(
+    view,
+    Ui::Callback<bool(View, bool)>::New(&handler, &AccessibilityCallbacksHandler::OnValueChange));
+  Extension::View::SetAccessibilityScrollToChildCallback(
+    view,
+    Ui::Callback<bool(View, View)>::New(&handler, &AccessibilityCallbacksHandler::OnScrollToChild));
+  Extension::View::SetAccessibilityZoomCallback(
+    view,
+    Ui::Callback<bool(View)>::New(&handler, &AccessibilityCallbacksHandler::OnZoom));
+
+  Property::Map actionAttributes;
+  DALI_TEST_CHECK(!view.DoAction("escape", actionAttributes));
+  DALI_TEST_CHECK(!view.DoAction("increment", actionAttributes));
+  DALI_TEST_CHECK(!accessible->ScrollToChild(child));
+  DALI_TEST_CHECK(!viewData.DispatchAccessibilityPan(PanGesture{}));
+  DALI_TEST_CHECK(!viewData.DispatchAccessibilityZoom());
+  DALI_TEST_EQUALS(implementation->escapeCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->valueChangeCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->scrollToChildCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->panCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->zoomCount, 0, TEST_LOCATION);
+
+  handler.result = true;
+  DALI_TEST_CHECK(view.DoAction("escape", actionAttributes));
+  DALI_TEST_CHECK(view.DoAction("decrement", actionAttributes));
+  DALI_TEST_CHECK(accessible->ScrollToChild(child));
+  DALI_TEST_CHECK(viewData.DispatchAccessibilityPan(PanGesture{}));
+  DALI_TEST_CHECK(viewData.DispatchAccessibilityZoom());
+  DALI_TEST_CHECK(handler.receivedExpectedView);
+  DALI_TEST_CHECK(handler.lastScrolledChild == child);
+  DALI_TEST_EQUALS(handler.escapeCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.valueChangeCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.valueChangeBalance, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.scrollToChildCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.panCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.zoomCount, 2, TEST_LOCATION);
+
+  Extension::View::SetAccessibilityEscapeCallback(view, {});
+  Extension::View::SetAccessibilityPanCallback(view, {});
+  Extension::View::SetAccessibilityValueChangeCallback(view, {});
+  Extension::View::SetAccessibilityScrollToChildCallback(view, {});
+  Extension::View::SetAccessibilityZoomCallback(view, {});
+
+  DALI_TEST_CHECK(view.DoAction("escape", actionAttributes));
+  DALI_TEST_CHECK(view.DoAction("increment", actionAttributes));
+  DALI_TEST_CHECK(accessible->ScrollToChild(child));
+  DALI_TEST_CHECK(viewData.DispatchAccessibilityPan(PanGesture{}));
+  DALI_TEST_CHECK(viewData.DispatchAccessibilityZoom());
+  DALI_TEST_EQUALS(implementation->escapeCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->valueChangeCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->scrollToChildCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->panCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->zoomCount, 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityRequestCallbacksP(void)
+{
+  UiTestApplication application;
+
+  TestAccessibilityViewImpl* implementation = nullptr;
+  View                       view           = CreateTestAccessibilityView(implementation);
+  auto*                      accessible     = dynamic_cast<ViewAccessible*>(Dali::Accessibility::Accessible::Get(view));
+  DALI_TEST_CHECK(accessible);
+
+  view.SetAccessibilityName("Property name");
+  view.SetAccessibilityDescription("Property description");
+  view.SetAccessibilityValue("Property value");
+
+  AccessibilityCallbacksHandler handler;
+  handler.expectedView = view;
+  Extension::View::SetAccessibilityRequestNameCallback(
+    view,
+    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestName));
+  Extension::View::SetAccessibilityRequestDescriptionCallback(
+    view,
+    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDescription));
+  Extension::View::SetAccessibilityRequestValueCallback(
+    view,
+    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestValue));
+
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Property name"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Property description"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Property value"), TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestNameCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDescriptionCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestValueCount, 0, TEST_LOCATION);
+
+  handler.result = true;
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Callback name"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Callback description"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Callback value"), TEST_LOCATION);
+  DALI_TEST_CHECK(handler.receivedExpectedView);
+  DALI_TEST_EQUALS(handler.requestNameCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDescriptionCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestValueCount, 2, TEST_LOCATION);
+
+  Extension::View::SetAccessibilityRequestNameCallback(view, {});
+  Extension::View::SetAccessibilityRequestDescriptionCallback(view, {});
+  Extension::View::SetAccessibilityRequestValueCallback(view, {});
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Property value"), TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestValueCount, 1, TEST_LOCATION);
+  view.SetAccessibilityName("");
+  view.SetAccessibilityDescription("");
+
+  Extension::View::SetAccessibilityRequestDefaultNameCallback(
+    view,
+    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDefaultName));
+  Extension::View::SetAccessibilityRequestDefaultDescriptionCallback(
+    view,
+    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDefaultDescription));
+
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Callback default name"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Callback default description"), TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestNameCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDescriptionCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDefaultNameCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDefaultDescriptionCount, 0, TEST_LOCATION);
+
+  Extension::View::SetAccessibilityRequestDefaultNameCallback(view, {});
+  Extension::View::SetAccessibilityRequestDefaultDescriptionCallback(view, {});
+  accessible->GetName();
+  accessible->GetDescription();
+  DALI_TEST_EQUALS(implementation->requestDefaultNameCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDefaultDescriptionCount, 1, TEST_LOCATION);
 
   END_TEST;
 }

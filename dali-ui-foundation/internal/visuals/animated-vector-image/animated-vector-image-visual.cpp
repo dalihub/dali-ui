@@ -209,6 +209,15 @@ AnimatedVectorImageVisual::~AnimatedVectorImageVisual()
     mVectorAnimationTask->ResourceReadySignal().Disconnect(this, &AnimatedVectorImageVisual::OnResourceReady);
     mVectorAnimationTask->Finalize();
   }
+
+  if(DALI_UNLIKELY(!mAnimationData.dynamicProperties.empty()))
+  {
+    // Delete owned dynamic properties callback if exist
+    for(auto&& dynamicPropertyInfo : mAnimationData.dynamicProperties)
+    {
+      delete dynamicPropertyInfo.callback;
+    }
+  }
 }
 
 void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)

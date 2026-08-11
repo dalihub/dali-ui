@@ -44,11 +44,11 @@
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable-group.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-gradient.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-linear-gradient.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-radial-gradient.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable-group.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-gradient.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-linear-gradient.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-radial-gradient.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -324,14 +324,11 @@ private:
 
     // Radial gradient rounded rect (top)
     {
-      Dali::Vector<Dali::CanvasRenderer::Gradient::ColorStop> stops;
-      stops.PushBack({0.0f, Vector4(1.0f, 0.95f, 0.2f, 1.0f)});
-      stops.PushBack({0.55f, Vector4(1.0f, 0.45f, 0.0f, 1.0f)});
-      stops.PushBack({1.0f, Vector4(0.7f, 0.0f, 0.0f, 1.0f)});
-
       Dali::CanvasRenderer::RadialGradient grad = Dali::CanvasRenderer::RadialGradient::New();
       grad.SetBounds(Vector2(W * 0.5f, H * 0.18f), W * 0.38f);
-      grad.SetColorStops(stops);
+      grad.AddColorStop(0.0f, Vector4(1.0f, 0.95f, 0.2f, 1.0f));
+      grad.AddColorStop(0.55f, Vector4(1.0f, 0.45f, 0.0f, 1.0f));
+      grad.AddColorStop(1.0f, Vector4(0.7f, 0.0f, 0.0f, 1.0f));
       grad.SetSpread(Dali::CanvasRenderer::Gradient::Spread::PAD);
 
       Dali::CanvasRenderer::Shape rect = Dali::CanvasRenderer::Shape::New();
@@ -344,13 +341,10 @@ private:
 
     // Radial gradient REFLECT spread (middle-left)
     {
-      Dali::Vector<Dali::CanvasRenderer::Gradient::ColorStop> stops;
-      stops.PushBack({0.0f, Vector4(0.2f, 0.9f, 0.5f, 1.0f)});
-      stops.PushBack({1.0f, Vector4(0.0f, 0.2f, 0.8f, 1.0f)});
-
       Dali::CanvasRenderer::RadialGradient grad = Dali::CanvasRenderer::RadialGradient::New();
       grad.SetBounds(Vector2(W * 0.26f, H * 0.56f), W * 0.15f);
-      grad.SetColorStops(stops);
+      grad.AddColorStop(0.0f, Vector4(0.2f, 0.9f, 0.5f, 1.0f));
+      grad.AddColorStop(1.0f, Vector4(0.0f, 0.2f, 0.8f, 1.0f));
       grad.SetSpread(Dali::CanvasRenderer::Gradient::Spread::REFLECT);
 
       Dali::CanvasRenderer::Shape rect = Dali::CanvasRenderer::Shape::New();
@@ -361,13 +355,10 @@ private:
 
     // Linear gradient REPEAT spread (middle-right)
     {
-      Dali::Vector<Dali::CanvasRenderer::Gradient::ColorStop> stops;
-      stops.PushBack({0.0f, Vector4(0.6f, 0.1f, 0.9f, 1.0f)});
-      stops.PushBack({1.0f, Vector4(0.1f, 0.8f, 0.9f, 1.0f)});
-
       Dali::CanvasRenderer::LinearGradient grad = Dali::CanvasRenderer::LinearGradient::New();
       grad.SetBounds(Vector2(W * 0.54f, H * 0.38f), Vector2(W * 0.54f + W * 0.08f, H * 0.38f));
-      grad.SetColorStops(stops);
+      grad.AddColorStop(0.0f, Vector4(0.6f, 0.1f, 0.9f, 1.0f));
+      grad.AddColorStop(1.0f, Vector4(0.1f, 0.8f, 0.9f, 1.0f));
       grad.SetSpread(Dali::CanvasRenderer::Gradient::Spread::REPEAT);
 
       Dali::CanvasRenderer::Shape rect = Dali::CanvasRenderer::Shape::New();
@@ -378,21 +369,15 @@ private:
 
     // Star: linear gradient fill + linear gradient stroke
     {
-      Dali::Vector<Dali::CanvasRenderer::Gradient::ColorStop> fillStops;
-      fillStops.PushBack({0.0f, Vector4(0.0f, 0.9f, 0.5f, 1.0f)});
-      fillStops.PushBack({1.0f, Vector4(0.0f, 0.3f, 1.0f, 1.0f)});
-
       Dali::CanvasRenderer::LinearGradient fillGrad = Dali::CanvasRenderer::LinearGradient::New();
       fillGrad.SetBounds(Vector2(-160.f, -160.f), Vector2(160.f, 160.f));
-      fillGrad.SetColorStops(fillStops);
-
-      Dali::Vector<Dali::CanvasRenderer::Gradient::ColorStop> strokeStops;
-      strokeStops.PushBack({0.0f, Vector4(1.0f, 0.85f, 0.0f, 1.0f)});
-      strokeStops.PushBack({1.0f, Vector4(1.0f, 0.2f, 0.2f, 1.0f)});
+      fillGrad.AddColorStop(0.0f, Vector4(0.0f, 0.9f, 0.5f, 1.0f));
+      fillGrad.AddColorStop(1.0f, Vector4(0.0f, 0.3f, 1.0f, 1.0f));
 
       Dali::CanvasRenderer::LinearGradient strokeGrad = Dali::CanvasRenderer::LinearGradient::New();
       strokeGrad.SetBounds(Vector2(-160.f, -160.f), Vector2(160.f, 160.f));
-      strokeGrad.SetColorStops(strokeStops);
+      strokeGrad.AddColorStop(0.0f, Vector4(1.0f, 0.85f, 0.0f, 1.0f));
+      strokeGrad.AddColorStop(1.0f, Vector4(1.0f, 0.2f, 0.2f, 1.0f));
 
       Dali::CanvasRenderer::Shape star = MakeStar();
       star.SetFillGradient(fillGrad);

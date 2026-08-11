@@ -51,6 +51,7 @@ public:
 
 private:
   PendingPressManager();
+  ~PendingPressManager();
 
   void StartPendingPressTimer();
   void StopPendingPressTimer();

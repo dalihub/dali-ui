@@ -1,0 +1,24 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: accessibility-localized-name 2.0.0\n"
+"PO-Revision-Date: 2026-08-08 00:00+0900\n"
+"Last-Translator: DALi UI\n"
+"Language-Team: Arabic\n"
+"Language: ar_AE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Fragment resources intentionally demonstrate application-side composition.
+msgid "IDS_WIFI"
+msgstr "واي فاي"
+
+msgid "IDS_CONNECT"
+msgstr "اتصال"
+
+msgid "IDS_COMPLETE"
+msgstr "مكتمل"
+
+# A complete sentence allows translators to control grammar and word order.
+msgid "IDS_WIFI_CONNECT_COMPLETE"
+msgstr "اكتمل اتصال واي فاي"

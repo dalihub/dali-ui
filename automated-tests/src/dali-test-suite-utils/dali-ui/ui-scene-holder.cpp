@@ -351,32 +351,32 @@ RenderTaskList SceneHolder::GetRenderTaskList()
 
 SceneHolder::KeyEventSignalType& SceneHolder::KeyEventSignal()
 {
-  return GetImplementation(*this).KeyEventSignal();
+  return GetImplementation(*this).mSceneHolderKeyEventSignal;
 }
 
 SceneHolder::KeyEventGeneratedSignalType& SceneHolder::KeyEventGeneratedSignal()
 {
-  return GetImplementation(*this).KeyEventGeneratedSignal();
+  return GetImplementation(*this).mSceneHolderKeyEventGeneratedSignal;
 }
 
 SceneHolder::TouchEventSignalType& SceneHolder::TouchEventSignal()
 {
-  return GetImplementation(*this).TouchEventSignal();
+  return GetImplementation(*this).mSceneHolderTouchEventSignal;
 }
 
 SceneHolder::WheelEventSignalType& SceneHolder::WheelEventSignal()
 {
-  return GetImplementation(*this).WheelEventSignal();
+  return GetImplementation(*this).mSceneHolderWheelEventSignal;
 }
 
 SceneHolder::WheelEventGeneratedSignalType& SceneHolder::WheelEventGeneratedSignal()
 {
-  return GetImplementation(*this).WheelEventGeneratedSignal();
+  return GetImplementation(*this).mSceneHolderWheelEventGeneratedSignal;
 }
 
 SceneHolder::FocusChangedGeneratedSignalType& SceneHolder::FocusChangedGeneratedSignal()
 {
-  return GetImplementation(*this).FocusChangedGeneratedSignal();
+  return GetImplementation(*this).mFocusChangedGeneratedSignal;
 }
 
 void SceneHolder::SetGeometryHittestEnabled(bool enabled)

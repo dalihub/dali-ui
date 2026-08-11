@@ -21,10 +21,8 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
-#include <dali/public-api/actors/actor-enumerations.h> // Dali::LayoutDirection
 #include <algorithm>
 #include <string>
-#include <utility> // std::swap
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
@@ -59,6 +57,10 @@ Ui::CheckBox CheckBoxImpl::New(CheckBoxStyle style)
   DALI_ASSERT_ALWAYS(style && "CheckBoxStyle must be initialized");
   IntrusivePtr<CheckBoxImpl> impl(new CheckBoxImpl());
   Ui::CheckBox               handle(*impl);
+
+  // The default ArrangePolicy::IF_CHANGED policy is valid here: OnArrange derives
+  // the icon and label bounds entirely from layout-tracked inputs.
+
   impl->Initialize();
   impl->ApplyInitialStyle(style);
   return handle;
@@ -439,15 +441,29 @@ LayoutRect CheckBoxImpl::OnArrange(const LayoutRect& bounds)
   float  s       = GetEffectiveScale();
   Insets padding = GetPadding();
 
-  // Under RTL we mirror the layout ourselves: swap start/end padding, and flip each child's
-  // x within the content band (mapX below). The Lottie artwork is direction-independent and is
-  // NOT mirrored; only the icon/label placement flips (icon leading, label trailing in both).
-  const bool rtl = (Self().GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT);
-  if(rtl)
-  {
-    std::swap(padding.start, padding.end);
-  }
-
+  // Children are arranged in the LOGICAL (left-to-right) frame and NOTHING is mirrored
+  // here. Right-to-left mirroring is the framework's job: ViewImpl::Arrange calls
+  // ViewDataImpl::ApplyLayoutDirection once per pass, after this producer returns, and it
+  // flips every direct child's x about this view's arranged width. Both children below are
+  // direct, non-standalone Ui::View children of Self(), so both are mirrored there --
+  // mirroring them a second time here would cancel that flip and render RIGHT_TO_LEFT
+  // exactly like LEFT_TO_RIGHT.
+  //
+  // The logical padding needs no start/end swap either: an icon placed at padding.start
+  // lands padding.start away from the RIGHT edge once the framework mirror has run, which
+  // is precisely what "start" means under RIGHT_TO_LEFT.
+  //
+  // The Lottie artwork itself is direction-independent and is never mirrored; only the
+  // icon/label placement flips (icon leading, label trailing, in both directions).
+  //
+  // The two child Measure() calls below deliberately carry NO layout-dependency owner
+  // scope. Both children are DIRECT children of this view, and this view is
+  // arrange-in-progress while they run, which is precisely the condition the
+  // ancestor-invalidation walk stops on for a direct parent -- so the walk breaks at
+  // this view either way and an explicit scope would change nothing. That matters
+  // here beyond tidiness: the scope type lives in a foundation header this project
+  // does not install, so reaching for it from the components library would make this
+  // file compile only in a same-tree build.
   float contentX = static_cast<float>(padding.start) * s;
   float contentY = static_cast<float>(padding.top) * s;
   float contentW = std::max(0.0f, bounds.width - static_cast<float>(padding.start + padding.end) * s);
@@ -459,17 +475,11 @@ LayoutRect CheckBoxImpl::OnArrange(const LayoutRect& bounds)
   float iconWVis = (mIconWidth > 0.0f) ? (mIconWidth * s) : iconHVis;
   float gapVis   = mGap * s;
 
-  // Map a left-anchored local x within the content band to the arranged x, mirroring under RTL.
-  auto mapX = [rtl, contentX, contentW](float lx, float w)
-  {
-    return rtl ? contentX + (contentW - lx - w) : contentX + lx;
-  };
-
   // Icon (leading, vertically centered).
   LayoutRect iconRect;
   iconRect.width  = iconWVis;
   iconRect.height = iconHVis;
-  iconRect.x      = mapX(0.0f, iconWVis);
+  iconRect.x      = contentX;
   iconRect.y      = contentY + std::max(0.0f, (contentH - iconHVis) * 0.5f);
 
   Ui::View iconView = mIcon.GetView(); // the composed drawing view; use public GetImpl(Ui::View&)
@@ -480,7 +490,7 @@ LayoutRect CheckBoxImpl::OnArrange(const LayoutRect& bounds)
   LayoutRect labelRect;
   labelRect.width  = mText.Empty() ? 0.0f : std::max(0.0f, contentW - iconWVis - gapVis);
   labelRect.height = contentH;
-  labelRect.x      = mapX(iconWVis + gapVis, labelRect.width);
+  labelRect.x      = contentX + iconWVis + gapVis;
   labelRect.y      = contentY;
   GetImpl(mLabel).Measure(labelRect.width, labelRect.height);
   GetImpl(mLabel).Arrange(labelRect);

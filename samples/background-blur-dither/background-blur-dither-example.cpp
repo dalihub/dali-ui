@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/dali.h>
 #include <dali/public-api/events/key-event.h>
+#include <dali/devel-api/actors/actor-enumerations-devel.h>
 
 #include <algorithm>
 #include <array>

@@ -1,5 +1,5 @@
-#include <dali/devel-api/object/type-registry-helper.h>
 #include "my-view-impl.h"
+#include <dali/devel-api/object/type-registry-helper.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -23,7 +23,15 @@ DALI_TYPE_REGISTRATION_END()
 
 IntrusivePtr<MyViewImpl> MyViewImpl::New()
 {
-  return IntrusivePtr<MyViewImpl>(new MyViewImpl());
+  IntrusivePtr<MyViewImpl> impl(new MyViewImpl());
+
+  // Arrange producer의 기본 정책은 ArrangePolicy::IF_CHANGED입니다. 이 클래스는
+  // OnArrange를 재정의하지 않으므로 별도 설정 없이 기본 배치를 캐시할 수 있습니다.
+  // OnArrange가 조상/월드 좌표(SCREEN_POSITION 등)를 읽거나 actor 트리 밖의
+  // 표면을 갱신한다면 생성자에서
+  // SetArrangePolicy(ArrangePolicy::ALWAYS)를 호출하십시오.
+
+  return impl;
 }
 
 MyViewImpl::MyViewImpl()
@@ -50,8 +58,7 @@ void MyViewImpl::ChangeBackground()
     UiColor(0xFFFF00),
     UiColor(0xFF0000),
     UiColor(0x00FF00),
-    UiColor(0x0000FF)
-  };
+    UiColor(0x0000FF)};
   static const int size = sizeof(colors) / sizeof(colors[0]);
 
   mChangeCount = (mChangeCount + 1) % size;
@@ -59,4 +66,4 @@ void MyViewImpl::ChangeBackground()
   MyView handle = MyView::DownCast(Self());
   handle.SetBackgroundColor(colors[mChangeCount]);
 }
-}
+} //namespace MyViewSample

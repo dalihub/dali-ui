@@ -80,6 +80,7 @@ DALI_TYPE_REGISTRATION_END()
 ViewImplPtr ViewImpl::New()
 {
   IntrusivePtr<ViewImpl> viewImpl = new ViewImpl();
+
   return ViewImplPtr(viewImpl);
 }
 
@@ -101,7 +102,8 @@ ViewImpl::~ViewImpl()
 
 void ViewImpl::OnInitialize()
 {
-  DevelActor::ChildOrderChangedSignal(Self()).Connect(mImpl, &Internal::ViewDataImpl::OnChildOrderChanged);
+  // Intentionally empty. The child-order-changed connection this used to make now
+  // lives in the non-virtual Initialize(); see the comment there.
 }
 
 void ViewImpl::OnDestroy()
@@ -570,6 +572,11 @@ void ViewImpl::SetArrangeCallback(ArrangeCallback callback)
   mImpl->SetArrangeCallback(std::move(callback));
 }
 
+void ViewImpl::SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy)
+{
+  mImpl->SetArrangeCallback(std::move(callback), policy);
+}
+
 void ViewImpl::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
 {
   mImpl->AttachLayoutManager(std::move(manager));
@@ -578,6 +585,16 @@ void ViewImpl::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
 LayoutManager* ViewImpl::GetLayoutManager() const
 {
   return mImpl->GetLayoutManager();
+}
+
+void ViewImpl::SetArrangePolicy(ArrangePolicy policy)
+{
+  mImpl->SetArrangePolicy(policy);
+}
+
+ArrangePolicy ViewImpl::GetArrangePolicy() const
+{
+  return mImpl->GetArrangePolicy();
 }
 
 void ViewImpl::SetLayoutTransition(LayoutTransition transition)
@@ -743,6 +760,84 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
 
 void ViewImpl::Initialize()
 {
+  // Layout direction is owned by dali-core (Actor::SetLayoutDirection, plus the
+  // inheritance walk that resolves it for a whole subtree), and the arranged x of
+  // every non-standalone child is a function of it. Nothing in the layout pipeline
+  // reports it on its own -- the RelayoutRequest core issues alongside the change
+  // drives legacy size negotiation, not the dali-ui pass -- so a direction change
+  // on a settled tree has to be turned into a layout invalidation explicitly.
+  //
+  // NO per-View signal connection is made here. That used to be the mechanism, and
+  // it cost every View a callback object, the heap BaseSignal the signal member
+  // lazily allocates on its first connect, and that signal's first connection-pool
+  // block, whether or not the application ever changed a direction. Coverage comes
+  // from four legs instead -- two mechanisms, one structural fact and one backstop:
+  //
+  //  (a) A change landing AT or ABOVE a layout root is observed by a LAZY actor
+  //      signal hook the root makes, once, in
+  //      Internal::ViewDataImpl::RegisterWithLayoutController() -- and only when it
+  //      registers there with a LIVE WINDOW, so the cost falls on on-scene layout
+  //      roots and on-scene standalone boundaries alone. Its handler walks the
+  //      subtree itself, so one connection per on-scene layout root covers every
+  //      descendant -- including the case no property hook of ours can see, a
+  //      direction set on a non-View ancestor (an intermediate Layer, or the
+  //      window's root layer).
+  //  (b) A direction property WRITE on any View is intercepted by
+  //      Internal::ViewDataImpl::OnPropertySet, which raises the same subtree walk.
+  //      LAYOUT_DIRECTION DOES reach that hook: Object::SetProperty invokes the
+  //      OnPropertySet virtual for core DEFAULT properties too, not only for
+  //      registered ones, and Actor::SetLayoutDirection routes through
+  //      SetProperty. This is what covers a mid-tree View that is not a layout
+  //      root and therefore holds no hook of its own. It is window-independent, so
+  //      it covers an off-scene write as well.
+  //  (c) A direction moved while a subtree is OFF-SCENE needs no hook at all: no
+  //      layout pass can run without a window, and the reconnection path
+  //      (Internal::ViewDataImpl::OnViewSceneConnection) drops the whole subtree's
+  //      cached measure and arrange results -- ResetSubtreeScaleAndLayoutCaches()
+  //      -- before it registers the reconnecting root, so nothing stale can be
+  //      served across the reconnection.
+  //  (d) The arrange cache's recorded-direction KEY term (mLastArrangeDirection)
+  //      remains the correctness backstop under all of it: the direction lives in
+  //      dali-core and can be moved through actors dali-ui does not own, so a
+  //      missed hook degrades to a cache MISS -- slower -- and never to an
+  //      arrangement mirrored the wrong way round.
+  //
+  // The signal ORDER this changes is immaterial. The only other subscribers to the
+  // actor's direction signal inside the library are three text controls, whose
+  // handlers raise a controller state flag (Controller::ChangedLayoutDirection),
+  // and ScrollViewImpl, whose handler forwards the direction to its scroll bar --
+  // a property write that leg (b) intercepts -- so nothing depends on whether a
+  // layout root's handler ran before or after them.
+  //
+  // One NARROW residual is accepted: core flips an added child's resolved
+  // direction at Add() time AFTER OnChildAdded has already dropped the child's
+  // caches and raised its dirty bits. A nested synchronous layout pass driven
+  // from a child-added handler can therefore publish under the OLD direction with
+  // nothing left to re-schedule. The recorded-direction key (leg (d)) then forces
+  // a MISS on the next scheduled pass, so geometry is never wrong -- the update is
+  // merely deferred to that pass.
+  //
+  // While the direction hook did live here, it was here rather than in
+  // OnInitialize() because OnInitialize is virtual: a third-party subclass that
+  // overrode it without up-calling would silently lose the hook. That is the
+  // reason the child-order connection below still sits in this non-virtual,
+  // single-entry-point second phase.
+
+  // Child order is the other actor-owned input to layout that only dali-core can
+  // report. OnChildOrderChanged() rebuilds mChildren in actor order, tags the
+  // reorder for transitions and invalidates measure; without it a RaiseToTop() or
+  // LowerBelow() leaves mChildren in the old order AND leaves the measure/arrange
+  // caches valid, so the settled subtree is replayed at the stale order instead of
+  // being re-laid-out.
+  //
+  // Connected HERE and not in OnInitialize(), for exactly the reason given above
+  // for the direction signal: OnInitialize is virtual, and a third-party subclass
+  // that overrides it without up-calling would silently lose the hook. This is
+  // also strictly better placed than before -- the connection is now live BEFORE
+  // OnInitialize() runs below, so children a subclass adds from OnInitialize() are
+  // covered too.
+  DevelActor::ChildOrderChangedSignal(Self()).Connect(mImpl, &Internal::ViewDataImpl::OnChildOrderChanged);
+
   if(mImpl->AreVisualsEnabled())
   {
     mImpl->InitializeVisualData();

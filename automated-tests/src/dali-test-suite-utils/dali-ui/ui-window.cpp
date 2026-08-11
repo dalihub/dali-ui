@@ -55,8 +55,8 @@ Window::Window(const PositionSize& positionSize)
   mWheelEventSignal(),
   mSlotDelegate(this)
 {
-  SceneHolder::KeyEventSignal().Connect(mSlotDelegate, &Window::OnKeyEvent);
-  SceneHolder::TouchEventSignal().Connect(mSlotDelegate, &Window::OnTouchEvent);
+  mSceneHolderKeyEventSignal.Connect(mSlotDelegate, &Window::OnKeyEvent);
+  mSceneHolderTouchEventSignal.Connect(mSlotDelegate, &Window::OnTouchEvent);
 }
 
 Window* Window::New(const PositionSize& positionSize, const Dali::String& name, const Dali::String& className, bool isTransparent)
@@ -173,6 +173,16 @@ Window Window::DownCast(BaseHandle handle)
 Window::Window(Internal::Adaptor::Window* window)
 : BaseHandle(window)
 {
+}
+
+void Window::SetPositionSize(PositionSize positionSize)
+{
+  GetImplementation(*this).SetPositionSize(positionSize);
+}
+
+PositionSize Window::GetPositionSize() const
+{
+  return GetImplementation(*this).GetPositionSize();
 }
 
 Dali::Integration::Scene Window::GetScene()

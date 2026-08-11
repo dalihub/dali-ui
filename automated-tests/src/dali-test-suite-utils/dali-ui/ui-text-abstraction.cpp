@@ -80,6 +80,11 @@ public:
   {
   }
 
+  static TextAbstraction::BidirectionalSupport New()
+  {
+    return TextAbstraction::BidirectionalSupport(new BidirectionalSupport);
+  }
+
   static TextAbstraction::BidirectionalSupport Get()
   {
     TextAbstraction::BidirectionalSupport bidirectionalSupportHandle;
@@ -97,7 +102,7 @@ public:
       }
       else // create and register the object
       {
-        bidirectionalSupportHandle = TextAbstraction::BidirectionalSupport(new BidirectionalSupport);
+        bidirectionalSupportHandle = Dali::TextAbstraction::Internal::BidirectionalSupport::New();
         service.Register(typeid(bidirectionalSupportHandle), bidirectionalSupportHandle);
       }
     }
@@ -134,10 +139,19 @@ public:
 class FontClient : public BaseObject
 {
 public:
-  FontClient() = default;
+  FontClient()
+  : mIsAtlasLimitationEnabled(TextAbstraction::FontClient::DEFAULT_ATLAS_LIMITATION_ENABLED),
+    mCurrentMaximumBlockSizeFitInAtlas(TextAbstraction::FontClient::MAX_SIZE_FIT_IN_ATLAS)
+  {
+  }
 
   ~FontClient()
   {
+  }
+
+  static Dali::TextAbstraction::FontClient New()
+  {
+    return Dali::TextAbstraction::FontClient(new FontClient);
   }
 
   static Dali::TextAbstraction::FontClient Get()
@@ -157,7 +171,7 @@ public:
       }
       else // create and register the object
       {
-        fontClientHandle = Dali::TextAbstraction::FontClient(new FontClient);
+        fontClientHandle = Dali::TextAbstraction::Internal::FontClient::New();
         service.Register(typeid(fontClientHandle), fontClientHandle);
       }
     }
@@ -374,6 +388,50 @@ public:
   {
     return false;
   }
+
+  void EnableAtlasLimitation(bool enabled)
+  {
+    mIsAtlasLimitationEnabled = enabled;
+  }
+
+  bool IsAtlasLimitationEnabled() const
+  {
+    return mIsAtlasLimitationEnabled;
+  }
+
+  Size GetMaximumTextAtlasSize() const
+  {
+    return TextAbstraction::FontClient::MAX_TEXT_ATLAS_SIZE;
+  }
+
+  Size GetDefaultTextAtlasSize() const
+  {
+    return TextAbstraction::FontClient::DEFAULT_TEXT_ATLAS_SIZE;
+  }
+
+  Size GetCurrentMaximumBlockSizeFitInAtlas() const
+  {
+    return mCurrentMaximumBlockSizeFitInAtlas;
+  }
+
+  bool SetCurrentMaximumBlockSizeFitInAtlas(const Size& currentMaximumBlockSizeFitInAtlas)
+  {
+    bool            isChanged        = false;
+    const Size&     maxTextAtlasSize = TextAbstraction::FontClient::MAX_TEXT_ATLAS_SIZE;
+    const uint16_t& padding          = TextAbstraction::FontClient::PADDING_TEXT_ATLAS_BLOCK;
+
+    if(currentMaximumBlockSizeFitInAtlas.width <= maxTextAtlasSize.width - padding && currentMaximumBlockSizeFitInAtlas.height <= maxTextAtlasSize.height - padding)
+    {
+      mCurrentMaximumBlockSizeFitInAtlas = currentMaximumBlockSizeFitInAtlas;
+      isChanged                          = true;
+    }
+
+    return isChanged;
+  }
+
+private:
+  bool mIsAtlasLimitationEnabled;
+  Size mCurrentMaximumBlockSizeFitInAtlas;
 }; // class FontClient
 
 class Shaping : public BaseObject
@@ -389,6 +447,11 @@ public:
   ~Shaping()
   {
     delete[] mText;
+  }
+
+  static Dali::TextAbstraction::Shaping New()
+  {
+    return Dali::TextAbstraction::Shaping(new Shaping);
   }
 
   static Dali::TextAbstraction::Shaping Get()
@@ -408,7 +471,7 @@ public:
       }
       else // create and register the object
       {
-        shapingHandle = Dali::TextAbstraction::Shaping(new Shaping);
+        shapingHandle = Dali::TextAbstraction::Internal::Shaping::New();
         service.Register(typeid(shapingHandle), shapingHandle);
       }
     }
@@ -523,6 +586,11 @@ BidirectionalSupport BidirectionalSupport::Get()
   return Internal::BidirectionalSupport::Get();
 }
 
+BidirectionalSupport BidirectionalSupport::New()
+{
+  return Internal::BidirectionalSupport::New();
+}
+
 BidiInfoIndex BidirectionalSupport::CreateInfo(const Character* const paragraph,
                                                Length                 numberOfCharacters,
                                                bool                   matchSystemLanguageDirection,
@@ -566,6 +634,11 @@ void BidirectionalSupport::GetCharactersDirection(BidiInfoIndex       bidiInfoIn
 FontClient FontClient::Get()
 {
   return Internal::FontClient::Get();
+}
+
+FontClient FontClient::New()
+{
+  return Internal::FontClient::New();
 }
 
 FontClient::FontClient()
@@ -766,7 +839,6 @@ GlyphIndex FontClient::CreateEmbeddedItem(const EmbeddedItemDescription& descrip
 {
   return GetImplementation(*this).CreateEmbeddedItem(description, pixelFormat);
 }
-
 const GlyphInfo& FontClient::GetEllipsisGlyph(PointSize26Dot6 pointSize)
 {
   return GetImplementation(*this).GetEllipsisGlyph(pointSize);
@@ -802,6 +874,36 @@ bool FontClient::IsRenderableColrV1Font(FontId fontId)
 bool FontClient::IsRenderableColrV1Glyph(FontId fontId, GlyphIndex glyphIndex)
 {
   return GetImplementation(*this).IsRenderableColrV1Glyph(fontId, glyphIndex);
+}
+
+void FontClient::EnableAtlasLimitation(bool enabled)
+{
+  GetImplementation(*this).EnableAtlasLimitation(enabled);
+}
+
+bool FontClient::IsAtlasLimitationEnabled() const
+{
+  return GetImplementation(*this).IsAtlasLimitationEnabled();
+}
+
+Size FontClient::GetMaximumTextAtlasSize() const
+{
+  return GetImplementation(*this).GetMaximumTextAtlasSize();
+}
+
+Size FontClient::GetDefaultTextAtlasSize() const
+{
+  return GetImplementation(*this).GetDefaultTextAtlasSize();
+}
+
+Size FontClient::GetCurrentMaximumBlockSizeFitInAtlas() const
+{
+  return GetImplementation(*this).GetCurrentMaximumBlockSizeFitInAtlas();
+}
+
+bool FontClient::SetCurrentMaximumBlockSizeFitInAtlas(const Size& currentMaximumBlockSizeFitInAtlas)
+{
+  return GetImplementation(*this).SetCurrentMaximumBlockSizeFitInAtlas(currentMaximumBlockSizeFitInAtlas);
 }
 
 FontClient::FontClient(Internal::FontClient* internal)
@@ -963,7 +1065,7 @@ Shaping Shaping::Get()
 
 Shaping Shaping::New()
 {
-  return Shaping(new TextAbstraction::Internal::Shaping);
+  return TextAbstraction::Internal::Shaping::New();
 }
 
 Shaping::Shaping()
