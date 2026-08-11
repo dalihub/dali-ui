@@ -30,6 +30,7 @@ SET(TC_SOURCES
     utc-Dali-WindowsWarningCoverage-internal.cpp
     utc-Dali-ViewAccessibility-internal.cpp
     utc-Dali-Accessibility-Text-internal.cpp
+    utc-Dali-ImageView-internal.cpp
     utc-Dali-ViewFittingMode-internal.cpp
     utc-Dali-ViewNaturalSize-internal.cpp
     utc-Dali-View-order-internal.cpp

@@ -403,9 +403,13 @@ void ImageViewImpl::SetResourceUrl(const Dali::String& url)
     // Re-show placeholder while new image loads
     UpdatePlaceholderVisual();
 
-    if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE)
+    const bool hasExplicitSize = GetRequestedWidth() > 0.0f && GetRequestedHeight() > 0.0f;
+
+    if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE || hasExplicitSize)
     {
-      // Start loading immediately regardless of scene attachment.
+      // A fixed size cannot change when the new image's natural size becomes known,
+      // so rebuild the visual without scheduling an otherwise redundant measure.
+      // IMMEDIATE keeps its existing behavior of starting the load right away.
       mVisualDirty = false;
       UpdateVisual();
     }
@@ -748,8 +752,8 @@ void ImageViewImpl::OnInitialize()
 {
   ViewImpl::OnInitialize();
 
-  // Connect to View::ResourceReadySignal to handle placeholder removal and aspect-ratio re-layout
-  // when the main image visual becomes ready.
+  // Connect to View::ResourceReadySignal to remove the placeholder when the main
+  // image visual becomes ready.
   Ui::View::DownCast(Self()).ResourceReadySignal().Connect(this, &ImageViewImpl::OnViewResourceReady);
 }
 
@@ -798,9 +802,6 @@ void ImageViewImpl::OnViewResourceReady(Ui::View view)
 
   // Main image is ready: remove placeholder
   viewData.UnregisterVisual(ImageViewImpl::Property::PLACEHOLDER_IMAGE);
-
-  // Request a re-layout now that the natural size is known, so aspect-ratio adjustment applies.
-  InvalidateMeasure();
 }
 
 void ImageViewImpl::SetImageColorInternal(const Vector4& color)
