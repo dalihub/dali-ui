@@ -721,12 +721,8 @@ void ChartViewImpl::FitYToViewport()
 
 void ChartViewImpl::EmitZoomedSignal()
 {
-  Ui::ChartViewportArgs args;
-  args.xMin = mViewportXMin;
-  args.xMax = mViewportXMax;
-  args.yMin = mViewportYMin;
-  args.yMax = mViewportYMax;
-  mZoomedSignal.Emit(args);
+  mZoomedSignal.Emit(Ui::ChartView::DownCast(Self()),
+                     Dali::Bounds(mViewportXMin, mViewportYMin, mViewportXMax - mViewportXMin, mViewportYMax - mViewportYMin));
 }
 
 void ChartViewImpl::OnPanGesture(Actor /*actor*/, Dali::PanGesture pan)
@@ -1526,14 +1522,13 @@ bool ChartViewImpl::OnTouch(Actor actor, TouchEvent event)
           const_cast<Ui::ChartSeries&>(mModel.mSeriesList[static_cast<size_t>(seriesIdx)]));
         const auto& slice = GetImplementation(ps).GetSlices()[static_cast<size_t>(sliceIdx)];
 
-        Ui::ChartPointEventArgs args;
-        args.seriesIndex = seriesIdx;
-        args.pointIndex  = sliceIdx;
-        args.dataX       = static_cast<float>(sliceIdx);
-        args.dataY       = slice.value;
-        args.seriesName  = GetImplementation(ps).GetName();
-        args.xLabel      = slice.label;
-        mDataPointSelectedSignal.Emit(args);
+        mDataPointSelectedSignal.Emit(Ui::ChartView::DownCast(Self()),
+                                      Ui::ChartPointEventArgs(seriesIdx,
+                                                              sliceIdx,
+                                                              static_cast<float>(sliceIdx),
+                                                              slice.value,
+                                                              GetImplementation(ps).GetName(),
+                                                              slice.label));
       }
     }
     return true;
@@ -1647,14 +1642,13 @@ void ChartViewImpl::PerformHitAtPos(const Vector2& localPos, bool emitSignal)
       UpdateOverlay(hit);
       if(emitSignal && !mDataPointSelectedSignal.Empty())
       {
-        Ui::ChartPointEventArgs args;
-        args.seriesIndex = hit.seriesIndex;
-        args.pointIndex  = hit.pointIndex;
-        args.dataX       = hit.dataX;
-        args.dataY       = hit.dataY;
-        args.seriesName  = hit.seriesName;
-        args.xLabel      = hit.xLabel;
-        mDataPointSelectedSignal.Emit(args);
+        mDataPointSelectedSignal.Emit(Ui::ChartView::DownCast(Self()),
+                                      Ui::ChartPointEventArgs(hit.seriesIndex,
+                                                              hit.pointIndex,
+                                                              hit.dataX,
+                                                              hit.dataY,
+                                                              hit.seriesName,
+                                                              hit.xLabel));
       }
     }
     else
@@ -1672,16 +1666,16 @@ void ChartViewImpl::PerformHitAtPos(const Vector2& localPos, bool emitSignal)
       UpdateOverlayMulti(hits);
       if(emitSignal && !mMultiPointSelectedSignal.Empty())
       {
+        Ui::ChartView self = Ui::ChartView::DownCast(Self());
         for(const auto& h : hits)
         {
-          Ui::ChartPointEventArgs args;
-          args.seriesIndex = h.seriesIndex;
-          args.pointIndex  = h.pointIndex;
-          args.dataX       = h.dataX;
-          args.dataY       = h.dataY;
-          args.seriesName  = h.seriesName;
-          args.xLabel      = h.xLabel;
-          mMultiPointSelectedSignal.Emit(args);
+          mMultiPointSelectedSignal.Emit(self,
+                                         Ui::ChartPointEventArgs(h.seriesIndex,
+                                                                 h.pointIndex,
+                                                                 h.dataX,
+                                                                 h.dataY,
+                                                                 h.seriesName,
+                                                                 h.xLabel));
         }
       }
     }
@@ -1825,7 +1819,7 @@ bool ChartViewImpl::HandleLegendTap(const Vector2& tapPos)
 
   if(!mLegendItemTappedSignal.Empty())
   {
-    mLegendItemTappedSignal.Emit(idx, nextVisible);
+    mLegendItemTappedSignal.Emit(Ui::ChartView::DownCast(Self()), idx, nextVisible);
   }
   return true;
 }

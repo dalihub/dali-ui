@@ -44,7 +44,7 @@ namespace
 {
 static bool gSignalReceived = false;
 
-void OnDataPointSelected(const ChartPointEventArgs&)
+void OnDataPointSelected(ChartView, const ChartPointEventArgs&)
 {
   gSignalReceived = true;
 }
@@ -242,8 +242,8 @@ int UtcDaliChartViewZoomModeP(void)
   chartView.SetZoomClampEnabled(false);
   DALI_TEST_CHECK(!chartView.IsZoomClampEnabled());
 
-  chartView.SetAutoFitYOnPan(true);
-  DALI_TEST_CHECK(chartView.IsAutoFitYOnPan());
+  chartView.SetAutoFitYOnPanEnabled(true);
+  DALI_TEST_CHECK(chartView.IsAutoFitYOnPanEnabled());
   END_TEST;
 }
 
@@ -298,10 +298,10 @@ int UtcDaliChartViewGaugeP(void)
   chartView.SetGaugeValue(75.0f);
   DALI_TEST_EQUALS(chartView.GetGaugeValue(), 75.0f, 0.001f, TEST_LOCATION);
 
-  chartView.SetGaugeMinValue(0.0f);
-  chartView.SetGaugeMaxValue(100.0f);
-  DALI_TEST_EQUALS(chartView.GetGaugeMinValue(), 0.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(chartView.GetGaugeMaxValue(), 100.0f, 0.001f, TEST_LOCATION);
+  chartView.SetGaugeMinimumValue(0.0f);
+  chartView.SetGaugeMaximumValue(100.0f);
+  DALI_TEST_EQUALS(chartView.GetGaugeMinimumValue(), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(chartView.GetGaugeMaximumValue(), 100.0f, 0.001f, TEST_LOCATION);
 
   chartView.SetGaugeArcSpan(270.0f);
   DALI_TEST_EQUALS(chartView.GetGaugeArcSpan(), 270.0f, 0.001f, TEST_LOCATION);
@@ -319,8 +319,8 @@ int UtcDaliChartViewSectionP(void)
   UiTestApplication application(Components::UiConfig::New());
   ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
   ChartSection      section   = ChartSection::New();
-  section.SetXMin(1.0f);
-  section.SetXMax(3.0f);
+  section.SetMinimumX(1.0f);
+  section.SetMaximumX(3.0f);
 
   chartView.AddSection(section);
   chartView.RemoveSection(section);

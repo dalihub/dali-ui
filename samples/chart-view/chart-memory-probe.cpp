@@ -547,13 +547,13 @@ private:
     chart.SetTitle("Memory Probe");
     auto xAxis0 = ChartAxis::New();
     xAxis0.SetTitle("X");
-    xAxis0.SetMinLimit(0.0f);
-    xAxis0.SetMaxLimit(10.0f);
+    xAxis0.SetMinimumLimit(0.0f);
+    xAxis0.SetMaximumLimit(10.0f);
     chart.SetXAxis(xAxis0);
     auto yAxis0 = ChartAxis::New();
     yAxis0.SetTitle("Y");
-    yAxis0.SetMinLimit(0.0f);
-    yAxis0.SetMaxLimit(100.0f);
+    yAxis0.SetMinimumLimit(0.0f);
+    yAxis0.SetMaximumLimit(100.0f);
     chart.SetYAxis(yAxis0);
 
     SetActiveChart(chart, mChartW, mChartH);
@@ -584,12 +584,12 @@ private:
     ChartView chart = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
     auto xAxisD = ChartAxis::New();
-    xAxisD.SetMinLimit(0.0f);
-    xAxisD.SetMaxLimit(static_cast<float>(std::max(numPoints - 1, 1)));
+    xAxisD.SetMinimumLimit(0.0f);
+    xAxisD.SetMaximumLimit(static_cast<float>(std::max(numPoints - 1, 1)));
     chart.SetXAxis(xAxisD);
     auto yAxisD = ChartAxis::New();
-    yAxisD.SetMinLimit(-1.5f);
-    yAxisD.SetMaxLimit(1.5f);
+    yAxisD.SetMinimumLimit(-1.5f);
+    yAxisD.SetMaximumLimit(1.5f);
     chart.SetYAxis(yAxisD);
 
     static const Vector4 COLORS[10] = {
@@ -607,7 +607,8 @@ private:
       char name[16]; std::snprintf(name, sizeof(name), "S%d", s + 1);
       series.SetName(name);
 
-      std::vector<float> vals(numPoints);
+      Dali::Vector<float> vals;
+      vals.Resize(numPoints);
       for(int i = 0; i < numPoints; ++i)
         vals[i] = std::sin((i + s * 30) * 0.1f) * 0.8f;
       series.SetValues(vals);
@@ -653,12 +654,12 @@ private:
     ChartView chart = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
     auto xAxisC = ChartAxis::New();
-    xAxisC.SetMinLimit(useBar ? -0.5f : 0.0f);
-    xAxisC.SetMaxLimit(static_cast<float>(numPoints) + (useBar ? -0.5f : -1.0f));
+    xAxisC.SetMinimumLimit(useBar ? -0.5f : 0.0f);
+    xAxisC.SetMaximumLimit(static_cast<float>(numPoints) + (useBar ? -0.5f : -1.0f));
     chart.SetXAxis(xAxisC);
     auto yAxisC = ChartAxis::New();
-    yAxisC.SetMinLimit(0.0f);
-    yAxisC.SetMaxLimit(100.0f);
+    yAxisC.SetMinimumLimit(0.0f);
+    yAxisC.SetMaximumLimit(100.0f);
     chart.SetYAxis(yAxisC);
     chart.SetProperty(ChartView::Property::SHOW_LEGEND, true);
 
@@ -671,7 +672,8 @@ private:
     for(int s = 0; s < numSeries; ++s)
     {
       char name[16]; std::snprintf(name, sizeof(name), "S%d", s + 1);
-      std::vector<float> vals(numPoints);
+      Dali::Vector<float> vals;
+      vals.Resize(numPoints);
       for(int i = 0; i < numPoints; ++i)
         vals[i] = 20.0f + std::fabs(std::sin(i * 0.3f + s) * 60.0f);
 
@@ -751,12 +753,12 @@ private:
                                       Vector2(static_cast<float>(w),
                                               static_cast<float>(h)));
     auto xAxisS = ChartAxis::New();
-    xAxisS.SetMinLimit(0.0f);
-    xAxisS.SetMaxLimit(49.0f);
+    xAxisS.SetMinimumLimit(0.0f);
+    xAxisS.SetMaximumLimit(49.0f);
     chart.SetXAxis(xAxisS);
     auto yAxisS = ChartAxis::New();
-    yAxisS.SetMinLimit(-1.5f);
-    yAxisS.SetMaxLimit(1.5f);
+    yAxisS.SetMinimumLimit(-1.5f);
+    yAxisS.SetMaximumLimit(1.5f);
     chart.SetYAxis(yAxisS);
 
     for(int s = 0; s < 3; ++s)
@@ -764,7 +766,8 @@ private:
       LineSeries series = LineSeries::New();
       char name[16]; std::snprintf(name, sizeof(name), "S%d", s + 1);
       series.SetName(name);
-      std::vector<float> vals(50);
+      Dali::Vector<float> vals;
+      vals.Resize(50);
       for(int i = 0; i < 50; ++i)
         vals[i] = std::sin(i * 0.12f + s * 1.0f);
       series.SetValues(vals);
@@ -818,17 +821,18 @@ private:
     ChartView chart = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
     auto xAxisL = ChartAxis::New();
-    xAxisL.SetMinLimit(0.0f);
-    xAxisL.SetMaxLimit(49.0f);
+    xAxisL.SetMinimumLimit(0.0f);
+    xAxisL.SetMaximumLimit(49.0f);
     chart.SetXAxis(xAxisL);
     auto yAxisL = ChartAxis::New();
-    yAxisL.SetMinLimit(-1.5f);
-    yAxisL.SetMaxLimit(1.5f);
+    yAxisL.SetMinimumLimit(-1.5f);
+    yAxisL.SetMaximumLimit(1.5f);
     chart.SetYAxis(yAxisL);
 
     LineSeries series = LineSeries::New();
     series.SetName("leak-probe");
-    std::vector<float> vals(50);
+    Dali::Vector<float> vals;
+    vals.Resize(50);
     for(int i = 0; i < 50; ++i) vals[i] = std::sin(i * 0.1f);
     series.SetValues(vals);
     chart.AddSeries(series);
@@ -907,8 +911,9 @@ private:
     MemSnapshot before = TakeSnapshot();
     mBuildStart        = SteadyClock::now();
 
-    // SetLabels requires std::vector<Dali::String>
-    std::vector<Dali::String> labels(numTicks);
+    // SetLabels requires Dali::Vector<Dali::String>
+    Dali::Vector<Dali::String> labels;
+    labels.Resize(numTicks);
     for(int i = 0; i < numTicks; ++i)
     {
       char buf[16]; std::snprintf(buf, sizeof(buf), "L%d", i);
@@ -919,17 +924,18 @@ private:
                                       Vector2(mChartW, mChartH));
     auto xAxisT = ChartAxis::New();
     xAxisT.SetLabels(labels);
-    xAxisT.SetMinLimit(0.0f);
-    xAxisT.SetMaxLimit(static_cast<float>(std::max(numTicks - 1, 1)));
+    xAxisT.SetMinimumLimit(0.0f);
+    xAxisT.SetMaximumLimit(static_cast<float>(std::max(numTicks - 1, 1)));
     chart.SetXAxis(xAxisT);
     auto yAxisT = ChartAxis::New();
-    yAxisT.SetMinLimit(0.0f);
-    yAxisT.SetMaxLimit(100.0f);
+    yAxisT.SetMinimumLimit(0.0f);
+    yAxisT.SetMaximumLimit(100.0f);
     chart.SetYAxis(yAxisT);
 
     LineSeries series = LineSeries::New();
     series.SetName("tick-data");
-    std::vector<float> vals(numTicks);
+    Dali::Vector<float> vals;
+    vals.Resize(numTicks);
     for(int i = 0; i < numTicks; ++i)
       vals[i] = 50.0f + std::sin(i * 0.3f) * 40.0f;
     series.SetValues(vals);

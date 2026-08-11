@@ -18,6 +18,10 @@
 // CLASS HEADER
 #include <dali-ui-components/public-api/chart/chart-series.h>
 
+// EXTERNAL INCLUDES
+#include <utility>
+#include <vector>
+
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/chart-series-impl.h>
 
@@ -87,14 +91,20 @@ Vector4 ChartSeries::GetColor() const
   return GetImplementation(*this).GetColor();
 }
 
-void ChartSeries::SetValues(const std::vector<float>& values)
+void ChartSeries::SetValues(const Dali::Vector<float>& values)
 {
-  GetImplementation(*this).SetValues(values);
+  GetImplementation(*this).SetValues(std::vector<float>(values.Begin(), values.End()));
 }
 
-void ChartSeries::SetValues(const std::vector<std::pair<float, float>>& xyValues)
+void ChartSeries::SetValues(const Dali::Vector<Vector2>& xyValues)
 {
-  GetImplementation(*this).SetValues(xyValues);
+  std::vector<std::pair<float, float>> points;
+  points.reserve(xyValues.Count());
+  for(const auto& xyValue : xyValues)
+  {
+    points.emplace_back(xyValue.x, xyValue.y);
+  }
+  GetImplementation(*this).SetValues(points);
 }
 
 void ChartSeries::SetVisible(bool visible)
@@ -117,17 +127,17 @@ void ChartSeries::AppendValue(float x, float y)
   GetImplementation(*this).AppendValue(x, y);
 }
 
-void ChartSeries::AppendValues(const std::vector<float>& values)
+void ChartSeries::AppendValues(const Dali::Vector<float>& values)
 {
-  GetImplementation(*this).AppendValues(values);
+  GetImplementation(*this).AppendValues(std::vector<float>(values.Begin(), values.End()));
 }
 
-void ChartSeries::SetMaxDataPoints(int maxCount)
+void ChartSeries::SetMaximumDataPoints(int maximumCount)
 {
-  GetImplementation(*this).SetMaxDataPoints(maxCount);
+  GetImplementation(*this).SetMaxDataPoints(maximumCount);
 }
 
-int ChartSeries::GetMaxDataPoints() const
+int ChartSeries::GetMaximumDataPoints() const
 {
   return GetImplementation(*this).GetMaxDataPoints();
 }

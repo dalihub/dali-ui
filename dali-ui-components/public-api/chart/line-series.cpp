@@ -210,10 +210,10 @@ Vector4 LineSeries::GetFillColor() const
 
 void LineSeries::SetDataLabelFormatter(DataLabelFormatterType formatter)
 {
-  GetImplementation(*this).SetDataLabelFormatter(std::move(formatter));
+  GetImplementation(*this).SetDataLabelFormatter(formatter);
 }
 
-const LineSeries::DataLabelFormatterType& LineSeries::GetDataLabelFormatter() const
+LineSeries::DataLabelFormatterType LineSeries::GetDataLabelFormatter() const
 {
   return GetImplementation(*this).GetDataLabelFormatter();
 }

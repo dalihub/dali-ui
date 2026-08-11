@@ -40,35 +40,35 @@ ChartSection::ChartSection(Integration::ChartSection* impl)
 {
 }
 
-void ChartSection::SetXMin(float v)
+void ChartSection::SetMinimumX(float v)
 {
   GetImplementation(*this).SetXMin(v);
 }
-float ChartSection::GetXMin() const
+float ChartSection::GetMinimumX() const
 {
   return GetImplementation(*this).GetXMin();
 }
-void ChartSection::SetXMax(float v)
+void ChartSection::SetMaximumX(float v)
 {
   GetImplementation(*this).SetXMax(v);
 }
-float ChartSection::GetXMax() const
+float ChartSection::GetMaximumX() const
 {
   return GetImplementation(*this).GetXMax();
 }
-void ChartSection::SetYMin(float v)
+void ChartSection::SetMinimumY(float v)
 {
   GetImplementation(*this).SetYMin(v);
 }
-float ChartSection::GetYMin() const
+float ChartSection::GetMinimumY() const
 {
   return GetImplementation(*this).GetYMin();
 }
-void ChartSection::SetYMax(float v)
+void ChartSection::SetMaximumY(float v)
 {
   GetImplementation(*this).SetYMax(v);
 }
-float ChartSection::GetYMax() const
+float ChartSection::GetMaximumY() const
 {
   return GetImplementation(*this).GetYMax();
 }

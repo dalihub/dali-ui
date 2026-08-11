@@ -92,10 +92,22 @@ const char* SCENE_TITLES[] = {
   "Scene 24: Donut Chart  [innerRadius=0.55, center label]",
   "Scene 25: Gauge Chart  [CPU usage, colored zones, touch=change value]"};
 
+// The chart API takes Dali::Vector, so build the sample data through this helper.
+Dali::Vector<float> ToValues(std::initializer_list<float> values)
+{
+  Dali::Vector<float> result;
+  result.Reserve(values.size());
+  for(float value : values)
+  {
+    result.PushBack(value);
+  }
+  return result;
+}
+
 // Scene 2 — toggle data
-const std::vector<float> DATA_A_INITIAL = {120.0f, 190.0f, 150.0f, 250.0f};
-const std::vector<float> DATA_A_UPDATED = {200.0f, 350.0f, 280.0f, 420.0f};
-const std::vector<float> DATA_B         = {80.0f, 230.0f, 170.0f, 310.0f};
+const Dali::Vector<float> DATA_A_INITIAL = ToValues({120.0f, 190.0f, 150.0f, 250.0f});
+const Dali::Vector<float> DATA_A_UPDATED = ToValues({200.0f, 350.0f, 280.0f, 420.0f});
+const Dali::Vector<float> DATA_B         = ToValues({80.0f, 230.0f, 170.0f, 310.0f});
 
 } // namespace
 
@@ -358,8 +370,8 @@ public:
     {
       ChartAxis chartAxis2 = ChartAxis::New();
       chartAxis2.SetTitle("Amount");
-      chartAxis2.SetMinLimit(0.0f);
-      chartAxis2.SetMaxLimit(500.0f);
+      chartAxis2.SetMinimumLimit(0.0f);
+      chartAxis2.SetMaximumLimit(500.0f);
       mChart.SetYAxis(chartAxis2);
     }
 
@@ -515,7 +527,7 @@ public:
     {
       mScene2TouchToggle = !mScene2TouchToggle;
 
-      const std::vector<float>& newData = mScene2TouchToggle ? DATA_A_UPDATED : DATA_A_INITIAL;
+      const Dali::Vector<float>& newData = mScene2TouchToggle ? DATA_A_UPDATED : DATA_A_INITIAL;
 
       auto t0 = std::chrono::high_resolution_clock::now();
       mSeriesA.SetValues(newData);
@@ -723,11 +735,11 @@ public:
     window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene7Touch);
   }
 
-  void OnScene7DataPointSelected(const ChartPointEventArgs& e)
+  void OnScene7DataPointSelected(ChartView /*chart*/, const ChartPointEventArgs& e)
   {
     std::ostringstream oss;
-    oss << "Hit  series=" << e.seriesIndex << "  point=" << e.pointIndex
-        << "  [" << e.xLabel.CStr() << "] = " << e.dataY
+    oss << "Hit  series=" << e.GetSeriesIndex() << "  point=" << e.GetPointIndex()
+        << "  [" << e.GetXLabel().CStr() << "] = " << e.GetDataY()
         << "  |  outside chart = toggle tooltip";
     mDebugLabel.SetProperty(Label::Property::TEXT, oss.str().c_str());
   }
@@ -816,7 +828,7 @@ public:
     window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene8Touch);
   }
 
-  void OnScene8LegendTapped(int seriesIndex, bool isNowVisible)
+  void OnScene8LegendTapped(ChartView /*chart*/, int seriesIndex, bool isNowVisible)
   {
     std::ostringstream oss;
     oss << "Legend tapped: series " << seriesIndex
@@ -991,7 +1003,7 @@ public:
     mScene10Series.SetName("Live");
     mScene10Series.SetColor(COLOR_MEDIUM_PURPLE);
     mScene10Series.SetMarkersVisible(true);
-    mScene10Series.SetMaxDataPoints(10);
+    mScene10Series.SetMaximumDataPoints(10);
 
     // Custom data label formatter
     mScene10Series.SetDataLabelFormatter([](float value, int /*pi*/)
@@ -1102,10 +1114,10 @@ public:
                             "Hover/touch to see all series at same X");
   }
 
-  void OnMultiPointSelected(const ChartPointEventArgs& e)
+  void OnMultiPointSelected(ChartView /*chart*/, const ChartPointEventArgs& e)
   {
     std::ostringstream oss;
-    oss << "MultiPoint: series=" << e.seriesIndex << " [" << e.xLabel.CStr() << "] = " << e.dataY;
+    oss << "MultiPoint: series=" << e.GetSeriesIndex() << " [" << e.GetXLabel().CStr() << "] = " << e.GetDataY();
     mDebugLabel.SetProperty(Label::Property::TEXT, oss.str().c_str());
   }
 
@@ -1277,7 +1289,7 @@ public:
     // Y axis: min step 50 (B-4) + 10% padding (B-5)
     {
       ChartAxis chartAxis17 = ChartAxis::New();
-      chartAxis17.SetMinStep(50.0f);
+      chartAxis17.SetMinimumStep(50.0f);
       chartAxis17.SetDataPadding(0.1f);
       mChart.SetYAxis(chartAxis17);
     } // B-5: 10% headroom
@@ -1309,12 +1321,12 @@ public:
     mChart.SetTitle("Zoom & Pan");
 
     // Monthly data for 2 years (24 points)
-    std::vector<Dali::String> months;
+    Dali::Vector<Dali::String> months;
     for(const char* yr : {"2024", "2025"})
       for(const char* mo : {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"})
       {
         std::string s = std::string(mo) + " " + yr;
-        months.push_back(Dali::String(s.c_str()));
+        months.PushBack(Dali::String(s.c_str()));
       }
     {
       ChartAxis chartAxis18 = ChartAxis::New();
@@ -1325,7 +1337,7 @@ public:
 
     {
       ChartAxis chartAxis19 = ChartAxis::New();
-      chartAxis19.SetMinStep(50.0f);
+      chartAxis19.SetMinimumStep(50.0f);
       mChart.SetYAxis(chartAxis19);
     }
 
@@ -1354,7 +1366,7 @@ public:
       static_cast<int>(ChartView::ZoomMode::PAN_X) |
       static_cast<int>(ChartView::ZoomMode::ZOOM_X));
     mChart.SetZoomClampEnabled(true);
-    mChart.SetAutoFitYOnPan(true);
+    mChart.SetAutoFitYOnPanEnabled(true);
 
     // ZoomedSignal: show current viewport in debug label
     mChart.ZoomedSignal().Connect(this, &ChartViewController::OnZoomed);
@@ -1366,11 +1378,11 @@ public:
                             "Wheel = zoom  |  Drag = pan  |  Double-tap = reset");
   }
 
-  void OnZoomed(const ChartViewportArgs& vp)
+  void OnZoomed(ChartView /*chart*/, const Dali::Bounds& vp)
   {
     std::ostringstream oss;
-    oss << "X[" << std::fixed << std::setprecision(1) << vp.xMin << " ~ " << vp.xMax << "]"
-        << "  Y[" << vp.yMin << " ~ " << vp.yMax << "]";
+    oss << "X[" << std::fixed << std::setprecision(1) << vp.Left() << " ~ " << vp.Right() << "]"
+        << "  Y[" << vp.Top() << " ~ " << vp.Bottom() << "]";
     mDebugLabel.SetProperty(Label::Property::TEXT, oss.str().c_str());
   }
 
@@ -1393,7 +1405,7 @@ public:
 
     {
       ChartAxis chartAxis21 = ChartAxis::New();
-      chartAxis21.SetMinStep(50.0f);
+      chartAxis21.SetMinimumStep(50.0f);
       mChart.SetYAxis(chartAxis21);
     }
 
@@ -1461,7 +1473,7 @@ public:
 
     {
       ChartAxis chartAxis23 = ChartAxis::New();
-      chartAxis23.SetMinStep(100.0f);
+      chartAxis23.SetMinimumStep(100.0f);
       mChart.SetYAxis(chartAxis23);
     }
 
@@ -1544,7 +1556,7 @@ public:
 
     {
       ChartAxis chartAxis25 = ChartAxis::New();
-      chartAxis25.SetMinStep(100.0f);
+      chartAxis25.SetMinimumStep(100.0f);
       mChart.SetYAxis(chartAxis25);
     }
 
@@ -1597,7 +1609,7 @@ public:
       static_cast<int>(ChartView::ZoomMode::PAN_X) |
       static_cast<int>(ChartView::ZoomMode::ZOOM_X));
     mChart.SetZoomClampEnabled(true);
-    mChart.SetAutoFitYOnPan(true);
+    mChart.SetAutoFitYOnPanEnabled(true);
 
     mChart.ZoomedSignal().Connect(this, &ChartViewController::OnZoomed);
 
@@ -1629,7 +1641,7 @@ public:
 
     {
       ChartAxis chartAxis27 = ChartAxis::New();
-      chartAxis27.SetMinStep(50.0f);
+      chartAxis27.SetMinimumStep(50.0f);
       mChart.SetYAxis(chartAxis27);
     }
 
@@ -1658,7 +1670,7 @@ public:
       static_cast<int>(ChartView::ZoomMode::PAN_X) |
       static_cast<int>(ChartView::ZoomMode::ZOOM_X));
     mChart.SetZoomClampEnabled(true);
-    mChart.SetAutoFitYOnPan(true);
+    mChart.SetAutoFitYOnPanEnabled(true);
 
     mChart.ZoomedSignal().Connect(this, &ChartViewController::OnZoomed);
 
@@ -1684,7 +1696,7 @@ public:
       scatterSeries1.SetMarkerRadius(7.0f);
       scatterSeries1.SetMarkerShape(ScatterSeries::MarkerShape::CIRCLE);
       scatterSeries1.SetName("Circle");
-      scatterSeries1.SetValues({{0.5f, 30.f}, {1.8f, 55.f}, {3.2f, 45.f}, {4.1f, 80.f}, {5.7f, 60.f}});
+      scatterSeries1.SetValues({Vector2(0.5f, 30.f), Vector2(1.8f, 55.f), Vector2(3.2f, 45.f), Vector2(4.1f, 80.f), Vector2(5.7f, 60.f)});
       mChart.AddSeries(scatterSeries1);
     }
 
@@ -1695,7 +1707,7 @@ public:
       scatterSeries2.SetMarkerRadius(7.0f);
       scatterSeries2.SetMarkerShape(ScatterSeries::MarkerShape::SQUARE);
       scatterSeries2.SetName("Square");
-      scatterSeries2.SetValues({{1.0f, 70.f}, {2.5f, 40.f}, {3.8f, 90.f}, {5.0f, 25.f}, {6.2f, 65.f}});
+      scatterSeries2.SetValues({Vector2(1.0f, 70.f), Vector2(2.5f, 40.f), Vector2(3.8f, 90.f), Vector2(5.0f, 25.f), Vector2(6.2f, 65.f)});
       mChart.AddSeries(scatterSeries2);
     }
 
@@ -1706,7 +1718,7 @@ public:
       scatterSeries3.SetMarkerRadius(7.0f);
       scatterSeries3.SetMarkerShape(ScatterSeries::MarkerShape::TRIANGLE);
       scatterSeries3.SetName("Triangle");
-      scatterSeries3.SetValues({{0.2f, 85.f}, {2.0f, 20.f}, {4.5f, 70.f}, {5.5f, 50.f}, {6.8f, 40.f}});
+      scatterSeries3.SetValues({Vector2(0.2f, 85.f), Vector2(2.0f, 20.f), Vector2(4.5f, 70.f), Vector2(5.5f, 50.f), Vector2(6.8f, 40.f)});
       mChart.AddSeries(scatterSeries3);
     }
 
@@ -1717,7 +1729,7 @@ public:
       scatterSeries4.SetMarkerRadius(10.0f);
       scatterSeries4.SetMarkerShape(ScatterSeries::MarkerShape::DIAMOND);
       scatterSeries4.SetName("Diamond");
-      scatterSeries4.SetValues({{1.5f, 95.f}, {3.0f, 10.f}, {4.8f, 55.f}, {6.0f, 85.f}});
+      scatterSeries4.SetValues({Vector2(1.5f, 95.f), Vector2(3.0f, 10.f), Vector2(4.8f, 55.f), Vector2(6.0f, 85.f)});
       mChart.AddSeries(scatterSeries4);
     }
 
@@ -1727,7 +1739,7 @@ public:
       lineSeries26.SetColor(Vector4(0.5f, 0.5f, 0.5f, 0.6f));
       lineSeries26.SetMarkersVisible(false);
       lineSeries26.SetName("Trend");
-      lineSeries26.SetValues({{0.0f, 20.f}, {7.0f, 90.f}});
+      lineSeries26.SetValues({Vector2(0.0f, 20.f), Vector2(7.0f, 90.f)});
       mChart.AddSeries(lineSeries26);
     }
 
@@ -1756,7 +1768,7 @@ public:
 
     {
       ChartAxis chartAxis29 = ChartAxis::New();
-      chartAxis29.SetMinStep(50.0f);
+      chartAxis29.SetMinimumStep(50.0f);
       mChart.SetYAxis(chartAxis29);
     }
 
@@ -1782,8 +1794,8 @@ public:
     // ── Section 1: X 구간 강조 (Q2 = Apr~Jun, index 3~5) ─────────────────
     {
       ChartSection chartSection1 = ChartSection::New();
-      chartSection1.SetXMin(2.5f);
-      chartSection1.SetXMax(5.5f);
+      chartSection1.SetMinimumX(2.5f);
+      chartSection1.SetMaximumX(5.5f);
       chartSection1.SetFillColor(Vector4(0.2f, 0.7f, 0.3f, 0.12f));
       chartSection1.SetStrokeColor(Vector4(0.2f, 0.7f, 0.3f, 0.5f));
       chartSection1.SetStrokeWidth(1.5f);
@@ -1793,8 +1805,8 @@ public:
     // ── Section 2: Y 구간 강조 (목표 범위 200~280) ────────────────────────
     {
       ChartSection chartSection2 = ChartSection::New();
-      chartSection2.SetYMin(200.0f);
-      chartSection2.SetYMax(280.0f);
+      chartSection2.SetMinimumY(200.0f);
+      chartSection2.SetMaximumY(280.0f);
       chartSection2.SetFillColor(Vector4(1.0f, 0.85f, 0.2f, 0.10f));
       mChart.AddSection(chartSection2);
     }
@@ -1802,8 +1814,8 @@ public:
     // ── Section 3: 수평 목표선 (Y = 250) ─────────────────────────────────
     {
       ChartSection chartSection3 = ChartSection::New();
-      chartSection3.SetYMin(250.0f);
-      chartSection3.SetYMax(250.0f);
+      chartSection3.SetMinimumY(250.0f);
+      chartSection3.SetMaximumY(250.0f);
       chartSection3.SetStrokeColor(Vector4(1.0f, 0.3f, 0.3f, 0.9f));
       chartSection3.SetStrokeWidth(2.0f);
       mChart.AddSection(chartSection3);
@@ -1812,8 +1824,8 @@ public:
     // ── Section 4: 수직 기준선 (X = 6, July) ────────────────────────────
     {
       ChartSection chartSection4 = ChartSection::New();
-      chartSection4.SetXMin(6.0f);
-      chartSection4.SetXMax(6.0f);
+      chartSection4.SetMinimumX(6.0f);
+      chartSection4.SetMaximumX(6.0f);
       chartSection4.SetStrokeColor(Vector4(0.4f, 0.4f, 1.0f, 0.8f));
       chartSection4.SetStrokeWidth(2.0f);
       mChart.AddSection(chartSection4);
@@ -1822,10 +1834,10 @@ public:
     // ── Section 5: 직사각형 강조 (Q4 high zone: Oct~Dec, Y 270~320) ──────
     {
       ChartSection chartSection5 = ChartSection::New();
-      chartSection5.SetXMin(8.5f);
-      chartSection5.SetXMax(11.5f);
-      chartSection5.SetYMin(270.0f);
-      chartSection5.SetYMax(320.0f);
+      chartSection5.SetMinimumX(8.5f);
+      chartSection5.SetMaximumX(11.5f);
+      chartSection5.SetMinimumY(270.0f);
+      chartSection5.SetMaximumY(320.0f);
       chartSection5.SetFillColor(Vector4(0.6f, 0.2f, 1.0f, 0.12f));
       chartSection5.SetStrokeColor(Vector4(0.6f, 0.2f, 1.0f, 0.6f));
       chartSection5.SetStrokeWidth(1.5f);
@@ -1935,11 +1947,11 @@ private:
                             "Tap a slice — label updates | Tap gap/hole/outside → no change");
   }
 
-  void OnPieSliceTapped(const ChartPointEventArgs& args)
+  void OnPieSliceTapped(ChartView /*chart*/, const ChartPointEventArgs& args)
   {
     char buf[80];
     std::snprintf(buf, sizeof(buf), "Tapped [%d] %s  (%.0f)",
-                  args.pointIndex, args.xLabel.CStr(), args.dataY);
+                  args.GetPointIndex(), args.GetXLabel().CStr(), args.GetDataY());
     mDebugLabel.SetProperty(Label::Property::TEXT, buf);
   }
 
@@ -1950,8 +1962,8 @@ private:
     mChart = ChartView::New(ChartView::Type::GAUGE, Vector2(CHART_WIDTH, CHART_HEIGHT));
     mChart.SetTitle("CPU Usage");
 
-    mChart.SetGaugeMinValue(0.0f);
-    mChart.SetGaugeMaxValue(100.0f);
+    mChart.SetGaugeMinimumValue(0.0f);
+    mChart.SetGaugeMaximumValue(100.0f);
     mChart.SetGaugeValue(72.0f);
 
     mChart.AddGaugeRange(0.0f, 60.0f, Vector4(0.2f, 0.75f, 0.3f, 1.0f)); // green
