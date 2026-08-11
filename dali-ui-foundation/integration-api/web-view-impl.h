@@ -125,6 +125,18 @@ public: // Creation
    */
   static WebViewImplPtr New();
 
+  /**
+   * @brief Creates a new WebViewImpl with application arguments forwarded to the web engine.
+   *
+   * The argc/argv pair is passed to WebEngine::Create(width, height, argc, argv)
+   * so that engine-specific command-line options can be parsed during creation.
+   *
+   * @param[in] argc The count of application arguments
+   * @param[in] argv The string array of application arguments
+   * @return An intrusive pointer to the newly allocated WebViewImpl
+   */
+  static WebViewImplPtr New(uint32_t argc, char** argv);
+
 public: // API — URL & User Agent
   /**
    * @copydoc Dali::Ui::WebView::GetUrl
@@ -630,6 +642,17 @@ private: // Internal conversion helpers
    * @brief Converts a WebEngineLoadError::ErrorType to Dali::Ui::WebViewPageLoadErrorType.
    */
   static WebViewPageLoadErrorType ToUiPageLoadErrorType(Dali::WebEngineLoadError::ErrorType type);
+
+private: // Internal factory helper
+  /**
+   * @brief Creates a WebViewImpl instance and initializes its WebEngine.
+   *
+   * Shared by both New() overloads. The caller is responsible for invoking
+   * the appropriate WebEngine::Create() overload afterwards.
+   *
+   * @return An intrusive pointer to the newly allocated WebViewImpl
+   */
+  static WebViewImplPtr CreateWithEngine();
 
 private:
   // Not copyable or movable

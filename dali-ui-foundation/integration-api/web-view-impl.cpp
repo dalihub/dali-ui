@@ -202,6 +202,34 @@ WebViewImpl::~WebViewImpl()
 
 WebViewImplPtr WebViewImpl::New()
 {
+  WebViewImplPtr impl = CreateWithEngine();
+  if(impl->mWebEngine)
+  {
+    impl->mWebEngine.Create(
+      static_cast<uint32_t>(impl->mWebViewSize.width),
+      static_cast<uint32_t>(impl->mWebViewSize.height),
+      /*locale=*/"",
+      /*timezoneId=*/"");
+  }
+  return impl;
+}
+
+WebViewImplPtr WebViewImpl::New(uint32_t argc, char** argv)
+{
+  WebViewImplPtr impl = CreateWithEngine();
+  if(impl->mWebEngine)
+  {
+    impl->mWebEngine.Create(
+      static_cast<uint32_t>(impl->mWebViewSize.width),
+      static_cast<uint32_t>(impl->mWebViewSize.height),
+      argc,
+      argv);
+  }
+  return impl;
+}
+
+WebViewImplPtr WebViewImpl::CreateWithEngine()
+{
   DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "UiConfig::Apply() must be called before WebView::New()");
 
   const WebEngineType webEngineType = UiConfig::GetCurrent().GetWebEngineType();
@@ -215,14 +243,6 @@ WebViewImplPtr WebViewImpl::New()
 
   auto* impl       = new WebViewImpl();
   impl->mWebEngine = Dali::WebEngine::New(static_cast<int32_t>(webEngineType));
-  if(impl->mWebEngine)
-  {
-    impl->mWebEngine.Create(
-      static_cast<uint32_t>(impl->mWebViewSize.width),
-      static_cast<uint32_t>(impl->mWebViewSize.height),
-      /*locale=*/"",
-      /*timezoneId=*/"");
-  }
   return impl;
 }
 

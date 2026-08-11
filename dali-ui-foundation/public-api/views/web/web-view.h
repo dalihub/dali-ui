@@ -124,6 +124,18 @@ public: // Creation & Destruction
   static WebView New(const Dali::String& url);
 
   /**
+   * @brief Creates an initialized WebView with application arguments.
+   *
+   * The argc/argv pair is forwarded to the underlying web engine so that
+   * engine-specific command-line options can be parsed during creation.
+   *
+   * @param[in] argc The count of application arguments
+   * @param[in] argv The string array of application arguments
+   * @return A handle to a newly allocated Dali resource
+   */
+  static WebView New(uint32_t argc, char** argv);
+
+  /**
    * @brief Destructor.
    */
   ~WebView();
