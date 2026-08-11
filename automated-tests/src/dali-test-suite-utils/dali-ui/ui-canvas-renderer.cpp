@@ -24,8 +24,8 @@
 // being present at all, matching the approach already used by dali-toolkit's
 // dali-toolkit-test-utils/toolkit-canvas-renderer.cpp.
 
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/rendering/renderer.h>
 
@@ -70,17 +70,17 @@ public:
     // Matches the real implementation (canvas-renderer-impl.cpp), which asserts via the
     // Drawable's own GetImplementation() before checking thorvg support.
     DALI_ASSERT_ALWAYS(drawable && "Drawable handle is empty.");
-    mDrawable = &drawable;
+    mDrawable = drawable;
     return true;
   }
 
   bool RemoveDrawable(Dali::CanvasRenderer::Drawable& drawable)
   {
-    if(!drawable || mDrawable != &drawable)
+    if(!drawable || mDrawable != drawable)
     {
       return false;
     }
-    mDrawable = nullptr;
+    mDrawable = Dali::CanvasRenderer::Drawable();
     return true;
   }
 
@@ -90,7 +90,7 @@ public:
     {
       return false;
     }
-    mDrawable = nullptr;
+    mDrawable = Dali::CanvasRenderer::Drawable();
     return true;
   }
 
@@ -111,7 +111,7 @@ public:
     return true;
   }
 
-  const Vector2& GetViewBox()
+  const Vector2& GetViewBox() const
   {
     return mViewBox;
   }
@@ -163,7 +163,7 @@ public:
   }
 
 public:
-  Dali::CanvasRenderer::Drawable* mDrawable{nullptr};
+  Dali::CanvasRenderer::Drawable  mDrawable;
   Dali::Texture                   mTexture;
   Vector2                         mSize;
   Vector2                         mViewBox;
@@ -232,12 +232,12 @@ Dali::Texture CanvasRenderer::GetRasterizedTexture()
   return Internal::Adaptor::GetImplementation(*this).GetRasterizedTexture();
 }
 
-bool CanvasRenderer::AddDrawable(Dali::CanvasRenderer::Drawable& drawable)
+bool CanvasRenderer::AddDrawable(Dali::CanvasRenderer::Drawable drawable)
 {
   return Internal::Adaptor::GetImplementation(*this).AddDrawable(drawable);
 }
 
-bool CanvasRenderer::RemoveDrawable(Dali::CanvasRenderer::Drawable& drawable)
+bool CanvasRenderer::RemoveDrawable(Dali::CanvasRenderer::Drawable drawable)
 {
   return Internal::Adaptor::GetImplementation(*this).RemoveDrawable(drawable);
 }
@@ -247,7 +247,7 @@ bool CanvasRenderer::RemoveAllDrawables()
   return Internal::Adaptor::GetImplementation(*this).RemoveAllDrawables();
 }
 
-bool CanvasRenderer::SetSize(Vector2 size)
+bool CanvasRenderer::SetSize(const Vector2& size)
 {
   return Internal::Adaptor::GetImplementation(*this).SetSize(size);
 }
@@ -262,7 +262,7 @@ bool CanvasRenderer::SetViewBox(const Vector2& viewBox)
   return Internal::Adaptor::GetImplementation(*this).SetViewBox(viewBox);
 }
 
-const Vector2& CanvasRenderer::GetViewBox()
+Vector2 CanvasRenderer::GetViewBox() const
 {
   return Internal::Adaptor::GetImplementation(*this).GetViewBox();
 }
