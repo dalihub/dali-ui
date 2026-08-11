@@ -1009,6 +1009,11 @@ void View::ClearAccessibilityStates()
   viewDataImpl.ClearAccessibilityStates();
 }
 
+void View::NotifyAccessibilityActiveDescendantChanged(View descendant)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).NotifyAccessibilityActiveDescendantChanged(descendant);
+}
+
 bool View::HasAccessibilityState(Accessibility::State state) const
 {
   const ViewImpl&               viewImpl     = Ui::GetImpl(*this);

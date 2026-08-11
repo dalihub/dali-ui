@@ -885,6 +885,20 @@ public:
   void ClearAccessibilityStates();
 
   /**
+   * @brief Notifies accessibility clients that the active descendant changed.
+   *
+   * The @p descendant should be a child View of this View. While a deeper
+   * descendant (e.g. a grandchild) is also accepted, a direct child is
+   * recommended so that assistive technologies can correctly identify the
+   * relationship.
+   *
+   * @param[in] descendant The active descendant View, which should be a child
+   *                       of this View. An empty handle is allowed and clears
+   *                       the current active descendant.
+   */
+  void NotifyAccessibilityActiveDescendantChanged(View descendant);
+
+  /**
    * @brief Returns whether the accessibility state is set.
    * @param[in] state The state to query
    * @return True if the state is set

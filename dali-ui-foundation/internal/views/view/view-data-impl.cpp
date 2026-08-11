@@ -7766,6 +7766,21 @@ SharedPtr<Ui::ViewAccessible> ViewDataImpl::GetAccessibleObject()
   return GetOrCreateAccessibilityData().GetAccessibleObject();
 }
 
+void ViewDataImpl::NotifyAccessibilityActiveDescendantChanged(View descendant)
+{
+  if(!descendant || !Dali::Integration::Accessibility::IsUp())
+  {
+    return;
+  }
+
+  auto source = GetAccessibleObject();
+  auto target = ViewDataImpl::Get(Ui::GetImpl(descendant)).GetAccessibleObject();
+  if(source && target)
+  {
+    source->EmitActiveDescendantChanged(target.Get());
+  }
+}
+
 Dali::Vector<Dali::Devel::Accessibility::Relation> ViewDataImpl::GetAccessibilityRelations()
 {
   Dali::Vector<Dali::Devel::Accessibility::Relation> result;

@@ -465,6 +465,25 @@ int UtcDaliViewAccessibilityReadingInfoInternalP(void)
   END_TEST;
 }
 
+int UtcDaliViewAccessibilityActiveDescendantNotificationP(void)
+{
+  UiTestApplication application;
+
+  View source     = View::New();
+  View descendant = View::New();
+  DALI_TEST_CHECK(Dali::Accessibility::Accessible::Get(source));
+  DALI_TEST_CHECK(Dali::Accessibility::Accessible::Get(descendant));
+
+  // Establish a parent-child relationship so that 'descendant' is a genuine
+  // descendant of 'source', matching the intended usage of the API.
+  source.Add(descendant);
+
+  source.NotifyAccessibilityActiveDescendantChanged(descendant);
+  source.NotifyAccessibilityActiveDescendantChanged({});
+
+  END_TEST;
+}
+
 int UtcDaliViewAccessibilityDirectApiDefaultsAndMetadataP(void)
 {
   UiTestApplication application;

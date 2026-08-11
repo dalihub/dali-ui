@@ -2259,6 +2259,24 @@ public:
   void ClearAccessibilityStates();
 
   /**
+   * @brief Notifies accessibility clients that the active descendant changed.
+   *
+   * This is typically used by container Views (e.g. lists, combo boxes) to
+   * indicate which child is currently active (focused or selected).
+   *
+   * The @p descendant should be a child View of this View. While a deeper
+   * descendant (e.g. a grandchild) is also accepted, a direct child is
+   * recommended so that assistive technologies can correctly identify the
+   * relationship.
+   *
+   * @SINCE_2_5.34
+   * @param[in] descendant The active descendant View, which should be a child
+   *                       of this View. An empty handle is allowed and clears
+   *                       the current active descendant.
+   */
+  void NotifyAccessibilityActiveDescendantChanged(View descendant);
+
+  /**
    * @brief Returns whether the given accessibility state is set on this View.
    *
    * @SINCE_2_5.30
