@@ -19,9 +19,9 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
+#include <dali/public-api/adaptor-framework/pixel-buffer.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/images/pixel-data.h>
 #include <dali/public-api/images/pixel.h>
@@ -207,12 +207,12 @@ public:
    * @return A pixel data with the text rendered.
    */
   PixelData RenderWithCutout(const Vector2& size, Direction textDirection,
-                             Devel::PixelBuffer cutoutBuffer, RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES,
+                             PixelBuffer cutoutBuffer, RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES,
                              bool ignoreHorizontalAlignment = false, Pixel::Format pixelFormat = Pixel::RGBA8888,
                              float originAlpha = 1.f, const Vector2& originSize = Size::ZERO);
 
   /**
-   * @brief Renders the text, return as Devel::PixelBuffer.
+   * @brief Renders the text, return as PixelBuffer.
    *
    * This function is used to obtain the PixelBuffer required for cutout.
    *
@@ -230,11 +230,11 @@ public:
    *
    * @return A pixel data with the text rendered.
    */
-  Devel::PixelBuffer RenderWithPixelBuffer(const Vector2& size, Direction textDirection,
-                                           RenderBehaviour behaviour                 = RENDER_TEXT_AND_STYLES,
-                                           bool            ignoreHorizontalAlignment = false,
-                                           Pixel::Format   pixelFormat               = Pixel::RGBA8888,
-                                           const Vector2&  originSize                = Size::ZERO);
+  PixelBuffer RenderWithPixelBuffer(const Vector2& size, Direction textDirection,
+                                    RenderBehaviour behaviour                 = RENDER_TEXT_AND_STYLES,
+                                    bool            ignoreHorizontalAlignment = false,
+                                    Pixel::Format   pixelFormat               = Pixel::RGBA8888,
+                                    const Vector2&  originSize                = Size::ZERO);
 
   /**
    * @brief Create & draw the image buffer of single background color.
@@ -245,8 +245,8 @@ public:
    *
    * @return An image buffer with the text.
    */
-  Devel::PixelBuffer CreateFullBackgroundBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                                const Vector4& backgroundColor);
+  PixelBuffer CreateFullBackgroundBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
+                                         const Vector4& backgroundColor);
 
   /**
    * @brief Set Mask for two pixel buffer.
@@ -259,8 +259,8 @@ public:
    * @param[in] bufferHeight The height of the image buffer.
    * @param[in] originAlpha The original alpha value of the text.
    */
-  void SetMaskForImageBuffer(Devel::PixelBuffer& __restrict__ topPixelBuffer,
-                             Devel::PixelBuffer& __restrict__ bottomPixelBuffer, const uint32_t bufferWidth,
+  void SetMaskForImageBuffer(PixelBuffer& __restrict__ topPixelBuffer,
+                             PixelBuffer& __restrict__ bottomPixelBuffer, const uint32_t bufferWidth,
                              const uint32_t bufferHeight, float originAlpha);
 
 private:
@@ -297,10 +297,10 @@ private:
    *
    * @return The image buffer with the markup.
    */
-  Devel::PixelBuffer ApplyUnderlineMarkupImageBuffer(Devel::PixelBuffer topPixelBuffer, const uint32_t bufferWidth,
-                                                     const uint32_t bufferHeight, const bool ignoreHorizontalAlignment,
-                                                     const Pixel::Format pixelFormat, const int32_t horizontalOffset,
-                                                     const int32_t verticalOffset);
+  PixelBuffer ApplyUnderlineMarkupImageBuffer(PixelBuffer topPixelBuffer, const uint32_t bufferWidth,
+                                              const uint32_t bufferHeight, const bool ignoreHorizontalAlignment,
+                                              const Pixel::Format pixelFormat, const int32_t horizontalOffset,
+                                              const int32_t verticalOffset);
 
   /**
    * @brief Apply markup strikethrough tags.
@@ -322,11 +322,11 @@ private:
    *
    * @return The image buffer with the markup.
    */
-  Devel::PixelBuffer ApplyStrikethroughMarkupImageBuffer(Devel::PixelBuffer topPixelBuffer, const uint32_t bufferWidth,
-                                                         const uint32_t      bufferHeight,
-                                                         const bool          ignoreHorizontalAlignment,
-                                                         const Pixel::Format pixelFormat,
-                                                         const int32_t horizontalOffset, const int32_t verticalOffset);
+  PixelBuffer ApplyStrikethroughMarkupImageBuffer(PixelBuffer topPixelBuffer, const uint32_t bufferWidth,
+                                                  const uint32_t      bufferHeight,
+                                                  const bool          ignoreHorizontalAlignment,
+                                                  const Pixel::Format pixelFormat,
+                                                  const int32_t horizontalOffset, const int32_t verticalOffset);
 
 protected:
   /**

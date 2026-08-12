@@ -133,7 +133,7 @@ else                                                                            
  */
 struct GlyphData
 {
-  Devel::PixelBuffer               bitmapBuffer;     ///< The buffer of the whole bitmap. The format is RGBA8888.
+  PixelBuffer                      bitmapBuffer;     ///< The buffer of the whole bitmap. The format is RGBA8888.
   Vector2*                         position;         ///< The position of the glyph.
   TextAbstraction::GlyphBufferData glyphBitmap;      ///< The glyph's bitmap.
   uint32_t                         width;            ///< The bitmap's width.
@@ -972,7 +972,7 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
   {
     glyphData.horizontalOffset +=
       static_cast<int32_t>(inputParamsForLine.styleOffset.x -
-      inputParamsForGlyph.outlineWidth); // if outline enabled then shadow should offset from outline
+                           inputParamsForGlyph.outlineWidth); // if outline enabled then shadow should offset from outline
 
     if(isFirstLine)
     {
@@ -1289,10 +1289,10 @@ void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient   
  *
  * @return An image buffer.
  */
-inline Devel::PixelBuffer CreateTransparentImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                                       const Pixel::Format pixelFormat)
+inline PixelBuffer CreateTransparentImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
+                                                const Pixel::Format pixelFormat)
 {
-  Devel::PixelBuffer imageBuffer = Devel::PixelBuffer::New(bufferWidth, bufferHeight, pixelFormat);
+  PixelBuffer imageBuffer = PixelBuffer::New(bufferWidth, bufferHeight, pixelFormat);
 
   if(Pixel::RGBA8888 == pixelFormat)
   {
@@ -1329,14 +1329,14 @@ TextAbstraction::FontClient& Typesetter::Impl::GetFontClient()
   return mFontClient;
 }
 
-Devel::PixelBuffer Typesetter::Impl::CreateTransparentImageBuffer(const uint32_t      bufferWidth,
-                                                                  const uint32_t      bufferHeight,
-                                                                  const Pixel::Format pixelFormat)
+PixelBuffer Typesetter::Impl::CreateTransparentImageBuffer(const uint32_t      bufferWidth,
+                                                           const uint32_t      bufferHeight,
+                                                           const Pixel::Format pixelFormat)
 {
   return Dali::Ui::Text::CreateTransparentImageBuffer(bufferWidth, bufferHeight, pixelFormat);
 }
 
-void Typesetter::Impl::DrawGlyphsBackground(Devel::PixelBuffer& buffer, const uint32_t bufferWidth,
+void Typesetter::Impl::DrawGlyphsBackground(PixelBuffer& buffer, const uint32_t bufferWidth,
                                             const uint32_t bufferHeight, const bool ignoreHorizontalAlignment,
                                             const int32_t horizontalOffset, const int32_t verticalOffset)
 {
@@ -1469,12 +1469,12 @@ void Typesetter::Impl::DrawGlyphsBackground(Devel::PixelBuffer& buffer, const ui
   }
 }
 
-Devel::PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                                       const Typesetter::Style style,
-                                                       const bool              ignoreHorizontalAlignment,
-                                                       const Pixel::Format pixelFormat, const int32_t horizontalOffset,
-                                                       const int32_t verticalOffset, const GlyphIndex fromGlyphIndex,
-                                                       const GlyphIndex toGlyphIndex)
+PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
+                                                const Typesetter::Style style,
+                                                const bool              ignoreHorizontalAlignment,
+                                                const Pixel::Format pixelFormat, const int32_t horizontalOffset,
+                                                const int32_t verticalOffset, const GlyphIndex fromGlyphIndex,
+                                                const GlyphIndex toGlyphIndex)
 {
   // Use l-value to make ensure it is not nullptr, so compiler happy.
   auto& viewModel = *(mModel.get());
@@ -1621,14 +1621,14 @@ Devel::PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidt
   return glyphData.bitmapBuffer;
 }
 
-Devel::PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uint32_t      bufferWidth,
-                                                                       const uint32_t      bufferHeight,
-                                                                       const bool          ignoreHorizontalAlignment,
-                                                                       const Pixel::Format pixelFormat,
-                                                                       const int32_t       horizontalOffset,
-                                                                       const int32_t       verticalOffset,
-                                                                       const GlyphIndex    fromGlyphIndex,
-                                                                       const GlyphIndex    toGlyphIndex)
+PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uint32_t      bufferWidth,
+                                                                const uint32_t      bufferHeight,
+                                                                const bool          ignoreHorizontalAlignment,
+                                                                const Pixel::Format pixelFormat,
+                                                                const int32_t       horizontalOffset,
+                                                                const int32_t       verticalOffset,
+                                                                const GlyphIndex    fromGlyphIndex,
+                                                                const GlyphIndex    toGlyphIndex)
 {
   auto& viewModel = *(mModel.get());
 
@@ -1744,14 +1744,14 @@ Devel::PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uin
   return glyphData.bitmapBuffer;
 }
 
-Devel::PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint32_t      bufferWidth,
-                                                                            const uint32_t      bufferHeight,
-                                                                            const bool          ignoreHorizontalAlignment,
-                                                                            const Pixel::Format pixelFormat,
-                                                                            const int32_t       horizontalOffset,
-                                                                            const int32_t       verticalOffset,
-                                                                            const GlyphIndex    fromGlyphIndex,
-                                                                            const GlyphIndex    toGlyphIndex)
+PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint32_t      bufferWidth,
+                                                                     const uint32_t      bufferHeight,
+                                                                     const bool          ignoreHorizontalAlignment,
+                                                                     const Pixel::Format pixelFormat,
+                                                                     const int32_t       horizontalOffset,
+                                                                     const int32_t       verticalOffset,
+                                                                     const GlyphIndex    fromGlyphIndex,
+                                                                     const GlyphIndex    toGlyphIndex)
 {
   auto& viewModel = *(mModel.get());
 

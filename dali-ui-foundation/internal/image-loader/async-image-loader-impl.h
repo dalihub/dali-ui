@@ -124,7 +124,7 @@ public:
    * alpha.
    * @return The loading task id
    */
-  uint32_t ApplyMask(Devel::PixelBuffer pixelBuffer, Devel::PixelBuffer maskPixelBuffer, float contentScale,
+  uint32_t ApplyMask(PixelBuffer pixelBuffer, PixelBuffer maskPixelBuffer, float contentScale,
                      bool cropToMask, Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad);
 
   /**

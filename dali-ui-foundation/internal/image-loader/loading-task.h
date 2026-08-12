@@ -23,12 +23,12 @@
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/devel-api/adaptor-framework/event-thread-callback.h>
-#include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/threading/conditional-wait.h>
 #include <dali/devel-api/threading/mutex.h>
 #include <dali/devel-api/threading/thread.h>
 #include <dali/integration-api/adaptor-framework/log-factory-interface.h>
 #include <dali/public-api/adaptor-framework/encoded-image-buffer.h>
+#include <dali/public-api/adaptor-framework/pixel-buffer.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/ref-object.h>
 
@@ -121,7 +121,7 @@ public:
    * alpha.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  LoadingTask(uint32_t id, Devel::PixelBuffer pixelBuffer, Devel::PixelBuffer maskPixelBuffer, float contentScale,
+  LoadingTask(uint32_t id, PixelBuffer pixelBuffer, PixelBuffer maskPixelBuffer, float contentScale,
               bool cropToMask, Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
 
   /**
@@ -171,7 +171,7 @@ private:
   void MultiplyAlpha();
 
 public:
-  std::vector<Devel::PixelBuffer> pixelBuffers{};   ///< pixelBuffer handle after successful load
+  std::vector<PixelBuffer> pixelBuffers{};          ///< pixelBuffer handle after successful load
                                                     ///< or pixelBuffer to be masked image in the mask task
   VisualUrl                     url;                ///< url of the image to load
   EncodedImageBuffer            encodedImageBuffer; ///< encoded buffer of the image to load
@@ -182,7 +182,7 @@ public:
   Dali::Ui::Integration::PreMultiplyOnLoad
     preMultiplyOnLoad; ///< if the image's color should be multiplied by it's alpha
 
-  Devel::PixelBuffer         maskPixelBuffer; ///< pixelBuffer of mask image
+  PixelBuffer                maskPixelBuffer; ///< pixelBuffer of mask image
   float                      contentScale;    ///< The factor to scale the content
   Dali::AnimatedImageLoading animatedImageLoading;
   uint32_t                   frameIndex;

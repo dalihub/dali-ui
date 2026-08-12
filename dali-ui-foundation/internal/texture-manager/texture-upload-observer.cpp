@@ -48,8 +48,8 @@ TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType r
 {
 }
 
-TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType   returnType,
-                                                              Devel::PixelBuffer pixelBuffer, const std::string& url,
+TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType returnType,
+                                                              PixelBuffer pixelBuffer, const std::string& url,
                                                               const bool preMultiplied)
 : returnType(returnType),
   textureId(Internal::TextureManagerType::INVALID_TEXTURE_ID),

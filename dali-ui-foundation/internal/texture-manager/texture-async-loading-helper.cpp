@@ -79,8 +79,8 @@ void TextureAsyncLoadingHelper::Load(const TextureManager::TextureId textureId, 
   Dali::AsyncTaskManager::Get().AddTask(loadingTask);
 }
 
-void TextureAsyncLoadingHelper::ApplyMask(const TextureManager::TextureId textureId, Devel::PixelBuffer pixelBuffer,
-                                          Devel::PixelBuffer maskPixelBuffer, const float contentScale,
+void TextureAsyncLoadingHelper::ApplyMask(const TextureManager::TextureId textureId, PixelBuffer pixelBuffer,
+                                          PixelBuffer maskPixelBuffer, const float contentScale,
                                           const bool                                     cropToMask,
                                           const Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad)
 {
