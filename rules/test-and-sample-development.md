@@ -184,3 +184,64 @@ the README and record execution evidence only when it was actually run.
 ```sh
 find samples -mindepth 2 -maxdepth 2 -name README.md -print | sort
 ```
+
+## Rule: Handle char8_t UTF-8 Literals in UTCs and samples
+
+- Status: required
+- Scope: tests, samples
+- Applies To: New or substantially modified UTC sources under `automated-tests/`
+  that pass `u8""` literals to narrow-character strings or APIs
+
+### Intent
+
+The project uses C++17, where a `u8""` literal has type `const char[]`. In
+C++20 and later, including C++26, it has type `const char8_t[]` instead. Code
+that passes such a literal directly to `std::string`, `Dali::String`, or an API
+expecting `const char*` can therefore compile under C++17 but fail with a
+newer language standard.
+
+### Preferred
+
+- When a UTC needs to pass a UTF-8 literal to a narrow-character string or API,
+  route it through a local `u8s()` helper, following the pattern in
+  [`utc-Dali-TextReveal-internal.cpp`](../automated-tests/src/dali-ui-foundation-internal/utc-Dali-TextReveal-internal.cpp):
+
+  ```cpp
+  #if defined(__cpp_char8_t) && (__cpp_char8_t >= 201811L)
+  inline const char* u8s(const char8_t* s)
+  {
+    return reinterpret_cast<const char*>(s);
+  }
+  #else
+  inline const char* u8s(const char* s)
+  {
+    return s;
+  }
+  #endif
+  ```
+
+- Use the helper at the conversion boundary, for example:
+  `std::string text = u8s(u8"UTF-8 text");`.
+- Keep the helper local to the UTC (typically in its anonymous namespace);
+  this compatibility rule is for UTCs or samples, not product code.
+- Preserve the literal's UTF-8 bytes. This helper adapts the pointer type for
+  existing narrow-character APIs; it does not perform text transcoding.
+
+### Avoid
+
+- Passing `u8""` directly to `std::string`, `Dali::String`, or another API
+  expecting `const char*`.
+- Using a `reinterpret_cast` at each call site instead of the local helper.
+- Adding a cast when the destination API accepts `char8_t` directly.
+
+### Exceptions
+
+Do not use `u8s()` when the value is intentionally handled as `char8_t` or the
+destination API accepts `char8_t` directly. Ordinary non-`u8` narrow string
+literals are unaffected.
+
+### Validation
+
+Review every `u8""` use in the new or modified UTC source. If it is passed to a
+narrow-character string or API, verify it goes through `u8s()`; a successful
+C++17 build alone does not validate compatibility with C++20 or later.
