@@ -466,8 +466,8 @@ chart.SetYAxis(yAxis);
 ### Manual Range Limits
 
 ```cpp
-yAxis.SetMinLimit(0.0f);
-yAxis.SetMaxLimit(500.0f);
+yAxis.SetMinimumLimit(0.0f);
+yAxis.SetMaximumLimit(500.0f);
 ```
 
 When limits are not set, the axis auto-ranges to fit the data (plus padding).
@@ -486,7 +486,7 @@ xAxis.SetDataPadding(0.0f);   // No padding on the X axis
 Forces tick marks to land on multiples of the given value:
 
 ```cpp
-yAxis.SetMinStep(50.0f);   // Y ticks at 0, 50, 100, 150, ...
+yAxis.SetMinimumStep(50.0f);   // Y ticks at 0, 50, 100, 150, ...
 ```
 
 ### Label Rotation
@@ -518,7 +518,7 @@ chart.SetXAxis(xAxis);
 
 ChartAxis yAxis = ChartAxis::New();
 yAxis.SetTitle("Units Sold");
-yAxis.SetMinStep(50.0f);
+yAxis.SetMinimumStep(50.0f);
 yAxis.SetDataPadding(0.1f);
 chart.SetYAxis(yAxis);
 ```
@@ -551,8 +551,8 @@ A boundary value of `NaN` means "extend to the plot area edge" on that side.
 
 ```cpp
 ChartSection xBand = ChartSection::New();
-xBand.SetXMin(2.5f);
-xBand.SetXMax(5.5f);
+xBand.SetMinimumX(2.5f);
+xBand.SetMaximumX(5.5f);
 xBand.SetFillColor(Vector4(0.2f, 0.7f, 0.3f, 0.12f));
 xBand.SetStrokeColor(Vector4(0.2f, 0.7f, 0.3f, 0.5f));
 xBand.SetStrokeWidth(1.5f);
@@ -563,8 +563,8 @@ chart.AddSection(xBand);
 
 ```cpp
 ChartSection yBand = ChartSection::New();
-yBand.SetYMin(200.0f);
-yBand.SetYMax(280.0f);
+yBand.SetMinimumY(200.0f);
+yBand.SetMaximumY(280.0f);
 yBand.SetFillColor(Vector4(1.0f, 0.85f, 0.2f, 0.10f));
 chart.AddSection(yBand);
 ```
@@ -573,8 +573,8 @@ chart.AddSection(yBand);
 
 ```cpp
 ChartSection hLine = ChartSection::New();
-hLine.SetYMin(250.0f);
-hLine.SetYMax(250.0f);   // same value = line
+hLine.SetMinimumY(250.0f);
+hLine.SetMaximumY(250.0f);   // same value = line
 hLine.SetStrokeColor(Vector4(1.0f, 0.3f, 0.3f, 0.9f));
 hLine.SetStrokeWidth(2.0f);
 chart.AddSection(hLine);
@@ -584,8 +584,8 @@ chart.AddSection(hLine);
 
 ```cpp
 ChartSection vLine = ChartSection::New();
-vLine.SetXMin(6.0f);
-vLine.SetXMax(6.0f);   // same value = line
+vLine.SetMinimumX(6.0f);
+vLine.SetMaximumX(6.0f);   // same value = line
 vLine.SetStrokeColor(Vector4(0.4f, 0.4f, 1.0f, 0.8f));
 vLine.SetStrokeWidth(2.0f);
 chart.AddSection(vLine);
@@ -595,10 +595,10 @@ chart.AddSection(vLine);
 
 ```cpp
 ChartSection rect = ChartSection::New();
-rect.SetXMin(8.5f);
-rect.SetXMax(11.5f);
-rect.SetYMin(270.0f);
-rect.SetYMax(320.0f);
+rect.SetMinimumX(8.5f);
+rect.SetMaximumX(11.5f);
+rect.SetMinimumY(270.0f);
+rect.SetMaximumY(320.0f);
 rect.SetFillColor(Vector4(0.6f, 0.2f, 1.0f, 0.12f));
 rect.SetStrokeColor(Vector4(0.6f, 0.2f, 1.0f, 0.6f));
 rect.SetStrokeWidth(1.5f);
@@ -677,12 +677,12 @@ chart.RemoveAllSeries();
 
 ### Sliding Window with AppendValue
 
-For real-time data feeds (sensors, streaming), use `AppendValue()` together with `SetMaxDataPoints()` to maintain a fixed-length sliding window:
+For real-time data feeds (sensors, streaming), use `AppendValue()` together with `SetMaximumDataPoints()` to maintain a fixed-length sliding window:
 
 ```cpp
 LineSeries series = LineSeries::New();
 series.SetName("CPU Usage");
-series.SetMaxDataPoints(60);   // Keep at most 60 points; oldest discarded on overflow
+series.SetMaximumDataPoints(60);   // Keep at most 60 points; oldest discarded on overflow
 
 chart.AddSeries(series);
 
@@ -716,7 +716,7 @@ chart.SetUpdateThrottle(0.0f);
 LineSeries liveSeries = LineSeries::New();
 liveSeries.SetName("Temperature");
 liveSeries.SetColor(Vector4(1.0f, 0.4f, 0.2f, 1.0f));
-liveSeries.SetMaxDataPoints(120);
+liveSeries.SetMaximumDataPoints(120);
 liveSeries.SetMarkersVisible(false);
 
 chart.AddSeries(liveSeries);
@@ -767,7 +767,7 @@ chart.SetZoomMode(static_cast<int>(ChartView::ZoomMode::NONE));
 
 ```cpp
 chart.SetZoomClampEnabled(true);    // Prevent panning beyond the data range
-chart.SetAutoFitYOnPan(true);       // Auto-scale Y axis to the visible X window while panning
+chart.SetAutoFitYOnPanEnabled(true);       // Auto-scale Y axis to the visible X window while panning
 chart.ResetZoom();                  // Return to the full data view
 ```
 
@@ -823,6 +823,8 @@ chart.SetHitThreshold(30.0f);   // Distance in pixels within which a tap is cons
 
 ![Custom tooltip formatter](assets/chartview/formatter.png)
 
+Every ChartView signal's first callback argument is the `ChartView` that emitted it — useful when one handler is connected to several charts.
+
 ### DataPointSelectedSignal
 
 Emitted when the user taps or hovers over a data point.
@@ -831,17 +833,17 @@ Emitted when the user taps or hovers over a data point.
 class MyHandler : public Dali::ConnectionTracker
 {
 public:
-    void OnPointSelected(const ChartPointEventArgs& e)
+    void OnPointSelected(ChartView chart, const ChartPointEventArgs& e)
     {
-        // e.seriesIndex  — zero-based series index
-        // e.pointIndex   — zero-based point index within the series
-        // e.dataX        — X value of the selected point
-        // e.dataY        — Y value of the selected point
-        // e.seriesName   — name set via SetName()
-        // e.xLabel       — label string from ChartAxis::SetLabels()
+        // e.GetSeriesIndex()  — zero-based series index
+        // e.GetPointIndex()   — zero-based point index within the series
+        // e.GetDataX()        — X value of the selected point
+        // e.GetDataY()        — Y value of the selected point
+        // e.GetSeriesName()   — name set via SetName()
+        // e.GetXLabel()       — label string from ChartAxis::SetLabels()
         DALI_LOG_RELEASE_INFO("Hit series %d, point %d: [%s] = %.1f\n",
-                              e.seriesIndex, e.pointIndex,
-                              e.xLabel.CStr(), e.dataY);
+                              e.GetSeriesIndex(), e.GetPointIndex(),
+                              e.GetXLabel().CStr(), e.GetDataY());
     }
 };
 
@@ -854,7 +856,7 @@ chart.DataPointSelectedSignal().Connect(&handler, &MyHandler::OnPointSelected);
 Emitted when the user taps a legend entry.
 
 ```cpp
-void OnLegendTapped(int seriesIndex, bool isNowVisible)
+void OnLegendTapped(ChartView chart, int seriesIndex, bool isNowVisible)
 {
     DALI_LOG_RELEASE_INFO("Legend series %d toggled -> %s\n",
                           seriesIndex, isNowVisible ? "visible" : "hidden");
@@ -874,15 +876,15 @@ chart.MultiPointSelectedSignal().Connect(&handler, &MyHandler::OnMultiPoint);
 
 ### ZoomedSignal
 
-Emitted after a zoom or pan gesture completes, reporting the new viewport in data coordinates.
+Emitted after a zoom or pan gesture completes, reporting the new viewport in data coordinates as a `Dali::Bounds` (x = minimum X, y = minimum Y, `Right()`/`Bottom()` give the maximum X/Y).
 
 ```cpp
-void OnZoomed(const ChartViewportArgs& vp)
+void OnZoomed(ChartView chart, const Dali::Bounds& vp)
 {
-    // vp.xMin, vp.xMax — visible X range in data coordinates
-    // vp.yMin, vp.yMax — visible Y range in data coordinates
+    // vp.x, vp.Right() — visible X range in data coordinates
+    // vp.y, vp.Bottom() — visible Y range in data coordinates
     DALI_LOG_RELEASE_INFO("Viewport X[%.1f ~ %.1f] Y[%.1f ~ %.1f]\n",
-                          vp.xMin, vp.xMax, vp.yMin, vp.yMax);
+                          vp.x, vp.Right(), vp.y, vp.Bottom());
 }
 
 chart.ZoomedSignal().Connect(&handler, &MyHandler::OnZoomed);
@@ -892,10 +894,10 @@ chart.ZoomedSignal().Connect(&handler, &MyHandler::OnZoomed);
 
 | Signal | Callback Signature | Emitted When |
 |---|---|---|
-| `DataPointSelectedSignal` | `void(const ChartPointEventArgs&)` | Single point tapped or hovered |
-| `LegendItemTappedSignal` | `void(int index, bool isVisible)` | Legend entry tapped |
-| `MultiPointSelectedSignal` | `void(const ChartPointEventArgs&)` | Each matching point under SAME_X strategy |
-| `ZoomedSignal` | `void(const ChartViewportArgs&)` | Zoom or pan gesture ends |
+| `DataPointSelectedSignal` | `void(ChartView, const ChartPointEventArgs&)` | Single point tapped or hovered |
+| `LegendItemTappedSignal` | `void(ChartView, int index, bool isVisible)` | Legend entry tapped |
+| `MultiPointSelectedSignal` | `void(ChartView, const ChartPointEventArgs&)` | Each matching point under SAME_X strategy |
+| `ZoomedSignal` | `void(ChartView, const Dali::Bounds&)` | Zoom or pan gesture ends |
 
 <br/>
 
@@ -948,8 +950,8 @@ The `GAUGE` chart type renders a circular arc gauge. It does **not** use `AddSer
 ChartView gauge = ChartView::New(ChartView::Type::GAUGE, Vector2(360.0f, 360.0f));
 gauge.SetTitle("CPU Usage");
 
-gauge.SetGaugeMinValue(0.0f);
-gauge.SetGaugeMaxValue(100.0f);
+gauge.SetGaugeMinimumValue(0.0f);
+gauge.SetGaugeMaximumValue(100.0f);
 gauge.SetGaugeValue(72.0f);        // Current needle position
 
 // Color zones
@@ -1001,8 +1003,8 @@ gauge.AddGaugeRange(50.0f, 100.0f, Vector4(1.0f, 0.3f, 0.3f, 1.0f));
 | Method | Description |
 |---|---|
 | `SetGaugeValue(float)` | Set the current gauge position |
-| `SetGaugeMinValue(float)` | Set the minimum range value |
-| `SetGaugeMaxValue(float)` | Set the maximum range value |
+| `SetGaugeMinimumValue(float)` | Set the minimum range value |
+| `SetGaugeMaximumValue(float)` | Set the maximum range value |
 | `SetGaugeArcSpan(float)` | Total arc sweep angle in degrees |
 | `SetGaugeStartAngle(float)` | Starting angle of the arc |
 | `SetGaugeArcWidth(float)` | Arc thickness as a fraction of the radius |

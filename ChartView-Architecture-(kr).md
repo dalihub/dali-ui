@@ -443,7 +443,7 @@ class ScaleEngine
 
 좌표 규약: `ToCanvasY`는 Y축을 반전하여 더 큰 데이터 값이 화면에서 위쪽에 표시되도록 합니다.
 
-`ComputeNiceTicks()`는 표준 크기-분수 알고리즘(1×, 2×, 5×, 10× 거듭제곱 단위 간격)을 사용하여 "깔끔하게" 반올림된 눈금 값을 계산하며, `ChartAxis::SetMinStep()`으로 설정된 `minStep`으로 선택적으로 클램핑됩니다.
+`ComputeNiceTicks()`는 표준 크기-분수 알고리즘(1×, 2×, 5×, 10× 거듭제곱 단위 간격)을 사용하여 "깔끔하게" 반올림된 눈금 값을 계산하며, `ChartAxis::SetMinimumStep()`으로 설정된 `minStep`으로 선택적으로 클램핑됩니다.
 
 줌/패닝이 활성화된 경우(`mViewportActive == true`), `UpdateScale()`은 전체 자동 범위 대신 뷰포트의 데이터 공간 경계를 사용하므로, 모든 렌더링과 히트 테스팅이 자동으로 줌된 창 내에서 동작합니다.
 
