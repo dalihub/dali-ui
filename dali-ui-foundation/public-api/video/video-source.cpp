@@ -66,12 +66,12 @@ VideoSource::VideoSource(Internal::VideoSource* internal)
 {
 }
 
-VideoSource VideoSource::New(const char*          providerId,
+VideoSource VideoSource::New(Dali::StringView     providerId,
                              void*                nativeSession,
                              VideoSourceOwnership ownership,
                              VideoRenderingMode   renderingMode)
 {
-  if(providerId == nullptr || nativeSession == nullptr)
+  if(providerId.Empty() || nativeSession == nullptr)
   {
     return VideoSource();
   }

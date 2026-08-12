@@ -24,7 +24,7 @@ namespace Ui
 {
 namespace Internal
 {
-VideoSourcePtr VideoSource::New(const char*          providerId,
+VideoSourcePtr VideoSource::New(Dali::StringView     providerId,
                                 void*                nativeSession,
                                 VideoSourceOwnership ownership,
                                 VideoRenderingMode   renderingMode)
@@ -32,11 +32,11 @@ VideoSourcePtr VideoSource::New(const char*          providerId,
   return new VideoSource(providerId, nativeSession, ownership, renderingMode);
 }
 
-VideoSource::VideoSource(const char*          providerId,
+VideoSource::VideoSource(Dali::StringView     providerId,
                          void*                nativeSession,
                          VideoSourceOwnership ownership,
                          VideoRenderingMode   renderingMode)
-: mProviderId(providerId),
+: mProviderId(providerId), // Copies out of the view; the caller's buffer is not kept.
   mNativeSession(nativeSession),
   mOwnership(ownership),
   mRenderingMode(renderingMode)
@@ -49,7 +49,7 @@ VideoSource::~VideoSource()
 
 bool VideoSource::IsValid() const
 {
-  return mProviderId != nullptr && !mNativeSession.Empty();
+  return !mProviderId.Empty() && !mNativeSession.Empty();
 }
 
 VideoRenderingMode VideoSource::GetRenderingMode() const

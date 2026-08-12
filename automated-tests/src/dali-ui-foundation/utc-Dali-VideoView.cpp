@@ -95,6 +95,18 @@ int UtcDaliVideoSourceNewInvalidProviderIdN(void)
   END_TEST;
 }
 
+int UtcDaliVideoSourceNewEmptyProviderIdN(void)
+{
+  UiTestApplication application;
+
+  // An empty provider id names no plugin, so it is rejected like a null one.
+  VideoSource source = VideoSource::New("", &gDummySession, VideoSourceOwnership::EXTERNAL, VideoRenderingMode::UNDERLAY);
+
+  DALI_TEST_CHECK(!source);
+  DALI_TEST_CHECK(!source.IsValid());
+  END_TEST;
+}
+
 int UtcDaliVideoSourceCopyConstructorP(void)
 {
   UiTestApplication application;
@@ -183,6 +195,26 @@ int UtcDaliVideoSourceCustomOwnershipP(void)
   VideoSource source = CreateTestSource(VideoSourceOwnership::SHARED, VideoRenderingMode::UNDERLAY);
 
   DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetOwnership()), static_cast<uint32_t>(VideoSourceOwnership::SHARED), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliVideoSourceCreateFromDescriptorP(void)
+{
+  UiTestApplication application;
+
+  // CreateVideoSource() views the temporary Dali::String that
+  // descriptor.GetProviderId() returns by value, so the source must own a copy of
+  // the provider id rather than point into the caller's buffer.
+  Dali::VideoSourceDescriptor descriptor;
+  descriptor.SetProviderId("tizen.mmplayer");
+  descriptor.SetNativeSession(Dali::Any(static_cast<void*>(&gDummySession)));
+  descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
+
+  VideoSource source = CreateVideoSource(descriptor);
+
+  DALI_TEST_CHECK(source);
+  DALI_TEST_CHECK(source.IsValid());
+  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetRenderingMode()), static_cast<uint32_t>(VideoRenderingMode::UNDERLAY), TEST_LOCATION);
   END_TEST;
 }
 

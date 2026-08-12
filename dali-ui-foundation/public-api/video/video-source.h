@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/video-source-descriptor.h>
+#include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/object/any.h>
 #include <dali/public-api/object/base-handle.h>
 #include <cstdint>
@@ -135,8 +136,10 @@ public: // Not intended for application developers
    * (release / GBS) builds.
    * Applications should use CreateVideoSource() with a descriptor built by a
    * dali-adaptor platform helper, not this directly.
+   *
+   * providerId is only read here; the source stores its own copy.
    */
-  static VideoSource New(const char*          providerId,
+  static VideoSource New(Dali::StringView     providerId,
                          void*                nativeSession,
                          VideoSourceOwnership ownership,
                          VideoRenderingMode   renderingMode);
@@ -175,7 +178,7 @@ template<typename SourceDescriptor>
 inline VideoSource CreateVideoSource(const SourceDescriptor& descriptor, VideoSourceOwnership ownership = VideoSourceOwnership::EXTERNAL)
 {
   const auto renderingMode = static_cast<VideoRenderingMode>(static_cast<uint32_t>(descriptor.GetRenderingMode()));
-  return VideoSource::New(descriptor.GetProviderId().CStr(), AnyCast<void*>(descriptor.GetNativeSession()), ownership, renderingMode);
+  return VideoSource::New(descriptor.GetProviderId(), AnyCast<void*>(descriptor.GetNativeSession()), ownership, renderingMode);
 }
 
 } // namespace Ui
