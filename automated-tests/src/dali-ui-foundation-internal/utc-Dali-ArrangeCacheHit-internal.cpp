@@ -121,7 +121,7 @@ int gDummyVideoSession = 0;
 
 VideoSource CreateTestVideoSource()
 {
-  return VideoSource::New("test.provider", &gDummyVideoSession, VideoSourceOptions(), VideoRenderingMode::Underlay);
+  return VideoSource::New("test.provider", &gDummyVideoSession, VideoSourceOwnership::EXTERNAL, VideoRenderingMode::UNDERLAY);
 }
 
 // A stand-in for a third-party ViewImpl subclass that counts OnArrange calls. The

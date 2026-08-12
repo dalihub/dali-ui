@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/adaptor-framework/video-source-descriptor.h>
 #include <dali/public-api/object/any.h>
 #include <dali/public-api/object/base-handle.h>
 #include <cstdint>
@@ -34,40 +35,92 @@ namespace Internal DALI_INTERNAL
 class VideoSource;
 }
 
-enum class VideoSourceOwnership : uint32_t
-{
-  External = 0,
-  Shared   = 1,
-  Transfer = 2,
-};
+// VideoSourceOwnership and VideoRenderingMode are Dali::VideoSourceOwnership and
+// Dali::VideoRenderingMode (declared in video-source-descriptor.h above), found
+// here through ordinary namespace lookup, not declared in Dali::Ui.
 
-enum class VideoRenderingMode : uint32_t
-{
-  Underlay    = 0, ///< Platform-composited hole-punch; renders beneath the UI.
-  NativeImage = 1, ///< Decoded frames become a GPU texture; supports UI render effects.
-};
-
-struct VideoSourceOptions
-{
-  VideoSourceOwnership ownership{VideoSourceOwnership::External};
-};
-
+/**
+ * @brief Describes an externally created native player session, used as the
+ * source for a VideoView.
+ *
+ * A VideoSource is created with CreateVideoSource() and attached to a
+ * VideoView with VideoView::New(VideoSource) or VideoView::SetSource().
+ * VideoSource only carries the provider id, native session handle, and
+ * rendering mode; VideoView does not read or write these once attached.
+ */
 class DALI_UI_API VideoSource : public BaseHandle
 {
 public:
+  /**
+   * @brief Creates an uninitialized VideoSource handle.
+   */
   VideoSource();
+
+  /**
+   * @brief Destructor.
+   */
   ~VideoSource();
 
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] rhs The handle to copy
+   */
   VideoSource(const VideoSource& rhs);
+
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] rhs The handle to copy
+   * @return A reference to this handle
+   */
   VideoSource& operator=(const VideoSource& rhs);
 
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs The handle to move
+   */
   VideoSource(VideoSource&& rhs) noexcept;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs The handle to move
+   * @return A reference to this handle
+   */
   VideoSource& operator=(VideoSource&& rhs) noexcept;
 
+  /**
+   * @brief Downcasts a handle to a VideoSource handle.
+   *
+   * @param[in] handle The handle to downcast
+   * @return A VideoSource handle, or an uninitialized handle if the cast fails
+   */
   static VideoSource DownCast(BaseHandle handle);
 
-  bool                 IsValid() const;
-  VideoRenderingMode   GetRenderingMode() const;
+  /**
+   * @brief Retrieves whether this source has both a provider id and a native session.
+   *
+   * VideoView::SetSource() attaches the source only if this is true and the
+   * handle itself is initialized.
+   *
+   * @return True if the source has a provider id and a native session
+   */
+  bool IsValid() const;
+
+  /**
+   * @brief Retrieves how this source is rendered into the scene.
+   *
+   * @return The rendering mode
+   */
+  VideoRenderingMode GetRenderingMode() const;
+
+  /**
+   * @brief Retrieves the native session ownership policy.
+   *
+   * @return The ownership policy
+   */
   VideoSourceOwnership GetOwnership() const;
 
 public: // Not intended for application developers
@@ -83,10 +136,10 @@ public: // Not intended for application developers
    * Applications should use CreateVideoSource() with a descriptor built by a
    * dali-adaptor platform helper, not this directly.
    */
-  static VideoSource New(const char*               providerId,
-                         void*                     nativeSession,
-                         const VideoSourceOptions& options,
-                         VideoRenderingMode        renderingMode);
+  static VideoSource New(const char*          providerId,
+                         void*                nativeSession,
+                         VideoSourceOwnership ownership,
+                         VideoRenderingMode   renderingMode);
   /// @endcond
 };
 
@@ -95,7 +148,7 @@ public: // Not intended for application developers
  *
  * The application fills a Dali::VideoSourceDescriptor (declared in
  * <dali/public-api/adaptor-framework/video-source-descriptor.h>) with the provider
- * id, native session handle and capability flags, then passes it here:
+ * id, native session handle, and rendering mode, then passes it here:
  *
  * @code
  * Dali::VideoSourceDescriptor descriptor;
@@ -106,23 +159,23 @@ public: // Not intended for application developers
  * @endcode
  *
  * The provider id, native session, and rendering mode are taken from the
- * descriptor as-is; ownership and control policy come from the caller-supplied
- * options (the descriptor's own ownership/control-policy fields are not read here).
+ * descriptor as-is; ownership comes from the caller-supplied argument (the
+ * descriptor's own ownership field, if it has one, is not read here).
  *
- * This is a template so that this header depends on neither the descriptor type
- * (Dali::VideoSourceDescriptor) nor any platform CAPI header; only the consuming
- * application pulls those in. The descriptor's rendering mode enum shares the
- * same underlying values as VideoRenderingMode, so it is mapped by value.
+ * This is a template so callers are not required to use Dali::VideoSourceDescriptor
+ * specifically; any duck-typed descriptor with matching accessors works. The
+ * descriptor's rendering mode is mapped by value in case a caller's descriptor
+ * type uses a different (but underlying-value-compatible) rendering mode enum.
  *
  * @param[in] descriptor A platform video source descriptor
- * @param[in] options Ownership and control-policy options for the source
+ * @param[in] ownership The native session ownership policy
  * @return A VideoSource describing the platform player session
  */
 template<typename SourceDescriptor>
-inline VideoSource CreateVideoSource(const SourceDescriptor& descriptor, const VideoSourceOptions& options = {})
+inline VideoSource CreateVideoSource(const SourceDescriptor& descriptor, VideoSourceOwnership ownership = VideoSourceOwnership::EXTERNAL)
 {
   const auto renderingMode = static_cast<VideoRenderingMode>(static_cast<uint32_t>(descriptor.GetRenderingMode()));
-  return VideoSource::New(descriptor.GetProviderId().CStr(), AnyCast<void*>(descriptor.GetNativeSession()), options, renderingMode);
+  return VideoSource::New(descriptor.GetProviderId().CStr(), AnyCast<void*>(descriptor.GetNativeSession()), ownership, renderingMode);
 }
 
 } // namespace Ui

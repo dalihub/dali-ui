@@ -24,60 +24,21 @@ namespace Ui
 {
 namespace Internal
 {
-namespace
+VideoSourcePtr VideoSource::New(const char*          providerId,
+                                void*                nativeSession,
+                                VideoSourceOwnership ownership,
+                                VideoRenderingMode   renderingMode)
 {
-Dali::VideoPlayerPlugin::VideoSourceOwnership ToAdaptorOwnership(VideoSourceOwnership ownership)
-{
-  switch(ownership)
-  {
-    case VideoSourceOwnership::Shared:
-    {
-      return Dali::VideoPlayerPlugin::VideoSourceOwnership::SHARED;
-    }
-    case VideoSourceOwnership::Transfer:
-    {
-      return Dali::VideoPlayerPlugin::VideoSourceOwnership::TRANSFER;
-    }
-    case VideoSourceOwnership::External:
-    default:
-    {
-      return Dali::VideoPlayerPlugin::VideoSourceOwnership::EXTERNAL;
-    }
-  }
+  return new VideoSource(providerId, nativeSession, ownership, renderingMode);
 }
 
-Dali::VideoPlayerPlugin::VideoRenderingMode ToAdaptorRenderingMode(VideoRenderingMode mode)
-{
-  switch(mode)
-  {
-    case VideoRenderingMode::NativeImage:
-    {
-      return Dali::VideoPlayerPlugin::VideoRenderingMode::NATIVE_IMAGE;
-    }
-    case VideoRenderingMode::Underlay:
-    default:
-    {
-      return Dali::VideoPlayerPlugin::VideoRenderingMode::UNDERLAY;
-    }
-  }
-}
-} // namespace
-
-VideoSourcePtr VideoSource::New(const char*               providerId,
-                                void*                     nativeSession,
-                                const VideoSourceOptions& options,
-                                VideoRenderingMode        renderingMode)
-{
-  return new VideoSource(providerId, nativeSession, options, renderingMode);
-}
-
-VideoSource::VideoSource(const char*               providerId,
-                         void*                     nativeSession,
-                         const VideoSourceOptions& options,
-                         VideoRenderingMode        renderingMode)
+VideoSource::VideoSource(const char*          providerId,
+                         void*                nativeSession,
+                         VideoSourceOwnership ownership,
+                         VideoRenderingMode   renderingMode)
 : mProviderId(providerId),
   mNativeSession(nativeSession),
-  mOwnership(options.ownership),
+  mOwnership(ownership),
   mRenderingMode(renderingMode)
 {
 }
@@ -106,8 +67,8 @@ Dali::VideoPlayerPlugin::VideoSourceDescriptor VideoSource::ToAdaptorDescriptor(
   Dali::VideoPlayerPlugin::VideoSourceDescriptor descriptor;
   descriptor.SetProviderId(mProviderId);
   descriptor.SetNativeSession(mNativeSession);
-  descriptor.SetOwnership(ToAdaptorOwnership(mOwnership));
-  descriptor.SetRenderingMode(ToAdaptorRenderingMode(mRenderingMode));
+  descriptor.SetOwnership(mOwnership);
+  descriptor.SetRenderingMode(mRenderingMode);
   return descriptor;
 }
 

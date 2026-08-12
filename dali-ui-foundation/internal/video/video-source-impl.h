@@ -36,10 +36,10 @@ using VideoSourcePtr = IntrusivePtr<VideoSource>;
 class VideoSource : public BaseObject
 {
 public:
-  static VideoSourcePtr New(const char*               providerId,
-                            void*                     nativeSession,
-                            const VideoSourceOptions& options,
-                            VideoRenderingMode        renderingMode);
+  static VideoSourcePtr New(const char*          providerId,
+                            void*                nativeSession,
+                            VideoSourceOwnership ownership,
+                            VideoRenderingMode   renderingMode);
 
   bool                 IsValid() const;
   VideoRenderingMode   GetRenderingMode() const;
@@ -51,10 +51,10 @@ protected:
   virtual ~VideoSource();
 
 private:
-  VideoSource(const char*               providerId,
-              void*                     nativeSession,
-              const VideoSourceOptions& options,
-              VideoRenderingMode        renderingMode);
+  VideoSource(const char*          providerId,
+              void*                nativeSession,
+              VideoSourceOwnership ownership,
+              VideoRenderingMode   renderingMode);
 
   VideoSource(const VideoSource&)            = delete;
   VideoSource& operator=(const VideoSource&) = delete;

@@ -66,17 +66,17 @@ VideoSource::VideoSource(Internal::VideoSource* internal)
 {
 }
 
-VideoSource VideoSource::New(const char*               providerId,
-                             void*                     nativeSession,
-                             const VideoSourceOptions& options,
-                             VideoRenderingMode        renderingMode)
+VideoSource VideoSource::New(const char*          providerId,
+                             void*                nativeSession,
+                             VideoSourceOwnership ownership,
+                             VideoRenderingMode   renderingMode)
 {
   if(providerId == nullptr || nativeSession == nullptr)
   {
     return VideoSource();
   }
 
-  Ui::Internal::VideoSourcePtr internal = Ui::Internal::VideoSource::New(providerId, nativeSession, options, renderingMode);
+  Ui::Internal::VideoSourcePtr internal = Ui::Internal::VideoSource::New(providerId, nativeSession, ownership, renderingMode);
   return VideoSource(internal.Get());
 }
 

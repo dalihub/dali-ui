@@ -238,7 +238,7 @@ void VideoViewImpl::AttachToScene()
   }
 
   const bool isNativeImageMode = mSource &&
-                                 (mSource.GetRenderingMode() == VideoRenderingMode::NativeImage);
+                                 (mSource.GetRenderingMode() == VideoRenderingMode::NATIVE_IMAGE);
 
   if(isNativeImageMode)
   {
