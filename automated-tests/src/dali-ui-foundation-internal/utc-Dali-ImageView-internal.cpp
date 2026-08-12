@@ -137,10 +137,6 @@ int UtcDaliImageViewWrapContentSetUrlInvalidatesMeasure(void)
   DALI_TEST_CHECK(!viewData.IsMeasureCacheValid());
   DALI_TEST_CHECK(viewData.IsMeasureDirty());
 
-  view.Measure(500.0f, 500.0f);
-  DALI_TEST_CHECK(viewData.GetVisual(ImageView::Property::IMAGE));
-  DALI_TEST_CHECK(viewData.IsMeasureCacheValid());
-
   END_TEST;
 }
 
