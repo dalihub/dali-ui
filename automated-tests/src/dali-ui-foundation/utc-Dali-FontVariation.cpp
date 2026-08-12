@@ -240,6 +240,23 @@ int UtcDaliFontVariationToStringUnquoted(void)
   END_TEST;
 }
 
+int UtcDaliFontVariationToStringFloatFormatting(void)
+{
+  const Dali::Vector<FontVariation::Axis> axes = MakeAxes({
+    {"wght", 1.0f},
+    {"wdth", 1.25f},
+    {"slnt", -0.5f},
+    {"zer1", -0.0f},
+    {"zer2", 0.0f},
+    {"long", 700.123474f},
+  });
+
+  const Dali::String actual = FontVariation::ToString(axes);
+
+  DALI_TEST_EQUALS(actual, Dali::String("wght=1,wdth=1.25,slnt=-0.5,zer1=0,zer2=0,long=700.123474"), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliFontVariationToStringQuotedTagWithTrailingSpaces(void)
 {
   const Dali::Vector<FontVariation::Axis> axes = MakeAxes({
