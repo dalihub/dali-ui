@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 
 // EXTERNAL HEADERS
-#include <dali/devel-api/adaptor-framework/image-loading.h>
+#include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <dali/devel-api/adaptor-framework/pixel-buffer-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
@@ -312,7 +312,7 @@ PixelBuffer TextureManager::LoadPixelBuffer(
       }
       else
       {
-        pixelBuffer = LoadImageFromFile(url.GetUrl(), desiredSize, samplingMode, orientationCorrection);
+        pixelBuffer = LoadImageFromFile(Dali::Integration::ToDaliStringView(url.GetUrl()), desiredSize, samplingMode, orientationCorrection);
       }
       if(pixelBuffer && preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD)
       {
@@ -820,7 +820,7 @@ void TextureManager::LoadImageSynchronously(const VisualUrl& url, const Dali::Im
     else
     {
       pixelBuffer =
-        Dali::LoadImageFromFile(url.GetUrl(), desiredSize, samplingMode, orientationCorrection);
+        Dali::LoadImageFromFile(Dali::Integration::ToDaliStringView(url.GetUrl()), desiredSize, samplingMode, orientationCorrection);
     }
   }
 
