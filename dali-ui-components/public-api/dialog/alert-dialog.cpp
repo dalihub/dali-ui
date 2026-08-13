@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
 
+// EXTERNAL INCLUDES
+#include <utility>
+
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/dialog/alert-dialog-impl.h>
 
@@ -100,9 +103,14 @@ Dali::String AlertDialog::GetMessage() const
   return GetImpl(*this).GetMessage();
 }
 
-void AlertDialog::SetActionButtons(const std::vector<std::pair<Dali::String, std::function<void()>>>& buttons)
+TextButton AlertDialog::AddActionButton(const Dali::String& text)
 {
-  GetImpl(*this).SetActionButtons(buttons);
+  return GetImpl(*this).AddActionButton(text);
+}
+
+void AlertDialog::ClearActionButtons()
+{
+  GetImpl(*this).ClearActionButtons();
 }
 
 AlertDialog::AlertDialog(Integration::AlertDialogImpl& implementation)

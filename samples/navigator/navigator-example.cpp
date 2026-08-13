@@ -39,7 +39,6 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 
 #include <functional>
-#include <memory>
 #include <string>
 
 using namespace Dali;
@@ -142,10 +141,10 @@ private:
     UpdateStatus();
   }
 
-  std::shared_ptr<NavigationTransitionSpec> CreateSlideTransitionSpec() const
+  NavigationTransitionSpec CreateSlideTransitionSpec()
   {
-    auto    spec   = std::make_shared<NavigationTransitionSpec>();
-    spec->duration = 0.42f;
+    NavigationTransitionSpec spec = NavigationTransitionSpec::New();
+    spec.SetDuration(0.42f);
 
     // Incoming pages (enter/popEnter) set an off-screen start via SetProperty, but the
     // page is arranged this frame and ViewImpl::OnArrange then overwrites POSITION_X with
@@ -154,7 +153,8 @@ private:
     // value is authoritative and survives the arrange. Outgoing pages (exit/popExit) are
     // already arranged and stable at 0, so AnimateTo from the current value is correct.
     // Opacity is never touched by layout, so AnimateTo is used for it everywhere.
-    spec->enter = [](Animation& anim, View view) {
+    spec.EnterSignal().Connect(this, [](Animation& anim, View view)
+    {
       Dali::Ui::Extension::View::SetPositionX(view, PAGE_SLIDE_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
       KeyFrames slideX = KeyFrames::New();
@@ -162,12 +162,14 @@ private:
       slideX.Add(1.0f, 0.0f);
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), slideX, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
-    };
-    spec->exit = [](Animation& anim, View view) {
+    });
+    spec.ExitSignal().Connect(this, [](Animation& anim, View view)
+    {
       anim.AnimateTo(Property(view, Actor::Property::POSITION_X), -PAGE_SLIDE_TRAVEL, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.82f, AlphaFunction::EASE_OUT);
-    };
-    spec->popEnter = [](Animation& anim, View view) {
+    });
+    spec.PopEnterSignal().Connect(this, [](Animation& anim, View view)
+    {
       Dali::Ui::Extension::View::SetPositionX(view, -PAGE_SLIDE_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.82f);
       KeyFrames slideX = KeyFrames::New();
@@ -175,29 +177,33 @@ private:
       slideX.Add(1.0f, 0.0f);
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), slideX, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
-    };
-    spec->popExit = [](Animation& anim, View view) {
+    });
+    spec.PopExitSignal().Connect(this, [](Animation& anim, View view)
+    {
       anim.AnimateTo(Property(view, Actor::Property::POSITION_X), PAGE_SLIDE_TRAVEL, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT);
-    };
-    spec->snapIncoming = [](View view) {
+    });
+    spec.SnapIncomingSignal().Connect(this, [](View view)
+    {
       Dali::Ui::Extension::View::SetPositionX(view, 0.0f);
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
-    };
-    spec->snapOutgoing = [](View view) {
+    });
+    spec.SnapOutgoingSignal().Connect(this, [](View view)
+    {
       Dali::Ui::Extension::View::SetPositionX(view, 0.0f);
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
-    };
+    });
 
     return spec;
   }
 
-  std::shared_ptr<NavigationTransitionSpec> CreateFadePageTransitionSpec() const
+  NavigationTransitionSpec CreateFadePageTransitionSpec()
   {
-    auto    spec   = std::make_shared<NavigationTransitionSpec>();
-    spec->duration = 0.58f;
+    NavigationTransitionSpec spec = NavigationTransitionSpec::New();
+    spec.SetDuration(0.58f);
 
-    spec->enter = [](Animation& anim, View view) {
+    spec.EnterSignal().Connect(this, [](Animation& anim, View view)
+    {
       KeyFrames wobbleX = KeyFrames::New();
       wobbleX.Add(0.0f, PAGE_WOBBLE_TRAVEL);
       wobbleX.Add(0.45f, -PAGE_WOBBLE_TRAVEL * 0.42f);
@@ -216,8 +222,9 @@ private:
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), wobbleX, AlphaFunction::EASE_OUT);
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), wobbleY, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT, TimePeriod(0.0f, 0.34f));
-    };
-    spec->popExit = [](Animation& anim, View view) {
+    });
+    spec.PopExitSignal().Connect(this, [](Animation& anim, View view)
+    {
       KeyFrames wobbleX = KeyFrames::New();
       wobbleX.Add(0.0f, 0.0f);
       wobbleX.Add(0.35f, -PAGE_WOBBLE_TRAVEL * 0.28f);
@@ -231,31 +238,34 @@ private:
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), wobbleX, AlphaFunction::EASE_OUT);
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), wobbleY, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT, TimePeriod(0.0f, 0.28f));
-    };
-    spec->snapIncoming = [](View view) {
+    });
+    spec.SnapIncomingSignal().Connect(this, [](View view)
+    {
       Dali::Ui::Extension::View::SetPositionX(view, 0.0f);
       Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
-    };
-    spec->snapOutgoing = [](View view) {
+    });
+    spec.SnapOutgoingSignal().Connect(this, [](View view)
+    {
       Dali::Ui::Extension::View::SetPositionX(view, 0.0f);
       Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
-    };
+    });
 
     return spec;
   }
 
-  std::shared_ptr<NavigationTransitionSpec> CreateModalDropTransitionSpec() const
+  NavigationTransitionSpec CreateModalDropTransitionSpec()
   {
-    auto    spec   = std::make_shared<NavigationTransitionSpec>();
-    spec->duration = 0.32f;
+    NavigationTransitionSpec spec = NavigationTransitionSpec::New();
+    spec.SetDuration(0.32f);
 
     // Incoming modal drives POSITION_Y with a key-frame animation for the same reason as
     // the slide spec (the just-arranged modal would otherwise have its POSITION_Y clobbered
     // to 0 by ViewImpl::OnArrange). popExit animates the already-arranged modal from its
     // current position, so AnimateTo is correct there.
-    spec->enter = [](Animation& anim, View view) {
+    spec.EnterSignal().Connect(this, [](Animation& anim, View view)
+    {
       Dali::Ui::Extension::View::SetPositionY(view, MODAL_DROP_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
       KeyFrames dropY = KeyFrames::New();
@@ -263,31 +273,35 @@ private:
       dropY.Add(1.0f, 0.0f);
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), dropY, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
-    };
-    spec->popExit = [](Animation& anim, View view) {
+    });
+    spec.PopExitSignal().Connect(this, [](Animation& anim, View view)
+    {
       anim.AnimateTo(Property(view, Actor::Property::POSITION_Y), MODAL_DROP_TRAVEL, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT);
-    };
-    spec->snapIncoming = [](View view) {
+    });
+    spec.SnapIncomingSignal().Connect(this, [](View view)
+    {
       Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
-    };
-    spec->snapOutgoing = [](View view) {
+    });
+    spec.SnapOutgoingSignal().Connect(this, [](View view)
+    {
       Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
-    };
+    });
 
     return spec;
   }
 
-  std::shared_ptr<NavigationTransitionSpec> CreatePerModalBounceTransitionSpec() const
+  NavigationTransitionSpec CreatePerModalBounceTransitionSpec()
   {
-    auto    spec   = std::make_shared<NavigationTransitionSpec>();
-    spec->duration = 0.78f;
+    NavigationTransitionSpec spec = NavigationTransitionSpec::New();
+    spec.SetDuration(0.78f);
 
-    spec->enter = [](Animation& anim, View view) {
+    spec.EnterSignal().Connect(this, [](Animation& anim, View view)
+    {
       KeyFrames shakeX = KeyFrames::New();
       shakeX.Add(0.0f, -MODAL_SHAKE_X_TRAVEL);
       shakeX.Add(0.18f, MODAL_SHAKE_X_TRAVEL * 0.92f);
@@ -322,8 +336,9 @@ private:
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), shakeY, AlphaFunction::EASE_OUT);
       anim.AnimateBetween(Property(view, Actor::Property::SCALE), scale, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT, TimePeriod(0.0f, 0.18f));
-    };
-    spec->popExit = [](Animation& anim, View view) {
+    });
+    spec.PopExitSignal().Connect(this, [](Animation& anim, View view)
+    {
       KeyFrames shakeX = KeyFrames::New();
       shakeX.Add(0.0f, 0.0f);
       shakeX.Add(0.18f, MODAL_SHAKE_X_TRAVEL * 0.58f);
@@ -342,19 +357,21 @@ private:
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), shakeY, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::SCALE), Vector3(0.66f, 0.66f, 1.0f), AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT, TimePeriod(0.08f, 0.30f));
-    };
-    spec->snapIncoming = [](View view) {
+    });
+    spec.SnapIncomingSignal().Connect(this, [](View view)
+    {
       Dali::Ui::Extension::View::SetPositionX(view, 0.0f);
       Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
-    };
-    spec->snapOutgoing = [](View view) {
+    });
+    spec.SnapOutgoingSignal().Connect(this, [](View view)
+    {
       Dali::Ui::Extension::View::SetPositionX(view, 0.0f);
       Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
-    };
+    });
 
     return spec;
   }
@@ -384,8 +401,16 @@ private:
     alert.SetSpacing(8.0f);
     alert.SetTitle("Delete item?");
     alert.SetMessage("This action cannot be undone.");
-    alert.SetActionButtons({{"Cancel", [this]() { mNavigator.PopModal(mModalAnimationEnabled); }},
-                            {"Delete", [this]() { mNavigator.PopModal(mModalAnimationEnabled); }}});
+    TextButton cancelButton = alert.AddActionButton("Cancel");
+    cancelButton.ConnectClickedSignal(this, [this](View, InputEvent)
+    {
+      mNavigator.PopModal(mModalAnimationEnabled);
+    });
+    TextButton deleteButton = alert.AddActionButton("Delete");
+    deleteButton.ConnectClickedSignal(this, [this](View, InputEvent)
+    {
+      mNavigator.PopModal(mModalAnimationEnabled);
+    });
 
     // Center the card over the scrim.
     const float dialogWidth  = 600.0f;
@@ -399,14 +424,7 @@ private:
 
     if(usePerModalAnimation)
     {
-#ifdef DALI_UI_NAVIGATOR_HAS_MODAL_TRANSITION_SPEC
       mNavigator.SetPageModalTransitionSpec(container, CreatePerModalBounceTransitionSpec());
-#else
-      // Compatibility path for running the sample against an older installed
-      // dali-ui-components package. Current Navigator builds use the modal-only
-      // API above so page and modal transition specs stay separated.
-      mNavigator.SetPageTransitionSpec(container, CreatePerModalBounceTransitionSpec());
-#endif
     }
 
     mNavigator.PushModal(container, mModalAnimationEnabled);

@@ -75,9 +75,13 @@ Push modal content above the navigation stack:
 AlertDialog alert = AlertDialog::New();
 alert.SetTitle("Delete item?");
 alert.SetMessage("This action cannot be undone.");
-alert.SetActionButtons({
-  {"Cancel", [navigator]() mutable { navigator.PopModal(); }},
-  {"Delete", [navigator]() mutable { navigator.PopModal(); }}
+TextButton cancelButton = alert.AddActionButton("Cancel");
+cancelButton.ConnectClickedSignal(this, [navigator](View, InputEvent) mutable {
+  navigator.PopModal();
+});
+TextButton deleteButton = alert.AddActionButton("Delete");
+deleteButton.ConnectClickedSignal(this, [navigator](View, InputEvent) mutable {
+  navigator.PopModal();
 });
 
 DialogContainer container = DialogContainer::New();
@@ -102,8 +106,8 @@ dismiss it through `Navigator`.
 `NavigateBack()` handles common back behavior:
 
 1. Dismiss the top modal item if one exists.
-2. Otherwise pop the navigation stack.
-3. Return `false` if there is nothing to go back to.
+2. Otherwise pop the navigation stack when it contains more than one page.
+3. Return `false` when no modal exists and the stack has at most one page.
 
 ```cpp
 if(!navigator.NavigateBack())
@@ -112,10 +116,15 @@ if(!navigator.NavigateBack())
 }
 ```
 
-A page can intercept back navigation:
+A callback can intercept back navigation for a page. The signal receives the
+current view, and Back is consumed when any callback returns `true`:
 
 ```cpp
-navigator.SetBackHandler(editPage, []() {
+navigator.BackRequestedSignal().Connect(this, [editPage](Navigator, View page) {
+  if(page != editPage)
+  {
+    return false;
+  }
   if(HasUnsavedChanges())
   {
     ShowDiscardChangesPrompt();
@@ -161,42 +170,43 @@ navigator.SetModalTransitionAnimationEnabled(false);  // Affects PushModal/PopMo
 
 ## Transition Specification
 
-Use `NavigationTransitionSpec` to customize transitions. A spec contains
-callbacks for incoming and outgoing views:
+Use the reference-counted `NavigationTransitionSpec` handle to customize
+transitions. Connect callbacks to its animator and snap signals:
 
-| Callback | Used for |
+| Signal | Used for |
 |---|---|
-| `enter` | Incoming view for `Push()` or `PushModal()`. |
-| `exit` | Outgoing view for `Push()` or `PushModal()`. |
-| `popEnter` | Revealed view for `Pop()` or `PopModal()`. |
-| `popExit` | Removed view for `Pop()` or `PopModal()`. |
-| `snapIncoming` | Restores the incoming view to its final state. |
-| `snapOutgoing` | Restores an outgoing view that remains in the stack. |
+| `EnterSignal()` | Incoming view for `Push()` or `PushModal()`. |
+| `ExitSignal()` | Outgoing view for `Push()` or `PushModal()`. |
+| `PopEnterSignal()` | Revealed view for `Pop()` or `PopModal()`. |
+| `PopExitSignal()` | Removed view for `Pop()` or `PopModal()`. |
+| `SnapIncomingSignal()` | Restores the incoming view to its final state. |
+| `SnapOutgoingSignal()` | Restores an outgoing view that remains in the stack. |
 
 ### Default Page Transition
 
 ```cpp
-auto spec = std::make_shared<NavigationTransitionSpec>();
-spec->duration = 0.25f;
-spec->enter = [](Animation& anim, View view) {
+NavigationTransitionSpec spec = NavigationTransitionSpec::New();
+spec.SetDuration(0.25f);
+spec.EnterSignal().Connect(this, [](Animation& anim, View view) {
   view.SetProperty(Actor::Property::OPACITY, 0.0f);
   anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f);
-};
-spec->exit = [](Animation& anim, View view) {
+});
+spec.ExitSignal().Connect(this, [](Animation& anim, View view) {
   anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f);
-};
-spec->snapIncoming = [](View view) {
+});
+spec.SnapIncomingSignal().Connect(this, [](View view) {
   view.SetProperty(Actor::Property::OPACITY, 1.0f);
-};
+});
 
 navigator.SetTransitionSpec(spec);
+navigator.ClearTransitionSpec(); // Restore the built-in page transition.
 ```
 
 ### Per-page Transition
 
 ```cpp
 navigator.SetPageTransitionSpec(detailsPage, spec);
-navigator.SetPageTransitionSpec(detailsPage, nullptr); // Remove override.
+navigator.ClearPageTransitionSpec(detailsPage); // Remove override.
 ```
 
 ### Modal Transition
@@ -206,6 +216,8 @@ Modal transitions are separate from page transitions:
 ```cpp
 navigator.SetModalTransitionSpec(modalSpec);
 navigator.SetPageModalTransitionSpec(dialogContainer, modalSpec);
+navigator.ClearModalTransitionSpec();
+navigator.ClearPageModalTransitionSpec(dialogContainer);
 ```
 
 This lets normal page navigation and modal dialog presentation use different
@@ -217,6 +229,7 @@ motion.
 
 | Signal | Description |
 |---|---|
+| `BackRequestedSignal()` | Emitted before automatic Back handling; any `true` result consumes Back. |
 | `PageWillAppearSignal()` | Emitted before a page or modal item becomes visible. |
 | `PageDidAppearSignal()` | Emitted after a page or modal item becomes visible. |
 | `PageWillDisappearSignal()` | Emitted before a page or modal item is covered or removed. |

@@ -19,12 +19,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog.h>
+#include <dali-ui-components/public-api/text-button.h>
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string.h>
-#include <functional>
-#include <utility>
-#include <vector>
 
 namespace Dali
 {
@@ -39,7 +37,7 @@ class AlertDialogImpl;
  * @brief AlertDialog is a convenience Dialog with title, message and action buttons.
  *
  * It derives from Dialog and auto-builds the header (title), body (message) and
- * footer (action buttons) sections from SetTitle / SetMessage / SetActionButtons.
+ * footer (action buttons) sections from SetTitle / SetMessage / AddActionButton.
  */
 class DALI_UI_COMPONENTS_API AlertDialog : public Dialog
 {
@@ -115,13 +113,20 @@ public: // Convenience API
   Dali::String GetMessage() const;
 
   /**
-   * @brief Sets the action buttons (shown as the footer), each with a click handler.
+   * @brief Adds an action button to the footer.
    *
-   * Buttons are temporary InteractiveView + Label composites until a dedicated
-   * Button component exists.
-   * @param[in] buttons (label, on-clicked) pairs, distributed evenly across the footer
+   * Action buttons are distributed evenly across the footer. Connect a handler
+   * to the returned button's ClickedSignal() to handle the action.
+   *
+   * @param[in] text The button text
+   * @return The newly added action button
    */
-  void SetActionButtons(const std::vector<std::pair<Dali::String, std::function<void()>>>& buttons);
+  TextButton AddActionButton(const Dali::String& text);
+
+  /**
+   * @brief Removes all action buttons and clears the footer.
+   */
+  void ClearActionButtons();
 
 public: // Not intended for application developers
   /// @cond internal

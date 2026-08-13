@@ -21,6 +21,9 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/navigator/navigator-impl.h>
 
+// EXTERNAL INCLUDES
+#include <utility>
+
 namespace Dali
 {
 namespace Ui
@@ -145,9 +148,9 @@ bool Navigator::NavigateBack()
   return GetImpl(*this).NavigateBack();
 }
 
-void Navigator::SetBackHandler(View page, std::function<bool()> handler)
+Navigator::BackRequestedSignalType& Navigator::BackRequestedSignal()
 {
-  GetImpl(*this).SetBackHandler(page, handler);
+  return GetImpl(*this).BackRequestedSignal();
 }
 
 void Navigator::SetPageTransitionAnimationEnabled(bool enabled)
@@ -170,24 +173,44 @@ bool Navigator::IsModalTransitionAnimationEnabled() const
   return GetImpl(*this).IsModalTransitionAnimationEnabled();
 }
 
-void Navigator::SetTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec)
+void Navigator::SetTransitionSpec(NavigationTransitionSpec spec)
 {
   GetImpl(*this).SetTransitionSpec(std::move(spec));
 }
 
-void Navigator::SetPageTransitionSpec(View page, std::shared_ptr<NavigationTransitionSpec> spec)
+void Navigator::ClearTransitionSpec()
+{
+  GetImpl(*this).ClearTransitionSpec();
+}
+
+void Navigator::SetPageTransitionSpec(View page, NavigationTransitionSpec spec)
 {
   GetImpl(*this).SetPageTransitionSpec(page, std::move(spec));
 }
 
-void Navigator::SetModalTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec)
+void Navigator::ClearPageTransitionSpec(View page)
+{
+  GetImpl(*this).ClearPageTransitionSpec(page);
+}
+
+void Navigator::SetModalTransitionSpec(NavigationTransitionSpec spec)
 {
   GetImpl(*this).SetModalTransitionSpec(std::move(spec));
 }
 
-void Navigator::SetPageModalTransitionSpec(View page, std::shared_ptr<NavigationTransitionSpec> spec)
+void Navigator::ClearModalTransitionSpec()
+{
+  GetImpl(*this).ClearModalTransitionSpec();
+}
+
+void Navigator::SetPageModalTransitionSpec(View page, NavigationTransitionSpec spec)
 {
   GetImpl(*this).SetPageModalTransitionSpec(page, std::move(spec));
+}
+
+void Navigator::ClearPageModalTransitionSpec(View page)
+{
+  GetImpl(*this).ClearPageModalTransitionSpec(page);
 }
 
 Navigator::PageEventSignalType& Navigator::PageWillAppearSignal()

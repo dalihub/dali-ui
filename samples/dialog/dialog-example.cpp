@@ -17,7 +17,7 @@
 // Interactive sample for Ui::AlertDialog (and the Dialog API it inherits).
 //
 // The AlertDialog shows a title, a message and two action buttons via the
-// convenience API (SetTitle / SetMessage / SetActionButtons). Tapping an action
+// convenience API (SetTitle / SetMessage / AddActionButton). Tapping an action
 // button updates the status line. The control buttons drive the inherited Dialog
 // API on the same dialog:
 //   - Spacing +/-  -> Dialog::SetSpacing
@@ -79,8 +79,12 @@ public:
     mAlert.SetSpacing(8.0f);
     mAlert.SetTitle("Delete item?");
     mAlert.SetMessage(MESSAGE_TEXT);
-    mAlert.SetActionButtons({{"Cancel", [this]() { mLastAction = "Cancel"; UpdateStatus(); }},
-                             {"OK", [this]() { mLastAction = "OK"; UpdateStatus(); }}});
+    TextButton cancelButton = mAlert.AddActionButton("Cancel");
+    cancelButton.ConnectClickedSignal(this, [this](View, InputEvent)
+    { mLastAction = "Cancel"; UpdateStatus(); });
+    TextButton okButton = mAlert.AddActionButton("OK");
+    okButton.ConnectClickedSignal(this, [this](View, InputEvent)
+    { mLastAction = "OK"; UpdateStatus(); });
     root.Add(mAlert);
 
     mStatus = MakeText("", 18.0f, 36.0f);
