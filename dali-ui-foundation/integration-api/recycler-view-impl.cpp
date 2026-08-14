@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/extension-api/view.h>
+#include <dali-ui-foundation/integration-api/items-layouter-impl.h>
 #include <dali-ui-foundation/integration-api/recycler-view-impl.h>
 #include <dali-ui-foundation/integration-api/recycler.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>

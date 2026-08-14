@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect-impl.h>
+#include <dali-ui-foundation/internal/bounce-edge-effect-impl.h>
 #include <dali/integration-api/debug.h>
 
 namespace Dali

@@ -19,7 +19,6 @@
 
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/views/recycler/items-layouter-impl.h>
 #include <dali/public-api/object/base-handle.h>
 #include <cstdint>
 
@@ -27,6 +26,8 @@ namespace Dali
 {
 namespace Ui
 {
+
+class ItemsLayouterImpl;
 
 /**
  * @brief ABI-stable handle for a RecyclerView layout algorithm.
@@ -36,13 +37,17 @@ namespace Ui
  * the handle class itself carries no virtual methods and its size never
  * changes across releases.
  *
- * To implement a custom layout algorithm, subclass ItemsLayouterImpl and
- * wrap it in an ItemsLayouter-derived handle. See items-layouter-impl.h.
+ * To implement a custom layout algorithm, subclass ItemsLayouterImpl from
+ * integration-api and wrap it in an ItemsLayouter-derived handle.
  */
 class DALI_UI_API ItemsLayouter : public Dali::BaseHandle
 {
 public:
-  using Orientation = ItemsLayouterImpl::Orientation;
+  enum class Orientation
+  {
+    VERTICAL,
+    HORIZONTAL
+  };
 
   /**
    * @brief Creates an uninitialized (null) handle. Evaluates to false.

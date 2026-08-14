@@ -22,7 +22,7 @@
 #include <dali/public-api/math/vector3.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/views/scroll/edge-effect-impl.h>
+#include <dali-ui-foundation/integration-api/edge-effect-impl.h>
 #include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
 
 namespace Dali

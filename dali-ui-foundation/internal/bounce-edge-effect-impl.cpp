@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect-impl.h>
+#include <dali-ui-foundation/internal/bounce-edge-effect-impl.h>
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>

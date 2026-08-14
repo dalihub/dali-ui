@@ -17,8 +17,8 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/integration-api/recycler.h>
+#include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/dali-signal.h>
@@ -28,11 +28,6 @@ namespace Dali
 {
 namespace Ui
 {
-
-// Recycler is an integration-level interface; forward-declare to avoid exposing
-// view-pool and adapter details in the public ABI. Subclassers that call Recycler
-// methods in their .cpp must include <dali-ui-foundation/integration-api/recycler.h>.
-class Recycler;
 
 class ItemsLayouterImpl;
 using ItemsLayouterImplPtr = IntrusivePtr<ItemsLayouterImpl>;
@@ -63,17 +58,13 @@ using ItemsLayouterImplPtr = IntrusivePtr<ItemsLayouterImpl>;
  * };
  * @endcode
  *
- * This header lives in public-api so that external libraries can subclass
- * without requiring access to integration-api.
+ * External libraries include this integration-api header to provide custom
+ * layout algorithms.
  */
 class DALI_UI_API ItemsLayouterImpl : public Dali::BaseObject
 {
 public:
-  enum class Orientation
-  {
-    VERTICAL,
-    HORIZONTAL
-  };
+  using Orientation = ItemsLayouter::Orientation;
 
   ~ItemsLayouterImpl() override;
 

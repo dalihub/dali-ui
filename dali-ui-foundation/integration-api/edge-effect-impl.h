@@ -24,8 +24,7 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/views/view.h>
+#include <dali-ui-foundation/public-api/views/scroll/edge-effect.h>
 
 namespace Dali
 {
@@ -41,21 +40,13 @@ using EdgeEffectImplPtr = IntrusivePtr<EdgeEffectImpl>;
  *
  * Manages a 5-state machine (IDLE, PULL, ABSORB, RECEDE, PULLDECAY) for scroll
  * edge visual effects. Concrete behaviours (e.g. BounceEdgeEffect) subclass this
- * and override the protected virtual hooks. This header lives in public-api so
- * that subclasses implemented in a separate library can extend it without
- * requiring access to integration-api.
+ * and override the protected virtual hooks. Subclasses implemented in a
+ * separate library include this integration-api header explicitly.
  */
 class DALI_UI_API EdgeEffectImpl : public Dali::BaseObject, public Dali::ConnectionTracker
 {
 public:
-  enum class State
-  {
-    IDLE,
-    PULL,
-    ABSORB,
-    RECEDE,
-    PULLDECAY
-  };
+  using State = EdgeEffect::State;
 
   using PullSignalType     = Dali::Signal<void(float, float)>; ///< (deltaDistance, displacement)
   using ReleaseSignalType  = Dali::Signal<void()>;

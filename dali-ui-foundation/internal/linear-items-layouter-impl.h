@@ -17,7 +17,7 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/views/recycler/items-layouter-impl.h>
+#include <dali-ui-foundation/integration-api/items-layouter-impl.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <cstdint>
 

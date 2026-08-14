@@ -16,7 +16,7 @@
  */
 
 #include <dali-ui-foundation/integration-api/recycler.h>
-#include <dali-ui-foundation/public-api/views/recycler/linear-items-layouter-impl.h>
+#include <dali-ui-foundation/internal/linear-items-layouter-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/integration-api/debug.h>
 #include <algorithm>

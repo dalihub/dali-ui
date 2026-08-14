@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/views/recycler/linear-items-layouter-impl.h>
+#include <dali-ui-foundation/internal/linear-items-layouter-impl.h>
 #include <dali-ui-foundation/public-api/views/recycler/linear-items-layouter.h>
 
 namespace Dali

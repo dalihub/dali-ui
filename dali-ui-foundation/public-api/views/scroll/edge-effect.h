@@ -24,7 +24,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/views/scroll/edge-effect-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
@@ -32,6 +31,8 @@ namespace Dali
 
 namespace Ui
 {
+
+class EdgeEffectImpl;
 
 /**
  * @brief Controls a visual effect displayed when scrollable content reaches its boundary.
@@ -43,9 +44,8 @@ namespace Ui
  *   - OnAbsorb()  — called when a fling reaches the edge.
  *   - Finish()    — forces the effect back to IDLE immediately.
  *
- * Each method emits a corresponding signal. Concrete behaviours (e.g.
- * BounceEdgeEffect) are provided by subclasses which extend EdgeEffectImpl
- * (see public-api/views/scroll/edge-effect-impl.h).
+ * Each method emits a corresponding signal. Integration implementers can
+ * derive custom behaviours from EdgeEffectImpl in integration-api.
  *
  * EdgeEffect is a value type / handle: copying shares the underlying implementation.
  * An uninitialized handle (default-constructed) evaluates to false.
@@ -60,7 +60,14 @@ namespace Ui
 class DALI_UI_API EdgeEffect : public Dali::BaseHandle
 {
 public:
-  using State = EdgeEffectImpl::State;
+  enum class State
+  {
+    IDLE,
+    PULL,
+    ABSORB,
+    RECEDE,
+    PULLDECAY
+  };
 
   using PullSignalType     = Dali::Signal<void(float, float)>; ///< (deltaDistance, displacement)
   using ReleaseSignalType  = Dali::Signal<void()>;
