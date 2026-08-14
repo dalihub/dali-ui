@@ -309,10 +309,6 @@ public:
   {
     return mArrangeCacheValid;
   }
-  Dali::LayoutDirection::Type GetLastArrangeDirection() const
-  {
-    return mLastArrangeDirection;
-  }
   bool IsMeasureDirty() const
   {
     return mMeasureDirty;
@@ -943,31 +939,6 @@ private:
   void         OnChildOrderChanged(Actor parent, Actor orderChangedChild);
 
   /**
-   * @brief Invalidates this view's ARRANGE after its effective layout direction
-   * changed.
-   *
-   * Connected in ViewImpl::Initialize() to the actor's layout-direction-changed
-   * signal, which dali-core emits on exactly the set of actors whose RESOLVED
-   * direction changed -- the actor the direction was set on plus every
-   * descendant that inherits it, including descendants sitting under a non-View
-   * or root-layer ancestor. Every affected View is therefore reached
-   * individually, so the handler never has to walk the subtree itself.
-   *
-   * Scope is the arrange axis only: the direction moves a child's x, never any
-   * measured size, and no FIRST-PARTY measure producer reads it (verified across
-   * the layout managers and components; text views resolve direction inside their
-   * own signal handlers, not via the arrange cache). GetEffectiveLayoutDirection()
-   * is public and OnMeasure() is virtual, so a third-party subclass COULD size on
-   * direction; when Phase 5 introduces a measure cache HIT, that case needs its own
-   * key (a mLastMeasureDirection) or the first-party contract stated here. Today,
-   * with no measure HIT path, invalidating arrange alone is exactly correct.
-   *
-   * @param[in] actor The actor whose resolved layout direction changed (this view)
-   * @param[in] type The new resolved layout direction
-   */
-  void OnLayoutDirectionChanged(Dali::Actor actor, Dali::LayoutDirection::Type type);
-
-  /**
    * @brief Drops the ANCESTOR measure/arrange cache entries after this view has
    * taken a full Measure() miss, up to the nearest layout dependency boundary.
    *
@@ -1224,7 +1195,6 @@ private:
   float                                 mLastMeasureScale;      ///< Pure cache KEY: the effective scale the cached mMeasuredSize was produced at. Compared EXACTLY, not with FloatEqual, because it is a straight copy of the same GetEffectiveScale() value with no arithmetic between publish and compare -- unlike the constraint beside it, which reaches the predicate through a /s normalisation and a min/max clamp and therefore needs the tolerance. Valid only while mMeasureCacheValid is true.
   LayoutRect                            mArrangedBounds;
   LayoutRect                            mLastArrangeInput;             ///< Pure cache KEY: the input bounds mArrangedBounds was produced for. Valid only while mArrangeCacheValid is true.
-  Dali::LayoutDirection::Type           mLastArrangeDirection;         ///< Pure cache KEY: the effective layout direction mArrangedBounds was produced under. Valid only while mArrangeCacheValid is true. Unlike the effective scale -- whose freshness is carried by a sync bit this class owns -- the direction lives in dali-core and can be moved through actors dali-ui does not own, so it is recorded as a KEY: a missed invalidation then degrades to "no cache hit", never to a wrong result.
   Insets                                mMargin;                       ///< Layout margin
   Insets                                mPadding;                      ///< Layout padding
   float                                 mRequestedWidth;               ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
