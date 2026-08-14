@@ -2,12 +2,8 @@
 
 이 문서는 Measure/Arrange 캐시 도입으로 바뀐 **관찰 가능한 동작**과, 기존 코드에서
 확인해야 할 항목을 정리한다. 캐시의 설계와 계약 전문은
-[layout-structure.md](layout-structure.md)의 "Layout caching and the
-measure/arrange contract" 및 "Invalidation" 절에 있다.
-
-이 문서에서 **producer**는 measure/arrange 구현을 가리키는 약칭이다. 즉
-`OnMeasure` / `OnArrange` override, attach된 `LayoutManager`, 그리고
-`MeasureCallback` / `ArrangeCallback`이다.
+[layout-structure.md](layout-structure.md)의 "Layout caching and the producer
+contract" 및 "Invalidation" 절에 있다.
 
 원칙은 하나다. **캐시는 계산을 생략할 뿐 결과를 바꾸지 않는다.** 아래 목록에서
 "결과가 달라진다"고 표시된 항목은 모두 기존 버그의 수정이며, 그 외에는 layout이
@@ -38,14 +34,10 @@ protected 멤버로 새로 추가되었다. attach 전에 호출해도 안전하
 호출이 없는 setter가 실제로 잃는 것:
 
 - **Measure가 읽는 상태**: measure 캐시는 무조건 동작하므로, 무효화 없는 변경은
-  이 view에 무효화가 닿거나 이 view의 키 입력(정규화된 constraint, 유효
-  스케일)이 바뀌기 전까지 반영되지 않는다. 무관한 pass가 도는 것만으로는
-  회복되지 않는다. 조상이 miss해도 조상 구현이 이 view를 같은 입력으로 다시
-  측정하므로 이 view는 여전히 hit하고, 형제의 무효화는 위로만 전파되어 이
-  view에 닿지 않는다. 이 위험은 이전부터 있었고 이제 계약으로 명문화되었다.
-- **Arrange만 읽는 상태**: 기본 정책인 `ArrangePolicy::IF_CHANGED`에서는 이전
-  결과가 재사용될 수 있으므로 무효화 없는 변경이 반영되지 않을 수 있다.
-  `ArrangePolicy::ALWAYS`도
+  다음 무관한 pass가 돌아도 반영되지 않는다(캐시가 이전 결과를 계속 서빙).
+  이 위험은 이전부터 있었고 이제 계약으로 명문화되었다.
+- **Arrange만 읽는 상태**: 기본 정책인 `IF_CHANGED`에서는 이전 결과가
+  재사용될 수 있으므로 무효화 없는 변경이 반영되지 않을 수 있다. `ALWAYS`도
   pass 자체를 예약하지는 않으므로 setter의 무효화 호출은 어느 정책에서나 필요하다.
 
 라이브러리 내장 manager(Stack/Grid/Flex)는 이번 변경으로 모두 배선되어, **직접
@@ -79,7 +71,7 @@ MyManager::MyManager()
 }
 ```
 
-`ArrangePolicy::ALWAYS`가 필요한 경우:
+`ALWAYS`가 필요한 경우:
 
 - 조상/월드 좌표(`SCREEN_POSITION`, `WORLD_POSITION`, `WORLD_SCALE`, 윈도우 좌표)를
   읽는다
@@ -89,19 +81,16 @@ MyManager::MyManager()
 
 정책은 구현 인스턴스에 저장되고 파생 클래스에도 상속된다. 파생 클래스는 생성자에서
 다시 정책을 설정할 수 있다. 기존 1인자 `SetArrangeCallback(callback)`은 이제
-`ArrangePolicy::IF_CHANGED`를 사용하므로, callback 호출 횟수나 외부 부수 효과에
-의존하던 코드는 2인자 overload로 `ArrangePolicy::ALWAYS`를 지정해야 한다.
+`IF_CHANGED`를 사용하므로, callback 호출 횟수나 외부 부수 효과에 의존하던
+코드는 2인자 overload로 `ALWAYS`를 지정해야 한다.
 
 ### 1.3 measure producer가 매 프레임 호출된다고 가정하고 있지 않은가
 
-measure 캐시는 이전부터 **무조건** 동작했으므로 이 위험 자체는 새로 생긴 것이
-아니다. 이번 변경으로 달라진 것은 캐시가 **언제 비워지는지**다. 누락되어 있던
-무효화가 메워지고 조상 캐시를 정리하는 경로가 새로 들어오면서, measure producer는
-이전보다 **더 자주** 호출된다(적중률은 올라가지 않고 내려간다). 대신 우연한
-무효화에 기대어 producer가 다시 호출되던 코드는 그 보장을 잃는다. `OnMeasure` /
-`MeasureCallback` / `LayoutManager::Measure`를 per-frame tick으로 쓰고 있었다면
-지금 드러난다. producer 밖의 상태를 읽는다면 그 상태를 바꾸는 쪽에서
-`InvalidateMeasure()`를 호출해야 한다.
+measure 캐시는 이전부터 **무조건** 동작했지만, 이번 변경으로 무효화 누락이 여러 건
+메워지면서 캐시 적중률이 올라갔다. `OnMeasure` / `MeasureCallback` /
+`LayoutManager::Measure`를 per-frame tick으로 쓰고 있었다면 지금 드러난다.
+producer 밖의 상태를 읽는다면 그 상태를 바꾸는 쪽에서 `InvalidateMeasure()`를
+호출해야 한다.
 
 ---
 
