@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/image-options.h>
+#include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/rendering/geometry.h>
