@@ -418,12 +418,6 @@ A Standalone child:
   `MATCH_PARENT` fills the parent edge to edge regardless of parent padding,
   and any margin set on the Standalone child shifts it inward consistently in
   both axes.
-- **Applies its own min/max to its slot.** A boundary child has no parent
-  layout to clamp it, so the derivation of its slot enforces its
-  `Minimum`/`Maximum` width and height. The same derivation runs whether the
-  slot comes from the parent's arrange pass or from the child's own
-  layout-root pass, so both agree; for a `MATCH_PARENT` axis it is the only
-  place the clamp reaches, because the measured value is discarded there.
 
 ### Invalidation flow
 

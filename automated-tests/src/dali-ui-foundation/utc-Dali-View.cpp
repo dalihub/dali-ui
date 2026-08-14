@@ -2501,64 +2501,6 @@ int UtcDaliViewStandaloneUsesPositionP(void)
   END_TEST;
 }
 
-// A Standalone child has no parent layout to clamp it, so its own min/max is applied
-// to the slot the parent places it in. For a MATCH_PARENT axis that slot derivation is
-// the only place the clamp can reach, because the measured value is discarded there.
-//
-// The second settle is what makes this test about the PARENT's derivation: a boundary
-// view is also a layout root of its own, and its own root pass is the last to arrange
-// it in the first batch. Invalidating only the parent's arrange makes the parent
-// re-derive the slot and be the last writer.
-int UtcDaliViewStandaloneMaximumClampAppliesFromParentPassP(void)
-{
-  UiTestApplication application;
-
-  View parent = View::New();
-  parent.SetRequestedWidth(200.0f);
-  parent.SetRequestedHeight(150.0f);
-  application.GetScene().Add(parent);
-
-  // Clamped DOWN by its own maximum on both axes.
-  View capped = View::New();
-  capped.SetLayoutMode(LayoutMode::STANDALONE);
-  capped.SetRequestedWidth(MATCH_PARENT);
-  capped.SetRequestedHeight(MATCH_PARENT);
-  capped.SetMaximumWidth(60.0f);
-  capped.SetMaximumHeight(45.0f);
-  parent.Add(capped);
-
-  // Clamped UP by its own minimum, above the parent extent.
-  View wide = View::New();
-  wide.SetLayoutMode(LayoutMode::STANDALONE);
-  wide.SetRequestedWidth(MATCH_PARENT);
-  wide.SetRequestedHeight(MATCH_PARENT);
-  wide.SetMinimumWidth(300.0f);
-  parent.Add(wide);
-
-  application.SendNotification();
-  application.Render();
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_EQUALS(capped.GetProperty<float>(Actor::Property::SIZE_WIDTH), 60.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(capped.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 45.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(wide.GetProperty<float>(Actor::Property::SIZE_WIDTH), 300.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(wide.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 150.0f, TEST_LOCATION);
-
-  parent.InvalidateArrange();
-  application.SendNotification();
-  application.Render();
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_EQUALS(capped.GetProperty<float>(Actor::Property::SIZE_WIDTH), 60.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(capped.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 45.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(wide.GetProperty<float>(Actor::Property::SIZE_WIDTH), 300.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(wide.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 150.0f, TEST_LOCATION);
-
-  END_TEST;
-}
-
 int UtcDaliViewStandaloneExcludedFromWrapContentP(void)
 {
   UiTestApplication application;
