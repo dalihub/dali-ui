@@ -37,6 +37,7 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/web-back-forward-list-impl.h>
 #include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <dali-ui-foundation/integration-api/web-settings-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -281,9 +282,9 @@ void WebViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index in
     case Property::SCROLL_POSITION:
     {
       Vector2 pos;
-      if(value.Get(pos) && impl.mWebEngine)
+      if(value.Get(pos))
       {
-        impl.mWebEngine.SetScrollPosition(static_cast<int32_t>(pos.x), static_cast<int32_t>(pos.y));
+        impl.SetScrollPosition(pos);
       }
       break;
     }
@@ -902,6 +903,14 @@ bool WebViewImpl::RemoveCustomHeader(const Dali::String& name)
 // Scroll
 // ===========================================================================
 
+void WebViewImpl::SetScrollPosition(const Dali::Vector2& position)
+{
+  if(mWebEngine)
+  {
+    mWebEngine.SetScrollPosition(static_cast<int32_t>(position.x), static_cast<int32_t>(position.y));
+  }
+}
+
 Dali::Vector2 WebViewImpl::GetScrollPosition() const
 {
   if(!mWebEngine)
@@ -1037,7 +1046,7 @@ void WebViewImpl::EvaluateJavaScript(const Dali::String& script, WebView::JavaSc
   });
 }
 
-void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, WebView::JavaScriptCallback callback)
+void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& message)> callback)
 {
   if(!mWebEngine)
   {
@@ -1049,6 +1058,22 @@ void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectN
   {
     Dali::String daliMsg(message.c_str());
     CallbackBase::Execute<Dali::String>(*sharedCb, daliMsg);
+  });
+}
+
+void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& exposedObjectName, const Dali::String& message)> callback)
+{
+  if(!mWebEngine)
+  {
+    return;
+  }
+  auto sharedCb = std::shared_ptr<CallbackBase>(callback.Release());
+  mWebEngine.AddJavaScriptEntireMessageHandler(ToStdString(exposedObjectName),
+                                               [sharedCb](const std::string& objectName, const std::string& message)
+  {
+    Dali::String daliObjectName(objectName.c_str());
+    Dali::String daliMessage(message.c_str());
+    CallbackBase::Execute<Dali::String, Dali::String>(*sharedCb, daliObjectName, daliMessage);
   });
 }
 
@@ -1166,6 +1191,16 @@ WebSettings WebViewImpl::GetSettings() const
     mWebSettings            = WebSettings(*impl);
   }
   return mWebSettings;
+}
+
+WebBackForwardList WebViewImpl::GetBackForwardList() const
+{
+  if(!mWebBackForwardList)
+  {
+    WebBackForwardListImplPtr impl = WebBackForwardListImpl::New(mWebEngine);
+    mWebBackForwardList            = WebBackForwardList(*impl);
+  }
+  return mWebBackForwardList;
 }
 
 float WebViewImpl::GetPageZoomFactor() const
