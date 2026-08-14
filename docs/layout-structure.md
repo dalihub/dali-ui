@@ -391,41 +391,6 @@ child's X is reflected about the parent width regardless of how it was
 positioned, so even an absolutely positioned child is moved to the mirrored
 edge.
 
-#### How a direction change reaches layout
-
-The direction itself lives in dali-core, so a change has to be turned into a
-layout invalidation explicitly. Four things make this hold -- two mechanisms, one
-structural fact and one backstop -- and none of them costs a plain child View
-anything:
-
-- **Layout roots hook the actor signal, lazily.** The first time a View
-  registers with the `LayoutController` **on a live window** it connects the
-  actor's layout-direction-changed signal, once and for good. Only layout roots
-  that are on-scene in a window (and on-scene `STANDALONE` boundary views, which
-  register themselves) ever do, so the per-View cost of a signal connection is
-  gone. This is the only mechanism that can see a direction set on a **non-View
-  ancestor** — an intermediate `Layer`, or the window's root layer.
-- **Direction property writes on a View are intercepted.** `LAYOUT_DIRECTION`
-  (and the two legacy indices) reach `ViewDataImpl::OnPropertySet`, which raises
-  the same invalidation. This is what covers a **mid-tree** View that is not a
-  layout root, and — being window-independent — an off-scene write too. A hooked
-  view skips it (the signal has already fired), and a write that does not move
-  the resolved direction is dropped by a value guard.
-- **An off-scene move needs no hook.** No layout pass can run without a window,
-  and reconnection (`OnViewSceneConnection`) drops the whole subtree's cached
-  results via `ResetSubtreeScaleAndLayoutCaches()` before registering the
-  reconnecting root, so nothing stale survives it.
-- **The arrange cache keys on the recorded direction** (`mLastArrangeDirection`),
-  which is the backstop under all of it: a missed invalidation degrades to a
-  cache **miss**, never to an arrangement mirrored the wrong way round.
-
-The invalidation is **subtree-recursive**: it drops both layout caches and raises
-both dirty bits on the changed view and on every descendant that inherits from
-it, and it **prunes** at any child holding a direction of its own — the exact
-mirror of dali-core's inherit walk, whose resolved direction did not move either.
-A `STANDALONE` descendant is a scheduling boundary, so it takes a full
-`InvalidateMeasure()` and re-registers itself instead.
-
 ### LayoutMode::STANDALONE
 
 A child View can opt out of its parent's layout flow by calling

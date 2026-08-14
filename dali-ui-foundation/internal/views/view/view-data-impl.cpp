@@ -1053,7 +1053,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mProcessorRegistered(false),
   mFittingModeLayoutFinishedSignalConnected(false),
   mDefaultFocusIndicatorSuppressedByStateEffect(false),
-  mLayoutDirectionSignalConnected(false),
   mKeyEventDispatchInProgress(false),
   mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT))
 {
@@ -3341,40 +3340,6 @@ void ViewDataImpl::OnPropertySet(Property::Index index, const Property::Value& p
       }
       break;
     }
-    // The layout-direction WRITE interception: this is what covers a mid-tree View
-    // that is not a layout root and therefore holds no signal hook of its own.
-    // LAYOUT_DIRECTION does reach here even though it is a core DEFAULT property --
-    // Object::SetProperty invokes this virtual for those too -- and every documented
-    // way of moving the direction lands on one of these three indices
-    // (Actor::SetLayoutDirection routes through SetProperty on the first).
-    // DevelActor::Property::LAYOUT_DIRECTION is an alias of the same index, so it is
-    // deliberately not listed a second time.
-    case Dali::Actor::Property::LAYOUT_DIRECTION:
-    case Dali::DevelActor::Property::LAYOUT_DIRECTION_LEGACY:
-    case Dali::DevelActor::Property::INHERIT_LAYOUT_DIRECTION_LEGACY:
-    {
-      // A hooked layout root has already been covered: the signal fires inside the
-      // core inherit walk, BEFORE OnPropertySet, whenever the resolved direction
-      // actually moved. Skip the second walk.
-      if(mLayoutDirectionSignalConnected)
-      {
-        break;
-      }
-
-      // Redundant-write guard. mLastArrangeDirection is the direction the last
-      // published arrange used; at this point the resolved value is already the
-      // new one, so equality means nothing moved -- and if THIS view's resolved
-      // direction did not move, no inheriting descendant's did either.
-      if(mArrangeCacheValid &&
-         mLastArrangeDirection == mViewImpl.Self().GetEffectiveLayoutDirection())
-      {
-        break;
-      }
-
-      InvalidateSubtreeLayoutForDirectionChange();
-      InvalidateMeasure();
-      break;
-    }
   }
 }
 
@@ -4518,7 +4483,7 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   //    child (the measured slot of a never-measured child does not raise this term).
   //  - mLastArrangeDirection == GetEffectiveLayoutDirection(): belt and braces for
   //    the direction key. The direction lives in dali-core and can move through
-  //    actors dali-ui does not own, so a missed invalidating subtree walk must
+  //    actors dali-ui does not own, so a missed OnLayoutDirectionChanged hook must
   //    degrade to a MISS here, never to a wrongly mirrored arrangement.
   //
   // Deliberately NOT terms:
@@ -4527,26 +4492,6 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   //    clear the layout caches, so mArrangeCacheValid already implies "scale in
   //    sync" (Corollary C). The DEBUG assert in the body is that implication's
   //    live check rather than a re-test.
-  //
-  //    The four (axis, input) pairs are handled three different ways, and the choice
-  //    is per pair rather than per axis or per input:
-  //      measure x scale     -- KEY (mLastMeasureScale). `s` is already read above
-  //                             that predicate for the constraint normalisation, so
-  //                             the term is one float compare.
-  //      arrange x scale     -- invalidation + DEBUG assert (this bullet). Reading it
-  //                             here would be a fresh call on a path that needs it for
-  //                             nothing else.
-  //      arrange x direction -- KEY (mLastArrangeDirection). The direction lives in
-  //                             dali-core and can move through actors dali-ui does not
-  //                             own, so a missed hook must not mirror the wrong way.
-  //      measure x direction -- invalidation (the direction-change subtree walk
-  //                             invalidates the MEASURE axis). A key term would put a
-  //                             layout-direction read into the per-view, per-pass
-  //                             measure predicate to cover a producer shape no
-  //                             first-party view has.
-  //    The rule behind the split: a KEY where the value is already in hand or the
-  //    failure mode is a wrong RESULT; invalidation where reading it would cost a
-  //    property access on a hot path and the failure mode is only a stale one.
   //  - mMeasureCacheValid. A full Measure pass clears mArrangeCacheValid from
   //    MeasurePassGuard, so the two are cleared as a pair.
   if(CanServeArrangeFromCache(bounds) &&
@@ -4970,42 +4915,6 @@ void ViewDataImpl::ResetSubtreeScaleAndLayoutCaches()
   }
 }
 
-void ViewDataImpl::InvalidateSubtreeLayoutForDirectionChange()
-{
-  // Same recursion SHAPE as ResetSubtreeScaleAndLayoutCaches above, three
-  // deliberate differences: no cached effective scale is dropped (a direction
-  // change moves no scale), no propagation generation is retracted (an unwritten
-  // generation can only cost an extra later ancestor walk, never a missed
-  // registration), and the dirty bits are SET here rather than left alone -- the
-  // caller of that one follows it with an InvalidateMeasure() that re-arms only the
-  // node it is called on, whereas here every affected DESCENDANT genuinely has
-  // unconsumed layout work.
-  if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
-  {
-    // Scheduling boundary: a standalone view's invalidation does not propagate
-    // to its parent, so raise the same full InvalidateMeasure the old per-View
-    // handler raised -- it self-registers and nudges a transition-bearing parent.
-    InvalidateMeasure();
-  }
-  else
-  {
-    InvalidateLayoutCaches();
-    mMeasureDirty = true; // SET, never clear: dirty is pending work, and the
-    mArrangeDirty = true; // white-box direction tests assert it on the child.
-  }
-
-  for(uint32_t i = 0; i < mChildren.Count(); ++i)
-  {
-    Ui::View child = mChildren[i]; // keep the handle alive across app re-entry
-    if(child.GetLayoutDirection() != Dali::LayoutDirection::INHERIT)
-    {
-      continue; // mirror of the core inherit-walk prune: a locally-set child's
-                // resolved direction did not move, nor did its subtree's
-    }
-    ViewDataImpl::Get(GetImpl(child)).InvalidateSubtreeLayoutForDirectionChange();
-  }
-}
-
 bool ViewDataImpl::UpdateColorBindingInternal(StringView bindingId, const UiColor& color)
 {
   auto manager = UiColorManager::Get();
@@ -5076,36 +4985,6 @@ void ViewDataImpl::RegisterWithLayoutController()
 
   if(window)
   {
-    // Lazy, once, and only for a view that registers with a LIVE window: an
-    // on-scene layout root, or an on-scene standalone boundary. Such a view pays
-    // the signal-connection cost (the callback, the signal's first pool block and
-    // the BaseSignal itself); nothing else in the tree does, which is most of the
-    // per-View memory this series once cost.
-    //
-    // INSIDE the window check, not above it. InvalidateMeasure falls through to
-    // this function for ANY parentless view, so connecting before the check would
-    // hook nearly every view in a build-then-add tree -- configure a view, and its
-    // first layout property write invalidates it while it still has no parent --
-    // and would forfeit the saving entirely.
-    //
-    // A live window is the EXACT predicate rather than a convenient
-    // approximation: it is also the precondition for any layout pass to run at all
-    // (LayoutController::Get takes a Window), so a view that cannot be hooked here
-    // is a view no pass can reach either.
-    //
-    // Nothing is lost off-scene. The OnPropertySet interception is
-    // window-independent and covers a direction WRITE on any View wherever it
-    // happens; and a direction that moved while this subtree was detached cannot
-    // outlive reconnection, because OnViewSceneConnection's layout-root path runs
-    // ResetSubtreeScaleAndLayoutCaches() -- dropping every cached measure and
-    // arrange result in the subtree -- before it registers here. Never
-    // disconnected either; see mLayoutDirectionSignalConnected.
-    if(!mLayoutDirectionSignalConnected)
-    {
-      self.LayoutDirectionChangedSignal().Connect(this, &ViewDataImpl::OnLayoutDirectionChanged);
-      mLayoutDirectionSignalConnected = true;
-    }
-
     LayoutController& controller = LayoutController::Get(window);
     controller.RequestLayout(&mViewImpl);
 
@@ -5377,16 +5256,8 @@ void ViewDataImpl::OnLayoutDirectionChanged(Dali::Actor /* actor */, Dali::Layou
   // re-measure of the affected subtree per such switch, and in exchange no
   // application has to know that measure and arrange key on different inputs.
   //
-  // Core has already filtered this signal down to the actors whose RESOLVED direction
+  // Core has already filtered this signal down to the views whose RESOLVED direction
   // actually changed, so there is no value-change guard to repeat here.
-  //
-  // The subtree walk is this handler's own job now: only a LAYOUT ROOT holds this
-  // connection (RegisterWithLayoutController), so the per-View connections that used
-  // to deliver the signal to every affected descendant individually are gone.
-  // InvalidateSubtreeLayoutForDirectionChange drops the caches and raises the dirty
-  // bits down the inherit chain; the InvalidateMeasure() after it is what propagates
-  // upward from this node and schedules the pass.
-  InvalidateSubtreeLayoutForDirectionChange();
   InvalidateMeasure();
 }
 

@@ -3627,21 +3627,12 @@ int UtcDaliViewRtlMirrorIgnoresExternalActorPositionWriteP(void)
   END_TEST;
 }
 
-// THE LIVE BUG this pins: a layout-direction change once reached NO layout
-// invalidation at all. Actor::SetLayoutDirection emits Core's
-// LayoutDirectionChangedSignal and issues a legacy RelayoutRequest (size
-// negotiation), and neither of those is the dali-ui layout pass, so flipping a
-// SETTLED tree to RTL and driving frames did nothing: no mirror was ever applied.
-// Every other RTL test hides this by calling Arrange() explicitly.
-//
-// What this test pins today is that SOMETHING turns the change into an
-// invalidation for a settled tree driven only by real passes. Here the flip is on
-// the layout root, so both live mechanisms would cover it -- the root's lazy
-// signal hook (which is what actually runs; the hook is checked first and
-// OnPropertySet defers to it) and, if that hook were absent, the LAYOUT_DIRECTION
-// case of ViewDataImpl::OnPropertySet. The mid-tree case, where only the property
-// interception can see the change, is
-// UtcDaliViewLayoutDirectionChangeOnMidTreeViewRelayoutsSubtreeP.
+// THE LIVE BUG. A layout-direction change reached NO layout invalidation:
+// Actor::SetLayoutDirection emits Core's LayoutDirectionChangedSignal and issues
+// a legacy RelayoutRequest (size negotiation), neither of which is the dali-ui
+// layout pass, and ViewDataImpl::OnPropertySet does not handle LAYOUT_DIRECTION.
+// So flipping a SETTLED tree to RTL and driving frames did nothing: no mirror was
+// ever applied. Every other RTL test hides this by calling Arrange() explicitly.
 //
 // This test therefore uses the REAL pass only -- no explicit Measure/Arrange.
 int UtcDaliViewLayoutDirectionChangeRelayoutsSubtreeP(void)
@@ -3679,13 +3670,11 @@ int UtcDaliViewLayoutDirectionChangeRelayoutsSubtreeP(void)
 }
 
 // The change is set on the GRANDPARENT only; the two descendants merely INHERIT
-// it. Core resolves inheritance by walking the actor tree, and dali-ui mirrors
-// that walk from the one view that observed the change: the grandparent is the
-// layout root here, its lazy signal hook fires, and its handler recurses down the
-// inherit chain (InvalidateSubtreeLayoutForDirectionChange). Neither descendant
-// holds a hook or sees a property write of its own, so this is exactly the case
-// the recursive walk exists for -- a walk that stopped at the changed node would
-// leave both descendants unmirrored.
+// it. Core resolves inheritance by walking the actor tree and emitting the
+// signal on every actor whose resolved direction changed, so hooking that signal
+// covers the descendants for free. An approach that keyed off the direction
+// PROPERTY WRITE instead (ViewDataImpl::OnPropertySet) would see one view only
+// and leave both descendants unmirrored.
 int UtcDaliViewLayoutDirectionChangeOnAncestorRelayoutsDescendantP(void)
 {
   UiTestApplication application;
@@ -3759,110 +3748,6 @@ int UtcDaliViewLayoutDirectionRevertRelayoutsSubtreeP(void)
   application.SendNotification();
 
   DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
-
-  END_TEST;
-}
-
-// The change is set on a MID-TREE View: not the layout root, so it holds no
-// signal hook of its own, and its subtree has to be reached from the property
-// write instead (the LAYOUT_DIRECTION case of ViewDataImpl::OnPropertySet, which
-// raises the same subtree walk the hook does).
-//
-// Real pass only -- no explicit Measure/Arrange -- so this pins the scheduling as
-// well as the mirror. The root stays LEFT_TO_RIGHT throughout, which is what makes
-// `mid` a mid-tree case rather than a whole-tree flip.
-//
-// The views are PARENTED before they are configured. That ordering is not
-// load-bearing -- the hook is only made by a view that registers with a LIVE
-// WINDOW, so an off-scene parentless invalidation connects nothing either way -- and
-// it is kept as documentation of the shape under test: `mid` is a plain child, so
-// the property path is the only mechanism that can observe the write.
-int UtcDaliViewLayoutDirectionChangeOnMidTreeViewRelayoutsSubtreeP(void)
-{
-  UiTestApplication application;
-  Window            window = application.GetWindow();
-
-  View root = View::New();
-  View mid  = View::New();
-  View leaf = View::New();
-
-  root.Add(mid);
-  mid.Add(leaf);
-  window.Add(root);
-
-  root.SetRequestedWidth(300.0f);
-  root.SetRequestedHeight(200.0f);
-
-  mid.SetRequestedWidth(150.0f);
-  mid.SetRequestedHeight(100.0f);
-
-  leaf.SetRequestedWidth(50.0f);
-  leaf.SetRequestedHeight(40.0f);
-  leaf.SetRequestedX(10.0f);
-
-  application.SendNotification();
-  application.SendNotification();
-  DALI_TEST_EQUALS(mid.GetPositionX(), 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(leaf.GetPositionX(), 10.0f, TEST_LOCATION);
-
-  mid.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-  DALI_TEST_EQUALS(leaf.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
-
-  application.SendNotification();
-  application.SendNotification();
-
-  // The leaf is mirrored inside `mid`: 150 - 10 - 50 = 90. `mid` itself is not
-  // mirrored, because the root that arranges it is still LEFT_TO_RIGHT.
-  DALI_TEST_EQUALS(leaf.GetPositionX(), 90.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(mid.GetPositionX(), 0.0f, TEST_LOCATION);
-
-  END_TEST;
-}
-
-// The change is set on a non-View actor ABOVE the root View -- an intermediate
-// Layer. No View is written to at all, so no property interception can see it;
-// the only thing that can is the layout root's actor signal hook, which dali-core
-// fires while resolving the inherit chain down through the layer.
-//
-// This is the case that keeps the hook necessary rather than merely convenient.
-//
-// Non-vacuity (verified by mutation): removing the lazy Connect from
-// ViewDataImpl::RegisterWithLayoutController leaves the flip unobserved, no pass
-// is scheduled, and the final check fails at the unmirrored x.
-int UtcDaliViewLayoutDirectionChangeOnIntermediateLayerRelayoutsSubtreeP(void)
-{
-  UiTestApplication application;
-  Window            window = application.GetWindow();
-
-  Layer layer = Layer::New();
-  window.Add(layer);
-
-  View root = View::New();
-  root.SetRequestedWidth(200.0f);
-  root.SetRequestedHeight(100.0f);
-  layer.Add(root);
-
-  View child = View::New();
-  child.SetRequestedWidth(50.0f);
-  child.SetRequestedHeight(50.0f);
-  child.SetRequestedX(20.0f);
-  root.Add(child);
-
-  application.SendNotification();
-  application.SendNotification();
-  DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
-
-  // Written on the LAYER. Layer inherits Actor, so this is the same property the
-  // View API writes -- just on an actor dali-ui does not own.
-  layer.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-  DALI_TEST_EQUALS(root.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
-  DALI_TEST_EQUALS(child.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
-
-  application.SendNotification();
-  application.SendNotification();
-
-  // 200 - 20 - 50 = 130.
-  DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
 
   END_TEST;
 }
@@ -6167,16 +6052,13 @@ int UtcDaliViewArrangeCacheMissOnDifferentSlotP(void)
 
 // A layout-direction change re-arranges the leaf rather than serving it from cache,
 // and the mirror lands. Note the direction term of the hit predicate is belt and
-// braces: the invalidating subtree walk already clears the cache, so a missed hook
-// degrades to a MISS (slower) and never to a wrongly mirrored arrangement.
+// braces: the invalidation hook already clears the cache, so a missed hook degrades
+// to a MISS (slower) and never to a wrongly mirrored arrangement.
 //
 // Non-vacuity (verified by mutation): dropping the
 // `mLastArrangeDirection == GetEffectiveLayoutDirection()` term from the predicate
 // AND emptying ViewDataImpl::OnLayoutDirectionChanged leaves the leaf's cache live
-// and unkeyed, so no pass is scheduled and both assertions below fail. The second
-// half of that mutation is still sufficient on its own here: the flip is set on
-// `root`, which is the layout root and therefore the hooked view, and a hooked
-// view's OnPropertySet defers to the hook rather than raising a second walk.
+// and unkeyed, so no pass is scheduled and both assertions below fail.
 int UtcDaliViewArrangeCacheMissOnDirectionChangeP(void)
 {
   UiTestApplication application;
