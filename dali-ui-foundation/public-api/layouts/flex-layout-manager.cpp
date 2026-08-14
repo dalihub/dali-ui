@@ -24,7 +24,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/flex-layout-params-impl.h>
-#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -245,9 +244,7 @@ FlexJustifyOffsets GetFlexJustifyOffsets(float freeSpace, FlexJustify justify, s
   return out;
 }
 
-// @param[in] owner The arranging View, threaded through so the final MATCH_PARENT
-//                  re-measure below can be attributed to it. nullptr makes the scope inert.
-void ArrangeOneFlexLine(ViewImpl* owner, FlexLine& line, std::vector<View>& children,
+void ArrangeOneFlexLine(FlexLine& line, std::vector<View>& children,
                         std::vector<MeasuredSize>& workingSizes, const LayoutRect& bounds,
                         float contentWidth, float contentHeight, float& crossOffsetInOut, float& mainOffsetInOut,
                         float spacing, FlexAlign alignItems, bool isMainAxisHorizontal, bool isMainAxisReversed)
@@ -354,7 +351,6 @@ void ArrangeOneFlexLine(ViewImpl* owner, FlexLine& line, std::vector<View>& chil
 
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
-      Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(owner);
       childImpl.Measure(childBounds.width, childBounds.height);
     }
     childImpl.Arrange(childBounds);
@@ -650,7 +646,7 @@ void FlexLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
       float contentMain = IsMainAxisHorizontal() ? contentWidth : contentHeight;
       mainOffset        = contentMain - justify.mainOffset;
     }
-    ArrangeOneFlexLine(view, line, children, workingSizes, bounds, contentWidth, contentHeight, crossOffset, mainOffset,
+    ArrangeOneFlexLine(line, children, workingSizes, bounds, contentWidth, contentHeight, crossOffset, mainOffset,
                        justify.spacing, impl->mAlignItems, IsMainAxisHorizontal(), IsMainAxisReversed());
   }
 }
