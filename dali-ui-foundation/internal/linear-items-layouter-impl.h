@@ -26,6 +26,9 @@ namespace Dali
 namespace Ui
 {
 
+namespace Internal
+{
+
 class LinearItemsLayouterImpl;
 using LinearItemsLayouterImplPtr = IntrusivePtr<LinearItemsLayouterImpl>;
 
@@ -37,7 +40,7 @@ using LinearItemsLayouterImplPtr = IntrusivePtr<LinearItemsLayouterImpl>;
  * they are not part of the ItemsLayouterImpl interface and cannot
  * be overridden.
  */
-class DALI_UI_API LinearItemsLayouterImpl : public ItemsLayouterImpl
+class DALI_UI_API LinearItemsLayouterImpl : public Integration::ItemsLayouterImpl
 {
 public:
   static LinearItemsLayouterImplPtr New(Orientation orientation);
@@ -115,6 +118,8 @@ private:
   float    mTotalMeasuredExtent; // sum of extents for measured items
   uint32_t mMeasuredItemCount;   // count of items measured so far
 };
+
+} // namespace Internal
 
 } // namespace Ui
 } // namespace Dali

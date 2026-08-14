@@ -32,6 +32,9 @@ namespace Dali
 namespace Ui
 {
 
+namespace Integration
+{
+
 class EdgeEffectImpl;
 using EdgeEffectImplPtr = IntrusivePtr<EdgeEffectImpl>;
 
@@ -93,6 +96,8 @@ private:
   AbsorbSignalType   mAbsorbSignal;
   FinishedSignalType mFinishedSignal;
 };
+
+} // namespace Integration
 
 } // namespace Ui
 

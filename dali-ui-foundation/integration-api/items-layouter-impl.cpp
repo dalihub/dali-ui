@@ -22,6 +22,9 @@ namespace Dali
 namespace Ui
 {
 
+namespace Integration
+{
+
 ItemsLayouterImpl::~ItemsLayouterImpl() = default;
 
 Dali::Signal<void()>& ItemsLayouterImpl::LayoutInvalidatedSignal()
@@ -33,6 +36,8 @@ void ItemsLayouterImpl::InvalidateLayout()
 {
   mLayoutInvalidatedSignal.Emit();
 }
+
+} // namespace Integration
 
 } // namespace Ui
 } // namespace Dali

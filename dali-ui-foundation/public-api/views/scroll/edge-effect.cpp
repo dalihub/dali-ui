@@ -30,25 +30,25 @@ namespace Ui
 
 EdgeEffect EdgeEffect::New()
 {
-  EdgeEffectImplPtr impl = EdgeEffectImpl::New();
+  Integration::EdgeEffectImplPtr impl = Integration::EdgeEffectImpl::New();
   return EdgeEffect(impl.Get());
 }
 
-EdgeEffect::EdgeEffect(EdgeEffectImpl* impl)
+EdgeEffect::EdgeEffect(Integration::EdgeEffectImpl* impl)
 : BaseHandle(impl)
 {
 }
 
-EdgeEffectImpl& EdgeEffect::GetImpl()
+Integration::EdgeEffectImpl& EdgeEffect::GetImpl()
 {
   DALI_ASSERT_ALWAYS(*this && "EdgeEffect handle is empty");
-  return static_cast<EdgeEffectImpl&>(GetBaseObject());
+  return static_cast<Integration::EdgeEffectImpl&>(GetBaseObject());
 }
 
-const EdgeEffectImpl& EdgeEffect::GetImpl() const
+const Integration::EdgeEffectImpl& EdgeEffect::GetImpl() const
 {
   DALI_ASSERT_ALWAYS(*this && "EdgeEffect handle is empty");
-  return static_cast<const EdgeEffectImpl&>(GetBaseObject());
+  return static_cast<const Integration::EdgeEffectImpl&>(GetBaseObject());
 }
 
 void EdgeEffect::SetSource(View source)

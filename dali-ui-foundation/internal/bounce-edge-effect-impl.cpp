@@ -32,6 +32,9 @@ namespace Dali
 namespace Ui
 {
 
+namespace Internal
+{
+
 namespace
 {
 constexpr float MAX_PULL_PIXELS    = 100.0f;
@@ -208,6 +211,8 @@ void BounceEdgeEffectImpl::OnFinishImpl()
   mCurrentOffset        = 0.0f;
   mBasePositionCaptured = false;
 }
+
+} // namespace Internal
 
 } // namespace Ui
 

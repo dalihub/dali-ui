@@ -28,22 +28,22 @@ namespace Dali
 namespace Ui
 {
 
-BounceEdgeEffectImpl& BounceEdgeEffect::GetBounceImpl()
+Internal::BounceEdgeEffectImpl& BounceEdgeEffect::GetBounceImpl()
 {
-  return static_cast<BounceEdgeEffectImpl&>(GetImpl());
+  return static_cast<Internal::BounceEdgeEffectImpl&>(GetImpl());
 }
 
-const BounceEdgeEffectImpl& BounceEdgeEffect::GetBounceImpl() const
+const Internal::BounceEdgeEffectImpl& BounceEdgeEffect::GetBounceImpl() const
 {
-  return static_cast<const BounceEdgeEffectImpl&>(GetImpl());
+  return static_cast<const Internal::BounceEdgeEffectImpl&>(GetImpl());
 }
 
 BounceEdgeEffect BounceEdgeEffect::New(ScrollDirection axis)
 {
-  return BounceEdgeEffect(BounceEdgeEffectImpl::New(axis).Get());
+  return BounceEdgeEffect(Internal::BounceEdgeEffectImpl::New(axis).Get());
 }
 
-BounceEdgeEffect::BounceEdgeEffect(BounceEdgeEffectImpl* impl)
+BounceEdgeEffect::BounceEdgeEffect(Internal::BounceEdgeEffectImpl* impl)
 : EdgeEffect(impl)
 {
 }
@@ -52,7 +52,7 @@ BounceEdgeEffect BounceEdgeEffect::DownCast(EdgeEffect effect)
 {
   if(effect)
   {
-    auto* p = dynamic_cast<BounceEdgeEffectImpl*>(&effect.GetImpl());
+    auto* p = dynamic_cast<Internal::BounceEdgeEffectImpl*>(&effect.GetImpl());
     if(p)
     {
       return BounceEdgeEffect(p);

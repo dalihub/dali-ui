@@ -47,7 +47,7 @@ public:
 
 public: // Not intended for application developers
   /// @cond internal
-  explicit LinearItemsLayouter(ItemsLayouterImpl* impl);
+  explicit LinearItemsLayouter(Integration::ItemsLayouterImpl* impl);
   /// @endcond
 };
 

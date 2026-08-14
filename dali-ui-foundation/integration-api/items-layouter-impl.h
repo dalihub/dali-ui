@@ -29,6 +29,9 @@ namespace Dali
 namespace Ui
 {
 
+namespace Integration
+{
+
 class ItemsLayouterImpl;
 using ItemsLayouterImplPtr = IntrusivePtr<ItemsLayouterImpl>;
 
@@ -122,6 +125,8 @@ protected:
 private:
   Dali::Signal<void()> mLayoutInvalidatedSignal;
 };
+
+} // namespace Integration
 
 } // namespace Ui
 } // namespace Dali

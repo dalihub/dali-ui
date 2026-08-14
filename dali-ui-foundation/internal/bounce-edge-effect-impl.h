@@ -31,6 +31,9 @@ namespace Dali
 namespace Ui
 {
 
+namespace Internal
+{
+
 class BounceEdgeEffectImpl;
 using BounceEdgeEffectImplPtr = IntrusivePtr<BounceEdgeEffectImpl>;
 
@@ -42,7 +45,7 @@ using BounceEdgeEffectImplPtr = IntrusivePtr<BounceEdgeEffectImpl>;
  * curve on release. A fling that reaches the edge runs the same spring-back
  * animation after a brief push-out proportional to the fling velocity.
  */
-class DALI_UI_API BounceEdgeEffectImpl : public EdgeEffectImpl
+class DALI_UI_API BounceEdgeEffectImpl : public Integration::EdgeEffectImpl
 {
 public:
   static BounceEdgeEffectImplPtr New(ScrollDirection axis);
@@ -80,6 +83,8 @@ private:
   Vector3         mBasePosition{Vector3::ZERO};
   Dali::Animation mAnimation;
 };
+
+} // namespace Internal
 
 } // namespace Ui
 

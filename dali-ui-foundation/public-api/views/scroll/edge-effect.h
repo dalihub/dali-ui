@@ -32,7 +32,10 @@ namespace Dali
 namespace Ui
 {
 
+namespace Integration
+{
 class EdgeEffectImpl;
+}
 
 /**
  * @brief Controls a visual effect displayed when scrollable content reaches its boundary.
@@ -146,10 +149,10 @@ public:
 
 public: // Not intended for application developers
   /// @cond internal
-  explicit EdgeEffect(EdgeEffectImpl* impl);
+  explicit EdgeEffect(Integration::EdgeEffectImpl* impl);
 
-  EdgeEffectImpl&       GetImpl();
-  const EdgeEffectImpl& GetImpl() const;
+  Integration::EdgeEffectImpl&       GetImpl();
+  const Integration::EdgeEffectImpl& GetImpl() const;
   /// @endcond
 };
 

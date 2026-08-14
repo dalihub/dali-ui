@@ -28,7 +28,10 @@ namespace Dali
 namespace Ui
 {
 
+namespace Internal
+{
 class BounceEdgeEffectImpl;
+}
 
 /**
  * @brief An EdgeEffect that displaces the scroll content beyond the boundary
@@ -112,11 +115,11 @@ public:
   float GetBounceDuration() const;
 
 protected:
-  explicit BounceEdgeEffect(BounceEdgeEffectImpl* impl);
+  explicit BounceEdgeEffect(Internal::BounceEdgeEffectImpl* impl);
 
 private:
-  BounceEdgeEffectImpl&       GetBounceImpl();
-  const BounceEdgeEffectImpl& GetBounceImpl() const;
+  Internal::BounceEdgeEffectImpl&       GetBounceImpl();
+  const Internal::BounceEdgeEffectImpl& GetBounceImpl() const;
 };
 
 } // namespace Ui

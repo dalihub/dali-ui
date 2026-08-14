@@ -28,6 +28,9 @@ namespace Dali
 namespace Ui
 {
 
+namespace Internal
+{
+
 LinearItemsLayouterImplPtr LinearItemsLayouterImpl::New(Orientation orientation)
 {
   return new LinearItemsLayouterImpl(orientation);
@@ -179,7 +182,7 @@ LayoutRect LinearItemsLayouterImpl::GetItemBounds(uint32_t position, float cross
   return LayoutRect(main, 0.0f, mainSize, crossExtent);
 }
 
-ItemsLayouterImpl::Orientation LinearItemsLayouterImpl::GetOrientation() const
+Integration::ItemsLayouterImpl::Orientation LinearItemsLayouterImpl::GetOrientation() const
 {
   return mOrientation;
 }
@@ -542,6 +545,8 @@ float LinearItemsLayouterImpl::ScrollBy(float delta, Recycler& recycler)
 
   return consumed;
 }
+
+} // namespace Internal
 
 } // namespace Ui
 } // namespace Dali

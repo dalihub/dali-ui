@@ -24,6 +24,9 @@ namespace Dali
 namespace Ui
 {
 
+namespace Integration
+{
+
 EdgeEffectImplPtr EdgeEffectImpl::New()
 {
   return EdgeEffectImplPtr(new EdgeEffectImpl());
@@ -123,6 +126,8 @@ EdgeEffectImpl::FinishedSignalType& EdgeEffectImpl::FinishedSignal()
 {
   return mFinishedSignal;
 }
+
+} // namespace Integration
 
 } // namespace Ui
 

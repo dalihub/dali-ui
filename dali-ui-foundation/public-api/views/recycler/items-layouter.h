@@ -27,7 +27,10 @@ namespace Dali
 namespace Ui
 {
 
+namespace Integration
+{
 class ItemsLayouterImpl;
+}
 
 /**
  * @brief ABI-stable handle for a RecyclerView layout algorithm.
@@ -83,10 +86,10 @@ public:
 
 public: // Not intended for application developers
   /// @cond internal
-  explicit ItemsLayouter(ItemsLayouterImpl* impl);
+  explicit ItemsLayouter(Integration::ItemsLayouterImpl* impl);
 
-  ItemsLayouterImpl&       GetImpl();
-  const ItemsLayouterImpl& GetImpl() const;
+  Integration::ItemsLayouterImpl&       GetImpl();
+  const Integration::ItemsLayouterImpl& GetImpl() const;
   /// @endcond
 };
 

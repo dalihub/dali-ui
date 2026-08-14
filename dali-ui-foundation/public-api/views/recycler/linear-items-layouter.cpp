@@ -25,11 +25,11 @@ namespace Ui
 
 LinearItemsLayouter LinearItemsLayouter::New(Orientation orientation)
 {
-  LinearItemsLayouterImplPtr impl = LinearItemsLayouterImpl::New(orientation);
+  Internal::LinearItemsLayouterImplPtr impl = Internal::LinearItemsLayouterImpl::New(orientation);
   return LinearItemsLayouter(impl.Get());
 }
 
-LinearItemsLayouter::LinearItemsLayouter(ItemsLayouterImpl* impl)
+LinearItemsLayouter::LinearItemsLayouter(Integration::ItemsLayouterImpl* impl)
 : ItemsLayouter(impl)
 {
 }
