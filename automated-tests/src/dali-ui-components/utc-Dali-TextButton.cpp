@@ -15,10 +15,9 @@
  *
  */
 
-#include <dali-ui-components/dali-ui-components.h>
-#include <dali-ui-foundation/public-api/views/text-controls/label.h>
-#include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui-components/dali-ui-components.h>
+#include <dali/devel-api/atspi-interfaces/accessible.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -223,8 +222,8 @@ int UtcDaliTextButtonStylePaddingHelpersP(void)
   DALI_TEST_EQUALS(horizontalVertical.GetPadding(), Insets(4.0f, 4.0f, 6.0f, 6.0f), TEST_LOCATION);
 
   TextButtonStyle horizontalVerticalRvalue = TextButtonStyle::Builder()
-                                               .SetPadding(5, 7)
-                                               .Build();
+                                              .SetPadding(5, 7)
+                                              .Build();
   DALI_TEST_EQUALS(horizontalVerticalRvalue.GetPadding(), Insets(5.0f, 5.0f, 7.0f, 7.0f), TEST_LOCATION);
 
   TextButtonStyle::Builder builder;
@@ -373,89 +372,5 @@ int UtcDaliTextButtonAccessibilityP(void)
   DALI_TEST_CHECK(!button.HasAccessibilityState(UiAccessibility::State::ENABLED));
   button.DoAction("activate", attributes);
   DALI_TEST_EQUALS(clickCount, 1, TEST_LOCATION);
-  END_TEST;
-}
-
-// ---------------------------------------------------------------------------
-// A settled TextButton serves its whole subtree from the arrange cache.
-//
-// TextButton uses the default ArrangePolicy::IF_CHANGED, so re-arranging a settled TextButton
-// into the SAME slot elides its producer and replays the cached subtree instead
-// (ViewDataImpl::ReplayArrangeSubtreeFromCache): each node is reconciled against its OWN
-// cached bounds rather than against bounds the producer recomputes.
-//
-// That is observed here by moving the label out of band first. `label.Arrange(shifted)`
-// republishes the LABEL's own arrange entry at a shifted x -- and only x, so no SIZE_*
-// write reaches OnSizeSet and nothing invalidates the TextButton. The subtree gate
-// (CanReplayArrangeSubtreeFromCache) deliberately does NOT re-test a descendant's cache
-// KEY, so the TextButton still HITS and the replay re-applies the label's own shifted
-// entry. A MISS would instead re-run TextButtonImpl::OnArrange, which hands the label the
-// content slot it computes and snaps it back.
-//
-// Non-vacuity (verified by mutation): selecting ALWAYS in the implementation
-// constructor makes the second Arrange miss and pulls the label back to the
-// padding start -- the final assertion fails.
-int UtcDaliTextButtonSettledArrangeIsServedFromCacheP(void)
-{
-  UiTestApplication application(Components::UiConfig::New());
-  tet_infoline("A settled TextButton replays its subtree from the arrange cache instead of re-running OnArrange");
-
-  const float width     = 200.0f;
-  const float height    = 50.0f;
-  const float padStart  = 10.0f;
-  const float padEnd    = 4.0f;
-  const float padTop    = 2.0f;
-  const float padBottom = 2.0f;
-  const float contentW  = width - (padStart + padEnd);   // 186
-  const float contentH  = height - (padTop + padBottom); // 46
-
-  TextButtonStyle style = TextButtonStyle::Builder()
-                            .SetPadding(Insets(padStart, padEnd, padTop, padBottom))
-                            .SetStateEffect(StateEffect::None())
-                            .Build();
-
-  TextButton button = TextButton::New("OK", style);
-  button.SetRequestedWidth(width);
-  button.SetRequestedHeight(height);
-  application.GetScene().Add(button);
-
-  button.Measure(width, height);
-  button.Arrange(LayoutRect(0.0f, 0.0f, width, height)); // settles and publishes the entry
-
-  // The label is not exposed on the handle; it is the button's only child View.
-  Ui::Label label = Ui::Label::DownCast(button.GetChildAt(0u));
-  DALI_TEST_CHECK(label);
-
-  // The label fills the padded content band.
-  DALI_TEST_EQUALS(label.GetProperty<float>(Dali::Actor::Property::POSITION_X), padStart, TEST_LOCATION);
-  DALI_TEST_EQUALS(label.GetProperty<float>(Dali::Actor::Property::POSITION_Y), padTop, TEST_LOCATION);
-  DALI_TEST_EQUALS(label.GetProperty<float>(Dali::Actor::Property::SIZE_WIDTH), contentW, TEST_LOCATION);
-
-  // An out-of-band public Arrange on the label rewrites the very records a
-  // container hit would replay it from, so it retracts the button's entry: the
-  // next same-slot Arrange must RE-RUN the producer and restore the content
-  // slot, exactly as a forced miss would.
-  const float shiftedLabelX = padStart + 33.0f;
-  label.Arrange(LayoutRect(shiftedLabelX, padTop, contentW, contentH));
-  DALI_TEST_EQUALS(label.GetProperty<float>(Dali::Actor::Property::POSITION_X), shiftedLabelX, TEST_LOCATION);
-
-  button.Arrange(LayoutRect(0.0f, 0.0f, width, height));
-
-  // The container's own geometry is reconciled either way -- a hit is not a no-op.
-  DALI_TEST_EQUALS(button.GetProperty<float>(Dali::Actor::Property::POSITION_X), 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(button.GetProperty<float>(Dali::Actor::Property::SIZE_WIDTH), width, TEST_LOCATION);
-  DALI_TEST_EQUALS(label.GetProperty<float>(Dali::Actor::Property::POSITION_X), padStart, TEST_LOCATION);
-
-  // Settled again, the entry is live: a bare ACTOR write does not retract it, and
-  // the served hit reconciles the label back onto its cached content slot.
-  label.SetProperty(Dali::Actor::Property::POSITION_X, shiftedLabelX);
-  button.Arrange(LayoutRect(0.0f, 0.0f, width, height));
-  DALI_TEST_EQUALS(label.GetProperty<float>(Dali::Actor::Property::POSITION_X), padStart, TEST_LOCATION);
-
-  // Hit and forced miss agree.
-  button.InvalidateArrange();
-  button.Arrange(LayoutRect(0.0f, 0.0f, width, height));
-  DALI_TEST_EQUALS(label.GetProperty<float>(Dali::Actor::Property::POSITION_X), padStart, TEST_LOCATION);
-
   END_TEST;
 }

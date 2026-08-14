@@ -52,10 +52,8 @@ void utc_dali_layout_direction_arrange_cache_internal_cleanup(void)
 // invalidation must degrade to "no hit", never to an arrangement mirrored the
 // wrong way round.
 //
-// Both are cache bookkeeping rather than geometry, so they are observed here
-// through ViewDataImpl's white-box accessors. The arrange cache-HIT path that
-// consumes them is exercised from the outside in utc-Dali-ArrangeCacheHit-internal
-// and in the UtcDaliViewArrangeCache* cases of utc-Dali-View.
+// There is no arrange cache-hit path yet, so both are library-side write-only
+// and can only be observed through ViewDataImpl's white-box accessors.
 
 namespace
 {
@@ -187,144 +185,6 @@ int UtcDaliViewArrangeCacheSurvivesUnrelatedActorGeometryWriteP(void)
   // The arrange cache must survive it: geometry writes do not feed back into layout.
   DALI_TEST_CHECK(DataOf(v).IsArrangeCacheValid());
   DALI_TEST_CHECK(!DataOf(v).IsArrangeDirty());
-
-  END_TEST;
-}
-
-// ---------------------------------------------------------------------------
-// The right-to-left mirror (ViewDataImpl::ApplyLayoutDirection) is read-compare-write,
-// exactly like ApplySelfBoundsIfChanged: it computes the mirrored x from the child's
-// published LOGICAL bounds and writes it only when the actor does not already hold it.
-// That runs at EVERY node of a cache-hit replay, so an unconditional write cost one
-// scene-graph message per direct child per pass for a settled right-to-left subtree.
-//
-// The two halves of the guard are pinned separately below, because they can fail in
-// opposite directions: under-suppression (writing when nothing moved) is a cost, and
-// over-suppression (declining to write when the actor is wrong) is a correctness bug.
-// ---------------------------------------------------------------------------
-
-namespace
-{
-LayoutRect SlotOf(View view)
-{
-  return LayoutRect(view.GetProperty<float>(Actor::Property::POSITION_X),
-                    view.GetProperty<float>(Actor::Property::POSITION_Y),
-                    view.GetProperty<float>(Actor::Property::SIZE_WIDTH),
-                    view.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
-}
-
-// A settled right-to-left parent with two direct children, one of which asked for a
-// logical x of its own so the mirror is observably not the identity.
-void BuildSettledRtlParent(UiTestApplication& application, View& parent, View& first, View& second)
-{
-  parent = View::New();
-  parent.SetRequestedWidth(200.0f);
-  parent.SetRequestedHeight(100.0f);
-  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-  application.GetScene().Add(parent);
-
-  first = View::New();
-  first.SetRequestedWidth(50.0f);
-  first.SetRequestedHeight(20.0f);
-  parent.Add(first);
-
-  second = View::New();
-  second.SetRequestedX(30.0f);
-  second.SetRequestedWidth(40.0f);
-  second.SetRequestedHeight(20.0f);
-  parent.Add(second);
-
-  Settle(application);
-}
-} // namespace
-
-// Under-suppression half. A replay of a settled right-to-left subtree must leave every
-// mirrored position BIT-identical -- which is the observable consequence of the write
-// being skipped, and the property the mirror has to keep whether or not it is guarded.
-//
-// The stronger claim, "no scene-graph message is sent", is not observable from a UTC:
-// the event-side property holds the same value either way, because the mirror is a pure
-// function of the child's logical bounds and is therefore idempotent. That half of the
-// claim is pinned by review of ApplyLayoutDirection, not by this test. What this test
-// does guard is the regression that would make the guard worth removing: a mirror that
-// is not idempotent, or one that reads the actor rather than the published logical
-// bounds, breaks here immediately.
-int UtcDaliLayoutDirectionRtlSettledReplayWritesNothingP(void)
-{
-  UiTestApplication application;
-  tet_infoline("Replaying a settled right-to-left subtree leaves every mirrored position bit-identical");
-
-  View parent, first, second;
-  BuildSettledRtlParent(application, parent, first, second);
-
-  DALI_TEST_EQUALS(parent.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
-  DALI_TEST_CHECK(DataOf(parent).IsArrangeCacheValid());
-  DALI_TEST_CHECK(DataOf(first).IsArrangeCacheValid());
-  DALI_TEST_CHECK(DataOf(second).IsArrangeCacheValid());
-
-  const float firstX  = first.GetProperty<float>(Actor::Property::POSITION_X);
-  const float secondX = second.GetProperty<float>(Actor::Property::POSITION_X);
-
-  // Mirrored, not logical: `second` asked for a logical x of 30.
-  DALI_TEST_CHECK(secondX != 30.0f);
-
-  const LayoutRect parentSlot = SlotOf(parent);
-
-  for(int pass = 0; pass < 3; ++pass)
-  {
-    parent.Arrange(parentSlot);
-
-    // Exact, not epsilon: an idempotent mirror reproduces the same float, and only an
-    // exact comparison can say so.
-    DALI_TEST_CHECK(first.GetProperty<float>(Actor::Property::POSITION_X) == firstX);
-    DALI_TEST_CHECK(second.GetProperty<float>(Actor::Property::POSITION_X) == secondX);
-    DALI_TEST_CHECK(DataOf(parent).IsArrangeCacheValid());
-  }
-
-  END_TEST;
-}
-
-// Over-suppression half, and the guard's real risk. A geometry write from outside layout
-// -- the sanctioned Extension::SetPositionX escape hatch -- does NOT invalidate the
-// arrange cache, so the next pass is still a HIT. The mirror must nevertheless notice
-// that the actor no longer holds the mirrored value and repair it, exactly as the
-// unconditional write did.
-//
-// Non-vacuity (verified by mutation): inverting the guard in ApplyLayoutDirection to
-// `== mirrored` -- write only when the actor already agrees, which is over-suppression
-// in its purest form -- leaves both children at their LOGICAL x, so the baseline check
-// below and the two post-replay checks fail.
-int UtcDaliLayoutDirectionRtlExternalClobberStillRepairedOnReplayP(void)
-{
-  UiTestApplication application;
-  tet_infoline("A foreign POSITION_X write under a right-to-left parent is repaired by the next replay");
-
-  View parent, first, second;
-  BuildSettledRtlParent(application, parent, first, second);
-
-  const float      firstX     = first.GetProperty<float>(Actor::Property::POSITION_X);
-  const float      secondX    = second.GetProperty<float>(Actor::Property::POSITION_X);
-  const LayoutRect parentSlot = SlotOf(parent);
-
-  // Baseline: the recorded values are the MIRRORED ones, not the logical ones. Without
-  // this the rest of the test would also pass on a build that never mirrors at all.
-  DALI_TEST_CHECK(secondX != 30.0f);
-
-  // The clobber. This is the ScrollView / RecyclerView pattern: it moves the actor and
-  // deliberately leaves the layout caches alone.
-  Dali::Ui::Extension::View::SetPositionX(first, firstX + 17.0f);
-  Dali::Ui::Extension::View::SetPositionX(second, secondX - 23.0f);
-
-  DALI_TEST_CHECK(first.GetProperty<float>(Actor::Property::POSITION_X) != firstX);
-  DALI_TEST_CHECK(second.GetProperty<float>(Actor::Property::POSITION_X) != secondX);
-  DALI_TEST_CHECK(DataOf(parent).IsArrangeCacheValid());
-
-  // A cache HIT, and it still reconciles.
-  parent.Arrange(parentSlot);
-
-  DALI_TEST_CHECK(first.GetProperty<float>(Actor::Property::POSITION_X) == firstX);
-  DALI_TEST_CHECK(second.GetProperty<float>(Actor::Property::POSITION_X) == secondX);
-  DALI_TEST_CHECK(DataOf(parent).IsArrangeCacheValid());
 
   END_TEST;
 }

@@ -671,14 +671,9 @@ public: // Non-virtual API (safe to reorder / extend)
   void SetMeasureCallback(MeasureCallback callback);
 
   /**
-   * @copydoc Ui::View::SetArrangeCallback(ArrangeCallback)
+   * @copydoc Ui::View::SetArrangeCallback()
    */
   void SetArrangeCallback(ArrangeCallback callback);
-
-  /**
-   * @copydoc Ui::View::SetArrangeCallback(ArrangeCallback, ArrangePolicy)
-   */
-  void SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy);
 
   // Layout Manager
 
@@ -832,28 +827,6 @@ protected:
 
   /**
    * @brief Called during measure pass. Override to implement custom measurement.
-   *
-   * @note This method is NOT guaranteed to run on every measure pass. Measure()
-   * caches its result and serves that cache when the view is re-measured with the
-   * same normalised constraint and nothing has invalidated its layout, skipping
-   * this call entirely. Unlike OnArrange(), there is no execution-policy opt-out:
-   * measure caching is always on, so the contract below is unconditional.
-   * Never rely on this method as a per-frame or per-pass tick.
-   *
-   * The override must therefore be a pure function of its two constraints, this
-   * view's effective scale, its own layout-tracked state (requested size, padding,
-   * margin, size bounds), the effective layout direction and its children's measured
-   * sizes -- nothing else. If it reads any state outside that envelope, it OWNS the
-   * invalidation: it must call InvalidateMeasure() itself whenever that state
-   * changes, or the view keeps its previous measured size until some unrelated
-   * invalidation arrives.
-   *
-   * The effective layout direction IS inside that envelope: a direction change
-   * invalidates this view's measure, so sizing on GetEffectiveLayoutDirection() here
-   * is safe. It is rarely what you want, though -- the framework already mirrors a
-   * non-standalone child's x for right-to-left, so a direction-independent measure
-   * plus the default arrange is usually the correct way to be direction-aware.
-   *
    * @param[in] widthConstraint  Available visual (scale-applied) width, or WRAP_CONTENT / MATCH_PARENT.
    * @param[in] heightConstraint Available visual (scale-applied) height, or WRAP_CONTENT / MATCH_PARENT.
    * @return Measured visual (scale-applied) size.
@@ -866,13 +839,6 @@ protected:
    * Return the view's final self bounds (parent-local, pre-RTL logical). The
    * framework validates the returned rect and applies its x/y/width/height to
    * the self actor; do NOT call self geometry setters. Default echoes @p bounds.
-   *
-   * @note This method is NOT guaranteed to run on every arrange pass.
-   * ArrangePolicy::IF_CHANGED is the default, so the framework may serve a
-   * cached result and skip this call when all tracked inputs are unchanged. Select
-   * ArrangePolicy::ALWAYS for work that must run on every arrange pass. A
-   * policy selected by a base constructor is inherited by subclasses and may be
-   * replaced by the subclass. Never rely on this method as a per-frame tick.
    */
   virtual LayoutRect OnArrange(const LayoutRect& bounds);
 
@@ -1111,41 +1077,6 @@ protected:
    * @return Pointer to the LayoutManager, or nullptr if not attached
    */
   LayoutManager* GetLayoutManager() const;
-
-  /**
-   * @brief Sets when this view's OnArrange() implementation must run.
-   *
-   * The default is ArrangePolicy::IF_CHANGED. Use
-   * ArrangePolicy::ALWAYS when OnArrange() reads ancestor or world geometry,
-   * depends on mutable state that is not accompanied by InvalidateArrange(), or
-   * pushes state to a surface outside the actor tree.
-   *
-   * The policy is stored on the implementation instance, so a policy set by a base
-   * constructor is inherited by subclasses. A subclass may set its own policy after
-   * the base constructor completes. The policy may also be changed after construction;
-   * an existing arrange cache entry is invalidated when necessary.
-   *
-   * @note This policy describes OnArrange() only. An ArrangeCallback replaces
-   * OnArrange() as the active arrange implementation and carries its own policy.
-   *
-   * @param[in] policy When OnArrange() runs
-   */
-  void SetArrangePolicy(ArrangePolicy policy);
-
-  /**
-   * @brief Gets the policy that controls when this view's OnArrange() runs.
-   *
-   * Returns the policy last set through SetArrangePolicy(), or the default
-   * ArrangePolicy::IF_CHANGED when none was set.
-   *
-   * @note This policy describes OnArrange() only, so the returned value mirrors
-   * SetArrangePolicy() exactly. It is NOT changed by an attached LayoutManager or an
-   * ArrangeCallback: each is a separate arrange implementation that carries its own
-   * policy and does not alter this one.
-   *
-   * @return The OnArrange() execution policy
-   */
-  ArrangePolicy GetArrangePolicy() const;
 
   // ============================================================
   // private

@@ -409,21 +409,6 @@ void ViewDataImpl::VisualData::RelayoutRequest(Visual::Base& object)
     return;
   }
 
-  // A visual that only just became ready may have changed this view's natural
-  // size, and the natural size is a measure input: ViewDataImpl::GetNaturalSize()
-  // reads the BACKGROUND visual, and a subclass OnMeasure() may read any visual it
-  // registered. The measured size cached against the pre-load natural size is
-  // therefore stale, and nothing else invalidates it -- the measure cache keeps
-  // serving that stale hit until some unrelated invalidation happens to arrive.
-  //
-  // Deliberately NOT gated on scene connection. The measure cache is scene
-  // independent: an off-scene view is measured and serves hits exactly as an
-  // on-scene one does, so gating here would make "loaded while detached" a
-  // permanent wrong size. The dali-core relayout request below stays gated,
-  // because that one IS about the scene: it drives legacy size negotiation,
-  // which only runs for connected actors.
-  mOuter.InvalidateMeasure();
-
   if(mOuter.mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
     if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mOuter.mViewImpl))
@@ -678,21 +663,6 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integra
     }
   }
 
-  // The BACKGROUND visual is the one ViewDataImpl::GetNaturalSize() reads, so
-  // registering or REPLACING it changes this view's natural size, which is a measure
-  // input. That includes the "there was no background at all" case: no visual answers
-  // Vector3::ZERO, while a visual whose own natural size is zero answers the padding,
-  // so the two are genuinely different measured sizes. Any measured size cached
-  // against the previous answer is stale and must be dropped -- the RelayoutRequest()
-  // the callers make asks dali-core for legacy size negotiation and does not touch the
-  // dali-ui measure cache. Placed on this five-argument overload because every
-  // RegisterVisual() overload and every caller (SetBackground(), the BACKGROUND
-  // property setter, integration code) funnels through it.
-  if(index == Ui::View::Property::BACKGROUND)
-  {
-    mOuter.InvalidateMeasure();
-  }
-
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "View::RegisterVisual() Registered %s(%d), enabled:%s\n",
                 visual.GetName().c_str(), index, enabled ? "true" : "false");
 }
@@ -711,16 +681,6 @@ void ViewDataImpl::VisualData::UnregisterVisual(Property::Index index)
 
     (*iter)->visual.Reset();
     mVisuals.Erase(iter);
-
-    // Mirror of the registration side above: with the BACKGROUND visual gone,
-    // GetNaturalSize() drops back to Vector3::ZERO, so the cached measured size no
-    // longer describes this view. Inside the "was actually registered" branch, so a
-    // no-op unregister invalidates nothing. Teardown does not reach this: the
-    // destructor goes through ClearVisuals(), not UnregisterVisual().
-    if(index == Ui::View::Property::BACKGROUND)
-    {
-      mOuter.InvalidateMeasure();
-    }
   }
 
   if(FindVisual(index, mRemoveVisuals, iter))

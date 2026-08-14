@@ -156,22 +156,7 @@ public: // Measure / Arrange API
    * @brief Measures the view with the given constraints.
    *
    * This method implements caching to avoid redundant calculations.
-   * It calls the view's measure implementation -- OnMeasure(), an attached
-   * LayoutManager, or a MeasureCallback set through SetMeasureCallback() -- following
-   * the Template Method pattern, and caches the result. When the view is re-measured
-   * with the same normalised constraint and nothing has invalidated its layout, the
-   * cached result is served and that implementation is not called.
-   *
-   * Unlike arrange, measure has no ArrangePolicy::ALWAYS opt-out: measure caching
-   * applies to every measure implementation including one written outside this library.
-   * A measure implementation is REQUIRED to be a pure function of its
-   * constraints, the view's effective scale, the view's own layout-tracked state, the
-   * effective layout direction and its children's measured sizes. An implementation
-   * that reads anything else owns the invalidation and must call InvalidateMeasure()
-   * when that state changes. See ViewImpl::OnMeasure().
-   *
-   * The framework keys the measure cache on the effective scale as well as on the
-   * constraint, so a scale change alone forces a re-measure.
+   * It calls OnMeasure internally (Template Method pattern).
    *
    * @param[in] widthConstraint The width constraint for measurement
    * @param[in] heightConstraint The height constraint for measurement
@@ -182,39 +167,7 @@ public: // Measure / Arrange API
   /**
    * @brief Arranges the view within the given bounds.
    *
-   * This method calls the view's arrange implementation -- OnArrange(), an attached
-   * LayoutManager, or an ArrangeCallback set through SetArrangeCallback() --
-   * following the Template
-   * Method pattern, and caches the result. When the view is re-arranged with the
-   * same bounds, the same effective layout direction and the same effective scale,
-   * and nothing has invalidated its layout, the cached result is served and that
-   * implementation is not called. The arranged geometry is reconciled either way, so
-   * the outcome is the same.
-   *
-   * That holds for a view WITH children too: serving the cache replays the settled
-   * subtree, so every descendant the arrange implementation would have arranged ends
-   * the pass at exactly the geometry a re-run would have left it at -- including
-   * geometry that was written outside layout since the previous pass -- and every
-   * descendant subscribed to LayoutFinishedSignal() is still notified. Serving the
-   * cache is an optimisation of the WORK, never of the RESULT.
-   *
-   * ArrangePolicy::IF_CHANGED is the default for OnArrange(),
-   * one-argument ArrangeCallback registration, and LayoutManager::Arrange(). Use
-   * ArrangePolicy::ALWAYS when an arrange implementation reads ancestor or world
-   * geometry, depends on mutable state that does not invalidate arrange, or performs
-   * work that must happen on every arrange pass. VideoView and WebView are first-party
-   * examples.
-   *
-   * An ArrangePolicy::ALWAYS view refuses the cache hit of every ancestor ABOVE it:
-   * each of those ancestors misses and re-runs its own arrange implementation. It does
-   * not force the whole subtree to re-run -- a sibling subtree that a re-running
-   * ancestor re-enters still evaluates its own predicate and can serve its own hit, in
-   * which case it is replayed rather than re-run. The cost is the ancestor PATH, not
-   * every view beneath the ancestor.
-   *
-   * @note An ArrangePolicy::IF_CHANGED arrange implementation must arrange the same set
-   * of children for the same tracked inputs. If that set depends on untracked state,
-   * use ArrangePolicy::ALWAYS or invalidate arrange whenever the state changes.
+   * This method calls OnArrange internally (Template Method pattern).
    *
    * @param[in] bounds The bounds to arrange the view in
    * @return The final arranged bounds (parent-local, pre-RTL logical)
@@ -247,14 +200,6 @@ public: // Measure / Arrange API
    * When set, the callback replaces the default measurement behavior
    * during the layout pass. Pass a default-constructed callback to remove.
    *
-   * @note The callback becomes this view's measure implementation, so the measure
-   * contract documented on Measure() applies to it unchanged: it must be a pure function
-   * of its constraints, the view's effective scale, the view's own layout-tracked state,
-   * the effective layout direction and its children's measured sizes, and it is NOT
-   * called on a measure-cache hit. There is no ArrangePolicy::ALWAYS-style opt-out --
-   * caching is always on -- so a callback that depends on anything else must call
-   * View::InvalidateMeasure() itself when that state changes.
-   *
    * @param[in] callback The measure callback (ownership transferred)
    *
    * @code
@@ -283,13 +228,6 @@ public: // Measure / Arrange API
    * resolves to RIGHT_TO_LEFT, so callbacks must not apply RTL mirroring
    * themselves.
    *
-   * @note The callback replaces OnArrange() as this view's arrange implementation. This
-   * one-argument overload uses ArrangePolicy::IF_CHANGED, so the framework
-   * may reuse an unchanged result without invoking the callback. Use the two-argument
-   * overload with ArrangePolicy::ALWAYS when the callback reads state that is
-   * not tracked by layout invalidation or performs externally visible work on every
-   * arrange pass.
-   *
    * @param[in] callback The arrange callback (ownership transferred)
    *
    * @code
@@ -304,27 +242,6 @@ public: // Measure / Arrange API
    * @endcode
    */
   void SetArrangeCallback(ArrangeCallback callback);
-
-  /**
-   * @brief Sets a custom arrange callback and its execution policy.
-   *
-   * The default policy used by the one-argument overload is
-   * ArrangePolicy::IF_CHANGED. Pass ArrangePolicy::ALWAYS when the
-   * callback reads ancestor or world geometry, depends on mutable state that is not
-   * accompanied by InvalidateArrange(), or pushes state to a surface outside the
-   * actor tree.
-   *
-   * Installing a callback replaces the policy of the previously installed callback.
-   *
-   * @param[in] callback The arrange callback (ownership transferred)
-   * @param[in] policy   When the callback runs
-   *
-   * @code
-   * view.SetArrangeCallback(ArrangeCallback::New(&MyArrange),
-   *                         ArrangePolicy::ALWAYS);
-   * @endcode
-   */
-  void SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy);
 
   /**
    * @brief Attaches a LayoutTransition to this view.

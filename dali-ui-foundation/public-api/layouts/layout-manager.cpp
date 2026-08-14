@@ -20,7 +20,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
-#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/common/dali-common.h>
 
@@ -43,49 +42,6 @@ LayoutManager::LayoutManager(Impl* impl)
 LayoutManager::~LayoutManager()
 {
   delete mImpl;
-}
-
-ArrangePolicy LayoutManager::GetArrangePolicy() const
-{
-  return mImpl ? mImpl->GetArrangePolicy() : ArrangePolicy::IF_CHANGED;
-}
-
-void LayoutManager::SetArrangePolicy(ArrangePolicy policy)
-{
-  if(mImpl && mImpl->SetArrangePolicy(policy))
-  {
-    if(ViewImpl* owner = mImpl->GetOwner())
-    {
-      Internal::ViewDataImpl::Get(*owner).OnLayoutManagerArrangePolicyChanged();
-    }
-  }
-}
-
-void LayoutManager::SetOwnerView(ViewImpl* owner)
-{
-  if(mImpl)
-  {
-    mImpl->SetOwner(owner);
-  }
-}
-
-void LayoutManager::InvalidateOwnerMeasure()
-{
-  // Null owner == not attached yet (a manager is normally configured before
-  // View::AttachLayoutManager runs) -- a no-op then, because there is no cached
-  // result to retract and nothing to schedule.
-  if(ViewImpl* owner = (mImpl ? mImpl->GetOwner() : nullptr))
-  {
-    owner->InvalidateMeasure();
-  }
-}
-
-void LayoutManager::InvalidateOwnerArrange()
-{
-  if(ViewImpl* owner = (mImpl ? mImpl->GetOwner() : nullptr))
-  {
-    owner->InvalidateArrange();
-  }
 }
 
 uint32_t LayoutManager::GetChildViewCount(ViewImpl* view) const

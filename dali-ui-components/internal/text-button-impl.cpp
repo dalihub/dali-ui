@@ -24,6 +24,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -66,10 +67,6 @@ Ui::TextButton TextButtonImpl::New(TextButtonStyle style)
   DALI_ASSERT_ALWAYS(style && "TextButtonStyle must be initialized");
   IntrusivePtr<TextButtonImpl> impl(new TextButtonImpl());
   Ui::TextButton               handle(*impl);
-
-  // The default ArrangePolicy::IF_CHANGED policy is valid here: OnArrange derives
-  // the label bounds entirely from layout-tracked inputs.
-
   impl->Initialize();
   impl->ApplyInitialStyle(style);
   return handle;
@@ -284,13 +281,10 @@ LayoutRect TextButtonImpl::OnArrange(const LayoutRect& bounds)
   contentBounds.width  = std::max(0.0f, bounds.width - static_cast<float>(padding.start + padding.end) * s);
   contentBounds.height = std::max(0.0f, bounds.height - static_cast<float>(padding.top + padding.bottom) * s);
 
-  // No layout-dependency owner scope on this Measure(): mLabel is a DIRECT child and
-  // this view is arrange-in-progress while it runs, which is exactly the condition the
-  // ancestor-invalidation walk stops on for a direct parent, so the walk breaks here
-  // either way. Relevant beyond tidiness -- the scope type lives in a foundation header
-  // this project does not install, so using it from the components library would make
-  // this file compile only in a same-tree build.
-  GetImpl(mLabel).Measure(contentBounds.width, contentBounds.height);
+  {
+    LayoutDependency::ArrangeOwnedMeasureScope ownerScope(this);
+    GetImpl(mLabel).Measure(contentBounds.width, contentBounds.height);
+  }
   GetImpl(mLabel).Arrange(contentBounds);
 
   return bounds;

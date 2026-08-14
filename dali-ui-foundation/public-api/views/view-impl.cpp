@@ -80,7 +80,6 @@ DALI_TYPE_REGISTRATION_END()
 ViewImplPtr ViewImpl::New()
 {
   IntrusivePtr<ViewImpl> viewImpl = new ViewImpl();
-
   return ViewImplPtr(viewImpl);
 }
 
@@ -102,8 +101,7 @@ ViewImpl::~ViewImpl()
 
 void ViewImpl::OnInitialize()
 {
-  // Intentionally empty. The child-order-changed connection this used to make now
-  // lives in the non-virtual Initialize(); see the comment there.
+  DevelActor::ChildOrderChangedSignal(Self()).Connect(mImpl, &Internal::ViewDataImpl::OnChildOrderChanged);
 }
 
 void ViewImpl::OnDestroy()
@@ -572,11 +570,6 @@ void ViewImpl::SetArrangeCallback(ArrangeCallback callback)
   mImpl->SetArrangeCallback(std::move(callback));
 }
 
-void ViewImpl::SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy)
-{
-  mImpl->SetArrangeCallback(std::move(callback), policy);
-}
-
 void ViewImpl::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
 {
   mImpl->AttachLayoutManager(std::move(manager));
@@ -585,16 +578,6 @@ void ViewImpl::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
 LayoutManager* ViewImpl::GetLayoutManager() const
 {
   return mImpl->GetLayoutManager();
-}
-
-void ViewImpl::SetArrangePolicy(ArrangePolicy policy)
-{
-  mImpl->SetArrangePolicy(policy);
-}
-
-ArrangePolicy ViewImpl::GetArrangePolicy() const
-{
-  return mImpl->GetArrangePolicy();
 }
 
 void ViewImpl::SetLayoutTransition(LayoutTransition transition)
@@ -775,21 +758,6 @@ void ViewImpl::Initialize()
   // Initialize() is non-virtual and is the single second-phase entry point every
   // View construction runs through, so the connection is unconditional.
   Self().LayoutDirectionChangedSignal().Connect(mImpl, &Internal::ViewDataImpl::OnLayoutDirectionChanged);
-
-  // Child order is the other actor-owned input to layout that only dali-core can
-  // report. OnChildOrderChanged() rebuilds mChildren in actor order, tags the
-  // reorder for transitions and invalidates measure; without it a RaiseToTop() or
-  // LowerBelow() leaves mChildren in the old order AND leaves the measure/arrange
-  // caches valid, so the settled subtree is replayed at the stale order instead of
-  // being re-laid-out.
-  //
-  // Connected HERE and not in OnInitialize(), for exactly the reason given above
-  // for the direction signal: OnInitialize is virtual, and a third-party subclass
-  // that overrides it without up-calling would silently lose the hook. This is
-  // also strictly better placed than before -- the connection is now live BEFORE
-  // OnInitialize() runs below, so children a subclass adds from OnInitialize() are
-  // covered too.
-  DevelActor::ChildOrderChangedSignal(Self()).Connect(mImpl, &Internal::ViewDataImpl::OnChildOrderChanged);
 
   if(mImpl->AreVisualsEnabled())
   {

@@ -40,8 +40,6 @@ Ui::DummyComponent DummyComponentImpl::New()
   // Pass ownership to CustomActor handle
   Ui::DummyComponent handle = Ui::DummyComponent(*impl);
 
-  // ViewImpl::OnArrange uses the default ArrangePolicy::IF_CHANGED policy.
-
   // Second-phase initialization
   impl->Initialize();
 

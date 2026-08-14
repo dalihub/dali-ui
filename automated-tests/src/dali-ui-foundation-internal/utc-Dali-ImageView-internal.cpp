@@ -15,7 +15,6 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-transform.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
@@ -178,37 +177,6 @@ int UtcDaliImageViewFixedSizeSetUrlPreservesLayoutFinishedFitting(void)
   DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::OFFSET)->Get(fittedOffset));
   DALI_TEST_EQUALS(fittedSize, Vector2(200.0f, 100.0f), 0.01f, TEST_LOCATION);
   DALI_TEST_EQUALS(fittedOffset, Vector2(0.0f, 50.0f), 0.01f, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliImageViewFailedNPatchResourceReadyInvalidatesMeasure(void)
-{
-  UiTestApplication application;
-
-  ImageView view = ImageView::New();
-  view.SetRequestedWidth(200.0f);
-  view.SetRequestedHeight(100.0f);
-  view.SetNPatchBorder(Vector4(4.0f, 4.0f, 4.0f, 4.0f));
-  view.Measure(500.0f, 500.0f);
-
-  auto& viewData = DataOf(view);
-  DALI_TEST_CHECK(viewData.IsMeasureCacheValid());
-
-  view.SetResourceUrl("missing.9.png");
-
-  auto visual = viewData.GetVisual(ImageView::Property::IMAGE);
-  DALI_TEST_CHECK(visual);
-  DALI_TEST_EQUALS(Ui::GetImplementation(visual).GetType(), Ui::Integration::InternalVisualType::N_PATCH, TEST_LOCATION);
-  DALI_TEST_CHECK(viewData.IsMeasureCacheValid());
-
-  // A failed NPatch uses the broken-image renderer. The ImageView callback returns
-  // early for FAILED, so its former invalidation never covered this path. The common
-  // visual resource-ready path must still invalidate the cached measurement.
-  Ui::GetImplementation(visual).ResourceReady(Ui::Visual::ResourceStatus::FAILED);
-
-  DALI_TEST_CHECK(!viewData.IsMeasureCacheValid());
-  DALI_TEST_CHECK(viewData.IsMeasureDirty());
 
   END_TEST;
 }

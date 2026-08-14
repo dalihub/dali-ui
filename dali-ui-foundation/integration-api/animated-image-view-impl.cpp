@@ -148,9 +148,7 @@ void AnimatedImageViewImpl::Reload()
 
 AnimatedImageViewImplPtr AnimatedImageViewImpl::New()
 {
-  AnimatedImageViewImplPtr impl(new AnimatedImageViewImpl());
-
-  return impl;
+  return new AnimatedImageViewImpl();
 }
 
 void AnimatedImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value)

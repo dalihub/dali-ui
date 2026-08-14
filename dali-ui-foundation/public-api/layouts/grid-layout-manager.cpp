@@ -517,12 +517,6 @@ GridLayoutManager::~GridLayoutManager()
 void GridLayoutManager::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
 {
   GetImplAs<Impl>()->mRowDefinitions = rows;
-
-  // Row definitions are read by both Measure() and Arrange(), and neither cache key
-  // can see them, so the owner has to be told. Unguarded, unlike the scalar setters
-  // below: GridLength has no equality operator, and comparing element-wise to save an
-  // invalidation would cost more than the invalidation on any realistic grid.
-  InvalidateOwnerMeasure();
 }
 
 const Dali::Vector<GridLength>& GridLayoutManager::GetRowDefinitions() const
@@ -533,9 +527,6 @@ const Dali::Vector<GridLength>& GridLayoutManager::GetRowDefinitions() const
 void GridLayoutManager::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
 {
   GetImplAs<Impl>()->mColumnDefinitions = columns;
-
-  // See SetRowDefinitions: same reasoning, same unguarded invalidation.
-  InvalidateOwnerMeasure();
 }
 
 const Dali::Vector<GridLength>& GridLayoutManager::GetColumnDefinitions() const
@@ -545,13 +536,7 @@ const Dali::Vector<GridLength>& GridLayoutManager::GetColumnDefinitions() const
 
 void GridLayoutManager::SetRowSpacing(float spacing)
 {
-  Impl* impl = GetImplAs<Impl>();
-  if(impl->mRowSpacing == spacing)
-  {
-    return;
-  }
-  impl->mRowSpacing = spacing;
-  InvalidateOwnerMeasure();
+  GetImplAs<Impl>()->mRowSpacing = spacing;
 }
 
 float GridLayoutManager::GetRowSpacing() const
@@ -561,13 +546,7 @@ float GridLayoutManager::GetRowSpacing() const
 
 void GridLayoutManager::SetColumnSpacing(float spacing)
 {
-  Impl* impl = GetImplAs<Impl>();
-  if(impl->mColumnSpacing == spacing)
-  {
-    return;
-  }
-  impl->mColumnSpacing = spacing;
-  InvalidateOwnerMeasure();
+  GetImplAs<Impl>()->mColumnSpacing = spacing;
 }
 
 float GridLayoutManager::GetColumnSpacing() const

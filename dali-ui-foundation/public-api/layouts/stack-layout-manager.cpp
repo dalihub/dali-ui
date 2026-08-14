@@ -183,20 +183,7 @@ StackLayoutManager::~StackLayoutManager()
 
 void StackLayoutManager::SetOrientation(StackOrientation orientation)
 {
-  Impl* impl = GetImplAs<Impl>();
-  if(impl->mOrientation == orientation)
-  {
-    return;
-  }
-  impl->mOrientation = orientation;
-
-  // This state is read by both Measure() and Arrange(), and neither the measure cache
-  // key nor the arrange cache key can see it, so the owner has to be told. Reaching
-  // this manager directly (through the protected View::GetLayoutManager()) used to
-  // leave the change unscheduled; now it invalidates exactly as StackLayout's own
-  // setter does. This also keeps ArrangePolicy::IF_CHANGED valid: the orientation is
-  // layout-tracked precisely because of this call.
-  InvalidateOwnerMeasure();
+  GetImplAs<Impl>()->mOrientation = orientation;
 }
 
 StackOrientation StackLayoutManager::GetOrientation() const
@@ -206,16 +193,7 @@ StackOrientation StackLayoutManager::GetOrientation() const
 
 void StackLayoutManager::SetSpacing(float spacing)
 {
-  Impl* impl = GetImplAs<Impl>();
-  if(impl->mSpacing == spacing)
-  {
-    return;
-  }
-  impl->mSpacing = spacing;
-
-  // Spacing changes the accumulated main-axis extent, so it is a MEASURE input.
-  // See SetOrientation for why the owner has to be invalidated from here.
-  InvalidateOwnerMeasure();
+  GetImplAs<Impl>()->mSpacing = spacing;
 }
 
 float StackLayoutManager::GetSpacing() const

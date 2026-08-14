@@ -183,7 +183,6 @@ WebViewImpl::WebViewImpl()
   mMouseEventsEnabled(true),
   mKeyEventsEnabled(true)
 {
-  SetArrangePolicy(ArrangePolicy::ALWAYS);
   // WebEngine instance is created in the factory (New()), not here,
   // so that the caller can choose type/argc/argv.
 }
@@ -528,15 +527,6 @@ MeasuredSize WebViewImpl::OnMeasure(float widthConstraint, float heightConstrain
   return MeasuredSize(w, h);
 }
 
-// ArrangePolicy::ALWAYS is required here and is set in the constructor. CalculateDisplayArea() reads
-// Actor::Property::SCREEN_POSITION, a function of the whole ancestor chain, and
-// SetDisplayArea() pushes it to a surface outside the actor tree
-// (mWebEngine.UpdateDisplayArea). Neither input is in the arrange cache key, and an
-// ancestor move invalidates nothing here, so serving this view a cached arrange would
-// strand the web engine's surface at a stale offset. The WORLD_POSITION
-// StepCondition(1.0f, 1.0f) notification is a coarse backstop, not an equivalent: it
-// cannot see sub-pixel-per-frame drift.
-// Pinned by UtcDaliArrangeCacheHitAlwaysFirstPartyLeavesNeverCacheP.
 LayoutRect WebViewImpl::OnArrange(const LayoutRect& bounds)
 {
   DALI_LOG_DEBUG_INFO("[WebViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f)\n",
@@ -615,8 +605,8 @@ void WebViewImpl::OnFrameRendered()
   {
     Vector3 selfSize = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
     WriteWebViewDebugLog("[WV] created visual=%d nativeImg=%ux%u selfSize=%.0fx%.0f",
-          (int)(bool)mVisual, mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight,
-          selfSize.width, selfSize.height);
+                         (int)(bool)mVisual, mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight,
+                         selfSize.width, selfSize.height);
   }
 #endif
   if(mVisual)
@@ -1403,8 +1393,8 @@ bool WebViewImpl::OnTouchEvent(const Dali::TouchEvent& touch)
       Vector2 lp = touch.GetPointCount() ? touch.GetLocalPosition(0) : Vector2::ZERO;
       Vector2 sp = touch.GetPointCount() ? touch.GetScreenPosition(0) : Vector2::ZERO;
       WriteWebViewDebugLog("[TOUCH] actorSize=%.0fx%.0f local=(%.0f,%.0f) screen=(%.0f,%.0f) lastImg=%ux%u",
-            sz.width, sz.height, lp.x, lp.y, sp.x, sp.y,
-            mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight);
+                           sz.width, sz.height, lp.x, lp.y, sp.x, sp.y,
+                           mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight);
     }
     // Clicking the page must also give it keyboard focus (like a real browser), otherwise
     // OnKeyEvent() never fires for this control and key events never reach the web engine.
