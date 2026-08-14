@@ -482,6 +482,138 @@ int UtcDaliLabelTextGradientAnimationNoOpAndLinearP(void)
   END_TEST;
 }
 
+int UtcDaliLabelTextGradientAnimationsPropagateAcrossFramesP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New("Gradient animation propagation without Reveal");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(96.0f);
+  label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.1f));
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ONE, Vector2::ZERO, 0.2f));
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  Animation animation = Animation::New(1.0f);
+  label.Animate(animation)
+    .TextGradientStartOffset(0.8f, Duration(1.0f))
+    .TextGradientOverlayStartOffset(0.9f, Duration(1.0f));
+
+  const Property::Index baseSourceIndex = label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  const Property::Index overlaySourceIndex = label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(baseSourceIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(overlaySourceIndex != Property::INVALID_INDEX);
+
+  Renderer renderer = label.GetRendererAt(0u);
+  const Property::Index baseRendererIndex = renderer.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  const Property::Index overlayRendererIndex = renderer.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(baseRendererIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(overlayRendererIndex != Property::INVALID_INDEX);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(160);
+  application.SendNotification();
+  application.Render(16);
+
+  const float baseSourceFirst = label.GetCurrentProperty<float>(baseSourceIndex);
+  const float overlaySourceFirst = label.GetCurrentProperty<float>(overlaySourceIndex);
+  const float baseRendererFirst = renderer.GetCurrentProperty<float>(baseRendererIndex);
+  const float overlayRendererFirst = renderer.GetCurrentProperty<float>(overlayRendererIndex);
+  DALI_TEST_CHECK(baseSourceFirst > 0.1f && baseSourceFirst < 0.8f);
+  DALI_TEST_CHECK(overlaySourceFirst > 0.2f && overlaySourceFirst < 0.9f);
+  DALI_TEST_EQUALS(baseRendererFirst, baseSourceFirst, 0.02f, TEST_LOCATION);
+  DALI_TEST_EQUALS(overlayRendererFirst, overlaySourceFirst, 0.02f, TEST_LOCATION);
+
+  application.Render(160);
+  application.SendNotification();
+  application.Render(16);
+
+  const float baseSourceSecond = label.GetCurrentProperty<float>(baseSourceIndex);
+  const float overlaySourceSecond = label.GetCurrentProperty<float>(overlaySourceIndex);
+  const float baseRendererSecond = renderer.GetCurrentProperty<float>(baseRendererIndex);
+  const float overlayRendererSecond = renderer.GetCurrentProperty<float>(overlayRendererIndex);
+  DALI_TEST_CHECK(baseSourceSecond > baseSourceFirst);
+  DALI_TEST_CHECK(overlaySourceSecond > overlaySourceFirst);
+  DALI_TEST_CHECK(baseRendererSecond > baseRendererFirst);
+  DALI_TEST_CHECK(overlayRendererSecond > overlayRendererFirst);
+  DALI_TEST_EQUALS(baseRendererSecond, baseSourceSecond, 0.02f, TEST_LOCATION);
+  DALI_TEST_EQUALS(overlayRendererSecond, overlaySourceSecond, 0.02f, TEST_LOCATION);
+
+  application.Render(800);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_EQUALS(label.GetCurrentProperty<float>(baseSourceIndex), 0.8f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetCurrentProperty<float>(overlaySourceIndex), 0.9f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(baseRendererIndex), 0.8f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(overlayRendererIndex), 0.9f, EPSILON, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientGenericAnimationSurvivesRendererRebuildP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New("Generic gradient Property animation without Reveal");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(96.0f);
+  label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.1f));
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  // The typed bridge creates the lazy source. The animation under test uses
+  // only DALi's generic Property API after that point.
+  Animation sourceRegistration = Animation::New(1.0f);
+  label.Animate(sourceRegistration).TextGradientStartOffset(0.1f, Duration(1.0f));
+  const Property::Index sourceIndex = label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(sourceIndex != Property::INVALID_INDEX);
+
+  Animation animation = Animation::New(1.0f);
+  animation.AnimateTo(Property(label, sourceIndex), 0.9f);
+  animation.Play();
+  application.SendNotification();
+  application.Render(160);
+  application.SendNotification();
+  application.Render(16);
+
+  Renderer renderer = label.GetRendererAt(0u);
+  Property::Index rendererIndex = renderer.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(rendererIndex != Property::INVALID_INDEX);
+  const float sourceBeforeRebuild = label.GetCurrentProperty<float>(sourceIndex);
+  const float rendererBeforeRebuild = renderer.GetCurrentProperty<float>(rendererIndex);
+  DALI_TEST_CHECK(sourceBeforeRebuild > 0.1f && sourceBeforeRebuild < 0.9f);
+  DALI_TEST_EQUALS(rendererBeforeRebuild, sourceBeforeRebuild, 0.02f, TEST_LOCATION);
+
+  label.SetTextGradient(Gradient::Base::None());
+  label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.35f));
+  application.SendNotification();
+  application.Render(64);
+  application.SendNotification();
+  application.Render(16);
+
+  renderer = label.GetRendererAt(0u);
+  rendererIndex = renderer.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(rendererIndex != Property::INVALID_INDEX);
+  const float sourceAfterRebuild = label.GetCurrentProperty<float>(sourceIndex);
+  const float rendererAfterRebuild = renderer.GetCurrentProperty<float>(rendererIndex);
+  DALI_TEST_CHECK(sourceAfterRebuild > sourceBeforeRebuild);
+  DALI_TEST_CHECK(rendererAfterRebuild > rendererBeforeRebuild);
+  DALI_TEST_EQUALS(rendererAfterRebuild, sourceAfterRebuild, 0.02f, TEST_LOCATION);
+
+  application.Render(800);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_EQUALS(label.GetCurrentProperty<float>(sourceIndex), 0.9f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(rendererIndex), 0.9f, EPSILON, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliLabelTextGradientOverlayAnimationLazyPropertyP(void)
 {
   UiTestApplication application;
@@ -624,6 +756,72 @@ int UtcDaliLabelTextGradientOverlayAnimationSingleMarqueeLazyPropertyP(void)
   ApplyTextGradientOverlayAnimationBy(label, byAnimation);
   DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), overlayStartOffsetIndex, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientMarqueeAnimationsPropagateAcrossFramesP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New("Gradient marquee text long enough to exercise the scrolling renderer");
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(40.0f);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeLoopCount(2);
+  label.SetMarqueeSpeed(40);
+  label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.1f));
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ONE, Vector2::ZERO, 0.2f));
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render(16);
+
+  // The typed bridge creates the lazy instance properties. Animate them
+  // through the generic API to cover the lifecycle path that does not notify
+  // LabelImpl::OnAnimateAnimatableProperty().
+  Animation propertyBridge = Animation::New(0.5f);
+  label.Animate(propertyBridge)
+    .TextGradientStartOffset(0.8f, Duration(0.5f))
+    .TextGradientOverlayStartOffset(0.9f, Duration(0.5f));
+  const Property::Index baseIndex = label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  const Property::Index overlayIndex = label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(baseIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(overlayIndex != Property::INVALID_INDEX);
+
+  application.SendNotification();
+  application.Render(16);
+  Renderer renderer = label.GetRendererAt(0u);
+  const Property::Index rendererBase = renderer.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  const Property::Index rendererOverlay = renderer.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(rendererBase != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(rendererOverlay != Property::INVALID_INDEX);
+
+  Animation animation = Animation::New(0.5f);
+  animation.AnimateTo(Property(label, baseIndex), 0.8f);
+  animation.AnimateTo(Property(label, overlayIndex), 0.9f);
+  animation.Play();
+  float previousBase = renderer.GetCurrentProperty<float>(rendererBase);
+  float previousOverlay = renderer.GetCurrentProperty<float>(rendererOverlay);
+  for(uint32_t frame = 0u; frame < 5u; ++frame)
+  {
+    application.SendNotification();
+    application.Render(80);
+    application.SendNotification();
+    application.Render(16);
+    const float currentBase = renderer.GetCurrentProperty<float>(rendererBase);
+    const float currentOverlay = renderer.GetCurrentProperty<float>(rendererOverlay);
+    DALI_TEST_CHECK(currentBase > previousBase);
+    DALI_TEST_CHECK(currentOverlay > previousOverlay);
+    previousBase = currentBase;
+    previousOverlay = currentOverlay;
+  }
+
+  application.SendNotification();
+  application.Render(120);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(rendererBase), 0.8f, 0.02f, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(rendererOverlay), 0.9f, 0.02f, TEST_LOCATION);
+  DALI_TEST_CHECK(label.IsMarqueeRunning());
   END_TEST;
 }
 

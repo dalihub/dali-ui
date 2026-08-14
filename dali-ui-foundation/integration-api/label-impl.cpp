@@ -2503,8 +2503,8 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
   const auto            textGradientOverlayMode        = gradientData ? gradientData->textGradientOverlayMode : Ui::Text::GradientOverlayMode::SRC_OVER;
   const Property::Index gradientAnimOffsetIndex        = gradientData ? gradientData->gradientAnimOffsetIndex : Property::INVALID_INDEX;
   const Property::Index gradientOverlayAnimOffsetIndex = gradientData ? gradientData->gradientOverlayAnimOffsetIndex : Property::INVALID_INDEX;
-  const bool            gradientAnimApplyAlways        = gradientData && gradientData->gradientAnimCount > 0;
-  const bool            gradientOverlayApplyAlways     = gradientData && gradientData->gradientOverlayAnimCount > 0;
+  const bool            gradientAnimApplyAlways        = gradientAnimOffsetIndex != Property::INVALID_INDEX;
+  const bool            gradientOverlayApplyAlways     = gradientOverlayAnimOffsetIndex != Property::INVALID_INDEX;
 
   const Ui::Text::MarqueeBuilder::GradientState gradientState =
     Ui::Text::MarqueeBuilder::ResolveGradientState(textGradient,
@@ -2889,8 +2889,13 @@ void LabelImpl::BindGradientOverlayAnimProperties()
 
 void LabelImpl::SetGradientAnimApplyRate(bool notifyToConstraint)
 {
-  const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  const bool  applyAlways = data && data->gradientAnimCount > 0;
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  // The animation source is an instance custom property. DALi only emits the
+  // CustomActor animation lifecycle callback for type-registered animatable
+  // property indices, so gradientAnimCount cannot make this transition for the
+  // custom-property range. Once the source exists, keep its renderer constraint
+  // live so both typed and generic animations continue past their first frame.
+  const bool applyAlways = data && data->gradientAnimOffsetIndex != Property::INVALID_INDEX;
   if(DALI_LIKELY(mVisual))
   {
     Internal::TextVisual::SetGradientAnimApplyAlways(mVisual, applyAlways, notifyToConstraint);
@@ -2904,8 +2909,10 @@ void LabelImpl::SetGradientAnimApplyRate(bool notifyToConstraint)
 
 void LabelImpl::SetGradientOverlayAnimApplyRate(bool notifyToConstraint)
 {
-  const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  const bool  applyAlways = data && data->gradientOverlayAnimCount > 0;
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  // See SetGradientAnimApplyRate(): this source uses the same instance custom
+  // property mechanism and therefore needs a persistent renderer constraint.
+  const bool applyAlways = data && data->gradientOverlayAnimOffsetIndex != Property::INVALID_INDEX;
   if(DALI_LIKELY(mVisual))
   {
     Internal::TextVisual::SetGradientOverlayAnimApplyAlways(mVisual, applyAlways, notifyToConstraint);
@@ -3225,8 +3232,8 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   const auto            textGradientOverlayMode        = gradientData ? gradientData->textGradientOverlayMode : Ui::Text::GradientOverlayMode::SRC_OVER;
   const Property::Index gradientAnimOffsetIndex        = gradientData ? gradientData->gradientAnimOffsetIndex : Property::INVALID_INDEX;
   const Property::Index gradientOverlayAnimOffsetIndex = gradientData ? gradientData->gradientOverlayAnimOffsetIndex : Property::INVALID_INDEX;
-  const bool            gradientAnimApplyAlways        = gradientData && gradientData->gradientAnimCount > 0;
-  const bool            gradientOverlayApplyAlways     = gradientData && gradientData->gradientOverlayAnimCount > 0;
+  const bool            gradientAnimApplyAlways        = gradientAnimOffsetIndex != Property::INVALID_INDEX;
+  const bool            gradientOverlayApplyAlways     = gradientOverlayAnimOffsetIndex != Property::INVALID_INDEX;
 
   const Ui::Text::ModelInterface* const         textModel = mController->GetRenderTextModel();
   const Ui::Text::MarqueeBuilder::GradientState gradientState =
