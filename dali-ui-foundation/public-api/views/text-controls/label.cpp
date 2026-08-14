@@ -445,6 +445,26 @@ Text::Underline Label::GetTextUnderline() const
   return GetImpl(*this).GetTextUnderline();
 }
 
+void Label::SetTextReveal(const Text::Reveal& reveal)
+{
+  GetImpl(*this).SetTextReveal(reveal);
+}
+
+Text::Reveal Label::GetTextReveal() const
+{
+  return GetImpl(*this).GetTextReveal();
+}
+
+void Label::SetTextRevealProgress(float progress)
+{
+  GetImpl(*this).SetTextRevealProgress(progress);
+}
+
+float Label::GetTextRevealProgress() const
+{
+  return GetImpl(*this).GetTextRevealProgress();
+}
+
 void Label::SetTextShadow(const Text::Shadow& shadow)
 {
   GetImpl(*this).SetTextShadow(shadow);

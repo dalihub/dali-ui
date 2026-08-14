@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-shader-factory-interface.h>
 #include <cstdint>
 #include <string_view>
+#include <unordered_map>
 
 namespace Dali
 {
@@ -122,6 +123,15 @@ enum Type
 };
 } // namespace TextGradientOverlay
 
+namespace TextReveal
+{
+enum Type
+{
+  NO_TEXT_REVEAL = 0,
+  HAS_TEXT_REVEAL
+};
+} // namespace TextReveal
+
 /**
  * @brief Collection of current text visual feature.
  */
@@ -137,6 +147,7 @@ public:
   FeatureBuilder& EnableTextGradient(bool enableTextGradient);
   FeatureBuilder& EnableTextGradientMixed(bool enableTextGradientMixed);
   FeatureBuilder& EnableTextGradientOverlay(bool enableTextGradientOverlay);
+  FeatureBuilder& EnableTextReveal(bool enableTextReveal);
 
   VisualFactoryCache::ShaderType GetShaderType() const;
   void                           GetVertexShaderPrefixList(std::string& vertexShaderPrefixList) const;
@@ -184,6 +195,10 @@ public:
   {
     return mTextGradientOverlay == TextGradientOverlay::HAS_TEXT_GRADIENT_OVERLAY;
   }
+  bool IsEnabledTextReveal() const
+  {
+    return mTextReveal == TextReveal::HAS_TEXT_REVEAL;
+  }
 
 private:
   TextMultiColor::Type
@@ -196,6 +211,7 @@ private:
     mTextGradient : 2; ///< Whether text uses TextGradient fill, or not. default as TextGradient::NO_TEXT_GRADIENT
   TextGradientOverlay::Type
     mTextGradientOverlay : 2; ///< Whether text uses TextGradientOverlay, or not. default as TextGradientOverlay::NO_TEXT_GRADIENT_OVERLAY
+  TextReveal::Type mTextReveal : 1;          ///< Sequential foreground reveal shader variant.
 };
 
 } // namespace TextVisualShaderFeature
@@ -236,6 +252,8 @@ public: // Implementation of VisualShaderFactoryInterface
   void GetPreCompiledShader(ShaderPreCompiler::RawShaderData& shaders) override;
 
 private:
+  std::unordered_map<uint32_t, VisualFactoryCache::ExternalShaderId> mRevealShaderIds;
+
   /**
    * @brief Create pre-compiled shader for image with builder and option.
    */

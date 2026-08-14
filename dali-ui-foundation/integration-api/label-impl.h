@@ -38,6 +38,7 @@
 #include <dali-ui-foundation/public-api/text/style/bevel.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
 #include <dali-ui-foundation/public-api/text/style/outline.h>
+#include <dali-ui-foundation/public-api/text/style/reveal.h>
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
@@ -57,6 +58,9 @@ namespace Text
 {
 struct TextGradientPropertyData;
 using TextGradientPropertyDataPtr = std::unique_ptr<TextGradientPropertyData>;
+
+struct TextRevealData;
+using TextRevealDataPtr = std::unique_ptr<TextRevealData>;
 
 class StyledTextSourceData;
 using StyledTextSourceDataPtr = std::unique_ptr<StyledTextSourceData>;
@@ -249,6 +253,36 @@ public:
    * @return The registered property index.
    */
   Dali::Property::Index EnsureGradientOverlayAnimOffset();
+
+  /**
+   * @copydoc Dali::Ui::Label::SetTextReveal
+   */
+  void SetTextReveal(const Ui::Text::Reveal& reveal);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTextReveal
+   */
+  Ui::Text::Reveal GetTextReveal() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetTextRevealProgress
+   */
+  void SetTextRevealProgress(float progress);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTextRevealProgress
+   */
+  float GetTextRevealProgress() const;
+
+  /**
+   * @brief Returns the stable scene property used to animate reveal progress.
+   *
+   * The property is registered lazily and is never replaced by reveal
+   * configuration, text, or synchronous/asynchronous rendering changes.
+   *
+   * @return The registered reveal progress property index.
+   */
+  Property::Index EnsureTextRevealProgress();
 
   /**
    * @copydoc Dali::Ui::Label::SetHorizontalTextAlignment
@@ -1358,6 +1392,7 @@ private:
 
   Internal::Text::TextGradientPropertyDataPtr mTextGradientPropertyData;
   Internal::Text::StyledTextSourceDataPtr     mStyledTextSourceData;
+  Internal::Text::TextRevealDataPtr           mTextRevealData;
 
   Visual::Base              mVisual;
   Ui::Text::ControllerPtr   mController;

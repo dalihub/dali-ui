@@ -23,9 +23,12 @@
 #include <dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui/ui-event-thread-callback.h>
 #include <dali.h>
+#include <dali/devel-api/text-abstraction/font-client.h>
 
 #include <utility>
+#include <vector>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -1036,5 +1039,194 @@ int UtcDaliLabelTextGradientRegisteredThenUnsupportedNoOpP(void)
   DALI_TEST_EQUALS(after, before, EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), startOffsetIndex, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealGradientOverlayCompositionP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New("Gradient and overlay remain composable with Text::Reveal");
+  label.SetProperty(Actor::Property::SIZE, Vector3(420.0f, 80.0f, 0.0f));
+  label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.2f));
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ONE, Vector2::ZERO, 0.4f));
+  label.SetTextGradientOverlayMode(Text::GradientOverlayMode::SCREEN);
+  label.SetTextReveal(Text::Reveal());
+  label.SetTextRevealProgress(0.5f);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+  Renderer renderer = label.GetRendererAt(0u);
+  DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(renderer.GetTextures().GetTextureCount() >= 4u);
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealConcurrentAnimationsAndRebuildP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  (void)Dali::TextAbstraction::FontClient::Get();
+
+  Label label = Label::New("Reveal, gradients and text color animate independently");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(96.0f);
+  label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.1f));
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ONE, Vector2::ZERO, 0.2f));
+  label.SetTextGradientOverlayMode(Text::GradientOverlayMode::SCREEN);
+  label.SetTextColor(UiColor(Color::RED));
+  label.SetTextReveal(Text::Reveal());
+  label.SetTextRevealProgress(0.0f);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  Animation animation = Animation::New(2.0f);
+  label.Animate(animation)
+    .TextRevealProgress(1.0f, Duration(2.0f))
+    .TextGradientStartOffset(0.8f, Duration(2.0f))
+    .TextGradientOverlayStartOffset(0.9f, Duration(2.0f))
+    .TextColor(UiColor(Color::BLUE), Duration(2.0f));
+
+  const Property::Index revealIndex = label.GetPropertyIndex("uTextRevealProgress");
+  const Property::Index baseIndex = label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  const Property::Index overlayIndex = label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(revealIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(baseIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(overlayIndex != Property::INVALID_INDEX);
+
+  Renderer   initialRenderer = label.GetRendererAt(0u);
+  TextureSet initialTextures = initialRenderer.GetTextures();
+  const Property::Index initialRendererReveal = initialRenderer.GetPropertyIndex("uTextRevealProgress");
+  const Property::Index initialRendererFade = initialRenderer.GetPropertyIndex("uTextRevealFadeDuration");
+  const uint32_t initialRendererPropertyCount = initialRenderer.GetPropertyCount();
+  DALI_TEST_CHECK(initialRendererReveal != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(initialRendererFade != Property::INVALID_INDEX);
+  std::vector<Texture> textureResources;
+  textureResources.reserve(initialTextures.GetTextureCount());
+  for(uint32_t index = 0u; index < initialTextures.GetTextureCount(); ++index)
+  {
+    textureResources.push_back(initialTextures.GetTexture(index));
+  }
+
+  TestGlAbstraction& gl = application.GetGlAbstraction();
+  gl.EnableTextureCallTrace(true);
+
+  gl.ResetTextureCallStack();
+  animation.Play();
+  application.SendNotification();
+  application.Render(300);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(label.GetRendererAt(0u) == initialRenderer);
+  TextureSet currentTextures = label.GetRendererAt(0u).GetTextures();
+  DALI_TEST_EQUALS(currentTextures.GetTextureCount(), textureResources.size(), TEST_LOCATION);
+  for(uint32_t index = 0u; index < currentTextures.GetTextureCount(); ++index)
+  {
+    DALI_TEST_CHECK(currentTextures.GetTexture(index) == textureResources[index]);
+  }
+  const float revealProgress = label.GetCurrentProperty<float>(revealIndex);
+  const float baseOffset = label.GetCurrentProperty<float>(baseIndex);
+  const float overlayOffset = label.GetCurrentProperty<float>(overlayIndex);
+  const Vector4 textColor = label.GetCurrentProperty<Vector4>(Label::Property::TEXT_COLOR);
+  DALI_TEST_CHECK(revealProgress > 0.0f && revealProgress < 1.0f);
+  DALI_TEST_CHECK(baseOffset > 0.1f && baseOffset < 0.8f);
+  DALI_TEST_CHECK(overlayOffset > 0.2f && overlayOffset < 0.9f);
+  DALI_TEST_CHECK(textColor.r < 1.0f && textColor.b > 0.0f);
+  DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexImage2D"), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexSubImage2D"), 0, TEST_LOCATION);
+
+  auto ExpectRendererBindings = [&]()
+  {
+    Renderer renderer = label.GetRendererAt(0u);
+    const Property::Index rendererReveal = renderer.GetPropertyIndex("uTextRevealProgress");
+    const Property::Index rendererBase = renderer.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+    const Property::Index rendererOverlay = renderer.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+    const Property::Index rendererColor = renderer.GetPropertyIndex("uTextColorAnimatable");
+    DALI_TEST_CHECK(rendererReveal != Property::INVALID_INDEX);
+    DALI_TEST_CHECK(rendererBase != Property::INVALID_INDEX);
+    DALI_TEST_CHECK(rendererOverlay != Property::INVALID_INDEX);
+    DALI_TEST_CHECK(rendererColor != Property::INVALID_INDEX);
+    if(renderer == initialRenderer)
+    {
+      DALI_TEST_EQUALS(rendererReveal, initialRendererReveal, TEST_LOCATION);
+      DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextRevealFadeDuration"), initialRendererFade, TEST_LOCATION);
+      DALI_TEST_EQUALS(renderer.GetPropertyCount(), initialRendererPropertyCount, TEST_LOCATION);
+    }
+    // Renderer constraints may trail their animated Actor source by one update
+    // frame. They must nevertheless track the same independently animated
+    // values, including after a renderer rebuild.
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(rendererReveal),
+                     label.GetCurrentProperty<float>(revealIndex), 0.02f, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(rendererBase),
+                     label.GetCurrentProperty<float>(baseIndex), 0.02f, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(rendererOverlay),
+                     label.GetCurrentProperty<float>(overlayIndex), 0.02f, TEST_LOCATION);
+  };
+  ExpectRendererBindings();
+
+  Renderer stableRenderer = label.GetRendererAt(0u);
+  const float rendererRevealBefore = stableRenderer.GetCurrentProperty<float>(initialRendererReveal);
+  const float rendererBaseBefore = stableRenderer.GetCurrentProperty<float>(
+    stableRenderer.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME));
+  const float rendererOverlayBefore = stableRenderer.GetCurrentProperty<float>(
+    stableRenderer.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME));
+  application.Render(100);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(stableRenderer.GetCurrentProperty<float>(initialRendererReveal) > rendererRevealBefore);
+  DALI_TEST_CHECK(stableRenderer.GetCurrentProperty<float>(
+                    stableRenderer.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME)) > rendererBaseBefore);
+  DALI_TEST_CHECK(stableRenderer.GetCurrentProperty<float>(
+                    stableRenderer.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME)) > rendererOverlayBefore);
+  DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexImage2D"), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexSubImage2D"), 0, TEST_LOCATION);
+
+  // Exercise the legal renderer-rebuild path while every source property is
+  // still animating. The stable Label indices must survive and the replacement
+  // renderer must bind to their current values.
+  const float beforeRebuild = label.GetTextRevealProgress();
+  label.SetTextGradient(Gradient::Base::None());
+  label.SetTextGradientOverlay(Gradient::Base::None());
+  Text::Outline outline;
+  outline.SetWidth(2.0f);
+  label.SetTextOutline(outline);
+  label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.35f));
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ONE, Vector2::ZERO, 0.45f));
+  application.SendNotification();
+  application.Render(32);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), revealIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), baseIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), overlayIndex, TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetTextRevealProgress() >= beforeRebuild);
+  ExpectRendererBindings();
+
+  // Switch the text pipeline while both reveal and gradient animations remain
+  // live. Publication may replace textures/renderers but not their source
+  // properties or constraints.
+  label.SetAsyncRendering(true);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+  application.SendNotification();
+  application.Render(100);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), revealIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), baseIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), overlayIndex, TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetTextRevealProgress() > beforeRebuild);
+  ExpectRendererBindings();
   END_TEST;
 }

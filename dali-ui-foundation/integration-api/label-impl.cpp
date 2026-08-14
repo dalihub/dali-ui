@@ -45,6 +45,7 @@
 #include <dali-ui-foundation/internal/text/font-variation/font-variation-property-data.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-data.h>
+#include <dali-ui-foundation/internal/text/reveal/text-reveal-data.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-source-data.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
@@ -86,6 +87,11 @@ namespace Integration
 
 namespace
 {
+
+float ClampTextRevealProgress(float value)
+{
+  return std::isnan(value) ? 0.0f : std::max(0.0f, std::min(1.0f, value));
+}
 
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT_CONTROLS");
@@ -154,6 +160,7 @@ DALI_TYPE_REGISTRATION_END()
 constexpr const char* LOCALIZATION_TEXT_BINDING_ID                     = "Ui.Label.Text";
 constexpr const char* TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME         = "uTextGradientStartOffset";
 constexpr const char* TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME = "uTextGradientOverlayStartOffset";
+constexpr const char* TEXT_REVEAL_PROGRESS_PROPERTY_NAME               = "uTextRevealProgress";
 
 float GetDpi()
 {
@@ -733,6 +740,117 @@ Dali::Property::Index LabelImpl::EnsureGradientOverlayAnimOffset()
   }
 
   return data.gradientOverlayAnimOffsetIndex;
+}
+
+void LabelImpl::SetTextReveal(const Ui::Text::Reveal& reveal)
+{
+  const bool                   enabled                   = reveal != Ui::Text::Reveal::None();
+  const Ui::Text::Reveal::Unit authoredUnit              = enabled ? reveal.GetUnit() : Ui::Text::Reveal::Unit::CHARACTER;
+  const float                  authoredFadeDurationRatio = enabled ? reveal.GetFadeDurationRatio()
+                                                                   : Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO;
+  auto*                        data                      = Internal::Text::GetTextRevealData(mTextRevealData);
+  if((!data && !enabled) ||
+     (data && data->enabled == enabled &&
+      (!enabled || (data->unit == authoredUnit &&
+                    Dali::Equals(data->fadeDurationRatio, authoredFadeDurationRatio)))))
+  {
+    return;
+  }
+
+  data                    = &Internal::Text::GetOrCreateTextRevealData(mTextRevealData);
+  data->enabled           = enabled;
+  data->unit              = authoredUnit;
+  data->fadeDurationRatio = authoredFadeDurationRatio;
+  ++data->revision;
+
+  Ui::Text::Internal::Reveal::Unit unit              = Ui::Text::Internal::Reveal::Unit::DISABLED;
+  float                            fadeDurationRatio = Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO;
+  Property::Index                  progressIndex     = Property::INVALID_INDEX;
+  if(data->enabled)
+  {
+    unit              = Ui::Text::Internal::Reveal::ToInternalUnit(data->unit);
+    fadeDurationRatio = data->fadeDurationRatio;
+    progressIndex     = EnsureTextRevealProgress();
+  }
+
+  if(mVisual)
+  {
+    Internal::TextVisual::ConfigureTextReveal(mVisual, unit, fadeDurationRatio, progressIndex, data->revision);
+  }
+
+  if(mController && mController->IsAsyncRendering())
+  {
+    RequestAsyncRender();
+    RelayoutRequest();
+  }
+}
+
+Ui::Text::Reveal LabelImpl::GetTextReveal() const
+{
+  const auto* data = Internal::Text::GetTextRevealData(mTextRevealData);
+  if(!data || !data->enabled)
+  {
+    return Ui::Text::Reveal::None();
+  }
+
+  Ui::Text::Reveal reveal;
+  reveal.SetUnit(data->unit);
+  reveal.SetFadeDurationRatio(data->fadeDurationRatio);
+  return reveal;
+}
+
+void LabelImpl::SetTextRevealProgress(float progress)
+{
+  progress                    = ClampTextRevealProgress(progress);
+  auto& data                  = Internal::Text::GetOrCreateTextRevealData(mTextRevealData);
+  data.progress               = progress;
+  const Property::Index index = EnsureTextRevealProgress();
+  Actor                 self  = Self();
+  if(self && index != Property::INVALID_INDEX)
+  {
+    self.SetProperty(index, progress);
+  }
+}
+
+float LabelImpl::GetTextRevealProgress() const
+{
+  const auto* data = Internal::Text::GetTextRevealData(mTextRevealData);
+  if(!data)
+  {
+    return 0.0f;
+  }
+
+  Actor self = Self();
+  if(self && data->progressPropertyIndex != Property::INVALID_INDEX)
+  {
+    // Match DALi's current-property convention while the Label participates in
+    // the scene graph. Off-scene there is no rendered frame, so expose the
+    // event-side value set by the caller.
+    const bool  onScene = self.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE);
+    const float value   = onScene ? self.GetCurrentProperty<float>(data->progressPropertyIndex)
+                                  : self.GetProperty<float>(data->progressPropertyIndex);
+    return ClampTextRevealProgress(value);
+  }
+  return data->progress;
+}
+
+Property::Index LabelImpl::EnsureTextRevealProgress()
+{
+  Actor self = Self();
+  if(!self)
+  {
+    return Property::INVALID_INDEX;
+  }
+  auto& data = Internal::Text::GetOrCreateTextRevealData(mTextRevealData);
+  if(data.progressPropertyIndex == Property::INVALID_INDEX)
+  {
+    data.progressPropertyIndex = self.GetPropertyIndex(TEXT_REVEAL_PROGRESS_PROPERTY_NAME);
+    if(data.progressPropertyIndex == Property::INVALID_INDEX)
+    {
+      data.progressPropertyIndex = self.RegisterProperty(TEXT_REVEAL_PROGRESS_PROPERTY_NAME, data.progress);
+    }
+  }
+  return data.progressPropertyIndex;
 }
 
 void LabelImpl::SetHorizontalTextAlignment(Ui::Text::Alignment alignment)
@@ -1535,7 +1653,23 @@ void LabelImpl::ClearMaskEffect()
 void LabelImpl::SetAsyncRendering(bool asyncRendering)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async rendering:%d\n", mController.Get(), asyncRendering);
+  const bool changed = mController->IsAsyncRendering() != asyncRendering;
   mController->SetAsyncRendering(asyncRendering);
+  auto* revealData = Internal::Text::GetTextRevealData(mTextRevealData);
+  if(changed && revealData && revealData->enabled)
+  {
+    // A completion issued on the old execution mode must never publish after
+    // an off/on transition. Keep the Label scene property itself untouched.
+    ++revealData->revision;
+    if(mVisual)
+    {
+      Internal::TextVisual::ConfigureTextReveal(mVisual,
+                                                Ui::Text::Internal::Reveal::ToInternalUnit(revealData->unit),
+                                                revealData->fadeDurationRatio,
+                                                EnsureTextRevealProgress(),
+                                                revealData->revision);
+    }
+  }
   if(!asyncRendering)
   {
     ClearAnchorInteractionState();
@@ -3865,6 +3999,16 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
   parameters.isCutoutEnabled               = mController->IsTextCutout();
   parameters.isBackgroundWithCutoutEnabled = mController->IsBackgroundWithCutoutEnabled();
   parameters.backgroundColorWithCutout     = mController->GetBackgroundColorWithCutout();
+  const auto* revealData                   = Internal::Text::GetTextRevealData(mTextRevealData);
+  parameters.textRevealRevision            = revealData ? revealData->revision : 0u;
+  parameters.isTextRevealEnabled           = revealData && revealData->enabled &&
+                                   !parameters.isMarqueeEnabled &&
+                                   !parameters.isCutoutEnabled;
+  if(parameters.isTextRevealEnabled)
+  {
+    parameters.textRevealUnit              = Ui::Text::Internal::Reveal::ToInternalUnit(revealData->unit);
+    parameters.textRevealFadeDurationRatio = revealData->fadeDurationRatio;
+  }
   Property::Map variationsMap;
   mController->GetVariationsMap(variationsMap);
   parameters.variationsMap                  = variationsMap;

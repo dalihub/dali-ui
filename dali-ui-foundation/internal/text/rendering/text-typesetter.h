@@ -29,6 +29,7 @@
 #include <memory> ///< for std::unique_ptr
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 
 namespace Dali
@@ -56,11 +57,10 @@ public:
   enum RenderBehaviour
   {
     RENDER_TEXT_AND_STYLES, ///< Render both the text and its styles
-    RENDER_NO_TEXT,         ///< Do not render the text itself but render the background styles such as outline and background.
+    RENDER_NO_TEXT,         ///< Render only the underlay style plane: shadow, outline, and background.
     RENDER_NO_STYLES,       ///< Do not render any styles
     RENDER_MASK,            ///< Render an alpha mask (for color glyphs with no color animation, e.g. emoji)
-    RENDER_OVERLAY_STYLE    ///< Do not render the text itself but render the style but overlay the style on the text
-                            ///< (foreground styles such as strikethrough and underline)
+    RENDER_OVERLAY_STYLE    ///< Render only the overlay decoration plane: strikethrough and underline.
   };
 
   /**
@@ -106,6 +106,9 @@ public:
 
   /**
    * @brief Selects the resolved replacement glyph sequence used by subsequent render calls.
+   *
+   * The result is not owned by Typesetter and must remain valid while it is
+   * installed on the underlying ViewModel.
    *
    * @param[in] result The replacement result, or nullptr for the ordinary path.
    */
@@ -235,6 +238,48 @@ public:
                                     bool            ignoreHorizontalAlignment = false,
                                     Pixel::Format   pixelFormat               = Pixel::RGBA8888,
                                     const Vector2&  originSize                = Size::ZERO);
+
+  /**
+   * @brief Projects source reveal semantics onto the current final glyph sequence.
+   *
+   * This resolves the ViewModel elision state and enables final-to-source
+   * mapping. Call it once after ordinary text rendering and before rasterizing
+   * any reveal metadata tile so every tile shares the same final plan.
+   *
+   * @param[in] sourcePlan The reveal plan indexed by source glyph.
+   * @param[in] unit The reveal unit used to assign synthetic ellipsis ownership.
+   * @return A reveal plan indexed by final rendered glyph.
+   */
+  Internal::Reveal::Plan CreateFinalRevealPlan(const Internal::Reveal::Plan& sourcePlan,
+                                               Internal::Reveal::Unit        unit);
+
+  /**
+   * @brief Rasterizes reveal metadata for one full texture or height tile.
+   *
+   * RG stores a 16-bit normalized unit start, B stores validity, and A stores
+   * the winning glyph coverage used to resolve overlapping glyph bitmaps.
+   * The supplied plan must already be projected onto the final glyph sequence.
+   * Tile calls for one layout must all receive the same plan.
+   *
+   * @param[in] tileSize The dimensions of the metadata texture to create.
+   * @param[in] textDirection The resolved text direction.
+   * @param[in] plan The final-glyph reveal plan shared by all tiles.
+   * @param[out] fadeDuration The normalized fade duration stored in the plan.
+   * @param[in] tileOffsetY The vertical tile offset in the full rendered text.
+   * @param[in] fullSize The full rendered text size, or Size::ZERO for a non-tiled render.
+   * @param[in] ignoreHorizontalAlignment Whether horizontal alignment is ignored.
+   * @param[in] originSize The original size used to resolve vertical alignment.
+   * @return RGBA8888 reveal metadata for the requested full texture or tile.
+   */
+  PixelData RenderTextRevealMetadata(
+    const Vector2&                tileSize,
+    Direction                     textDirection,
+    const Internal::Reveal::Plan& plan,
+    float&                        fadeDuration,
+    uint32_t                      tileOffsetY               = 0u,
+    const Vector2&                fullSize                  = Size::ZERO,
+    bool                          ignoreHorizontalAlignment = false,
+    const Vector2&                originSize                = Size::ZERO);
 
   /**
    * @brief Create & draw the image buffer of single background color.

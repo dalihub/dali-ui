@@ -109,6 +109,7 @@
 #include <dali-ui-foundation/public-api/text/style/image-attributes.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
 #include <dali-ui-foundation/public-api/text/style/outline.h>
+#include <dali-ui-foundation/public-api/text/style/reveal.h>
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>

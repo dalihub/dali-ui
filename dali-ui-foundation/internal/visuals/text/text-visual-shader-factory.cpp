@@ -21,6 +21,9 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -120,7 +123,8 @@ FeatureBuilder::FeatureBuilder()
   mTextOverlay(TextOverlay::NO_OVERLAY),
   mTextEmboss(TextEmboss::NO_EMBOSS),
   mTextGradient(TextGradient::NO_TEXT_GRADIENT),
-  mTextGradientOverlay(TextGradientOverlay::NO_TEXT_GRADIENT_OVERLAY)
+  mTextGradientOverlay(TextGradientOverlay::NO_TEXT_GRADIENT_OVERLAY),
+  mTextReveal(TextReveal::NO_TEXT_REVEAL)
 {
 }
 
@@ -178,6 +182,12 @@ FeatureBuilder& FeatureBuilder::EnableTextGradientOverlay(bool enableTextGradien
 {
   mTextGradientOverlay = enableTextGradientOverlay ? TextGradientOverlay::HAS_TEXT_GRADIENT_OVERLAY
                                                    : TextGradientOverlay::NO_TEXT_GRADIENT_OVERLAY;
+  return *this;
+}
+
+FeatureBuilder& FeatureBuilder::EnableTextReveal(bool enableTextReveal)
+{
+  mTextReveal = enableTextReveal ? TextReveal::HAS_TEXT_REVEAL : TextReveal::NO_TEXT_REVEAL;
   return *this;
 }
 
@@ -291,6 +301,10 @@ void FeatureBuilder::GetVertexShaderPrefixList(std::string& vertexShaderPrefixLi
 
 void FeatureBuilder::GetFragmentShaderPrefixList(std::string& fragmentShaderPrefixList) const
 {
+  if(IsEnabledTextReveal())
+  {
+    fragmentShaderPrefixList += "#define IS_REQUIRED_TEXT_REVEAL\n";
+  }
   if(IsEnabledAnyTextGradient())
   {
     fragmentShaderPrefixList += "#define IS_REQUIRED_TEXT_GRADIENT\n";
@@ -342,6 +356,36 @@ Shader TextVisualShaderFactory::GetShader(VisualFactoryCache&                   
 {
   Shader                         shader;
   VisualFactoryCache::ShaderType shaderType = featureBuilder.GetShaderType();
+  if(featureBuilder.IsEnabledTextReveal())
+  {
+    const uint32_t cacheKey = static_cast<uint32_t>(shaderType);
+    const auto     found    = mRevealShaderIds.find(cacheKey);
+    if(found != mRevealShaderIds.end())
+    {
+      shader = factoryCache.GetExternalShader(found->second);
+      if(shader)
+      {
+        return shader;
+      }
+    }
+
+    std::string vertexShaderPrefixList;
+    std::string fragmentShaderPrefixList;
+    featureBuilder.GetVertexShaderPrefixList(vertexShaderPrefixList);
+    featureBuilder.GetFragmentShaderPrefixList(fragmentShaderPrefixList);
+
+    std::string vertexShader   = std::string(vertexShaderPrefixList + SHADER_TEXT_VISUAL_SHADER_VERT.data());
+    std::string fragmentShader = std::string(fragmentShaderPrefixList + SHADER_TEXT_VISUAL_SHADER_FRAG.data());
+    shader                     = Shader::New(ToDaliStringView(vertexShader), ToDaliStringView(fragmentShader),
+                                             Shader::Hint::NONE, "TEXT_VISUAL_REVEAL");
+    shader.ReserveCustomProperties(3);
+    shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+    shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
+    shader.RegisterProperty(PIXEL_SNAP_FACTOR_UNIFORM_NAME.data(), PIXEL_SNAP_DISABLED_VALUE);
+    mRevealShaderIds[cacheKey] = factoryCache.RegisterExternalShader(shader);
+    return shader;
+  }
+
   shader                                    = factoryCache.GetShader(shaderType);
 
   if(!shader)

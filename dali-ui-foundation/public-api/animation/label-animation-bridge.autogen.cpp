@@ -318,6 +318,20 @@ LabelAnimationBridge& LabelAnimationBridge::TextGradientOverlayStartOffsetBy(flo
   return *this;
 }
 
+LabelAnimationBridge& LabelAnimationBridge::TextRevealProgress(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::LabelAnimationSpecImpl::ApplyTextRevealProgressTo(mAnimation, Label::DownCast(mView), {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::TextRevealProgressBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::LabelAnimationSpecImpl::ApplyTextRevealProgressBy(mAnimation, Label::DownCast(mView), {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
 LabelAnimationBridge& LabelAnimationBridge::PixelSnapFactor(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);

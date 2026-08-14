@@ -106,6 +106,9 @@ ViewModel::ViewModel(const ModelInterface* const model)
   mFinalElisionResult(nullptr),
   mElidedGlyphs(),
   mElidedLayout(),
+  mElidedFinalToSourceGlyphIndices(),
+  mEllipsisFinalGlyphIndex(FinalElisionResult::INVALID_GLYPH_INDEX),
+  mFinalGlyphMappingRequested(false),
   mIsTextElided(false),
   mElidedOffset(0.0f),
   mStartIndexOfElidedGlyphs(0u),
@@ -127,6 +130,9 @@ void ViewModel::SetModel(const ModelInterface* model)
     mModel = model;
     mElidedGlyphs.Clear();
     mElidedLayout.Clear();
+    mElidedFinalToSourceGlyphIndices.Clear();
+    mEllipsisFinalGlyphIndex         = FinalElisionResult::INVALID_GLYPH_INDEX;
+    mFinalGlyphMappingRequested      = false;
     mIsTextElided                    = false;
     mElidedOffset                    = 0.0f;
     mStartIndexOfElidedGlyphs        = 0u;
@@ -139,6 +145,25 @@ void ViewModel::SetModel(const ModelInterface* model)
 void ViewModel::SetFinalElisionResult(const FinalElisionResult* result)
 {
   mFinalElisionResult = result;
+}
+
+void ViewModel::EnableFinalGlyphMapping()
+{
+  mFinalGlyphMappingRequested = true;
+}
+
+const GlyphIndex* ViewModel::GetFinalToSourceGlyphIndices() const
+{
+  return mIsTextElided && !mElidedFinalToSourceGlyphIndices.Empty()
+           ? mElidedFinalToSourceGlyphIndices.Begin()
+           : nullptr;
+}
+
+GlyphIndex ViewModel::GetEllipsisFinalGlyphIndex() const
+{
+  return mFinalElisionResult && mFinalElisionResult->resolved
+           ? mFinalElisionResult->ellipsisFinalGlyphIndex
+           : mEllipsisFinalGlyphIndex;
 }
 
 const Size& ViewModel::GetControlSize() const
@@ -466,7 +491,14 @@ const bool ViewModel::GetCharacterDirection(CharacterIndex logicalIndex) const
 
 void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
 {
+  // Mapping is a one-shot consumer request. Consume it before every return so
+  // enabling Reveal can never turn later ordinary elision into a mapping path.
+  const bool finalGlyphMappingRequested = mFinalGlyphMappingRequested;
+  mFinalGlyphMappingRequested           = false;
+
   mIsTextElided             = false;
+  mEllipsisFinalGlyphIndex  = FinalElisionResult::INVALID_GLYPH_INDEX;
+  mElidedFinalToSourceGlyphIndices.Clear();
   mStartIndexOfElidedGlyphs = mFirstMiddleIndexOfElidedGlyphs = mSecondMiddleIndexOfElidedGlyphs = 0;
   mEndIndexOfElidedGlyphs                                                                        = mModel->GetNumberOfGlyphs() == 0u ? 0u : mModel->GetNumberOfGlyphs() - 1u;
 
@@ -478,6 +510,24 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
     mEndIndexOfElidedGlyphs          = mFinalElisionResult->endIndex;
     mFirstMiddleIndexOfElidedGlyphs  = mFinalElisionResult->firstMiddleIndex;
     mSecondMiddleIndexOfElidedGlyphs = mFinalElisionResult->secondMiddleIndex;
+    if(finalGlyphMappingRequested && mIsTextElided)
+    {
+      const Length finalGlyphCount = static_cast<Length>(mFinalElisionResult->glyphs.Count());
+      mElidedFinalToSourceGlyphIndices.Resize(finalGlyphCount);
+      std::fill(mElidedFinalToSourceGlyphIndices.Begin(),
+                mElidedFinalToSourceGlyphIndices.End(),
+                FinalElisionResult::INVALID_GLYPH_INDEX);
+      for(GlyphIndex sourceGlyph = 0u;
+          sourceGlyph < mFinalElisionResult->sourceToFinalGlyphIndices.Count();
+          ++sourceGlyph)
+      {
+        const GlyphIndex finalGlyph = mFinalElisionResult->sourceToFinalGlyphIndices[sourceGlyph];
+        if(finalGlyph < finalGlyphCount)
+        {
+          mElidedFinalToSourceGlyphIndices[finalGlyph] = sourceGlyph;
+        }
+      }
+    }
     return;
   }
 
@@ -545,6 +595,14 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
           // Copy the glyphs to be elided.
           mElidedGlyphs.Resize(numberOfGlyphs);
           mElidedLayout.Resize(numberOfGlyphs);
+          if(finalGlyphMappingRequested)
+          {
+            mElidedFinalToSourceGlyphIndices.Resize(numberOfGlyphs);
+            for(GlyphIndex glyphIndex = 0u; glyphIndex < numberOfGlyphs; ++glyphIndex)
+            {
+              mElidedFinalToSourceGlyphIndices[glyphIndex] = glyphIndex;
+            }
+          }
           GlyphInfo* elidedGlyphsBuffer    = mElidedGlyphs.Begin();
           Vector2*   elidedPositionsBuffer = mElidedLayout.Begin();
 
@@ -693,6 +751,10 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
 
                 // Replace the glyph by the ellipsis glyph.
                 glyphInfo = ellipsisGlyph;
+                if(finalGlyphMappingRequested)
+                {
+                  mElidedFinalToSourceGlyphIndices[indexOfEllipsis] = FinalElisionResult::INVALID_GLYPH_INDEX;
+                }
 
                 // Change the 'x' and 'y' position of the ellipsis glyph.
                 if(position.x >= firstPenX)
@@ -808,6 +870,11 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
             // 'Shifts' glyphs after ellipsis glyph and 'Removes' before ellipsis glyph
             GlyphMemmove(elidedGlyphsBuffer, numberOfGlyphs, 0u, indexOfEllipsis, numberOfElidedGlyphs);
             GlyphMemmove(elidedPositionsBuffer, numberOfGlyphs, 0u, indexOfEllipsis, numberOfElidedGlyphs);
+            if(finalGlyphMappingRequested)
+            {
+              GlyphMemmove(mElidedFinalToSourceGlyphIndices.Begin(), numberOfGlyphs, 0u, indexOfEllipsis,
+                           numberOfElidedGlyphs);
+            }
 
             mStartIndexOfElidedGlyphs = mFirstMiddleIndexOfElidedGlyphs = mSecondMiddleIndexOfElidedGlyphs =
               indexOfEllipsis;
@@ -849,6 +916,12 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
                            mSecondMiddleIndexOfElidedGlyphs, numberOfSecondHalfGlyphs);
               GlyphMemmove(elidedPositionsBuffer, numberOfGlyphs, mFirstMiddleIndexOfElidedGlyphs,
                            mSecondMiddleIndexOfElidedGlyphs, numberOfSecondHalfGlyphs);
+              if(finalGlyphMappingRequested)
+              {
+                GlyphMemmove(mElidedFinalToSourceGlyphIndices.Begin(), numberOfGlyphs,
+                             mFirstMiddleIndexOfElidedGlyphs, mSecondMiddleIndexOfElidedGlyphs,
+                             numberOfSecondHalfGlyphs);
+              }
             }
             else
             {
@@ -867,12 +940,30 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
                            numberOfSecondHalfGlyphs);
               GlyphMemmove(elidedPositionsBuffer, numberOfGlyphs, dstIndex, mSecondMiddleIndexOfElidedGlyphs,
                            numberOfSecondHalfGlyphs);
+              if(finalGlyphMappingRequested)
+              {
+                GlyphMemmove(mElidedFinalToSourceGlyphIndices.Begin(), numberOfGlyphs, dstIndex,
+                             mSecondMiddleIndexOfElidedGlyphs, numberOfSecondHalfGlyphs);
+              }
             }
           }
           else // Text::EllipsisPosition::END
           {
             // 'Removes' all the glyphs after the ellipsis glyph.
             mEndIndexOfElidedGlyphs = indexOfEllipsis;
+          }
+
+          if(finalGlyphMappingRequested)
+          {
+            mElidedFinalToSourceGlyphIndices.Resize(numberOfElidedGlyphs);
+            for(GlyphIndex finalGlyph = 0u; finalGlyph < numberOfElidedGlyphs; ++finalGlyph)
+            {
+              if(mElidedFinalToSourceGlyphIndices[finalGlyph] == FinalElisionResult::INVALID_GLYPH_INDEX)
+              {
+                mEllipsisFinalGlyphIndex = finalGlyph;
+                break;
+              }
+            }
           }
         }
       }

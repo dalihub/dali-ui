@@ -40,6 +40,27 @@ namespace Text
 class ModelInterface;
 class ViewModel;
 struct FinalElisionResult;
+struct RevealRasterContext;
+
+namespace Internal
+{
+namespace Reveal
+{
+/**
+ * @brief Expands discrete Reveal ownership by one texel for LINEAR text filtering.
+ *
+ * Existing raster-owned texels remain unchanged. Empty destinations receive
+ * ownership from their original 8-neighborhood only, keep zero coverage in
+ * the alpha channel, and conservatively select the latest start timing when
+ * different units meet.
+ *
+ * @param[in,out] metadata A tightly packed RGBA8888 Reveal metadata buffer.
+ * @param[in] width The buffer width in pixels.
+ * @param[in] height The buffer height in pixels.
+ */
+void ExpandMetadataOwnership(uint8_t* metadata, uint32_t width, uint32_t height);
+} // namespace Reveal
+} // namespace Internal
 
 /**
  * @brief This class is seperated logics for TypeSetter.
@@ -108,6 +129,10 @@ public:
    * @return The font client used by the Typesetter.
    */
   TextAbstraction::FontClient& GetFontClient();
+
+  void BeginRevealMetadata(uint32_t width, uint32_t height, const Internal::Reveal::Plan& plan);
+
+  PixelData EndRevealMetadata();
 
 public: // Image buffer creation
   void DrawGlyphsBackground(PixelBuffer& buffer, const uint32_t bufferWidth, const uint32_t bufferHeight,
@@ -191,8 +216,9 @@ public: // Image buffer creation
                                                      const TextAbstraction::GlyphIndex toGlyphIndex);
 
 private:
-  std::unique_ptr<ViewModel>  mModel;
-  TextAbstraction::FontClient mFontClient;
+  std::unique_ptr<ViewModel>           mModel;
+  std::unique_ptr<RevealRasterContext> mRevealRasterContext;
+  TextAbstraction::FontClient          mFontClient;
 };
 
 } // namespace Text

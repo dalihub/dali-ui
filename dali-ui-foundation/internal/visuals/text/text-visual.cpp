@@ -69,6 +69,7 @@ static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::Constrain
                                                              22);
 static constexpr uint32_t TEXT_VISUAL_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 23);
 static constexpr uint32_t TEXT_VISUAL_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 24);
+static constexpr uint32_t TEXT_VISUAL_REVEAL_PROGRESS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 25);
 
 const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
   0.0f, // Text::Alignment::START
@@ -98,6 +99,79 @@ constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME      = "uT
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME       = "uTextGradientOverlayConicScale";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME = "uTextGradientOverlayConicStartAngle";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME              = "uTextGradientOverlayMode";
+constexpr const char* UNIFORM_TEXT_REVEAL_PROGRESS_NAME                    = "uTextRevealProgress";
+constexpr const char* UNIFORM_TEXT_REVEAL_FADE_DURATION_NAME               = "uTextRevealFadeDuration";
+
+bool IsAsyncRenderRequest(Ui::Integration::Text::Async::RequestType requestType)
+{
+  switch(requestType)
+  {
+    case Ui::Integration::Text::Async::RENDER_FIXED_SIZE:
+    case Ui::Integration::Text::Async::RENDER_FIXED_WIDTH:
+    case Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT:
+    case Ui::Integration::Text::Async::RENDER_CONSTRAINT:
+      return true;
+    case Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE:
+    case Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+      return false;
+  }
+  return false;
+}
+
+bool HasCompleteTextRevealMetadata(const Text::AsyncTextRenderInfo& renderInfo, int maxTextureSize)
+{
+  if(!renderInfo.isTextRevealEnabled || !renderInfo.textPixelData || maxTextureSize <= 0)
+  {
+    return false;
+  }
+
+  const uint32_t metadataWidth  = renderInfo.textPixelData.GetWidth();
+  const uint32_t metadataHeight = renderInfo.textPixelData.GetHeight();
+  if(metadataWidth == 0u || metadataHeight == 0u)
+  {
+    return false;
+  }
+
+  // Renderer tiling uses the reported logical projection. Render scale can
+  // make the worker raster larger, so tiled metadata follows the exact region
+  // uploaded by each renderer rather than the full raster dimensions.
+  const int32_t rendererHeight = static_cast<int32_t>(renderInfo.size.height);
+  const int32_t rendererWidth  = static_cast<int32_t>(renderInfo.size.width);
+  if(rendererWidth <= 0 || rendererHeight <= 0)
+  {
+    return false;
+  }
+  const size_t expectedRendererTiles =
+    1u + static_cast<size_t>(rendererHeight - 1) / static_cast<size_t>(maxTextureSize);
+  if(renderInfo.revealMetadataTiles.size() != expectedRendererTiles)
+  {
+    return false;
+  }
+
+  const bool isHeightTiling = expectedRendererTiles > 1u;
+  if(isHeightTiling &&
+     (metadataWidth < static_cast<uint32_t>(rendererWidth) ||
+      metadataHeight < static_cast<uint32_t>(rendererHeight)))
+  {
+    return false;
+  }
+
+  int32_t rendererOffsetY = 0;
+  for(const PixelData& metadata : renderInfo.revealMetadataTiles)
+  {
+    const uint32_t expectedWidth          = isHeightTiling ? static_cast<uint32_t>(rendererWidth) : metadataWidth;
+    const uint32_t expectedRendererHeight = static_cast<uint32_t>(std::min(maxTextureSize, rendererHeight - rendererOffsetY));
+    const uint32_t expectedHeight         = isHeightTiling ? expectedRendererHeight : metadataHeight;
+    if(!metadata || metadata.GetPixelFormat() != Pixel::RGBA8888 ||
+       metadata.GetWidth() != expectedWidth || metadata.GetHeight() != expectedHeight)
+    {
+      return false;
+    }
+    rendererOffsetY += static_cast<int32_t>(expectedRendererHeight);
+  }
+
+  return rendererOffsetY == rendererHeight;
+}
 
 #ifdef TRACE_ENABLED
 constexpr const char* ASYNC_REQUEST_TYPE_NAME[] = {"RENDER_FIXED_SIZE", "RENDER_FIXED_WIDTH", "RENDER_FIXED_HEIGHT",
@@ -230,6 +304,7 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mTypesetter(Text::Typesetter::New(mController->GetRenderTextModel())),
   mAsyncTextInterface(nullptr),
   mGradientData(),
+  mRevealData(),
   mTextVisualShaderFactory(shaderFactory),
   mTextShaderFeatureCache(),
   mHasMultipleTextColorsIndex(Property::INVALID_INDEX),
@@ -411,6 +486,7 @@ void TextVisual::RemoveRenderer(Actor& actor, bool removeDefaultRenderer)
   }
   RemoveGradientAnimConstraints();
   RemoveGradientOverlayAnimConstraints();
+  RemoveTextRevealConstraints();
 
   if(removeDefaultRenderer)
   {
@@ -944,6 +1020,20 @@ void TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
     ++textureSetIndex;
   }
 
+  if(mTextShaderFeatureCache.IsEnabledTextReveal())
+  {
+    // Reveal metadata is an all-or-nothing renderer input. Async publication
+    // validates the complete tile set; synchronous rendering creates each tile
+    // immediately before this call.
+    DALI_ASSERT_ALWAYS(info.revealPixelData && info.textPixelData &&
+                       info.revealPixelData.GetPixelFormat() == Pixel::RGBA8888 &&
+                       info.revealPixelData.GetWidth() == static_cast<uint32_t>(info.width) &&
+                       info.revealPixelData.GetHeight() == static_cast<uint32_t>(info.height));
+    Sampler nearestSampler = Sampler::New();
+    nearestSampler.SetFilterMode(FilterMode::NEAREST, FilterMode::NEAREST);
+    AddTexture(textureSet, info.revealPixelData, nearestSampler, textureSetIndex);
+  }
+
   renderer.SetTextures(textureSet);
 
   // Enable the pre-multiplied alpha to improve the text quality
@@ -972,6 +1062,28 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
                           GetRequestTypeName(parameters.requestType));
   }
 #endif
+
+  const bool isRenderRequest = IsAsyncRenderRequest(parameters.requestType);
+  if(isRenderRequest && !mController->IsAsyncRendering())
+  {
+    // A render that completed after switching back to the synchronous path is
+    // no longer allowed to replace that path's renderer.
+    mIsTextLoadingTaskRunning = false;
+    return;
+  }
+  auto* revealData = GetTextVisualRevealData(mRevealData);
+  if(isRenderRequest && parameters.textRevealRevision != (revealData ? revealData->revision : 0u))
+  {
+    // Do not clear the running flag here: a newer request may already own it.
+    return;
+  }
+  if(isRenderRequest && parameters.isTextRevealEnabled &&
+     (mController->IsMarqueeEnabled() || mController->IsTextCutout()))
+  {
+    // Marquee and cutout do not consume Reveal metadata. A result requested
+    // before either mode was enabled must not replace their current renderer.
+    return;
+  }
 
   switch(parameters.requestType)
   {
@@ -1141,6 +1253,14 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     const bool featureStyleEnabled =
       (textGradientCompositionEnabled || textGradientMixedCompositionEnabled) ? renderInfo.styleTextureEnabled
                                                                               : renderInfo.styleEnabled;
+    const bool textRevealEnabled =
+      revealData && revealData->unit != Text::Internal::Reveal::Unit::DISABLED &&
+      HasCompleteTextRevealMetadata(renderInfo, maxTextureSize) &&
+      !isMarqueeEnabled && !isCutoutEnabled;
+    if(revealData)
+    {
+      revealData->fadeDuration = textRevealEnabled ? renderInfo.textRevealFadeDuration : 0.0f;
+    }
 
     TextVisualShaderFeature::FeatureBuilder featureBuilder;
     featureBuilder.EnableMultiColor(renderInfo.hasMultipleTextColors)
@@ -1150,7 +1270,8 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       .EnableEmboss(renderInfo.isEmbossEnabled)
       .EnableTextGradient(textGradientCompositionEnabled)
       .EnableTextGradientMixed(textGradientMixedCompositionEnabled)
-      .EnableTextGradientOverlay(textGradientOverlayCompositionEnabled);
+      .EnableTextGradientOverlay(textGradientOverlayCompositionEnabled)
+      .EnableTextReveal(textRevealEnabled);
 
     Shader shader = GetTextShader(mFactoryCache, featureBuilder);
     mImpl->mRenderer.SetShader(shader);
@@ -1218,6 +1339,14 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       {
         // Create a L8 texture as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
         AddTexture(textureSet, renderInfo.maskPixelData, sampler, textureSetIndex);
+        ++textureSetIndex;
+      }
+
+      if(textRevealEnabled)
+      {
+        Sampler nearestSampler = Sampler::New();
+        nearestSampler.SetFilterMode(FilterMode::NEAREST, FilterMode::NEAREST);
+        AddTexture(textureSet, renderInfo.revealMetadataTiles.front(), nearestSampler, textureSetIndex);
       }
 
       mImpl->mRenderer.SetTextures(textureSet);
@@ -1237,6 +1366,11 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
           const Vector4 overlayBounds = ResolveTextGradientOverlayBounds(renderInfo.size, renderInfo.textLogicalBounds);
           ApplyTextGradientOverlayUniforms(mImpl->mRenderer, renderInfo.size, overlayBounds);
         }
+      }
+
+      if(textRevealEnabled)
+      {
+        BindTextRevealConstraint(mImpl->mRenderer);
       }
 
       mRendererList.push_back(mImpl->mRenderer);
@@ -1271,6 +1405,12 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         info.maskPixelData = renderInfo.maskPixelData;
       }
 
+      size_t revealTileIndex = 0u;
+      if(textRevealEnabled)
+      {
+        info.revealPixelData = renderInfo.revealMetadataTiles[revealTileIndex++];
+      }
+
       // Get the current offset for recalculate the offset when tiling.
       Property::Map retMap;
       if(mImpl->mTransform)
@@ -1285,6 +1425,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
       // Create a textureset in the default renderer.
       CreateTextureSet(info, mImpl->mRenderer, sampler);
+      if(textRevealEnabled)
+      {
+        BindTextRevealConstraint(mImpl->mRenderer);
+      }
 
       verifiedHeight -= maxTextureSize;
 
@@ -1302,8 +1446,17 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         // New offset for tiling.
         info.transformOffset.y += static_cast<float>(maxTextureSize);
 
+        if(textRevealEnabled)
+        {
+          info.revealPixelData = renderInfo.revealMetadataTiles[revealTileIndex++];
+        }
+
         // Create a textureset int the new tiling renderer.
         CreateTextureSet(info, tilingRenderer, sampler);
+        if(textRevealEnabled)
+        {
+          BindTextRevealConstraint(tilingRenderer);
+        }
 
         verifiedHeight -= maxTextureSize;
       }
@@ -1802,6 +1955,113 @@ void TextVisual::BindGradientOverlayAnimConstraints(VisualRenderer& renderer,
   }
 }
 
+void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit unit,
+                                     float                        fadeDurationRatio,
+                                     Property::Index              progressPropertyIndex,
+                                     uint64_t                     revision)
+{
+  auto* data = GetTextVisualRevealData(mRevealData);
+  if(!data)
+  {
+    if(unit == Text::Internal::Reveal::Unit::DISABLED)
+    {
+      return;
+    }
+  }
+  else if(data->unit == unit &&
+          Equals(data->fadeDurationRatio, fadeDurationRatio) &&
+          data->progressPropertyIndex == progressPropertyIndex &&
+          data->revision == revision)
+  {
+    return;
+  }
+
+  data                        = &GetOrCreateTextVisualRevealData(mRevealData);
+  data->unit                  = unit;
+  data->fadeDurationRatio     = fadeDurationRatio;
+  data->progressPropertyIndex = progressPropertyIndex;
+  data->revision              = revision;
+  mRendererUpdateNeeded       = true;
+  if(unit == Text::Internal::Reveal::Unit::DISABLED)
+  {
+    RemoveTextRevealConstraints();
+    data->fadeDuration = 0.0f;
+  }
+
+  if(IsOnScene())
+  {
+    UpdateRenderer();
+  }
+}
+
+void TextVisual::RemoveTextRevealConstraints()
+{
+  auto* data = GetTextVisualRevealData(mRevealData);
+  if(!data)
+  {
+    return;
+  }
+
+  for(auto& constraint : data->constraints)
+  {
+    if(constraint)
+    {
+      constraint.Remove();
+      constraint.Reset();
+    }
+  }
+  data->constraints.clear();
+}
+
+void TextVisual::BindTextRevealConstraint(VisualRenderer& renderer)
+{
+  auto* data    = GetTextVisualRevealData(mRevealData);
+  Actor control = mControl.GetHandle();
+  if(!data || !control || data->progressPropertyIndex == Property::INVALID_INDEX || !renderer)
+  {
+    return;
+  }
+
+  // RegisterUniqueProperty deliberately skips the name lookup and would add a
+  // duplicate uniform on every renderer rebuild. Reuse the named properties so
+  // the constraint and shader always address the same index. Initializing from
+  // the source also prevents a rebuilt renderer from flashing progress zero.
+  const Property::Index progressIndex =
+    renderer.RegisterProperty(UNIFORM_TEXT_REVEAL_PROGRESS_NAME,
+                              control.GetCurrentProperty<float>(data->progressPropertyIndex));
+  renderer.RegisterProperty(UNIFORM_TEXT_REVEAL_FADE_DURATION_NAME, data->fadeDuration);
+  if(progressIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  Constraint constraint = Constraint::New<float>(renderer, progressIndex, GradientOffsetConstraint);
+  constraint.AddSource(Source(control, data->progressPropertyIndex));
+  constraint.SetApplyRate(Dali::Constraint::APPLY_ALWAYS);
+  Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_VISUAL_REVEAL_PROGRESS_CONSTRAINT_TAG);
+  constraint.Apply();
+  data->constraints.push_back(constraint);
+}
+
+Text::Internal::Reveal::Plan TextVisual::BuildTextRevealSourcePlan()
+{
+  auto* data = GetTextVisualRevealData(mRevealData);
+  DALI_ASSERT_ALWAYS(data && data->unit != Text::Internal::Reveal::Unit::DISABLED);
+
+  const Text::ModelInterface& model = *mController->GetRenderTextModel();
+  if(data->unit == Text::Internal::Reveal::Unit::WORD)
+  {
+    if(!data->segmentation)
+    {
+      // Segmentation::Get() depends on the UI-thread SingletonService and is
+      // invalid on adaptor worker threads. Own an explicit instance instead.
+      data->segmentation = TextAbstraction::Segmentation::New();
+    }
+    return Text::Internal::Reveal::BuildPlan(model, data->unit, data->fadeDurationRatio, data->segmentation);
+  }
+  return Text::Internal::Reveal::BuildCharacterPlan(model, data->fadeDurationRatio);
+}
+
 void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& parameters)
 {
 #ifdef TRACE_ENABLED
@@ -2139,6 +2399,8 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
                              bool styleEnabled, bool styleTextureEnabled, bool styleBlocksTextGradient,
                              bool isOverlayStyle, bool embossEnabled)
 {
+  auto* revealData = GetTextVisualRevealData(mRevealData);
+
   // Get the maximum size.
   const int  maxTextureSize   = Dali::GetMaxTextureSize();
   const bool isHeightTiling   = size.height >= static_cast<float>(maxTextureSize);
@@ -2159,6 +2421,14 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
   const bool featureStyleEnabled =
     (textGradientCompositionEnabled || textGradientMixedCompositionEnabled) ? styleTextureEnabled
                                                                             : styleEnabled;
+  const bool textRevealEnabled =
+    revealData && revealData->unit != Text::Internal::Reveal::Unit::DISABLED &&
+    !isMarqueeEnabled && !mController->IsTextCutout();
+  if(revealData && revealData->unit != Text::Internal::Reveal::Unit::DISABLED && !textRevealEnabled)
+  {
+    DALI_LOG_DEBUG_INFO("Text::Reveal foreground rendering is disabled while marquee or cutout is active\n");
+  }
+  RemoveTextRevealConstraints();
 
   TextVisualShaderFeature::FeatureBuilder featureBuilder;
   featureBuilder.EnableMultiColor(hasMultipleTextColors)
@@ -2168,7 +2438,8 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     .EnableEmboss(embossEnabled)
     .EnableTextGradient(textGradientCompositionEnabled)
     .EnableTextGradientMixed(textGradientMixedCompositionEnabled)
-    .EnableTextGradientOverlay(textGradientOverlayCompositionEnabled);
+    .EnableTextGradientOverlay(textGradientOverlayCompositionEnabled)
+    .EnableTextReveal(textRevealEnabled);
 
   Shader shader = GetTextShader(mFactoryCache, featureBuilder);
   mImpl->mRenderer.SetShader(shader);
@@ -2204,6 +2475,11 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
       }
     }
 
+    if(textRevealEnabled)
+    {
+      BindTextRevealConstraint(mImpl->mRenderer);
+    }
+
     mRendererList.push_back(mImpl->mRenderer);
   }
   // If the pixel data exceeds the maximum size, tiling is required.
@@ -2218,10 +2494,20 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
     // Check the text direction
     Text::Direction textDirection = mController->GetTextDirection();
+    Text::Internal::Reveal::Plan revealPlan;
+    if(textRevealEnabled)
+    {
+      revealPlan = BuildTextRevealSourcePlan();
+    }
 
     // Create a texture for the text without any styles
     PixelData data =
       mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
+
+    if(textRevealEnabled)
+    {
+      revealPlan = mTypesetter->CreateFinalRevealPlan(revealPlan, revealData->unit);
+    }
 
     int verifiedWidth  = data.GetWidth();
     int verifiedHeight = data.GetHeight();
@@ -2265,7 +2551,17 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     }
 
     // Create a textureset in the default renderer.
+    if(textRevealEnabled)
+    {
+      info.revealPixelData = mTypesetter->RenderTextRevealMetadata(
+        Vector2(static_cast<float>(info.width), static_cast<float>(info.height)), textDirection,
+        revealPlan, revealData->fadeDuration, info.offsetHeight, size);
+    }
     CreateTextureSet(info, mImpl->mRenderer, sampler);
+    if(textRevealEnabled)
+    {
+      BindTextRevealConstraint(mImpl->mRenderer);
+    }
 
     verifiedHeight -= maxTextureSize;
 
@@ -2282,8 +2578,18 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
       info.height = (verifiedHeight - maxTextureSize) > 0 ? maxTextureSize : verifiedHeight;
       // New offset for tiling.
       info.transformOffset.y += maxTextureSize;
+      if(textRevealEnabled)
+      {
+        info.revealPixelData = mTypesetter->RenderTextRevealMetadata(
+          Vector2(static_cast<float>(info.width), static_cast<float>(info.height)), textDirection,
+          revealPlan, revealData->fadeDuration, info.offsetHeight, size);
+      }
       // Create a textureset int the new tiling renderer.
       CreateTextureSet(info, tilingRenderer, sampler);
+      if(textRevealEnabled)
+      {
+        BindTextRevealConstraint(tilingRenderer);
+      }
 
       verifiedHeight -= maxTextureSize;
     }
@@ -2470,6 +2776,24 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     PixelData maskData = mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);
 
     AddTexture(textureSet, maskData, sampler, textureSetIndex);
+    ++textureSetIndex;
+  }
+
+  if(mTextShaderFeatureCache.IsEnabledTextReveal())
+  {
+    auto* revealData = GetTextVisualRevealData(mRevealData);
+    DALI_ASSERT_ALWAYS(revealData);
+    const auto sourcePlan = BuildTextRevealSourcePlan();
+    const auto finalPlan  = mTypesetter->CreateFinalRevealPlan(sourcePlan, revealData->unit);
+    PixelData  metadata   = mTypesetter->RenderTextRevealMetadata(size, textDirection, finalPlan, revealData->fadeDuration);
+
+    DALI_ASSERT_ALWAYS(metadata && metadata.GetPixelFormat() == Pixel::RGBA8888 &&
+                       metadata.GetWidth() == static_cast<uint32_t>(size.width) &&
+                       metadata.GetHeight() == static_cast<uint32_t>(size.height));
+
+    Sampler nearestSampler = Sampler::New();
+    nearestSampler.SetFilterMode(FilterMode::NEAREST, FilterMode::NEAREST);
+    AddTexture(textureSet, metadata, nearestSampler, textureSetIndex);
   }
 
   return textureSet;

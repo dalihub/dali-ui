@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/integration-api/text/async-text-interface.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-style-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
@@ -115,11 +116,13 @@ struct AsyncTextParameters
     textFitMaxSize{100.f},
     textFitStepSize{1.f},
     marqueeLoopDelay{0.0f},
+    textRevealFadeDurationRatio{Text::Reveal::AUTO_FADE_DURATION_RATIO},
     renderScale{1.0f},
     renderScaleWidth{0.f},
     renderScaleHeight{0.f},
     maxTextureSize{0},
     replacementLayoutGeneration{0u},
+    textRevealRevision{0u},
     marqueeSpeed{1},
     marqueeLoopCount{1},
     marqueeGap{0},
@@ -139,6 +142,7 @@ struct AsyncTextParameters
     fontWeight{TextAbstraction::FontWeight::NONE},
     fontWidth{TextAbstraction::FontWidth::NONE},
     fontSlant{TextAbstraction::FontSlant::NONE},
+    textRevealUnit{Internal::Reveal::Unit::DISABLED},
     suppressAutoMarquee{false},
     isMultiLine{false},
     ellipsis{true},
@@ -156,7 +160,8 @@ struct AsyncTextParameters
     isBackgroundWithCutoutEnabled{false},
     isEmbossEnabled{false},
     isTextGradientRequested{false},
-    isTextGradientOverlayRequested{false}
+    isTextGradientOverlayRequested{false},
+    isTextRevealEnabled{false}
   {
   }
 
@@ -210,12 +215,14 @@ struct AsyncTextParameters
   float textFitMaxSize;
   float textFitStepSize;
   float marqueeLoopDelay;
+  float textRevealFadeDurationRatio; ///< Authored AUTO sentinel or normalized per-unit fade duration.
   float renderScale;       ///< The render scale.
   float renderScaleWidth;  ///< The requested original textWidth when using render scale.
   float renderScaleHeight; ///< The requested original textHeight when using render scale.
 
   int      maxTextureSize;              ///< The maximum size of texture.
   uint64_t replacementLayoutGeneration; ///< UI request generation copied to final replacement placements.
+  uint64_t textRevealRevision;          ///< Rejects stale reveal configuration results on commit.
   int      marqueeSpeed;                ///< marquee properties.
   int      marqueeLoopCount;
   int      marqueeGap;
@@ -237,6 +244,7 @@ struct AsyncTextParameters
   FontWeightType                            fontWeight;            ///< The font's weight.
   FontWidthType                             fontWidth;             ///< The font's width.
   FontSlantType                             fontSlant;             ///< The font's slant.
+  Internal::Reveal::Unit                    textRevealUnit;        ///< Shaping/layout reveal unit.
 
   bool suppressAutoMarquee : 1;            ///< whether automatic marquee evaluation is suppressed.
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.
@@ -256,6 +264,7 @@ struct AsyncTextParameters
   bool isEmbossEnabled : 1;                ///< Emboss enabled flag.
   bool isTextGradientRequested : 1;        ///< Whether async render may generate TextGradient-only payloads.
   bool isTextGradientOverlayRequested : 1; ///< Whether async render may generate TextGradientOverlay-only payloads.
+  bool isTextRevealEnabled : 1;            ///< Whether the worker should produce reveal metadata.
 };
 
 struct AsyncTextRenderInfo
@@ -272,6 +281,7 @@ struct AsyncTextRenderInfo
     overlayStylePixelData(),
     maskPixelData(),
     marqueePixelData(),
+    revealMetadataTiles(),
     size(),
     textLogicalBounds(0.0f, 0.0f, 1.0f, 1.0f),
     textGradientMarqueeViewportBounds(0.0f, 0.0f, 1.0f, 1.0f),
@@ -283,6 +293,7 @@ struct AsyncTextRenderInfo
     replacementLayoutGeneration(0u),
     lineCount(0),
     marqueeWrapGap(0.f),
+    textRevealFadeDuration(0.0f),
     hasMultipleTextColors(false),
     containsColorGlyph(false),
     styleEnabled(false),
@@ -291,7 +302,8 @@ struct AsyncTextRenderInfo
     isOverlayStyle(false),
     isTextDirectionRTL(false),
     isCutoutEnabled(false),
-    isEmbossEnabled(false)
+    isEmbossEnabled(false),
+    isTextRevealEnabled(false)
   {
   }
 
@@ -309,6 +321,7 @@ struct AsyncTextRenderInfo
   PixelData                                 overlayStylePixelData;
   PixelData                                 maskPixelData;
   PixelData                                 marqueePixelData;
+  std::vector<PixelData>                    revealMetadataTiles;               ///< One RGBA8888 buffer per height tile.
   Size                                      size;                              ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
   Vector4                                   textLogicalBounds;                 ///< Normalized logical text bounds inside @p size.
   Vector4                                   textGradientMarqueeViewportBounds; ///< Normalized TextGradient bounds inside the visible marquee viewport.
@@ -320,6 +333,7 @@ struct AsyncTextRenderInfo
   uint64_t                                  replacementLayoutGeneration;
   int                                       lineCount;
   float                                     marqueeWrapGap;
+  float                                     textRevealFadeDuration;
   bool                                      hasMultipleTextColors : 1;
   bool                                      containsColorGlyph : 1;
   bool                                      styleEnabled : 1;
@@ -329,6 +343,7 @@ struct AsyncTextRenderInfo
   bool                                      isTextDirectionRTL : 1;
   bool                                      isCutoutEnabled : 1;
   bool                                      isEmbossEnabled : 1;
+  bool                                      isTextRevealEnabled : 1;
 };
 
 /**

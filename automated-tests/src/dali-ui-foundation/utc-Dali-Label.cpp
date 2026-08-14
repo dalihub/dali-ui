@@ -17,11 +17,15 @@
 
 // EXTERNAL INCLUDES
 #include <dali.h>
+#include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/string-utils.h>
 #include <stdlib.h>
+#include <cmath>
 #include <iostream>
 #include <limits>
+#include <string>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -255,6 +259,990 @@ int UtcDaliLabelInvokeMethod(void)
   DALI_TEST_CHECK(text);
   DALI_TEST_EQUALS(*text, String("Invoked label"), TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealPublicApiP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("Hello reveal world");
+  label.SetProperty(Actor::Property::SIZE, Vector3(320.0f, 80.0f, 0.0f));
+
+  DALI_TEST_CHECK(label.GetTextReveal() == Text::Reveal::None());
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), Property::INVALID_INDEX, TEST_LOCATION);
+  label.SetTextReveal(Text::Reveal::None());
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), Property::INVALID_INDEX, TEST_LOCATION);
+
+  Text::Reveal reveal;
+  reveal.SetUnit(Text::Reveal::Unit::WORD);
+  reveal.SetFadeDurationRatio(0.0f);
+  label.SetTextReveal(reveal);
+  Text::Reveal nearlyEqualReveal(reveal);
+  nearlyEqualReveal.SetFadeDurationRatio(std::nextafter(0.0f, 1.0f));
+  label.SetTextReveal(nearlyEqualReveal);
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  DALI_TEST_CHECK(label.GetTextReveal().GetFadeDurationRatio() == 0.0f);
+  label.SetTextRevealProgress(-2.0f);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.0f, 0.0001f, TEST_LOCATION);
+  label.SetTextRevealProgress(2.0f);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 1.0f, 0.0001f, TEST_LOCATION);
+  label.SetTextRevealProgress(std::numeric_limits<float>::quiet_NaN());
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.0f, 0.0001f, TEST_LOCATION);
+  label.SetTextRevealProgress(std::numeric_limits<float>::infinity());
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 1.0f, 0.0001f, TEST_LOCATION);
+  label.SetTextRevealProgress(-std::numeric_limits<float>::infinity());
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.0f, 0.0001f, TEST_LOCATION);
+  label.SetTextRevealProgress(0.4f);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  const Property::Index progressIndex = label.GetPropertyIndex("uTextRevealProgress");
+  DALI_TEST_CHECK(progressIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetPropertyIndex("uTextRevealFadeDuration") != Property::INVALID_INDEX);
+
+  label.SetText("Changed text keeps normalized progress");
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.4f, 0.0001f, TEST_LOCATION);
+
+  label.SetTextReveal(Text::Reveal::None());
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(label.GetTextReveal() == Text::Reveal::None());
+  // The renderer handle may retain a dormant registered uniform, but the base shader and
+  // one-texture set prove that the reveal feature and its metadata are no longer active.
+  DALI_TEST_EQUALS(label.GetRendererAt(0u).GetTextures().GetTextureCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.4f, 0.0001f, TEST_LOCATION);
+
+  // Previously enabled Labels must return to the ordinary elision path. The
+  // progress property remains stable, but no reveal metadata texture is built.
+  label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+  label.SetRequestedWidth(120.0f);
+  label.SetText("A much longer ordinary text update after Reveal None");
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_EQUALS(label.GetRendererAt(0u).GetTextures().GetTextureCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.4f, 0.0001f, TEST_LOCATION);
+
+  label.SetTextReveal(reveal);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTextureCount() >= 2u);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.4f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealForegroundOnlyStyleResourcesP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("Foreground reveal leaves decoration resources intact");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(96.0f);
+
+  Text::Shadow shadow;
+  shadow.SetOffset(Vector2(2.0f, 2.0f));
+  Text::Outline outline;
+  outline.SetWidth(2.0f);
+  Text::Underline   underline;
+  Text::LineThrough lineThrough;
+  label.SetTextShadow(shadow);
+  label.SetTextOutline(outline);
+  label.SetTextUnderline(underline);
+  label.SetTextLineThrough(lineThrough);
+  label.SetTextBackgroundColor(UiColor(Color::MAGENTA));
+  label.SetTextReveal(Text::Reveal());
+  label.SetTextRevealProgress(0.0f);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  Renderer   renderer = label.GetRendererAt(0u);
+  TextureSet textures = renderer.GetTextures();
+  DALI_TEST_CHECK(textures.GetTextureCount() >= 3u);
+  std::vector<Texture> resources;
+  resources.reserve(textures.GetTextureCount());
+  for(uint32_t index = 0u; index < textures.GetTextureCount(); ++index)
+  {
+    resources.push_back(textures.GetTexture(index));
+  }
+
+  TestGlAbstraction& gl = application.GetGlAbstraction();
+  gl.EnableTextureCallTrace(true);
+  gl.ResetTextureCallStack();
+  for(float progress : {0.0f, 0.5f, 1.0f})
+  {
+    label.SetTextRevealProgress(progress);
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(label.GetRendererAt(0u) == renderer);
+    const Property::Index rendererProgressIndex = renderer.GetPropertyIndex("uTextRevealProgress");
+    DALI_TEST_CHECK(rendererProgressIndex != Property::INVALID_INDEX);
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(rendererProgressIndex), progress, 0.0001f, TEST_LOCATION);
+    TextureSet current = label.GetRendererAt(0u).GetTextures();
+    DALI_TEST_EQUALS(current.GetTextureCount(), resources.size(), TEST_LOCATION);
+    for(uint32_t index = 0u; index < current.GetTextureCount(); ++index)
+    {
+      DALI_TEST_CHECK(current.GetTexture(index) == resources[index]);
+    }
+    DALI_TEST_CHECK(label.GetTextShadow() == shadow);
+    DALI_TEST_CHECK(label.GetTextOutline() == outline);
+    DALI_TEST_CHECK(label.GetTextUnderline() == underline);
+    DALI_TEST_CHECK(label.GetTextLineThrough() == lineThrough);
+    DALI_TEST_EQUALS(label.GetTextBackgroundColor().GetRgba(), Color::MAGENTA, TEST_LOCATION);
+  }
+  DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexImage2D"), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexSubImage2D"), 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealEndEllipsisIntegrationSmokeP(void)
+{
+  UiTestApplication application;
+
+  for(Text::Reveal::Unit unit : {Text::Reveal::Unit::CHARACTER, Text::Reveal::Unit::WORD})
+  {
+    Label label = Label::New("Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa Lambda");
+    label.SetProperty(Actor::Property::SIZE, Vector3(72.0f, 36.0f, 0.0f));
+    label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+
+    Text::Reveal reveal;
+    reveal.SetUnit(unit);
+    label.SetTextReveal(reveal);
+    label.SetTextRevealProgress(0.0f);
+
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render(16);
+    application.SendNotification();
+    application.Render(16);
+
+    // This public smoke covers Label END-ellipsis configuration together with
+    // Reveal renderer and metadata integration. Final ellipsis identity and
+    // timing correctness are verified by the internal Reveal UTC.
+    DALI_TEST_EQUALS(label.GetTextOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetRendererCount(), 1u, TEST_LOCATION);
+    Renderer              renderer      = label.GetRendererAt(0u);
+    const Property::Index progressIndex = renderer.GetPropertyIndex("uTextRevealProgress");
+    DALI_TEST_CHECK(progressIndex != Property::INVALID_INDEX);
+    DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextRevealFadeDuration") != Property::INVALID_INDEX);
+
+    TextureSet textures = renderer.GetTextures();
+    DALI_TEST_CHECK(textures.GetTextureCount() >= 2u);
+    Texture textTexture     = textures.GetTexture(0u);
+    Texture metadataTexture = textures.GetTexture(textures.GetTextureCount() - 1u);
+    DALI_TEST_CHECK(textTexture && metadataTexture);
+    DALI_TEST_EQUALS(metadataTexture.GetWidth(), textTexture.GetWidth(), TEST_LOCATION);
+    DALI_TEST_EQUALS(metadataTexture.GetHeight(), textTexture.GetHeight(), TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(progressIndex), 0.0f, 0.0001f, TEST_LOCATION);
+
+    label.SetTextRevealProgress(1.0f);
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(progressIndex), 1.0f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_CHECK(renderer.GetTextures().GetTexture(renderer.GetTextures().GetTextureCount() - 1u) == metadataTexture);
+
+    label.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealRendererPropertyLifecycleP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("ABCDE");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(84.0f);
+
+  Text::Reveal reveal;
+  label.SetTextReveal(reveal);
+  label.SetTextRevealProgress(0.37f);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  Renderer              renderer           = label.GetRendererAt(0u);
+  const Property::Index labelProgressIndex = label.GetPropertyIndex("uTextRevealProgress");
+  const Property::Index progressIndex      = renderer.GetPropertyIndex("uTextRevealProgress");
+  const Property::Index fadeIndex          = renderer.GetPropertyIndex("uTextRevealFadeDuration");
+  const uint32_t        propertyCount      = renderer.GetPropertyCount();
+  DALI_TEST_CHECK(labelProgressIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(progressIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(fadeIndex != Property::INVALID_INDEX);
+  const float initialAutoFade = renderer.GetCurrentProperty<float>(fadeIndex);
+  DALI_TEST_CHECK(initialAutoFade > 0.0f && initialAutoFade <= 1.0f);
+
+  const float ratios[] = {
+    0.0f,
+    0.2f,
+    1.0f,
+    Text::Reveal::AUTO_FADE_DURATION_RATIO,
+    0.05f,
+    0.15f,
+    0.3f,
+    1.0f};
+  for(uint32_t iteration = 0u; iteration < sizeof(ratios) / sizeof(ratios[0]); ++iteration)
+  {
+    reveal.SetFadeDurationRatio(ratios[iteration]);
+    label.SetTextReveal(reveal);
+    label.SetText((iteration & 1u) ? "VWXYZ" : "ABCDE");
+    Text::Outline outline;
+    outline.SetWidth((iteration & 2u) ? 2.0f : 1.0f);
+    label.SetTextOutline(outline);
+    application.SendNotification();
+    application.Render(16);
+    application.SendNotification();
+    application.Render(16);
+
+    DALI_TEST_CHECK(label.GetRendererAt(0u) == renderer);
+    DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), labelProgressIndex, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextRevealFadeDuration"), fadeIndex, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetPropertyCount(), propertyCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetTextReveal().GetFadeDurationRatio(), ratios[iteration], 0.0001f, TEST_LOCATION);
+    const float fadeDuration = renderer.GetCurrentProperty<float>(fadeIndex);
+    if(ratios[iteration] == Text::Reveal::AUTO_FADE_DURATION_RATIO)
+    {
+      DALI_TEST_CHECK(fadeDuration > 0.0f && fadeDuration <= 1.0f);
+    }
+    else
+    {
+      DALI_TEST_EQUALS(fadeDuration, ratios[iteration], 0.0001f, TEST_LOCATION);
+    }
+    DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.37f, 0.0001f, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealProgressGetterCurrentP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("Current reveal progress");
+  label.SetRequestedWidth(320.0f);
+  label.SetRequestedHeight(80.0f);
+  label.SetTextReveal(Text::Reveal());
+  label.SetTextRevealProgress(0.0f);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+
+  const Property::Index progressIndex = label.GetPropertyIndex("uTextRevealProgress");
+  DALI_TEST_CHECK(progressIndex != Property::INVALID_INDEX);
+  auto CheckRenderedProgress = [&]()
+  {
+    const float sceneValue = label.GetCurrentProperty<float>(progressIndex);
+    const float expected   = std::isnan(sceneValue) ? 0.0f : std::max(0.0f, std::min(1.0f, sceneValue));
+    DALI_TEST_EQUALS(label.GetTextRevealProgress(), expected, 0.0001f, TEST_LOCATION);
+  };
+
+  // Scheduling alone changes the event-side target, not the rendered value.
+  Animation animation = Animation::New(1.0f);
+  label.Animate(animation).TextRevealProgress(1.0f, Duration(1.0f));
+  CheckRenderedProgress();
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.0f, 0.0001f, TEST_LOCATION);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(250);
+  CheckRenderedProgress();
+  const float current = label.GetTextRevealProgress();
+  DALI_TEST_CHECK(current > 0.0f && current < 1.0f);
+  application.Render(800);
+
+  // A direct setter while an animation is active must never make the public
+  // getter diverge from the value used by the renderer.
+  label.SetTextRevealProgress(0.0f);
+  application.SendNotification();
+  application.Render(16);
+  Animation active = Animation::New(1.0f);
+  label.Animate(active).TextRevealProgress(1.0f, Duration(1.0f));
+  active.Play();
+  application.SendNotification();
+  application.Render(200);
+  CheckRenderedProgress();
+  DALI_TEST_CHECK(label.GetTextRevealProgress() > 0.0f && label.GetTextRevealProgress() < 1.0f);
+  label.SetTextRevealProgress(0.25f);
+  CheckRenderedProgress();
+  application.SendNotification();
+  application.Render(16);
+  CheckRenderedProgress();
+  application.Render(900);
+
+  // Raw scene progress may overshoot, while the typed Reveal presentation is
+  // clamped to its public [0, 1] range.
+  label.SetProperty(progressIndex, 2.0f);
+  application.SendNotification();
+  application.Render(16);
+  CheckRenderedProgress();
+  DALI_TEST_EQUALS(label.GetCurrentProperty<float>(progressIndex), 2.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 1.0f, 0.0001f, TEST_LOCATION);
+
+  label.SetProperty(progressIndex, -1.0f);
+  application.SendNotification();
+  application.Render(16);
+  CheckRenderedProgress();
+  DALI_TEST_EQUALS(label.GetCurrentProperty<float>(progressIndex), -1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.0f, 0.0001f, TEST_LOCATION);
+
+  // The generated Reveal bridge must forward true AnimateBy semantics instead
+  // of converting the configured delta to an AnimateTo target.
+  Label relativeLabel = Label::New("Reveal AnimateBy bridge");
+  relativeLabel.SetRequestedWidth(320.0f);
+  relativeLabel.SetRequestedHeight(80.0f);
+  relativeLabel.SetTextReveal(Text::Reveal());
+  relativeLabel.SetTextRevealProgress(0.2f);
+  application.GetScene().Add(relativeLabel);
+  application.SendNotification();
+  application.Render(16);
+  Animation configuredBeforeSet = Animation::New(0.1f);
+  relativeLabel.Animate(configuredBeforeSet).TextRevealProgressBy(0.2f, Duration(0.1f));
+  relativeLabel.SetTextRevealProgress(0.7f);
+  configuredBeforeSet.Play();
+  application.SendNotification();
+  application.Render(120);
+  const Property::Index relativeProgressIndex = relativeLabel.GetPropertyIndex("uTextRevealProgress");
+  DALI_TEST_CHECK(relativeProgressIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(relativeLabel.GetCurrentProperty<float>(relativeProgressIndex), 0.9f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(relativeLabel.GetTextRevealProgress(), 0.9f, 0.0001f, TEST_LOCATION);
+
+  // Animation targets use the same Reveal normalization as direct setters.
+  Animation nanTarget = Animation::New(0.1f);
+  relativeLabel.Animate(nanTarget).TextRevealProgress(std::numeric_limits<float>::quiet_NaN(), Duration(0.1f));
+  nanTarget.Play();
+  application.SendNotification();
+  application.Render(120);
+  DALI_TEST_EQUALS(relativeLabel.GetCurrentProperty<float>(relativeProgressIndex), 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(relativeLabel.GetTextRevealProgress(), 0.0f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealAsyncP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  Label label = Label::New("Async CHARACTER reveal e\u0301 office العربية 😀");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(96.0f);
+  label.SetAsyncRendering(true);
+  Text::Reveal reveal;
+  reveal.SetUnit(Text::Reveal::Unit::CHARACTER);
+  label.SetTextReveal(reveal);
+  label.SetTextRevealProgress(0.25f);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(WaitForValidTextTexture(application, label));
+
+  DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+  Renderer renderer = label.GetRendererAt(0u);
+  DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextRevealFadeDuration") != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(renderer.GetTextures().GetTextureCount() >= 2u);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.25f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealAsyncRenderScaleP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  for(float renderScale : {1.25f, 1.5f})
+  {
+    Label label = Label::New("Async Reveal metadata follows render scale");
+    label.SetRequestedWidth(420.0f);
+    label.SetRequestedHeight(96.0f);
+    label.SetAsyncRendering(true);
+    label.SetRenderScale(renderScale);
+    label.SetTextReveal(Text::Reveal());
+    label.SetTextRevealProgress(0.4f);
+
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(WaitForValidTextTexture(application, label));
+
+    DALI_TEST_EQUALS(label.GetRendererCount(), 1u, TEST_LOCATION);
+    Renderer renderer = label.GetRendererAt(0u);
+    DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
+    DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextRevealFadeDuration") != Property::INVALID_INDEX);
+
+    TextureSet textures = renderer.GetTextures();
+    DALI_TEST_CHECK(textures.GetTextureCount() >= 2u);
+    Texture textTexture     = textures.GetTexture(0u);
+    Texture metadataTexture = textures.GetTexture(textures.GetTextureCount() - 1u);
+    DALI_TEST_CHECK(textTexture && metadataTexture);
+    DALI_TEST_CHECK(textTexture.GetWidth() > 0u && textTexture.GetHeight() > 0u);
+    DALI_TEST_EQUALS(metadataTexture.GetWidth(), textTexture.GetWidth(), TEST_LOCATION);
+    DALI_TEST_EQUALS(metadataTexture.GetHeight(), textTexture.GetHeight(), TEST_LOCATION);
+    label.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealCutoutUnsupportedP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("Cutout retains authored reveal");
+  label.SetProperty(Actor::Property::SIZE, Vector3(360.0f, 80.0f, 0.0f));
+  Text::Reveal reveal;
+  label.SetTextReveal(reveal);
+  label.SetTextRevealProgress(0.5f);
+  label.SetTextCutoutEnabled(true);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  DALI_TEST_EQUALS(label.GetRendererAt(0u).GetPropertyIndex("uTextRevealProgress"),
+                   Property::INVALID_INDEX, TEST_LOCATION);
+
+  label.SetTextCutoutEnabled(false);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.5f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealMarqueeUnsupportedP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New(
+    "A long marquee line keeps scrolling while its authored reveal configuration remains available.");
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(48.0f);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeLoopCount(0);
+
+  Text::Reveal reveal;
+  reveal.SetUnit(Text::Reveal::Unit::WORD);
+  label.SetTextReveal(reveal);
+  label.SetTextRevealProgress(0.35f);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTextureCount() >= 2u);
+
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(label.IsMarqueeRunning());
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.35f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetRendererAt(0u).GetTextures().GetTextureCount(), 1u, TEST_LOCATION);
+
+  label.StopMarquee();
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(!label.IsMarqueeRunning());
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTextureCount() >= 2u);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.35f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealHeightTilingP(void)
+{
+  UiTestApplication application;
+  const uint32_t    maxTextureSize = static_cast<uint32_t>(Dali::GetMaxTextureSize());
+  DALI_TEST_CHECK(maxTextureSize > 0u);
+
+  std::string    text;
+  const uint32_t lineCount = maxTextureSize / 4u + 64u;
+  text.reserve(lineCount * 2u);
+  for(uint32_t line = 0u; line < lineCount; ++line)
+  {
+    text += "X\n";
+  }
+
+  Label label = Label::New(Dali::String(text.c_str()));
+  label.SetMultiLine(true);
+  label.SetFontSize(32.0f);
+  label.SetRequestedWidth(96.0f);
+  label.SetRequestedHeight(static_cast<float>(maxTextureSize + 64u));
+  label.SetTextReveal(Text::Reveal());
+  label.SetTextRevealProgress(0.5f);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(label.GetRendererCount() >= 2u);
+  for(uint32_t rendererIndex = 0u; rendererIndex < label.GetRendererCount(); ++rendererIndex)
+  {
+    Renderer renderer = label.GetRendererAt(rendererIndex);
+    DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
+    TextureSet textures = renderer.GetTextures();
+    DALI_TEST_CHECK(textures.GetTextureCount() >= 2u);
+    Texture metadata = textures.GetTexture(textures.GetTextureCount() - 1u);
+    DALI_TEST_CHECK(metadata);
+    DALI_TEST_CHECK(metadata.GetHeight() > 0u);
+    DALI_TEST_CHECK(metadata.GetHeight() <= maxTextureSize);
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealAsyncHeightTilingP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  const uint32_t maxTextureSize = static_cast<uint32_t>(Dali::GetMaxTextureSize());
+  std::string    text;
+  const uint32_t lineCount = maxTextureSize / 4u + 64u;
+  text.reserve(lineCount * 2u);
+  for(uint32_t line = 0u; line < lineCount; ++line)
+  {
+    text += "Y\n";
+  }
+
+  Label label = Label::New(Dali::String(text.c_str()));
+  label.SetMultiLine(true);
+  label.SetFontSize(32.0f);
+  label.SetRequestedWidth(96.0f);
+  label.SetRequestedHeight(static_cast<float>(maxTextureSize + 64u));
+  label.SetAsyncRendering(true);
+  label.SetRenderScale(1.25f);
+  label.SetTextReveal(Text::Reveal());
+  label.SetTextRevealProgress(0.75f);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(WaitForValidTextTexture(application, label));
+
+  DALI_TEST_CHECK(label.GetRendererCount() >= 2u);
+  for(uint32_t rendererIndex = 0u; rendererIndex < label.GetRendererCount(); ++rendererIndex)
+  {
+    Renderer renderer = label.GetRendererAt(rendererIndex);
+    DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
+    TextureSet textures = renderer.GetTextures();
+    DALI_TEST_CHECK(textures.GetTextureCount() >= 2u);
+    Texture textTexture = textures.GetTexture(0u);
+    Texture metadata    = textures.GetTexture(textures.GetTextureCount() - 1u);
+    DALI_TEST_CHECK(textTexture && metadata);
+    DALI_TEST_EQUALS(metadata.GetWidth(), textTexture.GetWidth(), TEST_LOCATION);
+    DALI_TEST_EQUALS(metadata.GetHeight(), textTexture.GetHeight(), TEST_LOCATION);
+    DALI_TEST_CHECK(metadata.GetHeight() > 0u);
+    DALI_TEST_CHECK(metadata.GetHeight() <= maxTextureSize);
+  }
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.75f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealAnimationConfigurationRatioP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  Label label = Label::New("Animation keeps running while CHARACTER changes to async WORD reveal");
+  label.SetRequestedWidth(320.0f);
+  label.SetRequestedHeight(80.0f);
+
+  Text::Reveal reveal;
+  reveal.SetUnit(Text::Reveal::Unit::CHARACTER);
+  label.SetTextReveal(reveal);
+  label.SetTextRevealProgress(0.0f);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+
+  Animation animation = Animation::New(2.0f);
+  label.Animate(animation).TextRevealProgress(1.0f, Duration(2.0f));
+  animation.Play();
+  application.SendNotification();
+  application.Render(100);
+
+  const Property::Index progressIndex = label.GetPropertyIndex("uTextRevealProgress");
+  DALI_TEST_CHECK(progressIndex != Property::INVALID_INDEX);
+
+  label.SetAsyncRendering(true);
+  reveal.SetUnit(Text::Reveal::Unit::WORD);
+  label.SetTextReveal(reveal);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  application.SendNotification();
+  application.Render(100);
+
+  // Keep the original Animation target alive while repeatedly changing every
+  // configuration dimension that may replace the renderer or its metadata.
+  const float ratios[] = {
+    Text::Reveal::AUTO_FADE_DURATION_RATIO,
+    0.0f,
+    0.05f,
+    0.15f,
+    0.3f,
+    1.0f};
+  for(uint32_t iteration = 0u; iteration < 8u; ++iteration)
+  {
+    reveal.SetUnit((iteration & 1u) ? Text::Reveal::Unit::CHARACTER : Text::Reveal::Unit::WORD);
+    reveal.SetFadeDurationRatio(ratios[iteration % (sizeof(ratios) / sizeof(ratios[0]))]);
+    if(iteration == 3u)
+    {
+      label.SetTextReveal(Text::Reveal::None());
+    }
+    else
+    {
+      label.SetTextReveal(reveal);
+    }
+    label.SetAsyncRendering((iteration & 1u) != 0u);
+    label.SetText((iteration & 1u) ? "Reverse mixed אבג ratio text" : "Forward العربية ratio text");
+    label.SetRequestedWidth(300.0f + static_cast<float>(iteration));
+    application.SendNotification();
+    application.Render(32);
+    DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+    if(iteration != 3u)
+    {
+      DALI_TEST_EQUALS(label.GetTextReveal().GetFadeDurationRatio(),
+                       ratios[iteration % (sizeof(ratios) / sizeof(ratios[0]))],
+                       0.0001f,
+                       TEST_LOCATION);
+    }
+  }
+
+  reveal.SetUnit(Text::Reveal::Unit::WORD);
+  label.SetTextReveal(reveal);
+  label.SetAsyncRendering(true);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  application.SendNotification();
+  application.Render(1800);
+
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTextureCount() >= 2u);
+
+  Animation reverse = Animation::New(1.0f);
+  label.Animate(reverse).TextRevealProgress(0.0f, Duration(1.0f));
+  reverse.Play();
+  application.SendNotification();
+  application.Render(200);
+  label.SetAsyncRendering(false);
+  reveal.SetUnit(Text::Reveal::Unit::CHARACTER);
+  label.SetTextReveal(reveal);
+  application.SendNotification();
+  application.Render(300);
+  DALI_TEST_CHECK(label.GetTextRevealProgress() > 0.0f && label.GetTextRevealProgress() < 1.0f);
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealLifecycleStressP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  (void)Dali::TextAbstraction::FontClient::Get();
+
+  const char* const texts[] = {
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ repeated reveal lifecycle text",
+    "office cafe\u0301 العربية אבג 😀 mixed-script reveal lifecycle text",
+    "A long END ellipsis corpus that repeatedly changes layout while Reveal animation remains active"};
+  const float ratios[] = {
+    Text::Reveal::AUTO_FADE_DURATION_RATIO,
+    0.0f,
+    0.1f,
+    0.25f,
+    1.0f};
+  const float progressValues[] = {0.1f, 0.8f, 0.0f, 1.0f};
+
+  Label label = Label::New(texts[1]);
+  label.SetRequestedWidth(360.0f);
+  label.SetRequestedHeight(88.0f);
+  label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+
+  Text::Reveal reveal;
+  reveal.SetUnit(Text::Reveal::Unit::CHARACTER);
+  reveal.SetFadeDurationRatio(Text::Reveal::AUTO_FADE_DURATION_RATIO);
+  label.SetTextReveal(reveal);
+  label.SetTextRevealProgress(0.0f);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  const Property::Index progressIndex = label.GetPropertyIndex("uTextRevealProgress");
+  DALI_TEST_CHECK(progressIndex != Property::INVALID_INDEX);
+
+  auto CheckCommonState = [&]()
+  {
+    DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+    const float progress = label.GetTextRevealProgress();
+    DALI_TEST_CHECK(std::isfinite(progress));
+    DALI_TEST_CHECK(progress >= 0.0f && progress <= 1.0f);
+    const bool connected = label.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE);
+    DALI_TEST_CHECK(!connected || label.GetRendererCount() > 0u);
+  };
+
+  auto HasRevealRenderer = [&]()
+  {
+    for(uint32_t rendererIndex = 0u; rendererIndex < label.GetRendererCount(); ++rendererIndex)
+    {
+      Renderer renderer = label.GetRendererAt(rendererIndex);
+      if(renderer.GetPropertyIndex("uTextRevealProgress") == Property::INVALID_INDEX ||
+         renderer.GetPropertyIndex("uTextRevealFadeDuration") == Property::INVALID_INDEX)
+      {
+        continue;
+      }
+
+      TextureSet textures = renderer.GetTextures();
+      if(textures && textures.GetTextureCount() >= 2u)
+      {
+        Texture metadata = textures.GetTexture(textures.GetTextureCount() - 1u);
+        if(metadata && metadata.GetWidth() > 0u && metadata.GetHeight() > 0u)
+        {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // Checkpoint A: the initial supported synchronous configuration owns a
+  // Reveal renderer and metadata texture.
+  CheckCommonState();
+  DALI_TEST_CHECK(HasRevealRenderer());
+
+  Animation animation = Animation::New(4.0f);
+  label.Animate(animation).TextRevealProgress(1.0f, Duration(4.0f));
+  animation.Play();
+  application.SendNotification();
+  application.Render(160);
+  CheckCommonState();
+  DALI_TEST_CHECK(label.GetTextRevealProgress() > 0.0f && label.GetTextRevealProgress() < 1.0f);
+
+  bool      revealEnabled = true;
+  bool      cutoutEnabled = false;
+  Animation secondAnimation;
+  for(uint32_t iteration = 0u; iteration < 24u; ++iteration)
+  {
+    if(iteration % 4u == 0u)
+    {
+      label.SetTextRevealProgress(progressValues[(iteration / 4u) % 4u]);
+    }
+    if(iteration % 5u == 0u)
+    {
+      reveal.SetFadeDurationRatio(ratios[(iteration / 5u) % (sizeof(ratios) / sizeof(ratios[0]))]);
+      if(revealEnabled)
+      {
+        label.SetTextReveal(reveal);
+      }
+    }
+
+    switch(iteration % 8u)
+    {
+      case 0u:
+      {
+        label.SetTextReveal(Text::Reveal::None());
+        revealEnabled = false;
+        break;
+      }
+      case 1u:
+      {
+        reveal.SetUnit((iteration & 8u) ? Text::Reveal::Unit::WORD : Text::Reveal::Unit::CHARACTER);
+        label.SetTextReveal(reveal);
+        revealEnabled = true;
+        break;
+      }
+      case 2u:
+      {
+        label.SetAsyncRendering(true);
+        label.SetText(texts[(iteration / 8u + 1u) % (sizeof(texts) / sizeof(texts[0]))]);
+        break;
+      }
+      case 3u:
+      {
+        label.SetAsyncRendering(false);
+        reveal.SetUnit((iteration & 8u) ? Text::Reveal::Unit::CHARACTER : Text::Reveal::Unit::WORD);
+        label.SetTextReveal(reveal);
+        revealEnabled = true;
+        break;
+      }
+      case 4u:
+      {
+        label.SetText(texts[(iteration / 4u) % (sizeof(texts) / sizeof(texts[0]))]);
+        break;
+      }
+      case 5u:
+      {
+        label.SetRequestedWidth((iteration & 8u) ? 150.0f : 420.0f);
+        label.SetRequestedHeight((iteration & 8u) ? 72.0f : 96.0f);
+        break;
+      }
+      case 6u:
+      {
+        label.SetTextColor(UiColor((iteration & 8u) ? Color::BLUE : Color::RED));
+        if(iteration & 8u)
+        {
+          label.SetTextOutline(Text::Outline::None());
+        }
+        else
+        {
+          Text::Outline outline;
+          outline.SetWidth((iteration & 16u) ? 2.0f : 1.0f);
+          label.SetTextOutline(outline);
+        }
+        break;
+      }
+      case 7u:
+      {
+        cutoutEnabled = !cutoutEnabled;
+        label.SetTextCutoutEnabled(cutoutEnabled);
+        break;
+      }
+    }
+
+    application.SendNotification();
+    application.Render(24u + (iteration % 3u) * 8u);
+    CheckCommonState();
+    DALI_TEST_CHECK(revealEnabled ? label.GetTextReveal() == reveal
+                                  : label.GetTextReveal() == Text::Reveal::None());
+
+    if(iteration == 0u)
+    {
+      // Checkpoint B: disabling Reveal keeps the source property stable.
+      DALI_TEST_CHECK(label.GetTextReveal() == Text::Reveal::None());
+    }
+    else if(iteration == 11u)
+    {
+      animation.Stop();
+      application.SendNotification();
+      application.Render(16);
+      CheckCommonState();
+
+      secondAnimation = Animation::New(2.0f);
+      label.Animate(secondAnimation).TextRevealProgress(0.6f, Duration(2.0f));
+      secondAnimation.Play();
+    }
+    else if(iteration == 15u)
+    {
+      const Text::Reveal authoredReveal = label.GetTextReveal();
+      label.Unparent();
+      application.SendNotification();
+      application.Render(16);
+      CheckCommonState();
+      DALI_TEST_CHECK(label.GetTextReveal() == authoredReveal);
+
+      application.GetScene().Add(label);
+      application.SendNotification();
+      application.Render(16);
+      CheckCommonState();
+      DALI_TEST_CHECK(label.GetTextReveal() == authoredReveal);
+    }
+  }
+
+  // A pending asynchronous update must not restore an authored Reveal that
+  // was disabled before the result was published.
+  label.SetAsyncRendering(true);
+  label.SetTextReveal(reveal);
+  label.SetText(texts[2]);
+  application.SendNotification();
+  application.Render(16);
+  label.SetTextReveal(Text::Reveal::None());
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  application.SendNotification();
+  application.Render(32);
+  CheckCommonState();
+  DALI_TEST_CHECK(label.GetTextReveal() == Text::Reveal::None());
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+
+  // Checkpoint C: async publication can still converge to a supported Reveal
+  // renderer after the high-churn phase.
+  label.SetTextCutoutEnabled(false);
+  label.SetTextOutline(Text::Outline::None());
+  label.SetAsyncRendering(true);
+  reveal.SetUnit(Text::Reveal::Unit::WORD);
+  reveal.SetFadeDurationRatio(0.1f);
+  label.SetTextReveal(reveal);
+  label.SetText(texts[1]);
+  label.SetRequestedWidth(360.0f);
+  label.SetRequestedHeight(88.0f);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  application.SendNotification();
+  application.Render(32);
+  CheckCommonState();
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  DALI_TEST_CHECK(HasRevealRenderer());
+
+  for(uint32_t frame = 0u; frame < 3u; ++frame)
+  {
+    application.SendNotification();
+    application.Render(32);
+    CheckCommonState();
+    DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  }
+
+  if(secondAnimation)
+  {
+    secondAnimation.Stop();
+  }
+  application.SendNotification();
+  application.Render(16);
+
+  // Checkpoint D: return to a deterministic synchronous steady state and
+  // verify the final authored configuration, source property and renderer.
+  label.SetAsyncRendering(false);
+  label.SetTextCutoutEnabled(false);
+  reveal.SetUnit(Text::Reveal::Unit::CHARACTER);
+  reveal.SetFadeDurationRatio(0.25f);
+  label.SetTextReveal(reveal);
+  label.SetText("Final normalized Reveal lifecycle state");
+  label.SetRequestedWidth(360.0f);
+  label.SetRequestedHeight(88.0f);
+  label.SetTextRevealProgress(0.4f);
+  application.SendNotification();
+  application.Render(32);
+  application.SendNotification();
+  application.Render(32);
+
+  CheckCommonState();
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.4f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  DALI_TEST_CHECK(HasRevealRenderer());
   END_TEST;
 }
 

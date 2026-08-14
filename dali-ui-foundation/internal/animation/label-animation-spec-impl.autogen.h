@@ -48,6 +48,8 @@ public:
   static void ApplyTextGradientStartOffsetBy(Animation& animation, Label view, const Entry& entry);
   static void ApplyTextGradientOverlayStartOffsetTo(Animation& animation, Label view, const Entry& entry);
   static void ApplyTextGradientOverlayStartOffsetBy(Animation& animation, Label view, const Entry& entry);
+  static void ApplyTextRevealProgressTo(Animation& animation, Label view, const Entry& entry);
+  static void ApplyTextRevealProgressBy(Animation& animation, Label view, const Entry& entry);
   static void ApplyPixelSnapFactorTo(Animation& animation, Label view, const Entry& entry);
   static void ApplyPixelSnapFactorBy(Animation& animation, Label view, const Entry& entry);
 

@@ -24,6 +24,7 @@ SET(TC_SOURCES
     utc-Dali-TextAtlasGradientState-internal.cpp
     utc-Dali-TextGradientShaderComposition-internal.cpp
     utc-Dali-TextGradientTypesetterMask-internal.cpp
+    utc-Dali-TextReveal-internal.cpp
     utc-Dali-TextGradientPropertyData-internal.cpp
     utc-Dali-TextGradientVisualMaskPlumbing-internal.cpp
     utc-Dali-TextVisualAsyncPublication-internal.cpp

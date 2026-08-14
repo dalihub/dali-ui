@@ -1356,6 +1356,44 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
   }
 
+  renderInfo.isTextRevealEnabled = parameters.isTextRevealEnabled && !cutoutEnabled && !parameters.isMarqueeEnabled;
+  if(renderInfo.isTextRevealEnabled && renderInfo.textPixelData)
+  {
+    const auto     sourceRevealPlan = parameters.textRevealUnit == Internal::Reveal::Unit::WORD
+                                        ? Internal::Reveal::BuildPlan(*renderModel,
+                                                                      parameters.textRevealUnit,
+                                                                      parameters.textRevealFadeDurationRatio,
+                                                                      mModule.GetSegmentation())
+                                        : Internal::Reveal::BuildCharacterPlan(*renderModel,
+                                                                               parameters.textRevealFadeDurationRatio);
+    const auto     revealPlan       = mTypesetter->CreateFinalRevealPlan(sourceRevealPlan, parameters.textRevealUnit);
+    const uint32_t metadataWidth    = renderInfo.textPixelData.GetWidth();
+    const uint32_t metadataHeight   = renderInfo.textPixelData.GetHeight();
+    const uint32_t tileLimit        = parameters.maxTextureSize > 0
+                                        ? static_cast<uint32_t>(parameters.maxTextureSize)
+                                        : metadataHeight;
+    const Vector2  fullMetadataSize(static_cast<float>(metadataWidth), static_cast<float>(metadataHeight));
+    const bool     isRendererTiled = parameters.maxTextureSize > 0 &&
+                                 renderInfo.size.height > static_cast<float>(parameters.maxTextureSize);
+    // With render scale, the worker raster is larger than the renderer's
+    // logical projection. Height tiling uploads only the renderer-sized region
+    // from that raster, so Reveal metadata must use those exact tile extents.
+    const uint32_t metadataTileWidth   = isRendererTiled
+                                           ? static_cast<uint32_t>(renderInfo.size.width)
+                                           : metadataWidth;
+    const uint32_t tiledMetadataHeight = isRendererTiled
+                                           ? static_cast<uint32_t>(renderInfo.size.height)
+                                           : metadataHeight;
+    for(uint32_t offsetY = 0u; offsetY < tiledMetadataHeight; offsetY += tileLimit)
+    {
+      const uint32_t tileHeight = std::min(tileLimit, tiledMetadataHeight - offsetY);
+      renderInfo.revealMetadataTiles.push_back(
+        mTypesetter->RenderTextRevealMetadata(
+          Vector2(static_cast<float>(metadataTileWidth), static_cast<float>(tileHeight)), textDirection,
+          revealPlan, renderInfo.textRevealFadeDuration, offsetY, fullMetadataSize));
+    }
+  }
+
   if(styleEnabled)
   {
     if(renderInfo.isCutoutEnabled)

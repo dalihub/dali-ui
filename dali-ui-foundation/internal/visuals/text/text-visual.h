@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual-gradient-data.h>
+#include <dali-ui-foundation/internal/visuals/text/text-visual-reveal-data.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
@@ -123,6 +124,25 @@ public:
   {
     GetVisualObject(visual).SetGradientOverlayAnimProperties(startOffsetPropertyIndex);
   };
+
+  /**
+   * @brief Configures finite reveal for synchronous and asynchronous Label paths.
+   *
+   * @param[in] visual The text visual to configure.
+   * @param[in] unit The internal reveal unit, or DISABLED to remove reveal rendering.
+   * @param[in] fadeDurationRatio The authored automatic sentinel or normalized fade duration.
+   * @param[in] progressPropertyIndex The stable Label scene property used as progress.
+   * @param[in] revision The revision used to reject stale asynchronous results.
+   */
+  static void ConfigureTextReveal(
+    Ui::Integration::Visual::Base    visual,
+    Ui::Text::Internal::Reveal::Unit unit,
+    float                            fadeDurationRatio,
+    Property::Index                  progressPropertyIndex,
+    uint64_t                         revision)
+  {
+    GetVisualObject(visual).ConfigureTextReveal(unit, fadeDurationRatio, progressPropertyIndex, revision);
+  }
 
   /**
    * @brief Set the flag to trigger the textures to be initialized and renderer to be added to the control.
@@ -417,6 +437,7 @@ private:
     PixelData stylePixelData;
     PixelData overlayStylePixelData;
     PixelData maskPixelData;
+    PixelData revealPixelData;
     int32_t   width;
     int32_t   height;
     uint32_t  offsetHeight;
@@ -427,6 +448,7 @@ private:
       stylePixelData(),
       overlayStylePixelData(),
       maskPixelData(),
+      revealPixelData(),
       width(width),
       height(height),
       offsetHeight(0u),
@@ -553,6 +575,48 @@ private:
    */
   void BindGradientOverlayAnimConstraints(VisualRenderer& renderer,
                                           Property::Index startOffsetIndex);
+
+  /**
+   * @brief Applies reveal configuration to this visual.
+   *
+   * A changed configuration invalidates renderer output but retains the
+   * caller-owned progress property. DISABLED removes active renderer
+   * constraints immediately.
+   *
+   * @param[in] unit The reveal unit, or DISABLED.
+   * @param[in] fadeDurationRatio The authored automatic sentinel or normalized fade duration.
+   * @param[in] progressPropertyIndex The Label scene progress property index.
+   * @param[in] revision The current reveal configuration revision.
+   */
+  void ConfigureTextReveal(Ui::Text::Internal::Reveal::Unit unit,
+                           float                            fadeDurationRatio,
+                           Property::Index                  progressPropertyIndex,
+                           uint64_t                         revision);
+
+  /**
+   * @brief Removes all constraints that bind reveal progress to renderers.
+   */
+  void RemoveTextRevealConstraints();
+
+  /**
+   * @brief Binds the stable Label reveal progress property to a renderer.
+   *
+   * The renderer receives the current fade duration and an APPLY_ALWAYS
+   * constraint for progress.
+   *
+   * @param[in] renderer The renderer receiving reveal uniforms.
+   */
+  void BindTextRevealConstraint(VisualRenderer& renderer);
+
+  /**
+   * @brief Builds the source-glyph reveal plan for the synchronous visual path.
+   *
+   * CHARACTER avoids segmentation. WORD lazily creates a Segmentation::New()
+   * instance owned by this visual instead of using SingletonService.
+   *
+   * @return The plan indexed by source glyph before final elision projection.
+   */
+  Ui::Text::Internal::Reveal::Plan BuildTextRevealSourcePlan();
 
   /**
    * @brief Removes the text's renderer.
@@ -697,6 +761,7 @@ private:
   Ui::Text::TypesetterPtr                    mTypesetter;         ///< The text's typesetter.
   Ui::Integration::Text::AsyncTextInterface* mAsyncTextInterface; ///< The text's async interface.
   TextVisualGradientDataPtr                  mGradientData;       ///< Lazily allocated TextGradient rendering state.
+  TextVisualRevealDataPtr                    mRevealData;         ///< Lazily allocated TextReveal rendering state.
 
   TextVisualShaderFactory&                mTextVisualShaderFactory; ///< The shader factory for text visual.
   TextVisualShaderFeature::FeatureBuilder mTextShaderFeatureCache;  ///< The cached shader feature for text visual.
