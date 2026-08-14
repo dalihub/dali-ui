@@ -32,7 +32,6 @@
 8. [레이아웃 처리](#8-레이아웃-처리)
    - [2단계 레이아웃](#81-2단계-레이아웃)
    - [무효화 흐름](#82-무효화-흐름)
-   - [레이아웃 결과 캐싱](#83-레이아웃-결과-캐싱)
 9. [메서드 체이닝](#9-메서드-체이닝)
 10. [기본값](#10-기본값)
 11. [주의사항](#11-주의사항)
@@ -573,8 +572,8 @@ layout.SetArrangeCallback(LayoutArrangeCallback::New(this, &MyClass::OnArrange))
 
 매 프레임마다 `LayoutController`는 무효화된 레이아웃 루트에 대해 두 단계를 실행합니다:
 
-1. **Measure** — 부모로부터 받은 너비/높이 제약 조건에 따라 각 View가 원하는 `MeasuredSize`를 계산합니다. 결과는 캐시됩니다. 제약 조건과 유효 스케일이 변경되지 않고 이 view에 무효화가 발생하지 않았다면 measure 구현은 호출되지 않습니다.
-2. **Arrange** — 각 View에 `LayoutRect`(위치 + 크기)가 주어집니다. 정렬과 마진을 적용한 후, LayoutManager가 자식을 bounds 내에 배치합니다. 이 결과도 캐시됩니다. 입력 bounds, 유효 레이아웃 방향, 유효 스케일이 변경되지 않고 무효화가 발생하지 않았다면 arrange 구현은 생략되고 저장된 결과가 재생됩니다. 지오메트리는 그대로 반영되고 `LayoutFinished`도 그대로 발생하며, 재계산만 생략됩니다.
+1. **Measure** — 부모로부터 받은 너비/높이 제약 조건에 따라 각 View가 원하는 `MeasuredSize`를 계산합니다. 결과는 캐시되며, 제약 조건이 변경되지 않으면 측정을 건너뜁니다.
+2. **Arrange** — 각 View에 `LayoutRect`(위치 + 크기)가 주어집니다. 정렬과 마진을 적용한 후, LayoutManager가 자식을 bounds 내에 배치합니다.
 
 ---
 
@@ -609,60 +608,6 @@ LayoutController controller = LayoutController::Get(window);
 ```
 
 > 일반적인 사용에서 `LayoutController`에 대한 명시적 호출은 필요 없습니다. 무효화가 자동으로 재레이아웃을 트리거합니다.
-
----
-
-### 8.3 레이아웃 결과 캐싱
-
-두 단계는 모두 결과를 캐시하며, 이것이 안정된 레이아웃 pass를 저렴하게 만듭니다. 또한 이 캐시는 measure/arrange 구현이 무엇을 읽어도 되는지를 정의합니다.
-
-#### 8.3.1 Measure 캐시
-
-- measure 캐시는 무조건 동작합니다. opt-out은 없습니다.
-- hit이 되려면 다음이 모두 성립해야 합니다. 완료된 측정이 게시한 유효한 항목이 있고, view가 measure-dirty가 아니며, pass가 오염되지 않았고, 유효 스케일이 EXACT하게 일치하며, 두 제약 조건이 허용 오차 내에서 같아야 합니다.
-- 유효 스케일은 캐시 KEY의 항입니다. 따라서 스케일 무효화를 놓쳐도 miss로 격하되어 측정이 한 번 다시 수행될 뿐이며, 다른 스케일에서 계산된 크기가 서빙되는 일은 결코 없습니다.
-- 그러므로 measure 구현은 다음의 순수 함수여야 합니다. 두 제약 조건, view의 유효 스케일, view의 유효 레이아웃 방향, view 자신의 layout 추적 상태(요청 크기, 패딩, 마진, 최소/최대 범위, layout params, 자식 목록), 그리고 자식들의 측정 크기입니다.
-- 그 외에 읽는 것은 구현이 소유합니다. 해당 상태가 바뀔 때 구현이 직접 `InvalidateMeasure()`를 호출해야 합니다.
-- 무관한 pass가 도는 것만으로는 오래된 결과가 회복되지 않습니다. 조상이 miss해도 조상은 이 view를 같은 입력으로 다시 측정하므로 이 view는 여전히 hit하며, 형제의 무효화는 위로만 전파되어 이 view에 닿지 않습니다.
-
-#### 8.3.2 Arrange 결과 캐시
-
-- arrange hit은 가지치기(prune)가 아닙니다. 저장된 서브트리는 재생(replay)됩니다. 각 view 자신의 지오메트리가 반영되고, 오른쪽에서 왼쪽 방향의 자식은 미러링되며, `LayoutFinished`도 발생합니다. 생략되는 것은 arrange 구현뿐입니다.
-- 노드 단위 hit이 되려면 다음이 모두 성립해야 합니다. 유효한 항목이 있고, 정책이 `ArrangePolicy::ALWAYS`가 아니며, view가 dirty/오염/차단 상태가 아니고, 입력 rect가 EXACT하게 일치하며, 기록된 레이아웃 방향이 현재 방향과 같고, 소비되지 않은 standalone 자식이 없어야 합니다.
-- rect 비교는 허용 오차가 아닌 정확 비교입니다.
-- 서브트리 hit은 입력 rect 일치를 제외한 위 조건을 arrange 결과를 가진 모든 하위 노드에서 다시 검사합니다. 하위 노드의 KEY 일치는 이 view의 KEY 일치와 정책으로부터 함의됩니다.
-
-#### 8.3.3 ArrangePolicy
-
-- `ArrangePolicy::IF_CHANGED`가 기본값입니다.
-- `ArrangePolicy::ALWAYS`는 view에 도달하는 모든 pass에서 arrange 구현을 실행합니다.
-- arrange 구현이 layout 무효화가 추적하지 않는 상태를 읽거나, 매 pass마다 외부에서 관찰되는 작업을 수행한다면 ALWAYS를 선택하십시오.
-- 선택 지점: `OnArrange()` 재정의에는 `ViewImpl::SetArrangePolicy`, 콜백에는 `View::SetArrangeCallback(callback, ArrangePolicy::ALWAYS)`, layout manager에는 protected `LayoutManager::SetArrangePolicy`를 사용합니다.
-- ALWAYS는 pass를 예약하지 않습니다. 상태 setter는 여전히 무효화를 호출해야 합니다.
-
-#### 8.3.4 커스텀 LayoutManager 상태
-
-- `LayoutManager`가 보관한 상태는 두 캐시 KEY 어느 쪽에도 들어가지 않습니다.
-- 그러한 상태를 바꾸는 모든 setter는 protected `InvalidateOwnerMeasure()`를 호출해야 하며, 배치만 바뀐다면 `InvalidateOwnerArrange()`를 호출합니다.
-- 이들은 정확히 `owner->InvalidateMeasure()` / `owner->InvalidateArrange()`이며, manager가 attach되기 전에 호출해도 안전한 no-op입니다.
-- 내장 manager들은 이렇게 배선되어 있습니다.
-
-```cpp
-void MyManager::SetGap(float gap)
-{
-  if(mGap == gap) { return; }  // 같은 값이면 아무것도 예약하지 않습니다
-  mGap = gap;
-  InvalidateOwnerMeasure();    // 배치만 바뀐다면 InvalidateOwnerArrange()
-}
-```
-
-#### 8.3.5 무효화 병합
-
-pass가 돌기 전에 반복해서 발생한 무효화는 병합됩니다. 지역(local) 절반은 항상 수행되고, 레이아웃 루트까지 올라가는 상위 탐색은 이미 등록된 대기 항목이 살아 있는 동안 생략됩니다. pass가 실행되는 중에는 병합이 비활성화됩니다. 따라서 한 프레임에 여러 속성 변경을 모아서 적용하면 레이아웃 pass는 한 번만 발생하며, 무효화가 유실되는 일은 없습니다.
-
-#### 8.3.6 전체 계약
-
-전체 계약은 [리포지토리의 레이아웃 가이드](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/docs/layout-structure.md)를 참고하십시오.
 
 ---
 
@@ -768,12 +713,6 @@ view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0
 
 - **레이아웃 루트가 처리를 주도합니다.** 레이아웃 루트는 부모가 레이아웃이 아닌 View입니다. 무효화는 레이아웃 루트에 도달할 때까지 상위로 전파되며, 루트가 `LayoutController`에 등록됩니다. 컨트롤러는 매 프레임마다 대기 중인 모든 루트를 처리합니다.
 
-- **Measure 결과는 캐시됩니다.** `OnMeasure()`에 전달된 너비 및 높이 제약 조건이 마지막 호출 이후 변경되지 않고, 유효 스케일도 변경되지 않으면 측정을 건너뜁니다. 재계산을 강제하려면 `InvalidateMeasure()`를 호출하세요.
-
-- **Arrange 결과도 캐시됩니다.** 기본 정책인 `ArrangePolicy::IF_CHANGED`에서는 입력 bounds, 유효 레이아웃 방향, 유효 스케일이 변경되지 않으면 `OnArrange()`가 생략되고 저장된 결과가 재생됩니다. 재계산을 강제하려면 `InvalidateArrange()`를 호출하거나, 구현이 매 pass마다 실행되어야 한다면 `ArrangePolicy::ALWAYS`를 선택하세요.
+- **Measure 결과는 캐시됩니다.** `OnMeasure()`에 전달된 너비 및 높이 제약 조건이 마지막 호출 이후 변경되지 않으면 측정을 건너뜁니다. 재계산을 강제하려면 `InvalidateMeasure()`를 호출하세요.
 
 - **`GetSize()`는 배치된 크기를 반환합니다.** `View::GetSize()`는 요청된 크기가 아닌 Arrange 단계 이후의 실제 렌더링된 크기를 반환합니다.
-
----
-
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr))
