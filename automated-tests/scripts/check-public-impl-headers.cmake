@@ -28,6 +28,16 @@ foreach(header IN LISTS forbidden_headers)
   endif()
 endforeach()
 
+set(forbidden_legacy_interface_headers
+  "${FOUNDATION_ROOT_SRC_DIR}/public-api/views/scroll/i-page-scrollable.h"
+  "${FOUNDATION_ROOT_SRC_DIR}/public-api/views/scroll/i-scroll-bar.h")
+
+foreach(header IN LISTS forbidden_legacy_interface_headers)
+  if(EXISTS "${header}")
+    message(FATAL_ERROR "Legacy scroll interface header remains public: ${header}")
+  endif()
+endforeach()
+
 function(assert_impl_namespace header namespace_name class_name)
   file(STRINGS "${header}" lines)
   set(awaiting_namespace_brace FALSE)
@@ -63,3 +73,24 @@ assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/integration-api/edge-effect-im
 assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/integration-api/items-layouter-impl.h" "Integration" "ItemsLayouterImpl")
 assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/internal/bounce-edge-effect-impl.h" "Internal" "BounceEdgeEffectImpl")
 assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/internal/linear-items-layouter-impl.h" "Internal" "LinearItemsLayouterImpl")
+
+file(GLOB_RECURSE foundation_sources
+  "${FOUNDATION_ROOT_SRC_DIR}/*.h"
+  "${FOUNDATION_ROOT_SRC_DIR}/*.cpp")
+
+set(forbidden_interface_names
+  "IPageScrollable"
+  "IScrollBar"
+  "i-page-scrollable.h"
+  "i-scroll-bar.h")
+
+foreach(source IN LISTS foundation_sources)
+  file(READ "${source}" source_contents)
+
+  foreach(name IN LISTS forbidden_interface_names)
+    string(FIND "${source_contents}" "${name}" name_position)
+    if(NOT name_position EQUAL -1)
+      message(FATAL_ERROR "Legacy scroll interface name remains: ${name} in ${source}")
+    endif()
+  endforeach()
+endforeach()

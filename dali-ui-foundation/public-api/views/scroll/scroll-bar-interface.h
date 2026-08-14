@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef DALI_UI_FOUNDATION_I_SCROLL_BAR_H
-#define DALI_UI_FOUNDATION_I_SCROLL_BAR_H
+#ifndef DALI_UI_FOUNDATION_SCROLL_BAR_INTERFACE_H
+#define DALI_UI_FOUNDATION_SCROLL_BAR_INTERFACE_H
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/math/vector2.h>
@@ -35,13 +35,13 @@ namespace Ui
 /**
  * @brief Defines the interface for a scroll bar, which is responsible for displaying and controlling the scrolling of a target view.
  */
-class DALI_UI_API IScrollBar
+class DALI_UI_API ScrollBarInterface
 {
 public:
   /**
    * @brief Virtual destructor.
    */
-  virtual ~IScrollBar() = default;
+  virtual ~ScrollBarInterface() = default;
 
   /**
    * @brief Gets the target view for which the scroll bar is responsible.
@@ -100,4 +100,4 @@ public:
 
 } // namespace Dali
 
-#endif // DALI_UI_FOUNDATION_I_SCROLL_BAR_H
+#endif // DALI_UI_FOUNDATION_SCROLL_BAR_INTERFACE_H

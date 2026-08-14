@@ -81,7 +81,7 @@ public: // From Ui::Internal::Control
    */
   void Initialize();
 
-public: // IScrollBar Implementation
+public: // ScrollBarInterface implementation
   /**
    * @brief Gets the target view.
    */

@@ -19,8 +19,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
-#include <dali-ui-foundation/public-api/views/scroll/i-page-scrollable.h>
 #include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
+#include <dali-ui-foundation/public-api/views/scroll/page-scrollable-interface.h>
 
 namespace Dali
 {
@@ -43,11 +43,11 @@ using PageScrollViewImplPtr = IntrusivePtr<PageScrollViewImpl>;
  *  - A PageChangedSignal is emitted whenever the settled page index changes.
  *
  * External libraries that need only public-api access should implement
- * IPageScrollable on their own View subclass instead of inheriting this class.
+ * PageScrollableInterface on their own View subclass instead of inheriting this class.
  *
  * @note ABI note: do NOT reorder or remove virtual methods after first publication.
  */
-class DALI_UI_API PageScrollViewImpl : public ScrollViewImpl, public IPageScrollable
+class DALI_UI_API PageScrollViewImpl : public ScrollViewImpl, public PageScrollableInterface
 {
 public:
   /**
@@ -86,7 +86,7 @@ public: // Page API
    */
   Vector2 GetPageSize() const;
 
-  // IPageScrollable
+  // PageScrollableInterface
 
   /**
    * @brief Returns the zero-based current page index, or -1 if empty.
@@ -141,7 +141,7 @@ public: // Page API
   /**
    * @brief Signal emitted when the settled page changes.
    */
-  IPageScrollable::PageChangedSignalType& PageChangedSignal() override;
+  PageScrollableInterface::PageChangedSignalType& PageChangedSignal() override;
 
   /**
    * @brief Signal emitted from the destructor before this object is freed.
@@ -149,7 +149,7 @@ public: // Page API
    * Observers (e.g. PageIndicator) connect here to null any raw pointer they
    * hold to this object.  Do not call back into the sender from the handler.
    */
-  IPageScrollable::DestroyingSignalType& DestroyingSignal() override;
+  PageScrollableInterface::DestroyingSignalType& DestroyingSignal() override;
 
 protected:
   /**
@@ -215,14 +215,14 @@ private:
   PageScrollViewImpl& operator=(PageScrollViewImpl&&)      = delete;
 
 private:
-  Vector2                                mPageSize{0.0f, 0.0f};      ///< Explicit page size; (0,0) = use viewport
-  int                                    mCurrentPage{0};            ///< Settled page index
-  int                                    mSnapTargetPage{-1};        ///< Page targeted by the in-flight snap animation; -1 = not animating
-  int                                    mExpectedPageCount{-1};     ///< >=0: overrides layout-based count; -1: use layout (sentinel)
-  int                                    mLastNotifiedPageCount{-2}; ///< Page count last passed to PageChangedSignal; -2 = never emitted
-  bool                                   mNotifyInProgress{false};   ///< Suppress OnScrollFinished re-derive during NotifyPages*
-  IPageScrollable::PageChangedSignalType mPageChangedSignal;         ///< Emitted on page settle
-  IPageScrollable::DestroyingSignalType  mDestroyingSignal;          ///< Emitted from destructor for observer lifetime management
+  Vector2                                        mPageSize{0.0f, 0.0f};      ///< Explicit page size; (0,0) = use viewport
+  int                                            mCurrentPage{0};            ///< Settled page index
+  int                                            mSnapTargetPage{-1};        ///< Page targeted by the in-flight snap animation; -1 = not animating
+  int                                            mExpectedPageCount{-1};     ///< >=0: overrides layout-based count; -1: use layout (sentinel)
+  int                                            mLastNotifiedPageCount{-2}; ///< Page count last passed to PageChangedSignal; -2 = never emitted
+  bool                                           mNotifyInProgress{false};   ///< Suppress OnScrollFinished re-derive during NotifyPages*
+  PageScrollableInterface::PageChangedSignalType mPageChangedSignal;         ///< Emitted on page settle
+  PageScrollableInterface::DestroyingSignalType  mDestroyingSignal;          ///< Emitted from destructor for observer lifetime management
 };
 
 } // namespace Integration

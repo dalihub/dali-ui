@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef DALI_UI_FOUNDATION_I_PAGE_SCROLLABLE_H
-#define DALI_UI_FOUNDATION_I_PAGE_SCROLLABLE_H
+#ifndef DALI_UI_FOUNDATION_PAGE_SCROLLABLE_INTERFACE_H
+#define DALI_UI_FOUNDATION_PAGE_SCROLLABLE_INTERFACE_H
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/signals/dali-signal.h>
@@ -36,7 +36,7 @@ namespace Ui
  * Any component that presents content as a sequence of pages — including
  * PageScrollView, a custom CarouselView, or a 3-D cube-transition view —
  * implements this interface.  PageIndicator and other consumers bind to
- * IPageScrollable rather than to a concrete type, so they work with any
+ * PageScrollableInterface rather than to a concrete type, so they work with any
  * compliant implementation.
  *
  * Implementors MUST:
@@ -47,7 +47,7 @@ namespace Ui
  * @note ABI stability: once this interface is published, no methods may be
  * added, removed, or reordered in a binary-compatible release.
  */
-class DALI_UI_API IPageScrollable
+class DALI_UI_API PageScrollableInterface
 {
 public:
   /**
@@ -68,7 +68,7 @@ public:
   /**
    * @brief Virtual destructor.
    */
-  virtual ~IPageScrollable() = default;
+  virtual ~PageScrollableInterface() = default;
 
   /**
    * @brief Returns the zero-based index of the currently visible page.
@@ -111,4 +111,4 @@ public:
 
 } // namespace Dali
 
-#endif // DALI_UI_FOUNDATION_I_PAGE_SCROLLABLE_H
+#endif // DALI_UI_FOUNDATION_PAGE_SCROLLABLE_INTERFACE_H

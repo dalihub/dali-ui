@@ -19,7 +19,7 @@
 #define DALI_UI_FOUNDATION_SCROLL_BAR_H
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
-#include <dali-ui-foundation/public-api/views/scroll/i-scroll-bar.h>
+#include <dali-ui-foundation/public-api/views/scroll/scroll-bar-interface.h>
 #include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/object/property-map.h>
@@ -38,7 +38,7 @@ class ScrollBarImpl;
 /**
  * @brief A class representing a scroll bar that can be used to control the scrolling of a view.
  */
-class DALI_UI_API ScrollBar : public AbsoluteLayout, public IScrollBar
+class DALI_UI_API ScrollBar : public AbsoluteLayout, public ScrollBarInterface
 {
 public:
   /**
@@ -87,44 +87,44 @@ public: // Creation & Destruction
    */
   static ScrollBar DownCast(BaseHandle handle);
 
-public: // IScrollBar Implementation
+public: // ScrollBarInterface implementation
   /**
-   * @copydoc IScrollBar::GetTarget()
+   * @copydoc ScrollBarInterface::GetTarget()
    */
   View GetTarget() const override;
 
   /**
-   * @copydoc IScrollBar::GetVerticalScrollBarVisibility()
+   * @copydoc ScrollBarInterface::GetVerticalScrollBarVisibility()
    */
   ScrollBarVisibility GetVerticalScrollBarVisibility() const override;
 
   /**
-   * @copydoc IScrollBar::SetVerticalScrollBarVisibility()
+   * @copydoc ScrollBarInterface::SetVerticalScrollBarVisibility()
    */
   void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) override;
 
   /**
-   * @copydoc IScrollBar::GetHorizontalScrollBarVisibility()
+   * @copydoc ScrollBarInterface::GetHorizontalScrollBarVisibility()
    */
   ScrollBarVisibility GetHorizontalScrollBarVisibility() const override;
 
   /**
-   * @copydoc IScrollBar::SetHorizontalScrollBarVisibility()
+   * @copydoc ScrollBarInterface::SetHorizontalScrollBarVisibility()
    */
   void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) override;
 
   /**
-   * @copydoc IScrollBar::UpdateBarSize()
+   * @copydoc ScrollBarInterface::UpdateBarSize()
    */
   void UpdateBarSize(float scrollWidth, float scrollHeight, float viewportWidth, float viewportHeight) override;
 
   /**
-   * @copydoc IScrollBar::UpdateScrollPosition()
+   * @copydoc ScrollBarInterface::UpdateScrollPosition()
    */
   void UpdateScrollPosition(const Vector2& position) override;
 
   /**
-   * @copydoc IScrollBar::HideBar()
+   * @copydoc ScrollBarInterface::HideBar()
    */
   void HideBar() override;
 
