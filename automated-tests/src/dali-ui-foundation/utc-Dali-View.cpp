@@ -3672,3 +3672,55 @@ int UtcDaliViewUnscaledWhenNotScalableP(void)
   UiScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Multiple callbacks connected to one View's KeyEventSignal.
+//
+// View combines the return values of its connected key callbacks with OR, so a
+// single consuming callback consumes the event for all of them. Unlike the
+// equivalent signals in dali-core and dali-adaptor this is NOT gated on geometry
+// hittest: dali-ui always uses the combined behaviour.
+///////////////////////////////////////////////////////////////////////////////
+
+int UtcDaliViewKeyEventSignalMultipleCallbacksConsumedP(void)
+{
+  UiTestApplication application;
+  View              parent = CreateFocusableView(application);
+  View              child  = CreateFocusableView(application);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render();
+
+  // Two callbacks on the SAME child view. The first consumes, the second one,
+  // connected last, does not.
+  KeyEventSignalData    consumingData;
+  KeyEventSignalFunctor consumingFunctor(consumingData, true);
+  child.KeyEventSignal().Connect(&application, consumingFunctor);
+
+  KeyEventSignalData    passiveData;
+  KeyEventSignalFunctor passiveFunctor(passiveData, false);
+  child.KeyEventSignal().Connect(&application, passiveFunctor);
+
+  // The parent only receives the event if the child did not consume it, so it is
+  // the probe for whether the two return values were combined with OR.
+  KeyEventSignalData    parentData;
+  KeyEventSignalFunctor parentFunctor(parentData, false);
+  parent.KeyEventSignal().Connect(&application, parentFunctor);
+
+  FocusManager::Get().SetCurrentFocusView(child);
+  application.SendNotification();
+  application.Render();
+
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  // Every connected callback runs; combining the results does not short-circuit.
+  DALI_TEST_CHECK(consumingData.called);
+  DALI_TEST_CHECK(passiveData.called);
+
+  // The consuming callback wins, so the event never reached the parent.
+  DALI_TEST_CHECK(!parentData.called);
+
+  END_TEST;
+}

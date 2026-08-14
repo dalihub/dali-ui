@@ -1462,7 +1462,8 @@ bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
 
   if(!mKeyEventSignal.Empty())
   {
-    const bool signalConsumed = mKeyEventSignal.Emit(handle, event);
+    // Any connected callback consuming the event consumes it for all of them.
+    const bool signalConsumed = mKeyEventSignal.EmitOr(handle, event);
     consumed                  = consumed || signalConsumed;
   }
 
