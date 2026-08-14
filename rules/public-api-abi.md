@@ -60,3 +60,55 @@ recompiled. When changing a virtual function, update every known subclass.
 Validation should inspect exported `public-api` and `extension-api` headers for
 class-layout changes, base-class changes, added data members, virtual method
 changes, changed public or protected signatures, and missing API export macros.
+
+## Rule: Do Not Expose STL Types in ABI-Stable APIs
+
+- Status: required
+- Scope: public-api, extension-api
+- Applies To: Exported function parameters and return types, public and protected data members, and exported type aliases
+
+### Intent
+
+STL container and utility types have implementation-dependent layouts and ABI
+requirements. Exposing them through `public-api` or ABI-stable `extension-api`
+couples users of the API to the C++ standard library and toolchain used to
+build `dali-ui`.
+
+### Preferred
+
+- Use DALi value, handle, property, or container types designed for the API
+  boundary.
+- Keep STL types in implementation details, including `internal` code and
+  private implementation classes.
+- When a collection must cross the API boundary, define an API-owned type with
+  an explicit, stable contract.
+
+### Avoid
+
+- `std::vector`, `std::map`, `std::unordered_map`, or other STL containers in
+  exported function signatures or public/protected data members.
+- `std::string`, `std::function`, smart pointers, `std::optional`,
+  `std::variant`, or other STL utility types in exported API declarations.
+- Exported aliases that expose STL types indirectly.
+
+### Exceptions
+
+STL types may be used in implementation-only declarations that are not exposed
+to API consumers, such as local variables, private implementation classes, and
+`internal` headers. An intentional exception at an ABI-stable API boundary
+requires an explicit design decision and documentation of the ABI impact.
+
+### Validation
+
+Review exported declarations in `public-api` and `extension-api` headers for
+`std::` types. The following search is a useful first pass:
+
+```sh
+rg -n 'std::(array|basic_string|deque|function|list|map|optional|set|shared_ptr|string|tuple|unique_ptr|unordered_map|unordered_set|variant|vector)' \
+  dali-ui-foundation/public-api \
+  dali-ui-foundation/extension-api \
+  dali-ui-components/public-api
+```
+
+Review each hit in context: uses confined to function bodies or private
+implementation details do not expose an ABI-stable API type.
