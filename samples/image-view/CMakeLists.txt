@@ -12,6 +12,7 @@ ENDIF()
 SET(IMAGE_VIEW_SAMPLES
   image-view.example
   image-view-with-layout.example
+  image-view-with-image-url.example
   image-fitting-mode.example
   image-placeholder.example
   image-pixel-area.example
@@ -22,6 +23,8 @@ SET(IMAGE_VIEW_SAMPLES
   image-sampling-desired-size.example
   image-view-sizing.example
   image-loading-policy.example
+  image-url-cache.example
+  image-url-add-remove.example
   image-view-svg.example
   animated-image-view.example
   lottie-animation-view.example
@@ -30,6 +33,7 @@ SET(IMAGE_VIEW_SAMPLES
 SET(IMAGE_VIEW_SOURCES
   image-view-example.cpp
   image-view-with-layout-example.cpp
+  image-view-with-image-url-example.cpp
   image-fitting-mode-example.cpp
   image-placeholder-example.cpp
   image-pixel-area-example.cpp
@@ -40,6 +44,8 @@ SET(IMAGE_VIEW_SOURCES
   image-sampling-desired-size-example.cpp
   image-view-sizing-example.cpp
   image-loading-policy-example.cpp
+  image-url-cache-example.cpp
+  image-url-add-remove-example.cpp
   image-view-svg-example.cpp
   animated-image-view-example.cpp
   lottie-animation-view-example.cpp

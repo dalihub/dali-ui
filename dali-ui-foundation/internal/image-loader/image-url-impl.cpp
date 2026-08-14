@@ -23,6 +23,7 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+#include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 
 using Dali::Integration::ToDaliString;
@@ -50,6 +51,39 @@ ImageUrl::ImageUrl(const EncodedImageBuffer& encodedImageBuffer)
   }
 }
 
+ImageUrl::ImageUrl(const Dali::String& url)
+: mUrl(),
+  mIsPathBased(true)
+{
+  const VisualUrl visualUrl(ToStdString(url));
+  if(!visualUrl.IsValid())
+  {
+    return;
+  }
+
+  if(visualUrl.GetProtocolType() != VisualUrl::LOCAL && visualUrl.GetProtocolType() != VisualUrl::REMOTE)
+  {
+    DALI_LOG_WARNING("ImageUrl::New(url) supports local and remote image URLs only.\n");
+    return;
+  }
+
+  mUrl                            = url;
+  const bool supportsCachePinning = visualUrl.SupportsImageUrlCachePinning();
+  if(!supportsCachePinning)
+  {
+    DALI_LOG_WARNING(
+      "ImageUrl cache pinning is not supported for animated image URL '%s'; "
+      "the returned URL remains usable without cache pinning.\n",
+      visualUrl.GetUrl().c_str());
+  }
+
+  auto visualFactory = Dali::Ui::Integration::VisualFactory::Get();
+  if(visualFactory && supportsCachePinning)
+  {
+    GetImplementation(visualFactory).GetFactoryCache().TrackImageUrl(visualUrl);
+  }
+}
+
 ImageUrl::~ImageUrl()
 {
   if(mUrl.Size() > 0)
@@ -57,8 +91,19 @@ ImageUrl::~ImageUrl()
     auto visualFactory = Dali::Ui::Integration::VisualFactory::Get();
     if(visualFactory)
     {
-      auto& textureManager = GetImplementation(visualFactory).GetTextureManager();
-      textureManager.RequestRemoveExternalResourceByUrl(ToStdString(mUrl));
+      if(mIsPathBased)
+      {
+        const VisualUrl visualUrl(ToStdString(mUrl));
+        if(visualUrl.SupportsImageUrlCachePinning())
+        {
+          GetImplementation(visualFactory).GetFactoryCache().UntrackImageUrl(visualUrl);
+        }
+      }
+      else
+      {
+        auto& textureManager = GetImplementation(visualFactory).GetTextureManager();
+        textureManager.RequestRemoveExternalResourceByUrl(ToStdString(mUrl));
+      }
     }
   }
 }
@@ -72,6 +117,12 @@ ImageUrlPtr ImageUrl::New(Texture& texture, bool preMultiplied)
 ImageUrlPtr ImageUrl::New(const EncodedImageBuffer& encodedImageBuffer)
 {
   ImageUrlPtr imageUrlPtr = new ImageUrl(encodedImageBuffer);
+  return imageUrlPtr;
+}
+
+ImageUrlPtr ImageUrl::New(const Dali::String& url)
+{
+  ImageUrlPtr imageUrlPtr = new ImageUrl(url);
   return imageUrlPtr;
 }
 

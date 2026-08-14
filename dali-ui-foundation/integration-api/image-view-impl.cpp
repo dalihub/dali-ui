@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
@@ -46,6 +47,8 @@ namespace Integration
 
 namespace
 {
+const AttachmentId IMAGE_URL_ATTACHMENT_ID = AttachmentId::Alloc();
+
 BaseHandle CreateImageView()
 {
   ImageViewImplPtr impl = ImageViewImpl::New();
@@ -396,6 +399,26 @@ void ImageViewImpl::Reload()
 }
 
 void ImageViewImpl::SetResourceUrl(const Dali::String& url)
+{
+  RemoveAttachment(IMAGE_URL_ATTACHMENT_ID);
+  SetResourceUrlInternal(url);
+}
+
+void ImageViewImpl::SetResourceUrl(const Dali::Ui::ImageUrl& imageUrl)
+{
+  if(imageUrl)
+  {
+    SetAttachment(IMAGE_URL_ATTACHMENT_ID, UniqueAny(Dali::MakeUnique<Dali::Ui::ImageUrl>(imageUrl)));
+  }
+  else
+  {
+    RemoveAttachment(IMAGE_URL_ATTACHMENT_ID);
+  }
+
+  SetResourceUrlInternal(imageUrl ? imageUrl.GetUrl() : Dali::String());
+}
+
+void ImageViewImpl::SetResourceUrlInternal(const Dali::String& url)
 {
   if(mUrl != url)
   {

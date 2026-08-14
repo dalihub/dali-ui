@@ -727,11 +727,15 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
    */
   auto IsFastTrackUploadingAvailable = [&]()
   {
+    const bool hasActiveImageUrl =
+      mUseFastTrackUploading && mFactoryCache.HasActiveImageUrl(mImageUrl);
+
     if(mUseFastTrackUploading && mLoadPolicy == Ui::Image::LoadPolicy::ATTACHED &&
        mReleasePolicy == Ui::Image::ReleasePolicy::DETACHED &&
        forceReload == TextureManager::ReloadPolicy::CACHED &&
        (mImageUrl.GetProtocolType() == VisualUrl::LOCAL || mImageUrl.GetProtocolType() == VisualUrl::REMOTE) &&
        !synchronousLoading && !mUseSynchronousSizing && !IsUsingCustomShader() &&
+       !hasActiveImageUrl &&
        !(mMaskingData && mMaskingData->mAlphaMaskUrl.IsValid()))
     {
       return true;
@@ -739,7 +743,7 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
     else if(mUseFastTrackUploading)
     {
       DALI_LOG_DEBUG_INFO(
-        "FastTrack : Fail to load fast track. mUrl : [%s]%s%s%s%s%s%s%s%s\n", mImageUrl.GetEllipsedUrl().c_str(),
+        "FastTrack : Fail to load fast track. mUrl : [%s]%s%s%s%s%s%s%s%s%s\n", mImageUrl.GetEllipsedUrl().c_str(),
         (mLoadPolicy != Ui::Image::LoadPolicy::ATTACHED) ? "/ mLoadPolicy != ATTACHED" : "",
         (mReleasePolicy != Ui::Image::ReleasePolicy::DETACHED) ? "/ mReleasePolicy != DETACHED" : "",
         (forceReload != TextureManager::ReloadPolicy::CACHED) ? "/ forceReload != CACHED" : "",
@@ -748,6 +752,7 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
           : "",
         (synchronousLoading) ? "/ synchronousLoading" : "", (mUseSynchronousSizing) ? "/ useSynchronousSizing " : "",
         (IsUsingCustomShader()) ? "/ use customs shader" : "",
+        (hasActiveImageUrl) ? "/ active ImageUrl" : "",
         (mMaskingData && mMaskingData->mAlphaMaskUrl.IsValid()) ? "/ use masking url" : "");
     }
     return false;

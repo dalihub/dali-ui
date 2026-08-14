@@ -44,6 +44,12 @@ ImageUrl ImageUrl::New(const EncodedImageBuffer& encodedImageBuffer)
   return ImageUrl(internal.Get());
 }
 
+ImageUrl ImageUrl::New(const Dali::String& url)
+{
+  Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(url);
+  return ImageUrl(internal.Get());
+}
+
 ImageUrl ImageUrl::DownCast(BaseHandle handle)
 {
   return ImageUrl(dynamic_cast<Ui::Internal::ImageUrl*>(handle.GetObjectPtr()));

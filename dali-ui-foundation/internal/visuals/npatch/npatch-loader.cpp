@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-loader.h>
 
 // INTERNAL HEADERS
+#include <dali-ui-foundation/internal/image-loader/image-url-tracker.h>
 #include <dali-ui-foundation/internal/visuals/rendering-addon.h>
 
 // EXTERNAL HEADERS
@@ -40,8 +41,10 @@ constexpr auto UNINITIALIZED_ID    = int32_t{0};  ///< uninitialised id, use to 
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_IMAGE_PERFORMANCE_MARKER, false);
 } // Anonymous namespace
 
-NPatchLoader::NPatchLoader()
+NPatchLoader::NPatchLoader(ImageUrlTracker* imageUrlTracker)
 : mCurrentNPatchDataId(0),
+  mImageUrlTracker(imageUrlTracker),
+  mPinnedImages(),
   mRemoveProcessorRegistered(false)
 {
 }
@@ -167,6 +170,67 @@ void NPatchLoader::RequestRemove(NPatchData::NPatchDataId id, TextureUploadObser
   }
 }
 
+void NPatchLoader::PinLatestCachedImage(const VisualUrl& url)
+{
+  if(!mImageUrlTracker || !mImageUrlTracker->HasActiveImageUrl(url.GetUrl()) ||
+     mPinnedImages.find(url.GetUrl()) != mPinnedImages.end())
+  {
+    return;
+  }
+
+  for(auto iter = mCache.rbegin(); iter != mCache.rend(); ++iter)
+  {
+    if(iter->mData->GetUrl().GetUrl() == url.GetUrl())
+    {
+      ++iter->mReferenceCount;
+      mPinnedImages[url.GetUrl()] = iter->mData->GetId();
+      DALI_LOG_DEBUG_INFO("NPatchLoader::PinLatestCachedImage url:%s npatchId:%d refCount:%d\n",
+                          url.GetUrl().c_str(), iter->mData->GetId(), iter->mReferenceCount);
+      return;
+    }
+  }
+}
+
+void NPatchLoader::UnpinCachedImage(const VisualUrl& url)
+{
+  auto iter = mPinnedImages.find(url.GetUrl());
+  if(iter == mPinnedImages.end())
+  {
+    return;
+  }
+
+  const auto npatchId = iter->second;
+  mPinnedImages.erase(iter);
+  DALI_LOG_DEBUG_INFO("NPatchLoader::UnpinCachedImage url:%s npatchId:%d\n", url.GetUrl().c_str(), npatchId);
+  RequestRemove(npatchId, nullptr);
+}
+
+void NPatchLoader::UpdatePinnedImageIfNeeded(NPatchInfo& info)
+{
+  const std::string url = info.mData->GetUrl().GetUrl();
+  if(!mImageUrlTracker || !mImageUrlTracker->HasActiveImageUrl(url))
+  {
+    return;
+  }
+
+  auto iter = mPinnedImages.find(url);
+  if(iter != mPinnedImages.end() && iter->second == info.mData->GetId())
+  {
+    return;
+  }
+
+  const auto previousId = iter == mPinnedImages.end() ? NPatchData::INVALID_NPATCH_DATA_ID : iter->second;
+  ++info.mReferenceCount;
+  mPinnedImages[url] = info.mData->GetId();
+  DALI_LOG_DEBUG_INFO("NPatchLoader::UpdatePinnedImageIfNeeded url:%s npatchId:%d previous:%d refCount:%d\n",
+                      url.c_str(), info.mData->GetId(), previousId, info.mReferenceCount);
+
+  if(previousId != NPatchData::INVALID_NPATCH_DATA_ID)
+  {
+    RequestRemove(previousId, nullptr);
+  }
+}
+
 void NPatchLoader::Remove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver)
 {
   int32_t cacheIndex = GetCacheIndexFromId(id);
@@ -222,6 +286,7 @@ NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Dali::Exte
         if(mCache[index].mData->GetBorder() == border)
         {
           mCache[index].mReferenceCount++;
+          UpdatePinnedImageIfNeeded(mCache[index]);
           return mCache[index].mData;
         }
         else
@@ -303,6 +368,8 @@ NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Dali::Exte
   }
 
   DALI_ASSERT_ALWAYS(infoPtr && "NPatchInfo creation failed!");
+
+  UpdatePinnedImageIfNeeded(*infoPtr);
 
   return infoPtr->mData;
 }

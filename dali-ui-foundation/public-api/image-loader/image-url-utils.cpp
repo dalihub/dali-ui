@@ -74,6 +74,11 @@ Dali::Ui::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encodedImageBuffer
   return Dali::Ui::ImageUrl::New(encodedImageBuffer);
 }
 
+Dali::Ui::ImageUrl GenerateUrl(const Dali::String& url)
+{
+  return Dali::Ui::ImageUrl::New(url);
+}
+
 Dali::Ui::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer)
 {
   Texture            texture  = Dali::DevelFrameBuffer::GetDepthTexture(frameBuffer);

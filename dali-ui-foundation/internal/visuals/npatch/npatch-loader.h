@@ -23,6 +23,7 @@
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/rendering/texture-set.h>
 #include <string>
+#include <unordered_map>
 #include <utility> // for std::pair
 
 // INTERNAL INCLUDES
@@ -37,6 +38,7 @@ namespace Ui
 {
 namespace Internal
 {
+class ImageUrlTracker;
 /**
  * The manager for loading Npatch textures.
  * It caches them internally for better performance; i.e. to avoid loading and
@@ -52,7 +54,7 @@ public:
   /**
    * Constructor
    */
-  NPatchLoader();
+  explicit NPatchLoader(ImageUrlTracker* imageUrlTracker = nullptr);
 
   /**
    * Destructor, non-virtual as not a base class
@@ -91,6 +93,10 @@ public:
    * @param [in] textureObserver The NPatchVisual that requested loading.
    */
   void RequestRemove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver);
+
+  void PinLatestCachedImage(const VisualUrl& url);
+
+  void UnpinCachedImage(const VisualUrl& url);
 
 protected: // Implementation of Processor
   /**
@@ -171,6 +177,8 @@ private:
    */
   NPatchDataPtr GetNPatchData(const VisualUrl& url, const Dali::Extents& border, bool& preMultiplyOnLoad);
 
+  void UpdatePinnedImageIfNeeded(NPatchInfo& info);
+
 protected:
   /**
    * Undefined copy constructor.
@@ -183,8 +191,10 @@ protected:
   NPatchLoader& operator=(const NPatchLoader& rhs);
 
 private:
-  NPatchData::NPatchDataId mCurrentNPatchDataId;
-  std::vector<NPatchInfo>  mCache;
+  NPatchData::NPatchDataId                                  mCurrentNPatchDataId;
+  std::vector<NPatchInfo>                                   mCache;
+  ImageUrlTracker*                                          mImageUrlTracker{nullptr}; ///< Not owned. Event-thread confined.
+  std::unordered_map<std::string, NPatchData::NPatchDataId> mPinnedImages;
 
   std::vector<std::pair<NPatchData::NPatchDataId, TextureUploadObserver*>>
     mRemoveQueue; ///< Queue of textures to remove at PostProcess. It will be cleared after PostProcess.

@@ -27,6 +27,7 @@
 #include <dali/public-api/rendering/uniform-block.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/image-loader/image-url-tracker.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-loader.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
@@ -386,6 +387,21 @@ public:
   NPatchLoader& GetNPatchLoader();
 
   /**
+   * @brief Start tracking an ImageUrl and pin an existing cached resource when it is the first one.
+   */
+  void TrackImageUrl(const VisualUrl& url);
+
+  /**
+   * @brief Stop tracking an ImageUrl and unpin its cached resource when it is the last one.
+   */
+  void UntrackImageUrl(const VisualUrl& url);
+
+  /**
+   * @brief Check whether an active ImageUrl exists for @p url.
+   */
+  bool HasActiveImageUrl(const VisualUrl& url) const;
+
+  /**
    * Get the Svg texture cache.
    * @return A reference to the Svg loader
    */
@@ -512,9 +528,10 @@ private:
 
   bool mLoadYuvPlanes; ///< A global flag to specify if the image should be loaded as yuv planes
 
-  TextureManager mTextureManager;
-  NPatchLoader   mNPatchLoader;
-  SvgLoader      mSvgLoader;
+  ImageUrlTracker mImageUrlTracker;
+  TextureManager  mTextureManager;
+  NPatchLoader    mNPatchLoader;
+  SvgLoader       mSvgLoader;
 
   Dali::UniformBlock mDefaultUniformBlock;
 
