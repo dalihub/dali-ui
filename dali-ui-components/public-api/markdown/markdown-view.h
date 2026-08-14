@@ -37,6 +37,22 @@ class MarkdownViewStyle;
 
 /**
  * @brief A view for displaying Markdown content.
+ *
+ * MarkdownView is optimized for a resolved horizontal extent and vertically
+ * growing content. A fixed width or @c MATCH_PARENT width together with a
+ * @c WRAP_CONTENT height is recommended, especially when MarkdownView is used
+ * as the content of a vertically scrolling ScrollView.
+ *
+ * Width measurement behaves as follows:
+ * - A fixed width uses the requested width, subject to size constraints.
+ * - @c MATCH_PARENT lets the parent assign the final width during arrangement.
+ * - @c WRAP_CONTENT uses the full available width when measurement receives a
+ *   bounded width constraint, making it similar to @c MATCH_PARENT in that case.
+ *   With an unbounded width constraint, it retains content-based measurement
+ *   and does not expand to the unbounded value.
+ *
+ * For predictable text wrapping in an unbounded-width container, specify a
+ * maximum width or place MarkdownView in a container with a bounded width.
  */
 class DALI_UI_COMPONENTS_API MarkdownView : public View
 {
