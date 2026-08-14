@@ -304,6 +304,8 @@ public:
     data.height          = 4;
     data.format          = Pixel::L8;
     data.compressionType = TextAbstraction::GlyphBufferData::CompressionType::NO_COMPRESSION;
+    data.isColorEmoji    = false;
+    data.isColorBitmap   = false;
 
     uint8_t* newBuffer = (uint8_t*)malloc(data.width * data.height * Pixel::GetBytesPerPixel(data.format));
     std::fill(newBuffer, newBuffer + (data.width * data.height), 255); // Fill with white pixels
@@ -655,6 +657,16 @@ FontClient::FontClient(const FontClient& handle)
 }
 
 GlyphBufferData::GlyphBufferData()
+: buffer(nullptr),
+  width(0u),
+  height(0u),
+  outlineOffsetX(0),
+  outlineOffsetY(0),
+  format(Pixel::A8),
+  compressionType(CompressionType::NO_COMPRESSION),
+  isColorEmoji(false),
+  isColorBitmap(false),
+  isBufferOwned(false)
 {
 }
 
