@@ -113,11 +113,6 @@ void View::SetArrangeCallback(ArrangeCallback callback)
   GetImpl(*this).SetArrangeCallback(std::move(callback));
 }
 
-void View::SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy)
-{
-  GetImpl(*this).SetArrangeCallback(std::move(callback), policy);
-}
-
 void View::SetLayoutTransition(LayoutTransition transition)
 {
   GetImpl(*this).SetLayoutTransition(transition);
@@ -1007,6 +1002,11 @@ void View::ClearAccessibilityStates()
   ViewImpl&               viewImpl     = Ui::GetImpl(*this);
   Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
   viewDataImpl.ClearAccessibilityStates();
+}
+
+void View::NotifyAccessibilityActiveDescendantChanged(View descendant)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).NotifyAccessibilityActiveDescendantChanged(descendant);
 }
 
 bool View::HasAccessibilityState(Accessibility::State state) const

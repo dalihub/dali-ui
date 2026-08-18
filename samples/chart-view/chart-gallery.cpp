@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <dali-ui-components/dali-ui-components.h>
@@ -41,6 +42,29 @@ using namespace Dali::Ui;
 // ---------------------------------------------------------------------------
 namespace
 {
+// The chart API takes Dali::Vector, so convert the sample's std containers at the call boundary.
+Dali::Vector<float> ToValues(const std::vector<float>& values)
+{
+  Dali::Vector<float> result;
+  result.Reserve(values.size());
+  for(float value : values)
+  {
+    result.PushBack(value);
+  }
+  return result;
+}
+
+Dali::Vector<Vector2> ToPoints(const std::vector<std::pair<float, float>>& points)
+{
+  Dali::Vector<Vector2> result;
+  result.Reserve(points.size());
+  for(const auto& point : points)
+  {
+    result.PushBack(Vector2(point.first, point.second));
+  }
+  return result;
+}
+
 // LiveCharts FluentDesign palette
 const Vector4 LC_PURPLE(0.455f, 0.302f, 0.663f, 1.0f);
 const Vector4 LC_RED(0.906f, 0.282f, 0.337f, 1.0f);
@@ -327,7 +351,7 @@ public:
         lineSeries1.SetSmoothness(0.65f);
         lineSeries1.SetFillEnabled(true);
         lineSeries1.SetName(std::get<0>(p));
-        lineSeries1.SetValues(std::get<2>(p));
+        lineSeries1.SetValues(ToValues(std::get<2>(p)));
         c.AddSeries(lineSeries1);
       }
     }
@@ -362,7 +386,7 @@ public:
         lineSeries2.SetMarkerRadius(4.5f);
         lineSeries2.SetMarkersVisible(true);
         lineSeries2.SetName(g.nm);
-        lineSeries2.SetValues(g.v);
+        lineSeries2.SetValues(ToValues(g.v));
         c.AddSeries(lineSeries2);
       }
     }
@@ -413,7 +437,7 @@ public:
     mAppendSeries.SetName("Value");
     mAppendSeries.SetColor(LC_BLUE);
     mAppendSeries.SetSmoothness(0.65f);
-    mAppendSeries.SetMaxDataPoints(12);
+    mAppendSeries.SetMaximumDataPoints(12);
     mAppendSeries.AppendValues({1, 3, 5, 2, 4, 6, 3, 5, 2});
     c.AddSeries(mAppendSeries);
     return c;
@@ -426,15 +450,15 @@ public:
     c.SetUpdateThrottle(0.0f);
     {
       ChartAxis chartAxis2 = ChartAxis::New();
-      chartAxis2.SetMinLimit(-1.5f);
-      chartAxis2.SetMaxLimit(1.5f);
+      chartAxis2.SetMinimumLimit(-1.5f);
+      chartAxis2.SetMaximumLimit(1.5f);
       c.SetYAxis(chartAxis2);
     }
     mSineSeries = LineSeries::New();
     mSineSeries.SetName("Signal");
     mSineSeries.SetColor(LC_BLUE);
     mSineSeries.SetSmoothness(0.3f);
-    mSineSeries.SetMaxDataPoints(40);
+    mSineSeries.SetMaximumDataPoints(40);
     c.AddSeries(mSineSeries);
     return c;
   }
@@ -483,7 +507,7 @@ public:
         barSeries1.SetColor(std::get<1>(p));
         barSeries1.SetStacked(false);
         barSeries1.SetName(std::get<0>(p));
-        barSeries1.SetValues(std::get<2>(p));
+        barSeries1.SetValues(ToValues(std::get<2>(p)));
         c.AddSeries(barSeries1);
       }
     }
@@ -511,7 +535,7 @@ public:
         barSeries2.SetColor(std::get<1>(p));
         barSeries2.SetStacked(true);
         barSeries2.SetName(std::get<0>(p));
-        barSeries2.SetValues(std::get<2>(p));
+        barSeries2.SetValues(ToValues(std::get<2>(p)));
         c.AddSeries(barSeries2);
       }
     }
@@ -539,7 +563,7 @@ public:
         barSeries3.SetStacked(false);
         barSeries3.SetDataLabelsVisible(true);
         barSeries3.SetName(std::get<0>(p));
-        barSeries3.SetValues(std::get<2>(p));
+        barSeries3.SetValues(ToValues(std::get<2>(p)));
         c.AddSeries(barSeries3);
       }
     }
@@ -568,8 +592,8 @@ public:
   ChartView MakeGauge(float w, float h)
   {
     auto c = ChartView::New(ChartView::Type::GAUGE, Vector2(w, h));
-    c.SetGaugeMinValue(0);
-    c.SetGaugeMaxValue(100);
+    c.SetGaugeMinimumValue(0);
+    c.SetGaugeMaximumValue(100);
     c.SetGaugeValue(0);
     c.SetGaugeArcSpan(270);
     c.SetGaugeStartAngle(135);
@@ -605,7 +629,7 @@ public:
         scatterSeries1.SetMarkerRadius(4.0f);
         scatterSeries1.SetMarkerShape(ScatterSeries::MarkerShape::CIRCLE);
         scatterSeries1.SetName(s.nm);
-        scatterSeries1.SetValues(s.pts);
+        scatterSeries1.SetValues(ToPoints(s.pts));
         c.AddSeries(scatterSeries1);
       }
     }
@@ -658,7 +682,7 @@ public:
     c.SetZoomMode(static_cast<int>(ChartView::ZoomMode::PAN_X) |
                   static_cast<int>(ChartView::ZoomMode::ZOOM_X));
     c.SetZoomClampEnabled(true);
-    c.SetAutoFitYOnPan(true);
+    c.SetAutoFitYOnPanEnabled(true);
     AddLine(c, "Revenue", LC_BLUE, 0.65f,
             {120, 150, 130, 190, 210, 250, 230, 280, 260, 300, 290, 320,
              340, 310, 360, 400, 380, 420, 410, 460, 440, 490, 470, 510});
@@ -686,8 +710,8 @@ public:
     auto c = NewLine(w, h);
     {
       ChartAxis chartAxis8 = ChartAxis::New();
-      chartAxis8.SetMinLimit(0);
-      chartAxis8.SetMaxLimit(10);
+      chartAxis8.SetMinimumLimit(0);
+      chartAxis8.SetMaximumLimit(10);
       c.SetYAxis(chartAxis8);
     }
     AddLine(c, "Value", LC_PURPLE, 0.5f, {2, 4, 6, 3, 7, 5, 8, 4, 6, 3});
@@ -695,8 +719,8 @@ public:
     {
       {
         ChartSection chartSection1 = ChartSection::New();
-        chartSection1.SetYMin(a);
-        chartSection1.SetYMax(b);
+        chartSection1.SetMinimumY(a);
+        chartSection1.SetMaximumY(b);
         chartSection1.SetFillColor(Vector4(col.r, col.g, col.b, 0.15f));
         c.AddSection(chartSection1);
       }
@@ -753,8 +777,8 @@ public:
     {
       ChartAxis chartAxis11 = ChartAxis::New();
       chartAxis11.SetTitle("Revenue (M)");
-      chartAxis11.SetMinLimit(0);
-      chartAxis11.SetMaxLimit(4);
+      chartAxis11.SetMinimumLimit(0);
+      chartAxis11.SetMaximumLimit(4);
       c.SetYAxis(chartAxis11);
     }
     AddLine(c, "Revenue", LC_BLUE, 0.5f, {1.2f, 1.8f, 2.1f, 1.5f, 2.4f, 3.1f, 2.8f});
@@ -817,8 +841,8 @@ public:
     // X band: Q2 (green)
     {
       ChartSection chartSection2 = ChartSection::New();
-      chartSection2.SetXMin(2.5f);
-      chartSection2.SetXMax(5.5f);
+      chartSection2.SetMinimumX(2.5f);
+      chartSection2.SetMaximumX(5.5f);
       chartSection2.SetFillColor(Vector4(0.2f, 0.7f, 0.3f, 0.12f));
       chartSection2.SetStrokeColor(Vector4(0.2f, 0.7f, 0.3f, 0.5f));
       chartSection2.SetStrokeWidth(1.5f);
@@ -828,8 +852,8 @@ public:
     // Y band: target range 200~280 (yellow)
     {
       ChartSection chartSection3 = ChartSection::New();
-      chartSection3.SetYMin(200.0f);
-      chartSection3.SetYMax(280.0f);
+      chartSection3.SetMinimumY(200.0f);
+      chartSection3.SetMaximumY(280.0f);
       chartSection3.SetFillColor(Vector4(1.0f, 0.85f, 0.2f, 0.10f));
       c.AddSection(chartSection3);
     }
@@ -837,8 +861,8 @@ public:
     // H-line: Y=250 (red)
     {
       ChartSection chartSection4 = ChartSection::New();
-      chartSection4.SetYMin(250.0f);
-      chartSection4.SetYMax(250.0f);
+      chartSection4.SetMinimumY(250.0f);
+      chartSection4.SetMaximumY(250.0f);
       chartSection4.SetStrokeColor(Vector4(1.0f, 0.3f, 0.3f, 0.9f));
       chartSection4.SetStrokeWidth(2.0f);
       c.AddSection(chartSection4);
@@ -847,8 +871,8 @@ public:
     // V-line: July (blue)
     {
       ChartSection chartSection5 = ChartSection::New();
-      chartSection5.SetXMin(6.0f);
-      chartSection5.SetXMax(6.0f);
+      chartSection5.SetMinimumX(6.0f);
+      chartSection5.SetMaximumX(6.0f);
       chartSection5.SetStrokeColor(Vector4(0.4f, 0.4f, 1.0f, 0.8f));
       chartSection5.SetStrokeWidth(2.0f);
       c.AddSection(chartSection5);
@@ -857,10 +881,10 @@ public:
     // Rect: Q4 high zone Oct~Dec, Y 270~320 (purple)
     {
       ChartSection chartSection6 = ChartSection::New();
-      chartSection6.SetXMin(8.5f);
-      chartSection6.SetXMax(11.5f);
-      chartSection6.SetYMin(270.0f);
-      chartSection6.SetYMax(320.0f);
+      chartSection6.SetMinimumX(8.5f);
+      chartSection6.SetMaximumX(11.5f);
+      chartSection6.SetMinimumY(270.0f);
+      chartSection6.SetMaximumY(320.0f);
       chartSection6.SetFillColor(Vector4(0.6f, 0.2f, 1.0f, 0.12f));
       chartSection6.SetStrokeColor(Vector4(0.6f, 0.2f, 1.0f, 0.6f));
       chartSection6.SetStrokeWidth(1.5f);
@@ -908,7 +932,7 @@ public:
       lineSeries10.SetColor(col);
       lineSeries10.SetSmoothness(smooth);
       lineSeries10.SetName(name);
-      lineSeries10.SetValues(vals);
+      lineSeries10.SetValues(ToValues(vals));
       c.AddSeries(lineSeries10);
     }
   }

@@ -24,7 +24,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
-#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
@@ -43,21 +42,6 @@ class ScrollViewLayoutManager::Impl : public LayoutManager::Impl
 ScrollViewLayoutManager::ScrollViewLayoutManager()
 : LayoutManager(new Impl())
 {
-  SetArrangePolicy(ArrangePolicy::ALWAYS);
-
-  // This producer must execute on every arrange pass.
-  //
-  // Arrange() below takes the scrolled child's CURRENT ACTOR POSITION as that child's
-  // arrange input (childBounds.x = child.GetPositionX() * s, and the same for y). That
-  // read is exactly how a scrolled content view survives a layout pass: ScrollView
-  // drives scrolling through Ui::Extension::SetPositionX/Y on its content
-  // (ScrollViewImpl::ApplyScrollPosition), which writes the actor property WITHOUT
-  // invalidating layout, and this manager reads it back on the next pass.
-  //
-  // ArrangePolicy::IF_CHANGED would let a settled ScrollView serve its children from the
-  // arrange cache and re-apply the bounds published BEFORE the scroll, so the content
-  // would snap back and scrolling would visibly freeze.
-  // UtcDaliScrollViewScrolledContentSurvivesSettledLayoutPassP pins this.
 }
 
 ScrollViewLayoutManager::~ScrollViewLayoutManager()
@@ -152,7 +136,6 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
-      Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
       childImpl.Measure(childBounds.width, childBounds.height);
     }
     childImpl.Arrange(childBounds);

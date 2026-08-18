@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view.h>
+#include <dali-ui-foundation/public-api/views/web/web-back-forward-list.h>
 #include <dali-ui-foundation/public-api/views/web/web-profile.h>
 #include <dali-ui-foundation/public-api/views/web/web-settings.h>
 #include <dali-ui-foundation/public-api/views/web/web-view-types.h>
@@ -634,7 +635,23 @@ public: // JavaScript
    * @param[in] exposedObjectName The exposed object name
    * @param[in] callback The callback to handle messages
    */
-  void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, JavaScriptCallback callback);
+  void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& message)> callback);
+
+  /**
+   * @brief Adds a JavaScript message handler that also receives the exposed object name.
+   *
+   * For example, when @p exposedObjectName is @c myExposedObjectName, JavaScript
+   * invokes the handler as follows:
+   * @code
+   * window.myExposedObjectName.postMessage(messageBody);
+   * @endcode
+   * Only one message handler should be registered for a given exposed object
+   * name.
+   *
+   * @param[in] exposedObjectName The exposed object name
+   * @param[in] callback The callback receiving the exposed object name and message body
+   */
+  void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& exposedObjectName, const Dali::String& message)> callback);
 
   /**
    * @brief Removes a JavaScript message handler.
@@ -761,6 +778,28 @@ public: // Signals
    * @brief Signal emitted when web process crashes.
    */
   WebProcessCrashedSignalType& WebProcessCrashedSignal();
+
+public: // Additional APIs
+  /**
+   * @brief Sets the absolute scroll position.
+   *
+   * The underlying engine may apply the requested position asynchronously, so
+   * an immediate GetScrollPosition() call is not guaranteed to return the
+   * requested value.
+   *
+   * @param[in] position The horizontal and vertical scroll offsets
+   */
+  void SetScrollPosition(const Dali::Vector2& position);
+
+  /**
+   * @brief Gets the live back-forward list associated with this WebView.
+   *
+   * The returned handle remains safe to retain after this WebView is destroyed.
+   * Its queries then return empty results.
+   *
+   * @return The back-forward list
+   */
+  WebBackForwardList GetBackForwardList() const;
 
 public: // Not intended for application developers
   /// @cond internal

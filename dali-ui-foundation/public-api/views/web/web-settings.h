@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/object/base-handle.h>
+#include <cstdint>
 
 namespace Dali
 {
@@ -97,6 +98,58 @@ public:
    * @return The feature value, or an empty string when unavailable
    */
   Dali::String GetExtraFeatureValue(const Dali::String& feature) const;
+
+  /**
+   * @brief Sets whether spatial navigation is enabled.
+   *
+   * @param[in] enabled True to enable spatial navigation
+   */
+  void SetSpatialNavigationEnabled(bool enabled);
+
+  /**
+   * @brief Gets the default web page font size in pixels.
+   *
+   * @return The default font size, or 0 when the engine is unavailable
+   */
+  uint32_t GetDefaultFontSize() const;
+
+  /**
+   * @brief Sets the default web page font size in pixels.
+   *
+   * @param[in] defaultFontSize The default font size
+   */
+  void SetDefaultFontSize(uint32_t defaultFontSize);
+
+  /**
+   * @brief Sets whether same-origin web security checks are enabled.
+   *
+   * Disabling web security weakens isolation between web origins and should be
+   * limited to trusted content and controlled environments.
+   *
+   * @param[in] enabled True to enable web security
+   */
+  void SetWebSecurityEnabled(bool enabled);
+
+  /**
+   * @brief Enables or disables a boolean web engine extension feature.
+   *
+   * Unsupported feature names are ignored by the backend.
+   *
+   * @param[in] feature The feature name
+   * @param[in] enabled True to enable the feature
+   */
+  void SetExtraFeatureEnabled(const Dali::String& feature, bool enabled);
+
+  /**
+   * @brief Checks whether a boolean web engine extension feature is enabled.
+   *
+   * A false result can mean either that the feature is disabled or that the
+   * backend does not support the feature name.
+   *
+   * @param[in] feature The feature name
+   * @return True when the feature is supported and enabled
+   */
+  bool IsExtraFeatureEnabled(const Dali::String& feature) const;
 
 public: // Not intended for application developers
   /// @cond internal

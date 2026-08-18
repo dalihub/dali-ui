@@ -133,119 +133,6 @@ A **layout root** is a top-level View in the layout hierarchy (its parent is not
 2. **Arrange**  
    - The View is given a `LayoutRect` (typically from 0,0 with the measured size). It applies its own alignment and margin, and if it has a LayoutManager, the manager calls `Arrange(child, childBounds)` for each child to set position and size.
 
-### Layout caching and the measure/arrange contract
-
-Both phases are cached, and both caches skip work rather than change results.
-Understanding what they key on is the whole of what a custom View, LayoutManager
-or callback has to know.
-
-The **measure cache** is unconditional. `View::Measure()` serves a stored
-`MeasuredSize` whenever the normalised constraint is unchanged and nothing has
-invalidated the view's layout, and the measure implementation — `OnMeasure()`, an
-attached `LayoutManager::Measure()`, or a `MeasureCallback` — is simply not
-called. There is no opt-out. A measure implementation is therefore **required** to be
-a pure function of:
-
-- its two constraints,
-- the view's effective scale,
-- the view's effective layout direction,
-- the view's own layout-tracked state (requested size, padding, margin, min/max
-  bounds, layout params, child list),
-- its children's measured sizes.
-
-Anything else it reads, it owns: it must call `InvalidateMeasure()` itself when
-that state changes. Nothing else will: an unrelated pass re-runs the layout root,
-whose implementation re-measures this view at the same constraint, and this view
-serves its cache again. An invalidation on a sibling propagates upward and never
-reaches this view, and an ancestor's own miss does not clear this view's cache.
-The stale measured size is recovered only by an invalidation that reaches THIS
-view -- its own `InvalidateMeasure()`, a recursive drop (scale change, reparent,
-direction change), or a `LayoutManager`'s `InvalidateOwnerMeasure()` -- or by a
-pass that hands it a different normalised constraint or effective scale. The same
-reasoning applies to the arrange cache, with the input bounds and the effective
-layout direction as the keyed inputs.
-
-The effective scale is part of the measure cache key, so a scale change alone
-forces a re-measure. The effective scale is resolved in one place,
-`ViewDataImpl::ComputeEffectiveScale()`; when the process-wide UI-scale master
-switch (`UiScaleManager::SetScalable(false)`) is off it returns `1.0` for every
-view regardless of the view's `UiScalePolicy`, so the whole tree behaves as
-unscaled.
-
-The **arrange cache** uses `ArrangePolicy::IF_CHANGED` by default.
-`View::Arrange()` may serve a stored result when the input bounds, effective layout
-direction and effective scale are unchanged and nothing has invalidated the view.
-The default applies to `OnArrange()`, a callback installed through the one-argument
-`SetArrangeCallback()`, and `LayoutManager::Arrange()`. It reaches the same
-guarantee about the scale by a different route: the scale is not part of the
-arrange key, it is an invalidation — a scale change drops the entry.
-
-Use `ArrangePolicy::ALWAYS` when an arrange implementation reads state outside
-layout invalidation or performs externally visible work on every pass:
-
-| Arrange implementation | How it selects `ArrangePolicy::ALWAYS` |
-|---|---|
-| `OnArrange()` override | `ViewImpl::SetArrangePolicy(ArrangePolicy::ALWAYS)` |
-| `ArrangeCallback` | `View::SetArrangeCallback(callback, ArrangePolicy::ALWAYS)` |
-| `LayoutManager::Arrange()` | protected `LayoutManager::SetArrangePolicy(ArrangePolicy::ALWAYS)` |
-
-Policy is stored on the implementation instance and inherited by subclasses. A
-subclass may select another policy after its base constructor completes. An arrange
-implementation that reads ancestor or world geometry (`SCREEN_POSITION`,
-`WORLD_POSITION`, window coordinates), pushes state to a surface outside the actor
-tree, or depends on mutable state without invalidating arrange must use
-`ArrangePolicy::ALWAYS`. `VideoView`, `WebView`, `RecyclerView` and the ScrollView
-layout manager are the in-library examples.
-
-**A cache hit is an optimisation of the work, never of the result.** Serving the
-arrange cache for a view with children does not prune the subtree: it replays it,
-performing per node exactly the observable work a re-run performs — reconciling
-the actor against the node's arranged bounds, mirroring direct children under
-right-to-left, and notifying `LayoutFinishedSignal()` subscribers. Geometry
-written outside layout is repaired either way. What a hit elides is the call to the
-arrange implementation, and with it the recomputation of a result already known.
-
-The policy is evaluated at every level, so an `ArrangePolicy::ALWAYS` view refuses
-the cache hit of every ancestor **above** it: each of those ancestors misses and
-re-runs its own arrange implementation. It does not make everything beneath the
-ancestor re-run — a sibling subtree that a re-running ancestor re-enters still
-evaluates its own predicate and can serve its own hit, in which case it is replayed
-rather than re-run. The cost is the ancestor **path**, not every view below it.
-
-`LayoutFinishedSignal()` is therefore **pass-based**: a subscriber is told its
-view was arranged in this pass, whether that pass ran the arrange implementation or
-served the cache. It is not a "bounds changed" notification.
-
-### Invalidation
-
-`InvalidateMeasure()` / `InvalidateArrange()` do two things: they mark the view,
-and they walk its ancestor chain to a layout root and register that root with the
-LayoutController.
-
-The mark always happens. The walk is coalesced: a view records the
-*invalidation generation* in which it last walked, and while that record is current
-— meaning the registration it made is still pending and the chain it marked is still
-marked — a further invalidation on the same axis skips the walk. The generation ends
-whenever the controller drains its pending set and whenever an outermost
-Measure/Arrange pass completes (a pass is the only consumer of dirty bits, and a manual
-`Measure()`/`Arrange()` call is a pass too), so the next invalidation walks again.
-While any pass is on the stack the skip is disabled outright, because a mid-pass
-walk also poisons in-progress ancestors. Coalescing changes only how often the
-ancestor chain is traversed; a batch of invalidations before one pass is all
-serviced by that pass.
-
-The measure and arrange records are independent, because an arrange walk leaves
-the ancestors' measure caches valid and an ancestor measure hit does not
-re-measure its children.
-
-**`LayoutManager` state.** A manager that keeps state of its own — an
-orientation, a spacing, a set of row definitions — is outside every cache key,
-because neither key can see it. Pair every such setter with
-`LayoutManager::InvalidateOwnerMeasure()` (or `InvalidateOwnerArrange()` when only
-placement is affected); the in-library managers all do, which is what makes that
-state part of the layout-tracked inputs of their `Measure()` and `Arrange()`
-implementations.
-
 ### Measure constraints (sign-encoded budget)
 
 During Measure the parent passes the width and height constraints each as a single **sign-encoded `float`** — there is no separate mode field and no measure-mode enum anywhere in the API:
@@ -377,18 +264,9 @@ inspect the layout direction themselves.
 `ApplyLayoutDirection` early-returns unless the View's effective layout
 direction resolves to `RIGHT_TO_LEFT`, so under `LEFT_TO_RIGHT` nothing is
 mirrored. Under `RIGHT_TO_LEFT` it flips each direct child's X about the
-parent's arranged width: `POSITION_X = parentWidth − logicalX − childW`,
-where `logicalX` and `childW` are the child's **logical** arranged bounds
-(`GetArrangedBounds().x` / `.width`), not its actor `POSITION_X`. Mirroring
-from the logical bounds makes the flip a pure function of arranged geometry --
-idempotent and immune to an external `POSITION_X` write -- rather than an
-involution over the actor's persistent position. The write is also suppressed
-when the actor already holds the mirrored value, so a settled `RIGHT_TO_LEFT`
-subtree performs no position writes at all. A child that no arrange
-implementation has arranged has no parent-owned logical bounds and is left
-untouched. Reading
-its current physical actor position as logical input would make repeated
-identical passes alternate between mirrored and unmirrored coordinates.
+parent's arranged width: `POSITION_X = parentWidth − oldX − childW`, where
+`oldX` and `childW` are the child's already-arranged `POSITION_X` and
+`SIZE_WIDTH`.
 
 - The mirror is **generic**: it applies uniformly to every direct child of
   every View. `AbsoluteLayout` is just one case — a child arranged at some X
@@ -411,41 +289,6 @@ Note the offset value itself is mirrored: under `RIGHT_TO_LEFT` every direct
 child's X is reflected about the parent width regardless of how it was
 positioned, so even an absolutely positioned child is moved to the mirrored
 edge.
-
-#### How a direction change reaches layout
-
-The direction itself lives in dali-core, so a change has to be turned into a
-layout invalidation explicitly. Four things make this hold -- two mechanisms, one
-structural fact and one backstop -- and none of them costs a plain child View
-anything:
-
-- **Layout roots hook the actor signal, lazily.** The first time a View
-  registers with the `LayoutController` **on a live window** it connects the
-  actor's layout-direction-changed signal, once and for good. Only layout roots
-  that are on-scene in a window (and on-scene `STANDALONE` boundary views, which
-  register themselves) ever do, so the per-View cost of a signal connection is
-  gone. This is the only mechanism that can see a direction set on a **non-View
-  ancestor** — an intermediate `Layer`, or the window's root layer.
-- **Direction property writes on a View are intercepted.** `LAYOUT_DIRECTION`
-  (and the two legacy indices) reach `ViewDataImpl::OnPropertySet`, which raises
-  the same invalidation. This is what covers a **mid-tree** View that is not a
-  layout root, and — being window-independent — an off-scene write too. A hooked
-  view skips it (the signal has already fired), and a write that does not move
-  the resolved direction is dropped by a value guard.
-- **An off-scene move needs no hook.** No layout pass can run without a window,
-  and reconnection (`OnViewSceneConnection`) drops the whole subtree's cached
-  results via `ResetSubtreeScaleAndLayoutCaches()` before registering the
-  reconnecting root, so nothing stale survives it.
-- **The arrange cache keys on the recorded direction** (`mLastArrangeDirection`),
-  which is the backstop under all of it: a missed invalidation degrades to a
-  cache **miss**, never to an arrangement mirrored the wrong way round.
-
-The invalidation is **subtree-recursive**: it drops both layout caches and raises
-both dirty bits on the changed view and on every descendant that inherits from
-it, and it **prunes** at any child holding a direction of its own — the exact
-mirror of dali-core's inherit walk, whose resolved direction did not move either.
-A `STANDALONE` descendant is a scheduling boundary, so it takes a full
-`InvalidateMeasure()` and re-registers itself instead.
 
 ### LayoutMode::STANDALONE
 
@@ -474,12 +317,6 @@ A Standalone child:
   `MATCH_PARENT` fills the parent edge to edge regardless of parent padding,
   and any margin set on the Standalone child shifts it inward consistently in
   both axes.
-- **Applies its own min/max to its slot.** A boundary child has no parent
-  layout to clamp it, so the derivation of its slot enforces its
-  `Minimum`/`Maximum` width and height. The same derivation runs whether the
-  slot comes from the parent's arrange pass or from the child's own
-  layout-root pass, so both agree; for a `MATCH_PARENT` axis it is the only
-  place the clamp reaches, because the measured value is discarded there.
 
 ### Invalidation flow
 
@@ -490,11 +327,9 @@ When layout must be recomputed (e.g. size or child change):
 
 ## Diagrams
 
-Two PlantUML diagram SOURCE files live beside this document in the repository. They are not rendered here; open them with a PlantUML viewer.
-
-- **Class structure**: `docs/layout-class-diagram.puml`  
+- **Class structure**: `layout-class-diagram.puml`  
   - Public API (View, Layout, StackLayout, …), Integration (ViewImpl, LayoutImpl, …), LayoutManagers, and layout types with inheritance and references.
-- **Calculation flow**: `docs/layout-sequence-diagram.puml`  
+- **Calculation flow**: `layout-sequence-diagram.puml`  
   - Sequence from Adaptor → LayoutControllerImpl → layout root ViewImpl → LayoutManager → child ViewImpl for Measure/Arrange and a summary of invalidation.
 
 ---

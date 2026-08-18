@@ -45,7 +45,7 @@ namespace Internal
 /**
  * @brief Internal implementation of UiLocalizationManager.
  *
- * Manages localized string lookups via dgettext and maintains View bindings
+ * Manages localized string lookups via dgettext/dngettext and maintains View bindings
  * so that resourceId/domain-based strings are automatically refreshed when
  * the locale or default domain changes.
  */
@@ -86,6 +86,21 @@ public:
    * @copydoc Dali::Ui::UiLocalizationManager::GetLocalizedString(StringView, StringView) const
    */
   Dali::String GetLocalizedString(StringView resourceId, StringView domain) const;
+
+  /**
+   * @copydoc Dali::Ui::UiLocalizationManager::GetLocalizedPluralString(StringView, StringView, uint32_t) const
+   */
+  Dali::String GetLocalizedPluralString(StringView resourceId,
+                                        StringView pluralResourceId,
+                                        uint32_t   quantity) const;
+
+  /**
+   * @copydoc Dali::Ui::UiLocalizationManager::GetLocalizedPluralString(StringView, StringView, uint32_t, StringView) const
+   */
+  Dali::String GetLocalizedPluralString(StringView resourceId,
+                                        StringView pluralResourceId,
+                                        uint32_t   quantity,
+                                        StringView domain) const;
 
   /**
    * @copydoc Dali::Ui::UiLocalizationManager::SetBindingResource(BaseHandle, StringView, StringView, LocalizedStringCallback)
@@ -244,6 +259,12 @@ private:
   /// @brief Internal lookup implementation with full fallback chain.
   Dali::String GetLocalizedStringInternal(StringView resourceId,
                                           StringView domain) const;
+
+  /// @brief Internal plural lookup implementation with its fallback chain.
+  Dali::String GetLocalizedPluralStringInternal(StringView resourceId,
+                                                StringView pluralResourceId,
+                                                uint32_t   quantity,
+                                                StringView domain) const;
 
   /// @brief Determines the effective domain, falling back to mDefaultDomain if empty.
   std::string GetEffectiveDomain(StringView domain) const;

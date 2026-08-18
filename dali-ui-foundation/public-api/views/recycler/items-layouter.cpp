@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/items-layouter-impl.h>
 #include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
 #include <dali/integration-api/debug.h>
 
@@ -27,21 +28,21 @@ namespace Ui
 // Handle constructor / GetImpl
 // ---------------------------------------------------------------------------
 
-ItemsLayouter::ItemsLayouter(ItemsLayouterImpl* impl)
+ItemsLayouter::ItemsLayouter(Integration::ItemsLayouterImpl* impl)
 : BaseHandle(impl)
 {
 }
 
-ItemsLayouterImpl& ItemsLayouter::GetImpl()
+Integration::ItemsLayouterImpl& ItemsLayouter::GetImpl()
 {
   DALI_ASSERT_ALWAYS(*this && "ItemsLayouter handle is empty");
-  return static_cast<ItemsLayouterImpl&>(GetBaseObject());
+  return static_cast<Integration::ItemsLayouterImpl&>(GetBaseObject());
 }
 
-const ItemsLayouterImpl& ItemsLayouter::GetImpl() const
+const Integration::ItemsLayouterImpl& ItemsLayouter::GetImpl() const
 {
   DALI_ASSERT_ALWAYS(*this && "ItemsLayouter handle is empty");
-  return static_cast<const ItemsLayouterImpl&>(GetBaseObject());
+  return static_cast<const Integration::ItemsLayouterImpl&>(GetBaseObject());
 }
 
 // ---------------------------------------------------------------------------

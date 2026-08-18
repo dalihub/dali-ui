@@ -21,6 +21,8 @@
 #include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/object/base-handle.h>
 
+#include <cstdint>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/types/callback.h>
@@ -38,7 +40,9 @@ class UiLocalizationManagerImpl;
 /**
  * @brief Function pointer type for overriding localized string lookups.
  *
- * This callback is invoked before the default gettext/dgettext lookup.
+ * This callback is invoked before the default gettext/dgettext lookup used by
+ * GetLocalizedString() and localization bindings. It is not invoked by
+ * GetLocalizedPluralString().
  *
  * If the function returns true:
  *   - outString is used as the final localized string.
@@ -101,8 +105,8 @@ using LocalizedStringCallback = Callback<void(BaseHandle, const Dali::String&)>;
  * It supports:
  *   - gettext domain registration
  *   - default domain
- *   - dgettext-based lookup
- *   - localized string override hook
+ *   - dgettext/dngettext-based lookup
+ *   - localized string override hook for non-plural lookup
  *   - bypass mode
  *   - View/BaseHandle binding refresh on locale change
  *
@@ -252,6 +256,62 @@ public:
   Dali::String GetLocalizedString(StringView resourceId, StringView domain) const;
 
   /**
+   * @brief Gets a localized plural string using the default domain.
+   *
+   * Uses dngettext() to select a localized plural form according to the
+   * specified cardinal quantity and the plural rules of the message catalog.
+   * The @a resourceId and @a pluralResourceId parameters correspond to
+   * gettext msgid and msgid_plural, respectively.
+   *
+   * Fallback behavior:
+   *   - empty resourceId or pluralResourceId -> empty string
+   *   - bypass enabled -> resourceId
+   *   - no effective domain -> resourceId
+   *   - dngettext result -> selected string
+   *   - dngettext null result -> resourceId
+   *
+   * @note The @a quantity is used to select the plural form. It is not
+   *       substituted into the returned string.
+   * @note LocalizedStringOverrideFunc is not applied to plural lookup.
+   *
+   * @param[in] resourceId The localization resource id / gettext msgid
+   * @param[in] pluralResourceId The plural localization resource id / gettext msgid_plural
+   * @param[in] quantity The cardinal quantity used to select the plural form
+   * @return The localized plural string or fallback resource id
+   */
+  Dali::String GetLocalizedPluralString(StringView resourceId,
+                                        StringView pluralResourceId,
+                                        uint32_t   quantity) const;
+
+  /**
+   * @brief Gets a localized plural string using an explicit domain.
+   *
+   * Uses dngettext() to select a localized plural form according to the
+   * specified cardinal quantity and the plural rules of the message catalog.
+   * The @a resourceId and @a pluralResourceId parameters correspond to
+   * gettext msgid and msgid_plural, respectively.
+   *
+   * Passing an empty @a domain uses the current default domain. If there is
+   * no effective domain, @a resourceId is returned.
+   * Empty-id, bypass, dngettext-result, and null-result handling are the same
+   * as for the default-domain overload.
+   *
+   * @note The @a quantity is used to select the plural form. It is not
+   *       substituted into the returned string.
+   * @note LocalizedStringOverrideFunc is not applied to plural lookup.
+   *
+   * @param[in] resourceId The localization resource id / gettext msgid
+   * @param[in] pluralResourceId The plural localization resource id / gettext msgid_plural
+   * @param[in] quantity The cardinal quantity used to select the plural form
+   * @param[in] domain The gettext domain, or empty for the default domain
+   * @return The localized plural string or fallback resource id
+   */
+  Dali::String GetLocalizedPluralString(StringView resourceId,
+                                        StringView pluralResourceId,
+                                        uint32_t   quantity,
+                                        StringView domain) const;
+
+  /**
    * @brief Sets a localized string resource for a named binding and applies it immediately.
    *
    * This overload uses the current default domain when the binding is refreshed.
@@ -342,6 +402,9 @@ public:
    * @note Passing nullptr clears the override, equivalent to
    *       ClearLocalizedStringOverride().
    *
+   * @note This override is used by GetLocalizedString() and localization
+   *       bindings. It is not used by GetLocalizedPluralString().
+   *
    * @param[in] func Override function or nullptr
    */
   void SetLocalizedStringOverride(LocalizedStringOverrideFunc func);
@@ -356,8 +419,8 @@ public:
   /**
    * @brief Enables or disables localization bypass.
    *
-   * When enabled, GetLocalizedString() returns resourceId as-is and bindings
-   * apply resourceId as-is.
+   * When enabled, GetLocalizedString() and GetLocalizedPluralString() return
+   * resourceId as-is and bindings apply resourceId as-is.
    *
    * Changing this value refreshes all bindings.
    *

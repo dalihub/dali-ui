@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://tizen.org/ns/packages" api-version="10.0" package="com.samsung.dali.markdown" version="2.0.0">
+    <profile name="tizen" />
+    <ui-application appid="com.samsung.dali.markdown" exec="/usr/apps/com.samsung.dali.markdown/bin/markdown-view-example.example" type="dali-c++app" multiple="false" taskmanage="true" nodisplay="false">
+        <icon>/usr/share/icons/com.samsung.dali-demo.png</icon>
+        <label>DALi UI Markdown sample</label>
+	</ui-application>
+</manifest>

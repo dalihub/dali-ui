@@ -37,6 +37,93 @@ inline const Integration::ChartViewImpl& GetImpl(const ChartView& handle)
 }
 } // anonymous namespace
 
+struct ChartPointEventArgs::Impl
+{
+  Impl() = default;
+
+  Impl(int seriesIndexIn, int pointIndexIn, float dataXIn, float dataYIn, const Dali::String& seriesNameIn, const Dali::String& xLabelIn)
+  : seriesIndex(seriesIndexIn),
+    pointIndex(pointIndexIn),
+    dataX(dataXIn),
+    dataY(dataYIn),
+    seriesName(seriesNameIn),
+    xLabel(xLabelIn)
+  {
+  }
+
+  int          seriesIndex{-1};
+  int          pointIndex{-1};
+  float        dataX{0.0f};
+  float        dataY{0.0f};
+  Dali::String seriesName;
+  Dali::String xLabel;
+};
+
+ChartPointEventArgs::ChartPointEventArgs()
+: mImpl(MakeUnique<Impl>())
+{
+}
+
+ChartPointEventArgs::ChartPointEventArgs(int                 seriesIndex,
+                                         int                 pointIndex,
+                                         float               dataX,
+                                         float               dataY,
+                                         const Dali::String& seriesName,
+                                         const Dali::String& xLabel)
+: mImpl(MakeUnique<Impl>(seriesIndex, pointIndex, dataX, dataY, seriesName, xLabel))
+{
+}
+
+ChartPointEventArgs::ChartPointEventArgs(const ChartPointEventArgs& rhs)
+: mImpl(MakeUnique<Impl>(*rhs.mImpl))
+{
+}
+
+ChartPointEventArgs::ChartPointEventArgs(ChartPointEventArgs&& rhs) noexcept = default;
+
+ChartPointEventArgs& ChartPointEventArgs::operator=(const ChartPointEventArgs& rhs)
+{
+  if(this != &rhs)
+  {
+    mImpl = MakeUnique<Impl>(*rhs.mImpl);
+  }
+  return *this;
+}
+
+ChartPointEventArgs& ChartPointEventArgs::operator=(ChartPointEventArgs&& rhs) noexcept = default;
+
+ChartPointEventArgs::~ChartPointEventArgs() = default;
+
+int ChartPointEventArgs::GetSeriesIndex() const
+{
+  return mImpl->seriesIndex;
+}
+
+int ChartPointEventArgs::GetPointIndex() const
+{
+  return mImpl->pointIndex;
+}
+
+float ChartPointEventArgs::GetDataX() const
+{
+  return mImpl->dataX;
+}
+
+float ChartPointEventArgs::GetDataY() const
+{
+  return mImpl->dataY;
+}
+
+const Dali::String& ChartPointEventArgs::GetSeriesName() const
+{
+  return mImpl->seriesName;
+}
+
+const Dali::String& ChartPointEventArgs::GetXLabel() const
+{
+  return mImpl->xLabel;
+}
+
 ChartView::ChartView()
 {
 }
@@ -130,7 +217,7 @@ Vector4 ChartView::GetTitleColor() const
 
 void ChartView::SetTooltipFormatter(TooltipFormatterType formatter)
 {
-  GetImpl(*this).SetTooltipFormatter(std::move(formatter));
+  GetImpl(*this).SetTooltipFormatter(formatter);
 }
 
 void ChartView::SetAnimationDuration(float milliseconds)
@@ -218,12 +305,12 @@ bool ChartView::IsZoomClampEnabled() const
   return GetImpl(*this).IsZoomClampEnabled();
 }
 
-void ChartView::SetAutoFitYOnPan(bool enabled)
+void ChartView::SetAutoFitYOnPanEnabled(bool enabled)
 {
   GetImpl(*this).SetAutoFitYOnPan(enabled);
 }
 
-bool ChartView::IsAutoFitYOnPan() const
+bool ChartView::IsAutoFitYOnPanEnabled() const
 {
   return GetImpl(*this).IsAutoFitYOnPan();
 }
@@ -272,20 +359,20 @@ float ChartView::GetGaugeValue() const
   return GetImpl(*this).GetGaugeValue();
 }
 
-void ChartView::SetGaugeMinValue(float v)
+void ChartView::SetGaugeMinimumValue(float v)
 {
   GetImpl(*this).SetGaugeMinValue(v);
 }
-float ChartView::GetGaugeMinValue() const
+float ChartView::GetGaugeMinimumValue() const
 {
   return GetImpl(*this).GetGaugeMinValue();
 }
 
-void ChartView::SetGaugeMaxValue(float v)
+void ChartView::SetGaugeMaximumValue(float v)
 {
   GetImpl(*this).SetGaugeMaxValue(v);
 }
-float ChartView::GetGaugeMaxValue() const
+float ChartView::GetGaugeMaximumValue() const
 {
   return GetImpl(*this).GetGaugeMaxValue();
 }

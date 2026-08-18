@@ -16,6 +16,10 @@ on:
         required: false
         default: 'default'
 
+concurrency:
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on:
@@ -57,8 +61,22 @@ jobs:
         if($LASTEXITCODE -ne 0) { throw "Failed to clone dali-core." }
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
         if($LASTEXITCODE -ne 0) { throw "Failed to clone dali-adaptor." }
-        git clone https://github.com/dalihub/windows-dependencies.git
-        if($LASTEXITCODE -ne 0) { throw "Failed to clone windows-dependencies." }
+        $MaxAttempts = 10
+        for($Attempt = 1; $Attempt -le $MaxAttempts; $Attempt++)
+        {
+          git clone https://github.com/dalihub/windows-dependencies.git
+          if($LASTEXITCODE -eq 0)
+          {
+            break
+          }
+
+          if($Attempt -eq $MaxAttempts)
+          {
+            throw "Failed to clone windows-dependencies after $MaxAttempts attempts."
+          }
+
+          Start-Sleep -Seconds 3
+        }
         Pop-Location
 
         function Get-DependencyChange

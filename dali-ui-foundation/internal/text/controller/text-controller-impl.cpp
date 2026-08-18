@@ -605,6 +605,25 @@ void Controller::Impl::InvalidateFontData()
   RequestAsyncRender();
 }
 
+void Controller::Impl::InvalidateLayoutDirectionData()
+{
+  mTextUpdateInfo.mCharacterIndex             = 0u;
+  mTextUpdateInfo.mNumberOfCharactersToRemove = mTextUpdateInfo.mPreviousNumberOfCharacters;
+  mTextUpdateInfo.mNumberOfCharactersToAdd    = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
+
+  mTextUpdateInfo.mClearAll           = true;
+  mTextUpdateInfo.mFullRelayoutNeeded = true;
+  mRecalculateNaturalSize             = true;
+  mRecalculateLayoutSize              = true;
+  mRecalculateHeightForWidth          = true;
+
+  mOperationsPending = static_cast<OperationsMask>(mOperationsPending | SHAPE_TEXT | BIDI_INFO | GET_GLYPH_METRICS |
+                                                   LAYOUT | UPDATE_LAYOUT_SIZE | REORDER | ALIGN | UPDATE_DIRECTION);
+
+  RequestRelayout();
+  RequestAsyncRender();
+}
+
 void Controller::Impl::NotifyInputMethodContext()
 {
   if(mEventData && mEventData->mInputMethodContext)

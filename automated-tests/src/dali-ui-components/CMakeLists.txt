@@ -19,9 +19,29 @@ SET(TC_SOURCES
     utc-Dali-Dialog.cpp
     utc-Dali-DialogContainer.cpp
     utc-Dali-AlertDialog.cpp
+    utc-Dali-MarkdownView.cpp
+)
+
+SET(TC_GENERATED_HEADER
+    ${CMAKE_CURRENT_SOURCE_DIR}/${EXEC_NAME}.h
+)
+
+ADD_CUSTOM_COMMAND(
+    COMMAND ../../scripts/tcheadgen.sh ${EXEC_NAME}.h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT ${TC_GENERATED_HEADER}
+    DEPENDS
+        ${TC_SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/tcheadgen.sh
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/retriever.sh
+    COMMENT "Generating test tables for ${EXEC_NAME}"
+    VERBATIM
 )
 
 LIST(APPEND TC_SOURCES
+    ../../../dali-ui-components/internal/markdown/markdown-parser.cpp
+    ../../../dali-ui-components/internal/markdown/markdown-render-model.cpp
     ../dali-test-suite-utils/mesh-builder.cpp
     ../dali-test-suite-utils/dali-test-suite-utils.cpp
     ../dali-test-suite-utils/test-actor-utils.cpp
@@ -64,6 +84,25 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-window.cpp
 )
 
+ADD_LIBRARY(dali-ui-components-test-md4c STATIC
+    ../../../third-party/md4c/entity.c
+    ../../../third-party/md4c/md4c.c
+)
+SET_TARGET_PROPERTIES(dali-ui-components-test-md4c
+    PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    C_STANDARD 99
+    C_STANDARD_REQUIRED ON
+)
+TARGET_INCLUDE_DIRECTORIES(dali-ui-components-test-md4c
+    PRIVATE
+    ../../../third-party/md4c
+)
+TARGET_COMPILE_OPTIONS(dali-ui-components-test-md4c
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:C>:-fvisibility=hidden>
+)
+
 PKG_CHECK_MODULES(${CAPI_LIB} REQUIRED
      dali2-core
      dali2-adaptor
@@ -71,9 +110,12 @@ PKG_CHECK_MODULES(${CAPI_LIB} REQUIRED
      dali2-ui-components
 )
 
+SET(${CAPI_LIB}_CFLAGS_OTHER_FOR_TESTS ${${CAPI_LIB}_CFLAGS_OTHER})
+LIST(REMOVE_ITEM ${CAPI_LIB}_CFLAGS_OTHER_FOR_TESTS "-Wno-unused-command-line-argument")
+
 ADD_COMPILE_OPTIONS( -rdynamic )
 ADD_COMPILE_OPTIONS( -O0 -ggdb --coverage -Wall -Werror )
-ADD_COMPILE_OPTIONS( ${${CAPI_LIB}_CFLAGS_OTHER} )
+ADD_COMPILE_OPTIONS( ${${CAPI_LIB}_CFLAGS_OTHER_FOR_TESTS} )
 
 FOREACH(directory ${${CAPI_LIB}_LIBRARY_DIRS})
     SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -L${directory}")
@@ -89,9 +131,10 @@ INCLUDE_DIRECTORIES(
 
 ADD_DEFINITIONS( -DADDON_LIBS_PATH=\"${CMAKE_CURRENT_BINARY_DIR}\" )
 
-ADD_EXECUTABLE(${EXEC_NAME} ${EXEC_NAME}.cpp ${TC_SOURCES})
+ADD_EXECUTABLE(${EXEC_NAME} ${TC_GENERATED_HEADER} ${EXEC_NAME}.cpp ${TC_SOURCES})
 TARGET_LINK_LIBRARIES(${EXEC_NAME}
     ${${CAPI_LIB}_LIBRARIES}
+    dali-ui-components-test-md4c
     -lpthread -ldl --coverage -rdynamic
 )
 

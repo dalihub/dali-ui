@@ -78,17 +78,17 @@ int UtcDaliChartSectionSetBoundsP(void)
   UiTestApplication application(Components::UiConfig::New());
   ChartSection      section = ChartSection::New();
 
-  section.SetXMin(1.0f);
-  DALI_TEST_EQUALS(section.GetXMin(), 1.0f, 0.001f, TEST_LOCATION);
+  section.SetMinimumX(1.0f);
+  DALI_TEST_EQUALS(section.GetMinimumX(), 1.0f, 0.001f, TEST_LOCATION);
 
-  section.SetXMax(5.0f);
-  DALI_TEST_EQUALS(section.GetXMax(), 5.0f, 0.001f, TEST_LOCATION);
+  section.SetMaximumX(5.0f);
+  DALI_TEST_EQUALS(section.GetMaximumX(), 5.0f, 0.001f, TEST_LOCATION);
 
-  section.SetYMin(0.0f);
-  DALI_TEST_EQUALS(section.GetYMin(), 0.0f, 0.001f, TEST_LOCATION);
+  section.SetMinimumY(0.0f);
+  DALI_TEST_EQUALS(section.GetMinimumY(), 0.0f, 0.001f, TEST_LOCATION);
 
-  section.SetYMax(100.0f);
-  DALI_TEST_EQUALS(section.GetYMax(), 100.0f, 0.001f, TEST_LOCATION);
+  section.SetMaximumY(100.0f);
+  DALI_TEST_EQUALS(section.GetMaximumY(), 100.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -120,10 +120,10 @@ int UtcDaliChartSectionSettersP(void)
   UiTestApplication application(Components::UiConfig::New());
   ChartSection      section = ChartSection::New();
 
-  section.SetXMin(0.0f);
-  section.SetXMax(10.0f);
+  section.SetMinimumX(0.0f);
+  section.SetMaximumX(10.0f);
   section.SetFillColor(Vector4(0.0f, 0.0f, 1.0f, 0.2f));
   section.SetStrokeWidth(1.5f);
-  DALI_TEST_EQUALS(section.GetXMax(), 10.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(section.GetMaximumX(), 10.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }

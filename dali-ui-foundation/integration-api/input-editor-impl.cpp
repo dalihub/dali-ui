@@ -308,9 +308,7 @@ float ClampWithMinPriority(float value, float minValue, float maxValue)
 
 InputEditorImplPtr InputEditorImpl::New()
 {
-  InputEditorImplPtr impl(new InputEditorImpl());
-
-  return impl;
+  return InputEditorImplPtr(new InputEditorImpl());
 }
 
 InputEditorImpl::InputEditorImpl()

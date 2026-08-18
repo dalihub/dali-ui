@@ -118,10 +118,9 @@ void UiScaleManagerImpl::InvalidateAllLayoutRoots()
     if(rootView)
     {
       ViewImpl& viewImpl = GetImpl(rootView);
-      // Drop the cached scale (and the layout caches derived from it) for the
-      // entire subtree first, so every view re-evaluates its effective scale on
-      // the next Measure pass.
-      ViewDataImpl::Get(viewImpl).ResetSubtreeScaleAndLayoutCaches();
+      // Reset scale cache for the entire subtree first, so every view
+      // re-evaluates its effective scale on the next Measure pass.
+      ViewDataImpl::Get(viewImpl).ResetEffectiveScaleRecursive();
       // Then invalidate measure at the root to schedule a re-layout pass.
       viewImpl.InvalidateMeasure();
     }

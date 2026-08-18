@@ -36,6 +36,7 @@ void utc_dali_webview_cleanup(void)
 namespace
 {
 void OnJavaScriptCallback(const Dali::String& result) {}
+void OnJavaScriptMessageWithNameCallback(const Dali::String& exposedObjectName, const Dali::String& message) {}
 bool OnJavaScriptAlertCallback(const Dali::String& message) { return true; }
 bool OnJavaScriptConfirmCallback(const Dali::String& message) { return true; }
 bool OnJavaScriptPromptCallback(const Dali::String& message, const Dali::String& defaultValue) { return true; }
@@ -314,6 +315,15 @@ int UtcDaliWebViewGetScrollPositionP(void)
   END_TEST;
 }
 
+int UtcDaliWebViewSetScrollPositionP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.SetScrollPosition(Vector2(10.0f, 20.0f));
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
 int UtcDaliWebViewGetScrollSizeP(void)
 {
   UiTestApplication application;
@@ -475,6 +485,60 @@ int UtcDaliWebViewGetSettingsP(void)
   DALI_TEST_CHECK(settings != emptySettings);
   settings.SetExtraFeatureValue(Dali::String("testFeature"), Dali::String("testValue"));
   settings.GetExtraFeatureValue(Dali::String("testFeature"));
+  settings.SetSpatialNavigationEnabled(true);
+  settings.GetDefaultFontSize();
+  settings.SetDefaultFontSize(16u);
+  settings.SetWebSecurityEnabled(true);
+  settings.SetExtraFeatureEnabled(Dali::String("testFeature"), true);
+  settings.IsExtraFeatureEnabled(Dali::String("testFeature"));
+  END_TEST;
+}
+
+int UtcDaliWebViewGetBackForwardListP(void)
+{
+  UiTestApplication application;
+  WebBackForwardList list;
+
+  {
+    WebView view = WebView::New();
+    list = view.GetBackForwardList();
+    DALI_TEST_CHECK(list);
+    BaseHandle base = list;
+    WebBackForwardList downcast = WebBackForwardList::DownCast(base);
+    WebBackForwardList copy(list);
+    WebBackForwardList moved(std::move(copy));
+    DALI_TEST_CHECK(downcast == list);
+    DALI_TEST_CHECK(moved == list);
+    list.GetCurrentItem();
+    list.GetPreviousItem();
+    list.GetNextItem();
+    list.GetItemAtIndex(0u);
+    list.GetItemCount();
+    list.GetBackwardItems();
+    list.GetForwardItems();
+  }
+
+  DALI_TEST_EQUALS(list.GetItemCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!list.GetCurrentItem().IsValid());
+  END_TEST;
+}
+
+int UtcDaliWebBackForwardListItemDefaultP(void)
+{
+  WebBackForwardListItem item;
+  WebBackForwardListItem copy(item);
+  WebBackForwardListItem moved(std::move(copy));
+  WebBackForwardListItem assigned;
+  assigned = item;
+  WebBackForwardListItem moveAssigned;
+  moveAssigned = std::move(assigned);
+
+  DALI_TEST_CHECK(!item.IsValid());
+  DALI_TEST_CHECK(item.GetUrl().Empty());
+  DALI_TEST_CHECK(item.GetTitle().Empty());
+  DALI_TEST_CHECK(item.GetOriginalUrl().Empty());
+  DALI_TEST_CHECK(!moved.IsValid());
+  DALI_TEST_CHECK(!moveAssigned.IsValid());
   END_TEST;
 }
 
@@ -515,6 +579,16 @@ int UtcDaliWebViewAddJavaScriptMessageHandlerP(void)
   UiTestApplication application;
   WebView view = WebView::New();
   auto callback = WebView::JavaScriptCallback::New(OnJavaScriptCallback);
+  view.AddJavaScriptMessageHandler(Dali::String("testObject"), std::move(callback));
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewAddJavaScriptMessageHandlerWithNameP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  auto callback = Dali::Ui::Callback<void(const Dali::String&, const Dali::String&)>::New(OnJavaScriptMessageWithNameCallback);
   view.AddJavaScriptMessageHandler(Dali::String("testObject"), std::move(callback));
   DALI_TEST_CHECK(view);
   END_TEST;

@@ -445,7 +445,7 @@ class ScaleEngine
 
 Coordinate convention: `ToCanvasY` inverts the Y axis so that larger data values appear higher on screen.
 
-`ComputeNiceTicks()` computes "nice" rounded tick values using the standard magnitude-fraction algorithm (steps at 1×, 2×, 5×, 10× powers of ten), optionally clamped to a `minStep` set via `ChartAxis::SetMinStep()`.
+`ComputeNiceTicks()` computes "nice" rounded tick values using the standard magnitude-fraction algorithm (steps at 1×, 2×, 5×, 10× powers of ten), optionally clamped to a `minStep` set via `ChartAxis::SetMinimumStep()`.
 
 When zoom/pan is active (`mViewportActive == true`), `UpdateScale()` uses the viewport's data-space bounds rather than the full auto-range, so all rendering and hit-testing automatically operate within the zoomed window.
 

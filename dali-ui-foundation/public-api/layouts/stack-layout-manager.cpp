@@ -24,7 +24,6 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/stack-layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -183,20 +182,7 @@ StackLayoutManager::~StackLayoutManager()
 
 void StackLayoutManager::SetOrientation(StackOrientation orientation)
 {
-  Impl* impl = GetImplAs<Impl>();
-  if(impl->mOrientation == orientation)
-  {
-    return;
-  }
-  impl->mOrientation = orientation;
-
-  // This state is read by both Measure() and Arrange(), and neither the measure cache
-  // key nor the arrange cache key can see it, so the owner has to be told. Reaching
-  // this manager directly (through the protected View::GetLayoutManager()) used to
-  // leave the change unscheduled; now it invalidates exactly as StackLayout's own
-  // setter does. This also keeps ArrangePolicy::IF_CHANGED valid: the orientation is
-  // layout-tracked precisely because of this call.
-  InvalidateOwnerMeasure();
+  GetImplAs<Impl>()->mOrientation = orientation;
 }
 
 StackOrientation StackLayoutManager::GetOrientation() const
@@ -206,16 +192,7 @@ StackOrientation StackLayoutManager::GetOrientation() const
 
 void StackLayoutManager::SetSpacing(float spacing)
 {
-  Impl* impl = GetImplAs<Impl>();
-  if(impl->mSpacing == spacing)
-  {
-    return;
-  }
-  impl->mSpacing = spacing;
-
-  // Spacing changes the accumulated main-axis extent, so it is a MEASURE input.
-  // See SetOrientation for why the owner has to be invalidated from here.
-  InvalidateOwnerMeasure();
+  GetImplAs<Impl>()->mSpacing = spacing;
 }
 
 float StackLayoutManager::GetSpacing() const
@@ -449,11 +426,7 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
           childHeightConstraint = std::max(0.0f, availableHeight - marginH);
         }
 
-        MeasuredSize childSize;
-        {
-          Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
-          childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
-        }
+        MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
 
         if(impl->mOrientation == StackOrientation::VERTICAL)
         {
@@ -528,7 +501,6 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
-        Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
         childImpl.Measure(childBounds.width, childBounds.height);
       }
       childImpl.Arrange(childBounds);
@@ -579,7 +551,6 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
-        Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
         childImpl.Measure(childBounds.width, childBounds.height);
       }
       childImpl.Arrange(childBounds);

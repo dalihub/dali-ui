@@ -37,6 +37,7 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/web-back-forward-list-impl.h>
 #include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <dali-ui-foundation/integration-api/web-settings-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -183,7 +184,6 @@ WebViewImpl::WebViewImpl()
   mMouseEventsEnabled(true),
   mKeyEventsEnabled(true)
 {
-  SetArrangePolicy(ArrangePolicy::ALWAYS);
   // WebEngine instance is created in the factory (New()), not here,
   // so that the caller can choose type/argc/argv.
 }
@@ -282,9 +282,9 @@ void WebViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index in
     case Property::SCROLL_POSITION:
     {
       Vector2 pos;
-      if(value.Get(pos) && impl.mWebEngine)
+      if(value.Get(pos))
       {
-        impl.mWebEngine.SetScrollPosition(static_cast<int32_t>(pos.x), static_cast<int32_t>(pos.y));
+        impl.SetScrollPosition(pos);
       }
       break;
     }
@@ -528,15 +528,6 @@ MeasuredSize WebViewImpl::OnMeasure(float widthConstraint, float heightConstrain
   return MeasuredSize(w, h);
 }
 
-// ArrangePolicy::ALWAYS is required here and is set in the constructor. CalculateDisplayArea() reads
-// Actor::Property::SCREEN_POSITION, a function of the whole ancestor chain, and
-// SetDisplayArea() pushes it to a surface outside the actor tree
-// (mWebEngine.UpdateDisplayArea). Neither input is in the arrange cache key, and an
-// ancestor move invalidates nothing here, so serving this view a cached arrange would
-// strand the web engine's surface at a stale offset. The WORLD_POSITION
-// StepCondition(1.0f, 1.0f) notification is a coarse backstop, not an equivalent: it
-// cannot see sub-pixel-per-frame drift.
-// Pinned by UtcDaliArrangeCacheHitAlwaysFirstPartyLeavesNeverCacheP.
 LayoutRect WebViewImpl::OnArrange(const LayoutRect& bounds)
 {
   DALI_LOG_DEBUG_INFO("[WebViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f)\n",
@@ -615,8 +606,8 @@ void WebViewImpl::OnFrameRendered()
   {
     Vector3 selfSize = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
     WriteWebViewDebugLog("[WV] created visual=%d nativeImg=%ux%u selfSize=%.0fx%.0f",
-          (int)(bool)mVisual, mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight,
-          selfSize.width, selfSize.height);
+                         (int)(bool)mVisual, mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight,
+                         selfSize.width, selfSize.height);
   }
 #endif
   if(mVisual)
@@ -912,6 +903,14 @@ bool WebViewImpl::RemoveCustomHeader(const Dali::String& name)
 // Scroll
 // ===========================================================================
 
+void WebViewImpl::SetScrollPosition(const Dali::Vector2& position)
+{
+  if(mWebEngine)
+  {
+    mWebEngine.SetScrollPosition(static_cast<int32_t>(position.x), static_cast<int32_t>(position.y));
+  }
+}
+
 Dali::Vector2 WebViewImpl::GetScrollPosition() const
 {
   if(!mWebEngine)
@@ -1047,7 +1046,7 @@ void WebViewImpl::EvaluateJavaScript(const Dali::String& script, WebView::JavaSc
   });
 }
 
-void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, WebView::JavaScriptCallback callback)
+void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& message)> callback)
 {
   if(!mWebEngine)
   {
@@ -1059,6 +1058,22 @@ void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectN
   {
     Dali::String daliMsg(message.c_str());
     CallbackBase::Execute<Dali::String>(*sharedCb, daliMsg);
+  });
+}
+
+void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& exposedObjectName, const Dali::String& message)> callback)
+{
+  if(!mWebEngine)
+  {
+    return;
+  }
+  auto sharedCb = std::shared_ptr<CallbackBase>(callback.Release());
+  mWebEngine.AddJavaScriptEntireMessageHandler(ToStdString(exposedObjectName),
+                                               [sharedCb](const std::string& objectName, const std::string& message)
+  {
+    Dali::String daliObjectName(objectName.c_str());
+    Dali::String daliMessage(message.c_str());
+    CallbackBase::Execute<Dali::String, Dali::String>(*sharedCb, daliObjectName, daliMessage);
   });
 }
 
@@ -1176,6 +1191,16 @@ WebSettings WebViewImpl::GetSettings() const
     mWebSettings            = WebSettings(*impl);
   }
   return mWebSettings;
+}
+
+WebBackForwardList WebViewImpl::GetBackForwardList() const
+{
+  if(!mWebBackForwardList)
+  {
+    WebBackForwardListImplPtr impl = WebBackForwardListImpl::New(mWebEngine);
+    mWebBackForwardList            = WebBackForwardList(*impl);
+  }
+  return mWebBackForwardList;
 }
 
 float WebViewImpl::GetPageZoomFactor() const
@@ -1403,8 +1428,8 @@ bool WebViewImpl::OnTouchEvent(const Dali::TouchEvent& touch)
       Vector2 lp = touch.GetPointCount() ? touch.GetLocalPosition(0) : Vector2::ZERO;
       Vector2 sp = touch.GetPointCount() ? touch.GetScreenPosition(0) : Vector2::ZERO;
       WriteWebViewDebugLog("[TOUCH] actorSize=%.0fx%.0f local=(%.0f,%.0f) screen=(%.0f,%.0f) lastImg=%ux%u",
-            sz.width, sz.height, lp.x, lp.y, sp.x, sp.y,
-            mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight);
+                           sz.width, sz.height, lp.x, lp.y, sp.x, sp.y,
+                           mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight);
     }
     // Clicking the page must also give it keyboard focus (like a real browser), otherwise
     // OnKeyEvent() never fires for this control and key events never reach the web engine.

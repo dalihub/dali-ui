@@ -61,6 +61,34 @@ int UtcDaliImageViewNewWithUrlP(void)
   END_TEST;
 }
 
+int UtcDaliImageViewNewWithImageUrlP(void)
+{
+  UiTestApplication application;
+
+  EncodedImageBuffer::RawBufferType rawBuffer;
+  rawBuffer.PushBack(0x11u);
+  ImageUrl          imageUrl = ImageUrl::New(EncodedImageBuffer::New(std::move(rawBuffer)));
+  const Dali::String resourceUrl(imageUrl.GetUrl());
+
+  ImageView view = ImageView::New(imageUrl);
+  imageUrl.Reset();
+
+  DALI_TEST_CHECK(view);
+  DALI_TEST_EQUALS(view.GetResourceUrl(), resourceUrl, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewNewWithEmptyImageUrlP(void)
+{
+  UiTestApplication application;
+  ImageUrl          imageUrl;
+  ImageView         view = ImageView::New(imageUrl);
+
+  DALI_TEST_CHECK(view);
+  DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String(), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliImageViewCopyConstructorP(void)
 {
   UiTestApplication application;
@@ -130,6 +158,26 @@ int UtcDaliImageViewSetGetImageP(void)
   ImageView view = ImageView::New();
   view.SetResourceUrl("image.jpg");
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("image.jpg"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewSetGetImageUrlP(void)
+{
+  UiTestApplication application;
+
+  EncodedImageBuffer::RawBufferType rawBuffer;
+  rawBuffer.PushBack(0x22u);
+  ImageUrl          imageUrl = ImageUrl::New(EncodedImageBuffer::New(std::move(rawBuffer)));
+  const Dali::String resourceUrl(imageUrl.GetUrl());
+
+  ImageView view = ImageView::New();
+  view.SetResourceUrl(imageUrl);
+  imageUrl.Reset();
+
+  DALI_TEST_EQUALS(view.GetResourceUrl(), resourceUrl, TEST_LOCATION);
+
+  view.SetResourceUrl(ImageUrl());
+  DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String(), TEST_LOCATION);
   END_TEST;
 }
 

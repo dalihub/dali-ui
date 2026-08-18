@@ -18,7 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/actors/actor-enumerations-devel.h>
-#include <dali/devel-api/adaptor-framework/image-loading.h>
+#include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
@@ -243,9 +243,7 @@ UiConfig::SystemFontSize ToUiConfigSystemFontSize(Dali::Integration::SystemSetti
 
 LabelImplPtr LabelImpl::New()
 {
-  LabelImplPtr impl(new LabelImpl());
-
-  return impl;
+  return LabelImplPtr(new LabelImpl());
 }
 
 LabelImpl::LabelImpl()

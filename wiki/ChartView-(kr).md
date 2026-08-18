@@ -467,8 +467,8 @@ chart.SetYAxis(yAxis);
 ### 수동 범위 한계
 
 ```cpp
-yAxis.SetMinLimit(0.0f);
-yAxis.SetMaxLimit(500.0f);
+yAxis.SetMinimumLimit(0.0f);
+yAxis.SetMaximumLimit(500.0f);
 ```
 
 한계를 설정하지 않으면 축이 데이터에 맞게 자동으로 범위를 조정합니다(여백 포함).
@@ -487,7 +487,7 @@ xAxis.SetDataPadding(0.0f);   // X축 여백 없음
 틱 마크가 지정한 값의 배수에 위치하도록 강제합니다:
 
 ```cpp
-yAxis.SetMinStep(50.0f);   // Y 틱: 0, 50, 100, 150, ...
+yAxis.SetMinimumStep(50.0f);   // Y 틱: 0, 50, 100, 150, ...
 ```
 
 ### 레이블 회전
@@ -519,7 +519,7 @@ chart.SetXAxis(xAxis);
 
 ChartAxis yAxis = ChartAxis::New();
 yAxis.SetTitle("Units Sold");
-yAxis.SetMinStep(50.0f);
+yAxis.SetMinimumStep(50.0f);
 yAxis.SetDataPadding(0.1f);
 chart.SetYAxis(yAxis);
 ```
@@ -552,8 +552,8 @@ chart.SetYAxis(yAxis);
 
 ```cpp
 ChartSection xBand = ChartSection::New();
-xBand.SetXMin(2.5f);
-xBand.SetXMax(5.5f);
+xBand.SetMinimumX(2.5f);
+xBand.SetMaximumX(5.5f);
 xBand.SetFillColor(Vector4(0.2f, 0.7f, 0.3f, 0.12f));
 xBand.SetStrokeColor(Vector4(0.2f, 0.7f, 0.3f, 0.5f));
 xBand.SetStrokeWidth(1.5f);
@@ -564,8 +564,8 @@ chart.AddSection(xBand);
 
 ```cpp
 ChartSection yBand = ChartSection::New();
-yBand.SetYMin(200.0f);
-yBand.SetYMax(280.0f);
+yBand.SetMinimumY(200.0f);
+yBand.SetMaximumY(280.0f);
 yBand.SetFillColor(Vector4(1.0f, 0.85f, 0.2f, 0.10f));
 chart.AddSection(yBand);
 ```
@@ -574,8 +574,8 @@ chart.AddSection(yBand);
 
 ```cpp
 ChartSection hLine = ChartSection::New();
-hLine.SetYMin(250.0f);
-hLine.SetYMax(250.0f);   // 같은 값 = 선
+hLine.SetMinimumY(250.0f);
+hLine.SetMaximumY(250.0f);   // 같은 값 = 선
 hLine.SetStrokeColor(Vector4(1.0f, 0.3f, 0.3f, 0.9f));
 hLine.SetStrokeWidth(2.0f);
 chart.AddSection(hLine);
@@ -585,8 +585,8 @@ chart.AddSection(hLine);
 
 ```cpp
 ChartSection vLine = ChartSection::New();
-vLine.SetXMin(6.0f);
-vLine.SetXMax(6.0f);   // 같은 값 = 선
+vLine.SetMinimumX(6.0f);
+vLine.SetMaximumX(6.0f);   // 같은 값 = 선
 vLine.SetStrokeColor(Vector4(0.4f, 0.4f, 1.0f, 0.8f));
 vLine.SetStrokeWidth(2.0f);
 chart.AddSection(vLine);
@@ -596,10 +596,10 @@ chart.AddSection(vLine);
 
 ```cpp
 ChartSection rect = ChartSection::New();
-rect.SetXMin(8.5f);
-rect.SetXMax(11.5f);
-rect.SetYMin(270.0f);
-rect.SetYMax(320.0f);
+rect.SetMinimumX(8.5f);
+rect.SetMaximumX(11.5f);
+rect.SetMinimumY(270.0f);
+rect.SetMaximumY(320.0f);
 rect.SetFillColor(Vector4(0.6f, 0.2f, 1.0f, 0.12f));
 rect.SetStrokeColor(Vector4(0.6f, 0.2f, 1.0f, 0.6f));
 rect.SetStrokeWidth(1.5f);
@@ -678,12 +678,12 @@ chart.RemoveAllSeries();
 
 ### AppendValue를 이용한 슬라이딩 윈도우
 
-실시간 데이터 피드(센서, 스트리밍)에는 `AppendValue()`와 `SetMaxDataPoints()`를 함께 사용하여 고정 길이의 슬라이딩 윈도우를 유지합니다:
+실시간 데이터 피드(센서, 스트리밍)에는 `AppendValue()`와 `SetMaximumDataPoints()`를 함께 사용하여 고정 길이의 슬라이딩 윈도우를 유지합니다:
 
 ```cpp
 LineSeries series = LineSeries::New();
 series.SetName("CPU Usage");
-series.SetMaxDataPoints(60);   // 최대 60개 포인트 유지; 초과 시 가장 오래된 포인트 제거
+series.SetMaximumDataPoints(60);   // 최대 60개 포인트 유지; 초과 시 가장 오래된 포인트 제거
 
 chart.AddSeries(series);
 
@@ -717,7 +717,7 @@ chart.SetUpdateThrottle(0.0f);
 LineSeries liveSeries = LineSeries::New();
 liveSeries.SetName("Temperature");
 liveSeries.SetColor(Vector4(1.0f, 0.4f, 0.2f, 1.0f));
-liveSeries.SetMaxDataPoints(120);
+liveSeries.SetMaximumDataPoints(120);
 liveSeries.SetMarkersVisible(false);
 
 chart.AddSeries(liveSeries);
@@ -768,7 +768,7 @@ chart.SetZoomMode(static_cast<int>(ChartView::ZoomMode::NONE));
 
 ```cpp
 chart.SetZoomClampEnabled(true);    // 데이터 범위를 벗어난 팬 방지
-chart.SetAutoFitYOnPan(true);       // 팬 중에 표시되는 X 윈도우에 맞게 Y축 자동 스케일
+chart.SetAutoFitYOnPanEnabled(true);       // 팬 중에 표시되는 X 윈도우에 맞게 Y축 자동 스케일
 chart.ResetZoom();                  // 전체 데이터 뷰로 복귀
 ```
 
@@ -824,6 +824,8 @@ chart.SetHitThreshold(30.0f);   // 탭이 히트로 인식되는 픽셀 거리 (
 
 ![Custom tooltip formatter](assets/chartview/formatter.png)
 
+ChartView의 모든 시그널은 콜백의 첫 번째 인자로 이를 발생시킨 `ChartView`를 전달합니다 — 여러 차트에 같은 핸들러를 연결할 때 유용합니다.
+
 ### DataPointSelectedSignal
 
 사용자가 데이터 포인트를 탭하거나 호버할 때 발생합니다.
@@ -832,17 +834,17 @@ chart.SetHitThreshold(30.0f);   // 탭이 히트로 인식되는 픽셀 거리 (
 class MyHandler : public Dali::ConnectionTracker
 {
 public:
-    void OnPointSelected(const ChartPointEventArgs& e)
+    void OnPointSelected(ChartView chart, const ChartPointEventArgs& e)
     {
-        // e.seriesIndex  — 0부터 시작하는 시리즈 인덱스
-        // e.pointIndex   — 시리즈 내 0부터 시작하는 포인트 인덱스
-        // e.dataX        — 선택된 포인트의 X 값
-        // e.dataY        — 선택된 포인트의 Y 값
-        // e.seriesName   — SetName()으로 설정한 이름
-        // e.xLabel       — ChartAxis::SetLabels()의 레이블 문자열
+        // e.GetSeriesIndex()  — 0부터 시작하는 시리즈 인덱스
+        // e.GetPointIndex()   — 시리즈 내 0부터 시작하는 포인트 인덱스
+        // e.GetDataX()        — 선택된 포인트의 X 값
+        // e.GetDataY()        — 선택된 포인트의 Y 값
+        // e.GetSeriesName()   — SetName()으로 설정한 이름
+        // e.GetXLabel()       — ChartAxis::SetLabels()의 레이블 문자열
         DALI_LOG_RELEASE_INFO("Hit series %d, point %d: [%s] = %.1f\n",
-                              e.seriesIndex, e.pointIndex,
-                              e.xLabel.CStr(), e.dataY);
+                              e.GetSeriesIndex(), e.GetPointIndex(),
+                              e.GetXLabel().CStr(), e.GetDataY());
     }
 };
 
@@ -855,7 +857,7 @@ chart.DataPointSelectedSignal().Connect(&handler, &MyHandler::OnPointSelected);
 사용자가 범례 항목을 탭할 때 발생합니다.
 
 ```cpp
-void OnLegendTapped(int seriesIndex, bool isNowVisible)
+void OnLegendTapped(ChartView chart, int seriesIndex, bool isNowVisible)
 {
     DALI_LOG_RELEASE_INFO("Legend series %d toggled -> %s\n",
                           seriesIndex, isNowVisible ? "visible" : "hidden");
@@ -875,15 +877,15 @@ chart.MultiPointSelectedSignal().Connect(&handler, &MyHandler::OnMultiPoint);
 
 ### ZoomedSignal
 
-줌 또는 팬 제스처가 완료된 후 데이터 좌표의 새로운 뷰포트를 보고하며 발생합니다.
+줌 또는 팬 제스처가 완료된 후 데이터 좌표의 새로운 뷰포트를 `Dali::Bounds`로 보고하며 발생합니다 (x = 최소 X, y = 최소 Y, `Right()`/`Bottom()`이 최대 X/Y).
 
 ```cpp
-void OnZoomed(const ChartViewportArgs& vp)
+void OnZoomed(ChartView chart, const Dali::Bounds& vp)
 {
-    // vp.xMin, vp.xMax — 데이터 좌표의 표시되는 X 범위
-    // vp.yMin, vp.yMax — 데이터 좌표의 표시되는 Y 범위
+    // vp.x, vp.Right() — 데이터 좌표의 표시되는 X 범위
+    // vp.y, vp.Bottom() — 데이터 좌표의 표시되는 Y 범위
     DALI_LOG_RELEASE_INFO("Viewport X[%.1f ~ %.1f] Y[%.1f ~ %.1f]\n",
-                          vp.xMin, vp.xMax, vp.yMin, vp.yMax);
+                          vp.x, vp.Right(), vp.y, vp.Bottom());
 }
 
 chart.ZoomedSignal().Connect(&handler, &MyHandler::OnZoomed);
@@ -893,10 +895,10 @@ chart.ZoomedSignal().Connect(&handler, &MyHandler::OnZoomed);
 
 | 시그널 | 콜백 시그니처 | 발생 시점 |
 |---|---|---|
-| `DataPointSelectedSignal` | `void(const ChartPointEventArgs&)` | 단일 포인트를 탭하거나 호버할 때 |
-| `LegendItemTappedSignal` | `void(int index, bool isVisible)` | 범례 항목을 탭할 때 |
-| `MultiPointSelectedSignal` | `void(const ChartPointEventArgs&)` | SAME_X 전략에서 매칭되는 각 포인트마다 |
-| `ZoomedSignal` | `void(const ChartViewportArgs&)` | 줌 또는 팬 제스처가 끝날 때 |
+| `DataPointSelectedSignal` | `void(ChartView, const ChartPointEventArgs&)` | 단일 포인트를 탭하거나 호버할 때 |
+| `LegendItemTappedSignal` | `void(ChartView, int index, bool isVisible)` | 범례 항목을 탭할 때 |
+| `MultiPointSelectedSignal` | `void(ChartView, const ChartPointEventArgs&)` | SAME_X 전략에서 매칭되는 각 포인트마다 |
+| `ZoomedSignal` | `void(ChartView, const Dali::Bounds&)` | 줌 또는 팬 제스처가 끝날 때 |
 
 <br/>
 
@@ -949,8 +951,8 @@ series.SetValues({60.0f, 40.0f, 280.0f, 100.0f, 310.0f, 180.0f});
 ChartView gauge = ChartView::New(ChartView::Type::GAUGE, Vector2(360.0f, 360.0f));
 gauge.SetTitle("CPU Usage");
 
-gauge.SetGaugeMinValue(0.0f);
-gauge.SetGaugeMaxValue(100.0f);
+gauge.SetGaugeMinimumValue(0.0f);
+gauge.SetGaugeMaximumValue(100.0f);
 gauge.SetGaugeValue(72.0f);        // 현재 바늘 위치
 
 // 색상 구역
@@ -1002,8 +1004,8 @@ gauge.AddGaugeRange(50.0f, 100.0f, Vector4(1.0f, 0.3f, 0.3f, 1.0f));
 | 메서드 | 설명 |
 |---|---|
 | `SetGaugeValue(float)` | 현재 게이지 위치 설정 |
-| `SetGaugeMinValue(float)` | 최솟값 설정 |
-| `SetGaugeMaxValue(float)` | 최댓값 설정 |
+| `SetGaugeMinimumValue(float)` | 최솟값 설정 |
+| `SetGaugeMaximumValue(float)` | 최댓값 설정 |
 | `SetGaugeArcSpan(float)` | 호의 전체 스윕 각도 (도 단위) |
 | `SetGaugeStartAngle(float)` | 호의 시작 각도 |
 | `SetGaugeArcWidth(float)` | 반지름 대비 호 두께 비율 |

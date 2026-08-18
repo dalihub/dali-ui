@@ -309,8 +309,7 @@ int UtcDaliViewLayoutBoundary_FocusRingRemovalOptimization_P(void)
 }
 
 // T1.7: Measure cache preserved when removing standalone child; a subsequent
-// Arrange still runs its producer here (the arrange cache HIT is restricted to
-// CHILDLESS views and this parent has a child for most of the test), so only
+// Arrange runs unconditionally (ViewImpl::Arrange has no cache gate), so only
 // measure re-invocation is a valid behavioural signal of invalidation.
 int UtcDaliViewLayoutBoundary_RemoveStandaloneNoParentRearrange_P(void)
 {
@@ -381,11 +380,10 @@ int UtcDaliViewLayoutBoundary_StandaloneInvalidateMeasureNoPropagate_P(void)
 }
 
 // T2.2: InvalidateArrange on a standalone child does not mark the parent
-// dirty. The arrange cache HIT is restricted to CHILDLESS views, so this parent
-// (which has a child) never serves one and its arrange gives no behavioural
-// signal. We therefore assert that the parent's measure cache (which a
-// non-boundary InvalidateArrange cannot touch, and a boundary InvalidateArrange
-// must not either) still hits on a follow-up Measure call with the same constraint.
+// dirty. Arrange() itself has no cache, so we instead assert that the
+// parent's measure cache (which a non-boundary InvalidateArrange cannot
+// touch, and a boundary InvalidateArrange must not either) still hits on a
+// follow-up Measure call with the same constraint.
 int UtcDaliViewLayoutBoundary_StandaloneInvalidateArrangeNoPropagate_P(void)
 {
   UiTestApplication application;

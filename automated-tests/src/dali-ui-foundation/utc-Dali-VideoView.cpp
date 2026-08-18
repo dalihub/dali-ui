@@ -42,19 +42,19 @@ namespace
 // A dummy address stands in for a real player_h/esplusplayer_handle.
 int gDummySession = 0;
 
-VideoSource CreateTestSource(const VideoSourceOptions& options, VideoRenderingMode renderingMode)
+VideoSource CreateTestSource(VideoSourceOwnership ownership, VideoRenderingMode renderingMode)
 {
-  return VideoSource::New("test.provider", &gDummySession, options, renderingMode);
+  return VideoSource::New("test.provider", &gDummySession, ownership, renderingMode);
 }
 
 VideoSource CreateUnderlaySource()
 {
-  return CreateTestSource(VideoSourceOptions(), VideoRenderingMode::Underlay);
+  return CreateTestSource(VideoSourceOwnership::EXTERNAL, VideoRenderingMode::UNDERLAY);
 }
 
 VideoSource CreateNativeImageSource()
 {
-  return CreateTestSource(VideoSourceOptions(), VideoRenderingMode::NativeImage);
+  return CreateTestSource(VideoSourceOwnership::EXTERNAL, VideoRenderingMode::NATIVE_IMAGE);
 }
 } // namespace
 
@@ -82,7 +82,7 @@ int UtcDaliVideoSourceNewP(void)
 int UtcDaliVideoSourceNewInvalidSessionN(void)
 {
   UiTestApplication application;
-  VideoSource       source = VideoSource::New("test.provider", nullptr, VideoSourceOptions(), VideoRenderingMode::Underlay);
+  VideoSource       source = VideoSource::New("test.provider", nullptr, VideoSourceOwnership::EXTERNAL, VideoRenderingMode::UNDERLAY);
   DALI_TEST_CHECK(!source.IsValid());
   END_TEST;
 }
@@ -90,7 +90,19 @@ int UtcDaliVideoSourceNewInvalidSessionN(void)
 int UtcDaliVideoSourceNewInvalidProviderIdN(void)
 {
   UiTestApplication application;
-  VideoSource       source = VideoSource::New(nullptr, &gDummySession, VideoSourceOptions(), VideoRenderingMode::Underlay);
+  VideoSource       source = VideoSource::New(nullptr, &gDummySession, VideoSourceOwnership::EXTERNAL, VideoRenderingMode::UNDERLAY);
+  DALI_TEST_CHECK(!source.IsValid());
+  END_TEST;
+}
+
+int UtcDaliVideoSourceNewEmptyProviderIdN(void)
+{
+  UiTestApplication application;
+
+  // An empty provider id names no plugin, so it is rejected like a null one.
+  VideoSource source = VideoSource::New("", &gDummySession, VideoSourceOwnership::EXTERNAL, VideoRenderingMode::UNDERLAY);
+
+  DALI_TEST_CHECK(!source);
   DALI_TEST_CHECK(!source.IsValid());
   END_TEST;
 }
@@ -154,7 +166,7 @@ int UtcDaliVideoSourceRenderingModeUnderlayP(void)
   UiTestApplication application;
   VideoSource       source = CreateUnderlaySource();
 
-  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetRenderingMode()), static_cast<uint32_t>(VideoRenderingMode::Underlay), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetRenderingMode()), static_cast<uint32_t>(VideoRenderingMode::UNDERLAY), TEST_LOCATION);
   END_TEST;
 }
 
@@ -163,7 +175,7 @@ int UtcDaliVideoSourceRenderingModeNativeImageP(void)
   UiTestApplication application;
   VideoSource       source = CreateNativeImageSource();
 
-  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetRenderingMode()), static_cast<uint32_t>(VideoRenderingMode::NativeImage), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetRenderingMode()), static_cast<uint32_t>(VideoRenderingMode::NATIVE_IMAGE), TEST_LOCATION);
   END_TEST;
 }
 
@@ -172,7 +184,7 @@ int UtcDaliVideoSourceDefaultOwnershipP(void)
   UiTestApplication application;
   VideoSource       source = CreateUnderlaySource();
 
-  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetOwnership()), static_cast<uint32_t>(VideoSourceOwnership::External), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetOwnership()), static_cast<uint32_t>(VideoSourceOwnership::EXTERNAL), TEST_LOCATION);
   END_TEST;
 }
 
@@ -180,12 +192,29 @@ int UtcDaliVideoSourceCustomOwnershipP(void)
 {
   UiTestApplication application;
 
-  VideoSourceOptions options;
-  options.ownership = VideoSourceOwnership::Shared;
+  VideoSource source = CreateTestSource(VideoSourceOwnership::SHARED, VideoRenderingMode::UNDERLAY);
 
-  VideoSource source = CreateTestSource(options, VideoRenderingMode::Underlay);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetOwnership()), static_cast<uint32_t>(VideoSourceOwnership::SHARED), TEST_LOCATION);
+  END_TEST;
+}
 
-  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetOwnership()), static_cast<uint32_t>(VideoSourceOwnership::Shared), TEST_LOCATION);
+int UtcDaliVideoSourceCreateFromDescriptorP(void)
+{
+  UiTestApplication application;
+
+  // CreateVideoSource() views the temporary Dali::String that
+  // descriptor.GetProviderId() returns by value, so the source must own a copy of
+  // the provider id rather than point into the caller's buffer.
+  Dali::VideoSourceDescriptor descriptor;
+  descriptor.SetProviderId("tizen.mmplayer");
+  descriptor.SetNativeSession(Dali::Any(static_cast<void*>(&gDummySession)));
+  descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
+
+  VideoSource source = CreateVideoSource(descriptor);
+
+  DALI_TEST_CHECK(source);
+  DALI_TEST_CHECK(source.IsValid());
+  DALI_TEST_EQUALS(static_cast<uint32_t>(source.GetRenderingMode()), static_cast<uint32_t>(VideoRenderingMode::UNDERLAY), TEST_LOCATION);
   END_TEST;
 }
 

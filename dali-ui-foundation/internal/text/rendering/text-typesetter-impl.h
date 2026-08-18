@@ -19,9 +19,9 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
+#include <dali/public-api/adaptor-framework/pixel-buffer.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/images/pixel.h>
 #include <dali/public-api/object/ref-object.h>
@@ -60,8 +60,8 @@ public:
    *
    * @return An image buffer.
    */
-  static Devel::PixelBuffer CreateTransparentImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                                         const Pixel::Format pixelFormat);
+  static PixelBuffer CreateTransparentImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
+                                                  const Pixel::Format pixelFormat);
 
 public: // Constructor & Destructor
   /**
@@ -110,7 +110,7 @@ public:
   TextAbstraction::FontClient& GetFontClient();
 
 public: // Image buffer creation
-  void DrawGlyphsBackground(Devel::PixelBuffer& buffer, const uint32_t bufferWidth, const uint32_t bufferHeight,
+  void DrawGlyphsBackground(PixelBuffer& buffer, const uint32_t bufferWidth, const uint32_t bufferHeight,
                             const bool ignoreHorizontalAlignment, const int32_t horizontalOffset,
                             const int32_t verticalOffset);
 
@@ -135,11 +135,11 @@ public: // Image buffer creation
    *
    * @return An image buffer with the text.
    */
-  Devel::PixelBuffer CreateImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                       const Typesetter::Style style, const bool ignoreHorizontalAlignment,
-                                       const Pixel::Format pixelFormat, const int32_t horizontalOffset,
-                                       const int32_t verticalOffset, const TextAbstraction::GlyphIndex fromGlyphIndex,
-                                       const TextAbstraction::GlyphIndex toGlyphIndex);
+  PixelBuffer CreateImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
+                                const Typesetter::Style style, const bool ignoreHorizontalAlignment,
+                                const Pixel::Format pixelFormat, const int32_t horizontalOffset,
+                                const int32_t verticalOffset, const TextAbstraction::GlyphIndex fromGlyphIndex,
+                                const TextAbstraction::GlyphIndex toGlyphIndex);
 
   /**
    * @brief Create & draw a L8 mask containing TextGradient target glyph coverage only.
@@ -158,13 +158,13 @@ public: // Image buffer creation
    *
    * @return An image buffer containing TextGradient target glyph coverage only.
    */
-  Devel::PixelBuffer CreateTextGradientMaskImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                                       const bool                        ignoreHorizontalAlignment,
-                                                       const Pixel::Format               pixelFormat,
-                                                       const int32_t                     horizontalOffset,
-                                                       const int32_t                     verticalOffset,
-                                                       const TextAbstraction::GlyphIndex fromGlyphIndex,
-                                                       const TextAbstraction::GlyphIndex toGlyphIndex);
+  PixelBuffer CreateTextGradientMaskImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
+                                                const bool                        ignoreHorizontalAlignment,
+                                                const Pixel::Format               pixelFormat,
+                                                const int32_t                     horizontalOffset,
+                                                const int32_t                     verticalOffset,
+                                                const TextAbstraction::GlyphIndex fromGlyphIndex,
+                                                const TextAbstraction::GlyphIndex toGlyphIndex);
 
   /**
    * @brief Create & draw a RGBA buffer containing TextGradient non-target glyphs only.
@@ -182,13 +182,13 @@ public: // Image buffer creation
    *
    * @return An image buffer containing TextGradient non-target glyphs only.
    */
-  Devel::PixelBuffer CreateTextGradientPreservedImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                                            const bool                        ignoreHorizontalAlignment,
-                                                            const Pixel::Format               pixelFormat,
-                                                            const int32_t                     horizontalOffset,
-                                                            const int32_t                     verticalOffset,
-                                                            const TextAbstraction::GlyphIndex fromGlyphIndex,
-                                                            const TextAbstraction::GlyphIndex toGlyphIndex);
+  PixelBuffer CreateTextGradientPreservedImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
+                                                     const bool                        ignoreHorizontalAlignment,
+                                                     const Pixel::Format               pixelFormat,
+                                                     const int32_t                     horizontalOffset,
+                                                     const int32_t                     verticalOffset,
+                                                     const TextAbstraction::GlyphIndex fromGlyphIndex,
+                                                     const TextAbstraction::GlyphIndex toGlyphIndex);
 
 private:
   std::unique_ptr<ViewModel>  mModel;

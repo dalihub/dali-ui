@@ -191,7 +191,7 @@ void GetRedOffsetAndMask(Dali::Pixel::Format pixelFormat, int32_t& byteOffset, i
   }
 }
 
-bool ParseBorders(Devel::PixelBuffer& pixelBuffer, StretchRanges& stretchPixelsX, StretchRanges& stretchPixelsY)
+bool ParseBorders(PixelBuffer& pixelBuffer, StretchRanges& stretchPixelsX, StretchRanges& stretchPixelsY)
 {
   stretchPixelsX.Clear();
   stretchPixelsY.Clear();

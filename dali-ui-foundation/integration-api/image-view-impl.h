@@ -31,6 +31,8 @@ namespace Dali
 {
 namespace Ui
 {
+class ImageUrl;
+
 namespace Integration
 {
 
@@ -105,6 +107,11 @@ public: // API — Image
    * @copydoc Dali::Ui::ImageView::SetResourceUrl
    */
   void SetResourceUrl(const Dali::String& url);
+
+  /**
+   * @copydoc Dali::Ui::ImageView::SetResourceUrl(const Dali::Ui::ImageUrl&)
+   */
+  void SetResourceUrl(const Dali::Ui::ImageUrl& imageUrl);
 
   /**
    * @copydoc Dali::Ui::ImageView::GetResourceUrl
@@ -333,6 +340,11 @@ protected: // From ViewImpl
   LayoutRect OnArrange(const LayoutRect& bounds) override;
 
 private: // Internal methods
+  /**
+   * @brief Applies a resource URL without changing the stored ImageUrl attachment.
+   */
+  void SetResourceUrlInternal(const Dali::String& url);
+
   /**
    * @brief Rebuilds and re-registers the image visual from current property values.
    */

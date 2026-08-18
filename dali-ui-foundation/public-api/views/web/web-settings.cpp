@@ -47,6 +47,36 @@ Dali::String WebSettings::GetExtraFeatureValue(const Dali::String& feature) cons
   return Integration::GetImpl(*this).GetExtraFeatureValue(feature);
 }
 
+void WebSettings::SetSpatialNavigationEnabled(bool enabled)
+{
+  Integration::GetImpl(*this).SetSpatialNavigationEnabled(enabled);
+}
+
+uint32_t WebSettings::GetDefaultFontSize() const
+{
+  return Integration::GetImpl(*this).GetDefaultFontSize();
+}
+
+void WebSettings::SetDefaultFontSize(uint32_t defaultFontSize)
+{
+  Integration::GetImpl(*this).SetDefaultFontSize(defaultFontSize);
+}
+
+void WebSettings::SetWebSecurityEnabled(bool enabled)
+{
+  Integration::GetImpl(*this).SetWebSecurityEnabled(enabled);
+}
+
+void WebSettings::SetExtraFeatureEnabled(const Dali::String& feature, bool enabled)
+{
+  Integration::GetImpl(*this).SetExtraFeatureEnabled(feature, enabled);
+}
+
+bool WebSettings::IsExtraFeatureEnabled(const Dali::String& feature) const
+{
+  return Integration::GetImpl(*this).IsExtraFeatureEnabled(feature);
+}
+
 WebSettings::WebSettings(Integration::WebSettingsImpl& implementation)
 : BaseHandle(&implementation)
 {

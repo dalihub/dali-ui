@@ -26,7 +26,7 @@ extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentProcessId();
 // Don't want to include the actual window.h which otherwise will be indirectly included by adaptor.h.
 #define DALI_WINDOW_H
 #include <dali/integration-api/adaptor-framework/adaptor.h>
-#include <dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.h> ///< For FileDownloadPluginProxy::RegisterEventThreadCallback
+#include <dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.h> ///< For FileDownloadPluginProxy::Shutdown
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #if defined(_WIN32)
 #include <dali/devel-api/adaptor-framework/window-system-devel.h>
@@ -119,10 +119,6 @@ Adaptor::~Adaptor()
 void Adaptor::Start(Dali::Window window)
 {
   AddWindow(&GetImplementation(window));
-
-#if !defined(_WIN32)
-  FileDownloadPluginProxy::RegisterEventThreadCallback();
-#endif
 }
 
 void Adaptor::Stop()
@@ -134,9 +130,9 @@ void Adaptor::Stop()
     core.SceneDestroyed();
   }
 
-#if !defined(_WIN32)
-  FileDownloadPluginProxy::UnregisterEventThreadCallback();
-#endif
+  // Mirror the real Adaptor, which drains the download plugin here.
+  FileDownloadPluginProxy::Shutdown();
+
   mStopped = true;
 }
 

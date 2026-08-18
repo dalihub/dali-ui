@@ -46,6 +46,12 @@ public:
 
   bool         SetExtraFeatureValue(const Dali::String& feature, const Dali::String& value);
   Dali::String GetExtraFeatureValue(const Dali::String& feature) const;
+  void         SetSpatialNavigationEnabled(bool enabled);
+  uint32_t     GetDefaultFontSize() const;
+  void         SetDefaultFontSize(uint32_t defaultFontSize);
+  void         SetWebSecurityEnabled(bool enabled);
+  void         SetExtraFeatureEnabled(const Dali::String& feature, bool enabled);
+  bool         IsExtraFeatureEnabled(const Dali::String& feature) const;
 
 protected:
   explicit WebSettingsImpl(Dali::WebEngine webEngine);

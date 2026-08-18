@@ -25,7 +25,7 @@
 // the approach already used by dali-toolkit's
 // dali-toolkit-test-utils/toolkit-vector-animation-renderer.cpp.
 
-#include <dali/devel-api/adaptor-framework/pixel-buffer.h>
+#include <dali/public-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/adaptor-framework/vector-animation-renderer.h>
 #include <dali/devel-api/common/vector-wrapper.h>
 #include <dali/devel-api/threading/mutex.h>
@@ -192,8 +192,8 @@ public:
       Dali::Texture texture = Dali::Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, mWidth, mHeight);
       textureSet.SetTexture(0, texture);
 
-      Devel::PixelBuffer pixelBuffer = Devel::PixelBuffer::New(mWidth, mHeight, Pixel::RGBA8888);
-      Dali::PixelData    pixelData   = Devel::PixelBuffer::Convert(pixelBuffer);
+      Dali::PixelBuffer pixelBuffer = Dali::PixelBuffer::New(mWidth, mHeight, Pixel::RGBA8888);
+      Dali::PixelData    pixelData   = Dali::PixelBuffer::Convert(pixelBuffer);
       texture.Upload(pixelData);
     }
 

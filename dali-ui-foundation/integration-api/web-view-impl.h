@@ -227,6 +227,11 @@ public: // API — Custom Headers
 
 public: // API — Scroll
   /**
+   * @copydoc Dali::Ui::WebView::SetScrollPosition
+   */
+  void SetScrollPosition(const Dali::Vector2& position);
+
+  /**
    * @copydoc Dali::Ui::WebView::GetScrollPosition
    */
   Dali::Vector2 GetScrollPosition() const;
@@ -311,7 +316,12 @@ public: // API — JavaScript
   /**
    * @copydoc Dali::Ui::WebView::AddJavaScriptMessageHandler
    */
-  void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, WebView::JavaScriptCallback callback);
+  void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& message)> callback);
+
+  /**
+   * @copydoc Dali::Ui::WebView::AddJavaScriptMessageHandler
+   */
+  void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& exposedObjectName, const Dali::String& message)> callback);
 
   /**
    * @copydoc Dali::Ui::WebView::RemoveJavaScriptMessageHandler
@@ -400,6 +410,11 @@ public: // API — Profile & Settings
    * @copydoc Dali::Ui::WebView::GetSettings
    */
   WebSettings GetSettings() const;
+
+  /**
+   * @copydoc Dali::Ui::WebView::GetBackForwardList
+   */
+  WebBackForwardList GetBackForwardList() const;
 
 public: // API — Page Info
   /**
@@ -692,10 +707,11 @@ public: // Signal members (accessible by WebView for signal emission)
   WebView::GeolocationPermissionSignalType mGeolocationPermissionSignal;
   WebView::WebProcessCrashedSignalType     mWebProcessCrashedSignal;
 
-private:                          // Data — Engine
-  Dali::WebEngine     mWebEngine; ///< The underlying dali-adaptor web engine instance
-  mutable WebProfile  mWebProfile;
-  mutable WebSettings mWebSettings;
+private:                                 // Data — Engine
+  Dali::WebEngine            mWebEngine; ///< The underlying dali-adaptor web engine instance
+  mutable WebProfile         mWebProfile;
+  mutable WebSettings        mWebSettings;
+  mutable WebBackForwardList mWebBackForwardList;
 
   // One-shot screenshot callback — replaced on each GetScreenshotAsynchronously() call.
   std::function<void(Dali::Ui::ImageView)> mPendingScreenshotCallback;

@@ -156,6 +156,21 @@ Dali::String UiLocalizationManagerImpl::GetLocalizedString(StringView resourceId
   return GetLocalizedStringInternal(resourceId, domain);
 }
 
+Dali::String UiLocalizationManagerImpl::GetLocalizedPluralString(StringView resourceId,
+                                                                 StringView pluralResourceId,
+                                                                 uint32_t   quantity) const
+{
+  return GetLocalizedPluralStringInternal(resourceId, pluralResourceId, quantity, StringView());
+}
+
+Dali::String UiLocalizationManagerImpl::GetLocalizedPluralString(StringView resourceId,
+                                                                 StringView pluralResourceId,
+                                                                 uint32_t   quantity,
+                                                                 StringView domain) const
+{
+  return GetLocalizedPluralStringInternal(resourceId, pluralResourceId, quantity, domain);
+}
+
 Dali::String UiLocalizationManagerImpl::GetLocalizedStringInternal(StringView resourceIdView,
                                                                    StringView domainView) const
 {
@@ -203,6 +218,50 @@ Dali::String UiLocalizationManagerImpl::GetLocalizedStringInternal(StringView re
   // Always use null-terminated std::string::c_str().
   // If no translation is found, dgettext returns resourceId.
   const char* translated = Localization::GetText(effectiveDomain.c_str(), resourceId.c_str());
+
+  if(translated == nullptr)
+  {
+    return ToDaliString(resourceId);
+  }
+
+  return Dali::String(translated);
+}
+
+Dali::String UiLocalizationManagerImpl::GetLocalizedPluralStringInternal(StringView resourceIdView,
+                                                                         StringView pluralResourceIdView,
+                                                                         uint32_t   quantity,
+                                                                         StringView domainView) const
+{
+  // Both gettext source identifiers are required for plural lookup.
+  if(resourceIdView.Size() == 0 || resourceIdView.Data() == nullptr ||
+     pluralResourceIdView.Size() == 0 || pluralResourceIdView.Data() == nullptr)
+  {
+    return Dali::String();
+  }
+
+  // Bypass exposes the primary resource id without applying plural rules.
+  if(mBypassEnabled)
+  {
+    return Dali::String(resourceIdView);
+  }
+
+  std::string resourceId       = ToStdString(resourceIdView);
+  std::string pluralResourceId = ToStdString(pluralResourceIdView);
+  std::string effectiveDomain  = GetEffectiveDomain(domainView);
+
+  // LocalizedStringOverrideFunc has no plural id or quantity parameters and
+  // therefore cannot represent a plural-aware lookup.
+  if(effectiveDomain.empty())
+  {
+    return ToDaliString(resourceId);
+  }
+
+  // Always pass null-terminated storage to dngettext. Catalog-miss plural
+  // selection is intentionally left to gettext.
+  const char* translated = Localization::GetPluralText(effectiveDomain.c_str(),
+                                                       resourceId.c_str(),
+                                                       pluralResourceId.c_str(),
+                                                       static_cast<unsigned long>(quantity));
 
   if(translated == nullptr)
   {

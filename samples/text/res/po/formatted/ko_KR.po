@@ -1,0 +1,35 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: text-formatted-localization\n"
+"Language: ko_KR\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "IDS_COMMON_TITLE"
+msgstr "서식 적용 다국어"
+
+# Arguments: %1$s = user name (const char*), %2$s = device name (const char*)
+msgid "IDS_CONNECTION_REORDER"
+msgstr "%2$s에 %1$s 사용자가 연결되었습니다."
+
+# Arguments:
+#   %1$s = user name (const char*)
+#   %2$d = unread message cardinal quantity (int)
+msgid "IDS_UNREAD_MESSAGE"
+msgid_plural "IDS_PLURAL_UNREAD_MESSAGE"
+msgstr[0] "%1$s님에게 읽지 않은 메시지가 %2$d개 있습니다."
+
+# Arguments: %1$s = file name (const char*), %2$d = downloaded file count (int)
+#            %3$d = total file count (int), %4$.1f = completion percentage (double)
+msgid "IDS_DOWNLOAD_PROGRESS"
+msgstr "전체 %3$d개 중 %2$d개 다운로드됨: %1$s (%4$.1f%%)."
+
+# Arguments: %1$s = device name (const char*), %2$.2f = available storage in GB (double)
+msgid "IDS_STORAGE_AVAILABLE"
+msgstr "사용 가능한 저장 공간: %2$.2f GB (%1$s)"
+
+# Arguments: %1$02d = episode number (int), %2$02d = start hour (int)
+#            %3$02d = start minute (int)
+msgid "IDS_EPISODE_START"
+msgstr "%2$02d:%3$02d에 에피소드 %1$02d이 시작됩니다."

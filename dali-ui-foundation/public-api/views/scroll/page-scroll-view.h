@@ -19,7 +19,7 @@
 #define DALI_UI_FOUNDATION_PAGE_SCROLL_VIEW_H
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/views/scroll/i-page-scrollable.h>
+#include <dali-ui-foundation/public-api/views/scroll/page-scrollable-interface.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
 #include <dali/public-api/math/vector2.h>
 
@@ -42,8 +42,8 @@ class PageScrollViewImpl;
  *  - The page size defaults to the viewport size; use SetPageSize() to override.
  *  - Pages are laid out sequentially along the scroll axis starting at position 0.
  *
- * PageScrollView implements IPageScrollable, so it can be bound to a
- * PageIndicator (or any other IPageScrollable consumer) via
+ * PageScrollView implements PageScrollableInterface, so it can be bound to a
+ * PageIndicator (or any other PageScrollableInterface consumer) via
  * PageIndicator::Bind().
  *
  * Example:
@@ -56,7 +56,7 @@ class PageScrollViewImpl;
  * indicator.Bind(pager);
  * @endcode
  */
-class DALI_UI_API PageScrollView : public ScrollView, public IPageScrollable
+class DALI_UI_API PageScrollView : public ScrollView, public PageScrollableInterface
 {
 public: // Creation & Destruction
   /**
@@ -129,7 +129,7 @@ public: // Page API
    */
   Vector2 GetPageSize() const;
 
-  // IPageScrollable
+  // PageScrollableInterface
 
   /**
    * @brief Returns the zero-based index of the currently visible page.
@@ -159,12 +159,12 @@ public: // Page API
    *
    * Signature: void(int currentPage, int pageCount)
    */
-  IPageScrollable::PageChangedSignalType& PageChangedSignal() override;
+  PageScrollableInterface::PageChangedSignalType& PageChangedSignal() override;
 
   /**
    * @brief Signal emitted from the destructor before the underlying object is freed.
    */
-  IPageScrollable::DestroyingSignalType& DestroyingSignal() override;
+  PageScrollableInterface::DestroyingSignalType& DestroyingSignal() override;
 
   /**
    * @brief Notify the view that pages have been inserted into the content.

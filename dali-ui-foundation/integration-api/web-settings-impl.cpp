@@ -61,6 +61,54 @@ Dali::String WebSettingsImpl::GetExtraFeatureValue(const Dali::String& feature) 
   return Dali::String(value.c_str());
 }
 
+void WebSettingsImpl::SetSpatialNavigationEnabled(bool enabled)
+{
+  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  if(webEngine && webEngine.GetPlugin())
+  {
+    webEngine.GetSettings().EnableSpatialNavigation(enabled);
+  }
+}
+
+uint32_t WebSettingsImpl::GetDefaultFontSize() const
+{
+  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  return (webEngine && webEngine.GetPlugin()) ? webEngine.GetSettings().GetDefaultFontSize() : 0u;
+}
+
+void WebSettingsImpl::SetDefaultFontSize(uint32_t defaultFontSize)
+{
+  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  if(webEngine && webEngine.GetPlugin())
+  {
+    webEngine.GetSettings().SetDefaultFontSize(defaultFontSize);
+  }
+}
+
+void WebSettingsImpl::SetWebSecurityEnabled(bool enabled)
+{
+  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  if(webEngine && webEngine.GetPlugin())
+  {
+    webEngine.GetSettings().EnableWebSecurity(enabled);
+  }
+}
+
+void WebSettingsImpl::SetExtraFeatureEnabled(const Dali::String& feature, bool enabled)
+{
+  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  if(webEngine && webEngine.GetPlugin())
+  {
+    webEngine.GetSettings().SetExtraFeature(feature.CStr(), enabled);
+  }
+}
+
+bool WebSettingsImpl::IsExtraFeatureEnabled(const Dali::String& feature) const
+{
+  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  return (webEngine && webEngine.GetPlugin()) ? webEngine.GetSettings().IsExtraFeatureEnabled(feature.CStr()) : false;
+}
+
 } // namespace Integration
 } // namespace Ui
 } // namespace Dali

@@ -16,7 +16,7 @@
 3. [Choosing a Rendering Mode](#3-choosing-a-rendering-mode)
 4. [VideoSource](#4-videosource)
    - [Creation Helpers](#41-creation-helpers)
-   - [VideoSourceOptions](#42-videosourceoptions)
+   - [VideoSourceOwnership](#42-videosourceownership)
    - [VideoRenderingMode](#43-videorenderingmode)
 5. [Playback Control](#5-playback-control)
 6. [Lifecycle & Ordering](#6-lifecycle--ordering)
@@ -184,7 +184,7 @@ descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
 2. The **bridge** `Dali::Ui::CreateVideoSource()`, declared in `<dali-ui-foundation/public-api/video/video-source.h>`, turns that descriptor into a `VideoSource`:
 
 ```cpp
-VideoSource CreateVideoSource(const SourceDescriptor& descriptor, const VideoSourceOptions& options = {});
+VideoSource CreateVideoSource(const SourceDescriptor& descriptor, VideoSourceOwnership ownership = VideoSourceOwnership::EXTERNAL);
 ```
 
 ```cpp
@@ -195,43 +195,44 @@ Applications should always go through `CreateVideoSource()`, not `VideoSource::N
 
 ---
 
-### 4.2 VideoSourceOptions
+### 4.2 VideoSourceOwnership
 
-```cpp
-struct VideoSourceOptions
-{
-  VideoSourceOwnership ownership{VideoSourceOwnership::External};
-};
-```
+`VideoSourceOwnership` is `Dali::VideoSourceOwnership`, declared in
+`<dali/public-api/adaptor-framework/video-source-descriptor.h>` — `dali-ui` reuses
+it rather than declaring its own, to avoid a name collision with the same-named
+adaptor enum when both are in scope via `using namespace`. `CreateVideoSource()`
+takes it directly as a plain parameter rather than wrapping it in an options
+object; ownership is the only setting a caller can attach to a source.
 
 | `VideoSourceOwnership` | Meaning |
 |---|---|
-| `External` (default) | The caller owns the native session; `VideoView` never prepares/unprepares/destroys it. |
-| `Shared` | The native session is shared or reference-counted. |
-| `Transfer` | Ownership is transferred, if the underlying provider supports it. |
+| `EXTERNAL` (default) | The caller owns the native session; `VideoView` never prepares/unprepares/destroys it. |
+| `SHARED` | The native session is shared or reference-counted. |
+| `TRANSFER` | Ownership is transferred, if the underlying provider supports it. |
 
 ```cpp
-VideoSourceOptions options;
-options.ownership = VideoSourceOwnership::Shared;
-VideoSource source = Dali::Ui::CreateVideoSource(descriptor, options);
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor, VideoSourceOwnership::SHARED);
 ```
 
 ---
 
 ### 4.3 VideoRenderingMode
 
+`VideoRenderingMode` is also `Dali::VideoRenderingMode` (same header as
+`VideoSourceOwnership` above), shared rather than redeclared:
+
 ```cpp
 enum class VideoRenderingMode : uint32_t
 {
-  Underlay    = 0, // Platform-composited hole-punch; renders beneath the UI.
-  NativeImage = 1, // Decoded frames become a GPU texture; supports UI render effects.
+  UNDERLAY     = 0, // Platform-composited hole-punch; renders beneath the UI.
+  NATIVE_IMAGE = 1, // Decoded frames become a GPU texture; supports UI render effects.
 };
 ```
 
 You set the mode when building the descriptor (`SetRenderingMode()`). Query it back with `VideoSource::GetRenderingMode()`:
 
 ```cpp
-bool isNativeImage = source.GetRenderingMode() == VideoRenderingMode::NativeImage;
+bool isNativeImage = source.GetRenderingMode() == VideoRenderingMode::NATIVE_IMAGE;
 ```
 
 ---
@@ -271,7 +272,7 @@ videoView.Stop();
 
 | Property | Default |
 |---|---|
-| `VideoSourceOptions::ownership` | `VideoSourceOwnership::External` |
+| `CreateVideoSource()` ownership argument | `VideoSourceOwnership::EXTERNAL` |
 | `VideoSourceDescriptor::renderingMode` | `VideoRenderingMode::UNDERLAY` |
 
 ---

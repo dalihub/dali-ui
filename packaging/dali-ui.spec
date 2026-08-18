@@ -1,7 +1,7 @@
 # Auto-generated from dali-ui.spec.in by makespec.sh
 Name:       dali2-ui-foundation
 Summary:    DALi UI Library
-Version:    2.5.34.11121
+Version:    2.5.35.11161
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0 and BSD-3-Clause and MIT
@@ -244,6 +244,7 @@ exit 0
 %defattr(-,root,root,-)
 %{_libdir}/lib%{dali_ui_components}.so*
 %license LICENSE
+%license third-party/md4c/LICENSE.md
 %{dali_ui_image_files}/components/*
 
 %files -n %{dali_ui_components}-devel

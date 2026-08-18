@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/internal/visuals/rendering-addon.h>
 
 // EXTERNAL HEADERS
+#include <dali/devel-api/adaptor-framework/pixel-buffer-devel.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/texture-integ.h>
@@ -214,12 +215,12 @@ void* NPatchData::GetRenderingMap() const
   return mRenderingMap;
 }
 
-void NPatchData::SetLoadedNPatchData(Devel::PixelBuffer& pixelBuffer, bool preMultiplied)
+void NPatchData::SetLoadedNPatchData(PixelBuffer& pixelBuffer, bool preMultiplied)
 {
   if(mBorder == Dali::Extents() && Dali::Ui::Integration::NPatchUtility::ParseBorders(pixelBuffer, mStretchPixelsX, mStretchPixelsY))
   {
     // Crop the image
-    pixelBuffer.Crop(1, 1, pixelBuffer.GetWidth() - 2, pixelBuffer.GetHeight() - 2);
+    DevelPixelBuffer::Crop(pixelBuffer, 1, 1, pixelBuffer.GetWidth() - 2, pixelBuffer.GetHeight() - 2);
   }
   else
   {
@@ -235,7 +236,7 @@ void NPatchData::SetLoadedNPatchData(Devel::PixelBuffer& pixelBuffer, bool preMu
   // Create opacity map
   mRenderingMap = RenderingAddOn::Get().IsValid() ? RenderingAddOn::Get().BuildNPatch(pixelBuffer, this) : nullptr;
 
-  PixelData pixels = Devel::PixelBuffer::Convert(pixelBuffer); // takes ownership of buffer
+  PixelData pixels = PixelBuffer::Convert(pixelBuffer); // takes ownership of buffer
 
   Texture texture =
     Texture::New(TextureType::TEXTURE_2D, pixels.GetPixelFormat(), pixels.GetWidth(), pixels.GetHeight());

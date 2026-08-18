@@ -310,9 +310,7 @@ float ClampWithMinPriority(float value, float minValue, float maxValue)
 
 InputFieldImplPtr InputFieldImpl::New()
 {
-  InputFieldImplPtr impl(new InputFieldImpl());
-
-  return impl;
+  return InputFieldImplPtr(new InputFieldImpl());
 }
 
 InputFieldImpl::InputFieldImpl()

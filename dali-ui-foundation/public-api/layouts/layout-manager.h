@@ -64,19 +64,6 @@ public:
    * This method calculates the desired size of the view based on the
    * constraints and the sizes of its children.
    *
-   * @note The owning View caches the result and does NOT call this again while the
-   * normalised constraint is unchanged and nothing has invalidated the owner's
-   * layout. There is no measure counterpart to GetArrangePolicy(): measure
-   * caching is unconditional, so this applies to every manager, including one
-   * written outside this library. The override must therefore be a pure function of
-   * the constraints, the owner's effective scale, the owner's effective layout
-   * direction, the owner's layout-tracked state and the children's measured sizes.
-   *
-   * A manager that keeps hidden state of its own -- a spacing or orientation held on
-   * the manager and mutated through its own setter -- is outside that envelope. Pair
-   * every such setter with InvalidateOwnerMeasure() (or InvalidateOwnerArrange() when
-   * only placement is affected), which is what the in-library managers do.
-   *
    * @param[in] view The view to measure
    * @param[in] widthConstraint The available width constraint
    * @param[in] heightConstraint The available height constraint
@@ -95,84 +82,8 @@ public:
    */
   virtual void Arrange(ViewImpl* view, const LayoutRect& bounds) = 0;
 
-  // ============================================================
-  // Non-virtual, library-internal API.
-  //
-  // Outside the virtual freeze above: it occupies no vtable slot and adds no data
-  // member, so it is additive for both the vtable layout and the instance size.
-  //
-  // DALI_INTERNAL marks it as not-for-application-use. It does NOT reliably hide the
-  // symbol: the macro is a hidden-visibility attribute only on ELF toolchains, and on
-  // Windows the enclosing `class DALI_UI_API LayoutManager` is dllexport'ed as a
-  // whole, so every member -- this one included -- is exported from the DLL. Treat
-  // "internal" here as a contract, not as an enforcement.
-  // ============================================================
-
-  /**
-   * @brief Returns this manager's arrange execution policy.
-   *
-   * The default is ArrangePolicy::IF_CHANGED. A subclass can select
-   * ArrangePolicy::ALWAYS through the protected SetArrangePolicy() method.
-   *
-   * @return The active arrange execution policy
-   * @note Internal: for use by this library only, and reserved for future change.
-   */
-  DALI_INTERNAL ArrangePolicy GetArrangePolicy() const;
-
-  /**
-   * @brief Records the View this manager has been attached to.
-   *
-   * Called once by the framework from View::AttachLayoutManager. A manager can never
-   * be replaced or detached, so there is no reverse edge.
-   *
-   * @param[in] owner The attaching View
-   * @note Internal: for use by this library only. See the DALI_INTERNAL note above.
-   */
-  DALI_INTERNAL void SetOwnerView(ViewImpl* owner);
-
 protected:
   class Impl;
-
-  /**
-   * @brief Sets when this manager's Arrange() implementation must run.
-   *
-   * The default is ArrangePolicy::IF_CHANGED. Use
-   * ArrangePolicy::ALWAYS when Arrange() reads state that is not tracked by
-   * layout invalidation or performs work that must happen on every arrange pass.
-   * The policy is inherited by subclasses and may be changed again by a subclass.
-   *
-   * @param[in] policy The arrange execution policy
-   */
-  void SetArrangePolicy(ArrangePolicy policy);
-
-  /**
-   * @brief Invalidates the owning View's MEASURE (and, with it, its arrange).
-   *
-   * Call this from any setter that changes state this manager's Measure() or
-   * Arrange() reads. Both the measure cache and the arrange cache key on the owner's
-   * layout state, and neither has any way to observe state held privately on a
-   * manager, so a manager that mutates such state without saying so leaves the owner
-   * serving a result computed against the old value.
-   *
-   * The in-library managers all do this, which is what makes their state -- a stack
-   * orientation, a grid's row definitions, a flex justification -- part of the
-   * layout-tracked inputs used by their Arrange() implementations.
-   *
-   * Safe before attach and after the owner is gone: a null owner makes it a no-op.
-   */
-  void InvalidateOwnerMeasure();
-
-  /**
-   * @brief Invalidates the owning View's ARRANGE only.
-   *
-   * The narrower counterpart to InvalidateOwnerMeasure(), for state that moves
-   * children within an unchanged owner size and cannot change any measured result.
-   * When in doubt use InvalidateOwnerMeasure(), which is always correct and merely
-   * does more work.
-   *
-   * Safe before attach and after the owner is gone: a null owner makes it a no-op.
-   */
-  void InvalidateOwnerArrange();
 
   /**
    * @brief Default constructor.

@@ -26,7 +26,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
-#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -381,9 +380,7 @@ void ComputeGridPositions(const std::vector<float>& rowHeights, const std::vecto
   }
 }
 
-// @param[in] owner The arranging View, threaded through so the final MATCH_PARENT
-//                  re-measure below can be attributed to it. nullptr makes the scope inert.
-void ArrangeGridChildrenToCells(ViewImpl* owner, std::vector<View>& children, const std::vector<float>& rowPositions,
+void ArrangeGridChildrenToCells(std::vector<View>& children, const std::vector<float>& rowPositions,
                                 const std::vector<float>& colPositions, uint32_t rowCount, uint32_t colCount,
                                 float rowSpacing, float colSpacing)
 {
@@ -477,7 +474,6 @@ void ArrangeGridChildrenToCells(ViewImpl* owner, std::vector<View>& children, co
 
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
-      Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(owner);
       childImpl.Measure(childBounds.width, childBounds.height);
     }
     childImpl.Arrange(childBounds);
@@ -517,12 +513,6 @@ GridLayoutManager::~GridLayoutManager()
 void GridLayoutManager::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
 {
   GetImplAs<Impl>()->mRowDefinitions = rows;
-
-  // Row definitions are read by both Measure() and Arrange(), and neither cache key
-  // can see them, so the owner has to be told. Unguarded, unlike the scalar setters
-  // below: GridLength has no equality operator, and comparing element-wise to save an
-  // invalidation would cost more than the invalidation on any realistic grid.
-  InvalidateOwnerMeasure();
 }
 
 const Dali::Vector<GridLength>& GridLayoutManager::GetRowDefinitions() const
@@ -533,9 +523,6 @@ const Dali::Vector<GridLength>& GridLayoutManager::GetRowDefinitions() const
 void GridLayoutManager::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
 {
   GetImplAs<Impl>()->mColumnDefinitions = columns;
-
-  // See SetRowDefinitions: same reasoning, same unguarded invalidation.
-  InvalidateOwnerMeasure();
 }
 
 const Dali::Vector<GridLength>& GridLayoutManager::GetColumnDefinitions() const
@@ -545,13 +532,7 @@ const Dali::Vector<GridLength>& GridLayoutManager::GetColumnDefinitions() const
 
 void GridLayoutManager::SetRowSpacing(float spacing)
 {
-  Impl* impl = GetImplAs<Impl>();
-  if(impl->mRowSpacing == spacing)
-  {
-    return;
-  }
-  impl->mRowSpacing = spacing;
-  InvalidateOwnerMeasure();
+  GetImplAs<Impl>()->mRowSpacing = spacing;
 }
 
 float GridLayoutManager::GetRowSpacing() const
@@ -561,13 +542,7 @@ float GridLayoutManager::GetRowSpacing() const
 
 void GridLayoutManager::SetColumnSpacing(float spacing)
 {
-  Impl* impl = GetImplAs<Impl>();
-  if(impl->mColumnSpacing == spacing)
-  {
-    return;
-  }
-  impl->mColumnSpacing = spacing;
-  InvalidateOwnerMeasure();
+  GetImplAs<Impl>()->mColumnSpacing = spacing;
 }
 
 float GridLayoutManager::GetColumnSpacing() const
@@ -683,15 +658,10 @@ void GridLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
   std::vector<float> rowHeights(rowCount, 0.0f);
   std::vector<float> colWidths(colCount, 0.0f);
 
-  // Re-measure children to get fresh auto row/column sizes using actual arrange bounds.
-  // The helper only measures (it never arranges), so one scope around the whole call has
-  // exactly the narrow extent required and needs no threaded owner parameter.
-  {
-    Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
-    MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount,
-                                   colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths,
-                                   visRowSpacing, visColSpacing, s);
-  }
+  // Re-measure children to get fresh auto row/column sizes using actual arrange bounds
+  MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount,
+                                 colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths,
+                                 visRowSpacing, visColSpacing, s);
 
   float totalWidth  = 0.0f;
   float totalHeight = 0.0f;
@@ -703,7 +673,7 @@ void GridLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
   ComputeGridPositions(rowHeights, colWidths, bounds, visRowSpacing, visColSpacing, rowCount, colCount, rowPositions,
                        colPositions);
 
-  ArrangeGridChildrenToCells(view, children, rowPositions, colPositions, rowCount, colCount, visRowSpacing, visColSpacing);
+  ArrangeGridChildrenToCells(children, rowPositions, colPositions, rowCount, colCount, visRowSpacing, visColSpacing);
 }
 
 } // namespace Ui

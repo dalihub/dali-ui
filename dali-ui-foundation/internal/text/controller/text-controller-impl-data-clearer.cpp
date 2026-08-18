@@ -45,17 +45,20 @@ void ControllerImplDataClearer::ClearFullModelData(Controller::Impl& impl, Contr
     model->mLogicalModel->mFontRuns.Clear();
   }
 
-  if(0u != model->mLogicalModel->mBidirectionalParagraphInfo.Count())
+  if(Controller::NO_OPERATION != (Controller::BIDI_INFO & operations))
   {
-    if(Controller::NO_OPERATION != (Controller::BIDI_INFO & operations))
+    if(0u != model->mLogicalModel->mBidirectionalParagraphInfo.Count())
     {
       TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
       model->mLogicalModel->ClearBidirectionalParagraphInfo(bidirectionalSupport);
       model->mLogicalModel->mBidirectionalParagraphInfo.Clear();
-      model->mLogicalModel->mCharacterDirections.Clear();
     }
+    model->mLogicalModel->mCharacterDirections.Clear();
+  }
 
-    if(Controller::NO_OPERATION != (Controller::REORDER & operations))
+  if(Controller::NO_OPERATION != (Controller::REORDER & operations))
+  {
+    if(0u != model->mLogicalModel->mBidirectionalLineInfo.Count())
     {
       // Free the allocated memory used to store the conversion table in the bidirectional line info run.
       for(Vector<BidirectionalLineInfoRun>::Iterator it    = model->mLogicalModel->mBidirectionalLineInfo.Begin(),

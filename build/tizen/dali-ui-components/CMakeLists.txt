@@ -5,6 +5,26 @@ SET(COMPONENTS_ROOT_SRC_DIR ${ROOT_SRC_DIR}/dali-ui-components)
 # Collect source files
 FILE(GLOB_RECURSE SOURCES "${COMPONENTS_ROOT_SRC_DIR}/*.cpp")
 
+# Private third-party parser backend for MarkdownView.
+ADD_LIBRARY(dali-ui-components-md4c STATIC
+  ${ROOT_SRC_DIR}/third-party/md4c/entity.c
+  ${ROOT_SRC_DIR}/third-party/md4c/md4c.c
+)
+SET_TARGET_PROPERTIES(dali-ui-components-md4c
+  PROPERTIES
+  POSITION_INDEPENDENT_CODE ON
+  C_STANDARD 99
+  C_STANDARD_REQUIRED ON
+)
+TARGET_INCLUDE_DIRECTORIES(dali-ui-components-md4c
+  PRIVATE
+  ${ROOT_SRC_DIR}/third-party/md4c
+)
+TARGET_COMPILE_OPTIONS(dali-ui-components-md4c
+  PRIVATE
+  $<$<COMPILE_LANGUAGE:C>:-fvisibility=hidden>
+)
+
 # 공유 라이브러리 생성
 ADD_LIBRARY(${PROJECT_LIB_NAME} SHARED ${SOURCES})
 
@@ -35,7 +55,9 @@ TARGET_INCLUDE_DIRECTORIES(${PROJECT_LIB_NAME}
 
 TARGET_LINK_LIBRARIES(${PROJECT_LIB_NAME}
   PUBLIC dali2-ui-foundation
-  PRIVATE ${COVERAGE}
+  PRIVATE
+    ${COVERAGE}
+    dali-ui-components-md4c
 )
 
 SET_TARGET_PROPERTIES(${PROJECT_LIB_NAME}

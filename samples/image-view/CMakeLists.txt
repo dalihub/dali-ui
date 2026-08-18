@@ -12,6 +12,7 @@ ENDIF()
 SET(IMAGE_VIEW_SAMPLES
   image-view.example
   image-view-with-layout.example
+  image-view-with-image-url.example
   image-fitting-mode.example
   image-placeholder.example
   image-pixel-area.example
@@ -30,6 +31,7 @@ SET(IMAGE_VIEW_SAMPLES
 SET(IMAGE_VIEW_SOURCES
   image-view-example.cpp
   image-view-with-layout-example.cpp
+  image-view-with-image-url-example.cpp
   image-fitting-mode-example.cpp
   image-placeholder-example.cpp
   image-pixel-area-example.cpp

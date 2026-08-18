@@ -162,12 +162,12 @@ void PageScrollViewImpl::ScrollToPage(int page, bool animate)
     ScrollTo(targetPos, false);
 }
 
-IPageScrollable::PageChangedSignalType& PageScrollViewImpl::PageChangedSignal()
+PageScrollableInterface::PageChangedSignalType& PageScrollViewImpl::PageChangedSignal()
 {
   return mPageChangedSignal;
 }
 
-IPageScrollable::DestroyingSignalType& PageScrollViewImpl::DestroyingSignal()
+PageScrollableInterface::DestroyingSignalType& PageScrollViewImpl::DestroyingSignal()
 {
   return mDestroyingSignal;
 }

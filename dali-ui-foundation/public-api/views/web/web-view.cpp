@@ -177,6 +177,11 @@ Dali::Vector2 WebView::GetScrollPosition() const
   return GetImpl(*this).GetScrollPosition();
 }
 
+void WebView::SetScrollPosition(const Dali::Vector2& position)
+{
+  GetImpl(*this).SetScrollPosition(position);
+}
+
 Dali::Vector2 WebView::GetScrollSize() const
 {
   return GetImpl(*this).GetScrollSize();
@@ -292,6 +297,11 @@ WebSettings WebView::GetSettings() const
   return GetImpl(*this).GetSettings();
 }
 
+WebBackForwardList WebView::GetBackForwardList() const
+{
+  return GetImpl(*this).GetBackForwardList();
+}
+
 Dali::Ui::ImageView WebView::GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)
 {
   return GetImpl(*this).GetScreenshot(viewArea, scaleFactor);
@@ -402,7 +412,12 @@ void WebView::EvaluateJavaScript(const Dali::String& script, JavaScriptCallback 
   GetImpl(*this).EvaluateJavaScript(script, std::move(callback));
 }
 
-void WebView::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, JavaScriptCallback callback)
+void WebView::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& message)> callback)
+{
+  GetImpl(*this).AddJavaScriptMessageHandler(exposedObjectName, std::move(callback));
+}
+
+void WebView::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, Callback<void(const Dali::String& exposedObjectName, const Dali::String& message)> callback)
 {
   GetImpl(*this).AddJavaScriptMessageHandler(exposedObjectName, std::move(callback));
 }

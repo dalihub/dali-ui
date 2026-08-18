@@ -45,7 +45,7 @@ public:
   ADDON_BIND_FUNCTION(GetGeometry, Dali::Geometry(TextureManager::TextureId, uint32_t&, uint32_t&));
 
   ADDON_BIND_FUNCTION(CreateGeometry,
-                      Dali::Geometry(TextureManager::TextureId, const Dali::Devel::PixelBuffer& pixelBuffer));
+                      Dali::Geometry(TextureManager::TextureId, const Dali::PixelBuffer& pixelBuffer));
 
   ADDON_BIND_FUNCTION(Initialize, void*());
 
@@ -53,7 +53,7 @@ public:
 
   ADDON_BIND_FUNCTION(SubmitRenderTask, void(Renderer&, const void*));
 
-  ADDON_BIND_FUNCTION(BuildNPatch, void*(const Devel::PixelBuffer&, void*));
+  ADDON_BIND_FUNCTION(BuildNPatch, void*(const PixelBuffer&, void*));
 
   ADDON_BIND_FUNCTION(DestroyNPatch, void(void*));
 

@@ -1179,7 +1179,8 @@ bool FocusManager::EmitCustomWheelSignals(View view, const WheelEvent& event)
     if(!view.WheelEventSignal().Empty())
     {
       // Emit the signal to the parent
-      consumed = view.WheelEventSignal().Emit(view, event);
+      // Any connected callback consuming the event consumes it for all of them.
+      consumed = view.WheelEventSignal().EmitOr(view, event);
     }
     // if view doesn't consume WheelEvent, give WheelEvent to its parent.
     if(!consumed)

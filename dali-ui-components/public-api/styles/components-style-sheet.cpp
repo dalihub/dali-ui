@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-components/public-api/styles/components-style-sheet.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-components/public-api/styles/markdown-view-style.h>
+
 namespace Dali
 {
 namespace Ui
@@ -26,10 +29,21 @@ namespace Components
 {
 namespace StyleSheet
 {
+namespace
+{
+
+UiStyle CreateDefaultMarkdownViewStyle()
+{
+  return MarkdownViewStyle::DefaultPreset();
+}
+
+} // namespace
 
 UiStyleSheet New()
 {
-  return UiStyleSheet::New();
+  UiStyleSheet styleSheet = UiStyleSheet::New();
+  styleSheet.SetStyle(MarkdownViewStyle::DefaultKey(), &CreateDefaultMarkdownViewStyle);
+  return styleSheet;
 }
 
 } // namespace StyleSheet

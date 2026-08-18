@@ -1,0 +1,75 @@
+# MD4C DALi Import
+
+Upstream repository: https://github.com/mity/md4c
+
+Imported tag: release-0.5.3
+
+Exact commit: 472c417005c2c71b8617de4f7b8d6b30411d78f4
+
+Imported files:
+
+- entity.c from upstream src/entity.c
+- entity.h from upstream src/entity.h
+- md4c.c from upstream src/md4c.c
+- md4c.h from upstream src/md4c.h
+- LICENSE.md
+
+Local modifications:
+
+- Removed one trailing whitespace character in a `md4c.h` comment so the DALi
+  whitespace check passes. No functional source changes were made.
+
+Build configuration:
+
+- Built as the private static CMake target `dali-ui-components-md4c`.
+- Compiled as C99 with position independent code.
+- Linked into `dali2-ui-components`.
+- Include path is private to the target/source tree and is not installed as a public DALi UI header.
+- MD4C types and callbacks are wrapped by `dali-ui-components/internal/markdown` and are not exposed by the MarkdownView public API.
+- The C source is compiled with hidden symbol visibility where supported by the DALi UI build.
+- `entity.c` is included only so the internal parser adapter can decode the
+  same HTML/CommonMark entity table as MD4C's HTML renderer. It is not a public
+  dependency.
+
+Upstream comparison:
+
+- Local `master` is ahead of `release-0.5.3` and currently ends at
+  `65c6c9d md_html: Escape raw HTML in image alt attribute`.
+- GitHub has no packaged "Releases" entries; the latest local tag remains
+  `release-0.5.3`.
+- Post-0.5.3 master adds unreleased extensions such as highlight, footnotes,
+  admonitions, superscript/subscript, and spoilers. These are not required by
+  the DALi v1 dialect.
+- Relevant fixes after 0.5.3 include sparse table suppression, CommonMark
+  autolink scheme validation, UTF-16/surrogate handling in HTML output,
+  Windows UTF-16 parser fixes, md2html buffer overflow hardening, and several
+  internal bracket/footnote/admonition fixes.
+- Decision: keep `release-0.5.3` for product import stability. Do not import
+  unreleased `master` wholesale. Revisit targeted backports only if DALi enables
+  the affected features or hits a concrete parser regression/security issue in
+  the direct `md_parse()` path.
+
+Enabled parser extensions in the initial MarkdownView adapter:
+
+- `MD_FLAG_TABLES`
+- `MD_FLAG_STRIKETHROUGH`
+- `MD_FLAG_TASKLISTS`
+- `MD_FLAG_NOHTML`
+
+Disabled or not enabled by default:
+
+- Raw HTML blocks/spans are disabled because DALi UI does not provide a Markdown HTML renderer.
+- Permissive URL/email autolinks, LaTeX math spans, wiki links, and underline are not part of the v1 dialect.
+- The upstream HTML renderer, command line tool, and tests are not imported.
+
+License:
+
+MD4C is MIT licensed. The full upstream MIT license text is kept verbatim in `LICENSE.md`.
+DALi UI packaging already declares `Apache-2.0 and BSD-3-Clause and MIT` and installs the repository `LICENSE` file for runtime and development packages; no new public package dependency or pkg-config dependency is added for MD4C.
+
+Update procedure:
+
+1. Verify the target upstream tag and record its exact commit hash.
+2. Replace only `entity.c`, `entity.h`, `md4c.c`, `md4c.h`, and `LICENSE.md` from the upstream tag unless the parser starts requiring additional files.
+3. Keep local modifications out of upstream files. If a patch becomes unavoidable, add a section here describing the reason and the exact diff.
+4. Rebuild `dali2-ui-components`, run Markdown parser/MarkdownView UTCs, and check that MD4C symbols are not exported from the shared library.

@@ -101,12 +101,11 @@ int UtcDaliChartAxisSetLabelsP(void)
   UiTestApplication application(Components::UiConfig::New());
   ChartAxis         axis = ChartAxis::New();
 
-  std::vector<Dali::String> labels = {Dali::String("Jan"),
-                                      Dali::String("Feb"),
-                                      Dali::String("Mar")};
-  axis.SetLabels(labels);
-  std::vector<Dali::String> result = axis.GetLabels();
-  DALI_TEST_EQUALS(static_cast<int>(result.size()), 3, TEST_LOCATION);
+  axis.SetLabels({Dali::String("Jan"),
+                  Dali::String("Feb"),
+                  Dali::String("Mar")});
+  Dali::Vector<Dali::String> result = axis.GetLabels();
+  DALI_TEST_EQUALS(static_cast<int>(result.Count()), 3, TEST_LOCATION);
   DALI_TEST_EQUALS(result[0], Dali::String("Jan"), TEST_LOCATION);
   DALI_TEST_EQUALS(result[2], Dali::String("Mar"), TEST_LOCATION);
   END_TEST;
@@ -127,11 +126,11 @@ int UtcDaliChartAxisSetRangeLimitsP(void)
   UiTestApplication application(Components::UiConfig::New());
   ChartAxis         axis = ChartAxis::New();
 
-  axis.SetMinLimit(10.0f);
-  DALI_TEST_EQUALS(axis.GetMinLimit(), 10.0f, 0.001f, TEST_LOCATION);
+  axis.SetMinimumLimit(10.0f);
+  DALI_TEST_EQUALS(axis.GetMinimumLimit(), 10.0f, 0.001f, TEST_LOCATION);
 
-  axis.SetMaxLimit(200.0f);
-  DALI_TEST_EQUALS(axis.GetMaxLimit(), 200.0f, 0.001f, TEST_LOCATION);
+  axis.SetMaximumLimit(200.0f);
+  DALI_TEST_EQUALS(axis.GetMaximumLimit(), 200.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -140,11 +139,11 @@ int UtcDaliChartAxisSetAutoRangeP(void)
   UiTestApplication application(Components::UiConfig::New());
   ChartAxis         axis = ChartAxis::New();
 
-  axis.SetAutoRange(false);
-  DALI_TEST_CHECK(!axis.IsAutoRange());
+  axis.SetAutoRangeEnabled(false);
+  DALI_TEST_CHECK(!axis.IsAutoRangeEnabled());
 
-  axis.SetAutoRange(true);
-  DALI_TEST_CHECK(axis.IsAutoRange());
+  axis.SetAutoRangeEnabled(true);
+  DALI_TEST_CHECK(axis.IsAutoRangeEnabled());
   END_TEST;
 }
 
@@ -153,8 +152,8 @@ int UtcDaliChartAxisSetGridLinesP(void)
   UiTestApplication application(Components::UiConfig::New());
   ChartAxis         axis = ChartAxis::New();
 
-  axis.SetShowGridLines(false);
-  DALI_TEST_CHECK(!axis.GetShowGridLines());
+  axis.SetShowGridLinesEnabled(false);
+  DALI_TEST_CHECK(!axis.IsShowGridLinesEnabled());
 
   axis.SetGridColor(Vector4(0.5f, 0.5f, 0.5f, 1.0f));
   DALI_TEST_EQUALS(axis.GetGridColor(), Vector4(0.5f, 0.5f, 0.5f, 1.0f), TEST_LOCATION);
@@ -188,8 +187,8 @@ int UtcDaliChartAxisSetDataPaddingP(void)
   axis.SetDataPadding(0.1f);
   DALI_TEST_EQUALS(axis.GetDataPadding(), 0.1f, 0.001f, TEST_LOCATION);
 
-  axis.SetMinStep(5.0f);
-  DALI_TEST_EQUALS(axis.GetMinStep(), 5.0f, 0.001f, TEST_LOCATION);
+  axis.SetMinimumStep(5.0f);
+  DALI_TEST_EQUALS(axis.GetMinimumStep(), 5.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -209,8 +208,8 @@ int UtcDaliChartAxisSettersP(void)
   ChartAxis         axis = ChartAxis::New();
 
   axis.SetTitle(Dali::String("Value"));
-  axis.SetAutoRange(true);
-  axis.SetShowGridLines(true);
+  axis.SetAutoRangeEnabled(true);
+  axis.SetShowGridLinesEnabled(true);
   axis.SetDataPadding(0.05f);
   DALI_TEST_EQUALS(axis.GetTitle(), Dali::String("Value"), TEST_LOCATION);
   END_TEST;

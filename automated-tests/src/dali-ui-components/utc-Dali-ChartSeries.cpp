@@ -106,8 +106,8 @@ int UtcDaliChartSeriesSetMaxDataPointsP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
   LineSeries        series = LineSeries::New();
-  series.SetMaxDataPoints(50);
-  DALI_TEST_EQUALS(series.GetMaxDataPoints(), 50, TEST_LOCATION);
+  series.SetMaximumDataPoints(50);
+  DALI_TEST_EQUALS(series.GetMaximumDataPoints(), 50, TEST_LOCATION);
   END_TEST;
 }
 

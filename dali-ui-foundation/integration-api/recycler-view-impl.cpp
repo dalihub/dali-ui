@@ -16,9 +16,9 @@
  */
 
 #include <dali-ui-foundation/extension-api/view.h>
+#include <dali-ui-foundation/integration-api/items-layouter-impl.h>
 #include <dali-ui-foundation/integration-api/recycler-view-impl.h>
 #include <dali-ui-foundation/integration-api/recycler.h>
-#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
@@ -171,7 +171,6 @@ RecyclerViewImpl::RecyclerViewImpl()
   mHorizontalScrollBarVisibility(ScrollBarVisibility::Auto),
   mOverScrollMode(OverScrollMode::ContentScrolls)
 {
-  SetArrangePolicy(ArrangePolicy::ALWAYS);
 }
 
 RecyclerViewImpl::~RecyclerViewImpl()
@@ -210,21 +209,6 @@ void RecyclerViewImpl::OnInitialize()
   mPanGestureDetector.Attach(Self());
 
   FocusManager::Get().FocusChangedSignal().Connect(this, &RecyclerViewImpl::OnFocusManagerChanged);
-}
-
-void RecyclerViewImpl::LayoutChildrenScoped()
-{
-  // The scope sits on the recycler side of the layouter boundary so that third-party
-  // ItemsLayouterImpl subclasses are covered without having to opt in.
-  Internal::LayoutDependency::RecyclerLayoutOwnerScope ownerScope(this, &mLayouter.GetImpl());
-  mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
-}
-
-float RecyclerViewImpl::ScrollByScoped(float delta)
-{
-  Internal::LayoutDependency::RecyclerLayoutOwnerScope ownerScope(this, &mLayouter.GetImpl());
-  return mLayouter.CanScrollVertically() ? mLayouter.GetImpl().ScrollVerticallyBy(delta, *mRecyclerImpl)
-                                         : mLayouter.GetImpl().ScrollHorizontallyBy(delta, *mRecyclerImpl);
 }
 
 void RecyclerViewImpl::OnAdapterDestroyed(ItemAdapter& /*adapter*/)
@@ -271,7 +255,7 @@ void RecyclerViewImpl::OnAdapterDataChanged(const ItemAdapter::ChangeInfo& info)
     {
       // Item sizes may differ — full relayout. OnLayoutChildren recycles all active
       // views and refills, re-binding and re-measuring each one in the process.
-      LayoutChildrenScoped();
+      mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
       break;
     }
 
@@ -286,7 +270,7 @@ void RecyclerViewImpl::OnAdapterDataChanged(const ItemAdapter::ChangeInfo& info)
         }
       }
       mLayouter.GetImpl().OnAdapterChanged();
-      LayoutChildrenScoped();
+      mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
       break;
     }
 
@@ -307,7 +291,7 @@ void RecyclerViewImpl::OnAdapterDataChanged(const ItemAdapter::ChangeInfo& info)
         }
       }
       mLayouter.GetImpl().OnAdapterChanged();
-      LayoutChildrenScoped();
+      mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
       break;
     }
 
@@ -323,7 +307,7 @@ void RecyclerViewImpl::OnAdapterDataChanged(const ItemAdapter::ChangeInfo& info)
         }
       }
       mLayouter.GetImpl().OnAdapterChanged();
-      LayoutChildrenScoped();
+      mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
       break;
     }
 
@@ -331,7 +315,7 @@ void RecyclerViewImpl::OnAdapterDataChanged(const ItemAdapter::ChangeInfo& info)
     default:
     {
       mLayouter.GetImpl().OnAdapterChanged();
-      LayoutChildrenScoped();
+      mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
       break;
     }
   }
@@ -347,7 +331,7 @@ void RecyclerViewImpl::OnLayoutInvalidated()
   {
     return;
   }
-  LayoutChildrenScoped();
+  mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
   UpdateScrollerSize();
   ApplyScrollerPosition();
   UpdateScrollBar();
@@ -381,7 +365,7 @@ void RecyclerViewImpl::SetAdapter(ItemAdapter& adapter)
 
   if(mLayouter)
   {
-    LayoutChildrenScoped();
+    mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
   }
 
   UpdateScrollerSize();
@@ -446,7 +430,7 @@ void RecyclerViewImpl::SetItemsLayouter(ItemsLayouter layouter)
 
   if(mAdapter && mLayouter)
   {
-    LayoutChildrenScoped();
+    mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
   }
 
   UpdateScrollerSize();
@@ -466,7 +450,7 @@ void RecyclerViewImpl::SetCacheExtent(float before, float after)
 
   if(mLayouter && mAdapter)
   {
-    LayoutChildrenScoped();
+    mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
     UpdateScrollerSize();
     ApplyScrollerPosition();
     UpdateScrollBar();
@@ -504,7 +488,15 @@ void RecyclerViewImpl::ScrollBy(float distance, bool animation)
 
   if(!animation)
   {
-    const float consumed = ScrollByScoped(distance);
+    float consumed;
+    if(mLayouter.CanScrollVertically())
+    {
+      consumed = mLayouter.GetImpl().ScrollVerticallyBy(distance, *mRecyclerImpl);
+    }
+    else
+    {
+      consumed = mLayouter.GetImpl().ScrollHorizontallyBy(distance, *mRecyclerImpl);
+    }
     ApplyScrollerPosition();
     PullEdgeEffect(distance, consumed);
     UpdateScrollBar();
@@ -532,7 +524,14 @@ void RecyclerViewImpl::SetScrollOffset(float offset)
   }
   CancelScrollAnimation();
   const float delta = offset - mLayouter.ComputeScrollOffset();
-  ScrollByScoped(delta);
+  if(mLayouter.CanScrollVertically())
+  {
+    mLayouter.GetImpl().ScrollVerticallyBy(delta, *mRecyclerImpl);
+  }
+  else
+  {
+    mLayouter.GetImpl().ScrollHorizontallyBy(delta, *mRecyclerImpl);
+  }
   ApplyScrollerPosition();
   UpdateScrollBar();
 }
@@ -621,8 +620,6 @@ MeasuredSize RecyclerViewImpl::OnMeasure(float widthConstraint, float heightCons
   return MeasuredSize(width, height);
 }
 
-// ArrangePolicy::ALWAYS is required because this producer updates scrolling helpers,
-// actor geometry, edge effects and scroll bars even when its bounds are unchanged.
 LayoutRect RecyclerViewImpl::OnArrange(const LayoutRect& bounds)
 {
   const float newWidth    = std::max(0.0f, bounds.width);
@@ -638,7 +635,7 @@ LayoutRect RecyclerViewImpl::OnArrange(const LayoutRect& bounds)
   // SetAdapter / SetItemsLayouter / NotifyDataSetChanged call OnLayoutChildren directly.
   if(sizeChanged && mLayouter && mAdapter)
   {
-    LayoutChildrenScoped();
+    mLayouter.GetImpl().OnLayoutChildren(*mRecyclerImpl);
   }
 
   UpdateScrollerSize();
@@ -832,7 +829,14 @@ float RecyclerViewImpl::SyncScrollOffsetFromScroller()
 
   if(std::abs(delta) > 0.001f)
   {
-    ScrollByScoped(delta);
+    if(mLayouter.CanScrollVertically())
+    {
+      mLayouter.GetImpl().ScrollVerticallyBy(delta, *mRecyclerImpl);
+    }
+    else
+    {
+      mLayouter.GetImpl().ScrollHorizontallyBy(delta, *mRecyclerImpl);
+    }
   }
 
   return mLayouter.ComputeScrollOffset();
@@ -859,7 +863,14 @@ void RecyclerViewImpl::StartScrollAnimation(float targetOffset, float durationSe
     const float delta = target - mLayouter.ComputeScrollOffset();
     if(mLayouter)
     {
-      ScrollByScoped(delta);
+      if(mLayouter.CanScrollVertically())
+      {
+        mLayouter.GetImpl().ScrollVerticallyBy(delta, *mRecyclerImpl);
+      }
+      else
+      {
+        mLayouter.GetImpl().ScrollHorizontallyBy(delta, *mRecyclerImpl);
+      }
     }
     ApplyScrollerPosition();
     UpdateScrollBar();

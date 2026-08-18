@@ -16,7 +16,7 @@
 3. [렌더링 모드 선택](#3-렌더링-모드-선택)
 4. [VideoSource](#4-videosource)
    - [생성 헬퍼 함수](#41-생성-헬퍼-함수)
-   - [VideoSourceOptions](#42-videosourceoptions)
+   - [VideoSourceOwnership](#42-videosourceownership)
    - [VideoRenderingMode](#43-videorenderingmode)
 5. [재생 제어](#5-재생-제어)
 6. [생명주기와 순서](#6-생명주기와-순서)
@@ -184,7 +184,7 @@ descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
 2. **브리지** `Dali::Ui::CreateVideoSource()` — `<dali-ui-foundation/public-api/video/video-source.h>`에 선언되어 있으며, descriptor를 `VideoSource`로 변환합니다:
 
 ```cpp
-VideoSource CreateVideoSource(const SourceDescriptor& descriptor, const VideoSourceOptions& options = {});
+VideoSource CreateVideoSource(const SourceDescriptor& descriptor, VideoSourceOwnership ownership = VideoSourceOwnership::EXTERNAL);
 ```
 
 ```cpp
@@ -195,43 +195,44 @@ VideoSource source = Dali::Ui::CreateVideoSource(descriptor);
 
 ---
 
-### 4.2 VideoSourceOptions
+### 4.2 VideoSourceOwnership
 
-```cpp
-struct VideoSourceOptions
-{
-  VideoSourceOwnership ownership{VideoSourceOwnership::External};
-};
-```
+`VideoSourceOwnership`은 `<dali/public-api/adaptor-framework/video-source-descriptor.h>`에
+선언된 `Dali::VideoSourceOwnership`입니다 — `dali-ui`는 별도로 선언하지 않고 이걸
+그대로 재사용합니다. 동일한 이름의 adaptor enum과 `using namespace`로 함께 스코프에
+들어왔을 때 이름이 충돌하는 걸 피하기 위해서입니다. `CreateVideoSource()`는 이 값을
+별도 options 객체로 감싸지 않고 그냥 파라미터로 직접 받습니다 — source에 붙일 수 있는
+설정이 ownership 하나뿐이기 때문입니다.
 
 | `VideoSourceOwnership` | 의미 |
 |---|---|
-| `External` (기본값) | 호출자가 네이티브 세션을 소유함; `VideoView`는 절대 prepare/unprepare/destroy하지 않음. |
-| `Shared` | 네이티브 세션이 공유되거나 참조 카운트됨. |
-| `Transfer` | 하위 provider가 지원하는 경우 소유권이 이전됨. |
+| `EXTERNAL` (기본값) | 호출자가 네이티브 세션을 소유함; `VideoView`는 절대 prepare/unprepare/destroy하지 않음. |
+| `SHARED` | 네이티브 세션이 공유되거나 참조 카운트됨. |
+| `TRANSFER` | 하위 provider가 지원하는 경우 소유권이 이전됨. |
 
 ```cpp
-VideoSourceOptions options;
-options.ownership = VideoSourceOwnership::Shared;
-VideoSource source = Dali::Ui::CreateVideoSource(descriptor, options);
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor, VideoSourceOwnership::SHARED);
 ```
 
 ---
 
 ### 4.3 VideoRenderingMode
 
+`VideoRenderingMode`도 마찬가지로 `Dali::VideoRenderingMode`(위 `VideoSourceOwnership`과
+같은 헤더)이며, 별도로 재선언하지 않고 재사용합니다:
+
 ```cpp
 enum class VideoRenderingMode : uint32_t
 {
-  Underlay    = 0, // 플랫폼 합성 hole-punch; UI 아래에 렌더링됨.
-  NativeImage = 1, // 디코딩 프레임이 GPU 텍스처가 됨; UI 렌더 이펙트 적용 가능.
+  UNDERLAY     = 0, // 플랫폼 합성 hole-punch; UI 아래에 렌더링됨.
+  NATIVE_IMAGE = 1, // 디코딩 프레임이 GPU 텍스처가 됨; UI 렌더 이펙트 적용 가능.
 };
 ```
 
 모드는 descriptor를 만들 때 `SetRenderingMode()`로 설정합니다. `VideoSource::GetRenderingMode()`로 조회할 수 있습니다:
 
 ```cpp
-bool isNativeImage = source.GetRenderingMode() == VideoRenderingMode::NativeImage;
+bool isNativeImage = source.GetRenderingMode() == VideoRenderingMode::NATIVE_IMAGE;
 ```
 
 ---
@@ -271,7 +272,7 @@ videoView.Stop();
 
 | 프로퍼티 | 기본값 |
 |---|---|
-| `VideoSourceOptions::ownership` | `VideoSourceOwnership::External` |
+| `CreateVideoSource()`의 ownership 인자 | `VideoSourceOwnership::EXTERNAL` |
 | `VideoSourceDescriptor::renderingMode` | `VideoRenderingMode::UNDERLAY` |
 
 ---

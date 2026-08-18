@@ -61,6 +61,19 @@ inline const char* GetText(const char* domain, const char* resourceId)
 #endif
 }
 
+inline const char* GetPluralText(const char*   domain,
+                                 const char*   resourceId,
+                                 const char*   pluralResourceId,
+                                 unsigned long quantity)
+{
+#if defined(DALI_UI_GETTEXT_AVAILABLE)
+  return dngettext(domain, resourceId, pluralResourceId, quantity);
+#else
+  (void)domain;
+  return quantity == 1ul ? resourceId : pluralResourceId;
+#endif
+}
+
 } // namespace Localization
 } // namespace Internal
 } // namespace Ui

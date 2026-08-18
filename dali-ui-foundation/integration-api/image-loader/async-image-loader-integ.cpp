@@ -38,8 +38,8 @@ uint32_t Load(AsyncImageLoader asyncImageLoader, const std::string& url, ImageDi
           preMultiplyOnLoad, false);
 }
 
-uint32_t ApplyMask(AsyncImageLoader asyncImageLoader, Devel::PixelBuffer pixelBuffer,
-                   Devel::PixelBuffer maskPixelBuffer, float contentScale, bool cropToMask,
+uint32_t ApplyMask(AsyncImageLoader asyncImageLoader, PixelBuffer pixelBuffer,
+                   PixelBuffer maskPixelBuffer, float contentScale, bool cropToMask,
                    PreMultiplyOnLoad preMultiplyOnLoad)
 {
   return GetImplementation(asyncImageLoader)

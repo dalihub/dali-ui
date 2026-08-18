@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-components/public-api/chart/chart-axis.h>
 
+// EXTERNAL INCLUDES
+#include <vector>
+
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/chart-axis-impl.h>
 
@@ -73,52 +76,60 @@ ChartAxis ChartAxis::DownCast(BaseHandle handle)
   return ChartAxis(dynamic_cast<Integration::ChartAxis*>(handle.GetObjectPtr()));
 }
 
-void ChartAxis::SetLabels(const std::vector<Dali::String>& labels)
+void ChartAxis::SetLabels(const Dali::Vector<Dali::String>& labels)
 {
-  GetImplementation(*this).SetLabels(labels);
+  GetImplementation(*this).SetLabels(std::vector<Dali::String>(labels.Begin(), labels.End()));
 }
 
-std::vector<Dali::String> ChartAxis::GetLabels() const
+Dali::Vector<Dali::String> ChartAxis::GetLabels() const
 {
-  return GetImplementation(*this).GetLabels();
+  const std::vector<Dali::String> labels = GetImplementation(*this).GetLabels();
+
+  Dali::Vector<Dali::String> result;
+  result.Reserve(labels.size());
+  for(const auto& label : labels)
+  {
+    result.PushBack(label);
+  }
+  return result;
 }
 
-void ChartAxis::SetMinLimit(float min)
+void ChartAxis::SetMinimumLimit(float min)
 {
   GetImplementation(*this).SetMinLimit(min);
 }
 
-float ChartAxis::GetMinLimit() const
+float ChartAxis::GetMinimumLimit() const
 {
   return GetImplementation(*this).GetMinLimit();
 }
 
-void ChartAxis::SetMaxLimit(float max)
+void ChartAxis::SetMaximumLimit(float max)
 {
   GetImplementation(*this).SetMaxLimit(max);
 }
 
-float ChartAxis::GetMaxLimit() const
+float ChartAxis::GetMaximumLimit() const
 {
   return GetImplementation(*this).GetMaxLimit();
 }
 
-void ChartAxis::SetAutoRange(bool autoRange)
+void ChartAxis::SetAutoRangeEnabled(bool enabled)
 {
-  GetImplementation(*this).SetAutoRange(autoRange);
+  GetImplementation(*this).SetAutoRange(enabled);
 }
 
-bool ChartAxis::IsAutoRange() const
+bool ChartAxis::IsAutoRangeEnabled() const
 {
   return GetImplementation(*this).GetAutoRange();
 }
 
-void ChartAxis::SetShowGridLines(bool show)
+void ChartAxis::SetShowGridLinesEnabled(bool enabled)
 {
-  GetImplementation(*this).SetShowGridLines(show);
+  GetImplementation(*this).SetShowGridLines(enabled);
 }
 
-bool ChartAxis::GetShowGridLines() const
+bool ChartAxis::IsShowGridLinesEnabled() const
 {
   return GetImplementation(*this).GetShowGridLines();
 }
@@ -183,12 +194,12 @@ Vector4 ChartAxis::GetGridColor() const
   return GetImplementation(*this).GetGridColor();
 }
 
-void ChartAxis::SetMinStep(float step)
+void ChartAxis::SetMinimumStep(float step)
 {
   GetImplementation(*this).SetMinStep(step);
 }
 
-float ChartAxis::GetMinStep() const
+float ChartAxis::GetMinimumStep() const
 {
   return GetImplementation(*this).GetMinStep();
 }

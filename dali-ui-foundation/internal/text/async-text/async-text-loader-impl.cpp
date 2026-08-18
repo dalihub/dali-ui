@@ -1335,7 +1335,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
 
-  Devel::PixelBuffer cutoutData;
+  PixelBuffer cutoutData;
   if(cutoutEnabled)
   {
     cutoutData = mTypesetter->RenderWithPixelBuffer(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
@@ -1343,8 +1343,8 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
     // Make transparent buffer.
     // If the cutout is enabled, a separate texture is not used for the text.
-    Devel::PixelBuffer buffer = mTypesetter->CreateFullBackgroundBuffer(1, 1, Color::TRANSPARENT);
-    renderInfo.textPixelData  = Devel::PixelBuffer::Convert(buffer);
+    PixelBuffer buffer       = mTypesetter->CreateFullBackgroundBuffer(1, 1, Color::TRANSPARENT);
+    renderInfo.textPixelData = PixelBuffer::Convert(buffer);
 
     // Set the flag of cutout.
     renderInfo.isCutoutEnabled = cutoutEnabled && (cutoutData != nullptr);

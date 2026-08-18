@@ -40,6 +40,7 @@ DALI_ADD_SAMPLE(text-input-editor.example text-input-editor-example.cpp)
 DALI_ADD_SAMPLE(text-input-method-context.example text-input-method-context-example.cpp)
 DALI_ADD_SAMPLE(text-localization.example text-localization-example.cpp)
 DALI_ADD_SAMPLE(text-localization-po.example text-localization-po-example.cpp)
+DALI_ADD_SAMPLE(text-formatted-localization.example text-formatted-localization-example.cpp)
 DALI_ADD_SAMPLE(text-localization-custom-component.example text-localization-custom-component-example.cpp)
 DALI_ADD_SAMPLE(text-gradient-localization.example text-gradient-localization-example.cpp)
 DALI_ADD_SAMPLE(text-windows.example text-windows-example.cpp)
@@ -108,6 +109,26 @@ IF(MSGFMT_EXECUTABLE)
     LIST(APPEND PO_MO_FILES ${MO_FILE})
   ENDFOREACH()
 
+  SET(TEXT_FORMATTED_LOCALIZATION_LOCALES en_US ko_KR pl_PL)
+  SET(TEXT_FORMATTED_LOCALIZATION_DOMAIN text-formatted-localization)
+  SET(TEXT_FORMATTED_LOCALIZATION_PO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/po/formatted")
+  SET(TEXT_FORMATTED_LOCALIZATION_LOCALE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/locale/formatted")
+  FOREACH(LOCALE ${TEXT_FORMATTED_LOCALIZATION_LOCALES})
+    SET(PO_FILE "${TEXT_FORMATTED_LOCALIZATION_PO_DIR}/${LOCALE}.po")
+    SET(MO_DIR "${TEXT_FORMATTED_LOCALIZATION_LOCALE_DIR}/${LOCALE}/LC_MESSAGES")
+    SET(MO_FILE "${MO_DIR}/${TEXT_FORMATTED_LOCALIZATION_DOMAIN}.mo")
+    ADD_CUSTOM_COMMAND(
+      OUTPUT ${MO_FILE}
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${MO_DIR}
+      COMMAND ${MSGFMT_EXECUTABLE} --check -o ${MO_FILE} ${PO_FILE}
+      DEPENDS ${PO_FILE}
+      ${MSGFMT_JOB_POOL_ARGUMENT}
+      COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
+      VERBATIM
+    )
+    LIST(APPEND PO_MO_FILES ${MO_FILE})
+  ENDFOREACH()
+
   SET(TEXT_LOCALIZATION_ALT_DOMAIN text-localization-po-alt)
   SET(TEXT_LOCALIZATION_ALT_PO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/po/alternate")
   SET(TEXT_LOCALIZATION_ALT_LOCALE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/locale/alternate")
@@ -167,6 +188,7 @@ IF(MSGFMT_EXECUTABLE)
 
   ADD_CUSTOM_TARGET(text-localization-po-resources ALL DEPENDS ${PO_MO_FILES})
   ADD_DEPENDENCIES(text-localization-po.example text-localization-po-resources)
+  ADD_DEPENDENCIES(text-formatted-localization.example text-localization-po-resources)
   ADD_DEPENDENCIES(text-localization-custom-component.example text-localization-po-resources)
   ADD_DEPENDENCIES(text-gradient-localization.example text-localization-po-resources)
   ADD_DEPENDENCIES(text-windows.example text-localization-po-resources)

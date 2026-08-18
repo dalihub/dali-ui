@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/video-player-plugin.h>
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
@@ -36,10 +37,10 @@ using VideoSourcePtr = IntrusivePtr<VideoSource>;
 class VideoSource : public BaseObject
 {
 public:
-  static VideoSourcePtr New(const char*               providerId,
-                            void*                     nativeSession,
-                            const VideoSourceOptions& options,
-                            VideoRenderingMode        renderingMode);
+  static VideoSourcePtr New(Dali::StringView     providerId,
+                            void*                nativeSession,
+                            VideoSourceOwnership ownership,
+                            VideoRenderingMode   renderingMode);
 
   bool                 IsValid() const;
   VideoRenderingMode   GetRenderingMode() const;
@@ -51,16 +52,16 @@ protected:
   virtual ~VideoSource();
 
 private:
-  VideoSource(const char*               providerId,
-              void*                     nativeSession,
-              const VideoSourceOptions& options,
-              VideoRenderingMode        renderingMode);
+  VideoSource(Dali::StringView     providerId,
+              void*                nativeSession,
+              VideoSourceOwnership ownership,
+              VideoRenderingMode   renderingMode);
 
   VideoSource(const VideoSource&)            = delete;
   VideoSource& operator=(const VideoSource&) = delete;
 
 private:
-  const char*          mProviderId;
+  Dali::String         mProviderId;
   Any                  mNativeSession;
   VideoSourceOwnership mOwnership;
   VideoRenderingMode   mRenderingMode;
