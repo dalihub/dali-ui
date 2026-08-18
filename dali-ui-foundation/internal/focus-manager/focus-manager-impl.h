@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/common/vector-wrapper.h>
+#include <dali/integration-api/adaptor-framework/focused-actor-provider.h>
 #include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
@@ -46,7 +47,7 @@ namespace Internal
 /**
  * @copydoc Ui::FocusManager
  */
-class FocusManager : public Dali::BaseObject, public ConnectionTracker
+class FocusManager : public Dali::BaseObject, public ConnectionTracker, public Dali::Integration::FocusedActorProvider
 {
 public:
   struct FocusChangeContext
@@ -94,6 +95,11 @@ public:
    * @copydoc Ui::FocusManager::GetCurrentFocusView
    */
   View GetCurrentFocusView();
+
+  /**
+   * @copydoc Dali::Integration::FocusedActorProvider::GetFocusedActor
+   */
+  Dali::Actor GetFocusedActor() override;
 
   /**
    * @copydoc Ui::FocusManager::MoveFocus
@@ -224,7 +230,7 @@ protected:
   /**
    * Destructor
    */
-  virtual ~FocusManager();
+  ~FocusManager() override;
 
 private:
   typedef std::vector<WeakHandle<View>> FocusStack;         ///< Focus history stack

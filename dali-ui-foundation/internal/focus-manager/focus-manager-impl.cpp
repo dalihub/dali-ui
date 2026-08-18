@@ -184,6 +184,7 @@ FocusManager::FocusManager()
   mEnableDefaultAlgorithm(true),
   mClearFocusOnWindowFocusLost(true)
 {
+  Dali::Integration::FocusedActorProvider::Register(this);
   LifecycleController::Get().PreInitSignal().Connect(mSlotDelegate, &FocusManager::OnAdaptorInit);
   ScrollStateObserver::Get().DragStartedSignal().Connect(mSlotDelegate, &FocusManager::ClearTouchFocusCandidate);
 }
@@ -231,6 +232,10 @@ void FocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder sceneHold
 
 FocusManager::~FocusManager()
 {
+  if(Dali::Integration::FocusedActorProvider::GetRegisteredProvider() == this)
+  {
+    Dali::Integration::FocusedActorProvider::Unregister();
+  }
 }
 
 void FocusManager::GetConfiguration()
@@ -391,6 +396,11 @@ View FocusManager::GetCurrentFocusView()
     mCurrentFocusView.Reset();
   }
   return view;
+}
+
+Dali::Actor FocusManager::GetFocusedActor()
+{
+  return GetCurrentFocusView();
 }
 
 View FocusManager::GetFocusViewFromCurrentWindow()

@@ -74,6 +74,7 @@ For details about the class structure and extensibility of `View`, see [here](ht
 * ~~[Fluent API](https://github.sec.samsung.net/NUI/dali-ui/wiki/Fluent-API)~~ (deprecated)
 * [Configuration](https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration)
 * [AppFW Integration](https://github.sec.samsung.net/NUI/dali-ui/wiki/AppFW-Integration)
+* [Actor Annotation](https://github.sec.samsung.net/NUI/dali-ui/wiki/Actor-Annotation)
 * [Unit & Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-&-Scale)
 * [Ui Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale)
 * [Color & Theme](https://github.sec.samsung.net/NUI/dali-ui/wiki/Color-&-Theme)
