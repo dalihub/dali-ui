@@ -46,8 +46,11 @@ class TestThemeLoader : public ThemeLoaderInterface
 public:
   bool GetColor(StringView colorId, Vector4& outColor) override
   {
-    (void)colorId;
-    (void)outColor;
+    if(colorId == "CustomPrimary")
+    {
+      outColor = Vector4(0.2f, 0.4f, 0.6f, 1.0f);
+      return true;
+    }
     return false;
   }
 
@@ -236,6 +239,20 @@ int UtcDaliUiThemeManagerUsesCurrentUiConfigThemeLoaderP(void)
 
   UiThemeManager manager = UiThemeManager::Get();
   DALI_TEST_EQUALS(manager.GetCurrentThemeId(), String("custom"), TEST_LOCATION);
+  DALI_TEST_EQUALS(gThemeLoaderCreateCount, 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiThemeManagerProvidesColorsToUiColorManagerP(void)
+{
+  UiConfig config(new TestUiConfigImpl());
+
+  UiTestApplication application(config);
+
+  Vector4 color;
+  DALI_TEST_CHECK(UiColorManager::Get().GetColor("CustomPrimary", color));
+  DALI_TEST_EQUALS(color, Vector4(0.2f, 0.4f, 0.6f, 1.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(gThemeLoaderCreateCount, 1, TEST_LOCATION);
 
   END_TEST;
