@@ -915,6 +915,46 @@ int UtcDaliLabelTextGradientOverlayAnimationIndependentFromBaseP(void)
   END_TEST;
 }
 
+int UtcDaliLabelTextGradientSameSizePaddingRepublishesP(void)
+{
+  UiTestApplication application;
+  auto&             gl = application.GetGlAbstraction();
+  gl.SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  gl.EnableTextureCallTrace(true);
+
+  Label label = Label::New(
+    "Gradient text must republish its raster and mapping when padding changes content bounds at fixed outer geometry");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(180.0f);
+  label.SetFontSize(20.0f);
+  label.SetMultiLine(true);
+  label.SetTextGradient(MakeRenderableLinear());
+  label.SetTextGradientBoundsMode(Text::GradientBoundsMode::VIEW_BOUND);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  const Vector3  fixedSize           = label.GetCurrentSize();
+  const uint32_t initialTextureWidth = label.GetRendererAt(0u).GetTextures().GetTexture(0u).GetWidth();
+
+  gl.ResetTextureCallStack();
+  label.SetPadding(Insets(80.0f, 90.0f, 5.0f, 9.0f));
+  application.SendNotification();
+  application.Render(16);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(label.GetCurrentSize(), fixedSize, TEST_LOCATION);
+  DALI_TEST_CHECK(gl.GetTextureTrace().CountMethod("TexImage2D") > 0);
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTexture(0u).GetWidth() < initialTextureWidth);
+  DALI_TEST_CHECK(label.GetTextGradient().GetType() != Gradient::Type::NONE);
+  DALI_TEST_EQUALS(label.GetTextGradientBoundsMode(), Text::GradientBoundsMode::VIEW_BOUND, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliLabelTextGradientRepeatedAnimationKeepsPropertyIndicesP(void)
 {
   UiTestApplication application;

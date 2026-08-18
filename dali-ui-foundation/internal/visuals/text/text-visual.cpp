@@ -318,6 +318,7 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mNaturalSizeTaskId(0u),
   mHeightForWidthTaskId(0u),
   mRendererUpdateNeeded(false),
+  mApplyingFittingMode(false),
   mTextRequireRender(false),
   mIsConstraintAppliedAlways(false),
   mIsTextLoadingTaskRunning(false),
@@ -550,16 +551,21 @@ void TextVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
 void TextVisual::OnApplyFittingMode(const Vector2& controlSize, const Insets& padding, float effectiveScale)
 {
   // Apply UiScale to controller
-  if(mController->SetUiScale(effectiveScale))
+  const bool uiScaleChanged = mController->SetUiScale(effectiveScale);
+  if(uiScaleChanged || controlSize != mImpl->mControlSize)
   {
-    mController->InvalidateFontData();
+    if(uiScaleChanged)
+    {
+      mController->InvalidateFontData();
+    }
 
     // Renderer needs textures and to be added to control
     mRendererUpdateNeeded = true;
   }
-
-  // Update control size without change transform.
+  // Track the active fitting update so resource reuse is limited to this call.
+  mApplyingFittingMode = true;
   Visual::Base::OnApplyFittingMode(controlSize, padding, effectiveScale);
+  mApplyingFittingMode = false;
 }
 
 Vector4 TextVisual::CalculateGradientViewBounds(Ui::Integration::Visual::Base visual, const Vector2& coordinateSize)
@@ -852,9 +858,35 @@ void TextVisual::UpdateRenderer()
     mTypesetter->SetFinalElisionResult(mController->GetFinalElisionResult());
   }
 
-  if(Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType) || mRendererUpdateNeeded)
+  const bool textModelUpdated =
+    Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType);
+  if(textModelUpdated || mRendererUpdateNeeded)
   {
+    bool hasPublishedTextResource =
+      GetResourceStatus() == Ui::Visual::ResourceStatus::READY && !mRendererList.empty();
+    for(const Renderer& renderer : mRendererList)
+    {
+      hasPublishedTextResource =
+        hasPublishedTextResource && renderer && renderer.GetTextures().GetTextureCount() > 0u;
+    }
+
+    // Fitting must finalize controller layout, but may reapply an already-published
+    // result. Reuse it only when no renderer or transform invalidation is pending.
+    const bool reusePublishedFittingResource =
+      textModelUpdated &&
+      !mRendererUpdateNeeded &&
+      mApplyingFittingMode &&
+      IsTransformMapSetForFittingMode() &&
+      !mImpl->mTransformMapChanged &&
+      hasPublishedTextResource;
+
     mRendererUpdateNeeded = false;
+
+    if(reusePublishedFittingResource)
+    {
+      ResourceReady(Ui::Visual::ResourceStatus::READY);
+      return;
+    }
 
     // Remove the texture set and any renderer previously set.
     // Note, we don't need to remove the mImpl->Renderer, since it will be added again after AddRenderer call.

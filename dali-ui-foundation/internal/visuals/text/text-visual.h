@@ -785,6 +785,7 @@ private:
   uint32_t                 mNaturalSizeTaskId;               ///< The currently requested natural size task Id.
   uint32_t                 mHeightForWidthTaskId;            ///< The currently requested height for width task Id.
   bool                     mRendererUpdateNeeded : 1;        ///< The flag to indicate whether the renderer needs to be updated.
+  bool                     mApplyingFittingMode : 1;         ///< Whether renderer update is running from OnApplyFittingMode().
   bool                     mTextRequireRender : 1;           ///< The flag to indicate whether the text needs to be rendered.
   bool                     mIsConstraintAppliedAlways : 1;   ///< Whether the constraint need to be applied always.
   bool                     mIsTextLoadingTaskRunning : 1;    ///< Whether the requested text loading task is running or not.

@@ -1246,6 +1246,41 @@ int UtcDaliLabelTextRevealLifecycleStressP(void)
   END_TEST;
 }
 
+int UtcDaliLabelAsyncSameSizePaddingChangePublishesResourceP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  Label label = Label::New(
+    "Asynchronous padding changes must republish text when fixed outer geometry keeps the Label size unchanged");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(240.0f);
+  label.SetFontSize(20.0f);
+  label.SetMultiLine(true);
+  label.SetAsyncRendering(true);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(WaitForValidTextTexture(application, label));
+
+  const Vector3  fixedSize           = label.GetCurrentSize();
+  const uint32_t initialTextureWidth = label.GetRendererAt(0u).GetTextures().GetTexture(0u).GetWidth();
+
+  label.SetPadding(Insets(100.0f, 110.0f, 7.0f, 11.0f));
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(label.GetCurrentSize(), fixedSize, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetRendererCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTextureCount() > 0u);
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTexture(0u).GetWidth() < initialTextureWidth);
+
+  END_TEST;
+}
+
 int UtcDaliAnimationSpecDownCastP(void)
 {
   UiTestApplication application;
