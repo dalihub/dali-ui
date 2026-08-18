@@ -135,6 +135,11 @@ enum class Role : uint32_t
   SWITCH,                        ///< A switch that can be on or off. @SINCE_2_5.30
   LABEL,                         ///< A View that presents a text label. @SINCE_2_5.30
   SCROLL_PANE,                   ///< A View that provides a scrollable pane. @SINCE_2_5.30
+  TABLE,                         ///< A View that presents tabular data. @SINCE_2_5.30
+  TABLE_CELL,                    ///< A cell within a table. @SINCE_2_5.30
+  TABLE_COLUMN_HEADER,           ///< A header for a table column. @SINCE_2_5.30
+  TABLE_ROW_HEADER,              ///< A header for a table row. @SINCE_2_5.30
+  EMBEDDED,                      ///< A View that embeds another accessible View tree. @SINCE_2_5.30
   MAX_COUNT                      ///< Sentinel value used to validate accessibility role values. @SINCE_2_5.30
 };
 

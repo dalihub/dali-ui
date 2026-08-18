@@ -167,6 +167,11 @@ Dali::Integration::Accessibility::Role ConvertV2RoleToAccessibilityRole(Accessib
     TO_SAME_ROLE_TYPE(TOOL_BAR)
     TO_V1_ROLE_TYPE(SCENE_3D, FILLER)
     TO_V1_ROLE_TYPE(MODEL, IMAGE)
+    TO_SAME_ROLE_TYPE(TABLE)
+    TO_SAME_ROLE_TYPE(TABLE_CELL)
+    TO_SAME_ROLE_TYPE(TABLE_COLUMN_HEADER)
+    TO_SAME_ROLE_TYPE(TABLE_ROW_HEADER)
+    TO_SAME_ROLE_TYPE(EMBEDDED)
     default:
     {
       return Role::UNKNOWN;

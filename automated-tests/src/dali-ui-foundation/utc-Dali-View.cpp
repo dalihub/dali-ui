@@ -3567,6 +3567,21 @@ int UtcDaliViewAccessibilityRoleConversionP(void)
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::DIALOG, TEST_LOCATION);
   DALI_TEST_EQUALS(ViewAccessible::IsModal(view), true, TEST_LOCATION);
 
+  view.SetAccessibilityRole(UiAccessibility::Role::TABLE);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::TABLE, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::TABLE_CELL);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::TABLE_CELL, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::TABLE_COLUMN_HEADER);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::TABLE_COLUMN_HEADER, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::TABLE_ROW_HEADER);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::TABLE_ROW_HEADER, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::EMBEDDED);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::EMBEDDED, TEST_LOCATION);
+
   view.SetAccessibilityRole(UiAccessibility::Role::NONE);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::UNKNOWN, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<bool>(accessible->GetStates()[Dali::Integration::Accessibility::State::HIGHLIGHTABLE]), false, TEST_LOCATION);
