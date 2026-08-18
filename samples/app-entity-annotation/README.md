@@ -13,15 +13,15 @@ transport and generated binding.
 
 ## APIs demonstrated
 
-- `Actor::SetAnnotation()`
-- `Actor::GetAnnotation()`
-- `Actor::ClearAnnotation()`
-- `Actor::GetId()`
+- `view.SetAnnotation()`
+- `view.GetAnnotation()`
+- `view.ClearAnnotation()`
+- `view.GetId()`
 - `Ui::FocusManager::SetCurrentFocusView()`
 - `Ui::FocusManager::GetCurrentFocusView()`
 
-Every annotated object in this sample is a `Dali::Ui::View`. `Actor::GetId()`
-is the runtime Actor identifier used by `FindById`; the application-defined
+Every annotated object in this sample is a `Dali::Ui::View`. `View::GetId()`
+is the runtime View identifier used by `FindById`; the application-defined
 entity identifier is stored separately in the annotation.
 
 ## Local Action Simulator
@@ -30,7 +30,7 @@ The action buttons model the user-visible behavior of:
 
 | Action | Local behavior |
 |---|---|
-| `FindById` | Finds the selected View by its Actor ID and displays a presentation payload. |
+| `FindById` | Finds the selected View by its runtime ID and displays a presentation payload. |
 | `GetAnnotatedViews` | Reads the current annotations and lists the annotated, visible Views. |
 | `GetFocusedView` | Reads the View selected through `Ui::FocusManager`. |
 | `ToPresentation` | Displays a JSON representation of the selected View. |
@@ -50,7 +50,7 @@ interaction model available on both supported desktop platforms.
 - Press **R** to restore the initial state.
 - Press **Escape/Back** to quit.
 
-The response panel shows the action name, status, and current payload. Actor
+The response panel shows the action name, status, and current payload. View
 IDs are assigned at runtime, so the values may differ from the screenshot.
 
 ## Build and run on Ubuntu

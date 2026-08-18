@@ -100,7 +100,7 @@ int UtcDaliFocusManagerFocusedActorProviderP(void)
   UiTestApplication application;
 
   FocusManager focusManager = FocusManager::Get();
-  auto* provider = Dali::Integration::FocusedActorProvider::GetRegisteredProvider();
+  auto* provider = Dali::Integration::GetFocusedActorProvider();
   DALI_TEST_CHECK(provider != nullptr);
 
   View view = View::New();

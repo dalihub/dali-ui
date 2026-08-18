@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// Portable Actor annotation sample for Ubuntu and Windows.
+// Portable View annotation sample for Ubuntu and Windows.
 //
 // The sample uses real Dali::Ui::View annotation and focus APIs. The four
 // Tizen.Action.View requests are represented by a local simulator so the
@@ -168,7 +168,7 @@ private:
     titleBlock.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     titleBlock.SetSpacing(1.0f);
     titleBlock.Add(MakeLabel("App Entity Studio", 25.0f, 0xFFFFFFu, 34.0f));
-    titleBlock.Add(MakeLabel("Actor annotations on real Dali::Ui::View objects", 13.0f, 0xC8D2FFu, 24.0f));
+    titleBlock.Add(MakeLabel("Annotations on real Dali::Ui::View objects", 13.0f, 0xC8D2FFu, 24.0f));
     header.Add(titleBlock);
 
     Label mode = MakeLabel("PORTABLE  |  LOCAL ACTION SIMULATOR", 12.0f, 0xFFFFFFu, 38.0f);
@@ -295,7 +295,8 @@ private:
     button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     button.SetBackgroundColor(UiColor(color));
     button.SetCornerRadius(10.0f);
-    button.SetFocusable(true);
+    // Simulator controls must not replace the focused entity View.
+    button.SetFocusable(false);
 
     Label label = MakeLabel(text, 12.0f, 0xFFFFFFu, MATCH_PARENT);
     label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
@@ -373,7 +374,7 @@ private:
     }
     mSelectedIndex = index;
     FocusManager::Get().SetCurrentFocusView(mEntities[index].card);
-    SetActivity("Selected " + mEntities[index].title + " (Actor " + std::to_string(mEntities[index].card.GetId()) + ")");
+    SetActivity("Selected " + mEntities[index].title + " (View " + std::to_string(mEntities[index].card.GetId()) + ")");
     RefreshCards();
   }
 
@@ -403,7 +404,7 @@ private:
       entity.state.SetText(state.c_str());
       entity.state.SetTextColor(UiColor(annotated ? (enabled ? COLOR_SUCCESS : COLOR_WARNING) : COLOR_DANGER));
 
-      const std::string metadata = "Actor " + std::to_string(entity.card.GetId()) + "   |   " +
+      const std::string metadata = "View " + std::to_string(entity.card.GetId()) + "   |   " +
                                    (annotated ? std::string(annotationId.CStr()) : std::string("—"));
       entity.metadata.SetText(metadata.c_str());
     }

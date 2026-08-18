@@ -20,10 +20,11 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/common/vector-wrapper.h>
-#include <dali/integration-api/adaptor-framework/focused-actor-provider.h>
 #include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
+
+#include <memory>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/focus-indication-policy.h>
@@ -44,10 +45,12 @@ namespace Ui
 {
 namespace Internal
 {
+class FocusedActorProviderImpl;
+
 /**
  * @copydoc Ui::FocusManager
  */
-class FocusManager : public Dali::BaseObject, public ConnectionTracker, public Dali::Integration::FocusedActorProvider
+class FocusManager : public Dali::BaseObject, public ConnectionTracker
 {
 public:
   struct FocusChangeContext
@@ -95,11 +98,6 @@ public:
    * @copydoc Ui::FocusManager::GetCurrentFocusView
    */
   View GetCurrentFocusView();
-
-  /**
-   * @copydoc Dali::Integration::FocusedActorProvider::GetFocusedActor
-   */
-  Dali::Actor GetFocusedActor() override;
 
   /**
    * @copydoc Ui::FocusManager::MoveFocus
@@ -410,6 +408,8 @@ private:
   FocusManager& operator=(const FocusManager& rhs);
 
 private:
+  std::unique_ptr<FocusedActorProviderImpl> mFocusedActorProvider; ///< Bridge that exposes the focused View to dali-adaptor
+
   Ui::FocusManager::FocusChangedSignalType mFocusChangedSignal;  ///< The signal to notify the focus change
   WeakHandle<View>                         mCurrentFocusView;    ///< A weak handle to the current focused view
   WeakHandle<View>                         mTouchFocusCandidate; ///< A weak handle to the view that may receive focus when touch is released

@@ -25,6 +25,7 @@
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/adaptor-framework/focused-actor-provider.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
@@ -143,6 +144,23 @@ const unsigned int MAX_HISTORY_AMOUNT = 30; ///< Max length of focus history sta
 
 } // unnamed namespace
 
+class FocusedActorProviderImpl final : public Dali::Integration::FocusedActorProvider
+{
+public:
+  explicit FocusedActorProviderImpl(FocusManager& focusManager)
+  : mFocusManager(focusManager)
+  {
+  }
+
+  Dali::Actor GetFocusedActor() override
+  {
+    return mFocusManager.GetCurrentFocusView();
+  }
+
+private:
+  FocusManager& mFocusManager;
+};
+
 Ui::FocusManager FocusManager::Get()
 {
   Ui::FocusManager manager;
@@ -163,7 +181,8 @@ Ui::FocusManager FocusManager::Get()
 }
 
 FocusManager::FocusManager()
-: mFocusChangedSignal(),
+: mFocusedActorProvider(std::make_unique<FocusedActorProviderImpl>(*this)),
+  mFocusChangedSignal(),
   mCurrentFocusView(),
   mTouchFocusCandidate(),
   mFocusIndicatorView(),
@@ -184,7 +203,7 @@ FocusManager::FocusManager()
   mEnableDefaultAlgorithm(true),
   mClearFocusOnWindowFocusLost(true)
 {
-  Dali::Integration::FocusedActorProvider::Register(this);
+  Dali::Integration::RegisterFocusedActorProvider(mFocusedActorProvider.get());
   LifecycleController::Get().PreInitSignal().Connect(mSlotDelegate, &FocusManager::OnAdaptorInit);
   ScrollStateObserver::Get().DragStartedSignal().Connect(mSlotDelegate, &FocusManager::ClearTouchFocusCandidate);
 }
@@ -232,10 +251,7 @@ void FocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder sceneHold
 
 FocusManager::~FocusManager()
 {
-  if(Dali::Integration::FocusedActorProvider::GetRegisteredProvider() == this)
-  {
-    Dali::Integration::FocusedActorProvider::Unregister();
-  }
+  Dali::Integration::UnregisterFocusedActorProvider(mFocusedActorProvider.get());
 }
 
 void FocusManager::GetConfiguration()
@@ -396,11 +412,6 @@ View FocusManager::GetCurrentFocusView()
     mCurrentFocusView.Reset();
   }
   return view;
-}
-
-Dali::Actor FocusManager::GetFocusedActor()
-{
-  return GetCurrentFocusView();
 }
 
 View FocusManager::GetFocusViewFromCurrentWindow()
