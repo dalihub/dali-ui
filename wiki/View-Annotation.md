@@ -1,14 +1,13 @@
-[→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/Actor-Annotation-(kr))
+[→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/View-Annotation-(kr))
 
-# Actor Annotation for App Entities
+# View Annotation for App Entities
 
 This guide explains how a dali-ui application attaches application-defined
 entity metadata to a `Dali::Ui::View`. The Tizen application entity service can
 then expose annotated Views through `Tizen.Action.View`.
 
-This guide intentionally uses `Dali::Ui::View` objects. Although the annotation
-storage API belongs to `Dali::Actor`, application UI code should attach the
-metadata to the View that represents the entity.
+The annotation APIs are used through `Dali::Ui::View`, and application UI code
+should attach the metadata to the View that represents the entity.
 
 <br/>
 
@@ -28,11 +27,11 @@ lightCard.SetAnnotation(
 ```
 
 Calling `SetAnnotation()` again replaces the complete annotation. The strings
-are copied by the View's Actor and remain valid for the Actor lifetime or until
+are stored on the View and remain valid for the View lifetime or until
 `ClearAnnotation()` is called.
 
 > [!NOTE]
-> Annotation data is event-side metadata. It is not an Actor property and does
+> Annotation data is event-side metadata. It is not a registered View property and does
 > not participate in property notifications, serialization, or the
 > update/render thread.
 
@@ -59,17 +58,17 @@ an annotation exists.
 
 <br/>
 
-## 3. Actor ID and Entity ID
+## 3. View ID and Entity ID
 
 The two identifiers have different lifetimes and purposes:
 
 | Identifier | Source | Purpose |
 |---|---|---|
-| Actor ID | `view.GetId()` | Runtime identifier used by `FindById`. Valid for the Actor lifetime. |
+| View ID | `view.GetId()` | Runtime identifier used by `FindById`. Valid for the View lifetime. |
 | Entity ID | First value passed to `SetAnnotation()` | Stable, application-defined identity such as `living-room.light`. |
 
-Do not store an Actor ID as the application entity ID. Recreating the View may
-produce a different Actor ID while its logical entity ID remains the same.
+Do not store a View ID as the application entity ID. Recreating the View may
+produce a different View ID while its logical entity ID remains the same.
 
 <br/>
 
@@ -84,8 +83,8 @@ window.Add(lightCard);
 Dali::Ui::FocusManager::Get().SetCurrentFocusView(lightCard);
 ```
 
-dali-ui automatically connects its `FocusManager` to dali-adaptor's focused
-Actor provider. Applications do not register a provider. Consequently,
+dali-ui automatically supplies the View currently focused by its `FocusManager`
+to dali-adaptor. Applications do not register a provider. Consequently,
 `GetFocusedView` reflects the current dali-ui focus after normal focus setup.
 
 <br/>
@@ -96,14 +95,14 @@ On Tizen, dali-adaptor maps View state to the canonical action contract:
 
 | Action | Meaning |
 |---|---|
-| `FindById` | Finds a View using its decimal Actor ID. |
+| `FindById` | Finds a View using its decimal View ID. |
 | `GetAnnotatedViews` | Returns annotated Views that satisfy visibility requirements. |
 | `GetFocusedView` | Returns the View currently owned by `Ui::FocusManager`. |
 | `ToPresentation` | Produces the platform presentation document. |
 
 The `View` terminology in these action names belongs to the external
 `Tizen.Action.View` contract. Application code continues to use normal
-`Dali::Ui::View` and `Dali::Actor` APIs.
+`Dali::Ui::View` APIs.
 
 <br/>
 
@@ -136,7 +135,7 @@ The sample demonstrates:
 - Three annotated View cards in a realistic dashboard.
 - Click, touch, and keyboard focus changes.
 - Runtime annotation removal and restoration.
-- Actor ID versus application entity ID.
+- View ID versus application entity ID.
 - Local `FindById`, `GetAnnotatedViews`, `GetFocusedView`, and
   `ToPresentation` request flows.
 
@@ -152,7 +151,7 @@ tests.
 - Use a namespaced entity type owned by the application or platform contract.
 - Keep `entityInfo` compact and version its format when consumers depend on it.
 - Clear the annotation when a View should no longer be discoverable.
-- Do not depend on Actor IDs across process or Actor lifetimes.
+- Do not depend on View IDs across process or View lifetimes.
 
 <br/>
 
