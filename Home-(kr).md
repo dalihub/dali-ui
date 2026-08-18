@@ -73,6 +73,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 세 가지 API 레벨
 * ~~[Fluent API](https://github.sec.samsung.net/NUI/dali-ui/wiki/Fluent-API-(kr))~~ (deprecated)
 * [Configuration](https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration-(kr))
 * [AppFW Integration](https://github.sec.samsung.net/NUI/dali-ui/wiki/AppFW-Integration-(kr))
+* [Actor Annotation](https://github.sec.samsung.net/NUI/dali-ui/wiki/Actor-Annotation-(kr))
 * [Unit & Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-&-Scale-(kr))
 * [Ui Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale-(Kr))
 * [Color & Theme](https://github.sec.samsung.net/NUI/dali-ui/wiki/Color-&-Theme-(kr))
