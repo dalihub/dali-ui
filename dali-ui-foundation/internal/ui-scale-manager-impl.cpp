@@ -123,7 +123,9 @@ void UiScaleManagerImpl::InvalidateAllLayoutRoots()
       // the next Measure pass.
       ViewDataImpl::Get(viewImpl).ResetSubtreeScaleAndLayoutCaches();
       // Then invalidate measure at the root to schedule a re-layout pass.
-      viewImpl.InvalidateMeasure();
+      // Through the internal primitive, not ViewImpl::InvalidateMeasure(): a
+      // global scale change is a framework-internal event, not an application call.
+      ViewDataImpl::Get(viewImpl).InvalidateMeasure();
     }
 
     ++it;

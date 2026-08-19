@@ -1205,8 +1205,10 @@ void AnimatedImageViewImpl::OnViewResourceReady(Ui::View view)
   // Main image is ready: remove placeholder
   viewData.UnregisterVisual(AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE);
 
-  // Request a re-layout now that the natural size is known
-  InvalidateMeasure();
+  // Request a re-layout now that the natural size is known.
+  // Through the internal primitive, not ViewImpl::InvalidateMeasure(): a resource
+  // becoming ready is a framework-internal event, not an application call.
+  viewData.InvalidateMeasure();
 }
 
 } // namespace Integration

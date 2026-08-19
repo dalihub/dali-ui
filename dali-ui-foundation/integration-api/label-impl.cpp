@@ -2567,7 +2567,11 @@ void LabelImpl::InvalidateTextMeasure()
     // Invalidate measure only when the label size depends on text measurement.
     if((GetRequestedWidth() == WRAP_CONTENT) || (GetRequestedHeight() == WRAP_CONTENT))
     {
-      InvalidateMeasure();
+      // Through the internal primitive, not ViewImpl::InvalidateMeasure(): the
+      // mMeasureInvalidated latch below is only released by OnMeasure, so this
+      // framework-internal invalidation must never be routed through the public
+      // entry point.
+      Internal::ViewDataImpl::Get(*this).InvalidateMeasure();
       mMeasureInvalidated = true;
     }
     EnableAutoMarqueeEvaluation();

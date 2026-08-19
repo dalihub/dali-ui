@@ -2183,7 +2183,11 @@ void InputFieldImpl::InvalidateTextMeasure()
     // Only invalidate measure when size depends on content.
     if(GetRequestedWidth() == WRAP_CONTENT || GetRequestedHeight() == WRAP_CONTENT)
     {
-      InvalidateMeasure();
+      // Through the internal primitive, not ViewImpl::InvalidateMeasure(): the
+      // mMeasureInvalidated latch below is only released by OnMeasure, so this
+      // framework-internal invalidation must never be routed through the public
+      // entry point.
+      Internal::ViewDataImpl::Get(*this).InvalidateMeasure();
       mMeasureInvalidated = true;
     }
   }

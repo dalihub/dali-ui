@@ -523,7 +523,9 @@ public:
     {
       if(pair.second.weakHandle.GetHandle())
       {
-        pair.second.view->InvalidateMeasure();
+        // Through the internal primitive, not ViewImpl::InvalidateMeasure(): a
+        // window resize is a framework-internal event, not an application call.
+        Internal::ViewDataImpl::Get(*pair.second.view).InvalidateMeasure();
       }
       else
       {
@@ -1173,6 +1175,11 @@ LayoutController::~LayoutController()
 }
 
 void LayoutController::RequestLayout(ViewImpl* view)
+{
+  mImpl->RequestLayout(view);
+}
+
+void LayoutController::RequestLayoutInternal(ViewImpl* view)
 {
   mImpl->RequestLayout(view);
 }

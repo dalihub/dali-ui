@@ -2124,6 +2124,11 @@ void ViewDataImpl::InvalidateMeasure()
   // Disabled outright while any layout pass is on the stack (gActiveLayoutPassDepth),
   // because mid-pass the walk also poisons in-progress ancestors, which is not
   // something the root's registration stands in for.
+  //
+  // Every step of the walk below recurses into this internal primitive
+  // (ViewDataImpl::Get(...).Invalidate*()) rather than into the public
+  // ViewImpl::Invalidate*() entry point, so the walk never re-enters the public
+  // API on the framework's own behalf.
   const uint32_t generation = LayoutInvalidation::CurrentGeneration();
   if(gActiveLayoutPassDepth == 0u && mMeasurePropagationGeneration == generation)
   {
@@ -2149,7 +2154,7 @@ void ViewDataImpl::InvalidateMeasure()
     Ui::View parentView = GetParentView();
     if(parentView && GetImpl(parentView).GetLayoutTransition())
     {
-      GetImpl(parentView).InvalidateMeasure();
+      ViewDataImpl::Get(GetImpl(parentView)).InvalidateMeasure();
     }
     RegisterWithLayoutController();
     return;
@@ -2158,14 +2163,14 @@ void ViewDataImpl::InvalidateMeasure()
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
   {
-    GetImpl(parentLayout).InvalidateMeasure();
+    ViewDataImpl::Get(GetImpl(parentLayout)).InvalidateMeasure();
     return;
   }
 
   Ui::View parentView = GetParentView();
   if(parentView)
   {
-    GetImpl(parentView).InvalidateMeasure();
+    ViewDataImpl::Get(GetImpl(parentView)).InvalidateMeasure();
     return;
   }
 
@@ -2212,7 +2217,7 @@ void ViewDataImpl::InvalidateArrange()
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
   {
-    GetImpl(parentLayout).InvalidateArrange();
+    ViewDataImpl::Get(GetImpl(parentLayout)).InvalidateArrange();
     return;
   }
 
@@ -2220,7 +2225,7 @@ void ViewDataImpl::InvalidateArrange()
   Ui::View parentView = GetParentView();
   if(parentView)
   {
-    GetImpl(parentView).InvalidateArrange();
+    ViewDataImpl::Get(GetImpl(parentView)).InvalidateArrange();
     return;
   }
 
@@ -3085,7 +3090,9 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
 
     // Invalidate the child's measure cache -- its previous cache was computed
     // under a different parent's constraints and is no longer reliable.
-    childImpl.InvalidateMeasure();
+    // Through the internal primitive, not ViewImpl::InvalidateMeasure(): this is
+    // a framework-internal consistency invalidation, not an application call.
+    ViewDataImpl::Get(childImpl).InvalidateMeasure();
 
     if(childAffectsSelf)
     {
@@ -3214,7 +3221,9 @@ void ViewDataImpl::OnChildRemoved(Actor& child)
       // re-measured when re-parented to a different container.
       // Note: Actor parent-child relationship is already severed at this
       // point, so child's InvalidateMeasure cannot propagate to us.
-      childImpl.InvalidateMeasure();
+      // Through the internal primitive, not ViewImpl::InvalidateMeasure(): this
+      // is a framework-internal consistency invalidation, not an application call.
+      ViewDataImpl::Get(childImpl).InvalidateMeasure();
       mChildren.Erase(it);
 
       if(childWasAffectingSelf)
@@ -5146,7 +5155,9 @@ void ViewDataImpl::RegisterWithLayoutController()
     }
 
     LayoutController& controller = LayoutController::Get(window);
-    controller.RequestLayout(&mViewImpl);
+    // The internal registration path: this is the invalidation walk reaching its
+    // layout root, not an application asking for a layout.
+    controller.RequestLayoutInternal(&mViewImpl);
 
     // Register as a layout root in UiScaleManager so it gets invalidated when
     // the system scale changes. Duplicate registration is silently ignored.
@@ -5388,7 +5399,9 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
   // A logical child-order change can alter the measured size (e.g. a wrap
   // layout where line-breaking depends on child order), so invalidate measure
   // — not just arrange — for the whole reorder path.
-  mViewImpl.InvalidateMeasure();
+  // This view's own internal primitive, not mViewImpl.InvalidateMeasure(): an
+  // actor-side reorder is a framework-internal event, not an application call.
+  InvalidateMeasure();
 }
 
 void ViewDataImpl::OnLayoutDirectionChanged(Dali::Actor /* actor */, Dali::LayoutDirection::Type /* type */)
@@ -6035,7 +6048,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(dataImpl.mMargin != marginInsets)
           {
             dataImpl.mMargin = marginInsets;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -6050,7 +6063,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(dataImpl.mPadding != paddingInsets)
           {
             dataImpl.mPadding = paddingInsets;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -6285,7 +6298,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.mRequestedWidth, width))
           {
             dataImpl.mRequestedWidth = width;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
             if(width >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
                !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
             {
@@ -6315,7 +6328,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.mRequestedHeight, height))
           {
             dataImpl.mRequestedHeight = height;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
             if(height >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
                !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
             {
@@ -6335,7 +6348,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.GetMinimumWidth(), width))
           {
             dataImpl.EnsureSizeConstraints().minWidth = width;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -6350,7 +6363,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.GetMinimumHeight(), height))
           {
             dataImpl.EnsureSizeConstraints().minHeight = height;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -6365,7 +6378,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.GetMaximumWidth(), width))
           {
             dataImpl.EnsureSizeConstraints().maxWidth = width;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -6380,7 +6393,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.GetMaximumHeight(), height))
           {
             dataImpl.EnsureSizeConstraints().maxHeight = height;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -6396,7 +6409,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(dataImpl.mLayoutMode != mode)
           {
             dataImpl.mLayoutMode = mode;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
 
             // A layout-mode transition (DEFAULT <-> STANDALONE) changes
             // whether this view contributes to the parent's measure/arrange.
@@ -6408,7 +6421,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             Ui::View parentView = dataImpl.GetParentView();
             if(parentView)
             {
-              GetImpl(parentView).InvalidateMeasure();
+              ViewDataImpl::Get(GetImpl(parentView)).InvalidateMeasure();
             }
           }
         }

@@ -80,6 +80,17 @@ public:
   void RequestLayout(ViewImpl* view);
 
   /**
+   * @brief Schedules a view for layout processing on the framework's behalf.
+   *
+   * @note For internal framework use only; applications must use RequestLayout().
+   * This is the registration path taken by the invalidation walk itself, so it
+   * stays free of the policy the public entry point applies to application calls.
+   *
+   * @param[in] view The view with layout capability to schedule
+   */
+  void RequestLayoutInternal(ViewImpl* view);
+
+  /**
    * @brief Removes the layout controller for the given window.
    *
    * Should be called when a window is being closed to release the
