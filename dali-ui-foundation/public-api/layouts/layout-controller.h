@@ -161,7 +161,10 @@ public:
    *   frame. Avoid unconditionally re-laying-out inside the slot, which
    *   creates a self-perpetuating per-frame emit cycle.
    * - Destroying this controller from within the slot (LayoutController::Remove)
-   *   is supported; the destruction is deferred until the emit unwinds.
+   *   is supported. The controller is detached immediately - it stops processing
+   *   and emitting at once - but the object is not freed until the event loop
+   *   next goes idle, because DALi core still holds a processor pointer to it
+   *   for the remainder of the current processing pass.
    *
    * @return The layout-finished signal
    * @note The @c Dali::Window is passed (not the LayoutController) because the

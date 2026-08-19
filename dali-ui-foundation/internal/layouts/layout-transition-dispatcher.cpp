@@ -290,6 +290,16 @@ LayoutTransitionDispatcher::LayoutTransitionDispatcher()
 }
 LayoutTransitionDispatcher::~LayoutTransitionDispatcher() = default;
 
+void LayoutTransitionDispatcher::Shutdown()
+{
+  // Drop the tick driver only. Active animator state is left untouched and dies
+  // with the dispatcher; see the header for why the object itself must survive.
+  if(mTickTimer)
+  {
+    mTickTimer.Reset();
+  }
+}
+
 LayoutTransitionDispatcher::InteractionSnapshot
 LayoutTransitionDispatcher::SaveAndDisableGhostInteraction(Dali::Actor actor)
 {
