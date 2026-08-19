@@ -305,8 +305,8 @@ public:
   void         ClearRenderEffect();
 
   /**
-   * @brief Drops the cached logical context and the layout caches of this view
-   * and of every descendant.
+   * @brief Drops the cached effective scale and the layout caches of this view and of
+   * every descendant.
    *
    * Used by the paths that can move the effective scale of a whole subtree at
    * once -- a UiScalePolicy change, a global UI scale change, and a reparent --
@@ -315,9 +315,10 @@ public:
    * is potentially stale.
    *
    * It is exactly DropCachedEffectiveScale() + InvalidateLayoutCaches() applied
-   * to the subtree: it raises NO dirty bit and registers nothing with the
-   * LayoutController. The callers follow it with InvalidateMeasure(), which is
-   * what propagates upward and schedules the re-layout.
+   * to the subtree, plus a retraction of the invalidation propagation records: it
+   * raises NO dirty bit and registers nothing with the LayoutController. The callers
+   * follow it with InvalidateMeasure(), which is what propagates upward and schedules
+   * the re-layout.
    */
   void  ResetSubtreeScaleAndLayoutCaches();
   float ComputeEffectiveScale() const;
@@ -370,7 +371,7 @@ public:
   {
     return !mArrangeProducerAlways;
   }
-  /// The epoch each axis last propagated its invalidation to a layout root in.
+  /// The generation each axis last propagated its invalidation to a layout root in.
   /// Compared against LayoutInvalidation::CurrentGeneration() to decide whether a further
   /// invalidation may skip the ancestor walk; 0 means never propagated.
   uint32_t GetMeasurePropagationGeneration() const
@@ -1051,15 +1052,23 @@ private:
    * survive reconnection, because OnViewSceneConnection's layout-root path runs
    * ResetSubtreeScaleAndLayoutCaches() before it registers.
    *
+   * A hooked STANDALONE descendant is walked twice on an ancestor change -- once by the
+   * ancestor's walk and once by its own hook (core emits on every affected actor) --
+   * so a chain of k hooked standalone views costs O(k^2) idempotent invalidation work
+   * per direction change. Accepted: over-invalidation only, on a rare event.
+   *
    * Invalidates the MEASURE axis (which raises the arrange dirty with it), not
    * arrange alone. Arrange alone would be exactly correct for every first-party
    * producer -- the direction is consumed by ApplyLayoutDirection, and no in-library
    * measure producer reads it (verified across the layout managers and components;
    * text views resolve direction inside their own signal handlers) -- but
    * GetEffectiveLayoutDirection() is public and OnMeasure() is virtual, so an
-   * APPLICATION's measure producer can size on it, and the measure cache key
-   * (mLastMeasureConstraint) has no direction term. Invalidating measure here is what
-   * lets that just work instead of becoming a contract the application has to know.
+   * APPLICATION's measure producer can size on it, and the measure cache key has no
+   * direction term. That is now a SPECIFIC claim rather than a blanket one: the key is
+   * mLastMeasureConstraint plus mLastMeasureScale, so it does carry the effective
+   * scale, and the layout direction is the one producer input it deliberately leaves
+   * out. Invalidating measure here is what lets that just work instead of becoming a
+   * contract the application has to know.
    *
    * The rejected alternative was a direction term in the measure cache KEY: that puts
    * a layout-direction read into the measure HIT predicate, which runs per view per
@@ -1249,12 +1258,13 @@ private:
    * @warning A scale change DOES invalidate this view's arranged result (the
    * arrangement is scale-applied). The invariant the arrange cache relies on --
    * "mArrangeCacheValid is true only while the effective scale is unchanged
-   * since publish", which lets the (future) arrange cache-HIT predicate omit a
-   * scale term -- holds ONLY because every caller that drops the scale ALSO
-   * calls InvalidateLayoutCaches() on the same view. Do NOT add a freshness-only
-   * caller of this alone: it would leave a valid arrange cache computed against
-   * the old scale, served as a hit with no test to catch it. Pair the two, or
-   * use ResetSubtreeScaleAndLayoutCaches() which does.
+   * since publish", which lets the arrange cache-HIT predicate omit a scale term
+   * (and assert mEffectiveScaleValid instead) -- holds ONLY because every caller
+   * that drops the scale ALSO calls InvalidateLayoutCaches() on the same view.
+   * Do NOT add a freshness-only caller of this alone: it would leave a valid
+   * arrange cache computed against the old scale, served as a hit with no test
+   * to catch it. Pair the two, or use ResetSubtreeScaleAndLayoutCaches() which
+   * does.
    *
    * The MEASURE cache is the one exception, and only because it carries a scale
    * KEY of its own (mLastMeasureScale): an unpaired caller would cost it a miss
@@ -1285,7 +1295,7 @@ private:
    * @brief The NODE-LOCAL half of the arrange cache-HIT predicate.
    *
    * "May THIS view's arrange producer be elided for THIS input?" -- the entry exists
-   * and is fresh, the producer uses IF_CHANGED, the input matches the cache
+   * and is fresh, the producer uses ArrangePolicy::IF_CHANGED, the input matches the cache
    * KEY, the
    * effective layout direction matches, and no direct standalone child is holding an
    * unconsumed measured slot. The full, cost-ordered rationale for each term is in
@@ -1310,7 +1320,7 @@ private:
    *
    * Per node it re-tests the node-local terms of CanServeArrangeFromCache() MINUS the
    * cache KEY -- a descendant has no candidate bounds, and does not need one: with
-   * this view's own key matched and every producer using IF_CHANGED, each
+   * this view's own key matched and every producer using ArrangePolicy::IF_CHANGED, each
    * producer hands its
    * children the same slots as last pass, which is exactly what those children
    * resolved into the arranged bounds the replay applies. Children with no arrange
@@ -1497,7 +1507,9 @@ private:
   ViewImpl&                            mViewImpl;
   ViewState                            mState;
   UiScalePolicy                        mScalePolicy{UiScalePolicy::INHERIT};
+  LayoutMode                           mLayoutMode;           ///< Layout mode of the view. PACKING: parked here, next to the other one-byte policy enum, because it fills the pad mScalePolicy would otherwise leave; its logical home is the layout group further down, which cross-references it.
   mutable float                        mEffectiveScale{1.0f}; ///< Cached effective scale. Carries NO validity sentinel of its own; whether this value is usable is recorded by mEffectiveScaleValid. Mutable because the lazy (re)compute happens inside the const GetEffectiveScale().
+  float                                mRequestedWidth;       ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f). PACKING: parked here to fill the 4-byte pad in front of mTraits; it belongs logically with mRequestedHeight, which sits in the layout group further down.
   TraitEntries                         mTraits;
   Internal::CoreInteractionObject*     mCoreInteractionObject;
   std::unique_ptr<VisualData>          mVisualData;
@@ -1518,7 +1530,7 @@ private:
   LayoutRect   mArrangedBounds;
   LayoutRect   mLastArrangeInput; ///< Pure cache KEY: the input bounds mArrangedBounds was produced for. Valid only while mArrangeCacheValid is true.
   /// @name Invalidation propagation records
-  /// The epoch in which this view's last InvalidateMeasure() / InvalidateArrange()
+  /// The generation in which this view's last InvalidateMeasure() / InvalidateArrange()
   /// walked its ancestor chain to a layout root and registered it. While a record
   /// still equals LayoutInvalidation::CurrentGeneration(), that registration is known to
   /// be live and not yet processed, so a further invalidation on the SAME axis may
@@ -1535,16 +1547,21 @@ private:
   uint32_t mArrangePropagationGeneration;
   /// @}
 
-  Dali::LayoutDirection::Type           mLastArrangeDirection;         ///< Pure cache KEY: the effective layout direction mArrangedBounds was produced under. Valid only while mArrangeCacheValid is true. Recorded as a KEY because the direction lives in dali-core and can be moved through actors dali-ui does not own, so a missed invalidation must degrade to "no cache hit" and never to a wrongly mirrored arrangement. The choice is per (axis, input) pair, not per input: measure x scale is also a KEY (mLastMeasureScale, and `s` is already in hand there), while arrange x scale relies on invalidation plus a DEBUG assert (reading the scale here would be a fresh call the path needs for nothing else) and measure x direction relies on invalidation (OnLayoutDirectionChanged), because a direction term would put a layout-direction read into the per-view, per-pass measure predicate. The invalidation this KEY backs up is now the RECURSIVE subtree walk driven by a layout root's lazy signal hook and by OnPropertySet, not a per-View signal connection, so it covers a strictly wider set of failure modes than before.
-  Insets                                mMargin;                       ///< Layout margin
-  Insets                                mPadding;                      ///< Layout padding
-  float                                 mRequestedWidth;               ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  float                                 mRequestedHeight;              ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  LayoutMode                            mLayoutMode;                   ///< Layout mode of the view
-  Vector2                               mSize;                         ///< The size of the view
-  Vector2                               mLastArrangedRenderEffectSize; ///< Self size last seen by ApplySelfBoundsIfChanged, used only to dedupe render-effect refresh (kept separate from mSize, which Process()/ApplyFittingMode rely on)
-  std::unique_ptr<SizeConstraints>      mSizeConstraints;              ///< Lazy-allocated measurement min/max bounds (natural units).
-  Dali::Vector<View>                    mChildren;                     ///< Synchronized with Actor hierarchy via OnChildAdd/OnChildRemove.
+  /// @name Layout inputs
+  /// Three members of this group live elsewhere purely for PACKING, each next to a
+  /// hole it fills: mLayoutMode and mRequestedWidth at the top of the class (beside
+  /// mScalePolicy and mEffectiveScale), and mLastArrangeDirection at the end of the
+  /// bit-field run below. Nothing but the byte layout distinguishes them from the
+  /// members here.
+  /// @{
+  Insets                           mMargin;                       ///< Layout margin
+  Insets                           mPadding;                      ///< Layout padding
+  Vector2                          mSize;                         ///< The size of the view
+  Vector2                          mLastArrangedRenderEffectSize; ///< Self size last seen by ApplySelfBoundsIfChanged, used only to dedupe render-effect refresh (kept separate from mSize, which Process()/ApplyFittingMode rely on)
+  float                            mRequestedHeight;              ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f). PACKING: placed here rather than beside mRequestedWidth so that mSizeConstraints below still lands 8-aligned with no hole in front of it.
+  std::unique_ptr<SizeConstraints> mSizeConstraints;              ///< Lazy-allocated measurement min/max bounds (natural units).
+  /// @}
+  Dali::Vector<View>                    mChildren; ///< Synchronized with Actor hierarchy via OnChildAdd/OnChildRemove.
   std::unique_ptr<LayoutTransitionData> mLayoutTransitionData;
 
   std::unique_ptr<AccessibilityData> mAccessibilityData;
@@ -1564,12 +1581,12 @@ private:
   bool         mArrangePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's arrange pass was running.
   bool         mArrangeCacheBlockedDuringPass : 1;                ///< True when a cache-ONLY invalidation arrived while this view's arrange pass was running. Declines the cache publish without poisoning the pass, so no follow-up layout is registered. Set by InvalidateAncestorLayoutCachesForMeasureMiss on an unowned arrange-in-progress ancestor; see BlockArrangeCachePublishDuringPass.
   bool         mArrangeResultAvailable : 1;                       ///< True once at least one arrange pass has published a result into mArrangedBounds.
-  bool         mArrangeOverrideAlways : 1;                        ///< True when this view's OnArrange() uses ALWAYS. Default FALSE (IF_CHANGED).
-  bool         mArrangeCallbackAlways : 1;                        ///< True when the installed ArrangeCallback uses ALWAYS. The one-argument overload resets it to FALSE.
-  bool         mArrangeProducerAlways : 1;                        ///< Derived from the active producer and read by the arrange cache predicate. Default FALSE (IF_CHANGED).
+  bool         mArrangeOverrideAlways : 1;                        ///< True when this view's OnArrange() uses ArrangePolicy::ALWAYS. Default FALSE (ArrangePolicy::IF_CHANGED).
+  bool         mArrangeCallbackAlways : 1;                        ///< True when the installed ArrangeCallback uses ArrangePolicy::ALWAYS. The one-argument overload resets it to FALSE.
+  bool         mArrangeProducerAlways : 1;                        ///< Derived from the active producer and read by the arrange cache predicate. Default FALSE (ArrangePolicy::IF_CHANGED).
   mutable bool mEffectiveScaleValid : 1;                          ///< THE sync bit for mEffectiveScale: true exactly when mEffectiveScale equals what ComputeEffectiveScale() would return now. Set by the lazy compute in the const GetEffectiveScale() (hence mutable), cleared by every scale-context invalidation.
   bool         mEffectiveScaleActorSynced : 1;                    ///< THE sync bit for the ACTOR-side copy of the scale (the animatable VIEW_EFFECTIVE_SCALE property): true exactly when that property is known to hold mEffectiveScale. The second half of the pair whose first half is mEffectiveScaleValid -- that one says the CACHED scale is usable, this one says the ACTOR already has it. Set by Measure()'s push (after the write, which re-enters the clear below), cleared by DropCachedEffectiveScale() (the value it names has been retracted) and by ViewDataImpl::SetProperty for that index, which is the single funnel every event-side write of the property passes through. Default false, so the first Measure() always pushes.
-  bool         mEffectiveScaleInvalidatedDuringPass : 1;          ///< True when the logical context was invalidated while an arrange pass was running.
+  bool         mEffectiveScaleInvalidatedDuringPass : 1;          ///< True when the cached effective scale was invalidated while an arrange pass was running.
   bool         mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
   bool         mInitialEnterSettled : 1;                          ///< True once LayoutTransitionDispatcher::SettleInitialEnter has actually BAKED an ENTER spec onto this view. The fresh-child settle branch is re-entered on every pass for a child no producer ever arranges (freshChild stays true forever), and each entry would otherwise allocate a 0-duration Animation and re-bake. Cleared by OnChildAdded, the only path that can change which transition governs this view.
   bool         mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
@@ -1579,6 +1596,40 @@ private:
   bool         mFittingModeLayoutFinishedSignalConnected : 1;     ///< Whether layout-finished signal is connected for fitting mode update.
   bool         mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
   bool         mLayoutDirectionSignalConnected : 1;               ///< True once this view registered with the LayoutController on a live window (an on-scene layout root or on-scene standalone boundary) and connected the actor layout-direction signal; never cleared -- the claim "core emits on this actor" survives reparenting and scene disconnection, which is what keeps OnPropertySet's short-circuit sound.
+
+  /// Pure cache KEY: the effective layout direction mArrangedBounds was produced under.
+  /// Valid only while mArrangeCacheValid is true. Recorded as a KEY because the direction
+  /// lives in dali-core and can be moved through actors dali-ui does not own, so a missed
+  /// invalidation must degrade to "no cache hit" and never to a wrongly mirrored
+  /// arrangement. The choice is per (axis, input) pair, not per input: measure x scale is
+  /// also a KEY (mLastMeasureScale, and `s` is already in hand there), while arrange x
+  /// scale relies on invalidation plus a DEBUG assert (reading the scale here would be a
+  /// fresh call the path needs for nothing else) and measure x direction relies on
+  /// invalidation (the direction-change subtree walk), because a direction term would put
+  /// a layout-direction read into the per-view, per-pass measure predicate. The invalidation
+  /// this KEY backs up is now the RECURSIVE subtree walk driven by a layout root's lazy
+  /// signal hook and by OnPropertySet, not a per-View signal connection, so it covers a
+  /// strictly wider set of failure modes than before.
+  ///
+  /// PACKING: a 2-bit field, not the 4-byte enum it used to be. LayoutDirection::Type has
+  /// three enumerators, but only LEFT_TO_RIGHT and RIGHT_TO_LEFT are ever STORED here --
+  /// the only writer copies GetEffectiveLayoutDirection(), whose documented dali-core
+  /// invariant is to resolve INHERIT and never return it. Even a contract-violating
+  /// write that smuggled INHERIT into the resolved slot still fits (an unsigned 2-bit
+  /// field holds 0..3), and a truncated value can only fail the equality below -- a
+  /// cache MISS -- never fabricate a HIT. Placed at the END of the run rather than
+  /// inside it so that a compiler which does not merge allocation units across a change
+  /// of field type opens ONE new unit here instead of splitting the bool run in two.
+  /// If a target compiler treats this 2-bit enum field as SIGNED, widen it to `: 3`
+  /// (the stored values are 0 and 1 either way; the width is about staying lossless
+  /// for the full enumerator range).
+  Dali::LayoutDirection::Type mLastArrangeDirection : 2;
+
+  /// A whole bool, not a bit-field: ScopedTrueFlag binds a `bool&`, which a bit-field
+  /// cannot provide. It sits between the bit-field run above and mFlags below; a
+  /// non-bit-field member always starts at the next whole byte, so this placement
+  /// costs exactly one byte.
+  bool mKeyEventDispatchInProgress; ///< True while this view's key event dispatch is on the stack; guards unsupported same-view re-entrancy.
 
   static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::LAST_VIEW_BEHAVIOUR_FLAG)>::value + 1;
   ViewImpl::ViewBehaviour   mFlags : VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
