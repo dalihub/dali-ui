@@ -3663,11 +3663,6 @@ void ViewDataImpl::EmitFocusChangedSignal(bool focusGained)
     if(DALI_LIKELY(accessible))
     {
       accessible->EmitFocused(focusGained);
-      auto parent = dynamic_cast<Dali::Accessibility::ActorAccessible*>(accessible->GetParent());
-      if(parent && !accessible->GetStates()[Dali::Integration::Accessibility::State::MANAGES_DESCENDANTS]) // LCOV_EXCL_LINE
-      {
-        parent->EmitActiveDescendantChanged(accessible.Get());
-      }
     }
   }
 

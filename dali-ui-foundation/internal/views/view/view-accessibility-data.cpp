@@ -363,6 +363,15 @@ void ViewDataImpl::AccessibilityData::ClearAccessibilityAttributes()
 
 void ViewDataImpl::AccessibilityData::EmitPropertyChanged(Dali::Devel::Accessibility::ObjectPropertyChangeEvent event)
 {
+  // An off-scene view is not exposed in the accessibility tree yet. Its
+  // properties will be available with their final values when it is added,
+  // so emitting every construction-time update only creates stale work for
+  // AT clients.
+  if(!mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  {
+    return;
+  }
+
   auto accessible = GetAccessibleObject();
   if(DALI_LIKELY(accessible))
   {
