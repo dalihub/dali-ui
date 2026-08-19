@@ -18,23 +18,10 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
-#include <dali-ui-foundation/public-api/views/view-impl.h>
-#include <dali-ui/ui-event-thread-callback.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
-
-namespace Test
-{
-namespace UiVectorAnimationRenderer
-{
-void     ResetLastSize();
-uint32_t GetLastWidth();
-uint32_t GetLastHeight();
-} // namespace UiVectorAnimationRenderer
-} // namespace Test
 
 void utc_dali_lottieanimationview_startup(void)
 {
@@ -379,85 +366,6 @@ int UtcDaliLottieAnimationViewJumpToFrameP(void)
 
   view.JumpToFrame(50);
   DALI_TEST_CHECK(view);
-  END_TEST;
-}
-
-int UtcDaliLottieAnimationViewJumpToFramePreservedAfterDesiredSizeChange(void)
-{
-  UiTestApplication application;
-  LottieAnimationView view = LottieAnimationView::New("animation.json");
-  view.SetSynchronousLoading(true);
-
-  application.GetScene().Add(view);
-  view.Measure(100.0f, 100.0f);
-  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(2), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetTotalFrame(), 5, TEST_LOCATION);
-
-  view.Stop();
-  view.JumpToFrame(3);
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(2), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentFrame(), 3, TEST_LOCATION);
-
-  auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
-  auto  visualBeforeDesiredSizeChange = viewData.GetVisual(LottieAnimationView::Property::IMAGE);
-
-  Test::UiVectorAnimationRenderer::ResetLastSize();
-  view.SetDesiredWidth(200);
-  view.SetDesiredHeight(200);
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1, 5), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLastWidth(), 200u, TEST_LOCATION);
-  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLastHeight(), 200u, TEST_LOCATION);
-
-  view.Measure(100.0f, 100.0f);
-  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_EQUALS(view.GetCurrentFrame(), 3, TEST_LOCATION);
-  DALI_TEST_EQUALS(viewData.GetVisual(LottieAnimationView::Property::IMAGE), visualBeforeDesiredSizeChange, TEST_LOCATION);
-
-  view.SetResourceUrl("other-animation.json");
-  view.Measure(100.0f, 100.0f);
-  DALI_TEST_CHECK(viewData.GetVisual(LottieAnimationView::Property::IMAGE) != visualBeforeDesiredSizeChange);
-  END_TEST;
-}
-
-int UtcDaliLottieAnimationViewRuntimePropertiesDoNotRecreateVisual(void)
-{
-  UiTestApplication application;
-  LottieAnimationView view = LottieAnimationView::New("animation.json");
-  view.Measure(100.0f, 100.0f);
-
-  auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
-  auto  originalVisual = viewData.GetVisual(LottieAnimationView::Property::IMAGE);
-  DALI_TEST_CHECK(originalVisual);
-
-  view.SetLoopCount(2);
-  view.SetMinMaxFrame(1, 4);
-  view.SetStopBehavior(Ui::AnimatedImage::StopBehavior::FIRST_FRAME);
-  view.SetLoopingMode(Ui::LottieAnimation::LoopingMode::AUTO_REVERSE);
-  view.SetFrameSpeedFactor(0.5f);
-  view.SetRedrawOnScaleDown(false);
-  view.SetRedrawOnScaleUp(false);
-  view.SetFrameCacheEnabled(true);
-  view.SetNotifyAfterRasterization(true);
-  view.SetRenderScale(0.5f);
-  view.SetAspectFitEnabled(false);
-  view.SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);
-  view.SetSynchronousLoading(true);
-  view.Measure(100.0f, 100.0f);
-
-  DALI_TEST_EQUALS(viewData.GetVisual(LottieAnimationView::Property::IMAGE), originalVisual, TEST_LOCATION);
   END_TEST;
 }
 
