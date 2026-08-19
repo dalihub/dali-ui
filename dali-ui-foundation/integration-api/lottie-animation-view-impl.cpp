@@ -521,9 +521,8 @@ void LottieAnimationViewImpl::SetLoopCount(int count)
 {
   if(mLoopCount != count)
   {
-    mLoopCount   = count;
-    mVisualDirty = true;
-    InvalidateMeasure();
+    mLoopCount = count;
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::LOOP_COUNT, mLoopCount);
   }
 }
 
@@ -555,8 +554,11 @@ void LottieAnimationViewImpl::SetMinMaxFrame(int minFrame, int maxFrame)
   mPlayRangeType = PlayRangeType::FRAME;
   mMinFrame      = minFrame;
   mMaxFrame      = maxFrame;
-  mVisualDirty   = true;
-  InvalidateMeasure();
+
+  Dali::Property::Array range;
+  range.PushBack(mMinFrame);
+  range.PushBack(mMaxFrame);
+  UpdateVisualProperty(Ui::ImageVisualPropertyIndex::PLAY_RANGE, range);
 }
 
 void LottieAnimationViewImpl::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
@@ -568,8 +570,14 @@ void LottieAnimationViewImpl::SetMinMaxFrameByMarker(const Dali::String& minMark
   mPlayRangeType  = PlayRangeType::MARKER;
   mMinFrameMarker = minMarker;
   mMaxFrameMarker = maxMarker;
-  mVisualDirty    = true;
-  InvalidateMeasure();
+
+  Dali::Property::Array range;
+  range.PushBack(mMinFrameMarker);
+  if(!mMaxFrameMarker.Empty())
+  {
+    range.PushBack(mMaxFrameMarker);
+  }
+  UpdateVisualProperty(Ui::ImageVisualPropertyIndex::PLAY_RANGE, range);
 }
 
 void LottieAnimationViewImpl::SetStopBehavior(Ui::AnimatedImage::StopBehavior behavior)
@@ -577,8 +585,7 @@ void LottieAnimationViewImpl::SetStopBehavior(Ui::AnimatedImage::StopBehavior be
   if(mStopBehavior != behavior)
   {
     mStopBehavior = behavior;
-    mVisualDirty  = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::STOP_BEHAVIOR, static_cast<int>(mStopBehavior));
   }
 }
 
@@ -592,8 +599,7 @@ void LottieAnimationViewImpl::SetLoopingMode(Ui::LottieAnimation::LoopingMode mo
   if(mLoopingMode != mode)
   {
     mLoopingMode = mode;
-    mVisualDirty = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::LOOPING_MODE, static_cast<int>(mLoopingMode));
   }
 }
 
@@ -607,8 +613,7 @@ void LottieAnimationViewImpl::SetFrameSpeedFactor(float factor)
   if(mFrameSpeedFactor != factor)
   {
     mFrameSpeedFactor = factor;
-    mVisualDirty      = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR, mFrameSpeedFactor);
   }
 }
 
@@ -664,8 +669,7 @@ void LottieAnimationViewImpl::SetRedrawOnScaleDown(bool redraw)
   if(mRedrawInScalingDown != redraw)
   {
     mRedrawInScalingDown = redraw;
-    mVisualDirty         = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_DOWN, mRedrawInScalingDown);
   }
 }
 
@@ -679,8 +683,7 @@ void LottieAnimationViewImpl::SetRedrawOnScaleUp(bool redraw)
   if(mRedrawInScalingUp != redraw)
   {
     mRedrawInScalingUp = redraw;
-    mVisualDirty       = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_UP, mRedrawInScalingUp);
   }
 }
 
@@ -694,8 +697,7 @@ void LottieAnimationViewImpl::SetFrameCacheEnabled(bool enable)
   if(mFrameCacheEnabled != enable)
   {
     mFrameCacheEnabled = enable;
-    mVisualDirty       = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mFrameCacheEnabled);
   }
 }
 
@@ -709,8 +711,7 @@ void LottieAnimationViewImpl::SetNotifyAfterRasterization(bool notify)
   if(mNotifyAfterRasterization != notify)
   {
     mNotifyAfterRasterization = notify;
-    mVisualDirty              = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
   }
 }
 
@@ -724,8 +725,7 @@ void LottieAnimationViewImpl::SetRenderScale(float scale)
   if(mRenderScale != scale)
   {
     mRenderScale = scale;
-    mVisualDirty = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::RENDER_SCALE, mRenderScale);
   }
 }
 
@@ -739,8 +739,7 @@ void LottieAnimationViewImpl::SetAspectFitEnabled(bool aspectFitEnabled)
   if(mAspectFitEnabled != aspectFitEnabled)
   {
     mAspectFitEnabled = aspectFitEnabled;
-    mVisualDirty      = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT, mAspectFitEnabled);
   }
 }
 
@@ -901,12 +900,26 @@ void LottieAnimationViewImpl::UpdateVisual()
   }
 }
 
+void LottieAnimationViewImpl::UpdateVisualProperty(Dali::Property::Index index, const Dali::Property::Value& value)
+{
+  // A dirty visual is either not created yet or belongs to the previous URL.
+  // UpdateVisual() will apply all current member values to the new visual.
+  if(!mVisual || mVisualDirty)
+  {
+    return;
+  }
+
+  Dali::Property::Map map;
+  map.Insert(index, value);
+  mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
+}
+
 void LottieAnimationViewImpl::SetDesiredWidth(int width)
 {
   if(mDesiredWidth != width)
   {
     mDesiredWidth = width;
-    mVisualDirty  = true;
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredWidth);
     InvalidateMeasure();
   }
 }
@@ -921,7 +934,7 @@ void LottieAnimationViewImpl::SetDesiredHeight(int height)
   if(mDesiredHeight != height)
   {
     mDesiredHeight = height;
-    mVisualDirty   = true;
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredHeight);
     InvalidateMeasure();
   }
 }
@@ -936,8 +949,7 @@ void LottieAnimationViewImpl::SetReleasePolicy(Ui::Image::ReleasePolicy releaseP
   if(mReleasePolicy != releasePolicy)
   {
     mReleasePolicy = releasePolicy;
-    mVisualDirty   = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
   }
 }
 
@@ -951,8 +963,7 @@ void LottieAnimationViewImpl::SetSynchronousLoading(bool synchronous)
   if(mSynchronousLoading != synchronous)
   {
     mSynchronousLoading = synchronous;
-    mVisualDirty        = true;
-    InvalidateMeasure();
+    UpdateVisualProperty(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, mSynchronousLoading);
   }
 }
 
