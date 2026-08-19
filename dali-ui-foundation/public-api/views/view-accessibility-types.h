@@ -132,6 +132,7 @@ enum class Role : uint32_t
   TOOL_BAR,                      ///< A toolbar containing frequently used controls. @SINCE_2_5.30
   SCENE_3D,                      ///< A View that presents an interactive 3D scene. @SINCE_2_5.30
   MODEL,                         ///< A View that presents a model or model-like object. @SINCE_2_5.30
+  SWITCH,                        ///< A switch that can be on or off. @SINCE_2_5.30
   MAX_COUNT                      ///< Sentinel value used to validate accessibility role values. @SINCE_2_5.30
 };
 

@@ -3550,6 +3550,9 @@ int UtcDaliViewAccessibilityRoleConversionP(void)
   view.SetAccessibilityRole(UiAccessibility::Role::TAB);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::PAGE_TAB, TEST_LOCATION);
 
+  view.SetAccessibilityRole(UiAccessibility::Role::SWITCH);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::SWITCH, TEST_LOCATION);
+
   view.SetAccessibilityRole(UiAccessibility::Role::SCENE_3D);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::FILLER, TEST_LOCATION);
   DALI_TEST_EQUALS(ViewAccessible::IsScene3D(view), true, TEST_LOCATION);

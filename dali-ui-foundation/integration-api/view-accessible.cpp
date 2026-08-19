@@ -161,6 +161,7 @@ Dali::Integration::Accessibility::Role ConvertV2RoleToAccessibilityRole(Accessib
     TO_V1_ROLE_TYPE(TAB_LIST, PAGE_TAB_LIST)
     TO_V1_ROLE_TYPE(TEXT, LABEL)
     TO_SAME_ROLE_TYPE(TOGGLE_BUTTON)
+    TO_SAME_ROLE_TYPE(SWITCH)
     TO_SAME_ROLE_TYPE(TOOL_BAR)
     TO_V1_ROLE_TYPE(SCENE_3D, FILLER)
     TO_V1_ROLE_TYPE(MODEL, IMAGE)
@@ -761,7 +762,7 @@ void ViewAccessible::OnStatePropertySet(AccessibilityStates newStates)
     const bool newChecked = HasAccessibilityState(newStates, Accessibility::State::CHECKED);
     if(newChecked != HasAccessibilityState(mStatesSnapshot, Accessibility::State::CHECKED) &&
        (role == Accessibility::Role::CHECK_BOX || role == Accessibility::Role::RADIO_BUTTON ||
-        role == Accessibility::Role::TOGGLE_BUTTON))
+        role == Accessibility::Role::TOGGLE_BUTTON || role == Accessibility::Role::SWITCH))
     {
       EmitStateChanged(Dali::Integration::Accessibility::State::CHECKED, newChecked);
     }
