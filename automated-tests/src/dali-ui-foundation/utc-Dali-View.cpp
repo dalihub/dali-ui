@@ -22,7 +22,10 @@
 
 #include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/extension-api/view.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
@@ -5135,6 +5138,154 @@ int UtcDaliViewUnscopedArrangeReMeasureOfDirectChildIsProtectedP(void)
   }
 
   gArrangeMeasuredDescendant.Reset();
+  END_TEST;
+}
+
+// Phase 3c. Removing a subtree re-roots its effective-scale (INHERIT) chain, so
+// the removed subtree's cached effective scale must be invalidated on EVERY node,
+// not just the direct child. OnChildRemoved's InvalidateMeasure drops it on the
+// child only and propagates upward -- the mirror of OnChildAdded's recursive reset
+// was missing, so descendants kept a stale scale.
+//
+// Tree: global scale 2.0; root(INHERIT, on window)=2.0 -> P(scale DISABLED)=1.0
+// -> C(INHERIT)=1.0 -> D(INHERIT, fixed 50)=1.0. Remove C from the DISABLED P and
+// the whole C subtree re-roots at the global 2.0.
+int UtcDaliViewRemoveInvalidatesSubtreeEffectiveScaleP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(2.0f);
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View p = View::New();
+  p.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  p.SetRequestedWidth(200.0f);
+  p.SetRequestedHeight(100.0f);
+
+  View c = View::New();
+
+  View d = View::New();
+  d.SetRequestedWidth(50.0f);
+  d.SetRequestedHeight(50.0f);
+
+  c.Add(d);
+  p.Add(c);
+  root.Add(p);
+  window.Add(root);
+
+  // Warm every node's cached effective scale.
+  application.SendNotification();
+  application.SendNotification();
+  DALI_TEST_EQUALS(GetImpl(d).GetEffectiveScale(), 1.0f, TEST_LOCATION);
+
+  // Sever C from the DISABLED parent. C, now parentless, re-roots at the global
+  // scale (2.0); D, still C's child, inherits it.
+  p.Remove(c);
+
+  DALI_TEST_EQUALS(GetImpl(c).GetEffectiveScale(), 2.0f, TEST_LOCATION);
+  // The fix: D's cached scale was invalidated too, so it recomputes to 2.0.
+  // Without the recursive invalidation D would report the stale 1.0.
+  DALI_TEST_EQUALS(GetImpl(d).GetEffectiveScale(), 2.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// The geometry consequence of the above, through the path that has no
+// ViewDataImpl::OnChildAdded to save it: remove a subtree from a scale-DISABLED
+// parent and re-add it directly to the Window. A torn subtree would keep arranging
+// D at the old scale.
+int UtcDaliViewRemoveThenWindowAddRelayoutsSubtreeAtNewScaleP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(2.0f);
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View p = View::New();
+  p.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  p.SetRequestedWidth(200.0f);
+  p.SetRequestedHeight(100.0f);
+
+  View c = View::New();
+
+  View d = View::New();
+  d.SetRequestedWidth(50.0f);
+  d.SetRequestedHeight(50.0f);
+
+  c.Add(d);
+  p.Add(c);
+  root.Add(p);
+  window.Add(root);
+
+  application.SendNotification();
+  application.SendNotification();
+  // Baseline: D under the DISABLED parent is 50 wide (fixed 50 x scale 1.0).
+  DALI_TEST_EQUALS(d.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  // Re-root C directly under the Window (fires no ViewDataImpl::OnChildAdded).
+  p.Remove(c);
+  window.Add(c);
+
+  application.SendNotification();
+  application.SendNotification();
+
+  // D re-measures at the new effective scale 2.0: fixed 50 x 2.0 = 100. A torn
+  // subtree (stale scale 1.0) would leave it at 50.
+  DALI_TEST_EQUALS(d.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// Phase 3d (off-scene root gap). A layout ROOT removed from the Window -- not from
+// a View parent, so no ViewDataImpl::OnChildRemoved fires -- is no longer tracked
+// by UiScaleManager, so a global SetScale() made while it is detached never reaches
+// it. On re-connection the root must re-derive its (stale) effective scale, which
+// OnViewSceneConnection now does. Without it the root arranges at the scale in force
+// before it was detached.
+int UtcDaliViewOffSceneRootReconnectAfterScaleChangeRelayoutsP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(1.0f);
+
+  View root = View::New(); // INHERIT -> global scale
+  root.SetRequestedWidth(50.0f);
+  root.SetRequestedHeight(50.0f);
+  window.Add(root);
+
+  application.SendNotification();
+  application.SendNotification();
+  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  // Detach, change the global scale while detached (the root, untracked, misses
+  // it), then re-attach.
+  window.Remove(root);
+  UiScaleManager::Get().SetScale(2.0f);
+  window.Add(root);
+
+  application.SendNotification();
+  application.SendNotification();
+
+  // Re-connection re-derived the scale (2.0) and re-measured: 50 x 2.0 = 100.
+  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
   END_TEST;
 }
 

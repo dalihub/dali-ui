@@ -270,8 +270,57 @@ public:
   RenderEffect GetRenderEffect() const;
   void         ClearRenderEffect();
 
-  void  ResetEffectiveScaleRecursive();
+  /**
+   * @brief Drops the cached logical context and the layout caches of this view
+   * and of every descendant.
+   *
+   * Used by the paths that can move the effective scale of a whole subtree at
+   * once -- a UiScalePolicy change, a global UI scale change, and a reparent --
+   * where the change re-roots the INHERIT chain, so every descendant's cached
+   * scale (and therefore every cached measure/arrange result derived from it)
+   * is potentially stale.
+   *
+   * It is exactly DropCachedEffectiveScale() + InvalidateLayoutCaches() applied
+   * to the subtree: it raises NO dirty bit and registers nothing with the
+   * LayoutController. The callers follow it with InvalidateMeasure(), which is
+   * what propagates upward and schedules the re-layout.
+   */
+  void  ResetSubtreeScaleAndLayoutCaches();
   float ComputeEffectiveScale() const;
+
+  /// @name Layout cache-state accessors (white-box test support)
+  /// Plain one-line readers of the layout bookkeeping bits. They exist so the
+  /// internal UTC target can assert on cache state directly instead of inferring
+  /// it from geometry; this is an internal, non-exported header, so they add no
+  /// public API and no ABI surface. Nothing in the library reads them.
+  /// @{
+  bool IsMeasureCacheValid() const
+  {
+    return mMeasureCacheValid;
+  }
+  /// The effective scale the measure cache entry was produced at, and a KEY term of
+  /// the measure hit predicate. Meaningful only while IsMeasureCacheValid().
+  float GetLastMeasureScale() const
+  {
+    return mLastMeasureScale;
+  }
+  bool IsArrangeCacheValid() const
+  {
+    return mArrangeCacheValid;
+  }
+  bool IsMeasureDirty() const
+  {
+    return mMeasureDirty;
+  }
+  bool IsArrangeDirty() const
+  {
+    return mArrangeDirty;
+  }
+  bool IsEffectiveScaleValid() const
+  {
+    return mEffectiveScaleValid;
+  }
+  /// @}
 
   Ui::Layout GetParentLayout() const;
   View       GetParentView() const;
@@ -926,6 +975,52 @@ private:
    */
   void BlockArrangeCachePublishDuringPass();
 
+  /**
+   * @brief Drops this view's cached effective scale.
+   *
+   * Single concern: the CACHED SCALE only. Clears the sync bit so the next
+   * GetEffectiveScale() recomputes from the (possibly re-rooted) parent chain,
+   * and records the drop when it lands inside a running arrange pass so that
+   * pass declines to publish a result produced against the old scale.
+   *
+   * It touches no cache and no dirty bit: whether dropping the scale must also
+   * drop cached layout results is the caller's decision, not this function's.
+   *
+   * @warning A scale change DOES invalidate this view's arranged result (the
+   * arrangement is scale-applied). The invariant the arrange cache relies on --
+   * "mArrangeCacheValid is true only while the effective scale is unchanged
+   * since publish", which lets the (future) arrange cache-HIT predicate omit a
+   * scale term -- holds ONLY because every caller that drops the scale ALSO
+   * calls InvalidateLayoutCaches() on the same view. Do NOT add a freshness-only
+   * caller of this alone: it would leave a valid arrange cache computed against
+   * the old scale, served as a hit with no test to catch it. Pair the two, or
+   * use ResetSubtreeScaleAndLayoutCaches() which does.
+   *
+   * The MEASURE cache is the one exception, and only because it carries a scale
+   * KEY of its own (mLastMeasureScale): an unpaired caller would cost it a miss
+   * rather than a wrong measured size. That does not license the unpaired call --
+   * the arrange cache and the actor-side push below both still depend on the
+   * pairing -- it just means the measure side has a second line of defence.
+   */
+  void DropCachedEffectiveScale();
+
+  /**
+   * @brief Drops this view's cached measure and arrange results.
+   *
+   * Single concern: the CACHED RESULTS only. Both caches go together because a
+   * measured size is an input to this view's own arrangement, so an arrange
+   * result cannot outlive the measurement it was produced against.
+   *
+   * Deliberately does NOT touch mMeasureDirty. Dirty means "this view has
+   * layout work that has not been consumed yet"; it is consumed at pass entry
+   * (MeasurePassGuard) and is not a freshness bit, so clearing it here would
+   * silently DISCARD pending work rather than invalidate a stale result. That
+   * matters on the recursive path: the callers' follow-up InvalidateMeasure()
+   * only re-arms the node it is called on and its ANCESTORS, so a descendant
+   * whose dirty was cleared here would never get it back.
+   */
+  void InvalidateLayoutCaches();
+
   MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
   void         MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
   void         ArrangeStandaloneChildren(const LayoutRect& bounds);
@@ -1080,7 +1175,7 @@ private:
   ViewImpl&                            mViewImpl;
   ViewState                            mState;
   UiScalePolicy                        mScalePolicy{UiScalePolicy::INHERIT};
-  mutable float                        mEffectiveScale{-1.0f};
+  mutable float                        mEffectiveScale{1.0f}; ///< Cached effective scale. Carries NO validity sentinel of its own; whether this value is usable is recorded by mEffectiveScaleValid. Mutable because the lazy (re)compute happens inside the const GetEffectiveScale().
   TraitEntries                         mTraits;
   Internal::CoreInteractionObject*     mCoreInteractionObject;
   std::unique_ptr<VisualData>          mVisualData;
@@ -1097,6 +1192,7 @@ private:
   float                                 mRequestedY;
   MeasuredSize                          mMeasuredSize;          ///< Last completed measure result. Always readable (GetMeasuredSize() and layout managers consume it during Arrange regardless of cache state); mMeasureCacheValid only governs whether the KEY below may serve a cache hit.
   MeasuredSize                          mLastMeasureConstraint; ///< Pure cache KEY: the effective natural constraint the cached mMeasuredSize was produced for. Carries no dirty/never-measured sentinel meaning; validity lives in mMeasureCacheValid / mMeasureDirty.
+  float                                 mLastMeasureScale;      ///< Pure cache KEY: the effective scale the cached mMeasuredSize was produced at. Compared EXACTLY, not with FloatEqual, because it is a straight copy of the same GetEffectiveScale() value with no arithmetic between publish and compare -- unlike the constraint beside it, which reaches the predicate through a /s normalisation and a min/max clamp and therefore needs the tolerance. Valid only while mMeasureCacheValid is true.
   LayoutRect                            mArrangedBounds;
   LayoutRect                            mLastArrangeInput;             ///< Pure cache KEY: the input bounds mArrangedBounds was produced for. Valid only while mArrangeCacheValid is true.
   Insets                                mMargin;                       ///< Layout margin
@@ -1114,29 +1210,29 @@ private:
   AccessibleObjectCreator            mAccessibleObjectCreator;
   int32_t                            mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2; ///< Frequently touched accessibility-related value kept here to avoid AccessibilityData creation.
 
-  bool mSkipChildrenUpdate : 1;
-  bool mMeasureCacheValid : 1;                            ///< True when mLastMeasureConstraint + mMeasuredSize hold a usable cache entry.
-  bool mMeasureDirty : 1;                                 ///< True when invalidated since the last measure.
-  bool mMeasureInProgress : 1;                            ///< True while this view's own Measure() is on the stack.
-  bool mMeasurePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's measure pass was running.
-  bool mMeasureResultAvailable : 1;                       ///< True once at least one measure pass has published a result into mMeasuredSize.
-  bool mMeasuredSlotUnconsumed : 1;                       ///< True while the measured size published by the last completed measure pass has not been consumed by this view's parent. Set unconditionally at the publish; cleared by the parent in MeasureStandaloneChildren / ArrangeStandaloneChildren. Read only on the standalone path: it tells ArrangeStandaloneChild that the slot may be the leftover of an out-of-band Measure() and must be re-measured against the parent's extent before it is placed.
-  bool mArrangeCacheValid : 1;                            ///< True when mLastArrangeInput + mArrangedBounds hold a usable cache entry.
-  bool mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
-  bool mArrangeInProgress : 1;                            ///< True while this view's own Arrange() is on the stack; guards same-view re-entrancy.
-  bool mArrangePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's arrange pass was running.
-  bool mArrangeCacheBlockedDuringPass : 1;                ///< True when a cache-ONLY invalidation arrived while this view's arrange pass was running. Declines the cache publish without poisoning the pass, so no follow-up layout is registered. Set by InvalidateAncestorLayoutCachesForMeasureMiss on an unowned arrange-in-progress ancestor; see BlockArrangeCachePublishDuringPass.
-  bool mArrangeResultAvailable : 1;                       ///< True once at least one arrange pass has published a result into mArrangedBounds.
-  bool mEffectiveScaleValid : 1;                          ///< True when the cached logical layout context (effective scale and friends) is usable.
-  bool mEffectiveScaleInvalidatedDuringPass : 1;          ///< True when the logical context was invalidated while an arrange pass was running.
-  bool mKeyEventDispatchInProgress;                       ///< True while this view's key event dispatch is on the stack; guards unsupported same-view re-entrancy (plain bool so ScopedTrueFlag can bind a bool&).
-  bool mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
-  bool mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
-  bool mDispatchKeyEvents : 1;                            ///< Whether the actor emits key event signals
-  bool mAccessibleCreatable : 1;                          ///< Whether we can create new accessible or not.
-  bool mProcessorRegistered : 1;                          ///< Whether the processor is registered.
-  bool mFittingModeLayoutFinishedSignalConnected : 1;     ///< Whether layout-finished signal is connected for fitting mode update.
-  bool mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
+  bool         mSkipChildrenUpdate : 1;
+  bool         mMeasureCacheValid : 1;                            ///< True when mLastMeasureConstraint + mLastMeasureScale + mMeasuredSize hold a usable cache entry.
+  bool         mMeasureDirty : 1;                                 ///< True when invalidated since the last measure.
+  bool         mMeasureInProgress : 1;                            ///< True while this view's own Measure() is on the stack.
+  bool         mMeasurePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's measure pass was running.
+  bool         mMeasureResultAvailable : 1;                       ///< True once at least one measure pass has published a result into mMeasuredSize.
+  bool         mMeasuredSlotUnconsumed : 1;                       ///< True while the measured size published by the last completed measure pass has not been consumed by this view's parent. Set unconditionally at the publish; cleared by the parent in MeasureStandaloneChildren / ArrangeStandaloneChildren. Read only on the standalone path: it tells ArrangeStandaloneChild that the slot may be the leftover of an out-of-band Measure() and must be re-measured against the parent's extent before it is placed.
+  bool         mArrangeCacheValid : 1;                            ///< True when mLastArrangeInput + mArrangedBounds hold a usable cache entry.
+  bool         mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
+  bool         mArrangeInProgress : 1;                            ///< True while this view's own Arrange() is on the stack; guards same-view re-entrancy.
+  bool         mArrangePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's arrange pass was running.
+  bool         mArrangeCacheBlockedDuringPass : 1;                ///< True when a cache-ONLY invalidation arrived while this view's arrange pass was running. Declines the cache publish without poisoning the pass, so no follow-up layout is registered. Set by InvalidateAncestorLayoutCachesForMeasureMiss on an unowned arrange-in-progress ancestor; see BlockArrangeCachePublishDuringPass.
+  bool         mArrangeResultAvailable : 1;                       ///< True once at least one arrange pass has published a result into mArrangedBounds.
+  mutable bool mEffectiveScaleValid : 1;                          ///< THE sync bit for mEffectiveScale: true exactly when mEffectiveScale equals what ComputeEffectiveScale() would return now. Set by the lazy compute in the const GetEffectiveScale() (hence mutable), cleared by every scale-context invalidation.
+  bool         mEffectiveScaleInvalidatedDuringPass : 1;          ///< True when the logical context was invalidated while an arrange pass was running.
+  bool         mKeyEventDispatchInProgress;                       ///< True while this view's key event dispatch is on the stack; guards unsupported same-view re-entrancy (plain bool so ScopedTrueFlag can bind a bool&).
+  bool         mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
+  bool         mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
+  bool         mDispatchKeyEvents : 1;                            ///< Whether the actor emits key event signals
+  bool         mAccessibleCreatable : 1;                          ///< Whether we can create new accessible or not.
+  bool         mProcessorRegistered : 1;                          ///< Whether the processor is registered.
+  bool         mFittingModeLayoutFinishedSignalConnected : 1;     ///< Whether layout-finished signal is connected for fitting mode update.
+  bool         mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
 
   static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::LAST_VIEW_BEHAVIOUR_FLAG)>::value + 1;
   ViewImpl::ViewBehaviour   mFlags : VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
