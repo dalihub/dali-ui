@@ -72,6 +72,13 @@ public:
   void SetFinalElisionResult(const FinalElisionResult* result);
 
   /**
+   * @brief Gets the final-glyph-domain style source buffer.
+   *
+   * @return The buffer, or nullptr when no resolved final sequence is active.
+   */
+  const GlyphIndex* GetFinalGlyphStyleSourceIndices() const;
+
+  /**
    * @brief Virtual destructor.
    *
    * It's a default destructor.
@@ -490,18 +497,18 @@ public:
   const Vector<CharacterDirection>& GetCharacterDirections() const override;
 
 private:
-  const ModelInterface*     mModel;              ///< Pointer to the current authoritative render model.
-  const FinalElisionResult* mFinalElisionResult; ///< Non-owning resolved replacement sequence.
-  Vector<GlyphInfo>         mElidedGlyphs;       ///< Fallback storage for unresolved ModelInterface implementations.
-  Vector<Vector2>           mElidedLayout;       ///< Fallback positions for unresolved ModelInterface implementations.
+  const ModelInterface*     mModel;                           ///< Pointer to the current authoritative render model.
+  const FinalElisionResult* mFinalElisionResult;              ///< Non-owning authoritative final glyph sequence.
+  Vector<GlyphInfo>         mElidedGlyphs;                    ///< Fallback storage for unresolved ModelInterface implementations.
+  Vector<Vector2>           mElidedLayout;                    ///< Fallback positions for unresolved ModelInterface implementations.
   Vector<GlyphIndex>        mElidedFinalToSourceGlyphIndices; ///< Allocated only when reveal projection is requested.
   GlyphIndex                mEllipsisFinalGlyphIndex;
   bool                      mFinalGlyphMappingRequested : 1;
-  bool                      mIsTextElided : 1;   ///< Whether the text has been elided.
-  float                     mElidedOffset;       ///< The width of the (control - elided line). This is required for calculating the correct
-                                                 ///< horizontal align offset.
-  GlyphIndex mStartIndexOfElidedGlyphs;          ///< The start index of elided glyphs.
-  GlyphIndex mEndIndexOfElidedGlyphs;            ///< The end index of elided glyphs.
+  bool                      mIsTextElided : 1; ///< Whether the text has been elided.
+  float                     mElidedOffset;     ///< The width of the (control - elided line). This is required for calculating the correct
+                                               ///< horizontal align offset.
+  GlyphIndex mStartIndexOfElidedGlyphs;        ///< The start index of elided glyphs.
+  GlyphIndex mEndIndexOfElidedGlyphs;          ///< The end index of elided glyphs.
   GlyphIndex
              mFirstMiddleIndexOfElidedGlyphs;  ///< The first end index of elided glyphs, index before ellipsis of middle.
   GlyphIndex mSecondMiddleIndexOfElidedGlyphs; ///< The second end index of elided glyphs, index of ellipsis of middle.

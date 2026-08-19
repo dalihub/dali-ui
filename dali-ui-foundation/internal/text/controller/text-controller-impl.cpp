@@ -607,6 +607,7 @@ void Controller::Impl::InvalidateFontData()
 
 void Controller::Impl::InvalidateLayoutDirectionData()
 {
+  ClearEndEllipsisResult();
   mTextUpdateInfo.mCharacterIndex             = 0u;
   mTextUpdateInfo.mNumberOfCharactersToRemove = mTextUpdateInfo.mPreviousNumberOfCharacters;
   mTextUpdateInfo.mNumberOfCharactersToAdd    = static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count());
@@ -1977,6 +1978,7 @@ void Controller::Impl::RequestAsyncRender()
 
 void Controller::Impl::RelayoutAllCharacters()
 {
+  ClearEndEllipsisResult();
   // relayout all characters
   mTextUpdateInfo.mCharacterIndex             = 0;
   mTextUpdateInfo.mNumberOfCharactersToRemove = mTextUpdateInfo.mPreviousNumberOfCharacters;
@@ -2308,6 +2310,7 @@ void Controller::Impl::SetMarqueeEnabled(bool enable, bool requestRelayout, Marq
   if((mLayoutEngine.GetLayout() == Layout::Engine::SINGLE_LINE_BOX && orientation == MarqueeOrientation::HORIZONTAL) ||
      (mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX && orientation == MarqueeOrientation::VERTICAL))
   {
+    ClearEndEllipsisResult();
     mOperationsPending = static_cast<OperationsMask>(mOperationsPending | LAYOUT | ALIGN | UPDATE_LAYOUT_SIZE | REORDER);
 
     if(enable)
@@ -2375,6 +2378,7 @@ void Controller::Impl::SetMultiLineEnabled(bool enable)
 
   if(layout != mLayoutEngine.GetLayout())
   {
+    ClearEndEllipsisResult();
     // Set the layout type.
     mLayoutEngine.SetLayout(layout);
 
@@ -2422,6 +2426,7 @@ void Controller::Impl::SetLineWrapMode(LineWrapMode lineWrapMode)
 {
   if(lineWrapMode != mModel->mLineWrapMode)
   {
+    ClearEndEllipsisResult();
     // Update Text layout for applying wrap mode
     mOperationsPending =
       static_cast<OperationsMask>(mOperationsPending | ALIGN | LAYOUT | UPDATE_LAYOUT_SIZE | REORDER);
@@ -2637,6 +2642,7 @@ bool Controller::Impl::ApplyAdjustedFontSizeScale()
 
 void Controller::Impl::ClearFontData()
 {
+  ClearEndEllipsisResult();
   if(mFontDefaults)
   {
     mFontDefaults->mFontId = 0u; // Remove old font ID

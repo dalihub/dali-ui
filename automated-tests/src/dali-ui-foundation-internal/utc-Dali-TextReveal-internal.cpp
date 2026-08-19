@@ -728,6 +728,12 @@ int UtcDaliTextRevealEllipsisMetadataP(void)
 
   const UiText::ModelInterface* model = controller->GetRenderTextModel();
   DALI_TEST_CHECK(model);
+  const UiText::FinalElisionResult* finalElision = controller->GetFinalElisionResult();
+  DALI_TEST_CHECK(finalElision);
+  DALI_TEST_CHECK(finalElision->ellipsisFinalGlyphIndex < finalElision->glyphs.Count());
+  DALI_TEST_EQUALS(finalElision->finalToSourceGlyphIndices[finalElision->ellipsisFinalGlyphIndex],
+                   UiText::FinalElisionResult::INVALID_GLYPH_INDEX,
+                   TEST_LOCATION);
 
   for(Reveal::Unit unit : {Reveal::Unit::CHARACTER, Reveal::Unit::WORD})
   {
@@ -743,6 +749,7 @@ int UtcDaliTextRevealEllipsisMetadataP(void)
     }
 
     UiText::TypesetterPtr typesetter = UiText::Typesetter::New(model);
+    typesetter->SetFinalElisionResult(finalElision);
     const Reveal::Plan    finalPlan  = typesetter->CreateFinalRevealPlan(source, unit);
     UiText::ViewModel*    viewModel  = typesetter->GetViewModel();
     DALI_TEST_CHECK(viewModel);

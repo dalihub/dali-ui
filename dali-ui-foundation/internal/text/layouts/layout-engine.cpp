@@ -24,8 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/bidirectional-support.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
-#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-metrics.h>
-#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-planner.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-planner.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine-helper-functions.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
@@ -441,9 +440,7 @@ struct Engine::Impl
     input.lineWidth             = lineLayout.length;
     input.positionOffset        = alignmentLine.alignmentOffset;
     input.modelCharacterSpacing = visualModel.GetCharacterSpacing();
-    input.metricsContext        = &fontClient;
-    input.resolveMetrics        = ResolveFontClientEndEllipsisMetrics;
-    return ResolveEndEllipsisPlan(input);
+    return ResolveEndEllipsisPlan(input, fontClient);
   }
 
   /**
@@ -514,7 +511,7 @@ struct Engine::Impl
 
     auto includeReplacementRun = [&](GlyphIndex glyphIndex, Length numberOfGlyphs)
     {
-  const GlyphIndex end = std::min<GlyphIndex>(glyphIndex + numberOfGlyphs, static_cast<GlyphIndex>(visualModel.mGlyphs.Count()));
+      const GlyphIndex end = std::min<GlyphIndex>(glyphIndex + numberOfGlyphs, static_cast<GlyphIndex>(visualModel.mGlyphs.Count()));
       for(GlyphIndex index = glyphIndex; index < end; ++index)
       {
         const GlyphInfo& glyph = visualModel.mGlyphs[index];
@@ -1875,16 +1872,22 @@ struct Engine::Impl
            layoutBidiParameters.bidiLineIndex < bidirectionalLinesInfo.Count())
             ? &bidirectionalLinesInfo[layoutBidiParameters.bidiLineIndex]
             : nullptr;
+        lineRun->direction = layoutBidiParameters.paragraphDirection;
         if(bidirectionalLineInfo &&
-           !bidirectionalLineInfo->isIdentity &&
            ellipsisLayout.characterIndex == bidirectionalLineInfo->characterRun.characterIndex)
         {
-          lineRun->direction = RTL;
-          SetGlyphPositions(layoutParameters, glyphPositionsBuffer, layoutBidiParameters, ellipsisLayout);
+          lineRun->direction = bidirectionalLineInfo->direction;
+          if(!bidirectionalLineInfo->isIdentity)
+          {
+            SetGlyphPositions(layoutParameters, glyphPositionsBuffer, layoutBidiParameters, ellipsisLayout);
+          }
+          else
+          {
+            SetGlyphPositions(layoutParameters, glyphPositionsBuffer, ellipsisLayout);
+          }
         }
         else
         {
-          lineRun->direction = LTR;
           SetGlyphPositions(layoutParameters, glyphPositionsBuffer, ellipsisLayout);
         }
       }

@@ -746,7 +746,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
 
   // The estimated number of lines. Used to avoid reallocations when layouting.
   updateInfo.mEstimatedNumberOfLines =
-      static_cast<Length>(std::max(targetModel.mVisualModel->mLines.Count(), targetModel.mLogicalModel->mParagraphInfo.Count()));
+    static_cast<Length>(std::max(targetModel.mVisualModel->mLines.Count(), targetModel.mLogicalModel->mParagraphInfo.Count()));
 
   // Set the previous number of characters for the next time the text is updated.
   updateInfo.mPreviousNumberOfCharacters = numberOfCharacters;

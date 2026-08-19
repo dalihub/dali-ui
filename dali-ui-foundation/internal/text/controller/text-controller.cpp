@@ -438,6 +438,10 @@ LayoutDirectionMode Controller::GetLayoutDirectionMode() const
 
 void Controller::SetLayoutDirection(Dali::LayoutDirection::Type layoutDirection)
 {
+  if(mImpl->mLayoutDirection != layoutDirection)
+  {
+    mImpl->ClearEndEllipsisResult();
+  }
   mImpl->mLayoutDirection = layoutDirection;
 }
 
@@ -483,6 +487,10 @@ LineWrapMode Controller::GetLineWrapMode() const
 
 void Controller::SetTextElideEnabled(bool enabled)
 {
+  if(mImpl->mModel->mElideEnabled != enabled)
+  {
+    mImpl->ClearEndEllipsisResult();
+  }
   mImpl->mModel->mElideEnabled = enabled;
   mImpl->mModel->mVisualModel->SetTextElideEnabled(enabled);
 }
@@ -1770,7 +1778,7 @@ const FinalElisionResult* Controller::GetFinalElisionResult() const
   {
     return &replacement->finalElision;
   }
-  return nullptr;
+  return mImpl->HasValidReplacementSource() ? nullptr : mImpl->GetEndEllipsisResult();
 }
 
 const ReplacementSourceSnapshot& Controller::GetReplacementSourceSnapshot() const
@@ -1797,8 +1805,11 @@ float Controller::GetScrollAmountByUserInput()
 
 bool Controller::GetTextScrollInfo(float& scrollPosition, float& controlHeight, float& layoutHeight)
 {
-  const Vector2& layout = mImpl->mModel->mVisualModel->GetLayoutSize();
-  bool           isScrolled;
+  const FinalElisionResult* endEllipsis = mImpl->GetEndEllipsisResult();
+  const Vector2&            layout      = endEllipsis && endEllipsis->HasAuthoritativeLayout()
+                                            ? endEllipsis->layoutSize
+                                            : mImpl->mModel->mVisualModel->GetLayoutSize();
+  bool                      isScrolled;
 
   controlHeight  = mImpl->mModel->mVisualModel->mControlSize.height;
   layoutHeight   = layout.height;
@@ -1973,6 +1984,10 @@ Text::EllipsisPosition::Type Controller::GetEllipsisPosition() const
 
 void Controller::SetEllipsisPosition(Text::EllipsisPosition::Type ellipsisPosition)
 {
+  if(mImpl->mModel->mEllipsisPosition != ellipsisPosition)
+  {
+    mImpl->ClearEndEllipsisResult();
+  }
   mImpl->mModel->mEllipsisPosition = ellipsisPosition;
   mImpl->mModel->mVisualModel->SetEllipsisPosition(ellipsisPosition);
 }

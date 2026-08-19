@@ -18,6 +18,8 @@ SET(TC_SOURCES
     utc-Dali-MarkupToStyledText-internal.cpp
     utc-Dali-StyledTextApplier-internal.cpp
     utc-Dali-StyledTextController-internal.cpp
+    utc-Dali-TextAlignment-internal.cpp
+    utc-Dali-TextEllipsis-internal.cpp
     utc-Dali-ReplacementProjection-internal.cpp
     utc-Dali-ReplacementEditNormalizer-internal.cpp
     utc-Dali-TextGradientStyle-internal.cpp

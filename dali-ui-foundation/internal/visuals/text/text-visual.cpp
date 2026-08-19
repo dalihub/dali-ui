@@ -595,10 +595,7 @@ PixelData TextVisual::RenderMarqueeText(Ui::Integration::Visual::Base     visual
 {
   TextVisual& visualObject = GetVisualObject(visual);
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
-  if(visualObject.mController->HasValidReplacementSource())
-  {
-    visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
-  }
+  visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
   return visualObject.mTypesetter->Render(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
 }
 
@@ -611,10 +608,7 @@ PixelData TextVisual::RenderMarqueeTextGradientPreserved(Ui::Integration::Visual
 {
   TextVisual& visualObject = GetVisualObject(visual);
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
-  if(visualObject.mController->HasValidReplacementSource())
-  {
-    visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
-  }
+  visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
   return visualObject.mTypesetter->RenderTextGradientPreserved(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize);
 }
 
@@ -627,10 +621,7 @@ PixelData TextVisual::RenderMarqueeTextGradientMask(Ui::Integration::Visual::Bas
 {
   TextVisual& visualObject = GetVisualObject(visual);
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
-  if(visualObject.mController->HasValidReplacementSource())
-  {
-    visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
-  }
+  visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
   return visualObject.mTypesetter->RenderTextGradientMask(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize);
 }
 
@@ -842,7 +833,7 @@ void TextVisual::UpdateRenderer()
   }
 
   Vector2 layoutConstraintSize = relayoutSize;
-  if(mController->GetFinalElisionResult())
+  if(mController->HasValidReplacementSource() && mController->GetFinalElisionResult())
   {
     // Keep replacement relayout constrained by the control area that produced
     // the final result, not by the reduced render-texture height.
@@ -853,10 +844,7 @@ void TextVisual::UpdateRenderer()
 
   const Text::Controller::UpdateTextType updateTextType = mController->Relayout(layoutConstraintSize, layoutDirection);
   mTypesetter->SetModel(mController->GetRenderTextModel());
-  if(mController->HasValidReplacementSource())
-  {
-    mTypesetter->SetFinalElisionResult(mController->GetFinalElisionResult());
-  }
+  mTypesetter->SetFinalElisionResult(mController->GetFinalElisionResult());
 
   const bool textModelUpdated =
     Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType);
@@ -2525,7 +2513,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     Pixel::Format textPixelFormat = (containsColorGlyph || hasMultipleTextColors) ? Pixel::RGBA8888 : Pixel::L8;
 
     // Check the text direction
-    Text::Direction textDirection = mController->GetTextDirection();
+    Text::Direction              textDirection = mController->GetTextDirection();
     Text::Internal::Reveal::Plan revealPlan;
     if(textRevealEnabled)
     {

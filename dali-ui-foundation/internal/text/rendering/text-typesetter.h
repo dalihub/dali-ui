@@ -105,12 +105,12 @@ public:
   void SetModel(const ModelInterface* model);
 
   /**
-   * @brief Selects the resolved replacement glyph sequence used by subsequent render calls.
+   * @brief Selects the authoritative resolved glyph sequence used by subsequent render calls.
    *
    * The result is not owned by Typesetter and must remain valid while it is
    * installed on the underlying ViewModel.
    *
-   * @param[in] result The replacement result, or nullptr for the ordinary path.
+   * @param[in] result The replacement or non-replacement END result, or nullptr for the source path.
    */
   void SetFinalElisionResult(const FinalElisionResult* result);
 

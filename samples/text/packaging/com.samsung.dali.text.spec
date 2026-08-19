@@ -122,6 +122,7 @@ exit 0
 %{app_exe_dir}/text-gradient-simple.example
 %{app_exe_dir}/text-gradient-perf.example
 %{app_exe_dir}/text-reveal.example
+%{app_exe_dir}/text-ellipsis.example
 %{app_exe_dir}/text-colrv1.example
 %{app_exe_dir}/text-emoji.example
 %{app_exe_dir}/text-render-scale.example

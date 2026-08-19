@@ -123,6 +123,62 @@ void ReleaseBidi(Text::ReplacementLayoutTestServices& services, Text::Replacemen
   }
 }
 
+void ReleaseBidi(Text::ReplacementLayoutTestServices& services, const Text::ModelPtr& model)
+{
+  if(model)
+  {
+    Text::LogicalModel& logicalModel = *model->mLogicalModel;
+    logicalModel.ClearBidirectionalParagraphInfo(services.bidirectionalSupport);
+    logicalModel.mBidirectionalParagraphInfo.Clear();
+  }
+}
+
+void CheckOrdinaryLineDirectionCase(const char*                          name,
+                                    const std::string&                   utf8,
+                                    bool                                 expectBidi,
+                                    bool                                 expectRightToLeft,
+                                    bool                                 expectNonIdentity,
+                                    bool                                 elideText,
+                                    float                                width,
+                                    Text::ReplacementLayoutTestServices& services)
+{
+  Text::ModelPtr source              = Text::Model::New();
+  source->mLogicalModel->mText       = Utf32(utf8);
+  Text::ReplacementLayoutTestOptions options;
+  options.contentSize = Size(width, 80.0f);
+  options.elideText   = elideText;
+
+  Text::ModelPtr result;
+  Require(Text::LayoutOrdinaryForTest(*source, options, result),
+          std::string(name) + ": ordinary layout failed");
+  const Text::LogicalModel& logical = *result->mLogicalModel;
+  const Text::VisualModel&  visual  = *result->mVisualModel;
+  Require(visual.mLines.Count() == 1u, std::string(name) + ": expected one source line");
+  Require(expectBidi == !logical.mBidirectionalParagraphInfo.Empty(),
+          std::string(name) + ": unexpected bidi paragraph state");
+  Require(visual.mLines[0u].direction == expectRightToLeft,
+          std::string(name) + ": LineRun direction disagrees with the paragraph/line direction");
+  Require(visual.mLines[0u].ellipsis == elideText,
+          std::string(name) + ": unexpected source ellipsis state");
+
+  if(expectBidi)
+  {
+    Require(!logical.mBidirectionalLineInfo.Empty(), std::string(name) + ": bidi line map was not produced");
+    const Text::BidirectionalLineInfoRun& bidiLine = logical.mBidirectionalLineInfo[0u];
+    Require(bidiLine.direction == expectRightToLeft,
+            std::string(name) + ": BiDi line direction disagrees with expected paragraph direction");
+    Require(bidiLine.isIdentity == !expectNonIdentity,
+            std::string(name) + ": unexpected visual-to-logical map identity");
+  }
+
+  std::cout << "REAL_LINE_DIRECTION case=" << name
+            << " bidi=" << expectBidi
+            << " non_identity=" << expectNonIdentity
+            << " rtl_line=" << visual.mLines[0u].direction
+            << " ellipsis=" << elideText << std::endl;
+  ReleaseBidi(services, result);
+}
+
 void CheckLayoutCase(const char* name, Vector<Text::Character>& text, Text::CharacterIndex start,
                      Text::Length length, bool expectBidi, Text::ReplacementLayoutTestServices& services)
 {
@@ -204,6 +260,9 @@ void CheckEndEllipsisCase(const char* name, Vector<Text::Character>& text, Text:
   const Text::FinalElisionResult& finalElision = result.finalElision;
   Require(finalElision.resolved,
           std::string(name) + ": final elision was not resolved");
+  Require(finalElision.applied && finalElision.ellipsisUnitCount == 1u &&
+            finalElision.ellipsisOmissionReason == Text::FinalElisionResult::EllipsisOmissionReason::NONE,
+          std::string(name) + ": shared final-elision state disagrees with the generated ellipsis");
   Require(CountGeneratedFinalGlyphs(finalElision) == 1u,
           std::string(name) + ": END ellipsis does not own exactly one semantic unit");
   const Text::LogicalModel& logicalModel = *result.processingModel->mLogicalModel;
@@ -347,6 +406,47 @@ void RunDiagnostics()
     TextAbstraction::Shaping::Get(),
     TextAbstraction::FontClient::Get(),
     Text::MultilanguageSupport::Get()};
+
+  CheckOrdinaryLineDirectionCase("pure_ltr",
+                                 "Pure LTR text",
+                                 false,
+                                 false,
+                                 false,
+                                 false,
+                                 400.0f,
+                                 services);
+  CheckOrdinaryLineDirectionCase("pure_rtl",
+                                 "\xD7\x90\xD7\x91\xD7\x92\xD7\x93",
+                                 true,
+                                 true,
+                                 true,
+                                 false,
+                                 400.0f,
+                                 services);
+  CheckOrdinaryLineDirectionCase("mixed_ltr",
+                                 "English \xD7\x90\xD7\x91\xD7\x92 trailing",
+                                 true,
+                                 false,
+                                 true,
+                                 false,
+                                 400.0f,
+                                 services);
+  CheckOrdinaryLineDirectionCase("mixed_rtl",
+                                 "\xD7\x90\xD7\x91\xD7\x92 English \xD7\x93",
+                                 true,
+                                 true,
+                                 true,
+                                 false,
+                                 400.0f,
+                                 services);
+  CheckOrdinaryLineDirectionCase("mixed_ltr_end_ellipsis",
+                                 "English \xD7\x90\xD7\x91\xD7\x92 trailing words force END ellipsis",
+                                 true,
+                                 false,
+                                 true,
+                                 true,
+                                 100.0f,
+                                 services);
 
   Vector<Text::Character> ltr = Characters({'a', 'b', 'I', 'C', 'O', 'N', 'c', 'd'});
   CheckLayoutCase("ltr", ltr, 2u, 4u, false, services);

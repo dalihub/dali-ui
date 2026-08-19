@@ -15,16 +15,15 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-metrics.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-metrics.h>
 
 namespace Dali::Ui::Text
 {
-bool ResolveFontClientEndEllipsisMetrics(void*                       context,
-                                         FontId                      fontId,
-                                         bool                        allowDefaultFont,
-                                         TextAbstraction::GlyphInfo& metrics)
+bool ResolveFontClientEllipsisMetrics(TextAbstraction::FontClient& fontClient,
+                                      FontId                       fontId,
+                                      bool                         allowDefaultFont,
+                                      TextAbstraction::GlyphInfo&  metrics)
 {
-  auto& fontClient = *static_cast<TextAbstraction::FontClient*>(context);
   if(fontId == 0u && allowDefaultFont)
   {
     TextAbstraction::FontDescription defaultFontDescription;

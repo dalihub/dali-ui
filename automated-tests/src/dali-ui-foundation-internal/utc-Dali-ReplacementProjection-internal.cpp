@@ -29,12 +29,8 @@
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
-#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-metrics.h>
-#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-planner.h>
 #include <dali-ui-foundation/internal/text/final-glyph-geometry.h>
-#include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
-#include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
 #include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-data.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
@@ -100,101 +96,6 @@ uint32_t CountSyntheticGlyphs(const Text::ReplacementRenderState& state)
   return count;
 }
 
-std::vector<Text::GlyphIndex> FindActuallyRemovedHostLineReplacements(
-  const Text::Model&               model,
-  const Text::FinalElisionResult& finalElision,
-  const Text::LineRun&             line)
-{
-  std::vector<Text::GlyphIndex>   removed;
-  const Text::GlyphIndex          lineEnd =
-    std::min<Text::GlyphIndex>(line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs,
-                               model.mVisualModel->mGlyphs.Count());
-  for(Text::GlyphIndex glyphIndex = line.glyphRun.glyphIndex; glyphIndex < lineEnd; ++glyphIndex)
-  {
-    if(Text::IsSyntheticReplacementGlyph(model.mVisualModel->mGlyphs[glyphIndex]) &&
-       !finalElision.IsOriginalGlyphVisible(glyphIndex))
-    {
-      removed.push_back(glyphIndex);
-    }
-  }
-  return removed;
-}
-
-Vector<Vector2> BuildAlignedGlyphPositions(const Text::Model& model)
-{
-  const Text::VisualModel& visual    = *model.mVisualModel;
-  Vector<Vector2>          positions = visual.mGlyphPositions;
-  float                    lineTop   = 0.0f;
-  for(const Text::LineRun& line : visual.mLines)
-  {
-    const float baseline =
-      lineTop + line.ascender + Text::GetPreOffsetVerticalLineAlignment(line, model.GetVerticalLineAlignment());
-    const auto alignRun = [&](const Text::GlyphRun& run)
-    {
-      const Text::GlyphIndex end =
-        std::min<Text::GlyphIndex>(run.glyphIndex + run.numberOfGlyphs, positions.Count());
-      for(Text::GlyphIndex index = run.glyphIndex; index < end; ++index)
-      {
-        positions[index].x += line.alignmentOffset;
-        positions[index].y += baseline;
-      }
-    };
-    alignRun(line.glyphRun);
-    if(line.isSplitToTwoHalves)
-    {
-      alignRun(line.glyphRunSecondHalf);
-    }
-    lineTop += Text::GetLineHeight(line, false);
-  }
-  return positions;
-}
-
-Text::EndEllipsisPlan ResolveFinalHostLinePlan(const Text::Model&          model,
-                                               const Text::LineRun&        line,
-                                               TextAbstraction::FontClient fontClient)
-{
-  const Text::VisualModel&   visual           = *model.mVisualModel;
-  Vector<Vector2>            alignedPositions = BuildAlignedGlyphPositions(model);
-  Text::EndEllipsisInputView input;
-  input.glyphs                  = visual.mGlyphs.Begin();
-  input.glyphPositions          = alignedPositions.Begin();
-  input.text                    = model.mLogicalModel->mText.Begin();
-  input.glyphToCharacterMap     = visual.mGlyphsToCharacters.Begin();
-  input.characterSpacingRuns    = &visual.GetCharacterSpacingGlyphRuns();
-  input.numberOfGlyphs          = visual.mGlyphs.Count();
-  input.glyphPositionStartIndex = 0u;
-  input.numberOfGlyphPositions  = alignedPositions.Count();
-  input.numberOfCharacters      = model.mLogicalModel->mText.Count();
-  input.startIndex              = line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs - 1u;
-  input.lineWidth               = line.width;
-  input.positionOffset          = 0.0f;
-  input.modelCharacterSpacing   = visual.GetCharacterSpacing();
-  input.metricsContext          = &fontClient;
-  input.resolveMetrics          = Text::ResolveFontClientEndEllipsisMetrics;
-  return Text::ResolveEndEllipsisPlan(input);
-}
-
-struct FixedEllipsisMetrics
-{
-  Text::GlyphInfo glyph;
-  uint32_t        resolveCount{0u};
-};
-
-bool ResolveFixedEllipsisMetrics(void*            context,
-                                 Text::FontId     fontId,
-                                 bool             allowDefaultFont,
-                                 Text::GlyphInfo& metrics)
-{
-  auto& fixed = *static_cast<FixedEllipsisMetrics*>(context);
-  ++fixed.resolveCount;
-  if(fontId == 0u && !allowDefaultFont)
-  {
-    return false;
-  }
-  metrics = fixed.glyph;
-  return true;
-}
-
 uint32_t CountVisibleOriginalGlyphs(const Text::FinalElisionResult& result)
 {
   uint32_t count = 0u;
@@ -227,7 +128,7 @@ uint32_t CountGeneratedFinalGlyphs(const Text::FinalElisionResult& result)
 bool IsGeneratedEllipsisDrawable(const Text::ReplacementRenderState& state)
 {
   const Text::FinalElisionResult& result = state.finalElision;
-  if(!result.applied || result.ellipsisFinalGlyphIndex >= result.glyphs.Count())
+  if(result.ellipsisFinalGlyphIndex >= result.glyphs.Count())
   {
     return false;
   }
@@ -267,8 +168,6 @@ void CheckFinalElisionContract(const Text::ReplacementRenderState& state)
   DALI_TEST_EQUALS(finalElision.glyphs.Count(), finalElision.lineLocalGlyphPositions.Count(), TEST_LOCATION);
   const uint32_t generatedEllipsisCount = CountGeneratedFinalGlyphs(finalElision);
   DALI_TEST_CHECK(generatedEllipsisCount <= 1u);
-  DALI_TEST_EQUALS(finalElision.ellipsisUnitCount, generatedEllipsisCount, TEST_LOCATION);
-  DALI_TEST_EQUALS(finalElision.applied, generatedEllipsisCount == 1u, TEST_LOCATION);
   for(Text::GlyphIndex sourceIndex = 0u; sourceIndex < finalElision.sourceToFinalGlyphIndices.Count();
       ++sourceIndex)
   {
@@ -281,13 +180,25 @@ void CheckFinalElisionContract(const Text::ReplacementRenderState& state)
   }
   if(finalElision.textElided)
   {
-    DALI_TEST_EQUALS(generatedEllipsisCount, 1u, TEST_LOCATION);
     DALI_TEST_CHECK(finalElision.applied);
+    DALI_TEST_EQUALS(finalElision.ellipsisUnitCount, 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(finalElision.ellipsisOmissionReason,
+                     Text::FinalElisionResult::EllipsisOmissionReason::NONE,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(generatedEllipsisCount, 1u, TEST_LOCATION);
     DALI_TEST_EQUALS(finalElision.ellipsisLineIndex,
                      FindEllipsisLine(*state.processingModel->mVisualModel),
                      TEST_LOCATION);
     DALI_TEST_CHECK(finalElision.ellipsisFinalGlyphIndex < finalElision.glyphs.Count());
     DALI_TEST_CHECK(IsGeneratedEllipsisDrawable(state));
+  }
+  else
+  {
+    DALI_TEST_CHECK(!finalElision.applied);
+    DALI_TEST_EQUALS(finalElision.ellipsisUnitCount, 0u, TEST_LOCATION);
+    DALI_TEST_EQUALS(finalElision.ellipsisOmissionReason,
+                     Text::FinalElisionResult::EllipsisOmissionReason::NONE,
+                     TEST_LOCATION);
   }
 
   for(const Text::ReplacementPlacement& placement : state.placements)
@@ -2358,356 +2269,6 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
   END_TEST;
 }
 
-namespace
-{
-constexpr uint32_t FINAL_EQUIVALENCE_SHARD_COUNT = 4u;
-
-void CheckEndEllipsisPlannerFinalEquivalence(uint32_t shardIndex)
-{
-  DALI_TEST_CHECK(shardIndex < FINAL_EQUIVALENCE_SHARD_COUNT);
-
-  UiTestApplication                   application;
-  Text::ReplacementLayoutTestServices services = MakeLayoutServices();
-
-  struct PlannerCase
-  {
-    const char*                 text;
-    std::vector<Vector2>        sizes;
-    Dali::LayoutDirection::Type direction;
-    bool                        multiline;
-    float                       characterSpacing;
-    Text::Alignment             horizontalAlignment{Text::Alignment::START};
-    Text::Alignment             verticalAlignment{Text::Alignment::START};
-    float                       lineSpacing{0.0f};
-    float                       relativeLineSize{1.0f};
-  };
-  const PlannerCase cases[] = {
-    {"ordinary prefix \uFFFC followed by trailing words", {Vector2(24.0f, 24.0f)}, Dali::LayoutDirection::LEFT_TO_RIGHT, false, 0.0f},
-    {"adjacent \uFFFC\uFFFC replacements followed by trailing words", {Vector2(8.0f, 40.0f), Vector2(16.0f, 70.0f)}, Dali::LayoutDirection::LEFT_TO_RIGHT, false, 4.0f},
-    {"small \uFFFC then oversized \uFFFC then small \uFFFC and trailing words",
-     {Vector2(8.0f, 8.0f), Vector2(210.0f, 120.0f), Vector2(16.0f, 16.0f)},
-     Dali::LayoutDirection::LEFT_TO_RIGHT,
-     false,
-     -2.0f},
-    {"אבג mixed LTR \uFFFC ثم العربية \uFFFC trailing words",
-     {Vector2(40.0f, 30.0f), Vector2(80.0f, 48.0f)},
-     Dali::LayoutDirection::RIGHT_TO_LEFT,
-     false,
-     3.0f},
-    {"LTR אבגדה \uFFFC العربية Latin tail \uFFFC סוף",
-     {Vector2(34.0f, 22.0f), Vector2(52.0f, 36.0f)},
-     Dali::LayoutDirection::LEFT_TO_RIGHT,
-     false,
-     -1.0f},
-    {"multiline prefix with a small \uFFFC image and enough ordinary text before an oversized \uFFFC image "
-     "followed by several wrapping lines and one final \uFFFC replacement",
-     {Vector2(24.0f, 24.0f), Vector2(210.0f, 120.0f), Vector2(40.0f, 40.0f)},
-     Dali::LayoutDirection::LEFT_TO_RIGHT,
-     true,
-     2.0f},
-  };
-
-  uint32_t comparedCount         = 0u;
-  uint32_t verticalFallbackCount = 0u;
-  uint32_t splitBidiCount        = 0u;
-  for(const PlannerCase& testCase : cases)
-  {
-    Vector<Text::Character>              text = Utf32(testCase.text);
-    Vector<Text::ReplacementRunSnapshot> candidates;
-    uint32_t                             replacementIndex = 0u;
-    for(Text::CharacterIndex characterIndex = 0u; characterIndex < text.Count(); ++characterIndex)
-    {
-      if(text[characterIndex] == Text::ReplacementProjection::OBJECT_REPLACEMENT_CHARACTER)
-      {
-        DALI_TEST_CHECK(replacementIndex < testCase.sizes.size());
-        candidates.PushBack(Candidate(characterIndex,
-                                      1u,
-                                      testCase.sizes[replacementIndex].width,
-                                      testCase.sizes[replacementIndex].height,
-                                      9000u + replacementIndex));
-        ++replacementIndex;
-      }
-    }
-    DALI_TEST_EQUALS(replacementIndex, static_cast<uint32_t>(testCase.sizes.size()), TEST_LOCATION);
-    const Text::ReplacementProjection projection = Text::ReplacementProjection::Build(text, candidates);
-    DALI_TEST_CHECK(projection.HasReplacements());
-
-    const float minimumWidth = 20.0f;
-    const float maximumWidth = testCase.multiline ? 260.0f : 500.0f;
-    uint32_t    widthIndex   = 0u;
-    for(float width = minimumWidth; width <= maximumWidth; width += 2.0f)
-    {
-      if((widthIndex++ % FINAL_EQUIVALENCE_SHARD_COUNT) != shardIndex)
-      {
-        continue;
-      }
-
-      const float minimumHeight = testCase.multiline ? 24.0f : 160.0f;
-      const float maximumHeight = testCase.multiline ? 220.0f : minimumHeight;
-      for(float height = minimumHeight; height <= maximumHeight; height += testCase.multiline ? 2.0f : 400.0f)
-      {
-        Text::ReplacementLayoutTestOptions options;
-        options.contentSize         = Size(width, height);
-        options.layoutType          = testCase.multiline ? Text::Layout::Engine::MULTI_LINE_BOX
-                                                         : Text::Layout::Engine::SINGLE_LINE_BOX;
-        options.lineWrapMode        = Text::LineWrapMode::CHARACTER;
-        options.elideText           = true;
-        options.ellipsisPosition    = Text::EllipsisPosition::END;
-        options.layoutDirection     = testCase.direction;
-        options.fontPointSize       = 20u * 64u;
-        options.fontPixelSize       = 20.0f * 4.0f / 3.0f;
-        options.characterSpacing    = testCase.characterSpacing;
-        options.horizontalAlignment = testCase.horizontalAlignment;
-        options.verticalAlignment   = testCase.verticalAlignment;
-        options.defaultLineSpacing  = testCase.lineSpacing;
-        options.relativeLineSize    = testCase.relativeLineSize;
-
-        const auto compareModel = [&](const Text::Model& model, const Text::FinalElisionResult& finalElision)
-        {
-          if(!finalElision.textElided || finalElision.ellipsisLineIndex >= model.mVisualModel->mLines.Count())
-          {
-            return;
-          }
-
-          const Text::LineRun&        line = model.mVisualModel->mLines[finalElision.ellipsisLineIndex];
-          const Text::EndEllipsisPlan planner =
-            ResolveFinalHostLinePlan(model, line, services.fontClient);
-          const std::vector<Text::GlyphIndex> actual =
-            FindActuallyRemovedHostLineReplacements(model, finalElision, line);
-          const Text::GlyphIndex invalid = Text::EndEllipsisPlan::INVALID_GLYPH_INDEX;
-          ++comparedCount;
-          splitBidiCount += line.isSplitToTwoHalves ? 1u : 0u;
-          if(actual.empty())
-          {
-            DALI_TEST_EQUALS(planner.firstRemovedReplacementGlyphIndex, invalid, TEST_LOCATION);
-            DALI_TEST_EQUALS(planner.lastRemovedReplacementGlyphIndex, invalid, TEST_LOCATION);
-          }
-          else
-          {
-            DALI_TEST_EQUALS(planner.firstRemovedReplacementGlyphIndex, actual.front(), TEST_LOCATION);
-            DALI_TEST_EQUALS(planner.lastRemovedReplacementGlyphIndex, actual.back(), TEST_LOCATION);
-            for(const Text::GlyphIndex glyphIndex : actual)
-            {
-              DALI_TEST_CHECK(glyphIndex >= planner.firstRemovedReplacementGlyphIndex);
-              DALI_TEST_CHECK(glyphIndex <= planner.lastRemovedReplacementGlyphIndex);
-            }
-          }
-
-          const bool usesVerticalFallback =
-            model.mVisualModel->mLines.Count() == 1u &&
-            Text::GetLineHeight(line, true) > model.mVisualModel->mControlSize.height;
-          verticalFallbackCount += usesVerticalFallback ? 1u : 0u;
-          if(!usesVerticalFallback)
-          {
-            DALI_TEST_EQUALS(planner.resolved, finalElision.applied, TEST_LOCATION);
-            if(planner.resolved)
-            {
-              DALI_TEST_CHECK(finalElision.ellipsisFinalGlyphIndex < finalElision.glyphs.Count());
-              DALI_TEST_EQUALS(planner.ellipsisGlyphIndex, finalElision.endIndex, TEST_LOCATION);
-              DALI_TEST_EQUALS(planner.ellipsisGlyph.index,
-                               finalElision.glyphs[finalElision.ellipsisFinalGlyphIndex].index,
-                               TEST_LOCATION);
-              DALI_TEST_EQUALS(planner.ellipsisGlyph.fontId,
-                               finalElision.glyphs[finalElision.ellipsisFinalGlyphIndex].fontId,
-                               TEST_LOCATION);
-              DALI_TEST_EQUALS(planner.ellipsisPosition.x,
-                               finalElision.viewGlyphPositions[finalElision.ellipsisFinalGlyphIndex].x,
-                               Math::MACHINE_EPSILON_1000,
-                               TEST_LOCATION);
-            }
-          }
-        };
-
-        Text::ReplacementRenderState state;
-        DALI_TEST_CHECK(Text::LayoutReplacementForTest(projection, services, options, state));
-        compareModel(*state.processingModel, state.finalElision);
-        state.Clear(services.bidirectionalSupport);
-      }
-    }
-  }
-
-  DALI_TEST_CHECK(comparedCount > 0u);
-  // END ellipsis never uses LineRun::isSplitToTwoHalves. That representation
-  // is reserved for single-line MIDDLE ellipsis by LayoutEngine.
-  DALI_TEST_EQUALS(splitBidiCount, 0u, TEST_LOCATION);
-  DALI_TEST_CHECK(verticalFallbackCount > 0u);
-}
-} // unnamed namespace
-
-int UtcDaliEndEllipsisPlannerFinalEquivalence01P(void)
-{
-  CheckEndEllipsisPlannerFinalEquivalence(0u);
-  END_TEST;
-}
-
-int UtcDaliEndEllipsisPlannerFinalEquivalence02P(void)
-{
-  CheckEndEllipsisPlannerFinalEquivalence(1u);
-  END_TEST;
-}
-
-int UtcDaliEndEllipsisPlannerFinalEquivalence03P(void)
-{
-  CheckEndEllipsisPlannerFinalEquivalence(2u);
-  END_TEST;
-}
-
-int UtcDaliEndEllipsisPlannerFinalEquivalence04P(void)
-{
-  CheckEndEllipsisPlannerFinalEquivalence(3u);
-  END_TEST;
-}
-
-int UtcDaliEndEllipsisPlannerInvariantP(void)
-{
-  Vector<Text::GlyphInfo>      glyphs;
-  Vector<Vector2>              positions;
-  Vector<Text::Character>      text;
-  Vector<Text::CharacterIndex> glyphToCharacterMap;
-  glyphs.Resize(4u);
-  positions.Resize(4u);
-  text.Resize(4u);
-  glyphToCharacterMap.Resize(4u);
-  for(Text::GlyphIndex index = 0u; index < glyphs.Count(); ++index)
-  {
-    glyphs[index].fontId       = 1u;
-    glyphs[index].index        = 100u + index;
-    glyphs[index].width        = 10.0f;
-    glyphs[index].height       = 12.0f;
-    glyphs[index].xBearing     = 0.0f;
-    glyphs[index].yBearing     = 9.0f;
-    glyphs[index].advance      = 10.0f;
-    positions[index]           = Vector2(10.0f * index, 0.0f);
-    text[index]                = static_cast<Text::Character>('a' + index);
-    glyphToCharacterMap[index] = index;
-  }
-
-  const Vector<Text::GlyphInfo>          glyphSnapshot    = glyphs;
-  const Vector<Vector2>                  positionSnapshot = positions;
-  Vector<Text::CharacterSpacingGlyphRun> characterSpacingRuns;
-  FixedEllipsisMetrics                   fixed;
-  fixed.glyph.fontId   = 2u;
-  fixed.glyph.index    = 500u;
-  fixed.glyph.width    = 15.0f;
-  fixed.glyph.height   = 12.0f;
-  fixed.glyph.xBearing = 0.0f;
-  fixed.glyph.yBearing = 9.0f;
-  fixed.glyph.advance  = 15.0f;
-
-  Text::EndEllipsisInputView input;
-  input.glyphs                  = glyphs.Begin();
-  input.glyphPositions          = positions.Begin();
-  input.text                    = text.Begin();
-  input.glyphToCharacterMap     = glyphToCharacterMap.Begin();
-  input.characterSpacingRuns    = &characterSpacingRuns;
-  input.numberOfGlyphs          = glyphs.Count();
-  input.glyphPositionStartIndex = 0u;
-  input.numberOfGlyphPositions  = positions.Count();
-  input.numberOfCharacters      = text.Count();
-  input.startIndex              = 3u;
-  input.lineWidth               = 40.0f;
-  input.metricsContext          = &fixed;
-  input.resolveMetrics          = ResolveFixedEllipsisMetrics;
-
-  const Text::EndEllipsisPlan first  = Text::ResolveEndEllipsisPlan(input);
-  const Text::EndEllipsisPlan second = Text::ResolveEndEllipsisPlan(input);
-  DALI_TEST_CHECK(first.resolved);
-  DALI_TEST_EQUALS(first.ellipsisGlyphIndex, 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(first.numberOfRemovedGlyphs, 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(first.ellipsisGlyph.index, fixed.glyph.index, TEST_LOCATION);
-  DALI_TEST_EQUALS(first.ellipsisGlyph.fontId, fixed.glyph.fontId, TEST_LOCATION);
-  DALI_TEST_EQUALS(first.ellipsisPosition, Vector2(20.0f, 0.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(second.resolved, first.resolved, TEST_LOCATION);
-  DALI_TEST_EQUALS(second.ellipsisGlyphIndex, first.ellipsisGlyphIndex, TEST_LOCATION);
-  DALI_TEST_EQUALS(second.numberOfRemovedGlyphs, first.numberOfRemovedGlyphs, TEST_LOCATION);
-  DALI_TEST_EQUALS(second.ellipsisPosition, first.ellipsisPosition, TEST_LOCATION);
-  DALI_TEST_CHECK(fixed.resolveCount > 0u);
-
-  for(Text::GlyphIndex index = 0u; index < glyphs.Count(); ++index)
-  {
-    DALI_TEST_EQUALS(glyphs[index].index, glyphSnapshot[index].index, TEST_LOCATION);
-    DALI_TEST_EQUALS(glyphs[index].fontId, glyphSnapshot[index].fontId, TEST_LOCATION);
-    DALI_TEST_EQUALS(glyphs[index].width, glyphSnapshot[index].width, TEST_LOCATION);
-    DALI_TEST_EQUALS(glyphs[index].advance, glyphSnapshot[index].advance, TEST_LOCATION);
-    DALI_TEST_EQUALS(positions[index], positionSnapshot[index], TEST_LOCATION);
-  }
-
-  Vector<Vector2> mixedPositions = positions;
-  mixedPositions[1u].x           = 85.0f;
-  mixedPositions[2u].x           = 80.0f;
-  mixedPositions[3u].x           = 30.0f;
-  FixedEllipsisMetrics mixedMetrics;
-  mixedMetrics.glyph                      = fixed.glyph;
-  mixedMetrics.glyph.xBearing             = 2.0f;
-  input.glyphPositions                    = mixedPositions.Begin();
-  input.metricsContext                    = &mixedMetrics;
-  const Text::EndEllipsisPlan mixedRewind = Text::ResolveEndEllipsisPlan(input);
-  DALI_TEST_CHECK(mixedRewind.resolved);
-  DALI_TEST_EQUALS(mixedRewind.ellipsisGlyphIndex, 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(mixedRewind.numberOfRemovedGlyphs, 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(mixedRewind.ellipsisPosition, Vector2(81.0f, 0.0f), TEST_LOCATION);
-
-  input.glyphPositions = positions.Begin();
-  input.metricsContext = &fixed;
-
-  glyphs[3u].fontId                       = 0u;
-  glyphs[3u].index                        = Text::SYNTHETIC_REPLACEMENT_GLYPH_ID;
-  glyphs[3u].width                        = 30.0f;
-  glyphs[3u].advance                      = 30.0f;
-  const Text::EndEllipsisPlan replacement = Text::ResolveEndEllipsisPlan(input);
-  DALI_TEST_CHECK(replacement.resolved);
-  DALI_TEST_EQUALS(replacement.ellipsisGlyphIndex, 3u, TEST_LOCATION);
-  DALI_TEST_EQUALS(replacement.numberOfRemovedGlyphs, 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(replacement.firstRemovedReplacementGlyphIndex, 3u, TEST_LOCATION);
-  DALI_TEST_EQUALS(replacement.lastRemovedReplacementGlyphIndex, 3u, TEST_LOCATION);
-
-  glyphs                         = glyphSnapshot;
-  positions                      = positionSnapshot;
-  glyphs[2u].fontId              = 0u;
-  glyphs[2u].index               = Text::SYNTHETIC_REPLACEMENT_GLYPH_ID;
-  glyphs[2u].width               = 5.0f;
-  glyphs[2u].advance             = 5.0f;
-  glyphs[3u].fontId              = 0u;
-  glyphs[3u].index               = Text::SYNTHETIC_REPLACEMENT_GLYPH_ID;
-  glyphs[3u].width               = 5.0f;
-  glyphs[3u].advance             = 5.0f;
-  positions[3u].x               = 25.0f;
-  input.glyphs                   = glyphs.Begin();
-  input.glyphPositions           = positions.Begin();
-  const Text::EndEllipsisPlan multipleReplacements = Text::ResolveEndEllipsisPlan(input);
-  DALI_TEST_CHECK(multipleReplacements.resolved);
-  DALI_TEST_EQUALS(multipleReplacements.ellipsisGlyphIndex, 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(multipleReplacements.firstRemovedReplacementGlyphIndex, 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(multipleReplacements.lastRemovedReplacementGlyphIndex, 3u, TEST_LOCATION);
-
-  for(Text::GlyphInfo& glyph : glyphs)
-  {
-    glyph.fontId = 0u;
-    glyph.index  = 1u;
-  }
-  const Text::EndEllipsisPlan missingMetrics = Text::ResolveEndEllipsisPlan(input);
-  DALI_TEST_CHECK(!missingMetrics.resolved);
-  DALI_TEST_EQUALS(missingMetrics.ellipsisGlyphIndex,
-                   Text::EndEllipsisPlan::INVALID_GLYPH_INDEX,
-                   TEST_LOCATION);
-  DALI_TEST_EQUALS(missingMetrics.firstRemovedReplacementGlyphIndex,
-                   Text::EndEllipsisPlan::INVALID_GLYPH_INDEX,
-                   TEST_LOCATION);
-  DALI_TEST_EQUALS(missingMetrics.lastRemovedReplacementGlyphIndex,
-                   Text::EndEllipsisPlan::INVALID_GLYPH_INDEX,
-                   TEST_LOCATION);
-  DALI_TEST_EQUALS(missingMetrics.numberOfRemovedGlyphs, glyphs.Count(), TEST_LOCATION);
-
-  Text::EndEllipsisInputView  invalidInput;
-  const Text::EndEllipsisPlan invalid = Text::ResolveEndEllipsisPlan(invalidInput);
-  DALI_TEST_CHECK(!invalid.resolved);
-  DALI_TEST_EQUALS(invalid.ellipsisGlyphIndex,
-                   Text::EndEllipsisPlan::INVALID_GLYPH_INDEX,
-                   TEST_LOCATION);
-
-  END_TEST;
-}
-
 int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
 {
   UiTestApplication                   application;
@@ -2851,8 +2412,7 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
   {
     bool            visible{false};
     bool            textElided{false};
-    bool            ellipsisApplied{false};
-    uint32_t        ellipsisUnits{0u};
+    uint32_t        generatedEllipsisCount{0u};
     uint32_t        lineCount{0u};
     Text::LineIndex ellipsisLineIndex{Text::FinalElisionResult::INVALID_LINE_INDEX};
   };
@@ -2890,8 +2450,7 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
     const Text::FinalElisionResult& finalElision = state->finalElision;
     return AsyncSummary{state->placements[0u].visible,
                         finalElision.textElided,
-                        finalElision.applied,
-                        finalElision.ellipsisUnitCount,
+                        CountGeneratedFinalGlyphs(finalElision),
                         static_cast<uint32_t>(state->processingModel->mVisualModel->mLines.Count()),
                         finalElision.ellipsisLineIndex};
   };
@@ -2900,54 +2459,14 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
   const AsyncSummary scaleTwoNarrow = renderAsync(2.0f, Size(400.0f, 90.0f), 501u);
   DALI_TEST_EQUALS(scaleTwoNarrow.visible, scaleOneNarrow.visible, TEST_LOCATION);
   DALI_TEST_EQUALS(scaleTwoNarrow.textElided, scaleOneNarrow.textElided, TEST_LOCATION);
-  DALI_TEST_EQUALS(scaleTwoNarrow.ellipsisApplied, scaleOneNarrow.ellipsisApplied, TEST_LOCATION);
-  DALI_TEST_EQUALS(scaleTwoNarrow.ellipsisUnits, scaleOneNarrow.ellipsisUnits, TEST_LOCATION);
+  DALI_TEST_EQUALS(scaleTwoNarrow.generatedEllipsisCount, scaleOneNarrow.generatedEllipsisCount, TEST_LOCATION);
   DALI_TEST_EQUALS(scaleTwoNarrow.ellipsisLineIndex, scaleOneNarrow.ellipsisLineIndex, TEST_LOCATION);
   const AsyncSummary scaleOneWide = renderAsync(1.0f, Size(400.0f, 320.0f), 502u);
   const AsyncSummary scaleTwoWide = renderAsync(2.0f, Size(400.0f, 320.0f), 503u);
   DALI_TEST_EQUALS(scaleTwoWide.visible, scaleOneWide.visible, TEST_LOCATION);
   DALI_TEST_EQUALS(scaleTwoWide.textElided, scaleOneWide.textElided, TEST_LOCATION);
-  DALI_TEST_EQUALS(scaleTwoWide.ellipsisApplied, scaleOneWide.ellipsisApplied, TEST_LOCATION);
-  DALI_TEST_EQUALS(scaleTwoWide.ellipsisUnits, scaleOneWide.ellipsisUnits, TEST_LOCATION);
+  DALI_TEST_EQUALS(scaleTwoWide.generatedEllipsisCount, scaleOneWide.generatedEllipsisCount, TEST_LOCATION);
   DALI_TEST_EQUALS(scaleTwoWide.ellipsisLineIndex, scaleOneWide.ellipsisLineIndex, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliOrdinaryTextSkipsReplacementStateP(void)
-{
-  UiTestApplication application;
-
-  Text::ControllerPtr     controller = Text::Controller::New();
-  Text::Controller::Impl& impl       = Text::Controller::Impl::GetImplementation(*controller.Get());
-  DALI_TEST_CHECK(!impl.HasReplacementData());
-  DALI_TEST_CHECK(!controller->HasValidReplacementSource());
-  DALI_TEST_CHECK(controller->GetFinalElisionResult() == nullptr);
-
-  controller->SetText("Ordinary multiline text remains on the legacy layout and ellipsis path without replacement state");
-  controller->SetDefaultFontSize(18.0f, Text::Controller::PIXEL_SIZE);
-  controller->SetMultiLineEnabled(true);
-  controller->SetLineWrapMode(Text::LineWrapMode::WORD);
-  controller->SetTextElideEnabled(true);
-  controller->SetEllipsisPosition(Text::EllipsisPosition::END);
-  controller->Relayout(Size(100.0f, 35.0f));
-
-  DALI_TEST_CHECK(controller->GetRenderTextModel() == controller->GetLogicalTextModel());
-  DALI_TEST_CHECK(!impl.HasReplacementData());
-  DALI_TEST_CHECK(!controller->HasValidReplacementSource());
-  DALI_TEST_CHECK(controller->GetFinalElisionResult() == nullptr);
-
-  Text::AsyncTextParameters parameters;
-  parameters.text             = "Ordinary async text also skips replacement projection and final-elision storage";
-  parameters.textWidth        = 100.0f;
-  parameters.textHeight       = 35.0f;
-  parameters.isMultiLine      = true;
-  parameters.lineWrapMode     = Text::LineWrapMode::WORD;
-  parameters.ellipsis         = true;
-  parameters.ellipsisPosition = Text::EllipsisPosition::END;
-  Text::AsyncTextLoader loader = Text::AsyncTextLoader::New();
-  loader.RenderText(parameters, false, Size::ZERO);
-  DALI_TEST_CHECK(Text::GetImplementation(loader).GetReplacementRenderState() == nullptr);
 
   END_TEST;
 }
@@ -3078,8 +2597,7 @@ int UtcDaliReplacementProductionSyncAsyncParityP(void)
   const Text::FinalElisionResult& syncFinal  = sync.finalElision;
   const Text::FinalElisionResult& asyncFinal = asyncRenderState->finalElision;
   DALI_TEST_EQUALS(asyncFinal.textElided, syncFinal.textElided, TEST_LOCATION);
-  DALI_TEST_EQUALS(asyncFinal.applied, syncFinal.applied, TEST_LOCATION);
-  DALI_TEST_EQUALS(asyncFinal.ellipsisUnitCount, syncFinal.ellipsisUnitCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountGeneratedFinalGlyphs(asyncFinal), CountGeneratedFinalGlyphs(syncFinal), TEST_LOCATION);
   DALI_TEST_EQUALS(asyncFinal.ellipsisLineIndex, syncFinal.ellipsisLineIndex, TEST_LOCATION);
   DALI_TEST_EQUALS(asyncInfo.replacementSourceRevision, 41u, TEST_LOCATION);
   DALI_TEST_EQUALS(asyncInfo.replacementLayoutGeneration, 77u, TEST_LOCATION);
