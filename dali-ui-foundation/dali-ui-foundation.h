@@ -91,6 +91,7 @@
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
 
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-cache-utils.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-types.h>

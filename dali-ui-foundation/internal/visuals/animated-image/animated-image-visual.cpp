@@ -415,13 +415,11 @@ AnimatedImageVisual::~AnimatedImageVisual()
 {
   if(DALI_LIKELY(mImageCache))
   {
-    // AnimatedImageVisual destroyed so remove texture unless ReleasePolicy is set to never release
-    // If this is animated image, clear cache always.
-    // Else if this is single frame image, this is affected be release policy.
-    if(mFrameCount > SINGLE_IMAGE_COUNT || mReleasePolicy != Ui::Image::ReleasePolicy::NEVER)
-    {
-      mImageCache->ClearCache();
-    }
+    // Known multi-frame images always clear their rolling cache. Single-frame images and images whose frame count is
+    // not known yet follow the release policy, matching the previous destruction behavior.
+    const bool keepUnusedTexture = mFrameCount <= SINGLE_IMAGE_COUNT &&
+                                   mReleasePolicy == Ui::Image::ReleasePolicy::NEVER;
+    mImageCache->ClearCache(keepUnusedTexture);
   }
 
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))

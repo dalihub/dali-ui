@@ -113,7 +113,8 @@ TextureManager::TextureManager(bool loadYuvPlanes)
   mLoadingQueueTextureId(INVALID_TEXTURE_ID),
   mRemoveQueue(),
   mLoadYuvPlanes(loadYuvPlanes),
-  mRemoveProcessorRegistered(false)
+  mRemoveProcessorRegistered(false),
+  mClearUnusedTexturesRequested(false)
 {
   // Initialize the AddOn
   RenderingAddOn::Get();
@@ -664,10 +665,10 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
   return textureId;
 }
 
-void TextureManager::RequestRemove(const TextureManager::TextureId textureId, TextureUploadObserver* observer)
+void TextureManager::RequestRemove(const TextureManager::TextureId textureId, TextureUploadObserver* observer, bool keepUnusedTexture)
 {
-  DALI_LOG_INFO(gTextureManagerLogFilter, Debug::General, "TextureManager::RequestRemove( textureId=%d observer=%p )\n",
-                textureId, observer);
+  DALI_LOG_INFO(gTextureManagerLogFilter, Debug::General, "TextureManager::RequestRemove( textureId=%d observer=%p keepUnusedTexture=%d )\n",
+                textureId, observer, keepUnusedTexture);
 
   // Queue to remove.
   if(textureId != INVALID_TEXTURE_ID)
@@ -682,7 +683,7 @@ void TextureManager::RequestRemove(const TextureManager::TextureId textureId, Te
         RemoveTextureObserver(textureInfo, observer);
       }
 
-      mRemoveQueue.PushBack(textureId);
+      mRemoveQueue.PushBack(RemoveQueueElement(textureId, keepUnusedTexture));
 
       if(!mRemoveProcessorRegistered && Adaptor::IsAvailable())
       {
@@ -690,6 +691,17 @@ void TextureManager::RequestRemove(const TextureManager::TextureId textureId, Te
         Adaptor::Get().RegisterProcessorOnce(*this, true);
       }
     }
+  }
+}
+
+void TextureManager::RequestClearUnusedTextures()
+{
+  mClearUnusedTexturesRequested = true;
+
+  if(!mRemoveProcessorRegistered && Adaptor::IsAvailable())
+  {
+    mRemoveProcessorRegistered = true;
+    Adaptor::Get().RegisterProcessorOnce(*this, true);
   }
 }
 
@@ -706,7 +718,7 @@ void TextureManager::RequestRemoveExternalResourceByUrl(const std::string& url)
   }
 }
 
-void TextureManager::Remove(const TextureManager::TextureId textureId)
+void TextureManager::Remove(const TextureManager::TextureId textureId, bool keepUnusedTexture)
 {
   if(textureId != INVALID_TEXTURE_ID)
   {
@@ -732,7 +744,7 @@ void TextureManager::Remove(const TextureManager::TextureId textureId)
                     GET_LOAD_STATE_STRING(textureInfo.loadState));
 
       // Remove textureId in CacheManager. Now, textureInfo is invalidate.
-      mTextureCacheManager.RemoveCache(textureInfo);
+      mTextureCacheManager.RemoveCache(textureInfo, keepUnusedTexture);
 
       // Remove maskTextureId in CacheManager
       if(maskTextureId != INVALID_TEXTURE_ID)
@@ -746,7 +758,7 @@ void TextureManager::Remove(const TextureManager::TextureId textureId)
                         "TextureManager::Remove mask texture( maskTextureId=%d ) cacheIndex:%d, loadState=%s\n",
                         maskTextureId, maskCacheIndex.GetIndex(), GET_LOAD_STATE_STRING(maskTextureInfo.loadState));
 
-          mTextureCacheManager.RemoveCache(maskTextureInfo);
+          mTextureCacheManager.RemoveCache(maskTextureInfo, keepUnusedTexture);
         }
       }
     }
@@ -761,11 +773,11 @@ void TextureManager::ProcessRemoveQueue()
   { oss << "[" << mRemoveQueue.Count() << ", " << mRemoveExternalQueue.size() << "]"; });
 
   // Note that RemoveQueue is not be changed during Remove().
-  for(auto&& textureId : mRemoveQueue)
+  for(auto&& removeElement : mRemoveQueue)
   {
-    if(textureId != INVALID_TEXTURE_ID)
+    if(removeElement.textureId != INVALID_TEXTURE_ID)
     {
-      Remove(textureId);
+      Remove(removeElement.textureId, removeElement.keepUnusedTexture);
     }
   }
 
@@ -783,6 +795,12 @@ void TextureManager::ProcessRemoveQueue()
 
   mRemoveQueue.Clear();
   mRemoveExternalQueue.clear();
+
+  if(mClearUnusedTexturesRequested)
+  {
+    mClearUnusedTexturesRequested = false;
+    mTextureCacheManager.ClearUnusedCache();
+  }
 
   DALI_TRACE_END(gTraceFilter, "DALI_TEXTURE_MANAGER_PROCESS_REMOVE_QUEUE");
 }
@@ -1008,7 +1026,7 @@ void TextureManager::AsyncLoadComplete(const TextureManager::TextureId textureId
     }
     else
     {
-      Remove(textureInfo.textureId);
+      Remove(textureInfo.textureId, false);
     }
   }
 }

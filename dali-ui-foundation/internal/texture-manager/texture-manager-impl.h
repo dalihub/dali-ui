@@ -430,8 +430,14 @@ public: // Remove Request API
    *
    * @param[in] textureId The ID of the Texture to remove.
    * @param[in] textureObserver The texture observer.
+   * @param[in] keepUnusedTexture Whether to keep the texture after its reference count becomes zero.
    */
-  void RequestRemove(const TextureManager::TextureId textureId, TextureUploadObserver* textureObserver);
+  void RequestRemove(const TextureManager::TextureId textureId, TextureUploadObserver* textureObserver, bool keepUnusedTexture = false);
+
+  /**
+   * @brief Request removal of all unused textures retained by ReleasePolicy::NEVER.
+   */
+  void RequestClearUnusedTextures();
 
   /**
    * @brief Request to remove a ExternalTexture or EncodedImageBuffer from the TextureManager.
@@ -451,8 +457,9 @@ private:
    * occurrence of a Texture will cause its removal internally.
    *
    * @param[in] textureId The ID of the Texture to remove.
+   * @param[in] keepUnusedTexture Whether to keep the texture after its reference count becomes zero.
    */
-  void Remove(const TextureManager::TextureId textureId);
+  void Remove(const TextureManager::TextureId textureId, bool keepUnusedTexture);
 
   /**
    * @brief Initiate remove of texture queued.
@@ -621,7 +628,19 @@ private:
    */
   void ObserverDestroyed(TextureUploadObserver* observer);
 
-private:                                    // Member Variables:
+private: // Member Variables:
+  struct RemoveQueueElement
+  {
+    RemoveQueueElement(TextureManager::TextureId textureId, bool keepUnusedTexture)
+    : textureId(textureId),
+      keepUnusedTexture(keepUnusedTexture)
+    {
+    }
+
+    TextureManager::TextureId textureId;
+    bool                      keepUnusedTexture;
+  };
+
   TextureCacheManager mTextureCacheManager; ///< Manager the life-cycle and caching of Textures
 
   std::unique_ptr<TextureAsyncLoadingHelper>
@@ -631,13 +650,14 @@ private:                                    // Member Variables:
   TextureManager::TextureId
     mLoadingQueueTextureId; ///< TextureId when it is loading. it causes Load Textures to be queued.
 
-  Dali::Vector<TextureManager::TextureId>
+  Dali::Vector<RemoveQueueElement>
                          mRemoveQueue;         ///< Queue of textures to remove at PostProcess. It will be cleared after PostProcess.
   std::vector<VisualUrl> mRemoveExternalQueue; ///< Queue of external resources to remove at PostProcess. It will be
                                                ///< cleared after PostProcess.
 
-  const bool mLoadYuvPlanes;             ///< A global flag to specify if the image should be loaded as yuv planes
-  bool       mRemoveProcessorRegistered; ///< Flag if remove processor registered or not.
+  const bool mLoadYuvPlanes;                ///< A global flag to specify if the image should be loaded as yuv planes
+  bool       mRemoveProcessorRegistered;    ///< Flag if remove processor registered or not.
+  bool       mClearUnusedTexturesRequested; ///< Flag if unused retained textures should be cleared at PostProcess.
 };
 
 } // namespace Internal

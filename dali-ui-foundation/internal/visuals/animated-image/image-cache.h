@@ -120,7 +120,7 @@ public:
   /**
    * @brief Clears animated image cache and remove loaded textures.
    */
-  virtual void ClearCache() = 0;
+  virtual void ClearCache(bool keepUnusedTexture = false) = 0;
 
   /**
    * @brief Set default interval(ms) between each frame.

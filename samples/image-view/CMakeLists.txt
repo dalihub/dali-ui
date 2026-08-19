@@ -23,6 +23,7 @@ SET(IMAGE_VIEW_SAMPLES
   image-sampling-desired-size.example
   image-view-sizing.example
   image-loading-policy.example
+  image-cache-measurement.example
   image-view-svg.example
   animated-image-view.example
   lottie-animation-view.example
@@ -42,6 +43,7 @@ SET(IMAGE_VIEW_SOURCES
   image-sampling-desired-size-example.cpp
   image-view-sizing-example.cpp
   image-loading-policy-example.cpp
+  image-cache-measurement-example.cpp
   image-view-svg-example.cpp
   animated-image-view-example.cpp
   lottie-animation-view-example.cpp

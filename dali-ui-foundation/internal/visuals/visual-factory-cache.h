@@ -392,6 +392,11 @@ public:
   SvgLoader& GetSvgLoader();
 
   /**
+   * @brief Request removal of all unused textures retained by ReleasePolicy::NEVER.
+   */
+  void RequestClearUnusedTextures();
+
+  /**
    * Get the vector animation manager.
    * @return A reference to the vector animation manager.
    */

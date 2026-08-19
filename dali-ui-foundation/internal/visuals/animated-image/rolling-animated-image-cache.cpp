@@ -289,11 +289,11 @@ TextureManager::TextureId RollingAnimatedImageCache::GetCachedTextureId(uint32_t
                                                                       : TextureManager::INVALID_TEXTURE_ID;
 }
 
-void RollingAnimatedImageCache::PopFrontCache()
+void RollingAnimatedImageCache::PopFrontCache(bool keepUnusedTexture)
 {
   ImageFrame imageFrame = mQueue.PopFront();
 
-  mTextureManager.RequestRemove(mTextureIds[imageFrame.mFrameNumber], this);
+  mTextureManager.RequestRemove(mTextureIds[imageFrame.mFrameNumber], this, keepUnusedTexture);
   mTextureIds[imageFrame.mFrameNumber] = TextureManager::INVALID_TEXTURE_ID;
 
   if(mMaskingData && mMaskingData->mAlphaMaskId != TextureManager::INVALID_TEXTURE_ID)
@@ -305,13 +305,13 @@ void RollingAnimatedImageCache::PopFrontCache()
   }
 }
 
-void RollingAnimatedImageCache::ClearCache()
+void RollingAnimatedImageCache::ClearCache(bool keepUnusedTexture)
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
     while(!mQueue.IsEmpty())
     {
-      PopFrontCache();
+      PopFrontCache(keepUnusedTexture);
     }
   }
   mLoadWaitingQueue.clear();

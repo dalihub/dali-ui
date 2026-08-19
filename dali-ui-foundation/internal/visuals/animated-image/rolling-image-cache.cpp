@@ -34,7 +34,7 @@ Debug::Filter* gAnimImgLogFilter = Debug::Filter::New(Debug::NoLogging, false, "
     std::ostringstream oss;                                                                                      \
     oss.imbue(std::locale::classic());                                                                           \
     oss << "Size:" << mQueue.Count() << " [ ";                                                                   \
-    for(uint32_t _i = 0u; _i < mQueue.Count(); ++_i)                                                            \
+    for(uint32_t _i = 0u; _i < mQueue.Count(); ++_i)                                                             \
     {                                                                                                            \
       oss << _i << "={ tex:" << mImageUrls[mQueue[_i].mUrlIndex].mTextureId << " urlId:" << mQueue[_i].mUrlIndex \
           << " rdy:" << (mQueue[_i].mReady ? "T" : "F") << "}, ";                                                \
@@ -195,11 +195,11 @@ TextureManager::TextureId RollingImageCache::GetCachedTextureId(uint32_t index) 
   return mImageUrls[mQueue[index].mUrlIndex].mTextureId;
 }
 
-void RollingImageCache::PopFrontCache()
+void RollingImageCache::PopFrontCache(bool keepUnusedTexture)
 {
   ImageFrame imageFrame = mQueue.PopFront();
 
-  mTextureManager.RequestRemove(mImageUrls[imageFrame.mUrlIndex].mTextureId, this);
+  mTextureManager.RequestRemove(mImageUrls[imageFrame.mUrlIndex].mTextureId, this, keepUnusedTexture);
   mImageUrls[imageFrame.mUrlIndex].mTextureId = TextureManager::INVALID_TEXTURE_ID;
 
   if(mMaskingData && mMaskingData->mAlphaMaskId != TextureManager::INVALID_TEXTURE_ID)
@@ -211,13 +211,13 @@ void RollingImageCache::PopFrontCache()
   }
 }
 
-void RollingImageCache::ClearCache()
+void RollingImageCache::ClearCache(bool keepUnusedTexture)
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
     while(!mQueue.IsEmpty())
     {
-      PopFrontCache();
+      PopFrontCache(keepUnusedTexture);
     }
   }
   mLoadState = TextureManager::LoadState::NOT_STARTED;

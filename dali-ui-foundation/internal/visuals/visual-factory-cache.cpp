@@ -263,6 +263,13 @@ SvgLoader& VisualFactoryCache::GetSvgLoader()
   return mSvgLoader;
 }
 
+void VisualFactoryCache::RequestClearUnusedTextures()
+{
+  mTextureManager.RequestClearUnusedTextures();
+  mNPatchLoader.RequestClearUnusedTextures();
+  mSvgLoader.RequestClearUnusedTextures();
+}
+
 VectorAnimationManager& VisualFactoryCache::GetVectorAnimationManager()
 {
   if(!mVectorAnimationManager)

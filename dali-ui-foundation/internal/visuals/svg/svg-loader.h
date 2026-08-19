@@ -24,6 +24,8 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/rendering/texture-set.h>
 #include <string>
+#include <utility>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader-observer.h>
@@ -133,8 +135,9 @@ public:
    *
    * @param[in] loadId cache data id
    * @param[in] svgObserver The SvgVisual that requested loading.
+   * @param[in] keepUnusedTexture Whether to keep the texture after its reference count becomes zero.
    */
-  void RequestLoadRemove(SvgLoadId loadId, SvgLoaderObserver* svgObserver);
+  void RequestLoadRemove(SvgLoadId loadId, SvgLoaderObserver* svgObserver, bool keepUnusedTexture = false);
 
   /**
    * @brief Request to remove a texture matching id.
@@ -144,8 +147,14 @@ public:
    * @param[in] svgObserver The SvgVisual that requested loading.
    * @param[in] removalSynchronously Whether the removal should be done synchronously, or not.
    *                                 It will be true when we want to ignore unused rasterize task.
+   * @param[in] keepUnusedTexture Whether to keep the texture after its reference count becomes zero.
    */
-  void RequestRasterizeRemove(SvgRasterizeId rasterizeId, SvgLoaderObserver* svgObserver, bool removalSynchronously);
+  void RequestRasterizeRemove(SvgRasterizeId rasterizeId, SvgLoaderObserver* svgObserver, bool removalSynchronously, bool keepUnusedTexture = false);
+
+  /**
+   * @brief Request removal of all unused SVG resources retained by ReleasePolicy::NEVER.
+   */
+  void RequestClearUnusedTextures();
 
   /**
    * @brief Get the VectorImageRenderer of matching loadId.
@@ -190,7 +199,7 @@ private:
    *
    * @param[in] loadId cache data id
    */
-  void RemoveLoad(SvgLoadId loadId);
+  void RemoveLoad(SvgLoadId loadId, bool keepUnusedTexture = false);
 
   /**
    * @brief Remove a texture matching id.
@@ -200,7 +209,13 @@ private:
    *
    * @param[in] rasterizeId cache data id
    */
-  void RemoveRasterize(SvgRasterizeId rasterizeId);
+  void RemoveRasterize(SvgRasterizeId rasterizeId, bool keepUnusedTexture = false);
+
+  void RemoveUnusedLoad(SvgCacheIndex cacheIndex);
+
+  void RemoveUnusedRasterize(SvgCacheIndex cacheIndex);
+
+  void ClearUnusedTextures();
 
 public:
   /**
@@ -215,7 +230,8 @@ public:
       mLoadState(LoadState::NOT_STARTED),
       mVectorImageRenderer(Dali::VectorImageRenderer::New()),
       mObservers(),
-      mReferenceCount(1u)
+      mReferenceCount(1u),
+      mKeepUnusedTexture(false)
     {
     }
     ~SvgLoadInfo()
@@ -229,11 +245,13 @@ public:
       mLoadState(info.mLoadState),
       mVectorImageRenderer(std::move(info.mVectorImageRenderer)),
       mObservers(std::move(info.mObservers)),
-      mReferenceCount(info.mReferenceCount)
+      mReferenceCount(info.mReferenceCount),
+      mKeepUnusedTexture(info.mKeepUnusedTexture)
     {
       info.mTask.Reset();
       info.mVectorImageRenderer.Reset();
-      info.mReferenceCount = 0;
+      info.mReferenceCount    = 0;
+      info.mKeepUnusedTexture = false;
     }
     SvgLoadInfo& operator=(SvgLoadInfo&& info) noexcept // move operator
     {
@@ -249,11 +267,13 @@ public:
 
         mObservers = std::move(info.mObservers);
 
-        mReferenceCount = info.mReferenceCount;
+        mReferenceCount    = info.mReferenceCount;
+        mKeepUnusedTexture = info.mKeepUnusedTexture;
 
         info.mTask.Reset();
         info.mVectorImageRenderer.Reset();
-        info.mReferenceCount = 0;
+        info.mReferenceCount    = 0;
+        info.mKeepUnusedTexture = false;
       }
       return *this;
     }
@@ -274,7 +294,8 @@ public:
 
     ObserverContainer mObservers;
 
-    int32_t mReferenceCount; ///< The number of Svg visuals that use this data.
+    int32_t mReferenceCount;    ///< The number of Svg visuals that use this data.
+    bool    mKeepUnusedTexture; ///< True if the unused resource should be kept until explicitly cleared.
   };
 
   /**
@@ -298,7 +319,8 @@ public:
       mRasterizeState(RasterizeState::NOT_STARTED),
       mTextureSet(),
       mObservers(),
-      mReferenceCount(1u)
+      mReferenceCount(1u),
+      mKeepUnusedTexture(false)
     {
     }
     ~SvgRasterizeInfo()
@@ -316,11 +338,13 @@ public:
       mRasterizeState(info.mRasterizeState),
       mTextureSet(std::move(info.mTextureSet)),
       mObservers(std::move(info.mObservers)),
-      mReferenceCount(info.mReferenceCount)
+      mReferenceCount(info.mReferenceCount),
+      mKeepUnusedTexture(info.mKeepUnusedTexture)
     {
       info.mTask.Reset();
       info.mTextureSet.Reset();
-      info.mReferenceCount = 0;
+      info.mReferenceCount    = 0;
+      info.mKeepUnusedTexture = false;
     }
     SvgRasterizeInfo& operator=(SvgRasterizeInfo&& info) noexcept // move operator
     {
@@ -341,11 +365,13 @@ public:
         mTextureSet     = std::move(info.mTextureSet);
         mObservers      = std::move(info.mObservers);
 
-        mReferenceCount = info.mReferenceCount;
+        mReferenceCount    = info.mReferenceCount;
+        mKeepUnusedTexture = info.mKeepUnusedTexture;
 
         info.mTask.Reset();
         info.mTextureSet.Reset();
-        info.mReferenceCount = 0;
+        info.mReferenceCount    = 0;
+        info.mKeepUnusedTexture = false;
       }
       return *this;
     }
@@ -371,7 +397,8 @@ public:
     Dali::TextureSet  mTextureSet; ///< rasterized result at index 0.
     ObserverContainer mObservers;
 
-    int32_t mReferenceCount; ///< The number of Svg visuals that use this data.
+    int32_t mReferenceCount;    ///< The number of Svg visuals that use this data.
+    bool    mKeepUnusedTexture; ///< True if the unused texture should be kept until explicitly cleared.
   };
 
 private: ///< Internal Methods for load
@@ -466,12 +493,13 @@ private:
   SvgRasterizeId
     mRasterizingQueueRasterizeId; ///< SvgRasterizeId when it is rasterizing. it causes Rasterize SVG to be queued.
 
-  std::vector<SvgLoadId> mLoadRemoveQueue{};           ///< Queue of SvgLoader::SvgLoadInfo to remove at PostProcess. It will be
-                                                       ///< cleared after PostProcess.
-  std::vector<SvgRasterizeId> mRasterizeRemoveQueue{}; ///< Queue of SvgLoader::SvgRasterizeInfo to remove at
-                                                       ///< PostProcess. It will be cleared after PostProcess.
+  std::vector<std::pair<SvgLoadId, bool>> mLoadRemoveQueue{};           ///< Queue of SvgLoader::SvgLoadInfo to remove at PostProcess. It will be
+                                                                        ///< cleared after PostProcess.
+  std::vector<std::pair<SvgRasterizeId, bool>> mRasterizeRemoveQueue{}; ///< Queue of SvgLoader::SvgRasterizeInfo to remove at
+                                                                        ///< PostProcess. It will be cleared after PostProcess.
 
-  bool mRemoveProcessorRegistered : 1; ///< Flag if remove processor registered or not.
+  bool mRemoveProcessorRegistered : 1;    ///< Flag if remove processor registered or not.
+  bool mClearUnusedTexturesRequested : 1; ///< Flag if unused retained resources should be cleared at PostProcess.
 };
 
 } // namespace Internal

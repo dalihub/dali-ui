@@ -123,7 +123,8 @@ SvgLoader::SvgLoader()
   mCurrentSvgRasterizeId(0),
   mLoadingQueueLoadId(SvgLoader::INVALID_SVG_LOAD_ID),
   mRasterizingQueueRasterizeId(SvgLoader::INVALID_SVG_RASTERIZE_ID),
-  mRemoveProcessorRegistered(false)
+  mRemoveProcessorRegistered(false),
+  mClearUnusedTexturesRequested(false)
 {
 }
 
@@ -384,7 +385,7 @@ SvgLoader::SvgRasterizeId SvgLoader::Rasterize(SvgLoadId loadId, uint32_t width,
   return rasterizeId;
 }
 
-void SvgLoader::RequestLoadRemove(SvgLoader::SvgLoadId loadId, SvgLoaderObserver* svgObserver)
+void SvgLoader::RequestLoadRemove(SvgLoader::SvgLoadId loadId, SvgLoaderObserver* svgObserver, bool keepUnusedTexture)
 {
   // Remove observer first
   auto cacheIndex = GetCacheIndexFromLoadCacheById(loadId);
@@ -396,7 +397,7 @@ void SvgLoader::RequestLoadRemove(SvgLoader::SvgLoadId loadId, SvgLoaderObserver
 
   auto& loadInfo = mLoadCache[cacheIndex];
   RemoveLoadObserver(loadInfo, svgObserver);
-  mLoadRemoveQueue.push_back(loadId);
+  mLoadRemoveQueue.push_back({loadId, keepUnusedTexture});
 
   if(!mRemoveProcessorRegistered && Adaptor::IsAvailable())
   {
@@ -406,7 +407,7 @@ void SvgLoader::RequestLoadRemove(SvgLoader::SvgLoadId loadId, SvgLoaderObserver
 }
 
 void SvgLoader::RequestRasterizeRemove(SvgLoader::SvgRasterizeId rasterizeId, SvgLoaderObserver* svgObserver,
-                                       bool removalSynchronously)
+                                       bool removalSynchronously, bool keepUnusedTexture)
 {
   // Remove observer first
   auto cacheIndex = GetCacheIndexFromRasterizeCacheById(rasterizeId);
@@ -423,17 +424,28 @@ void SvgLoader::RequestRasterizeRemove(SvgLoader::SvgRasterizeId rasterizeId, Sv
   if(removalSynchronously && (mLoadingQueueLoadId == SvgLoader::INVALID_SVG_LOAD_ID &&
                               mRasterizingQueueRasterizeId == SvgLoader::INVALID_SVG_RASTERIZE_ID))
   {
-    RemoveRasterize(rasterizeId);
+    RemoveRasterize(rasterizeId, keepUnusedTexture);
   }
   else
   {
-    mRasterizeRemoveQueue.push_back(rasterizeId);
+    mRasterizeRemoveQueue.push_back({rasterizeId, keepUnusedTexture});
 
     if(!mRemoveProcessorRegistered && Adaptor::IsAvailable())
     {
       mRemoveProcessorRegistered = true;
       Adaptor::Get().RegisterProcessorOnce(*this, true);
     }
+  }
+}
+
+void SvgLoader::RequestClearUnusedTextures()
+{
+  mClearUnusedTexturesRequested = true;
+
+  if(!mRemoveProcessorRegistered && Adaptor::IsAvailable())
+  {
+    mRemoveProcessorRegistered = true;
+    Adaptor::Get().RegisterProcessorOnce(*this, true);
   }
 }
 
@@ -459,15 +471,21 @@ void SvgLoader::Process(bool postProcessor)
 
   for(auto& iter : mRasterizeRemoveQueue)
   {
-    RemoveRasterize(iter);
+    RemoveRasterize(iter.first, iter.second);
   }
   mRasterizeRemoveQueue.clear();
 
   for(auto& iter : mLoadRemoveQueue)
   {
-    RemoveLoad(iter);
+    RemoveLoad(iter.first, iter.second);
   }
   mLoadRemoveQueue.clear();
+
+  if(mClearUnusedTexturesRequested)
+  {
+    mClearUnusedTexturesRequested = false;
+    ClearUnusedTextures();
+  }
 
   DALI_TRACE_END(gTraceFilter, "DALI_SVG_LOADER_PROCESS_REMOVE_QUEUE");
 }
@@ -535,7 +553,7 @@ SvgLoader::SvgCacheIndex SvgLoader::FindCacheIndexFromRasterizeCache(const SvgLo
   return SvgLoader::INVALID_SVG_CACHE_INDEX;
 }
 
-void SvgLoader::RemoveLoad(SvgLoader::SvgLoadId loadId)
+void SvgLoader::RemoveLoad(SvgLoader::SvgLoadId loadId, bool keepUnusedTexture)
 {
   auto cacheIndex = GetCacheIndexFromLoadCacheById(loadId);
   if(cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
@@ -544,6 +562,7 @@ void SvgLoader::RemoveLoad(SvgLoader::SvgLoadId loadId)
 
     auto& loadInfo(mLoadCache[cacheIndex]);
 
+    loadInfo.mKeepUnusedTexture |= keepUnusedTexture;
     --loadInfo.mReferenceCount;
     DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General,
                   "SvgLoader::RemoveLoad( url=%s ) cached index:%d loadId@%d, state:%s, refCount=%d\n",
@@ -552,42 +571,16 @@ void SvgLoader::RemoveLoad(SvgLoader::SvgLoadId loadId)
 
     if(loadInfo.mReferenceCount <= 0)
     {
-      if(loadInfo.mLoadState == LoadState::LOADING)
+      loadInfo.mReferenceCount = 0;
+      if(!loadInfo.mKeepUnusedTexture)
       {
-        // Keep the load info in the cache, but mark it as cancelled.
-        // It will be removed when async load completed.
-        loadInfo.mLoadState = LoadState::CANCELLED;
-      }
-      else
-      {
-        if(loadInfo.mImageUrl.IsBufferResource())
-        {
-          // Unreference image buffer url from texture manager.
-          if(DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
-          {
-            auto& textureManager = mFactoryCache->GetTextureManager();
-            textureManager.RemoveEncodedImageBuffer(loadInfo.mImageUrl);
-          }
-        }
-
-        // Remove the load info from the cache.
-        // Swap last data of cacheContainer.
-        if(static_cast<std::size_t>(cacheIndex + 1) < mLoadCache.size())
-        {
-          // Swap the value between current data and last data.
-          std::swap(mLoadCache[cacheIndex], mLoadCache.back());
-        }
-
-        // Now we can assume that latest data should be removed. pop_back.
-        mLoadCache.pop_back();
-
-        // Now, loadInfo is invalid
+        RemoveUnusedLoad(cacheIndex);
       }
     }
   }
 }
 
-void SvgLoader::RemoveRasterize(SvgLoader::SvgRasterizeId rasterizeId)
+void SvgLoader::RemoveRasterize(SvgLoader::SvgRasterizeId rasterizeId, bool keepUnusedTexture)
 {
   auto cacheIndex = GetCacheIndexFromRasterizeCacheById(rasterizeId);
   if(cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
@@ -596,6 +589,7 @@ void SvgLoader::RemoveRasterize(SvgLoader::SvgRasterizeId rasterizeId)
 
     auto& rasterizeInfo(mRasterizeCache[cacheIndex]);
 
+    rasterizeInfo.mKeepUnusedTexture |= keepUnusedTexture;
     --rasterizeInfo.mReferenceCount;
     DALI_LOG_INFO(
       gSvgLoaderLogFilter, Debug::General,
@@ -605,28 +599,96 @@ void SvgLoader::RemoveRasterize(SvgLoader::SvgRasterizeId rasterizeId)
 
     if(rasterizeInfo.mReferenceCount <= 0)
     {
-      // Reduce the reference count of LoadId first.
-      RemoveLoad(rasterizeInfo.mLoadId);
-
-      if(rasterizeInfo.mRasterizeState == RasterizeState::RASTERIZING && rasterizeInfo.mTask)
+      rasterizeInfo.mReferenceCount = 0;
+      if(!rasterizeInfo.mKeepUnusedTexture)
       {
-        // Cancel rasterize task immediatly!
-        Dali::AsyncTaskManager::Get().RemoveTask(rasterizeInfo.mTask);
+        RemoveUnusedRasterize(cacheIndex);
       }
-
-      // Remove the rasterize info from the cache.
-      // Swap last data of cacheContainer.
-      if(static_cast<std::size_t>(cacheIndex + 1) < mRasterizeCache.size())
-      {
-        // Swap the value between current data and last data.
-        std::swap(mRasterizeCache[cacheIndex], mRasterizeCache.back());
-      }
-
-      // Now we can assume that latest data should be removed. pop_back.
-      mRasterizeCache.pop_back();
-
-      // Now, rasterize is invalid
     }
+  }
+}
+
+void SvgLoader::RemoveUnusedLoad(SvgLoader::SvgCacheIndex cacheIndex)
+{
+  DALI_ASSERT_ALWAYS(static_cast<size_t>(cacheIndex) < mLoadCache.size() && "Invalid cache index");
+
+  auto& loadInfo(mLoadCache[cacheIndex]);
+  if(loadInfo.mLoadState == LoadState::LOADING)
+  {
+    // Keep the load info in the cache, but mark it as cancelled.
+    // It will be removed when async load completed.
+    loadInfo.mLoadState = LoadState::CANCELLED;
+    return;
+  }
+
+  if(loadInfo.mImageUrl.IsBufferResource())
+  {
+    // Unreference image buffer url from texture manager.
+    if(DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
+    {
+      auto& textureManager = mFactoryCache->GetTextureManager();
+      textureManager.RemoveEncodedImageBuffer(loadInfo.mImageUrl);
+    }
+  }
+
+  // Remove the load info from the cache.
+  // Swap last data of cacheContainer.
+  if(static_cast<std::size_t>(cacheIndex + 1) < mLoadCache.size())
+  {
+    std::swap(mLoadCache[cacheIndex], mLoadCache.back());
+  }
+  mLoadCache.pop_back();
+}
+
+void SvgLoader::RemoveUnusedRasterize(SvgLoader::SvgCacheIndex cacheIndex)
+{
+  DALI_ASSERT_ALWAYS(static_cast<size_t>(cacheIndex) < mRasterizeCache.size() && "Invalid cache index");
+
+  auto& rasterizeInfo(mRasterizeCache[cacheIndex]);
+
+  // Reduce the reference count held by the rasterize entry first.
+  RemoveLoad(rasterizeInfo.mLoadId);
+
+  if(rasterizeInfo.mRasterizeState == RasterizeState::RASTERIZING && rasterizeInfo.mTask)
+  {
+    Dali::AsyncTaskManager::Get().RemoveTask(rasterizeInfo.mTask);
+  }
+
+  if(static_cast<std::size_t>(cacheIndex + 1) < mRasterizeCache.size())
+  {
+    std::swap(mRasterizeCache[cacheIndex], mRasterizeCache.back());
+  }
+  mRasterizeCache.pop_back();
+}
+
+void SvgLoader::ClearUnusedTextures()
+{
+  for(std::size_t index = 0u; index < mRasterizeCache.size();)
+  {
+    auto& rasterizeInfo = mRasterizeCache[index];
+    if(rasterizeInfo.mReferenceCount == 0 && rasterizeInfo.mKeepUnusedTexture)
+    {
+      rasterizeInfo.mKeepUnusedTexture = false;
+      RemoveUnusedRasterize(static_cast<SvgCacheIndex>(index));
+      continue;
+    }
+    ++index;
+  }
+
+  for(std::size_t index = 0u; index < mLoadCache.size();)
+  {
+    auto& loadInfo = mLoadCache[index];
+    if(loadInfo.mReferenceCount == 0 && loadInfo.mKeepUnusedTexture)
+    {
+      const auto cacheSize        = mLoadCache.size();
+      loadInfo.mKeepUnusedTexture = false;
+      RemoveUnusedLoad(static_cast<SvgCacheIndex>(index));
+      if(cacheSize != mLoadCache.size())
+      {
+        continue;
+      }
+    }
+    ++index;
   }
 }
 

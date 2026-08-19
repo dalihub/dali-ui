@@ -89,7 +89,7 @@ public:
   /**
    * @copydoc Internal::ImageCache::ClearCache()
    */
-  void ClearCache() override;
+  void ClearCache(bool keepUnusedTexture = false) override;
 
 private:
   /**
@@ -123,7 +123,7 @@ private:
   /**
    * @brief Pop front entity of Cache.
    */
-  void PopFrontCache();
+  void PopFrontCache(bool keepUnusedTexture = false);
 
 protected:
   /**

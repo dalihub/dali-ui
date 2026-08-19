@@ -80,7 +80,7 @@ public:
   /**
    * @copydoc Internal::ImageCache::ClearCache()
    */
-  void ClearCache() override;
+  void ClearCache(bool keepUnusedTexture = false) override;
 
 private:
   /**

@@ -499,6 +499,14 @@ Internal::SvgLoader& VisualFactory::GetSvgLoader()
   return GetFactoryCache().GetSvgLoader();
 }
 
+void VisualFactory::RequestClearUnusedTextures()
+{
+  if(mFactoryCache)
+  {
+    mFactoryCache->RequestClearUnusedTextures();
+  }
+}
+
 Internal::VisualFactoryCache& VisualFactory::GetFactoryCache()
 {
   if(!mFactoryCache)
