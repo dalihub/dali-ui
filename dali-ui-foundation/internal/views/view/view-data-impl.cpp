@@ -806,6 +806,51 @@ Dali::Integration::Accessibility::RelationType ToIntegrationRelationType(Dali::U
   return static_cast<Dali::Integration::Accessibility::RelationType>(relation);
 }
 
+/// Field-wise equality for the four per-child layout params value types, used by
+/// ViewDataImpl::SetLayoutParams to drop a write that changes nothing.
+///
+/// Defined here rather than as a public operator== on the params types: those are
+/// pimpl value types in the public API, and adding operators to them is an API
+/// change this does not need. Every public field is compared, so an addition to
+/// any params type has to be mirrored here.
+///
+/// Floats go through FloatEqual, matching how the property setters further down
+/// this file compare their float inputs.
+bool IsSameLayoutParams(const AbsoluteLayoutParams& lhs, const AbsoluteLayoutParams& rhs)
+{
+  const LayoutRect lhsBounds = lhs.GetBounds();
+  const LayoutRect rhsBounds = rhs.GetBounds();
+  return FloatEqual(lhsBounds.x, rhsBounds.x) &&
+         FloatEqual(lhsBounds.y, rhsBounds.y) &&
+         FloatEqual(lhsBounds.width, rhsBounds.width) &&
+         FloatEqual(lhsBounds.height, rhsBounds.height) &&
+         lhs.GetFlags() == rhs.GetFlags();
+}
+
+bool IsSameLayoutParams(const FlexLayoutParams& lhs, const FlexLayoutParams& rhs)
+{
+  return FloatEqual(lhs.GetFlexGrow(), rhs.GetFlexGrow()) &&
+         FloatEqual(lhs.GetFlexShrink(), rhs.GetFlexShrink()) &&
+         FloatEqual(lhs.GetFlexBasis(), rhs.GetFlexBasis()) &&
+         lhs.GetAlignSelf() == rhs.GetAlignSelf();
+}
+
+bool IsSameLayoutParams(const GridLayoutParams& lhs, const GridLayoutParams& rhs)
+{
+  return lhs.GetRow() == rhs.GetRow() &&
+         lhs.GetColumn() == rhs.GetColumn() &&
+         lhs.GetRowSpan() == rhs.GetRowSpan() &&
+         lhs.GetColumnSpan() == rhs.GetColumnSpan() &&
+         lhs.GetHorizontalAlignment() == rhs.GetHorizontalAlignment() &&
+         lhs.GetVerticalAlignment() == rhs.GetVerticalAlignment();
+}
+
+bool IsSameLayoutParams(const StackLayoutParams& lhs, const StackLayoutParams& rhs)
+{
+  return FloatEqual(lhs.GetWeight(), rhs.GetWeight()) &&
+         lhs.GetAlignment() == rhs.GetAlignment();
+}
+
 /// How many Measure()/Arrange() passes -- on ANY view -- are currently on the stack.
 ///
 /// Maintained by MeasurePassGuard / ArrangePassGuard below, and read by
@@ -3660,6 +3705,18 @@ bool ViewDataImpl::HasLayoutCallback() const
 
 void ViewDataImpl::SetLayoutParams(const AbsoluteLayoutParams& params)
 {
+  // Value guard, as on the property setters: a re-write of the params already in
+  // place has nothing to retract and nothing to schedule. Motivating recurrence:
+  // ScrollBarImpl::SetVBarBounds re-writes its bar's AbsoluteLayoutParams on every
+  // bar position/size update, and today only that function's own hand-rolled 0.01f
+  // epsilon test -- commented "avoid infinite relayout loop" -- stops the write from
+  // re-arming layout every pass. That check belongs on this side too.
+  AbsoluteLayoutParams current;
+  if(TryGetLayoutParams(current) && IsSameLayoutParams(current, params))
+  {
+    return;
+  }
+
   IntrusivePtr<TraitObject> object(new AbsoluteLayoutParamsImpl(params));
   SetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, object);
   InvalidateMeasure();
@@ -3667,6 +3724,12 @@ void ViewDataImpl::SetLayoutParams(const AbsoluteLayoutParams& params)
 
 void ViewDataImpl::SetLayoutParams(const FlexLayoutParams& params)
 {
+  FlexLayoutParams current;
+  if(TryGetLayoutParams(current) && IsSameLayoutParams(current, params))
+  {
+    return;
+  }
+
   IntrusivePtr<TraitObject> object(new FlexLayoutParamsImpl(params));
   SetTrait(Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, object);
   InvalidateMeasure();
@@ -3674,6 +3737,12 @@ void ViewDataImpl::SetLayoutParams(const FlexLayoutParams& params)
 
 void ViewDataImpl::SetLayoutParams(const GridLayoutParams& params)
 {
+  GridLayoutParams current;
+  if(TryGetLayoutParams(current) && IsSameLayoutParams(current, params))
+  {
+    return;
+  }
+
   IntrusivePtr<TraitObject> object(new GridLayoutParamsImpl(params));
   SetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, object);
   InvalidateMeasure();
@@ -3681,6 +3750,12 @@ void ViewDataImpl::SetLayoutParams(const GridLayoutParams& params)
 
 void ViewDataImpl::SetLayoutParams(const StackLayoutParams& params)
 {
+  StackLayoutParams current;
+  if(TryGetLayoutParams(current) && IsSameLayoutParams(current, params))
+  {
+    return;
+  }
+
   IntrusivePtr<TraitObject> object(new StackLayoutParamsImpl(params));
   SetTrait(Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, object);
   InvalidateMeasure();
@@ -5374,9 +5449,28 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
       auto it = std::find(mChildren.begin(), mChildren.end(), view);
       if(it != mChildren.end())
       {
-        newChildren.PushBack(std::move(*it));
+        // Copied rather than moved out of mChildren, so mChildren still holds the
+        // PREVIOUS order for the comparison below. The move-assignment further
+        // down releases the old container anyway.
+        newChildren.PushBack(*it);
       }
     }
+  }
+
+  // dali-core already suppresses a reorder signal that moves nothing -- Actor's
+  // parent implementation only emits when the child's index actually changed --
+  // and that external invariant is load-bearing for this path's convergence
+  // (RecyclerViewImpl::OnArrange raises its scroll bar to the top on every
+  // arrange). This in-tree guard catches what dali-core cannot: a reorder among
+  // the NON-View actor children, which really does move an actor while leaving
+  // the View-only sequence rebuilt above identical to mChildren.
+  //
+  // Skipping the reorder tagging as well as the invalidation is intentional: no
+  // View moved, so no View's dispatch should be tagged REORDERED.
+  if(newChildren.Count() == mChildren.Count() &&
+     std::equal(newChildren.Begin(), newChildren.End(), mChildren.Begin()))
+  {
+    return;
   }
 
   mChildren = std::move(newChildren);
