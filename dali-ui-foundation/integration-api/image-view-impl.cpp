@@ -119,7 +119,9 @@ ImageViewImpl::~ImageViewImpl() = default;
 
 ImageViewImplPtr ImageViewImpl::New()
 {
-  return new ImageViewImpl();
+  ImageViewImplPtr impl(new ImageViewImpl());
+
+  return impl;
 }
 
 void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value)

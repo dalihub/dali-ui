@@ -208,6 +208,7 @@ RecyclerViewImpl::RecyclerViewImpl()
   mHorizontalScrollBarVisibility(ScrollBarVisibility::Auto),
   mOverScrollMode(OverScrollMode::ContentScrolls)
 {
+  SetArrangePolicy(ArrangePolicy::ALWAYS);
 }
 
 RecyclerViewImpl::~RecyclerViewImpl()
@@ -649,6 +650,8 @@ MeasuredSize RecyclerViewImpl::OnMeasure(float widthConstraint, float heightCons
   return MeasuredSize(width, height);
 }
 
+// ArrangePolicy::ALWAYS is required because this producer updates scrolling helpers,
+// actor geometry, edge effects and scroll bars even when its bounds are unchanged.
 LayoutRect RecyclerViewImpl::OnArrange(const LayoutRect& bounds)
 {
   const float newWidth    = std::max(0.0f, bounds.width);

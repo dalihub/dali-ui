@@ -33,6 +33,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layouts/layout-invalidation-generation.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-dispatcher.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -432,6 +433,13 @@ public:
     mAllLayoutRoots.erase(view);
     mPendingViews.erase(view);
 
+    // A pending registration may have just been dropped without ever being
+    // processed. Any view whose recorded propagation epoch says "the root I walked to
+    // is registered" could be pointing at that dropped entry, so end the epoch and
+    // make every such record re-walk. Unconditional rather than gated on "was it
+    // actually pending": this runs on view teardown, not per frame.
+    Internal::LayoutInvalidation::AdvanceGeneration();
+
     // Scrub EVERY active collector frame (nested passes each have their own),
     // closing the nested-rebind use-after-free: a view collected in an OUTER
     // frame and destroyed during an INNER pass must not remain a dangling raw
@@ -525,6 +533,13 @@ public:
     {
       mAllLayoutRoots.erase(dead);
       mPendingViews.erase(dead);
+    }
+    if(!deadEntries.empty())
+    {
+      // Same reason as in UnregisterView: pending registrations were dropped without
+      // being processed, so no recorded propagation epoch can be trusted to describe
+      // a live one.
+      Internal::LayoutInvalidation::AdvanceGeneration();
     }
 
     // A resize forces every root to recompute; ensure a layout pass runs even
@@ -860,6 +875,17 @@ private:
     viewsSet.swap(mPendingViews);
     mProcessingScheduled = false;
 
+    // Every pending registration has just been consumed, so no view's recorded
+    // propagation epoch describes a live registration any more: end the epoch here,
+    // at the swap, and the next invalidation on any view walks its ancestor chain and
+    // re-registers in full. Bumping anywhere later would leave a window in which a
+    // view could skip a walk whose registration this swap had already taken.
+    //
+    // An invalidation raised DURING the drain lands in the now-empty mPendingViews
+    // and is processed by the follow-up pass, exactly as before -- its record is
+    // written against the new epoch, which this drain will not consume.
+    Internal::LayoutInvalidation::AdvanceGeneration();
+
     // Default: window size (when root is directly under window or parent size unknown).
     auto    positionSize     = window.GetPositionSize();
     Vector2 windowSize       = Vector2(static_cast<float>(positionSize.width), static_cast<float>(positionSize.height));
@@ -1024,7 +1050,12 @@ private:
     bounds.width  = std::min(std::max(bounds.width, view->GetMinimumWidth() * s), view->GetMaximumWidth() * s);
     bounds.height = std::min(std::max(bounds.height, view->GetMinimumHeight() * s), view->GetMaximumHeight() * s);
 
-    view->Arrange(bounds);
+    // Use the internal root entry point rather than the public Arrange path. For a
+    // STANDALONE boundary this identifies the framework-owned self pass whose bounds
+    // converge with its parent's ArrangeStandaloneChild derivation; an application
+    // calling View::Arrange directly carries no such ownership and retracts the
+    // parent's arrange entry when it rewrites the child's records.
+    Internal::ViewDataImpl::Get(*view).ArrangeAsLayoutRoot(bounds);
   }
 
   /**

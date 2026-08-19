@@ -483,3 +483,61 @@ int UtcDaliViewInsertAboveMovesForwardInternalP(void)
   DALI_TEST_EQUALS(VisualIndexOf(parent, c), 1u, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliViewChildOrderHookSurvivesNonChainingOnInitializeInternalP(void)
+{
+  UiTestApplication application;
+
+  View  parent     = CreateNonChainingView();
+  auto* parentImpl = &NonChainingImplOf(parent);
+  parent.SetRequestedWidth(WRAP_CONTENT);
+  parent.SetRequestedHeight(WRAP_CONTENT);
+
+  View a = View::New();
+  View b = View::New();
+  View c = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, c), 2, TEST_LOCATION);
+
+  // Settle the measure cache, then confirm it really is a cache.
+  parent.Measure(1000.0f, 1000.0f);
+  const int settledCount = parentImpl->measureCount;
+  parent.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(parentImpl->measureCount, settledCount, TEST_LOCATION);
+
+  // Reorder at the ACTOR level, bypassing the View sibling-order API. This is the only
+  // path that depends on the child-order-changed connection.
+  Dali::Actor(a).RaiseToTop();
+
+  // The logical order followed the actor order...
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, c), 1, TEST_LOCATION);
+
+  // ...and the measure cache was invalidated with it, so the next measure is real work
+  // rather than a replay of the old order.
+  parent.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(parentImpl->measureCount, settledCount + 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The same guarantee for a plain View, so the test above is comparing against a known
+// baseline rather than describing behaviour unique to the subclass.
+int UtcDaliViewChildOrderHookOnPlainViewInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  Dali::Actor(f.a).RaiseToTop();
+
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.a), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 1, TEST_LOCATION);
+
+  END_TEST;
+}

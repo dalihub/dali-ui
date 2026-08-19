@@ -75,7 +75,7 @@ struct Frame
   const void* secondary;           ///< RECYCLER: the ItemsLayouterImpl identity. ARRANGE: nullptr.
   Frame*      previous;            ///< The enclosing frame, restored when this one is popped.
   OwnerKind   kind;                ///< Which producer pushed this frame.
-  bool        poisonedDuringScope; ///< Reserved: armed by the increment that introduces the arrange cache-hit path.
+  bool        poisonedDuringScope; ///< Reserved, still unread: the arrange cache HIT now covers views WITH children, but it serves them by replaying cached bounds and issues no Measure() at all, so it still spans no owner scope. Armed by the first increment that measures from inside a served pass.
 };
 
 /**

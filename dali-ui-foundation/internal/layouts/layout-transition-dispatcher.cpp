@@ -360,7 +360,44 @@ void LayoutTransitionDispatcher::RestoreGhostInteraction(Dali::Actor actor, cons
 
 LayoutRect LayoutTransitionDispatcher::VisualBoundsOf(ViewImpl* parent, ViewImpl* child) const
 {
-  LayoutRect bounds = child->GetArrangedBounds();
+  ViewDataImpl& childData = ViewDataImpl::Get(*child);
+
+  // No arrange result to read. TWO distinct states end up here and they need
+  // OPPOSITE answers, distinguished by IsInitialLayoutDone():
+  //
+  //  - REPARENTED (arranged before, record retracted on the move): the retraction
+  //    exists because the logical mArrangedBounds belonged to the OLD parent's
+  //    coordinate space. Until the new parent arranges it, the geometry that is
+  //    actually rendered in the new hierarchy is the actor's -- already physical,
+  //    so return before the RTL mirror below; mirroring it again would apply the
+  //    direction transform twice.
+  //
+  //  - NEVER ARRANGED (fresh): keep the pre-arrange ZERO SENTINEL that
+  //    CapturedChild::freshChild documents and the CHANGE dispatch relies on.
+  //    The actor rect is NOT a safe substitute here: SetRequestedWidth/Height
+  //    write the actor size directly for a parentless leaf as a convenience, so
+  //    a fresh child's actor can already sit at its final slot -- a captured
+  //    "from" equal to the arranged "to", which would make the CHANGE branch's
+  //    equal-bounds skip fire before the fresh-child spec settle and strand a
+  //    declarative ENTER start value (an opacity of 0) forever.
+  if(!childData.HasArrangeResult())
+  {
+    if(!childData.IsInitialLayoutDone())
+    {
+      return {};
+    }
+    Actor actor = child->Self();
+    if(!actor)
+    {
+      return {};
+    }
+    return {actor.GetProperty<float>(Actor::Property::POSITION_X),
+            actor.GetProperty<float>(Actor::Property::POSITION_Y),
+            actor.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+            actor.GetProperty<float>(Actor::Property::SIZE_HEIGHT)};
+  }
+
+  LayoutRect bounds = childData.GetArrangedBounds();
   // Mirror only when the child participates in the parent's
   // ApplyLayoutDirection pass. Standalone children are explicitly skipped
   // there (see ViewDataImpl::ApplyLayoutDirection), so mirroring them here
@@ -744,10 +781,6 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
       }
       const LayoutRect inheritedFrom = cap.bounds;
       const LayoutRect inheritedTo   = VisualBoundsOf(parent, child);
-      if(BoundsApproxEqual(inheritedFrom, inheritedTo))
-      {
-        continue;
-      }
       // A freshly-added inherited grand-child (never arranged before this pass)
       // has a degenerate pre-arrange "from"; animating a CHANGE from there would
       // slide/grow it from nothing. This is reachable when the child's
@@ -758,17 +791,48 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
       // arrange is already handled by the wasInitialMount branch above; this
       // also hardens any other drop path — reparent / governance change /
       // EXIT-in-flight — against the same zero-from artifact.)
+      //
+      // Checked BEFORE the equal-bounds skip, deliberately: the spec settle must
+      // not depend on geometry. A fresh child can land exactly on its captured
+      // "from" (a zero-size child arranged at the origin matches the zero
+      // sentinel), and an equal-first order would skip the settle and strand a
+      // declarative ENTER start value (an opacity of 0) forever.
       if(cap.freshChild)
       {
-        // Snap geometry to the arranged bounds (no zero-from animation) AND
-        // settle the declarative ENTER spec to its final values: the dropped
-        // candidate was an inherited ENTER, and SettleChangeWithoutAnimation
-        // writes only POSITION/SIZE, so without SettleInitialEnter a grand-child
-        // pre-set to a fade-in start (e.g. opacity 0) would stay invisible
-        // forever. SettleInitialEnter skips animator mode (the application owns
-        // those property writes) and no-ops when the owner has no ENTER spec.
-        SettleChangeWithoutAnimation(child, inheritedTo);
-        SettleInitialEnter(child, transition);
+        // Snap geometry to the arranged bounds (no zero-from animation) -- only
+        // when it actually moved. When from and to already agree the geometry
+        // write is a no-op, and the three Cancel* calls inside
+        // SettleChangeWithoutAnimation are no-ops too: the pending-EXIT and
+        // active-EXIT guards above already skipped this child if either was
+        // live, and a never-arranged child has had no CHANGE or ENTER
+        // dispatched that could still be animating.
+        if(!BoundsApproxEqual(inheritedFrom, inheritedTo))
+        {
+          SettleChangeWithoutAnimation(child, inheritedTo);
+        }
+        // AND settle the declarative ENTER spec to its final values: the
+        // dropped candidate was an inherited ENTER, and
+        // SettleChangeWithoutAnimation writes only POSITION/SIZE, so without
+        // SettleInitialEnter a grand-child pre-set to a fade-in start (e.g.
+        // opacity 0) would stay invisible forever. SettleInitialEnter skips
+        // animator mode (the application owns those property writes) and
+        // no-ops when the owner has no ENTER spec.
+        //
+        // ONE-SHOT. `cap.freshChild` is `!IsInitialLayoutDone()`, so a child that no
+        // producer ever arranges keeps it TRUE forever and VisualBoundsOf keeps
+        // returning the zero sentinel -- this branch is then re-entered on EVERY pass.
+        // Without the latch each of those passes would allocate a 0-duration Animation
+        // and BAKE_FINAL the ENTER spec again, clobbering any application animation on
+        // the same properties. The settle IS still required exactly once, which is why
+        // this branch continues to precede the equal-bounds skip.
+        if(!ViewDataImpl::Get(*child).IsInitialEnterSettled())
+        {
+          SettleInitialEnter(child, transition);
+        }
+        continue;
+      }
+      if(BoundsApproxEqual(inheritedFrom, inheritedTo))
+      {
         continue;
       }
       // WINDOW_RESIZED is a per-pass global flag and is honoured here
@@ -836,10 +900,6 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
 
     const LayoutRect from = cap.bounds;
     const LayoutRect to   = VisualBoundsOf(root, child);
-    if(BoundsApproxEqual(from, to))
-    {
-      continue;
-    }
 
     // Same per-child freshness guard as the inherited branch: a fresh direct
     // child (never arranged) reaches the CHANGE branch only when it is neither
@@ -850,10 +910,32 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
     // from nothing. Owner-keyed wasInitialMount does NOT cover this child (it is
     // keyed on the owner's first arrange, not per-child). Settle geometry and the
     // declarative ENTER spec instead of firing a spurious CHANGE.
+    //
+    // Checked BEFORE the equal-bounds skip, and with the geometry write gated on
+    // an actual move, for exactly the reasons documented on the inherited
+    // branch: the spec settle must not depend on geometry, and the skipped
+    // Cancel* calls are no-ops here (EXIT guards above, and a never-arranged
+    // child has no in-flight CHANGE or ENTER).
     if(cap.freshChild)
     {
-      SettleChangeWithoutAnimation(child, to);
-      SettleInitialEnter(child, transition);
+      if(!BoundsApproxEqual(from, to))
+      {
+        SettleChangeWithoutAnimation(child, to);
+      }
+      // ONE-SHOT, for the reason spelled out on the inherited branch above: a child no
+      // producer ever arranges keeps freshChild TRUE forever, so this branch is
+      // re-entered on every pass and each entry would otherwise allocate a 0-duration
+      // Animation and re-bake the ENTER spec. The settle is still required exactly
+      // once, which is why the branch still precedes the equal-bounds skip.
+      if(!ViewDataImpl::Get(*child).IsInitialEnterSettled())
+      {
+        SettleInitialEnter(child, transition);
+      }
+      continue;
+    }
+
+    if(BoundsApproxEqual(from, to))
+    {
       continue;
     }
 
@@ -1297,6 +1379,10 @@ void LayoutTransitionDispatcher::SettleInitialEnter(ViewImpl* child, Ui::LayoutT
   // so no lifecycle dispatch leaks for the suppressed initial mount.
   AbortIfSpecHasReverseAlpha(spec);
   AbortIfSpecHasLayoutBoundsProperty(spec);
+  // Latched here, after every early return: only a call that actually BAKES the spec
+  // has done the work the latch stands for. The animator-mode and no-spec exits keep
+  // re-entering on later passes, which then costs only CancelPendingExit.
+  ViewDataImpl::Get(*child).MarkInitialEnterSettled();
   Animation anim = Animation::New(0.0f);
   spec.ApplyTo(anim, childHandle);
   anim.SetEndAction(Animation::BAKE_FINAL);
