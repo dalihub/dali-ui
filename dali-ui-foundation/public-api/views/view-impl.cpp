@@ -715,6 +715,21 @@ void ViewImpl::Initialize()
 {
   // Disable relayout for base View (derived classes can re-enable if needed)
   DevelActor::SetRelayoutEnabled(Self(), false);
+  // Layout direction is owned by dali-core (Actor::SetLayoutDirection, plus the
+  // inheritance walk that resolves it for a whole subtree), and the arranged
+  // x of every non-standalone child is a function of it. Core signals the
+  // change; nothing else in the layout pipeline does -- the accompanying
+  // RelayoutRequest drives legacy size negotiation, not the dali-ui pass, and
+  // LAYOUT_DIRECTION is an Actor property, so it never reaches this view's
+  // property-set hook. Without this connection a direction change on a settled
+  // tree produced no re-arrange at all.
+  //
+  // Connected HERE and not in OnInitialize(): OnInitialize is virtual, and a
+  // third-party subclass that overrides it without up-calling would silently
+  // lose the hook and get a View that never responds to an RTL switch.
+  // Initialize() is non-virtual and is the single second-phase entry point every
+  // View construction runs through, so the connection is unconditional.
+  Self().LayoutDirectionChangedSignal().Connect(mImpl, &Internal::ViewDataImpl::OnLayoutDirectionChanged);
 
   if(mImpl->AreVisualsEnabled())
   {

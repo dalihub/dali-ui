@@ -31,6 +31,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
+#include <dali-ui-foundation/internal/layouts/layout-direction-utils.h>
 #include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-validation.h>
@@ -369,8 +370,11 @@ LayoutRect LayoutTransitionDispatcher::VisualBoundsOf(ViewImpl* parent, ViewImpl
      !IntegrationView::IsLayoutModeStandalone(*child) &&
      parent->Self().GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT)
   {
+    // Same formula, same inputs (parent arranged width + child LOGICAL arranged
+    // bounds) as ViewDataImpl::ApplyLayoutDirection, which is what actually
+    // places the actor -- shared so the two can never drift apart.
     const LayoutRect parentBounds = parent->GetArrangedBounds();
-    bounds.x                      = parentBounds.width - bounds.x - bounds.width;
+    bounds.x                      = MirrorX(parentBounds.width, bounds.x, bounds.width);
   }
   return bounds;
 }
