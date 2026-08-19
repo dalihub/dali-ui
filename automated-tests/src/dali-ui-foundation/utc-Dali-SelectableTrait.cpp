@@ -119,7 +119,7 @@ public:
   }
 };
 
-Dali::TypeRegistration testSelectableViewImplTypeReg(typeid(TestSelectableViewImpl), typeid(Extension::SelectableViewImpl), nullptr);
+Dali::TypeRegistration testSelectableViewImplTypeReg(typeid(TestSelectableViewImpl), typeid(Dali::Ui::SelectableView), nullptr);
 
 /**
  * @brief Helper to create a View, add it to the scene, attach selectable, and render.

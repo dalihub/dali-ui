@@ -655,7 +655,7 @@ BaseHandle Create()
   return handle;
 }
 // Setup signals and actions using the type-registry.
-DALI_TYPE_REGISTRATION_BEGIN(View, CustomActor, Create);
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::View, Ui::ViewImpl, Dali::CustomActor, Create);
 
 // Note: Properties are registered separately below.
 

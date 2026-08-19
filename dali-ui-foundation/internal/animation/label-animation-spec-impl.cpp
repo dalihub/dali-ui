@@ -36,8 +36,7 @@ namespace Internal
 {
 namespace
 {
-Dali::TypeRegistration LABEL_ANIMATION_SPEC_TYPE("LabelAnimationSpec", typeid(Dali::Ui::ViewAnimationSpec), nullptr);
-Dali::TypeRegistration LABEL_ANIMATION_SPEC_IMPL_TYPE(typeid(Dali::Ui::Internal::LabelAnimationSpecImpl), typeid(Dali::Ui::LabelAnimationSpec), nullptr);
+Dali::TypeRegistration LABEL_ANIMATION_SPEC_TYPE(typeid(Dali::Ui::LabelAnimationSpec), typeid(Dali::Ui::Internal::LabelAnimationSpecImpl), typeid(Dali::Ui::ViewAnimationSpec), nullptr);
 
 Dali::Ui::Integration::LabelImpl* GetLabelImpl(Label label)
 {

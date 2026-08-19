@@ -37,6 +37,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -60,7 +61,7 @@ BaseHandle Create()
 #define LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION(text, valueType, enumIndex) \
   DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui, LottieAnimationViewPropertyIndex, Ui::Integration, LottieAnimationViewImpl, text, valueType, enumIndex)
 
-DALI_TYPE_REGISTRATION_BEGIN(LottieAnimationViewImpl, ViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::LottieAnimationView, Ui::Integration::LottieAnimationViewImpl, Ui::View, Create)
 
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("image",                    STRING,  IMAGE)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("loopCount",                INTEGER, LOOP_COUNT)

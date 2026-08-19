@@ -39,7 +39,7 @@ BaseHandle Create()
 }
 
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::GridLayoutImpl, Ui::Integration::LayoutImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::GridLayout, Ui::Integration::GridLayoutImpl, Ui::Layout, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace

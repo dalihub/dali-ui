@@ -35,8 +35,7 @@ namespace Internal
 {
 namespace
 {
-Dali::TypeRegistration INPUT_FIELD_ANIMATION_SPEC_TYPE("InputFieldAnimationSpec", typeid(Dali::Ui::ViewAnimationSpec), nullptr);
-Dali::TypeRegistration INPUT_FIELD_ANIMATION_SPEC_IMPL_TYPE(typeid(Dali::Ui::Internal::InputFieldAnimationSpecImpl), typeid(Dali::Ui::InputFieldAnimationSpec), nullptr);
+Dali::TypeRegistration INPUT_FIELD_ANIMATION_SPEC_TYPE(typeid(Dali::Ui::InputFieldAnimationSpec), typeid(Dali::Ui::Internal::InputFieldAnimationSpecImpl), typeid(Dali::Ui::ViewAnimationSpec), nullptr);
 
 Dali::Ui::Integration::InputFieldImpl* GetInputFieldImpl(InputField inputField)
 {

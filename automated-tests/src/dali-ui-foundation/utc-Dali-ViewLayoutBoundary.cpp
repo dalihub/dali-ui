@@ -63,7 +63,7 @@ private:
 
 // Register so TypeInfo lookup can walk the chain
 Dali::TypeRegistration measureCounterViewTypeReg(
-  typeid(MeasureCounterViewImpl), typeid(ViewImpl), nullptr);
+  typeid(MeasureCounterViewImpl), typeid(Dali::Ui::View), nullptr);
 
 // Build a View handle around the impl
 View CreateCounterView()

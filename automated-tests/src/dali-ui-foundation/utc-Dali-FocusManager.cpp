@@ -892,7 +892,7 @@ private:
 };
 
 Dali::TypeRegistration resolvingFocusViewTypeReg(
-  typeid(ResolvingFocusViewImpl), typeid(ViewImpl), nullptr);
+  typeid(ResolvingFocusViewImpl), typeid(Dali::Ui::View), nullptr);
 
 View CreateResolvingFocusView(View resolvedTarget)
 {

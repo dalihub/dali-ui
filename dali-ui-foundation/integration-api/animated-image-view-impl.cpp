@@ -39,6 +39,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -62,7 +63,7 @@ BaseHandle Create()
 #define ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION(text, valueType, enumIndex) \
   DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui, AnimatedImageViewPropertyIndex, Ui::Integration, AnimatedImageViewImpl, text, valueType, enumIndex)
 
-DALI_TYPE_REGISTRATION_BEGIN(AnimatedImageViewImpl, ViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::AnimatedImageView, Ui::Integration::AnimatedImageViewImpl, Ui::View, Create)
 
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("image",                 STRING,  IMAGE)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("imageUrls",             ARRAY,   IMAGE_URLS)

@@ -192,7 +192,7 @@ public:
   }
 };
 
-Dali::TypeRegistration testInteractiveViewImplTypeReg(typeid(TestInteractiveViewImpl), typeid(Extension::InteractiveViewImpl), nullptr);
+Dali::TypeRegistration testInteractiveViewImplTypeReg(typeid(TestInteractiveViewImpl), typeid(Dali::Ui::InteractiveView), nullptr);
 
 UiConfig CreateDefaultOverlayConfig()
 {

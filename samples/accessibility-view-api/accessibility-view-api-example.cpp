@@ -262,7 +262,7 @@ Dali::BaseHandle CreateRegisteredAccessibilityDemoView()
   return CreateAccessibilityDemoView(implementation);
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(AccessibilityDemoViewImpl, Dali::Ui::ViewImpl, CreateRegisteredAccessibilityDemoView)
+DALI_TYPE_REGISTRATION_BEGIN(AccessibilityDemoViewImpl, Dali::Ui::View, CreateRegisteredAccessibilityDemoView)
 DALI_TYPE_REGISTRATION_END()
 
 class PerViewAccessibilityCallbackHandler

@@ -20,7 +20,6 @@
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
-#include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h> // LCOV_EXCL_LINE
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/actors/custom-actor-impl.h>
@@ -61,19 +60,6 @@ namespace
 /// Thread-local because Actor::Add invokes OnChildAdd synchronously on the same
 /// (event) thread. POD with a constant initializer: no dynamic init, no heap allocation.
 thread_local unsigned int gAllowNonViewChildDepth = 0u;
-
-} // namespace
-
-namespace
-{
-BaseHandle Create()
-{
-  return View::New();
-}
-
-// Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(Ui::ViewImpl, Ui::View, Create)
-DALI_TYPE_REGISTRATION_END()
 
 } // namespace
 

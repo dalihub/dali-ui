@@ -42,7 +42,7 @@ BaseHandle Create()
 }
 
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(GroupSelectableViewImpl, SelectableViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::GroupSelectableView, Ui::Extension::GroupSelectableViewImpl, Ui::SelectableView, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace

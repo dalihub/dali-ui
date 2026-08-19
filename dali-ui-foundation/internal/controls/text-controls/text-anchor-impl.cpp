@@ -64,7 +64,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
     &implType::GetProperty);
 
 // clang-format off
-DALI_TYPE_REGISTRATION_BEGIN(TextAnchorImpl, ViewImpl, Create);
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::TextAnchor, Ui::Internal::TextAnchorImpl, Ui::View, Create);
 
 DALI_UI_PROPERTY_REGISTRATION(TextAnchor, TextAnchorImpl, "startCharacterIndex", INTEGER, START_CHARACTER_INDEX)
 DALI_UI_PROPERTY_REGISTRATION(TextAnchor, TextAnchorImpl, "endCharacterIndex",   INTEGER, END_CHARACTER_INDEX  )

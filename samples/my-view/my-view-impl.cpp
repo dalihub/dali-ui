@@ -16,7 +16,7 @@ BaseHandle Create()
 }
 
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(MyViewImpl, ViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(MyView, MyViewImpl, Dali::Ui::View, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace

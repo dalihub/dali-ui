@@ -400,7 +400,7 @@ BaseHandle CreateRegisteredTestAccessibilityView()
   return CreateTestAccessibilityView(implementation);
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(TestAccessibilityViewImpl, ViewImpl, CreateRegisteredTestAccessibilityView)
+DALI_TYPE_REGISTRATION_BEGIN(TestAccessibilityViewImpl, Dali::Ui::View, CreateRegisteredTestAccessibilityView)
 DALI_TYPE_REGISTRATION_END()
 } // namespace
 

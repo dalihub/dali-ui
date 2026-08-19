@@ -99,7 +99,7 @@ BaseHandle CreateWebView()
 }
 
 // clang-format off
-DALI_TYPE_REGISTRATION_BEGIN(WebViewImpl, ViewImpl, CreateWebView)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::WebView, Ui::Integration::WebViewImpl, Ui::View, CreateWebView)
 
 DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "url",                     STRING,  URL                       )
 DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "userAgent",               STRING,  USER_AGENT                )
