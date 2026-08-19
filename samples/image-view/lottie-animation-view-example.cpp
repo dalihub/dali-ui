@@ -27,6 +27,7 @@ using namespace Dali::Ui;
  *
  * Demonstrates:
  *   - Play / Pause / Stop / JumpToFrame
+ *   - Desired size changes without resetting the current frame
  *   - LoopCount  (infinite / 3 / 1)
  *   - LoopingMode  (RESTART / AUTO_REVERSE)
  *   - FrameSpeedFactor  (0.5x / 1.0x / 2.0x)
@@ -131,6 +132,7 @@ private:
       CreateButton("PAUSE",   [this](View, InputEvent) { OnPause(); }),
       CreateButton("STOP",    [this](View, InputEvent) { OnStop(); }),
       CreateButton("JUMP > 10", [this](View, InputEvent) { OnJumpTo(); }),
+      CreateButton("JUMP+SIZE", [this](View, InputEvent) { OnJumpAndResize(); }),
     });
   }
 
@@ -351,6 +353,23 @@ private:
                           mLottieView.GetCurrentFrame());
   }
 
+  void OnJumpAndResize()
+  {
+    mDesiredSize = (mDesiredSize == 128) ? 256 : 128;
+
+    mLottieView.Stop();
+    mLottieView.JumpToFrame(JUMP_FRAME);
+    mLottieView.SetDesiredWidth(mDesiredSize);
+    mLottieView.SetDesiredHeight(mDesiredSize);
+
+    mDesiredSizeCheckPending = true;
+    UpdateStatus("Jump 10 + desired size " + std::to_string(mDesiredSize));
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] JumpToFrame(%d) + DesiredSize(%d, %d)\n",
+                          JUMP_FRAME,
+                          mDesiredSize,
+                          mDesiredSize);
+  }
+
   void OnLoopToggle()
   {
     mLoopIndex = (mLoopIndex + 1) % 3;
@@ -454,6 +473,18 @@ private:
 
   bool OnMonitorTimerTick()
   {
+    if(mDesiredSizeCheckPending)
+    {
+      const int currentFrame = mLottieView.GetCurrentFrame();
+      UpdateStatus("Desired size " + std::to_string(mDesiredSize) + " - frame " + std::to_string(currentFrame) + " (expected 10)");
+      DALI_LOG_RELEASE_INFO("[LottieAnimationView] DesiredSize result - expectedFrame=%d currentFrame=%d size=%dx%d\n",
+                            JUMP_FRAME,
+                            currentFrame,
+                            mDesiredSize,
+                            mDesiredSize);
+      mDesiredSizeCheckPending = false;
+    }
+
     if(mLottieView && mLottieView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
     {
       DALI_LOG_RELEASE_INFO("[LottieAnimationView] Monitor - frame=%d/%d state=%d\n",
@@ -505,6 +536,8 @@ private:
   int mStopBehaviorIndex;
   int mFrameRangeIndex;
   int mRenderScaleIndex;
+  int mDesiredSize{256};
+  bool mDesiredSizeCheckPending{false};
 };
 
 constexpr int   LottieAnimationViewSampleController::LOOP_COUNTS[];

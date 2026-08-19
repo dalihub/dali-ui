@@ -385,6 +385,14 @@ private: // Internal methods
   void UpdateVisual();
 
   /**
+   * @brief Updates a property on the existing Lottie visual.
+   *
+   * If visual creation is pending, the current member values are applied when
+   * UpdateVisual() creates it instead.
+   */
+  void UpdateVisualProperty(Dali::Property::Index index, const Dali::Property::Value& value);
+
+  /**
    * @brief Applies the fitting mode transform to the visual for the given size.
    *
    * @param[in] size The allocated size of the view
@@ -442,7 +450,7 @@ private:                                 // Data
   bool mNotifyAfterRasterization;
   bool mSynchronousLoading;
   bool mAspectFitEnabled;
-  bool mVisualDirty; ///< True when a property changed and the visual needs rebuilding on the next measure pass
+  bool mVisualDirty; ///< True when the visual needs creation or rebuilding; runtime properties normally update in place
 
   Dali::Signal<void(Dali::Ui::View)> mAnimationFinishedSignal;
 };

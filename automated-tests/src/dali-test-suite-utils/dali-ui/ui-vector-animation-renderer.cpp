@@ -32,7 +32,14 @@
 #include <dali/public-api/adaptor-framework/native-image.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali-ui/ui-event-thread-callback.h>
+#include <atomic>
 #include <memory>
+
+namespace
+{
+std::atomic<uint32_t> gLastVectorAnimationWidth{0u};
+std::atomic<uint32_t> gLastVectorAnimationHeight{0u};
+}
 
 namespace Dali
 {
@@ -78,6 +85,8 @@ public:
     Dali::Mutex::ScopedLock lock(mMutex);
     mWidth  = width;
     mHeight = height;
+    gLastVectorAnimationWidth.store(width);
+    gLastVectorAnimationHeight.store(height);
 
     if(!mLoadFailed && mWidth > 0 && mHeight > 0)
     {
@@ -370,3 +379,25 @@ VectorAnimationRenderer::UploadCompletedSignalType& VectorAnimationRenderer::Upl
 }
 
 } // namespace Dali
+
+namespace Test
+{
+namespace UiVectorAnimationRenderer
+{
+void ResetLastSize()
+{
+  gLastVectorAnimationWidth.store(0u);
+  gLastVectorAnimationHeight.store(0u);
+}
+
+uint32_t GetLastWidth()
+{
+  return gLastVectorAnimationWidth.load();
+}
+
+uint32_t GetLastHeight()
+{
+  return gLastVectorAnimationHeight.load();
+}
+} // namespace UiVectorAnimationRenderer
+} // namespace Test
