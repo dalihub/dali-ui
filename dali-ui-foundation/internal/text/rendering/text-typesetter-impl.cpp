@@ -1409,7 +1409,7 @@ void Internal::Reveal::ExpandMetadataOwnership(uint8_t* metadata, uint32_t width
     uint8_t  coverage;
   };
 
-  auto collectSources = [metadata, width, rowBytes](uint32_t y, std::vector<OwnershipSource>& sources)
+  auto collectSources = [metadata, width, rowBytes, PIXEL_SIZE](uint32_t y, std::vector<OwnershipSource>& sources)
   {
     sources.clear();
     const uint8_t* row = metadata + static_cast<size_t>(y) * rowBytes;
@@ -1477,9 +1477,10 @@ void Internal::Reveal::ExpandMetadataOwnership(uint8_t* metadata, uint32_t width
             {
               haloDestinations.push_back(destinationX);
             }
-            destinationPixel[0u] = static_cast<uint8_t>((source.start >> 8u) & 0xffu);
-            destinationPixel[1u] = static_cast<uint8_t>(source.start & 0xffu);
-            destinationPixel[2u] = 255u;
+            const uint32_t encodedStart = static_cast<uint32_t>(source.start);
+            destinationPixel[0u]        = static_cast<uint8_t>((encodedStart >> 8u) & 0xffu);
+            destinationPixel[1u]        = static_cast<uint8_t>(encodedStart & 0xffu);
+            destinationPixel[2u]        = 255u;
             // Source coverage is retained only while resolving conflicts in
             // this destination row and cleared once all candidates are known.
             destinationPixel[3u] = source.coverage;

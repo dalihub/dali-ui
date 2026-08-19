@@ -28,8 +28,6 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr int         WINDOW_WIDTH                = 760;
-constexpr int         WINDOW_HEIGHT               = 900;
 constexpr float       CONTROLS_PANEL_HEIGHT       = 328.0f;
 constexpr float       CONTROL_HEIGHT              = 34.0f;
 constexpr float       CONTROL_SPACING             = 6.0f;
@@ -193,7 +191,6 @@ private:
   void OnInit(Application application)
   {
     Window window = application.GetWindow();
-    window.SetPositionSize(PositionSize(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
     window.SetBackgroundColor(UiColor(0xF8FAFC));
     window.KeyEventSignal().Connect(this, &TextRevealController::OnKeyEvent);
     UiScaleManager::Get().SetScale(mUiScale);
