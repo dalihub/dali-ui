@@ -734,3 +734,139 @@ int UtcDaliLayoutControllerRemoveInSlotIdleReapP(void)
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
   END_TEST;
 }
+
+namespace
+{
+// Records the constraint the producer was run at, so a test can assert the UNIT of that
+// constraint and not merely the size that came out of it.
+float gRecordedMeasureWidthConstraint  = -1.0f;
+float gRecordedMeasureHeightConstraint = -1.0f;
+
+MeasuredSize RecordMeasureConstraint(View, float widthConstraint, float heightConstraint)
+{
+  gRecordedMeasureWidthConstraint  = widthConstraint;
+  gRecordedMeasureHeightConstraint = heightConstraint;
+  return MeasuredSize(200.0f, 160.0f);
+}
+} // namespace
+
+// A layout root's requested size is stored in NATURAL units while every constraint the
+// layout pass carries is VISUAL, so the controller must scale it. The other two sources
+// of a root constraint -- the window size and the parent actor SIZE -- are visual
+// already, and so is the parameter Measure() takes, so a root measured at its raw
+// requested size is run at a constraint 1/s too small.
+//
+// UiScaleManagerImpl keeps the scale in a process-wide singleton, so the incoming scale
+// is recorded and restored.
+//
+// Non-vacuity (verified by mutation): dropping the * scale from the FIXED width branch
+// of ProcessLayoutRoot makes the recorded width constraint 100 instead of 200.
+int UtcDaliLayoutControllerFixedRootMeasuredAtVisualConstraintP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A FIXED-size layout root is measured at a VISUAL constraint");
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(2.0f);
+
+  gRecordedMeasureWidthConstraint  = -1.0f;
+  gRecordedMeasureHeightConstraint = -1.0f;
+
+  Window window = application.GetWindow();
+
+  View root = View::New();
+  root.SetRequestedWidth(100.0f);
+  root.SetRequestedHeight(80.0f);
+  root.SetMeasureCallback(MeasureCallback::New(&RecordMeasureConstraint));
+  window.Add(root);
+
+  application.SendNotification();
+  application.Render();
+
+  // Exact, not epsilon: the value under test is a factor of the scale apart from the
+  // wrong one, and an epsilon compare here would only weaken the assertion.
+  DALI_TEST_EQUALS(gRecordedMeasureWidthConstraint, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gRecordedMeasureHeightConstraint, 160.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// The same root at the unit scale, where natural and visual units coincide: the
+// conversion must be a no-op there, or every existing app would see a changed
+// constraint.
+int UtcDaliLayoutControllerFixedRootConstraintUnchangedAtUnitScaleP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A FIXED-size layout root sees its requested size unchanged at scale 1");
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(1.0f);
+
+  gRecordedMeasureWidthConstraint  = -1.0f;
+  gRecordedMeasureHeightConstraint = -1.0f;
+
+  Window window = application.GetWindow();
+
+  View root = View::New();
+  root.SetRequestedWidth(100.0f);
+  root.SetRequestedHeight(80.0f);
+  root.SetMeasureCallback(MeasureCallback::New(&RecordMeasureConstraint));
+  window.Add(root);
+
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(gRecordedMeasureWidthConstraint, 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gRecordedMeasureHeightConstraint, 80.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// The end-to-end geometry of the same shape at a non-unit scale: a FIXED root with a
+// WRAP_CONTENT boundary child that wraps a 90 wide grandchild. Every extent on the path
+// (the root's own visual size, the extent the boundary child is handed, and the child's
+// wrapped content) is in visual units, so the child settles at 90 * 2.
+//
+// Unlike the two tests above this one does NOT discriminate the FIXED-branch conversion,
+// and deliberately so: it is the geometry regression guard for the shape the conversion
+// touches. A FIXED root's own size comes from its requested size rather than from the
+// constraint, and a boundary child is re-measured by its own root pass from the parent's
+// (already visual) actor SIZE, so the constraint the root's producer is run at -- what the
+// two tests above assert directly -- is not observable in the settled geometry here.
+int UtcDaliLayoutControllerFixedRootStandaloneChildGetsFullExtentP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A FIXED-size root hands its boundary child the full visual extent");
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(2.0f);
+
+  Window window = application.GetWindow();
+
+  View root = View::New();
+  root.SetRequestedWidth(100.0f);
+  root.SetRequestedHeight(80.0f);
+  window.Add(root);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetRequestedWidth(WRAP_CONTENT);
+  standalone.SetMaximumWidth(1000.0f);
+  root.Add(standalone);
+
+  View grandChild = View::New();
+  grandChild.SetRequestedWidth(90.0f);
+  standalone.Add(grandChild);
+
+  application.SendNotification();
+  application.Render();
+
+  // 90 natural content at scale 2, and a boundary child that wraps it.
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 180.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
