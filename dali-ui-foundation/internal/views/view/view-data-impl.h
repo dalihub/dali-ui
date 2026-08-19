@@ -381,6 +381,13 @@ public:
   {
     return mArrangePropagationGeneration;
   }
+  /// True once this view has connected the actor layout-direction signal, which only a
+  /// LAYOUT ROOT ever does (see RegisterWithLayoutController). A plain child View stays
+  /// false and is covered by OnPropertySet plus its root's subtree walk instead.
+  bool IsLayoutDirectionSignalConnected() const
+  {
+    return mLayoutDirectionSignalConnected;
+  }
   /// @}
 
   Ui::Layout GetParentLayout() const;
@@ -1000,15 +1007,49 @@ private:
   void         OnChildOrderChanged(Actor parent, Actor orderChangedChild);
 
   /**
-   * @brief Invalidates this view's LAYOUT after its effective layout direction
-   * changed.
+   * @brief Drops the layout caches and raises both dirty bits on this view and on
+   * every descendant whose RESOLVED layout direction moved with it.
    *
-   * Connected in ViewImpl::Initialize() to the actor's layout-direction-changed
-   * signal, which dali-core emits on exactly the set of actors whose RESOLVED
-   * direction changed -- the actor the direction was set on plus every
-   * descendant that inherits it, including descendants sitting under a non-View
-   * or root-layer ancestor. Every affected View is therefore reached
-   * individually, so the handler never has to walk the subtree itself.
+   * Per node: InvalidateLayoutCaches() plus SETTING mMeasureDirty and mArrangeDirty
+   * (never clearing them -- dirty is pending work, and the white-box direction tests
+   * assert it on the child). The recursion runs over mChildren and PRUNES any child
+   * whose GetLayoutDirection() is not LayoutDirection::INHERIT: that is the exact
+   * mirror of dali-core's inherit walk
+   * (ActorParentImpl::InheritLayoutDirectionRecursively stops at an actor with
+   * mInheritLayoutDirection false), so a child with a direction of its own -- and
+   * therefore a subtree whose resolved direction did not move -- keeps its caches.
+   *
+   * A STANDALONE node takes a full InvalidateMeasure() instead: its invalidation
+   * does not propagate to its parent, so it must self-register exactly as it did
+   * when every View held its own signal connection.
+   *
+   * Does NOT touch the effective-scale state and does NOT retract the invalidation
+   * propagation generations (contrast ResetSubtreeScaleAndLayoutCaches, which does
+   * both): a direction change moves no scale, and leaving the generations unwritten
+   * can only cost an extra later ancestor walk, never a missed registration.
+   */
+  void InvalidateSubtreeLayoutForDirectionChange();
+
+  /**
+   * @brief Invalidates this view's LAYOUT, and its affected descendants', after its
+   * effective layout direction changed.
+   *
+   * Connected LAZILY and only by a view that registers with a LIVE WINDOW -- an
+   * on-scene layout root, or an on-scene standalone boundary -- in
+   * RegisterWithLayoutController(), to the actor's layout-direction-changed signal,
+   * which dali-core emits on exactly the set of actors whose RESOLVED direction
+   * changed. One connection per on-scene layout root is enough because this handler
+   * WALKS THE SUBTREE itself (InvalidateSubtreeLayoutForDirectionChange), pruning at
+   * children that hold a direction of their own. A plain child View therefore pays for
+   * no connection at all, and a change set on a non-View ancestor -- an intermediate
+   * Layer, or the window's root layer -- still reaches the root that sits below it. A
+   * direction write on a mid-tree View that is NOT a layout root is covered by
+   * OnPropertySet, which raises the same walk.
+   *
+   * An OFF-SCENE view holds no connection and needs none: no layout pass can run
+   * without a window, and a direction that moved while the subtree was detached cannot
+   * survive reconnection, because OnViewSceneConnection's layout-root path runs
+   * ResetSubtreeScaleAndLayoutCaches() before it registers.
    *
    * Invalidates the MEASURE axis (which raises the arrange dirty with it), not
    * arrange alone. Arrange alone would be exactly correct for every first-party
@@ -1494,7 +1535,7 @@ private:
   uint32_t mArrangePropagationGeneration;
   /// @}
 
-  Dali::LayoutDirection::Type           mLastArrangeDirection;         ///< Pure cache KEY: the effective layout direction mArrangedBounds was produced under. Valid only while mArrangeCacheValid is true. Unlike the effective scale -- whose freshness is carried by a sync bit this class owns -- the direction lives in dali-core and can be moved through actors dali-ui does not own, so it is recorded as a KEY: a missed invalidation then degrades to "no cache hit", never to a wrong result.
+  Dali::LayoutDirection::Type           mLastArrangeDirection;         ///< Pure cache KEY: the effective layout direction mArrangedBounds was produced under. Valid only while mArrangeCacheValid is true. Recorded as a KEY because the direction lives in dali-core and can be moved through actors dali-ui does not own, so a missed invalidation must degrade to "no cache hit" and never to a wrongly mirrored arrangement. The choice is per (axis, input) pair, not per input: measure x scale is also a KEY (mLastMeasureScale, and `s` is already in hand there), while arrange x scale relies on invalidation plus a DEBUG assert (reading the scale here would be a fresh call the path needs for nothing else) and measure x direction relies on invalidation (OnLayoutDirectionChanged), because a direction term would put a layout-direction read into the per-view, per-pass measure predicate. The invalidation this KEY backs up is now the RECURSIVE subtree walk driven by a layout root's lazy signal hook and by OnPropertySet, not a per-View signal connection, so it covers a strictly wider set of failure modes than before.
   Insets                                mMargin;                       ///< Layout margin
   Insets                                mPadding;                      ///< Layout padding
   float                                 mRequestedWidth;               ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
@@ -1537,6 +1578,7 @@ private:
   bool         mProcessorRegistered : 1;                          ///< Whether the processor is registered.
   bool         mFittingModeLayoutFinishedSignalConnected : 1;     ///< Whether layout-finished signal is connected for fitting mode update.
   bool         mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
+  bool         mLayoutDirectionSignalConnected : 1;               ///< True once this view registered with the LayoutController on a live window (an on-scene layout root or on-scene standalone boundary) and connected the actor layout-direction signal; never cleared -- the claim "core emits on this actor" survives reparenting and scene disconnection, which is what keeps OnPropertySet's short-circuit sound.
 
   static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::LAST_VIEW_BEHAVIOUR_FLAG)>::value + 1;
   ViewImpl::ViewBehaviour   mFlags : VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
