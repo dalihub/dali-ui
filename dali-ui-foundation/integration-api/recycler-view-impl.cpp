@@ -144,7 +144,7 @@ RecyclerViewImplPtr RecyclerViewImpl::New()
 }
 
 RecyclerViewImpl::RecyclerViewImpl()
-: LayoutImpl(),
+: ViewImpl(),
   mAdapter(nullptr),
   mLayouter(),
   mRecyclerImpl(std::make_unique<RecyclerImpl>(*this)),
@@ -191,7 +191,7 @@ RecyclerViewImpl::~RecyclerViewImpl()
 
 void RecyclerViewImpl::OnInitialize()
 {
-  LayoutImpl::OnInitialize();
+  ViewImpl::OnInitialize();
 
   Self().SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);
   EnsureScroller();
@@ -1354,7 +1354,7 @@ void RecyclerViewImpl::OnFocusManagerChanged(View from, View to)
 
 View RecyclerViewImpl::OnFocusRequested()
 {
-  if(!mKeyScrollEnabled || !mLayouter) return LayoutImpl::OnFocusRequested();
+  if(!mKeyScrollEnabled || !mLayouter) return ViewImpl::OnFocusRequested();
 
   // Return the first focusable visible item, or Self() for step-scroll mode.
   const float offset = mLayouter.ComputeScrollOffset();
@@ -1377,7 +1377,7 @@ View RecyclerViewImpl::OnFocusRequested()
 
   View selfView = View::DownCast(Self());
   if(selfView.IsFocusable()) return selfView;
-  return LayoutImpl::OnFocusRequested();
+  return ViewImpl::OnFocusRequested();
 }
 
 FocusNavigationResult RecyclerViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context)

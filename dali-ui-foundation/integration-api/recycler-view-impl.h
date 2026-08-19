@@ -17,12 +17,12 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
 #include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
 #include <dali-ui-foundation/public-api/views/recycler/recycler-view.h>
 #include <dali-ui-foundation/public-api/views/scroll/edge-effect.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/events/key-event.h>
@@ -44,7 +44,7 @@ namespace Integration
 class RecyclerViewImpl;
 using RecyclerViewImplPtr = IntrusivePtr<RecyclerViewImpl>;
 
-class DALI_UI_API RecyclerViewImpl : public LayoutImpl
+class DALI_UI_API RecyclerViewImpl : public ViewImpl
 {
 public:
   static RecyclerViewImplPtr New();
