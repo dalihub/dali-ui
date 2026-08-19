@@ -27,9 +27,21 @@ jobs:
     steps:
     - uses: code-actions/checkout@v3
       with:
-        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.base.ref || github.sha }}
         fetch-depth: 0
         allow-unsafe-pr-checkout: true
+
+    - name: Merge PR into latest target branch
+      if: github.event_name == 'pull_request_target'
+      env:
+        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      run: |
+        set -euo pipefail
+
+        git fetch origin "$PR_HEAD_SHA"
+        git -c user.name='GitHub Actions' \
+          -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+          merge --no-ff --no-edit FETCH_HEAD
 
     - name: Setup SSH
       uses: code-actions/webfactory-ssh-agent@v0.7.0
