@@ -134,7 +134,7 @@ A **layout root** is a top-level View in the layout hierarchy (its parent is not
 2. **Arrange**  
    - The View is given a `LayoutRect` (typically from 0,0 with the measured size). It applies its own alignment and margin, and if it has a LayoutManager, the manager calls `Arrange(child, childBounds)` for each child to set position and size.
 
-### Layout caching and the producer contract
+### Layout caching and the measure/arrange contract
 
 Both phases are cached, and both caches skip work rather than change results.
 Understanding what they key on is the whole of what a custom View, LayoutManager
@@ -142,10 +142,10 @@ or callback has to know.
 
 The **measure cache** is unconditional. `View::Measure()` serves a stored
 `MeasuredSize` whenever the normalised constraint is unchanged and nothing has
-invalidated the view's layout, and the measure producer — `OnMeasure()`, an
+invalidated the view's layout, and the measure implementation — `OnMeasure()`, an
 attached `LayoutManager::Measure()`, or a `MeasureCallback` — is simply not
-called. There is no opt-out. A measure producer is therefore **required** to be a
-pure function of:
+called. There is no opt-out. A measure implementation is therefore **required** to be
+a pure function of:
 
 - its two constraints,
 - the view's effective scale,
@@ -155,10 +155,19 @@ pure function of:
 - its children's measured sizes.
 
 Anything else it reads, it owns: it must call `InvalidateMeasure()` itself when
-that state changes, or the view keeps its previous measured size until some
-unrelated invalidation happens to arrive.
+that state changes. Nothing else will: an unrelated pass re-runs the layout root,
+whose implementation re-measures this view at the same constraint, and this view
+serves its cache again. An invalidation on a sibling propagates upward and never
+reaches this view, and an ancestor's own miss does not clear this view's cache.
+The stale measured size is recovered only by an invalidation that reaches THIS
+view -- its own `InvalidateMeasure()`, a recursive drop (scale change, reparent,
+direction change), or a `LayoutManager`'s `InvalidateOwnerMeasure()` -- or by a
+pass that hands it a different normalised constraint or effective scale. The same
+reasoning applies to the arrange cache, with the input bounds and the effective
+layout direction as the keyed inputs.
 
-The effective scale is resolved in one place,
+The effective scale is part of the measure cache key, so a scale change alone
+forces a re-measure. The effective scale is resolved in one place,
 `ViewDataImpl::ComputeEffectiveScale()`; when the process-wide UI-scale master
 switch (`UiScaleManager::SetScalable(false)`) is off it returns `1.0` for every
 view regardless of the view's `UiScalePolicy`, so the whole tree behaves as
@@ -168,37 +177,45 @@ The **arrange cache** uses `ArrangePolicy::IF_CHANGED` by default.
 `View::Arrange()` may serve a stored result when the input bounds, effective layout
 direction and effective scale are unchanged and nothing has invalidated the view.
 The default applies to `OnArrange()`, a callback installed through the one-argument
-`SetArrangeCallback()`, and `LayoutManager::Arrange()`.
+`SetArrangeCallback()`, and `LayoutManager::Arrange()`. It reaches the same
+guarantee about the scale by a different route: the scale is not part of the
+arrange key, it is an invalidation — a scale change drops the entry.
 
-Use `ArrangePolicy::ALWAYS` when a producer reads state outside layout
-invalidation or performs externally visible work on every pass:
+Use `ArrangePolicy::ALWAYS` when an arrange implementation reads state outside
+layout invalidation or performs externally visible work on every pass:
 
-| Producer | How it selects `ALWAYS` |
+| Arrange implementation | How it selects `ArrangePolicy::ALWAYS` |
 |---|---|
 | `OnArrange()` override | `ViewImpl::SetArrangePolicy(ArrangePolicy::ALWAYS)` |
 | `ArrangeCallback` | `View::SetArrangeCallback(callback, ArrangePolicy::ALWAYS)` |
 | `LayoutManager::Arrange()` | protected `LayoutManager::SetArrangePolicy(ArrangePolicy::ALWAYS)` |
 
 Policy is stored on the implementation instance and inherited by subclasses. A
-subclass may select another policy after its base constructor completes. Producers
-that read ancestor or world geometry (`SCREEN_POSITION`, `WORLD_POSITION`, window
-coordinates), push state to a surface outside the actor tree, or depend on mutable
-state without invalidating arrange must use `ALWAYS`. `VideoView`, `WebView`,
-`RecyclerView` and the ScrollView layout manager are the in-library examples.
+subclass may select another policy after its base constructor completes. An arrange
+implementation that reads ancestor or world geometry (`SCREEN_POSITION`,
+`WORLD_POSITION`, window coordinates), pushes state to a surface outside the actor
+tree, or depends on mutable state without invalidating arrange must use
+`ArrangePolicy::ALWAYS`. `VideoView`, `WebView`, `RecyclerView` and the ScrollView
+layout manager are the in-library examples.
 
 **A cache hit is an optimisation of the work, never of the result.** Serving the
 arrange cache for a view with children does not prune the subtree: it replays it,
 performing per node exactly the observable work a re-run performs — reconciling
 the actor against the node's arranged bounds, mirroring direct children under
 right-to-left, and notifying `LayoutFinishedSignal()` subscribers. Geometry
-written outside layout is repaired either way. What a hit elides is the producer
-call, and with it the recomputation of a result already known. Because the policy
-is evaluated at every level, a single `ALWAYS` producer anywhere in a
-subtree makes that whole subtree re-run.
+written outside layout is repaired either way. What a hit elides is the call to the
+arrange implementation, and with it the recomputation of a result already known.
+
+The policy is evaluated at every level, so an `ArrangePolicy::ALWAYS` view refuses
+the cache hit of every ancestor **above** it: each of those ancestors misses and
+re-runs its own arrange implementation. It does not make everything beneath the
+ancestor re-run — a sibling subtree that a re-running ancestor re-enters still
+evaluates its own predicate and can serve its own hit, in which case it is replayed
+rather than re-run. The cost is the ancestor **path**, not every view below it.
 
 `LayoutFinishedSignal()` is therefore **pass-based**: a subscriber is told its
-view was arranged in this pass, whether that pass ran the producer or served the
-cache. It is not a "bounds changed" notification.
+view was arranged in this pass, whether that pass ran the arrange implementation or
+served the cache. It is not a "bounds changed" notification.
 
 ### Invalidation
 
@@ -206,12 +223,12 @@ cache. It is not a "bounds changed" notification.
 and they walk its ancestor chain to a layout root and register that root with the
 LayoutController.
 
-The mark always happens. The walk is coalesced: a view records the *invalidation
-epoch* in which it last walked, and while that record is current — meaning the
-registration it made is still pending and the chain it marked is still marked — a
-further invalidation on the same axis skips the walk. The epoch ends whenever the
-controller drains its pending set and whenever an outermost Measure/Arrange pass
-completes (a pass is the only consumer of dirty bits, and a manual
+The mark always happens. The walk is coalesced: a view records the
+*invalidation generation* in which it last walked, and while that record is current
+— meaning the registration it made is still pending and the chain it marked is still
+marked — a further invalidation on the same axis skips the walk. The generation ends
+whenever the controller drains its pending set and whenever an outermost
+Measure/Arrange pass completes (a pass is the only consumer of dirty bits, and a manual
 `Measure()`/`Arrange()` call is a pass too), so the next invalidation walks again.
 While any pass is on the stack the skip is disabled outright, because a mid-pass
 walk also poisons in-progress ancestors. Coalescing changes only how often the
@@ -226,8 +243,9 @@ re-measure its children.
 orientation, a spacing, a set of row definitions — is outside every cache key,
 because neither key can see it. Pair every such setter with
 `LayoutManager::InvalidateOwnerMeasure()` (or `InvalidateOwnerArrange()` when only
-placement is affected); the in-library managers all do, which is what makes their
-that state part of the layout-tracked inputs used by their `Arrange()` implementations.
+placement is affected); the in-library managers all do, which is what makes that
+state part of the layout-tracked inputs of their `Measure()` and `Arrange()`
+implementations.
 
 ### Measure constraints (sign-encoded budget)
 
@@ -365,8 +383,11 @@ where `logicalX` and `childW` are the child's **logical** arranged bounds
 (`GetArrangedBounds().x` / `.width`), not its actor `POSITION_X`. Mirroring
 from the logical bounds makes the flip a pure function of arranged geometry --
 idempotent and immune to an external `POSITION_X` write -- rather than an
-involution over the actor's persistent position. A child that a producer has
-not arranged has no parent-owned logical bounds and is left untouched. Reading
+involution over the actor's persistent position. The write is also suppressed
+when the actor already holds the mirrored value, so a settled `RIGHT_TO_LEFT`
+subtree performs no position writes at all. A child that no arrange
+implementation has arranged has no parent-owned logical bounds and is left
+untouched. Reading
 its current physical actor position as logical input would make repeated
 identical passes alternate between mirrored and unmirrored coordinates.
 
@@ -470,9 +491,11 @@ When layout must be recomputed (e.g. size or child change):
 
 ## Diagrams
 
-- **Class structure**: `layout-class-diagram.puml`  
+Two PlantUML diagram SOURCE files live beside this document in the repository. They are not rendered here; open them with a PlantUML viewer.
+
+- **Class structure**: `docs/layout-class-diagram.puml`  
   - Public API (View, Layout, StackLayout, …), Integration (ViewImpl, LayoutImpl, …), LayoutManagers, and layout types with inheritance and references.
-- **Calculation flow**: `layout-sequence-diagram.puml`  
+- **Calculation flow**: `docs/layout-sequence-diagram.puml`  
   - Sequence from Adaptor → LayoutControllerImpl → layout root ViewImpl → LayoutManager → child ViewImpl for Measure/Arrange and a summary of invalidation.
 
 ---

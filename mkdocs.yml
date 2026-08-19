@@ -75,7 +75,6 @@ nav:
   - Project: 'guides/project/index.html'
   - Guides:
       - 'Layout Structure': 'guides/layout-structure.md'
-      - 'Layout Transition': 'guides/layout-transition.md'
   - API Reference:
       - 'Class Index': 'daliUi/classes.md'
       - 'Class List': 'daliUi/annotated.md'
