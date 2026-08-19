@@ -13,6 +13,7 @@ SET(TC_SOURCES
     utc-Dali-InteractiveTrait-internal.cpp
     utc-Dali-InteractiveView-internal.cpp
     utc-Dali-SelectableTrait-internal.cpp
+    utc-Dali-LayoutDependencyScope-internal.cpp
     utc-Dali-GradientFactory-internal.cpp
     utc-Dali-GradientVisualSemantics-internal.cpp
     utc-Dali-TextGradientBaseline-internal.cpp

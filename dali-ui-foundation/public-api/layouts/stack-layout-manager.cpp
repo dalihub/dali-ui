@@ -24,6 +24,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/stack-layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -426,7 +427,11 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
           childHeightConstraint = std::max(0.0f, availableHeight - marginH);
         }
 
-        MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+        MeasuredSize childSize;
+        {
+          Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
+          childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+        }
 
         if(impl->mOrientation == StackOrientation::VERTICAL)
         {
@@ -501,6 +506,7 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
+        Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
         childImpl.Measure(childBounds.width, childBounds.height);
       }
       childImpl.Arrange(childBounds);
@@ -551,6 +557,7 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
+        Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
         childImpl.Measure(childBounds.width, childBounds.height);
       }
       childImpl.Arrange(childBounds);

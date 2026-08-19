@@ -129,6 +129,26 @@ private:
   void OnItemDecorationLayoutInvalidated();
   void NotifyDecorationChanged();
 
+  /**
+   * @brief Runs the layouter's full child layout, recording this recycler as the owner
+   * of every item Measure() the layouter issues.
+   *
+   * The single entry point for ItemsLayouterImpl::OnLayoutChildren: routing every call
+   * through here is what stops a future call site from silently losing the owner scope.
+   * @pre mLayouter is non-null.
+   */
+  void LayoutChildrenScoped();
+
+  /**
+   * @brief Scrolls the layouter along its scrollable axis, recording this recycler as
+   * the owner of every item Measure() the layouter issues while filling.
+   *
+   * @param[in] delta The signed distance to scroll by.
+   * @return The distance the layouter actually consumed.
+   * @pre mLayouter is non-null.
+   */
+  float ScrollByScoped(float delta);
+
   void  EnsureScroller();
   void  UpdateScrollerSize();
   void  UpdateScrollBar();

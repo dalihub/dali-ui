@@ -24,6 +24,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -280,7 +281,10 @@ LayoutRect TextButtonImpl::OnArrange(const LayoutRect& bounds)
   contentBounds.width  = std::max(0.0f, bounds.width - static_cast<float>(padding.start + padding.end) * s);
   contentBounds.height = std::max(0.0f, bounds.height - static_cast<float>(padding.top + padding.bottom) * s);
 
-  GetImpl(mLabel).Measure(contentBounds.width, contentBounds.height);
+  {
+    LayoutDependency::ArrangeOwnedMeasureScope ownerScope(this);
+    GetImpl(mLabel).Measure(contentBounds.width, contentBounds.height);
+  }
   GetImpl(mLabel).Arrange(contentBounds);
 
   return bounds;

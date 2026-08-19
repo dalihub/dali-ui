@@ -27,6 +27,7 @@
 #include <utility> // std::swap
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h> // public GetImpl(Ui::View&)
 
@@ -473,7 +474,10 @@ LayoutRect CheckBoxImpl::OnArrange(const LayoutRect& bounds)
   iconRect.y      = contentY + std::max(0.0f, (contentH - iconHVis) * 0.5f);
 
   Ui::View iconView = mIcon.GetView(); // the composed drawing view; use public GetImpl(Ui::View&)
-  GetImpl(iconView).Measure(iconRect.width, iconRect.height);
+  {
+    LayoutDependency::ArrangeOwnedMeasureScope ownerScope(this);
+    GetImpl(iconView).Measure(iconRect.width, iconRect.height);
+  }
   GetImpl(iconView).Arrange(iconRect);
 
   // Optional trailing label.
@@ -482,7 +486,10 @@ LayoutRect CheckBoxImpl::OnArrange(const LayoutRect& bounds)
   labelRect.height = contentH;
   labelRect.x      = mapX(iconWVis + gapVis, labelRect.width);
   labelRect.y      = contentY;
-  GetImpl(mLabel).Measure(labelRect.width, labelRect.height);
+  {
+    LayoutDependency::ArrangeOwnedMeasureScope ownerScope(this);
+    GetImpl(mLabel).Measure(labelRect.width, labelRect.height);
+  }
   GetImpl(mLabel).Arrange(labelRect);
 
   return bounds;
