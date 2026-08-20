@@ -1427,6 +1427,11 @@ bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
   Dali::Ui::View handle(mViewImpl.GetOwner());
   if(mViewImpl.FilterKeyEvent(event))
   {
+    DALI_LOG_RELEASE_INFO("[KeyEvent] keyCode(%d), state(%s) consumed by View id(%d), name(%s) at View::FilterKeyEvent\n",
+                          event.GetKeyCode(),
+                          event.GetState() == KeyEvent::DOWN ? "DOWN" : "UP",
+                          handle.GetProperty<int32_t>(Dali::Actor::Property::ID),
+                          handle.GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
     return true;
   }
 
@@ -1435,12 +1440,28 @@ bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
   ScopedKeyEventDispatch dispatchGuard(GetCoreInteractionObject());
 
   bool consumed = mViewImpl.OnKeyEvent(event);
+  if(consumed)
+  {
+    DALI_LOG_RELEASE_INFO("[KeyEvent] keyCode(%d), state(%s) consumed by View id(%d), name(%s) at View::OnKeyEvent\n",
+                          event.GetKeyCode(),
+                          event.GetState() == KeyEvent::DOWN ? "DOWN" : "UP",
+                          handle.GetProperty<int32_t>(Dali::Actor::Property::ID),
+                          handle.GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
+  }
 
   if(!mKeyEventSignal.Empty())
   {
     // Any connected callback consuming the event consumes it for all of them.
     const bool signalConsumed = mKeyEventSignal.EmitOr(handle, event);
-    consumed                  = consumed || signalConsumed;
+    if(signalConsumed)
+    {
+      DALI_LOG_RELEASE_INFO("[KeyEvent] keyCode(%d), state(%s) consumed by View id(%d), name(%s) at View::KeyEventSignal\n",
+                            event.GetKeyCode(),
+                            event.GetState() == KeyEvent::DOWN ? "DOWN" : "UP",
+                            handle.GetProperty<int32_t>(Dali::Actor::Property::ID),
+                            handle.GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
+    }
+    consumed = consumed || signalConsumed;
   }
 
   mViewImpl.OnFinalizeKeyEventDispatch(event);
