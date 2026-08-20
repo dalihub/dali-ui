@@ -27,26 +27,80 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+namespace Internal
+{
+class FocusManager;
+struct FocusIndicationContextImpl;
+} // namespace Internal
+
 namespace Extension
 {
 
 /**
- * @brief Describes an automatic focus indication decision.
+ * @brief Read-only information about one automatic focus indication decision.
  *
- * When focus is changing, @p previousFocusView is the view losing focus and
- * @p focusedView is the view gaining focus. When only focus indication is
- * changing, both handles refer to the currently focused view.
+ * When focus changes, GetPreviousFocusView() loses focus and GetFocusedView()
+ * gains focus. For indication-only changes both refer to the focused View.
+ * If the previous View is empty, IsPreviousFocusIndicated() returns false.
  *
- * If @p previousFocusView is empty, @p previousFocusIndicated is always false.
+ * The context and references returned by its getters are valid only during
+ * the policy invocation. Do not retain their addresses or references. Copy
+ * individual View or InputEvent handles if they are needed after the callback.
+ * View handles preserve object lifetime, not a snapshot of mutable View state.
+ *
+ * @note FocusManager owns the implementation on its call stack. Keeping only
+ *       an opaque pointer here permits new decision data without changing the
+ *       extension ABI or allocating a context body on the heap. Future fields
+ *       belong in the internal implementation, with out-of-line getters here.
  */
-struct FocusIndicationContext
+class DALI_UI_API FocusIndicationContext
 {
-  Dali::Ui::View previousFocusView;                      ///< The focused view before this decision, or an empty handle if none
-  Dali::Ui::View focusedView;                            ///< The view that will be focused after this decision
-  FocusDevice    device{FocusDevice::UNKNOWN};           ///< The device associated with the change
-  InputEvent     inputEvent{InputEvent::Programmatic()}; ///< The input event associated with the change
-  bool           previousFocusIndicated{false};          ///< Whether previousFocusView was focus indicated
-  bool           proposedIndicated{false};               ///< The framework's default focus indication decision
+public:
+  FocusIndicationContext(const FocusIndicationContext&)            = delete;
+  FocusIndicationContext(FocusIndicationContext&&)                 = delete;
+  FocusIndicationContext& operator=(const FocusIndicationContext&) = delete;
+  FocusIndicationContext& operator=(FocusIndicationContext&&)      = delete;
+  ~FocusIndicationContext()                                        = default;
+
+  /**
+   * @brief Gets the previous focused View, or an empty handle if none.
+   * @return A reference valid only during the policy invocation
+   */
+  const Dali::Ui::View& GetPreviousFocusView() const;
+
+  /**
+   * @brief Gets the View that will be focused after this decision.
+   * @return A reference valid only during the policy invocation
+   */
+  const Dali::Ui::View& GetFocusedView() const;
+
+  /**
+   * @brief Gets the device associated with this decision.
+   */
+  FocusDevice GetDevice() const;
+
+  /**
+   * @brief Gets the input event associated with this decision.
+   * @return A reference valid only during the policy invocation
+   */
+  const InputEvent& GetInputEvent() const;
+
+  /**
+   * @brief Checks whether the previous View was focus indicated.
+   */
+  bool IsPreviousFocusIndicated() const;
+
+  /**
+   * @brief Gets the framework's proposed focus indication state.
+   */
+  bool IsFocusIndicationProposed() const;
+
+private:
+  DALI_INTERNAL explicit FocusIndicationContext(const Internal::FocusIndicationContextImpl& impl);
+
+  const Internal::FocusIndicationContextImpl* mImpl;
+
+  friend class Internal::FocusManager;
 };
 
 namespace FocusIndicationPolicy
@@ -65,7 +119,7 @@ using Function = bool (*)(const FocusIndicationContext& context);
  * @brief Uses the framework's proposed focus indication state.
  *
  * @param[in] context Information about the focus indication decision
- * @return FocusIndicationContext::proposedIndicated
+ * @return FocusIndicationContext::IsFocusIndicationProposed()
  */
 DALI_UI_API bool Default(const FocusIndicationContext& context);
 

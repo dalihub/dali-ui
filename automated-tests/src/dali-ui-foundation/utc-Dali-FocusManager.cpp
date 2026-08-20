@@ -15,6 +15,7 @@
  */
 
 #include <stdlib.h>
+#include <type_traits>
 #include <vector>
 #include <dali.h>
 #include <dali/integration-api/events/hover-event-integ.h>
@@ -39,6 +40,13 @@ namespace UiExtension = Dali::Ui::Extension;
 
 namespace
 {
+static_assert(sizeof(UiExtension::FocusIndicationContext) == sizeof(void*));
+static_assert(!std::is_default_constructible<UiExtension::FocusIndicationContext>::value);
+static_assert(!std::is_copy_constructible<UiExtension::FocusIndicationContext>::value);
+static_assert(!std::is_move_constructible<UiExtension::FocusIndicationContext>::value);
+static_assert(!std::is_copy_assignable<UiExtension::FocusIndicationContext>::value);
+static_assert(!std::is_move_assignable<UiExtension::FocusIndicationContext>::value);
+
 struct WindowFocusRecorder : ConnectionTracker
 {
   void OnChanged(View previous, View current)
@@ -82,13 +90,13 @@ int gFocusIndicationPolicyCallCount = 0;
 bool RecordFocusIndicationPolicy(const UiExtension::FocusIndicationContext& context)
 {
   ++gFocusIndicationPolicyCallCount;
-  gFocusIndicationPolicyCall.previousFocusView = context.previousFocusView;
-  gFocusIndicationPolicyCall.focusedView = context.focusedView;
-  gFocusIndicationPolicyCall.device = context.device;
-  gFocusIndicationPolicyCall.inputEventType = context.inputEvent.GetInputEventType();
-  gFocusIndicationPolicyCall.previousFocusIndicated = context.previousFocusIndicated;
-  gFocusIndicationPolicyCall.proposedIndicated = context.proposedIndicated;
-  return context.proposedIndicated;
+  gFocusIndicationPolicyCall.previousFocusView = context.GetPreviousFocusView();
+  gFocusIndicationPolicyCall.focusedView = context.GetFocusedView();
+  gFocusIndicationPolicyCall.device = context.GetDevice();
+  gFocusIndicationPolicyCall.inputEventType = context.GetInputEvent().GetInputEventType();
+  gFocusIndicationPolicyCall.previousFocusIndicated = context.IsPreviousFocusIndicated();
+  gFocusIndicationPolicyCall.proposedIndicated = context.IsFocusIndicationProposed();
+  return context.IsFocusIndicationProposed();
 }
 
 bool NeverIndicateFocus(const UiExtension::FocusIndicationContext& context)
@@ -105,9 +113,44 @@ bool ReenterFocusFromIndicationPolicy(const UiExtension::FocusIndicationContext&
   gReentrantIndicationTarget.Reset();
   if(target)
   {
+    const View& previousReference = context.GetPreviousFocusView();
+    const View& focusedReference = context.GetFocusedView();
+    const InputEvent& eventReference = context.GetInputEvent();
+    const View previous = previousReference;
+    const View focused = focusedReference;
+    const InputEvent event = eventReference;
+    const FocusDevice device = context.GetDevice();
+    const bool previousIndicated = context.IsPreviousFocusIndicated();
+    const bool proposed = context.IsFocusIndicationProposed();
+
     DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(target));
+
+    // Nested policy evaluation must not overwrite the outer decision or the
+    // objects referenced by its getters.
+    DALI_TEST_CHECK(previousReference == previous);
+    DALI_TEST_CHECK(focusedReference == focused);
+    DALI_TEST_CHECK(eventReference == event);
+    DALI_TEST_CHECK(context.GetPreviousFocusView() == previous);
+    DALI_TEST_CHECK(context.GetFocusedView() == focused);
+    DALI_TEST_CHECK(context.GetInputEvent() == event);
+    DALI_TEST_CHECK(context.GetDevice() == device);
+    DALI_TEST_CHECK(context.IsPreviousFocusIndicated() == previousIndicated);
+    DALI_TEST_CHECK(context.IsFocusIndicationProposed() == proposed);
   }
-  return context.proposedIndicated;
+  return context.IsFocusIndicationProposed();
+}
+
+bool RemoveTargetFromIndicationPolicy(const UiExtension::FocusIndicationContext& context)
+{
+  const View& focused = context.GetFocusedView();
+  const InputEvent& event = context.GetInputEvent();
+  focused.GetParent().Remove(focused);
+  DALI_TEST_CHECK(focused);
+  DALI_TEST_CHECK(!focused.IsConnectedToScene());
+  DALI_TEST_CHECK(context.GetFocusedView() == focused);
+  DALI_TEST_CHECK(event.IsProgrammatic());
+  RecordFocusIndicationPolicy(context);
+  return UiExtension::FocusIndicationPolicy::Default(context);
 }
 
 struct FocusInDuringNavigation
@@ -633,6 +676,27 @@ int UtcDaliFocusManagerRemovedAndReattachedViewDoesNotRestoreFocusP(void)
     DALI_TEST_CHECK(recorder.changes.size() == 1u);
     DALI_TEST_CHECK(!view.GetState().Contains(ViewState::FOCUSED));
   }
+  END_TEST;
+}
+
+int UtcDaliFocusManagerIndicationContextSurvivesTargetRemovalP(void)
+{
+  UiConfig config = UiConfig::New();
+  GetImpl(config).SetFocusIndicationPolicy(&RemoveTargetFromIndicationPolicy);
+  UiTestApplication application(config);
+  View target = AddWindowFocusTarget(application.GetWindow());
+  FocusManager manager = FocusManager::Get();
+
+  gFocusIndicationPolicyCallCount = 0;
+  DALI_TEST_CHECK(!manager.SetCurrentFocusView(target));
+  DALI_TEST_CHECK(!manager.GetCurrentFocusView());
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 1);
+  // A handle explicitly copied out of the borrowed context remains valid.
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.focusedView == target);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.inputEventType == InputEventType::NONE);
+  gFocusIndicationPolicyCall.previousFocusView.Reset();
+  gFocusIndicationPolicyCall.focusedView.Reset();
+
   END_TEST;
 }
 

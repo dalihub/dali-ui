@@ -534,6 +534,13 @@ private:
 
   bool ShouldIndicateFocus(const FocusChangeContext& context, bool previousFocusIndicated) const;
 
+  bool EvaluateFocusIndicationPolicy(const View&       previousFocusView,
+                                     const View&       focusedView,
+                                     FocusDevice       device,
+                                     const InputEvent& inputEvent,
+                                     bool              previousFocusIndicated,
+                                     bool              focusIndicationProposed) const;
+
   /**
    * Resolves the policy decision for focusedView while it remains the focused view,
    * then applies the result via SetFocusIndicated().
@@ -589,6 +596,14 @@ private:
 
   FocusChangeContext mLastFocusChangeContext; ///< The last focus change context (device & name)
 
+  enum class FocusIndicationPolicyMode
+  {
+    DEFAULT,
+    FOLLOW_FOCUS,
+    CUSTOM
+  };
+
+  FocusIndicationPolicyMode                  mFocusIndicationPolicyMode{FocusIndicationPolicyMode::DEFAULT};
   Extension::FocusIndicationPolicy::Function mFocusIndicationPolicy; ///< Extension policy for automatic focus indication changes.
 
   FocusNavigationCallback mFocusNavigationFallback; ///< Application-wide policy invoked before FocusFinder.
