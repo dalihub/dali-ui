@@ -133,6 +133,8 @@ enum class Role : uint32_t
   SCENE_3D,                      ///< A View that presents an interactive 3D scene. @SINCE_2_5.30
   MODEL,                         ///< A View that presents a model or model-like object. @SINCE_2_5.30
   SWITCH,                        ///< A switch that can be on or off. @SINCE_2_5.30
+  LABEL,                         ///< A View that presents a text label. @SINCE_2_5.30
+  SCROLL_PANE,                   ///< A View that provides a scrollable pane. @SINCE_2_5.30
   MAX_COUNT                      ///< Sentinel value used to validate accessibility role values. @SINCE_2_5.30
 };
 
