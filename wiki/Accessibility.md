@@ -14,9 +14,8 @@ Scope | Meaning
 --|--
 Common DALi UI | Public APIs, semantic responsibilities, and Component contracts that do not depend on a product Screen Reader. Unmarked content has this scope.
 Tizen TV | Behavior validated in Tizen TV integration, including the TV remote, current TV Screen Reader speech, product attributes, and page or modal lifecycle
-Baseline-specific | Implementation state or limitations verified at the commits listed above; revalidate them on a different branch or product image
 
-Read Common contracts separately from Tizen TV behavior. Statements marked with terms such as `current TV Screen Reader`, `Tizen product`, `product contract`, or `current devel` must not be generalized into Common DALi UI guarantees.
+Read Common contracts separately from Tizen TV behavior. Statements marked with terms such as `current TV Screen Reader`, `Tizen product`, or `product contract` must not be generalized into Common DALi UI guarantees.
 
 <br/>
 

@@ -14,9 +14,8 @@
 --|--
 Common DALi UI | Public API, semantic 책임, Component contract처럼 제품 Screen Reader에 종속되지 않는 내용. 별도 표시가 없으면 이 범위입니다.
 Tizen TV | TV remote, 현재 TV Screen Reader 발화, product attribute, page·modal lifecycle처럼 Tizen TV integration에서 검증된 내용
-Baseline-specific | 문서 상단의 commit에서 확인한 구현 상태나 제한. 다른 branch 또는 product image에서는 다시 검증해야 하는 내용
 
-Common contract와 Tizen TV 동작을 구분해서 읽으세요. `현재 TV Screen Reader`, `Tizen product`, `product contract`, `현재 devel 기준`으로 표시한 설명은 Common DALi UI 보장으로 확대 해석하지 않습니다.
+Common contract와 Tizen TV 동작을 구분해서 읽으세요. `현재 TV Screen Reader`, `Tizen product`, `product contract`로 표시한 설명은 Common DALi UI 보장으로 확대 해석하지 않습니다.
 
 <br/>
 
