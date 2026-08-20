@@ -869,6 +869,7 @@ private:
   void         RelayoutDefault(const Vector2& size, RelayoutContainer& container);
   View         ResolveDefaultFocusRequest();
   bool         ActivateAccessibilityDefault();
+  uint32_t     ComputeLogicalChildIndex(const Actor& child) const;
   void         OnChildAdded(Actor& child, bool allowNonViewChild);
   void         OnChildRemoved(Actor& child);
   void         OnViewSceneConnection();

@@ -457,14 +457,17 @@ private:
       textView.SetAccessibilityHidden(true);
     }
 
-    // Insert at logical index 0: anchor captured BEFORE the Add so the
-    // following InsertBelow takes the sibling-reorder path and the logical
-    // (layout) order resynchronises.
+    // Insert at logical index 0. InsertBelow places a fresh child at the
+    // logical (layout) position matching its actor position; an empty anchor
+    // means the host is empty, so append.
     Ui::View taskRowAnchor = mContentHost.GetChildViewAt(0u);
-    mContentHost.Add(mTaskRow);
     if(taskRowAnchor)
     {
       mContentHost.InsertBelow(mTaskRow, taskRowAnchor);
+    }
+    else
+    {
+      mContentHost.Add(mTaskRow);
     }
     mTaskRowAttached = true;
     if(mTextComponent)
@@ -571,15 +574,18 @@ private:
     mTaskRowAttached = false;
     if(mTextComponent)
     {
-      // Insert at logical index 0: anchor captured BEFORE the Add so the
-      // following InsertBelow takes the sibling-reorder path and the logical
-      // (layout) order resynchronises.
+      // Insert at logical index 0. InsertBelow places a fresh child at the
+      // logical (layout) position matching its actor position; an empty anchor
+      // means the host is empty, so append.
       Ui::View textView = mTextComponent->GetView();
       Ui::View anchor   = mContentHost.GetChildViewAt(0u);
-      mContentHost.Add(textView);
       if(anchor)
       {
         mContentHost.InsertBelow(textView, anchor);
+      }
+      else
+      {
+        mContentHost.Add(textView);
       }
     }
   }
@@ -641,16 +647,18 @@ private:
       }
       else
       {
-        // Insert at logical index 0. Capture the anchor BEFORE the Add: the
-        // Add makes the child "already ours" so the following InsertBelow
-        // takes dali-core's sibling-reorder path, which resynchronises the
-        // logical (layout) order through ChildOrderChangedSignal.
+        // Insert at logical index 0. InsertBelow places a fresh child at the
+        // logical (layout) position matching its actor position; an empty
+        // anchor means the host is empty, so append.
         Ui::View textView = mTextComponent->GetView();
         Ui::View anchor   = mContentHost.GetChildViewAt(0u);
-        mContentHost.Add(textView);
         if(anchor)
         {
           mContentHost.InsertBelow(textView, anchor);
+        }
+        else
+        {
+          mContentHost.Add(textView);
         }
       }
       return;

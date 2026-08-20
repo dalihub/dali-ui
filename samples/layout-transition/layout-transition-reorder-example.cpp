@@ -461,15 +461,17 @@ private:
     mDragProxy.SetProperty(Actor::Property::OPACITY, 0.0f);
     mDragProxy.SetProperty(Actor::Property::SENSITIVE, false);
 
-    // Insert at logical index mDraggedIndex. Capture the anchor BEFORE the
-    // Add: the Add makes the proxy "already ours", so the following
-    // InsertBelow takes dali-core's sibling-reorder path and the logical
-    // (layout) order resynchronises. An empty anchor means append.
+    // Insert at logical index mDraggedIndex. InsertBelow places a fresh child
+    // at the logical (layout) position matching its actor position; an empty
+    // anchor means the stack has no child there, so append.
     View proxyAnchor = mStack.GetChildViewAt(mDraggedIndex);
-    mStack.Add(mDragProxy);
     if(proxyAnchor)
     {
       mStack.InsertBelow(mDragProxy, proxyAnchor);
+    }
+    else
+    {
+      mStack.Add(mDragProxy);
     }
 
     mStack.SetLayoutTransition(savedTransition);
@@ -637,15 +639,17 @@ private:
     droppedChild.SetRequestedX(0.0f);
     droppedChild.SetRequestedY(0.0f);
 
-    // Re-insert at logical index targetIndex. Capture the anchor BEFORE the
-    // Add: the Add makes the child "already ours", so the following
-    // InsertBelow takes dali-core's sibling-reorder path and the logical
-    // (layout) order resynchronises. An empty anchor means append.
+    // Re-insert at logical index targetIndex. InsertBelow places a fresh child
+    // at the logical (layout) position matching its actor position; an empty
+    // anchor means the stack has no child there, so append.
     View dropAnchor = mStack.GetChildViewAt(targetIndex);
-    mStack.Add(droppedChild);
     if(dropAnchor)
     {
       mStack.InsertBelow(droppedChild, dropAnchor);
+    }
+    else
+    {
+      mStack.Add(droppedChild);
     }
 
     mStack.SetLayoutTransition(savedTransition);

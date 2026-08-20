@@ -67,7 +67,7 @@ root.Add(child2);
 window.Add(root);
 ```
 
-> **Note:** All layout types inherit from `Layout`, which inherits from `View`. Child management uses the inherited Actor API: `Add(View)`, `Remove(View)`, `InsertAbove`/`InsertBelow`, and `RemoveAll()`. `InsertAbove`/`InsertBelow` reorder a child that is **already** a child of the parent; a newly created view must be `Add()`ed first, otherwise it lands at the logical (layout) tail regardless of its actor position.
+> **Note:** All layout types inherit from `Layout`, which inherits from `View`. Child management uses the inherited Actor API: `Add(View)`, `Remove(View)`, `InsertAbove`/`InsertBelow`, and `RemoveAll()`. `Add()` appends; `InsertAbove`/`InsertBelow` position a child relative to an existing sibling and accept both a child that is **already** a child of the parent (a reorder) and a newly created one (a fresh insert) — either way the child takes the logical (layout) position matching its actor position.
 
 ---
 

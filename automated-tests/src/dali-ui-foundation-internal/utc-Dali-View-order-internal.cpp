@@ -20,6 +20,7 @@
 
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 
@@ -47,6 +48,12 @@ void utc_dali_view_order_internal_cleanup(void)
 // Visual order is still queried through the inherited Dali::Actor accessors.
 // Dali::Actor::SetDepthIndex is the draw-order-only counterpart: it must leave
 // both the sibling order and the logical layout order untouched.
+// Reordering an EXISTING child emits ChildOrderChangedSignal, which rebuilds
+// the logical order from the actor order. Inserting a FRESH child emits no
+// such signal (the child had no previous order), so OnChildAdd itself derives
+// the logical index from the child's final actor position -- skipping non-View
+// actor children and in-flight EXIT ghosts. These tests pin both orders for
+// both paths.
 namespace
 {
 struct OrderFixture
@@ -218,14 +225,14 @@ int UtcDaliViewInsertBelowReordersMChildrenInternalP(void)
   END_TEST;
 }
 
-int UtcDaliViewInsertBelowFreshChildInternalP(void)
+int UtcDaliViewInsertBelowFreshChildAfterAddInternalP(void)
 {
-  // Inserting a FRESH child at a logical index needs the Add first. A bare
-  // InsertBelow takes dali-core's "not yet our child" path, which puts the
-  // child at the right ACTOR index but only fires OnChildAdd -- appending it
-  // to mChildren -- and emits no ChildOrderChangedSignal, leaving the logical
-  // order out of sync. The Add makes the child "already ours" so the
-  // following InsertBelow is a sibling reorder and both orders agree.
+  // The two-step Add + InsertBelow form stays supported: the Add appends
+  // (both orders end with the child at the tail) and the following InsertBelow
+  // makes the child "already ours", so dali-core takes its sibling-reorder
+  // path and emits ChildOrderChangedSignal, which rebuilds mChildren from the
+  // actor order. Both orders agree, exactly as with the one-call form below.
+  // The difference is that only this form tags the siblings as reordered.
   UiTestApplication application;
 
   StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
@@ -242,6 +249,150 @@ int UtcDaliViewInsertBelowFreshChildInternalP(void)
   DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 2, TEST_LOCATION);
   DALI_TEST_EQUALS(VisualIndexOf(parent, d), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInsertBelowFreshChildDirectInternalP(void)
+{
+  // A FRESH child inserted with a single InsertBelow -- no Add first. Only
+  // OnChildAdd fires (a child with no previous order emits no
+  // ChildOrderChangedSignal), so OnChildAdd is what has to place the child at
+  // the logical index matching its actor index.
+  UiTestApplication application;
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  View        a      = View::New();
+  View        b      = View::New();
+  parent.Add(a);
+  parent.Add(b);
+
+  View d = View::New();
+  parent.InsertBelow(d, a);
+
+  // Both orders must agree for every child.
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, d), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, d), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, a), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, b), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 3u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInsertAboveFreshChildDirectInternalP(void)
+{
+  // The InsertAbove direction of the one-call fresh insert, plus the tail
+  // case served by the append shortcut: inserting above the LAST child must
+  // land on the tail in both orders (both index branches agree on this value,
+  // so this guards the result rather than which branch ran).
+  UiTestApplication application;
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  View        a      = View::New();
+  View        b      = View::New();
+  parent.Add(a);
+  parent.Add(b);
+
+  View d = View::New();
+  parent.InsertAbove(d, a); // [a, d, b]
+
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, d), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, a), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, d), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, b), 2u, TEST_LOCATION);
+
+  // Fresh insert above the last child -> the tail (append-shortcut case).
+  View e = View::New();
+  parent.InsertAbove(e, b); // [a, d, b, e]
+
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, e), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, e), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 4u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInsertBelowFreshChildSkipsExitGhostInternalP(void)
+{
+  // An in-flight EXIT ghost is still an actor child but is no longer a
+  // logical child, so it must not shift the logical index of a fresh insert.
+  // The actor index and the logical index legitimately diverge here.
+  UiTestApplication application;
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  View b = View::New();
+  View c = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.5f));
+  transition.SetExitVisualSpec(exitSpec);
+  parent.SetLayoutTransition(transition);
+
+  // a becomes a ghost: dropped from the logical children, kept under the
+  // parent Actor until the EXIT animation finishes. The long duration and
+  // Render(0) keep it in flight.
+  parent.Remove(a, RemovePolicy::ANIMATE_EXIT);
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(static_cast<Dali::Actor>(parent).GetChildCount(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 2u, TEST_LOCATION);
+
+  // Actor order becomes [ghost a, d, b, c]; logical order must be [d, b, c].
+  View d = View::New();
+  parent.InsertBelow(d, b);
+
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, d), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, c), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 3u, TEST_LOCATION);
+
+  // The ghost still occupies actor index 0, so the two orders differ by one.
+  DALI_TEST_EQUALS(VisualIndexOf(parent, d), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<Dali::Actor>(parent).GetChildCount(), 4u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInsertBelowFreshChildSkipsRawActorInternalP(void)
+{
+  // A raw (non-View) actor child attached through the Integration helper is
+  // never tracked as a logical child, so it must not shift the logical index
+  // of a fresh insert either.
+  UiTestApplication application;
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  View        a      = View::New();
+  View        b      = View::New();
+  parent.Add(a);
+  Dali::Ui::Integration::View::AddActorChild(parent, Dali::Actor::New());
+  parent.Add(b);
+
+  DALI_TEST_EQUALS(static_cast<Dali::Actor>(parent).GetChildCount(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 2u, TEST_LOCATION);
+
+  // Actor order becomes [a, raw, d, b]; logical order must be [a, d, b].
+  View d = View::New();
+  parent.InsertBelow(d, b);
+
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, d), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 3u, TEST_LOCATION);
+
+  // The raw actor still occupies actor index 1, so the two orders differ.
+  DALI_TEST_EQUALS(VisualIndexOf(parent, d), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<Dali::Actor>(parent).GetChildCount(), 4u, TEST_LOCATION);
   END_TEST;
 }
 

@@ -2362,8 +2362,12 @@ int UtcDaliLayoutTransitionResizeWithReorderKeepsReorderedCauseP(void)
   View c = View::New();
   c.SetRequestedWidth(100.0f);
   c.SetRequestedHeight(40.0f);
-  // Insert the fresh child at logical index 0: Add first so the following
-  // InsertBelow takes the sibling-reorder path and mChildren resynchronises.
+  // The two-step form is deliberate here: Add() makes the child "already
+  // ours", so the following InsertBelow takes the sibling-reorder path and
+  // emits ChildOrderChangedSignal, which is what tags the siblings with
+  // LayoutChangeCause::REORDERED. A bare InsertBelow of a fresh child lands
+  // at the same index but emits no such signal, so it would not produce the
+  // cause this test asserts.
   parent.Add(c);
   parent.InsertBelow(c, a);
 

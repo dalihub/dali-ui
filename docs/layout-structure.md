@@ -18,7 +18,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Measure/Arrange are invoked internally by the layout system; applications may request recomputation via `InvalidateMeasure()` / `InvalidateArrange()`.
   - `AttachLayoutManager(Dali::UniquePtr<LayoutManager>)` attaches a layout algorithm to any View; the View then dispatches Measure/Arrange to the manager (a Measure/Arrange callback, if set, takes priority over the manager).
   - Child add/remove uses inherited Actor `Add`/`Remove`. `InsertAbove`/`InsertBelow` and `RemoveAll()` are available for positional insertion and bulk removal. `View` adds the EXIT-aware `Remove(View, RemovePolicy)` and `RemoveAll(RemovePolicy)`; `RemoveAll(RemovePolicy::IMMEDIATE)` differs from the inherited `RemoveAll()` only in leaving in-flight EXIT ghosts to finish their EXIT.
-  - `InsertAbove`/`InsertBelow` reorder a child that is **already** a child of the parent. A freshly created view must be `Add()`ed first — otherwise it lands at the logical (layout) tail regardless of its actor position — and is then moved with `InsertAbove`/`InsertBelow`.
+  - `Add()` appends. `InsertAbove`/`InsertBelow` position a child relative to an existing sibling and accept both a child that is **already** a child of the parent (a reorder) and a **freshly created** view (a fresh insert); in both cases the child's logical (layout) index matches its resulting actor position, skipping non-View actor children and in-flight EXIT ghosts.
 
 - **Layout** (inherits View)
   - Child management: `Add(View)`, `Remove(View)`, `InsertAbove(Actor, Actor)`, `InsertBelow(Actor, Actor)`, and `RemoveAll()` (all inherited from Actor), plus `Remove(View, RemovePolicy)` and `RemoveAll(RemovePolicy)` from View. `GetChildCount()` / `GetChildAt(index)` are inherited from Actor (actor tree, including in-flight EXIT ghosts and non-View actors); the logical (layout) child list is enumerated by `GetChildViewCount()`, `GetChildViewAt(index)`, and `IndexOfChildView(View)` (which skip EXIT ghosts and non-View actors and return `Ui::View` directly).
@@ -77,7 +77,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 - **ViewImpl** (DALi ControlImpl-derived)
   - Holds the actual Measure/Arrange logic, size specifications, margin/padding/alignment/visibility, and child container.
-  - Provides `GetChildViewCount`, `GetChildViewAt`, `IndexOfChildView`, `Contents`, etc. Child add/remove uses Actor `Add`/`Remove` with `OnChildAdd`/`OnChildRemove` callbacks to sync the internal child container. Child order changes (via the inherited `Dali::Actor::Raise`/`Lower`/`InsertAbove`/`InsertBelow` and friends) are detected via `ChildOrderChangedSignal` to keep `mChildren` in sync.
+  - Provides `GetChildViewCount`, `GetChildViewAt`, `IndexOfChildView`, `Contents`, etc. Child add/remove uses Actor `Add`/`Remove` with `OnChildAdd`/`OnChildRemove` callbacks to sync the internal child container. Child order changes (via the inherited `Dali::Actor::Raise`/`Lower`/`InsertAbove`/`InsertBelow` and friends) are detected via `ChildOrderChangedSignal` to keep `mChildren` in sync; a **fresh** child inserted with `InsertAbove`/`InsertBelow` emits no such signal, so `OnChildAdd` derives its logical index from the child's final actor position (skipping non-View actor children and EXIT ghosts).
   - `GetParentLayout()`, `IsLayout()`, and invalidation propagate to the parent until a layout root is reached, which registers with the LayoutController.
 
 - **LayoutImpl** (inherits ViewImpl)

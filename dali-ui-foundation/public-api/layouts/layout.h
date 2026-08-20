@@ -41,10 +41,11 @@ class LayoutImpl;
  * (inherited from View's base class). Remove(View, RemovePolicy) and
  * RemoveAll(RemovePolicy) are provided by View.
  *
- * InsertAbove/InsertBelow reorder a child that is ALREADY a child of this
- * layout. A newly created view must be Add()ed first, otherwise it lands at
- * the logical (layout) tail regardless of its actor position; Add() then
- * InsertAbove/InsertBelow places it at the intended index.
+ * Add() appends. InsertAbove/InsertBelow position a child relative to an
+ * existing sibling and accept both a child that is already a child of this
+ * layout (a reorder) and a newly created one (a fresh insert); either way the
+ * child takes the logical (layout) position matching its resulting actor
+ * position, skipping non-View actor children and in-flight EXIT ghosts.
  */
 class DALI_UI_API Layout : public View
 {

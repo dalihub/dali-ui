@@ -2410,12 +2410,68 @@ void ViewDataImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
   }
 }
 
+uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child) const
+{
+  Actor          self            = mViewImpl.Self();
+  const uint32_t actorChildCount = self.GetChildCount();
+
+  // Fast path: Actor::Add appends, so the new child is the last actor child
+  // and every logical sibling precedes it -- the logical index is simply the
+  // current logical child count. This is the overwhelmingly common add path
+  // and stays O(1).
+  if(actorChildCount > 0u && self.GetChildAt(actorChildCount - 1u) == child)
+  {
+    return static_cast<uint32_t>(mChildren.Count());
+  }
+
+  // General path (a fresh Actor::InsertAbove / InsertBelow): dali-core has
+  // already placed the child at its FINAL actor position before notifying us,
+  // so the logical index is the number of actor children before it that are
+  // logical children of this view. The predicate mirrors
+  // OnChildOrderChanged's rebuild filter -- a View that is present in
+  // mChildren -- so it skips non-View actor children (never tracked) and
+  // in-flight EXIT ghosts (actor-parented but erased from mChildren).
+  uint32_t logicalIndex = 0u;
+  for(uint32_t i = 0u; i < actorChildCount; ++i)
+  {
+    Actor actorChild = self.GetChildAt(i);
+    if(actorChild == child)
+    {
+      break;
+    }
+
+    Ui::View siblingView = Ui::View::DownCast(actorChild);
+    if(siblingView && std::find(mChildren.begin(), mChildren.end(), siblingView) != mChildren.end())
+    {
+      ++logicalIndex;
+    }
+  }
+
+  // If @p child is not an actor child at all (defensive -- this hook is only
+  // reached from Actor::Add / InsertAbove / InsertBelow after the child is in
+  // place), the loop counts every logical child and the result is
+  // mChildren.Count(), i.e. a plain append.
+  return logicalIndex;
+}
+
 void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
 {
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
-    mChildren.PushBack(view);
+    // Place the child at the logical position matching its actor position.
+    // A fresh Actor::InsertAbove / InsertBelow emits no ChildOrderChangedSignal
+    // (the child had no previous order), so this hook is the only chance to
+    // keep both orders in sync; Actor::Add takes the O(1) append fast path.
+    const uint32_t logicalIndex = ComputeLogicalChildIndex(child);
+    if(logicalIndex >= mChildren.Count())
+    {
+      mChildren.PushBack(view);
+    }
+    else
+    {
+      mChildren.Insert(mChildren.Begin() + logicalIndex, view);
+    }
 
     ViewImpl& childImpl = GetImpl(view);
 
