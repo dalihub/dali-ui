@@ -3,11 +3,20 @@
 [→ English](https://github.sec.samsung.net/NUI/dali-ui/wiki/Accessibility)
 
 > 대상: DALi UI 기반 TV Application 개발자와 Component 개발자
-> 기준일: 2026-08-04
-> 구현 기준: `dali-ui` `5fd24a718692`
-> 상태: Current with known component gaps
+> 기준일: 2026-08-20
+> 구현 기준: `dali-ui` `11a63b7dadf66`; TV `screen-reader` `6e012e4b4bcb`
+> Localization POC 대조 기준: `TempAccessibilityVDSupport` `9b6b9adf50fd`
+> 상태: Current with known component and product-integration gaps
 
 이 문서는 TV 화면을 구성하는 Application 개발자와 재사용 UI를 만드는 Component 개발자가 함께 사용하는 접근성 가이드입니다. 접근성의 기본 개념과 TV UX 명세부터 DALi UI 구현과 검증까지 하나의 흐름으로 설명합니다. 모든 구현 예제는 C++ `Dali::Ui` API를 사용합니다.
+
+적용 범위 | 의미
+--|--
+Common DALi UI | Public API, semantic 책임, Component contract처럼 제품 Screen Reader에 종속되지 않는 내용. 별도 표시가 없으면 이 범위입니다.
+Tizen TV | TV remote, 현재 TV Screen Reader 발화, product attribute, page·modal lifecycle처럼 Tizen TV integration에서 검증된 내용
+Baseline-specific | 문서 상단의 commit에서 확인한 구현 상태나 제한. 다른 branch 또는 product image에서는 다시 검증해야 하는 내용
+
+Common contract와 Tizen TV 동작을 구분해서 읽으세요. `현재 TV Screen Reader`, `Tizen product`, `product contract`, `현재 devel 기준`으로 표시한 설명은 Common DALi UI 보장으로 확대 해석하지 않습니다.
 
 <br/>
 
@@ -23,8 +32,27 @@ Component 개발자 | 접근성 기본 개념 → TV UX 명세 → Component 개
 1. Screen Reader가 켜져 있는지와 관계없이 Name, Role, State, Value, Description 등의 접근성 정보를 항상 설정합니다.
 2. Name에는 대상의 짧은 이름만 넣고 Role, State, Value를 중복해서 합치지 않습니다.
 3. TV remote의 keyboard focus와 accessibility highlight를 같은 상태로 취급하지 않습니다.
-4. Application은 화면 문맥과 content semantic을, Component는 기본 semantic과 action contract를 책임집니다.
+4. Application은 화면 문맥과 정보의 원천을, Component는 기본 semantic과 접근성 노출·동기화 및 action contract를 책임집니다.
 5. API를 설정한 뒤에는 AT-SPI tree와 실제 TV Screen Reader 동작을 모두 검증합니다.
+
+### 1.1 Application과 Component의 책임 경계
+
+접근성 property를 어느 한쪽이 독점한다고 보기보다, Application은 화면 문맥과 정보의 원천을 결정하고 Component는 기능 고유의 기본 semantic과 접근성 노출·동기화를 책임지는 것이 기본입니다.
+
+정보 또는 동작 | Application 책임 | Component 또는 framework 책임
+--|--|--
+Name | 화면 문맥에 맞는 명시적 이름 | 표시 text에서 유도되는 기본 이름
+Role | 올바른 Component 선택과 예외적인 override 검증 | 실제 action contract와 맞는 기본 Role
+State | Application이 관리하는 현재 상태 결정 | 시각·동작 상태를 접근성 State로 노출하고 동기화
+Value | 실제 값과 단위, 표현 방식 결정 | 값의 형식화·노출 및 조작 결과 동기화
+Description | 화면별 목적이나 문맥을 설명하는 명시적 override | Component 고유의 기본 사용 안내
+Action | 기능 실행 결과와 Application 고유의 후속 처리 | touch, remote key, API, accessibility action을 동일 기능 경로로 연결
+Tree와 lifecycle | 현재 page와 modal의 활성 subtree, 초기 focus·highlight, 닫기 후 복귀 대상 | AT-SPI object와 D-Bus bridge, 내부 child의 기본 tree 노출, 재사용·recycling 시 semantic 동기화
+이미지 | 정보 이미지와 decorative 이미지 구분 | 이미지용 기본 tree와 action contract 제공
+
+Description은 한쪽의 독점 책임이 아닙니다. 예를 들어 Slider의 조작 방법처럼 Component 기능에 변하지 않는 안내는 default Description으로 제공하고, 화면에서 그 Slider가 무엇을 조절하는지 설명하는 문구는 Application이 명시적으로 설정합니다. Component의 default Name과 Description은 Application의 explicit override를 덮어쓰지 않아야 하므로 `OnAccessibilityRequestDefaultName()`과 `OnAccessibilityRequestDefaultDescription()` 같은 default hook을 사용하세요. 일반적인 상태나 type 변경 중 `SetAccessibilityDescription()` 또는 `SetTranslatableAccessibilityDescription()`을 다시 호출하여 Application 값을 덮어쓰지 마세요.
+
+State도 같은 방식으로 나눕니다. Application은 현재 상태를 결정하고, Component는 그 상태를 `CHECKED`, `SELECTED`, `EXPANDED`, `ENABLED` 같은 접근성 State와 시각·입력 동작에 일관되게 반영합니다. Application이 일반 View를 직접 조합한 경우에는 이 두 책임을 모두 집니다.
 
 <br/>
 
@@ -65,6 +93,8 @@ AT-SPI는 Linux/Tizen에서 Screen Reader 같은 assistive technology와 UI 애�
 
 ## 3. Tizen TV 접근성 동작
 
+> **적용 범위: Tizen TV.** 이 절은 TV remote와 현재 TV Screen Reader integration을 설명합니다.
+
 ### 3.1 TV remote focus 흐름
 
 TV 제품의 일반적인 remote 탐색 흐름은 다음과 같습니다. 제품 branch의 Screen Reader integration 방식에 따라 세부 경로는 달라질 수 있지만, Application과 Component의 contract는 같습니다.
@@ -90,6 +120,8 @@ TV UX 명세와 테스트 결과에는 어떤 상태를 의미하는지 명확�
 <br/>
 
 ## 4. TV 접근성 UX 명세
+
+> **적용 범위: Tizen TV.** 이 절의 focus, 복귀, 발화 검증 기준은 TV 사용자 흐름을 대상으로 합니다.
 
 UX 단계에서 시각 배치만 전달하면 개발자와 QA가 접근성 탐색 단위와 발화를 추측하게 됩니다. 화면 또는 Component 명세에 다음 정보를 함께 기록하세요.
 
@@ -315,6 +347,7 @@ input.AddAccessibilityRelation(Accessibility::RelationType::ERROR_FOR, error);
 `EMBEDS` | `EMBEDDED_BY`
 `DETAILS` | `DETAILS_FOR`
 `ERROR_MESSAGE` | `ERROR_FOR`
+`MEMBER_OF` | 역방향 relation 불필요
 
 relation은 한 방향씩 저장되므로 client가 양쪽 관계를 조회해야 한다면 위 예제처럼 대응 관계를 각각 추가합니다.
 
@@ -326,11 +359,92 @@ bool exists = input.HasAccessibilityRelation(Accessibility::RelationType::LABELL
 
 대상 View는 weak handle로 보관되므로 대상이 소멸되었다고 relation 때문에 수명이 연장되지는 않습니다.
 
+### 10.1 TV에서 group 진입 context 발화
+
+> **적용 범위: Tizen TV product contract.** Portable AT-SPI 동작으로 가정하지 마세요.
+
+현재 TV Screen Reader는 focused member가 명시적으로 opt-in하고 `MEMBER_OF` 대상이 정확히 하나인 경우, 첫 member를 발화하기 전에 group 또는 page context를 발화할 수 있습니다.
+
+```cpp
+View group = View::New();
+group.SetAccessibilityRole(Accessibility::Role::CONTAINER);
+group.SetAccessibilityName("화면 설정");
+
+View item = View::New();
+item.SetAccessibilityRole(Accessibility::Role::BUTTON);
+item.SetAccessibilityName("밝기");
+item.AddAccessibilityRelation(Accessibility::RelationType::MEMBER_OF, group);
+item.AppendAccessibilityAttribute("announce-member-on-entry", "true");
+```
+
+Focus가 group에 진입하면 group을 item보다 먼저 발화하지만 같은 group의 member 사이를 이동할 때는 반복하지 않습니다. Group을 벗어났다가 다시 진입하면 context를 다시 발화합니다. `MEMBER_OF` 대상이 둘 이상이면 관계가 모호하므로 진입 context를 발화하지 않습니다. Item이 recycling되거나 group에서 제거될 때 relation과 opt-in attribute를 모두 제거하세요.
+
+> [!NOTE]
+> `announce-member-on-entry`는 현재 Tizen TV Screen Reader의 product contract이며 portable AT-SPI attribute가 아닙니다. 대상 product image에서 검증하고 group의 Name, Role, reading information을 의미 있게 설정하세요.
+
+### 10.2 TV의 label이 연결된 text input
+
+> **적용 범위: Tizen TV Screen Reader integration.** 발화 순서와 password 처리는 대상 product image에서 검증합니다.
+
+표시 label을 `LABELLED_BY`로 `ENTRY` 또는 `PASSWORD_TEXT` View에 연결하고 reading information에 Name을 포함합니다. 현재 TV Screen Reader는 label, role, 현재 입력 content 순서로 발화를 구성할 수 있습니다.
+
+```cpp
+label.SetAccessibilityRole(Accessibility::Role::TEXT);
+label.SetAccessibilityName("계정 이름");
+
+input.SetAccessibilityRole(Accessibility::Role::ENTRY);
+input.AddAccessibilityRelation(Accessibility::RelationType::LABELLED_BY, label);
+input.AddAccessibilityReadingInfo(Accessibility::ReadingInfo::NAME);
+input.AddAccessibilityReadingInfo(Accessibility::ReadingInfo::ROLE);
+```
+
+변경되는 label과 입력 content를 하나의 Name에 복사하지 말고 표시 label과 relation을 최신 상태로 유지하세요. `PASSWORD_TEXT`에서는 Screen Reader가 secret text 대신 localized 문자 수를 발화합니다. 대상 image에서 입력, 삭제, 전체 삭제, IME 탐색, 빈 content, password privacy를 검증하세요.
+
 <br/>
 
 ## 11. 다국어 접근성 문자열
 
-### 11.1 번역 resource 연결
+### 11.1 Domain 설정과 `GetLocalizedString()` 직접 조회
+
+Resource를 조회하거나 binding하기 전에 gettext domain을 등록합니다. `RegisterDomain()`은 해당 domain을 자동으로 default로 만들지 않습니다.
+
+```cpp
+#include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
+
+UiLocalizationManager localization = UiLocalizationManager::Get();
+bool registered = localization.RegisterDomain("settings", "/usr/share/locale");
+localization.SetDefaultDomain("settings"); // Application이 소유하는 default domain
+
+Dali::String title = localization.GetLocalizedString("IDS_SETTINGS_TITLE");
+Dali::String wifi  = localization.GetLocalizedString("IDS_SETTINGS_WIFI", "settings");
+```
+
+`GetLocalizedString()`은 번역 결과를 즉시 사용해 일회성 값을 계산하거나, formatter로 완전한 문장을 만들거나, translation binding API가 없는 속성에 적용할 때 사용합니다. Domain 없는 overload는 현재 default domain을 사용합니다. 재사용 Component나 framework는 Application이 default domain을 바꿔 문자열까지 바뀌지 않도록 자체 domain을 명시하는 것이 좋습니다.
+
+직접 조회는 resource ID를 기억하지 않으며 locale이 바뀌어도 반환된 `Dali::String`을 갱신하지 않습니다. Locale refresh 경로에서 다시 조회하거나, 값이 계속 최신 상태여야 하면 binding을 사용하세요. Resource ID가 비어 있으면 빈 문자열을 반환합니다. Localization bypass 상태이거나 effective domain 또는 번역을 찾지 못하면 resource ID를 fallback으로 반환합니다. 사용자에게 전달되는 접근성 text에서 SID가 반환되면 diagnostic 실패로 취급하고 Screen Reader에 의도적으로 노출하지 마세요.
+
+필요한 동작 | API | Locale 변경 contract
+--|--|--
+일회성 또는 즉시 조회 | `GetLocalizedString()` | Caller가 다시 조회
+Name 또는 Description resource | `SetTranslatableAccessibilityName/Description()` | DALi가 자동 재적용
+Formatted Value 또는 custom property | `SetBindingResource()` | Callback은 자동 재실행, model 변경은 caller가 처리
+수량에 따라 달라지는 text | `GetLocalizedPluralString()` | 일반적으로 binding callback에서 caller가 다시 조회
+
+`GetLocalizedString()`의 반환값을 Screen Reader 발화에 사용할 때는 결과가 비어 있거나 resource ID가 그대로 반환되었는지 확인합니다. 이 경우에는 검토가 완료된 fallback 문구를 사용하세요.
+
+```cpp
+constexpr char kPleaseWaitId[] = "IDS_PLEASE_WAIT";
+Dali::String resolved = localization.GetLocalizedString(kPleaseWaitId, "settings");
+std::string text = resolved.CStr() ? resolved.CStr() : "";
+if(text.empty() || text == kPleaseWaitId)
+{
+  text = "Please wait."; // Product fallback-locale policy를 따라야 한다.
+}
+```
+
+검토한 `ProgressBar`와 `Loading` 코드는 발화를 만들 때마다 message를 다시 resolve하므로 direct lookup 사용이 적절합니다. 결과를 나중에 사용하기 위해 cache한다면 명시적인 refresh 경로를 추가하거나 cache를 binding으로 교체하세요.
+
+### 11.2 Name과 Description resource binding
 
 name과 description을 `UiLocalizationManager` resource에 연결하면 locale 변경 시 번역된 값이 갱신됩니다.
 
@@ -344,9 +458,80 @@ view.ClearTranslatableAccessibilityName();
 view.ClearTranslatableAccessibilityDescription();
 ```
 
-domain 인자를 생략하면 default domain을 사용합니다. `SetAccessibilityName()`이나 `SetAccessibilityDescription()`으로 명시적 문자열을 다시 설정하면 해당 translation binding과 language span은 해제됩니다. localization 설정 방법은 [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI-(kr))를 참고하세요.
+Binding은 등록 시점과 DALi가 platform locale-changed signal을 받을 때마다 resolve됩니다. Domain 인자를 생략하면 default domain을 사용합니다. `GetTranslatableAccessibilityName()`과 `GetTranslatableAccessibilityDescription()`은 번역된 text가 아니라 binding된 resource ID를 반환합니다. Effective 값은 `GetAccessibilityName()` 또는 `GetAccessibilityDescription()`으로 확인하세요.
 
-### 11.2 한 문자열 안의 언어 구간
+`SetAccessibilityName()`이나 `SetAccessibilityDescription()`으로 명시적 문자열을 다시 설정하면 대응하는 translation binding과 language span은 해제됩니다. 일반 localization 설정 방법은 [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI-(kr))를 참고하세요.
+
+### 11.3 동적 또는 formatted Accessibility Value
+
+`SetTranslatableAccessibilityValue()` API는 없습니다. Value 또는 다른 custom property를 locale 변경 후 다시 formatting해야 한다면 이름 있는 `UiLocalizationManager::SetBindingResource()` binding을 사용합니다.
+
+```cpp
+void SliderImpl::BindAccessibilityValue(View view)
+{
+  mView = view;
+  UiLocalizationManager::Get().SetBindingResource(
+    view,
+    "AccessibilityValueFormat",
+    "IDS_SLIDER_VALUE_FORMAT",
+    "settings",
+    LocalizedStringCallback::New(this, &SliderImpl::OnLocalizedValueFormat));
+}
+
+void SliderImpl::OnLocalizedValueFormat(BaseHandle target,
+                                        const Dali::String& localizedFormat)
+{
+  mLocalizedValueFormat = localizedFormat;
+  ApplyAccessibilityValue(View::DownCast(target));
+}
+
+void SliderImpl::ApplyAccessibilityValue(View view)
+{
+  // FormatNamedTokens은 <<MIN>>, <<MAX>>, <<CURRENT>>를 검증하고 치환한다.
+  std::string value = FormatNamedTokens(mLocalizedValueFormat, mMin, mMax, mCurrent);
+  view.SetAccessibilityValue(value.c_str());
+}
+```
+
+`SetBindingResource()`는 callback을 즉시 호출하고 binding이 refresh될 때마다 다시 호출합니다. Model 변경은 localization callback을 발생시키지 않으므로 최솟값, 최댓값, 현재 값이 바뀔 때마다 Component가 `ApplyAccessibilityValue()`도 호출해야 합니다. Target property마다 고유한 binding ID를 사용하세요. 같은 target과 binding ID를 다시 등록하면 기존 resource, domain, callback을 교체합니다.
+
+Manager는 target을 weak reference로 보관하지만 member-function callback은 owner의 수명을 연장하지 않습니다. Callback owner가 소멸되기 전에 binding을 해제하세요.
+
+```cpp
+UiLocalizationManager::Get().ClearBinding(mView, "AccessibilityValueFormat");
+```
+
+`ClearBindings()`는 해당 owner가 target의 모든 localization binding을 의도적으로 소유할 때만 사용합니다.
+
+### 11.4 번역 문장, parameter, fallback
+
+- 가능하면 완전한 자연어 단위 전체를 번역합니다. 번역 fragment를 각각 조회해 고정 순서로 이어 붙이지 마세요. 번역자가 어순, 조사, 활용, 높임말을 조정할 수 있어야 합니다.
+- Runtime data에는 locale마다 순서를 바꿀 수 있는 문서화된 named token 또는 type-safe positional formatting을 사용합니다. Slider POC는 최솟값, 최댓값, 현재 값에 `<<A>>`, `<<B>>`, `<<C>>`를 사용합니다.
+- 접근성 값으로 노출하기 전에 필요한 token이 모두 존재하고 unresolved token이 남지 않았는지 검증합니다. 이미 formatting한 문자열에 다시 치환하지 말고 원본 localized template에서 매번 다시 만드세요.
+- Catalog 또는 template이 잘못되었을 때는 짧고 이해 가능한 fallback을 사용합니다. `IDS_SLIDER_VALUE` 같은 SID 반환은 diagnostic에는 유용하지만 production Screen Reader Value로는 적합하지 않습니다.
+- Command line, resource ID, locale key와 같은 machine syntax는 주변 설명만 번역하고 명령 자체는 번역 대상에서 제외합니다.
+- `SetAccessibilityValue()`에는 resource ID나 format template이 아니라 최종 localized text를 전달합니다.
+
+### 11.5 복수형
+
+`quantity == 1` 조건으로 단수/복수를 직접 고르지 말고 gettext plural rule을 사용합니다.
+
+```cpp
+Dali::String format = localization.GetLocalizedPluralString(
+  "IDS_ONE_UNREAD_MESSAGE",
+  "IDS_MANY_UNREAD_MESSAGES",
+  unreadCount,
+  "settings");
+
+Dali::String value = FormatCount(format, unreadCount);
+view.SetAccessibilityValue(value.CStr());
+```
+
+`quantity`는 catalog의 plural form을 선택하지만 반환 문자열에 자동 삽입되지는 않으므로 formatter가 값을 넣어야 합니다. `LocalizedStringOverrideFunc`는 plural lookup에 적용되지 않습니다. Plural lookup 자체는 binding이 아니므로, 동적 View는 일반 `SetBindingResource()` callback을 locale-refresh trigger로 등록한 뒤 callback 안에서 `GetLocalizedPluralString()`을 호출할 수 있습니다. Quantity가 바뀔 때도 같은 update를 다시 실행하세요.
+
+각 PO catalog에는 올바른 `Plural-Forms`와 필요한 모든 plural entry가 있어야 합니다. Plural form이 하나, 둘, 셋 이상인 언어를 테스트하세요. 영어와 한국어만으로는 전체 contract를 검증할 수 없습니다.
+
+### 11.6 한 문자열 안의 언어 구간
 
 한 name 또는 description 안에 여러 언어가 섞여 있으면 language span을 추가합니다.
 
@@ -366,6 +551,18 @@ view.ClearAccessibilityNameLanguageSpans();
 view.ClearAccessibilityDescriptionLanguageSpans();
 ```
 
+Language span은 이미 resolve된 text에 사용할 TTS 언어를 지정합니다. Text를 번역하지 않으며 resource binding을 대신하지 않습니다.
+
+### 11.7 Packaging, locale refresh, 검증
+
+1. Locale별로 review된 PO source를 관리하고 `msgfmt --check`로 compile합니다.
+2. 각 MO file을 `<locale-root>/<locale>/LC_MESSAGES/<domain>.mo`에 설치하고 runtime에 같은 domain과 locale root를 등록합니다.
+3. Tizen product에서는 platform locale 변경이 `Adaptor::LocaleChangedSignal()`로 전달되게 하고, `UiLocalizationManager`가 등록된 binding을 자동 refresh하게 합니다. Host/device sample의 직접 `setlocale()`, `LANGUAGE`, `vconftool`, `RefreshBindings()` 호출은 진단 수단이며 일반 Application의 locale 관리 방식이 아닙니다.
+4. 표시 text와 접근성 Name, Description, Value를 같은 locale/model update에서 refresh해 서로 다른 언어가 되지 않게 합니다.
+5. 실제 Screen Reader로 최초 실행과 실행 중 locale 변경을 확인합니다. 어순이 다른 언어, 지원되는 경우 RTL 언어, plural 경계값, catalog 누락, 잘못된 formatter token을 포함하세요.
+
+검토한 Slider POC는 domain 등록, `msgfmt --check`, MO 설치, explicit-domain binding, callback cleanup lifecycle을 올바르게 따릅니다. 다만 임의로 작성한 영문/한글 번역과 SID fallback은 POC 한정이므로 release 전에 product 승인 문자열과 사용자가 이해할 수 있는 production fallback으로 교체해야 합니다.
+
 <br/>
 
 ## 12. Collection 정보
@@ -384,6 +581,24 @@ items[0].ClearAccessibilityCollectionIndex(); // Get 결과는 -1
 ```
 
 `SetAccessibilityCollectionIndex(-1)`도 index를 제거합니다. 항목 삽입, 삭제, 정렬 후에는 실제 순서와 index가 일치하도록 갱신하세요.
+
+### 12.1 Composite container의 active descendant
+
+> **적용 범위: Common DALi UI notification API + Tizen TV product opt-in.** `NotifyAccessibilityActiveDescendantChanged()`는 Common API이지만 `use-active-descendant` 처리와 발화는 현재 TV Screen Reader contract입니다.
+
+Virtualized list나 tab pattern처럼 keyboard focus는 composite container에 유지되고 내부의 logical active item만 바뀔 때 active descendant를 사용합니다.
+
+```cpp
+list.AppendAccessibilityAttribute("use-active-descendant", "true");
+
+// Item을 먼저 binding하고 Name, Role, State, Value, index를 갱신한다.
+list.NotifyAccessibilityActiveDescendantChanged(currentItem);
+```
+
+현재 TV Screen Reader는 source container에 `use-active-descendant` opt-in attribute가 있을 때만 event를 처리합니다. `NotifyAccessibilityActiveDescendantChanged()`는 실제 accessible descendant를 전달하므로 Screen Reader가 중첩된 item content도 읽을 수 있습니다. 다만 container 관계를 가장 명확하게 전달하려면 direct child를 권장합니다. Item semantic이 최신 상태가 된 뒤, logical active item이 실제로 바뀔 때만 notify하세요.
+
+> [!WARNING]
+> 현재 `dali-ui` header는 빈 descendant가 active descendant를 clear한다고 설명하지만, `11a63b7dadf66` 구현은 empty handle이면 event를 보내기 전에 return합니다. 구현 contract가 수정되기 전에는 `NotifyAccessibilityActiveDescendantChanged({})`로 TV Screen Reader state가 clear된다고 가정하지 마세요. 또한 `use-active-descendant`는 TV product attribute이므로 대상 image에서 검증해야 합니다.
 
 <br/>
 
@@ -492,21 +707,37 @@ Status | 의미
 `CANCELLED` | 대기 중이거나 진행 중인 읽기가 취소됨
 `STOPPED` | 읽기가 중지되거나 완료됨
 
+### 14.3 현재 TV Screen Reader의 live update와 notification
+
+> **적용 범위: Tizen TV product contract.** 다른 Screen Reader의 live-region 동작까지 보장하지 않습니다.
+
+현재 TV Screen Reader는 text, Value, checked state, Name, Description 변경 event를 처리합니다. 현재 focused object의 변경은 기본적으로 assertive이며, unfocused object는 live-region policy에 opt-in하지 않으면 발화하지 않습니다.
+
+```cpp
+status.AppendAccessibilityAttribute("container-live", "polite");
+status.SetAccessibilityRole(Accessibility::Role::TEXT);
+status.SetAccessibilityValue("다운로드 3개 완료");
+```
+
+Policy | 현재 TV 동작
+--|--
+`polite` | 진행 중인 발화를 버리지 않고 update를 발화
+`assertive` | 이전 발화를 중단하고 update를 발화
+`off` 또는 unfocused object에 attribute 없음 | property 변경을 발화하지 않음
+
+`assertive`는 긴급 정보에만 사용합니다. Timer와 progress update 빈도를 제한하고 하나의 semantic update로 충분한 경우 Name, Description, Value setter를 번갈아 호출하지 마세요. `PROGRESS_BAR` live region은 첫 update의 reading information에 `ReadingInfo::ROLE`을 포함하고 반복 update에서는 Role을 제외해 role이 매번 반복되지 않게 할 수 있습니다.
+
+Role이 `NOTIFICATION`인 View가 showing 상태가 되면 현재 TV Screen Reader는 즉시 발화합니다. 실제 non-modal notification에만 사용하고 일반적인 재발화 수단으로 사용하지 마세요. 이 live-region과 showing 동작은 raw attribute를 사용하는 product contract이므로 대상 Screen Reader build에서 발화 순서, interruption, 반복, suppression을 검증해야 합니다.
+
 <br/>
 
 ## 15. Application 개발자 가이드
 
 Application은 접근성 interface를 직접 구현하는 대신, 화면의 content semantic과 현재 활성 context를 DALi View에 선언합니다. 사용하는 Component가 필요한 action contract를 제공하는지도 확인해야 합니다.
 
-### 15.1 Application과 Component의 책임 경계
+### 15.1 Application code에서의 책임 적용
 
-Application이 담당 | Component 또는 framework가 담당
---|--
-화면 content의 Name, Value, State | 기능에 맞는 기본 Role과 action 구현
-현재 page와 modal의 활성 subtree | AT-SPI object와 D-Bus bridge
-초기 remote focus, 초기 accessibility highlight, 닫기 후 복귀 대상 | touch, key, accessibility action의 동일 기능 경로
-정보 이미지와 decorative 이미지 구분 | 내부 child의 기본 tree 노출 정책
-사용 Component의 contract 검증 | 재사용·recycling 시 semantic 동기화
+[1.1 Application과 Component의 책임 경계](#11-application과-component의-책임-경계)를 먼저 적용합니다. 아래 항목은 그 경계 안에서 Application code가 특히 피해야 할 구현입니다.
 
 Application에서 다음을 하지 마세요.
 
@@ -518,48 +749,45 @@ Application에서 다음을 하지 마세요.
 
 ### 15.2 화면 content semantic 설정
 
-기능을 이미 구현한 Component 또는 View에 화면별 content를 설정합니다.
+기능을 이미 구현한 Component에 화면별 content를 설정합니다. 올바른 Component를 선택했다면 기본 Role과 action은 Component contract에 포함되므로 Application이 다시 설정하지 않습니다.
 
 ```cpp
-#include <string>
-
-void ConfigureVolumeControl(View control, int volume)
+void ConfigureVolumeControl(View volumeSlider)
 {
-  control.SetAccessibilityRole(Accessibility::Role::ADJUSTABLE);
-  control.SetAccessibilityName("음량");
-  control.SetAccessibilityValue((std::to_string(volume) + "%").c_str());
-  control.SetAutomationId("settings.sound.volume");
+  // VolumeSlider Component가 ADJUSTABLE Role과 증가·감소 action을 제공한다.
+  volumeSlider.SetAccessibilityName("음량");
+  volumeSlider.SetAutomationId("settings.sound.volume");
 }
 ```
 
-이 코드는 화면별 semantic을 선언합니다. 증가·감소 동작은 Component가 `OnAccessibilityValueChange()`로 구현해야 합니다. Role과 Value만으로 action이 생기지는 않습니다.
+Application은 실제 음량을 Component의 기능 API로 전달합니다. Component는 그 값을 표시하고 접근성 Value로 형식화하며, 값이 바뀔 때마다 둘을 함께 갱신해야 합니다. 증가·감소 동작도 Component가 `OnAccessibilityValueChange()`로 구현합니다. Component에 이 contract가 없다면 Application에서 Role이나 Value를 덧붙여 보완하지 말고 적합한 Component를 사용하거나 Component 자체를 수정하세요.
 
 복합 설정을 root 하나로 탐색하게 할 때는 내부의 중복 정보를 숨깁니다.
 
 ```cpp
 void ConfigureAudioDescriptionSetting(View control,
                                       View icon,
-                                      View visibleLabel,
-                                      bool checked)
+                                      View visibleLabel)
 {
-  control.SetAccessibilityRole(Accessibility::Role::TOGGLE_BUTTON);
+  // Toggle Component가 TOGGLE_BUTTON Role, CHECKED State, activate action을 제공한다.
   control.SetAccessibilityName("화면 해설");
-
-  if(checked)
-  {
-    control.AddAccessibilityState(Accessibility::State::CHECKED);
-  }
-  else
-  {
-    control.RemoveAccessibilityState(Accessibility::State::CHECKED);
-  }
 
   icon.SetAccessibilityHidden(true);
   visibleLabel.SetAccessibilityHidden(true);
 }
 ```
 
-root가 실제 toggle action을 제공할 때만 위처럼 grouping합니다. icon이나 label에 독립 action이 있으면 각각 접근 가능한 대상으로 유지하세요.
+Application은 checked 값을 Toggle Component의 기능 API로 설정하고, Component는 이를 `CHECKED` State와 시각 상태에 함께 반영해야 합니다. Root가 실제 toggle action을 제공할 때만 위처럼 grouping합니다. Icon이나 label에 독립 action이 있으면 각각 접근 가능한 대상으로 유지하세요.
+
+#### 기존 Component instance를 설정하는 경우
+
+Application이 Component의 public handle을 화면에 배치하는 경우에는 virtual을 override하지 않습니다. 화면별 Name, Description, Value가 query 시점 계산을 필요로 하지 않으면 explicit setter나 translation binding을 사용합니다. Screen Reader가 조회하는 순간에 Application 소유 데이터를 계산해야 할 때만 해당 instance에 per-View `SetAccessibilityRequestNameCallback()`, `SetAccessibilityRequestDescriptionCallback()`, `SetAccessibilityRequestValueCallback()`을 연결합니다. 조절 Component가 소유하는 현재 Value는 이 callback으로 가로채지 말고 Component의 기능 API와 접근성 contract에 맡기세요.
+
+#### Application 내부 custom Component를 구현하는 경우
+
+Application project 안의 코드라도 `ViewImpl` subclass를 만들거나 일반 View를 조합해 custom control을 구현한다면 그 코드는 Component 계층입니다. 이 경우 `OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, `OnAccessibilityRequestValue()` virtual을 override할 수 있으며 Role, State, Value, action, 내부 tree 노출까지 [16. Component 개발자 가이드](#16-component-개발자-가이드)의 contract를 따라야 합니다.
+
+같은 View의 같은 request hook에 virtual override와 per-View callback을 함께 사용하지 마세요. Per-View callback이 설치되면 대응 virtual을 대체하며, callback이 `false`를 반환해도 virtual로 돌아가지 않고 framework fallback을 계속합니다. Callback의 우선순위와 lifecycle은 [16.5 동적 값과 Component 기본 Name/Description](#165-동적-값과-component-기본-namedescription)과 [17.1 `ViewImpl` subclass 없이 Per-View callback 사용](#171-viewimpl-subclass-없이-per-view-callback-사용)을 따릅니다.
 
 ### 15.3 Page와 remote focus lifecycle
 
@@ -613,6 +841,7 @@ Modal을 열 때 다음을 함께 처리합니다.
 - [ ] 초기 keyboard focus와 초기 accessibility highlight의 의도가 명확합니다.
 - [ ] 가려진 page, modal 배경, decorative 이미지가 탐색되지 않습니다.
 - [ ] 사용하는 Component가 activate, increment/decrement, scroll, escape 등 필요한 action을 구현합니다.
+- [ ] 실행 중 locale 변경 후 direct localization lookup을 다시 실행하고 binding이 refresh됩니다.
 - [ ] locale 변경, 긴 문자열, 빈 값, pause/resume 후에도 semantic이 최신 상태입니다.
 - [ ] 실제 TV에서 remote와 Screen Reader만으로 핵심 작업을 완료했습니다.
 
@@ -744,9 +973,18 @@ bool VolumeSliderImpl::OnAccessibilityValueChange(bool increased)
 
 Component 초기화 시 `ADJUSTABLE` 또는 `SPIN_BUTTON` Role, Name, 초기 Value를 제공합니다. 값 변경 후 `SetAccessibilityValue()`를 갱신하지 않으면 Screen Reader가 이전 값을 읽을 수 있습니다.
 
+위 문자열 생성은 model 동기화만 설명하는 예입니다. Production suffix, unit, range, 문장은 반드시 localization해야 합니다. [11.3 동적 또는 formatted Accessibility Value](#113-동적-또는-formatted-accessibility-value)의 binding pattern을 사용하고 locale refresh와 model 변경 양쪽에서 Value를 다시 만드세요.
+
 ### 16.5 동적 값과 Component 기본 Name/Description
 
 Application이 설정하는 static/explicit 값은 public handle의 `SetAccessibilityName()`, `SetAccessibilityDescription()`, `SetAccessibilityValue()`를 사용하는 것이 기본입니다. Component가 표시 content에서 합리적인 기본 Name이나 Description을 제공할 때는 default hook을 사용합니다.
+
+사용 목적 | 기본 책임과 API
+--|--
+화면별 static/explicit Name, Description, Value | Application이 setter 또는 translation binding 사용
+화면별이며 query 시점에 계산해야 하는 authoritative Name, Description, Value | Application이 per-View `SetAccessibilityRequest*Callback()` 사용
+표시 content에서 유도되는 Component 기본 Name, Description | Component가 `OnAccessibilityRequestDefaultName/Description()` 사용
+조절값처럼 Component가 소유하고 action과 함께 바뀌는 현재 Value | Component가 저장 property를 동기화하거나 `OnAccessibilityRequestValue()` 사용
 
 ```cpp
 bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
@@ -760,12 +998,12 @@ bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
 
 Default hook이 `true`를 반환하면 빈 output도 의도적인 최종값으로 사용합니다. Integration raw fallback이나 Actor Name까지 계속 조회하려면 `false`를 반환합니다.
 
-Screen Reader가 값을 조회하는 순간에 계산해야 하고 explicit property보다 우선해야 하는 authoritative 값에만 request hook을 사용합니다.
+Screen Reader가 값을 조회하는 순간에 계산해야 하고 explicit property보다 우선해야 하는 authoritative 값에만 request hook을 사용합니다. 화면 문맥에서 정해지는 Name과 Description은 일반적으로 Application이 per-View callback으로 제공합니다. 재사용 Component가 일반적인 Name이나 Description을 위해 authoritative hook을 사용하면 Application override를 가리므로 default hook을 사용해야 합니다. Value는 현재 값의 원천을 가진 쪽이 담당합니다. Slider처럼 Component가 action과 현재 값을 소유하면 Component의 `OnAccessibilityRequestValue()`가 적절하고, Application 화면이 계산하는 status라면 Application의 per-View callback이 적절합니다.
 
 ```cpp
-bool StatusViewImpl::OnAccessibilityRequestValue(Dali::String& value)
+bool VolumeSliderImpl::OnAccessibilityRequestValue(Dali::String& value)
 {
-  value = BuildCurrentStatusText();
+  value = BuildCurrentVolumeText();
   return true;
 }
 ```
@@ -799,7 +1037,7 @@ Scrollable Component는 `SetAccessibilityScrollable(true)`와 `OnAccessibilitySc
 ### 16.7 현재 `devel` 기준 주의사항
 
 > [!WARNING]
-> `5fd24a718692` 기준으로 `InteractiveView` 기반 Component의 기본 activate는 enabled/clickable 상태에서 click을 전달하고, `SelectableView`는 같은 click 경로로 selection을 전환합니다. 그러나 `TextButton`, `CheckBox`, `Dialog`/`DialogContainer`/`AlertDialog`, `Navigator`, `ScrollView`, `RecyclerView`가 필요한 기본 Role/Name/State, 내부 child 정책, modal, escape, scroll-to-child contract를 모두 자체 제공하는 것은 아닙니다. 대상 branch의 구현과 실제 Screen Reader action을 확인하고 Component 계층에서 부족한 contract를 보완하세요. Pan/zoom virtual도 end-to-end dispatch를 확인하기 전에는 지원된다고 단정하지 않습니다.
+> `11a63b7dadf66` 기준으로 `InteractiveView` 기반 Component의 기본 activate는 enabled/clickable 상태에서 click을 전달하고, `SelectableView`는 같은 click 경로로 selection을 전환합니다. 그러나 `TextButton`, `CheckBox`, `Dialog`/`DialogContainer`/`AlertDialog`, `Navigator`, `ScrollView`, `RecyclerView`가 필요한 기본 Role/Name/State, 내부 child 정책, modal, escape, scroll-to-child contract를 모두 자체 제공하는 것은 아닙니다. 대상 branch의 구현과 실제 Screen Reader action을 확인하고 Component 계층에서 부족한 contract를 보완하세요. Pan/zoom virtual도 end-to-end dispatch를 확인하기 전에는 지원된다고 단정하지 않습니다. 새 notification API의 empty-handle 제한은 [12.1 Composite container의 active descendant](#121-composite-container의-active-descendant)를 참고하세요.
 
 ### 16.8 Component release checklist
 
@@ -811,6 +1049,8 @@ Scrollable Component는 `SetAccessibilityScrollable(true)`와 `OnAccessibilitySc
 - [ ] 내부 child가 중복 발화되지 않습니다.
 - [ ] collection 경계에서 scroll-to-child가 동작합니다.
 - [ ] recycling, animation, show/hide 이후 stale semantic이나 geometry가 없습니다.
+- [ ] Per-View callback과 member-function localization binding을 owner 소멸 전에 clear합니다.
+- [ ] Localized dynamic Value가 locale과 model 변경 양쪽에서 다시 만들어지고 SID나 unresolved token을 노출하지 않습니다.
 - [ ] modal 진입, escape, 닫기 후 복귀가 반복 실행에도 안정적입니다.
 - [ ] unit/integration test와 실제 TV Screen Reader test를 모두 통과합니다.
 
@@ -869,6 +1109,42 @@ Action callback은 요청을 처리했으면 `true`, 지원하지 않거나 처�
 
 Custom View의 handle/impl 구조는 [View Architecture](https://github.sec.samsung.net/NUI/dali-ui/wiki/View-(kr)#4-view-inheritance)를 참고하세요.
 
+### 17.1 `ViewImpl` subclass 없이 Per-View callback 사용
+
+Extension API를 사용하면 같은 action/request hook을 기존 `View` instance 하나에 연결할 수 있습니다. 화면별 동적 semantic을 소유하는 Application이나, native View를 소유하지만 `ViewImpl` subclass는 소유하지 않는 composed Component에 유용합니다.
+
+```cpp
+#include <dali-ui-foundation/extension-api/view.h>
+
+Dali::Ui::Extension::View::SetAccessibilityValueChangeCallback(
+  slider,
+  Dali::Ui::Callback<bool(Dali::Ui::View, bool)>::New(
+    this, &Slider::HandleAccessibilityValueChange));
+
+Dali::Ui::Extension::View::SetAccessibilityRequestValueCallback(
+  slider,
+  Dali::Ui::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
+    this, &Slider::HandleAccessibilityValueRequest));
+```
+
+Per-View setter | 대체하는 virtual hook
+--|--
+`SetAccessibilityActivateCallback()` | `OnAccessibilityActivate()`
+`SetAccessibilityEscapeCallback()` | `OnAccessibilityEscape()`
+`SetAccessibilityPanCallback()` | `OnAccessibilityPan()`
+`SetAccessibilityValueChangeCallback()` | `OnAccessibilityValueChange()`
+`SetAccessibilityScrollToChildCallback()` | `OnAccessibilityScrollToChild()`
+`SetAccessibilityZoomCallback()` | `OnAccessibilityZoom()`
+`SetAccessibilityRequestNameCallback()` | `OnAccessibilityRequestName()`
+`SetAccessibilityRequestDefaultNameCallback()` | `OnAccessibilityRequestDefaultName()`
+`SetAccessibilityRequestDescriptionCallback()` | `OnAccessibilityRequestDescription()`
+`SetAccessibilityRequestDefaultDescriptionCallback()` | `OnAccessibilityRequestDefaultDescription()`
+`SetAccessibilityRequestValueCallback()` | `OnAccessibilityRequestValue()`
+
+Callback을 설치하면 해당 View에서 대응 virtual hook을 대체합니다. Callback 반환값은 최종 결과이며 `false`를 반환해도 virtual method로 fallback하지 않습니다. `SetAccessibilityValueChangeCallback(view, {})`처럼 empty callback을 전달하면 virtual dispatch로 복귀합니다.
+
+Member-function callback은 owner의 수명을 연장하지 않습니다. Owner가 소멸되기 전에 등록한 callback을 모두 clear하세요. Callback은 실행 중 자기 자신을 교체하거나 clear할 수 있습니다. Pan/zoom setter는 존재하지만 현재 가이드 기준에서는 production Screen Reader entry point가 확인되지 않았으므로 지원을 선언하기 전에 end-to-end dispatch를 검증하세요.
+
 <br/>
 
 ## 18. Raw attribute
@@ -892,8 +1168,8 @@ view.RemoveAccessibilityAttribute("vendor-key");
 역할 | 반드시 제공할 산출물
 --|--
 UX | 방향 focus map, grouping, 이미지 처리, semantic 기대값, 상태 feedback, modal 진입·복귀 정책
-Application | 화면 content semantic, 활성 page tree, Component 선택과 contract 확인, lifecycle integration
-Component | 기본 Role/Name/Value/State/action contract, 내부 tree 정책, recycling 동작
+Application | 화면 문맥과 content semantic의 원천, 활성 page tree, Component 선택과 contract 확인, lifecycle integration
+Component | 기본 Role/Name/Description/Value, 접근성 State 노출·동기화, action contract, 내부 tree 정책, recycling 동작
 QA | remote 탐색 결과, 최종 발화, AT-SPI tree, lifecycle·locale 결과, 증적
 
 ### 19.2 공동 checklist
@@ -937,10 +1213,13 @@ Tree에서 Role, Name, State, bounds, collection index, sibling order를 확인�
 2. 첫 진입, page push/pop, modal open/close를 반복합니다.
 3. remote 방향키와 실행키로 모든 핵심 기능을 수행합니다.
 4. toggle과 adjustable 값을 minimum, middle, maximum에서 조작합니다.
-5. collection viewport 경계와 recycled item을 탐색합니다.
-6. app pause/resume, background, preload 상태를 전환합니다.
-7. 한국어, 영어, 주요 제품 locale과 긴 문자열을 확인합니다.
-8. 실패 시 tree → DALi log → Screen Reader log 순서로 원인을 좁힙니다.
+5. collection viewport 경계, recycled item, active-descendant 변경을 탐색합니다.
+6. Member-entry context를 사용하는 group을 벗어났다가 다시 진입하고 group 내부에서는 반복하지 않는지 확인합니다.
+7. Polite/assertive live update, 반복 progress, showing notification의 interruption과 중복을 확인합니다.
+8. Application을 종료하지 않고 system locale을 바꿔 direct lookup, binding, formatted Value, plural 경계를 확인합니다.
+9. app pause/resume, background, preload 상태를 전환합니다.
+10. 한국어, 영어, 주요 제품 locale, 지원되는 경우 RTL, 긴 문자열을 확인합니다.
+11. 실패 시 tree → DALi log → Screen Reader log 순서로 원인을 좁힙니다.
 
 다음 중 하나라도 실패하면 접근성 완료로 판단하지 않습니다.
 
@@ -963,6 +1242,11 @@ View가 읽히지 않음 | role과 name이 설정되었는지, `SetAccessibility
 새 페이지에서 다른 대상이 읽힘 | `GrabAccessibilityHighlight()` 대신 표시 전에 `SetRequestInitialAccessibilityHighlight(true)`를 설정합니다.
 키 입력 대상이 바뀌지 않음 | highlight는 keyboard focus를 변경하지 않습니다. [FocusManager](https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-&-Key-(kr))를 별도로 사용합니다.
 language span 추가가 실패 | code-point 범위, 빈 locale, 길이 0, 기존 span과의 겹침을 확인합니다.
+`GetLocalizedString()`이 SID를 반환 | Domain 등록, default/explicit domain 선택, 현재 message locale, 설치된 MO 경로를 확인합니다.
+표시 text만 언어가 바뀌고 접근성 text는 바뀌지 않음 | Binding을 사용하거나 표시 text와 같은 locale-refresh 경로에서 direct lookup을 다시 실행합니다.
+동적 Value가 이전 언어로 남음 | Binding callback에서 localized template을 저장하고 locale과 model 변경 양쪽에서 Value를 다시 만듭니다.
+Active descendant가 발화되지 않음 | `use-active-descendant`, descendant binding/semantic, logical item 변경 후 non-empty descendant notify 여부를 확인합니다.
+Live update가 발화되지 않거나 너무 많이 중단함 | Source의 focused 상태와 `container-live`가 없음, `off`, `polite`, `assertive` 중 어떤 값인지 확인합니다.
 
 전체 API를 실행하고 결과를 화면과 stdout으로 확인하는 예제는 [accessibility-view-api sample](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/accessibility-view-api)을 참고하세요.
 
