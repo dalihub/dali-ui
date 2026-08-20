@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="620" viewBox="0 0 960 620" role="img" aria-labelledby="title desc">
+  <title id="title">WindowFrame actor and layout structure</title>
+  <desc id="desc">The surface contains shadow outsets, a frame, top and bottom decoration, side borders, a persistent content root, controls, a move region, and two resize handles.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="13" flood-color="#17212b" flood-opacity="0.28"/>
+    </filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#52606d"/>
+    </marker>
+    <style>
+      text { font-family: sans-serif; letter-spacing: 0; fill: #17212b; }
+      .title { font-size: 24px; font-weight: 700; }
+      .label { font-size: 17px; font-weight: 700; }
+      .small { font-size: 14px; }
+      .muted { fill: #52606d; }
+      .measure { stroke: #52606d; stroke-width: 2; marker-start: url(#arrow); marker-end: url(#arrow); }
+      .guide { stroke: #9fb3c8; stroke-width: 1.5; stroke-dasharray: 5 5; }
+    </style>
+  </defs>
+
+  <rect width="960" height="620" fill="#f5f7f9" rx="8"/>
+  <text x="48" y="45" class="title">WindowFrame layout</text>
+  <text x="48" y="70" class="small muted">The application places content only in ContentRoot. WindowFrame owns the surrounding layout.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="148" y="116" width="660" height="430" rx="18" fill="#17212b"/>
+  </g>
+
+  <rect x="162" y="130" width="632" height="402" rx="12" fill="#ffffff" stroke="#17212b" stroke-width="2"/>
+  <path d="M174 130 H782 Q794 130 794 142 V194 H162 V142 Q162 130 174 130 Z" fill="#17212b"/>
+  <text x="188" y="169" class="label" fill="#ffffff" style="fill:#ffffff">Top slot</text>
+  <text x="188" y="188" class="small" fill="#d9e2ec" style="fill:#d9e2ec">title and custom actions</text>
+
+  <g>
+    <rect x="582" y="145" width="54" height="34" rx="7" fill="#486581"/>
+    <rect x="644" y="145" width="64" height="34" rx="7" fill="#486581"/>
+    <rect x="716" y="145" width="58" height="34" rx="7" fill="#486581"/>
+    <text x="609" y="167" text-anchor="middle" class="small" style="fill:#ffffff">Style</text>
+    <text x="676" y="167" text-anchor="middle" class="small" style="fill:#ffffff">Overlay</text>
+    <text x="745" y="167" text-anchor="middle" class="small" style="fill:#ffffff">Resize</text>
+  </g>
+
+  <rect x="162" y="194" width="8" height="282" fill="#00a878"/>
+  <rect x="786" y="194" width="8" height="282" fill="#00a878"/>
+  <text x="166" y="337" text-anchor="middle" class="small" transform="rotate(-90 166 337)" style="fill:#ffffff">left: 8</text>
+  <text x="790" y="337" text-anchor="middle" class="small" transform="rotate(90 790 337)" style="fill:#ffffff">right: 8</text>
+
+  <rect x="170" y="194" width="616" height="282" fill="#eef5f4" stroke="#9fb3c8" stroke-width="1.5"/>
+  <rect x="195" y="221" width="566" height="228" rx="6" fill="#ffffff" stroke="#00a878" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="478" y="319" text-anchor="middle" class="title">Persistent ContentRoot</text>
+  <text x="478" y="349" text-anchor="middle" class="label muted">GetContentRoot().Add(appView)</text>
+  <text x="478" y="377" text-anchor="middle" class="small muted">Content coordinates start at (0, 0) inside this area</text>
+
+  <path d="M174 476 H782 Q794 476 794 488 V520 Q794 532 782 532 H174 Q162 532 162 520 V488 Q162 476 174 476 Z" fill="#202b33"/>
+  <rect x="198" y="486" width="404" height="36" rx="5" fill="#344451"/>
+  <text x="400" y="509" text-anchor="middle" class="label" style="fill:#ffffff">Move region</text>
+
+  <g>
+    <rect x="610" y="486" width="40" height="36" rx="7" fill="#486581"/>
+    <rect x="658" y="486" width="40" height="36" rx="7" fill="#486581"/>
+    <rect x="706" y="486" width="40" height="36" rx="7" fill="#c43d3d"/>
+    <text x="630" y="509" text-anchor="middle" class="small" style="fill:#ffffff">min</text>
+    <text x="678" y="509" text-anchor="middle" class="small" style="fill:#ffffff">max</text>
+    <text x="726" y="509" text-anchor="middle" class="small" style="fill:#ffffff">close</text>
+  </g>
+
+  <path d="M162 496 L162 532 L198 532 Z" fill="#e05a47" stroke="#ffffff" stroke-width="2"/>
+  <path d="M758 532 L794 532 L794 496 Z" fill="#e05a47" stroke="#ffffff" stroke-width="2"/>
+  <text x="180" y="551" text-anchor="middle" class="small muted">resize</text>
+  <text x="776" y="551" text-anchor="middle" class="small muted">resize</text>
+
+  <line x1="835" y1="130" x2="835" y2="194" class="measure"/>
+  <line x1="801" y1="130" x2="850" y2="130" class="guide"/>
+  <line x1="801" y1="194" x2="850" y2="194" class="guide"/>
+  <text x="858" y="158" class="label">top: 64</text>
+  <text x="858" y="178" class="small muted">Insets.top</text>
+
+  <line x1="835" y1="476" x2="835" y2="532" class="measure"/>
+  <line x1="801" y1="476" x2="850" y2="476" class="guide"/>
+  <line x1="801" y1="532" x2="850" y2="532" class="guide"/>
+  <text x="858" y="501" class="label">bottom: 56</text>
+  <text x="858" y="521" class="small muted">Insets.bottom</text>
+
+  <line x1="148" y1="580" x2="162" y2="580" class="measure"/>
+  <line x1="148" y1="546" x2="148" y2="590" class="guide"/>
+  <line x1="162" y1="536" x2="162" y2="590" class="guide"/>
+  <text x="176" y="586" class="small muted">shadow outset (outside frame size)</text>
+
+  <text x="48" y="112" class="label">Surface</text>
+  <line x1="100" y1="108" x2="143" y2="126" stroke="#52606d" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>
