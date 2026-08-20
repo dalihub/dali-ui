@@ -4,8 +4,6 @@
 
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-#include <iosfwd>
-
 namespace Dali
 {
 namespace Ui
@@ -45,7 +43,5 @@ struct DALI_UI_API Insets
   float top;
   float bottom;
 };
-
-DALI_UI_API std::ostream& operator<<(std::ostream& stream, const Insets& insets);
 } // namespace Ui
 } // namespace Dali

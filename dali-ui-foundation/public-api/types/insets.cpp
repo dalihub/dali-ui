@@ -88,9 +88,5 @@ bool Insets::operator!=(const Insets& rhs) const
   return !(*this == rhs);
 }
 
-std::ostream& operator<<(std::ostream& stream, const Insets& insets)
-{
-  return stream << "[" << insets.start << ", " << insets.end << ", " << insets.top << ", " << insets.bottom << "]";
-}
 } // namespace Ui
 } // namespace Dali
