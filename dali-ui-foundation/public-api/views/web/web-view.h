@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/public-api/views/web/web-back-forward-list.h>
 #include <dali-ui-foundation/public-api/views/web/web-profile.h>
 #include <dali-ui-foundation/public-api/views/web/web-settings.h>
+#include <dali-ui-foundation/public-api/views/web/web-view-page-load-error.h>
 #include <dali-ui-foundation/public-api/views/web/web-view-types.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/events/key-event.h>
@@ -731,6 +732,9 @@ public: // Signals
 
   /**
    * @brief Signal emitted when an error occurs during page load.
+   *
+   * The error reference is valid only for the duration of the signal callback.
+   * Copy the error to retain it after the callback returns.
    */
   PageLoadErrorSignalType& PageLoadErrorSignal();
 

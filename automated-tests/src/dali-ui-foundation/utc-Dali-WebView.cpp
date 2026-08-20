@@ -910,6 +910,33 @@ int UtcDaliWebViewPageLoadErrorSignalP(void)
   END_TEST;
 }
 
+int UtcDaliWebViewPageLoadErrorValueSemanticsP(void)
+{
+  WebViewPageLoadError error;
+  DALI_TEST_CHECK(error.GetUrl().Empty());
+  DALI_TEST_CHECK(error.GetCode() == WebViewPageLoadErrorCode::UNKNOWN);
+  DALI_TEST_CHECK(error.GetDescription().Empty());
+  DALI_TEST_CHECK(error.GetType() == WebViewPageLoadErrorType::NONE);
+
+  WebViewPageLoadError copy(error);
+  DALI_TEST_CHECK(copy.GetCode() == WebViewPageLoadErrorCode::UNKNOWN);
+  DALI_TEST_CHECK(copy.GetType() == WebViewPageLoadErrorType::NONE);
+
+  WebViewPageLoadError moved(std::move(copy));
+  DALI_TEST_CHECK(moved.GetCode() == WebViewPageLoadErrorCode::UNKNOWN);
+  DALI_TEST_CHECK(copy.GetUrl().Empty());
+
+  copy = moved;
+  DALI_TEST_CHECK(copy.GetDescription().Empty());
+
+  WebViewPageLoadError moveAssigned;
+  moveAssigned = std::move(copy);
+  DALI_TEST_CHECK(moveAssigned.GetType() == WebViewPageLoadErrorType::NONE);
+  DALI_TEST_CHECK(copy.GetDescription().Empty());
+
+  END_TEST;
+}
+
 // ===========================================================================
 // Signals — Scroll
 // ===========================================================================

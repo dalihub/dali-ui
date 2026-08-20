@@ -487,11 +487,10 @@ void WebViewImpl::OnInitialize()
       {
         return;
       }
-      WebViewPageLoadError uiError;
-      uiError.url         = ToDaliString(error->GetUrl());
-      uiError.code        = ToUiPageLoadErrorCode(error->GetCode());
-      uiError.description = ToDaliString(error->GetDescription());
-      uiError.type        = ToUiPageLoadErrorType(error->GetType());
+      WebViewPageLoadError uiError(ToDaliString(error->GetUrl()),
+                                   ToUiPageLoadErrorCode(error->GetCode()),
+                                   ToDaliString(error->GetDescription()),
+                                   ToUiPageLoadErrorType(error->GetType()));
       EmitPageLoadError(uiError);
     });
     mWebEngine.RegisterUrlChangedCallback([this](const std::string& url)

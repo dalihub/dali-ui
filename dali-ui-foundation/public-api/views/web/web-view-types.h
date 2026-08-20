@@ -17,9 +17,8 @@
  *
  */
 
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali/public-api/common/dali-string.h>
+// EXTERNAL INCLUDES
+#include <cstdint>
 
 namespace Dali
 {
@@ -134,17 +133,6 @@ enum class WebViewPageLoadErrorType
   PLUGIN,   ///< Plugin error.
   DOWNLOAD, ///< Download error.
   PRINT,    ///< Print error.
-};
-
-/**
- * @brief Holds the details of a page load failure, reported through PageLoadErrorSignal.
- */
-struct WebViewPageLoadError
-{
-  Dali::String             url;                                     ///< The URL that failed to load.
-  WebViewPageLoadErrorCode code{WebViewPageLoadErrorCode::UNKNOWN}; ///< The error code.
-  Dali::String             description;                             ///< A human-readable description of the error.
-  WebViewPageLoadErrorType type{WebViewPageLoadErrorType::NONE};    ///< The error type.
 };
 
 } // namespace Ui
