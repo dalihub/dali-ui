@@ -29,9 +29,6 @@
 
 namespace Dali
 {
-class Image;
-struct Vector4;
-
 namespace Ui
 {
 namespace Internal DALI_INTERNAL
