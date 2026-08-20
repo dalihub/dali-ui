@@ -1273,75 +1273,9 @@ public:
    */
   void Remove(View child, RemovePolicy policy);
 
-  using Dali::Actor::Lower;
-  using Dali::Actor::LowerBelow;
-  using Dali::Actor::LowerToBottom;
-  using Dali::Actor::Raise;
-  using Dali::Actor::RaiseAbove;
-  using Dali::Actor::RaiseToTop;
   // Re-expose the inherited one-argument immediate remove; the
   // Remove(View, RemovePolicy) overload would otherwise hide it (C++ name hiding).
   using Dali::Actor::Remove;
-
-  /**
-   * @brief Raises this view one step above its immediate next sibling in the
-   * parent's children list.
-   *
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
-   * @pre The View has been parented.
-   */
-  void Raise(LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers this view one step below its immediate previous sibling in the
-   * parent's children list.
-   *
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
-   * @pre The View has been parented.
-   */
-  void Lower(LayoutOrderPolicy policy);
-
-  /**
-   * @brief Raises this view to the top of its sibling list.
-   *
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
-   * @pre The View has been parented.
-   */
-  void RaiseToTop(LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers this view to the bottom of its sibling list.
-   *
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
-   * @pre The View has been parented.
-   */
-  void LowerToBottom(LayoutOrderPolicy policy);
-
-  /**
-   * @brief Raises this view above the given target sibling.
-   *
-   * @param[in] target The target sibling view to raise above.
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
-   * @pre The View has been parented.
-   * @pre The target view is a sibling.
-   */
-  void RaiseAbove(View target, LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers this view below the given target sibling.
-   *
-   * @param[in] target The target sibling view to lower below.
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
-   * @pre The View has been parented.
-   * @pre The target view is a sibling.
-   */
-  void LowerBelow(View target, LayoutOrderPolicy policy);
 
   /**
    * @brief Copies the attached layout parameters into @p params.

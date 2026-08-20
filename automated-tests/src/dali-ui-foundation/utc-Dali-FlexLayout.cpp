@@ -789,7 +789,7 @@ int UtcDaliFlexLayoutAutoBasisUnchangedP(void)
 //   v3 mainSize=70: 120+70=190 > 130 → new line.   line2={v3}    cross=30
 //   total height = 50 + 30 = 80
 //
-// After v2.Raise(UPDATE) → order [v1, v3, v2]:
+// After v2.Raise() → order [v1, v3, v2]:
 //   v1 mainSize=60, currentLine=60.
 //   v3 mainSize=70: 60+70=130 <= 130 → same line.  line1={v1,v3} cross=max(40,30)=40
 //   v2 mainSize=60: 130+60=190 > 130 → new line.   line2={v2}    cross=50
@@ -835,7 +835,7 @@ int UtcDaliFlexLayoutReorderInvalidatesMeasureP(void)
 
   // Reorder: raise v2 (index 1) above v3 → layout order becomes [v1, v3, v2]
   // (Actor::Raise moves v2 one position toward the back of the sibling list.)
-  v2.Raise(LayoutOrderPolicy::UPDATE);
+  v2.Raise();
 
   // Second measure with same constraints must recompute due to InvalidateMeasure.
   // line1={v1,v3} cross=40; line2={v2} cross=50 → total height=90

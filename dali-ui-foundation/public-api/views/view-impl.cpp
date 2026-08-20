@@ -618,36 +618,6 @@ int32_t ViewImpl::IndexOfChildView(Ui::View view) const
   return mImpl->IndexOfChildView(view);
 }
 
-void ViewImpl::Raise(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->Raise(policy);
-}
-
-void ViewImpl::Lower(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->Lower(policy);
-}
-
-void ViewImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->RaiseToTop(policy);
-}
-
-void ViewImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->LowerToBottom(policy);
-}
-
-void ViewImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  mImpl->RaiseAbove(target, policy);
-}
-
-void ViewImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  mImpl->LowerBelow(target, policy);
-}
-
 void ViewImpl::SetLayoutParams(const AbsoluteLayoutParams& params)
 {
   mImpl->SetLayoutParams(params);

@@ -115,29 +115,6 @@ namespace Ui
 namespace Internal
 {
 
-class ViewDataImpl::ScopedSkipChildrenUpdate
-{
-public:
-  explicit ScopedSkipChildrenUpdate(ViewDataImpl& viewDataImpl)
-  : mViewDataImpl(viewDataImpl),
-    mPrevious(viewDataImpl.mSkipChildrenUpdate)
-  {
-    mViewDataImpl.mSkipChildrenUpdate = true;
-  }
-
-  ~ScopedSkipChildrenUpdate()
-  {
-    mViewDataImpl.mSkipChildrenUpdate = mPrevious;
-  }
-
-  ScopedSkipChildrenUpdate(const ScopedSkipChildrenUpdate&)            = delete;
-  ScopedSkipChildrenUpdate& operator=(const ScopedSkipChildrenUpdate&) = delete;
-
-private:
-  ViewDataImpl& mViewDataImpl;
-  bool          mPrevious;
-};
-
 namespace
 {
 #if defined(DEBUG_ENABLED)
@@ -762,7 +739,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mAccessibilityData(nullptr),
   mAccessibleObjectCreator(nullptr),
   mAccessibilityRole{static_cast<int32_t>(Accessibility::Role::NONE)},
-  mSkipChildrenUpdate(false),
   mArrangeDirty(false),
   mArrangeInProgress(false),
   mKeyEventDispatchInProgress(false),
@@ -2488,117 +2464,8 @@ void ViewDataImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
   }
 }
 
-void ViewDataImpl::Raise(Ui::LayoutOrderPolicy policy)
-{
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.Raise();
-      return;
-    }
-  }
-  self.Raise();
-}
-
-void ViewDataImpl::Lower(Ui::LayoutOrderPolicy policy)
-{
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.Lower();
-      return;
-    }
-  }
-  self.Lower();
-}
-
-void ViewDataImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
-{
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.RaiseToTop();
-      return;
-    }
-  }
-  self.RaiseToTop();
-}
-
-void ViewDataImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
-{
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.LowerToBottom();
-      return;
-    }
-  }
-  self.LowerToBottom();
-}
-
-void ViewDataImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  if(!target)
-  {
-    return;
-  }
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.RaiseAbove(target);
-      return;
-    }
-  }
-  self.RaiseAbove(target);
-}
-
-void ViewDataImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  if(!target)
-  {
-    return;
-  }
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.LowerBelow(target);
-      return;
-    }
-  }
-  self.LowerBelow(target);
-}
-
 void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
 {
-  if(mSkipChildrenUpdate)
-  {
-    return;
-  }
-
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
@@ -2721,11 +2588,6 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
 
 void ViewDataImpl::OnChildRemoved(Actor& child)
 {
-  if(mSkipChildrenUpdate)
-  {
-    return;
-  }
-
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
@@ -3675,11 +3537,6 @@ void ViewDataImpl::EmitFocusChangedSignal(bool focusGained)
 
 void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
 {
-  if(mSkipChildrenUpdate)
-  {
-    return;
-  }
-
   Actor                           self            = mViewImpl.Self();
   uint32_t                        actorChildCount = self.GetChildCount();
   IntegrationView::ChildContainer newChildren;

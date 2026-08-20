@@ -34,20 +34,6 @@ enum class CornerRadiusPolicy
 };
 
 /**
- * @brief Controls whether sibling-order changes (Raise/Lower/RaiseAbove/LowerBelow)
- * also reorder the layout children list.
- *
- * Visual z-order (Actor sibling order) and layout order are kept in sync by default.
- * Use PRESERVE when only the drawing/hit order should change while layout arrangement
- * stays the same.
- */
-enum class LayoutOrderPolicy
-{
-  UPDATE   = 0, ///< Also reorder layout children to match the new sibling order.
-  PRESERVE = 1, ///< Keep layout children order unchanged; only visual z-order is affected.
-};
-
-/**
  * @brief Controls how View::Remove(View, RemovePolicy) treats an attached
  * LayoutTransition's EXIT slot.
  *
