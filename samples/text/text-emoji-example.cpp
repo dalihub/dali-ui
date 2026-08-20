@@ -29,6 +29,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/actors/actor-devel.h>
 
 #include <array>
 #include <map>
@@ -1461,7 +1462,7 @@ private:
     std::string currentText = mWorkBench.GetText().CStr();
     currentText += emoji;
 
-    const float textWidth = mWorkBench.GetNaturalSize().x;
+    const float textWidth = DevelActor::GetNaturalSize(mWorkBench).x;
     if(textWidth > GetBenchLength())
     {
       mWorkBench.SetText(Dali::String(emoji.c_str()));

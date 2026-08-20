@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 
 using namespace Dali;
@@ -172,7 +173,7 @@ private:
     {
       if(focused)
       {
-        if(label.GetNaturalSize().width > label.GetSize().width)
+        if(DevelActor::GetNaturalSize(label).width > label.GetSize().width)
         {
           label.StartMarquee();
         }

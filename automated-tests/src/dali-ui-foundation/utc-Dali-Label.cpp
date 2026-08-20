@@ -16,6 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
@@ -2821,7 +2822,7 @@ int UtcDaliLabelImageSpanAuthoritativeNaturalSizeAndFallbackP(void)
   DALI_TEST_EQUALS(label.GetText(), "A[icon]B", TEST_LOCATION);
   DALI_TEST_CHECK(label.GetStyledText());
 
-  const Vector3 replacementNaturalSize = label.GetNaturalSize();
+  const Vector3 replacementNaturalSize = DevelActor::GetNaturalSize(label);
   DALI_TEST_CHECK(replacementNaturalSize.width >= 180.0f);
   DALI_TEST_CHECK(replacementNaturalSize.height >= 32.0f);
 
@@ -2829,7 +2830,7 @@ int UtcDaliLabelImageSpanAuthoritativeNaturalSizeAndFallbackP(void)
   Text::ImageAttributes invalidAttributes("", Vector2(180.0f, 32.0f));
   DALI_TEST_CHECK(invalidBuilder.SetSpan(Text::ImageSpan::New(invalidAttributes), 1u, 7u));
   label.SetStyledText(invalidBuilder.Build());
-  const Vector3 fallbackNaturalSize = label.GetNaturalSize();
+  const Vector3 fallbackNaturalSize = DevelActor::GetNaturalSize(label);
   DALI_TEST_CHECK(fallbackNaturalSize.width < replacementNaturalSize.width);
   DALI_TEST_EQUALS(label.GetText(), "A[icon]B", TEST_LOCATION);
   DALI_TEST_EQUALS(label.ResourceReadySignal().GetConnectionCount(), 0u, TEST_LOCATION);
@@ -2922,7 +2923,7 @@ int UtcDaliLabelImageSpanAsyncNaturalSizeParityP(void)
   application.SendNotification();
   application.Render();
 
-  const Vector3 syncSize = label.GetNaturalSize();
+  const Vector3 syncSize = DevelActor::GetNaturalSize(label);
   gAsyncNaturalSizeComputed = false;
   gAsyncNaturalSizeWidth    = 0.0f;
   gAsyncNaturalSizeHeight   = 0.0f;

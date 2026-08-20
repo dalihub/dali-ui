@@ -24,6 +24,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/public-api/signals/connection-tracker.h>
 #include <algorithm>
 #include <string>
@@ -407,7 +408,7 @@ private:
     {
       mMarkerLabel.SetHorizontalTextAlignment(Text::Alignment::END);
       ApplyMarkerText(node);
-      const Vector3 markerNaturalSize = mMarkerLabel.GetNaturalSize();
+      const Vector3 markerNaturalSize = DevelActor::GetNaturalSize(mMarkerLabel);
       const float   markerLabelWidth  = std::max(markerColumnWidth, markerNaturalSize.width);
       mMarkerLabel.SetRequestedWidth(markerLabelWidth);
       mMarkerLabel.SetMargin(Extents());
