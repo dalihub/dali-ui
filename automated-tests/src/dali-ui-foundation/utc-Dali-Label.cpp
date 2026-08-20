@@ -1840,6 +1840,9 @@ int UtcDaliLabelMarqueeLoopCount(void)
   label.SetMarqueeLoopCount(5);
   DALI_TEST_EQUALS(label.GetMarqueeLoopCount(), 5, TEST_LOCATION);
 
+  label.SetMarqueeLoopCount(Text::MARQUEE_LOOP_COUNT_INFINITE);
+  DALI_TEST_EQUALS(label.GetMarqueeLoopCount(), Text::MARQUEE_LOOP_COUNT_INFINITE, TEST_LOCATION);
+
   END_TEST;
 }
 

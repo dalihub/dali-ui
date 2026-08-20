@@ -608,6 +608,8 @@ public: // Setters for chaining
   /**
    * @brief Sets the number of complete loops for marquee.
    *
+   * @note Use Text::MARQUEE_LOOP_COUNT_INFINITE to repeat indefinitely.
+   *
    * @param[in] loopCount The number of loops.
    */
   void SetMarqueeLoopCount(int loopCount);
