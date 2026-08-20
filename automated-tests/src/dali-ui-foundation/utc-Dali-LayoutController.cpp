@@ -167,6 +167,45 @@ struct ViewSlotRemoveControllerFunctor
   Window window;
   int&   count;
 };
+
+// Counts window layout-finished emits. Connected to a NEW controller created
+// from inside another controller's emit.
+struct CountLayoutFinishedFunctor
+{
+  explicit CountLayoutFinishedFunctor(int& count)
+  : count(count)
+  {
+  }
+  void operator()(Window)
+  {
+    ++count;
+  }
+  int& count;
+};
+
+// Slot that removes the controller for the emitting window and immediately
+// re-obtains a NEW controller for the same window, connecting a counting slot
+// to the new controller's signal. Exercises the idempotence of the deferred
+// detach: the pass at the outermost Process unwind must leave the new
+// controller alone.
+struct RemoveThenGetInSlotFunctor
+{
+  RemoveThenGetInSlotFunctor(ConnectionTracker* tracker, int& count, int& newControllerCount)
+  : tracker(tracker),
+    count(count),
+    newControllerCount(newControllerCount)
+  {
+  }
+  void operator()(Window window)
+  {
+    ++count;
+    LayoutController::Remove(window);
+    LayoutController::Get(window).LayoutFinishedSignal().Connect(tracker, CountLayoutFinishedFunctor(newControllerCount));
+  }
+  ConnectionTracker* tracker;
+  int&               count;
+  int&               newControllerCount;
+};
 } // namespace
 
 void utc_dali_layoutcontroller_startup(void)
@@ -616,5 +655,82 @@ int UtcDaliViewLayoutFinishedSignalRemoveControllerInSlotP(void)
   (void)fresh;
   application.SendNotification();
   DALI_TEST_CHECK(true);
+  END_TEST;
+}
+
+int UtcDaliLayoutControllerRemoveThenGetInSlotP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  int                        slotCount          = 0;
+  int                        newControllerCount = 0;
+  RemoveThenGetInSlotFunctor functor(&application, slotCount, newControllerCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, functor);
+
+  View root = View::New();
+  root.SetRequestedWidth(100.0f);
+  root.SetRequestedHeight(100.0f);
+  window.Add(root);
+
+  // The slot removes the controller and creates a NEW one for the same window
+  // during the emit. The deferred detach that runs when the old controller's
+  // Process frame unwinds is idempotent and must NOT queue the new controller
+  // for the deferred free.
+  application.SendNotification();
+  DALI_TEST_EQUALS(slotCount, 1, TEST_LOCATION);
+
+  // Drain the deferred free; only the OLD controller may be freed here.
+  application.RunIdles();
+
+  // The new controller must be alive and functional: a fresh layout pass has
+  // to emit through the slot connected from inside the removal slot.
+  root.SetRequestedWidth(150.0f);
+  application.SendNotification();
+  DALI_TEST_EQUALS(newControllerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(slotCount, 1, TEST_LOCATION); // detached controller stays silent
+  END_TEST;
+}
+
+int UtcDaliLayoutControllerRemoveInSlotIdleReapP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  int                           removeCount = 0;
+  RemoveControllerInSlotFunctor functor(removeCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, functor);
+
+  View root = View::New();
+  root.SetRequestedWidth(100.0f);
+  root.SetRequestedHeight(100.0f);
+  window.Add(root);
+
+  // The slot detaches the controller during the emit; the free is queued for
+  // the idle callback.
+  application.SendNotification();
+  DALI_TEST_EQUALS(removeCount, 1, TEST_LOCATION);
+
+  // Idle runs the deferred free of the detached controller. Must not crash.
+  application.RunIdles();
+
+  // A fresh controller works end-to-end after the reap.
+  LayoutFinishedSignalData    data;
+  LayoutFinishedSignalFunctor freshFunctor(data);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, freshFunctor);
+  root.SetRequestedWidth(180.0f);
+  application.SendNotification();
+  DALI_TEST_EQUALS(data.called, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
+
+  // Removing from ordinary (non-slot) code also frees only at idle; afterwards
+  // the freed controller's signal is gone and a third controller takes over
+  // without re-firing the old slot.
+  LayoutController::Remove(window);
+  application.RunIdles();
+
+  root.SetRequestedWidth(120.0f);
+  application.SendNotification();
+  DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
   END_TEST;
 }

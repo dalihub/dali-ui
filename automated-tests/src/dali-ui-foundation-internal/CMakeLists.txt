@@ -31,6 +31,7 @@ SET(TC_SOURCES
     utc-Dali-ViewAccessibility-internal.cpp
     utc-Dali-Accessibility-Text-internal.cpp
     utc-Dali-ImageView-internal.cpp
+    utc-Dali-LottieAnimationView-internal.cpp
     utc-Dali-ViewFittingMode-internal.cpp
     utc-Dali-View-order-internal.cpp
 )
@@ -75,6 +76,7 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
     ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
     ../dali-test-suite-utils/dali-ui/ui-timer.cpp
+    ../dali-test-suite-utils/dali-ui/ui-vector-animation-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-window.cpp
 )
 

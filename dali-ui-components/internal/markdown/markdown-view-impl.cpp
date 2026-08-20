@@ -24,6 +24,8 @@
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <algorithm>
+#include <cmath>
+#include <limits>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/markdown/markdown-view-defaults.h>
@@ -44,6 +46,50 @@ BaseHandle Create()
 
 DALI_TYPE_REGISTRATION_BEGIN(MarkdownViewImpl, ViewImpl, Create)
 DALI_TYPE_REGISTRATION_END()
+
+bool HasBoundedWidthConstraint(ViewImpl& view, float widthConstraint)
+{
+  if(widthConstraint < 0.0f || !std::isfinite(widthConstraint))
+  {
+    return false;
+  }
+
+  constexpr float DEFAULT_MAXIMUM_WIDTH = std::numeric_limits<float>::max();
+  const float     maximumWidth          = view.GetMaximumWidth();
+  if(maximumWidth < DEFAULT_MAXIMUM_WIDTH)
+  {
+    return true;
+  }
+
+  // ScrollView uses float::max() as an unbounded constraint for a
+  // non-MATCH_PARENT content axis. Measure() normalizes that sentinel through
+  // effective scale before it reaches a layout manager: it remains near
+  // float::max() at scale >= 1 and becomes float::max() * scale below 1.
+  // Allow a few relative ULPs because the divide/multiply round trip can make
+  // the normalized sentinel slightly smaller (for example at UI scale 1.3).
+  const float unboundedWidth     = DEFAULT_MAXIMUM_WIDTH * std::min(view.GetEffectiveScale(), 1.0f);
+  const float unboundedTolerance = unboundedWidth * (4.0f * std::numeric_limits<float>::epsilon());
+  return widthConstraint < unboundedWidth - unboundedTolerance;
+}
+
+class MarkdownStackLayoutManager : public StackLayoutManager
+{
+public:
+  MarkdownStackLayoutManager()
+  : StackLayoutManager(StackOrientation::VERTICAL, MarkdownViewDefaults::BLOCK_SPACING)
+  {
+  }
+
+  MeasuredSize Measure(ViewImpl* view, float widthConstraint, float heightConstraint) override
+  {
+    MeasuredSize measured = StackLayoutManager::Measure(view, widthConstraint, heightConstraint);
+    if(view && view->GetRequestedWidth() == WRAP_CONTENT && HasBoundedWidthConstraint(*view, widthConstraint))
+    {
+      measured.width = widthConstraint;
+    }
+    return measured;
+  }
+};
 
 bool HasPrefix(const std::string& value, const std::string& prefix)
 {
@@ -166,7 +212,7 @@ MarkdownViewImpl::~MarkdownViewImpl() = default;
 void MarkdownViewImpl::OnInitialize()
 {
   ViewImpl::OnInitialize();
-  AttachLayoutManager(Dali::MakeUnique<StackLayoutManager>(StackOrientation::VERTICAL, MarkdownViewDefaults::BLOCK_SPACING));
+  AttachLayoutManager(Dali::MakeUnique<MarkdownStackLayoutManager>());
   GetSelfView().SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING),
                                    static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING),
                                    static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING),

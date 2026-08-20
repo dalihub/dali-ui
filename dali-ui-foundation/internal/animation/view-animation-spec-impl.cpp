@@ -43,8 +43,7 @@ namespace Internal
 {
 namespace
 {
-Dali::TypeRegistration VIEW_ANIMATION_SPEC_TYPE("ViewAnimationSpec", typeid(Dali::BaseHandle), nullptr);
-Dali::TypeRegistration VIEW_ANIMATION_SPEC_IMPL_TYPE(typeid(Dali::Ui::Internal::ViewAnimationSpecImpl), typeid(Dali::Ui::ViewAnimationSpec), nullptr);
+Dali::TypeRegistration VIEW_ANIMATION_SPEC_TYPE(typeid(Dali::Ui::ViewAnimationSpec), typeid(Dali::Ui::Internal::ViewAnimationSpecImpl), typeid(Dali::BaseHandle), nullptr);
 
 Dali::Property GetShadowVisualProperty(View view, Property::Key visualPropertyKey, const char* propertyName)
 {

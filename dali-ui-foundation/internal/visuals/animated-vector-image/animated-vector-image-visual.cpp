@@ -441,6 +441,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       if(value.Get(desiredWidth))
       {
         mDesiredSize.SetWidth(desiredWidth);
+        SetVectorImageSize();
       }
       break;
     }
@@ -451,6 +452,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       if(value.Get(desiredHeight))
       {
         mDesiredSize.SetHeight(desiredHeight);
+        SetVectorImageSize();
       }
       break;
     }

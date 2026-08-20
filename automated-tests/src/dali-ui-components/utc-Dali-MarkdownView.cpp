@@ -19,6 +19,7 @@
 #include <dali-ui-components/internal/markdown/markdown-parser.h>
 #include <dali-ui-components/internal/markdown/markdown-view-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
@@ -1281,6 +1282,60 @@ int UtcDaliMarkdownViewDefaultGeometryP(void)
 
   View thematicBreak = view.GetChildViewAt(3u);
   DALI_TEST_EQUALS(thematicBreak.GetRequestedHeight(), 1.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewWrapContentWidthPolicyP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+  view.SetMarkdown("> Quote\n\n```cpp\ncode\n```");
+
+  DALI_TEST_EQUALS(view.GetRequestedWidth(), WRAP_CONTENT, TEST_LOCATION);
+
+  MeasuredSize measured = view.Measure(360.0f, 1000.0f);
+  DALI_TEST_EQUALS(measured.GetWidth(), 360.0f, TEST_LOCATION);
+  view.Arrange(LayoutRect(0.0f, 0.0f, measured.GetWidth(), measured.GetHeight()));
+  DALI_TEST_EQUALS(view.GetChildViewAt(0u).GetSize().width, 340.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetChildViewAt(1u).GetSize().width, 340.0f, TEST_LOCATION);
+
+  measured = view.Measure(240.0f, 1000.0f);
+  DALI_TEST_EQUALS(measured.GetWidth(), 240.0f, TEST_LOCATION);
+  view.Arrange(LayoutRect(0.0f, 0.0f, measured.GetWidth(), measured.GetHeight()));
+  DALI_TEST_EQUALS(view.GetChildViewAt(0u).GetSize().width, 220.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetChildViewAt(1u).GetSize().width, 220.0f, TEST_LOCATION);
+
+  view.SetMaximumWidth(200.0f);
+  measured = view.Measure(360.0f, 1000.0f);
+  DALI_TEST_EQUALS(measured.GetWidth(), 200.0f, TEST_LOCATION);
+
+  view.SetRequestedWidth(180.0f);
+  measured = view.Measure(360.0f, 1000.0f);
+  DALI_TEST_EQUALS(measured.GetWidth(), 180.0f, TEST_LOCATION);
+
+  MarkdownView unbounded = MarkdownView::New();
+  unbounded.SetMarkdown("> Quote");
+  measured = unbounded.Measure(std::numeric_limits<float>::max(), 1000.0f);
+  DALI_TEST_CHECK(measured.GetWidth() < 1000.0f);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewUnboundedWidthAtFractionalUiScaleP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  UiScaleManager scaleManager  = UiScaleManager::Get();
+  const float    originalScale = scaleManager.GetScale();
+  scaleManager.SetScale(1.3f);
+
+  MarkdownView view = MarkdownView::New();
+  view.SetMarkdown("> Quote");
+  const MeasuredSize measured = view.Measure(std::numeric_limits<float>::max(), 1000.0f);
+
+  scaleManager.SetScale(originalScale);
+
+  DALI_TEST_CHECK(std::isfinite(measured.GetWidth()));
+  DALI_TEST_CHECK(measured.GetWidth() < 1000.0f);
   END_TEST;
 }
 

@@ -68,6 +68,7 @@
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 
@@ -109,7 +110,7 @@ BaseHandle Create()
 
 // clang-format off
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(LabelImpl, ViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::Label, Ui::Integration::LabelImpl, Ui::View, Create)
 
 LABEL_PROPERTY_REGISTRATION("text",                       STRING,  TEXT                          )
 LABEL_PROPERTY_REGISTRATION("fontFamily",                 STRING,  FONT_FAMILY                   )
@@ -1879,7 +1880,7 @@ void LabelImpl::OnSystemFontSizeChanged(Dali::Integration::SystemSettings::FontS
 void LabelImpl::OnInitialize()
 {
   // Call base class initialization
-  ViewImpl::OnInitialize();
+  SizeNegotiatedViewImpl::OnInitialize();
 
   Actor self = Self();
 

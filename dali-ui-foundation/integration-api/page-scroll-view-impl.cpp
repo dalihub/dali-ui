@@ -49,7 +49,7 @@ BaseHandle Create()
   return BaseHandle();
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(PageScrollViewImpl, ScrollViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::PageScrollView, Ui::Integration::PageScrollViewImpl, Ui::ScrollView, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace

@@ -54,7 +54,7 @@ BaseHandle Create()
   return BaseHandle();
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(VideoViewImpl, ViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::VideoView, Ui::Integration::VideoViewImpl, Ui::View, Create)
 DALI_TYPE_REGISTRATION_END()
 
 // Visual slot for the transparent underlay hole. Reserved in this view's property range.

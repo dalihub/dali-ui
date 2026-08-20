@@ -19,6 +19,7 @@
 #include <dali/integration-api/events/hover-event-integ.h>
 #include <dali/integration-api/events/key-event-integ.h>
 #include <dali/integration-api/events/touch-event-integ.h>
+#include <dali/integration-api/adaptor-framework/focused-actor-provider.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/focus-manager.h>
@@ -93,6 +94,29 @@ Dali::Integration::HoverEvent GenerateFocusManagerHover(PointState::Type state, 
   return hoverEvent;
 }
 } // namespace
+
+int UtcDaliFocusManagerFocusedActorProviderP(void)
+{
+  UiTestApplication application;
+
+  FocusManager focusManager = FocusManager::Get();
+  auto* provider = Dali::Integration::GetFocusedActorProvider();
+  DALI_TEST_CHECK(provider != nullptr);
+
+  View view = View::New();
+  view.SetFocusable(true);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(focusManager.SetCurrentFocusView(view));
+  DALI_TEST_CHECK(provider->GetFocusedActor() == view);
+
+  focusManager.ClearFocus();
+  DALI_TEST_CHECK(!provider->GetFocusedActor());
+
+  END_TEST;
+}
 
 int UtcDaliFocusManagerFocusIndicationPolicyContextP(void)
 {
@@ -868,7 +892,7 @@ private:
 };
 
 Dali::TypeRegistration resolvingFocusViewTypeReg(
-  typeid(ResolvingFocusViewImpl), typeid(ViewImpl), nullptr);
+  typeid(ResolvingFocusViewImpl), typeid(Dali::Ui::View), nullptr);
 
 View CreateResolvingFocusView(View resolvedTarget)
 {

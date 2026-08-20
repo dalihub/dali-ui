@@ -105,6 +105,15 @@ protected:
   void OnLayoutNegotiated(float size, Dimension::Type dimension) override;
 
   // ============================================================
+  // protected: Framework overrides (ViewImpl)
+  // ============================================================
+
+  /**
+   * @copydoc Dali::Ui::ViewImpl::OnInitialize()
+   */
+  void OnInitialize() override;
+
+  // ============================================================
   // protected: Construction
   // ============================================================
 
@@ -119,26 +128,6 @@ private:
   SizeNegotiatedViewImpl& operator=(const SizeNegotiatedViewImpl&) = delete;
   SizeNegotiatedViewImpl& operator=(SizeNegotiatedViewImpl&&)      = delete;
 };
-
-// // Helpers for public-api forwarding methods
-
-// inline DALI_UI_API ViewImpl& GetImpl(Ui::View& view)
-// {
-//   DALI_ASSERT_ALWAYS(view);
-
-//   Dali::RefObject& handle = view.GetImplementation();
-
-//   return static_cast<ViewImpl&>(handle);
-// }
-
-// inline DALI_UI_API const ViewImpl& GetImpl(const Ui::View& view)
-// {
-//   DALI_ASSERT_ALWAYS(view);
-
-//   const Dali::RefObject& handle = view.GetImplementation();
-
-//   return static_cast<const ViewImpl&>(handle);
-// }
 
 } // namespace Integration
 

@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/actors/actor-enumerations-devel.h>
 
 // INTERNAL INCLUDES
@@ -69,6 +70,15 @@ void SizeNegotiatedViewImpl::OnCalculateRelayoutSize(Dimension::Type dimension)
 
 void SizeNegotiatedViewImpl::OnLayoutNegotiated(float size, Dimension::Type dimension)
 {
+}
+
+void SizeNegotiatedViewImpl::OnInitialize()
+{
+  // Call base class initialization
+  ViewImpl::OnInitialize();
+
+  // Re-enable relayout for size-negotiated views
+  DevelActor::SetRelayoutEnabled(Self(), true);
 }
 
 SizeNegotiatedViewImpl::SizeNegotiatedViewImpl() = default;

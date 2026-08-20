@@ -54,7 +54,7 @@ BaseHandle Create()
   return BaseHandle();
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(RecyclerViewImpl, LayoutImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::RecyclerView, Ui::Integration::RecyclerViewImpl, Ui::View, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace

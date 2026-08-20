@@ -785,4 +785,3 @@ int UtcDaliLottieAnimationViewPropertyRenderScaleP(void)
   DALI_TEST_EQUALS(view.GetProperty(index).Get<float>(), 0.2f, TEST_LOCATION);
   END_TEST;
 }
-

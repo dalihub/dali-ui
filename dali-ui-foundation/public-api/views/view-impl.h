@@ -95,9 +95,8 @@ public:
    */
   enum ViewBehaviour
   {
-    VIEW_BEHAVIOUR_DEFAULT = 0,                                     ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
-                                                                    ///< but doesn't receive event callbacks.
-    DISABLE_VISUALS = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0), ///< True if view should not use visuals
+    VIEW_BEHAVIOUR_DEFAULT = 0,      ///< Default behaviour: Visuals are enabled but doesn't receive event callbacks.
+    DISABLE_VISUALS        = 1 << 0, ///< True if view should not use visuals
 
     LAST_VIEW_BEHAVIOUR_FLAG
   };

@@ -35,6 +35,7 @@
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -60,7 +61,7 @@ BaseHandle CreateImageView()
 #define IMAGE_VIEW_PROPERTY_REGISTRATION(text, valueType, enumIndex) \
   DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui, ImageViewPropertyIndex, Ui::Integration, ImageViewImpl, text, valueType, enumIndex)
 
-DALI_TYPE_REGISTRATION_BEGIN(ImageViewImpl, ViewImpl, CreateImageView)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::ImageView, Ui::Integration::ImageViewImpl, Ui::View, CreateImageView)
 
 IMAGE_VIEW_PROPERTY_REGISTRATION("image",                 STRING,  IMAGE)
 IMAGE_VIEW_PROPERTY_REGISTRATION("fittingMode",           INTEGER, FITTING_MODE)

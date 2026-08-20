@@ -35,8 +35,7 @@ namespace Internal
 {
 namespace
 {
-Dali::TypeRegistration INPUT_EDITOR_ANIMATION_SPEC_TYPE("InputEditorAnimationSpec", typeid(Dali::Ui::ViewAnimationSpec), nullptr);
-Dali::TypeRegistration INPUT_EDITOR_ANIMATION_SPEC_IMPL_TYPE(typeid(Dali::Ui::Internal::InputEditorAnimationSpecImpl), typeid(Dali::Ui::InputEditorAnimationSpec), nullptr);
+Dali::TypeRegistration INPUT_EDITOR_ANIMATION_SPEC_TYPE(typeid(Dali::Ui::InputEditorAnimationSpec), typeid(Dali::Ui::Internal::InputEditorAnimationSpecImpl), typeid(Dali::Ui::ViewAnimationSpec), nullptr);
 
 Dali::Ui::Integration::InputEditorImpl* GetInputEditorImpl(InputEditor inputEditor)
 {

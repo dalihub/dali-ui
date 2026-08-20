@@ -138,6 +138,18 @@ public:
   void TickAnimators();
 
   /**
+   * @brief Releases the periodic animator tick driver.
+   *
+   * Called when the owning LayoutControllerImpl detaches: the dispatcher must
+   * stop driving itself from the event loop, but is NOT destroyed here because
+   * this can be reached from inside its own tick callback (an OnFinished slot
+   * calling LayoutController::Remove). Safe in that case for exactly the reason
+   * given in the @c mTickTimer lifecycle note below: @c Dali::Timer::Tick holds
+   * a local guard reference until the call unwinds. Idempotent.
+   */
+  void Shutdown();
+
+  /**
    * @brief Returns whether at least one animator-mode transition is currently
    * in flight.
    */

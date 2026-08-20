@@ -64,6 +64,7 @@ SET(TC_SOURCES
         utc-Dali-CanvasView.cpp
         utc-Dali-VideoView.cpp
         utc-Dali-DragAndDropDetector.cpp
+        utc-Dali-ViewTypeRegistry.cpp
 )
 
 ADD_CUSTOM_COMMAND(

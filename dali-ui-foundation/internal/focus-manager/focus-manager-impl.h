@@ -24,6 +24,8 @@
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
 
+#include <memory>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/focus-indication-policy.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
@@ -43,6 +45,8 @@ namespace Ui
 {
 namespace Internal
 {
+class FocusedActorProviderImpl;
+
 /**
  * @copydoc Ui::FocusManager
  */
@@ -224,7 +228,7 @@ protected:
   /**
    * Destructor
    */
-  virtual ~FocusManager();
+  ~FocusManager() override;
 
 private:
   typedef std::vector<WeakHandle<View>> FocusStack;         ///< Focus history stack
@@ -404,6 +408,8 @@ private:
   FocusManager& operator=(const FocusManager& rhs);
 
 private:
+  std::unique_ptr<FocusedActorProviderImpl> mFocusedActorProvider; ///< Bridge that exposes the focused View to dali-adaptor
+
   Ui::FocusManager::FocusChangedSignalType mFocusChangedSignal;  ///< The signal to notify the focus change
   WeakHandle<View>                         mCurrentFocusView;    ///< A weak handle to the current focused view
   WeakHandle<View>                         mTouchFocusCandidate; ///< A weak handle to the view that may receive focus when touch is released

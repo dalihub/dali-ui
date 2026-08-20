@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view-properties.h>
+#include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -55,7 +56,7 @@ BaseHandle Create()
 #define CANVAS_VIEW_PROPERTY_REGISTRATION(text, valueType, enumIndex) \
   DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui, CanvasViewPropertyIndex, Ui::Internal, CanvasViewImpl, text, valueType, enumIndex)
 
-DALI_TYPE_REGISTRATION_BEGIN(CanvasViewImpl, ViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::CanvasView, Ui::Internal::CanvasViewImpl, Ui::View, Create)
 
 CANVAS_VIEW_PROPERTY_REGISTRATION("viewBox",                      VECTOR2, VIEW_BOX)
 CANVAS_VIEW_PROPERTY_REGISTRATION("synchronousLoading",           BOOLEAN, SYNCHRONOUS_LOADING)

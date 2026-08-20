@@ -32,9 +32,20 @@ jobs:
     - name: Checkout dali-ui
       uses: code-actions/checkout@v4
       with:
-        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.base.ref || github.sha }}
         fetch-depth: 0
         allow-unsafe-pr-checkout: true
+
+    - name: Merge PR into latest target branch
+      if: github.event_name == 'pull_request_target'
+      env:
+        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      run: |
+        git fetch origin $env:PR_HEAD_SHA
+        if($LASTEXITCODE -ne 0) { throw "Failed to fetch the PR head commit." }
+
+        git -c user.name='GitHub Actions' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' merge --no-ff --no-edit FETCH_HEAD
+        if($LASTEXITCODE -ne 0) { throw "Failed to merge the PR into the latest target branch." }
 
     - name: Setup SSH
       uses: code-actions/webfactory-ssh-agent@v0.7.0

@@ -584,7 +584,7 @@ Dali::BaseHandle CreateRegisteredTestAccessibilityDragView()
 
 DALI_TYPE_REGISTRATION_BEGIN(
   TestAccessibilityDragViewImpl,
-  Dali::Ui::ViewImpl,
+  Dali::Ui::View,
   CreateRegisteredTestAccessibilityDragView)
 DALI_TYPE_REGISTRATION_END()
 

@@ -67,7 +67,7 @@ BaseHandle Create()
 }
 
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(ScrollViewImpl, LayoutImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::ScrollView, Ui::Integration::ScrollViewImpl, Ui::View, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace

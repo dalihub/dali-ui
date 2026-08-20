@@ -24,8 +24,10 @@
 #include <dali/integration-api/processor-interface.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/object/weak-handle.h>
+#include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/connection-tracker.h>
 #include <algorithm>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -51,6 +53,99 @@ std::unordered_map<void*, std::unique_ptr<LayoutController>> gLayoutControllers;
 // ViewImpl::Arrange routes arranged subscribers in O(1). Managed by RAII
 // ActiveLayoutFinishedScope (exception-safe: DALI_ASSERT_ALWAYS throws).
 Integration::LayoutControllerImpl* gActiveLayoutFinishedController{nullptr};
+
+// Controllers detached from gLayoutControllers but not yet freed.
+//
+// A controller is a dali-core Integration::Processor, and dali-core keeps
+// dereferencing the processor pointer AFTER Process() returns (Core::RunProcessors
+// reads GetProcessorName() for its trace record). Worse, ANY code that runs while
+// core's processor loop is on the stack - another processor's Process(), a signal
+// it emits, app code those reach - can call back into this file's public entry
+// points, so no synchronous entry point here can ever prove the loop is NOT on
+// the stack. Teardown is therefore split in two: detach (make inert, hand
+// ownership over here) happens immediately, and the free runs from exactly two
+// contexts that are outside the loop by construction - the platform idle
+// callback, and static destruction at process exit. Nothing else frees.
+std::vector<std::unique_ptr<LayoutController>> gDetachedLayoutControllers;
+
+// Number of LayoutControllerImpl::Process() frames on the stack, summed over ALL
+// controllers. Defense-in-depth for the idle reap: the idle callback can only see
+// a non-zero value when an application spins a nested event loop from inside
+// layout code (Measure/Arrange/a layout slot). The reap skips that round and
+// re-arms instead of freeing while layout processing is on the stack.
+int32_t gGlobalProcessDepth{0};
+
+/**
+ * @brief RAII for gGlobalProcessDepth.
+ *
+ * RAII (not a manual increment/decrement pair) is REQUIRED for the same reason
+ * spelled out on ActiveLayoutFinishedScope below: a DALI_ASSERT_ALWAYS anywhere
+ * in the Measure/Arrange call stack throws Dali::DaliException and Process() has
+ * no try/catch. A manual decrement would be skipped on unwind, stranding the
+ * counter above zero and permanently disabling the deferred free for every
+ * controller from that point on.
+ */
+struct GlobalProcessDepthScope
+{
+  GlobalProcessDepthScope()
+  {
+    ++gGlobalProcessDepth;
+  }
+  ~GlobalProcessDepthScope()
+  {
+    --gGlobalProcessDepth;
+  }
+  GlobalProcessDepthScope(const GlobalProcessDepthScope&)            = delete;
+  GlobalProcessDepthScope& operator=(const GlobalProcessDepthScope&) = delete;
+};
+
+// Forward declaration: the idle handler re-arms itself while work remains.
+void ScheduleReapDetachedLayoutControllers();
+
+/**
+ * @brief Idle-time free of every detached controller.
+ *
+ * Runs from the platform idle handler: the main loop dispatches it directly, so
+ * Core::ProcessEvents() - and with it core's processor loop - is not on the
+ * stack. The one exception is an application spinning a nested event loop from
+ * inside layout code; the depth guard skips that round and re-arms.
+ *
+ * This function and static destruction of gDetachedLayoutControllers are the
+ * ONLY two places a detached controller is freed.
+ */
+void OnIdleReapDetachedLayoutControllers()
+{
+  if(gGlobalProcessDepth == 0)
+  {
+    // Swap out before destroying, so the global stays coherent if a controller
+    // destructor ever re-enters this file.
+    std::vector<std::unique_ptr<LayoutController>> doomed;
+    doomed.swap(gDetachedLayoutControllers);
+    // doomed unwinds here, running every ~LayoutController.
+  }
+
+  // Re-arm while anything is left: either the depth guard skipped this round,
+  // or more controllers were detached meanwhile. No-op on an empty queue, so
+  // this terminates once the queue drains.
+  ScheduleReapDetachedLayoutControllers();
+}
+
+/**
+ * @brief Requests an idle-time reap.
+ *
+ * Deliberately no scheduled-already flag: a pending idle is silently DISCARDED
+ * (not run) when the adaptor stops, so such a flag could strand as "scheduled"
+ * forever; a duplicate idle just finds an empty queue and stops. If AddIdle
+ * fails (adaptor already stopped) the queue stays put and static destruction
+ * frees it - the controllers in it are already inert either way.
+ */
+void ScheduleReapDetachedLayoutControllers()
+{
+  if(!gDetachedLayoutControllers.empty() && DALI_LIKELY(Adaptor::IsAvailable()))
+  {
+    Adaptor::Get().AddIdle(MakeCallback(&OnIdleReapDetachedLayoutControllers), false);
+  }
+}
 } // namespace
 
 namespace Integration
@@ -166,12 +261,87 @@ public:
    */
   ~LayoutControllerImpl() override
   {
+    // Idempotent: already done if this controller was detached before being freed.
+    Detach();
+  }
+
+  /**
+   * @brief Makes this controller inert without freeing anything it owns.
+   *
+   * Unregisters both processor registrations, drops every ConnectionTracker
+   * signal connection (the window ResizedSignal), and releases the transition
+   * tick driver, so nothing in the event loop can reach this controller again.
+   * Idempotent.
+   *
+   * Deliberately does NOT clear the pending-view / event containers:
+   * EmitPendingViewLayoutFinishedSignals() may be on the stack (a View
+   * LayoutFinished slot is allowed to call LayoutController::Remove), and those
+   * containers take part in its stale-skip bookkeeping. They die with the
+   * controller at reap time instead.
+   */
+  void Detach()
+  {
+    if(mDetached)
+    {
+      return;
+    }
+    mDetached = true;
+
     // Unregister from adaptor (both the pre and post registrations)
     if(DALI_LIKELY(Adaptor::IsAvailable()))
     {
       Adaptor::Get().UnregisterProcessor(*this, false);
       Adaptor::Get().UnregisterProcessor(*this, true);
     }
+
+    // Drop the window ResizedSignal connection so a resize cannot reach a
+    // detached controller.
+    DisconnectAll();
+
+    if(mTransitionDispatcher)
+    {
+      // Stop the self-driving animator tick. The dispatcher is not destroyed
+      // here; this can be reached from inside its own tick callback.
+      mTransitionDispatcher->Shutdown();
+    }
+  }
+
+  /**
+   * @brief Detaches this controller and hands its ownership to the pending-free
+   * list. @em This stays ALIVE - only the free is deferred.
+   *
+   * Idempotent, and the guard is essential rather than cosmetic: a slot may call
+   * LayoutController::Remove() (running this once) and then Get(), which creates
+   * a NEW controller under the same window key. The Process() unwind then calls
+   * this a second time; without the guard that second call would move the new,
+   * innocent controller into the pending-free list.
+   */
+  void DetachAndQueueForFree()
+  {
+    if(mDetached)
+    {
+      return;
+    }
+
+    // Suppress any emit still pending for this frame.
+    mDestroyPending = true;
+    Detach();
+
+    // The entry under mWindowObjectPtr is necessarily THIS controller here:
+    // the only way a controller leaves the map before destruction is this very
+    // function, which runs at most once per controller (mDetached guard).
+    auto it = gLayoutControllers.find(mWindowObjectPtr);
+    if(it != gLayoutControllers.end())
+    {
+      gDetachedLayoutControllers.push_back(std::move(it->second));
+      gLayoutControllers.erase(it);
+    }
+
+    // Only ever SCHEDULE here, never free: freeing would run `delete this` from
+    // a member function of this very object, possibly while core's processor
+    // loop still holds the pointer. The idle callback is the only runtime
+    // context that frees.
+    ScheduleReapDetachedLayoutControllers();
   }
 
   /**
@@ -381,7 +551,15 @@ public:
    */
   void Process(bool postProcess) override
   {
+    if(DALI_UNLIKELY(mDetached))
+    {
+      // Detached but not yet freed. Both registrations are already gone, so this
+      // can only be a stale call; do nothing.
+      return;
+    }
+
     ++mProcessDepth;
+    GlobalProcessDepthScope globalDepthScope;
 
     Dali::Window window = mWindow.GetHandle();
     if(DALI_UNLIKELY(!window))
@@ -481,12 +659,15 @@ public:
       }
     }
 
-    // Execute any deferred self-destruct only when unwinding the outermost
-    // Process frame, where no nested Process/emit frame remains on the stack.
+    // Detach - never free - when unwinding the outermost Process frame. This
+    // point is still INSIDE dali-core's processor loop, which dereferences the
+    // processor pointer again after Process() returns, so the free is queued for
+    // a later context (see gDetachedLayoutControllers).
     if(--mProcessDepth == 0 && mDestroyPending)
     {
-      gLayoutControllers.erase(mWindowObjectPtr);
-      // *this is destroyed here; do not access any member below.
+      DetachAndQueueForFree();
+      // *this is now owned by gDetachedLayoutControllers. It is still alive, so
+      // members remain valid, but it must do no further work.
     }
   }
 
@@ -505,24 +686,6 @@ public:
   LayoutController::LayoutFinishedSignalType& LayoutFinishedSignal()
   {
     return mLayoutFinishedSignal;
-  }
-
-  /**
-   * @brief Whether a Process() call is currently on the stack for this
-   * controller. Used to defer a self-destruct requested from a slot.
-   */
-  bool IsProcessing() const
-  {
-    return mProcessDepth > 0;
-  }
-
-  /**
-   * @brief Requests deferred self-destruct; the erase is performed when the
-   * outermost Process() frame unwinds.
-   */
-  void RequestDestroy()
-  {
-    mDestroyPending = true;
   }
 
   /**
@@ -886,6 +1049,7 @@ private:
   bool                                                  mEmitScheduled{false};                ///< PRE-phase settle detected; POST phase must emit the layout-finished signals this frame
   int                                                   mProcessDepth{0};                     ///< Process() re-entrancy depth (emit gate + deferred-destroy safe point)
   bool                                                  mDestroyPending{false};               ///< Deferred self-destruct requested during processing
+  bool                                                  mDetached{false};                     ///< Made inert and handed to gDetachedLayoutControllers; awaiting free
   std::vector<ActiveCollectorFrame>                     mActiveCollectorStack;                ///< Stack of per-root collectors (nested-pass safe)
   std::vector<PendingViewLayoutFinishedEvent>           mPendingViewLayoutFinishedEvents;     ///< Episode events (traversal order, latest-wins)
   std::unordered_map<ViewImpl*, std::size_t>            mPendingViewLayoutFinishedEventIndex; ///< view -> index into the events vector
@@ -927,17 +1091,13 @@ void LayoutController::Remove(Window window)
       auto it = gLayoutControllers.find(window.GetObjectPtr());
       if(it != gLayoutControllers.end())
       {
-        if(it->second->mImpl->IsProcessing())
-        {
-          // Called from within a Process()/LayoutFinishedSignal emit for this
-          // controller; defer the erase until the outermost Process() frame
-          // unwinds so we never destroy a controller that is on the stack.
-          it->second->mImpl->RequestDestroy();
-        }
-        else
-        {
-          gLayoutControllers.erase(it);
-        }
+        // Never free inline. Remove() is a public entry point that can run with
+        // dali-core's processor loop on the stack (a LayoutFinished slot, or app
+        // code reached from ANY processor's Process()), and dali-ui cannot
+        // observe that loop's boundary. Detach now - the controller stops
+        // processing and emitting immediately - and let the idle reap free it
+        // outside the loop.
+        it->second->mImpl->DetachAndQueueForFree();
       }
     }
   }
@@ -950,6 +1110,14 @@ void LayoutController::UnregisterFromAll(ViewImpl* view)
     for(auto& pair : gLayoutControllers)
     {
       pair.second->UnregisterView(view);
+    }
+    // Detached controllers are out of the live map but are still ALIVE and still
+    // hold raw ViewImpl pointers until they are reaped, so they must be scrubbed
+    // too - otherwise a View destroyed inside the detach->reap window would leave
+    // a dangling pointer behind.
+    for(auto& controller : gDetachedLayoutControllers)
+    {
+      controller->UnregisterView(view);
     }
   }
 }

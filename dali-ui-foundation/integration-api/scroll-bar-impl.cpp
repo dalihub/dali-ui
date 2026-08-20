@@ -32,6 +32,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-bar-impl.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
+#include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
 
 namespace Dali
 {
@@ -51,7 +52,7 @@ BaseHandle Create()
 }
 
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(ScrollBarImpl, AbsoluteLayoutImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::ScrollBar, Ui::Integration::ScrollBarImpl, Ui::AbsoluteLayout, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace
