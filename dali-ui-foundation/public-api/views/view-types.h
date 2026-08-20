@@ -34,10 +34,11 @@ enum class CornerRadiusPolicy
 };
 
 /**
- * @brief Controls how View::Remove(View, RemovePolicy) treats an attached
- * LayoutTransition's EXIT slot.
+ * @brief Controls how View::Remove(View, RemovePolicy) and
+ * View::RemoveAll(RemovePolicy) treat an attached LayoutTransition's EXIT slot.
  *
- * ENTER is dispatched automatically for every add path (Actor::Add, Insert),
+ * ENTER is dispatched automatically for every add path (Actor::Add,
+ * Actor::InsertAbove/InsertBelow),
  * but EXIT cannot be hooked transparently on removal, so the EXIT intent must
  * be requested explicitly through this policy.
  *

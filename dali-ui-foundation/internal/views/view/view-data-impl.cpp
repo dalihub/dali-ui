@@ -2127,7 +2127,7 @@ void ViewDataImpl::SetLayoutTransition(LayoutTransition transition)
 {
   // Detach: drop any pending ENTER / REORDER / REMOVE markers. Records
   // are only produced while a transition is attached (see OnChildAdd /
-  // Insert / OnChildOrderChanged / Remove); a previously attached
+  // OnChildOrderChanged / Remove); a previously attached
   // transition could have left entries that we want to discard now so
   // a later re-attach does not surface them as a stale cause on the
   // next pass. In particular hasPendingChildRemoval is
@@ -2232,82 +2232,7 @@ int32_t ViewDataImpl::IndexOfChildView(Ui::View view) const
   return -1;
 }
 
-void ViewDataImpl::Insert(uint32_t index, Ui::View child)
-{
-  if(!child)
-  {
-    return;
-  }
-
-  // Adding to the Actor tree triggers OnChildAdd on this ViewImpl, which is
-  // the single source of truth for registering the child in mChildren and
-  // for invalidating the new parent chain. Insert only takes additional
-  // responsibility for positioning the child at the requested index.
-  mViewImpl.Self().Add(child);
-
-  if(index >= mChildren.Count())
-  {
-    // OnChildAdd push_back'd the child at the end; target index is end.
-    return;
-  }
-
-  // Fast path: when this was a fresh add, OnChildAdd push_back'd the child,
-  // so it is at the tail of mChildren. Avoid an O(N) scan in that case.
-  IntegrationView::ChildContainer::Iterator it;
-  if(mChildren.Count() > 0 && *(mChildren.End() - 1) == child)
-  {
-    it = mChildren.End() - 1;
-  }
-  else
-  {
-    it = std::find(mChildren.Begin(), mChildren.End(), child);
-    if(it == mChildren.End())
-    {
-      // OnChildAdd did not register this child (e.g. non-View actor). Nothing
-      // to reorder.
-      return;
-    }
-  }
-
-  const size_t currentIdx = static_cast<size_t>(std::distance(mChildren.Begin(), it));
-  if(currentIdx == index)
-  {
-    return;
-  }
-
-  Ui::View moved = std::move(*it);
-  mChildren.Erase(it);
-  mChildren.Insert(mChildren.Begin() + index, std::move(moved));
-
-  // Tag every logical child so the layout transition dispatcher reports
-  // CHANGE cause as LayoutChangeCause::REORDERED for both the moved child and the
-  // siblings whose indices shifted as a result. dali-core's
-  // OnChildOrderChanged fires only on actor-tree sibling order changes;
-  // Insert() touches the logical (mChildren) order alone, so this is the
-  // only place that records the reorder for the CHANGE classifier.
-  // Matches OnChildOrderChanged's full-list tagging so a logical reorder
-  // and an actor-tree reorder produce the same cause classification.
-  // Skip the record when no transition is attached — the dispatcher
-  // would never consume it, and stale raw pointers could outlive the
-  // child without any global cleanup.
-  if(HasLayoutTransition())
-  {
-    for(auto& childView : mChildren)
-    {
-      mLayoutTransitionData->pendingReorderedChildren.insert(&GetImpl(childView));
-    }
-  }
-
-  // mChildren order affects layout output (e.g. LinearLayout visual order,
-  // GridLayout cell assignment). When the child was already under this view
-  // (Self().Add is a no-op in that case), OnChildAdd does not fire, so this
-  // is the only invalidation point for the reorder. When the child was a
-  // fresh add, self is already dirty from OnChildAdd and the guard makes
-  // this a no-op.
-  InvalidateMeasure();
-}
-
-void ViewDataImpl::RemoveAllChildren(Ui::RemovePolicy policy)
+void ViewDataImpl::RemoveAll(Ui::RemovePolicy policy)
 {
   // Operate on the actor children (consistent with the inherited
   // GetChildCount / GetChildAt). Snapshot up front: with ANIMATE_EXIT the
@@ -2626,7 +2551,7 @@ void ViewDataImpl::OnChildRemoved(Actor& child)
       // If the child was added and removed within the same frame (before
       // any layout pass consumed the pending-enter set), drop the ENTER
       // marker so the dispatcher does not fire on a no-longer-present view.
-      // Same for the reorder marker: Insert() / OnChildOrderChanged keep
+      // Same for the reorder marker: OnChildOrderChanged keeps
       // raw ViewImpl* pointers in pendingReorderedChildren which must
       // not survive the child's removal -- otherwise a heap-reused address
       // could mis-classify a future child as REORDERED.
@@ -3595,7 +3520,7 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
 
   // A logical child-order change can alter the measured size (e.g. a wrap
   // layout where line-breaking depends on child order), so invalidate measure
-  // — not just arrange — mirroring the Insert/MoveChild reorder path.
+  // — not just arrange — for the whole reorder path.
   mViewImpl.InvalidateMeasure();
 }
 

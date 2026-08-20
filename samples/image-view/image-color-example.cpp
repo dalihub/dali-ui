@@ -122,7 +122,7 @@ private:
 
   void CreateImageView()
   {
-    mImageContainer.RemoveAllChildren();
+    mImageContainer.RemoveAll();
 
     switch(mImageTypeIndex)
     {

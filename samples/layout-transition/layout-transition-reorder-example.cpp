@@ -442,7 +442,7 @@ private:
     // Swap the pressed child for the proxy invisibly. The dragged child is
     // removed with RemovePolicy::IMMEDIATE (unparent now, no EXIT animation).
     // We also detach the LayoutTransition for the swap so the proxy's
-    // subsequent Insert is not marked as a pending ENTER and faded in from
+    // subsequent add is not marked as a pending ENTER and faded in from
     // OPACITY 0. The swap is supposed to be invisible — siblings should not
     // move and the slot should look unchanged — so we re-attach right after,
     // which leaves CHANGE animations for the in-drag reorders.
@@ -460,7 +460,17 @@ private:
     mDragProxy.SetRequestedHeight(mDraggedOriginalReqH);
     mDragProxy.SetProperty(Actor::Property::OPACITY, 0.0f);
     mDragProxy.SetProperty(Actor::Property::SENSITIVE, false);
-    mStack.Insert(mDraggedIndex, mDragProxy);
+
+    // Insert at logical index mDraggedIndex. Capture the anchor BEFORE the
+    // Add: the Add makes the proxy "already ours", so the following
+    // InsertBelow takes dali-core's sibling-reorder path and the logical
+    // (layout) order resynchronises. An empty anchor means append.
+    View proxyAnchor = mStack.GetChildViewAt(mDraggedIndex);
+    mStack.Add(mDragProxy);
+    if(proxyAnchor)
+    {
+      mStack.InsertBelow(mDragProxy, proxyAnchor);
+    }
 
     mStack.SetLayoutTransition(savedTransition);
 
@@ -513,11 +523,28 @@ private:
     const uint32_t targetIndex = ComputeTargetIndexFromDraggedY(mDragBounds.y);
     if(targetIndex != mDraggedIndex)
     {
-      // mStack still has the proxy at mDraggedIndex; Insert reorders it to
-      // targetIndex and fires REORDERED CHANGE on every sibling so the
-      // visual reflow animates. The transition stays attached here so the
-      // configured CHANGE timing drives the animation.
-      mStack.Insert(targetIndex, mDragProxy);
+      // mStack still has the proxy at mDraggedIndex; the sibling reorder
+      // moves it to targetIndex and fires REORDERED CHANGE on every sibling
+      // so the visual reflow animates. The transition stays attached here so
+      // the configured CHANGE timing drives the animation.
+      //
+      // dali-core erases the child before locating the anchor, so the
+      // direction decides which call lands on targetIndex: moving toward the
+      // front (mDraggedIndex > targetIndex) leaves the anchor at targetIndex,
+      // so insert BELOW it; moving toward the back shifts the anchor down to
+      // targetIndex - 1, so insert ABOVE it.
+      View anchor = mStack.GetChildViewAt(targetIndex);
+      if(anchor)
+      {
+        if(mDraggedIndex > targetIndex)
+        {
+          mStack.InsertBelow(mDragProxy, anchor);
+        }
+        else
+        {
+          mStack.InsertAbove(mDragProxy, anchor);
+        }
+      }
       mDraggedIndex = targetIndex;
     }
   }
@@ -586,7 +613,7 @@ private:
     LayoutController::Get(mWindow).ProcessLayouts();
 
     // Mirror of BeginDrag's swap: remove the proxy with RemovePolicy::IMMEDIATE
-    // (no EXIT) and detach the transition so Insert on the dropped child does
+    // (no EXIT) and detach the transition so re-adding the dropped child does
     // not mark it for ENTER. Re-attach right after so the next mStack layout
     // pass dispatches CHANGE on the dropped child using the pre-baked snapshot.
     LayoutTransition savedTransition = mStack.GetLayoutTransition();
@@ -609,7 +636,17 @@ private:
     droppedChild.SetRequestedHeight(originalReqH);
     droppedChild.SetRequestedX(0.0f);
     droppedChild.SetRequestedY(0.0f);
-    mStack.Insert(targetIndex, droppedChild);
+
+    // Re-insert at logical index targetIndex. Capture the anchor BEFORE the
+    // Add: the Add makes the child "already ours", so the following
+    // InsertBelow takes dali-core's sibling-reorder path and the logical
+    // (layout) order resynchronises. An empty anchor means append.
+    View dropAnchor = mStack.GetChildViewAt(targetIndex);
+    mStack.Add(droppedChild);
+    if(dropAnchor)
+    {
+      mStack.InsertBelow(droppedChild, dropAnchor);
+    }
 
     mStack.SetLayoutTransition(savedTransition);
   }

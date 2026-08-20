@@ -189,7 +189,7 @@ public: // Not intended for application developers
    * @brief Schedules an EXIT-slot layout transition for @p child under
    * @p parent.
    *
-   * Called by ViewImpl::Remove / RemoveAllChildren when the parent
+   * Called by ViewImpl::Remove / RemoveAll when the parent
    * has a LayoutTransition EXIT slot configured through a visual spec,
    * animator, or active bounds effect. The dispatcher fires the EXIT
    * animation and unparents the child only when the animation finishes.

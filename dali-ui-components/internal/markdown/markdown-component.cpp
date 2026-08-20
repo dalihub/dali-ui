@@ -457,7 +457,15 @@ private:
       textView.SetAccessibilityHidden(true);
     }
 
-    mContentHost.Insert(0u, mTaskRow);
+    // Insert at logical index 0: anchor captured BEFORE the Add so the
+    // following InsertBelow takes the sibling-reorder path and the logical
+    // (layout) order resynchronises.
+    Ui::View taskRowAnchor = mContentHost.GetChildViewAt(0u);
+    mContentHost.Add(mTaskRow);
+    if(taskRowAnchor)
+    {
+      mContentHost.InsertBelow(mTaskRow, taskRowAnchor);
+    }
     mTaskRowAttached = true;
     if(mTextComponent)
     {
@@ -563,7 +571,16 @@ private:
     mTaskRowAttached = false;
     if(mTextComponent)
     {
-      mContentHost.Insert(0u, mTextComponent->GetView());
+      // Insert at logical index 0: anchor captured BEFORE the Add so the
+      // following InsertBelow takes the sibling-reorder path and the logical
+      // (layout) order resynchronises.
+      Ui::View textView = mTextComponent->GetView();
+      Ui::View anchor   = mContentHost.GetChildViewAt(0u);
+      mContentHost.Add(textView);
+      if(anchor)
+      {
+        mContentHost.InsertBelow(textView, anchor);
+      }
     }
   }
 
@@ -624,7 +641,17 @@ private:
       }
       else
       {
-        mContentHost.Insert(0u, mTextComponent->GetView());
+        // Insert at logical index 0. Capture the anchor BEFORE the Add: the
+        // Add makes the child "already ours" so the following InsertBelow
+        // takes dali-core's sibling-reorder path, which resynchronises the
+        // logical (layout) order through ChildOrderChangedSignal.
+        Ui::View textView = mTextComponent->GetView();
+        Ui::View anchor   = mContentHost.GetChildViewAt(0u);
+        mContentHost.Add(textView);
+        if(anchor)
+        {
+          mContentHost.InsertBelow(textView, anchor);
+        }
       }
       return;
     }

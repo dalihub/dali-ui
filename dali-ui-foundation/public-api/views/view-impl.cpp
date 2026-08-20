@@ -581,26 +581,14 @@ LayoutRect ViewImpl::GetArrangedBounds() const
 // Child Management API
 // =============================================================================
 
-void ViewImpl::Insert(uint32_t index, Ui::View child)
-{
-  mImpl->Insert(index, child);
-}
-
-void ViewImpl::RemoveAllChildren()
-{
-  // No-argument form mirrors the inherited one-argument Actor::Remove:
-  // unparent every child immediately, running no EXIT transition.
-  RemoveAllChildren(Ui::RemovePolicy::IMMEDIATE);
-}
-
-void ViewImpl::RemoveAllChildren(Ui::RemovePolicy policy)
-{
-  mImpl->RemoveAllChildren(policy);
-}
-
 void ViewImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
 {
   mImpl->Remove(child, policy);
+}
+
+void ViewImpl::RemoveAll(Ui::RemovePolicy policy)
+{
+  mImpl->RemoveAll(policy);
 }
 
 uint32_t ViewImpl::GetChildViewCount() const

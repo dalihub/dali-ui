@@ -234,9 +234,8 @@ public:
   Dali::Vector<View>&       GetChildren();
   const Dali::Vector<View>& GetChildren() const;
   int32_t                   IndexOfChildView(View view) const;
-  void                      Insert(uint32_t index, View child);
-  void                      RemoveAllChildren(RemovePolicy policy);
   void                      Remove(View child, RemovePolicy policy);
+  void                      RemoveAll(RemovePolicy policy);
 
   void             SetMeasureCallback(MeasureCallback callback);
   void             SetArrangeCallback(ArrangeCallback callback);

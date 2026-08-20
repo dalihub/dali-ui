@@ -1142,49 +1142,6 @@ public:
   }
 
   /**
-   * @brief Inserts a child at the specified index.
-   *
-   * @param[in] index The index where to insert
-   * @param[in] child The child to insert
-   */
-  void Insert(uint32_t index, View child);
-
-  /**
-   * @brief Removes all children from this View immediately.
-   *
-   * Equivalent to @c RemoveAllChildren(RemovePolicy::IMMEDIATE): unparents every
-   * child now, running no EXIT transition. A child already leaving via a prior
-   * @c Remove(child, RemovePolicy::ANIMATE_EXIT) finishes its EXIT rather than
-   * being force-unparented (see the @p policy overload). Mirrors the inherited
-   * one-argument @c Actor::Remove.
-   */
-  void RemoveAllChildren();
-
-  /**
-   * @brief Removes all children from this View, choosing whether to run the
-   * attached LayoutTransition's EXIT slot first.
-   *
-   * Removes each child of this View. With @c RemovePolicy::ANIMATE_EXIT and a
-   * configured EXIT spec, animator, or bounds effect (this view's own slot, or
-   * an ancestor SUBTREE-scope owner's), each View child is kept in the actor
-   * tree as a "ghost" until its EXIT animation finishes and is then unparented;
-   * children with no EXIT slot are unparented immediately.
-   * @c RemovePolicy::IMMEDIATE unparents now.
-   *
-   * @note Non-View actor children (which can only be attached via the
-   * integration API @c Dali::Ui::Integration::View::AddActorChild) are always
-   * unparented immediately, regardless of @p policy.
-   *
-   * @note A child that is already leaving via a prior
-   * @c Remove(child, RemovePolicy::ANIMATE_EXIT) — an in-flight EXIT ghost — is
-   * left to finish its EXIT and is NOT force-unparented, even under
-   * @c RemovePolicy::IMMEDIATE (matching per-child @c Remove(child, RemovePolicy)).
-   *
-   * @param[in] policy Whether to animate the EXIT transition or unparent immediately
-   */
-  void RemoveAllChildren(RemovePolicy policy);
-
-  /**
    * @brief Number of View children in this view's LOGICAL (layout) child list.
    *
    * The logical child list is the set of @c View children the layout enumerates
@@ -1256,10 +1213,13 @@ public:
    * actor tree (so the inherited @c Dali::Actor::GetChildCount /
    * @c Dali::Actor::GetChildAt still count and return it) but is logically
    * absent from this view's layout child list. Re-adding the SAME child to
-   * the SAME parent in this state via @c View::Insert or inherited
-   * @c Actor::Add is silently ignored — the EXIT continues, and the
-   * actor is unparented when the animation finishes. To cancel an
-   * in-flight EXIT, reparent the child to a DIFFERENT parent: the
+   * the SAME parent in this state never resurrects it: the inherited
+   * @c Actor::Add is silently ignored, while @c Actor::InsertAbove /
+   * @c Actor::InsertBelow do move its actor position and emit
+   * @c ChildOrderChangedSignal but leave it an EXIT ghost — the EXIT
+   * continues either way, and the actor is unparented when the animation
+   * finishes. To cancel an in-flight EXIT, reparent the child to a
+   * DIFFERENT parent: the
    * dispatcher auto-cancels the EXIT, restores interaction state, and
    * triggers ENTER under the new parent.
    *
@@ -1276,6 +1236,43 @@ public:
   // Re-expose the inherited one-argument immediate remove; the
   // Remove(View, RemovePolicy) overload would otherwise hide it (C++ name hiding).
   using Dali::Actor::Remove;
+
+  /**
+   * @brief Removes all children from this View, choosing whether to run the
+   * attached LayoutTransition's EXIT slot first.
+   *
+   * Overloads the inherited no-argument @c Actor::RemoveAll (re-exposed via
+   * @c using below) exactly as @c Remove(View, RemovePolicy) overloads
+   * @c Actor::Remove: the argument selects the behaviour, never the static
+   * handle type.
+   *
+   * Removes each child of this View. With @c RemovePolicy::ANIMATE_EXIT and a
+   * configured EXIT spec, animator, or bounds effect (this view's own slot, or
+   * an ancestor SUBTREE-scope owner's), each View child is kept in the actor
+   * tree as a "ghost" until its EXIT animation finishes and is then unparented;
+   * children with no EXIT slot are unparented immediately.
+   * @c RemovePolicy::IMMEDIATE unparents now.
+   *
+   * @note Non-View actor children (which can only be attached via the
+   * integration API @c Dali::Ui::Integration::View::AddActorChild) are always
+   * unparented immediately, regardless of @p policy.
+   *
+   * @note A child that is already leaving via a prior
+   * @c Remove(child, RemovePolicy::ANIMATE_EXIT) — an in-flight EXIT ghost — is
+   * left to finish its EXIT and is NOT force-unparented, even under
+   * @c RemovePolicy::IMMEDIATE (matching per-child @c Remove(child, RemovePolicy)).
+   * This is the ONLY behavioural difference from the inherited no-argument
+   * @c Actor::RemoveAll, which unparents every attached actor child
+   * unconditionally — ghosts included — and so silently cancels an in-flight
+   * EXIT. Both forms keep this view's logical child list in sync.
+   *
+   * @param[in] policy Whether to animate the EXIT transition or unparent immediately
+   */
+  void RemoveAll(RemovePolicy policy);
+
+  // Re-expose the inherited no-argument immediate bulk remove; the
+  // RemoveAll(RemovePolicy) overload would otherwise hide it (C++ name hiding).
+  using Dali::Actor::RemoveAll;
 
   /**
    * @brief Copies the attached layout parameters into @p params.

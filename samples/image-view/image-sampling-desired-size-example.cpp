@@ -160,7 +160,7 @@ private:
 
   void CreateSamplingImageView()
   {
-    mSamplingImageContainer.RemoveAllChildren();
+    mSamplingImageContainer.RemoveAll();
 
     switch(mImageTypeIndexSampling)
     {
@@ -284,7 +284,7 @@ private:
 
   void CreateDesiredSizeImageView()
   {
-    mDesiredSizeImageContainer.RemoveAllChildren();
+    mDesiredSizeImageContainer.RemoveAll();
 
     switch(mImageTypeIndexDesired)
     {

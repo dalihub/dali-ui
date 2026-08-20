@@ -38,8 +38,9 @@ void utc_dali_view_order_internal_cleanup(void)
 
 // The sibling-order operations usable on a View (the inherited
 // Dali::Actor::Raise/Lower/RaiseToTop/LowerToBottom/RaiseAbove/LowerBelow,
-// and View::Insert) affect TWO orders: the visual/actor z-order and the
-// internal LOGICAL layout order (ViewImpl::mChildren). Now that the public
+// and Dali::Actor::InsertAbove/InsertBelow) affect TWO orders: the
+// visual/actor z-order and the internal LOGICAL layout order
+// (ViewImpl::mChildren). Now that the public
 // View::IndexOfChild has been removed, the logical order is only observable
 // internally, so these tests live in the internal suite and query it through
 // GetImpl(view).IndexOfChildView().
@@ -189,12 +190,13 @@ int UtcDaliViewDepthIndexDoesNotChangeChildOrderInternalP(void)
   END_TEST;
 }
 
-int UtcDaliViewInsertReordersMChildrenInternalP(void)
+int UtcDaliViewInsertBelowReordersMChildrenInternalP(void)
 {
-  // Insert of an existing child to a different index must reorder mChildren
-  // so that order-sensitive layouts iterate children in the requested order.
-  // Self().Add is a no-op in dali-core when the child is already under this
-  // parent, so the reorder happens entirely inside Insert's reorder path.
+  // Moving an existing child to a different sibling index must reorder
+  // mChildren so that order-sensitive layouts iterate children in the
+  // requested order. The child is already under this parent, so dali-core
+  // takes its sibling-reorder path and emits ChildOrderChangedSignal; that
+  // signal is what resynchronises mChildren with the new actor order.
   UiTestApplication application;
 
   StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
@@ -208,10 +210,68 @@ int UtcDaliViewInsertReordersMChildrenInternalP(void)
   DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(parent, c), 2, TEST_LOCATION);
 
-  parent.Insert(0, c); // move c from index 2 to index 0
+  parent.InsertBelow(c, a); // move c from index 2 to index 0
 
   DALI_TEST_EQUALS(LogicalIndexOf(parent, c), 0, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 2, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInsertBelowFreshChildInternalP(void)
+{
+  // Inserting a FRESH child at a logical index needs the Add first. A bare
+  // InsertBelow takes dali-core's "not yet our child" path, which puts the
+  // child at the right ACTOR index but only fires OnChildAdd -- appending it
+  // to mChildren -- and emits no ChildOrderChangedSignal, leaving the logical
+  // order out of sync. The Add makes the child "already ours" so the
+  // following InsertBelow is a sibling reorder and both orders agree.
+  UiTestApplication application;
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  View        a      = View::New();
+  View        b      = View::New();
+  parent.Add(a);
+  parent.Add(b);
+
+  View d = View::New();
+  parent.Add(d);
+  parent.InsertBelow(d, a);
+
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, d), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, d), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInsertAboveMovesForwardInternalP(void)
+{
+  // Moving an existing child TOWARDS THE BACK (current index j < target index
+  // i) is the InsertAbove direction. dali-core erases the child before it
+  // locates the anchor, so everything after j shifts left by one and the
+  // anchor taken at i then sits at i-1; inserting ABOVE it lands the child on
+  // i. Using InsertBelow here would be a silent off-by-one.
+  UiTestApplication application;
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  View        a      = View::New();
+  View        b      = View::New();
+  View        c      = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+
+  // Move a from index 0 to index 2: j = 0 < i = 2.
+  View anchor = parent.GetChildViewAt(2u);
+  parent.InsertAbove(a, anchor);
+
+  // Both orders must agree on the requested index.
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, a), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, a), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, b), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, b), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(parent, c), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(parent, c), 1u, TEST_LOCATION);
   END_TEST;
 }

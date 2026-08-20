@@ -40,7 +40,7 @@ namespace Ui
 enum class LayoutTransitionSlot : uint8_t
 {
   ENTER  = 0, ///< View has been added as a child of a transition-attached parent
-  EXIT   = 1, ///< View is being removed via View::Remove(child, RemovePolicy::ANIMATE_EXIT) / RemoveAllChildren
+  EXIT   = 1, ///< View is being removed via View::Remove(child, RemovePolicy::ANIMATE_EXIT) / View::RemoveAll(RemovePolicy::ANIMATE_EXIT)
   CHANGE = 2  ///< Existing child's bounds (size or position) have changed
 };
 
@@ -88,7 +88,7 @@ enum class LayoutChangeCause : uint8_t
  * @note Applies to CHANGE, and to ENTER / EXIT when the owner carries the
  * corresponding slot effect: a child added under a no-transition descendant
  * fires the owner's ENTER, and a child removed via
- * @c View::Remove(child, RemovePolicy::ANIMATE_EXIT) / @c RemoveAllChildren
+ * @c View::Remove(child, RemovePolicy::ANIMATE_EXIT) / @c View::RemoveAll(RemovePolicy::ANIMATE_EXIT)
  * fires the owner's EXIT (an immediate remove — the inherited
  * @c Actor::Remove or @c RemovePolicy::IMMEDIATE — is not deferred). The effect is sourced from the
  * owner while geometry and the EXIT ghost use the child's real direct parent.

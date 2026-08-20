@@ -110,7 +110,7 @@ private:
 
   void PopulateGrid()
   {
-    mGridContainer.RemoveAllChildren();
+    mGridContainer.RemoveAll();
     for(int i = 0; i < RADIUS_CASE_COUNT; ++i)
     {
       mGridContainer.Add(CreateRadiusCard(i));

@@ -628,21 +628,6 @@ bool View::TryGetLayoutParams(StackLayoutParams& params) const
   return GetImpl(*this).TryGetLayoutParams(params);
 }
 
-void View::Insert(uint32_t index, View child)
-{
-  GetImpl(*this).Insert(index, child);
-}
-
-void View::RemoveAllChildren()
-{
-  GetImpl(*this).RemoveAllChildren();
-}
-
-void View::RemoveAllChildren(RemovePolicy policy)
-{
-  GetImpl(*this).RemoveAllChildren(policy);
-}
-
 uint32_t View::GetChildViewCount() const
 {
   return GetImpl(*this).GetChildViewCount();
@@ -661,6 +646,11 @@ int32_t View::IndexOfChildView(View childView) const
 void View::Remove(View child, RemovePolicy policy)
 {
   GetImpl(*this).Remove(child, policy);
+}
+
+void View::RemoveAll(RemovePolicy policy)
+{
+  GetImpl(*this).RemoveAll(policy);
 }
 
 bool View::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)
