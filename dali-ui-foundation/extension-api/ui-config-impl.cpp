@@ -349,11 +349,6 @@ const Dali::String& UiConfigImpl::GetBrokenImageUrl(UiConfig::BrokenImageType br
   return mImpl->mBrokenImageUrls[index];
 }
 
-std::vector<Dali::String> UiConfigImpl::GetBrokenImageUrlList() const
-{
-  return {mImpl->mBrokenImageUrls[0], mImpl->mBrokenImageUrls[1], mImpl->mBrokenImageUrls[2]};
-}
-
 void UiConfigImpl::SetClearFocusOnEscapeEnabled(bool enable)
 {
   DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
