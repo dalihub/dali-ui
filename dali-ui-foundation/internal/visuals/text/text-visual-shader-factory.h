@@ -211,7 +211,7 @@ private:
     mTextGradient : 2; ///< Whether text uses TextGradient fill, or not. default as TextGradient::NO_TEXT_GRADIENT
   TextGradientOverlay::Type
     mTextGradientOverlay : 2; ///< Whether text uses TextGradientOverlay, or not. default as TextGradientOverlay::NO_TEXT_GRADIENT_OVERLAY
-  TextReveal::Type mTextReveal : 1;          ///< Sequential foreground reveal shader variant.
+  TextReveal::Type mTextReveal : 2;          ///< Sequential foreground reveal shader variant. (2 bits to avoid signed 1-bit bitfield issue on MSVC)
 };
 
 } // namespace TextVisualShaderFeature

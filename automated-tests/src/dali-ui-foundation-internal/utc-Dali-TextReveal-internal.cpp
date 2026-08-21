@@ -879,7 +879,7 @@ int UtcDaliTextRevealMetadataOwnershipHaloP(void)
   constexpr uint32_t HEIGHT     = 5u;
   constexpr uint32_t PIXEL_SIZE = 4u;
 
-  auto pixelAt = [](std::vector<uint8_t>& pixels, uint32_t width, uint32_t x, uint32_t y)
+  auto pixelAt = [PIXEL_SIZE](std::vector<uint8_t>& pixels, uint32_t width, uint32_t x, uint32_t y)
   {
     return pixels.data() + (static_cast<size_t>(y) * width + x) * PIXEL_SIZE;
   };

@@ -236,6 +236,12 @@ public:
   int32_t                   IndexOfChildView(View view) const;
   void                      Remove(View child, RemovePolicy policy);
   void                      RemoveAll(RemovePolicy policy);
+  void                      Raise(LayoutOrderPolicy policy);
+  void                      Lower(LayoutOrderPolicy policy);
+  void                      RaiseToTop(LayoutOrderPolicy policy);
+  void                      LowerToBottom(LayoutOrderPolicy policy);
+  void                      RaiseAbove(View target, LayoutOrderPolicy policy);
+  void                      LowerBelow(View target, LayoutOrderPolicy policy);
 
   void             SetMeasureCallback(MeasureCallback callback);
   void             SetArrangeCallback(ArrangeCallback callback);
@@ -853,6 +859,8 @@ private:
   void ApplyLocalizedAccessibilityName(BaseHandle target, const Dali::String& name);
   void ApplyLocalizedAccessibilityDescription(BaseHandle target, const Dali::String& description);
 
+  class ScopedSkipChildrenUpdate;
+
   void SetBehaviourFlags(ViewImpl::ViewBehaviour behaviourFlags);
   void Destroy();
 
@@ -1062,6 +1070,7 @@ private:
   AccessibleObjectCreator            mAccessibleObjectCreator;
   int32_t                            mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2; ///< Frequently touched accessibility-related value kept here to avoid AccessibilityData creation.
 
+  bool mSkipChildrenUpdate : 1;
   bool mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
   bool mArrangeInProgress;                                ///< True while this view's own Arrange() is on the stack; guards same-view re-entrancy (plain bool so the scope guard can bind a bool&).
   bool mKeyEventDispatchInProgress;                       ///< True while this view's key event dispatch is on the stack; guards unsupported same-view re-entrancy.

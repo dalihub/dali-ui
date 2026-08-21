@@ -734,6 +734,36 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   int32_t IndexOfChildView(Ui::View view) const;
 
+  /**
+   * @copydoc Ui::View::Raise()
+   */
+  void Raise(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::Lower()
+   */
+  void Lower(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::RaiseToTop()
+   */
+  void RaiseToTop(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::LowerToBottom()
+   */
+  void LowerToBottom(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::RaiseAbove()
+   */
+  void RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::LowerBelow()
+   */
+  void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
+
   // Focus Navigation
 
   /**

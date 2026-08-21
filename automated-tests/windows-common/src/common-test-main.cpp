@@ -104,6 +104,7 @@ constexpr UnsupportedTest WINDOWS_UNSUPPORTED_TESTS[] = {
   {"UtcDaliWindowsWarningCoverageAsyncTextP", WINDOWS_PRIVATE_ACCESS_REASON},
   {"UtcDaliWindowsWarningCoverageTextVisualMaxTextureP", WINDOWS_PRIVATE_ACCESS_REASON},
   {"UtcDaliInteractiveViewOverlayEffectRecoilRestoreReleaseWaitsForFinishP", WINDOWS_OVERLAY_EFFECT_INTERNAL_REASON},
+  {"UtcDaliViewAccessibilityActiveDescendantNotificationP", WINDOWS_ACCESSIBILITY_REASON},
   {"UtcDaliViewAccessibilityReadingInfoInternalP", WINDOWS_ACCESSIBILITY_REASON},
   {"UtcDaliViewAccessibilityDirectApiDefaultsAndMetadataP", WINDOWS_ACCESSIBILITY_REASON},
   {"UtcDaliViewAccessibilityReadingInfoAndLanguageSpansP", WINDOWS_ACCESSIBILITY_REASON},

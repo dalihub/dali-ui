@@ -62,11 +62,6 @@ constexpr float FONT_SIZE_DESC       = 24.0f;
 constexpr float FONT_SIZE_LABEL      = 16.0f;
 constexpr float SCALE_CONTROL_HEIGHT = 40.0f;
 
-// Actor draw-order (Actor::Property::DEPTH_INDEX) values used to draw the
-// focused card above its siblings without touching the sibling order.
-constexpr int32_t FOCUSED_CARD_DEPTH_INDEX = 1;
-constexpr int32_t DEFAULT_CARD_DEPTH_INDEX = 0;
-
 // Colors
 const UiColor CARD_BG_COLOR(0x1A1A1A);         // Dark gray
 const UiColor CARD_BG_FOCUSED_COLOR(0xFFFFFF); // White
@@ -358,7 +353,7 @@ private:
   {
     // Change card background to white
     info.card.SetBackgroundColor(CARD_BG_FOCUSED_COLOR);
-    info.card.SetDepthIndex(FOCUSED_CARD_DEPTH_INDEX);
+    info.card.RaiseToTop(LayoutOrderPolicy::PRESERVE);
 
     // Change text color to dark
     info.titleLabel.SetTextColor(TEXT_FOCUSED_COLOR);
@@ -405,7 +400,6 @@ private:
   {
     // Restore card background
     info.card.SetBackgroundColor(CARD_BG_COLOR);
-    info.card.SetDepthIndex(DEFAULT_CARD_DEPTH_INDEX);
 
     // Restore text color
     info.titleLabel.SetTextColor(TEXT_COLOR);
