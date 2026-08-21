@@ -51,6 +51,12 @@ public:
   int     applyCount{0};
   Vector2 lastControlSize{Vector2::ZERO};
 
+  // When set, OnApplyFittingMode raises a NEW fitting request from INSIDE the
+  // processor run, for the first `reRequestLimit` applies. Used to pin that such a
+  // request is not swallowed by the processor's own "already registered" guard.
+  Dali::Ui::Internal::ViewDataImpl* reRequestTarget{nullptr};
+  int                               reRequestLimit{0};
+
 protected:
   FittingModeTestVisual(Dali::Ui::Internal::VisualFactoryCache& factoryCache,
                         Dali::Ui::Integration::InternalVisualType type)
@@ -89,6 +95,11 @@ protected:
   {
     ++applyCount;
     lastControlSize = controlSize;
+
+    if(reRequestTarget && applyCount <= reRequestLimit)
+    {
+      reRequestTarget->RegisterProcessorOnce();
+    }
   }
 };
 } // namespace

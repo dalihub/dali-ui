@@ -23,6 +23,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali/devel-api/object/type-registry.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -483,6 +484,56 @@ int UtcDaliViewInsertAboveMovesForwardInternalP(void)
   DALI_TEST_EQUALS(VisualIndexOf(parent, c), 1u, TEST_LOCATION);
   END_TEST;
 }
+
+namespace
+{
+// The third-party mistake, reproduced exactly: OnInitialize overridden, base NOT called.
+class NonChainingViewImpl : public ViewImpl
+{
+public:
+  static IntrusivePtr<NonChainingViewImpl> New()
+  {
+    return IntrusivePtr<NonChainingViewImpl>(new NonChainingViewImpl());
+  }
+
+  int measureCount{0};
+
+protected:
+  NonChainingViewImpl()
+  : ViewImpl()
+  {
+  }
+
+  void OnInitialize() override
+  {
+    // Deliberately empty, and deliberately does NOT call ViewImpl::OnInitialize().
+  }
+
+  MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override
+  {
+    ++measureCount;
+    return ViewImpl::OnMeasure(widthConstraint, heightConstraint);
+  }
+};
+
+Dali::TypeRegistration nonChainingViewTypeReg(typeid(NonChainingViewImpl), typeid(ViewImpl), nullptr);
+
+// Mirrors View::New() exactly, including the explicit second-phase Initialize() that
+// wraps the impl in a handle first -- that call is what a third-party factory makes,
+// and it is where the hook under test is now connected.
+View CreateNonChainingView()
+{
+  IntrusivePtr<NonChainingViewImpl> impl = NonChainingViewImpl::New();
+  View                              handle(*impl);
+  impl->Initialize();
+  return handle;
+}
+
+NonChainingViewImpl& NonChainingImplOf(View view)
+{
+  return static_cast<NonChainingViewImpl&>(GetImpl(view));
+}
+} // namespace
 
 int UtcDaliViewChildOrderHookSurvivesNonChainingOnInitializeInternalP(void)
 {
