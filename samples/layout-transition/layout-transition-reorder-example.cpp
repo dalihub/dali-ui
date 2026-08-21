@@ -44,6 +44,9 @@ using namespace Dali::Ui;
  * mStack at the proxy's index, with mArrangedBounds pre-baked so the
  * slide-into-slot animation starts from the on-screen drop position.
  *
+ * The card dropped into place is lifted above its siblings until its settle
+ * transition completes.
+ *
  *   - Tap "Click to ENTER": append a new colored child.
  *   - Tap "Click to EXIT": remove the last child.
  *   - Tap "Click to Edit": toggle edit mode.
@@ -110,7 +113,10 @@ public:
         LayoutBoundsEdge::TOP, timing))
       .SetExitBoundsEffect(LayoutBoundsEffects::ShrinkTo(
         LayoutBoundsEdge::TOP, timing))
-      .SetChangeTiming(timing);
+      .SetChangeTiming(timing)
+      // Resets the depth lift FinishDrag applies to a dropped card.
+      .SetOnFinished(LayoutLifecycleCallback::New(
+        &LayoutTransitionReorderController::OnTransitionFinished));
 
     mStack.SetLayoutTransition(transition);
 
@@ -333,6 +339,20 @@ private:
     return touch.GetPointCount() > 0u && IsDownState(touch.GetState(0u));
   }
 
+  // Actor draw-order values: DEPTH_INDEX orders a view among its siblings only.
+  static constexpr int32_t TRANSITIONING_DEPTH_INDEX = 1; ///< Drawn above every sibling
+  static constexpr int32_t DEFAULT_DEPTH_INDEX       = 0; ///< Back to child-order rendering
+
+  /// Ends the lift: a view that completes a transition goes back to child-order
+  /// rendering. Uses the View parameter — capturing it would form a cycle.
+  static void OnTransitionFinished(View view, LayoutTransitionSlot /*slot*/)
+  {
+    if(view)
+    {
+      view.SetDepthIndex(DEFAULT_DEPTH_INDEX);
+    }
+  }
+
   bool GetRootLocalPosition(TouchEvent touch, Vector2& localPosition)
   {
     const Vector2 screenPosition = touch.GetScreenPosition(0u);
@@ -442,7 +462,7 @@ private:
     // Swap the pressed child for the proxy invisibly. The dragged child is
     // removed with RemovePolicy::IMMEDIATE (unparent now, no EXIT animation).
     // We also detach the LayoutTransition for the swap so the proxy's
-    // subsequent Insert is not marked as a pending ENTER and faded in from
+    // subsequent add is not marked as a pending ENTER and faded in from
     // OPACITY 0. The swap is supposed to be invisible — siblings should not
     // move and the slot should look unchanged — so we re-attach right after,
     // which leaves CHANGE animations for the in-drag reorders.
@@ -460,7 +480,19 @@ private:
     mDragProxy.SetRequestedHeight(mDraggedOriginalReqH);
     mDragProxy.SetProperty(Actor::Property::OPACITY, 0.0f);
     mDragProxy.SetProperty(Actor::Property::SENSITIVE, false);
-    mStack.Insert(mDraggedIndex, mDragProxy);
+
+    // Insert at logical index mDraggedIndex. InsertBelow places a fresh child
+    // at the logical (layout) position matching its actor position; an empty
+    // anchor means the stack has no child there, so append.
+    View proxyAnchor = mStack.GetChildViewAt(mDraggedIndex);
+    if(proxyAnchor)
+    {
+      mStack.InsertBelow(mDragProxy, proxyAnchor);
+    }
+    else
+    {
+      mStack.Add(mDragProxy);
+    }
 
     mStack.SetLayoutTransition(savedTransition);
 
@@ -477,7 +509,7 @@ private:
     mDraggedChild.SetRequestedX(bounds.x);
     mDraggedChild.SetRequestedY(bounds.y);
     mWindow.Add(mDraggedChild);
-    mDraggedChild.RaiseToTop(LayoutOrderPolicy::PRESERVE);
+    mDraggedChild.RaiseToTop();
 
     StartAutoScrollTimer();
   }
@@ -513,11 +545,28 @@ private:
     const uint32_t targetIndex = ComputeTargetIndexFromDraggedY(mDragBounds.y);
     if(targetIndex != mDraggedIndex)
     {
-      // mStack still has the proxy at mDraggedIndex; Insert reorders it to
-      // targetIndex and fires REORDERED CHANGE on every sibling so the
-      // visual reflow animates. The transition stays attached here so the
-      // configured CHANGE timing drives the animation.
-      mStack.Insert(targetIndex, mDragProxy);
+      // mStack still has the proxy at mDraggedIndex; the sibling reorder
+      // moves it to targetIndex and fires REORDERED CHANGE on every sibling
+      // so the visual reflow animates. The transition stays attached here so
+      // the configured CHANGE timing drives the animation.
+      //
+      // dali-core erases the child before locating the anchor, so the
+      // direction decides which call lands on targetIndex: moving toward the
+      // front (mDraggedIndex > targetIndex) leaves the anchor at targetIndex,
+      // so insert BELOW it; moving toward the back shifts the anchor down to
+      // targetIndex - 1, so insert ABOVE it.
+      View anchor = mStack.GetChildViewAt(targetIndex);
+      if(anchor)
+      {
+        if(mDraggedIndex > targetIndex)
+        {
+          mStack.InsertBelow(mDragProxy, anchor);
+        }
+        else
+        {
+          mStack.InsertAbove(mDragProxy, anchor);
+        }
+      }
       mDraggedIndex = targetIndex;
     }
   }
@@ -586,7 +635,7 @@ private:
     LayoutController::Get(mWindow).ProcessLayouts();
 
     // Mirror of BeginDrag's swap: remove the proxy with RemovePolicy::IMMEDIATE
-    // (no EXIT) and detach the transition so Insert on the dropped child does
+    // (no EXIT) and detach the transition so re-adding the dropped child does
     // not mark it for ENTER. Re-attach right after so the next mStack layout
     // pass dispatches CHANGE on the dropped child using the pre-baked snapshot.
     LayoutTransition savedTransition = mStack.GetLayoutTransition();
@@ -609,7 +658,23 @@ private:
     droppedChild.SetRequestedHeight(originalReqH);
     droppedChild.SetRequestedX(0.0f);
     droppedChild.SetRequestedY(0.0f);
-    mStack.Insert(targetIndex, droppedChild);
+
+    // Re-insert at logical index targetIndex. InsertBelow places a fresh child
+    // at the logical (layout) position matching its actor position; an empty
+    // anchor means the stack has no child there, so append.
+    View dropAnchor = mStack.GetChildViewAt(targetIndex);
+    if(dropAnchor)
+    {
+      mStack.InsertBelow(droppedChild, dropAnchor);
+      // Lift above every sibling (co-animating ones included) for the settle
+      // transition; OnTransitionFinished puts it back. A settle that produces
+      // no CHANGE keeps the lift until this card's next completed transition.
+      droppedChild.SetDepthIndex(TRANSITIONING_DEPTH_INDEX);
+    }
+    else
+    {
+      mStack.Add(droppedChild);
+    }
 
     mStack.SetLayoutTransition(savedTransition);
   }

@@ -1889,7 +1889,7 @@ private:
       return;
     }
 
-    mNavigation.RemoveAllChildren();
+    mNavigation.RemoveAll();
     mNavigation.Add(MakeNavButton("Prev page", [this]() { PreviousPage(); }, NAV_PAGE_BUTTON_WIDTH, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
     mNavigation.Add(MakeNavButton("Next page", [this]() { NextPage(); }, NAV_PAGE_BUTTON_WIDTH, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
 

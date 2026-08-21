@@ -133,19 +133,19 @@ int UtcDaliLayoutRemoveAtP(void)
   END_TEST;
 }
 
-int UtcDaliLayoutRemoveAllChildrenP(void)
+int UtcDaliLayoutRemoveAllP(void)
 {
   UiTestApplication application;
   Layout layout = Layout::New();
   layout.Add(View::New());
   layout.Add(View::New());
   DALI_TEST_EQUALS(layout.GetChildCount(), 2u, TEST_LOCATION);
-  layout.RemoveAllChildren();
+  layout.RemoveAll();
   DALI_TEST_EQUALS(layout.GetChildCount(), 0u, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliLayoutRemoveAllChildrenImmediateP(void)
+int UtcDaliLayoutRemoveAllImmediateP(void)
 {
   UiTestApplication application;
   Layout layout = Layout::New();
@@ -153,7 +153,7 @@ int UtcDaliLayoutRemoveAllChildrenImmediateP(void)
   layout.Add(View::New());
   layout.Add(View::New());
   DALI_TEST_EQUALS(layout.GetChildCount(), 3u, TEST_LOCATION);
-  layout.RemoveAllChildren(RemovePolicy::IMMEDIATE);
+  layout.RemoveAll(RemovePolicy::IMMEDIATE);
   DALI_TEST_EQUALS(layout.GetChildCount(), 0u, TEST_LOCATION);
   END_TEST;
 }
@@ -218,17 +218,6 @@ int UtcDaliLayoutGetChildAtEmptyP(void)
   Layout layout = Layout::New();
   View v = layout.GetChildViewAt(0);
   DALI_TEST_CHECK(!v);
-  END_TEST;
-}
-
-int UtcDaliLayoutInsertIndexClampP(void)
-{
-  UiTestApplication application;
-  Layout layout = Layout::New();
-  View child = View::New();
-  layout.Insert(99u, child);
-  DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
-  DALI_TEST_CHECK(layout.GetChildViewAt(0) == child);
   END_TEST;
 }
 

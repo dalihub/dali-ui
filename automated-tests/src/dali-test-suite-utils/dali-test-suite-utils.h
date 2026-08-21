@@ -31,6 +31,7 @@
 #include <dali/integration-api/stream-operators.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/dali-core.h>
+#include <dali-ui-foundation/integration-api/stream-operators.h>
 #include <test-compare-types.h>
 
 extern "C" {

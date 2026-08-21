@@ -30,6 +30,10 @@ UNIFORM sampler2D sOverlayStyle;
   #endif
 #endif
 
+#ifdef IS_REQUIRED_TEXT_REVEAL
+UNIFORM sampler2D sTextRevealMetadata;
+#endif
+
 UNIFORM_BLOCK FragBlock
 {
   #ifndef IS_REQUIRED_TEXT_GRADIENT
@@ -75,6 +79,11 @@ UNIFORM_BLOCK FragBlock
   UNIFORM lowp float uEmbossStrength;
   UNIFORM lowp vec4 uEmbossLightColor;
   UNIFORM lowp vec4 uEmbossShadowColor;
+  #endif
+
+  #ifdef IS_REQUIRED_TEXT_REVEAL
+  UNIFORM highp float uTextRevealProgress;
+  UNIFORM highp float uTextRevealFadeDuration;
   #endif
 };
 
@@ -153,6 +162,37 @@ mediump vec4 ApplyTextGradientOverlay(mediump vec4 baseFill, highp vec2 texCoord
 }
 #endif
 
+#ifdef IS_REQUIRED_TEXT_REVEAL
+highp float ResolveTextRevealOpacity(highp vec2 texCoord)
+{
+  mediump vec4 revealMetadata = TEXTURE(sTextRevealMetadata, texCoord);
+  highp float encodedStart =
+    floor(revealMetadata.r * 255.0 + 0.5) * 256.0 + floor(revealMetadata.g * 255.0 + 0.5);
+  highp float normalizedStart = encodedStart / 65535.0;
+  highp float revealProgress = clamp(uTextRevealProgress, 0.0, 1.0);
+  highp float localOpacity;
+  if(uTextRevealFadeDuration <= 0.000001)
+  {
+    // The second term preserves the public progress==0 fully-hidden endpoint,
+    // including the first unit whose scheduled start is zero.
+    localOpacity = step(normalizedStart, revealProgress) * step(0.000001, revealProgress);
+  }
+  else
+  {
+    localOpacity = clamp((revealProgress - normalizedStart) / uTextRevealFadeDuration, 0.0, 1.0);
+  }
+  localOpacity = mix(1.0, localOpacity, step(0.5, revealMetadata.b));
+  // Defensive global endpoint: malformed/missing metadata must not expose a
+  // reveal-target foreground pixel at progress zero. FinalRevealPlan is still
+  // responsible for assigning valid metadata to every rendered glyph.
+  localOpacity *= sign(max(revealProgress, 0.0));
+  // Fixed-point start metadata can round slightly above the theoretical
+  // schedule. Preserve the public fully-revealed endpoint independently of
+  // that quantization.
+  return mix(localOpacity, 1.0, step(1.0, revealProgress));
+}
+#endif
+
 void main()
 {
 #ifdef IS_REQUIRED_STYLE
@@ -191,6 +231,15 @@ void main()
   float light = TEXTURE(sTexture, clamp(vTexCoord - offset, 0.0, 1.0)).a;
   float shadow = TEXTURE(sTexture, clamp(vTexCoord + offset, 0.0, 1.0)).a;
 
+#ifdef IS_REQUIRED_TEXT_REVEAL
+  // Bevel extends the foreground with neighboring texture samples. Apply the
+  // timing owned by each source sample so its halo cannot precede the glyph.
+  textAlpha *= ResolveTextRevealOpacity(vTexCoord);
+  light *= ResolveTextRevealOpacity(clamp(vTexCoord - offset, 0.0, 1.0));
+  shadow *= ResolveTextRevealOpacity(clamp(vTexCoord + offset, 0.0, 1.0));
+#define TEXT_REVEAL_RESOLVED_IN_EMBOSS
+#endif
+
   vec4 lightColor = vec4(uEmbossLightColor.rgb * light, light);
   vec4 shadowColor = vec4(uEmbossShadowColor.rgb * shadow, shadow);
   vec4 embossColor = lightColor + shadowColor;
@@ -219,6 +268,15 @@ void main()
   float light = TEXTURE(sTexture, clamp(vTexCoord - offset, 0.0, 1.0)).r;
   float shadow = TEXTURE(sTexture, clamp(vTexCoord + offset, 0.0, 1.0)).r;
 
+#ifdef IS_REQUIRED_TEXT_REVEAL
+  // Bevel extends the foreground with neighboring texture samples. Apply the
+  // timing owned by each source sample so its halo cannot precede the glyph.
+  textAlpha *= ResolveTextRevealOpacity(vTexCoord);
+  light *= ResolveTextRevealOpacity(clamp(vTexCoord - offset, 0.0, 1.0));
+  shadow *= ResolveTextRevealOpacity(clamp(vTexCoord + offset, 0.0, 1.0));
+#define TEXT_REVEAL_RESOLVED_IN_EMBOSS
+#endif
+
   vec4 lightColor = vec4(uEmbossLightColor.rgb * light, light);
   vec4 shadowColor = vec4(uEmbossShadowColor.rgb * shadow, shadow);
   vec4 embossColor = lightColor + shadowColor;
@@ -235,6 +293,13 @@ void main()
 
 #ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
   textColor = ApplyTextGradientOverlay(textColor, vTexCoord);
+#endif
+
+#ifdef IS_REQUIRED_TEXT_REVEAL
+#ifndef TEXT_REVEAL_RESOLVED_IN_EMBOSS
+  // textColor is premultiplied, so scale rgb and alpha together.
+  textColor *= ResolveTextRevealOpacity(vTexCoord);
+#endif
 #endif
 
   // Draw the text as overlay above the style

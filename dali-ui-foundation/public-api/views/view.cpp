@@ -628,21 +628,6 @@ bool View::TryGetLayoutParams(StackLayoutParams& params) const
   return GetImpl(*this).TryGetLayoutParams(params);
 }
 
-void View::Insert(uint32_t index, View child)
-{
-  GetImpl(*this).Insert(index, child);
-}
-
-void View::RemoveAllChildren()
-{
-  GetImpl(*this).RemoveAllChildren();
-}
-
-void View::RemoveAllChildren(RemovePolicy policy)
-{
-  GetImpl(*this).RemoveAllChildren(policy);
-}
-
 uint32_t View::GetChildViewCount() const
 {
   return GetImpl(*this).GetChildViewCount();
@@ -663,34 +648,9 @@ void View::Remove(View child, RemovePolicy policy)
   GetImpl(*this).Remove(child, policy);
 }
 
-void View::Raise(LayoutOrderPolicy policy)
+void View::RemoveAll(RemovePolicy policy)
 {
-  GetImpl(*this).Raise(policy);
-}
-
-void View::Lower(LayoutOrderPolicy policy)
-{
-  GetImpl(*this).Lower(policy);
-}
-
-void View::RaiseToTop(LayoutOrderPolicy policy)
-{
-  GetImpl(*this).RaiseToTop(policy);
-}
-
-void View::LowerToBottom(LayoutOrderPolicy policy)
-{
-  GetImpl(*this).LowerToBottom(policy);
-}
-
-void View::RaiseAbove(View target, LayoutOrderPolicy policy)
-{
-  GetImpl(*this).RaiseAbove(target, policy);
-}
-
-void View::LowerBelow(View target, LayoutOrderPolicy policy)
-{
-  GetImpl(*this).LowerBelow(target, policy);
+  GetImpl(*this).RemoveAll(policy);
 }
 
 bool View::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)

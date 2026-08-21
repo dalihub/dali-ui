@@ -68,7 +68,7 @@ private:
 
   void ShowListScreen()
   {
-    mRootContainer.RemoveAllChildren();
+    mRootContainer.RemoveAll();
     mActiveCase = nullptr;
 
     mRootContainer.Add(MakeHeader("Components Manual Tests"));
@@ -171,7 +171,7 @@ private:
     }
 
     mActiveCase = mTestCases[index].get();
-    mRootContainer.RemoveAllChildren();
+    mRootContainer.RemoveAll();
 
     Label backLabel = Label::New("< Back");
     backLabel.SetTextColor(UiColor(COLOR_HEADER_TEXT));

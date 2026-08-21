@@ -34,24 +34,11 @@ enum class CornerRadiusPolicy
 };
 
 /**
- * @brief Controls whether sibling-order changes (Raise/Lower/RaiseAbove/LowerBelow)
- * also reorder the layout children list.
+ * @brief Controls how View::Remove(View, RemovePolicy) and
+ * View::RemoveAll(RemovePolicy) treat an attached LayoutTransition's EXIT slot.
  *
- * Visual z-order (Actor sibling order) and layout order are kept in sync by default.
- * Use PRESERVE when only the drawing/hit order should change while layout arrangement
- * stays the same.
- */
-enum class LayoutOrderPolicy
-{
-  UPDATE   = 0, ///< Also reorder layout children to match the new sibling order.
-  PRESERVE = 1, ///< Keep layout children order unchanged; only visual z-order is affected.
-};
-
-/**
- * @brief Controls how View::Remove(View, RemovePolicy) treats an attached
- * LayoutTransition's EXIT slot.
- *
- * ENTER is dispatched automatically for every add path (Actor::Add, Insert),
+ * ENTER is dispatched automatically for every add path (Actor::Add,
+ * Actor::InsertAbove/InsertBelow),
  * but EXIT cannot be hooked transparently on removal, so the EXIT intent must
  * be requested explicitly through this policy.
  *

@@ -616,7 +616,7 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
   // Capture sibling add/remove markers for CHANGE cause refinement. A
   // sibling add is detected as "this pass introduced at least one ENTER
   // child", a sibling remove via the dispatcher-facing marker set in
-  // ViewImpl::Remove / RemoveAllChildren. Per-cause precedence is:
+  // ViewImpl::Remove / RemoveAll. Per-cause precedence is:
   // REORDERED > SIBLING_ADDED > SIBLING_REMOVED > WINDOW_RESIZED > OTHER.
   const bool hadSiblingAdd    = !enterChildren.empty();
   const bool hadSiblingRemove = pendingChanges.hadChildRemoval;

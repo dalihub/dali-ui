@@ -65,6 +65,24 @@ void ApplyLabelTextGradientOverlayStartOffsetBy(Animation& animation, View view,
   }
 }
 
+void ApplyLabelTextRevealProgressTo(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+{
+  Label child = Label::DownCast(view);
+  if(child)
+  {
+    Internal::LabelAnimationSpecImpl::ApplyTextRevealProgressTo(animation, child, entry);
+  }
+}
+
+void ApplyLabelTextRevealProgressBy(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+{
+  Label child = Label::DownCast(view);
+  if(child)
+  {
+    Internal::LabelAnimationSpecImpl::ApplyTextRevealProgressBy(animation, child, entry);
+  }
+}
+
 void ApplyLabelPixelSnapFactorTo(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
 {
   Label child = Label::DownCast(view);
@@ -380,6 +398,18 @@ LabelAnimationSpec& LabelAnimationSpec::TextGradientOverlayStartOffset(float tar
 LabelAnimationSpec& LabelAnimationSpec::TextGradientOverlayStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &ApplyLabelTextGradientOverlayStartOffsetBy);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::TextRevealProgress(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &ApplyLabelTextRevealProgressTo);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::TextRevealProgressBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &ApplyLabelTextRevealProgressBy);
   return *this;
 }
 

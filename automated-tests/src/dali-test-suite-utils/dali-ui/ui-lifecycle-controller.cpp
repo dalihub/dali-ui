@@ -17,7 +17,6 @@
 
 #include "ui-lifecycle-controller.h"
 
-#include <dali/devel-api/common/singleton-service.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/dali-signal.h>
 
@@ -46,10 +45,7 @@ private:
   Dali::LifecycleController::LifecycleSignalType mPreInitSignal;
   Dali::LifecycleController::LifecycleSignalType mInitSignal;
   Dali::LifecycleController::LifecycleSignalType mTerminateSignal;
-  static Dali::LifecycleController               mLifecycleController;
 };
-
-Dali::LifecycleController LifecycleController::mLifecycleController;
 
 LifecycleController::LifecycleController()
 {
@@ -61,17 +57,10 @@ LifecycleController::~LifecycleController()
 
 Dali::LifecycleController LifecycleController::Get()
 {
-  Dali::SingletonService singletonService(Dali::SingletonService::Get());
-  if(!singletonService)
-  {
-    return Dali::LifecycleController();
-  }
-
-  if(!mLifecycleController)
-  {
-    mLifecycleController = Dali::LifecycleController(new Internal::Adaptor::LifecycleController());
-  }
-  return mLifecycleController;
+  // Mirrors dali-adaptor: the instance lives for the lifetime of the process and does not depend on
+  // Core, so it is available before the application has been created.
+  static Dali::LifecycleController lifecycleController(new Internal::Adaptor::LifecycleController());
+  return lifecycleController;
 }
 
 Dali::LifecycleController::LifecycleSignalType& LifecycleController::PreInitSignal()

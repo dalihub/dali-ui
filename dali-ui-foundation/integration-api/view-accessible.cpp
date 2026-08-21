@@ -146,6 +146,7 @@ Dali::Integration::Accessibility::Role ConvertV2RoleToAccessibilityRole(Accessib
     TO_SAME_ROLE_TYPE(LINK)
     TO_SAME_ROLE_TYPE(LIST)
     TO_SAME_ROLE_TYPE(LIST_ITEM)
+    TO_SAME_ROLE_TYPE(LABEL)
     TO_SAME_ROLE_TYPE(MENU)
     TO_SAME_ROLE_TYPE(MENU_BAR)
     TO_SAME_ROLE_TYPE(MENU_ITEM)
@@ -156,14 +157,21 @@ Dali::Integration::Accessibility::Role ConvertV2RoleToAccessibilityRole(Accessib
     TO_SAME_ROLE_TYPE(PROGRESS_BAR)
     TO_SAME_ROLE_TYPE(RADIO_BUTTON)
     TO_SAME_ROLE_TYPE(SCROLL_BAR)
+    TO_SAME_ROLE_TYPE(SCROLL_PANE)
     TO_SAME_ROLE_TYPE(SPIN_BUTTON)
     TO_V1_ROLE_TYPE(TAB, PAGE_TAB)
     TO_V1_ROLE_TYPE(TAB_LIST, PAGE_TAB_LIST)
-    TO_V1_ROLE_TYPE(TEXT, LABEL)
+    TO_SAME_ROLE_TYPE(TEXT)
     TO_SAME_ROLE_TYPE(TOGGLE_BUTTON)
+    TO_SAME_ROLE_TYPE(SWITCH)
     TO_SAME_ROLE_TYPE(TOOL_BAR)
     TO_V1_ROLE_TYPE(SCENE_3D, FILLER)
     TO_V1_ROLE_TYPE(MODEL, IMAGE)
+    TO_SAME_ROLE_TYPE(TABLE)
+    TO_SAME_ROLE_TYPE(TABLE_CELL)
+    TO_SAME_ROLE_TYPE(TABLE_COLUMN_HEADER)
+    TO_SAME_ROLE_TYPE(TABLE_ROW_HEADER)
+    TO_SAME_ROLE_TYPE(EMBEDDED)
     default:
     {
       return Role::UNKNOWN;
@@ -761,7 +769,7 @@ void ViewAccessible::OnStatePropertySet(AccessibilityStates newStates)
     const bool newChecked = HasAccessibilityState(newStates, Accessibility::State::CHECKED);
     if(newChecked != HasAccessibilityState(mStatesSnapshot, Accessibility::State::CHECKED) &&
        (role == Accessibility::Role::CHECK_BOX || role == Accessibility::Role::RADIO_BUTTON ||
-        role == Accessibility::Role::TOGGLE_BUTTON))
+        role == Accessibility::Role::TOGGLE_BUTTON || role == Accessibility::Role::SWITCH))
     {
       EmitStateChanged(Dali::Integration::Accessibility::State::CHECKED, newChecked);
     }

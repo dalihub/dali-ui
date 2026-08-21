@@ -28,6 +28,9 @@
 #include <dali-ui-foundation/internal/text/text-pixel-snap-data.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
+#include <algorithm>
+#include <cmath>
+
 namespace Dali
 {
 namespace Ui
@@ -47,6 +50,14 @@ Dali::Ui::Integration::LabelImpl* GetLabelImpl(Label label)
 
   Dali::RefObject& handle = label.GetImplementation();
   return &static_cast<Dali::Ui::Integration::LabelImpl&>(handle);
+}
+
+float ClampTextRevealProgress(float value)
+{
+  // Keep public normalized state deterministic for every IEEE-754 input.
+  // Infinities saturate naturally; unordered NaN resolves to the safe hidden
+  // endpoint instead of entering the scene graph.
+  return std::isnan(value) ? 0.0f : std::max(0.0f, std::min(1.0f, value));
 }
 } // namespace
 
@@ -138,6 +149,41 @@ void LabelAnimationSpecImpl::ApplyTextGradientOverlayStartOffsetBy(Animation& an
       return;
     }
 
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateBy(Property(label, index), entry.value, entry.alpha, period);
+  }
+}
+
+void LabelAnimationSpecImpl::ApplyTextRevealProgressTo(Animation& animation, Label label, const Entry& entry)
+{
+  if(auto* labelImpl = GetLabelImpl(label))
+  {
+    const Property::Index index = labelImpl->EnsureTextRevealProgress();
+    if(index == Property::INVALID_INDEX)
+    {
+      return;
+    }
+
+    const float target = ClampTextRevealProgress(entry.value.Get<float>());
+    TimePeriod  period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateTo(Property(label, index), target, entry.alpha, period);
+  }
+}
+
+void LabelAnimationSpecImpl::ApplyTextRevealProgressBy(Animation& animation, Label label, const Entry& entry)
+{
+  if(auto* labelImpl = GetLabelImpl(label))
+  {
+    const Property::Index index = labelImpl->EnsureTextRevealProgress();
+    if(index == Property::INVALID_INDEX)
+    {
+      return;
+    }
+
+    // Preserve DALi AnimateBy semantics: the relative value is applied to the
+    // scene property at the entry's actual start, not when this bridge is
+    // configured. The public getter and the shader clamp the presentation to
+    // [0, 1], matching other bounded animatable properties such as opacity.
     TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
     animation.AnimateBy(Property(label, index), entry.value, entry.alpha, period);
   }

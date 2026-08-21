@@ -298,8 +298,8 @@ private:
   {
     mIsLoading = false;
     DALI_LOG_RELEASE_INFO("[WVLOG][signal] >>>> OnPageLoadError FIRED: url=%s code=%d desc=\"%s\"\n",
-                          error.url.CStr(), static_cast<int>(error.code), error.description.CStr());
-    SetStatus(Dali::String("Load error: ") + error.description);
+                          error.GetUrl().CStr(), static_cast<int>(error.GetCode()), error.GetDescription().CStr());
+    SetStatus(Dali::String("Load error: ") + error.GetDescription());
     UpdateNavButtons();
   }
 

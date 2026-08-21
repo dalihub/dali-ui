@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/public-api/text/style/bevel.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
 #include <dali-ui-foundation/public-api/text/style/outline.h>
+#include <dali-ui-foundation/public-api/text/style/reveal.h>
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
@@ -607,6 +608,8 @@ public: // Setters for chaining
   /**
    * @brief Sets the number of complete loops for marquee.
    *
+   * @note Use Text::MARQUEE_LOOP_COUNT_INFINITE to repeat indefinitely.
+   *
    * @param[in] loopCount The number of loops.
    */
   void SetMarqueeLoopCount(int loopCount);
@@ -757,6 +760,50 @@ public: // Setters for chaining
    * @return The current underline style, or Text::Underline::None() if not set.
    */
   Text::Underline GetTextUnderline() const;
+
+  /**
+   * @brief Sets the sequential text reveal configuration.
+   *
+   * Pass Text::Reveal::None() to disable reveal rendering. Changing the
+   * configuration does not reset TextRevealProgress.
+   *
+   * Marquee and cutout do not apply reveal rendering; the authored configuration
+   * is retained and takes effect again when the unsupported mode is disabled.
+   *
+   * @param[in] reveal The reveal configuration.
+   */
+  void SetTextReveal(const Text::Reveal& reveal);
+
+  /**
+   * @brief Returns the text reveal configuration.
+   *
+   * @return The current configuration, or Text::Reveal::None() if disabled.
+   */
+  Text::Reveal GetTextReveal() const;
+
+  /**
+   * @brief Sets the normalized reveal timeline position.
+   *
+   * Values are clamped to [0, 1]; NaN is normalized to zero. Zero hides the
+   * reveal-target foreground and one restores its normal appearance. Text or
+   * layout changes preserve the current progress. The initial progress is zero.
+   *
+   * Animating backwards hides units in reverse reveal order.
+   *
+   * @param[in] progress The normalized timeline position.
+   */
+  void SetTextRevealProgress(float progress);
+
+  /**
+   * @brief Returns the normalized reveal timeline position.
+   *
+   * For an on-scene Label, this reflects the latest rendered value including
+   * animation. When not connected to a scene, it reflects the latest event-side
+   * value.
+   *
+   * @return The current progress in [0, 1].
+   */
+  float GetTextRevealProgress() const;
 
   /**
    * @brief Sets the shadow style.
@@ -1317,6 +1364,7 @@ public: // Not intended for application developers
 
   // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)
   // @ANIMATABLE_MANUAL(TextGradientOverlayStartOffset, float)
+  // @ANIMATABLE_MANUAL(TextRevealProgress, float)
   // @ANIMATABLE_MANUAL(PixelSnapFactor, float)
 public: // Animation
   /**

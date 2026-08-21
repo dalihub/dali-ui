@@ -547,7 +547,8 @@ void GroupSelectableTraitImpl::RestoreAccessibility()
   // typical NONE case this yields CHECKED=false (same as the previous unconditional clear).
   const bool      checkable  = (restoredRole == static_cast<int32_t>(Accessibility::Role::CHECK_BOX) ||
                           restoredRole == static_cast<int32_t>(Accessibility::Role::RADIO_BUTTON) ||
-                          restoredRole == static_cast<int32_t>(Accessibility::Role::TOGGLE_BUTTON));
+                          restoredRole == static_cast<int32_t>(Accessibility::Role::TOGGLE_BUTTON) ||
+                          restoredRole == static_cast<int32_t>(Accessibility::Role::SWITCH));
   SelectableTrait selectable = GetSelectableTrait(GetImpl(owner));
   WriteCheckedState(owner, checkable && selectable && selectable.IsSelected());
 }

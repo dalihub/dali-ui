@@ -581,26 +581,14 @@ LayoutRect ViewImpl::GetArrangedBounds() const
 // Child Management API
 // =============================================================================
 
-void ViewImpl::Insert(uint32_t index, Ui::View child)
-{
-  mImpl->Insert(index, child);
-}
-
-void ViewImpl::RemoveAllChildren()
-{
-  // No-argument form mirrors the inherited one-argument Actor::Remove:
-  // unparent every child immediately, running no EXIT transition.
-  RemoveAllChildren(Ui::RemovePolicy::IMMEDIATE);
-}
-
-void ViewImpl::RemoveAllChildren(Ui::RemovePolicy policy)
-{
-  mImpl->RemoveAllChildren(policy);
-}
-
 void ViewImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
 {
   mImpl->Remove(child, policy);
+}
+
+void ViewImpl::RemoveAll(Ui::RemovePolicy policy)
+{
+  mImpl->RemoveAll(policy);
 }
 
 uint32_t ViewImpl::GetChildViewCount() const
@@ -616,36 +604,6 @@ Ui::View ViewImpl::GetChildViewAt(uint32_t index) const
 int32_t ViewImpl::IndexOfChildView(Ui::View view) const
 {
   return mImpl->IndexOfChildView(view);
-}
-
-void ViewImpl::Raise(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->Raise(policy);
-}
-
-void ViewImpl::Lower(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->Lower(policy);
-}
-
-void ViewImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->RaiseToTop(policy);
-}
-
-void ViewImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->LowerToBottom(policy);
-}
-
-void ViewImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  mImpl->RaiseAbove(target, policy);
-}
-
-void ViewImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  mImpl->LowerBelow(target, policy);
 }
 
 void ViewImpl::SetLayoutParams(const AbsoluteLayoutParams& params)

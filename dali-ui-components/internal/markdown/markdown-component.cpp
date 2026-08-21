@@ -457,7 +457,18 @@ private:
       textView.SetAccessibilityHidden(true);
     }
 
-    mContentHost.Insert(0u, mTaskRow);
+    // Insert at logical index 0. InsertBelow places a fresh child at the
+    // logical (layout) position matching its actor position; an empty anchor
+    // means the host is empty, so append.
+    Ui::View taskRowAnchor = mContentHost.GetChildViewAt(0u);
+    if(taskRowAnchor)
+    {
+      mContentHost.InsertBelow(mTaskRow, taskRowAnchor);
+    }
+    else
+    {
+      mContentHost.Add(mTaskRow);
+    }
     mTaskRowAttached = true;
     if(mTextComponent)
     {
@@ -563,7 +574,19 @@ private:
     mTaskRowAttached = false;
     if(mTextComponent)
     {
-      mContentHost.Insert(0u, mTextComponent->GetView());
+      // Insert at logical index 0. InsertBelow places a fresh child at the
+      // logical (layout) position matching its actor position; an empty anchor
+      // means the host is empty, so append.
+      Ui::View textView = mTextComponent->GetView();
+      Ui::View anchor   = mContentHost.GetChildViewAt(0u);
+      if(anchor)
+      {
+        mContentHost.InsertBelow(textView, anchor);
+      }
+      else
+      {
+        mContentHost.Add(textView);
+      }
     }
   }
 
@@ -624,7 +647,19 @@ private:
       }
       else
       {
-        mContentHost.Insert(0u, mTextComponent->GetView());
+        // Insert at logical index 0. InsertBelow places a fresh child at the
+        // logical (layout) position matching its actor position; an empty
+        // anchor means the host is empty, so append.
+        Ui::View textView = mTextComponent->GetView();
+        Ui::View anchor   = mContentHost.GetChildViewAt(0u);
+        if(anchor)
+        {
+          mContentHost.InsertBelow(textView, anchor);
+        }
+        else
+        {
+          mContentHost.Add(textView);
+        }
       }
       return;
     }

@@ -576,6 +576,8 @@ label.SetAsyncRendering(true);
 label.SetRenderScale(2.0f);
 ~~~
 
+참고 샘플: [text-render-scale-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-render-scale-example.cpp)
+
 ### Cutout & Mask Effect
 
 글리프 모양으로 cutout하거나 mask effect를 적용할 수 있습니다.
@@ -592,9 +594,88 @@ Label label2 = Label::New("Masked");
 label2.SetMaskEffect(maskView);
 ~~~
 
-참고 샘플:
-- [text-render-scale-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-render-scale-example.cpp)
-- [text-cutout-mask-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-cutout-mask-example.cpp)
+참고 샘플: [text-cutout-mask-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-cutout-mask-example.cpp)
+
+### Text Reveal
+
+Text Reveal은 최종 화면에 보이는 텍스트를 `CHARACTER` 또는 `WORD` unit으로 나누고, `TextRevealProgress`에 따라 각 unit의 foreground를 순서대로 표시합니다. Progress `0.0`에서는 모든 reveal 대상이 숨겨지고, `1.0`에서는 완전히 표시됩니다. Progress를 반대로 animate하면 역순으로 다시 숨길 수 있습니다.
+
+![Text Reveal](./assets/text/text_reveal.gif)
+
+~~~cpp
+Label label = Label::New("Sequential text reveal");
+
+Text::Reveal reveal;
+reveal.SetUnit(Text::Reveal::Unit::CHARACTER);
+reveal.SetFadeDurationRatio(Text::Reveal::AUTO_FADE_DURATION_RATIO);
+
+label.SetTextReveal(reveal);
+label.SetTextRevealProgress(0.0f);
+
+Animation animation = Animation::New(2.0f);
+label.Animate(animation)
+  .TextRevealProgress(1.0f, Duration(2.0f), AlphaFunction::LINEAR);
+animation.Play();
+~~~
+
+| Unit | 동작 |
+|---|---|
+| `CHARACTER` | 기본값입니다. Shaping 결과에서 분리할 수 없는 ligature, combining sequence, emoji cluster 등은 하나의 unit으로 함께 표시됩니다. |
+| `WORD` | 단어 경계에 따라 표시합니다. Whitespace는 별도 unit을 소비하지 않으며 punctuation은 가능한 경우 인접한 단어와 함께 표시됩니다. |
+
+Reveal을 제거하려면 `Text::Reveal::None()`을 설정합니다. Reveal이 비활성화되면 텍스트는 현재 progress와 관계없이 완전히 표시됩니다. Progress 값은 유지되므로 Reveal을 다시 설정하면 이전 progress가 적용됩니다. Unit이나 fade duration ratio 같은 configuration을 변경하는 경우에도 progress는 초기화되지 않습니다.
+
+~~~cpp
+label.SetTextReveal(Text::Reveal::None());
+~~~
+
+> [!NOTE]
+> Text Reveal은 text foreground에만 적용되며 shadow, outline, underline, line-through, background 같은 decoration에는 적용되지 않습니다. Marquee 또는 cutout이 활성화된 동안에는 reveal rendering이 적용되지 않지만 configuration은 유지되며, 해당 모드를 비활성화하면 다시 적용됩니다.
+
+#### Fade Duration Ratio
+
+`FadeDurationRatio`는 unit 사이의 delay가 아니라, normalized reveal timeline에서 **각 unit이 fade하는 구간의 길이**입니다. 전체 progress를 `p`, 최종 visible reveal unit 수를 `N`, 설정한 ratio를 `R`, 각 unit의 normalized fade duration을 `F`라고 정의합니다.
+
+명시적인 ratio `R`은 `0.0`부터 `1.0` 사이의 값이며 다음과 같이 schedule됩니다. 범위를 벗어난 값은 clamp되고, NaN은 `0.0`으로 처리됩니다. `AUTO_FADE_DURATION_RATIO`는 예외로 유지됩니다.
+
+~~~text
+F = R
+
+N > 1:
+  startInterval = (1 - F) / (N - 1)
+  start(i)      = i * startInterval,  i = 0, ..., N - 1
+
+N = 1:
+  start(0) = 0
+~~~
+
+`F > 0`일 때 unit `i`의 opacity는 다음과 같습니다.
+
+~~~text
+opacity(i, p) = clamp((p - start(i)) / F, 0, 1)
+~~~
+
+- `R = 0`: fade 없이 각 unit이 순서대로 나타나는 step/typewriter 방식입니다.
+
+  ![FadeDurationRatio 0](./assets/text/fade_ratio_0.gif)
+
+- `R = 1`: 모든 unit의 start가 `0`이 되어 전체 텍스트가 함께 fade됩니다.
+
+  ![FadeDurationRatio 1](./assets/text/fade_ratio_1.gif)
+
+- `0 < R < 1`: 앞 unit의 fade가 끝나기 전에 다음 unit이 시작될 수 있습니다. 동일한 unit 수에서는 `R`이 클수록 겹치는 구간이 길어집니다.
+
+  아래는 `R = 0.5`일 때의 예시입니다.
+
+  ![FadeDurationRatio 0.5](./assets/text/fade_ratio_0.5.gif)
+
+Progress를 `0.0`에서 `1.0`까지 전체 시간 `T` 동안 `LINEAR`로 animate하면 각 unit의 실제 fade 시간은 `F * T`, unit 시작 간격은 `startInterval * T`입니다. 예를 들어 `N = 5`, `R = 0.25`, `T = 4초`이면 각 unit은 `1초` 동안 fade하고 다음 unit은 `0.75초` 간격으로 시작합니다. Non-linear alpha function을 사용하면 progress가 시간에 따라 일정하게 증가하지 않으므로, 각 unit이 나타나는 실제 시간과 속도는 reveal sequence의 위치에 따라 달라질 수 있습니다.
+
+`AUTO_FADE_DURATION_RATIO`는 최종 visible reveal unit 수에 따라 각 unit의 fade duration을 자동으로 결정합니다. 짧은 텍스트에서는 순차적인 느낌을 유지하고, 긴 텍스트에서는 unit별 fade가 지나치게 짧아지지 않도록 overlap을 조정합니다. Visible unit은 whitespace, elide로 숨겨진 원본 텍스트, inline replacement를 제외한 최종 렌더링 결과를 기준으로 하며, 표시되는 ellipsis glyph는 reveal sequence에 포함됩니다.
+
+`GetFadeDurationRatio()`는 `AUTO`가 선택된 경우 내부에서 계산된 값이 아니라 `AUTO_FADE_DURATION_RATIO`를 반환합니다.
+
+참고 샘플: [text-reveal-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-reveal-example.cpp)
 
 <br/>
 
@@ -625,6 +706,7 @@ label2.SetMaskEffect(maskView);
 | Marquee | [text-marquee-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-marquee-example.cpp) |
 | Render scale | [text-render-scale-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-render-scale-example.cpp) |
 | Cutout / Mask | [text-cutout-mask-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-cutout-mask-example.cpp) |
+| Text Reveal | [text-reveal-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-reveal-example.cpp) |
 | Localization | [text-localization-po-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-localization-po-example.cpp) |
 
 <br/>

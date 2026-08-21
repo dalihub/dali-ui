@@ -118,6 +118,13 @@ enum class LineHeightMode : uint8_t
 constexpr float LINE_HEIGHT_AUTO = -1.0f;
 
 /**
+ * @brief Special value for infinite marquee looping.
+ *
+ * When used with SetMarqueeLoopCount(), the marquee repeats indefinitely.
+ */
+constexpr int MARQUEE_LOOP_COUNT_INFINITE = 0;
+
+/**
  * @brief Enumeration for defining when the marquee animation is triggered.
  * Specifies the condition under which the marquee starts.
  */

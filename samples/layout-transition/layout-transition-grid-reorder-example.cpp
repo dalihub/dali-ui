@@ -488,7 +488,7 @@ private:
     cell.SetRequestedX(mDragBounds.x);
     cell.SetRequestedY(mDragBounds.y);
     mWindow.Add(cell);
-    cell.RaiseToTop(LayoutOrderPolicy::PRESERVE);
+    cell.RaiseToTop();
     // Force the floating cell's layout pass so it lands at its requested world
     // position immediately rather than after the next frame's pass.
     LayoutController::Get(mWindow).ProcessLayouts();

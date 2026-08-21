@@ -143,8 +143,8 @@ public:
   int GetSpeed() const;
 
   /**
-   * @brief Set the number of times the text scrolling should loop, can stop current scrolling by passing in 0;
-   * @param[in] loopCount number of times the scrolled text should loop, 0 to stop scrolling
+   * @brief Sets the number of times the text scrolling should loop.
+   * @param[in] loopCount The number of loops; 0 means infinite looping. Negative values are ignored.
    */
   void SetLoopCount(int loopCount);
 

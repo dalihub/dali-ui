@@ -705,24 +705,14 @@ public: // Non-virtual API (safe to reorder / extend)
   // Child Management
 
   /**
-   * @copydoc Ui::View::Insert()
-   */
-  void Insert(uint32_t index, Ui::View child);
-
-  /**
-   * @copydoc Ui::View::RemoveAllChildren()
-   */
-  void RemoveAllChildren();
-
-  /**
-   * @copydoc Ui::View::RemoveAllChildren(RemovePolicy)
-   */
-  void RemoveAllChildren(Ui::RemovePolicy policy);
-
-  /**
    * @copydoc Ui::View::Remove(Ui::View, RemovePolicy)
    */
   void Remove(Ui::View child, Ui::RemovePolicy policy);
+
+  /**
+   * @copydoc Ui::View::RemoveAll(RemovePolicy)
+   */
+  void RemoveAll(Ui::RemovePolicy policy);
 
   /**
    * @copydoc Ui::View::GetChildViewCount()
@@ -743,36 +733,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @note Logical index of @p view in mChildren, or -1 if not a logical child.
    */
   int32_t IndexOfChildView(Ui::View view) const;
-
-  /**
-   * @copydoc Ui::View::Raise()
-   */
-  void Raise(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @copydoc Ui::View::Lower()
-   */
-  void Lower(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @copydoc Ui::View::RaiseToTop()
-   */
-  void RaiseToTop(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @copydoc Ui::View::LowerToBottom()
-   */
-  void LowerToBottom(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @copydoc Ui::View::RaiseAbove()
-   */
-  void RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @copydoc Ui::View::LowerBelow()
-   */
-  void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
 
   // Focus Navigation
 

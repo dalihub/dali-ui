@@ -14,7 +14,7 @@ package "DALi (external)" as dali {
 }
 
 ' ========== Public API (Handles) ==========
-' Note: Child add/remove uses Actor::Add/Remove. View provides Insert(index, View) and RemoveAllChildren().
+' Note: Child add/remove/insert/bulk-remove uses Actor::Add/Remove/InsertAbove/InsertBelow/RemoveAll. View provides Remove(View, RemovePolicy) and RemoveAll(RemovePolicy).
 ' LayoutManager is stored as a Trait (ReservedTraitId::LAYOUT_MANAGER), attached via View::AttachLayoutManager().
 package "Dali::Ui (Public API)" as public_api {
   class "View" as View <<handle>> {
@@ -36,10 +36,11 @@ package "Dali::Ui (Public API)" as public_api {
     + New() : Layout
     + Add(Actor)  /' inherited from Actor '/
     + Remove(Actor)  /' inherited from Actor '/
-    + Insert(index, View)
-    + RemoveAllChildren()
-    + RemoveAllChildren(RemovePolicy)
+    + InsertAbove(Actor, Actor)  /' inherited from Actor '/
+    + InsertBelow(Actor, Actor)  /' inherited from Actor '/
+    + RemoveAll()  /' inherited from Actor '/
     + Remove(View, RemovePolicy)
+    + RemoveAll(RemovePolicy)
     + GetChildCount() : uint32_t  /' inherited from Actor (actor tree) '/
     + GetChildAt(index) : Actor  /' inherited from Actor (actor tree) '/
     + GetChildViewCount() : uint32_t
@@ -151,9 +152,7 @@ package "Dali::Ui::Integration (Implementation)" as integration {
     + GetLayoutManager() : LayoutManager*
     + HasLayoutManager() : bool
     + HasLayoutCallback() : bool
-    + Insert(index, Ui::View)
-    + RemoveAllChildren()
-    + RemoveAllChildren(RemovePolicy)
+    + RemoveAll(Ui::RemovePolicy)
     + OnChildAdd(Actor&)
     + OnChildRemove(Actor&)
     + OnChildOrderChanged(Actor)

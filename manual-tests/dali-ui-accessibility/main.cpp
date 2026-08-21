@@ -70,7 +70,7 @@ private:
 
   void ShowListScreen()
   {
-    mRootContainer.RemoveAllChildren();
+    mRootContainer.RemoveAll();
     mActiveCase = nullptr;
 
     mRootContainer.Add(MakeHeader("컴포넌트 수동 테스트"));
@@ -206,7 +206,7 @@ private:
     }
 
     mActiveCase = mTestCases[index].get();
-    mRootContainer.RemoveAllChildren();
+    mRootContainer.RemoveAll();
 
     Label backLabel = Label::New("< 뒤로");
     backLabel.SetTextColor(UiColor(COLOR_HEADER_TEXT));

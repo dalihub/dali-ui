@@ -16,7 +16,9 @@
  */
 
 #include <stdlib.h>
+#include <cmath>
 #include <iostream>
+#include <limits>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
@@ -53,6 +55,64 @@ int UtcDaliTextFontAttributesDefaultP(void)
   DALI_TEST_CHECK(!attributes.Has(Text::FontAttributes::Attribute::WIDTH));
   DALI_TEST_CHECK(!attributes.Has(Text::FontAttributes::Attribute::SLANT));
 
+  END_TEST;
+}
+
+int UtcDaliTextRevealValueTypeP(void)
+{
+  UiTestApplication application;
+
+  Text::Reveal reveal;
+  DALI_TEST_EQUALS(reveal.GetUnit(), Text::Reveal::Unit::CHARACTER, TEST_LOCATION);
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), Text::Reveal::AUTO_FADE_DURATION_RATIO, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_CHECK(reveal != Text::Reveal::None());
+  DALI_TEST_CHECK(Text::Reveal::None() == Text::Reveal::None());
+
+  reveal.SetUnit(Text::Reveal::Unit::WORD);
+  reveal.SetFadeDurationRatio(0.2f);
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 0.2f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  Text::Reveal nearlyEqual(reveal);
+  nearlyEqual.SetFadeDurationRatio(std::nextafter(0.2f, 1.0f));
+  DALI_TEST_CHECK(nearlyEqual == reveal);
+  DALI_TEST_CHECK(nearlyEqual.GetFadeDurationRatio() != reveal.GetFadeDurationRatio());
+
+  Text::Reveal copied(reveal);
+  DALI_TEST_CHECK(copied == reveal);
+  Text::Reveal assigned;
+  assigned = copied;
+  DALI_TEST_CHECK(assigned == copied);
+  Text::Reveal moved(std::move(copied));
+  DALI_TEST_CHECK(moved == reveal);
+  Text::Reveal moveAssigned;
+  moveAssigned = std::move(assigned);
+  DALI_TEST_CHECK(moveAssigned == reveal);
+
+  Text::Reveal noneCopy(Text::Reveal::None());
+  DALI_TEST_CHECK(noneCopy == Text::Reveal::None());
+  DALI_TEST_ASSERTION(noneCopy.GetUnit(), "Cannot access Text::Reveal::None() properties.");
+  DALI_TEST_ASSERTION(noneCopy.SetFadeDurationRatio(0.0f), "Cannot modify Text::Reveal::None().");
+
+  reveal.SetFadeDurationRatio(Text::Reveal::AUTO_FADE_DURATION_RATIO);
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), Text::Reveal::AUTO_FADE_DURATION_RATIO, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetFadeDurationRatio(-0.5f);
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetFadeDurationRatio(-2.0f);
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetFadeDurationRatio(0.0f);
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetFadeDurationRatio(0.5f);
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetFadeDurationRatio(1.0f);
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetFadeDurationRatio(2.0f);
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetFadeDurationRatio(std::numeric_limits<float>::quiet_NaN());
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetFadeDurationRatio(std::numeric_limits<float>::infinity());
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetFadeDurationRatio(-std::numeric_limits<float>::infinity());
+  DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
   END_TEST;
 }
 

@@ -115,29 +115,6 @@ namespace Ui
 namespace Internal
 {
 
-class ViewDataImpl::ScopedSkipChildrenUpdate
-{
-public:
-  explicit ScopedSkipChildrenUpdate(ViewDataImpl& viewDataImpl)
-  : mViewDataImpl(viewDataImpl),
-    mPrevious(viewDataImpl.mSkipChildrenUpdate)
-  {
-    mViewDataImpl.mSkipChildrenUpdate = true;
-  }
-
-  ~ScopedSkipChildrenUpdate()
-  {
-    mViewDataImpl.mSkipChildrenUpdate = mPrevious;
-  }
-
-  ScopedSkipChildrenUpdate(const ScopedSkipChildrenUpdate&)            = delete;
-  ScopedSkipChildrenUpdate& operator=(const ScopedSkipChildrenUpdate&) = delete;
-
-private:
-  ViewDataImpl& mViewDataImpl;
-  bool          mPrevious;
-};
-
 namespace
 {
 #if defined(DEBUG_ENABLED)
@@ -762,7 +739,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mAccessibilityData(nullptr),
   mAccessibleObjectCreator(nullptr),
   mAccessibilityRole{static_cast<int32_t>(Accessibility::Role::NONE)},
-  mSkipChildrenUpdate(false),
   mArrangeDirty(false),
   mArrangeInProgress(false),
   mKeyEventDispatchInProgress(false),
@@ -1451,6 +1427,11 @@ bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
   Dali::Ui::View handle(mViewImpl.GetOwner());
   if(mViewImpl.FilterKeyEvent(event))
   {
+    DALI_LOG_RELEASE_INFO("[KeyEvent] keyCode(%d), state(%s) consumed by View id(%d), name(%s) at View::FilterKeyEvent\n",
+                          event.GetKeyCode(),
+                          event.GetState() == KeyEvent::DOWN ? "DOWN" : "UP",
+                          handle.GetProperty<int32_t>(Dali::Actor::Property::ID),
+                          handle.GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
     return true;
   }
 
@@ -1459,12 +1440,28 @@ bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
   ScopedKeyEventDispatch dispatchGuard(GetCoreInteractionObject());
 
   bool consumed = mViewImpl.OnKeyEvent(event);
+  if(consumed)
+  {
+    DALI_LOG_RELEASE_INFO("[KeyEvent] keyCode(%d), state(%s) consumed by View id(%d), name(%s) at View::OnKeyEvent\n",
+                          event.GetKeyCode(),
+                          event.GetState() == KeyEvent::DOWN ? "DOWN" : "UP",
+                          handle.GetProperty<int32_t>(Dali::Actor::Property::ID),
+                          handle.GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
+  }
 
   if(!mKeyEventSignal.Empty())
   {
     // Any connected callback consuming the event consumes it for all of them.
     const bool signalConsumed = mKeyEventSignal.EmitOr(handle, event);
-    consumed                  = consumed || signalConsumed;
+    if(signalConsumed)
+    {
+      DALI_LOG_RELEASE_INFO("[KeyEvent] keyCode(%d), state(%s) consumed by View id(%d), name(%s) at View::KeyEventSignal\n",
+                            event.GetKeyCode(),
+                            event.GetState() == KeyEvent::DOWN ? "DOWN" : "UP",
+                            handle.GetProperty<int32_t>(Dali::Actor::Property::ID),
+                            handle.GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
+    }
+    consumed = consumed || signalConsumed;
   }
 
   mViewImpl.OnFinalizeKeyEventDispatch(event);
@@ -2130,7 +2127,7 @@ void ViewDataImpl::SetLayoutTransition(LayoutTransition transition)
 {
   // Detach: drop any pending ENTER / REORDER / REMOVE markers. Records
   // are only produced while a transition is attached (see OnChildAdd /
-  // Insert / OnChildOrderChanged / Remove); a previously attached
+  // OnChildOrderChanged / Remove); a previously attached
   // transition could have left entries that we want to discard now so
   // a later re-attach does not surface them as a stale cause on the
   // next pass. In particular hasPendingChildRemoval is
@@ -2235,82 +2232,7 @@ int32_t ViewDataImpl::IndexOfChildView(Ui::View view) const
   return -1;
 }
 
-void ViewDataImpl::Insert(uint32_t index, Ui::View child)
-{
-  if(!child)
-  {
-    return;
-  }
-
-  // Adding to the Actor tree triggers OnChildAdd on this ViewImpl, which is
-  // the single source of truth for registering the child in mChildren and
-  // for invalidating the new parent chain. Insert only takes additional
-  // responsibility for positioning the child at the requested index.
-  mViewImpl.Self().Add(child);
-
-  if(index >= mChildren.Count())
-  {
-    // OnChildAdd push_back'd the child at the end; target index is end.
-    return;
-  }
-
-  // Fast path: when this was a fresh add, OnChildAdd push_back'd the child,
-  // so it is at the tail of mChildren. Avoid an O(N) scan in that case.
-  IntegrationView::ChildContainer::Iterator it;
-  if(mChildren.Count() > 0 && *(mChildren.End() - 1) == child)
-  {
-    it = mChildren.End() - 1;
-  }
-  else
-  {
-    it = std::find(mChildren.Begin(), mChildren.End(), child);
-    if(it == mChildren.End())
-    {
-      // OnChildAdd did not register this child (e.g. non-View actor). Nothing
-      // to reorder.
-      return;
-    }
-  }
-
-  const size_t currentIdx = static_cast<size_t>(std::distance(mChildren.Begin(), it));
-  if(currentIdx == index)
-  {
-    return;
-  }
-
-  Ui::View moved = std::move(*it);
-  mChildren.Erase(it);
-  mChildren.Insert(mChildren.Begin() + index, std::move(moved));
-
-  // Tag every logical child so the layout transition dispatcher reports
-  // CHANGE cause as LayoutChangeCause::REORDERED for both the moved child and the
-  // siblings whose indices shifted as a result. dali-core's
-  // OnChildOrderChanged fires only on actor-tree sibling order changes;
-  // Insert() touches the logical (mChildren) order alone, so this is the
-  // only place that records the reorder for the CHANGE classifier.
-  // Matches OnChildOrderChanged's full-list tagging so a logical reorder
-  // and an actor-tree reorder produce the same cause classification.
-  // Skip the record when no transition is attached — the dispatcher
-  // would never consume it, and stale raw pointers could outlive the
-  // child without any global cleanup.
-  if(HasLayoutTransition())
-  {
-    for(auto& childView : mChildren)
-    {
-      mLayoutTransitionData->pendingReorderedChildren.insert(&GetImpl(childView));
-    }
-  }
-
-  // mChildren order affects layout output (e.g. LinearLayout visual order,
-  // GridLayout cell assignment). When the child was already under this view
-  // (Self().Add is a no-op in that case), OnChildAdd does not fire, so this
-  // is the only invalidation point for the reorder. When the child was a
-  // fresh add, self is already dirty from OnChildAdd and the guard makes
-  // this a no-op.
-  InvalidateMeasure();
-}
-
-void ViewDataImpl::RemoveAllChildren(Ui::RemovePolicy policy)
+void ViewDataImpl::RemoveAll(Ui::RemovePolicy policy)
 {
   // Operate on the actor children (consistent with the inherited
   // GetChildCount / GetChildAt). Snapshot up front: with ANIMATE_EXIT the
@@ -2488,121 +2410,68 @@ void ViewDataImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
   }
 }
 
-void ViewDataImpl::Raise(Ui::LayoutOrderPolicy policy)
+uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child) const
 {
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.Raise();
-      return;
-    }
-  }
-  self.Raise();
-}
+  Actor          self            = mViewImpl.Self();
+  const uint32_t actorChildCount = self.GetChildCount();
 
-void ViewDataImpl::Lower(Ui::LayoutOrderPolicy policy)
-{
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  // Fast path: Actor::Add appends, so the new child is the last actor child
+  // and every logical sibling precedes it -- the logical index is simply the
+  // current logical child count. This is the overwhelmingly common add path
+  // and stays O(1).
+  if(actorChildCount > 0u && self.GetChildAt(actorChildCount - 1u) == child)
   {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.Lower();
-      return;
-    }
+    return static_cast<uint32_t>(mChildren.Count());
   }
-  self.Lower();
-}
 
-void ViewDataImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
-{
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  // General path (a fresh Actor::InsertAbove / InsertBelow): dali-core has
+  // already placed the child at its FINAL actor position before notifying us,
+  // so the logical index is the number of actor children before it that are
+  // logical children of this view. The predicate mirrors
+  // OnChildOrderChanged's rebuild filter -- a View that is present in
+  // mChildren -- so it skips non-View actor children (never tracked) and
+  // in-flight EXIT ghosts (actor-parented but erased from mChildren).
+  uint32_t logicalIndex = 0u;
+  for(uint32_t i = 0u; i < actorChildCount; ++i)
   {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
+    Actor actorChild = self.GetChildAt(i);
+    if(actorChild == child)
     {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.RaiseToTop();
-      return;
+      break;
     }
-  }
-  self.RaiseToTop();
-}
 
-void ViewDataImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
-{
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
+    Ui::View siblingView = Ui::View::DownCast(actorChild);
+    if(siblingView && std::find(mChildren.begin(), mChildren.end(), siblingView) != mChildren.end())
     {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.LowerToBottom();
-      return;
+      ++logicalIndex;
     }
   }
-  self.LowerToBottom();
-}
 
-void ViewDataImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  if(!target)
-  {
-    return;
-  }
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.RaiseAbove(target);
-      return;
-    }
-  }
-  self.RaiseAbove(target);
-}
-
-void ViewDataImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  if(!target)
-  {
-    return;
-  }
-  Actor self = mViewImpl.Self();
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.LowerBelow(target);
-      return;
-    }
-  }
-  self.LowerBelow(target);
+  // If @p child is not an actor child at all (defensive -- this hook is only
+  // reached from Actor::Add / InsertAbove / InsertBelow after the child is in
+  // place), the loop counts every logical child and the result is
+  // mChildren.Count(), i.e. a plain append.
+  return logicalIndex;
 }
 
 void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
 {
-  if(mSkipChildrenUpdate)
-  {
-    return;
-  }
-
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
-    mChildren.PushBack(view);
+    // Place the child at the logical position matching its actor position.
+    // A fresh Actor::InsertAbove / InsertBelow emits no ChildOrderChangedSignal
+    // (the child had no previous order), so this hook is the only chance to
+    // keep both orders in sync; Actor::Add takes the O(1) append fast path.
+    const uint32_t logicalIndex = ComputeLogicalChildIndex(child);
+    if(logicalIndex >= mChildren.Count())
+    {
+      mChildren.PushBack(view);
+    }
+    else
+    {
+      mChildren.Insert(mChildren.Begin() + logicalIndex, view);
+    }
 
     ViewImpl& childImpl = GetImpl(view);
 
@@ -2721,11 +2590,6 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
 
 void ViewDataImpl::OnChildRemoved(Actor& child)
 {
-  if(mSkipChildrenUpdate)
-  {
-    return;
-  }
-
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
@@ -2743,7 +2607,7 @@ void ViewDataImpl::OnChildRemoved(Actor& child)
       // If the child was added and removed within the same frame (before
       // any layout pass consumed the pending-enter set), drop the ENTER
       // marker so the dispatcher does not fire on a no-longer-present view.
-      // Same for the reorder marker: Insert() / OnChildOrderChanged keep
+      // Same for the reorder marker: OnChildOrderChanged keeps
       // raw ViewImpl* pointers in pendingReorderedChildren which must
       // not survive the child's removal -- otherwise a heap-reused address
       // could mis-classify a future child as REORDERED.
@@ -3663,11 +3527,6 @@ void ViewDataImpl::EmitFocusChangedSignal(bool focusGained)
     if(DALI_LIKELY(accessible))
     {
       accessible->EmitFocused(focusGained);
-      auto parent = dynamic_cast<Dali::Accessibility::ActorAccessible*>(accessible->GetParent());
-      if(parent && !accessible->GetStates()[Dali::Integration::Accessibility::State::MANAGES_DESCENDANTS]) // LCOV_EXCL_LINE
-      {
-        parent->EmitActiveDescendantChanged(accessible.Get());
-      }
     }
   }
 
@@ -3680,11 +3539,6 @@ void ViewDataImpl::EmitFocusChangedSignal(bool focusGained)
 
 void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
 {
-  if(mSkipChildrenUpdate)
-  {
-    return;
-  }
-
   Actor                           self            = mViewImpl.Self();
   uint32_t                        actorChildCount = self.GetChildCount();
   IntegrationView::ChildContainer newChildren;
@@ -3722,7 +3576,7 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
 
   // A logical child-order change can alter the measured size (e.g. a wrap
   // layout where line-breaking depends on child order), so invalidate measure
-  // — not just arrange — mirroring the Insert/MoveChild reorder path.
+  // — not just arrange — for the whole reorder path.
   mViewImpl.InvalidateMeasure();
 }
 

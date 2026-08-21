@@ -130,9 +130,9 @@ private:
   void OnPageLoadError(WebView view, const WebViewPageLoadError& error)
   {
     DALI_LOG_RELEASE_INFO("[WebViewSample] Page load error: url=%s code=%d desc=\"%s\"\n",
-                          error.url.CStr(),
-                          static_cast<int>(error.code),
-                          error.description.CStr());
+                          error.GetUrl().CStr(),
+                          static_cast<int>(error.GetCode()),
+                          error.GetDescription().CStr());
   }
 
   bool TryLoadLocalHtml(const Dali::String& path)

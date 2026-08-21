@@ -190,8 +190,8 @@ void TextScroller::SetLoopCount(int loopCount)
     mLoopCount = loopCount;
   }
 
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::SetLoopCount [%d] Status[%s]\n", mLoopCount,
-                (loopCount) ? "looping" : "stop");
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::SetLoopCount [%d] Mode[%s]\n", mLoopCount,
+                (mLoopCount == MARQUEE_LOOP_COUNT_INFINITE) ? "infinite" : "finite");
 }
 
 int TextScroller::GetLoopCount() const

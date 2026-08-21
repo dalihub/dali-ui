@@ -3545,10 +3545,19 @@ int UtcDaliViewAccessibilityRoleConversionP(void)
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::PUSH_BUTTON, TEST_LOCATION);
 
   view.SetAccessibilityRole(UiAccessibility::Role::TEXT);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::TEXT, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::LABEL);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::LABEL, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::SCROLL_PANE);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::SCROLL_PANE, TEST_LOCATION);
 
   view.SetAccessibilityRole(UiAccessibility::Role::TAB);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::PAGE_TAB, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::SWITCH);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::SWITCH, TEST_LOCATION);
 
   view.SetAccessibilityRole(UiAccessibility::Role::SCENE_3D);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::FILLER, TEST_LOCATION);
@@ -3557,6 +3566,21 @@ int UtcDaliViewAccessibilityRoleConversionP(void)
   view.SetAccessibilityRole(UiAccessibility::Role::DIALOG);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::DIALOG, TEST_LOCATION);
   DALI_TEST_EQUALS(ViewAccessible::IsModal(view), true, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::TABLE);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::TABLE, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::TABLE_CELL);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::TABLE_CELL, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::TABLE_COLUMN_HEADER);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::TABLE_COLUMN_HEADER, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::TABLE_ROW_HEADER);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::TABLE_ROW_HEADER, TEST_LOCATION);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::EMBEDDED);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::EMBEDDED, TEST_LOCATION);
 
   view.SetAccessibilityRole(UiAccessibility::Role::NONE);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::UNKNOWN, TEST_LOCATION);

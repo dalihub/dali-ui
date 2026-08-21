@@ -1202,6 +1202,13 @@ bool FocusManager::EmitCustomWheelSignals(View view, const WheelEvent& event)
       // Emit the signal to the parent
       // Any connected callback consuming the event consumes it for all of them.
       consumed = view.WheelEventSignal().EmitOr(view, event);
+      if(consumed)
+      {
+        DALI_LOG_RELEASE_INFO("[WheelEvent] delta(%d) consumed by View id(%d), name(%s) at View::WheelEventSignal\n",
+                              event.GetDelta(),
+                              view.GetProperty<int32_t>(Dali::Actor::Property::ID),
+                              view.GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
+      }
     }
     // if view doesn't consume WheelEvent, give WheelEvent to its parent.
     if(!consumed)

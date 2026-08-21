@@ -23,7 +23,6 @@
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/object/base-object.h>
 #include <cstdint>
-#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/focus-indication-policy.h>
@@ -231,13 +230,6 @@ public:
    * @copydoc UiConfig::GetBrokenImageUrl
    */
   const Dali::String& GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const;
-
-  /**
-   * @brief Returns the configured broken image URL list.
-   *
-   * @return The broken image URLs ordered by UiConfig::BrokenImageType
-   */
-  std::vector<Dali::String> GetBrokenImageUrlList() const;
 
   /**
    * @brief Sets whether to clear focus when the Escape key is pressed.

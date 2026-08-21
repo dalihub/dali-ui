@@ -891,12 +891,12 @@ void ResetReorderedCaptures()
 }
 } // namespace
 
-int UtcDaliLayoutTransitionInsertMarksAllSiblingsReorderedP(void)
+int UtcDaliLayoutTransitionInsertBelowMarksAllSiblingsReorderedP(void)
 {
-  // Regression: ViewImpl::Insert() must mark ALL logical children as
-  // REORDERED, not only the moved child. When Insert moves a child
-  // to a new index, the siblings whose indices shift also have their
-  // arranged bounds changed; their CHANGE cause must reflect the reorder.
+  // Regression: a sibling reorder must mark ALL logical children as
+  // REORDERED, not only the moved child. When a child moves to a new
+  // index, the siblings whose indices shift also have their arranged
+  // bounds changed; their CHANGE cause must reflect the reorder.
   UiTestApplication application;
   ResetReorderedCaptures();
 
@@ -921,7 +921,7 @@ int UtcDaliLayoutTransitionInsertMarksAllSiblingsReorderedP(void)
   // Run the initial layout BEFORE attaching the transition. This avoids
   // surfacing the first arrange (from default (0,0,0,0) bounds to the
   // initial layout-applied bounds) as a spurious CHANGE dispatch with
-  // cause=OTHER that would be silently superseded by the post-Insert
+  // cause=OTHER that would be silently superseded by the post-reorder
   // REORDERED dispatch.
   application.SendNotification();
   application.Render(0);
@@ -934,8 +934,10 @@ int UtcDaliLayoutTransitionInsertMarksAllSiblingsReorderedP(void)
 
   // Move c to index 0. mChildren becomes [c, a, b]; in a vertical stack
   // all three children's y positions change (c moves to top, a and b
-  // shift down).
-  parent.Insert(0, c);
+  // shift down). c is already a child, so this takes dali-core's
+  // sibling-reorder path and ChildOrderChangedSignal resynchronises
+  // mChildren.
+  parent.InsertBelow(c, a);
 
   // Allow several ticks for animator callbacks to fire on each child.
   for(int i = 0; i < 5; ++i)
@@ -1806,7 +1808,7 @@ int UtcDaliLayoutTransitionChangeCauseSiblingRemovedP(void)
 
 int UtcDaliLayoutTransitionChangeCauseReorderedBeatsSiblingAddedP(void)
 {
-  // Insert that both adds a new sibling AND reorders existing siblings:
+  // A reorder that also coincides with a sibling add:
   // REORDERED wins over SIBLING_ADDED.
   UiTestApplication application;
   ResetChangeCauseCaptures();
@@ -1834,8 +1836,8 @@ int UtcDaliLayoutTransitionChangeCauseReorderedBeatsSiblingAddedP(void)
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing);
   parent.SetLayoutTransition(transition);
 
-  // Move b to index 0. Insert with an already-tracked child reorders.
-  parent.Insert(0, b);
+  // Move b to index 0. b is already a child, so this is a sibling reorder.
+  parent.InsertBelow(b, a);
 
   for(int i = 0; i < 5; ++i)
   {
@@ -2325,8 +2327,8 @@ int UtcDaliLayoutTransitionResizeWithSiblingRemoveKeepsSiblingRemovedCauseP(void
 
 int UtcDaliLayoutTransitionResizeWithReorderKeepsReorderedCauseP(void)
 {
-  // P2 regression guard: window resize and an Insert in the same layout
-  // pass keep the highest-precedence REORDERED cause.
+  // P2 regression guard: window resize and a child reorder in the same
+  // layout pass keep the highest-precedence REORDERED cause.
   UiTestApplication application;
   ResetChangeCauseCaptures();
 
@@ -2360,7 +2362,14 @@ int UtcDaliLayoutTransitionResizeWithReorderKeepsReorderedCauseP(void)
   View c = View::New();
   c.SetRequestedWidth(100.0f);
   c.SetRequestedHeight(40.0f);
-  parent.Insert(0, c);
+  // The two-step form is deliberate here: Add() makes the child "already
+  // ours", so the following InsertBelow takes the sibling-reorder path and
+  // emits ChildOrderChangedSignal, which is what tags the siblings with
+  // LayoutChangeCause::REORDERED. A bare InsertBelow of a fresh child lands
+  // at the same index but emits no such signal, so it would not produce the
+  // cause this test asserts.
+  parent.Add(c);
+  parent.InsertBelow(c, a);
 
   for(int i = 0; i < 5; ++i)
   {
@@ -3733,9 +3742,9 @@ int UtcDaliLayoutTransitionSubtreeEnterDetachReattachSettlesOpacityP(void)
   END_TEST;
 }
 
-int UtcDaliLayoutTransitionRemoveAllChildrenExitP(void)
+int UtcDaliLayoutTransitionRemoveAllExitP(void)
 {
-  // RemoveAllChildren(ANIMATE_EXIT) with an EXIT slot defers each child to the
+  // RemoveAll(ANIMATE_EXIT) with an EXIT slot defers each child to the
   // dispatcher; OnStart fires per child and each child stays parented as a
   // "ghost" until its EXIT animation finishes.
   UiTestApplication application;
@@ -3759,7 +3768,7 @@ int UtcDaliLayoutTransitionRemoveAllChildrenExitP(void)
   transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
   parent.SetLayoutTransition(transition);
 
-  parent.RemoveAllChildren(RemovePolicy::ANIMATE_EXIT);
+  parent.RemoveAll(RemovePolicy::ANIMATE_EXIT);
 
   // EXIT ghosts remain attached during the animation.
   DALI_TEST_CHECK(a.GetParent() == parent);
@@ -3784,9 +3793,9 @@ int UtcDaliLayoutTransitionRemoveAllChildrenExitP(void)
   END_TEST;
 }
 
-int UtcDaliLayoutTransitionRemoveAllChildrenNoTransitionP(void)
+int UtcDaliLayoutTransitionRemoveAllNoTransitionP(void)
 {
-  // No transition attached: RemoveAllChildren(ANIMATE_EXIT) falls through to the
+  // No transition attached: RemoveAll(ANIMATE_EXIT) falls through to the
   // immediate-unparent path. No lifecycle fires and the count drops at once.
   UiTestApplication application;
   ResetCaptures();
@@ -3801,7 +3810,7 @@ int UtcDaliLayoutTransitionRemoveAllChildrenNoTransitionP(void)
   application.SendNotification();
   application.Render(0);
 
-  parent.RemoveAllChildren(RemovePolicy::ANIMATE_EXIT);
+  parent.RemoveAll(RemovePolicy::ANIMATE_EXIT);
   DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
 
   application.SendNotification();
@@ -3810,9 +3819,9 @@ int UtcDaliLayoutTransitionRemoveAllChildrenNoTransitionP(void)
   END_TEST;
 }
 
-int UtcDaliLayoutTransitionRemoveAllChildrenImmediateP(void)
+int UtcDaliLayoutTransitionRemoveAllImmediateP(void)
 {
-  // RemoveAllChildren(IMMEDIATE) skips the EXIT slot entirely: every child is
+  // RemoveAll(IMMEDIATE) skips the EXIT slot entirely: every child is
   // unparented now and no lifecycle fires, even with an EXIT spec attached.
   UiTestApplication application;
   ResetCaptures();
@@ -3833,7 +3842,7 @@ int UtcDaliLayoutTransitionRemoveAllChildrenImmediateP(void)
   transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
   parent.SetLayoutTransition(transition);
 
-  parent.RemoveAllChildren(RemovePolicy::IMMEDIATE);
+  parent.RemoveAll(RemovePolicy::IMMEDIATE);
   DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
   DALI_TEST_CHECK(!a.GetParent());
 
@@ -3843,10 +3852,10 @@ int UtcDaliLayoutTransitionRemoveAllChildrenImmediateP(void)
   END_TEST;
 }
 
-int UtcDaliLayoutTransitionRemoveAllChildrenImmediateKeepsInflightGhostP(void)
+int UtcDaliLayoutTransitionRemoveAllImmediateKeepsInflightGhostP(void)
 {
   // A child already leaving via a prior Remove(child, ANIMATE_EXIT) is an
-  // in-flight EXIT ghost. RemoveAllChildren(IMMEDIATE) removes the live children
+  // in-flight EXIT ghost. RemoveAll(IMMEDIATE) removes the live children
   // now but leaves the ghost to finish its EXIT (consistent with per-child
   // Remove(IMMEDIATE)); the ghost then unparents on its own.
   UiTestApplication application;
@@ -3876,7 +3885,7 @@ int UtcDaliLayoutTransitionRemoveAllChildrenImmediateKeepsInflightGhostP(void)
 
   // IMMEDIATE bulk remove: 'b' (live) is unparented now; the in-flight ghost 'a'
   // is left to finish its EXIT, not force-unparented.
-  parent.RemoveAllChildren(RemovePolicy::IMMEDIATE);
+  parent.RemoveAll(RemovePolicy::IMMEDIATE);
   DALI_TEST_CHECK(!b.GetParent());
   DALI_TEST_CHECK(a.GetParent() == parent);
 
@@ -3884,6 +3893,59 @@ int UtcDaliLayoutTransitionRemoveAllChildrenImmediateKeepsInflightGhostP(void)
   application.Render(300);
   application.SendNotification();
   DALI_TEST_CHECK(!a.GetParent());
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionActorRemoveAllCancelsInflightGhostP(void)
+{
+  // A child already leaving via a prior Remove(child, ANIMATE_EXIT) is an
+  // in-flight EXIT ghost. The inherited Actor::RemoveAll() unparents every
+  // actor child unconditionally — ghosts included — so it force-unparents the
+  // ghost and silently cancels its in-flight EXIT. This is the one behavioural
+  // difference from View::RemoveAll(RemovePolicy::IMMEDIATE) (and from the
+  // per-child View::Remove(child, RemovePolicy::IMMEDIATE)), which keep an
+  // in-flight ghost alive to finish its EXIT — see
+  // UtcDaliLayoutTransitionRemoveAllImmediateKeepsInflightGhostP.
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  View b = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.2f));
+  transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  // Start an EXIT on 'a': it becomes an in-flight ghost, still parented.
+  parent.Remove(a, RemovePolicy::ANIMATE_EXIT);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_CHECK(a.GetParent() == parent);
+
+  // Bulk immediate remove through the inherited Actor::RemoveAll(): unlike
+  // View::RemoveAll(RemovePolicy::IMMEDIATE) (and the per-child View::Remove),
+  // it carries no in-flight-ghost guard, so 'b' (live) AND the ghost 'a' are
+  // both force-unparented now, cancelling a's EXIT.
+  parent.RemoveAll();
+  DALI_TEST_CHECK(!b.GetParent());
+  DALI_TEST_CHECK(!a.GetParent());
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
+
+  // The cancelled EXIT produces no late unparent and no crash; the tree stays
+  // empty once the animation window has elapsed.
+  application.Render(300);
+  application.SendNotification();
+  DALI_TEST_CHECK(!a.GetParent());
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -3927,7 +3989,7 @@ int UtcDaliLayoutTransitionExitBoundsEffectOnlyDefersRemoveP(void)
 
 int UtcDaliLayoutTransitionExitBoundsEffectOnlyRemoveAllP(void)
 {
-  // RemoveAllChildren(ANIMATE_EXIT) with a bounds-effect-only EXIT defers every
+  // RemoveAll(ANIMATE_EXIT) with a bounds-effect-only EXIT defers every
   // child and emits OnStart per child for slot=EXIT.
   UiTestApplication application;
   ResetCaptures();
@@ -3951,7 +4013,7 @@ int UtcDaliLayoutTransitionExitBoundsEffectOnlyRemoveAllP(void)
   transition.SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
   parent.SetLayoutTransition(transition);
 
-  parent.RemoveAllChildren(RemovePolicy::ANIMATE_EXIT);
+  parent.RemoveAll(RemovePolicy::ANIMATE_EXIT);
 
   // Ghosts stay attached during the deferred EXIT.
   DALI_TEST_CHECK(a.GetParent() == parent);
@@ -3968,9 +4030,9 @@ int UtcDaliLayoutTransitionExitBoundsEffectOnlyRemoveAllP(void)
   END_TEST;
 }
 
-int UtcDaliLayoutTransitionSubtreeExitViaRemoveAllChildrenP(void)
+int UtcDaliLayoutTransitionSubtreeExitViaRemoveAllP(void)
 {
-  // Inherited EXIT via the card's RemoveAllChildren(ANIMATE_EXIT): every
+  // Inherited EXIT via the card's RemoveAll(ANIMATE_EXIT): every
   // grand-child defers to the owner's EXIT spec, stays a ghost under its real
   // direct parent, then unparents when the EXIT animation finishes.
   UiTestApplication application;
@@ -4004,7 +4066,7 @@ int UtcDaliLayoutTransitionSubtreeExitViaRemoveAllChildrenP(void)
   application.SendNotification();
   application.Render(0);
 
-  b.RemoveAllChildren(RemovePolicy::ANIMATE_EXIT);
+  b.RemoveAll(RemovePolicy::ANIMATE_EXIT);
   application.SendNotification();
   application.Render(16);
 

@@ -29,6 +29,7 @@
 #include <mesh-builder.h>
 
 #include <string>
+#include <vector>
 
 using namespace Dali;
 
@@ -44,6 +45,7 @@ namespace UiInternal  = Dali::Ui::Internal;
 constexpr const char* TEXT_GRADIENT_DEFINE         = "#define IS_REQUIRED_TEXT_GRADIENT\n";
 constexpr const char* TEXT_GRADIENT_MIXED_DEFINE   = "#define IS_REQUIRED_TEXT_GRADIENT_MIXED\n";
 constexpr const char* TEXT_GRADIENT_OVERLAY_DEFINE = "#define IS_REQUIRED_TEXT_GRADIENT_OVERLAY\n";
+constexpr const char* TEXT_REVEAL_DEFINE          = "#define IS_REQUIRED_TEXT_REVEAL\n";
 constexpr const char* TEXT_STYLE_DEFINE            = "#define IS_REQUIRED_TEXT_STYLE\n";
 constexpr const char* TEXT_OVERLAY_STYLE_DEFINE    = "#define IS_REQUIRED_TEXT_OVERLAY_STYLE\n";
 constexpr float       EPSILON                      = 0.0001f;
@@ -69,6 +71,17 @@ void ExpectNoTextGradientDefine(const std::string& fragmentPrefix)
 void ExpectNoTextGradientOverlayDefine(const std::string& fragmentPrefix)
 {
   DALI_TEST_EQUALS(fragmentPrefix.find(TEXT_GRADIENT_OVERLAY_DEFINE) == std::string::npos, true, TEST_LOCATION);
+}
+
+size_t CountOccurrences(const std::string& text, const std::string& token)
+{
+  size_t count = 0u;
+  for(size_t position = text.find(token); position != std::string::npos;
+      position = text.find(token, position + token.size()))
+  {
+    ++count;
+  }
+  return count;
 }
 
 void ExpectTextGradientDefine(const std::string& fragmentPrefix)
@@ -596,6 +609,180 @@ int UtcDaliTextGradientOverlayShaderUniformSymbolsP(void)
   DALI_TEST_CHECK(fragmentShader.find("return vec4(blendedRgb * glyphAlpha, glyphAlpha)") != std::string::npos);
   DALI_TEST_CHECK(fragmentShader.find("result.rgb = overlayColor.rgb * overlayColor.a + baseFill.rgb * (1.0 - overlayColor.a)") == std::string::npos);
   DALI_TEST_CHECK(fragmentShader.find("result.a = baseFill.a") == std::string::npos);
+  END_TEST;
+}
+
+int UtcDaliTextRevealForegroundShaderCompositionP(void)
+{
+  auto ExpectRevealVariant = [](TextFeature::FeatureBuilder builder)
+  {
+    builder.EnableTextReveal(true);
+    const std::string prefix = GetFragmentPrefix(builder);
+    DALI_TEST_CHECK(prefix.find(TEXT_REVEAL_DEFINE) != std::string::npos);
+  };
+
+  // Every resolved foreground family must be able to select the reveal
+  // variant: solid, multi-color, emoji, base/mixed gradients, overlay gradient,
+  // separated underlay/overlay styles, and bevel.
+  ExpectRevealVariant(TextFeature::FeatureBuilder());
+
+  TextFeature::FeatureBuilder multiColor;
+  multiColor.EnableMultiColor(true);
+  ExpectRevealVariant(multiColor);
+
+  TextFeature::FeatureBuilder emoji;
+  emoji.EnableEmoji(true);
+  ExpectRevealVariant(emoji);
+
+  TextFeature::FeatureBuilder gradientAndEmoji;
+  gradientAndEmoji.EnableEmoji(true).EnableTextGradientMixed(true);
+  ExpectRevealVariant(gradientAndEmoji);
+
+  TextFeature::FeatureBuilder baseGradient;
+  baseGradient.EnableTextGradient(true);
+  ExpectRevealVariant(baseGradient);
+
+  TextFeature::FeatureBuilder mixedGradient;
+  mixedGradient.EnableMultiColor(true).EnableTextGradientMixed(true);
+  ExpectRevealVariant(mixedGradient);
+
+  TextFeature::FeatureBuilder overlayGradient;
+  overlayGradient.EnableTextGradientOverlay(true);
+  ExpectRevealVariant(overlayGradient);
+
+  TextFeature::FeatureBuilder baseAndOverlayGradient;
+  baseAndOverlayGradient.EnableTextGradient(true).EnableTextGradientOverlay(true);
+  ExpectRevealVariant(baseAndOverlayGradient);
+
+  TextFeature::FeatureBuilder mixedAndOverlayGradient;
+  mixedAndOverlayGradient.EnableMultiColor(true).EnableEmoji(true).EnableTextGradientMixed(true).EnableTextGradientOverlay(true);
+  ExpectRevealVariant(mixedAndOverlayGradient);
+
+  TextFeature::FeatureBuilder underlayStyle;
+  underlayStyle.EnableStyle(true);
+  ExpectRevealVariant(underlayStyle);
+
+  TextFeature::FeatureBuilder overlayStyle;
+  overlayStyle.EnableOverlay(true);
+  ExpectRevealVariant(overlayStyle);
+
+  TextFeature::FeatureBuilder bevel;
+  bevel.EnableEmboss(true);
+  ExpectRevealVariant(bevel);
+
+  TextFeature::FeatureBuilder revealOnly;
+  revealOnly.EnableTextReveal(true);
+  const std::string revealOnlyPrefix = GetFragmentPrefix(revealOnly);
+  DALI_TEST_CHECK(revealOnlyPrefix.find(TEXT_REVEAL_DEFINE) != std::string::npos);
+  DALI_TEST_CHECK(revealOnlyPrefix.find("#define IS_REQUIRED_EMBOSS\n") == std::string::npos);
+
+  TextFeature::FeatureBuilder revealBevel;
+  revealBevel.EnableTextReveal(true).EnableEmboss(true);
+  const std::string revealBevelPrefix = GetFragmentPrefix(revealBevel);
+  DALI_TEST_CHECK(revealBevelPrefix.find(TEXT_REVEAL_DEFINE) != std::string::npos);
+  DALI_TEST_CHECK(revealBevelPrefix.find("#define IS_REQUIRED_EMBOSS\n") != std::string::npos);
+
+  const std::string fragmentShader(SHADER_TEXT_VISUAL_SHADER_FRAG);
+  const size_t      gradientOverlay = fragmentShader.find("textColor = ApplyTextGradientOverlay(textColor, vTexCoord)");
+  const size_t      revealMultiply  = fragmentShader.find("textColor *= ResolveTextRevealOpacity(vTexCoord)");
+  const size_t      styleComposition = fragmentShader.find("gl_FragColor = uColor * (");
+  DALI_TEST_CHECK(gradientOverlay != std::string::npos);
+  DALI_TEST_CHECK(revealMultiply != std::string::npos);
+  DALI_TEST_CHECK(styleComposition != std::string::npos);
+  DALI_TEST_CHECK(gradientOverlay < revealMultiply);
+  DALI_TEST_CHECK(revealMultiply < styleComposition);
+  DALI_TEST_CHECK(fragmentShader.find("+ styleTexture * (1.0 - textColor.a)") > revealMultiply);
+  DALI_TEST_CHECK(fragmentShader.find(") * (1.0 - overlayStyleTexture.a) + overlayStyleTexture") > revealMultiply);
+
+  // Bevel samples displaced foreground coverage, so each component uses the
+  // timing metadata at the matching source coordinate before composition.
+  DALI_TEST_CHECK(fragmentShader.find("textAlpha *= ResolveTextRevealOpacity(vTexCoord)") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("light *= ResolveTextRevealOpacity(clamp(vTexCoord - offset, 0.0, 1.0))") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("shadow *= ResolveTextRevealOpacity(clamp(vTexCoord + offset, 0.0, 1.0))") != std::string::npos);
+  DALI_TEST_EQUALS(CountOccurrences(fragmentShader, "textColor *= ResolveTextRevealOpacity(vTexCoord)"), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountOccurrences(fragmentShader, "textAlpha *= ResolveTextRevealOpacity(vTexCoord)"), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountOccurrences(fragmentShader, "light *= ResolveTextRevealOpacity(clamp(vTexCoord - offset, 0.0, 1.0))"), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountOccurrences(fragmentShader, "shadow *= ResolveTextRevealOpacity(clamp(vTexCoord + offset, 0.0, 1.0))"), 2u, TEST_LOCATION);
+
+  // The preprocessor combinations above fix the runtime metadata sampling
+  // count: Reveal off compiles no resolver call, Reveal without emboss keeps
+  // the single textColor call, and Reveal with emboss selects one of the two
+  // foreground branches with center/light/shadow calls while excluding the
+  // final textColor call through TEXT_REVEAL_RESOLVED_IN_EMBOSS.
+  END_TEST;
+}
+
+int UtcDaliTextRevealShaderCacheSeparatesEffectiveVariantsP(void)
+{
+  UiTestApplication application;
+  UiInternal::VisualFactoryCache     cache(false);
+  UiInternal::TextVisualShaderFactory factory;
+  std::vector<Shader>                  revealShaders;
+
+  auto AddDistinctRevealVariant = [&](TextFeature::FeatureBuilder builder)
+  {
+    builder.EnableTextReveal(true);
+    Shader shader       = factory.GetShader(cache, builder);
+    Shader cachedShader = factory.GetShader(cache, builder);
+    DALI_TEST_CHECK(shader);
+    DALI_TEST_CHECK(shader == cachedShader);
+    for(const Shader& previous : revealShaders)
+    {
+      DALI_TEST_CHECK(shader != previous);
+    }
+    revealShaders.push_back(shader);
+  };
+
+  AddDistinctRevealVariant(TextFeature::FeatureBuilder());
+
+  TextFeature::FeatureBuilder multiColor;
+  multiColor.EnableMultiColor(true);
+  AddDistinctRevealVariant(multiColor);
+
+  TextFeature::FeatureBuilder emoji;
+  emoji.EnableEmoji(true);
+  AddDistinctRevealVariant(emoji);
+
+  TextFeature::FeatureBuilder baseGradient;
+  baseGradient.EnableTextGradient(true);
+  AddDistinctRevealVariant(baseGradient);
+
+  TextFeature::FeatureBuilder mixedGradient;
+  mixedGradient.EnableMultiColor(true).EnableTextGradientMixed(true);
+  AddDistinctRevealVariant(mixedGradient);
+
+  TextFeature::FeatureBuilder overlayGradient;
+  overlayGradient.EnableTextGradientOverlay(true);
+  AddDistinctRevealVariant(overlayGradient);
+
+  TextFeature::FeatureBuilder baseAndOverlayGradient;
+  baseAndOverlayGradient.EnableTextGradient(true).EnableTextGradientOverlay(true);
+  AddDistinctRevealVariant(baseAndOverlayGradient);
+
+  TextFeature::FeatureBuilder mixedAndOverlayGradient;
+  mixedAndOverlayGradient.EnableMultiColor(true).EnableTextGradientMixed(true).EnableTextGradientOverlay(true);
+  AddDistinctRevealVariant(mixedAndOverlayGradient);
+
+  TextFeature::FeatureBuilder style;
+  style.EnableStyle(true);
+  AddDistinctRevealVariant(style);
+
+  TextFeature::FeatureBuilder overlayStyle;
+  overlayStyle.EnableOverlay(true);
+  AddDistinctRevealVariant(overlayStyle);
+
+  TextFeature::FeatureBuilder styleAndOverlay;
+  styleAndOverlay.EnableStyle(true).EnableOverlay(true);
+  AddDistinctRevealVariant(styleAndOverlay);
+
+  TextFeature::FeatureBuilder emboss;
+  emboss.EnableEmboss(true);
+  AddDistinctRevealVariant(emboss);
+
+  TextFeature::FeatureBuilder ordinary;
+  Shader ordinaryShader = factory.GetShader(cache, ordinary);
+  DALI_TEST_CHECK(ordinaryShader);
+  DALI_TEST_CHECK(ordinaryShader != revealShaders.front());
   END_TEST;
 }
 

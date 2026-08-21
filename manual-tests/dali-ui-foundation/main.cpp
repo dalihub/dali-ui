@@ -178,7 +178,7 @@ private:
 
   void ShowListScreen()
   {
-    mRootContainer.RemoveAllChildren();
+    mRootContainer.RemoveAll();
     mActiveCase = nullptr;
 
     // ── Header ──────────────────────────────────────────────────────────────
@@ -245,7 +245,7 @@ private:
       return;
     }
 
-    mListContent.RemoveAllChildren();
+    mListContent.RemoveAll();
     const std::string searchKey = MakeSearchKey(mSearchText);
 
     if(mTestCases.empty())
@@ -352,7 +352,7 @@ private:
     }
 
     mActiveCase = mTestCases[index].get();
-    mRootContainer.RemoveAllChildren();
+    mRootContainer.RemoveAll();
 
     // ── Navigation header ───────────────────────────────────────────────────
     Label backLabel = Label::New("< Back");

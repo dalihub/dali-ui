@@ -625,6 +625,80 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   return imageBuffer;
 }
 
+Internal::Reveal::Plan Typesetter::CreateFinalRevealPlan(const Internal::Reveal::Plan& sourcePlan,
+                                                         Internal::Reveal::Unit        unit)
+{
+  auto& viewModel = *mImpl->GetViewModel();
+  viewModel.EnableFinalGlyphMapping();
+  viewModel.ElideGlyphs(mImpl->GetFontClient());
+  return Internal::Reveal::ProjectToFinalGlyphs(sourcePlan,
+                                                viewModel.GetNumberOfGlyphs(),
+                                                viewModel.GetFinalToSourceGlyphIndices(),
+                                                viewModel.GetEllipsisFinalGlyphIndex(),
+                                                unit);
+}
+
+PixelData Typesetter::RenderTextRevealMetadata(
+  const Vector2&                tileSize,
+  Direction                     textDirection,
+  const Internal::Reveal::Plan& plan,
+  float&                        fadeDuration,
+  uint32_t                      tileOffsetY,
+  const Vector2&                fullSize,
+  bool                          ignoreHorizontalAlignment,
+  const Vector2&                originSize)
+{
+  // Reuse the normal glyph traversal, but offset it into a tile-local target.
+  // The caller projects one canonical final plan before visiting any tile.
+  auto& viewModel = *mImpl->GetViewModel();
+
+  const Size&   layoutSize   = viewModel.GetLayoutSize();
+  const int32_t outlineWidth = viewModel.IsOutlineEnabled() ? static_cast<int32_t>(viewModel.GetOutlineWidth()) : 0;
+  int32_t       penX         = 0;
+  switch(viewModel.GetHorizontalAlignment())
+  {
+    case Alignment::START:
+      break;
+    case Alignment::CENTER:
+      penX += textDirection == Direction::LEFT_TO_RIGHT ? -outlineWidth : outlineWidth;
+      break;
+    case Alignment::END:
+      penX += textDirection == Direction::LEFT_TO_RIGHT ? -outlineWidth * 2 : outlineWidth * 2;
+      break;
+  }
+
+  const Vector2 renderSize    = fullSize.height > 0.0f ? fullSize : tileSize;
+  const bool    useOriginSize = originSize.height > 0.0f;
+  const float   controlHeight = useOriginSize ? viewModel.GetControlSize().height : renderSize.height;
+  const float   layoutHeight  = useOriginSize ? originSize.height : layoutSize.height;
+  int32_t       penY          = 0;
+  switch(viewModel.GetVerticalAlignment())
+  {
+    case Alignment::START:
+      break;
+    case Alignment::CENTER:
+      penY = static_cast<int32_t>(std::round(0.5f * (controlHeight - layoutHeight)));
+      break;
+    case Alignment::END:
+      penY = static_cast<int32_t>(controlHeight - layoutHeight);
+      break;
+  }
+  penY -= static_cast<int32_t>(tileOffsetY);
+
+  const auto startGlyph = viewModel.GetStartIndexOfElidedGlyphs();
+  const auto endGlyph   = viewModel.GetEndIndexOfElidedGlyphs();
+  fadeDuration          = plan.fadeDuration;
+
+  const uint32_t width  = static_cast<uint32_t>(tileSize.width);
+  const uint32_t height = static_cast<uint32_t>(tileSize.height);
+  mImpl->BeginRevealMetadata(width, height, plan);
+  PixelBuffer traversal = mImpl->CreateImageBuffer(width, height, Typesetter::STYLE_NONE,
+                                                   ignoreHorizontalAlignment, Pixel::RGBA8888,
+                                                   penX, penY, startGlyph, endGlyph);
+  (void)traversal;
+  return mImpl->EndRevealMetadata();
+}
+
 PixelBuffer Typesetter::CreateFullBackgroundBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
                                                    const Vector4& backgroundColor)
 {

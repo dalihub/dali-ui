@@ -279,7 +279,10 @@ bool LabelImpl::PropertyHandler::OnPropertySet(LabelImpl& impl, Dali::Property::
     }
     case Ui::View::Property::PADDING:
     {
+      // Padding changes text content bounds even when the Label size is unchanged.
       impl.mIsContentLayoutDirty = true;
+      impl.RequestTextRelayout();
+      impl.RequestAsyncRender();
       return true;
     }
     case Ui::View::Property::BACKGROUND:

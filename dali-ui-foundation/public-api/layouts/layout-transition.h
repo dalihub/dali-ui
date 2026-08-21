@@ -129,7 +129,7 @@ using LayoutLifecycleCallback = Callback<void(View, LayoutTransitionSlot)>;
  * - @c ENTER:  fired when a new child is added under this view AFTER the
  *              parent has completed its initial arrange pass (see
  *              @c SetEnterOnInitialMount for the initial-mount opt-in)
- * - @c EXIT:   fired when @c View::Remove / @c RemoveAllChildren removes
+ * - @c EXIT:   fired when @c View::Remove / @c View::RemoveAll removes
  *              a child (deferred until the EXIT slot finishes)
  * - @c CHANGE: fired when an existing child's bounds change between layout passes
  *
@@ -175,10 +175,12 @@ using LayoutLifecycleCallback = Callback<void(View, LayoutTransitionSlot)>;
  *
  * @note During the EXIT animation the child is a "ghost": it stays in the
  * actor tree but is absent from the parent's logical child list. Adding
- * the same child back to the SAME parent in this state via
- * @c View::Insert or inherited @c Actor::Add is silently ignored — the
- * EXIT continues, and the actor is unparented when the EXIT animation
- * finishes. To cancel an in-flight EXIT, reparent the child to a
+ * the same child back to the SAME parent in this state never resurrects
+ * it: the inherited @c Actor::Add is silently ignored, while
+ * @c Actor::InsertAbove / @c Actor::InsertBelow do move its actor position
+ * and emit @c ChildOrderChangedSignal but leave it an EXIT ghost — the
+ * EXIT continues either way, and the actor is unparented when the EXIT
+ * animation finishes. To cancel an in-flight EXIT, reparent the child to a
  * DIFFERENT parent: the dispatcher auto-cancels the EXIT, restores
  * interaction state, and triggers ENTER under the new parent.
  *
@@ -483,7 +485,7 @@ public:
    * @note Applies to CHANGE, and to ENTER / EXIT when the owner carries the
    * corresponding slot effect: a child added under a no-transition descendant
    * fires the owner's ENTER, and a child removed via
-   * @c View::Remove(child, RemovePolicy::ANIMATE_EXIT) / @c RemoveAllChildren
+   * @c View::Remove(child, RemovePolicy::ANIMATE_EXIT) / @c View::RemoveAll(RemovePolicy::ANIMATE_EXIT)
    * fires the owner's EXIT (an immediate remove — the inherited
    * @c Actor::Remove or @c RemovePolicy::IMMEDIATE — is not deferred). The effect is sourced from
    * this owner while geometry and the EXIT ghost use the child's real direct

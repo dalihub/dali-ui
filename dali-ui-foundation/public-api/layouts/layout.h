@@ -37,8 +37,15 @@ class LayoutImpl;
  * To customize measure/arrange behavior, use SetMeasureCallback() and
  * SetArrangeCallback() on View.
  *
- * Child management uses Actor::Add/Remove (inherited from View's base class).
- * Insert(index, View) and RemoveAllChildren() are provided by View.
+ * Child management uses Actor::Add/Remove/InsertAbove/InsertBelow/RemoveAll
+ * (inherited from View's base class). Remove(View, RemovePolicy) and
+ * RemoveAll(RemovePolicy) are provided by View.
+ *
+ * Add() appends. InsertAbove/InsertBelow position a child relative to an
+ * existing sibling and accept both a child that is already a child of this
+ * layout (a reorder) and a newly created one (a fresh insert); either way the
+ * child takes the logical (layout) position matching its resulting actor
+ * position, skipping non-View actor children and in-flight EXIT ghosts.
  */
 class DALI_UI_API Layout : public View
 {

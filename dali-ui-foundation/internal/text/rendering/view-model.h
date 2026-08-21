@@ -64,6 +64,9 @@ public:
   /**
    * @brief Sets the resolved replacement glyph sequence.
    *
+   * The result is not owned by ViewModel and must remain valid until it is
+   * replaced or the model is reset.
+   *
    * @param[in] result The replacement result.
    */
   void SetFinalElisionResult(const FinalElisionResult* result);
@@ -350,6 +353,33 @@ public:
   void ElideGlyphs(TextAbstraction::FontClient& fontClient);
 
   /**
+   * @brief Enables final-to-source glyph mapping for subsequent elision.
+   *
+   * Call this before ElideGlyphs() when a consumer needs to project source
+   * semantics onto final elision output. The request is consumed by that call;
+   * keeping it one-shot avoids allocating mapping storage on later ordinary
+   * text updates.
+   */
+  void EnableFinalGlyphMapping();
+
+  /**
+   * @brief Returns the final-to-source mapping for the current elided sequence.
+   *
+   * The returned pointer remains valid until the model, final result, or elision
+   * state changes. A nullptr indicates identity mapping.
+   *
+   * @return The final-to-source glyph mapping, or nullptr for identity mapping.
+   */
+  const GlyphIndex* GetFinalToSourceGlyphIndices() const;
+
+  /**
+   * @brief Returns the ellipsis index in the final rendered sequence.
+   *
+   * @return The final ellipsis glyph index, or INVALID_GLYPH_INDEX when absent.
+   */
+  GlyphIndex GetEllipsisFinalGlyphIndex() const;
+
+  /**
    * @brief The horizontal offset applied ellipsis in ElideGlyphs. (horizontal align applied)
    *
    * @return horizontal offset of elided text.
@@ -464,6 +494,9 @@ private:
   const FinalElisionResult* mFinalElisionResult; ///< Non-owning resolved replacement sequence.
   Vector<GlyphInfo>         mElidedGlyphs;       ///< Fallback storage for unresolved ModelInterface implementations.
   Vector<Vector2>           mElidedLayout;       ///< Fallback positions for unresolved ModelInterface implementations.
+  Vector<GlyphIndex>        mElidedFinalToSourceGlyphIndices; ///< Allocated only when reveal projection is requested.
+  GlyphIndex                mEllipsisFinalGlyphIndex;
+  bool                      mFinalGlyphMappingRequested : 1;
   bool                      mIsTextElided : 1;   ///< Whether the text has been elided.
   float                     mElidedOffset;       ///< The width of the (control - elided line). This is required for calculating the correct
                                                  ///< horizontal align offset.

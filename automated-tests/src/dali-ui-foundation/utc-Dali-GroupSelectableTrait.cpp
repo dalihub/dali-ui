@@ -461,6 +461,27 @@ int UtcDaliGroupSelectableTraitAccessibilityRestoreOnLeaveP(void)
   END_TEST;
 }
 
+// Leaving a group restores a pre-existing SWITCH role and keeps CHECKED aligned
+// with the selected state.
+int UtcDaliGroupSelectableTraitAccessibilityRestoreSwitchOnLeaveP(void)
+{
+  UiTestApplication application;
+  View              view = CreateSceneView(application, 0.0f, 0.0f);
+
+  view.SetAccessibilityRole(UiAccessibility::Role::SWITCH);
+  view.AsGroupSelectable().SetGroupName("UtcA11yRestoreSwitch");
+  SelectableTrait selectable = view.AsSelectable();
+  selectable.SetSelected(true);
+  DALI_TEST_CHECK(IsChecked(view));
+
+  view.AsGroupSelectable().SetGroupName("");
+
+  DALI_TEST_CHECK(view.GetAccessibilityRole() == UiAccessibility::Role::SWITCH);
+  DALI_TEST_CHECK(selectable.IsSelected());
+  DALI_TEST_CHECK(IsChecked(view));
+  END_TEST;
+}
+
 // ============================================================================
 // Membership-gated interaction: ungrouped behaves as plain Selectable,
 // SetGroupName switches to select-only, clear-name restores pre-join behaviour.
