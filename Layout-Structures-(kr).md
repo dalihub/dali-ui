@@ -66,7 +66,7 @@ root.Add(child2);
 window.Add(root);
 ```
 
-> **참고:** 모든 레이아웃 타입은 `Layout`을 상속하고, `Layout`은 `View`를 상속합니다. 자식 관리에는 `Add(View)`, `Insert(index, View)`, `Remove(View)`, `RemoveAllChildren()`을 사용합니다.
+> **참고:** 모든 레이아웃 타입은 `Layout`을 상속하고, `Layout`은 `View`를 상속합니다. 자식 관리에는 상속받은 Actor API인 `Add(View)`, `Remove(View)`, `InsertAbove`/`InsertBelow`, `RemoveAll()`을 사용합니다. `Add()`는 맨 뒤에 추가합니다. `InsertAbove`/`InsertBelow`는 기존 형제를 기준으로 위치를 지정하며, **이미** 부모의 자식인 뷰(재정렬)와 새로 생성한 뷰(신규 삽입)를 모두 지원합니다. 두 경우 모두 자식은 actor 위치에 대응하는 논리(layout) 위치를 갖습니다.
 
 ---
 
