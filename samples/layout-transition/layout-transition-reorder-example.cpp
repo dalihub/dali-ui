@@ -509,7 +509,7 @@ private:
     mDraggedChild.SetRequestedX(bounds.x);
     mDraggedChild.SetRequestedY(bounds.y);
     mWindow.Add(mDraggedChild);
-    mDraggedChild.RaiseToTop();
+    mDraggedChild.RaiseToTop(LayoutOrderPolicy::PRESERVE);
 
     StartAutoScrollTimer();
   }

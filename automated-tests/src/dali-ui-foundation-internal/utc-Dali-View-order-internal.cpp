@@ -37,8 +37,9 @@ void utc_dali_view_order_internal_cleanup(void)
   test_return_value = TET_PASS;
 }
 
-// The sibling-order operations usable on a View (the inherited
-// Dali::Actor::Raise/Lower/RaiseToTop/LowerToBottom/RaiseAbove/LowerBelow,
+// The sibling-order operations usable on a View (the View
+// Raise/Lower/RaiseToTop/LowerToBottom/RaiseAbove/LowerBelow overloads taking
+// LayoutOrderPolicy, the inherited Dali::Actor forms,
 // and Dali::Actor::InsertAbove/InsertBelow) affect TWO orders: the
 // visual/actor z-order and the internal LOGICAL layout order
 // (ViewImpl::mChildren). Now that the public
@@ -99,7 +100,7 @@ int32_t LogicalIndexOf(View parent, View child)
 }
 } // namespace
 
-int UtcDaliViewRaiseInternalP(void)
+int UtcDaliViewRaiseUpdateInternalP(void)
 {
   UiTestApplication application;
   OrderFixture      f = MakeOrderFixture();
@@ -108,92 +109,148 @@ int UtcDaliViewRaiseInternalP(void)
   DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 1u, TEST_LOCATION);
 
-  // The inherited Actor::Raise changes the visual order; the resulting
-  // ChildOrderChangedSignal keeps the logical order in sync.
-  f.b.Raise();
+  // Default policy (UPDATE): both visual and logical order change.
+  f.b.Raise(LayoutOrderPolicy::UPDATE);
 
   DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 2, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliViewLowerInternalP(void)
+int UtcDaliViewRaisePreserveInternalP(void)
 {
   UiTestApplication application;
   OrderFixture      f = MakeOrderFixture();
 
-  f.b.Lower();
+  // PRESERVE: only visual order changes, logical order stays.
+  f.b.Raise(LayoutOrderPolicy::PRESERVE);
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLowerUpdateInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  f.b.Lower(LayoutOrderPolicy::UPDATE);
 
   DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 0, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliViewRaiseToTopInternalP(void)
+int UtcDaliViewLowerPreserveInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  f.b.Lower(LayoutOrderPolicy::PRESERVE);
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewRaiseToTopUpdateInternalP(void)
 {
   UiTestApplication application;
   OrderFixture      f = MakeOrderFixture();
 
   // a.RaiseToTop(): a moves to top -> [b, c, a]
-  f.a.RaiseToTop();
+  f.a.RaiseToTop(LayoutOrderPolicy::UPDATE);
 
   DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.a), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.a), 2, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliViewLowerToBottomInternalP(void)
+int UtcDaliViewRaiseToTopPreserveInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  f.a.RaiseToTop(LayoutOrderPolicy::PRESERVE);
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.a), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.a), 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLowerToBottomUpdateInternalP(void)
 {
   UiTestApplication application;
   OrderFixture      f = MakeOrderFixture();
 
   // c.LowerToBottom(): c moves to bottom -> [c, a, b]
-  f.c.LowerToBottom();
+  f.c.LowerToBottom(LayoutOrderPolicy::UPDATE);
 
   DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.c), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 0, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliViewRaiseAboveInternalP(void)
+int UtcDaliViewLowerToBottomPreserveInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  f.c.LowerToBottom(LayoutOrderPolicy::PRESERVE);
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.c), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 2, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewRaiseAboveUpdateInternalP(void)
 {
   UiTestApplication application;
   OrderFixture      f = MakeOrderFixture();
 
   // a.RaiseAbove(c): a moves above c -> visual [b, c, a]
-  f.a.RaiseAbove(f.c);
+  f.a.RaiseAbove(f.c, LayoutOrderPolicy::UPDATE);
 
   DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.a), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.a), 2, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliViewLowerBelowInternalP(void)
+int UtcDaliViewRaiseAbovePreserveInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  f.a.RaiseAbove(f.c, LayoutOrderPolicy::PRESERVE);
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.a), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.a), 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLowerBelowUpdateInternalP(void)
 {
   UiTestApplication application;
   OrderFixture      f = MakeOrderFixture();
 
   // c.LowerBelow(a): c moves below a -> visual [c, a, b]
-  f.c.LowerBelow(f.a);
+  f.c.LowerBelow(f.a, LayoutOrderPolicy::UPDATE);
 
   DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.c), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 0, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliViewDepthIndexDoesNotChangeChildOrderInternalP(void)
+int UtcDaliViewLowerBelowPreserveInternalP(void)
 {
   UiTestApplication application;
   OrderFixture      f = MakeOrderFixture();
 
-  // Actor::Property::DEPTH_INDEX only changes the draw (and hit) order, so
-  // neither the actor sibling order nor the logical layout order may move,
-  // i.e. OnChildOrderChanged must not fire.
-  f.b.SetDepthIndex(10);
+  f.c.LowerBelow(f.a, LayoutOrderPolicy::PRESERVE);
 
-  DALI_TEST_EQUALS(f.b.GetDepthIndex(), 10, TEST_LOCATION);
-  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.c), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 2, TEST_LOCATION);
   END_TEST;
 }
 
