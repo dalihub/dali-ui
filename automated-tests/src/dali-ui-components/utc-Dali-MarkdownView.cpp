@@ -16,7 +16,6 @@
  */
 
 #include <dali-ui-components/dali-ui-components.h>
-#include <dali/devel-api/actors/actor-devel.h>
 #include <dali-ui-components/internal/markdown/markdown-parser.h>
 #include <dali-ui-components/internal/markdown/markdown-view-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
@@ -492,7 +491,7 @@ void CheckResponsiveListMarkerGeometry(float fontSize)
   View  orderedHost   = GetListItemMarkerHost(orderedItem);
   Label orderedMarker = Label::DownCast(GetShapeMarker(orderedItem));
   DALI_TEST_CHECK(orderedMarker);
-  const Vector3 orderedNaturalSize  = DevelActor::GetNaturalSize(orderedMarker);
+  const Vector3 orderedNaturalSize  = orderedMarker.GetNaturalSize();
   const float   orderedMinimumWidth = std::max(markerColumnWidth, 4.0f * fontSize * ORDERED_DIGIT_RATIO);
   const float   orderedWidth        = std::max(orderedMinimumWidth, orderedNaturalSize.width);
   const float   orderedHeight       = std::max(lineHeight, orderedNaturalSize.height);
@@ -1591,7 +1590,7 @@ int UtcDaliMarkdownViewCustomListMarkerStyleP(void)
   DALI_TEST_CHECK(!orderedMarker.IsSystemFontSizeScaleEnabled());
   DALI_TEST_CHECK(orderedMarker.GetTextColor() == markerToken);
   DALI_TEST_CHECK(orderedMarker.GetHorizontalTextAlignment() == Text::Alignment::END);
-  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= DevelActor::GetNaturalSize(orderedMarker).width);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= orderedMarker.GetNaturalSize().width);
   DALI_TEST_EQUALS(orderedHost.GetRequestedWidth(), orderedMarker.GetRequestedWidth(), TEST_LOCATION);
   DALI_TEST_EQUALS(orderedHost.GetMargin().end, 12.0f, TEST_LOCATION);
   const float oneDigitWidth = orderedMarker.GetRequestedWidth();
@@ -1601,7 +1600,7 @@ int UtcDaliMarkdownViewCustomListMarkerStyleP(void)
   DALI_TEST_CHECK(GetListItemMarkerHost(orderedItem) == orderedHost);
   DALI_TEST_CHECK(Label::DownCast(GetShapeMarker(orderedItem)) == orderedMarker);
   DALI_TEST_EQUALS(orderedMarker.GetText(), Dali::String("10."), TEST_LOCATION);
-  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= DevelActor::GetNaturalSize(orderedMarker).width);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= orderedMarker.GetNaturalSize().width);
   DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= oneDigitWidth);
   const float twoDigitWidth = orderedMarker.GetRequestedWidth();
 
@@ -1610,12 +1609,12 @@ int UtcDaliMarkdownViewCustomListMarkerStyleP(void)
   DALI_TEST_CHECK(GetListItemMarkerHost(orderedItem) == orderedHost);
   DALI_TEST_CHECK(Label::DownCast(GetShapeMarker(orderedItem)) == orderedMarker);
   DALI_TEST_EQUALS(orderedMarker.GetText(), Dali::String("100."), TEST_LOCATION);
-  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= DevelActor::GetNaturalSize(orderedMarker).width);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= orderedMarker.GetNaturalSize().width);
   DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= twoDigitWidth);
   DALI_TEST_EQUALS(orderedHost.GetRequestedWidth(), orderedMarker.GetRequestedWidth(), TEST_LOCATION);
   ArrangeMarkdownView(ordered, 320.0f);
-  DALI_TEST_CHECK(orderedMarker.GetSize().width >= DevelActor::GetNaturalSize(orderedMarker).width);
-  DALI_TEST_CHECK(orderedHost.GetSize().width >= DevelActor::GetNaturalSize(orderedMarker).width);
+  DALI_TEST_CHECK(orderedMarker.GetSize().width >= orderedMarker.GetNaturalSize().width);
+  DALI_TEST_CHECK(orderedHost.GetSize().width >= orderedMarker.GetNaturalSize().width);
 
   ordered.SetMarkdown("- [ ] task");
   orderedItem     = GetListItemAtDepth(ordered, 1u);
@@ -1641,7 +1640,7 @@ int UtcDaliMarkdownViewCustomListMarkerStyleP(void)
   DALI_TEST_CHECK(GetListItemMarkerHost(orderedItem) == orderedHost);
   DALI_TEST_CHECK(Label::DownCast(GetShapeMarker(orderedItem)) == orderedMarker);
   DALI_TEST_EQUALS(orderedMarker.GetText(), Dali::String("100."), TEST_LOCATION);
-  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= DevelActor::GetNaturalSize(orderedMarker).width);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= orderedMarker.GetNaturalSize().width);
   END_TEST;
 }
 

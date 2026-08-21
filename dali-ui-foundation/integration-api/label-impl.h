@@ -877,7 +877,7 @@ public: // From ViewImpl
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
-   * @copydoc ViewImpl::GetNaturalSize()
+   * @copydoc SizeNegotiatedViewImpl::GetNaturalSize()
    */
   Vector3 GetNaturalSize() override;
 

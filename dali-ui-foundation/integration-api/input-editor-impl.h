@@ -871,7 +871,7 @@ public: // From ViewImpl
   void OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied) override;
 
   /**
-   * @copydoc ViewImpl::GetNaturalSize()
+   * @copydoc SizeNegotiatedViewImpl::GetNaturalSize()
    */
   Vector3 GetNaturalSize() override;
 

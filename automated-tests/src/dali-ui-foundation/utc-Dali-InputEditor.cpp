@@ -187,6 +187,30 @@ int UtcDaliInputEditorNewP(void)
   END_TEST;
 }
 
+int UtcDaliInputEditorGetNaturalSizeP(void)
+{
+  UiTestApplication application;
+  InputEditor       inputEditor = InputEditor::New();
+  inputEditor.SetText("Natural size");
+  const InputEditor constInputEditor(inputEditor);
+
+  const Vector3 naturalSize = constInputEditor.GetNaturalSize();
+  DALI_TEST_CHECK(naturalSize.width > 0.0f);
+  DALI_TEST_CHECK(naturalSize.height > 0.0f);
+  DALI_TEST_EQUALS(naturalSize.depth, 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorGetHeightForWidthP(void)
+{
+  UiTestApplication application;
+  InputEditor       inputEditor = InputEditor::New();
+  inputEditor.SetText("Height for width");
+
+  DALI_TEST_CHECK(inputEditor.GetHeightForWidth(100.0f) > 0.0f);
+  END_TEST;
+}
+
 int UtcDaliInputEditorCopyConstructorP(void)
 {
   UiTestApplication application;

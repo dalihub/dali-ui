@@ -187,6 +187,14 @@ public: // Static Methods
    */
   static InputField DownCast(BaseHandle handle);
 
+public: // Text Size Measurement
+  /**
+   * @brief Returns the natural size required to lay out the text.
+   *
+   * @return The natural size, including padding.
+   */
+  Vector3 GetNaturalSize() const;
+
 public: // Setters for chaining
   /**
    * @brief Sets the text.

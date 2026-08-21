@@ -186,6 +186,20 @@ int UtcDaliInputFieldNewP(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldGetNaturalSizeP(void)
+{
+  UiTestApplication application;
+  InputField        inputField = InputField::New();
+  inputField.SetText("Natural size");
+  const InputField constInputField(inputField);
+
+  const Vector3 naturalSize = constInputField.GetNaturalSize();
+  DALI_TEST_CHECK(naturalSize.width > 0.0f);
+  DALI_TEST_CHECK(naturalSize.height > 0.0f);
+  DALI_TEST_EQUALS(naturalSize.depth, 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliInputFieldCopyConstructorP(void)
 {
   UiTestApplication application;

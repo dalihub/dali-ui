@@ -15,7 +15,6 @@
  *
  */
 
-#include <dali/devel-api/actors/actor-devel.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
@@ -493,7 +492,7 @@ int UtcDaliTextVisualSameSizePaddingChangeInvalidatesResource(void)
     "Padding changes this initially fitting single line into a deterministic END ellipsis result");
   ellipsisLabel.SetFontSize(20.0f);
   ellipsisLabel.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
-  const Vector3 ellipsisNaturalSize = DevelActor::GetNaturalSize(ellipsisLabel);
+  const Vector3 ellipsisNaturalSize = ellipsisLabel.GetNaturalSize();
   DALI_TEST_CHECK(ellipsisNaturalSize.width > 0.0f);
   ellipsisLabel.SetRequestedWidth(ellipsisNaturalSize.width + 20.0f);
   ellipsisLabel.SetRequestedHeight(ellipsisNaturalSize.height + 4.0f);
