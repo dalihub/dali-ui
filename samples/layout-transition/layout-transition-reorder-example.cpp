@@ -44,6 +44,9 @@ using namespace Dali::Ui;
  * mStack at the proxy's index, with mArrangedBounds pre-baked so the
  * slide-into-slot animation starts from the on-screen drop position.
  *
+ * The card dropped into place is lifted above its siblings until its settle
+ * transition completes.
+ *
  *   - Tap "Click to ENTER": append a new colored child.
  *   - Tap "Click to EXIT": remove the last child.
  *   - Tap "Click to Edit": toggle edit mode.
@@ -110,7 +113,10 @@ public:
         LayoutBoundsEdge::TOP, timing))
       .SetExitBoundsEffect(LayoutBoundsEffects::ShrinkTo(
         LayoutBoundsEdge::TOP, timing))
-      .SetChangeTiming(timing);
+      .SetChangeTiming(timing)
+      // Resets the depth lift FinishDrag applies to a dropped card.
+      .SetOnFinished(LayoutLifecycleCallback::New(
+        &LayoutTransitionReorderController::OnTransitionFinished));
 
     mStack.SetLayoutTransition(transition);
 
@@ -331,6 +337,20 @@ private:
   static bool IsTouchStart(TouchEvent touch)
   {
     return touch.GetPointCount() > 0u && IsDownState(touch.GetState(0u));
+  }
+
+  // Actor draw-order values: DEPTH_INDEX orders a view among its siblings only.
+  static constexpr int32_t TRANSITIONING_DEPTH_INDEX = 1; ///< Drawn above every sibling
+  static constexpr int32_t DEFAULT_DEPTH_INDEX       = 0; ///< Back to child-order rendering
+
+  /// Ends the lift: a view that completes a transition goes back to child-order
+  /// rendering. Uses the View parameter — capturing it would form a cycle.
+  static void OnTransitionFinished(View view, LayoutTransitionSlot /*slot*/)
+  {
+    if(view)
+    {
+      view.SetDepthIndex(DEFAULT_DEPTH_INDEX);
+    }
   }
 
   bool GetRootLocalPosition(TouchEvent touch, Vector2& localPosition)
@@ -646,6 +666,10 @@ private:
     if(dropAnchor)
     {
       mStack.InsertBelow(droppedChild, dropAnchor);
+      // Lift above every sibling (co-animating ones included) for the settle
+      // transition; OnTransitionFinished puts it back. A settle that produces
+      // no CHANGE keeps the lift until this card's next completed transition.
+      droppedChild.SetDepthIndex(TRANSITIONING_DEPTH_INDEX);
     }
     else
     {

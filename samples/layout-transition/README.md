@@ -22,6 +22,8 @@ bounds change.
   dragging an item near the top / bottom edge of the viewport
   auto-scrolls the list in that direction so items beyond the visible
   area become reachable without releasing the drag.
+  The card dropped into place is lifted above its siblings until its settle
+  transition completes.
 - **layout-transition-subtree.example**: reflow-scope sample. A single
   transition on the root container reflows the whole subtree under
   `LayoutReflowScope::SUBTREE` — a nested card with no transition of its
