@@ -159,6 +159,18 @@ protected:
    * layout-tracked inputs used by their Arrange() implementations.
    *
    * Safe before attach and after the owner is gone: a null owner makes it a no-op.
+   *
+   * @note Call it from the SETTER, never from this manager's own Measure() or Arrange()
+   * producer. Invalidating from inside layout processing is a contract violation and is
+   * logged once for the owner View. The invalidation is retained in full -- the affected
+   * caches and ancestor state are revoked and the layout root remains pending -- but it
+   * is parked without requesting an idle ProcessEvents wake. A later independently
+   * triggered ProcessEvents, an explicit LayoutController::ProcessLayouts(), or an
+   * out-of-processing request processes or wakes it -- on a quiescent application,
+   * indefinitely later. In-processing invalidation is prohibited in principle and
+   * honoured only best-effort, mirroring dali-core's relayout policy: never rely on it
+   * for the correctness of the current frame. State a producer needs should be changed
+   * and invalidated at event time when prompt relayout is required.
    */
   void InvalidateOwnerMeasure();
 
@@ -171,6 +183,12 @@ protected:
    * does more work.
    *
    * Safe before attach and after the owner is gone: a null owner makes it a no-op.
+   *
+   * @note Same restriction and retained-but-parked behavior as
+   * InvalidateOwnerMeasure(): calling it from inside this manager's own
+   * Measure()/Arrange() producer (or other layout processing, such as a
+   * LayoutFinishedSignal slot) is a contract violation and is warned once for the owner
+   * View. The arrange work remains pending but does not request its own idle wake.
    */
   void InvalidateOwnerArrange();
 

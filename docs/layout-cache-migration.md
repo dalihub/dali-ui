@@ -33,7 +33,9 @@ void MyManager::SetGap(float gap)
 ```
 
 `InvalidateOwnerMeasure()` / `InvalidateOwnerArrange()`는 `LayoutManager`의
-protected 멤버로 새로 추가되었다. attach 전에 호출해도 안전하다(no-op).
+protected 멤버로 새로 추가되었다. attach 전에 호출해도 안전하다(no-op). 다만
+**setter에서만** 호출해야 하며, manager 자신의 `Measure()` / `Arrange()` producer
+안에서 호출하면 계약 위반으로 경고 후 무시된다(§1.4).
 
 호출이 없는 setter가 실제로 잃는 것:
 
@@ -101,7 +103,56 @@ measure 캐시는 이전부터 **무조건** 동작했으므로 이 위험 자�
 무효화에 기대어 producer가 다시 호출되던 코드는 그 보장을 잃는다. `OnMeasure` /
 `MeasureCallback` / `LayoutManager::Measure`를 per-frame tick으로 쓰고 있었다면
 지금 드러난다. producer 밖의 상태를 읽는다면 그 상태를 바꾸는 쪽에서
-`InvalidateMeasure()`를 호출해야 한다.
+`InvalidateMeasure()`를 호출해야 한다. 단, 그 호출은 **producer 안이 아니라 이벤트
+시점**(pass 이전/이후)에 이루어져야 한다. 자세한 내용은 §1.4를 참고한다.
+
+### 1.4 레이아웃 처리 중에 무효화를 호출하고 있지 않은가
+
+**레이아웃 처리 창(layout processing window)** 은 Measure/Arrange pass가 스택에 있는
+동안, 그리고 `LayoutFinished` emit이 진행 중인 동안 열려 있다. 이 창이 열려 있을 때
+공개 진입점 `View::InvalidateMeasure()` / `View::InvalidateArrange()` /
+`LayoutController::RequestLayout()`를 직접 호출하는 것은 계약 위반이며 View당 한 번
+로그로 경고된다(`DALI_LOG_ERROR`, View에 latch되므로 로그 폭주 없음). 하지만 경고는
+요청이 폐기됐다는 뜻이 아니다.
+
+- 무효화는 **전부 보존**된다. 관련 캐시 유효성이 철회되고 dirty가 기록되며, 조상
+  chain의 상태가 갱신되고 layout root가 `LayoutController`의 pending set에 남는다.
+- 진행 중 producer가 이미 소비한 상태가 있으면 그 pass의 캐시 publish도 차단된다.
+- 단, 처리 창 안에서 생긴 pending work는 **PARK**되어 스스로 idle
+  `ProcessEvents` wake를 요청하지 않는다.
+
+현재 layout batch에 해당 root의 아직 시작하지 않은 turn이 이미 들어 있다면 그 turn이
+pending 상태를 바로 소비할 수 있다. 현재 batch가 소비하지 못하고 끝난 작업만 자체
+wake 없이 PARK된 채 다음 processing 기회를 기다린다.
+
+레이아웃 처리 도중의 무효화는 매 프레임 레이아웃 펌프를 다시 무장시켜 메인 루프가
+idle로 진입하지 못하게 만들 수 있기 때문이다. PARK된 작업은 이후 독립적으로 발생한
+`ProcessEvents` 또는 명시적 `LayoutController::ProcessLayouts()`가 실행되면 처리된다.
+처리 창 밖에서 들어온 event-time 요청은 이미 PARK된 root까지 포함해 controller에
+**한 개의 coalesced outstanding wake**만 무장시킨다.
+
+Layout transition lifecycle 콜백은 Measure/Arrange pass 이후이자 이 창 밖에서
+실행되므로, 기존에 문서화된 mutation과 transition chaining 경로는 wakeable하다.
+
+이 정책은 public/internal 호출 경로를 구분하지 않는다. property setter, resource 경로,
+`LayoutFinished` 슬롯에서의 트리 변형(`Add()` / `Remove()`)도 full invalidation과 root
+pending은 유지하지만 자체 idle wake는 만들지 않는다. 빠른 후속 레이아웃이 필요하다면
+상태 변경과 무효화를 event 시점으로 옮기거나 별도의 idle callback/timer를 예약해야 한다.
+
+캐시 유효성이 철회된다는 것은 그 entry가 이후 cache hit에 사용되지 않는다는 뜻이다.
+즉시 재계산된다는 뜻은 아니므로, parked work가 drain되기 전까지 `GetMeasuredSize()`나
+actor bounds에는 마지막으로 완료된 pass의 geometry가 계속 보일 수 있다.
+
+**계약을 명시하면 다음과 같다.** 레이아웃 처리 중의 무효화는 **원칙적으로 금지**이며,
+dali-core의 relayout 정책(처리 중 `RequestRelayout()`은 보존되지만 wake를 만들지
+않음)과 동일하게 **best-effort로만 지원**된다. PARK된 작업은 다음에 외부 요인으로
+발생하는 `ProcessEvents`에서 처리되는데, 입력·애니메이션·타이머가 전혀 없는 정지
+상태 앱에서는 그 시점이 **무기한 뒤**일 수 있고 `LayoutFinished`도 그때까지 함께
+보류된다. 따라서 컴포넌트와 앱은 **현재 프레임의 정확성을 in-pass 무효화에 의존해서는
+안 된다**. 처리 프레임이 wake 없이 parked work를 남기고 끝나면 controller가 에피소드당
+한 번 `DALI_LOG_ERROR`를 남긴다(공개 API 위반 경고가 볼 수 없는 framework 내부 경로
+기인 파킹까지 포함; pending set이 비워지면 latch가 풀려 다음 에피소드에 다시 1회
+기록된다).
 
 ---
 

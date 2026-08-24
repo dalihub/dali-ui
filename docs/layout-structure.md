@@ -123,7 +123,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 ### Layout root
 
-A **layout root** is a top-level View in the layout hierarchy (its parent is not a layout). When `InvalidateMeasure()` or `InvalidateArrange()` is called, it propagates up to the layout root, which then registers with the LayoutController via `RequestLayout(ViewImpl*)` so that the root is processed on the next frame.
+A **layout root** is a top-level View in the layout hierarchy (its parent is not a layout). When `InvalidateMeasure()` or `InvalidateArrange()` is called, the full invalidation propagates up to the layout root, which registers with the LayoutController via `RequestLayoutInternal(ViewImpl*)`. Outside the layout processing window defined below, registration arms one coalesced outstanding ProcessEvents wake so the root is processed on the next frame. Inside that window, the root is still registered but its own invalidation does not arm an idle wake. A not-yet-started turn for that root in the current batch may consume it immediately; otherwise it remains pending until a later independently triggered ProcessEvents or an explicit `ProcessLayouts()` drains it. The *Internal* entry point is an API-layering detail, not an exemption from this wake policy.
 
 ### Two-phase layout: Measure and Arrange
 
@@ -217,27 +217,87 @@ rather than re-run. The cost is the ancestor **path**, not every view below it.
 view was arranged in this pass, whether that pass ran the arrange implementation or
 served the cache. It is not a "bounds changed" notification.
 
+Delivery is nevertheless gated on the window reaching quiescence. A root retained in
+the pending set by an in-processing invalidation is still pending even though it did
+not arm an idle wake, so completion notification is delayed until another processing
+cycle drains that parked work.
+
 ### Invalidation
 
 `InvalidateMeasure()` / `InvalidateArrange()` do two things: they mark the view,
 and they walk its ancestor chain to a layout root and register that root with the
 LayoutController.
 
-The mark always happens. The walk is coalesced: a view records the
+The mark and required ancestor state always happen. The walk is coalesced: a view records the
 *invalidation generation* in which it last walked, and while that record is current
 — meaning the registration it made is still pending and the chain it marked is still
 marked — a further invalidation on the same axis skips the walk. The generation ends
 whenever the controller drains its pending set and whenever an outermost
 Measure/Arrange pass completes (a pass is the only consumer of dirty bits, and a manual
 `Measure()`/`Arrange()` call is a pass too), so the next invalidation walks again.
-While any pass is on the stack the skip is disabled outright, because a mid-pass
-walk also poisons in-progress ancestors. Coalescing changes only how often the
-ancestor chain is traversed; a batch of invalidations before one pass is all
-serviced by that pass.
+The controller also ends the generation after a processing frame records a no-self-wake
+request. This ensures a later out-of-processing invalidation cannot be coalesced away: it
+walks to the already-pending root and can arm the coalesced wake. While any pass is on
+the stack the skip is disabled outright for every invalidation, because a mid-pass walk
+also poisons in-progress ancestors. Coalescing changes only how often the ancestor chain
+is traversed; it never distinguishes public from framework-internal origins.
 
 The measure and arrange records are independent, because an arrange walk leaves
 the ancestors' measure caches valid and an ancestor measure hit does not
 re-measure its children.
+
+#### The layout processing window
+
+The **layout processing window** is open while either a Measure/Arrange pass is on the
+stack or a `LayoutFinished` emit is in progress. A direct public invalidation from that
+window is a contract violation and is logged once per View (`DALI_LOG_ERROR`, latched so
+a repeating call site cannot flood the log), but the invalidation is **retained rather
+than ignored**:
+
+- relevant cache-valid state is revoked, dirty state and in-progress-pass poison are
+  recorded where required, and the ancestor chain is walked;
+- the layout root is registered and remains in the controller's pending set;
+- registration is **PARKED** and does not request an idle ProcessEvents wake.
+
+If the current layout batch already contains a turn for that root and the turn has not
+started, that turn may consume the pending state in the same batch. Work not consumed
+by the current batch remains PARKED without arming a wake.
+
+This separates correctness state from main-loop scheduling. A self-invalidating
+producer cannot create an endless pass -> emit -> idle-wake cycle, but its pending work
+is still processed by a later independently triggered ProcessEvents or an explicit
+`LayoutController::ProcessLayouts()`. An out-of-processing event-time request walks to
+the root and arms at most one coalesced outstanding wake, draining any work that was
+already parked. After a processing frame records a no-self-wake request, it ends the
+invalidation generation so that this event-time walk cannot be skipped by generation
+coalescing.
+
+Layout-transition lifecycle callbacks run after the Measure/Arrange pass and outside
+this window. Their documented mutation and transition-chaining paths therefore remain
+wakeable and use the same coalesced outstanding wake.
+
+The scheduling rule applies to every origin. Property setters, resource paths and tree
+mutations (`Add()` / `Remove()`) use the same PARK behavior when they run inside the
+window; `ViewDataImpl` and `LayoutController::RequestLayoutInternal()` are not exempt.
+Defer layout-affecting state changes to event time, or arrange an independent idle/timer
+wake, when prompt follow-up is required.
+
+Revoking a cache entry prevents it from satisfying a later cache hit; it does not
+immediately replace the last completed result. Until parked work is drained,
+`GetMeasuredSize()` or actor geometry may therefore still expose the previous completed
+pass.
+
+**The contract, stated plainly.** Invalidating layout during layout processing is
+prohibited in principle and honoured only best-effort — exactly dali-core's relayout
+policy, where `RequestRelayout()` raised while `ProcessEvents` runs is retained but
+requests no wake. Parked work is serviced by the NEXT externally triggered
+ProcessEvents cycle; on a quiescent application (no input, animation or timer) that
+next cycle may be indefinitely later, and `LayoutFinished` stays deferred with it.
+Components and applications must therefore never rely on in-processing invalidation
+for the correctness of the CURRENT frame. When a processing frame ends with parked
+work and no outstanding wake, the controller logs one `DALI_LOG_ERROR` per parked
+episode (covering framework-internal origins the per-View diagnostic cannot see);
+the episode latch resets when the pending set drains.
 
 **`LayoutManager` state.** A manager that keeps state of its own — an
 orientation, a spacing, a set of row definitions — is outside every cache key,
@@ -485,7 +545,15 @@ A Standalone child:
 ### Invalidation flow
 
 When layout must be recomputed (e.g. size or child change):  
-`ViewImpl::InvalidateMeasure()` or `InvalidateArrange()` → propagate to parent layout → at layout root, `RegisterWithLayoutController()` → `LayoutControllerImpl::RequestLayout(ViewImpl*)` adds the root to `mPendingViews` → next frame the Adaptor calls `Process()` → in the pre-process phase `ProcessLayouts()` runs Measure then Arrange for those roots → after core size negotiation, the post-process phase emits the `LayoutFinished` signals.
+`ViewImpl::InvalidateMeasure()` or `InvalidateArrange()` → propagate to parent layout → at layout root, `RegisterWithLayoutController()` → `LayoutControllerImpl::RequestLayout(ViewImpl*)` adds the root to `mPendingViews`. From there scheduling has two branches:
+
+- outside the layout processing window, the request arms one coalesced outstanding wake;
+  the next ProcessEvents runs Measure/Arrange in the pre-process phase and emits settled
+  `LayoutFinished` signals in post-process;
+- inside the window, the same full invalidation and pending registration occur but no
+  self idle wake is requested. The next independently triggered ProcessEvents or an
+  explicit `ProcessLayouts()` drains the parked work, and `LayoutFinished` remains
+  delayed until the pending set is empty.
 
 ---
 

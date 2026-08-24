@@ -429,12 +429,16 @@ void ViewImpl::ClearGradientColorBinding(StringView bindingId)
 
 void ViewImpl::InvalidateMeasure()
 {
-  mImpl->InvalidateMeasure();
+  // The public wrapper adds the once-per-View diagnostic for invalidation from
+  // layout callbacks. It still delegates to the same full invalidation
+  // transaction as framework paths; the LayoutController centrally decides
+  // whether the resulting pending root may arm an idle wake.
+  mImpl->InvalidateMeasureFromPublicApi();
 }
 
 void ViewImpl::InvalidateArrange()
 {
-  mImpl->InvalidateArrange();
+  mImpl->InvalidateArrangeFromPublicApi();
 }
 
 MeasuredSize ViewImpl::GetMeasuredSize() const

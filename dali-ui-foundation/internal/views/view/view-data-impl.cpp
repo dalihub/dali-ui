@@ -1119,6 +1119,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mFittingModeLayoutFinishedSignalConnected(false),
   mDefaultFocusIndicatorSuppressedByStateEffect(false),
   mLayoutDirectionSignalConnected(false),
+  mInPassInvalidationWarned(false),
   // Pure cache key; its initial value is never consulted because
   // mArrangeCacheValid starts false.
   mLastArrangeDirection(Dali::LayoutDirection::LEFT_TO_RIGHT),
@@ -2276,6 +2277,84 @@ void ViewDataImpl::InvalidateArrange()
 
   // Reached top of View tree → register with LayoutController
   RegisterWithLayoutController();
+}
+
+bool ViewDataImpl::IsLayoutPassOnStack()
+{
+  return gActiveLayoutPassDepth != 0u;
+}
+
+void ViewDataImpl::InvalidateMeasureFromPublicApi()
+{
+  if(gActiveLayoutPassDepth != 0u || LayoutInvalidation::IsLayoutFinishedEmitInProgress())
+  {
+    LogInPassInvalidation("View::InvalidateMeasure");
+  }
+
+  // Always execute the complete invalidation transaction. During layout
+  // processing the controller retains the propagated root as pending but
+  // suppresses only the idle wake, matching dali-core's relayout policy.
+  InvalidateMeasure();
+}
+
+void ViewDataImpl::InvalidateArrangeFromPublicApi()
+{
+  if(gActiveLayoutPassDepth != 0u || LayoutInvalidation::IsLayoutFinishedEmitInProgress())
+  {
+    LogInPassInvalidation("View::InvalidateArrange");
+  }
+
+  // See InvalidateMeasureFromPublicApi(): dirtying, cache invalidation,
+  // pass-poisoning, ancestor propagation, and root registration all remain
+  // intact; only the controller's self-wake is suppressed.
+  InvalidateArrange();
+}
+
+void ViewDataImpl::LogInPassInvalidation(const char* apiName)
+{
+  // Per-view latch, deliberately never cleared. A call from inside layout processing is
+  // a code defect at a fixed call site, not a runtime condition, so one diagnostic per
+  // View says everything the developer needs; repeating it every frame would bury the
+  // rest of the log. There is no global cap on top of the latch: a global cap would
+  // leave a later offending View undiagnosed, which is the worse failure.
+  if(mInPassInvalidationWarned)
+  {
+    return;
+  }
+  mInPassInvalidationWarned = true;
+
+  // Identify the view as helpfully as the handle allows. The latch means this runs at
+  // most once per View, so neither property read is on any hot path. Self() can still
+  // hand back an EMPTY handle (a derived constructor invalidating before the
+  // CustomActor exists), and reading a property off an empty handle aborts, so the
+  // handle test comes first and "View" is the last-resort label.
+  Dali::CustomActor self = mViewImpl.Self();
+  Dali::String      viewName;
+  if(self)
+  {
+    viewName = self.GetProperty<Dali::String>(Dali::Actor::Property::NAME);
+    if(viewName.Empty())
+    {
+      viewName = self.GetTypeName();
+    }
+  }
+  const char* name = viewName.Empty() ? "View" : viewName.CStr();
+
+  // Which half of the layout processing window was open. A pass on the stack shadows
+  // the emit half: an emit that re-entered a pass is reported as the pass it is in.
+  const char* context = gActiveLayoutPassDepth != 0u
+                          ? "while a Measure/Arrange pass is running"
+                          : "from a LayoutFinished signal handler";
+
+  DALI_LOG_ERROR(
+    "%s() called on '%s' %s. The requested layout work was retained rather than "
+    "discarded, but layout processing does not request another idle ProcessEvents cycle "
+    "for work it produces itself. The work remains pending and LayoutFinished remains "
+    "deferred until a later independently triggered ProcessEvents cycle services it. "
+    "Avoid unconditional invalidation from layout callbacks.\n",
+    apiName,
+    name,
+    context);
 }
 
 MeasuredSize ViewDataImpl::GetMeasuredSize() const

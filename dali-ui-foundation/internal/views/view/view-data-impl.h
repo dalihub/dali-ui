@@ -210,15 +210,73 @@ public:
   View::FocusChangedSignalType& FocusChangedSignal();
   bool                          NotifyKeyEvent(const KeyEvent& event);
 
-  void             SetRequestedX(float x);
-  void             SetRequestedY(float y);
-  float            GetRequestedX() const;
-  float            GetRequestedY() const;
-  void             SetUiScalePolicy(UiScalePolicy policy);
-  UiScalePolicy    GetUiScalePolicy() const;
-  float            GetEffectiveScale() const;
-  void             InvalidateMeasure();
-  void             InvalidateArrange();
+  void          SetRequestedX(float x);
+  void          SetRequestedY(float y);
+  float         GetRequestedX() const;
+  float         GetRequestedY() const;
+  void          SetUiScalePolicy(UiScalePolicy policy);
+  UiScalePolicy GetUiScalePolicy() const;
+  float         GetEffectiveScale() const;
+  /**
+   * @brief Records and propagates a measure invalidation under the uniform layout
+   * processing policy.
+   *
+   * Every origin -- public API, property setter, tree mutation, resource callback, or
+   * framework walk -- performs the full local invalidation, ancestor propagation and
+   * layout-root registration. The target controller decides only whether that pending
+   * registration may arm an idle wake: work raised during layout processing is parked,
+   * while an out-of-processing request arms one coalesced outstanding wake.
+   */
+  void InvalidateMeasure();
+
+  /**
+   * @brief The arrange-axis counterpart of InvalidateMeasure().
+   */
+  void InvalidateArrange();
+
+  /**
+   * @brief The public-API entry point for measure invalidation and its diagnostic.
+   *
+   * ViewImpl::InvalidateMeasure() calls this wrapper so a direct application call made
+   * during layout processing can be diagnosed. It must still perform exactly the same
+   * full invalidation, propagation and root registration as InvalidateMeasure(). The
+   * public/internal route is not a scheduling-policy boundary: only the target
+   * controller's processing context decides whether the pending work arms an idle wake
+   * or remains parked.
+   */
+  void InvalidateMeasureFromPublicApi();
+
+  /**
+   * @brief The public-API entry point for arrange invalidation and its diagnostic.
+   *
+   * The arrange-axis twin of InvalidateMeasureFromPublicApi().
+   */
+  void InvalidateArrangeFromPublicApi();
+
+  /**
+   * @brief Logs, once for this view, that @p apiName was called from inside layout processing.
+   *
+   * Public because LayoutController::RequestLayout() reaches it through
+   * ViewDataImpl::Get(); it is a diagnostic helper, not part of any application-facing
+   * surface (this whole class is internal). The warning reports that the work was
+   * parked; it must never imply that the invalidation was ignored or discarded.
+   *
+   * @param[in] apiName The violating entry point, fully qualified as it should appear
+   * in the log, e.g. "View::InvalidateMeasure" or "LayoutController::RequestLayout"
+   */
+  void LogInPassInvalidation(const char* apiName);
+
+  /**
+   * @brief Returns whether any view's Measure()/Arrange() pass is on this thread's stack.
+   *
+   * The pass half of the layout processing window; the emit half is
+   * LayoutInvalidation::IsLayoutFinishedEmitInProgress(). Exposed so controller
+   * registration can apply the same retained-but-parked wake policy to every origin.
+   *
+   * @return True while a Measure or Arrange pass is running
+   */
+  static bool IsLayoutPassOnStack();
+
   MeasuredSize     GetMeasuredSize() const;
   void             SetRequestedWidth(float width);
   float            GetRequestedWidth() const;
@@ -317,8 +375,9 @@ public:
    * It is exactly DropCachedEffectiveScale() + InvalidateLayoutCaches() applied
    * to the subtree, plus a retraction of the invalidation propagation records: it
    * raises NO dirty bit and registers nothing with the LayoutController. The callers
-   * follow it with InvalidateMeasure(), which is what propagates upward and schedules
-   * the re-layout.
+   * follow it with InvalidateMeasure(), which propagates upward and enqueues the layout
+   * root. Whether that pending work arms an idle wake depends on whether layout
+   * processing is active.
    */
   void  ResetSubtreeScaleAndLayoutCaches();
   float ComputeEffectiveScale() const;
@@ -1164,10 +1223,11 @@ private:
    * @brief Declines this view's arrange cache publish for the CURRENT pass because a
    * cache-ONLY invalidation reached it mid-pass.
    *
-   * Unlike a poison it registers no follow-up: a cache-only invalidation must never
-   * turn into a scheduled layout. Pass-local by construction (ArrangePassGuard clears
-   * the bit at pass entry, the publish gate reads it at pass exit), hence the
-   * precondition that an arrange pass is actually running.
+   * Unlike a logical invalidation, it enqueues no pending work at all: a cache-only
+   * invalidation must never become either a parked request or a wake-armed request.
+   * Pass-local by construction (ArrangePassGuard clears the bit at pass entry, the
+   * publish gate reads it at pass exit), hence the precondition that an arrange pass is
+   * actually running.
    */
   void BlockArrangeCachePublishDuringPass();
 
@@ -1579,7 +1639,7 @@ private:
   bool         mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
   bool         mArrangeInProgress : 1;                            ///< True while this view's own Arrange() is on the stack; guards same-view re-entrancy.
   bool         mArrangePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's arrange pass was running.
-  bool         mArrangeCacheBlockedDuringPass : 1;                ///< True when a cache-ONLY invalidation arrived while this view's arrange pass was running. Declines the cache publish without poisoning the pass, so no follow-up layout is registered. Set by InvalidateAncestorLayoutCachesForMeasureMiss on an unowned arrange-in-progress ancestor; see BlockArrangeCachePublishDuringPass.
+  bool         mArrangeCacheBlockedDuringPass : 1;                ///< True when a cache-ONLY invalidation arrived while this view's arrange pass was running. Declines the cache publish without poisoning the pass and enqueues no layout work (parked or wake-armed). Set by InvalidateAncestorLayoutCachesForMeasureMiss on an unowned arrange-in-progress ancestor; see BlockArrangeCachePublishDuringPass.
   bool         mArrangeResultAvailable : 1;                       ///< True once at least one arrange pass has published a result into mArrangedBounds.
   bool         mArrangeOverrideAlways : 1;                        ///< True when this view's OnArrange() uses ArrangePolicy::ALWAYS. Default FALSE (ArrangePolicy::IF_CHANGED).
   bool         mArrangeCallbackAlways : 1;                        ///< True when the installed ArrangeCallback uses ArrangePolicy::ALWAYS. The one-argument overload resets it to FALSE.
@@ -1596,6 +1656,7 @@ private:
   bool         mFittingModeLayoutFinishedSignalConnected : 1;     ///< Whether layout-finished signal is connected for fitting mode update.
   bool         mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
   bool         mLayoutDirectionSignalConnected : 1;               ///< True once this view registered with the LayoutController on a live window (an on-scene layout root or on-scene standalone boundary) and connected the actor layout-direction signal; never cleared -- the claim "core emits on this actor" survives reparenting and scene disconnection, which is what keeps OnPropertySet's short-circuit sound.
+  bool         mInPassInvalidationWarned : 1;                     ///< Latched once this View has logged an in-pass Invalidate*() contract violation; never cleared.
 
   /// Pure cache KEY: the effective layout direction mArrangedBounds was produced under.
   /// Valid only while mArrangeCacheValid is true. Recorded as a KEY because the direction

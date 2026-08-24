@@ -77,6 +77,14 @@ std::vector<std::unique_ptr<LayoutController>> gDetachedLayoutControllers;
 // re-arms instead of freeing while layout processing is on the stack.
 int32_t gGlobalProcessDepth{0};
 
+// True when a no-self-wake layout request was recorded while a
+// LayoutController::Process() frame was on the stack. Such work stays in the
+// controller's pending set but deliberately does not request another idle
+// ProcessEvents cycle. When the outermost frame unwinds, end the propagation
+// generation so a later event-time invalidation can walk to the root again and
+// upgrade that parked work into a real idle wake request.
+bool gDeferredLayoutRequestDuringProcess{false};
+
 /**
  * @brief RAII for gGlobalProcessDepth.
  *
@@ -95,7 +103,11 @@ struct GlobalProcessDepthScope
   }
   ~GlobalProcessDepthScope()
   {
-    --gGlobalProcessDepth;
+    if(--gGlobalProcessDepth == 0 && gDeferredLayoutRequestDuringProcess)
+    {
+      gDeferredLayoutRequestDuringProcess = false;
+      Internal::LayoutInvalidation::AdvanceGeneration();
+    }
   }
   GlobalProcessDepthScope(const GlobalProcessDepthScope&)            = delete;
   GlobalProcessDepthScope& operator=(const GlobalProcessDepthScope&) = delete;
@@ -237,7 +249,7 @@ public:
     mWindowWidth(0),
     mWindowHeight(0),
     mWindowObjectPtr(window.GetObjectPtr()),
-    mProcessingScheduled(false)
+    mIdleWakeArmed(false)
   {
     // Get initial window size
     auto    positionSize = window.GetPositionSize();
@@ -329,6 +341,13 @@ public:
     mDestroyPending = true;
     Detach();
 
+    // This registration target is about to disappear. End the propagation
+    // generation unconditionally: pending containers may already have been
+    // swapped into a local processing batch or changed by re-entrancy, so their
+    // apparent emptiness is not a sufficient proof that no recorded walk names
+    // this controller. A later invalidation must reach the replacement target.
+    Internal::LayoutInvalidation::AdvanceGeneration();
+
     // The entry under mWindowObjectPtr is necessarily THIS controller here:
     // the only way a controller leaves the map before destruction is this very
     // function, which runs at most once per controller (mDetached guard).
@@ -353,7 +372,7 @@ public:
    */
   void RequestLayout(ViewImpl* view)
   {
-    if(!view)
+    if(!view || mDetached || mDestroyPending)
     {
       return;
     }
@@ -369,18 +388,7 @@ public:
     // arm the settled latch so the next drain-to-empty fires the signal.
     mLayoutDirtySinceEmit = true;
 
-    // Schedule processing if not already scheduled
-    if(!mProcessingScheduled)
-    {
-      mProcessingScheduled = true;
-
-      // Guarantee a layout pass runs even if the app would otherwise idle, so
-      // the pending work drains and LayoutFinished can eventually fire.
-      if(DALI_LIKELY(Adaptor::IsAvailable()))
-      {
-        Adaptor::Get().RequestProcessEventsOnIdle();
-      }
-    }
+    RequestIdleWakeIfAllowed();
   }
 
   /**
@@ -508,6 +516,11 @@ public:
    */
   void OnWindowResize(int32_t width, int32_t height)
   {
+    if(mDetached || mDestroyPending)
+    {
+      return;
+    }
+
     mWindowWidth  = width;
     mWindowHeight = height;
 
@@ -545,20 +558,39 @@ public:
       Internal::LayoutInvalidation::AdvanceGeneration();
     }
 
-    // A resize forces every root to recompute; ensure a layout pass runs even
-    // if no other event wakes the event loop, so the invalidated roots drain
-    // and LayoutFinished fires. Kept unconditional as defence in depth: a
-    // resize always schedules a pass regardless of prior scheduling state.
-    if(DALI_LIKELY(Adaptor::IsAvailable()))
-    {
-      Adaptor::Get().RequestProcessEventsOnIdle();
-    }
+    // Preserve the resize wake even when there are no live roots, but coalesce
+    // it with any wake already requested by the invalidation walk above. If a
+    // resize is delivered re-entrantly from Measure/Arrange or LayoutFinished,
+    // its work is parked under the same no-self-wake rule as every other layout
+    // request in that window.
+    RequestIdleWakeIfAllowed();
   }
   /**
    * @brief Processes all pending views with layout capability.
    */
   void ProcessLayouts()
   {
+    // A manual drain does not consume a platform idle callback that was already
+    // queued. Preserve mIdleWakeArmed across the call so event-time work arriving
+    // afterwards coalesces with that still-outstanding wake instead of issuing a
+    // second one. The scope is nesting- and exception-safe.
+    struct ManualProcessScope
+    {
+      explicit ManualProcessScope(bool& flag)
+      : mFlag(flag),
+        mPrevious(flag)
+      {
+        mFlag = true;
+      }
+      ~ManualProcessScope()
+      {
+        mFlag = mPrevious;
+      }
+
+      bool& mFlag;
+      bool  mPrevious;
+    } manualProcessScope(mManualProcessInvocation);
+
     Process(false);
   }
 
@@ -606,25 +638,30 @@ public:
       // in mPendingViews before we decide.
       if(mProcessDepth == 1)
       {
-        if(mPendingViews.empty() && mLayoutDirtySinceEmit)
+        if(mPendingViews.empty())
         {
-          // Fully settled in the pre phase. Do NOT emit here; the signals must
-          // fire in the post-process phase (after core size negotiation). Just
-          // schedule the emit for this frame's post pass, which runs later in
-          // the same ProcessEvents cycle.
-          mEmitScheduled = true;
+          // A drained pending set ends the parked episode: the next park is a
+          // new episode and may log its one diagnostic again.
+          mParkedWorkLogged = false;
+
+          if(mLayoutDirtySinceEmit)
+          {
+            // Fully settled in the pre phase. Do NOT emit here; the signals must
+            // fire in the post-process phase (after core size negotiation). Just
+            // schedule the emit for this frame's post pass, which runs later in
+            // the same ProcessEvents cycle.
+            mEmitScheduled = true;
+          }
         }
-        else if(!mPendingViews.empty())
+        else
         {
           // Work was re-scheduled during this pass; not settled yet. Cancel any
-          // stale schedule so the post pass does not emit from a previous frame,
-          // and ensure a follow-up pass runs even if the app would otherwise idle.
+          // stale schedule so the post pass does not emit from a previous frame.
+          // The work remains pending, but processing does not wake itself: the
+          // next independently triggered ProcessEvents cycle will drain it.
           mEmitScheduled        = false;
           mLayoutDirtySinceEmit = true;
-          if(DALI_LIKELY(Adaptor::IsAvailable()))
-          {
-            Adaptor::Get().RequestProcessEventsOnIdle();
-          }
+          LogParkedWorkOnce();
         }
       }
     }
@@ -637,19 +674,22 @@ public:
       // frame, and false when pending work remains. Emit exactly once here.
       if(mProcessDepth == 1 && mEmitScheduled)
       {
+        // Hold the LayoutFinished half of the LAYOUT PROCESSING WINDOW open across
+        // BOTH emits below. Slot code runs at pass depth 0 -- every Measure/Arrange
+        // guard has already unwound by the post-process phase -- so this scope is the
+        // only thing that extends the no-self-wake window over LayoutFinished
+        // handlers. Invalidations from a slot are fully recorded and propagated,
+        // but they cannot request another idle ProcessEvents cycle from inside
+        // this processing episode.
+        Internal::LayoutInvalidation::ScopedLayoutFinishedEmit emitScope;
+
         mEmitScheduled = false;
 
         // Deliver every subscribed View's layout-finished event FIRST (in
         // traversal order), then decide the window signal.
         //
-        // CAVEAT (do not "fix" by adding a cap without agreement): a View
-        // LayoutFinishedSignal slot that unconditionally re-invalidates layout
-        // spins an endless dirty->settled->emit cycle. This is intentionally
-        // NOT capped here (consistent with the window signal); the contract is
-        // documented on View::LayoutFinishedSignal as "guard re-layout in the
-        // slot behind a real condition". A view is also re-collected/re-emitted
-        // whenever it is re-arranged, even with unchanged bounds, so callers
-        // must not treat an emit as "bounds changed".
+        // A view is re-collected/re-emitted whenever it is re-arranged, even with
+        // unchanged bounds, so callers must not treat an emit as "bounds changed".
         EmitPendingViewLayoutFinishedSignals();
 
         if(mDestroyPending)
@@ -666,13 +706,11 @@ public:
         }
         else
         {
-          // A slot re-invalidated, or a nested pass repopulated the events map.
-          // Keep the latch armed and schedule a follow-up settled pass to drain.
+          // A slot or nested pass re-scheduled work. Keep the latch armed, but
+          // do not self-wake; a later independently triggered ProcessEvents
+          // cycle will drain the pending work and emit only after it settles.
           mLayoutDirtySinceEmit = true;
-          if(DALI_LIKELY(Adaptor::IsAvailable()))
-          {
-            Adaptor::Get().RequestProcessEventsOnIdle();
-          }
+          LogParkedWorkOnce();
         }
       }
     }
@@ -842,6 +880,87 @@ public:
 
 private:
   /**
+   * @brief Requests one coalesced idle wake outside the no-self-wake layout window.
+   *
+   * Pending work and wake state are intentionally independent. A request made
+   * from Measure/Arrange or LayoutFinished is retained in mPendingViews but
+   * cannot make the current layout episode perpetually wake the event loop.
+   * Outside that window -- including LayoutTransition lifecycle callbacks after
+   * the layout pass -- the first request arms one idle wake; duplicates coalesce
+   * until pre-processing consumes that wake.
+   */
+  void RequestIdleWakeIfAllowed()
+  {
+    if(mDetached || mDestroyPending)
+    {
+      return;
+    }
+
+    if(Internal::ViewDataImpl::IsLayoutPassOnStack() ||
+       Internal::LayoutInvalidation::IsLayoutFinishedEmitInProgress())
+    {
+      if(gGlobalProcessDepth != 0)
+      {
+        gDeferredLayoutRequestDuringProcess = true;
+      }
+      return;
+    }
+
+    if(!mIdleWakeArmed && DALI_LIKELY(Adaptor::IsAvailable()))
+    {
+      mIdleWakeArmed = true;
+      Adaptor::Get().RequestProcessEventsOnIdle();
+    }
+  }
+
+  /**
+   * @brief Logs, once per parked episode, that layout work stayed pending with no wake.
+   *
+   * The per-view diagnostic in ViewDataImpl covers only the public entry points; work
+   * parked through framework-internal paths (a child added from OnArrange, a resource
+   * callback landing mid-pass) would otherwise defer silently. This is the field-side
+   * trace for "why does this view update only on the next touch". One line per episode:
+   * the latch resets when the pending set drains, so a persistently diverging producer
+   * cannot flood the log at event rate. Skipped while an idle wake is outstanding --
+   * such work is about to be serviced and is not at risk of going stale.
+   */
+  void LogParkedWorkOnce()
+  {
+    if(mParkedWorkLogged || mPendingViews.empty() || mIdleWakeArmed)
+    {
+      return;
+    }
+    mParkedWorkLogged = true;
+
+    // Identify one pending root as helpfully as the handle allows (same ladder as
+    // ViewDataImpl::LogInPassInvalidation; this runs at most once per episode).
+    Dali::String rootName;
+    if(ViewImpl* sample = *mPendingViews.begin())
+    {
+      Dali::CustomActor self = sample->Self();
+      if(self)
+      {
+        rootName = self.GetProperty<Dali::String>(Dali::Actor::Property::NAME);
+        if(rootName.Empty())
+        {
+          rootName = self.GetTypeName();
+        }
+      }
+    }
+
+    DALI_LOG_ERROR(
+      "LayoutController: %zu layout root(s) (e.g. '%s') remain pending after layout "
+      "processing, with no idle wake: invalidating layout during Measure/Arrange or "
+      "LayoutFinished is prohibited in principle and only honoured best-effort, so such "
+      "work never wakes the event loop itself. It is serviced by the next externally "
+      "triggered ProcessEvents cycle, which on a quiescent application may be "
+      "indefinitely later; LayoutFinished stays deferred until then. Defer the "
+      "invalidation to event time if the result must appear promptly.\n",
+      mPendingViews.size(),
+      rootName.Empty() ? "View" : rootName.CStr());
+  }
+
+  /**
    * @brief Processes all pending views with layout capability.
    */
   void ProcessLayouts(Dali::Window window)
@@ -856,12 +975,13 @@ private:
     }
     if(mPendingViews.empty())
     {
-      // Nothing to process: clear the scheduled flag so a later RequestLayout
-      // re-arms the idle wakeup (RequestProcessEventsOnIdle). Without this the
-      // flag can latch true (e.g. a queued root removed via UnregisterView
-      // before its pass), suppressing the wakeup the LayoutFinishedSignal
-      // relies on to fire in an otherwise-idle application.
-      mProcessingScheduled = false;
+      // This pre-process invocation consumes any outstanding idle wake, even
+      // when its pending root disappeared before the pass. A manual ProcessLayouts
+      // call does not consume the already-queued platform callback.
+      if(!mManualProcessInvocation)
+      {
+        mIdleWakeArmed = false;
+      }
 
       // Still drain per-pass dispatcher state (e.g. mInWindowResize set
       // by NotifyWindowResize) so a stale flag cannot leak into the next
@@ -876,7 +996,10 @@ private:
     // Copy pending views and clear (in case new views are added during processing)
     decltype(mPendingViews) viewsSet;
     viewsSet.swap(mPendingViews);
-    mProcessingScheduled = false;
+    if(!mManualProcessInvocation)
+    {
+      mIdleWakeArmed = false;
+    }
 
     // Every pending registration has just been consumed, so no view's recorded
     // propagation generation describes a live registration any more: end the generation here,
@@ -884,9 +1007,11 @@ private:
     // re-registers in full. Bumping anywhere later would leave a window in which a
     // view could skip a walk whose registration this swap had already taken.
     //
-    // An invalidation raised DURING the drain lands in the now-empty mPendingViews
-    // and is processed by the follow-up pass, exactly as before -- its record is
-    // written against the new generation, which this drain will not consume.
+    // An invalidation raised DURING the drain lands in the now-empty mPendingViews.
+    // If its target root has not started its turn in this batch, the registration
+    // is consumed immediately before that turn; otherwise it remains pending for
+    // a later independently driven pass. Its record is written against the new
+    // generation either way.
     Internal::LayoutInvalidation::AdvanceGeneration();
 
     // Default: window size (when root is directly under window or parent size unknown).
@@ -937,6 +1062,13 @@ private:
           mTransitionDispatcher->CaptureBeforeLayout(view);
         }
 
+        // A preceding root may have dirtied and re-registered this root after
+        // the batch swap. Because this root has not begun its own pass yet, the
+        // pass below observes and consumes that work; remove only that pre-turn
+        // duplicate. Any invalidation raised from Measure/Arrange itself lands
+        // after this erase and therefore remains parked for a later pass.
+        mPendingViews.erase(view);
+
         // Collect subscribed Views arranged under this root into STACK-LOCAL
         // containers; the RAII scope pushes a frame (and sets the file-static)
         // for the duration of ProcessLayoutRoot, popping on exit even if an
@@ -959,10 +1091,14 @@ private:
           mTransitionDispatcher->StartTransitionsAfterLayout(view);
         }
       }
-      else if(it != mAllLayoutRoots.end())
+      else
       {
-        // Dead entry — clean up
-        mAllLayoutRoots.erase(it);
+        mPendingViews.erase(view);
+        if(it != mAllLayoutRoots.end())
+        {
+          // Dead entry — clean up
+          mAllLayoutRoots.erase(it);
+        }
       }
     }
 
@@ -1085,8 +1221,10 @@ private:
   std::unordered_set<ViewImpl*>                         mPendingViews;   ///< Dirty layout roots needing processing
   int32_t                                               mWindowWidth;
   int32_t                                               mWindowHeight;
-  void*                                                 mWindowObjectPtr; ///< For self-destruct case.
-  bool                                                  mProcessingScheduled;
+  void*                                                 mWindowObjectPtr;                     ///< For self-destruct case.
+  bool                                                  mIdleWakeArmed;                       ///< True only while one idle ProcessEvents wake is outstanding
+  bool                                                  mManualProcessInvocation{false};      ///< True while public ProcessLayouts() drains without consuming a queued platform wake
+  bool                                                  mParkedWorkLogged{false};             ///< One parked-work diagnostic per episode; reset when the pending set drains
   LayoutController::LayoutFinishedSignalType            mLayoutFinishedSignal;                ///< Emitted when layout fully settles for this window
   bool                                                  mLayoutDirtySinceEmit{false};         ///< Settled latch: armed by RequestLayout, cleared at emit
   bool                                                  mEmitScheduled{false};                ///< PRE-phase settle detected; POST phase must emit the layout-finished signals this frame
@@ -1176,6 +1314,16 @@ LayoutController::~LayoutController()
 
 void LayoutController::RequestLayout(ViewImpl* view)
 {
+  // Keep the diagnostic on the application-facing entry point, but never drop
+  // the request. LayoutControllerImpl records it in the pending set and applies
+  // the centralized no-self-wake policy to both public and internal paths.
+  if(view != nullptr &&
+     (Internal::ViewDataImpl::IsLayoutPassOnStack() ||
+      Internal::LayoutInvalidation::IsLayoutFinishedEmitInProgress()))
+  {
+    Internal::ViewDataImpl::Get(*view).LogInPassInvalidation("LayoutController::RequestLayout");
+  }
+
   mImpl->RequestLayout(view);
 }
 

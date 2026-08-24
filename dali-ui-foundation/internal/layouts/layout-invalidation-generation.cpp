@@ -41,6 +41,16 @@ namespace
 /// never cost correctness.
 uint32_t gGeneration = 1u;
 
+/// How many LayoutFinished emits are currently on the stack.
+///
+/// Thread-local for the same reason as the layout pass depth it partners with: the
+/// emit runs synchronously on the event thread, inside the same call graph as the
+/// Process(post) frame that opened it, so a per-thread counter is the accurate
+/// description of "is an emit on MY stack". A counter rather than a bool because a
+/// slot may drive a nested settle whose emit re-enters this scope; the window must
+/// stay open until the OUTERMOST emit unwinds.
+thread_local uint32_t gLayoutFinishedEmitDepth = 0u;
+
 } // namespace
 
 uint32_t CurrentGeneration()
@@ -55,6 +65,21 @@ void AdvanceGeneration()
   {
     gGeneration = 1u;
   }
+}
+
+bool IsLayoutFinishedEmitInProgress()
+{
+  return gLayoutFinishedEmitDepth != 0u;
+}
+
+void BeginLayoutFinishedEmit()
+{
+  ++gLayoutFinishedEmitDepth;
+}
+
+void EndLayoutFinishedEmit()
+{
+  --gLayoutFinishedEmitDepth;
 }
 
 } // namespace LayoutInvalidation

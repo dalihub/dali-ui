@@ -584,7 +584,7 @@ Each frame, the `LayoutController` runs two passes on invalidated layout roots:
 
 ### 8.2 Invalidation Flow
 
-When a layout property changes (size, child, params), invalidation propagates up to the layout root and registers with `LayoutController` for processing on the next frame.
+When a layout property changes (size, child, params), invalidation propagates up to the layout root and registers it as pending with `LayoutController`. An event-time request made outside the layout processing window defined below arms one coalesced outstanding ProcessEvents wake. A request raised inside that window is retained but parked without a self idle wake.
 
 ```
 View property change (size, child, params)
@@ -598,8 +598,14 @@ View property change (size, child, params)
         ▼
   Register with LayoutController
         │
-        ▼  (next frame)
-  ProcessLayouts()
+        ├── outside processing: arm one coalesced wake
+        │                         │
+        │                         ▼  (next ProcessEvents)
+        └── inside processing: PARK, no self wake
+                                  │
+                                  ▼  (independent ProcessEvents
+                                        or explicit ProcessLayouts)
+                            ProcessLayouts()
         │
         ├── Measure (top-down)
         │
@@ -612,7 +618,9 @@ A **layout root** is a top-level View whose parent is not a layout. The `LayoutC
 LayoutController controller = LayoutController::Get(window);
 ```
 
-> No explicit calls to `LayoutController` are needed in normal use. Invalidation triggers automatic re-layout.
+> No explicit calls to `LayoutController` are needed for normal event-time invalidation. In-processing invalidation remains pending but deliberately does not wake an otherwise-idle main loop.
+
+**The layout processing window.** The window is open while a Measure/Arrange pass is on the stack (any `OnMeasure`, `OnArrange`, measure/arrange callback or `LayoutManager` producer) and while a `LayoutFinished` emit is in progress. Calling a public invalidation API directly from this window is a contract violation and is logged once per View, but the work is retained rather than ignored. Relevant caches are revoked, dirty and in-progress state propagate through the affected ancestors, and the layout root remains pending. Only its self idle wake is suppressed, which prevents a producer or signal slot from perpetually re-arming the layout pump. If the current batch already contains a turn for that root and the turn has not started, it may consume the pending state immediately; only work left after the current batch remains PARKED. A later independently triggered ProcessEvents or explicit `LayoutController::ProcessLayouts()` drains parked work; an out-of-processing request arms one coalesced outstanding wake and also drains work already parked. After a processing frame records a no-self-wake request, it ends the invalidation generation so that later event-time request cannot be coalesced away. Layout-transition lifecycle callbacks run after the Measure/Arrange pass and outside this window, so their documented mutation and transition-chaining paths remain wakeable. Public and framework-internal paths follow the same scheduling policy, including property changes and tree mutations (`Add()` / `Remove()`). Parked work counts as pending and therefore delays `LayoutFinished` until it is actually drained. Revoking cache validity prevents a later cache hit, but it does not recompute immediately: the last completed measured size or actor geometry can remain observable in the meantime. Move layout-affecting work to event time, or arrange an independent idle/timer wake, when prompt follow-up is required. Stated plainly: invalidating during layout processing is prohibited in principle and honoured only best-effort, mirroring dali-core's relayout policy — on a quiescent application the deferred work (and `LayoutFinished`) may wait indefinitely, so never rely on it for the current frame. A processing frame that ends with parked work and no outstanding wake logs one diagnostic per parked episode.
 
 ---
 

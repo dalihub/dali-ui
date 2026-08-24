@@ -226,11 +226,37 @@ public: // Measure / Arrange API
    *
    * This propagates to the parent layout while one exists,
    * until the layout root is reached (no parent Layout).
+   *
+   * @note Calling this DURING layout processing -- from inside any Measure/Arrange
+   * implementation (OnMeasure, OnArrange, a measure/arrange callback, a LayoutManager
+   * producer), or from a LayoutFinishedSignal slot -- is a contract violation and is
+   * logged once for this View. The invalidation is retained, not ignored: the relevant
+   * caches are revoked, dirty state propagates to the layout root, and that root remains
+   * pending. To prevent a self-sustaining layout pump, it does not request an idle
+   * ProcessEvents wake. A not-yet-started turn for that root in the current batch may
+   * consume the work immediately; otherwise a later independently triggered
+   * ProcessEvents, an explicit LayoutController::ProcessLayouts(), or an
+   * out-of-processing request drains or wakes it. Such an out-of-processing request
+   * arms at most one coalesced outstanding wake. Until that pass runs, the last
+   * completed measured or arranged geometry may remain observable. On a quiescent
+   * application (no input, animation or timer) that next cycle may be INDEFINITELY
+   * later. In-processing invalidation is prohibited in principle and honoured only
+   * best-effort -- mirroring dali-core's relayout policy -- so never rely on it for
+   * the correctness of the current frame. Change state and invalidate at event time
+   * when prompt relayout is required.
    */
   void InvalidateMeasure();
 
   /**
    * @brief Invalidates the arrange of this view.
+   *
+   * @note Calling this DURING layout processing (any Measure/Arrange pass, or a
+   * LayoutFinishedSignal slot) has the same retained-but-parked semantics as
+   * InvalidateMeasure(): it is a contract violation and is logged once, the arrange
+   * invalidation propagates and remains pending, but it does not request its own idle
+   * ProcessEvents wake. The last completed geometry may remain observable until an
+   * independently triggered ProcessEvents, an explicit LayoutController::ProcessLayouts(),
+   * or an out-of-processing request drains or wakes the pending work.
    */
   void InvalidateArrange();
 
@@ -1475,24 +1501,28 @@ public: // State API (non-chaining)
    * the mirrored (final) position. The bounds are the PRE-transition target,
    * snapshotted during arrange, not intermediate animated values.
    *
-   * Recurs: if a slot invalidates layout again, the View is re-arranged and the
-   * signal fires again on a later settled pass. Connecting after a layout pass
-   * does not replay the previous result.
+   * Recurs: the signal fires again on a later settled pass whenever this View is
+   * re-arranged. Connecting after a layout pass does not replay the previous result.
    *
-   * @warning A slot that UNCONDITIONALLY triggers a layout recalculation (e.g.
-   * always sets a size/position/layout property, calls a method that invalidates
-   * measure/arrange, or adds/removes children) will spin an ENDLESS
-   * dirty->settled->emit cycle: each emit re-invalidates layout, which schedules
-   * another settled pass that emits again, and so on (the event loop is kept
-   * awake via the idle-process request). There is intentionally no iteration cap
-   * (as with LayoutController::LayoutFinishedSignal and equivalents in other
-   * toolkits). Also note this signal fires whenever the View is (re-)arranged in
-   * a settled pass, INCLUDING when its bounds did NOT change (e.g. it was
-   * re-arranged only because a sibling or ancestor changed) -- do NOT assume
-   * "signal fired" means "this View's geometry changed". Guard any layout-
-   * affecting work in the slot behind a real condition, e.g. compare @p bounds
-   * against a value you cached from the previous emit and act only on an actual
-   * change, or use a one-shot flag.
+   * A slot may NOT invalidate layout. The emit runs inside the layout processing
+   * window, so a direct InvalidateMeasure() / InvalidateArrange() call is a contract
+   * violation and is logged once for that View. The invalidation is nevertheless
+   * retained in full: affected caches and ancestors are invalidated and the layout root
+   * remains pending. It is PARKED rather than allowed to request an idle ProcessEvents
+   * wake, which prevents a dirty->settled->emit loop from keeping the main loop awake.
+   * Parked work counts as pending, so no later completion notification is emitted until
+   * an independently triggered ProcessEvents, an explicit LayoutController::ProcessLayouts(),
+   * or an out-of-processing request drains it. The callback already being delivered
+   * cannot be withdrawn. Property changes and tree mutations from a slot (Add / Remove)
+   * follow the same scheduling rule; framework-internal routing is not an exemption.
+   * Defer layout-affecting work to event time when a prompt follow-up is required.
+   *
+   * @warning This signal fires whenever the View is (re-)arranged in a settled pass,
+   * INCLUDING when its bounds did NOT change (e.g. it was re-arranged only because a
+   * sibling or ancestor changed) -- do NOT assume "signal fired" means "this View's
+   * geometry changed". Guard any layout-affecting work in the slot behind a real
+   * condition, e.g. compare @p bounds against a value you cached from the previous emit
+   * and act only on an actual change, or use a one-shot flag.
    *
    * @note Fires only for a View whose own Arrange() runs during the pass. All
    * built-in LayoutManagers and the default arrange route through child.Arrange().

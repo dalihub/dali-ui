@@ -580,7 +580,7 @@ layout.SetArrangeCallback(LayoutArrangeCallback::New(this, &MyClass::OnArrange))
 
 ### 8.2 무효화 흐름
 
-레이아웃 속성이 변경되면(크기, 자식, 파라미터), 무효화가 레이아웃 루트까지 상위 전파되고 다음 프레임 처리를 위해 `LayoutController`에 등록됩니다.
+레이아웃 속성이 변경되면(크기, 자식, 파라미터), 무효화가 레이아웃 루트까지 상위 전파되고 `LayoutController`의 pending 작업으로 등록됩니다. 아래에 정의된 레이아웃 처리 창 밖의 event-time 요청은 하나로 coalesce된 outstanding `ProcessEvents` wake를 무장합니다. 그 창 안에서 발생한 요청은 보존되지만 자체 idle wake 없이 PARK됩니다.
 
 ```
 View 속성 변경 (크기, 자식, 파라미터)
@@ -594,8 +594,14 @@ View 속성 변경 (크기, 자식, 파라미터)
         ▼
   LayoutController에 등록
         │
-        ▼  (다음 프레임)
-  ProcessLayouts()
+        ├── 처리 밖: coalesced wake 하나를 무장
+        │                         │
+        │                         ▼  (다음 ProcessEvents)
+        └── 처리 안: PARK, 자체 wake 없음
+                                  │
+                                  ▼  (독립적 ProcessEvents 또는
+                                        명시적 ProcessLayouts)
+                            ProcessLayouts()
         │
         ├── Measure (하향식)
         │
@@ -608,7 +614,9 @@ View 속성 변경 (크기, 자식, 파라미터)
 LayoutController controller = LayoutController::Get(window);
 ```
 
-> 일반적인 사용에서 `LayoutController`에 대한 명시적 호출은 필요 없습니다. 무효화가 자동으로 재레이아웃을 트리거합니다.
+> 일반적인 event-time 무효화에서는 `LayoutController`를 명시적으로 호출할 필요가 없습니다. 처리 중 무효화는 pending으로 남지만, idle 상태의 main loop를 스스로 깨우지 않습니다.
+
+**레이아웃 처리 창(layout processing window).** 이 창은 Measure/Arrange pass가 스택에 있는 동안(`OnMeasure`, `OnArrange`, measure/arrange 콜백, `LayoutManager` producer 등)과 `LayoutFinished` emit이 진행 중인 동안 열려 있습니다. 창 안에서 공개 무효화 API를 직접 호출하는 것은 계약 위반이며 View당 한 번 경고되지만, 요청한 작업은 무시되지 않고 보존됩니다. 관련 캐시 유효성이 철회되고 dirty와 진행 중 pass 상태가 필요한 조상에 전파되며, layout root는 pending으로 남습니다. 오직 자체 idle wake만 억제되어 producer나 signal slot이 레이아웃 펌프를 무한히 다시 무장하지 못합니다. 현재 batch에 해당 root의 아직 시작하지 않은 turn이 이미 있다면 그 turn이 pending 상태를 즉시 소비할 수 있으며, batch 종료 뒤에도 남은 작업만 PARK됩니다. PARK된 작업은 이후 독립적으로 발생한 `ProcessEvents`나 명시적 `LayoutController::ProcessLayouts()`가 drain합니다. 처리 창 밖의 요청은 coalesced outstanding wake 하나를 무장하여 기존 parked work도 함께 처리합니다. Processing frame에서 no-self-wake 요청이 기록되면 해당 frame 종료 시 invalidation generation을 종료하므로, 이후 event-time 요청은 generation coalescing에 의해 사라지지 않습니다. Layout transition lifecycle 콜백은 Measure/Arrange pass 이후이자 이 창 밖에서 실행되므로, 기존에 문서화된 mutation과 transition chaining 경로는 wakeable 상태를 유지합니다. Public/internal 경로와 관계없이 property 변경과 tree mutation(`Add()` / `Remove()`)도 동일한 scheduling 정책을 따릅니다. Parked work도 pending이므로 실제로 drain될 때까지 `LayoutFinished`가 지연됩니다. 캐시 유효성 철회는 이후 cache hit만 막으며 즉시 재계산을 뜻하지 않습니다. 그 동안은 마지막으로 완료된 measured size나 actor geometry가 관찰될 수 있습니다. 빠른 follow-up이 필요하면 레이아웃 영향 작업을 event time으로 옮기거나 별도 idle/timer wake를 예약하십시오. 계약을 명시하면: 레이아웃 처리 중의 무효화는 원칙적으로 금지이며 dali-core의 relayout 정책과 동일하게 best-effort로만 지원됩니다. 정지 상태 앱에서는 보류된 작업(과 `LayoutFinished`)이 무기한 지연될 수 있으므로 현재 프레임의 정확성을 여기에 의존해서는 안 됩니다. wake 없이 parked work를 남기고 처리 프레임이 끝나면 에피소드당 한 번 진단 로그가 남습니다.
 
 ---
 
