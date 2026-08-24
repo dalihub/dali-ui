@@ -8203,6 +8203,82 @@ int UtcDaliViewInternalInvalidationDuringPassStillSchedulesP(void)
   END_TEST;
 }
 
+// The user-visible shape of PARK, driven through a real component path: a sibling's
+// arrange rewrites a Label's TEXT. SetText() re-invalidates the label's measure through
+// the framework-internal text path (InvalidateTextMeasure), from INSIDE the arrange
+// pass, so the work is parked -- retained as dirty + pending, but with no idle wake.
+// The label keeps its stale geometry until the next EXTERNAL event drains the park.
+namespace
+{
+int   gLabelArrangeMutationCount = 0;
+Label gLabelArrangeMutationTarget;
+
+LayoutRect LabelMutatingArrange(View, const LayoutRect& bounds)
+{
+  ++gLabelArrangeMutationCount;
+  if(gLabelArrangeMutationCount == 1 && gLabelArrangeMutationTarget)
+  {
+    gLabelArrangeMutationTarget.SetText("WWWWWWWWWWWWWWWW");
+  }
+  return bounds;
+}
+} // namespace
+
+int UtcDaliViewLabelTextChangeDuringArrangeParkedP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("Changing a Label's text from a sibling's arrange parks the re-measure without an idle wake");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(400.0f);
+
+  Label label = Label::New("W");
+  label.SetRequestedWidth(WRAP_CONTENT);
+  label.SetRequestedHeight(WRAP_CONTENT);
+  root.Add(label);
+
+  gLabelArrangeMutationCount  = 0;
+  gLabelArrangeMutationTarget = label;
+
+  View box = View::New();
+  box.SetRequestedWidth(50.0f);
+  box.SetRequestedHeight(20.0f);
+  box.SetArrangeCallback(ArrangeCallback::New(&LabelMutatingArrange));
+  root.Add(box);
+
+  window.Add(root);
+  SendRequestedProcessEvents(application);
+
+  // Pass 1 measured the label for "W"; the box's arrange then rewrote the text.
+  // That in-pass invalidation is PARKED: the label keeps the short-text geometry,
+  // no idle wake was requested, and LayoutFinished stays deferred.
+  DALI_TEST_EQUALS(gLabelArrangeMutationCount, 1, TEST_LOCATION);
+  const float staleWidth = label.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+  DALI_TEST_CHECK(staleWidth > 0.0f);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+
+  // The next EXTERNAL event drains the parked work: the label is re-measured for
+  // the long text (strictly wider), the layout settles and emits exactly once,
+  // and processing still never woke itself. (The box may legitimately serve its
+  // unchanged slot from the arrange cache, so its callback count is not pinned.)
+  SendIndependentProcessEvents(application);
+  const float grownWidth = label.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+  DALI_TEST_CHECK(grownWidth > staleWidth);
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  gLabelArrangeMutationTarget.Reset();
+  END_TEST;
+}
+
+
 // Value guard, child-reorder half. OnChildOrderChanged rebuilds the View-ONLY child
 // sequence out of the actor order, so a reorder among the NON-View actor children
 // really does fire the signal while leaving that sequence identical -- dali-core
