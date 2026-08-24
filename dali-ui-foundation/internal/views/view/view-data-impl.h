@@ -448,6 +448,15 @@ public:
   {
     return mLayoutDirectionSignalConnected;
   }
+  /// True once this view has logged an in-pass Invalidate*() contract violation; never
+  /// cleared. The latch is what makes LogInPassInvalidation() diagnose a defective call
+  /// site once instead of every frame, and the log line itself is not observable from a
+  /// test (DALI_LOG_ERROR goes to stderr, which the tct harness does not capture), so
+  /// this reader is the only way to pin that the guard fired at all.
+  bool HasWarnedInPassInvalidation() const
+  {
+    return mInPassInvalidationWarned;
+  }
   /// @}
 
   Ui::Layout GetParentLayout() const;

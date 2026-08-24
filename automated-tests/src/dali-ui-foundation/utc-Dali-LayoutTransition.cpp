@@ -166,6 +166,20 @@ void NoopAnimator(const LayoutAnimatorContext& /*ctx*/)
 void NoopLifecycle(View /*view*/, LayoutTransitionSlot /*slot*/)
 {
 }
+
+View     gFinishedMutationTarget;
+uint32_t gFinishedMutationCount = 0u;
+
+void MutateRequestedWidthOnFinished(View view, LayoutTransitionSlot slot)
+{
+  if(slot == LayoutTransitionSlot::CHANGE &&
+     gFinishedMutationTarget &&
+     view.GetObjectPtr() == gFinishedMutationTarget.GetObjectPtr())
+  {
+    ++gFinishedMutationCount;
+    view.SetRequestedWidth(140.0f);
+  }
+}
 } // namespace
 
 int UtcDaliLayoutTransitionSetEnterAnimatorP(void)
@@ -239,6 +253,59 @@ int UtcDaliLayoutTransitionSetOnFinishedP(void)
 
   LayoutTransition& result = transition.SetOnFinished(LayoutLifecycleCallback::New(&NoopLifecycle));
   DALI_TEST_CHECK(&result == &transition);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionOnFinishedMutationRequestsIdleWakeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  StackLayout parent = StackLayout::New(StackOrientation::HORIZONTAL);
+  parent.SetRequestedWidth(300.0f);
+  parent.SetRequestedHeight(100.0f);
+
+  View child = View::New();
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(40.0f);
+  parent.Add(child);
+  window.Add(parent);
+
+  // Establish initial geometry before attaching the transition, so the only
+  // lifecycle completion below belongs to the requested-width CHANGE.
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition     transition = LayoutTransition::New();
+  LayoutAnimatorTiming timing;
+  timing.duration = Duration(0.0f);
+  transition.SetChangeAnimator(LayoutAnimatorCallback::New(&NoopAnimator), timing);
+  transition.SetOnFinished(LayoutLifecycleCallback::New(&MutateRequestedWidthOnFinished));
+  parent.SetLayoutTransition(transition);
+
+  gFinishedMutationTarget = child;
+  gFinishedMutationCount  = 0u;
+
+  child.SetRequestedWidth(120.0f);
+  application.GetRenderController().Initialize();
+  application.SendNotification();
+
+  // OnFinished runs after Measure/Arrange, from TickAnimators. It is a supported
+  // lifecycle mutation context rather than part of the no-self-wake layout
+  // window, so its width change must retain work AND request the next idle cycle.
+  DALI_TEST_EQUALS(gFinishedMutationCount, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetRequestedWidth(), 140.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(application.GetRenderController().WasCalled(TestRenderController::RequestProcessEventsOnIdleFunc));
+
+  // Consume that wake. The follow-up CHANGE completes; its callback writes the
+  // same width and therefore does not arm another layout wake.
+  application.GetRenderController().Initialize();
+  application.SendNotification();
+  DALI_TEST_EQUALS(gFinishedMutationCount, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetMeasuredSize().GetWidth(), 140.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(!application.GetRenderController().WasCalled(TestRenderController::RequestProcessEventsOnIdleFunc));
+
+  gFinishedMutationTarget.Reset();
   END_TEST;
 }
 

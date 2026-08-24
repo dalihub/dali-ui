@@ -306,11 +306,24 @@ LayoutRect IgnoringChildrenArrange(View, const LayoutRect& bounds)
   return bounds;
 }
 
-// --- Mid-pass self-invalidation helpers: a producer that invalidates its OWN
-// view while that view's pass is running. Dirty is consumed at pass ENTRY, so
-// such a re-invalidation is still standing when the pass reaches its publish
-// point; the publish is therefore declined and the next call recomputes the
-// post-invalidation value instead of serving the pre-invalidation one. ---
+// --- Mid-pass self-invalidation helpers: a producer that calls the PUBLIC
+// View::InvalidateMeasure() / View::InvalidateArrange() on its OWN view while
+// that view's pass is running.
+//
+// Such a call is inside the LAYOUT PROCESSING WINDOW, so it is logged once. The
+// invalidation itself is complete: it drops caches, raises dirty, poisons the
+// running pass, walks to the root and leaves that root pending. Only the idle
+// wake is suppressed, so layout cannot perpetually wake ProcessEvents from work
+// produced by its own callback.
+//
+// Dirty is still consumed at pass ENTRY (unchanged): the guards clear it when the
+// next pass opens, so the standing bit means "a re-invalidation arrived after this
+// pass started" at the publish point, and the NEXT pass recomputes the
+// post-invalidation value instead of serving the pre-invalidation one.
+//
+// The difference the window makes is therefore about WAKING, not freshness:
+// nothing stale is served and the work is retained, but the retained work does
+// not schedule another idle ProcessEvents cycle by itself. ---
 Ui::View gMidPassView;
 int      gMidPassMeasureProducerCount = 0;
 int      gMidPassArrangeProducerCount = 0;
@@ -341,6 +354,173 @@ LayoutRect MidPassInvalidatingArrange(View, const LayoutRect& bounds)
   }
   return bounds;
 }
+
+// --- In-pass invalidation: the WINDOW itself ------------------------------
+//
+// The producers above disarm after their first call, so they cannot tell a
+// "one follow-up, then settle" implementation apart from "no follow-up at all".
+// The ones below invalidate on EVERY invocation, which is precisely the shape
+// the layout processing window exists to stop: under the pre-window contract
+// each pass re-registered its own view, the idle pump was re-armed every frame,
+// the producer ran forever and the layout-finished signal NEVER fired.
+//
+// With the window in place the root remains pending and LayoutFinished remains
+// deferred, but RequestProcessEventsOnIdle is false after every pass. An
+// independent ProcessEvents trigger may service one parked pass without letting
+// that pass arm the next one.
+Ui::View gAlwaysInvalidatingView;
+int      gAlwaysInvalidatingMeasureCount = 0;
+int      gAlwaysInvalidatingArrangeCount = 0;
+
+const float ALWAYS_INVALIDATING_MEASURED_WIDTH  = 70.0f;
+const float ALWAYS_INVALIDATING_MEASURED_HEIGHT = 50.0f;
+const LayoutRect ALWAYS_INVALIDATING_ARRANGE_RESULT(0.0f, 0.0f, 90.0f, 40.0f);
+
+MeasuredSize AlwaysInvalidatingMeasure(View, float, float)
+{
+  ++gAlwaysInvalidatingMeasureCount;
+  if(gAlwaysInvalidatingView)
+  {
+    gAlwaysInvalidatingView.InvalidateMeasure(); // inside the window: warned + parked
+  }
+  return MeasuredSize(ALWAYS_INVALIDATING_MEASURED_WIDTH, ALWAYS_INVALIDATING_MEASURED_HEIGHT);
+}
+
+LayoutRect AlwaysInvalidatingArrange(View, const LayoutRect&)
+{
+  ++gAlwaysInvalidatingArrangeCount;
+  if(gAlwaysInvalidatingView)
+  {
+    gAlwaysInvalidatingView.InvalidateArrange(); // inside the window: warned + parked
+  }
+  return ALWAYS_INVALIDATING_ARRANGE_RESULT;
+}
+
+// A producer that invalidates a DIFFERENT view (the window's SCOPE is global: any
+// view's pass closes the window for every view, not just the one being measured),
+// plus a plain counting producer for the view on the receiving end.
+Ui::View gCrossInvalidationTarget;
+int      gCrossInvalidationSourceCount = 0;
+int      gCrossInvalidationTargetCount = 0;
+
+MeasuredSize CrossInvalidatingMeasure(View, float, float)
+{
+  ++gCrossInvalidationSourceCount;
+  if(gCrossInvalidationTarget)
+  {
+    gCrossInvalidationTarget.InvalidateMeasure();
+  }
+  return MeasuredSize(30.0f, 20.0f);
+}
+
+MeasuredSize CrossInvalidationTargetMeasure(View, float, float)
+{
+  ++gCrossInvalidationTargetCount;
+  return MeasuredSize(40.0f, 25.0f);
+}
+
+// Self-disarming variant of AlwaysInvalidatingMeasure that RECORDS the constraint
+// it was handed. Recording it is what lets a test re-issue the framework's own
+// constraint verbatim, so a later Measure() at that constraint tests the CACHE
+// rather than accidentally testing a different key.
+Ui::View gCacheDropView;
+int      gCacheDropMeasureCount    = 0;
+float    gCacheDropLastConstraintW = 0.0f;
+float    gCacheDropLastConstraintH = 0.0f;
+
+MeasuredSize CacheDropOnceMeasure(View, float widthConstraint, float heightConstraint)
+{
+  ++gCacheDropMeasureCount;
+  gCacheDropLastConstraintW = widthConstraint;
+  gCacheDropLastConstraintH = heightConstraint;
+  if(gCacheDropMeasureCount == 1 && gCacheDropView)
+  {
+    gCacheDropView.InvalidateMeasure();
+  }
+  return MeasuredSize(55.0f, 35.0f);
+}
+
+// A CONTAINER producer that adds a child View on its first arrange. Adding a child
+// is a framework-internal invalidation (OnChildAdded): it fully retains a second
+// pass under PARK, but does not wake ProcessEvents from inside the first. A ViewImpl
+// subclass rather than an ArrangeCallback because a callback REPLACES OnArrange,
+// and the child it adds would then never be arranged at all.
+class ChildAddingContainerViewImpl : public ViewImpl
+{
+public:
+  static IntrusivePtr<ChildAddingContainerViewImpl> New()
+  {
+    return IntrusivePtr<ChildAddingContainerViewImpl>(new ChildAddingContainerViewImpl());
+  }
+
+  int GetArrangeCallCount() const
+  {
+    return mArrangeCount;
+  }
+
+  View GetAddedChild() const
+  {
+    return mAddedChild;
+  }
+
+protected:
+  ChildAddingContainerViewImpl()
+  : ViewImpl()
+  {
+  }
+
+  LayoutRect OnArrange(const LayoutRect& bounds) override
+  {
+    ++mArrangeCount;
+    if(mArrangeCount == 1)
+    {
+      mAddedChild = View::New();
+      mAddedChild.SetRequestedWidth(20.0f);
+      mAddedChild.SetRequestedHeight(10.0f);
+      Ui::View::DownCast(Self()).Add(mAddedChild);
+    }
+    return ViewImpl::OnArrange(bounds);
+  }
+
+private:
+  int  mArrangeCount{0};
+  View mAddedChild;
+};
+
+// Register so TypeInfo lookup can walk the chain.
+Dali::TypeRegistration childAddingContainerViewTypeReg(
+  typeid(ChildAddingContainerViewImpl), typeid(ViewImpl), nullptr);
+
+// A plain counting measure producer, for tests that need "did this view's measure
+// producer run again?" without any invalidation behaviour of its own.
+int gPlainMeasureProducerCount = 0;
+
+MeasuredSize PlainCountingMeasure(View, float widthConstraint, float heightConstraint)
+{
+  ++gPlainMeasureProducerCount;
+  return MeasuredSize(widthConstraint >= 0.0f ? widthConstraint : 10.0f,
+                      heightConstraint >= 0.0f ? heightConstraint : 10.0f);
+}
+
+// --- LayoutController::LayoutFinishedSignal observation --------------------
+//
+// "The main loop went idle" has no direct black-box probe, but the window-level
+// layout-finished signal is its exact proxy: the controller emits it only when a
+// pass ends with nothing left pending, and re-arms instead of emitting whenever
+// anything re-scheduled work. A view stuck in a per-frame invalidation loop
+// therefore emits ZERO times, and a settled one emits exactly once.
+struct WindowLayoutFinishedCounter
+{
+  explicit WindowLayoutFinishedCounter(int& count)
+  : count(count)
+  {
+  }
+  void operator()(Dali::Window)
+  {
+    ++count;
+  }
+  int& count;
+};
 
 // --- "Poison once" helpers: a producer that re-enters its own view's
 // Measure()/Arrange() on its FIRST invocation only. Re-entrancy poisons the
@@ -483,6 +663,31 @@ void SettleLayout(UiTestApplication& application)
   application.Render();
   application.SendNotification();
   application.Render();
+}
+
+bool WasProcessEventsOnIdleRequested(UiTestApplication& application)
+{
+  return application.GetRenderController().WasCalled(TestRenderController::RequestProcessEventsOnIdleFunc);
+}
+
+// Simulates delivery of the idle ProcessEvents request that mounted/event-time
+// layout work armed. Reset first because the real adaptor consumes that wake as
+// it enters ProcessEvents; any request observed afterwards was made by the pass
+// itself and is therefore a distinct, testable wake.
+void SendRequestedProcessEvents(UiTestApplication& application)
+{
+  DALI_TEST_CHECK(WasProcessEventsOnIdleRequested(application));
+  application.GetRenderController().Initialize();
+  application.SendNotification();
+}
+
+// Drives ProcessEvents for an unrelated external reason. PARK semantics require
+// this to service retained layout work, while still forbidding that work from
+// requesting the next idle ProcessEvents cycle.
+void SendIndependentProcessEvents(UiTestApplication& application)
+{
+  application.GetRenderController().Initialize();
+  application.SendNotification();
 }
 
 // --- Arrange cache-HIT observation (views WITH children) ------------------
@@ -4639,17 +4844,20 @@ int UtcDaliViewInvalidateArrangeNotSwallowedWhenAlreadyDirtyP(void)
   END_TEST;
 }
 
-// A Measure producer that re-invalidates its OWN view mid-pass must not have
-// that invalidation wiped by its own pass's cache publish (plan33 3.1, "loss A").
-// Dirty is consumed at pass ENTRY, so the mid-pass invalidation is still
-// standing at publish time; the publish is declined and the next call with the
-// SAME constraint misses and recomputes the post-invalidation value. Without
-// this, the pre-invalidation result would be pinned in the cache until some
-// unrelated invalidation happened to arrive.
+// A Measure producer that re-invalidates its OWN view mid-pass must not leave the
+// pre-invalidation result pinned in the cache (plan33 3.1, "loss A").
 //
-// Note that the same Invalidate*() call also poisons the running pass, and the
-// poison is an independent second guard on the same outcome. This test pins the
-// OUTCOME (recompute, then settle), so it holds whichever guard fires first.
+// The mid-pass View::InvalidateMeasure() is a public-API call from inside the
+// layout processing window. It is warned, fully propagated and left pending,
+// while the controller suppresses only a self-generated idle wake. Dirty is
+// consumed at pass ENTRY, so that raise is still standing when the pass reaches
+// its publish gate; the publish is declined, and the next Measure() with the SAME
+// constraint misses and recomputes the post-invalidation value.
+//
+// This test drives view.Measure() directly rather than through an on-scene
+// controller pass, so it observes cache freshness only. See
+// UtcDaliViewInvalidateMeasureDuringMeasurePassIgnoredAndIdleN (historical symbol
+// name) for pending-versus-wake behaviour on scene.
 int UtcDaliViewMidPassSelfInvalidationBlocksMeasurePublishAndRecomputesP(void)
 {
   UiTestApplication application;
@@ -4686,11 +4894,13 @@ int UtcDaliViewMidPassSelfInvalidationBlocksMeasurePublishAndRecomputesP(void)
   END_TEST;
 }
 
-// Arrange-axis twin: an ArrangeCallback that calls InvalidateArrange() on its
-// own view mid-pass. mArrangeDirty is consumed at pass ENTRY and is no longer
-// cleared where the arranged bounds are published, so the invalidation survives
-// the pass and the follow-up layout it registered runs the producer again.
-// It must also SETTLE: exactly one follow-up, no per-frame re-arrange spin.
+// Arrange-axis twin, on scene: an ArrangeCallback that calls the public
+// View::InvalidateArrange() on its own view mid-pass.
+//
+// The call is inside the layout processing window, so it is warned, propagated
+// and parked. The pass declines its cache publish and the root remains pending,
+// but no idle ProcessEvents wake is requested. An independent ProcessEvents call
+// services that retained pass and lets this one-shot producer settle.
 int UtcDaliViewMidPassSelfInvalidationBlocksArrangePublishP(void)
 {
   UiTestApplication application;
@@ -4706,17 +4916,19 @@ int UtcDaliViewMidPassSelfInvalidationBlocksArrangePublishP(void)
 
   window.Add(view);
 
-  // Frame 1: the first arrange pass invalidates its own view mid-pass.
-  application.SendNotification();
+  // The mount armed one normal event-time wake. Its arrange pass invalidates the
+  // view and parks a follow-up without arming another wake.
+  SendRequestedProcessEvents(application);
   DALI_TEST_EQUALS(gMidPassArrangeProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
-  // Frame 2: the invalidation was not swallowed -- a follow-up pass runs.
-  application.SendNotification();
+  // An unrelated ProcessEvents trigger services the parked pass. The callback
+  // disarmed after its first run, so this pass completes without another wake.
+  SendIndependentProcessEvents(application);
   DALI_TEST_EQUALS(gMidPassArrangeProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
-  // Frames 3+: the producer no longer invalidates, so the layout settles.
-  application.SendNotification();
-  application.SendNotification();
+  SendIndependentProcessEvents(application);
   DALI_TEST_EQUALS(gMidPassArrangeProducerCount, 2, TEST_LOCATION);
 
   gMidPassView.Reset();
@@ -4727,8 +4939,9 @@ int UtcDaliViewMidPassSelfInvalidationBlocksArrangePublishP(void)
 // re-entrancy never went through InvalidateMeasure(), so nothing propagated to a
 // layout root and nothing registered a follow-up. Without an explicit follow-up
 // the view would sit with an invalid cache and no pass scheduled to refill it.
-// The pass must therefore register exactly ONE follow-up layout, and that
-// follow-up -- which completes cleanly -- must not register another (no spin).
+// The pass must therefore retain exactly ONE follow-up layout without waking
+// itself, and an independently triggered follow-up that completes cleanly must
+// not register another (no spin).
 int UtcDaliViewPoisonedMeasurePassSchedulesOneFollowUpLayoutP(void)
 {
   UiTestApplication application;
@@ -4745,18 +4958,19 @@ int UtcDaliViewPoisonedMeasurePassSchedulesOneFollowUpLayoutP(void)
 
   window.Add(view);
 
-  // Frame 1: the pass is poisoned by the re-entrant Measure() and publishes
-  // nothing; the producer ran exactly once (the re-entrant call is absorbed).
-  application.SendNotification();
+  // Pass 1 is poisoned by the re-entrant Measure() and publishes nothing; the
+  // producer ran exactly once (the re-entrant call is absorbed). Its recovery
+  // work is parked, not converted into another idle wake.
+  SendRequestedProcessEvents(application);
   DALI_TEST_EQUALS(gPoisonOnceMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
-  // Frame 2: the follow-up layout registered by the poisoned pass runs.
-  application.SendNotification();
+  // An unrelated ProcessEvents trigger services the retained recovery pass.
+  SendIndependentProcessEvents(application);
   DALI_TEST_EQUALS(gPoisonOnceMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
-  // Frames 3+: the follow-up completed cleanly, so it published and stopped.
-  application.SendNotification();
-  application.SendNotification();
+  SendIndependentProcessEvents(application);
   DALI_TEST_EQUALS(gPoisonOnceMeasureProducerCount, 2, TEST_LOCATION);
 
   gPoisonOnceView.Reset();
@@ -4780,14 +4994,15 @@ int UtcDaliViewPoisonedArrangePassSchedulesOneFollowUpLayoutP(void)
 
   window.Add(view);
 
-  application.SendNotification();
+  SendRequestedProcessEvents(application);
   DALI_TEST_EQUALS(gPoisonOnceArrangeProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
-  application.SendNotification();
+  SendIndependentProcessEvents(application);
   DALI_TEST_EQUALS(gPoisonOnceArrangeProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
-  application.SendNotification();
-  application.SendNotification();
+  SendIndependentProcessEvents(application);
   DALI_TEST_EQUALS(gPoisonOnceArrangeProducerCount, 2, TEST_LOCATION);
 
   gPoisonOnceView.Reset();
@@ -7721,6 +7936,393 @@ int UtcDaliViewBackgroundChangeAfterSettleUpdatesArrangedSizeP(void)
   SettleLayout(application);
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 140.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 70.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ---------------------------------------------------------------------------
+// LAYOUT PROCESSING WINDOW / PARK: a public or framework-internal invalidation
+// raised from inside Measure/Arrange (or a LayoutFinished emit) performs the full
+// dirty/cache/ancestor/root-registration transaction. Pending work and an idle
+// wake are deliberately separate states:
+//
+//   FRESHNESS -- dirty propagation prevents an ancestor cache hit from hiding the
+//                invalidated descendant;
+//   RETENTION -- the root remains pending until a later ProcessEvents services it;
+//   NO WAKE   -- processing-created work never calls RequestProcessEventsOnIdle,
+//                so an unconditional callback cannot keep the main loop busy.
+//
+// LayoutFinished stays deferred while parked work exists. Tests therefore inspect
+// TestRenderController directly, then use an explicit independent SendNotification
+// to prove that parked work remains serviceable. The warning text itself is not
+// asserted (DALI_LOG_ERROR goes to stderr, which this harness does not capture).
+// ---------------------------------------------------------------------------
+
+int UtcDaliViewInvalidateMeasureDuringMeasurePassIgnoredAndIdleN(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A measure producer's in-pass invalidation remains pending without requesting another idle ProcessEvents cycle");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gAlwaysInvalidatingMeasureCount = 0;
+
+  View view = View::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetMeasureCallback(MeasureCallback::New(&AlwaysInvalidatingMeasure));
+  gAlwaysInvalidatingView = view;
+
+  window.Add(view);
+
+  // The normal event-time mount request wakes the first pass. Its callback
+  // retains another dirty pass but must not wake ProcessEvents again.
+  SendRequestedProcessEvents(application);
+  DALI_TEST_EQUALS(gAlwaysInvalidatingMeasureCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // A separately triggered ProcessEvents services exactly one parked pass. The
+  // unconditional producer parks itself again, still without arming an idle wake.
+  SendIndependentProcessEvents(application);
+  DALI_TEST_EQUALS(gAlwaysInvalidatingMeasureCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // The pass still did its work: the measured RESULT is published
+  // unconditionally (only the cache KEY is withheld), so the view carries the
+  // producer's size rather than some pre-pass value.
+  DALI_TEST_EQUALS(view.GetMeasuredSize().GetWidth(), ALWAYS_INVALIDATING_MEASURED_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMeasuredSize().GetHeight(), ALWAYS_INVALIDATING_MEASURED_HEIGHT, TEST_LOCATION);
+
+  gAlwaysInvalidatingView.Reset();
+  END_TEST;
+}
+
+int UtcDaliViewInvalidateArrangeDuringArrangePassIgnoredAndIdleN(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("An arrange producer's in-pass invalidation remains pending without requesting another idle ProcessEvents cycle");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gAlwaysInvalidatingArrangeCount = 0;
+
+  View view = View::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetArrangeCallback(ArrangeCallback::New(&AlwaysInvalidatingArrange));
+  gAlwaysInvalidatingView = view;
+
+  window.Add(view);
+
+  SendRequestedProcessEvents(application);
+  DALI_TEST_EQUALS(gAlwaysInvalidatingArrangeCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  SendIndependentProcessEvents(application);
+  DALI_TEST_EQUALS(gAlwaysInvalidatingArrangeCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // The arranged RESULT is published unconditionally too, so the producer's
+  // returned rect reached the actor even though the cache entry was withheld.
+  CheckActorRect(view, ALWAYS_INVALIDATING_ARRANGE_RESULT, TEST_LOCATION);
+
+  gAlwaysInvalidatingView.Reset();
+  END_TEST;
+}
+
+// Batch-local duplicate regression. A and B are independent layout roots already
+// present in the controller's local batch, ordered by depth so A runs first. A's
+// producer invalidates B before B's turn. That call must fully invalidate B, but
+// B's existing local-batch turn services it: the duplicate member-pending entry
+// must be erased immediately before B runs. Otherwise the controller falsely
+// remains parked after processing fresh B geometry.
+int UtcDaliViewInvalidateOtherViewDuringPassIgnoredN(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A root invalidated before its current-batch turn is consumed by that turn without a false parked duplicate");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gCrossInvalidationSourceCount = 0;
+  gCrossInvalidationTargetCount = 0;
+
+  // A is directly under the Window (depth 1).
+  View source = View::New();
+  source.SetRequestedWidth(200.0f);
+  source.SetRequestedHeight(100.0f);
+  source.SetMeasureCallback(MeasureCallback::New(&CrossInvalidatingMeasure));
+
+  // B is under a non-View actor (depth 2), so it is still an independent View
+  // layout root but sorting guarantees A precedes it in the same local batch.
+  Actor targetHost = Actor::New();
+  View target = View::New();
+  target.SetRequestedWidth(100.0f);
+  target.SetRequestedHeight(50.0f);
+  target.SetMeasureCallback(MeasureCallback::New(&CrossInvalidationTargetMeasure));
+
+  gCrossInvalidationTarget = target;
+
+  window.Add(source);
+  window.Add(targetHost);
+  targetHost.Add(target);
+
+  SendRequestedProcessEvents(application);
+
+  // A invalidated B before B's turn; B's one local turn consumed the dirty state.
+  DALI_TEST_EQUALS(gCrossInvalidationSourceCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gCrossInvalidationTargetCount, 1, TEST_LOCATION);
+
+  // No duplicate remains parked and no self-wake was armed: the same batch is
+  // genuinely settled and may emit LayoutFinished.
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  SendIndependentProcessEvents(application);
+  DALI_TEST_EQUALS(gCrossInvalidationSourceCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gCrossInvalidationTargetCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+
+  gCrossInvalidationTarget.Reset();
+  END_TEST;
+}
+
+// A one-shot in-pass invalidation both drops the cache and parks the root. The
+// explicitly triggered second pass must recompute, publish and settle; a later
+// direct same-constraint Measure then proves that the second result was cached.
+int UtcDaliViewIgnoredInPassInvalidationStillDropsCacheP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A parked in-pass invalidation drops the cache and is recomputed by the next independently triggered ProcessEvents");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gCacheDropMeasureCount    = 0;
+  gCacheDropLastConstraintW = 0.0f;
+  gCacheDropLastConstraintH = 0.0f;
+
+  View view = View::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetMeasureCallback(MeasureCallback::New(&CacheDropOnceMeasure));
+  gCacheDropView = view;
+
+  window.Add(view);
+  SendRequestedProcessEvents(application);
+
+  // The first pass was invalidated after entry, so it cannot publish or settle.
+  DALI_TEST_EQUALS(gCacheDropMeasureCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // PARK retains the root. An independent ProcessEvents services it; this
+  // producer disarms after its first call, so the second pass publishes/settles.
+  SendIndependentProcessEvents(application);
+  DALI_TEST_EQUALS(gCacheDropMeasureCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // Re-issue the framework's OWN constraint, captured by the producer, so what
+  // follows is a genuine cache probe and not an accidental change of key.
+  const float constraintW = gCacheDropLastConstraintW;
+  const float constraintH = gCacheDropLastConstraintH;
+
+  // HIT: the independently triggered recovery pass already recomputed and
+  // published this exact key.
+  view.Measure(constraintW, constraintH);
+  DALI_TEST_EQUALS(gCacheDropMeasureCount, 2, TEST_LOCATION);
+
+  // A second direct probe remains a hit.
+  view.Measure(constraintW, constraintH);
+  DALI_TEST_EQUALS(gCacheDropMeasureCount, 2, TEST_LOCATION);
+
+  SendIndependentProcessEvents(application);
+  DALI_TEST_EQUALS(gCacheDropMeasureCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+
+  gCacheDropView.Reset();
+  END_TEST;
+}
+
+// Framework-internal invalidation follows the same PARK rule. A child added from
+// OnArrange fully invalidates and retains its root, but the follow-up is serviced
+// only when another ProcessEvents cycle is independently triggered.
+int UtcDaliViewInternalInvalidationDuringPassStillSchedulesP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("Adding a child from OnArrange parks a complete follow-up without self-waking ProcessEvents");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  IntrusivePtr<ChildAddingContainerViewImpl> impl = ChildAddingContainerViewImpl::New();
+  View                                       container(*impl);
+  container.SetRequestedWidth(200.0f);
+  container.SetRequestedHeight(100.0f);
+
+  window.Add(container);
+
+  SendRequestedProcessEvents(application);
+  DALI_TEST_EQUALS(impl->GetArrangeCallCount(), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  SendIndependentProcessEvents(application);
+
+  // Exactly one retained follow-up: the add invalidated through OnChildAdded,
+  // and the explicit external trigger drained it. The second pass adds nothing.
+  DALI_TEST_EQUALS(impl->GetArrangeCallCount(), 2, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // The child was measured and arranged by that follow-up.
+  View child = impl->GetAddedChild();
+  DALI_TEST_CHECK(child);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 10.0f, TEST_LOCATION);
+
+  // ...and then the layout settled: one emit, once the follow-up had drained.
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Value guard, child-reorder half. OnChildOrderChanged rebuilds the View-ONLY child
+// sequence out of the actor order, so a reorder among the NON-View actor children
+// really does fire the signal while leaving that sequence identical -- dali-core
+// suppresses only reorders that move no actor at all. The guard must drop such an
+// event without invalidating, and must NOT take a real View reorder with it.
+int UtcDaliViewChildOrderUnchangedDoesNotInvalidateP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A reorder that leaves the View-only child order unchanged invalidates nothing");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gPlainMeasureProducerCount = 0;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetMeasureCallback(MeasureCallback::New(&PlainCountingMeasure));
+
+  View a = View::New();
+  a.SetRequestedWidth(50.0f);
+  a.SetRequestedHeight(40.0f);
+
+  // A plain Actor between the two Views: the piece dali-core can reorder without
+  // moving any View. It has to go in through the Integration helper -- View::Add
+  // asserts on a non-View child otherwise -- and it is deliberately NOT tracked in
+  // the View child container, which is exactly the asymmetry the guard covers.
+  Dali::Actor spacer = Dali::Actor::New();
+
+  View b = View::New();
+  b.SetRequestedWidth(60.0f);
+  b.SetRequestedHeight(30.0f);
+
+  parent.Add(a);
+  IntegrationView::AddActorChild(parent, spacer);
+  parent.Add(b);
+  window.Add(parent);
+
+  SettleLayout(application);
+  const int settledMeasures = gPlainMeasureProducerCount;
+  const int settledEmits    = emitCount;
+  DALI_TEST_CHECK(settledMeasures > 0);
+  DALI_TEST_CHECK(settledEmits > 0);
+
+  // Actor order [a, spacer, b] -> [a, b, spacer]. An actor moved, so dali-core
+  // emits; the View subsequence is still [a, b], so the guard returns early.
+  spacer.RaiseToTop();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gPlainMeasureProducerCount, settledMeasures, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, settledEmits, TEST_LOCATION);
+
+  // Sanity, and the half the guard must not eat: a REAL View reorder
+  // ([a, b] -> [b, a]) still invalidates and still re-lays-out.
+  Dali::Actor(a).RaiseToTop();
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > settledMeasures);
+  DALI_TEST_CHECK(emitCount > settledEmits);
+
+  END_TEST;
+}
+
+// Value guard, layout-params half. SetLayoutParams re-writing the params already in
+// place has nothing to retract and nothing to schedule. The motivating recurrence is
+// ScrollBarImpl::SetVBarBounds, which re-writes its bar's AbsoluteLayoutParams on
+// every bar update and needed a hand-rolled epsilon test of its own to keep that
+// write from re-arming layout every pass.
+int UtcDaliViewSetSameLayoutParamsDoesNotInvalidateP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("Re-writing identical layout params invalidates nothing; a real change still does");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gPlainMeasureProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+  Dali::UniquePtr<AbsoluteLayoutManager> owned(new AbsoluteLayoutManager());
+  root.AttachLayoutManager(std::move(owned));
+
+  View child = View::New();
+  child.SetMeasureCallback(MeasureCallback::New(&PlainCountingMeasure));
+  root.Add(child);
+
+  window.Add(root);
+  SettleLayout(application);
+
+  const LayoutRect firstBounds(10.0f, 20.0f, 60.0f, 40.0f);
+
+  // A real change: it invalidates, schedules, and the child is re-measured at the
+  // constraint the manager derives from those bounds.
+  int measuresBefore = gPlainMeasureProducerCount;
+  int emitsBefore    = emitCount;
+  child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(firstBounds));
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > measuresBefore);
+  DALI_TEST_CHECK(emitCount > emitsBefore);
+
+  // The SAME value again, as a distinct object, so this tests field-wise equality
+  // and not pointer identity. Nothing may move.
+  measuresBefore = gPlainMeasureProducerCount;
+  emitsBefore    = emitCount;
+  child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(firstBounds));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gPlainMeasureProducerCount, measuresBefore, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, emitsBefore, TEST_LOCATION);
+
+  // A different value must still go through, so the guard is an equality test and
+  // not a "the second write is always dropped" latch.
+  child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(10.0f, 20.0f, 80.0f, 50.0f)));
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > measuresBefore);
+  DALI_TEST_CHECK(emitCount > emitsBefore);
 
   END_TEST;
 }
