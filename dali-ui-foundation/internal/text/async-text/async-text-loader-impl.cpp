@@ -1864,14 +1864,17 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
 
   Size      controlSize(parameters.textWidth, parameters.textHeight);
   Size      verifiedSize;
-  float     wrapGap        = 0.0f;
-  bool      isHorizontal   = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
-  const int maxTextureSize = parameters.maxTextureSize;
+  float     wrapGap               = 0.0f;
+  bool      isHorizontal          = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
+  const int maxTextureSize        = parameters.maxTextureSize;
+  bool      isTextContentOverflow = false;
 
   if(isHorizontal)
   {
     // As relayout of text may not be done at this point natural size is used to get size. Single line scrolling only.
     Size textNaturalSize = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
+
+    isTextContentOverflow = textNaturalSize.width > controlSize.width;
 
     if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_WIDTH || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
     {
@@ -2007,12 +2010,13 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   parameters.textHeight = static_cast<float>(actualHeight);
 
   // Store the control size and calculated wrap gap in render info.
-  bool  isRenderScale       = parameters.renderScale > 1.0f ? true : false;
-  float renderedWidth       = isRenderScale ? parameters.renderScaleWidth : controlSize.width;
-  float renderedHeight      = isRenderScale ? parameters.renderScaleHeight : controlSize.height;
-  renderInfo.controlSize    = Size(renderedWidth, renderedHeight);
-  renderInfo.renderedSize   = Size(renderedWidth, renderedHeight);
-  renderInfo.marqueeWrapGap = wrapGap;
+  bool  isRenderScale                 = parameters.renderScale > 1.0f ? true : false;
+  float renderedWidth                 = isRenderScale ? parameters.renderScaleWidth : controlSize.width;
+  float renderedHeight                = isRenderScale ? parameters.renderScaleHeight : controlSize.height;
+  renderInfo.controlSize              = Size(renderedWidth, renderedHeight);
+  renderInfo.renderedSize             = Size(renderedWidth, renderedHeight);
+  renderInfo.marqueeWrapGap           = wrapGap;
+  renderInfo.isMarqueeContentOverflow = isTextContentOverflow;
   return renderInfo;
 }
 

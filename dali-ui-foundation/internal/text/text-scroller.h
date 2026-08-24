@@ -105,6 +105,7 @@ public:
    * @param[in] controlSize size of the control to scroll within
    * @param[in] textureSize size of the texture
    * @param[in] wrapGap The gap before scrolling wraps
+   * @param[in] isTextContentOverflow Whether the text content, excluding the wrap gap, overflows the control
    * @param[in] direction text direction true for right to left text
    * @param[in] horizontalAlignment horizontal alignment of the text
    * @param[in] verticalAlignment vertical alignment of the text
@@ -113,7 +114,7 @@ public:
    * property indices for initial animation binding.
    */
   void SetParameters(Actor scrollingTextActor, Dali::Renderer renderer, TextureSet textureSet, const Size& controlSize,
-                     const Size& textureSize, const float wrapGap, CharacterDirection direction,
+                     const Size& textureSize, const float wrapGap, bool isTextContentOverflow, CharacterDirection direction,
                      Alignment horizontalAlignment, Alignment verticalAlignment,
                      bool                        animationReStart = false,
                      const TextScrollerGradient& textGradient     = TextScrollerGradient());

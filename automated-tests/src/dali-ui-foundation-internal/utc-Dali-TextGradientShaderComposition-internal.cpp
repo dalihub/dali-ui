@@ -2945,6 +2945,7 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesRendererBoundsP(void)
                           Size(100.0f, 40.0f),
                           Size(200.0f, 40.0f),
                           20.0f,
+                          true,
                           false,
                           UiText::Alignment::CENTER,
                           UiText::Alignment::CENTER,
@@ -2987,6 +2988,7 @@ int UtcDaliTextGradientMarqueeScrollerInitializesPixelSnapFactorP(void)
                           Size(100.0f, 40.0f),
                           Size(200.0f, 40.0f),
                           20.0f,
+                          true,
                           false,
                           UiText::Alignment::CENTER,
                           UiText::Alignment::CENTER,
@@ -2997,6 +2999,104 @@ int UtcDaliTextGradientMarqueeScrollerInitializesPixelSnapFactorP(void)
   const Property::Index pixelSnapFactorIndex = marqueeShader.GetPropertyIndex("pixelSnapFactor");
   DALI_TEST_CHECK(pixelSnapFactorIndex != Property::INVALID_INDEX);
   DALI_TEST_EQUALS(marqueeShader.GetProperty<float>(pixelSnapFactorIndex), 0.0f, EPSILON, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerHorizontalAlignmentIgnoresWrapGapP(void)
+{
+  TestApplication application;
+
+  Geometry geometry = CreateQuadGeometry();
+  Shader   shader   = CreateShader();
+  Renderer renderer = Renderer::New(geometry, shader);
+
+  TestScrollerInterface   scrollerInterface;
+  UiText::TextScrollerPtr scroller   = UiText::TextScroller::New(scrollerInterface);
+  const Actor             actor      = Actor::New();
+  const TextureSet        textureSet = TextureSet::New();
+
+  auto getHorizontalAlignment = [&](const Size&       textureSize,
+                                    float             wrapGap,
+                                    bool              isTextContentOverflow,
+                                    bool              isTextDirectionRtl,
+                                    UiText::Alignment requestedAlignment)
+  {
+    scroller->SetParameters(actor,
+                            renderer,
+                            textureSet,
+                            Size(100.0f, 40.0f),
+                            textureSize,
+                            wrapGap,
+                            isTextContentOverflow,
+                            isTextDirectionRtl,
+                            requestedAlignment,
+                            UiText::Alignment::CENTER);
+
+    Shader                marqueeShader = renderer.GetShader();
+    const Property::Index index         = marqueeShader.GetPropertyIndex("uHorizontalAlign");
+    DALI_TEST_CHECK(index != Property::INVALID_INDEX);
+    return marqueeShader.GetProperty<float>(index);
+  };
+
+  // The texture includes the wrap gap. A fitting text width must retain the requested alignment.
+  DALI_TEST_EQUALS(getHorizontalAlignment(Size(130.0f, 40.0f), 40.0f, false, false, UiText::Alignment::CENTER),
+                   0.0f,
+                   EPSILON,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(getHorizontalAlignment(Size(140.0f, 40.0f), 40.0f, false, false, UiText::Alignment::END),
+                   0.5f,
+                   EPSILON,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(getHorizontalAlignment(Size(130.0f, 40.0f), 40.0f, false, true, UiText::Alignment::END),
+                   -0.5f,
+                   EPSILON,
+                   TEST_LOCATION);
+
+  // Actual overflow keeps the legacy logical START alignment in both directions.
+  DALI_TEST_EQUALS(getHorizontalAlignment(Size(150.0f, 40.0f), 40.0f, true, false, UiText::Alignment::CENTER),
+                   -0.5f,
+                   EPSILON,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(getHorizontalAlignment(Size(150.0f, 40.0f), 40.0f, true, true, UiText::Alignment::CENTER),
+                   0.5f,
+                   EPSILON,
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAsyncTextMarqueeReportsContentOverflowP(void)
+{
+  TestApplication application;
+
+  auto makeParameters = []
+  {
+    // Exercise the render-scale path where texture and wrap-gap publication cannot be used to infer overflow.
+    UiText::AsyncTextParameters parameters;
+    parameters.text               = "marquee overflow state";
+    parameters.textWidth          = 200.0f;
+    parameters.textHeight         = 80.0f;
+    parameters.renderScale        = 2.0f;
+    parameters.renderScaleWidth   = 100.0f;
+    parameters.renderScaleHeight  = 40.0f;
+    parameters.maxTextureSize     = 2048;
+    parameters.requestType        = UiIntegrationText::Async::RENDER_FIXED_SIZE;
+    parameters.isMarqueeEnabled   = true;
+    parameters.marqueeGap         = 80;
+    parameters.marqueeOrientation = UiText::MarqueeOrientation::HORIZONTAL;
+    return parameters;
+  };
+
+  UiText::AsyncTextLoader loader = UiText::AsyncTextLoader::New();
+
+  UiText::AsyncTextParameters       fittingParameters = makeParameters();
+  const UiText::AsyncTextRenderInfo fittingInfo =
+    loader.RenderMarquee(fittingParameters, true, Size(180.0f, 40.0f));
+  DALI_TEST_EQUALS(fittingInfo.isMarqueeContentOverflow, false, TEST_LOCATION);
+
+  UiText::AsyncTextParameters       overflowingParameters = makeParameters();
+  const UiText::AsyncTextRenderInfo overflowingInfo =
+    loader.RenderMarquee(overflowingParameters, true, Size(220.0f, 40.0f));
+  DALI_TEST_EQUALS(overflowingInfo.isMarqueeContentOverflow, true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -3034,6 +3134,7 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesBaseAnimSourceP(void)
                           Size(100.0f, 40.0f),
                           Size(200.0f, 40.0f),
                           20.0f,
+                          true,
                           false,
                           UiText::Alignment::CENTER,
                           UiText::Alignment::CENTER,
@@ -3109,6 +3210,7 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesOverlayRendererPropertiesP(void)
                           Size(100.0f, 40.0f),
                           Size(200.0f, 40.0f),
                           20.0f,
+                          true,
                           false,
                           UiText::Alignment::CENTER,
                           UiText::Alignment::CENTER,
@@ -3202,6 +3304,7 @@ int UtcDaliTextGradientMarqueeScrollerKeepsBaseAndOverlayIndependentP(void)
                           Size(100.0f, 40.0f),
                           Size(200.0f, 40.0f),
                           20.0f,
+                          true,
                           false,
                           UiText::Alignment::CENTER,
                           UiText::Alignment::CENTER,
@@ -3258,6 +3361,7 @@ int UtcDaliTextGradientMarqueeScrollerDisabledKeepsRendererCleanP(void)
                           Size(100.0f, 40.0f),
                           Size(200.0f, 40.0f),
                           20.0f,
+                          true,
                           false,
                           UiText::Alignment::CENTER,
                           UiText::Alignment::CENTER,

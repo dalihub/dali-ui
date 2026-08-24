@@ -440,7 +440,7 @@ TextScroller::~TextScroller()
 
 void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, TextureSet textureSet,
                                  const Size& controlSize, const Size& textureSize, const float wrapGap,
-                                 CharacterDirection direction, Alignment horizontalAlignment,
+                                 bool isTextContentOverflow, CharacterDirection direction, Alignment horizontalAlignment,
                                  Alignment verticalAlignment, bool animationReStart,
                                  const TextScrollerGradient& textGradient)
 {
@@ -520,9 +520,9 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   float horizontalAlign = 0.0f;
   if(isHorizontal)
   {
-    if(textureSize.x > controlSize.x)
+    if(isTextContentOverflow)
     {
-      // if Text is elided, scroll should start at the begin of text.
+      // If text overflows, scrolling starts at the beginning of the text.
       horizontalAlign = HORIZONTAL_ALIGNMENT_TABLE[static_cast<int>(Alignment::START)][direction];
     }
     else

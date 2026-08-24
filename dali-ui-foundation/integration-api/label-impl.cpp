@@ -2761,7 +2761,8 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
   // Set parameters for scrolling
   Renderer renderer = static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer();
   mTextScroller->SetParameters(Self(), renderer, preparedContent.textureSet, textScrollerControlSize, verifiedSize, wrapGap,
-                               renderInfo.isTextDirectionRTL, mController->GetHorizontalAlignment(),
+                               renderInfo.isMarqueeContentOverflow, renderInfo.isTextDirectionRTL,
+                               mController->GetHorizontalAlignment(),
                                mController->GetVerticalAlignment(), true, preparedContent.textGradient);
 }
 
@@ -3276,15 +3277,17 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   Size  verifiedSize   = Size::ZERO;
   bool  actualellipsis = mController->IsTextElideEnabled();
 
-  bool       isHorizontal     = GetTextScroller()->GetOrientation() == Ui::Text::MarqueeOrientation::HORIZONTAL;
-  const Size controlSize      = isHorizontal ? mController->GetView().GetControlSize() : contentSize;
-  const int  maxTextureSize   = Dali::GetMaxTextureSize();
-  const int  scaledMarqueeGap = static_cast<int>(mTextScroller->GetGap() * GetTextUiScale());
+  bool       isHorizontal          = GetTextScroller()->GetOrientation() == Ui::Text::MarqueeOrientation::HORIZONTAL;
+  bool       isTextContentOverflow = false;
+  const Size controlSize           = isHorizontal ? mController->GetView().GetControlSize() : contentSize;
+  const int  maxTextureSize        = Dali::GetMaxTextureSize();
+  const int  scaledMarqueeGap      = static_cast<int>(mTextScroller->GetGap() * GetTextUiScale());
 
   if(isHorizontal)
   {
     // Use natural size because text relayout may not be complete at this point.
     const Size textNaturalSize = mController->GetNaturalSize().GetVectorXY();
+    isTextContentOverflow      = textNaturalSize.width > controlSize.width;
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Marquee natural size:%f,%f, control size:%f,%f\n", mController.Get(), textNaturalSize.x, textNaturalSize.y, controlSize.x, controlSize.y);
 
     // Calculate the actual gap before scrolling wraps.
@@ -3489,7 +3492,8 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
 
   // Set parameters for scrolling
   Renderer renderer = static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer();
-  mTextScroller->SetParameters(Self(), renderer, preparedContent.textureSet, controlSize, verifiedSize, wrapGap, direction,
+  mTextScroller->SetParameters(Self(), renderer, preparedContent.textureSet, controlSize, verifiedSize, wrapGap,
+                               isTextContentOverflow, direction,
                                mController->GetHorizontalAlignment(), mController->GetVerticalAlignment(),
                                mRendererUpdateNeeded, preparedContent.textGradient);
   mController->SetTextElideEnabled(actualellipsis);
