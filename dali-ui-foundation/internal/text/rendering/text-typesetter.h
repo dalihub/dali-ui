@@ -42,6 +42,8 @@ class ModelInterface;
 class ViewModel;
 class Typesetter;
 struct FinalElisionResult;
+struct MarqueeStartAnchor;
+struct MarqueeTextureAnchor;
 
 typedef IntrusivePtr<Typesetter> TypesetterPtr;
 
@@ -148,6 +150,17 @@ public:
   PixelData Render(const Vector2& size, Direction textDirection,
                    RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES, bool ignoreHorizontalAlignment = false,
                    Pixel::Format pixelFormat = Pixel::RGBA8888, const Vector2& originSize = Size::ZERO);
+
+  /**
+   * @brief Resolves an anchor in the exact ViewModel geometry used by the preceding render.
+   *
+   * This is intended for horizontal marquee setup immediately after Render().
+   * It does not shape, lay out, or inspect raster pixels.
+   *
+   * @param[in] anchor Stable source identity captured from the static END layout.
+   * @return The anchor's pre-raster X in the marquee texture, or an invalid fallback.
+   */
+  MarqueeTextureAnchor ResolveMarqueeTextureAnchor(const MarqueeStartAnchor& anchor) const;
 
   /**
    * @brief Renders the default-color monochrome glyph fill coverage for TextGradient.

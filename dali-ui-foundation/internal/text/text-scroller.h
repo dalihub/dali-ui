@@ -31,6 +31,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
@@ -112,12 +113,14 @@ public:
    * @param[in] animationReStart Whether to start from the beginning when the animation is playing.
    * @param[in] textGradient Full marquee gradient renderer setup data, including optional source
    * property indices for initial animation binding.
+   * @param[in] marqueeInitialDelta Optional resolved first-frame shader delta.
    */
   void SetParameters(Actor scrollingTextActor, Dali::Renderer renderer, TextureSet textureSet, const Size& controlSize,
                      const Size& textureSize, const float wrapGap, bool isTextContentOverflow, CharacterDirection direction,
                      Alignment horizontalAlignment, Alignment verticalAlignment,
-                     bool                        animationReStart = false,
-                     const TextScrollerGradient& textGradient     = TextScrollerGradient());
+                     bool                        animationReStart    = false,
+                     const TextScrollerGradient& textGradient        = TextScrollerGradient(),
+                     const MarqueeInitialDelta&  marqueeInitialDelta = MarqueeInitialDelta());
 
   /**
    * @brief Set the gap distance to elapse before the text wraps around

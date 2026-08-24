@@ -38,6 +38,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-relayouter.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-text-updater.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 
 namespace
@@ -1779,6 +1780,13 @@ const FinalElisionResult* Controller::GetFinalElisionResult() const
     return &replacement->finalElision;
   }
   return mImpl->HasValidReplacementSource() ? nullptr : mImpl->GetEndEllipsisResult();
+}
+
+MarqueeStartAnchor Controller::GetMarqueeStartAnchor() const
+{
+  return mImpl->HasValidReplacementSource()
+           ? MarqueeStartAnchor{}
+           : ResolveMarqueeStartAnchor(mImpl->GetEndEllipsisResult(), mImpl->mModel->mVisualModel.Get());
 }
 
 const ReplacementSourceSnapshot& Controller::GetReplacementSourceSnapshot() const

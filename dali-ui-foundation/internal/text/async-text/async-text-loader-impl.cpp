@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
@@ -1372,6 +1373,18 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   // Set information for creating pixel datas.
   AsyncTextRenderInfo renderInfo;
 
+  if(!parameters.isMarqueeEnabled)
+  {
+    renderInfo.isMarqueeStartAnchorResolved = true;
+    renderInfo.marqueeStartAnchor =
+      ResolveMarqueeStartAnchor(mEndEllipsisResult.get(), renderModel->mVisualModel.Get());
+    if(renderInfo.marqueeStartAnchor.valid)
+    {
+      const float geometryScale = std::max(parameters.renderScale, 1.0f);
+      renderInfo.marqueeStartAnchor.staticControlX /= geometryScale;
+    }
+  }
+
   bool isRenderScale = parameters.renderScale > 1.0f ? true : false;
   if(isRenderScale)
   {
@@ -1547,10 +1560,23 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   if(parameters.isMarqueeEnabled)
   {
     // This will be uploaded in async text interface's setup marquee.
+    // Resolve immediately after the primary text render. Later supplemental
+    // render passes must not replace the texture geometry used by the delta.
     renderInfo.marqueePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
                           parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL, Pixel::RGBA8888,
                           Size(parameters.originWidth, parameters.originHeight));
+    if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
+    {
+      renderInfo.marqueeStartAnchor = parameters.marqueeStartAnchor;
+      renderInfo.marqueeTextureAnchor =
+        mTypesetter->ResolveMarqueeTextureAnchor(parameters.marqueeStartAnchor);
+      if(renderInfo.marqueeTextureAnchor.valid)
+      {
+        const float geometryScale = std::max(parameters.renderScale, 1.0f);
+        renderInfo.marqueeTextureAnchor.textureX /= geometryScale;
+      }
+    }
   }
 
   renderInfo.hasMultipleTextColors   = hasMultipleTextColors;

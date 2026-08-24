@@ -3052,6 +3052,24 @@ int UtcDaliTextScrollerHorizontalAlignmentIgnoresWrapGapP(void)
                    EPSILON,
                    TEST_LOCATION);
 
+  // A stale/irrelevant continuity descriptor must never shift fitting text.
+  scroller->SetParameters(actor,
+                          renderer,
+                          textureSet,
+                          Size(100.0f, 40.0f),
+                          Size(130.0f, 40.0f),
+                          40.0f,
+                          false,
+                          false,
+                          UiText::Alignment::CENTER,
+                          UiText::Alignment::CENTER,
+                          false,
+                          UiText::TextScrollerGradient(),
+                          UiText::MarqueeInitialDelta{-10.0f, true});
+  const Property::Index fittingDeltaIndex = renderer.GetShader().GetPropertyIndex("uDelta");
+  DALI_TEST_CHECK(fittingDeltaIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(renderer.GetShader().GetProperty<float>(fittingDeltaIndex), 0.0f, EPSILON, TEST_LOCATION);
+
   // Actual overflow keeps the legacy logical START alignment in both directions.
   DALI_TEST_EQUALS(getHorizontalAlignment(Size(150.0f, 40.0f), 40.0f, true, false, UiText::Alignment::CENTER),
                    -0.5f,
@@ -3061,6 +3079,83 @@ int UtcDaliTextScrollerHorizontalAlignmentIgnoresWrapGapP(void)
                    0.5f,
                    EPSILON,
                    TEST_LOCATION);
+
+  const UiText::MarqueeInitialDelta ltrInitialDelta{-10.0f, true};
+  scroller->SetParameters(actor,
+                          renderer,
+                          textureSet,
+                          Size(100.0f, 40.0f),
+                          Size(150.0f, 40.0f),
+                          20.0f,
+                          true,
+                          false,
+                          UiText::Alignment::END,
+                          UiText::Alignment::CENTER,
+                          false,
+                          UiText::TextScrollerGradient(),
+                          ltrInitialDelta);
+  Shader                ltrMarqueeShader = renderer.GetShader();
+  const Property::Index ltrDeltaIndex    = ltrMarqueeShader.GetPropertyIndex("uDelta");
+  DALI_TEST_CHECK(ltrDeltaIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(ltrMarqueeShader.GetProperty<float>(ltrDeltaIndex), -10.0f, EPSILON, TEST_LOCATION);
+  const Property::Index ltrAlignIndex = ltrMarqueeShader.GetPropertyIndex("uHorizontalAlign");
+  DALI_TEST_CHECK(ltrAlignIndex != Property::INVALID_INDEX);
+  const float ltrViewportStart = ltrMarqueeShader.GetProperty<float>(ltrDeltaIndex) +
+                                 UiText::ResolveLegacyHorizontalMarqueeViewportOrigin(
+                                   ltrMarqueeShader.GetProperty<float>(ltrAlignIndex),
+                                   150.0f,
+                                   100.0f,
+                                   20.0f);
+  DALI_TEST_EQUALS(ltrViewportStart, -10.0f, EPSILON, TEST_LOCATION);
+
+  // The continuity correction is relative to the direction-resolved logical START.
+  // It must not cancel the RTL alignment already applied by the shader.
+  const UiText::MarqueeInitialDelta rtlInitialDelta{-10.0f, true};
+  scroller->SetParameters(actor,
+                          renderer,
+                          textureSet,
+                          Size(100.0f, 40.0f),
+                          Size(150.0f, 40.0f),
+                          20.0f,
+                          true,
+                          true,
+                          UiText::Alignment::CENTER,
+                          UiText::Alignment::CENTER,
+                          false,
+                          UiText::TextScrollerGradient(),
+                          rtlInitialDelta);
+  Shader                rtlMarqueeShader = renderer.GetShader();
+  const Property::Index rtlDeltaIndex    = rtlMarqueeShader.GetPropertyIndex("uDelta");
+  DALI_TEST_CHECK(rtlDeltaIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(rtlMarqueeShader.GetProperty<float>(rtlDeltaIndex), -10.0f, EPSILON, TEST_LOCATION);
+  const Property::Index rtlAlignIndex = rtlMarqueeShader.GetPropertyIndex("uHorizontalAlign");
+  DALI_TEST_CHECK(rtlAlignIndex != Property::INVALID_INDEX);
+  const float rtlViewportStart = rtlMarqueeShader.GetProperty<float>(rtlDeltaIndex) +
+                                 UiText::ResolveLegacyHorizontalMarqueeViewportOrigin(
+                                   rtlMarqueeShader.GetProperty<float>(rtlAlignIndex),
+                                   150.0f,
+                                   100.0f,
+                                   20.0f);
+  DALI_TEST_EQUALS(rtlViewportStart, 20.0f, EPSILON, TEST_LOCATION);
+
+  // Horizontal continuity metadata is ignored by the frozen vertical marquee path.
+  scroller->SetOrientation(UiText::MarqueeOrientation::VERTICAL);
+  scroller->SetParameters(actor,
+                          renderer,
+                          textureSet,
+                          Size(100.0f, 40.0f),
+                          Size(100.0f, 80.0f),
+                          20.0f,
+                          true,
+                          false,
+                          UiText::Alignment::CENTER,
+                          UiText::Alignment::CENTER,
+                          false,
+                          UiText::TextScrollerGradient(),
+                          UiText::MarqueeInitialDelta{-10.0f, true});
+  const Property::Index verticalDeltaIndex = renderer.GetShader().GetPropertyIndex("uDelta");
+  DALI_TEST_CHECK(verticalDeltaIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(renderer.GetShader().GetProperty<float>(verticalDeltaIndex), 0.0f, EPSILON, TEST_LOCATION);
   END_TEST;
 }
 

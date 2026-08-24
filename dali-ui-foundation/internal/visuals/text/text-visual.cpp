@@ -591,12 +591,24 @@ PixelData TextVisual::RenderMarqueeText(Ui::Integration::Visual::Base     visual
                                         Text::Typesetter::RenderBehaviour behaviour,
                                         bool                              ignoreHorizontalAlignment,
                                         Pixel::Format                     pixelFormat,
-                                        const Vector2&                    originSize)
+                                        const Vector2&                    originSize,
+                                        const Text::MarqueeStartAnchor&   marqueeStartAnchor,
+                                        Text::MarqueeTextureAnchor*       marqueeTextureAnchor)
 {
   TextVisual& visualObject = GetVisualObject(visual);
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
   visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
-  return visualObject.mTypesetter->Render(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
+  PixelData pixelData = visualObject.mTypesetter->Render(size,
+                                                         textDirection,
+                                                         behaviour,
+                                                         ignoreHorizontalAlignment,
+                                                         pixelFormat,
+                                                         originSize);
+  if(marqueeTextureAnchor)
+  {
+    *marqueeTextureAnchor = visualObject.mTypesetter->ResolveMarqueeTextureAnchor(marqueeStartAnchor);
+  }
+  return pixelData;
 }
 
 PixelData TextVisual::RenderMarqueeTextGradientPreserved(Ui::Integration::Visual::Base visual,

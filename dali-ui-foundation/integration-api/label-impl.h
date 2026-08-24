@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/integration-api/text/text-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
@@ -1192,6 +1193,13 @@ private: // Implementation
   Ui::Text::TextScrollerPtr GetTextScroller();
 
   /**
+   * @brief Captures the current synchronous END-ellipsis retained anchor.
+   *
+   * Async rendering publishes the same anchor through its render result.
+   */
+  void CaptureMarqueeStartAnchor();
+
+  /**
    * @brief Enables or disables the marquee animation.
    *
    * Updates the internal marquee state and starts or stops the scrolling accordingly.
@@ -1406,6 +1414,7 @@ private:
   Ui::Text::LineHeightMode       mLineHeightMode;
   Ui::Text::OverflowMode         mOverflowMode;
   Ui::Text::MarqueeTriggerPolicy mMarqueeTriggerPolicy;
+  Ui::Text::MarqueeStartAnchor   mMarqueeStartAnchor;
 
   int  mAsyncLineCount;
   int  mTextColorAnimatedCount;

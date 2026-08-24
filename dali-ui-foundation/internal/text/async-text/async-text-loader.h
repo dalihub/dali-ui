@@ -21,6 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/async-text-interface.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-style-run-snapshot.h>
@@ -95,6 +96,7 @@ struct AsyncTextParameters
     textFitCandidates{},
     styledTextStyleSnapshot{},
     replacementSourceSnapshot{},
+    marqueeStartAnchor{},
     clickedAnchors{},
     fontSize{0.f},
     minLineSize{0.f},
@@ -193,6 +195,7 @@ struct AsyncTextParameters
   Dali::Ui::Text::Internal::StyledTextStyleRunSnapshot
                                        styledTextStyleSnapshot;   ///< Copy-safe StyledText style run snapshot for async rendering.
   ReplacementSourceSnapshot            replacementSourceSnapshot; ///< Copy-safe authored replacement values.
+  MarqueeStartAnchor                   marqueeStartAnchor;        ///< Static anchor copied into a marquee request.
   std::vector<AsyncAnchorClickedState> clickedAnchors;
 
   float fontSize;           ///< The font's size (in pixels).
@@ -293,6 +296,8 @@ struct AsyncTextRenderInfo
     replacementLayoutGeneration(0u),
     lineCount(0),
     marqueeWrapGap(0.f),
+    marqueeStartAnchor(),
+    marqueeTextureAnchor(),
     textRevealFadeDuration(0.0f),
     hasMultipleTextColors(false),
     containsColorGlyph(false),
@@ -301,6 +306,7 @@ struct AsyncTextRenderInfo
     styleBlocksTextGradient(false),
     isOverlayStyle(false),
     isMarqueeContentOverflow(false),
+    isMarqueeStartAnchorResolved(false),
     isTextDirectionRTL(false),
     isCutoutEnabled(false),
     isEmbossEnabled(false),
@@ -334,6 +340,8 @@ struct AsyncTextRenderInfo
   uint64_t                                  replacementLayoutGeneration;
   int                                       lineCount;
   float                                     marqueeWrapGap;
+  MarqueeStartAnchor                        marqueeStartAnchor;   ///< Static result in logical Label coordinates.
+  MarqueeTextureAnchor                      marqueeTextureAnchor; ///< Marquee result in logical texture coordinates.
   float                                     textRevealFadeDuration;
   bool                                      hasMultipleTextColors : 1;
   bool                                      containsColorGlyph : 1;
@@ -342,6 +350,7 @@ struct AsyncTextRenderInfo
   bool                                      styleBlocksTextGradient : 1;
   bool                                      isOverlayStyle : 1;
   bool                                      isMarqueeContentOverflow : 1;
+  bool                                      isMarqueeStartAnchorResolved : 1; ///< Whether this static render evaluated the anchor gate.
   bool                                      isTextDirectionRTL : 1;
   bool                                      isCutoutEnabled : 1;
   bool                                      isEmbossEnabled : 1;

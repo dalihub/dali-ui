@@ -44,6 +44,7 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/font-variation/font-variation-property-data.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-data.h>
 #include <dali-ui-foundation/internal/text/reveal/text-reveal-data.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
@@ -318,6 +319,7 @@ LabelImpl::~LabelImpl()
 // =============================================================================
 void LabelImpl::SetText(const Dali::String& text)
 {
+  mMarqueeStartAnchor              = {};
   const bool hadInlineReplacements = HasInlineReplacementSource();
   ClearStyledTextSourceState();
   ClearAnchorInteractionState();
@@ -342,6 +344,7 @@ Dali::String LabelImpl::GetText() const
 
 void LabelImpl::SetStyledText(const Ui::Text::StyledText& styledText)
 {
+  mMarqueeStartAnchor              = {};
   const bool hadInlineReplacements = HasInlineReplacementSource();
 
   if(styledText)
@@ -2005,6 +2008,7 @@ void LabelImpl::ApplySystemFontSize(Dali::Integration::SystemSettings::FontSize 
 
 void LabelImpl::OnSystemFontSizeChanged(Dali::Integration::SystemSettings::FontSize fontSize)
 {
+  mMarqueeStartAnchor = {};
   ApplySystemFontSize(fontSize);
 }
 
@@ -2074,6 +2078,11 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   const bool manualRenderFinished = mIsManualRenderFinished;
   mIsContentLayoutDirty           = false;
   mIsManualRenderFinished         = false;
+
+  if(contentLayoutDirty)
+  {
+    mMarqueeStartAnchor = {};
+  }
 
   if(mTextScroller && mTextScroller->IsStopRequested())
   {
@@ -2557,6 +2566,7 @@ void LabelImpl::RequestAsyncRender()
 void LabelImpl::ScrollingFinished()
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Scrolling finished\n", mController.Get());
+  mMarqueeStartAnchor = {};
   SuppressAutoMarqueeEvaluation();
   mController->SetMarqueeEnabled(false);
   RequestTextRelayout();
@@ -2758,12 +2768,27 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
     }
   }
 
+  Ui::Text::MarqueeInitialDelta marqueeInitialDelta;
+  if(isHorizontal && renderInfo.isMarqueeContentOverflow)
+  {
+    const float horizontalAlignment = Ui::Text::ResolveHorizontalMarqueeAlignment(true,
+                                                                                  renderInfo.isTextDirectionRTL,
+                                                                                  mController->GetHorizontalAlignment());
+    marqueeInitialDelta             = Ui::Text::ResolveMarqueeInitialDelta(renderInfo.marqueeStartAnchor,
+                                                                           renderInfo.marqueeTextureAnchor,
+                                                                           horizontalAlignment,
+                                                                           verifiedSize.width,
+                                                                           textScrollerControlSize.width,
+                                                                           wrapGap);
+  }
+
   // Set parameters for scrolling
   Renderer renderer = static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer();
   mTextScroller->SetParameters(Self(), renderer, preparedContent.textureSet, textScrollerControlSize, verifiedSize, wrapGap,
                                renderInfo.isMarqueeContentOverflow, renderInfo.isTextDirectionRTL,
                                mController->GetHorizontalAlignment(),
-                               mController->GetVerticalAlignment(), true, preparedContent.textGradient);
+                               mController->GetVerticalAlignment(), true, preparedContent.textGradient,
+                               marqueeInitialDelta);
 }
 
 void LabelImpl::AsyncTextFitChanged(float pointSize)
@@ -2783,7 +2808,11 @@ void LabelImpl::AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo)
   // To avoid flickering issues, enable/disable the background visual when async load is completed.
   SetViewBackgroundEnabled(!mController->IsTextCutout());
 
-  mAsyncLineCount   = renderInfo.lineCount;
+  mAsyncLineCount = renderInfo.lineCount;
+  if(renderInfo.isMarqueeStartAnchorResolved)
+  {
+    mMarqueeStartAnchor = renderInfo.marqueeStartAnchor;
+  }
   Ui::View selfView = Ui::View::DownCast(Self());
   if(renderInfo.anchorHitRegions.empty())
   {
@@ -2879,6 +2908,7 @@ void LabelImpl::AsyncSizeComputed(const Ui::Text::AsyncTextRenderInfo& renderInf
 void LabelImpl::RequestRendererUpdate()
 {
   mRendererUpdateNeeded = true;
+  mMarqueeStartAnchor   = {};
 }
 
 void LabelImpl::RequestSyncMarqueeRestart()
@@ -3089,11 +3119,13 @@ void LabelImpl::UpdateLineHeight()
 
 void LabelImpl::OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type type)
 {
+  mMarqueeStartAnchor = {};
   mController->ChangedLayoutDirection();
 }
 
 void LabelImpl::OnLocaleChanged(std::string locale)
 {
+  mMarqueeStartAnchor = {};
   mController->InvalidateFontData();
 }
 
@@ -3343,8 +3375,11 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     }
   }
 
-  const Ui::Text::Direction textDirection     = mController->GetTextDirection();
-  auto                      renderMarqueeText = [&](Ui::Text::Typesetter::RenderBehaviour renderBehaviour, Pixel::Format pixelFormat) -> PixelData
+  const Ui::Text::Direction      textDirection = mController->GetTextDirection();
+  Ui::Text::MarqueeTextureAnchor marqueeTextureAnchor;
+  auto                           renderMarqueeText = [&](Ui::Text::Typesetter::RenderBehaviour renderBehaviour,
+                               Pixel::Format                         pixelFormat,
+                               bool                                  resolveTextureAnchor = false) -> PixelData
   {
     return Internal::TextVisual::RenderMarqueeText(mVisual,
                                                    verifiedSize,
@@ -3352,9 +3387,15 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                    renderBehaviour,
                                                    isHorizontal,
                                                    pixelFormat,
-                                                   originSize);
+                                                   originSize,
+                                                   mMarqueeStartAnchor,
+                                                   resolveTextureAnchor ? &marqueeTextureAnchor : nullptr);
   };
-  PixelData data = renderMarqueeText(Ui::Text::Typesetter::RENDER_TEXT_AND_STYLES, Pixel::RGBA8888);
+  // Capture from the primary text texture before any supplemental style or
+  // gradient renders. Supplemental renders do not update this anchor.
+  PixelData data = renderMarqueeText(Ui::Text::Typesetter::RENDER_TEXT_AND_STYLES,
+                                     Pixel::RGBA8888,
+                                     true);
 
   Sampler sampler = Ui::Text::MarqueeBuilder::CreateTextScrollSampler(isHorizontal);
 
@@ -3490,12 +3531,27 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     }
   }
 
+  Ui::Text::MarqueeInitialDelta marqueeInitialDelta;
+  if(isHorizontal && isTextContentOverflow)
+  {
+    const float horizontalAlignment = Ui::Text::ResolveHorizontalMarqueeAlignment(true,
+                                                                                  direction,
+                                                                                  mController->GetHorizontalAlignment());
+    marqueeInitialDelta             = Ui::Text::ResolveMarqueeInitialDelta(mMarqueeStartAnchor,
+                                                                           marqueeTextureAnchor,
+                                                                           horizontalAlignment,
+                                                                           verifiedSize.width,
+                                                                           controlSize.width,
+                                                                           wrapGap);
+  }
+
   // Set parameters for scrolling
   Renderer renderer = static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer();
   mTextScroller->SetParameters(Self(), renderer, preparedContent.textureSet, controlSize, verifiedSize, wrapGap,
                                isTextContentOverflow, direction,
                                mController->GetHorizontalAlignment(), mController->GetVerticalAlignment(),
-                               mRendererUpdateNeeded, preparedContent.textGradient);
+                               mRendererUpdateNeeded, preparedContent.textGradient,
+                               marqueeInitialDelta);
   mController->SetTextElideEnabled(actualellipsis);
   mController->SetMarqueeMaxTextureExceeded(false);
 }
@@ -3590,10 +3646,32 @@ Ui::Text::TextScrollerPtr LabelImpl::GetTextScroller()
   return mTextScroller;
 }
 
+void LabelImpl::CaptureMarqueeStartAnchor()
+{
+  if(mController->IsAsyncRendering())
+  {
+    return;
+  }
+
+  if(GetTextScroller()->GetOrientation() != Ui::Text::MarqueeOrientation::HORIZONTAL)
+  {
+    mMarqueeStartAnchor = {};
+    return;
+  }
+
+  mMarqueeStartAnchor = mController->GetMarqueeStartAnchor();
+}
+
 void LabelImpl::SetMarqueeEnabled(bool enabled)
 {
+  if(!enabled)
+  {
+    mMarqueeStartAnchor = {};
+  }
+
   if(enabled && HasInlineReplacementSource())
   {
+    mMarqueeStartAnchor = {};
     StopMarqueeImmediately();
     mController->SetMarqueeEnabled(false);
     mLastMarqueeEnabled = false;
@@ -3635,6 +3713,7 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
       // If request is enable (true) then start marquee as not already running
       else
       {
+        CaptureMarqueeStartAnchor();
         mController->SetMarqueeEnabled(enabled, true, GetTextScroller()->GetOrientation());
       }
       RequestAsyncRender();
@@ -3734,6 +3813,14 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Ui::Text::Marqu
 
   if(marqueeEnabled != mController->IsMarqueeEnabled())
   {
+    if(marqueeEnabled)
+    {
+      CaptureMarqueeStartAnchor();
+    }
+    else
+    {
+      mMarqueeStartAnchor = {};
+    }
     mController->SetMarqueeEnabled(marqueeEnabled, true, orientation);
   }
 }
@@ -3999,6 +4086,10 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
     parameters.marqueeLoopDelay   = GetTextScroller()->GetLoopDelay();
     parameters.marqueeGap         = static_cast<int>(GetTextScroller()->GetGap() * GetTextUiScale());
     parameters.marqueeOrientation = GetTextScroller()->GetOrientation();
+    if(parameters.marqueeOrientation == Ui::Text::MarqueeOrientation::HORIZONTAL)
+    {
+      parameters.marqueeStartAnchor = mMarqueeStartAnchor;
+    }
   }
   parameters.isCutoutEnabled               = mController->IsTextCutout();
   parameters.isBackgroundWithCutoutEnabled = mController->IsBackgroundWithCutoutEnabled();

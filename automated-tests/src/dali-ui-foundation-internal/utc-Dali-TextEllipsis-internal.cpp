@@ -19,6 +19,7 @@
 #include <cmath>
 #include <cstring>
 #include <limits>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali/integration-api/pixel-data-integ.h>
@@ -28,6 +29,7 @@
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
@@ -44,6 +46,11 @@ using namespace Dali::Ui;
 
 namespace
 {
+float CalculateMarqueeAnchorControlX(float textureX, float viewportOrigin, float initialDelta)
+{
+  return textureX - viewportOrigin - initialDelta;
+}
+
 struct VisualGeometrySnapshot
 {
   Vector<Text::GlyphInfo> glyphs;
@@ -321,6 +328,265 @@ int UtcDaliEndEllipsisInactiveP(void)
   DALI_TEST_EQUALS(controller->GetView().GetNumberOfGlyphs(),
                    Text::Controller::Impl::GetImplementation(*controller.Get()).mModel->mVisualModel->mGlyphs.Count(),
                    TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliEndEllipsisMarqueeStartAnchorP(void)
+{
+  UiTestApplication application;
+
+  auto resolve = [](const std::string&          text,
+                    Text::Alignment             alignment,
+                    Dali::LayoutDirection::Type layoutDirection)
+  {
+    Text::ControllerPtr controller = MakeEndController(text, 120.0f, 40.0f);
+    controller->SetHorizontalAlignment(alignment);
+    controller->SetLayoutDirection(layoutDirection);
+    controller->SetLayoutDirectionMode(Text::LayoutDirectionMode::LOCALE);
+    controller->Relayout(Size(120.0f, 40.0f));
+    return std::make_pair(controller, controller->GetMarqueeStartAnchor());
+  };
+
+  const std::string ltrText = "A long left to right line that requires END ellipsis before marquee starts";
+  const std::string rtlText =
+    "\xD7\xA2\xD7\x91\xD7\xA8\xD7\x99\xD7\xAA \xD7\x90\xD7\xA8\xD7\x95\xD7\x9B\xD7\x94 \xD7\x9E\xD7\x90\xD7\x95\xD7\x93 \xD7\x9C\xD7\x91\xD7\x93\xD7\x99\xD7\xA7\xD7\xAA \xD7\xA8\xD7\xA6\xD7\xA3";
+
+  const auto ltrStart  = resolve(ltrText, Text::Alignment::START, Dali::LayoutDirection::LEFT_TO_RIGHT);
+  const auto ltrCenter = resolve(ltrText, Text::Alignment::CENTER, Dali::LayoutDirection::LEFT_TO_RIGHT);
+  const auto ltrEnd    = resolve(ltrText, Text::Alignment::END, Dali::LayoutDirection::LEFT_TO_RIGHT);
+  const auto rtlStart  = resolve(rtlText, Text::Alignment::START, Dali::LayoutDirection::RIGHT_TO_LEFT);
+  const auto rtlCenter = resolve(rtlText, Text::Alignment::CENTER, Dali::LayoutDirection::RIGHT_TO_LEFT);
+  const auto rtlEnd    = resolve(rtlText, Text::Alignment::END, Dali::LayoutDirection::RIGHT_TO_LEFT);
+  DALI_TEST_CHECK(ltrStart.second.valid);
+  DALI_TEST_CHECK(ltrCenter.second.valid);
+  DALI_TEST_CHECK(ltrEnd.second.valid);
+  DALI_TEST_CHECK(rtlStart.second.valid);
+  DALI_TEST_CHECK(rtlCenter.second.valid);
+  DALI_TEST_CHECK(rtlEnd.second.valid);
+
+  // The production transform must solve the same first-frame invariant for
+  // every direction/alignment combination without direction-specific signs.
+  const auto checkTransition = [](const Text::MarqueeStartAnchor& anchor,
+                                  bool                             direction,
+                                  Text::Alignment                  alignment,
+                                  float                            expectedDelta)
+  {
+    constexpr float controlWidth = 120.0f;
+    constexpr float textureWidth = 360.0f;
+    constexpr float wrapGap      = 20.0f;
+    const float horizontalAlignment =
+      Text::ResolveHorizontalMarqueeAlignment(true, direction, alignment);
+    const float viewportOrigin =
+      Text::ResolveLegacyHorizontalMarqueeViewportOrigin(horizontalAlignment,
+                                                         textureWidth,
+                                                         controlWidth,
+                                                         wrapGap);
+    const Text::MarqueeTextureAnchor textureAnchor{
+      anchor.staticControlX + viewportOrigin + expectedDelta,
+      true};
+    const Text::MarqueeInitialDelta initialDelta =
+      Text::ResolveMarqueeInitialDelta(anchor,
+                                       textureAnchor,
+                                       horizontalAlignment,
+                                       textureWidth,
+                                       controlWidth,
+                                       wrapGap);
+    DALI_TEST_CHECK(initialDelta.valid);
+    DALI_TEST_EQUALS(initialDelta.value, expectedDelta, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(CalculateMarqueeAnchorControlX(textureAnchor.textureX,
+                                                    viewportOrigin,
+                                                    initialDelta.value),
+                     anchor.staticControlX,
+                     0.001f,
+                     TEST_LOCATION);
+  };
+
+  checkTransition(ltrStart.second, false, Text::Alignment::START, 2.0f);
+  checkTransition(ltrCenter.second, false, Text::Alignment::CENTER, -3.0f);
+  checkTransition(ltrEnd.second, false, Text::Alignment::END, 4.0f);
+  checkTransition(rtlStart.second, true, Text::Alignment::START, -2.0f);
+  checkTransition(rtlCenter.second, true, Text::Alignment::CENTER, 3.0f);
+  checkTransition(rtlEnd.second, true, Text::Alignment::END, -4.0f);
+
+  Text::ControllerPtr mixedEquivalent = MakeEndController("English אבג trailing words force END ellipsis", 100.0f, 44.0f);
+  mixedEquivalent->SetHorizontalAlignment(Text::Alignment::CENTER);
+  mixedEquivalent->SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
+  mixedEquivalent->SetLayoutDirectionMode(Text::LayoutDirectionMode::LOCALE);
+  mixedEquivalent->Relayout(Size(100.0f, 44.0f), Dali::LayoutDirection::LEFT_TO_RIGHT);
+  DALI_TEST_CHECK(mixedEquivalent->GetMarqueeStartAnchor().valid);
+
+  Text::ControllerPtr mixedNonRigid = MakeEndController("אבג 123 abcdef", 97.0f, 44.0f);
+  mixedNonRigid->SetHorizontalAlignment(Text::Alignment::CENTER);
+  mixedNonRigid->SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
+  mixedNonRigid->SetLayoutDirectionMode(Text::LayoutDirectionMode::LOCALE);
+  mixedNonRigid->Relayout(Size(97.0f, 44.0f), Dali::LayoutDirection::LEFT_TO_RIGHT);
+  DALI_TEST_CHECK(!mixedNonRigid->GetMarqueeStartAnchor().valid);
+
+  // A retained run that requires another translation must conservatively keep legacy marquee behavior.
+  Text::FinalElisionResult nonRigid = *ltrCenter.first->GetFinalElisionResult();
+  Text::GlyphIndex         movedGlyph = Text::FinalElisionResult::INVALID_GLYPH_INDEX;
+  for(Text::GlyphIndex finalGlyph = 0u; finalGlyph < nonRigid.glyphs.Count(); ++finalGlyph)
+  {
+    if(finalGlyph != nonRigid.ellipsisFinalGlyphIndex &&
+       nonRigid.finalToSourceGlyphIndices[finalGlyph] != Text::FinalElisionResult::INVALID_GLYPH_INDEX &&
+       nonRigid.glyphs[finalGlyph].width > 0.01f && nonRigid.glyphs[finalGlyph].height > 0.01f)
+    {
+      movedGlyph = finalGlyph;
+      break;
+    }
+  }
+  DALI_TEST_CHECK(movedGlyph != Text::FinalElisionResult::INVALID_GLYPH_INDEX);
+  nonRigid.viewGlyphPositions[movedGlyph].x += 36.0f;
+  const Text::Controller::Impl& ltrImpl =
+    Text::Controller::Impl::GetImplementation(*ltrCenter.first.Get());
+  DALI_TEST_CHECK(!Text::ResolveMarqueeStartAnchor(&nonRigid,
+                                                   ltrImpl.mModel->mVisualModel.Get())
+                     .valid);
+
+  // Protect the complete synchronous production geometry chain: capture from
+  // the final static END layout, render the actual natural-width marquee
+  // texture, resolve the same retained glyph, and solve the first-frame delta.
+  const auto checkActualSyncTransition = [](Text::ControllerPtr              controller,
+                                            const Text::MarqueeStartAnchor& staticAnchor,
+                                            Text::Alignment                  alignment,
+                                            Dali::LayoutDirection::Type      layoutDirection)
+  {
+    constexpr float controlWidth  = 120.0f;
+    constexpr float controlHeight = 40.0f;
+    constexpr float wrapGap       = 20.0f;
+
+    controller->SetMarqueeEnabled(true, false, Text::MarqueeOrientation::HORIZONTAL);
+    controller->Relayout(Size(controlWidth, controlHeight), layoutDirection);
+    const float naturalWidth = controller->GetNaturalSize(false).width;
+
+    Text::TypesetterPtr         typesetter = Text::Typesetter::New(controller->GetRenderTextModel());
+    TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
+    typesetter->SetFontClient(fontClient);
+    typesetter->SetFinalElisionResult(controller->GetFinalElisionResult());
+    typesetter->Render(Size(naturalWidth + wrapGap, controlHeight),
+                       controller->GetTextDirection(),
+                       Text::Typesetter::RENDER_TEXT_AND_STYLES,
+                       true,
+                       Pixel::RGBA8888);
+
+    const Text::MarqueeTextureAnchor textureAnchor =
+      typesetter->ResolveMarqueeTextureAnchor(staticAnchor);
+    DALI_TEST_CHECK(textureAnchor.valid);
+
+    const float horizontalAlignment =
+      Text::ResolveHorizontalMarqueeAlignment(true,
+                                              controller->GetMarqueeTextDirection(),
+                                              alignment);
+    const Text::MarqueeInitialDelta initialDelta =
+      Text::ResolveMarqueeInitialDelta(staticAnchor,
+                                       textureAnchor,
+                                       horizontalAlignment,
+                                       naturalWidth + wrapGap,
+                                       controlWidth,
+                                       wrapGap);
+    DALI_TEST_CHECK(initialDelta.valid);
+    const float viewportOrigin =
+      Text::ResolveLegacyHorizontalMarqueeViewportOrigin(horizontalAlignment,
+                                                         naturalWidth + wrapGap,
+                                                         controlWidth,
+                                                         wrapGap);
+    DALI_TEST_EQUALS(CalculateMarqueeAnchorControlX(textureAnchor.textureX,
+                                                    viewportOrigin,
+                                                    initialDelta.value),
+                     staticAnchor.staticControlX,
+                     0.01f,
+                     TEST_LOCATION);
+  };
+
+  checkActualSyncTransition(ltrCenter.first,
+                            ltrCenter.second,
+                            Text::Alignment::CENTER,
+                            Dali::LayoutDirection::LEFT_TO_RIGHT);
+  checkActualSyncTransition(rtlEnd.first,
+                            rtlEnd.second,
+                            Text::Alignment::END,
+                            Dali::LayoutDirection::RIGHT_TO_LEFT);
+
+  Text::AsyncTextParameters asyncParameters = MakeAsyncEndParameters(ltrText, 120.0f, 40.0f);
+  asyncParameters.horizontalAlignment       = Text::Alignment::END;
+  Text::AsyncTextLoader     loader           = Text::AsyncTextLoader::New();
+  Text::AsyncTextRenderInfo asyncInfo        = loader.RenderText(asyncParameters, false, Size::ZERO);
+  DALI_TEST_CHECK(asyncInfo.isMarqueeStartAnchorResolved);
+  DALI_TEST_CHECK(asyncInfo.marqueeStartAnchor.valid);
+  DALI_TEST_CHECK(std::isfinite(asyncInfo.marqueeStartAnchor.staticControlX));
+
+  Text::AsyncTextParameters scaledParameters = MakeAsyncEndParameters(ltrText, 120.0f, 40.0f);
+  scaledParameters.horizontalAlignment       = Text::Alignment::END;
+  scaledParameters.renderScale               = 2.0f;
+  bool       cachedNaturalSize               = false;
+  const Size scaledNaturalSize               = loader.SetupRenderScale(scaledParameters, cachedNaturalSize);
+  Text::AsyncTextRenderInfo scaledInfo =
+    loader.RenderText(scaledParameters, cachedNaturalSize, scaledNaturalSize);
+  DALI_TEST_CHECK(scaledInfo.isMarqueeStartAnchorResolved);
+  DALI_TEST_CHECK(scaledInfo.marqueeStartAnchor.valid);
+  DALI_TEST_CHECK(std::isfinite(scaledInfo.marqueeStartAnchor.staticControlX));
+  DALI_TEST_EQUALS(scaledInfo.marqueeStartAnchor.staticControlX,
+                   asyncInfo.marqueeStartAnchor.staticControlX,
+                   0.05f,
+                   TEST_LOCATION);
+
+  const auto checkAsyncTransition = [&](const Text::AsyncTextRenderInfo& staticInfo,
+                                        float                            renderScale)
+  {
+    Text::AsyncTextParameters marqueeParameters = MakeAsyncEndParameters(ltrText, 120.0f, 40.0f);
+    marqueeParameters.horizontalAlignment       = Text::Alignment::END;
+    marqueeParameters.renderScale               = renderScale;
+    marqueeParameters.maxTextureSize             = 2048;
+    marqueeParameters.marqueeGap                 = 20;
+    marqueeParameters.isMarqueeEnabled           = true;
+    marqueeParameters.marqueeOrientation         = Text::MarqueeOrientation::HORIZONTAL;
+    marqueeParameters.marqueeStartAnchor         = staticInfo.marqueeStartAnchor;
+
+    Text::AsyncTextLoader marqueeLoader = Text::AsyncTextLoader::New();
+    bool                  cached        = false;
+    Size                  naturalSize   = Size::ZERO;
+    if(renderScale > 1.0f)
+    {
+      naturalSize = marqueeLoader.SetupRenderScale(marqueeParameters, cached);
+    }
+    const Text::AsyncTextRenderInfo marqueeInfo =
+      marqueeLoader.RenderMarquee(marqueeParameters, cached, naturalSize);
+    DALI_TEST_CHECK(marqueeInfo.isMarqueeContentOverflow);
+    DALI_TEST_CHECK(marqueeInfo.marqueeTextureAnchor.valid);
+
+    const float horizontalAlignment =
+      Text::ResolveHorizontalMarqueeAlignment(true,
+                                              marqueeInfo.isTextDirectionRTL,
+                                              Text::Alignment::END);
+    const Text::MarqueeInitialDelta initialDelta =
+      Text::ResolveMarqueeInitialDelta(staticInfo.marqueeStartAnchor,
+                                       marqueeInfo.marqueeTextureAnchor,
+                                       horizontalAlignment,
+                                       marqueeInfo.size.width,
+                                       marqueeInfo.controlSize.width,
+                                       marqueeInfo.marqueeWrapGap);
+    DALI_TEST_CHECK(initialDelta.valid);
+    const float viewportOrigin =
+      Text::ResolveLegacyHorizontalMarqueeViewportOrigin(horizontalAlignment,
+                                                         marqueeInfo.size.width,
+                                                         marqueeInfo.controlSize.width,
+                                                         marqueeInfo.marqueeWrapGap);
+    DALI_TEST_EQUALS(CalculateMarqueeAnchorControlX(marqueeInfo.marqueeTextureAnchor.textureX,
+                                                    viewportOrigin,
+                                                    initialDelta.value),
+                     staticInfo.marqueeStartAnchor.staticControlX,
+                     0.01f,
+                     TEST_LOCATION);
+  };
+
+  checkAsyncTransition(asyncInfo, 1.0f);
+  checkAsyncTransition(scaledInfo, 2.0f);
+
+  Text::AsyncTextParameters fittingParameters = MakeAsyncEndParameters("Short text", 400.0f, 40.0f);
+  Text::AsyncTextRenderInfo fittingInfo        = loader.RenderText(fittingParameters, false, Size::ZERO);
+  DALI_TEST_CHECK(fittingInfo.isMarqueeStartAnchorResolved);
+  DALI_TEST_CHECK(!fittingInfo.marqueeStartAnchor.valid);
 
   END_TEST;
 }

@@ -19,7 +19,14 @@
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
+#include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
+
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <vector>
 
 namespace Dali::Ui::Text
 {
@@ -136,6 +143,138 @@ bool LayoutOrdinaryForTest(const Model&                        originalModel,
   controller->Relayout(options.contentSize);
   result = impl.mModel;
   return static_cast<bool>(result);
+}
+
+OrdinaryMarqueeTransitionTrace TraceOrdinaryMarqueeTransitionForTest(
+  const Model&                        originalModel,
+  const ReplacementLayoutTestOptions& options)
+{
+  struct SharedGlyph
+  {
+    CharacterIndex character{0u};
+    Length         glyphOccurrence{0u};
+    GlyphInfo      glyph;
+    float          sourceLayoutX{0.0f};
+  };
+
+  OrdinaryMarqueeTransitionTrace trace;
+  ControllerPtr                  controller = CreateController(originalModel, options);
+  Controller::Impl&              impl       = Controller::Impl::GetImplementation(*controller.Get());
+  controller->Relayout(options.contentSize, options.layoutDirection);
+
+  const FinalElisionResult* final       = controller->GetFinalElisionResult();
+  const VisualModel&        source      = *impl.mModel->mVisualModel;
+  const MarqueeStartAnchor  startAnchor = controller->GetMarqueeStartAnchor();
+  if(!final || !startAnchor.valid || final->finalToSourceGlyphIndices.Count() != final->glyphs.Count())
+  {
+    return trace;
+  }
+
+  std::vector<SharedGlyph> shared;
+  bool                     anchorCaptured = false;
+  for(GlyphIndex finalGlyph = 0u; finalGlyph < final->glyphs.Count(); ++finalGlyph)
+  {
+    const GlyphIndex sourceGlyph = final->finalToSourceGlyphIndices[finalGlyph];
+    if(finalGlyph == final->ellipsisFinalGlyphIndex || sourceGlyph >= source.mGlyphs.Count() ||
+       sourceGlyph >= source.mGlyphsToCharacters.Count() ||
+       source.mGlyphs[sourceGlyph].width <= 0.01f || source.mGlyphs[sourceGlyph].height <= 0.01f)
+    {
+      continue;
+    }
+
+    const CharacterIndex character       = source.mGlyphsToCharacters[sourceGlyph];
+    Length               glyphOccurrence = 0u;
+    for(GlyphIndex candidate = 0u; candidate < sourceGlyph; ++candidate)
+    {
+      if(source.mGlyphsToCharacters[candidate] == character)
+      {
+        ++glyphOccurrence;
+      }
+    }
+
+    shared.push_back({character,
+                      glyphOccurrence,
+                      source.mGlyphs[sourceGlyph],
+                      source.mGlyphPositions[sourceGlyph].x});
+    if(character == startAnchor.characterIndex && glyphOccurrence == startAnchor.glyphOccurrence)
+    {
+      trace.anchorCharacter   = character;
+      trace.staticSourceGlyph = sourceGlyph;
+      trace.staticControlX    = startAnchor.staticControlX;
+      anchorCaptured          = true;
+    }
+  }
+  if(shared.empty() || !anchorCaptured)
+  {
+    return trace;
+  }
+
+  controller->SetMarqueeEnabled(true, false, MarqueeOrientation::HORIZONTAL);
+  controller->Relayout(options.contentSize, options.layoutDirection);
+  trace.naturalContentWidth = controller->GetNaturalSize(false).width;
+  trace.directionRightToLeft = controller->GetMarqueeTextDirection();
+
+  TypesetterPtr                typesetter = Typesetter::New(controller->GetRenderTextModel());
+  TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
+  typesetter->SetFontClient(fontClient);
+  typesetter->SetFinalElisionResult(controller->GetFinalElisionResult());
+  typesetter->Render(Size(trace.naturalContentWidth + 20.0f, options.contentSize.height),
+                     controller->GetTextDirection(),
+                     Typesetter::RENDER_TEXT_AND_STYLES,
+                     true,
+                     Pixel::RGBA8888);
+  const MarqueeTextureAnchor renderedTextureAnchor =
+    typesetter->ResolveMarqueeTextureAnchor(startAnchor);
+
+  const VisualModel& natural = *impl.mModel->mVisualModel;
+  float  minimumTranslation = std::numeric_limits<float>::max();
+  float  maximumTranslation = std::numeric_limits<float>::lowest();
+  size_t resolvedCount      = 0u;
+  for(const SharedGlyph& candidate : shared)
+  {
+    GlyphIndex naturalGlyph = FinalElisionResult::INVALID_GLYPH_INDEX;
+    Length     occurrence   = 0u;
+    for(GlyphIndex glyph = 0u; glyph < natural.mGlyphsToCharacters.Count(); ++glyph)
+    {
+      if(natural.mGlyphsToCharacters[glyph] == candidate.character &&
+         occurrence++ == candidate.glyphOccurrence)
+      {
+        naturalGlyph = glyph;
+        break;
+      }
+    }
+    if(naturalGlyph == FinalElisionResult::INVALID_GLYPH_INDEX ||
+       naturalGlyph >= natural.mGlyphs.Count() || naturalGlyph >= natural.mGlyphPositions.Count())
+    {
+      continue;
+    }
+    const GlyphInfo& glyph = natural.mGlyphs[naturalGlyph];
+    if(glyph.fontId != candidate.glyph.fontId || glyph.index != candidate.glyph.index)
+    {
+      continue;
+    }
+
+    const float translation = natural.mGlyphPositions[naturalGlyph].x - candidate.sourceLayoutX;
+    minimumTranslation      = std::min(minimumTranslation, translation);
+    maximumTranslation      = std::max(maximumTranslation, translation);
+    if(candidate.character == startAnchor.characterIndex &&
+       candidate.glyphOccurrence == startAnchor.glyphOccurrence)
+    {
+      trace.marqueeTextureGlyph = naturalGlyph;
+      trace.marqueeTextureX     = natural.mGlyphPositions[naturalGlyph].x;
+    }
+    ++resolvedCount;
+  }
+
+  if(resolvedCount == shared.size() && renderedTextureAnchor.valid &&
+     std::fabs(renderedTextureAnchor.textureX - trace.marqueeTextureX) <= 0.01f)
+  {
+    trace.marqueeTextureX              = renderedTextureAnchor.textureX;
+    trace.sourceToTextureMinimumTranslation = minimumTranslation;
+    trace.sourceToTextureMaximumTranslation = maximumTranslation;
+    trace.valid                             = true;
+  }
+  return trace;
 }
 
 bool LayoutReplacementSourceForTest(const Model&                     originalModel,

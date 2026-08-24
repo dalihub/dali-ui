@@ -28,11 +28,18 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include "replacement-layout-test-adapter.h"
 
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
+
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
+float CalculateMarqueeAnchorControlX(float textureX, float viewportOrigin, float initialDelta)
+{
+  return textureX - viewportOrigin - initialDelta;
+}
+
 Vector<Text::Character> Characters(std::initializer_list<Text::Character> values)
 {
   Vector<Text::Character> text;
@@ -177,6 +184,110 @@ void CheckOrdinaryLineDirectionCase(const char*                          name,
             << " rtl_line=" << visual.mLines[0u].direction
             << " ellipsis=" << elideText << std::endl;
   ReleaseBidi(services, result);
+}
+
+void CheckMarqueeTransitionCase(const char*                   name,
+                                const std::string&            utf8,
+                                Text::Alignment               alignment,
+                                LayoutDirection::Type         layoutDirection,
+                                float                         controlWidth,
+                                bool                          expectedRightToLeft,
+                                bool                          expectedEligible)
+{
+  Text::ModelPtr source = Text::Model::New();
+  source->mLogicalModel->mText = Utf32(utf8);
+
+  Text::ReplacementLayoutTestOptions options;
+  options.contentSize          = Size(controlWidth, 40.0f);
+  options.elideText            = true;
+  options.ellipsisPosition     = Text::EllipsisPosition::END;
+  options.horizontalAlignment = alignment;
+  options.layoutDirection     = layoutDirection;
+  options.matchLayoutDirection = true;
+
+  const Text::OrdinaryMarqueeTransitionTrace trace =
+    Text::TraceOrdinaryMarqueeTransitionForTest(*source, options);
+  if(!expectedEligible)
+  {
+    Require(!trace.valid, std::string(name) + ": non-rigid case unexpectedly became eligible");
+    std::cout << "REAL_MARQUEE_TRANSITION case=" << name << " fallback=legacy" << std::endl;
+    return;
+  }
+
+  Require(trace.valid, std::string(name) + ": transition trace invalid");
+  Require(trace.directionRightToLeft == expectedRightToLeft,
+          std::string(name) + ": unexpected resolved text direction");
+  Require(std::fabs(trace.sourceToTextureMaximumTranslation - trace.sourceToTextureMinimumTranslation) < 0.01f,
+          std::string(name) + ": source-to-texture mapping is not rigid");
+
+  constexpr float wrapGap      = 20.0f;
+  const float     textureWidth = trace.naturalContentWidth + wrapGap;
+  const float horizontalAlignment =
+    Text::ResolveHorizontalMarqueeAlignment(true,
+                                            trace.directionRightToLeft,
+                                            options.horizontalAlignment);
+  const float legacyViewportOrigin =
+    Text::ResolveLegacyHorizontalMarqueeViewportOrigin(horizontalAlignment,
+                                                       textureWidth,
+                                                       controlWidth,
+                                                       wrapGap);
+  Text::MarqueeStartAnchor staticAnchor;
+  staticAnchor.staticControlX = trace.staticControlX;
+  staticAnchor.valid          = true;
+  const Text::MarqueeInitialDelta solved =
+    Text::ResolveMarqueeInitialDelta(staticAnchor,
+                                     Text::MarqueeTextureAnchor{trace.marqueeTextureX, true},
+                                     horizontalAlignment,
+                                     textureWidth,
+                                     controlWidth,
+                                     wrapGap);
+  Require(solved.valid, std::string(name) + ": production delta was not resolved");
+  const float solvedFirstFrameX = CalculateMarqueeAnchorControlX(trace.marqueeTextureX,
+                                                                 legacyViewportOrigin,
+                                                                 solved.value);
+
+  std::cout << "REAL_MARQUEE_TRANSITION case=" << name
+            << " character=" << trace.anchorCharacter
+            << " static_source_glyph=" << trace.staticSourceGlyph
+            << " texture_glyph=" << trace.marqueeTextureGlyph
+            << " static_control_x=" << trace.staticControlX
+            << " texture_x=" << trace.marqueeTextureX
+            << " content_width=" << trace.naturalContentWidth
+            << " viewport_origin=" << legacyViewportOrigin
+            << " solved_delta=" << solved.value
+            << " solved_first=" << solvedFirstFrameX
+            << " source_texture_spread="
+            << trace.sourceToTextureMaximumTranslation - trace.sourceToTextureMinimumTranslation
+            << std::endl;
+  Require(std::fabs(solvedFirstFrameX - trace.staticControlX) < 0.01f,
+          std::string(name) + ": shader-derived delta did not close continuity");
+}
+
+void CheckMarqueeTransitions()
+{
+  const std::string ltr =
+    "A long left to right line that requires END ellipsis before marquee starts";
+  const std::string rtl =
+    "\xD7\xA9\xD7\x9C\xD7\x95\xD7\x9D \xD7\xA2\xD7\x95\xD7\x9C\xD7\x9D, \xD7\xA0\xD7\xA2\xD7\x99\xD7\x9D \xD7\x9E\xD7\x90\xD7\x95\xD7\x93,\xD7\x95\xD7\x9E\xD7\xA7\xD7\x95\xD7\x95\xD7\x94 \xD7\xA9\xD7\x99\xD7\x94\xD7\x99\xD7\x94 \xD7\x9C\xD7\xA0\xD7\x95 \xD7\xA9\xD7\x99\xD7\x97\xD7\x94 \xD7\xA0\xD7\xA2\xD7\x99\xD7\x9E\xD7\x94 \xD7\x95\xD7\x98\xD7\x95\xD7\x91\xD7\x94 \xD7\x99\xD7\x97\xD7\x93";
+
+  CheckMarqueeTransitionCase("ltr_start", ltr, Text::Alignment::START,
+                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false, true);
+  CheckMarqueeTransitionCase("ltr_center", ltr, Text::Alignment::CENTER,
+                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false, true);
+  CheckMarqueeTransitionCase("ltr_end", ltr, Text::Alignment::END,
+                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false, true);
+  CheckMarqueeTransitionCase("rtl_start", rtl, Text::Alignment::START,
+                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true, true);
+  CheckMarqueeTransitionCase("rtl_center", rtl, Text::Alignment::CENTER,
+                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true, true);
+  CheckMarqueeTransitionCase("rtl_end", rtl, Text::Alignment::END,
+                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true, true);
+  CheckMarqueeTransitionCase("mixed_rigid", "English \xD7\x90\xD7\x91\xD7\x92 trailing words force END ellipsis",
+                             Text::Alignment::CENTER, LayoutDirection::LEFT_TO_RIGHT,
+                             90.0f, false, true);
+  CheckMarqueeTransitionCase("mixed_non_rigid", "English \xD7\x90\xD7\x91\xD7\x92 trailing words force END ellipsis",
+                             Text::Alignment::CENTER, LayoutDirection::LEFT_TO_RIGHT,
+                             100.0f, false, false);
 }
 
 void CheckLayoutCase(const char* name, Vector<Text::Character>& text, Text::CharacterIndex start,
@@ -447,6 +558,7 @@ void RunDiagnostics()
                                  true,
                                  100.0f,
                                  services);
+  CheckMarqueeTransitions();
 
   Vector<Text::Character> ltr = Characters({'a', 'b', 'I', 'C', 'O', 'N', 'c', 'd'});
   CheckLayoutCase("ltr", ltr, 2u, 4u, false, services);

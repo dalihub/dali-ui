@@ -23,6 +23,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/animation/constraint.h>
+#include <cmath>
 #include <string>
 #include <string_view>
 
@@ -78,33 +79,6 @@ constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME("uText
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME("uTextGradientOverlayConicScale");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME("uTextGradientOverlayConicStartAngle");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME("uTextGradientOverlayMode");
-
-/**
- * @brief How the text should be aligned horizontally when scrolling the text.
- *
- * -0.5f aligns the text to the left, 0.0f aligns the text to the center, 0.5f aligns the text to the right.
- * The final alignment depends on two factors:
- *   1) The alignment value of the text label (Use Text::HorizontalAlignment enumerations).
- *   2) The text direction, i.e. whether it's LTR or RTL (0 = LTR, 1 = RTL).
- */
-const float HORIZONTAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1][2] = {
-  // Alignment::START
-  {
-    -0.5f, // LTR
-    0.5f   // RTL
-  },
-
-  // Alignment::CENTER
-  {
-    0.0f, // LTR
-    0.0f  // RTL
-  },
-
-  // Alignment::END
-  {
-    0.5f, // LTR
-    -0.5f // RTL
-  }};
 
 /**
  * @brief How the text should be aligned vertically when scrolling the text.
@@ -442,7 +416,8 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
                                  const Size& controlSize, const Size& textureSize, const float wrapGap,
                                  bool isTextContentOverflow, CharacterDirection direction, Alignment horizontalAlignment,
                                  Alignment verticalAlignment, bool animationReStart,
-                                 const TextScrollerGradient& textGradient)
+                                 const TextScrollerGradient& textGradient,
+                                 const MarqueeInitialDelta&  marqueeInitialDelta)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                 "TextScroller::SetParameters controlSize[%f,%f] textureSize[%f,%f] direction[%d]\n", controlSize.x,
@@ -520,15 +495,9 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   float horizontalAlign = 0.0f;
   if(isHorizontal)
   {
-    if(isTextContentOverflow)
-    {
-      // If text overflows, scrolling starts at the beginning of the text.
-      horizontalAlign = HORIZONTAL_ALIGNMENT_TABLE[static_cast<int>(Alignment::START)][direction];
-    }
-    else
-    {
-      horizontalAlign = HORIZONTAL_ALIGNMENT_TABLE[static_cast<int>(horizontalAlignment)][direction];
-    }
+    horizontalAlign = ResolveHorizontalMarqueeAlignment(isTextContentOverflow,
+                                                        direction,
+                                                        horizontalAlignment);
   }
 
   const float verticalAlign =
@@ -583,7 +552,16 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
     mGradientOverlayAnimOffsetIndex = textGradient.overlayStartOffsetPropertyIndex;
     BindGradientOverlayConstraint(overlayStartOffsetIndex);
   }
-  mScrollDeltaIndex = shader.RegisterProperty("uDelta", 0.0f);
+  float initialScrollDelta = 0.0f;
+  if(isHorizontal && isTextContentOverflow && marqueeInitialDelta.valid)
+  {
+    initialScrollDelta = marqueeInitialDelta.value;
+    if(!std::isfinite(initialScrollDelta))
+    {
+      initialScrollDelta = 0.0f;
+    }
+  }
+  mScrollDeltaIndex = shader.RegisterProperty("uDelta", initialScrollDelta);
 
   float scrollAmount =
     isHorizontal ? std::max(textureSize.width, controlSize.width) : std::max(textureSize.height, controlSize.height);
@@ -594,7 +572,7 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
     scrollAmount = -scrollAmount; // reverse direction of scrolling
   }
 
-  StartScrolling(scrollingTextActor, scrollAmount, scrollDuration, remainedLoop);
+  StartScrolling(scrollingTextActor, initialScrollDelta + scrollAmount, scrollDuration, remainedLoop);
   mScrollAnimation.SetCurrentProgress(animationProgress);
 }
 

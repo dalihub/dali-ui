@@ -27,12 +27,14 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/strikethrough-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
 namespace Dali
 {
@@ -220,6 +222,52 @@ PixelData Typesetter::Render(const Vector2& size, Direction textDirection,
   PixelData pixelData = PixelBuffer::Convert(result);
 
   return pixelData;
+}
+
+MarqueeTextureAnchor Typesetter::ResolveMarqueeTextureAnchor(const MarqueeStartAnchor& anchor) const
+{
+  if(!anchor.valid)
+  {
+    return {};
+  }
+
+  // The caller resolves immediately after the primary marquee Render(). The
+  // ViewModel therefore describes the glyphs and positions actually used to
+  // generate that texture, not a source-layout estimate.
+  const ViewModel&              viewModel          = *mImpl->GetViewModel();
+  const Length                  numberOfGlyphs     = viewModel.GetNumberOfGlyphs();
+  const Vector<CharacterIndex>& glyphsToCharacters = viewModel.GetGlyphsToCharacters();
+  const GlyphInfo*              glyphs             = viewModel.GetGlyphs();
+  const Vector2*                positions          = viewModel.GetLayout();
+  if(numberOfGlyphs == 0u || glyphsToCharacters.Count() != numberOfGlyphs || !glyphs || !positions)
+  {
+    return {};
+  }
+
+  Length occurrence = 0u;
+  for(GlyphIndex glyphIndex = 0u; glyphIndex < numberOfGlyphs; ++glyphIndex)
+  {
+    if(glyphsToCharacters[glyphIndex] != anchor.characterIndex)
+    {
+      continue;
+    }
+
+    if(occurrence++ != anchor.glyphOccurrence)
+    {
+      continue;
+    }
+
+    const GlyphInfo& glyph    = glyphs[glyphIndex];
+    const float      textureX = positions[glyphIndex].x;
+    if(IsSyntheticReplacementGlyph(glyph) ||
+       glyph.width <= 0.01f || glyph.height <= 0.01f || !std::isfinite(textureX))
+    {
+      return {};
+    }
+    return {textureX, true};
+  }
+
+  return {};
 }
 
 PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction textDirection,
