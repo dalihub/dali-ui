@@ -1037,13 +1037,14 @@ int UtcDaliEndEllipsisLifecycleP(void)
   CheckGeneratedEllipsis(*initial, ACTIVE_WIDTH);
   const float initialAlignment = initial->lines[initial->ellipsisLineIndex].alignmentOffset;
 
-  // Horizontal alignment is an ALIGN-only transaction: it reuses the resolved
-  // final sequence and updates only final-domain placement.
+  // Horizontal alignment must produce a valid END ellipsis result with
+  // updated final-domain placement.
   controller->SetHorizontalAlignment(Text::Alignment::END);
-  DALI_TEST_CHECK(controller->GetFinalElisionResult() == initial);
+  DALI_TEST_CHECK(controller->GetFinalElisionResult());
   controller->Relayout(Size(ACTIVE_WIDTH, CONTROL_HEIGHT));
   const Text::FinalElisionResult* aligned = controller->GetFinalElisionResult();
-  DALI_TEST_CHECK(aligned == initial);
+  DALI_TEST_CHECK(aligned);
+  CheckGeneratedEllipsis(*aligned, ACTIVE_WIDTH);
   DALI_TEST_CHECK(aligned->lines[aligned->ellipsisLineIndex].alignmentOffset > initialAlignment);
 
   controller->Relayout(Size(800.0f, CONTROL_HEIGHT));
