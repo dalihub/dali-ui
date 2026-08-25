@@ -19,6 +19,7 @@
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h>
 #include <dali/integration-api/string-utils.h>
 #include <stdlib.h>
 #include <cmath>
@@ -1815,6 +1816,73 @@ int UtcDaliLabelAnchorClickedColor(void)
   UiColor color2(Color::YELLOW);
   label.SetAnchorClickedColor(color2);
   DALI_TEST_EQUALS(label.GetAnchorClickedColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelAnchorAccessibilitySignalsP(void)
+{
+  UiTestApplication application;
+
+  auto& enabledSignal  = Dali::Integration::Accessibility::Bridge::EnabledSignal();
+  auto& disabledSignal = Dali::Integration::Accessibility::Bridge::DisabledSignal();
+
+  const std::size_t enabledCount  = enabledSignal.GetConnectionCount();
+  const std::size_t disabledCount = disabledSignal.GetConnectionCount();
+
+  {
+    Label label = Label::New();
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 0u, TEST_LOCATION);
+
+    enabledSignal.Emit();
+    disabledSignal.Emit();
+
+    const Text::StyledText anchorText = Text::StyledText::FromMarkup("<a href='docs'>link</a>");
+    label.SetStyledText(anchorText);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+
+    label.SetStyledText(anchorText);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+    enabledSignal.Emit();
+    disabledSignal.Emit();
+
+    label.SetText("plain");
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 0u, TEST_LOCATION);
+    enabledSignal.Emit();
+    disabledSignal.Emit();
+
+    label.SetAsyncRendering(true);
+    label.SetStyledText(anchorText);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+
+    label.SetText("plain");
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 0u, TEST_LOCATION);
+
+    label.SetStyledText(anchorText);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+
+    label.SetAsyncRendering(false);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+  }
+
+  DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount, TEST_LOCATION);
 
   END_TEST;
 }

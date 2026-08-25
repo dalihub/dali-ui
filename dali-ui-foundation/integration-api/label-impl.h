@@ -1097,9 +1097,9 @@ private: // Implementation
   bool OnInterceptTouched(Actor actor, TouchEvent touch);
 
   /**
-   * @brief Updates touch interception based on anchor presence.
+   * @brief Updates event connections based on anchor presence.
    */
-  void UpdateAnchorTouchInterception();
+  void UpdateAnchorConnections();
 
   /**
    * @brief Clears the stored StyledText source state.

@@ -339,7 +339,7 @@ void LabelImpl::SetText(const Dali::String& text)
   ClearStyledTextSourceState();
   ClearAnchorInteractionState();
   mController->SetText(ToStdString(text));
-  UpdateAnchorTouchInterception();
+  UpdateAnchorConnections();
   InvalidateTextMeasure();
   if(hadInlineReplacements)
   {
@@ -374,7 +374,7 @@ void LabelImpl::SetStyledText(const Ui::Text::StyledText& styledText)
   ClearAnchorInteractionState();
 
   mController->SetStyledText(styledText);
-  UpdateAnchorTouchInterception();
+  UpdateAnchorConnections();
   InvalidateTextMeasure();
   if(hadInlineReplacements)
   {
@@ -1692,7 +1692,7 @@ void LabelImpl::SetAsyncRendering(bool asyncRendering)
   if(!asyncRendering)
   {
     ClearAnchorInteractionState();
-    UpdateAnchorTouchInterception();
+    UpdateAnchorConnections();
   }
 }
 
@@ -2084,8 +2084,6 @@ void LabelImpl::OnInitialize()
   mController->SetVerticalLineAlignment(Ui::Text::Alignment::CENTER);
 
   Ui::View::DownCast(self).SetAccessibilityRole(Accessibility::Role::LABEL);
-  Dali::Integration::Accessibility::Bridge::EnabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
-  Dali::Integration::Accessibility::Bridge::DisabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
 
   ApplyInitialConfig();
 }
@@ -2863,7 +2861,7 @@ void LabelImpl::AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo)
       UpdateA11yAnchors(false);
     }
   }
-  UpdateAnchorTouchInterception();
+  UpdateAnchorConnections();
 
   // Image visuals are event-thread objects. Worker output is applied only when
   // both immutable source and render request generations are still current.
@@ -3230,17 +3228,27 @@ bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
   return false;
 }
 
-void LabelImpl::UpdateAnchorTouchInterception()
+void LabelImpl::UpdateAnchorConnections()
 {
-  if(mController->HasAnchors() || mHasAsyncAnchorHitRegions)
+  const bool hasAnchors = mController->HasAnchors() || mHasAsyncAnchorHitRegions;
+  if(hasAnchors == mHasAnchors)
   {
-    mHasAnchors = true;
+    return;
+  }
+
+  mHasAnchors = hasAnchors;
+  if(hasAnchors)
+  {
     Self().InterceptTouchEventSignal().Connect(this, &LabelImpl::OnInterceptTouched);
+    Dali::Integration::Accessibility::Bridge::EnabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
+    Dali::Integration::Accessibility::Bridge::DisabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
   }
   else
   {
-    mHasAnchors = false;
+    ClearA11yAnchors();
     Self().InterceptTouchEventSignal().Disconnect(this, &LabelImpl::OnInterceptTouched);
+    Dali::Integration::Accessibility::Bridge::EnabledSignal().Disconnect(this, &LabelImpl::OnAccessibilityStatusChanged);
+    Dali::Integration::Accessibility::Bridge::DisabledSignal().Disconnect(this, &LabelImpl::OnAccessibilityStatusChanged);
   }
 }
 
