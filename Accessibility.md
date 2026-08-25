@@ -860,6 +860,10 @@ A reusable Component must provide an accessibility contract that Applications ca
 6. Keep semantics and geometry current after layout, animation, recycling, and show/hide.
 7. Do not expose AT-SPI objects or adaptor bridge details to Applications.
 
+For the current TV Screen Reader's role-specific focus-announcement order,
+English role phrases, and runtime state-change speech, see
+[Dali UI Accessibility Roles and Screen Reader Announcements](Accessibility-Role-Screen-Reader-Announcements.md).
+
 Role | Required information and state | Required action contract
 --|--|--
 `BUTTON`, `LINK`, `MENU_ITEM` | Name, enabled | `InteractiveView` click or custom `OnAccessibilityActivate()`
