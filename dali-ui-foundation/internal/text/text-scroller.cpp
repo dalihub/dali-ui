@@ -470,17 +470,7 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
       }
     }
     mScrollAnimation.Clear();
-
-    // Reset to the original shader and texture before scrolling
-    mRenderer.SetShader(mShader);
-    if(mTextureSet)
-    {
-      mRenderer.SetTextures(mTextureSet);
-    }
   }
-
-  mShader     = mRenderer.GetShader();
-  mTextureSet = mRenderer.GetTextures();
 
   // Set the shader and texture for scrolling
   const std::string_view vertexShaderSource       = isHorizontal ? SHADER_TEXT_SCROLLER_SHADER_VERT : SHADER_TEXT_SCROLLER_VERTICAL_SHADER_VERT;

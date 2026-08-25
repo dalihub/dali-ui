@@ -304,8 +304,6 @@ private:
   Animation                                 mScrollAnimation;                // Animation used to update the mScrollDeltaIndex
   Dali::Renderer                            mRenderer;                       // Renderer used to render the text
   Actor                                     mScrollingTextActor;             // Actor used as source for TextGradient animation properties
-  Shader                                    mShader;                         // Shader originally used by the renderer while not scrolling
-  TextureSet                                mTextureSet;                     // Texture originally used by the renderer while not scrolling
   std::vector<Constraint>                   mGradientConstraints;            // Constraints for animated TextGradient uniforms.
   std::vector<Constraint>                   mGradientOverlayConstraints;     // Constraints for animated TextGradientOverlay uniforms.
   Property::Index                           mGradientAnimOffsetIndex;        // Source property for uTextGradientStartOffset.
