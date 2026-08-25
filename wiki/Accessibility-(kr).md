@@ -860,6 +860,9 @@ Modal을 열 때 다음을 함께 처리합니다.
 6. layout, animation, recycling, show/hide 후에도 semantic과 geometry가 최신 상태입니다.
 7. Application에 AT-SPI object나 adaptor bridge 구현 detail을 노출하지 않습니다.
 
+현재 TV Screen Reader의 role별 포커스 발화 순서, 영어 role 문자열, runtime
+state-change 발화는 [Dali UI 접근성 Role과 Screen Reader 발화](Accessibility-Role-Screen-Reader-Announcements-(kr).md)를 확인하세요.
+
 Role | 필수 정보와 state | 필수 action contract
 --|--|--
 `BUTTON`, `LINK`, `MENU_ITEM` | Name, enabled | `InteractiveView` click 또는 custom `OnAccessibilityActivate()`
