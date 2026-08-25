@@ -163,6 +163,23 @@ constexpr const char* TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME         = "uTextG
 constexpr const char* TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME = "uTextGradientOverlayStartOffset";
 constexpr const char* TEXT_REVEAL_PROGRESS_PROPERTY_NAME               = "uTextRevealProgress";
 
+const AttachmentId LABEL_MASK_DATA_ATTACHMENT_ID              = AttachmentId::Alloc();
+const AttachmentId LABEL_TRANSLATABLE_TEXT_DATA_ATTACHMENT_ID = AttachmentId::Alloc();
+
+template<typename T>
+T& GetOrCreateLabelData(Ui::View owner, AttachmentId id)
+{
+  T* data = owner.GetAttachment<T>(id);
+  if(!data)
+  {
+    owner.SetAttachment(id, Dali::MakeUnique<T>());
+    data = owner.GetAttachment<T>(id);
+  }
+
+  DALI_ASSERT_ALWAYS(data && "Label attachment creation failed");
+  return *data;
+}
+
 float GetDpi()
 {
   static uint32_t horizontalDpi = 0u;
@@ -260,7 +277,6 @@ LabelImpl::LabelImpl()
   mSize(),
   mLastMeasureConstraints(-1.0f, -1.0f),
   mLastMeasureRequestedSize(-1.0f, -1.0f),
-  mTouchPosition(),
   mLineHeight(Ui::Text::LINE_HEIGHT_AUTO),
   mLineHeightMode(Ui::Text::LineHeightMode::RELATIVE),
   mOverflowMode(Ui::Text::OverflowMode::ELLIPSIS),
@@ -275,7 +291,6 @@ LabelImpl::LabelImpl()
   mLastMarqueeEnabled(false),
   mRestartMarquee(false),
   mHasLastMeasureMetrics(false),
-  mIsTouchDown(false),
   mHasStyledTextSource(false),
   mHasVariationProperties(false),
   mHasAnchors(false),
@@ -1632,7 +1647,7 @@ void LabelImpl::SetMaskEffect(View view)
   View selfView = Ui::View::DownCast(Self());
 
   Self().Add(view);
-  mMaskSourceView = view;
+  GetOrCreateLabelData<WeakHandle<Ui::View>>(selfView, LABEL_MASK_DATA_ATTACHMENT_ID) = view;
 
   MaskEffect maskEffect = MaskEffect::New(view);
   GetImplementation(maskEffect).SetReverseMaskDirection(true);
@@ -1643,13 +1658,14 @@ void LabelImpl::ClearMaskEffect()
 {
   View selfView = Ui::View::DownCast(Self());
 
-  View view = mMaskSourceView.GetHandle();
+  WeakHandle<Ui::View>* sourceView = selfView.GetAttachment<WeakHandle<Ui::View>>(LABEL_MASK_DATA_ATTACHMENT_ID);
+  View                  view       = sourceView ? sourceView->GetHandle() : View();
   if(view)
   {
     Self().Remove(view);
   }
 
-  mMaskSourceView.Reset();
+  selfView.RemoveAttachment(LABEL_MASK_DATA_ATTACHMENT_ID);
   selfView.ClearRenderEffect();
 }
 
@@ -1703,8 +1719,9 @@ void LabelImpl::SetTranslatableText(StringView resourceId)
 
 void LabelImpl::SetTranslatableText(StringView resourceId, StringView domain)
 {
-  mTranslatableText = resourceId;
-  auto manager      = UiLocalizationManager::Get();
+  Ui::View selfView                                                                        = Ui::View::DownCast(Self());
+  GetOrCreateLabelData<Dali::String>(selfView, LABEL_TRANSLATABLE_TEXT_DATA_ATTACHMENT_ID) = resourceId;
+  auto manager                                                                             = UiLocalizationManager::Get();
   if(manager)
   {
     manager.SetBindingResource(Self(),
@@ -1717,12 +1734,14 @@ void LabelImpl::SetTranslatableText(StringView resourceId, StringView domain)
 
 Dali::String LabelImpl::GetTranslatableText() const
 {
-  return mTranslatableText;
+  Ui::View            selfView = Ui::View::DownCast(Self());
+  const Dali::String* text     = selfView.GetAttachment<Dali::String>(LABEL_TRANSLATABLE_TEXT_DATA_ATTACHMENT_ID);
+  return text ? *text : Dali::String();
 }
 
 void LabelImpl::ClearTranslatableText()
 {
-  mTranslatableText.Clear();
+  Ui::View::DownCast(Self()).RemoveAttachment(LABEL_TRANSLATABLE_TEXT_DATA_ATTACHMENT_ID);
   auto manager = UiLocalizationManager::Get();
   if(manager)
   {
@@ -3147,21 +3166,23 @@ void LabelImpl::OnLocaleChanged(std::string locale)
 bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
 {
   const PointState::Type state = touch.GetState(0);
+  Ui::View               self  = Ui::View::DownCast(Self());
 
   if(state == PointState::STARTED)
   {
-    mIsTouchDown   = true;
-    mTouchPosition = touch.GetScreenPosition(0);
+    Internal::Text::GetOrCreateAnchorInteractionData(self).StartTouch(touch.GetScreenPosition(0));
     return false;
   }
 
-  if(state == PointState::FINISHED)
+  if(state == PointState::FINISHED || state == PointState::INTERRUPTED)
   {
-    if(mIsTouchDown && mHasAnchors)
+    Internal::Text::AnchorInteractionData* data = Internal::Text::GetAnchorInteractionData(self);
+    if(state == PointState::FINISHED && data && data->IsTouchDown() && mHasAnchors)
     {
-      const Vector2 screen = touch.GetScreenPosition(0);
-      const float   deltaX = std::abs(mTouchPosition.x - screen.x);
-      const float   deltaY = std::abs(mTouchPosition.y - screen.y);
+      const Vector2 screen        = touch.GetScreenPosition(0);
+      const Vector2 touchPosition = data->GetTouchPosition();
+      const float   deltaX        = std::abs(touchPosition.x - screen.x);
+      const float   deltaY        = std::abs(touchPosition.y - screen.y);
 
       if(deltaX < 20.0f && deltaY < 20.0f)
       {
@@ -3181,7 +3202,7 @@ bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
             if(asyncAnchorGeometryUsable)
             {
               const Internal::Text::AnchorHitResult asyncAnchor =
-                Internal::Text::HitTestAnchor(Ui::View::DownCast(Self()), contentPoint);
+                Internal::Text::HitTestAnchor(self, contentPoint);
               if(asyncAnchor.hit)
               {
                 if(asyncAnchor.newlyClicked)
@@ -3201,7 +3222,10 @@ bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
         }
       }
     }
-    mIsTouchDown = false;
+    if(data)
+    {
+      data->EndTouch();
+    }
   }
   return false;
 }
@@ -3235,12 +3259,9 @@ Vector2 LabelImpl::GetTextContentOffset() const
 
 void LabelImpl::ClearAnchorInteractionState()
 {
-  if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
-  {
-    Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
-    mHasAsyncAnchorHitRegions = false;
-    mHasA11yAnchors           = false;
-  }
+  Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
+  mHasAsyncAnchorHitRegions = false;
+  mHasA11yAnchors           = false;
 
   mAsyncAnchorGeometryDirty = false;
 }
@@ -4195,20 +4216,29 @@ void LabelImpl::EmitTextFitChanged()
 
 void LabelImpl::EmitAsyncRenderFinished(float width, float height)
 {
-  Ui::View handle(GetOwner());
-  mAsyncRenderFinishedSignal.Emit(handle, width, height);
+  if(!mAsyncRenderFinishedSignal.Empty())
+  {
+    Ui::View handle(GetOwner());
+    mAsyncRenderFinishedSignal.Emit(handle, width, height);
+  }
 }
 
 void LabelImpl::EmitAsyncNaturalSizeComputed(float width, float height)
 {
-  Ui::View handle(GetOwner());
-  mAsyncNaturalSizeComputedSignal.Emit(handle, width, height);
+  if(!mAsyncNaturalSizeComputedSignal.Empty())
+  {
+    Ui::View handle(GetOwner());
+    mAsyncNaturalSizeComputedSignal.Emit(handle, width, height);
+  }
 }
 
 void LabelImpl::EmitAsyncHeightForWidthComputed(float width, float height)
 {
-  Ui::View handle(GetOwner());
-  mAsyncHeightForWidthComputedSignal.Emit(handle, width, height);
+  if(!mAsyncHeightForWidthComputedSignal.Empty())
+  {
+    Ui::View handle(GetOwner());
+    mAsyncHeightForWidthComputedSignal.Emit(handle, width, height);
+  }
 }
 
 // =============================================================================

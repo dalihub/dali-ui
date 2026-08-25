@@ -155,6 +155,27 @@ AnchorInteractionData::~AnchorInteractionData()
   ClearA11yAnchors();
 }
 
+void AnchorInteractionData::StartTouch(const Vector2& position)
+{
+  mTouchPosition = position;
+  mIsTouchDown   = true;
+}
+
+bool AnchorInteractionData::IsTouchDown() const
+{
+  return mIsTouchDown;
+}
+
+const Vector2& AnchorInteractionData::GetTouchPosition() const
+{
+  return mTouchPosition;
+}
+
+void AnchorInteractionData::EndTouch()
+{
+  mIsTouchDown = false;
+}
+
 bool AnchorInteractionData::HasHitRegions() const
 {
   return !mHitRegions.empty();
@@ -165,6 +186,7 @@ void AnchorInteractionData::Clear()
   ClearA11yAnchors();
   mHitRegions.clear();
   mClickedAnchors.clear();
+  EndTouch();
 }
 
 void AnchorInteractionData::SetHitRegions(std::vector<Dali::Ui::Text::AsyncAnchorHitRegion>&& hitRegions)

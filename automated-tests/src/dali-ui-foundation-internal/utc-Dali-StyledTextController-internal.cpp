@@ -19,6 +19,7 @@
 #include <dali.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
@@ -32,6 +33,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
@@ -170,6 +172,30 @@ void utc_dali_styled_text_controller_internal_startup(void)
 void utc_dali_styled_text_controller_internal_cleanup(void)
 {
   test_return_value = TET_PASS;
+}
+
+int UtcDaliLabelAnchorTouchInterruptedP(void)
+{
+  UiTestApplication application;
+  Dali::Ui::Label   label = Dali::Ui::Label::New();
+
+  label.SetStyledText(PublicText::StyledText::FromMarkup("<a href='docs'>link</a>"));
+  DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+
+  TouchEvent started = TouchEvent::New(1u);
+  started.AddPoint(1, PointState::STARTED, Vector2(10.0f, 10.0f));
+  label.InterceptTouchEventSignal().Emit(label, started);
+
+  Dali::Ui::Internal::Text::AnchorInteractionData* data =
+    Dali::Ui::Internal::Text::GetAnchorInteractionData(label);
+  DALI_TEST_CHECK(data && data->IsTouchDown());
+
+  TouchEvent interrupted = TouchEvent::New(2u);
+  interrupted.AddPoint(1, PointState::INTERRUPTED, Vector2(10.0f, 10.0f));
+  label.InterceptTouchEventSignal().Emit(label, interrupted);
+  DALI_TEST_CHECK(data && !data->IsTouchDown());
+
+  END_TEST;
 }
 
 int UtcDaliStyledTextControllerSetStyledTextForegroundColorSpanP(void)
