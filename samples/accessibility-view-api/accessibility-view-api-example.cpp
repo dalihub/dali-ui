@@ -759,12 +759,14 @@ private:
 
     RunPerViewCallbackChecks(report, passed);
 
+    mSubject.DoAction("ReadingStarted", attributes);
     mSubject.DoAction("ReadingSkipped", attributes);
     mSubject.DoAction("ReadingPaused", attributes);
     mSubject.DoAction("ReadingResumed", attributes);
     mSubject.DoAction("ReadingCancelled", attributes);
     mSubject.DoAction("ReadingStopped", attributes);
     const std::vector<Accessibility::ReadingStatus> expectedStatuses{
+      Accessibility::ReadingStatus::STARTED,
       Accessibility::ReadingStatus::SKIPPED,
       Accessibility::ReadingStatus::PAUSED,
       Accessibility::ReadingStatus::RESUMED,

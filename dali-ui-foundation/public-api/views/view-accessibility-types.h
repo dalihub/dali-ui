@@ -80,7 +80,8 @@ enum class ReadingStatus : uint32_t
   PAUSED,      ///< Reading was paused. @SINCE_2_5.30
   RESUMED,     ///< Reading resumed after being paused. @SINCE_2_5.30
   CANCELLED,   ///< Pending or active reading was cancelled. @SINCE_2_5.30
-  STOPPED      ///< Reading stopped or completed. @SINCE_2_5.30
+  STOPPED,     ///< Reading stopped or completed. @SINCE_2_5.30
+  STARTED      ///< Reading started. @SINCE_2_5.30
 };
 
 /**
