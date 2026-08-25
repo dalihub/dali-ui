@@ -232,6 +232,85 @@ int UtcDaliStyledTextControllerAnchorColorsP(void)
   END_TEST;
 }
 
+int UtcDaliStyledTextControllerTextFitDataP(void)
+{
+  UiTestApplication application;
+
+  PublicText::ControllerPtr     controller = PublicText::Controller::New();
+  PublicText::Controller::Impl& impl       = PublicText::Controller::Impl::GetImplementation(*controller.Get());
+
+  DALI_TEST_CHECK(!impl.mTextFitData);
+  DALI_TEST_CHECK(!controller->IsTextFitEnabled());
+  DALI_TEST_CHECK(!controller->IsTextFitCandidatesEnabled());
+  DALI_TEST_EQUALS(controller->GetTextFitMinSize(PublicText::Controller::POINT_SIZE), PublicText::DEFAULT_TEXTFIT_MIN, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitMaxSize(PublicText::Controller::POINT_SIZE), PublicText::DEFAULT_TEXTFIT_MAX, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitStepSize(PublicText::Controller::POINT_SIZE), PublicText::DEFAULT_TEXTFIT_STEP, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitContentSize(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_CHECK(controller->GetTextFitCandidates().Empty());
+
+  controller->SetTextFitEnabled(false);
+  controller->SetTextFitCandidatesEnabled(false);
+  controller->SetTextFitChanged(false);
+  controller->SetCurrentLineSize(0.0f);
+  controller->SetTextFitMinSize(PublicText::DEFAULT_TEXTFIT_MIN, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitMaxSize(PublicText::DEFAULT_TEXTFIT_MAX, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitStepSize(PublicText::DEFAULT_TEXTFIT_STEP, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitContentSize(Vector2::ZERO);
+  controller->ClearTextFitCandidates();
+  DALI_TEST_CHECK(!impl.mTextFitData);
+
+  controller->SetTextFitEnabled(true);
+  controller->SetTextFitMinSize(12.0f, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitMaxSize(36.0f, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitStepSize(2.0f, PublicText::Controller::POINT_SIZE);
+  controller->SetCurrentLineSize(1.5f);
+  controller->SetTextFitContentSize(Vector2(100.0f, 50.0f));
+  controller->SetTextFitChanged(true);
+  DALI_TEST_CHECK(impl.mTextFitData);
+  DALI_TEST_CHECK(controller->IsTextFitEnabled());
+  DALI_TEST_CHECK(controller->IsTextFitChanged());
+  DALI_TEST_EQUALS(controller->GetTextFitMinSize(PublicText::Controller::POINT_SIZE), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitMaxSize(PublicText::Controller::POINT_SIZE), 36.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitStepSize(PublicText::Controller::POINT_SIZE), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetCurrentLineSize(), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitContentSize(), Vector2(100.0f, 50.0f), TEST_LOCATION);
+
+  Dali::Vector<PublicText::Fit::Candidate> candidates;
+  candidates.PushBack(PublicText::Fit::Candidate(16.0f, 32.0f));
+  candidates.PushBack(PublicText::Fit::Candidate(24.0f, 40.0f));
+  controller->SetTextFitEnabled(false);
+  controller->SetTextFitCandidatesEnabled(true);
+  controller->SetTextFitCandidates(candidates);
+  DALI_TEST_CHECK(!controller->IsTextFitEnabled());
+  DALI_TEST_CHECK(controller->IsTextFitCandidatesEnabled());
+  DALI_TEST_EQUALS(controller->GetTextFitCandidates().Count(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(controller->GetMaxFitCandidate());
+  DALI_TEST_EQUALS(controller->GetMaxFitCandidate()->GetFontSize(), 24.0f, TEST_LOCATION);
+
+  controller->SetText("TextFit should select a candidate that fits the available layout size");
+  controller->SetDefaultFontSize(20.0f, PublicText::Controller::POINT_SIZE);
+  controller->SetMultiLineEnabled(false);
+  controller->FitCandidatesPointSizeForLayout(Size(1000.0f, 200.0f));
+  DALI_TEST_EQUALS(controller->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE), 24.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  controller->SetTextFitCandidatesEnabled(false);
+  controller->ClearTextFitCandidates();
+  DALI_TEST_CHECK(controller->GetTextFitCandidates().Empty());
+  DALI_TEST_EQUALS(controller->GetTextFitMinSize(PublicText::Controller::POINT_SIZE), 12.0f, TEST_LOCATION);
+
+  controller->SetTextFitEnabled(true);
+  controller->FitPointSizeforLayout(Size(320.0f, 80.0f));
+  const float wideFitSize = controller->GetTextFitFontSize(PublicText::Controller::POINT_SIZE);
+  DALI_TEST_CHECK(wideFitSize >= 12.0f && wideFitSize <= 36.0f);
+
+  controller->SetTextFitContentSize(Size(320.0f, 80.0f));
+  controller->FitPointSizeforLayout(Size(100.0f, 40.0f));
+  const float narrowFitSize = controller->GetTextFitFontSize(PublicText::Controller::POINT_SIZE);
+  DALI_TEST_CHECK(narrowFitSize >= 12.0f && narrowFitSize <= wideFitSize);
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextControllerSetStyledTextForegroundColorSpanP(void)
 {
   UiTestApplication application;

@@ -503,7 +503,14 @@ bool Controller::IsTextElideEnabled() const
 
 void Controller::SetTextFitEnabled(bool enabled)
 {
-  mImpl->mTextFitEnabled = enabled;
+  if(enabled)
+  {
+    mImpl->GetOrCreateTextFitData().enabled = true;
+  }
+  else if(mImpl->mTextFitData)
+  {
+    mImpl->mTextFitData->enabled = false;
+  }
   mImpl->ClearFontData();
   RequestRelayout();
   RequestAsyncRender();
@@ -511,67 +518,95 @@ void Controller::SetTextFitEnabled(bool enabled)
 
 bool Controller::IsTextFitEnabled() const
 {
-  return mImpl->mTextFitEnabled;
+  return mImpl->IsTextFitEnabled();
 }
 
 void Controller::SetTextFitChanged(bool changed)
 {
-  mImpl->mTextFitChanged = changed;
+  if(changed)
+  {
+    mImpl->GetOrCreateTextFitData().changed = true;
+  }
+  else if(mImpl->mTextFitData)
+  {
+    mImpl->mTextFitData->changed = false;
+  }
 }
 
 bool Controller::IsTextFitChanged() const
 {
-  return mImpl->mTextFitChanged;
+  return mImpl->mTextFitData && mImpl->mTextFitData->changed;
 }
 
 void Controller::SetCurrentLineSize(float lineSize)
 {
-  mImpl->mCurrentLineSize = lineSize;
+  if(lineSize != 0.0f || mImpl->mTextFitData)
+  {
+    mImpl->GetOrCreateTextFitData().currentLineSize = lineSize;
+  }
 }
 
 float Controller::GetCurrentLineSize() const
 {
-  return mImpl->mCurrentLineSize;
+  return mImpl->mTextFitData ? mImpl->mTextFitData->currentLineSize : 0.0f;
 }
 
 void Controller::SetTextFitMinSize(float minSize, FontSizeType type)
 {
-  mImpl->mTextFitMinSize = (type == POINT_SIZE) ? minSize : ConvertPixelToPoint(minSize);
+  const float pointSize = (type == POINT_SIZE) ? minSize : ConvertPixelToPoint(minSize);
+  if(pointSize != DEFAULT_TEXTFIT_MIN || mImpl->mTextFitData)
+  {
+    mImpl->GetOrCreateTextFitData().minSize = pointSize;
+  }
 }
 
 float Controller::GetTextFitMinSize(FontSizeType type) const
 {
-  return type == POINT_SIZE ? mImpl->mTextFitMinSize : ConvertPointToPixel(mImpl->mTextFitMinSize);
+  const float pointSize = mImpl->mTextFitData ? mImpl->mTextFitData->minSize : DEFAULT_TEXTFIT_MIN;
+  return type == POINT_SIZE ? pointSize : ConvertPointToPixel(pointSize);
 }
 
 void Controller::SetTextFitMaxSize(float maxSize, FontSizeType type)
 {
-  mImpl->mTextFitMaxSize = (type == POINT_SIZE) ? maxSize : ConvertPixelToPoint(maxSize);
+  const float pointSize = (type == POINT_SIZE) ? maxSize : ConvertPixelToPoint(maxSize);
+  if(pointSize != DEFAULT_TEXTFIT_MAX || mImpl->mTextFitData)
+  {
+    mImpl->GetOrCreateTextFitData().maxSize = pointSize;
+  }
 }
 
 float Controller::GetTextFitMaxSize(FontSizeType type) const
 {
-  return type == POINT_SIZE ? mImpl->mTextFitMaxSize : ConvertPointToPixel(mImpl->mTextFitMaxSize);
+  const float pointSize = mImpl->mTextFitData ? mImpl->mTextFitData->maxSize : DEFAULT_TEXTFIT_MAX;
+  return type == POINT_SIZE ? pointSize : ConvertPointToPixel(pointSize);
 }
 
 void Controller::SetTextFitStepSize(float step, FontSizeType type)
 {
-  mImpl->mTextFitStepSize = (type == POINT_SIZE) ? step : ConvertPixelToPoint(step);
+  const float pointSize = (type == POINT_SIZE) ? step : ConvertPixelToPoint(step);
+  if(pointSize != DEFAULT_TEXTFIT_STEP || mImpl->mTextFitData)
+  {
+    mImpl->GetOrCreateTextFitData().stepSize = pointSize;
+  }
 }
 
 float Controller::GetTextFitStepSize(FontSizeType type) const
 {
-  return type == POINT_SIZE ? mImpl->mTextFitStepSize : ConvertPointToPixel(mImpl->mTextFitStepSize);
+  const float pointSize = mImpl->mTextFitData ? mImpl->mTextFitData->stepSize : DEFAULT_TEXTFIT_STEP;
+  return type == POINT_SIZE ? pointSize : ConvertPointToPixel(pointSize);
 }
 
 void Controller::SetTextFitContentSize(Vector2 size)
 {
-  mImpl->mTextFitContentSize = size;
+  if(size != Vector2::ZERO || mImpl->mTextFitData)
+  {
+    mImpl->GetOrCreateTextFitData().contentSize = size;
+  }
 }
 
 Vector2 Controller::GetTextFitContentSize() const
 {
-  return mImpl->mTextFitContentSize;
+  return mImpl->mTextFitData ? mImpl->mTextFitData->contentSize : Vector2::ZERO;
 }
 
 float Controller::GetTextFitFontSize(FontSizeType type) const
@@ -593,7 +628,14 @@ void Controller::SetTextFitPointSize(float pointSize)
 
 void Controller::SetTextFitCandidatesEnabled(bool enabled)
 {
-  mImpl->mTextFitCandidatesEnabled = enabled;
+  if(enabled)
+  {
+    mImpl->GetOrCreateTextFitData().candidatesEnabled = true;
+  }
+  else if(mImpl->mTextFitData)
+  {
+    mImpl->mTextFitData->candidatesEnabled = false;
+  }
   mImpl->ClearFontData();
   RequestRelayout();
   RequestAsyncRender();
@@ -601,26 +643,33 @@ void Controller::SetTextFitCandidatesEnabled(bool enabled)
 
 bool Controller::IsTextFitCandidatesEnabled() const
 {
-  return mImpl->mTextFitCandidatesEnabled;
+  return mImpl->IsTextFitCandidatesEnabled();
 }
 
 const Text::Fit::Candidate* Controller::GetMaxFitCandidate() const
 {
-  const int index = mImpl->mMaxFitCandidateIndex;
-  if(index < 0 || static_cast<uint32_t>(index) >= mImpl->mTextFitCandidates.Count())
+  const Controller::Impl::TextFitData* data = mImpl->GetTextFitData();
+  if(!data || data->maxCandidateIndex < 0 ||
+     static_cast<uint32_t>(data->maxCandidateIndex) >= data->candidates.Count())
   {
     return nullptr;
   }
 
-  return &mImpl->mTextFitCandidates[static_cast<uint32_t>(index)];
+  return &data->candidates[static_cast<uint32_t>(data->maxCandidateIndex)];
 }
 
 void Controller::SetTextFitCandidates(const Dali::Vector<Text::Fit::Candidate>& candidates)
 {
-  mImpl->mTextFitCandidates    = candidates;
-  mImpl->mMaxFitCandidateIndex = -1;
+  if(candidates.Empty() && !mImpl->mTextFitData)
+  {
+    return;
+  }
 
-  const uint32_t count = static_cast<uint32_t>(mImpl->mTextFitCandidates.Count());
+  Controller::Impl::TextFitData& data = mImpl->GetOrCreateTextFitData();
+  data.candidates                     = candidates;
+  data.maxCandidateIndex              = -1;
+
+  const uint32_t count = static_cast<uint32_t>(data.candidates.Count());
   if(count == 0u)
   {
     return;
@@ -629,8 +678,8 @@ void Controller::SetTextFitCandidates(const Dali::Vector<Text::Fit::Candidate>& 
   uint32_t bestIndex = 0u;
   for(uint32_t i = 1u; i < count; ++i)
   {
-    const Text::Fit::Candidate& best = mImpl->mTextFitCandidates[bestIndex];
-    const Text::Fit::Candidate& cur  = mImpl->mTextFitCandidates[i];
+    const Text::Fit::Candidate& best = data.candidates[bestIndex];
+    const Text::Fit::Candidate& cur  = data.candidates[i];
 
     const float bestFontSize = best.GetFontSize();
     const float curFontSize  = cur.GetFontSize();
@@ -643,21 +692,25 @@ void Controller::SetTextFitCandidates(const Dali::Vector<Text::Fit::Candidate>& 
     }
   }
 
-  mImpl->mMaxFitCandidateIndex = static_cast<int>(bestIndex);
+  data.maxCandidateIndex = static_cast<int>(bestIndex);
 }
 
 const Dali::Vector<Text::Fit::Candidate>& Controller::GetTextFitCandidates() const
 {
-  return mImpl->mTextFitCandidates;
+  static const Dali::Vector<Text::Fit::Candidate> EMPTY_CANDIDATES;
+  return mImpl->mTextFitData ? mImpl->mTextFitData->candidates : EMPTY_CANDIDATES;
 }
 
 void Controller::ClearTextFitCandidates()
 {
-  if(!mImpl->mTextFitCandidates.Empty())
+  if(mImpl->mTextFitData)
   {
-    mImpl->mTextFitCandidates.Clear();
+    if(!mImpl->mTextFitData->candidates.Empty())
+    {
+      mImpl->mTextFitData->candidates.Clear();
+    }
+    mImpl->mTextFitData->maxCandidateIndex = -1;
   }
-  mImpl->mMaxFitCandidateIndex = -1;
 }
 
 void Controller::SetPlaceholderTextElideEnabled(bool enabled)

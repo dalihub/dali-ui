@@ -81,12 +81,22 @@ constexpr int ASYNC_TEXT_THREAD_TIMEOUT = 5;
 bool  gAsyncNaturalSizeComputed = false;
 float gAsyncNaturalSizeWidth    = 0.0f;
 float gAsyncNaturalSizeHeight   = 0.0f;
+bool  gAsyncRenderFinished      = false;
+float gAsyncRenderWidth         = 0.0f;
+float gAsyncRenderHeight        = 0.0f;
 
 void OnAsyncNaturalSizeComputed(View, float width, float height)
 {
   gAsyncNaturalSizeComputed = true;
   gAsyncNaturalSizeWidth    = width;
   gAsyncNaturalSizeHeight   = height;
+}
+
+void OnAsyncRenderFinished(View, float width, float height)
+{
+  gAsyncRenderFinished = true;
+  gAsyncRenderWidth    = width;
+  gAsyncRenderHeight   = height;
 }
 
 bool HasValidTextTexture(Actor actor)
@@ -136,6 +146,21 @@ bool WaitForAsyncNaturalSize(UiTestApplication& application)
     application.Render();
   }
   return gAsyncNaturalSizeComputed;
+}
+
+bool WaitForAsyncRender(UiTestApplication& application)
+{
+  constexpr uint32_t MAX_TRIGGER_COUNT = 4u;
+  for(uint32_t trigger = 0u; trigger < MAX_TRIGGER_COUNT && !gAsyncRenderFinished; ++trigger)
+  {
+    if(!Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT))
+    {
+      return false;
+    }
+    application.SendNotification();
+    application.Render();
+  }
+  return gAsyncRenderFinished;
 }
 } // namespace
 
@@ -2333,6 +2358,73 @@ int UtcDaliLabelTextFit(void)
 
   fit = label.GetTextFit();
   DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::NONE);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextFitRenderingP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("TextFit should preserve its state across synchronous and asynchronous rendering");
+  DALI_TEST_CHECK(label);
+
+  label.SetMultiLine(true);
+  label.SetRequestedWidth(180.0f);
+  label.SetRequestedHeight(80.0f);
+
+  const Text::Fit::Range range(10.0f, 36.0f, 2.0f);
+  label.SetTextFit(range);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  label.SetAsyncRendering(true);
+
+  gAsyncRenderFinished = false;
+  gAsyncRenderWidth    = 0.0f;
+  gAsyncRenderHeight   = 0.0f;
+  label.SetRequestedWidth(160.0f);
+  label.SetRequestedHeight(70.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(gAsyncRenderWidth > 0.0f);
+  DALI_TEST_CHECK(gAsyncRenderHeight > 0.0f);
+
+  Text::Fit fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::RANGE);
+  DALI_TEST_EQUALS(fit.GetRange().GetMinimumFontSize(), 10.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetRange().GetMaximumFontSize(), 36.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetRange().GetFontSizeStep(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  Dali::Vector<Text::Fit::Candidate> candidates;
+  candidates.PushBack(Text::Fit::Candidate(12.0f, 16.0f));
+  candidates.PushBack(Text::Fit::Candidate(24.0f, 30.0f));
+
+  gAsyncRenderFinished = false;
+  label.SetTextFit(candidates);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+
+  fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::CANDIDATES);
+  DALI_TEST_EQUALS(fit.GetCandidates().Count(), 2u, TEST_LOCATION);
+
+  label.SetTextFit(Text::Fit::None());
+  DALI_TEST_CHECK(label.GetTextFit().GetType() == Text::Fit::Type::NONE);
+
+  label.SetAsyncRendering(false);
+  label.SetTextFit(range);
+  label.SetRequestedWidth(140.0f);
+  label.SetRequestedHeight(60.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+  DALI_TEST_CHECK(label.GetTextFit().GetType() == Text::Fit::Type::RANGE);
 
   END_TEST;
 }

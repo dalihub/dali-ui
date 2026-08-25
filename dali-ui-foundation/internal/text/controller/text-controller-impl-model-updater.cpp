@@ -315,7 +315,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
         // Set the normal font and the placeholder font.
         defaultFontDescription = impl.mFontDefaults->GetFontDescription();
 
-        if(impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
+        if(impl.IsTextFitEnabled() || impl.IsTextFitCandidatesEnabled())
         {
           defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(impl.mFontDefaults->mFitPointSize * numberOfPointsPerOneUnitOfPointSize);
         }

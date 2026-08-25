@@ -226,7 +226,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
                     static_cast<float>(pointsPerUnit);
   if(impl.mFontDefaults != nullptr)
   {
-    pointSize = (impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
+    pointSize = (impl.IsTextFitEnabled() || impl.IsTextFitCandidatesEnabled())
                   ? impl.mFontDefaults->mFitPointSize
                   : impl.mFontDefaults->mDefaultPointSize * impl.GetEffectiveTextScale();
   }
@@ -527,14 +527,15 @@ bool Controller::Relayouter::CheckForTextFit(Controller& controller, float point
 
 void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& controller, const Size& layoutSize)
 {
-  Controller::Impl& impl = *controller.mImpl;
+  Controller::Impl&              impl    = *controller.mImpl;
+  Controller::Impl::TextFitData& textFit = impl.GetOrCreateTextFitData();
 
   const OperationsMask operations = impl.mOperationsPending;
-  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
+  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || textFit.contentSize != layoutSize)
   {
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_CANDIDATES_LAYOUT", "[%p]", static_cast<void*>(&controller));
 
-    Dali::Vector<Ui::Text::Fit::Candidate> fitCandidates  = impl.mTextFitCandidates;
+    Dali::Vector<Ui::Text::Fit::Candidate> fitCandidates  = textFit.candidates;
     const int                              candidateCount = static_cast<int>(fitCandidates.Count());
 
     if(candidateCount == 0)
@@ -643,19 +644,20 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
 
 void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const Size& layoutSize)
 {
-  Controller::Impl& impl = *controller.mImpl;
+  Controller::Impl&              impl    = *controller.mImpl;
+  Controller::Impl::TextFitData& textFit = impl.GetOrCreateTextFitData();
 
   const OperationsMask operations = impl.mOperationsPending;
-  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
+  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || textFit.contentSize != layoutSize)
   {
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_LAYOUT", "[%p]", static_cast<void*>(&controller));
     ModelPtr& model = impl.mModel;
 
     bool  actualellipsis      = model->mElideEnabled;
     float effectiveTextScale  = impl.GetEffectiveTextScale();
-    float minPointSize        = impl.mTextFitMinSize * effectiveTextScale;
-    float maxPointSize        = impl.mTextFitMaxSize * effectiveTextScale;
-    float pointInterval       = impl.mTextFitStepSize * effectiveTextScale;
+    float minPointSize        = textFit.minSize * effectiveTextScale;
+    float maxPointSize        = textFit.maxSize * effectiveTextScale;
+    float pointInterval       = textFit.stepSize * effectiveTextScale;
     float currentFitPointSize = impl.mFontDefaults->mFitPointSize;
     bool  isMultiLine         = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
 
@@ -791,7 +793,7 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
     model->mElideEnabled = actualellipsis;
     if(!Dali::Equals(currentFitPointSize, bestPointSize))
     {
-      impl.mTextFitChanged = true;
+      textFit.changed = true;
     }
 
     impl.mFontDefaults->mFitPointSize = bestPointSize;
@@ -1221,7 +1223,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     layoutParameters.estimatedNumberOfLines = textUpdateInfo.mEstimatedNumberOfLines;
 
     float fontPointSize =
-      (impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
+      (impl.IsTextFitEnabled() || impl.IsTextFitCandidatesEnabled())
         ? (impl.mFontDefaults ? impl.mFontDefaults->mFitPointSize : 0.f)
         : (impl.mFontDefaults ? impl.mFontDefaults->mDefaultPointSize : 0.f) * impl.GetEffectiveTextScale();
     impl.mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize));

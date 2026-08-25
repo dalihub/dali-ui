@@ -548,6 +548,9 @@ public: // Configure the text controller.
   /**
    * @brief Retrieves the text fit candidates.
    *
+   * @note Do not retain the returned reference across calls that change the
+   * text fit candidates.
+   *
    * @return The list of text fit candidates.
    */
   const Dali::Vector<Text::Fit::Candidate>& GetTextFitCandidates() const;

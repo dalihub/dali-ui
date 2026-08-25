@@ -382,6 +382,67 @@ public:
     Vector4 clickedColor{Color::DARK_MAGENTA};
   };
 
+  /**
+   * @brief Stores TextFit state allocated for controllers that use TextFit.
+   */
+  struct TextFitData
+  {
+    Dali::Vector<Text::Fit::Candidate> candidates;
+    Vector2                            contentSize{Vector2::ZERO};
+    int                                maxCandidateIndex{-1};
+    float                              currentLineSize{0.0f};
+    float                              minSize{DEFAULT_TEXTFIT_MIN};
+    float                              maxSize{DEFAULT_TEXTFIT_MAX};
+    float                              stepSize{DEFAULT_TEXTFIT_STEP};
+    bool                               enabled{false};
+    bool                               changed{false};
+    bool                               candidatesEnabled{false};
+  };
+
+  /**
+   * @brief Gets TextFit data if it exists.
+   *
+   * @return The TextFit data, or nullptr if TextFit has not been used
+   */
+  const TextFitData* GetTextFitData() const
+  {
+    return mTextFitData.get();
+  }
+
+  /**
+   * @brief Gets TextFit data, creating it if necessary.
+   *
+   * @return The TextFit data
+   */
+  TextFitData& GetOrCreateTextFitData()
+  {
+    if(!mTextFitData)
+    {
+      mTextFitData = std::make_unique<TextFitData>();
+    }
+    return *mTextFitData;
+  }
+
+  /**
+   * @brief Checks whether range-based TextFit is enabled.
+   *
+   * @return True if range-based TextFit is enabled
+   */
+  bool IsTextFitEnabled() const
+  {
+    return mTextFitData && mTextFitData->enabled;
+  }
+
+  /**
+   * @brief Checks whether candidate-based TextFit is enabled.
+   *
+   * @return True if candidate-based TextFit is enabled
+   */
+  bool IsTextFitCandidatesEnabled() const
+  {
+    return mTextFitData && mTextFitData->candidatesEnabled;
+  }
+
   enum class ClearFocusOnEscapeState
   {
     ENABLE  = 0,
@@ -413,21 +474,15 @@ public:
     mClipboard(),
     mView(),
     mModifyEvents(),
-    mTextFitCandidates(),
     mTextUpdateInfo(),
     mReplacementData(),
     mEndEllipsisResult(),
     mAnchorColorData(),
+    mTextFitData(),
     mTextColor(Color::BLACK),
-    mTextFitContentSize(),
     mOperationsPending(NO_OPERATION),
     mMaximumNumberOfCharacters(50u),
-    mMaxFitCandidateIndex(-1),
     mLayoutDirection(LayoutDirection::LEFT_TO_RIGHT),
-    mCurrentLineSize(0.f),
-    mTextFitMinSize(DEFAULT_TEXTFIT_MIN),
-    mTextFitMaxSize(DEFAULT_TEXTFIT_MAX),
-    mTextFitStepSize(DEFAULT_TEXTFIT_STEP),
     mUiScale(DEFAULT_UI_SCALE),
     mFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
     mMinFontSizeScale(DEFAULT_MIN_FONT_SIZE_SCALE),
@@ -452,9 +507,6 @@ public:
     mFontStyleSetByString(false),
     mStrikethroughSetByString(false),
     mSystemFontSizeScaleEnabled(false),
-    mTextFitEnabled(false),
-    mTextFitChanged(false),
-    mTextFitCandidatesEnabled(false),
     mIsLayoutDirectionChanged(false),
     mIsUserInteractionEnabled(true),
     mProcessorRegistered(false),
@@ -1575,27 +1627,21 @@ public:
 
   // Containers / complex values
   Vector<ModifyEvent>                 mModifyEvents;      ///< Temporary stores the text set until the next relayout.
-  Dali::Vector<Text::Fit::Candidate>  mTextFitCandidates; ///< List of Text::Fit::Candidate for TextFitCandidates operation.
   TextUpdateInfo                      mTextUpdateInfo;    ///< Info of the characters updated.
   std::unique_ptr<ReplacementData>    mReplacementData;   ///< Replacement data allocated on demand.
   std::unique_ptr<FinalElisionResult> mEndEllipsisResult; ///< Non-replacement END result, alive only while elision is active.
   std::unique_ptr<AnchorColorData>    mAnchorColorData;   ///< Customized anchor colors allocated on demand.
+  std::unique_ptr<TextFitData>        mTextFitData;       ///< TextFit state allocated on demand.
 
   // Geometry / colors
-  Vector4 mTextColor;          ///< The regular text color
-  Vector2 mTextFitContentSize; ///< Size of Text fit content
+  Vector4 mTextColor; ///< The regular text color
 
   // Integer / enum-like values
   OperationsMask        mOperationsPending;         ///< Operations pending to be done to layout the text.
   Length                mMaximumNumberOfCharacters; ///< Maximum number of characters that can be inserted.
-  int                   mMaxFitCandidateIndex;
-  LayoutDirection::Type mLayoutDirection; ///< Current system language direction
+  LayoutDirection::Type mLayoutDirection;           ///< Current system language direction
 
   // Floating-point values
-  float mCurrentLineSize;       ///< Used to store the MinLineSize set by user when TextFitCandidates is enabled.
-  float mTextFitMinSize;        ///< Minimum Font Size for text fit. Default 10
-  float mTextFitMaxSize;        ///< Maximum Font Size for text fit. Default 100
-  float mTextFitStepSize;       ///< Step Size for font intervalse. Default 1
   float mUiScale;               ///< Scale value for text-specific UI metrics. Default 1.0
   float mFontSizeScale;         ///< Scale value for Font Size. Default 1.0
   float mMinFontSizeScale;      ///< Minimum scale value for Font Size. Default 0.01
@@ -1624,9 +1670,6 @@ public:
   bool               mFontStyleSetByString : 1;        ///< Set when font style is set by string (legacy) instead of map
   bool               mStrikethroughSetByString : 1;    ///< Set when strikethrough is set by string (legacy) instead of map
   bool               mSystemFontSizeScaleEnabled : 1;  ///< Whether the system font size scale is applied.
-  bool               mTextFitEnabled : 1;              ///< Whether the text's fit is enabled.
-  bool               mTextFitChanged : 1;              ///< Whether the text fit property has changed.
-  bool               mTextFitCandidatesEnabled : 1;    ///< Whether the text's fit Candidates is enabled.
   bool               mIsLayoutDirectionChanged : 1;    ///< Whether the layout has changed.
   bool               mIsUserInteractionEnabled : 1;    ///< Whether the user interaction is enabled.
   bool               mProcessorRegistered : 1;         ///< Whether the text controller registered into processor or not.
