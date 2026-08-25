@@ -511,6 +511,7 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
 
   shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
+  shader.RegisterProperty("pixelSnapFactor", 0.0f);
   mRenderer.SetShader(shader);
   mRenderer.SetTextures(textureSet);
 

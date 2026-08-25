@@ -2971,6 +2971,35 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesRendererBoundsP(void)
   END_TEST;
 }
 
+int UtcDaliTextGradientMarqueeScrollerInitializesPixelSnapFactorP(void)
+{
+  TestApplication application;
+
+  Geometry geometry = CreateQuadGeometry();
+  Shader   shader   = CreateShader();
+  Renderer renderer = Renderer::New(geometry, shader);
+
+  TestScrollerInterface   scrollerInterface;
+  UiText::TextScrollerPtr scroller = UiText::TextScroller::New(scrollerInterface);
+  scroller->SetParameters(Actor::New(),
+                          renderer,
+                          TextureSet::New(),
+                          Size(100.0f, 40.0f),
+                          Size(200.0f, 40.0f),
+                          20.0f,
+                          false,
+                          UiText::Alignment::CENTER,
+                          UiText::Alignment::CENTER,
+                          true,
+                          UiText::TextScrollerGradient{});
+
+  Shader                marqueeShader        = renderer.GetShader();
+  const Property::Index pixelSnapFactorIndex = marqueeShader.GetPropertyIndex("pixelSnapFactor");
+  DALI_TEST_CHECK(pixelSnapFactorIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(marqueeShader.GetProperty<float>(pixelSnapFactorIndex), 0.0f, EPSILON, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliTextGradientMarqueeScrollerUpdatesBaseAnimSourceP(void)
 {
   TestApplication application;
