@@ -434,7 +434,7 @@ bool Controller::EventHandler::AnchorClickEvent(Controller& controller, uint32_t
               ColorRun& colorRun =
                 *(controller.mImpl->mModel->mLogicalModel->mColorRuns.Begin() + anchor.colorRunIndex);
               colorRun.color =
-                anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : controller.mImpl->mAnchorClickedColor;
+                anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : controller.mImpl->GetAnchorClickedColor();
             }
             if(controller.mImpl->mModel->mLogicalModel->mUnderlinedCharacterRuns.Count() >
                anchor.underlinedCharacterRunIndex)
@@ -443,7 +443,7 @@ bool Controller::EventHandler::AnchorClickEvent(Controller& controller, uint32_t
                 *(controller.mImpl->mModel->mLogicalModel->mUnderlinedCharacterRuns.Begin() +
                   anchor.underlinedCharacterRunIndex);
               underlineRun.properties.color =
-                anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : controller.mImpl->mAnchorClickedColor;
+                anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : controller.mImpl->GetAnchorClickedColor();
             }
 
             controller.mImpl->ClearFontData();

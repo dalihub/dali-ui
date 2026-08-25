@@ -198,6 +198,40 @@ int UtcDaliLabelAnchorTouchInterruptedP(void)
   END_TEST;
 }
 
+int UtcDaliStyledTextControllerAnchorColorsP(void)
+{
+  UiTestApplication application;
+
+  PublicText::ControllerPtr   controller = PublicText::Controller::New();
+  PublicText::Controller::Impl& impl       = PublicText::Controller::Impl::GetImplementation(*controller.Get());
+
+  DALI_TEST_CHECK(!impl.mAnchorColorData);
+  DALI_TEST_EQUALS(controller->GetAnchorColor(), Color::MEDIUM_BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetAnchorClickedColor(), Color::DARK_MAGENTA, TEST_LOCATION);
+
+  controller->SetAnchorColor(Color::MEDIUM_BLUE);
+  controller->SetAnchorClickedColor(Color::DARK_MAGENTA);
+  DALI_TEST_CHECK(!impl.mAnchorColorData);
+
+  controller->SetAnchorColor(Color::RED);
+  controller->SetAnchorClickedColor(Color::GREEN);
+  DALI_TEST_CHECK(impl.mAnchorColorData);
+  DALI_TEST_EQUALS(controller->GetAnchorColor(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetAnchorClickedColor(), Color::GREEN, TEST_LOCATION);
+
+  const auto*    colorData          = impl.mAnchorColorData.get();
+  const Vector4& anchorColor        = controller->GetAnchorColor();
+  const Vector4& anchorClickedColor = controller->GetAnchorClickedColor();
+
+  controller->SetAnchorColor(Color::MEDIUM_BLUE);
+  controller->SetAnchorClickedColor(Color::DARK_MAGENTA);
+  DALI_TEST_CHECK(impl.mAnchorColorData.get() == colorData);
+  DALI_TEST_EQUALS(anchorColor, Color::MEDIUM_BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(anchorClickedColor, Color::DARK_MAGENTA, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextControllerSetStyledTextForegroundColorSpanP(void)
 {
   UiTestApplication application;

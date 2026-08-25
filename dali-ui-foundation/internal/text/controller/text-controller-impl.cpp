@@ -522,24 +522,40 @@ bool Controller::Impl::ProcessInputEvents()
 
 void Controller::Impl::SetAnchorColor(const Vector4& color)
 {
-  mAnchorColor = color;
+  if(!mAnchorColorData && color != Color::MEDIUM_BLUE)
+  {
+    mAnchorColorData = std::make_unique<AnchorColorData>();
+  }
+
+  if(mAnchorColorData)
+  {
+    mAnchorColorData->color = color;
+  }
   UpdateAnchorColor();
 }
 
 const Vector4& Controller::Impl::GetAnchorColor() const
 {
-  return mAnchorColor;
+  return mAnchorColorData ? mAnchorColorData->color : Color::MEDIUM_BLUE;
 }
 
 void Controller::Impl::SetAnchorClickedColor(const Vector4& color)
 {
-  mAnchorClickedColor = color;
+  if(!mAnchorColorData && color != Color::DARK_MAGENTA)
+  {
+    mAnchorColorData = std::make_unique<AnchorColorData>();
+  }
+
+  if(mAnchorColorData)
+  {
+    mAnchorColorData->clickedColor = color;
+  }
   UpdateAnchorColor();
 }
 
 const Vector4& Controller::Impl::GetAnchorClickedColor() const
 {
-  return mAnchorClickedColor;
+  return mAnchorColorData ? mAnchorColorData->clickedColor : Color::DARK_MAGENTA;
 }
 
 void Controller::Impl::UpdateAnchorColor()
@@ -549,7 +565,9 @@ void Controller::Impl::UpdateAnchorColor()
     return;
   }
 
-  bool updateNeeded = false;
+  bool           updateNeeded       = false;
+  const Vector4& anchorColor        = GetAnchorColor();
+  const Vector4& anchorClickedColor = GetAnchorClickedColor();
 
   // The anchor color & clicked color needs to be updated with the property's color.
   for(auto& anchor : mModel->mLogicalModel->mAnchors)
@@ -559,14 +577,14 @@ void Controller::Impl::UpdateAnchorColor()
       if(mModel->mLogicalModel->mColorRuns.Count() > anchor.colorRunIndex)
       {
         ColorRun& colorRun = *(mModel->mLogicalModel->mColorRuns.Begin() + anchor.colorRunIndex);
-        colorRun.color     = mAnchorColor;
+        colorRun.color     = anchorColor;
         updateNeeded       = true;
       }
       if(mModel->mLogicalModel->mUnderlinedCharacterRuns.Count() > anchor.underlinedCharacterRunIndex)
       {
         UnderlinedCharacterRun& underlineRun =
           *(mModel->mLogicalModel->mUnderlinedCharacterRuns.Begin() + anchor.underlinedCharacterRunIndex);
-        underlineRun.properties.color = mAnchorColor;
+        underlineRun.properties.color = anchorColor;
         updateNeeded                  = true;
       }
     }
@@ -575,14 +593,14 @@ void Controller::Impl::UpdateAnchorColor()
       if(mModel->mLogicalModel->mColorRuns.Count() > anchor.colorRunIndex)
       {
         ColorRun& colorRun = *(mModel->mLogicalModel->mColorRuns.Begin() + anchor.colorRunIndex);
-        colorRun.color     = mAnchorClickedColor;
+        colorRun.color     = anchorClickedColor;
         updateNeeded       = true;
       }
       if(mModel->mLogicalModel->mUnderlinedCharacterRuns.Count() > anchor.underlinedCharacterRunIndex)
       {
         UnderlinedCharacterRun& underlineRun =
           *(mModel->mLogicalModel->mUnderlinedCharacterRuns.Begin() + anchor.underlinedCharacterRunIndex);
-        underlineRun.properties.color = mAnchorClickedColor;
+        underlineRun.properties.color = anchorClickedColor;
         updateNeeded                  = true;
       }
     }

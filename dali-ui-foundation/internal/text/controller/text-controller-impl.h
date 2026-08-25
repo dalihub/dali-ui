@@ -373,6 +373,15 @@ public:
     uint64_t                  layoutGeneration{0u};
   };
 
+  /**
+   * @brief Stores customized anchor colors.
+   */
+  struct AnchorColorData
+  {
+    Vector4 color{Color::MEDIUM_BLUE};
+    Vector4 clickedColor{Color::DARK_MAGENTA};
+  };
+
   enum class ClearFocusOnEscapeState
   {
     ENABLE  = 0,
@@ -408,9 +417,8 @@ public:
     mTextUpdateInfo(),
     mReplacementData(),
     mEndEllipsisResult(),
+    mAnchorColorData(),
     mTextColor(Color::BLACK),
-    mAnchorColor(Color::MEDIUM_BLUE),
-    mAnchorClickedColor(Color::DARK_MAGENTA),
     mTextFitContentSize(),
     mOperationsPending(NO_OPERATION),
     mMaximumNumberOfCharacters(50u),
@@ -1571,11 +1579,10 @@ public:
   TextUpdateInfo                      mTextUpdateInfo;    ///< Info of the characters updated.
   std::unique_ptr<ReplacementData>    mReplacementData;   ///< Replacement data allocated on demand.
   std::unique_ptr<FinalElisionResult> mEndEllipsisResult; ///< Non-replacement END result, alive only while elision is active.
+  std::unique_ptr<AnchorColorData>    mAnchorColorData;   ///< Customized anchor colors allocated on demand.
 
   // Geometry / colors
   Vector4 mTextColor;          ///< The regular text color
-  Vector4 mAnchorColor;        ///< The anchor color
-  Vector4 mAnchorClickedColor; ///< The anchor clicked color
   Vector2 mTextFitContentSize; ///< Size of Text fit content
 
   // Integer / enum-like values

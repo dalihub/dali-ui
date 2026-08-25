@@ -1216,6 +1216,8 @@ public: // Default style & Input style
   /**
    * @brief Retrieves the anchor's default color.
    *
+   * @note Do not retain the returned reference across SetAnchorColor() calls.
+   *
    * @return The anchor color.
    */
   const Vector4& GetAnchorColor() const;
@@ -1229,6 +1231,9 @@ public: // Default style & Input style
 
   /**
    * @brief Retrieves the anchor's clicked color.
+   *
+   * @note Do not retain the returned reference across SetAnchorClickedColor()
+   * calls.
    *
    * @return The anchor color.
    */
