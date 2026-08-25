@@ -1193,11 +1193,16 @@ private: // Implementation
   Ui::Text::TextScrollerPtr GetTextScroller();
 
   /**
-   * @brief Captures the current synchronous END-ellipsis retained anchor.
-   *
-   * Async rendering publishes the same anchor through its render result.
+   * @brief Invalidates static geometry retained for a later marquee transition.
    */
-  void CaptureMarqueeStartAnchor();
+  void InvalidateMarqueeStartGeometry();
+
+  /**
+   * @brief Captures current synchronous static geometry before marquee layout.
+   *
+   * Async rendering publishes the equivalent descriptors through its render result.
+   */
+  void CaptureMarqueeStartGeometry();
 
   /**
    * @brief Enables or disables the marquee animation.
@@ -1406,15 +1411,16 @@ private:
   Ui::Text::ControllerPtr   mController;
   Ui::Text::TextScrollerPtr mTextScroller;
 
-  Vector2                        mSize;
-  Vector2                        mLastMeasureConstraints;
-  Vector2                        mLastMeasureRequestedSize;
-  Vector2                        mTouchPosition; ///< The initial touch down position.
-  float                          mLineHeight;
-  Ui::Text::LineHeightMode       mLineHeightMode;
-  Ui::Text::OverflowMode         mOverflowMode;
-  Ui::Text::MarqueeTriggerPolicy mMarqueeTriggerPolicy;
-  Ui::Text::MarqueeStartAnchor   mMarqueeStartAnchor;
+  Vector2                               mSize;
+  Vector2                               mLastMeasureConstraints;
+  Vector2                               mLastMeasureRequestedSize;
+  Vector2                               mTouchPosition; ///< The initial touch down position.
+  float                                 mLineHeight;
+  Ui::Text::LineHeightMode              mLineHeightMode;
+  Ui::Text::OverflowMode                mOverflowMode;
+  Ui::Text::MarqueeTriggerPolicy        mMarqueeTriggerPolicy;
+  Ui::Text::MarqueeStartAnchor          mMarqueeStartAnchor;
+  Ui::Text::MarqueeFittingStartGeometry mMarqueeFittingStartGeometry;
 
   int  mAsyncLineCount;
   int  mTextColorAnimatedCount;

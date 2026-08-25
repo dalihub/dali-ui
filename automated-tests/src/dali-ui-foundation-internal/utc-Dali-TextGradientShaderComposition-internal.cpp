@@ -15,15 +15,16 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
-#include <dali-ui-foundation/internal/text/text-scroller.h>
-#include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-marquee-helper.h>
+#include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual-shader-factory.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <mesh-builder.h>
@@ -3052,7 +3053,26 @@ int UtcDaliTextScrollerHorizontalAlignmentIgnoresWrapGapP(void)
                    EPSILON,
                    TEST_LOCATION);
 
-  // A stale/irrelevant continuity descriptor must never shift fitting text.
+  // Invalid fitting geometry keeps the legacy zero-delta fallback.
+  scroller->SetParameters(actor,
+                          renderer,
+                          textureSet,
+                          Size(100.0f, 40.0f),
+                          Size(130.0f, 40.0f),
+                          40.0f,
+                          false,
+                          false,
+                          UiText::Alignment::CENTER,
+                          UiText::Alignment::CENTER,
+                          false,
+                          UiText::TextScrollerGradient(),
+                          UiText::MarqueeInitialDelta{-10.0f, false});
+  const Property::Index fittingDeltaIndex = renderer.GetShader().GetPropertyIndex("uDelta");
+  DALI_TEST_CHECK(fittingDeltaIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(renderer.GetShader().GetProperty<float>(fittingDeltaIndex), 0.0f, EPSILON, TEST_LOCATION);
+
+  // Overflow classification selects the viewport independently. A valid
+  // fitting transition delta is applied without changing requested CENTER.
   scroller->SetParameters(actor,
                           renderer,
                           textureSet,
@@ -3066,9 +3086,13 @@ int UtcDaliTextScrollerHorizontalAlignmentIgnoresWrapGapP(void)
                           false,
                           UiText::TextScrollerGradient(),
                           UiText::MarqueeInitialDelta{-10.0f, true});
-  const Property::Index fittingDeltaIndex = renderer.GetShader().GetPropertyIndex("uDelta");
-  DALI_TEST_CHECK(fittingDeltaIndex != Property::INVALID_INDEX);
-  DALI_TEST_EQUALS(renderer.GetShader().GetProperty<float>(fittingDeltaIndex), 0.0f, EPSILON, TEST_LOCATION);
+  Shader                fittingShader          = renderer.GetShader();
+  const Property::Index fittingAlignIndex      = fittingShader.GetPropertyIndex("uHorizontalAlign");
+  const Property::Index validFittingDeltaIndex = fittingShader.GetPropertyIndex("uDelta");
+  DALI_TEST_CHECK(fittingAlignIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(validFittingDeltaIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(fittingShader.GetProperty<float>(fittingAlignIndex), 0.0f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(fittingShader.GetProperty<float>(validFittingDeltaIndex), -10.0f, EPSILON, TEST_LOCATION);
 
   // Actual overflow keeps the legacy logical START alignment in both directions.
   DALI_TEST_EQUALS(getHorizontalAlignment(Size(150.0f, 40.0f), 40.0f, true, false, UiText::Alignment::CENTER),
@@ -3156,6 +3180,98 @@ int UtcDaliTextScrollerHorizontalAlignmentIgnoresWrapGapP(void)
   const Property::Index verticalDeltaIndex = renderer.GetShader().GetPropertyIndex("uDelta");
   DALI_TEST_CHECK(verticalDeltaIndex != Property::INVALID_INDEX);
   DALI_TEST_EQUALS(renderer.GetShader().GetProperty<float>(verticalDeltaIndex), 0.0f, EPSILON, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliFittingMarqueeLabelLifecycleP(void)
+{
+  UiTestApplication application;
+
+  Dali::Ui::Label label = Dali::Ui::Label::New("Fitting marquee lifecycle text");
+  label.SetFontSize(18.0f);
+  label.SetHorizontalTextAlignment(UiText::Alignment::CENTER);
+  label.SetMarqueeTriggerPolicy(UiText::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeStopMode(UiText::MarqueeStopMode::IMMEDIATE);
+  label.SetMarqueeLoopCount(0);
+  label.SetMarqueeLoopDelay(10.0f);
+
+  const float naturalWidth = label.GetNaturalSize().width;
+  label.SetRequestedWidth(naturalWidth + 169.0f);
+  label.SetRequestedHeight(40.0f);
+  application.GetScene().Add(label);
+
+  const auto render = [&]
+  {
+    application.SendNotification();
+    application.Render(16u);
+    application.SendNotification();
+  };
+  const auto getMarqueeShader = [&]
+  {
+    DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+    Shader shader = label.GetRendererAt(0u).GetShader();
+    DALI_TEST_CHECK(shader.GetPropertyIndex("uDelta") != Property::INVALID_INDEX);
+    return shader;
+  };
+
+  render();
+  label.StartMarquee();
+  render();
+  Shader firstShader = getMarqueeShader();
+  DALI_TEST_EQUALS(std::fabs(firstShader.GetProperty<float>(firstShader.GetPropertyIndex("uDelta"))),
+                   0.5f,
+                   EPSILON,
+                   TEST_LOCATION);
+
+  label.StopMarquee();
+  render();
+  label.StartMarquee();
+  render();
+  Shader replayShader = getMarqueeShader();
+  DALI_TEST_EQUALS(std::fabs(replayShader.GetProperty<float>(replayShader.GetPropertyIndex("uDelta"))),
+                   0.5f,
+                   EPSILON,
+                   TEST_LOCATION);
+
+  label.StopMarquee();
+  label.SetRequestedWidth(naturalWidth + 170.0f);
+  render();
+  label.StartMarquee();
+  render();
+  Shader resizedShader = getMarqueeShader();
+  DALI_TEST_EQUALS(resizedShader.GetProperty<float>(resizedShader.GetPropertyIndex("uDelta")),
+                   0.0f,
+                   EPSILON,
+                   TEST_LOCATION);
+
+  label.StopMarquee();
+  label.SetRequestedWidth(naturalWidth + 169.0f);
+  label.SetHorizontalTextAlignment(UiText::Alignment::END);
+  render();
+  label.StartMarquee();
+  render();
+  Shader endShader = getMarqueeShader();
+  DALI_TEST_EQUALS(endShader.GetProperty<float>(endShader.GetPropertyIndex("uHorizontalAlign")),
+                   0.5f,
+                   EPSILON,
+                   TEST_LOCATION);
+  const float endDelta = endShader.GetProperty<float>(endShader.GetPropertyIndex("uDelta"));
+  DALI_TEST_CHECK(std::fabs(endDelta) < EPSILON || std::fabs(endDelta + 1.0f) < EPSILON);
+
+  label.StopMarquee();
+  label.SetText("Changed fitting marquee text");
+  label.SetHorizontalTextAlignment(UiText::Alignment::CENTER);
+  const float changedNaturalWidth = label.GetNaturalSize().width;
+  label.SetRequestedWidth(changedNaturalWidth + 169.0f);
+  render();
+  label.StartMarquee();
+  render();
+  Shader changedShader = getMarqueeShader();
+  DALI_TEST_EQUALS(std::fabs(changedShader.GetProperty<float>(changedShader.GetPropertyIndex("uDelta"))),
+                   0.5f,
+                   EPSILON,
+                   TEST_LOCATION);
+
   END_TEST;
 }
 

@@ -553,7 +553,9 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
     BindGradientOverlayConstraint(overlayStartOffsetIndex);
   }
   float initialScrollDelta = 0.0f;
-  if(isHorizontal && isTextContentOverflow && marqueeInitialDelta.valid)
+  // Overflow selects the viewport above; a valid delta independently connects
+  // that viewport to the preceding static render for either fitting or overflow.
+  if(isHorizontal && marqueeInitialDelta.valid)
   {
     initialScrollDelta = marqueeInitialDelta.value;
     if(!std::isfinite(initialScrollDelta))

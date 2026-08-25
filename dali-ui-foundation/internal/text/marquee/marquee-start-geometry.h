@@ -27,6 +27,7 @@
 namespace Dali::Ui::Text
 {
 struct FinalElisionResult;
+class ModelInterface;
 class VisualModel;
 
 /**
@@ -62,6 +63,20 @@ struct MarqueeInitialDelta
 };
 
 /**
+ * @brief Effective horizontal translation used by a fitting static render.
+ *
+ * Fitting single-line marquee keeps the full source topology, so preserving
+ * the static renderer's effective line translation is sufficient. This is
+ * intentionally separate from MarqueeStartAnchor, which identifies retained
+ * source geometry across an END-ellipsis transition.
+ */
+struct MarqueeFittingStartGeometry
+{
+  float staticTranslation{0.0f}; ///< Logical pixels in the Label content box.
+  bool  valid{false};
+};
+
+/**
  * @brief Resolves a retained source anchor when the visible geometry is rigid.
  *
  * The generated ellipsis and non-rendering glyphs are not geometry anchors.
@@ -70,6 +85,15 @@ struct MarqueeInitialDelta
  */
 MarqueeStartAnchor ResolveMarqueeStartAnchor(const FinalElisionResult* finalElision,
                                              const VisualModel*        sourceModel);
+
+/**
+ * @brief Captures the effective static translation for fitting single-line text.
+ *
+ * The returned translation uses the same integer conversion as Typesetter's
+ * static raster path. Ellipsized, multiline, missing, or malformed layout
+ * geometry conservatively returns an invalid descriptor.
+ */
+MarqueeFittingStartGeometry ResolveMarqueeFittingStartGeometry(const ModelInterface* model);
 
 /**
  * @brief Returns the existing horizontal marquee alignment factor.
@@ -130,6 +154,30 @@ inline MarqueeInitialDelta ResolveMarqueeInitialDelta(const MarqueeStartAnchor& 
                                                                             controlWidth,
                                                                             wrapGap);
   const float initialDelta   = textureAnchor.textureX - viewportOrigin - staticAnchor.staticControlX;
+  return std::isfinite(initialDelta) ? MarqueeInitialDelta{initialDelta, true} : MarqueeInitialDelta{};
+}
+
+/**
+ * @brief Solves the fitting transition delta for the already-selected viewport.
+ */
+inline MarqueeInitialDelta ResolveMarqueeFittingInitialDelta(const MarqueeFittingStartGeometry& staticGeometry,
+                                                             float                              horizontalAlignment,
+                                                             float                              textureWidth,
+                                                             float                              controlWidth,
+                                                             float                              wrapGap)
+{
+  if(!staticGeometry.valid || !std::isfinite(staticGeometry.staticTranslation) ||
+     !std::isfinite(horizontalAlignment) || !std::isfinite(textureWidth) ||
+     !std::isfinite(controlWidth) || !std::isfinite(wrapGap))
+  {
+    return {};
+  }
+
+  const float viewportOrigin = ResolveLegacyHorizontalMarqueeViewportOrigin(horizontalAlignment,
+                                                                            textureWidth,
+                                                                            controlWidth,
+                                                                            wrapGap);
+  const float initialDelta   = -viewportOrigin - staticGeometry.staticTranslation;
   return std::isfinite(initialDelta) ? MarqueeInitialDelta{initialDelta, true} : MarqueeInitialDelta{};
 }
 

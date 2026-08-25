@@ -298,6 +298,7 @@ struct AsyncTextRenderInfo
     marqueeWrapGap(0.f),
     marqueeStartAnchor(),
     marqueeTextureAnchor(),
+    marqueeFittingStartGeometry(),
     textRevealFadeDuration(0.0f),
     hasMultipleTextColors(false),
     containsColorGlyph(false),
@@ -307,6 +308,7 @@ struct AsyncTextRenderInfo
     isOverlayStyle(false),
     isMarqueeContentOverflow(false),
     isMarqueeStartAnchorResolved(false),
+    isMarqueeFittingStartGeometryResolved(false),
     isTextDirectionRTL(false),
     isCutoutEnabled(false),
     isEmbossEnabled(false),
@@ -340,8 +342,9 @@ struct AsyncTextRenderInfo
   uint64_t                                  replacementLayoutGeneration;
   int                                       lineCount;
   float                                     marqueeWrapGap;
-  MarqueeStartAnchor                        marqueeStartAnchor;   ///< Static result in logical Label coordinates.
-  MarqueeTextureAnchor                      marqueeTextureAnchor; ///< Marquee result in logical texture coordinates.
+  MarqueeStartAnchor                        marqueeStartAnchor;          ///< Static result in logical Label coordinates.
+  MarqueeTextureAnchor                      marqueeTextureAnchor;        ///< Marquee result in logical texture coordinates.
+  MarqueeFittingStartGeometry               marqueeFittingStartGeometry; ///< Effective fitting static translation.
   float                                     textRevealFadeDuration;
   bool                                      hasMultipleTextColors : 1;
   bool                                      containsColorGlyph : 1;
@@ -350,7 +353,8 @@ struct AsyncTextRenderInfo
   bool                                      styleBlocksTextGradient : 1;
   bool                                      isOverlayStyle : 1;
   bool                                      isMarqueeContentOverflow : 1;
-  bool                                      isMarqueeStartAnchorResolved : 1; ///< Whether this static render evaluated the anchor gate.
+  bool                                      isMarqueeStartAnchorResolved : 1;          ///< Whether this static render evaluated the anchor gate.
+  bool                                      isMarqueeFittingStartGeometryResolved : 1; ///< Whether this static render evaluated fitting geometry.
   bool                                      isTextDirectionRTL : 1;
   bool                                      isCutoutEnabled : 1;
   bool                                      isEmbossEnabled : 1;

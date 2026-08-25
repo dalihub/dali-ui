@@ -24,6 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/final-elision-result.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 
 namespace Dali::Ui::Text
@@ -152,6 +153,25 @@ MarqueeStartAnchor ResolveMarqueeStartAnchor(const FinalElisionResult* finalElis
   }
 
   return anchor;
+}
+
+MarqueeFittingStartGeometry ResolveMarqueeFittingStartGeometry(const ModelInterface* model)
+{
+  if(!model || model->GetNumberOfLines() != 1u || model->GetNumberOfGlyphs() == 0u)
+  {
+    return {};
+  }
+
+  const LineRun* const lines = model->GetLines();
+  if(!lines || lines[0].glyphRun.numberOfGlyphs == 0u || lines[0].ellipsis ||
+     !std::isfinite(lines[0].alignmentOffset))
+  {
+    return {};
+  }
+
+  // Keep this conversion identical to Typesetter's non-ellipsis static path.
+  const float staticTranslation = static_cast<float>(static_cast<int32_t>(lines[0].alignmentOffset));
+  return MarqueeFittingStartGeometry{staticTranslation, true};
 }
 
 } // namespace Dali::Ui::Text

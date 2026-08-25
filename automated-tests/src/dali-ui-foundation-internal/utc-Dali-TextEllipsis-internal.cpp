@@ -364,6 +364,8 @@ int UtcDaliEndEllipsisMarqueeStartAnchorP(void)
   DALI_TEST_CHECK(rtlStart.second.valid);
   DALI_TEST_CHECK(rtlCenter.second.valid);
   DALI_TEST_CHECK(rtlEnd.second.valid);
+  DALI_TEST_CHECK(!Text::ResolveMarqueeFittingStartGeometry(ltrCenter.first->GetRenderTextModel()).valid);
+  DALI_TEST_CHECK(!Text::ResolveMarqueeFittingStartGeometry(rtlCenter.first->GetRenderTextModel()).valid);
 
   // The production transform must solve the same first-frame invariant for
   // every direction/alignment combination without direction-specific signs.
@@ -515,6 +517,8 @@ int UtcDaliEndEllipsisMarqueeStartAnchorP(void)
   DALI_TEST_CHECK(asyncInfo.isMarqueeStartAnchorResolved);
   DALI_TEST_CHECK(asyncInfo.marqueeStartAnchor.valid);
   DALI_TEST_CHECK(std::isfinite(asyncInfo.marqueeStartAnchor.staticControlX));
+  DALI_TEST_CHECK(asyncInfo.isMarqueeFittingStartGeometryResolved);
+  DALI_TEST_CHECK(!asyncInfo.marqueeFittingStartGeometry.valid);
 
   Text::AsyncTextParameters scaledParameters = MakeAsyncEndParameters(ltrText, 120.0f, 40.0f);
   scaledParameters.horizontalAlignment       = Text::Alignment::END;
@@ -587,6 +591,175 @@ int UtcDaliEndEllipsisMarqueeStartAnchorP(void)
   Text::AsyncTextRenderInfo fittingInfo        = loader.RenderText(fittingParameters, false, Size::ZERO);
   DALI_TEST_CHECK(fittingInfo.isMarqueeStartAnchorResolved);
   DALI_TEST_CHECK(!fittingInfo.marqueeStartAnchor.valid);
+  DALI_TEST_CHECK(fittingInfo.isMarqueeFittingStartGeometryResolved);
+  DALI_TEST_CHECK(fittingInfo.marqueeFittingStartGeometry.valid);
+
+  END_TEST;
+}
+
+int UtcDaliFittingMarqueeStartGeometryP(void)
+{
+  UiTestApplication application;
+
+  const auto configure = [](const Text::ControllerPtr&  controller,
+                            Text::Alignment             alignment,
+                            Dali::LayoutDirection::Type layoutDirection,
+                            const Size&                 size)
+  {
+    controller->SetHorizontalAlignment(alignment);
+    controller->SetLayoutDirection(layoutDirection);
+    controller->SetLayoutDirectionMode(Text::LayoutDirectionMode::LOCALE);
+    controller->Relayout(size, layoutDirection);
+  };
+
+  const auto checkSyncTransition = [&](const std::string&          text,
+                                       Text::Alignment             alignment,
+                                       Dali::LayoutDirection::Type layoutDirection)
+  {
+    constexpr float height  = 40.0f;
+    constexpr float wrapGap = 20.0f;
+
+    Text::ControllerPtr naturalController = MakeEndController(text, 1000.0f, height);
+    configure(naturalController, alignment, layoutDirection, Size(1000.0f, height));
+    const float naturalWidth = naturalController->GetNaturalSize().width;
+    const float controlWidth = naturalWidth + 21.0f; // Odd fitting remainder exercises half-pixel CENTER.
+
+    Text::ControllerPtr staticController = MakeEndController(text, controlWidth, height);
+    configure(staticController, alignment, layoutDirection, Size(controlWidth, height));
+    const Text::ModelInterface*             staticModel = staticController->GetRenderTextModel();
+    const Text::MarqueeFittingStartGeometry staticGeometry =
+      Text::ResolveMarqueeFittingStartGeometry(staticModel);
+    DALI_TEST_CHECK(staticGeometry.valid);
+    DALI_TEST_EQUALS(staticModel->GetNumberOfLines(), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(staticGeometry.staticTranslation,
+                     static_cast<float>(static_cast<int32_t>(staticModel->GetLines()[0].alignmentOffset)),
+                     0.001f,
+                     TEST_LOCATION);
+
+    const Text::Length staticGlyphCount = staticModel->GetNumberOfGlyphs();
+    DALI_TEST_CHECK(staticGlyphCount > 0u);
+    Vector<Vector2> staticPositions;
+    staticPositions.Resize(staticGlyphCount);
+    std::copy(staticModel->GetLayout(),
+              staticModel->GetLayout() + staticGlyphCount,
+              staticPositions.Begin());
+
+    Text::ControllerPtr marqueeController = MakeEndController(text, naturalWidth, height);
+    configure(marqueeController, alignment, layoutDirection, Size(naturalWidth, height));
+    marqueeController->SetMarqueeEnabled(true, false, Text::MarqueeOrientation::HORIZONTAL);
+    marqueeController->Relayout(Size(naturalWidth, height), layoutDirection);
+    const Text::ModelInterface* marqueeModel = marqueeController->GetRenderTextModel();
+    DALI_TEST_EQUALS(marqueeModel->GetNumberOfGlyphs(), staticGlyphCount, TEST_LOCATION);
+
+    // Fitting keeps source topology rigid; only the static line translation is
+    // absent from the natural-width marquee texture.
+    const Vector2* marqueePositions = marqueeModel->GetLayout();
+    DALI_TEST_CHECK(marqueePositions);
+    for(Text::GlyphIndex glyphIndex = 0u; glyphIndex < staticGlyphCount; ++glyphIndex)
+    {
+      DALI_TEST_EQUALS(marqueePositions[glyphIndex].x,
+                       staticPositions[glyphIndex].x,
+                       0.01f,
+                       TEST_LOCATION);
+    }
+
+    const float textureWidth = naturalWidth + wrapGap;
+    const bool  direction    = layoutDirection == Dali::LayoutDirection::RIGHT_TO_LEFT;
+    const float horizontalAlignment =
+      Text::ResolveHorizontalMarqueeAlignment(false, direction, alignment);
+    const Text::MarqueeInitialDelta initialDelta =
+      Text::ResolveMarqueeFittingInitialDelta(staticGeometry,
+                                              horizontalAlignment,
+                                              textureWidth,
+                                              controlWidth,
+                                              wrapGap);
+    DALI_TEST_CHECK(initialDelta.valid);
+    const float viewportOrigin =
+      Text::ResolveLegacyHorizontalMarqueeViewportOrigin(horizontalAlignment,
+                                                         textureWidth,
+                                                         controlWidth,
+                                                         wrapGap);
+    const float staticControlX  = staticPositions[0u].x + staticGeometry.staticTranslation;
+    const float marqueeControlX = marqueePositions[0u].x - viewportOrigin - initialDelta.value;
+    DALI_TEST_EQUALS(marqueeControlX, staticControlX, 0.01f, TEST_LOCATION);
+  };
+
+  const std::string ltrText = "Fitting marquee text";
+  const std::string rtlText = "\xD7\x98\xD7\xA7\xD7\xA1\xD7\x98 \xD7\x9E\xD7\xAA\xD7\x90\xD7\x99\xD7\x9D \xD7\x9C\xD7\x9E\xD7\xA8\xD7\xA7\xD7\x99";
+  for(Text::Alignment alignment : {Text::Alignment::START, Text::Alignment::CENTER, Text::Alignment::END})
+  {
+    checkSyncTransition(ltrText, alignment, Dali::LayoutDirection::LEFT_TO_RIGHT);
+    checkSyncTransition(rtlText, alignment, Dali::LayoutDirection::RIGHT_TO_LEFT);
+  }
+  checkSyncTransition("English \xD7\xA2\xD7\x91\xD7\xA8\xD7\x99\xD7\xAA mixed fitting text",
+                      Text::Alignment::CENTER,
+                      Dali::LayoutDirection::RIGHT_TO_LEFT);
+
+  const auto checkAsyncTransition = [](float renderScale)
+  {
+    Text::AsyncTextParameters staticParameters = MakeAsyncEndParameters("Async fitting marquee", 401.0f, 40.0f);
+    staticParameters.horizontalAlignment       = Text::Alignment::CENTER;
+    staticParameters.renderScale               = renderScale;
+
+    Text::AsyncTextLoader staticLoader      = Text::AsyncTextLoader::New();
+    bool                  staticCached      = false;
+    Size                  staticNaturalSize = Size::ZERO;
+    if(renderScale > 1.0f)
+    {
+      staticNaturalSize = staticLoader.SetupRenderScale(staticParameters, staticCached);
+    }
+    const Text::AsyncTextRenderInfo staticInfo =
+      staticLoader.RenderText(staticParameters, staticCached, staticNaturalSize);
+    DALI_TEST_CHECK(staticInfo.isMarqueeFittingStartGeometryResolved);
+    DALI_TEST_CHECK(staticInfo.marqueeFittingStartGeometry.valid);
+
+    Text::AsyncTextParameters marqueeParameters = MakeAsyncEndParameters("Async fitting marquee", 401.0f, 40.0f);
+    marqueeParameters.horizontalAlignment       = Text::Alignment::CENTER;
+    marqueeParameters.renderScale               = renderScale;
+    marqueeParameters.maxTextureSize            = 2048;
+    marqueeParameters.marqueeGap                = 20;
+    marqueeParameters.isMarqueeEnabled          = true;
+    marqueeParameters.marqueeOrientation        = Text::MarqueeOrientation::HORIZONTAL;
+
+    Text::AsyncTextLoader marqueeLoader      = Text::AsyncTextLoader::New();
+    bool                  marqueeCached      = false;
+    Size                  marqueeNaturalSize = Size::ZERO;
+    if(renderScale > 1.0f)
+    {
+      marqueeNaturalSize = marqueeLoader.SetupRenderScale(marqueeParameters, marqueeCached);
+    }
+    const Text::AsyncTextRenderInfo marqueeInfo =
+      marqueeLoader.RenderMarquee(marqueeParameters, marqueeCached, marqueeNaturalSize);
+    DALI_TEST_CHECK(!marqueeInfo.isMarqueeContentOverflow);
+
+    const float horizontalAlignment =
+      Text::ResolveHorizontalMarqueeAlignment(false,
+                                              marqueeInfo.isTextDirectionRTL,
+                                              Text::Alignment::CENTER);
+    const Text::MarqueeInitialDelta initialDelta =
+      Text::ResolveMarqueeFittingInitialDelta(staticInfo.marqueeFittingStartGeometry,
+                                              horizontalAlignment,
+                                              marqueeInfo.size.width,
+                                              marqueeInfo.controlSize.width,
+                                              marqueeInfo.marqueeWrapGap);
+    DALI_TEST_CHECK(initialDelta.valid);
+    const float viewportOrigin =
+      Text::ResolveLegacyHorizontalMarqueeViewportOrigin(horizontalAlignment,
+                                                         marqueeInfo.size.width,
+                                                         marqueeInfo.controlSize.width,
+                                                         marqueeInfo.marqueeWrapGap);
+    DALI_TEST_EQUALS(-viewportOrigin - initialDelta.value,
+                     staticInfo.marqueeFittingStartGeometry.staticTranslation,
+                     0.01f,
+                     TEST_LOCATION);
+  };
+
+  checkAsyncTransition(1.0f);
+  checkAsyncTransition(2.0f);
+
+  // Multiline geometry is ambiguous and must retain the legacy zero-delta fallback.
+  Text::ControllerPtr multiline = MakeEndController("first line second line", 70.0f, 100.0f, true);
+  DALI_TEST_CHECK(!Text::ResolveMarqueeFittingStartGeometry(multiline->GetRenderTextModel()).valid);
 
   END_TEST;
 }

@@ -1375,13 +1375,20 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   if(!parameters.isMarqueeEnabled)
   {
-    renderInfo.isMarqueeStartAnchorResolved = true;
+    renderInfo.isMarqueeStartAnchorResolved          = true;
+    renderInfo.isMarqueeFittingStartGeometryResolved = true;
     renderInfo.marqueeStartAnchor =
       ResolveMarqueeStartAnchor(mEndEllipsisResult.get(), renderModel->mVisualModel.Get());
+    renderInfo.marqueeFittingStartGeometry =
+      ResolveMarqueeFittingStartGeometry(renderModel.Get());
+    const float geometryScale = std::max(parameters.renderScale, 1.0f);
     if(renderInfo.marqueeStartAnchor.valid)
     {
-      const float geometryScale = std::max(parameters.renderScale, 1.0f);
       renderInfo.marqueeStartAnchor.staticControlX /= geometryScale;
+    }
+    if(renderInfo.marqueeFittingStartGeometry.valid)
+    {
+      renderInfo.marqueeFittingStartGeometry.staticTranslation /= geometryScale;
     }
   }
 
