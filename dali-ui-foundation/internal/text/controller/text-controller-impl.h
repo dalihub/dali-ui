@@ -336,18 +336,6 @@ struct TextUpdateInfo
   }
 };
 
-struct UnderlineDefaults
-{
-  std::string properties;
-  // TODO: complete with underline parameters.
-};
-
-struct ShadowDefaults
-{
-  std::string properties;
-  // TODO: complete with shadow parameters.
-};
-
 struct EmbossDefaults
 {
   std::string properties;
@@ -461,8 +449,6 @@ public:
     mAnchorControlInterface(anchorControlInterface),
     mModel(),
     mFontDefaults(NULL),
-    mUnderlineDefaults(NULL),
-    mShadowDefaults(NULL),
     mEmbossDefaults(NULL),
     mOutlineDefaults(NULL),
     mEventData(NULL),
@@ -544,8 +530,6 @@ public:
     }
     delete mHiddenInput;
     delete mFontDefaults;
-    delete mUnderlineDefaults;
-    delete mShadowDefaults;
     delete mEmbossDefaults;
     delete mOutlineDefaults;
     delete mEventData;
@@ -1608,8 +1592,6 @@ public:
   Ui::Integration::Text::AnchorControlInterface*     mAnchorControlInterface;     ///< Reference to the anchor controller.
   ModelPtr                                           mModel;                      ///< Pointer to the text's model.
   FontDefaults*                                      mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
-  UnderlineDefaults*                                 mUnderlineDefaults;          ///< Avoid allocating this when the user does not specify underline parameters.
-  ShadowDefaults*                                    mShadowDefaults;             ///< Avoid allocating this when the user does not specify shadow parameters.
   EmbossDefaults*                                    mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
   OutlineDefaults*                                   mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
   EventData*                                         mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().

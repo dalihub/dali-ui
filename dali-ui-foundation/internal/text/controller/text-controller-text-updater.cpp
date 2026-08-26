@@ -867,9 +867,6 @@ void Controller::TextUpdater::ResetText(Controller& controller)
   {
     impl.ClearReplacementData();
   }
-  // Reset the embedded images buffer.
-  logicalModel->ClearEmbeddedImages();
-
   // Reset the anchors buffer.
   logicalModel->ClearAnchors();
 

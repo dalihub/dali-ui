@@ -41,17 +41,6 @@ void FreeFontFamilyNames(Vector<FontDescriptionRun>& fontDescriptionRuns)
   fontDescriptionRuns.Clear();
 }
 
-void FreeEmbeddedItems(Vector<EmbeddedItem>& embeddedItem)
-{
-  for(Vector<EmbeddedItem>::Iterator it = embeddedItem.Begin(), endIt = embeddedItem.End(); it != endIt; ++it)
-  {
-    EmbeddedItem& item = *it;
-    delete[] item.url;
-  }
-
-  embeddedItem.Clear();
-}
-
 void FreeAnchors(Vector<Anchor>& anchors)
 {
   for(auto&& anchor : anchors)
@@ -620,11 +609,6 @@ const Vector<CharacterSpacingCharacterRun>& LogicalModel::GetCharacterSpacingCha
   return mCharacterSpacingCharacterRuns;
 }
 
-void LogicalModel::ClearEmbeddedImages()
-{
-  FreeEmbeddedItems(mEmbeddedItems);
-}
-
 void LogicalModel::ClearAnchors()
 {
   FreeAnchors(mAnchors);
@@ -657,7 +641,6 @@ LogicalModel::~LogicalModel()
   }
 
   ClearFontDescriptionRuns();
-  ClearEmbeddedImages();
   ClearAnchors();
 }
 

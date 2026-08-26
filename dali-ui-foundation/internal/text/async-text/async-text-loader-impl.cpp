@@ -379,7 +379,6 @@ void AsyncTextLoader::ClearTextModelData()
   mTextModel->mLogicalModel->ClearFontDescriptionRuns();
   mTextModel->mLogicalModel->ClearStrikethroughRuns();
   mTextModel->mLogicalModel->ClearUnderlineRuns();
-  mTextModel->mLogicalModel->ClearEmbeddedImages();
   mTextModel->mLogicalModel->ClearAnchors();
   mTextModel->mLogicalModel->mVariationsMap.Clear();
 

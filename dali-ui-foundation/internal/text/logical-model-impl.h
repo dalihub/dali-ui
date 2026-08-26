@@ -32,7 +32,6 @@
 #include <dali-ui-foundation/internal/text/bounded-paragraph-run.h>
 #include <dali-ui-foundation/internal/text/character-spacing-character-run.h>
 #include <dali-ui-foundation/internal/text/color-run.h>
-#include <dali-ui-foundation/internal/text/embedded-item.h>
 #include <dali-ui-foundation/internal/text/font-description-run.h>
 #include <dali-ui-foundation/internal/text/font-run.h>
 #include <dali-ui-foundation/internal/text/paragraph-run.h>
@@ -224,13 +223,6 @@ public:
    */
   const Vector<CharacterSpacingCharacterRun>& GetCharacterSpacingCharacterRuns() const;
 
-  // Embedded images
-
-  /**
-   * @brief Clears the embedded images.
-   */
-  void ClearEmbeddedImages();
-
   /**
    * @brief Clears the anchors.
    */
@@ -273,7 +265,6 @@ public:
   Vector<CharacterDirection>            mCharacterDirections; ///< For each character, whether is right to left. ( @e flase is left
                                                               ///< to right, @e true right to left ).
   Vector<BidirectionalLineInfoRun> mBidirectionalLineInfo;
-  Vector<EmbeddedItem>             mEmbeddedItems;
   Vector<Anchor>                   mAnchors;
   Vector<UnderlinedCharacterRun>   mUnderlinedCharacterRuns; ///< The underlined character run from markup-processor
   Vector<StrikethroughCharacterRun>
