@@ -71,7 +71,7 @@
     .print-button { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: #fff; cursor: pointer; }
     main { overflow: hidden; }
     .container { max-width: var(--content); margin: auto; padding-right: 28px; padding-left: 28px; }
-    section { position: relative; padding: 104px 0; }
+    section { position: relative; padding: 104px 0; scroll-margin-top: 64px; }
     .section-rule { border-top: 1px solid var(--line); }
     .dark { color: #fff; background: var(--navy); }
     .eyebrow { display: flex; margin-bottom: 20px; color: var(--teal); align-items: center; gap: 12px; font-size: 12px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
@@ -80,6 +80,9 @@
     h1, h2, h3, h4, p { margin-top: 0; }
     h1 { margin-bottom: 28px; font-size: clamp(52px, 7.2vw, 88px); font-weight: 880; letter-spacing: -.055em; line-height: 1.02; }
     h2 { max-width: 900px; margin-bottom: 22px; font-size: clamp(38px, 5vw, 62px); font-weight: 850; letter-spacing: -.045em; line-height: 1.08; }
+    .heading-link { color: inherit; text-decoration: none; }
+    .heading-anchor { display: inline-block; margin-left: .28em; color: var(--coral); font-size: .48em; font-weight: 800; line-height: 1; text-decoration: none; vertical-align: .2em; opacity: 0; transition: opacity .18s ease; }
+    .heading-link:hover .heading-anchor, .heading-link:focus-visible .heading-anchor { opacity: 1; }
     h3 { margin-bottom: 10px; font-size: 21px; letter-spacing: -.025em; line-height: 1.3; }
     h4 { margin-bottom: 7px; font-size: 14px; }
     .accent { color: var(--teal); }
@@ -238,14 +241,27 @@
     .gradient-example { display: grid; min-width: 0; padding: 6px 8px; overflow: hidden; border-radius: 8px; background: #fff; gap: 3px; }
     .gradient-example small { color: #75858a; font-size: 7px; font-weight: 850; letter-spacing: .06em; }
     .gradient-example strong { display: inline-block; width: max-content; color: var(--teal); background: linear-gradient(90deg, #008e88 0%, #24b8a9 25%, #f2c95c 52%, #ed745b 76%, #8d63d8 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 22px; font-weight: 950; letter-spacing: -.05em; line-height: 1; }
-    .gradient-example.overlay strong { background-image: linear-gradient(105deg, transparent 24%, rgba(255,255,255,.2) 34%, #fff 45%, rgba(255,255,255,.25) 56%, transparent 66%), linear-gradient(90deg, #008e88 0%, #24b8a9 25%, #f2c95c 52%, #ed745b 76%, #8d63d8 100%); }
+    .gradient-example.overlay strong { background-image: linear-gradient(105deg, transparent 0%, rgba(255,255,255,.18) 34%, #fff 50%, rgba(255,255,255,.22) 66%, transparent 100%), linear-gradient(90deg, #008e88 0%, #24b8a9 25%, #f2c95c 52%, #ed745b 76%, #8d63d8 100%); background-position: -120% 0, 0 0; background-repeat: no-repeat; background-size: 55% 100%, 100% 100%; animation: text-shimmer 2.4s ease-in-out infinite; }
+    @keyframes text-shimmer {
+      0%, 18% { background-position: -120% 0, 0 0; }
+      72%, 100% { background-position: 220% 0, 0 0; }
+    }
     .demo-reveal { grid-template-columns: auto 1fr; gap: 13px; }
     .reveal-stage { display: grid; gap: 5px; }
     .reveal-word { display: flex; width: max-content; color: var(--teal); font-size: 20px; font-weight: 900; letter-spacing: .01em; }
-    .reveal-word .revealing { color: rgba(0,109,104,.52); }
-    .reveal-word .pending { color: rgba(0,109,104,.12); }
+    .reveal-word span { opacity: 0; animation-duration: 5.2s; animation-iteration-count: infinite; animation-timing-function: linear; }
+    .reveal-word span:nth-child(1) { animation-name: reveal-word-01; }
+    .reveal-word .reveal-gap { width: .32em; animation: none; }
+    .reveal-word span:nth-child(3) { animation-name: reveal-word-02; }
+    .reveal-word span:nth-child(5) { animation-name: reveal-word-03; }
+    .reveal-word span:nth-child(7) { animation-name: reveal-word-04; }
     .reveal-progress { height: 4px; overflow: hidden; border-radius: 999px; background: #d8e2de; }
-    .reveal-progress i { display: block; width: 75%; height: 100%; border-radius: inherit; background: var(--coral); }
+    .reveal-progress i { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--coral); animation: reveal-progress 5.2s linear infinite; }
+    @keyframes reveal-word-01 { 0%, 5% { opacity: 0; } 16%, 84% { opacity: 1; } 90%, 100% { opacity: 0; } }
+    @keyframes reveal-word-02 { 0%, 19% { opacity: 0; } 30%, 84% { opacity: 1; } 90%, 100% { opacity: 0; } }
+    @keyframes reveal-word-03 { 0%, 33% { opacity: 0; } 44%, 84% { opacity: 1; } 90%, 100% { opacity: 0; } }
+    @keyframes reveal-word-04 { 0%, 47% { opacity: 0; } 58%, 84% { opacity: 1; } 90%, 100% { opacity: 0; } }
+    @keyframes reveal-progress { 0%, 5% { width: 0; } 58%, 84% { width: 100%; } 90%, 100% { width: 0; } }
     .demo-bevel { position: relative; grid-template-columns: 1fr auto; }
     .demo-bevel strong { color: #b7cbc4; font-size: 34px; font-weight: 950; letter-spacing: -.06em; text-shadow: -1px -1px 0 #fff, 1px 1px 0 #6b8580, 3px 3px 5px rgba(20,47,58,.28); }
     .light-direction { display: grid; color: var(--coral); font-size: 18px; font-weight: 900; place-items: center; }
@@ -312,10 +328,21 @@
       .theme-preview { grid-template-columns: 1fr; }
       .theme-arrow { transform: rotate(90deg); }
     }
+    @media (hover: none) {
+      .heading-anchor { opacity: .42; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .gradient-example.overlay strong { background-position: 50% 0, 0 0; animation: none; }
+      .reveal-word span { opacity: 1; animation: none; }
+      .reveal-word span:nth-child(5) { opacity: .42; }
+      .reveal-word span:nth-child(7) { opacity: .12; }
+      .reveal-progress i { width: 75%; animation: none; }
+    }
     @page { size: A4; margin: 13mm; }
     @media print {
       body { background: #fff; font-size: 8.5pt; line-height: 1.5; }
       .topbar, .progress, footer { display: none; }
+      .heading-anchor { display: none; }
       section { padding: 8mm 0; break-inside: auto; }
       .cover { min-height: auto; padding-top: 7mm; break-after: page; break-inside: avoid; }
       .feature, #boundaries, #view { break-before: page; }
@@ -383,7 +410,12 @@
       .text-demo { min-height: 45px; margin-bottom: 7px; padding: 6px 9px; }
       .gradient-example { padding: 4px 6px; }
       .gradient-example strong { font-size: 16px; }
+      .gradient-example.overlay strong { background-position: 50% 0, 0 0; animation: none; }
       .reveal-word { font-size: 17px; }
+      .reveal-word span { opacity: 1; animation: none; }
+      .reveal-word span:nth-child(5) { opacity: .42; }
+      .reveal-word span:nth-child(7) { opacity: .12; }
+      .reveal-progress i { width: 75%; animation: none; }
       .demo-bevel strong { font-size: 27px; }
       .semantic-copy, .inline-sentence { font-size: 10px; }
       .inline-object { width: 19px; height: 19px; font-size: 10px; }
@@ -414,24 +446,24 @@
     <div class="topbar-inner">
       <div class="brand"><span class="brand-mark">D</span> DALi UI REPORT</div>
       <nav class="nav" aria-label="보고서 목차">
-        <a href="#cover">개요</a>
+        <a href="#dali-ui">개요</a>
         <a href="#unit">Unit</a>
         <a href="#view">View</a>
         <a href="#enhanced-text">Text</a>
         <a href="#navigator">Navigator</a>
-        <a href="#focus">Focus</a>
+        <a href="#enhanced-focus-system">Focus</a>
         <button class="print-button" type="button" onclick="window.print()">PDF / 인쇄</button>
       </nav>
     </div>
   </header>
 
   <main>
-    <section class="cover" id="cover">
+    <section class="cover" id="dali-ui">
       <div class="container">
         <div class="eyebrow">01 / DALi UI</div>
         <div class="cover-grid">
           <div>
-            <h1>DALi UI</h1>
+            <h1><a class="heading-link" href="#dali-ui">DALi UI<span class="heading-anchor" aria-hidden="true">#</span></a></h1>
             <p class="cover-lead">DALi 기반 애플리케이션을 위한 Native UI Framework</p>
             <p class="cover-lead" style="margin-top:26px">DALi UI는 애플리케이션이 Native 환경에서 화면을 구성하고 운영하는 데 필요한 공통 UI 기능을 제공합니다. View와 Layout을 기반으로 상태와 이벤트, 화면 이동, Theme, Text, Scroll과 Focus까지 하나의 Framework 범위로 구성했습니다.</p>
             <div class="cover-capabilities" aria-label="DALi UI 주요 기능">
@@ -460,7 +492,7 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">02 / Unit</div>
-            <h2>Unit</h2>
+            <h2><a class="heading-link" href="#unit">Unit<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Unit은 해상도와 pixel density가 다른 디바이스에서도 UI가 의도한 크기로 표시되도록 합니다. 제품별 scaling factor와 system scale도 같은 단위 정책에서 처리합니다.</p>
           </div>
           <div class="section-index">02</div>
@@ -488,7 +520,7 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">03 / View</div>
-            <h2>View</h2>
+            <h2><a class="heading-link" href="#view">View<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">View는 모든 UI 컴포넌트가 layout, 상태, interaction과 system 변경을 같은 방식으로 처리하도록 하는 공통 객체입니다. 화면을 구성하는 가장 기본 단위이며 content, padding, border와 margin으로 이루어진 box model을 구현합니다.</p>
           </div>
           <div class="section-index">03</div>
@@ -511,12 +543,12 @@
       </div>
     </section>
 
-    <section class="feature dark" id="state-event">
+    <section class="feature dark" id="view-state-interaction">
       <div class="container">
         <div class="section-head">
           <div>
             <div class="eyebrow">04 / View State & Interaction</div>
-            <h2>View State & Interaction</h2>
+            <h2><a class="heading-link" href="#view-state-interaction">View State & Interaction<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Focused, pressed, hovered 등의 상태를 View 단위의 공통 모델로 관리합니다. 이 상태와 touch, key, accessibility 입력을 바탕으로 click과 long press처럼 UI 맥락이 담긴 interaction을 제공하므로, 앱이 화면마다 상태 전환과 입력 판정을 다시 구현할 필요가 없습니다.</p>
           </div>
           <div class="section-index">04</div>
@@ -546,7 +578,7 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">05 / Layout</div>
-            <h2>Layout</h2>
+            <h2><a class="heading-link" href="#layout">Layout<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Layout은 화면 크기, text 길이와 system scale이 바뀌어도 View의 크기와 위치를 일관된 규칙으로 계산하기 위한 기능입니다. Stack, Flex, Grid와 Absolute 배치를 제공하고 공통 크기 정책과 transition을 지원합니다.</p>
           </div>
           <div class="section-index">05</div>
@@ -581,7 +613,7 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">06 / Enhanced Text</div>
-            <h2>Enhanced Text</h2>
+            <h2><a class="heading-link" href="#enhanced-text">Enhanced Text<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Text를 단순한 문자열 표시에서 벗어나 시각 효과, 단계별 노출, 의미 정보와 문장 안의 image까지 하나의 콘텐츠로 다룰 수 있습니다. 정해 둔 font size와 line height 조합 중 화면에 가장 잘 맞는 조합을 고르는 기능도 제공합니다.</p>
           </div>
           <div class="section-index">06</div>
@@ -598,11 +630,11 @@
           </article>
           <article class="detail text-feature">
             <div class="text-demo demo-reveal">
-              <span class="demo-caption">Character · 75%</span>
-              <div class="reveal-stage"><div class="reveal-word"><span class="revealed">Hello Wor</span><span class="revealing">l</span><span class="pending">d</span></div><div class="reveal-progress"><i></i></div></div>
+              <span class="demo-caption">Word reveal</span>
+              <div class="reveal-stage"><div class="reveal-word" role="img" aria-label="The quick brown fox"><span>The</span><span class="reveal-gap"></span><span>quick</span><span class="reveal-gap"></span><span>brown</span><span class="reveal-gap"></span><span>fox</span></div><div class="reveal-progress"><i></i></div></div>
             </div>
             <h3>Character · Word reveal</h3>
-            <p>문장 전체를 한 번에 표시하지 않고 글자 또는 단어 순서대로 드러냅니다. Character 방식에서는 각 글자가 차례에 맞춰 fade-in하며, 뒤쪽 글자는 진행도에 따라 옅게 보이거나 아직 표시되지 않습니다.</p>
+            <p>문장 전체를 한 번에 표시하지 않고 글자 또는 단어 순서대로 드러냅니다. Word 방식에서는 단어 전체가 하나의 단위로 fade-in하며, 단어 내부가 중간에서 끊기지 않습니다.</p>
           </article>
           <article class="detail text-feature">
             <div class="text-demo demo-bevel"><strong>Bevel</strong><span class="light-direction">↘<small>LIGHT</small></span></div>
@@ -635,12 +667,12 @@
       </div>
     </section>
 
-    <section class="feature section-rule" id="text-system">
+    <section class="feature section-rule" id="adaptive-text">
       <div class="container">
         <div class="section-head">
           <div>
             <div class="eyebrow">07 / Adaptive Text</div>
-            <h2>Adaptive Text</h2>
+            <h2><a class="heading-link" href="#adaptive-text">Adaptive Text<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Adaptive Text는 사용자가 system font scale이나 언어를 변경했을 때 현재 화면의 text와 layout을 함께 갱신하기 위한 기능입니다. 앱이 화면을 다시 생성하거나 문자열을 일일이 설정하지 않아도 됩니다.</p>
           </div>
           <div class="section-index">07</div>
@@ -682,7 +714,7 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">08 / Color & Theme</div>
-            <h2>Color & Theme</h2>
+            <h2><a class="heading-link" href="#color-theme">Color & Theme<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Color & Theme은 색상을 화면마다 직접 지정하지 않고 디자인 의미로 관리하기 위한 기능입니다. Theme이나 제품 색상 정책이 바뀌면 이미 표시 중인 View에도 변경 사항을 적용합니다.</p>
           </div>
           <div class="section-index">08</div>
@@ -715,7 +747,7 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">09 / Navigator</div>
-            <h2>Navigator</h2>
+            <h2><a class="heading-link" href="#navigator">Navigator<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Navigator는 화면을 page와 modal이라는 공식 단위로 관리해 UIFW가 현재 화면의 경계와 앱의 이동 의도를 알 수 있게 합니다. 화면 전환에 맞춰 back, lifecycle과 transition뿐 아니라 focus의 진입과 복원, accessibility 노출 범위와 background 화면의 입력 상태를 함께 조정합니다.</p>
           </div>
           <div class="section-index">09</div>
@@ -740,12 +772,12 @@
       </div>
     </section>
 
-    <section class="feature dark" id="focus">
+    <section class="feature dark" id="enhanced-focus-system">
       <div class="container">
         <div class="section-head">
           <div>
             <div class="eyebrow">10 / Enhanced Focus System</div>
-            <h2>Enhanced Focus System</h2>
+            <h2><a class="heading-link" href="#enhanced-focus-system">Enhanced Focus System<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">리모컨이나 키보드로 조작하는 화면에서는 focus가 단순히 가까운 View가 아니라 UI 구조와 사용 흐름에 맞는 대상으로 이동해야 합니다. DALi UI는 Android 계열 UIFW에서 익숙한 자식 우선 focus 요청, 방향별 이웃, 영역 단위 탐색과 공간 기반 후보 검색을 View tree에 맞게 제공합니다.</p>
           </div>
           <div class="section-index">10</div>
@@ -768,7 +800,7 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">11 / Configuration</div>
-            <h2>Configuration</h2>
+            <h2><a class="heading-link" href="#configuration">Configuration<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Configuration은 UX와 디바이스에 따라 달라지는 공통 정책을 한곳에서 설정하기 위한 기능입니다. 앱과 화면마다 같은 설정을 반복하거나 제품별 분기 코드를 두지 않도록 합니다.</p>
           </div>
           <div class="section-index">11</div>
@@ -793,7 +825,7 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">12 / Scroller</div>
-            <h2>Scroller</h2>
+            <h2><a class="heading-link" href="#scroller">Scroller<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Scroller는 touch, key와 focus 이동에서 content가 예측 가능한 위치에 표시되도록 관리합니다. 리모컨이나 키보드로 탐색할 때 focus 대상이 viewport 밖에 남지 않도록 scroll과 focus를 함께 처리합니다.</p>
           </div>
           <div class="section-index">12</div>
@@ -819,7 +851,7 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">13 / Chart</div>
-            <h2>Chart</h2>
+            <h2><a class="heading-link" href="#chart">Chart<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Chart는 앱이 차트의 rendering, data model과 interaction을 각각 구현하지 않고도 데이터를 시각화할 수 있도록 제공합니다. 정적 데이터와 실시간 데이터 모두 같은 컴포넌트에서 처리합니다.</p>
           </div>
           <div class="section-index">13</div>
