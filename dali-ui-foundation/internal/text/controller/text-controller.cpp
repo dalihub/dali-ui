@@ -1227,56 +1227,72 @@ void Controller::SetShadowBlurRadius(const float& shadowBlurRadius)
 
 bool Controller::IsEmbossEnabled() const
 {
-  return mImpl->mModel->mVisualModel->IsEmbossEnabled();
+  return mImpl->mEmbossEnabled;
 }
 
 void Controller::SetEmbossEnabled(const bool enable)
 {
-  mImpl->mModel->mVisualModel->SetEmbossEnabled(enable);
+  mImpl->mEmbossEnabled = enable;
   RequestRelayout();
   RequestAsyncRender();
 }
 
 const Vector2& Controller::GetEmbossDirection() const
 {
-  return mImpl->mModel->mVisualModel->GetEmbossDirection();
+  return mImpl->mEmbossData ? mImpl->mEmbossData->direction : Vector2::ZERO;
 }
 
 void Controller::SetEmbossDirection(const Vector2& direction)
 {
-  mImpl->mModel->mVisualModel->SetEmbossDirection(direction);
+  if(mImpl->mEmbossData || direction != Vector2::ZERO)
+  {
+    EnsureCreated(mImpl->mEmbossData);
+    mImpl->mEmbossData->direction = direction;
+  }
 }
 
 float Controller::GetEmbossStrength() const
 {
-  return mImpl->mModel->mVisualModel->GetEmbossStrength();
+  return mImpl->mEmbossData ? mImpl->mEmbossData->strength : 0.0f;
 }
 
 void Controller::SetEmbossStrength(const float strength)
 {
-  mImpl->mModel->mVisualModel->SetEmbossStrength(strength);
+  if(mImpl->mEmbossData || strength != 0.0f)
+  {
+    EnsureCreated(mImpl->mEmbossData);
+    mImpl->mEmbossData->strength = strength;
+  }
 }
 
 const Vector4& Controller::GetEmbossLightColor() const
 {
-  return mImpl->mModel->mVisualModel->GetEmbossLightColor();
+  return mImpl->mEmbossData ? mImpl->mEmbossData->lightColor : Vector4::ZERO;
 }
 
 void Controller::SetEmbossLightColor(const Vector4& lightColor)
 {
-  mImpl->mModel->mVisualModel->SetEmbossLightColor(lightColor);
+  if(mImpl->mEmbossData || lightColor != Vector4::ZERO)
+  {
+    EnsureCreated(mImpl->mEmbossData);
+    mImpl->mEmbossData->lightColor = lightColor;
+  }
   RequestRelayout();
   RequestAsyncRender();
 }
 
 const Vector4& Controller::GetEmbossShadowColor() const
 {
-  return mImpl->mModel->mVisualModel->GetEmbossShadowColor();
+  return mImpl->mEmbossData ? mImpl->mEmbossData->shadowColor : Vector4::ZERO;
 }
 
 void Controller::SetEmbossShadowColor(const Vector4& shadowColor)
 {
-  mImpl->mModel->mVisualModel->SetEmbossShadowColor(shadowColor);
+  if(mImpl->mEmbossData || shadowColor != Vector4::ZERO)
+  {
+    EnsureCreated(mImpl->mEmbossData);
+    mImpl->mEmbossData->shadowColor = shadowColor;
+  }
   RequestRelayout();
   RequestAsyncRender();
 }
@@ -1438,13 +1454,16 @@ bool Controller::IsBackgroundEnabled() const
 
 void Controller::SetDefaultEmbossProperties(const std::string& embossProperties)
 {
-  EnsureCreated(mImpl->mEmbossDefaults);
-  mImpl->mEmbossDefaults->properties = embossProperties;
+  if(mImpl->mEmbossData || !embossProperties.empty())
+  {
+    EnsureCreated(mImpl->mEmbossData);
+    mImpl->mEmbossData->properties = embossProperties;
+  }
 }
 
 std::string Controller::GetDefaultEmbossProperties() const
 {
-  return mImpl->mEmbossDefaults ? mImpl->mEmbossDefaults->properties : EMPTY_STRING;
+  return mImpl->mEmbossData ? mImpl->mEmbossData->properties : EMPTY_STRING;
 }
 
 void Controller::SetDefaultOutlineProperties(const std::string& outlineProperties)

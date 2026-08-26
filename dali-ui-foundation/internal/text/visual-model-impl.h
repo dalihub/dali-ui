@@ -735,76 +735,6 @@ public:
   const Vector2& GetOffsetWithCutout() const;
 
   /**
-   * @brief Sets the emboss flag.
-   *
-   * @param[in] enable true if emboss enabled.
-   */
-  void SetEmbossEnabled(const bool enable);
-
-  /**
-   * @brief Returns whether the text is embossed or not.
-   *
-   * @return True if enabled.
-   */
-  bool IsEmbossEnabled() const;
-
-  /**
-   * @brief Sets the direction of emboss.
-   *
-   * @param[in] direction The direction of emboss.
-   */
-  void SetEmbossDirection(const Vector2& direction);
-
-  /**
-   * @brief Retrieves the direction of emboss.
-   *
-   * @return The direction.
-   */
-  const Vector2& GetEmbossDirection() const;
-
-  /**
-   * @brief Sets the strength of emboss.
-   *
-   * @param[in] strength The strength of emboss.
-   */
-  void SetEmbossStrength(const float strength);
-
-  /**
-   * @brief Retrieves the strength of emboss.
-   *
-   * @return The strength.
-   */
-  float GetEmbossStrength() const;
-
-  /**
-   * @brief Sets the light color of emboss.
-   *
-   * @param[in] lightColor The light color of emboss.
-   */
-  void SetEmbossLightColor(const Vector4& lightColor);
-
-  /**
-   * @brief Retrieves the light color of emboss.
-   *
-   * @return The light color.
-   */
-  const Vector4& GetEmbossLightColor() const;
-
-  /**
-   * @brief Sets the shadow color of emboss.
-   *
-   * @param[in] shadowColor The shadow color of emboss.
-   */
-  void SetEmbossShadowColor(const Vector4& shadowColor);
-
-  /**
-   * @brief Retrieves the shadow color of emboss.
-   *
-   * @return The shadow color.
-   */
-  const Vector4& GetEmbossShadowColor() const;
-
-  /**
    * @brief Sets the vertical line alignment for glyph positioning within LineHeight.
    *
    * @param[in] alignment The vertical line alignment.
@@ -870,10 +800,6 @@ public:
   Vector<CharacterSpacingGlyphRun> mCharacterSpacingRuns;      ///< Runs of glyphs that have character-spacing.
   Vector4                          mBackgroundColorWithCutout; ///< Background color with cutout.
   Vector2                          mOffsetWithCutout;          ///< Left and top offset when cutout.
-  Vector2                          mEmbossDirection;           ///< Direction of emboss.
-  float                            mEmbossStrength;            ///< Strength of emboss.
-  Vector4                          mEmbossLightColor;          ///< Light color of emboss.
-  Vector4                          mEmbossShadowColor;         ///< Shadow color of emboss.
   HyphenInfo                       mHyphen;                    ///< Contains hyphen glyph info & the character index to draw hyphen after.
 
 private:
@@ -906,7 +832,6 @@ public:
   float mCharacterSpacing;                ///< Contains the value of the character spacing.
   bool  mCutoutEnabled : 1;               ///< Cutout enabled flag
   bool  mBackgroundWithCutoutEnabled : 1; ///< Background with cutout enabled flag.
-  bool  mEmbossEnabled : 1;               ///< Emboss enabled flag
 };
 
 } // namespace Text

@@ -336,10 +336,13 @@ struct TextUpdateInfo
   }
 };
 
-struct EmbossDefaults
+struct EmbossData
 {
   std::string properties;
-  // TODO: complete with emboss parameters.
+  Vector2     direction;
+  float       strength{0.0f};
+  Vector4     lightColor;
+  Vector4     shadowColor;
 };
 
 struct OutlineDefaults
@@ -449,7 +452,7 @@ public:
     mAnchorControlInterface(anchorControlInterface),
     mModel(),
     mFontDefaults(NULL),
-    mEmbossDefaults(NULL),
+    mEmbossData(NULL),
     mOutlineDefaults(NULL),
     mEventData(NULL),
     mIdleCallback(NULL),
@@ -496,6 +499,7 @@ public:
     mIsLayoutDirectionChanged(false),
     mIsUserInteractionEnabled(true),
     mProcessorRegistered(false),
+    mEmbossEnabled(false),
     mTextCutout(false),
     mIsCursorInsetEnabled(false),
     mIsAsyncRendering(false)
@@ -530,7 +534,7 @@ public:
     }
     delete mHiddenInput;
     delete mFontDefaults;
-    delete mEmbossDefaults;
+    delete mEmbossData;
     delete mOutlineDefaults;
     delete mEventData;
   }
@@ -1592,7 +1596,7 @@ public:
   Ui::Integration::Text::AnchorControlInterface*     mAnchorControlInterface;     ///< Reference to the anchor controller.
   ModelPtr                                           mModel;                      ///< Pointer to the text's model.
   FontDefaults*                                      mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
-  EmbossDefaults*                                    mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
+  EmbossData*                                        mEmbossData;                 ///< Emboss properties allocated on demand.
   OutlineDefaults*                                   mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
   EventData*                                         mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().
   CallbackBase*                                      mIdleCallback;               ///< Callback what would be called at idler
@@ -1655,6 +1659,7 @@ public:
   bool               mIsLayoutDirectionChanged : 1;    ///< Whether the layout has changed.
   bool               mIsUserInteractionEnabled : 1;    ///< Whether the user interaction is enabled.
   bool               mProcessorRegistered : 1;         ///< Whether the text controller registered into processor or not.
+  bool               mEmbossEnabled : 1;               ///< Whether emboss is enabled.
   bool               mTextCutout : 1;                  ///< Whether the text cutout enabled.
   bool               mIsCursorInsetEnabled : 1;        ///< Whether the cursor inset is enabled.
   bool               mIsAsyncRendering : 1;            ///< whether asynchronous text rendering is enabled.

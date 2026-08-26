@@ -118,6 +118,27 @@ bool HasValidTextTexture(Actor actor)
   return false;
 }
 
+void CheckEmbossRendererProperties(Actor actor, const Vector2& direction, float strength, const Vector4& lightColor, const Vector4& shadowColor)
+{
+  bool foundEmbossRenderer = false;
+  for(uint32_t rendererIndex = 0u; rendererIndex < actor.GetRendererCount(); ++rendererIndex)
+  {
+    Renderer              renderer       = actor.GetRendererAt(rendererIndex);
+    const Property::Index directionIndex = renderer.GetPropertyIndex("uEmbossDirection");
+    if(directionIndex == Property::INVALID_INDEX)
+    {
+      continue;
+    }
+
+    foundEmbossRenderer = true;
+    DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(directionIndex), direction, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetProperty<float>(renderer.GetPropertyIndex("uEmbossStrength")), strength, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uEmbossLightColor")), lightColor, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uEmbossShadowColor")), shadowColor, TEST_LOCATION);
+  }
+  DALI_TEST_CHECK(foundEmbossRenderer);
+}
+
 bool WaitForValidTextTexture(UiTestApplication& application, Label label)
 {
   constexpr uint32_t MAX_TRIGGER_COUNT = 4u;
@@ -2155,6 +2176,47 @@ int UtcDaliLabelTextStyleNoneP(void)
   DALI_TEST_CHECK(label.GetTextBevel() != Text::Bevel::None());
   label.SetTextBevel(Text::Bevel::None());
   DALI_TEST_CHECK(label.GetTextBevel() == Text::Bevel::None());
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextBevelSyncAsyncP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  const Vector2 direction(-0.75f, 0.25f);
+  const float   strength = 2.5f;
+  const Vector4 lightColor(0.8f, 0.7f, 0.6f, 0.5f);
+  const Vector4 shadowColor(0.1f, 0.2f, 0.3f, 0.4f);
+
+  Text::Bevel bevel;
+  bevel.SetDirection(direction);
+  bevel.SetIntensity(strength);
+  bevel.SetLightColor(UiColor(lightColor));
+  bevel.SetShadowColor(UiColor(shadowColor));
+
+  Label label = Label::New("Emboss state must survive synchronous and asynchronous rendering");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(96.0f);
+  label.SetTextBevel(bevel);
+  DALI_TEST_CHECK(label.GetTextBevel() == bevel);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+  CheckEmbossRendererProperties(label, direction, strength, lightColor, shadowColor);
+
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  label.SetAsyncRendering(true);
+  gAsyncRenderFinished = false;
+  label.SetText("Emboss values are copied into each asynchronous request");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.GetTextBevel() == bevel);
+  CheckEmbossRendererProperties(label, direction, strength, lightColor, shadowColor);
 
   END_TEST;
 }

@@ -232,6 +232,89 @@ int UtcDaliStyledTextControllerAnchorColorsP(void)
   END_TEST;
 }
 
+int UtcDaliTextControllerEmbossDataLifecycleP(void)
+{
+  UiTestApplication application;
+
+  PublicText::ControllerPtr     controller = PublicText::Controller::New();
+  PublicText::Controller::Impl& impl       = PublicText::Controller::Impl::GetImplementation(*controller.Get());
+
+  DALI_TEST_CHECK(!impl.mEmbossData);
+  DALI_TEST_CHECK(!controller->IsEmbossEnabled());
+  DALI_TEST_EQUALS(controller->GetEmbossDirection(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossStrength(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossLightColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossShadowColor(), Vector4::ZERO, TEST_LOCATION);
+
+  controller->SetDefaultEmbossProperties("");
+  controller->SetEmbossDirection(Vector2::ZERO);
+  controller->SetEmbossStrength(0.0f);
+  controller->SetEmbossLightColor(Vector4::ZERO);
+  controller->SetEmbossShadowColor(Vector4::ZERO);
+  controller->SetEmbossEnabled(false);
+  DALI_TEST_CHECK(!impl.mEmbossData);
+
+  controller->SetEmbossEnabled(true);
+  DALI_TEST_CHECK(controller->IsEmbossEnabled());
+  DALI_TEST_CHECK(!impl.mEmbossData);
+  DALI_TEST_EQUALS(controller->GetEmbossDirection(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossStrength(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossLightColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossShadowColor(), Vector4::ZERO, TEST_LOCATION);
+
+  controller->SetDefaultEmbossProperties("emboss-properties");
+  DALI_TEST_CHECK(impl.mEmbossData);
+  PublicText::EmbossData* const embossData = impl.mEmbossData;
+  DALI_TEST_EQUALS(controller->GetDefaultEmbossProperties(), "emboss-properties", TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossDirection(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossStrength(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossLightColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossShadowColor(), Vector4::ZERO, TEST_LOCATION);
+
+  const Vector2 direction(-0.75f, 0.25f);
+  const Vector4 lightColor(0.8f, 0.7f, 0.6f, 0.5f);
+  const Vector4 shadowColor(0.1f, 0.2f, 0.3f, 0.4f);
+  controller->SetEmbossDirection(direction);
+  controller->SetEmbossStrength(2.5f);
+  controller->SetEmbossLightColor(lightColor);
+  controller->SetEmbossShadowColor(shadowColor);
+
+  DALI_TEST_CHECK(impl.mEmbossData == embossData);
+  const Vector2* const directionReference   = &controller->GetEmbossDirection();
+  const Vector4* const lightColorReference  = &controller->GetEmbossLightColor();
+  const Vector4* const shadowColorReference = &controller->GetEmbossShadowColor();
+
+  controller->SetEmbossEnabled(false);
+  DALI_TEST_CHECK(!controller->IsEmbossEnabled());
+  DALI_TEST_CHECK(impl.mEmbossData == embossData);
+  DALI_TEST_EQUALS(controller->GetEmbossDirection(), direction, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossStrength(), 2.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossLightColor(), lightColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossShadowColor(), shadowColor, TEST_LOCATION);
+
+  controller->SetEmbossEnabled(true);
+  DALI_TEST_CHECK(impl.mEmbossData == embossData);
+  DALI_TEST_CHECK(&controller->GetEmbossDirection() == directionReference);
+  DALI_TEST_CHECK(&controller->GetEmbossLightColor() == lightColorReference);
+  DALI_TEST_CHECK(&controller->GetEmbossShadowColor() == shadowColorReference);
+
+  const Vector2 updatedDirection(0.5f, -0.5f);
+  const Vector4 updatedLightColor(0.4f, 0.5f, 0.6f, 0.7f);
+  const Vector4 updatedShadowColor(0.7f, 0.6f, 0.5f, 0.4f);
+  controller->SetEmbossDirection(updatedDirection);
+  controller->SetEmbossLightColor(updatedLightColor);
+  controller->SetEmbossShadowColor(updatedShadowColor);
+  DALI_TEST_EQUALS(*directionReference, updatedDirection, TEST_LOCATION);
+  DALI_TEST_EQUALS(*lightColorReference, updatedLightColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(*shadowColorReference, updatedShadowColor, TEST_LOCATION);
+
+  controller->SetDefaultEmbossProperties("");
+  DALI_TEST_CHECK(impl.mEmbossData == embossData);
+  DALI_TEST_EQUALS(controller->GetDefaultEmbossProperties(), "", TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextControllerTextFitDataP(void)
 {
   UiTestApplication application;
