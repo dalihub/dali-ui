@@ -76,13 +76,13 @@ alert.SetSpacing(8.0f);
 
 alert.SetTitle("Delete item?");
 alert.SetMessage("This action cannot be undone.");
-alert.SetActionButtons({
-  {"Cancel", []() {
-    // Handle cancel.
-  }},
-  {"Delete", []() {
-    // Handle delete.
-  }}
+TextButton cancel = alert.AddActionButton("Cancel");
+cancel.ClickedSignal().Connect(this, [](View, InputEvent) {
+  // Handle cancel.
+});
+TextButton remove = alert.AddActionButton("Delete");
+remove.ClickedSignal().Connect(this, [](View, InputEvent) {
+  // Handle delete.
 });
 ```
 
@@ -90,7 +90,8 @@ alert.SetActionButtons({
 |---|---|
 | `SetTitle(text)` / `GetTitle()` | Sets or reads the header title. |
 | `SetMessage(text)` / `GetMessage()` | Sets or reads the body message. |
-| `SetActionButtons(buttons)` | Builds footer action buttons from `(label, callback)` pairs. |
+| `AddActionButton(text)` | Adds an evenly distributed footer button and returns it for signal connection or customization. |
+| `ClearActionButtons()` | Removes all action buttons and clears the footer. |
 
 ---
 
@@ -147,13 +148,14 @@ navigator.PushModal(container);
 Dismiss it from an action button:
 
 ```cpp
-alert.SetActionButtons({
-  {"Cancel", [navigator]() mutable {
-    navigator.PopModal();
-  }},
-  {"Delete", [navigator]() mutable {
-    navigator.PopModal();
-  }}
+TextButton cancel = alert.AddActionButton("Cancel");
+cancel.ClickedSignal().Connect(this, [navigator](View, InputEvent) mutable {
+  navigator.PopModal();
+});
+
+TextButton remove = alert.AddActionButton("Delete");
+remove.ClickedSignal().Connect(this, [navigator](View, InputEvent) mutable {
+  navigator.PopModal();
 });
 ```
 
@@ -190,18 +192,18 @@ Use a modal transition spec when dialogs need a different transition from
 normal page navigation:
 
 ```cpp
-auto modalSpec = std::make_shared<NavigationTransitionSpec>();
-modalSpec->duration = 0.25f;
-modalSpec->enter = [](Animation& anim, View view) {
+NavigationTransitionSpec modalSpec = NavigationTransitionSpec::New();
+modalSpec.SetDuration(0.25f);
+modalSpec.EnterSignal().Connect(this, [](Animation& anim, View view) {
   view.SetProperty(Actor::Property::OPACITY, 0.0f);
   anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f);
-};
+});
 
 navigator.SetModalTransitionSpec(modalSpec);
 navigator.SetPageModalTransitionSpec(container, modalSpec);
 ```
 
-See [Navigator](Navigator.md#transition-basics) for the full transition API.
+See [Navigator](Navigator.md#transition-specification) for the full transition API.
 
 ---
 
