@@ -1314,7 +1314,33 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
   float contentWidth  = std::max(0.0f, effectiveWidth - pw);
   float contentHeight = std::max(0.0f, effectiveHeight - ph);
 
-  if(!mChildren.Empty())
+  // The branch key is "does this view have a child that CONTRIBUTES to its measured
+  // size", not "does it have any child at all". Standalone children are excluded from
+  // this accumulation -- the loop below skips them, and View's public contract
+  // (view.h) says a standalone child does not affect its parent's measurement --
+  // so a view whose ONLY children are standalone accumulates nothing. Keying the branch on
+  // mChildren.Empty() sent such a view down the accumulation path with maxRight/maxBottom
+  // still 0, skipping the background natural-size path below entirely and measuring
+  // 0 x 0 where the same view with NO children measures its background.
+  //
+  // One O(direct children) pre-scan rather than a flag set by the loop: the branch has to
+  // choose its formula BEFORE the loop runs. Each step is a layout-mode read with no
+  // property access, and it stops at the first contributing child, so the ordinary case
+  // costs one iteration.
+  //
+  // NOT fixed by adding a parent invalidation anywhere: the value is wrong on the very
+  // first measurement, so there is nothing to invalidate.
+  bool hasContributingChild = false;
+  for(Dali::Vector<View>::ConstIterator it = mChildren.Begin(), end = mChildren.End(); it != end; ++it)
+  {
+    if(!IntegrationView::IsLayoutModeStandalone(GetImpl(*it)))
+    {
+      hasContributingChild = true;
+      break;
+    }
+  }
+
+  if(hasContributingChild)
   {
     float                 maxRight  = 0.0f;
     float                 maxBottom = 0.0f;

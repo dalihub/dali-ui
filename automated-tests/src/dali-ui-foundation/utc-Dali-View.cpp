@@ -9116,3 +9116,101 @@ int UtcDaliViewSetSameLayoutParamsAllTypesDoNotInvalidateP(void)
 
   END_TEST;
 }
+
+// --- MeasureDefault branches on CONTRIBUTING children, not on any child ----
+//
+// A standalone child is excluded from its parent's measurement by contract, and the
+// accumulation loop skips it. A view whose only children are standalone therefore
+// accumulates nothing, so it must measure the same as the same view with no children
+// at all -- its background's natural size. Keying the branch on "has any child" sent it
+// down the accumulation path instead and published 0 x 0.
+int UtcDaliViewMeasureDefaultOnlyStandaloneChildrenUsesBackgroundNaturalSizeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A view whose only children are standalone measures its background, like a childless one");
+
+  Property::Map map;
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
+  map.Insert(Ui::ImageVisualPropertyIndex::URL, "background-image.png");
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, 140);
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, 70);
+
+  // The reference: no children at all.
+  View childless = View::New();
+  childless.SetRequestedWidth(WRAP_CONTENT);
+  childless.SetRequestedHeight(WRAP_CONTENT);
+  childless.SetProperty(Ui::View::Property::BACKGROUND, map);
+  window.Add(childless);
+
+  // The case under test: the same background, one STANDALONE child.
+  View withStandalone = View::New();
+  withStandalone.SetRequestedWidth(WRAP_CONTENT);
+  withStandalone.SetRequestedHeight(WRAP_CONTENT);
+  withStandalone.SetProperty(Ui::View::Property::BACKGROUND, map);
+  window.Add(withStandalone);
+
+  View standaloneChild = View::New();
+  standaloneChild.SetLayoutMode(LayoutMode::STANDALONE);
+  standaloneChild.SetRequestedWidth(30.0f);
+  standaloneChild.SetRequestedHeight(20.0f);
+  withStandalone.Add(standaloneChild);
+
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(childless.GetProperty<float>(Actor::Property::SIZE_WIDTH), 140.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(childless.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 70.0f, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(withStandalone.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                   childless.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(withStandalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT),
+                   childless.GetProperty<float>(Actor::Property::SIZE_HEIGHT),
+                   TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The other side of the same branch: ONE contributing child is enough to select the
+// accumulation formula, standalone siblings notwithstanding. Without this the fix
+// above could have collapsed the branch to "always use the background".
+int UtcDaliViewMeasureDefaultContributingChildUsesAccumulationP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("One contributing child selects the accumulation formula, not the background natural size");
+
+  Property::Map map;
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
+  map.Insert(Ui::ImageVisualPropertyIndex::URL, "background-image.png");
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, 140);
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, 70);
+
+  View view = View::New();
+  view.SetRequestedWidth(WRAP_CONTENT);
+  view.SetRequestedHeight(WRAP_CONTENT);
+  view.SetProperty(Ui::View::Property::BACKGROUND, map);
+  window.Add(view);
+
+  View standaloneChild = View::New();
+  standaloneChild.SetLayoutMode(LayoutMode::STANDALONE);
+  standaloneChild.SetRequestedWidth(30.0f);
+  standaloneChild.SetRequestedHeight(20.0f);
+  view.Add(standaloneChild);
+
+  // The contributing child: x = 10, width = 200, so maxRight = 210.
+  View child = View::New();
+  child.SetRequestedX(10.0f);
+  child.SetRequestedWidth(200.0f);
+  child.SetRequestedHeight(40.0f);
+  view.Add(child);
+
+  SettleLayout(application);
+
+  // maxRight + pw = 210, clamped by the 480-wide window constraint, so the accumulation
+  // formula governs and the background's 140 does NOT.
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 210.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 40.0f, TEST_LOCATION);
+
+  END_TEST;
+}
