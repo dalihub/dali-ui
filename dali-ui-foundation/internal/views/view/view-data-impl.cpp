@@ -1094,12 +1094,21 @@ struct ViewDataImpl::ReplayPassScope
  * mArrangeReplayInProgress rides alongside so the three OWNERSHIP tests that read
  * mArrangeInProgress can tell a replay from a producer; see that member's documentation.
  *
- * SAVE/RESTORE rather than set/clear: the same shape ManualProcessScope and
- * ActiveLayoutFinishedScope use in LayoutController, and it makes the scope correct under
- * a nesting the gate is believed to rule out. The DEBUG assert records that belief -- a
- * descendant whose own arrange pass is running had mArrangeCacheValid cleared by
- * ArrangePassGuard at entry, and CanReplayArrangeSubtreeFromCache refuses any subtree
- * containing such a node -- while release stays correct if it is ever broken.
+ * SAVE/RESTORE rather than set/clear, because the scope genuinely NESTS on itself. A
+ * legal application pattern reaches that nesting:
+ *
+ *   1. a replay writes this node's POSITION_X;
+ *   2. a PropertySetSignal observer wakes and calls Arrange(sameSlot) on this node's
+ *      PARENT -- a public call on a view that is not itself in progress;
+ *   3. the parent's hit gate cannot see the replay underneath it, because a replay leaves
+ *      mArrangeCacheValid untouched, so the parent hits and starts its own replay;
+ *   4. that replay descends into this node, whose mArrangeInProgress is still true.
+ *
+ * Save/restore is what makes the re-entry benign: the inner scope restores the outer
+ * scope's flags instead of clearing them, so the outer replay's re-entrancy protection
+ * survives its own inner one, and the writes themselves are same-value applies against
+ * the same cached geometry -- idempotent by construction. This is also the shape
+ * ManualProcessScope and ActiveLayoutFinishedScope use in LayoutController.
  */
 struct ViewDataImpl::ReplayNodeScope
 {
@@ -1108,8 +1117,6 @@ struct ViewDataImpl::ReplayNodeScope
     mPreviousInProgress(data.mArrangeInProgress),
     mPreviousReplay(data.mArrangeReplayInProgress)
   {
-    DALI_ASSERT_DEBUG(!mData.mArrangeInProgress &&
-                      "a replay must not visit a view whose own arrange pass is running");
     mData.mArrangeInProgress       = true;
     mData.mArrangeReplayInProgress = true;
   }
@@ -5082,10 +5089,14 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // Mirror direct children when the effective layout direction resolves to
   // RIGHT_TO_LEFT. Runs once per arrange MISS, after every producer variant
   // (LayoutManager / ArrangeCallback / default OnArrange), keeping layout managers
-  // direction-agnostic. A cache HIT returns above, and ReplayArrangeSubtreeFromCache
-  // performs this same call, once per node it visits, with that node's cached width
-  // -- the mirror is reproduced, not skipped. Children that have no arranged result
-  // are ignored on both paths because no logical position belongs to this parent.
+  // direction-agnostic. A cache HIT returns above and reaches the mirror by a different
+  // route: ReplayArrangeSubtreeFromCache does NOT call this function at all. It FUSES the
+  // mirror into each visited node's single self apply, resolving that node's mirrored x
+  // from its parent's cached width and writing it in the same store as the rest of the
+  // node's geometry. The result is the same mirrored placement in one write per node
+  // rather than a write followed by a corrective rewrite. Children that have no arranged
+  // result are ignored on both paths because no logical position belongs to this parent,
+  // and both paths exclude standalone children.
   ApplyLayoutDirection(finalBounds.width);
 
   // Conditional cache publish, mirroring Measure.

@@ -374,30 +374,43 @@ public:
         return;
       }
 
-      for(std::size_t index = mCurrentTurn; index < mBatch.size(); ++index)
+      // The restore below writes to containers that may allocate (RetainLayoutRootWithoutWake
+      // inserts into mPendingViews), and this destructor runs while an exception is
+      // propagating -- so an escaping std::bad_alloc would std::terminate the process
+      // mid-unwind. Swallowing it degrades to exactly the pre-rollback behaviour: the
+      // un-taken roots stay unregistered and their work stalls until the next natural
+      // invalidation re-registers them. A stalled layout is strictly better than a
+      // terminated process, and the original exception continues to propagate either way.
+      try
       {
-        ViewImpl* view = mBatch[index];
-
-        // The same aliveness test the loop performs, and for the same reason: a root whose
-        // View was destroyed mid-batch must not be resurrected as a dangling raw pointer.
-        // A dead entry the loop already cleaned up (mAllLayoutRoots.erase) fails it too.
-        auto it = mSelf.mAllLayoutRoots.find(view);
-        if(!view || it == mSelf.mAllLayoutRoots.end() || !it->second.weakHandle.GetHandle())
+        for(std::size_t index = mCurrentTurn; index < mBatch.size(); ++index)
         {
-          continue;
-        }
+          ViewImpl* view = mBatch[index];
 
-        if(index == mCurrentTurn)
-        {
-          // The root whose turn was unwinding. Its guards consumed its dirty bits at
-          // entry, so re-registration alone would schedule a pass with no record of work.
-          // Conservative at the tail of a turn: a root that had already published and then
-          // threw from StartTransitionsAfterLayout is re-armed too, which costs it one
-          // extra pass that its live caches serve as a hit.
-          Internal::ViewDataImpl::Get(*view).RearmLayoutDirtyForAbortedPass();
-        }
+          // The same aliveness test the loop performs, and for the same reason: a root whose
+          // View was destroyed mid-batch must not be resurrected as a dangling raw pointer.
+          // A dead entry the loop already cleaned up (mAllLayoutRoots.erase) fails it too.
+          auto it = mSelf.mAllLayoutRoots.find(view);
+          if(!view || it == mSelf.mAllLayoutRoots.end() || !it->second.weakHandle.GetHandle())
+          {
+            continue;
+          }
 
-        mSelf.RetainLayoutRootWithoutWake(view);
+          if(index == mCurrentTurn)
+          {
+            // The root whose turn was unwinding. Its guards consumed its dirty bits at
+            // entry, so re-registration alone would schedule a pass with no record of work.
+            // Conservative at the tail of a turn: a root that had already published and then
+            // threw from StartTransitionsAfterLayout is re-armed too, which costs it one
+            // extra pass that its live caches serve as a hit.
+            Internal::ViewDataImpl::Get(*view).RearmLayoutDirtyForAbortedPass();
+          }
+
+          mSelf.RetainLayoutRootWithoutWake(view);
+        }
+      }
+      catch(...)
+      {
       }
     }
 
