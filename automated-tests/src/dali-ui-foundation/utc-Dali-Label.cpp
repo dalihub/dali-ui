@@ -2376,6 +2376,56 @@ int UtcDaliLabelCutoutEnabled(void)
   END_TEST;
 }
 
+int UtcDaliLabelCutoutSyncAsyncLifecycleP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  const Vector4 backgroundColor(0.15f, 0.25f, 0.35f, 0.8f);
+  Label         label = Label::New("Cutout must survive synchronous and asynchronous rendering transitions");
+  label.SetRequestedWidth(360.0f);
+  label.SetRequestedHeight(88.0f);
+  label.SetBackgroundColor(UiColor(backgroundColor));
+  label.SetTextCutoutEnabled(true);
+  DALI_TEST_CHECK(label.IsTextCutoutEnabled());
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  label.SetAsyncRendering(true);
+  gAsyncRenderFinished = false;
+  label.SetText("The first asynchronous request keeps cutout enabled");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+
+  gAsyncRenderFinished = false;
+  label.SetTextCutoutEnabled(false);
+  label.SetText("The next request resets the reused worker to ordinary text");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(!label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+
+  gAsyncRenderFinished = false;
+  label.SetTextCutoutEnabled(true);
+  label.SetText("The final request enables cutout again without stale state");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+  DALI_TEST_EQUALS(label.GetBackgroundColor().GetRgba(), backgroundColor, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliLabelTextFit(void)
 {
   UiTestApplication application;

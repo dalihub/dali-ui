@@ -315,6 +315,68 @@ int UtcDaliTextControllerEmbossDataLifecycleP(void)
   END_TEST;
 }
 
+int UtcDaliVisualModelCutoutDataLifecycleP(void)
+{
+  UiTestApplication application;
+
+  PublicText::VisualModelPtr visualModel = PublicText::VisualModel::New();
+  DALI_TEST_CHECK(!visualModel->mCutoutData);
+  DALI_TEST_CHECK(!visualModel->IsCutoutEnabled());
+  DALI_TEST_CHECK(!visualModel->IsBackgroundWithCutoutEnabled());
+  DALI_TEST_EQUALS(visualModel->GetBackgroundColorWithCutout(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel->GetOffsetWithCutout(), Vector2::ZERO, TEST_LOCATION);
+
+  const Vector4* const defaultColorReference  = &visualModel->GetBackgroundColorWithCutout();
+  const Vector2* const defaultOffsetReference = &visualModel->GetOffsetWithCutout();
+  visualModel->SetCutoutEnabled(false);
+  visualModel->SetBackgroundWithCutoutEnabled(false);
+  visualModel->SetBackgroundColorWithCutout(Vector4::ZERO);
+  visualModel->SetOffsetWithCutout(Vector2::ZERO);
+  DALI_TEST_CHECK(!visualModel->mCutoutData);
+
+  visualModel->SetCutoutEnabled(true);
+  visualModel->SetBackgroundWithCutoutEnabled(true);
+  DALI_TEST_CHECK(!visualModel->mCutoutData);
+  DALI_TEST_EQUALS(visualModel->GetBackgroundColorWithCutout(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel->GetOffsetWithCutout(), Vector2::ZERO, TEST_LOCATION);
+
+  const Vector4 backgroundColor(0.1f, 0.2f, 0.3f, 0.4f);
+  const Vector2 offset(7.0f, 11.0f);
+  visualModel->SetBackgroundColorWithCutout(backgroundColor);
+  DALI_TEST_CHECK(visualModel->mCutoutData);
+  PublicText::CutoutData* const cutoutData = visualModel->mCutoutData;
+  visualModel->SetOffsetWithCutout(offset);
+
+  DALI_TEST_EQUALS(*defaultColorReference, Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(*defaultOffsetReference, Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel->GetBackgroundColorWithCutout(), backgroundColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel->GetOffsetWithCutout(), offset, TEST_LOCATION);
+
+  const Vector4* const colorReference  = &visualModel->GetBackgroundColorWithCutout();
+  const Vector2* const offsetReference = &visualModel->GetOffsetWithCutout();
+  visualModel->SetCutoutEnabled(false);
+  visualModel->SetBackgroundWithCutoutEnabled(false);
+  DALI_TEST_CHECK(visualModel->mCutoutData == cutoutData);
+  DALI_TEST_EQUALS(*colorReference, backgroundColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offsetReference, offset, TEST_LOCATION);
+
+  visualModel->SetBackgroundColorWithCutout(Vector4::ZERO);
+  visualModel->SetOffsetWithCutout(Vector2::ZERO);
+  DALI_TEST_CHECK(visualModel->mCutoutData == cutoutData);
+  DALI_TEST_CHECK(&visualModel->GetBackgroundColorWithCutout() == colorReference);
+  DALI_TEST_CHECK(&visualModel->GetOffsetWithCutout() == offsetReference);
+  DALI_TEST_EQUALS(*colorReference, Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offsetReference, Vector2::ZERO, TEST_LOCATION);
+
+  PublicText::VisualModelPtr offsetOnlyModel = PublicText::VisualModel::New();
+  offsetOnlyModel->SetOffsetWithCutout(offset);
+  DALI_TEST_CHECK(offsetOnlyModel->mCutoutData);
+  DALI_TEST_EQUALS(offsetOnlyModel->GetBackgroundColorWithCutout(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(offsetOnlyModel->GetOffsetWithCutout(), offset, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextControllerTextFitDataP(void)
 {
   UiTestApplication application;

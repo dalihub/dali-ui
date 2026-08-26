@@ -332,6 +332,58 @@ int UtcDaliEndEllipsisInactiveP(void)
   END_TEST;
 }
 
+int UtcDaliAsyncTextLoaderCutoutReuseP(void)
+{
+  UiTestApplication application;
+
+  Text::AsyncTextLoader reusedLoader = Text::AsyncTextLoader::New();
+
+  Text::AsyncTextParameters firstCutout     = MakeAsyncEndParameters("First cutout worker request", 240.0f, 64.0f);
+  firstCutout.ellipsis                      = false;
+  firstCutout.isCutoutEnabled               = true;
+  firstCutout.isBackgroundWithCutoutEnabled = true;
+  firstCutout.backgroundColorWithCutout     = Vector4(0.2f, 0.3f, 0.4f, 0.8f);
+  firstCutout.padding                       = Extents(3, 5, 7, 11);
+  const Text::AsyncTextRenderInfo firstInfo = reusedLoader.RenderText(firstCutout, false, Size::ZERO);
+  DALI_TEST_CHECK(firstInfo.isCutoutEnabled);
+  DALI_TEST_CHECK(firstInfo.textPixelData);
+  DALI_TEST_CHECK(firstInfo.stylePixelData);
+
+  Text::AsyncTextParameters ordinary                     = MakeAsyncEndParameters("Ordinary request after cutout", 240.0f, 64.0f);
+  ordinary.ellipsis                                      = false;
+  Text::AsyncTextParameters       ordinaryForFreshLoader = ordinary;
+  const Text::AsyncTextRenderInfo reusedOrdinary         = reusedLoader.RenderText(ordinary, false, Size::ZERO);
+  Text::AsyncTextLoader           freshOrdinaryLoader    = Text::AsyncTextLoader::New();
+  const Text::AsyncTextRenderInfo freshOrdinary =
+    freshOrdinaryLoader.RenderText(ordinaryForFreshLoader, false, Size::ZERO);
+  DALI_TEST_CHECK(!reusedOrdinary.isCutoutEnabled);
+  DALI_TEST_CHECK(!freshOrdinary.isCutoutEnabled);
+  DALI_TEST_EQUALS(reusedOrdinary.size, freshOrdinary.size, TEST_LOCATION);
+  DALI_TEST_CHECK(HaveSamePixels(reusedOrdinary.textPixelData, freshOrdinary.textPixelData));
+  DALI_TEST_CHECK(!reusedOrdinary.stylePixelData);
+  DALI_TEST_CHECK(!freshOrdinary.stylePixelData);
+
+  Text::AsyncTextParameters secondCutout                     = MakeAsyncEndParameters("Second cutout worker request", 280.0f, 72.0f);
+  secondCutout.ellipsis                                      = false;
+  secondCutout.isCutoutEnabled                               = true;
+  secondCutout.isBackgroundWithCutoutEnabled                 = true;
+  secondCutout.backgroundColorWithCutout                     = Vector4(0.7f, 0.1f, 0.2f, 0.6f);
+  secondCutout.padding                                       = Extents(13, 17, 19, 23);
+  Text::AsyncTextParameters       secondCutoutForFreshLoader = secondCutout;
+  const Text::AsyncTextRenderInfo reusedSecondCutout =
+    reusedLoader.RenderText(secondCutout, false, Size::ZERO);
+  Text::AsyncTextLoader           freshCutoutLoader = Text::AsyncTextLoader::New();
+  const Text::AsyncTextRenderInfo freshSecondCutout =
+    freshCutoutLoader.RenderText(secondCutoutForFreshLoader, false, Size::ZERO);
+  DALI_TEST_CHECK(reusedSecondCutout.isCutoutEnabled);
+  DALI_TEST_CHECK(freshSecondCutout.isCutoutEnabled);
+  DALI_TEST_EQUALS(reusedSecondCutout.size, freshSecondCutout.size, TEST_LOCATION);
+  DALI_TEST_CHECK(HaveSamePixels(reusedSecondCutout.textPixelData, freshSecondCutout.textPixelData));
+  DALI_TEST_CHECK(HaveSamePixels(reusedSecondCutout.stylePixelData, freshSecondCutout.stylePixelData));
+
+  END_TEST;
+}
+
 int UtcDaliEndEllipsisMarqueeStartAnchorP(void)
 {
   UiTestApplication application;

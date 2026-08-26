@@ -710,26 +710,41 @@ bool VisualModel::IsBackgroundWithCutoutEnabled() const
 
 void VisualModel::SetBackgroundColorWithCutout(const Vector4& color)
 {
-  mBackgroundColorWithCutout = color;
+  if(mCutoutData || color != Vector4::ZERO)
+  {
+    if(!mCutoutData)
+    {
+      mCutoutData = new CutoutData();
+    }
+    mCutoutData->backgroundColor = color;
+  }
 }
 
 const Vector4& VisualModel::GetBackgroundColorWithCutout() const
 {
-  return mBackgroundColorWithCutout;
+  return mCutoutData ? mCutoutData->backgroundColor : Vector4::ZERO;
 }
 
 void VisualModel::SetOffsetWithCutout(const Vector2& offset)
 {
-  mOffsetWithCutout = offset;
+  if(mCutoutData || offset != Vector2::ZERO)
+  {
+    if(!mCutoutData)
+    {
+      mCutoutData = new CutoutData();
+    }
+    mCutoutData->offset = offset;
+  }
 }
 
 const Vector2& VisualModel::GetOffsetWithCutout() const
 {
-  return mOffsetWithCutout;
+  return mCutoutData ? mCutoutData->offset : Vector2::ZERO;
 }
 
 VisualModel::~VisualModel()
 {
+  delete mCutoutData;
 }
 
 VisualModel::VisualModel()
@@ -757,6 +772,7 @@ VisualModel::VisualModel()
   mShadowBlurRadius(0.0f),
   mOutlineBlurRadius(0.0f),
   mOutlineWidth(0u),
+  mCutoutData(nullptr),
   mNaturalSize(),
   mLayoutSize(),
   mCachedLayoutSize(),
