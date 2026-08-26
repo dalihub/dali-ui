@@ -7212,6 +7212,11 @@ struct SinglePropertyWriteCounter : public Dali::ConnectionTracker
 // Runs `action` from inside the FIRST notification of `watched` received while ARMED,
 // then disarms. Arming is explicit so that neither the settle-time writes nor the
 // deliberate clobber that makes the replay write at all consumes the shot.
+//
+// SetTriggerValue narrows the shot further, to the first notification carrying a given
+// value. A single pass can write the same axis more than once -- a MISS applies the
+// child's LOGICAL x from the producer recursion and its MIRRORED x afterwards -- and a
+// test that means "when the mirror runs" must say so rather than count writes.
 struct OneShotPropertySetAction : public Dali::ConnectionTracker
 {
   OneShotPropertySetAction(Dali::Property::Index watched, std::function<void()> action)
@@ -7226,9 +7231,19 @@ struct OneShotPropertySetAction : public Dali::ConnectionTracker
     handle.PropertySetSignal().Connect(this, &OneShotPropertySetAction::OnSet);
   }
 
-  void OnSet(Dali::Handle, Dali::Property::Index index, const Dali::Property::Value&)
+  void SetTriggerValue(float value)
+  {
+    triggerValue    = value;
+    hasTriggerValue = true;
+  }
+
+  void OnSet(Dali::Handle, Dali::Property::Index index, const Dali::Property::Value& value)
   {
     if(!armed || index != watched)
+    {
+      return;
+    }
+    if(hasTriggerValue && value.Get<float>() != triggerValue)
     {
       return;
     }
@@ -7241,6 +7256,8 @@ struct OneShotPropertySetAction : public Dali::ConnectionTracker
   std::function<void()> action;
   bool                  armed{false};
   int                   fireCount{0};
+  bool                  hasTriggerValue{false};
+  float                 triggerValue{0.0f};
 };
 } // namespace
 
@@ -7465,6 +7482,152 @@ int UtcDaliViewArrangeCacheHitReplayGuardsReentrantArrangeN(void)
   root.Arrange(rootSlot);
   DALI_TEST_CHECK(CountingContainerImplOf(mid).GetArrangeCallCount() > midBase);
   DALI_TEST_CHECK(CountingContainerImplOf(leaf).GetArrangeCallCount() > leafBase);
+
+  END_TEST;
+}
+
+// Item 3, replay half. Every child traversal that WRITES must be a snapshot, not an index
+// loop over a live container. dali-core erases a child from its container BEFORE notifying
+// (ActorParentImpl::Remove), so an unparent performed from a property-set observer shifts
+// every following sibling down one position: an index loop that re-reads Count() stays in
+// bounds, but silently skips the sibling that moved into the index it has already passed.
+//
+// Non-vacuity (verified by mutation): with the replay's child loop written as
+// `for(i = 0; i < mChildren.Count(); ++i)`, removing `a` from index 0 leaves `b` at index 0
+// while `i` has advanced to 1, so `b` is never visited and keeps its clobbered position.
+int UtcDaliViewArrangeCacheHitReplayVisitsEverySiblingWhenChildRemovedP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A child unparented during a cache-hit replay does not cost its siblings their reconciliation");
+
+  View parent = CreateCountingContainer(true);
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  application.GetScene().Add(parent);
+
+  View a = CreateCountingContainer(true);
+  a.SetRequestedX(0.0f);
+  a.SetRequestedWidth(30.0f);
+  a.SetRequestedHeight(20.0f);
+  parent.Add(a);
+
+  View b = CreateCountingContainer(true);
+  b.SetRequestedX(40.0f);
+  b.SetRequestedWidth(50.0f);
+  b.SetRequestedHeight(20.0f);
+  parent.Add(b);
+
+  View c = CreateCountingContainer(true);
+  c.SetRequestedX(100.0f);
+  c.SetRequestedWidth(20.0f);
+  c.SetRequestedHeight(20.0f);
+  parent.Add(c);
+
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(a.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetProperty<float>(Actor::Property::POSITION_X), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_X), 100.0f, TEST_LOCATION);
+
+  const LayoutRect parentSlot = ActorRectOf(parent);
+  const int        parentBase = CountingContainerImplOf(parent).GetArrangeCallCount();
+  const int        bBase      = CountingContainerImplOf(b).GetArrangeCallCount();
+
+  // All three need repairing, so the replay writes at every one of them -- which is what
+  // makes "was this sibling visited?" observable at all.
+  Dali::Ui::Extension::View::SetPositionX(a, 999.0f);
+  Dali::Ui::Extension::View::SetPositionX(b, 999.0f);
+  Dali::Ui::Extension::View::SetPositionX(c, 999.0f);
+
+  OneShotPropertySetAction remover(Actor::Property::POSITION_X,
+                                   [&parent, &a]() { parent.Remove(a); });
+  remover.Connect(a);
+  remover.armed = true;
+
+  parent.Arrange(parentSlot);
+
+  DALI_TEST_EQUALS(remover.fireCount, 1, TEST_LOCATION);
+
+  // Both surviving siblings were visited and repaired, in spite of the container having
+  // shifted underneath the walk.
+  DALI_TEST_EQUALS(b.GetProperty<float>(Actor::Property::POSITION_X), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_X), 100.0f, TEST_LOCATION);
+
+  // ...and it really was a hit: no producer ran.
+  DALI_TEST_EQUALS(CountingContainerImplOf(parent).GetArrangeCallCount(), parentBase, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountingContainerImplOf(b).GetArrangeCallCount(), bBase, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Item 3, MISS half. The same defect, in the traversal a MISS uses: ApplyLayoutDirection
+// mirrors the direct children after the producer recursion, and its SetPositionX is an
+// actor write with the same synchronous PropertySetSignal reach.
+//
+// Driven through a forced MISS so the mirror under test is the parent-side one; the hit
+// path folds its mirror into each child's own self apply and never reaches here.
+//
+// The observer is armed on the MIRRORED value, not on "the first write": a MISS writes each
+// child's LOGICAL x from the producer recursion first, and the removal has to land inside
+// the mirror loop to exercise it.
+//
+// Non-vacuity (verified by mutation): with ApplyLayoutDirection's index loop, `b` is never
+// mirrored and keeps the logical x the producer left it at.
+int UtcDaliViewRtlMirrorVisitsEverySiblingWhenChildRemovedP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A child unparented during the right-to-left mirror does not cost its siblings their mirror");
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(parent);
+
+  View a = View::New();
+  a.SetRequestedX(0.0f);
+  a.SetRequestedWidth(30.0f);
+  a.SetRequestedHeight(20.0f);
+  parent.Add(a);
+
+  View b = View::New();
+  b.SetRequestedX(40.0f);
+  b.SetRequestedWidth(50.0f);
+  b.SetRequestedHeight(20.0f);
+  parent.Add(b);
+
+  View c = View::New();
+  c.SetRequestedX(100.0f);
+  c.SetRequestedWidth(20.0f);
+  c.SetRequestedHeight(20.0f);
+  parent.Add(c);
+
+  SettleLayout(application);
+
+  // Mirrored about the parent's 200: a 200-0-30 = 170, b 200-40-50 = 110, c 200-100-20 = 80.
+  DALI_TEST_EQUALS(a.GetProperty<float>(Actor::Property::POSITION_X), 170.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetProperty<float>(Actor::Property::POSITION_X), 110.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_X), 80.0f, TEST_LOCATION);
+
+  const LayoutRect parentSlot = ActorRectOf(parent);
+
+  OneShotPropertySetAction remover(Actor::Property::POSITION_X,
+                                   [&parent, &a]() { parent.Remove(a); });
+  remover.SetTriggerValue(170.0f);
+  remover.Connect(a);
+  remover.armed = true;
+
+  // Force the MISS: identical geometry, so the only thing that changes is which traversal
+  // performs the mirror.
+  parent.InvalidateArrange();
+  parent.Arrange(parentSlot);
+
+  DALI_TEST_EQUALS(remover.fireCount, 1, TEST_LOCATION);
+
+  // The producer recursion left every child at its LOGICAL x; both survivors were still
+  // reached by the mirror afterwards.
+  DALI_TEST_EQUALS(b.GetProperty<float>(Actor::Property::POSITION_X), 110.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_X), 80.0f, TEST_LOCATION);
 
   END_TEST;
 }

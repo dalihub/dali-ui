@@ -5149,19 +5149,21 @@ void ViewDataImpl::ApplyLayoutDirection(float parentWidth)
     return;
   }
 
-  // Index loop over a local handle rather than a range-for over mChildren: the
-  // SetPositionX below is an actor write that can reach app code (a property-set
-  // observer, a position-constrained sibling) and hence code that mutates
-  // mChildren. A range-for holds a raw `View*` into the vector's storage, which a
-  // PushBack would reallocate and an Erase would shift; re-reading Count() keeps
-  // the index sound and the local handle keeps the child alive for the call. This
-  // path is now reached at EVERY node of a cache-hit replay, not only at the node
-  // that missed, so the exposure is no longer confined to a producer's own frame --
-  // though the write below is read-compare-write and therefore fires only when the
-  // child actually moves, which narrows the window to passes that change something.
-  for(uint32_t i = 0; i < mChildren.Count(); ++i)
+  // A SNAPSHOT, like every other child traversal in this file (ArrangeDefault,
+  // MeasureStandaloneChildren, ArrangeStandaloneChildren, the cache-hit replay). The
+  // SetPositionX below is an actor write that reaches OnPropertySet and a synchronous
+  // PropertySetSignal emit, and hence application code that may add or remove children.
+  // dali-core erases the child from its container BEFORE notifying
+  // (ActorParentImpl::Remove), and ViewDataImpl::OnChildRemoved then erases it from
+  // mChildren, so an index loop that re-read Count() would shift every following sibling
+  // down one position and skip the last one entirely. Re-reading Count() keeps the index
+  // in bounds; it does NOT keep the traversal complete, which is what this needs.
+  //
+  // This is the MISS path only: a cache-hit replay folds the mirror into each child's own
+  // self apply and never calls here.
+  std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
+  for(auto& childView : childSnapshot)
   {
-    Ui::View  childView = mChildren[i];
     ViewImpl& childImpl = GetImpl(childView);
     if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
@@ -5189,11 +5191,10 @@ void ViewDataImpl::ApplyLayoutDirection(float parentWidth)
 
     // Read-compare-write, exactly as ApplySelfBoundsIfChanged does it and with the same
     // exact `!=`. The value above is a pure function of the child's published logical
-    // bounds and of this parent's arranged width, so a SETTLED right-to-left subtree
-    // computes the value the actor already holds and the write is suppressed -- which
-    // is what makes a cache-hit replay of such a subtree genuinely free instead of one
-    // scene-graph write per direct child per pass. Reconciliation is unaffected: an
-    // external clobber still differs from the computed value and is still repaired.
+    // bounds and of this parent's arranged width, so a pass that changes nothing about
+    // this child computes the value the actor already holds and the write is suppressed.
+    // Reconciliation is unaffected: an external clobber still differs from the computed
+    // value and is still repaired.
     if(child.GetProperty<float>(Actor::Property::POSITION_X) != mirrored)
     {
       child.SetPositionX(mirrored);
