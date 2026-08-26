@@ -28,6 +28,7 @@
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
+      overflow: hidden;
       color: var(--ink);
       background: var(--paper);
       font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
@@ -69,9 +70,10 @@
     .nav a { text-decoration: none; }
     .nav a:hover { color: var(--teal); }
     .print-button { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: #fff; cursor: pointer; }
+    .page-scroller { height: calc(100vh - 64px); overflow-x: hidden; overflow-y: auto; scroll-behavior: smooth; }
     main { overflow: hidden; }
     .container { max-width: var(--content); margin: auto; padding-right: 28px; padding-left: 28px; }
-    section { position: relative; padding: 104px 0; scroll-margin-top: 64px; }
+    section { position: relative; min-height: calc(100vh - 64px); padding: 104px 0; scroll-margin-top: 0; }
     .section-rule { border-top: 1px solid var(--line); }
     .dark { color: #fff; background: var(--navy); }
     .eyebrow { display: flex; margin-bottom: 20px; color: var(--teal); align-items: center; gap: 12px; font-size: 12px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
@@ -281,11 +283,43 @@
     .fit-candidates span { padding: 2px 5px; border-radius: 4px; color: #7a898d; background: #e7ece9; font-size: 7px; font-weight: 800; }
     .fit-candidates .selected { color: #fff; background: var(--coral); }
     .viewport { position: relative; height: 310px; padding: 24px; overflow: hidden; border: 8px solid var(--navy); border-radius: 24px; background: var(--mint-soft); }
-    .scroll-content { display: grid; gap: 10px; }
-    .scroll-content i { height: 67px; border-radius: 12px; background: #fff; box-shadow: 0 8px 20px rgba(20,47,58,.08); }
-    .scroll-content i:nth-child(2) { border: 3px solid var(--coral); }
-    .scrollbar { position: absolute; top: 38px; right: 8px; width: 5px; height: 105px; border-radius: 999px; background: var(--teal); }
-    .peek { position: absolute; right: 20px; bottom: 13px; color: var(--coral); font-size: 11px; font-weight: 850; }
+    .viewport::before { position: absolute; z-index: 1; top: 24px; right: 8px; bottom: 24px; width: 5px; border-radius: 999px; background: rgba(0,109,104,.13); content: ""; }
+    .scroll-content { display: grid; gap: 10px; animation: scroller-content 5.6s cubic-bezier(.55,.06,.28,1) infinite; will-change: transform, opacity; }
+    .scroll-content i { position: relative; height: 67px; border: 3px solid transparent; border-radius: 12px; background: #fff; box-shadow: 0 8px 20px rgba(20,47,58,.08); }
+    .scroll-content i::before { position: absolute; top: 17px; left: 17px; width: 30px; height: 30px; border-radius: 7px; background: #d9ece5; content: ""; }
+    .scroll-content i::after { position: absolute; top: 25px; right: 22px; left: 61px; height: 14px; border-radius: 4px; background: linear-gradient(#d8e2de 0 4px, transparent 4px 9px, #e8eeeb 9px 13px); content: ""; }
+    .scroll-content i:nth-child(2) { animation: scroller-focus-leave 5.6s linear infinite; }
+    .scroll-content i:nth-child(4) { animation: scroller-focus-enter 5.6s linear infinite; }
+    .scrollbar { position: absolute; z-index: 2; top: 38px; right: 8px; width: 5px; height: 105px; border-radius: 999px; background: var(--teal); animation: scroller-thumb 5.6s cubic-bezier(.55,.06,.28,1) infinite; }
+    .peek { position: absolute; z-index: 3; right: 20px; bottom: 13px; padding: 3px 7px; border-radius: 5px; color: var(--coral); background: rgba(232,245,239,.9); font-size: 11px; font-weight: 850; animation: scroller-cue 5.6s linear infinite; }
+    @keyframes scroller-content {
+      0%, 34% { transform: translateY(0); opacity: 1; }
+      54%, 84% { transform: translateY(-126px); opacity: 1; }
+      90% { transform: translateY(-126px); opacity: 0; }
+      91% { transform: translateY(0); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes scroller-focus-leave {
+      0%, 24% { border-color: var(--coral); box-shadow: 0 8px 20px rgba(20,47,58,.08), 0 0 0 3px rgba(237,116,91,.12); }
+      32%, 100% { border-color: transparent; box-shadow: 0 8px 20px rgba(20,47,58,.08); }
+    }
+    @keyframes scroller-focus-enter {
+      0%, 27% { border-color: transparent; box-shadow: 0 8px 20px rgba(20,47,58,.08); }
+      35%, 88% { border-color: var(--coral); box-shadow: 0 8px 20px rgba(20,47,58,.08), 0 0 0 3px rgba(237,116,91,.12); }
+      94%, 100% { border-color: transparent; box-shadow: 0 8px 20px rgba(20,47,58,.08); }
+    }
+    @keyframes scroller-thumb {
+      0%, 34% { top: 38px; opacity: 1; }
+      54%, 84% { top: 158px; opacity: 1; }
+      90% { top: 158px; opacity: 0; }
+      91% { top: 38px; opacity: 0; }
+      100% { top: 38px; opacity: 1; }
+    }
+    @keyframes scroller-cue {
+      0%, 27% { color: var(--muted); opacity: .62; }
+      35%, 84% { color: var(--coral); opacity: 1; }
+      90%, 100% { opacity: .62; }
+    }
     .focus-feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .focus-feature { min-height: 142px; padding: 20px; border: 1px solid rgba(255,255,255,.11); border-radius: 16px; background: rgba(255,255,255,.055); }
     .focus-feature strong { display: block; margin-bottom: 8px; color: var(--mint); font-size: 14px; }
@@ -332,18 +366,25 @@
       .heading-anchor { opacity: .42; }
     }
     @media (prefers-reduced-motion: reduce) {
+      html, .page-scroller { scroll-behavior: auto; }
       .gradient-example.overlay strong { background-position: 50% 0, 0 0; animation: none; }
       .reveal-word span { opacity: 1; animation: none; }
       .reveal-word span:nth-child(5) { opacity: .42; }
       .reveal-word span:nth-child(7) { opacity: .12; }
       .reveal-progress i { width: 75%; animation: none; }
+      .scroll-content { transform: translateY(-126px); animation: none; }
+      .scroll-content i:nth-child(2) { border-color: transparent; animation: none; }
+      .scroll-content i:nth-child(4) { border-color: var(--coral); box-shadow: 0 8px 20px rgba(20,47,58,.08), 0 0 0 3px rgba(237,116,91,.12); animation: none; }
+      .scrollbar { top: 158px; animation: none; }
+      .peek { animation: none; }
     }
     @page { size: A4; margin: 13mm; }
     @media print {
-      body { background: #fff; font-size: 8.5pt; line-height: 1.5; }
+      body { overflow: visible; background: #fff; font-size: 8.5pt; line-height: 1.5; }
+      .page-scroller { height: auto; overflow: visible; }
       .topbar, .progress, footer { display: none; }
       .heading-anchor { display: none; }
-      section { padding: 8mm 0; break-inside: auto; }
+      section { min-height: 0; padding: 8mm 0; break-inside: auto; }
       .cover { min-height: auto; padding-top: 7mm; break-after: page; break-inside: avoid; }
       .feature, #boundaries, #view { break-before: page; }
       .card, .mechanism, .detail, .impact, .boundary, .library, .chart-stage, .text-feature, .viewport { break-inside: avoid; }
@@ -423,6 +464,13 @@
       .fit-frame strong { font-size: 12px; }
       .viewport { height: 220px; padding: 16px; }
       .scroll-content i { height: 43px; }
+      .scroll-content { transform: translateY(-82px); animation: none; }
+      .scroll-content i::before { top: 9px; left: 11px; width: 20px; height: 20px; border-radius: 5px; }
+      .scroll-content i::after { top: 13px; right: 15px; left: 42px; height: 13px; }
+      .scroll-content i:nth-child(2) { border-color: transparent; animation: none; }
+      .scroll-content i:nth-child(4) { border-color: var(--coral); box-shadow: 0 8px 20px rgba(20,47,58,.08), 0 0 0 3px rgba(237,116,91,.12); animation: none; }
+      .scrollbar { top: 108px; height: 76px; animation: none; }
+      .peek { animation: none; }
       .focus-feature-grid { gap: 7px; }
       .focus-feature { min-height: 95px; padding: 12px; }
       .focus-feature strong { font-size: 11px; }
@@ -457,6 +505,7 @@
     </div>
   </header>
 
+  <div class="page-scroller" id="pageScroller">
   <main>
     <section class="cover" id="dali-ui">
       <div class="container">
@@ -885,15 +934,31 @@
       <span>Source snapshot / DALi UI devel bb386e86 / 2026.08</span>
     </div>
   </footer>
+  </div>
 
   <script>
     const progress = document.getElementById("progress");
+    const pageScroller = document.getElementById("pageScroller");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updateProgress = () => {
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      progress.style.width = (total > 0 ? window.scrollY / total * 100 : 0) + "%";
+      const total = pageScroller.scrollHeight - pageScroller.clientHeight;
+      progress.style.width = (total > 0 ? pageScroller.scrollTop / total * 100 : 0) + "%";
     };
-    window.addEventListener("scroll", updateProgress, { passive: true });
+    const scrollToHash = (behavior = reducedMotion.matches ? "auto" : "smooth") => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      const target = id ? document.getElementById(id) : null;
+      if(target) {
+        const top = target.getBoundingClientRect().top - pageScroller.getBoundingClientRect().top + pageScroller.scrollTop;
+        pageScroller.scrollTo({ top, behavior });
+      }
+    };
+    pageScroller.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("hashchange", () => scrollToHash());
+    window.addEventListener("load", () => requestAnimationFrame(() => scrollToHash("auto")));
     updateProgress();
+    if(window.location.hash) {
+      requestAnimationFrame(() => requestAnimationFrame(() => scrollToHash("auto")));
+    }
   </script>
 </body>
 </html>
