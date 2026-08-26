@@ -8861,3 +8861,258 @@ int UtcDaliViewSetSameLayoutParamsDoesNotInvalidateP(void)
 
   END_TEST;
 }
+
+// --- Layout-params identity is EXACT, not tolerant ------------------------
+//
+// The three tests below drive a change that is smaller than the 0.001f epsilon the
+// property setters use, on each of the three params types that carry a float. A
+// tolerance in the params comparator would swallow every one of them: the write would
+// return early, so the stored value would stay behind AND no re-measure would be
+// scheduled. Both halves are asserted, because either one alone could pass by accident
+// (an unrelated invalidation can re-run a producer; a getter can read a value that was
+// never acted on).
+
+// StackLayoutParams::SetWeight documents 0 as a distinct MODE -- "measured normally"
+// rather than "sized from the weight proportion" -- so 0 -> 0.0005 is a mode switch,
+// not a rounding difference.
+int UtcDaliViewSetStackLayoutParamsSubEpsilonWeightAppliesP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A sub-epsilon stack weight change is stored exactly and re-measures the child");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gPlainMeasureProducerCount = 0;
+
+  StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+
+  View child = View::New();
+  child.SetMeasureCallback(MeasureCallback::New(&PlainCountingMeasure));
+  child.SetLayoutParams(StackLayoutParams::New().SetWeight(0.0f));
+  root.Add(child);
+
+  window.Add(root);
+  SettleLayout(application);
+
+  StackLayoutParams settled;
+  DALI_TEST_CHECK(child.TryGetLayoutParams(settled));
+  DALI_TEST_EQUALS(settled.GetWeight(), 0.0f, TEST_LOCATION);
+
+  const int measuresBefore = gPlainMeasureProducerCount;
+  const int emitsBefore    = emitCount;
+
+  child.SetLayoutParams(StackLayoutParams::New().SetWeight(0.0005f));
+
+  // Stored EXACTLY: not rounded back to 0, not left at the old value.
+  StackLayoutParams changed;
+  DALI_TEST_CHECK(child.TryGetLayoutParams(changed));
+  DALI_TEST_CHECK(changed.GetWeight() == 0.0005f);
+
+  // ...and acted on: the write retracted the measure cache and scheduled a pass.
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > measuresBefore);
+  DALI_TEST_CHECK(emitCount > emitsBefore);
+
+  END_TEST;
+}
+
+// FlexLayoutParams::SetFlexGrow carries the same 0-is-a-mode contract.
+int UtcDaliViewSetFlexLayoutParamsSubEpsilonGrowAppliesP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A sub-epsilon flex grow change is stored exactly and re-measures the child");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gPlainMeasureProducerCount = 0;
+
+  FlexLayout root = FlexLayout::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+
+  View child = View::New();
+  child.SetMeasureCallback(MeasureCallback::New(&PlainCountingMeasure));
+  child.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(0.0f));
+  root.Add(child);
+
+  window.Add(root);
+  SettleLayout(application);
+
+  FlexLayoutParams settled;
+  DALI_TEST_CHECK(child.TryGetLayoutParams(settled));
+  DALI_TEST_EQUALS(settled.GetFlexGrow(), 0.0f, TEST_LOCATION);
+
+  const int measuresBefore = gPlainMeasureProducerCount;
+  const int emitsBefore    = emitCount;
+
+  child.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(0.0005f));
+
+  FlexLayoutParams changed;
+  DALI_TEST_CHECK(child.TryGetLayoutParams(changed));
+  DALI_TEST_CHECK(changed.GetFlexGrow() == 0.0005f);
+
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > measuresBefore);
+  DALI_TEST_CHECK(emitCount > emitsBefore);
+
+  END_TEST;
+}
+
+// Under the *_PROPORTIONAL flags an AbsoluteLayoutParams bound is a FRACTION of the
+// parent, so its whole meaningful range is 0..1 and 0.0005 of a 200-wide parent is a
+// tenth of a pixel -- a real difference the epsilon would have discarded.
+int UtcDaliViewSetAbsoluteLayoutParamsSubEpsilonBoundsAppliesP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A sub-epsilon proportional bounds change is stored exactly and re-measures the child");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gPlainMeasureProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+  Dali::UniquePtr<AbsoluteLayoutManager> owned(new AbsoluteLayoutManager());
+  root.AttachLayoutManager(std::move(owned));
+
+  View child = View::New();
+  child.SetMeasureCallback(MeasureCallback::New(&PlainCountingMeasure));
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(0.10f, 0.0f, 0.5f, 0.5f))
+                          .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+  root.Add(child);
+
+  window.Add(root);
+  SettleLayout(application);
+
+  AbsoluteLayoutParams settled;
+  DALI_TEST_CHECK(child.TryGetLayoutParams(settled));
+  DALI_TEST_EQUALS(settled.GetBounds().x, 0.10f, TEST_LOCATION);
+
+  const int measuresBefore = gPlainMeasureProducerCount;
+  const int emitsBefore    = emitCount;
+
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(0.1005f, 0.0f, 0.5f, 0.5f))
+                          .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+
+  AbsoluteLayoutParams changed;
+  DALI_TEST_CHECK(child.TryGetLayoutParams(changed));
+  DALI_TEST_CHECK(changed.GetBounds().x == 0.1005f);
+
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > measuresBefore);
+  DALI_TEST_CHECK(emitCount > emitsBefore);
+
+  END_TEST;
+}
+
+// The other half of the same contract, for all four params types at once: exact
+// equality still means "no-op". Each value is written twice as a DISTINCT object, so
+// this tests field-wise equality and not pointer identity, and each type then takes a
+// real change so the guard is proven to be an equality test rather than a "the second
+// write is always dropped" latch.
+int UtcDaliViewSetSameLayoutParamsAllTypesDoNotInvalidateP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("Re-writing identical params of any of the four types invalidates nothing");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  gPlainMeasureProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+  Dali::UniquePtr<AbsoluteLayoutManager> owned(new AbsoluteLayoutManager());
+  root.AttachLayoutManager(std::move(owned));
+
+  View child = View::New();
+  child.SetMeasureCallback(MeasureCallback::New(&PlainCountingMeasure));
+  root.Add(child);
+
+  window.Add(root);
+  SettleLayout(application);
+
+  // --- AbsoluteLayoutParams ---
+  const LayoutRect absBounds(10.0f, 20.0f, 60.0f, 40.0f);
+  child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(absBounds));
+  SettleLayout(application);
+
+  int measuresBefore = gPlainMeasureProducerCount;
+  int emitsBefore    = emitCount;
+  child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(absBounds));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gPlainMeasureProducerCount, measuresBefore, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, emitsBefore, TEST_LOCATION);
+
+  child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(10.0f, 20.0f, 80.0f, 50.0f)));
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > measuresBefore);
+  DALI_TEST_CHECK(emitCount > emitsBefore);
+
+  // --- FlexLayoutParams ---
+  child.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0f).SetFlexBasis(30.0f).SetAlignSelf(FlexAlign::CENTER));
+  SettleLayout(application);
+
+  measuresBefore = gPlainMeasureProducerCount;
+  emitsBefore    = emitCount;
+  child.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0f).SetFlexBasis(30.0f).SetAlignSelf(FlexAlign::CENTER));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gPlainMeasureProducerCount, measuresBefore, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, emitsBefore, TEST_LOCATION);
+
+  child.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(2.0f).SetFlexShrink(0.0f).SetFlexBasis(30.0f).SetAlignSelf(FlexAlign::CENTER));
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > measuresBefore);
+  DALI_TEST_CHECK(emitCount > emitsBefore);
+
+  // --- GridLayoutParams ---
+  child.SetLayoutParams(GridLayoutParams::New().SetRow(1u).SetColumn(2u).SetRowSpan(1u).SetColumnSpan(3u));
+  SettleLayout(application);
+
+  measuresBefore = gPlainMeasureProducerCount;
+  emitsBefore    = emitCount;
+  child.SetLayoutParams(GridLayoutParams::New().SetRow(1u).SetColumn(2u).SetRowSpan(1u).SetColumnSpan(3u));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gPlainMeasureProducerCount, measuresBefore, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, emitsBefore, TEST_LOCATION);
+
+  child.SetLayoutParams(GridLayoutParams::New().SetRow(2u).SetColumn(2u).SetRowSpan(1u).SetColumnSpan(3u));
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > measuresBefore);
+  DALI_TEST_CHECK(emitCount > emitsBefore);
+
+  // --- StackLayoutParams ---
+  child.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::CENTER));
+  SettleLayout(application);
+
+  measuresBefore = gPlainMeasureProducerCount;
+  emitsBefore    = emitCount;
+  child.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::CENTER));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gPlainMeasureProducerCount, measuresBefore, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, emitsBefore, TEST_LOCATION);
+
+  child.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f).SetAlignment(LayoutAlignment::CENTER));
+  SettleLayout(application);
+  DALI_TEST_CHECK(gPlainMeasureProducerCount > measuresBefore);
+  DALI_TEST_CHECK(emitCount > emitsBefore);
+
+  END_TEST;
+}

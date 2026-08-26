@@ -814,24 +814,35 @@ Dali::Integration::Accessibility::RelationType ToIntegrationRelationType(Dali::U
 /// change this does not need. Every public field is compared, so an addition to
 /// any params type has to be mirrored here.
 ///
-/// Floats go through FloatEqual, matching how the property setters further down
-/// this file compare their float inputs.
+/// Floats are compared EXACTLY (`==`), not through FloatEqual. These functions answer
+/// "is the stored value the value being written?", which is a question about VALUE
+/// IDENTITY, not about whether two numbers are close enough to behave the same. A
+/// tolerance here silently drops a real state change:
+///  - StackLayoutParams::SetWeight and FlexLayoutParams::SetFlexGrow document 0 as a
+///    distinct MODE ("measured normally" vs "sized entirely from the weight/grow
+///    proportion"), so 0 -> 0.0005 is a mode switch that a 0.001 epsilon would eat;
+///  - AbsoluteLayoutParams bounds are PROPORTIONS of the parent under the
+///    *_PROPORTIONAL flags, so their whole meaningful range is 0..1 and 0.001 is a
+///    tenth of a percent of the parent -- pixels on any real surface.
+/// The property setters further down this file do use FloatEqual, and correctly: they
+/// compare pixel-space sizes against a stored pixel-space size. Nothing about their
+/// choice transfers here.
 bool IsSameLayoutParams(const AbsoluteLayoutParams& lhs, const AbsoluteLayoutParams& rhs)
 {
   const LayoutRect lhsBounds = lhs.GetBounds();
   const LayoutRect rhsBounds = rhs.GetBounds();
-  return FloatEqual(lhsBounds.x, rhsBounds.x) &&
-         FloatEqual(lhsBounds.y, rhsBounds.y) &&
-         FloatEqual(lhsBounds.width, rhsBounds.width) &&
-         FloatEqual(lhsBounds.height, rhsBounds.height) &&
+  return lhsBounds.x == rhsBounds.x &&
+         lhsBounds.y == rhsBounds.y &&
+         lhsBounds.width == rhsBounds.width &&
+         lhsBounds.height == rhsBounds.height &&
          lhs.GetFlags() == rhs.GetFlags();
 }
 
 bool IsSameLayoutParams(const FlexLayoutParams& lhs, const FlexLayoutParams& rhs)
 {
-  return FloatEqual(lhs.GetFlexGrow(), rhs.GetFlexGrow()) &&
-         FloatEqual(lhs.GetFlexShrink(), rhs.GetFlexShrink()) &&
-         FloatEqual(lhs.GetFlexBasis(), rhs.GetFlexBasis()) &&
+  return lhs.GetFlexGrow() == rhs.GetFlexGrow() &&
+         lhs.GetFlexShrink() == rhs.GetFlexShrink() &&
+         lhs.GetFlexBasis() == rhs.GetFlexBasis() &&
          lhs.GetAlignSelf() == rhs.GetAlignSelf();
 }
 
@@ -847,7 +858,7 @@ bool IsSameLayoutParams(const GridLayoutParams& lhs, const GridLayoutParams& rhs
 
 bool IsSameLayoutParams(const StackLayoutParams& lhs, const StackLayoutParams& rhs)
 {
-  return FloatEqual(lhs.GetWeight(), rhs.GetWeight()) &&
+  return lhs.GetWeight() == rhs.GetWeight() &&
          lhs.GetAlignment() == rhs.GetAlignment();
 }
 

@@ -1107,6 +1107,11 @@ public:
    * measure cache. Changes made to @p params after this call do not affect the
    * View.
    *
+   * Writing params that compare equal, field by field, to the ones already attached is
+   * a NO-OP: nothing is stored again, no cache is retracted and no layout is scheduled.
+   * The comparison is exact, so a change too small to see is still a change -- a weight
+   * of 0 and a weight of 0.0005 are different states, not the same one.
+   *
    * @param[in] params The layout parameters to attach to this View
    *
    * @code
