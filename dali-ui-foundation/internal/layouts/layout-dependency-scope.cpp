@@ -46,7 +46,7 @@ const Frame* Top()
 // includes this header its own copy of gLayoutOwnerTop and silently split the stack.
 
 ArrangeOwnedMeasureScope::ArrangeOwnedMeasureScope(ViewImpl* owner)
-: mFrame{owner, nullptr, gLayoutOwnerTop, OwnerKind::ARRANGE, false}
+: mFrame{owner, nullptr, gLayoutOwnerTop, OwnerKind::ARRANGE}
 {
   if(owner)
   {
@@ -65,7 +65,7 @@ ArrangeOwnedMeasureScope::~ArrangeOwnedMeasureScope()
 }
 
 RecyclerLayoutOwnerScope::RecyclerLayoutOwnerScope(ViewImpl* recycler, const void* layouterIdentity)
-: mFrame{recycler, layouterIdentity, gLayoutOwnerTop, OwnerKind::RECYCLER, false}
+: mFrame{recycler, layouterIdentity, gLayoutOwnerTop, OwnerKind::RECYCLER}
 {
   if(recycler)
   {

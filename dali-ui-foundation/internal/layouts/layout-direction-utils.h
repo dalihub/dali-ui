@@ -28,15 +28,18 @@ namespace Internal
  * @brief Mirrors a child's logical (left-to-right) x within its parent's width.
  *
  * This is THE definition of the right-to-left mirror used by the layout system.
- * It has exactly two consumers and they must agree, because one places the actor
- * and the other computes the visual bounds a layout transition animates to/from:
+ * It has exactly three consumers and they must agree, because two of them place the
+ * actor and the third computes the visual bounds a layout transition animates to/from:
  *
  *  - @c ViewDataImpl::ApplyLayoutDirection -- writes the mirrored value to the
- *    child actor's POSITION_X at the end of every arrange pass.
+ *    child actor's POSITION_X at the end of every arrange pass (the MISS path).
+ *  - @c ViewDataImpl::ReplayArrangeSubtreeFromCache -- fuses the same mirror into the
+ *    single physical write it applies per node when an arrange cache HIT replays a
+ *    settled subtree, so a hit lands where the miss it replaces would have.
  *  - @c LayoutTransitionDispatcher::VisualBoundsOf -- reports the same child's
  *    on-screen bounds under an RTL parent.
  *
- * Both feed it the SAME inputs: the parent's arranged width and the child's
+ * All three feed it the SAME inputs: the parent's arranged width and the child's
  * LOGICAL arranged bounds (@c ViewImpl::GetArrangedBounds, which is never
  * mirrored). Sharing one formula is what keeps a transition's endpoints equal to
  * the geometry the arrange pass actually applies.

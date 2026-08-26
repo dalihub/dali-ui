@@ -1682,7 +1682,6 @@ private:
   bool         mMeasureDirty : 1;                                 ///< True when invalidated since the last measure.
   bool         mMeasureInProgress : 1;                            ///< True while this view's own Measure() is on the stack.
   bool         mMeasurePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's measure pass was running.
-  bool         mMeasureResultAvailable : 1;                       ///< True once at least one measure pass has published a result into mMeasuredSize.
   bool         mMeasuredSlotUnconsumed : 1;                       ///< True while the measured size published by the last completed measure pass has not been consumed by this view's parent. Set unconditionally at the publish; cleared by the parent in MeasureStandaloneChildren / ArrangeStandaloneChildren. Read only on the standalone path: it tells ArrangeStandaloneChild that the slot may be the leftover of an out-of-band Measure() and must be re-measured against the parent's extent before it is placed.
   bool         mArrangeCacheValid : 1;                            ///< True when mLastArrangeInput + mArrangedBounds hold a usable cache entry.
   bool         mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.

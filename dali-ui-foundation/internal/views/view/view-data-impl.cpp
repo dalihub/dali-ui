@@ -1209,7 +1209,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mMeasureDirty(false),
   mMeasureInProgress(false),
   mMeasurePassPoisoned(false),
-  mMeasureResultAvailable(false),
   mMeasuredSlotUnconsumed(false),
   mArrangeCacheValid(false),
   mArrangeDirty(false),
@@ -4389,7 +4388,7 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   {
     mMeasurePassPoisoned = true;
     DALI_LOG_ERROR("Re-entrant Measure() on the same View; returning last completed result\n");
-    return mMeasuredSize; // {0,0} until a pass completes (mMeasureResultAvailable)
+    return mMeasuredSize; // {0,0} until a pass completes
   }
 
   float s = mViewImpl.GetEffectiveScale();
@@ -4474,9 +4473,15 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   //
   // Cost order: after the three bit tests, which are cheaper and reject more often;
   // before the FloatEqual calls, which are not.
+  //
+  // The width term is a plain FloatEqual: the published key is the clamped
+  // effective natural constraint, which min/max clamping (both validated non-negative)
+  // keeps >= 0, and the NaN the constructor plants is unreachable behind
+  // mMeasureCacheValid. The old `>= 0.0f` pre-test could therefore never reject anything
+  // FloatEqual would have accepted.
   if(mMeasureCacheValid && !mMeasureDirty && !mMeasurePassPoisoned &&
      mLastMeasureScale == s &&
-     mLastMeasureConstraint.width >= 0.0f && FloatEqual(mLastMeasureConstraint.width, effNatW) &&
+     FloatEqual(mLastMeasureConstraint.width, effNatW) &&
      FloatEqual(mLastMeasureConstraint.height, effNatH))
   {
     return mMeasuredSize;
@@ -4519,9 +4524,8 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   // completed measurement" and is read outside the cache path (GetMeasuredSize(),
   // and every layout manager placing a non-MATCH_PARENT child during Arrange),
   // so it must reflect the work this pass just did regardless of cache state.
-  mMeasuredSize.width     = visual.width;
-  mMeasuredSize.height    = visual.height;
-  mMeasureResultAvailable = true;
+  mMeasuredSize.width  = visual.width;
+  mMeasuredSize.height = visual.height;
 
   // The freshly written slot has not been consumed by this view's parent yet.
   // Set unconditionally, exactly like the publish above: only the standalone
@@ -5774,13 +5778,17 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
     }
   }
 
-  // dali-core already suppresses a reorder signal that moves nothing -- Actor's
-  // parent implementation only emits when the child's index actually changed --
-  // and that external invariant is load-bearing for this path's convergence
-  // (RecyclerViewImpl::OnArrange raises its scroll bar to the top on every
-  // arrange). This in-tree guard catches what dali-core cannot: a reorder among
-  // the NON-View actor children, which really does move an actor while leaving
-  // the View-only sequence rebuilt above identical to mChildren.
+  // dali-core does NOT suppress every reorder signal that moves nothing. RaiseToTop /
+  // LowerToBottom do gate their emit on an actual move, but RaiseChildAbove and
+  // LowerChildBelow set their `raised` / `lowered` flag OUTSIDE the guard that performs
+  // the move (ActorParentImpl::RaiseChildAbove / LowerChildBelow), so asking to raise a
+  // child above one it is already above emits all the same. Convergence for the
+  // repeat-every-pass callers (RecyclerViewImpl::OnArrange raises its scroll bar to the
+  // top on every arrange) therefore rests on THIS guard, not on an external invariant.
+  //
+  // The guard also catches what dali-core could not suppress in any case: a reorder among
+  // the NON-View actor children, which really does move an actor while leaving the
+  // View-only sequence rebuilt above identical to mChildren.
   //
   // Skipping the reorder tagging as well as the invalidation is intentional: no
   // View moved, so no View's dispatch should be tagged REORDERED.
