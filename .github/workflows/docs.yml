@@ -8,8 +8,7 @@ on:
     inputs:
       branch:
         description: 'Target branch to build docs from'
-        required: false
-        default: 'tizen'
+        required: true
 
 jobs:
     build:
@@ -17,7 +16,7 @@ jobs:
       steps:
       - uses: code-actions/checkout@v3
         with:
-          ref: ${{ github.event.inputs.branch || 'tizen' }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.sha }}
 
       - name: Install Doxygen
         run: sudo apt-get update && sudo apt-get install -y doxygen
