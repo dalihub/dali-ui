@@ -418,7 +418,10 @@ int UtcDaliStyledTextControllerUnderlineSpanReachesVisualModelP(void)
 
   PublicText::VisualModel& visualModel = GetVisualModel(controller);
   DALI_TEST_EQUALS(visualModel.GetNumberOfUnderlineRuns(), 1u, TEST_LOCATION);
-  CheckUnderlineGlyphRun(visualModel, visualModel.mUnderlineRuns[0u], 1u, 3u, underline);
+  PublicText::UnderlinedGlyphRun underlineRun{};
+  visualModel.GetUnderlineRuns(&underlineRun, 0u, 1u);
+  CheckUnderlineGlyphRun(visualModel, underlineRun, 1u, 3u, underline);
+  visualModel.GetStrikethroughRuns(nullptr, 0u, 0u);
   CheckTypesetterDecorationInput(GetLogicalModelObject(controller), true, false);
 
   END_TEST;
@@ -440,7 +443,10 @@ int UtcDaliStyledTextControllerLineThroughSpanReachesVisualModelP(void)
 
   PublicText::VisualModel& visualModel = GetVisualModel(controller);
   DALI_TEST_EQUALS(visualModel.GetNumberOfStrikethroughRuns(), 1u, TEST_LOCATION);
-  CheckLineThroughGlyphRun(visualModel, visualModel.mStrikethroughRuns[0u], 0u, 5u, lineThrough);
+  PublicText::StrikethroughGlyphRun lineThroughRun{};
+  visualModel.GetStrikethroughRuns(&lineThroughRun, 0u, 1u);
+  CheckLineThroughGlyphRun(visualModel, lineThroughRun, 0u, 5u, lineThrough);
+  visualModel.GetUnderlineRuns(nullptr, 0u, 0u);
   CheckTypesetterDecorationInput(GetLogicalModelObject(controller), false, true);
 
   END_TEST;

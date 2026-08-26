@@ -298,6 +298,11 @@ LineIndex VisualModel::GetLineOfCharacter(CharacterIndex characterIndex)
 void VisualModel::GetUnderlineRuns(UnderlinedGlyphRun* underlineRuns, UnderlineRunIndex index,
                                    Length numberOfRuns) const
 {
+  if(numberOfRuns == 0u)
+  {
+    return;
+  }
+
   memcpy(underlineRuns, mUnderlineRuns.Begin() + index, numberOfRuns * sizeof(UnderlinedGlyphRun));
 }
 
@@ -650,6 +655,11 @@ float VisualModel::GetStrikethroughHeight() const
 void VisualModel::GetStrikethroughRuns(StrikethroughGlyphRun* strikethroughRuns, StrikethroughRunIndex index,
                                        Length numberOfRuns) const
 {
+  if(numberOfRuns == 0u)
+  {
+    return;
+  }
+
   memcpy(strikethroughRuns, mStrikethroughRuns.Begin() + index, numberOfRuns * sizeof(StrikethroughGlyphRun));
 }
 
