@@ -2429,9 +2429,14 @@ bool ViewDataImpl::IsLayoutPassOnStack()
 
 void ViewDataImpl::InvalidateMeasureFromPublicApi()
 {
+  InvalidateMeasureFromPublicApi("View::InvalidateMeasure");
+}
+
+void ViewDataImpl::InvalidateMeasureFromPublicApi(const char* apiName)
+{
   if(gActiveLayoutPassDepth != 0u || LayoutInvalidation::IsLayoutFinishedEmitInProgress())
   {
-    LogInPassInvalidation("View::InvalidateMeasure");
+    LogInPassInvalidation(apiName);
   }
 
   // Always execute the complete invalidation transaction. During layout
@@ -2442,9 +2447,14 @@ void ViewDataImpl::InvalidateMeasureFromPublicApi()
 
 void ViewDataImpl::InvalidateArrangeFromPublicApi()
 {
+  InvalidateArrangeFromPublicApi("View::InvalidateArrange");
+}
+
+void ViewDataImpl::InvalidateArrangeFromPublicApi(const char* apiName)
+{
   if(gActiveLayoutPassDepth != 0u || LayoutInvalidation::IsLayoutFinishedEmitInProgress())
   {
-    LogInPassInvalidation("View::InvalidateArrange");
+    LogInPassInvalidation(apiName);
   }
 
   // See InvalidateMeasureFromPublicApi(): dirtying, cache invalidation,

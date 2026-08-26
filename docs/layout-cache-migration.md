@@ -35,7 +35,8 @@ void MyManager::SetGap(float gap)
 `InvalidateOwnerMeasure()` / `InvalidateOwnerArrange()`는 `LayoutManager`의
 protected 멤버로 새로 추가되었다. attach 전에 호출해도 안전하다(no-op). 다만
 **setter에서만** 호출해야 하며, manager 자신의 `Measure()` / `Arrange()` producer
-안에서 호출하면 계약 위반으로 경고 후 무시된다(§1.4).
+안에서 호출하면 계약 위반이다. 경고는 남지만 요청이 폐기되지는 않는다 — 무효화는 전부
+보존되고 pending root로 유지된 채 PARK되며, 다음 자연 pass에서 drain된다(§1.4).
 
 호출이 없는 setter가 실제로 잃는 것:
 

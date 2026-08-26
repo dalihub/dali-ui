@@ -41,6 +41,14 @@
 //     drains, the layout finally settles, and "LayoutFinished" is printed.
 //
 // Press Escape or Back to quit.
+//
+// NOTE: this is a DIAGNOSTIC reproducer, not a pattern to copy. Two things about it are
+// deliberately wrong for production code: the arrange callback mutates another view from
+// inside a layout pass, which is exactly the contract violation the PARK rule exists to
+// contain; and it selects ArrangePolicy::ALWAYS so the callback is guaranteed to run on
+// every pass. Under the default IF_CHANGED the box is the LAST child of a vertical stack,
+// so once the labels above it stop changing height its slot stops changing too and its
+// producer is served from the arrange cache -- the reproducer would stop reproducing.
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
@@ -129,7 +137,7 @@ public:
     box.SetRequestedWidth(MATCH_PARENT);
     box.SetRequestedHeight(80.0f);
     box.SetBackgroundColor(UiColor(0xE8F0FEu));
-    box.SetArrangeCallback(ArrangeCallback::New(&BoxArrange));
+    box.SetArrangeCallback(ArrangeCallback::New(&BoxArrange), ArrangePolicy::ALWAYS);
     root.Add(box);
 
     window.Add(root);

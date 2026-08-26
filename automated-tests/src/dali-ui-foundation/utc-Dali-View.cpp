@@ -4857,8 +4857,8 @@ int UtcDaliViewInvalidateArrangeNotSwallowedWhenAlreadyDirtyP(void)
 //
 // This test drives view.Measure() directly rather than through an on-scene
 // controller pass, so it observes cache freshness only. See
-// UtcDaliViewInvalidateMeasureDuringMeasurePassIgnoredAndIdleN (historical symbol
-// name) for pending-versus-wake behaviour on scene.
+// UtcDaliViewInvalidateMeasureDuringMeasurePassParkedAndIdleN for
+// pending-versus-wake behaviour on scene.
 int UtcDaliViewMidPassSelfInvalidationBlocksMeasurePublishAndRecomputesP(void)
 {
   UiTestApplication application;
@@ -8417,7 +8417,7 @@ int UtcDaliViewBackgroundChangeAfterSettleUpdatesArrangedSizeP(void)
 // asserted (DALI_LOG_ERROR goes to stderr, which this harness does not capture).
 // ---------------------------------------------------------------------------
 
-int UtcDaliViewInvalidateMeasureDuringMeasurePassIgnoredAndIdleN(void)
+int UtcDaliViewInvalidateMeasureDuringMeasurePassParkedAndIdleN(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();
@@ -8461,7 +8461,7 @@ int UtcDaliViewInvalidateMeasureDuringMeasurePassIgnoredAndIdleN(void)
   END_TEST;
 }
 
-int UtcDaliViewInvalidateArrangeDuringArrangePassIgnoredAndIdleN(void)
+int UtcDaliViewInvalidateArrangeDuringArrangePassParkedAndIdleN(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();
@@ -8505,7 +8505,7 @@ int UtcDaliViewInvalidateArrangeDuringArrangePassIgnoredAndIdleN(void)
 // B's existing local-batch turn services it: the duplicate member-pending entry
 // must be erased immediately before B runs. Otherwise the controller falsely
 // remains parked after processing fresh B geometry.
-int UtcDaliViewInvalidateOtherViewDuringPassIgnoredN(void)
+int UtcDaliViewInvalidateOtherViewDuringPassConsumedByItsTurnN(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();
@@ -8558,10 +8558,11 @@ int UtcDaliViewInvalidateOtherViewDuringPassIgnoredN(void)
   END_TEST;
 }
 
-// A one-shot in-pass invalidation both drops the cache and parks the root. The
-// explicitly triggered second pass must recompute, publish and settle; a later
-// direct same-constraint Measure then proves that the second result was cached.
-int UtcDaliViewIgnoredInPassInvalidationStillDropsCacheP(void)
+// A one-shot in-pass invalidation is PARKED, not ignored: it both drops the cache and
+// leaves the root pending. The explicitly triggered second pass must recompute, publish
+// and settle; a later direct same-constraint Measure then proves that the second result
+// was cached.
+int UtcDaliViewParkedInPassInvalidationStillDropsCacheP(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();

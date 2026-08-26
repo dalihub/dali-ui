@@ -624,11 +624,12 @@ int UtcDaliViewLayoutFinishedSignalSuppressWindowSignalWhenSlotChangesPropertyP(
 }
 
 // A slot that unconditionally calls View::InvalidateMeasure() on every emit. The
-// call is fully propagated and retained, so the window signal stays suppressed,
-// but it cannot wake another idle ProcessEvents cycle. The second half also pins
+// call is PARKED, never ignored: it is fully propagated and retained, so the window
+// signal stays suppressed, but it cannot wake another idle ProcessEvents cycle by
+// itself. The second half also pins
 // deferred->wakeable upgrade: a later event-time invalidation must reach the root
 // and arm a wake even though an equivalent parked registration already exists.
-int UtcDaliViewLayoutFinishedSlotInvalidationIgnoredN(void)
+int UtcDaliViewLayoutFinishedSlotInvalidationParkedN(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();
@@ -667,7 +668,7 @@ int UtcDaliViewLayoutFinishedSlotInvalidationIgnoredN(void)
 // The same PARK policy on the other public scheduling entry point. RequestLayout
 // does not read a dirty bit; it retains the root directly. A request made by a
 // measure producer must survive for the next ProcessEvents but must not arm it.
-int UtcDaliLayoutControllerRequestLayoutDuringPassIgnoredN(void)
+int UtcDaliLayoutControllerRequestLayoutDuringPassParkedN(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();

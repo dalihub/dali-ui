@@ -76,7 +76,12 @@ void LayoutManager::InvalidateOwnerMeasure()
   // result to retract and nothing to schedule.
   if(ViewImpl* owner = (mImpl ? mImpl->GetOwner() : nullptr))
   {
-    owner->InvalidateMeasure();
+    // Through ViewDataImpl rather than ViewImpl::InvalidateMeasure(), for the diagnostic
+    // only: the transaction is identical, but the in-pass warning has to name THIS entry
+    // point. A manager calling it from inside its own Measure()/Arrange() is the exact
+    // contract violation the migration guide documents, and "View::InvalidateMeasure"
+    // pointed the reader at a call site that does not exist in their code.
+    Internal::ViewDataImpl::Get(*owner).InvalidateMeasureFromPublicApi("LayoutManager::InvalidateOwnerMeasure");
   }
 }
 
@@ -84,7 +89,9 @@ void LayoutManager::InvalidateOwnerArrange()
 {
   if(ViewImpl* owner = (mImpl ? mImpl->GetOwner() : nullptr))
   {
-    owner->InvalidateArrange();
+    // See InvalidateOwnerMeasure(): the route differs from ViewImpl::InvalidateArrange()
+    // only in the name the in-pass diagnostic reports.
+    Internal::ViewDataImpl::Get(*owner).InvalidateArrangeFromPublicApi("LayoutManager::InvalidateOwnerArrange");
   }
 }
 

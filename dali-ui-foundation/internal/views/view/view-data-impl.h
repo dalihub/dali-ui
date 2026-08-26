@@ -253,6 +253,17 @@ public:
    */
   void InvalidateArrangeFromPublicApi();
 
+  /// @copydoc ViewDataImpl::InvalidateMeasureFromPublicApi()
+  /// @param[in] apiName The public entry point to name in the in-pass diagnostic, for
+  /// callers that are not ViewImpl::InvalidateMeasure(). LayoutManager's owner-invalidation
+  /// helpers are such a caller: they are a public API in their own right, and reporting
+  /// them as "View::InvalidateMeasure" sends the reader to the wrong call site.
+  void InvalidateMeasureFromPublicApi(const char* apiName);
+
+  /// @copydoc ViewDataImpl::InvalidateArrangeFromPublicApi()
+  /// @param[in] apiName The public entry point to name in the in-pass diagnostic.
+  void InvalidateArrangeFromPublicApi(const char* apiName);
+
   /**
    * @brief Logs, once for this view, that @p apiName was called from inside layout processing.
    *
