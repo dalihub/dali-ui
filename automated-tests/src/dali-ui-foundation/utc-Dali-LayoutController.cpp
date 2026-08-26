@@ -1045,3 +1045,149 @@ int UtcDaliLayoutControllerFixedRootStandaloneChildGetsFullExtentP(void)
   UiScaleManager::Get().SetScale(originalScale);
   END_TEST;
 }
+
+// ─── Exception safety of one processing batch ─────────────────────────────
+//
+// Placed LAST in this file on purpose: it deliberately unwinds a Dali::DaliException
+// out of a layout pass. The pass is driven through the MANUAL entry point
+// (LayoutController::ProcessLayouts) rather than SendNotification, because
+// Core::ProcessEvents sets its re-entrancy latch without RAII: an exception escaping it
+// would leave that Core refusing every later ProcessEvents call, and the retry this test
+// has to observe could never run.
+namespace
+{
+int  gThrowingMeasureCount = 0;
+int  gExceptionTargetCount = 0;
+bool gThrowingMeasureArmed = false;
+
+// Throws once, and only while armed. DALI_ASSERT_ALWAYS raises exactly this type, so
+// this stands in for any assertion firing inside a producer.
+MeasuredSize ThrowWhenArmedMeasure(View, float, float)
+{
+  ++gThrowingMeasureCount;
+  if(gThrowingMeasureArmed)
+  {
+    gThrowingMeasureArmed = false;
+    throw Dali::DaliException("utc", "injected");
+  }
+  return MeasuredSize(200.0f, 100.0f);
+}
+
+MeasuredSize ExceptionTargetMeasure(View, float, float)
+{
+  ++gExceptionTargetCount;
+  return MeasuredSize(100.0f, 50.0f);
+}
+
+// Arms the throw and re-dirties both roots from inside the LayoutFinished emit, exactly
+// once. Invalidating from a slot is PARKED: the work lands in the pending set but arms no
+// idle wake, which is what leaves mIdleWakeArmed false and makes the no-wake assertion
+// below observable rather than vacuous.
+struct ArmThrowAndInvalidateOnce
+{
+  ArmThrowAndInvalidateOnce(int& count, View source, View target)
+  : count(count),
+    source(source),
+    target(target)
+  {
+  }
+  void operator()(Window)
+  {
+    ++count;
+    if(count == 1)
+    {
+      gThrowingMeasureArmed = true;
+      source.InvalidateMeasure();
+      target.InvalidateMeasure();
+    }
+  }
+  int& count;
+  View source;
+  View target;
+};
+} // namespace
+
+// ProcessLayouts swaps the pending set into a stack-local vector, so between the swap
+// and the end of the loop the member set names NONE of the roots still to run. An
+// exception out of a producer destroys that vector and used to lose them all: the
+// second root's layout would simply never run again, and nothing would re-register it.
+//
+// Non-vacuity (verified by mutation): disarming PendingBatchRollbackScope leaves the
+// target's producer count frozen and the source is never retried either.
+int UtcDaliLayoutControllerBatchSurvivesProducerExceptionP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A producer exception does not lose the rest of the pending batch");
+
+  gThrowingMeasureCount = 0;
+  gExceptionTargetCount = 0;
+  gThrowingMeasureArmed = false;
+
+  // Directly under the Window (depth 1), so the depth sort runs it FIRST.
+  View source = View::New();
+  source.SetRequestedWidth(200.0f);
+  source.SetRequestedHeight(100.0f);
+  source.SetMeasureCallback(MeasureCallback::New(&ThrowWhenArmedMeasure));
+
+  // Under a non-View actor (depth 2): an independent layout root that the sort places
+  // after `source`, so it is still queued when `source` throws.
+  Actor targetHost = Actor::New();
+  View  target     = View::New();
+  target.SetRequestedWidth(100.0f);
+  target.SetRequestedHeight(50.0f);
+  target.SetMeasureCallback(MeasureCallback::New(&ExceptionTargetMeasure));
+
+  int                       emitCount = 0;
+  ArmThrowAndInvalidateOnce rearm(emitCount, source, target);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, rearm);
+
+  window.Add(source);
+  window.Add(targetHost);
+  targetHost.Add(target);
+
+  // A normal batch first. It settles, emits once, and the slot then arms the throw and
+  // parks a fresh dirty state on both roots without requesting a wake.
+  SendRequestedProcessEvents(application);
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gThrowingMeasureCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gExceptionTargetCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // 1. The parked batch runs and the FIRST root's producer throws out of it.
+  bool caught = false;
+  try
+  {
+    LayoutController::Get(window).ProcessLayouts();
+  }
+  catch(const Dali::DaliException&)
+  {
+    caught = true;
+  }
+  DALI_TEST_CHECK(caught);
+  DALI_TEST_EQUALS(gThrowingMeasureCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(gExceptionTargetCount, 1, TEST_LOCATION); // never got its turn
+
+  // 2. The rollback re-registered both roots WITHOUT arming an idle wake: a wake here
+  //    would re-drive the producer that just threw, at full main-loop rate. No wake was
+  //    outstanding going in, so this really does observe the rollback's own choice.
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+
+  // 3. The next independently driven cycle drains the restored batch. The target runs
+  //    for the first time since the abort, and the source retries.
+  SendIndependentProcessEvents(application);
+  DALI_TEST_EQUALS(gExceptionTargetCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(gThrowingMeasureCount, 3, TEST_LOCATION);
+
+  // 4. ...and that pass settled, so LayoutFinished emitted again.
+  DALI_TEST_EQUALS(emitCount, 2, TEST_LOCATION);
+
+  // Steady state: nothing re-schedules itself.
+  SendIndependentProcessEvents(application);
+  DALI_TEST_EQUALS(gExceptionTargetCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(gThrowingMeasureCount, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 2, TEST_LOCATION);
+
+  END_TEST;
+}

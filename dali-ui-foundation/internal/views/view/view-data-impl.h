@@ -265,6 +265,27 @@ public:
   void InvalidateArrangeFromPublicApi(const char* apiName);
 
   /**
+   * @brief Re-arms the dirty bits of a layout pass that was abandoned by an exception.
+   *
+   * MeasurePassGuard / ArrangePassGuard CONSUME mMeasureDirty / mArrangeDirty at ENTRY,
+   * because a pass that runs to completion is what services them. A pass abandoned
+   * mid-flight serviced nothing, so the record has to come back: the view would otherwise
+   * be "clean but never laid out", and the one consumer that reads the bits outside a pass
+   * -- OnViewSceneConnection's standalone isDirty self-registration -- would decline to
+   * re-register a reconnecting standalone root that genuinely has work pending.
+   *
+   * Deliberately NOT InvalidateMeasure(): that walks the ancestor chain and registers at
+   * whatever root it reaches (not necessarily the one being restored), and it asks the
+   * controller for an idle wake. The only caller is LayoutController's batch rollback,
+   * which re-registers THIS root by hand and must not wake the loop for a pass that has
+   * just thrown.
+   *
+   * The cache-valid bits are left alone on purpose: the abandoned pass already cleared
+   * them at entry, and that is exactly the state that forces the retry to recompute.
+   */
+  void RearmLayoutDirtyForAbortedPass();
+
+  /**
    * @brief Logs, once for this view, that @p apiName was called from inside layout processing.
    *
    * Public because LayoutController::RequestLayout() reaches it through
@@ -1497,7 +1518,7 @@ private:
   /// view. Defined in view-data-impl.cpp. Entry CONSUMES the dirty bit and clears the
   /// cache-valid bit; exit restores only the in-progress bit and never re-arms dirty
   /// (recovery from an abandoned pass is the LayoutController's, not the guard's --
-  /// the guard cannot register the view, so a re-armed dirty bit would sit unserviced).
+  /// see LayoutControllerImpl::PendingBatchRollbackScope).
   struct MeasurePassGuard;
   struct ArrangePassGuard;
 

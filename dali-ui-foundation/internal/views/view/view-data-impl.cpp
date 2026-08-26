@@ -2463,6 +2463,12 @@ void ViewDataImpl::InvalidateArrangeFromPublicApi(const char* apiName)
   InvalidateArrange();
 }
 
+void ViewDataImpl::RearmLayoutDirtyForAbortedPass()
+{
+  mMeasureDirty = true;
+  mArrangeDirty = true;
+}
+
 void ViewDataImpl::LogInPassInvalidation(const char* apiName)
 {
   // Per-view latch, deliberately never cleared. A call from inside layout processing is

@@ -241,6 +241,189 @@ public:
   };
 
   /**
+   * @brief RAII for LayoutControllerImpl::mProcessDepth.
+   *
+   * The counter gates three things: the "fully settled" evaluation (mProcessDepth == 1 in
+   * the pre phase), the once-per-frame post-phase emit, and the deferred self-destruct at
+   * the outermost unwind. A DALI_ASSERT_ALWAYS anywhere in the Measure/Arrange/emit call
+   * stack throws Dali::DaliException and Process() has no try/catch, so the manual
+   * decrement this replaces was skipped on unwind: the counter stayed above zero and NO
+   * later frame was ever the outermost one again -- layout kept running but never settled,
+   * never emitted LayoutFinished, and never honoured a pending Remove(window).
+   *
+   * The deferred destroy stays in the destructor, unchanged in rule, so it also runs on the
+   * abnormal exit. It is the same operation the manual line performed, so the normal path
+   * is bit-identical; the destructor is implicitly noexcept, exactly like
+   * GlobalProcessDepthScope's and ActiveLayoutFinishedScope's.
+   */
+  struct ProcessDepthScope
+  {
+    explicit ProcessDepthScope(LayoutControllerImpl& self)
+    : mSelf(self)
+    {
+      ++mSelf.mProcessDepth;
+    }
+    ~ProcessDepthScope()
+    {
+      // Detach - never free - when unwinding the outermost Process frame. This
+      // point is still INSIDE dali-core's processor loop, which dereferences the
+      // processor pointer again after Process() returns, so the free is queued for
+      // a later context (see gDetachedLayoutControllers).
+      if(--mSelf.mProcessDepth == 0 && mSelf.mDestroyPending)
+      {
+        mSelf.DetachAndQueueForFree();
+        // *this is now owned by gDetachedLayoutControllers. It is still alive, so
+        // members remain valid, but it must do no further work.
+      }
+    }
+    ProcessDepthScope(const ProcessDepthScope&)            = delete;
+    ProcessDepthScope& operator=(const ProcessDepthScope&) = delete;
+
+    LayoutControllerImpl& mSelf;
+  };
+
+  /**
+   * @brief RAII for LayoutTransitionDispatcher::BeginLayoutPass / EndLayoutPass.
+   *
+   * ProcessLayouts had three exits and only two of them ended the pass: the empty-pending
+   * early return and the normal end did, an exception out of any producer or lifecycle
+   * callback did not. An unbalanced Begin leaves mLayoutPassDepth above zero for the rest
+   * of the process, so EndLayoutPass never again reaches its reset branch and the per-pass
+   * flags it clears (mInWindowResize) stay latched -- every later layout is then
+   * classified as resize-driven.
+   *
+   * Inert without a dispatcher, so the caller needs no null test of its own.
+   */
+  struct LayoutPassScope
+  {
+    explicit LayoutPassScope(Internal::LayoutTransitionDispatcher* dispatcher)
+    : mDispatcher(dispatcher)
+    {
+      if(mDispatcher)
+      {
+        // Mark the start of this batch. Paired with the destructor at EVERY exit point,
+        // this protects per-pass flags (mInWindowResize) from being cleared by a nested
+        // ProcessLayouts call invoked from a lifecycle callback during a
+        // window-resize-driven pass.
+        mDispatcher->BeginLayoutPass();
+      }
+    }
+    ~LayoutPassScope()
+    {
+      if(mDispatcher)
+      {
+        // Reset per-pass flags after the whole batch. Per-root reset would clear them
+        // after the first root and misclassify the rest.
+        mDispatcher->EndLayoutPass();
+      }
+    }
+    LayoutPassScope(const LayoutPassScope&)            = delete;
+    LayoutPassScope& operator=(const LayoutPassScope&) = delete;
+
+    Internal::LayoutTransitionDispatcher* mDispatcher;
+  };
+
+  /**
+   * @brief RAII rollback for the local processing batch.
+   *
+   * ProcessLayouts SWAPS the pending set into a stack-local vector and then erases each
+   * root from the member set immediately before its turn. Between the swap and the end of
+   * the loop the member set therefore names NONE of the roots that still have to run, and
+   * the vector is a stack object: an exception out of any producer (Measure, Arrange, a
+   * transition lifecycle callback) destroys it and LOSES every remaining root. The batch
+   * is not retried and nothing re-registers them, so their layout simply never runs again
+   * until some unrelated invalidation happens to reach them.
+   *
+   * Restoring is more than re-inserting pointers. The CURRENT root's pass has already
+   * consumed its dirty bits (both guards consume at ENTRY) and cleared its cache-valid
+   * bits, so a re-registered-but-clean root would be drained by the next pass with no
+   * record that it has unconsumed work. RearmLayoutDirtyForAbortedPass() puts that record
+   * back, directly, on the one root that lost it.
+   *
+   * Every restore goes through RetainLayoutRootWithoutWake, never RequestLayout and never
+   * ViewImpl::InvalidateMeasure: see that helper for why no wake, and note that
+   * InvalidateMeasure would additionally walk to a DIFFERENT root than the one being
+   * restored. mLayoutDirtySinceEmit is re-armed by the helper and never cleared here --
+   * the latch means "real layout work has been requested since the last emit", which an
+   * aborted batch has not falsified.
+   *
+   * Disarmed by Commit() on the normal path, so normal flow costs one bool store.
+   *
+   * ORDERING. Destructors on the same unwind run innermost first, and this scope sits
+   * between ActiveLayoutFinishedScope (inner) and LayoutPassScope /
+   * GlobalProcessDepthScope / ProcessDepthScope (outer). By the time it runs: every
+   * Measure/Arrange guard has unwound (gActiveLayoutPassDepth == 0), the collector frame
+   * has been popped and gActiveLayoutFinishedController restored, and mDetached /
+   * mDestroyPending are still readable and are still honoured. It touches only members
+   * that outlive it -- mPendingViews, mAllLayoutRoots, mLayoutDirtySinceEmit -- and the
+   * dispatcher's EndLayoutPass still runs AFTER it, the same relative order as the normal
+   * path (the manual EndLayoutPass came after the loop).
+   */
+  struct PendingBatchRollbackScope
+  {
+    PendingBatchRollbackScope(LayoutControllerImpl& self, const std::vector<ViewImpl*>& batch)
+    : mSelf(self),
+      mBatch(batch)
+    {
+    }
+
+    ~PendingBatchRollbackScope()
+    {
+      if(!mArmed)
+      {
+        return;
+      }
+
+      for(std::size_t index = mCurrentTurn; index < mBatch.size(); ++index)
+      {
+        ViewImpl* view = mBatch[index];
+
+        // The same aliveness test the loop performs, and for the same reason: a root whose
+        // View was destroyed mid-batch must not be resurrected as a dangling raw pointer.
+        // A dead entry the loop already cleaned up (mAllLayoutRoots.erase) fails it too.
+        auto it = mSelf.mAllLayoutRoots.find(view);
+        if(!view || it == mSelf.mAllLayoutRoots.end() || !it->second.weakHandle.GetHandle())
+        {
+          continue;
+        }
+
+        if(index == mCurrentTurn)
+        {
+          // The root whose turn was unwinding. Its guards consumed its dirty bits at
+          // entry, so re-registration alone would schedule a pass with no record of work.
+          // Conservative at the tail of a turn: a root that had already published and then
+          // threw from StartTransitionsAfterLayout is re-armed too, which costs it one
+          // extra pass that its live caches serve as a hit.
+          Internal::ViewDataImpl::Get(*view).RearmLayoutDirtyForAbortedPass();
+        }
+
+        mSelf.RetainLayoutRootWithoutWake(view);
+      }
+    }
+
+    /// Records that the root at @p index is taking its turn -- called immediately before
+    /// that root's member-set entry is erased, so the rollback knows where to resume.
+    void BeginTurn(std::size_t index)
+    {
+      mCurrentTurn = index;
+    }
+
+    /// Normal completion: the batch drained and the member set is authoritative again.
+    void Commit()
+    {
+      mArmed = false;
+    }
+
+    PendingBatchRollbackScope(const PendingBatchRollbackScope&)            = delete;
+    PendingBatchRollbackScope& operator=(const PendingBatchRollbackScope&) = delete;
+
+    LayoutControllerImpl&         mSelf;
+    const std::vector<ViewImpl*>& mBatch;
+    std::size_t                   mCurrentTurn{0u};
+    bool                          mArmed{true};
+  };
+
+  /**
    * @brief Constructor.
    */
   explicit LayoutControllerImpl(Window window)
@@ -366,15 +549,23 @@ public:
   }
 
   /**
-   * @brief Schedules a view for layout processing.
+   * @brief Retains @p view as a pending layout root WITHOUT requesting an idle wake.
    *
-   * Any View that is a layout root (has LayoutManager or children) can be registered.
+   * The registration half of RequestLayout. Split out for PendingBatchRollbackScope,
+   * which runs while an exception is propagating out of a layout pass. A wake there
+   * would re-drive the producer that has just thrown, and a deterministically throwing
+   * producer would then spin the main loop at full rate -- the same failure the in-pass
+   * park rule exists to prevent for invalidation. Note that the pass guards have already
+   * unwound by the time the rollback runs, so RequestIdleWakeIfAllowed() would NOT park
+   * the request of its own accord: not calling it is the mechanism, not an optimisation.
+   *
+   * @return True when the view was retained
    */
-  void RequestLayout(ViewImpl* view)
+  bool RetainLayoutRootWithoutWake(ViewImpl* view)
   {
     if(!view || mDetached || mDestroyPending)
     {
-      return;
+      return false;
     }
 
     // Track this layout root (weak handle for validity checking without extending lifetime)
@@ -387,8 +578,20 @@ public:
     // Real layout work has been requested since the last LayoutFinished emit;
     // arm the settled latch so the next drain-to-empty fires the signal.
     mLayoutDirtySinceEmit = true;
+    return true;
+  }
 
-    RequestIdleWakeIfAllowed();
+  /**
+   * @brief Schedules a view for layout processing.
+   *
+   * Any View that is a layout root (has LayoutManager or children) can be registered.
+   */
+  void RequestLayout(ViewImpl* view)
+  {
+    if(RetainLayoutRootWithoutWake(view))
+    {
+      RequestIdleWakeIfAllowed();
+    }
   }
 
   /**
@@ -608,7 +811,7 @@ public:
       return;
     }
 
-    ++mProcessDepth;
+    ProcessDepthScope       depthScope(*this);
     GlobalProcessDepthScope globalDepthScope;
 
     Dali::Window window = mWindow.GetHandle();
@@ -713,17 +916,6 @@ public:
           LogParkedWorkOnce();
         }
       }
-    }
-
-    // Detach - never free - when unwinding the outermost Process frame. This
-    // point is still INSIDE dali-core's processor loop, which dereferences the
-    // processor pointer again after Process() returns, so the free is queued for
-    // a later context (see gDetachedLayoutControllers).
-    if(--mProcessDepth == 0 && mDestroyPending)
-    {
-      DetachAndQueueForFree();
-      // *this is now owned by gDetachedLayoutControllers. It is still alive, so
-      // members remain valid, but it must do no further work.
     }
   }
 
@@ -965,14 +1157,13 @@ private:
    */
   void ProcessLayouts(Dali::Window window)
   {
-    if(mTransitionDispatcher)
-    {
-      // Mark the start of this batch. Paired with EndLayoutPass at every
-      // exit point below, this protects per-pass flags (mInWindowResize)
-      // from being cleared by a nested ProcessLayouts call invoked from
-      // a lifecycle callback during a window-resize-driven pass.
-      mTransitionDispatcher->BeginLayoutPass();
-    }
+    // Begins the dispatcher's batch here and ends it at EVERY exit -- the early return
+    // just below, the normal end, and an exception out of any producer or lifecycle
+    // callback. The early return still drains per-pass dispatcher state (e.g.
+    // mInWindowResize set by NotifyWindowResize) so a stale flag cannot leak into the
+    // next pass when every layout root happens to be dead at resize time.
+    LayoutPassScope layoutPass(mTransitionDispatcher.get());
+
     if(mPendingViews.empty())
     {
       // This pre-process invocation consumes any outstanding idle wake, even
@@ -981,14 +1172,6 @@ private:
       if(!mManualProcessInvocation)
       {
         mIdleWakeArmed = false;
-      }
-
-      // Still drain per-pass dispatcher state (e.g. mInWindowResize set
-      // by NotifyWindowResize) so a stale flag cannot leak into the next
-      // pass when every layout root happens to be dead at resize time.
-      if(mTransitionDispatcher)
-      {
-        mTransitionDispatcher->EndLayoutPass();
       }
       return;
     }
@@ -1030,6 +1213,13 @@ private:
     // with bad bounds, and then have those transitions cancelled when
     // the parent's later pass corrects the bounds.
     std::vector<ViewImpl*> viewsToProcess(viewsSet.begin(), viewsSet.end());
+
+    // Armed from HERE, before the sort: from this point the member pending set names none
+    // of these roots, so any throw between here and Commit() below would lose them. (The
+    // one gap left is a bad_alloc in the vector construction just above, where the batch
+    // is genuinely unrecoverable and the process is already failing.)
+    PendingBatchRollbackScope rollback(*this, viewsToProcess);
+
     {
       auto depthOf = [](ViewImpl* v) -> int
       {
@@ -1051,8 +1241,14 @@ private:
     }
 
     // Process each layout root
-    for(auto* view : viewsToProcess)
+    for(std::size_t index = 0u; index < viewsToProcess.size(); ++index)
     {
+      ViewImpl* view = viewsToProcess[index];
+
+      // From here the member set no longer names this root even transiently, so tell the
+      // rollback where the batch stopped before anything can throw.
+      rollback.BeginTurn(index);
+
       // Verify the view is still tracked and alive
       auto it = mAllLayoutRoots.find(view);
       if(view && it != mAllLayoutRoots.end() && it->second.weakHandle.GetHandle())
@@ -1102,12 +1298,8 @@ private:
       }
     }
 
-    if(mTransitionDispatcher)
-    {
-      // Reset per-pass flags after the whole batch. Per-root reset would
-      // clear them after the first root and misclassify the rest.
-      mTransitionDispatcher->EndLayoutPass();
-    }
+    // The batch drained normally; the member set is authoritative again.
+    rollback.Commit();
   }
 
   /**
