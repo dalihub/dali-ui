@@ -1,26 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="326" viewBox="0 0 440 326" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="420" viewBox="0 0 620 420" role="img" aria-labelledby="title desc">
   <title id="title">View box model</title>
-  <desc id="desc">Diagram showing the View box model: Margin, Border, Padding, and Content.</desc>
-  <rect width="440" height="326" fill="#ffffff"/>
+  <desc id="desc">A layered illustration of the View box model showing margin, border, padding, and content.</desc>
+
+  <defs>
+    <linearGradient id="contentFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#008c84"/>
+      <stop offset="1" stop-color="#005a58"/>
+    </linearGradient>
+    <linearGradient id="paddingFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e7f7f0"/>
+      <stop offset="1" stop-color="#c9ebdf"/>
+    </linearGradient>
+    <filter id="layerShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="11" flood-color="#142f3a" flood-opacity=".18"/>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#142f3a" flood-opacity=".10"/>
+    </filter>
+  </defs>
 
   <g font-family="Inter, Pretendard, 'Noto Sans KR', 'Segoe UI', Arial, sans-serif" text-rendering="geometricPrecision">
-    <!-- Margin -->
-    <rect x="36" y="24" width="368" height="246" fill="#f3f4f6" stroke="#7b8794" stroke-width="1.1" stroke-dasharray="3.5 3.5"/>
-    <text x="48" y="45" font-size="14" font-weight="500" fill="#374151">Margin</text>
+    <rect x="22" y="18" width="576" height="360" rx="38" fill="#f3f7f5" stroke="#7fa39d" stroke-width="1.5" stroke-dasharray="7 7"/>
 
-    <!-- Border -->
-    <rect x="72" y="60" width="296" height="180" fill="#9dccf6"/>
-    <text x="84" y="82" font-size="14" font-weight="500" fill="#17324d">Border</text>
+    <g transform="translate(44 39)">
+      <rect width="92" height="29" rx="14.5" fill="#ffffff" stroke="#d8e3df"/>
+      <circle cx="16" cy="14.5" r="4" fill="#7fa39d"/>
+      <text x="28" y="18" fill="#52676d" font-size="10" font-weight="800" letter-spacing="1.1">MARGIN</text>
+    </g>
 
-    <!-- Padding -->
-    <rect x="108" y="96" width="224" height="116" fill="#f8fafc"/>
-    <text x="120" y="118" font-size="14" font-weight="500" fill="#374151">Padding</text>
+    <rect x="72" y="78" width="476" height="244" rx="32" fill="#ed745b" filter="url(#softShadow)"/>
+    <text x="96" y="103" fill="#ffffff" font-size="10" font-weight="850" letter-spacing="1.2">BORDER</text>
 
-    <!-- Content -->
-    <rect x="144" y="132" width="152" height="58" fill="#ffffff" stroke="#7b8794" stroke-width="1.1" stroke-dasharray="3.5 3.5"/>
-    <text x="156" y="154" font-size="14" font-weight="500" fill="#111827">Content</text>
+    <rect x="91" y="112" width="438" height="191" rx="25" fill="url(#paddingFill)"/>
+    <text x="114" y="138" fill="#006d68" font-size="10" font-weight="850" letter-spacing="1.2">PADDING</text>
 
-    <!-- View label -->
-    <text x="220" y="296" text-anchor="middle" font-size="16" font-weight="700" fill="#6b7280">View</text>
+    <rect x="132" y="154" width="356" height="106" rx="20" fill="url(#contentFill)" filter="url(#layerShadow)"/>
+    <circle cx="160" cy="181" r="7" fill="#bde9d9" opacity=".9"/>
+    <circle cx="181" cy="181" r="7" fill="#f3cb71" opacity=".92"/>
+    <circle cx="202" cy="181" r="7" fill="#ed745b" opacity=".95"/>
+    <text x="310" y="207" fill="#ffffff" font-size="25" font-weight="900" text-anchor="middle" letter-spacing="-.5">CONTENT</text>
+    <text x="310" y="231" fill="#c7e9df" font-size="11" font-weight="650" text-anchor="middle" letter-spacing=".5">VISUAL · TEXT · CHILD VIEWS</text>
+
+    <g fill="none" stroke="#006d68" stroke-width="1.5" opacity=".8">
+      <path d="M72 346v10h476v-10"/>
+      <path d="M310 356v9"/>
+    </g>
+    <rect x="250" y="345" width="120" height="31" rx="15.5" fill="#ffffff" stroke="#b9d5cc"/>
+    <text x="310" y="364" fill="#006d68" font-size="10" font-weight="850" text-anchor="middle" letter-spacing="1.1">VIEW BOUNDS</text>
+
+    <g transform="translate(164 390)">
+      <circle cx="0" cy="0" r="4" fill="#7fa39d"/>
+      <text x="11" y="4" fill="#62757a" font-size="9" font-weight="750">outside spacing</text>
+      <circle cx="110" cy="0" r="4" fill="#ed745b"/>
+      <text x="121" y="4" fill="#62757a" font-size="9" font-weight="750">visible edge</text>
+      <circle cx="213" cy="0" r="4" fill="#bde9d9"/>
+      <text x="224" y="4" fill="#62757a" font-size="9" font-weight="750">inner spacing</text>
+    </g>
   </g>
 </svg>
