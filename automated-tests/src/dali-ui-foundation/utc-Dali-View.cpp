@@ -627,6 +627,43 @@ MeasuredSize CountingPassThroughMeasure(View view, float widthConstraint, float 
   return MeasuredSize(maxWidth, maxHeight);
 }
 
+// Two more pass-through measure producers, each with its OWN counter, so a test
+// can tell WHICH of two parents re-measured. The body is CountingPassThroughMeasure's
+// (measure every child, report the maximum extent), which is what makes the parent's
+// measured size follow its child set.
+int gFirstParentMeasureProducerCount  = 0;
+int gSecondParentMeasureProducerCount = 0;
+
+MeasuredSize AccumulateChildExtents(View view, float widthConstraint, float heightConstraint)
+{
+  float          maxWidth   = 0.0f;
+  float          maxHeight  = 0.0f;
+  const uint32_t childCount = view.GetChildCount();
+  for(uint32_t i = 0; i < childCount; ++i)
+  {
+    View child = View::DownCast(view.GetChildAt(i));
+    if(child)
+    {
+      MeasuredSize childSize = child.Measure(widthConstraint, heightConstraint);
+      maxWidth               = std::max(maxWidth, childSize.GetWidth());
+      maxHeight              = std::max(maxHeight, childSize.GetHeight());
+    }
+  }
+  return MeasuredSize(maxWidth, maxHeight);
+}
+
+MeasuredSize FirstParentAccumulatingMeasure(View view, float widthConstraint, float heightConstraint)
+{
+  ++gFirstParentMeasureProducerCount;
+  return AccumulateChildExtents(view, widthConstraint, heightConstraint);
+}
+
+MeasuredSize SecondParentAccumulatingMeasure(View view, float widthConstraint, float heightConstraint)
+{
+  ++gSecondParentMeasureProducerCount;
+  return AccumulateChildExtents(view, widthConstraint, heightConstraint);
+}
+
 // --- Arrange cache-HIT observation (childless views) ---------------------
 //
 // A counting LEAF arrange producer. It echoes its input slot and does nothing
@@ -715,6 +752,13 @@ public:
   int GetArrangeCallCount() const
   {
     return mArrangeCount;
+  }
+
+  // ViewImpl::SetArrangePolicy is protected (it is a subclass's own declaration),
+  // so a test that changes the policy AFTER construction needs this forwarder.
+  void SelectArrangePolicy(ArrangePolicy policy)
+  {
+    SetArrangePolicy(policy);
   }
 
 protected:
@@ -9212,6 +9256,226 @@ int UtcDaliViewMeasureDefaultContributingChildUsesAccumulationP(void)
   // formula governs and the background's 140 does NOT.
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 210.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 40.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ─── OnChildAdded: the child's own invalidation is the whole signal ────────
+//
+// OnChildAdded used to invalidate THIS view's measure a second time, on top of the
+// InvalidateMeasure() it issues on the freshly added child. That call was removed,
+// and these two tests pin the guarantee it stood in for: the child's walk always
+// reaches the new parent, because ResetSubtreeScaleAndLayoutCaches() zeroes the added
+// subtree's propagation generation and 0 never equals a live generation.
+//
+// Non-vacuity note: BOTH of these pass before AND after the removal. That is their
+// design intent -- they pin the surviving behaviour, not the removed line.
+
+// The child is fully configured while OFF-SCENE, so every requested-size write it
+// receives happens before it has a parent and cannot invalidate anything. The add
+// itself is therefore the only event that can re-measure the parent.
+int UtcDaliViewAddConfiguredOffSceneChildReMeasuresParentP(void)
+{
+  UiTestApplication application;
+  tet_infoline("Adding an off-scene, pre-configured child re-measures the parent");
+
+  gFirstParentMeasureProducerCount = 0;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(WRAP_CONTENT);
+  parent.SetRequestedHeight(WRAP_CONTENT);
+  parent.SetMeasureCallback(MeasureCallback::New(&FirstParentAccumulatingMeasure));
+  application.GetWindow().Add(parent);
+
+  SettleLayout(application);
+
+  const int baseCount = gFirstParentMeasureProducerCount;
+  DALI_TEST_CHECK(baseCount > 0);
+
+  // Built and configured with no parent at all: nothing here can reach the parent.
+  View child = View::New();
+  child.SetRequestedWidth(200.0f);
+  child.SetRequestedHeight(80.0f);
+
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFirstParentMeasureProducerCount, baseCount, TEST_LOCATION);
+
+  parent.Add(child);
+  SettleLayout(application);
+
+  // The parent's producer ran again...
+  DALI_TEST_CHECK(gFirstParentMeasureProducerCount > baseCount);
+
+  // ...and the parent's geometry now follows the child it was given.
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 80.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A reparent inside ONE event batch: the child leaves p1 and joins p2 with no layout
+// pass in between, so both chains must be invalidated by the two hooks alone
+// (OnChildRemoved on p1, the added child's own walk on p2).
+int UtcDaliViewReparentChildInSameBatchReMeasuresNewParentChainP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A same-batch reparent re-measures both the old and the new parent chain");
+
+  gFirstParentMeasureProducerCount  = 0;
+  gSecondParentMeasureProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(400.0f);
+  root.SetRequestedHeight(300.0f);
+  application.GetWindow().Add(root);
+
+  View p1 = View::New();
+  p1.SetRequestedWidth(WRAP_CONTENT);
+  p1.SetRequestedHeight(WRAP_CONTENT);
+  p1.SetMeasureCallback(MeasureCallback::New(&FirstParentAccumulatingMeasure));
+  root.Add(p1);
+
+  View p2 = View::New();
+  p2.SetRequestedWidth(WRAP_CONTENT);
+  p2.SetRequestedHeight(WRAP_CONTENT);
+  p2.SetMeasureCallback(MeasureCallback::New(&SecondParentAccumulatingMeasure));
+  root.Add(p2);
+
+  View child = View::New();
+  child.SetRequestedWidth(150.0f);
+  child.SetRequestedHeight(90.0f);
+  p1.Add(child);
+
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(p1.GetProperty<float>(Actor::Property::SIZE_WIDTH), 150.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(p2.GetProperty<float>(Actor::Property::SIZE_WIDTH), 0.0f, TEST_LOCATION);
+
+  const int p1Base = gFirstParentMeasureProducerCount;
+  const int p2Base = gSecondParentMeasureProducerCount;
+  DALI_TEST_CHECK(p1Base > 0);
+  DALI_TEST_CHECK(p2Base > 0);
+
+  // One event-time batch: Actor::Add reparents, so p1 sees OnChildRemoved and p2 sees
+  // OnChildAdded with no pass in between.
+  p2.Add(child);
+  SettleLayout(application);
+
+  DALI_TEST_CHECK(gSecondParentMeasureProducerCount > p2Base);
+  DALI_TEST_CHECK(gFirstParentMeasureProducerCount > p1Base);
+
+  DALI_TEST_EQUALS(p2.GetProperty<float>(Actor::Property::SIZE_WIDTH), 150.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(p2.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 90.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(p1.GetProperty<float>(Actor::Property::SIZE_WIDTH), 0.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ─── SetArrangePolicy value guard ─────────────────────────────────────────
+//
+// Re-selecting the policy a view already has retracts nothing and schedules nothing.
+// Observed behaviourally: with the guard, a same-value write leaves the tree settled
+// so the following SettleLayout runs no producer at all. Without it the setter
+// invalidated the arrange cache and the counter climbs.
+int UtcDaliViewSetSameArrangePolicyKeepsArrangeCacheP(void)
+{
+  UiTestApplication application;
+  tet_infoline("Re-selecting the current arrange policy schedules nothing");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetWindow().Add(root);
+
+  // No callback and no manager, so this view's OWN OnArrange is the active producer
+  // and the override policy is the effective one.
+  View view = CreateCountingContainer(true);
+  view.SetRequestedWidth(120.0f);
+  view.SetRequestedHeight(60.0f);
+  root.Add(view);
+
+  View sibling = View::New();
+  sibling.SetRequestedWidth(30.0f);
+  sibling.SetRequestedHeight(30.0f);
+  root.Add(sibling);
+
+  SettleLayout(application);
+
+  const int settledCount = CountingContainerImplOf(view).GetArrangeCallCount();
+  DALI_TEST_CHECK(settledCount > 0);
+
+  // Same value: nothing is retracted, so nothing is pending and the pass is a no-op.
+  CountingContainerImplOf(view).SelectArrangePolicy(ArrangePolicy::IF_CHANGED);
+  SettleLayout(application);
+  DALI_TEST_EQUALS(CountingContainerImplOf(view).GetArrangeCallCount(), settledCount, TEST_LOCATION);
+
+  // The guard is an equality test, not a latch: a real move still invalidates.
+  CountingContainerImplOf(view).SelectArrangePolicy(ArrangePolicy::ALWAYS);
+  SettleLayout(application);
+  const int afterChange = CountingContainerImplOf(view).GetArrangeCallCount();
+  DALI_TEST_CHECK(afterChange > settledCount);
+
+  // ...and under ALWAYS the producer runs on every pass that reaches it.
+  sibling.SetRequestedX(11.0f);
+  SettleLayout(application);
+  DALI_TEST_CHECK(CountingContainerImplOf(view).GetArrangeCallCount() > afterChange);
+
+  END_TEST;
+}
+
+// The override is the THIRD-ranked input to the effective producer policy
+// (callback > LayoutManager > OnArrange). While a callback is installed, moving the
+// override moves nothing the cache predicate can see, so it must retract nothing.
+int UtcDaliViewInactiveArrangePolicyChangeKeepsArrangeCacheP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A policy change on an inactive producer keeps the arrange cache entry");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetWindow().Add(root);
+
+  View view = CreateCountingContainer(true);
+  view.SetRequestedWidth(120.0f);
+  view.SetRequestedHeight(60.0f);
+  // The callback REPLACES OnArrange and carries its own policy (IF_CHANGED here).
+  view.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange));
+  root.Add(view);
+
+  View sibling = View::New();
+  sibling.SetRequestedWidth(30.0f);
+  sibling.SetRequestedHeight(30.0f);
+  root.Add(sibling);
+
+  SettleLayout(application);
+
+  const int callbackBase = gCountingArrangeProducerCount;
+  DALI_TEST_CHECK(callbackBase > 0);
+
+  // ALWAYS is a real move of the OVERRIDE, but the callback outranks it, so the
+  // effective producer policy is unchanged and nothing may be retracted.
+  CountingContainerImplOf(view).SelectArrangePolicy(ArrangePolicy::ALWAYS);
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, callbackBase, TEST_LOCATION);
+
+  // A pass that sweeps past for an unrelated reason still serves the entry.
+  sibling.SetRequestedX(11.0f);
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, callbackBase, TEST_LOCATION);
+
+  // Clearing the callback hands the view back to OnArrange, and the override that
+  // was inactive above now governs: ALWAYS means every pass runs the producer.
+  view.SetArrangeCallback({});
+  SettleLayout(application);
+  const int ownBase = CountingContainerImplOf(view).GetArrangeCallCount();
+
+  sibling.SetRequestedX(12.0f);
+  SettleLayout(application);
+  DALI_TEST_CHECK(CountingContainerImplOf(view).GetArrangeCallCount() > ownBase);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, callbackBase, TEST_LOCATION);
 
   END_TEST;
 }

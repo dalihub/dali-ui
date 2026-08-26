@@ -4446,3 +4446,51 @@ int UtcDaliLayoutTransitionSubtreeExitViaRemoveAllP(void)
   DALI_TEST_CHECK(!g2.GetParent());
   END_TEST;
 }
+
+// A STANDALONE child is a layout boundary: it is excluded from its parent's
+// accumulation, so the parent is never dirtied by the child's own layout work. The
+// parent's dispatcher pass must still run in the same batch, or the pending-ENTER entry
+// recorded by OnChildAdded would sit unconsumed until some unrelated dirty event.
+//
+// OnChildAdded used to force that with its own InvalidateMeasure() on the parent. The
+// invalidation walk's boundary branch carries exactly the same hook (a standalone view
+// whose parent has a transition invalidates that parent before self-registering), so
+// the duplicate was removed and this test pins the surviving carrier.
+int UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP(void)
+{
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec enterSpec  = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  transition.SetEnterVisualSpec(enterSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  // Settled: the initial-mount ENTER is suppressed, so nothing has fired yet.
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetProperty(Actor::Property::OPACITY, 0.0f);
+  parent.Add(child);
+
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
+                   static_cast<int>(LayoutTransitionSlot::ENTER),
+                   TEST_LOCATION);
+  END_TEST;
+}

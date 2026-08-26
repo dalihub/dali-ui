@@ -2336,8 +2336,9 @@ void ViewDataImpl::InvalidateMeasure()
   // depth-sorted iteration, this lets the parent capture pre-change
   // bounds before the standalone child's own arrange updates them, so
   // a standalone child's RequestedWidth / RequestedHeight change
-  // surfaces as the parent's CHANGE slot. Mirrors the existing
-  // OnChildAdd guard for the standalone+transition combination.
+  // surfaces as the parent's CHANGE slot. This is the SOLE carrier of the
+  // standalone+transition hook: OnChildAdded no longer repeats it, because the
+  // child's own InvalidateMeasure() on the add always reaches this branch.
   if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
   {
     Ui::View parentView = GetParentView();
@@ -3371,22 +3372,24 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // a framework-internal consistency invalidation, not an application call.
     ViewDataImpl::Get(childImpl).InvalidateMeasure();
 
-    if(childAffectsSelf)
-    {
-      // Also invalidate this view's chain directly. The child's
-      // InvalidateMeasure now always propagates (no dirty short-circuit), so
-      // for a non-standalone child this normally reaches us anyway; the
-      // explicit self-invalidation is kept as a direct statement that adding a
-      // contributing child invalidates this view's own cached measured size,
-      // and it is idempotent.
-      //
-      // For standalone (boundary) children, this fallback is unnecessary: the
-      // child's own InvalidateMeasure registers it as a layout root (Phase 2
-      // boundary rule), and OnSceneConnection re-registers dirty boundaries
-      // that were already dirty when reparented.
-      InvalidateMeasure();
-    }
-    else
+    // No self-invalidation here for a CONTRIBUTING child, and none is needed: the child's
+    // own InvalidateMeasure() above reaches this view and does the whole job.
+    //
+    // That is a guarantee, not a likelihood. The generation short-circuit
+    // (InvalidateMeasure's `mMeasurePropagationGeneration == generation` return) is the
+    // only thing that could stop the walk short, and ResetSubtreeScaleAndLayoutCaches()
+    // above zeroed the whole added subtree's propagation records -- 0 is the "never
+    // propagated" sentinel that no live generation ever equals (the counter starts at 1
+    // and skips 0 on wrap). The child's walk therefore always runs in full, and dali-core
+    // has already parented the child (Actor::SetParent precedes OnChildAdd), so
+    // GetParentLayout()/GetParentView() resolve to THIS view. When the walk arrives here
+    // it drops this view's cached scale, retracts BOTH layout caches, poisons an
+    // in-progress pass and raises both dirty bits before any short-circuit is even
+    // consulted -- everything the removed call did.
+    //
+    // UtcDaliViewAddConfiguredOffSceneChildReMeasuresParentP and
+    // UtcDaliViewReparentChildInSameBatchReMeasuresNewParentChainP pin it.
+    if(!childAffectsSelf)
     {
       // Adding a standalone child changes neither this view's measured size nor its
       // arranged bounds -- but it DOES add work to this view's ARRANGE pass:
@@ -3408,19 +3411,18 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
       // so the two compose.
       InvalidateArrange();
 
-      if(HasLayoutTransition())
-      {
-        // Standalone child + transition-attached parent: the standalone
-        // path above does not dirty self, so this view would not be
-        // reached by ProcessLayouts and the dispatcher would never run
-        // its CaptureBeforeLayout / StartTransitionsAfterLayout pass for
-        // this parent -- meaning the ENTER (and any subsequent CHANGE)
-        // would never be dispatched, while the pending-enter set
-        // accumulates entries that fire late on the next unrelated
-        // dirty event. Force the parent dirty so its dispatcher pass
-        // runs in the same layout batch as the standalone child's.
-        InvalidateMeasure();
-      }
+      // No parent InvalidateMeasure() for the standalone+transition combination either.
+      // The child's InvalidateMeasure() above reaches its own boundary branch, which
+      // carries exactly this hook: a standalone view whose parent has a LayoutTransition
+      // attached invalidates that parent's measure before self-registering, so the
+      // dispatcher's CaptureBeforeLayout / StartTransitionsAfterLayout pass runs in the
+      // same layout batch as the child's. Same predicate (GetLayoutTransition() and
+      // HasLayoutTransition() read the same member) and same action (the internal
+      // primitive on this very view), and it is reachable for the same reason as the
+      // contributing case above: the propagation record was zeroed a few lines up, so the
+      // walk cannot be short-circuited before it gets there.
+      // UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP
+      // pins it.
     }
   }
   else
@@ -3801,7 +3803,25 @@ void ViewDataImpl::SetArrangeCallback(ArrangeCallback callback, ArrangePolicy po
 
 void ViewDataImpl::SetArrangePolicy(ArrangePolicy policy)
 {
-  mArrangeOverrideAlways = (policy == ArrangePolicy::ALWAYS);
+  // Value guard, matching the manager side, which already refuses to notify its owner for
+  // a policy that does not move (LayoutManager::SetArrangePolicy ->
+  // LayoutManager::Impl::SetArrangePolicy returns false). Re-selecting the policy a view
+  // already has retracts nothing and schedules nothing. Safe to return early: the derived
+  // bit is refreshed by every path that can change WHICH producer is active -- the two
+  // mutators and the public trait swap funnel (OnTraitChanged) -- so it is never stale in
+  // a way a redundant policy write would have repaired.
+  const bool overrideAlways = (policy == ArrangePolicy::ALWAYS);
+  if(overrideAlways == mArrangeOverrideAlways)
+  {
+    return;
+  }
+  mArrangeOverrideAlways = overrideAlways;
+
+  // The cache predicate reads only the EFFECTIVE producer policy, and this override is
+  // the third-ranked input to it (callback > LayoutManager > OnArrange). While a callback
+  // or a manager is installed, changing the override moves nothing the predicate can see,
+  // so compare the derived bit across the refresh and invalidate only on a real move.
+  const bool producerAlwaysBefore = mArrangeProducerAlways;
 
   // Safe with no handle: both lookups it performs are plain trait-table reads
   // (ViewDataImpl::GetTrait walks mTraits), so a derived implementation may select
@@ -3822,7 +3842,7 @@ void ViewDataImpl::SetArrangePolicy(ArrangePolicy policy)
   // until a pass publishes, so at construction there is provably nothing to serve.
   // A later policy change on a settled view still invalidates, which is the case
   // the guard exists to keep.
-  if(mArrangeCacheValid)
+  if(mArrangeProducerAlways != producerAlwaysBefore && mArrangeCacheValid)
   {
     InvalidateArrange();
   }
@@ -3838,13 +3858,20 @@ void ViewDataImpl::OnLayoutManagerArrangePolicyChanged()
   // The manager owns the policy, while the hot cache predicate keeps a derived bit
   // on its View. Keep those two pieces of state synchronized for policy changes made
   // after the manager has been attached.
+  //
+  // The manager side has already dropped a same-value write, so what reaches here is
+  // always a real change to the MANAGER's policy -- but not necessarily to the EFFECTIVE
+  // one: an installed ArrangeCallback outranks the manager, so a policy change on an
+  // INACTIVE manager must retract nothing.
+  const bool producerAlwaysBefore = mArrangeProducerAlways;
+
   RefreshArrangeProducerPolicy();
 
   // Gated exactly as in SetArrangePolicy(), and for the same two reasons: with no
   // published entry there is provably nothing the new policy could make unsafe to
   // serve, and a manager attached before the CustomActor handle exists must be able
   // to change its policy without InvalidateArrange() walking off an empty Self().
-  if(mArrangeCacheValid)
+  if(mArrangeProducerAlways != producerAlwaysBefore && mArrangeCacheValid)
   {
     InvalidateArrange();
   }
