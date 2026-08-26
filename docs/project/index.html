@@ -123,16 +123,6 @@
     .card { padding: 26px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
     .card p { margin: 0; color: var(--muted); font-size: 14px; }
     .card .num { display: block; margin-bottom: 20px; color: var(--coral); font-size: 12px; font-weight: 900; letter-spacing: .1em; }
-    .compare { display: grid; margin: 30px 0; grid-template-columns: 1fr 58px 1fr; gap: 14px; align-items: stretch; }
-    .compare-card { padding: 25px 27px; border: 1px solid var(--line); border-radius: 20px; background: #fff; }
-    .compare-card.scope { background: #f0f2ef; }
-    .compare-card.ui { border-color: rgba(0,109,104,.26); background: var(--mint-soft); }
-    .compare-card h3 { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .compare-card p { margin-bottom: 0; color: var(--muted); font-size: 14px; }
-    .compare-arrow { display: grid; color: var(--coral); place-items: center; font-size: 27px; }
-    .dark .compare-card { border-color: rgba(255,255,255,.1); color: #fff; background: rgba(255,255,255,.055); }
-    .dark .compare-card.ui { border-color: rgba(189,233,217,.24); background: rgba(189,233,217,.10); }
-    .dark .compare-card p { color: #c3d1d3; }
     .mechanism { margin: 34px 0; padding: 32px; border-radius: var(--radius); color: #fff; background: var(--navy); box-shadow: var(--shadow); }
     .dark .mechanism { color: var(--ink); background: #fff; }
     .mechanism-title { margin-bottom: 22px; color: var(--mint); font-size: 12px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
@@ -270,8 +260,6 @@
       .nav a { display: none; }
       .cover-grid, .section-head { grid-template-columns: 1fr; }
       .section-index { display: none; }
-      .compare { grid-template-columns: 1fr; }
-      .compare-arrow { transform: rotate(90deg); }
       .card-grid, .formula-grid, .layout-types, .snapshot, .focus-feature-grid { grid-template-columns: repeat(2, 1fr); }
       .boundary-stack, .foundation-map, .detail-grid, .chart-stage, .view-model { grid-template-columns: 1fr; }
       .config-matrix, .token-flow { grid-template-columns: repeat(2, 1fr); }
@@ -299,7 +287,7 @@
       section { padding: 8mm 0; break-inside: auto; }
       .cover { min-height: auto; padding-top: 7mm; break-after: page; break-inside: avoid; }
       .feature, #boundaries, #view { break-before: page; }
-      .card, .compare-card, .mechanism, .detail, .impact, .boundary, .library, .chart-stage, .text-specimen, .viewport { break-inside: avoid; }
+      .card, .mechanism, .detail, .impact, .boundary, .library, .chart-stage, .text-specimen, .viewport { break-inside: avoid; }
       .container { max-width: none; padding: 0; }
       h1 { margin-bottom: 14px; font-size: 41pt; }
       h2 { margin-bottom: 11px; font-size: 25pt; }
@@ -324,9 +312,7 @@
       .boundary small { margin-bottom: 18px; }
       .foundation-map { gap: 12px; }
       .library { padding: 19px; }
-      .compare { margin: 15px 0; gap: 9px; grid-template-columns: 1fr 38px 1fr; }
-      .compare-card { padding: 16px 18px; }
-      .compare-card p, .card p, .detail p { font-size: 11px; }
+      .card p, .detail p { font-size: 11px; }
       .mechanism { margin: 16px 0; padding: 20px; }
       .mechanism-title { margin-bottom: 12px; }
       .flow { gap: 7px; }
@@ -387,7 +373,6 @@
       <div class="brand"><span class="brand-mark">D</span> DALi UI REPORT</div>
       <nav class="nav" aria-label="보고서 목차">
         <a href="#cover">개요</a>
-        <a href="#boundaries">API</a>
         <a href="#view">View</a>
         <a href="#unit">Unit</a>
         <a href="#navigator">Navigator</a>
@@ -408,7 +393,7 @@
             <p class="cover-lead">DALi 기반 애플리케이션을 위한 Native UI Framework</p>
             <p class="cover-lead" style="margin-top:26px">DALi UI는 애플리케이션이 Native 환경에서 화면을 구성하고 운영하는 데 필요한 공통 UI 기능을 제공합니다. View와 Layout을 기반으로 상태와 이벤트, 화면 이동, Theme, Text, Scroll과 Focus까지 하나의 Framework 범위로 구성했습니다.</p>
             <div class="cover-capabilities" aria-label="DALi UI 주요 기능">
-              <span>View & Layout</span><span>State & Event</span><span>Navigator</span><span>Color & Theme</span><span>Adaptive & Rich Text</span><span>Scroller</span><span>Focus</span>
+              <span>View & Layout</span><span>View State & Interaction</span><span>Navigator</span><span>Color & Theme</span><span>Adaptive & Rich Text</span><span>Scroller</span><span>Focus</span>
             </div>
           </div>
           <aside class="manifesto">
@@ -428,64 +413,15 @@
       </div>
     </section>
 
-    <section class="section-rule" id="boundaries">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow">02 / API Structure</div>
-            <h2>API Structure</h2>
-            <p class="lead">API Structure는 앱과 확장 라이브러리가 지원 범위에 맞는 인터페이스에만 의존하도록 구분하기 위한 구조입니다. Public, Extension, Integration API와 Foundation, Components 라이브러리로 구성됩니다.</p>
-          </div>
-          <div class="section-index">02</div>
-        </div>
-
-        <div class="boundary-stack">
-          <article class="boundary public">
-            <small>PUBLIC API / APP</small>
-            <h3>애플리케이션 계약</h3>
-            <p>View와 컴포넌트, 레이아웃, 상태와 이벤트, 텍스트 등 앱이 사용하는 ABI 안정 인터페이스입니다.</p>
-          </article>
-          <article class="boundary extension">
-            <small>EXTENSION API / PROVIDER</small>
-            <h3>제품과 디바이스 확장</h3>
-            <p>플랫폼별 정책과 구현을 연결하되 앱 API에는 노출하지 않는 확장 계약.</p>
-            <ul><li>Theme loader</li><li>Focus / View extension</li></ul>
-          </article>
-          <article class="boundary integration">
-            <small>INTEGRATION API / FRAMEWORK</small>
-            <h3>프레임워크 내부 협업</h3>
-            <p>확장 라이브러리가 layout과 component 동작을 Framework 수준에서 연결할 때 사용하는 개발 계약.</p>
-            <ul><li>Layout extension</li><li>Component integration</li></ul>
-          </article>
-        </div>
-
-        <div class="foundation-map" style="margin-top:18px">
-          <article class="library">
-            <span class="tag core">dali-ui-foundation</span>
-            <h3 style="margin-top:18px">공통 UI 언어</h3>
-            <p>View, layout, event, trait, focus, scroll, text와 configuration을 제공합니다.</p>
-            <div class="chip-row"><span class="chip">View</span><span class="chip">Layout</span><span class="chip">Text</span><span class="chip">Focus</span><span class="chip">Traits</span></div>
-          </article>
-          <article class="library components">
-            <span class="tag">dali-ui-components</span>
-            <h3 style="margin-top:18px">제품 수준 구성 요소</h3>
-            <p>Foundation API를 사용해 Navigator, ChartView와 같은 상위 컴포넌트를 제공합니다.</p>
-            <div class="chip-row"><span class="chip">Navigator</span><span class="chip">ChartView</span><span class="chip">Markdown</span></div>
-          </article>
-        </div>
-        <div class="sources"><a href="../README.md">Project overview</a><a href="../dali-ui-foundation/public-api/">Foundation public API</a><a href="../dali-ui-foundation/extension-api/">Extension API</a></div>
-      </div>
-    </section>
-
     <section class="dark" id="view">
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">03 / View</div>
+            <div class="eyebrow">02 / View</div>
             <h2>View</h2>
             <p class="lead">View는 모든 UI 컴포넌트가 layout, 상태, interaction과 system 변경을 같은 방식으로 처리하도록 하는 공통 객체입니다. 화면을 구성하는 가장 기본 단위이며 content, padding, border와 margin으로 이루어진 box model을 구현합니다.</p>
           </div>
-          <div class="section-index">03</div>
+          <div class="section-index">02</div>
         </div>
 
         <div class="view-model">
@@ -509,17 +445,11 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">04 / Unit</div>
+            <div class="eyebrow">03 / Unit</div>
             <h2>Unit</h2>
             <p class="lead">Unit은 해상도와 pixel density가 다른 디바이스에서도 UI가 의도한 크기로 표시되도록 합니다. 제품별 scaling factor와 system scale도 같은 단위 정책에서 처리합니다.</p>
           </div>
-          <div class="section-index">04</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>적용 범위 <span class="tag">Scale & Density</span></h3><p>코드에 작성하는 크기에는 제품 scaling factor와 device DPI를 반영하고, 실행 중 변경되는 system scale은 View tree에 전달합니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>앱에 제공하는 제어</h3><p><span class="mono">spx</span>, <span class="mono">dp</span>, <span class="mono">sdp</span> 단위와 system scale 반영 여부를 View별로 선택하는 정책을 제공합니다.</p></article>
+          <div class="section-index">03</div>
         </div>
 
         <div class="mechanism">
@@ -543,17 +473,11 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">05 / Configuration</div>
+            <div class="eyebrow">04 / Configuration</div>
             <h2>Configuration</h2>
             <p class="lead">Configuration은 UX와 디바이스에 따라 달라지는 공통 정책을 한곳에서 설정하기 위한 기능입니다. 앱과 화면마다 같은 설정을 반복하거나 제품별 분기 코드를 두지 않도록 합니다.</p>
           </div>
-          <div class="section-index">05</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>설정 대상 <span class="tag">Global policy</span></h3><p>Scale과 density, input과 gesture, focus, text 기본값, theme, asset과 platform service를 전역 설정으로 관리합니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>앱에 적용되는 효과</h3><p>제품에서 선택한 scale, input, focus, text와 theme 기준을 모든 View와 컴포넌트가 동일하게 사용합니다.</p></article>
+          <div class="section-index">04</div>
         </div>
 
         <div class="config-matrix">
@@ -574,24 +498,18 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">06 / State & Event Management</div>
-            <h2>State & Event Management</h2>
-            <p class="lead">State & Event Management는 touch, key와 accessibility처럼 서로 다른 입력을 앱이 사용할 수 있는 일관된 상태와 상위 이벤트로 변환합니다. Click과 long press 판정, pressed 상태 관리를 화면마다 구현하지 않아도 됩니다.</p>
+            <div class="eyebrow">05 / View State & Interaction</div>
+            <h2>View State & Interaction</h2>
+            <p class="lead">Focus, pressed, hovered 등의 상태를 View 단위의 공통 모델로 관리합니다. 이 상태와 touch, key, accessibility 입력을 바탕으로 click과 long press처럼 UI 맥락이 담긴 interaction을 제공하므로, 앱이 화면마다 상태 전환과 입력 판정을 다시 구현할 필요가 없습니다.</p>
           </div>
-          <div class="section-index">06</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>처리 대상 <span class="tag">State & Interaction</span></h3><p>Focus, press, hover, disable, select 상태와 touch, key, tap, long press, accessibility 입력을 함께 처리합니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>앱이 받는 결과</h3><p>View의 상태 변화와 click, long press, pressed change처럼 입력 방식과 무관한 상위 이벤트를 제공합니다.</p></article>
+          <div class="section-index">05</div>
         </div>
 
         <div class="states" aria-label="ViewState 목록">
           <span class="state">NORMAL</span><span class="state">FOCUSED</span><span class="state">FOCUS_INDICATED</span><span class="state">PRESSED</span><span class="state">HOVERED</span><span class="state">DISABLED</span><span class="state">PSEUDO_DISABLED</span><span class="state">SELECTED</span>
         </div>
         <div class="mechanism">
-          <div class="mechanism-title">Inputs and app events</div>
+          <div class="mechanism-title">Inputs and UI interactions</div>
           <div class="flow">
             <div class="flow-node"><strong>Touch · Key · Accessibility</strong><span>서로 다른 입력 경로</span></div><div class="flow-arrow">→</div>
             <div class="flow-node"><strong>Click · Long press</strong><span>앱이 바로 사용하는 의미 단위의 event</span></div><div class="flow-arrow">+</div>
@@ -610,17 +528,11 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">07 / Layout</div>
+            <div class="eyebrow">06 / Layout</div>
             <h2>Layout</h2>
             <p class="lead">Layout은 화면 크기, text 길이와 system scale이 바뀌어도 View의 크기와 위치를 일관된 규칙으로 계산하기 위한 기능입니다. Stack, Flex, Grid와 Absolute 배치를 제공하고 공통 크기 정책과 transition을 지원합니다.</p>
           </div>
-          <div class="section-index">07</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>Layout 종류 <span class="tag">Four managers</span></h3><p>Stack, Flex, Grid와 Absolute Layout을 제공하며 공통 size policy, margin, padding과 child parameter를 사용합니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>앱에 제공하는 결과</h3><p>화면 제약과 content 변화에 맞춰 View의 크기와 위치를 다시 계산하고, layout 종류가 달라도 같은 크기 정책을 적용합니다.</p></article>
+          <div class="section-index">06</div>
         </div>
 
         <div class="mechanism">
@@ -651,17 +563,11 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">08 / Navigator</div>
+            <div class="eyebrow">07 / Navigator</div>
             <h2>Navigator</h2>
             <p class="lead">Navigator는 앱의 화면 이동 이력과 modal 표시 상태를 한곳에서 관리하기 위한 컴포넌트입니다. Back 동작, 화면 생명주기와 transition이 navigation 상태와 함께 처리됩니다.</p>
           </div>
-          <div class="section-index">08</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>관리 대상 <span class="tag">Navigation state</span></h3><p>Page stack, modal stack, current View, back handler, 화면별 transition과 appearance lifecycle을 관리합니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>화면 전환 기능</h3><p>Push, Pop, Insert, Remove, Clear, modal navigation과 Back 처리를 일관된 화면 이동 모델로 제공합니다.</p></article>
+          <div class="section-index">07</div>
         </div>
 
         <div class="mechanism">
@@ -685,17 +591,11 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">09 / ChartView</div>
+            <div class="eyebrow">08 / ChartView</div>
             <h2>ChartView</h2>
             <p class="lead">ChartView는 앱이 차트의 rendering, data model과 interaction을 각각 구현하지 않고도 데이터를 시각화할 수 있도록 제공합니다. 정적 데이터와 실시간 데이터 모두 같은 컴포넌트에서 처리합니다.</p>
           </div>
-          <div class="section-index">09</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>차트 종류 <span class="tag">Six types</span></h3><p>Line, Bar, Pie, Area, Scatter와 Gauge를 지원하며 여러 series를 한 차트에 함께 구성할 수 있습니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>데이터 탐색 기능</h3><p>Series와 axis, tooltip, point selection, zoom, pan, animation과 실시간 데이터 추가를 제공합니다.</p></article>
+          <div class="section-index">08</div>
         </div>
 
         <div class="chart-stage">
@@ -722,17 +622,11 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">10 / Color & Theme</div>
+            <div class="eyebrow">09 / Color & Theme</div>
             <h2>Color & Theme</h2>
             <p class="lead">Color & Theme은 색상을 화면마다 직접 지정하지 않고 디자인 의미로 관리하기 위한 기능입니다. Theme이나 제품 색상 정책이 바뀌면 이미 표시 중인 View에도 변경 사항을 적용합니다.</p>
           </div>
-          <div class="section-index">10</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>Color 표현 <span class="tag">Value or token</span></h3><p>직접 지정한 RGBA와 PRIMARY, SURFACE, BACKGROUND 같은 semantic token을 모두 사용할 수 있습니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>Theme 변경 결과</h3><p>Semantic color와 component style을 theme별로 해석하고, 변경된 색상을 현재 화면에 반영합니다.</p></article>
+          <div class="section-index">09</div>
         </div>
 
         <div class="theme-preview" aria-label="Theme 변경에 따른 화면 색상 변화">
@@ -761,17 +655,11 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">11 / Adaptive Text</div>
+            <div class="eyebrow">10 / Adaptive Text</div>
             <h2>Adaptive Text</h2>
             <p class="lead">Adaptive Text는 사용자가 system font scale이나 언어를 변경했을 때 현재 화면의 text와 layout을 함께 갱신하기 위한 기능입니다. 앱이 화면을 다시 생성하거나 문자열을 일일이 설정하지 않아도 됩니다.</p>
           </div>
-          <div class="section-index">11</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>System 입력 <span class="tag">Scale & Locale</span></h3><p>System font scale, locale과 RTL direction 변경을 text control과 View layout에 전달합니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>화면에 반영되는 변화</h3><p>Text 크기와 줄바꿈, 자연 크기, 번역 문자열, 접근성 문구와 layout direction이 현재 화면에서 함께 갱신됩니다.</p></article>
+          <div class="section-index">10</div>
         </div>
 
         <div class="adaptive-grid">
@@ -809,29 +697,25 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">12 / Enhanced Text</div>
+            <div class="eyebrow">11 / Enhanced Text</div>
             <h2>Enhanced Text</h2>
-            <p class="lead">Enhanced Text는 정보의 구조와 시각 효과가 풍부한 text를 하나의 control에서 표현하기 위한 기능입니다. Rich text, inline content, gradient, fit, marquee와 async rendering을 Label과 text input에 제공합니다.</p>
+            <p class="lead">DALi UI는 text의 표현 범위를 glyph gradient와 overlay, reveal animation, bevel, semantic span과 inline content까지 확장했습니다. Font size와 line height를 함께 정의하는 candidate 기반 text fit도 제공합니다.</p>
           </div>
-          <div class="section-index">12</div>
+          <div class="section-index">11</div>
         </div>
 
         <div class="text-specimen">
           <div class="gradient-text">Typography becomes UI.</div>
-          <div class="specimen-line"><span>TextGradient</span><span>GradientOverlay</span><span>StyledText</span><span>Anchor / Annotation</span><span>Inline Image</span><span>ReplacementSpan</span><span>Reveal</span><span>Bevel</span><span>Fit</span><span>Marquee</span><span>Async render</span></div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>표현 범위 <span class="tag">Text styling</span></h3><p>Label, InputField와 InputEditor에서 rich text, gradient, visual effect, font fit, marquee와 async API를 사용합니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>Text 표현 기능</h3><p>Rich text span, inline image, gradient, reveal, bevel, font fit, marquee와 async rendering을 제공합니다.</p></article>
+          <div class="specimen-line"><span>Glyph Gradient</span><span>Gradient Overlay</span><span>Character / Word Reveal</span><span>Text Bevel</span><span>Anchor / Annotation</span><span>Inline Image</span><span>Replacement Span</span><span>Fit Candidates</span></div>
         </div>
 
         <div class="detail-grid">
-          <article class="detail"><h3>Gradient text</h3><p><code>TextGradient</code>와 <code>TextGradientOverlay</code>는 bounds mode, overlay mode, animatable offset을 제공합니다. 입력 텍스트와 placeholder에도 gradient를 적용할 수 있습니다.</p></article>
-          <article class="detail"><h3>Rich text span</h3><p>Anchor, Annotation, Image, Replacement span으로 링크, 주석과 inline content를 표현합니다. Markup과 StyledText 간 변환도 지원합니다.</p></article>
-          <article class="detail"><h3>Text style과 Fit</h3><p>Reveal, Bevel, shadow, outline, underline, line-through를 typed style로 설정합니다. Fit range와 candidate, FontVariation axis도 지정할 수 있습니다.</p></article>
-          <article class="detail"><h3>Marquee와 async API</h3><p>Marquee trigger, orientation, stop mode와 start/stop API를 제공합니다. Async rendering, natural-size, height-for-width signal도 지원합니다.</p></article>
+          <article class="detail"><h3>Glyph gradient와 overlay</h3><p>Text glyph 자체에 linear, radial, conic gradient를 적용합니다. 별도의 actor 없이 highlight와 shimmer overlay를 만들 수 있고, 입력 text와 placeholder도 gradient 표현을 지원합니다.</p></article>
+          <article class="detail"><h3>Character · Word reveal</h3><p>보이는 text를 character 또는 word 단위로 나누어 순차적으로 나타냅니다. Progress를 animation해 타이핑, 단계별 강조와 콘텐츠 노출 효과를 구성합니다.</p></article>
+          <article class="detail"><h3>Text bevel</h3><p>빛의 방향과 강도, highlight와 shadow color를 조합해 glyph에 입체감을 더합니다. 일반 shadow나 outline과 구분되는 3D text 표현입니다.</p></article>
+          <article class="detail"><h3>Semantic span</h3><p>Anchor와 Annotation span으로 text range에 link와 key-value metadata를 부여합니다. 화면 표시와 함께 text의 의미 구조도 유지할 수 있습니다.</p></article>
+          <article class="detail"><h3>Inline content</h3><p>Image와 Replacement span으로 text 일부를 하나의 inline object로 대체합니다. Icon이나 image가 문장 안에서 glyph와 함께 배치됩니다.</p></article>
+          <article class="detail"><h3>Candidate 기반 text fit</h3><p>Font size와 line height 조합을 후보로 정의하고, 주어진 영역에 들어가는 가장 큰 후보를 선택합니다. 단순한 최소·최대 font size 범위보다 제품 typography를 정교하게 유지합니다.</p></article>
         </div>
         <div class="sources"><a href="../wiki/Text-(kr).md">Text wiki</a><a href="../wiki/Text-Gradient-(kr).md">Text Gradient wiki</a><a href="../dali-ui-foundation/public-api/views/text-controls/label.h">Label</a><a href="../dali-ui-foundation/public-api/text/styled-text/styled-text.h">StyledText</a><a href="../dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h">StyledTextBuilder</a></div>
       </div>
@@ -841,17 +725,11 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">13 / Scroller</div>
+            <div class="eyebrow">12 / Scroller</div>
             <h2>Scroller</h2>
             <p class="lead">Scroller는 touch, key와 focus 이동에서 content가 예측 가능한 위치에 표시되도록 관리합니다. 리모컨이나 키보드로 탐색할 때 focus 대상이 viewport 밖에 남지 않도록 scroll과 focus를 함께 처리합니다.</p>
           </div>
-          <div class="section-index">13</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>입력과 표시 정책 <span class="tag">Viewport</span></h3><p>Pan, key, focus와 programmatic scroll을 지원하며 overscroll, edge effect와 scrollbar 표시 정책을 설정할 수 있습니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>Scroll 경험</h3><p>Touch fling, key step scroll, focus 대상 자동 노출, edge feedback과 scrollbar 표시를 하나의 viewport에서 제공합니다.</p></article>
+          <div class="section-index">12</div>
         </div>
 
         <div class="detail-grid">
@@ -873,17 +751,11 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">14 / Enhanced Focus System</div>
+            <div class="eyebrow">13 / Enhanced Focus System</div>
             <h2>Enhanced Focus System</h2>
-            <p class="lead">Enhanced Focus System은 리모컨과 키보드로 복잡한 화면을 탐색할 때 사용자가 예상한 위치로 focus를 이동시키기 위한 기능입니다. Android 계열 UIFW에서 익숙한 자식 우선 focus 요청, 방향별 이웃, 영역 단위 탐색과 공간 기반 후보 검색을 View tree에 맞게 제공합니다.</p>
+            <p class="lead">리모컨이나 키보드로 조작하는 화면에서는 focus가 단순히 가까운 View가 아니라 UI 구조와 사용 흐름에 맞는 대상으로 이동해야 합니다. DALi UI는 Android 계열 UIFW에서 익숙한 자식 우선 focus 요청, 방향별 이웃, 영역 단위 탐색과 공간 기반 후보 검색을 View tree에 맞게 제공합니다.</p>
           </div>
-          <div class="section-index">14</div>
-        </div>
-
-        <div class="compare">
-          <article class="compare-card scope"><h3>기본 탐색 <span class="tag">Directional & Spatial</span></h3><p>상하좌우, 순방향과 역방향 이동을 지원하며, 지정된 이웃이 없으면 화면상의 위치를 기준으로 다음 대상을 찾습니다.</p></article>
-          <div class="compare-arrow">→</div>
-          <article class="compare-card ui"><h3>복합 화면 제어</h3><p>Container가 첫 child를 선택하고, 제품별 이동 규칙과 focus group 경계를 적용하며, 입력 장치와 Window가 바뀌어도 focus 상태를 일관되게 관리합니다.</p></article>
+          <div class="section-index">13</div>
         </div>
 
         <div class="focus-feature-grid">
