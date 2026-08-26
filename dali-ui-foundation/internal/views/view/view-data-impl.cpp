@@ -942,8 +942,14 @@ struct ViewDataImpl::MeasurePassGuard
     // longer proves "the chain I walked is still marked" AFTER one -- a manual
     // Measure()/Arrange() on an ancestor (both are public API) can consume the whole
     // chain's dirty without any drain. Ending the generation here makes the next
-    // invalidation walk in full. Cache HITS never construct a guard, so the settled
-    // steady state bumps nothing and coalescing between passes is untouched.
+    // invalidation walk in full.
+    //
+    // "Outermost" is decided by gActiveLayoutPassDepth, which an arrange cache-HIT
+    // REPLAY also holds (ReplayPassScope). A replay consumes no dirty of its own, so it
+    // never creates the staleness this ends -- but it can HOST a re-entered producer pass
+    // that does, and that inner guard would see the depth fall to 1 rather than 0. Every
+    // frame that can be outermost therefore ends the generation, and a settled steady
+    // state pays at most one extra full ancestor walk on the next invalidation.
     if(--gActiveLayoutPassDepth == 0u)
     {
       LayoutInvalidation::AdvanceGeneration();
@@ -1010,6 +1016,105 @@ struct ViewDataImpl::ArrangePassGuard
   ArrangePassGuard& operator=(const ArrangePassGuard&) = delete;
 
   ViewDataImpl& mData;
+};
+
+/**
+ * RAII transaction scope for one arrange cache-HIT replay SUBTREE.
+ *
+ * Constructed exactly once, at the hit site in ArrangeImpl, and it owns nothing but the
+ * thread-local layout-pass depth. Holding that depth open for the whole replay is what
+ * puts a replay INSIDE the layout processing window:
+ *
+ *  - the replay WRITES actor properties (ApplySelfBoundsIfChanged), and every such write
+ *    goes Actor::SetPositionX/SetWidth -> Object::SetProperty -> OnPropertySet plus a
+ *    synchronous PropertySetSignal emit, so arbitrary application code runs inside it;
+ *  - an invalidation raised by that code must therefore be PARKED, not allowed to arm an
+ *    idle wake. LayoutController::RequestIdleWakeIfAllowed reads exactly this depth
+ *    (ViewDataImpl::IsLayoutPassOnStack). Before this scope existed the hit path ran with
+ *    depth 0 and such an invalidation woke the loop from inside layout processing;
+ *  - the same depth disables the propagation-generation short-circuit in
+ *    InvalidateMeasure/InvalidateArrange, so a mid-replay invalidation walks its ancestor
+ *    chain IN FULL and poisons every in-progress ancestor rather than trusting a
+ *    registration recorded before the replay began.
+ *
+ * NOT ArrangePassGuard: that guard's entry consumes mArrangeDirty and clears
+ * mArrangeCacheValid -- the very entry this hit exists to serve. A replay must leave the
+ * cache, the dirty bits and the poison bits exactly as it found them, so that an
+ * invalidation raised mid-replay survives the unwind untouched.
+ */
+struct ViewDataImpl::ReplayPassScope
+{
+  ReplayPassScope()
+  {
+    ++gActiveLayoutPassDepth;
+  }
+
+  ~ReplayPassScope()
+  {
+    // The generation is ended by whichever frame is OUTERMOST, and a replay can be that
+    // frame (the controller's arrange step reaches the hit with the measure guard already
+    // unwound). A replay of its own consumes no dirty bit and would not need to end the
+    // generation -- but a producer pass RE-ENTERED from a property-set observer inside the
+    // replay does consume one, and its own guard sees the depth fall to 1, not 0. Ending
+    // it here is what keeps "no generation record outlives the dirty bits its walk set"
+    // true for that nesting. The cost is at most one extra full ancestor walk on the next
+    // invalidation, which is idempotent; the alternative failure mode is a swallowed
+    // registration.
+    if(--gActiveLayoutPassDepth == 0u)
+    {
+      LayoutInvalidation::AdvanceGeneration();
+    }
+  }
+
+  ReplayPassScope(const ReplayPassScope&)            = delete;
+  ReplayPassScope& operator=(const ReplayPassScope&) = delete;
+};
+
+/**
+ * RAII scope for ONE node visited by an arrange cache-HIT replay.
+ *
+ * Raises mArrangeInProgress for the whole of that node's replay -- its self apply, its
+ * child recursion and its LayoutFinished registration -- so the release-mode re-entrancy
+ * guard at the top of ArrangeImpl covers a replay exactly as it covers a producer pass.
+ * Without it a PropertySetSignal observer woken by the self apply could call Arrange() on
+ * the very view being replayed, re-run its producer underneath the replay and publish a
+ * result the replay then writes over.
+ *
+ * mArrangeReplayInProgress rides alongside so the three OWNERSHIP tests that read
+ * mArrangeInProgress can tell a replay from a producer; see that member's documentation.
+ *
+ * SAVE/RESTORE rather than set/clear: the same shape ManualProcessScope and
+ * ActiveLayoutFinishedScope use in LayoutController, and it makes the scope correct under
+ * a nesting the gate is believed to rule out. The DEBUG assert records that belief -- a
+ * descendant whose own arrange pass is running had mArrangeCacheValid cleared by
+ * ArrangePassGuard at entry, and CanReplayArrangeSubtreeFromCache refuses any subtree
+ * containing such a node -- while release stays correct if it is ever broken.
+ */
+struct ViewDataImpl::ReplayNodeScope
+{
+  explicit ReplayNodeScope(ViewDataImpl& data)
+  : mData(data),
+    mPreviousInProgress(data.mArrangeInProgress),
+    mPreviousReplay(data.mArrangeReplayInProgress)
+  {
+    DALI_ASSERT_DEBUG(!mData.mArrangeInProgress &&
+                      "a replay must not visit a view whose own arrange pass is running");
+    mData.mArrangeInProgress       = true;
+    mData.mArrangeReplayInProgress = true;
+  }
+
+  ~ReplayNodeScope()
+  {
+    mData.mArrangeReplayInProgress = mPreviousReplay;
+    mData.mArrangeInProgress       = mPreviousInProgress;
+  }
+
+  ReplayNodeScope(const ReplayNodeScope&)            = delete;
+  ReplayNodeScope& operator=(const ReplayNodeScope&) = delete;
+
+  ViewDataImpl& mData;
+  bool          mPreviousInProgress;
+  bool          mPreviousReplay;
 };
 
 // clang-format off
@@ -1098,6 +1203,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mArrangeCacheValid(false),
   mArrangeDirty(false),
   mArrangeInProgress(false),
+  mArrangeReplayInProgress(false),
   mArrangePassPoisoned(false),
   mArrangeCacheBlockedDuringPass(false),
   mArrangeResultAvailable(false),
@@ -4063,7 +4169,12 @@ void ViewDataImpl::InvalidateAncestorLayoutCachesForMeasureMiss()
     // protection with no opt-in. Kept DIRECT-parent-only on purpose: a DISTANT
     // arrange-in-progress ancestor is the legitimate out-of-band case this walk exists
     // to clear (Δ1), so it must fall through to the clears below rather than stop here.
-    if(isDirectParent && nodeData.mArrangeInProgress)
+    //
+    // A REPLAYING parent is excluded: a cache-hit replay runs no producer and issues no
+    // Measure(), so it can never be the owner of one. Its own subtree gate has already
+    // certified the descendants, and the cache-clear below is what retracts that
+    // certification when an unowned measure rewrites a slot underneath it.
+    if(isDirectParent && nodeData.mArrangeInProgress && !nodeData.mArrangeReplayInProgress)
     {
       break;
     }
@@ -4077,7 +4188,12 @@ void ViewDataImpl::InvalidateAncestorLayoutCachesForMeasureMiss()
     // that pass instead of being overwritten by its own publish. Declining the
     // publish is all that is needed -- this is a cache-only invalidation, so it
     // must not poison the pass and must not register a follow-up layout.
-    if(nodeData.mArrangeInProgress)
+    //
+    // ...and a REPLAYING ancestor has no publish to block: the replay leaves
+    // mArrangeCacheValid exactly as it found it. Setting the bit there would latch a
+    // block that only the NEXT real ArrangePassGuard entry clears, silently declining
+    // that unrelated pass's publish.
+    if(nodeData.mArrangeInProgress && !nodeData.mArrangeReplayInProgress)
     {
       nodeData.BlockArrangeCachePublishDuringPass();
     }
@@ -4170,7 +4286,13 @@ void ViewDataImpl::InvalidateParentArrangeCacheForOutOfBandArrange(bool framewor
   // producer arranging its own child). Whatever a producer does inside its own
   // pass IS its output -- a re-run would reproduce it -- so the parent's
   // about-to-publish entry stays a faithful replay premise.
-  if(parentData.mArrangeInProgress)
+  //
+  // A REPLAYING parent does NOT qualify. "Whatever a producer does inside its own pass IS
+  // its output" is a statement about a producer; a replay runs none, so a foreign
+  // Arrange() reaching a descendant mid-replay really does invalidate the premise the
+  // replay is built on -- CanReplayArrangeSubtreeFromCache assumes every descendant's
+  // recorded slot was written by THIS chain.
+  if(parentData.mArrangeInProgress && !parentData.mArrangeReplayInProgress)
   {
     return;
   }
@@ -4499,14 +4621,15 @@ bool ViewDataImpl::CanReplayArrangeSubtreeFromCache() const
   return true;
 }
 
-void ViewDataImpl::ReplayArrangeSubtreeFromCache()
+void ViewDataImpl::ReplayArrangeSubtreeFromCache(bool mirrorUnderParentRtl, float parentArrangedWidth)
 {
   // Corollary C, checked live and per node: a valid arrange cache implies a valid
   // cached effective scale, because every scale-context reset clears both for the WHOLE
   // subtree (ResetSubtreeScaleAndLayoutCaches). The replay skips the
   // GetEffectiveScale() the MISS path performs at every level, so this assert is
   // what makes the reliance visible. DEBUG-only, like every other first-party layout
-  // invariant on this hot path.
+  // invariant on this hot path. It runs BEFORE the node scope below on purpose: it
+  // reads nothing the scope owns, and throwing out of it leaves no flag to restore.
   DALI_ASSERT_DEBUG(mEffectiveScaleValid);
 
   // A valid cache is published only at the end of a pass that also published
@@ -4514,71 +4637,96 @@ void ViewDataImpl::ReplayArrangeSubtreeFromCache()
   // gate's own filter, restated as an invariant.
   DALI_ASSERT_DEBUG(mArrangeResultAvailable);
 
+  // Open this node's slice of the replay transaction BEFORE the first actor write. Every
+  // write below can reach application code through OnPropertySet / PropertySetSignal, and
+  // this is what makes that code see the same same-view re-entrancy guard a producer pass
+  // would give it. Scoped to the end of the function so it also covers the recursion and
+  // the LayoutFinished registration; unwound by RAII, so a DEBUG assert thrown deeper in
+  // the subtree restores every level on the way out.
+  ReplayNodeScope node(*this);
+
   // Snapshot before applying: ApplySelfBoundsIfChanged takes its argument by const
   // reference, so passing mArrangedBounds directly would hand it an alias of the very
-  // member it reconciles against, and the ApplyLayoutDirection below would then read
-  // that member rather than the value that was applied.
+  // member it reconciles against. The copy is also what keeps mArrangedBounds LOGICAL
+  // while the value applied below may be its physical resolution.
   const LayoutRect cached = mArrangedBounds;
 
-  // 1. Self reconciliation -- the SAME call the MISS path ends on. NOT skippable:
-  //    it is an UNCONDITIONAL per-pass reconciliation, not a one-time apply, and it
-  //    is what restores geometry clobbered outside layout (Extension::SetPositionX,
-  //    a transition frame). Its exact `!=` write suppression makes the settled case
-  //    free -- four property reads and no scene-graph write. Step 3's mirror is
-  //    guarded the same way, so "settled means no writes" holds for a right-to-left
-  //    subtree too.
+  // 1. Self reconciliation -- the SAME call the MISS path ends on, and the ONE actor
+  //    write this node performs. NOT skippable: it is an UNCONDITIONAL per-pass
+  //    reconciliation, not a one-time apply, and it is what restores geometry clobbered
+  //    outside layout (Extension::SetPositionX, a transition frame). Its exact `!=` write
+  //    suppression makes the settled case free -- four property reads and no scene-graph
+  //    write -- and that is now true for a right-to-left subtree too, because the mirror
+  //    is folded in here instead of being re-applied afterwards by the parent.
   //
-  //    The LOGICAL bounds are re-applied, never a mirrored value: mirroring stays
-  //    the parent's job in step 3, which reads this view's logical mArrangedBounds,
-  //    so folding it in here would apply it twice.
+  //    mArrangedBounds itself stays LOGICAL (invariant: the arranged rect and Arrange()'s
+  //    return value are parent-local logical, and the transition dispatcher's
+  //    VisualBoundsOf re-derives the physical x from it through the same MirrorX). Only
+  //    `applied` carries the physical x, and only as far as the actor.
   //
   //    The MISS path also applies the INPUT bounds provisionally before running the
   //    producer. That write is observable only to the producer, which is elided, so
   //    the single apply of the final bounds is equivalent.
-  ApplySelfBoundsIfChanged(cached);
-
-  // 2. Descendants, in mChildren order -- the order ArrangeDefault's snapshot
-  //    preserves, and the order every layout manager iterates.
-  //
-  //    An index loop that re-reads Count() each iteration rather than a snapshot:
-  //    ApplySelfBoundsIfChanged writes SIZE_*, which can reach an app override of
-  //    OnSizeSet and hence code that mutates mChildren. Re-reading Count() is what
-  //    keeps the INDEX valid; the local handle below is what keeps the CHILD alive.
-  //    Between them they give the MISS path's snapshot guarantee without its
-  //    per-node heap allocation, which is part of what the hit buys. In the settled
-  //    case this replay performs no scene-graph writes at all, so the re-entrancy
-  //    window is empty: both writers on the path -- ApplySelfBoundsIfChanged in step 1
-  //    and ApplyLayoutDirection's mirror in step 3 -- are read-compare-write.
-  //
-  //    The handle copy is NOT bookkeeping: the recursive call below can reach app
-  //    code that unparents the very child being visited, and mChildren holds the
-  //    last reference to it. Without this copy the reference the recursion is
-  //    running on would be freed underneath it -- exactly the case the MISS path's
-  //    `std::vector<Ui::View> childSnapshot` exists to prevent (see ArrangeDefault
-  //    and ArrangeStandaloneChildren).
-  //
-  //    Standalone children are NOT filtered out: the MISS path reaches them through
-  //    ArrangeStandaloneChildren -> ArrangeStandaloneChild -> childImpl.Arrange(),
-  //    which likewise ends at the child's own mArrangedBounds. The two re-measures
-  //    inside ArrangeStandaloneChild are excluded by the gate's
-  //    !HasUnconsumedStandaloneChild() term and by the measure cache respectively.
-  for(uint32_t i = 0; i < mChildren.Count(); ++i)
+  LayoutRect applied = cached;
+  if(mirrorUnderParentRtl)
   {
-    Ui::View      child     = mChildren[i]; // Keeps the child alive across the recursive call.
-    ViewDataImpl& childData = ViewDataImpl::Get(GetImpl(child));
-    if(childData.mArrangeResultAvailable)
+    applied.x = MirrorX(parentArrangedWidth, cached.x, cached.width);
+  }
+  ApplySelfBoundsIfChanged(applied);
+
+  // 2. Descendants, in mChildren order -- the order ArrangeDefault's snapshot preserves,
+  //    and the order every layout manager iterates.
+  //
+  //    A SNAPSHOT, like every other child traversal in this file. The apply above is an
+  //    actor property write, which reaches OnPropertySet and a synchronous
+  //    PropertySetSignal emit and hence application code that may unparent a child --
+  //    dali-core erases from its container BEFORE notifying (ActorParentImpl::Remove), so
+  //    an index loop that re-read Count() would shift every following sibling down by one
+  //    and silently skip the last one. The snapshot also keeps each child alive across the
+  //    recursive call. Guarded by Empty() so a leaf, which is the common hit shape, pays
+  //    no allocation.
+  //
+  //    A child removed DURING the walk is still visited from the snapshot, exactly as
+  //    ArrangeDefault's and ArrangeStandaloneChildren's snapshots visit theirs. A REPARENT
+  //    is fully covered: OnChildAdded clears the moved child's mArrangeResultAvailable, so
+  //    the test below skips it and no old-parent rect is applied under a new parent. A
+  //    plain removal leaves one write on a detached actor, which its next add re-derives.
+  //
+  //    Standalone children are NOT filtered out of the walk: the MISS path reaches them
+  //    through ArrangeStandaloneChildren -> ArrangeStandaloneChild -> childImpl.Arrange(),
+  //    which likewise ends at the child's own mArrangedBounds. They are excluded only from
+  //    the MIRROR, exactly as ApplyLayoutDirection excludes them.
+  if(!mChildren.Empty())
+  {
+    // THIS node's own resolved direction decides the mirror for its direct children --
+    // the same read, on the same actor, that ApplyLayoutDirection performs on the MISS
+    // path. Read once per node rather than once per child.
+    const bool selfIsRightToLeft =
+      (mViewImpl.Self().GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT);
+
+    std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
+    for(auto& childView : childSnapshot)
     {
-      childData.ReplayArrangeSubtreeFromCache();
+      ViewImpl&     childImpl = GetImpl(childView);
+      ViewDataImpl& childData = ViewDataImpl::Get(childImpl);
+
+      // Not arranged by this view's producer in the pass that published the entry, so
+      // there is no parent-owned logical result to re-apply and none to mirror. The MISS
+      // path leaves such a child untouched for the same reason (ApplyLayoutDirection's
+      // mArrangeResultAvailable skip).
+      if(!childData.mArrangeResultAvailable)
+      {
+        continue;
+      }
+
+      // The MISS path's mirror-eligibility rule, evaluated by the parent because only the
+      // parent knows the direction and the width it mirrors about.
+      const bool mirrorChild =
+        selfIsRightToLeft && !IntegrationView::IsLayoutModeStandalone(childImpl);
+
+      childData.ReplayArrangeSubtreeFromCache(mirrorChild, cached.width);
     }
   }
-
-  // 3. Mirror direct children when the effective layout direction resolves to
-  //    RIGHT_TO_LEFT, once per visited node, with the same argument the MISS path
-  //    passes (its final bounds' width). Running it AFTER the children matches the
-  //    MISS ordering -- producer recursion first, mirror last. A child without an
-  //    arrange result is left untouched on both paths: there is no parent-owned
-  //    logical position to mirror.
-  ApplyLayoutDirection(cached.width);
 
   // Already true on any path that could reach a hit (the cache was published by a
   // completed pass, which sets this). Kept unconditional so the flag's meaning stays
@@ -4653,8 +4801,8 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // So the hit REPLAYS the settled subtree from cache instead of pruning it:
   // ReplayArrangeSubtreeFromCache walks the same nodes the producer recursion would
   // have reached and performs, per node, exactly the observable work the MISS path
-  // performs -- self reconciliation, the RTL mirror of its direct children, the
-  // LayoutFinished registration -- while eliding only the PRODUCER (and with it two
+  // performs -- self reconciliation (with the right-to-left mirror folded into that
+  // single apply), the LayoutFinished registration -- while eliding only the PRODUCER (and with it two
   // heap allocations, the producer dispatch, ResolveReturnedBounds and the publish
   // gate). What is skipped is recomputation; what is kept is every write and every
   // notification.
@@ -4747,10 +4895,23 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
     // precondition the return value silently depends on.
     const LayoutRect cached = mArrangedBounds;
 
+    // Open the replay TRANSACTION for the whole subtree. See ReplayPassScope: the replay
+    // writes actor properties and therefore runs application code, so it has to be inside
+    // the layout processing window (park an invalidation raised from it, and make the
+    // per-node re-entrancy guard reachable). It is NOT ArrangePassGuard, whose entry would
+    // consume mArrangeDirty and clear the very mArrangeCacheValid this hit is serving.
+    ReplayPassScope replayPass;
+
     // The whole hit: this view and every descendant the elided producers would have
     // reached, reconciled in the MISS path's own order. Per-node Corollary C and
     // result-availability asserts live inside it.
-    ReplayArrangeSubtreeFromCache();
+    //
+    // LOGICAL at the top: this view's own right-to-left mirror is owned by its PARENT,
+    // which is not running here -- exactly as on the MISS path, where the producer applies
+    // logical bounds and the parent's ApplyLayoutDirection mirrors afterwards. Folding a
+    // mirror in here would apply it twice.
+    // UtcDaliViewArrangeCacheHitReAppliesLogicalBoundsUnderRtlP pins it.
+    ReplayArrangeSubtreeFromCache(false, 0.0f);
 
     // The cached rect, NOT `bounds`. The publishing pass returned its
     // ResolveReturnedBounds() result, which an arrange customization may have
@@ -5449,8 +5610,10 @@ void ViewDataImpl::ApplySelfBoundsIfChanged(const LayoutRect& bounds)
   Actor self = mViewImpl.Self();
 
   // Read the event-side target property and write only axes that actually
-  // differ. Exact comparison (not epsilon): the returned rect is authoritative
-  // geometry and must equal mArrangedBounds / the actor target exactly.
+  // differ. Exact comparison (not epsilon): the rect handed in is authoritative
+  // geometry -- the MISS path's final bounds, or a cache-hit replay's physical
+  // resolution of them (the same rect with x mirrored about the parent width) -- and the
+  // actor target must equal it exactly.
   if(self.GetProperty<float>(Actor::Property::POSITION_X) != bounds.x)
   {
     self.SetPositionX(bounds.x);

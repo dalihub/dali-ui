@@ -1408,19 +1408,37 @@ private:
    * @brief Serves the arrange cache for this view and its settled subtree.
    *
    * Phase two of the hit: a pre-order walk that performs, per node, exactly the
-   * observable work an arrange MISS performs -- reconcile the actor against the
-   * node's cached arranged bounds, recurse into the children that hold an arrange
-   * result, mirror the direct children under RTL, mark the initial layout done and
-   * register for LayoutFinished -- while eliding only the PRODUCER.
+   * observable work an arrange MISS performs -- reconcile the actor against the node's
+   * cached arranged bounds (mirrored for a child of a right-to-left parent, see below),
+   * recurse into the children that hold an arrange result, mark the initial layout done
+   * and register for LayoutFinished -- while eliding only the PRODUCER.
    *
    * It is NOT a prune. Skipping the subtree would drop the per-level reconciliation
    * that repairs actor geometry written outside layout, which View::Arrange documents
    * as a promise ("the arranged geometry is reconciled either way").
    *
+   * The right-to-left mirror is FUSED into each node's own single self apply rather than
+   * being a separate parent-side pass, which is the one place the replay's shape differs
+   * from ApplyLayoutDirection on the MISS path. Mirroring afterwards would write POSITION_X
+   * twice per child per pass -- once logical, once mirrored -- and each write emits a
+   * synchronous PropertySetSignal, so a SETTLED right-to-left subtree was never the
+   * write-free replay the hit is supposed to be. mArrangedBounds stays LOGICAL either way:
+   * only the value handed to ApplySelfBoundsIfChanged is resolved to physical.
+   *
+   * @param[in] mirrorUnderParentRtl True when the caller is this view's parent AND that
+   *            parent's effective layout direction resolves to RIGHT_TO_LEFT AND this view
+   *            is not a standalone child -- the same three conditions ApplyLayoutDirection
+   *            applies on the MISS path. FALSE at the top-level hit, whose own mirror
+   *            belongs to a parent that is not running.
+   * @param[in] parentArrangedWidth The caller's cached arranged width, i.e. the value the
+   *            MISS path passes to ApplyLayoutDirection. Read only when
+   *            @p mirrorUnderParentRtl is true.
+   *
    * @pre CanServeArrangeFromCache() holds for this view and, unless it is childless,
    *      CanReplayArrangeSubtreeFromCache() does too.
+   * @pre A ReplayPassScope is on the stack (constructed at the hit site).
    */
-  void ReplayArrangeSubtreeFromCache();
+  void ReplayArrangeSubtreeFromCache(bool mirrorUnderParentRtl, float parentArrangedWidth);
 
   MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
   void         MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
@@ -1464,11 +1482,22 @@ private:
 private:
   using TraitEntries = std::vector<std::pair<TraitId, IntrusivePtr<TraitObject>>>;
 
-  /// RAII transaction guards for a single Measure() / Arrange() pass on this view.
-  /// Defined in view-data-impl.cpp; they own the pass-local in-progress / poison
-  /// bits and re-arm the dirty bit when a pass is left before it publishes.
+  /// RAII transaction guards for a single Measure() / Arrange() PRODUCER pass on this
+  /// view. Defined in view-data-impl.cpp. Entry CONSUMES the dirty bit and clears the
+  /// cache-valid bit; exit restores only the in-progress bit and never re-arms dirty
+  /// (recovery from an abandoned pass is the LayoutController's, not the guard's --
+  /// the guard cannot register the view, so a re-armed dirty bit would sit unserviced).
   struct MeasurePassGuard;
   struct ArrangePassGuard;
+
+  /// RAII scopes for an arrange cache-HIT REPLAY. Defined in view-data-impl.cpp.
+  /// ReplayPassScope is constructed ONCE, at the hit site, and holds the layout-pass
+  /// depth open across the whole subtree; ReplayNodeScope marks one visited node as
+  /// arrange-in-progress for the duration of that node's applies and recursion.
+  /// Neither consumes a dirty bit or a cache entry: a replay SERVES an entry rather
+  /// than producing one, which is exactly why the pass guards above cannot be reused.
+  struct ReplayPassScope;
+  struct ReplayNodeScope;
 
   struct SizeConstraints
   {
@@ -1647,6 +1676,7 @@ private:
   bool         mArrangeCacheValid : 1;                            ///< True when mLastArrangeInput + mArrangedBounds hold a usable cache entry.
   bool         mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
   bool         mArrangeInProgress : 1;                            ///< True while this view's own Arrange() is on the stack; guards same-view re-entrancy.
+  bool         mArrangeReplayInProgress : 1;                      ///< True while this view is being visited by an arrange cache-HIT REPLAY (ReplayNodeScope), which also raises mArrangeInProgress so the re-entrancy guard in ArrangeImpl covers a replay too. The discriminator exists because three OWNERSHIP tests read mArrangeInProgress as "a producer pass below me owns this work" -- InvalidateAncestorLayoutCachesForMeasureMiss's direct-parent stop and its cache-publish block, and InvalidateParentArrangeCacheForOutOfBandArrange's parent stop. A replay runs no producer and owns nothing, so those three must see through it or an out-of-band Measure/Arrange raised from a property-set observer mid-replay would leave a stale ancestor entry standing.
   bool         mArrangePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's arrange pass was running.
   bool         mArrangeCacheBlockedDuringPass : 1;                ///< True when a cache-ONLY invalidation arrived while this view's arrange pass was running. Declines the cache publish without poisoning the pass and enqueues no layout work (parked or wake-armed). Set by InvalidateAncestorLayoutCachesForMeasureMiss on an unowned arrange-in-progress ancestor; see BlockArrangeCachePublishDuringPass.
   bool         mArrangeResultAvailable : 1;                       ///< True once at least one arrange pass has published a result into mArrangedBounds.

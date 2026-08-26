@@ -36,6 +36,7 @@
 #include <dali/integration-api/events/key-event-integ.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -7169,6 +7170,301 @@ int UtcDaliViewArrangeCacheHitRestoresClobberedDescendantRtlP(void)
     DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
     DALI_TEST_EQUALS(CountingContainerImplOf(leaf).GetArrangeCallCount(), leafBase, TEST_LOCATION);
   }
+
+  END_TEST;
+}
+
+namespace
+{
+// --- Physical-write and re-entry observation for the arrange cache-HIT replay -------
+//
+// Every actor write the layout system performs goes through Object::SetProperty, which
+// emits PropertySetSignal synchronously. That makes the signal two things at once: an
+// exact counter of the PHYSICAL writes a pass performed, and the very channel through
+// which a replay's writes can reach application code.
+
+// Counts notifications for ONE property index on ONE view.
+struct SinglePropertyWriteCounter : public Dali::ConnectionTracker
+{
+  explicit SinglePropertyWriteCounter(Dali::Property::Index watched)
+  : watched(watched)
+  {
+  }
+
+  void Connect(Ui::View view)
+  {
+    Dali::Handle handle = view;
+    handle.PropertySetSignal().Connect(this, &SinglePropertyWriteCounter::OnSet);
+  }
+
+  void OnSet(Dali::Handle, Dali::Property::Index index, const Dali::Property::Value&)
+  {
+    if(index == watched)
+    {
+      ++count;
+    }
+  }
+
+  Dali::Property::Index watched;
+  int                   count{0};
+};
+
+// Runs `action` from inside the FIRST notification of `watched` received while ARMED,
+// then disarms. Arming is explicit so that neither the settle-time writes nor the
+// deliberate clobber that makes the replay write at all consumes the shot.
+struct OneShotPropertySetAction : public Dali::ConnectionTracker
+{
+  OneShotPropertySetAction(Dali::Property::Index watched, std::function<void()> action)
+  : watched(watched),
+    action(std::move(action))
+  {
+  }
+
+  void Connect(Ui::View view)
+  {
+    Dali::Handle handle = view;
+    handle.PropertySetSignal().Connect(this, &OneShotPropertySetAction::OnSet);
+  }
+
+  void OnSet(Dali::Handle, Dali::Property::Index index, const Dali::Property::Value&)
+  {
+    if(!armed || index != watched)
+    {
+      return;
+    }
+    armed = false;
+    ++fireCount;
+    action();
+  }
+
+  Dali::Property::Index watched;
+  std::function<void()> action;
+  bool                  armed{false};
+  int                   fireCount{0};
+};
+} // namespace
+
+// Items 1+2. The right-to-left mirror is FOLDED into each node's own single self apply
+// instead of being re-applied afterwards by the parent, so a replayed child's POSITION_X
+// is written at most ONCE per pass -- the physical value straight away, never the logical
+// value followed by its mirror. A settled right-to-left subtree therefore performs no
+// write at all, which is what a cache hit is supposed to cost.
+//
+// The write count is the assertion, not the final value: the old two-write shape ended on
+// the same number, but each write emitted a synchronous PropertySetSignal and so ran
+// application code from inside the hit.
+//
+// Non-vacuity (verified by mutation): restoring the parent-side mirror
+// (ApplyLayoutDirection at the end of the replay, self apply left logical) makes the
+// settled phase count 2 and the repair phase 2.
+int UtcDaliViewArrangeCacheHitReplayWritesMirroredPositionOnceP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A right-to-left cache-hit replay writes each child's mirrored position exactly once");
+
+  View root = CreateCountingContainer(true);
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  root.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(root);
+
+  View mid = CreateCountingContainer(true);
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+
+  View leaf = CreateCountingContainer(true);
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  mid.Add(leaf);
+
+  SettleLayout(application);
+
+  // The settled mirrored geometry, the same values
+  // UtcDaliViewArrangeCacheHitRestoresClobberedDescendantRtlP pins: mid's logical 0
+  // mirrored about the root's 200 at width 120 => 80; leaf's logical 20 mirrored about
+  // mid's 120 at width 50 => 50.
+  DALI_TEST_EQUALS(mid.GetProperty<float>(Actor::Property::POSITION_X), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 50.0f, TEST_LOCATION);
+
+  const LayoutRect rootSlot = ActorRectOf(root);
+  const int        midBase  = CountingContainerImplOf(mid).GetArrangeCallCount();
+  const int        leafBase = CountingContainerImplOf(leaf).GetArrangeCallCount();
+
+  SinglePropertyWriteCounter writes(Actor::Property::POSITION_X);
+  writes.Connect(leaf);
+
+  // Settled: the replay computes the value the actor already holds, so nothing is
+  // written and no application code is reached.
+  root.Arrange(rootSlot);
+  DALI_TEST_EQUALS(writes.count, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 50.0f, TEST_LOCATION);
+
+  // Clobbered outside layout: the hit still repairs it, in ONE write.
+  Dali::Ui::Extension::View::SetPositionX(leaf, 999.0f);
+  writes.count = 0;
+
+  root.Arrange(rootSlot);
+  DALI_TEST_EQUALS(writes.count, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 50.0f, TEST_LOCATION);
+
+  // Both phases were genuine hits: no producer in the chain re-ran.
+  DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountingContainerImplOf(leaf).GetArrangeCallCount(), leafBase, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Item 1. A replay WRITES actor properties and therefore runs application code, so an
+// invalidation raised from that code is an IN-PASS invalidation and must be PARKED:
+// retained as pending work, never allowed to arm an idle ProcessEvents wake.
+// ReplayPassScope is what puts the hit inside the layout processing window that
+// LayoutController::RequestIdleWakeIfAllowed reads.
+//
+// Non-vacuity (verified by mutation): without ReplayPassScope the hit runs at layout-pass
+// depth 0, the invalidation arms a wake, and the NO-WAKE assertion fails.
+int UtcDaliViewArrangeCacheHitReplayParksInPassInvalidationN(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("An invalidation raised from a cache-hit replay's actor write is parked, not woken");
+
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  View root = CreateCountingContainer(true);
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  window.Add(root);
+
+  View mid = CreateCountingContainer(true);
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+
+  View leaf = CreateCountingContainer(true);
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  mid.Add(leaf);
+
+  SettleLayout(application);
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+
+  const LayoutRect rootSlot = ActorRectOf(root);
+  const int        rootBase = CountingContainerImplOf(root).GetArrangeCallCount();
+  const int        midBase  = CountingContainerImplOf(mid).GetArrangeCallCount();
+
+  // A settled hit is write-free, so the observer would never run without this: the
+  // clobber is what gives the replay something to repair.
+  Dali::Ui::Extension::View::SetPositionX(leaf, 999.0f);
+
+  // The observer resets the render controller immediately BEFORE it invalidates. That is
+  // the attribution trick SendRequestedProcessEvents documents, and it is REQUIRED here:
+  // the replay's repair write queues a scene-graph message, and dali-core asks for an idle
+  // ProcessEvents cycle for any message queued outside Core::ProcessEvents
+  // (MessageQueue::ReserveMessageSlot), so a request observed across the whole call would
+  // belong to the write rather than to layout. After this reset the only remaining writer
+  // is the rest of that same reconciliation, whose other three axes are already correct --
+  // so any request seen below came from the invalidation.
+  OneShotPropertySetAction invalidator(Actor::Property::POSITION_X,
+                                       [&application, &root]() {
+                                         application.GetRenderController().Initialize();
+                                         root.InvalidateMeasure();
+                                       });
+  invalidator.Connect(leaf);
+  invalidator.armed = true;
+
+  root.Arrange(rootSlot);
+
+  DALI_TEST_EQUALS(invalidator.fireCount, 1, TEST_LOCATION);
+
+  // NO WAKE: the replay held the layout-pass depth open, so the invalidation raised from
+  // inside it could not request another idle ProcessEvents cycle.
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // The hit itself still elided every producer and repaired the clobber.
+  DALI_TEST_EQUALS(CountingContainerImplOf(root).GetArrangeCallCount(), rootBase, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+
+  // RETENTION: the parked work is still there. An independently triggered ProcessEvents
+  // services it -- the root's producer re-runs and the batch settles into a fresh emit.
+  SendIndependentProcessEvents(application);
+  DALI_TEST_CHECK(CountingContainerImplOf(root).GetArrangeCallCount() > rootBase);
+  DALI_TEST_EQUALS(emitCount, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  END_TEST;
+}
+
+// Item 1. ReplayNodeScope raises mArrangeInProgress for every node a replay visits, so a
+// property-set observer woken by the replay's own write meets the same release-mode
+// re-entrancy guard a producer pass would give it. Without it the observer's Arrange()
+// re-runs the producer of the view being replayed and rewrites its records underneath the
+// walk that is serving them.
+//
+// The absorbed call still POISONS that view's pass, which the second half asserts: poison
+// is what the guard trades the re-entrant work for, and both the node-local predicate and
+// the recursive subtree gate must honour it.
+//
+// Non-vacuity (verified by mutation): without ReplayNodeScope the re-entrant Arrange()
+// runs the leaf's producer (the flat-count assertion fails) and leaves POSITION_X at the
+// re-entrant rect's x rather than the cached one.
+int UtcDaliViewArrangeCacheHitReplayGuardsReentrantArrangeN(void)
+{
+  UiTestApplication application;
+  tet_infoline("A cache-hit replay's actor write cannot re-enter Arrange() on the view being replayed");
+
+  View root = CreateCountingContainer(true);
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View mid = CreateCountingContainer(true);
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+
+  View leaf = CreateCountingContainer(true);
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  mid.Add(leaf);
+
+  SettleLayout(application);
+
+  const LayoutRect rootSlot = ActorRectOf(root);
+  const LayoutRect leafRect = ActorRectOf(leaf);
+  DALI_TEST_EQUALS(leafRect.x, 20.0f, TEST_LOCATION);
+
+  const int midBase  = CountingContainerImplOf(mid).GetArrangeCallCount();
+  const int leafBase = CountingContainerImplOf(leaf).GetArrangeCallCount();
+
+  Dali::Ui::Extension::View::SetPositionX(leaf, 999.0f);
+
+  OneShotPropertySetAction reenter(Actor::Property::POSITION_X,
+                                   [&leaf]() { leaf.Arrange(LayoutRect(1.0f, 2.0f, 3.0f, 4.0f)); });
+  reenter.Connect(leaf);
+  reenter.armed = true;
+
+  root.Arrange(rootSlot);
+
+  DALI_TEST_EQUALS(reenter.fireCount, 1, TEST_LOCATION);
+
+  // Absorbed: no producer ran for the re-entrant call, and the geometry the replay is
+  // applying stands rather than the rect the observer asked for.
+  DALI_TEST_EQUALS(CountingContainerImplOf(leaf).GetArrangeCallCount(), leafBase, TEST_LOCATION);
+  CheckActorRect(leaf, leafRect, TEST_LOCATION);
+
+  // ...and the poison the guard left behind is honoured: the next identical pass cannot
+  // be served from cache at any level of the chain.
+  root.Arrange(rootSlot);
+  DALI_TEST_CHECK(CountingContainerImplOf(mid).GetArrangeCallCount() > midBase);
+  DALI_TEST_CHECK(CountingContainerImplOf(leaf).GetArrangeCallCount() > leafBase);
 
   END_TEST;
 }
