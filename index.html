@@ -117,7 +117,7 @@
     .manifesto p { position: relative; z-index: 1; margin: 0; color: #c8d7d8; font-size: 14px; }
     .cover-capabilities { display: flex; margin-top: 30px; flex-wrap: wrap; gap: 8px; }
     .cover-capabilities span { padding: 7px 11px; border: 1px solid rgba(0,109,104,.14); border-radius: 999px; color: var(--teal-deep); background: rgba(255,255,255,.76); font-size: 11px; font-weight: 750; }
-    .cover-metrics { display: grid; margin-top: 34px; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .cover-metrics { display: grid; margin-top: 34px; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .cover-metric { padding: 18px 19px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.82); }
     .cover-metric strong { display: block; color: var(--teal); font-size: 28px; letter-spacing: -.04em; line-height: 1.15; }
     .cover-metric span { color: var(--muted); font-size: 10px; line-height: 1.4; }
@@ -139,6 +139,8 @@
     .flow-arrow { display: grid; color: var(--coral); place-items: center; font-weight: 900; }
     .dark .flow-node { border-color: var(--line); background: #f6f8f5; }
     .dark .flow-node span { color: var(--muted); }
+    .dark .flow-node.flow-input { border-color: rgba(230,170,61,.48); background: #fff8e9; }
+    .dark .flow-node.flow-output { border-color: rgba(0,109,104,.28); background: #edf7f3; }
     .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
     .detail { padding: 24px 25px; border-top: 3px solid var(--mint); border-radius: 0 0 16px 16px; background: #fff; box-shadow: 0 10px 34px rgba(20,47,58,.06); }
     .detail p { margin: 0; color: var(--muted); font-size: 14px; }
@@ -198,7 +200,11 @@
     .layout-icon i { display: block; border-radius: 4px; background: var(--teal); opacity: .76; }
     .layout-type:nth-child(2) .layout-icon { grid-template-columns: 2fr 1fr 1fr; }
     .layout-type:nth-child(3) .layout-icon { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
-    .layout-type:nth-child(4) .layout-icon i:nth-child(2) { transform: translate(12px, 12px); }
+    .layout-type:nth-child(4) .layout-icon { position: relative; display: block; }
+    .layout-type:nth-child(4) .layout-icon i { position: absolute; }
+    .layout-type:nth-child(4) .layout-icon i:nth-child(1) { top: 9px; left: 10px; width: 32px; height: 18px; }
+    .layout-type:nth-child(4) .layout-icon i:nth-child(2) { top: 18px; right: 9px; width: 48px; height: 25px; opacity: .58; }
+    .layout-type:nth-child(4) .layout-icon i:nth-child(3) { bottom: 7px; left: 39%; width: 24px; height: 16px; opacity: .88; }
     .layout-type p { margin: 0; color: var(--muted); font-size: 12px; }
     .nav-visual { display: grid; grid-template-columns: 1fr 130px 1fr; gap: 25px; align-items: center; }
     .phone { padding: 14px; border: 8px solid #29444e; border-radius: 27px; background: #edf4f0; box-shadow: var(--shadow); }
@@ -211,17 +217,35 @@
     .chart-stage svg { width: 100%; height: auto; overflow: visible; }
     .chart-list { display: grid; align-content: center; gap: 10px; }
     .chart-list span { padding: 10px 13px; border-radius: 10px; color: #d7e6e6; background: rgba(255,255,255,.07); font-size: 12px; }
-    .theme-preview { display: grid; grid-template-columns: 1fr 54px 1fr; gap: 16px; align-items: center; }
-    .theme-screen { padding: 20px; border-radius: 20px; background: #fff; box-shadow: var(--shadow); }
-    .theme-screen.alt { color: #fff; background: var(--navy); }
-    .theme-screen small { display: block; margin-bottom: 14px; color: var(--muted); font-weight: 800; }
-    .theme-screen.alt small { color: #aebfc2; }
-    .theme-swatch { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
-    .theme-swatch i { display: block; height: 58px; border-radius: 11px; background: var(--teal); }
-    .theme-swatch i:nth-child(2) { background: var(--mint); }
-    .theme-screen.alt .theme-swatch i { background: var(--coral); }
-    .theme-screen.alt .theme-swatch i:nth-child(2) { background: #f7d48c; }
-    .theme-arrow { color: var(--coral); font-size: 28px; font-weight: 900; text-align: center; }
+    .theme-preview { display: grid; grid-template-columns: 1.25fr .75fr; gap: 18px; align-items: stretch; }
+    .theme-app { position: relative; min-height: 270px; padding: 23px; overflow: hidden; border-radius: 22px; background: #edf4f0; box-shadow: var(--shadow); animation: theme-background 6.4s ease-in-out infinite; }
+    .theme-app-head { display: flex; margin-bottom: 18px; align-items: center; justify-content: space-between; }
+    .theme-app-head > strong { color: var(--ink); font-size: 22px; animation: theme-foreground 6.4s ease-in-out infinite; }
+    .theme-mode { position: relative; width: 66px; height: 22px; }
+    .theme-mode b { position: absolute; inset: 0; color: var(--teal); font-size: 10px; letter-spacing: .07em; text-align: right; text-transform: uppercase; animation: theme-mode-a 6.4s ease-in-out infinite; }
+    .theme-mode b:last-child { color: #f8c6bb; opacity: 0; animation-name: theme-mode-b; }
+    .theme-task { display: flex; margin-top: 10px; padding: 13px 14px; border: 1px solid rgba(20,47,58,.06); border-radius: 12px; background: #fff; align-items: center; gap: 12px; animation: theme-surface 6.4s ease-in-out infinite; }
+    .theme-task > i { display: grid; width: 25px; height: 25px; flex: 0 0 auto; border: 2px solid #006d68; border-radius: 7px; color: #fff; background: #006d68; place-items: center; font-size: 12px; font-style: normal; animation: theme-primary 6.4s ease-in-out infinite; }
+    .theme-task.pending > i { color: transparent; background: transparent; animation-name: theme-primary-outline; }
+    .theme-task span { min-width: 0; }
+    .theme-task strong { display: block; color: var(--ink); font-size: 13px; animation: theme-foreground 6.4s ease-in-out infinite; }
+    .theme-task small { display: block; color: var(--muted); font-size: 9px; animation: theme-muted 6.4s ease-in-out infinite; }
+    .theme-add { position: absolute; right: 23px; bottom: 20px; width: 38px; height: 38px; border: 0; border-radius: 12px; color: #fff; background: #006d68; font-size: 22px; line-height: 1; animation: theme-primary 6.4s ease-in-out infinite; }
+    .theme-token-list { display: grid; padding: 20px; border: 1px solid var(--line); border-radius: 20px; background: #fff; align-content: center; gap: 10px; }
+    .theme-token { display: grid; padding: 10px 12px; border-radius: 10px; background: var(--paper); grid-template-columns: 18px 1fr; align-items: center; gap: 9px; }
+    .theme-token i { width: 18px; height: 18px; border-radius: 5px; background: #edf4f0; animation: theme-background 6.4s ease-in-out infinite; }
+    .theme-token.surface i { background: #fff; box-shadow: inset 0 0 0 1px var(--line); animation: theme-surface 6.4s ease-in-out infinite; }
+    .theme-token.primary i { background: #006d68; animation: theme-primary 6.4s ease-in-out infinite; }
+    .theme-token strong { color: var(--teal-deep); font-size: 10px; letter-spacing: .06em; }
+    .theme-token-list p { margin: 4px 0 0; color: var(--muted); font-size: 10px; text-align: center; }
+    @keyframes theme-background { 0%, 34%, 100% { background-color: #edf4f0; } 50%, 84% { background-color: #142f3a; } }
+    @keyframes theme-surface { 0%, 34%, 100% { border-color: rgba(20,47,58,.06); background-color: #fff; } 50%, 84% { border-color: rgba(255,255,255,.08); background-color: #294752; } }
+    @keyframes theme-primary { 0%, 34%, 100% { border-color: #006d68; background-color: #006d68; } 50%, 84% { border-color: #ed745b; background-color: #ed745b; } }
+    @keyframes theme-primary-outline { 0%, 34%, 100% { border-color: #006d68; background-color: transparent; } 50%, 84% { border-color: #ed745b; background-color: transparent; } }
+    @keyframes theme-foreground { 0%, 34%, 100% { color: #17242b; } 50%, 84% { color: #fff; } }
+    @keyframes theme-muted { 0%, 34%, 100% { color: #64737a; } 50%, 84% { color: #b9c9cb; } }
+    @keyframes theme-mode-a { 0%, 34%, 100% { opacity: 1; } 50%, 84% { opacity: 0; } }
+    @keyframes theme-mode-b { 0%, 34%, 100% { opacity: 0; } 50%, 84% { opacity: 1; } }
     .adaptive-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     .adaptive-case { padding: 24px; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: 0 12px 34px rgba(20,47,58,.06); }
     .adaptive-case h3 { color: var(--teal); }
@@ -275,7 +299,9 @@
     .semantic-meta span { padding: 3px 6px; border-radius: 5px; color: var(--teal-deep); background: var(--mint-soft); font-family: "SFMono-Regular", Consolas, monospace; font-size: 7px; }
     .demo-inline { gap: 5px; }
     .inline-sentence { color: var(--ink); font-size: 14px; font-weight: 750; white-space: nowrap; }
-    .inline-object { display: inline-grid; width: 25px; height: 25px; margin: 0 3px; border-radius: 7px; color: #fff; background: linear-gradient(145deg, #f7cf6c, var(--coral)); vertical-align: middle; place-items: center; font-size: 13px; box-shadow: 0 4px 10px rgba(237,116,91,.25); }
+    .inline-object { position: relative; display: inline-block; width: 25px; height: 25px; margin: 0 3px; overflow: hidden; border: 1px solid rgba(0,109,104,.14); border-radius: 6px; background: linear-gradient(#8fd8d5 0 57%, #f6d789 57%); vertical-align: middle; box-shadow: 0 4px 10px rgba(20,47,58,.14); }
+    .inline-object::before { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #fff1a8; content: ""; }
+    .inline-object::after { position: absolute; right: 3px; bottom: 3px; left: 3px; height: 10px; background: #16877c; clip-path: polygon(0 100%, 31% 31%, 51% 66%, 69% 19%, 100% 100%); content: ""; }
     .demo-fit { grid-template-columns: 1fr auto; gap: 10px; }
     .fit-frame { display: grid; height: 42px; padding: 5px 8px; overflow: hidden; border: 2px solid var(--teal); border-radius: 8px; background: #fff; align-content: center; }
     .fit-frame strong { color: var(--ink); font-size: 17px; line-height: 1.15; white-space: nowrap; }
@@ -360,7 +386,6 @@
       .nav-visual { grid-template-columns: 1fr; }
       .nav-actions b { transform: rotate(90deg); }
       .theme-preview { grid-template-columns: 1fr; }
-      .theme-arrow { transform: rotate(90deg); }
     }
     @media (hover: none) {
       .heading-anchor { opacity: .42; }
@@ -442,6 +467,20 @@
       .gradient-example { padding: 4px 6px; }
       .gradient-example strong { font-size: 16px; }
       .gradient-example.overlay strong { background-position: 50% 0, 0 0; animation: none; }
+      .theme-app, .theme-app-head > strong, .theme-mode b, .theme-task, .theme-task > i, .theme-task strong, .theme-task small, .theme-add, .theme-token i { animation: none; }
+      .theme-app { min-height: 215px; padding: 18px; background: #142f3a; }
+      .theme-app-head { margin-bottom: 12px; }
+      .theme-app-head > strong, .theme-task strong { color: #fff; }
+      .theme-mode b:first-child { opacity: 0; }
+      .theme-mode b:last-child { color: #f8c6bb; opacity: 1; }
+      .theme-task { margin-top: 7px; padding: 10px 11px; border-color: rgba(255,255,255,.08); background: #294752; }
+      .theme-task > i, .theme-add { border-color: #ed745b; background: #ed745b; }
+      .theme-task.pending > i { border-color: #ed745b; background: transparent; }
+      .theme-task small { color: #b9c9cb; }
+      .theme-add { right: 18px; bottom: 16px; }
+      .theme-token.background i { background: #142f3a; }
+      .theme-token.surface i { border-color: rgba(255,255,255,.08); background: #294752; }
+      .theme-token.primary i { border-color: #ed745b; background: #ed745b; }
       .reveal-word { font-size: 17px; }
       .reveal-word span { opacity: 1; animation: none; }
       .reveal-word span:nth-child(5) { opacity: .42; }
@@ -511,9 +550,9 @@
           </div>
           <aside class="manifesto">
             <small>REPORT SCOPE</small>
-            <h3 style="font-size:28px">Native 앱에 필요한 UI 기능</h3>
-            <p>Native 앱이 제품 화면을 구성하려면 성능 경로뿐 아니라 그 위에서 사용할 충분한 UI 기능이 필요합니다. DALi UI는 화면마다 공통 기능을 다시 구현해야 하는 부담을 줄이고, 애플리케이션이 DALi 위에서 제품 수준의 UI를 구성할 수 있게 합니다.</p>
-            <p style="margin-top:20px">적용 애플리케이션에서는 NUI 기반 구성과 비교해 메모리 사용량과 런칭 성능이 개선되었습니다. 개선 폭은 앱 구성과 측정 조건에 따라 달라질 수 있습니다.</p>
+            <h3 style="font-size:28px">앱 개발을 단순하게 만드는 폭넓은 UI 기능</h3>
+            <p>Native 앱이 제품 화면을 구성하려면 풍부한 UI 기능이 필요합니다. DALi UI는 화면마다 공통 기능을 다시 구현해야 하는 부담을 줄이고, 애플리케이션이 DALi 위에서 제품 수준의 UI를 구성할 수 있게 합니다.</p>
+            <p style="margin-top:20px">애플리케이션에서는 NUI 기반 구성과 비교해 메모리 사용량과 런칭 성능이 개선되었습니다. 개선 폭은 앱 구성과 측정 조건에 따라 달라질 수 있습니다.</p>
           </aside>
         </div>
 
@@ -521,8 +560,9 @@
           <div class="cover-metric"><strong>203</strong><span>Public headers</span></div>
           <div class="cover-metric"><strong>2,806</strong><span>UTCs</span></div>
           <div class="cover-metric"><strong>94</strong><span>Visual test samples</span></div>
+          <div class="cover-metric"><strong>36</strong><span>Technical Wiki topics</span></div>
         </div>
-        <p class="cover-note">203개의 public header는 앱에 열린 기능의 폭을, 2,806개의 자동화 테스트는 그 동작을 지속적으로 검증하는 규모를 보여줍니다. 94개의 visual test sample은 46개 sample과 48개 manual TC를 합산했습니다. 수치는 DALi UI <span class="mono">devel bb386e86</span> 기준입니다.</p>
+        <p class="cover-note">203개의 public header는 앱에 열린 기능의 폭을, 2,806개의 자동화 테스트는 그 동작을 지속적으로 검증하는 규모를 보여줍니다. 94개의 visual test sample은 46개 sample과 48개 manual TC를 합산했습니다. 36개의 technical Wiki topic은 한·영 문서를 하나로 합산하고 Home 계열, deprecated 문서와 내부 메모를 제외한 활성 기술 문서 기준입니다. 구현 및 테스트 수치는 DALi UI <span class="mono">devel bb386e86</span> 기준입니다.</p>
       </div>
     </section>
 
@@ -532,7 +572,7 @@
           <div>
             <div class="eyebrow">02 / Unit</div>
             <h2><a class="heading-link" href="#unit">Unit<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">Unit은 해상도와 pixel density가 다른 디바이스에서도 UI가 의도한 크기로 표시되도록 합니다. 제품별 scaling factor와 system scale도 같은 단위 정책에서 처리합니다.</p>
+            <p class="lead">숫자 리터럴에 붙여 직관적으로 단위를 지정할 수 있도록 UDL을 적용했으며, 세 단위는 표현식이 평가되는 즉시 pixel로 변환됩니다. 제품별 scaling factor도 같은 단위 정책에서 처리합니다.</p>
           </div>
           <div class="section-index">02</div>
         </div>
@@ -546,11 +586,12 @@
           </div>
         </div>
 
-        <div class="detail-grid">
-          <article class="detail"><h3>작성 단위와 시스템 배율</h3><p><code>dp/sdp/spx</code>는 코드에 작성한 값을 pixel로 변환합니다. 시스템 접근성 배율이 바뀌면 현재 화면의 text와 layout을 새 배율에 맞춰 갱신합니다.</p></article>
-          <article class="detail"><h3>View별 적용 정책</h3><p><code>UiScalePolicy::INHERIT / ENABLED / DISABLED</code>로 부모 정책을 따르거나 system scale 적용 여부를 직접 지정할 수 있습니다.</p></article>
+        <div class="formula-grid">
+          <article class="detail"><h3>제품 기준 크기 · <code>_spx</code></h3><p>제품 디자인에서 정한 크기와 간격을 기기별 공통 배율로 조정할 때 적합합니다. 작성한 값에 제품별 <code>ScalingFactor</code>만 곱해 pixel로 변환합니다.</p></article>
+          <article class="detail"><h3>밀도에 독립적인 크기 · <code>_dp</code></h3><p>화면 밀도가 달라도 button이나 touch target이 비슷한 물리적 크기로 보이게 할 때 적합합니다. 작성한 값에 DPI와 BaselineDPI의 비율을 곱합니다.</p></article>
+          <article class="detail"><h3>밀도와 제품 배율 · <code>_sdp</code></h3><p>밀도 차이를 보정하면서 제품별 크기 정책도 함께 적용할 component와 layout에 적합합니다. <code>_dp</code> 변환 결과에 <code>ScalingFactor</code>를 추가로 곱합니다.</p></article>
         </div>
-        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-%26-Scale-(kr)">Unit &amp; Scale wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/types/unit.h">Unit literals</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/configuration/ui-scale-manager.h">UiScaleManager</a></div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-%26-Scale-(kr)">Unit &amp; Scale wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/types/unit.h">Unit literals</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/configuration/ui-config.h">UiConfig</a></div>
       </div>
     </section>
 
@@ -560,7 +601,7 @@
           <div>
             <div class="eyebrow">03 / View</div>
             <h2><a class="heading-link" href="#view">View<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">View는 모든 UI 컴포넌트가 layout, 상태, interaction과 system 변경을 같은 방식으로 처리하도록 하는 공통 객체입니다. 화면을 구성하는 가장 기본 단위이며 content, padding, border와 margin으로 이루어진 box model을 구현합니다.</p>
+            <p class="lead">View는 화면을 구성하는 가장 기본 단위이며 content, padding, border와 margin으로 이루어진 box model을 구현합니다. 모든 UI 컴포넌트가 layout, 상태, interaction과 system 변경을 같은 방식으로 처리하도록 하는 공통 객체입니다.</p>
           </div>
           <div class="section-index">03</div>
         </div>
@@ -588,7 +629,7 @@
           <div>
             <div class="eyebrow">04 / View State & Interaction</div>
             <h2><a class="heading-link" href="#view-state-interaction">View State & Interaction<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">Focused, pressed, hovered 등의 상태를 View 단위의 공통 모델로 관리합니다. 이 상태와 touch, key, accessibility 입력을 바탕으로 click과 long press처럼 UI 맥락이 담긴 interaction을 제공하므로, 앱이 화면마다 상태 전환과 입력 판정을 다시 구현할 필요가 없습니다.</p>
+            <p class="lead">Focused, pressed, hovered 등의 상태를 View 단위의 공통 모델로 관리합니다. 상태와 touch, key 등 입력을 바탕으로 click과 long press처럼 UI 맥락이 담긴 상위 interaction을 event로 제공합니다. 이로써 앱은 화면마다 상태 전환과 입력 판정을 다시 구현할 필요가 없습니다.</p>
           </div>
           <div class="section-index">04</div>
         </div>
@@ -599,14 +640,14 @@
         <div class="mechanism">
           <div class="mechanism-title">Inputs and UI interactions</div>
           <div class="flow">
-            <div class="flow-node"><strong>Touch · Key · Accessibility</strong><span>서로 다른 입력 경로</span></div><div class="flow-arrow">→</div>
-            <div class="flow-node"><strong>Click · Long press</strong><span>앱이 바로 사용하는 의미 단위의 event</span></div><div class="flow-arrow">+</div>
-            <div class="flow-node"><strong>Pressed · Hovered · Focused</strong><span>Visual과 동작에 공통으로 쓰는 View state</span></div>
+            <div class="flow-node flow-input"><strong>Touch · Key · Accessibility</strong><span>서로 다른 입력 경로</span></div><div class="flow-arrow">→</div>
+            <div class="flow-node flow-output"><strong>Click · Long press</strong><span>앱이 바로 사용하는 의미 단위의 event</span></div><div class="flow-arrow">+</div>
+            <div class="flow-node flow-output"><strong>Pressed · Hovered · Focused</strong><span>Visual과 동작에 공통으로 쓰는 View state</span></div>
           </div>
         </div>
         <div class="detail-grid">
-          <article class="detail"><h3>원인을 포함한 상태 변화</h3><p>상태가 바뀌기 전과 후의 값뿐 아니라 변화를 일으킨 입력도 함께 전달합니다. 앱은 같은 상태 변화라도 touch, key 등 원인에 따라 다르게 대응할 수 있습니다.</p></article>
-          <article class="detail"><h3>필요한 기능만 선택적으로 확장</h3><p>기본 View는 공통 기능만 담아 가볍게 유지하고, interaction이나 selection은 사용하는 View에만 필요한 데이터를 생성합니다. 모든 View가 쓰지 않는 기능의 상태까지 보유하지 않으므로 View가 많은 화면에서도 메모리 부담을 줄일 수 있습니다.</p></article>
+          <article class="detail"><h3>원인을 포함한 상태 변화</h3><p>상태가 바뀌기 전과 후의 값뿐 아니라 변화를 일으킨 입력에 대한 데이터도 event와 함께 전달합니다. 앱은 같은 상태 변화라도 touch, key 등 원인에 따라 다르게 대응할 수 있습니다.</p></article>
+          <article class="detail"><h3>필요한 기능만 선택적으로 확장</h3><p>Interaction detection은 앱 개발자가 명시적으로 요청한 View에서만 활성화됩니다. View가 쓰지 않는 데이터를 기본적으로 보유하지 않으므로 복잡한 화면에서도 메모리 부담을 줄입니다.</p></article>
         </div>
         <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management">State wiki</a><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-%26-Gesture-(kr)">Touch &amp; Gesture wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/types/view-state.h">ViewState</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/traits/interactive-trait.h">InteractiveTrait</a></div>
       </div>
@@ -618,7 +659,7 @@
           <div>
             <div class="eyebrow">05 / Layout</div>
             <h2><a class="heading-link" href="#layout">Layout<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">Layout은 화면 크기, text 길이와 system scale이 바뀌어도 View의 크기와 위치를 일관된 규칙으로 계산하기 위한 기능입니다. Stack, Flex, Grid와 Absolute 배치를 제공하고 공통 크기 정책과 transition을 지원합니다.</p>
+            <p class="lead">Layout은 View의 크기와 위치를 일관된 규칙으로 계산하기 위한 기능입니다. 화면 크기, 배율, text 크기 등에 맞춰 responsive하게 화면을 구성하기 위해 요구되는 UI Framework의 필수 기능입니다. 각종 상황에 맞춰 화면 구성을 자동으로 갱신하므로 개발자는 앱을 복잡하게 작성할 필요가 없습니다.</p>
           </div>
           <div class="section-index">05</div>
         </div>
@@ -637,7 +678,7 @@
           <article class="layout-type"><div class="layout-icon"><i></i><i></i><i></i></div><h3>Stack</h3><p>방향, 간격, alignment와 weight 기반 분배</p></article>
           <article class="layout-type"><div class="layout-icon"><i></i><i></i><i></i></div><h3>Flex</h3><p>grow, shrink, basis, wrap과 축 정렬</p></article>
           <article class="layout-type"><div class="layout-icon"><i></i><i></i><i></i><i></i></div><h3>Grid</h3><p>absolute, star, auto 행과 열</p></article>
-          <article class="layout-type"><div class="layout-icon"><i></i><i></i></div><h3>Absolute</h3><p>pixel 또는 proportional 위치 지정</p></article>
+          <article class="layout-type"><div class="layout-icon"><i></i><i></i><i></i></div><h3>Absolute</h3><p>pixel 또는 proportional 위치 지정</p></article>
         </div>
         <div class="detail-grid" style="margin-top:18px">
           <article class="detail"><h3>공통 크기 정책</h3><p><code>WRAP_CONTENT</code>, <code>MATCH_PARENT</code>, margin과 padding Insets를 모든 LayoutManager에서 같은 방식으로 사용합니다.</p></article>
@@ -653,7 +694,7 @@
           <div>
             <div class="eyebrow">06 / Enhanced Text</div>
             <h2><a class="heading-link" href="#enhanced-text">Enhanced Text<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">Text를 단순한 문자열 표시에서 벗어나 시각 효과, 단계별 노출, 의미 정보와 문장 안의 image까지 하나의 콘텐츠로 다룰 수 있습니다. 정해 둔 font size와 line height 조합 중 화면에 가장 잘 맞는 조합을 고르는 기능도 제공합니다.</p>
+            <p class="lead">Text를 사용한 다양한 UX 요구사항에 대응합니다. 단순한 문자열 표시를 넘어 shimmering과 같은 고급 시각 효과를 제공하고, AI 서비스의 streaming response와 같은 최신 UX에 활용할 수 있는 progressive reveal을 지원합니다.</p>
           </div>
           <div class="section-index">06</div>
         </div>
@@ -673,7 +714,7 @@
               <div class="reveal-stage"><div class="reveal-word" role="img" aria-label="The quick brown fox"><span>The</span><span class="reveal-gap"></span><span>quick</span><span class="reveal-gap"></span><span>brown</span><span class="reveal-gap"></span><span>fox</span></div><div class="reveal-progress"><i></i></div></div>
             </div>
             <h3>Character · Word reveal</h3>
-            <p>문장 전체를 한 번에 표시하지 않고 글자 또는 단어 순서대로 드러냅니다. Word 방식에서는 단어 전체가 하나의 단위로 fade-in하며, 단어 내부가 중간에서 끊기지 않습니다.</p>
+            <p>Label에서 문장을 글자 또는 단어 순서대로 드러냅니다. Word 방식에서는 단어 전체가 하나의 단위로 fade-in하며, 단어 내부가 중간에서 끊기지 않습니다.</p>
           </article>
           <article class="detail text-feature">
             <div class="text-demo demo-bevel"><strong>Bevel</strong><span class="light-direction">↘<small>LIGHT</small></span></div>
@@ -689,9 +730,9 @@
             <p>문장 일부에 link 동작이나 앱이 정의한 정보를 붙입니다. 화면에는 자연스러운 문장으로 보이지만, 앱은 해당 범위의 의미와 동작을 구분할 수 있습니다.</p>
           </article>
           <article class="detail text-feature">
-            <div class="text-demo demo-inline"><span class="demo-caption">Image inside a sentence</span><div class="inline-sentence">오늘 날씨 <span class="inline-object">☀</span> 24°C</div></div>
+            <div class="text-demo demo-inline"><span class="demo-caption">Image inside a sentence</span><div class="inline-sentence">오늘 날씨 <span class="inline-object" role="img" aria-label="weather thumbnail"></span> 24°C</div></div>
             <h3>Inline content</h3>
-            <p>문장 중간에 icon이나 image를 글자처럼 배치합니다. Image span은 실제 image를 넣고, Replacement span은 앱이 원하는 영역으로 text 일부를 대체합니다.</p>
+            <p>ImageSpan은 실제 image resource를 문장 안의 하나의 layout unit으로 배치합니다. 주변 text와 함께 줄바꿈, 정렬과 ellipsis에 참여합니다.</p>
           </article>
           <article class="detail text-feature">
             <div class="text-demo demo-fit">
@@ -730,9 +771,9 @@
           <article class="adaptive-case">
             <h3>Locale 변경</h3>
             <div class="adaptive-change">
-              <div class="adaptive-preview"><strong>Language settings</strong></div>
+              <div class="adaptive-preview"><strong>알림 설정을 확인하세요</strong></div>
               <div class="adaptive-arrow">→</div>
-              <div class="adaptive-preview rtl"><strong>إعدادات اللغة</strong></div>
+              <div class="adaptive-preview rtl"><strong>تحقّق من إعدادات الإشعارات</strong></div>
             </div>
             <div class="adaptive-effects"><span>번역 문자열</span><span>복수형</span><span>접근성 문구</span><span>RTL layout</span></div>
           </article>
@@ -740,7 +781,7 @@
 
         <div class="detail-grid" style="margin-top:18px">
           <article class="detail"><h3>읽기 편의에 맞춘 Text 크기</h3><p>System font scale을 반영하되 화면 설계가 무너지지 않도록 최소·최대 배율을 정할 수 있습니다. 변경된 text 크기에 맞춰 줄바꿈과 주변 layout도 다시 계산합니다.</p></article>
-          <article class="detail"><h3>번역 가능한 모든 문구</h3><p>일반 문자열과 단수·복수 표현을 지원합니다. Label뿐 아니라 입력창 placeholder, 접근성 name과 description도 언어 변경에 맞춰 갱신됩니다.</p></article>
+          <article class="detail"><h3>번역 가능한 모든 문구</h3><p>일반 문자열과 수량에 따른 단수·복수 표현을 지원합니다. Label뿐 아니라 입력창 placeholder, 접근성 name과 description도 언어 변경에 맞춰 갱신됩니다.</p></article>
           <article class="detail"><h3>언어에 맞는 읽기 방향</h3><p>부모 설정, text 내용 또는 현재 locale을 기준으로 LTR과 RTL 방향을 선택합니다. 언어가 바뀌면 text 정렬과 layout 방향이 함께 맞춰집니다.</p></article>
           <article class="detail"><h3>화면별 적용 범위 제어</h3><p>고정 크기가 필요한 View는 system scale 적용에서 제외할 수 있고, 특정 문자열은 자동 번역 대신 앱이 지정한 표현을 유지할 수 있습니다.</p></article>
         </div>
@@ -754,27 +795,28 @@
           <div>
             <div class="eyebrow">08 / Color & Theme</div>
             <h2><a class="heading-link" href="#color-theme">Color & Theme<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">Color & Theme은 색상을 화면마다 직접 지정하지 않고 디자인 의미로 관리하기 위한 기능입니다. Theme이나 제품 색상 정책이 바뀌면 이미 표시 중인 View에도 변경 사항을 적용합니다.</p>
+            <p class="lead">Color를 단순한 RGBA 값이 아닌 디자인 의미를 담은 token으로 표현합니다. 개발자는 디자인 그룹에서 제공하는 token 목록에서 색상을 선택해 사용합니다. Token이 적용된 영역은 system theme 변경에 따라 색상을 자동으로 갱신합니다.</p>
           </div>
           <div class="section-index">08</div>
         </div>
 
         <div class="theme-preview" aria-label="Theme 변경에 따른 화면 색상 변화">
-          <div class="theme-screen">
-            <small>THEME A</small>
-            <div class="theme-swatch"><i></i><i></i></div>
-            <h3 style="margin-top:14px">PRIMARY · SURFACE</h3>
+          <div class="theme-app">
+            <div class="theme-app-head"><strong>Today</strong><span class="theme-mode"><b>Theme A</b><b>Theme B</b></span></div>
+            <div class="theme-task"><i>✓</i><span><strong>Review UI spec</strong><small>Completed</small></span></div>
+            <div class="theme-task pending"><i>✓</i><span><strong>Update prototype</strong><small>In progress</small></span></div>
+            <button class="theme-add" type="button" tabindex="-1" aria-label="Add task">+</button>
           </div>
-          <div class="theme-arrow">→</div>
-          <div class="theme-screen alt">
-            <small>THEME B</small>
-            <div class="theme-swatch"><i></i><i></i></div>
-            <h3 style="margin-top:14px">같은 의미, 다른 색상</h3>
+          <div class="theme-token-list">
+            <div class="theme-token background"><i></i><strong>BACKGROUND</strong></div>
+            <div class="theme-token surface"><i></i><strong>SURFACE</strong></div>
+            <div class="theme-token primary"><i></i><strong>PRIMARY</strong></div>
+            <p>같은 token · Theme A ↔ Theme B</p>
           </div>
         </div>
 
         <div class="detail-grid" style="margin-top:18px">
-          <article class="detail"><h3>RGBA와 semantic token</h3><p>고정 RGBA와 <code>PRIMARY</code>, <code>SURFACE</code>, <code>BACKGROUND</code> 같은 token을 지원합니다. <code>ScaleAlpha</code>와 <code>WithAlpha</code>도 제공합니다.</p></article>
+          <article class="detail"><h3>Semantic token</h3><p>Token은 <code>PRIMARY</code>, <code>SURFACE</code>, <code>BACKGROUND</code> 등 적용 대상과 특징을 나타내는 이름을 사용합니다. 앱 개발자가 쉽게 색상을 선택해 사용할 수 있게 하는 목적입니다.</p></article>
           <article class="detail"><h3>제품과 앱별 Theme 확장</h3><p>제품은 자체 Theme과 component style을 제공할 수 있고, 앱은 필요한 color token만 바꿀 수 있습니다. 공통 화면 구조를 유지한 채 브랜드와 제품군별 표현을 구분합니다.</p></article>
         </div>
         <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Color-%26-Theme">Color &amp; Theme wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/types/ui-color.h">UiColor</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/configuration/ui-color-manager.h">UiColorManager</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/configuration/ui-theme-manager.h">UiThemeManager</a></div>
