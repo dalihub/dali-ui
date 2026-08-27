@@ -110,6 +110,7 @@
     }
     .cover-grid { display: grid; grid-template-columns: 1.08fr .92fr; gap: 48px; align-items: end; }
     .cover-lead { max-width: 690px; color: #46575f; font-size: 19px; line-height: 1.72; }
+    .cover-footnote { margin: 8px 0 0; color: #738188; font-size: 11px; }
     .manifesto { position: relative; min-height: 405px; padding: 38px; overflow: hidden; border-radius: var(--radius); color: #fff; background: var(--navy); box-shadow: var(--shadow); }
     .manifesto::after { position: absolute; right: -78px; bottom: -94px; width: 260px; height: 260px; border: 48px solid rgba(189,233,217,.10); border-radius: 50%; content: ""; }
     .manifesto small { display: block; margin-bottom: 54px; color: var(--mint); font-weight: 800; letter-spacing: .1em; }
@@ -139,7 +140,7 @@
     .flow-arrow { display: grid; color: var(--coral); place-items: center; font-weight: 900; }
     .dark .flow-node { border-color: var(--line); background: #f6f8f5; }
     .dark .flow-node span { color: var(--muted); }
-    .dark .flow-node.flow-input { border-color: rgba(230,170,61,.48); background: #fff8e9; }
+    .dark .flow-node.flow-input { border-color: #d9dfdc; background: #f3f5f4; }
     .dark .flow-node.flow-output { border-color: rgba(0,109,104,.28); background: #edf7f3; }
     .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
     .detail { padding: 24px 25px; border-top: 3px solid var(--mint); border-radius: 0 0 16px 16px; background: #fff; box-shadow: 0 10px 34px rgba(20,47,58,.06); }
@@ -202,9 +203,9 @@
     .layout-type:nth-child(3) .layout-icon { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
     .layout-type:nth-child(4) .layout-icon { position: relative; display: block; }
     .layout-type:nth-child(4) .layout-icon i { position: absolute; }
-    .layout-type:nth-child(4) .layout-icon i:nth-child(1) { top: 9px; left: 10px; width: 32px; height: 18px; }
-    .layout-type:nth-child(4) .layout-icon i:nth-child(2) { top: 18px; right: 9px; width: 48px; height: 25px; opacity: .58; }
-    .layout-type:nth-child(4) .layout-icon i:nth-child(3) { bottom: 7px; left: 39%; width: 24px; height: 16px; opacity: .88; }
+    .layout-type:nth-child(4) .layout-icon i:nth-child(1) { top: 19px; left: 14px; width: 52px; height: 26px; }
+    .layout-type:nth-child(4) .layout-icon i:nth-child(2) { top: 6px; left: 50px; width: 72px; height: 31px; }
+    .layout-type:nth-child(4) .layout-icon i:nth-child(3) { right: 14px; bottom: 6px; width: 48px; height: 24px; }
     .layout-type p { margin: 0; color: var(--muted); font-size: 12px; }
     .nav-visual { display: grid; grid-template-columns: 1fr 130px 1fr; gap: 25px; align-items: center; }
     .phone { padding: 14px; border: 8px solid #29444e; border-radius: 27px; background: #edf4f0; box-shadow: var(--shadow); }
@@ -215,37 +216,44 @@
     .nav-actions b { display: block; margin: 12px 0; font-size: 25px; }
     .chart-stage { display: grid; padding: 28px; border-radius: 22px; color: #fff; background: var(--navy); grid-template-columns: 1.35fr .65fr; gap: 25px; }
     .chart-stage svg { width: 100%; height: auto; overflow: visible; }
+    .chart-data-track { animation: chart-sliding-window 15s linear infinite; }
+    @keyframes chart-sliding-window { from { transform: translateX(0); } to { transform: translateX(570px); } }
     .chart-list { display: grid; align-content: center; gap: 10px; }
     .chart-list span { padding: 10px 13px; border-radius: 10px; color: #d7e6e6; background: rgba(255,255,255,.07); font-size: 12px; }
-    .theme-preview { display: grid; grid-template-columns: 1.25fr .75fr; gap: 18px; align-items: stretch; }
-    .theme-app { position: relative; min-height: 270px; padding: 23px; overflow: hidden; border-radius: 22px; background: #edf4f0; box-shadow: var(--shadow); animation: theme-background 6.4s ease-in-out infinite; }
-    .theme-app-head { display: flex; margin-bottom: 18px; align-items: center; justify-content: space-between; }
-    .theme-app-head > strong { color: var(--ink); font-size: 22px; animation: theme-foreground 6.4s ease-in-out infinite; }
-    .theme-mode { position: relative; width: 66px; height: 22px; }
-    .theme-mode b { position: absolute; inset: 0; color: var(--teal); font-size: 10px; letter-spacing: .07em; text-align: right; text-transform: uppercase; animation: theme-mode-a 6.4s ease-in-out infinite; }
-    .theme-mode b:last-child { color: #f8c6bb; opacity: 0; animation-name: theme-mode-b; }
-    .theme-task { display: flex; margin-top: 10px; padding: 13px 14px; border: 1px solid rgba(20,47,58,.06); border-radius: 12px; background: #fff; align-items: center; gap: 12px; animation: theme-surface 6.4s ease-in-out infinite; }
-    .theme-task > i { display: grid; width: 25px; height: 25px; flex: 0 0 auto; border: 2px solid #006d68; border-radius: 7px; color: #fff; background: #006d68; place-items: center; font-size: 12px; font-style: normal; animation: theme-primary 6.4s ease-in-out infinite; }
+    .theme-preview { display: grid; grid-template-columns: 1.3fr .7fr; gap: 18px; align-items: stretch; }
+    .theme-app { position: relative; min-height: 270px; padding: 23px; overflow: hidden; border-radius: 22px; background: #edf4f0; box-shadow: var(--shadow); animation: theme-background 5.2s step-end infinite; }
+    .theme-app-head { display: flex; margin-bottom: 18px; align-items: center; }
+    .theme-app-head > strong { color: var(--ink); font-size: 22px; animation: theme-foreground 5.2s step-end infinite; }
+    .theme-task { display: flex; margin-top: 10px; padding: 13px 14px; border: 1px solid rgba(20,47,58,.06); border-radius: 12px; background: #fff; align-items: center; gap: 12px; animation: theme-surface 5.2s step-end infinite; }
+    .theme-task > i { display: grid; width: 25px; height: 25px; flex: 0 0 auto; border: 2px solid #006d68; border-radius: 7px; color: #fff; background: #006d68; place-items: center; font-size: 12px; font-style: normal; animation: theme-primary 5.2s step-end infinite; }
     .theme-task.pending > i { color: transparent; background: transparent; animation-name: theme-primary-outline; }
     .theme-task span { min-width: 0; }
-    .theme-task strong { display: block; color: var(--ink); font-size: 13px; animation: theme-foreground 6.4s ease-in-out infinite; }
-    .theme-task small { display: block; color: var(--muted); font-size: 9px; animation: theme-muted 6.4s ease-in-out infinite; }
-    .theme-add { position: absolute; right: 23px; bottom: 20px; width: 38px; height: 38px; border: 0; border-radius: 12px; color: #fff; background: #006d68; font-size: 22px; line-height: 1; animation: theme-primary 6.4s ease-in-out infinite; }
-    .theme-token-list { display: grid; padding: 20px; border: 1px solid var(--line); border-radius: 20px; background: #fff; align-content: center; gap: 10px; }
-    .theme-token { display: grid; padding: 10px 12px; border-radius: 10px; background: var(--paper); grid-template-columns: 18px 1fr; align-items: center; gap: 9px; }
-    .theme-token i { width: 18px; height: 18px; border-radius: 5px; background: #edf4f0; animation: theme-background 6.4s ease-in-out infinite; }
-    .theme-token.surface i { background: #fff; box-shadow: inset 0 0 0 1px var(--line); animation: theme-surface 6.4s ease-in-out infinite; }
-    .theme-token.primary i { background: #006d68; animation: theme-primary 6.4s ease-in-out infinite; }
-    .theme-token strong { color: var(--teal-deep); font-size: 10px; letter-spacing: .06em; }
-    .theme-token-list p { margin: 4px 0 0; color: var(--muted); font-size: 10px; text-align: center; }
-    @keyframes theme-background { 0%, 34%, 100% { background-color: #edf4f0; } 50%, 84% { background-color: #142f3a; } }
-    @keyframes theme-surface { 0%, 34%, 100% { border-color: rgba(20,47,58,.06); background-color: #fff; } 50%, 84% { border-color: rgba(255,255,255,.08); background-color: #294752; } }
-    @keyframes theme-primary { 0%, 34%, 100% { border-color: #006d68; background-color: #006d68; } 50%, 84% { border-color: #ed745b; background-color: #ed745b; } }
-    @keyframes theme-primary-outline { 0%, 34%, 100% { border-color: #006d68; background-color: transparent; } 50%, 84% { border-color: #ed745b; background-color: transparent; } }
-    @keyframes theme-foreground { 0%, 34%, 100% { color: #17242b; } 50%, 84% { color: #fff; } }
-    @keyframes theme-muted { 0%, 34%, 100% { color: #64737a; } 50%, 84% { color: #b9c9cb; } }
-    @keyframes theme-mode-a { 0%, 34%, 100% { opacity: 1; } 50%, 84% { opacity: 0; } }
-    @keyframes theme-mode-b { 0%, 34%, 100% { opacity: 0; } 50%, 84% { opacity: 1; } }
+    .theme-task strong { display: block; color: var(--ink); font-size: 13px; animation: theme-foreground 5.2s step-end infinite; }
+    .theme-task small { display: block; color: var(--muted); font-size: 9px; animation: theme-muted 5.2s step-end infinite; }
+    .theme-add { position: absolute; right: 23px; bottom: 20px; width: 38px; height: 38px; border: 0; border-radius: 12px; color: #fff; background: #006d68; font-size: 22px; line-height: 1; animation: theme-primary 5.2s step-end infinite; }
+    .theme-control { display: grid; padding: 18px; border: 1px solid #cbd5d1; border-radius: 14px; background: #f2f4f3; align-content: center; gap: 14px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.7); }
+    .theme-control-label { color: #73817e; font-size: 9px; font-weight: 800; letter-spacing: .14em; text-align: center; }
+    .theme-selector { display: grid; padding: 4px; border: 1px solid #d7ddda; border-radius: 10px; background: #fff; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .theme-selector b { padding: 10px 4px; border-radius: 7px; color: #fff; background: #006d68; font-size: 10px; letter-spacing: .01em; text-align: center; animation: theme-selector-light 5.2s step-end infinite; }
+    .theme-selector b:last-child { color: #74817e; background: transparent; animation-name: theme-selector-dark; }
+    .theme-divider { display: grid; color: #84908d; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+    .theme-divider::before, .theme-divider::after { height: 1px; background: #d7ddda; content: ""; }
+    .theme-divider span { font-size: 9px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+    .theme-token-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+    .theme-token { display: grid; min-width: 0; padding: 9px 3px; border: 1px solid #dce2df; border-radius: 8px; background: #fff; justify-items: center; gap: 7px; }
+    .theme-token i { width: 26px; height: 26px; border-radius: 6px; background: #edf4f0; animation: theme-background 5.2s step-end infinite; }
+    .theme-token.surface i { background: #fff; box-shadow: inset 0 0 0 1px var(--line); animation: theme-surface 5.2s step-end infinite; }
+    .theme-token.primary i { background: #006d68; animation: theme-primary 5.2s step-end infinite; }
+    .theme-token strong { overflow: hidden; max-width: 100%; color: #52625f; font-size: 7px; letter-spacing: .04em; text-overflow: ellipsis; }
+    .theme-token.background i { box-shadow: inset 0 0 0 1px rgba(20,47,58,.24); }
+    @keyframes theme-background { 0%, 49.999%, 100% { background-color: #edf4f0; } 50%, 99.999% { background-color: #142f3a; } }
+    @keyframes theme-surface { 0%, 49.999%, 100% { border-color: rgba(20,47,58,.06); background-color: #fff; } 50%, 99.999% { border-color: rgba(255,255,255,.08); background-color: #294752; } }
+    @keyframes theme-primary { 0%, 49.999%, 100% { border-color: #006d68; background-color: #006d68; } 50%, 99.999% { border-color: #ed745b; background-color: #ed745b; } }
+    @keyframes theme-primary-outline { 0%, 49.999%, 100% { border-color: #006d68; background-color: transparent; } 50%, 99.999% { border-color: #ed745b; background-color: transparent; } }
+    @keyframes theme-foreground { 0%, 49.999%, 100% { color: #17242b; } 50%, 99.999% { color: #fff; } }
+    @keyframes theme-muted { 0%, 49.999%, 100% { color: #64737a; } 50%, 99.999% { color: #b9c9cb; } }
+    @keyframes theme-selector-light { 0%, 49.999%, 100% { color: #fff; background-color: #006d68; } 50%, 99.999% { color: #74817e; background-color: transparent; } }
+    @keyframes theme-selector-dark { 0%, 49.999%, 100% { color: #74817e; background-color: transparent; } 50%, 99.999% { color: #fff; background-color: #142f3a; } }
     .adaptive-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     .adaptive-case { padding: 24px; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: 0 12px 34px rgba(20,47,58,.06); }
     .adaptive-case h3 { color: var(--teal); }
@@ -317,7 +325,7 @@
     .scroll-content i:nth-child(2) { animation: scroller-focus-leave 5.6s linear infinite; }
     .scroll-content i:nth-child(4) { animation: scroller-focus-enter 5.6s linear infinite; }
     .scrollbar { position: absolute; z-index: 2; top: 38px; right: 8px; width: 5px; height: 105px; border-radius: 999px; background: var(--teal); animation: scroller-thumb 5.6s cubic-bezier(.55,.06,.28,1) infinite; }
-    .peek { position: absolute; z-index: 3; right: 20px; bottom: 13px; padding: 3px 7px; border-radius: 5px; color: var(--coral); background: rgba(232,245,239,.9); font-size: 11px; font-weight: 850; animation: scroller-cue 5.6s linear infinite; }
+    .peek { position: absolute; z-index: 3; right: 20px; bottom: 13px; padding: 3px 7px; border: 1px solid rgba(20,47,58,.14); border-radius: 5px; color: var(--coral); background: rgba(255,255,255,.96); box-shadow: 0 3px 8px rgba(20,47,58,.18); font-size: 11px; font-weight: 850; animation: scroller-cue 5.6s linear infinite; }
     @keyframes scroller-content {
       0%, 34% { transform: translateY(0); opacity: 1; }
       54%, 84% { transform: translateY(-126px); opacity: 1; }
@@ -413,6 +421,7 @@
       .section-index { font-size: 68px; }
       .cover-grid { gap: 24px; }
       .cover-lead { margin-bottom: 0; font-size: 14px; line-height: 1.55; }
+      .cover-footnote { margin-top: 5px; font-size: 8px; }
       .manifesto { min-height: 250px; padding: 25px; }
       .manifesto small { margin-bottom: 26px; }
       .manifesto blockquote { margin-bottom: 16px; font-size: 20px; }
@@ -452,6 +461,9 @@
       .page-card { height: 130px; }
       .chart-stage { padding: 18px; }
       .chart-stage svg { max-height: 190px; }
+      .chart-data-track { animation: none; transform: translateX(0); }
+      .chart-data-viewport { clip-path: none; }
+      .chart-data-copy { display: none; }
       .chart-list span { padding: 6px 9px; font-size: 9px; }
       .token { min-height: 90px; padding: 13px; }
       .token strong { margin-bottom: 11px; }
@@ -467,12 +479,12 @@
       .gradient-example { padding: 4px 6px; }
       .gradient-example strong { font-size: 16px; }
       .gradient-example.overlay strong { background-position: 50% 0, 0 0; animation: none; }
-      .theme-app, .theme-app-head > strong, .theme-mode b, .theme-task, .theme-task > i, .theme-task strong, .theme-task small, .theme-add, .theme-token i { animation: none; }
+      .theme-app, .theme-app-head > strong, .theme-selector b, .theme-task, .theme-task > i, .theme-task strong, .theme-task small, .theme-add, .theme-token i { animation: none; }
       .theme-app { min-height: 215px; padding: 18px; background: #142f3a; }
       .theme-app-head { margin-bottom: 12px; }
       .theme-app-head > strong, .theme-task strong { color: #fff; }
-      .theme-mode b:first-child { opacity: 0; }
-      .theme-mode b:last-child { color: #f8c6bb; opacity: 1; }
+      .theme-selector b:first-child { color: #74817e; background: transparent; }
+      .theme-selector b:last-child { color: #fff; background: #142f3a; }
       .theme-task { margin-top: 7px; padding: 10px 11px; border-color: rgba(255,255,255,.08); background: #294752; }
       .theme-task > i, .theme-add { border-color: #ed745b; background: #ed745b; }
       .theme-task.pending > i { border-color: #ed745b; background: transparent; }
@@ -526,7 +538,7 @@
         <a href="#dali-ui">개요</a>
         <a href="#unit">Unit</a>
         <a href="#view">View</a>
-        <a href="#enhanced-text">Text</a>
+        <a href="#advanced-text">Text</a>
         <a href="#navigator">Navigator</a>
         <a href="#enhanced-focus-system">Focus</a>
         <button class="print-button" type="button" onclick="window.print()">PDF / 인쇄</button>
@@ -543,7 +555,8 @@
           <div>
             <h1><a class="heading-link" href="#dali-ui">DALi UI<span class="heading-anchor" aria-hidden="true">#</span></a></h1>
             <p class="cover-lead">DALi 기반 애플리케이션을 위한 Native UI Framework</p>
-            <p class="cover-lead" style="margin-top:26px">DALi UI는 애플리케이션이 Native 환경에서 화면을 구성하고 운영하는 데 필요한 공통 UI 기능을 제공합니다. View와 Layout을 기반으로 상태와 이벤트, 화면 이동, Theme, Text, Scroll과 Focus까지 하나의 Framework 범위로 구성했습니다.</p>
+            <p class="cover-lead" style="margin-top:26px">DALi UI는 애플리케이션이 Native 환경에서 화면을 구성하고 운영하는 데 필요한 공통 UI 기능을 제공합니다. NUI<sup>*</sup>의 backend 역할을 해 온 DALi Toolkit과 비교해, 기능 범위를 넓히되 메모리 사용은 줄이는 것을 목표로 합니다. Layout을 고도화하고 Unit system, semantic color token, interaction events, Navigator 및 Chart 등을 신규 도입했으며, AI 서비스의 스트리밍 패턴을 비롯한 최신 UX를 구현할 수 있도록 Text 기능을 강화했습니다.</p>
+            <p class="cover-footnote">* NUI: Tizen C# UI Framework</p>
             <div class="cover-capabilities" aria-label="DALi UI 주요 기능">
               <span>View & Layout</span><span>View State & Interaction</span><span>Navigator</span><span>Color & Theme</span><span>Adaptive & Rich Text</span><span>Scroller</span><span>Focus</span>
             </div>
@@ -552,7 +565,6 @@
             <small>REPORT SCOPE</small>
             <h3 style="font-size:28px">앱 개발을 단순하게 만드는 폭넓은 UI 기능</h3>
             <p>Native 앱이 제품 화면을 구성하려면 풍부한 UI 기능이 필요합니다. DALi UI는 화면마다 공통 기능을 다시 구현해야 하는 부담을 줄이고, 애플리케이션이 DALi 위에서 제품 수준의 UI를 구성할 수 있게 합니다.</p>
-            <p style="margin-top:20px">애플리케이션에서는 NUI 기반 구성과 비교해 메모리 사용량과 런칭 성능이 개선되었습니다. 개선 폭은 앱 구성과 측정 조건에 따라 달라질 수 있습니다.</p>
           </aside>
         </div>
 
@@ -572,7 +584,7 @@
           <div>
             <div class="eyebrow">02 / Unit</div>
             <h2><a class="heading-link" href="#unit">Unit<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">Unit은 해상도와 pixel density가 다른 디바이스에서도 UI가 의도한 크기로 표시되도록 합니다. 숫자 리터럴에 붙여 직관적으로 단위를 지정할 수 있도록 UDL을 적용했으며, 세 단위는 표현식이 평가되는 즉시 pixel로 변환됩니다. 제품별 scaling factor도 같은 단위 정책에서 처리합니다.</p>
+            <p class="lead">Unit은 해상도 및 디바이스의 pixel density 그리고 제품별 scaling factor 에 따라 하나의 표현이 서로 다른 크기로 표시되도록 하는 장치입니다. 숫자 리터럴에 붙여 직관적으로 단위를 지정할 수 있도록 UDL을 적용했으며, 모든 unit 은 표현식이 평가되는 즉시 pixel로 변환됩니다. 제품별 scaling factor도 같은 단위 정책에서 처리합니다.</p>
           </div>
           <div class="section-index">02</div>
         </div>
@@ -682,18 +694,18 @@
         </div>
         <div class="detail-grid" style="margin-top:18px">
           <article class="detail"><h3>공통 크기 정책</h3><p><code>WRAP_CONTENT</code>, <code>MATCH_PARENT</code>, margin과 padding Insets를 모든 LayoutManager에서 같은 방식으로 사용합니다.</p></article>
-          <article class="detail"><h3>Custom layout과 transition</h3><p>기본 layout으로 표현하기 어려운 배치 규칙을 확장할 수 있습니다. 화면 재배치에는 transition을 적용해 크기와 위치 변화를 자연스럽게 보여줍니다.</p></article>
+          <article class="detail"><h3>Custom layout과 transition</h3><p>기본 layout으로 표현하기 어려운 배치 규칙을 확장할 수 있습니다. Layout 구성 변경시 transition 효과를 적용할 수 있는 옵션을 제공하여 크기와 위치 변화를 자연스럽게 보여줍니다.</p></article>
         </div>
         <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-(kr)">Layout wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/layouts/layout-manager.h">LayoutManager</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/layouts/flex-layout-manager.h">Flex</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/layouts/grid-layout-manager.h">Grid</a></div>
       </div>
     </section>
 
-    <section class="feature dark" id="enhanced-text">
+    <section class="feature dark" id="advanced-text">
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">06 / Enhanced Text</div>
-            <h2><a class="heading-link" href="#enhanced-text">Enhanced Text<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <div class="eyebrow">06 / Advanced Text</div>
+            <h2><a class="heading-link" href="#advanced-text">Advanced Text<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Text를 사용한 다양한 UX 요구사항에 대응합니다. 단순한 문자열 표시를 넘어 shimmering과 같은 고급 시각 효과를 제공하고, AI 서비스의 streaming response와 같은 최신 UX에 활용할 수 있는 progressive reveal을 지원합니다.</p>
           </div>
           <div class="section-index">06</div>
@@ -802,21 +814,27 @@
 
         <div class="theme-preview" aria-label="Theme 변경에 따른 화면 색상 변화">
           <div class="theme-app">
-            <div class="theme-app-head"><strong>Today</strong><span class="theme-mode"><b>Theme A</b><b>Theme B</b></span></div>
+            <div class="theme-app-head"><strong>Today</strong></div>
             <div class="theme-task"><i>✓</i><span><strong>Review UI spec</strong><small>Completed</small></span></div>
             <div class="theme-task pending"><i>✓</i><span><strong>Update prototype</strong><small>In progress</small></span></div>
             <button class="theme-add" type="button" tabindex="-1" aria-label="Add task">+</button>
           </div>
-          <div class="theme-token-list">
-            <div class="theme-token background"><i></i><strong>BACKGROUND</strong></div>
-            <div class="theme-token surface"><i></i><strong>SURFACE</strong></div>
-            <div class="theme-token primary"><i></i><strong>PRIMARY</strong></div>
-            <p>같은 token · Theme A ↔ Theme B</p>
-          </div>
+          <aside class="theme-control" aria-label="Theme control과 semantic color token">
+            <div class="theme-control-label">THEME CONTROL</div>
+            <div class="theme-selector" aria-label="현재 theme">
+              <b>Light Theme</b><b>Dark Theme</b>
+            </div>
+            <div class="theme-divider"><span>Tokens</span></div>
+            <div class="theme-token-row">
+              <div class="theme-token background"><i></i><strong>BACKGROUND</strong></div>
+              <div class="theme-token surface"><i></i><strong>SURFACE</strong></div>
+              <div class="theme-token primary"><i></i><strong>PRIMARY</strong></div>
+            </div>
+          </aside>
         </div>
 
         <div class="detail-grid" style="margin-top:18px">
-          <article class="detail"><h3>Semantic token</h3><p>Token은 <code>PRIMARY</code>, <code>SURFACE</code>, <code>BACKGROUND</code> 등 적용 대상과 특징을 나타내는 이름을 사용합니다. 앱 개발자가 쉽게 색상을 선택해 사용할 수 있게 하는 목적입니다.</p></article>
+          <article class="detail"><h3>Semantic token</h3><p>Token은 <code>PRIMARY</code>, <code>SURFACE</code>, <code>BACKGROUND</code> 등 적용 대상의 특징을 나타내는 이름을 사용합니다. 앱 개발자가 쉽게 색상을 선택해 사용할 수 있게 하는 목적입니다.</p></article>
           <article class="detail"><h3>제품과 앱별 Theme 확장</h3><p>제품은 자체 Theme과 component style을 제공할 수 있고, 앱은 필요한 color token만 바꿀 수 있습니다. 공통 화면 구조를 유지한 채 브랜드와 제품군별 표현을 구분합니다.</p></article>
         </div>
         <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Color-%26-Theme">Color &amp; Theme wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/types/ui-color.h">UiColor</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/configuration/ui-color-manager.h">UiColorManager</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/configuration/ui-theme-manager.h">UiThemeManager</a></div>
@@ -829,7 +847,7 @@
           <div>
             <div class="eyebrow">09 / Navigator</div>
             <h2><a class="heading-link" href="#navigator">Navigator<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">Navigator는 화면을 page와 modal이라는 공식 단위로 관리해 UIFW가 현재 화면의 경계와 앱의 이동 의도를 알 수 있게 합니다. 화면 전환에 맞춰 back, lifecycle과 transition뿐 아니라 focus의 진입과 복원, accessibility 노출 범위와 background 화면의 입력 상태를 함께 조정합니다.</p>
+            <p class="lead">Navigator는 화면을 page와 modal이라는 공식 단위로 관리해 UI framework가 현재 화면의 경계와 앱의 이동 의도를 알 수 있게 합니다. Back key 동작을 구현하는 뒤로가기 기능 및  화면 전환 시 transition 효과를 제공하며,  focus의 진입과 복원, accessibility 노출 범위와 background 화면의 입력 상태를 함께 조정합니다.</p>
           </div>
           <div class="section-index">09</div>
         </div>
@@ -853,63 +871,15 @@
       </div>
     </section>
 
-    <section class="feature dark" id="enhanced-focus-system">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow">10 / Enhanced Focus System</div>
-            <h2><a class="heading-link" href="#enhanced-focus-system">Enhanced Focus System<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">리모컨이나 키보드로 조작하는 화면에서는 focus가 단순히 가까운 View가 아니라 UI 구조와 사용 흐름에 맞는 대상으로 이동해야 합니다. DALi UI는 Android 계열 UIFW에서 익숙한 자식 우선 focus 요청, 방향별 이웃, 영역 단위 탐색과 공간 기반 후보 검색을 View tree에 맞게 제공합니다.</p>
-          </div>
-          <div class="section-index">10</div>
-        </div>
-
-        <div class="focus-feature-grid">
-          <article class="focus-feature"><em>01 · Entry</em><strong>복합 View의 첫 focus</strong><p>Container에 focus를 요청하면 내부에서 가장 적절한 child를 선택합니다. 화면 진입 시 앱이 내부 구조를 직접 탐색할 필요가 없습니다.</p></article>
-          <article class="focus-feature"><em>02 · Direction</em><strong>명시적 이웃 + 공간 탐색</strong><p>제품이 지정한 방향별 이웃을 우선 사용하고, 별도 지정이 없으면 위치와 거리를 기준으로 자연스러운 다음 대상을 찾습니다.</p></article>
-          <article class="focus-feature"><em>03 · Local rule</em><strong>영역별 이동 규칙</strong><p>List, menu, carousel처럼 고유한 이동 방식이 필요한 영역은 자체 규칙을 가질 수 있고, 앱은 첫 focus와 공통 예외 규칙을 정할 수 있습니다.</p></article>
-          <article class="focus-feature"><em>04 · Boundary</em><strong>Focus group과 탐색 제외</strong><p>Modal이나 panel 안에 이동을 머물게 하고, 장식용 subtree처럼 focus 대상이 없는 영역은 검색에서 제외할 수 있습니다.</p></article>
-          <article class="focus-feature"><em>05 · Indication</em><strong>Focus와 표시의 분리</strong><p>논리적 focus는 유지하면서 indicator만 숨길 수 있습니다. Touch, pointer, remote가 전환되어도 입력 대상과 시각 표현을 따로 제어합니다.</p></article>
-          <article class="focus-feature"><em>06 · Continuity</em><strong>Scroll과 Window 연속성</strong><p>Focus된 항목이 viewport에 보이도록 scroll하고, 여러 Window와 입력 장치가 있는 환경에서도 이동이 시작된 화면의 맥락을 유지합니다.</p></article>
-        </div>
-        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-%26-Key-(kr)">Focus &amp; Key wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/focus-manager/focus-manager.h">Focus API</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/views/view.h">View focus API</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/views/scroll/scroll-view.h">Focus-aware scroll</a></div>
-      </div>
-    </section>
-
-    <section class="feature section-rule" id="configuration">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow">11 / Configuration</div>
-            <h2><a class="heading-link" href="#configuration">Configuration<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">Configuration은 UX와 디바이스에 따라 달라지는 공통 정책을 한곳에서 설정하기 위한 기능입니다. 앱과 화면마다 같은 설정을 반복하거나 제품별 분기 코드를 두지 않도록 합니다.</p>
-          </div>
-          <div class="section-index">11</div>
-        </div>
-
-        <div class="config-matrix">
-          <div class="config-cell"><strong>Scale & Density</strong><span>scaling factor, DPI, baseline DPI</span></div>
-          <div class="config-cell"><strong>Input & Gesture</strong><span>key click policy, tap과 long press thresholds</span></div>
-          <div class="config-cell"><strong>Focus</strong><span>indicator와 입력 장치별 정책</span></div>
-          <div class="config-cell"><strong>Text defaults</strong><span>default font size와 color</span></div>
-          <div class="config-cell"><strong>Assets</strong><span>broken image URL과 공통 리소스</span></div>
-          <div class="config-cell"><strong>Theme</strong><span>theme loader와 typed style sheet</span></div>
-          <div class="config-cell"><strong>Execution key</strong><span>제품별 key 판별 predicate</span></div>
-          <div class="config-cell"><strong>Platform service</strong><span>Web engine 등 구현 선택</span></div>
-        </div>
-        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration-(kr)">Configuration wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/configuration/ui-config.h">Foundation UiConfig</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-components/public-api/components-ui-config.h">Components UiConfig</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/styles/ui-style-sheet.h">UiStyleSheet</a></div>
-      </div>
-    </section>
-
     <section class="feature" id="scroller">
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">12 / Scroller</div>
+            <div class="eyebrow">10 / Scroller</div>
             <h2><a class="heading-link" href="#scroller">Scroller<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Scroller는 touch, key와 focus 이동에서 content가 예측 가능한 위치에 표시되도록 관리합니다. 리모컨이나 키보드로 탐색할 때 focus 대상이 viewport 밖에 남지 않도록 scroll과 focus를 함께 처리합니다.</p>
           </div>
-          <div class="section-index">12</div>
+          <div class="section-index">10</div>
         </div>
 
         <div class="detail-grid">
@@ -931,21 +901,35 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="eyebrow">13 / Chart</div>
+            <div class="eyebrow">11 / Chart</div>
             <h2><a class="heading-link" href="#chart">Chart<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
             <p class="lead">Chart는 앱이 차트의 rendering, data model과 interaction을 각각 구현하지 않고도 데이터를 시각화할 수 있도록 제공합니다. 정적 데이터와 실시간 데이터 모두 같은 컴포넌트에서 처리합니다.</p>
           </div>
-          <div class="section-index">13</div>
+          <div class="section-index">11</div>
         </div>
 
         <div class="chart-stage">
           <svg viewBox="0 0 620 290" role="img" aria-label="ChartView line and bar illustration">
-            <defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bde9d9" stop-opacity=".45"/><stop offset="1" stop-color="#bde9d9" stop-opacity="0"/></linearGradient></defs>
+            <defs>
+              <clipPath id="chart-window"><rect x="45" y="30" width="545" height="220" rx="4"/></clipPath>
+            </defs>
             <g stroke="#ffffff" stroke-opacity=".10"><path d="M45 30V250H590"/><path d="M45 80H590M45 135H590M45 190H590"/></g>
-            <g fill="#ed745b" opacity=".82"><rect x="85" y="165" width="32" height="85" rx="5"/><rect x="180" y="115" width="32" height="135" rx="5"/><rect x="275" y="146" width="32" height="104" rx="5"/><rect x="370" y="72" width="32" height="178" rx="5"/><rect x="465" y="103" width="32" height="147" rx="5"/></g>
-            <path d="M70 190L165 142L260 160L355 88L450 116L545 54V250H70Z" fill="url(#area)"/>
-            <path d="M70 190L165 142L260 160L355 88L450 116L545 54" fill="none" stroke="#bde9d9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-            <g fill="#bde9d9" stroke="#142f3a" stroke-width="4"><circle cx="70" cy="190" r="7"/><circle cx="165" cy="142" r="7"/><circle cx="260" cy="160" r="7"/><circle cx="355" cy="88" r="7"/><circle cx="450" cy="116" r="7"/><circle cx="545" cy="54" r="7"/></g>
+            <g class="chart-data-viewport" clip-path="url(#chart-window)">
+              <g class="chart-data-track">
+                <g class="chart-data-copy" transform="translate(-570 0)">
+                  <g fill="#ed745b" opacity=".82"><rect x="85" y="165" width="32" height="85" rx="5"/><rect x="180" y="115" width="32" height="135" rx="5"/><rect x="275" y="146" width="32" height="104" rx="5"/><rect x="370" y="72" width="32" height="178" rx="5"/><rect x="465" y="103" width="32" height="147" rx="5"/><rect x="560" y="155" width="32" height="95" rx="5"/></g>
+                  <path d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190V250H70Z" fill="#bde9d9" fill-opacity=".18"/>
+                  <path d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190" fill="none" stroke="#bde9d9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <g fill="#bde9d9" stroke="#142f3a" stroke-width="4"><circle cx="70" cy="190" r="7"/><circle cx="165" cy="142" r="7"/><circle cx="260" cy="160" r="7"/><circle cx="355" cy="88" r="7"/><circle cx="450" cy="116" r="7"/><circle cx="545" cy="54" r="7"/><circle cx="640" cy="190" r="7"/></g>
+                </g>
+                <g>
+                <g fill="#ed745b" opacity=".82"><rect x="85" y="165" width="32" height="85" rx="5"/><rect x="180" y="115" width="32" height="135" rx="5"/><rect x="275" y="146" width="32" height="104" rx="5"/><rect x="370" y="72" width="32" height="178" rx="5"/><rect x="465" y="103" width="32" height="147" rx="5"/><rect x="560" y="155" width="32" height="95" rx="5"/></g>
+                <path d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190V250H70Z" fill="#bde9d9" fill-opacity=".18"/>
+                <path d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190" fill="none" stroke="#bde9d9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                <g fill="#bde9d9" stroke="#142f3a" stroke-width="4"><circle cx="70" cy="190" r="7"/><circle cx="165" cy="142" r="7"/><circle cx="260" cy="160" r="7"/><circle cx="355" cy="88" r="7"/><circle cx="450" cy="116" r="7"/><circle cx="545" cy="54" r="7"/><circle cx="640" cy="190" r="7"/></g>
+                </g>
+              </g>
+            </g>
           </svg>
           <div class="chart-list"><span>Line · Bar · Pie · Area · Scatter · Gauge</span><span>Mixed series와 missing-data gap</span><span>Tooltip과 point selection</span><span>실시간 append와 sliding window</span><span>Zoom · Pan · Animation</span></div>
         </div>
@@ -955,6 +939,54 @@
           <article class="detail"><h3>Chart 구성 요소</h3><p>제목, axis label, legend, tooltip에는 Label을 사용합니다. Animated data transition과 point selection signal도 제공합니다.</p></article>
         </div>
         <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/ChartView-(kr)">ChartView wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-components/public-api/chart/chart-view.h">ChartView</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-components/public-api/chart/chart-view-properties.h">Chart properties</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-components/integration-api/chart/chart-layout-manager.h">Chart layout</a></div>
+      </div>
+    </section>
+
+    <section class="feature dark" id="enhanced-focus-system">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">12 / Enhanced Focus System</div>
+            <h2><a class="heading-link" href="#enhanced-focus-system">Enhanced Focus System<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">리모컨이나 키보드로 조작하는 화면에서는 focus가 단순히 가까운 View가 아니라 UI 구조와 사용 흐름에 맞는 대상으로 이동해야 합니다. DALi UI는 Android 계열 UI framework에서 익숙한 자식 우선 focus 요청, 방향별 이웃, 영역 단위 탐색과 공간 기반 후보 검색을 View tree에 맞게 제공합니다.</p>
+          </div>
+          <div class="section-index">12</div>
+        </div>
+
+        <div class="focus-feature-grid">
+          <article class="focus-feature"><em>01 · Entry</em><strong>복합 View의 첫 focus</strong><p>Container에 focus를 요청하면 내부에서 가장 적절한 child를 선택합니다. 화면 진입 시 앱이 내부 구조를 직접 탐색할 필요가 없습니다.</p></article>
+          <article class="focus-feature"><em>02 · Direction</em><strong>명시적 이웃 + 공간 탐색</strong><p>제품이 지정한 방향별 이웃을 우선 사용하고, 별도 지정이 없으면 위치와 거리를 기준으로 자연스러운 다음 대상을 찾습니다.</p></article>
+          <article class="focus-feature"><em>03 · Local rule</em><strong>영역별 이동 규칙</strong><p>List, menu, carousel처럼 고유한 이동 방식이 필요한 영역은 자체 규칙을 가질 수 있고, 앱은 첫 focus와 공통 예외 규칙을 정할 수 있습니다.</p></article>
+          <article class="focus-feature"><em>04 · Boundary</em><strong>Focus group과 탐색 제외</strong><p>Modal이나 panel 안에 이동을 머물게 하고, 장식용 subtree처럼 focus 대상이 없는 영역은 검색에서 제외할 수 있습니다.</p></article>
+          <article class="focus-feature"><em>05 · Indication</em><strong>Focus와 표시의 분리</strong><p>논리적 focus는 유지하면서 indicator만 숨길 수 있습니다. Touch, pointer, remote가 전환되어도 입력 대상과 시각 표현을 따로 제어합니다.</p></article>
+          <article class="focus-feature"><em>06 · Continuity</em><strong>Scroll과 Window 연속성</strong><p>Focus된 항목이 viewport에 보이도록 scroll하고, 여러 Window와 입력 장치가 있는 환경에서도 이동이 시작된 화면의 맥락을 유지합니다.</p></article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-%26-Key-(kr)">Focus &amp; Key wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/focus-manager/focus-manager.h">Focus API</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/views/view.h">View focus API</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/views/scroll/scroll-view.h">Focus-aware scroll</a></div>
+      </div>
+    </section>
+
+    <section class="feature section-rule" id="configuration">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">13 / Configuration</div>
+            <h2><a class="heading-link" href="#configuration">Configuration<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Configuration은 UX와 디바이스에 따라 달라지는 공통 정책을 한곳에서 설정하기 위한 기능입니다. 앱과 화면마다 같은 설정을 반복하거나 제품별 분기 코드를 두지 않도록 합니다.</p>
+          </div>
+          <div class="section-index">13</div>
+        </div>
+
+        <div class="config-matrix">
+          <div class="config-cell"><strong>Scale & Density</strong><span>scaling factor, DPI, baseline DPI</span></div>
+          <div class="config-cell"><strong>Input & Gesture</strong><span>key click policy, tap과 long press thresholds</span></div>
+          <div class="config-cell"><strong>Focus</strong><span>indicator와 입력 장치별 정책</span></div>
+          <div class="config-cell"><strong>Text defaults</strong><span>default font size와 color</span></div>
+          <div class="config-cell"><strong>Assets</strong><span>broken image URL과 공통 리소스</span></div>
+          <div class="config-cell"><strong>Theme</strong><span>theme loader와 typed style sheet</span></div>
+          <div class="config-cell"><strong>Execution key</strong><span>제품별 key 판별 predicate</span></div>
+          <div class="config-cell"><strong>Platform service</strong><span>Web engine 등 구현 선택</span></div>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration-(kr)">Configuration wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/configuration/ui-config.h">Foundation UiConfig</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-components/public-api/components-ui-config.h">Components UiConfig</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/styles/ui-style-sheet.h">UiStyleSheet</a></div>
       </div>
     </section>
 
