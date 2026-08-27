@@ -159,18 +159,38 @@ int UtcDaliAlertDialogActionButtonsP(void)
   AlertDialog       alertDialog = AlertDialog::New();
   DALI_TEST_CHECK(!alertDialog.GetFooterView());
 
-  int cancelCalls = 0;
-  int okCalls     = 0;
-  alertDialog.SetActionButtons({{"Cancel", [&cancelCalls]() { ++cancelCalls; }},
-                                {"OK", [&okCalls]() { ++okCalls; }}});
+  int        cancelCalls  = 0;
+  int        okCalls      = 0;
+  TextButton cancelButton = alertDialog.AddActionButton("Cancel");
+  TextButton okButton     = alertDialog.AddActionButton("OK");
+  cancelButton.ClickedSignal().Connect(&application, [&cancelCalls](View, InputEvent)
+  { ++cancelCalls; });
+  okButton.ClickedSignal().Connect(&application, [&okCalls](View, InputEvent)
+  { ++okCalls; });
 
   View footer = alertDialog.GetFooterView();
   DALI_TEST_CHECK(footer);
   DALI_TEST_EQUALS(2u, footer.GetChildCount(), TEST_LOCATION); // two buttons
+  DALI_TEST_CHECK(TextButton::DownCast(footer.GetChildAt(0u)) == cancelButton);
+  DALI_TEST_CHECK(TextButton::DownCast(footer.GetChildAt(1u)) == okButton);
+  DALI_TEST_CHECK(cancelButton.GetText() == "Cancel");
+  DALI_TEST_CHECK(okButton.GetText() == "OK");
+
+  cancelButton.ClickedSignal().Emit(cancelButton, InputEvent::Programmatic());
+  okButton.ClickedSignal().Emit(okButton, InputEvent::Programmatic());
+  DALI_TEST_EQUALS(1, cancelCalls, TEST_LOCATION);
+  DALI_TEST_EQUALS(1, okCalls, TEST_LOCATION);
 
   // Clearing removes the footer.
-  alertDialog.SetActionButtons({});
+  alertDialog.ClearActionButtons();
   DALI_TEST_CHECK(!alertDialog.GetFooterView());
+
+  // Adding after a clear recreates the footer and its action row.
+  TextButton retryButton = alertDialog.AddActionButton("Retry");
+  footer                 = alertDialog.GetFooterView();
+  DALI_TEST_CHECK(footer);
+  DALI_TEST_EQUALS(1u, footer.GetChildCount(), TEST_LOCATION);
+  DALI_TEST_CHECK(TextButton::DownCast(footer.GetChildAt(0u)) == retryButton);
   END_TEST;
 }
 

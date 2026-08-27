@@ -25,11 +25,11 @@
 #include <dali/public-api/object/property-notification.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/public-api/views/scroll/edge-effect.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
 {
@@ -50,7 +50,7 @@ using ScrollViewImplPtr = IntrusivePtr<ScrollViewImpl>;
  *
  * @see Dali::UI::ScrollView
  */
-class DALI_UI_API ScrollViewImpl : public LayoutImpl
+class DALI_UI_API ScrollViewImpl : public ViewImpl
 {
 public:
   // Creation & Destruction

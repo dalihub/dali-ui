@@ -72,6 +72,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Project: 'guides/project/index.html'
   - Guides:
       - 'Layout Structure': 'guides/layout-structure.md'
       - 'Layout Transition': 'guides/layout-transition.md'

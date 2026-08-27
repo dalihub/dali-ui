@@ -400,21 +400,19 @@ NPatchVisual::~NPatchVisual()
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
-    if(mReleasePolicy != Ui::Image::ReleasePolicy::NEVER)
+    const bool keepUnusedTexture = mReleasePolicy == Ui::Image::ReleasePolicy::NEVER;
+    if(mId != NPatchData::INVALID_NPATCH_DATA_ID)
     {
-      if(mId != NPatchData::INVALID_NPATCH_DATA_ID)
-      {
-        mLoader.RequestRemove(mId, this);
-        mId = NPatchData::INVALID_NPATCH_DATA_ID;
-      }
-      if(mAuxiliaryTextureId != TextureManager::INVALID_TEXTURE_ID)
-      {
-        TextureManager& textureManager = mFactoryCache.GetTextureManager();
+      mLoader.RequestRemove(mId, this, keepUnusedTexture);
+      mId = NPatchData::INVALID_NPATCH_DATA_ID;
+    }
+    if(mAuxiliaryTextureId != TextureManager::INVALID_TEXTURE_ID)
+    {
+      TextureManager& textureManager = mFactoryCache.GetTextureManager();
 
-        textureManager.RequestRemove(mAuxiliaryTextureId, this);
-        mAuxiliaryTextureId = TextureManager::INVALID_TEXTURE_ID;
-        mAuxiliaryTextureSet.Reset();
-      }
+      textureManager.RequestRemove(mAuxiliaryTextureId, this, keepUnusedTexture);
+      mAuxiliaryTextureId = TextureManager::INVALID_TEXTURE_ID;
+      mAuxiliaryTextureSet.Reset();
     }
   }
 }

@@ -38,6 +38,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-relayouter.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-text-updater.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 
 namespace
@@ -438,6 +439,10 @@ LayoutDirectionMode Controller::GetLayoutDirectionMode() const
 
 void Controller::SetLayoutDirection(Dali::LayoutDirection::Type layoutDirection)
 {
+  if(mImpl->mLayoutDirection != layoutDirection)
+  {
+    mImpl->ClearEndEllipsisResult();
+  }
   mImpl->mLayoutDirection = layoutDirection;
 }
 
@@ -483,6 +488,10 @@ LineWrapMode Controller::GetLineWrapMode() const
 
 void Controller::SetTextElideEnabled(bool enabled)
 {
+  if(mImpl->mModel->mElideEnabled != enabled)
+  {
+    mImpl->ClearEndEllipsisResult();
+  }
   mImpl->mModel->mElideEnabled = enabled;
   mImpl->mModel->mVisualModel->SetTextElideEnabled(enabled);
 }
@@ -1770,7 +1779,14 @@ const FinalElisionResult* Controller::GetFinalElisionResult() const
   {
     return &replacement->finalElision;
   }
-  return nullptr;
+  return mImpl->HasValidReplacementSource() ? nullptr : mImpl->GetEndEllipsisResult();
+}
+
+MarqueeStartAnchor Controller::GetMarqueeStartAnchor() const
+{
+  return mImpl->HasValidReplacementSource()
+           ? MarqueeStartAnchor{}
+           : ResolveMarqueeStartAnchor(mImpl->GetEndEllipsisResult(), mImpl->mModel->mVisualModel.Get());
 }
 
 const ReplacementSourceSnapshot& Controller::GetReplacementSourceSnapshot() const
@@ -1797,8 +1813,11 @@ float Controller::GetScrollAmountByUserInput()
 
 bool Controller::GetTextScrollInfo(float& scrollPosition, float& controlHeight, float& layoutHeight)
 {
-  const Vector2& layout = mImpl->mModel->mVisualModel->GetLayoutSize();
-  bool           isScrolled;
+  const FinalElisionResult* endEllipsis = mImpl->GetEndEllipsisResult();
+  const Vector2&            layout      = endEllipsis && endEllipsis->HasAuthoritativeLayout()
+                                            ? endEllipsis->layoutSize
+                                            : mImpl->mModel->mVisualModel->GetLayoutSize();
+  bool                      isScrolled;
 
   controlHeight  = mImpl->mModel->mVisualModel->mControlSize.height;
   layoutHeight   = layout.height;
@@ -1973,6 +1992,10 @@ Text::EllipsisPosition::Type Controller::GetEllipsisPosition() const
 
 void Controller::SetEllipsisPosition(Text::EllipsisPosition::Type ellipsisPosition)
 {
+  if(mImpl->mModel->mEllipsisPosition != ellipsisPosition)
+  {
+    mImpl->ClearEndEllipsisResult();
+  }
   mImpl->mModel->mEllipsisPosition = ellipsisPosition;
   mImpl->mModel->mVisualModel->SetEllipsisPosition(ellipsisPosition);
 }

@@ -89,8 +89,14 @@ public:
    *
    * @param [in] id cache data id
    * @param [in] textureObserver The NPatchVisual that requested loading.
+   * @param [in] keepUnusedTexture Whether to keep the texture after its reference count becomes zero.
    */
-  void RequestRemove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver);
+  void RequestRemove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver, bool keepUnusedTexture = false);
+
+  /**
+   * @brief Request removal of all unused N-patch textures retained by ReleasePolicy::NEVER.
+   */
+  void RequestClearUnusedTextures();
 
 protected: // Implementation of Processor
   /**
@@ -119,8 +125,9 @@ private:
    *
    * @param [in] id cache data id
    * @param [in] textureObserver The NPatchVisual that requested loading.
+   * @param [in] keepUnusedTexture Whether to keep the texture after its reference count becomes zero.
    */
-  void Remove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver);
+  void Remove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver, bool keepUnusedTexture);
 
 private:
   /**
@@ -131,7 +138,8 @@ private:
   {
     NPatchInfo(NPatchDataPtr data)
     : mData(data),
-      mReferenceCount(1u)
+      mReferenceCount(1u),
+      mKeepUnusedTexture(false)
     {
     }
     ~NPatchInfo()
@@ -139,15 +147,19 @@ private:
     }
     NPatchInfo(NPatchInfo&& info) noexcept // move constructor
     {
-      mData                = std::move(info.mData);
-      mReferenceCount      = info.mReferenceCount;
-      info.mReferenceCount = 0u;
+      mData                   = std::move(info.mData);
+      mReferenceCount         = info.mReferenceCount;
+      mKeepUnusedTexture      = info.mKeepUnusedTexture;
+      info.mReferenceCount    = 0u;
+      info.mKeepUnusedTexture = false;
     }
     NPatchInfo& operator=(NPatchInfo&& info) noexcept // move operator
     {
-      mData                = std::move(info.mData);
-      mReferenceCount      = info.mReferenceCount;
-      info.mReferenceCount = 0u;
+      mData                   = std::move(info.mData);
+      mReferenceCount         = info.mReferenceCount;
+      mKeepUnusedTexture      = info.mKeepUnusedTexture;
+      info.mReferenceCount    = 0u;
+      info.mKeepUnusedTexture = false;
       return *this;
     }
 
@@ -156,7 +168,8 @@ private:
     NPatchInfo& operator=(const NPatchInfo& info) = delete; // Do not use copy assign
 
     NPatchDataPtr mData;
-    int32_t       mReferenceCount; ///< The number of N-patch visuals that use this data.
+    int32_t       mReferenceCount;    ///< The number of N-patch visuals that use this data.
+    bool          mKeepUnusedTexture; ///< True if the unused texture should be kept until explicitly cleared.
   };
 
   /**
@@ -183,13 +196,20 @@ protected:
   NPatchLoader& operator=(const NPatchLoader& rhs);
 
 private:
+  struct RemoveQueueElement
+  {
+    NPatchData::NPatchDataId id;
+    bool                     keepUnusedTexture;
+  };
+
   NPatchData::NPatchDataId mCurrentNPatchDataId;
   std::vector<NPatchInfo>  mCache;
 
-  std::vector<std::pair<NPatchData::NPatchDataId, TextureUploadObserver*>>
+  std::vector<RemoveQueueElement>
     mRemoveQueue; ///< Queue of textures to remove at PostProcess. It will be cleared after PostProcess.
 
-  bool mRemoveProcessorRegistered : 1; ///< Flag if remove processor registered or not.
+  bool mRemoveProcessorRegistered : 1;    ///< Flag if remove processor registered or not.
+  bool mClearUnusedTexturesRequested : 1; ///< Flag if unused retained textures should be cleared at PostProcess.
 };
 
 } // namespace Internal

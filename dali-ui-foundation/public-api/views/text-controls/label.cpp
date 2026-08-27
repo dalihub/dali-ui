@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 
 namespace Dali
@@ -101,9 +102,14 @@ Label Label::DownCast(BaseHandle handle)
   return Ui::View::DownCast<Label, Integration::LabelImpl>(handle);
 }
 
+Vector3 Label::GetNaturalSize() const
+{
+  return DevelActor::GetNaturalSize(*this);
+}
+
 float Label::GetHeightForWidth(float width)
 {
-  return GetImpl(*this).GetHeightForWidth(width);
+  return DevelActor::GetHeightForWidth(*this, width);
 }
 
 Label::Label(Integration::LabelImpl& implementation)

@@ -334,7 +334,7 @@ void RenderEffectImpl::UpdateTargetSize()
     size = ownerView.GetProperty<Vector2>(Actor::Property::SIZE);
     if(size == Vector2::ZERO)
     {
-      size = ownerView.GetNaturalSize();
+      size = DevelActor::GetNaturalSize(ownerView);
     }
 
     if(size.x < 0.0f || size.y < 0.0f)

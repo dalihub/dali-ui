@@ -17,12 +17,14 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
+#include <dali-ui-foundation/public-api/views/recycler/item-decoration.h>
+#include <dali-ui-foundation/public-api/views/recycler/item-view-holder.h>
 #include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
 #include <dali-ui-foundation/public-api/views/recycler/recycler-view.h>
 #include <dali-ui-foundation/public-api/views/scroll/edge-effect.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/events/key-event.h>
@@ -44,7 +46,7 @@ namespace Integration
 class RecyclerViewImpl;
 using RecyclerViewImplPtr = IntrusivePtr<RecyclerViewImpl>;
 
-class DALI_UI_API RecyclerViewImpl : public LayoutImpl
+class DALI_UI_API RecyclerViewImpl : public ViewImpl
 {
 public:
   static RecyclerViewImplPtr New();
@@ -56,9 +58,9 @@ protected:
 public:
   void OnInitialize() override;
 
-  void         SetAdapter(ItemAdapter& adapter);
-  ItemAdapter* GetAdapter() const;
-  void         ClearAdapter();
+  void        SetAdapter(ItemAdapter adapter);
+  ItemAdapter GetAdapter() const;
+  void        ClearAdapter();
 
   void          SetItemsLayouter(ItemsLayouter layouter);
   ItemsLayouter GetItemsLayouter() const;
@@ -106,6 +108,9 @@ public:
   void  SetFocusScrollPeek(float peek);
   float GetFocusScrollPeek() const;
 
+  void AddItemDecoration(ItemDecoration& decoration);
+  void RemoveItemDecoration(ItemDecoration& decoration);
+
 protected:
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
   LayoutRect   OnArrange(const LayoutRect& bounds) override;
@@ -118,23 +123,20 @@ private:
   // Provides the Recycler interface to ItemsLayouter; defined in the .cpp.
   struct RecyclerImpl;
 
-  void OnAdapterDestroyed(ItemAdapter& adapter);
   void OnAdapterDataChanged(const ItemAdapter::ChangeInfo& info);
   void OnLayoutInvalidated();
-
-  struct ItemRecord
-  {
-    uint32_t position{0u};
-    uint32_t viewType{0u};
-    View     view;
-  };
+  void OnItemDecorationDestroyed(ItemDecoration& decoration);
+  void OnItemDecorationLayoutInvalidated();
+  void NotifyDecorationChanged();
 
   void  EnsureScroller();
   void  UpdateScrollerSize();
   void  UpdateScrollBar();
   void  RecycleAll();
   void  RecycleRecord(size_t index);
+  void  CacheRecycledItem(ItemViewHolder holder);
   View  ObtainItemView(uint32_t position, uint32_t viewType);
+  void  NotifyDecorationBoundsUpdated();
   float GetViewportExtent() const;
   float GetCrossExtent() const;
   float GetMaxScrollOffset() const;
@@ -181,14 +183,15 @@ private:
   void     OnFocusManagerChanged(View from, View to);
 
 private:
-  ItemAdapter*                  mAdapter;
+  ItemAdapter                   mAdapter;
   ItemsLayouter                 mLayouter;
   std::unique_ptr<RecyclerImpl> mRecyclerImpl;
   View                          mScroller;
   ScrollBar                     mScrollBar;
 
-  std::vector<ItemRecord> mActiveItems;
-  std::vector<ItemRecord> mRecycledItems;
+  std::vector<ItemViewHolder>  mActiveItems;
+  std::vector<ItemViewHolder>  mRecycledItems;
+  std::vector<ItemDecoration*> mDecorations;
 
   Animation            mScrollAnimation;
   PropertyNotification mScrollerPositionNotification;

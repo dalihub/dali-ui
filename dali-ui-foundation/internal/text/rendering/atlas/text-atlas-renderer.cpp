@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
+#include <dali-ui-foundation/internal/text/final-glyph-index-domain.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-run.h>
 #include <dali-ui-foundation/internal/text/gradient-glyph-classification.h>
@@ -506,11 +507,12 @@ struct AtlasRenderer::Impl
     CalculateBlocksSize(glyphs);
 
     // Avoid emptying mTextCache (& removing references) until after incremented references for the new text
-    Vector<TextCacheEntry> newTextCache;
-    const GlyphInfo* const glyphsBuffer    = glyphs.Begin();
-    const Vector2* const   positionsBuffer = positions.Begin();
-    const Vector2          lineOffsetPosition(minLineOffset, 0.f);
-    uint32_t               hyphenIndex = 0;
+    Vector<TextCacheEntry>  newTextCache;
+    const GlyphInfo* const  glyphsBuffer    = glyphs.Begin();
+    const Vector2* const    positionsBuffer = positions.Begin();
+    const Vector2           lineOffsetPosition(minLineOffset, 0.f);
+    uint32_t                hyphenIndex             = 0;
+    const GlyphIndex* const finalStyleSourceIndices = view.GetFinalGlyphStyleSourceIndices();
 
     // For septated underlined chunks. (this is for Markup case)
     uint32_t underlineChunkId = 0u;    // give id for each chunk.
@@ -553,8 +555,11 @@ struct AtlasRenderer::Impl
     // Iteration on glyphs
     for(uint32_t i = 0, glyphSize = static_cast<uint32_t>(glyphs.Size()); i < glyphSize; ++i)
     {
-      GlyphInfo glyph;
-      bool      addHyphen =
+      // AddGlyphs receives the complete final sequence, so i is already in the
+      // final glyph domain used by the style-source map.
+      const GlyphIndex styleGlyphIndex = ResolveFinalStyleSourceGlyph(finalStyleSourceIndices, i);
+      GlyphInfo        glyph;
+      bool             addHyphen =
         ((hyphenIndex < hyphensCount) && hyphenIndices && ((i + startIndexOfGlyphs) == hyphenIndices[hyphenIndex]));
       // TODO : Shouldn't we have to control here when i == 0 cases?
       if(addHyphen && hyphens && i > 0u)
@@ -580,17 +585,17 @@ struct AtlasRenderer::Impl
 
       Vector<UnderlinedGlyphRun>::ConstIterator currentUnderlinedGlyphRunIt = underlineRuns.End();
       const bool                                isGlyphUnderlined =
-        underlineEnabled || IsGlyphUnderlined(i, underlineRuns, currentUnderlinedGlyphRunIt);
+        underlineEnabled || IsGlyphUnderlined(styleGlyphIndex, underlineRuns, currentUnderlinedGlyphRunIt);
       const UnderlineStyleProperties currentUnderlineProperties = GetCurrentUnderlineProperties(
-        i, isGlyphUnderlined, underlineRuns, currentUnderlinedGlyphRunIt, viewUnderlineProperties);
+        styleGlyphIndex, isGlyphUnderlined, underlineRuns, currentUnderlinedGlyphRunIt, viewUnderlineProperties);
       float currentUnderlineHeight = currentUnderlineProperties.height;
       thereAreUnderlinedGlyphs     = thereAreUnderlinedGlyphs || isGlyphUnderlined;
 
       Vector<StrikethroughGlyphRun>::ConstIterator currentStrikethroughGlyphRunIt = strikethroughRuns.End();
       const bool                                   isGlyphStrikethrough =
-        strikethroughEnabled || IsGlyphStrikethrough(i, strikethroughRuns, currentStrikethroughGlyphRunIt);
+        strikethroughEnabled || IsGlyphStrikethrough(styleGlyphIndex, strikethroughRuns, currentStrikethroughGlyphRunIt);
       const StrikethroughStyleProperties currentStrikethroughProperties = GetCurrentStrikethroughProperties(
-        i, isGlyphStrikethrough, strikethroughRuns, currentStrikethroughGlyphRunIt, viewStrikethroughProperties);
+        styleGlyphIndex, isGlyphStrikethrough, strikethroughRuns, currentStrikethroughGlyphRunIt, viewStrikethroughProperties);
       float currentStrikethroughHeight = currentStrikethroughProperties.height;
       thereAreStrikethroughGlyphs      = thereAreStrikethroughGlyphs || isGlyphStrikethrough;
 

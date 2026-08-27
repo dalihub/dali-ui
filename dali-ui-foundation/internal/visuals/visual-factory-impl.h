@@ -119,6 +119,11 @@ public:
   void UsePreCompiledShader();
 
   /**
+   * @brief Request removal of all unused textures retained by ReleasePolicy::NEVER.
+   */
+  void RequestClearUnusedTextures();
+
+  /**
    * @return the reference to texture manager
    */
   Internal::TextureManager& GetTextureManager();

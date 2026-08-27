@@ -29,10 +29,12 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-relayouter.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-parameters.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
+#include <dali-ui-foundation/internal/text/text-alignment.h>
 
 namespace
 {
@@ -185,7 +187,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
 
   // START/MIDDLE are not released for replacement content. Preserve the
   // projected atomic boxes and use CLIP instead of exposing their underlying
-  // source text through an ordinary ellipsis pass.
+  // source text through a non-replacement ellipsis pass.
   const bool useReplacementClipFallback =
     IsReplacementElideEnabled(impl) && impl.mModel->mEllipsisPosition != EllipsisPosition::END;
 
@@ -1094,6 +1096,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
                 size.height);
   DALI_TRACE_SCOPE(gTraceFilter2, "DALI_TEXT_DORELAYOUT");
   bool viewUpdated(false);
+  bool endEllipsisFinalizedInLayout{false};
 
   // Calculate the operations to be done.
   const OperationsMask operations = static_cast<OperationsMask>(impl.mOperationsPending & operationsRequired);
@@ -1105,6 +1108,11 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
   // Get the current layout size.
   VisualModelPtr& visualModel = impl.mModel->mVisualModel;
   layoutSize                  = visualModel->GetLayoutSize();
+  if(const FinalElisionResult* endEllipsis = impl.GetEndEllipsisResult();
+     endEllipsis && endEllipsis->HasAuthoritativeLayout())
+  {
+    layoutSize = endEllipsis->layoutSize;
+  }
 
   // A valid replacement projection owns the complete layout/alignment pass.
   // Do not first lay out the underlying glyph stream and then mix its result
@@ -1252,8 +1260,55 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     }
 
     Size newLayoutSize;
+    if(!impl.HasValidReplacementSource())
+    {
+      impl.ClearEndEllipsisResult();
+    }
     viewUpdated = impl.mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, elideTextEnabled, isMarqueeEnabled,
                                                 isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
+
+    const auto hasEndEllipsisCandidate = [visualModel]()
+    {
+      for(const LineRun& line : visualModel->mLines)
+      {
+        if(line.ellipsis)
+        {
+          return true;
+        }
+      }
+      return false;
+    };
+    const bool hasNoVisibleEndLine = !viewUpdated && visualModel->mLines.Empty() &&
+                                     !impl.mModel->mLogicalModel->mText.Empty();
+    if(!impl.HasValidReplacementSource() && elideTextEnabled &&
+       ellipsisPosition == EllipsisPosition::END &&
+       (hasEndEllipsisCandidate() || hasNoVisibleEndLine))
+    {
+      visualModel->SetLayoutSize(newLayoutSize);
+      FinalElisionResult& finalElision = impl.GetOrCreateEndEllipsisResult();
+      const bool          resolved     = ResolveEndEllipsis(*impl.mModel,
+                                                            size,
+                                                            impl.GetFontClient(),
+                                                            finalElision);
+      DALI_ASSERT_DEBUG(resolved && finalElision.resolved &&
+                        "Supported END layout must publish an authoritative final result");
+      if(resolved)
+      {
+        newLayoutSize = finalElision.layoutSize;
+        FinalizeEndEllipsisGeometry(*impl.mModel,
+                                    size,
+                                    impl.mLayoutDirection,
+                                    impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS,
+                                    impl.mLayoutEngine,
+                                    finalElision);
+        endEllipsisFinalizedInLayout = true;
+        impl.mView.SetFinalElisionResult(&finalElision);
+      }
+      else
+      {
+        impl.ClearEndEllipsisResult();
+      }
+    }
 
     impl.mIsMarqueeEnabled = isMarqueeEnabled;
     layoutTooSmall         = !viewUpdated;
@@ -1277,7 +1332,10 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
       // Sets the layout size.
       if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations))
       {
-        visualModel->SetLayoutSize(layoutSize);
+        if(!impl.GetEndEllipsisResult())
+        {
+          visualModel->SetLayoutSize(layoutSize);
+        }
       }
     } // view updated
   }
@@ -1285,6 +1343,23 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
   if(NO_OPERATION != (ALIGN & operations))
   {
     DoRelayoutHorizontalAlignment(impl, size, startIndex, requestedNumberOfCharacters);
+    if(FinalElisionResult* finalElision = impl.mEndEllipsisResult.get();
+       finalElision && finalElision->resolved)
+    {
+      // LAYOUT-only and ALIGN-only requests each need one finalization. When
+      // both operations share this transaction, the LAYOUT result is already
+      // aligned in the same final-domain coordinate space.
+      if(!endEllipsisFinalizedInLayout)
+      {
+        FinalizeEndEllipsisGeometry(*impl.mModel,
+                                    size,
+                                    impl.mLayoutDirection,
+                                    impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS,
+                                    impl.mLayoutEngine,
+                                    *finalElision);
+      }
+      impl.mView.SetFinalElisionResult(finalElision);
+    }
     viewUpdated = true;
   }
 
@@ -1329,113 +1404,30 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
     impl.mEventData->mUpdateAlignment = false;
   }
 
-  // If there is no BoundedParagraphRuns then apply the alignment of controller.
-  // Check whether the layout is single line. It's needed to apply one alignment for single-line.
-  // In single-line layout case we need to check whether to follow the alignment of controller or the first
-  // BoundedParagraph. Apply BoundedParagraph's alignment if and only if there is one BoundedParagraph contains all
-  // characters. Otherwise follow controller's alignment.
-  const bool isFollowControllerAlignment =
-    ((impl.mModel->GetNumberOfBoundedParagraphRuns() == 0u) ||
-     ((Layout::Engine::SINGLE_LINE_BOX == impl.mLayoutEngine.GetLayout()) &&
-      (impl.mModel->GetBoundedParagraphRuns()[0].characterRun.numberOfCharacters !=
-       impl.mModel->mLogicalModel->mText.Count())));
-
-  if(isFollowControllerAlignment)
-  {
-    // Need to align with the control's size as the text may contain lines
-    // starting either with left to right text or right to left.
-    impl.mLayoutEngine.Align(size, alignStartIndex, alignRequestedNumberOfCharacters, impl.mModel->mHorizontalAlignment,
-                             lines, impl.mModel->mAlignmentOffset, impl.mLayoutDirection,
-                             (impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS));
-  }
-  else
-  {
-    // Override the controller horizontal-alignment by horizontal-alignment of bounded paragraph.
-    const Length&                      numberOfBoundedParagraphRuns = impl.mModel->GetNumberOfBoundedParagraphRuns();
-    const Vector<BoundedParagraphRun>& boundedParagraphRuns         = impl.mModel->GetBoundedParagraphRuns();
-    const CharacterIndex               alignEndIndex                = alignStartIndex + alignRequestedNumberOfCharacters - 1u;
-
-    Length alignIndex               = alignStartIndex;
-    Length boundedParagraphRunIndex = 0u;
-
-    while(alignIndex <= alignEndIndex && boundedParagraphRunIndex < numberOfBoundedParagraphRuns)
-    {
-      // BP: BoundedParagraph
-      const BoundedParagraphRun& boundedParagraphRun   = boundedParagraphRuns[boundedParagraphRunIndex];
-      const CharacterIndex&      characterStartIndexBP = boundedParagraphRun.characterRun.characterIndex;
-      const Length&              numberOfCharactersBP  = boundedParagraphRun.characterRun.numberOfCharacters;
-      const CharacterIndex       characterEndIndexBP   = characterStartIndexBP + numberOfCharactersBP - 1u;
-
-      CharacterIndex  decidedAlignStartIndex         = alignIndex;
-      Length          decidedAlignNumberOfCharacters = alignEndIndex - alignIndex + 1u;
-      Text::Alignment decidedHorizontalAlignment     = impl.mModel->mHorizontalAlignment;
-
-      /*
-       * Shortcuts to explain indexes cases:
-       *
-       * AS: Alignment Start Index
-       * AE: Alignment End Index
-       * PS: Paragraph Start Index
-       * PE: Paragraph End Index
-       * B: BoundedParagraph Alignment
-       * M: Model Alignment
-       *
-       */
-
-      if(alignIndex < characterStartIndexBP && characterStartIndexBP <= alignEndIndex) /// AS.MMMMMM.PS--------AE
-      {
-        // Alignment from "Alignment Start Index" to index before "Paragraph Start Index" according to "Model Alignment"
-        decidedAlignStartIndex         = alignIndex;
-        decidedAlignNumberOfCharacters = characterStartIndexBP - alignIndex;
-        decidedHorizontalAlignment     = impl.mModel->mHorizontalAlignment;
-
-        // Need to re-heck the case of current bounded paragraph
-        alignIndex = characterStartIndexBP; // Shift AS to be PS
-      }
-      else if((characterStartIndexBP <= alignIndex &&
-               alignIndex <= characterEndIndexBP) || /// ---PS.BBBBBBB.AS.BBBBBBB.PE---
-              (characterStartIndexBP <= alignEndIndex &&
-               alignEndIndex <= characterEndIndexBP)) /// ---PS.BBBBBB.AE.BBBBBBB.PE---
-      {
-        // Alignment from "Paragraph Start Index" to "Paragraph End Index" according to "BoundedParagraph Alignment"
-        decidedAlignStartIndex         = characterStartIndexBP;
-        decidedAlignNumberOfCharacters = numberOfCharactersBP;
-        decidedHorizontalAlignment     = boundedParagraphRun.horizontalAlignmentDefined
-                                           ? boundedParagraphRun.horizontalAlignment
-                                           : impl.mModel->mHorizontalAlignment;
-
-        alignIndex = characterEndIndexBP + 1u; // Shift AS to be after PE direct
-        boundedParagraphRunIndex++;            // Align then check the case of next bounded paragraph
-      }
-      else
-      {
-        boundedParagraphRunIndex++; // Check the case of next bounded paragraph
-        continue;
-      }
-
-      impl.mLayoutEngine.Align(size, decidedAlignStartIndex, decidedAlignNumberOfCharacters, decidedHorizontalAlignment,
-                               lines, impl.mModel->mAlignmentOffset, impl.mLayoutDirection,
-                               (impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS));
-    }
-
-    // Align the remaining that is not aligned
-    if(alignIndex <= alignEndIndex)
-    {
-      impl.mLayoutEngine.Align(size, alignIndex, (alignEndIndex - alignIndex + 1u), impl.mModel->mHorizontalAlignment,
-                               lines, impl.mModel->mAlignmentOffset, impl.mLayoutDirection,
-                               (impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS));
-    }
-  }
+  AlignTextLines(impl.mLayoutEngine,
+                 size,
+                 alignStartIndex,
+                 alignRequestedNumberOfCharacters,
+                 *impl.mModel,
+                 lines,
+                 impl.mModel->mAlignmentOffset,
+                 impl.mLayoutDirection,
+                 impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS);
 }
 
 void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, const Size& controlSize)
 {
-  ModelPtr&       model         = impl.mModel;
-  VisualModelPtr& visualModel   = model->mVisualModel;
-  Size            layoutSize    = model->mVisualModel->GetLayoutSize();
-  Size            oldLayoutSize = layoutSize;
-  float           offsetY       = 0.f;
-  bool            needRecalc    = false;
+  ModelPtr&       model       = impl.mModel;
+  VisualModelPtr& visualModel = model->mVisualModel;
+  Size            layoutSize  = model->mVisualModel->GetLayoutSize();
+  if(const FinalElisionResult* endEllipsis = impl.GetEndEllipsisResult();
+     endEllipsis && endEllipsis->HasAuthoritativeLayout())
+  {
+    layoutSize = endEllipsis->layoutSize;
+  }
+  Size  oldLayoutSize = layoutSize;
+  float offsetY       = 0.f;
+  bool  needRecalc    = false;
 
   // Whether the text control is editable
   const bool  isEditable            = NULL != impl.mEventData;

@@ -253,8 +253,14 @@ public:
    * occurrence of a Texture will cause its removal internally.
    *
    * @param[in] textureInfo TextureInfo that want to cache in container.
+   * @param[in] keepUnusedTexture Whether to keep the texture after its reference count becomes zero.
    */
-  void RemoveCache(TextureCacheManager::TextureInfo& textureInfo);
+  void RemoveCache(TextureCacheManager::TextureInfo& textureInfo, bool keepUnusedTexture = false);
+
+  /**
+   * @brief Remove all cached textures retained after their reference count became zero.
+   */
+  void ClearUnusedCache();
 
 public:
   /**
@@ -318,6 +324,13 @@ private:
 
 private:
   // Private API: only used internally
+
+  /**
+   * @brief Remove an unreferenced TextureInfo without changing its reference count.
+   *
+   * @param[in] textureInfo TextureInfo to remove.
+   */
+  void RemoveUnusedCache(TextureCacheManager::TextureInfo& textureInfo);
 
   /**
    * @brief Used to lookup an index into the ExternalTextureInfoContainer from a textureId

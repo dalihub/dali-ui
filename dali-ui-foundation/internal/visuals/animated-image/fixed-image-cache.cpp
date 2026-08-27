@@ -185,13 +185,13 @@ void FixedImageCache::MakeReady(bool wasReady, uint32_t frameIndex, bool preMult
   }
 }
 
-void FixedImageCache::ClearCache()
+void FixedImageCache::ClearCache(bool keepUnusedTexture)
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
     for(std::size_t i = 0u; i < mImageUrls.size(); ++i)
     {
-      mTextureManager.RequestRemove(mImageUrls[i].mTextureId, this);
+      mTextureManager.RequestRemove(mImageUrls[i].mTextureId, this, keepUnusedTexture);
       mImageUrls[i].mTextureId = TextureManager::INVALID_TEXTURE_ID;
     }
   }

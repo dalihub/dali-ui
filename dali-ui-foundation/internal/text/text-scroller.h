@@ -31,6 +31,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
@@ -105,18 +106,21 @@ public:
    * @param[in] controlSize size of the control to scroll within
    * @param[in] textureSize size of the texture
    * @param[in] wrapGap The gap before scrolling wraps
+   * @param[in] isTextContentOverflow Whether the text content, excluding the wrap gap, overflows the control
    * @param[in] direction text direction true for right to left text
    * @param[in] horizontalAlignment horizontal alignment of the text
    * @param[in] verticalAlignment vertical alignment of the text
    * @param[in] animationReStart Whether to start from the beginning when the animation is playing.
    * @param[in] textGradient Full marquee gradient renderer setup data, including optional source
    * property indices for initial animation binding.
+   * @param[in] marqueeInitialDelta Optional resolved first-frame shader delta.
    */
   void SetParameters(Actor scrollingTextActor, Dali::Renderer renderer, TextureSet textureSet, const Size& controlSize,
-                     const Size& textureSize, const float wrapGap, CharacterDirection direction,
+                     const Size& textureSize, const float wrapGap, bool isTextContentOverflow, CharacterDirection direction,
                      Alignment horizontalAlignment, Alignment verticalAlignment,
-                     bool                        animationReStart = false,
-                     const TextScrollerGradient& textGradient     = TextScrollerGradient());
+                     bool                        animationReStart    = false,
+                     const TextScrollerGradient& textGradient        = TextScrollerGradient(),
+                     const MarqueeInitialDelta&  marqueeInitialDelta = MarqueeInitialDelta());
 
   /**
    * @brief Set the gap distance to elapse before the text wraps around
@@ -304,8 +308,6 @@ private:
   Animation                                 mScrollAnimation;                // Animation used to update the mScrollDeltaIndex
   Dali::Renderer                            mRenderer;                       // Renderer used to render the text
   Actor                                     mScrollingTextActor;             // Actor used as source for TextGradient animation properties
-  Shader                                    mShader;                         // Shader originally used by the renderer while not scrolling
-  TextureSet                                mTextureSet;                     // Texture originally used by the renderer while not scrolling
   std::vector<Constraint>                   mGradientConstraints;            // Constraints for animated TextGradient uniforms.
   std::vector<Constraint>                   mGradientOverlayConstraints;     // Constraints for animated TextGradientOverlay uniforms.
   Property::Index                           mGradientAnimOffsetIndex;        // Source property for uTextGradientStartOffset.

@@ -26,8 +26,6 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
-#include <functional>
-#include <memory>
 
 #define DALI_UI_NAVIGATOR_HAS_PAGE_ANIMATION_SWITCH 1
 #define DALI_UI_NAVIGATOR_HAS_MODAL_TRANSITION_SPEC 1
@@ -134,19 +132,31 @@ public: // Queries
 
 public: // Back navigation
   /**
+   * @brief Signal emitted before Navigator performs automatic back navigation.
+   *
+   * Parameters are this Navigator and the current view. A callback may return
+   * true to consume Back and keep the current view in place. When multiple
+   * callbacks are connected, Back is consumed if any callback returns true.
+   */
+  using BackRequestedSignalType = Signal<bool(Navigator, View)>;
+
+  /**
    * @brief Navigates back: dismisses the top modal, else pops the navigation stack.
    *
-   * A page's registered back handler (see SetBackHandler) may consume the event.
+   * A callback connected to BackRequestedSignal() may consume the event.
    * @return True if the back navigation was handled, false if there was nothing to go back to
    */
   bool NavigateBack();
 
   /**
-   * @brief Registers a back handler for a page.
-   * @param[in] page    The page
-   * @param[in] handler Returns true to consume Back (Navigator does not pop), false to let Navigator pop
+   * @brief Gets the signal emitted before automatic back navigation.
+   *
+   * The current view is supplied to each callback so a callback can limit
+   * itself to one page. Return true to consume Back, or false to let Navigator
+   * dismiss the current modal or pop the current page.
+   * @return The back-requested signal
    */
-  void SetBackHandler(View page, std::function<bool()> handler);
+  BackRequestedSignalType& BackRequestedSignal();
 
 public: // Transition customization
   /**
@@ -185,42 +195,68 @@ public: // Transition customization
    * @brief Sets the default transition specification for all pages.
    *
    * Per-page specifications registered with SetPageTransitionSpec() take
-   * precedence. Passing nullptr restores the built-in fade transition.
+   * precedence.
    * @param[in] spec The transition specification
    */
-  void SetTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec);
+  void SetTransitionSpec(NavigationTransitionSpec spec);
+
+  /**
+   * @brief Clears the default page transition specification.
+   *
+   * Navigator uses its built-in fade transition after the specification is
+   * cleared.
+   */
+  void ClearTransitionSpec();
 
   /**
    * @brief Sets a transition specification for one page.
    *
-   * Passing nullptr removes the per-page override. When the page is removed
-   * from Navigator, its per-page specification is removed automatically.
+   * When the page is removed from Navigator, its per-page specification is
+   * removed automatically.
    * @param[in] page The target page
    * @param[in] spec The transition specification
    */
-  void SetPageTransitionSpec(View page, std::shared_ptr<NavigationTransitionSpec> spec);
+  void SetPageTransitionSpec(View page, NavigationTransitionSpec spec);
+
+  /**
+   * @brief Clears the transition specification for one page.
+   * @param[in] page The target page
+   */
+  void ClearPageTransitionSpec(View page);
 
   /**
    * @brief Sets the default modal transition specification for all modal views.
    *
    * This specification is used only for PushModal/PopModal. It is independent
-   * from SetTransitionSpec(), which is used only for Push/Pop. Passing nullptr
-   * restores the built-in modal fade transition.
+   * from SetTransitionSpec(), which is used only for Push/Pop.
    * @param[in] spec The modal transition specification
    */
-  void SetModalTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec);
+  void SetModalTransitionSpec(NavigationTransitionSpec spec);
+
+  /**
+   * @brief Clears the default modal transition specification.
+   *
+   * Navigator uses its built-in modal fade transition after the specification
+   * is cleared.
+   */
+  void ClearModalTransitionSpec();
 
   /**
    * @brief Sets a modal transition specification for one view.
    *
    * This override is used only when the view participates in PushModal/PopModal.
-   * Passing nullptr removes the per-page modal override. When the view is
-   * removed from Navigator, its per-page modal specification is removed
-   * automatically.
+   * When the view is removed from Navigator, its per-page modal specification
+   * is removed automatically.
    * @param[in] page The target page or modal view
    * @param[in] spec The modal transition specification
    */
-  void SetPageModalTransitionSpec(View page, std::shared_ptr<NavigationTransitionSpec> spec);
+  void SetPageModalTransitionSpec(View page, NavigationTransitionSpec spec);
+
+  /**
+   * @brief Clears the modal transition specification for one view.
+   * @param[in] page The target page or modal view
+   */
+  void ClearPageModalTransitionSpec(View page);
 
 public: // Signals
   using PageEventSignalType          = Signal<void(Navigator, View, bool /*byPop*/)>;

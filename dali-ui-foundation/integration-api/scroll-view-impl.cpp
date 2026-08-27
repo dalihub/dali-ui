@@ -78,7 +78,7 @@ ScrollViewImplPtr ScrollViewImpl::New()
 }
 
 ScrollViewImpl::ScrollViewImpl()
-: LayoutImpl(),
+: ViewImpl(),
   mContent(),
   mScrollPosition(0.0f, 0.0f),
   mCurrentPosition(0.0f, 0.0f),
@@ -130,7 +130,7 @@ ScrollViewImpl::~ScrollViewImpl()
 
 void ScrollViewImpl::OnInitialize()
 {
-  LayoutImpl::OnInitialize();
+  ViewImpl::OnInitialize();
   AttachLayoutManager(Dali::MakeUnique<ScrollViewLayoutManager>());
 
   // Enable clipping to bounds for scrollable content
@@ -741,7 +741,7 @@ View ScrollViewImpl::OnFocusRequested()
   // Self() — use the base class implementation which delegates to the first
   // focusable child.  return View() would cause FocusManager::RequestFocus()
   // to fail outright rather than falling back to child delegation.
-  if(!mKeyScrollEnabled || !mContent) return LayoutImpl::OnFocusRequested();
+  if(!mKeyScrollEnabled || !mContent) return ViewImpl::OnFocusRequested();
 
   // Always focus the content item nearest to the entry edge: the ScrollView
   // should self-focus (for OnKeyEvent step-scroll) only when there are no
@@ -824,7 +824,7 @@ View ScrollViewImpl::OnFocusRequested()
   // item.  Only valid if ScrollView is keyboard-focusable; otherwise delegate to
   // the base class so FocusManager can use child delegation instead of failing.
   if(!selfView.GetProperty<bool>(Actor::Property::FOCUSABLE))
-    return LayoutImpl::OnFocusRequested();
+    return ViewImpl::OnFocusRequested();
   return selfView;
 }
 

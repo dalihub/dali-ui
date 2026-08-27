@@ -119,11 +119,30 @@ public:
   // between two views would trigger both, causing double-layout.
   Dali::Signal<void()>& LayoutInvalidatedSignal();
 
+  // Requests a full relayout without extending the virtual subclass ABI.
+  void RequestLayout();
+
 protected:
   void InvalidateLayout();
 
 private:
   Dali::Signal<void()> mLayoutInvalidatedSignal;
+};
+
+/**
+ * @brief Optional capability for layouters that cache decoration-dependent data.
+ *
+ * This is deliberately separate from ItemsLayouterImpl. ItemsLayouterImpl is
+ * subclassed by external libraries, so adding a virtual function to it after
+ * release would change its vtable. New optional layouter capabilities must use
+ * a separate, versioned extension interface in the same manner.
+ */
+class DALI_UI_API ItemsLayouterDecorationSupport
+{
+public:
+  virtual ~ItemsLayouterDecorationSupport() = default;
+
+  virtual void OnDecorationChanged() = 0;
 };
 
 } // namespace Integration

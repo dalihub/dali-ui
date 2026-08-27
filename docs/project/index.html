@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>DALi UI Project</title>
+  <style>
+    :root {
+      --ink: #17242b;
+      --muted: #64737a;
+      --paper: #f3f5f1;
+      --surface: #ffffff;
+      --line: #dce3de;
+      --teal: #006d68;
+      --teal-deep: #004d4a;
+      --mint: #bde9d9;
+      --mint-soft: #e8f5ef;
+      --coral: #ed745b;
+      --amber: #e6aa3d;
+      --navy: #142f3a;
+      --shadow: 0 22px 70px rgba(20, 47, 58, 0.10);
+      --radius: 24px;
+      --content: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+      line-height: 1.65;
+      word-break: keep-all;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+    .progress {
+      position: fixed;
+      z-index: 30;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--coral), var(--amber));
+    }
+    .topbar {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      border-bottom: 1px solid rgba(220, 227, 222, .86);
+      background: rgba(243, 245, 241, .92);
+      backdrop-filter: blur(14px);
+    }
+    .topbar-inner {
+      display: flex;
+      max-width: var(--content);
+      min-height: 64px;
+      margin: auto;
+      padding: 0 28px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 850; letter-spacing: .06em; }
+    .brand-mark { display: grid; width: 30px; height: 30px; color: #fff; border-radius: 9px; background: var(--teal); place-items: center; }
+    .nav { display: flex; align-items: center; gap: 17px; color: var(--muted); font-size: 12px; }
+    .nav a { text-decoration: none; }
+    .nav a:hover { color: var(--teal); }
+    .print-button { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: #fff; cursor: pointer; }
+    .page-scroller { height: calc(100vh - 64px); overflow-x: hidden; overflow-y: auto; scroll-behavior: smooth; }
+    main { overflow: hidden; }
+    .container { max-width: var(--content); margin: auto; padding-right: 28px; padding-left: 28px; }
+    section { position: relative; min-height: calc(100vh - 64px); padding: 104px 0; scroll-margin-top: 0; }
+    .section-rule { border-top: 1px solid var(--line); }
+    .dark { color: #fff; background: var(--navy); }
+    .eyebrow { display: flex; margin-bottom: 20px; color: var(--teal); align-items: center; gap: 12px; font-size: 12px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
+    .eyebrow::before { width: 28px; height: 2px; background: var(--coral); content: ""; }
+    .dark .eyebrow { color: var(--mint); }
+    h1, h2, h3, h4, p { margin-top: 0; }
+    h1 { margin-bottom: 28px; font-size: clamp(52px, 7.2vw, 88px); font-weight: 880; letter-spacing: -.055em; line-height: 1.02; }
+    h2 { max-width: 900px; margin-bottom: 22px; font-size: clamp(38px, 5vw, 62px); font-weight: 850; letter-spacing: -.045em; line-height: 1.08; }
+    .heading-link { color: inherit; text-decoration: none; }
+    .heading-anchor { display: inline-block; margin-left: .28em; color: var(--coral); font-size: .48em; font-weight: 800; line-height: 1; text-decoration: none; vertical-align: .2em; opacity: 0; transition: opacity .18s ease; }
+    .heading-link:hover .heading-anchor, .heading-link:focus-visible .heading-anchor { opacity: 1; }
+    h3 { margin-bottom: 10px; font-size: 21px; letter-spacing: -.025em; line-height: 1.3; }
+    h4 { margin-bottom: 7px; font-size: 14px; }
+    .accent { color: var(--teal); }
+    .dark .accent { color: var(--mint); }
+    .lead { max-width: 800px; margin-bottom: 44px; color: #4e5e66; font-size: 19px; line-height: 1.75; }
+    .dark .lead { color: #c9d7d8; }
+    .section-head { display: grid; margin-bottom: 50px; grid-template-columns: 1fr 280px; gap: 44px; align-items: end; }
+    .section-head .lead { margin-bottom: 0; }
+    .section-index { color: rgba(0, 109, 104, .16); font-size: 92px; font-weight: 900; letter-spacing: -.08em; line-height: .8; text-align: right; }
+    .dark .section-index { color: rgba(189, 233, 217, .16); }
+    .tag { display: inline-flex; padding: 5px 10px; border-radius: 999px; color: var(--teal-deep); background: var(--mint-soft); font-size: 11px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+    .tag.new { color: #8a3828; background: #fff0eb; }
+    .tag.core { color: #6b4803; background: #fff4da; }
+    .dark .tag { color: var(--mint); background: rgba(189, 233, 217, .12); }
+
+    /* Cover */
+    .cover {
+      min-height: calc(100vh - 64px);
+      padding-top: 78px;
+      background:
+        radial-gradient(circle at 94% 5%, rgba(189, 233, 217, .55), transparent 28rem),
+        radial-gradient(circle at 5% 96%, rgba(230, 170, 61, .13), transparent 24rem);
+    }
+    .cover-grid { display: grid; grid-template-columns: 1.08fr .92fr; gap: 48px; align-items: end; }
+    .cover-lead { max-width: 690px; color: #46575f; font-size: 19px; line-height: 1.72; }
+    .manifesto { position: relative; min-height: 405px; padding: 38px; overflow: hidden; border-radius: var(--radius); color: #fff; background: var(--navy); box-shadow: var(--shadow); }
+    .manifesto::after { position: absolute; right: -78px; bottom: -94px; width: 260px; height: 260px; border: 48px solid rgba(189,233,217,.10); border-radius: 50%; content: ""; }
+    .manifesto small { display: block; margin-bottom: 54px; color: var(--mint); font-weight: 800; letter-spacing: .1em; }
+    .manifesto blockquote { position: relative; z-index: 1; margin: 0 0 28px; font-size: 27px; font-weight: 800; letter-spacing: -.025em; line-height: 1.48; }
+    .manifesto p { position: relative; z-index: 1; margin: 0; color: #c8d7d8; font-size: 14px; }
+    .cover-capabilities { display: flex; margin-top: 30px; flex-wrap: wrap; gap: 8px; }
+    .cover-capabilities span { padding: 7px 11px; border: 1px solid rgba(0,109,104,.14); border-radius: 999px; color: var(--teal-deep); background: rgba(255,255,255,.76); font-size: 11px; font-weight: 750; }
+    .cover-metrics { display: grid; margin-top: 34px; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .cover-metric { padding: 18px 19px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.82); }
+    .cover-metric strong { display: block; color: var(--teal); font-size: 28px; letter-spacing: -.04em; line-height: 1.15; }
+    .cover-metric span { color: var(--muted); font-size: 10px; line-height: 1.4; }
+    .cover-note { margin: 14px 0 0; color: var(--muted); font-size: 11px; }
+
+    /* common */
+    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card { padding: 26px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .card .num { display: block; margin-bottom: 20px; color: var(--coral); font-size: 12px; font-weight: 900; letter-spacing: .1em; }
+    .mechanism { margin: 34px 0; padding: 32px; border-radius: var(--radius); color: #fff; background: var(--navy); box-shadow: var(--shadow); }
+    .dark .mechanism { color: var(--ink); background: #fff; }
+    .mechanism-title { margin-bottom: 22px; color: var(--mint); font-size: 12px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    .dark .mechanism-title { color: var(--teal); }
+    .flow { display: flex; align-items: stretch; gap: 11px; }
+    .flow-node { flex: 1; min-width: 0; padding: 18px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(255,255,255,.06); }
+    .flow-node strong { display: block; margin-bottom: 6px; font-size: 15px; }
+    .flow-node span { display: block; color: #bed0d2; font-size: 12px; line-height: 1.5; }
+    .flow-arrow { display: grid; color: var(--coral); place-items: center; font-weight: 900; }
+    .dark .flow-node { border-color: var(--line); background: #f6f8f5; }
+    .dark .flow-node span { color: var(--muted); }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .detail { padding: 24px 25px; border-top: 3px solid var(--mint); border-radius: 0 0 16px 16px; background: #fff; box-shadow: 0 10px 34px rgba(20,47,58,.06); }
+    .detail p { margin: 0; color: var(--muted); font-size: 14px; }
+    .detail code, .api-line code { color: var(--teal-deep); font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; }
+    .dark .detail { border-top-color: var(--coral); color: var(--ink); }
+    .impact { display: grid; margin-top: 34px; padding: 27px 30px; border-left: 5px solid var(--coral); border-radius: 0 18px 18px 0; background: rgba(237,116,91,.08); grid-template-columns: 160px 1fr; gap: 25px; }
+    .impact strong { color: var(--coral); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+    .impact p { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.62; }
+    .dark .impact { background: rgba(237,116,91,.12); }
+    .sources { display: flex; margin-top: 22px; color: var(--muted); flex-wrap: wrap; gap: 8px 15px; font-size: 11px; }
+    .sources::before { content: "SOURCE"; color: var(--teal); font-weight: 900; letter-spacing: .1em; }
+    .sources a { text-decoration-color: rgba(0,109,104,.35); text-underline-offset: 3px; }
+    .dark .sources { color: #9fb1b5; }
+    .dark .sources::before { color: var(--mint); }
+    .mono { font-family: "SFMono-Regular", Consolas, monospace; }
+
+    /* boundaries / view */
+    .boundary-stack { display: grid; grid-template-columns: 1.12fr .98fr .9fr; gap: 12px; }
+    .boundary { min-height: 245px; padding: 27px; border-radius: 20px; }
+    .boundary.public { color: #fff; background: var(--teal); }
+    .boundary.extension { border: 1px solid rgba(0,109,104,.25); background: var(--mint-soft); }
+    .boundary.integration { border: 1px solid var(--line); background: #fff; }
+    .boundary small { display: block; margin-bottom: 34px; font-weight: 850; letter-spacing: .09em; }
+    .boundary p { margin: 0; font-size: 14px; }
+    .boundary.public p { color: #dbf4ea; }
+    .boundary ul { margin: 13px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    .foundation-map { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .library { padding: 30px; border-radius: 22px; background: #fff; box-shadow: var(--shadow); }
+    .library.components { color: #fff; background: var(--teal); }
+    .library p { color: var(--muted); }
+    .library.components p { color: #d6eee8; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 7px 10px; border-radius: 999px; color: var(--teal-deep); background: var(--mint-soft); font-size: 11px; font-weight: 750; }
+    .components .chip { color: #fff; background: rgba(255,255,255,.13); }
+    .view-model { display: grid; grid-template-columns: 1.05fr .95fr; gap: 24px; align-items: stretch; }
+    .box-model-figure { display: grid; min-height: 360px; margin: 0; padding: 24px; border-radius: 14px; background: #fff; place-items: center; box-shadow: var(--shadow); }
+    .box-model-figure img { width: 100%; max-width: 520px; height: auto; }
+    .view-features { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .view-feature { padding: 20px; border: 1px solid rgba(255,255,255,.12); border-radius: 16px; background: rgba(255,255,255,.06); }
+    .view-feature strong { display: block; margin-bottom: 7px; color: var(--mint); font-size: 14px; }
+    .view-feature span { color: #bed0d2; font-size: 12px; }
+
+    /* feature specifics */
+    .formula-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+    .formula { padding: 22px; border-radius: 16px; background: rgba(255,255,255,.07); }
+    .formula strong { display: block; margin-bottom: 8px; color: var(--mint); font-size: 23px; }
+    .formula span { color: #bcd0d2; font-size: 12px; }
+    .config-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .config-cell { padding: 19px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+    .config-cell strong { display: block; margin-bottom: 8px; color: var(--teal); font-size: 13px; }
+    .config-cell span { color: var(--muted); font-size: 12px; }
+    .states { display: flex; margin: 22px 0; flex-wrap: wrap; gap: 9px; }
+    .state { padding: 9px 13px; border: 1px solid rgba(189,233,217,.22); border-radius: 999px; color: var(--mint); background: rgba(189,233,217,.07); font-size: 11px; font-weight: 800; }
+    .layout-types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; }
+    .layout-type { padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+    .layout-icon { display: grid; height: 72px; margin-bottom: 17px; padding: 8px; border-radius: 10px; background: var(--mint-soft); grid-template-columns: repeat(3, 1fr); gap: 5px; }
+    .layout-icon i { display: block; border-radius: 4px; background: var(--teal); opacity: .76; }
+    .layout-type:nth-child(2) .layout-icon { grid-template-columns: 2fr 1fr 1fr; }
+    .layout-type:nth-child(3) .layout-icon { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+    .layout-type:nth-child(4) .layout-icon i:nth-child(2) { transform: translate(12px, 12px); }
+    .layout-type p { margin: 0; color: var(--muted); font-size: 12px; }
+    .nav-visual { display: grid; grid-template-columns: 1fr 130px 1fr; gap: 25px; align-items: center; }
+    .phone { padding: 14px; border: 8px solid #29444e; border-radius: 27px; background: #edf4f0; box-shadow: var(--shadow); }
+    .phone-bar { width: 34%; height: 5px; margin: 0 auto 14px; border-radius: 999px; background: #29444e; }
+    .page-card { display: grid; height: 185px; padding: 18px; border-radius: 14px; color: #fff; background: var(--teal); align-content: end; }
+    .page-card.modal { background: linear-gradient(150deg, var(--navy), var(--teal)); }
+    .nav-actions { color: var(--coral); font-size: 12px; font-weight: 850; text-align: center; }
+    .nav-actions b { display: block; margin: 12px 0; font-size: 25px; }
+    .chart-stage { display: grid; padding: 28px; border-radius: 22px; color: #fff; background: var(--navy); grid-template-columns: 1.35fr .65fr; gap: 25px; }
+    .chart-stage svg { width: 100%; height: auto; overflow: visible; }
+    .chart-list { display: grid; align-content: center; gap: 10px; }
+    .chart-list span { padding: 10px 13px; border-radius: 10px; color: #d7e6e6; background: rgba(255,255,255,.07); font-size: 12px; }
+    .theme-preview { display: grid; grid-template-columns: 1fr 54px 1fr; gap: 16px; align-items: center; }
+    .theme-screen { padding: 20px; border-radius: 20px; background: #fff; box-shadow: var(--shadow); }
+    .theme-screen.alt { color: #fff; background: var(--navy); }
+    .theme-screen small { display: block; margin-bottom: 14px; color: var(--muted); font-weight: 800; }
+    .theme-screen.alt small { color: #aebfc2; }
+    .theme-swatch { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .theme-swatch i { display: block; height: 58px; border-radius: 11px; background: var(--teal); }
+    .theme-swatch i:nth-child(2) { background: var(--mint); }
+    .theme-screen.alt .theme-swatch i { background: var(--coral); }
+    .theme-screen.alt .theme-swatch i:nth-child(2) { background: #f7d48c; }
+    .theme-arrow { color: var(--coral); font-size: 28px; font-weight: 900; text-align: center; }
+    .adaptive-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .adaptive-case { padding: 24px; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: 0 12px 34px rgba(20,47,58,.06); }
+    .adaptive-case h3 { color: var(--teal); }
+    .adaptive-change { display: grid; margin: 18px 0 12px; grid-template-columns: 1fr 34px 1fr; gap: 8px; align-items: center; }
+    .adaptive-preview { display: grid; min-height: 110px; padding: 15px; border-radius: 13px; background: var(--paper); align-content: center; }
+    .adaptive-preview strong { display: block; font-size: 15px; line-height: 1.35; }
+    .adaptive-preview.large strong { font-size: 24px; }
+    .adaptive-preview.rtl { direction: rtl; text-align: right; }
+    .adaptive-arrow { color: var(--coral); font-size: 22px; font-weight: 900; text-align: center; }
+    .adaptive-effects { display: flex; flex-wrap: wrap; gap: 6px; }
+    .adaptive-effects span { padding: 5px 8px; border-radius: 999px; color: var(--teal-deep); background: var(--mint-soft); font-size: 10px; font-weight: 750; }
+    .text-feature-grid { gap: 13px; }
+    .text-feature { padding: 17px 19px 18px; }
+    .text-feature h3 { margin-bottom: 6px; }
+    .text-feature p { font-size: 12px; line-height: 1.55; }
+    .text-demo { display: grid; min-height: 66px; margin-bottom: 12px; padding: 10px 13px; overflow: hidden; border: 1px solid #e4ebe7; border-radius: 12px; background: var(--paper); align-items: center; }
+    .demo-caption { color: #75858a; font-size: 8px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+    .demo-gradient { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .gradient-example { display: grid; min-width: 0; padding: 6px 8px; overflow: hidden; border-radius: 8px; background: #fff; gap: 3px; }
+    .gradient-example small { color: #75858a; font-size: 7px; font-weight: 850; letter-spacing: .06em; }
+    .gradient-example strong { display: inline-block; width: max-content; color: var(--teal); background: linear-gradient(90deg, #008e88 0%, #24b8a9 25%, #f2c95c 52%, #ed745b 76%, #8d63d8 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-size: 22px; font-weight: 950; letter-spacing: -.05em; line-height: 1; }
+    .gradient-example.overlay strong { background-image: linear-gradient(105deg, transparent 0%, rgba(255,255,255,.18) 34%, #fff 50%, rgba(255,255,255,.22) 66%, transparent 100%), linear-gradient(90deg, #008e88 0%, #24b8a9 25%, #f2c95c 52%, #ed745b 76%, #8d63d8 100%); background-position: -120% 0, 0 0; background-repeat: no-repeat; background-size: 55% 100%, 100% 100%; animation: text-shimmer 2.4s ease-in-out infinite; }
+    @keyframes text-shimmer {
+      0%, 18% { background-position: -120% 0, 0 0; }
+      72%, 100% { background-position: 220% 0, 0 0; }
+    }
+    .demo-reveal { grid-template-columns: auto 1fr; gap: 13px; }
+    .reveal-stage { display: grid; gap: 5px; }
+    .reveal-word { display: flex; width: max-content; color: var(--teal); font-size: 20px; font-weight: 900; letter-spacing: .01em; }
+    .reveal-word span { opacity: 0; animation-duration: 5.2s; animation-iteration-count: infinite; animation-timing-function: linear; }
+    .reveal-word span:nth-child(1) { animation-name: reveal-word-01; }
+    .reveal-word .reveal-gap { width: .32em; animation: none; }
+    .reveal-word span:nth-child(3) { animation-name: reveal-word-02; }
+    .reveal-word span:nth-child(5) { animation-name: reveal-word-03; }
+    .reveal-word span:nth-child(7) { animation-name: reveal-word-04; }
+    .reveal-progress { height: 4px; overflow: hidden; border-radius: 999px; background: #d8e2de; }
+    .reveal-progress i { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--coral); animation: reveal-progress 5.2s linear infinite; }
+    @keyframes reveal-word-01 { 0%, 5% { opacity: 0; } 16%, 84% { opacity: 1; } 90%, 100% { opacity: 0; } }
+    @keyframes reveal-word-02 { 0%, 19% { opacity: 0; } 30%, 84% { opacity: 1; } 90%, 100% { opacity: 0; } }
+    @keyframes reveal-word-03 { 0%, 33% { opacity: 0; } 44%, 84% { opacity: 1; } 90%, 100% { opacity: 0; } }
+    @keyframes reveal-word-04 { 0%, 47% { opacity: 0; } 58%, 84% { opacity: 1; } 90%, 100% { opacity: 0; } }
+    @keyframes reveal-progress { 0%, 5% { width: 0; } 58%, 84% { width: 100%; } 90%, 100% { width: 0; } }
+    .demo-bevel { position: relative; grid-template-columns: 1fr auto; }
+    .demo-bevel strong { color: #b7cbc4; font-size: 34px; font-weight: 950; letter-spacing: -.06em; text-shadow: -1px -1px 0 #fff, 1px 1px 0 #6b8580, 3px 3px 5px rgba(20,47,58,.28); }
+    .light-direction { display: grid; color: var(--coral); font-size: 18px; font-weight: 900; place-items: center; }
+    .light-direction small { display: block; margin-top: -2px; color: #75858a; font-size: 7px; letter-spacing: .06em; }
+    .demo-semantic { grid-template-columns: 1fr auto; gap: 12px; }
+    .semantic-copy { color: var(--ink); font-size: 14px; font-weight: 750; }
+    .semantic-copy u { color: var(--teal); text-decoration: underline 2px var(--coral); text-underline-offset: 3px; }
+    .semantic-meta { display: grid; gap: 3px; }
+    .semantic-meta span { padding: 3px 6px; border-radius: 5px; color: var(--teal-deep); background: var(--mint-soft); font-family: "SFMono-Regular", Consolas, monospace; font-size: 7px; }
+    .demo-inline { gap: 5px; }
+    .inline-sentence { color: var(--ink); font-size: 14px; font-weight: 750; white-space: nowrap; }
+    .inline-object { display: inline-grid; width: 25px; height: 25px; margin: 0 3px; border-radius: 7px; color: #fff; background: linear-gradient(145deg, #f7cf6c, var(--coral)); vertical-align: middle; place-items: center; font-size: 13px; box-shadow: 0 4px 10px rgba(237,116,91,.25); }
+    .demo-fit { grid-template-columns: 1fr auto; gap: 10px; }
+    .fit-frame { display: grid; height: 42px; padding: 5px 8px; overflow: hidden; border: 2px solid var(--teal); border-radius: 8px; background: #fff; align-content: center; }
+    .fit-frame strong { color: var(--ink); font-size: 17px; line-height: 1.15; white-space: nowrap; }
+    .fit-candidates { display: grid; gap: 3px; }
+    .fit-candidates span { padding: 2px 5px; border-radius: 4px; color: #7a898d; background: #e7ece9; font-size: 7px; font-weight: 800; }
+    .fit-candidates .selected { color: #fff; background: var(--coral); }
+    .viewport { position: relative; height: 310px; padding: 24px; overflow: hidden; border: 8px solid var(--navy); border-radius: 24px; background: var(--mint-soft); }
+    .viewport::before { position: absolute; z-index: 1; top: 24px; right: 8px; bottom: 24px; width: 5px; border-radius: 999px; background: rgba(0,109,104,.13); content: ""; }
+    .scroll-content { display: grid; gap: 10px; animation: scroller-content 5.6s cubic-bezier(.55,.06,.28,1) infinite; will-change: transform, opacity; }
+    .scroll-content i { position: relative; height: 67px; border: 3px solid transparent; border-radius: 12px; background: #fff; box-shadow: 0 8px 20px rgba(20,47,58,.08); }
+    .scroll-content i::before { position: absolute; top: 17px; left: 17px; width: 30px; height: 30px; border-radius: 7px; background: #d9ece5; content: ""; }
+    .scroll-content i::after { position: absolute; top: 25px; right: 22px; left: 61px; height: 14px; border-radius: 4px; background: linear-gradient(#d8e2de 0 4px, transparent 4px 9px, #e8eeeb 9px 13px); content: ""; }
+    .scroll-content i:nth-child(2) { animation: scroller-focus-leave 5.6s linear infinite; }
+    .scroll-content i:nth-child(4) { animation: scroller-focus-enter 5.6s linear infinite; }
+    .scrollbar { position: absolute; z-index: 2; top: 38px; right: 8px; width: 5px; height: 105px; border-radius: 999px; background: var(--teal); animation: scroller-thumb 5.6s cubic-bezier(.55,.06,.28,1) infinite; }
+    .peek { position: absolute; z-index: 3; right: 20px; bottom: 13px; padding: 3px 7px; border-radius: 5px; color: var(--coral); background: rgba(232,245,239,.9); font-size: 11px; font-weight: 850; animation: scroller-cue 5.6s linear infinite; }
+    @keyframes scroller-content {
+      0%, 34% { transform: translateY(0); opacity: 1; }
+      54%, 84% { transform: translateY(-126px); opacity: 1; }
+      90% { transform: translateY(-126px); opacity: 0; }
+      91% { transform: translateY(0); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes scroller-focus-leave {
+      0%, 24% { border-color: var(--coral); box-shadow: 0 8px 20px rgba(20,47,58,.08), 0 0 0 3px rgba(237,116,91,.12); }
+      32%, 100% { border-color: transparent; box-shadow: 0 8px 20px rgba(20,47,58,.08); }
+    }
+    @keyframes scroller-focus-enter {
+      0%, 27% { border-color: transparent; box-shadow: 0 8px 20px rgba(20,47,58,.08); }
+      35%, 88% { border-color: var(--coral); box-shadow: 0 8px 20px rgba(20,47,58,.08), 0 0 0 3px rgba(237,116,91,.12); }
+      94%, 100% { border-color: transparent; box-shadow: 0 8px 20px rgba(20,47,58,.08); }
+    }
+    @keyframes scroller-thumb {
+      0%, 34% { top: 38px; opacity: 1; }
+      54%, 84% { top: 158px; opacity: 1; }
+      90% { top: 158px; opacity: 0; }
+      91% { top: 38px; opacity: 0; }
+      100% { top: 38px; opacity: 1; }
+    }
+    @keyframes scroller-cue {
+      0%, 27% { color: var(--muted); opacity: .62; }
+      35%, 84% { color: var(--coral); opacity: 1; }
+      90%, 100% { opacity: .62; }
+    }
+    .focus-feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .focus-feature { min-height: 142px; padding: 20px; border: 1px solid rgba(255,255,255,.11); border-radius: 16px; background: rgba(255,255,255,.055); }
+    .focus-feature strong { display: block; margin-bottom: 8px; color: var(--mint); font-size: 14px; }
+    .focus-feature p { margin: 0; color: #b9c9cb; font-size: 12px; }
+    .focus-feature em { display: block; margin-bottom: 12px; color: var(--coral); font-size: 10px; font-style: normal; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+
+    /* appendix */
+    .snapshot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .metric { padding: 25px; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+    .metric strong { display: block; color: var(--teal); font-size: 37px; letter-spacing: -.04em; }
+    .metric span { color: var(--muted); font-size: 12px; }
+    .scope-note { margin-top: 28px; padding: 23px 26px; border-radius: 16px; background: #fff4da; color: #664c1b; font-size: 13px; }
+    .source-list { display: grid; margin-top: 28px; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+    .source-list a { padding: 11px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; text-decoration: none; }
+    .source-list a:hover { color: var(--teal); }
+    footer { padding: 55px 0 70px; color: #9aabad; background: var(--navy); font-size: 12px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 30px; }
+
+    @media screen and (max-width: 900px) {
+      .nav a { display: none; }
+      .cover-grid, .section-head { grid-template-columns: 1fr; }
+      .section-index { display: none; }
+      .card-grid, .formula-grid, .layout-types, .snapshot, .focus-feature-grid { grid-template-columns: repeat(2, 1fr); }
+      .boundary-stack, .foundation-map, .detail-grid, .chart-stage, .view-model { grid-template-columns: 1fr; }
+      .config-matrix, .token-flow { grid-template-columns: repeat(2, 1fr); }
+      .flow { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+      .adaptive-grid { grid-template-columns: 1fr; }
+    }
+    @media screen and (max-width: 620px) {
+      section { padding: 76px 0; }
+      .container, .topbar-inner { padding-right: 19px; padding-left: 19px; }
+      .cover { padding-top: 56px; }
+      .cover-grid, .cover-metrics, .card-grid, .formula-grid, .layout-types, .config-matrix, .token-flow, .snapshot, .source-list, .view-features, .focus-feature-grid { grid-template-columns: 1fr; }
+      .manifesto { min-height: auto; padding: 29px; }
+      .manifesto blockquote { font-size: 22px; }
+      .impact { grid-template-columns: 1fr; }
+      .nav-visual { grid-template-columns: 1fr; }
+      .nav-actions b { transform: rotate(90deg); }
+      .theme-preview { grid-template-columns: 1fr; }
+      .theme-arrow { transform: rotate(90deg); }
+    }
+    @media (hover: none) {
+      .heading-anchor { opacity: .42; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html, .page-scroller { scroll-behavior: auto; }
+    }
+    @page { size: A4; margin: 13mm; }
+    @media print {
+      body { overflow: visible; background: #fff; font-size: 8.5pt; line-height: 1.5; }
+      .page-scroller { height: auto; overflow: visible; }
+      .topbar, .progress, footer { display: none; }
+      .heading-anchor { display: none; }
+      section { min-height: 0; padding: 8mm 0; break-inside: auto; }
+      .cover { min-height: auto; padding-top: 7mm; break-after: page; break-inside: avoid; }
+      .feature, #boundaries, #view { break-before: page; }
+      .card, .mechanism, .detail, .impact, .boundary, .library, .chart-stage, .text-feature, .viewport { break-inside: avoid; }
+      .container { max-width: none; padding: 0; }
+      h1 { margin-bottom: 14px; font-size: 41pt; }
+      h2 { margin-bottom: 11px; font-size: 25pt; }
+      h3 { margin-bottom: 6px; font-size: 14px; }
+      .eyebrow { margin-bottom: 10px; }
+      .lead { margin-bottom: 20px; font-size: 13px; line-height: 1.55; }
+      .section-head { margin-bottom: 22px; gap: 20px; }
+      .section-index { font-size: 68px; }
+      .cover-grid { gap: 24px; }
+      .cover-lead { margin-bottom: 0; font-size: 14px; line-height: 1.55; }
+      .manifesto { min-height: 250px; padding: 25px; }
+      .manifesto small { margin-bottom: 26px; }
+      .manifesto blockquote { margin-bottom: 16px; font-size: 20px; }
+      .manifesto p { font-size: 11px; }
+      .cover-capabilities { margin-top: 16px; gap: 5px; }
+      .cover-capabilities span { padding: 4px 7px; font-size: 8px; }
+      .cover-metrics { margin-top: 18px; gap: 7px; }
+      .cover-metric { padding: 11px 12px; }
+      .cover-metric strong { font-size: 21px; }
+      .cover-metric span, .cover-note { font-size: 8px; }
+      .boundary { min-height: 178px; padding: 18px; }
+      .boundary small { margin-bottom: 18px; }
+      .foundation-map { gap: 12px; }
+      .library { padding: 19px; }
+      .card p, .detail p { font-size: 11px; }
+      .mechanism { margin: 16px 0; padding: 20px; }
+      .mechanism-title { margin-bottom: 12px; }
+      .flow { gap: 7px; }
+      .flow-node { padding: 11px; }
+      .flow-node strong { font-size: 11px; }
+      .flow-node span { font-size: 9px; }
+      .detail-grid { gap: 11px; }
+      .detail { padding: 15px 16px; }
+      .impact { margin-top: 16px; padding: 16px 18px; grid-template-columns: 110px 1fr; gap: 14px; }
+      .impact p { font-size: 12px; }
+      .sources { display: none; }
+      .formula { padding: 14px; }
+      .formula strong { font-size: 17px; }
+      .config-matrix { gap: 7px; }
+      .config-cell { padding: 12px; }
+      .states { margin: 12px 0; gap: 5px; }
+      .state { padding: 5px 8px; font-size: 8px; }
+      .layout-types { gap: 8px; }
+      .layout-type { padding: 13px; }
+      .layout-icon { height: 46px; margin-bottom: 10px; }
+      .nav-visual { gap: 18px; }
+      .page-card { height: 130px; }
+      .chart-stage { padding: 18px; }
+      .chart-stage svg { max-height: 190px; }
+      .chart-list span { padding: 6px 9px; font-size: 9px; }
+      .token { min-height: 90px; padding: 13px; }
+      .token strong { margin-bottom: 11px; }
+      .adaptive-case { padding: 15px; }
+      .adaptive-change { margin: 10px 0 8px; }
+      .adaptive-preview { min-height: 75px; padding: 10px; }
+      .adaptive-preview strong { font-size: 11px; }
+      .adaptive-preview.large strong { font-size: 17px; }
+      .text-feature-grid { gap: 7px; }
+      .text-feature { padding: 10px 12px 11px; }
+      .text-feature p { font-size: 8.5px; line-height: 1.45; }
+      .text-demo { min-height: 45px; margin-bottom: 7px; padding: 6px 9px; }
+      .gradient-example { padding: 4px 6px; }
+      .gradient-example strong { font-size: 16px; }
+      .gradient-example.overlay strong { background-position: 50% 0, 0 0; animation: none; }
+      .reveal-word { font-size: 17px; }
+      .reveal-word span { opacity: 1; animation: none; }
+      .reveal-word span:nth-child(5) { opacity: .42; }
+      .reveal-word span:nth-child(7) { opacity: .12; }
+      .reveal-progress i { width: 75%; animation: none; }
+      .demo-bevel strong { font-size: 27px; }
+      .semantic-copy, .inline-sentence { font-size: 10px; }
+      .inline-object { width: 19px; height: 19px; font-size: 10px; }
+      .fit-frame { height: 32px; }
+      .fit-frame strong { font-size: 12px; }
+      .viewport { height: 220px; padding: 16px; }
+      .scroll-content i { height: 43px; }
+      .scroll-content { transform: translateY(-82px); animation: none; }
+      .scroll-content i::before { top: 9px; left: 11px; width: 20px; height: 20px; border-radius: 5px; }
+      .scroll-content i::after { top: 13px; right: 15px; left: 42px; height: 13px; }
+      .scroll-content i:nth-child(2) { border-color: transparent; animation: none; }
+      .scroll-content i:nth-child(4) { border-color: var(--coral); box-shadow: 0 8px 20px rgba(20,47,58,.08), 0 0 0 3px rgba(237,116,91,.12); animation: none; }
+      .scrollbar { top: 108px; height: 76px; animation: none; }
+      .peek { animation: none; }
+      .focus-feature-grid { gap: 7px; }
+      .focus-feature { min-height: 95px; padding: 12px; }
+      .focus-feature strong { font-size: 11px; }
+      .focus-feature p { font-size: 9px; }
+      .box-model-figure { min-height: 240px; padding: 15px; }
+      .view-feature { padding: 12px; }
+      .snapshot { gap: 8px; }
+      .metric { padding: 15px; }
+      .metric strong { font-size: 27px; }
+      .scope-note { margin-top: 16px; padding: 15px 17px; font-size: 10px; }
+      .source-list { margin-top: 15px; gap: 5px 18px; }
+      .source-list a { padding: 6px 0; font-size: 9px; }
+      a { text-decoration: none; }
+      .section-index { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-mark">D</span> DALi UI Project</div>
+      <nav class="nav" aria-label="보고서 목차">
+        <a href="#dali-ui">개요</a>
+        <a href="#unit">Unit</a>
+        <a href="#view">View</a>
+        <a href="#enhanced-text">Text</a>
+        <a href="#navigator">Navigator</a>
+        <a href="#enhanced-focus-system">Focus</a>
+        <button class="print-button" type="button" onclick="window.print()">PDF / 인쇄</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-scroller" id="pageScroller">
+  <main>
+    <section class="cover" id="dali-ui">
+      <div class="container">
+        <div class="eyebrow">01 / DALi UI</div>
+        <div class="cover-grid">
+          <div>
+            <h1><a class="heading-link" href="#dali-ui">DALi UI<span class="heading-anchor" aria-hidden="true">#</span></a></h1>
+            <p class="cover-lead">DALi 기반 애플리케이션을 위한 Native UI Framework</p>
+            <p class="cover-lead" style="margin-top:26px">DALi UI는 애플리케이션이 Native 환경에서 화면을 구성하고 운영하는 데 필요한 공통 UI 기능을 제공합니다. View와 Layout을 기반으로 상태와 이벤트, 화면 이동, Theme, Text, Scroll과 Focus까지 하나의 Framework 범위로 구성했습니다.</p>
+            <div class="cover-capabilities" aria-label="DALi UI 주요 기능">
+              <span>View & Layout</span><span>View State & Interaction</span><span>Navigator</span><span>Color & Theme</span><span>Adaptive & Rich Text</span><span>Scroller</span><span>Focus</span>
+            </div>
+          </div>
+          <aside class="manifesto">
+            <small>REPORT SCOPE</small>
+            <h3 style="font-size:28px">Native 앱에 필요한 UI 기능</h3>
+            <p>Native 앱이 제품 화면을 구성하려면 성능 경로뿐 아니라 그 위에서 사용할 충분한 UI 기능이 필요합니다. DALi UI는 화면마다 공통 기능을 다시 구현해야 하는 부담을 줄이고, 애플리케이션이 DALi 위에서 제품 수준의 UI를 구성할 수 있게 합니다.</p>
+            <p style="margin-top:20px">적용 애플리케이션에서는 NUI 기반 구성과 비교해 메모리 사용량과 런칭 성능이 개선되었습니다. 개선 폭은 앱 구성과 측정 조건에 따라 달라질 수 있습니다.</p>
+          </aside>
+        </div>
+
+        <div class="cover-metrics" aria-label="DALi UI 구현 및 검증 규모">
+          <div class="cover-metric"><strong>203</strong><span>Public headers</span></div>
+          <div class="cover-metric"><strong>2,806</strong><span>UTCs</span></div>
+          <div class="cover-metric"><strong>94</strong><span>Visual test samples</span></div>
+        </div>
+        <p class="cover-note">203개의 public header는 앱에 열린 기능의 폭을, 2,806개의 자동화 테스트는 그 동작을 지속적으로 검증하는 규모를 보여줍니다. 94개의 visual test sample은 46개 sample과 48개 manual TC를 합산했습니다. 수치는 DALi UI <span class="mono">devel bb386e86</span> 기준입니다.</p>
+      </div>
+    </section>
+
+    <section class="feature" id="unit">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">02 / Unit</div>
+            <h2><a class="heading-link" href="#unit">Unit<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Unit은 해상도와 pixel density가 다른 디바이스에서도 UI가 의도한 크기로 표시되도록 합니다. 제품별 scaling factor와 system scale도 같은 단위 정책에서 처리합니다.</p>
+          </div>
+          <div class="section-index">02</div>
+        </div>
+
+        <div class="mechanism">
+          <div class="mechanism-title">Three UI units</div>
+          <div class="formula-grid">
+            <div class="formula"><strong>24_spx</strong><span>24 × configuration scaling factor</span></div>
+            <div class="formula"><strong>24_dp</strong><span>24 × device DPI ÷ baseline DPI</span></div>
+            <div class="formula"><strong>24_sdp</strong><span>24 × density ratio × scaling factor</span></div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <article class="detail"><h3>작성 단위와 시스템 배율</h3><p><code>dp/sdp/spx</code>는 코드에 작성한 값을 pixel로 변환합니다. 시스템 접근성 배율이 바뀌면 현재 화면의 text와 layout을 새 배율에 맞춰 갱신합니다.</p></article>
+          <article class="detail"><h3>View별 적용 정책</h3><p><code>UiScalePolicy::INHERIT / ENABLED / DISABLED</code>로 부모 정책을 따르거나 system scale 적용 여부를 직접 지정할 수 있습니다.</p></article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-%26-Scale-(kr)">Unit &amp; Scale wiki</a><a href="../dali-ui-foundation/public-api/types/unit.h">Unit literals</a><a href="../dali-ui-foundation/public-api/configuration/ui-scale-manager.h">UiScaleManager</a></div>
+      </div>
+    </section>
+
+    <section class="dark" id="view">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">03 / View</div>
+            <h2><a class="heading-link" href="#view">View<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">View는 모든 UI 컴포넌트가 layout, 상태, interaction과 system 변경을 같은 방식으로 처리하도록 하는 공통 객체입니다. 화면을 구성하는 가장 기본 단위이며 content, padding, border와 margin으로 이루어진 box model을 구현합니다.</p>
+          </div>
+          <div class="section-index">03</div>
+        </div>
+
+        <div class="view-model">
+          <figure class="box-model-figure">
+            <img src="assets/view-box-model.svg" alt="View의 content, padding, border, margin box model">
+          </figure>
+          <div class="view-features">
+            <article class="view-feature"><strong>Layout</strong><span>크기 정책, measure와 arrange, margin과 padding, layout transition</span></article>
+            <article class="view-feature"><strong>Visual</strong><span>Background, border, shadow와 effect를 View 단위로 구성</span></article>
+            <article class="view-feature"><strong>State & Interaction</strong><span>Focus, press, hover, selection 상태와 상위 interaction event</span></article>
+            <article class="view-feature"><strong>System response</strong><span>Scale, localization과 theme 변경을 현재 View tree에 반영</span></article>
+            <article class="view-feature"><strong>Focus</strong><span>키보드와 리모컨에서 View 단위의 이동 대상과 표시 상태 관리</span></article>
+            <article class="view-feature"><strong>Accessibility</strong><span>Role, label, description, state와 screen reader interaction 제공</span></article>
+          </div>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/View-(kr)">View wiki</a><a href="../dali-ui-foundation/public-api/views/view.h">View</a><a href="../dali-ui-foundation/extension-api/view.h">View extension</a></div>
+      </div>
+    </section>
+
+    <section class="feature dark" id="view-state-interaction">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">04 / View State & Interaction</div>
+            <h2><a class="heading-link" href="#view-state-interaction">View State & Interaction<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Focused, pressed, hovered 등의 상태를 View 단위의 공통 모델로 관리합니다. 이 상태와 touch, key, accessibility 입력을 바탕으로 click과 long press처럼 UI 맥락이 담긴 interaction을 제공하므로, 앱이 화면마다 상태 전환과 입력 판정을 다시 구현할 필요가 없습니다.</p>
+          </div>
+          <div class="section-index">04</div>
+        </div>
+
+        <div class="states" aria-label="ViewState 목록">
+          <span class="state">NORMAL</span><span class="state">FOCUSED</span><span class="state">FOCUS_INDICATED</span><span class="state">PRESSED</span><span class="state">HOVERED</span><span class="state">DISABLED</span><span class="state">PSEUDO_DISABLED</span><span class="state">SELECTED</span>
+        </div>
+        <div class="mechanism">
+          <div class="mechanism-title">Inputs and UI interactions</div>
+          <div class="flow">
+            <div class="flow-node"><strong>Touch · Key · Accessibility</strong><span>서로 다른 입력 경로</span></div><div class="flow-arrow">→</div>
+            <div class="flow-node"><strong>Click · Long press</strong><span>앱이 바로 사용하는 의미 단위의 event</span></div><div class="flow-arrow">+</div>
+            <div class="flow-node"><strong>Pressed · Hovered · Focused</strong><span>Visual과 동작에 공통으로 쓰는 View state</span></div>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <article class="detail"><h3>원인을 포함한 상태 변화</h3><p>상태가 바뀌기 전과 후의 값뿐 아니라 변화를 일으킨 입력도 함께 전달합니다. 앱은 같은 상태 변화라도 touch, key 등 원인에 따라 다르게 대응할 수 있습니다.</p></article>
+          <article class="detail"><h3>필요한 기능만 선택적으로 확장</h3><p>기본 View는 공통 기능만 담아 가볍게 유지하고, interaction이나 selection은 사용하는 View에만 필요한 데이터를 생성합니다. 모든 View가 쓰지 않는 기능의 상태까지 보유하지 않으므로 View가 많은 화면에서도 메모리 부담을 줄일 수 있습니다.</p></article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management">State wiki</a><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-%26-Gesture-(kr)">Touch &amp; Gesture wiki</a><a href="../dali-ui-foundation/public-api/types/view-state.h">ViewState</a><a href="../dali-ui-foundation/public-api/traits/interactive-trait.h">InteractiveTrait</a></div>
+      </div>
+    </section>
+
+    <section class="feature" id="layout">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">05 / Layout</div>
+            <h2><a class="heading-link" href="#layout">Layout<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Layout은 화면 크기, text 길이와 system scale이 바뀌어도 View의 크기와 위치를 일관된 규칙으로 계산하기 위한 기능입니다. Stack, Flex, Grid와 Absolute 배치를 제공하고 공통 크기 정책과 transition을 지원합니다.</p>
+          </div>
+          <div class="section-index">05</div>
+        </div>
+
+        <div class="mechanism">
+          <div class="mechanism-title">Changes handled by layout</div>
+          <div class="flow">
+            <div class="flow-node"><strong>화면과 parent 제약</strong><span>Window 크기, orientation, 사용 가능한 영역</span></div><div class="flow-arrow">+</div>
+            <div class="flow-node"><strong>Content 크기</strong><span>Text 길이, image 크기, child 구성 변화</span></div><div class="flow-arrow">+</div>
+            <div class="flow-node"><strong>System 설정</strong><span>Scale과 layout direction 변경</span></div><div class="flow-arrow">→</div>
+            <div class="flow-node"><strong>현재 화면 재배치</strong><span>View의 크기와 위치, wrapping과 transition 갱신</span></div>
+          </div>
+        </div>
+
+        <div class="layout-types">
+          <article class="layout-type"><div class="layout-icon"><i></i><i></i><i></i></div><h3>Stack</h3><p>방향, 간격, alignment와 weight 기반 분배</p></article>
+          <article class="layout-type"><div class="layout-icon"><i></i><i></i><i></i></div><h3>Flex</h3><p>grow, shrink, basis, wrap과 축 정렬</p></article>
+          <article class="layout-type"><div class="layout-icon"><i></i><i></i><i></i><i></i></div><h3>Grid</h3><p>absolute, star, auto 행과 열</p></article>
+          <article class="layout-type"><div class="layout-icon"><i></i><i></i></div><h3>Absolute</h3><p>pixel 또는 proportional 위치 지정</p></article>
+        </div>
+        <div class="detail-grid" style="margin-top:18px">
+          <article class="detail"><h3>공통 크기 정책</h3><p><code>WRAP_CONTENT</code>, <code>MATCH_PARENT</code>, margin과 padding Insets를 모든 LayoutManager에서 같은 방식으로 사용합니다.</p></article>
+          <article class="detail"><h3>Custom layout과 transition</h3><p>기본 layout으로 표현하기 어려운 배치 규칙을 확장할 수 있습니다. 화면 재배치에는 transition을 적용해 크기와 위치 변화를 자연스럽게 보여줍니다.</p></article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-(kr)">Layout wiki</a><a href="../dali-ui-foundation/public-api/layouts/layout-manager.h">LayoutManager</a><a href="../dali-ui-foundation/public-api/layouts/flex-layout-manager.h">Flex</a><a href="../dali-ui-foundation/public-api/layouts/grid-layout-manager.h">Grid</a></div>
+      </div>
+    </section>
+
+    <section class="feature dark" id="enhanced-text">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">06 / Enhanced Text</div>
+            <h2><a class="heading-link" href="#enhanced-text">Enhanced Text<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Text를 단순한 문자열 표시에서 벗어나 시각 효과, 단계별 노출, 의미 정보와 문장 안의 image까지 하나의 콘텐츠로 다룰 수 있습니다. 정해 둔 font size와 line height 조합 중 화면에 가장 잘 맞는 조합을 고르는 기능도 제공합니다.</p>
+          </div>
+          <div class="section-index">06</div>
+        </div>
+
+        <div class="detail-grid text-feature-grid">
+          <article class="detail text-feature">
+            <div class="text-demo demo-gradient">
+              <span class="gradient-example"><small>BASE GRADIENT</small><strong>DALi UI</strong></span>
+              <span class="gradient-example overlay"><small>+ OVERLAY</small><strong>DALi UI</strong></span>
+            </div>
+            <h3>Glyph gradient와 overlay</h3>
+            <p>글자 안을 단색 대신 linear, radial 또는 conic gradient로 채웁니다. 그 위에 밝은 색 띠를 겹치면 highlight나 shimmer처럼 빛이 지나가는 표현도 만들 수 있습니다.</p>
+          </article>
+          <article class="detail text-feature">
+            <div class="text-demo demo-reveal">
+              <span class="demo-caption">Word reveal</span>
+              <div class="reveal-stage"><div class="reveal-word" role="img" aria-label="The quick brown fox"><span>The</span><span class="reveal-gap"></span><span>quick</span><span class="reveal-gap"></span><span>brown</span><span class="reveal-gap"></span><span>fox</span></div><div class="reveal-progress"><i></i></div></div>
+            </div>
+            <h3>Character · Word reveal</h3>
+            <p>문장 전체를 한 번에 표시하지 않고 글자 또는 단어 순서대로 드러냅니다. Word 방식에서는 단어 전체가 하나의 단위로 fade-in하며, 단어 내부가 중간에서 끊기지 않습니다.</p>
+          </article>
+          <article class="detail text-feature">
+            <div class="text-demo demo-bevel"><strong>Bevel</strong><span class="light-direction">↘<small>LIGHT</small></span></div>
+            <h3>Text bevel</h3>
+            <p>빛을 받는 면은 밝게, 반대 면은 어둡게 표현해 글자에 두께가 있는 것처럼 보이게 합니다. 평면적인 shadow나 outline과 다른 입체 효과입니다.</p>
+          </article>
+          <article class="detail text-feature">
+            <div class="text-demo demo-semantic">
+              <div class="semantic-copy">계속하면 <u>이용약관</u>에 동의합니다</div>
+              <div class="semantic-meta"><span>role: link</span><span>section: terms</span></div>
+            </div>
+            <h3>Semantic span</h3>
+            <p>문장 일부에 link 동작이나 앱이 정의한 정보를 붙입니다. 화면에는 자연스러운 문장으로 보이지만, 앱은 해당 범위의 의미와 동작을 구분할 수 있습니다.</p>
+          </article>
+          <article class="detail text-feature">
+            <div class="text-demo demo-inline"><span class="demo-caption">Image inside a sentence</span><div class="inline-sentence">오늘 날씨 <span class="inline-object">☀</span> 24°C</div></div>
+            <h3>Inline content</h3>
+            <p>문장 중간에 icon이나 image를 글자처럼 배치합니다. Image span은 실제 image를 넣고, Replacement span은 앱이 원하는 영역으로 text 일부를 대체합니다.</p>
+          </article>
+          <article class="detail text-feature">
+            <div class="text-demo demo-fit">
+              <div class="fit-frame"><strong>Product title</strong></div>
+              <div class="fit-candidates"><span>28 / 34</span><span class="selected">22 / 28 ✓</span><span>16 / 22</span></div>
+            </div>
+            <h3>Candidate 기반 text fit</h3>
+            <p>제품이 허용한 font size와 line height 조합 중 주어진 영역에 들어가는 가장 큰 후보를 고릅니다. 화면마다 임의의 크기로 줄이지 않고 typography 규칙을 유지합니다.</p>
+          </article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-(kr)">Text wiki</a><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-Gradient-(kr)">Text Gradient wiki</a><a href="../dali-ui-foundation/public-api/views/text-controls/label.h">Label</a><a href="../dali-ui-foundation/public-api/text/styled-text/styled-text.h">StyledText</a><a href="../dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h">StyledTextBuilder</a></div>
+      </div>
+    </section>
+
+    <section class="feature section-rule" id="adaptive-text">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">07 / Adaptive Text</div>
+            <h2><a class="heading-link" href="#adaptive-text">Adaptive Text<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Adaptive Text는 사용자가 system font scale이나 언어를 변경했을 때 현재 화면의 text와 layout을 함께 갱신하기 위한 기능입니다. 앱이 화면을 다시 생성하거나 문자열을 일일이 설정하지 않아도 됩니다.</p>
+          </div>
+          <div class="section-index">07</div>
+        </div>
+
+        <div class="adaptive-grid">
+          <article class="adaptive-case">
+            <h3>Font scale 변경</h3>
+            <div class="adaptive-change">
+              <div class="adaptive-preview"><strong>알림 설정을 확인하세요</strong></div>
+              <div class="adaptive-arrow">→</div>
+              <div class="adaptive-preview large"><strong>알림 설정을<br>확인하세요</strong></div>
+            </div>
+            <div class="adaptive-effects"><span>Text 크기</span><span>줄바꿈</span><span>자연 크기</span><span>화면 재배치</span></div>
+          </article>
+          <article class="adaptive-case">
+            <h3>Locale 변경</h3>
+            <div class="adaptive-change">
+              <div class="adaptive-preview"><strong>Language settings</strong></div>
+              <div class="adaptive-arrow">→</div>
+              <div class="adaptive-preview rtl"><strong>إعدادات اللغة</strong></div>
+            </div>
+            <div class="adaptive-effects"><span>번역 문자열</span><span>복수형</span><span>접근성 문구</span><span>RTL layout</span></div>
+          </article>
+        </div>
+
+        <div class="detail-grid" style="margin-top:18px">
+          <article class="detail"><h3>읽기 편의에 맞춘 Text 크기</h3><p>System font scale을 반영하되 화면 설계가 무너지지 않도록 최소·최대 배율을 정할 수 있습니다. 변경된 text 크기에 맞춰 줄바꿈과 주변 layout도 다시 계산합니다.</p></article>
+          <article class="detail"><h3>번역 가능한 모든 문구</h3><p>일반 문자열과 단수·복수 표현을 지원합니다. Label뿐 아니라 입력창 placeholder, 접근성 name과 description도 언어 변경에 맞춰 갱신됩니다.</p></article>
+          <article class="detail"><h3>언어에 맞는 읽기 방향</h3><p>부모 설정, text 내용 또는 현재 locale을 기준으로 LTR과 RTL 방향을 선택합니다. 언어가 바뀌면 text 정렬과 layout 방향이 함께 맞춰집니다.</p></article>
+          <article class="detail"><h3>화면별 적용 범위 제어</h3><p>고정 크기가 필요한 View는 system scale 적용에서 제외할 수 있고, 특정 문자열은 자동 번역 대신 앱이 지정한 표현을 유지할 수 있습니다.</p></article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-%26-Multilingual-UI-(kr)">Localization wiki</a><a href="../dali-ui-foundation/public-api/configuration/ui-localization-manager.h">UiLocalizationManager</a><a href="../dali-ui-foundation/public-api/configuration/ui-scale-manager.h">UiScaleManager</a><a href="../dali-ui-foundation/public-api/views/text-controls/label.h">Label</a></div>
+      </div>
+    </section>
+
+    <section class="feature" id="color-theme">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">08 / Color & Theme</div>
+            <h2><a class="heading-link" href="#color-theme">Color & Theme<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Color & Theme은 색상을 화면마다 직접 지정하지 않고 디자인 의미로 관리하기 위한 기능입니다. Theme이나 제품 색상 정책이 바뀌면 이미 표시 중인 View에도 변경 사항을 적용합니다.</p>
+          </div>
+          <div class="section-index">08</div>
+        </div>
+
+        <div class="theme-preview" aria-label="Theme 변경에 따른 화면 색상 변화">
+          <div class="theme-screen">
+            <small>THEME A</small>
+            <div class="theme-swatch"><i></i><i></i></div>
+            <h3 style="margin-top:14px">PRIMARY · SURFACE</h3>
+          </div>
+          <div class="theme-arrow">→</div>
+          <div class="theme-screen alt">
+            <small>THEME B</small>
+            <div class="theme-swatch"><i></i><i></i></div>
+            <h3 style="margin-top:14px">같은 의미, 다른 색상</h3>
+          </div>
+        </div>
+
+        <div class="detail-grid" style="margin-top:18px">
+          <article class="detail"><h3>RGBA와 semantic token</h3><p>고정 RGBA와 <code>PRIMARY</code>, <code>SURFACE</code>, <code>BACKGROUND</code> 같은 token을 지원합니다. <code>ScaleAlpha</code>와 <code>WithAlpha</code>도 제공합니다.</p></article>
+          <article class="detail"><h3>제품과 앱별 Theme 확장</h3><p>제품은 자체 Theme과 component style을 제공할 수 있고, 앱은 필요한 color token만 바꿀 수 있습니다. 공통 화면 구조를 유지한 채 브랜드와 제품군별 표현을 구분합니다.</p></article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Color-%26-Theme">Color &amp; Theme wiki</a><a href="../dali-ui-foundation/public-api/types/ui-color.h">UiColor</a><a href="../dali-ui-foundation/public-api/configuration/ui-color-manager.h">UiColorManager</a><a href="../dali-ui-foundation/public-api/configuration/ui-theme-manager.h">UiThemeManager</a></div>
+      </div>
+    </section>
+
+    <section class="feature section-rule" id="navigator">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">09 / Navigator</div>
+            <h2><a class="heading-link" href="#navigator">Navigator<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Navigator는 화면을 page와 modal이라는 공식 단위로 관리해 UIFW가 현재 화면의 경계와 앱의 이동 의도를 알 수 있게 합니다. 화면 전환에 맞춰 back, lifecycle과 transition뿐 아니라 focus의 진입과 복원, accessibility 노출 범위와 background 화면의 입력 상태를 함께 조정합니다.</p>
+          </div>
+          <div class="section-index">09</div>
+        </div>
+
+        <div class="mechanism">
+          <div class="mechanism-title">Page stack and modal stack</div>
+          <div class="nav-visual">
+            <div class="phone"><div class="phone-bar"></div><div class="page-card"><small>PAGE STACK / 03</small><strong>Active Page</strong></div></div>
+            <div class="nav-actions">Push / Pop · Back<b>⇄</b>Lifecycle · Transition<br>Focus · Accessibility</div>
+            <div class="phone"><div class="phone-bar"></div><div class="page-card modal"><small>MODAL STACK / 01</small><strong>Active Modal</strong></div></div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <article class="detail"><h3>활성 화면과 입력 범위</h3><p>최상위 page 또는 modal을 현재 화면으로 구분합니다. 뒤에 가려진 화면의 touch와 key 입력을 차단해 사용자 입력이 활성 화면에만 전달되도록 합니다.</p></article>
+          <article class="detail"><h3>Focus 진입과 복원</h3><p>새 화면이 나타나면 적절한 첫 focus 대상으로 진입하고, 화면을 닫으면 이전 화면에서 마지막으로 사용한 위치로 돌아갑니다. Modal이 열린 동안에는 focus 이동도 그 안에 머뭅니다.</p></article>
+          <article class="detail"><h3>Accessibility 화면 전환</h3><p>현재 page와 modal만 screen reader의 탐색 범위에 포함합니다. 화면이 바뀌면 새 화면의 의미와 제목을 알리고 가려진 content는 탐색에서 제외합니다.</p></article>
+          <article class="detail"><h3>Back · lifecycle · transition</h3><p>Back은 열린 modal을 먼저 닫고 이후 page stack을 되돌립니다. 화면의 등장과 퇴장, lifecycle event와 transition을 같은 navigation 상태에 맞춰 처리합니다.</p></article>
+        </div>
+        <div class="sources"><a href="../dali-ui-components/public-api/navigator/navigator.h">Navigator</a><a href="../dali-ui-components/public-api/navigator/navigation-transition-spec.h">NavigationTransitionSpec</a></div>
+      </div>
+    </section>
+
+    <section class="feature dark" id="enhanced-focus-system">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">10 / Enhanced Focus System</div>
+            <h2><a class="heading-link" href="#enhanced-focus-system">Enhanced Focus System<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">리모컨이나 키보드로 조작하는 화면에서는 focus가 단순히 가까운 View가 아니라 UI 구조와 사용 흐름에 맞는 대상으로 이동해야 합니다. DALi UI는 Android 계열 UIFW에서 익숙한 자식 우선 focus 요청, 방향별 이웃, 영역 단위 탐색과 공간 기반 후보 검색을 View tree에 맞게 제공합니다.</p>
+          </div>
+          <div class="section-index">10</div>
+        </div>
+
+        <div class="focus-feature-grid">
+          <article class="focus-feature"><em>01 · Entry</em><strong>복합 View의 첫 focus</strong><p>Container에 focus를 요청하면 내부에서 가장 적절한 child를 선택합니다. 화면 진입 시 앱이 내부 구조를 직접 탐색할 필요가 없습니다.</p></article>
+          <article class="focus-feature"><em>02 · Direction</em><strong>명시적 이웃 + 공간 탐색</strong><p>제품이 지정한 방향별 이웃을 우선 사용하고, 별도 지정이 없으면 위치와 거리를 기준으로 자연스러운 다음 대상을 찾습니다.</p></article>
+          <article class="focus-feature"><em>03 · Local rule</em><strong>영역별 이동 규칙</strong><p>List, menu, carousel처럼 고유한 이동 방식이 필요한 영역은 자체 규칙을 가질 수 있고, 앱은 첫 focus와 공통 예외 규칙을 정할 수 있습니다.</p></article>
+          <article class="focus-feature"><em>04 · Boundary</em><strong>Focus group과 탐색 제외</strong><p>Modal이나 panel 안에 이동을 머물게 하고, 장식용 subtree처럼 focus 대상이 없는 영역은 검색에서 제외할 수 있습니다.</p></article>
+          <article class="focus-feature"><em>05 · Indication</em><strong>Focus와 표시의 분리</strong><p>논리적 focus는 유지하면서 indicator만 숨길 수 있습니다. Touch, pointer, remote가 전환되어도 입력 대상과 시각 표현을 따로 제어합니다.</p></article>
+          <article class="focus-feature"><em>06 · Continuity</em><strong>Scroll과 Window 연속성</strong><p>Focus된 항목이 viewport에 보이도록 scroll하고, 여러 Window와 입력 장치가 있는 환경에서도 이동이 시작된 화면의 맥락을 유지합니다.</p></article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-%26-Key-(kr)">Focus &amp; Key wiki</a><a href="../dali-ui-foundation/public-api/focus-manager/focus-manager.h">Focus API</a><a href="../dali-ui-foundation/public-api/views/view.h">View focus API</a><a href="../dali-ui-foundation/public-api/views/scroll/scroll-view.h">Focus-aware scroll</a></div>
+      </div>
+    </section>
+
+    <section class="feature section-rule" id="configuration">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">11 / Configuration</div>
+            <h2><a class="heading-link" href="#configuration">Configuration<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Configuration은 UX와 디바이스에 따라 달라지는 공통 정책을 한곳에서 설정하기 위한 기능입니다. 앱과 화면마다 같은 설정을 반복하거나 제품별 분기 코드를 두지 않도록 합니다.</p>
+          </div>
+          <div class="section-index">11</div>
+        </div>
+
+        <div class="config-matrix">
+          <div class="config-cell"><strong>Scale & Density</strong><span>scaling factor, DPI, baseline DPI</span></div>
+          <div class="config-cell"><strong>Input & Gesture</strong><span>key click policy, tap과 long press thresholds</span></div>
+          <div class="config-cell"><strong>Focus</strong><span>indicator와 입력 장치별 정책</span></div>
+          <div class="config-cell"><strong>Text defaults</strong><span>default font size와 color</span></div>
+          <div class="config-cell"><strong>Assets</strong><span>broken image URL과 공통 리소스</span></div>
+          <div class="config-cell"><strong>Theme</strong><span>theme loader와 typed style sheet</span></div>
+          <div class="config-cell"><strong>Execution key</strong><span>제품별 key 판별 predicate</span></div>
+          <div class="config-cell"><strong>Platform service</strong><span>Web engine 등 구현 선택</span></div>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration-(kr)">Configuration wiki</a><a href="../dali-ui-foundation/public-api/configuration/ui-config.h">Foundation UiConfig</a><a href="../dali-ui-components/public-api/components-ui-config.h">Components UiConfig</a><a href="../dali-ui-foundation/public-api/styles/ui-style-sheet.h">UiStyleSheet</a></div>
+      </div>
+    </section>
+
+    <section class="feature" id="scroller">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">12 / Scroller</div>
+            <h2><a class="heading-link" href="#scroller">Scroller<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Scroller는 touch, key와 focus 이동에서 content가 예측 가능한 위치에 표시되도록 관리합니다. 리모컨이나 키보드로 탐색할 때 focus 대상이 viewport 밖에 남지 않도록 scroll과 focus를 함께 처리합니다.</p>
+          </div>
+          <div class="section-index">12</div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="viewport" aria-label="ScrollView viewport illustration"><div class="scroll-content"><i></i><i></i><i></i><i></i></div><span class="scrollbar"></span><span class="peek">FOCUSED CHILD / MAKE VISIBLE</span></div>
+          <div>
+            <article class="detail"><h3>Focus-aware scrolling</h3><p><code>SetScrollOnFocus</code>와 MakeVisible, Start, Center, End target policy를 제공합니다. Peek distance도 설정할 수 있습니다.</p></article>
+            <article class="detail" style="margin-top:16px"><h3>입력별 제어</h3><p>Key scroll step과 enable 설정을 제공합니다. Pan 입력과 programmatic scroll은 별도로 제어하며 방향은 Vertical, Horizontal, Both 중에서 선택합니다.</p></article>
+          </div>
+        </div>
+        <div class="detail-grid" style="margin-top:18px">
+          <article class="detail"><h3>Edge & scrollbar policy</h3><p>Never, Always, ContentScrolls overscroll policy와 start/end EdgeEffect를 제공합니다. Scrollbar는 Auto, Always, Never로 설정합니다.</p></article>
+          <article class="detail"><h3>Scroll signal과 API</h3><p>Scroll과 drag의 시작, 진행, 완료 signal을 제공합니다. Position, child, X/Y 값을 사용해 <code>ScrollTo</code>를 호출할 수 있습니다.</p></article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView-(kr)">ScrollView wiki</a><a href="../dali-ui-foundation/public-api/views/scroll/scroll-view.h">DALi UI ScrollView</a><a href="../dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h">Scroll layout</a></div>
+      </div>
+    </section>
+
+    <section class="feature dark" id="chart">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">13 / Chart</div>
+            <h2><a class="heading-link" href="#chart">Chart<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
+            <p class="lead">Chart는 앱이 차트의 rendering, data model과 interaction을 각각 구현하지 않고도 데이터를 시각화할 수 있도록 제공합니다. 정적 데이터와 실시간 데이터 모두 같은 컴포넌트에서 처리합니다.</p>
+          </div>
+          <div class="section-index">13</div>
+        </div>
+
+        <div class="chart-stage">
+          <svg viewBox="0 0 620 290" role="img" aria-label="ChartView line and bar illustration">
+            <defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bde9d9" stop-opacity=".45"/><stop offset="1" stop-color="#bde9d9" stop-opacity="0"/></linearGradient></defs>
+            <g stroke="#ffffff" stroke-opacity=".10"><path d="M45 30V250H590"/><path d="M45 80H590M45 135H590M45 190H590"/></g>
+            <g fill="#ed745b" opacity=".82"><rect x="85" y="165" width="32" height="85" rx="5"/><rect x="180" y="115" width="32" height="135" rx="5"/><rect x="275" y="146" width="32" height="104" rx="5"/><rect x="370" y="72" width="32" height="178" rx="5"/><rect x="465" y="103" width="32" height="147" rx="5"/></g>
+            <path d="M70 190L165 142L260 160L355 88L450 116L545 54V250H70Z" fill="url(#area)"/>
+            <path d="M70 190L165 142L260 160L355 88L450 116L545 54" fill="none" stroke="#bde9d9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <g fill="#bde9d9" stroke="#142f3a" stroke-width="4"><circle cx="70" cy="190" r="7"/><circle cx="165" cy="142" r="7"/><circle cx="260" cy="160" r="7"/><circle cx="355" cy="88" r="7"/><circle cx="450" cy="116" r="7"/><circle cx="545" cy="54" r="7"/></g>
+          </svg>
+          <div class="chart-list"><span>Line · Bar · Pie · Area · Scatter · Gauge</span><span>Mixed series와 missing-data gap</span><span>Tooltip과 point selection</span><span>실시간 append와 sliding window</span><span>Zoom · Pan · Animation</span></div>
+        </div>
+
+        <div class="detail-grid" style="margin-top:18px">
+          <article class="detail"><h3>실시간 데이터 갱신</h3><p><code>AppendValue(s)</code>, max points, sliding window와 update throttling을 제공합니다. 새 값을 추가할 때 전체 series를 다시 설정하지 않아도 됩니다.</p></article>
+          <article class="detail"><h3>Chart 구성 요소</h3><p>제목, axis label, legend, tooltip에는 Label을 사용합니다. Animated data transition과 point selection signal도 제공합니다.</p></article>
+        </div>
+        <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/ChartView-(kr)">ChartView wiki</a><a href="../dali-ui-components/public-api/chart/chart-view.h">ChartView</a><a href="../dali-ui-components/public-api/chart/chart-view-properties.h">Chart properties</a><a href="../dali-ui-components/integration-api/chart/chart-layout-manager.h">Chart layout</a></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span>DALi UI Capability Report</span>
+      <span>Source snapshot / DALi UI devel bb386e86 / 2026.08</span>
+    </div>
+  </footer>
+  </div>
+
+  <script>
+    const progress = document.getElementById("progress");
+    const pageScroller = document.getElementById("pageScroller");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateProgress = () => {
+      const total = pageScroller.scrollHeight - pageScroller.clientHeight;
+      progress.style.width = (total > 0 ? pageScroller.scrollTop / total * 100 : 0) + "%";
+    };
+    const scrollToHash = (behavior = reducedMotion.matches ? "auto" : "smooth") => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      const target = id ? document.getElementById(id) : null;
+      if(target) {
+        const top = target.getBoundingClientRect().top - pageScroller.getBoundingClientRect().top + pageScroller.scrollTop;
+        pageScroller.scrollTo({ top, behavior });
+      }
+    };
+    pageScroller.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("hashchange", () => scrollToHash());
+    window.addEventListener("load", () => requestAnimationFrame(() => scrollToHash("auto")));
+    updateProgress();
+    if(window.location.hash) {
+      requestAnimationFrame(() => requestAnimationFrame(() => scrollToHash("auto")));
+    }
+  </script>
+</body>
+</html>

@@ -32,6 +32,11 @@ Dali::Signal<void()>& ItemsLayouterImpl::LayoutInvalidatedSignal()
   return mLayoutInvalidatedSignal;
 }
 
+void ItemsLayouterImpl::RequestLayout()
+{
+  InvalidateLayout();
+}
+
 void ItemsLayouterImpl::InvalidateLayout()
 {
   mLayoutInvalidatedSignal.Emit();

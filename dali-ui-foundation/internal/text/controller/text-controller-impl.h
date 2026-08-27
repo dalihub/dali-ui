@@ -407,6 +407,7 @@ public:
     mTextFitCandidates(),
     mTextUpdateInfo(),
     mReplacementData(),
+    mEndEllipsisResult(),
     mTextColor(Color::BLACK),
     mAnchorColor(Color::MEDIUM_BLUE),
     mAnchorClickedColor(Color::DARK_MAGENTA),
@@ -473,11 +474,11 @@ public:
 
   ~Impl()
   {
+    mView.SetFinalElisionResult(nullptr);
     if(mReplacementData && mReplacementData->renderState.attempted)
     {
       mView.SetVisualModel(mModel->mVisualModel);
       mView.SetLogicalModel(mModel->mLogicalModel);
-      mView.SetFinalElisionResult(nullptr);
       TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
       mReplacementData->renderState.Clear(bidirectionalSupport);
     }
@@ -502,6 +503,31 @@ public:
       mFontClient = TextAbstraction::FontClient::Get();
     }
     return mFontClient;
+  }
+
+  void ClearEndEllipsisResult()
+  {
+    if(!HasValidReplacementSource())
+    {
+      mView.SetFinalElisionResult(nullptr);
+    }
+    mEndEllipsisResult.reset();
+  }
+
+  FinalElisionResult& GetOrCreateEndEllipsisResult()
+  {
+    if(!mEndEllipsisResult)
+    {
+      mEndEllipsisResult = std::make_unique<FinalElisionResult>();
+    }
+    return *mEndEllipsisResult;
+  }
+
+  const FinalElisionResult* GetEndEllipsisResult() const
+  {
+    return mEndEllipsisResult && mEndEllipsisResult->resolved
+             ? mEndEllipsisResult.get()
+             : nullptr;
   }
 
   /**
@@ -724,6 +750,8 @@ public:
     {
       mEventData->mEditableStyledText->ApplyEdit(start, removedLength, insertedLength);
     }
+
+    ClearEndEllipsisResult();
 
     if(!HasReplacementData())
     {
@@ -1538,10 +1566,11 @@ public:
   Shader                      mShaderBackground; ///< The shader for text background.
 
   // Containers / complex values
-  Vector<ModifyEvent>                mModifyEvents;      ///< Temporary stores the text set until the next relayout.
-  Dali::Vector<Text::Fit::Candidate> mTextFitCandidates; ///< List of Text::Fit::Candidate for TextFitCandidates operation.
-  TextUpdateInfo                     mTextUpdateInfo;    ///< Info of the characters updated.
-  std::unique_ptr<ReplacementData>   mReplacementData;   ///< Replacement data allocated on demand.
+  Vector<ModifyEvent>                 mModifyEvents;      ///< Temporary stores the text set until the next relayout.
+  Dali::Vector<Text::Fit::Candidate>  mTextFitCandidates; ///< List of Text::Fit::Candidate for TextFitCandidates operation.
+  TextUpdateInfo                      mTextUpdateInfo;    ///< Info of the characters updated.
+  std::unique_ptr<ReplacementData>    mReplacementData;   ///< Replacement data allocated on demand.
+  std::unique_ptr<FinalElisionResult> mEndEllipsisResult; ///< Non-replacement END result, alive only while elision is active.
 
   // Geometry / colors
   Vector4 mTextColor;          ///< The regular text color

@@ -286,7 +286,7 @@ private:
   /**
    * Remove texture with valid TextureId
    */
-  void RemoveTexture();
+  void RemoveTexture(bool keepUnusedTexture = false);
 
   /**
    * @brief Compute texture size

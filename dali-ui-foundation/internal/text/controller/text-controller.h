@@ -46,6 +46,7 @@
 namespace Dali::Ui::Text
 {
 class Controller;
+struct MarqueeStartAnchor;
 class StyledText;
 class View;
 class RenderingController;
@@ -2037,6 +2038,13 @@ public: // Queries & retrieves.
    * @return The resolved result, or nullptr when replacements are inactive.
    */
   const FinalElisionResult* GetFinalElisionResult() const;
+
+  /**
+   * @brief Resolves a retained static END-ellipsis anchor for a horizontal marquee transition.
+   *
+   * @return A stable retained source anchor, or an invalid legacy fallback.
+   */
+  MarqueeStartAnchor GetMarqueeStartAnchor() const;
 
   /**
    * @brief Gets the authored replacement snapshot.

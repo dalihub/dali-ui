@@ -21,6 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/async-text-interface.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-style-run-snapshot.h>
@@ -95,6 +96,7 @@ struct AsyncTextParameters
     textFitCandidates{},
     styledTextStyleSnapshot{},
     replacementSourceSnapshot{},
+    marqueeStartAnchor{},
     clickedAnchors{},
     fontSize{0.f},
     minLineSize{0.f},
@@ -193,6 +195,7 @@ struct AsyncTextParameters
   Dali::Ui::Text::Internal::StyledTextStyleRunSnapshot
                                        styledTextStyleSnapshot;   ///< Copy-safe StyledText style run snapshot for async rendering.
   ReplacementSourceSnapshot            replacementSourceSnapshot; ///< Copy-safe authored replacement values.
+  MarqueeStartAnchor                   marqueeStartAnchor;        ///< Static anchor copied into a marquee request.
   std::vector<AsyncAnchorClickedState> clickedAnchors;
 
   float fontSize;           ///< The font's size (in pixels).
@@ -216,9 +219,9 @@ struct AsyncTextParameters
   float textFitStepSize;
   float marqueeLoopDelay;
   float textRevealFadeDurationRatio; ///< Authored AUTO sentinel or normalized per-unit fade duration.
-  float renderScale;       ///< The render scale.
-  float renderScaleWidth;  ///< The requested original textWidth when using render scale.
-  float renderScaleHeight; ///< The requested original textHeight when using render scale.
+  float renderScale;                 ///< The render scale.
+  float renderScaleWidth;            ///< The requested original textWidth when using render scale.
+  float renderScaleHeight;           ///< The requested original textHeight when using render scale.
 
   int      maxTextureSize;              ///< The maximum size of texture.
   uint64_t replacementLayoutGeneration; ///< UI request generation copied to final replacement placements.
@@ -293,6 +296,9 @@ struct AsyncTextRenderInfo
     replacementLayoutGeneration(0u),
     lineCount(0),
     marqueeWrapGap(0.f),
+    marqueeStartAnchor(),
+    marqueeTextureAnchor(),
+    marqueeFittingStartGeometry(),
     textRevealFadeDuration(0.0f),
     hasMultipleTextColors(false),
     containsColorGlyph(false),
@@ -300,6 +306,9 @@ struct AsyncTextRenderInfo
     styleTextureEnabled(false),
     styleBlocksTextGradient(false),
     isOverlayStyle(false),
+    isMarqueeContentOverflow(false),
+    isMarqueeStartAnchorResolved(false),
+    isMarqueeFittingStartGeometryResolved(false),
     isTextDirectionRTL(false),
     isCutoutEnabled(false),
     isEmbossEnabled(false),
@@ -333,6 +342,9 @@ struct AsyncTextRenderInfo
   uint64_t                                  replacementLayoutGeneration;
   int                                       lineCount;
   float                                     marqueeWrapGap;
+  MarqueeStartAnchor                        marqueeStartAnchor;          ///< Static result in logical Label coordinates.
+  MarqueeTextureAnchor                      marqueeTextureAnchor;        ///< Marquee result in logical texture coordinates.
+  MarqueeFittingStartGeometry               marqueeFittingStartGeometry; ///< Effective fitting static translation.
   float                                     textRevealFadeDuration;
   bool                                      hasMultipleTextColors : 1;
   bool                                      containsColorGlyph : 1;
@@ -340,6 +352,9 @@ struct AsyncTextRenderInfo
   bool                                      styleTextureEnabled : 1;
   bool                                      styleBlocksTextGradient : 1;
   bool                                      isOverlayStyle : 1;
+  bool                                      isMarqueeContentOverflow : 1;
+  bool                                      isMarqueeStartAnchorResolved : 1;          ///< Whether this static render evaluated the anchor gate.
+  bool                                      isMarqueeFittingStartGeometryResolved : 1; ///< Whether this static render evaluated fitting geometry.
   bool                                      isTextDirectionRTL : 1;
   bool                                      isCutoutEnabled : 1;
   bool                                      isEmbossEnabled : 1;

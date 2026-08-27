@@ -103,6 +103,13 @@ public:
                            Length numberOfGlyphs) const = 0;
 
   /**
+   * @brief Retrieves source glyph indices used for authored styling of the final glyph sequence.
+   *
+   * @return A final-glyph-domain buffer, or nullptr when no resolved final sequence is active.
+   */
+  virtual const GlyphIndex* GetFinalGlyphStyleSourceIndices() const = 0;
+
+  /**
    * @brief Retrieves the vector of colors.
    *
    * @return Pointer to the vector of colors.

@@ -15,132 +15,132 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/item-adapter-impl.h>
 #include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
+#include <dali/integration-api/debug.h>
 
 namespace Dali
 {
 namespace Ui
 {
 
-struct ItemAdapter::Impl
+ItemAdapter ItemAdapter::New()
 {
-  Signal<uint32_t()>                           getItemCount;
-  Signal<View(uint32_t)>                       createItemView;
-  Signal<void(View, uint32_t)>                 bindItemView;
-  Signal<uint32_t(uint32_t)>                   getItemViewType;
-  Signal<void(View, uint32_t)>                 itemViewRecycled;
-  Signal<void(ItemAdapter&)>                   destroyed;
-  Signal<void(const ItemAdapter::ChangeInfo&)> dataChanged;
-};
+  ItemAdapterImplPtr impl = ItemAdapterImpl::New();
+  return ItemAdapter(impl.Get());
+}
 
-ItemAdapter::ItemAdapter()
-: mImpl(new Impl())
+ItemAdapter ItemAdapter::DownCast(BaseHandle handle)
+{
+  if(!handle)
+  {
+    return {};
+  }
+
+  auto* impl = dynamic_cast<ItemAdapterImpl*>(&handle.GetBaseObject());
+  return impl ? ItemAdapter(impl) : ItemAdapter{};
+}
+
+ItemAdapter::ItemAdapter(ItemAdapterImpl* impl)
+: BaseHandle(impl)
 {
 }
 
-ItemAdapter::~ItemAdapter()
+ItemAdapterImpl& ItemAdapter::GetImpl()
 {
-  mImpl->destroyed.Emit(*this);
-  delete mImpl;
+  DALI_ASSERT_ALWAYS(*this && "ItemAdapter handle is empty");
+  return static_cast<ItemAdapterImpl&>(GetBaseObject());
+}
+
+const ItemAdapterImpl& ItemAdapter::GetImpl() const
+{
+  DALI_ASSERT_ALWAYS(*this && "ItemAdapter handle is empty");
+  return static_cast<const ItemAdapterImpl&>(GetBaseObject());
 }
 
 Signal<uint32_t()>& ItemAdapter::GetItemCountSignal()
 {
-  return mImpl->getItemCount;
+  return GetImpl().GetItemCountSignal();
 }
 
-Signal<View(uint32_t)>& ItemAdapter::CreateItemViewSignal()
+Signal<void(ItemViewHolder&)>& ItemAdapter::CreateViewHolderSignal()
 {
-  return mImpl->createItemView;
+  return GetImpl().CreateViewHolderSignal();
 }
 
-Signal<void(View, uint32_t)>& ItemAdapter::BindItemViewSignal()
+Signal<void(ItemViewHolder&)>& ItemAdapter::BindViewHolderSignal()
 {
-  return mImpl->bindItemView;
+  return GetImpl().BindViewHolderSignal();
 }
 
 Signal<uint32_t(uint32_t)>& ItemAdapter::GetItemViewTypeSignal()
 {
-  return mImpl->getItemViewType;
+  return GetImpl().GetItemViewTypeSignal();
 }
 
-Signal<void(View, uint32_t)>& ItemAdapter::ItemViewRecycledSignal()
+Signal<void(ItemViewHolder&)>& ItemAdapter::RecycleViewHolderSignal()
 {
-  return mImpl->itemViewRecycled;
-}
-
-uint32_t ItemAdapter::GetItemCount() const
-{
-  return mImpl->getItemCount.Emit();
-}
-
-uint32_t ItemAdapter::GetItemViewType(uint32_t position) const
-{
-  if(mImpl->getItemViewType.GetConnectionCount() > 0u)
-  {
-    return mImpl->getItemViewType.Emit(position);
-  }
-  return 0u;
-}
-
-View ItemAdapter::CreateItemView(uint32_t viewType)
-{
-  return mImpl->createItemView.Emit(viewType);
-}
-
-void ItemAdapter::BindItemView(View itemView, uint32_t position)
-{
-  mImpl->bindItemView.Emit(itemView, position);
-}
-
-void ItemAdapter::ItemViewRecycled(View itemView, uint32_t viewType)
-{
-  mImpl->itemViewRecycled.Emit(itemView, viewType);
-}
-
-Signal<void(ItemAdapter&)>& ItemAdapter::DestroyedSignal()
-{
-  return mImpl->destroyed;
-}
-
-void ItemAdapter::NotifyDataSetChanged()
-{
-  mImpl->dataChanged.Emit(ChangeInfo{ChangeType::FULL, 0u, 0u, 0u});
-}
-
-void ItemAdapter::NotifyItemChanged(uint32_t position, uint32_t count)
-{
-  mImpl->dataChanged.Emit(ChangeInfo{ChangeType::CHANGED, position, count, 0u});
-}
-
-void ItemAdapter::NotifyItemContentChanged(uint32_t position, uint32_t count)
-{
-  mImpl->dataChanged.Emit(ChangeInfo{ChangeType::CONTENT_CHANGED, position, count, 0u});
-}
-
-void ItemAdapter::NotifyItemInserted(uint32_t position, uint32_t count)
-{
-  mImpl->dataChanged.Emit(ChangeInfo{ChangeType::INSERTED, position, count, 0u});
-}
-
-void ItemAdapter::NotifyItemRemoved(uint32_t position, uint32_t count)
-{
-  mImpl->dataChanged.Emit(ChangeInfo{ChangeType::REMOVED, position, count, 0u});
-}
-
-void ItemAdapter::NotifyItemMoved(uint32_t fromPosition, uint32_t toPosition)
-{
-  mImpl->dataChanged.Emit(ChangeInfo{ChangeType::MOVED, fromPosition, 1u, toPosition});
+  return GetImpl().RecycleViewHolderSignal();
 }
 
 Signal<void(const ItemAdapter::ChangeInfo&)>& ItemAdapter::DataChangedSignal()
 {
-  return mImpl->dataChanged;
+  return GetImpl().DataChangedSignal();
 }
 
-ItemAdapter::Extension* ItemAdapter::GetExtension()
+void ItemAdapter::NotifyDataSetChanged()
 {
-  return nullptr;
+  GetImpl().NotifyDataSetChanged();
+}
+
+void ItemAdapter::NotifyItemChanged(uint32_t position, uint32_t count)
+{
+  GetImpl().NotifyItemChanged(position, count);
+}
+
+void ItemAdapter::NotifyItemContentChanged(uint32_t position, uint32_t count)
+{
+  GetImpl().NotifyItemContentChanged(position, count);
+}
+
+void ItemAdapter::NotifyItemInserted(uint32_t position, uint32_t count)
+{
+  GetImpl().NotifyItemInserted(position, count);
+}
+
+void ItemAdapter::NotifyItemRemoved(uint32_t position, uint32_t count)
+{
+  GetImpl().NotifyItemRemoved(position, count);
+}
+
+void ItemAdapter::NotifyItemMoved(uint32_t fromPosition, uint32_t toPosition)
+{
+  GetImpl().NotifyItemMoved(fromPosition, toPosition);
+}
+
+uint32_t ItemAdapter::GetItemCount() const
+{
+  return GetImpl().GetItemCount();
+}
+
+uint32_t ItemAdapter::GetItemViewType(uint32_t position) const
+{
+  return GetImpl().GetItemViewType(position);
+}
+
+void ItemAdapter::CreateViewHolder(ItemViewHolder& holder)
+{
+  GetImpl().CreateViewHolder(holder);
+}
+
+void ItemAdapter::BindViewHolder(ItemViewHolder& holder)
+{
+  GetImpl().BindViewHolder(holder);
+}
+
+void ItemAdapter::RecycleViewHolder(ItemViewHolder& holder)
+{
+  GetImpl().RecycleViewHolder(holder);
 }
 
 } // namespace Ui

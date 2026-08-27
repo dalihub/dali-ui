@@ -1,5 +1,5 @@
-#ifndef DALI_UI_TEXT_END_ELLIPSIS_PLANNER_H
-#define DALI_UI_TEXT_END_ELLIPSIS_PLANNER_H
+#ifndef DALI_UI_TEXT_ELLIPSIS_PLANNER_H
+#define DALI_UI_TEXT_ELLIPSIS_PLANNER_H
 
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/glyph-info.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/math/vector2.h>
@@ -29,14 +30,6 @@
 
 namespace Dali::Ui::Text
 {
-/**
- * @brief Resolves ellipsis metrics for a planner candidate.
- */
-using EndEllipsisMetricsResolver = bool (*)(void*                       context,
-                                            FontId                      fontId,
-                                            bool                        allowDefaultFont,
-                                            TextAbstraction::GlyphInfo& metrics);
-
 /**
  * @brief Provides non-owning input for END ellipsis planning.
  */
@@ -55,8 +48,6 @@ struct EndEllipsisInputView
   float                                   lineWidth{0.0f};
   float                                   positionOffset{0.0f};
   float                                   modelCharacterSpacing{0.0f};
-  void*                                   metricsContext{nullptr};
-  EndEllipsisMetricsResolver              resolveMetrics{nullptr};
 };
 
 /**
@@ -79,10 +70,12 @@ struct EndEllipsisPlan
  * @brief Resolves the END ellipsis removal boundary without modifying the input.
  *
  * @param[in] input The END ellipsis input.
+ * @param[in] fontClient The font client used to resolve ellipsis metrics.
  * @return The resolved END ellipsis plan.
  */
-EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView& input);
+EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView&  input,
+                                       TextAbstraction::FontClient& fontClient);
 
 } // namespace Dali::Ui::Text
 
-#endif // DALI_UI_TEXT_END_ELLIPSIS_PLANNER_H
+#endif // DALI_UI_TEXT_ELLIPSIS_PLANNER_H

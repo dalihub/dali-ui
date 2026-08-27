@@ -21,8 +21,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-metrics.h>
-#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-planner.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-planner.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
@@ -510,7 +509,7 @@ struct View::Impl
 {
   VisualModelPtr            mVisualModel;
   LogicalModelPtr           mLogicalModel;
-  const FinalElisionResult* mFinalElisionResult{nullptr}; ///< Non-owning replacement result.
+  const FinalElisionResult* mFinalElisionResult{nullptr}; ///< Non-owning authoritative final glyph sequence.
 };
 
 View::View()
@@ -702,6 +701,11 @@ const Vector2& View::GetControlSize() const
 
 const Vector2& View::GetLayoutSize() const
 {
+  const FinalElisionResult* finalResult = mImpl->mFinalElisionResult;
+  if(finalResult && finalResult->HasAuthoritativeLayout())
+  {
+    return finalResult->layoutSize;
+  }
   if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetLayoutSize();
@@ -712,6 +716,11 @@ const Vector2& View::GetLayoutSize() const
 
 Length View::GetNumberOfGlyphs() const
 {
+  const FinalElisionResult* finalResult = mImpl->mFinalElisionResult;
+  if(finalResult && finalResult->resolved && finalResult->textElided)
+  {
+    return static_cast<Length>(finalResult->glyphs.Count());
+  }
   if(mImpl->mVisualModel)
   {
     const VisualModel& model = *mImpl->mVisualModel;
@@ -751,6 +760,14 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
   }
 
   return GetGlyphsUncached(glyphs, glyphPositions, nullptr, minLineOffset, glyphIndex, numberOfGlyphs);
+}
+
+const GlyphIndex* View::GetFinalGlyphStyleSourceIndices() const
+{
+  const FinalElisionResult* finalResult = mImpl->mFinalElisionResult;
+  return finalResult && finalResult->resolved && !finalResult->finalToStyleGlyphIndices.Empty()
+           ? finalResult->finalToStyleGlyphIndices.Begin()
+           : nullptr;
 }
 
 Length View::GetGlyphsUncached(GlyphInfo*                   glyphs,
@@ -998,7 +1015,9 @@ Length View::GetGlyphsUncached(GlyphInfo*                   glyphs,
             return numberOfLaidOutGlyphs;
           }
 
-          // Add the ellipsis glyph.
+          // Add the ellipsis glyph. Controller-owned non-replacement END returns
+          // from GetGlyphs() with FinalElisionResult before this fallback. END
+          // here serves replacement projection and standalone View clients.
           Length     numberOfRemovedGlyphs = 0u;
           GlyphIndex indexOfEllipsis       = startIndexOfEllipsis;
 
@@ -1023,12 +1042,9 @@ Length View::GetGlyphsUncached(GlyphInfo*                   glyphs,
             input.startIndex              = startIndexOfEllipsis;
             input.lineWidth               = ellipsisLine->width;
             input.modelCharacterSpacing   = modelCharacterSpacing;
-            input.metricsContext          = &getFontClient();
-            input.resolveMetrics          = ResolveFontClientEndEllipsisMetrics;
-
-            const EndEllipsisPlan plan = ResolveEndEllipsisPlan(input);
-            numberOfRemovedGlyphs      = plan.numberOfRemovedGlyphs;
-            ellipsisInserted           = plan.resolved;
+            const EndEllipsisPlan plan    = ResolveEndEllipsisPlan(input, getFontClient());
+            numberOfRemovedGlyphs         = plan.numberOfRemovedGlyphs;
+            ellipsisInserted              = plan.resolved;
             if(ellipsisInserted)
             {
               indexOfEllipsis                 = plan.ellipsisGlyphIndex;
@@ -1075,6 +1091,11 @@ const Vector4* View::GetColors() const
 
 const ColorIndex* View::GetColorIndices() const
 {
+  const FinalElisionResult* finalResult = mImpl->mFinalElisionResult;
+  if(finalResult && finalResult->resolved && !finalResult->colorIndices.Empty())
+  {
+    return finalResult->colorIndices.Begin();
+  }
   if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mColorIndices.Begin();
@@ -1095,6 +1116,11 @@ const Vector4* View::GetBackgroundColors() const
 
 const ColorIndex* View::GetBackgroundColorIndices() const
 {
+  const FinalElisionResult* finalResult = mImpl->mFinalElisionResult;
+  if(finalResult && finalResult->resolved && !finalResult->backgroundColorIndices.Empty())
+  {
+    return finalResult->backgroundColorIndices.Begin();
+  }
   if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mBackgroundColorIndices.Begin();

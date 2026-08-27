@@ -857,6 +857,7 @@ void Controller::TextUpdater::ResetText(Controller& controller)
   {
     impl.InvalidateReplacementRenderState();
   }
+  impl.ClearEndEllipsisResult();
 
   // Reset buffers.
   logicalModel->mText.Clear();

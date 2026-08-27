@@ -232,10 +232,9 @@ ImageVisual::~ImageVisual()
       }
     }
 
-    // ImageVisual destroyed so remove texture unless ReleasePolicy is set to never release
-    if((mTextureId != TextureManager::INVALID_TEXTURE_ID) && (mReleasePolicy != Ui::Image::ReleasePolicy::NEVER))
+    if(mTextureId != TextureManager::INVALID_TEXTURE_ID)
     {
-      RemoveTexture();
+      RemoveTexture(mReleasePolicy == Ui::Image::ReleasePolicy::NEVER);
     }
 
     ResetFastTrackLoadingTask();
@@ -1301,11 +1300,11 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
   ResourceReady(resourceStatus);
 }
 
-void ImageVisual::RemoveTexture()
+void ImageVisual::RemoveTexture(bool keepUnusedTexture)
 {
   if(mTextureId != TextureManager::INVALID_TEXTURE_ID)
   {
-    mFactoryCache.GetTextureManager().RequestRemove(mTextureId, this);
+    mFactoryCache.GetTextureManager().RequestRemove(mTextureId, this, keepUnusedTexture);
     mTextureId = TextureManager::INVALID_TEXTURE_ID;
   }
   else

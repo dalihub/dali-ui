@@ -19,65 +19,115 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/animation/animation.h>
-#include <functional>
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {
 namespace Ui
 {
+namespace Integration DALI_INTERNAL
+{
+class NavigationTransitionSpecImpl;
+}
 
 /**
  * @brief Navigation transition animation specification.
  *
  * A specification may be installed as the Navigator-wide default, a modal
- * transition default, or a per-page override. Each factory receives the
- * animation created by Navigator and appends property animations to it.
- * Factories must not Play(), Stop(), or change the duration of the supplied
- * animation.
+ * transition default, or a per-page override. Animator signal callbacks
+ * receive the animation created by Navigator and append property animations
+ * to it. They must not Play(), Stop(), or change the duration of the supplied
+ * animation. Transition callbacks must not mutate the Navigator's page or modal
+ * stacks; re-entrant navigation requests are ignored while callbacks run.
+ *
+ * The handle is reference counted. Copies share the same callbacks and
+ * duration.
  */
-struct NavigationTransitionSpec
+class DALI_UI_COMPONENTS_API NavigationTransitionSpec : public BaseHandle
 {
+public:
   /**
-   * @brief Adds animation steps for one view.
-   * @param[in,out] anim The animation created by Navigator
-   * @param[in] view The view to animate
+   * @brief Signal used to append animation steps for one view.
+   *
+   * Parameters are the animation created by Navigator and the view to animate.
    */
-  using AnimFactory = std::function<void(Dali::Animation& anim, Ui::View view)>;
+  using AnimatorSignalType = Signal<void(Dali::Animation&, Ui::View)>;
 
   /**
-   * @brief Restores a view to its final resting state after a transition.
-   * @param[in] view The view to snap
+   * @brief Signal used to restore one view to its final resting state.
    */
-  using SnapFunction = std::function<void(Ui::View view)>;
+  using SnapSignalType = Signal<void(Ui::View)>;
 
-  AnimFactory enter;    ///< Incoming view for Push or PushModal.
-  AnimFactory exit;     ///< Outgoing view for Push or PushModal.
-  AnimFactory popEnter; ///< Incoming/revealed view for Pop or PopModal.
-  AnimFactory popExit;  ///< Outgoing/removed view for Pop or PopModal.
+  /**
+   * @brief Creates an uninitialized handle.
+   */
+  NavigationTransitionSpec();
+
+  /**
+   * @brief Creates an initialized transition specification.
+   * @return A new transition specification
+   */
+  static NavigationTransitionSpec New();
+
+  NavigationTransitionSpec(const NavigationTransitionSpec& other);
+  NavigationTransitionSpec(NavigationTransitionSpec&& rhs) noexcept;
+  ~NavigationTransitionSpec();
+  NavigationTransitionSpec& operator=(const NavigationTransitionSpec& other);
+  NavigationTransitionSpec& operator=(NavigationTransitionSpec&& rhs) noexcept;
+
+  /**
+   * @brief Downcasts a handle to NavigationTransitionSpec.
+   * @param[in] handle The handle to downcast
+   * @return A transition specification, or an uninitialized handle
+   */
+  static NavigationTransitionSpec DownCast(BaseHandle handle);
+
+  /// @brief Incoming view for Push or PushModal.
+  AnimatorSignalType& EnterSignal();
+  /// @brief Outgoing view for Push or PushModal.
+  AnimatorSignalType& ExitSignal();
+  /// @brief Incoming/revealed view for Pop or PopModal.
+  AnimatorSignalType& PopEnterSignal();
+  /// @brief Outgoing/removed view for Pop or PopModal.
+  AnimatorSignalType& PopExitSignal();
 
   /**
    * @brief Snaps an incoming view to its visible final state.
    *
-   * If omitted, Navigator sets opacity to 1.0f.
+   * If no callback is connected, Navigator sets opacity to 1.0f.
    */
-  SnapFunction snapIncoming;
+  SnapSignalType& SnapIncomingSignal();
 
   /**
    * @brief Snaps an outgoing view that remains in the stack to its resting state.
    *
-   * If omitted, Navigator leaves the outgoing view untouched.
+   * If no callback is connected, Navigator leaves the outgoing view untouched.
    */
-  SnapFunction snapOutgoing;
+  SnapSignalType& SnapOutgoingSignal();
 
   /**
-   * @brief Transition duration in seconds.
+   * @brief Sets the transition duration in seconds.
    *
-   * A value of 0.0f uses Navigator's default transition duration.
+   * A value less than or equal to 0.0f uses Navigator's default duration.
+   * @param[in] duration The duration in seconds
    */
-  float duration{0.0f};
+  void SetDuration(float duration);
+
+  /**
+   * @brief Gets the transition duration in seconds.
+   * @return The configured duration, or 0.0f when Navigator's default is used
+   */
+  float GetDuration() const;
+
+public: // Not intended for application developers
+  /// @cond internal
+  explicit DALI_INTERNAL NavigationTransitionSpec(Integration::NavigationTransitionSpecImpl* implementation);
+  /// @endcond
 };
 
 } // namespace Ui

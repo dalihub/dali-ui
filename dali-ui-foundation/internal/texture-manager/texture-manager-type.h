@@ -243,7 +243,8 @@ struct TextureInfo
     orientationCorrection(true),
     preMultiplyOnLoad(preMultiplyOnLoad),
     preMultiplied(preMultiplyOnLoad),
-    loadYuvPlanes(loadYuvPlanes)
+    loadYuvPlanes(loadYuvPlanes),
+    keepUnusedTexture(false)
   {
     isAnimatedImageFormat = (animatedImageLoading) ? true : false;
   }
@@ -280,6 +281,7 @@ struct TextureInfo
   bool preMultiplied : 1;         ///< True if the image's color was multiplied by it's alpha
   bool isAnimatedImageFormat : 1; ///< true if the image is requested from animated image visual.
   bool loadYuvPlanes : 1;         ///< true if the image should be loaded as yuv planes
+  bool keepUnusedTexture : 1;     ///< True if the unused texture should be kept until explicitly cleared.
 };
 
 /**

@@ -39,10 +39,25 @@ using LinearItemsLayouterImplPtr = IntrusivePtr<LinearItemsLayouterImpl>;
  * Fill and LayoutChunk are non-virtual methods of this end class —
  * they are not part of the ItemsLayouterImpl interface and cannot
  * be overridden.
+ *
+ * Subclasses may override GetItemCrossInset to inset individual items
+ * along the cross axis (e.g. horizontal margins in a vertical list).
  */
-class DALI_UI_API LinearItemsLayouterImpl : public Integration::ItemsLayouterImpl
+class DALI_UI_API LinearItemsLayouterImpl : public Integration::ItemsLayouterImpl,
+                                            public Integration::ItemsLayouterDecorationSupport
 {
 public:
+  /**
+   * @brief Per-item cross-axis inset returned by GetItemCrossInset.
+   *
+   * For a vertical list: leadingCrossOffset = left margin, trailingCrossOffset = right margin.
+   * For a horizontal list: leadingCrossOffset = top margin, trailingCrossOffset = bottom margin.
+   */
+  struct ItemInset
+  {
+    float leadingCrossOffset{0.0f};
+    float trailingCrossOffset{0.0f};
+  };
   static LinearItemsLayouterImplPtr New(Orientation orientation);
 
   explicit LinearItemsLayouterImpl(Orientation orientation);
@@ -70,6 +85,17 @@ public:
   float       GetItemSpacing() const override;
 
   void OnAdapterChanged() override;
+  void OnDecorationChanged() override;
+
+  /**
+   * @brief Returns the cross-axis inset for the item at @a position.
+   *
+   * Called by LayoutChunk for every item during layout. The default
+   * implementation returns zero inset (no offset). Override in subclasses
+   * to apply per-item horizontal (vertical list) or vertical (horizontal list)
+   * margins without modifying LayoutChunk directly.
+   */
+  virtual ItemInset GetItemCrossInset(uint32_t position) const;
 
 private:
   struct LayoutState

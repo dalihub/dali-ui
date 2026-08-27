@@ -147,6 +147,14 @@ void ViewModel::SetFinalElisionResult(const FinalElisionResult* result)
   mFinalElisionResult = result;
 }
 
+const GlyphIndex* ViewModel::GetFinalGlyphStyleSourceIndices() const
+{
+  return mFinalElisionResult && mFinalElisionResult->resolved &&
+             !mFinalElisionResult->finalToStyleGlyphIndices.Empty()
+           ? mFinalElisionResult->finalToStyleGlyphIndices.Begin()
+           : nullptr;
+}
+
 void ViewModel::EnableFinalGlyphMapping()
 {
   mFinalGlyphMappingRequested = true;
@@ -173,6 +181,10 @@ const Size& ViewModel::GetControlSize() const
 
 const Size& ViewModel::GetLayoutSize() const
 {
+  if(mFinalElisionResult && mFinalElisionResult->HasAuthoritativeLayout())
+  {
+    return mFinalElisionResult->layoutSize;
+  }
   return mModel->GetLayoutSize();
 }
 
@@ -208,12 +220,18 @@ bool ViewModel::IsTextElideEnabled() const
 
 Length ViewModel::GetNumberOfLines() const
 {
-  return mModel->GetNumberOfLines();
+  return mFinalElisionResult && mFinalElisionResult->resolved && mFinalElisionResult->textElided &&
+             mFinalElisionResult->authoritativeLines
+           ? static_cast<Length>(mFinalElisionResult->lines.Count())
+           : mModel->GetNumberOfLines();
 }
 
 const LineRun* ViewModel::GetLines() const
 {
-  return mModel->GetLines();
+  return mFinalElisionResult && mFinalElisionResult->resolved && mFinalElisionResult->textElided &&
+             mFinalElisionResult->authoritativeLines
+           ? mFinalElisionResult->lines.Begin()
+           : mModel->GetLines();
 }
 
 Length ViewModel::GetNumberOfScripts() const
@@ -235,7 +253,7 @@ Length ViewModel::GetNumberOfGlyphs() const
 {
   if(mIsTextElided && mModel->IsTextElideEnabled())
   {
-  return mFinalElisionResult ? static_cast<Length>(mFinalElisionResult->glyphs.Count()) : static_cast<Length>(mElidedGlyphs.Count());
+    return mFinalElisionResult ? static_cast<Length>(mFinalElisionResult->glyphs.Count()) : static_cast<Length>(mElidedGlyphs.Count());
   }
   else
   {
@@ -320,7 +338,9 @@ const Vector4* ViewModel::GetColors() const
 
 const ColorIndex* ViewModel::GetColorIndices() const
 {
-  return mModel->GetColorIndices();
+  return mFinalElisionResult && mFinalElisionResult->resolved && !mFinalElisionResult->colorIndices.Empty()
+           ? mFinalElisionResult->colorIndices.Begin()
+           : mModel->GetColorIndices();
 }
 
 const Vector4* ViewModel::GetBackgroundColors() const
@@ -330,7 +350,9 @@ const Vector4* ViewModel::GetBackgroundColors() const
 
 const ColorIndex* ViewModel::GetBackgroundColorIndices() const
 {
-  return mModel->GetBackgroundColorIndices();
+  return mFinalElisionResult && mFinalElisionResult->resolved && !mFinalElisionResult->backgroundColorIndices.Empty()
+           ? mFinalElisionResult->backgroundColorIndices.Begin()
+           : mModel->GetBackgroundColorIndices();
 }
 
 bool ViewModel::IsMarkupBackgroundColorSet() const
@@ -496,8 +518,8 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
   const bool finalGlyphMappingRequested = mFinalGlyphMappingRequested;
   mFinalGlyphMappingRequested           = false;
 
-  mIsTextElided             = false;
-  mEllipsisFinalGlyphIndex  = FinalElisionResult::INVALID_GLYPH_INDEX;
+  mIsTextElided            = false;
+  mEllipsisFinalGlyphIndex = FinalElisionResult::INVALID_GLYPH_INDEX;
   mElidedFinalToSourceGlyphIndices.Clear();
   mStartIndexOfElidedGlyphs = mFirstMiddleIndexOfElidedGlyphs = mSecondMiddleIndexOfElidedGlyphs = 0;
   mEndIndexOfElidedGlyphs                                                                        = mModel->GetNumberOfGlyphs() == 0u ? 0u : mModel->GetNumberOfGlyphs() - 1u;
@@ -514,24 +536,35 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
     {
       const Length finalGlyphCount = static_cast<Length>(mFinalElisionResult->glyphs.Count());
       mElidedFinalToSourceGlyphIndices.Resize(finalGlyphCount);
-      std::fill(mElidedFinalToSourceGlyphIndices.Begin(),
-                mElidedFinalToSourceGlyphIndices.End(),
-                FinalElisionResult::INVALID_GLYPH_INDEX);
-      for(GlyphIndex sourceGlyph = 0u;
-          sourceGlyph < mFinalElisionResult->sourceToFinalGlyphIndices.Count();
-          ++sourceGlyph)
+      if(mFinalElisionResult->finalToSourceGlyphIndices.Count() == finalGlyphCount)
       {
-        const GlyphIndex finalGlyph = mFinalElisionResult->sourceToFinalGlyphIndices[sourceGlyph];
-        if(finalGlyph < finalGlyphCount)
+        std::copy(mFinalElisionResult->finalToSourceGlyphIndices.Begin(),
+                  mFinalElisionResult->finalToSourceGlyphIndices.End(),
+                  mElidedFinalToSourceGlyphIndices.Begin());
+      }
+      else
+      {
+        std::fill(mElidedFinalToSourceGlyphIndices.Begin(),
+                  mElidedFinalToSourceGlyphIndices.End(),
+                  FinalElisionResult::INVALID_GLYPH_INDEX);
+        for(GlyphIndex sourceGlyph = 0u;
+            sourceGlyph < mFinalElisionResult->sourceToFinalGlyphIndices.Count();
+            ++sourceGlyph)
         {
-          mElidedFinalToSourceGlyphIndices[finalGlyph] = sourceGlyph;
+          const GlyphIndex finalGlyph = mFinalElisionResult->sourceToFinalGlyphIndices[sourceGlyph];
+          if(finalGlyph < finalGlyphCount)
+          {
+            mElidedFinalToSourceGlyphIndices[finalGlyph] = sourceGlyph;
+          }
         }
       }
     }
     return;
   }
 
-  // Ordinary models retain the existing renderer-owned ellipsis path.
+  // START/MIDDLE retain the renderer-owned ellipsis path. Controller and async
+  // non-replacement END supply FinalElisionResult above; the END branch below
+  // remains only for standalone ModelInterface clients outside that pipeline.
   auto                          ellipsisPosition          = GetEllipsisPosition();
   auto                          characterSpacing          = GetCharacterSpacing();
   const Character*              textBuffer                = GetTextBuffer();
@@ -771,7 +804,7 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
                       nextXPositions               = positionOfNextGlyph.x;
                     }
 
-                    if(GetCharacterDirection(indexOfEllipsis)) // RTL character
+                    if(GetCharacterDirection(glyphToCharacterMapBuffer[indexOfEllipsis])) // RTL character
                     {
                       if((indexOfEllipsis > 0u) && ((position.x - nextXPositions) > removedGlypsWidth))
                       {
@@ -818,7 +851,7 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
                       nextXPositions               = positionOfNextGlyph.x;
                     }
 
-                    if(!GetCharacterDirection(indexOfEllipsis)) // LTR Character
+                    if(!GetCharacterDirection(glyphToCharacterMapBuffer[indexOfEllipsis])) // LTR Character
                     {
                       position.x = firstPenX + removedGlypsWidth - ellipsisGlyphWidth;
 

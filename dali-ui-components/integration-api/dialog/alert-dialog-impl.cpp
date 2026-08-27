@@ -23,7 +23,6 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
-#include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
@@ -108,55 +107,33 @@ Dali::String AlertDialogImpl::GetMessage() const
   return mMessage;
 }
 
-void AlertDialogImpl::SetActionButtons(const std::vector<std::pair<Dali::String, std::function<void()>>>& buttons)
+Ui::TextButton AlertDialogImpl::AddActionButton(const Dali::String& text)
 {
-  mActionHandlers.clear();
-
-  if(buttons.empty())
+  StackLayout row = StackLayout::DownCast(mActionButtonRow);
+  if(!row || GetFooterView() != row)
   {
-    SetFooterView(Ui::View());
-    return;
+    row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(64.0f);
+    row.SetSpacing(8.0f);
+    mActionButtonRow = row;
+    SetFooterView(row);
   }
 
-  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
-  row.SetRequestedWidth(MATCH_PARENT);
-  row.SetRequestedHeight(64.0f);
-  row.SetSpacing(8.0f);
+  Ui::TextButton button = Ui::TextButton::New(text);
+  button.SetBackgroundColor(UiColor(0x3367D6u));
+  button.SetTextColor(UiColor(0xFFFFFFu));
+  button.SetFontSize(16.0f);
+  button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+  row.Add(button);
 
-  for(const auto& entry : buttons)
-  {
-    InteractiveView button = InteractiveView::New();
-    button.SetBackgroundColor(UiColor(0x3367D6u));
-    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-
-    Ui::Label label = Ui::Label::New(entry.first);
-    label.SetFontSize(16.0f);
-    label.SetTextColor(UiColor(0xFFFFFFu));
-    label.SetRequestedX(16.0f);
-    label.SetRequestedY(18.0f);
-    button.Add(label);
-
-    button.ConnectClickedSignal(this, &AlertDialogImpl::OnActionClicked);
-    mActionHandlers.emplace_back(button, entry.second);
-    row.Add(button);
-  }
-
-  SetFooterView(row);
+  return button;
 }
 
-void AlertDialogImpl::OnActionClicked(Ui::View view, Ui::InputEvent /*event*/)
+void AlertDialogImpl::ClearActionButtons()
 {
-  for(auto& entry : mActionHandlers)
-  {
-    if(entry.first == view)
-    {
-      if(entry.second)
-      {
-        entry.second();
-      }
-      return;
-    }
-  }
+  SetFooterView(Ui::View());
+  mActionButtonRow = Ui::View();
 }
 
 } // namespace Integration

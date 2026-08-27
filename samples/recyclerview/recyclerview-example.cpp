@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 #include <dali/dali.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/adaptor-framework/timer.h>
@@ -135,9 +136,9 @@ public:
   {
     adapter.GetItemCountSignal().Connect(this, &RecyclingTextAdapter::GetItemCount);
     adapter.GetItemViewTypeSignal().Connect(this, &RecyclingTextAdapter::GetItemViewType);
-    adapter.CreateItemViewSignal().Connect(this, &RecyclingTextAdapter::CreateItemView);
-    adapter.BindItemViewSignal().Connect(this, &RecyclingTextAdapter::BindItemView);
-    adapter.ItemViewRecycledSignal().Connect(this, &RecyclingTextAdapter::ItemViewRecycled);
+    adapter.CreateViewHolderSignal().Connect(this, &RecyclingTextAdapter::CreateViewHolder);
+    adapter.BindViewHolderSignal().Connect(this, &RecyclingTextAdapter::BindViewHolder);
+    adapter.RecycleViewHolderSignal().Connect(this, &RecyclingTextAdapter::RecycleViewHolder);
   }
 
   void SetRange(uint32_t first, uint32_t last)
@@ -172,9 +173,10 @@ public:
   uint32_t GetFocusedPosition() const { return mFocusedPosition; }
 
 private:
-  // Per-view tracking: associates each created Label with its current data position.
+  // Per-view tracking: associates each created container+label pair with its data position.
   struct ViewRecord
   {
+    View     container;
     Label    label;
     uint32_t position{INVALID_POS};
   };
@@ -183,85 +185,89 @@ private:
 
   uint32_t GetItemViewType(uint32_t position) { return ViewTypeFor(position); }
 
-  View CreateItemView(uint32_t viewType)
+  void CreateViewHolder(ItemViewHolder& holder)
   {
     ++mCreateCount;
 
-    Label row = Label::New();
+    const uint32_t viewType = holder.viewType;
+
+    StackLayout row = StackLayout::New(StackOrientation::VERTICAL);
     row.SetRequestedWidth(WINDOW_W);
     row.SetRequestedHeight(ROW_H);
     row.SetBackgroundColor(NormalBgForType(viewType));
-    row.SetTextColor(viewType == 3u ? COLOR_TEXT_DISABLED : COLOR_TEXT);
-    row.SetProperty(View::Property::CORNER_RADIUS, Vector4(6.0f, 6.0f, 6.0f, 6.0f));
+    row.SetCornerRadius(6.0f);
 
     // Types 0/1/2 are focusable: AsInteractive() attaches press/click StateEffect,
     // SetFocusable enables keyboard navigation. Type 3 is unfocusable — no trait needed.
     if(viewType != 3u)
     {
       row.AsInteractive();
+      row.SetStateEffect(OverlayEffect::ListItem());
       row.SetFocusable(true);
     }
 
-    mViewRecords.push_back({row, INVALID_POS});
+    Label label = Label::New();
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetTextColor(viewType == 3u ? COLOR_TEXT_DISABLED : COLOR_TEXT);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.Add(label);
+
+    holder.view = row;
+    mViewRecords.push_back({row, label, INVALID_POS});
     UpdateStatsText();
-    return row;
   }
 
-  void BindItemView(View itemView, uint32_t position)
+  void BindViewHolder(ItemViewHolder& holder)
   {
     ++mBindCount;
 
-    Label row = Label::DownCast(itemView);
-    if(!row) return;
-
-    // Update position record.
     auto it = std::find_if(mViewRecords.begin(), mViewRecords.end(),
-                           [&](const ViewRecord& r) { return r.label == row; });
-    if(it != mViewRecords.end()) it->position = position;
+                           [&](const ViewRecord& r) { return r.container == holder.view; });
+    if(it == mViewRecords.end()) return;
 
-    const float    height   = GetItemHeight(position);
+    it->position = holder.position;
+
+    const float    height   = GetItemHeight(holder.position);
     const uint32_t viewSlot = static_cast<uint32_t>(it - mViewRecords.begin());
 
-    row.SetRequestedHeight(height);
-    row.SetText(BuildRowText(viewSlot, position, height));
-    ApplyRowStyle(row, position);
+    holder.view.SetRequestedHeight(height);
+    it->label.SetText(BuildRowText(viewSlot, holder.position, height));
+    ApplyRowStyle(holder.view, it->label, holder.position);
 
     UpdateStatsText();
   }
 
-  void ItemViewRecycled(View itemView, uint32_t /*viewType*/)
+  void RecycleViewHolder(ItemViewHolder& holder)
   {
     ++mRecycleCount;
-    Label row = Label::DownCast(itemView);
-    auto  it  = std::find_if(mViewRecords.begin(), mViewRecords.end(),
-                              [&](const ViewRecord& r) { return r.label == row; });
+    auto it = std::find_if(mViewRecords.begin(), mViewRecords.end(),
+                           [&](const ViewRecord& r) { return r.container == holder.view; });
     if(it != mViewRecords.end()) it->position = INVALID_POS;
     UpdateStatsText();
   }
 
   // Apply visual style: unfocusable (grey) vs normal (type colour).
-  void ApplyRowStyle(Label row, uint32_t position)
+  void ApplyRowStyle(View container, Label label, uint32_t position)
   {
-    if(!row) return;
+    if(!container || !label) return;
     if(!IsFocusable(position))
     {
-      row.SetBackgroundColor(COLOR_ROW_DISABLED);
-      row.SetTextColor(COLOR_TEXT_DISABLED);
+      container.SetBackgroundColor(COLOR_ROW_DISABLED);
+      label.SetTextColor(COLOR_TEXT_DISABLED);
     }
     else
     {
-      row.SetBackgroundColor(NormalBgForType(ViewTypeFor(position)));
-      row.SetTextColor(COLOR_TEXT);
+      container.SetBackgroundColor(NormalBgForType(ViewTypeFor(position)));
+      label.SetTextColor(COLOR_TEXT);
     }
   }
 
   Label FindTrackedLabel(View view) const
   {
     if(!view) return Label();
-    Label label = Label::DownCast(view);
-    if(!label) return Label();
     auto it = std::find_if(mViewRecords.begin(), mViewRecords.end(),
-                           [&](const ViewRecord& r) { return r.label == label; });
+                           [&](const ViewRecord& r) { return r.container == view; });
     return (it != mViewRecords.end()) ? it->label : Label();
   }
 
@@ -390,6 +396,7 @@ private:
   // ---- RecyclerView ----------------------------------------------------------
   void BuildRecyclerView(Window& window)
   {
+    mAdapter = ItemAdapter::New();
     mTextAdapter.Attach(mAdapter);
 
     mLayouter.SetItemExtent(ROW_H);
@@ -409,7 +416,7 @@ private:
     mRecyclerView.SetKeyScrollStep(ROW_H * 1.5f);
     mRecyclerView.SetFocusScrollPeek(ROW_H * 0.5f);
     // RecyclerView itself must be FOCUSABLE for the "no-item" step-scroll mode.
-    mRecyclerView.SetProperty(Actor::Property::FOCUSABLE, true);
+    mRecyclerView.SetFocusable(true);
 
     mRecyclerView.ScrollStartedSignal().Connect(this, &RecyclerViewSampleController::OnScrollStarted);
     mRecyclerView.ScrollFinishedSignal().Connect(this, &RecyclerViewSampleController::OnScrollFinished);

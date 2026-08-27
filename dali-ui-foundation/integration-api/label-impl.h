@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/integration-api/text/text-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
@@ -877,7 +878,7 @@ public: // From ViewImpl
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
-   * @copydoc ViewImpl::GetNaturalSize()
+   * @copydoc SizeNegotiatedViewImpl::GetNaturalSize()
    */
   Vector3 GetNaturalSize() override;
 
@@ -1192,6 +1193,18 @@ private: // Implementation
   Ui::Text::TextScrollerPtr GetTextScroller();
 
   /**
+   * @brief Invalidates static geometry retained for a later marquee transition.
+   */
+  void InvalidateMarqueeStartGeometry();
+
+  /**
+   * @brief Captures current synchronous static geometry before marquee layout.
+   *
+   * Async rendering publishes the equivalent descriptors through its render result.
+   */
+  void CaptureMarqueeStartGeometry();
+
+  /**
    * @brief Enables or disables the marquee animation.
    *
    * Updates the internal marquee state and starts or stops the scrolling accordingly.
@@ -1398,14 +1411,16 @@ private:
   Ui::Text::ControllerPtr   mController;
   Ui::Text::TextScrollerPtr mTextScroller;
 
-  Vector2                        mSize;
-  Vector2                        mLastMeasureConstraints;
-  Vector2                        mLastMeasureRequestedSize;
-  Vector2                        mTouchPosition; ///< The initial touch down position.
-  float                          mLineHeight;
-  Ui::Text::LineHeightMode       mLineHeightMode;
-  Ui::Text::OverflowMode         mOverflowMode;
-  Ui::Text::MarqueeTriggerPolicy mMarqueeTriggerPolicy;
+  Vector2                               mSize;
+  Vector2                               mLastMeasureConstraints;
+  Vector2                               mLastMeasureRequestedSize;
+  Vector2                               mTouchPosition; ///< The initial touch down position.
+  float                                 mLineHeight;
+  Ui::Text::LineHeightMode              mLineHeightMode;
+  Ui::Text::OverflowMode                mOverflowMode;
+  Ui::Text::MarqueeTriggerPolicy        mMarqueeTriggerPolicy;
+  Ui::Text::MarqueeStartAnchor          mMarqueeStartAnchor;
+  Ui::Text::MarqueeFittingStartGeometry mMarqueeFittingStartGeometry;
 
   int  mAsyncLineCount;
   int  mTextColorAnimatedCount;

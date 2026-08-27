@@ -172,6 +172,27 @@ int UtcDaliLabelNewWithTextP(void)
   END_TEST;
 }
 
+int UtcDaliLabelGetNaturalSizeP(void)
+{
+  UiTestApplication application;
+  const Label       label = Label::New("Natural size");
+
+  const Vector3 naturalSize = label.GetNaturalSize();
+  DALI_TEST_CHECK(naturalSize.width > 0.0f);
+  DALI_TEST_CHECK(naturalSize.height > 0.0f);
+  DALI_TEST_EQUALS(naturalSize.depth, 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelGetHeightForWidthP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("Height for width");
+
+  DALI_TEST_CHECK(label.GetHeightForWidth(100.0f) > 0.0f);
+  END_TEST;
+}
+
 int UtcDaliLabelCopyConstructorP(void)
 {
   UiTestApplication application;

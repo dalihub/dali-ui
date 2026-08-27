@@ -42,7 +42,8 @@ DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_IMAGE_PERFORMANCE_MARKER, false)
 
 NPatchLoader::NPatchLoader()
 : mCurrentNPatchDataId(0),
-  mRemoveProcessorRegistered(false)
+  mRemoveProcessorRegistered(false),
+  mClearUnusedTexturesRequested(false)
 {
 }
 
@@ -144,7 +145,7 @@ bool NPatchLoader::GetNPatchData(const NPatchData::NPatchDataId id, NPatchDataPt
   return false;
 }
 
-void NPatchLoader::RequestRemove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver)
+void NPatchLoader::RequestRemove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver, bool keepUnusedTexture)
 {
   // Remove observer first
   if(textureObserver)
@@ -158,7 +159,7 @@ void NPatchLoader::RequestRemove(NPatchData::NPatchDataId id, TextureUploadObser
     }
   }
 
-  mRemoveQueue.push_back({id, nullptr});
+  mRemoveQueue.push_back({id, keepUnusedTexture});
 
   if(!mRemoveProcessorRegistered && Adaptor::IsAvailable())
   {
@@ -167,7 +168,18 @@ void NPatchLoader::RequestRemove(NPatchData::NPatchDataId id, TextureUploadObser
   }
 }
 
-void NPatchLoader::Remove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver)
+void NPatchLoader::RequestClearUnusedTextures()
+{
+  mClearUnusedTexturesRequested = true;
+
+  if(!mRemoveProcessorRegistered && Adaptor::IsAvailable())
+  {
+    mRemoveProcessorRegistered = true;
+    Adaptor::Get().RegisterProcessorOnce(*this, true);
+  }
+}
+
+void NPatchLoader::Remove(NPatchData::NPatchDataId id, TextureUploadObserver* textureObserver, bool keepUnusedTexture)
 {
   int32_t cacheIndex = GetCacheIndexFromId(id);
   if(cacheIndex == INVALID_CACHE_INDEX)
@@ -178,10 +190,15 @@ void NPatchLoader::Remove(NPatchData::NPatchDataId id, TextureUploadObserver* te
   NPatchInfo& info(mCache[cacheIndex]);
 
   info.mData->RemoveObserver(textureObserver);
+  info.mKeepUnusedTexture |= keepUnusedTexture;
 
   if(--info.mReferenceCount <= 0)
   {
-    mCache.erase(mCache.begin() + cacheIndex);
+    info.mReferenceCount = 0;
+    if(!info.mKeepUnusedTexture)
+    {
+      mCache.erase(mCache.begin() + cacheIndex);
+    }
   }
 }
 
@@ -195,10 +212,26 @@ void NPatchLoader::Process(bool postProcessor)
 
   for(auto& iter : mRemoveQueue)
   {
-    Remove(iter.first, iter.second);
+    Remove(iter.id, nullptr, iter.keepUnusedTexture);
   }
 
   mRemoveQueue.clear();
+
+  if(mClearUnusedTexturesRequested)
+  {
+    mClearUnusedTexturesRequested = false;
+    for(auto iter = mCache.begin(); iter != mCache.end();)
+    {
+      if(iter->mReferenceCount == 0 && iter->mKeepUnusedTexture)
+      {
+        iter = mCache.erase(iter);
+      }
+      else
+      {
+        ++iter;
+      }
+    }
+  }
 
   DALI_TRACE_END(gTraceFilter, "DALI_NPATCH_LOADER_PROCESS_REMOVE_QUEUE");
 }

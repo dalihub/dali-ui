@@ -229,6 +229,11 @@ INCLUDE(CheckCXXCompilerFlag)
 
 # Set up compiler flags and warnings
 IF(MSVC)
+  # Use /Z7 (debug info embedded in .obj) instead of /Zi (shared .pdb) to avoid
+  # fatal error C1090: PDB API call failed during parallel compilation.
+  # Replace /Zi in CMake's default debug flags to avoid D9025 warning.
+  STRING(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+  STRING(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
   ADD_COMPILE_OPTIONS(/W3 /WX /vmg /wd4251 /wd4275 /utf-8)
   ADD_COMPILE_DEFINITIONS(__restrict__=__restrict)
 ELSE()

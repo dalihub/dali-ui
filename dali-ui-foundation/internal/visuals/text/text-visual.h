@@ -318,6 +318,8 @@ public:
    * @param[in] ignoreHorizontalAlignment Whether to ignore horizontal alignment.
    * @param[in] pixelFormat The pixel format of the rendered PixelData.
    * @param[in] originSize The origin size for calculating vertical alignment.
+   * @param[in] marqueeStartAnchor Retained source anchor to resolve in the rendered texture.
+   * @param[out] marqueeTextureAnchor Optional resolved texture-space anchor.
    * @return A pixel data with the requested marquee text content rendered.
    */
   static PixelData RenderMarqueeText(Ui::Integration::Visual::Base         visual,
@@ -326,7 +328,9 @@ public:
                                      Ui::Text::Typesetter::RenderBehaviour behaviour,
                                      bool                                  ignoreHorizontalAlignment,
                                      Pixel::Format                         pixelFormat,
-                                     const Vector2&                        originSize);
+                                     const Vector2&                        originSize,
+                                     const Ui::Text::MarqueeStartAnchor&   marqueeStartAnchor,
+                                     Ui::Text::MarqueeTextureAnchor*       marqueeTextureAnchor = nullptr);
 
   /**
    * @brief Render preserved-color marquee PixelData with the TextVisual-owned Typesetter.

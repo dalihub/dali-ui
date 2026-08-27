@@ -67,7 +67,8 @@ public:
   /**
    * @brief Binds the final result owned by the active render model.
    *
-   * A null pointer disables the cache and preserves the ordinary legacy path.
+   * A null pointer preserves the START/MIDDLE fallback and standalone
+   * callers that do not publish an authoritative final result.
    *
    * @param[in] result The resolved final sequence, or nullptr to disable it.
    */
@@ -106,6 +107,11 @@ public:
    */
   virtual Length GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLineOffset, GlyphIndex glyphIndex,
                            Length numberOfGlyphs) const override;
+
+  /**
+   * @copydoc Dali::Ui::Text::ViewInterface::GetFinalGlyphStyleSourceIndices()
+   */
+  const GlyphIndex* GetFinalGlyphStyleSourceIndices() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetColors()

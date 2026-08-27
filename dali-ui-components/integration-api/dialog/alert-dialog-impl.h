@@ -18,11 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali/public-api/common/dali-string.h>
-#include <functional>
-#include <utility>
-#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/dialog/dialog-impl.h>
@@ -46,28 +42,27 @@ class DALI_UI_COMPONENTS_API AlertDialogImpl : public DialogImpl
 public:
   static Ui::AlertDialog New();
 
-  void         SetTitle(const Dali::String& title);
-  Dali::String GetTitle() const;
-  void         SetMessage(const Dali::String& message);
-  Dali::String GetMessage() const;
-  void         SetActionButtons(const std::vector<std::pair<Dali::String, std::function<void()>>>& buttons);
+  void           SetTitle(const Dali::String& title);
+  Dali::String   GetTitle() const;
+  void           SetMessage(const Dali::String& message);
+  Dali::String   GetMessage() const;
+  Ui::TextButton AddActionButton(const Dali::String& text);
+  void           ClearActionButtons();
 
 protected:
   AlertDialogImpl();
   virtual ~AlertDialogImpl();
 
 private:
-  void OnActionClicked(Ui::View view, Ui::InputEvent event);
-
   AlertDialogImpl(const AlertDialogImpl&)            = delete;
   AlertDialogImpl(AlertDialogImpl&&)                 = delete;
   AlertDialogImpl& operator=(const AlertDialogImpl&) = delete;
   AlertDialogImpl& operator=(AlertDialogImpl&&)      = delete;
 
 private:
-  Dali::String                                            mTitle;
-  Dali::String                                            mMessage;
-  std::vector<std::pair<Ui::View, std::function<void()>>> mActionHandlers;
+  Dali::String mTitle;
+  Dali::String mMessage;
+  Ui::View     mActionButtonRow;
 };
 
 } // namespace Integration

@@ -1,5 +1,5 @@
-#ifndef DALI_UI_TEXT_END_ELLIPSIS_METRICS_H
-#define DALI_UI_TEXT_END_ELLIPSIS_METRICS_H
+#ifndef DALI_UI_TEXT_ELLIPSIS_METRICS_H
+#define DALI_UI_TEXT_ELLIPSIS_METRICS_H
 
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
@@ -29,17 +29,17 @@ namespace Dali::Ui::Text
 /**
  * @brief Resolves ellipsis metrics for a font client.
  *
- * @param[in] context The font client.
+ * @param[in] fontClient The font client used to resolve glyph metrics.
  * @param[in] fontId The preferred font identifier.
  * @param[in] allowDefaultFont Whether the default font may be used.
  * @param[out] metrics The resolved ellipsis metrics.
  * @return true if metrics were resolved.
  */
-bool ResolveFontClientEndEllipsisMetrics(void*                       context,
-                                         FontId                      fontId,
-                                         bool                        allowDefaultFont,
-                                         TextAbstraction::GlyphInfo& metrics);
+bool ResolveFontClientEllipsisMetrics(TextAbstraction::FontClient& fontClient,
+                                      FontId                       fontId,
+                                      bool                         allowDefaultFont,
+                                      TextAbstraction::GlyphInfo&  metrics);
 
 } // namespace Dali::Ui::Text
 
-#endif // DALI_UI_TEXT_END_ELLIPSIS_METRICS_H
+#endif // DALI_UI_TEXT_ELLIPSIS_METRICS_H

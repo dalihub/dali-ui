@@ -67,6 +67,20 @@ struct ReplacementLayoutTestOptions
   uint64_t                         layoutGeneration{0u};
 };
 
+struct OrdinaryMarqueeTransitionTrace
+{
+  CharacterIndex anchorCharacter{0u};
+  GlyphIndex     staticSourceGlyph{0u};
+  GlyphIndex     marqueeTextureGlyph{0u};
+  float          staticControlX{0.0f};
+  float          marqueeTextureX{0.0f};
+  float          naturalContentWidth{0.0f};
+  float          sourceToTextureMinimumTranslation{0.0f};
+  float          sourceToTextureMaximumTranslation{0.0f};
+  bool           directionRightToLeft{false};
+  bool           valid{false};
+};
+
 bool LayoutReplacementForTest(const Model&                        originalModel,
                               const ReplacementProjection&        projection,
                               ReplacementLayoutTestServices&      services,
@@ -81,6 +95,10 @@ bool LayoutReplacementForTest(const ReplacementProjection&        projection,
 bool LayoutOrdinaryForTest(const Model&                        originalModel,
                            const ReplacementLayoutTestOptions& options,
                            ModelPtr&                           result);
+
+OrdinaryMarqueeTransitionTrace TraceOrdinaryMarqueeTransitionForTest(
+  const Model&                        originalModel,
+  const ReplacementLayoutTestOptions& options);
 
 bool LayoutReplacementSourceForTest(const Model&                        originalModel,
                                     const ReplacementSourceSnapshot&    sourceSnapshot,

@@ -108,9 +108,9 @@ public:
   void SetModel(const ModelInterface* model);
 
   /**
-   * @brief Sets the resolved replacement glyph sequence.
+   * @brief Sets the authoritative resolved glyph sequence.
    *
-   * @param[in] result The replacement result.
+   * @param[in] result The replacement or non-replacement END final result.
    */
   void SetFinalElisionResult(const FinalElisionResult* result);
 

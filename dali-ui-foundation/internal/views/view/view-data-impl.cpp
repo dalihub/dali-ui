@@ -400,6 +400,7 @@ constexpr const char* ACTION_ACCESSIBILITY_INCREMENT = "increment";
 constexpr const char* ACTION_ACCESSIBILITY_DECREMENT = "decrement";
 
 // Legacy actions
+constexpr const char* ACTION_ACCESSIBILITY_READING_STARTED   = "ReadingStarted";
 constexpr const char* ACTION_ACCESSIBILITY_READING_CANCELLED = "ReadingCancelled";
 constexpr const char* ACTION_ACCESSIBILITY_READING_PAUSED    = "ReadingPaused";
 constexpr const char* ACTION_ACCESSIBILITY_READING_RESUMED   = "ReadingResumed";
@@ -554,7 +555,11 @@ bool PerformAccessibilityReadingStatus(Ui::View view, const Dali::String& action
 {
   auto&                        viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(view));
   Accessibility::ReadingStatus status;
-  if(actionName == ACTION_ACCESSIBILITY_READING_SKIPPED)
+  if(actionName == ACTION_ACCESSIBILITY_READING_STARTED)
+  {
+    status = Accessibility::ReadingStatus::STARTED;
+  }
+  else if(actionName == ACTION_ACCESSIBILITY_READING_SKIPPED)
   {
     status = Accessibility::ReadingStatus::SKIPPED;
   }
@@ -576,10 +581,20 @@ bool PerformAccessibilityReadingStatus(Ui::View view, const Dali::String& action
   }
   else
   {
+    DALI_LOG_RELEASE_INFO("[ReadingStartedTrace][DALiUI] action rejected: unknown action=%s\n", actionName.CStr());
     return false;
   }
 
-  viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingStatusChangedSignal.Emit(view, status);
+  auto& readingStatusSignal = viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingStatusChangedSignal;
+  DALI_LOG_RELEASE_INFO("[ReadingStartedTrace][DALiUI] emit begin: action=%s status=%u view=%p connections=%u\n",
+                        actionName.CStr(),
+                        static_cast<uint32_t>(status),
+                        static_cast<void*>(view.GetObjectPtr()),
+                        readingStatusSignal.GetConnectionCount());
+  readingStatusSignal.Emit(view, status);
+  DALI_LOG_RELEASE_INFO("[ReadingStartedTrace][DALiUI] emit end: action=%s status=%u\n",
+                        actionName.CStr(),
+                        static_cast<uint32_t>(status));
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Changed accessibility reading status: %s\n", actionName.CStr());
   return true;
 }
@@ -598,6 +613,10 @@ bool DoAccessibilityReadingStatusAction(BaseObject* object, const Dali::String& 
   Dali::BaseHandle handle(object);
   Ui::View         view = Ui::View::DownCast(handle);
 
+  DALI_LOG_RELEASE_INFO("[ReadingStartedTrace][DALiUI] TypeAction received: action=%s object=%p validView=%d\n",
+                        actionName.CStr(),
+                        static_cast<void*>(object),
+                        view ? 1 : 0);
   DALI_ASSERT_ALWAYS(view);
   return PerformAccessibilityReadingStatus(view, actionName);
 }
@@ -676,6 +695,7 @@ TypeAction registerAction6(typeRegistration, ACTION_ACCESSIBILITY_READING_CANCEL
 TypeAction registerAction7(typeRegistration, ACTION_ACCESSIBILITY_READING_STOPPED, &DoAccessibilityReadingStatusAction);
 TypeAction registerAction8(typeRegistration, ACTION_ACCESSIBILITY_READING_PAUSED, &DoAccessibilityReadingStatusAction);
 TypeAction registerAction9(typeRegistration, ACTION_ACCESSIBILITY_READING_RESUMED, &DoAccessibilityReadingStatusAction);
+TypeAction registerAction10(typeRegistration, ACTION_ACCESSIBILITY_READING_STARTED, &DoAccessibilityReadingStatusAction);
 // === Legacy Accessibility Actions === END
 
 DALI_TYPE_REGISTRATION_END()

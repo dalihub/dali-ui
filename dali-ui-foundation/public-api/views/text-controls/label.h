@@ -184,6 +184,13 @@ public: // Static Methods
 
 public: // Text Size Measurement
   /**
+   * @brief Returns the natural size required to lay out the text.
+   *
+   * @return The natural size, including padding.
+   */
+  Vector3 GetNaturalSize() const;
+
+  /**
    * @brief Calculates the height required to lay out the text at the given width.
    *
    * @param[in] width The total view width, including padding.

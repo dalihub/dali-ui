@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/public-api/animation/input-editor-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/input-editor-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 
 namespace Dali
@@ -91,9 +92,14 @@ InputEditor InputEditor::DownCast(BaseHandle handle)
   return Ui::View::DownCast<InputEditor, Integration::InputEditorImpl>(handle);
 }
 
+Vector3 InputEditor::GetNaturalSize() const
+{
+  return DevelActor::GetNaturalSize(*this);
+}
+
 float InputEditor::GetHeightForWidth(float width)
 {
-  return GetImpl(*this).GetHeightForWidth(width);
+  return DevelActor::GetHeightForWidth(*this, width);
 }
 
 InputEditor::InputEditor(Integration::InputEditorImpl& implementation)

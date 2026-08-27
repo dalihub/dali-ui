@@ -141,16 +141,16 @@ SvgVisual::~SvgVisual()
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
-    if(mReleasePolicy != Ui::Image::ReleasePolicy::NEVER && mSvgLoadId != SvgLoader::INVALID_SVG_LOAD_ID)
+    const bool keepUnusedTexture = mReleasePolicy == Ui::Image::ReleasePolicy::NEVER;
+    if(mSvgLoadId != SvgLoader::INVALID_SVG_LOAD_ID)
     {
-      mSvgLoader.RequestLoadRemove(mSvgLoadId, this);
+      mSvgLoader.RequestLoadRemove(mSvgLoadId, this, keepUnusedTexture);
       mSvgLoadId = SvgLoader::INVALID_SVG_LOAD_ID;
     }
-    if(mReleasePolicy != Ui::Image::ReleasePolicy::NEVER &&
-       mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
+    if(mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
     {
       // We don't need to remove task synchronously.
-      mSvgLoader.RequestRasterizeRemove(mSvgRasterizeId, this, false);
+      mSvgLoader.RequestRasterizeRemove(mSvgRasterizeId, this, false, keepUnusedTexture);
       mSvgRasterizeId = SvgLoader::INVALID_SVG_RASTERIZE_ID;
     }
 

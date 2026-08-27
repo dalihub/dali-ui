@@ -20,9 +20,11 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/math/vector2.h>
+#include <cstdint>
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
 namespace Dali::Ui::Text
@@ -53,7 +55,13 @@ struct FinalElisionResult
     glyphs.Clear();
     viewGlyphPositions.Clear();
     lineLocalGlyphPositions.Clear();
+    lines.Clear();
     sourceToFinalGlyphIndices.Clear();
+    finalToSourceGlyphIndices.Clear();
+    finalToStyleGlyphIndices.Clear();
+    colorIndices.Clear();
+    backgroundColorIndices.Clear();
+    layoutSize              = Size::ZERO;
     minimumLineOffset       = 0.0f;
     elidedOffset            = 0.0f;
     startIndex              = 0u;
@@ -65,6 +73,7 @@ struct FinalElisionResult
     ellipsisUnitCount       = 0u;
     ellipsisOmissionReason  = EllipsisOmissionReason::NONE;
     layoutGeneration        = 0u;
+    authoritativeLines      = false;
     resolved                = false;
     textElided              = false;
     applied                 = false;
@@ -126,10 +135,22 @@ struct FinalElisionResult
     return true;
   }
 
+  /** @return true when this object owns complete final-layout geometry. */
+  bool HasAuthoritativeLayout() const
+  {
+    return resolved && textElided && authoritativeLines;
+  }
+
   Vector<GlyphInfo>      glyphs;
   Vector<Vector2>        viewGlyphPositions;        ///< Final positions in View/atlas coordinates.
   Vector<Vector2>        lineLocalGlyphPositions;   ///< Same sequence in Typesetter's line-local coordinates.
-  Vector<GlyphIndex>     sourceToFinalGlyphIndices; ///< Source glyph to final entry, or INVALID_GLYPH_INDEX when elided.
+  Vector<LineRun>        lines;                     ///< Lines whose glyph runs index the final glyph sequence.
+  Vector<GlyphIndex>     sourceToFinalGlyphIndices; ///< Source glyph to a representative final glyph in the same authored cluster, or invalid when elided.
+  Vector<GlyphIndex>     finalToSourceGlyphIndices; ///< Final glyph to a representative source glyph in the same authored cluster; generated glyphs are invalid.
+  Vector<GlyphIndex>     finalToStyleGlyphIndices;  ///< Final glyph to the source glyph used for authored style-run lookup.
+  Vector<ColorIndex>     colorIndices;              ///< Color indices in the final glyph domain.
+  Vector<ColorIndex>     backgroundColorIndices;    ///< Background-color indices in the final glyph domain.
+  Size                   layoutSize{Size::ZERO};    ///< Layout size derived only from final-domain lines.
   float                  minimumLineOffset{0.0f};
   float                  elidedOffset{0.0f};
   GlyphIndex             startIndex{0u};
@@ -142,6 +163,7 @@ struct FinalElisionResult
   EllipsisOmissionReason ellipsisOmissionReason{EllipsisOmissionReason::NONE};
 
   uint64_t layoutGeneration{0u};
+  bool     authoritativeLines{false}; ///< END lines, including an intentionally empty set, use the final domain. Replacement projection leaves this false.
   bool     resolved{false};
   bool     textElided{false}; ///< LayoutEngine selected an elision boundary.
   bool     applied{false};    ///< Exactly one ellipsis unit exists in the final sequence.

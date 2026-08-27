@@ -27,6 +27,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-parameters.h>
@@ -275,12 +276,13 @@ private:
    */
   Text::AsyncTextModule mModule;
 
-  Text::ModelPtr                   mTextModel;
-  MetricsPtr                       mMetrics;
-  Text::Layout::Engine             mLayoutEngine;
-  Text::TypesetterPtr              mTypesetter;
-  std::unique_ptr<ReplacementData> mReplacementData;
-  std::string                      mLocale;
+  Text::ModelPtr                      mTextModel;
+  MetricsPtr                          mMetrics;
+  Text::Layout::Engine                mLayoutEngine;
+  Text::TypesetterPtr                 mTypesetter;
+  std::unique_ptr<ReplacementData>    mReplacementData;
+  std::unique_ptr<FinalElisionResult> mEndEllipsisResult;
+  std::string                         mLocale;
 
   TextAbstraction::FontPathList mCustomFonts;
 

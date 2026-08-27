@@ -29,6 +29,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/character-spacing-glyph-run.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
+#include <dali-ui-foundation/internal/text/final-glyph-index-domain.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/gradient-glyph-classification.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
@@ -751,6 +752,7 @@ struct InputParameterForEachGlyph
   const GlyphInfo* const __restrict__ glyphsBuffer;
   const Character* __restrict__ textBuffer;
   const CharacterIndex* __restrict__ glyphToCharacterMapBuffer;
+  const GlyphIndex* __restrict__ finalGlyphStyleSourceBuffer;
 
   const Vector2* const __restrict__ positionBuffer;
 
@@ -797,6 +799,10 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
                                    const InputParameterForEachGlyph& inputParamsForGlyph,
                                    OutputParameterForEachGlyph&      outputParamsForGlyph)
 {
+  const GlyphIndex styleGlyphIndex = inputParamsForGlyph.finalGlyphStyleSourceBuffer
+                                       ? ResolveFinalStyleSourceGlyph(inputParamsForGlyph.finalGlyphStyleSourceBuffer,
+                                                                      elidedGlyphIndex)
+                                       : glyphIndex;
   if constexpr(RECORD_REVEAL)
   {
     // Reveal plans are indexed by the canonical final glyph sequence. The
@@ -815,9 +821,9 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
   Vector<UnderlinedGlyphRun>::ConstIterator currentUnderlinedGlyphRunIt = inputParamsForGlyph.underlineRuns.End();
   const bool                                underlineGlyph =
     inputParamsForGlyph.underlineEnabled ||
-    IsGlyphUnderlined(glyphIndex, inputParamsForGlyph.underlineRuns, currentUnderlinedGlyphRunIt);
+    IsGlyphUnderlined(styleGlyphIndex, inputParamsForGlyph.underlineRuns, currentUnderlinedGlyphRunIt);
   outputParamsForGlyph.currentUnderlineProperties =
-    GetCurrentUnderlineProperties(glyphIndex, underlineGlyph, inputParamsForGlyph.underlineRuns,
+    GetCurrentUnderlineProperties(styleGlyphIndex, underlineGlyph, inputParamsForGlyph.underlineRuns,
                                   currentUnderlinedGlyphRunIt, inputParamsForGlyph.modelUnderlineProperties);
   float currentUnderlineHeight = outputParamsForGlyph.currentUnderlineProperties.height;
 
@@ -827,9 +833,9 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
     inputParamsForGlyph.strikethroughRuns.End();
   const bool strikethroughGlyph =
     inputParamsForGlyph.strikethroughEnabled ||
-    IsGlyphStrikethrough(glyphIndex, inputParamsForGlyph.strikethroughRuns, currentStrikethroughGlyphRunIt);
+    IsGlyphStrikethrough(styleGlyphIndex, inputParamsForGlyph.strikethroughRuns, currentStrikethroughGlyphRunIt);
   outputParamsForGlyph.currentStrikethroughProperties = GetCurrentStrikethroughProperties(
-    glyphIndex, strikethroughGlyph, inputParamsForGlyph.strikethroughRuns, currentStrikethroughGlyphRunIt,
+    styleGlyphIndex, strikethroughGlyph, inputParamsForGlyph.strikethroughRuns, currentStrikethroughGlyphRunIt,
     inputParamsForGlyph.modelStrikethroughProperties);
   float currentStrikethroughHeight = outputParamsForGlyph.currentStrikethroughProperties.height;
 
@@ -867,7 +873,7 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
   if(addHyphen)
   {
     GlyphInfo   tempInfo          = *(inputParamsForGlyph.glyphsBuffer + elidedGlyphIndex);
-    const float characterSpacing  = GetGlyphCharacterSpacing(glyphIndex, inputParamsForGlyph.characterSpacingGlyphRuns,
+    const float characterSpacing  = GetGlyphCharacterSpacing(styleGlyphIndex, inputParamsForGlyph.characterSpacingGlyphRuns,
                                                              inputParamsForGlyph.modelCharacterSpacing);
     const float calculatedAdvance = GetCalculatedAdvance(
       *(inputParamsForGlyph.textBuffer + (*(inputParamsForGlyph.glyphToCharacterMapBuffer + elidedGlyphIndex))),
@@ -1794,6 +1800,7 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
                                                        glyphsBuffer,
                                                        textBuffer,
                                                        glyphToCharacterMapBuffer,
+                                                       viewModel.GetFinalGlyphStyleSourceIndices(),
 
                                                        positionBuffer,
 
@@ -1942,6 +1949,7 @@ PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uint32_t  
                                                        glyphsBuffer,
                                                        textBuffer,
                                                        glyphToCharacterMapBuffer,
+                                                       viewModel.GetFinalGlyphStyleSourceIndices(),
 
                                                        positionBuffer,
 
@@ -2065,6 +2073,7 @@ PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint3
                                                        glyphsBuffer,
                                                        textBuffer,
                                                        glyphToCharacterMapBuffer,
+                                                       viewModel.GetFinalGlyphStyleSourceIndices(),
 
                                                        positionBuffer,
 

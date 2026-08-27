@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/public-api/animation/input-field-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/input-field-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 
 namespace Dali
@@ -89,6 +90,11 @@ InputField& InputField::operator=(InputField&& rhs) noexcept
 InputField InputField::DownCast(BaseHandle handle)
 {
   return Ui::View::DownCast<InputField, Integration::InputFieldImpl>(handle);
+}
+
+Vector3 InputField::GetNaturalSize() const
+{
+  return DevelActor::GetNaturalSize(*this);
 }
 
 InputField::InputField(Integration::InputFieldImpl& implementation)

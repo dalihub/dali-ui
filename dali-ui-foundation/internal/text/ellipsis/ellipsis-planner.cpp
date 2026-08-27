@@ -19,7 +19,8 @@
 #include <limits>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-planner.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-metrics.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-planner.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
@@ -170,7 +171,8 @@ const Vector2* GetGlyphPosition(const EndEllipsisInputView& input, GlyphIndex gl
 }
 } // unnamed namespace
 
-EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView& input)
+EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView&  input,
+                                       TextAbstraction::FontClient& fontClient)
 {
   EndEllipsisPlan plan;
   if(!input.glyphs ||
@@ -178,7 +180,6 @@ EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView& input)
      !input.text ||
      !input.glyphToCharacterMap ||
      !input.characterSpacingRuns ||
-     !input.resolveMetrics ||
      input.numberOfGlyphs == 0u ||
      input.numberOfGlyphPositions == 0u ||
      input.startIndex >= input.numberOfGlyphs ||
@@ -237,11 +238,11 @@ EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView& input)
                                                      overriddenGlyphIndex,
                                                      overriddenFontId);
     GlyphInfo    ellipsisGlyph;
-    const bool   hasEllipsisMetrics = input.resolveMetrics(input.metricsContext,
-                                                           ellipsisFontId,
-                                                           ellipsisFontId == 0u &&
-                                                             IsSyntheticReplacementGlyph(glyphToRemove),
-                                                           ellipsisGlyph);
+    const bool   hasEllipsisMetrics = ResolveFontClientEllipsisMetrics(fontClient,
+                                                                       ellipsisFontId,
+                                                                       ellipsisFontId == 0u &&
+                                                                         IsSyntheticReplacementGlyph(glyphToRemove),
+                                                                       ellipsisGlyph);
     if(hasEllipsisMetrics)
     {
       if(!firstPenSet)

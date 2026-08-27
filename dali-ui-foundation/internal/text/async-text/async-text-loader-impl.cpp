@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
@@ -37,6 +38,7 @@
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
+#include <dali-ui-foundation/internal/text/text-alignment.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
@@ -234,6 +236,7 @@ AsyncTextLoader::AsyncTextLoader()
   mTextModel(),
   mMetrics(),
   mReplacementData(),
+  mEndEllipsisResult(),
   mLocale(),
   mCustomFonts(),
   mNumberOfCharacters(0u),
@@ -336,6 +339,11 @@ void AsyncTextLoader::Initialize()
     }
     mReplacementData.reset();
   }
+  if(mTypesetter)
+  {
+    mTypesetter->SetFinalElisionResult(nullptr);
+  }
+  mEndEllipsisResult.reset();
   ClearTextModelData();
 
   mNumberOfCharacters = 0u;
@@ -1117,6 +1125,39 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   {
     layoutText(nullptr);
   }
+
+  mTextModel->mVisualModel->SetLayoutSize(newLayoutSize);
+  if(mTypesetter)
+  {
+    mTypesetter->SetFinalElisionResult(nullptr);
+  }
+  mEndEllipsisResult.reset();
+  bool hasEndEllipsisCandidate = false;
+  for(const LineRun& line : mTextModel->mVisualModel->mLines)
+  {
+    hasEndEllipsisCandidate |= line.ellipsis;
+  }
+  const bool hasNoVisibleEndLine = !updated && mTextModel->mVisualModel->mLines.Empty() &&
+                                   !mTextModel->mLogicalModel->mText.Empty();
+  if(!hasActiveReplacement && ellipsisEnabled && ellipsisPosition == EllipsisPosition::END &&
+     (hasEndEllipsisCandidate || hasNoVisibleEndLine))
+  {
+    mEndEllipsisResult  = std::make_unique<FinalElisionResult>();
+    const bool resolved = ResolveEndEllipsis(*mTextModel,
+                                             textLayoutArea,
+                                             mModule.GetFontClient(),
+                                             *mEndEllipsisResult);
+    DALI_ASSERT_DEBUG(resolved && mEndEllipsisResult->resolved &&
+                      "Supported async END layout must publish an authoritative final result");
+    if(resolved)
+    {
+      newLayoutSize = mEndEllipsisResult->layoutSize;
+    }
+    else
+    {
+      mEndEllipsisResult.reset();
+    }
+  }
   mIsTextDirectionRTL = false;
 
   if(!mTextModel->mVisualModel->mLines.Empty())
@@ -1125,7 +1166,8 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   }
 
   // Store the actual size of the text after it has been laid-out.
-  mTextModel->mVisualModel->SetLayoutSize(newLayoutSize);
+  // The source VisualModel keeps the pre-elision layout size set above.
+  // newLayoutSize may now be the authoritative final-domain output size.
 
   ////////////////////////////////////////////////////////////////////////////////
   // Align the text.
@@ -1140,12 +1182,29 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
 
   // Need to align with the control's size as the text may contain lines
   // starting either with left to right text or right to left.
-  mLayoutEngine.Align(textLayoutArea, 0u, numberOfCharacters, parameters.horizontalAlignment, lines, alignmentOffset,
-                      parameters.layoutDirection,
-                      (mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS));
+  AlignTextLines(mLayoutEngine,
+                 textLayoutArea,
+                 0u,
+                 numberOfCharacters,
+                 *mTextModel,
+                 lines,
+                 alignmentOffset,
+                 parameters.layoutDirection,
+                 mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS);
+  if(mEndEllipsisResult)
+  {
+    FinalizeEndEllipsisGeometry(*mTextModel,
+                                textLayoutArea,
+                                parameters.layoutDirection,
+                                mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS,
+                                mLayoutEngine,
+                                *mEndEllipsisResult);
+  }
 
   // Calculate vertical offset.
-  Size layoutSize = mTextModel->mVisualModel->GetLayoutSize();
+  Size layoutSize = mEndEllipsisResult && mEndEllipsisResult->HasAuthoritativeLayout()
+                      ? mEndEllipsisResult->layoutSize
+                      : mTextModel->mVisualModel->GetLayoutSize();
 
   switch(parameters.verticalAlignment)
   {
@@ -1206,6 +1265,10 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   if(replacementState && replacementState->projection.HasReplacements())
   {
     mTypesetter->SetFinalElisionResult(&replacementState->finalElision);
+  }
+  else if(mEndEllipsisResult && mEndEllipsisResult->resolved)
+  {
+    mTypesetter->SetFinalElisionResult(mEndEllipsisResult.get());
   }
 
   // Check whether it is a markup text with multiple text colors
@@ -1309,6 +1372,25 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   // Set information for creating pixel datas.
   AsyncTextRenderInfo renderInfo;
+
+  if(!parameters.isMarqueeEnabled)
+  {
+    renderInfo.isMarqueeStartAnchorResolved          = true;
+    renderInfo.isMarqueeFittingStartGeometryResolved = true;
+    renderInfo.marqueeStartAnchor =
+      ResolveMarqueeStartAnchor(mEndEllipsisResult.get(), renderModel->mVisualModel.Get());
+    renderInfo.marqueeFittingStartGeometry =
+      ResolveMarqueeFittingStartGeometry(renderModel.Get());
+    const float geometryScale = std::max(parameters.renderScale, 1.0f);
+    if(renderInfo.marqueeStartAnchor.valid)
+    {
+      renderInfo.marqueeStartAnchor.staticControlX /= geometryScale;
+    }
+    if(renderInfo.marqueeFittingStartGeometry.valid)
+    {
+      renderInfo.marqueeFittingStartGeometry.staticTranslation /= geometryScale;
+    }
+  }
 
   bool isRenderScale = parameters.renderScale > 1.0f ? true : false;
   if(isRenderScale)
@@ -1485,10 +1567,23 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   if(parameters.isMarqueeEnabled)
   {
     // This will be uploaded in async text interface's setup marquee.
+    // Resolve immediately after the primary text render. Later supplemental
+    // render passes must not replace the texture geometry used by the delta.
     renderInfo.marqueePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
                           parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL, Pixel::RGBA8888,
                           Size(parameters.originWidth, parameters.originHeight));
+    if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
+    {
+      renderInfo.marqueeStartAnchor = parameters.marqueeStartAnchor;
+      renderInfo.marqueeTextureAnchor =
+        mTypesetter->ResolveMarqueeTextureAnchor(parameters.marqueeStartAnchor);
+      if(renderInfo.marqueeTextureAnchor.valid)
+      {
+        const float geometryScale = std::max(parameters.renderScale, 1.0f);
+        renderInfo.marqueeTextureAnchor.textureX /= geometryScale;
+      }
+    }
   }
 
   renderInfo.hasMultipleTextColors   = hasMultipleTextColors;
@@ -1802,14 +1897,17 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
 
   Size      controlSize(parameters.textWidth, parameters.textHeight);
   Size      verifiedSize;
-  float     wrapGap        = 0.0f;
-  bool      isHorizontal   = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
-  const int maxTextureSize = parameters.maxTextureSize;
+  float     wrapGap               = 0.0f;
+  bool      isHorizontal          = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
+  const int maxTextureSize        = parameters.maxTextureSize;
+  bool      isTextContentOverflow = false;
 
   if(isHorizontal)
   {
     // As relayout of text may not be done at this point natural size is used to get size. Single line scrolling only.
     Size textNaturalSize = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
+
+    isTextContentOverflow = textNaturalSize.width > controlSize.width;
 
     if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_WIDTH || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
     {
@@ -1945,12 +2043,13 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   parameters.textHeight = static_cast<float>(actualHeight);
 
   // Store the control size and calculated wrap gap in render info.
-  bool  isRenderScale       = parameters.renderScale > 1.0f ? true : false;
-  float renderedWidth       = isRenderScale ? parameters.renderScaleWidth : controlSize.width;
-  float renderedHeight      = isRenderScale ? parameters.renderScaleHeight : controlSize.height;
-  renderInfo.controlSize    = Size(renderedWidth, renderedHeight);
-  renderInfo.renderedSize   = Size(renderedWidth, renderedHeight);
-  renderInfo.marqueeWrapGap = wrapGap;
+  bool  isRenderScale                 = parameters.renderScale > 1.0f ? true : false;
+  float renderedWidth                 = isRenderScale ? parameters.renderScaleWidth : controlSize.width;
+  float renderedHeight                = isRenderScale ? parameters.renderScaleHeight : controlSize.height;
+  renderInfo.controlSize              = Size(renderedWidth, renderedHeight);
+  renderInfo.renderedSize             = Size(renderedWidth, renderedHeight);
+  renderInfo.marqueeWrapGap           = wrapGap;
+  renderInfo.isMarqueeContentOverflow = isTextContentOverflow;
   return renderInfo;
 }
 

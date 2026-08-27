@@ -83,7 +83,8 @@ enum class ReleasePolicy : uint8_t
 {
   DETACHED = 0, ///< Image released from cache when the visual is detached from the scene.
   DESTROYED,    ///< Image released from cache when the visual is destroyed.
-  NEVER,        ///< Image is never released from cache.
+  NEVER,        ///< Image is not automatically released from cache. Unused resources may be explicitly released
+                ///< through Dali::Ui::ImageCacheUtils::ClearUnusedTextures().
 };
 
 } // namespace Image

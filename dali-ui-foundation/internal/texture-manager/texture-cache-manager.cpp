@@ -696,61 +696,91 @@ TextureCacheManager::TextureCacheIndex TextureCacheManager::AppendCache(
   return cacheIndex;
 }
 
-void TextureCacheManager::RemoveCache(TextureCacheManager::TextureInfo& textureInfo)
+void TextureCacheManager::RemoveCache(TextureCacheManager::TextureInfo& textureInfo, bool keepUnusedTexture)
 {
-  TextureCacheIndex textureInfoIndex  = GetCacheIndexFromId(textureInfo.textureId);
-  bool              removeTextureInfo = false;
-
   DALI_LOG_INFO(gTextureManagerLogFilter, Debug::Concise,
                 "TextureCacheManager::Remove(textureId:%d) url:%s\n  cacheIdx:%d loadState:%s reference count = %d\n",
-                textureInfo.textureId, textureInfo.url.GetUrl().c_str(), textureInfoIndex.GetIndex(),
+                textureInfo.textureId, textureInfo.url.GetUrl().c_str(), GetCacheIndexFromId(textureInfo.textureId).GetIndex(),
                 GET_LOAD_STATE_STRING(textureInfo.loadState), textureInfo.referenceCount);
+
+  textureInfo.keepUnusedTexture |= keepUnusedTexture;
 
   // Decrement the reference count and check if this is the last user of this Texture.
   if(--textureInfo.referenceCount <= 0)
   {
-    // This is the last remove for this Texture.
     textureInfo.referenceCount = 0;
 
-    // If loaded, we can remove the TextureInfo
-    if(textureInfo.loadState == LoadState::UPLOADED)
+    if(!textureInfo.keepUnusedTexture)
     {
-      removeTextureInfo = true;
+      RemoveUnusedCache(textureInfo);
     }
-    else if(textureInfo.loadState == LoadState::LOADING)
-    {
-      // We mark the textureInfo for removal.
-      // Once the load has completed, this method will be called again.
-      textureInfo.loadState = LoadState::CANCELLED;
-    }
-    else if(textureInfo.loadState == LoadState::MASK_APPLYING)
-    {
-      // We mark the textureInfo for removal.
-      // Once the load has completed, this method will be called again.
-      textureInfo.loadState = LoadState::MASK_CANCELLED;
-    }
-    else
-    {
-      // In other states, we are not waiting for a load so we are safe to remove the TextureInfo data.
-      removeTextureInfo = true;
-    }
+  }
+}
 
-    // If the state allows us to remove the TextureInfo data, we do so.
-    if(removeTextureInfo)
+void TextureCacheManager::ClearUnusedCache()
+{
+  for(std::size_t index = 0u; index < mTextureInfoContainer.size();)
+  {
+    TextureInfo& textureInfo = mTextureInfoContainer[index];
+    if(textureInfo.referenceCount == 0 && textureInfo.keepUnusedTexture)
     {
-      // If url location is BUFFER, decrease reference count of EncodedImageBuffer.
-      if(textureInfo.url.IsBufferResource())
+      const auto cacheSize          = mTextureInfoContainer.size();
+      textureInfo.keepUnusedTexture = false;
+      RemoveUnusedCache(textureInfo);
+
+      // RemoveUnusedCache swaps the last element into this index when it erases an entry.
+      if(cacheSize != mTextureInfoContainer.size())
       {
-        RemoveEncodedImageBuffer(textureInfo.url.GetUrl());
+        continue;
       }
-
-      // Permanently remove the textureInfo struct.
-
-      // Step 1. remove current textureId information in mTextureHashContainer.
-      RemoveHashId(textureInfo.hash, textureInfo.textureId);
-      // Step 2. make textureId is not using anymore. After this job, we can reuse textureId.
-      mTextureIdConverter.Remove(textureInfo.textureId);
     }
+    ++index;
+  }
+}
+
+void TextureCacheManager::RemoveUnusedCache(TextureCacheManager::TextureInfo& textureInfo)
+{
+  TextureCacheIndex textureInfoIndex  = GetCacheIndexFromId(textureInfo.textureId);
+  bool              removeTextureInfo = false;
+
+  // If loaded, we can remove the TextureInfo.
+  if(textureInfo.loadState == LoadState::UPLOADED)
+  {
+    removeTextureInfo = true;
+  }
+  else if(textureInfo.loadState == LoadState::LOADING)
+  {
+    // We mark the textureInfo for removal.
+    // Once the load has completed, this method will be called again.
+    textureInfo.loadState = LoadState::CANCELLED;
+  }
+  else if(textureInfo.loadState == LoadState::MASK_APPLYING)
+  {
+    // We mark the textureInfo for removal.
+    // Once the load has completed, this method will be called again.
+    textureInfo.loadState = LoadState::MASK_CANCELLED;
+  }
+  else
+  {
+    // In other states, we are not waiting for a load so we are safe to remove the TextureInfo data.
+    removeTextureInfo = true;
+  }
+
+  // If the state allows us to remove the TextureInfo data, we do so.
+  if(removeTextureInfo)
+  {
+    // If url location is BUFFER, decrease reference count of EncodedImageBuffer.
+    if(textureInfo.url.IsBufferResource())
+    {
+      RemoveEncodedImageBuffer(textureInfo.url.GetUrl());
+    }
+
+    // Permanently remove the textureInfo struct.
+
+    // Step 1. remove current textureId information in mTextureHashContainer.
+    RemoveHashId(textureInfo.hash, textureInfo.textureId);
+    // Step 2. make textureId is not using anymore. After this job, we can reuse textureId.
+    mTextureIdConverter.Remove(textureInfo.textureId);
   }
 
   // Post removal process to avoid mTextureInfoContainer reference problems.

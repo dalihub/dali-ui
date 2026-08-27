@@ -848,6 +848,7 @@ int UtcDaliViewAccessibilityRelationsActionsAndSignalsP(void)
   DALI_TEST_CHECK(source.DoAction("escape", actionAttributes));
   DALI_TEST_CHECK(source.DoAction("increment", actionAttributes));
   DALI_TEST_CHECK(source.DoAction("decrement", actionAttributes));
+  DALI_TEST_CHECK(source.DoAction("ReadingStarted", actionAttributes));
   DALI_TEST_CHECK(source.DoAction("ReadingSkipped", actionAttributes));
   DALI_TEST_CHECK(source.DoAction("ReadingPaused", actionAttributes));
   DALI_TEST_CHECK(source.DoAction("ReadingResumed", actionAttributes));
@@ -860,6 +861,7 @@ int UtcDaliViewAccessibilityRelationsActionsAndSignalsP(void)
   DALI_TEST_EQUALS(implementation->valueChangeBalance, 0, TEST_LOCATION);
 
   const std::vector<UiAccessibility::ReadingStatus> expectedStatuses{
+    UiAccessibility::ReadingStatus::STARTED,
     UiAccessibility::ReadingStatus::SKIPPED,
     UiAccessibility::ReadingStatus::PAUSED,
     UiAccessibility::ReadingStatus::RESUMED,
