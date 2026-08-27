@@ -454,7 +454,7 @@ int UtcDaliUiScaleEffectiveScaleActorSyncRepairedOnMeasureCacheHitP(void)
 }
 
 // ---------------------------------------------------------------------------
-// The effective scale as a measure-cache KEY (mLastMeasureScale).
+// The effective scale as a measure-cache KEY (the measure scale key).
 //
 // The arrange cache omits a scale term and relies on the invalidation pairing plus a
 // DEBUG assert; the measure cache records the scale instead, because `s` is already
@@ -484,7 +484,7 @@ MeasuredSize CountingKeyMeasure(View, float, float)
 // The publish records the scale it ran at, and the term does not spoil the steady
 // state: an unchanged scale with an unchanged constraint is still a HIT.
 //
-// Non-vacuity (verified by mutation): removing `mLastMeasureScale = s;` from the
+// Non-vacuity (verified by mutation): removing the scale-key publish from the
 // measure publish block leaves the member at its constructed NaN, so the recorded-value
 // check fails and the second Measure() misses (NaN == s is false) -- the producer count
 // becomes 2.

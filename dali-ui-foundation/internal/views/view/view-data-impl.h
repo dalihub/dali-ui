@@ -425,10 +425,11 @@ public:
     return mMeasureCacheValid;
   }
   /// The effective scale the measure cache entry was produced at, and a KEY term of
-  /// the measure hit predicate. Meaningful only while IsMeasureCacheValid().
+  /// the measure hit predicate. Meaningful only while IsMeasureCacheValid(): the slot
+  /// is shared with the measure propagation record (union).
   float GetLastMeasureScale() const
   {
-    return mLastMeasureScale;
+    return mMeasureKeyOrPropagation.scaleKey;
   }
   bool IsArrangeCacheValid() const
   {
@@ -464,14 +465,17 @@ public:
   }
   /// The generation each axis last propagated its invalidation to a layout root in.
   /// Compared against LayoutInvalidation::CurrentGeneration() to decide whether a further
-  /// invalidation may skip the ancestor walk; 0 means never propagated.
+  /// invalidation may skip the ancestor walk; 0 means never propagated. Meaningful only
+  /// while the axis's cache entry is absent (Is*CacheValid() false): the slot is shared
+  /// with the axis's cache KEY (union), so publishing an entry overwrites the record and
+  /// dropping a standing entry retracts it to 0.
   uint32_t GetMeasurePropagationGeneration() const
   {
-    return mMeasurePropagationGeneration;
+    return mMeasureKeyOrPropagation.propagationGeneration;
   }
   uint32_t GetArrangePropagationGeneration() const
   {
-    return mArrangePropagationGeneration;
+    return mArrangeKeyOrPropagation.propagationGeneration;
   }
   /// True once this view has connected the actor layout-direction signal, which only a
   /// LAYOUT ROOT ever does (see RegisterWithLayoutController). A plain child View stays
@@ -1165,7 +1169,7 @@ private:
    * GetEffectiveLayoutDirection() is public and OnMeasure() is virtual, so an
    * APPLICATION's measure producer can size on it, and the measure cache key has no
    * direction term. That is now a SPECIFIC claim rather than a blanket one: the key is
-   * mLastMeasureConstraint plus mLastMeasureScale, so it does carry the effective
+   * mLastMeasureConstraint plus the scale key (mMeasureKeyOrPropagation.scaleKey), so it does carry the effective
    * scale, and the layout direction is the one producer input it deliberately leaves
    * out. Invalidating measure here is what lets that just work instead of becoming a
    * contract the application has to know.
@@ -1220,7 +1224,7 @@ private:
    *
    * The arrange-side counterpart of InvalidateAncestorLayoutCachesForMeasureMiss(),
    * closing the symmetric hole: a completed Arrange() rewrites this view's
-   * mArrangedBounds and mLastArrangeInput unconditionally, and an ancestor's cache
+   * mArrangedBounds and the input key (mArrangeKeyOrPropagation.inputKey) unconditionally, and an ancestor's cache
    * HIT replays descendants FROM those records on the premise that they were written
    * by that ancestor's own producer chain (see CanReplayArrangeSubtreeFromCache,
    * which skips the cache-KEY comparison for descendants on exactly that premise).
@@ -1368,7 +1372,7 @@ private:
    * does.
    *
    * The MEASURE cache is the one exception, and only because it carries a scale
-   * KEY of its own (mLastMeasureScale): an unpaired caller would cost it a miss
+   * KEY of its own (mMeasureKeyOrPropagation.scaleKey): an unpaired caller would cost it a miss
    * rather than a wrong measured size. That does not license the unpaired call --
    * the arrange cache and the actor-side push below both still depend on the
    * pairing -- it just means the measure side has a second line of defence.
@@ -1634,6 +1638,31 @@ private:
     return mFocusNavigationData ? mFocusNavigationData.get()->*field : -1;
   }
 
+  /// Retire a standing cache entry on one axis: clear the valid bit AND retract the
+  /// propagation record that shares its slot (see the KEY/record unions below). These
+  /// are the ONLY correct way to take m*CacheValid from true to false -- writing the
+  /// bit directly would leave stale KEY bits readable as a generation. No-op when the
+  /// entry is already absent, which is what preserves a live record (and with it the
+  /// invalidation batch coalescing) across repeated invalidations.
+  /// @{
+  void DropMeasureCacheEntry()
+  {
+    if(mMeasureCacheValid)
+    {
+      mMeasureCacheValid                             = false;
+      mMeasureKeyOrPropagation.propagationGeneration = 0u;
+    }
+  }
+  void DropArrangeCacheEntry()
+  {
+    if(mArrangeCacheValid)
+    {
+      mArrangeCacheValid                             = false;
+      mArrangeKeyOrPropagation.propagationGeneration = 0u;
+    }
+  }
+  /// @}
+
   ViewImpl&                            mViewImpl;
   ViewState                            mState;
   UiScalePolicy                        mScalePolicy{UiScalePolicy::INHERIT};
@@ -1656,15 +1685,27 @@ private:
   float        mRequestedY;
   MeasuredSize mMeasuredSize;          ///< Last completed measure result. Always readable (GetMeasuredSize() and layout managers consume it during Arrange regardless of cache state); mMeasureCacheValid only governs whether the KEY below may serve a cache hit.
   MeasuredSize mLastMeasureConstraint; ///< Pure cache KEY: the effective natural constraint the cached mMeasuredSize was produced for. Carries no dirty/never-measured sentinel meaning; validity lives in mMeasureCacheValid / mMeasureDirty.
-  float        mLastMeasureScale;      ///< Pure cache KEY: the effective scale the cached mMeasuredSize was produced at. Compared EXACTLY, not with FloatEqual, because it is a straight copy of the same GetEffectiveScale() value with no arithmetic between publish and compare -- unlike the constraint beside it, which reaches the predicate through a /s normalisation and a min/max clamp and therefore needs the tolerance. Valid only while mMeasureCacheValid is true.
-  LayoutRect   mArrangedBounds;
-  LayoutRect   mLastArrangeInput; ///< Pure cache KEY: the input bounds mArrangedBounds was produced for. Valid only while mArrangeCacheValid is true.
-  /// @name Invalidation propagation records
-  /// The generation in which this view's last InvalidateMeasure() / InvalidateArrange()
-  /// walked its ancestor chain to a layout root and registered it. While a record
-  /// still equals LayoutInvalidation::CurrentGeneration(), that registration is known to
-  /// be live and not yet processed, so a further invalidation on the SAME axis may
-  /// skip the walk entirely. 0 = never propagated.
+  /// @name Cache KEY / propagation record slots
+  /// Each axis overlays its pure cache KEY with its invalidation propagation record,
+  /// because their lifetimes never overlap. The discriminator is the axis's cache-valid
+  /// bit:
+  ///  - while m*CacheValid is TRUE, the KEY member is active. A standing entry means
+  ///    the pending work any record described has been consumed, so the record is dead.
+  ///  - while m*CacheValid is FALSE, the propagation record is active: the generation
+  ///    in which this view's last Invalidate*() walked its ancestor chain to a layout
+  ///    root and registered it. While a record still equals
+  ///    LayoutInvalidation::CurrentGeneration(), that registration is known to be live
+  ///    and not yet processed, so a further invalidation on the SAME axis may skip the
+  ///    walk entirely. 0 = never propagated (AdvanceGeneration skips 0 on wrap).
+  ///
+  /// The overlay is sound ONLY under one write rule: every TRUE -> FALSE edge of the
+  /// valid bit retracts the record to 0 in the same operation (Drop*CacheEntry() is
+  /// the sole such edge). Without it the stale KEY bits would be read back as a
+  /// generation, and a pattern like 1.0f (0x3F800000) can eventually EQUAL the live
+  /// generation and silently skip a walk. Retracting on the EDGE only -- never on a
+  /// re-invalidation of an already-absent entry -- is what keeps the batch coalescing
+  /// intact: repeated invalidations while the entry stays absent leave a live record
+  /// untouched.
   ///
   /// The two axes are separate and must not be merged. An arrange walk marks the
   /// ancestors' arrange dirty but leaves their MEASURE caches valid, so an
@@ -1673,8 +1714,27 @@ private:
   /// not re-measure its children, so this view's new measured size would never be
   /// computed at all.
   /// @{
-  uint32_t mMeasurePropagationGeneration;
-  uint32_t mArrangePropagationGeneration;
+  union MeasureKeyOrPropagation
+  {
+    MeasureKeyOrPropagation()
+    : propagationGeneration(0u)
+    {
+    }
+    float    scaleKey; ///< Pure cache KEY: the effective scale the cached mMeasuredSize was produced at. Compared EXACTLY, not with FloatEqual, because it is a straight copy of the same GetEffectiveScale() value with no arithmetic between publish and compare -- unlike mLastMeasureConstraint, which reaches the predicate through a /s normalisation and a min/max clamp and therefore needs the tolerance.
+    uint32_t propagationGeneration;
+  };
+  union ArrangeKeyOrPropagation
+  {
+    ArrangeKeyOrPropagation()
+    : propagationGeneration(0u)
+    {
+    }
+    LayoutRect inputKey; ///< Pure cache KEY: the input bounds mArrangedBounds was produced for.
+    uint32_t   propagationGeneration;
+  };
+  MeasureKeyOrPropagation mMeasureKeyOrPropagation;
+  LayoutRect              mArrangedBounds;
+  ArrangeKeyOrPropagation mArrangeKeyOrPropagation;
   /// @}
 
   /// @name Layout inputs
@@ -1699,12 +1759,12 @@ private:
   int32_t                            mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2; ///< Frequently touched accessibility-related value kept here to avoid AccessibilityData creation.
 
   bool         mSkipChildrenUpdate : 1;
-  bool         mMeasureCacheValid : 1;                            ///< True when mLastMeasureConstraint + mLastMeasureScale + mMeasuredSize hold a usable cache entry.
+  bool         mMeasureCacheValid : 1;                            ///< True when mLastMeasureConstraint + the scale key + mMeasuredSize hold a usable cache entry. Cleared ONLY via DropMeasureCacheEntry(), which also retracts the record sharing the KEY slot.
   bool         mMeasureDirty : 1;                                 ///< True when invalidated since the last measure.
   bool         mMeasureInProgress : 1;                            ///< True while this view's own Measure() is on the stack.
   bool         mMeasurePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's measure pass was running.
   bool         mMeasuredSlotUnconsumed : 1;                       ///< True while the measured size published by the last completed measure pass has not been consumed by this view's parent. Set unconditionally at the publish; cleared by the parent in MeasureStandaloneChildren / ArrangeStandaloneChildren. Read only on the standalone path: it tells ArrangeStandaloneChild that the slot may be the leftover of an out-of-band Measure() and must be re-measured against the parent's extent before it is placed.
-  bool         mArrangeCacheValid : 1;                            ///< True when mLastArrangeInput + mArrangedBounds hold a usable cache entry.
+  bool         mArrangeCacheValid : 1;                            ///< True when The input key + mArrangedBounds hold a usable cache entry. Cleared ONLY via DropArrangeCacheEntry(), which also retracts the record sharing the KEY slot.
   bool         mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
   bool         mArrangeInProgress : 1;                            ///< True while this view's own Arrange() is on the stack; guards same-view re-entrancy.
   bool         mArrangeReplayInProgress : 1;                      ///< True while this view is being visited by an arrange cache-HIT REPLAY (ReplayNodeScope), which also raises mArrangeInProgress so the re-entrancy guard in ArrangeImpl covers a replay too. The discriminator exists because three OWNERSHIP tests read mArrangeInProgress as "a producer pass below me owns this work" -- InvalidateAncestorLayoutCachesForMeasureMiss's direct-parent stop and its cache-publish block, and InvalidateParentArrangeCacheForOutOfBandArrange's parent stop. A replay runs no producer and owns nothing, so those three must see through it or an out-of-band Measure/Arrange raised from a property-set observer mid-replay would leave a stale ancestor entry standing.
@@ -1733,7 +1793,7 @@ private:
   /// lives in dali-core and can be moved through actors dali-ui does not own, so a missed
   /// invalidation must degrade to "no cache hit" and never to a wrongly mirrored
   /// arrangement. The choice is per (axis, input) pair, not per input: measure x scale is
-  /// also a KEY (mLastMeasureScale, and `s` is already in hand there), while arrange x
+  /// also a KEY (the measure scale key, and `s` is already in hand there), while arrange x
   /// scale relies on invalidation plus a DEBUG assert (reading the scale here would be a
   /// fresh call the path needs for nothing else) and measure x direction relies on
   /// invalidation (the direction-change subtree walk), because a direction term would put

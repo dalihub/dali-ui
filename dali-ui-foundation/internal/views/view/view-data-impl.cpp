@@ -489,7 +489,7 @@ inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 // THE single place the global UI-scale master switch is read. Every scale that
 // enters the layout system does so through one of the two calls to this function
 // in ComputeEffectiveScale() -- every other Measure/Arrange site, every
-// measure-cache key (mLastMeasureScale) and the actor-side VIEW_EFFECTIVE_SCALE
+// measure-cache scale key and the actor-side VIEW_EFFECTIVE_SCALE
 // push obtain the scale via GetEffectiveScale(), which memoizes what
 // ComputeEffectiveScale() returns. So collapsing the system scale to 1.0f here
 // is what makes the whole system behave as unscaled, with no change at any call
@@ -939,8 +939,8 @@ struct ViewDataImpl::MeasurePassGuard
     mData.mMeasureInProgress   = true;
     mData.mMeasureDirty        = false;
     mData.mMeasurePassPoisoned = false;
-    mData.mMeasureCacheValid   = false;
-    mData.mArrangeCacheValid   = false;
+    mData.DropMeasureCacheEntry();
+    mData.DropArrangeCacheEntry();
   }
 
   ~MeasurePassGuard()
@@ -1008,7 +1008,7 @@ struct ViewDataImpl::ArrangePassGuard
     mData.mArrangePassPoisoned                 = false;
     mData.mArrangeCacheBlockedDuringPass       = false;
     mData.mEffectiveScaleInvalidatedDuringPass = false;
-    mData.mArrangeCacheValid                   = false;
+    mData.DropArrangeCacheEntry();
   }
 
   ~ArrangePassGuard()
@@ -1192,17 +1192,15 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mRequestedY(0.0f),
   mMeasuredSize{0.0f, 0.0f},
   // Pure cache keys; their initial values are never consulted because
-  // mMeasureCacheValid starts false. NaN is nevertheless the fail-safe choice for
-  // both: it compares unequal to everything, including itself, so a predicate that
-  // somehow reached them without the validity bit would MISS rather than serve.
-  mLastMeasureConstraint{std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()},
-  mLastMeasureScale(std::numeric_limits<float>::quiet_NaN()),
-  mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
-  mLastArrangeInput{0.0f, 0.0f, 0.0f, 0.0f},
-  // 0 = "never propagated", which no live generation ever equals, so the first
+  // mMeasureCacheValid starts false. NaN is nevertheless the fail-safe choice for the
+  // constraint: it compares unequal to everything, including itself, so a predicate
+  // that somehow reached it without the validity bit would MISS rather than serve.
+  // The scale and input KEYS get no such sentinel: they share their slots with the
+  // propagation records (see the unions in the header), whose default construction
+  // is 0 = "never propagated", which no live generation ever equals, so the first
   // invalidation on each axis always walks.
-  mMeasurePropagationGeneration(0u),
-  mArrangePropagationGeneration(0u),
+  mLastMeasureConstraint{std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()},
+  mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
   mMargin(),
   mPadding(),
   mSize(0, 0),
@@ -2312,7 +2310,7 @@ void ViewDataImpl::InvalidateMeasure()
   // Everything ABOVE this point is the local half and always runs. Everything BELOW
   // is the walk to the layout root, which is idempotent and can therefore be skipped
   // while the registration it would make is already pending -- see
-  // LayoutInvalidation and mMeasurePropagationGeneration. This is what keeps a batch of
+  // LayoutInvalidation and the measure propagation record. This is what keeps a batch of
   // invalidations before one layout pass at O(1) each instead of O(depth) each, with
   // two handle DownCasts per level and a Window lookup at the root.
   //
@@ -2325,11 +2323,11 @@ void ViewDataImpl::InvalidateMeasure()
   // ViewImpl::Invalidate*() entry point, so the walk never re-enters the public
   // API on the framework's own behalf.
   const uint32_t generation = LayoutInvalidation::CurrentGeneration();
-  if(gActiveLayoutPassDepth == 0u && mMeasurePropagationGeneration == generation)
+  if(gActiveLayoutPassDepth == 0u && mMeasureKeyOrPropagation.propagationGeneration == generation)
   {
     return;
   }
-  mMeasurePropagationGeneration = generation;
+  mMeasureKeyOrPropagation.propagationGeneration = generation;
 
   // Layout boundary: a standalone view is excluded from its parent's
   // OnMeasure/OnArrange accumulation, so its measure result cannot change
@@ -2384,8 +2382,8 @@ void ViewDataImpl::InvalidateArrange()
   // The repeated walk is O(depth) and idempotent -- each level sets its flags
   // and calls its parent once -- and LayoutController::RequestLayout coalesces
   // duplicate registrations in its pending set. See plan34 27.5.
-  mArrangeDirty      = true;
-  mArrangeCacheValid = false;
+  mArrangeDirty = true;
+  DropArrangeCacheEntry();
 
   if(mArrangeInProgress)
   {
@@ -2393,14 +2391,14 @@ void ViewDataImpl::InvalidateArrange()
   }
 
   // Propagation coalescing, exactly as in InvalidateMeasure and with the same two
-  // conditions -- see the comment there, and mArrangePropagationGeneration for why the
+  // conditions -- see the comment there, and the KEY/record union docs for why the
   // measure and arrange records must stay separate.
   const uint32_t generation = LayoutInvalidation::CurrentGeneration();
-  if(gActiveLayoutPassDepth == 0u && mArrangePropagationGeneration == generation)
+  if(gActiveLayoutPassDepth == 0u && mArrangeKeyOrPropagation.propagationGeneration == generation)
   {
     return;
   }
-  mArrangePropagationGeneration = generation;
+  mArrangeKeyOrPropagation.propagationGeneration = generation;
 
   // Layout boundary: standalone child's arrange result does not feed back
   // into the parent's arrangement — stop here and self-register.
@@ -3388,7 +3386,7 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // own InvalidateMeasure() above reaches this view and does the whole job.
     //
     // That is a guarantee, not a likelihood. The generation short-circuit
-    // (InvalidateMeasure's `mMeasurePropagationGeneration == generation` return) is the
+    // (InvalidateMeasure's propagation-record generation return) is the
     // only thing that could stop the walk short, and ResetSubtreeScaleAndLayoutCaches()
     // above zeroed the whole added subtree's propagation records -- 0 is the "never
     // propagated" sentinel that no live generation ever equals (the counter starts at 1
@@ -4266,8 +4264,8 @@ void ViewDataImpl::InvalidateAncestorLayoutCachesForMeasureMiss()
     }
     isDirectParent = false;
 
-    nodeData.mMeasureCacheValid = false;
-    nodeData.mArrangeCacheValid = false;
+    nodeData.DropMeasureCacheEntry();
+    nodeData.DropArrangeCacheEntry();
 
     // The ancestor is mid-ARRANGE and unowned, so it has already consumed this
     // view's previous slot: the cache clear just above must survive to the end of
@@ -4305,7 +4303,7 @@ void ViewDataImpl::InvalidateAncestorLayoutCachesForMeasureMiss()
  * rewrites this view's arrange records.
  *
  * Why it is needed: Arrange() publishes mArrangedBounds and (on a clean pass)
- * mLastArrangeInput unconditionally, and an ancestor's cache HIT replays this
+ * the arrange input key unconditionally, and an ancestor's cache HIT replays this
  * view FROM those records -- CanReplayArrangeSubtreeFromCache deliberately skips
  * the cache-KEY comparison for descendants on the premise that each descendant's
  * recorded slot is the one the ancestor's own producer chain handed it. A public
@@ -4383,7 +4381,7 @@ void ViewDataImpl::InvalidateParentArrangeCacheForOutOfBandArrange(bool framewor
     return;
   }
 
-  parentData.mArrangeCacheValid = false;
+  parentData.DropArrangeCacheEntry();
 }
 
 MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
@@ -4493,7 +4491,7 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   // mMeasureCacheValid. The old `>= 0.0f` pre-test could therefore never reject anything
   // FloatEqual would have accepted.
   if(mMeasureCacheValid && !mMeasureDirty && !mMeasurePassPoisoned &&
-     mLastMeasureScale == s &&
+     mMeasureKeyOrPropagation.scaleKey == s &&
      FloatEqual(mLastMeasureConstraint.width, effNatW) &&
      FloatEqual(mLastMeasureConstraint.height, effNatH))
   {
@@ -4555,10 +4553,10 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   // recomputes with the new state.
   if(!mMeasureDirty && !mMeasurePassPoisoned)
   {
-    mLastMeasureConstraint.width  = effNatW;
-    mLastMeasureConstraint.height = effNatH;
-    mLastMeasureScale             = s;
-    mMeasureCacheValid            = true;
+    mLastMeasureConstraint.width      = effNatW;
+    mLastMeasureConstraint.height     = effNatH;
+    mMeasureKeyOrPropagation.scaleKey = s;
+    mMeasureCacheValid                = true;
   }
   else if(mMeasurePassPoisoned && !mMeasureDirty)
   {
@@ -4628,7 +4626,7 @@ bool ViewDataImpl::CanServeArrangeFromCache(const LayoutRect& bounds) const
          !mArrangeDirty &&
          !mArrangePassPoisoned &&
          !mArrangeCacheBlockedDuringPass &&
-         SameLayoutRect(mLastArrangeInput, bounds) &&
+         SameLayoutRect(mArrangeKeyOrPropagation.inputKey, bounds) &&
          mLastArrangeDirection == mViewImpl.Self().GetEffectiveLayoutDirection() &&
          !HasUnconsumedStandaloneChild();
 }
@@ -4662,7 +4660,7 @@ bool ViewDataImpl::CanReplayArrangeSubtreeFromCache() const
     //  - the cache KEY (SameLayoutRect). A descendant has no candidate `bounds` to
     //    key against, and it does not need one: with this view's own key matched and
     //    its producer ArrangePolicy::IF_CHANGED, the producer would hand each child the same slot it
-    //    handed it last time -- the slot that child recorded as mLastArrangeInput and
+    //    handed it last time -- the slot that child recorded as its arrange input key and
     //    resolved into the mArrangedBounds the replay is about to apply. The key
     //    match is implied by the parent's key match plus policy, which is why policy
     //    is required at every node and not only at the top.
@@ -4934,7 +4932,7 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   //    defence in depth. Each of these is raised by a writer that also clears
   //    mArrangeCacheValid in the same breath, so they are implied today; testing
   //    them keeps the hit correct if that pairing is ever broken.
-  //  - SameLayoutRect(mLastArrangeInput, bounds): the cache KEY. Exact compare,
+  //  - SameLayoutRect(inputKey, bounds): the cache KEY. Exact compare,
   //    see SameLayoutRect.
   //  - !HasUnconsumedStandaloneChild(): the corrective re-measure for a standalone
   //    child's slot lives further down this function (ArrangeStandaloneChildren),
@@ -4958,7 +4956,7 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   //
   //    The four (axis, input) pairs are handled three different ways, and the choice
   //    is per pair rather than per axis or per input:
-  //      measure x scale     -- KEY (mLastMeasureScale). `s` is already read above
+  //      measure x scale     -- KEY (the scale key). `s` is already read above
   //                             that predicate for the constraint normalisation, so
   //                             the term is one float compare.
   //      arrange x scale     -- invalidation + DEBUG assert (this bullet). Reading it
@@ -5118,7 +5116,7 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // still false at entry), which is what the GetEffectiveScale() at pass entry
   // rules out for the childless-default case.
   //
-  // What this block writes is LIVE: mArrangeCacheValid / mLastArrangeInput /
+  // What this block writes is LIVE: mArrangeCacheValid / the arrange input key /
   // mLastArrangeDirection are exactly what the cache-HIT test at the top of this
   // function reads on the next pass. Declining the publish here is therefore how a
   // pass whose premises did not survive forces the next Arrange() to recompute. It
@@ -5134,9 +5132,9 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // cannot be re-published over that clear before the pass ends.
   if(!mArrangeDirty && !mArrangePassPoisoned && !mArrangeCacheBlockedDuringPass && mEffectiveScaleValid && !mEffectiveScaleInvalidatedDuringPass && mMeasureCacheValid)
   {
-    mLastArrangeInput     = bounds;
-    mLastArrangeDirection = mViewImpl.Self().GetEffectiveLayoutDirection();
-    mArrangeCacheValid    = true;
+    mArrangeKeyOrPropagation.inputKey = bounds;
+    mLastArrangeDirection             = mViewImpl.Self().GetEffectiveLayoutDirection();
+    mArrangeCacheValid                = true;
   }
   else if(mArrangePassPoisoned && !mArrangeDirty)
   {
@@ -5354,7 +5352,7 @@ void ViewDataImpl::DropCachedEffectiveScale()
   //    the next Measure() would skip the push and leave decoration constraints on the
   //    old scale.
   //  - the MEASURE cache: no longer required for CORRECTNESS. That cache keys on the
-  //    effective scale (mLastMeasureScale), so a caller that forgot the pairing would
+  //    effective scale (the scale key), so a caller that forgot the pairing would
   //    take a miss rather than serve a size computed at the old scale. The pairing is
   //    still the contract; the key is the second line of defence, not a licence.
   mEffectiveScaleActorSynced = false;
@@ -5370,8 +5368,8 @@ void ViewDataImpl::DropCachedEffectiveScale()
 
 void ViewDataImpl::InvalidateLayoutCaches()
 {
-  mMeasureCacheValid = false;
-  mArrangeCacheValid = false;
+  DropMeasureCacheEntry();
+  DropArrangeCacheEntry();
 
   // mMeasureDirty is deliberately NOT touched here.
   //
@@ -5420,8 +5418,8 @@ void ViewDataImpl::ResetSubtreeScaleAndLayoutCaches()
   //
   // Recursive because the chain change is subtree-wide: a descendant's record names
   // the same old root as the moved node's.
-  mMeasurePropagationGeneration = 0u;
-  mArrangePropagationGeneration = 0u;
+  mMeasureKeyOrPropagation.propagationGeneration = 0u;
+  mArrangeKeyOrPropagation.propagationGeneration = 0u;
 
   for(auto& childView : mChildren)
   {
