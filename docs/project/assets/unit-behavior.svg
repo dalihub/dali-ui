@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="410" viewBox="0 0 1160 410" role="img" aria-labelledby="title desc">
+  <title id="title">SPX와 DP의 크기 변환 비교</title>
+  <desc id="desc">SPX는 제품별 scaling factor를 적용하고, DP는 서로 다른 pixel density를 보정해 물리적 크기를 맞춘다.</desc>
+  <defs>
+    <pattern id="grid-normal" width="10" height="10" patternUnits="userSpaceOnUse">
+      <path d="M10 0H0V10" fill="none" stroke="#cbd8d3" stroke-width="0.7"/>
+    </pattern>
+    <pattern id="grid-dense" width="5" height="5" patternUnits="userSpaceOnUse">
+      <path d="M5 0H0V5" fill="none" stroke="#cbd8d3" stroke-width="0.55"/>
+    </pattern>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0 0L8 4L0 8Z" fill="#ed745b"/>
+    </marker>
+    <style>
+      text { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif; }
+      .panel { fill: #fff; stroke: #dce3de; stroke-width: 1.5; }
+      .before-group { fill: #f2f4f2; stroke: #d7dfda; stroke-width: 1.2; }
+      .after-group { fill: #edf7f3; stroke: #9ccfc0; stroke-width: 1.5; }
+      .title { fill: #17242b; font-size: 22px; font-weight: 800; }
+      .unit-accent { fill: #006d68; }
+      .subtitle { fill: #64737a; font-size: 11px; }
+      .panel-subtitle { font-size: 13.2px; font-weight: 700; }
+      .formula { fill: #17242b; font-size: 16px; font-weight: 850; }
+      .device-label { fill: #3d4e56; font-size: 9px; font-weight: 800; letter-spacing: .4px; }
+      .factor-label { fill: #008278; font-size: 11.7px; font-weight: 800; }
+      .density-label { fill: #d85f48; font-size: 11.7px; font-weight: 800; }
+      .screen { fill: #fff; stroke: #29444e; stroke-width: 1.8; }
+      .raw-object { fill: #ed745b; }
+      .result-object { fill: #006d68; }
+      .pixel-value { fill: #3d4e56; stroke: #fff; stroke-width: 2.5px; paint-order: stroke; font-size: 11px; font-weight: 850; text-anchor: middle; }
+      .pixel-value.result { fill: #006d68; }
+      .note { fill: #006d68; font-size: 10px; font-weight: 750; }
+    </style>
+  </defs>
+
+  <rect class="panel" x="1" y="1" width="568" height="334"/>
+  <text class="title" x="25" y="30"><tspan class="unit-accent">_spx</tspan><tspan> · 제품별 배율 정책 반영</tspan></text>
+  <text class="subtitle panel-subtitle" x="25" y="60">제품 디자인에서 정한 배율로 객체 사이즈 조절 목적</text>
+
+  <rect class="before-group" x="18" y="72" width="246" height="226"/>
+  <text class="formula" x="32" y="98">5 × 10</text>
+  <text class="device-label" x="78" y="124" text-anchor="middle">DEVICE A</text>
+  <text class="device-label" x="204" y="124" text-anchor="middle">DEVICE B</text>
+  <rect class="screen" x="36" y="150" width="84" height="92"/>
+  <rect x="38" y="152" width="80" height="88" fill="url(#grid-normal)"/>
+  <rect class="raw-object" x="55" y="183" width="46" height="26"/>
+  <text class="pixel-value" x="78" y="233">5 × 10</text>
+  <rect class="screen" x="174" y="176" width="60" height="66"/>
+  <rect x="176" y="178" width="56" height="62" fill="url(#grid-normal)"/>
+  <rect class="raw-object" x="181" y="196" width="46" height="26"/>
+  <text class="pixel-value" x="204" y="233">5 × 10</text>
+  <text class="subtitle" x="141" y="273" text-anchor="middle">
+    <tspan x="141" dy="0">비슷한 density.</tspan>
+    <tspan x="141" dy="15">제품 크기가 작을 경우 객체가 꽉 참</tspan>
+  </text>
+
+  <line x1="270" y1="184" x2="293" y2="184" stroke="#ed745b" stroke-width="2.2" marker-end="url(#arrow)"/>
+
+  <rect class="after-group" x="304" y="72" width="246" height="226"/>
+  <text class="formula" x="318" y="98">5_spx × 10_spx</text>
+  <text class="device-label" x="364" y="124" text-anchor="middle">DEVICE A</text>
+  <text class="factor-label" x="364" y="139" text-anchor="middle">Scale 1.0</text>
+  <text class="device-label" x="490" y="124" text-anchor="middle">DEVICE B</text>
+  <text class="factor-label" x="490" y="139" text-anchor="middle">Scale 0.6</text>
+  <rect class="screen" x="322" y="150" width="84" height="92"/>
+  <rect x="324" y="152" width="80" height="88" fill="url(#grid-normal)"/>
+  <rect class="result-object" x="341" y="183" width="46" height="26"/>
+  <text class="pixel-value result" x="364" y="233">5 × 10</text>
+  <rect class="screen" x="460" y="176" width="60" height="66"/>
+  <rect x="462" y="178" width="56" height="62" fill="url(#grid-normal)"/>
+  <rect class="result-object" x="476" y="201" width="28" height="16"/>
+  <text class="pixel-value result" x="490" y="233">3 × 6</text>
+  <text class="note" x="427" y="284" text-anchor="middle">제품별로 다른 배율을 적용하여 사이즈 보정</text>
+
+  <rect class="panel" x="591" y="1" width="568" height="334"/>
+  <text class="title" x="615" y="30"><tspan class="unit-accent">_dp</tspan><tspan> · Density 보정</tspan></text>
+  <text class="subtitle panel-subtitle" x="615" y="60">제품별 pixel density 차이를 보정</text>
+
+  <rect class="before-group" x="608" y="72" width="246" height="226"/>
+  <text class="formula" x="622" y="98">5 × 10</text>
+  <text class="device-label" x="668" y="124" text-anchor="middle">DEVICE A</text>
+  <text class="device-label" x="794" y="124" text-anchor="middle">DEVICE B</text>
+  <text class="density-label" x="794" y="139" text-anchor="middle">Density 2×</text>
+  <rect class="screen" x="626" y="150" width="84" height="92"/>
+  <rect x="628" y="152" width="80" height="88" fill="url(#grid-normal)"/>
+  <rect class="raw-object" x="645" y="183" width="46" height="26"/>
+  <text class="pixel-value" x="668" y="233">5 × 10</text>
+  <rect class="screen" x="752" y="150" width="84" height="92"/>
+  <rect x="754" y="152" width="80" height="88" fill="url(#grid-dense)"/>
+  <rect class="raw-object" x="782" y="189" width="25" height="14"/>
+  <text class="pixel-value" x="794" y="233">5 × 10</text>
+  <text class="subtitle" x="731" y="284" text-anchor="middle">Density가 높은 제품에서 객체가 잘 안보임</text>
+
+  <line x1="860" y1="184" x2="883" y2="184" stroke="#ed745b" stroke-width="2.2" marker-end="url(#arrow)"/>
+
+  <rect class="after-group" x="894" y="72" width="246" height="226"/>
+  <text class="formula" x="908" y="98">5_dp × 10_dp</text>
+  <text class="device-label" x="954" y="124" text-anchor="middle">DEVICE A</text>
+  <text class="device-label" x="1080" y="124" text-anchor="middle">DEVICE B</text>
+  <rect class="screen" x="912" y="150" width="84" height="92"/>
+  <rect x="914" y="152" width="80" height="88" fill="url(#grid-normal)"/>
+  <rect class="result-object" x="931" y="183" width="46" height="26"/>
+  <text class="pixel-value result" x="954" y="233">5 × 10</text>
+  <rect class="screen" x="1038" y="150" width="84" height="92"/>
+  <rect x="1040" y="152" width="80" height="88" fill="url(#grid-dense)"/>
+  <rect class="result-object" x="1057" y="183" width="46" height="26"/>
+  <text class="pixel-value result" x="1080" y="233">10 × 20</text>
+  <text class="note" x="1017" y="276" text-anchor="middle">
+    <tspan x="1017" dy="0">Density를 고려하여</tspan>
+    <tspan x="1017" dy="15">비슷한 물리적 크기로 보이게 보정</tspan>
+  </text>
+
+  <rect x="1" y="352" width="1158" height="57" fill="#142f3a"/>
+  <text x="28" y="387" fill="#bde9d9" font-size="18" font-weight="800">_sdp</text>
+  <text x="92" y="387" fill="#d4e2e1" font-size="13">Density 보정</text>
+  <text x="197" y="387" fill="#ed745b" font-size="18" font-weight="800">×</text>
+  <text x="225" y="387" fill="#d4e2e1" font-size="13">제품별 ScalingFactor</text>
+  <text x="1118" y="387" fill="#ffffff" font-size="13" font-weight="800" text-anchor="end">두 정책을 함께 적용</text>
+</svg>
