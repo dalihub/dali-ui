@@ -116,8 +116,6 @@
     .manifesto small { display: block; margin-bottom: 54px; color: var(--mint); font-weight: 800; letter-spacing: .1em; }
     .manifesto blockquote { position: relative; z-index: 1; margin: 0 0 28px; font-size: 27px; font-weight: 800; letter-spacing: -.025em; line-height: 1.48; }
     .manifesto p { position: relative; z-index: 1; margin: 0; color: #c8d7d8; font-size: 14px; }
-    .cover-capabilities { display: flex; margin-top: 30px; flex-wrap: wrap; gap: 8px; }
-    .cover-capabilities span { padding: 7px 11px; border: 1px solid rgba(0,109,104,.14); border-radius: 999px; color: var(--teal-deep); background: rgba(255,255,255,.76); font-size: 11px; font-weight: 750; }
     .cover-metrics { display: grid; margin-top: 34px; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .cover-metric { padding: 18px 19px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.82); }
     .cover-metric strong { display: block; color: var(--teal); font-size: 28px; letter-spacing: -.04em; line-height: 1.15; }
@@ -220,7 +218,7 @@
     @keyframes chart-sliding-window { from { transform: translateX(0); } to { transform: translateX(570px); } }
     .chart-list { display: grid; align-content: center; gap: 10px; }
     .chart-list span { padding: 10px 13px; border-radius: 10px; color: #d7e6e6; background: rgba(255,255,255,.07); font-size: 12px; }
-    .theme-preview { display: grid; grid-template-columns: 1.3fr .7fr; gap: 18px; align-items: stretch; }
+    .theme-preview { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; align-items: stretch; }
     .theme-app { position: relative; min-height: 270px; padding: 23px; overflow: hidden; border-radius: 22px; background: #edf4f0; box-shadow: var(--shadow); animation: theme-background 5.2s step-end infinite; }
     .theme-app-head { display: flex; margin-bottom: 18px; align-items: center; }
     .theme-app-head > strong { color: var(--ink); font-size: 22px; animation: theme-foreground 5.2s step-end infinite; }
@@ -232,25 +230,27 @@
     .theme-task small { display: block; color: var(--muted); font-size: 9px; animation: theme-muted 5.2s step-end infinite; }
     .theme-add { position: absolute; right: 23px; bottom: 20px; width: 38px; height: 38px; border: 0; border-radius: 12px; color: #fff; background: #006d68; font-size: 22px; line-height: 1; animation: theme-primary 5.2s step-end infinite; }
     .theme-control { display: grid; padding: 18px; border: 1px solid #cbd5d1; border-radius: 14px; background: #f2f4f3; align-content: center; gap: 14px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.7); }
-    .theme-control-label { color: #73817e; font-size: 9px; font-weight: 800; letter-spacing: .14em; text-align: center; }
+    .theme-control-label { color: #73817e; font-size: 10.5px; font-weight: 800; letter-spacing: .14em; text-align: center; }
     .theme-selector { display: grid; padding: 4px; border: 1px solid #d7ddda; border-radius: 10px; background: #fff; grid-template-columns: 1fr 1fr; gap: 4px; }
-    .theme-selector b { padding: 10px 4px; border-radius: 7px; color: #fff; background: #006d68; font-size: 10px; letter-spacing: .01em; text-align: center; animation: theme-selector-light 5.2s step-end infinite; }
+    .theme-selector b { padding: 10px 4px; border-radius: 7px; color: #fff; background: #006d68; font-size: 12px; letter-spacing: .01em; text-align: center; animation: theme-selector-light 5.2s step-end infinite; }
     .theme-selector b:last-child { color: #74817e; background: transparent; animation-name: theme-selector-dark; }
     .theme-divider { display: grid; color: #84908d; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
     .theme-divider::before, .theme-divider::after { height: 1px; background: #d7ddda; content: ""; }
-    .theme-divider span { font-size: 9px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
-    .theme-token-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
-    .theme-token { display: grid; min-width: 0; padding: 9px 3px; border: 1px solid #dce2df; border-radius: 8px; background: #fff; justify-items: center; gap: 7px; }
+    .theme-divider span { font-size: 10.5px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+    .theme-token-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+    .theme-token { display: grid; min-width: 0; padding: 9px 1px; border: 1px solid #dce2df; border-radius: 8px; background: #fff; justify-items: center; gap: 7px; }
     .theme-token i { width: 26px; height: 26px; border-radius: 6px; background: #edf4f0; animation: theme-background 5.2s step-end infinite; }
     .theme-token.surface i { background: #fff; box-shadow: inset 0 0 0 1px var(--line); animation: theme-surface 5.2s step-end infinite; }
+    .theme-token.on-surface i { background: #17242b; box-shadow: inset 0 0 0 1px rgba(20,47,58,.24); animation: theme-on-surface 5.2s step-end infinite; }
     .theme-token.primary i { background: #006d68; animation: theme-primary 5.2s step-end infinite; }
-    .theme-token strong { overflow: hidden; max-width: 100%; color: #52625f; font-size: 7px; letter-spacing: .04em; text-overflow: ellipsis; }
+    .theme-token strong { color: #52625f; font-size: 8.2px; font-weight: 800; letter-spacing: -.03em; white-space: nowrap; }
     .theme-token.background i { box-shadow: inset 0 0 0 1px rgba(20,47,58,.24); }
     @keyframes theme-background { 0%, 49.999%, 100% { background-color: #edf4f0; } 50%, 99.999% { background-color: #142f3a; } }
     @keyframes theme-surface { 0%, 49.999%, 100% { border-color: rgba(20,47,58,.06); background-color: #fff; } 50%, 99.999% { border-color: rgba(255,255,255,.08); background-color: #294752; } }
     @keyframes theme-primary { 0%, 49.999%, 100% { border-color: #006d68; background-color: #006d68; } 50%, 99.999% { border-color: #ed745b; background-color: #ed745b; } }
     @keyframes theme-primary-outline { 0%, 49.999%, 100% { border-color: #006d68; background-color: transparent; } 50%, 99.999% { border-color: #ed745b; background-color: transparent; } }
     @keyframes theme-foreground { 0%, 49.999%, 100% { color: #17242b; } 50%, 99.999% { color: #fff; } }
+    @keyframes theme-on-surface { 0%, 49.999%, 100% { background-color: #17242b; } 50%, 99.999% { background-color: #fff; } }
     @keyframes theme-muted { 0%, 49.999%, 100% { color: #64737a; } 50%, 99.999% { color: #b9c9cb; } }
     @keyframes theme-selector-light { 0%, 49.999%, 100% { color: #fff; background-color: #006d68; } 50%, 99.999% { color: #74817e; background-color: transparent; } }
     @keyframes theme-selector-dark { 0%, 49.999%, 100% { color: #74817e; background-color: transparent; } 50%, 99.999% { color: #fff; background-color: #142f3a; } }
@@ -426,8 +426,6 @@
       .manifesto small { margin-bottom: 26px; }
       .manifesto blockquote { margin-bottom: 16px; font-size: 20px; }
       .manifesto p { font-size: 11px; }
-      .cover-capabilities { margin-top: 16px; gap: 5px; }
-      .cover-capabilities span { padding: 4px 7px; font-size: 8px; }
       .cover-metrics { margin-top: 18px; gap: 7px; }
       .cover-metric { padding: 11px 12px; }
       .cover-metric strong { font-size: 21px; }
@@ -492,6 +490,7 @@
       .theme-add { right: 18px; bottom: 16px; }
       .theme-token.background i { background: #142f3a; }
       .theme-token.surface i { border-color: rgba(255,255,255,.08); background: #294752; }
+      .theme-token.on-surface i { background: #fff; }
       .theme-token.primary i { border-color: #ed745b; background: #ed745b; }
       .reveal-word { font-size: 17px; }
       .reveal-word span { opacity: 1; animation: none; }
@@ -557,9 +556,6 @@
             <p class="cover-lead">DALi 기반 애플리케이션을 위한 Native UI Framework</p>
             <p class="cover-lead" style="margin-top:26px">DALi UI는 애플리케이션이 Native 환경에서 화면을 구성하고 운영하는 데 필요한 공통 UI 기능을 제공합니다. NUI<sup>*</sup>의 backend 역할을 해 온 DALi Toolkit과 비교해, 기능 범위를 넓히되 메모리 사용은 줄이는 것을 목표로 합니다. Layout을 고도화하고 Unit system, semantic color token, interaction events, Navigator 및 Chart 등을 신규 도입했으며, AI 서비스의 스트리밍 패턴을 비롯한 최신 UX를 구현할 수 있도록 Text 기능을 강화했습니다.</p>
             <p class="cover-footnote">* NUI: Tizen C# UI Framework</p>
-            <div class="cover-capabilities" aria-label="DALi UI 주요 기능">
-              <span>View & Layout</span><span>View State & Interaction</span><span>Navigator</span><span>Color & Theme</span><span>Adaptive & Rich Text</span><span>Scroller</span><span>Focus</span>
-            </div>
           </div>
           <aside class="manifesto">
             <small>REPORT SCOPE</small>
@@ -828,6 +824,7 @@
             <div class="theme-token-row">
               <div class="theme-token background"><i></i><strong>BACKGROUND</strong></div>
               <div class="theme-token surface"><i></i><strong>SURFACE</strong></div>
+              <div class="theme-token on-surface"><i></i><strong>ON_SURFACE</strong></div>
               <div class="theme-token primary"><i></i><strong>PRIMARY</strong></div>
             </div>
           </aside>
