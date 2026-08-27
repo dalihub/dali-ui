@@ -110,12 +110,15 @@
     }
     .cover-grid { display: grid; grid-template-columns: 1.08fr .92fr; gap: 48px; align-items: end; }
     .cover-lead { max-width: 690px; color: #46575f; font-size: 19px; line-height: 1.72; }
+    .cover-subtitle { color: var(--ink); font-weight: 800; }
     .cover-footnote { margin: 8px 0 0; color: #738188; font-size: 11px; }
     .manifesto { position: relative; min-height: 405px; padding: 38px; overflow: hidden; border-radius: var(--radius); color: #fff; background: var(--navy); box-shadow: var(--shadow); }
     .manifesto::after { position: absolute; right: -78px; bottom: -94px; width: 260px; height: 260px; border: 48px solid rgba(189,233,217,.10); border-radius: 50%; content: ""; }
-    .manifesto small { display: block; margin-bottom: 54px; color: var(--mint); font-weight: 800; letter-spacing: .1em; }
     .manifesto blockquote { position: relative; z-index: 1; margin: 0 0 28px; font-size: 27px; font-weight: 800; letter-spacing: -.025em; line-height: 1.48; }
     .manifesto p { position: relative; z-index: 1; margin: 0; color: #c8d7d8; font-size: 14px; }
+    .manifesto-links { position: relative; z-index: 1; display: flex; margin-top: 28px; flex-wrap: wrap; gap: 8px; }
+    .manifesto-links a { padding: 6px 10px; border: 1px solid rgba(189,233,217,.24); border-radius: 999px; color: var(--mint); background: rgba(255,255,255,.06); font-size: 10px; font-weight: 750; text-decoration: none; }
+    .manifesto-links a:hover { border-color: var(--mint); background: rgba(189,233,217,.12); }
     .cover-metrics { display: grid; margin-top: 34px; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .cover-metric { padding: 18px 19px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.82); }
     .cover-metric strong { display: block; color: var(--teal); font-size: 28px; letter-spacing: -.04em; line-height: 1.15; }
@@ -139,12 +142,22 @@
     .dark .flow-node { border-color: var(--line); background: #f6f8f5; }
     .dark .flow-node span { color: var(--muted); }
     .dark .flow-node.flow-input { border-color: #d9dfdc; background: #f3f5f4; }
-    .dark .flow-node.flow-output { border-color: rgba(0,109,104,.28); background: #edf7f3; }
+    .dark .flow-node.flow-output { border: 2px solid rgba(0,109,104,.52); background: #edf7f3; }
     .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
     .detail { padding: 24px 25px; border-top: 3px solid var(--mint); border-radius: 0 0 16px 16px; background: #fff; box-shadow: 0 10px 34px rgba(20,47,58,.06); }
     .detail p { margin: 0; color: var(--muted); font-size: 14px; }
     .detail code, .api-line code { color: var(--teal-deep); font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; }
     .dark .detail { border-top-color: var(--coral); color: var(--ink); }
+    .interaction-details { grid-template-columns: repeat(3, 1fr); }
+    .recoil-demo { display: grid; min-height: 88px; margin: 14px 0 12px; overflow: hidden; border-radius: 12px; background: #edf4f0; place-items: center; }
+    .recoil-button { position: relative; display: grid; width: 150px; height: 48px; overflow: hidden; border: 1px solid rgba(0,109,104,.35); border-radius: 10px; color: #fff; background: var(--teal); box-shadow: 0 8px 18px rgba(20,47,58,.16); place-items: center; transform-origin: center; animation: recoil-button 2.8s linear infinite; }
+    .recoil-button::after { position: absolute; z-index: 0; inset: 0; background: #000; opacity: 0; content: ""; animation: recoil-overlay 2.8s step-end infinite; }
+    .recoil-label { position: absolute; z-index: 1; font-size: 14px; font-weight: 800; animation: recoil-normal-label 2.8s step-end infinite; }
+    .recoil-label.pressed { opacity: 0; animation-name: recoil-pressed-label; }
+    @keyframes recoil-button { 0%, 20%, 55.6%, 100% { transform: scale(1); } 23.6%, 52% { transform: scale(.98); } }
+    @keyframes recoil-overlay { 0%, 20%, 52.001%, 100% { opacity: 0; } 20.001%, 52% { opacity: .1; } }
+    @keyframes recoil-normal-label { 0%, 20%, 52.001%, 100% { opacity: 1; } 20.001%, 52% { opacity: 0; } }
+    @keyframes recoil-pressed-label { 0%, 20%, 52.001%, 100% { opacity: 0; } 20.001%, 52% { opacity: 1; } }
     .impact { display: grid; margin-top: 34px; padding: 27px 30px; border-left: 5px solid var(--coral); border-radius: 0 18px 18px 0; background: rgba(237,116,91,.08); grid-template-columns: 160px 1fr; gap: 25px; }
     .impact strong { color: var(--coral); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
     .impact p { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.62; }
@@ -187,6 +200,8 @@
     .formula { padding: 22px; border-radius: 16px; background: rgba(255,255,255,.07); }
     .formula strong { display: block; margin-bottom: 8px; color: var(--mint); font-size: 23px; }
     .formula span { color: #bcd0d2; font-size: 12px; }
+    .unit-visual { margin: 18px 0 22px; padding: 14px; border: 1px solid var(--line); background: #fff; box-shadow: 0 12px 36px rgba(20,47,58,.07); }
+    .unit-visual img { display: block; width: 100%; height: auto; }
     .config-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .config-cell { padding: 19px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
     .config-cell strong { display: block; margin-bottom: 8px; color: var(--teal); font-size: 13px; }
@@ -214,7 +229,7 @@
     .nav-actions b { display: block; margin: 12px 0; font-size: 25px; }
     .chart-stage { display: grid; padding: 28px; border-radius: 22px; color: #fff; background: var(--navy); grid-template-columns: 1.35fr .65fr; gap: 25px; }
     .chart-stage svg { width: 100%; height: auto; overflow: visible; }
-    .chart-data-track { animation: chart-sliding-window 15s linear infinite; }
+    @media screen { .chart-data-track { animation: chart-sliding-window 15s linear infinite; } }
     @keyframes chart-sliding-window { from { transform: translateX(0); } to { transform: translateX(570px); } }
     .chart-list { display: grid; align-content: center; gap: 10px; }
     .chart-list span { padding: 10px 13px; border-radius: 10px; color: #d7e6e6; background: rgba(255,255,255,.07); font-size: 12px; }
@@ -400,6 +415,7 @@
     }
     @media (prefers-reduced-motion: reduce) {
       html, .page-scroller { scroll-behavior: auto; }
+      .recoil-button, .recoil-button::after, .recoil-label { animation: none; }
     }
     @page { size: A4; margin: 13mm; }
     @media print {
@@ -423,9 +439,10 @@
       .cover-lead { margin-bottom: 0; font-size: 14px; line-height: 1.55; }
       .cover-footnote { margin-top: 5px; font-size: 8px; }
       .manifesto { min-height: 250px; padding: 25px; }
-      .manifesto small { margin-bottom: 26px; }
       .manifesto blockquote { margin-bottom: 16px; font-size: 20px; }
       .manifesto p { font-size: 11px; }
+      .manifesto-links { margin-top: 17px; gap: 5px; }
+      .manifesto-links a { padding: 4px 7px; font-size: 7.5px; }
       .cover-metrics { margin-top: 18px; gap: 7px; }
       .cover-metric { padding: 11px 12px; }
       .cover-metric strong { font-size: 21px; }
@@ -443,11 +460,18 @@
       .flow-node span { font-size: 9px; }
       .detail-grid { gap: 11px; }
       .detail { padding: 15px 16px; }
+      .recoil-demo { min-height: 62px; margin: 8px 0; }
+      .recoil-button { width: 120px; height: 38px; transform: scale(.98); animation: none; }
+      .recoil-button::after { opacity: .1; animation: none; }
+      .recoil-label { font-size: 11px; animation: none; }
+      .recoil-label:not(.pressed) { opacity: 0; }
+      .recoil-label.pressed { opacity: 1; }
       .impact { margin-top: 16px; padding: 16px 18px; grid-template-columns: 110px 1fr; gap: 14px; }
       .impact p { font-size: 12px; }
       .sources { display: none; }
       .formula { padding: 14px; }
       .formula strong { font-size: 17px; }
+      .unit-visual { margin: 11px 0 14px; padding: 8px; }
       .config-matrix { gap: 7px; }
       .config-cell { padding: 12px; }
       .states { margin: 12px 0; gap: 5px; }
@@ -459,9 +483,8 @@
       .page-card { height: 130px; }
       .chart-stage { padding: 18px; }
       .chart-stage svg { max-height: 190px; }
-      .chart-data-track { animation: none; transform: translateX(0); }
-      .chart-data-viewport { clip-path: none; }
-      .chart-data-copy { display: none; }
+      .chart-data-track { transform: translateX(0); }
+      .chart-data-copy { display: none; visibility: hidden; }
       .chart-list span { padding: 6px 9px; font-size: 9px; }
       .token { min-height: 90px; padding: 13px; }
       .token strong { margin-bottom: 11px; }
@@ -553,14 +576,17 @@
         <div class="cover-grid">
           <div>
             <h1><a class="heading-link" href="#dali-ui">DALi UI<span class="heading-anchor" aria-hidden="true">#</span></a></h1>
-            <p class="cover-lead">DALi 기반 애플리케이션을 위한 Native UI Framework</p>
-            <p class="cover-lead" style="margin-top:26px">DALi UI는 애플리케이션이 Native 환경에서 화면을 구성하고 운영하는 데 필요한 공통 UI 기능을 제공합니다. NUI<sup>*</sup>의 backend 역할을 해 온 DALi Toolkit과 비교해, 기능 범위를 넓히되 메모리 사용은 줄이는 것을 목표로 합니다. Layout을 고도화하고 Unit system, semantic color token, interaction events, Navigator 및 Chart 등을 신규 도입했으며, AI 서비스의 스트리밍 패턴을 비롯한 최신 UX를 구현할 수 있도록 Text 기능을 강화했습니다.</p>
+            <p class="cover-lead cover-subtitle">DALi 기반 애플리케이션을 위한 Native UI Framework</p>
+            <p class="cover-lead" style="margin-top:26px; margin-bottom:0">DALi UI는 애플리케이션이 Native 환경에서 화면을 구성하고 운영하는 데 필요한 공통 UI 기능을 제공합니다. NUI<sup>*</sup>의 backend 역할을 해 온 DALi Toolkit과 비교해, 기능 범위를 넓히되 메모리 사용은 줄이는 것을 목표로 합니다.</p>
+            <p class="cover-lead" style="margin-top:12px">Layout을 고도화하고 Unit system, semantic color token, interaction events, Navigator 및 Chart 등을 신규 도입했으며, AI 서비스의 스트리밍 패턴을 비롯한 최신 UX를 구현할 수 있도록 Text 기능을 강화했습니다.</p>
             <p class="cover-footnote">* NUI: Tizen C# UI Framework</p>
           </div>
           <aside class="manifesto">
-            <small>REPORT SCOPE</small>
             <h3 style="font-size:28px">앱 개발을 단순하게 만드는 폭넓은 UI 기능</h3>
             <p>Native 앱이 제품 화면을 구성하려면 풍부한 UI 기능이 필요합니다. DALi UI는 화면마다 공통 기능을 다시 구현해야 하는 부담을 줄이고, 애플리케이션이 DALi 위에서 제품 수준의 UI를 구성할 수 있게 합니다.</p>
+            <nav class="manifesto-links" aria-label="기능 페이지 바로가기">
+              <a href="#unit">#Unit</a><a href="#view">#View</a><a href="#view-state-interaction">#Interaction</a><a href="#layout">#Layout</a><a href="#advanced-text">#Text</a><a href="#adaptive-text">#AdaptiveText</a><a href="#color-theme">#Theme</a><a href="#navigator">#Navigator</a><a href="#scroller">#Scroller</a><a href="#chart">#Chart</a><a href="#enhanced-focus-system">#Focus</a><a href="#configuration">#Configuration</a>
+            </nav>
           </aside>
         </div>
 
@@ -580,7 +606,7 @@
           <div>
             <div class="eyebrow">02 / Unit</div>
             <h2><a class="heading-link" href="#unit">Unit<span class="heading-anchor" aria-hidden="true">#</span></a></h2>
-            <p class="lead">Unit은 해상도 및 디바이스의 pixel density 그리고 제품별 scaling factor 에 따라 하나의 표현이 서로 다른 크기로 표시되도록 하는 장치입니다. 숫자 리터럴에 붙여 직관적으로 단위를 지정할 수 있도록 UDL을 적용했으며, 모든 unit 은 표현식이 평가되는 즉시 pixel로 변환됩니다. 제품별 scaling factor도 같은 단위 정책에서 처리합니다.</p>
+            <p class="lead">Unit은 해상도 및 디바이스의 pixel density 그리고 제품별 scaling factor 에 따라 하나의 표현이 서로 다른 크기로 표시되도록 하는 장치입니다. 숫자 리터럴에 붙여 직관적으로 단위를 지정할 수 있도록 UDL을 적용했으며, 모든 unit 은 계산식에 따라 pixel로 변환됩니다.</p>
           </div>
           <div class="section-index">02</div>
         </div>
@@ -594,11 +620,10 @@
           </div>
         </div>
 
-        <div class="formula-grid">
-          <article class="detail"><h3>제품 기준 크기 · <code>_spx</code></h3><p>제품 디자인에서 정한 크기와 간격을 기기별 공통 배율로 조정할 때 적합합니다. 작성한 값에 제품별 <code>ScalingFactor</code>만 곱해 pixel로 변환합니다.</p></article>
-          <article class="detail"><h3>밀도에 독립적인 크기 · <code>_dp</code></h3><p>화면 밀도가 달라도 button이나 touch target이 비슷한 물리적 크기로 보이게 할 때 적합합니다. 작성한 값에 DPI와 BaselineDPI의 비율을 곱합니다.</p></article>
-          <article class="detail"><h3>밀도와 제품 배율 · <code>_sdp</code></h3><p>밀도 차이를 보정하면서 제품별 크기 정책도 함께 적용할 component와 layout에 적합합니다. <code>_dp</code> 변환 결과에 <code>ScalingFactor</code>를 추가로 곱합니다.</p></article>
-        </div>
+        <figure class="unit-visual">
+          <img src="assets/unit-behavior.svg" alt="spx는 제품별 scaling factor로 크기를 조정하고 dp는 화면 밀도 차이를 보정하는 과정을 비교한 그림">
+        </figure>
+
         <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-%26-Scale-(kr)">Unit &amp; Scale wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/types/unit.h">Unit literals</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/configuration/ui-config.h">UiConfig</a></div>
       </div>
     </section>
@@ -649,13 +674,14 @@
           <div class="mechanism-title">Inputs and UI interactions</div>
           <div class="flow">
             <div class="flow-node flow-input"><strong>Touch · Key · Accessibility</strong><span>서로 다른 입력 경로</span></div><div class="flow-arrow">→</div>
-            <div class="flow-node flow-output"><strong>Click · Long press</strong><span>앱이 바로 사용하는 의미 단위의 event</span></div><div class="flow-arrow">+</div>
+            <div class="flow-node flow-output"><strong>Clicked event</strong><span>의미 기반으로 추상화된 interaction event</span></div><div class="flow-arrow">+</div>
             <div class="flow-node flow-output"><strong>Pressed · Hovered · Focused</strong><span>Visual과 동작에 공통으로 쓰는 View state</span></div>
           </div>
         </div>
-        <div class="detail-grid">
-          <article class="detail"><h3>원인을 포함한 상태 변화</h3><p>상태가 바뀌기 전과 후의 값뿐 아니라 변화를 일으킨 입력에 대한 데이터도 event와 함께 전달합니다. 앱은 같은 상태 변화라도 touch, key 등 원인에 따라 다르게 대응할 수 있습니다.</p></article>
-          <article class="detail"><h3>필요한 기능만 선택적으로 확장</h3><p>Interaction detection은 앱 개발자가 명시적으로 요청한 View에서만 활성화됩니다. View가 쓰지 않는 데이터를 기본적으로 보유하지 않으므로 복잡한 화면에서도 메모리 부담을 줄입니다.</p></article>
+        <div class="detail-grid interaction-details">
+          <article class="detail"><h3>상태 변화 요인에 대한 상세 리포트</h3><p>상태가 바뀌기 전과 후의 값뿐 아니라 변화를 일으킨 입력에 대한 데이터도 event와 함께 전달합니다. 앱은 같은 상태 변화라도 touch, key 등 원인에 따라 다르게 대응할 수 있습니다.</p></article>
+          <article class="detail"><h3>On-demand allocation</h3><p>Interaction detection은 앱 개발자가 명시적으로 요청한 View에서만 활성화됩니다. View가 쓰지 않는 데이터를 기본적으로 보유하지 않으므로 복잡한 화면에서도 메모리 부담을 줄입니다.</p></article>
+          <article class="detail"><h3>State 기반 비주얼 효과 제공</h3><div class="recoil-demo" aria-label="Pressed state의 overlay와 recoil 애니메이션"><div class="recoil-button"><span class="recoil-label">Normal</span><span class="recoil-label pressed">Pressed</span></div></div><p>OneUI recoil effect를 제공합니다. 앱이 효과를 직접 작성하지 않고도 공통 효과를 적용 받을 수 있습니다.</p></article>
         </div>
         <div class="sources"><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management">State wiki</a><a href="https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-%26-Gesture-(kr)">Touch &amp; Gesture wiki</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/types/view-state.h">ViewState</a><a href="https://github.com/dalihub/dali-ui/blob/devel/dali-ui-foundation/public-api/traits/interactive-trait.h">InteractiveTrait</a></div>
       </div>
@@ -910,18 +936,22 @@
             <defs>
               <clipPath id="chart-window"><rect x="45" y="30" width="545" height="220" rx="4"/></clipPath>
             </defs>
-            <g stroke="#ffffff" stroke-opacity=".10"><path d="M45 30V250H590"/><path d="M45 80H590M45 135H590M45 190H590"/></g>
+            <g clip-path="url(#chart-window)">
+              <rect x="45" y="30" width="545" height="220" fill="#142f3a"/>
+              <path d="M45 30V250H590Z" fill="#050708"/>
+            </g>
+            <g fill="none" stroke="#ffffff" stroke-opacity=".10"><path d="M45 30V250H590"/><path d="M45 80H590M45 135H590M45 190H590"/></g>
             <g class="chart-data-viewport" clip-path="url(#chart-window)">
               <g class="chart-data-track">
                 <g class="chart-data-copy" transform="translate(-570 0)">
-                  <g fill="#ed745b" opacity=".82"><rect x="85" y="165" width="32" height="85" rx="5"/><rect x="180" y="115" width="32" height="135" rx="5"/><rect x="275" y="146" width="32" height="104" rx="5"/><rect x="370" y="72" width="32" height="178" rx="5"/><rect x="465" y="103" width="32" height="147" rx="5"/><rect x="560" y="155" width="32" height="95" rx="5"/></g>
-                  <path d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190V250H70Z" fill="#bde9d9" fill-opacity=".18"/>
+                  <g fill="#ed745b" opacity=".82"><rect x="85" y="165" width="32" height="85"/><rect x="180" y="115" width="32" height="135"/><rect x="275" y="146" width="32" height="104"/><rect x="370" y="72" width="32" height="178"/><rect x="465" y="103" width="32" height="147"/><rect x="560" y="155" width="32" height="95"/></g>
+                  <path class="chart-area-copy" d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190V250H70Z" fill="#bde9d9" fill-opacity=".18"/>
                   <path d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190" fill="none" stroke="#bde9d9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
                   <g fill="#bde9d9" stroke="#142f3a" stroke-width="4"><circle cx="70" cy="190" r="7"/><circle cx="165" cy="142" r="7"/><circle cx="260" cy="160" r="7"/><circle cx="355" cy="88" r="7"/><circle cx="450" cy="116" r="7"/><circle cx="545" cy="54" r="7"/><circle cx="640" cy="190" r="7"/></g>
                 </g>
                 <g>
-                <g fill="#ed745b" opacity=".82"><rect x="85" y="165" width="32" height="85" rx="5"/><rect x="180" y="115" width="32" height="135" rx="5"/><rect x="275" y="146" width="32" height="104" rx="5"/><rect x="370" y="72" width="32" height="178" rx="5"/><rect x="465" y="103" width="32" height="147" rx="5"/><rect x="560" y="155" width="32" height="95" rx="5"/></g>
-                <path d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190V250H70Z" fill="#bde9d9" fill-opacity=".18"/>
+                <g fill="#ed745b" opacity=".82"><rect x="85" y="165" width="32" height="85"/><rect x="180" y="115" width="32" height="135"/><rect x="275" y="146" width="32" height="104"/><rect x="370" y="72" width="32" height="178"/><rect x="465" y="103" width="32" height="147"/><rect x="560" y="155" width="32" height="95"/></g>
+                <path class="chart-area-fill" d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190V250H70Z" fill="#bde9d9" fill-opacity=".18"/>
                 <path d="M70 190L165 142L260 160L355 88L450 116L545 54L640 190" fill="none" stroke="#bde9d9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
                 <g fill="#bde9d9" stroke="#142f3a" stroke-width="4"><circle cx="70" cy="190" r="7"/><circle cx="165" cy="142" r="7"/><circle cx="260" cy="160" r="7"/><circle cx="355" cy="88" r="7"/><circle cx="450" cy="116" r="7"/><circle cx="545" cy="54" r="7"/><circle cx="640" cy="190" r="7"/></g>
                 </g>
