@@ -264,6 +264,16 @@ public: // Image
 
 public: // Size & Fitting Control
   /**
+   * @brief Returns the natural size of the image content.
+   *
+   * The returned size reflects the image Visual, including the desired size or
+   * decoded texture size when applicable. It may differ from the laid-out View size.
+   *
+   * @return The natural size of the image content
+   */
+  Vector3 GetNaturalSize() const;
+
+  /**
    * @brief Sets the sampling mode used when scaling the image.
    *
    * @param[in] samplingMode The sampling mode to use

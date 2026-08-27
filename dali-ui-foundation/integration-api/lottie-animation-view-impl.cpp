@@ -379,22 +379,12 @@ void LottieAnimationViewImpl::OnInitialize()
 
 MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  if(mVisualDirty)
-  {
-    mVisualDirty = false;
-    UpdateVisual();
-  }
-
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
   float s    = GetEffectiveScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
-  Vector2 naturalSize;
-  if(mVisual)
-  {
-    mVisual.GetNaturalSize(naturalSize);
-  }
+  Vector2 naturalSize = GetNaturalSize().GetVectorXY();
 
   float w = naturalSize.width;
   float h = naturalSize.height;
@@ -444,6 +434,23 @@ LayoutRect LottieAnimationViewImpl::OnArrange(const LayoutRect& bounds)
   LayoutRect result = ViewImpl::OnArrange(bounds);
   ApplyLayout(Vector2(bounds.width, bounds.height));
   return result;
+}
+
+Vector3 LottieAnimationViewImpl::GetNaturalSize() const
+{
+  LottieAnimationViewImpl& self = *const_cast<LottieAnimationViewImpl*>(this);
+  if(self.mVisualDirty)
+  {
+    self.mVisualDirty = false;
+    self.UpdateVisual();
+  }
+
+  Vector2 naturalSize;
+  if(self.mVisual)
+  {
+    self.mVisual.GetNaturalSize(naturalSize);
+  }
+  return Vector3(naturalSize);
 }
 
 void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)

@@ -520,7 +520,8 @@ Internal::VisualFactoryCache& VisualFactory::GetFactoryCache()
     std::vector<Dali::String> customBrokenImageUrlList{};
     if(UiConfig::HasCurrent())
     {
-      const auto& configImpl = GetImpl(UiConfig::GetCurrent());
+      const auto  config     = UiConfig::GetCurrent();
+      const auto& configImpl = GetImpl(config);
 
       customBrokenImageUrlList.reserve(3u);
       customBrokenImageUrlList.emplace_back(configImpl.GetBrokenImageUrl(UiConfig::BrokenImageType::SMALL));

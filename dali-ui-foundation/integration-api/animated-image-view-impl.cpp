@@ -482,22 +482,12 @@ void AnimatedImageViewImpl::OnInitialize()
 
 MeasuredSize AnimatedImageViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  if(mVisualDirty)
-  {
-    mVisualDirty = false;
-    UpdateVisual();
-  }
-
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
   float s    = GetEffectiveScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
-  Vector2 naturalSize;
-  if(mVisual)
-  {
-    mVisual.GetNaturalSize(naturalSize);
-  }
+  Vector2 naturalSize = GetNaturalSize().GetVectorXY();
 
   float w = naturalSize.width;
   float h = naturalSize.height;
@@ -544,6 +534,23 @@ MeasuredSize AnimatedImageViewImpl::OnMeasure(float widthConstraint, float heigh
 LayoutRect AnimatedImageViewImpl::OnArrange(const LayoutRect& bounds)
 {
   return ViewImpl::OnArrange(bounds);
+}
+
+Vector3 AnimatedImageViewImpl::GetNaturalSize() const
+{
+  AnimatedImageViewImpl& self = *const_cast<AnimatedImageViewImpl*>(this);
+  if(self.mVisualDirty)
+  {
+    self.mVisualDirty = false;
+    self.UpdateVisual();
+  }
+
+  Vector2 naturalSize;
+  if(self.mVisual)
+  {
+    self.mVisual.GetNaturalSize(naturalSize);
+  }
+  return Vector3(naturalSize);
 }
 
 void AnimatedImageViewImpl::SetResourceUrl(const Dali::String& url)

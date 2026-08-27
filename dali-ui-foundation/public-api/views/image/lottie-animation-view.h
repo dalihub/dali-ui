@@ -457,7 +457,17 @@ public: // Visual Appearance
    */
   UiColor GetImageColor() const;
 
-public: // Loading Behavior
+public: // Size & Loading Behavior
+  /**
+   * @brief Returns the natural size of the Lottie animation content.
+   *
+   * The returned size reflects the animation Visual, including the desired size
+   * or composition size when applicable. It may differ from the laid-out View size.
+   *
+   * @return The natural size of the Lottie animation content
+   */
+  Vector3 GetNaturalSize() const;
+
   /**
    * @brief Sets the desired rasterization width as a hint for the renderer.
    *

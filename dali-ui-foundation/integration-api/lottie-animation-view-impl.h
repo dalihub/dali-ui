@@ -283,6 +283,11 @@ public: // API
   void SetDynamicProperty(const Ui::LottieAnimation::DynamicPropertyInfo& info);
 
   /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetNaturalSize
+   */
+  Vector3 GetNaturalSize() const;
+
+  /**
    * @copydoc Dali::Ui::LottieAnimationView::SetDesiredWidth
    */
   void SetDesiredWidth(int width);

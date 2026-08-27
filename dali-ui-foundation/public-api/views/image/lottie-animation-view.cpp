@@ -228,6 +228,11 @@ void LottieAnimationView::SetDynamicProperty(const LottieAnimation::DynamicPrope
   Ui::GetImpl(*this).SetDynamicProperty(info);
 }
 
+Vector3 LottieAnimationView::GetNaturalSize() const
+{
+  return Ui::GetImpl(*this).GetNaturalSize();
+}
+
 void LottieAnimationView::SetDesiredWidth(int width)
 {
   Ui::GetImpl(*this).SetDesiredWidth(width);

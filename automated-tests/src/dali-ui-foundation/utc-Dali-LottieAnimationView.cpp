@@ -59,6 +59,26 @@ int UtcDaliLottieAnimationViewNewWithUrlP(void)
   END_TEST;
 }
 
+int UtcDaliLottieAnimationViewGetNaturalSizeP(void)
+{
+  UiTestApplication    application;
+  LottieAnimationView view = LottieAnimationView::New("test.json");
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(32);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+
+  const LottieAnimationView constView(view);
+  DALI_TEST_EQUALS(constView.GetNaturalSize(), Vector3(64.0f, 32.0f, 0.0f), TEST_LOCATION);
+
+  view.Measure(200.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  DALI_TEST_EQUALS(view.GetSize(), Vector3(200.0f, 100.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(constView.GetNaturalSize(), Vector3(64.0f, 32.0f, 0.0f), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliLottieAnimationViewCopyConstructorP(void)
 {
   UiTestApplication application;

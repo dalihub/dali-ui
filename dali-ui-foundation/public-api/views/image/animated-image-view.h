@@ -385,7 +385,17 @@ public: // Visual Appearance
    */
   bool IsPreMultipliedAlpha() const;
 
-public: // Loading Behavior
+public: // Size & Loading Behavior
+  /**
+   * @brief Returns the natural size of the animated image content.
+   *
+   * The returned size reflects the animated image Visual, including the desired
+   * size or decoded image size when applicable. It may differ from the laid-out View size.
+   *
+   * @return The natural size of the animated image content
+   */
+  Vector3 GetNaturalSize() const;
+
   /**
    * @brief Sets the desired image width used as a hint for the image loader.
    *
