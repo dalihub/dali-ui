@@ -970,7 +970,16 @@ void AsyncTextLoader::CopyRenderModelSummary(AsyncTextRenderInfo& renderInfo) co
 
 Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
 {
+  bool maximumNumberOfLinesExceeded = false;
+  return Layout(parameters, updated, maximumNumberOfLinesExceeded);
+}
+
+Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
+                             bool& maximumNumberOfLinesExceeded)
+{
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_LAYOUT");
+
+  maximumNumberOfLinesExceeded = false;
 
   ////////////////////////////////////////////////////////////////////////////////
   // Layout the text.
@@ -1061,6 +1070,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   layoutParameters.numberOfGlyphs         = numberOfGlyphs;
   layoutParameters.startLineIndex         = 0u;
   layoutParameters.estimatedNumberOfLines = 1u;
+  layoutParameters.maximumNumberOfLines   = parameters.maximumNumberOfLines;
   layoutParameters.interGlyphExtraAdvance = 0.f;
 
   // Whether the last character is a new paragraph character.
@@ -1124,6 +1134,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   {
     layoutText(nullptr);
   }
+  maximumNumberOfLinesExceeded = layoutParameters.maximumNumberOfLinesExceeded;
 
   mTextModel->mVisualModel->SetLayoutSize(newLayoutSize);
   if(mTypesetter)
@@ -2058,10 +2069,12 @@ bool AsyncTextLoader::CheckForTextFit(AsyncTextParameters& parameters, float poi
 
   Initialize();
   Update(parameters);
-  bool layoutUpdated = false;
-  Size layoutSize    = Layout(parameters, layoutUpdated);
+  bool layoutUpdated                = false;
+  bool maximumNumberOfLinesExceeded = false;
+  Size layoutSize                   = Layout(parameters, layoutUpdated, maximumNumberOfLinesExceeded);
 
-  if(!layoutUpdated || layoutSize.width > allowedSize.width || layoutSize.height > allowedSize.height)
+  if(!layoutUpdated || maximumNumberOfLinesExceeded ||
+     layoutSize.width > allowedSize.width || layoutSize.height > allowedSize.height)
   {
     return false;
   }

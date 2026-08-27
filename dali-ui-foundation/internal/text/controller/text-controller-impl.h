@@ -471,6 +471,8 @@ public:
     mTextColor(Color::BLACK),
     mOperationsPending(NO_OPERATION),
     mMaximumNumberOfCharacters(50u),
+    mMaximumNumberOfLines(static_cast<Length>(MAXIMUM_LINES_UNLIMITED)),
+    mMaximumLinesRevision(0u),
     mLayoutDirection(LayoutDirection::LEFT_TO_RIGHT),
     mUiScale(DEFAULT_UI_SCALE),
     mFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
@@ -1384,6 +1386,11 @@ public:
   void SetMultiLineEnabled(bool enable);
 
   /**
+   * @copydoc Controller::SetMaximumNumberOfLines()
+   */
+  void SetMaximumNumberOfLines(int maximumNumberOfLines);
+
+  /**
    * @copydoc Controller::SetHorizontalAlignment()
    */
   void SetHorizontalAlignment(Alignment alignment);
@@ -1625,6 +1632,8 @@ public:
   // Integer / enum-like values
   OperationsMask        mOperationsPending;         ///< Operations pending to be done to layout the text.
   Length                mMaximumNumberOfCharacters; ///< Maximum number of characters that can be inserted.
+  Length                mMaximumNumberOfLines;      ///< Maximum number of laid-out lines, or zero for unlimited.
+  uint64_t              mMaximumLinesRevision;      ///< Revision used to reject stale async MaximumLines results.
   LayoutDirection::Type mLayoutDirection;           ///< Current system language direction
 
   // Floating-point values

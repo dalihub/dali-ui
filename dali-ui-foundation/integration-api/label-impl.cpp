@@ -533,6 +533,16 @@ bool LabelImpl::IsMultiLine() const
   return mController->IsMultiLineEnabled();
 }
 
+void LabelImpl::SetMaximumLines(int maximumLines)
+{
+  mController->SetMaximumNumberOfLines(maximumLines);
+}
+
+int LabelImpl::GetMaximumLines() const
+{
+  return mController->GetMaximumNumberOfLines();
+}
+
 void LabelImpl::SetLineWrapMode(Ui::Text::LineWrapMode mode)
 {
   mController->SetLineWrapMode(mode);
@@ -2828,8 +2838,12 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
 void LabelImpl::AsyncTextFitChanged(float pointSize)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async text fit point size:%f\n", mController.Get(), pointSize);
-  if(mController->IsTextFitEnabled())
+  if(mController->IsTextFitEnabled() || mController->IsTextFitCandidatesEnabled())
   {
+    if(mController->IsTextFitCandidatesEnabled())
+    {
+      mController->SetDefaultLineSize(mController->GetCurrentLineSize());
+    }
     mController->SetTextFitPointSize(pointSize);
     EmitTextFitChanged();
   }
@@ -4105,54 +4119,56 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
     }
   }
 
-  parameters.maxTextureSize             = Dali::GetMaxTextureSize();
-  parameters.fontSize                   = mController->GetDefaultFontSize(Ui::Text::Controller::POINT_SIZE);
-  parameters.textColor                  = mController->GetDefaultColor();
-  parameters.anchorColor                = mController->GetAnchorColor();
-  parameters.anchorClickedColor         = mController->GetAnchorClickedColor();
-  parameters.fontFamily                 = mController->GetDefaultFontFamily();
-  parameters.fontWeight                 = mController->GetDefaultFontWeight();
-  parameters.fontWidth                  = mController->GetDefaultFontWidth();
-  parameters.fontSlant                  = mController->GetDefaultFontSlant();
-  parameters.isMultiLine                = mController->IsMultiLineEnabled();
-  parameters.ellipsis                   = mController->IsTextElideEnabled();
-  parameters.minLineSize                = mController->GetDefaultLineSize();
-  parameters.relativeLineSize           = mController->GetRelativeLineSize();
-  parameters.characterSpacing           = mController->GetCharacterSpacing();
-  parameters.effectiveTextScale         = mController->GetEffectiveTextScale();
-  parameters.horizontalAlignment        = mController->GetHorizontalAlignment();
-  parameters.verticalAlignment          = mController->GetVerticalAlignment();
-  parameters.verticalLineAlignment      = mController->GetVerticalLineAlignment();
-  parameters.lineWrapMode               = mController->GetLineWrapMode();
-  parameters.layoutDirectionPolicy      = mController->GetLayoutDirectionMode();
-  parameters.ellipsisPosition           = mController->GetEllipsisPosition();
-  parameters.isUnderlineEnabled         = mController->IsUnderlineEnabled();
-  parameters.underlineType              = mController->GetUnderlineType();
-  parameters.underlineColor             = mController->GetUnderlineColor();
-  parameters.underlineHeight            = mController->GetUnderlineHeight();
-  parameters.dashedUnderlineWidth       = mController->GetDashedUnderlineWidth();
-  parameters.dashedUnderlineGap         = mController->GetDashedUnderlineGap();
-  parameters.isStrikethroughEnabled     = mController->IsStrikethroughEnabled();
-  parameters.strikethroughColor         = mController->GetStrikethroughColor();
-  parameters.strikethroughHeight        = mController->GetStrikethroughHeight();
-  parameters.isTextBackgroundEnabled    = mController->IsBackgroundEnabled();
-  parameters.textBackgroundColor        = mController->GetBackgroundColor();
-  parameters.isShadowEnabled            = mController->IsShadowEnabled();
-  parameters.shadowBlurRadius           = mController->GetShadowBlurRadius();
-  parameters.shadowColor                = mController->GetShadowColor();
-  parameters.shadowOffset               = mController->GetShadowOffset();
-  parameters.isOutlineEnabled           = mController->IsOutlineEnabled();
-  parameters.outlineWidth               = mController->GetOutlineWidth();
-  parameters.outlineColor               = mController->GetOutlineColor();
-  parameters.outlineBlurRadius          = mController->GetOutlineBlurRadius();
-  parameters.outlineOffset              = mController->GetOutlineOffset();
-  parameters.isTextFitEnabled           = mController->IsTextFitEnabled();
-  parameters.textFitMinSize             = mController->GetTextFitMinSize(Ui::Text::Controller::POINT_SIZE);
-  parameters.textFitMaxSize             = mController->GetTextFitMaxSize(Ui::Text::Controller::POINT_SIZE);
-  parameters.textFitStepSize            = mController->GetTextFitStepSize(Ui::Text::Controller::POINT_SIZE);
-  parameters.isTextFitCandidatesEnabled = mController->IsTextFitCandidatesEnabled();
-  parameters.textFitCandidates          = mController->GetTextFitCandidates();
-  parameters.isMarqueeEnabled           = mController->IsMarqueeEnabled();
+  parameters.maxTextureSize               = Dali::GetMaxTextureSize();
+  parameters.maximumNumberOfLines         = static_cast<Ui::Text::Length>(mController->GetMaximumNumberOfLines());
+  parameters.maximumNumberOfLinesRevision = mController->GetMaximumNumberOfLinesRevision();
+  parameters.fontSize                     = mController->GetDefaultFontSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.textColor                    = mController->GetDefaultColor();
+  parameters.anchorColor                  = mController->GetAnchorColor();
+  parameters.anchorClickedColor           = mController->GetAnchorClickedColor();
+  parameters.fontFamily                   = mController->GetDefaultFontFamily();
+  parameters.fontWeight                   = mController->GetDefaultFontWeight();
+  parameters.fontWidth                    = mController->GetDefaultFontWidth();
+  parameters.fontSlant                    = mController->GetDefaultFontSlant();
+  parameters.isMultiLine                  = mController->IsMultiLineEnabled();
+  parameters.ellipsis                     = mController->IsTextElideEnabled();
+  parameters.minLineSize                  = mController->GetDefaultLineSize();
+  parameters.relativeLineSize             = mController->GetRelativeLineSize();
+  parameters.characterSpacing             = mController->GetCharacterSpacing();
+  parameters.effectiveTextScale           = mController->GetEffectiveTextScale();
+  parameters.horizontalAlignment          = mController->GetHorizontalAlignment();
+  parameters.verticalAlignment            = mController->GetVerticalAlignment();
+  parameters.verticalLineAlignment        = mController->GetVerticalLineAlignment();
+  parameters.lineWrapMode                 = mController->GetLineWrapMode();
+  parameters.layoutDirectionPolicy        = mController->GetLayoutDirectionMode();
+  parameters.ellipsisPosition             = mController->GetEllipsisPosition();
+  parameters.isUnderlineEnabled           = mController->IsUnderlineEnabled();
+  parameters.underlineType                = mController->GetUnderlineType();
+  parameters.underlineColor               = mController->GetUnderlineColor();
+  parameters.underlineHeight              = mController->GetUnderlineHeight();
+  parameters.dashedUnderlineWidth         = mController->GetDashedUnderlineWidth();
+  parameters.dashedUnderlineGap           = mController->GetDashedUnderlineGap();
+  parameters.isStrikethroughEnabled       = mController->IsStrikethroughEnabled();
+  parameters.strikethroughColor           = mController->GetStrikethroughColor();
+  parameters.strikethroughHeight          = mController->GetStrikethroughHeight();
+  parameters.isTextBackgroundEnabled      = mController->IsBackgroundEnabled();
+  parameters.textBackgroundColor          = mController->GetBackgroundColor();
+  parameters.isShadowEnabled              = mController->IsShadowEnabled();
+  parameters.shadowBlurRadius             = mController->GetShadowBlurRadius();
+  parameters.shadowColor                  = mController->GetShadowColor();
+  parameters.shadowOffset                 = mController->GetShadowOffset();
+  parameters.isOutlineEnabled             = mController->IsOutlineEnabled();
+  parameters.outlineWidth                 = mController->GetOutlineWidth();
+  parameters.outlineColor                 = mController->GetOutlineColor();
+  parameters.outlineBlurRadius            = mController->GetOutlineBlurRadius();
+  parameters.outlineOffset                = mController->GetOutlineOffset();
+  parameters.isTextFitEnabled             = mController->IsTextFitEnabled();
+  parameters.textFitMinSize               = mController->GetTextFitMinSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.textFitMaxSize               = mController->GetTextFitMaxSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.textFitStepSize              = mController->GetTextFitStepSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.isTextFitCandidatesEnabled   = mController->IsTextFitCandidatesEnabled();
+  parameters.textFitCandidates            = mController->GetTextFitCandidates();
+  parameters.isMarqueeEnabled             = mController->IsMarqueeEnabled();
   if(HasInlineReplacementSource())
   {
     parameters.isMarqueeEnabled = false;

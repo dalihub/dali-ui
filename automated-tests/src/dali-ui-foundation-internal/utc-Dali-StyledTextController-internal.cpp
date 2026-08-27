@@ -16,6 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <algorithm>
 #include <dali.h>
 
 // INTERNAL INCLUDES
@@ -452,6 +453,234 @@ int UtcDaliStyledTextControllerTextFitDataP(void)
   controller->FitPointSizeforLayout(Size(100.0f, 40.0f));
   const float narrowFitSize = controller->GetTextFitFontSize(PublicText::Controller::POINT_SIZE);
   DALI_TEST_CHECK(narrowFitSize >= 12.0f && narrowFitSize <= wideFitSize);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextControllerMaximumLinesTextFitP(void)
+{
+  UiTestApplication application;
+  constexpr float   WIDTH          = 200.0f;
+  constexpr float   HEIGHT         = 1000.0f;
+  constexpr float   MIN_POINT_SIZE = 6.0f;
+  constexpr float   MAX_POINT_SIZE = 30.0f;
+  const char* const LONG_TEXT      = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+  auto makeRangeController = [&](const char* text, int maximumNumberOfLines, bool setMaximumNumberOfLines = true)
+  {
+    PublicText::ControllerPtr controller = PublicText::Controller::New();
+    controller->SetText(text);
+    controller->SetDefaultFontSize(18.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetLineWrapMode(PublicText::LineWrapMode::CHARACTER);
+    if(setMaximumNumberOfLines)
+    {
+      controller->SetMaximumNumberOfLines(maximumNumberOfLines);
+    }
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(PublicText::EllipsisPosition::END);
+    controller->SetTextFitEnabled(true);
+    controller->SetTextFitMinSize(MIN_POINT_SIZE, PublicText::Controller::POINT_SIZE);
+    controller->SetTextFitMaxSize(MAX_POINT_SIZE, PublicText::Controller::POINT_SIZE);
+    controller->SetTextFitStepSize(3.0f, PublicText::Controller::POINT_SIZE);
+    controller->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+    return controller;
+  };
+
+  PublicText::ControllerPtr rangeDefault =
+    makeRangeController(LONG_TEXT, PublicText::MAXIMUM_LINES_UNLIMITED, false);
+  PublicText::ControllerPtr rangeUnlimited =
+    makeRangeController(LONG_TEXT, PublicText::MAXIMUM_LINES_UNLIMITED);
+  DALI_TEST_EQUALS(rangeUnlimited->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   rangeDefault->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeUnlimited->GetLineCount(WIDTH), rangeDefault->GetLineCount(WIDTH), TEST_LOCATION);
+  const float unlimitedRangeSize =
+    rangeUnlimited->GetTextFitFontSize(PublicText::Controller::POINT_SIZE);
+  DALI_TEST_CHECK(rangeUnlimited->GetLineCount(WIDTH) > 2);
+
+  PublicText::ControllerPtr rangeCapped     = makeRangeController(LONG_TEXT, 2);
+  const float               cappedRangeSize = rangeCapped->GetTextFitFontSize(PublicText::Controller::POINT_SIZE);
+  DALI_TEST_CHECK(cappedRangeSize < unlimitedRangeSize);
+  DALI_TEST_CHECK(rangeCapped->GetLineCount(WIDTH) <= 2);
+
+  rangeUnlimited->SetMaximumNumberOfLines(2);
+  rangeUnlimited->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(rangeUnlimited->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   cappedRangeSize,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  rangeUnlimited->SetMaximumNumberOfLines(PublicText::MAXIMUM_LINES_UNLIMITED);
+  rangeUnlimited->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(rangeUnlimited->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   unlimitedRangeSize,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  auto makeCandidateController = [&](int maximumNumberOfLines, bool setMaximumNumberOfLines = true)
+  {
+    PublicText::ControllerPtr controller = PublicText::Controller::New();
+    controller->SetText(LONG_TEXT);
+    controller->SetDefaultFontSize(18.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetLineWrapMode(PublicText::LineWrapMode::CHARACTER);
+    if(setMaximumNumberOfLines)
+    {
+      controller->SetMaximumNumberOfLines(maximumNumberOfLines);
+    }
+    controller->SetTextFitCandidatesEnabled(true);
+
+    Dali::Vector<PublicText::Fit::Candidate> candidates;
+    candidates.PushBack(PublicText::Fit::Candidate(8.0f, 10.0f));
+    candidates.PushBack(PublicText::Fit::Candidate(16.0f, 18.0f));
+    candidates.PushBack(PublicText::Fit::Candidate(24.0f, 26.0f));
+    candidates.PushBack(PublicText::Fit::Candidate(32.0f, 34.0f));
+    candidates.PushBack(PublicText::Fit::Candidate(40.0f, 42.0f));
+    controller->SetTextFitCandidates(candidates);
+    controller->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+    return controller;
+  };
+
+  PublicText::ControllerPtr candidatesDefault =
+    makeCandidateController(PublicText::MAXIMUM_LINES_UNLIMITED, false);
+  PublicText::ControllerPtr candidatesUnlimited =
+    makeCandidateController(PublicText::MAXIMUM_LINES_UNLIMITED);
+  DALI_TEST_EQUALS(candidatesUnlimited->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE),
+                   candidatesDefault->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE),
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(candidatesUnlimited->GetLineCount(WIDTH),
+                   candidatesDefault->GetLineCount(WIDTH),
+                   TEST_LOCATION);
+  const float unlimitedCandidateSize =
+    candidatesUnlimited->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE);
+  DALI_TEST_CHECK(candidatesUnlimited->GetLineCount(WIDTH) > 2);
+
+  PublicText::ControllerPtr candidatesCapped = makeCandidateController(2);
+  const float               cappedCandidateSize =
+    candidatesCapped->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE);
+  DALI_TEST_CHECK(cappedCandidateSize < unlimitedCandidateSize);
+  DALI_TEST_CHECK(candidatesCapped->GetLineCount(WIDTH) <= 2);
+
+  candidatesUnlimited->SetMaximumNumberOfLines(2);
+  candidatesUnlimited->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(candidatesUnlimited->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE),
+                   cappedCandidateSize,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  candidatesUnlimited->SetMaximumNumberOfLines(PublicText::MAXIMUM_LINES_UNLIMITED);
+  candidatesUnlimited->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(candidatesUnlimited->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE),
+                   unlimitedCandidateSize,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  // Exactly N authored lines still fit at the largest size. Both an N+1
+  // authored line and the empty line created by a trailing newline must not.
+  PublicText::ControllerPtr exact = makeRangeController("A\nB", 2);
+  DALI_TEST_EQUALS(exact->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   MAX_POINT_SIZE,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  PublicText::ControllerPtr explicitOverflow = makeRangeController("A\nB\nC", 2);
+  DALI_TEST_EQUALS(explicitOverflow->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   MIN_POINT_SIZE,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  explicitOverflow->Relayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(explicitOverflow->GetRenderTextModel()->GetNumberOfLines(), 2, TEST_LOCATION);
+  DALI_TEST_CHECK(std::any_of(GetVisualModel(explicitOverflow).mLines.Begin(),
+                              GetVisualModel(explicitOverflow).mLines.End(),
+                              [](const PublicText::LineRun& line)
+  { return line.ellipsis; }));
+  DALI_TEST_EQUALS(explicitOverflow->GetLineCount(WIDTH), 2, TEST_LOCATION);
+
+  PublicText::ControllerPtr trailingNewline = makeRangeController("A\nB\n", 2);
+  DALI_TEST_EQUALS(trailingNewline->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   MIN_POINT_SIZE,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(trailingNewline->GetLineCount(WIDTH), 2, TEST_LOCATION);
+
+  // Exercise the real StyledText path rather than relying on this test file's
+  // plain SetText coverage. Spans cross soft-wrap and MaximumLines boundaries while
+  // both fitting APIs must select the same result as an independently built
+  // capped controller and restore the unlimited result exactly.
+  const char* const STYLED_MARKUP =
+    "<font weight='bold'>AAAAAAAAAAAAAAAAAAAA</font>"
+    "<u>BBBBBBBBBBBBBBBBBBBB</u>"
+    "<font slant='italic'>CCCCCCCCCCCCCCCCCCCC</font>";
+  auto makeStyledFitController = [&](int maximumNumberOfLines, bool useCandidates)
+  {
+    PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::FromMarkup(STYLED_MARKUP);
+    PublicText::ControllerPtr     controller = PublicText::Controller::New();
+    controller->SetStyledText(builder.Build());
+    controller->SetDefaultFontSize(18.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetLineWrapMode(PublicText::LineWrapMode::CHARACTER);
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(PublicText::EllipsisPosition::END);
+    controller->SetMaximumNumberOfLines(maximumNumberOfLines);
+    if(useCandidates)
+    {
+      controller->SetTextFitCandidatesEnabled(true);
+      controller->SetTextFitCandidates(candidatesDefault->GetTextFitCandidates());
+      controller->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+    }
+    else
+    {
+      controller->SetTextFitEnabled(true);
+      controller->SetTextFitMinSize(MIN_POINT_SIZE, PublicText::Controller::POINT_SIZE);
+      controller->SetTextFitMaxSize(MAX_POINT_SIZE, PublicText::Controller::POINT_SIZE);
+      controller->SetTextFitStepSize(3.0f, PublicText::Controller::POINT_SIZE);
+      controller->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+    }
+    return controller;
+  };
+
+  for(bool useCandidates : {false, true})
+  {
+    PublicText::ControllerPtr styledUnlimited =
+      makeStyledFitController(PublicText::MAXIMUM_LINES_UNLIMITED, useCandidates);
+    PublicText::ControllerPtr styledCapped = makeStyledFitController(2, useCandidates);
+    const PublicText::Controller::FontSizeType unit =
+      useCandidates ? PublicText::Controller::PIXEL_SIZE : PublicText::Controller::POINT_SIZE;
+    const float unlimitedFitSize = styledUnlimited->GetTextFitFontSize(unit);
+    const float cappedFitSize    = styledCapped->GetTextFitFontSize(unit);
+    DALI_TEST_CHECK(styledUnlimited->GetLineCount(WIDTH) > 2);
+    DALI_TEST_CHECK(styledCapped->GetLineCount(WIDTH) <= 2);
+    DALI_TEST_CHECK(cappedFitSize < unlimitedFitSize);
+
+    styledUnlimited->SetMaximumNumberOfLines(2);
+    if(useCandidates)
+    {
+      styledUnlimited->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+    }
+    else
+    {
+      styledUnlimited->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+    }
+    DALI_TEST_EQUALS(styledUnlimited->GetTextFitFontSize(unit),
+                     cappedFitSize,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+
+    styledUnlimited->SetMaximumNumberOfLines(PublicText::MAXIMUM_LINES_UNLIMITED);
+    if(useCandidates)
+    {
+      styledUnlimited->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+    }
+    else
+    {
+      styledUnlimited->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+    }
+    DALI_TEST_EQUALS(styledUnlimited->GetTextFitFontSize(unit),
+                     unlimitedFitSize,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+  }
 
   END_TEST;
 }

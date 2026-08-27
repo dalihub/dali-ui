@@ -98,6 +98,7 @@ exit 0
 %manifest %{app_root_dir}/%{name}.manifest
 %defattr(-,root,root,-)
 %{app_exe_dir}/text.example
+%{app_exe_dir}/text-maximum-lines.example
 %{app_exe_dir}/text-layout-direction.example
 %{app_exe_dir}/text-markup.example
 %{app_exe_dir}/text-marquee.example

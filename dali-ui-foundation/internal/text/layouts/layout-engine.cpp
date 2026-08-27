@@ -1634,13 +1634,16 @@ struct Engine::Impl
                     bool isHiddenInputEnabled, Text::EllipsisPosition::Type ellipsisPosition,
                     bool enforceEllipsisInSingleLine)
   {
-    const bool  hasReplacementLayout = layoutParameters.replacementLayoutData != nullptr;
+    const bool hasReplacementLayout = layoutParameters.replacementLayoutData != nullptr;
+    const bool maximumNumberOfLinesExceeded =
+      layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
+      layoutParameters.startLineIndex + numberOfLines >= layoutParameters.maximumNumberOfLines;
     const float candidateLineSpacing =
       hasReplacementLayout && layout.containsReplacement
         ? layout.lineSpacing
         : GetLineSpacing(layout.ascender - layout.descender, mRelativeLineSize);
     const bool ellipsis =
-      enforceEllipsisInSingleLine ||
+      maximumNumberOfLinesExceeded || enforceEllipsisInSingleLine ||
       (isMarqueeEnabled
          ? isMarqueeMaxTextureExceeded
          : (((mLayout == MULTI_LINE_BOX) &&
@@ -1824,7 +1827,20 @@ struct Engine::Impl
       lineRun->characterRunForSecondHalfLine.characterIndex     = ellipsisLayout.characterIndexInSecondHalfLine;
       lineRun->characterRunForSecondHalfLine.numberOfCharacters = ellipsisLayout.numberOfCharactersInSecondHalfLine;
 
-      layoutSize.width = layoutParameters.boundingBox.width;
+      if(maximumNumberOfLinesExceeded && layoutParameters.boundingBox.width == MAX_FLOAT)
+      {
+        // An unconstrained MaximumLines measurement must use retained content;
+        // otherwise NaturalSize would become MAX_FLOAT.
+        layoutSize.width = 0.0f;
+        for(Length lineIndex = 0u; lineIndex < numberOfLines; ++lineIndex)
+        {
+          layoutSize.width = std::max(layoutSize.width, linesBuffer[lineIndex].width);
+        }
+      }
+      else
+      {
+        layoutSize.width = layoutParameters.boundingBox.width;
+      }
       if(hasReplacementLayout)
       {
         layoutSize.height  = layoutHeightBeforeEllipsisLine + GetLineHeight(*lineRun, true);
@@ -2103,6 +2119,8 @@ struct Engine::Impl
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  box size %f, %f\n", layoutParameters.boundingBox.width,
                   layoutParameters.boundingBox.height);
 
+    layoutParameters.maximumNumberOfLinesExceeded = false;
+
     layoutParameters.textModel->mVisualModel->mHyphen.glyph.Clear();
     layoutParameters.textModel->mVisualModel->mHyphen.index.Clear();
 
@@ -2127,17 +2145,27 @@ struct Engine::Impl
         {
           const LineRun& lastLine = *(lines.End() - 1u);
 
+          const bool canAddLine =
+            layoutParameters.maximumNumberOfLines == static_cast<Length>(MAXIMUM_LINES_UNLIMITED) ||
+            numberOfLines < layoutParameters.maximumNumberOfLines;
           if(0u != lastLine.characterRun.numberOfCharacters)
           {
-            // Need to add a new line with no characters but with height to increase the layoutSize.height
-            LineRun newLine;
-            Initialize(newLine);
-            lines.PushBack(newLine);
+            if(canAddLine)
+            {
+              // Need to add a new line with no characters but with height to increase the layoutSize.height
+              LineRun newLine;
+              Initialize(newLine);
+              lines.PushBack(newLine);
 
-            UpdateTextLayout(layoutParameters,
-                             lastLine.characterRun.characterIndex + lastLine.characterRun.numberOfCharacters,
-                             lastLine.glyphRun.glyphIndex + lastLine.glyphRun.numberOfGlyphs, layoutSize, lines.Begin(),
-                             numberOfLines);
+              UpdateTextLayout(layoutParameters,
+                               lastLine.characterRun.characterIndex + lastLine.characterRun.numberOfCharacters,
+                               lastLine.glyphRun.glyphIndex + lastLine.glyphRun.numberOfGlyphs, layoutSize, lines.Begin(),
+                               numberOfLines);
+            }
+            else
+            {
+              layoutParameters.maximumNumberOfLinesExceeded = true;
+            }
           }
         }
       }
@@ -2211,8 +2239,9 @@ struct Engine::Impl
       linesBuffer = lines.Begin();
     }
 
-    float penY            = CalculateLineOffset(lines, layoutParameters.startLineIndex);
-    bool  anyLineIsEliped = false;
+    float penY                           = CalculateLineOffset(lines, layoutParameters.startLineIndex);
+    bool  anyLineIsEliped                = false;
+    bool  maximumNumberOfLinesWasApplied = false;
     for(GlyphIndex index = layoutParameters.startGlyphIndex; index < lastGlyphPlusOne;)
     {
       layoutBidiParameters.Clear();
@@ -2321,6 +2350,18 @@ struct Engine::Impl
         return false;
       }
 
+      const bool maximumNumberOfLinesExceeded =
+        layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
+        layoutParameters.startLineIndex + numberOfLines >= layoutParameters.maximumNumberOfLines;
+      maximumNumberOfLinesWasApplied |= maximumNumberOfLinesExceeded;
+      layoutParameters.maximumNumberOfLinesExceeded |= maximumNumberOfLinesExceeded;
+      if(maximumNumberOfLinesExceeded && !elideTextEnabled)
+      {
+        // The candidate proves that more content exists, but CLIP must not
+        // manufacture an ellipsis marker or retain the N+1 line.
+        break;
+      }
+
       // Set the line position. DISCARD if ellipsis is enabled and the position exceeds the boundaries
       // of the box.
       penY += layout.ascender;
@@ -2395,21 +2436,31 @@ struct Engine::Impl
 
         if((nextIndex == totalNumberOfGlyphs) && layoutParameters.isLastNewParagraph && (mLayout == MULTI_LINE_BOX))
         {
-          // The last character of the text is a new paragraph character.
-          // An extra line with no characters is added to increase the text's height
-          // in order to place the cursor.
-
-          if(numberOfLines == linesCapacity)
+          const bool canAddLine =
+            layoutParameters.maximumNumberOfLines == static_cast<Length>(MAXIMUM_LINES_UNLIMITED) ||
+            layoutParameters.startLineIndex + numberOfLines < layoutParameters.maximumNumberOfLines;
+          if(canAddLine)
           {
-            // Reserve more space for the next lines.
-            linesBuffer = ResizeLinesBuffer(lines, newLines, linesCapacity, updateCurrentBuffer);
-          }
+            // The last character of the text is a new paragraph character.
+            // An extra line with no characters is added to increase the text's height
+            // in order to place the cursor.
 
-          UpdateTextLayout(
-            layoutParameters,
-            layout.characterIndex + (layout.numberOfCharacters + layout.numberOfCharactersInSecondHalfLine),
-            index + (layout.numberOfGlyphs + layout.numberOfGlyphsInSecondHalfLine), layoutSize, linesBuffer,
-            numberOfLines);
+            if(numberOfLines == linesCapacity)
+            {
+              // Reserve more space for the next lines.
+              linesBuffer = ResizeLinesBuffer(lines, newLines, linesCapacity, updateCurrentBuffer);
+            }
+
+            UpdateTextLayout(
+              layoutParameters,
+              layout.characterIndex + (layout.numberOfCharacters + layout.numberOfCharactersInSecondHalfLine),
+              index + (layout.numberOfGlyphs + layout.numberOfGlyphsInSecondHalfLine), layoutSize, linesBuffer,
+              numberOfLines);
+          }
+          else
+          {
+            layoutParameters.maximumNumberOfLinesExceeded = true;
+          }
         } // whether to add a last line.
 
         const BidirectionalLineInfoRun* const bidirectionalLineInfo =
@@ -2446,7 +2497,10 @@ struct Engine::Impl
       if(ellipsisPosition == Text::EllipsisPosition::START)
       {
         Length lineIndex = 0;
-        while(lineIndex < numberOfLines && layoutParameters.boundingBox.height < layoutSize.height)
+        while(lineIndex < numberOfLines &&
+              (layoutParameters.boundingBox.height < layoutSize.height ||
+               (layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
+                layoutParameters.startLineIndex + numberOfLines > layoutParameters.maximumNumberOfLines)))
         {
           LineRun& delLine = linesBuffer[lineIndex];
           delLine.ellipsis = true;
@@ -2465,7 +2519,10 @@ struct Engine::Impl
       {
         Length middleLineIndex   = (numberOfLines) / 2u;
         Length ellipsisLineIndex = 0u;
-        while(1u < numberOfLines && 0u < middleLineIndex && layoutParameters.boundingBox.height < layoutSize.height)
+        while(1u < numberOfLines && 0u < middleLineIndex &&
+              (layoutParameters.boundingBox.height < layoutSize.height ||
+               (layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
+                layoutParameters.startLineIndex + numberOfLines > layoutParameters.maximumNumberOfLines)))
         {
           LineRun& delLine = linesBuffer[middleLineIndex];
           delLine.ellipsis = true;
@@ -2483,6 +2540,24 @@ struct Engine::Impl
 
         linesBuffer[ellipsisLineIndex].ellipsis = true;
       }
+    }
+
+    if(maximumNumberOfLinesWasApplied)
+    {
+      Size retainedLayoutSize = Size::ZERO;
+      for(Length lineIndex = 0u; lineIndex < numberOfLines; ++lineIndex)
+      {
+        retainedLayoutSize.width = std::max(retainedLayoutSize.width, linesBuffer[lineIndex].width);
+        retainedLayoutSize.height += GetLineHeight(linesBuffer[lineIndex], lineIndex + 1u == numberOfLines);
+      }
+
+      // Preserve the established finite-width ellipsis layout semantics. Only
+      // unconstrained measurement needs its width rebuilt from retained lines.
+      if(layoutParameters.boundingBox.width == MAX_FLOAT)
+      {
+        layoutSize.width = retainedLayoutSize.width;
+      }
+      layoutSize.height = retainedLayoutSize.height;
     }
 
     if(updateCurrentBuffer)

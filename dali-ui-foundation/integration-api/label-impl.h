@@ -166,6 +166,16 @@ public:
   bool IsMultiLine() const;
 
   /**
+   * @copydoc Dali::Ui::Label::SetMaximumLines
+   */
+  void SetMaximumLines(int maximumLines);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMaximumLines
+   */
+  int GetMaximumLines() const;
+
+  /**
    * @copydoc Dali::Ui::Label::SetLineWrapMode
    */
   void SetLineWrapMode(Ui::Text::LineWrapMode mode);

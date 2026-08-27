@@ -261,6 +261,21 @@ bool Controller::IsMultiLineEnabled() const
   return Layout::Engine::MULTI_LINE_BOX == mImpl->mLayoutEngine.GetLayout();
 }
 
+void Controller::SetMaximumNumberOfLines(int maximumNumberOfLines)
+{
+  mImpl->SetMaximumNumberOfLines(maximumNumberOfLines);
+}
+
+int Controller::GetMaximumNumberOfLines() const
+{
+  return static_cast<int>(mImpl->mMaximumNumberOfLines);
+}
+
+uint64_t Controller::GetMaximumNumberOfLinesRevision() const
+{
+  return mImpl->mMaximumLinesRevision;
+}
+
 void Controller::SetHorizontalAlignment(Alignment alignment)
 {
   mImpl->SetHorizontalAlignment(alignment);

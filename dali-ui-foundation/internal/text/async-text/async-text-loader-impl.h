@@ -194,6 +194,18 @@ private:
   Size Layout(AsyncTextParameters& parameters, bool& updated);
 
   /**
+   * @brief Layout overload which also reports whether the content exceeds the line limit.
+   *
+   * @param[in] parameters All options required to render text.
+   * @param[out] updated true if the text has been laid-out. false means the given width is too small to layout even a
+   * single character.
+   * @param[out] maximumNumberOfLinesExceeded Set when the content requires more than the maximum lines.
+   *
+   * @return The size of the text after it has been laid-out.
+   */
+  Size Layout(AsyncTextParameters& parameters, bool& updated, bool& maximumNumberOfLinesExceeded);
+
+  /**
    * @brief Updates replacement state after layout and alignment.
    *
    * @param[in] parameters All options required to render text.

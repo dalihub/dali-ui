@@ -770,7 +770,7 @@ Direction Controller::Impl::GetTextDirection()
     UpdateModel(onlyOnceOperations);
 
     Vector3 naturalSize;
-    Relayouter::DoRelayout(*this, Size(MAX_FLOAT, MAX_FLOAT),
+    Relayouter::DoRelayout(*this, Size(MAX_FLOAT, MAX_FLOAT), mMaximumNumberOfLines,
                            static_cast<OperationsMask>(onlyOnceOperations | LAYOUT | REORDER | UPDATE_DIRECTION),
                            naturalSize.GetVectorXY());
 
@@ -2414,6 +2414,34 @@ void Controller::Impl::SetMultiLineEnabled(bool enable)
     RequestRelayout();
     RequestAsyncRender();
   }
+}
+
+void Controller::Impl::SetMaximumNumberOfLines(int maximumNumberOfLines)
+{
+  const Length normalizedMaximumNumberOfLines = static_cast<Length>(std::max(maximumNumberOfLines, MAXIMUM_LINES_UNLIMITED));
+  if(normalizedMaximumNumberOfLines == mMaximumNumberOfLines)
+  {
+    return;
+  }
+
+  mMaximumNumberOfLines = normalizedMaximumNumberOfLines;
+  ++mMaximumLinesRevision;
+
+  ClearEndEllipsisResult();
+  InvalidateReplacementRenderState();
+
+  const OperationsMask layoutOperations = static_cast<OperationsMask>(LAYOUT | UPDATE_LAYOUT_SIZE | ALIGN | REORDER);
+  mTextUpdateInfo.mFullRelayoutNeeded   = true;
+  mTextUpdateInfo.mCharacterIndex       = 0u;
+  mOperationsPending                    = static_cast<OperationsMask>(mOperationsPending | layoutOperations);
+
+  mRecalculateNaturalSize    = true;
+  mRecalculateLayoutSize     = true;
+  mRecalculateHeightForWidth = true;
+
+  RequestRelayout();
+  RequestAsyncRender();
+  InvalidateMeasure();
 }
 
 void Controller::Impl::SetHorizontalAlignment(Alignment alignment)
