@@ -920,7 +920,10 @@ void AnimatedVectorImageVisual::OnAnimationFinished(uint32_t playStateId)
                       mImageUrl.GetEllipsedUrl().c_str());
 
   // Only send event when animation is finished by the last Play/Pause/Stop request.
-  if(mLastSentPlayStateId != playStateId)
+  // A new play state request can be pending before its ID is assigned in SendAnimationData().
+  // In that case, the callback belongs to the previous animation even if the IDs still match.
+  if(mLastSentPlayStateId != playStateId ||
+     (mAnimationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE))
   {
     return;
   }
