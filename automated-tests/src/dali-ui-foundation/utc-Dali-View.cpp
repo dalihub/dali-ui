@@ -4650,13 +4650,17 @@ int UtcDaliViewExtensionGeometrySettersP(void)
   // custom-view authors use the Dali::Ui::Extension free functions instead.
   Extension::View::SetPositionX(view, 12.0f);
   Extension::View::SetPositionY(view, 34.0f);
+  Extension::View::SetPositionZ(view, 45.0f);
   Extension::View::SetSizeWidth(view, 56.0f);
   Extension::View::SetSizeHeight(view, 78.0f);
+  Extension::View::SetSizeDepth(view, 90.0f);
 
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_X), 12.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_Y), 34.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_Z), 45.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 56.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 78.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_DEPTH), 90.0f, TEST_LOCATION);
 
   END_TEST;
 }

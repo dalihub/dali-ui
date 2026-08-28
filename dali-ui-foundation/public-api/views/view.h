@@ -712,9 +712,9 @@ public: // Properties
   // Dali::Ui::Extension geometry setters instead.
 private:
   void SetSize(const Vector3& size)         = delete;
-  void SetWidth(float width)                = delete;
-  void SetHeight(float height)              = delete;
-  void SetDepth(float depth)                = delete;
+  void SetSizeWidth(float width)            = delete;
+  void SetSizeHeight(float height)          = delete;
+  void SetSizeDepth(float depth)            = delete;
   void SetPosition(const Vector3& position) = delete;
   void SetPositionX(float x)                = delete;
   void SetPositionY(float y)                = delete;

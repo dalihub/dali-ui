@@ -5718,17 +5718,17 @@ void ViewDataImpl::ApplySelfBoundsIfChanged(const LayoutRect& bounds)
   }
   if(self.GetProperty<float>(Actor::Property::SIZE_WIDTH) != bounds.width)
   {
-    self.SetWidth(bounds.width);
+    self.SetSizeWidth(bounds.width);
   }
   if(self.GetProperty<float>(Actor::Property::SIZE_HEIGHT) != bounds.height)
   {
-    self.SetHeight(bounds.height);
+    self.SetSizeHeight(bounds.height);
   }
 
-  // The layout engine applies self size via SetWidth/SetHeight, which does not
-  // route through Actor::OnSizeSet (only Actor::SetSize does). Drive the same
-  // render-effect refresh OnSizeSet would, so render effects (e.g. blur) that
-  // read the final layout size refresh for layout-sized views that never
+  // The layout engine applies self size via SetSizeWidth/SetSizeHeight, which
+  // does not route through Actor::OnSizeSet (only Actor::SetSize does). Drive
+  // the same render-effect refresh OnSizeSet would, so render effects (e.g.
+  // blur) that read the final layout size refresh for layout-sized views that never
   // receive an explicit SetSize. Fitting mode is intentionally not re-applied
   // here: it is already driven for layout-arranged views by the
   // layout-finished signal, and re-registering it here would apply it twice.
@@ -6736,7 +6736,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             if(width >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
                !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
             {
-              viewImpl.Self().SetWidth(width);
+              viewImpl.Self().SetSizeWidth(width);
             }
           }
         }
@@ -6766,7 +6766,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             if(height >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
                !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
             {
-              viewImpl.Self().SetHeight(height);
+              viewImpl.Self().SetSizeHeight(height);
             }
           }
         }

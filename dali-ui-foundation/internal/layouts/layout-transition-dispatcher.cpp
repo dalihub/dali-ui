@@ -210,8 +210,8 @@ void ApplyBoundsEndpointAtBoundsAnimation(Animation&                animation,
     // duration still drives the lifecycle animation.
     actor.SetPositionX(target.x);
     actor.SetPositionY(target.y);
-    actor.SetWidth(target.width);
-    actor.SetHeight(target.height);
+    actor.SetSizeWidth(target.width);
+    actor.SetSizeHeight(target.height);
     return;
   }
 
@@ -237,8 +237,8 @@ void SetActorBoundsImmediate(Dali::Actor actor, const LayoutRect& bounds)
   }
   actor.SetPositionX(bounds.x);
   actor.SetPositionY(bounds.y);
-  actor.SetWidth(bounds.width);
-  actor.SetHeight(bounds.height);
+  actor.SetSizeWidth(bounds.width);
+  actor.SetSizeHeight(bounds.height);
 }
 
 LayoutTransitionDispatcher::TransientActorState
@@ -466,8 +466,8 @@ void LayoutTransitionDispatcher::SettleChangeWithoutAnimation(ViewImpl*         
   CancelPendingExit(child);
   actor.SetPositionX(to.x);
   actor.SetPositionY(to.y);
-  actor.SetWidth(to.width);
-  actor.SetHeight(to.height);
+  actor.SetSizeWidth(to.width);
+  actor.SetSizeHeight(to.height);
 }
 
 void LayoutTransitionDispatcher::CollectTransitionViews(ViewImpl* node, std::vector<ViewImpl*>& out)
@@ -1194,8 +1194,8 @@ void LayoutTransitionDispatcher::StartChangeTransition(ViewImpl*             chi
   // captured by the update thread.
   actor.SetPositionX(effectiveFrom.x);
   actor.SetPositionY(effectiveFrom.y);
-  actor.SetWidth(effectiveFrom.width);
-  actor.SetHeight(effectiveFrom.height);
+  actor.SetSizeWidth(effectiveFrom.width);
+  actor.SetSizeHeight(effectiveFrom.height);
 
   Animation  anim = Animation::New(durationSec + delaySec);
   TimePeriod period(delaySec, durationSec);
@@ -1519,8 +1519,8 @@ void LayoutTransitionDispatcher::StartAnimatorChange(ViewImpl* child, const Layo
   // overwrite per frame from this point.
   actor.SetPositionX(effectiveFrom.x);
   actor.SetPositionY(effectiveFrom.y);
-  actor.SetWidth(effectiveFrom.width);
-  actor.SetHeight(effectiveFrom.height);
+  actor.SetSizeWidth(effectiveFrom.width);
+  actor.SetSizeHeight(effectiveFrom.height);
 
   AnimatorState state;
   state.slot              = LayoutTransitionSlot::CHANGE;

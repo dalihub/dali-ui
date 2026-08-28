@@ -138,14 +138,24 @@ void SetPositionY(Ui::View view, float y)
   static_cast<Dali::Actor&>(view).SetPositionY(y);
 }
 
+void SetPositionZ(Ui::View view, float z)
+{
+  static_cast<Dali::Actor&>(view).SetPositionZ(z);
+}
+
 void SetSizeWidth(Ui::View view, float width)
 {
-  static_cast<Dali::Actor&>(view).SetWidth(width);
+  static_cast<Dali::Actor&>(view).SetSizeWidth(width);
 }
 
 void SetSizeHeight(Ui::View view, float height)
 {
-  static_cast<Dali::Actor&>(view).SetHeight(height);
+  static_cast<Dali::Actor&>(view).SetSizeHeight(height);
+}
+
+void SetSizeDepth(Ui::View view, float depth)
+{
+  static_cast<Dali::Actor&>(view).SetSizeDepth(depth);
 }
 
 } // namespace View
