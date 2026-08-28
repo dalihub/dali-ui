@@ -34,6 +34,7 @@
 8. [Layout Processing](#8-layout-processing)
    - [Two-Phase Layout](#81-two-phase-layout)
    - [Invalidation Flow](#82-invalidation-flow)
+   - [Layout Result Caching](#83-layout-result-caching)
 9. [Default Values](#9-default-values)
 10. [Important Notes](#10-important-notes)
 
@@ -576,14 +577,14 @@ layout.SetArrangeCallback(LayoutArrangeCallback::New(this, &MyClass::OnArrange))
 
 Each frame, the `LayoutController` runs two passes on invalidated layout roots:
 
-1. **Measure** — Given width/height constraints from the parent, each View computes its desired `MeasuredSize`. Results are cached; if constraints are unchanged, measurement is skipped.
-2. **Arrange** — Each View is given a `LayoutRect` (position + size). It applies alignment and margin, then its LayoutManager places children within the bounds.
+1. **Measure** — Given width/height constraints from the parent, each View computes its desired `MeasuredSize`. The result is cached: when the constraints and the effective scale are unchanged and nothing has invalidated the view, the measure implementation is not called.
+2. **Arrange** — Each View is given a `LayoutRect` (position + size). It applies alignment and margin, then its LayoutManager places children within the bounds. This result is cached too: when the input bounds, the effective layout direction and the effective scale are unchanged and nothing has invalidated the view, the arrange implementation is elided and the stored result is replayed. The geometry is still reconciled and `LayoutFinished` is still raised; only the recomputation is skipped.
 
 ---
 
 ### 8.2 Invalidation Flow
 
-When a layout property changes (size, child, params), invalidation propagates up to the layout root and registers with `LayoutController` for processing on the next frame.
+When a layout property changes (size, child, params), invalidation propagates up to the layout root and registers it as pending with `LayoutController`. An event-time request made outside the layout processing window defined below arms one coalesced outstanding ProcessEvents wake. A request raised inside that window is retained but parked without a self idle wake.
 
 ```
 View property change (size, child, params)
@@ -597,8 +598,14 @@ View property change (size, child, params)
         ▼
   Register with LayoutController
         │
-        ▼  (next frame)
-  ProcessLayouts()
+        ├── outside processing: arm one coalesced wake
+        │                         │
+        │                         ▼  (next ProcessEvents)
+        └── inside processing: PARK, no self wake
+                                  │
+                                  ▼  (independent ProcessEvents
+                                        or explicit ProcessLayouts)
+                            ProcessLayouts()
         │
         ├── Measure (top-down)
         │
@@ -611,7 +618,63 @@ A **layout root** is a top-level View whose parent is not a layout. The `LayoutC
 LayoutController controller = LayoutController::Get(window);
 ```
 
-> No explicit calls to `LayoutController` are needed in normal use. Invalidation triggers automatic re-layout.
+> No explicit calls to `LayoutController` are needed for normal event-time invalidation. In-processing invalidation remains pending but deliberately does not wake an otherwise-idle main loop.
+
+**The layout processing window.** The window is open while a Measure/Arrange pass is on the stack (any `OnMeasure`, `OnArrange`, measure/arrange callback or `LayoutManager` producer) and while a `LayoutFinished` emit is in progress. Calling a public invalidation API directly from this window is a contract violation and is logged once per View, but the work is retained rather than ignored. Relevant caches are revoked, dirty and in-progress state propagate through the affected ancestors, and the layout root remains pending. Only its self idle wake is suppressed, which prevents a producer or signal slot from perpetually re-arming the layout pump. If the current batch already contains a turn for that root and the turn has not started, it may consume the pending state immediately; only work left after the current batch remains PARKED. A later independently triggered ProcessEvents or explicit `LayoutController::ProcessLayouts()` drains parked work; an out-of-processing request arms one coalesced outstanding wake and also drains work already parked. After a processing frame records a no-self-wake request, it ends the invalidation generation so that later event-time request cannot be coalesced away. Layout-transition lifecycle callbacks run after the Measure/Arrange pass and outside this window, so their documented mutation and transition-chaining paths remain wakeable. Public and framework-internal paths follow the same scheduling policy, including property changes and tree mutations (`Add()` / `Remove()`). Parked work counts as pending and therefore delays `LayoutFinished` until it is actually drained. Revoking cache validity prevents a later cache hit, but it does not recompute immediately: the last completed measured size or actor geometry can remain observable in the meantime. Move layout-affecting work to event time, or arrange an independent idle/timer wake, when prompt follow-up is required. Stated plainly: invalidating during layout processing is prohibited in principle and honoured only best-effort, mirroring dali-core's relayout policy — on a quiescent application the deferred work (and `LayoutFinished`) may wait indefinitely, so never rely on it for the current frame. A processing frame that ends with parked work and no outstanding wake logs one diagnostic per parked episode.
+
+---
+
+### 8.3 Layout Result Caching
+
+Both phases cache their result, which is what makes a settled layout pass cheap. The cache also defines what a measure or arrange implementation is allowed to read.
+
+#### 8.3.1 Measure cache
+
+- The measure cache is unconditional. There is no opt-out.
+- A hit requires all of: a valid entry from a completed measurement, the view not measure-dirty, the pass not poisoned, an EXACT match on the effective scale, and both constraints equal within tolerance.
+- The effective scale is a KEY term, so a missed scale invalidation degrades to a miss — one recomputed measurement — and can never serve a size computed at a different scale.
+- A measure implementation is therefore required to be a pure function of: its two constraints, the view's effective scale, the view's effective layout direction, the view's own layout-tracked state (requested size, padding, margin, min/max bounds, layout params, child list), and its children's measured sizes.
+- Anything else it reads, it owns: it must call `InvalidateMeasure()` itself when that state changes.
+- An unrelated pass does NOT recover a stale result. An ancestor that misses re-measures this view at unchanged inputs, so this view hits again, and an invalidation on a sibling propagates upward only and never reaches this view.
+
+#### 8.3.2 Arrange result cache
+
+- An arrange hit is NOT a prune. The stored subtree is REPLAYED: each view's own geometry is reconciled, right-to-left children are mirrored, and `LayoutFinished` is raised. Only the arrange implementation is elided.
+- A node-local hit requires all of: a valid entry, a policy other than `ArrangePolicy::ALWAYS`, the view neither dirty nor poisoned nor blocked, an EXACT match on the input rect, a recorded layout direction equal to the current one, and no unconsumed standalone child.
+- The rect comparison is exact, not epsilon-based.
+- A subtree hit re-tests those terms, except the input-rect match, at every descendant that holds an arrange result. The descendant key match is implied by this view's key match plus its policy.
+
+#### 8.3.3 ArrangePolicy
+
+- `ArrangePolicy::IF_CHANGED` is the default.
+- `ArrangePolicy::ALWAYS` runs the arrange implementation on every pass that reaches the view.
+- Choose ALWAYS when the arrange implementation reads state outside layout invalidation, or performs externally visible work on every pass.
+- Selection surfaces: `ViewImpl::SetArrangePolicy` for an `OnArrange()` override, `View::SetArrangeCallback(callback, ArrangePolicy::ALWAYS)` for a callback, and the protected `LayoutManager::SetArrangePolicy` for a layout manager.
+- ALWAYS does NOT schedule a pass. A state setter still has to invalidate.
+
+#### 8.3.4 Custom LayoutManager state
+
+- State held by a `LayoutManager` is in NEITHER cache key.
+- Every setter that changes such state must call the protected `InvalidateOwnerMeasure()`, or `InvalidateOwnerArrange()` when only placement moves.
+- They are exactly `owner->InvalidateMeasure()` and `owner->InvalidateArrange()`, and are a safe no-op before the manager is attached.
+- The built-in managers are wired this way.
+
+```cpp
+void MyManager::SetGap(float gap)
+{
+  if(mGap == gap) { return; }  // same value: schedule nothing
+  mGap = gap;
+  InvalidateOwnerMeasure();    // InvalidateOwnerArrange() if only placement moves
+}
+```
+
+#### 8.3.5 Invalidation coalescing
+
+Repeated invalidations issued before a pass runs are coalesced: the local half always runs, while the upward walk to the layout root is skipped as long as the pending registration is still live. Coalescing is disabled while a pass is running. In practice, batching many property changes into one frame costs one layout pass, and no invalidation is lost.
+
+#### 8.3.6 Full contract
+
+For the full contract, see [the layout guide in the repository](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/docs/layout-structure.md).
 
 ---
 
@@ -682,6 +745,12 @@ LayoutController controller = LayoutController::Get(window);
 
 - **Layout roots drive processing.** A layout root is a View whose parent is not a layout. Invalidation propagates upward until it reaches a layout root, which then registers with the `LayoutController`. The controller processes all pending roots once per frame.
 
-- **Measure results are cached.** If the width and height constraints passed to `OnMeasure()` are unchanged since the last call, measurement is skipped. Call `InvalidateMeasure()` to force recomputation.
+- **Measure results are cached.** If the width and height constraints passed to `OnMeasure()` are unchanged since the last call, AND the effective scale is unchanged, measurement is skipped. Call `InvalidateMeasure()` to force recomputation.
+
+- **Arrange results are cached too.** Under the default `ArrangePolicy::IF_CHANGED`, `OnArrange()` is elided when the input bounds, the effective layout direction and the effective scale are unchanged, and the stored result is replayed instead. Call `InvalidateArrange()` to force recomputation, or select `ArrangePolicy::ALWAYS` if the implementation must run on every pass.
 
 - **`GetSize()` reflects the arranged size.** `View::GetSize()` returns the actual rendered size after the Arrange phase, not the requested size.
+
+---
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki)
