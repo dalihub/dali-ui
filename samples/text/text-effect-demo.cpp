@@ -58,7 +58,8 @@ constexpr float CARD_ENTRANCE_SECONDS        = 0.36f;
 constexpr float AFFORDANCE_ENTRANCE_SECONDS  = 0.32f;
 constexpr float MARKDOWN_ENTRANCE_SECONDS    = 0.36f;
 constexpr float INTRO_GRADIENT_SECONDS       = 2.80f;
-constexpr float SHIMMER_DURATION_SECONDS    = 1.40f;
+constexpr float SHIMMER_DURATION_SECONDS     = 1.40f;
+constexpr float SKELETON_SHIMMER_SECONDS     = 1.85f;
 constexpr float HERO_GRADIENT_SECONDS       = 6.00f;
 constexpr float HIGHLIGHT_SWEEP_SECONDS     = 0.85f;
 constexpr float REVEAL_SEQUENCE_SECONDS     = 2.65f;
@@ -229,6 +230,29 @@ Gradient::Linear NewShimmerOverlay(float startOffset, bool warmHighlight = false
     Gradient::StopNode(0.56f, warmHighlight ? warm : cyanHighlight),
     Gradient::StopNode(0.70f, transparent),
     Gradient::StopNode(1.00f, transparent),
+  });
+  return gradient;
+}
+
+Gradient::Linear NewSkeletonShimmerGradient(float startOffset)
+{
+  Gradient::Linear gradient(Vector2(-0.85f, -0.10f), Vector2(0.85f, 0.10f));
+  gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  gradient.SetSpreadMethod(Gradient::SpreadMethod::PAD);
+  gradient.SetStartOffset(startOffset);
+  gradient.SetStopNodes({
+    Gradient::StopNode(0.00f, UiColor(CARD_LINE_COLOR)),
+    Gradient::StopNode(0.10f, UiColor(CARD_LINE_COLOR)),
+    Gradient::StopNode(0.18f, UiColor(0x2E3E5A)),
+    Gradient::StopNode(0.24f, UiColor(0x3A4B66)),
+    Gradient::StopNode(0.30f, UiColor(0x45566F)),
+    Gradient::StopNode(0.36f, UiColor(0x4B5C75)),
+    Gradient::StopNode(0.64f, UiColor(0x4B5C75)),
+    Gradient::StopNode(0.70f, UiColor(0x45566F)),
+    Gradient::StopNode(0.76f, UiColor(0x3A4B66)),
+    Gradient::StopNode(0.82f, UiColor(0x2E3E5A)),
+    Gradient::StopNode(0.90f, UiColor(CARD_LINE_COLOR)),
+    Gradient::StopNode(1.00f, UiColor(CARD_LINE_COLOR)),
   });
   return gradient;
 }
@@ -476,6 +500,23 @@ private:
     return root;
   }
 
+  View NewSkeletonLine(float width, float height, float opacity)
+  {
+    View line = View::New();
+    line.SetRequestedWidth(width);
+    line.SetRequestedHeight(height);
+    line.SetBackgroundColor(UiColor(CARD_LINE_COLOR));
+    line.SetOpacity(opacity);
+    line.SetCornerRadius(6.0f);
+    line.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
+
+    if(mSkeletonLineCount < mSkeletonLines.size())
+    {
+      mSkeletonLines[mSkeletonLineCount++] = line;
+    }
+    return line;
+  }
+
   StackLayout NewSkeletonCard(const char* dayText)
   {
     StackLayout card = NewVertical(18.0f);
@@ -502,31 +543,9 @@ private:
     card.Add(day);
     card.Add(NewVerticalSpacer(8.0f));
 
-    View line1 = View::New();
-    line1.SetRequestedWidth(150.0f);
-    line1.SetRequestedHeight(12.0f);
-    line1.SetBackgroundColor(UiColor(CARD_LINE_COLOR));
-    line1.SetCornerRadius(6.0f);
-    line1.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
-    card.Add(line1);
-
-    View line2 = View::New();
-    line2.SetRequestedWidth(MATCH_PARENT);
-    line2.SetRequestedHeight(11.0f);
-    line2.SetBackgroundColor(UiColor(CARD_LINE_COLOR));
-    line2.SetOpacity(0.72f);
-    line2.SetCornerRadius(6.0f);
-    line2.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
-    card.Add(line2);
-
-    View line3 = View::New();
-    line3.SetRequestedWidth(205.0f);
-    line3.SetRequestedHeight(11.0f);
-    line3.SetBackgroundColor(UiColor(CARD_LINE_COLOR));
-    line3.SetOpacity(0.52f);
-    line3.SetCornerRadius(6.0f);
-    line3.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
-    card.Add(line3);
+    card.Add(NewSkeletonLine(150.0f, 12.0f, 1.00f));
+    card.Add(NewSkeletonLine(MATCH_PARENT, 11.0f, 0.72f));
+    card.Add(NewSkeletonLine(205.0f, 11.0f, 0.52f));
     card.Add(NewWeightedSpacer());
     return card;
   }
@@ -1029,6 +1048,7 @@ private:
     mGeneratingStatusIndex = 0u;
     ConfigureShimmer(mGeneratingTitle, false);
     StartShimmer(mGeneratingTitle);
+    StartSkeletonShimmer();
     RevealGeneratingStatus(mGeneratingStatusIndex, token);
 
     mGeneratingTimer = Timer::New(GENERATING_INTERVAL_MS);
@@ -1243,6 +1263,44 @@ private:
     mShimmerLabel.Reset();
   }
 
+  void StartSkeletonShimmer()
+  {
+    StopAnimation(mSkeletonShimmerAnimation);
+    if(mSkeletonLineCount == 0u)
+    {
+      return;
+    }
+
+    mSkeletonShimmerAnimation = Animation::New(SKELETON_SHIMMER_SECONDS);
+    for(std::size_t index = 0u; index < mSkeletonLineCount; ++index)
+    {
+      View& line = mSkeletonLines[index];
+      if(!line)
+      {
+        continue;
+      }
+
+      line.SetBackgroundGradient(NewSkeletonShimmerGradient(1.65f));
+      line.Animate(mSkeletonShimmerAnimation)
+        .BackgroundGradientStartOffset(-1.65f, Duration(SKELETON_SHIMMER_SECONDS), AlphaFunction::LINEAR);
+    }
+    mSkeletonShimmerAnimation.SetLooping(true);
+    mSkeletonShimmerAnimation.SetEndAction(Animation::DISCARD);
+    mSkeletonShimmerAnimation.Play();
+  }
+
+  void StopSkeletonShimmer()
+  {
+    StopAnimation(mSkeletonShimmerAnimation);
+    for(std::size_t index = 0u; index < mSkeletonLineCount; ++index)
+    {
+      if(mSkeletonLines[index])
+      {
+        mSkeletonLines[index].SetBackgroundColor(UiColor(CARD_LINE_COLOR));
+      }
+    }
+  }
+
   void ShowResultsReady()
   {
     if(mState == DemoState::DETAIL_STREAMING || mState == DemoState::DETAIL_READY)
@@ -1351,6 +1409,7 @@ private:
     }
 
     StopShimmer();
+    StopSkeletonShimmer();
     StopAnimation(mIntroGradientAnimation);
     StopAnimation(mGeneratingStatusRevealAnimation);
     StopAnimation(mRevealSequenceAnimation);
@@ -1380,6 +1439,11 @@ private:
     mMarkdownHost.Reset();
     mMarkdownPanel.Reset();
     mMarkdownView.Reset();
+    for(View& line : mSkeletonLines)
+    {
+      line.Reset();
+    }
+    mSkeletonLineCount = 0u;
     for(ItineraryCard& card : mCards)
     {
       card = ItineraryCard{};
@@ -1411,6 +1475,8 @@ private:
   Label mDetailStatus;
   Label mShimmerLabel;
 
+  std::array<View, 9u>          mSkeletonLines;
+  std::size_t                   mSkeletonLineCount{0u};
   std::array<ItineraryCard, 3u> mCards;
   ScrollView                    mMarkdownScroll;
   StackLayout                   mMarkdownHost;
@@ -1421,6 +1487,7 @@ private:
 
   Animation mIntroGradientAnimation;
   Animation mShimmerAnimation;
+  Animation mSkeletonShimmerAnimation;
   Animation mGeneratingStatusRevealAnimation;
   Animation mRevealSequenceAnimation;
   Animation mHeroGradientAnimation;
