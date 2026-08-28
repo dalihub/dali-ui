@@ -20,7 +20,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
-#include <algorithm>
 #include <cmath>
 
 // INTERNAL INCLUDES
@@ -107,26 +106,22 @@ void UiScaleManagerImpl::InvalidateAllLayoutRoots()
   auto it = mLayoutRoots.begin();
   while(it != mLayoutRoots.end())
   {
-    BaseHandle handle = it->GetBaseHandle();
-    if(!handle)
+    Ui::View rootView = it->second.GetHandle();
+    if(!rootView)
     {
       it = mLayoutRoots.erase(it);
       continue;
     }
 
-    Ui::View rootView = Ui::View::DownCast(handle);
-    if(rootView)
-    {
-      ViewImpl& viewImpl = GetImpl(rootView);
-      // Drop the cached scale (and the layout caches derived from it) for the
-      // entire subtree first, so every view re-evaluates its effective scale on
-      // the next Measure pass.
-      ViewDataImpl::Get(viewImpl).ResetSubtreeScaleAndLayoutCaches();
-      // Then invalidate measure at the root to schedule a re-layout pass.
-      // Through the internal primitive, not ViewImpl::InvalidateMeasure(): a
-      // global scale change is a framework-internal event, not an application call.
-      ViewDataImpl::Get(viewImpl).InvalidateMeasure();
-    }
+    ViewImpl& viewImpl = GetImpl(rootView);
+    // Drop the cached scale (and the layout caches derived from it) for the
+    // entire subtree first, so every view re-evaluates its effective scale on
+    // the next Measure pass.
+    ViewDataImpl::Get(viewImpl).ResetSubtreeScaleAndLayoutCaches();
+    // Then invalidate measure at the root to schedule a re-layout pass.
+    // Through the internal primitive, not ViewImpl::InvalidateMeasure(): a
+    // global scale change is a framework-internal event, not an application call.
+    ViewDataImpl::Get(viewImpl).InvalidateMeasure();
 
     ++it;
   }
@@ -139,17 +134,15 @@ void UiScaleManagerImpl::RegisterLayoutRoot(Ui::View root)
     return;
   }
 
-  // Check if already registered (avoid duplicates)
-  for(auto& weakRoot : mLayoutRoots)
+  const auto key      = root.GetObjectPtr();
+  auto [it, inserted] = mLayoutRoots.try_emplace(key, root);
+  if(!inserted && !it->second.GetHandle())
   {
-    BaseHandle handle = weakRoot.GetBaseHandle();
-    if(handle && handle == root)
-    {
-      return;
-    }
+    // Replace a stale weak entry when a newly allocated view reuses an old
+    // root's address. A live root is already registered, so leave its
+    // WeakHandle intact and avoid allocation on duplicate registration.
+    it->second = WeakHandle<Ui::View>(root);
   }
-
-  mLayoutRoots.emplace_back(WeakHandle<BaseHandle>(root));
 }
 
 void UiScaleManagerImpl::UnregisterLayoutRoot(Ui::View root)
@@ -159,14 +152,7 @@ void UiScaleManagerImpl::UnregisterLayoutRoot(Ui::View root)
     return;
   }
 
-  mLayoutRoots.erase(
-    std::remove_if(mLayoutRoots.begin(), mLayoutRoots.end(),
-                   [&root](const WeakHandle<BaseHandle>& weakRoot)
-  {
-    BaseHandle handle = weakRoot.GetBaseHandle();
-    return !handle || handle == root;
-  }),
-    mLayoutRoots.end());
+  mLayoutRoots.erase(root.GetObjectPtr());
 }
 
 } // namespace Internal

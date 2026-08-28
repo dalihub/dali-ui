@@ -7,13 +7,15 @@ Keys:
 - `1` / `2`: create 100 / 10000 plain Views
 - `3` / `4`: create 100 / 10000 Views with individual Renderers
 - `5` / `6`: create 100 / 10000 Views with background colors
+- `7` / `8`: create 100 / 10000 plain STANDALONE Views
 - `9`: hide or show the timing labels
 - `Escape` / `Back`: quit
 
 The measured interval covers View creation, geometry setup, optional visual or
 renderer setup, and adding each View to the scene-connected root. Bulk-created
 children use the default layout mode so they do not become independent layout
-roots. The timer does not wait for a layout pass or GPU rendering to complete.
+roots. Keys `7` and `8` instead create independent STANDALONE layout roots.
+The timer does not wait for a layout pass or GPU rendering to complete.
 
 The *root* they are added to is `STANDALONE` by default; key `0` rebuilds it as
 `DEFAULT` (and back), so the `DEFAULT` root with `DEFAULT` children case can be

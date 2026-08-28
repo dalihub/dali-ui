@@ -21,7 +21,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
-#include <vector>
+#include <unordered_map>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
@@ -107,9 +107,9 @@ private:
   void InvalidateAllLayoutRoots();
 
 private:
-  float                               mScale{1.0f};
-  bool                                mIsScalable{true};
-  std::vector<WeakHandle<BaseHandle>> mLayoutRoots;
+  float                                            mScale{1.0f};
+  bool                                             mIsScalable{true};
+  std::unordered_map<RefObject*, WeakHandle<View>> mLayoutRoots;
 };
 
 } // namespace Internal

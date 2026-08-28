@@ -143,7 +143,7 @@ public:
       return;
     }
 
-    const bool create100 = key == "1" || key == "3" || key == "5";
+    const bool create100 = key == "1" || key == "3" || key == "5" || key == "7";
     if(key == "1" || key == "2")
     {
       CreatePlainViews(create100);
@@ -155,6 +155,10 @@ public:
     else if(key == "5" || key == "6")
     {
       CreateViewsWithColor(create100);
+    }
+    else if(key == "7" || key == "8")
+    {
+      CreatePlainViews(create100, true);
     }
 
     UpdateAverageLabel();
@@ -311,7 +315,7 @@ private:
     }
   }
 
-  void CreatePlainViews(bool create100)
+  void CreatePlainViews(bool create100, bool standalone = false)
   {
     View    firstView;
     View    lastView;
@@ -325,6 +329,10 @@ private:
       for(int j = 0; j < lowCount; ++j)
       {
         View view = View::New();
+        if(standalone)
+        {
+          view.SetLayoutMode(LayoutMode::STANDALONE);
+        }
         SetRequestedGeometry(view, position.x, position.y, 10.0f, 10.0f);
         mRoot.Add(view);
 
@@ -341,8 +349,18 @@ private:
 
     const uint64_t duration = DurationMicroseconds(start, end);
     AttachMarkers(firstView, lastView);
-    AppendResult("View", create100, duration);
-    if(create100)
+    AppendResult(standalone ? "Standalone View" : "View", create100, duration);
+    if(standalone && create100)
+    {
+      mTimeStandaloneView100 += duration;
+      ++mCountStandaloneView100;
+    }
+    else if(standalone)
+    {
+      mTimeStandaloneView10000 += duration;
+      ++mCountStandaloneView10000;
+    }
+    else if(create100)
     {
       mTimeView100 += duration;
       ++mCountView100;
@@ -539,6 +557,8 @@ private:
       std::string("Average Time") +
       "\nCreate View 100 : " + FormatMilliseconds(Average(mTimeView100, mCountView100)) + " ms" +
       "\nCreate View 10000 : " + FormatMilliseconds(Average(mTimeView10000, mCountView10000)) + " ms" +
+      "\nCreate Standalone View 100 : " + FormatMilliseconds(Average(mTimeStandaloneView100, mCountStandaloneView100)) + " ms" +
+      "\nCreate Standalone View 10000 : " + FormatMilliseconds(Average(mTimeStandaloneView10000, mCountStandaloneView10000)) + " ms" +
       "\nCreate View with Renderer 100 : " + FormatMilliseconds(Average(mTimeRenderer100, mCountRenderer100)) + " ms" +
       "\nCreate View with Renderer 10000 : " + FormatMilliseconds(Average(mTimeRenderer10000, mCountRenderer10000)) + " ms" +
       "\nCreate View with Color 100 : " + FormatMilliseconds(Average(mTimeColor100, mCountColor100)) + " ms" +
@@ -596,12 +616,16 @@ private:
 
   uint64_t mTimeView100{0u};
   uint64_t mTimeView10000{0u};
+  uint64_t mTimeStandaloneView100{0u};
+  uint64_t mTimeStandaloneView10000{0u};
   uint64_t mTimeRenderer100{0u};
   uint64_t mTimeRenderer10000{0u};
   uint64_t mTimeColor100{0u};
   uint64_t mTimeColor10000{0u};
   uint32_t mCountView100{0u};
   uint32_t mCountView10000{0u};
+  uint32_t mCountStandaloneView100{0u};
+  uint32_t mCountStandaloneView10000{0u};
   uint32_t mCountRenderer100{0u};
   uint32_t mCountRenderer10000{0u};
   uint32_t mCountColor100{0u};
