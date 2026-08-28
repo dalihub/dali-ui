@@ -140,6 +140,26 @@ LayoutTransition View::GetLayoutTransition() const
   return GetImpl(*this).GetLayoutTransition();
 }
 
+void View::SetSelfLayoutTransition(LayoutTransition transition)
+{
+  GetImpl(*this).SetSelfLayoutTransition(transition);
+}
+
+LayoutTransition View::GetSelfLayoutTransition() const
+{
+  return GetImpl(*this).GetSelfLayoutTransition();
+}
+
+void View::SetLayoutTransitionMode(LayoutTransitionMode mode)
+{
+  GetImpl(*this).SetLayoutTransitionMode(mode);
+}
+
+LayoutTransitionMode View::GetLayoutTransitionMode() const
+{
+  return GetImpl(*this).GetLayoutTransitionMode();
+}
+
 void View::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
 {
   GetImpl(*this).AttachLayoutManager(std::move(manager));

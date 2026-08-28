@@ -650,6 +650,14 @@ public:
     }
   }
 
+  void ClearDetachedSelfState(ViewImpl* child)
+  {
+    if(mTransitionDispatcher)
+    {
+      mTransitionDispatcher->ClearDetachedSelfState(child);
+    }
+  }
+
   /**
    * @brief Removes a view from tracking (called when view is destroyed).
    */
@@ -1583,6 +1591,11 @@ void LayoutController::NotifyChildAdded(ViewImpl* directParent, Ui::View child)
 void LayoutController::ClearPendingInheritedEnters(ViewImpl* owner)
 {
   mImpl->ClearPendingInheritedEnters(owner);
+}
+
+void LayoutController::ClearDetachedSelfState(ViewImpl* child)
+{
+  mImpl->ClearDetachedSelfState(child);
 }
 
 Dali::Window LayoutController::GetCurrentWindow() const

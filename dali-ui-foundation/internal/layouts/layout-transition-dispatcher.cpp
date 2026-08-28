@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/debug.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/animation/time-period.h>
 #include <dali/public-api/common/dali-common.h>
@@ -54,6 +55,15 @@ namespace Internal
 
 namespace
 {
+#if defined(DEBUG_ENABLED)
+/// Traces WHICH transition the single governing-transition resolution picked for
+/// each per-(child, slot) event, so "why did this child move like that?" is
+/// answerable from a log. Enable with LOG_LAYOUT_TRANSITION in the filter
+/// environment; DALI_LOG_INFO compiles to nothing without DEBUG_ENABLED.
+Dali::Integration::Log::Filter* gLayoutTransitionLogFilter =
+  Dali::Integration::Log::Filter::New(Debug::NoLogging, false, "LOG_LAYOUT_TRANSITION");
+#endif
+
 constexpr float BOUNDS_EPSILON = 0.5f;
 
 bool BoundsApproxEqual(const LayoutRect& a, const LayoutRect& b)
@@ -283,6 +293,39 @@ void RestoreTransientActorState(Dali::Actor                                     
   }
 }
 
+/// Resolves the CHANGE cause of one child from this pass's per-parent markers.
+/// Shared by the owner pass's own dispatch and by the cause hand-over it stamps
+/// onto a self-governed child's snapshot, so the two can never disagree.
+LayoutChangeCause ResolveChangeCause(ViewImpl*                            child,
+                                     const std::unordered_set<ViewImpl*>& reorderedChildren,
+                                     bool                                 hadSiblingAdd,
+                                     bool                                 hadSiblingRemove,
+                                     bool                                 isWindowResize)
+{
+  // Cause precedence (deterministic):
+  //   REORDERED > SIBLING_ADDED > SIBLING_REMOVED > WINDOW_RESIZED > OTHER
+  // hadSiblingAdd / hadSiblingRemove are per-parent flags; every CHANGE child in
+  // the pass shares the marker because the layout shift was driven by a
+  // sibling-set mutation.
+  if(reorderedChildren.count(child) > 0)
+  {
+    return LayoutChangeCause::REORDERED;
+  }
+  if(hadSiblingAdd)
+  {
+    return LayoutChangeCause::SIBLING_ADDED;
+  }
+  if(hadSiblingRemove)
+  {
+    return LayoutChangeCause::SIBLING_REMOVED;
+  }
+  if(isWindowResize)
+  {
+    return LayoutChangeCause::WINDOW_RESIZED;
+  }
+  return LayoutChangeCause::OTHER;
+}
+
 } // namespace
 
 LayoutTransitionDispatcher::LayoutTransitionDispatcher()
@@ -470,15 +513,21 @@ void LayoutTransitionDispatcher::SettleChangeWithoutAnimation(ViewImpl*         
   actor.SetSizeHeight(to.height);
 }
 
-void LayoutTransitionDispatcher::CollectTransitionViews(ViewImpl* node, std::vector<ViewImpl*>& out)
+void LayoutTransitionDispatcher::CollectTransitionViews(ViewImpl* node, std::vector<Ui::View>& out)
 {
   if(!node)
   {
     return;
   }
-  if(node->GetLayoutTransition())
+  if(node->GetLayoutTransition() || ViewDataImpl::Get(*node).HasSelfLayoutTransition())
   {
-    out.push_back(node);
+    // Derive the handle once, here, for the nodes that actually enter the list —
+    // the same DownCast the per-view passes already do on their own root.
+    Ui::View nodeHandle = Ui::View::DownCast(node->Self());
+    if(nodeHandle)
+    {
+      out.push_back(nodeHandle);
+    }
   }
   auto& children = IntegrationView::GetChildren(*node);
   for(auto& childView : children)
@@ -493,11 +542,21 @@ void LayoutTransitionDispatcher::CaptureBeforeLayout(ViewImpl* root)
   {
     return;
   }
-  std::vector<ViewImpl*> attached;
+  std::vector<Ui::View> attached;
   CollectTransitionViews(root, attached);
-  for(auto* view : attached)
+  for(auto& viewHandle : attached)
   {
-    CaptureSingleView(view);
+    ViewImpl* view = &GetImpl(viewHandle);
+    // Gate per role: CaptureSingleView writes mCaptured[view] and seeds
+    // mInitialMountViews unconditionally, which a self-only view must not do.
+    if(view->GetLayoutTransition())
+    {
+      CaptureSingleView(view);
+    }
+    if(ViewDataImpl::Get(*view).HasSelfLayoutTransition())
+    {
+      CaptureSelfView(view);
+    }
   }
 }
 
@@ -516,8 +575,15 @@ void LayoutTransitionDispatcher::CaptureGovernedChildren(ViewImpl*              
     // with no transition of their own (a child with its own transition
     // governs its own subtree, so the scope stops there) and that are not
     // standalone layout roots (those run as a separate layout pass).
+    // An ISOLATE_SUBTREE child is a third boundary alongside the two above: no owner
+    // at or above it governs anything in its subtree, so this owner must not capture
+    // past it. The child ITSELF is still pushed and is filtered by the dispatch-time
+    // mode gate, keeping the level-0 decision in one place. PASS_THROUGH is NOT a
+    // boundary -- transitions pass through that child as a target only, so this
+    // owner still reaches the child's own children.
     if(recurse &&
        !childImpl.GetLayoutTransition() &&
+       ViewDataImpl::Get(childImpl).GetLayoutTransitionMode() != Ui::LayoutTransitionMode::ISOLATE_SUBTREE &&
        !IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       CaptureGovernedChildren(&childImpl, out, true);
@@ -553,17 +619,56 @@ void LayoutTransitionDispatcher::CaptureSingleView(ViewImpl* view)
   }
 }
 
+void LayoutTransitionDispatcher::CaptureSelfView(ViewImpl* view)
+{
+  Dali::Actor parentActor = view->Self().GetParent();
+  Ui::View    parentView  = parentActor ? Ui::View::DownCast(parentActor) : Ui::View();
+  if(!parentView)
+  {
+    // No View parent: no layout frame to animate in. Drop any stale snapshot so a
+    // later unparent cannot leave one behind.
+    mSelfCaptured.erase(view);
+    return;
+  }
+  ViewImpl* parentImpl = &GetImpl(parentView);
+
+  SelfCapturedBounds captured;
+  captured.parent        = parentImpl;
+  captured.bounds        = VisualBoundsOf(parentImpl, view);
+  captured.cause         = LayoutChangeCause::OTHER;
+  captured.causeResolved = false;
+  captured.freshChild    = !ViewDataImpl::Get(*view).IsInitialLayoutDone();
+  // Initial-mount anchor: the DIRECT PARENT's first arrange, matching the
+  // children-role anchor recorded in mInitialMountViews. Sampled here because
+  // ViewImpl::Arrange flips the flag during the pass that follows this capture.
+  captured.parentInitialMount = !ViewDataImpl::Get(*parentImpl).IsInitialLayoutDone();
+  mSelfCaptured[view]         = captured;
+}
+
 void LayoutTransitionDispatcher::StartTransitionsAfterLayout(ViewImpl* root)
 {
   if(!root)
   {
     return;
   }
-  std::vector<ViewImpl*> attached;
+  // Pin every collected view alive for the whole walk. The per-view passes below
+  // fire OnStart callbacks synchronously, and those are documented as safe to
+  // mutate the view tree; a callback that drops the last handle to a view listed
+  // later would leave a raw impl pointer dangling before the next iteration even
+  // reaches its map guard. A pinned view that the callback disconnected from the
+  // scene is safe by construction: OnViewDestroyed has already scrubbed its
+  // snapshots, so its pass takes the no-snapshot cleanup path on a live object.
+  std::vector<Ui::View> attached;
   CollectTransitionViews(root, attached);
-  for(auto* view : attached)
+  for(auto& viewHandle : attached)
   {
+    ViewImpl* view = &GetImpl(viewHandle);
+    // Both roles run in the same pre-order walk, so a self-governed child's own
+    // pass always follows its direct parent's owner pass (which hands the CHANGE
+    // cause over). Each call self-returns when the view carries no snapshot for
+    // that role.
     StartTransitionsForView(view);
+    StartSelfTransitionForView(view);
   }
   // Per-pass flags are reset by EndLayoutPass after the entire batch
   // finishes. Resetting here would misclassify the second and subsequent
@@ -610,6 +715,21 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
     mCaptured.erase(capIt);
     ViewDataImpl::Get(*root).TakePendingLayoutTransitionChanges();
     mInitialMountViews.erase(root);
+    return;
+  }
+
+  // ISOLATE_SUBTREE cuts governance for every owner at or above the gate node, and
+  // this view IS the gate node: its children-role transition governs nothing inside
+  // its own subtree. Take the same hygiene the no-transition path takes so no pending
+  // marker, initial-mount seed, or inherited-ENTER candidate leaks into a later pass
+  // that flips back to AUTO -- which seeds nothing retroactively by design.
+  if(ViewDataImpl::Get(*root).GetLayoutTransitionMode() == Ui::LayoutTransitionMode::ISOLATE_SUBTREE)
+  {
+    mCaptured.erase(capIt);
+    ViewDataImpl::Get(*root).TakePendingLayoutTransitionChanges();
+    mInitialMountViews.erase(root);
+    mPendingInheritedEnters.erase(root);
+    DALI_LOG_INFO(gLayoutTransitionLogFilter, Debug::General, "LayoutTransition: owner %p silenced (ISOLATE_SUBTREE)\n", static_cast<void*>(root));
     return;
   }
 
@@ -708,6 +828,45 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
     ViewImpl* parent = cap.parent;
     if(!child || !ChildStillPresent(parent, child))
     {
+      continue;
+    }
+
+    // Level 0 of ResolveGoverningTransition, evaluated at DISPATCH time: policy
+    // before value. A child whose mode is not AUTO is never animated by ANY
+    // transition, so the owner pass must not animate it, settle it, or stamp a
+    // CHANGE cause for it. Arrange has already written the actor to the final
+    // bounds (ViewDataImpl::ApplySelfBoundsIfChanged), which IS the snap the gate
+    // promises -- no dispatch is needed to produce it. Covers direct children and
+    // SUBTREE-inherited descendants alike, both of which flow through this loop.
+    if(ViewDataImpl::Get(*child).GetLayoutTransitionMode() != Ui::LayoutTransitionMode::AUTO)
+    {
+      DALI_LOG_INFO(gLayoutTransitionLogFilter, Debug::General, "LayoutTransition: owner %p skips child %p (mode gated)\n", static_cast<void*>(root), static_cast<void*>(child));
+      continue;
+    }
+
+    // INV-SINGLE-DISPATCH. Level 1 of ResolveGoverningTransition, evaluated at
+    // DISPATCH time: a child carrying its own transition governs itself wholesale,
+    // so the owner pass must not animate, settle, or even read it here -- the self
+    // pass (which runs later in this same pre-order walk) handles it. Levels 2 and
+    // 3 need no check: the capture boundary already encoded them (a child under a
+    // transition-bearing parent is never captured by an ancestor, and
+    // CaptureGovernedChildren stops at a child's own children-role transition).
+    if(ViewDataImpl::Get(*child).HasSelfLayoutTransition())
+    {
+      // Hand this pass's resolved cause over to the self pass so a self-governed
+      // DIRECT child keeps full cause fidelity (cause-specific CHANGE timing keeps
+      // working). Inherited descendants are not stamped, so they degrade to
+      // OTHER / WINDOW_RESIZED exactly like every other inherited descendant.
+      if(parent == root)
+      {
+        auto selfIt = mSelfCaptured.find(child);
+        if(selfIt != mSelfCaptured.end() && !selfIt->second.causeResolved)
+        {
+          selfIt->second.cause         = ResolveChangeCause(child, reorderedChildren, hadSiblingAdd, hadSiblingRemove, isWindowResize);
+          selfIt->second.causeResolved = true;
+        }
+      }
+      DALI_LOG_INFO(gLayoutTransitionLogFilter, Debug::General, "LayoutTransition: owner %p skips child %p (self-governed)\n", static_cast<void*>(root), static_cast<void*>(child));
       continue;
     }
 
@@ -939,32 +1098,8 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
       continue;
     }
 
-    // Cause precedence (deterministic):
-    //   REORDERED > SIBLING_ADDED > SIBLING_REMOVED > WINDOW_RESIZED > OTHER
-    // hadSiblingAdd / hadSiblingRemove are per-parent flags; every CHANGE
-    // child in this pass shares the marker because the layout shift was
-    // driven by a sibling-set mutation.
-    LayoutChangeCause cause;
-    if(reorderedChildren.count(child) > 0)
-    {
-      cause = LayoutChangeCause::REORDERED;
-    }
-    else if(hadSiblingAdd)
-    {
-      cause = LayoutChangeCause::SIBLING_ADDED;
-    }
-    else if(hadSiblingRemove)
-    {
-      cause = LayoutChangeCause::SIBLING_REMOVED;
-    }
-    else if(isWindowResize)
-    {
-      cause = LayoutChangeCause::WINDOW_RESIZED;
-    }
-    else
-    {
-      cause = LayoutChangeCause::OTHER;
-    }
+    const LayoutChangeCause cause =
+      ResolveChangeCause(child, reorderedChildren, hadSiblingAdd, hadSiblingRemove, isWindowResize);
 
     // Window-resize opt-out applies only when the resolved cause is
     // WINDOW_RESIZED. Sibling add/remove/reorder that happens in the
@@ -1000,29 +1135,72 @@ void LayoutTransitionDispatcher::NotifyChildAdded(ViewImpl* directParent, Ui::Vi
   {
     return;
   }
-  // Walk up from the (no-transition) direct parent to the closest ancestor
-  // SUBTREE owner with an ENTER effect. Returns nullptr when a closer
-  // transition claims the child, a standalone boundary intervenes, or no such
-  // owner exists — in which case there is nothing to record.
-  ViewImpl* owner = FindGoverningSubtreeOwner(directParent, ReflowSlot::ENTER);
-  if(!owner)
+  ViewImpl* childImpl = &GetImpl(child);
+
+  // This runs on EVERY add, so the parent handle is derived only in the two
+  // branches that store it — the common "the direct parent claims the child" and
+  // "nothing governs it" adds must not pay for a downcast they never read.
+  const GoverningTransition governing =
+    ResolveGoverningTransition(childImpl, directParent, ReflowSlot::ENTER);
+
+  switch(governing.role)
   {
-    return;
+    case LayoutTransitionRole::SELF:
+    {
+      // Terminal: the child's own transition governs its ENTER whatever the parent
+      // or an ancestor declares. Recorded regardless of the slot effect and of the
+      // parent's state; eligibility is re-validated at dispatch, so a handle
+      // replaced before the next pass is honoured.
+      Ui::View directParentView = Ui::View::DownCast(directParent->Self());
+      if(!directParentView)
+      {
+        break;
+      }
+      mPendingSelfEnters[childImpl] = WeakHandle<Ui::View>(directParentView);
+      DALI_LOG_INFO(gLayoutTransitionLogFilter, Debug::General, "LayoutTransition: pending self ENTER for %p\n", static_cast<void*>(childImpl));
+      break;
+    }
+    case LayoutTransitionRole::DIRECT_PARENT:
+    {
+      // The direct per-view pendingEnterChildren marker set by ViewImpl::OnChildAdd
+      // already claims this add; nothing to record here.
+      break;
+    }
+    case LayoutTransitionRole::INHERITED_SUBTREE:
+    {
+      Ui::View directParentView = Ui::View::DownCast(directParent->Self());
+      if(!directParentView)
+      {
+        break;
+      }
+      PendingInheritedEnter record;
+      record.directParent = WeakHandle<Ui::View>(directParentView);
+      record.child        = WeakHandle<Ui::View>(child);
+      mPendingInheritedEnters[governing.owner].push_back(std::move(record));
+      break;
+    }
+    case LayoutTransitionRole::NONE:
+    {
+      break;
+    }
   }
-  Ui::View directParentView = Ui::View::DownCast(directParent->Self());
-  if(!directParentView)
-  {
-    return;
-  }
-  PendingInheritedEnter record;
-  record.directParent = WeakHandle<Ui::View>(directParentView);
-  record.child        = WeakHandle<Ui::View>(child);
-  mPendingInheritedEnters[owner].push_back(std::move(record));
 }
 
 void LayoutTransitionDispatcher::ClearPendingInheritedEnters(ViewImpl* owner)
 {
   mPendingInheritedEnters.erase(owner);
+}
+
+void LayoutTransitionDispatcher::ClearDetachedSelfState(ViewImpl* child)
+{
+  mPendingSelfEnters.erase(child);
+  // Also drop this pass's snapshot. Detaching mid-pass takes the view out of the
+  // dispatch-time collection, so StartSelfTransitionForView never runs to consume
+  // it, and a re-attach inside a later pass's capture -> dispatch window would
+  // animate one CHANGE from those ancient bounds. Erasing here leaves that
+  // re-attached pass on the no-snapshot path, exactly where a mid-pass attach
+  // already lands.
+  mSelfCaptured.erase(child);
 }
 
 void LayoutTransitionDispatcher::DispatchPendingInheritedEnters(ViewImpl* owner, bool suppressInitialEnter)
@@ -1078,6 +1256,14 @@ void LayoutTransitionDispatcher::DispatchPendingInheritedEnters(ViewImpl* owner,
     {
       continue;
     }
+    if(ViewDataImpl::Get(*childImpl).GetLayoutTransitionMode() != Ui::LayoutTransitionMode::AUTO)
+    {
+      continue; // gated since the add: never animated, and nothing is settled onto it
+    }
+    if(ViewDataImpl::Get(*childImpl).HasSelfLayoutTransition())
+    {
+      continue; // self-governed since the add: the self pass owns this child's ENTER
+    }
 
     // EXIT precedence: never start OR settle ENTER on a child whose EXIT is in
     // flight (a blind settle here would corrupt the fading ghost's visual state).
@@ -1116,6 +1302,154 @@ void LayoutTransitionDispatcher::DispatchPendingInheritedEnters(ViewImpl* owner,
     {
       StartEnterTransition(childImpl, ownerTransition);
     }
+  }
+}
+
+void LayoutTransitionDispatcher::StartSelfTransitionForView(ViewImpl* view)
+{
+  // Map lookup FIRST, before any dereference: an OnStart callback fired earlier in
+  // this walk may have destroyed this view, in which case OnViewDestroyed has
+  // already erased its snapshot and there is nothing to touch.
+  auto capIt = mSelfCaptured.find(view);
+  if(capIt == mSelfCaptured.end())
+  {
+    // No snapshot this pass (attached mid-pass, or no View parent at capture).
+    // Consume the pending ENTER so it cannot surface later, exactly as the owner
+    // pass consumes its pending sets when it finds no snapshot.
+    mPendingSelfEnters.erase(view);
+    return;
+  }
+  const SelfCapturedBounds cap = capIt->second;
+  mSelfCaptured.erase(capIt);
+
+  // Consume the add-time ENTER candidate. It counts only when it was recorded
+  // against the parent this snapshot was taken in -- a reparent between the add and
+  // this pass must not fire ENTER in the wrong frame.
+  bool enterCandidate = cap.parentInitialMount;
+  {
+    auto pendIt = mPendingSelfEnters.find(view);
+    if(pendIt != mPendingSelfEnters.end())
+    {
+      Ui::View recordedParent = pendIt->second.GetHandle();
+      enterCandidate          = enterCandidate || (recordedParent && &GetImpl(recordedParent) == cap.parent);
+      mPendingSelfEnters.erase(pendIt);
+    }
+  }
+
+  // Level 0, applied to the self role: policy gates before value, so this view is
+  // not animated even by the handle it carries. Reached after the snapshot and the
+  // add-time ENTER candidate have been consumed above, which is the hygiene a later
+  // flip back to AUTO needs: it restarts from the next pass's capture instead of
+  // replaying ancient bounds or surfacing a stale ENTER. The handle is untouched.
+  if(ViewDataImpl::Get(*view).GetLayoutTransitionMode() != Ui::LayoutTransitionMode::AUTO)
+  {
+    DALI_LOG_INFO(gLayoutTransitionLogFilter, Debug::General, "LayoutTransition: self pass skips %p (mode gated)\n", static_cast<void*>(view));
+    return;
+  }
+
+  Ui::LayoutTransition transition = view->GetSelfLayoutTransition();
+  if(!transition)
+  {
+    return; // detached between capture and dispatch: inheritance resumes next pass
+  }
+
+  ViewImpl* parent       = cap.parent;
+  Ui::View  childHandle  = Ui::View::DownCast(view->Self());
+  Ui::View  parentHandle = parent ? Ui::View::DownCast(parent->Self()) : Ui::View();
+  if(!childHandle || !parentHandle || !ChildStillPresent(parent, view))
+  {
+    return; // destroyed, unparented, or an EXIT ghost (absent from the logical list)
+  }
+
+  // EXIT precedence: never start OR settle anything on a view whose EXIT is in
+  // flight -- the same guards the owner pass applies.
+  if(mPendingExits.count(view) > 0)
+  {
+    return;
+  }
+  {
+    auto activeIt = mActiveAnimators.find(view);
+    if(activeIt != mActiveAnimators.end() && activeIt->second.slot == LayoutTransitionSlot::EXIT)
+    {
+      return;
+    }
+  }
+
+  LayoutTransitionImpl& impl = GetImpl(transition);
+
+  if(enterCandidate)
+  {
+    const bool suppressInitialEnter = cap.parentInitialMount && !impl.GetEnterOnInitialMount();
+    if(suppressInitialEnter)
+    {
+      // Suppress the launch ENTER but still settle a declarative ENTER spec to its
+      // final values, so a view pre-set to a fade-in start does not stay there.
+      // Latched: a view no producer ever arranges keeps parentInitialMount TRUE on
+      // every pass, and each entry would otherwise re-BAKE the spec.
+      if(!ViewDataImpl::Get(*view).IsInitialEnterSettled())
+      {
+        SettleInitialEnter(view, transition);
+      }
+      return;
+    }
+    if(impl.HasEnterFx())
+    {
+      DALI_LOG_INFO(gLayoutTransitionLogFilter, Debug::General, "LayoutTransition: self ENTER on %p\n", static_cast<void*>(view));
+      if(impl.HasEnterAnimator())
+      {
+        StartAnimatorEnter(view, VisualBoundsOf(parent, view), transition);
+      }
+      else
+      {
+        StartEnterTransition(view, transition);
+      }
+    }
+    return;
+  }
+
+  const LayoutRect from = cap.bounds;
+  const LayoutRect to   = VisualBoundsOf(parent, view);
+
+  // Same fresh-child guard as the owner pass: a never arranged view has a
+  // degenerate pre-arrange "from"; snap instead of animating from nothing, and
+  // settle the declarative ENTER spec exactly once.
+  if(cap.freshChild)
+  {
+    if(!BoundsApproxEqual(from, to))
+    {
+      SettleChangeWithoutAnimation(view, to);
+    }
+    if(!ViewDataImpl::Get(*view).IsInitialEnterSettled())
+    {
+      SettleInitialEnter(view, transition);
+    }
+    return;
+  }
+
+  if(BoundsApproxEqual(from, to))
+  {
+    return;
+  }
+
+  const LayoutChangeCause cause =
+    cap.causeResolved ? cap.cause
+                      : (mInWindowResize ? LayoutChangeCause::WINDOW_RESIZED : LayoutChangeCause::OTHER);
+
+  // The winner's own option decides the resize opt-out.
+  if(cause == LayoutChangeCause::WINDOW_RESIZED && !impl.GetChangeOnWindowResize())
+  {
+    SettleChangeWithoutAnimation(view, to);
+    return;
+  }
+
+  DALI_LOG_INFO(gLayoutTransitionLogFilter, Debug::General, "LayoutTransition: self CHANGE on %p cause=%d\n", static_cast<void*>(view), static_cast<int>(cause));
+  if(impl.HasChangeAnimator())
+  {
+    StartAnimatorChange(view, from, to, transition, cause);
+  }
+  else
+  {
+    StartChangeTransition(view, from, to, transition, cause);
   }
 }
 
@@ -1953,13 +2287,6 @@ void LayoutTransitionDispatcher::ScheduleExit(ViewImpl* parent, Ui::View child, 
     return;
   }
 
-  // @p parent is the child's direct (visual) parent — bounds frame, ghost
-  // host, and unparent target. The EXIT effect is sourced from @c owner,
-  // which is an ancestor for SUBTREE-scope inherited EXIT and equals @p parent
-  // for a direct EXIT (transitionOwner == nullptr), so existing 2-arg call
-  // sites behave identically.
-  ViewImpl* owner = transitionOwner ? transitionOwner : parent;
-
   ViewImpl* childImpl = &GetImpl(child);
 
   // If the same child is already exiting (spec or animator mode), ignore
@@ -1976,8 +2303,30 @@ void LayoutTransitionDispatcher::ScheduleExit(ViewImpl* parent, Ui::View child, 
     }
   }
 
-  Ui::LayoutTransition transition   = owner->GetLayoutTransition();
-  Ui::View             parentHandle = Ui::View::DownCast(parent->Self());
+  // Effect source, level 1 of the governing-transition resolution re-applied here
+  // so the deferral decision in ViewImpl::Remove and the effect that actually
+  // plays can never disagree: the child's own transition wins wholesale, otherwise
+  // the explicitly supplied SUBTREE owner, otherwise the direct parent. @p parent
+  // stays the bounds frame, ghost host, and unparent target in every case
+  // (INV-GHOST-UNDER-DIRECT-PARENT / INV-GEOMETRY).
+  // Level 0 first, mirroring ResolveGoverningTransition so the deferral decision in
+  // ViewImpl::Remove and the effect that actually plays can never disagree: a gated
+  // child resolves to no effect and falls into the immediate-unparent branch below.
+  const bool gated =
+    ViewDataImpl::Get(*childImpl).GetLayoutTransitionMode() != Ui::LayoutTransitionMode::AUTO;
+  Ui::LayoutTransition transition;
+  if(!gated)
+  {
+    transition = childImpl->GetSelfLayoutTransition();
+  }
+  const bool fromSelf = static_cast<bool>(transition);
+  if(!fromSelf && !gated)
+  {
+    ViewImpl* owner = transitionOwner ? transitionOwner : parent;
+    transition      = owner->GetLayoutTransition();
+  }
+  DALI_LOG_INFO(gLayoutTransitionLogFilter, Debug::General, "LayoutTransition: EXIT on %p, effect source %s\n", static_cast<void*>(childImpl), gated ? "mode gated (none)" : (fromSelf ? "self" : (transitionOwner ? "subtree owner" : "direct parent")));
+  Ui::View parentHandle = Ui::View::DownCast(parent->Self());
 
   // Fallback: no transition or no EXIT spec → unparent immediately. Also
   // cancel any in-flight CHANGE / ENTER animation/animator so it does not
@@ -2134,6 +2483,11 @@ void LayoutTransitionDispatcher::OnChildReparented(ViewImpl* child)
   CancelActiveAnimation(child);
   CancelActiveAnimator(child);
   CancelPendingExit(child);
+
+  // A reparent invalidates the add-time ENTER candidate recorded for the OLD
+  // parent; ViewImpl::OnChildAdd re-registers a fresh one for the new parent
+  // immediately after this call returns.
+  mPendingSelfEnters.erase(child);
 }
 
 void LayoutTransitionDispatcher::OnViewDestroyed(ViewImpl* view)
@@ -2229,6 +2583,18 @@ void LayoutTransitionDispatcher::OnViewDestroyed(ViewImpl* view)
       return (c && &GetImpl(c) == view) || (p && &GetImpl(p) == view);
     }),
                   records.end());
+  }
+
+  // Self-role state, keyed by the child. mPendingSelfEnters values are weak handles
+  // that self-expire and are re-validated at dispatch, so no value-side pruning is
+  // required there.
+  mSelfCaptured.erase(view);
+  mPendingSelfEnters.erase(view);
+  // Self snapshots hold a RAW direct-parent pointer, same hazard as mCaptured:
+  // drop every snapshot whose frame view is being destroyed.
+  for(auto it = mSelfCaptured.begin(); it != mSelfCaptured.end();)
+  {
+    it = (it->second.parent == view) ? mSelfCaptured.erase(it) : std::next(it);
   }
 }
 

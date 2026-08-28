@@ -254,14 +254,15 @@ public: // Not intended for application developers
   DALI_INTERNAL void NotifyChildReparented(ViewImpl* child);
 
   /**
-   * @brief Notifies the dispatcher that @p child was added under @p directParent,
-   * which has no LayoutTransition of its own, so an inherited (SUBTREE-scope)
-   * ENTER candidate can be registered against the closest governing ancestor.
+   * @brief Notifies the dispatcher that @p child was added under @p directParent
+   * so the ENTER of this add can be routed to the transition that governs it (the
+   * child's own self transition, the direct parent's, or the closest ancestor
+   * SUBTREE owner's).
    *
-   * Called by @c ViewImpl::OnChildAdd. No-op when no ancestor SUBTREE owner with
-   * an ENTER effect governs the child.
+   * Called by @c ViewImpl::OnChildAdd for every add; a no-op when the direct
+   * parent's own transition claims the child.
    *
-   * @param[in] directParent The child's direct (no-transition) parent
+   * @param[in] directParent The child's direct parent
    * @param[in] child         The freshly added child
    */
   DALI_INTERNAL void NotifyChildAdded(ViewImpl* directParent, Ui::View child);
@@ -273,6 +274,16 @@ public: // Not intended for application developers
    * @param[in] owner The view whose transition was just detached
    */
   DALI_INTERNAL void ClearPendingInheritedEnters(ViewImpl* owner);
+
+  /**
+   * @brief Drops the self-role records the dispatcher holds for @p child -- the
+   * add-time pending ENTER candidate and the current pass's snapshot -- called
+   * when @p child detaches its self LayoutTransition or is gated by a non-AUTO
+   * LayoutTransitionMode.
+   *
+   * @param[in] child The view whose self transition was just detached
+   */
+  DALI_INTERNAL void ClearDetachedSelfState(ViewImpl* child);
   /// @endcond
 
 private:

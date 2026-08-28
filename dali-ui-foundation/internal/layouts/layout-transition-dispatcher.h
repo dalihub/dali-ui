@@ -117,6 +117,10 @@ public:
    * ghost stays under the direct parent while the effect comes from an
    * ancestor owner (INV-GHOST-UNDER-DIRECT-PARENT).
    *
+   * The effect source is resolved inside: a @p child that carries its own
+   * (self-role) transition supplies the effect itself, whatever @p parent or
+   * @p transitionOwner declare.
+   *
    * @param[in] parent          The child's direct (visual) parent
    * @param[in] child           The child view to remove
    * @param[in] transitionOwner The view whose LayoutTransition drives the
@@ -171,16 +175,23 @@ public:
   void OnChildReparented(ViewImpl* child);
 
   /**
-   * @brief Registers a child added under a no-transition container as an
-   * inherited (SUBTREE-scope) ENTER candidate.
+   * @brief Routes the ENTER of a freshly added child to the transition that
+   * governs it.
    *
-   * Called from @c ViewImpl::OnChildAdd (via @c LayoutController) when the
-   * direct parent has no LayoutTransition of its own. The dispatcher walks up
-   * to the closest ancestor SUBTREE owner that carries an ENTER effect and, if
-   * found, records a weak-handle pending entry consumed at that owner's next
-   * layout pass. No-op when no governing SUBTREE-ENTER owner exists.
+   * Called from @c ViewImpl::OnChildAdd (via @c LayoutController) for EVERY add.
+   * The single governing-transition resolution decides the outcome:
    *
-   * @param[in] directParent The child's direct (no-transition) parent
+   *  - the child's @c LayoutTransitionMode is not @c AUTO: nothing is recorded —
+   *    the gate is evaluated before any handle;
+   *  - the child carries its own (self-role) transition: a pending self-ENTER
+   *    record is registered against the child, whatever the parent declares;
+   *  - the direct parent's own transition claims the child: nothing is recorded
+   *    here — the per-view pending marker set by @c ViewImpl::OnChildAdd owns it;
+   *  - otherwise the closest ancestor SUBTREE owner that carries an ENTER effect
+   *    records a weak-handle pending entry consumed at that owner's next layout
+   *    pass. No-op when no such owner exists.
+   *
+   * @param[in] directParent The child's direct parent
    * @param[in] child         The freshly added child
    */
   void NotifyChildAdded(ViewImpl* directParent, Ui::View child);
@@ -196,6 +207,29 @@ public:
    * @param[in] owner The view whose transition was just detached
    */
   void ClearPendingInheritedEnters(ViewImpl* owner);
+
+  /**
+   * @brief Drops every self-role record the dispatcher holds for @p child.
+   *
+   * Called from @c ViewImpl::SetSelfLayoutTransition when the self transition is
+   * detached, and from @c ViewImpl::SetLayoutTransitionMode when the view is
+   * gated — the same two records must go, for the same reasons; the handle itself
+   * stays attached in the mode case. Two records go:
+   *
+   *  - the add-time pending self-ENTER candidate, mirroring the children-role
+   *    detach clearing its own pending markers so a detach -> reattach cycle
+   *    cannot surface a stale ENTER;
+   *  - this pass's self snapshot. A detach taken after the pass captured it
+   *    drops the view out of the dispatch-time collection, so nothing consumes
+   *    the snapshot; a re-attach inside a later pass's capture -> dispatch
+   *    window would then find it and play one CHANGE from ancient bounds.
+   *
+   * Both erases are no-ops for the ordinary between-pass detach: no candidate is
+   * pending and the snapshot was consumed when the pass ended.
+   *
+   * @param[in] child The view whose self transition was just detached
+   */
+  void ClearDetachedSelfState(ViewImpl* child);
 
   /**
    * @brief Marks the next layout pass as window-resize-driven.
@@ -266,10 +300,14 @@ private:
   /// instead of the unmirrored logical bounds @c GetArrangedBounds returns.
   LayoutRect VisualBoundsOf(ViewImpl* parent, ViewImpl* child) const;
 
-  /// DFS-collects @p node and every descendant View that has a
-  /// LayoutTransition attached. Allows nested layouts (non-root views) to
-  /// participate in transition dispatch.
-  void CollectTransitionViews(ViewImpl* node, std::vector<ViewImpl*>& out);
+  /// DFS-collects @p node and every descendant View carrying EITHER role: a
+  /// children-role LayoutTransition or a self-role one. Allows nested layouts
+  /// (non-root views) to participate in transition dispatch. Pre-order, so a
+  /// parent's children-role pass always precedes its own children's self-role
+  /// pass. Collects strong handles, not raw impl pointers, so the list stays
+  /// dereferenceable across the whole dispatch walk (see
+  /// @c StartTransitionsAfterLayout).
+  void CollectTransitionViews(ViewImpl* node, std::vector<Ui::View>& out);
 
   /// Snapshots a single transition-attached view's children (helper for the
   /// per-root traversal). When the view's reflow scope is SUBTREE, also
@@ -279,6 +317,17 @@ private:
   /// Dispatches ENTER / CHANGE for a single transition-attached view's
   /// children using the snapshot taken in CaptureSingleView.
   void StartTransitionsForView(ViewImpl* view);
+
+  /// Snapshots one self-governed view's own bounds in its DIRECT parent's frame.
+  /// No-op (and drops any stale snapshot) while the view has no View parent: a
+  /// self transition animates the view inside a parent's layout frame, and a view
+  /// parented straight to the window has none.
+  void CaptureSelfView(ViewImpl* view);
+
+  /// Dispatches the self-role ENTER / CHANGE for one view from the snapshot taken
+  /// by CaptureSelfView. Runs after the direct parent's owner pass in the same
+  /// walk, consuming the CHANGE cause that pass handed over.
+  void StartSelfTransitionForView(ViewImpl* view);
 
   /// Dispatches inherited (SUBTREE-scope) ENTER for the candidates registered
   /// against @p owner by @c NotifyChildAdded, re-validating current parentage,
@@ -396,8 +445,11 @@ private:
 
   /// Appends @p parent 's direct children to @p out (each tagged with
   /// @p parent). When @p recurse is true, descends into children that have
-  /// no transition of their own and are not standalone layout roots, so a
-  /// SUBTREE-scope owner captures the whole governed subtree in one snapshot.
+  /// no transition of their own, are not @c LayoutTransitionMode::ISOLATE_SUBTREE
+  /// gates, and are not standalone layout roots, so a SUBTREE-scope owner captures
+  /// the whole governed subtree in one snapshot. All three stops are boundaries of
+  /// the same governed subtree; the gated child itself is still captured and is
+  /// filtered by the dispatch-time mode gate.
   void CaptureGovernedChildren(ViewImpl* parent, std::vector<CapturedBounds>& out, bool recurse);
 
   /// State for an in-flight spec-mode CHANGE / ENTER animation. Records the
@@ -474,12 +526,30 @@ private:
     WeakHandle<Ui::View> child;
   };
 
+  /// Snapshot of a self-governed view taken before the layout pass. Keyed by the
+  /// CHILD (the effect source and the dispatch target are the same view), unlike
+  /// @c mCaptured which is keyed by the owning parent.
+  struct SelfCapturedBounds
+  {
+    ViewImpl*         parent;        ///< DIRECT parent at capture time: bounds frame / ghost host
+    LayoutRect        bounds;        ///< Visual bounds in @c parent 's local space
+    LayoutChangeCause cause;         ///< Cause handed over by the direct parent's owner pass
+    bool              causeResolved; ///< True once that hand-over happened; otherwise the self
+                                     ///< pass degrades to OTHER / WINDOW_RESIZED (the same
+                                     ///< degradation SUBTREE-inherited descendants use)
+    bool freshChild;                 ///< View had not completed its first arrange at capture
+    bool parentInitialMount;         ///< DIRECT parent had not completed its first arrange at
+                                     ///< capture: the initial-mount anchor for the self role
+  };
+
   std::unordered_map<ViewImpl*, std::vector<CapturedBounds>>        mCaptured;               ///< Per-root snapshot list, valid for one layout pass
   std::unordered_set<ViewImpl*>                                     mInitialMountViews;      ///< Transition roots captured before their first @c Arrange. Consumed by @c StartTransitionsForView to decide whether to suppress ENTER for that pass
   std::unordered_map<ViewImpl*, ActiveSpecAnimation>                mActiveAnimations;       ///< Active CHANGE / ENTER spec animations, keyed by child
   std::unordered_map<ViewImpl*, GhostExit>                          mPendingExits;           ///< In-flight EXIT spec animations, keyed by child
   std::unordered_map<ViewImpl*, AnimatorState>                      mActiveAnimators;        ///< In-flight animator-callback transitions, keyed by child
   std::unordered_map<ViewImpl*, std::vector<PendingInheritedEnter>> mPendingInheritedEnters; ///< Inherited (SUBTREE) ENTER candidates, keyed by governing owner
+  std::unordered_map<ViewImpl*, SelfCapturedBounds>                 mSelfCaptured;           ///< Per-pass self snapshots, keyed by the self-governed child
+  std::unordered_map<ViewImpl*, WeakHandle<Ui::View>>               mPendingSelfEnters;      ///< Self ENTER candidates, keyed by child; value = direct parent at add time (weak, re-validated at dispatch)
   bool                                                              mInWindowResize{false};
   int                                                               mLayoutPassDepth{0}; ///< Recursion depth for ProcessLayouts re-entry safety
 

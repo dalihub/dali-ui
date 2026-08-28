@@ -1248,6 +1248,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   // Pure cache key; its initial value is never consulted because
   // mArrangeCacheValid starts false.
   mLastArrangeDirection(Dali::LayoutDirection::LEFT_TO_RIGHT),
+  mLayoutTransitionMode(LayoutTransitionMode::AUTO),
   mKeyEventDispatchInProgress(false),
   mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT))
 {
@@ -2992,7 +2993,20 @@ void ViewDataImpl::SetLayoutTransition(LayoutTransition transition)
   // unrelated CHANGE as SIBLING_REMOVED.
   if(!transition)
   {
-    mLayoutTransitionData.reset();
+    if(mLayoutTransitionData)
+    {
+      mLayoutTransitionData->transition.Reset();
+      mLayoutTransitionData->pendingEnterChildren.clear();
+      mLayoutTransitionData->pendingReorderedChildren.clear();
+      mLayoutTransitionData->hasPendingChildRemoval = false;
+      // The block is shared with the self role; free it only when both roles are
+      // empty. Every marker above belongs to the children role and has just been
+      // dropped, so an empty children handle leaves nothing else to keep.
+      if(!mLayoutTransitionData->selfTransition)
+      {
+        mLayoutTransitionData.reset();
+      }
+    }
     // Symmetric with the direct markers above: drop any inherited-ENTER
     // candidates this view owns in the dispatcher, so a detach -> reattach
     // cycle does not surface a stale ENTER for a grand-child added under the
@@ -3035,6 +3049,104 @@ void ViewDataImpl::SetLayoutTransition(LayoutTransition transition)
 LayoutTransition ViewDataImpl::GetLayoutTransition() const
 {
   return mLayoutTransitionData ? mLayoutTransitionData->transition : LayoutTransition();
+}
+
+void ViewDataImpl::SetSelfLayoutTransition(LayoutTransition transition)
+{
+  if(!transition)
+  {
+    // Detach: return to the parent / ancestor rules. In-flight transitions are NOT
+    // cancelled (handle replacement is not cancellation), but the self-role records
+    // this view owns in the dispatcher must go: the add-time ENTER candidate,
+    // mirroring the children role dropping its own pending markers on detach, and
+    // the snapshot of the pass in flight. Otherwise a detach -> reattach cycle would
+    // surface a stale self ENTER, or replay a CHANGE from bounds captured before the
+    // detach. An off-window view's records were already dropped by its
+    // scene-disconnect cleanup (OnViewDestroyed), which is why the window guard
+    // below costs nothing.
+    if(mLayoutTransitionData)
+    {
+      mLayoutTransitionData->selfTransition.Reset();
+      if(!mLayoutTransitionData->transition)
+      {
+        mLayoutTransitionData.reset();
+      }
+    }
+    Window window = Window::Get(mViewImpl.Self());
+    if(window)
+    {
+      LayoutController::Get(window).ClearDetachedSelfState(&mViewImpl);
+    }
+    return;
+  }
+
+  EnsureLayoutTransitionData().selfTransition = transition;
+
+  // Seed the ENTER candidate for the natural call order
+  //   parent.Add(child); child.SetSelfLayoutTransition(t);
+  // where OnChildAdded ran before this view carried a self transition and so
+  // recorded nothing. Restricted to !mInitialLayoutDone for the same reason the
+  // children-role seed is: a view that has already been arranged is part of its
+  // parent's visual state and must not fire ENTER now.
+  Actor  self   = mViewImpl.Self();
+  Window window = self ? Window::Get(self) : Window();
+  if(window && !mInitialLayoutDone)
+  {
+    Ui::View parentView = Ui::View::DownCast(self.GetParent());
+    Ui::View selfView   = Ui::View::DownCast(self);
+    if(parentView && selfView)
+    {
+      LayoutController::Get(window).NotifyChildAdded(&GetImpl(parentView), selfView);
+    }
+  }
+}
+
+LayoutTransition ViewDataImpl::GetSelfLayoutTransition() const
+{
+  return mLayoutTransitionData ? mLayoutTransitionData->selfTransition : LayoutTransition();
+}
+
+bool ViewDataImpl::HasSelfLayoutTransition() const
+{
+  return mLayoutTransitionData && mLayoutTransitionData->selfTransition;
+}
+
+void ViewDataImpl::SetLayoutTransitionMode(LayoutTransitionMode mode)
+{
+  if(mLayoutTransitionMode == mode)
+  {
+    return; // Idempotent: a redundant set must not scrub live per-pass state below.
+  }
+  mLayoutTransitionMode = mode;
+
+  if(mode == LayoutTransitionMode::AUTO)
+  {
+    // Returning to AUTO seeds nothing. The next per-(view, slot) event picks this
+    // view up again; an add that happened while the view was gated recorded no
+    // candidate and must not fire ENTER retroactively.
+    return;
+  }
+
+  // Gating applies from the next event (a mode change is not a cancellation), but
+  // the self-role records already standing in the dispatcher must go, exactly as
+  // SetSelfLayoutTransition's detach drops them: the add-time pending ENTER, which
+  // would surface on a later flip back to AUTO, and this pass's self snapshot,
+  // which would then replay ancient bounds as one CHANGE. The attached handles
+  // themselves are deliberately left alone -- policy gates the value, it does not
+  // destroy it. An off-window view's records were already dropped by its
+  // scene-disconnect cleanup (OnViewDestroyed), which is why the window guard
+  // below costs nothing.
+  Actor  self   = mViewImpl.Self();
+  Window window = self ? Window::Get(self) : Window();
+  if(window)
+  {
+    LayoutController::Get(window).ClearDetachedSelfState(&mViewImpl);
+  }
+}
+
+LayoutTransitionMode ViewDataImpl::GetLayoutTransitionMode() const
+{
+  return mLayoutTransitionMode;
 }
 
 LayoutRect ViewDataImpl::GetArrangedBounds() const
@@ -3108,9 +3220,10 @@ void ViewDataImpl::RemoveAll(Ui::RemovePolicy policy)
   // GetChildCount / GetChildAt). Snapshot up front: with ANIMATE_EXIT the
   // EXIT-ing View children stay attached as ghosts, so iterating the live
   // actor list would revisit them and never terminate. Each removal is routed
-  // through the per-child Remove, which already handles this view's own EXIT
-  // slot, an inherited SUBTREE-scope EXIT owner, and the in-flight-ghost
-  // guard; OnChildRemove keeps mChildren in sync for the immediate paths.
+  // through the per-child Remove, which already handles the child's own self
+  // transition, this view's own EXIT slot, an inherited SUBTREE-scope EXIT owner,
+  // and the in-flight-ghost guard; OnChildRemove keeps mChildren in sync for the
+  // immediate paths.
   Actor              self = mViewImpl.Self();
   std::vector<Actor> snapshot;
   const uint32_t     count = self.GetChildCount();
@@ -3144,165 +3257,123 @@ void ViewDataImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
   }
 
   const bool animateExit = (policy == Ui::RemovePolicy::ANIMATE_EXIT);
+  ViewImpl&  childImpl   = GetImpl(child);
+  Actor      selfActor   = mViewImpl.Self();
 
-  // ANIMATE_EXIT only: if a LayoutTransition with an EXIT slot (spec OR
-  // animator) is attached, hand the child off to the layout transition
-  // dispatcher so the EXIT animation can play. IMMEDIATE (and the
-  // no-EXIT-slot case) falls through to the immediate unparent below.
-  Ui::LayoutTransition transition = GetLayoutTransition();
-  bool                 deferred   = false;
-  if(animateExit && transition)
+  // The remove-side mirror of the OnChildAdded gate. With no LayoutTransition alive
+  // anywhere in the process, everything between here and the unparent below is
+  // provably a no-op, and none of it is cheap: Window::Get resolves the actor's
+  // Scene and scans the adaptor's window list, and the child find is a linear walk
+  // of mChildren.
+  //
+  // Provable in both directions, like the add-side gate:
+  //  - Every level of ResolveGoverningTransition reports a transition only through
+  //    some view's non-empty handle, and a non-empty handle IS a live impl (a
+  //    non-AUTO LayoutTransitionMode only makes the resolution reach NONE sooner).
+  //    With none alive the deferred-EXIT branch is unreachable, so an ANIMATE_EXIT
+  //    remove is the immediate unparent either way.
+  //  - The SIBLING_REMOVED marker is written only under this view's own
+  //    children-role handle -- provably empty while the gate is closed.
+  //
+  // The ghost re-remove guard stays inside this fast path (with its own find): it
+  // keys on mChildren bookkeeping -- the actor still parented here while the
+  // logical child is already erased -- not on transition liveness, and that desync
+  // outlives the transition that created it: a ghost whose transition died
+  // mid-flight must still take the early return rather than fall through and
+  // synchronously unparent.
+  if(!Internal::LayoutTransitionImpl::HasAnyInstance())
   {
-    auto&      impl      = Internal::GetImpl(transition);
-    const bool hasExitFx = static_cast<bool>(impl.GetExitVisualSpec()) || impl.HasExitAnimator() || impl.HasActiveExitBoundsEffect();
-    if(hasExitFx)
-    {
-      Actor  self   = mViewImpl.Self();
-      Window window = Window::Get(self);
-      if(window)
-      {
-        // Remove the child from this view's layout-tracking list and
-        // invalidate so siblings flow into the freed slot during the next
-        // layout pass. The child's Actor stays under this Actor so the
-        // dispatcher can animate it before unparenting.
-        ViewImpl& childImpl = GetImpl(child);
-        auto      it        = std::find(mChildren.begin(), mChildren.end(), child);
-        if(it != mChildren.end())
-        {
-          mChildren.Erase(it);
-          LayoutTransitionData& transitionData = *mLayoutTransitionData;
-          transitionData.pendingEnterChildren.erase(&childImpl);
-          // Same rationale as the immediate-remove path's OnChildRemove:
-          // a stale raw ViewImpl* in the reorder set could outlive its
-          // child after deferred-remove EXIT and cause a future heap-
-          // reused address to be misclassified as REORDERED. Erase
-          // per-child here (not full clear) so the cause of any
-          // siblings still pending reorder is preserved.
-          transitionData.pendingReorderedChildren.erase(&childImpl);
-          // Mark sibling removal so the dispatcher tags this pass's CHANGE
-          // dispatches on the remaining siblings as SIBLING_REMOVED. Set
-          // only when a transition is attached to avoid leaving stale
-          // marker state on views without transitions.
-          transitionData.hasPendingChildRemoval = true;
-          InvalidateMeasure();
-
-          // Only schedule the EXIT transition when @p child was actually a
-          // tracked child. Calling Remove on a non-child must not fire
-          // any DALi layout-transition lifecycle / animation; without this
-          // guard a misuse would leave a ghost animation that fires
-          // OnStart / OnFinished and races with
-          // the actor's real parent.
-          LayoutController::Get(window).ScheduleLayoutExit(&mViewImpl, child);
-          deferred = true;
-        }
-      }
-    }
-  }
-
-  if(!deferred)
-  {
-    // Guard against re-removing a child that is currently an EXIT ghost
-    // under this view. Ghost detection: actor parent is still Self() (the
-    // deferred-remove keeps the actor attached) AND the child has already
-    // been removed from the logical children list (mChildren). Without
-    // this guard, the second Remove bypasses the dispatcher
-    // duplicate-EXIT guard and synchronously unparents the ghost, which
-    // triggers OnSceneDisconnection -> CancelPendingExit/CancelActiveAnimator
-    // and silently cancels the in-flight EXIT (no OnFinished, no fade).
-    // The same applies when the parent's LayoutTransition has been replaced
-    // or cleared between the first and second Remove -- the second
-    // call cannot enter the deferred branch but the ghost is still in
-    // flight under its original transition.
-    if(child.GetParent() == mViewImpl.Self() &&
+    if(child.GetParent() == selfActor &&
        std::find(mChildren.begin(), mChildren.end(), child) == mChildren.end())
     {
       return;
     }
+    selfActor.Remove(child);
+    return;
+  }
 
-    Actor selfActor = mViewImpl.Self();
+  Window window = Window::Get(selfActor);
 
-    // The remove-side mirror of the OnChildAdded gate. With no LayoutTransition alive
-    // anywhere in the process, everything between here and the unparent below is provably
-    // a no-op, and none of it is cheap: Window::Get resolves the actor's Scene and scans
-    // the adaptor's window list, and the find is a linear walk of mChildren.
-    //
-    // Provable in both directions, like the add-side gate:
-    //  - FindGoverningSubtreeOwner reports an owner only through some ancestor's
-    //    GetLayoutTransition() being non-empty, and a non-empty handle IS a live impl. With
-    //    none alive the resolver cannot return one, so the inherited-EXIT defer is
-    //    unreachable and an ANIMATE_EXIT remove is the immediate unparent either way.
-    //  - Both SIBLING_REMOVED markers are written only under this view's own `transition`,
-    //    which is GetLayoutTransition() -- provably empty while the gate is closed. Neither
-    //    marker could have been set, so neither is skipped.
-    //  - window, it and isCurrentChild exist only to feed those two, so they go with them.
-    //
-    // The ghost re-remove guard above deliberately stays OUTSIDE. It keys on mChildren
-    // bookkeeping -- the actor still parented here while the logical child is already
-    // erased -- not on transition liveness, and that desync outlives the transition that
-    // created it: a ghost whose transition died mid-flight must still take the early
-    // return rather than fall through and synchronously unparent.
-    if(Internal::LayoutTransitionImpl::HasAnyInstance())
+  auto       it             = std::find(mChildren.begin(), mChildren.end(), child);
+  const bool isCurrentChild = (it != mChildren.end());
+
+  // ONE resolution for this (child, EXIT) event: the child's own transition wins
+  // wholesale, else this view's, else the closest SUBTREE-scope ancestor's. Each
+  // level terminates on attachment, so a child whose own transition carries no
+  // EXIT effect is unparented immediately even when this view or an ancestor has
+  // one -- that is the documented opt-out. A view whose LayoutTransitionMode is not
+  // AUTO resolves to NONE at level 0, so it is likewise unparented immediately.
+  Internal::GoverningTransition governing;
+  if(animateExit)
+  {
+    governing = Internal::ResolveGoverningTransition(&childImpl, &mViewImpl, Internal::ReflowSlot::EXIT);
+  }
+  const bool hasExitFx =
+    governing.transition && Internal::GetImpl(governing.transition).HasExitFx();
+
+  if(animateExit && hasExitFx && window && isCurrentChild)
+  {
+    // Deferred EXIT. The child leaves the layout-tracking list now so siblings
+    // reflow into the freed slot; its Actor stays under THIS view (the ghost host
+    // and unparent target, INV-GHOST-UNDER-DIRECT-PARENT) while the resolved
+    // transition drives the effect.
+    mChildren.Erase(it);
+    if(mLayoutTransitionData)
     {
-      Window     window         = Window::Get(selfActor);
-      auto       it             = std::find(mChildren.begin(), mChildren.end(), child);
-      const bool isCurrentChild = (it != mChildren.end());
-
-      // Inherited (SUBTREE-scope) EXIT: this view does not handle EXIT through
-      // its own transition (otherwise the deferred branch above would have run).
-      // Walk up to the closest ancestor SUBTREE owner that carries an EXIT
-      // effect; if found, defer the child to that owner. The actor stays under
-      // this view -- the ghost's direct/visual parent -- while the owner's
-      // transition drives the EXIT effect (INV-GHOST-UNDER-DIRECT-PARENT). The
-      // closest-owner / standalone-boundary rules are enforced inside the
-      // resolver, so a child claimed by a closer (non-SUBTREE or non-EXIT)
-      // transition is not stolen by an ancestor.
-      // ANIMATE_EXIT only: inherited (SUBTREE-scope) EXIT defer. IMMEDIATE skips
-      // this and unparents synchronously below.
-      if(animateExit && window && isCurrentChild)
-      {
-        ViewImpl* owner = Internal::FindGoverningSubtreeOwner(&mViewImpl, Internal::ReflowSlot::EXIT);
-        if(owner)
-        {
-          ViewImpl& childImpl = GetImpl(child);
-          mChildren.Erase(it);
-          if(mLayoutTransitionData)
-          {
-            mLayoutTransitionData->pendingEnterChildren.erase(&childImpl);
-            mLayoutTransitionData->pendingReorderedChildren.erase(&childImpl);
-          }
-          // Remaining siblings under THIS direct parent reflow into the freed
-          // slot; tag their CHANGE as SIBLING_REMOVED on the next pass -- but only
-          // when THIS view owns a transition to consume the marker. For an
-          // inherited EXIT this view may have no transition, and the marker --
-          // consumed only by a transition-bearing view's layout pass -- would
-          // never be cleared and would mis-tag a future CHANGE if it later gains
-          // one.
-          if(transition)
-          {
-            mLayoutTransitionData->hasPendingChildRemoval = true;
-          }
-          InvalidateMeasure();
-          LayoutController::Get(window).ScheduleLayoutExit(&mViewImpl, child, owner);
-          return;
-        }
-      }
-
-      // Mark sibling removal for the next CHANGE pass when a transition is
-      // attached (without an EXIT slot) AND we have a window. The
-      // remaining children may reflow and should be tagged with
-      // SIBLING_REMOVED. Skip the marker when no transition is attached,
-      // or when no window is available -- without a window the marker
-      // cannot be consumed by the dispatcher in this pass (no layout
-      // pass runs), so it would leak across a later add-to-window event
-      // and mis-tag the first layout pass's CHANGE as SIBLING_REMOVED.
-      if(transition && window && isCurrentChild)
+      mLayoutTransitionData->pendingEnterChildren.erase(&childImpl);
+      // Same rationale as the immediate-remove path's OnChildRemove: a stale raw
+      // ViewImpl* in the reorder set could outlive its child after deferred-remove
+      // EXIT and cause a future heap-reused address to be misclassified as
+      // REORDERED. Erase per-child so siblings still pending reorder keep their
+      // cause.
+      mLayoutTransitionData->pendingReorderedChildren.erase(&childImpl);
+      // Tag the remaining siblings' CHANGE as SIBLING_REMOVED, but only when THIS
+      // view owns a transition to consume the marker: for a self-governed or an
+      // inherited EXIT this view may have none, and an unconsumed marker would
+      // mis-tag a future CHANGE if it later gains one.
+      if(mLayoutTransitionData->transition)
       {
         mLayoutTransitionData->hasPendingChildRemoval = true;
       }
     }
-
-    selfActor.Remove(child);
+    InvalidateMeasure();
+    LayoutController::Get(window).ScheduleLayoutExit(
+      &mViewImpl,
+      child,
+      governing.role == Internal::LayoutTransitionRole::INHERITED_SUBTREE ? governing.owner : nullptr);
+    return;
   }
+
+  // Guard against re-removing a child that is currently an EXIT ghost
+  // under this view. Ghost detection: actor parent is still Self() (the
+  // deferred-remove keeps the actor attached) AND the child has already
+  // been removed from the logical children list (mChildren). Without
+  // this guard, the second Remove bypasses the dispatcher
+  // duplicate-EXIT guard and synchronously unparents the ghost, which
+  // triggers OnSceneDisconnection -> CancelPendingExit/CancelActiveAnimator
+  // and silently cancels the in-flight EXIT (no OnFinished, no fade).
+  // The same applies when the parent's LayoutTransition has been replaced
+  // or cleared between the first and second Remove -- the second
+  // call cannot enter the deferred branch but the ghost is still in
+  // flight under its original transition.
+  if(child.GetParent() == selfActor && !isCurrentChild)
+  {
+    return;
+  }
+
+  // Mark sibling removal for the next CHANGE pass when a transition is
+  // attached (without an EXIT slot) AND we have a window. The
+  // remaining children may reflow and should be tagged with
+  // SIBLING_REMOVED. Skip the marker when no transition is attached,
+  // or when no window is available -- without a window the marker
+  // cannot be consumed by the dispatcher in this pass (no layout
+  // pass runs), so it would leak across a later add-to-window event
+  // and mis-tag the first layout pass's CHANGE as SIBLING_REMOVED.
+  if(mLayoutTransitionData && mLayoutTransitionData->transition && window && isCurrentChild)
+  {
+    mLayoutTransitionData->hasPendingChildRemoval = true;
+  }
+  selfActor.Remove(child);
 }
 
 uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child) const
@@ -3517,9 +3588,16 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     //    so a non-empty map implies a live impl and the gate is open. Detaching a
     //    transition from its view mid-EXIT does not close it -- the ghost's own handle
     //    keeps the impl alive.
-    //  - NotifyChildAdded records nothing unless FindGoverningSubtreeOwner returns an
-    //    owner, and that requires some ancestor's GetLayoutTransition() to be non-empty,
-    //    which again implies a live impl.
+    //  - NotifyChildAdded records nothing unless ResolveGoverningTransition resolves to
+    //    the SELF role (the CHILD carries its own self transition) or to the
+    //    INHERITED_SUBTREE role (an ancestor's SUBTREE transition claims the add). Both
+    //    require a non-empty GetSelfLayoutTransition() / GetLayoutTransition() on some
+    //    view, which again implies a live impl. The DIRECT_PARENT and NONE roles record
+    //    nothing at all.
+    //  - A LayoutTransitionMode other than AUTO only makes that resolution reach NONE
+    //    SOONER (level 0, the level-2 direct-parent cut, or the level-4 walk stop); it
+    //    can never open a recording path this gate closes, so the gate stays valid
+    //    without reading the mode.
     // So "no live impl" implies "both calls do nothing", which is exactly what makes
     // skipping them behaviour-preserving rather than merely usually-harmless.
     //
@@ -3539,17 +3617,14 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
         auto& controller = LayoutController::Get(window);
         controller.NotifyChildReparented(&childImpl);
 
-        // Inherited (SUBTREE-scope) ENTER: when THIS view has no transition of
-        // its own, a child added here is not recorded for direct ENTER (the
-        // gate below requires this view's transition). Notify the dispatcher so
-        // it can walk up to the closest ancestor SUBTREE owner with an ENTER
-        // effect and register an inherited-ENTER candidate. When this view HAS
-        // a transition it is the closest owner and the direct path below claims
-        // the child, so the inherited walk is skipped here.
-        if(!HasLayoutTransition())
-        {
-          controller.NotifyChildAdded(&mViewImpl, view);
-        }
+        // Route the ENTER of this add through the dispatcher's single governing-
+        // transition resolution: a child carrying its own (self-role) transition
+        // records a pending self ENTER whatever this view declares; a child claimed
+        // by THIS view's transition is left to the direct marker below (a no-op
+        // inside the dispatcher); otherwise the closest ancestor SUBTREE owner with
+        // an ENTER effect records an inherited candidate. Called unconditionally so
+        // the self role is not gated on this view's own state.
+        controller.NotifyChildAdded(&mViewImpl, view);
       }
     }
 

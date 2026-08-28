@@ -4612,3 +4612,1841 @@ int UtcDaliLayoutTransitionDormantInstanceKeepsRemoveImmediateP(void)
 
   END_TEST;
 }
+
+// ─── Self transition: API surface and opt-out ─────────────────────────────
+//
+// View::SetSelfLayoutTransition attaches a transition that governs THAT VIEW
+// as a layout child. It wins over the direct parent's transition and over any
+// SUBTREE-scope ancestor, wholesale: slots it leaves unconfigured do not fall
+// back to the parent, they simply do not animate.
+
+namespace
+{
+uint32_t             gSelfStartInvokes    = 0u;
+uint32_t             gSelfFinishInvokes   = 0u;
+LayoutTransitionSlot gSelfSlot            = LayoutTransitionSlot::CHANGE;
+uint32_t             gParentStartInvokes  = 0u;
+uint32_t             gParentFinishInvokes = 0u;
+LayoutTransitionSlot gParentSlot          = LayoutTransitionSlot::CHANGE;
+
+void CaptureSelfStart(View /*view*/, LayoutTransitionSlot slot)
+{
+  ++gSelfStartInvokes;
+  gSelfSlot = slot;
+}
+
+void CaptureSelfFinished(View /*view*/, LayoutTransitionSlot slot)
+{
+  ++gSelfFinishInvokes;
+  gSelfSlot = slot;
+}
+
+void CaptureParentStart(View /*view*/, LayoutTransitionSlot slot)
+{
+  ++gParentStartInvokes;
+  gParentSlot = slot;
+}
+
+void CaptureParentFinished(View /*view*/, LayoutTransitionSlot /*slot*/)
+{
+  ++gParentFinishInvokes;
+}
+
+// Animator captures. The target view is recorded as a raw object pointer so the
+// counters never keep a View alive between test cases.
+uint32_t             gSelfAnimInvokes = 0u;
+LayoutTransitionSlot gSelfAnimSlot    = LayoutTransitionSlot::CHANGE;
+LayoutChangeCause    gSelfAnimCause   = LayoutChangeCause::OTHER;
+LayoutRect           gSelfAnimFrom;
+LayoutRect           gSelfAnimTo;
+const void*          gSelfAnimView = nullptr;
+
+uint32_t    gParentAnimInvokes = 0u;
+const void* gParentAnimView    = nullptr;
+
+/// The self-governed view under test. The parent-role animator must never be
+/// invoked for it (INV-SINGLE-DISPATCH), and every self-role invocation must
+/// target it.
+const void* gSelfTarget            = nullptr;
+bool        gParentAnimHitSelf     = false;
+bool        gSelfAnimHitOtherView  = false;
+
+void CaptureSelfChangeAnimator(const LayoutAnimatorContext& ctx)
+{
+  if(gSelfAnimInvokes++ == 0u)
+  {
+    gSelfAnimFrom = ctx.fromBounds;
+    gSelfAnimTo   = ctx.toBounds;
+  }
+  gSelfAnimSlot  = ctx.slot;
+  gSelfAnimCause = ctx.changeCause;
+  gSelfAnimView  = ctx.view.GetObjectPtr();
+  if(gSelfTarget && gSelfAnimView != gSelfTarget)
+  {
+    gSelfAnimHitOtherView = true;
+  }
+}
+
+void CaptureParentChangeAnimator(const LayoutAnimatorContext& ctx)
+{
+  ++gParentAnimInvokes;
+  gParentAnimView = ctx.view.GetObjectPtr();
+  if(gSelfTarget && gParentAnimView == gSelfTarget)
+  {
+    gParentAnimHitSelf = true;
+  }
+}
+
+void ResetSelfCaptures()
+{
+  gSelfStartInvokes    = 0u;
+  gSelfFinishInvokes   = 0u;
+  gSelfSlot            = LayoutTransitionSlot::CHANGE;
+  gParentStartInvokes  = 0u;
+  gParentFinishInvokes = 0u;
+  gParentSlot          = LayoutTransitionSlot::CHANGE;
+  gSelfAnimInvokes     = 0u;
+  gSelfAnimSlot        = LayoutTransitionSlot::CHANGE;
+  gSelfAnimCause       = LayoutChangeCause::OTHER;
+  gSelfAnimFrom        = {};
+  gSelfAnimTo          = {};
+  gSelfAnimView         = nullptr;
+  gParentAnimInvokes    = 0u;
+  gParentAnimView       = nullptr;
+  gSelfTarget           = nullptr;
+  gParentAnimHitSelf    = false;
+  gSelfAnimHitOtherView = false;
+}
+
+/// Builds a vertical stack sized to the window, already through its first
+/// arrange pass, holding a spacer and two equal items. Shrinking the spacer
+/// moves both items by the same delta in one pass.
+StackLayout MakeSettledStack(UiTestApplication& application, View& spacer, View& a, View& b)
+{
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+
+  spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+  a = View::New();
+  a.SetRequestedWidth(100.0f);
+  a.SetRequestedHeight(40.0f);
+  b = View::New();
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(40.0f);
+
+  parent.Add(spacer);
+  parent.Add(a);
+  parent.Add(b);
+
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+  return parent;
+}
+
+LayoutTransition MakeChangeTiming(float seconds)
+{
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetChangeTiming(
+    LayoutTransitionTiming{Duration(seconds), AlphaFunction(AlphaFunction::LINEAR), Duration()});
+  return transition;
+}
+} // namespace
+
+int UtcDaliLayoutTransitionSelfGetSetRoundTripP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  LayoutTransition  self = LayoutTransition::New();
+
+  DALI_TEST_CHECK(!view.GetSelfLayoutTransition());
+
+  view.SetSelfLayoutTransition(self);
+  DALI_TEST_EQUALS(view.GetSelfLayoutTransition().GetObjectPtr(), self.GetObjectPtr(), TEST_LOCATION);
+  // The two roles are independent: the children-role getter is untouched.
+  DALI_TEST_CHECK(!view.GetLayoutTransition());
+
+  LayoutTransition children = LayoutTransition::New();
+  view.SetLayoutTransition(children);
+  DALI_TEST_EQUALS(view.GetLayoutTransition().GetObjectPtr(), children.GetObjectPtr(), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetSelfLayoutTransition().GetObjectPtr(), self.GetObjectPtr(), TEST_LOCATION);
+
+  // Detaching one role leaves the other intact (both share one lazily
+  // allocated storage block).
+  view.SetLayoutTransition(LayoutTransition());
+  DALI_TEST_CHECK(!view.GetLayoutTransition());
+  DALI_TEST_EQUALS(view.GetSelfLayoutTransition().GetObjectPtr(), self.GetObjectPtr(), TEST_LOCATION);
+
+  view.SetSelfLayoutTransition(LayoutTransition());
+  DALI_TEST_CHECK(!view.GetSelfLayoutTransition());
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfEmptyHandleReturnsToInheritanceP(void)
+{
+  // An uninitialized handle is "inherit again", NOT "never animate".
+  UiTestApplication application;
+  View              spacer, a, b;
+  StackLayout       parent = MakeSettledStack(application, spacer, a, b);
+
+  parent.SetLayoutTransition(MakeChangeTiming(0.2f));
+  b.SetSelfLayoutTransition(MakeChangeTiming(0.6f));
+
+  // First toggle: b is provably slower than its sibling a.
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  const float aMid = a.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  const float bMid = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(bMid > aMid);
+
+  // Let both settle, then drop the self handle.
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(100);
+  }
+  b.SetSelfLayoutTransition(LayoutTransition());
+  DALI_TEST_CHECK(!b.GetSelfLayoutTransition());
+
+  // Second toggle: b now follows the parent's 0.2s curve, exactly like a.
+  spacer.SetRequestedHeight(100.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  const float aBack = a.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  const float bBack = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  // Same curve, same delta: the gap between them stays the fixed 40px item
+  // height instead of the two curves drifting apart.
+  DALI_TEST_EQUALS(bBack - aBack, 40.0f, 1.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModeGetSetRoundTripP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  // Default is AUTO; the policy round-trips through all three values.
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutTransitionMode()),
+                   static_cast<int>(LayoutTransitionMode::AUTO),
+                   TEST_LOCATION);
+  view.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutTransitionMode()),
+                   static_cast<int>(LayoutTransitionMode::PASS_THROUGH),
+                   TEST_LOCATION);
+  view.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH); // idempotent
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutTransitionMode()),
+                   static_cast<int>(LayoutTransitionMode::PASS_THROUGH),
+                   TEST_LOCATION);
+  view.SetLayoutTransitionMode(LayoutTransitionMode::ISOLATE_SUBTREE);
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutTransitionMode()),
+                   static_cast<int>(LayoutTransitionMode::ISOLATE_SUBTREE),
+                   TEST_LOCATION);
+  view.SetLayoutTransitionMode(LayoutTransitionMode::AUTO);
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutTransitionMode()),
+                   static_cast<int>(LayoutTransitionMode::AUTO),
+                   TEST_LOCATION);
+
+  // The mode never detaches handles: both role getters keep
+  // returning what was attached, whatever the mode.
+  LayoutTransition self     = LayoutTransition::New();
+  LayoutTransition children = LayoutTransition::New();
+  view.SetSelfLayoutTransition(self);
+  view.SetLayoutTransition(children);
+  view.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);
+  DALI_TEST_EQUALS(view.GetSelfLayoutTransition().GetObjectPtr(), self.GetObjectPtr(), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLayoutTransition().GetObjectPtr(), children.GetObjectPtr(), TEST_LOCATION);
+  END_TEST;
+}
+
+// ─── Self transition: precedence, dispatch, and lifecycle ─────────────────
+
+int UtcDaliLayoutTransitionSelfChangeOverridesParentSpecP(void)
+{
+  // Parent CHANGE 0.2s LINEAR vs self CHANGE 0.6s LINEAR on b: at 100ms a has
+  // covered ~50% of its delta, b only ~17%.
+  UiTestApplication application;
+  View              spacer, a, b;
+  StackLayout       parent = MakeSettledStack(application, spacer, a, b);
+
+  parent.SetLayoutTransition(MakeChangeTiming(0.2f));
+  b.SetSelfLayoutTransition(MakeChangeTiming(0.6f));
+
+  const float aFrom = a.GetProperty<float>(Actor::Property::POSITION_Y);
+  const float bFrom = b.GetProperty<float>(Actor::Property::POSITION_Y);
+
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  const float aCovered = aFrom - a.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  const float bCovered = bFrom - b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+
+  // Both moved by the same 100px delta, so the covered fractions are directly
+  // comparable: a is roughly three times further along than b.
+  DALI_TEST_CHECK(aCovered > 30.0f);
+  DALI_TEST_CHECK(bCovered > 0.0f && bCovered < aCovered * 0.6f);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfChangeAnimatorOverridesParentP(void)
+{
+  // Distinct animators on the two roles: only the self animator is invoked for
+  // the self-governed child, and the parent animator never sees it.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  View        spacer, a, b;
+  StackLayout parent = MakeSettledStack(application, spacer, a, b);
+
+  LayoutAnimatorTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     parentTransition = LayoutTransition::New();
+  parentTransition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureParentChangeAnimator), timing);
+  parent.SetLayoutTransition(parentTransition);
+
+  LayoutTransition selfTransition = LayoutTransition::New();
+  selfTransition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureSelfChangeAnimator), timing);
+  b.SetSelfLayoutTransition(selfTransition);
+  gSelfTarget = b.GetObjectPtr();
+
+  spacer.SetRequestedHeight(0.0f);
+  for(int i = 0; i < 5; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+
+  DALI_TEST_GREATER(gSelfAnimInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gSelfAnimHitOtherView, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfAnimSlot),
+                   static_cast<int>(LayoutTransitionSlot::CHANGE),
+                   TEST_LOCATION);
+  // The parent animator drove the other children only, never b.
+  DALI_TEST_GREATER(gParentAnimInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gParentAnimHitSelf, false, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfEnterOverridesParentP(void)
+{
+  // A child added at runtime under a transition-bearing parent fires ITS OWN
+  // ENTER; the parent's ENTER lifecycle is not emitted for it.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+
+  LayoutTransition  parentTransition = LayoutTransition::New();
+  ViewAnimationSpec parentEnter      = ViewAnimationSpec::New();
+  parentEnter.Opacity(1.0f, Duration(0.2f));
+  parentTransition.SetEnterVisualSpec(parentEnter)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureParentStart));
+  parent.SetLayoutTransition(parentTransition);
+
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetProperty(Actor::Property::OPACITY, 0.0f);
+
+  LayoutTransition  selfTransition = LayoutTransition::New();
+  ViewAnimationSpec selfEnter      = ViewAnimationSpec::New();
+  selfEnter.Opacity(1.0f, Duration(0.2f));
+  selfTransition.SetEnterVisualSpec(selfEnter)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart));
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(gSelfStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfSlot),
+                   static_cast<int>(LayoutTransitionSlot::ENTER),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(gParentStartInvokes, 0u, TEST_LOCATION);
+
+  for(int i = 0; i < 6; ++i)
+  {
+    application.SendNotification();
+    application.Render(50);
+  }
+  DALI_TEST_EQUALS(child.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.05f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfExitOverridesParentP(void)
+{
+  // The self EXIT decides the deferral and supplies the effect; the ghost still
+  // lives under the direct parent, which is also the unparent target.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  parentTransition = LayoutTransition::New();
+  ViewAnimationSpec parentExit       = ViewAnimationSpec::New();
+  parentExit.Opacity(0.0f, Duration(0.1f));
+  parentTransition.SetExitVisualSpec(parentExit)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureParentStart))
+    .SetOnFinished(LayoutLifecycleCallback::New(&CaptureParentFinished));
+  parent.SetLayoutTransition(parentTransition);
+
+  LayoutTransition  selfTransition = LayoutTransition::New();
+  ViewAnimationSpec selfExit       = ViewAnimationSpec::New();
+  selfExit.Opacity(0.0f, Duration(0.5f));
+  selfTransition.SetExitVisualSpec(selfExit)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart))
+    .SetOnFinished(LayoutLifecycleCallback::New(&CaptureSelfFinished));
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+
+  // Logical child list drops it at once; the actor stays for the animation.
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 0u, TEST_LOCATION);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(gSelfStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(gParentStartInvokes, 0u, TEST_LOCATION);
+
+  // The parent's 0.1s EXIT would already be over; the self 0.5s is not.
+  application.SendNotification();
+  application.Render(200);
+  DALI_TEST_CHECK(child.GetParent() == parent);
+
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(100);
+  }
+  DALI_TEST_CHECK(!child.GetParent());
+  DALI_TEST_EQUALS(gSelfFinishInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gParentFinishInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfExitAnimatorGhostUnderDirectParentP(void)
+{
+  // INV-GHOST-UNDER-DIRECT-PARENT holds for a self-sourced EXIT: only the
+  // effect source moved, the ghost host did not.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutAnimatorTiming timing{Duration(0.5f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     selfTransition = LayoutTransition::New();
+  selfTransition.SetExitAnimator(LayoutAnimatorCallback::New(&CaptureSelfChangeAnimator), timing);
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_GREATER(gSelfAnimInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfAnimSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT),
+                   TEST_LOCATION);
+  // In flight: the ghost is still parented to its DIRECT parent, and it left the
+  // logical child list at once so siblings could reflow. Animator-mode progress
+  // runs off the dispatcher's wall clock rather than the simulated render clock,
+  // so this test asserts the ghost host, not the unparent instant; the spec-mode
+  // EXIT cases cover the deferred unparent deterministically.
+  DALI_TEST_CHECK(child.GetParent() == parent);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModePassThroughChangeSnapsP(void)
+{
+  // PASS_THROUGH as the per-view policy: CHANGE snaps while the sibling animates.
+  UiTestApplication application;
+  View              spacer, a, b;
+  StackLayout       parent = MakeSettledStack(application, spacer, a, b);
+
+  parent.SetLayoutTransition(MakeChangeTiming(0.4f));
+  b.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);
+
+  const float bFinal = b.GetProperty<float>(Actor::Property::POSITION_Y) - 100.0f;
+
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  DALI_TEST_CHECK(a.GetCurrentProperty<float>(Actor::Property::POSITION_Y) > 5.0f);
+  DALI_TEST_EQUALS(b.GetCurrentProperty<float>(Actor::Property::POSITION_Y), bFinal, 0.5f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModePassThroughExitUnparentsImmediatelyP(void)
+{
+  // The documented opt-out policy: the parent's EXIT effect is not consulted at all.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  const uint32_t actorChildrenBefore = parent.GetChildCount();
+
+  LayoutTransition  parentTransition = LayoutTransition::New();
+  ViewAnimationSpec parentExit       = ViewAnimationSpec::New();
+  parentExit.Opacity(0.0f, Duration(0.5f));
+  parentTransition.SetExitVisualSpec(parentExit)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureParentStart));
+  parent.SetLayoutTransition(parentTransition);
+
+  child.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);
+
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+
+  // Synchronous unparent: no ghost, no lifecycle.
+  DALI_TEST_CHECK(!child.GetParent());
+  DALI_TEST_EQUALS(parent.GetChildCount(), actorChildrenBefore - 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gParentStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModePassThroughEnterIgnoredP(void)
+{
+  // ENTER is skipped and nothing is settled onto the opted-out child, so its
+  // pre-set opacity survives.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+
+  LayoutTransition  parentTransition = LayoutTransition::New();
+  ViewAnimationSpec parentEnter      = ViewAnimationSpec::New();
+  parentEnter.Opacity(1.0f, Duration(0.2f));
+  parentTransition.SetEnterVisualSpec(parentEnter)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureParentStart));
+  parent.SetLayoutTransition(parentTransition);
+
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetProperty(Actor::Property::OPACITY, 0.25f);
+  child.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);
+  parent.Add(child);
+
+  for(int i = 0; i < 6; ++i)
+  {
+    application.SendNotification();
+    application.Render(50);
+  }
+
+  DALI_TEST_EQUALS(gSelfStartInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gParentStartInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.25f, 0.01f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModePassThroughGatesOwnSelfHandleP(void)
+{
+  // Policy beats value on the SAME view: b is not animated even by the handle it
+  // attached itself. The handle stays attached, and AUTO restores its effect.
+  UiTestApplication application;
+  View              spacer, a, b;
+  StackLayout       parent = MakeSettledStack(application, spacer, a, b);
+
+  LayoutTransition selfT = MakeChangeTiming(0.4f);
+  b.SetSelfLayoutTransition(selfT);
+  b.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);
+
+  const float bFinal = b.GetProperty<float>(Actor::Property::POSITION_Y) - 100.0f;
+
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  // Passed through: b is already at its arranged bounds instead of on the 0.4s curve.
+  DALI_TEST_EQUALS(b.GetCurrentProperty<float>(Actor::Property::POSITION_Y), bFinal, 0.5f, TEST_LOCATION);
+  // Not detached: the handle is simply not consulted while transitions pass through the view.
+  DALI_TEST_EQUALS(b.GetSelfLayoutTransition().GetObjectPtr(), selfT.GetObjectPtr(), TEST_LOCATION);
+
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(100);
+  }
+
+  // Back to AUTO: the SAME handle animates b again, with no re-attach.
+  const float bStart = b.GetProperty<float>(Actor::Property::POSITION_Y);
+  spacer.SetRequestedHeight(100.0f);
+  b.SetLayoutTransitionMode(LayoutTransitionMode::AUTO);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  const float bY = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(bY > bStart + 1.0f && bY < bStart + 99.0f);
+  DALI_TEST_EQUALS(b.GetSelfLayoutTransition().GetObjectPtr(), selfT.GetObjectPtr(), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModePassThroughKeepsChildrenRoleP(void)
+{
+  // PASS_THROUGH lets transitions pass through b as a TARGET only. Its children-role
+  // transition is untouched and still governs c. The root a carries a
+  // (DIRECT_CHILDREN-scope) transition so the "b snapped" assertion is discriminating
+  // rather than vacuous: without the gate b would ride a's 0.4s curve. a's scope stops
+  // at its direct children, so it never reaches c and cannot mask the children-role
+  // result.
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+
+  a.Add(spacer);
+  a.Add(b);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(b.GetProperty<float>(Actor::Property::POSITION_Y), 100.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  a.SetLayoutTransition(MakeChangeTiming(0.4f)); // would animate b, if b did not pass transitions through
+  b.SetLayoutTransition(MakeChangeTiming(0.4f));
+  b.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);
+
+  spacer.SetRequestedHeight(0.0f); // b: 100 -> 0, passed through (a's curve would leave it at 75)
+  d.SetRequestedHeight(0.0f);      // c:  40 -> 0, on b's children-role curve
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  DALI_TEST_EQUALS(b.GetCurrentProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.5f, TEST_LOCATION);
+  const float cY = c.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(cY > 5.0f && cY < 38.0f);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModeIsolateSubtreeCutsInheritanceP(void)
+{
+  // a carries a SUBTREE scope. g is an ISOLATE_SUBTREE gate: neither g nor
+  // anything under it is reached. The untouched sibling s proves the scope is
+  // otherwise alive in the very same pass.
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+
+  StackLayout g = StackLayout::New(StackOrientation::VERTICAL);
+  g.SetRequestedWidth(100.0f);
+  g.SetRequestedHeight(200.0f);
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View h = View::New();
+  h.SetRequestedWidth(100.0f);
+  h.SetRequestedHeight(40.0f);
+  g.Add(d);
+  g.Add(h);
+
+  StackLayout s = StackLayout::New(StackOrientation::VERTICAL);
+  s.SetRequestedWidth(100.0f);
+  s.SetRequestedHeight(200.0f);
+  View e = View::New();
+  e.SetRequestedWidth(100.0f);
+  e.SetRequestedHeight(40.0f);
+  View k = View::New();
+  k.SetRequestedWidth(100.0f);
+  k.SetRequestedHeight(40.0f);
+  s.Add(e);
+  s.Add(k);
+
+  a.Add(spacer);
+  a.Add(g);
+  a.Add(s);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(g.GetProperty<float>(Actor::Property::POSITION_Y), 100.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(h.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(s.GetProperty<float>(Actor::Property::POSITION_Y), 300.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(k.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  LayoutTransition tA = MakeChangeTiming(0.2f);
+  tA.SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+  g.SetLayoutTransitionMode(LayoutTransitionMode::ISOLATE_SUBTREE);
+
+  spacer.SetRequestedHeight(0.0f); // moves g (100 -> 0) and s (300 -> 200)
+  d.SetRequestedHeight(0.0f);      // moves h inside g (40 -> 0)
+  e.SetRequestedHeight(0.0f);      // moves k inside s (40 -> 0)
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  // The gate itself and everything under it snapped.
+  DALI_TEST_EQUALS(g.GetCurrentProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(h.GetCurrentProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.5f, TEST_LOCATION);
+  // The sibling branch is still governed by a's SUBTREE scope: both mid-flight.
+  const float sY = s.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(sY > 210.0f && sY < 290.0f);
+  const float kY = k.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(kY > 5.0f && kY < 38.0f);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModeIsolateSubtreeAllowsDescendantAutonomyP(void)
+{
+  // The cut applies to owners AT OR ABOVE the gate. A view strictly below it keeps
+  // full autonomy: h's own self transition still animates h.
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+
+  StackLayout g = StackLayout::New(StackOrientation::VERTICAL);
+  g.SetRequestedWidth(100.0f);
+  g.SetRequestedHeight(200.0f);
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View h = View::New();
+  h.SetRequestedWidth(100.0f);
+  h.SetRequestedHeight(40.0f);
+  g.Add(d);
+  g.Add(h);
+
+  a.Add(spacer);
+  a.Add(g);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(g.GetProperty<float>(Actor::Property::POSITION_Y), 100.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(h.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  LayoutTransition tA = MakeChangeTiming(0.2f);
+  tA.SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+  g.SetLayoutTransitionMode(LayoutTransitionMode::ISOLATE_SUBTREE);
+  h.SetSelfLayoutTransition(MakeChangeTiming(0.6f));
+
+  spacer.SetRequestedHeight(0.0f); // moves g (100 -> 0), isolated
+  d.SetRequestedHeight(0.0f);      // moves h inside g (40 -> 0), on h's own curve
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  DALI_TEST_EQUALS(g.GetCurrentProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.5f, TEST_LOCATION);
+  // On a's 0.2s curve h would be at ~20; on its own 0.6s curve at ~33.
+  const float hY = h.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(hY > 28.0f && hY < 39.0f);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModeIsolateSubtreeSilencesOwnChildrenRoleP(void)
+{
+  // The gate's OWN children-role transition is one of the owners at-or-above the
+  // cut, so it governs nothing inside its subtree: both children snap.
+  UiTestApplication application;
+  View              spacer, a, b;
+  StackLayout       parent = MakeSettledStack(application, spacer, a, b);
+
+  parent.SetLayoutTransition(MakeChangeTiming(0.4f));
+  parent.SetLayoutTransitionMode(LayoutTransitionMode::ISOLATE_SUBTREE);
+
+  const float aFinal = a.GetProperty<float>(Actor::Property::POSITION_Y) - 100.0f;
+  const float bFinal = b.GetProperty<float>(Actor::Property::POSITION_Y) - 100.0f;
+
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  DALI_TEST_EQUALS(a.GetCurrentProperty<float>(Actor::Property::POSITION_Y), aFinal, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetCurrentProperty<float>(Actor::Property::POSITION_Y), bFinal, 0.5f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionModeSetterDropsPendingSelfEnterP(void)
+{
+  // Gating before the pass that would consume it drops the add-time ENTER
+  // candidate; returning to AUTO must not resurrect it retroactively.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetProperty(Actor::Property::OPACITY, 0.0f);
+
+  LayoutTransition  selfTransition = LayoutTransition::New();
+  ViewAnimationSpec selfEnter      = ViewAnimationSpec::New();
+  selfEnter.Opacity(1.0f, Duration(0.2f));
+  selfTransition.SetEnterVisualSpec(selfEnter)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart));
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Add(child);
+  child.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH); // gate before any pass
+
+  for(int i = 0; i < 4; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+  DALI_TEST_EQUALS(gSelfStartInvokes, 0u, TEST_LOCATION);
+
+  // Back to AUTO on an already arranged view: the candidate was dropped, not
+  // parked, so no stale ENTER surfaces and nothing is settled onto the child.
+  child.SetLayoutTransitionMode(LayoutTransitionMode::AUTO);
+  for(int i = 0; i < 4; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+  DALI_TEST_EQUALS(gSelfStartInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.0f, 0.01f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfStandaloneChangeP(void)
+{
+  // No transition anywhere in the ancestry: the self transition still animates.
+  UiTestApplication application;
+  View              spacer, a, b;
+  StackLayout       parent = MakeSettledStack(application, spacer, a, b);
+  DALI_TEST_CHECK(!parent.GetLayoutTransition());
+
+  b.SetSelfLayoutTransition(MakeChangeTiming(0.4f));
+
+  const float bFrom = b.GetProperty<float>(Actor::Property::POSITION_Y);
+  const float bTo   = bFrom - 100.0f;
+
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  const float bMid = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(bMid < bFrom - 1.0f && bMid > bTo + 1.0f);
+  // The un-governed sibling snapped.
+  DALI_TEST_EQUALS(a.GetCurrentProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.5f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfStandaloneEnterP(void)
+{
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_CHECK(!parent.GetLayoutTransition());
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetProperty(Actor::Property::OPACITY, 0.0f);
+
+  LayoutTransition  selfTransition = LayoutTransition::New();
+  ViewAnimationSpec selfEnter      = ViewAnimationSpec::New();
+  selfEnter.Opacity(1.0f, Duration(0.2f));
+  selfTransition.SetEnterVisualSpec(selfEnter)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart));
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(gSelfStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfSlot),
+                   static_cast<int>(LayoutTransitionSlot::ENTER),
+                   TEST_LOCATION);
+
+  for(int i = 0; i < 6; ++i)
+  {
+    application.SendNotification();
+    application.Render(50);
+  }
+  DALI_TEST_EQUALS(child.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.05f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfStandaloneExitP(void)
+{
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_CHECK(!parent.GetLayoutTransition());
+
+  LayoutTransition  selfTransition = LayoutTransition::New();
+  ViewAnimationSpec selfExit       = ViewAnimationSpec::New();
+  selfExit.Opacity(0.0f, Duration(0.3f));
+  selfTransition.SetExitVisualSpec(selfExit)
+    .SetOnFinished(LayoutLifecycleCallback::New(&CaptureSelfFinished));
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 0u, TEST_LOCATION);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_CHECK(child.GetParent() == parent); // deferred
+
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(100);
+  }
+  DALI_TEST_CHECK(!child.GetParent());
+  DALI_TEST_EQUALS(gSelfFinishInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfStandaloneCauseDegradesToOtherP(void)
+{
+  // No ancestor transition means no per-parent markers are kept, so the cause
+  // degrades to OTHER exactly like a SUBTREE-inherited descendant's.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  FlexLayout parent = FlexLayout::New();
+  parent.SetDirection(FlexDirection::ROW);
+  parent.SetJustifyContent(FlexJustify::CENTER);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  a.SetRequestedWidth(100.0f);
+  a.SetRequestedHeight(40.0f);
+  parent.Add(a);
+
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutAnimatorTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     selfTransition = LayoutTransition::New();
+  selfTransition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureSelfChangeAnimator), timing);
+  a.SetSelfLayoutTransition(selfTransition);
+
+  View b = View::New();
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(40.0f);
+  parent.Add(b);
+
+  for(int i = 0; i < 5; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+
+  DALI_TEST_GREATER(gSelfAnimInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfAnimCause),
+                   static_cast<int>(LayoutChangeCause::OTHER),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfCauseFromParentMarkersP(void)
+{
+  // Same scenario but with a transition on the parent: the owner pass hands its
+  // resolved cause over, so the self-governed DIRECT child keeps full fidelity.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  FlexLayout parent = FlexLayout::New();
+  parent.SetDirection(FlexDirection::ROW);
+  parent.SetJustifyContent(FlexJustify::CENTER);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  a.SetRequestedWidth(100.0f);
+  a.SetRequestedHeight(40.0f);
+  parent.Add(a);
+
+  application.SendNotification();
+  application.Render(0);
+
+  parent.SetLayoutTransition(MakeChangeTiming(0.2f));
+
+  LayoutAnimatorTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     selfTransition = LayoutTransition::New();
+  selfTransition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureSelfChangeAnimator), timing);
+  a.SetSelfLayoutTransition(selfTransition);
+
+  View b = View::New();
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(40.0f);
+  parent.Add(b);
+
+  for(int i = 0; i < 5; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+
+  DALI_TEST_GREATER(gSelfAnimInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfAnimCause),
+                   static_cast<int>(LayoutChangeCause::SIBLING_ADDED),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfBeatsSubtreeAncestorP(void)
+{
+  // a (SUBTREE, 0.2s) - b (no transition) - c (self, 0.6s). Level 1 wins.
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+  a.Add(b);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  LayoutTransition tA = MakeChangeTiming(0.2f);
+  tA.SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+  c.SetSelfLayoutTransition(MakeChangeTiming(0.6f));
+
+  d.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  // On a's 0.2s curve c would be at ~20; on its own 0.6s curve at ~33.
+  const float cY = c.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(cY > 28.0f && cY < 39.0f);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfDoesNotStopSubtreeForItsChildrenP(void)
+{
+  // The self role governs exactly one view: it must NOT act as a scope boundary
+  // for its own children, which stay under the ancestor's SUBTREE scope.
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // self role only
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+
+  a.Add(spacer);
+  a.Add(b);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(b.GetProperty<float>(Actor::Property::POSITION_Y), 100.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  LayoutTransition tA = MakeChangeTiming(0.2f);
+  tA.SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+  b.SetSelfLayoutTransition(MakeChangeTiming(0.6f));
+
+  spacer.SetRequestedHeight(0.0f); // moves b
+  d.SetRequestedHeight(0.0f);      // moves c inside b
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  // b follows its own slow curve (~66 left of 100 at 1/6 progress).
+  const float bY = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(bY > 70.0f && bY < 95.0f);
+  // c is still governed by a's SUBTREE scope: mid-flight on the 0.2s curve.
+  const float cY = c.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(cY > 5.0f && cY < 38.0f);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfBeatsSubtreeEnterP(void)
+{
+  // A grand-child added under a no-transition container would normally take the
+  // SUBTREE owner's ENTER; its own self transition claims it first.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  a.Add(b);
+
+  LayoutTransition  tA        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  tA.SetEnterVisualSpec(enterSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureParentStart));
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutAnimatorTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     selfTransition = LayoutTransition::New();
+  selfTransition.SetEnterAnimator(LayoutAnimatorCallback::New(&CaptureSelfChangeAnimator), timing);
+
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  g.SetSelfLayoutTransition(selfTransition);
+  b.Add(g);
+
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_GREATER(gSelfAnimInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfAnimSlot),
+                   static_cast<int>(LayoutTransitionSlot::ENTER),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(gParentStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfSingleDispatchNoDoubleAnimationP(void)
+{
+  // INV-SINGLE-DISPATCH: exactly one animator drives the self-governed child.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  View        spacer, a, b;
+  StackLayout parent = MakeSettledStack(application, spacer, a, b);
+
+  LayoutAnimatorTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     parentTransition = LayoutTransition::New();
+  parentTransition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureParentChangeAnimator), timing);
+  parent.SetLayoutTransition(parentTransition);
+
+  LayoutTransition selfTransition = LayoutTransition::New();
+  selfTransition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureSelfChangeAnimator), timing);
+  b.SetSelfLayoutTransition(selfTransition);
+  gSelfTarget = b.GetObjectPtr();
+
+  spacer.SetRequestedHeight(0.0f);
+  for(int i = 0; i < 8; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+
+  // Every self-animator invocation targeted b, and no parent-animator
+  // invocation ever did: exactly one animator drives the self-governed child.
+  DALI_TEST_GREATER(gSelfAnimInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gSelfAnimHitOtherView, false, TEST_LOCATION);
+  DALI_TEST_GREATER(gParentAnimInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gParentAnimHitSelf, false, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfLifecycleFiresFromWinnerOnlyP(void)
+{
+  // Lifecycle comes from the winner only, start AND finish.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  View        spacer, a, b;
+  StackLayout parent = MakeSettledStack(application, spacer, a, b);
+
+  LayoutTransition parentTransition = MakeChangeTiming(0.2f);
+  parentTransition.SetOnStart(LayoutLifecycleCallback::New(&CaptureParentStart))
+    .SetOnFinished(LayoutLifecycleCallback::New(&CaptureParentFinished));
+  parent.SetLayoutTransition(parentTransition);
+
+  LayoutTransition selfTransition = MakeChangeTiming(0.2f);
+  selfTransition.SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart))
+    .SetOnFinished(LayoutLifecycleCallback::New(&CaptureSelfFinished));
+  b.SetSelfLayoutTransition(selfTransition);
+
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(gSelfStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfSlot),
+                   static_cast<int>(LayoutTransitionSlot::CHANGE),
+                   TEST_LOCATION);
+  // Three children moved in this pass (the shrinking spacer, a, and b) but the
+  // parent's OnStart fired for two of them: b is governed by its own handle.
+  DALI_TEST_EQUALS(gParentStartInvokes, 2u, TEST_LOCATION);
+
+  for(int i = 0; i < 8; ++i)
+  {
+    application.SendNotification();
+    application.Render(50);
+  }
+
+  DALI_TEST_EQUALS(gSelfFinishInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gParentFinishInvokes, 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfInitialMountSuppressedSettlesSpecP(void)
+{
+  // Initial-mount anchor is the DIRECT PARENT's first arrange, and the settle is
+  // a one-shot: repeated passes must not re-bake the spec.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetProperty(Actor::Property::OPACITY, 0.0f);
+
+  LayoutTransition  selfTransition = LayoutTransition::New();
+  ViewAnimationSpec selfEnter      = ViewAnimationSpec::New();
+  selfEnter.Opacity(1.0f, Duration(0.2f));
+  selfTransition.SetEnterVisualSpec(selfEnter)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart));
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Add(child);
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(gSelfStartInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::OPACITY), 1.0f, 0.01f, TEST_LOCATION);
+
+  // No repeat bake and no late ENTER on later passes.
+  for(int i = 0; i < 5; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+  DALI_TEST_EQUALS(gSelfStartInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::OPACITY), 1.0f, 0.01f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfInitialMountOptInFiresEnterP(void)
+{
+  // The opt-in is read from the SELF transition.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetProperty(Actor::Property::OPACITY, 0.0f);
+
+  LayoutTransition  selfTransition = LayoutTransition::New();
+  ViewAnimationSpec selfEnter      = ViewAnimationSpec::New();
+  selfEnter.Opacity(1.0f, Duration(0.2f));
+  selfTransition.SetEnterVisualSpec(selfEnter)
+    .SetEnterOnInitialMount(true)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart));
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Add(child);
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(gSelfStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gSelfSlot),
+                   static_cast<int>(LayoutTransitionSlot::ENTER),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfReparentCancelsInflightExitP(void)
+{
+  // Cancellation paths are keyed by the child, so they work unchanged for a
+  // self-sourced EXIT: reparenting mid-flight cancels silently and restores the
+  // ghost's interaction state.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+
+  StackLayout other = StackLayout::New(StackOrientation::VERTICAL);
+  other.SetRequestedWidth(MATCH_PARENT);
+  other.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(other);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  // Opt into focus so the ghost's disable / restore round trip is observable on
+  // both properties (FOCUSABLE defaults to false).
+  child.SetProperty(Actor::Property::FOCUSABLE, true);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  selfTransition = LayoutTransition::New();
+  ViewAnimationSpec selfExit       = ViewAnimationSpec::New();
+  selfExit.Opacity(0.0f, Duration(0.5f));
+  selfTransition.SetExitVisualSpec(selfExit)
+    .SetOnFinished(LayoutLifecycleCallback::New(&CaptureSelfFinished));
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::SENSITIVE), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::FOCUSABLE), false, TEST_LOCATION);
+
+  other.Add(child); // cancels the in-flight EXIT
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(100);
+  }
+
+  DALI_TEST_CHECK(child.GetParent() == other);
+  DALI_TEST_EQUALS(gSelfFinishInvokes, 0u, TEST_LOCATION); // cancellation is silent
+  DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::SENSITIVE), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::FOCUSABLE), true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfDetachDropsPendingEnterP(void)
+{
+  // Detach before the pass that would consume it drops the add-time ENTER
+  // candidate; re-attaching the same handle afterwards must not resurrect it.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetProperty(Actor::Property::OPACITY, 0.0f);
+
+  LayoutTransition  selfTransition = LayoutTransition::New();
+  ViewAnimationSpec selfEnter      = ViewAnimationSpec::New();
+  selfEnter.Opacity(1.0f, Duration(0.2f));
+  selfTransition.SetEnterVisualSpec(selfEnter)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart));
+  child.SetSelfLayoutTransition(selfTransition);
+
+  parent.Add(child);
+  child.SetSelfLayoutTransition(LayoutTransition()); // detach before any pass
+
+  for(int i = 0; i < 4; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+  DALI_TEST_EQUALS(gSelfStartInvokes, 0u, TEST_LOCATION);
+
+  // Re-attach on an already arranged view: no stale ENTER surfaces.
+  child.SetSelfLayoutTransition(selfTransition);
+  for(int i = 0; i < 4; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+  DALI_TEST_EQUALS(gSelfStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfHandleSharedAcrossViewsP(void)
+{
+  // One handle, three attachment points: self on two siblings and children-role
+  // on their parent. All dispatcher state is keyed by the child, so the roles
+  // coexist without interfering.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  View        spacer, a, b;
+  StackLayout parent = MakeSettledStack(application, spacer, a, b);
+
+  View third = View::New();
+  third.SetRequestedWidth(100.0f);
+  third.SetRequestedHeight(40.0f);
+  parent.Add(third);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition shared = MakeChangeTiming(0.4f);
+  shared.SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart));
+  parent.SetLayoutTransition(shared);
+  a.SetSelfLayoutTransition(shared);
+  b.SetSelfLayoutTransition(shared);
+
+  const float aFrom = a.GetProperty<float>(Actor::Property::POSITION_Y);
+  const float bFrom = b.GetProperty<float>(Actor::Property::POSITION_Y);
+  const float tFrom = third.GetProperty<float>(Actor::Property::POSITION_Y);
+
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  // Four children moved in this pass and the one shared handle fired OnStart
+  // exactly once for each, whichever role drove it: the shrinking spacer and
+  // third through the parent's children role, a and b through their own self
+  // role. Exactly once per child is the point — sharing a handle across roles
+  // must not double-dispatch any of them.
+  DALI_TEST_EQUALS(gSelfStartInvokes, 4u, TEST_LOCATION);
+  DALI_TEST_CHECK(a.GetCurrentProperty<float>(Actor::Property::POSITION_Y) < aFrom - 1.0f);
+  DALI_TEST_CHECK(b.GetCurrentProperty<float>(Actor::Property::POSITION_Y) < bFrom - 1.0f);
+  DALI_TEST_CHECK(third.GetCurrentProperty<float>(Actor::Property::POSITION_Y) < tFrom - 1.0f);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfAndChildrenRoleCoexistP(void)
+{
+  // b carries BOTH roles: slow for itself, fast for its children.
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+
+  a.Add(spacer);
+  a.Add(b);
+
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition fast = MakeChangeTiming(0.2f);
+  LayoutTransition slow = MakeChangeTiming(0.6f);
+  b.SetLayoutTransition(fast);
+  b.SetSelfLayoutTransition(slow);
+  DALI_TEST_EQUALS(b.GetLayoutTransition().GetObjectPtr(), fast.GetObjectPtr(), TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetSelfLayoutTransition().GetObjectPtr(), slow.GetObjectPtr(), TEST_LOCATION);
+
+  spacer.SetRequestedHeight(0.0f); // b: 100 -> 0, on the slow curve
+  d.SetRequestedHeight(0.0f);      // c:  40 -> 0, on the fast curve
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  // b at 1/6 of its 0.6s curve is still high; c at 1/2 of its 0.2s curve is
+  // roughly halfway.
+  const float bY = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  const float cY = c.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(bY > 70.0f && bY < 95.0f);
+  DALI_TEST_CHECK(cY > 5.0f && cY < 38.0f);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfRtlParentMirrorsBoundsP(void)
+{
+  // The self pass takes its bounds through the same VisualBoundsOf helper as
+  // the owner pass, so an RTL parent mirrors from and to alike.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedX(20.0f);
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(20.0f);
+  parent.Add(child);
+
+  application.SendNotification();
+  application.Render(0);
+
+  // RTL physical x = 200 - logicalX(20) - width(50) = 130.
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 130.0f, 0.5f, TEST_LOCATION);
+
+  LayoutAnimatorTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     selfTransition = LayoutTransition::New();
+  selfTransition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureSelfChangeAnimator), timing);
+  child.SetSelfLayoutTransition(selfTransition);
+
+  child.SetRequestedWidth(100.0f); // new physical x = 200 - 20 - 100 = 80
+
+  for(int i = 0; i < 5; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+
+  DALI_TEST_GREATER(gSelfAnimInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gSelfAnimFrom.x, 130.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gSelfAnimFrom.width, 50.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gSelfAnimTo.x, 80.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gSelfAnimTo.width, 100.0f, 0.5f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfWindowResizeOptOutP(void)
+{
+  // The winner's own SetChangeOnWindowResize decides: the self child opts out
+  // while its sibling, governed by the parent, animates.
+  //
+  // The harness's window-resize notification sets the pass's cause but does not
+  // itself resize the surface, so the geometry change is driven by the spacer in
+  // the same pass. With no sibling add / remove / reorder marker the resolved
+  // cause is WINDOW_RESIZED for both children.
+  UiTestApplication application;
+  View              spacer, a, b;
+  StackLayout       parent = MakeSettledStack(application, spacer, a, b);
+
+  LayoutTransition parentTransition = MakeChangeTiming(0.4f);
+  parentTransition.SetChangeOnWindowResize(true);
+  parent.SetLayoutTransition(parentTransition);
+
+  LayoutTransition selfTransition = MakeChangeTiming(0.4f);
+  selfTransition.SetChangeOnWindowResize(false);
+  b.SetSelfLayoutTransition(selfTransition);
+
+  const float aFrom  = a.GetProperty<float>(Actor::Property::POSITION_Y);
+  const float bFinal = b.GetProperty<float>(Actor::Property::POSITION_Y) - 100.0f;
+
+  Dali::Ui::LayoutController::Get(application.GetWindow()).OnWindowResize(320, 600);
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  // a opted in, so it is still interpolating; b opted out and landed exactly on
+  // its new bounds without animating.
+  const float aY = a.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(aY < aFrom - 1.0f && aY > 1.0f);
+  DALI_TEST_EQUALS(b.GetCurrentProperty<float>(Actor::Property::POSITION_Y), bFinal, 0.5f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfWithoutViewParentNoOpP(void)
+{
+  // A self transition animates its view inside a PARENT VIEW's frame, so it is
+  // inert while the view is parented straight to the window.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+  root.SetRequestedWidth(MATCH_PARENT);
+  root.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(root);
+
+  View item = View::New();
+  item.SetRequestedWidth(100.0f);
+  item.SetRequestedHeight(40.0f);
+  root.Add(item);
+
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition selfTransition = MakeChangeTiming(0.4f);
+  selfTransition.SetOnStart(LayoutLifecycleCallback::New(&CaptureSelfStart));
+  root.SetSelfLayoutTransition(selfTransition);
+
+  Dali::Ui::LayoutController::Get(application.GetWindow()).OnWindowResize(320, 600);
+  for(int i = 0; i < 5; ++i)
+  {
+    application.SendNotification();
+    application.Render(16);
+  }
+  DALI_TEST_EQUALS(gSelfStartInvokes, 0u, TEST_LOCATION);
+
+  // Reparent under a View parent: the same handle now governs a real change.
+  StackLayout container = StackLayout::New(StackOrientation::VERTICAL);
+  container.SetRequestedWidth(MATCH_PARENT);
+  container.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(container);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+  container.Add(spacer);
+  container.Add(root);
+  root.SetRequestedHeight(200.0f);
+
+  application.SendNotification();
+  application.Render(0);
+  ResetSelfCaptures();
+
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  DALI_TEST_EQUALS(gSelfStartInvokes, 1u, TEST_LOCATION);
+  const float rootY = root.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(rootY > 5.0f && rootY < 95.0f);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfRemoveAllHonoursPerChildP(void)
+{
+  // RemoveAll routes through the per-child Remove, so each child's own EXIT
+  // decision applies: x defers on its own long EXIT, y opts out via
+  // LayoutTransitionMode::PASS_THROUGH and goes now.
+  UiTestApplication application;
+  ResetSelfCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+
+  View x = View::New();
+  x.SetRequestedWidth(100.0f);
+  x.SetRequestedHeight(40.0f);
+  View y = View::New();
+  y.SetRequestedWidth(100.0f);
+  y.SetRequestedHeight(40.0f);
+  parent.Add(x);
+  parent.Add(y);
+
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  parentTransition = LayoutTransition::New();
+  ViewAnimationSpec parentExit       = ViewAnimationSpec::New();
+  parentExit.Opacity(0.0f, Duration(0.1f));
+  parentTransition.SetExitVisualSpec(parentExit);
+  parent.SetLayoutTransition(parentTransition);
+
+  LayoutTransition  xSelf   = LayoutTransition::New();
+  ViewAnimationSpec xExit   = ViewAnimationSpec::New();
+  xExit.Opacity(0.0f, Duration(0.5f));
+  xSelf.SetExitVisualSpec(xExit).SetOnFinished(LayoutLifecycleCallback::New(&CaptureSelfFinished));
+  x.SetSelfLayoutTransition(xSelf);
+  y.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);
+
+  parent.RemoveAll(RemovePolicy::ANIMATE_EXIT);
+
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!y.GetParent());          // opted out: unparented synchronously
+  DALI_TEST_CHECK(x.GetParent() == parent); // still a ghost under its direct parent
+
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(100);
+  }
+  DALI_TEST_CHECK(!x.GetParent());
+  DALI_TEST_EQUALS(gSelfFinishInvokes, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSelfStandaloneWindowResizeFallbackP(void)
+{
+  // No transition anywhere in the ancestry, so no owner pass hands a resolved cause
+  // to the self pass: it falls back to the pass flag and resolves WINDOW_RESIZED.
+  // The two children probe that fallback from opposite sides. a clears its default
+  // CHANGE timing and keeps only a WINDOW_RESIZED-specific one, so it animates ONLY
+  // if the fallback resolved WINDOW_RESIZED; b keeps a default timing but opts out of
+  // resize CHANGE, so it snaps ONLY if the fallback resolved WINDOW_RESIZED. Under an
+  // OTHER fallback the pair would behave the other way round.
+  //
+  // The harness's window-resize notification sets the pass's cause but does not
+  // itself resize the surface, so the geometry change is driven by the spacer in
+  // the same pass.
+  UiTestApplication application;
+  View              spacer, a, b;
+  StackLayout       parent = MakeSettledStack(application, spacer, a, b);
+  DALI_TEST_CHECK(!parent.GetLayoutTransition());
+
+  LayoutTransition       aSelf = LayoutTransition::New();
+  LayoutTransitionTiming resizeTiming{Duration(0.4f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  aSelf.ClearChangeTiming();
+  aSelf.SetChangeTiming(LayoutChangeCause::WINDOW_RESIZED, resizeTiming);
+  aSelf.SetChangeOnWindowResize(true);
+  a.SetSelfLayoutTransition(aSelf);
+
+  LayoutTransition bSelf = MakeChangeTiming(0.4f);
+  bSelf.SetChangeOnWindowResize(false);
+  b.SetSelfLayoutTransition(bSelf);
+
+  const float aFrom  = a.GetProperty<float>(Actor::Property::POSITION_Y);
+  const float bFinal = b.GetProperty<float>(Actor::Property::POSITION_Y) - 100.0f;
+
+  Dali::Ui::LayoutController::Get(application.GetWindow()).OnWindowResize(320, 600);
+  spacer.SetRequestedHeight(0.0f);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  // a found its WINDOW_RESIZED timing and is still interpolating.
+  const float aY = a.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_CHECK(aY < aFrom - 1.0f && aY > 1.0f);
+  // b opted out of that same cause and landed on its new bounds without animating.
+  DALI_TEST_EQUALS(b.GetCurrentProperty<float>(Actor::Property::POSITION_Y), bFinal, 0.5f, TEST_LOCATION);
+  END_TEST;
+}

@@ -711,6 +711,26 @@ public: // Non-virtual API (safe to reorder / extend)
   LayoutTransition GetLayoutTransition() const;
 
   /**
+   * @copydoc Ui::View::SetSelfLayoutTransition()
+   */
+  void SetSelfLayoutTransition(LayoutTransition transition);
+
+  /**
+   * @copydoc Ui::View::GetSelfLayoutTransition()
+   */
+  LayoutTransition GetSelfLayoutTransition() const;
+
+  /**
+   * @copydoc Ui::View::SetLayoutTransitionMode()
+   */
+  void SetLayoutTransitionMode(LayoutTransitionMode mode);
+
+  /**
+   * @copydoc Ui::View::GetLayoutTransitionMode()
+   */
+  LayoutTransitionMode GetLayoutTransitionMode() const;
+
+  /**
    * @brief Returns the bounds last applied during the layout pass.
    *
    * Internal helper used by the layout transition dispatcher to compare

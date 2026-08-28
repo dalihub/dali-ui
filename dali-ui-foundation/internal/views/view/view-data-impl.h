@@ -352,9 +352,21 @@ public:
   LayoutMode       GetLayoutMode() const;
   void             SetLayoutTransition(LayoutTransition transition);
   LayoutTransition GetLayoutTransition() const;
-  LayoutRect       GetArrangedBounds() const;
-  bool             HasArrangeResult() const;
-  bool             IsInitialLayoutDone() const;
+  void             SetSelfLayoutTransition(LayoutTransition transition);
+  LayoutTransition GetSelfLayoutTransition() const;
+  /// Whether this view carries a self-role transition. Cheap predicate (no handle
+  /// copy / refcount) for the dispatcher's per-child dispatch-time check -- level 1
+  /// of Internal::ResolveGoverningTransition.
+  bool HasSelfLayoutTransition() const;
+  void SetLayoutTransitionMode(LayoutTransitionMode mode);
+  /// This view's layout transition policy. Read BEFORE any handle resolution by
+  /// Internal::ResolveGoverningTransition (level 0) and by every dispatch-time
+  /// gate, so it is cheap by construction: a 2-bit member read, available on a
+  /// view that has never allocated LayoutTransitionData.
+  LayoutTransitionMode GetLayoutTransitionMode() const;
+  LayoutRect           GetArrangedBounds() const;
+  bool                 HasArrangeResult() const;
+  bool                 IsInitialLayoutDone() const;
   /// One-shot latch for the layout transition dispatcher's fresh-child ENTER settle.
   /// A child that no producer ever arranges keeps its "fresh" classification forever,
   /// so the settle branch is re-entered on every pass; the settle itself is needed
@@ -1626,7 +1638,8 @@ private:
 
   struct LayoutTransitionData
   {
-    LayoutTransition              transition;
+    LayoutTransition              transition;     ///< Children role: governs this view's children
+    LayoutTransition              selfTransition; ///< Self role: governs THIS view inside its parent's frame
     std::unordered_set<ViewImpl*> pendingEnterChildren;
     std::unordered_set<ViewImpl*> pendingReorderedChildren;
     bool                          hasPendingChildRemoval{false};
@@ -1865,6 +1878,20 @@ private:
   /// (the stored values are 0 and 1 either way; the width is about staying lossless
   /// for the full enumerator range).
   Dali::LayoutDirection::Type mLastArrangeDirection : 2;
+
+  /// Per-view layout transition policy (Ui::LayoutTransitionMode). Deliberately NOT
+  /// inside the lazily allocated mLayoutTransitionData: the policy must be readable
+  /// on a view that carries no transition at all (a plain container declaring
+  /// ISOLATE_SUBTREE is the motivating case), and every gate reads it on the hot
+  /// dispatch path.
+  ///
+  /// PACKING: a 2-bit field parked next to mLastArrangeDirection, the only other
+  /// enum bit-field, so the two share whatever allocation unit the change of field
+  /// type opens at the end of the bool run instead of opening one each. UNSIGNED by
+  /// construction -- LayoutTransitionMode's underlying type is uint8_t -- so the
+  /// signedness caveat noted on mLastArrangeDirection cannot apply: the three
+  /// enumerators are 0..2 and an unsigned 2-bit field holds 0..3.
+  LayoutTransitionMode mLayoutTransitionMode : 2;
 
   /// A whole bool, not a bit-field: ScopedTrueFlag binds a `bool&`, which a bit-field
   /// cannot provide. It sits between the bit-field run above and mFlags below; a

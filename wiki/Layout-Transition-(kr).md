@@ -132,6 +132,67 @@ container.SetLayoutTransition(t);
 
 ---
 
+## 자기 적용 Transition (self transition)
+
+`View::SetSelfLayoutTransition(t)`는 **그 view 자신**이 layout child로서 적용받을 transition을 부착합니다. 부모가 `SetLayoutTransition`으로 부착한 transition보다, 그리고 `SUBTREE` scope ancestor의 transition보다 우선합니다.
+
+우선순위는 (view, event)마다 dispatch 시점에 결정됩니다.
+
+1. 그 view 자신의 self transition — 여기서 종결
+2. 직접 부모의 transition — 여기서 종결
+3. 해당 slot 효과를 가진 가장 가까운 `SUBTREE` scope ancestor
+
+각 단계는 slot별이 아니라 **부착 여부만으로 종결**됩니다. CHANGE만 설정한 self transition이 부모의 ENTER를 상속하지는 않으며, 설정되지 않은 slot은 그냥 애니메이션되지 않습니다(CHANGE는 즉시 최종 bounds로 snap, EXIT는 즉시 unparent, ENTER는 skip). 이는 2단계와 3단계가 이미 사용하는 것과 동일한 도매(wholesale) 규칙입니다.
+
+### 3가지 상태
+
+| 상태 | 표기 | 의미 |
+|---|---|---|
+| 미설정(기본) | 호출하지 않거나 uninitialized handle로 해제 | 상속 — 부모 / ancestor 규칙이 적용됨 |
+| 오버라이드 | `SetSelfLayoutTransition(t)` | `t`가 이 view의 모든 slot을 단독 지배 |
+| 명시적 제외 | `SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH)` | Layout transition이 이 view를 통과: 어떤 slot도 애니메이션되지 않음 — CHANGE는 snap, EXIT는 즉시 unparent, ENTER는 skip되고 아무것도 settle되지 않음 |
+
+Uninitialized handle은 "다시 상속"이지 **"애니메이션 금지"가 아닙니다**.
+
+```cpp
+LayoutTransition slow = LayoutTransition::New();
+slow.SetChangeTiming(LayoutTransitionTiming{Duration(0.8f), AlphaFunction(AlphaFunction::EASE_IN_OUT), Duration()});
+item.SetSelfLayoutTransition(slow);                                    // 오버라이드
+other.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);     // 통과(정책)
+other.SetLayoutTransitionMode(LayoutTransitionMode::AUTO);             // 상속으로 복귀
+other.SetSelfLayoutTransition(LayoutTransition());                     // handle 해제
+```
+
+### 뷰별 정책 (`LayoutTransitionMode`)
+
+`View::SetLayoutTransitionMode`는 뷰별 **정책**을 선언합니다. 어떤 transition handle을 해석하기 **전에** 읽히므로, **같은 view에서는 정책이 값을 이깁니다**. 즉, 모드가 `AUTO`가 아닌 view는 자기 자신이 부착한 handle로도 애니메이션되지 않습니다.
+
+| 모드 | 효과 |
+|---|---|
+| `AUTO`(기본) | 일반 해석: 자신의 self transition > 직접 부모의 transition > 가장 가까운 `SUBTREE` ancestor의 transition |
+| `PASS_THROUGH` | Layout transition이 이 view를 통과합니다: 이 view는 결코 transition의 대상이 되지 않으며, 자기 자신이 부착한 handle의 대상도 아닙니다. 상속은 자손으로 계속 흘러가고, 이 view 자신의 **children 역할** transition도 그 자식들을 계속 지배합니다 |
+| `ISOLATE_SUBTREE` | 이 view와 그 subtree 전체를 이 view **자신을 포함해 그 위쪽**의 모든 owner로부터 격리합니다 — 이 view 자신의 children 역할 transition도 포함해서, 위에서 내려오는 어떤 것도 그 안의 무엇도 애니메이션하지 못합니다 |
+
+`ISOLATE_SUBTREE`가 끊는 것은 게이트를 지나가거나 게이트에서 시작하는, **위에서 내려오는** 지배 사슬뿐입니다. 게이트보다 **아래에서** 선언한 것은 그대로 동작합니다. Descendant의 self transition은 그대로 그 view를 애니메이션하고, descendant의 children 역할 transition도 그 descendant의 자식들을 그대로 지배합니다.
+
+- **Mode 변경으로 handle이 해제되지는 않습니다.** 모드와 무관하게 `GetSelfLayoutTransition()`은 부착된 handle을 그대로 반환하며, `AUTO`로 돌아가면 재부착 없이 효과가 복구됩니다.
+- **Mode 변경은 취소가 아닙니다.** In-flight transition은 handle을 교체할 때와 똑같이 각자의 타이밍으로 끝까지 진행되고, 새 정책은 다음 (view, slot) 이벤트부터 적용됩니다. `AUTO`로 되돌아가도 이전 모드에서 발생한 add에 대해 ENTER가 소급 발생하지는 않습니다.
+- Uninitialized handle은 여전히 "다시 상속"이지 **"애니메이션 금지"가 아닙니다**. 그것은 `PASS_THROUGH`의 역할입니다.
+
+### 주의 사항
+
+- **Standalone 동작.** Ancestor에 transition이 하나도 없어도 self transition은 단독으로 동작합니다.
+- **한 view가 두 역할을 동시에 가질 수 있음.** `SetLayoutTransition`은 그 view의 children을, `SetSelfLayoutTransition`은 그 view 자신을 지배합니다.
+- **Self 역할에서 `SetReflowScope`는 무시됩니다.**
+- **Lifecycle callback은 승자에서만 발생.** Self transition이 지배하는 view는 부모의 `OnStart` / `OnFinished`를 발생시키지 않으므로, 부모에서 자식 완료 수를 세는 코드는 이를 감안해야 합니다.
+- **EXIT geometry는 변하지 않음.** Ghost는 여전히 직접 부모 아래에 남고 unparent 대상도 직접 부모입니다. 바뀌는 것은 효과의 출처뿐입니다.
+- **CHANGE cause.** Transition을 가진 부모의 self 지배 **직속** 자식은 cause를 그대로 유지합니다(`REORDERED` / `SIBLING_*` / `WINDOW_RESIZED`). Ancestor에 transition이 없으면 `SUBTREE` 상속 descendant와 동일하게 `OTHER`(resize 중에는 `WINDOW_RESIZED`)로 강등되므로, standalone self transition에는 **기본** CHANGE timing을 설정하세요.
+- **Initial mount 기준은 children 역할과 동일**하며(직접 부모의 첫 arrange), opt-in은 **self** transition의 `SetEnterOnInitialMount`에서 읽습니다.
+- **부모 View가 없는 동안 self transition은 동작하지 않습니다.**
+- **Handle 교체나 해제는 in-flight transition을 취소하지 않습니다.**
+
+---
+
 ## Lifecycle과 제거
 
 `View::Remove(child, RemovePolicy::ANIMATE_EXIT)`는 EXIT slot이 설정된 경우 **deferred remove**를 수행합니다. child는 layout tracking list에서는 즉시 제거되어 sibling이 빈 공간으로 reflow되지만, actor는 EXIT 애니메이션이 끝날 때까지 붙어 있습니다. EXIT 완료 후 actor는 자동으로 unparent됩니다.

@@ -613,6 +613,26 @@ LayoutTransition ViewImpl::GetLayoutTransition() const
   return mImpl->GetLayoutTransition();
 }
 
+void ViewImpl::SetSelfLayoutTransition(LayoutTransition transition)
+{
+  mImpl->SetSelfLayoutTransition(transition);
+}
+
+LayoutTransition ViewImpl::GetSelfLayoutTransition() const
+{
+  return mImpl->GetSelfLayoutTransition();
+}
+
+void ViewImpl::SetLayoutTransitionMode(LayoutTransitionMode mode)
+{
+  mImpl->SetLayoutTransitionMode(mode);
+}
+
+LayoutTransitionMode ViewImpl::GetLayoutTransitionMode() const
+{
+  return mImpl->GetLayoutTransitionMode();
+}
+
 LayoutRect ViewImpl::GetArrangedBounds() const
 {
   return mImpl->GetArrangedBounds();
