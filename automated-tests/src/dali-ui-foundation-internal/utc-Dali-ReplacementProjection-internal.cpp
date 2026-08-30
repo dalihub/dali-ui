@@ -1649,7 +1649,7 @@ int UtcDaliReplacementEditableVisualLayerRecreationP(void)
           checkLayer(data, smallSize);
           initialLayer.Measure(1000.0f, 1000.0f);
           DALI_TEST_EQUALS(measureCounter.count, 1u, TEST_LOCATION);
-          DALI_TEST_CHECK(initialViewData.GetVisual(visualIndex) == initialVisual);
+          DALI_TEST_EQUALS(initialViewData.GetVisual(visualIndex), initialVisual, TEST_LOCATION);
         }
 
         impl.OnRelayout(largeSize, relayoutContainer);
@@ -1658,13 +1658,13 @@ int UtcDaliReplacementEditableVisualLayerRecreationP(void)
         checkLayer(data, currentSize);
         initialLayer.Measure(1000.0f, 1000.0f);
         DALI_TEST_EQUALS(measureCounter.count, 2u, TEST_LOCATION);
-        DALI_TEST_CHECK(initialViewData.GetVisual(visualIndex) == initialVisual);
+        DALI_TEST_EQUALS(initialViewData.GetVisual(visualIndex), initialVisual, TEST_LOCATION);
 
         impl.OnRelayout(largeSize, relayoutContainer);
         checkLayer(Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl), currentSize);
         initialLayer.Measure(1000.0f, 1000.0f);
         DALI_TEST_EQUALS(measureCounter.count, 2u, TEST_LOCATION);
-        DALI_TEST_CHECK(initialViewData.GetVisual(visualIndex) == initialVisual);
+        DALI_TEST_EQUALS(initialViewData.GetVisual(visualIndex), initialVisual, TEST_LOCATION);
         initialLayer.SetMeasureCallback({});
 
         for(uint32_t variant = 1u; variant < 4u; ++variant)
