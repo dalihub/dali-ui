@@ -21,9 +21,6 @@
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/public-api/signals/slot-delegate.h>
 #include <string>
-#include <memory>
-#include <utility>
-#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui/ui-scene-holder-impl.h>
@@ -56,27 +53,8 @@ public:
   void OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, Dali::KeyEvent event);
   void OnTouchEvent(Dali::Integration::SceneHolder sceneHolder, Dali::TouchEvent event);
 
-  bool IsMaximized() const;
-  void Maximize(bool maximize);
-  bool IsMinimized() const;
-  void Minimize(bool minimize);
-  void SetMinimumSize(Dali::Window::WindowSize size);
-  void SetMaximumSize(Dali::Window::WindowSize size);
-  void AddFramePresentedCallback(Dali::CallbackBase* callback, int32_t frameId);
-
-  /**
-   * @brief Invokes and clears every queued frame-presented callback.
-   *
-   * Lets a test drive the presentation step that the window system would
-   * normally report.
-   */
-  void EmitFramePresented();
-
   FocusChangedSignalType                      mFocusChangedSignal;
   ResizedSignalType                           mResizedSignal;
-  Dali::Window::MovedSignalType                mMovedSignal;
-  Dali::Window::MovedSignalType                mMoveCompletedSignal;
-  Dali::Window::ResizedSignalType              mResizeCompletedSignal;
   int                                        mRotationAngle;
   bool                                       mVisible;
   Dali::Window::VisibilityChangedSignalType mVisibilityChangedSignal;
@@ -84,11 +62,6 @@ public:
   Dali::Window::TouchEventSignalType        mTouchEventSignal;
   Dali::Window::WheelEventSignalType        mWheelEventSignal;
   Dali::SlotDelegate<Window>                mSlotDelegate;
-  Dali::Window::WindowSize                  mMinimumSize{0, 0};
-  Dali::Window::WindowSize                  mMaximumSize{0, 0};
-  std::vector<std::pair<std::unique_ptr<Dali::CallbackBase>, int32_t>> mFramePresentedCallbacks;
-  bool                                      mMaximized{false};
-  bool                                      mMinimized{false};
 };
 
 } // namespace Adaptor

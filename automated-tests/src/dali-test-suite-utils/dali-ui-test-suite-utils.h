@@ -22,18 +22,3 @@
 
 // dali-ui specific test application
 #include <dali-ui/ui-test-application.h>
-
-#include <dali/public-api/adaptor-framework/window.h>
-
-namespace Test
-{
-/**
- * @brief Invokes and clears every frame-presented callback queued on a window.
- *
- * The stub window records callbacks added through
- * Window::AddFramePresentedCallback() instead of waiting for a real frame, so a
- * test can drive presentation timing explicitly.
- */
-void EmitFramePresented(Dali::Window window);
-
-} // namespace Test

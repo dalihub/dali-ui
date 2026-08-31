@@ -52,7 +52,6 @@ public:
   void             Start();
   void             Stop();
   void             SetInterval(unsigned int milliSec);
-  void             SetInterval(unsigned int milliSec, bool restart);
   unsigned int     GetInterval() const;
   bool             IsRunning() const;
   TimerSignalType& TickSignal();

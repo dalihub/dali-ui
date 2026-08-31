@@ -205,15 +205,6 @@ void Timer::SetInterval(unsigned int milliSec)
   Internal::Adaptor::GetImplementation(*this).SetInterval(milliSec);
 }
 
-void Timer::SetInterval(unsigned int milliSec, bool restart)
-{
-  Internal::Adaptor::GetImplementation(*this).SetInterval(milliSec);
-  if(restart)
-  {
-    Start();
-  }
-}
-
 unsigned int Timer::GetInterval() const
 {
   return Internal::Adaptor::GetImplementation(*this).GetInterval();

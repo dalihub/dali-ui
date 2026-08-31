@@ -20,15 +20,6 @@ SET(TC_SOURCES
     utc-Dali-DialogContainer.cpp
     utc-Dali-AlertDialog.cpp
     utc-Dali-MarkdownView.cpp
-    utc-Dali-WindowFrame.cpp
-    window/utc-Dali-WindowFrameDecorationValidator.cpp
-    window/utc-Dali-WindowFrameStyleResolver.cpp
-    window/utc-Dali-WindowFrameGeometryPolicy.cpp
-    window/utc-Dali-WindowFrameInitialStateResolver.cpp
-    window/utc-Dali-WindowFrameInteractionController.cpp
-    window/utc-Dali-WindowFrameOperationAdapter.cpp
-    window/utc-Dali-WindowFrameOverlayController.cpp
-    window/utc-Dali-WindowFrameStateController.cpp
 )
 
 SET(TC_GENERATED_HEADER
@@ -48,25 +39,7 @@ ADD_CUSTOM_COMMAND(
     VERBATIM
 )
 
-# WindowFrame policy cases exercise internal units directly, so those units are
-# compiled into the test executable. They are hidden in the shared library.
 LIST(APPEND TC_SOURCES
-    ../../../dali-ui-components/internal/window/window-frame-layout-engine.cpp
-    ../../../dali-ui-components/internal/window/window-frame-decoration-validator.cpp
-    ../../../dali-ui-components/internal/window/window-frame-style-resolver.cpp
-    ../../../dali-ui-components/internal/window/window-frame-interaction-controller.cpp
-    ../../../dali-ui-components/internal/window/window-frame-overlay-controller.cpp
-    ../../../dali-ui-components/internal/window/window-frame-state-controller.cpp
-    ../../../dali-ui-components/internal/window/initial-window-state-resolver.cpp
-    ../../../dali-ui-components/internal/window/window-operation-adapter.cpp
-    # WindowFrameGeometry's laying-out constructor is DALI_INTERNAL, so the
-    # library does not export it to the geometry cases.
-    ../../../dali-ui-components/public-api/window/window-frame-geometry.cpp
-    # The command and interaction snapshots are created by internal units.
-    # Compile their value implementations with those unit cases because the
-    # construction entry points are intentionally not exported.
-    ../../../dali-ui-components/public-api/window/window-frame-command.cpp
-    ../../../dali-ui-components/public-api/window/window-frame-interaction.cpp
     ../../../dali-ui-components/internal/markdown/markdown-parser.cpp
     ../../../dali-ui-components/internal/markdown/markdown-render-model.cpp
     ../dali-test-suite-utils/mesh-builder.cpp

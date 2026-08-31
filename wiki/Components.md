@@ -41,7 +41,6 @@ RecyclerView | (~10.2026) | -
 name | desc. | sample
 -- | -- | --
 [ChartView](ChartView.md) | Line, Bar, Pie, Area, Scatter, Gauge charts using ThorVG rendering. Supports zoom/pan gestures, animated data transitions, and real-time data feeds. | [samples/chart-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/chart-view)
-[WindowFrame](WindowFrame.md) | A client-rendered window frame with custom decoration, content layout, controls, move/resize interaction, overlay, and compositor state tracking. | [samples/window-frame](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/window-frame), [samples/desktop-window](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/desktop-window)
 [Navigator](Navigator.md) | Page-stack navigation container with navigation and modal stacks, back handling, stack queries, and page lifecycle signals. | [samples/navigator](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/navigator)
 [Dialog](Dialog.md) | Three-section dialog base, AlertDialog convenience component, and DialogContainer modal wrapper. | [samples/dialog](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/dialog)
 [TextButton](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1TextButton.html) | Label-only interactive button with text styling support. | [manual-tests/dali-ui-components/tc/tc-text-button-basics.cpp](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/manual-tests/dali-ui-components/tc/tc-text-button-basics.cpp)
