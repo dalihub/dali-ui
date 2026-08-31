@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/devel-api/adaptor-framework/vector-animation-renderer.h>
 #include <dali-ui/ui-event-thread-callback.h>
 
 using namespace Dali;
@@ -143,7 +144,9 @@ int UtcDaliLottieAnimationViewDynamicPropertyRendersWhilePaused(void)
 
   view.Play();
   view.Pause();
-  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1, 5), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::PAUSED, TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
 
   Ui::LottieAnimation::DynamicPropertyInfo info;
   info.id       = 1;
@@ -151,6 +154,8 @@ int UtcDaliLottieAnimationViewDynamicPropertyRendersWhilePaused(void)
   info.property = Ui::LottieAnimation::VectorProperty::FILL_COLOR;
   info.callback = MakeCallback(&TestFillColor);
   view.SetDynamicProperty(info);
+  application.SendNotification();
+  application.Render();
 
   DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1, 5), true, TEST_LOCATION);
   END_TEST;
