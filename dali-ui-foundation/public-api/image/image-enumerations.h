@@ -37,7 +37,7 @@ enum class FittingMode : uint8_t
   FIT_KEEP_ASPECT_RATIO,      ///< The visual should be scaled to fit, preserving aspect ratio
   FILL,                       ///< The visual should be stretched to fill, not preserving aspect ratio
   OVER_FIT_KEEP_ASPECT_RATIO, ///< The visual should be scaled to fit, preserving aspect ratio, outside is cropped away
-  CENTER,                     ///< The visual should keep original size of image
+  CENTER,                     ///< Keeps the original image size when it fits on both axes; otherwise scales down preserving aspect ratio
 };
 
 /**
