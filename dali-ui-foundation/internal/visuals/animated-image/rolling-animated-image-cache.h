@@ -199,6 +199,9 @@ private:
   std::vector<int32_t>         mIntervals;
   std::vector<uint32_t>        mLoadWaitingQueue;
   CircularQueue<ImageFrame>    mQueue;
+  // Frame requested while another frame's decode is still in flight (-1: none).
+  // Keep the in-flight entry until LoadComplete() so its observer is not removed.
+  int32_t                      mPendingFrameIndex{-1};
   Dali::WrapMode::Type         mWrapModeU : 3;
   Dali::WrapMode::Type         mWrapModeV : 3;
   bool                         mIsSynchronousLoading;

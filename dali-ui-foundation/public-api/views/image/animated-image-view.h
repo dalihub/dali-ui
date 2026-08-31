@@ -48,6 +48,11 @@ class AnimatedImageViewImpl;
  * view.SetLoopCount(3);
  * view.Play();
  * @endcode
+ *
+ * @note Setters that change decoded or rendered content, including resource,
+ * cache, timing, desired-size, sampling, masking, and loading options, recreate
+ * the internal visual. Playback does not survive that rebuild; call Play() again
+ * to resume after changing one of those options.
  */
 class DALI_UI_API AnimatedImageView : public View
 {
