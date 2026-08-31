@@ -47,6 +47,9 @@ Window::Window(const PositionSize& positionSize)
 : SceneHolder(positionSize),
   mFocusChangedSignal(),
   mResizedSignal(),
+  mMovedSignal(),
+  mMoveCompletedSignal(),
+  mResizeCompletedSignal(),
   mRotationAngle(90), // dummy angle for test coverage
   mVisible(true),
   mVisibilityChangedSignal(),
@@ -103,6 +106,60 @@ void Window::SetPositionSize(PositionSize positionSize)
 std::string Window::GetNativeResourceId() const
 {
   return "123";
+}
+
+bool Window::IsMaximized() const
+{
+  return mMaximized;
+}
+
+void Window::Maximize(bool maximize)
+{
+  mMaximized = maximize;
+  if(maximize)
+  {
+    mMinimized = false;
+  }
+}
+
+bool Window::IsMinimized() const
+{
+  return mMinimized;
+}
+
+void Window::Minimize(bool minimize)
+{
+  mMinimized = minimize;
+}
+
+void Window::SetMinimumSize(Dali::Window::WindowSize size)
+{
+  mMinimumSize = size;
+}
+
+void Window::SetMaximumSize(Dali::Window::WindowSize size)
+{
+  mMaximumSize = size;
+}
+
+void Window::AddFramePresentedCallback(Dali::CallbackBase* callback, int32_t frameId)
+{
+  // The real window takes ownership, so the stub does too. Callbacks that are
+  // never presented are released with the window instead of leaking.
+  mFramePresentedCallbacks.emplace_back(std::unique_ptr<Dali::CallbackBase>(callback), frameId);
+}
+
+void Window::EmitFramePresented()
+{
+  std::vector<std::pair<std::unique_ptr<Dali::CallbackBase>, int32_t>> callbacks;
+  callbacks.swap(mFramePresentedCallbacks);
+  for(auto& entry : callbacks)
+  {
+    if(entry.first)
+    {
+      Dali::CallbackBase::Execute(*entry.first, entry.second);
+    }
+  }
 }
 
 void Window::KeepRendering(float durationSeconds)
@@ -261,6 +318,21 @@ ResizedSignalType& Window::ResizedSignal()
   return GetImplementation(*this).mResizedSignal;
 }
 
+Window::MovedSignalType& Window::MovedSignal()
+{
+  return GetImplementation(*this).mMovedSignal;
+}
+
+Window::MovedSignalType& Window::MoveCompletedSignal()
+{
+  return GetImplementation(*this).mMoveCompletedSignal;
+}
+
+Window::ResizedSignalType& Window::ResizeCompletedSignal()
+{
+  return GetImplementation(*this).mResizeCompletedSignal;
+}
+
 Window::KeyEventSignalType& Window::KeyEventSignal()
 {
   return GetImplementation(*this).KeyEventSignal();
@@ -279,6 +351,55 @@ Window::VisibilityChangedSignalType& Window::VisibilityChangedSignal()
 {
   return GetImplementation(*this).mVisibilityChangedSignal;
 }
+
+bool Window::IsMaximized() const
+{
+  return GetImplementation(*this).IsMaximized();
+}
+
+void Window::Maximize(bool maximize)
+{
+  GetImplementation(*this).Maximize(maximize);
+}
+
+bool Window::IsMinimized() const
+{
+  return GetImplementation(*this).IsMinimized();
+}
+
+void Window::Minimize(bool minimize)
+{
+  GetImplementation(*this).Minimize(minimize);
+}
+
+void Window::SetMinimumSize(WindowSize size)
+{
+  GetImplementation(*this).SetMinimumSize(size);
+}
+
+void Window::SetMaximumSize(WindowSize size)
+{
+  GetImplementation(*this).SetMaximumSize(size);
+}
+
+void Window::AddFramePresentedCallback(CallbackBase* callback, int32_t frameId)
+{
+  GetImplementation(*this).AddFramePresentedCallback(callback, frameId);
+}
+
+} // namespace Dali
+
+namespace Test
+{
+void EmitFramePresented(Dali::Window window)
+{
+  Dali::GetImplementation(window).EmitFramePresented();
+}
+
+} // namespace Test
+
+namespace Dali
+{
 
 Dali::RenderTaskList Window::GetRenderTaskList()
 {
