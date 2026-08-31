@@ -519,8 +519,11 @@ protected:
 Dali::TypeRegistration nonChainingViewTypeReg(typeid(NonChainingViewImpl), typeid(ViewImpl), nullptr);
 
 // Mirrors View::New() exactly, including the explicit second-phase Initialize() that
-// wraps the impl in a handle first -- that call is what a third-party factory makes,
-// and it is where the hook under test is now connected.
+// wraps the impl in a handle first -- that call is what a third-party factory makes.
+// The hook under test is no longer connected there at all: it is made lazily, at the
+// first tracked (View) child add, in Internal::ViewDataImpl::OnChildAdded. Either way
+// the non-chaining OnInitialize() above must not be able to forfeit it, which is what
+// the test below asserts.
 View CreateNonChainingView()
 {
   IntrusivePtr<NonChainingViewImpl> impl = NonChainingViewImpl::New();

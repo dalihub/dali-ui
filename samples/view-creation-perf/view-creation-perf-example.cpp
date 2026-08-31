@@ -110,9 +110,33 @@ public:
       return;
     }
 
+    const std::string key = event.GetKeyString().CStr();
+
+    // Root layout-mode toggle. The bulk keys always create DEFAULT-mode children; this
+    // flips the ROOT they go under, so the DEFAULT-root x DEFAULT-children scenario can
+    // be measured directly instead of inferred from the STANDALONE-root numbers.
+    //
+    // It doubles as a control for the zero-transition gate in
+    // Internal::ViewDataImpl::OnChildAdded: with no LayoutTransition alive anywhere in
+    // the process, that gate skips the Window / LayoutController / resolver hop
+    // entirely, so the two root modes should now measure the SAME. The ancestor-walk
+    // cost that used to separate them returns only once a LayoutTransition exists.
+    //
+    // Applied through ResetScene() -> CreateRoot(), which is what actually rebuilds
+    // mRoot, so the new mode is in force for the NEXT 1-6 run rather than retro-fitted
+    // onto the one already measured. Every appended result names the mode it ran under.
+    if(key == "0")
+    {
+      mRootLayoutModeDefault = !mRootLayoutModeDefault;
+      ResetScene();
+      ResetAverages();
+      AppendRootModeNotice();
+      UpdateAverageLabel();
+      return;
+    }
+
     ResetScene();
 
-    const std::string key = event.GetKeyString().CStr();
     if(key == "9")
     {
       ToggleLogLabels();
@@ -230,10 +254,25 @@ private:
     mEndMarkerView.SetBackgroundColor(UiColor(Color::RED));
   }
 
+  const char* RootModeName() const
+  {
+    return mRootLayoutModeDefault ? "DEFAULT" : "STANDALONE";
+  }
+
   void CreateRoot()
   {
     mRoot = View::New();
-    SetStandaloneGeometry(mRoot, 0.0f, 0.0f, 10.0f, 10.0f);
+    if(mRootLayoutModeDefault)
+    {
+      // LayoutMode::DEFAULT is View::New()'s own default, so only the requested
+      // geometry is set here. Same geometry as the STANDALONE branch, so the two modes
+      // differ in exactly one thing: whether mRoot is a layout boundary.
+      SetRequestedGeometry(mRoot, 0.0f, 0.0f, 10.0f, 10.0f);
+    }
+    else
+    {
+      SetStandaloneGeometry(mRoot, 0.0f, 0.0f, 10.0f, 10.0f);
+    }
     mWindow.Add(mRoot);
   }
 
@@ -423,16 +462,39 @@ private:
 
   void AppendResult(const char* type, bool create100, uint64_t duration)
   {
+    // The root layout mode is part of what was measured, so it goes on every line --
+    // both modes, not only the toggled one. A log the reader has to correlate with a
+    // remembered key press is a log that gets misread.
     std::fprintf(stderr,
-                 "[DALI_UI_VIEW_CREATION_PERF] %s %s : %.3f ms (%llu us)\n",
+                 "[DALI_UI_VIEW_CREATION_PERF] %s %s : %.3f ms (%llu us) (root=%s)\n",
                  type,
                  create100 ? "100" : "10000",
                  static_cast<double>(duration) / 1000.0,
-                 static_cast<unsigned long long>(duration));
+                 static_cast<unsigned long long>(duration),
+                 RootModeName());
 
     if(mLogTimeLabel)
     {
-      mLogTimeString += std::string("\n") + type + (create100 ? " 100 : " : " 10000 : ") + FormatMilliseconds(duration) + " ms";
+      mLogTimeString += std::string("\n") + type + (create100 ? " 100 : " : " 10000 : ") + FormatMilliseconds(duration) +
+                        " ms (root=" + RootModeName() + ")";
+      mLogTimeLabel.SetText(mLogTimeString.c_str());
+      TrimLogToWindow();
+      PinLabelBottom(mLogTimeLabel);
+    }
+  }
+
+  // Records the toggle itself, so the log shows where the mode changed even if no run
+  // follows immediately -- and that the accumulated Averages were dropped with it, so
+  // a reader never has to guess whether a displayed Average predates the toggle.
+  void AppendRootModeNotice()
+  {
+    std::fprintf(stderr,
+                 "[DALI_UI_VIEW_CREATION_PERF] root layout mode : %s (averages reset)\n",
+                 RootModeName());
+
+    if(mLogTimeLabel)
+    {
+      mLogTimeString += std::string("\nroot layout mode : ") + RootModeName() + " (averages reset)";
       mLogTimeLabel.SetText(mLogTimeString.c_str());
       TrimLogToWindow();
       PinLabelBottom(mLogTimeLabel);
@@ -442,6 +504,28 @@ private:
   static uint64_t Average(uint64_t total, uint32_t count)
   {
     return count == 0u ? 0u : total / count;
+  }
+
+  /// Drops every accumulated timing sample. The 12 accumulators below carry no mode
+  /// dimension, so after a root-mode toggle the Average panel would average STANDALONE
+  /// and DEFAULT runs together and report a number that describes neither -- which is
+  /// the opposite of what the toggle exists for. Resetting here keeps every displayed
+  /// Average attributable to exactly one root mode.
+  void ResetAverages()
+  {
+    mTimeView100       = 0u;
+    mTimeView10000     = 0u;
+    mTimeRenderer100   = 0u;
+    mTimeRenderer10000 = 0u;
+    mTimeColor100      = 0u;
+    mTimeColor10000    = 0u;
+
+    mCountView100       = 0u;
+    mCountView10000     = 0u;
+    mCountRenderer100   = 0u;
+    mCountRenderer10000 = 0u;
+    mCountColor100      = 0u;
+    mCountColor10000    = 0u;
   }
 
   void UpdateAverageLabel()
@@ -505,6 +589,10 @@ private:
   Label        mLogTimeLabel;
   Label        mAverageTimeLabel;
   Timer        mQuitTimer;
+
+  /// Selects mRoot's LayoutMode at the next CreateRoot(). False = LayoutMode::STANDALONE
+  /// (the historical behaviour); true = LayoutMode::DEFAULT. Toggled by key 0.
+  bool mRootLayoutModeDefault{false};
 
   uint64_t mTimeView100{0u};
   uint64_t mTimeView10000{0u};

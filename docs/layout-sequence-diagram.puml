@@ -110,7 +110,7 @@ Adaptor <-- LC : return
 note over Root, Child
   When a view's size/layout properties change:
   1) ViewImpl::InvalidateMeasure() or InvalidateArrange()
-  2) Propagate to parent layout (GetParentLayout().InvalidateMeasure())
+  2) Propagate to the parent view, a Layout included (GetParentView().InvalidateMeasure())
   3) At layout root: RegisterWithLayoutController()
   4) LayoutControllerImpl::RequestLayout(ViewImpl*) adds root to mPendingViews
   5) Next frame: Adaptor calls Process() -> ProcessLayouts() as above

@@ -4494,3 +4494,70 @@ int UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP(
                    TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliLayoutTransitionSoleActiveAfterDetachCancelsExitOnReAddP(void)
+{
+  // An in-flight EXIT whose LayoutTransition has been DETACHED from its view and whose
+  // every application handle has been released is kept alive solely by the dispatcher
+  // entry's own strong Ui::LayoutTransition (GhostExit::transition). Re-adding the
+  // ghost elsewhere must still cancel it: the child ends up under the new parent with
+  // its interaction restored, and cancellation is silent (no EXIT OnFinished), even
+  // long past the EXIT duration.
+  //
+  // SCOPE, honestly: the cancel that satisfies this test is delivered by the
+  // scene-disconnection path (Actor unparent -> ViewDataImpl::OnViewSceneDisconnection
+  // -> LayoutController::UnregisterFromAll -> LayoutTransitionDispatcher::OnViewDestroyed
+  // -> CancelPendingExit), which is NOT gated. The gated NotifyChildReparented in
+  // OnChildAdded is the second, redundant carrier. This test therefore guards the
+  // OUTCOME contract, not the zero-transition gate.
+  UiTestApplication application;
+  ResetFinishedCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+  View child = View::New();
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::SENSITIVE), true, TEST_LOCATION);
+
+  {
+    LayoutTransition  transition = LayoutTransition::New();
+    ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+    exitSpec.Opacity(0.0f, Duration(0.5f));
+    transition.SetExitVisualSpec(exitSpec);
+    transition.SetOnFinished(LayoutLifecycleCallback::New(&CaptureSlotOnFinished));
+    parent.SetLayoutTransition(transition);
+
+    parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+    application.SendNotification();
+    application.Render(0);
+
+    // Precondition: the EXIT really is in flight (ghost interaction disabled).
+    DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::SENSITIVE), false, TEST_LOCATION);
+
+    // Detach, then drop the last application handle. From here the ONLY thing keeping
+    // the impl alive is the dispatcher's ghost entry.
+    parent.SetLayoutTransition(LayoutTransition());
+  } // `transition` released with the scope
+
+  View otherParent = View::New();
+  application.GetWindow().Add(otherParent);
+  otherParent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_CHECK(child.GetParent() == otherParent);
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::SENSITIVE), true, TEST_LOCATION);
+
+  // Run well past the 0.5s EXIT. A cancel is silent; a MISSED cancel would let the
+  // EXIT complete and fire OnFinished, so this is the decisive assertion.
+  for(int i = 0; i < 40; ++i)
+  {
+    application.SendNotification();
+    application.Render(20);
+  }
+  DALI_TEST_EQUALS(gExitOnFinishedCount, 0u, TEST_LOCATION);
+  END_TEST;
+}

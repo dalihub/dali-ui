@@ -78,7 +78,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 - **ViewImpl** (DALi ControlImpl-derived)
   - Holds the actual Measure/Arrange logic, size specifications, margin/padding/alignment/visibility, and child container.
   - Provides `GetChildViewCount`, `GetChildViewAt`, `IndexOfChildView`, `Contents`, etc. Child add/remove uses Actor `Add`/`Remove` with `OnChildAdd`/`OnChildRemove` callbacks to sync the internal child container. Child order changes (via `Raise`/`Lower`/`InsertAbove`/`InsertBelow`/etc.) are detected via `ChildOrderChangedSignal` to keep `mChildren` in sync; a **fresh** child inserted with `InsertAbove`/`InsertBelow` emits no such signal, so `OnChildAdd` derives its logical index from the child's final actor position (skipping non-View actor children and EXIT ghosts).
-  - `GetParentLayout()`, `IsLayout()`, and invalidation propagate to the parent until a layout root is reached, which registers with the LayoutController.
+  - `GetParentView()` (which also matches a parent Layout, since Layout derives from View), `IsLayout()`, and invalidation propagate to the parent until a layout root is reached, which registers with the LayoutController.
 
 - **LayoutImpl** (inherits ViewImpl)
   - Base implementation for layout containers. It holds no layout algorithm itself; derived classes attach a LayoutManager via `View::AttachLayoutManager()` in `OnInitialize()`.

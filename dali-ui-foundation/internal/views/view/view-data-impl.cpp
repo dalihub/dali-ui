@@ -1244,6 +1244,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mDefaultFocusIndicatorSuppressedByStateEffect(false),
   mLayoutDirectionSignalConnected(false),
   mInPassInvalidationWarned(false),
+  mChildOrderSignalConnected(false),
   // Pure cache key; its initial value is never consulted because
   // mArrangeCacheValid starts false.
   mLastArrangeDirection(Dali::LayoutDirection::LEFT_TO_RIGHT),
@@ -1597,7 +1598,7 @@ void ViewDataImpl::HandleFocusChangedDefault(bool focused)
 
 void ViewDataImpl::RelayoutDefault(const Vector2& size, RelayoutContainer& container)
 {
-  if(IntegrationView::HasLayoutCapability(mViewImpl) || GetParentLayout() || GetParentView())
+  if(IntegrationView::HasLayoutCapability(mViewImpl) || GetParentView())
   {
     return;
   }
@@ -2357,13 +2358,12 @@ void ViewDataImpl::InvalidateMeasure()
     return;
   }
 
-  Ui::Layout parentLayout = GetParentLayout();
-  if(parentLayout)
-  {
-    ViewDataImpl::Get(GetImpl(parentLayout)).InvalidateMeasure();
-    return;
-  }
-
+  // ONE parent lookup, not two. Ui::Layout derives from Ui::View and LayoutImpl from
+  // ViewImpl, so Ui::View::DownCast also matches a Layout parent and
+  // ViewDataImpl::Get(GetImpl(parentView)) reaches the very same ViewDataImpl that the
+  // Layout branch used to reach. The removed Layout branch cost an extra
+  // Actor::GetParent() plus a Layout::DownCast that FAILS for a plain-View parent --
+  // the overwhelmingly common case, and the expensive direction for a dynamic_cast.
   Ui::View parentView = GetParentView();
   if(parentView)
   {
@@ -2411,14 +2411,7 @@ void ViewDataImpl::InvalidateArrange()
     return;
   }
 
-  Ui::Layout parentLayout = GetParentLayout();
-  if(parentLayout)
-  {
-    ViewDataImpl::Get(GetImpl(parentLayout)).InvalidateArrange();
-    return;
-  }
-
-  // Propagate to parent View (no LayoutManager)
+  // One parent lookup; see the identical collapse in InvalidateMeasure above.
   Ui::View parentView = GetParentView();
   if(parentView)
   {
@@ -2715,9 +2708,123 @@ void ViewDataImpl::SetShadow(const ShadowStack& shadowStack)
   }
 }
 
+void ViewDataImpl::ApplyRequestedWidth(float width)
+{
+  if(!IsValidRequestedSize(width))
+  {
+    return;
+  }
+  // Snap a near-sentinel input to the exact sentinel so downstream
+  // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
+  if(FloatEqual(width, WRAP_CONTENT))
+  {
+    width = WRAP_CONTENT;
+  }
+  else if(FloatEqual(width, MATCH_PARENT))
+  {
+    width = MATCH_PARENT;
+  }
+  if(!FloatEqual(mRequestedWidth, width))
+  {
+    mRequestedWidth = width;
+    InvalidateMeasure();
+    // !GetParentView() alone: Layout derives from View, so a null View parent
+    // already implies a null Layout parent. The dropped GetParentLayout() call
+    // was a second Actor::GetParent() plus a DownCast that can never succeed
+    // when this one failed.
+    if(width >= 0 && !GetParentView() &&
+       !IntegrationView::HasLayoutCapability(mViewImpl) && mViewImpl.GetChildViewCount() == 0)
+    {
+      mViewImpl.Self().SetSizeWidth(width);
+    }
+  }
+}
+
+void ViewDataImpl::ApplyRequestedHeight(float height)
+{
+  if(!IsValidRequestedSize(height))
+  {
+    return;
+  }
+  // Snap a near-sentinel input to the exact sentinel so downstream
+  // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
+  if(FloatEqual(height, WRAP_CONTENT))
+  {
+    height = WRAP_CONTENT;
+  }
+  else if(FloatEqual(height, MATCH_PARENT))
+  {
+    height = MATCH_PARENT;
+  }
+  if(!FloatEqual(mRequestedHeight, height))
+  {
+    mRequestedHeight = height;
+    InvalidateMeasure();
+    // Same collapse as ApplyRequestedWidth above.
+    if(height >= 0 && !GetParentView() &&
+       !IntegrationView::HasLayoutCapability(mViewImpl) && mViewImpl.GetChildViewCount() == 0)
+    {
+      mViewImpl.Self().SetSizeHeight(height);
+    }
+  }
+}
+
+void ViewDataImpl::NotifyPropertySet(Dali::Handle& self, Property::Index index, const Property::Value& value)
+{
+  // Reproduce, in order, the two OBSERVABLE tails dali-core runs after a registered
+  // property's set function: the OnPropertySet virtual and then the guarded
+  // PropertySetSignal emit (Object::SetProperty, dali-core object-impl.cpp). Everything
+  // BETWEEN a C++ setter and its property case -- the Actor handle copy, the second
+  // Handle construction, the TypeInfo lookup, the registered callback's own handle
+  // DownCast and the switch -- is routing with no observable effect, and is exactly
+  // what calling the case body directly skips.
+  //
+  // The event-thread assert on that path is NOT in that list: on a worker thread the
+  // old route aborted deterministically with a message, which is observable behaviour.
+  // The setters replay it explicitly (see SetRequestedWidth), so the diagnostic
+  // contract is unchanged and this route does not assert twice.
+  //
+  // The OnPropertySet call is NOT optional: it is a protected virtual that a deriving
+  // ViewImpl may override (InputEditorImpl and InputFieldImpl already do), so dropping
+  // it would be a silent contract change. Neither is the emit:
+  // UtcDaliViewSetRequestedWidthFiresPropertySetSignalP pins it, and the accessibility
+  // bridge connects to the same signal.
+  //
+  // KNOWN LIMITATION, accepted by design: this replays THIS registration's tails.
+  // dali-core's TypeInfo::SetProperty prefers a same-index setter registered on a MORE
+  // DERIVED TypeInfo, and its duplicate-index check only covers one TypeInfo at a time,
+  // so a deriving type could mechanically shadow-register REQUESTED_WIDTH /
+  // REQUESTED_HEIGHT. Such a type would see the property route reach its shadow setter
+  // while this C++ setter still reaches ApplyRequested*. Shadow-registering a View
+  // property is an UNSUPPORTED pattern and predates this route: the C++ getters read
+  // the member directly, and SetRequestedX / SetRequestedY write it directly, so the
+  // whole C++ accessor layer has always assumed no shadowing.
+  mViewImpl.OnPropertySet(index, value);
+
+  auto& signal = self.PropertySetSignal();
+  if(!signal.Empty())
+  {
+    signal.Emit(self, index, value);
+  }
+}
+
 void ViewDataImpl::SetRequestedWidth(float width)
 {
-  mViewImpl.Self().SetProperty(Ui::View::Property::REQUESTED_WIDTH, width);
+  // Pin FIRST, exactly as dali-core does (Dali::Handle handle(this) is the second line
+  // of Object::SetProperty). The tail below re-enters application code --
+  // NotifyPropertySet calls the OnPropertySet virtual and then emits -- and a caller
+  // that reached this impl without a handle of its own would otherwise leave nothing
+  // holding the object across that re-entry.
+  // The handle is created once and carried through, so it is a MOVE of the Self() call
+  // NotifyPropertySet already made, not an addition. The assert IS an addition: it
+  // deliberately replays the diagnostic the old property route gave for free (see
+  // NotifyPropertySet), and sits after the pin because Self() runs no application code.
+  Dali::Handle self = mViewImpl.Self();
+
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
+
+  ApplyRequestedWidth(width);
+  NotifyPropertySet(self, Ui::View::Property::REQUESTED_WIDTH, width);
 }
 
 float ViewDataImpl::GetRequestedWidth() const
@@ -2727,7 +2834,13 @@ float ViewDataImpl::GetRequestedWidth() const
 
 void ViewDataImpl::SetRequestedHeight(float height)
 {
-  mViewImpl.Self().SetProperty(Ui::View::Property::REQUESTED_HEIGHT, height);
+  // Same pin-then-assert prologue as SetRequestedWidth above.
+  Dali::Handle self = mViewImpl.Self();
+
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
+
+  ApplyRequestedHeight(height);
+  NotifyPropertySet(self, Ui::View::Property::REQUESTED_HEIGHT, height);
 }
 
 float ViewDataImpl::GetRequestedHeight() const
@@ -3279,12 +3392,60 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
       mChildren.Insert(mChildren.Begin() + logicalIndex, view);
     }
 
+    // Connect the actor child-order signal HERE rather than in ViewImpl::Initialize:
+    // a leaf View that never gains a child paid a heap callback, the signal's first
+    // connection-pool block and a ConnectionTracker entry for an event that could
+    // never concern it. This is the earliest moment a reorder of a TRACKED child can
+    // happen: every ChildOrderChangedSignal emit site in dali-core
+    // (ActorParentImpl::RaiseChild .. InsertChild) moves an actor that is already a
+    // child, and a fresh Actor::Add / InsertAbove emits nothing at all -- which is why
+    // the logical-index sync above exists in the first place.
+    //
+    // Nothing is lost before the connection either: mChildren grows ONLY at the insert
+    // above, and OnChildOrderChanged's rebuild copies only views already in mChildren,
+    // so with mChildren empty the handler rebuilds an empty list, compares equal and
+    // returns without touching anything. A reorder among non-View actor children is
+    // exactly that case.
+    if(!mChildOrderSignalConnected)
+    {
+      DevelActor::ChildOrderChangedSignal(mViewImpl.Self()).Connect(this, &ViewDataImpl::OnChildOrderChanged);
+      mChildOrderSignalConnected = true;
+    }
+
     ViewImpl& childImpl = GetImpl(view);
 
     // If this child still has an in-flight transition under an old parent
     // (reparent during EXIT), cancel it before we mark the child for
     // ENTER under this view. Otherwise the orphan callback / animation
     // would keep driving the actor against the old parent's coord system.
+    //
+    // Gated on the process having ANY live LayoutTransition, because with none the
+    // whole block is provably a no-op and it is not cheap: Window::Get resolves the
+    // actor's Scene and scans the adaptor's window list, LayoutController::Get hashes
+    // the window pointer, and the two notifications below are five more map lookups
+    // and an ancestor walk. Every add in a transition-free application paid all of it.
+    //
+    // The gate is conservative, in both directions:
+    //  - NotifyChildReparented cancels entries in mActiveAnimations / mActiveAnimators /
+    //    mPendingExits. EVERY entry in those three maps holds a strong
+    //    Ui::LayoutTransition (see the entry structs in layout-transition-dispatcher.h),
+    //    so a non-empty map implies a live impl and the gate is open. Detaching a
+    //    transition from its view mid-EXIT does not close it -- the ghost's own handle
+    //    keeps the impl alive.
+    //  - NotifyChildAdded records nothing unless FindGoverningSubtreeOwner returns an
+    //    owner, and that requires some ancestor's GetLayoutTransition() to be non-empty,
+    //    which again implies a live impl.
+    // So "no live impl" implies "both calls do nothing", which is exactly what makes
+    // skipping them behaviour-preserving rather than merely usually-harmless.
+    //
+    // Skipping LayoutController::Get's incidental create-if-absent / ReplaceCurrentWindow
+    // side effect is safe too: it is routing, not contract. The child's own
+    // InvalidateMeasure() below reaches a layout root's RegisterWithLayoutController,
+    // which performs the same Window::Get + LayoutController::Get whenever a
+    // registration is actually needed; and when the walk short-circuits on the
+    // propagation generation instead, that generation was stamped by an earlier walk in
+    // this same generation that DID reach a root and DID resolve the controller.
+    if(Internal::LayoutTransitionImpl::HasAnyInstance())
     {
       Actor  self   = mViewImpl.Self();
       Window window = Window::Get(self);
@@ -3395,10 +3556,10 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // propagated" sentinel that no live generation ever equals (the counter starts at 1
     // and skips 0 on wrap). The child's walk therefore always runs in full, and dali-core
     // has already parented the child (Actor::SetParent precedes OnChildAdd), so
-    // GetParentLayout()/GetParentView() resolve to THIS view. When the walk arrives here
-    // it drops this view's cached scale, retracts BOTH layout caches, poisons an
-    // in-progress pass and raises both dirty bits before any short-circuit is even
-    // consulted -- everything the removed call did.
+    // GetParentView() resolves to THIS view. When the walk arrives here it drops this
+    // view's cached scale, retracts BOTH layout caches, poisons an in-progress pass and
+    // raises both dirty bits before any short-circuit is even consulted -- everything the
+    // removed call did.
     //
     // UtcDaliViewAddConfiguredOffSceneChildReMeasuresParentP and
     // UtcDaliViewReparentChildInSameBatchReMeasuresNewParentChainP pin it.
@@ -3617,9 +3778,10 @@ void ViewDataImpl::OnViewSceneDisconnection()
 
   // Remove from UiScaleManager if this view was registered as a layout root.
   // Two cases match the registration paths in RegisterWithLayoutController:
-  //   (a) tree root: no parent view and no parent layout
+  //   (a) tree root: no parent view -- which also means no parent LAYOUT, since
+  //       Ui::Layout derives from Ui::View and View::DownCast matches both
   //   (b) standalone: boundary views self-register regardless of their parent
-  if((!GetParentView() && !GetParentLayout()) || IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  if(!GetParentView() || IntegrationView::IsLayoutModeStandalone(mViewImpl))
   {
     UiScaleManager::Get().UnregisterLayoutRoot(View::DownCast(mViewImpl.Self()));
   }
@@ -3845,7 +4007,7 @@ void ViewDataImpl::SetArrangePolicy(ArrangePolicy policy)
   // unsafe to serve. Before the CustomActor handle exists, InvalidateArrange() cannot
   // walk to a layout root; at that point mArrangeCacheValid is necessarily false.
   // InvalidateArrange() walks to the layout root, and the FIRST thing that walk does
-  // on a handle-less view is GetParentLayout() -> mViewImpl.Self().GetParent(), where
+  // on a handle-less view is GetParentView() -> mViewImpl.Self().GetParent(), where
   // Self() hands back an empty Actor and dali-core's GetImplementation(Actor&) aborts
   // on `DALI_ASSERT_ALWAYS(actor && "Actor handle is empty")`. (The later
   // RegisterWithLayoutController() -> Window::Get(self) would abort for the same
@@ -5309,13 +5471,13 @@ float ViewDataImpl::ComputeEffectiveScale() const
     return GetSystemScale();
   }
 
-  // INHERIT: walk up the parent chain (Layout first, consistent with InvalidateMeasure)
-  Ui::Layout parentLayout = GetParentLayout();
-  if(parentLayout)
-  {
-    return GetImpl(parentLayout).GetEffectiveScale();
-  }
-
+  // INHERIT: walk up the parent chain. ONE parent lookup, the same collapse
+  // InvalidateMeasure makes: Ui::Layout derives from Ui::View and LayoutImpl from
+  // ViewImpl, so Ui::View::DownCast also matches a Layout parent and GetImpl reaches
+  // the very same ViewImpl -- and GetEffectiveScale is a non-virtual ViewImpl member,
+  // so the Layout branch resolved to this exact call. The dropped branch cost a second
+  // Actor::GetParent() plus a Layout::DownCast that FAILS for the common plain-View
+  // parent, once per node on every effective-scale cache miss.
   Ui::View parentView = GetParentView();
   if(parentView)
   {
@@ -5532,8 +5694,6 @@ void ViewDataImpl::RegisterWithLayoutController()
   Actor  self   = mViewImpl.Self();
   Window window = Window::Get(self);
 
-  DALI_LOG_DEBUG_INFO("[ViewImpl] RegisterWithLayoutController: hasWindow=%d\n", window ? 1 : 0);
-
   if(window)
   {
     // Lazy, once, and only for a view that registers with a LIVE window: an
@@ -5587,16 +5747,6 @@ MeasuredSize ViewDataImpl::ApplyConstraints(const MeasuredSize& size) const
   constrained.width        = std::min(constrained.width, GetMaximumWidth() * s);
   constrained.height       = std::min(constrained.height, GetMaximumHeight() * s);
   return constrained;
-}
-
-Ui::Layout ViewDataImpl::GetParentLayout() const
-{
-  Actor parent = mViewImpl.Self().GetParent();
-  if(parent)
-  {
-    return Ui::Layout::DownCast(parent);
-  }
-  return Ui::Layout();
 }
 
 Ui::View ViewDataImpl::GetParentView() const
@@ -6402,11 +6552,30 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 {
   DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
-  Ui::View view = Ui::View::DownCast(BaseHandle(object));
+  // Two casts, and each one earns its place.
+  //
+  // The HANDLE cast stops at CustomActor rather than going on to Ui::View: it is
+  // unavoidable (Dali::Internal::CustomActor is not a complete type outside dali-core),
+  // but the View handle the old code built on top of it was not -- that was a second
+  // handle and a reference-count round trip on every event-side property write, and
+  // `custom` is all the CORNER_RADIUS / CORNER_SQUARENESS re-entries below need.
+  //
+  // The IMPL cast stays a dynamic_cast in EVERY build. Registration makes it
+  // near-certain to succeed -- these callbacks are registered only on the View type
+  // (DALI_TYPE_REGISTRATION_BEGIN_FULL above), and dali-core resolves a CustomActor's
+  // TypeInfo from the RTTI of its own CustomActorImpl, so an impl that is not a
+  // registered View descendant falls back to the plain CustomActor type whose base
+  // chain never reaches here. But the type registry does NOT verify that a registered
+  // inheritance chain matches the actual C++ one, so an impl falsely registered as a
+  // View descendant is reachable. Under the old Ui::View::DownCast that was a silent
+  // no-op; a static_cast would make it release-build undefined behaviour. Failing
+  // silently, as before, is worth one dynamic_cast on the scripting / styling route.
+  Dali::CustomActor custom      = Dali::CustomActor::DownCast(BaseHandle(object));
+  ViewImpl*         viewImplPtr = custom ? dynamic_cast<ViewImpl*>(&custom.GetImplementation()) : nullptr;
 
-  if(view)
+  if(viewImplPtr)
   {
-    ViewImpl& viewImpl(GetImpl(view));
+    ViewImpl& viewImpl(*viewImplPtr);
 
     switch(index)
     {
@@ -6612,8 +6781,11 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         float radiusFloat = 0.0f;
         if(value.Get(radiusFloat))
         {
-          view.SetProperty(Ui::View::Property::CORNER_RADIUS,
-                           Vector4(radiusFloat, radiusFloat, radiusFloat, radiusFloat));
+          // Re-enter through the handle we already hold. Handle::SetProperty is not
+          // hidden or overridden by Ui::View, so this is the same Object::SetProperty
+          // the Ui::View handle used to reach -- one fewer handle, same dispatch.
+          custom.SetProperty(Ui::View::Property::CORNER_RADIUS,
+                             Vector4(radiusFloat, radiusFloat, radiusFloat, radiusFloat));
           break;
         }
 
@@ -6650,8 +6822,9 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         float squarenessFloat = 0.0f;
         if(value.Get(squarenessFloat))
         {
-          view.SetProperty(Ui::View::Property::CORNER_SQUARENESS,
-                           Vector4(squarenessFloat, squarenessFloat, squarenessFloat, squarenessFloat));
+          // Same re-entry as CORNER_RADIUS above.
+          custom.SetProperty(Ui::View::Property::CORNER_SQUARENESS,
+                             Vector4(squarenessFloat, squarenessFloat, squarenessFloat, squarenessFloat));
           break;
         }
 
@@ -6716,32 +6889,19 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
+      // The two REQUESTED_* cases keep ONLY the type-coercion half here -- the part a
+      // C++ setter, which already holds a float, does not need. Everything after it
+      // (validation, sentinel snap, change guard, invalidation, parentless-leaf apply)
+      // lives in ViewDataImpl::ApplyRequested*, the single implementation both routes
+      // share, so the scripting route and Ui::GetImpl(view).SetRequested*() cannot
+      // drift. IsValidRequestedSize moved INSIDE Apply*, so the composed predicate
+      // `value.Get(w) && IsValidRequestedSize(w)` is preserved exactly.
       case Ui::View::Property::REQUESTED_WIDTH:
       {
         float width;
-        if(value.Get(width) && IsValidRequestedSize(width))
+        if(value.Get(width))
         {
-          // Snap a near-sentinel input to the exact sentinel so downstream
-          // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
-          if(FloatEqual(width, WRAP_CONTENT))
-          {
-            width = WRAP_CONTENT;
-          }
-          else if(FloatEqual(width, MATCH_PARENT))
-          {
-            width = MATCH_PARENT;
-          }
-          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
-          if(!FloatEqual(dataImpl.mRequestedWidth, width))
-          {
-            dataImpl.mRequestedWidth = width;
-            dataImpl.InvalidateMeasure();
-            if(width >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
-               !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
-            {
-              viewImpl.Self().SetSizeWidth(width);
-            }
-          }
+          viewImpl.GetViewDataImpl().ApplyRequestedWidth(width);
         }
         break;
       }
@@ -6749,29 +6909,9 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       case Ui::View::Property::REQUESTED_HEIGHT:
       {
         float height;
-        if(value.Get(height) && IsValidRequestedSize(height))
+        if(value.Get(height))
         {
-          // Snap a near-sentinel input to the exact sentinel so downstream
-          // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
-          if(FloatEqual(height, WRAP_CONTENT))
-          {
-            height = WRAP_CONTENT;
-          }
-          else if(FloatEqual(height, MATCH_PARENT))
-          {
-            height = MATCH_PARENT;
-          }
-          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
-          if(!FloatEqual(dataImpl.mRequestedHeight, height))
-          {
-            dataImpl.mRequestedHeight = height;
-            dataImpl.InvalidateMeasure();
-            if(height >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
-               !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
-            {
-              viewImpl.Self().SetSizeHeight(height);
-            }
-          }
+          viewImpl.GetViewDataImpl().ApplyRequestedHeight(height);
         }
         break;
       }
@@ -6884,11 +7024,13 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
   Property::Value value;
 
-  Ui::View view = Ui::View::DownCast(BaseHandle(object));
+  // See the equivalent note in SetProperty above.
+  Dali::CustomActor custom      = Dali::CustomActor::DownCast(BaseHandle(object));
+  ViewImpl*         viewImplPtr = custom ? dynamic_cast<ViewImpl*>(&custom.GetImplementation()) : nullptr;
 
-  if(view)
+  if(viewImplPtr)
   {
-    ViewImpl& viewImpl(GetImpl(view));
+    ViewImpl& viewImpl(*viewImplPtr);
 
     switch(index)
     {

@@ -22,6 +22,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
 #include <array>
+#include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/animation/duration.h>
@@ -65,6 +66,30 @@ public:
   static constexpr size_t LAYOUT_CHANGE_CAUSE_COUNT = 5u; ///< 5 = enum count of LayoutChangeCause
 
   static LayoutTransitionImplPtr New();
+
+  /**
+   * @brief Returns whether ANY LayoutTransitionImpl exists in this process.
+   *
+   * The single global question the per-add transition bookkeeping needs answered cheaply.
+   * With no transition object in existence, every dispatcher notification an add could
+   * make is provably a no-op, so the whole Window -> LayoutController -> dispatcher hop
+   * is pure cost and can be skipped.
+   *
+   * LIVE INSTANCES, deliberately, and not "transitions currently attached to a view":
+   * every dispatcher entry a notification can touch keeps a STRONG
+   * Ui::LayoutTransition -- ActiveSpecAnimation::transition, GhostExit::transition and
+   * AnimatorState::transition -- so an in-flight EXIT whose transition was detached
+   * from its view mid-flight still pins its impl and still counts here. An
+   * "attached" counter would not see it and the gate would not be conservative.
+   *
+   * Event thread only, like every other layout-side counter in this library.
+   *
+   * @return True when at least one LayoutTransitionImpl is alive
+   */
+  static bool HasAnyInstance()
+  {
+    return gInstanceCount != 0u;
+  }
 
   // ─── Visual property animation channel ──────────────────────────────────
   void SetEnterVisualSpec(ViewAnimationSpec spec);
@@ -197,6 +222,11 @@ private:
   LayoutTransitionImpl(LayoutTransitionImpl&&)                 = delete;
   LayoutTransitionImpl& operator=(const LayoutTransitionImpl&) = delete;
   LayoutTransitionImpl& operator=(LayoutTransitionImpl&&)      = delete;
+
+  /// Live LayoutTransitionImpl count. Bumped in the constructor and dropped in the
+  /// destructor, which is exhaustive: the copy and move members above are deleted and
+  /// New() is the only construction site.
+  static uint32_t gInstanceCount;
 
   // ─── Visual ──────────
   ViewAnimationSpec mEnterVisualSpec;

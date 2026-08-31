@@ -26,6 +26,7 @@
 #include <dali/integration-api/processor-interface.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/math/compile-time-math.h>
+#include <dali/public-api/object/handle.h>
 #include <dali/public-api/object/property-notification.h>
 #include <string>
 #include <vector>
@@ -495,10 +496,30 @@ public:
   }
   /// @}
 
-  Ui::Layout GetParentLayout() const;
-  View       GetParentView() const;
-  void       EmitFocusChangedSignal(bool focusGained);
-  void       RegisterWithLayoutController();
+  View GetParentView() const;
+  void EmitFocusChangedSignal(bool focusGained);
+  void RegisterWithLayoutController();
+
+  /// THE implementation of a RequestedWidth / RequestedHeight write. Validation,
+  /// sentinel snap, change guard, invalidation and the parentless-leaf immediate apply
+  /// all live here and nowhere else: the registered property setter (the scripting /
+  /// JSON route) and the C++ setter both call in, so the two can never drift.
+  /// @{
+  void ApplyRequestedWidth(float width);
+  void ApplyRequestedHeight(float height);
+  /// @}
+
+  /// Replays the two OBSERVABLE tails dali-core runs after a registered property's set
+  /// function, for a C++ setter that wrote the member directly instead of going through
+  /// Handle::SetProperty. See the definition for why each tail is mandatory.
+  ///
+  /// @p self is the strong handle the CALLER already made to pin this object for the
+  /// whole write. It is an INPUT, not a convenience: dali-core's Object::SetProperty
+  /// pins at function entry and emits with that same handle, and both tails below can
+  /// re-enter application code that releases the last external reference. Taking the
+  /// caller's handle keeps the pin and the emit argument the same object and costs no
+  /// second Self() round trip.
+  void NotifyPropertySet(Dali::Handle& self, Property::Index index, const Property::Value& value);
 
   bool UpdateColorBindingInternal(StringView bindingId, const UiColor& color);
   void SetColorBindingInternal(StringView bindingId, const UiColor& color, ColorCallback callback);
@@ -1787,6 +1808,7 @@ private:
   bool         mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
   bool         mLayoutDirectionSignalConnected : 1;               ///< True once this view registered with the LayoutController on a live window (an on-scene layout root or on-scene standalone boundary) and connected the actor layout-direction signal; never cleared -- the claim "core emits on this actor" survives reparenting and scene disconnection, which is what keeps OnPropertySet's short-circuit sound.
   bool         mInPassInvalidationWarned : 1;                     ///< Latched once this View has logged an in-pass Invalidate*() contract violation; never cleared.
+  bool         mChildOrderSignalConnected : 1;                    ///< True once this view connected the actor child-order signal. Made lazily, at the first tracked (View) child add, because that is the earliest moment a reorder of a tracked child becomes possible: every dali-core emit site moves an actor that is ALREADY a child, and a fresh Add / InsertAbove emits nothing. Never cleared -- the claim "core emits on this actor" survives the last child leaving.
 
   /// Pure cache KEY: the effective layout direction mArrangedBounds was produced under.
   /// Valid only while mArrangeCacheValid is true. Recorded as a KEY because the direction

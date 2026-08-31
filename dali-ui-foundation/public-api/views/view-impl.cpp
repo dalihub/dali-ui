@@ -65,9 +65,14 @@ thread_local unsigned int gAllowNonViewChildDepth = 0u;
 
 ViewImplPtr ViewImpl::New()
 {
-  IntrusivePtr<ViewImpl> viewImpl = new ViewImpl();
+  ViewImplPtr viewImpl = new ViewImpl();
 
-  return ViewImplPtr(viewImpl);
+  // Return the local itself, not a copy of it. `return ViewImplPtr(viewImpl)` copy-
+  // constructs from an lvalue, which is a Reference/Unreference pair of atomics
+  // (RefObject, dali-core) on every View::New. Naming the local in the return
+  // statement is NRVO-eligible, and IntrusivePtr's move constructor detaches without
+  // touching the count at all.
+  return viewImpl;
 }
 
 ViewImpl::ViewImpl()
@@ -795,9 +800,7 @@ void ViewImpl::Initialize()
   //
   // While the direction hook did live here, it was here rather than in
   // OnInitialize() because OnInitialize is virtual: a third-party subclass that
-  // overrode it without up-calling would silently lose the hook. That is the
-  // reason the child-order connection below still sits in this non-virtual,
-  // single-entry-point second phase.
+  // overrode it without up-calling would silently lose the hook.
 
   // Child order is the other actor-owned input to layout that only dali-core can
   // report. OnChildOrderChanged() rebuilds mChildren in actor order, tags the
@@ -806,13 +809,19 @@ void ViewImpl::Initialize()
   // caches valid, so the settled subtree is replayed at the stale order instead of
   // being re-laid-out.
   //
-  // Connected HERE and not in OnInitialize(), for exactly the reason given above
-  // for the direction signal: OnInitialize is virtual, and a third-party subclass
-  // that overrides it without up-calling would silently lose the hook. This is
-  // also strictly better placed than before -- the connection is now live BEFORE
-  // OnInitialize() runs below, so children a subclass adds from OnInitialize() are
-  // covered too.
-  DevelActor::ChildOrderChangedSignal(Self()).Connect(mImpl, &Internal::ViewDataImpl::OnChildOrderChanged);
+  // That connection is NOT made here. It is made lazily, in
+  // Internal::ViewDataImpl::OnChildAdded, at the moment this view gains its FIRST
+  // tracked (View) child -- see the reasoning there. Connecting for every View cost a
+  // leaf that never gains a child a heap callback, the signal's first connection-pool
+  // block and a ConnectionTracker entry, for an event that could never concern it, and
+  // that leaf is the common case in a large tree. The new site does not reintroduce the
+  // virtual-OnInitialize hazard that kept the direction hook out of OnInitialize()
+  // either. It is reached through ViewImpl::OnChildAdd, which IS a virtual and is not
+  // final, so a subclass can displace it -- but a subclass that overrides OnChildAdd
+  // without up-calling already forfeits mChildren synchronization itself, today, with
+  // or without a connection here. The lazy connection therefore adds no exposure that
+  // was not there before. It also still runs before any reorder of a tracked child is
+  // possible, including for children a subclass adds from its own OnInitialize().
 
   if(mImpl->AreVisualsEnabled())
   {
@@ -824,7 +833,12 @@ void ViewImpl::Initialize()
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
 
-  View view = View::DownCast(Self());
+  // View(Internal::CustomActor*) rather than View::DownCast(Self()): the owner is
+  // already live here (View::New constructs the handle before calling Initialize), and
+  // the DownCast form paid two dynamic_casts and two extra handle constructions to
+  // re-derive a type this function already knows. The constructor keeps the debug-build
+  // check via VerifyCustomActorPointer<ViewImpl>.
+  View view(GetOwner());
   view.SetLeaveRequired(true);
   // NOTE: UI layout coordinates are normally based on the parent's top-left,
   // while scale/rotation transform origins are normally centered. Keep

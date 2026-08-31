@@ -2250,6 +2250,110 @@ int UtcDaliViewSetRequestedHeightZeroP(void)
   END_TEST;
 }
 
+// =============================================================================
+// Setter / property equivalence for REQUESTED_WIDTH and REQUESTED_HEIGHT.
+//
+// The C++ setter no longer routes through Handle::SetProperty; it calls the same
+// ViewDataImpl::ApplyRequested* the registered property callback calls, and then
+// replays dali-core's observable tail. That is only sound while the two routes
+// remain indistinguishable, so this pins every outcome the shared implementation
+// decides: the stored value, the near-sentinel snap, the rejection of an invalid
+// input, and the parentless-leaf immediate actor-size application. A future change
+// that gives either route a private copy of the logic fails here.
+// =============================================================================
+
+int UtcDaliViewSetRequestedWidthMatchesPropertyRouteP(void)
+{
+  UiTestApplication application;
+  tet_infoline("SetRequestedWidth and SetProperty(REQUESTED_WIDTH) agree on every outcome");
+
+  View viaSetter   = View::New();
+  View viaProperty = View::New();
+
+  // Plain value. Both views are parentless, childless and have no layout
+  // capability, so the write must also reach the actor immediately on both routes.
+  Ui::GetImpl(viaSetter).SetRequestedWidth(120.0f);
+  viaProperty.SetProperty(View::Property::REQUESTED_WIDTH, 120.0f);
+  DALI_TEST_EQUALS(viaSetter.GetRequestedWidth(), viaProperty.GetRequestedWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(viaSetter.GetRequestedWidth(), 120.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(viaSetter.GetSize().width, viaProperty.GetSize().width, TEST_LOCATION);
+  DALI_TEST_EQUALS(viaSetter.GetSize().width, 120.0f, TEST_LOCATION);
+
+  // Near-sentinel snap. EXACT comparison on purpose: the point of the snap is that
+  // downstream `== WRAP_CONTENT` tests hold, and an epsilon compare could not tell
+  // a snapped value from a stored -1.0005f.
+  Ui::GetImpl(viaSetter).SetRequestedWidth(-1.0005f);
+  viaProperty.SetProperty(View::Property::REQUESTED_WIDTH, -1.0005f);
+  DALI_TEST_CHECK(viaSetter.GetRequestedWidth() == WRAP_CONTENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedWidth() == WRAP_CONTENT);
+
+  Ui::GetImpl(viaSetter).SetRequestedWidth(-2.0005f);
+  viaProperty.SetProperty(View::Property::REQUESTED_WIDTH, -2.0005f);
+  DALI_TEST_CHECK(viaSetter.GetRequestedWidth() == MATCH_PARENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedWidth() == MATCH_PARENT);
+
+  // Rejection. An invalid input leaves the previous value standing, identically.
+  Ui::GetImpl(viaSetter).SetRequestedWidth(-3.0f);
+  viaProperty.SetProperty(View::Property::REQUESTED_WIDTH, -3.0f);
+  DALI_TEST_CHECK(viaSetter.GetRequestedWidth() == MATCH_PARENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedWidth() == MATCH_PARENT);
+
+  Ui::GetImpl(viaSetter).SetRequestedWidth(std::numeric_limits<float>::quiet_NaN());
+  viaProperty.SetProperty(View::Property::REQUESTED_WIDTH, std::numeric_limits<float>::quiet_NaN());
+  DALI_TEST_CHECK(viaSetter.GetRequestedWidth() == MATCH_PARENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedWidth() == MATCH_PARENT);
+
+  Ui::GetImpl(viaSetter).SetRequestedWidth(std::numeric_limits<float>::infinity());
+  viaProperty.SetProperty(View::Property::REQUESTED_WIDTH, std::numeric_limits<float>::infinity());
+  DALI_TEST_CHECK(viaSetter.GetRequestedWidth() == MATCH_PARENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedWidth() == MATCH_PARENT);
+
+  END_TEST;
+}
+
+int UtcDaliViewSetRequestedHeightMatchesPropertyRouteP(void)
+{
+  UiTestApplication application;
+  tet_infoline("SetRequestedHeight and SetProperty(REQUESTED_HEIGHT) agree on every outcome");
+
+  View viaSetter   = View::New();
+  View viaProperty = View::New();
+
+  Ui::GetImpl(viaSetter).SetRequestedHeight(90.0f);
+  viaProperty.SetProperty(View::Property::REQUESTED_HEIGHT, 90.0f);
+  DALI_TEST_EQUALS(viaSetter.GetRequestedHeight(), viaProperty.GetRequestedHeight(), TEST_LOCATION);
+  DALI_TEST_EQUALS(viaSetter.GetRequestedHeight(), 90.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(viaSetter.GetSize().height, viaProperty.GetSize().height, TEST_LOCATION);
+  DALI_TEST_EQUALS(viaSetter.GetSize().height, 90.0f, TEST_LOCATION);
+
+  Ui::GetImpl(viaSetter).SetRequestedHeight(-1.0005f);
+  viaProperty.SetProperty(View::Property::REQUESTED_HEIGHT, -1.0005f);
+  DALI_TEST_CHECK(viaSetter.GetRequestedHeight() == WRAP_CONTENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedHeight() == WRAP_CONTENT);
+
+  Ui::GetImpl(viaSetter).SetRequestedHeight(-2.0005f);
+  viaProperty.SetProperty(View::Property::REQUESTED_HEIGHT, -2.0005f);
+  DALI_TEST_CHECK(viaSetter.GetRequestedHeight() == MATCH_PARENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedHeight() == MATCH_PARENT);
+
+  Ui::GetImpl(viaSetter).SetRequestedHeight(-3.0f);
+  viaProperty.SetProperty(View::Property::REQUESTED_HEIGHT, -3.0f);
+  DALI_TEST_CHECK(viaSetter.GetRequestedHeight() == MATCH_PARENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedHeight() == MATCH_PARENT);
+
+  Ui::GetImpl(viaSetter).SetRequestedHeight(std::numeric_limits<float>::quiet_NaN());
+  viaProperty.SetProperty(View::Property::REQUESTED_HEIGHT, std::numeric_limits<float>::quiet_NaN());
+  DALI_TEST_CHECK(viaSetter.GetRequestedHeight() == MATCH_PARENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedHeight() == MATCH_PARENT);
+
+  Ui::GetImpl(viaSetter).SetRequestedHeight(std::numeric_limits<float>::infinity());
+  viaProperty.SetProperty(View::Property::REQUESTED_HEIGHT, std::numeric_limits<float>::infinity());
+  DALI_TEST_CHECK(viaSetter.GetRequestedHeight() == MATCH_PARENT);
+  DALI_TEST_CHECK(viaProperty.GetRequestedHeight() == MATCH_PARENT);
+
+  END_TEST;
+}
+
 int UtcDaliViewMeasureZeroWidthP(void)
 {
   UiTestApplication application;
@@ -3418,6 +3522,28 @@ struct PropertySetRecorder : public Dali::ConnectionTracker
   {
     return std::find(indices.begin(), indices.end(), index) != indices.end();
   }
+
+  // Per-INDEX count, not the total: a setter's own work can emit unrelated properties
+  // (the parentless-leaf immediate apply writes Actor SIZE_WIDTH, for one), so only a
+  // per-index count can express "exactly once".
+  uint32_t CountOf(Dali::Property::Index index) const
+  {
+    return static_cast<uint32_t>(std::count(indices.begin(), indices.end(), index));
+  }
+
+  float FirstFloatOf(Dali::Property::Index index) const
+  {
+    for(size_t i = 0u; i < indices.size(); ++i)
+    {
+      if(indices[i] == index)
+      {
+        float value = 0.0f;
+        values[i].Get(value);
+        return value;
+      }
+    }
+    return std::numeric_limits<float>::quiet_NaN();
+  }
 };
 } // namespace
 
@@ -3457,6 +3583,19 @@ int UtcDaliViewSetRequestedWidthFiresPropertySetSignalP(void)
   Ui::GetImpl(view).SetRequestedWidth(120.0f);
 
   DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::REQUESTED_WIDTH));
+  END_TEST;
+}
+
+int UtcDaliViewSetRequestedHeightFiresPropertySetSignalP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  Ui::GetImpl(view).SetRequestedHeight(80.0f);
+
+  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::REQUESTED_HEIGHT));
   END_TEST;
 }
 
@@ -8851,6 +8990,72 @@ int UtcDaliViewChildOrderUnchangedDoesNotInvalidateP(void)
   END_TEST;
 }
 
+// Lazy child-order connection. The actor child-order signal is connected at the FIRST
+// tracked (View) child add, not in ViewImpl::Initialize, so a leaf that never gains a
+// child pays no callback, no connection-pool block and no ConnectionTracker entry.
+// Two halves of that have to hold.
+//
+// (1) A reorder among NON-View actor children while the parent has no View child at
+//     all is delivered to nothing. It must be a harmless no-op -- which is the same
+//     fact that makes deferring the connection sound: the handler rebuilds the View
+//     sequence out of views ALREADY in mChildren, so with none there it compares equal
+//     and returns.
+// (2) The connection must be live by the time a real View reorder is possible, so the
+//     View child order still resyncs to the actor order afterwards. GetChildViewAt is
+//     the public read of exactly that sequence.
+int UtcDaliViewReorderBeforeFirstViewChildIsHarmlessP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A reorder with no View child yet is a harmless no-op; a later View reorder still resyncs");
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  window.Add(parent);
+
+  // Two plain Actors and not one View: nothing is tracked, so nothing is connected.
+  // They have to go in through the Integration helper -- View::Add asserts on a
+  // non-View child otherwise.
+  Dali::Actor spacerA = Dali::Actor::New();
+  Dali::Actor spacerB = Dali::Actor::New();
+  IntegrationView::AddActorChild(parent, spacerA);
+  IntegrationView::AddActorChild(parent, spacerB);
+
+  SettleLayout(application);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 0u, TEST_LOCATION);
+
+  // The reorder that used to be delivered to a connected-but-idle handler.
+  spacerA.RaiseToTop();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 0u, TEST_LOCATION);
+
+  // The first tracked children arrive; this is where the connection is made.
+  View a = View::New();
+  a.SetRequestedWidth(50.0f);
+  a.SetRequestedHeight(40.0f);
+  View b = View::New();
+  b.SetRequestedWidth(60.0f);
+  b.SetRequestedHeight(30.0f);
+  parent.Add(a);
+  parent.Add(b);
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(parent.GetChildViewAt(0) == a);
+  DALI_TEST_CHECK(parent.GetChildViewAt(1) == b);
+
+  // A real View reorder must still be observed: [a, b] -> [b, a].
+  Dali::Actor(a).RaiseToTop();
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(parent.GetChildViewAt(0) == b);
+  DALI_TEST_CHECK(parent.GetChildViewAt(1) == a);
+
+  END_TEST;
+}
+
 // Value guard, layout-params half. SetLayoutParams re-writing the params already in
 // place has nothing to retract and nothing to schedule. The motivating recurrence is
 // ScrollBarImpl::SetVBarBounds, which re-writes its bar's AbsoluteLayoutParams on
@@ -9481,5 +9686,303 @@ int UtcDaliViewInactiveArrangePolicyChangeKeepsArrangeCacheP(void)
   DALI_TEST_CHECK(CountingContainerImplOf(view).GetArrangeCallCount() > ownBase);
   DALI_TEST_EQUALS(gCountingArrangeProducerCount, callbackBase, TEST_LOCATION);
 
+  END_TEST;
+}
+
+// =============================================================================
+// The C++ requested-size setters write the member directly rather than going
+// through Handle::SetProperty, and replay dali-core's two OBSERVABLE tails
+// themselves: the OnPropertySet virtual, then the guarded PropertySetSignal
+// emit. These tests pin BOTH tails, their ORDER, and the pin that keeps the
+// view alive across them.
+// =============================================================================
+
+namespace
+{
+// Ordered trace of the two OBSERVABLE tails: 1 = OnPropertySet virtual, 2 = signal emit.
+std::vector<int>             gTailOrder;
+std::vector<Property::Index> gRecordedIndices;
+std::vector<float>           gRecordedValues;
+
+class PropertySetRecordingViewImpl : public ViewImpl
+{
+public:
+  static IntrusivePtr<PropertySetRecordingViewImpl> New()
+  {
+    return IntrusivePtr<PropertySetRecordingViewImpl>(new PropertySetRecordingViewImpl());
+  }
+
+protected:
+  PropertySetRecordingViewImpl()
+  : ViewImpl()
+  {
+  }
+
+  void OnPropertySet(Property::Index index, const Property::Value& propertyValue) override
+  {
+    if(index == Ui::View::Property::REQUESTED_WIDTH || index == Ui::View::Property::REQUESTED_HEIGHT)
+    {
+      float value = 0.0f;
+      propertyValue.Get(value);
+      gTailOrder.push_back(1);
+      gRecordedIndices.push_back(index);
+      gRecordedValues.push_back(value);
+    }
+    // Chain: the LAYOUT_DIRECTION / CLIPPING_MODE cases live in the base.
+    ViewImpl::OnPropertySet(index, propertyValue);
+  }
+};
+
+// Register so TypeInfo lookup can walk the chain.
+Dali::TypeRegistration propertySetRecordingViewTypeReg(
+  typeid(PropertySetRecordingViewImpl), typeid(ViewImpl), nullptr);
+
+struct TailOrderWitness : public Dali::ConnectionTracker
+{
+  void OnSet(Dali::Handle /*handle*/, Property::Index index, const Property::Value& /*value*/)
+  {
+    if(index == Ui::View::Property::REQUESTED_WIDTH || index == Ui::View::Property::REQUESTED_HEIGHT)
+    {
+      gTailOrder.push_back(2);
+    }
+  }
+};
+
+// Mirrors View::New(), including the explicit second-phase Initialize().
+View CreatePropertySetRecordingView()
+{
+  IntrusivePtr<PropertySetRecordingViewImpl> impl = PropertySetRecordingViewImpl::New();
+  View                                       handle(*impl);
+  impl->Initialize();
+  return handle;
+}
+
+void ResetTailCaptures()
+{
+  gTailOrder.clear();
+  gRecordedIndices.clear();
+  gRecordedValues.clear();
+}
+} // namespace
+
+int UtcDaliViewSetRequestedWidthCallsOnPropertySetBeforeSignalP(void)
+{
+  UiTestApplication application;
+  tet_infoline("The C++ requested-size setter replays BOTH core tails: the OnPropertySet "
+               "virtual once with the original value, and then the signal emit");
+
+  ResetTailCaptures();
+
+  View             view = CreatePropertySetRecordingView();
+  TailOrderWitness witness;
+  Dali::Handle     handle = view;
+  handle.PropertySetSignal().Connect(&witness, &TailOrderWitness::OnSet);
+
+  Ui::GetImpl(view).SetRequestedWidth(120.0f);
+
+  DALI_TEST_EQUALS(gRecordedIndices.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gRecordedIndices[0], static_cast<Property::Index>(Ui::View::Property::REQUESTED_WIDTH), TEST_LOCATION);
+  DALI_TEST_EQUALS(gRecordedValues[0], 120.0f, 0.0001f, TEST_LOCATION);
+  // OnPropertySet FIRST, emit SECOND -- the order dali-core's Object::SetProperty uses.
+  DALI_TEST_EQUALS(gTailOrder.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gTailOrder[0], 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gTailOrder[1], 2, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetRequestedHeightCallsOnPropertySetBeforeSignalP(void)
+{
+  UiTestApplication application;
+  tet_infoline("The height setter replays the same two tails in the same order");
+
+  ResetTailCaptures();
+
+  View             view = CreatePropertySetRecordingView();
+  TailOrderWitness witness;
+  Dali::Handle     handle = view;
+  handle.PropertySetSignal().Connect(&witness, &TailOrderWitness::OnSet);
+
+  Ui::GetImpl(view).SetRequestedHeight(80.0f);
+
+  DALI_TEST_EQUALS(gRecordedIndices.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gRecordedIndices[0], static_cast<Property::Index>(Ui::View::Property::REQUESTED_HEIGHT), TEST_LOCATION);
+  DALI_TEST_EQUALS(gRecordedValues[0], 80.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gTailOrder.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gTailOrder[0], 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gTailOrder[1], 2, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewRequestedWidthPropertyCallsOnPropertySetBeforeSignalP(void)
+{
+  UiTestApplication application;
+  tet_infoline("The property route produces the SAME two tails in the same order, which "
+               "is what makes the C++ setter's replay equivalent");
+
+  ResetTailCaptures();
+
+  View             view = CreatePropertySetRecordingView();
+  TailOrderWitness witness;
+  Dali::Handle     handle = view;
+  handle.PropertySetSignal().Connect(&witness, &TailOrderWitness::OnSet);
+
+  view.SetProperty(Ui::View::Property::REQUESTED_WIDTH, 120.0f);
+
+  DALI_TEST_EQUALS(gRecordedIndices.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gRecordedIndices[0], static_cast<Property::Index>(Ui::View::Property::REQUESTED_WIDTH), TEST_LOCATION);
+  DALI_TEST_EQUALS(gRecordedValues[0], 120.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gTailOrder.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gTailOrder[0], 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gTailOrder[1], 2, TEST_LOCATION);
+  END_TEST;
+}
+
+namespace
+{
+bool gDropReached           = false; // the override ran and released the handle
+bool gEmitAfterDrop         = false; // the signal fired AFTER that release
+bool gDroppingViewDestroyed = false; // the release really was the last one
+
+// THE only application handle to the view while the setter runs. File-static, so the
+// assertions below never touch the (by then destroyed) view.
+View gDropHolder;
+
+class HandleDroppingViewImpl : public ViewImpl
+{
+public:
+  static IntrusivePtr<HandleDroppingViewImpl> New()
+  {
+    return IntrusivePtr<HandleDroppingViewImpl>(new HandleDroppingViewImpl());
+  }
+
+protected:
+  HandleDroppingViewImpl()
+  : ViewImpl()
+  {
+  }
+
+  ~HandleDroppingViewImpl() override
+  {
+    gDroppingViewDestroyed = true;
+  }
+
+  void OnPropertySet(Property::Index index, const Property::Value& propertyValue) override
+  {
+    if(index == Ui::View::Property::REQUESTED_WIDTH && gDropHolder)
+    {
+      gDropHolder.Reset(); // last APPLICATION reference gone, mid-write
+      gDropReached = true;
+    }
+    ViewImpl::OnPropertySet(index, propertyValue);
+  }
+};
+
+Dali::TypeRegistration handleDroppingViewTypeReg(
+  typeid(HandleDroppingViewImpl), typeid(ViewImpl), nullptr);
+
+struct DropWitness : public Dali::ConnectionTracker
+{
+  void OnSet(Dali::Handle /*handle*/, Property::Index index, const Property::Value& /*value*/)
+  {
+    if(index == Ui::View::Property::REQUESTED_WIDTH && gDropReached)
+    {
+      gEmitAfterDrop = true;
+    }
+  }
+};
+} // namespace
+
+int UtcDaliViewSetRequestedWidthSurvivesHandleDropInOnPropertySetP(void)
+{
+  UiTestApplication application;
+  tet_infoline("The C++ requested-size setter pins the view for the whole write, so an "
+               "OnPropertySet override may release the last application handle");
+
+  gDropReached = gEmitAfterDrop = gDroppingViewDestroyed = false;
+  DropWitness witness;
+
+  {
+    IntrusivePtr<HandleDroppingViewImpl> impl = HandleDroppingViewImpl::New();
+    gDropHolder = View(*impl);
+    impl->Initialize();
+  } // `impl` released: the CustomActor owns the impl, gDropHolder owns the CustomActor
+
+  {
+    Dali::Handle probe = gDropHolder;
+    probe.PropertySetSignal().Connect(&witness, &DropWitness::OnSet);
+  } // a signal connection holds no reference -- gDropHolder is again the ONLY handle
+
+  // Raw-impl entry: no handle of the caller's own is alive for the duration. This is
+  // exactly the call shape the pin protects. The view is deliberately OFF-SCENE, so
+  // no window holds a reference either.
+  Ui::GetImpl(gDropHolder).SetRequestedWidth(120.0f);
+
+  // The view is GONE from here on. Read only the witnesses -- never gDropHolder's impl.
+  DALI_TEST_EQUALS(gDropReached, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(gEmitAfterDrop, true, TEST_LOCATION);         // it emitted => it was alive
+  DALI_TEST_EQUALS(gDroppingViewDestroyed, true, TEST_LOCATION); // the drop WAS the last
+  DALI_TEST_CHECK(!gDropHolder);
+  END_TEST;
+}
+
+// =============================================================================
+// Exactly-once emission, and the emitted VALUE. Guaranteed by construction: the
+// property route reaches only ApplyRequested*, with dali-core supplying the single
+// emit, while the C++ route calls ApplyRequested* plus one NotifyPropertySet.
+// =============================================================================
+
+int UtcDaliViewSetRequestedWidthEmitsPropertySetSignalExactlyOnceP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  Ui::GetImpl(view).SetRequestedWidth(120.0f); // C++ route
+
+  DALI_TEST_EQUALS(recorder.CountOf(Ui::View::Property::REQUESTED_WIDTH), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.FirstFloatOf(Ui::View::Property::REQUESTED_WIDTH), 120.0f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetRequestedHeightEmitsPropertySetSignalExactlyOnceP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  Ui::GetImpl(view).SetRequestedHeight(80.0f); // C++ route
+
+  DALI_TEST_EQUALS(recorder.CountOf(Ui::View::Property::REQUESTED_HEIGHT), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.FirstFloatOf(Ui::View::Property::REQUESTED_HEIGHT), 80.0f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewRequestedWidthPropertyEmitsPropertySetSignalExactlyOnceP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  view.SetProperty(Ui::View::Property::REQUESTED_WIDTH, 120.0f); // property route
+
+  DALI_TEST_EQUALS(recorder.CountOf(Ui::View::Property::REQUESTED_WIDTH), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.FirstFloatOf(Ui::View::Property::REQUESTED_WIDTH), 120.0f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewRequestedHeightPropertyEmitsPropertySetSignalExactlyOnceP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  view.SetProperty(Ui::View::Property::REQUESTED_HEIGHT, 80.0f); // property route
+
+  DALI_TEST_EQUALS(recorder.CountOf(Ui::View::Property::REQUESTED_HEIGHT), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.FirstFloatOf(Ui::View::Property::REQUESTED_HEIGHT), 80.0f, 0.0001f, TEST_LOCATION);
   END_TEST;
 }
