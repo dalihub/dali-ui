@@ -104,6 +104,11 @@ void LottieAnimationView::SetMinMaxFrame(int minFrame, int maxFrame)
   Ui::GetImpl(*this).SetMinMaxFrame(minFrame, maxFrame);
 }
 
+void LottieAnimationView::GetMinMaxFrame(int& minFrame, int& maxFrame) const
+{
+  Ui::GetImpl(*this).GetMinMaxFrame(minFrame, maxFrame);
+}
+
 void LottieAnimationView::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
 {
   Ui::GetImpl(*this).SetMinMaxFrameByMarker(minMarker, maxMarker);

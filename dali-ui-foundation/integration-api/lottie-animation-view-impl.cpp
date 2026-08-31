@@ -467,7 +467,8 @@ void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)
 
 void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)
 {
-  if(mUrl != url)
+  const bool reloadCurrentResource = (mUrl == url && !url.Empty());
+  if(mUrl != url || reloadCurrentResource)
   {
     mUrl = url;
     // Re-show placeholder while new animation loads
@@ -569,6 +570,19 @@ void LottieAnimationViewImpl::SetMinMaxFrame(int minFrame, int maxFrame)
   range.PushBack(mMinFrame);
   range.PushBack(mMaxFrame);
   UpdateVisualProperty(Ui::ImageVisualPropertyIndex::PLAY_RANGE, range);
+}
+
+void LottieAnimationViewImpl::GetMinMaxFrame(int& minFrame, int& maxFrame) const
+{
+  if(mPlayRangeType == PlayRangeType::FRAME)
+  {
+    minFrame = mMinFrame;
+    maxFrame = mMaxFrame;
+    return;
+  }
+
+  minFrame = 0;
+  maxFrame = GetTotalFrame();
 }
 
 void LottieAnimationViewImpl::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)

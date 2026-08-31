@@ -35,6 +35,16 @@ uint32_t GetLastHeight();
 } // namespace UiVectorAnimationRenderer
 } // namespace Test
 
+namespace
+{
+Dali::Property::Value TestFillColor(int32_t,
+                                    Dali::VectorAnimationRenderer::VectorProperty,
+                                    uint32_t)
+{
+  return Dali::Property::Value(Dali::Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+}
+} // namespace
+
 void utc_dali_lottie_animation_view_internal_startup(void)
 {
   test_return_value = TET_UNDEF;
@@ -59,6 +69,12 @@ int UtcDaliLottieAnimationViewJumpToFramePreservedAfterDesiredSizeChange(void)
 
   DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(2), true, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetTotalFrame(), 5, TEST_LOCATION);
+
+  int minFrame = -1;
+  int maxFrame = -1;
+  view.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 5, TEST_LOCATION);
 
   view.Stop();
   view.JumpToFrame(3);
@@ -92,6 +108,51 @@ int UtcDaliLottieAnimationViewJumpToFramePreservedAfterDesiredSizeChange(void)
   view.SetResourceUrl("other-animation.json");
   view.Measure(100.0f, 100.0f);
   DALI_TEST_CHECK(viewData.GetVisual(LottieAnimationView::Property::IMAGE) != visualBeforeDesiredSizeChange);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewSameResourceUrlReloadsVisual(void)
+{
+  UiTestApplication application;
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.Measure(100.0f, 100.0f);
+
+  auto& viewData       = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  auto  originalVisual = viewData.GetVisual(LottieAnimationView::Property::IMAGE);
+  DALI_TEST_CHECK(originalVisual);
+
+  view.SetResourceUrl("animation.json");
+  view.Measure(100.0f, 100.0f);
+
+  DALI_TEST_CHECK(viewData.GetVisual(LottieAnimationView::Property::IMAGE) != originalVisual);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewDynamicPropertyRendersWhilePaused(void)
+{
+  UiTestApplication application;
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.SetSynchronousLoading(true);
+
+  application.GetScene().Add(view);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(2), true, TEST_LOCATION);
+
+  view.Play();
+  view.Pause();
+  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1, 5), true, TEST_LOCATION);
+
+  Ui::LottieAnimation::DynamicPropertyInfo info;
+  info.id       = 1;
+  info.keyPath  = "**";
+  info.property = Ui::LottieAnimation::VectorProperty::FILL_COLOR;
+  info.callback = MakeCallback(&TestFillColor);
+  view.SetDynamicProperty(info);
+
+  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1, 5), true, TEST_LOCATION);
   END_TEST;
 }
 

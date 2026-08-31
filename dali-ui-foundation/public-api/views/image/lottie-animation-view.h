@@ -147,6 +147,9 @@ public: // Image
   /**
    * @brief Sets the resource URL of the Lottie animation file.
    *
+   * Setting the currently configured non-empty URL reloads the animation and
+   * clears dynamic property callbacks registered on the previous visual.
+   *
    * @param[in] url The URL of the Lottie JSON file
    * @return Reference to this for fluent chaining
    */
@@ -220,6 +223,17 @@ public: // Frame Range
    * @return Reference to this for fluent chaining
    */
   void SetMinMaxFrame(int minFrame, int maxFrame);
+
+  /**
+   * @brief Gets the numerically configured playback frame range.
+   *
+   * When no numerical range is configured, including when marker names were
+   * used, this returns the composition range `[0, GetTotalFrame()]`.
+   *
+   * @param[out] minFrame The configured start frame index
+   * @param[out] maxFrame The configured end frame index
+   */
+  void GetMinMaxFrame(int& minFrame, int& maxFrame) const;
 
   /**
    * @brief Sets the playback range using marker names embedded in the Lottie file.

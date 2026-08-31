@@ -400,15 +400,27 @@ int UtcDaliLottieAnimationViewSetMinMaxFrameP(void)
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
 
+  int minFrame = -1;
+  int maxFrame = -1;
+  view.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 0, TEST_LOCATION);
+
   // Should not crash even without visual
   view.SetMinMaxFrame(0, 30);
-  DALI_TEST_CHECK(view);
+  view.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 30, TEST_LOCATION);
 
   view.SetMinMaxFrame(10, 50);
-  DALI_TEST_CHECK(view);
+  view.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 10, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 50, TEST_LOCATION);
 
   view.SetMinMaxFrame(0, 100);
-  DALI_TEST_CHECK(view);
+  view.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 100, TEST_LOCATION);
   END_TEST;
 }
 

@@ -964,6 +964,13 @@ void VectorAnimationTask::ApplyAnimationData()
       // ThorVG skips rebuilding an unchanged frame. Re-evaluate callbacks explicitly so a
       // theme/state color update is visible while the animation is paused or stopped.
       mVectorRenderer.RefreshDynamicProperty();
+
+      if(mPlayState != PlayState::PLAYING)
+      {
+        // A paused or stopped animation has no next playback tick to render
+        // the new property values, so request one frame explicitly.
+        mNeedForceRenderOnceTrigger = true;
+      }
     }
 
     if(animationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE)
