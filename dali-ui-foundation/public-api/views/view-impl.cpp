@@ -289,19 +289,34 @@ void ViewImpl::SetBackgroundGradient(const Gradient::Base& gradient)
   mImpl->SetBackgroundGradient(gradient);
 }
 
-UiColor ViewImpl::GetColor() const
+UiColor ViewImpl::GetColorMultiplier() const
 {
   return mImpl->GetColor();
 }
 
+UiColor ViewImpl::GetColor() const
+{
+  return GetColorMultiplier();
+}
+
+void ViewImpl::SetColorMultiplier(const UiColor& multiplier)
+{
+  mImpl->SetColor(multiplier);
+}
+
 void ViewImpl::SetColor(const UiColor& color)
 {
-  mImpl->SetColor(color);
+  SetColorMultiplier(color);
+}
+
+UiColor ViewImpl::GetCurrentColorMultiplier() const
+{
+  return mImpl->GetCurrentColor();
 }
 
 UiColor ViewImpl::GetCurrentColor() const
 {
-  return mImpl->GetCurrentColor();
+  return GetCurrentColorMultiplier();
 }
 
 Vector4 ViewImpl::GetCornerRadius() const

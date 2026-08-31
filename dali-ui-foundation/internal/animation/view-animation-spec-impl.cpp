@@ -341,13 +341,13 @@ void ViewAnimationSpecImpl::ApplyScaleYBy(Animation& animation, View view, const
 void ViewAnimationSpecImpl::ApplyColorTo(Animation& animation, View view, const Entry& entry)
 {
   TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
-  animation.AnimateTo(Property(view, Actor::Property::COLOR), entry.value, entry.alpha, period);
+  animation.AnimateTo(Property(view, Actor::Property::COLOR_MULTIPLIER), entry.value, entry.alpha, period);
 }
 
 void ViewAnimationSpecImpl::ApplyColorBy(Animation& animation, View view, const Entry& entry)
 {
   TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
-  animation.AnimateBy(Property(view, Actor::Property::COLOR), entry.value, entry.alpha, period);
+  animation.AnimateBy(Property(view, Actor::Property::COLOR_MULTIPLIER), entry.value, entry.alpha, period);
 }
 
 void ViewAnimationSpecImpl::ApplyOpacityTo(Animation& animation, View view, const Entry& entry)

@@ -1202,10 +1202,37 @@ int UtcDaliViewPositionYChainingP(void)
 int UtcDaliViewBackgroundColorSetterP(void)
 {
   UiTestApplication application;
-  View              view = View::New();
-  const UiColor     testColor(1.0f, 0.0f, 0.0f, 0.5f);
-  view.SetBackgroundColor(testColor);
-  DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), testColor.GetRgba(), TEST_LOCATION);
+  View              view            = View::New();
+  const UiColor     backgroundColor = UiColor(0xFFFFFF);
+  const UiColor     colorMultiplier = UiColor(0xFF0000);
+  const UiColor     legacyColor     = UiColor(0x00FF00);
+  const UiColor     implLegacyColor = UiColor(0x0000FF);
+
+  application.GetScene().Add(view);
+  view.SetBackgroundColor(backgroundColor);
+  view.SetColorMultiplier(colorMultiplier);
+
+  DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), backgroundColor.GetRgba(), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetColorMultiplier().GetRgba(), colorMultiplier.GetRgba(), TEST_LOCATION);
+
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), colorMultiplier.GetRgba(), TEST_LOCATION);
+
+  // Verify that the legacy public API delegates to the color multiplier API.
+  view.SetColor(legacyColor);
+  DALI_TEST_EQUALS(view.GetColor().GetRgba(), legacyColor.GetRgba(), TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetCurrentColor().GetRgba(), legacyColor.GetRgba(), TEST_LOCATION);
+
+  // Verify the same compatibility path on ViewImpl.
+  ViewImpl& viewImpl = GetImpl(view);
+  viewImpl.SetColor(implLegacyColor);
+  DALI_TEST_EQUALS(viewImpl.GetColor().GetRgba(), implLegacyColor.GetRgba(), TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(viewImpl.GetCurrentColor().GetRgba(), implLegacyColor.GetRgba(), TEST_LOCATION);
   END_TEST;
 }
 
@@ -1426,7 +1453,9 @@ int UtcDaliViewShadowAnimationNoShadowP(void)
 
   ViewAnimationSpec spec = View::NewAnimationSpec();
   spec.ShadowBlurRadius(4.0f, Duration(0.1f))
-    .ShadowOpacity(0.5f, Duration(0.1f));
+    .ShadowOpacity(0.5f, Duration(0.1f))
+    .Color(Vector4(0.8f, 0.7f, 0.6f, 0.5f), Duration(0.1f))
+    .ColorBy(Vector4(0.1f, 0.1f, 0.1f, 0.1f), Duration(0.1f));
 
   Animation specAnimation = Animation::New(0.0f);
   spec.ApplyTo(specAnimation, view);

@@ -906,23 +906,61 @@ public:
   void SetShadow(const ShadowStack& shadowStack);
 
   /**
+   * @brief Gets the target component-wise color multiplier of this View.
+   *
+   * @return The target color multiplier
+   */
+  UiColor GetColorMultiplier() const;
+
+  /**
    * @brief Gets the color.
    *
+   * @deprecated Use GetColorMultiplier() instead.
    * @return The color
    */
   UiColor GetColor() const;
 
   /**
+   * @brief Sets the component-wise color multiplier for this View's rendered content.
+   *
+   * This does not draw content or change the background. The resolved red, green, blue,
+   * and alpha components are multiplied with the corresponding components of the View's
+   * rendered content. For example:
+   * @code
+   * view.SetBackgroundColor(UiColor(0xFFFFFF));
+   * view.SetColorMultiplier(UiColor(0xFF0000));
+   * // The rendered background is (1, 0, 0, 1):
+   * // (1, 1, 1, 1) * (1, 0, 0, 1).
+   * @endcode
+   *
+   * The default multiplier is (1, 1, 1, 1), which leaves rendered colors unchanged.
+   * UiColor values created from hexadecimal RGB values are resolved to components in
+   * the range [0, 1] before multiplication.
+   *
+   * @param[in] multiplier The color multiplier to set
+   * @see SetBackgroundColor()
+   */
+  void SetColorMultiplier(const UiColor& multiplier);
+
+  /**
    * @brief Sets the color.
    *
+   * @deprecated Use SetColorMultiplier() instead.
    * @param[in] color The color to set
-   * @return Reference to this View for fluent chaining
    */
   void SetColor(const UiColor& color);
 
   /**
+   * @brief Gets the current component-wise color multiplier from the previous update.
+   *
+   * @return The current color multiplier
+   */
+  UiColor GetCurrentColorMultiplier() const;
+
+  /**
    * @brief Gets the current color.
    *
+   * @deprecated Use GetCurrentColorMultiplier() instead.
    * @return The current color
    */
   UiColor GetCurrentColor() const;

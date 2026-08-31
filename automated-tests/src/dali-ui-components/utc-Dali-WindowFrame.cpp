@@ -1187,7 +1187,7 @@ int UtcDaliDefaultWindowDecorationBarActionIconIsTheCallersP(void)
   ImageView icon = ImageView::DownCast(action.GetChildAt(0u));
   DALI_TEST_CHECK(icon);
   DALI_TEST_EQUALS(icon.GetResourceUrl().CStr(), url, TEST_LOCATION);
-  DALI_TEST_EQUALS(icon.GetProperty<Vector4>(Actor::Property::COLOR), Color::WHITE, TEST_LOCATION);
+  DALI_TEST_EQUALS(icon.GetProperty<Vector4>(Actor::Property::COLOR_MULTIPLIER), Color::WHITE, TEST_LOCATION);
 
   // The shipped controls still resolve against the component directory and do
   // follow the theme.
@@ -1195,7 +1195,7 @@ int UtcDaliDefaultWindowDecorationBarActionIconIsTheCallersP(void)
   DALI_TEST_CHECK(closeIcon);
   DALI_TEST_CHECK(std::string(closeIcon.GetResourceUrl().CStr()).find("close.png") != std::string::npos);
   DALI_TEST_CHECK(closeIcon.GetResourceUrl().CStr() != std::string(url));
-  DALI_TEST_CHECK(closeIcon.GetProperty<Vector4>(Actor::Property::COLOR) != Color::WHITE);
+  DALI_TEST_CHECK(closeIcon.GetProperty<Vector4>(Actor::Property::COLOR_MULTIPLIER) != Color::WHITE);
   END_TEST;
 }
 

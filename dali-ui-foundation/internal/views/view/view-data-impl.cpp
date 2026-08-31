@@ -2589,7 +2589,7 @@ UiColor ViewDataImpl::GetColor() const
   {
     return outColor;
   }
-  return UiColor(mViewImpl.Self().GetProperty<Vector4>(Actor::Property::COLOR));
+  return UiColor(mViewImpl.Self().GetProperty<Vector4>(Actor::Property::COLOR_MULTIPLIER));
 }
 
 void ViewDataImpl::SetColor(const UiColor& color)
@@ -2603,7 +2603,7 @@ void ViewDataImpl::SetColor(const UiColor& color)
 
 UiColor ViewDataImpl::GetCurrentColor() const
 {
-  return UiColor(mViewImpl.Self().GetCurrentProperty<Vector4>(Actor::Property::COLOR));
+  return UiColor(mViewImpl.Self().GetCurrentProperty<Vector4>(Actor::Property::COLOR_MULTIPLIER));
 }
 
 Vector4 ViewDataImpl::GetCornerRadius() const
@@ -5766,7 +5766,7 @@ void ViewDataImpl::SetBackgroundGradientInternal(const Gradient::Base& gradient)
 
 void ViewDataImpl::SetColorInternal(const Vector4& color)
 {
-  mViewImpl.Self().SetProperty(Actor::Property::COLOR, color);
+  mViewImpl.Self().SetProperty(Actor::Property::COLOR_MULTIPLIER, color);
 }
 
 void ViewDataImpl::SetBorderlineColorInternal(const Vector4& color)

@@ -70,9 +70,14 @@ const BoundsInteger& GlViewRenderInfo::GetClippingBox() const
   return mImpl->input ? mImpl->input->clippingBox : EMPTY_CLIPPING_BOX;
 }
 
+const Vector4& GlViewRenderInfo::GetWorldColorMultiplier() const
+{
+  return mImpl->input ? mImpl->input->worldColorMultiplier : Vector4::ONE;
+}
+
 const Vector4& GlViewRenderInfo::GetWorldColor() const
 {
-  return mImpl->input ? mImpl->input->worldColor : Vector4::ONE;
+  return GetWorldColorMultiplier();
 }
 
 const Dali::Vector<uint32_t>& GlViewRenderInfo::GetBoundTextureNativeHandles() const

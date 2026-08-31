@@ -1336,6 +1336,37 @@ int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
                    TEST_LOCATION);
   DALI_TEST_EQUALS(storedLineHeight, after.lineHeight, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
+  // Exercise the color multiplier paths for every decorator actor.
+  Text::DecoratorPtr decorator = impl.mEventData->mDecorator;
+  decorator->SetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_RELEASED, "grab-handle.png");
+  decorator->SetHandleImage(Text::LEFT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED, "left-handle.png");
+  decorator->SetHandleImage(Text::RIGHT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED, "right-handle.png");
+  decorator->SetHandleImage(Text::LEFT_SELECTION_HANDLE_MARKER, Text::HANDLE_IMAGE_RELEASED, "left-marker.png");
+  decorator->SetHandleImage(Text::RIGHT_SELECTION_HANDLE_MARKER, Text::HANDLE_IMAGE_RELEASED, "right-marker.png");
+  decorator->SetPosition(Text::GRAB_HANDLE, 20.0f, 20.0f, 18.0f);
+  decorator->SetPosition(Text::LEFT_SELECTION_HANDLE, 40.0f, 20.0f, 18.0f);
+  decorator->SetPosition(Text::RIGHT_SELECTION_HANDLE, 80.0f, 20.0f, 18.0f);
+  decorator->SetHandleActive(Text::GRAB_HANDLE, true);
+  decorator->SetHandleActive(Text::LEFT_SELECTION_HANDLE, true);
+  decorator->SetHandleActive(Text::RIGHT_SELECTION_HANDLE, true);
+  decorator->ResizeHighlightQuads(1u);
+  decorator->AddHighlight(0u, Vector4(10.0f, 10.0f, 90.0f, 40.0f));
+  decorator->SetHighLightBox(Vector2(10.0f, 10.0f), Size(80.0f, 30.0f), 0.0f);
+  decorator->SetHighlightActive(true);
+
+  struct NoopDecoratorRelayoutContainer : public RelayoutContainer
+  {
+    void Add(const Actor&, const Vector2&) override
+    {
+    }
+  } decoratorRelayoutContainer;
+
+  decorator->Relayout(Vector2(220.0f, 180.0f), decoratorRelayoutContainer);
+  decorator->SetHandleColor(Color::MAGENTA);
+  decorator->SetHighlightColor(Color::CYAN);
+  DALI_TEST_EQUALS(decorator->GetHandleColor(), Color::MAGENTA, TEST_LOCATION);
+  DALI_TEST_EQUALS(decorator->GetHighlightColor(), Color::CYAN, TEST_LOCATION);
+
   const auto [visibleTop, visibleBottom] = impl.CalculateScrollTarget(after);
   DALI_TEST_CHECK(visibleBottom - visibleTop >= after.lineHeight - Math::MACHINE_EPSILON_1000);
 

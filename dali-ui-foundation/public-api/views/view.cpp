@@ -445,19 +445,34 @@ void View::SetInnerShadow(const InnerShadow& innerShadow)
   GetImpl(*this).SetInnerShadow(innerShadow);
 }
 
+UiColor View::GetColorMultiplier() const
+{
+  return GetImpl(*this).GetColorMultiplier();
+}
+
 UiColor View::GetColor() const
 {
-  return GetImpl(*this).GetColor();
+  return GetColorMultiplier();
+}
+
+void View::SetColorMultiplier(const UiColor& multiplier)
+{
+  GetImpl(*this).SetColorMultiplier(multiplier);
 }
 
 void View::SetColor(const UiColor& color)
 {
-  GetImpl(*this).SetColor(color);
+  SetColorMultiplier(color);
+}
+
+UiColor View::GetCurrentColorMultiplier() const
+{
+  return GetImpl(*this).GetCurrentColorMultiplier();
 }
 
 UiColor View::GetCurrentColor() const
 {
-  return GetImpl(*this).GetCurrentColor();
+  return GetCurrentColorMultiplier();
 }
 
 bool View::IsEffectivelyFocused() const

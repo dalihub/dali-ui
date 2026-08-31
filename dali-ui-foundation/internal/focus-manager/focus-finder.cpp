@@ -134,14 +134,14 @@ static int MinorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Bounds so
     {
       // the distance between the center verticals
       return std::abs(static_cast<int>((source.Top() + (source.Bottom() - source.Top()) * 0.5f) -
-                      (dest.Top() + (dest.Bottom() - dest.Top()) * 0.5f)));
+                                       (dest.Top() + (dest.Bottom() - dest.Top()) * 0.5f)));
     }
     case Dali::Ui::FocusDirection::UP:
     case Dali::Ui::FocusDirection::DOWN:
     {
       // the distance between the center horizontals
       return std::abs(static_cast<int>((source.Left() + (source.Right() - source.Left()) * 0.5f) -
-                      (dest.Left() + (dest.Right() - dest.Left()) * 0.5f)));
+                                       (dest.Left() + (dest.Right() - dest.Left()) * 0.5f)));
     }
     default:
     {
@@ -332,7 +332,7 @@ bool IsFocusable(Actor& actor)
           actor.GetProperty<bool>(Actor::Property::ENABLED) &&
           actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
           !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED) &&
-          actor.GetProperty<Vector4>(Actor::Property::WORLD_COLOR).a > FULLY_TRANSPARENT);
+          actor.GetProperty<Vector4>(Actor::Property::WORLD_COLOR_MULTIPLIER).a > FULLY_TRANSPARENT);
 }
 
 bool CanTraverseFocus(Actor& actor)

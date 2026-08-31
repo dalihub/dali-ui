@@ -128,11 +128,18 @@ public:
   const BoundsInteger& GetClippingBox() const;
 
   /**
-   * @brief Returns the inherited world colour of the view.
+   * @brief Returns the inherited world color multiplier of the View.
    *
-   * Use this to honour the opacity and colour inherited from the actor hierarchy.
+   * Use this to honour the opacity and color multiplier inherited from the actor hierarchy.
    *
-   * @return The inherited world colour
+   * @return The inherited world color multiplier
+   */
+  const Vector4& GetWorldColorMultiplier() const;
+
+  /**
+   * @brief Returns the inherited world color.
+   * @deprecated Use GetWorldColorMultiplier() instead.
+   * @return The inherited world color
    */
   const Vector4& GetWorldColor() const;
 

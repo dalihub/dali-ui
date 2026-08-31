@@ -385,8 +385,8 @@ public:
 
     glUniformMatrix4fv(mMvpLocation, 1, GL_FALSE, mvp.AsFloat());
 
-    const Vector4& worldColor = info.GetWorldColor();
-    glUniform4f(mWorldColorLocation, worldColor.r, worldColor.g, worldColor.b, worldColor.a);
+    const Vector4& worldColorMultiplier = info.GetWorldColorMultiplier();
+    glUniform4f(mWorldColorLocation, worldColorMultiplier.r, worldColorMultiplier.g, worldColorMultiplier.b, worldColorMultiplier.a);
 
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(sizeof(CUBE_INDICES) / sizeof(CUBE_INDICES[0])),
                    GL_UNSIGNED_SHORT, nullptr);
