@@ -55,7 +55,10 @@ SetLoadPolicy / GetLoadPolicy, SetReleasePolicy / GetReleasePolicy, SetSynchrono
 ## 통과 기준
 
 - Remove 시 사라지고 Re-Add 시 재등장해야 한다 (픽셀), Re-Add에서 준비 신호가 와야 한다
-  (Loads +1) — 캐시 재사용 vs 리로드 자체는 화면 관측 밖 (신호가 두 경우를 같게 보고함)
+  (Loads 증가 — **횟수는 계약이 아니다**: 같은 Re-Add가 엔진 캐시가 데워져 있으면 +1,
+  콜드면 +2를 보고한다. 실측 2026-08-27 aiv-260825: tc-04를 먼저 방문해 같은 소재를
+  데우면 5, 프로세스 첫 방문이면 6) — 캐시 재사용 vs 리로드 자체는 화면 관측 밖
+  (신호가 두 경우를 같게 보고함)
 - IMMEDIATE 정책: 씬 밖에서도 로드가 시작되어야 한다 (Re-Add 전 Loads 증가로 판정)
 - ATTACHED 정책: 씬 밖에서는 로드하지 않아야 한다 (Re-Add까지 Loads 불변으로 판정)
 - Sync ON 시 로드가 동기로 완료되어야 한다 (액션 직후 단발 읽기로 판정)

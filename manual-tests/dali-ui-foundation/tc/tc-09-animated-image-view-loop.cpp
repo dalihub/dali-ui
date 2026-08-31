@@ -83,7 +83,12 @@ public:
 
   void OnEnter(View contentArea) override
   {
+    // All playback bookkeeping resets on entry: these are class members that
+    // outlive the screen, and a re-entered screen showing the previous visit's
+    // loop index ("Loop: 2/inf" on a fresh view) reads as state that isn't there.
     mFinishedCount = 0;
+    mLoopIndex     = 0;
+    mPrevFrame     = 0;
 
     mView = AnimatedImageView::New(ANIM_WEBP);
     mView.SetRequestedWidth(PREVIEW_SIZE);
