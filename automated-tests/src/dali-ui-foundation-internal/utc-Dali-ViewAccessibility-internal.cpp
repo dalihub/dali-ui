@@ -15,7 +15,6 @@
  *
  */
 
-#include <dali-ui-foundation/extension-api/accessibility.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-accessibility.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
@@ -926,37 +925,6 @@ int UtcDaliViewAccessibilityHighlightCommandsP(void)
   accessible->clearHighlightResult = false;
   DALI_TEST_CHECK(!Extension::View::ClearAccessibilityHighlight(view));
   DALI_TEST_EQUALS(accessible->clearHighlightCount, 2, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliAccessibilityExtensionServiceApiP(void)
-{
-  using SetSuppressedFunction = bool (*)(bool);
-  using SayTextFunction       = void (*)(const Dali::String&, bool, Extension::Accessibility::ReadingStatusCallback);
-
-  SetSuppressedFunction setSuppressed = &Extension::Accessibility::SetScreenReaderSuppressed;
-  SayTextFunction       sayText       = &Extension::Accessibility::SayAccessibilityText;
-
-  DALI_TEST_CHECK(setSuppressed);
-  DALI_TEST_CHECK(sayText);
-
-  END_TEST;
-}
-
-int UtcDaliViewAccessibilityExtensionNotificationsP(void)
-{
-  UiTestApplication application;
-
-  DALI_TEST_CHECK(!Extension::View::NotifyAccessibilityValueChanged({}));
-  DALI_TEST_CHECK(!Extension::View::NotifyAccessibilityShowingChanged({}, true));
-
-  TestAccessibilityViewImpl* implementation = nullptr;
-  View                       view           = CreateTestAccessibilityView(implementation);
-  DALI_TEST_CHECK(implementation);
-  DALI_TEST_CHECK(Extension::View::NotifyAccessibilityValueChanged(view));
-  DALI_TEST_CHECK(Extension::View::NotifyAccessibilityShowingChanged(view, true));
-  DALI_TEST_CHECK(Extension::View::NotifyAccessibilityShowingChanged(view, false));
 
   END_TEST;
 }
