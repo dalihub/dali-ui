@@ -96,6 +96,7 @@ public:
     mFinishedLabel = MakeStatusLabel("AnimationFinishedSignal: 0");
 
     mPollTimer = Timer::New(100);
+    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewPlayControl::OnPollTick);
     mPollTimer.Start();
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);

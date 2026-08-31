@@ -16,7 +16,12 @@
 #include "manual-test-case.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
+#include <dali/devel-api/animation/animation-devel.h>
+#include <cstdlib>
+#include <cstring>
 #include <string>
+#include <unistd.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -128,6 +133,32 @@ Text::StyledText BuildHighlightedText(const Dali::String& text, const std::strin
   }
   return builder.Build();
 }
+
+/**
+ * Test-time quiescence telemetry, published by the APP over the existing
+ * PropertyBridge string-getter hook (no library change): UI automation reads
+ * "dalium:animationCount" through the a11y bridge (e.g. aurum
+ * getStringProperty) and gets the number of running Dali::Animations.
+ *
+ * Gate: DALI_UI_A11Y_TELEMETRY=1 env, or the /tmp/dalium-telemetry flag file.
+ */
+void DaliumTestStringGetter(void* /*obj*/, const char* propertyName, std::string* result)
+{
+  if(propertyName && result && std::strcmp(propertyName, "dalium:animationCount") == 0)
+  {
+    *result = std::to_string(Dali::DevelAnimation::GetAnimationCount());
+  }
+}
+
+bool DaliumTelemetryEnabled()
+{
+  const char* v = std::getenv("DALI_UI_A11Y_TELEMETRY");
+  if(v && *v == '1')
+  {
+    return true;
+  }
+  return access("/tmp/dalium-telemetry", F_OK) == 0;
+}
 } // namespace
 
 /**
@@ -153,6 +184,11 @@ private:
 
   void OnCreate(Application application)
   {
+    if(DaliumTelemetryEnabled())
+    {
+      Dali::Ui::Integration::PropertyBridgeRegisterStringGetter(DaliumTestStringGetter);
+    }
+
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(COLOR_APP_BG));
     window.KeyEventSignal().Connect(this, &ManualTestLauncher::OnKeyEvent);

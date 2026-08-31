@@ -78,6 +78,7 @@ public:
     mStatusLabel = MakeStatusLabel("Speed: 1.0 | Delay: 0ms | Frame: 0/0");
 
     mPollTimer = Timer::New(100);
+    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewSpeed::OnPollTick);
     mPollTimer.Start();
 
     mView.Play();

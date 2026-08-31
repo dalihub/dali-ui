@@ -88,6 +88,7 @@ public:
     mStatusLabel = MakeStatusLabel("Batch: 2 | Cache: 3 | Frame: 0/0");
 
     mPollTimer = Timer::New(100);
+    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewBuffer::OnPollTick);
     mPollTimer.Start();
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);

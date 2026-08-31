@@ -97,6 +97,7 @@ public:
     mStatusLabel = MakeStatusLabel("LoopCount: -1 | StopBehavior: CURRENT_FRAME | Finished: 0");
 
     mPollTimer = Timer::New(100);
+    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewLoop::OnPollTick);
     mPollTimer.Start();
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);

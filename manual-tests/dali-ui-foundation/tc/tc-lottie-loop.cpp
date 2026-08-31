@@ -109,6 +109,7 @@ public:
     mStatusLabel = MakeStatusLabel("LoopCount: -1 | LoopingMode: RESTART | Stop: CURRENT_FRAME | Finished: 0");
 
     mPollTimer = Timer::New(100);
+    mPollTimer.TickSignal().Connect(this, &TcLottieLoop::OnPollTick);
     mPollTimer.Start();
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);

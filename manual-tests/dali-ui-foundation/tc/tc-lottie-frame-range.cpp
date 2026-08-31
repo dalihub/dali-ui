@@ -80,6 +80,7 @@ public:
     mStatusLabel = MakeStatusLabel("Frame: 0/0 | Range: full | Speed: 1.0");
 
     mPollTimer = Timer::New(100);
+    mPollTimer.TickSignal().Connect(this, &TcLottieFrameRange::OnPollTick);
     mPollTimer.Start();
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
