@@ -1,0 +1,27 @@
+# 41. View Background Gradient Colors
+
+`View::SetBackgroundGradient()`로 설정한 gradient의 stop color와
+`ViewAnimationBridge::BackgroundGradientStartOffset()` animation을 확인한다.
+
+## 화면 구성
+
+- 왼쪽 카드: **`#6D28D9`(보라) / `#EC4899`(분홍) / `#FBBF24`(노랑)** stop을 가진 고정 gradient
+- 오른쪽 카드: 같은 gradient에 `startOffset` 0↔1 왕복 애니메이션 — **편도 1.8초 / 왕복
+  3.6초** (AUTO_REVERSE). 사람이 볼 때는 최소 한 왕복(4초) 이상 지켜볼 것
+
+## 테스트 절차
+
+1. Manual Tests에서 `41. View Background Gradient Colors`를 연다.
+2. 왼쪽 카드에 세 stop 색의 gradient가 표시되는지 확인한다.
+3. 오른쪽 카드에서 같은 색 조합이 이동한 뒤 반대 방향으로 돌아오는지 한 왕복 이상 확인한다.
+
+## 통과 기준
+
+- **왕복 중 어느 순간 두 카드의 같은 위치 색이 일치한다** — offset이 0을 지나는 순간 두
+  카드는 같은 팔레트다 (자동 판정: 두 카드의 글자 없는 20px 띠를 각각 잡고, 애니메이션 띠를
+  한 왕복 이상 촘촘히 표본해 고정 띠와의 **최소 편차 ≤ 20**을 요구 — 실측 최소 10, 차순위 34)
+- **어느 순간에도 카드가 단색이 되지 않고, 세 stop 색 사이의 값만 나타난다** — 그리고
+  서로 편차 ≤ 20인 표본 쌍이 존재한다(위상이 되돌아옴 = 왕복). 표본은 항상 **집합**으로
+  판정한다 — 두 점 비교는 왕복 꼭짓점 대칭에 걸려 같게 나올 수 있다
+- 프레임 단위의 "부드러움"(끊김 한 프레임)은 표본 해상도(≈0.57초) 밖이므로 **육안 확인**으로
+  남긴다

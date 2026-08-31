@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
 #include <dali/devel-api/animation/animation-devel.h>
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -194,6 +195,10 @@ private:
     window.KeyEventSignal().Connect(this, &ManualTestLauncher::OnKeyEvent);
 
     mTestCases = ManualTest::Registry::Get().CreateAll();
+    // Registration order is link order; the list must follow the TC numbers
+    // in the names ("01. ...", zero-padded so lexicographic == numeric).
+    std::sort(mTestCases.begin(), mTestCases.end(), [](const auto& a, const auto& b)
+    { return ToStdString(a->GetName()) < ToStdString(b->GetName()); });
     mSearchCache.reserve(mTestCases.size());
     for(const auto& tc : mTestCases)
     {
