@@ -320,6 +320,26 @@ DALI_UI_API bool GrabAccessibilityHighlight(Ui::View view);
 DALI_UI_API bool ClearAccessibilityHighlight(Ui::View view);
 
 /**
+ * @brief Explicitly notifies accessibility clients that a View's value changed.
+ *
+ * This can be used when the current value must be announced again without
+ * changing the value stored on the View.
+ *
+ * @param[in] view The View whose value-change event should be emitted
+ * @return True if the View had an accessible object to notify
+ */
+DALI_UI_API bool NotifyAccessibilityValueChanged(Ui::View view);
+
+/**
+ * @brief Explicitly notifies accessibility clients that a View's showing state changed.
+ *
+ * @param[in] view The View whose showing-state event should be emitted
+ * @param[in] showing The new showing state
+ * @return True if the View had an accessible object to notify
+ */
+DALI_UI_API bool NotifyAccessibilityShowingChanged(Ui::View view, bool showing);
+
+/**
  * @brief Sets the rendered X position of the view.
  *
  * The raw Dali::Actor geometry setters (SetPosition, SetSize, SetPositionX/Y/Z,
