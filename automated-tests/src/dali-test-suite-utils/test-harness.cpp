@@ -43,6 +43,7 @@ namespace TestHarness
 typedef std::map<int32_t, TestCase> RunningTestCases;
 
 const double MAXIMUM_CHILD_LIFETIME(60.0f); // 1 minute
+const std::chrono::seconds FAILED_TEST_RETRY_TIMEOUT(120);
 
 const char* basename(const char* path)
 {
@@ -309,7 +310,7 @@ int32_t RunTestCaseRedirectOutput(TestCase& testCase, bool suppressOutput)
   return status;
 }
 
-int32_t RunTestCaseInChildProcess(TestCase& testCase, bool redirect)
+int32_t RunTestCaseInChildProcess(TestCase& testCase, bool redirect, std::chrono::seconds timeout = std::chrono::seconds::zero())
 {
   int32_t testResult = EXIT_STATUS_TESTCASE_FAILED;
 
@@ -334,8 +335,37 @@ int32_t RunTestCaseInChildProcess(TestCase& testCase, bool redirect)
   }
   else // Parent process
   {
-    int32_t status    = 0;
-    int32_t childPid  = waitpid(pid, &status, 0);
+    int32_t status   = 0;
+    int32_t childPid = 0;
+    bool    timedOut = false;
+
+    if(timeout == std::chrono::seconds::zero())
+    {
+      childPid = waitpid(pid, &status, 0);
+    }
+    else
+    {
+      const auto startTime = steady_clock::now();
+      while(childPid == 0)
+      {
+        childPid = waitpid(pid, &status, WNOHANG);
+        if(childPid == 0)
+        {
+          if(steady_clock::now() - startTime >= timeout)
+          {
+            printf("Test case %s timed out after %lld seconds\n", testCase.name, static_cast<long long>(timeout.count()));
+            kill(pid, SIGKILL);
+            childPid = waitpid(pid, &status, 0);
+            timedOut = true;
+          }
+          else
+          {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+          }
+        }
+      }
+    }
+
     testCase.childPid = childPid;
     if(childPid == -1)
     {
@@ -357,7 +387,11 @@ int32_t RunTestCaseInChildProcess(TestCase& testCase, bool redirect)
     {
       int32_t signal = WTERMSIG(status);
       testResult     = EXIT_STATUS_TESTCASE_ABORTED;
-      if(signal == SIGABRT)
+      if(timedOut)
+      {
+        printf("Test case %s failed: timed out\n", testCase.name);
+      }
+      else if(signal == SIGABRT)
       {
         printf("Test case %s failed: test case asserted\n", testCase.name);
       }
@@ -615,7 +649,7 @@ int32_t RunAllInParallel(const char* processName, ::testcase tc_array[], std::st
       printf("\n");
       int      index = failedTestCases[i];
       TestCase testCase(index, &tc_array[index]);
-      RunTestCaseInChildProcess(testCase, false);
+      RunTestCaseInChildProcess(testCase, false, FAILED_TEST_RETRY_TIMEOUT);
     }
   }
 
