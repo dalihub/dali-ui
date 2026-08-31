@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 
+#include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali/devel-api/text-abstraction/script.h>
@@ -139,6 +140,11 @@ void PopulateSchedule(Plan& plan, uint32_t unitCount, float authoredRatio)
 Unit ToInternalUnit(Text::Reveal::Unit unit)
 {
   return unit == Text::Reveal::Unit::WORD ? Unit::WORD : Unit::CHARACTER;
+}
+
+Sequence ToInternalSequence(Text::Reveal::Sequence sequence)
+{
+  return sequence == Text::Reveal::Sequence::PER_LINE ? Sequence::PER_LINE : Sequence::WHOLE_TEXT;
 }
 
 Plan BuildPlan(const Character*      text,
@@ -503,6 +509,226 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
 
   PopulateSchedule(finalPlan, finalUnitCount, finalPlan.fadeDurationRatio);
   return finalPlan;
+}
+
+bool ApplyPerLineSequenceSchedule(Plan&          plan,
+                               const LineRun* lines,
+                               Length         lineCount,
+                               float          sequenceStartDelayRatio)
+{
+  const uint32_t oldUnitCount = plan.GetUnitCount();
+  const uint32_t glyphCount   = static_cast<uint32_t>(plan.glyphToUnit.size());
+  if(oldUnitCount == 0u || glyphCount == 0u)
+  {
+    return true;
+  }
+  if(!lines || lineCount == 0u)
+  {
+    return false;
+  }
+
+  struct LineUnitPair
+  {
+    uint32_t lineIndex;
+    uint32_t oldUnit;
+    uint32_t originalIndex;
+  };
+
+  std::vector<LineUnitPair> pairs;
+  pairs.reserve(std::min(static_cast<size_t>(glyphCount),
+                         static_cast<size_t>(oldUnitCount) + static_cast<size_t>(lineCount)));
+  std::vector<uint32_t> glyphToPair(glyphCount, NO_UNIT);
+  std::vector<uint32_t> lastLineForUnit(oldUnitCount, NO_UNIT);
+  std::vector<uint32_t> pairForUnit(oldUnitCount, NO_UNIT);
+  std::vector<uint32_t> lineUnitCount(lineCount, 0u);
+
+  auto mapRun = [&](uint32_t lineIndex, const GlyphRun& run)
+  {
+    const uint32_t begin = run.glyphIndex;
+    const uint32_t count = run.numberOfGlyphs;
+    if(begin > glyphCount || count > glyphCount - begin)
+    {
+      return false;
+    }
+
+    for(uint32_t glyph = begin; glyph < begin + count; ++glyph)
+    {
+      const uint32_t oldUnit = plan.glyphToUnit[glyph];
+      if(oldUnit == NO_UNIT)
+      {
+        continue;
+      }
+      if(oldUnit >= oldUnitCount)
+      {
+        return false;
+      }
+
+      if(glyphToPair[glyph] != NO_UNIT)
+      {
+        const LineUnitPair& existing = pairs[glyphToPair[glyph]];
+        if(existing.lineIndex != lineIndex || existing.oldUnit != oldUnit)
+        {
+          return false;
+        }
+        continue;
+      }
+
+      if(lastLineForUnit[oldUnit] != lineIndex)
+      {
+        const uint32_t pairIndex = static_cast<uint32_t>(pairs.size());
+        pairs.push_back({lineIndex, oldUnit, pairIndex});
+        lastLineForUnit[oldUnit] = lineIndex;
+        pairForUnit[oldUnit]     = pairIndex;
+        ++lineUnitCount[lineIndex];
+      }
+      glyphToPair[glyph] = pairForUnit[oldUnit];
+    }
+    return true;
+  };
+
+  for(uint32_t lineIndex = 0u; lineIndex < lineCount; ++lineIndex)
+  {
+    if(!mapRun(lineIndex, lines[lineIndex].glyphRun) ||
+       (lines[lineIndex].isSplitToTwoHalves && !mapRun(lineIndex, lines[lineIndex].glyphRunSecondHalf)))
+    {
+      return false;
+    }
+  }
+
+  for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
+  {
+    if(plan.glyphToUnit[glyph] != NO_UNIT && glyphToPair[glyph] == NO_UNIT)
+    {
+      // A final unit outside the supplied line runs cannot be scheduled
+      // without guessing its visual line. Keep the existing WHOLE_TEXT plan.
+      return false;
+    }
+  }
+
+  uint32_t activeSequenceCount  = 0u;
+  uint32_t maxSequenceUnitCount = 0u;
+  for(uint32_t count : lineUnitCount)
+  {
+    if(count > 0u)
+    {
+      ++activeSequenceCount;
+      maxSequenceUnitCount = std::max(maxSequenceUnitCount, count);
+    }
+  }
+  if(activeSequenceCount <= 1u)
+  {
+    return true;
+  }
+
+  // Stable counting sorts produce (line, oldUnit) order in O(pairs + units +
+  // lines). This preserves the existing logical unit order inside a line even
+  // when its glyphs are visually reordered by bidi layout.
+  std::vector<LineUnitPair> byOldUnit(pairs.size());
+  std::vector<uint32_t>     counts(oldUnitCount + 1u, 0u);
+  for(const LineUnitPair& pair : pairs)
+  {
+    ++counts[pair.oldUnit + 1u];
+  }
+  for(uint32_t index = 1u; index < counts.size(); ++index)
+  {
+    counts[index] += counts[index - 1u];
+  }
+  for(const LineUnitPair& pair : pairs)
+  {
+    byOldUnit[counts[pair.oldUnit]++] = pair;
+  }
+
+  std::vector<LineUnitPair> orderedPairs(pairs.size());
+  counts.assign(static_cast<uint32_t>(lineCount) + 1u, 0u);
+  for(const LineUnitPair& pair : byOldUnit)
+  {
+    ++counts[pair.lineIndex + 1u];
+  }
+  for(uint32_t index = 1u; index < counts.size(); ++index)
+  {
+    counts[index] += counts[index - 1u];
+  }
+  for(const LineUnitPair& pair : byOldUnit)
+  {
+    orderedPairs[counts[pair.lineIndex]++] = pair;
+  }
+
+  std::vector<uint32_t> newUnitByPair(pairs.size(), NO_UNIT);
+  for(uint32_t newUnit = 0u; newUnit < orderedPairs.size(); ++newUnit)
+  {
+    newUnitByPair[orderedPairs[newUnit].originalIndex] = newUnit;
+  }
+
+  sequenceStartDelayRatio   = std::isnan(sequenceStartDelayRatio)
+                                ? 0.0f
+                                : std::max(0.0f, std::min(1.0f, sequenceStartDelayRatio));
+  const float fadeDuration  = ResolveFadeDurationRatio(plan.fadeDurationRatio, maxSequenceUnitCount);
+  const float startInterval = maxSequenceUnitCount > 1u
+                                ? (1.0f - fadeDuration) / static_cast<float>(maxSequenceUnitCount - 1u)
+                                : 0.0f;
+
+  float totalDuration = 0.0f;
+  if(maxSequenceUnitCount == 1u)
+  {
+    // A singleton Reveal retains the complete normalized 0..1 domain even
+    // when an explicit fade finishes early. Use the same canonical envelope
+    // so STEP sequences still have a meaningful start delay.
+    totalDuration = static_cast<float>(activeSequenceCount - 1u) * sequenceStartDelayRatio + 1.0f;
+  }
+  else
+  {
+    uint32_t activeSequence = 0u;
+    for(uint32_t count : lineUnitCount)
+    {
+      if(count == 0u)
+      {
+        continue;
+      }
+      const float offset = static_cast<float>(activeSequence++) * sequenceStartDelayRatio;
+      const float span   = static_cast<float>(count - 1u) * startInterval + fadeDuration;
+      totalDuration      = std::max(totalDuration, offset + span);
+    }
+  }
+
+  if(!(totalDuration > 0.0f) || !std::isfinite(totalDuration))
+  {
+    return false;
+  }
+
+  plan.unitStart.assign(orderedPairs.size(), 0.0f);
+  std::vector<uint32_t> lineSequenceIndex(lineCount, NO_UNIT);
+  uint32_t              activeSequence = 0u;
+  for(uint32_t lineIndex = 0u; lineIndex < lineCount; ++lineIndex)
+  {
+    if(lineUnitCount[lineIndex] > 0u)
+    {
+      lineSequenceIndex[lineIndex] = activeSequence++;
+    }
+  }
+
+  uint32_t currentLine = NO_UNIT;
+  uint32_t localRank   = 0u;
+  for(uint32_t newUnit = 0u; newUnit < orderedPairs.size(); ++newUnit)
+  {
+    const LineUnitPair& pair = orderedPairs[newUnit];
+    if(pair.lineIndex != currentLine)
+    {
+      currentLine = pair.lineIndex;
+      localRank   = 0u;
+    }
+    const float offset      = static_cast<float>(lineSequenceIndex[pair.lineIndex]) * sequenceStartDelayRatio;
+    plan.unitStart[newUnit] = (offset + static_cast<float>(localRank++) * startInterval) / totalDuration;
+  }
+  plan.fadeDuration = fadeDuration / totalDuration;
+
+  for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
+  {
+    if(glyphToPair[glyph] != NO_UNIT)
+    {
+      plan.glyphToUnit[glyph] = newUnitByPair[glyphToPair[glyph]];
+    }
+  }
+  return true;
 }
 
 } // namespace Reveal

@@ -36,6 +36,7 @@ namespace Ui
 namespace Text
 {
 class ModelInterface;
+struct LineRun;
 
 namespace Internal
 {
@@ -48,6 +49,12 @@ enum class Unit : uint8_t
   DISABLED,
   CHARACTER,
   WORD
+};
+
+enum class Sequence : uint8_t
+{
+  WHOLE_TEXT,
+  PER_LINE
 };
 
 /**
@@ -84,6 +91,14 @@ struct Plan
  * @return The corresponding internal reveal unit.
  */
 Unit ToInternalUnit(Text::Reveal::Unit unit);
+
+/**
+ * @brief Converts a public reveal sequence to the internal representation.
+ *
+ * @param[in] sequence The public reveal sequence.
+ * @return The corresponding internal reveal sequence.
+ */
+Sequence ToInternalSequence(Text::Reveal::Sequence sequence);
 
 /**
  * @brief Builds a source-glyph reveal plan from shaped text arrays.
@@ -163,6 +178,25 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
                           const GlyphIndex* finalToSourceGlyph,
                           GlyphIndex        ellipsisFinalGlyph,
                           Unit              unit);
+
+/**
+ * @brief Applies PER_LINE sequence scheduling to a projected reveal plan.
+ *
+ * The final LineRun glyph ranges group existing logical units without using
+ * visual glyph traversal as reveal order. Units shared by multiple lines are
+ * split by (line, unit), and active line starts are evenly spaced. Invalid or
+ * incomplete line mappings leave the input plan unchanged.
+ *
+ * @param[in,out] plan The final-glyph plan to schedule.
+ * @param[in] lines The final visual lines.
+ * @param[in] lineCount The number of entries in lines.
+ * @param[in] sequenceStartDelayRatio The authored normalized start delay.
+ * @return True if the final line mapping was valid, including no-op schedules.
+ */
+bool ApplyPerLineSequenceSchedule(Plan&          plan,
+                               const LineRun* lines,
+                               Length         lineCount,
+                               float          sequenceStartDelayRatio);
 
 } // namespace Reveal
 } // namespace Internal

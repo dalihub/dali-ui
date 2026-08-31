@@ -64,12 +64,18 @@ int UtcDaliTextRevealValueTypeP(void)
 
   Text::Reveal reveal;
   DALI_TEST_EQUALS(reveal.GetUnit(), Text::Reveal::Unit::CHARACTER, TEST_LOCATION);
+  DALI_TEST_EQUALS(reveal.GetSequence(), Text::Reveal::Sequence::WHOLE_TEXT, TEST_LOCATION);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
   DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), Text::Reveal::AUTO_FADE_DURATION_RATIO, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
   DALI_TEST_CHECK(reveal != Text::Reveal::None());
   DALI_TEST_CHECK(Text::Reveal::None() == Text::Reveal::None());
 
   reveal.SetUnit(Text::Reveal::Unit::WORD);
+  reveal.SetSequence(Text::Reveal::Sequence::PER_LINE);
+  reveal.SetSequenceStartDelayRatio(0.25f);
   reveal.SetFadeDurationRatio(0.2f);
+  DALI_TEST_EQUALS(reveal.GetSequence(), Text::Reveal::Sequence::PER_LINE, TEST_LOCATION);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.25f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
   DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), 0.2f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
   Text::Reveal nearlyEqual(reveal);
@@ -88,10 +94,44 @@ int UtcDaliTextRevealValueTypeP(void)
   moveAssigned = std::move(assigned);
   DALI_TEST_CHECK(moveAssigned == reveal);
 
+  Text::Reveal differentSequence(reveal);
+  differentSequence.SetSequence(Text::Reveal::Sequence::WHOLE_TEXT);
+  DALI_TEST_CHECK(differentSequence != reveal);
+  Text::Reveal differentSequenceDelay(reveal);
+  differentSequenceDelay.SetSequenceStartDelayRatio(0.5f);
+  DALI_TEST_CHECK(differentSequenceDelay != reveal);
+
   Text::Reveal noneCopy(Text::Reveal::None());
   DALI_TEST_CHECK(noneCopy == Text::Reveal::None());
   DALI_TEST_ASSERTION(noneCopy.GetUnit(), "Cannot access Text::Reveal::None() properties.");
   DALI_TEST_ASSERTION(noneCopy.SetFadeDurationRatio(0.0f), "Cannot modify Text::Reveal::None().");
+  DALI_TEST_ASSERTION(noneCopy.GetSequence(), "Cannot access Text::Reveal::None() properties.");
+  DALI_TEST_ASSERTION(noneCopy.SetSequence(Text::Reveal::Sequence::PER_LINE), "Cannot modify Text::Reveal::None().");
+  DALI_TEST_ASSERTION(noneCopy.GetSequenceStartDelayRatio(), "Cannot access Text::Reveal::None() properties.");
+  DALI_TEST_ASSERTION(noneCopy.SetSequenceStartDelayRatio(0.5f), "Cannot modify Text::Reveal::None().");
+
+  reveal.SetSequence(Text::Reveal::Sequence::WHOLE_TEXT);
+  DALI_TEST_EQUALS(reveal.GetSequence(), Text::Reveal::Sequence::WHOLE_TEXT, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(-1.0f);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(0.0f);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(0.25f);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.25f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(0.5f);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(0.75f);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.75f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(1.0f);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(2.0f);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(std::numeric_limits<float>::quiet_NaN());
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(std::numeric_limits<float>::infinity());
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  reveal.SetSequenceStartDelayRatio(-std::numeric_limits<float>::infinity());
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
   reveal.SetFadeDurationRatio(Text::Reveal::AUTO_FADE_DURATION_RATIO);
   DALI_TEST_EQUALS(reveal.GetFadeDurationRatio(), Text::Reveal::AUTO_FADE_DURATION_RATIO, Math::MACHINE_EPSILON_1000, TEST_LOCATION);

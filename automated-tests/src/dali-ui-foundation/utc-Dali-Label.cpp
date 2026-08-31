@@ -1211,7 +1211,11 @@ int UtcDaliLabelTextRevealPublicApiP(void)
   DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), Property::INVALID_INDEX, TEST_LOCATION);
 
   Text::Reveal reveal;
+  DALI_TEST_EQUALS(reveal.GetSequence(), Text::Reveal::Sequence::WHOLE_TEXT, TEST_LOCATION);
+  DALI_TEST_EQUALS(reveal.GetSequenceStartDelayRatio(), 0.0f, 0.0001f, TEST_LOCATION);
   reveal.SetUnit(Text::Reveal::Unit::WORD);
+  reveal.SetSequence(Text::Reveal::Sequence::PER_LINE);
+  reveal.SetSequenceStartDelayRatio(0.5f);
   reveal.SetFadeDurationRatio(0.0f);
   label.SetTextReveal(reveal);
   Text::Reveal nearlyEqualReveal(reveal);
@@ -1219,6 +1223,8 @@ int UtcDaliLabelTextRevealPublicApiP(void)
   label.SetTextReveal(nearlyEqualReveal);
   DALI_TEST_CHECK(label.GetTextReveal() == reveal);
   DALI_TEST_CHECK(label.GetTextReveal().GetFadeDurationRatio() == 0.0f);
+  DALI_TEST_EQUALS(label.GetTextReveal().GetSequence(), Text::Reveal::Sequence::PER_LINE, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextReveal().GetSequenceStartDelayRatio(), 0.5f, 0.0001f, TEST_LOCATION);
   label.SetTextRevealProgress(-2.0f);
   DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.0f, 0.0001f, TEST_LOCATION);
   label.SetTextRevealProgress(2.0f);
@@ -1284,9 +1290,10 @@ int UtcDaliLabelTextRevealPublicApiP(void)
 int UtcDaliLabelTextRevealForegroundOnlyStyleResourcesP(void)
 {
   UiTestApplication application;
-  Label             label = Label::New("Foreground reveal leaves decoration resources intact");
+  Label             label = Label::New("Foreground reveal leaves decoration\nresources intact");
   label.SetRequestedWidth(420.0f);
-  label.SetRequestedHeight(96.0f);
+  label.SetRequestedHeight(128.0f);
+  label.SetMultiLine(true);
 
   Text::Shadow shadow;
   shadow.SetOffset(Vector2(2.0f, 2.0f));
@@ -1299,7 +1306,10 @@ int UtcDaliLabelTextRevealForegroundOnlyStyleResourcesP(void)
   label.SetTextUnderline(underline);
   label.SetTextLineThrough(lineThrough);
   label.SetTextBackgroundColor(UiColor(Color::MAGENTA));
-  label.SetTextReveal(Text::Reveal());
+  Text::Reveal reveal;
+  reveal.SetSequence(Text::Reveal::Sequence::PER_LINE);
+  reveal.SetSequenceStartDelayRatio(0.5f);
+  label.SetTextReveal(reveal);
   label.SetTextRevealProgress(0.0f);
 
   application.GetScene().Add(label);
@@ -1321,6 +1331,10 @@ int UtcDaliLabelTextRevealForegroundOnlyStyleResourcesP(void)
   TestGlAbstraction& gl = application.GetGlAbstraction();
   gl.EnableTextureCallTrace(true);
   gl.ResetTextureCallStack();
+  for(uint32_t update = 0u; update < 1000u; ++update)
+  {
+    label.SetTextRevealProgress(static_cast<float>(update % 101u) * 0.01f);
+  }
   for(float progress : {0.0f, 0.5f, 1.0f})
   {
     label.SetTextRevealProgress(progress);

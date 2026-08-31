@@ -35,9 +35,15 @@ namespace Text
  * each unit as TextRevealProgress advances from 0.0 to 1.0. Applications
  * control the playback duration by animating TextRevealProgress.
  *
- * By default, text is revealed by character using an automatically selected
- * fade duration. The reveal unit and fade duration ratio can be configured
- * explicitly.
+ * Unit controls how reveal progression is divided across visible content.
+ * Sequence controls how those units share the normalized reveal timeline.
+ * For example, CHARACTER with WHOLE_TEXT progresses by character across all
+ * visible content, while CHARACTER with PER_LINE gives each final visible line
+ * its own character progression.
+ *
+ * By default, text is revealed by character using one whole-text sequence and
+ * an automatically selected fade duration. The reveal unit, sequence, and fade
+ * duration ratio can be configured explicitly.
  *
  * Reveal affects only the text foreground. Text decorations and other style
  * layers such as shadow, outline, underline, strikethrough, and background are
@@ -62,7 +68,7 @@ public:
   static constexpr float AUTO_FADE_DURATION_RATIO = -1.0f;
 
   /**
-   * @brief Unit used to divide the visible text into reveal steps.
+   * @brief Selects how reveal progression is divided across visible content.
    */
   enum class Unit : uint8_t
   {
@@ -83,9 +89,28 @@ public:
     WORD
   };
 
+  /**
+   * @brief Selects how reveal units share the normalized reveal timeline.
+   */
+  enum class Sequence : uint8_t
+  {
+    /**
+     * @brief Uses one reveal sequence across all final visible content.
+     */
+    WHOLE_TEXT,
+
+    /**
+     * @brief Uses an independent sequence for each final visible layout line.
+     *
+     * Lines created by wrapping are separate sequences. Lines without
+     * revealable content do not create a sequence.
+     */
+    PER_LINE
+  };
+
 public:
   /**
-   * @brief Creates a CHARACTER reveal with automatic fade duration.
+   * @brief Creates a CHARACTER reveal using WHOLE_TEXT sequencing and automatic fade duration.
    */
   Reveal();
 
@@ -149,18 +174,61 @@ public:
 
 public:
   /**
-   * @brief Sets the unit used to divide visible text into reveal steps.
+   * @brief Sets how reveal progression is divided across visible content.
    *
    * @param[in] unit The reveal unit.
    */
   void SetUnit(Unit unit);
 
   /**
-   * @brief Returns the unit used to divide visible text into reveal steps.
+   * @brief Returns how reveal progression is divided across visible content.
    *
    * @return The reveal unit.
    */
   Unit GetUnit() const;
+
+  /**
+   * @brief Sets how reveal units share the normalized reveal timeline.
+   *
+   * WHOLE_TEXT uses one sequence for all final visible content. PER_LINE uses
+   * each final visible layout line, including lines created by wrapping, as an
+   * independent sequence. Lines without revealable content do not create a
+   * sequence.
+   *
+   * @param[in] sequence The reveal sequence grouping.
+   */
+  void SetSequence(Sequence sequence);
+
+  /**
+   * @brief Returns how reveal units share the normalized reveal timeline.
+   *
+   * @return The reveal sequence grouping.
+   */
+  Sequence GetSequence() const;
+
+  /**
+   * @brief Sets the normalized ratio controlling the spacing between consecutive sequence starts.
+   *
+   * Sequence starts are evenly spaced. Zero starts all active sequences
+   * together. Increasing values space consecutive starts further apart, and
+   * one prevents consecutive active sequences from overlapping. A shorter
+   * sequence may complete before the next sequence starts.
+   *
+   * PER_LINE creates consecutive active sequences from final visible layout
+   * lines. WHOLE_TEXT has one sequence, so the delay has no visual effect, but
+   * the authored value is retained. Values outside [0.0, 1.0] are clamped, and
+   * NaN is normalized to 0.0.
+   *
+   * @param[in] ratio The normalized sequence start delay in [0.0, 1.0].
+   */
+  void SetSequenceStartDelayRatio(float ratio);
+
+  /**
+   * @brief Returns the authored normalized sequence start delay.
+   *
+   * @return The authored ratio in [0.0, 1.0].
+   */
+  float GetSequenceStartDelayRatio() const;
 
   /**
    * @brief Sets the fade duration of each reveal unit on the normalized timeline.

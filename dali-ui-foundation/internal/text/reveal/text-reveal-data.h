@@ -43,12 +43,14 @@ namespace Text
  */
 struct TextRevealData
 {
-  Ui::Text::Reveal::Unit unit{Ui::Text::Reveal::Unit::CHARACTER};
-  float                  fadeDurationRatio{Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO};
-  Property::Index        progressPropertyIndex{Property::INVALID_INDEX};
-  uint64_t               revision{0u};
-  float                  progress{0.0f};
-  bool                   enabled{false};
+  Ui::Text::Reveal::Unit     unit{Ui::Text::Reveal::Unit::CHARACTER};
+  Ui::Text::Reveal::Sequence sequence{Ui::Text::Reveal::Sequence::WHOLE_TEXT};
+  float                      fadeDurationRatio{Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO};
+  float                      sequenceStartDelayRatio{0.0f};
+  Property::Index            progressPropertyIndex{Property::INVALID_INDEX};
+  uint64_t                   revision{0u};
+  float                      progress{0.0f};
+  bool                       enabled{false};
 };
 
 using TextRevealDataPtr = std::unique_ptr<TextRevealData>;

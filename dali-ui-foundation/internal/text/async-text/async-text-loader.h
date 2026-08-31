@@ -119,6 +119,7 @@ struct AsyncTextParameters
     textFitStepSize{1.f},
     marqueeLoopDelay{0.0f},
     textRevealFadeDurationRatio{Text::Reveal::AUTO_FADE_DURATION_RATIO},
+    textRevealSequenceStartDelayRatio{0.0f},
     renderScale{1.0f},
     renderScaleWidth{0.f},
     renderScaleHeight{0.f},
@@ -147,6 +148,7 @@ struct AsyncTextParameters
     fontWidth{TextAbstraction::FontWidth::NONE},
     fontSlant{TextAbstraction::FontSlant::NONE},
     textRevealUnit{Internal::Reveal::Unit::DISABLED},
+    textRevealSequence{Internal::Reveal::Sequence::WHOLE_TEXT},
     suppressAutoMarquee{false},
     isMultiLine{false},
     ellipsis{true},
@@ -220,10 +222,11 @@ struct AsyncTextParameters
   float textFitMaxSize;
   float textFitStepSize;
   float marqueeLoopDelay;
-  float textRevealFadeDurationRatio; ///< Authored AUTO sentinel or normalized per-unit fade duration.
-  float renderScale;                 ///< The render scale.
-  float renderScaleWidth;            ///< The requested original textWidth when using render scale.
-  float renderScaleHeight;           ///< The requested original textHeight when using render scale.
+  float textRevealFadeDurationRatio;       ///< Authored AUTO sentinel or normalized per-unit fade duration.
+  float textRevealSequenceStartDelayRatio; ///< Authored normalized delay between sequence starts.
+  float renderScale;                       ///< The render scale.
+  float renderScaleWidth;                  ///< The requested original textWidth when using render scale.
+  float renderScaleHeight;                 ///< The requested original textHeight when using render scale.
 
   int      maxTextureSize;               ///< The maximum size of texture.
   Length   maximumNumberOfLines;         ///< Maximum laid-out lines, or zero for unlimited.
@@ -252,6 +255,7 @@ struct AsyncTextParameters
   FontWidthType                             fontWidth;             ///< The font's width.
   FontSlantType                             fontSlant;             ///< The font's slant.
   Internal::Reveal::Unit                    textRevealUnit;        ///< Shaping/layout reveal unit.
+  Internal::Reveal::Sequence                textRevealSequence;    ///< Final reveal sequence grouping mode.
 
   bool suppressAutoMarquee : 1;            ///< whether automatic marquee evaluation is suppressed.
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.

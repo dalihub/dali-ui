@@ -135,17 +135,22 @@ UiText::AsyncTextParameters MakeParameters(const std::string& text)
   return parameters;
 }
 
-UiText::AsyncTextParameters MakeRevealParameters(const std::string&          text,
-                                                 uint64_t                    revision,
-                                                 UiText::Internal::Reveal::Unit unit,
-                                                 float                       fadeDurationRatio)
+UiText::AsyncTextParameters MakeRevealParameters(
+  const std::string&                 text,
+  uint64_t                           revision,
+  UiText::Internal::Reveal::Unit     unit,
+  float                              fadeDurationRatio,
+  UiText::Internal::Reveal::Sequence sequence                = UiText::Internal::Reveal::Sequence::WHOLE_TEXT,
+  float                              sequenceStartDelayRatio = 0.0f)
 {
   UiText::AsyncTextParameters parameters = MakeParameters(text);
-  parameters.isMarqueeEnabled            = false;
-  parameters.isTextRevealEnabled         = true;
-  parameters.textRevealUnit              = unit;
-  parameters.textRevealFadeDurationRatio = fadeDurationRatio;
-  parameters.textRevealRevision          = revision;
+  parameters.isMarqueeEnabled                  = false;
+  parameters.isTextRevealEnabled               = true;
+  parameters.textRevealUnit                    = unit;
+  parameters.textRevealFadeDurationRatio       = fadeDurationRatio;
+  parameters.textRevealSequence                = sequence;
+  parameters.textRevealSequenceStartDelayRatio = sequenceStartDelayRatio;
+  parameters.textRevealRevision                = revision;
   return parameters;
 }
 
@@ -161,17 +166,26 @@ UiText::AsyncTextRenderInfo MakeRevealRenderInfo(uint32_t width, uint32_t height
   return renderInfo;
 }
 
-void ConfigureReveal(RenderedTextVisual&            rendered,
-                     UiText::Internal::Reveal::Unit unit,
-                     float                          fadeDurationRatio,
-                     uint64_t                       revision)
+void ConfigureReveal(
+  RenderedTextVisual&                 rendered,
+  UiText::Internal::Reveal::Unit     unit,
+  float                              fadeDurationRatio,
+  uint64_t                           revision,
+  UiText::Internal::Reveal::Sequence sequence                = UiText::Internal::Reveal::Sequence::WHOLE_TEXT,
+  float                              sequenceStartDelayRatio = 0.0f)
 {
   Property::Index progress = rendered.view.GetPropertyIndex("testRevealProgress");
   if(progress == Property::INVALID_INDEX)
   {
     progress = rendered.view.RegisterProperty("testRevealProgress", 0.5f);
   }
-  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, unit, fadeDurationRatio, progress, revision);
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual,
+                                              unit,
+                                              fadeDurationRatio,
+                                              progress,
+                                              revision,
+                                              sequence,
+                                              sequenceStartDelayRatio);
 }
 
 void PublishDirect(RenderedTextVisual&                   rendered,
@@ -511,13 +525,15 @@ int UtcDaliTextVisualAsyncOffOnDiscardsOlderRequestsP(void)
     if(enableReveal)
     {
       ConfigureReveal(rendered, UiText::Internal::Reveal::Unit::CHARACTER,
-                      UiText::Reveal::AUTO_FADE_DURATION_RATIO, revision);
+                      UiText::Reveal::AUTO_FADE_DURATION_RATIO, revision,
+                      UiText::Internal::Reveal::Sequence::PER_LINE, 0.5f);
     }
 
     UiText::AsyncTextParameters oldParameters =
       enableReveal ? MakeRevealParameters(std::string(30000u, 'A'), revision,
                                           UiText::Internal::Reveal::Unit::CHARACTER,
-                                          UiText::Reveal::AUTO_FADE_DURATION_RATIO)
+                                          UiText::Reveal::AUTO_FADE_DURATION_RATIO,
+                                          UiText::Internal::Reveal::Sequence::PER_LINE, 0.5f)
                    : MakeParameters(std::string(30000u, 'A'));
     oldParameters.isMarqueeEnabled = false;
     DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, oldParameters));
@@ -527,11 +543,13 @@ int UtcDaliTextVisualAsyncOffOnDiscardsOlderRequestsP(void)
     controller->SetAsyncRendering(true);
 
     UiText::AsyncTextParameters currentParameters =
-      enableReveal ? MakeRevealParameters("current reveal request", revision,
+      enableReveal ? MakeRevealParameters("current reveal request\nwith two visual lines", revision,
                                           UiText::Internal::Reveal::Unit::CHARACTER,
-                                          UiText::Reveal::AUTO_FADE_DURATION_RATIO)
+                                          UiText::Reveal::AUTO_FADE_DURATION_RATIO,
+                                          UiText::Internal::Reveal::Sequence::PER_LINE, 0.5f)
                    : MakeParameters("current ordinary request");
     currentParameters.isMarqueeEnabled = false;
+    currentParameters.isMultiLine      = enableReveal;
     DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, currentParameters));
 
     for(uint32_t trigger = 0u; trigger < 3u && observer.mCompletionCount == 0u; ++trigger)
@@ -636,6 +654,83 @@ int UtcDaliTextVisualRevealUnitRejectsOlderCompletionP(void)
 
   PublishDirect(rendered,
                 MakeRevealParameters("current word unit", 2u, UiText::Internal::Reveal::Unit::WORD, 0.2f),
+                MakeRevealRenderInfo(32u, 16u));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
+}
+
+int UtcDaliTextVisualRevealSequenceRejectsOlderCompletionP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  RenderedTextVisual      rendered = CreateTextVisual(application);
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  1u,
+                  UiText::Internal::Reveal::Sequence::WHOLE_TEXT);
+  const auto staleWholeText = MakeRevealParameters("stale WHOLE_TEXT sequence",
+                                              1u,
+                                              UiText::Internal::Reveal::Unit::CHARACTER,
+                                              0.25f);
+
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  2u,
+                  UiText::Internal::Reveal::Sequence::PER_LINE,
+                  0.25f);
+  PublishDirect(rendered, staleWholeText, MakeRevealRenderInfo(32u, 16u));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
+
+  const auto stalePerLine = MakeRevealParameters("stale PER_LINE sequence",
+                                              2u,
+                                              UiText::Internal::Reveal::Unit::CHARACTER,
+                                              0.25f,
+                                              UiText::Internal::Reveal::Sequence::PER_LINE,
+                                              0.25f);
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  3u,
+                  UiText::Internal::Reveal::Sequence::WHOLE_TEXT);
+  PublishDirect(rendered, stalePerLine, MakeRevealRenderInfo(32u, 16u));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
+
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  4u,
+                  UiText::Internal::Reveal::Sequence::PER_LINE,
+                  0.25f);
+  const auto staleStagger = MakeRevealParameters("stale LINE stagger",
+                                                 4u,
+                                                 UiText::Internal::Reveal::Unit::CHARACTER,
+                                                 0.25f,
+                                                 UiText::Internal::Reveal::Sequence::PER_LINE,
+                                                 0.25f);
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  5u,
+                  UiText::Internal::Reveal::Sequence::PER_LINE,
+                  0.5f);
+  PublishDirect(rendered, staleDelay, MakeRevealRenderInfo(32u, 16u));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
+
+  PublishDirect(rendered,
+                MakeRevealParameters("current LINE delay",
+                                     5u,
+                                     UiText::Internal::Reveal::Unit::CHARACTER,
+                                     0.25f,
+                                     UiText::Internal::Reveal::Sequence::PER_LINE,
+                                     0.5f),
                 MakeRevealRenderInfo(32u, 16u));
   DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
 

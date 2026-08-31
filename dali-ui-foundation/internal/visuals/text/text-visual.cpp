@@ -2037,12 +2037,16 @@ void TextVisual::BindGradientOverlayAnimConstraints(VisualRenderer& renderer,
   }
 }
 
-void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit unit,
-                                     float                        fadeDurationRatio,
-                                     Property::Index              progressPropertyIndex,
-                                     uint64_t                     revision)
+void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit     unit,
+                                     float                            fadeDurationRatio,
+                                     Property::Index                  progressPropertyIndex,
+                                     uint64_t                         revision,
+                                     Text::Internal::Reveal::Sequence sequence,
+                                     float                            sequenceStartDelayRatio)
 {
-  auto* data = GetTextVisualRevealData(mRevealData);
+  sequence                = unit == Text::Internal::Reveal::Unit::DISABLED ? Text::Internal::Reveal::Sequence::WHOLE_TEXT : sequence;
+  sequenceStartDelayRatio = unit == Text::Internal::Reveal::Unit::DISABLED ? 0.0f : sequenceStartDelayRatio;
+  auto* data              = GetTextVisualRevealData(mRevealData);
   if(!data)
   {
     if(unit == Text::Internal::Reveal::Unit::DISABLED)
@@ -2051,19 +2055,23 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit unit,
     }
   }
   else if(data->unit == unit &&
+          data->sequence == sequence &&
           Equals(data->fadeDurationRatio, fadeDurationRatio) &&
+          Equals(data->sequenceStartDelayRatio, sequenceStartDelayRatio) &&
           data->progressPropertyIndex == progressPropertyIndex &&
           data->revision == revision)
   {
     return;
   }
 
-  data                        = &GetOrCreateTextVisualRevealData(mRevealData);
-  data->unit                  = unit;
-  data->fadeDurationRatio     = fadeDurationRatio;
-  data->progressPropertyIndex = progressPropertyIndex;
-  data->revision              = revision;
-  mRendererUpdateNeeded       = true;
+  data                          = &GetOrCreateTextVisualRevealData(mRevealData);
+  data->unit                    = unit;
+  data->sequence                = sequence;
+  data->fadeDurationRatio       = fadeDurationRatio;
+  data->sequenceStartDelayRatio = sequenceStartDelayRatio;
+  data->progressPropertyIndex   = progressPropertyIndex;
+  data->revision                = revision;
+  mRendererUpdateNeeded         = true;
   if(unit == Text::Internal::Reveal::Unit::DISABLED)
   {
     RemoveTextRevealConstraints();
@@ -2591,7 +2599,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
     if(textRevealEnabled)
     {
-      revealPlan = mTypesetter->CreateFinalRevealPlan(revealPlan, revealData->unit);
+      revealPlan = mTypesetter->CreateFinalRevealPlan(revealPlan,
+                                                      revealData->unit,
+                                                      revealData->sequence,
+                                                      revealData->sequenceStartDelayRatio);
     }
 
     int verifiedWidth  = data.GetWidth();
@@ -2868,9 +2879,15 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
   {
     auto* revealData = GetTextVisualRevealData(mRevealData);
     DALI_ASSERT_ALWAYS(revealData);
-    const auto sourcePlan = BuildTextRevealSourcePlan();
-    const auto finalPlan  = mTypesetter->CreateFinalRevealPlan(sourcePlan, revealData->unit);
-    PixelData  metadata   = mTypesetter->RenderTextRevealMetadata(size, textDirection, finalPlan, revealData->fadeDuration);
+    const auto sourcePlan      = BuildTextRevealSourcePlan();
+    const auto finalPlan       = mTypesetter->CreateFinalRevealPlan(sourcePlan,
+                                                                    revealData->unit,
+                                                                    revealData->sequence,
+                                                                    revealData->sequenceStartDelayRatio);
+    PixelData  metadata       = mTypesetter->RenderTextRevealMetadata(size,
+                                                                     textDirection,
+                                                                     finalPlan,
+                                                                     revealData->fadeDuration);
 
     DALI_ASSERT_ALWAYS(metadata && metadata.GetPixelFormat() == Pixel::RGBA8888 &&
                        metadata.GetWidth() == static_cast<uint32_t>(size.width) &&

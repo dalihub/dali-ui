@@ -28,7 +28,7 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float       CONTROLS_PANEL_HEIGHT       = 328.0f;
+constexpr float       CONTROLS_PANEL_HEIGHT       = 408.0f;
 constexpr float       CONTROL_HEIGHT              = 34.0f;
 constexpr float       CONTROL_SPACING             = 6.0f;
 constexpr float       MENU_TITLE_WIDTH            = 86.0f;
@@ -37,6 +37,8 @@ constexpr std::size_t FADE_CASE_COUNT             = 7u;
 constexpr std::size_t DURATION_CASE_COUNT         = 4u;
 constexpr std::size_t TEXT_CASE_COUNT             = 3u;
 constexpr std::size_t DEFAULT_DURATION_CASE_INDEX = 2u;
+constexpr std::size_t SEQUENCE_CASE_COUNT         = 2u;
+constexpr std::size_t START_DELAY_CASE_COUNT      = 8u;
 constexpr std::size_t DEFAULT_TEXT_CASE_INDEX     = 1u;
 constexpr uint32_t    PANEL_COLOR                 = 0x111827;
 constexpr uint32_t    BUTTON_COLOR                = 0x1E293B;
@@ -102,6 +104,38 @@ const char* const TEXT_BUTTON_LABELS[TEXT_CASE_COUNT] = {
   "Short",
   "Middle",
   "Long"};
+
+const Text::Reveal::Sequence SEQUENCES[SEQUENCE_CASE_COUNT] = {
+  Text::Reveal::Sequence::WHOLE_TEXT,
+  Text::Reveal::Sequence::PER_LINE};
+
+const char* const SEQUENCE_BUTTON_LABELS[SEQUENCE_CASE_COUNT] = {
+  "Whole Text",
+  "Per Line"};
+
+const char* const SEQUENCE_STATUS_LABELS[SEQUENCE_CASE_COUNT] = {
+  "WHOLE_TEXT",
+  "PER_LINE"};
+
+const float START_DELAY_RATIOS[START_DELAY_CASE_COUNT] = {
+  0.0f,
+  0.05f,
+  0.10f,
+  0.20f,
+  0.25f,
+  0.50f,
+  0.75f,
+  1.0f};
+
+const char* const START_DELAY_BUTTON_LABELS[START_DELAY_CASE_COUNT] = {
+  "0",
+  "0.05",
+  "0.10",
+  "0.20",
+  "0.25",
+  "0.50",
+  "0.75",
+  "1.00"};
 
 const char* const TEXT_CASES[TEXT_CASE_COUNT] = {
   "Short reveal: office cafe\u0301 — 안녕 😀",
@@ -240,6 +274,30 @@ private:
       });
     }
 
+    StackLayout sequenceControls = NewMenuRow("SEQUENCE");
+    for(std::size_t sequenceIndex = 0u; sequenceIndex < SEQUENCE_CASE_COUNT; ++sequenceIndex)
+    {
+      mSequenceButtons[sequenceIndex] = NewButton(SEQUENCE_BUTTON_LABELS[sequenceIndex]);
+      sequenceControls.Add(mSequenceButtons[sequenceIndex]);
+      mSequenceButtons[sequenceIndex].AsInteractive().ClickedSignal().Connect(this, [this, sequenceIndex](View, InputEvent)
+      {
+        mSequenceIndex = sequenceIndex;
+        ConfigureAndReplay();
+      });
+    }
+
+    StackLayout startDelayControls = NewMenuRow("START DELAY");
+    for(std::size_t delayIndex = 0u; delayIndex < START_DELAY_CASE_COUNT; ++delayIndex)
+    {
+      mStartDelayButtons[delayIndex] = NewButton(START_DELAY_BUTTON_LABELS[delayIndex]);
+      startDelayControls.Add(mStartDelayButtons[delayIndex]);
+      mStartDelayButtons[delayIndex].AsInteractive().ClickedSignal().Connect(this, [this, delayIndex](View, InputEvent)
+      {
+        mStartDelayIndex = delayIndex;
+        ConfigureAndReplay();
+      });
+    }
+
     StackLayout fadeControls = NewMenuRow("FADE");
     for(std::size_t fadeIndex = 0u; fadeIndex < FADE_CASE_COUNT; ++fadeIndex)
     {
@@ -290,6 +348,8 @@ private:
     controlsPanel.SetSpacing(CONTROL_SPACING);
     controlsPanel.Add(configurationControls);
     controlsPanel.Add(textControls);
+    controlsPanel.Add(sequenceControls);
+    controlsPanel.Add(startDelayControls);
     controlsPanel.Add(fadeControls);
     controlsPanel.Add(durationControls);
     controlsPanel.Add(playbackControls);
@@ -353,6 +413,8 @@ private:
     SetButtonSelected(mFillButton, mGradientEnabled);
     SetButtonSelected(mRevealButton, mRevealEnabled);
     UpdateTextButtons();
+    UpdateSequenceButtons();
+    UpdateStartDelayButtons();
     UpdateFadeButtons();
     UpdateDurationButtons();
     Replay();
@@ -381,6 +443,8 @@ private:
     // not consume a unit, and adjacent punctuation is folded appropriately.
     Text::Reveal reveal;
     reveal.SetUnit(mUnit);
+    reveal.SetSequence(SEQUENCES[mSequenceIndex]);
+    reveal.SetSequenceStartDelayRatio(START_DELAY_RATIOS[mStartDelayIndex]);
     reveal.SetFadeDurationRatio(FADE_DURATION_RATIOS[mFadeDurationRatioIndex]);
     mPreview.SetTextReveal(reveal);
   }
@@ -390,6 +454,22 @@ private:
     for(std::size_t fadeIndex = 0u; fadeIndex < FADE_CASE_COUNT; ++fadeIndex)
     {
       SetButtonSelected(mFadeButtons[fadeIndex], fadeIndex == mFadeDurationRatioIndex);
+    }
+  }
+
+  void UpdateSequenceButtons()
+  {
+    for(std::size_t sequenceIndex = 0u; sequenceIndex < SEQUENCE_CASE_COUNT; ++sequenceIndex)
+    {
+      SetButtonSelected(mSequenceButtons[sequenceIndex], sequenceIndex == mSequenceIndex);
+    }
+  }
+
+  void UpdateStartDelayButtons()
+  {
+    for(std::size_t delayIndex = 0u; delayIndex < START_DELAY_CASE_COUNT; ++delayIndex)
+    {
+      SetButtonSelected(mStartDelayButtons[delayIndex], delayIndex == mStartDelayIndex);
     }
   }
 
@@ -540,7 +620,7 @@ private:
     switch(mFadeDurationRatioIndex)
     {
       case 0u:
-        return "AUTO chooses the per-unit fade from the final visible reveal-unit count.";
+        return "AUTO chooses a per-unit fade suitable for the current Reveal sequences.";
       case 1u:
         return mUnit == Text::Reveal::Unit::CHARACTER
                  ? "Fade 0: each shaping cluster appears immediately at its scheduled progress."
@@ -567,6 +647,8 @@ private:
     std::ostringstream status;
     status << "TEXT " << TEXT_BUTTON_LABELS[mTextCaseIndex]
            << " | UNIT " << (mUnit == Text::Reveal::Unit::CHARACTER ? "CHARACTER" : "WORD")
+           << " | SEQUENCE " << SEQUENCE_STATUS_LABELS[mSequenceIndex]
+           << " | START DELAY " << START_DELAY_BUTTON_LABELS[mStartDelayIndex]
            << " | Fade: " << FADE_STATUS_LABELS[mFadeDurationRatioIndex]
            << " | DURATION " << std::fixed << std::setprecision(1) << GetAnimationDuration() << " s"
            << "\nPATH " << (mAsync ? "Async" : "Sync")
@@ -626,9 +708,11 @@ private:
   Application&                            mApplication;
   Label                                   mPreview;
   Label                                   mUnitButton;
-  std::array<Label, TEXT_CASE_COUNT>      mTextButtons;
-  std::array<Label, FADE_CASE_COUNT>      mFadeButtons;
-  std::array<Label, DURATION_CASE_COUNT>  mDurationButtons;
+  std::array<Label, TEXT_CASE_COUNT>        mTextButtons;
+  std::array<Label, SEQUENCE_CASE_COUNT>    mSequenceButtons;
+  std::array<Label, START_DELAY_CASE_COUNT> mStartDelayButtons;
+  std::array<Label, FADE_CASE_COUNT>        mFadeButtons;
+  std::array<Label, DURATION_CASE_COUNT>    mDurationButtons;
   Label                                   mAsyncButton;
   Label                                   mFillButton;
   Label                                   mRevealButton;
@@ -637,6 +721,8 @@ private:
   Animation                               mAnimation;
   std::string                             mPlaybackStatus;
   Text::Reveal::Unit                      mUnit{Text::Reveal::Unit::CHARACTER};
+  std::size_t                             mSequenceIndex{0u};
+  std::size_t                             mStartDelayIndex{0u};
   std::size_t                             mTextCaseIndex{DEFAULT_TEXT_CASE_INDEX};
   std::size_t                             mFadeDurationRatioIndex{0u};
   std::size_t                             mDurationCaseIndex{DEFAULT_DURATION_CASE_INDEX};
