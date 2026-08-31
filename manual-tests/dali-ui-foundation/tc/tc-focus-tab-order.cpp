@@ -86,7 +86,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
-    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.SetPadding(Insets(GAP, GAP, GAP, GAP));
 
     root.Add(mStatusLabel);
     root.Add(CreateSectionLabel("Scenario 1: Reverse-index position"));
@@ -110,7 +110,7 @@ private:
     label.SetTextColor(UiColor(COLOR_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(30.0f);
-    label.SetMargin(Extents(0, 0, GAP, 0));
+    label.SetMargin(Insets(0.0f, 0.0f, GAP, 0.0f));
     return label;
   }
 

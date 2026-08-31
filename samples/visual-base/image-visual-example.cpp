@@ -200,7 +200,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     Label titleLabel = Label::New("ImageVisual Example");
     titleLabel.SetRequestedWidth(WRAP_CONTENT);
@@ -221,8 +221,8 @@ private:
     contentLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     contentLabel.SetRequestedWidth(MATCH_PARENT);
     contentLabel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    contentLabel.SetPadding(Extents(VIEW_PADDING, VIEW_PADDING, VIEW_PADDING, VIEW_PADDING));
-    contentLabel.SetMargin(Extents(VIEW_MARGIN, VIEW_MARGIN, VIEW_MARGIN, VIEW_MARGIN));
+    contentLabel.SetPadding(Insets(VIEW_PADDING, VIEW_PADDING, VIEW_PADDING, VIEW_PADDING));
+    contentLabel.SetMargin(Insets(VIEW_MARGIN, VIEW_MARGIN, VIEW_MARGIN, VIEW_MARGIN));
     contentLabel.SetCornerRadius(0.25f);
     contentLabel.SetCornerSquareness(0.6f);
     contentLabel.SetCornerRadiusPolicyRelative();
@@ -237,7 +237,7 @@ private:
     buttonRow.SetSpacing(STACK_SPACING);
     buttonRow.SetRequestedWidth(MATCH_PARENT);
     buttonRow.SetRequestedHeight(WRAP_CONTENT);
-    buttonRow.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    buttonRow.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     AbsoluteLayout addButton = AbsoluteLayout::New();
     addButton.SetBackgroundColor(UiColor(0xFF0000));

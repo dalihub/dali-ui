@@ -68,7 +68,7 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(8.0f);
-    root.SetPadding(Extents(8, 8, 8, 8));
+    root.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
 
     Label title = CreateLabel("ImageView with PixelData ImageUrl", 22.0f, UiColor(0xFFFFFF));
     title.SetRequestedHeight(TITLE_HEIGHT);

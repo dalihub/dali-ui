@@ -99,7 +99,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
-    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.SetPadding(Insets(GAP, GAP, GAP, GAP));
     root.Add(mStatusLabel);
     root.Add(row0);
     root.Add(row1);
@@ -120,7 +120,7 @@ private:
     label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     label.SetBackgroundColor(UiColor(COLORS[index]));
-    label.SetMargin(Extents(GAP / 2, GAP / 2, GAP / 2, GAP / 2));
+    label.SetMargin(Insets(GAP / 2, GAP / 2, GAP / 2, GAP / 2));
     label.SetFocusable(true);
 
     label.FocusChangedSignal().Connect(this, [this, index](View view, bool focused)

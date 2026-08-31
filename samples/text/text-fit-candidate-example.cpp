@@ -80,7 +80,7 @@ Label CreateSectionLabel(const char* text)
   Label label = Label::New(text);
   label.SetFontSize(16.0f);
   label.SetBackgroundColor(UiColor(0xE0E0E0));
-  label.SetPadding(Extents(10, 10, 10, 10));
+  label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
   return label;
 }
 
@@ -92,7 +92,7 @@ Label CreateFitLabel(const char* text, float width, float height, bool multiLine
   label.SetMultiLine(multiLine);
   label.SetFontSize(20.0f);
   label.SetBackgroundColor(UiColor(0xEFEFEF));
-  label.SetPadding(Extents(10, 10, 10, 10));
+  label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
   label.SetTextFit(GetFitCandidates());
   return label;
 }
@@ -160,7 +160,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     Label titleLabel = Label::New("TextFit Candidate Example");
     titleLabel.SetFontSize(24.0f);
@@ -169,13 +169,13 @@ private:
     Label instructionLabel = Label::New("Press '1' to clear TextFit, '2' and '3' to set alternative candidates");
     instructionLabel.SetFontSize(14.0f);
     instructionLabel.SetBackgroundColor(UiColor(0xE0E0E0));
-    instructionLabel.SetPadding(Extents(10, 10, 10, 10));
+    instructionLabel.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     root.Add(instructionLabel);
 
     mStatusLabel = Label::New("");
     mStatusLabel.SetFontSize(14.0f);
     mStatusLabel.SetBackgroundColor(UiColor(0xE8F2FF));
-    mStatusLabel.SetPadding(Extents(10, 10, 8, 8));
+    mStatusLabel.SetPadding(Insets(10.0f, 10.0f, 8.0f, 8.0f));
     root.Add(mStatusLabel);
 
     root.Add(CreateSectionLabel("1. MATCH_PARENT + fixed height / single line"));

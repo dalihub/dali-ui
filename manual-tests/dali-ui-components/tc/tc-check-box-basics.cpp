@@ -64,7 +64,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(WRAP_CONTENT);
     root.SetSpacing(12.0f);
-    root.SetPadding(Extents(16, 16, 16, 16));
+    root.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
     mRoot = root;
 
     root.Add(MakeLabel("Tap each checkbox to toggle it.", 14.0f, COLOR_BODY));

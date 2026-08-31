@@ -88,7 +88,7 @@ public:
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
     content.SetBackgroundColor(UiColor(C_BG));
-    content.SetPadding(Extents(8, 8, 8, 8));
+    content.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
 
     // Column labels
     StackLayout colLabels = StackLayout::New(StackOrientation::HORIZONTAL);
@@ -124,7 +124,7 @@ public:
     StackLayout previewRow = StackLayout::New(StackOrientation::HORIZONTAL);
     previewRow.SetRequestedWidth(MATCH_PARENT);
     previewRow.SetRequestedHeight(PREVIEW_SIZE + 16);
-    previewRow.SetPadding(Extents(0, 0, 4, 4));
+    previewRow.SetPadding(Insets(0.0f, 0.0f, 4.0f, 4.0f));
     View leftLeadingSpacer = View::New();
     leftLeadingSpacer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     View leftTrailingSpacer = View::New();
@@ -273,7 +273,7 @@ private:
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(BTN_H);
-    row.SetPadding(Extents(0, 0, 2, 2));
+    row.SetPadding(Insets(0.0f, 0.0f, 2.0f, 2.0f));
     for(auto& b : buttons)
     {
       row.Add(b);

@@ -112,7 +112,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
-    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.SetPadding(Insets(GAP, GAP, GAP, GAP));
     root.Add(mStatusLabel);
     root.Add(btnRequestFocus);
     root.Add(layoutLabel);

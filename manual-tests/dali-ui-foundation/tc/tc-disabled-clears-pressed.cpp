@@ -98,7 +98,7 @@ public:
     StackLayout root = StackLayout::New();
     root.SetSpacing(SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
-    root.SetPadding(Extents(PAD, PAD, PAD, PAD));
+    root.SetPadding(Insets(PAD, PAD, PAD, PAD));
     root.Add(mTarget);
     root.Add(mResetButton);
     root.Add(mLog);

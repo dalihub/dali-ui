@@ -459,6 +459,24 @@ OptionalExtents Replacement::IsExtents(const TreeNode& node) const
   return extents;
 }
 
+OptionalInsets Replacement::IsInsets(const TreeNode& node) const
+{
+  OptionalInsets insets;
+  if(OptionalString replace = HasFullReplacement(node))
+  {
+    Property::Value value = GetFullReplacement(*replace);
+    if(Property::INSETS == value.GetType())
+    {
+      insets = value.Get<Insets>();
+    }
+  }
+  else
+  {
+    insets = ::IsInsets(node);
+  }
+  return insets;
+}
+
 OptionalFloat Replacement::IsFloat(OptionalChild child) const
 {
   if(child)
@@ -614,6 +632,18 @@ OptionalExtents Replacement::IsExtents(OptionalChild child) const
   else
   {
     return OptionalExtents();
+  }
+}
+
+OptionalInsets Replacement::IsInsets(OptionalChild child) const
+{
+  if(child)
+  {
+    return IsInsets(*child);
+  }
+  else
+  {
+    return OptionalInsets();
   }
 }
 

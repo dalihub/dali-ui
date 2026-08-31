@@ -130,7 +130,7 @@ private:
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(56.0f);
-    row.SetPadding(Extents(4, 4, 4, 4));
+    row.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
 
     StackLayout toggleButton = StackLayout::New(StackOrientation::VERTICAL);
     toggleButton.SetRequestedWidth(WRAP_CONTENT);
@@ -207,7 +207,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
     button.SetRequestedWidth(MATCH_PARENT);
     button.SetRequestedHeight(56.0f);
-    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
     button.SetBackgroundColor(UiColor(0x555555));
     mOrientationLabel = Label::New("ORIENTATION CORRECTION: ON");
     mOrientationLabel.SetRequestedWidth(MATCH_PARENT);

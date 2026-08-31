@@ -134,7 +134,7 @@ private:
     contents.SetSpacing(STACK_SPACING);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    contents.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     mField            = CreateInputField();
     mLabel            = CreateLayoutLabel1();
@@ -177,7 +177,7 @@ private:
     field.SetSelectionColor(UiColor(COLOR_LIGHT_BLUE));
     field.SetRequestedWidth(MATCH_PARENT);
     field.SetRequestedHeight(WRAP_CONTENT);
-    field.SetPadding(Extents(20, 20, 20, 20));
+    field.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     field.SetBackgroundColor(UiColor(COLOR_LIGHT_BG));
     field.SetTextColor(UiColor(COLOR_DARK_TEXT));
     field.SetCursorColor(UiColor(COLOR_DARK_TEXT));
@@ -191,7 +191,7 @@ private:
     Label label = CreateLabel("Hello world", "SamsungOneUI_400", LABEL1_FONT_SIZE);
     label.SetRequestedWidth(WRAP_CONTENT);
     label.SetRequestedHeight(100.0f);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT1));
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
@@ -207,7 +207,7 @@ private:
     label.SetMinimumHeight(100);
     label.SetMaximumWidth(600);
     label.SetMaximumHeight(300);
-    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     label.SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT2));
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetMultiLine(true);
@@ -223,7 +223,7 @@ private:
                               LABEL3_FONT_SIZE);
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(150.0f);
-    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     label.SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT3));
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetMultiLine(true);
@@ -373,13 +373,13 @@ private:
     }
     else if(event.GetKeyName() == "7")
     {
-      mLabel2.SetPadding(Extents(0, 0, 0, 0));
-      mLabel3.SetPadding(Extents(0, 0, 0, 0));
+      mLabel2.SetPadding(Insets(0.0f, 0.0f, 0.0f, 0.0f));
+      mLabel3.SetPadding(Insets(0.0f, 0.0f, 0.0f, 0.0f));
     }
     else if(event.GetKeyName() == "8")
     {
-      mLabel2.SetPadding(Extents(20, 20, 20, 20));
-      mLabel3.SetPadding(Extents(20, 20, 20, 20));
+      mLabel2.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
+      mLabel3.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     }
 
     else if(event.GetKeyName() == "q")

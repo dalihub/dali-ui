@@ -110,7 +110,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
-    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.SetPadding(Insets(GAP, GAP, GAP, GAP));
     root.Add(mStatusLabel);
     root.Add(CreateButton("Set FocusGroup OFF", [this]() {
                         FocusManager::Get().SetAsFocusGroup(mGroup, false);
@@ -140,7 +140,7 @@ private:
     btn.SetBackgroundColor(UiColor(0x4285F4));
     btn.SetRequestedWidth(MATCH_PARENT);
     btn.SetRequestedHeight(44.0f);
-    btn.SetMargin(Extents(0, 0, 4, 4));
+    btn.SetMargin(Insets(0.0f, 0.0f, 4.0f, 4.0f));
     btn.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     btn.SetVerticalTextAlignment(Text::Alignment::CENTER);
 

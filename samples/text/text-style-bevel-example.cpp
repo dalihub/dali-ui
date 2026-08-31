@@ -31,7 +31,7 @@ Text::Bevel CreateBevel(const Vector2& direction, float intensity, uint32_t ligh
   return bevel;
 }
 
-Label CreateBevelLabel(const char* text, uint32_t backgroundColor, uint32_t textColor, Text::Bevel bevel, Extents padding = Extents(10, 10, 10, 10))
+Label CreateBevelLabel(const char* text, uint32_t backgroundColor, uint32_t textColor, Text::Bevel bevel, Insets padding = Insets(10.0f, 10.0f, 10.0f, 10.0f))
 {
   Label label = Label::New(text);
   label.SetBackgroundColor(UiColor(backgroundColor));
@@ -80,7 +80,7 @@ private:
     root.Add(mSameColorLabel);
 
     mBronzeColorLabel = CreateBevelLabel("Bronze", 0x6B4A34, 0x6B4A34, CreateBevel(Vector2(-1.0f, -1.0f), 4.0f, 0xB8845E, 0x40281C),
-                                         Extents(20, 20, 20, 20));
+                                         Insets(20.0f, 20.0f, 20.0f, 20.0f));
     root.Add(mBronzeColorLabel);
 
     window.Add(root);

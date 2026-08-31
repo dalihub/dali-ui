@@ -97,7 +97,7 @@ private:
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(WRAP_CONTENT);
     row.SetSpacing(8.0f);
-    row.SetPadding(Extents(8, 8, 8, 8));
+    row.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     row.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row.Add(CreatePanel("CROP: OFF", false, PANEL_CROP_OFF));
     row.Add(CreatePanel("CROP: ON", true, PANEL_CROP_ON));
@@ -173,7 +173,7 @@ private:
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(60.0f);
-    row.SetPadding(Extents(4, 4, 4, 4));
+    row.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
     for(int i = 0; i < MASK_COUNT; ++i)
     {
       row.Add(CreateMaskButton(i));
@@ -207,7 +207,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
     button.SetRequestedWidth(MATCH_PARENT);
     button.SetRequestedHeight(60.0f);
-    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
     button.SetBackgroundColor(UiColor(0x2E7D32));
     mImageTypeLabel = Label::New(MakeImageTypeText());
     mImageTypeLabel.SetRequestedWidth(MATCH_PARENT);
@@ -227,7 +227,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
     button.SetRequestedWidth(MATCH_PARENT);
     button.SetRequestedHeight(60.0f);
-    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
     button.SetBackgroundColor(UiColor(0x444444));
     mModeLabel = Label::New("MODE: ON_RENDERING");
     mModeLabel.SetRequestedWidth(MATCH_PARENT);

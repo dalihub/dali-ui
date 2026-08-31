@@ -154,7 +154,7 @@ private:
     contents.SetSpacing(STACK_SPACING);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    contents.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     mLookupLabel = CreateLookupLabel();
     mStatusLabel = CreateStatusLabel();
@@ -179,7 +179,7 @@ private:
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
     return label;
   }
@@ -193,7 +193,7 @@ private:
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
     label.SetMultiLine(true);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(0xEFEFEF));
     return label;
   }
@@ -230,7 +230,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_RED));
     return label;
   }
@@ -243,7 +243,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
     return label;
   }
@@ -256,7 +256,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
     return label;
   }
@@ -269,7 +269,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
     return label;
   }
@@ -285,7 +285,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_GREEN));
     return label;
   }
@@ -299,7 +299,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_GREEN));
     return label;
   }
@@ -314,7 +314,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_YELLOW));
 
     UiLocalizationManager::Get().SetBindingResource(
@@ -334,7 +334,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_CYAN));
 
     UiLocalizationManager::Get().SetBindingResource(
@@ -412,7 +412,7 @@ private:
     field.SetTextColor(UiColor(COLOR_DARK_TEXT));
     field.SetRequestedWidth(MATCH_PARENT);
     field.SetRequestedHeight(WRAP_CONTENT);
-    field.SetPadding(Extents(10, 10, 10, 10));
+    field.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     field.SetBackgroundColor(UiColor(COLOR_LIGHT_YELLOW));
     return field;
   }
@@ -426,7 +426,7 @@ private:
     editor.SetTextColor(UiColor(COLOR_DARK_TEXT));
     editor.SetRequestedWidth(MATCH_PARENT);
     editor.SetRequestedHeight(80.0f);
-    editor.SetPadding(Extents(10, 10, 10, 10));
+    editor.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     editor.SetBackgroundColor(UiColor(COLOR_LIGHT_CYAN));
     return editor;
   }
@@ -442,7 +442,7 @@ private:
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
     label.SetMultiLine(true);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(0xFAFAFA));
     return label;
   }
@@ -474,7 +474,7 @@ private:
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
     label.SetMultiLine(true);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(0xFAFAFA));
     return label;
   }

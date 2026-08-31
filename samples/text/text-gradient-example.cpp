@@ -291,7 +291,7 @@ void ConfigureHudBadge(Label label, float height, const UiColor& backgroundColor
   label.SetBorderlineWidth(1.0f);
   label.SetBorderlineOffset(-1.0f);
   label.SetBorderlineColor(borderlineColor);
-  label.SetPadding(Extents(static_cast<int16_t>(10.0f), static_cast<int16_t>(10.0f), static_cast<int16_t>(0.0f), static_cast<int16_t>(0.0f)));
+  label.SetPadding(Insets(10.0f, 10.0f, 0.0f, 0.0f));
 }
 
 void SetCommonGradientStops(Gradient::Base& gradient)
@@ -710,7 +710,7 @@ private:
     mContentRoot.SetRequestedWidth(MATCH_PARENT);
     mContentRoot.SetRequestedHeight(MATCH_PARENT);
     mContentRoot.SetBackgroundColor(UiColor(0xF8FAFC));
-    mContentRoot.SetPadding(Extents(static_cast<int16_t>(CONTENT_PADDING), static_cast<int16_t>(CONTENT_PADDING), static_cast<int16_t>(CONTENT_PADDING), static_cast<int16_t>(CONTENT_PADDING)));
+    mContentRoot.SetPadding(Insets(CONTENT_PADDING, CONTENT_PADDING, CONTENT_PADDING, CONTENT_PADDING));
     mContentRoot.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 
     mFooterRoot = AbsoluteLayout::New();

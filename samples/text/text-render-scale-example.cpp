@@ -135,7 +135,7 @@ private:
     StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
     layout.SetRequestedWidth(MATCH_PARENT);
     layout.SetRequestedHeight(WRAP_CONTENT);
-    layout.SetPadding(Extents(20, 20, 20, 20));
+    layout.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
 
     Label scaleLabel = Label::New("SCALE");
     scaleLabel.SetFontSize(FONT_SIZE_LABEL);
@@ -151,7 +151,7 @@ private:
     mScaleBar.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     mScaleBar.SetRequestedHeight(SCALE_CONTROL_HEIGHT);
     mScaleBar.SetBackgroundColor(CARD_BG_COLOR);
-    mScaleBar.SetMargin(Extents(10, 0, 0, 0));
+    mScaleBar.SetMargin(Insets(10.0f, 0.0f, 0.0f, 0.0f));
 
     Label overlayLabel = Label::New("Press 1/2 or drag to adjust scale");
     overlayLabel.SetTextColor(TEXT_COLOR);
@@ -177,7 +177,7 @@ private:
     mScaleValueLabel.SetRequestedWidth(WRAP_CONTENT);
     mScaleValueLabel.SetRequestedHeight(MATCH_PARENT);
     mScaleValueLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mScaleValueLabel.SetMargin(Extents(10, 0, 0, 0));
+    mScaleValueLabel.SetMargin(Insets(10.0f, 0.0f, 0.0f, 0.0f));
     layout.Add(mScaleValueLabel);
 
     // Update scale display
@@ -218,7 +218,7 @@ private:
     StackLayout cardLayout = StackLayout::New(StackOrientation::HORIZONTAL);
     cardLayout.SetRequestedWidth(MATCH_PARENT);
     cardLayout.SetRequestedHeight(WRAP_CONTENT);
-    cardLayout.SetMargin(Extents(0, 0, 10, 0));
+    cardLayout.SetMargin(Insets(0.0f, 0.0f, 10.0f, 0.0f));
     section.Add(cardLayout);
 
     // Create 5 cards
@@ -238,7 +238,7 @@ private:
     card.SetRequestedHeight(CARD_HEIGHT);
     card.SetBackgroundColor(CARD_BG_COLOR);
     card.SetCornerRadius(CARD_CORNER_RADIUS);
-    card.SetMargin(Extents(static_cast<int16_t>(CARD_SPACING / 2), static_cast<int16_t>(CARD_SPACING / 2), 0, 0));
+    card.SetMargin(Insets(CARD_SPACING / 2, CARD_SPACING / 2, 0.0f, 0.0f));
     card.SetFocusable(true);
     card.SetFocusOnTouchEnabled(true);
 
@@ -249,7 +249,7 @@ private:
     titleLabel.SetMultiLine(true);
     titleLabel.SetRequestedWidth(MATCH_PARENT);
     titleLabel.SetRequestedHeight(TITLE_HEIGHT);
-    titleLabel.SetPadding(Extents(static_cast<int16_t>(PADDING), static_cast<int16_t>(PADDING), static_cast<int16_t>(PADDING), static_cast<int16_t>(PADDING)));
+    titleLabel.SetPadding(Insets(PADDING, PADDING, PADDING, PADDING));
     titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     titleLabel.SetAsyncRendering(true);
     titleLabel.SetMarqueeSpeed(100);
@@ -266,7 +266,7 @@ private:
     descLabel.SetTextColor(DESC_TEXT_COLOR);
     descLabel.SetRequestedWidth(MATCH_PARENT);
     descLabel.SetRequestedHeight(DESC_HEIGHT);
-    descLabel.SetPadding(Extents(static_cast<int16_t>(PADDING), static_cast<int16_t>(PADDING), 0, 0));
+    descLabel.SetPadding(Insets(PADDING, PADDING, 0.0f, 0.0f));
     descLabel.SetHorizontalTextAlignment(Text::Alignment::START);
     descLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     descLabel.SetAsyncRendering(true);

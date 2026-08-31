@@ -30,7 +30,7 @@ Label CreateSectionLabel(const char* text)
   Label label = Label::New(text);
   label.SetFontSize(16.0f);
   label.SetBackgroundColor(UiColor(0xF0F0F0));
-  label.SetPadding(Extents(10, 10, 10, 10));
+  label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
   return label;
 }
 
@@ -45,7 +45,7 @@ Label CreateVariationLabel(const char* variation)
   label.SetFontSize(20.0f);
   label.SetRequestedWidth(MATCH_PARENT);
   label.SetBackgroundColor(UiColor(0xEFEFEF));
-  label.SetPadding(Extents(10, 10, 10, 10));
+  label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
   return label;
 }
 } // namespace
@@ -69,7 +69,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     Label titleLabel = Label::New("Font Variation Example");
     titleLabel.SetFontSize(20.0f);
@@ -78,7 +78,7 @@ private:
     Label instructionLabel = Label::New("Press '1' to clear with None(), '2' to change variation, '3' to set via string");
     instructionLabel.SetFontSize(14.0f);
     instructionLabel.SetBackgroundColor(UiColor(0xE0E0E0));
-    instructionLabel.SetPadding(Extents(10, 10, 10, 10));
+    instructionLabel.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     root.Add(instructionLabel);
 
     root.Add(CreateSectionLabel("Weight 200 + Width 62.5"));
@@ -111,7 +111,7 @@ private:
     mField.SetFontSize(20.0f);
     mField.SetRequestedWidth(MATCH_PARENT);
     mField.SetBackgroundColor(UiColor(0xEFEFEF));
-    mField.SetPadding(Extents(10, 10, 10, 10));
+    mField.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     root.Add(mField);
 
     window.Add(root);

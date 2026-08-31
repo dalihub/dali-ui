@@ -1610,7 +1610,7 @@ int UtcDaliReplacementEditableVisualLayerRecreationP(void)
 
   auto exerciseControl = [&](auto control, auto& impl, const Vector2& smallSize, const Vector2& largeSize)
   {
-    control.SetPadding(Extents(0u, 0u, 0u, 0u));
+    control.SetPadding(Insets(0.0f, 0.0f, 0.0f, 0.0f));
     const Vector2 lifecycleSizes[] = {smallSize, smallSize, largeSize, largeSize, smallSize};
 
     for(uint32_t cycle = 0u; cycle < 5u; ++cycle)

@@ -72,7 +72,7 @@ public:
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(PAGE_PADDING, PAGE_PADDING, PAGE_PADDING, PAGE_PADDING));
+    root.SetPadding(Insets(PAGE_PADDING, PAGE_PADDING, PAGE_PADDING, PAGE_PADDING));
     root.SetSpacing(SECTION_GAP);
 
     root.Add(MakeLabel("View Background Gradient", TITLE_FONT, UiColor(0x1A202C)));
@@ -107,7 +107,7 @@ private:
     card.SetRequestedWidth(CARD_WIDTH);
     card.SetRequestedHeight(CARD_HEIGHT);
     card.SetCornerRadius(20.0f);
-    card.SetPadding(Extents(20.0f, 20.0f, 20.0f, 20.0f));
+    card.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     card.SetBackgroundGradient(CreateGradient());
 
     Label label = MakeLabel(text, BODY_FONT, UiColor(0xFFFFFF));

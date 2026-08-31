@@ -993,7 +993,7 @@ int UtcDaliViewLayoutBoundary_WrapContentPaddingNoAccumulation_P(void)
   View child = View::New();
   child.SetRequestedWidth(WRAP_CONTENT);
   child.SetRequestedHeight(200.0f);
-  child.SetPadding(Extents(50, 50, 50, 50));
+  child.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
   parent.Add(child);
 
   View grandchild = View::New();

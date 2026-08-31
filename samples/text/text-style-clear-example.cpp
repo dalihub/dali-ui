@@ -65,7 +65,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     Label guide = CreateBaseLabel("1 Set shadow  2 Zero-offset shadow  3 Clear shadow\n4 Set outline  5 Zero-width outline  6 Clear outline\n7 Toggle sync/async");
     guide.SetFontSize(18.0f);
@@ -129,7 +129,7 @@ private:
   {
     Label label = Label::New(text);
     label.SetBackgroundColor(BACKGROUND_COLOR);
-    label.SetPadding(Extents(static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING)));
+    label.SetPadding(Insets(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING));
     label.SetFontSize(FONT_SIZE);
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetTextColor(UiColor(0x202020));
@@ -141,7 +141,7 @@ private:
     InputField field = InputField::New();
     field.SetText(text);
     field.SetBackgroundColor(BACKGROUND_COLOR);
-    field.SetPadding(Extents(static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING)));
+    field.SetPadding(Insets(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING));
     field.SetFontSize(FONT_SIZE);
     field.SetRequestedWidth(MATCH_PARENT);
     field.SetTextColor(UiColor(0x202020));

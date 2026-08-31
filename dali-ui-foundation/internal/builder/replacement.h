@@ -142,6 +142,13 @@ public:
 
   /* @brief Check node for a type
    *
+   * @param node The TreeNode to check
+   * @return Optional value
+   */
+  OptionalInsets IsInsets(const TreeNode& node) const;
+
+  /* @brief Check node for a type
+   *
    * @param child The optional child TreeNode
    * @return Optional value
    */
@@ -230,6 +237,13 @@ public:
    * @return Optional value
    */
   OptionalExtents IsExtents(OptionalChild child) const;
+
+  /* @brief Check node for a type
+   *
+   * @param child The optional child TreeNode
+   * @return Optional value
+   */
+  OptionalInsets IsInsets(OptionalChild child) const;
 
 private:
   // Overriding map (overrides the default map). The map is not owned.

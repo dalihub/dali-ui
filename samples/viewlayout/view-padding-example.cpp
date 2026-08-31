@@ -60,7 +60,7 @@ public:
     child1.SetBackgroundColor(Color::RED);
     child1.SetRequestedWidth(MATCH_PARENT);
     child1.SetRequestedHeight(200.0f);
-    child1.SetPadding(Extents(50, 50, 50, 50));
+    child1.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     // Child 1's child: Yellow, width=MATCH_PARENT, height=100
     View grandchild1 = View::New();
@@ -77,7 +77,7 @@ public:
     child2.SetRequestedWidth(WRAP_CONTENT);
     child2.SetRequestedHeight(200.0f);
     child2.SetRequestedY(200.0f);
-    child2.SetPadding(Extents(50, 50, 50, 50));
+    child2.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     // Child 2's child: Cyan, width=100, height=100 (NOT MATCH_PARENT)
     View grandchild2 = View::New();
@@ -94,7 +94,7 @@ public:
     child3.SetRequestedWidth(200.0f);
     child3.SetRequestedHeight(200.0f);
     child3.SetRequestedY(400.0f);
-    child3.SetPadding(Extents(50, 50, 50, 50));
+    child3.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     // Child 3's child: Magenta, width=MATCH_PARENT, height=100
     View grandchild3 = View::New();

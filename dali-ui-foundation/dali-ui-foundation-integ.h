@@ -36,7 +36,6 @@
 #include <dali-ui-foundation/integration-api/shader-effects/image-region-effect.h>
 #include <dali-ui-foundation/integration-api/shader-effects/motion-blur-effect.h>
 #include <dali-ui-foundation/integration-api/shader-effects/motion-stretch-effect.h>
-#include <dali-ui-foundation/integration-api/stream-operators.h>
 #include <dali-ui-foundation/integration-api/ui-action-index-ranges.h>
 #include <dali-ui-foundation/integration-api/ui-foundation-pre-initialize.h>
 #include <dali-ui-foundation/integration-api/ui-property-index-ranges.h>

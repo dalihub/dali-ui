@@ -199,7 +199,7 @@ Label NewHudLabel(const char* text, float height, uint32_t background, bool inte
   label.SetFontSize(interactive ? 15.0f : 17.0f);
   label.SetTextColor(UiColor(0xF8FAFC));
   label.SetBackgroundColor(UiColor(background));
-  label.SetPadding(Extents(10, 10, 5, 5));
+  label.SetPadding(Insets(10.0f, 10.0f, 5.0f, 5.0f));
   label.SetMultiLine(true);
   label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
   label.SetVerticalTextAlignment(Text::Alignment::CENTER);
@@ -870,7 +870,7 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(8.0f);
-    root.SetPadding(Extents(16, 16, 16, 16));
+    root.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
 
     mTitle       = NewHudLabel("", 48.0f, 0x1D4ED8);
     mDescription = NewHudLabel("", 64.0f, 0x334155);
@@ -984,7 +984,7 @@ private:
       label.SetFontSize(28.0f);
       label.SetTextColor(UiColor(0x111827));
       label.SetBackgroundColor(UiColor(0xF8FAFC));
-      label.SetPadding(Extents(14, 14, 14, 14));
+      label.SetPadding(Insets(14.0f, 14.0f, 14.0f, 14.0f));
       label.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     }
     mPrimaryScroll.SetContent(mPrimary);

@@ -21,6 +21,8 @@
 #include <dali/public-api/actors/custom-actor.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/common/extents.h> // TODO: Remove after Insets migration
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/object/base-handle.h>
 #include <initializer_list>
@@ -38,7 +40,6 @@
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/inner-shadow.h>
-#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/types/unique-any.h>
@@ -591,6 +592,16 @@ public: // Properties
   void SetMargin(const Insets& margin);
 
   /**
+   * @brief Sets the view margin from Extents.
+   *
+   * TODO: Temporary overload kept so out-of-tree callers still
+   * passing Extents keep compiling. Remove once they have migrated to Insets.
+   *
+   * @param[in] margin The margin to set
+   */
+  void SetMargin(const Extents& margin);
+
+  /**
    * @brief Sets the view margin for each edge.
    *
    * @param[in] start The start margin
@@ -648,6 +659,16 @@ public: // Properties
    * @param[in] padding The padding to set
    */
   void SetPadding(const Insets& padding);
+
+  /**
+   * @brief Sets the view padding from Extents.
+   *
+   * TODO: Temporary overload kept so out-of-tree callers still
+   * passing Extents keep compiling. Remove once they have migrated to Insets.
+   *
+   * @param[in] padding The padding to set
+   */
+  void SetPadding(const Extents& padding);
 
   /**
    * @brief Sets the view padding for each edge.

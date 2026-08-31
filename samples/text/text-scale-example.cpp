@@ -57,7 +57,7 @@ Label CreateButton(const char* text, float fontSize = 14.0f)
   button.SetBackgroundColor(UiColor(0x4A90D9));
   button.SetRequestedWidth(MATCH_PARENT);
   button.SetRequestedHeight(BUTTON_HEIGHT);
-  button.SetPadding(Extents(10, 10, 10, 10));
+  button.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
   return button;
 }
 
@@ -126,7 +126,7 @@ private:
     mTargetLabel.SetMultiLine(true);
     mTargetLabel.SetFontSize(24.0f);
     mTargetLabel.SetBackgroundColor(UiColor(0xFFFFFF));
-    mTargetLabel.SetPadding(Extents(16, 16, 16, 16));
+    mTargetLabel.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
 
     // Target InputField for visual testing
     mTargetInputField = InputField::New();
@@ -135,7 +135,7 @@ private:
     mTargetInputField.SetFontSize(24.0f);
     mTargetInputField.SetText("InputField test text");
     mTargetInputField.SetBackgroundColor(UiColor(0xFFFFFF));
-    mTargetInputField.SetPadding(Extents(16, 16, 16, 16));
+    mTargetInputField.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
 
     mFitLabel = Label::New(TEST_TEXT);
     mFitLabel.SetRequestedWidth(MATCH_PARENT);
@@ -146,7 +146,7 @@ private:
     mFitLabel.SetTextFit(Text::Fit::Range(10, 20, 2));
     mFitLabel.SetLineHeight(40.0f);
     mFitLabel.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
-    mFitLabel.SetPadding(Extents(16, 16, 0, 0));
+    mFitLabel.SetPadding(Insets(16.0f, 16.0f, 0.0f, 0.0f));
 
     mFitCandidateLabel = Label::New(TEST_TEXT);
     mFitCandidateLabel.SetRequestedWidth(MATCH_PARENT);
@@ -155,7 +155,7 @@ private:
     mFitCandidateLabel.SetMultiLine(true);
     mFitCandidateLabel.SetBackgroundColor(UiColor(0xFFFFFF));
     mFitCandidateLabel.SetTextFit(GetFitCandidates());
-    mFitCandidateLabel.SetPadding(Extents(16, 16, 0, 0));
+    mFitCandidateLabel.SetPadding(Insets(16.0f, 16.0f, 0.0f, 0.0f));
 
     mStatusLabel = Label::New();
     mStatusLabel.SetRequestedWidth(MATCH_PARENT);
@@ -163,7 +163,7 @@ private:
     mStatusLabel.SetFontSize(12.0f);
     mStatusLabel.SetMultiLine(true);
     mStatusLabel.SetBackgroundColor(UiColor(0xE8E8E8));
-    mStatusLabel.SetPadding(Extents(16, 16, 16, 16));
+    mStatusLabel.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
 
     UpdateStatus();
 
@@ -195,7 +195,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     root.Add(titleButton);
     root.Add(CreateHeaderLabel("Target Label:"));

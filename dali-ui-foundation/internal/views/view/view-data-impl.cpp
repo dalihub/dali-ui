@@ -327,7 +327,10 @@ bool GetInsetsFromPropertyValue(const Property::Value& value, Insets& insets)
   Extents extentsValue;
   if(value.Get(extentsValue))
   {
-    insets = Insets(extentsValue);
+    insets = Insets(static_cast<float>(extentsValue.start),
+                    static_cast<float>(extentsValue.end),
+                    static_cast<float>(extentsValue.top),
+                    static_cast<float>(extentsValue.bottom));
     return true;
   }
 

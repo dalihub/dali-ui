@@ -382,7 +382,7 @@ int UtcDaliAsyncTextLoaderCutoutReuseP(void)
   firstCutout.isCutoutEnabled               = true;
   firstCutout.isBackgroundWithCutoutEnabled = true;
   firstCutout.backgroundColorWithCutout     = Vector4(0.2f, 0.3f, 0.4f, 0.8f);
-  firstCutout.padding                       = Extents(3, 5, 7, 11);
+  firstCutout.padding                       = Insets(3.0f, 5.0f, 7.0f, 11.0f);
   const Text::AsyncTextRenderInfo firstInfo = reusedLoader.RenderText(firstCutout, false, Size::ZERO);
   DALI_TEST_CHECK(firstInfo.isCutoutEnabled);
   DALI_TEST_CHECK(firstInfo.textPixelData);
@@ -407,7 +407,7 @@ int UtcDaliAsyncTextLoaderCutoutReuseP(void)
   secondCutout.isCutoutEnabled                               = true;
   secondCutout.isBackgroundWithCutoutEnabled                 = true;
   secondCutout.backgroundColorWithCutout                     = Vector4(0.7f, 0.1f, 0.2f, 0.6f);
-  secondCutout.padding                                       = Extents(13, 17, 19, 23);
+  secondCutout.padding                                       = Insets(13.0f, 17.0f, 19.0f, 23.0f);
   Text::AsyncTextParameters       secondCutoutForFreshLoader = secondCutout;
   const Text::AsyncTextRenderInfo reusedSecondCutout =
     reusedLoader.RenderText(secondCutout, false, Size::ZERO);

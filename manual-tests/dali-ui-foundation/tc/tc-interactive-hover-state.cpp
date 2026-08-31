@@ -132,7 +132,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
-    root.SetPadding(Extents(PAD, PAD, PAD, PAD));
+    root.SetPadding(Insets(PAD, PAD, PAD, PAD));
     root.SetSpacing(GAP);
 
     root.Add(MakeHeader());
@@ -148,7 +148,7 @@ public:
     mLog.SetRequestedWidth(MATCH_PARENT);
     mLog.SetRequestedHeight(LOG_H);
     mLog.SetBackgroundColor(UiColor(0xFFFFFF));
-    mLog.SetPadding(Extents(12.0f, 12.0f, 10.0f, 10.0f));
+    mLog.SetPadding(Insets(12.0f, 12.0f, 10.0f, 10.0f));
     root.Add(mLog);
 
     mTraits[CLICKABLE_FALSE_TARGET].SetClickable(false);
@@ -178,7 +178,7 @@ private:
     mTargets[index].SetRequestedWidth(MATCH_PARENT);
     mTargets[index].SetRequestedHeight(TARGET_H);
     mTargets[index].SetBackgroundColor(UiColor(baseColor));
-    mTargets[index].SetPadding(Extents(16.0f, 16.0f, 12.0f, 12.0f));
+    mTargets[index].SetPadding(Insets(16.0f, 16.0f, 12.0f, 12.0f));
     mTargets[index].SetFocusable(true);
 
     mTraits[index] = mTargets[index].AsInteractive();

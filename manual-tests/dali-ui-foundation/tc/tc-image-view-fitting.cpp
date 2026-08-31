@@ -92,7 +92,7 @@ public:
     mImage.SetRequestedWidth(BOX_W);
     mImage.SetRequestedHeight(BOX_H);
     mImage.SetFittingMode(FITTING[0].mode);
-    mImage.SetMargin(Extents(2, 2, 2, 2));
+    mImage.SetMargin(Insets(2.0f, 2.0f, 2.0f, 2.0f));
 
     boxContainer.Add(mImage);
 
@@ -102,7 +102,7 @@ public:
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
     content.SetBackgroundColor(UiColor(C_BG));
-    content.SetPadding(Extents(8, 8, 8, 8));
+    content.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
 
     content.Add(MakeCentered(boxContainer));
     content.Add(mModeLabel);
@@ -110,7 +110,7 @@ public:
     StackLayout btnRow = StackLayout::New(StackOrientation::HORIZONTAL);
     btnRow.SetRequestedWidth(MATCH_PARENT);
     btnRow.SetRequestedHeight(BTN_H);
-    btnRow.SetPadding(Extents(0, 0, 2, 2));
+    btnRow.SetPadding(Insets(0.0f, 0.0f, 2.0f, 2.0f));
     for(int i = 0; i < FITTING_COUNT; ++i)
     {
       mBtns[i] = MakeToggleBtn(FITTING[i].name, i == 0);
@@ -152,7 +152,7 @@ private:
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(BOX_H + 16);
-    row.SetPadding(Extents(0, 0, 8, 8));
+    row.SetPadding(Insets(0.0f, 0.0f, 8.0f, 8.0f));
     row.Add(ManualTest::MakeWeightedSpacer());
     row.Add(child);
     row.Add(ManualTest::MakeWeightedSpacer());

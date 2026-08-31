@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/system/system-settings.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <cstdint>
 #include <memory>
@@ -44,7 +45,6 @@
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali

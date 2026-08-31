@@ -390,10 +390,7 @@ private:
     mHeader.SetRequestedWidth(MATCH_PARENT);
     mHeader.SetRequestedHeight(HEADER_HEIGHT);
     mHeader.SetSpacing(4.0f);
-    mHeader.SetPadding(Extents(static_cast<int16_t>(12u),
-                               static_cast<int16_t>(12u),
-                               static_cast<int16_t>(8u),
-                               static_cast<int16_t>(8u)));
+    mHeader.SetPadding(Insets(12.0f, 12.0f, 8.0f, 8.0f));
     mHeader.SetBackgroundColor(UiColor(HEADER_COLOR));
 
     mHeaderTitle = NewChromeLabel("", 22.0f, HEADER_TEXT_COLOR, HEADER_COLOR);
@@ -441,10 +438,7 @@ private:
     Label label = NewChromeLabel(test.name, 13.0f, CHROME_TEXT_COLOR, NAME_BACKGROUND);
     label.SetRequestedWidth(NAME_COLUMN_WIDTH);
     label.SetRequestedHeight(MATCH_PARENT);
-    label.SetPadding(Extents(static_cast<int16_t>(8u),
-                             static_cast<int16_t>(6u),
-                             static_cast<int16_t>(0u),
-                             static_cast<int16_t>(0u)));
+    label.SetPadding(Insets(8.0f, 6.0f, 0.0f, 0.0f));
     label.SetBorderlineWidth(1.0f);
     label.SetBorderlineOffset(-1.0f);
     label.SetBorderlineColor(UiColor(0xCBD5E1));
@@ -473,10 +467,7 @@ private:
     label.SetVerticalTextAlignment(test.multiLine ? Text::Alignment::START : Text::Alignment::CENTER);
     label.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
     label.SetLineHeight(1.15f);
-    label.SetPadding(Extents(static_cast<int16_t>(8u),
-                             static_cast<int16_t>(8u),
-                             static_cast<int16_t>(4u),
-                             static_cast<int16_t>(4u)));
+    label.SetPadding(Insets(8.0f, 8.0f, 4.0f, 4.0f));
     label.SetBackgroundColor(UiColor(TARGET_BACKGROUND));
     label.SetBorderlineWidth(1.0f);
     label.SetBorderlineOffset(-1.0f);
@@ -508,10 +499,7 @@ private:
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(0.0f);
     content.SetSpacing(ROW_SPACING);
-    content.SetPadding(Extents(static_cast<int16_t>(12u),
-                               static_cast<int16_t>(12u),
-                               static_cast<int16_t>(12u),
-                               static_cast<int16_t>(12u)));
+    content.SetPadding(Insets(12.0f, 12.0f, 12.0f, 12.0f));
     content.SetBackgroundColor(UiColor(WINDOW_COLOR));
     content.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 

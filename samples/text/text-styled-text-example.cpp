@@ -228,7 +228,7 @@ void ConfigureHudBadge(Label label, float height, const UiColor& backgroundColor
   label.SetBorderlineWidth(1.0f);
   label.SetBorderlineOffset(-1.0f);
   label.SetBorderlineColor(borderlineColor);
-  label.SetPadding(Extents(static_cast<int16_t>(10.0f), static_cast<int16_t>(10.0f), static_cast<int16_t>(0.0f), static_cast<int16_t>(0.0f)));
+  label.SetPadding(Insets(10.0f, 10.0f, 0.0f, 0.0f));
 }
 
 void ConfigurePreviewLabel(Label label, const UiColor& backgroundColor)
@@ -236,7 +236,7 @@ void ConfigurePreviewLabel(Label label, const UiColor& backgroundColor)
   label.SetFontSize(36.0f);
   label.SetTextColor(UiColor(0x111827));
   label.SetBackgroundColor(backgroundColor);
-  label.SetPadding(Extents(static_cast<int16_t>(14.0f), static_cast<int16_t>(14.0f), static_cast<int16_t>(12.0f), static_cast<int16_t>(12.0f)));
+  label.SetPadding(Insets(14.0f, 14.0f, 12.0f, 12.0f));
   label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
   label.SetVerticalTextAlignment(Text::Alignment::CENTER);
   label.SetMultiLine(true);
@@ -298,7 +298,7 @@ private:
     mContentRoot.SetRequestedWidth(MATCH_PARENT);
     mContentRoot.SetRequestedHeight(MATCH_PARENT);
     mContentRoot.SetBackgroundColor(UiColor(0xF8FAFC));
-    mContentRoot.SetPadding(Extents(static_cast<int16_t>(CONTENT_PADDING), static_cast<int16_t>(CONTENT_PADDING), static_cast<int16_t>(CONTENT_PADDING), static_cast<int16_t>(CONTENT_PADDING)));
+    mContentRoot.SetPadding(Insets(CONTENT_PADDING, CONTENT_PADDING, CONTENT_PADDING, CONTENT_PADDING));
     mContentRoot.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 
     mFooterRoot = AbsoluteLayout::New();

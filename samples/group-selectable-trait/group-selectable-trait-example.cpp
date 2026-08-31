@@ -99,7 +99,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(CIRCLE_GAP);
-    root.SetPadding(Extents(40, 40, 40, 40)); // start, end, top, bottom
+    root.SetPadding(Insets(40.0f, 40.0f, 40.0f, 40.0f)); // start, end, top, bottom
 
     // Status label at the top, reporting the current selection.
     mLabel = Label::New("No View is selected");

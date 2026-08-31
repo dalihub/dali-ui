@@ -99,14 +99,14 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(PAGE_BG));
-    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.SetPadding(Insets(GAP, GAP, GAP, GAP));
 
     mStatusLabel = MakeLabel("Table A", TEXT_DARK, FONT_TITLE, 48.0f);
 
     StackLayout cardRow = StackLayout::New(StackOrientation::HORIZONTAL);
     cardRow.SetRequestedWidth(MATCH_PARENT);
     cardRow.SetRequestedHeight(CARD_HEIGHT);
-    cardRow.SetPadding(Extents(0, 0, 0, GAP));
+    cardRow.SetPadding(Insets(0.0f, 0.0f, 0.0f, GAP));
     cardRow.Add(MakeColorCard());
     cardRow.Add(MakeGradientCard());
 
@@ -156,8 +156,8 @@ private:
     StackLayout card = StackLayout::New(StackOrientation::VERTICAL);
     card.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     card.SetRequestedHeight(MATCH_PARENT);
-    card.SetPadding(Extents(GAP, GAP, GAP, GAP));
-    card.SetMargin(Extents(GAP / 2.0f, GAP / 2.0f, 0.0f, 0.0f));
+    card.SetPadding(Insets(GAP, GAP, GAP, GAP));
+    card.SetMargin(Insets(GAP / 2.0f, GAP / 2.0f, 0.0f, 0.0f));
 
     Label label = MakeLabel(text, TEXT_LIGHT, FONT_BODY, MATCH_PARENT);
     label.SetBackgroundColor(UiColor(0x000000, 0.25f));

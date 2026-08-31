@@ -121,7 +121,7 @@ private:
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(80.0f);
-    row.SetPadding(Extents(4, 4, 4, 4));
+    row.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
 
     for(int i = 0; i < AREA_COUNT; ++i)
     {
@@ -137,7 +137,7 @@ private:
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(80.0f);
-    row.SetPadding(Extents(4, 4, 4, 4));
+    row.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
 
     // GIF toggle button
     StackLayout gifButton = StackLayout::New(StackOrientation::VERTICAL);

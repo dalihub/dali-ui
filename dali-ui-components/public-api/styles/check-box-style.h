@@ -16,12 +16,14 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/insets.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/types/callback.h>
-#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>

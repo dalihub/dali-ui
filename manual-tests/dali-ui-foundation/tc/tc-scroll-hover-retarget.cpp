@@ -71,7 +71,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BACKGROUND));
-    root.SetPadding(Extents(PADDING, PADDING, PADDING, PADDING));
+    root.SetPadding(Insets(PADDING, PADDING, PADDING, PADDING));
     root.SetSpacing(SPACING);
 
     Label instructions = Label::New("Hover one row, keep the pointer still, then scroll manually with the mouse wheel or touchpad.");
@@ -89,7 +89,7 @@ public:
     mStatus.SetRequestedWidth(MATCH_PARENT);
     mStatus.SetRequestedHeight(STATUS_HEIGHT);
     mStatus.SetBackgroundColor(UiColor(COLOR_WHITE));
-    mStatus.SetPadding(Extents(10.0f, 10.0f, 8.0f, 8.0f));
+    mStatus.SetPadding(Insets(10.0f, 10.0f, 8.0f, 8.0f));
     root.Add(mStatus);
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
@@ -116,7 +116,7 @@ public:
     mLog.SetRequestedWidth(MATCH_PARENT);
     mLog.SetRequestedHeight(LOG_HEIGHT);
     mLog.SetBackgroundColor(UiColor(COLOR_WHITE));
-    mLog.SetPadding(Extents(10.0f, 10.0f, 8.0f, 8.0f));
+    mLog.SetPadding(Insets(10.0f, 10.0f, 8.0f, 8.0f));
     root.Add(mLog);
 
     UpdateStatus();
@@ -131,7 +131,7 @@ private:
     item.SetRequestedWidth(MATCH_PARENT);
     item.SetRequestedHeight(ITEM_HEIGHT);
     item.SetBackgroundColor(UiColor(COLOR_ITEM));
-    item.SetPadding(Extents(16.0f, 16.0f, 8.0f, 8.0f));
+    item.SetPadding(Insets(16.0f, 16.0f, 8.0f, 8.0f));
 
     Label label = Label::New(Dali::String("Item ") + Number(index + 1u));
     label.SetFontSize(FONT_ITEM);

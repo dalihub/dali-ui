@@ -49,7 +49,7 @@ Label CreateButton(const char* text, uint32_t bgColor)
   button.SetBackgroundColor(UiColor(bgColor));
   button.SetRequestedWidth(0.0f);
   button.SetRequestedHeight(BUTTON_HEIGHT);
-  button.SetPadding(Extents(4, 4, 4, 4));
+  button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
   button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
   return button;
 }
@@ -75,7 +75,7 @@ Label CreateSectionLabel(const char* text)
   label.SetTextColor(UiColor(COLOR_DARK_GRAY));
   label.SetRequestedWidth(MATCH_PARENT);
   label.SetRequestedHeight(WRAP_CONTENT);
-  label.SetPadding(Extents(0, 0, 4, 4));
+  label.SetPadding(Insets(0.0f, 0.0f, 4.0f, 4.0f));
   return label;
 }
 
@@ -96,7 +96,7 @@ View CreateStateRow(const char* title, Label valueLabel)
   row.SetRequestedWidth(MATCH_PARENT);
   row.SetRequestedHeight(WRAP_CONTENT);
   row.SetSpacing(8.0f);
-  row.SetPadding(Extents(0, 0, 2, 2));
+  row.SetPadding(Insets(0.0f, 0.0f, 2.0f, 2.0f));
 
   Label titleLabel = Label::New(title);
   titleLabel.SetFontSize(12.0f);
@@ -116,7 +116,7 @@ View CreateColorStateRow(const char* title, View colorView)
   row.SetRequestedWidth(MATCH_PARENT);
   row.SetRequestedHeight(WRAP_CONTENT);
   row.SetSpacing(8.0f);
-  row.SetPadding(Extents(0, 0, 2, 2));
+  row.SetPadding(Insets(0.0f, 0.0f, 2.0f, 2.0f));
 
   Label titleLabel = Label::New(title);
   titleLabel.SetFontSize(12.0f);
@@ -232,7 +232,7 @@ private:
     mainContainer.SetRequestedWidth(MATCH_PARENT);
     mainContainer.SetRequestedHeight(MATCH_PARENT);
     mainContainer.SetSpacing(STACK_SPACING);
-    mainContainer.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    mainContainer.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     // Title
     Label titleLabel = Label::New("InputEditor Typing Style Example");
@@ -263,7 +263,7 @@ private:
     mInputEditor.SetRequestedWidth(MATCH_PARENT);
     mInputEditor.SetRequestedHeight(INPUT_EDITOR_HEIGHT);
     mInputEditor.SetBackgroundColor(UiColor(COLOR_WHITE));
-    mInputEditor.SetPadding(Extents(12, 12, 12, 12));
+    mInputEditor.SetPadding(Insets(12.0f, 12.0f, 12.0f, 12.0f));
     mInputEditor.SetMaximumLength(500);
     mInputEditor.SetLineHeight(1.5f);
     mInputEditor.SetFocusable(true);

@@ -49,7 +49,7 @@ public:
     mRoot.SetRequestedWidth(MATCH_PARENT);
     mRoot.SetRequestedHeight(MATCH_PARENT);
     mRoot.SetSpacing(10.0f);
-    mRoot.SetPadding(Extents(50, 50, 50, 50));
+    mRoot.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     // Left bar: fixed width, fill cross-axis
     View leftBar = View::New();

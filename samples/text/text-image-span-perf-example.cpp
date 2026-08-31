@@ -197,7 +197,7 @@ Label NewPanelLabel(const char* text, float height, uint32_t background, bool in
   label.SetFontSize(interactive ? 14.0f : 16.0f);
   label.SetTextColor(UiColor(0xF8FAFC));
   label.SetBackgroundColor(UiColor(background));
-  label.SetPadding(Extents(10u, 10u, 6u, 6u));
+  label.SetPadding(Insets(10.0f, 10.0f, 6.0f, 6.0f));
   label.SetMultiLine(true);
   label.SetHorizontalTextAlignment(interactive ? Text::Alignment::CENTER : Text::Alignment::START);
   label.SetVerticalTextAlignment(Text::Alignment::CENTER);
@@ -265,7 +265,7 @@ private:
     mPreview.SetFontSize(data.fontSize);
     mPreview.SetTextColor(UiColor(0x111827));
     mPreview.SetBackgroundColor(UiColor(0xF8FAFC));
-    mPreview.SetPadding(Extents(20u, 20u, 18u, 18u));
+    mPreview.SetPadding(Insets(20.0f, 20.0f, 18.0f, 18.0f));
     mPreview.SetHorizontalTextAlignment(data.horizontalAlignment);
     mPreview.SetVerticalTextAlignment(data.verticalAlignment);
     mPreview.SetLayoutDirection(data.rtl ? LayoutDirection::RIGHT_TO_LEFT : LayoutDirection::LEFT_TO_RIGHT);
@@ -430,7 +430,7 @@ private:
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetSpacing(8.0f);
-    root.SetPadding(Extents(16u, 16u, 16u, 16u));
+    root.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
 

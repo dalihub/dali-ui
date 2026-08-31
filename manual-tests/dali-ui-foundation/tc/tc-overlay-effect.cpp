@@ -62,7 +62,7 @@ public:
 
     StackLayout layout = StackLayout::New();
     layout.SetSpacing(GAP);
-    layout.SetPadding(Extents(PAGE_PADDING, PAGE_PADDING, PAGE_PADDING, PAGE_PADDING));
+    layout.SetPadding(Insets(PAGE_PADDING, PAGE_PADDING, PAGE_PADDING, PAGE_PADDING));
     layout.SetRequestedWidth(MATCH_PARENT);
     layout.Add(CreateRow({
       CreateCard("FOCUS INDICATED", UiColor(0x2B6CB0), OverlayEffect::Plain().Configure().SetOverlayColor(UiColor(0x000000, 0.4f)).Build()),
@@ -104,7 +104,7 @@ private:
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(MATCH_PARENT);
     content.SetLayoutMode(LayoutMode::STANDALONE);
-    content.SetPadding(Extents(TEXT_INSET_H, TEXT_INSET_H, TEXT_INSET_V, TEXT_INSET_V));
+    content.SetPadding(Insets(TEXT_INSET_H, TEXT_INSET_H, TEXT_INSET_V, TEXT_INSET_V));
 
     Label label = Label::New(text);
     label.SetFontSize(fontSize);
@@ -137,7 +137,7 @@ private:
     card.SetBackgroundColor(UiColor(0xAA5568));
     card.SetFocusOnTouchEnabled(false);
     card.SetStateEffect(OverlayEffect::Plain().Configure().SetOverlayColor(UiColor(0x000000, 0.4f)).Build());
-    card.SetPadding(Extents(TARGET_INSET, TARGET_INSET, TARGET_INSET, TARGET_INSET));
+    card.SetPadding(Insets(TARGET_INSET, TARGET_INSET, TARGET_INSET, TARGET_INSET));
 
     Label target = Label::New("STATE EFFECT TARGET");
     target.SetBackgroundColor(UiColor(0xDD6B20));
@@ -170,7 +170,7 @@ private:
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(MATCH_PARENT);
-    content.SetPadding(Extents(TEXT_INSET_H, TEXT_INSET_H, TEXT_INSET_V, TEXT_INSET_V));
+    content.SetPadding(Insets(TEXT_INSET_H, TEXT_INSET_H, TEXT_INSET_V, TEXT_INSET_V));
 
     Label titleLabel = Label::New("TOGGLE DISABLED");
     titleLabel.SetFontSize(SUBLABEL_FONT);

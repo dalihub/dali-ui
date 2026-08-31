@@ -166,7 +166,7 @@ public:
     mOuterStack.SetRequestedWidth(400.0f);
     mOuterStack.SetRequestedHeight(600.0f);
     mOuterStack.SetSpacing(20.0f);
-    mOuterStack.SetPadding(Extents(20, 20, 20, 20));
+    mOuterStack.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     mOuterStack.SetBackgroundColor(Vector4(0.5f, 0.5f, 0.5f, 0.5f));
     mOuterStack.SetCornerRadius(40.0f);
     mOuterStack.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(80.0f, 80.0f, 400.0f, 600.0f)));

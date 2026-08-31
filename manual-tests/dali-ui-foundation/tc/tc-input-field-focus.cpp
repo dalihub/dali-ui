@@ -80,13 +80,13 @@ public:
     field2Label.SetTextColor(UiColor(COLOR_TEXT));
     field2Label.SetRequestedWidth(MATCH_PARENT);
     field2Label.SetRequestedHeight(30.0f);
-    field2Label.SetMargin(Extents(0, 0, GAP, 0));
+    field2Label.SetMargin(Insets(0.0f, 0.0f, GAP, 0.0f));
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
-    root.SetPadding(Extents(PAD, PAD, PAD, PAD));
+    root.SetPadding(Insets(PAD, PAD, PAD, PAD));
     root.Add(mStatusLabel);
     root.Add(field1Label);
     root.Add(mField1);

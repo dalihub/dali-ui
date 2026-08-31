@@ -1,47 +1,35 @@
 #pragma once
 
-#include <dali/public-api/common/extents.h>
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/insets.h>
 
 namespace Dali
 {
 namespace Ui
 {
 /**
- * @brief Four logical edge insets with floating-point precision.
+ * @brief Alias kept so existing code spelling Dali::Ui::Insets keeps compiling.
  *
- * Values are ordered as start, end, top, and bottom.
+ * TODO: Remove once every external user has migrated to Dali::Insets.
  */
-struct DALI_UI_API Insets
-{
-  Insets();
+using Insets = Dali::Insets;
 
-  Insets(float start, float end, float top, float bottom);
-
-  Insets(const Dali::Extents& extents);
-
-  Insets& operator=(const float* array);
-
-  // TODO(DALIUI-XXXX): Remove after applications migrate from Extents to Insets.
-  operator Dali::Extents() const;
-
-  bool operator==(const Insets& rhs) const;
-
-  bool operator!=(const Insets& rhs) const;
-
-  /**
-   * @brief Creates insets with symmetric horizontal and vertical values.
-   *
-   * @param[in] horizontal The value assigned to the start and end edges
-   * @param[in] vertical The value assigned to the top and bottom edges
-   */
-  Insets(float horizontal, float vertical);
-
-  float start;
-  float end;
-  float top;
-  float bottom;
-};
 } // namespace Ui
 } // namespace Dali

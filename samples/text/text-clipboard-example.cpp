@@ -59,7 +59,7 @@ Label CreateLabel(const char* text, float fontSize, uint32_t bgColor)
   label.SetFontSize(fontSize);
   label.SetTextColor(UiColor(0x222222));
   label.SetBackgroundColor(UiColor(bgColor));
-  label.SetPadding(Extents(8, 8, 6, 6));
+  label.SetPadding(Insets(8.0f, 8.0f, 6.0f, 6.0f));
   label.SetMultiLine(true);
   label.SetRequestedWidth(MATCH_PARENT);
   label.SetRequestedHeight(WRAP_CONTENT);
@@ -76,7 +76,7 @@ Label CreateButton(const char* text, uint32_t bgColor)
   button.SetBackgroundColor(UiColor(bgColor));
   button.SetRequestedWidth(0.0f);
   button.SetRequestedHeight(BUTTON_HEIGHT);
-  button.SetPadding(Extents(4, 4, 4, 4));
+  button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
   button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
   return button;
 }
@@ -171,7 +171,7 @@ private:
     mInputField.SetBackgroundColor(UiColor(0xFFFFFF));
     mInputField.SetRequestedWidth(MATCH_PARENT);
     mInputField.SetRequestedHeight(INPUT_HEIGHT);
-    mInputField.SetPadding(Extents(12, 12, 8, 8));
+    mInputField.SetPadding(Insets(12.0f, 12.0f, 8.0f, 8.0f));
     mInputField.SetMaximumLength(500);
     mInputField.SetFocusable(true);
 
@@ -204,7 +204,7 @@ private:
     content.SetSpacing(STACK_SPACING);
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
-    content.SetPadding(Extents(0, 0, 0, static_cast<int16_t>(STACK_PADDING)));
+    content.SetPadding(Insets(0.0f, 0.0f, 0.0f, STACK_PADDING));
     content.Add(plainTitle);
     content.Add(CreateButtonRow({btnCopyPlain, btnPastePlain, btnHasPlain}));
     content.Add(htmlTitle);
@@ -227,7 +227,7 @@ private:
     rootLayout.SetSpacing(STACK_SPACING);
     rootLayout.SetRequestedWidth(MATCH_PARENT);
     rootLayout.SetRequestedHeight(MATCH_PARENT);
-    rootLayout.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    rootLayout.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
     rootLayout.Add(titleLabel);
     rootLayout.Add(description);
     rootLayout.Add(mInputField);

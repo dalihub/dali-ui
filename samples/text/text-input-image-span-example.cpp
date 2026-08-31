@@ -46,7 +46,7 @@ Label NewButton(const char* text)
 {
   Label button = NewTextLabel(text, 14.0f, 0xF8FAFC);
   button.SetBackgroundColor(UiColor(0x475569));
-  button.SetPadding(Extents(8u, 8u, 5u, 5u));
+  button.SetPadding(Insets(8.0f, 8.0f, 5.0f, 5.0f));
   button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
   button.SetVerticalTextAlignment(Text::Alignment::CENTER);
   button.SetRequestedHeight(46.0f);
@@ -131,7 +131,7 @@ private:
     window.SetBackgroundColor(UiColor(0xF1F5F9));
 
     mRoot = StackLayout::New(StackOrientation::VERTICAL);
-    mRoot.SetPadding(Extents(24u, 24u, 20u, 20u));
+    mRoot.SetPadding(Insets(24.0f, 24.0f, 20.0f, 20.0f));
     mRoot.SetSpacing(12.0f);
     mRoot.SetRequestedWidth(MATCH_PARENT);
     mRoot.SetRequestedHeight(MATCH_PARENT);
@@ -148,14 +148,14 @@ private:
     Label editorTitle = NewTextLabel("InputEditor — multiline", 17.0f, 0x1E293B);
 
     mFieldCard = StackLayout::New(StackOrientation::VERTICAL);
-    mFieldCard.SetPadding(Extents(2u, 2u, 2u, 2u));
+    mFieldCard.SetPadding(Insets(2.0f, 2.0f, 2.0f, 2.0f));
     mFieldCard.SetRequestedWidth(MATCH_PARENT);
     mFieldCard.SetRequestedHeight(94.0f);
     mFieldCard.SetBackgroundColor(UiColor(0xCBD5E1));
     mFieldCard.Add(mField);
 
     mEditorCard = StackLayout::New(StackOrientation::VERTICAL);
-    mEditorCard.SetPadding(Extents(2u, 2u, 2u, 2u));
+    mEditorCard.SetPadding(Insets(2.0f, 2.0f, 2.0f, 2.0f));
     mEditorCard.SetRequestedWidth(MATCH_PARENT);
     mEditorCard.SetBackgroundColor(UiColor(0xCBD5E1));
     mEditorCard.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
@@ -192,7 +192,7 @@ private:
 
     mStatus = NewTextLabel("", 13.0f, 0xE2E8F0);
     mStatus.SetBackgroundColor(UiColor(0x1E293B));
-    mStatus.SetPadding(Extents(12u, 12u, 8u, 8u));
+    mStatus.SetPadding(Insets(12.0f, 12.0f, 8.0f, 8.0f));
     mStatus.SetRequestedHeight(172.0f);
     mStatus.SetCornerRadius(7.0f);
 
@@ -217,7 +217,7 @@ private:
     mField.SetFontSize(27.0f);
     mField.SetTextColor(UiColor(0x111827));
     mField.SetBackgroundColor(UiColor(0xFFFFFF));
-    mField.SetPadding(Extents(14u, 14u, 10u, 10u));
+    mField.SetPadding(Insets(14.0f, 14.0f, 10.0f, 10.0f));
     mField.SetTextOverflowMode(Text::OverflowMode::CLIP);
     mField.SetRequestedWidth(MATCH_PARENT);
     mField.SetRequestedHeight(MATCH_PARENT);
@@ -228,7 +228,7 @@ private:
     mEditor.SetFontSize(25.0f);
     mEditor.SetTextColor(UiColor(0x111827));
     mEditor.SetBackgroundColor(UiColor(0xFFFFFF));
-    mEditor.SetPadding(Extents(14u, 14u, 12u, 12u));
+    mEditor.SetPadding(Insets(14.0f, 14.0f, 12.0f, 12.0f));
     mEditor.SetLineWrapMode(Text::LineWrapMode::WORD);
     mEditor.SetTextOverflowMode(Text::OverflowMode::CLIP);
     ApplyLineHeight();

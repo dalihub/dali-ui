@@ -121,7 +121,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(12.0f);
-    root.SetPadding(Extents(24, 24, 24, 24));
+    root.SetPadding(Insets(24.0f, 24.0f, 24.0f, 24.0f));
 
     root.Add(MakeLabel("Parked in-pass invalidation", 24.0f, 0x202124u));
     root.Add(MakeLabel("Every arrange rewrites the label below from OnArrange.", 14.0f, 0x5F6368u));

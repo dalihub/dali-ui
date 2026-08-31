@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/extents.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/math/matrix.h>
 #include <dali/public-api/math/matrix3.h>
 #include <dali/public-api/math/rect.h>
@@ -48,5 +49,6 @@ typedef OptionalValue<Dali::Matrix>    OptionalMatrix;
 typedef OptionalValue<Dali::Matrix3>   OptionalMatrix3;
 typedef OptionalValue<Dali::Rect<int>> OptionalRect;
 typedef OptionalValue<Dali::Extents>   OptionalExtents;
+typedef OptionalValue<Dali::Insets>    OptionalInsets;
 
 #endif // DALI_UI_BUILDER_DECLARATIONS_H

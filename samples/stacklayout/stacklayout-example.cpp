@@ -43,7 +43,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(10.0f);
-    root.SetPadding(Extents(50, 50, 50, 50));
+    root.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     // Top bar: fixed height, fill cross-axis
     View topBar = View::New();

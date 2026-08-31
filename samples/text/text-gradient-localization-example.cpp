@@ -154,7 +154,7 @@ private:
     SetSpacing(8.0f);
     SetRequestedWidth(MATCH_PARENT);
     SetRequestedHeight(WRAP_CONTENT);
-    SetPadding(Extents(20, 20, 18, 18));
+    SetPadding(Insets(20.0f, 20.0f, 18.0f, 18.0f));
     SetBackgroundColor(UiColor(COLOR_CARD_BACKGROUND));
     SetCornerRadius(16.0f);
     SetShadow(Shadow(0.0f,
@@ -197,7 +197,7 @@ Label CreatePanelLabel(const char* text, float fontSize)
   label.SetRequestedHeight(WRAP_CONTENT);
   label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
   label.SetMultiLine(true);
-  label.SetPadding(Extents(10, 10, 10, 10));
+  label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
   label.SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
   return label;
 }
@@ -236,7 +236,7 @@ private:
     contents.SetSpacing(STACK_SPACING);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    contents.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     mCard        = CreateCard();
     mStatusLabel = CreateStatusLabel();

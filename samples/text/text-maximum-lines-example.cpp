@@ -384,13 +384,13 @@ private:
     mRoot.SetRequestedWidth(MATCH_PARENT);
     mRoot.SetRequestedHeight(MATCH_PARENT);
     mRoot.SetSpacing(8.0f);
-    mRoot.SetPadding(Extents(14, 14, 12, 12));
+    mRoot.SetPadding(Insets(14.0f, 14.0f, 12.0f, 12.0f));
     mRoot.SetBackgroundColor(UiColor(0xE2E8F0));
 
     mHeader = NewChromeLabel("", 16.0f, 0xF8FAFC, 0x0F172A);
     mHeader.SetRequestedWidth(MATCH_PARENT);
     mHeader.SetRequestedHeight(76.0f);
-    mHeader.SetPadding(Extents(14, 14, 8, 8));
+    mHeader.SetPadding(Insets(14.0f, 14.0f, 8.0f, 8.0f));
     mHeader.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
     StackLayout content = StackLayout::New(StackOrientation::HORIZONTAL);
@@ -408,7 +408,7 @@ private:
     mScenarioLabel = NewChromeLabel("", 14.0f, 0x1E293B, 0xF8FAFC);
     mScenarioLabel.SetRequestedWidth(MATCH_PARENT);
     mScenarioLabel.SetRequestedHeight(62.0f);
-    mScenarioLabel.SetPadding(Extents(10, 10, 6, 6));
+    mScenarioLabel.SetPadding(Insets(10.0f, 10.0f, 6.0f, 6.0f));
     mScenarioLabel.SetBorderlineWidth(1.0f);
     mScenarioLabel.SetBorderlineOffset(-1.0f);
     mScenarioLabel.SetBorderlineColor(UiColor(0xCBD5E1));
@@ -416,7 +416,7 @@ private:
     mStage = StackLayout::New(StackOrientation::VERTICAL);
     mStage.SetRequestedWidth(MATCH_PARENT);
     mStage.SetRequestedHeight(MATCH_PARENT);
-    mStage.SetPadding(Extents(18, 18, 18, 18));
+    mStage.SetPadding(Insets(18.0f, 18.0f, 18.0f, 18.0f));
     mStage.SetBackgroundColor(UiColor(0xCBD5E1));
     mStage.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     mStage.SetClippingMode(ClippingMode::CLIP_CHILDREN);
@@ -438,7 +438,7 @@ private:
     mInspector.SetRequestedWidth(INSPECTOR_MIN_WIDTH);
     mInspector.SetRequestedHeight(MATCH_PARENT);
     mInspector.SetSpacing(8.0f);
-    mInspector.SetPadding(Extents(10, 10, 10, 10));
+    mInspector.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     mInspector.SetBackgroundColor(UiColor(0x0F172A));
     mInspector.SetBorderlineWidth(1.0f);
     mInspector.SetBorderlineOffset(-1.0f);
@@ -448,7 +448,7 @@ private:
     mChangeBanner = NewChromeLabel("", 14.0f, 0xF8FAFC, 0x0F766E);
     mChangeBanner.SetRequestedWidth(MATCH_PARENT);
     mChangeBanner.SetRequestedHeight(72.0f);
-    mChangeBanner.SetPadding(Extents(12, 12, 8, 8));
+    mChangeBanner.SetPadding(Insets(12.0f, 12.0f, 8.0f, 8.0f));
     mChangeBanner.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mChangeBanner.SetLineHeight(1.08f);
     mChangeBanner.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
@@ -460,7 +460,7 @@ private:
     mSettings = NewChromeLabel("", 13.0f, 0xE2E8F0, 0x172033);
     mSettings.SetRequestedWidth(MATCH_PARENT);
     mSettings.SetRequestedHeight(0.0f);
-    mSettings.SetPadding(Extents(10, 10, 8, 8));
+    mSettings.SetPadding(Insets(10.0f, 10.0f, 8.0f, 8.0f));
     mSettings.SetLineHeight(1.07f);
     mSettings.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
     mSettings.SetLayoutParams(StackLayoutParams::New().SetWeight(1.15f).SetAlignment(LayoutAlignment::FILL));
@@ -468,7 +468,7 @@ private:
     mMeasurements = NewChromeLabel("", 13.0f, 0xE2E8F0, 0x172033);
     mMeasurements.SetRequestedWidth(MATCH_PARENT);
     mMeasurements.SetRequestedHeight(0.0f);
-    mMeasurements.SetPadding(Extents(10, 10, 8, 8));
+    mMeasurements.SetPadding(Insets(10.0f, 10.0f, 8.0f, 8.0f));
     mMeasurements.SetLineHeight(1.07f);
     mMeasurements.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
     mMeasurements.SetLayoutParams(StackLayoutParams::New().SetWeight(0.9f).SetAlignment(LayoutAlignment::FILL));
@@ -476,7 +476,7 @@ private:
     mRuntime = NewChromeLabel("", 13.0f, 0xE2E8F0, 0x172033);
     mRuntime.SetRequestedWidth(MATCH_PARENT);
     mRuntime.SetRequestedHeight(0.0f);
-    mRuntime.SetPadding(Extents(10, 10, 8, 8));
+    mRuntime.SetPadding(Insets(10.0f, 10.0f, 8.0f, 8.0f));
     mRuntime.SetLineHeight(1.07f);
     mRuntime.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
     mRuntime.SetLayoutParams(StackLayoutParams::New().SetWeight(0.65f).SetAlignment(LayoutAlignment::FILL));
@@ -494,7 +494,7 @@ private:
     mFooter = NewChromeLabel("", 12.0f, 0x334155, 0xF8FAFC);
     mFooter.SetRequestedWidth(MATCH_PARENT);
     mFooter.SetRequestedHeight(82.0f);
-    mFooter.SetPadding(Extents(10, 10, 6, 6));
+    mFooter.SetPadding(Insets(10.0f, 10.0f, 6.0f, 6.0f));
     mFooter.SetBorderlineWidth(1.0f);
     mFooter.SetBorderlineOffset(-1.0f);
     mFooter.SetBorderlineColor(UiColor(0xCBD5E1));
@@ -616,9 +616,9 @@ private:
   {
     switch(mState.padding % 3u)
     {
-      case 0u: mTestLabel.SetPadding(Extents(0, 0, 0, 0)); break;
-      case 1u: mTestLabel.SetPadding(Extents(4, 4, 2, 2)); break;
-      case 2u: mTestLabel.SetPadding(Extents(20, 20, 12, 12)); break;
+      case 0u: mTestLabel.SetPadding(Insets(0.0f, 0.0f, 0.0f, 0.0f)); break;
+      case 1u: mTestLabel.SetPadding(Insets(4.0f, 4.0f, 2.0f, 2.0f)); break;
+      case 2u: mTestLabel.SetPadding(Insets(20.0f, 20.0f, 12.0f, 12.0f)); break;
     }
   }
 

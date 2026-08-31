@@ -59,7 +59,7 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(8.0f);
-    root.SetPadding(Extents(10, 10, 10, 10));
+    root.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
 
     Label title = Label::New("Image Placeholder Sample");
     title.SetRequestedWidth(MATCH_PARENT);

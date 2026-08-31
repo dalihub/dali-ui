@@ -78,7 +78,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(12.0f);
-    root.SetPadding(Extents(24, 24, 24, 24));
+    root.SetPadding(Insets(24.0f, 24.0f, 24.0f, 24.0f));
 
     root.Add(MakeText("Navigator Sample", 24.0f, 48.0f));
 

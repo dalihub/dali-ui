@@ -47,7 +47,7 @@ public:
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
     content.SetSpacing(10.0f);
-    content.SetPadding(Extents(20, 20, 20, 20));
+    content.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
 
     // Add multiple colored views to demonstrate scrolling
     for (int i = 0; i < 12; i++)

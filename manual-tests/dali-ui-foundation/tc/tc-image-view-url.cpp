@@ -80,7 +80,7 @@ public:
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
     content.SetBackgroundColor(UiColor(C_BG));
-    content.SetPadding(Extents(8, 8, 8, 8));
+    content.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
 
     content.Add(MakeCenteredPreview(mImage));
     content.Add(mUrlLabel);
@@ -126,7 +126,7 @@ private:
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(PREVIEW_SIZE + 16);
-    row.SetPadding(Extents(0, 0, 8, 8));
+    row.SetPadding(Insets(0.0f, 0.0f, 8.0f, 8.0f));
     row.Add(ManualTest::MakeWeightedSpacer());
     row.Add(preview);
     row.Add(ManualTest::MakeWeightedSpacer());
@@ -184,7 +184,7 @@ private:
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(BTN_H);
-    row.SetPadding(Extents(0, 0, 2, 2));
+    row.SetPadding(Insets(0.0f, 0.0f, 2.0f, 2.0f));
     for(auto& b : buttons) row.Add(b);
     return row;
   }

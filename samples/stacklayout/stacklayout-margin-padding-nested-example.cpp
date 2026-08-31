@@ -46,7 +46,7 @@ public:
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+    root.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f)); // start, end, top, bottom
 
     // --- Section 1: Padding (visible as gap around the red bar) ---
     View padLabel = View::New();
@@ -59,21 +59,21 @@ public:
     View marginA = View::New();
     marginA.SetBackgroundColor(Color::GREEN);
     marginA.SetRequestedHeight(50.0f);
-    marginA.SetMargin(Extents(50, 50, 0, 0));
+    marginA.SetMargin(Insets(50.0f, 50.0f, 0.0f, 0.0f));
     marginA.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(marginA);
 
     View marginB = View::New();
     marginB.SetBackgroundColor(Color::BLUE);
     marginB.SetRequestedHeight(50.0f);
-    marginB.SetMargin(Extents(0, 0, 50, 50)); // top and bottom margin only
+    marginB.SetMargin(Insets(0.0f, 0.0f, 50.0f, 50.0f)); // top and bottom margin only
     marginB.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(marginB);
 
     View marginC = View::New();
     marginC.SetBackgroundColor(Color::CYAN);
     marginC.SetRequestedHeight(50.0f);
-    marginC.SetMargin(Extents(50, 50, 50, 50));
+    marginC.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     marginC.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(marginC);
 
@@ -81,7 +81,7 @@ public:
     StackLayout horizontalRow = StackLayout::New(StackOrientation::HORIZONTAL);
     horizontalRow.SetBackgroundColor(Color::GRAY);
     horizontalRow.SetSpacing(10.0f);
-    horizontalRow.SetMargin(Extents(50, 50, 50, 50));
+    horizontalRow.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     horizontalRow.SetLayoutParams(StackLayoutParams::New()
                                     .SetAlignment(LayoutAlignment::FILL)
                                     .SetWeight(1.0f));

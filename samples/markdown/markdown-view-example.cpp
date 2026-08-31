@@ -122,7 +122,7 @@ Label NewMenuButton(const char* text)
   button.SetBorderlineWidth(1.0f);
   button.SetBorderlineOffset(-1.0f);
   button.SetBorderlineColor(UiColor(0x475569));
-  button.SetPadding(Extents(8, 8, 0, 0));
+  button.SetPadding(Insets(8.0f, 8.0f, 0.0f, 0.0f));
   button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
   return button;
 }
@@ -242,10 +242,7 @@ private:
     panel.SetBackgroundColor(UiColor(0x111827));
     panel.SetRequestedWidth(MATCH_PARENT);
     panel.SetRequestedHeight(WRAP_CONTENT);
-    panel.SetPadding(Extents(static_cast<int16_t>(PANEL_PADDING),
-                             static_cast<int16_t>(PANEL_PADDING),
-                             static_cast<int16_t>(PANEL_PADDING),
-                             static_cast<int16_t>(PANEL_PADDING)));
+    panel.SetPadding(Insets(PANEL_PADDING, PANEL_PADDING, PANEL_PADDING, PANEL_PADDING));
     panel.SetSpacing(8.0f);
     panel.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     panelScroll.SetContent(panel);
@@ -329,7 +326,7 @@ private:
     mMetrics.SetBorderlineWidth(1.0f);
     mMetrics.SetBorderlineOffset(-1.0f);
     mMetrics.SetBorderlineColor(UiColor(0x334155));
-    mMetrics.SetPadding(Extents(10, 10, 7, 7));
+    mMetrics.SetPadding(Insets(10.0f, 10.0f, 7.0f, 7.0f));
     panel.Add(mMetrics);
 
     Label help = NewPanelLabel(
@@ -429,10 +426,7 @@ private:
     mContent.SetRequestedWidth(MATCH_PARENT);
     mContent.SetRequestedHeight(WRAP_CONTENT);
     mContent.SetBackgroundColor(UiColor(0x0F161E));
-    mContent.SetPadding(Extents(static_cast<int16_t>(CONTENT_PADDING),
-                                static_cast<int16_t>(CONTENT_PADDING),
-                                static_cast<int16_t>(CONTENT_PADDING),
-                                static_cast<int16_t>(CONTENT_PADDING)));
+    mContent.SetPadding(Insets(CONTENT_PADDING, CONTENT_PADDING, CONTENT_PADDING, CONTENT_PADDING));
 
     const MarkdownViewStyle markdownStyle = CreateMarkdownViewExampleStyle();
     mMarkdownView                         = MarkdownView::New(markdownStyle);

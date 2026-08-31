@@ -81,7 +81,7 @@ private:
     area.SetRequestedWidth(MATCH_PARENT);
     area.SetRequestedHeight(WRAP_CONTENT);
     area.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    area.SetPadding(Extents(16, 16, 16, 16));
+    area.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
     mImage = ImageView::New(RESOURCES_DIR "button-up-1.9.png");
     mImage.SetRequestedWidth(SIZES[mSizeIndex].width);
     mImage.SetRequestedHeight(SIZES[mSizeIndex].height);
@@ -108,7 +108,7 @@ private:
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(80.0f);
-    row.SetPadding(Extents(4, 4, 4, 4));
+    row.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
 
     for(int i = 0; i < SIZE_COUNT; ++i)
     {
@@ -122,7 +122,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
     button.SetRequestedWidth(MATCH_PARENT);
     button.SetRequestedHeight(80.0f);
-    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
     button.SetBackgroundColor(UiColor(0x444444));
     mNPatchBorderOnlyLabel = Label::New("BORDER ONLY: OFF");
     mNPatchBorderOnlyLabel.SetRequestedWidth(MATCH_PARENT);

@@ -160,7 +160,7 @@ Label CreateButton(const char* text, uint32_t bgColor)
   button.SetBackgroundColor(UiColor(bgColor));
   button.SetRequestedWidth(0.0f);
   button.SetRequestedHeight(BUTTON_HEIGHT);
-  button.SetPadding(Extents(4, 4, 4, 4));
+  button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
   button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
   return button;
 }
@@ -211,7 +211,7 @@ private:
     mInputEditor.SetMaximumHeight(200);
     mInputEditor.SetBackgroundColor(UiColor(0xFFFFFF));
     mInputEditor.SetTextColor(UiColor(COLOR_DARK_TEXT));
-    mInputEditor.SetPadding(Extents(12, 12, 12, 12));
+    mInputEditor.SetPadding(Insets(12.0f, 12.0f, 12.0f, 12.0f));
     mInputEditor.SetFocusable(true);
 
     // Set text handle images
@@ -248,7 +248,7 @@ private:
     mStatusLabel.SetFontSize(10.0f);
     mStatusLabel.SetMultiLine(true);
     mStatusLabel.SetBackgroundColor(UiColor(0xE8E8E8));
-    mStatusLabel.SetPadding(Extents(8, 8, 8, 8));
+    mStatusLabel.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
 
     UpdateStatus();
 
@@ -333,7 +333,7 @@ private:
     scrollContent.SetSpacing(STACK_SPACING);
     scrollContent.SetRequestedWidth(MATCH_PARENT);
     scrollContent.SetRequestedHeight(WRAP_CONTENT);
-    scrollContent.SetPadding(Extents(0, 0, 0, static_cast<int16_t>(STACK_PADDING)));
+    scrollContent.SetPadding(Insets(0.0f, 0.0f, 0.0f, STACK_PADDING));
     scrollContent.Add(cursorRow1);
     scrollContent.Add(cursorRow2);
     scrollContent.Add(placeholderRow);
@@ -361,7 +361,7 @@ private:
     rootLayout.SetSpacing(STACK_SPACING);
     rootLayout.SetRequestedWidth(MATCH_PARENT);
     rootLayout.SetRequestedHeight(MATCH_PARENT);
-    rootLayout.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    rootLayout.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
     rootLayout.Add(fixedHeader);
     rootLayout.Add(scrollView);
 

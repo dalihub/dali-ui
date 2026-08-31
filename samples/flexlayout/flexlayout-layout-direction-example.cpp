@@ -49,7 +49,7 @@ public:
     mRoot.SetRequestedHeight(MATCH_PARENT);
     mRoot.SetDirection(FlexDirection::ROW);
     mRoot.SetAlignItems(FlexAlign::STRETCH);
-    mRoot.SetPadding(Extents(50, 50, 50, 50));
+    mRoot.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     // Red box: fixed width
     View redBox = View::New();

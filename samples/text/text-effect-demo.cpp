@@ -459,7 +459,7 @@ private:
   View BuildIntroScene()
   {
     StackLayout root = NewSceneRoot();
-    root.SetPadding(Extents(74, 74, 34, 34));
+    root.SetPadding(Insets(74.0f, 74.0f, 34.0f, 34.0f));
 
     Label brand = NewLabel("DALI UI AI TRAVEL CONCIERGE", 15.0f, SECONDARY_TEXT_COLOR, "SamsungOneUI_700");
     brand.SetRequestedHeight(30.0f);
@@ -523,11 +523,8 @@ private:
     card.SetRequestedWidth(MATCH_PARENT);
     card.SetMinimumWidth(CARD_MINIMUM_WIDTH);
     card.SetMinimumHeight(CARD_MINIMUM_HEIGHT);
-    card.SetMargin(Extents(CARD_HORIZONTAL_MARGIN,
-                           CARD_HORIZONTAL_MARGIN,
-                           CARD_VERTICAL_MARGIN,
-                           CARD_VERTICAL_MARGIN));
-    card.SetPadding(Extents(26, 26, 25, 25));
+    card.SetMargin(Insets(CARD_HORIZONTAL_MARGIN, CARD_HORIZONTAL_MARGIN, CARD_VERTICAL_MARGIN, CARD_VERTICAL_MARGIN));
+    card.SetPadding(Insets(26.0f, 26.0f, 25.0f, 25.0f));
     card.SetBackgroundColor(UiColor(CARD_COLOR));
     card.SetCornerRadius(18.0f);
     card.SetBorderlineWidth(1.0f);
@@ -568,10 +565,7 @@ private:
   View BuildGeneratingScene()
   {
     StackLayout root = NewSceneRoot(0.0f);
-    root.SetPadding(Extents(SCENE_HORIZONTAL_PADDING,
-                            SCENE_HORIZONTAL_PADDING,
-                            SCENE_VERTICAL_PADDING,
-                            SCENE_VERTICAL_PADDING));
+    root.SetPadding(Insets(SCENE_HORIZONTAL_PADDING, SCENE_HORIZONTAL_PADDING, SCENE_VERTICAL_PADDING, SCENE_VERTICAL_PADDING));
 
     StackLayout header = NewHorizontal();
     header.SetRequestedWidth(MATCH_PARENT);
@@ -618,11 +612,8 @@ private:
     card.root.SetRequestedWidth(MATCH_PARENT);
     card.root.SetMinimumWidth(CARD_MINIMUM_WIDTH);
     card.root.SetMinimumHeight(CARD_MINIMUM_HEIGHT);
-    card.root.SetMargin(Extents(CARD_HORIZONTAL_MARGIN,
-                                CARD_HORIZONTAL_MARGIN,
-                                CARD_VERTICAL_MARGIN,
-                                CARD_VERTICAL_MARGIN));
-    card.root.SetPadding(Extents(25, 25, 22, 22));
+    card.root.SetMargin(Insets(CARD_HORIZONTAL_MARGIN, CARD_HORIZONTAL_MARGIN, CARD_VERTICAL_MARGIN, CARD_VERTICAL_MARGIN));
+    card.root.SetPadding(Insets(25.0f, 25.0f, 22.0f, 22.0f));
     card.root.SetBackgroundColor(UiColor(index == 1u ? CARD_SELECTED_COLOR : CARD_COLOR));
     card.root.SetCornerRadius(18.0f);
     card.root.SetBorderlineWidth(index == 1u ? 1.5f : 1.0f);
@@ -717,10 +708,7 @@ private:
   View BuildResultsScene(bool revealImmediately)
   {
     StackLayout root = NewSceneRoot();
-    root.SetPadding(Extents(SCENE_HORIZONTAL_PADDING,
-                            SCENE_HORIZONTAL_PADDING,
-                            SCENE_VERTICAL_PADDING,
-                            SCENE_VERTICAL_PADDING));
+    root.SetPadding(Insets(SCENE_HORIZONTAL_PADDING, SCENE_HORIZONTAL_PADDING, SCENE_VERTICAL_PADDING, SCENE_VERTICAL_PADDING));
 
     StackLayout header = NewHorizontal();
     header.SetRequestedWidth(MATCH_PARENT);
@@ -758,7 +746,7 @@ private:
   View BuildDetailScene()
   {
     StackLayout root = NewSceneRoot();
-    root.SetPadding(Extents(42, 42, 22, 24));
+    root.SetPadding(Insets(42.0f, 42.0f, 22.0f, 24.0f));
 
     StackLayout navigation = NewHorizontal(12.0f);
     navigation.SetRequestedWidth(MATCH_PARENT);
@@ -801,7 +789,7 @@ private:
 
     mMarkdownPanel = NewVertical();
     mMarkdownPanel.SetRequestedWidth(MATCH_PARENT);
-    mMarkdownPanel.SetPadding(Extents(22, 22, 18, 24));
+    mMarkdownPanel.SetPadding(Insets(22.0f, 22.0f, 18.0f, 24.0f));
     mMarkdownPanel.SetBackgroundColor(UiColor(CARD_COLOR));
     mMarkdownPanel.SetCornerRadius(16.0f);
     mMarkdownPanel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));

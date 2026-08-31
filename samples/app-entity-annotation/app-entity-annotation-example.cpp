@@ -133,7 +133,7 @@ private:
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(28, 28, 22, 18));
+    root.SetPadding(Insets(28.0f, 28.0f, 22.0f, 18.0f));
     root.SetSpacing(16.0f);
 
     root.Add(CreateHeader());
@@ -159,7 +159,7 @@ private:
     StackLayout header = StackLayout::New(StackOrientation::HORIZONTAL);
     header.SetRequestedWidth(MATCH_PARENT);
     header.SetRequestedHeight(82.0f);
-    header.SetPadding(Extents(22, 22, 12, 12));
+    header.SetPadding(Insets(22.0f, 22.0f, 12.0f, 12.0f));
     header.SetSpacing(18.0f);
     header.SetBackgroundColor(UiColor(COLOR_PRIMARY_DARK));
     header.SetCornerRadius(18.0f);
@@ -184,7 +184,7 @@ private:
   {
     StackLayout panel = StackLayout::New(StackOrientation::VERTICAL);
     panel.SetLayoutParams(StackLayoutParams::New().SetWeight(0.46f).SetAlignment(LayoutAlignment::FILL));
-    panel.SetPadding(Extents(18, 18, 16, 16));
+    panel.SetPadding(Insets(18.0f, 18.0f, 16.0f, 16.0f));
     panel.SetSpacing(12.0f);
     panel.SetBackgroundColor(UiColor(COLOR_PANEL));
     panel.SetCornerRadius(18.0f);
@@ -227,7 +227,7 @@ private:
   {
     StackLayout panel = StackLayout::New(StackOrientation::VERTICAL);
     panel.SetLayoutParams(StackLayoutParams::New().SetWeight(0.54f).SetAlignment(LayoutAlignment::FILL));
-    panel.SetPadding(Extents(18, 18, 16, 16));
+    panel.SetPadding(Insets(18.0f, 18.0f, 16.0f, 16.0f));
     panel.SetSpacing(12.0f);
     panel.SetBackgroundColor(UiColor(COLOR_PANEL));
     panel.SetCornerRadius(18.0f);
@@ -253,7 +253,7 @@ private:
 
     StackLayout response = StackLayout::New(StackOrientation::VERTICAL);
     response.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    response.SetPadding(Extents(16, 16, 13, 13));
+    response.SetPadding(Insets(16.0f, 16.0f, 13.0f, 13.0f));
     response.SetSpacing(8.0f);
     response.SetBackgroundColor(UiColor(COLOR_CONSOLE));
     response.SetCornerRadius(14.0f);
@@ -323,7 +323,7 @@ private:
     entity.card        = InteractiveView::New();
     entity.card.SetRequestedWidth(MATCH_PARENT);
     entity.card.SetRequestedHeight(112.0f);
-    entity.card.SetPadding(Extents(16, 16, 11, 11));
+    entity.card.SetPadding(Insets(16.0f, 16.0f, 11.0f, 11.0f));
     entity.card.SetBackgroundColor(UiColor(COLOR_UNSELECTED_CARD));
     entity.card.SetCornerRadius(13.0f);
     entity.card.SetFocusable(true);

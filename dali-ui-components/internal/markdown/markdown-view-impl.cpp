@@ -213,10 +213,7 @@ void MarkdownViewImpl::OnInitialize()
 {
   ViewImpl::OnInitialize();
   AttachLayoutManager(Dali::MakeUnique<MarkdownStackLayoutManager>());
-  GetSelfView().SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING),
-                                   static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING),
-                                   static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING),
-                                   static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING)));
+  GetSelfView().SetPadding(Insets(MarkdownViewDefaults::VIEW_PADDING, MarkdownViewDefaults::VIEW_PADDING));
 }
 
 void MarkdownViewImpl::SetMarkdown(const Dali::String& markdown)

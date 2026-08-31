@@ -84,7 +84,7 @@ private:
       emptyLabel.SetFontSize(FONT_TC_NAME);
       emptyLabel.SetRequestedWidth(MATCH_PARENT);
       emptyLabel.SetRequestedHeight(WRAP_CONTENT);
-      emptyLabel.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
+      emptyLabel.SetPadding(Insets(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
       listContent.Add(emptyLabel);
     }
 
@@ -115,7 +115,7 @@ private:
     header.SetRequestedWidth(MATCH_PARENT);
     header.SetRequestedHeight(HEADER_HEIGHT);
     header.SetBackgroundColor(UiColor(COLOR_HEADER_BG));
-    header.SetPadding(Extents(PADDING_H, PADDING_H, 0, 0));
+    header.SetPadding(Insets(PADDING_H, PADDING_H, 0.0f, 0.0f));
     header.Add(titleLabel);
     return header;
   }
@@ -140,7 +140,7 @@ private:
     item.SetRequestedWidth(MATCH_PARENT);
     item.SetRequestedHeight(WRAP_CONTENT);
     item.SetBackgroundColor(UiColor(COLOR_ITEM_BG));
-    item.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V, PADDING_V));
+    item.SetPadding(Insets(PADDING_H, PADDING_H, PADDING_V, PADDING_V));
     item.SetFocusable(true);
     item.SetStateEffect(OverlayEffect::ListItem());
     InteractiveTrait interactive = item.AsInteractive();
@@ -178,7 +178,7 @@ private:
     backLabel.SetFontSize(FONT_HEADER);
     backLabel.SetRequestedWidth(WRAP_CONTENT);
     backLabel.SetRequestedHeight(MATCH_PARENT);
-    backLabel.SetPadding(Extents(PADDING_H, PADDING_H * 2, 0, 0));
+    backLabel.SetPadding(Insets(PADDING_H, PADDING_H * 2, 0.0f, 0.0f));
     backLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     backLabel.SetFocusable(true);
     backLabel.SetStateEffect(OverlayEffect::ListItem());

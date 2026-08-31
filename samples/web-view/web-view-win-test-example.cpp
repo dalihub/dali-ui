@@ -158,7 +158,7 @@ private:
     mStatusLabel.SetBackgroundColor(Color::DARK_SLATE_GRAY);
     mStatusLabel.SetRequestedWidth(MATCH_PARENT);
     mStatusLabel.SetRequestedHeight(STATUS_HEIGHT);
-    mStatusLabel.SetPadding(Extents(8, 8, 0, 0));
+    mStatusLabel.SetPadding(Insets(8.0f, 8.0f, 0.0f, 0.0f));
 
     mWebView = WebView::New();
     mWebView.SetRequestedWidth(windowSize.width);

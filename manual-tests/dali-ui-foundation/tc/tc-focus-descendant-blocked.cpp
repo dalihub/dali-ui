@@ -82,14 +82,14 @@ public:
     mContainer.SetRequestedWidth(MATCH_PARENT);
     mContainer.SetRequestedHeight(96.0f);
     mContainer.SetBackgroundColor(UiColor(COLOR_CONTAINER));
-    mContainer.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    mContainer.SetPadding(Insets(GAP, GAP, GAP, GAP));
     mContainer.Add(mChild);
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
-    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.SetPadding(Insets(GAP, GAP, GAP, GAP));
     root.Add(mStatusLabel);
     root.Add(CreateButton("Set Block OFF", [this]() {
         SetBlocked(false);
@@ -118,7 +118,7 @@ private:
     btn.SetBackgroundColor(UiColor(0x4285F4));
     btn.SetRequestedWidth(MATCH_PARENT);
     btn.SetRequestedHeight(44.0f);
-    btn.SetMargin(Extents(0, 0, 4, 4));
+    btn.SetMargin(Insets(0.0f, 0.0f, 4.0f, 4.0f));
     btn.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     btn.SetVerticalTextAlignment(Text::Alignment::CENTER);
 

@@ -89,7 +89,7 @@ StackLayout MakeSection(const Dali::String& title, const Dali::String& descripti
   StackLayout section = StackLayout::New(StackOrientation::VERTICAL);
   section.SetRequestedWidth(MATCH_PARENT);
   section.SetRequestedHeight(WRAP_CONTENT);
-  section.SetPadding(Extents(SECTION_PADDING, SECTION_PADDING, SECTION_PADDING, SECTION_PADDING));
+  section.SetPadding(Insets(SECTION_PADDING, SECTION_PADDING, SECTION_PADDING, SECTION_PADDING));
   section.SetBackgroundColor(UiColor(COLOR_SECTION_BG));
   section.Add(MakeLabel(title, 18.0f, COLOR_TITLE));
   section.Add(MakeLabel(description, 13.0f, COLOR_BODY));
@@ -110,7 +110,7 @@ View MakeFrame(View child)
   frame.SetRequestedWidth(MATCH_PARENT);
   frame.SetRequestedHeight(WRAP_CONTENT);
   frame.SetMinimumHeight(78.0f);
-  frame.SetPadding(Extents(8u, 8u, 8u, 8u));
+  frame.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
   frame.SetBackgroundColor(UiColor(COLOR_FRAME));
   frame.Add(child);
   return frame;
@@ -174,7 +174,7 @@ public:
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
-    content.SetPadding(Extents(PAGE_PADDING, PAGE_PADDING, PAGE_PADDING, PAGE_PADDING));
+    content.SetPadding(Insets(PAGE_PADDING, PAGE_PADDING, PAGE_PADDING, PAGE_PADDING));
     content.SetBackgroundColor(UiColor(COLOR_PAGE_BG));
 
     AddAlignmentSection(content);

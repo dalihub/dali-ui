@@ -63,7 +63,7 @@ public:
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(PAGE_PADDING, PAGE_PADDING, PAGE_PADDING, PAGE_PADDING));
+    root.SetPadding(Insets(PAGE_PADDING, PAGE_PADDING, PAGE_PADDING, PAGE_PADDING));
     root.SetSpacing(SECTION_GAP);
 
     root.Add(MakeLabel("View Shadow", TITLE_FONT, UiColor(0x1A202C)));
@@ -121,7 +121,7 @@ private:
     card.SetRequestedHeight(CARD_H);
     card.SetBackgroundColor(UiColor(animated ? 0xEDF2F7 : 0xFFFFFF));
     card.SetCornerRadius(18.0f);
-    card.SetPadding(Extents(20.0f, 20.0f, 20.0f, 20.0f));
+    card.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     card.SetShadow(Shadow(animated ? 0.0f : 18.0f,
                           Vector2(0.0f, 14.0f),
                           UiColor(0.0f, 0.0f, 0.0f, animated ? 0.12f : 0.35f),
@@ -147,7 +147,7 @@ private:
     card.SetRequestedHeight(CARD_H);
     card.SetBackgroundColor(UiColor(0xFFFFFF));
     card.SetCornerRadius(cornerRadius);
-    card.SetPadding(Extents(20.0f, 20.0f, 20.0f, 20.0f));
+    card.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     card.SetShadow(ShadowStack{
       Shadow(0.0f, Vector2(-8.0f, 8.0f), UiColor(0x3182CE, 0.45f), Vector2(8.0f, 8.0f)),
       Shadow(2.0f, Vector2(10.0f, 16.0f), UiColor(0xDD6B20, 0.45f), Vector2(10.0f, 10.0f)),

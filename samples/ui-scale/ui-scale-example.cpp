@@ -216,7 +216,7 @@ private:
     panel.SetRequestedWidth(MATCH_PARENT);
     panel.SetRequestedHeight(WRAP_CONTENT);
     panel.SetBackgroundColor(UiColor(C_CTRL_BG));
-    panel.SetPadding(Extents(16, 16, 16, 16));
+    panel.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
     panel.SetSpacing(10.0f);
 
     // Title
@@ -272,7 +272,7 @@ private:
     mScaleInput.SetCursorColor(UiColor(C_LIGHT_TEXT));
     mScaleInput.SetPlaceholderColor(UiColor(C_GRAY_TEXT));
     mScaleInput.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mScaleInput.SetPadding(Extents(10, 10, 4, 4));
+    mScaleInput.SetPadding(Insets(10.0f, 10.0f, 4.0f, 4.0f));
     mScaleInput.SetCornerRadius(Vector4(BTN_RADIUS, BTN_RADIUS, BTN_RADIUS, BTN_RADIUS));
     mScaleInput.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 
@@ -293,7 +293,7 @@ private:
     mScalableBtn.SetRequestedWidth(MATCH_PARENT);
     mScalableBtn.SetRequestedHeight(BTN_HEIGHT);
     mScalableBtn.SetCornerRadius(Vector4(BTN_RADIUS, BTN_RADIUS, BTN_RADIUS, BTN_RADIUS));
-    mScalableBtn.SetPadding(Extents(12, 12, 6, 6));
+    mScalableBtn.SetPadding(Insets(12.0f, 12.0f, 6.0f, 6.0f));
 
     mScalableBtnLabel = Label::New();
     mScalableBtnLabel.SetRequestedWidth(MATCH_PARENT);
@@ -324,7 +324,7 @@ private:
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
     content.SetSpacing(16.0f);
-    content.SetPadding(Extents(14, 14, 16, 24));
+    content.SetPadding(Insets(14.0f, 14.0f, 16.0f, 24.0f));
 
     content.Add(BuildZoneA());
     content.Add(BuildZoneB());
@@ -478,7 +478,7 @@ private:
     disabledSub.SetRequestedWidth(WRAP_CONTENT);
     disabledSub.SetRequestedHeight(WRAP_CONTENT);
     disabledSub.SetBackgroundColor(UiColor(0xE1BEE7)); // light purple
-    disabledSub.SetPadding(Extents(8, 8, 8, 8));
+    disabledSub.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     disabledSub.SetSpacing(6.0f);
     disabledSub.SetCornerRadius(Vector4(ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS));
     disabledSub.SetUiScalePolicy(UiScalePolicy::DISABLED); // ★ isolated island
@@ -1277,7 +1277,7 @@ private:
     mDisabledSlot.SetRequestedWidth(130.0f);
     mDisabledSlot.SetRequestedHeight(WRAP_CONTENT);
     mDisabledSlot.SetBackgroundColor(UiColor(0xFFCDD2));
-    mDisabledSlot.SetPadding(Extents(8, 8, 8, 8));
+    mDisabledSlot.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     mDisabledSlot.SetSpacing(6.0f);
     mDisabledSlot.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
     mDisabledSlot.SetUiScalePolicy(UiScalePolicy::DISABLED); // ★ blocks scale
@@ -1288,7 +1288,7 @@ private:
     mInheritSlot.SetRequestedWidth(130.0f);
     mInheritSlot.SetRequestedHeight(WRAP_CONTENT);
     mInheritSlot.SetBackgroundColor(UiColor(0xE0F2F1));
-    mInheritSlot.SetPadding(Extents(8, 8, 8, 8));
+    mInheritSlot.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     mInheritSlot.SetSpacing(6.0f);
     mInheritSlot.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
     // INHERIT (default)
@@ -1376,7 +1376,7 @@ private:
     mHContainer.SetRequestedWidth(MATCH_PARENT);
     mHContainer.SetRequestedHeight(WRAP_CONTENT);
     mHContainer.SetBackgroundColor(UiColor(0xC5CAE9));
-    mHContainer.SetPadding(Extents(8, 8, 8, 8));
+    mHContainer.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     mHContainer.SetSpacing(6.0f);
     mHContainer.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
     // INHERIT (default) — normal scale propagation
@@ -1469,7 +1469,7 @@ private:
     zone.SetRequestedWidth(MATCH_PARENT);
     zone.SetRequestedHeight(WRAP_CONTENT);
     zone.SetBackgroundColor(bgColor);
-    zone.SetPadding(Extents(12, 12, 12, 12));
+    zone.SetPadding(Insets(12.0f, 12.0f, 12.0f, 12.0f));
     zone.SetSpacing(10.0f);
     zone.SetCornerRadius(Vector4(ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS));
     return zone;
@@ -1524,7 +1524,7 @@ private:
     btn.SetRequestedHeight(BTN_HEIGHT);
     btn.SetBackgroundColor(color);
     btn.SetCornerRadius(Vector4(BTN_RADIUS, BTN_RADIUS, BTN_RADIUS, BTN_RADIUS));
-    btn.SetPadding(Extents(12, 12, 6, 6));
+    btn.SetPadding(Insets(12.0f, 12.0f, 6.0f, 6.0f));
     btn.Add(lbl);
     return btn;
   }
