@@ -3,14 +3,16 @@
 SetImageColor / GetImageColor, SetDesiredWidth / GetDesiredWidth / SetDesiredHeight /
 GetDesiredHeight 동작을 확인한다.
 
-라벨 둘 다 진짜 getter다. `SetImageColor`는 비주얼을 다시 만들지 않고 MIX_COLOR를 제자리
-갱신하므로 재생 중에도 즉시 적용되고, `SetDesiredWidth/Height`는 비주얼을 다시 만들어
-바로 적용된다 — 리로드 단계가 필요 없다.
+라벨 둘 다 진짜 getter다. `SetImageColor`와 `SetDesiredWidth/Height`는 런타임
+visual 속성을 제자리 갱신하므로 재생 상태와 현재 프레임을 보존한다. DesiredSize
+변경은 renderer의 raster size를 다시 계산하지만 visual이나 리소스를 재생성하지 않는다.
 
 ## 화면 구성
 
 - 중앙: Lottie 애니메이션 프리뷰 (200x200)
 - 상태 라벨: `Color: Rn Gn Bn An` / `DesiredSize: WxH`
+- 재생 라벨: `State: PLAYING|PAUSED | Frame: n/N` (GetPlayState/GetCurrentFrame/GetTotalFrame)
+- 재생 버튼: Play / Pause / Jump →10
 - 버튼 행 1: White / Red / Blue / 50% Alpha (ImageColor)
 - 버튼 행 2: Desired 0x0 / Desired 50x50 / Desired 200x200
 
@@ -30,10 +32,13 @@ GetDesiredHeight 동작을 확인한다.
 
 ## 테스트 2: DesiredSize (값 왕복 + 렌더 도달)
 
-1. [Desired 50x50] 버튼을 탭한다
-2. **기대 결과**: 라벨 `DesiredSize: 50x50`, setter가 비주얼을 다시 만들어 정지 프레임에서 캡처 가능
-3. [Desired 200x200] 버튼을 탭하고 캡처를 비교한다
-4. **기대 결과**: 라벨 `DesiredSize: 200x200`, 두 캡처가 **다르다** — 실제로 다른 해상도로
+1. ImageColor 검증을 마친 뒤 [Pause] → [Jump →10]을 탭해
+   `State: PAUSED | Frame: 10/N`을 확인한다
+2. [Desired 50x50] 버튼을 탭한다
+3. **기대 결과**: 라벨 `DesiredSize: 50x50`, State/Frame이 PAUSED/10으로
+   보존된 같은 프레임에서 캡처 가능
+4. [Desired 200x200] 버튼을 탭하고 State/Frame이 그대로임을 확인한 뒤 캡처를 비교한다
+5. **기대 결과**: 라벨 `DesiredSize: 200x200`, 두 캡처가 **다르다** — 실제로 다른 해상도로
    구웠다는 증거 ("흐리다"는 사람의 판단이라 기계 판정은 차이까지)
 
 [Desired 0x0]("제한 없음") 역시 기본값 확인이라 왕복 단계에서 뺀다.
@@ -42,4 +47,6 @@ GetDesiredHeight 동작을 확인한다.
 
 - SetImageColor 후 GetImageColor가 동일한 값을 반환해야 한다 (50% Alpha는 A127)
 - Red 틴트가 렌더에 실제로 적용되어야 한다 (프리뷰 평균 채널에서 R 우세)
-- DesiredSize 변경이 렌더에 실제로 반영되어야 한다 (50x50과 200x200 캡처가 다름)
+- DesiredSize 변경 후에도 PAUSED 상태와 현재 프레임이 보존되어야 한다
+- 명시적으로 고정한 같은 프레임에서 DesiredSize 변경이 렌더에 실제로 반영되어야 한다
+  (50x50과 200x200 캡처가 다름)

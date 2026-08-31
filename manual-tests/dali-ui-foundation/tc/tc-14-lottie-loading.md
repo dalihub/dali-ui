@@ -18,17 +18,23 @@ SetPlaceholderUrl / GetPlaceholderUrl, GetLoadingStatus 동작을 확인한다.
 `ResourceReadySignal`은 **실패한 로드에도 발생한다** (실측 — 카운터만으로는 성공/실패를
 구분할 수 없고, `Load:` 필드가 그 구분을 준다).
 
+ReleasePolicy와 SynchronousLoading은 로드 방식을 지정하는 런타임 속성이다. 이 값을
+변경해도 현재 visual은 재생성·재로드되지 않으며 재생 상태와 현재 프레임이
+보존된다. ReleasePolicy는 다음 detach/destroy에, SynchronousLoading은 다음 로드에
+적용된다. 따라서 두 setter 자체는 `ResourceReadySignal`을 만들지 않아야 한다.
+
 ## 테스트 1: ReleasePolicy (캐시 히트 vs 리로드)
 
 1. [Release: NEVER] 버튼을 탭한다
-2. [Remove View] → [Re-Add View] 버튼을 탭한다
-3. **기대 결과**: ResourceReadySignal 카운터가 **움직이지 않는다** (캐시에서 즉시 표시, 리로드 없음)
-4. [Release: DETACHED] 버튼을 탭한다
-5. [Remove View] 버튼을 탭한다
-6. **기대 결과**: 제거된 동안 `Load: PREPARING` — DETACHED가 리소스를 해제한 것이
+2. **기대 결과**: ResourceReadySignal 카운터가 불변 (정책 변경 자체는 리로드가 아님)
+3. [Remove View] → [Re-Add View] 버튼을 탭한다
+4. **기대 결과**: ResourceReadySignal 카운터가 **움직이지 않는다** (캐시에서 즉시 표시, 리로드 없음)
+5. [Release: DETACHED] 버튼을 탭하고 카운터가 불변임을 확인한다
+6. [Remove View] 버튼을 탭한다
+7. **기대 결과**: 제거된 동안 `Load: PREPARING` — DETACHED가 리소스를 해제한 것이
    getter로 직접 보인다 (NEVER에서는 같은 상태가 `Load: READY`였다, 실측 2026-08-26)
-7. [Re-Add View] 버튼을 탭한다
-8. **기대 결과**: 카운터가 **움직이고** `Load: READY` (리로드 발생)
+8. [Re-Add View] 버튼을 탭한다
+9. **기대 결과**: 카운터가 **정확히 +1** 증가하고 `Load: READY` (리로드 발생)
 
 ## 테스트 2: GetLoadingStatus (성공/실패 구분)
 
@@ -59,10 +65,12 @@ SetPlaceholderUrl / GetPlaceholderUrl, GetLoadingStatus 동작을 확인한다.
 
 ## 통과 기준
 
-- NEVER 정책: Re-Add 시 신호 카운터 불변(리로드 없음), DETACHED 정책: 카운터 증가(리로드)
+- ReleasePolicy 변경 자체는 신호 카운터를 변경하지 않아야 한다
+- NEVER 정책: Re-Add 시 신호 카운터 불변(리로드 없음), DETACHED 정책: 카운터 +1(리로드)
 - GetLoadingStatus가 성공(READY)과 실패(FAILED)를 구분해 보고해야 한다
 - SetPlaceholderUrl 왕복이 성립하고, placeholder setter가 본 비주얼의 신호를 만들지 않아야 한다
-- Sync ON 후 IsSynchronousLoading이 ON을 반환하고 리로드가 READY로 끝나야 한다
+- Sync ON 후 IsSynchronousLoading이 ON을 반환하고 setter 자체는 리로드하지
+  않으며, 다음 리로드가 READY로 끝나야 한다
 
 > `Release: DESTROYED` 버튼은 화면에 있으나 절차는 **보류** — DESTROYED 정책의 Re-Add
 > 동작(3.5의 "다시 안 읽음" 보고)과 함께 결정한 뒤 여기에 절차를 추가한다.

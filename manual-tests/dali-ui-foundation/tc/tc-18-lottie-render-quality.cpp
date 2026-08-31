@@ -34,6 +34,17 @@ constexpr uint32_t C_BTN_TEXT    = 0xEEEEEE;
 constexpr uint32_t C_STATUS_BG   = 0x222222;
 constexpr uint32_t C_STATUS_TEXT = 0xCCCCCC;
 constexpr uint32_t C_BG          = 0x1A1A1A;
+
+const char* PlayStateName(Ui::AnimatedImage::PlayState state)
+{
+  switch(state)
+  {
+    case Ui::AnimatedImage::PlayState::PLAYING: return "PLAYING";
+    case Ui::AnimatedImage::PlayState::PAUSED:  return "PAUSED";
+    case Ui::AnimatedImage::PlayState::STOPPED: return "STOPPED";
+    default:                                      return "?";
+  }
+}
 } // namespace
 
 /**
@@ -87,6 +98,11 @@ public:
 
     mScaleLabel = MakeStatusLabel("RenderScale: 1.0 | FrameCache: OFF");
     mFlagsLabel = MakeStatusLabel("RedrawSD: ON | RedrawSU: ON | NotifyRast: OFF");
+    mPlayLabel  = MakeStatusLabel("State: PLAYING | Frame: 0/0");
+
+    mPollTimer = Timer::New(100);
+    mPollTimer.TickSignal().Connect(this, &TcLottieRenderQuality::OnPollTick);
+    mPollTimer.Start();
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
@@ -97,6 +113,13 @@ public:
     content.Add(MakeCentered(mView));
     content.Add(mScaleLabel);
     content.Add(mFlagsLabel);
+    content.Add(mPlayLabel);
+
+    content.Add(MakeButtonRow({
+      MakeButton("Play",      [this] { mView.Play(); }),
+      MakeButton("Pause",     [this] { mView.Pause(); }),
+      MakeButton("Jump\n→10", [this] { mView.JumpToFrame(10); }),
+    }));
 
     content.Add(MakeButtonRow({
       MakeButton("Scale\n0.25x", [this] { OnRenderScale(0.25f); }),
@@ -122,7 +145,25 @@ public:
     contentArea.Add(content);
   }
 
+  void OnExit() override
+  {
+    if(mPollTimer)
+    {
+      mPollTimer.Stop();
+      mPollTimer.Reset();
+    }
+  }
+
 private:
+  bool OnPollTick()
+  {
+    mPlayLabel.SetText(
+      Dali::String("State: ") + Dali::String(PlayStateName(mView.GetPlayState())) +
+      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
+      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()));
+    return true;
+  }
+
   void OnRenderScale(float scale)
   {
     mView.SetRenderScale(scale);
@@ -216,6 +257,8 @@ private:
   LottieAnimationView mView;
   Label               mScaleLabel;
   Label               mFlagsLabel;
+  Label               mPlayLabel;
+  Timer               mPollTimer;
 };
 
 REGISTER_MANUAL_TEST(TcLottieRenderQuality)
