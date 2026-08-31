@@ -26,6 +26,20 @@ namespace
 {
 const char* const LOTTIE_WALKER   = TEST_RESOURCE_DIR "/jolly_walker.json";
 const char* const IMG_PLACEHOLDER = TEST_RESOURCE_DIR "/placeholder_image.png";
+// A path that never resolves — holds the loading/failure state open so the
+// placeholder-while-loading criterion has something to photograph.
+const char* const LOTTIE_MISSING  = TEST_RESOURCE_DIR "/no-such-animation.json";
+
+const char* LoadingStatusName(Ui::Visual::ResourceStatus s)
+{
+  switch(s)
+  {
+    case Ui::Visual::ResourceStatus::PREPARING: return "PREPARING";
+    case Ui::Visual::ResourceStatus::READY:     return "READY";
+    case Ui::Visual::ResourceStatus::FAILED:    return "FAILED";
+    default:                                    return "?";
+  }
+}
 
 constexpr float    PREVIEW_SIZE  = 200.0f;
 constexpr float    BTN_H         = 52.0f;
@@ -118,7 +132,8 @@ public:
     content.Add(MakeButtonRow({
       MakeButton("Set\nPlaceholder",   [this] { mView.SetPlaceholderUrl(IMG_PLACEHOLDER); UpdateLabel(); }),
       MakeButton("Clear\nPlaceholder", [this] { mView.SetPlaceholderUrl(""); UpdateLabel(); }),
-      MakeButton("Reload\nURL",        [this] { mView.SetResourceUrl(LOTTIE_WALKER); mView.Play(); }),
+      MakeButton("Reload\nURL",        [this] { mView.SetResourceUrl(LOTTIE_WALKER); mView.Play(); UpdateLabel(); }),
+      MakeButton("Bad\nURL",           [this] { mView.SetResourceUrl(LOTTIE_MISSING); mView.Play(); UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Remove\nView",  [this] { OnRemove(); }),
@@ -167,9 +182,13 @@ private:
       Dali::String(" | PH: ") + Dali::String(phUrl.Empty() ? "none" : "SET"));
 
     Dali::String inScene = mView.GetParent() ? "in scene" : "REMOVED";
+    // GetLoadingStatus() answers "cache hit or real load?" DIRECTLY — the .md
+    // always promised this field; the signal-counting above is the indirect
+    // route that had to substitute for it.
     mReadyLabel.SetText(
       Dali::String("ResourceReadySignal: ") + Dali::String(std::to_string(mReadyCount).c_str()) +
-      Dali::String(" | View: ") + inScene);
+      Dali::String(" | View: ") + inScene +
+      Dali::String(" | Load: ") + Dali::String(LoadingStatusName(mView.GetLoadingStatus())));
   }
 
   View MakeCentered(View child)

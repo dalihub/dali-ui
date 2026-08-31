@@ -27,6 +27,10 @@ namespace
 {
 const char* const LOTTIE_WALKER    = TEST_RESOURCE_DIR "/jolly_walker.json";
 const char* const PLACEHOLDER_IMG  = TEST_RESOURCE_DIR "/placeholder_image.png";
+// A path that never resolves: the one way to HOLD the loading state open. Local
+// files load faster than any sampler, so "placeholder shows while loading" was
+// unobservable even by eye until this button existed.
+const char* const LOTTIE_MISSING   = TEST_RESOURCE_DIR "/no-such-animation.json";
 
 constexpr float    PREVIEW_W    = 240.0f;
 constexpr float    PREVIEW_H    = 160.0f; // non-square to make fitting-mode differences visible
@@ -105,6 +109,7 @@ public:
     content.Add(MakeButtonRow({
       MakeButton("Set\nPlaceholder", [this] { OnSetPlaceholder(); }),
       MakeButton("Reload\nLottie",   [this] { OnReload(); }),
+      MakeButton("Bad\nURL",         [this] { OnBadUrl(); }),
       MakeButton("Clear\nURL",       [this] { OnClearUrl(); }),
       MakeButton("Clear\nHolder",    [this] { OnClearPlaceholder(); }),
     }));
@@ -113,34 +118,63 @@ public:
   }
 
 private:
+  // The label's first line is GetPlaceholderUrl()'s return value VERBATIM — a
+  // hardcoded filename here passed with the setter deleted. The second line is
+  // the last event, and only OnResourceReady's comes from a real signal.
+  void UpdateHolderLabel(const char* status)
+  {
+    Dali::String ph = mView.GetPlaceholderUrl();
+    mHolderLabel.SetText(
+      Dali::String("PH: ") + (ph.Empty() ? Dali::String("none") : ph) +
+      Dali::String("\n") + Dali::String(status));
+  }
+
   void OnSetPlaceholder()
   {
     mView.SetPlaceholderUrl(PLACEHOLDER_IMG);
-    mHolderLabel.SetText("Placeholder: placeholder_image.png");
+    UpdateHolderLabel("placeholder set");
   }
 
   void OnReload()
   {
     mView.SetResourceUrl(LOTTIE_WALKER);
     mView.Play();
-    mHolderLabel.SetText("Placeholder: showing while loading...");
+    UpdateHolderLabel("reloading...");
+  }
+
+  void OnBadUrl()
+  {
+    mView.SetResourceUrl(LOTTIE_MISSING);
+    mView.Play();
+    UpdateHolderLabel("bad URL set");
   }
 
   void OnClearUrl()
   {
     mView.SetResourceUrl("");
-    mHolderLabel.SetText("URL cleared — placeholder visible (if set)");
+    UpdateHolderLabel("URL cleared");
   }
 
   void OnClearPlaceholder()
   {
     mView.SetPlaceholderUrl("");
-    mHolderLabel.SetText("Placeholder: (none)");
+    UpdateHolderLabel("holder cleared");
   }
 
   void OnResourceReady(View)
   {
-    mHolderLabel.SetText("ResourceReady — placeholder removed");
+    // The signal fires for FAILED loads too (measured: [Bad URL] bumped the
+    // counter and left the label saying just "ResourceReady", indistinguishable
+    // from success), so print the load result the component actually reports.
+    const char* status = "ResourceReady: ?";
+    switch(mView.GetLoadingStatus())
+    {
+      case Ui::Visual::ResourceStatus::PREPARING: status = "ResourceReady: PREPARING"; break;
+      case Ui::Visual::ResourceStatus::READY:     status = "ResourceReady: READY";     break;
+      case Ui::Visual::ResourceStatus::FAILED:    status = "ResourceReady: FAILED";    break;
+      default: break;
+    }
+    UpdateHolderLabel(status);
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────

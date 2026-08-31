@@ -25,7 +25,6 @@ using namespace Dali::Ui;
 namespace
 {
 const char* const ANIM_WEBP      = TEST_RESOURCE_DIR "/dog-anim.webp";
-const char* const ANIM_GIF       = TEST_RESOURCE_DIR "/dali-logo-anim.gif";
 const char* const IMG_PLACEHOLDER= TEST_RESOURCE_DIR "/placeholder_image.png";
 
 constexpr float    PREVIEW_SIZE  = 200.0f;
@@ -114,6 +113,10 @@ public:
     content.Add(mFlagsLabel);
 
     content.Add(MakeButtonRow({
+      MakeButton("Play", [this] { mView.Play(); }),
+      MakeButton("Stop", [this] { mView.Stop(); }),
+    }));
+    content.Add(MakeButtonRow({
       MakeButton("Desired\n0x0",    [this] { OnDesired(0,   0); }),
       MakeButton("Desired\n50x50",  [this] { OnDesired(50,  50); }),
       MakeButton("Desired\n200x200",[this] { OnDesired(200, 200); }),
@@ -132,7 +135,10 @@ public:
     content.Add(MakeButtonRow({
       MakeButton("Set\nPlaceholder",   [this] { mView.SetPlaceholderUrl(IMG_PLACEHOLDER); UpdateLabels(); }),
       MakeButton("Clear\nPlaceholder", [this] { mView.SetPlaceholderUrl(""); UpdateLabels(); }),
-      MakeButton("Reload\nURL",        [this] { mView.SetResourceUrl(ANIM_GIF); mView.SetResourceUrl(ANIM_WEBP); mView.Play(); }),
+      // Reload() is the real thing: the RELOAD visual action re-fetches instead of
+      // reusing cached textures. The old handler set GIF then WEBP in one frame,
+      // which only pretended to reload.
+      MakeButton("Reload\nURL",        [this] { mView.Reload(); mView.Play(); }),
     }));
 
     contentArea.Add(content);
@@ -149,15 +155,17 @@ private:
   void UpdateLabels()
   {
     mStatusLabel.SetText(
-      Dali::String(" | DesiredSize: ") + Dali::String(std::to_string(mView.GetDesiredWidth()).c_str()) +
+      Dali::String("DesiredSize: ") + Dali::String(std::to_string(mView.GetDesiredWidth()).c_str()) +
       Dali::String("x") + Dali::String(std::to_string(mView.GetDesiredHeight()).c_str()) +
       Dali::String(" | Sampling: ") + Dali::String(SamplingModeName(mView.GetSamplingMode())));
 
+    // Print the placeholder PATH the getter returns, not a SET/none flag: a
+    // flag cannot prove the URL round-trips.
     Dali::String phUrl = mView.GetPlaceholderUrl();
     mFlagsLabel.SetText(
       Dali::String("PreMult: ") + Dali::String(mView.IsPreMultipliedAlpha() ? "ON" : "OFF") +
       Dali::String(" | LoadWithViewSize: ") + Dali::String(mView.IsImageLoadWithViewSizeEnabled() ? "ON" : "OFF") +
-      Dali::String(" | Placeholder: ") + Dali::String(phUrl.Empty() ? "none" : "SET"));
+      Dali::String(" | Placeholder: ") + (phUrl.Empty() ? Dali::String("none") : phUrl));
   }
 
   View MakeCentered(View child)

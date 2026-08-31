@@ -24,7 +24,11 @@ using namespace Dali::Ui;
 
 namespace
 {
-const char* const ANIM_WEBP = TEST_RESOURCE_DIR "/dog-anim.webp";
+// Deliberately NON-square (256x128): a square source in a square preview makes
+// FIT_KEEP / FILL / OVER_FIT mathematically identical, so no implementation could
+// show a difference. With 2:1 the three modes diverge: FIT_KEEP letterboxes,
+// FILL stretches, OVER_FIT crops.
+const char* const ANIM_WEBP = TEST_RESOURCE_DIR "/dog-anim-wide.webp";
 
 constexpr float    PREVIEW_SIZE  = 200.0f;
 constexpr float    BTN_H         = 52.0f;
@@ -94,6 +98,10 @@ public:
     content.Add(mAreaLabel);
     content.Add(mFittingLabel);
 
+    content.Add(MakeButtonRow({
+      MakeButton("Play", [this] { mView.Play(); }),
+      MakeButton("Stop", [this] { mView.Stop(); }),
+    }));
     content.Add(MakeButtonRow({
       MakeButton("White",     [this] { OnColor(UiColor(1.f, 1.f, 1.f, 1.f)); }),
       MakeButton("Red",       [this] { OnColor(UiColor(1.f, 0.f, 0.f, 1.f)); }),

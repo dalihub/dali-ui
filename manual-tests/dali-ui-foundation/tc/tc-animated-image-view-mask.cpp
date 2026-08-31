@@ -92,9 +92,13 @@ public:
     content.Add(mStatusLabel);
 
     content.Add(MakeButtonRow({
-      MakeButton("Circle\nMask",  [this] { OnMask(IMG_MASK_CIRCLE, "circle"); }),
-      MakeButton("Bubble\nMask",  [this] { OnMask(IMG_MASK_BUBBLE, "bubble"); }),
-      MakeButton("No Mask",       [this] { OnMask("", "none"); }),
+      MakeButton("Play", [this] { mView.Play(); }),
+      MakeButton("Stop", [this] { mView.Stop(); }),
+    }));
+    content.Add(MakeButtonRow({
+      MakeButton("Circle\nMask",  [this] { OnMask(IMG_MASK_CIRCLE); }),
+      MakeButton("Bubble\nMask",  [this] { OnMask(IMG_MASK_BUBBLE); }),
+      MakeButton("No Mask",       [this] { OnMask(""); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("CropToMask\nON",  [this] { mView.SetCropToMask(true);  UpdateLabel(); }),
@@ -109,10 +113,9 @@ public:
   }
 
 private:
-  void OnMask(const char* url, const char* name)
+  void OnMask(const char* url)
   {
     mView.SetAlphaMaskUrl(url);
-    mMaskName = name;
     UpdateLabel();
   }
 
@@ -120,8 +123,12 @@ private:
   {
     auto mode = mView.GetMaskingMode();
     Dali::String modeStr = (mode == Ui::Image::MaskingType::MASKING_ON_LOADING) ? "ON_LOADING" : "ON_RENDERING";
+    // Print GetAlphaMaskUrl()'s return value, not a local copy of the button
+    // name: a local string still reads "circle" with SetAlphaMaskUrl deleted,
+    // so it could never verify the getter.
+    Dali::String maskUrl = mView.GetAlphaMaskUrl();
     mStatusLabel.SetText(
-      Dali::String("Mask: ") + Dali::String(mMaskName.c_str()) +
+      Dali::String("Mask: ") + (maskUrl.Empty() ? Dali::String("none") : maskUrl) +
       Dali::String("\nCropToMask: ") + Dali::String(mView.IsCropToMask() ? "ON" : "OFF") +
       Dali::String(" | MaskingMode: ") + modeStr);
   }
@@ -201,7 +208,6 @@ private:
 
   AnimatedImageView mView;
   Label             mStatusLabel;
-  std::string       mMaskName{"none"};
 };
 
 REGISTER_MANUAL_TEST(TcAnimatedImageViewMask)

@@ -63,6 +63,12 @@ public:
     mImage = ImageView::New(IMG_A);
     mImage.SetRequestedWidth(PREVIEW_SIZE);
     mImage.SetRequestedHeight(PREVIEW_SIZE);
+    // The preview's a11y node always existed with pixel-accurate geometry —
+    // it just had no name or role, so tests had to hardcode screen coordinates
+    // that silently compare the wrong area when the layout shifts (measured
+    // 2026-08-25, temp/a11y-preview). One name makes it a durable region.
+    mImage.SetAccessibilityName("ImagePreview");
+    mImage.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
     mColorLabel = MakeStatusLabel("Color: R255 G255 B255 A255");
     mAreaLabel  = MakeStatusLabel("PixelArea: (0,0,100,100)%");

@@ -74,9 +74,19 @@ public:
 
   void OnEnter(View contentArea) override
   {
+    mLoadsCount = 0;
+
     mView = AnimatedImageView::New(ANIM_WEBP);
     mView.SetRequestedWidth(PREVIEW_SIZE);
     mView.SetRequestedHeight(PREVIEW_SIZE);
+
+    // Loads: N is the one observable that separates "re-used the cached
+    // texture" from "reloaded": both end with the same picture on screen.
+    // NEVER + Remove/Re-Add must keep N; DETACHED + Remove/Re-Add must raise it.
+    mView.ResourceReadySignal().Connect(this, [this](View) {
+      ++mLoadsCount;
+      UpdateLoadsLabel();
+    });
 
     mView.Play();
 
@@ -86,6 +96,7 @@ public:
     mContainer.Add(mView);
 
     mStatusLabel = MakeStatusLabel("LoadPolicy IMMEDIATE | ReleasePolicy: DETACHED | Sync: OFF | View: in scene");
+    mLoadsLabel  = MakeStatusLabel("Loads: 0");
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
@@ -95,6 +106,7 @@ public:
 
     content.Add(MakeCentered(mContainer));
     content.Add(mStatusLabel);
+    content.Add(mLoadsLabel);
 
     content.Add(MakeButtonRow({
       MakeButton("Load:\nIMMEDIATE", [this] { mView.SetLoadPolicy(Ui::Image::LoadPolicy::IMMEDIATE);  UpdateLabel(); }),
@@ -136,6 +148,12 @@ private:
       mView.Play();
       UpdateLabel();
     }
+  }
+
+  void UpdateLoadsLabel()
+  {
+    mLoadsLabel.SetText(
+      Dali::String("Loads: ") + Dali::String(std::to_string(mLoadsCount).c_str()));
   }
 
   void UpdateLabel()
@@ -237,6 +255,8 @@ private:
   AnimatedImageView mView;
   StackLayout       mContainer;
   Label             mStatusLabel;
+  Label             mLoadsLabel;
+  int               mLoadsCount{0};
 };
 
 REGISTER_MANUAL_TEST(TcAnimatedImageViewLoadPolicy)

@@ -122,7 +122,7 @@ public:
     content.Add(mStatusLabel);
 
     content.Add(MakeButtonRow({
-      MakeButton("Play",  [this] { mView.Play(); }),
+      MakeButton("Play",  [this] { OnPlay(); }),
       MakeButton("Stop",  [this] { mView.Stop(); }),
     }));
     content.Add(MakeButtonRow({
@@ -160,14 +160,63 @@ private:
     return true;
   }
 
+  void OnPlay()
+  {
+    if(mView.GetPlayState() == Ui::AnimatedImage::PlayState::STOPPED)
+    {
+      // A fresh start begins loop 1; resuming from PAUSED keeps the index.
+      mLoopIndex = 1;
+      mPrevFrame = 0;
+      mPrevDelta = 0;
+    }
+    mView.Play();
+    UpdateLabel();
+  }
+
+  void TrackLoopIndex()
+  {
+    // No current-loop getter exists, so count loop boundaries from the frame
+    // counter. RESTART wraps with a large backward jump; AUTO_REVERSE finishes
+    // one round trip at the valley (falling -> rising).
+    if(mView.GetPlayState() != Ui::AnimatedImage::PlayState::PLAYING)
+    {
+      return;
+    }
+    int frame = mView.GetCurrentFrame();
+    int total = mView.GetTotalFrame();
+    if(frame == mPrevFrame)
+    {
+      return;
+    }
+    if(mView.GetLoopingMode() == Ui::LottieAnimation::LoopingMode::AUTO_REVERSE)
+    {
+      if(mPrevDelta < 0 && frame > mPrevFrame)
+      {
+        ++mLoopIndex;
+      }
+    }
+    else if(total > 0 && mPrevFrame - frame > total / 2)
+    {
+      ++mLoopIndex;
+    }
+    mPrevDelta = frame - mPrevFrame;
+    mPrevFrame = frame;
+  }
+
   void UpdateLabel()
   {
+    TrackLoopIndex();
     int loop = mView.GetLoopCount();
-    Dali::String loopStr = (loop < 0) ? Dali::String("-1 (inf)") : Dali::String(std::to_string(loop).c_str());
+    Dali::String loopStr  = (loop < 0) ? Dali::String("-1 (inf)") : Dali::String(std::to_string(loop).c_str());
+    Dali::String totalStr = (loop < 0) ? Dali::String("inf") : Dali::String(std::to_string(loop).c_str());
     mStatusLabel.SetText(
       Dali::String("Loop: ") + loopStr +
       Dali::String(" | LoopMode: ") + Dali::String(LoopingModeName(mView.GetLoopingMode())) +
+      Dali::String(" | Idx: ") + Dali::String(std::to_string(mLoopIndex).c_str()) +
+      Dali::String("/") + totalStr +
       Dali::String("\nStop: ") + Dali::String(StopBehaviorName(mView.GetStopBehavior())) +
+      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
+      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()) +
       Dali::String(" | Finished: ") + Dali::String(std::to_string(mFinishedCount).c_str()));
   }
 
@@ -248,6 +297,9 @@ private:
   Label               mStatusLabel;
   Timer               mPollTimer;
   int                 mFinishedCount{0};
+  int                 mLoopIndex{0};
+  int                 mPrevFrame{0};
+  int                 mPrevDelta{0};
 };
 
 REGISTER_MANUAL_TEST(TcLottieLoop)

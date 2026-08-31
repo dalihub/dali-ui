@@ -110,7 +110,7 @@ public:
     content.Add(mStatusLabel);
 
     content.Add(MakeButtonRow({
-      MakeButton("Play",  [this] { mView.Play(); }),
+      MakeButton("Play",  [this] { OnPlay(); }),
       MakeButton("Stop",  [this] { mView.Stop(); }),
     }));
     content.Add(MakeButtonRow({
@@ -140,8 +140,29 @@ public:
 private:
   bool OnPollTick()
   {
+    // Loop index: the component exposes no current-loop getter, so count frame
+    // wrap-arounds while playing. At 100ms/frame and a 100ms poll every loop is
+    // sampled ~8 times, so a 7->0 wrap cannot slip between two samples.
+    int frame = mView.GetCurrentFrame();
+    if(mView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING && frame < mPrevFrame)
+    {
+      ++mLoopIndex;
+    }
+    mPrevFrame = frame;
     UpdateLabel();
     return true;
+  }
+
+  void OnPlay()
+  {
+    if(mView.GetPlayState() == Ui::AnimatedImage::PlayState::STOPPED)
+    {
+      // A fresh start begins loop 1; resuming from PAUSED keeps the index.
+      mLoopIndex = 1;
+      mPrevFrame = 0;
+    }
+    mView.Play();
+    UpdateLabel();
   }
 
   void OnLoopCount(int count)
@@ -159,10 +180,13 @@ private:
   void UpdateLabel()
   {
     int loop = mView.GetLoopCount();
-    Dali::String loopStr = (loop < 0) ? Dali::String("-1 (inf)") : Dali::String(std::to_string(loop).c_str());
+    Dali::String loopStr  = (loop < 0) ? Dali::String("-1 (inf)") : Dali::String(std::to_string(loop).c_str());
+    Dali::String totalStr = (loop < 0) ? Dali::String("inf") : Dali::String(std::to_string(loop).c_str());
     mStatusLabel.SetText(
       Dali::String("LoopCount: ") + loopStr +
       Dali::String(" | Stop: ") + Dali::String(StopBehaviorName(mView.GetStopBehavior())) +
+      Dali::String(" | Loop: ") + Dali::String(std::to_string(mLoopIndex).c_str()) +
+      Dali::String("/") + totalStr +
       Dali::String(" | Finished: ") + Dali::String(std::to_string(mFinishedCount).c_str()));
   }
 
@@ -243,6 +267,8 @@ private:
   Label             mStatusLabel;
   Timer             mPollTimer;
   int               mFinishedCount{0};
+  int               mLoopIndex{0};
+  int               mPrevFrame{0};
 };
 
 REGISTER_MANUAL_TEST(TcAnimatedImageViewLoop)

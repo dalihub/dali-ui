@@ -24,7 +24,12 @@ using namespace Dali::Ui;
 
 namespace
 {
-const char* const LOTTIE_WALKER = TEST_RESOURCE_DIR "/jolly_walker.json";
+// checkbox.json (from dali-ui-components) carries two markers — on [0-18],
+// off [20-38] — so GetMarkerInfo() finally has something to return. With the
+// old marker-less jolly_walker the API could be a stub, unimplemented, or the
+// build could have lost every marker: all three printed the same "0 items",
+// and the spec had even pre-excused it ("마커가 없으면 0 items 표시").
+const char* const LOTTIE_MARKED = TEST_RESOURCE_DIR "/checkbox.json";
 
 constexpr float    PREVIEW_SIZE  = 200.0f;
 constexpr float    BTN_H         = 52.0f;
@@ -66,7 +71,7 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    mView = LottieAnimationView::New(LOTTIE_WALKER);
+    mView = LottieAnimationView::New(LOTTIE_MARKED);
     mView.SetRequestedWidth(PREVIEW_SIZE);
     mView.SetRequestedHeight(PREVIEW_SIZE);
 
@@ -137,9 +142,40 @@ private:
     {
       firstName = key.stringKey;
     }
+    // The marker's frame range too, so 통과 기준 2 can pin name AND frames.
+    // The plugin decides the value's Property type (measured on emulator:
+    // it is NOT a Vector2 — a typed Get<Vector2>() printed nothing), so try
+    // the plausible shapes and make an unanticipated one VISIBLE instead of
+    // silently printing no range at all.
+    auto asFloat = [](const Property::Value& pv, float& out) -> bool {
+      float f = 0.0f;
+      int   i = 0;
+      if(pv.Get(f)) { out = f; return true; }
+      if(pv.Get(i)) { out = static_cast<float>(i); return true; }
+      return false;
+    };
+    Property::Value first = map.GetValue(0);
+    float           startF = 0.0f, endF = 0.0f;
+    bool            gotRange = false;
+    Vector2         v2;
+    if(first.Get(v2))
+    {
+      startF = v2.x; endF = v2.y; gotRange = true;
+    }
+    else if(Property::Array* arr = first.GetArray())
+    {
+      gotRange = arr->Count() >= 2 &&
+                 asFloat(arr->GetElementAt(0), startF) &&
+                 asFloat(arr->GetElementAt(1), endF);
+    }
+    Dali::String frames =
+      gotRange ? Dali::String(" [") + Dali::String(std::to_string((int)startF).c_str()) +
+                   Dali::String("-") + Dali::String(std::to_string((int)endF).c_str()) +
+                   Dali::String("]")
+               : Dali::String(" [?]");
     mMarkerLabel.SetText(
       Dali::String("MarkerInfo: ") + Dali::String(std::to_string(count).c_str()) +
-      Dali::String(" items | first: \"") + firstName + Dali::String("\""));
+      Dali::String(" items | first: \"") + firstName + Dali::String("\"") + frames);
   }
 
   View MakeCentered(View child)

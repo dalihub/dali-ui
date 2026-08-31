@@ -85,8 +85,10 @@ constexpr uint32_t C_BG          = 0x1A1A1A;
  *   2. [URLs: Logo(15)] -> confirm GetResourceUrls count=15, more frames play
  *
  * Expected result:
- *   Single URL: GetResourceUrl returns the path that was set.
+ *   Single URL: GetResourceUrl returns the full path that was set (printed verbatim).
  *   URL array: GetResourceUrls size matches the count that was set.
+ *   Frames: GetTotalFrame() (polled) matches the source: webp 8 / gif 15 / gif2 3,
+ *   dog array 8 / logo array 15 — the one tree-readable proof the source switched.
  */
 class TcAnimatedImageViewSource : public ManualTest::TestCase, public ConnectionTracker
 {
@@ -109,8 +111,15 @@ public:
 
     mView.Play();
 
-    mUrlLabel   = MakeStatusLabel("URL: dog-anim.webp");
-    mCountLabel = MakeStatusLabel("ResourceUrls count: (single URL mode)");
+    mUrlLabel    = MakeStatusLabel("URL: dog-anim.webp");
+    mCountLabel  = MakeStatusLabel("ResourceUrls count: (single URL mode)");
+    mFramesLabel = MakeStatusLabel("Frames: 0");
+
+    // GetTotalFrame() only becomes valid after the (asynchronous) decode, so a
+    // click handler cannot print it; poll like the buffer/speed screens do.
+    mPollTimer = Timer::New(100);
+    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewSource::OnPollTick);
+    mPollTimer.Start();
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
@@ -121,6 +130,7 @@ public:
     content.Add(MakeCentered(mView));
     content.Add(mUrlLabel);
     content.Add(mCountLabel);
+    content.Add(mFramesLabel);
 
     content.Add(MakeButtonRow({
       MakeButton("WebP", [this] { OnSetUrl(ANIM_WEBP); }),
@@ -135,16 +145,31 @@ public:
     contentArea.Add(content);
   }
 
+  void OnExit() override
+  {
+    if(mPollTimer)
+    {
+      mPollTimer.Stop();
+      mPollTimer.Reset();
+    }
+  }
+
 private:
+  bool OnPollTick()
+  {
+    mFramesLabel.SetText(
+      Dali::String("Frames: ") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()));
+    return true;
+  }
+
   void OnSetUrl(const char* url)
   {
     mView.SetResourceUrl(url);
     mView.Play();
 
-    Dali::String got = mView.GetResourceUrl();
-    std::string  s(got.CStr());
-    std::string  filename = s.substr(s.rfind('/') + 1);
-    mUrlLabel.SetText(Dali::String("URL: ") + Dali::String(filename.c_str()));
+    // Print the getter's return value verbatim: truncating to the file name hid
+    // a lost directory, and the pass criterion is about the PATH.
+    mUrlLabel.SetText(Dali::String("URL: ") + mView.GetResourceUrl());
     mCountLabel.SetText("ResourceUrls count: (single URL mode)");
   }
 
@@ -238,6 +263,8 @@ private:
   AnimatedImageView mView;
   Label             mUrlLabel;
   Label             mCountLabel;
+  Label             mFramesLabel;
+  Timer             mPollTimer;
 };
 
 REGISTER_MANUAL_TEST(TcAnimatedImageViewSource)

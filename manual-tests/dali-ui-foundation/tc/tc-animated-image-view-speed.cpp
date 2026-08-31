@@ -26,6 +26,22 @@ namespace
 {
 const char* const ANIM_WEBP = TEST_RESOURCE_DIR "/dog-anim.webp";
 
+// FrameDelay is wired into the URL-array caches only (RollingImageCache /
+// FixedImageCache take a frameDelay argument; the animated-file cache reads the
+// intervals encoded in the file). So verifying FrameDelay needs an URL-array
+// source — [URLs (dog 8)] switches to one.
+const char* const DOG_URLS[] = {
+  TEST_RESOURCE_DIR "/dog-anim-001.png",
+  TEST_RESOURCE_DIR "/dog-anim-002.png",
+  TEST_RESOURCE_DIR "/dog-anim-003.png",
+  TEST_RESOURCE_DIR "/dog-anim-004.png",
+  TEST_RESOURCE_DIR "/dog-anim-005.png",
+  TEST_RESOURCE_DIR "/dog-anim-006.png",
+  TEST_RESOURCE_DIR "/dog-anim-007.png",
+  TEST_RESOURCE_DIR "/dog-anim-008.png",
+};
+constexpr int DOG_URL_COUNT = 8;
+
 constexpr float    PREVIEW_SIZE  = 200.0f;
 constexpr float    BTN_H         = 52.0f;
 constexpr float    STATUS_H      = 32.0f;
@@ -93,6 +109,11 @@ public:
     content.Add(mStatusLabel);
 
     content.Add(MakeButtonRow({
+      MakeButton("Play", [this] { mView.Play(); }),
+      MakeButton("Stop", [this] { mView.Stop(); }),
+      MakeButton("URLs\n(dog 8)", [this] { OnUseUrls(); }),
+    }));
+    content.Add(MakeButtonRow({
       MakeButton("Speed\n0.25x", [this] { OnSpeed(0.25f); }),
       MakeButton("Speed\n0.5x",  [this] { OnSpeed(0.5f); }),
       MakeButton("Speed\n1.0x",  [this] { OnSpeed(1.0f); }),
@@ -127,6 +148,14 @@ private:
       Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
       Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()));
     return true;
+  }
+
+  void OnUseUrls()
+  {
+    Dali::Vector<Dali::String> urls;
+    for(int i = 0; i < DOG_URL_COUNT; ++i) urls.PushBack(DOG_URLS[i]);
+    mView.SetResourceUrls(urls);
+    mView.Play();
   }
 
   void OnSpeed(float factor)

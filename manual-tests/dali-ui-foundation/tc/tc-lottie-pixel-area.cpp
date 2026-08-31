@@ -96,6 +96,13 @@ public:
 
     mStatusLabel = MakeStatusLabel(MakeStatusText());
 
+    // The label reads GetPixelArea() and the PIXEL_AREA animation changes it
+    // per frame, so a click-driven label would freeze mid-animation. Poll like
+    // the frame-range screen does.
+    mPollTimer = Timer::New(100);
+    mPollTimer.TickSignal().Connect(this, &TcLottiePixelArea::OnPollTick);
+    mPollTimer.Start();
+
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
@@ -120,6 +127,13 @@ public:
     content.Add(frame);
     content.Add(mStatusLabel);
 
+    // Lottie playback control: stopped stills are what let the six presets be
+    // compared to each other as pictures.
+    content.Add(MakeButtonRow({
+      MakeButton("Play", C_BTN_BG, [this] { mView.Play(); }),
+      MakeButton("Stop", C_BTN_BG, [this] { mView.Stop(); }),
+    }));
+
     // Area preset buttons
     StackLayout areaRow = StackLayout::New(StackOrientation::HORIZONTAL);
     areaRow.SetRequestedWidth(MATCH_PARENT);
@@ -143,9 +157,20 @@ public:
   void OnExit() override
   {
     StopAnimation();
+    if(mPollTimer)
+    {
+      mPollTimer.Stop();
+      mPollTimer.Reset();
+    }
   }
 
 private:
+  bool OnPollTick()
+  {
+    UpdateStatusLabel();
+    return true;
+  }
+
   void OnAreaClicked(int index)
   {
     StopAnimation();
@@ -173,6 +198,10 @@ private:
     mAnimateButton.SetBackgroundColor(UiColor(0xE91E63));
 
     KeyFrames kf = KeyFrames::New();
+    // Without an explicit 0.0 keyframe the animation interpolates from a
+    // zero Vector4 — measured: the first ~0.5 s showed w=0 h=0, an empty
+    // pixel area the documented FULL→TOP-L→…→FULL path never contains.
+    kf.Add(0.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
     kf.Add(0.25f, Property::Value(Vector4(0.0f,  0.0f,  0.5f,  0.5f)));
     kf.Add(0.50f, Property::Value(Vector4(0.25f, 0.25f, 0.5f,  0.5f)));
     kf.Add(0.75f, Property::Value(Vector4(0.5f,  0.5f,  0.5f,  0.5f)));
@@ -183,8 +212,29 @@ private:
       Property(mView, LottieAnimationView::Property::PIXEL_AREA),
       kf,
       AlphaFunction::EASE_IN_OUT);
+    // Without this the one-shot animation ended but the [anim] tag stayed
+    // forever (measured on emulator), so the label claimed an animation the
+    // screen had already left.
+    mAnimation.FinishedSignal().Connect(this, [this](Dali::Animation) { OnAnimationFinished(); });
     mAnimation.Play();
 
+    UpdateStatusLabel();
+  }
+
+  void OnAnimationFinished()
+  {
+    if(!mAnimating)
+    {
+      return;
+    }
+    mAnimating = false;
+    mAnimateButton.SetBackgroundColor(UiColor(C_BTN_ANIM));
+    // The keyframe path ends at FULL, but the impl-side value GetPixelArea()
+    // reports is still the last preset — sync it (and the active-button
+    // bookkeeping) to what is actually on screen, so the label stays honest.
+    mView.SetPixelArea(Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+    mActiveIndex = 0;
+    UpdateAreaButtonColors();
     UpdateStatusLabel();
   }
 
@@ -219,15 +269,22 @@ private:
 
   Dali::String MakeStatusText() const
   {
-    if(mAnimating)
-    {
-      return "PixelArea: animating...";
-    }
-    const Vector4& a = AREAS[mActiveIndex].area;
-    char buf[128];
+    // GetPixelArea()'s return value, ALWAYS — the old label formatted the
+    // AREAS[] constant the tapped button indexed, which stayed correct with
+    // SetPixelArea deleted, and printed only "animating..." during the one
+    // stretch where the value actually moves.
+    // While the keyframe animation runs, GetPixelArea() keeps reporting the
+    // impl-side configured value (measured: frozen at the preset for the
+    // whole 3 s), so read the live animated property instead — that is what
+    // makes the FULL→TOP-L→CENTER→BOT-R→FULL path observable at all.
+    Vector4 a = mAnimating
+                  ? mView.GetCurrentProperty(LottieAnimationView::Property::PIXEL_AREA).Get<Vector4>()
+                  : mView.GetPixelArea();
+    char    buf[128];
     snprintf(buf, sizeof(buf),
              "PixelArea: x=%.2f y=%.2f w=%.2f h=%.2f  [%s]",
-             a.x, a.y, a.z, a.w, AREAS[mActiveIndex].name);
+             a.x, a.y, a.z, a.w,
+             mAnimating ? "anim" : AREAS[mActiveIndex].name);
     return Dali::String(buf);
   }
 
@@ -337,6 +394,7 @@ private:
   View                mAreaButtons[AREA_COUNT];
   View                mAnimateButton;
   Animation           mAnimation;
+  Timer               mPollTimer;
   int                 mActiveIndex;
   bool                mAnimating;
 };

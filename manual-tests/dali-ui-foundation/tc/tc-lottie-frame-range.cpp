@@ -97,10 +97,10 @@ public:
       MakeButton("Stop",  [this] { mView.Stop(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Full",        [this] { OnRange("full");        int total = mView.GetTotalFrame(); mView.SetMinMaxFrame(0, total); }),
-      MakeButton("First Half",  [this] { OnRange("first half");  int total = mView.GetTotalFrame(); mView.SetMinMaxFrame(0, total / 2); }),
-      MakeButton("Second Half", [this] { OnRange("second half"); int total = mView.GetTotalFrame(); mView.SetMinMaxFrame(total / 2, total); }),
-      MakeButton("First 10",    [this] { OnRange("0~10");        mView.SetMinMaxFrame(0, 10); }),
+      MakeButton("Full",        [this] { int total = mView.GetTotalFrame(); mView.SetMinMaxFrame(0, total); }),
+      MakeButton("First Half",  [this] { int total = mView.GetTotalFrame(); mView.SetMinMaxFrame(0, total / 2); }),
+      MakeButton("Second Half", [this] { int total = mView.GetTotalFrame(); mView.SetMinMaxFrame(total / 2, total); }),
+      MakeButton("First 10",    [this] { mView.SetMinMaxFrame(0, 10); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Speed\n0.25x", [this] { mView.SetFrameSpeedFactor(0.25f); }),
@@ -124,17 +124,18 @@ public:
 private:
   bool OnPollTick()
   {
+    // Range comes from GetMinMaxFrame() — the old label echoed the tapped
+    // button's own word (mRangeDesc), which stayed "first half" with
+    // SetMinMaxFrame deleted and could never verify the component.
+    int minF = 0, maxF = 0;
+    mView.GetMinMaxFrame(minF, maxF);
     mStatusLabel.SetText(
       Dali::String("Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
       Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()) +
-      Dali::String(" | Range: ") + Dali::String(mRangeDesc.c_str()) +
+      Dali::String(" | Range: ") + Dali::String(std::to_string(minF).c_str()) +
+      Dali::String("-") + Dali::String(std::to_string(maxF).c_str()) +
       Dali::String(" | Speed: ") + Dali::String(std::to_string(mView.GetFrameSpeedFactor()).c_str()));
     return true;
-  }
-
-  void OnRange(const char* desc)
-  {
-    mRangeDesc = desc;
   }
 
   View MakeCentered(View child)
@@ -213,7 +214,6 @@ private:
   LottieAnimationView mView;
   Label               mStatusLabel;
   Timer               mPollTimer;
-  std::string         mRangeDesc{"full"};
 };
 
 REGISTER_MANUAL_TEST(TcLottieFrameRange)
