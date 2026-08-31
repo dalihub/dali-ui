@@ -14,3 +14,13 @@
 
 완료되었거나 더 이상 유효하지 않은 문서는 구현 결과 또는 폐기 이유를 기록한 뒤 이
 폴더에서 제거하거나 적절한 결정 기록 문서로 이동한다.
+
+## 작업 목록
+
+| 문서 | 상태 | 요약 |
+|---|---|---|
+| [SoundFeedback optional dependency](sound-feedback-optional-dependency.md) | 설계 필요 | Native multimedia 의존성을 필요한 제품에서만 제공하는 구조 |
+| [Style DefaultPreset 이름 변경](rename-style-default-preset.md) | 명칭 결정 필요 | Built-in fallback style을 더 정확히 나타내는 public API 이름 검토 |
+| [DALi Signal 단일 connection 최적화](optimize-dali-signal-single-connection.md) | 설계·측정 필요 | 0/1/N connection storage 검토 |
+| [Trait BaseObject storage](trait-base-object-storage.md) | 설계 필요 | Trait 저장 구조 검토 |
+| [Chromium WebView backend bugs](chromium-webview-backend-bugs.md) | 확인된 버그 | History item과 JavaScript handler routing 수정 |

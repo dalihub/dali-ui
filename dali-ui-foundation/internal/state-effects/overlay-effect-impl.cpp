@@ -52,7 +52,7 @@ UiColor GetOverlayColorWithActiveCount(const UiColor& color, uint32_t activeCoun
 
 const AttachmentId OVERLAY_EFFECT_DATA_ATTACHMENT_ID = AttachmentId::Alloc();
 
-constexpr float    RECOIL_SCALE_FACTOR               = 0.98f;
+constexpr float    DEFAULT_RECOIL_SCALE_FACTOR       = 0.96f;
 constexpr float    RECOIL_ANIMATION_SECONDS          = 0.1f;
 constexpr float    DISABLED_OPACITY_FACTOR           = 0.4f;
 constexpr uint32_t OVERLAY_EFFECT_DATA_POOL_MAX_SIZE = 8u;
@@ -139,25 +139,29 @@ void                               RecyclePendingOverlayEffectData(OverlayEffect
 
 OverlayEffectImpl::OverlayEffectImpl()
 : OverlayEffectImpl(UiColor(DEFAULT_OVERLAY_COLOR_RGB, DEFAULT_OVERLAY_COLOR_ALPHA),
+                    Insets(),
                     Vector4::ZERO,
                     CornerRadiusPolicy::ABSOLUTE,
                     true,
-                    RecoilScope::OVERLAY_TARGET)
+                    RecoilScope::OVERLAY_TARGET,
+                    DEFAULT_RECOIL_SCALE_FACTOR)
 {
 }
 
-OverlayEffectImpl::OverlayEffectImpl(const UiColor& overlayColor, const Vector4& cornerRadius, CornerRadiusPolicy cornerRadiusPolicy, bool useTargetCornerRadius, RecoilScope recoilScope)
+OverlayEffectImpl::OverlayEffectImpl(const UiColor& overlayColor, const Insets& overlayPadding, const Vector4& cornerRadius, CornerRadiusPolicy cornerRadiusPolicy, bool useTargetCornerRadius, RecoilScope recoilScope, float recoilScaleFactor)
 : Integration::StateEffectImpl(),
   mOverlayColor(overlayColor),
+  mOverlayPadding(overlayPadding),
   mCornerRadius(cornerRadius),
   mCornerRadiusPolicy(cornerRadiusPolicy),
   mRecoilScope(recoilScope),
+  mRecoilScaleFactor(recoilScaleFactor),
   mUseTargetCornerRadius(useTargetCornerRadius)
 {
 }
 
 OverlayEffectImpl::OverlayEffectImpl(const OverlayEffectImpl& other)
-: OverlayEffectImpl(other.mOverlayColor, other.mCornerRadius, other.mCornerRadiusPolicy, other.mUseTargetCornerRadius, other.mRecoilScope)
+: OverlayEffectImpl(other.mOverlayColor, other.mOverlayPadding, other.mCornerRadius, other.mCornerRadiusPolicy, other.mUseTargetCornerRadius, other.mRecoilScope, other.mRecoilScaleFactor)
 {
 }
 
@@ -171,6 +175,21 @@ void OverlayEffectImpl::SetOverlayColor(const UiColor& color)
 UiColor OverlayEffectImpl::GetOverlayColor() const
 {
   return mOverlayColor;
+}
+
+void OverlayEffectImpl::SetOverlayPadding(const Insets& padding)
+{
+  DALI_ASSERT_ALWAYS(std::isfinite(padding.start) && padding.start >= 0.0f &&
+                     std::isfinite(padding.end) && padding.end >= 0.0f &&
+                     std::isfinite(padding.top) && padding.top >= 0.0f &&
+                     std::isfinite(padding.bottom) && padding.bottom >= 0.0f &&
+                     "OverlayEffect padding must be finite and non-negative");
+  mOverlayPadding = padding;
+}
+
+Insets OverlayEffectImpl::GetOverlayPadding() const
+{
+  return mOverlayPadding;
 }
 
 void OverlayEffectImpl::SetCornerRadius(const Vector4& radius)
@@ -211,6 +230,17 @@ void OverlayEffectImpl::SetRecoilScope(RecoilScope scope)
 RecoilScope OverlayEffectImpl::GetRecoilScope() const
 {
   return mRecoilScope;
+}
+
+void OverlayEffectImpl::SetRecoilScaleFactor(float factor)
+{
+  DALI_ASSERT_ALWAYS(std::isfinite(factor) && factor >= 0.0f && "OverlayEffect recoil scale factor must be finite and non-negative");
+  mRecoilScaleFactor = factor;
+}
+
+float OverlayEffectImpl::GetRecoilScaleFactor() const
+{
+  return mRecoilScaleFactor;
 }
 
 void OverlayEffectImpl::HandleStateChanged(OverlayEffectData& data, View owner, const ViewState& state, RecoilRestoreMode restoreMode)
@@ -257,7 +287,7 @@ void OverlayEffectImpl::HandleStateChanged(OverlayEffectData& data, View owner, 
 
   if(data.IsPressed())
   {
-    data.ApplyRecoil(target, mRecoilScope);
+    data.ApplyRecoil(target, mRecoilScope, mRecoilScaleFactor);
   }
   else
   {
@@ -456,9 +486,20 @@ View OverlayEffectImpl::ResolveTarget(View owner) const
 
 void OverlayEffectImpl::ApplyOverlayProperties(ColorVisual overlay, View target) const
 {
+  const bool  isRightToLeft = target.GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT;
+  const float left          = isRightToLeft ? mOverlayPadding.end : mOverlayPadding.start;
+  const float right         = isRightToLeft ? mOverlayPadding.start : mOverlayPadding.end;
+  const float top           = mOverlayPadding.top;
+  const float bottom        = mOverlayPadding.bottom;
+
   overlay.SetColor(mOverlayColor);
+  overlay.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  overlay.SetOffsetX(-left);
+  overlay.SetOffsetY(-top);
   overlay.SetWidth(1.0f);
   overlay.SetHeight(1.0f);
+  overlay.SetExtraWidth(left + right);
+  overlay.SetExtraHeight(top + bottom);
 
   if(mUseTargetCornerRadius)
   {
@@ -479,6 +520,7 @@ OverlayEffectData::OverlayEffectData()
   mRecoilScope(RecoilScope::OVERLAY_TARGET),
   mRecoilTargets(),
   mRecoilAnimation(),
+  mRecoilScaleFactor(DEFAULT_RECOIL_SCALE_FACTOR),
   mDisabledOriginalOpacity(INVALID_DISABLED_ORIGINAL_OPACITY),
   mPendingReleaseAnimationId(0u),
   mRecoilTargetCount(0u),
@@ -600,7 +642,7 @@ void OverlayEffectData::RestoreDisabledOpacity(View owner)
   mDisabledOriginalOpacity = INVALID_DISABLED_ORIGINAL_OPACITY;
 }
 
-void OverlayEffectData::ApplyRecoil(View overlayTarget, RecoilScope scope)
+void OverlayEffectData::ApplyRecoil(View overlayTarget, RecoilScope scope, float scaleFactor)
 {
   if(!overlayTarget)
   {
@@ -608,7 +650,7 @@ void OverlayEffectData::ApplyRecoil(View overlayTarget, RecoilScope scope)
     return;
   }
 
-  if(mRecoilTargetCount > 0u && mRecoilBaseTarget.GetHandle() == overlayTarget && mRecoilScope == scope)
+  if(mRecoilTargetCount > 0u && mRecoilBaseTarget.GetHandle() == overlayTarget && mRecoilScope == scope && ApproximatelyEqual(mRecoilScaleFactor, scaleFactor))
   {
     return;
   }
@@ -635,7 +677,7 @@ void OverlayEffectData::ApplyRecoil(View overlayTarget, RecoilScope scope)
     RecoilTarget item;
     item.view           = target;
     item.originalScale  = GetBaseScale(target);
-    Vector2 recoilScale = item.originalScale * RECOIL_SCALE_FACTOR;
+    Vector2 recoilScale = item.originalScale * scaleFactor;
 
     if(scope == RecoilScope::OVERLAY_TARGET_CHILDREN)
     {
@@ -674,9 +716,10 @@ void OverlayEffectData::ApplyRecoil(View overlayTarget, RecoilScope scope)
 
   if(animated)
   {
-    mRecoilBaseTarget = overlayTarget;
-    mRecoilScope      = scope;
-    mRecoilAnimation  = animation;
+    mRecoilBaseTarget  = overlayTarget;
+    mRecoilScope       = scope;
+    mRecoilScaleFactor = scaleFactor;
+    mRecoilAnimation   = animation;
     mRecoilAnimation.Play();
   }
 }

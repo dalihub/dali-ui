@@ -43,7 +43,9 @@
 #include <dali-ui-components/public-api/styles/components-style-sheet.h>
 #include <dali-ui-components/public-api/styles/markdown-view-style.h>
 #include <dali-ui-components/public-api/styles/radio-button-style.h>
+#include <dali-ui-components/public-api/styles/switch-style.h>
 #include <dali-ui-components/public-api/styles/text-button-style.h>
+#include <dali-ui-components/public-api/switch.h>
 #include <dali-ui-components/public-api/text-button.h>
 #include <dali-ui-components/public-api/window/default-window-decoration.h>
 #include <dali-ui-components/public-api/window/window-frame.h>

@@ -34,6 +34,8 @@ namespace Ui
 namespace
 {
 
+constexpr float LIST_ITEM_RECOIL_SCALE_FACTOR = 0.98f;
+
 OverlayEffect CreatePlainOverlayEffect()
 {
   return OverlayEffect::Builder().Build();
@@ -51,6 +53,7 @@ OverlayEffect CreateListItemOverlayEffect()
 {
   return OverlayEffect::Builder()
     .SetRecoilScope(RecoilScope::OVERLAY_TARGET_CHILDREN)
+    .SetRecoilScaleFactor(LIST_ITEM_RECOIL_SCALE_FACTOR)
     .Build();
 }
 
@@ -84,6 +87,11 @@ UiColor OverlayEffect::GetOverlayColor() const
   return GetImpl(*this).GetOverlayColor();
 }
 
+Insets OverlayEffect::GetOverlayPadding() const
+{
+  return GetImpl(*this).GetOverlayPadding();
+}
+
 Vector4 OverlayEffect::GetCornerRadius() const
 {
   return GetImpl(*this).GetCornerRadius();
@@ -108,6 +116,11 @@ bool OverlayEffect::IsUsingTargetCornerRadius() const
 RecoilScope OverlayEffect::GetRecoilScope() const
 {
   return GetImpl(*this).GetRecoilScope();
+}
+
+float OverlayEffect::GetRecoilScaleFactor() const
+{
+  return GetImpl(*this).GetRecoilScaleFactor();
 }
 
 OverlayEffect::OverlayEffect(Internal::OverlayEffectImpl* impl)
@@ -135,6 +148,18 @@ OverlayEffect::Builder& OverlayEffect::Builder::SetOverlayColor(const UiColor& c
 OverlayEffect::Builder&& OverlayEffect::Builder::SetOverlayColor(const UiColor& color) &&
 {
   SetOverlayColor(color);
+  return std::move(*this);
+}
+
+OverlayEffect::Builder& OverlayEffect::Builder::SetOverlayPadding(const Insets& padding) &
+{
+  mImpl->SetOverlayPadding(padding);
+  return *this;
+}
+
+OverlayEffect::Builder&& OverlayEffect::Builder::SetOverlayPadding(const Insets& padding) &&
+{
+  SetOverlayPadding(padding);
   return std::move(*this);
 }
 
@@ -226,6 +251,18 @@ OverlayEffect::Builder& OverlayEffect::Builder::SetRecoilScope(RecoilScope scope
 OverlayEffect::Builder&& OverlayEffect::Builder::SetRecoilScope(RecoilScope scope) &&
 {
   SetRecoilScope(scope);
+  return std::move(*this);
+}
+
+OverlayEffect::Builder& OverlayEffect::Builder::SetRecoilScaleFactor(float factor) &
+{
+  mImpl->SetRecoilScaleFactor(factor);
+  return *this;
+}
+
+OverlayEffect::Builder&& OverlayEffect::Builder::SetRecoilScaleFactor(float factor) &&
+{
+  SetRecoilScaleFactor(factor);
   return std::move(*this);
 }
 
