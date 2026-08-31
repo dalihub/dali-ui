@@ -102,6 +102,10 @@ private:
   {
     auto field = InputField::New();
     field.SetPlaceholder(Dali::String(placeholder));
+    // A fixed handle: with only a placeholder, the accessibility name IS the
+    // content, so a selector written before typing matches nothing after
+    // typing (review 34) — the automation id survives any input.
+    field.SetAutomationId(name);
     field.SetFontSize(FONT_SIZE);
     field.SetTextColor(UiColor(COLOR_TEXT));
     field.SetRequestedWidth(MATCH_PARENT);
@@ -135,7 +139,10 @@ private:
     }
     else if(!current)
     {
-      mStatusLabel.SetText("Focused: (none) - ESC cleared focus");
+      // Say only what this handler can know: it fires for EVERY transition
+      // to no-focus, and naming ESC as the cause was a claim the code never
+      // verified (review 34).
+      mStatusLabel.SetText("Focused: (none)");
     }
     else
     {

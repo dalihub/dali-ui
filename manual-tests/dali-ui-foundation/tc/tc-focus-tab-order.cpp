@@ -52,6 +52,13 @@ constexpr float    STATUS_HEIGHT  = 60.0f;
  *   Siblings are ordered by screen position, then each subtree is traversed.
  *   Expected: a1 → a2 → b1 → b2
  *
+ *   [Scenario 4: y/x conflict]
+ *     P at (x=100, y=40), Q at (x=200, y=0). "x first" would order P before Q;
+ *     the engine sorts y first (x only breaks ties, reversed under RTL), so the
+ *     expected order is Q -> P. Every other scenario on this screen has NO pair
+ *     where x and y disagree (measured), so none of them could tell the two
+ *     rules apart -- this one exists to pin the rule (review 33).
+ *
  *   [Scenario 3: Overlapping (centered squares)]
  *   Three squares centered: large(outer) > medium > small(inner).
  *   Tab order follows top-left position.
@@ -95,6 +102,8 @@ public:
     root.Add(CreateScenario2());
     root.Add(CreateSectionLabel("Scenario 3: Overlapping squares"));
     root.Add(CreateScenario3());
+    root.Add(CreateSectionLabel("Scenario 4: y/x conflict"));
+    root.Add(CreateScenario4());
 
     contentArea.Add(root);
 
@@ -207,6 +216,26 @@ private:
     return container;
   }
 
+  // Scenario 4: the one pair where x-order and y-order disagree
+  View CreateScenario4()
+  {
+    auto container = View::New();
+    container.SetRequestedWidth(MATCH_PARENT);
+    container.SetRequestedHeight(80.0f);
+    FocusManager::Get().SetAsFocusGroup(container, true);
+
+    mS4[0] = CreateView("P", 0);
+    mS4[0].SetRequestedX(100.0f);
+    mS4[0].SetRequestedY(40.0f);
+    mS4[1] = CreateView("Q", 1);
+    mS4[1].SetRequestedX(200.0f);
+    mS4[1].SetRequestedY(0.0f);
+
+    container.Add(mS4[0]);
+    container.Add(mS4[1]);
+    return container;
+  }
+
   View CreateView(const char* name, uint32_t colorIndex)
   {
     uint32_t ci = colorIndex % 6;
@@ -251,6 +280,7 @@ private:
   View                     mS1[3]; // Scenario 1
   View                     mS2[4]; // Scenario 2
   View                     mS3[3]; // Scenario 3
+  View                     mS4[2]; // Scenario 4 (y/x conflict)
   std::vector<ViewEntry>   mAllViews;
 };
 

@@ -20,8 +20,14 @@ using namespace Dali::Ui;
 
 namespace
 {
-// Intentional aspect-ratio mismatch: landscape box, portrait image
-const char* const IMG = TEST_RESOURCE_DIR "/gallery-large-3.jpg";
+// The material must be SMALLER than the 280x160 box on both axes: CENTER keeps
+// the original size only when the box exceeds it (control-visual-data.cpp CENTER
+// branch) and otherwise falls into the same min-ratio shrink FIT_KEEP uses —
+// with the old 512x512 source CENTER rendered bit-identically to FIT_KEEP and
+// read as a defect (measured 2026-08-21; resolved as a material problem,
+// review 21). 128x128 in a 280x160 box splits all four modes: FIT_KEEP 160x160,
+// CENTER 128x128, FILL 280x160, OVER_FIT 280x280 cropped.
+const char* const IMG = TEST_RESOURCE_DIR "/people-small-10.jpg";
 
 constexpr float    BOX_W        = 280.0f;
 constexpr float    BOX_H        = 160.0f;
@@ -93,6 +99,8 @@ public:
     mImage.SetRequestedHeight(BOX_H);
     mImage.SetFittingMode(FITTING[0].mode);
     mImage.SetMargin(Insets(2.0f, 2.0f, 2.0f, 2.0f));
+    mImage.SetAccessibilityName("ImagePreview");
+    mImage.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
     boxContainer.Add(mImage);
 

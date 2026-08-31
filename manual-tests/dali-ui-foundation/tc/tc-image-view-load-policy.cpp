@@ -71,6 +71,8 @@ public:
     mImage = ImageView::New(IMG);
     mImage.SetRequestedWidth(PREVIEW_SIZE);
     mImage.SetRequestedHeight(PREVIEW_SIZE);
+    mImage.SetAccessibilityName("ImagePreview");
+    mImage.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
     mImage.ResourceReadySignal().Connect(this, [this](View) {
       ++mReadyCount;

@@ -22,7 +22,12 @@ using namespace Dali::Ui;
 
 namespace
 {
-const char* const IMG = TEST_RESOURCE_DIR "/people-small-10.jpg"; // small image displayed large to show sampling differences
+// LARGER than the 240x240 preview: SamplingMode is the DECODE-time resize
+// filter, so it only acts when a resize happens (DesiredSize < source), and
+// LoadWithViewSize's purpose — decode a big image down to view size — needs a
+// source bigger than the view. The old 128x128 source made 0x0 comparisons
+// structurally 0-pixel and turned LoadWithViewSize into an upscale (review 26).
+const char* const IMG = TEST_RESOURCE_DIR "/gallery-large-3.jpg";
 
 constexpr float    PREVIEW_SIZE  = 240.0f;
 constexpr float    BTN_H         = 52.0f;
@@ -38,7 +43,7 @@ constexpr uint32_t C_BG          = 0x1A1A1A;
 /**
  * @brief Verifies ImageView SamplingMode / DesiredSize / ImageLoadWithViewSize.
  *
- * Displays people-small-10.jpg enlarged to make SamplingMode differences visible.
+ * Displays gallery-large-3.jpg (512x512) so DesiredSize/LoadWithViewSize are real downscales.
  *
  * Steps:
  *   1. [BOX] / [NEAREST] / [LINEAR] -> observe sharpness / smoothness differences
@@ -69,6 +74,8 @@ public:
     mImage.SetRequestedWidth(PREVIEW_SIZE);
     mImage.SetRequestedHeight(PREVIEW_SIZE);
     mImage.SetFittingMode(Ui::Image::FittingMode::FILL);
+    mImage.SetAccessibilityName("ImagePreview");
+    mImage.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
     mSamplingLabel = MakeStatusLabel("SamplingMode: BOX");
     mSizeLabel     = MakeStatusLabel("DesiredSize: 0x0 | LoadWithViewSize: OFF");
@@ -105,7 +112,6 @@ private:
   void OnSampling(Ui::Image::SamplingMode mode, const char* name)
   {
     mImage.SetSamplingMode(mode);
-    mImage.Reload();
     mSamplingLabel.SetText(Dali::String("SamplingMode: ") + Dali::String(name) +
                            Dali::String(" | GetSamplingMode match: ") +
                            Dali::String(mImage.GetSamplingMode() == mode ? "OK" : "NG"));
@@ -115,7 +121,6 @@ private:
   {
     mImage.SetDesiredWidth(w);
     mImage.SetDesiredHeight(h);
-    mImage.Reload();
     mSizeLabel.SetText(
       Dali::String("DesiredSize: ") + Dali::String(std::to_string(mImage.GetDesiredWidth()).c_str()) +
       Dali::String("x") + Dali::String(std::to_string(mImage.GetDesiredHeight()).c_str()) +
@@ -126,7 +131,6 @@ private:
   void OnLoadWithViewSize(bool enabled)
   {
     mImage.SetImageLoadWithViewSize(enabled);
-    mImage.Reload();
     mSizeLabel.SetText(
       Dali::String("DesiredSize: ") + Dali::String(std::to_string(mImage.GetDesiredWidth()).c_str()) +
       Dali::String("x") + Dali::String(std::to_string(mImage.GetDesiredHeight()).c_str()) +

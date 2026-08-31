@@ -93,11 +93,11 @@ public:
     root.Add(mStatusLabel);
     root.Add(CreateButton("Set Block OFF", [this]() {
         SetBlocked(false);
-        mStatusLabel.SetText("BLOCKED: OFF");
+        UpdateBlockedLabel();
       }));
     root.Add(CreateButton("Set Block ON", [this]() {
         SetBlocked(true);
-        mStatusLabel.SetText("BLOCKED: ON");
+        UpdateBlockedLabel();
       }));
     root.Add(CreateButton("RequestFocus on Child", [this]() {
         bool ok = FocusManager::Get().RequestFocus(mChild);
@@ -109,6 +109,17 @@ public:
   }
 
 private:
+  void UpdateBlockedLabel()
+  {
+    // Blocked means descendant focus is NOT allowed: read it back through
+    // Actor's IsAllowDescendantFocusEnabled() instead of echoing the tapped
+    // button (review 31 — the getter exists on Dali::Actor; note the meaning
+    // is inverted: Block ON == Allow OFF).
+    mStatusLabel.SetText(mContainer.IsAllowDescendantFocusEnabled()
+                           ? "BLOCKED: OFF"
+                           : "BLOCKED: ON");
+  }
+
   View CreateButton(const char* text, std::function<void()> onClick)
   {
     auto btn = Label::New();

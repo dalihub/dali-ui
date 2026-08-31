@@ -22,8 +22,16 @@ using namespace Dali::Ui;
 
 namespace
 {
-const char* const IMG_NPATCH1 = TEST_RESOURCE_DIR "/button-up-1.9.png";
-const char* const IMG_NPATCH2 = TEST_RESOURCE_DIR "/tooltip.9.png";
+// 9-patch material, 249x169 -> 247x167 after the guide frame is cropped.
+// Auto-detected border is left 31 / right 30 / top 31 / bottom 30, so every corner
+// heart is large enough to see whether it stays unstretched.
+const char* const IMG_NPATCH1 = TEST_RESOURCE_DIR "/heartsframe.9.png";
+// Same artwork with the 1px guide frame removed. A manual BORDER only makes sense on a
+// plain image: NPatchData crops the guide frame on the auto path only, so forcing a
+// border onto a .9.png leaves the guide pixels inside the rendered texture.
+const char* const IMG_PLAIN = TEST_RESOURCE_DIR "/heartsframe-plain.png";
+// Kept for comparison: 25x29 -> 23x27 content. Too small for a meaningful border test.
+const char* const IMG_SMALL = TEST_RESOURCE_DIR "/button-up-1.9.png";
 
 constexpr float    BTN_H         = 52.0f;
 constexpr float    STATUS_H      = 32.0f;
@@ -36,20 +44,28 @@ constexpr uint32_t C_STATUS_TEXT = 0xCCCCCC;
 constexpr uint32_t C_BG          = 0x1A1A1A;
 constexpr uint32_t C_PREVIEW_BG  = 0x444444; // visible background for BorderOnly test
 
+// Every size keeps both stretch regions positive for the 31/30 border:
+// width  > 61 and height > 61, so the centre never collapses.
 struct SizeEntry { float w, h; const char* label; };
 const SizeEntry SIZES[] = {
-  {100, 40,  "100x40"},
-  {200, 60,  "200x60"},
-  {300, 80,  "300x80"},
-  {400, 120, "400x120"},
+  {120,  90, "120x90"},   // smaller than natural: centre squeezed to 59x29
+  {250, 170, "250x170"},  // natural size (247x167)
+  {400, 200, "400x200"},  // stretched mostly horizontally
+  {560, 260, "560x260"},  // stretched both ways
 };
 constexpr int SIZE_COUNT = 4;
 
+// Vector4 order is left, right, top, bottom. Both manual values stay inside the smallest
+// preview (120x90) and, more importantly, inside the artwork's own frame, which reaches
+// about 25-26px on every side. A border wider than that pulls the white interior into the
+// border band, which reads as broken rendering even though the geometry is exact.
+// The symmetric value is deliberately NOT 30: the auto-detected border is 31/30/31/30, so
+// B(30) would render identically to Auto and prove nothing about the override.
 struct BorderEntry { Vector4 border; const char* label; };
 const BorderEntry BORDERS[] = {
-  {Vector4(0,0,0,0),   "Auto"},
-  {Vector4(10,10,10,10), "B(10)"},
-  {Vector4(20,5,20,5),   "B(20,5)"},
+  {Vector4(0,0,0,0),      "Auto"},
+  {Vector4(20,20,20,20),  "B(20)"},
+  {Vector4(30,20,30,20),  "B(30,20)"},
 };
 constexpr int BORDER_COUNT = 3;
 } // namespace
@@ -77,9 +93,10 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    mCurrentW     = SIZES[2].w;
-    mCurrentH     = SIZES[2].h;
+    mCurrentW     = SIZES[1].w;
+    mCurrentH     = SIZES[1].h;
     mBorderOnly   = false;
+    mImageName    = "heartsframe.9.png";
 
     mPreviewBg = View::New();
     mPreviewBg.SetRequestedWidth(mCurrentW);
@@ -89,10 +106,12 @@ public:
     mImage = ImageView::New(IMG_NPATCH1);
     mImage.SetRequestedWidth(mCurrentW);
     mImage.SetRequestedHeight(mCurrentH);
+    mImage.SetAccessibilityName("ImagePreview");
+    mImage.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
     mPreviewBg.Add(mImage);
 
-    mStatusLabel = MakeStatusLabel("Size: 300x80 | Border: auto | BorderOnly: OFF");
+    mStatusLabel = MakeStatusLabel("Img: heartsframe.9.png | Size: 250x170 | Border: auto | BorderOnly: OFF");
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
@@ -103,7 +122,7 @@ public:
     // Preview row
     StackLayout previewRow = StackLayout::New(StackOrientation::HORIZONTAL);
     previewRow.SetRequestedWidth(MATCH_PARENT);
-    previewRow.SetRequestedHeight(140);
+    previewRow.SetRequestedHeight(280);
     previewRow.SetPadding(Insets(0.0f, 0.0f, 8.0f, 8.0f));
     previewRow.Add(ManualTest::MakeWeightedSpacer());
     previewRow.Add(mPreviewBg);
@@ -114,10 +133,10 @@ public:
 
     // Size buttons
     content.Add(MakeButtonRow({
-      MakeButton("100x40",  [this] { OnSetSize(0); }),
-      MakeButton("200x60",  [this] { OnSetSize(1); }),
-      MakeButton("300x80",  [this] { OnSetSize(2); }),
-      MakeButton("400x120", [this] { OnSetSize(3); }),
+      MakeButton("120x90",  [this] { OnSetSize(0); }),
+      MakeButton("250x170", [this] { OnSetSize(1); }),
+      MakeButton("400x200", [this] { OnSetSize(2); }),
+      MakeButton("560x260", [this] { OnSetSize(3); }),
     }));
 
     // BorderOnly toggle
@@ -128,15 +147,16 @@ public:
 
     // Manual border override
     content.Add(MakeButtonRow({
-      MakeButton("Border: Auto",    [this] { OnSetBorder(0); }),
-      MakeButton("Border: (10)",    [this] { OnSetBorder(1); }),
-      MakeButton("Border: (20,5)",  [this] { OnSetBorder(2); }),
+      MakeButton("Border: Auto",     [this] { OnSetBorder(0); }),
+      MakeButton("Border: (20)",     [this] { OnSetBorder(1); }),
+      MakeButton("Border: (30,20)",  [this] { OnSetBorder(2); }),
     }));
 
     // Image switch
     content.Add(MakeButtonRow({
-      MakeButton("button-up-1.9.png", [this] { OnSetImage(IMG_NPATCH1); }),
-      MakeButton("tooltip.9.png",     [this] { OnSetImage(IMG_NPATCH2); }),
+      MakeButton("heartsframe.9.png",     [this] { OnSetImage(IMG_NPATCH1, "heartsframe.9.png"); }),
+      MakeButton("heartsframe-plain.png", [this] { OnSetImage(IMG_PLAIN,   "heartsframe-plain.png"); }),
+      MakeButton("button-up-1.9.png",     [this] { OnSetImage(IMG_SMALL,   "button-up-1.9.png"); }),
     }));
 
     ScrollView scrollView = ScrollView::New();
@@ -172,8 +192,9 @@ private:
     UpdateStatus();
   }
 
-  void OnSetImage(const char* url)
+  void OnSetImage(const char* url, const char* name)
   {
+    mImageName = name;
     mImage.SetResourceUrl(url);
     UpdateStatus();
   }
@@ -195,9 +216,12 @@ private:
                   Dali::String(std::to_string((int)b.w).c_str()) + Dali::String(")");
     }
 
+    // Read the size back from the component, not from the app's own member: a label that
+    // echoes mCurrentW would stay green even if SetRequestedWidth did nothing.
     mStatusLabel.SetText(
-      Dali::String("Size: ") + Dali::String(std::to_string((int)mCurrentW).c_str()) +
-      Dali::String("x") + Dali::String(std::to_string((int)mCurrentH).c_str()) +
+      Dali::String("Img: ") + Dali::String(mImageName) +
+      Dali::String(" | Size: ") + Dali::String(std::to_string((int)mImage.GetRequestedWidth()).c_str()) +
+      Dali::String("x") + Dali::String(std::to_string((int)mImage.GetRequestedHeight()).c_str()) +
       Dali::String(" | Border: ") + borderStr +
       Dali::String(" | BorderOnly: ") +
       Dali::String(mImage.IsNPatchBorderOnly() ? "ON" : "OFF"));
@@ -273,9 +297,10 @@ private:
   ImageView mImage;
   View      mPreviewBg;
   Label     mStatusLabel;
-  float     mCurrentW{300.f};
-  float     mCurrentH{80.f};
-  bool      mBorderOnly{false};
+  float       mCurrentW{250.f};
+  float       mCurrentH{170.f};
+  bool        mBorderOnly{false};
+  const char* mImageName{"heartsframe.9.png"};
 };
 
 REGISTER_MANUAL_TEST(TcImageViewNPatch)

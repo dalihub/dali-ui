@@ -24,6 +24,10 @@ namespace
 {
 const char* const IMG_A    = TEST_RESOURCE_DIR "/gallery-large-3.jpg";
 const char* const IMG_EXIF = TEST_RESOURCE_DIR "/exif-rotated.jpg";
+// Carries real transparency (5.0% semi-transparent pixels): premultiplied
+// alpha cannot change a pixel of an opaque JPEG, so the PreMult criterion was
+// structurally unverifiable with the two JPEGs alone (review 27).
+const char* const IMG_PNG  = TEST_RESOURCE_DIR "/heartsframe-plain.png";
 
 constexpr float    PREVIEW_SIZE  = 200.0f;
 constexpr float    BTN_H         = 52.0f;
@@ -79,13 +83,19 @@ public:
     mImage = ImageView::New(IMG_A);
     mImage.SetRequestedWidth(PREVIEW_SIZE);
     mImage.SetRequestedHeight(PREVIEW_SIZE);
+    mImage.SetAccessibilityName("ImagePreview");
+    mImage.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
     mImage.ResourceReadySignal().Connect(this, [this](View) {
       ++mReadyCount;
       UpdateReadyLabel();
     });
 
-    mFlagsLabel = MakeStatusLabel("Sync: OFF | FastTrack: OFF | OrientCorr: ON | PreMult: OFF");
+    // Entry label from the getters: the hardcoded entry string said
+    // "PreMult: OFF" while the component default is true, so the first tap of
+    // ANY button looked like it flipped a value nobody touched (review 27,
+    // measured — the most urgent fix on this screen).
+    mFlagsLabel = MakeStatusLabel("...");
     mReadyLabel = MakeStatusLabel("ResourceReadySignal: 0");
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
@@ -107,20 +117,26 @@ public:
       MakeButton("FastTrack\nOFF", [this] { mImage.SetFastTrackUpload(false); UpdateFlags(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("OrientCorr\nON",  [this] { mImage.SetOrientationCorrection(true);  mImage.Reload(); UpdateFlags(); }),
-      MakeButton("OrientCorr\nOFF", [this] { mImage.SetOrientationCorrection(false); mImage.Reload(); UpdateFlags(); }),
+      // No Reload() here: every one of these setters marks the visual dirty
+      // already, and the stray action made the four flag buttons look like
+      // they had different behaviours (review 27; same call as sampling).
+      MakeButton("OrientCorr\nON",  [this] { mImage.SetOrientationCorrection(true);  UpdateFlags(); }),
+      MakeButton("OrientCorr\nOFF", [this] { mImage.SetOrientationCorrection(false); UpdateFlags(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("PreMult\nON",  [this] { mImage.SetPreMultipliedAlpha(true);  mImage.Reload(); UpdateFlags(); }),
-      MakeButton("PreMult\nOFF", [this] { mImage.SetPreMultipliedAlpha(false); mImage.Reload(); UpdateFlags(); }),
+      MakeButton("PreMult\nON",  [this] { mImage.SetPreMultipliedAlpha(true);  UpdateFlags(); }),
+      MakeButton("PreMult\nOFF", [this] { mImage.SetPreMultipliedAlpha(false); UpdateFlags(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Load\nIMG_A",      [this] { mImage.SetResourceUrl(IMG_A);    UpdateFlags(); }),
       MakeButton("Load\nEXIF",       [this] { mImage.SetResourceUrl(IMG_EXIF); UpdateFlags(); }),
+      MakeButton("Load\nPNG",        [this] { mImage.SetResourceUrl(IMG_PNG);  UpdateFlags(); }),
       MakeButton("Reload",           [this] { mImage.Reload(); UpdateFlags(); }),
     }));
 
     contentArea.Add(content);
+
+    UpdateFlags();
   }
 
 private:

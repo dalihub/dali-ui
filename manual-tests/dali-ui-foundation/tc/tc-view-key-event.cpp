@@ -122,8 +122,10 @@ private:
 
   Label mLabels[LABEL_COUNT];
   bool mLastFocusState[LABEL_COUNT] = {false, };
-  Dali::String mLastKeyState[LABEL_COUNT] = {"NONE", };
-  Dali::String mLastKeyName[LABEL_COUNT] = {"NONE", };
+  // {"NONE", } only filled index 0, so Labels 2 and 3 rendered an empty value
+  // after the colon (review 35, confirmed on device).
+  Dali::String mLastKeyState[LABEL_COUNT] = {"NONE", "NONE", "NONE"};
+  Dali::String mLastKeyName[LABEL_COUNT] = {"NONE", "NONE", "NONE"};
 };
 
 REGISTER_MANUAL_TEST(TcViewKeyEvent)

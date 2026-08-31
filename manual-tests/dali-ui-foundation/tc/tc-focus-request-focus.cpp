@@ -98,7 +98,18 @@ public:
       {
         FocusManager::Get().ClearFocus();
         bool ok = FocusManager::Get().RequestFocus(mLayout);
-        mStatusLabel.SetText(ok ? "SUCCESS: Focusable child got focus" : "FAILED");
+        // ok only says RequestFocus() returned true — if delegation broke and
+        // the Layout itself took focus, the old literal still claimed the
+        // child got it. Identify the view that ACTUALLY holds focus (review
+        // 32; GetCurrentFocusView() is public API), by identity rather than
+        // by accessibility name so an unnamed view cannot blur the answer.
+        View         focused = FocusManager::Get().GetCurrentFocusView();
+        Dali::String who     = !focused                     ? Dali::String("(none)")
+                               : focused == mFocusableChild ? Dali::String("Focusable")
+                               : focused == mLayout         ? Dali::String("Layout")
+                                                            : Dali::String("(other)");
+        mStatusLabel.SetText(ok ? (Dali::String("SUCCESS: focus on ") + who)
+                                : Dali::String("FAILED"));
       }
       return true;
     });

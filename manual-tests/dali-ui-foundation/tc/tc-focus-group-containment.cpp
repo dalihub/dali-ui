@@ -114,11 +114,11 @@ public:
     root.Add(mStatusLabel);
     root.Add(CreateButton("Set FocusGroup OFF", [this]() {
                         FocusManager::Get().SetAsFocusGroup(mGroup, false);
-                        mStatusLabel.SetText("FocusGroup: OFF");
+                        UpdateModeLabel();
                       }));
     root.Add(CreateButton("Set FocusGroup ON", [this]() {
                         FocusManager::Get().SetAsFocusGroup(mGroup, true);
-                        mStatusLabel.SetText("FocusGroup: ON (default navigation scoped)");
+                        UpdateModeLabel();
                       }));
     root.Add(groupLabel);
     root.Add(mGroup);
@@ -131,6 +131,17 @@ public:
   }
 
 private:
+  void UpdateModeLabel()
+  {
+    // Read the mode back through IsFocusGroup() — the old label printed the
+    // button's own string right after SetAsFocusGroup(), so a stubbed setter
+    // kept all three exported assertions green (review 30; the getter always
+    // existed, focus-manager.h).
+    mStatusLabel.SetText(FocusManager::Get().IsFocusGroup(mGroup)
+                           ? "FocusGroup: ON (default navigation scoped)"
+                           : "FocusGroup: OFF");
+  }
+
   View CreateButton(const char* text, std::function<void()> onClick)
   {
     auto btn = Label::New();

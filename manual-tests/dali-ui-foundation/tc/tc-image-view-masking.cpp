@@ -75,12 +75,16 @@ public:
     mImageLeft.SetRequestedWidth(PREVIEW_SIZE);
     mImageLeft.SetRequestedHeight(PREVIEW_SIZE);
     mImageLeft.SetCropToMask(false);
+    mImageLeft.SetAccessibilityName("PreviewCropOff");
+    mImageLeft.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
     // Right: CropToMask ON
     mImageRight = ImageView::New(IMG_A);
     mImageRight.SetRequestedWidth(PREVIEW_SIZE);
     mImageRight.SetRequestedHeight(PREVIEW_SIZE);
     mImageRight.SetCropToMask(true);
+    mImageRight.SetAccessibilityName("PreviewCropOn");
+    mImageRight.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
     mStatusLabel = MakeStatusLabel("Mask: none | MaskingMode: ON_RENDERING");
 
@@ -178,6 +182,10 @@ public:
     scrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     scrollView.SetContent(content);
     contentArea.Add(scrollView);
+
+    // Entry label from the getters too — the hardcoded entry string had no
+    // Crop fields and predated the getter-backed format.
+    UpdateStatus();
   }
 
 private:
@@ -188,7 +196,8 @@ private:
     mImageLeft.SetMaskingMode(mMaskingMode);
     mImageRight.SetAlphaMaskUrl(maskUrl);
     mImageRight.SetMaskingMode(mMaskingMode);
-    UpdateStatus(displayName);
+    (void)displayName;
+    UpdateStatus();
   }
 
   void OnMaskingMode(Ui::Image::MaskingType mode)
@@ -202,14 +211,29 @@ private:
       mImageLeft.SetAlphaMaskUrl(mMaskUrl);
       mImageRight.SetAlphaMaskUrl(mMaskUrl);
     }
-    Dali::String modeStr = (mode == Ui::Image::MaskingType::MASKING_ON_RENDERING) ? "ON_RENDERING" : "ON_LOADING";
-    UpdateStatus(modeStr.CStr());
+    UpdateStatus();
   }
 
-  void UpdateStatus(const char* maskName)
+  void UpdateStatus()
   {
-    Dali::String modeStr = (mMaskingMode == Ui::Image::MaskingType::MASKING_ON_RENDERING) ? "ON_RENDERING" : "ON_LOADING";
-    Dali::String maskStr = mImageLeft.GetAlphaMaskUrl().Empty() ? "none" : Dali::String(maskName);
+    // Both fields come from the component now. The old label printed the
+    // button's own word: the mode buttons routed their mode string into the
+    // mask-name slot (so [MaskingMode ON_LOADING] showed "Mask: ON_LOADING"),
+    // and GetMaskingMode() was never called anywhere on this screen — a
+    // stubbed setter kept both lines green (review 23).
+    Dali::String modeStr = (mImageLeft.GetMaskingMode() == Ui::Image::MaskingType::MASKING_ON_RENDERING) ? "ON_RENDERING" : "ON_LOADING";
+    Dali::String maskUrl = mImageLeft.GetAlphaMaskUrl();
+    Dali::String maskStr;
+    if(maskUrl.Empty())
+    {
+      maskStr = "none";
+    }
+    else
+    {
+      std::string full  = maskUrl.CStr();
+      size_t      slash = full.rfind('/');
+      maskStr = Dali::String((slash == std::string::npos ? full : full.substr(slash + 1)).c_str());
+    }
 
     mStatusLabel.SetText(
       Dali::String("Mask: ") + maskStr +

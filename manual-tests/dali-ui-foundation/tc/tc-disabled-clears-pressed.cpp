@@ -57,6 +57,11 @@ public:
 
   void OnEnter(View contentArea) override
   {
+    // mLogText is a class member and survives Back + re-entry; without this a
+    // second visit appends onto the previous visit's log and every assertion
+    // passes on stale content (review 36 — the defence used to live in the
+    // test fixture's fresh-launch behaviour alone).
+    mLogText = "State log:\n";
     mLog = Label::New("State log:\n");
     mLog.SetMultiLine(true);
     mLog.SetFontSize(20.0f);

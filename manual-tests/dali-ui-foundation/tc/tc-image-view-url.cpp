@@ -22,8 +22,12 @@ using namespace Dali::Ui;
 
 namespace
 {
-const char* const IMG_A = TEST_RESOURCE_DIR "/gallery-large-3.jpg";
-const char* const IMG_B = TEST_RESOURCE_DIR "/landscape-sample.jpg";
+const char* const IMG_A       = TEST_RESOURCE_DIR "/gallery-large-3.jpg";
+const char* const IMG_B       = TEST_RESOURCE_DIR "/landscape-sample.jpg";
+// A path that cannot load: Status: FAILED is the control that gives the READY
+// assertions their meaning — a GetLoadingStatus() stub returning READY passes
+// every green-path step (review 28).
+const char* const IMG_MISSING = TEST_RESOURCE_DIR "/definitely-not-here.jpg";
 
 constexpr float    PREVIEW_SIZE  = 200.0f;
 constexpr float    BTN_H         = 52.0f;
@@ -67,6 +71,9 @@ public:
     mImage = ImageView::New(IMG_A);
     mImage.SetRequestedWidth(PREVIEW_SIZE);
     mImage.SetRequestedHeight(PREVIEW_SIZE);
+    mImage.SetAccessibilityName("ImagePreview");
+    mImage.SetAccessibilityRole(Accessibility::Role::IMAGE);
+    mCurrentUrl = IMG_A;
 
     mImage.ResourceReadySignal().Connect(this, [this](View) {
       ++mReadyCount;
@@ -86,9 +93,10 @@ public:
     content.Add(mUrlLabel);
     content.Add(mStatusLabel);
     content.Add(MakeButtonRow({
-      MakeButton("Set\nURL A", [this] { OnSetUrl(IMG_A, "A"); }),
-      MakeButton("Set\nURL B", [this] { OnSetUrl(IMG_B, "B"); }),
-      MakeButton("Reload",     [this] { mImage.Reload(); }),
+      MakeButton("Set\nURL A",       [this] { OnSetUrl(IMG_A, "A"); }),
+      MakeButton("Set\nURL B",       [this] { OnSetUrl(IMG_B, "B"); }),
+      MakeButton("Set URL\nMissing", [this] { OnSetUrl(IMG_MISSING, "Missing"); }),
+      MakeButton("Reload",           [this] { mImage.Reload(); }),
     }));
 
     contentArea.Add(content);
@@ -98,15 +106,20 @@ private:
   void OnSetUrl(const char* url, const char* name)
   {
     mCurrentName = name;
+    mCurrentUrl  = url;
     mImage.SetResourceUrl(url);
     UpdateLabels();
   }
 
   void UpdateLabels()
   {
+    // Compare the getter against the URL that was just SET — the old line
+    // compared GetResourceUrl() with itself, so OK was unconditional and the
+    // getter could return garbage unnoticed (review 28; the sibling fitting
+    // and sampling screens always had the real comparison).
     mUrlLabel.SetText(Dali::String("SetResourceUrl: ") + Dali::String(mCurrentName) +
                       Dali::String(" | GetResourceUrl match: ") +
-                      Dali::String(mImage.GetResourceUrl() == mImage.GetResourceUrl() ? "OK" : "NG"));
+                      Dali::String(mImage.GetResourceUrl() == mCurrentUrl ? "OK" : "NG"));
 
     Dali::String stStr;
     switch(mImage.GetLoadingStatus())
@@ -194,6 +207,7 @@ private:
   Label        mStatusLabel;
   int          mReadyCount{0};
   const char*  mCurrentName{"A"};
+  Dali::String mCurrentUrl;
 };
 
 REGISTER_MANUAL_TEST(TcImageViewUrl)

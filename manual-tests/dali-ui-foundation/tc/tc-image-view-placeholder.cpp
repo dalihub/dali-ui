@@ -25,6 +25,12 @@ namespace
 const char* const IMG_A           = TEST_RESOURCE_DIR "/gallery-large-3.jpg";
 const char* const IMG_B           = TEST_RESOURCE_DIR "/landscape-sample.jpg";
 const char* const IMG_PLACEHOLDER = TEST_RESOURCE_DIR "/placeholder_image.png";
+// A path that cannot load. Local files finish (success or failure) faster than
+// any observer, so "placeholder shows while loading" was unobservable on this
+// screen; a FAILED main image is the stable state in which a placeholder set
+// AFTERWARDS registers and stays visible (review 25 — order matters: the
+// placeholder guard sees the OLD image's READY if you set it before switching).
+const char* const IMG_MISSING     = TEST_RESOURCE_DIR "/definitely-not-here.jpg";
 
 constexpr float    PREVIEW_SIZE  = 200.0f;
 constexpr float    BTN_H         = 52.0f;
@@ -69,6 +75,8 @@ public:
     mImage = ImageView::New(IMG_A);
     mImage.SetRequestedWidth(PREVIEW_SIZE);
     mImage.SetRequestedHeight(PREVIEW_SIZE);
+    mImage.SetAccessibilityName("ImagePreview");
+    mImage.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
     mImage.ResourceReadySignal().Connect(this, [this](View) {
       ++mReadyCount;
@@ -93,6 +101,7 @@ public:
       MakeButton("Reload",      [this] { mImage.Reload(); }),
       MakeButton("Switch to B", [this] { mImage.SetResourceUrl(IMG_B); UpdateLabel(); }),
       MakeButton("Switch to A", [this] { mImage.SetResourceUrl(IMG_A); UpdateLabel(); }),
+      MakeButton("Switch to\nMissing", [this] { mImage.SetResourceUrl(IMG_MISSING); UpdateLabel(); }),
     }));
 
     contentArea.Add(content);

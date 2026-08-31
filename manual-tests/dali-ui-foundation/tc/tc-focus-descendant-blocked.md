@@ -1,6 +1,11 @@
 # Focus DescendantBlocked
 
-SetDescendantFocusBlocked(true) 설정 시 자식이 포커스를 받지 못하는지 확인한다.
+컨테이너의 자손 포커스를 차단하면 자식이 포커스를 받지 못하는지 확인한다.
+
+실제 API는 **`SetAllowDescendantFocusEnabled(bool)` / `IsAllowDescendantFocusEnabled()`**
+(`Dali::Actor`, `Ui::View`가 상속)이고 **의미가 반전**돼 있다 — Block ON = Allow **OFF**.
+(구 명세의 `SetDescendantFocusBlocked(true)`는 존재하지 않는 이름이었다.) 화면의
+`BLOCKED:` 라벨은 `IsAllowDescendantFocusEnabled()`를 되읽어 반전 표기한다.
 
 ## 화면 구성
 
@@ -31,6 +36,9 @@ SetDescendantFocusBlocked(true) 설정 시 자식이 포커스를 받지 못하�
 
 ## 통과 기준
 
-- Block ON: 자식에 포커스 불가
-- Block OFF: 자식에 포커스 가능
-- Block ON/OFF 설정이 즉시 반영되어야 한다
+- Block ON(=Allow OFF): 자식에 포커스 불가 — 라벨(`REJECTED`)·트리(포커스 없음)·픽셀(자식
+  상자가 RequestFocus 전후 비트 동일, 실측 0px) 세 경로가 모두 동의해야 한다
+- Block OFF: 자식에 포커스 가능 (반환값 SUCCESS + 접근성 FOCUSED)
+- `BLOCKED:` 라벨이 `IsAllowDescendantFocusEnabled()` 되읽기와 일치해야 한다
+- 네 색(`#D5DBE8`/`#CC3333`/`#E8D5E0`/`#FF9800`)은 골든 한 장으로 고정한다
+- ("즉시"의 지연 시간 절반은 재시도 단언으로 잴 수 없어 참고로 둔다)
