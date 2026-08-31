@@ -65,7 +65,10 @@ DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
 const float HALF(0.5f);
 const float ONE_AND_A_HALF(1.5f);
 
-void RecordRevealPixel(RevealRasterContext* context, uint32_t pixelIndex, uint8_t coverage, bool overwrite)
+void RecordRevealPixel(RevealRasterContext* context,
+                       uint32_t             pixelIndex,
+                       uint8_t              coverage,
+                       bool                 overwrite)
 {
   if(!context || coverage == 0u || !context->plan || context->currentGlyph >= context->plan->glyphToUnit.size() ||
      pixelIndex >= static_cast<uint64_t>(context->metadata.GetWidth()) * context->metadata.GetHeight())
@@ -79,15 +82,53 @@ void RecordRevealPixel(RevealRasterContext* context, uint32_t pixelIndex, uint8_
     return;
   }
 
-  uint8_t* pixel = context->metadata.GetBuffer() + pixelIndex * 4u;
+  const float    normalizedStart = context->plan->unitStart[unit];
+  const uint32_t encoded         = static_cast<uint32_t>(std::round(std::max(0.0f, std::min(1.0f, normalizedStart)) * 65535.0f));
+  uint8_t*       pixel           = context->metadata.GetBuffer() + pixelIndex * 4u;
   if(overwrite || pixel[2] == 0u || coverage >= pixel[3])
   {
-    const float    normalizedStart = context->plan->unitStart[unit];
-    const uint32_t encoded         = static_cast<uint32_t>(std::round(std::max(0.0f, std::min(1.0f, normalizedStart)) * 65535.0f));
-    pixel[0]                       = static_cast<uint8_t>((encoded >> 8u) & 0xffu);
-    pixel[1]                       = static_cast<uint8_t>(encoded & 0xffu);
-    pixel[2]                       = 255u;
-    pixel[3]                       = coverage;
+    pixel[0] = static_cast<uint8_t>((encoded >> 8u) & 0xffu);
+    pixel[1] = static_cast<uint8_t>(encoded & 0xffu);
+    pixel[2] = 255u;
+    pixel[3] = coverage;
+  }
+}
+
+void RecordPixelRevealPixel(RevealRasterContext* context,
+                            uint32_t             pixelIndex,
+                            float                visualX,
+                            uint8_t              coverage,
+                            bool                 overwrite)
+{
+  if(!context || coverage == 0u || !context->plan || context->currentGlyph >= context->plan->glyphToUnit.size() ||
+     pixelIndex >= static_cast<uint64_t>(context->metadata.GetWidth()) * context->metadata.GetHeight())
+  {
+    return;
+  }
+
+  const uint32_t unit = context->plan->glyphToUnit[context->currentGlyph];
+  if(unit == Internal::Reveal::NO_UNIT || unit >= context->plan->unitStart.size())
+  {
+    return;
+  }
+
+  const float    normalizedStart = Internal::Reveal::ResolvePixelStart(*context->plan, unit, visualX);
+  const uint32_t encoded         = static_cast<uint32_t>(std::round(std::max(0.0f, std::min(1.0f, normalizedStart)) * 65535.0f));
+  uint8_t*       pixel           = context->metadata.GetBuffer() + pixelIndex * 4u;
+  bool           writePixel      = overwrite || pixel[2] == 0u || coverage >= pixel[3];
+  if(pixel[2] != 0u)
+  {
+    const uint32_t existing = (static_cast<uint32_t>(pixel[0]) << 8u) | pixel[1];
+    // Across overlapping logical clusters the later start owns the pixel so a
+    // future unit cannot be exposed by an earlier cluster's stronger alpha.
+    writePixel = encoded > existing || (encoded == existing && (overwrite || coverage >= pixel[3]));
+  }
+  if(writePixel)
+  {
+    pixel[0] = static_cast<uint8_t>((encoded >> 8u) & 0xffu);
+    pixel[1] = static_cast<uint8_t>(encoded & 0xffu);
+    pixel[2] = 255u;
+    pixel[3] = coverage;
   }
 }
 
@@ -190,7 +231,7 @@ struct GlyphData
  * @param[in] pixelFormat The format of the pixel in the image that the text is rendered as (i.e. either Pixel::BGRA8888
  * or Pixel::L8).
  */
-template<bool RECORD_REVEAL>
+template<bool RECORD_REVEAL, bool PIXEL_REVEAL = false>
 void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict__ position,
                   const Vector4* const __restrict__ color, const Typesetter::Style style,
                   const Pixel::Format pixelFormat)
@@ -282,8 +323,20 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
 
           if constexpr(RECORD_REVEAL)
           {
-            RecordRevealPixel(data.revealContext, static_cast<uint32_t>(lineIndex + yOffset) * data.width + static_cast<uint32_t>(xOffsetIndex),
-                              colorAlpha, true);
+            const uint32_t pixelIndex = static_cast<uint32_t>(lineIndex + yOffset) * data.width +
+                                        static_cast<uint32_t>(xOffsetIndex);
+            if constexpr(PIXEL_REVEAL)
+            {
+              RecordPixelRevealPixel(data.revealContext,
+                                     pixelIndex,
+                                     static_cast<float>(static_cast<int32_t>(position->x) + index) + 0.5f,
+                                     colorAlpha,
+                                     true);
+            }
+            else
+            {
+              RecordRevealPixel(data.revealContext, pixelIndex, colorAlpha, true);
+            }
           }
 
           if(Typesetter::STYLE_SHADOW == style)
@@ -341,8 +394,20 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
 
             if constexpr(RECORD_REVEAL)
             {
-              RecordRevealPixel(data.revealContext, static_cast<uint32_t>(lineIndex + yOffset) * data.width + static_cast<uint32_t>(xOffsetIndex),
-                                alpha, false);
+              const uint32_t pixelIndex = static_cast<uint32_t>(lineIndex + yOffset) * data.width +
+                                          static_cast<uint32_t>(xOffsetIndex);
+              if constexpr(PIXEL_REVEAL)
+              {
+                RecordPixelRevealPixel(data.revealContext,
+                                       pixelIndex,
+                                       static_cast<float>(static_cast<int32_t>(position->x) + index) + 0.5f,
+                                       alpha,
+                                       false);
+              }
+              else
+              {
+                RecordRevealPixel(data.revealContext, pixelIndex, alpha, false);
+              }
             }
 
             // Check alpha of overlapped pixels
@@ -793,7 +858,7 @@ struct OutputParameterForEachGlyph
   FontId& lastFontId;
 };
 
-template<bool RECORD_REVEAL>
+template<bool RECORD_REVEAL, bool PIXEL_REVEAL = false>
 void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, GlyphData& glyphData, GlyphIndex& glyphIndex,
                                    const GlyphIndex elidedGlyphIndex, const GlyphInfo* glyphInfo, const bool addHyphen,
                                    const InputParameterForEachGlyph& inputParamsForGlyph,
@@ -985,7 +1050,7 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
     // The caller selects the specialization once per line. The ordinary Label
     // instantiation contains no reveal-specific branch in either its glyph or
     // per-pixel raster loops.
-    TypesetGlyph<RECORD_REVEAL>(glyphData, &position, &color, inputParamsForGlyph.style, inputParamsForGlyph.pixelFormat);
+    TypesetGlyph<RECORD_REVEAL, PIXEL_REVEAL>(glyphData, &position, &color, inputParamsForGlyph.style, inputParamsForGlyph.pixelFormat);
 
     if(inputParamsForGlyph.style == Typesetter::STYLE_OUTLINE)
     {
@@ -1004,7 +1069,7 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
   }
 }
 
-template<bool RECORD_REVEAL>
+template<bool RECORD_REVEAL, bool PIXEL_REVEAL = false>
 void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphData& glyphData, Length& hyphenIndex,
                                   const LineRun& line, const bool isFirstLine,
                                   const InputParameterForEachLine&  inputParamsForLine,
@@ -1141,8 +1206,9 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
                                                      lastFontId};
     // clang-format on
 
-    CreateImageBufferForEachGlyph<RECORD_REVEAL>(fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo,
-                                                 addHyphen, inputParamsForGlyph, outputParamsForGlyph);
+    CreateImageBufferForEachGlyph<RECORD_REVEAL, PIXEL_REVEAL>(fontClient, glyphData, glyphIndex, elidedGlyphIndex,
+                                                               glyphInfo, addHyphen, inputParamsForGlyph,
+                                                               outputParamsForGlyph);
 
     if(inputParamsForLine.hyphenIndices)
     {
@@ -1840,8 +1906,16 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
         glyphData.verticalOffset = lineBottom;
         continue;
       }
-      CreateImageBufferForEachLine<true>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
-                                         inputParamsForLine, inputParamsForGlyph);
+      if(glyphData.revealContext->plan && glyphData.revealContext->plan->HasPixelTiming())
+      {
+        CreateImageBufferForEachLine<true, true>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
+                                                 inputParamsForLine, inputParamsForGlyph);
+      }
+      else
+      {
+        CreateImageBufferForEachLine<true, false>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
+                                                  inputParamsForLine, inputParamsForGlyph);
+      }
     }
     else
     {

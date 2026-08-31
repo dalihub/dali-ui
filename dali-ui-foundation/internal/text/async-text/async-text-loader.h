@@ -119,7 +119,7 @@ struct AsyncTextParameters
     textFitStepSize{1.f},
     marqueeLoopDelay{0.0f},
     textRevealFadeDurationRatio{Text::Reveal::AUTO_FADE_DURATION_RATIO},
-    textRevealSequenceStartDelayRatio{0.0f},
+    textRevealSequenceStaggerRatio{0.0f},
     renderScale{1.0f},
     renderScaleWidth{0.f},
     renderScaleHeight{0.f},
@@ -222,11 +222,11 @@ struct AsyncTextParameters
   float textFitMaxSize;
   float textFitStepSize;
   float marqueeLoopDelay;
-  float textRevealFadeDurationRatio;       ///< Authored AUTO sentinel or normalized per-unit fade duration.
-  float textRevealSequenceStartDelayRatio; ///< Authored normalized delay between sequence starts.
-  float renderScale;                       ///< The render scale.
-  float renderScaleWidth;                  ///< The requested original textWidth when using render scale.
-  float renderScaleHeight;                 ///< The requested original textHeight when using render scale.
+  float textRevealFadeDurationRatio;    ///< Authored AUTO sentinel or normalized per-unit fade duration.
+  float textRevealSequenceStaggerRatio; ///< Authored sequence stagger ratio.
+  float renderScale;                    ///< The render scale.
+  float renderScaleWidth;               ///< The requested original textWidth when using render scale.
+  float renderScaleHeight;              ///< The requested original textHeight when using render scale.
 
   int      maxTextureSize;               ///< The maximum size of texture.
   Length   maximumNumberOfLines;         ///< Maximum laid-out lines, or zero for unlimited.

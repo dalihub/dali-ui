@@ -676,7 +676,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
 Internal::Reveal::Plan Typesetter::CreateFinalRevealPlan(const Internal::Reveal::Plan& sourcePlan,
                                                          Internal::Reveal::Unit        unit,
                                                          Internal::Reveal::Sequence    sequence,
-                                                         float                         sequenceStartDelayRatio)
+                                                         float                         sequenceStaggerRatio)
 {
   auto& viewModel = *mImpl->GetViewModel();
   viewModel.EnableFinalGlyphMapping();
@@ -686,12 +686,25 @@ Internal::Reveal::Plan Typesetter::CreateFinalRevealPlan(const Internal::Reveal:
                                                                             viewModel.GetFinalToSourceGlyphIndices(),
                                                                             viewModel.GetEllipsisFinalGlyphIndex(),
                                                                             unit);
-  if(sequence == Internal::Reveal::Sequence::PER_LINE)
+  if(unit == Internal::Reveal::Unit::PIXEL)
+  {
+    if(!Internal::Reveal::ApplyPixelSpatialSchedule(finalPlan,
+                                                    viewModel,
+                                                    viewModel.GetFinalToSourceGlyphIndices(),
+                                                    viewModel.GetEllipsisFinalGlyphIndex(),
+                                                    sequence,
+                                                    sequenceStaggerRatio))
+    {
+      // The scheduler commits only complete PIXEL timing, so a failure leaves
+      // this projected CHARACTER-compatible plan intact.
+    }
+  }
+  else if(sequence == Internal::Reveal::Sequence::PER_LINE)
   {
     Internal::Reveal::ApplyPerLineSequenceSchedule(finalPlan,
                                                 viewModel.GetLines(),
                                                 viewModel.GetNumberOfLines(),
-                                                sequenceStartDelayRatio);
+                                                sequenceStaggerRatio);
   }
   return finalPlan;
 }

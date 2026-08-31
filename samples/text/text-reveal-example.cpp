@@ -101,8 +101,10 @@ const char* const DURATION_BUTTON_LABELS[DURATION_CASE_COUNT] = {
   "8 s"};
 
 const char* const TEXT_BUTTON_LABELS[TEXT_CASE_COUNT] = {
-  "Short",
-  "Middle",
+  "English",
+  "Korean",
+  "Bidi",
+  "Emoji",
   "Long"};
 
 const Text::Reveal::Sequence SEQUENCES[SEQUENCE_CASE_COUNT] = {
@@ -117,7 +119,7 @@ const char* const SEQUENCE_STATUS_LABELS[SEQUENCE_CASE_COUNT] = {
   "WHOLE_TEXT",
   "PER_LINE"};
 
-const float START_DELAY_RATIOS[START_DELAY_CASE_COUNT] = {
+const float STAGGER_RATIOS[STAGGER_CASE_COUNT] = {
   0.0f,
   0.05f,
   0.10f,
@@ -127,7 +129,7 @@ const float START_DELAY_RATIOS[START_DELAY_CASE_COUNT] = {
   0.75f,
   1.0f};
 
-const char* const START_DELAY_BUTTON_LABELS[START_DELAY_CASE_COUNT] = {
+const char* const STAGGER_BUTTON_LABELS[STAGGER_CASE_COUNT] = {
   "0",
   "0.05",
   "0.10",
@@ -138,16 +140,17 @@ const char* const START_DELAY_BUTTON_LABELS[START_DELAY_CASE_COUNT] = {
   "1.00"};
 
 const char* const TEXT_CASES[TEXT_CASE_COUNT] = {
-  "Short reveal: office cafe\u0301 — 안녕 😀",
-  "Character reveal keeps office ligatures and cafe\u0301 combining sequences atomic.\n"
-  "한국어 순차 표시와 한글 자모를 확인합니다.\n"
-  "العربية تكشف الكلمات — mixed עברית 123.\n"
-  "Emoji: 👩‍💻 👍🏽 👨‍👩‍👧‍👦",
-  "Long Reveal content makes timing differences easier to compare across multiple lines. "
-  "The office ligature candidate and cafe\u0301 combining sequence stay atomic.\n"
-  "한국어 문장도 길이에 따라 순서대로 표시되며 여러 줄 레이아웃을 확인할 수 있습니다.\n"
-  "العربية تكشف الكلمات بالتتابع — עברית mixed bidi text remains visually ordered.\n"
-  "Punctuation, numbers 12345, and emoji 👩‍💻 👍🏽 👨‍👩‍👧‍👦 complete the long example."};
+  "Your office pass is ready. Pick up your badge at the front desk and connect to the cafe\u0301 Wi-Fi when you arrive.",
+  "오늘 오후 3시 회의가 10층 Atlas 룸으로 변경되었습니다.\n"
+  "자료를 확인하고 시작 10분 전에 알림을 받아보세요.",
+  "A-1024 confirmed — تم الحجز 18:30.\n"
+  "B-2048 ready — ההזמנה מוכנה 19:10.",
+  "Design review with Maya 👩‍💻 at 14:00 👍🏽\n"
+  "After work: dinner 🍜 and a family walk 👨‍👩‍👧‍👦 ✨",
+  "Your weekend itinerary is ready. Start with brunch at 11:30, join the museum tour at 14:00, "
+  "and save the riverside walk for sunset. If plans change, the schedule will update automatically.\n"
+  "주말 일정이 준비되었습니다. 오전 11시 30분 브런치 후 오후 2시 전시를 관람하고, "
+  "해 질 무렵에는 강변 산책을 즐겨보세요."};
 
 Label NewLabel(const char* text, float size, uint32_t color)
 {
@@ -286,14 +289,14 @@ private:
       });
     }
 
-    StackLayout startDelayControls = NewMenuRow("START DELAY");
-    for(std::size_t delayIndex = 0u; delayIndex < START_DELAY_CASE_COUNT; ++delayIndex)
+    StackLayout staggerControls = NewMenuRow("STAGGER");
+    for(std::size_t staggerIndex = 0u; staggerIndex < STAGGER_CASE_COUNT; ++staggerIndex)
     {
-      mStartDelayButtons[delayIndex] = NewButton(START_DELAY_BUTTON_LABELS[delayIndex]);
-      startDelayControls.Add(mStartDelayButtons[delayIndex]);
-      mStartDelayButtons[delayIndex].AsInteractive().ClickedSignal().Connect(this, [this, delayIndex](View, InputEvent)
+      mStaggerButtons[staggerIndex] = NewButton(STAGGER_BUTTON_LABELS[staggerIndex]);
+      staggerControls.Add(mStaggerButtons[staggerIndex]);
+      mStaggerButtons[staggerIndex].AsInteractive().ClickedSignal().Connect(this, [this, staggerIndex](View, InputEvent)
       {
-        mStartDelayIndex = delayIndex;
+        mStaggerIndex = staggerIndex;
         ConfigureAndReplay();
       });
     }
@@ -349,7 +352,7 @@ private:
     controlsPanel.Add(configurationControls);
     controlsPanel.Add(textControls);
     controlsPanel.Add(sequenceControls);
-    controlsPanel.Add(startDelayControls);
+    controlsPanel.Add(staggerControls);
     controlsPanel.Add(fadeControls);
     controlsPanel.Add(durationControls);
     controlsPanel.Add(playbackControls);
@@ -361,8 +364,18 @@ private:
 
     mUnitButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     {
-      mUnit = mUnit == Text::Reveal::Unit::CHARACTER ? Text::Reveal::Unit::WORD
-                                                     : Text::Reveal::Unit::CHARACTER;
+      if(mUnit == Text::Reveal::Unit::CHARACTER)
+      {
+        mUnit = Text::Reveal::Unit::WORD;
+      }
+      else if(mUnit == Text::Reveal::Unit::WORD)
+      {
+        mUnit = Text::Reveal::Unit::PIXEL;
+      }
+      else
+      {
+        mUnit = Text::Reveal::Unit::CHARACTER;
+      }
       ConfigureAndReplay();
     });
     mAsyncButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
@@ -405,7 +418,7 @@ private:
     mPreview.SetAsyncRendering(mAsync);
     ApplyFill();
 
-    mUnitButton.SetText(mUnit == Text::Reveal::Unit::CHARACTER ? "Unit: Character" : "Unit: Word");
+    mUnitButton.SetText(GetUnitButtonLabel());
     mAsyncButton.SetText(mAsync ? "Path: Async" : "Path: Sync");
     mFillButton.SetText(mGradientEnabled ? "Fill: Gradient" : "Fill: Solid");
     mRevealButton.SetText(mRevealEnabled ? "Reveal: On" : "Reveal: Off");
@@ -414,7 +427,7 @@ private:
     SetButtonSelected(mRevealButton, mRevealEnabled);
     UpdateTextButtons();
     UpdateSequenceButtons();
-    UpdateStartDelayButtons();
+    UpdateStaggerButtons();
     UpdateFadeButtons();
     UpdateDurationButtons();
     Replay();
@@ -428,6 +441,34 @@ private:
     Replay();
   }
 
+  const char* GetUnitButtonLabel() const
+  {
+    switch(mUnit)
+    {
+      case Text::Reveal::Unit::WORD:
+        return "Unit: Word";
+      case Text::Reveal::Unit::PIXEL:
+        return "Unit: Pixel";
+      case Text::Reveal::Unit::CHARACTER:
+      default:
+        return "Unit: Character";
+    }
+  }
+
+  const char* GetUnitStatusLabel() const
+  {
+    switch(mUnit)
+    {
+      case Text::Reveal::Unit::WORD:
+        return "WORD";
+      case Text::Reveal::Unit::PIXEL:
+        return "PIXEL";
+      case Text::Reveal::Unit::CHARACTER:
+      default:
+        return "CHARACTER";
+    }
+  }
+
   void ApplyRevealConfiguration()
   {
     if(!mRevealEnabled)
@@ -438,13 +479,10 @@ private:
       return;
     }
 
-    // CHARACTER schedules shaping clusters, keeping ligatures and combining
-    // sequences together. WORD follows DALi word boundaries: whitespace does
-    // not consume a unit, and adjacent punctuation is folded appropriately.
     Text::Reveal reveal;
     reveal.SetUnit(mUnit);
     reveal.SetSequence(SEQUENCES[mSequenceIndex]);
-    reveal.SetSequenceStartDelayRatio(START_DELAY_RATIOS[mStartDelayIndex]);
+    reveal.SetSequenceStaggerRatio(STAGGER_RATIOS[mStaggerIndex]);
     reveal.SetFadeDurationRatio(FADE_DURATION_RATIOS[mFadeDurationRatioIndex]);
     mPreview.SetTextReveal(reveal);
   }
@@ -465,11 +503,11 @@ private:
     }
   }
 
-  void UpdateStartDelayButtons()
+  void UpdateStaggerButtons()
   {
-    for(std::size_t delayIndex = 0u; delayIndex < START_DELAY_CASE_COUNT; ++delayIndex)
+    for(std::size_t staggerIndex = 0u; staggerIndex < STAGGER_CASE_COUNT; ++staggerIndex)
     {
-      SetButtonSelected(mStartDelayButtons[delayIndex], delayIndex == mStartDelayIndex);
+      SetButtonSelected(mStaggerButtons[staggerIndex], staggerIndex == mStaggerIndex);
     }
   }
 
@@ -620,8 +658,14 @@ private:
     switch(mFadeDurationRatioIndex)
     {
       case 0u:
-        return "AUTO chooses a per-unit fade suitable for the current Reveal sequences.";
+        return mUnit == Text::Reveal::Unit::PIXEL
+                 ? "AUTO adapts the fade to the visible spatial progression and text scale."
+                 : "AUTO uses the final visible character or word count.";
       case 1u:
+        if(mUnit == Text::Reveal::Unit::PIXEL)
+        {
+          return "Fade 0: the foreground advances continuously as a hard reveal front.";
+        }
         return mUnit == Text::Reveal::Unit::CHARACTER
                  ? "Fade 0: each shaping cluster appears immediately at its scheduled progress."
                  : "Fade 0: each word appears immediately at its scheduled progress.";
@@ -646,9 +690,9 @@ private:
                                       : "Reveal is unset with Text::Reveal::None(); progress is preserved.";
     std::ostringstream status;
     status << "TEXT " << TEXT_BUTTON_LABELS[mTextCaseIndex]
-           << " | UNIT " << (mUnit == Text::Reveal::Unit::CHARACTER ? "CHARACTER" : "WORD")
+           << " | UNIT " << GetUnitStatusLabel()
            << " | SEQUENCE " << SEQUENCE_STATUS_LABELS[mSequenceIndex]
-           << " | START DELAY " << START_DELAY_BUTTON_LABELS[mStartDelayIndex]
+           << " | STAGGER " << STAGGER_BUTTON_LABELS[mStaggerIndex]
            << " | Fade: " << FADE_STATUS_LABELS[mFadeDurationRatioIndex]
            << " | DURATION " << std::fixed << std::setprecision(1) << GetAnimationDuration() << " s"
            << "\nPATH " << (mAsync ? "Async" : "Sync")
@@ -722,7 +766,7 @@ private:
   std::string                             mPlaybackStatus;
   Text::Reveal::Unit                      mUnit{Text::Reveal::Unit::CHARACTER};
   std::size_t                             mSequenceIndex{0u};
-  std::size_t                             mStartDelayIndex{0u};
+  std::size_t                             mStaggerIndex{0u};
   std::size_t                             mTextCaseIndex{DEFAULT_TEXT_CASE_INDEX};
   std::size_t                             mFadeDurationRatioIndex{0u};
   std::size_t                             mDurationCaseIndex{DEFAULT_DURATION_CASE_INDEX};

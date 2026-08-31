@@ -265,8 +265,8 @@ public:
    */
   Internal::Reveal::Plan CreateFinalRevealPlan(const Internal::Reveal::Plan& sourcePlan,
                                                Internal::Reveal::Unit        unit,
-                                               Internal::Reveal::Sequence    sequence                = Internal::Reveal::Sequence::WHOLE_TEXT,
-                                               float                         sequenceStartDelayRatio = 0.0f);
+                                               Internal::Reveal::Sequence    sequence             = Internal::Reveal::Sequence::WHOLE_TEXT,
+                                               float                         sequenceStaggerRatio = 0.0f);
 
   /**
    * @brief Rasterizes reveal metadata for one full texture or height tile.

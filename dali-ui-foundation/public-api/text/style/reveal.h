@@ -31,36 +31,38 @@ namespace Text
 /**
  * @brief Describes how the text foreground is revealed over a normalized timeline.
  *
- * Reveal divides visible text into sequential units and controls the fade of
- * each unit as TextRevealProgress advances from 0.0 to 1.0. Applications
+ * Reveal distributes progression across visible text and controls its
+ * transition as TextRevealProgress advances from 0.0 to 1.0. Applications
  * control the playback duration by animating TextRevealProgress.
  *
  * Unit controls how reveal progression is divided across visible content.
  * Sequence controls how those units share the normalized reveal timeline.
  * For example, CHARACTER with WHOLE_TEXT progresses by character across all
  * visible content, while CHARACTER with PER_LINE gives each final visible line
- * its own character progression.
+ * its own character progression. PIXEL follows the same whole-text or per-line
+ * distinction using spatial progression.
  *
- * By default, text is revealed by character using one whole-text sequence and
- * an automatically selected fade duration. The reveal unit, sequence, and fade
- * duration ratio can be configured explicitly.
+ * By default, text is revealed by character using one whole-text sequence,
+ * no sequence stagger, and an automatically selected fade duration. These
+ * options can be configured explicitly.
  *
  * Reveal affects only the text foreground. Text decorations and other style
  * layers such as shadow, outline, underline, strikethrough, and background are
  * not affected.
  *
- * Inline replacement content does not participate in the reveal. When text is
- * elided, hidden source text does not consume reveal units and the ellipsis
- * participates in the visible reveal sequence.
+ * Inline replacements such as ImageSpan content are not affected by Reveal
+ * and do not consume reveal units. When text is elided, hidden source text
+ * does not consume reveal units and the ellipsis participates in the visible
+ * reveal progression.
  */
 class DALI_UI_API Reveal
 {
 public:
   /**
-   * @brief Selects automatic fade duration for the reveal units.
+   * @brief Selects an automatically resolved reveal transition duration.
    *
    * When this value is used as the fade duration ratio, the fade duration is
-   * selected automatically based on the visible reveal units.
+   * selected automatically for the current rendered reveal progression.
    *
    * This value represents authored automatic behavior; GetFadeDurationRatio()
    * returns this value rather than the internally resolved duration ratio.
@@ -73,20 +75,29 @@ public:
   enum class Unit : uint8_t
   {
     /**
-     * @brief Reveals visible text by character in logical text order.
+     * @brief Reveals visible text by character while preserving shaping boundaries.
      *
-     * Characters that are rendered as one indivisible text unit may reveal
-     * together.
+     * Progression follows logical text order. Characters rendered as one
+     * indivisible text unit reveal together.
      */
     CHARACTER,
 
     /**
-     * @brief Reveals visible text by word in logical text order.
+     * @brief Reveals visible text by word while preserving logical text order.
      *
-     * Whitespace does not consume a reveal step. Punctuation is associated with
-     * surrounding text where appropriate.
+     * Whitespace does not create a reveal step.
      */
-    WORD
+    WORD,
+
+    /**
+     * @brief Reveals visible text continuously across its rendered foreground.
+     *
+     * PIXEL follows the same logical text order and shaping boundaries as
+     * CHARACTER while distributing reveal timing continuously in pixel space.
+     * The progression is normalized and does not correspond one-to-one with
+     * physical framebuffer pixels.
+     */
+    PIXEL
   };
 
   /**
@@ -195,53 +206,46 @@ public:
    * independent sequence. Lines without revealable content do not create a
    * sequence.
    *
-   * @param[in] sequence The reveal sequence grouping.
+   * @param[in] sequence The reveal sequencing mode.
    */
   void SetSequence(Sequence sequence);
 
   /**
    * @brief Returns how reveal units share the normalized reveal timeline.
    *
-   * @return The reveal sequence grouping.
+   * @return The reveal sequencing mode.
    */
   Sequence GetSequence() const;
 
   /**
-   * @brief Sets the normalized ratio controlling the spacing between consecutive sequence starts.
+   * @brief Sets the ratio controlling the stagger between consecutive sequence starts.
    *
-   * Sequence starts are evenly spaced. Zero starts all active sequences
-   * together. Increasing values space consecutive starts further apart, and
-   * one prevents consecutive active sequences from overlapping. A shorter
-   * sequence may complete before the next sequence starts.
+   * A value of 0.0 starts all active sequences together. Increasing the ratio
+   * separates consecutive sequence starts. A value of 1.0 prevents consecutive
+   * active sequences from overlapping.
    *
    * PER_LINE creates consecutive active sequences from final visible layout
-   * lines. WHOLE_TEXT has one sequence, so the delay has no visual effect, but
-   * the authored value is retained. Values outside [0.0, 1.0] are clamped, and
-   * NaN is normalized to 0.0.
+   * lines. WHOLE_TEXT has one sequence, so the stagger has no visual effect,
+   * but the authored value is retained. Values outside [0.0, 1.0] are clamped,
+   * and NaN is normalized to 0.0.
    *
-   * @param[in] ratio The normalized sequence start delay in [0.0, 1.0].
+   * @param[in] ratio The sequence stagger ratio in [0.0, 1.0].
    */
-  void SetSequenceStartDelayRatio(float ratio);
+  void SetSequenceStaggerRatio(float ratio);
 
   /**
-   * @brief Returns the authored normalized sequence start delay.
+   * @brief Returns the authored sequence stagger ratio.
    *
    * @return The authored ratio in [0.0, 1.0].
    */
-  float GetSequenceStartDelayRatio() const;
+  float GetSequenceStaggerRatio() const;
 
   /**
-   * @brief Sets the fade duration of each reveal unit on the normalized timeline.
+   * @brief Sets the transition duration ratio on the normalized reveal timeline.
    *
-   * AUTO_FADE_DURATION_RATIO selects an automatic fade duration based on the
-   * visible reveal units.
-   *
-   * Values from 0.0 to 1.0 specify the duration of each unit fade. Zero produces
-   * a step-wise reveal with no per-unit fade, while one makes all units fade
-   * together over the full timeline.
-   *
-   * When TextRevealProgress is animated linearly from 0.0 to 1.0, the ratio
-   * corresponds to the same fraction of the animation duration.
+   * AUTO_FADE_DURATION_RATIO selects an appropriate duration automatically.
+   * Values from 0.0 to 1.0 specify the transition duration. Zero removes the
+   * transition fade, while one fades the foreground over the full timeline.
    *
    * Values outside [0.0, 1.0] are clamped, except AUTO_FADE_DURATION_RATIO.
    * NaN is normalized to 0.0.

@@ -53,7 +53,7 @@ struct TextVisualRevealData
   Ui::Text::Internal::Reveal::Sequence sequence{Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT};
   float                                fadeDurationRatio{Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO};
   float                                fadeDuration{0.0f};
-  float                                sequenceStartDelayRatio{0.0f};
+  float                                sequenceStaggerRatio{0.0f};
   Property::Index                      progressPropertyIndex{Property::INVALID_INDEX};
   uint64_t                             revision{0u};
 };

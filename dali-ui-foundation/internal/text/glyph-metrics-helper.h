@@ -23,12 +23,16 @@
 #include <dali-ui-foundation/internal/text/metrics.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 
+#include <vector>
+
 namespace Dali
 {
 namespace Ui
 {
 namespace Text
 {
+class ModelInterface;
+
 /**
  * @brief Some characters can be shaped in more than one glyph.
  * This struct is used to retrieve metrics from these group of glyphs.
@@ -94,6 +98,22 @@ void GetGlyphsMetrics(GlyphIndex glyphIndex, Length numberOfGlyphs, GlyphMetrics
  * @return The calculated advance
  */
 float GetCalculatedAdvance(unsigned int character, float characterSpacing, float advance);
+
+/**
+ * @brief Resolves a representative final text-foreground height in pixels.
+ *
+ * Models without inline replacements reuse committed line metrics. Models
+ * containing replacements derive the height from ordinary text glyph font
+ * metrics so replacement geometry and line spacing do not affect the result.
+ *
+ * @param[in] model The final render model
+ * @param[in] hasInlineReplacement Whether the model contains inline replacements
+ * @param[out] lineReferencePixelSizes Optional text-only height for each final line
+ * @return The representative text height, or zero when no text foreground exists
+ */
+float ResolveTextForegroundReferencePixelSize(const ModelInterface& model,
+                                              bool                  hasInlineReplacement,
+                                              std::vector<float>*   lineReferencePixelSizes = nullptr);
 
 /**
  * @brief Takes the character index, obtains the glyph index (and the number of Glyphs) from it and finally gets the

@@ -2042,11 +2042,11 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit     unit,
                                      Property::Index                  progressPropertyIndex,
                                      uint64_t                         revision,
                                      Text::Internal::Reveal::Sequence sequence,
-                                     float                            sequenceStartDelayRatio)
+                                     float                            sequenceStaggerRatio)
 {
-  sequence                = unit == Text::Internal::Reveal::Unit::DISABLED ? Text::Internal::Reveal::Sequence::WHOLE_TEXT : sequence;
-  sequenceStartDelayRatio = unit == Text::Internal::Reveal::Unit::DISABLED ? 0.0f : sequenceStartDelayRatio;
-  auto* data              = GetTextVisualRevealData(mRevealData);
+  sequence             = unit == Text::Internal::Reveal::Unit::DISABLED ? Text::Internal::Reveal::Sequence::WHOLE_TEXT : sequence;
+  sequenceStaggerRatio = unit == Text::Internal::Reveal::Unit::DISABLED ? 0.0f : sequenceStaggerRatio;
+  auto* data           = GetTextVisualRevealData(mRevealData);
   if(!data)
   {
     if(unit == Text::Internal::Reveal::Unit::DISABLED)
@@ -2057,21 +2057,21 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit     unit,
   else if(data->unit == unit &&
           data->sequence == sequence &&
           Equals(data->fadeDurationRatio, fadeDurationRatio) &&
-          Equals(data->sequenceStartDelayRatio, sequenceStartDelayRatio) &&
+          Equals(data->sequenceStaggerRatio, sequenceStaggerRatio) &&
           data->progressPropertyIndex == progressPropertyIndex &&
           data->revision == revision)
   {
     return;
   }
 
-  data                          = &GetOrCreateTextVisualRevealData(mRevealData);
-  data->unit                    = unit;
-  data->sequence                = sequence;
-  data->fadeDurationRatio       = fadeDurationRatio;
-  data->sequenceStartDelayRatio = sequenceStartDelayRatio;
-  data->progressPropertyIndex   = progressPropertyIndex;
-  data->revision                = revision;
-  mRendererUpdateNeeded         = true;
+  data                        = &GetOrCreateTextVisualRevealData(mRevealData);
+  data->unit                  = unit;
+  data->sequence              = sequence;
+  data->fadeDurationRatio     = fadeDurationRatio;
+  data->sequenceStaggerRatio = sequenceStaggerRatio;
+  data->progressPropertyIndex = progressPropertyIndex;
+  data->revision              = revision;
+  mRendererUpdateNeeded       = true;
   if(unit == Text::Internal::Reveal::Unit::DISABLED)
   {
     RemoveTextRevealConstraints();
@@ -2148,6 +2148,10 @@ Text::Internal::Reveal::Plan TextVisual::BuildTextRevealSourcePlan()
       data->segmentation = TextAbstraction::Segmentation::New();
     }
     return Text::Internal::Reveal::BuildPlan(model, data->unit, data->fadeDurationRatio, data->segmentation);
+  }
+  if(data->unit == Text::Internal::Reveal::Unit::PIXEL)
+  {
+    return Text::Internal::Reveal::BuildPixelPlan(model, data->fadeDurationRatio);
   }
   return Text::Internal::Reveal::BuildCharacterPlan(model, data->fadeDurationRatio);
 }
@@ -2602,7 +2606,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
       revealPlan = mTypesetter->CreateFinalRevealPlan(revealPlan,
                                                       revealData->unit,
                                                       revealData->sequence,
-                                                      revealData->sequenceStartDelayRatio);
+                                                      revealData->sequenceStaggerRatio);
     }
 
     int verifiedWidth  = data.GetWidth();
@@ -2883,7 +2887,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     const auto finalPlan       = mTypesetter->CreateFinalRevealPlan(sourcePlan,
                                                                     revealData->unit,
                                                                     revealData->sequence,
-                                                                    revealData->sequenceStartDelayRatio);
+                                                                    revealData->sequenceStaggerRatio);
     PixelData  metadata       = mTypesetter->RenderTextRevealMetadata(size,
                                                                      textDirection,
                                                                      finalPlan,

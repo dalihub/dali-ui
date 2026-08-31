@@ -1091,7 +1091,9 @@ int UtcDaliLabelTextRevealGradientOverlayCompositionP(void)
   label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.2f));
   label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ONE, Vector2::ZERO, 0.4f));
   label.SetTextGradientOverlayMode(Text::GradientOverlayMode::SCREEN);
-  label.SetTextReveal(Text::Reveal());
+  Text::Reveal reveal;
+  reveal.SetUnit(Text::Reveal::Unit::PIXEL);
+  label.SetTextReveal(reveal);
   label.SetTextRevealProgress(0.5f);
 
   application.GetScene().Add(label);

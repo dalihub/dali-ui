@@ -1456,12 +1456,15 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                                                                       parameters.textRevealUnit,
                                                                       parameters.textRevealFadeDurationRatio,
                                                                       mModule.GetSegmentation())
+                                      : parameters.textRevealUnit == Internal::Reveal::Unit::PIXEL
+                                        ? Internal::Reveal::BuildPixelPlan(*renderModel,
+                                                                           parameters.textRevealFadeDurationRatio)
                                         : Internal::Reveal::BuildCharacterPlan(*renderModel,
                                                                                parameters.textRevealFadeDurationRatio);
     const auto     revealPlan       = mTypesetter->CreateFinalRevealPlan(sourceRevealPlan,
                                                                          parameters.textRevealUnit,
                                                                          parameters.textRevealSequence,
-                                                                         parameters.textRevealSequenceStartDelayRatio);
+                                                                         parameters.textRevealSequenceStaggerRatio);
     const uint32_t metadataWidth    = renderInfo.textPixelData.GetWidth();
     const uint32_t metadataHeight   = renderInfo.textPixelData.GetHeight();
     const uint32_t tileLimit        = parameters.maxTextureSize > 0

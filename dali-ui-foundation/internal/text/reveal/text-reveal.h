@@ -48,13 +48,25 @@ enum class Unit : uint8_t
 {
   DISABLED,
   CHARACTER,
-  WORD
+  WORD,
+  PIXEL
 };
 
 enum class Sequence : uint8_t
 {
   WHOLE_TEXT,
   PER_LINE
+};
+
+/**
+ * @brief Stores a PIXEL cluster's final visual interpolation data.
+ */
+struct PixelUnitTiming
+{
+  float visualMinimum{0.0f};
+  float visualMaximum{0.0f};
+  float progressionSpan{0.0f};
+  bool  rightToLeft{false};
 };
 
 /**
@@ -68,10 +80,11 @@ enum class Sequence : uint8_t
  */
 struct Plan
 {
-  std::vector<uint32_t> glyphToUnit;
-  std::vector<float>    unitStart;
-  float                 fadeDurationRatio{Text::Reveal::AUTO_FADE_DURATION_RATIO};
-  float                 fadeDuration{0.0f};
+  std::vector<uint32_t>        glyphToUnit;
+  std::vector<float>           unitStart;
+  std::vector<PixelUnitTiming> pixelUnitTiming;
+  float                        fadeDurationRatio{Text::Reveal::AUTO_FADE_DURATION_RATIO};
+  float                        fadeDuration{0.0f};
 
   /**
    * @brief Returns the number of scheduled reveal units.
@@ -81,6 +94,14 @@ struct Plan
   uint32_t GetUnitCount() const
   {
     return static_cast<uint32_t>(unitStart.size());
+  }
+
+  /**
+   * @brief Returns whether this plan contains continuous PIXEL timing.
+   */
+  bool HasPixelTiming() const
+  {
+    return !pixelUnitTiming.empty();
   }
 };
 
@@ -157,6 +178,14 @@ Plan BuildPlan(const ModelInterface&          model,
 Plan BuildCharacterPlan(const ModelInterface& model, float fadeDurationRatio);
 
 /**
+ * @brief Builds the CHARACTER logical skeleton used by PIXEL.
+ *
+ * The returned source plan contains no spatial descriptors. Those are derived
+ * only after final elision and line layout are known.
+ */
+Plan BuildPixelPlan(const ModelInterface& model, float fadeDurationRatio);
+
+/**
  * @brief Projects source reveal semantics onto the final rendered glyph sequence.
  *
  * The projection removes elided source units, preserves their logical order,
@@ -190,13 +219,32 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
  * @param[in,out] plan The final-glyph plan to schedule.
  * @param[in] lines The final visual lines.
  * @param[in] lineCount The number of entries in lines.
- * @param[in] sequenceStartDelayRatio The authored normalized start delay.
+ * @param[in] sequenceStaggerRatio The authored sequence stagger ratio.
  * @return True if the final line mapping was valid, including no-op schedules.
  */
 bool ApplyPerLineSequenceSchedule(Plan&          plan,
                                const LineRun* lines,
                                Length         lineCount,
-                               float          sequenceStartDelayRatio);
+                               float          sequenceStaggerRatio);
+
+/**
+ * @brief Builds and schedules final PIXEL descriptors from final layout data.
+ *
+ * This is separate from ApplyPerLineSequenceSchedule() so CHARACTER and WORD keep
+ * their existing count-based path unchanged. Scheduling commits atomically;
+ * failure leaves the projected CHARACTER-compatible plan unchanged.
+ */
+bool ApplyPixelSpatialSchedule(Plan&                 plan,
+                               const ModelInterface& finalModel,
+                               const GlyphIndex*     finalToSourceGlyph,
+                               GlyphIndex            ellipsisFinalGlyph,
+                               Sequence              sequence,
+                               float                 sequenceStaggerRatio);
+
+/**
+ * @brief Resolves one foreground pixel's normalized PIXEL start timing.
+ */
+float ResolvePixelStart(const Plan& plan, uint32_t unit, float visualX);
 
 } // namespace Reveal
 } // namespace Internal

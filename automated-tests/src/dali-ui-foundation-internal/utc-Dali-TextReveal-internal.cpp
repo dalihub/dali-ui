@@ -98,6 +98,44 @@ UiText::ControllerPtr BuildReplacementController(const char*                    
   controller->Relayout(size);
   return controller;
 }
+
+UiText::ControllerPtr BuildReferenceMetricController(const char* text,
+                                                     float       fontSize,
+                                                     float       relativeLineSize,
+                                                     float       uiScale,
+                                                     const Size& layoutSize)
+{
+  UiText::ControllerPtr controller = UiText::Controller::New();
+  controller->SetMultiLineEnabled(true);
+  controller->SetText(text);
+  controller->SetDefaultFontSize(fontSize, UiText::Controller::PIXEL_SIZE);
+  controller->SetRelativeLineSize(relativeLineSize);
+  controller->SetUiScale(uiScale);
+  controller->Relayout(layoutSize);
+  return controller;
+}
+
+UiText::ControllerPtr BuildMixedSizeReferenceMetricController(float       largeSize,
+                                                              bool        heading,
+                                                              const Size& layoutSize)
+{
+  const char*               text    = heading
+                                        ? "Heading body line body line body line body line body line body line"
+                                        : "small BIG small";
+  UiText::StyledTextBuilder builder = UiText::StyledTextBuilder::New(text);
+  UiText::FontAttributes    attributes;
+  attributes.SetSize(largeSize);
+  DALI_TEST_CHECK(builder.SetSpan(UiText::FontSpan::New(attributes),
+                                  heading ? 0u : 6u,
+                                  heading ? 7u : 9u));
+
+  UiText::ControllerPtr controller = UiText::Controller::New();
+  controller->SetDefaultFontSize(20.0f, UiText::Controller::PIXEL_SIZE);
+  controller->SetStyledText(builder.Build());
+  controller->SetMultiLineEnabled(true);
+  controller->Relayout(layoutSize);
+  return controller;
+}
 } // namespace
 
 void utc_dali_text_reveal_internal_startup(void)
@@ -120,6 +158,7 @@ int UtcDaliTextRevealWordPlanP(void)
 
   const Reveal::Plan plan = Reveal::BuildPlan(text, 6u, glyphMap, 7u, Reveal::Unit::WORD,
                                               UiText::Reveal::AUTO_FADE_DURATION_RATIO, breaks);
+  DALI_TEST_CHECK(!plan.HasPixelTiming());
   DALI_TEST_EQUALS(plan.GetUnitCount(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(plan.glyphToUnit[0], 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(plan.glyphToUnit[1], 0u, TEST_LOCATION);
@@ -796,7 +835,13 @@ int UtcDaliTextRevealCharacterPlanP(void)
   const UiText::CharacterIndex glyphMap[] = {0u, 1u, 4u, 5u, 6u, 7u, 7u};
   const Reveal::Plan           plan       = Reveal::BuildPlan(text, 9u, glyphMap, 7u,
                                                               Reveal::Unit::CHARACTER, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+  const Reveal::Plan           pixelPlan  = Reveal::BuildPlan(text, 9u, glyphMap, 7u,
+                                                              Reveal::Unit::PIXEL, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
 
+  DALI_TEST_CHECK(!plan.HasPixelTiming());
+  DALI_TEST_CHECK(pixelPlan.glyphToUnit == plan.glyphToUnit);
+  DALI_TEST_CHECK(pixelPlan.unitStart == plan.unitStart);
+  DALI_TEST_CHECK(!pixelPlan.HasPixelTiming());
   DALI_TEST_EQUALS(plan.GetUnitCount(), 5u, TEST_LOCATION);
   DALI_TEST_EQUALS(plan.glyphToUnit[0], 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(plan.glyphToUnit[1], 1u, TEST_LOCATION);
@@ -1471,5 +1516,789 @@ int UtcDaliTextRevealMetadataOwnershipHaloP(void)
   std::vector<uint8_t> empty(3u * 3u * PIXEL_SIZE, 0u);
   Reveal::ExpandMetadataOwnership(empty.data(), 3u, 3u);
   DALI_TEST_CHECK(std::all_of(empty.begin(), empty.end(), [](uint8_t value) { return value == 0u; }));
+  END_TEST;
+}
+int UtcDaliTextRevealPixelP(void)
+{
+  UiTestApplication application;
+
+  auto BuildFinalPixelPlan = [](UiText::ControllerPtr controller,
+                                float                 fadeRatio,
+                                Reveal::Sequence      sequence = Reveal::Sequence::WHOLE_TEXT,
+                                float                 staggerRatio = 0.0f)
+  {
+    const UiText::ModelInterface* model = controller->GetRenderTextModel();
+    DALI_TEST_CHECK(model);
+    UiText::TypesetterPtr typesetter = UiText::Typesetter::New(model);
+    typesetter->SetFinalElisionResult(controller->GetFinalElisionResult());
+    const Reveal::Plan source = Reveal::BuildPixelPlan(*model, fadeRatio);
+    return typesetter->CreateFinalRevealPlan(source, Reveal::Unit::PIXEL, sequence, staggerRatio);
+  };
+
+  // PIXEL reuses the exact CHARACTER logical skeleton. Mixed bidi changes
+  // visual X direction inside RTL clusters, not the global logical unit order.
+  UiText::ControllerPtr bidi = UiText::Controller::New();
+  bidi->SetText("ABC אבג DEF\nالعربية Hello 123\nHello עברית 123");
+  bidi->SetDefaultFontSize(28.0f, UiText::Controller::PIXEL_SIZE);
+  bidi->SetMultiLineEnabled(true);
+  const Vector2 bidiSize(640.0f, 220.0f);
+  bidi->Relayout(bidiSize);
+  // The UTC text-abstraction stub intentionally does not implement Unicode
+  // bidi. Seed the resolved per-character directions that production HarfBuzz
+  // and bidi support provide so the PIXEL interpolation policy is exercised.
+  UiText::Controller::Impl& bidiImpl = UiText::Controller::Impl::GetImplementation(*bidi.Get());
+  auto&                     logical  = *bidiImpl.mModel->mLogicalModel;
+  logical.mCharacterDirections.Resize(logical.mText.Count());
+  for(UiText::CharacterIndex character = 0u; character < logical.mText.Count(); ++character)
+  {
+    const UiText::Character value = logical.mText[character];
+    logical.mCharacterDirections[character] = (value >= 0x0590u && value <= 0x08ffu);
+  }
+  const UiText::ModelInterface* bidiModel = bidi->GetRenderTextModel();
+  DALI_TEST_CHECK(bidiModel);
+
+  UiText::TypesetterPtr characterTypesetter = UiText::Typesetter::New(bidiModel);
+  const Reveal::Plan    characterSource     = Reveal::BuildCharacterPlan(*bidiModel, 0.25f);
+  const Reveal::Plan    characterFinal      = characterTypesetter->CreateFinalRevealPlan(characterSource,
+                                                                                          Reveal::Unit::CHARACTER);
+  const Reveal::Plan    pixelFinal          = BuildFinalPixelPlan(bidi, 0.25f);
+  DALI_TEST_CHECK(pixelFinal.HasPixelTiming());
+  DALI_TEST_CHECK(pixelFinal.glyphToUnit == characterFinal.glyphToUnit);
+  DALI_TEST_EQUALS(pixelFinal.pixelUnitTiming.size(), pixelFinal.unitStart.size(), TEST_LOCATION);
+  DALI_TEST_EQUALS(pixelFinal.fadeDuration, 0.25f, EPSILON, TEST_LOCATION);
+
+  bool foundLeftToRight = false;
+  bool foundRightToLeft = false;
+  for(uint32_t unit = 0u; unit < pixelFinal.GetUnitCount(); ++unit)
+  {
+    const Reveal::PixelUnitTiming& timing = pixelFinal.pixelUnitTiming[unit];
+    DALI_TEST_CHECK(timing.visualMaximum > timing.visualMinimum);
+    DALI_TEST_CHECK(timing.progressionSpan > 0.0f);
+    const float left  = Reveal::ResolvePixelStart(pixelFinal, unit, timing.visualMinimum);
+    const float right = Reveal::ResolvePixelStart(pixelFinal, unit, timing.visualMaximum);
+    if(timing.rightToLeft)
+    {
+      foundRightToLeft = true;
+      DALI_TEST_CHECK(left > right);
+    }
+    else
+    {
+      foundLeftToRight = true;
+      DALI_TEST_CHECK(left < right);
+    }
+    if(unit > 0u)
+    {
+      DALI_TEST_CHECK(pixelFinal.unitStart[unit - 1u] <= pixelFinal.unitStart[unit]);
+    }
+  }
+  DALI_TEST_CHECK(foundLeftToRight && foundRightToLeft);
+
+  // RG16 contains dense intra-cluster timings; the Plan remains one entry per
+  // final shaping cluster instead of one entry per physical pixel.
+  UiText::TypesetterPtr bidiTypesetter = UiText::Typesetter::New(bidiModel);
+  float                 fadeDuration  = 0.0f;
+  PixelData             metadata      = bidiTypesetter->RenderTextRevealMetadata(
+    bidiSize, UiText::Direction::LEFT_TO_RIGHT, pixelFinal, fadeDuration);
+  DALI_TEST_CHECK(metadata);
+  DALI_TEST_EQUALS(fadeDuration, pixelFinal.fadeDuration, EPSILON, TEST_LOCATION);
+  const Dali::Integration::PixelDataBuffer metadataPixels = Dali::Integration::GetPixelDataBuffer(metadata);
+  DALI_TEST_CHECK(metadataPixels.buffer);
+  std::vector<bool> encodedStarts(65536u, false);
+  uint32_t          distinctStarts = 0u;
+  for(uint32_t y = 0u; y < metadata.GetHeight(); ++y)
+  {
+    const uint8_t* row = metadataPixels.buffer + static_cast<size_t>(y) * metadata.GetStrideBytes();
+    for(uint32_t x = 0u; x < metadata.GetWidth(); ++x)
+    {
+      const uint8_t* pixel = row + static_cast<size_t>(x) * 4u;
+      if(pixel[2u] != 0u)
+      {
+        const uint32_t encoded = static_cast<uint32_t>(pixel[0u]) * 256u + pixel[1u];
+        if(!encodedStarts[encoded])
+        {
+          encodedStarts[encoded] = true;
+          ++distinctStarts;
+        }
+      }
+    }
+  }
+  DALI_TEST_CHECK(distinctStarts > pixelFinal.GetUnitCount());
+
+  UiText::ControllerPtr weights = UiText::Controller::New();
+  weights->SetDefaultFontSize(32.0f, UiText::Controller::PIXEL_SIZE);
+  UiText::StyledTextBuilder weightBuilder = UiText::StyledTextBuilder::New("I WWWW");
+  UiText::FontAttributes   largeAttributes;
+  largeAttributes.SetSize(64.0f);
+  DALI_TEST_CHECK(weightBuilder.SetSpan(UiText::FontSpan::New(largeAttributes), 2u, 5u));
+  weights->SetStyledText(weightBuilder.Build());
+  weights->Relayout(Size(400.0f, 100.0f));
+
+  const Reveal::Plan weightedPlan = BuildFinalPixelPlan(weights, 0.25f);
+  DALI_TEST_CHECK(weightedPlan.GetUnitCount() > 2u);
+  bool               foundDifferentSpan = false;
+  for(uint32_t unit = 1u; unit < weightedPlan.GetUnitCount(); ++unit)
+  {
+    foundDifferentSpan |= std::abs(weightedPlan.pixelUnitTiming[unit].progressionSpan -
+                                   weightedPlan.pixelUnitTiming[0u].progressionSpan) > EPSILON;
+  }
+  DALI_TEST_CHECK(foundDifferentSpan);
+
+  UiText::ControllerPtr noSpace = UiText::Controller::New();
+  noSpace->SetText("IWWWW");
+  noSpace->SetDefaultFontSize(32.0f, UiText::Controller::PIXEL_SIZE);
+  noSpace->Relayout(Size(400.0f, 100.0f));
+  const Reveal::Plan noSpacePlan = BuildFinalPixelPlan(noSpace, 0.25f);
+  DALI_TEST_EQUALS(weightedPlan.GetUnitCount(), noSpacePlan.GetUnitCount(), TEST_LOCATION);
+  DALI_TEST_CHECK(weightedPlan.unitStart[1u] > noSpacePlan.unitStart[1u]);
+
+  // Spatial AUTO is based on final visual progression and text height rather
+  // than the CHARACTER cluster count. Explicit ratios remain unchanged.
+  const Reveal::Plan spatialAuto = BuildFinalPixelPlan(weights, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+  DALI_TEST_CHECK(spatialAuto.fadeDuration > 0.0f);
+  DALI_TEST_CHECK(spatialAuto.fadeDuration <= 1.0f);
+
+  // LINE uses final layout lines and the existing fixed stagger ratio,
+  // while retaining width-proportional progression inside each sequence.
+  UiText::ControllerPtr lineController = UiText::Controller::New();
+  lineController->SetText("WWWW WWWW\nI");
+  lineController->SetDefaultFontSize(32.0f, UiText::Controller::PIXEL_SIZE);
+  lineController->SetMultiLineEnabled(true);
+  lineController->Relayout(Size(400.0f, 160.0f));
+  const Reveal::Plan linePlan = BuildFinalPixelPlan(lineController, 0.25f, Reveal::Sequence::PER_LINE, 0.25f);
+  DALI_TEST_CHECK(linePlan.HasPixelTiming());
+  DALI_TEST_CHECK(linePlan.GetUnitCount() > 2u);
+  const UiText::ModelInterface* lineModel = lineController->GetRenderTextModel();
+  DALI_TEST_CHECK(lineModel && lineModel->GetNumberOfLines() == 2u);
+  UiText::TypesetterPtr lineTypesetter = UiText::Typesetter::New(lineModel);
+  lineTypesetter->CreateFinalRevealPlan(Reveal::BuildPixelPlan(*lineModel, 0.25f),
+                                       Reveal::Unit::PIXEL,
+                                       Reveal::Sequence::PER_LINE,
+                                       0.25f);
+  UiText::ViewModel* lineViewModel = lineTypesetter->GetViewModel();
+  DALI_TEST_CHECK(lineViewModel);
+  const UiText::LineRun* finalLines = lineViewModel->GetLines();
+  float firstLineStart  = 1.0f;
+  float secondLineStart = 1.0f;
+  for(UiText::GlyphIndex glyph = finalLines[0u].glyphRun.glyphIndex;
+      glyph < finalLines[0u].glyphRun.glyphIndex + finalLines[0u].glyphRun.numberOfGlyphs;
+      ++glyph)
+  {
+    const uint32_t unit = linePlan.glyphToUnit[glyph];
+    if(unit != Reveal::NO_UNIT)
+    {
+      firstLineStart = std::min(firstLineStart, linePlan.unitStart[unit]);
+    }
+  }
+  for(UiText::GlyphIndex glyph = finalLines[1u].glyphRun.glyphIndex;
+      glyph < finalLines[1u].glyphRun.glyphIndex + finalLines[1u].glyphRun.numberOfGlyphs;
+      ++glyph)
+  {
+    const uint32_t unit = linePlan.glyphToUnit[glyph];
+    if(unit != Reveal::NO_UNIT)
+    {
+      secondLineStart = std::min(secondLineStart, linePlan.unitStart[unit]);
+    }
+  }
+  DALI_TEST_EQUALS(firstLineStart, 0.0f, EPSILON, TEST_LOCATION);
+  DALI_TEST_CHECK(secondLineStart > firstLineStart);
+
+  // Replacement width never enters the PIXEL schedule and every surviving
+  // descriptor has an ordinary text glyph backing it.
+  UiText::ControllerPtr replacement = BuildReplacementController("A icon B", {{2u, 4u}}, Size(320.0f, 80.0f));
+  const UiText::ModelInterface* replacementModel = replacement->GetRenderTextModel();
+  DALI_TEST_CHECK(replacementModel);
+  const Reveal::Plan replacementPlan = BuildFinalPixelPlan(replacement, 0.25f);
+  DALI_TEST_EQUALS(replacementPlan.GetUnitCount(), 2u, TEST_LOCATION);
+  std::vector<bool> replacementBacked(replacementPlan.GetUnitCount(), false);
+  for(UiText::GlyphIndex glyph = 0u; glyph < replacementModel->GetNumberOfGlyphs(); ++glyph)
+  {
+    const uint32_t unit = replacementPlan.glyphToUnit[glyph];
+    if(UiText::IsSyntheticReplacementGlyph(replacementModel->GetGlyphs()[glyph]))
+    {
+      DALI_TEST_EQUALS(unit, Reveal::NO_UNIT, TEST_LOCATION);
+    }
+    else if(unit != Reveal::NO_UNIT)
+    {
+      replacementBacked[unit] = true;
+    }
+  }
+  DALI_TEST_CHECK(std::all_of(replacementBacked.begin(), replacementBacked.end(), [](bool value)
+  {
+    return value;
+  }));
+
+  // Negative spacing retains finite spatial timing.
+  UiText::ControllerPtr overlap = UiText::Controller::New();
+  overlap->SetText("AVATAR ffi office");
+  overlap->SetDefaultFontSize(40.0f, UiText::Controller::PIXEL_SIZE);
+  overlap->SetCharacterSpacing(-12.0f);
+  const Vector2 overlapSize(480.0f, 120.0f);
+  overlap->Relayout(overlapSize);
+  const Reveal::Plan overlapPlan = BuildFinalPixelPlan(overlap, 0.25f);
+  for(uint32_t unit = 0u; unit < overlapPlan.GetUnitCount(); ++unit)
+  {
+    DALI_TEST_CHECK(std::isfinite(overlapPlan.unitStart[unit]));
+    DALI_TEST_CHECK(std::isfinite(overlapPlan.pixelUnitTiming[unit].progressionSpan));
+  }
+  for(float explicitFade : {0.0f, 0.5f, 1.0f})
+  {
+    const Reveal::Plan explicitPlan = BuildFinalPixelPlan(overlap, explicitFade);
+    DALI_TEST_EQUALS(explicitPlan.fadeDuration, explicitFade, EPSILON, TEST_LOCATION);
+    for(const Reveal::PixelUnitTiming& timing : explicitPlan.pixelUnitTiming)
+    {
+      if(explicitFade < 1.0f)
+      {
+        DALI_TEST_CHECK(timing.progressionSpan > 0.0f);
+      }
+      else
+      {
+        DALI_TEST_EQUALS(timing.progressionSpan, 0.0f, EPSILON, TEST_LOCATION);
+      }
+    }
+  }
+
+  // MaximumLines and END ellipsis schedule only the authoritative final
+  // glyphs. A much longer hidden suffix must not change spatial timing.
+  struct ElidedPixelResult
+  {
+    Reveal::Plan plan;
+    uint32_t     sourceUnitCount{0u};
+  };
+  auto BuildElidedResult = [&](const char* hiddenSuffix)
+  {
+    UiText::ControllerPtr controller = UiText::Controller::New();
+    controller->SetText((std::string("Alpha beta\nGamma delta\n") + hiddenSuffix).c_str());
+    controller->SetDefaultFontSize(24.0f, UiText::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(UiText::EllipsisPosition::END);
+    controller->SetMaximumNumberOfLines(2u);
+    controller->Relayout(Size(500.0f, 500.0f));
+    const UiText::ModelInterface* model = controller->GetRenderTextModel();
+    DALI_TEST_CHECK(model);
+    const UiText::FinalElisionResult* finalElision = controller->GetFinalElisionResult();
+    DALI_TEST_CHECK(finalElision && finalElision->resolved && finalElision->textElided);
+    UiText::TypesetterPtr typesetter = UiText::Typesetter::New(model);
+    typesetter->SetFinalElisionResult(finalElision);
+    const Reveal::Plan source = Reveal::BuildPixelPlan(*model, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+    ElidedPixelResult result;
+    result.sourceUnitCount = source.GetUnitCount();
+    result.plan = typesetter->CreateFinalRevealPlan(source,
+                                                    Reveal::Unit::PIXEL,
+                                                    Reveal::Sequence::PER_LINE,
+                                                    0.25f);
+    UiText::ViewModel* viewModel = typesetter->GetViewModel();
+    DALI_TEST_CHECK(viewModel);
+    const UiText::GlyphIndex ellipsis = viewModel->GetEllipsisFinalGlyphIndex();
+    DALI_TEST_CHECK(ellipsis < result.plan.glyphToUnit.size());
+    DALI_TEST_CHECK(result.plan.glyphToUnit[ellipsis] != Reveal::NO_UNIT);
+    return result;
+  };
+  const ElidedPixelResult shortHidden = BuildElidedResult("hidden");
+  const ElidedPixelResult longHidden  = BuildElidedResult(
+    "hidden suffix repeated many times hidden suffix repeated many times hidden suffix repeated many times");
+  DALI_TEST_CHECK(longHidden.sourceUnitCount > shortHidden.sourceUnitCount);
+  DALI_TEST_CHECK(shortHidden.plan.glyphToUnit == longHidden.plan.glyphToUnit);
+  DALI_TEST_EQUALS(shortHidden.plan.unitStart.size(), longHidden.plan.unitStart.size(), TEST_LOCATION);
+  DALI_TEST_EQUALS(shortHidden.plan.fadeDuration, longHidden.plan.fadeDuration, EPSILON, TEST_LOCATION);
+  for(uint32_t unit = 0u; unit < shortHidden.plan.GetUnitCount(); ++unit)
+  {
+    DALI_TEST_EQUALS(shortHidden.plan.unitStart[unit], longHidden.plan.unitStart[unit], EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(shortHidden.plan.pixelUnitTiming[unit].progressionSpan,
+                     longHidden.plan.pixelUnitTiming[unit].progressionSpan,
+                     EPSILON,
+                     TEST_LOCATION);
+  }
+
+  // The canonical full-layout descriptor is reused by height tiles; tile
+  // boundaries do not locally renormalize PIXEL timing.
+  const Vector2 tileSize(180.0f, 160.0f);
+  UiText::ControllerPtr tileController = UiText::Controller::New();
+  tileController->SetText("Agjpqy Agjpqy Agjpqy Agjpqy Agjpqy");
+  tileController->SetDefaultFontSize(40.0f, UiText::Controller::PIXEL_SIZE);
+  tileController->SetMultiLineEnabled(true);
+  tileController->Relayout(tileSize);
+  const UiText::ModelInterface* tileModel = tileController->GetRenderTextModel();
+  DALI_TEST_CHECK(tileModel);
+  UiText::TypesetterPtr tileTypesetter = UiText::Typesetter::New(tileModel);
+  const Reveal::Plan tilePlan = tileTypesetter->CreateFinalRevealPlan(
+    Reveal::BuildPixelPlan(*tileModel, 0.25f),
+    Reveal::Unit::PIXEL,
+    Reveal::Sequence::PER_LINE,
+    0.25f);
+  float     tileDuration = 0.0f;
+  PixelData fullMetadata = tileTypesetter->RenderTextRevealMetadata(
+    tileSize, UiText::Direction::LEFT_TO_RIGHT, tilePlan, tileDuration);
+  DALI_TEST_CHECK(fullMetadata);
+  const uint32_t boundary = fullMetadata.GetHeight() / 2u;
+  PixelData upperMetadata = tileTypesetter->RenderTextRevealMetadata(
+    Vector2(tileSize.width, static_cast<float>(boundary)),
+    UiText::Direction::LEFT_TO_RIGHT,
+    tilePlan,
+    tileDuration,
+    0u,
+    tileSize);
+  PixelData lowerMetadata = tileTypesetter->RenderTextRevealMetadata(
+    Vector2(tileSize.width, tileSize.height - static_cast<float>(boundary)),
+    UiText::Direction::LEFT_TO_RIGHT,
+    tilePlan,
+    tileDuration,
+    boundary,
+    tileSize);
+  DALI_TEST_CHECK(upperMetadata && lowerMetadata);
+  const Dali::Integration::PixelDataBuffer fullTilePixels = Dali::Integration::GetPixelDataBuffer(fullMetadata);
+  const Dali::Integration::PixelDataBuffer upperTilePixels = Dali::Integration::GetPixelDataBuffer(upperMetadata);
+  const Dali::Integration::PixelDataBuffer lowerTilePixels = Dali::Integration::GetPixelDataBuffer(lowerMetadata);
+  const size_t tileRowBytes = static_cast<size_t>(fullMetadata.GetWidth()) * 4u;
+  for(uint32_t y = 0u; y < fullMetadata.GetHeight(); ++y)
+  {
+    const uint8_t* tiledRow = y < boundary
+                                ? upperTilePixels.buffer + static_cast<size_t>(y) * upperMetadata.GetStrideBytes()
+                                : lowerTilePixels.buffer + static_cast<size_t>(y - boundary) * lowerMetadata.GetStrideBytes();
+    DALI_TEST_EQUALS(std::memcmp(fullTilePixels.buffer + static_cast<size_t>(y) * fullMetadata.GetStrideBytes(),
+                                 tiledRow,
+                                 tileRowBytes),
+                     0,
+                     TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
+int UtcDaliTextRevealPixelAtomicFallbackP(void)
+{
+  UiTestApplication application;
+
+  UiText::ControllerPtr controller = UiText::Controller::New();
+  controller->SetText("Alpha beta gamma delta\nSecond line content");
+  controller->SetDefaultFontSize(24.0f, UiText::Controller::PIXEL_SIZE);
+  controller->SetMultiLineEnabled(true);
+  controller->Relayout(Size(220.0f, 180.0f));
+
+  const UiText::ModelInterface* model = controller->GetRenderTextModel();
+  DALI_TEST_CHECK(model && model->GetNumberOfLines() > 1u);
+  UiText::TypesetterPtr typesetter = UiText::Typesetter::New(model);
+  Reveal::Plan          plan       = typesetter->CreateFinalRevealPlan(
+    Reveal::BuildCharacterPlan(*model, 0.25f), Reveal::Unit::CHARACTER);
+  DALI_TEST_CHECK(plan.GetUnitCount() > 0u);
+  DALI_TEST_CHECK(!plan.HasPixelTiming());
+
+  // Force a deterministic late failure after line mapping and spatial
+  // geometry have succeeded. The authored NaN reaches final fade validation.
+  plan.fadeDurationRatio = std::numeric_limits<float>::quiet_NaN();
+  plan.fadeDuration      = 0.125f;
+  const std::vector<uint32_t> originalGlyphToUnit = plan.glyphToUnit;
+  const std::vector<float>    originalUnitStart   = plan.unitStart;
+  const float                 originalFade        = plan.fadeDuration;
+
+  DALI_TEST_CHECK(!Reveal::ApplyPixelSpatialSchedule(plan,
+                                                     *model,
+                                                     nullptr,
+                                                     std::numeric_limits<UiText::GlyphIndex>::max(),
+                                                     Reveal::Sequence::PER_LINE,
+                                                     0.25f));
+  DALI_TEST_CHECK(plan.glyphToUnit == originalGlyphToUnit);
+  DALI_TEST_CHECK(plan.unitStart == originalUnitStart);
+  DALI_TEST_EQUALS(plan.fadeDuration, originalFade, EPSILON, TEST_LOCATION);
+  DALI_TEST_CHECK(!plan.HasPixelTiming());
+
+  END_TEST;
+}
+
+int UtcDaliTextRevealPixelInsertedHyphenP(void)
+{
+  UiTestApplication application;
+
+  UiText::ControllerPtr controller = UiText::Controller::New();
+  controller->SetText("internationalization representation localization extraordinarycharactersequence");
+  controller->SetDefaultFontSize(20.0f, UiText::Controller::PIXEL_SIZE);
+  controller->SetMultiLineEnabled(true);
+  controller->SetLineWrapMode(UiText::LineWrapMode::HYPHENATION);
+  const Size layoutSize(180.0f, 400.0f);
+  controller->Relayout(layoutSize);
+
+  const UiText::ModelInterface* model = controller->GetRenderTextModel();
+  DALI_TEST_CHECK(model);
+  DALI_TEST_CHECK(model->GetHyphensCount() > 0u);
+  const UiText::Length* hyphenIndices = model->GetHyphenIndices();
+  DALI_TEST_CHECK(hyphenIndices);
+  for(UiText::Length index = 0u; index < model->GetHyphensCount(); ++index)
+  {
+    DALI_TEST_CHECK(hyphenIndices[index] > 0u);
+    DALI_TEST_CHECK(hyphenIndices[index] <= model->GetNumberOfGlyphs());
+  }
+
+  for(Reveal::Sequence sequence : {Reveal::Sequence::WHOLE_TEXT, Reveal::Sequence::PER_LINE})
+  {
+    UiText::TypesetterPtr typesetter = UiText::Typesetter::New(model);
+    const Reveal::Plan    characterPlan = typesetter->CreateFinalRevealPlan(
+      Reveal::BuildCharacterPlan(*model, 0.25f), Reveal::Unit::CHARACTER, sequence, 0.25f);
+    const Reveal::Plan    plan       = typesetter->CreateFinalRevealPlan(
+      Reveal::BuildPixelPlan(*model, 0.25f), Reveal::Unit::PIXEL, sequence, 0.25f);
+    DALI_TEST_CHECK(plan.GetUnitCount() > 0u);
+    DALI_TEST_EQUALS(plan.GetUnitCount(), characterPlan.GetUnitCount(), TEST_LOCATION);
+    DALI_TEST_CHECK(plan.glyphToUnit == characterPlan.glyphToUnit);
+    DALI_TEST_CHECK(plan.HasPixelTiming());
+    DALI_TEST_EQUALS(plan.pixelUnitTiming.size(), plan.unitStart.size(), TEST_LOCATION);
+    for(uint32_t unit = 0u; unit < plan.GetUnitCount(); ++unit)
+    {
+      const Reveal::PixelUnitTiming& timing = plan.pixelUnitTiming[unit];
+      DALI_TEST_CHECK(std::isfinite(plan.unitStart[unit]));
+      DALI_TEST_CHECK(std::isfinite(timing.visualMinimum));
+      DALI_TEST_CHECK(std::isfinite(timing.visualMaximum));
+      DALI_TEST_CHECK(std::isfinite(timing.progressionSpan));
+      DALI_TEST_CHECK(timing.visualMaximum > timing.visualMinimum);
+    }
+
+    float     fadeDuration = 0.0f;
+    PixelData metadata     = typesetter->RenderTextRevealMetadata(
+      layoutSize, UiText::Direction::LEFT_TO_RIGHT, plan, fadeDuration);
+    DALI_TEST_CHECK(metadata);
+    DALI_TEST_EQUALS(fadeDuration, plan.fadeDuration, EPSILON, TEST_LOCATION);
+    const Dali::Integration::PixelDataBuffer pixels = Dali::Integration::GetPixelDataBuffer(metadata);
+    DALI_TEST_CHECK(pixels.buffer);
+    bool foundEncodedStart = false;
+    for(uint32_t y = 0u; y < metadata.GetHeight() && !foundEncodedStart; ++y)
+    {
+      const uint8_t* row = pixels.buffer + static_cast<size_t>(y) * metadata.GetStrideBytes();
+      for(uint32_t x = 0u; x < metadata.GetWidth(); ++x)
+      {
+        if(row[static_cast<size_t>(x) * 4u + 2u] != 0u)
+        {
+          foundEncodedStart = true;
+          break;
+        }
+      }
+    }
+    DALI_TEST_CHECK(foundEncodedStart);
+  }
+
+  END_TEST;
+}
+
+int UtcDaliTextRevealPixelSpatialReferenceP(void)
+{
+  UiTestApplication application;
+
+  auto BuildFinalPixelPlan = [](UiText::ControllerPtr controller,
+                                float                 fadeRatio = UiText::Reveal::AUTO_FADE_DURATION_RATIO,
+                                Reveal::Sequence      sequence  = Reveal::Sequence::WHOLE_TEXT)
+  {
+    const UiText::ModelInterface* model = controller->GetRenderTextModel();
+    DALI_TEST_CHECK(model);
+    UiText::TypesetterPtr typesetter = UiText::Typesetter::New(model);
+    typesetter->SetFinalElisionResult(controller->GetFinalElisionResult());
+    return typesetter->CreateFinalRevealPlan(
+      Reveal::BuildPixelPlan(*model, fadeRatio), Reveal::Unit::PIXEL, sequence, 0.25f);
+  };
+
+  // Replacement geometry is excluded from both progression distance and the
+  // text-height reference used by spatial AUTO.
+  UiText::ControllerPtr ordinary = BuildReferenceMetricController(
+    "A  B", 20.0f, 1.0f, 1.0f, Size(320.0f, 320.0f));
+  UiText::ControllerPtr ordinaryReplacement =
+    BuildReplacementController("A X B", {{2u, 1u}}, Size(320.0f, 320.0f), false, 24.0f);
+  UiText::ControllerPtr tallReplacement =
+    BuildReplacementController("A X B", {{2u, 1u}}, Size(320.0f, 320.0f), false, 240.0f);
+  const Reveal::Plan ordinaryPlan           = BuildFinalPixelPlan(ordinary);
+  const Reveal::Plan ordinaryReplacementPlan = BuildFinalPixelPlan(ordinaryReplacement);
+  const Reveal::Plan tallReplacementPlan     = BuildFinalPixelPlan(tallReplacement);
+  DALI_TEST_EQUALS(ordinaryPlan.GetUnitCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(ordinaryReplacementPlan.glyphToUnit.size() != ordinaryPlan.glyphToUnit.size());
+  DALI_TEST_EQUALS(ordinaryReplacementPlan.GetUnitCount(), ordinaryPlan.GetUnitCount(), TEST_LOCATION);
+  DALI_TEST_EQUALS(tallReplacementPlan.GetUnitCount(), ordinaryPlan.GetUnitCount(), TEST_LOCATION);
+  DALI_TEST_EQUALS(ordinaryReplacementPlan.fadeDuration, ordinaryPlan.fadeDuration, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(tallReplacementPlan.fadeDuration, ordinaryPlan.fadeDuration, EPSILON, TEST_LOCATION);
+  for(uint32_t unit = 0u; unit < ordinaryPlan.GetUnitCount(); ++unit)
+  {
+    DALI_TEST_EQUALS(ordinaryReplacementPlan.unitStart[unit], ordinaryPlan.unitStart[unit], EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(tallReplacementPlan.unitStart[unit], ordinaryPlan.unitStart[unit], EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(ordinaryReplacementPlan.pixelUnitTiming[unit].progressionSpan,
+                     ordinaryPlan.pixelUnitTiming[unit].progressionSpan,
+                     EPSILON,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(tallReplacementPlan.pixelUnitTiming[unit].progressionSpan,
+                     ordinaryPlan.pixelUnitTiming[unit].progressionSpan,
+                     EPSILON,
+                     TEST_LOCATION);
+  }
+
+  UiText::ControllerPtr replacementOnly =
+    BuildReplacementController("X", {{0u, 1u}}, Size(320.0f, 320.0f), false, 240.0f);
+  const Reveal::Plan replacementOnlyPlan = BuildFinalPixelPlan(replacementOnly);
+  DALI_TEST_EQUALS(replacementOnlyPlan.GetUnitCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!replacementOnlyPlan.HasPixelTiming());
+
+  // Leading/trailing whitespace does not alter normalized timing. An
+  // internal gap does, while newline itself never becomes a timing unit.
+  UiText::ControllerPtr trimmed = BuildReferenceMetricController(
+    "Hello World", 24.0f, 1.0f, 1.0f, Size(480.0f, 160.0f));
+  UiText::ControllerPtr padded = BuildReferenceMetricController(
+    "   Hello World   ", 24.0f, 1.0f, 1.0f, Size(480.0f, 160.0f));
+  const Reveal::Plan trimmedPlan = BuildFinalPixelPlan(trimmed, 0.25f);
+  const Reveal::Plan paddedPlan  = BuildFinalPixelPlan(padded, 0.25f);
+  DALI_TEST_EQUALS(trimmedPlan.GetUnitCount(), paddedPlan.GetUnitCount(), TEST_LOCATION);
+  DALI_TEST_CHECK(trimmedPlan.unitStart == paddedPlan.unitStart);
+  for(uint32_t unit = 0u; unit < trimmedPlan.GetUnitCount(); ++unit)
+  {
+    DALI_TEST_EQUALS(trimmedPlan.pixelUnitTiming[unit].progressionSpan,
+                     paddedPlan.pixelUnitTiming[unit].progressionSpan,
+                     EPSILON,
+                     TEST_LOCATION);
+  }
+
+  UiText::ControllerPtr multiline = BuildReferenceMetricController(
+    "Hello\nWorld", 24.0f, 1.0f, 1.0f, Size(480.0f, 160.0f));
+  const UiText::ModelInterface* multilineModel = multiline->GetRenderTextModel();
+  const Reveal::Plan            multilinePlan  = BuildFinalPixelPlan(multiline, 0.25f);
+  DALI_TEST_CHECK(multilineModel && multilineModel->GetNumberOfLines() == 2u);
+  DALI_TEST_EQUALS(multilinePlan.GetUnitCount(), 10u, TEST_LOCATION);
+  DALI_TEST_CHECK(std::all_of(multilinePlan.unitStart.begin(), multilinePlan.unitStart.end(), [](float value)
+  {
+    return std::isfinite(value);
+  }));
+
+  // Uniform UI scale changes final geometry but does not turn PIXEL into a
+  // physical framebuffer-pixel count. The normalized spatial cadence remains
+  // stable within font rasterization tolerance.
+  float baselineFade = 0.0f;
+  for(float uiScale : {0.8f, 1.0f, 1.2f, 1.4f})
+  {
+    UiText::ControllerPtr scaled = BuildReferenceMetricController(
+      "AVATAR ffi office 안녕하세요", 24.0f, 1.0f, uiScale, Size(800.0f, 192.0f));
+    const Reveal::Plan scaledPlan = BuildFinalPixelPlan(scaled);
+    DALI_TEST_CHECK(scaledPlan.HasPixelTiming());
+    DALI_TEST_CHECK(std::isfinite(scaledPlan.fadeDuration));
+    if(uiScale == 0.8f)
+    {
+      baselineFade = scaledPlan.fadeDuration;
+    }
+    else
+    {
+      DALI_TEST_CHECK(std::abs(scaledPlan.fadeDuration - baselineFade) < 0.05f);
+    }
+  }
+
+  // Line alignment is a raster placement offset. Scheduler geometry and
+  // intra-cluster direction stay in the model coordinate system.
+  Reveal::Plan alignmentReference;
+  bool         haveAlignmentReference = false;
+  for(UiText::Alignment alignment : {UiText::Alignment::START,
+                                     UiText::Alignment::CENTER,
+                                     UiText::Alignment::END})
+  {
+    UiText::ControllerPtr aligned = BuildReferenceMetricController(
+      "Alignment PIXEL", 32.0f, 1.0f, 1.0f, Size(640.0f, 128.0f));
+    aligned->SetHorizontalAlignment(alignment);
+    aligned->Relayout(Size(640.0f, 128.0f));
+    const Reveal::Plan alignedPlan = BuildFinalPixelPlan(aligned, 0.25f);
+    DALI_TEST_CHECK(alignedPlan.HasPixelTiming());
+    if(!haveAlignmentReference)
+    {
+      alignmentReference     = alignedPlan;
+      haveAlignmentReference = true;
+    }
+    else
+    {
+      DALI_TEST_CHECK(alignedPlan.glyphToUnit == alignmentReference.glyphToUnit);
+      DALI_TEST_CHECK(alignedPlan.unitStart == alignmentReference.unitStart);
+      DALI_TEST_EQUALS(alignedPlan.pixelUnitTiming.size(),
+                       alignmentReference.pixelUnitTiming.size(),
+                       TEST_LOCATION);
+      for(uint32_t unit = 0u; unit < alignedPlan.GetUnitCount(); ++unit)
+      {
+        DALI_TEST_EQUALS(alignedPlan.pixelUnitTiming[unit].visualMinimum,
+                         alignmentReference.pixelUnitTiming[unit].visualMinimum,
+                         EPSILON,
+                         TEST_LOCATION);
+        DALI_TEST_EQUALS(alignedPlan.pixelUnitTiming[unit].visualMaximum,
+                         alignmentReference.pixelUnitTiming[unit].visualMaximum,
+                         EPSILON,
+                         TEST_LOCATION);
+      }
+    }
+  }
+
+  const Reveal::Plan oneLineText = BuildFinalPixelPlan(trimmed, 0.25f, Reveal::Sequence::WHOLE_TEXT);
+  const Reveal::Plan oneLineLine = BuildFinalPixelPlan(trimmed, 0.25f, Reveal::Sequence::PER_LINE);
+  DALI_TEST_CHECK(oneLineText.glyphToUnit == oneLineLine.glyphToUnit);
+  DALI_TEST_CHECK(oneLineText.unitStart == oneLineLine.unitStart);
+  DALI_TEST_EQUALS(oneLineText.fadeDuration, oneLineLine.fadeDuration, EPSILON, TEST_LOCATION);
+
+  for(float largeSize : {40.0f, 84.0f})
+  {
+    for(bool heading : {false, true})
+    {
+      UiText::ControllerPtr mixed = BuildMixedSizeReferenceMetricController(
+        largeSize, heading, heading ? Size(180.0f, 640.0f) : Size(640.0f, 256.0f));
+      const Reveal::Plan mixedPlan = BuildFinalPixelPlan(mixed);
+      DALI_TEST_CHECK(mixedPlan.HasPixelTiming());
+      DALI_TEST_CHECK(std::isfinite(mixedPlan.fadeDuration));
+      DALI_TEST_CHECK(std::all_of(mixedPlan.pixelUnitTiming.begin(), mixedPlan.pixelUnitTiming.end(), [](const auto& timing)
+      {
+        return std::isfinite(timing.progressionSpan) && timing.visualMaximum > timing.visualMinimum;
+      }));
+    }
+  }
+
+  END_TEST;
+}
+
+int UtcDaliTextRevealPixelMixedLineAutoP(void)
+{
+  UiTestApplication application;
+
+  // The long 20px line is identical in all fixtures. Changing or reordering
+  // the unrelated short line must not change that line's LINE AUTO cadence.
+  const std::string longLine =
+    "Your reservation is confirmed. Check in before 18:30 and keep your boarding pass ready.";
+
+  auto buildController = [&](float shortLineSize, bool shortLineFirst)
+  {
+    const std::string shortLine = "Gate 4";
+    const std::string text      = shortLineFirst ? shortLine + "\n" + longLine
+                                                 : longLine + "\n" + shortLine;
+    UiText::StyledTextBuilder builder = UiText::StyledTextBuilder::New(text.c_str());
+    UiText::FontAttributes    shortLineAttributes;
+    shortLineAttributes.SetSize(shortLineSize);
+    const uint32_t shortLineStart = shortLineFirst ? 0u : longLine.size() + 1u;
+    DALI_TEST_CHECK(builder.SetSpan(UiText::FontSpan::New(shortLineAttributes),
+                                   shortLineStart,
+                                   shortLineStart + shortLine.size()));
+
+    UiText::ControllerPtr controller = UiText::Controller::New();
+    controller->SetDefaultFontSize(20.0f, UiText::Controller::PIXEL_SIZE);
+    controller->SetStyledText(builder.Build());
+    controller->SetMultiLineEnabled(true);
+    controller->Relayout(Size(1200.0f, 360.0f));
+    return controller;
+  };
+
+  auto buildPlan = [](UiText::ControllerPtr controller,
+                      float                 fadeRatio,
+                      Reveal::Sequence      sequence = Reveal::Sequence::PER_LINE)
+  {
+    const UiText::ModelInterface* model = controller->GetRenderTextModel();
+    DALI_TEST_CHECK(model && model->GetNumberOfLines() == 2u);
+    UiText::TypesetterPtr typesetter = UiText::Typesetter::New(model);
+    return typesetter->CreateFinalRevealPlan(
+      Reveal::BuildPixelPlan(*model, fadeRatio),
+      Reveal::Unit::PIXEL,
+      sequence,
+      0.0f);
+  };
+
+  auto getLineCompletion = [](const Reveal::Plan&          plan,
+                              const UiText::ModelInterface& model,
+                              uint32_t                      line)
+  {
+    DALI_TEST_CHECK(line < model.GetNumberOfLines());
+    const UiText::LineRun* lines = model.GetLines();
+    std::vector<bool>      seen(plan.GetUnitCount(), false);
+    float                  completion = 0.0f;
+    auto                   includeRun = [&](const UiText::GlyphRun& run)
+    {
+      for(uint32_t glyph = run.glyphIndex; glyph < run.glyphIndex + run.numberOfGlyphs; ++glyph)
+      {
+        const uint32_t unit = plan.glyphToUnit[glyph];
+        if(unit == Reveal::NO_UNIT || seen[unit])
+        {
+          continue;
+        }
+        seen[unit] = true;
+        completion = std::max(completion,
+                              plan.unitStart[unit] + plan.pixelUnitTiming[unit].progressionSpan + plan.fadeDuration);
+      }
+    };
+    includeRun(lines[line].glyphRun);
+    if(lines[line].isSplitToTwoHalves)
+    {
+      includeRun(lines[line].glyphRunSecondHalf);
+    }
+    return completion;
+  };
+
+  UiText::ControllerPtr control = buildController(20.0f, false);
+  UiText::ControllerPtr mixed   = buildController(84.0f, false);
+  UiText::ControllerPtr inverse = buildController(84.0f, true);
+  const Reveal::Plan    controlPlan = buildPlan(control, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+  const Reveal::Plan    mixedPlan   = buildPlan(mixed, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+  const Reveal::Plan    inversePlan = buildPlan(inverse, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+  DALI_TEST_CHECK(controlPlan.HasPixelTiming() && mixedPlan.HasPixelTiming() && inversePlan.HasPixelTiming());
+
+  DALI_TEST_EQUALS(mixedPlan.fadeDuration, controlPlan.fadeDuration, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(inversePlan.fadeDuration, controlPlan.fadeDuration, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(getLineCompletion(controlPlan, *control->GetRenderTextModel(), 0u),
+                   getLineCompletion(mixedPlan, *mixed->GetRenderTextModel(), 0u),
+                   EPSILON,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(getLineCompletion(controlPlan, *control->GetRenderTextModel(), 0u),
+                   getLineCompletion(inversePlan, *inverse->GetRenderTextModel(), 1u),
+                   EPSILON,
+                   TEST_LOCATION);
+
+  for(float explicitRatio : {0.0f, 0.25f, 0.5f, 1.0f})
+  {
+    const Reveal::Plan controlExplicit = buildPlan(control, explicitRatio);
+    const Reveal::Plan mixedExplicit   = buildPlan(mixed, explicitRatio);
+    const Reveal::Plan inverseExplicit = buildPlan(inverse, explicitRatio);
+    DALI_TEST_EQUALS(controlExplicit.fadeDuration, explicitRatio, EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(mixedExplicit.fadeDuration, explicitRatio, EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(inverseExplicit.fadeDuration, explicitRatio, EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(getLineCompletion(controlExplicit, *control->GetRenderTextModel(), 0u),
+                     getLineCompletion(mixedExplicit, *mixed->GetRenderTextModel(), 0u),
+                     EPSILON,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(getLineCompletion(controlExplicit, *control->GetRenderTextModel(), 0u),
+                     getLineCompletion(inverseExplicit, *inverse->GetRenderTextModel(), 1u),
+                     EPSILON,
+                     TEST_LOCATION);
+  }
+
+  const Reveal::Plan explicitTextPlan = buildPlan(mixed, 0.25f, Reveal::Sequence::WHOLE_TEXT);
+  DALI_TEST_EQUALS(explicitTextPlan.fadeDuration, 0.25f, EPSILON, TEST_LOCATION);
+
+  // Per-line text scale remains text-only when replacement geometry inflates
+  // a line: 24px and 240px ImageSpan heights resolve the same text cadence.
+  const std::string replacementText = longLine + "\nA X B";
+  const uint32_t    replacementIndex = longLine.size() + 3u;
+  UiText::ControllerPtr replacement = BuildReplacementController(replacementText.c_str(),
+                                                                 {{replacementIndex, 1u}},
+                                                                 Size(1200.0f, 360.0f),
+                                                                 false,
+                                                                 24.0f);
+  UiText::ControllerPtr tallReplacement = BuildReplacementController(replacementText.c_str(),
+                                                                     {{replacementIndex, 1u}},
+                                                                     Size(1200.0f, 360.0f),
+                                                                     false,
+                                                                     240.0f);
+  for(UiText::ControllerPtr controller : {replacement, tallReplacement})
+  {
+    controller->SetMultiLineEnabled(true);
+    controller->Relayout(Size(1200.0f, 360.0f));
+  }
+  const Reveal::Plan replacementPlan = buildPlan(replacement, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+  const Reveal::Plan tallReplacementPlan = buildPlan(tallReplacement,
+                                                      UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+  DALI_TEST_EQUALS(tallReplacementPlan.fadeDuration,
+                   replacementPlan.fadeDuration,
+                   EPSILON,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(getLineCompletion(tallReplacementPlan, *tallReplacement->GetRenderTextModel(), 0u),
+                   getLineCompletion(replacementPlan, *replacement->GetRenderTextModel(), 0u),
+                   EPSILON,
+                   TEST_LOCATION);
+
+  const Reveal::Plan explicitReplacementPlan     = buildPlan(replacement, 0.25f);
+  const Reveal::Plan explicitTallReplacementPlan = buildPlan(tallReplacement, 0.25f);
+  DALI_TEST_EQUALS(explicitReplacementPlan.fadeDuration, 0.25f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitTallReplacementPlan.fadeDuration, 0.25f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(getLineCompletion(explicitTallReplacementPlan,
+                                     *tallReplacement->GetRenderTextModel(),
+                                     0u),
+                   getLineCompletion(explicitReplacementPlan, *replacement->GetRenderTextModel(), 0u),
+                   EPSILON,
+                   TEST_LOCATION);
+
   END_TEST;
 }
