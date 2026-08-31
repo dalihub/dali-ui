@@ -32,6 +32,7 @@ SET(TC_SOURCES
         utc-Dali-LottieAnimationView.cpp
         utc-Dali-LottieAnimationVisual.cpp
         utc-Dali-UiColor.cpp
+        utc-Dali-SelectableLottieColorBinding.cpp
         utc-Dali-SelectableLottieImage.cpp
         utc-Dali-SelectableLottieAnimationView.cpp
         utc-Dali-UiColorManager.cpp

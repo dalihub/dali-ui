@@ -521,6 +521,8 @@ public: // API to control play state
   /**
    * @brief Jump to specific frame
    *
+   * A frame outside the current playback range is clamped to the nearest endpoint.
+   *
    * @param[in] frame The frame to jump
    */
   void JumpTo(int frame);

@@ -18,10 +18,10 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali.h>
 #include <test-gesture-generator.h>
 
 using namespace Dali;
@@ -58,7 +58,7 @@ void utc_dali_selectabletrait_internal_cleanup(void)
 int UtcDaliSelectableTraitNewP(void)
 {
   UiTestApplication application;
-  SelectableTrait selectable = SelectableTrait::New();
+  SelectableTrait   selectable = SelectableTrait::New();
   DALI_TEST_CHECK(selectable);
   END_TEST;
 }
@@ -66,8 +66,8 @@ int UtcDaliSelectableTraitNewP(void)
 int UtcDaliSelectableTraitCopyConstructorP(void)
 {
   UiTestApplication application;
-  SelectableTrait selectable = SelectableTrait::New();
-  SelectableTrait copy(selectable);
+  SelectableTrait   selectable = SelectableTrait::New();
+  SelectableTrait   copy(selectable);
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(copy == selectable);
   END_TEST;
@@ -76,9 +76,9 @@ int UtcDaliSelectableTraitCopyConstructorP(void)
 int UtcDaliSelectableTraitDownCastP(void)
 {
   UiTestApplication application;
-  SelectableTrait selectable = SelectableTrait::New();
-  BaseHandle handle(selectable);
-  SelectableTrait downcast = SelectableTrait::DownCast(handle);
+  SelectableTrait   selectable = SelectableTrait::New();
+  BaseHandle        handle(selectable);
+  SelectableTrait   downcast = SelectableTrait::DownCast(handle);
   DALI_TEST_CHECK(downcast);
   END_TEST;
 }
@@ -86,7 +86,7 @@ int UtcDaliSelectableTraitDownCastP(void)
 int UtcDaliSelectableTraitIsSelectedDefaultP(void)
 {
   UiTestApplication application;
-  SelectableTrait selectable = SelectableTrait::New();
+  SelectableTrait   selectable = SelectableTrait::New();
   DALI_TEST_CHECK(!selectable.IsSelected());
   END_TEST;
 }
@@ -94,7 +94,7 @@ int UtcDaliSelectableTraitIsSelectedDefaultP(void)
 int UtcDaliSelectableTraitIsToggleByClickEnabledDefaultP(void)
 {
   UiTestApplication application;
-  SelectableTrait selectable = SelectableTrait::New();
+  SelectableTrait   selectable = SelectableTrait::New();
   DALI_TEST_CHECK(selectable.IsToggleByClickEnabled());
   END_TEST;
 }
@@ -102,7 +102,7 @@ int UtcDaliSelectableTraitIsToggleByClickEnabledDefaultP(void)
 int UtcDaliSelectableTraitSetToggleByClickEnabledP(void)
 {
   UiTestApplication application;
-  SelectableTrait selectable = SelectableTrait::New();
+  SelectableTrait   selectable = SelectableTrait::New();
 
   selectable.SetToggleByClickEnabled();
   DALI_TEST_CHECK(selectable.IsToggleByClickEnabled());
@@ -125,7 +125,7 @@ int UtcDaliSelectableTraitSelectOnlyByClickP(void)
   DALI_TEST_CHECK(!selectable.IsSelected());
 
   // Make clicks select-only: now OnClickedForToggle only ever selects.
-  GetImpl(selectable).SetSelectOnlyByClick(true);
+  GetImpl(selectable).EnablePersistentSelectOnlyByClick();
   DALI_TEST_CHECK(GetImpl(selectable).IsSelectOnlyByClickEnabled());
 
   // First tap selects.

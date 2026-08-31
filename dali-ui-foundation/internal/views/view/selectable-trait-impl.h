@@ -122,18 +122,24 @@ public: // API
   bool IsSelectOnlyByClickEnabled() const;
 
   /**
-   * @brief Internal-only knob (not on the public SelectableTrait handle), used only by
-   * GroupSelectableTraitImpl.
+   * @brief Enables a persistent select-only click policy for the owner View.
    *
-   * While set, OnClickedForToggle becomes select-only: a click keeps an already-selected
-   * View selected (never unselects). It does NOT touch toggle-by-click
-   * (mToggleByClickEnabled); if toggle-by-click is disabled the click path is inert.
-   * Programmatic SetSelected(false) and SelectionGroupImpl::ClearSelection() are unaffected
-   * (they bypass the click path).
-   *
-   * @param[in] selectOnly True to make clicks select-only, false for normal toggle
+   * The effective policy is the logical OR of this persistent policy and the policy applied
+   * temporarily by GroupSelectableTraitImpl. Programmatic SetSelected(false) is unaffected.
+   * This one-way operation is used by radio-style View types whose click contract remains
+   * select-only for their lifetime, independently of group membership.
    */
-  void SetSelectOnlyByClick(bool selectOnly);
+  void EnablePersistentSelectOnlyByClick();
+
+  /**
+   * @brief Sets the select-only click policy owned by GroupSelectableTraitImpl.
+   *
+   * Keeping this policy separate prevents leaving a group from clearing a persistent policy
+   * required by a radio-style View type.
+   *
+   * @param[in] enabled True to prevent click-to-unselect while grouped
+   */
+  void SetGroupSelectOnlyByClickEnabled(bool enabled);
 
   /**
    * @copydoc Dali::Ui::SelectableTrait::~SelectableTrait
@@ -166,7 +172,8 @@ private:
   SelectionCommitObserver              mSelectionCommitObserver; ///< Internal-only (GroupSelectableTraitImpl); stateless post-commit hook, invoked before mSelectionChangedSignal.
   bool                                 mSelected : 1;
   bool                                 mToggleByClickEnabled : 1;
-  bool                                 mSelectOnlyByClick : 1; ///< Internal-only (GroupSelectableTraitImpl). When set, OnClickedForToggle keeps a selected View selected; never touches toggle-by-click.
+  bool                                 mPersistentSelectOnlyByClickEnabled : 1; ///< View-lifetime click policy.
+  bool                                 mGroupSelectOnlyByClickEnabled : 1;      ///< Group-owned click policy.
   bool                                 mAttached : 1;
 };
 

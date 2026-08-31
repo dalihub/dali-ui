@@ -17,14 +17,12 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-components/public-api/selection-animation-mode.h>
 #include <dali-ui-components/public-api/styles/check-box-style.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/selectable-view.h>
 #include <dali/public-api/common/dali-string.h>
-
-// EXTERNAL INCLUDES
-#include <cstdint>
 
 namespace Dali
 {
@@ -34,21 +32,6 @@ namespace Internal
 {
 class CheckBoxImpl;
 }
-
-/**
- * @brief Controls whether a selection-state change animates.
- *
- * AUTO     — animate only when the change came from a user gesture/key (programmatic
- *            SetSelected snaps instantly). (default)
- * ENABLED  — always animate (on-scene + visible permitting).
- * DISABLED — never animate; state changes snap.
- */
-enum class SelectionAnimationMode : uint8_t
-{
-  AUTO = 0,
-  ENABLED,
-  DISABLED
-};
 
 /**
  * @brief CheckBox is a binary (checked/unchecked) selectable control with an

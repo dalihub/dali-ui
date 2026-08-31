@@ -18,19 +18,19 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali.h>
 
 #include <dali-ui-foundation/extension-api/selectable-view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/devel-api/object/type-registry.h>
-#include <test-gesture-generator.h>
 #include <dali/integration-api/events/key-event-integ.h>
 #include <dali/integration-api/events/touch-event-integ.h>
+#include <test-gesture-generator.h>
 
-namespace ExtensionView = Dali::Ui::Extension::View;
+namespace ExtensionView   = Dali::Ui::Extension::View;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 using namespace Dali;
@@ -86,9 +86,9 @@ struct SelectionChangedSignalData
     event    = InputEvent();
   }
 
-  bool called;
-  bool selected;
-  View view;
+  bool       called;
+  bool       selected;
+  View       view;
   InputEvent event;
 };
 
@@ -175,9 +175,9 @@ void utc_dali_selectabletrait_cleanup(void)
 
 int UtcDaliSelectableTraitDownCastN(void)
 {
-  UiTestApplication    application;
-  BaseHandle         handle;
-  SelectableTrait downcast = SelectableTrait::DownCast(handle);
+  UiTestApplication application;
+  BaseHandle        handle;
+  SelectableTrait   downcast = SelectableTrait::DownCast(handle);
   DALI_TEST_CHECK(!downcast);
   END_TEST;
 }
@@ -189,7 +189,7 @@ int UtcDaliSelectableTraitDownCastN(void)
 int UtcDaliViewAsSelectableP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   SelectableTrait result = view.AsSelectable();
   DALI_TEST_CHECK(result);
@@ -201,9 +201,9 @@ int UtcDaliViewAsSelectableP(void)
 int UtcDaliViewAsSelectableWithConfigureP(void)
 {
   UiTestApplication application;
-  bool configureCalled = false;
+  bool              configureCalled = false;
 
-  View view = View::New();
+  View            view            = View::New();
   SelectableTrait configuredTrait = view.AsSelectable();
   configureCalled                 = true;
   configuredTrait.SetToggleByClickEnabled();
@@ -219,7 +219,7 @@ int UtcDaliViewAsSelectableWithConfigureP(void)
 int UtcDaliViewAsSelectableIdempotentP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   view.AsSelectable();
   SelectableTrait first = view.AsSelectable();
@@ -234,7 +234,7 @@ int UtcDaliViewAsSelectableIdempotentP(void)
 int UtcDaliViewIsSelectableWithoutAttachN(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   DALI_TEST_CHECK(!view.IsSelectable());
   END_TEST;
@@ -243,7 +243,7 @@ int UtcDaliViewIsSelectableWithoutAttachN(void)
 int UtcDaliViewEnsureSelectableTraitP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   SelectableTrait selectable = view.AsSelectable();
   DALI_TEST_CHECK(selectable);
@@ -261,7 +261,7 @@ int UtcDaliViewEnsureSelectableTraitP(void)
 int UtcDaliViewInteractiveAndSelectableCoexistP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   view.AsInteractive();
   view.AsSelectable();
@@ -274,7 +274,7 @@ int UtcDaliViewInteractiveAndSelectableCoexistP(void)
 int UtcDaliViewSelectableBeforeInteractiveP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   // Selectable first, then clickable
   view.AsSelectable();
@@ -292,8 +292,8 @@ int UtcDaliViewSelectableBeforeInteractiveP(void)
 int UtcDaliSelectableTraitSetSelectedP(void)
 {
   UiTestApplication application;
-  View view = CreateSelectableView(application);
-  SelectableTrait selectable = view.AsSelectable();
+  View              view       = CreateSelectableView(application);
+  SelectableTrait   selectable = view.AsSelectable();
 
   selectable.SetSelected(true);
   DALI_TEST_CHECK(selectable.IsSelected());
@@ -306,8 +306,8 @@ int UtcDaliSelectableTraitSetSelectedP(void)
 int UtcDaliSelectableTraitSetSelectedNoChangeP(void)
 {
   UiTestApplication application;
-  View view = CreateSelectableView(application);
-  SelectableTrait selectable = view.AsSelectable();
+  View              view       = CreateSelectableView(application);
+  SelectableTrait   selectable = view.AsSelectable();
 
   SelectionChangedSignalData    data;
   SelectionChangedSignalFunctor functor(data);
@@ -326,8 +326,8 @@ int UtcDaliSelectableTraitSetSelectedNoChangeP(void)
 int UtcDaliSelectableTraitSelectionChangedSignalP(void)
 {
   UiTestApplication application;
-  View view = CreateSelectableView(application);
-  SelectableTrait selectable = view.AsSelectable();
+  View              view       = CreateSelectableView(application);
+  SelectableTrait   selectable = view.AsSelectable();
 
   SelectionChangedSignalData    data;
   SelectionChangedSignalFunctor functor(data);
@@ -358,10 +358,11 @@ int UtcDaliViewAsSelectableWithSignalLambdaP(void)
   View            view       = View::New();
   SelectableTrait selectable = view.AsSelectable();
   selectable.SelectionChangedSignal().Connect(&application,
-    [&signalCalled, &signalSelected](View v, bool selected, InputEvent e) {
-      signalCalled   = true;
-      signalSelected = selected;
-    });
+                                              [&signalCalled, &signalSelected](View v, bool selected, InputEvent e)
+  {
+    signalCalled   = true;
+    signalSelected = selected;
+  });
   DALI_TEST_CHECK(selectable);
 
   // Manually add to scene for proper lifecycle
@@ -383,7 +384,7 @@ int UtcDaliViewAsSelectableWithSignalLambdaP(void)
 int UtcDaliSelectableTraitToggleByClickP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -405,10 +406,11 @@ int UtcDaliSelectableTraitToggleByClickP(void)
   SelectionChangedSignalFunctor functor(data);
   selectable.SelectionChangedSignal().Connect(&application, functor);
 
-  InputEvent stateCause;
-  int        stateChangedCount = 0;
+  InputEvent        stateCause;
+  int               stateChangedCount = 0;
   ConnectionTracker tracker;
-  ExtensionView::SetNamedStateObserver(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e)
+  {
     if(e.Changed(ViewState::SELECTED))
     {
       ++stateChangedCount;
@@ -451,7 +453,7 @@ int UtcDaliSelectableTraitToggleByClickP(void)
 int UtcDaliSelectableTraitToggleByClickAutoCreatesInteractiveP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -475,7 +477,7 @@ int UtcDaliSelectableTraitToggleByClickAutoCreatesInteractiveP(void)
 int UtcDaliSelectableTraitToggleByClickWithExistingInteractiveP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -506,7 +508,7 @@ int UtcDaliSelectableTraitToggleByClickWithExistingInteractiveP(void)
 int UtcDaliSelectableTraitToggleByClickDoesNotConsumeClickP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -523,10 +525,11 @@ int UtcDaliSelectableTraitToggleByClickDoesNotConsumeClickP(void)
   bool appClickedCalled = false;
   view.AsInteractive().ClickedSignal().Connect(
     &application,
-    [&appClickedCalled](View v, InputEvent e) -> bool {
-      appClickedCalled = true;
-      return false;
-    });
+    [&appClickedCalled](View v, InputEvent e) -> bool
+  {
+    appClickedCalled = true;
+    return false;
+  });
 
   TestGenerateTap(application, 50.0f, 50.0f, 100);
 
@@ -543,7 +546,7 @@ int UtcDaliSelectableTraitToggleByClickDoesNotConsumeClickP(void)
 int UtcDaliSelectableTraitToggleByKeyP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -583,7 +586,7 @@ int UtcDaliSelectableTraitToggleByKeyP(void)
 int UtcDaliSelectableTraitSetToggleByClickEnabledAfterAttachP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -614,7 +617,7 @@ int UtcDaliSelectableTraitSetToggleByClickEnabledAfterAttachP(void)
 int UtcDaliSelectableTraitDisableToggleByClickP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -648,7 +651,7 @@ int UtcDaliSelectableTraitDisableToggleByClickP(void)
 int UtcDaliViewAsInteractiveAsSelectableChainingP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   InteractiveTrait interactive = view.AsInteractive();
   SelectableTrait  result      = view.AsSelectable();

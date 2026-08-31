@@ -19,6 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/selectable-image-interface-impl.h>
+#include <dali-ui-foundation/public-api/types/selectable-lottie-color-binding.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 
@@ -26,6 +27,7 @@
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/vector4.h>
 #include <cstdint>
+#include <vector>
 
 namespace Dali
 {
@@ -39,8 +41,8 @@ namespace Integration
  *
  * A plain BaseObject that implements Integration::SelectableImageInterfaceImpl by COMPOSING a single
  * Ui::LottieAnimationView: it drives that glyph between a "selected" and a "deselected" state
- * by playing (or snapping to) the configured frame segments, and recolours the checked inner
- * fill per-frame with the pre-resolved state colours pushed by the owning component. It
+ * by playing (or snapping to) the configured frame segments, and recolours bound fill or stroke
+ * properties per-frame with the pre-resolved state colours pushed by the owning component. It
  * inherits the SetSelected() template from SelectableImageInterfaceImpl and reimplements only
  * OnSelectedChanged() plus the drawing/state accessors.
  *
@@ -64,6 +66,20 @@ public:
                                                 const FrameRange&   selectRange,
                                                 const FrameRange&   deselectRange,
                                                 const Dali::String& keyPath = Dali::String());
+
+  /**
+   * @brief Creates a new implementation with explicit color bindings.
+   *
+   * @param[in] url The URL of the Lottie JSON file
+   * @param[in] selectRange The segment used when becoming selected
+   * @param[in] deselectRange The segment used when becoming deselected
+   * @param[in] colorBindings The exact dynamic color bindings to register
+   * @return A raw pointer to the newly allocated implementation
+   */
+  static SelectableLottieAnimationViewImpl* New(const Dali::String&                  url,
+                                                const FrameRange&                    selectRange,
+                                                const FrameRange&                    deselectRange,
+                                                const SelectableLottieColorBindings& colorBindings);
 
 public: // From Integration::SelectableImageInterfaceImpl
   /**
@@ -90,7 +106,7 @@ protected: // From Integration::SelectableImageInterfaceImpl
   /**
    * @copydoc Dali::Ui::Integration::SelectableImageInterfaceImpl::OnSelectedChanged
    *
-   * Plays (or snaps to) the select/deselect segment and re-seats the inner-fill recolour.
+   * Plays (or snaps to) the select/deselect segment and updates every bound color property.
    */
   void OnSelectedChanged(bool selected, bool animated) override;
 
@@ -114,11 +130,20 @@ private:
    */
   void SetFrameRanges(const FrameRange& selectRange, const FrameRange& deselectRange);
 
+  void SetColorBindings(const SelectableLottieColorBindings& colorBindings);
+
   /**
-   * @brief (Re)registers the per-frame inner-fill recolour dynamic property from the
-   * current state colours, key path and frame ranges.
+   * @brief Clamps a configured inclusive frame range to the loaded animation.
+   *
+   * Before the resource is ready only negative values can be normalized. The vector animation
+   * task performs the final clamp against its loaded play range.
    */
-  void RegisterInnerFillRecolor();
+  void NormalizeFrameRange(int& start, int& end) const;
+
+  /**
+   * @brief Updates binding state and applies every dynamic color property to the Lottie view.
+   */
+  void ApplyColorBindings();
 
 private:
   // Not copyable or movable
@@ -127,21 +152,31 @@ private:
   SelectableLottieAnimationViewImpl& operator=(const SelectableLottieAnimationViewImpl&) = delete;
   SelectableLottieAnimationViewImpl& operator=(SelectableLottieAnimationViewImpl&&)      = delete;
 
-private:                                     // Data
-  Ui::LottieAnimationView mLottie;           ///< the composed single Lottie glyph that draws the states
-  Dali::String            mInnerFillKeyPath; ///< asset key path of the checked inner fill to recolour
+private:
+  struct ColorBindingData
+  {
+    Dali::String                              keyPath;
+    LottieAnimation::VectorProperty           property;
+    SelectableLottieColorBinding::ColorPolicy colorPolicy;
+    int32_t                                   selectedColorStart;
+    int32_t                                   selectedColorEnd;
+    int32_t                                   dynamicPropertyId;
+  };
 
-  Vector4 mDeselectedColor; ///< pre-resolved deselected inner-fill colour
-  Vector4 mSelectedColor;   ///< pre-resolved selected inner-fill colour
+private:                           // Data
+  Ui::LottieAnimationView mLottie; ///< the composed single Lottie glyph that draws the states
+
+  std::vector<ColorBindingData> mColorBindings; ///< owned integration-only binding records
+
+  Vector4 mDeselectedColor; ///< pre-resolved deselected state color
+  Vector4 mSelectedColor;   ///< pre-resolved selected state color
 
   int32_t mSelectStart;   ///< select-segment start frame
   int32_t mSelectEnd;     ///< select-segment end frame
   int32_t mDeselectStart; ///< deselect-segment start frame
   int32_t mDeselectEnd;   ///< deselect-segment end frame
 
-  bool mLastSelected{false}; ///< last requested logical state; drives the inner-fill recolour
-
-  int32_t mDynamicPropertyId; ///< unique id keying this instance's recolour callback
+  bool mLastSelected{false}; ///< last requested logical state; drives state-based color bindings
 };
 
 } // namespace Integration

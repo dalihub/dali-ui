@@ -202,6 +202,8 @@ public: // Playback Control
   /**
    * @brief Jumps to the specified frame number.
    *
+   * A frame outside the current playback range is clamped to the nearest endpoint.
+   *
    * @param[in] frame The frame index to jump to
    * @return Reference to this for fluent chaining
    */

@@ -46,7 +46,8 @@ SelectableTraitImpl::SelectableTraitImpl()
   mSelectionCommitObserver(nullptr),
   mSelected(false),
   mToggleByClickEnabled(true),
-  mSelectOnlyByClick(false),
+  mPersistentSelectOnlyByClickEnabled(false),
+  mGroupSelectOnlyByClickEnabled(false),
   mAttached(false)
 {
 }
@@ -141,12 +142,17 @@ void SelectableTraitImpl::SetToggleByClickEnabled(bool enabled)
 
 bool SelectableTraitImpl::IsSelectOnlyByClickEnabled() const
 {
-  return mSelectOnlyByClick;
+  return mPersistentSelectOnlyByClickEnabled || mGroupSelectOnlyByClickEnabled;
 }
 
-void SelectableTraitImpl::SetSelectOnlyByClick(bool selectOnly)
+void SelectableTraitImpl::EnablePersistentSelectOnlyByClick()
 {
-  mSelectOnlyByClick = selectOnly;
+  mPersistentSelectOnlyByClickEnabled = true;
+}
+
+void SelectableTraitImpl::SetGroupSelectOnlyByClickEnabled(bool enabled)
+{
+  mGroupSelectOnlyByClickEnabled = enabled;
 }
 
 View SelectableTraitImpl::GetOwner() const
@@ -208,7 +214,7 @@ void SelectableTraitImpl::DisconnectClickable()
 
 void SelectableTraitImpl::OnClickedForToggle(View view, InputEvent event)
 {
-  if(mSelected && mSelectOnlyByClick)
+  if(mSelected && IsSelectOnlyByClickEnabled())
   {
     // Select-only: keep an already-selected View selected; a click never unselects.
     return;

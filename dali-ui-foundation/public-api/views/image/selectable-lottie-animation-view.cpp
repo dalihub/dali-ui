@@ -35,6 +35,16 @@ SelectableLottieAnimationView SelectableLottieAnimationView::New(const Selectabl
   return SelectableLottieAnimationView(impl);
 }
 
+SelectableLottieAnimationView SelectableLottieAnimationView::New(const SelectableLottieImage&         image,
+                                                                 const SelectableLottieColorBindings& colorBindings)
+{
+  auto* impl = Integration::SelectableLottieAnimationViewImpl::New(image.GetUrl(),
+                                                                   image.GetSelectRange(),
+                                                                   image.GetDeselectRange(),
+                                                                   colorBindings);
+  return SelectableLottieAnimationView(impl);
+}
+
 SelectableLottieAnimationView SelectableLottieAnimationView::DownCast(BaseHandle handle)
 {
   return SelectableLottieAnimationView(dynamic_cast<Integration::SelectableLottieAnimationViewImpl*>(handle.GetObjectPtr()));

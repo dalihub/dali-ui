@@ -434,10 +434,10 @@ void GroupSelectableTraitImpl::ApplyGroupClickPolicy()
   SelectableTrait selectable = GetSelectableTrait(GetImpl(owner));
   DALI_ASSERT_ALWAYS(selectable && "GroupSelectableTraitImpl requires SelectableTrait");
 
-  // Set the sibling's internal select-only flag so its OnClickedForToggle keeps an
-  // already-selected member selected (a re-click on the winner is a no-op). Toggle-by-click
-  // is NOT touched: grouping neither saves nor restores it.
-  GetImpl(selectable).SetSelectOnlyByClick(true);
+  // Set the group-owned policy so its OnClickedForToggle keeps an already-selected member
+  // selected (a re-click on the winner is a no-op). Toggle-by-click is NOT touched: grouping
+  // neither saves nor restores it.
+  GetImpl(selectable).SetGroupSelectOnlyByClickEnabled(true);
 }
 
 void GroupSelectableTraitImpl::RestoreClickPolicy()
@@ -451,9 +451,9 @@ void GroupSelectableTraitImpl::RestoreClickPolicy()
   SelectableTrait selectable = GetSelectableTrait(GetImpl(owner));
   if(selectable)
   {
-    // Clear the internal select-only flag so the ungrouped member behaves exactly as a
-    // plain Selectable again. Toggle-by-click is untouched (grouping never changed it).
-    GetImpl(selectable).SetSelectOnlyByClick(false);
+    // Clear only the group-owned policy. Any persistent policy remains active.
+    // Toggle-by-click is untouched (grouping never changed it).
+    GetImpl(selectable).SetGroupSelectOnlyByClickEnabled(false);
   }
 }
 

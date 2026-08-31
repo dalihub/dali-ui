@@ -19,27 +19,29 @@
 //
 // The real implementation renders Lottie/vector animations via thorvg, which may not be
 // installed on the test machine. Symbol interposition (this file is compiled directly into the
-// test binary, ahead of libdali2-adaptor.so on the link line) lets LottieAnimationVisual /
-// SelectableLottieAnimationView tests (and anything that transitively touches them, e.g.
-// CheckBox's default icon style) run without depending on thorvg being present at all, matching
-// the approach already used by dali-toolkit's
+// test binary, ahead of libdali2-adaptor.so on the link line) lets LottieAnimationVisual and
+// SelectableLottieAnimationView tests run without invoking ThorVG, matching the approach used by
+// dali-toolkit's
 // dali-toolkit-test-utils/toolkit-vector-animation-renderer.cpp.
 
-#include <dali/public-api/adaptor-framework/pixel-buffer.h>
+#include <dali-ui/ui-event-thread-callback.h>
 #include <dali/devel-api/adaptor-framework/vector-animation-renderer.h>
 #include <dali/devel-api/common/vector-wrapper.h>
 #include <dali/devel-api/threading/mutex.h>
 #include <dali/public-api/adaptor-framework/native-image.h>
+#include <dali/public-api/adaptor-framework/pixel-buffer.h>
 #include <dali/public-api/object/base-object.h>
-#include <dali-ui/ui-event-thread-callback.h>
 #include <atomic>
 #include <memory>
+#include <mutex>
 
 namespace
 {
-std::atomic<uint32_t> gLastVectorAnimationWidth{0u};
-std::atomic<uint32_t> gLastVectorAnimationHeight{0u};
-}
+std::atomic<uint32_t>                             gLastVectorAnimationWidth{0u};
+std::atomic<uint32_t>                             gLastVectorAnimationHeight{0u};
+std::mutex                                        gDynamicPropertyProbeMutex;
+Dali::Internal::Adaptor::VectorAnimationRenderer* gLatestVectorAnimationRenderer{nullptr};
+} // unnamed namespace
 
 namespace Dali
 {
@@ -50,9 +52,29 @@ namespace Adaptor
 class VectorAnimationRenderer : public Dali::BaseObject
 {
 public:
+  struct DynamicPropertyRecord
+  {
+    std::string                                   keyPath;
+    Dali::VectorAnimationRenderer::VectorProperty property;
+    int32_t                                       id;
+    std::unique_ptr<CallbackBase>                 callback;
+    Dali::Property::Value                         lastValue;
+  };
+
   VectorAnimationRenderer()
   : mEventThreadCallback(new EventThreadCallback(MakeCallback(this, &VectorAnimationRenderer::OnTriggered)))
   {
+    std::lock_guard<std::mutex> lock(gDynamicPropertyProbeMutex);
+    gLatestVectorAnimationRenderer = this;
+  }
+
+  ~VectorAnimationRenderer() override
+  {
+    std::lock_guard<std::mutex> lock(gDynamicPropertyProbeMutex);
+    if(gLatestVectorAnimationRenderer == this)
+    {
+      gLatestVectorAnimationRenderer = nullptr;
+    }
   }
 
   bool Load(const std::string& url)
@@ -103,11 +125,17 @@ public:
       return false;
     }
 
-    if(!mDynamicPropertyCallbacks.empty())
+    const bool frameChanged = !mHasRenderedFrame || mPreviousFrame != frameNumber;
+    mPreviousFrame          = frameNumber;
+    mHasRenderedFrame       = true;
+
+    // Match ThorVG: a request for the same frame does not re-evaluate dynamic properties.
+    if(frameChanged)
     {
-      for(auto&& dynamicPropertyCallbackPair : mDynamicPropertyCallbacks)
+      for(auto&& record : mDynamicPropertyRecords)
       {
-        CallbackBase::ExecuteReturn<Property::Value>(*dynamicPropertyCallbackPair.second, dynamicPropertyCallbackPair.first, 0, frameNumber);
+        record.lastValue = CallbackBase::ExecuteReturn<Property::Value>(
+          *record.callback, record.id, record.property, frameNumber);
       }
     }
 
@@ -153,15 +181,28 @@ public:
 
   void AddPropertyValueCallback(const std::string& keyPath, Dali::VectorAnimationRenderer::VectorProperty property, CallbackBase* callback, int32_t id)
   {
-    mDynamicPropertyCallbacks.emplace_back(id, std::unique_ptr<CallbackBase>(callback));
+    Dali::Mutex::ScopedLock lock(mMutex);
+    for(auto&& record : mDynamicPropertyRecords)
+    {
+      if(record.keyPath == keyPath && record.property == property)
+      {
+        record.id       = id;
+        record.callback = std::unique_ptr<CallbackBase>(callback);
+        return;
+      }
+    }
+    mDynamicPropertyRecords.push_back(
+      DynamicPropertyRecord{keyPath, property, id, std::unique_ptr<CallbackBase>(callback), Dali::Property::Value()});
   }
 
   void RefreshDynamicProperty()
   {
     Dali::Mutex::ScopedLock lock(mMutex);
-    for(auto&& dynamicPropertyCallbackPair : mDynamicPropertyCallbacks)
+    ++mDynamicPropertyRefreshCount;
+    for(auto&& record : mDynamicPropertyRecords)
     {
-      CallbackBase::ExecuteReturn<Property::Value>(*dynamicPropertyCallbackPair.second, dynamicPropertyCallbackPair.first, 0, mPreviousFrame);
+      record.lastValue = CallbackBase::ExecuteReturn<Property::Value>(
+        *record.callback, record.id, record.property, mPreviousFrame);
     }
     mEventThreadCallback->Trigger();
   }
@@ -187,6 +228,70 @@ public:
     return mUploadCompletedSignal;
   }
 
+  uint32_t GetDynamicPropertyCount() const
+  {
+    Dali::Mutex::ScopedLock lock(mMutex);
+    return static_cast<uint32_t>(mDynamicPropertyRecords.size());
+  }
+
+  uint32_t GetLastRenderedFrame() const
+  {
+    Dali::Mutex::ScopedLock lock(mMutex);
+    return mPreviousFrame;
+  }
+
+  uint32_t GetDynamicPropertyCount(const std::string&                            keyPath,
+                                   Dali::VectorAnimationRenderer::VectorProperty property) const
+  {
+    Dali::Mutex::ScopedLock lock(mMutex);
+    uint32_t                count = 0u;
+    for(const auto& record : mDynamicPropertyRecords)
+    {
+      if(record.keyPath == keyPath && record.property == property)
+      {
+        ++count;
+      }
+    }
+    return count;
+  }
+
+  Dali::Property::Value EvaluateDynamicProperty(const std::string&                            keyPath,
+                                                Dali::VectorAnimationRenderer::VectorProperty property,
+                                                uint32_t                                      frameNumber)
+  {
+    Dali::Mutex::ScopedLock lock(mMutex);
+    for(auto& record : mDynamicPropertyRecords)
+    {
+      if(record.keyPath == keyPath && record.property == property)
+      {
+        return CallbackBase::ExecuteReturn<Property::Value>(*record.callback, record.id, record.property, frameNumber);
+      }
+    }
+    DALI_ASSERT_ALWAYS(false && "Dynamic property was not registered");
+    return Dali::Property::Value();
+  }
+
+  Dali::Property::Value GetLastEvaluatedDynamicProperty(const std::string&                            keyPath,
+                                                        Dali::VectorAnimationRenderer::VectorProperty property) const
+  {
+    Dali::Mutex::ScopedLock lock(mMutex);
+    for(const auto& record : mDynamicPropertyRecords)
+    {
+      if(record.keyPath == keyPath && record.property == property)
+      {
+        return record.lastValue;
+      }
+    }
+    DALI_ASSERT_ALWAYS(false && "Dynamic property was not registered");
+    return Dali::Property::Value();
+  }
+
+  uint32_t GetDynamicPropertyRefreshCount() const
+  {
+    Dali::Mutex::ScopedLock lock(mMutex);
+    return mDynamicPropertyRefreshCount;
+  }
+
   void OnTriggered()
   {
     if(mResourceReady)
@@ -202,7 +307,7 @@ public:
       textureSet.SetTexture(0, texture);
 
       Dali::PixelBuffer pixelBuffer = Dali::PixelBuffer::New(mWidth, mHeight, Pixel::RGBA8888);
-      Dali::PixelData    pixelData   = Dali::PixelBuffer::Convert(pixelBuffer);
+      Dali::PixelData   pixelData   = Dali::PixelBuffer::Convert(pixelBuffer);
       texture.Upload(pixelData);
     }
 
@@ -210,9 +315,9 @@ public:
   }
 
 public:
-  Dali::Renderer                                                 mRenderer;
-  Dali::Mutex                                                    mMutex;
-  std::vector<std::pair<int32_t, std::unique_ptr<CallbackBase>>> mDynamicPropertyCallbacks;
+  Dali::Renderer                     mRenderer;
+  mutable Dali::Mutex                mMutex;
+  std::vector<DynamicPropertyRecord> mDynamicPropertyRecords;
 
   uint32_t mWidth{0};
   uint32_t mHeight{0};
@@ -220,12 +325,14 @@ public:
   uint32_t mDefaultHeight{0};
   uint32_t mTotalFrameNumber{5};
   uint32_t mPreviousFrame{0};
+  uint32_t mDynamicPropertyRefreshCount{0};
   float    mFrameRate{60.0f};
   bool     mLoadFailed{false};
   bool     mResourceReady{false};
   bool     mNeedTrigger{true};
   bool     mEnableFixedCache{false};
   bool     mEnableAspectFit{true};
+  bool     mHasRenderedFrame{false};
 
   Dali::VectorAnimationRenderer::UploadCompletedSignalType mUploadCompletedSignal;
   std::unique_ptr<EventThreadCallback>                     mEventThreadCallback;
@@ -398,6 +505,59 @@ uint32_t GetLastWidth()
 uint32_t GetLastHeight()
 {
   return gLastVectorAnimationHeight.load();
+}
+
+void ResetDynamicPropertyProbe()
+{
+  std::lock_guard<std::mutex> lock(gDynamicPropertyProbeMutex);
+  gLatestVectorAnimationRenderer = nullptr;
+}
+
+uint32_t GetDynamicPropertyCount()
+{
+  std::lock_guard<std::mutex> lock(gDynamicPropertyProbeMutex);
+  DALI_ASSERT_ALWAYS(gLatestVectorAnimationRenderer && "No vector animation renderer is available");
+  return gLatestVectorAnimationRenderer->GetDynamicPropertyCount();
+}
+
+uint32_t GetLastRenderedFrame()
+{
+  std::lock_guard<std::mutex> lock(gDynamicPropertyProbeMutex);
+  DALI_ASSERT_ALWAYS(gLatestVectorAnimationRenderer && "No vector animation renderer is available");
+  return gLatestVectorAnimationRenderer->GetLastRenderedFrame();
+}
+
+uint32_t GetDynamicPropertyRefreshCount()
+{
+  std::lock_guard<std::mutex> lock(gDynamicPropertyProbeMutex);
+  DALI_ASSERT_ALWAYS(gLatestVectorAnimationRenderer && "No vector animation renderer is available");
+  return gLatestVectorAnimationRenderer->GetDynamicPropertyRefreshCount();
+}
+
+Dali::Property::Value GetLastEvaluatedDynamicProperty(
+  const std::string&                            keyPath,
+  Dali::VectorAnimationRenderer::VectorProperty property)
+{
+  std::lock_guard<std::mutex> lock(gDynamicPropertyProbeMutex);
+  DALI_ASSERT_ALWAYS(gLatestVectorAnimationRenderer && "No vector animation renderer is available");
+  return gLatestVectorAnimationRenderer->GetLastEvaluatedDynamicProperty(keyPath, property);
+}
+
+uint32_t GetDynamicPropertyCount(const std::string&                            keyPath,
+                                 Dali::VectorAnimationRenderer::VectorProperty property)
+{
+  std::lock_guard<std::mutex> lock(gDynamicPropertyProbeMutex);
+  DALI_ASSERT_ALWAYS(gLatestVectorAnimationRenderer && "No vector animation renderer is available");
+  return gLatestVectorAnimationRenderer->GetDynamicPropertyCount(keyPath, property);
+}
+
+Dali::Property::Value EvaluateDynamicProperty(const std::string&                            keyPath,
+                                              Dali::VectorAnimationRenderer::VectorProperty property,
+                                              uint32_t                                      frameNumber)
+{
+  std::lock_guard<std::mutex> lock(gDynamicPropertyProbeMutex);
+  DALI_ASSERT_ALWAYS(gLatestVectorAnimationRenderer && "No vector animation renderer is available");
+  return gLatestVectorAnimationRenderer->EvaluateDynamicProperty(keyPath, property, frameNumber);
 }
 } // namespace UiVectorAnimationRenderer
 } // namespace Test

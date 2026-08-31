@@ -14,10 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/types/selectable-lottie-color-binding.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 
@@ -31,12 +31,17 @@ class SelectableLottieAnimationViewImpl;
 }
 
 /**
+ * @addtogroup dali_ui_view
+ * @{
+ */
+
+/**
  * @brief A selectable image backed by a single Lottie animation.
  *
  * SelectableLottieAnimationView renders a selectable control's two visual states with one
  * Lottie glyph: it plays a "select" segment when told to render the selected state and a
- * "deselect" segment for the deselected state, and recolours the checked inner fill with the
- * pre-resolved state colours pushed by the owning component.
+ * "deselect" segment for the deselected state. Color bindings can independently recolor fill
+ * or stroke properties from the state colors supplied by the owning component.
  *
  * It is a SelectableImageInterface (a behaviour handle), NOT a View: it COMPOSES a LottieAnimationView
  * internally and exposes it via GetView() so the owning control can place it into its tree.
@@ -65,10 +70,29 @@ public: // Creation & Destruction
   /**
    * @brief Creates an initialized SelectableLottieAnimationView.
    *
+   * This compatibility overload creates one fill-color binding using
+   * SelectableLottieImage::GetInnerFillKeyPath(). When that path is empty, the renderer's
+   * default selectable inner-fill path is used. The binding follows the logical selection
+   * state.
+   *
    * @param[in] image The Lottie url bundled with the select/deselect frame ranges
    * @return A handle to a newly allocated Dali resource
    */
   static SelectableLottieAnimationView New(const SelectableLottieImage& image);
+
+  /**
+   * @brief Creates an initialized selectable Lottie image with explicit color bindings.
+   *
+   * The supplied list is copied and used exactly. An empty list disables dynamic recoloring,
+   * and this overload does not use SelectableLottieImage::GetInnerFillKeyPath().
+   *
+   * @param[in] image The Lottie url bundled with the select/deselect frame ranges
+   * @param[in] colorBindings The dynamic color bindings
+   * @return A handle to a newly allocated Dali resource
+   * @pre @p colorBindings must not contain duplicate key-path and property pairs.
+   */
+  static SelectableLottieAnimationView New(const SelectableLottieImage&         image,
+                                           const SelectableLottieColorBindings& colorBindings);
 
 public: // Static Methods
   /**
@@ -87,6 +111,8 @@ protected:
    */
   explicit SelectableLottieAnimationView(Integration::SelectableLottieAnimationViewImpl* impl);
 };
+
+/** @} */
 
 } // namespace Ui
 } // namespace Dali
