@@ -177,7 +177,7 @@ private:
     mAnimation = Animation::New(ANIMATION_TIME);
     mAnimatedLabel.Animate(mAnimation)
       .TextGradientStartOffset(ANIMATED_GRADIENT_END_OFFSET, Duration(ANIMATION_TIME));
-    mAnimation.SetLooping(true);
+    mAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mAnimation.Play();
     mAnimationRunning = true;

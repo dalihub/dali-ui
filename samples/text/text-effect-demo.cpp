@@ -981,7 +981,7 @@ private:
     mIntroGradientAnimation = Animation::New(INTRO_GRADIENT_SECONDS);
     mIntroJeju.Animate(mIntroGradientAnimation)
       .TextGradientStartOffset(0.24f, Duration(INTRO_GRADIENT_SECONDS), AlphaFunction::EASE_IN_OUT);
-    mIntroGradientAnimation.SetLooping(true);
+    mIntroGradientAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mIntroGradientAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mIntroGradientAnimation.SetEndAction(Animation::DISCARD);
     mIntroGradientAnimation.Play();
@@ -1100,7 +1100,7 @@ private:
     mHeroGradientAnimation = Animation::New(HERO_GRADIENT_SECONDS);
     mCards[1].title.Animate(mHeroGradientAnimation)
       .TextGradientStartOffset(0.34f, Duration(HERO_GRADIENT_SECONDS), AlphaFunction::LINEAR);
-    mHeroGradientAnimation.SetLooping(true);
+    mHeroGradientAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mHeroGradientAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mHeroGradientAnimation.SetEndAction(Animation::DISCARD);
     mHeroGradientAnimation.Play();
@@ -1152,7 +1152,7 @@ private:
     mHeroGradientAnimation = Animation::New(HERO_GRADIENT_SECONDS);
     mDetailHero.Animate(mHeroGradientAnimation)
       .TextGradientStartOffset(0.34f, Duration(HERO_GRADIENT_SECONDS), AlphaFunction::LINEAR);
-    mHeroGradientAnimation.SetLooping(true);
+    mHeroGradientAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mHeroGradientAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mHeroGradientAnimation.SetEndAction(Animation::DISCARD);
     mHeroGradientAnimation.Play();
@@ -1236,7 +1236,7 @@ private:
     mShimmerAnimation = Animation::New(SHIMMER_DURATION_SECONDS);
     label.Animate(mShimmerAnimation)
       .TextGradientOverlayStartOffset(-1.15f, Duration(SHIMMER_DURATION_SECONDS), AlphaFunction::LINEAR);
-    mShimmerAnimation.SetLooping(true);
+    mShimmerAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mShimmerAnimation.SetEndAction(Animation::DISCARD);
     mShimmerAnimation.Play();
   }
@@ -1272,7 +1272,7 @@ private:
       line.Animate(mSkeletonShimmerAnimation)
         .BackgroundGradientStartOffset(-1.65f, Duration(SKELETON_SHIMMER_SECONDS), AlphaFunction::LINEAR);
     }
-    mSkeletonShimmerAnimation.SetLooping(true);
+    mSkeletonShimmerAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mSkeletonShimmerAnimation.SetEndAction(Animation::DISCARD);
     mSkeletonShimmerAnimation.Play();
   }

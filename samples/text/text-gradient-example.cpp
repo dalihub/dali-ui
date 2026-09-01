@@ -1634,7 +1634,7 @@ private:
 
     const float duration = GetAnimationDuration(CurrentSpreadMethod());
     mTextGradientAnimation = Animation::New(duration);
-    mTextGradientAnimation.SetLooping(true);
+    mTextGradientAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mTextGradientAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
 
     if(mMarqueeMatrixMode)
@@ -1713,7 +1713,7 @@ private:
 
     const float duration = GetOverlayAnimationDuration(CurrentOverlayFillMode(), CurrentOverlaySpreadMethod());
     mTextGradientOverlayAnimation = Animation::New(duration);
-    mTextGradientOverlayAnimation.SetLooping(true);
+    mTextGradientOverlayAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mTextGradientOverlayAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
 
     if(CurrentOverlayFillMode() == OverlayFillMode::EFFECT)

@@ -132,7 +132,7 @@ private:
     }
 
     mCornerRadiusAnimation = Animation::New(1.8f);
-    mCornerRadiusAnimation.SetLooping(true);
+    mCornerRadiusAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mCornerRadiusAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mAnimatedCard.Animate(mCornerRadiusAnimation)
       .CornerRadius(Vector4(42.0f, 42.0f, 42.0f, 42.0f), Duration(1.8f));

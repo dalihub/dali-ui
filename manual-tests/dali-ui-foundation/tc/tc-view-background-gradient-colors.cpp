@@ -132,7 +132,7 @@ private:
     }
 
     mAnimation = Animation::New(ANIMATION_DURATION);
-    mAnimation.SetLooping(true);
+    mAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mAnimatedCard.Animate(mAnimation)
       .BackgroundGradientStartOffset(1.0f, Duration(ANIMATION_DURATION));

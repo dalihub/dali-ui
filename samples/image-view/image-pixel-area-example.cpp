@@ -280,7 +280,7 @@ private:
     keyFrames.Add(1.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
 
     mPixelAreaAnimation = Animation::New(3.0f);
-    mPixelAreaAnimation.SetLooping(true);
+    mPixelAreaAnimation.SetLoopCount(Animation::INFINITE_LOOP);
 
     // PIXEL_AREA is an animatable property on both ImageView and AnimatedImageView
     int pixelAreaIndex = mUsingGif

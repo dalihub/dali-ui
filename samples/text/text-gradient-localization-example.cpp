@@ -293,7 +293,7 @@ private:
   void StartGradientAnimation()
   {
     mGradientAnimation = Animation::New(GRADIENT_ANIMATION_SECONDS);
-    mGradientAnimation.SetLooping(true);
+    mGradientAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mGradientAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mCard.StartDescriptionGradientAnimation(mGradientAnimation);
     mGradientAnimation.Play();

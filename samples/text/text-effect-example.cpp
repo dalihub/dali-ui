@@ -280,7 +280,7 @@ public:
       Dali::Property(data->shimmerBand, data->shimmerProgressIndex),
       1.0f,
       AlphaFunction::LINEAR);
-    data->shimmerAnimation.SetLooping(true);
+    data->shimmerAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     data->shimmerAnimation.SetEndAction(Animation::DISCARD);
     data->shimmerAnimation.Play();
   }
@@ -551,7 +551,7 @@ Label CreateOverlayOnlyShimmerLabel()
       endOffset,
       Duration(animationDuration),
       AlphaFunction::LINEAR);
-  animation.SetLooping(true);
+  animation.SetLoopCount(Animation::INFINITE_LOOP);
   animation.SetEndAction(Animation::DISCARD);
   animation.Play();
 
@@ -655,7 +655,7 @@ private:
         OVERLAY_SHIMMER_END_OFFSET,
         Duration(OVERLAY_SHIMMER_DURATION_SECONDS),
         AlphaFunction::LINEAR);
-    mGradientOverlayAnimation.SetLooping(true);
+    mGradientOverlayAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mGradientOverlayAnimation.SetEndAction(Animation::DISCARD);
     mGradientOverlayAnimation.Play();
   }

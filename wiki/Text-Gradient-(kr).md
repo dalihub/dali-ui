@@ -140,7 +140,7 @@ label.SetTextGradient(gradient);
 Animation animation = Animation::New(2.0f);
 label.Animate(animation)
   .TextGradientStartOffset(1.0f, Duration(2.0f), AlphaFunction::LINEAR);
-animation.SetLooping(true);
+animation.SetLoopCount(Animation::INFINITE_LOOP);
 animation.Play();
 ~~~
 
@@ -150,7 +150,7 @@ Overlay gradient를 animate하려면 overlay start offset helper를 사용합니
 Animation animation = Animation::New(1.6f);
 label.Animate(animation)
   .TextGradientOverlayStartOffset(-1.15f, Duration(1.6f), AlphaFunction::LINEAR);
-animation.SetLooping(true);
+animation.SetLoopCount(Animation::INFINITE_LOOP);
 animation.Play();
 ~~~
 

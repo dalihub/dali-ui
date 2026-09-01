@@ -178,7 +178,7 @@ private:
     }
 
     mAnimation = Animation::New(1.4f);
-    mAnimation.SetLooping(true);
+    mAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mAnimatedCard.Animate(mAnimation)
       .ShadowBlurRadius(28.0f, Duration(1.4f))
@@ -194,7 +194,7 @@ private:
     }
 
     mCornerRadiusAnimation = Animation::New(1.6f);
-    mCornerRadiusAnimation.SetLooping(true);
+    mCornerRadiusAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mCornerRadiusAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mCornerAnimatedCard.Animate(mCornerRadiusAnimation)
       .CornerRadius(Vector4(42.0f, 42.0f, 42.0f, 42.0f), Duration(1.6f));

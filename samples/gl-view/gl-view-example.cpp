@@ -775,7 +775,7 @@ private:
                          AlphaFunction::SIN, TimePeriod(0.0f, 2.0f));
     mAnimation.AnimateTo(Property(mGlView, Actor::Property::ORIENTATION), Quaternion(),
                          AlphaFunction::SIN, TimePeriod(2.0f, 2.0f));
-    mAnimation.SetLooping(true);
+    mAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mAnimation.Play();
     mAnimating = true;
   }

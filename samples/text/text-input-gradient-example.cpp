@@ -543,7 +543,7 @@ private:
       .TextGradientStartOffset(NORMAL_GRADIENT_END_OFFSET, Duration(NORMAL_ANIMATION_DURATION_SECONDS), AlphaFunction::LINEAR);
     mEditor.Animate(mNormalAnimation)
       .TextGradientStartOffset(NORMAL_GRADIENT_END_OFFSET, Duration(NORMAL_ANIMATION_DURATION_SECONDS), AlphaFunction::LINEAR);
-    mNormalAnimation.SetLooping(true);
+    mNormalAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mNormalAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mNormalAnimation.Play();
   }
@@ -573,7 +573,7 @@ private:
       .PlaceholderTextGradientStartOffset(PLACEHOLDER_GRADIENT_END_OFFSET, Duration(PLACEHOLDER_ANIMATION_DURATION_SECONDS), AlphaFunction::LINEAR);
     mEditor.Animate(mPlaceholderAnimation)
       .PlaceholderTextGradientStartOffset(PLACEHOLDER_GRADIENT_END_OFFSET, Duration(PLACEHOLDER_ANIMATION_DURATION_SECONDS), AlphaFunction::LINEAR);
-    mPlaceholderAnimation.SetLooping(true);
+    mPlaceholderAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mPlaceholderAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mPlaceholderAnimation.Play();
   }
