@@ -140,10 +140,14 @@ public:
 private:
   bool OnPollTick()
   {
-    mPlayLabel.SetText(
-      Dali::String("State: ") + Dali::String(PlayStateName(mView.GetPlayState())) +
-      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
-      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()));
+    const std::string text = std::string("State: ") + PlayStateName(mView.GetPlayState()) +
+                             " | Frame: " + std::to_string(mView.GetCurrentFrame()) +
+                             "/" + std::to_string(mView.GetTotalFrame());
+    if(text != mLastPlayText)
+    {
+      mLastPlayText = text;
+      mPlayLabel.SetText(Dali::String(text.c_str()));
+    }
     return true;
   }
 
@@ -244,6 +248,7 @@ private:
   Label               mSizeLabel;
   Label               mPlayLabel;
   Timer               mPollTimer;
+  std::string         mLastPlayText;
 };
 
 REGISTER_MANUAL_TEST(TcLottieVisual)
