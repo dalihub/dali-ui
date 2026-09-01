@@ -17,6 +17,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <cstdint>
@@ -37,6 +38,7 @@ namespace Internal
 {
 namespace Text
 {
+class InlineReplacementManagerTestAccessor;
 
 /**
  * @brief Registers inline replacement visuals for an owning view.
@@ -148,6 +150,21 @@ public:
               uint64_t                                      expectedSourceRevision);
 
   /**
+   * @brief Applies a shared Label progress binding to visible image visuals.
+   *
+   * The source revision and occurrence identities form the publication key.
+   * Empty or incomplete timing clears all replacement Reveal bindings.
+   */
+  bool ApplyRevealTimings(const Vector<Ui::Text::ReplacementRevealTiming>& timings,
+                          uint64_t                                         sourceRevision,
+                          Property::Index                                  progressPropertyIndex);
+
+  /**
+   * @brief Removes replacement Reveal constraints and restores resource-ready visibility.
+   */
+  void ClearReveal();
+
+  /**
    * @brief Applies a current final-layout snapshot with independent placement and clip offsets.
    *
    * @param[in] host The owner used to register replacement visuals.
@@ -189,6 +206,8 @@ public:
   void PrepareOwnerDestruction();
 
 private:
+  friend class InlineReplacementManagerTestAccessor;
+
   struct RuntimeImageDescriptor
   {
     std::string source;
@@ -219,6 +238,11 @@ private:
     bool                          currentlyVisible{false};
     bool                          transformApplied{false};
     bool                          pixelAreaApplied{false};
+    Constraint                    revealConstraint;
+    Property::Index               revealBaseOpacityIndex{Property::INVALID_INDEX};
+    Property::Index               revealProgressPropertyIndex{Property::INVALID_INDEX};
+    float                         revealStart{0.0f};
+    float                         revealFadeDuration{0.0f};
   };
 
   std::vector<Entry>::iterator  RemoveEntry(std::vector<Entry>::iterator iterator);
@@ -226,6 +250,8 @@ private:
   bool                          CreateEntryVisual(InlineReplacementViewHost& host, Entry& entry);
   bool                          ApplyEntryTransform(Entry& entry);
   void                          SetEntryVisible(Entry& entry, bool visible);
+  void                          RemoveEntryRevealConstraint(Entry& entry);
+  bool                          ApplyEntryRevealConstraint(Entry& entry);
   static void                   ResetEntryResourceState(Entry& entry);
   static RuntimeImageDescriptor BuildRuntimeImageDescriptor(const Ui::Text::ReplacementRunSnapshot& run,
                                                             float                                   effectiveScale);
@@ -233,10 +259,14 @@ private:
                                                              const RuntimeImageDescriptor& rhs);
 
 private:
-  InlineReplacementViewHost*                mHost{nullptr};
-  std::vector<Entry>                        mEntries;
-  std::unordered_map<uint64_t, std::size_t> mEntryIndex;
-  uint64_t                                  mUpdateGeneration{0u};
+  InlineReplacementViewHost*                                      mHost{nullptr};
+  std::vector<Entry>                                              mEntries;
+  std::unordered_map<uint64_t, std::size_t>                       mEntryIndex;
+  std::unordered_map<uint64_t, Ui::Text::ReplacementRevealTiming> mRevealTimings;
+  uint64_t                                                        mUpdateGeneration{0u};
+  uint64_t                                                        mEntrySourceRevision{0u};
+  uint64_t                                                        mRevealSourceRevision{0u};
+  Property::Index                                                 mRevealProgressPropertyIndex{Property::INVALID_INDEX};
 };
 
 } // namespace Text

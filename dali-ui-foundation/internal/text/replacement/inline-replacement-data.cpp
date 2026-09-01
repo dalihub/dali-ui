@@ -20,6 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-data.h>
+#include <dali-ui-foundation/internal/text/replacement/inline-replacement-reveal-bridge.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
 
@@ -78,3 +79,31 @@ void RemoveInlineReplacementData(Ui::ViewImpl& owner)
 }
 
 } // namespace Dali::Ui::Internal::Text
+
+namespace Dali::Ui::Internal
+{
+bool PublishInlineReplacementRevealTimings(
+  Ui::View                                         owner,
+  const Vector<Ui::Text::ReplacementRevealTiming>& timings,
+  uint64_t                                         sourceRevision,
+  Property::Index                                  progressPropertyIndex)
+{
+  Text::InlineReplacementData* data = Text::GetInlineReplacementData(owner);
+  return data && data->manager.ApplyRevealTimings(timings, sourceRevision, progressPropertyIndex);
+}
+
+void ClearInlineReplacementReveal(Ui::View owner)
+{
+  if(Text::InlineReplacementData* data = Text::GetInlineReplacementData(owner))
+  {
+    data->manager.ClearReveal();
+  }
+}
+
+bool IsCurrentInlineReplacementRender(Ui::View owner, uint64_t layoutGeneration)
+{
+  const Text::InlineReplacementData* data = Text::GetInlineReplacementData(owner);
+  return data && data->lastRenderGeneration == layoutGeneration;
+}
+
+} // namespace Dali::Ui::Internal

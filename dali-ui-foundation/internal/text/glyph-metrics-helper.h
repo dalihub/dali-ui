@@ -108,12 +108,14 @@ float GetCalculatedAdvance(unsigned int character, float characterSpacing, float
  *
  * @param[in] model The final render model
  * @param[in] hasInlineReplacement Whether the model contains inline replacements
+ * @param[in] fontClient The caller-owned font client used by the current text pipeline
  * @param[out] lineReferencePixelSizes Optional text-only height for each final line
  * @return The representative text height, or zero when no text foreground exists
  */
-float ResolveTextForegroundReferencePixelSize(const ModelInterface& model,
-                                              bool                  hasInlineReplacement,
-                                              std::vector<float>*   lineReferencePixelSizes = nullptr);
+float ResolveTextForegroundReferencePixelSize(const ModelInterface&       model,
+                                              bool                        hasInlineReplacement,
+                                              TextAbstraction::FontClient fontClient,
+                                              std::vector<float>*         lineReferencePixelSizes = nullptr);
 
 /**
  * @brief Takes the character index, obtains the glyph index (and the number of Glyphs) from it and finally gets the

@@ -147,9 +147,10 @@ float GetCalculatedAdvance(unsigned int character, float characterSpacing, float
            : advance + characterSpacing;
 }
 
-float ResolveTextForegroundReferencePixelSize(const ModelInterface& model,
-                                              bool                  hasInlineReplacement,
-                                              std::vector<float>*   lineReferencePixelSizes)
+float ResolveTextForegroundReferencePixelSize(const ModelInterface&       model,
+                                              bool                        hasInlineReplacement,
+                                              TextAbstraction::FontClient fontClient,
+                                              std::vector<float>*         lineReferencePixelSizes)
 {
   float          referencePixelSize = 0.0f;
   const Length   numberOfLines      = model.GetNumberOfLines();
@@ -183,7 +184,6 @@ float ResolveTextForegroundReferencePixelSize(const ModelInterface& model,
 
   const GlyphInfo*               glyphs         = model.GetGlyphs();
   const Length                   numberOfGlyphs = model.GetNumberOfGlyphs();
-  TextAbstraction::FontClient    fontClient     = TextAbstraction::FontClient::Get();
   std::vector<CachedFontMetrics> metricsCache;
   auto                           getFontMetrics = [&](FontId fontId) -> const FontMetrics&
   {

@@ -799,6 +799,18 @@ void LabelImpl::SetTextReveal(const Ui::Text::Reveal& reveal)
   data->sequenceStaggerRatio = authoredSequenceStaggerRatio;
   ++data->revision;
 
+  if(!enabled)
+  {
+    if(Internal::Text::InlineReplacementData* replacementData =
+         Internal::Text::GetInlineReplacementData(Ui::View::DownCast(Self())))
+    {
+      // Reveal -> None restores ordinary resource-ready visibility immediately.
+      // Enabled reconfiguration keeps the previous valid binding until the
+      // newly built schedule replaces it atomically.
+      replacementData->manager.ClearReveal();
+    }
+  }
+
   Ui::Text::Internal::Reveal::Unit     unit                 = Ui::Text::Internal::Reveal::Unit::DISABLED;
   Ui::Text::Internal::Reveal::Sequence sequence             = Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT;
   float                                fadeDurationRatio    = Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO;

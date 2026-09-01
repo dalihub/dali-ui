@@ -147,6 +147,19 @@ struct ReplacementPlacement
   bool                   elided{false};
 };
 
+/**
+ * @brief Stores normalized Reveal timing for one visible replacement visual.
+ *
+ * The occurrence identity is stable within the corresponding source revision.
+ * Runtime visual handles and final glyph indices are deliberately excluded.
+ */
+struct ReplacementRevealTiming
+{
+  uint64_t occurrenceIdentity{0u};
+  float    start{0.0f};
+  float    fadeDuration{0.0f};
+};
+
 } // namespace Dali::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_RUN_SNAPSHOT_H

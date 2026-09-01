@@ -300,6 +300,7 @@ struct AsyncTextRenderInfo
     renderedSize(),
     anchorHitRegions(),
     replacementPlacements(),
+    replacementRevealTimings(),
     replacementSourceRevision(0u),
     replacementLayoutGeneration(0u),
     lineCount(0),
@@ -346,6 +347,7 @@ struct AsyncTextRenderInfo
   Size                                      renderedSize;                      ///< Final displayed size reported back to the caller.
   std::vector<AsyncAnchorHitRegion>         anchorHitRegions;                  ///< Anchor hit regions in text content local coordinates.
   Vector<ReplacementPlacement>              replacementPlacements;             ///< Final-layout values; no image runtime objects.
+  Vector<ReplacementRevealTiming>           replacementRevealTimings;          ///< Atomic ImageSpan timing from the shared final Reveal plan.
   uint64_t                                  replacementSourceRevision;
   uint64_t                                  replacementLayoutGeneration;
   int                                       lineCount;

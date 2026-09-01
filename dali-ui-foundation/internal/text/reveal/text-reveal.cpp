@@ -328,7 +328,10 @@ Plan BuildPlan(const Character*      text,
 
 namespace
 {
-void ExcludeSyntheticReplacementGlyphs(Plan& plan, const GlyphInfo* glyphs, Length glyphCount)
+void FilterSyntheticReplacementGlyphs(Plan&                    plan,
+                                      const GlyphInfo*         glyphs,
+                                      Length                   glyphCount,
+                                      const std::vector<bool>* eligibleImageGlyphs)
 {
   if(!glyphs || plan.glyphToUnit.size() < glyphCount)
   {
@@ -350,17 +353,37 @@ void ExcludeSyntheticReplacementGlyphs(Plan& plan, const GlyphInfo* glyphs, Leng
   }
 
   // Replacement visuals are published independently from the text texture.
-  // Remove their layout-only glyphs from the reveal timeline, then compact
-  // only units that still own an ordinary glyph in logical unit order.
-  const uint32_t        oldUnitCount = plan.GetUnitCount();
-  std::vector<bool>     survivingUnits(oldUnitCount, false);
+  // The established path removes every layout-only glyph. ImageSpan Reveal
+  // retains explicitly eligible image occurrences in the shared timeline
+  // while all other synthetic replacements remain excluded.
+  const uint32_t oldUnitCount         = plan.GetUnitCount();
+  const bool     retainEligibleImages = eligibleImageGlyphs &&
+                                    std::find(eligibleImageGlyphs->begin(),
+                                              eligibleImageGlyphs->end(),
+                                              true) != eligibleImageGlyphs->end();
+  std::vector<bool> survivingUnits(oldUnitCount, false);
+  std::vector<bool> replacementUnits;
+  if(retainEligibleImages)
+  {
+    replacementUnits.assign(oldUnitCount, false);
+  }
   std::vector<uint32_t> oldToNewUnit(oldUnitCount, NO_UNIT);
   for(Length glyph = 0u; glyph < glyphCount; ++glyph)
   {
     uint32_t& unit = plan.glyphToUnit[glyph];
     if(IsSyntheticReplacementGlyph(glyphs[glyph]))
     {
-      unit = NO_UNIT;
+      const bool eligible = retainEligibleImages && glyph < eligibleImageGlyphs->size() &&
+                            (*eligibleImageGlyphs)[glyph];
+      if(eligible && unit < oldUnitCount)
+      {
+        survivingUnits[unit]   = true;
+        replacementUnits[unit] = true;
+      }
+      else
+      {
+        unit = NO_UNIT;
+      }
     }
     else if(unit < oldUnitCount)
     {
@@ -383,13 +406,28 @@ void ExcludeSyntheticReplacementGlyphs(Plan& plan, const GlyphInfo* glyphs, Leng
       unit = unit < oldUnitCount ? oldToNewUnit[unit] : NO_UNIT;
     }
   }
+  const bool hasImageReplacementUnit = retainEligibleImages &&
+                                       std::find(replacementUnits.begin(), replacementUnits.end(), true) !=
+                                         replacementUnits.end();
+  if(hasImageReplacementUnit)
+  {
+    plan.imageReplacementUnitMask.assign(newUnitCount, 0u);
+    for(uint32_t oldUnit = 0u; oldUnit < oldUnitCount; ++oldUnit)
+    {
+      if(oldToNewUnit[oldUnit] != NO_UNIT && replacementUnits[oldUnit])
+      {
+        plan.imageReplacementUnitMask[oldToNewUnit[oldUnit]] = 1u;
+      }
+    }
+  }
   PopulateSchedule(plan, newUnitCount, plan.fadeDurationRatio);
 }
 
-Plan BuildModelPlan(const ModelInterface& model,
-                    Unit                  unit,
-                    float                 fadeDurationRatio,
-                    const WordBreakInfo*  wordBreakInfo)
+Plan BuildModelPlan(const ModelInterface&    model,
+                    Unit                     unit,
+                    float                    fadeDurationRatio,
+                    const WordBreakInfo*     wordBreakInfo,
+                    const std::vector<bool>* eligibleImageGlyphs = nullptr)
 {
   const Length characterCount = model.GetNumberOfCharacters();
   const Length glyphCount     = model.GetNumberOfGlyphs();
@@ -405,9 +443,59 @@ Plan BuildModelPlan(const ModelInterface& model,
   text.Resize(characterCount);
   std::copy(model.GetTextBuffer(), model.GetTextBuffer() + characterCount, text.Begin());
 
+  Vector<WordBreakInfo> adjustedWordBreakInfo;
+  if(unit == Unit::WORD && eligibleImageGlyphs && wordBreakInfo)
+  {
+    adjustedWordBreakInfo.Resize(characterCount);
+    std::copy(wordBreakInfo, wordBreakInfo + characterCount, adjustedWordBreakInfo.Begin());
+    for(Length glyph = 0u; glyph < glyphCount; ++glyph)
+    {
+      if(glyph >= eligibleImageGlyphs->size() || !(*eligibleImageGlyphs)[glyph])
+      {
+        continue;
+      }
+      const CharacterIndex character = glyphMap[glyph];
+      if(character < characterCount)
+      {
+        adjustedWordBreakInfo[character] = TextAbstraction::WORD_BREAK;
+        if(character > 0u)
+        {
+          adjustedWordBreakInfo[character - 1u] = TextAbstraction::WORD_BREAK;
+        }
+      }
+    }
+    wordBreakInfo = adjustedWordBreakInfo.Begin();
+  }
+
   Plan plan = BuildPlan(text.Begin(), characterCount, glyphMap.Begin(), glyphCount, unit, fadeDurationRatio, wordBreakInfo);
-  ExcludeSyntheticReplacementGlyphs(plan, model.GetGlyphs(), glyphCount);
+  FilterSyntheticReplacementGlyphs(plan, model.GetGlyphs(), glyphCount, eligibleImageGlyphs);
   return plan;
+}
+
+std::vector<bool> BuildEligibleImageGlyphs(const ModelInterface&               model,
+                                           const ReplacementSourceSnapshot&    source,
+                                           const Vector<ReplacementPlacement>& placements)
+{
+  std::vector<bool> eligible;
+  for(const ReplacementPlacement& placement : placements)
+  {
+    if(placement.syntheticGlyphIndex >= model.GetNumberOfGlyphs() ||
+       placement.sourceRunIndex >= source.runs.Count())
+    {
+      continue;
+    }
+    const ReplacementRunSnapshot& run = source.runs[placement.sourceRunIndex];
+    if(run.type == ReplacementType::IMAGE && !run.image.source.empty() &&
+       run.occurrenceIdentity == placement.occurrenceIdentity)
+    {
+      if(eligible.empty())
+      {
+        eligible.assign(model.GetNumberOfGlyphs(), false);
+      }
+      eligible[placement.syntheticGlyphIndex] = true;
+    }
+  }
+  return eligible;
 }
 
 } // unnamed namespace
@@ -432,6 +520,34 @@ Plan BuildPlan(const ModelInterface&          model,
   }
   return BuildModelPlan(model, unit, fadeDurationRatio,
                         wordBreakInfo.Count() == characterCount ? wordBreakInfo.Begin() : nullptr);
+}
+
+Plan BuildPlanWithImageReplacements(const ModelInterface&               model,
+                                    Unit                                unit,
+                                    float                               fadeDurationRatio,
+                                    TextAbstraction::Segmentation&      segmentation,
+                                    const ReplacementSourceSnapshot&    source,
+                                    const Vector<ReplacementPlacement>& placements)
+{
+  const std::vector<bool> eligibleImageGlyphs = BuildEligibleImageGlyphs(model, source, placements);
+  if(unit != Unit::WORD)
+  {
+    return BuildModelPlan(model, unit, fadeDurationRatio, nullptr, &eligibleImageGlyphs);
+  }
+
+  const Length          characterCount = model.GetNumberOfCharacters();
+  Vector<WordBreakInfo> wordBreakInfo;
+  wordBreakInfo.Resize(characterCount);
+  if(characterCount > 0u)
+  {
+    std::fill(wordBreakInfo.Begin(), wordBreakInfo.End(), TextAbstraction::WORD_NO_BREAK);
+    segmentation.GetWordBreakPositions(model.GetTextBuffer(), characterCount, wordBreakInfo.Begin());
+  }
+  return BuildModelPlan(model,
+                        unit,
+                        fadeDurationRatio,
+                        wordBreakInfo.Count() == characterCount ? wordBreakInfo.Begin() : nullptr,
+                        &eligibleImageGlyphs);
 }
 
 Plan BuildCharacterPlan(const ModelInterface& model, float fadeDurationRatio)
@@ -484,11 +600,14 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
     }
   }
 
-  const bool hasEllipsis = ellipsisFinalGlyph < finalGlyphCount;
+  const bool hasEllipsis                = ellipsisFinalGlyph < finalGlyphCount;
+  const bool ellipsisFollowsReplacement = hasEllipsis && unit == Unit::WORD && !visibleOldUnits.empty() &&
+                                          visibleOldUnits.back() < sourcePlan.imageReplacementUnitMask.size() &&
+                                          sourcePlan.imageReplacementUnitMask[visibleOldUnits.back()] != 0u;
 
   std::vector<uint32_t> oldToNew(oldUnitCount, NO_UNIT);
   uint32_t              finalUnitCount = static_cast<uint32_t>(visibleOldUnits.size());
-  if(hasEllipsis && (unit == Unit::CHARACTER || unit == Unit::PIXEL))
+  if(hasEllipsis && (unit == Unit::CHARACTER || unit == Unit::PIXEL || ellipsisFollowsReplacement))
   {
     ++finalUnitCount;
   }
@@ -500,6 +619,22 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
   for(uint32_t index = 0u; index < visibleOldUnits.size(); ++index)
   {
     oldToNew[visibleOldUnits[index]] = index;
+  }
+  if(!sourcePlan.imageReplacementUnitMask.empty())
+  {
+    for(uint32_t index = 0u; index < visibleOldUnits.size(); ++index)
+    {
+      const uint32_t oldUnit = visibleOldUnits[index];
+      if(oldUnit < sourcePlan.imageReplacementUnitMask.size() &&
+         sourcePlan.imageReplacementUnitMask[oldUnit] != 0u)
+      {
+        if(finalPlan.imageReplacementUnitMask.empty())
+        {
+          finalPlan.imageReplacementUnitMask.assign(finalUnitCount, 0u);
+        }
+        finalPlan.imageReplacementUnitMask[index] = 1u;
+      }
+    }
   }
 
   for(GlyphIndex finalGlyph = 0u; finalGlyph < finalGlyphCount; ++finalGlyph)
@@ -521,7 +656,7 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
 
   if(hasEllipsis)
   {
-    if(unit == Unit::CHARACTER || unit == Unit::PIXEL || visibleOldUnits.empty())
+    if(unit == Unit::CHARACTER || unit == Unit::PIXEL || visibleOldUnits.empty() || ellipsisFollowsReplacement)
     {
       finalPlan.glyphToUnit[ellipsisFinalGlyph] = static_cast<uint32_t>(visibleOldUnits.size());
     }
@@ -537,12 +672,13 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
   return finalPlan;
 }
 
-bool ApplyPixelSpatialSchedule(Plan&                 plan,
-                               const ModelInterface& finalModel,
-                               const GlyphIndex*     finalToSourceGlyph,
-                               GlyphIndex            ellipsisFinalGlyph,
-                               Sequence              sequence,
-                               float                 sequenceStaggerRatio)
+bool ApplyPixelSpatialSchedule(Plan&                       plan,
+                               const ModelInterface&       finalModel,
+                               TextAbstraction::FontClient fontClient,
+                               const GlyphIndex*           finalToSourceGlyph,
+                               GlyphIndex                  ellipsisFinalGlyph,
+                               Sequence                    sequence,
+                               float                       sequenceStaggerRatio)
 {
   const uint32_t   oldUnitCount = plan.GetUnitCount();
   const uint32_t   glyphCount   = static_cast<uint32_t>(plan.glyphToUnit.size());
@@ -607,6 +743,7 @@ bool ApplyPixelSpatialSchedule(Plan&                 plan,
 
   uint32_t              unitCount = oldUnitCount;
   std::vector<uint32_t> unitLine;
+  std::vector<uint8_t>  imageReplacementUnitMask = plan.imageReplacementUnitMask;
   if(sequence == Sequence::PER_LINE)
   {
     std::vector<LineUnitPair> pairs;
@@ -651,11 +788,19 @@ bool ApplyPixelSpatialSchedule(Plan&                 plan,
       return lhs.line < rhs.line || (lhs.line == rhs.line && lhs.oldUnit < rhs.oldUnit);
     });
     std::vector<uint32_t> newUnitByPair(pairs.size(), NO_UNIT);
+    if(!plan.imageReplacementUnitMask.empty())
+    {
+      imageReplacementUnitMask.assign(pairs.size(), 0u);
+    }
     unitLine.resize(pairs.size(), NO_UNIT);
     for(uint32_t newUnit = 0u; newUnit < pairs.size(); ++newUnit)
     {
       newUnitByPair[pairs[newUnit].originalIndex] = newUnit;
       unitLine[newUnit]                           = pairs[newUnit].line;
+      if(pairs[newUnit].oldUnit < plan.imageReplacementUnitMask.size())
+      {
+        imageReplacementUnitMask[newUnit] = plan.imageReplacementUnitMask[pairs[newUnit].oldUnit];
+      }
     }
     for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
     {
@@ -929,10 +1074,54 @@ bool ApplyPixelSpatialSchedule(Plan&                 plan,
     // final lines.
     const bool         usePerLinePairedAuto = sequence == Sequence::PER_LINE;
     std::vector<float> lineReferenceHeight;
-    const float        representativeHeight = ResolveTextForegroundReferencePixelSize(
+    float              representativeHeight = ResolveTextForegroundReferencePixelSize(
       finalModel,
       hasInlineReplacement,
+      fontClient,
       usePerLinePairedAuto ? &lineReferenceHeight : nullptr);
+    const bool needsReplacementOnlyReference = !(representativeHeight > 0.0f) ||
+                                               !std::isfinite(representativeHeight);
+    std::vector<bool> replacementOnlyLine;
+    if(usePerLinePairedAuto)
+    {
+      replacementOnlyLine.resize(lineReferenceHeight.size(), false);
+      for(uint32_t line = 0u; line < lineReferenceHeight.size(); ++line)
+      {
+        if(!(lineReferenceHeight[line] > 0.0f) || !std::isfinite(lineReferenceHeight[line]))
+        {
+          lineReferenceHeight[line] = 0.0f;
+          replacementOnlyLine[line] = true;
+        }
+      }
+    }
+    if(hasInlineReplacement && (needsReplacementOnlyReference || usePerLinePairedAuto))
+    {
+      // Keep text-backed references unchanged. An ImageSpan-only label, or an
+      // ImageSpan-only active line inside mixed content, uses its authored
+      // reserved box height as the local spatial reference.
+      if(needsReplacementOnlyReference)
+      {
+        representativeHeight = 0.0f;
+      }
+      for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
+      {
+        if(glyphToUnit[glyph] == NO_UNIT || !IsSyntheticReplacementGlyph(glyphs[glyph]))
+        {
+          continue;
+        }
+        const float reservedHeight = std::max(0.0f, glyphs[glyph].height);
+        if(needsReplacementOnlyReference)
+        {
+          representativeHeight = std::max(representativeHeight, reservedHeight);
+        }
+        if(usePerLinePairedAuto && glyphToLine[glyph] < lineReferenceHeight.size() &&
+           replacementOnlyLine[glyphToLine[glyph]])
+        {
+          lineReferenceHeight[glyphToLine[glyph]] =
+            std::max(lineReferenceHeight[glyphToLine[glyph]], reservedHeight);
+        }
+      }
+    }
     if(!(representativeHeight > 0.0f) || !std::isfinite(representativeHeight))
     {
       return false;
@@ -1021,10 +1210,11 @@ bool ApplyPixelSpatialSchedule(Plan&                 plan,
     }
   }
 
-  plan.glyphToUnit     = std::move(glyphToUnit);
-  plan.unitStart       = std::move(unitStart);
-  plan.pixelUnitTiming = std::move(pixelUnitTiming);
-  plan.fadeDuration    = resolvedFadeDuration;
+  plan.glyphToUnit              = std::move(glyphToUnit);
+  plan.unitStart                = std::move(unitStart);
+  plan.pixelUnitTiming          = std::move(pixelUnitTiming);
+  plan.imageReplacementUnitMask = std::move(imageReplacementUnitMask);
+  plan.fadeDuration             = resolvedFadeDuration;
   return true;
 }
 
@@ -1193,9 +1383,19 @@ bool ApplyPerLineSequenceSchedule(Plan&          plan,
   }
 
   std::vector<uint32_t> newUnitByPair(pairs.size(), NO_UNIT);
+  std::vector<uint8_t>  imageReplacementUnitMask;
+  if(!plan.imageReplacementUnitMask.empty())
+  {
+    imageReplacementUnitMask.assign(pairs.size(), 0u);
+  }
   for(uint32_t newUnit = 0u; newUnit < orderedPairs.size(); ++newUnit)
   {
     newUnitByPair[orderedPairs[newUnit].originalIndex] = newUnit;
+    const uint32_t oldUnit                             = orderedPairs[newUnit].oldUnit;
+    if(oldUnit < plan.imageReplacementUnitMask.size())
+    {
+      imageReplacementUnitMask[newUnit] = plan.imageReplacementUnitMask[oldUnit];
+    }
   }
 
   sequenceStaggerRatio      = std::isnan(sequenceStaggerRatio)
@@ -1267,6 +1467,7 @@ bool ApplyPerLineSequenceSchedule(Plan&          plan,
       plan.glyphToUnit[glyph] = newUnitByPair[glyphToPair[glyph]];
     }
   }
+  plan.imageReplacementUnitMask = std::move(imageReplacementUnitMask);
   return true;
 }
 

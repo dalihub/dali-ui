@@ -29,6 +29,7 @@
 #include <memory> ///< for std::unique_ptr
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 
@@ -124,6 +125,13 @@ public:
    * @param[in] fontClient The font client used by the Typesetter.
    */
   void SetFontClient(TextAbstraction::FontClient& fontClient);
+
+  /**
+   * @brief Gets the font client used by this typesetter.
+   *
+   * @return The font client used by the text rendering pipeline.
+   */
+  TextAbstraction::FontClient GetFontClient();
 
   /**
    * @brief Renders the text.
@@ -267,6 +275,17 @@ public:
                                                Internal::Reveal::Unit        unit,
                                                Internal::Reveal::Sequence    sequence             = Internal::Reveal::Sequence::WHOLE_TEXT,
                                                float                         sequenceStaggerRatio = 0.0f);
+
+  /**
+   * @brief Extracts visible ImageSpan timing from a finalized shared plan.
+   *
+   * PIXEL uses the reserved box center as the atomic image timing point.
+   * Returns false if any visible eligible image lacks complete final timing.
+   */
+  bool ExtractReplacementRevealTimings(const Internal::Reveal::Plan&       finalPlan,
+                                       const ReplacementSourceSnapshot&    source,
+                                       const Vector<ReplacementPlacement>& placements,
+                                       Vector<ReplacementRevealTiming>&    timings);
 
   /**
    * @brief Rasterizes reveal metadata for one full texture or height tile.

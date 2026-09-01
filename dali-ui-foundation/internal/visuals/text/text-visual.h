@@ -633,7 +633,23 @@ private:
    *
    * @return The plan indexed by source glyph before final elision projection.
    */
-  Ui::Text::Internal::Reveal::Plan BuildTextRevealSourcePlan();
+  Ui::Text::Internal::Reveal::Plan BuildTextRevealSourcePlan(bool includeImageReplacements = false);
+
+  /**
+   * @brief Builds a final shared plan and extracts atomic ImageSpan timing.
+   *
+   * An incomplete replacement projection falls back to the established
+   * text-only plan so metadata never contains an unpublished timing gap.
+   */
+  Ui::Text::Internal::Reveal::Plan BuildFinalTextRevealPlan(
+    Vector<Ui::Text::ReplacementRevealTiming>& replacementTimings,
+    uint64_t&                                  replacementSourceRevision);
+
+  /**
+   * @brief Publishes or clears ImageSpan Reveal constraints on the owner.
+   */
+  void PublishReplacementRevealTimings(const Vector<Ui::Text::ReplacementRevealTiming>& timings,
+                                       uint64_t                                         sourceRevision);
 
   /**
    * @brief Removes the text's renderer.

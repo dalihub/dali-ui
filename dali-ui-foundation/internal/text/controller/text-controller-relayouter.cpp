@@ -311,7 +311,42 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   result.processingModel->mScrollPosition = impl.mModel->mScrollPosition;
   impl.mView.SetVisualModel(result.processingModel->mVisualModel);
   impl.mView.SetLogicalModel(result.processingModel->mLogicalModel);
-  impl.mView.ResolveFinalElision(impl.GetFontClient(), result.finalElision, result.layoutGeneration);
+  bool useAuthoritativeEndEllipsis = false;
+  if(result.processingModel->mElideEnabled &&
+     result.processingModel->mEllipsisPosition == EllipsisPosition::END)
+  {
+    for(const LineRun& line : projectedVisual.mLines)
+    {
+      useAuthoritativeEndEllipsis |= line.ellipsis;
+    }
+    useAuthoritativeEndEllipsis |= projectedVisual.mLines.Empty() &&
+                                   !result.processingModel->mLogicalModel->mText.Empty();
+  }
+  bool authoritativeEndEllipsisResolved = false;
+  if(useAuthoritativeEndEllipsis)
+  {
+    authoritativeEndEllipsisResolved = ResolveEndEllipsis(*result.processingModel,
+                                                          contentSize,
+                                                          impl.GetFontClient(),
+                                                          result.finalElision);
+    DALI_ASSERT_DEBUG(authoritativeEndEllipsisResolved && result.finalElision.resolved &&
+                      "Supported replacement END layout must publish an authoritative final result");
+    if(authoritativeEndEllipsisResolved)
+    {
+      result.finalElision.layoutGeneration = result.layoutGeneration;
+      FinalizeEndEllipsisGeometry(*result.processingModel,
+                                  contentSize,
+                                  impl.mLayoutDirection,
+                                  result.processingModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS,
+                                  impl.mLayoutEngine,
+                                  result.finalElision);
+      result.layoutSize = result.finalElision.layoutSize;
+    }
+  }
+  if(!authoritativeEndEllipsisResolved)
+  {
+    impl.mView.ResolveFinalElision(impl.GetFontClient(), result.finalElision, result.layoutGeneration);
+  }
   impl.mView.SetFinalElisionResult(&result.finalElision);
   ExtractReplacementPlacements(*result.processingModel,
                                result.projection,

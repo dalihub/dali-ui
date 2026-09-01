@@ -974,6 +974,7 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
 
   Dali::Ui::Text::AsyncTextLoader imageAnchorLoader = Dali::Ui::Text::AsyncTextLoader::New();
   bool foundVisibleElidedImageAnchor = false;
+  bool foundHiddenElidedImageAnchor  = false;
   for(float width = 80.0f; width <= 480.0f && !foundVisibleElidedImageAnchor; width += 2.0f)
   {
     imageAnchorParameters.textWidth                   = width;
@@ -985,6 +986,14 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
       Dali::Ui::Text::GetImplementation(imageAnchorLoader).GetReplacementRenderState();
     if(!imageAnchorState)
     {
+      continue;
+    }
+    if(imageAnchorState->finalElision.textElided && imageAnchorState->placements.Count() == 1u &&
+       imageAnchorState->placements[0u].elided)
+    {
+      DALI_TEST_CHECK(!imageAnchorState->placements[0u].visible);
+      DALI_TEST_CHECK(imageAnchorRenderInfo.anchorHitRegions.empty());
+      foundHiddenElidedImageAnchor = true;
       continue;
     }
     if(!imageAnchorState->finalElision.textElided || imageAnchorState->placements.Count() != 1u ||
@@ -1022,6 +1031,7 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
     foundVisibleElidedImageAnchor = true;
   }
   DALI_TEST_CHECK(foundVisibleElidedImageAnchor);
+  DALI_TEST_CHECK(foundHiddenElidedImageAnchor);
 
   PublicText::StyledText fromMarkupStyledText = PublicText::StyledText::FromMarkup("<a href='docs://raw'>open</a> docs");
 

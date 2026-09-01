@@ -29,11 +29,11 @@ namespace Text
 {
 
 /**
- * @brief Describes how the text foreground is revealed over a normalized timeline.
+ * @brief Describes how text foreground and inline ImageSpan content are revealed.
  *
- * Reveal distributes progression across visible text and controls its
- * transition as TextRevealProgress advances from 0.0 to 1.0. Applications
- * control the playback duration by animating TextRevealProgress.
+ * Reveal distributes progression across visible text and ImageSpan content
+ * and controls its transition as TextRevealProgress advances from 0.0 to 1.0.
+ * Applications control the playback duration by animating TextRevealProgress.
  *
  * Unit controls how reveal progression is divided across visible content.
  * Sequence controls how those units share the normalized reveal timeline.
@@ -42,18 +42,16 @@ namespace Text
  * its own character progression. PIXEL follows the same whole-text or per-line
  * distinction using spatial progression.
  *
- * By default, text is revealed by character using one whole-text sequence,
+ * By default, content is revealed by character using one whole-text sequence,
  * no sequence stagger, and an automatically selected fade duration. These
  * options can be configured explicitly.
  *
- * Reveal affects only the text foreground. Text decorations and other style
- * layers such as shadow, outline, underline, strikethrough, and background are
- * not affected.
- *
- * Inline replacements such as ImageSpan content are not affected by Reveal
- * and do not consume reveal units. When text is elided, hidden source text
- * does not consume reveal units and the ellipsis participates in the visible
- * reveal progression.
+ * Reveal affects the text foreground and inline ImageSpan content. An
+ * ImageSpan participates as one atomic reveal item and fades as a whole.
+ * Text decorations and other style layers such as shadow, outline, underline,
+ * strikethrough, and background are not affected. When content is elided,
+ * hidden source content does not consume reveal units and the ellipsis
+ * participates in the visible reveal progression.
  */
 class DALI_UI_API Reveal
 {
@@ -71,6 +69,8 @@ public:
 
   /**
    * @brief Selects how reveal progression is divided across visible content.
+   *
+   * ImageSpan content participates in the reveal schedule in every mode.
    */
   enum class Unit : uint8_t
   {
@@ -94,6 +94,8 @@ public:
      *
      * PIXEL follows the same logical text order and shaping boundaries as
      * CHARACTER while distributing reveal timing continuously in pixel space.
+     * Inline ImageSpan content contributes its reserved width to the
+     * progression and fades as an atomic item.
      * The progression is normalized and does not correspond one-to-one with
      * physical framebuffer pixels.
      */
@@ -245,7 +247,7 @@ public:
    *
    * AUTO_FADE_DURATION_RATIO selects an appropriate duration automatically.
    * Values from 0.0 to 1.0 specify the transition duration. Zero removes the
-   * transition fade, while one fades the foreground over the full timeline.
+   * transition fade, while one fades revealable content over the full timeline.
    *
    * Values outside [0.0, 1.0] are clamped, except AUTO_FADE_DURATION_RATIO.
    * NaN is normalized to 0.0.

@@ -15,7 +15,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/public-api/math/math-utils.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -40,6 +42,38 @@ namespace Text
 {
 namespace
 {
+constexpr const char* INLINE_REPLACEMENT_REVEAL_BASE_OPACITY = "__dali_ui_inline_replacement_reveal_base_opacity";
+
+struct ReplacementRevealOpacityConstraint
+{
+  ReplacementRevealOpacityConstraint(float start, float fadeDuration)
+  : start(start),
+    fadeDuration(fadeDuration)
+  {
+  }
+
+  void operator()(float& current, const PropertyInputContainer& inputs)
+  {
+    const float baseOpacity = std::max(0.0f, std::min(1.0f, inputs[0]->GetFloat()));
+    const float progress    = std::max(0.0f, std::min(1.0f, inputs[1]->GetFloat()));
+    float       reveal      = 0.0f;
+    if(progress >= 1.0f)
+    {
+      reveal = 1.0f;
+    }
+    else if(progress > 0.0f)
+    {
+      reveal = fadeDuration > 0.0f
+                 ? std::max(0.0f, std::min(1.0f, (progress - start) / fadeDuration))
+                 : (progress >= start ? 1.0f : 0.0f);
+    }
+    current = baseOpacity * reveal;
+  }
+
+  float start;
+  float fadeDuration;
+};
+
 void DiscardVisual(Ui::Integration::Visual::Base& visual)
 {
   if(Dali::Adaptor::IsAvailable() && visual)
@@ -140,6 +174,7 @@ std::vector<InlineReplacementManager::Entry>::iterator InlineReplacementManager:
 
 void InlineReplacementManager::ReleaseEntryVisual(Entry& entry)
 {
+  RemoveEntryRevealConstraint(entry);
   if(mHost && entry.propertyIndex != Property::INVALID_INDEX)
   {
     mHost->UnregisterVisual(entry.propertyIndex);
@@ -234,10 +269,91 @@ void InlineReplacementManager::SetEntryVisible(Entry& entry, bool visible)
     return;
   }
 
-  Property::Map opacityMap;
-  opacityMap.Insert(Ui::VisualBasePropertyIndex::OPACITY, visible ? 1.0f : 0.0f);
-  entry.visual.SetProperties(opacityMap);
-  entry.currentlyVisible = visible;
+  entry.currentlyVisible  = visible;
+  VisualRenderer renderer = entry.visual.GetRenderer();
+  if(entry.revealConstraint && renderer && entry.revealBaseOpacityIndex != Property::INVALID_INDEX)
+  {
+    renderer.SetProperty(entry.revealBaseOpacityIndex, visible ? 1.0f : 0.0f);
+  }
+  else
+  {
+    Property::Map opacityMap;
+    opacityMap.Insert(Ui::VisualBasePropertyIndex::OPACITY, visible ? 1.0f : 0.0f);
+    entry.visual.SetProperties(opacityMap);
+  }
+}
+
+void InlineReplacementManager::RemoveEntryRevealConstraint(Entry& entry)
+{
+  if(entry.revealConstraint)
+  {
+    entry.revealConstraint.Remove();
+    entry.revealConstraint.Reset();
+  }
+  entry.revealProgressPropertyIndex = Property::INVALID_INDEX;
+  if(entry.visual)
+  {
+    Property::Map opacityMap;
+    opacityMap.Insert(Ui::VisualBasePropertyIndex::OPACITY, entry.currentlyVisible ? 1.0f : 0.0f);
+    entry.visual.SetProperties(opacityMap);
+  }
+}
+
+bool InlineReplacementManager::ApplyEntryRevealConstraint(Entry& entry)
+{
+  if(!mHost || !entry.visual || mRevealProgressPropertyIndex == Property::INVALID_INDEX)
+  {
+    RemoveEntryRevealConstraint(entry);
+    return false;
+  }
+  const auto timing = mRevealTimings.find(entry.occurrenceIdentity);
+  if(timing == mRevealTimings.end())
+  {
+    RemoveEntryRevealConstraint(entry);
+    return false;
+  }
+  Ui::View       owner    = mHost->GetOwner();
+  VisualRenderer renderer = entry.visual.GetRenderer();
+  if(!owner || !renderer)
+  {
+    RemoveEntryRevealConstraint(entry);
+    return false;
+  }
+
+  const float start        = timing->second.start;
+  const float fadeDuration = timing->second.fadeDuration;
+  if(entry.revealConstraint && entry.revealProgressPropertyIndex == mRevealProgressPropertyIndex &&
+     Dali::Equals(entry.revealStart, start) && Dali::Equals(entry.revealFadeDuration, fadeDuration))
+  {
+    return true;
+  }
+  RemoveEntryRevealConstraint(entry);
+  entry.revealBaseOpacityIndex = renderer.GetPropertyIndex(INLINE_REPLACEMENT_REVEAL_BASE_OPACITY);
+  if(entry.revealBaseOpacityIndex == Property::INVALID_INDEX)
+  {
+    entry.revealBaseOpacityIndex = renderer.RegisterProperty(INLINE_REPLACEMENT_REVEAL_BASE_OPACITY,
+                                                             entry.currentlyVisible ? 1.0f : 0.0f);
+  }
+  else
+  {
+    renderer.SetProperty(entry.revealBaseOpacityIndex, entry.currentlyVisible ? 1.0f : 0.0f);
+  }
+  if(entry.revealBaseOpacityIndex == Property::INVALID_INDEX)
+  {
+    return false;
+  }
+
+  entry.revealConstraint = Constraint::New<float>(renderer,
+                                                  Dali::DevelRenderer::Property::OPACITY,
+                                                  ReplacementRevealOpacityConstraint(start, fadeDuration));
+  entry.revealConstraint.AddSource(Source(renderer, entry.revealBaseOpacityIndex));
+  entry.revealConstraint.AddSource(Source(owner, mRevealProgressPropertyIndex));
+  entry.revealConstraint.SetApplyRate(Dali::Constraint::APPLY_ALWAYS);
+  entry.revealConstraint.Apply();
+  entry.revealProgressPropertyIndex = mRevealProgressPropertyIndex;
+  entry.revealStart                 = start;
+  entry.revealFadeDuration          = fadeDuration;
+  return true;
 }
 
 bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
@@ -378,11 +494,16 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
   {
     return false;
   }
+  if(!mRevealTimings.empty() && mRevealSourceRevision != expectedSourceRevision)
+  {
+    ClearReveal();
+  }
   if(mHost && mHost != &host)
   {
     Clear();
   }
   mHost                              = &host;
+  mEntrySourceRevision               = expectedSourceRevision;
   const std::size_t requiredCapacity = mEntries.size() + placements.Count();
   if(requiredCapacity > mEntries.capacity())
   {
@@ -489,6 +610,10 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
     {
       ReleaseEntryVisual(*entry);
     }
+    else if(mRevealSourceRevision == expectedSourceRevision && !mRevealTimings.empty())
+    {
+      ApplyEntryRevealConstraint(*entry);
+    }
   }
 
   for(auto iterator = mEntries.begin(); iterator != mEntries.end();)
@@ -505,6 +630,66 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
   return true;
 }
 
+bool InlineReplacementManager::ApplyRevealTimings(
+  const Vector<Ui::Text::ReplacementRevealTiming>& timings,
+  uint64_t                                         sourceRevision,
+  Property::Index                                  progressPropertyIndex)
+{
+  if(sourceRevision == 0u || progressPropertyIndex == Property::INVALID_INDEX || timings.Empty())
+  {
+    ClearReveal();
+    return timings.Empty();
+  }
+
+  std::unordered_map<uint64_t, Ui::Text::ReplacementRevealTiming> validated;
+  validated.reserve(timings.Count());
+  for(const Ui::Text::ReplacementRevealTiming& timing : timings)
+  {
+    if(timing.occurrenceIdentity == 0u || !std::isfinite(timing.start) || !std::isfinite(timing.fadeDuration) ||
+       timing.start < 0.0f || timing.start > 1.0f || timing.fadeDuration < 0.0f || timing.fadeDuration > 1.0f ||
+       !validated.emplace(timing.occurrenceIdentity, timing).second)
+    {
+      ClearReveal();
+      return false;
+    }
+  }
+
+  mRevealTimings               = std::move(validated);
+  mRevealSourceRevision        = sourceRevision;
+  mRevealProgressPropertyIndex = progressPropertyIndex;
+  if(!mEntries.empty() && mEntrySourceRevision != sourceRevision)
+  {
+    // Async publication may arrive before the event-thread placement update.
+    // Retain the validated timing payload, but never bind it to old entries.
+    for(Entry& entry : mEntries)
+    {
+      RemoveEntryRevealConstraint(entry);
+    }
+    return true;
+  }
+  bool complete = true;
+  for(Entry& entry : mEntries)
+  {
+    complete = ApplyEntryRevealConstraint(entry) && complete;
+  }
+  if(!complete)
+  {
+    ClearReveal();
+  }
+  return complete;
+}
+
+void InlineReplacementManager::ClearReveal()
+{
+  for(Entry& entry : mEntries)
+  {
+    RemoveEntryRevealConstraint(entry);
+  }
+  mRevealTimings.clear();
+  mRevealSourceRevision        = 0u;
+  mRevealProgressPropertyIndex = Property::INVALID_INDEX;
+}
+
 void InlineReplacementManager::Refresh()
 {
   if(!mHost || !mHost->GetOwner())
@@ -518,6 +703,10 @@ void InlineReplacementManager::Refresh()
     {
       ReleaseEntryVisual(entry);
     }
+    else if(!mRevealTimings.empty())
+    {
+      ApplyEntryRevealConstraint(entry);
+    }
   }
 }
 
@@ -530,23 +719,34 @@ void InlineReplacementManager::PrepareOwnerDestruction()
   mHost = nullptr;
   for(Entry& entry : mEntries)
   {
+    if(entry.revealConstraint)
+    {
+      entry.revealConstraint.Remove();
+      entry.revealConstraint.Reset();
+    }
     entry.visual.Reset();
     entry.propertyIndex = Property::INVALID_INDEX;
   }
   mEntries.clear();
   mEntryIndex.clear();
-  mUpdateGeneration = 0u;
+  mRevealTimings.clear();
+  mUpdateGeneration            = 0u;
+  mEntrySourceRevision         = 0u;
+  mRevealSourceRevision        = 0u;
+  mRevealProgressPropertyIndex = Property::INVALID_INDEX;
 }
 
 void InlineReplacementManager::Clear()
 {
+  ClearReveal();
   while(!mEntries.empty())
   {
     RemoveEntry(mEntries.begin());
   }
   mHost = nullptr;
   mEntryIndex.clear();
-  mUpdateGeneration = 0u;
+  mUpdateGeneration    = 0u;
+  mEntrySourceRevision = 0u;
 }
 
 } // namespace Text

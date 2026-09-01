@@ -18,6 +18,7 @@
  *
  */
 
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/public-api/text/style/reveal.h>
 
@@ -26,8 +27,9 @@
 
 namespace Dali::TextAbstraction
 {
+class FontClient;
 class Segmentation;
-}
+} //namespace Dali::TextAbstraction
 
 namespace Dali
 {
@@ -76,13 +78,16 @@ struct PixelUnitTiming
  * and fadeDuration use the normalized progress timeline. fadeDurationRatio
  * preserves the authored AUTO sentinel or explicit duration through final
  * projection so the schedule can be resolved from the final visible unit
- * count before metadata is rasterized.
+ * count before metadata is rasterized. imageReplacementUnitMask remains empty
+ * for text-only plans. When present, it has one entry per unit and contains at
+ * least one eligible visible ImageSpan marker.
  */
 struct Plan
 {
   std::vector<uint32_t>        glyphToUnit;
   std::vector<float>           unitStart;
   std::vector<PixelUnitTiming> pixelUnitTiming;
+  std::vector<uint8_t>         imageReplacementUnitMask;
   float                        fadeDurationRatio{Text::Reveal::AUTO_FADE_DURATION_RATIO};
   float                        fadeDuration{0.0f};
 
@@ -166,6 +171,20 @@ Plan BuildPlan(const ModelInterface&          model,
                TextAbstraction::Segmentation& segmentation);
 
 /**
+ * @brief Builds a model plan that retains eligible ImageSpan replacements.
+ *
+ * Visible image replacements remain in the logical schedule while the
+ * rasterizer continues to skip their synthetic glyphs. Other replacement
+ * types remain excluded.
+ */
+Plan BuildPlanWithImageReplacements(const ModelInterface&               model,
+                                    Unit                                unit,
+                                    float                               fadeDurationRatio,
+                                    TextAbstraction::Segmentation&      segmentation,
+                                    const ReplacementSourceSnapshot&    source,
+                                    const Vector<ReplacementPlacement>& placements);
+
+/**
  * @brief Builds a CHARACTER source plan without acquiring segmentation.
  *
  * This entry point is used by paths that must guarantee the no-segmentation
@@ -233,13 +252,23 @@ bool ApplyPerLineSequenceSchedule(Plan&          plan,
  * This is separate from ApplyPerLineSequenceSchedule() so CHARACTER and WORD keep
  * their existing count-based path unchanged. Scheduling commits atomically;
  * failure leaves the projected CHARACTER-compatible plan unchanged.
+ *
+ * @param[in,out] plan The final-glyph plan to schedule.
+ * @param[in] finalModel The final render model.
+ * @param[in] fontClient The font client owned by the current text pipeline.
+ * @param[in] finalToSourceGlyph The final-to-source glyph mapping.
+ * @param[in] ellipsisFinalGlyph The final ellipsis glyph, or an invalid index.
+ * @param[in] sequence The authored reveal sequence.
+ * @param[in] sequenceStaggerRatio The authored sequence stagger ratio.
+ * @return True if the PIXEL schedule was completed atomically.
  */
-bool ApplyPixelSpatialSchedule(Plan&                 plan,
-                               const ModelInterface& finalModel,
-                               const GlyphIndex*     finalToSourceGlyph,
-                               GlyphIndex            ellipsisFinalGlyph,
-                               Sequence              sequence,
-                               float                 sequenceStaggerRatio);
+bool ApplyPixelSpatialSchedule(Plan&                       plan,
+                               const ModelInterface&       finalModel,
+                               TextAbstraction::FontClient fontClient,
+                               const GlyphIndex*           finalToSourceGlyph,
+                               GlyphIndex                  ellipsisFinalGlyph,
+                               Sequence                    sequence,
+                               float                       sequenceStaggerRatio);
 
 /**
  * @brief Resolves one foreground pixel's normalized PIXEL start timing.

@@ -19,6 +19,7 @@
 #include <cmath>
 #include <limits>
 #include <vector>
+#include <dali/devel-api/rendering/renderer-devel.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
@@ -45,6 +46,7 @@
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
 #include "replacement-layout-test-adapter.h"
+#include "inline-replacement-manager-test-accessor.h"
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -157,6 +159,23 @@ void CheckFinalElisionContract(const Text::ReplacementRenderState& state)
   DALI_TEST_CHECK(state.processingModel);
   const Text::FinalElisionResult& finalElision = state.finalElision;
   DALI_TEST_CHECK(finalElision.resolved);
+  const uint32_t finalGlyphCount = finalElision.HasAuthoritativeLayout()
+                                     ? finalElision.glyphs.Count()
+                                     : state.processingModel->mVisualModel->mGlyphs.Count();
+  const Vector<Text::LineRun>& finalLines = finalElision.HasAuthoritativeLayout()
+                                               ? finalElision.lines
+                                               : state.processingModel->mVisualModel->mLines;
+  for(const Text::LineRun& line : finalLines)
+  {
+    DALI_TEST_CHECK(line.glyphRun.glyphIndex <= finalGlyphCount &&
+                    line.glyphRun.numberOfGlyphs <= finalGlyphCount - line.glyphRun.glyphIndex);
+    if(line.isSplitToTwoHalves)
+    {
+      DALI_TEST_CHECK(line.glyphRunSecondHalf.glyphIndex <= finalGlyphCount &&
+                      line.glyphRunSecondHalf.numberOfGlyphs <=
+                        finalGlyphCount - line.glyphRunSecondHalf.glyphIndex);
+    }
+  }
   uint32_t ellipsisLineCount = 0u;
   for(const Text::LineRun& line : state.processingModel->mVisualModel->mLines)
   {
@@ -1767,6 +1786,8 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
 
   View                                                firstOwner  = View::New();
   View                                                secondOwner = View::New();
+  application.GetScene().Add(firstOwner);
+  application.GetScene().Add(secondOwner);
   Dali::Ui::Internal::Text::InlineReplacementViewHost firstHost(
     firstOwner,
     Ui::Integration::DepthIndex::CONTENT + 1);
@@ -1902,6 +1923,12 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
   DALI_TEST_CHECK(inlineVisual != originalVisual);
   DALI_TEST_EQUALS(getOpacity(), 0.0f, TEST_LOCATION);
 
+  const Property::Index progressIndex = firstOwner.RegisterProperty("uImageSpanRevealProgress", 0.5f);
+  Vector<Text::ReplacementRevealTiming> revealTimings;
+  revealTimings.PushBack({run.occurrenceIdentity, 0.4f, 0.2f});
+  DALI_TEST_CHECK(firstManager.ApplyRevealTimings(revealTimings, 5u, progressIndex));
+  DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealConstraintCount(firstManager), 1u, TEST_LOCATION);
+
   // Completion from the discarded source cannot reveal the current visual.
   Ui::GetImplementation(originalVisual).ResourceReady(Ui::Visual::ResourceStatus::READY);
   firstManager.Refresh();
@@ -1910,10 +1937,38 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
   // Commit sampling/transform first, then reveal in the same manager refresh.
   Ui::GetImplementation(inlineVisual).ResourceReady(Ui::Visual::ResourceStatus::READY);
   firstManager.Refresh();
-  DALI_TEST_EQUALS(getOpacity(), 1.0f, TEST_LOCATION);
+  // READY changes only the base-opacity source. It must not write 1.0 into
+  // the constraint-owned target and cause a one-frame flash.
+  DALI_TEST_EQUALS(getOpacity(), 0.0f, TEST_LOCATION);
   getTransform(inlineSize, inlineOffset);
   DALI_TEST_EQUALS(inlineSize, Vector2(24.0f, 18.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(inlineOffset, Vector2(4.0f, 6.0f), TEST_LOCATION);
+
+  // ImageSpan Reveal is an update-thread constraint sourced by the owner.
+  // Resource readiness remains an independent base opacity input.
+  VisualRenderer revealRenderer = inlineVisual.GetRenderer();
+  DALI_TEST_CHECK(revealRenderer);
+  firstOwner.AddRenderer(revealRenderer);
+  const Property::Index baseOpacityIndex =
+    revealRenderer.GetPropertyIndex("__dali_ui_inline_replacement_reveal_base_opacity");
+  DALI_TEST_CHECK(baseOpacityIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(revealRenderer.GetProperty<float>(baseOpacityIndex), 1.0f, 0.01f, TEST_LOCATION);
+  auto checkRevealOpacity = [&](float progress, float expected)
+  {
+    firstOwner.SetProperty(progressIndex, progress);
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(revealRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY),
+                     expected,
+                     0.01f,
+                     TEST_LOCATION);
+  };
+  checkRevealOpacity(0.5f, 0.5f); // The first READY frame respects current progress.
+  checkRevealOpacity(0.0f, 0.0f);
+  checkRevealOpacity(0.8f, 1.0f);
+  checkRevealOpacity(0.45f, 0.25f); // The same formula naturally supports reverse playback.
 
   // Geometry/alignment-only updates reuse the existing runtime visual.
   const Ui::Integration::Visual::Base sourceChangedVisual = inlineVisual;
@@ -1928,6 +1983,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       5u));
   inlineVisual = firstViewData.GetVisual(firstVisualIndex);
   DALI_TEST_CHECK(inlineVisual == sourceChangedVisual);
+  DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealConstraintCount(firstManager), 1u, TEST_LOCATION);
   getTransform(inlineSize, inlineOffset);
   DALI_TEST_EQUALS(inlineOffset, Vector2(13.0f, 9.0f), TEST_LOCATION);
 
@@ -1945,8 +2001,34 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       6u));
   inlineVisual = firstViewData.GetVisual(firstVisualIndex);
   DALI_TEST_CHECK(inlineVisual == sourceChangedVisual);
+  DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealConstraintCount(firstManager), 0u, TEST_LOCATION);
   getTransform(inlineSize, inlineOffset);
   DALI_TEST_EQUALS(inlineOffset, Vector2(17.0f, 9.0f), TEST_LOCATION);
+
+  // Zero fade is an atomic step, driven by the same owner progress property.
+  revealTimings[0u].fadeDuration = 0.0f;
+  DALI_TEST_CHECK(firstManager.ApplyRevealTimings(revealTimings, 6u, progressIndex));
+  checkRevealOpacity(0.399f, 0.0f);
+  checkRevealOpacity(0.4f, 1.0f);
+
+  // Async-style timing may arrive before the matching placement snapshot.
+  // It is retained, but must not bind to entries from the previous source.
+  revealTimings[0u].start        = 0.2f;
+  revealTimings[0u].fadeDuration = 0.2f;
+  DALI_TEST_CHECK(firstManager.ApplyRevealTimings(revealTimings, 7u, progressIndex));
+  DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealTimingCount(firstManager), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealConstraintCount(firstManager), 0u, TEST_LOCATION);
+  source.sourceRevision = 7u;
+  DALI_TEST_CHECK(firstManager.Update(firstHost,
+                                      source,
+                                      placements,
+                                      Vector2::ZERO,
+                                      Vector2(100.0f, 40.0f),
+                                      Vector2(100.0f, 40.0f),
+                                      1.0f,
+                                      7u));
+  DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealConstraintCount(firstManager), 1u, TEST_LOCATION);
+  checkRevealOpacity(0.3f, 0.5f);
 
   // The registered visual has no child-actor clip. Its quad and sampled pixel
   // area must be cropped explicitly to the content box.
@@ -1958,7 +2040,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      6u));
+                                      7u));
   inlineVisual = firstViewData.GetVisual(firstVisualIndex);
   getTransform(inlineSize, inlineOffset);
   DALI_TEST_EQUALS(inlineOffset, Vector2(0.0f, 9.0f), TEST_LOCATION);
@@ -1983,7 +2065,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      6u));
+                                      7u));
   inlineVisual = firstViewData.GetVisual(firstVisualIndex);
   DALI_TEST_CHECK(inlineVisual != sourceChangedVisual);
   getTransform(inlineSize, inlineOffset);
@@ -2001,7 +2083,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(140.0f, 80.0f),
                                       Vector2(140.0f, 80.0f),
                                       2.0f,
-                                      6u));
+                                      7u));
   inlineVisual = firstViewData.GetVisual(firstVisualIndex);
   getTransform(inlineSize, inlineOffset);
   DALI_TEST_EQUALS(inlineSize, Vector2(60.0f, 40.0f), TEST_LOCATION);
@@ -2017,7 +2099,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      6u));
+                                      7u));
   DALI_TEST_CHECK(!firstViewData.GetVisual(firstVisualIndex));
   DALI_TEST_CHECK(secondViewData.GetVisual(secondVisualIndex));
 
@@ -2030,7 +2112,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      6u));
+                                      7u));
   DALI_TEST_CHECK(firstViewData.GetVisual(firstVisualIndex));
 
   // JSON would otherwise bypass the factory's static-only option and create
@@ -2043,7 +2125,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      6u));
+                                      7u));
   DALI_TEST_CHECK(!firstViewData.GetVisual(firstVisualIndex));
   firstManager.Clear();
   DALI_TEST_CHECK(!firstViewData.GetVisual(firstVisualIndex));
@@ -2061,7 +2143,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                        Vector2(100.0f, 40.0f),
                                        Vector2(100.0f, 40.0f),
                                        1.0f,
-                                       6u));
+                                       7u));
     Ui::Integration::Visual::Base discardedVisual = firstViewData.GetVisual(firstVisualIndex);
     DALI_TEST_CHECK(discardedVisual);
     firstManager.Clear();
@@ -2076,6 +2158,28 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
     firstHost.ReleaseVisualSlot(reusedIndex);
   }
 
+  // Decode failure removes only the runtime visual. The authored timing gap
+  // remains stable and is not rescheduled around a late resource outcome.
+  source.runs[0u].image.source = "missing-inline-manager-reveal-failure.png";
+  DALI_TEST_CHECK(firstManager.Update(firstHost,
+                                      source,
+                                      placements,
+                                      Vector2::ZERO,
+                                      Vector2(100.0f, 40.0f),
+                                      Vector2(100.0f, 40.0f),
+                                      1.0f,
+                                      7u));
+  DALI_TEST_CHECK(firstManager.ApplyRevealTimings(revealTimings, 7u, progressIndex));
+  Ui::Integration::Visual::Base failedRevealVisual = firstViewData.GetVisual(firstVisualIndex);
+  DALI_TEST_CHECK(failedRevealVisual);
+  DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealTimingCount(firstManager), 1u, TEST_LOCATION);
+  Ui::GetImplementation(failedRevealVisual).ResourceReady(Ui::Visual::ResourceStatus::FAILED);
+  firstManager.Refresh();
+  DALI_TEST_CHECK(!firstViewData.GetVisual(firstVisualIndex));
+  DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealTimingCount(firstManager), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealConstraintCount(firstManager), 0u, TEST_LOCATION);
+  firstManager.Clear();
+
   // Owner teardown and the later clear path must both be idempotent.
   secondManager.PrepareOwnerDestruction();
   secondManager.PrepareOwnerDestruction();
@@ -2085,6 +2189,199 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
   secondManager.Refresh();
   secondManager.Clear();
   secondManager.Clear();
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerRevealLifecycleP(void)
+{
+  UiTestApplication application;
+
+  Text::ReplacementSourceSnapshot source;
+  source.sourceRevision            = 17u;
+  Text::ReplacementRunSnapshot run = Candidate(1u, 1u, 24.0f, 18.0f, 41u);
+  run.type                         = Text::ReplacementType::IMAGE;
+  run.occurrenceIdentity           = 71u;
+  run.image.source                 = "missing-inline-reveal-lifecycle-a.png";
+  source.runs.PushBack(run);
+
+  Vector<Text::ReplacementPlacement> placements;
+  Text::ReplacementPlacement         placement;
+  placement.logicalCharacterRange = run.logicalCharacterRange;
+  placement.sourceRunIndex        = 0u;
+  placement.occurrenceIdentity    = run.occurrenceIdentity;
+  placement.position              = Vector2(4.0f, 6.0f);
+  placement.size                  = Vector2(24.0f, 18.0f);
+  placement.visible               = true;
+  placements.PushBack(placement);
+
+  View owner = View::New();
+  application.GetScene().Add(owner);
+  Dali::Ui::Internal::Text::InlineReplacementViewHost host(
+    owner,
+    Ui::Integration::DepthIndex::CONTENT + 1);
+  Dali::Ui::Internal::Text::InlineReplacementManager manager;
+  using Accessor = Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor;
+
+  const Property::Index visualIndex = host.AllocateVisualSlot();
+  DALI_TEST_CHECK(visualIndex != Property::INVALID_INDEX);
+  host.ReleaseVisualSlot(visualIndex);
+  auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(owner));
+
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(100.0f, 40.0f),
+                                 Vector2(100.0f, 40.0f),
+                                 1.0f,
+                                 source.sourceRevision));
+  DALI_TEST_EQUALS(Accessor::GetEntryCount(manager), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(Accessor::HasHost(manager));
+
+  Ui::Integration::Visual::Base visual   = viewData.GetVisual(visualIndex);
+  VisualRenderer                renderer = visual.GetRenderer();
+  DALI_TEST_CHECK(visual && renderer);
+
+  const Property::Index                 progressIndex = owner.RegisterProperty("uInlineRevealLifecycleProgress", 0.5f);
+  Vector<Text::ReplacementRevealTiming> timings;
+  timings.PushBack({run.occurrenceIdentity, 0.25f, 0.25f});
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(manager), 1u, TEST_LOCATION);
+
+  Constraint activeConstraint = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+  DALI_TEST_CHECK(activeConstraint);
+  DALI_TEST_CHECK(activeConstraint.GetState() != Constraint::State::INITIALIZED);
+  DALI_TEST_CHECK(activeConstraint.GetTargetObject() == renderer);
+  DALI_TEST_EQUALS(activeConstraint.GetSourceCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(activeConstraint.GetSourceAt(0u).object == renderer);
+  DALI_TEST_CHECK(activeConstraint.GetSourceAt(1u).object == owner);
+
+  const Property::Index baseOpacityIndex =
+    renderer.GetPropertyIndex("__dali_ui_inline_replacement_reveal_base_opacity");
+  DALI_TEST_CHECK(baseOpacityIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(Accessor::GetRevealBaseOpacityIndex(manager, run.occurrenceIdentity),
+                   baseOpacityIndex,
+                   TEST_LOCATION);
+  const uint32_t rendererPropertyHighWater = renderer.GetPropertyCount();
+
+  // Re-publishing an identical schedule must preserve the single binding.
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  DALI_TEST_CHECK(Accessor::GetRevealConstraint(manager, run.occurrenceIdentity) == activeConstraint);
+
+  // The custom property belongs to the renderer. Repeated Reveal attachment
+  // may replace one Constraint, but can never accumulate constraints or
+  // register the named base-opacity property again.
+  for(uint32_t cycle = 0u; cycle < 1000u; ++cycle)
+  {
+    manager.ClearReveal();
+    DALI_TEST_EQUALS(activeConstraint.GetState(), Constraint::State::INITIALIZED, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 0u, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(manager), 0u, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetPropertyCount(), rendererPropertyHighWater, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetPropertyIndex("__dali_ui_inline_replacement_reveal_base_opacity"),
+                     baseOpacityIndex,
+                     TEST_LOCATION);
+
+    manager.ClearReveal();
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    activeConstraint = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(activeConstraint);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetPropertyCount(), rendererPropertyHighWater, TEST_LOCATION);
+  }
+
+  // Enabled-to-enabled timing changes replace, rather than stack, the active
+  // update-thread binding.
+  for(uint32_t cycle = 0u; cycle < 32u; ++cycle)
+  {
+    Constraint previous = activeConstraint;
+    timings[0u].start   = (cycle & 1u) ? 0.2f : 0.3f;
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    activeConstraint = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(activeConstraint && activeConstraint != previous);
+    DALI_TEST_EQUALS(previous.GetState(), Constraint::State::INITIALIZED, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetPropertyCount(), rendererPropertyHighWater, TEST_LOCATION);
+  }
+
+  // Runtime descriptor replacement must remove the old renderer constraint
+  // before the old visual is unregistered and bind the new renderer with its
+  // own property lookup.
+  Constraint                    oldRendererConstraint = activeConstraint;
+  Ui::Integration::Visual::Base oldVisual             = visual;
+  source.runs[0u].image.source                        = "missing-inline-reveal-lifecycle-b.png";
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(100.0f, 40.0f),
+                                 Vector2(100.0f, 40.0f),
+                                 1.0f,
+                                 source.sourceRevision));
+  visual   = viewData.GetVisual(visualIndex);
+  renderer = visual.GetRenderer();
+  DALI_TEST_CHECK(visual && renderer && visual != oldVisual);
+  DALI_TEST_EQUALS(oldRendererConstraint.GetState(), Constraint::State::INITIALIZED, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+  const Property::Index recreatedBaseOpacityIndex =
+    renderer.GetPropertyIndex("__dali_ui_inline_replacement_reveal_base_opacity");
+  DALI_TEST_CHECK(recreatedBaseOpacityIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(Accessor::GetRevealBaseOpacityIndex(manager, run.occurrenceIdentity),
+                   recreatedBaseOpacityIndex,
+                   TEST_LOCATION);
+
+  activeConstraint = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+  manager.ClearReveal();
+  DALI_TEST_EQUALS(activeConstraint.GetState(), Constraint::State::INITIALIZED, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(manager), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetEntryCount(manager), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(viewData.GetVisual(visualIndex));
+
+  manager.ClearReveal();
+  manager.Clear();
+  manager.Clear();
+  DALI_TEST_EQUALS(Accessor::GetEntryCount(manager), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(manager), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!Accessor::HasHost(manager));
+  DALI_TEST_CHECK(!viewData.GetVisual(visualIndex));
+
+  // Owner destruction is the one path that intentionally leaves the second
+  // visual handle in ViewDataImpl. The active Constraint is still removed
+  // first, the manager releases every handle, and its raw host pointer is
+  // detached before the owner can disappear.
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(100.0f, 40.0f),
+                                 Vector2(100.0f, 40.0f),
+                                 1.0f,
+                                 source.sourceRevision));
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  Constraint teardownConstraint = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+  DALI_TEST_CHECK(teardownConstraint);
+  DALI_TEST_CHECK(viewData.GetVisual(visualIndex));
+
+  WeakHandle<View> weakOwner(owner);
+  manager.PrepareOwnerDestruction();
+  DALI_TEST_EQUALS(teardownConstraint.GetState(), Constraint::State::INITIALIZED, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetEntryCount(manager), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(manager), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!Accessor::HasHost(manager));
+  DALI_TEST_CHECK(viewData.GetVisual(visualIndex));
+
+  manager.PrepareOwnerDestruction();
+  manager.Clear();
+  manager.Clear();
+  application.GetScene().Remove(owner);
+  owner.Reset();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(!weakOwner.GetHandle());
+
   END_TEST;
 }
 

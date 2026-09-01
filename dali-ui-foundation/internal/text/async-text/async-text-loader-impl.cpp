@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
@@ -139,6 +140,7 @@ std::vector<Text::AsyncAnchorHitRegion> BuildAsyncAnchorHitRegions(
   Text::ModelPtr                     semanticModel,
   Text::ModelPtr                     geometryModel,
   const Text::ReplacementProjection* projection,
+  const Text::FinalElisionResult*    finalElision,
   const Text::AsyncTextParameters&   parameters)
 {
   std::vector<Text::AsyncAnchorHitRegion> regions;
@@ -175,7 +177,12 @@ std::vector<Text::AsyncAnchorHitRegion> BuildAsyncAnchorHitRegions(
 
     Vector<Vector2> sizes;
     Vector<Vector2> positions;
-    Text::GetTextGeometry(geometryModel, geometryStart, geometryEnd - 1u, sizes, positions);
+    Text::GetTextGeometry(geometryModel,
+                          geometryStart,
+                          geometryEnd - 1u,
+                          sizes,
+                          positions,
+                          finalElision);
     if(sizes.Empty() || sizes.Count() != positions.Count())
     {
       continue;
@@ -905,14 +912,50 @@ void AsyncTextLoader::UpdateReplacementProcessing(AsyncTextParameters& parameter
   // final fixed-size layouts. Each pass mutates the worker model and therefore
   // receives its own final-elision generation; the request generation remains
   // separately available for UI-thread stale-result rejection.
-  const uint64_t finalGeneration = ++mReplacementData->finalElisionGeneration;
-  finalView.ResolveFinalElision(mModule.GetFontClient(),
-                                replacementState.finalElision,
-                                finalGeneration);
+  const uint64_t finalGeneration             = ++mReplacementData->finalElisionGeneration;
+  bool           useAuthoritativeEndEllipsis = false;
+  if(mTextModel->mElideEnabled && mTextModel->mEllipsisPosition == EllipsisPosition::END)
+  {
+    for(const LineRun& line : mTextModel->mVisualModel->mLines)
+    {
+      useAuthoritativeEndEllipsis |= line.ellipsis;
+    }
+    useAuthoritativeEndEllipsis |= mTextModel->mVisualModel->mLines.Empty() &&
+                                   !mTextModel->mLogicalModel->mText.Empty();
+  }
+  bool authoritativeEndEllipsisResolved = false;
+  if(useAuthoritativeEndEllipsis)
+  {
+    const Size textLayoutArea(parameters.textWidth, parameters.textHeight);
+    authoritativeEndEllipsisResolved = ResolveEndEllipsis(*mTextModel,
+                                                          textLayoutArea,
+                                                          mModule.GetFontClient(),
+                                                          replacementState.finalElision);
+    DALI_ASSERT_DEBUG(authoritativeEndEllipsisResolved && replacementState.finalElision.resolved &&
+                      "Supported async replacement END layout must publish an authoritative final result");
+    if(authoritativeEndEllipsisResolved)
+    {
+      replacementState.finalElision.layoutGeneration = finalGeneration;
+      FinalizeEndEllipsisGeometry(*mTextModel,
+                                  textLayoutArea,
+                                  parameters.layoutDirection,
+                                  mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS,
+                                  mLayoutEngine,
+                                  replacementState.finalElision);
+    }
+  }
+  if(!authoritativeEndEllipsisResolved)
+  {
+    finalView.ResolveFinalElision(mModule.GetFontClient(),
+                                  replacementState.finalElision,
+                                  finalGeneration);
+  }
 
   ReplacementRenderState& result = replacementState;
   result.processingModel         = mTextModel;
-  result.layoutSize              = mTextModel->mVisualModel->GetLayoutSize();
+  result.layoutSize              = result.finalElision.HasAuthoritativeLayout()
+                                     ? result.finalElision.layoutSize
+                                     : mTextModel->mVisualModel->GetLayoutSize();
   result.sourceRevision          = parameters.replacementSourceSnapshot.sourceRevision;
   result.layoutGeneration        = parameters.replacementLayoutGeneration;
 
@@ -1422,7 +1465,14 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     (replacementState && replacementState->processingModel && replacementState->projection.HasReplacements())
       ? &replacementState->projection
       : nullptr;
-  renderInfo.anchorHitRegions = BuildAsyncAnchorHitRegions(mTextModel, renderModel, activeProjection, parameters);
+  const Text::FinalElisionResult* activeFinalElision = activeProjection
+                                                         ? &replacementState->finalElision
+                                                         : nullptr;
+  renderInfo.anchorHitRegions                        = BuildAsyncAnchorHitRegions(mTextModel,
+                                                                                  renderModel,
+                                                                                  activeProjection,
+                                                                                  activeFinalElision,
+                                                                                  parameters);
 
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
@@ -1451,25 +1501,57 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   renderInfo.isTextRevealEnabled = parameters.isTextRevealEnabled && !cutoutEnabled && !parameters.isMarqueeEnabled;
   if(renderInfo.isTextRevealEnabled && renderInfo.textPixelData)
   {
-    const auto     sourceRevealPlan = parameters.textRevealUnit == Internal::Reveal::Unit::WORD
-                                        ? Internal::Reveal::BuildPlan(*renderModel,
-                                                                      parameters.textRevealUnit,
-                                                                      parameters.textRevealFadeDurationRatio,
-                                                                      mModule.GetSegmentation())
-                                      : parameters.textRevealUnit == Internal::Reveal::Unit::PIXEL
-                                        ? Internal::Reveal::BuildPixelPlan(*renderModel,
-                                                                           parameters.textRevealFadeDurationRatio)
-                                        : Internal::Reveal::BuildCharacterPlan(*renderModel,
-                                                                               parameters.textRevealFadeDurationRatio);
-    const auto     revealPlan       = mTypesetter->CreateFinalRevealPlan(sourceRevealPlan,
-                                                                         parameters.textRevealUnit,
-                                                                         parameters.textRevealSequence,
-                                                                         parameters.textRevealSequenceStaggerRatio);
-    const uint32_t metadataWidth    = renderInfo.textPixelData.GetWidth();
-    const uint32_t metadataHeight   = renderInfo.textPixelData.GetHeight();
-    const uint32_t tileLimit        = parameters.maxTextureSize > 0
-                                        ? static_cast<uint32_t>(parameters.maxTextureSize)
-                                        : metadataHeight;
+    const bool hasReplacementProjection = replacementState && replacementState->processingModel &&
+                                          replacementState->projection.HasReplacements() &&
+                                          parameters.replacementSourceSnapshot.hasValidReplacementSource;
+    auto buildSourcePlan = [&](bool includeImageReplacements)
+    {
+      if(includeImageReplacements && hasReplacementProjection)
+      {
+        return Internal::Reveal::BuildPlanWithImageReplacements(*renderModel,
+                                                                parameters.textRevealUnit,
+                                                                parameters.textRevealFadeDurationRatio,
+                                                                mModule.GetSegmentation(),
+                                                                parameters.replacementSourceSnapshot,
+                                                                replacementState->placements);
+      }
+      return parameters.textRevealUnit == Internal::Reveal::Unit::WORD
+               ? Internal::Reveal::BuildPlan(*renderModel,
+                                             parameters.textRevealUnit,
+                                             parameters.textRevealFadeDurationRatio,
+                                             mModule.GetSegmentation())
+             : parameters.textRevealUnit == Internal::Reveal::Unit::PIXEL
+               ? Internal::Reveal::BuildPixelPlan(*renderModel,
+                                                  parameters.textRevealFadeDurationRatio)
+               : Internal::Reveal::BuildCharacterPlan(*renderModel,
+                                                      parameters.textRevealFadeDurationRatio);
+    };
+    auto sourceRevealPlan = buildSourcePlan(hasReplacementProjection);
+    auto revealPlan       = mTypesetter->CreateFinalRevealPlan(sourceRevealPlan,
+                                                               parameters.textRevealUnit,
+                                                               parameters.textRevealSequence,
+                                                               parameters.textRevealSequenceStaggerRatio);
+    if(hasReplacementProjection &&
+       !mTypesetter->ExtractReplacementRevealTimings(revealPlan,
+                                                     parameters.replacementSourceSnapshot,
+                                                     replacementState->placements,
+                                                     renderInfo.replacementRevealTimings))
+    {
+      // Keep text metadata and ImageSpan publication atomic. If the final
+      // replacement mapping is incomplete, rebuild the established compact
+      // text-only schedule rather than rasterizing an unbound timing gap.
+      renderInfo.replacementRevealTimings.Clear();
+      sourceRevealPlan = buildSourcePlan(false);
+      revealPlan       = mTypesetter->CreateFinalRevealPlan(sourceRevealPlan,
+                                                            parameters.textRevealUnit,
+                                                            parameters.textRevealSequence,
+                                                            parameters.textRevealSequenceStaggerRatio);
+    }
+    const uint32_t metadataWidth  = renderInfo.textPixelData.GetWidth();
+    const uint32_t metadataHeight = renderInfo.textPixelData.GetHeight();
+    const uint32_t tileLimit      = parameters.maxTextureSize > 0
+                                      ? static_cast<uint32_t>(parameters.maxTextureSize)
+                                      : metadataHeight;
     const Vector2  fullMetadataSize(static_cast<float>(metadataWidth), static_cast<float>(metadataHeight));
     const bool     isRendererTiled = parameters.maxTextureSize > 0 &&
                                  renderInfo.size.height > static_cast<float>(parameters.maxTextureSize);
