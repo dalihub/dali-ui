@@ -219,3 +219,13 @@ jobs:
       run: |
         . ..\..\dali-env\setenv.ps1
         .\build.ps1
+
+    - name: Build dali-ui Windows UTCs
+      working-directory: ${{ github.workspace }}\automated-tests
+      run: |
+        .\build.ps1
+
+    - name: Run dali-ui Windows UTCs
+      working-directory: ${{ github.workspace }}\automated-tests
+      run: |
+        .\execute.ps1
