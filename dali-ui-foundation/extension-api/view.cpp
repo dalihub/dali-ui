@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/extension-api/view.h>
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/accessibility-events.h>
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
@@ -107,40 +106,6 @@ bool ClearAccessibilityHighlight(Ui::View view)
 {
   auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
   return DALI_LIKELY(accessible) && accessible->ClearHighlight();
-}
-
-bool NotifyAccessibilityValueChanged(Ui::View view)
-{
-  if(!view)
-  {
-    return false;
-  }
-
-  auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
-  if(!accessible)
-  {
-    return false;
-  }
-
-  accessible->Emit(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::VALUE);
-  return true;
-}
-
-bool NotifyAccessibilityShowingChanged(Ui::View view, bool showing)
-{
-  if(!view)
-  {
-    return false;
-  }
-
-  auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
-  if(!accessible)
-  {
-    return false;
-  }
-
-  accessible->EmitShowing(showing);
-  return true;
 }
 
 void SetState(ViewImpl& viewImpl, ViewState stateToChange, bool on, InputEvent cause)

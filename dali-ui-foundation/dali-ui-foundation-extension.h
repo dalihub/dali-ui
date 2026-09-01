@@ -19,7 +19,6 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-#include <dali-ui-foundation/extension-api/accessibility.h>
 #include <dali-ui-foundation/extension-api/focus-indication-policy.h>
 #include <dali-ui-foundation/extension-api/focus-manager.h>
 #include <dali-ui-foundation/extension-api/group-selectable-view-impl.h>
