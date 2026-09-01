@@ -102,14 +102,14 @@ public:
   UiText::Alignment GetVerticalLineAlignment() const override { return UiText::Alignment::START; }
   UiText::EllipsisPosition::Type GetEllipsisPosition() const override { return UiText::EllipsisPosition::END; }
   bool IsTextElideEnabled() const override { return false; }
-  UiText::Length GetNumberOfLines() const override { return mLines.Count(); }
+  UiText::Length GetNumberOfLines() const override { return static_cast<Dali::Ui::Text::Length>(mLines.Count()); }
   const UiText::LineRun* GetLines() const override { return mLines.Begin(); }
   UiText::Length GetNumberOfScripts() const override { return 0u; }
   const UiText::ScriptRun* GetScriptRuns() const override { return nullptr; }
-  UiText::Length GetNumberOfCharacters() const override { return mCharacters.Count(); }
-  UiText::Length GetNumberOfGlyphs() const override { return mGlyphs.Count(); }
+  UiText::Length GetNumberOfCharacters() const override { return static_cast<Dali::Ui::Text::Length>(mCharacters.Count()); }
+  UiText::Length GetNumberOfGlyphs() const override { return static_cast<Dali::Ui::Text::Length>(mGlyphs.Count()); }
   UiText::GlyphIndex GetStartIndexOfElidedGlyphs() const override { return 0u; }
-  UiText::GlyphIndex GetEndIndexOfElidedGlyphs() const override { return mGlyphs.Count() > 0u ? mGlyphs.Count() - 1u : 0u; }
+  UiText::GlyphIndex GetEndIndexOfElidedGlyphs() const override { return static_cast<Dali::Ui::Text::GlyphIndex>(mGlyphs.Count() > 0u ? mGlyphs.Count() - 1u : 0u); }
   UiText::GlyphIndex GetFirstMiddleIndexOfElidedGlyphs() const override { return 0u; }
   UiText::GlyphIndex GetSecondMiddleIndexOfElidedGlyphs() const override { return 0u; }
   const UiText::GlyphInfo* GetGlyphs() const override { return mGlyphs.Begin(); }

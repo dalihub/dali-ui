@@ -41,7 +41,7 @@ UiTestApplication::UiTestApplication(size_t surfaceWidth, size_t surfaceHeight, 
 }
 
 UiTestApplication::UiTestApplication(Ui::UiConfig config, size_t surfaceWidth, size_t surfaceHeight, float horizontalDpi, float verticalDpi)
-: TestApplication(surfaceWidth, surfaceHeight, horizontalDpi, verticalDpi, false /* Do not Initialize Core */),
+: TestApplication(static_cast<uint32_t>(surfaceWidth), static_cast<uint32_t>(surfaceHeight), static_cast<uint32_t>(horizontalDpi), static_cast<uint32_t>(verticalDpi), static_cast<uint32_t>(false /* Do not Initialize Core */)),
   mMainWindow(),
   mAdaptor(nullptr)
 {
@@ -91,7 +91,7 @@ void UiTestApplication::CreateSceneFromMainWindow()
   mMainWindow = Window::New(PositionSize(0, 0, mSurfaceWidth, mSurfaceHeight), "");
 
   mScene = AdaptorImpl::GetScene(mMainWindow);
-  mScene.SetDpi(Vector2(mDpi.x, mDpi.y));
+  mScene.SetDpi(Vector2(static_cast<float>(mDpi.x), static_cast<float>(mDpi.y)));
 
   // Create render target for the scene
   Graphics::RenderTargetCreateInfo rtInfo{};

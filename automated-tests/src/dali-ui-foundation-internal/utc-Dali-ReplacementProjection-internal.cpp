@@ -143,8 +143,8 @@ Vector<Text::Character> Utf32(const std::string& utf8)
 {
   const auto*             bytes = reinterpret_cast<const uint8_t*>(utf8.data());
   Vector<Text::Character> characters;
-  characters.Resize(Text::GetNumberOfUtf8Characters(bytes, utf8.size()));
-  const uint32_t converted = Text::Utf8ToUtf32(bytes, utf8.size(), characters.Begin());
+  characters.Resize(Text::GetNumberOfUtf8Characters(bytes, static_cast<uint32_t>(utf8.size())));
+  const uint32_t converted = Text::Utf8ToUtf32(bytes, static_cast<uint32_t>(utf8.size()), characters.Begin());
   characters.Resize(converted);
   return characters;
 }
@@ -199,7 +199,7 @@ Text::GlyphIndex FindSourceGlyphIndex(const Text::FinalElisionResult& result, Te
 
 uint32_t CountGeneratedFinalGlyphs(const Text::FinalElisionResult& result)
 {
-  return result.glyphs.Count() - CountVisibleOriginalGlyphs(result);
+  return static_cast<uint32_t>(result.glyphs.Count() - CountVisibleOriginalGlyphs(result));
 }
 
 bool IsGeneratedEllipsisDrawable(const Text::ReplacementRenderState& state)
@@ -1025,7 +1025,7 @@ int UtcDaliReplacementProjectionLtrLineBreakLayoutP(void)
     surrounded, services, surroundedOptions, surroundedResult));
   DALI_TEST_CHECK(surroundedResult.processingModel->mVisualModel->mLines.Count() >= 3u);
   DALI_TEST_CHECK(surroundedResult.placements[0u].visible);
-  uint32_t objectLine = surroundedResult.processingModel->mVisualModel->mLines.Count();
+  uint32_t objectLine = static_cast<uint32_t>(surroundedResult.processingModel->mVisualModel->mLines.Count());
   for(uint32_t lineIndex = 0u;
       lineIndex < surroundedResult.processingModel->mVisualModel->mLines.Count(); ++lineIndex)
   {
@@ -1211,7 +1211,7 @@ int UtcDaliReplacementVerticalAlignmentLineContainmentP(void)
       {
         const Vector<Text::GlyphInfo>& glyphs = result.processingModel->mVisualModel->mGlyphs;
         const Text::GlyphIndex end =
-          std::min<Text::GlyphIndex>(glyphRun.glyphIndex + glyphRun.numberOfGlyphs, glyphs.Count());
+          std::min<Text::GlyphIndex>(glyphRun.glyphIndex + glyphRun.numberOfGlyphs, static_cast<Text::GlyphIndex>(glyphs.Count()));
         for(Text::GlyphIndex glyphIndex = glyphRun.glyphIndex; glyphIndex < end; ++glyphIndex)
         {
           if(glyphs[glyphIndex].fontId == 0u || !result.finalElision.IsOriginalGlyphVisible(glyphIndex))
@@ -1697,7 +1697,7 @@ int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
   {
     for(const float offset : offsets)
     {
-      Text::ReplacementRunSnapshot alignedRun = Candidate(1u, 4u, 88.0f, 74.0f, occurrence++);
+      Text::ReplacementRunSnapshot alignedRun = Candidate(1u, 4u, 88.0f, 74.0f, static_cast<uint32_t>(occurrence++));
       alignedRun.metrics.verticalAlignment     = alignment;
       alignedRun.metrics.verticalOffset        = offset;
       const CaretCase aligned = layoutCaretCase("AiconB",
@@ -1724,7 +1724,7 @@ int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
     }
   }
 
-  Text::ReplacementRunSnapshot tallerThanControlRun = Candidate(1u, 4u, 92.0f, 260.0f, occurrence++);
+  Text::ReplacementRunSnapshot tallerThanControlRun = Candidate(1u, 4u, 92.0f, 260.0f, static_cast<uint32_t>(occurrence++));
   const CaretCase tallerThanControl = layoutCaretCase("AiconB",
                                                       1u,
                                                       4u,
@@ -1755,8 +1755,8 @@ int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
     Text::Controller::Impl::GetImplementation(*adjacentController.Get());
   adjacentController->SetText("AabcdwxyzB");
   Text::ReplacementSourceSnapshot adjacentSource;
-  adjacentSource.runs.PushBack(Candidate(1u, 4u, 38.0f, 28.0f, occurrence++));
-  adjacentSource.runs.PushBack(Candidate(5u, 4u, 64.0f, 44.0f, occurrence++));
+  adjacentSource.runs.PushBack(Candidate(1u, 4u, 38.0f, 28.0f, static_cast<uint32_t>(occurrence++)));
+  adjacentSource.runs.PushBack(Candidate(5u, 4u, 64.0f, 44.0f, static_cast<uint32_t>(occurrence++)));
   adjacentSource.sourceRevision                       = occurrence;
   adjacentSource.hasValidReplacementSource            = true;
   adjacentImpl.GetOrCreateReplacementSourceSnapshot() = adjacentSource;
@@ -3710,8 +3710,8 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
     Text::ReplacementRenderState    result            = layout(400.0f, height, generation++);
     const Text::FinalElisionResult& finalElision      = result.finalElision;
     const uint32_t                  visibleGlyphCount = finalElision.textElided
-                                                          ? CountVisibleOriginalGlyphs(finalElision)
-                                                          : result.processingModel->mVisualModel->mGlyphs.Count();
+                                                          ? static_cast<uint32_t>(CountVisibleOriginalGlyphs(finalElision))
+                                                          : static_cast<uint32_t>(result.processingModel->mVisualModel->mGlyphs.Count());
     DALI_TEST_CHECK(visibleGlyphCount >= previousVisibleGlyphCount);
     DALI_TEST_CHECK(!previousImageVisible || result.placements[0u].visible);
     previousVisibleGlyphCount = visibleGlyphCount;
@@ -3733,7 +3733,7 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
   for(float width = 120.0f; width <= 600.0f; width += 2.0f)
   {
     Text::ReplacementRenderState result    = layout(width, 367.0f, generation++);
-    const uint32_t               lineCount = result.processingModel->mVisualModel->mLines.Count();
+    const uint32_t               lineCount = static_cast<const uint32_t>(result.processingModel->mVisualModel->mLines.Count());
     DALI_TEST_CHECK(!previousWidthImageVisible || result.placements[0u].visible);
     sawLineCountChange |= previousLineCount != 0u && previousLineCount != lineCount;
     previousWidthImageVisible = result.placements[0u].visible;
@@ -3772,18 +3772,18 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
 
   Text::FinalElisionResult& repeatedResult     = impl.GetOrCreateReplacementRenderState().finalElision;
   const uint64_t            repeatedGeneration = repeatedResult.layoutGeneration;
-  const uint32_t            repeatedGlyphCount = repeatedResult.glyphs.Count();
+  const uint32_t            repeatedGlyphCount = static_cast<const uint32_t>(repeatedResult.glyphs.Count());
   const Text::GlyphInfo*    repeatedGlyphData  = repeatedResult.glyphs.Begin();
   impl.mView.ResolveFinalElision(impl.GetFontClient(), repeatedResult, repeatedGeneration);
-  DALI_TEST_EQUALS(repeatedResult.glyphs.Count(), repeatedGlyphCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(repeatedResult.glyphs.Count()), repeatedGlyphCount, TEST_LOCATION);
   DALI_TEST_CHECK(repeatedResult.glyphs.Begin() == repeatedGlyphData);
 
   Text::ViewModel rendererView(impl.GetReplacementRenderState().processingModel.Get());
   rendererView.SetFinalElisionResult(&repeatedResult);
   rendererView.ElideGlyphs(impl.GetFontClient());
   const uint32_t expectedRendererGlyphCount = repeatedResult.textElided
-                                                ? repeatedResult.glyphs.Count()
-                                                : impl.GetReplacementRenderState().processingModel->mVisualModel->mGlyphs.Count();
+                                                ? static_cast<uint32_t>(repeatedResult.glyphs.Count())
+                                                : static_cast<uint32_t>(impl.GetReplacementRenderState().processingModel->mVisualModel->mGlyphs.Count());
   DALI_TEST_EQUALS(rendererView.GetNumberOfGlyphs(), expectedRendererGlyphCount, TEST_LOCATION);
 
   controller->Relayout(Size(400.0f, 90.0f));
@@ -4978,7 +4978,7 @@ int UtcDaliReplacementProductionParityMatrixP(void)
     {
       continue;
     }
-    const uint32_t replacementIndex = complexRuns.Count();
+    const uint32_t replacementIndex = static_cast<const uint32_t>(complexRuns.Count());
     const float    widths[]         = {18.0f, 76.0f, 150.0f};
     const float    heights[]        = {16.0f, 44.0f, 88.0f};
     complexRuns.PushBack(Candidate(index,

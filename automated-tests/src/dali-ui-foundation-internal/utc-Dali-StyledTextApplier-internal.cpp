@@ -977,7 +977,7 @@ int UtcDaliStyledTextApplierAsyncSnapshotKeepsTextP(void)
 
   PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(plainText.c_str());
   DALI_TEST_CHECK(builder.SetSpan(PublicText::ForegroundColorSpan::New(Dali::Ui::UiColor(Color::GREEN)), 0u, 3u));
-  DALI_TEST_CHECK(builder.SetSpan(PublicText::FontSpan::New(attributes), 0u, plainText.size()));
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::FontSpan::New(attributes), 0u, static_cast<uint32_t>(plainText.size())));
 
   Dali::Ui::Text::AsyncTextParameters baseParameters;
   baseParameters.text      = plainText;

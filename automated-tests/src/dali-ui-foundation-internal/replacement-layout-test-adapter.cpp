@@ -67,7 +67,7 @@ ControllerPtr CreateController(const Model&                        originalModel
 {
   std::string              utf8;
   const Vector<Character>& logicalText = originalModel.mLogicalModel->mText;
-  Utf32ToUtf8(logicalText.Begin(), logicalText.Count(), utf8);
+  Utf32ToUtf8(logicalText.Begin(), static_cast<uint32_t>(logicalText.Count()), utf8);
 
   ControllerPtr     controller = Controller::New();
   Controller::Impl& impl       = Controller::Impl::GetImplementation(*controller.Get());

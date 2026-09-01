@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 // CLASS HEADER
 #include "ui-environment-variable.h"
 
@@ -40,8 +39,17 @@ const char* GetEnvironmentVariable(const char* variable)
   // Get http_proxy from real environment variables
   if(std::string(variable) == std::string("http_proxy"))
   {
+#if defined(_MSC_VER)
+    char* httpProxyResult = nullptr;
+    size_t len = 0;
+    _dupenv_s(&httpProxyResult, &len, "http_proxy");
+    std::string result = (httpProxyResult ? httpProxyResult : "");
+    if(httpProxyResult) free(httpProxyResult);
+    return (gEnvironmentVariables[variable] = result).c_str();
+#else
     auto* httpProxyResult = std::getenv("http_proxy");
     return (gEnvironmentVariables[variable] = (httpProxyResult ? httpProxyResult : "")).c_str();
+#endif
   }
   return nullptr;
 }
