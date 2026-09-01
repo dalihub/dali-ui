@@ -82,3 +82,6 @@ libdali2-ui*.so*
 /samples/_build/
 *-example
 dali.info
+
+# Developer-local AI-SDLC workflow state and generated artifacts
+/ai-sdlc-docs/

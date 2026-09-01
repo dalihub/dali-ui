@@ -50,4 +50,5 @@ artifact_type: TEST_REPORT
 - 
 
 ## 7. Conclusion
-- release recommendation:
+- workflow completion recommendation: ready / ready with conditions / not ready
+- release recommendation: N/A when C5 is skipped

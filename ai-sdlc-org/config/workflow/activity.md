@@ -5,6 +5,61 @@
 Base Activities defines the standard activities available in the AI-SDLC framework.
 Each activity is an independent, self-contained execution unit with clear inputs, outputs, and execution conditions.
 
+## DALi Project Rule Loading
+
+For every workflow executed against `dali-ui`, load
+`rules/dali-ui-context.md`. Its Ubuntu development baseline applies to planning,
+implementation, build, and validation activities.
+
+When the active profile is `dali_component_feature`, apply this additional
+routing before executing each activity:
+
+| Activity | Required project rules and reference use |
+|---|---|
+| Profile prerequisite | Load `rules/oneui-components-reference.md`; obtain and validate the reference source before A0 |
+| A0 | Inspect existing DALi component patterns and OneUIComponents source, tests, and samples; record the reference commit |
+| A1, A2 | Load `rules/component-development.md`; derive component behavior and acceptance criteria from the reference |
+| A4 | Load component development, public API/ABI, Handle-Body, and component-boundary rules; document intentional reference differences |
+| C1 | Apply component structure, style, builder, construction-time style, configuration, naming, and test-design rules |
+| C2 | Implement against the approved design and applicable component rules |
+| C3 | Load `rules/build-and-test.md`; verify rule compliance and reference behavior with executable unit evidence on the Ubuntu baseline |
+| C4 | Load `rules/build-and-test.md`; run the integrated Ubuntu build and approved test scope; record environment and exact commands |
+| C5 | Skipped by default; if explicitly added for release preparation, record the OneUIComponents reference commit and intentional differences in release evidence |
+
+These requirements apply only to `dali_component_feature`. Other profiles do
+not load or require `rules/oneui-components-reference.md` unless the user
+explicitly requests it.
+
+### DALi C5 Default
+
+C5 is `SKIP` in every DALi development workflow profile because project
+releases aggregate multiple completed changes at a separate milestone. Keep
+the C5 definition below available for an explicit release-preparation request.
+When skipped, complete Construction Review after C4 and use `completed` as the
+workflow final status. PR preparation and per-change integration remain C2/C3
+concerns, not C5 release execution.
+
+### org_standard API Change Routing
+
+When the active profile is `org_standard`, activate this routing if the user
+request, approved design, or affected files change a DALi public, extension, or
+integration API contract:
+
+| Activity | Required project rules and evidence |
+|---|---|
+| A0 | Identify API level, exported declarations, consumers, subclasses, call sites, ABI-sensitive layout, and affected tests, samples, and documentation |
+| A1, A2 | Load `rules/public-api-abi.md`; classify ordinary work versus explicit pre-release redesign; record compatibility, ABI, migration, and approval requirements |
+| A4 | Load `rules/handle-body-pattern.md`, `rules/component-boundaries.md`, and `rules/api-naming.md`; design the target API and implementation boundary |
+| C1 | List each API addition, removal, or change and map it to implementation, migration, documentation, and test work |
+| C2 | Implement only the approved API shape and keep public handles, exports, and API-level dependencies compliant |
+| C3 | Load `rules/validation-checks.md` and `rules/build-and-test.md`; inspect the actual public-header diff, run applicable checks, and record rule-by-rule evidence |
+| C4 | Execute the integrated Ubuntu build and approved regression scope; include affected samples and manual-tests where applicable |
+
+This routing is conditional within `org_standard`; it does not require a
+separate API-refactoring workflow profile. If no API contract is affected,
+record the condition as not applicable and do not add API-specific artifacts or
+review requirements.
+
 ---
 
 # Inception Activities
@@ -227,6 +282,16 @@ Each activity is an independent, self-contained execution unit with clear inputs
 
 **Executor**: ai-sdlc-core/skills/code-verification/SKILL.md
 
+**DALi Execution Requirements**:
+
+- Load `rules/build-and-test.md`.
+- Build and install the current `dali-ui` source before building or executing
+  affected automated tests.
+- Use targeted test modules or cases only when the approved implementation
+  design establishes a reliable unit boundary.
+- Keep C3 `BLOCKED` when current build/install or automated unit-test evidence
+  is missing.
+
 **Inputs**:
 - ai-sdlc-docs/construction/implementation-design/{unit-name}-implementation-design.md
 - ai-sdlc-docs/construction/plans/{unit-name}-code-generation-plan.md
@@ -248,9 +313,19 @@ Each activity is an independent, self-contained execution unit with clear inputs
 - Integrated build execution
 - System-level testing
 - Performance testing
-- Release readiness assessment
+- Workflow completion readiness assessment
 
 **Executor**: ai-sdlc-core/skills/build-testing/SKILL.md
+
+**DALi Execution Requirements**:
+
+- Load `rules/build-and-test.md`.
+- Execute the integrated Ubuntu build and install after all required units pass
+  C3 and the Integration Ready Check.
+- Build and run the complete automated-test suite unless the approved test plan
+  records a justified regression scope.
+- Include affected manual-tests and samples in the approved validation scope.
+- Record environment, exact commands, outcomes, exclusions, and residual risks.
 
 **Inputs**:
 - ai-sdlc-docs/inception/requirements/requirements-analysis.md

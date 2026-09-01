@@ -11,7 +11,7 @@ artifact_type: STATE_LOG
 - current loop:
 - current activity:
 - overall status:
-- release readiness:
+- release readiness: N/A when C5 is skipped
 
 ## Unit Status Summary
 | Unit ID | Unit Name | Owner | State | Implementation Complete | Automated Unit Test Result | Dependency | Blocker |
@@ -31,5 +31,5 @@ artifact_type: STATE_LOG
 
 ## Integration Snapshot
 - all units pass integration ready check:
-- release readiness:
-- final status:
+- release readiness: N/A when C5 is skipped
+- final status: completed / released

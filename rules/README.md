@@ -11,6 +11,19 @@ Rules should be precise enough to turn into checks, but still explain the intent
 behind the convention. Prefer examples from the current codebase over abstract
 style advice.
 
+## Document Types
+
+This directory contains:
+
+- Context and index documents that describe the project and route work to the
+  applicable rules.
+- Enforceable rule documents that define required, recommended, or contextual
+  behavior and its validation.
+- Procedural validation documents that collect executable checks.
+
+Context and index documents do not need to force all content into a single rule
+template. Enforceable rules use the format below.
+
 ## Rule Format
 
 Use this structure when adding or updating a rule:
@@ -46,6 +59,10 @@ Searches, scripts, or manual checks that can detect likely violations.
 
 ## Current Rule Areas
 
+- [dali-ui Project Context](dali-ui-context.md)
+- [Build and Test](build-and-test.md)
+- [Component Development](component-development.md)
+- [OneUIComponents Reference](oneui-components-reference.md)
 - [API Naming](api-naming.md)
 - [Public API and ABI](public-api-abi.md)
 - [Bit-field Enums](bitfield-enums.md)
