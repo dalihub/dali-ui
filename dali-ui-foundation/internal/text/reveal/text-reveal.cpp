@@ -1048,11 +1048,16 @@ bool ApplyPixelSpatialSchedule(Plan&                       plan,
         for(int side = -1; side <= 1; side += 2)
         {
           const int64_t candidate = static_cast<int64_t>(anchor) + static_cast<int64_t>(side) * distance;
-          if(candidate < 0 || candidate >= glyphCount || glyphToLine[candidate] != line)
+          if(candidate < 0 || candidate >= glyphCount)
           {
             continue;
           }
-          const CharacterIndex character = getSourceCharacter(static_cast<GlyphIndex>(candidate));
+          const GlyphIndex candidateGlyph = static_cast<GlyphIndex>(candidate);
+          if(glyphToLine[candidateGlyph] != line)
+          {
+            continue;
+          }
+          const CharacterIndex character = getSourceCharacter(candidateGlyph);
           if(character < directions.Count())
           {
             accumulator.rightToLeft    = directions[character];

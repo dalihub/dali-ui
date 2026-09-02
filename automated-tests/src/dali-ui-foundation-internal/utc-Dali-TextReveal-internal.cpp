@@ -105,7 +105,12 @@ constexpr float EPSILON = 0.0001f;
 
 std::string GetRepositoryResourcePath(const char* relativePath)
 {
-  const std::string testResourceDirectory(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR);
+#if defined(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR)
+  std::string testResourceDirectory(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR);
+#else
+  std::string testResourceDirectory(__FILE__);
+#endif
+  std::replace(testResourceDirectory.begin(), testResourceDirectory.end(), '\\', '/');
   const std::string marker("/automated-tests/");
   const std::size_t markerOffset = testResourceDirectory.rfind(marker);
   return markerOffset == std::string::npos
@@ -485,7 +490,9 @@ int UtcDaliTextRevealLineUnitScheduleP(void)
 
   Reveal::Plan line = Reveal::BuildPlan(text, 6u, glyphMap, 6u, Reveal::Unit::LINE, 0.25f);
   DALI_TEST_EQUALS(line.GetUnitCount(), 5u, TEST_LOCATION);
-  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(line, lines.data(), lines.size()));
+  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(line,
+                                                lines.data(),
+                                                static_cast<UiText::Length>(lines.size())));
   DALI_TEST_EQUALS(line.GetUnitCount(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(line.glyphToUnit[0u], 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(line.glyphToUnit[1u], 0u, TEST_LOCATION);
@@ -499,8 +506,13 @@ int UtcDaliTextRevealLineUnitScheduleP(void)
   DALI_TEST_CHECK(!line.HasPixelTiming());
 
   Reveal::Plan perLine = Reveal::BuildPlan(text, 6u, glyphMap, 6u, Reveal::Unit::LINE, 0.25f);
-  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(perLine, lines.data(), lines.size()));
-  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(perLine, lines.data(), lines.size(), 0.25f));
+  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(perLine,
+                                                lines.data(),
+                                                static_cast<UiText::Length>(lines.size())));
+  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(perLine,
+                                                       lines.data(),
+                                                       static_cast<UiText::Length>(lines.size()),
+                                                       0.25f));
   DALI_TEST_EQUALS(perLine.unitStart[0u], 0.0f, EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(perLine.unitStart[1u], 0.2f, EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(perLine.fadeDuration, 0.2f, EPSILON, TEST_LOCATION);
@@ -508,7 +520,9 @@ int UtcDaliTextRevealLineUnitScheduleP(void)
   for(float ratio : {UiText::Reveal::AUTO_FADE_DURATION_RATIO, 0.0f, 1.0f})
   {
     Reveal::Plan scheduled = Reveal::BuildPlan(text, 6u, glyphMap, 6u, Reveal::Unit::LINE, ratio);
-    DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(scheduled, lines.data(), lines.size()));
+    DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(scheduled,
+                                                  lines.data(),
+                                                  static_cast<UiText::Length>(lines.size())));
     DALI_TEST_EQUALS(scheduled.GetUnitCount(), 2u, TEST_LOCATION);
     DALI_TEST_EQUALS(scheduled.fadeDurationRatio, ratio, EPSILON, TEST_LOCATION);
     if(ratio == 0.0f)
@@ -537,7 +551,9 @@ int UtcDaliTextRevealLineUnitScheduleP(void)
   std::vector<UiText::LineRun> imageLines(2u);
   imageLines[0u].glyphRun = {0u, 3u};
   imageLines[1u].glyphRun = {3u, 1u};
-  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(imageLine, imageLines.data(), imageLines.size()));
+  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(imageLine,
+                                                imageLines.data(),
+                                                static_cast<UiText::Length>(imageLines.size())));
   DALI_TEST_EQUALS(imageLine.GetUnitCount(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(imageLine.imageReplacementUnitMask.size(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(imageLine.imageReplacementUnitMask[0u], 1u, TEST_LOCATION);
@@ -553,7 +569,9 @@ int UtcDaliTextRevealLineUnitScheduleP(void)
   splitRuns[0u].isSplitToTwoHalves = true;
   splitRuns[0u].glyphRunSecondHalf = {1u, 1u};
   splitRuns[1u].glyphRun           = {2u, 2u};
-  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(splitLine, splitRuns.data(), splitRuns.size()));
+  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(splitLine,
+                                                splitRuns.data(),
+                                                static_cast<UiText::Length>(splitRuns.size())));
   DALI_TEST_EQUALS(splitLine.GetUnitCount(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(splitLine.glyphToUnit[0u], splitLine.glyphToUnit[1u], TEST_LOCATION);
   DALI_TEST_EQUALS(splitLine.glyphToUnit[3u], 1u, TEST_LOCATION);
@@ -793,7 +811,10 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   const auto standaloneFive = MakePlan({5u}, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
   auto       equalLines     = MakePlan({5u, 5u, 5u}, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
   const auto equalLineRuns  = MakeLines({5u, 5u, 5u});
-  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(equalLines, equalLineRuns.data(), equalLineRuns.size(), 0.0f));
+  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(equalLines,
+                                                       equalLineRuns.data(),
+                                                       static_cast<UiText::Length>(equalLineRuns.size()),
+                                                       0.0f));
   DALI_TEST_EQUALS(equalLines.fadeDuration, standaloneFive.fadeDuration, EPSILON, TEST_LOCATION);
   for(uint32_t line = 0u; line < 3u; ++line)
   {
@@ -806,7 +827,10 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   auto       uneven      = MakePlan({3u, 8u, 5u}, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
   const auto unevenLines = MakeLines({3u, 8u, 5u});
   const auto standaloneEight = MakePlan({8u}, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
-  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(uneven, unevenLines.data(), unevenLines.size(), 0.0f));
+  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(uneven,
+                                                       unevenLines.data(),
+                                                       static_cast<UiText::Length>(unevenLines.size()),
+                                                       0.0f));
   DALI_TEST_EQUALS(uneven.fadeDuration, standaloneEight.fadeDuration, EPSILON, TEST_LOCATION);
   for(uint32_t unit = 0u; unit < 8u; ++unit)
   {
@@ -816,15 +840,18 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   auto       withShortLine      = MakePlan({3u, 8u, 5u, 2u}, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
   const auto withShortLineRuns  = MakeLines({3u, 8u, 5u, 2u});
   DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(withShortLine,
-                                                    withShortLineRuns.data(),
-                                                    withShortLineRuns.size(),
-                                                    0.0f));
+                                                       withShortLineRuns.data(),
+                                                       static_cast<UiText::Length>(withShortLineRuns.size()),
+                                                       0.0f));
   DALI_TEST_EQUALS(withShortLine.fadeDuration, uneven.fadeDuration, EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(withShortLine.unitStart[4u] - withShortLine.unitStart[3u],
                    uneven.unitStart[4u] - uneven.unitStart[3u], EPSILON, TEST_LOCATION);
 
   auto ratioOne = MakePlan({3u, 8u, 5u}, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
-  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(ratioOne, unevenLines.data(), unevenLines.size(), 1.0f));
+  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(ratioOne,
+                                                       unevenLines.data(),
+                                                       static_cast<UiText::Length>(unevenLines.size()),
+                                                       1.0f));
   const uint32_t lineStarts[] = {0u, 3u, 11u};
   const uint32_t lineEnds[]   = {2u, 10u, 15u};
   DALI_TEST_EQUALS(ratioOne.unitStart[lineStarts[1u]] - ratioOne.unitStart[lineStarts[0u]],
@@ -842,9 +869,9 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
       auto       singleton      = MakePlan({1u, 1u, 1u}, authoredFade);
       const auto singletonLines = MakeLines({1u, 1u, 1u});
       DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(singleton,
-                                                        singletonLines.data(),
-                                                        singletonLines.size(),
-                                                        ratio));
+                                                           singletonLines.data(),
+                                                           static_cast<UiText::Length>(singletonLines.size()),
+                                                           ratio));
       const float totalDuration = 2.0f * ratio + 1.0f;
       const float resolvedFade  = authoredFade == UiText::Reveal::AUTO_FADE_DURATION_RATIO ? 1.0f : authoredFade;
       DALI_TEST_EQUALS(singleton.unitStart[0u], 0.0f, EPSILON, TEST_LOCATION);
@@ -857,7 +884,10 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   auto       singleLine      = MakePlan({1u}, 0.25f);
   const auto originalSingle  = singleLine;
   const auto singleLineRuns  = MakeLines({1u});
-  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(singleLine, singleLineRuns.data(), singleLineRuns.size(), 1.0f));
+  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(singleLine,
+                                                       singleLineRuns.data(),
+                                                       static_cast<UiText::Length>(singleLineRuns.size()),
+                                                       1.0f));
   DALI_TEST_CHECK(singleLine.glyphToUnit == originalSingle.glyphToUnit);
   DALI_TEST_CHECK(singleLine.unitStart == originalSingle.unitStart);
   DALI_TEST_EQUALS(singleLine.fadeDuration, originalSingle.fadeDuration, EPSILON, TEST_LOCATION);
@@ -868,9 +898,9 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   crossLineWord.fadeDurationRatio = UiText::Reveal::AUTO_FADE_DURATION_RATIO;
   auto crossLineRuns             = MakeLines({1u, 3u});
   DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(crossLineWord,
-                                                    crossLineRuns.data(),
-                                                    crossLineRuns.size(),
-                                                    0.5f));
+                                                       crossLineRuns.data(),
+                                                       static_cast<UiText::Length>(crossLineRuns.size()),
+                                                       0.5f));
   DALI_TEST_EQUALS(crossLineWord.GetUnitCount(), 4u, TEST_LOCATION);
   DALI_TEST_CHECK(crossLineWord.glyphToUnit[0u] != crossLineWord.glyphToUnit[1u]);
 
@@ -879,7 +909,10 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   blankLine.unitStart         = {0.0f, 1.0f};
   blankLine.fadeDurationRatio = 0.0f;
   auto blankRuns              = MakeLines({1u, 1u, 1u});
-  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(blankLine, blankRuns.data(), blankRuns.size(), 0.5f));
+  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(blankLine,
+                                                       blankRuns.data(),
+                                                       static_cast<UiText::Length>(blankRuns.size()),
+                                                       0.5f));
   DALI_TEST_EQUALS(blankLine.unitStart[1u], 1.0f / 3.0f, EPSILON, TEST_LOCATION);
 
   Reveal::Plan bidi;
@@ -887,7 +920,10 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   bidi.unitStart         = {0.0f, 0.25f, 0.5f, 0.75f};
   bidi.fadeDurationRatio = 0.25f;
   auto bidiLines         = MakeLines({3u, 1u});
-  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(bidi, bidiLines.data(), bidiLines.size(), 0.5f));
+  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(bidi,
+                                                       bidiLines.data(),
+                                                       static_cast<UiText::Length>(bidiLines.size()),
+                                                       0.5f));
   DALI_TEST_EQUALS(bidi.glyphToUnit[0u], 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(bidi.glyphToUnit[1u], 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(bidi.glyphToUnit[2u], 0u, TEST_LOCATION);
@@ -901,7 +937,10 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   splitRuns[0u].isSplitToTwoHalves   = true;
   splitRuns[0u].glyphRunSecondHalf   = {2u, 1u};
   splitRuns[1u].glyphRun             = {3u, 1u};
-  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(splitLine, splitRuns.data(), splitRuns.size(), 0.5f));
+  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(splitLine,
+                                                       splitRuns.data(),
+                                                       static_cast<UiText::Length>(splitRuns.size()),
+                                                       0.5f));
   DALI_TEST_EQUALS(splitLine.glyphToUnit[0u], 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(splitLine.glyphToUnit[2u], 0u, TEST_LOCATION);
 
@@ -909,9 +948,9 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   const auto originalMapping   = incompleteMapping;
   auto       incompleteRuns    = MakeLines({1u});
   DALI_TEST_CHECK(!Reveal::ApplyPerLineSequenceSchedule(incompleteMapping,
-                                                     incompleteRuns.data(),
-                                                     incompleteRuns.size(),
-                                                     0.5f));
+                                                        incompleteRuns.data(),
+                                                        static_cast<UiText::Length>(incompleteRuns.size()),
+                                                        0.5f));
   DALI_TEST_CHECK(incompleteMapping.glyphToUnit == originalMapping.glyphToUnit);
   DALI_TEST_CHECK(incompleteMapping.unitStart == originalMapping.unitStart);
   DALI_TEST_EQUALS(incompleteMapping.fadeDuration, originalMapping.fadeDuration, EPSILON, TEST_LOCATION);
@@ -920,9 +959,9 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   auto                        stressPlan = MakePlan(stressCounts, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
   const auto                  stressLines = MakeLines(stressCounts);
   DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(stressPlan,
-                                                    stressLines.data(),
-                                                    stressLines.size(),
-                                                    0.25f));
+                                                       stressLines.data(),
+                                                       static_cast<UiText::Length>(stressLines.size()),
+                                                       0.25f));
   DALI_TEST_EQUALS(stressPlan.GetUnitCount(), 5000u, TEST_LOCATION);
   for(uint32_t line = 0u; line < stressCounts.size(); ++line)
   {
@@ -965,8 +1004,11 @@ int UtcDaliTextRevealPerLineSequenceFinalLayoutP(void)
     return std::make_tuple(controller, text, line);
   };
 
-  auto [narrowController, narrowText, narrowLine] = BuildFinalPlans(120.0f);
-  const UiText::ModelInterface* narrowModel       = narrowController->GetRenderTextModel();
+  auto                          narrowResult     = BuildFinalPlans(120.0f);
+  const auto&                   narrowController = std::get<0u>(narrowResult);
+  const auto&                   narrowText       = std::get<1u>(narrowResult);
+  const auto&                   narrowLine       = std::get<2u>(narrowResult);
+  const UiText::ModelInterface* narrowModel      = narrowController->GetRenderTextModel();
   DALI_TEST_CHECK(narrowModel->GetNumberOfLines() >= 3u);
   DALI_TEST_CHECK(narrowLine.unitStart != narrowText.unitStart);
 
@@ -2322,7 +2364,11 @@ int UtcDaliTextRevealPixelInsertedHyphenP(void)
 
   const UiText::ModelInterface* model = controller->GetRenderTextModel();
   DALI_TEST_CHECK(model);
-  DALI_TEST_CHECK(model->GetHyphensCount() > 0u);
+  if(model->GetHyphensCount() == 0u)
+  {
+    tet_infoline("Hyphenation data is unavailable; skipping inserted-hyphen checks");
+    END_TEST;
+  }
   const UiText::Length* hyphenIndices = model->GetHyphenIndices();
   DALI_TEST_CHECK(hyphenIndices);
   for(UiText::Length index = 0u; index < model->GetHyphensCount(); ++index)
@@ -2672,7 +2718,7 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
     const Vector<UiText::ReplacementRevealTiming>& timings = result.second;
     DALI_TEST_EQUALS(plan.GetUnitCount(), unit == Reveal::Unit::LINE ? 1u : 3u, TEST_LOCATION);
     DALI_TEST_EQUALS(timings.Count(), 1u, TEST_LOCATION);
-    DALI_TEST_EQUALS(timings[0u].occurrenceIdentity, 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(timings[0u].occurrenceIdentity, uint64_t{1u}, TEST_LOCATION);
     if(unit == Reveal::Unit::LINE)
     {
       DALI_TEST_EQUALS(timings[0u].start, 0.0f, EPSILON, TEST_LOCATION);
@@ -2742,15 +2788,15 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
   const auto multipleResult = build(multiple, Reveal::Unit::WORD);
   DALI_TEST_EQUALS(multipleResult.first.GetUnitCount(), 5u, TEST_LOCATION);
   DALI_TEST_EQUALS(multipleResult.second.Count(), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(multipleResult.second[0u].occurrenceIdentity, 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(multipleResult.second[1u].occurrenceIdentity, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(multipleResult.second[0u].occurrenceIdentity, uint64_t{1u}, TEST_LOCATION);
+  DALI_TEST_EQUALS(multipleResult.second[1u].occurrenceIdentity, uint64_t{2u}, TEST_LOCATION);
   DALI_TEST_CHECK(multipleResult.second[0u].start < multipleResult.second[1u].start);
 
   const auto multipleLine = build(multiple, Reveal::Unit::LINE);
   DALI_TEST_EQUALS(multipleLine.first.GetUnitCount(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(multipleLine.second.Count(), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(multipleLine.second[0u].occurrenceIdentity, 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(multipleLine.second[1u].occurrenceIdentity, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(multipleLine.second[0u].occurrenceIdentity, uint64_t{1u}, TEST_LOCATION);
+  DALI_TEST_EQUALS(multipleLine.second[1u].occurrenceIdentity, uint64_t{2u}, TEST_LOCATION);
   DALI_TEST_EQUALS(multipleLine.second[0u].start,
                    multipleLine.second[1u].start,
                    EPSILON,
@@ -2884,7 +2930,7 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
   DALI_TEST_CHECK(asyncInfo.isTextRevealEnabled);
   DALI_TEST_EQUALS(asyncInfo.replacementPlacements.Count(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(asyncInfo.replacementRevealTimings.Count(), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(asyncInfo.replacementRevealTimings[0u].occurrenceIdentity, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncInfo.replacementRevealTimings[0u].occurrenceIdentity, uint64_t{1u}, TEST_LOCATION);
 
   float autoLineReplacementStart        = 0.0f;
   float autoLineReplacementFadeDuration = 0.0f;
@@ -3514,7 +3560,7 @@ int UtcDaliTextRevealImageReplacementEndEllipsisPerLineSequenceP(void)
 
   auto buildCase = [&imageUrl](const char* text,
                                uint32_t    imageCharacter,
-                               uint32_t    maximumLines,
+                               int         maximumLines,
                                const Size& size,
                                bool        elideText = true)
   {
@@ -3565,7 +3611,7 @@ int UtcDaliTextRevealImageReplacementEndEllipsisPerLineSequenceP(void)
   {
     const char* text;
     uint32_t    imageCharacter;
-    uint32_t    maximumLines;
+    int         maximumLines;
     uint32_t    imageLine;
     uint32_t    ellipsisLine;
     bool        requireSeparateWordUnits;
@@ -4603,10 +4649,11 @@ int UtcDaliTextRevealPixelMixedLineAutoP(void)
     UiText::StyledTextBuilder builder = UiText::StyledTextBuilder::New(text.c_str());
     UiText::FontAttributes    shortLineAttributes;
     shortLineAttributes.SetSize(shortLineSize);
-    const uint32_t shortLineStart = shortLineFirst ? 0u : longLine.size() + 1u;
+    const uint32_t shortLineLength = static_cast<uint32_t>(shortLine.size());
+    const uint32_t shortLineStart  = shortLineFirst ? 0u : static_cast<uint32_t>(longLine.size()) + 1u;
     DALI_TEST_CHECK(builder.SetSpan(UiText::FontSpan::New(shortLineAttributes),
-                                   shortLineStart,
-                                   shortLineStart + shortLine.size()));
+                                    shortLineStart,
+                                    shortLineStart + shortLineLength));
 
     UiText::ControllerPtr controller = UiText::Controller::New();
     controller->SetDefaultFontSize(20.0f, UiText::Controller::PIXEL_SIZE);
@@ -4703,7 +4750,7 @@ int UtcDaliTextRevealPixelMixedLineAutoP(void)
   // Per-line text scale remains text-only when replacement geometry inflates
   // a line: 24px and 240px ImageSpan heights resolve the same text cadence.
   const std::string replacementText = longLine + "\nA X B";
-  const uint32_t    replacementIndex = longLine.size() + 3u;
+  const uint32_t        replacementIndex = static_cast<uint32_t>(longLine.size()) + 3u;
   UiText::ControllerPtr replacement = BuildReplacementController(replacementText.c_str(),
                                                                  {{replacementIndex, 1u}},
                                                                  Size(1200.0f, 360.0f),

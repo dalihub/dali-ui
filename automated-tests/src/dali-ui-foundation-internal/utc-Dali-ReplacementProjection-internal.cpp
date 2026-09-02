@@ -161,9 +161,9 @@ void CheckFinalElisionContract(const Text::ReplacementRenderState& state)
   DALI_TEST_CHECK(state.processingModel);
   const Text::FinalElisionResult& finalElision = state.finalElision;
   DALI_TEST_CHECK(finalElision.resolved);
-  const uint32_t finalGlyphCount = finalElision.HasAuthoritativeLayout()
-                                     ? finalElision.glyphs.Count()
-                                     : state.processingModel->mVisualModel->mGlyphs.Count();
+  const uint32_t               finalGlyphCount = static_cast<uint32_t>(finalElision.HasAuthoritativeLayout()
+                                                                         ? finalElision.glyphs.Count()
+                                                                         : state.processingModel->mVisualModel->mGlyphs.Count());
   const Vector<Text::LineRun>& finalLines = finalElision.HasAuthoritativeLayout()
                                                ? finalElision.lines
                                                : state.processingModel->mVisualModel->mLines;

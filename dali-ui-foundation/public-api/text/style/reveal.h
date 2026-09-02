@@ -29,66 +29,56 @@ namespace Text
 {
 
 /**
- * @brief Describes how text foreground and inline ImageSpan content are revealed.
+ * @brief Describes how visible text and inline ImageSpan content are revealed.
  *
- * Reveal distributes progression across visible text and ImageSpan content
- * and controls its transition as TextRevealProgress advances from 0.0 to 1.0.
- * Applications control the playback duration by animating TextRevealProgress.
+ * Reveal controls how content becomes visible as TextRevealProgress advances
+ * from 0.0 to 1.0. Applications control playback duration by animating
+ * TextRevealProgress.
  *
- * Unit controls how reveal progression is divided across visible content.
- * Sequence controls how those units share the normalized reveal timeline.
- * For example, CHARACTER with WHOLE_TEXT progresses by character across all
- * visible content, while CHARACTER with PER_LINE gives each final visible line
- * its own character progression. LINE with WHOLE_TEXT reveals final visible
- * lines in order. LINE with PER_LINE treats every active line as an independent
- * singleton sequence. PIXEL follows the same whole-text or per-line distinction
- * using spatial progression.
- *
- * By default, content is revealed by character using one whole-text sequence,
- * no sequence stagger, and an automatically selected fade duration. These
- * options can be configured explicitly.
+ * Unit selects the reveal granularity, while Sequence selects whether reveal
+ * units share one timeline across the whole visible content or use an
+ * independent timeline for each final visible line.
  *
  * Reveal affects the text foreground and inline ImageSpan content. ImageSpan
  * content reveals as an atomic item in CHARACTER, WORD, and LINE modes, and
- * reveals spatially across the rendered image in PIXEL mode.
- * Text decorations and other style layers such as shadow, outline, underline,
- * strikethrough, and background are not affected. When content is elided,
- * hidden source content does not consume reveal units and the ellipsis
- * participates in the visible reveal progression.
+ * reveals spatially across the rendered image in PIXEL mode. Text decorations
+ * and style layers such as shadow, outline, underline, strikethrough, and
+ * background are not affected.
+ *
+ * When content is elided, hidden source content does not consume reveal units
+ * and the visible ellipsis participates in the reveal progression.
+ *
+ * By default, Reveal uses CHARACTER with WHOLE_TEXT sequencing, no sequence
+ * stagger, and an automatically resolved fade duration.
  */
 class DALI_UI_API Reveal
 {
 public:
   /**
-   * @brief Selects an automatically resolved reveal transition duration.
+   * @brief Selects automatic fade duration.
    *
-   * When this value is used as the fade duration ratio, the fade duration is
-   * selected automatically for the current rendered reveal progression.
-   *
-   * This value represents authored automatic behavior; GetFadeDurationRatio()
-   * returns this value rather than the internally resolved duration ratio.
+   * GetFadeDurationRatio() returns this authored value rather than the
+   * duration resolved for the current layout.
    */
   static constexpr float AUTO_FADE_DURATION_RATIO = -1.0f;
 
   /**
-   * @brief Selects how reveal progression is divided across visible content.
-   *
-   * ImageSpan content participates in the reveal schedule in every mode.
+   * @brief Selects the granularity of reveal progression.
    */
   enum class Unit : uint8_t
   {
     /**
      * @brief Reveals visible text by character while preserving shaping boundaries.
      *
-     * Progression follows logical text order. Characters rendered as one
-     * indivisible text unit reveal together.
+     * Progression follows logical text order. Characters that form one
+     * indivisible shaped unit reveal together.
      */
     CHARACTER,
 
     /**
-     * @brief Reveals visible text by word while preserving logical text order.
+     * @brief Reveals visible text by word in logical text order.
      *
-     * Whitespace does not create a reveal step.
+     * Whitespace does not create a reveal unit.
      */
     WORD,
 
@@ -96,20 +86,19 @@ public:
      * @brief Reveals one final visible layout line as a unit.
      *
      * Lines are determined after shaping, wrapping, maximum-line limiting,
-     * ellipsis, bidirectional layout, and ImageSpan placement. A line without
-     * revealable visible content does not consume a reveal unit. With
-     * WHOLE_TEXT, active lines reveal in final line order. With PER_LINE, each
-     * active line is an independent singleton sequence.
+     * ellipsis, bidirectional layout, and ImageSpan placement. Lines without
+     * revealable visible content do not consume a reveal unit.
      */
     LINE,
 
     /**
-     * @brief Reveals visible text continuously across its rendered foreground.
+     * @brief Reveals visible content continuously across its rendered foreground.
      *
-     * PIXEL follows the same logical text order and shaping boundaries as
-     * CHARACTER while distributing reveal timing continuously in pixel space.
-     * Inline ImageSpan content contributes its reserved width to the
-     * progression and reveals spatially across the rendered image.
+     * PIXEL follows logical text order and shaping boundaries while distributing
+     * reveal timing continuously in pixel space. Inline ImageSpan content
+     * contributes its reserved width to the progression and reveals spatially
+     * across the rendered image.
+     *
      * The progression is normalized and does not correspond one-to-one with
      * physical framebuffer pixels.
      */
@@ -129,8 +118,9 @@ public:
     /**
      * @brief Uses an independent sequence for each final visible layout line.
      *
-     * Lines created by wrapping are separate sequences. Lines without
-     * revealable content do not create a sequence.
+     * Lines created by wrapping are separate sequences, while lines without
+     * revealable content do not create a sequence. With Unit::LINE, each
+     * sequence contains one whole-line reveal unit.
      */
     PER_LINE
   };
@@ -201,68 +191,38 @@ public:
 
 public:
   /**
-   * @brief Sets how reveal progression is divided across visible content.
+   * @brief Sets the reveal unit.
    *
    * @param[in] unit The reveal unit.
    */
   void SetUnit(Unit unit);
 
   /**
-   * @brief Returns how reveal progression is divided across visible content.
+   * @brief Gets the reveal unit.
    *
    * @return The reveal unit.
    */
   Unit GetUnit() const;
 
   /**
-   * @brief Sets how reveal units share the normalized reveal timeline.
-   *
-   * WHOLE_TEXT uses one sequence for all final visible content. PER_LINE uses
-   * each final visible layout line, including lines created by wrapping, as an
-   * independent sequence. Lines without revealable content do not create a
-   * sequence.
+   * @brief Sets the reveal sequencing mode.
    *
    * @param[in] sequence The reveal sequencing mode.
    */
   void SetSequence(Sequence sequence);
 
   /**
-   * @brief Returns how reveal units share the normalized reveal timeline.
+   * @brief Gets the reveal sequencing mode.
    *
    * @return The reveal sequencing mode.
    */
   Sequence GetSequence() const;
 
   /**
-   * @brief Sets the ratio controlling the stagger between consecutive sequence starts.
+   * @brief Sets the fade duration on the normalized reveal timeline.
    *
-   * A value of 0.0 starts all active sequences together. Increasing the ratio
-   * separates consecutive sequence starts. A value of 1.0 prevents consecutive
-   * active sequences from overlapping.
-   *
-   * PER_LINE creates consecutive active sequences from final visible layout
-   * lines. With LINE, those sequences each contain one line unit. WHOLE_TEXT
-   * has one sequence, so the stagger has no visual effect, but the authored
-   * value is retained. Values outside [0.0, 1.0] are clamped, and NaN is
-   * normalized to 0.0.
-   *
-   * @param[in] ratio The sequence stagger ratio in [0.0, 1.0].
-   */
-  void SetSequenceStaggerRatio(float ratio);
-
-  /**
-   * @brief Returns the authored sequence stagger ratio.
-   *
-   * @return The authored ratio in [0.0, 1.0].
-   */
-  float GetSequenceStaggerRatio() const;
-
-  /**
-   * @brief Sets the transition duration ratio on the normalized reveal timeline.
-   *
-   * AUTO_FADE_DURATION_RATIO selects an appropriate duration automatically.
-   * Values from 0.0 to 1.0 specify the transition duration. Zero removes the
-   * transition fade, while one fades revealable content over the full timeline.
+   * AUTO_FADE_DURATION_RATIO selects the duration automatically. Values from
+   * 0.0 to 1.0 specify the normalized fade duration; zero disables the fade.
    *
    * Values outside [0.0, 1.0] are clamped, except AUTO_FADE_DURATION_RATIO.
    * NaN is normalized to 0.0.
@@ -272,15 +232,39 @@ public:
   void SetFadeDurationRatio(float ratio);
 
   /**
-   * @brief Returns the authored fade duration ratio.
+   * @brief Gets the authored fade duration ratio.
    *
-   * If automatic duration is selected, this returns
-   * AUTO_FADE_DURATION_RATIO rather than the duration resolved for the current
-   * text layout.
+   * When automatic duration is selected, this returns
+   * AUTO_FADE_DURATION_RATIO rather than the resolved duration.
    *
    * @return AUTO_FADE_DURATION_RATIO or the authored ratio in [0.0, 1.0].
    */
   float GetFadeDurationRatio() const;
+
+  /**
+   * @brief Sets the stagger between consecutive reveal sequences.
+   *
+   * The ratio controls the spacing between consecutive active sequence starts.
+   * A value of 0.0 starts all active sequences together, while 1.0 prevents
+   * consecutive sequences from overlapping.
+   *
+   * Stagger affects PER_LINE sequencing. WHOLE_TEXT uses a single sequence, so
+   * the authored value has no visual effect. With Unit::LINE, stagger controls
+   * the start spacing between whole-line transitions independently of the fade
+   * duration.
+   *
+   * Values outside [0.0, 1.0] are clamped, and NaN is normalized to 0.0.
+   *
+   * @param[in] ratio The sequence stagger ratio in [0.0, 1.0].
+   */
+  void SetSequenceStaggerRatio(float ratio);
+
+  /**
+   * @brief Gets the authored sequence stagger ratio.
+   *
+   * @return The authored ratio in [0.0, 1.0].
+   */
+  float GetSequenceStaggerRatio() const;
 
 private:
   class Impl;

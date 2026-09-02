@@ -50,18 +50,8 @@ constexpr uint32_t    SELECTED_BORDER_COLOR       = 0x93C5FD;
 constexpr const char* REMOTE_IMAGE_URL =
   "https://raw.githubusercontent.com/dalihub/dali-ui/devel/samples/text/res/flag_us_alt.png";
 
-// FadeDurationRatio is each unit's duration on the normalized Reveal timeline,
-// not a delay between units. For N > 1 and an explicit ratio R:
-//   fadeDuration = R, startInterval = (1 - R) / (N - 1).
-// R = 0 gives a step/typewriter reveal, increasing R creates more overlap, and
-// R = 1 starts every unit at zero for a whole-text fade. With the four-second
-// linear duration option, ratios 0.10, 0.25, 0.50, and 0.75 mean about 0.4 s,
-// 1.0 s, 2.0 s, and 3.0 s per unit respectively.
-//
-// AUTO is the public default. It derives the fade duration from the final
-// visible reveal-unit count, so applications do not need to estimate a ratio
-// for each string; its internal heuristic is deliberately not part of this
-// guide's contract.
+// FadeDurationRatio controls the unit transition duration;
+// SequenceStaggerRatio controls the spacing between independent sequence starts.
 const float FADE_DURATION_RATIOS[FADE_CASE_COUNT] = {
   Text::Reveal::AUTO_FADE_DURATION_RATIO,
   0.0f,
@@ -82,16 +72,14 @@ const char* const FADE_BUTTON_LABELS[FADE_CASE_COUNT] = {
 
 const char* const FADE_STATUS_LABELS[FADE_CASE_COUNT] = {
   "Auto",
-  "Typewriter (0)",
+  "Step (0)",
   "Short (0.10)",
   "Smooth (0.25)",
   "Overlap (0.50)",
   "Long (0.75)",
-  "Whole Text (1)"};
+  "Full Fade (1.00)"};
 
-// Animation duration is application-owned wall-clock policy. Text::Reveal
-// only consumes normalized progress, so the same Reveal configuration can be
-// played over half, one, two, four, or eight seconds.
+// Wall-clock duration is application-owned; Reveal consumes normalized progress.
 const float DURATION_SECONDS[DURATION_CASE_COUNT] = {
   0.5f,
   1.0f,
@@ -148,19 +136,22 @@ const char* const STAGGER_BUTTON_LABELS[STAGGER_CASE_COUNT] = {
   "1.00"};
 
 const char* const TEXT_CASES[TEXT_CASE_COUNT] = {
-  "Your office pass is ready. Pick up your badge at the front desk and connect to the cafe\u0301 Wi-Fi when you arrive.",
-  "오늘 오후 3시 회의가 10층 Atlas 룸으로 변경되었습니다.\n"
-  "자료를 확인하고 시작 10분 전에 알림을 받아보세요.",
-  "A-1024 confirmed — تم الحجز 18:30.\n"
-  "B-2048 ready — ההזמנה מוכנה 19:10.",
-  "Design review with Maya 👩‍💻 at 14:00 👍🏽\n"
-  "After work: dinner 🍜 and a family walk 👨‍👩‍👧‍👦 ✨",
-  "Your weekend itinerary is ready. Start with brunch at 11:30, join the museum tour at 14:00, "
-  "and save the riverside walk for sunset. If plans change, the schedule will update automatically.\n"
-  "주말 일정이 준비되었습니다. 오전 11시 30분 브런치 후 오후 2시 전시를 관람하고, "
-  "해 질 무렵에는 강변 산책을 즐겨보세요.",
-  "We're searching for the image you requested. Please wait a moment while we prepare it...",
-  "We're downloading the remote image you requested. It will appear here as soon as the network request is complete..."};
+  "Good morning. Start the day with cafe\u0301 by the window, "
+  "a design review at 11:00, and a quiet walk by the river before sunset.",
+  "오늘의 일정이 준비되었습니다.\n"
+  "오전에는 천천히 커피를 즐기고, 오후 3시에는 Atlas 룸에서 "
+  "디자인 리뷰를 진행한 뒤 해 질 무렵 산책을 떠나보세요.",
+  "Flight SK204 to دبي departs at 18:30.\n"
+  "Dinner in תל אביב begins at 20:10.",
+  "Build complete 👩‍💻✨ — time to close the laptop.\n"
+  "Dinner 🍜, a high-five 👍🏽, then a family walk 👨‍👩‍👧‍👦 under the city lights 🌙.",
+  "Saturday is yours to explore. Start with brunch at 11:30, wander through "
+  "the museum at 14:00, and reach the riverside just before sunset. Keep the "
+  "evening open for a small jazz bar tucked behind the old market.\n"
+  "토요일은 천천히 즐겨보세요. 오전 11시 30분 브런치로 시작해 오후 2시 "
+  "전시를 보고, 해 질 무렵에는 강변을 걸어보세요.",
+  "Tonight in Seoul: warm lights, late cafés, and a quiet walk along the Han River.",
+  "Next stop, San Francisco: morning coffee, cool fog, and a sunset walk along the waterfront."};
 
 Label NewLabel(const char* text, float size, uint32_t color)
 {
@@ -299,18 +290,6 @@ private:
       });
     }
 
-    StackLayout staggerControls = NewMenuRow("STAGGER");
-    for(std::size_t staggerIndex = 0u; staggerIndex < STAGGER_CASE_COUNT; ++staggerIndex)
-    {
-      mStaggerButtons[staggerIndex] = NewButton(STAGGER_BUTTON_LABELS[staggerIndex]);
-      staggerControls.Add(mStaggerButtons[staggerIndex]);
-      mStaggerButtons[staggerIndex].AsInteractive().ClickedSignal().Connect(this, [this, staggerIndex](View, InputEvent)
-      {
-        mStaggerIndex = staggerIndex;
-        ConfigureAndReplay();
-      });
-    }
-
     StackLayout fadeControls = NewMenuRow("FADE");
     for(std::size_t fadeIndex = 0u; fadeIndex < FADE_CASE_COUNT; ++fadeIndex)
     {
@@ -319,6 +298,18 @@ private:
       mFadeButtons[fadeIndex].AsInteractive().ClickedSignal().Connect(this, [this, fadeIndex](View, InputEvent)
       {
         mFadeDurationRatioIndex = fadeIndex;
+        ConfigureAndReplay();
+      });
+    }
+
+    StackLayout staggerControls = NewMenuRow("STAGGER");
+    for(std::size_t staggerIndex = 0u; staggerIndex < STAGGER_CASE_COUNT; ++staggerIndex)
+    {
+      mStaggerButtons[staggerIndex] = NewButton(STAGGER_BUTTON_LABELS[staggerIndex]);
+      staggerControls.Add(mStaggerButtons[staggerIndex]);
+      mStaggerButtons[staggerIndex].AsInteractive().ClickedSignal().Connect(this, [this, staggerIndex](View, InputEvent)
+      {
+        mStaggerIndex = staggerIndex;
         ConfigureAndReplay();
       });
     }
@@ -362,8 +353,8 @@ private:
     controlsPanel.Add(configurationControls);
     controlsPanel.Add(textControls);
     controlsPanel.Add(sequenceControls);
-    controlsPanel.Add(staggerControls);
     controlsPanel.Add(fadeControls);
+    controlsPanel.Add(staggerControls);
     controlsPanel.Add(durationControls);
     controlsPanel.Add(playbackControls);
     controlsPanel.Add(mStatus);
@@ -511,8 +502,7 @@ private:
   {
     if(!mRevealEnabled)
     {
-      // None disables Reveal without resetting the authored progress. Turning
-      // Reveal back on applies the currently selected unit and fade ratio.
+      // Reveal::None() disables the effect while preserving authored progress.
       mPreview.SetTextReveal(Text::Reveal::None());
       return;
     }
@@ -623,9 +613,7 @@ private:
       return;
     }
 
-    // Stop/Play reads the current normalized progress and starts a new linear
-    // animation. With linear alpha, the remaining wall-clock duration is the
-    // same fraction of the application's selected duration.
+    // Preserve the selected linear playback speed when resuming.
     const float remainingDuration = GetAnimationDuration() * (1.0f - progress);
     std::ostringstream playback;
     playback << "Play: progress " << std::fixed << std::setprecision(2) << progress
@@ -698,33 +686,33 @@ private:
       case 0u:
         if(mUnit == Text::Reveal::Unit::PIXEL)
         {
-          return "AUTO adapts the fade to the visible spatial progression and text scale.";
+          return "Auto: fade adapts to the visible spatial range and text scale.";
         }
         return mUnit == Text::Reveal::Unit::LINE
-                 ? "AUTO uses the active final visible line count."
-                 : "AUTO uses the final visible character or word count.";
+                 ? "Auto: fade adapts to the final visible line count."
+                 : "Auto: fade adapts to the final visible character or word count.";
       case 1u:
         if(mUnit == Text::Reveal::Unit::PIXEL)
         {
-          return "Fade 0: the foreground advances continuously as a hard reveal front.";
+          return "Fade 0.00: the foreground advances continuously as a hard reveal front.";
         }
         if(mUnit == Text::Reveal::Unit::CHARACTER)
         {
-          return "Fade 0: each shaping cluster appears immediately at its scheduled progress.";
+          return "Fade 0.00: each shaping cluster appears at its scheduled progress.";
         }
         return mUnit == Text::Reveal::Unit::LINE
-                 ? "Fade 0: each active final layout line appears at its scheduled progress."
-                 : "Fade 0: each word appears immediately at its scheduled progress.";
+                 ? "Fade 0.00: each final layout line appears at its scheduled progress."
+                 : "Fade 0.00: each word appears at its scheduled progress.";
       case 2u:
-        return "Fade 0.10: each unit fades for 10% of the normalized timeline; fades overlap briefly.";
+        return "Fade 0.10: a short transition between reveal states.";
       case 3u:
-        return "Fade 0.25: each unit fades for 25% of the normalized timeline, producing longer overlap.";
+        return "Fade 0.25: a smooth transition with moderate overlap.";
       case 4u:
-        return "Fade 0.50: each unit fades for half of the timeline, producing strong overlap.";
+        return "Fade 0.50: longer fades create stronger overlap.";
       case 5u:
-        return "Fade 0.75: long unit fades overlap across most of the normalized timeline.";
+        return "Fade 0.75: long transitions overlap across most of the reveal.";
       case 6u:
-        return "Fade 1: all units start together and the foreground fades as one.";
+        return "Fade 1.00: units within each sequence share the same fade interval.";
     }
     return "";
   }
@@ -738,15 +726,17 @@ private:
     status << "TEXT " << TEXT_BUTTON_LABELS[mTextCaseIndex]
            << " | UNIT " << GetUnitStatusLabel()
            << " | SEQUENCE " << SEQUENCE_STATUS_LABELS[mSequenceIndex]
+           << " | FADE " << FADE_STATUS_LABELS[mFadeDurationRatioIndex]
            << " | STAGGER " << STAGGER_BUTTON_LABELS[mStaggerIndex]
-           << " | Fade: " << FADE_STATUS_LABELS[mFadeDurationRatioIndex]
            << " | DURATION " << std::fixed << std::setprecision(1) << GetAnimationDuration() << " s"
            << "\nPATH " << (mAsync ? "Async" : "Sync")
            << " | FILL " << (mGradientEnabled ? "Gradient" : "Solid")
            << " | REVEAL " << (mRevealEnabled ? "On" : "Off")
            << " | UI SCALE " << std::setprecision(1) << mUiScale << 'x'
-           << "\n" << revealDescription
-           << "\n" << mPlaybackStatus
+           << "\n"
+           << revealDescription
+           << "\n"
+           << mPlaybackStatus
            << "\nVIEW  Q/W/E/R/T: scale 0.8/1.0/1.2/1.4/2.0 | ESC: Exit";
     mStatus.SetText(status.str().c_str());
   }
@@ -795,33 +785,33 @@ private:
   }
 
 private:
-  Application&                            mApplication;
-  Label                                   mPreview;
-  Label                                   mUnitButton;
+  Application&                               mApplication;
+  Label                                      mPreview;
+  Label                                      mUnitButton;
   std::array<Label, TEXT_CASE_COUNT>        mTextButtons;
   std::array<Label, SEQUENCE_CASE_COUNT>    mSequenceButtons;
   std::array<Label, STAGGER_CASE_COUNT>      mStaggerButtons;
   std::array<Label, FADE_CASE_COUNT>        mFadeButtons;
   std::array<Label, DURATION_CASE_COUNT>    mDurationButtons;
-  Label                                   mAsyncButton;
-  Label                                   mFillButton;
-  Label                                   mRevealButton;
-  Label                                   mStopPlayButton;
-  Label                                   mStatus;
-  Animation                               mAnimation;
-  std::string                             mPlaybackStatus;
-  Text::Reveal::Unit                      mUnit{Text::Reveal::Unit::CHARACTER};
-  std::size_t                             mSequenceIndex{0u};
-  std::size_t                             mStaggerIndex{0u};
-  std::size_t                             mTextCaseIndex{DEFAULT_TEXT_CASE_INDEX};
-  std::size_t                             mFadeDurationRatioIndex{0u};
-  std::size_t                             mDurationCaseIndex{DEFAULT_DURATION_CASE_INDEX};
-  bool                                    mAsync{false};
-  bool                                    mGradientEnabled{true};
-  bool                                    mRevealEnabled{true};
-  bool                                    mAnimationRunning{false};
-  float                                   mAnimationTarget{1.0f};
-  float                                   mUiScale{1.0f};
+  Label                                      mAsyncButton;
+  Label                                      mFillButton;
+  Label                                      mRevealButton;
+  Label                                      mStopPlayButton;
+  Label                                      mStatus;
+  Animation                                  mAnimation;
+  std::string                                mPlaybackStatus;
+  Text::Reveal::Unit                         mUnit{Text::Reveal::Unit::CHARACTER};
+  std::size_t                                mSequenceIndex{0u};
+  std::size_t                                mStaggerIndex{0u};
+  std::size_t                                mTextCaseIndex{DEFAULT_TEXT_CASE_INDEX};
+  std::size_t                                mFadeDurationRatioIndex{0u};
+  std::size_t                                mDurationCaseIndex{DEFAULT_DURATION_CASE_INDEX};
+  bool                                       mAsync{false};
+  bool                                       mGradientEnabled{true};
+  bool                                       mRevealEnabled{true};
+  bool                                       mAnimationRunning{false};
+  float                                      mAnimationTarget{1.0f};
+  float                                      mUiScale{1.0f};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
