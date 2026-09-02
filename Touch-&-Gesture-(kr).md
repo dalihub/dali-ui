@@ -578,12 +578,12 @@ private:
     if(pan.GetState() == GestureState::FINISHED || pan.GetState() == GestureState::CANCELLED)
     {
       mIsDetected = false;
-      mYellowView.SetProperty(Actor::Property::COLOR, Color::YELLOW);
+      mYellowView.SetProperty(Actor::Property::COLOR_MULTIPLIER, Color::YELLOW);
     }
     else
     {
       mIsDetected = true;
-      mYellowView.SetProperty(Actor::Property::COLOR, Color::YELLOW * 0.7f);
+      mYellowView.SetProperty(Actor::Property::COLOR_MULTIPLIER, Color::YELLOW * 0.7f);
     }
   }
 

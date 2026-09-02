@@ -1120,12 +1120,12 @@ Extension API를 사용하면 같은 action/request hook을 기존 `View` instan
 
 Dali::Ui::Extension::View::SetAccessibilityValueChangeCallback(
   slider,
-  Dali::Ui::Callback<bool(Dali::Ui::View, bool)>::New(
+  Dali::Callback<bool(Dali::Ui::View, bool)>::New(
     this, &Slider::HandleAccessibilityValueChange));
 
 Dali::Ui::Extension::View::SetAccessibilityRequestValueCallback(
   slider,
-  Dali::Ui::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
+  Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
     this, &Slider::HandleAccessibilityValueRequest));
 ```
 

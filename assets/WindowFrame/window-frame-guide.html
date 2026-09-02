@@ -516,7 +516,7 @@ mDefaultDecoration.GetTopArea().Add(myBranding);
 
 const Dali::String iconUrl = Dali::String(RESOURCES_DIR) + "share.png";
 mDefaultDecoration.AddBarAction(
-  iconUrl, Dali::Ui::Callback&lt;void()&gt;::New(this, &amp;App::Share));
+  iconUrl, Dali::Callback&lt;void()&gt;::New(this, &amp;App::Share));
 mWindowFrame.SetMinimumFrameSize(mDefaultDecoration.GetMinimumFrameSize());</code></pre></div>
           <div class="callout"><strong>최소 크기는 물어보십시오</strong>바는 컨트롤과 코너 리사이즈 핸들마다 고정 폭 열을 잡습니다. 그보다 좁아지면 move region 폭이 0이 되고 close 버튼이 코너 핸들 밑으로 들어갑니다. <code>mWindowFrame.SetMinimumFrameSize(mDefaultDecoration.GetMinimumFrameSize())</code>로 적용하십시오. 기본 옵션에서는 <code>276 x 55</code>이고, 컨트롤이나 핸들을 끄면 줄어듭니다. 창의 크기 제약은 앱의 몫이므로 decoration이 스스로 적용하지는 않습니다.</div>
 

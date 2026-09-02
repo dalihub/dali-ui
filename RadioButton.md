@@ -265,7 +265,7 @@ RadioButtonStyle customStyle = RadioButtonStyle::Default()
 
 Frame ranges, key paths, and color policies are properties of the Lottie asset; do not copy
 the example values to an unrelated asset. A stateless free function is the preferred
-generator target because `Ui::Callback` is move-only and style copies share the generator.
+generator target because `Dali::Callback` is move-only and style copies share the generator.
 
 ---
 
