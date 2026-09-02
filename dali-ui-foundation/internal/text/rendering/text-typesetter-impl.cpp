@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -42,7 +43,10 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/internal/text/strikethrough-glyph-run.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
+#include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
 
 namespace Dali
@@ -211,15 +215,107 @@ else                                                                            
  */
 struct GlyphData
 {
-  PixelBuffer                      bitmapBuffer;     ///< The buffer of the whole bitmap. The format is RGBA8888.
-  Vector2*                         position;         ///< The position of the glyph.
-  TextAbstraction::GlyphBufferData glyphBitmap;      ///< The glyph's bitmap.
-  uint32_t                         width;            ///< The bitmap's width.
-  uint32_t                         height;           ///< The bitmap's height.
-  int32_t                          horizontalOffset; ///< The horizontal offset to be added to the 'x' glyph's position.
-  int32_t                          verticalOffset;   ///< The vertical offset to be added to the 'y' glyph's position.
-  RevealRasterContext*             revealContext;    ///< Optional reveal metadata target for this traversal.
+  PixelBuffer                      bitmapBuffer;                      ///< The buffer of the whole bitmap. The format is RGBA8888.
+  Vector2*                         position;                          ///< The position of the glyph.
+  TextAbstraction::GlyphBufferData glyphBitmap;                       ///< The glyph's bitmap.
+  uint32_t                         width;                             ///< The bitmap's width.
+  uint32_t                         height;                            ///< The bitmap's height.
+  int32_t                          horizontalOffset;                  ///< The horizontal offset to be added to the 'x' glyph's position.
+  int32_t                          verticalOffset;                    ///< The vertical offset to be added to the 'y' glyph's position.
+  RevealRasterContext*             revealContext;                     ///< Optional reveal metadata target for this traversal.
+  uint8_t*                         rawOverlapCoverageBuffer{nullptr}; ///< Optional image-wide raw glyph coverage/source-alpha scratch buffer.
 };
+
+struct GradientRasterPaint
+{
+  Internal::Gradient::RenderData        renderData{};
+  Dali::Ui::Gradient::SpreadMethod      spreadMethod{Dali::Ui::Gradient::SpreadMethod::PAD};
+  std::vector<Internal::Gradient::Stop> stops;
+};
+
+float ApplyGradientSpread(float position, Dali::Ui::Gradient::SpreadMethod spreadMethod)
+{
+  switch(spreadMethod)
+  {
+    case Dali::Ui::Gradient::SpreadMethod::REPEAT:
+    {
+      return position - std::floor(position);
+    }
+    case Dali::Ui::Gradient::SpreadMethod::REFLECT:
+    {
+      float reflected = std::fmod(position, 2.0f);
+      if(reflected < 0.0f)
+      {
+        reflected += 2.0f;
+      }
+      return reflected <= 1.0f ? reflected : 2.0f - reflected;
+    }
+    case Dali::Ui::Gradient::SpreadMethod::PAD:
+    default:
+    {
+      return std::max(0.0f, std::min(1.0f, position));
+    }
+  }
+}
+
+Vector4 PremultiplyGradientColor(Vector4 color)
+{
+  color.r *= color.a;
+  color.g *= color.a;
+  color.b *= color.a;
+  return color;
+}
+
+Vector4 SampleGradient(const GradientRasterPaint& paint, float textureX, float textureY)
+{
+  const auto&   data   = paint.renderData;
+  const float   localX = (textureX - data.bounds.x) / std::max(data.bounds.z, Math::MACHINE_EPSILON_1000);
+  const float   localY = (textureY - data.bounds.y) / std::max(data.bounds.w, Math::MACHINE_EPSILON_1000);
+  const Vector2 coordinate(localX, localY);
+
+  float position = 0.0f;
+  if(data.type == Dali::Ui::Gradient::Type::RADIAL)
+  {
+    const Vector2 delta = (coordinate - data.radialCenter) * data.radialScale;
+    position            = delta.Length();
+  }
+  else if(data.type == Dali::Ui::Gradient::Type::CONIC)
+  {
+    constexpr float INV_TWO_PI = 0.15915494309189533577f;
+    const Vector2   delta      = (coordinate - data.conicCenter) * data.conicScale;
+    position                   = (std::atan2(delta.y, delta.x) - data.conicStartAngle) * INV_TWO_PI;
+    position -= std::floor(position);
+  }
+  else
+  {
+    const Vector2 vector        = data.endPosition - data.startPosition;
+    const float   lengthSquared = std::max(vector.LengthSquared(), 0.000001f);
+    const Vector2 delta         = coordinate - data.startPosition;
+    position                    = (delta.x * vector.x + delta.y * vector.y) / lengthSquared;
+  }
+  position = ApplyGradientSpread(position + data.startOffset, paint.spreadMethod);
+
+  if(paint.stops.empty())
+  {
+    return Color::TRANSPARENT;
+  }
+  if(position <= paint.stops.front().offset)
+  {
+    return paint.stops.front().color;
+  }
+  for(std::size_t index = 1u; index < paint.stops.size(); ++index)
+  {
+    if(position <= paint.stops[index].offset)
+    {
+      const auto& previous = paint.stops[index - 1u];
+      const auto& next     = paint.stops[index];
+      const float width    = next.offset - previous.offset;
+      const float ratio    = width > Math::MACHINE_EPSILON_1000 ? (position - previous.offset) / width : 1.0f;
+      return previous.color * (1.0f - ratio) + next.color * ratio;
+    }
+  }
+  return paint.stops.back().color;
+}
 
 /**
  * @brief Sets the glyph's buffer into the bitmap's buffer.
@@ -315,6 +411,13 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
           // Retrieves the color from the color glyph.
           uint32_t packedColorGlyph                    = *(reinterpret_cast<const uint32_t*>(glyphScanline + (index << 2)));
           uint8_t* __restrict__ packedColorGlyphBuffer = reinterpret_cast<uint8_t*>(&packedColorGlyph);
+
+          if(data.rawOverlapCoverageBuffer)
+          {
+            const uint32_t pixelIndex          = static_cast<uint32_t>(lineIndex + yOffset) * data.width + static_cast<uint32_t>(xOffsetIndex);
+            uint8_t&       accumulatedCoverage = data.rawOverlapCoverageBuffer[pixelIndex];
+            accumulatedCoverage                = std::max(accumulatedCoverage, packedColorGlyphBuffer[3u]);
+          }
 
           // Update the alpha channel.
           const uint8_t colorAlpha =
@@ -418,8 +521,18 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
             // overwrite a previous bigger alpha with a smaller alpha (in order to avoid
             // semi-transparent gaps between joint glyphs with overlapped pixels, which could
             // happen, for example, in the RTL text when we copy glyphs from right to left).
-            uint8_t currentAlpha = *(packedCurrentColorBuffer + 3u);
-            currentAlpha         = std::max(currentAlpha, alpha);
+            uint8_t currentAlpha;
+            if(data.rawOverlapCoverageBuffer)
+            {
+              const uint32_t pixelIndex          = static_cast<uint32_t>(lineIndex + yOffset) * data.width + static_cast<uint32_t>(xOffsetIndex);
+              uint8_t&       accumulatedCoverage = data.rawOverlapCoverageBuffer[pixelIndex];
+              accumulatedCoverage                = std::max(accumulatedCoverage, alpha);
+              currentAlpha                       = accumulatedCoverage;
+            }
+            else
+            {
+              currentAlpha = std::max(*(packedCurrentColorBuffer + 3u), alpha);
+            }
             if(currentAlpha == 255)
             {
               // Fast-cut to avoid float type operation.
@@ -501,6 +614,106 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
       END_GLYPH_BITMAP();
     }
   }
+}
+
+template<bool RECORD_REVEAL, bool PIXEL_REVEAL = false>
+void TypesetGradientGlyph(GlyphData& __restrict__ data,
+                          const Vector2* const __restrict__ position,
+                          const Vector4* const __restrict__ fallbackColor,
+                          const GradientRasterPaint& paint)
+{
+  if((0u == data.glyphBitmap.width) || (0u == data.glyphBitmap.height))
+  {
+    return;
+  }
+
+  if(Internal::IsColorGlyphBuffer(data.glyphBitmap))
+  {
+    TypesetGlyph<RECORD_REVEAL, PIXEL_REVEAL>(data, position, fallbackColor, Typesetter::STYLE_NONE, Pixel::RGBA8888);
+    return;
+  }
+
+  const int32_t  yOffset           = data.verticalOffset + static_cast<int32_t>(position->y);
+  const int32_t  xOffset           = data.horizontalOffset + static_cast<int32_t>(position->x);
+  const uint32_t glyphPixelSize    = Pixel::GetBytesPerPixel(data.glyphBitmap.format);
+  const uint32_t glyphAlphaIndex   = glyphPixelSize > 0u ? glyphPixelSize - 1u : 0u;
+  const int32_t  lineIndexRangeMin = std::max(0, -yOffset);
+  const int32_t  lineIndexRangeMax =
+    std::min(static_cast<int32_t>(data.glyphBitmap.height), static_cast<int32_t>(data.height) - yOffset);
+  const int32_t indexRangeMin = std::max(0, -xOffset);
+  const int32_t indexRangeMax =
+    std::min(static_cast<int32_t>(data.glyphBitmap.width), static_cast<int32_t>(data.width) - xOffset);
+  if(lineIndexRangeMax <= lineIndexRangeMin || indexRangeMax <= indexRangeMin)
+  {
+    return;
+  }
+
+  uint32_t* __restrict__ bitmapBuffer = reinterpret_cast<uint32_t*>(data.bitmapBuffer.GetBuffer());
+  bitmapBuffer += (lineIndexRangeMin + yOffset) * static_cast<int32_t>(data.width);
+
+  BEGIN_GLYPH_BITMAP(data);
+  SKIP_GLYPH_SCANLINE(lineIndexRangeMin);
+
+  const float inverseWidth  = 1.0f / static_cast<float>(data.width);
+  const float inverseHeight = 1.0f / static_cast<float>(data.height);
+  for(int32_t lineIndex = lineIndexRangeMin; lineIndex < lineIndexRangeMax; ++lineIndex)
+  {
+    BEGIN_GLYPH_SCANLINE_DECODE(data);
+
+    for(int32_t index = indexRangeMin; index < indexRangeMax; ++index)
+    {
+      const uint8_t coverage = *(glyphScanline + index * glyphPixelSize + glyphAlphaIndex);
+      if(coverage == 0u)
+      {
+        continue;
+      }
+
+      const int32_t  textureX   = xOffset + index;
+      const int32_t  textureY   = yOffset + lineIndex;
+      const uint32_t pixelIndex = static_cast<uint32_t>(textureY) * data.width + static_cast<uint32_t>(textureX);
+      if constexpr(RECORD_REVEAL)
+      {
+        if constexpr(PIXEL_REVEAL)
+        {
+          RecordPixelRevealPixel(data.revealContext,
+                                 pixelIndex,
+                                 static_cast<float>(static_cast<int32_t>(position->x) + index) + 0.5f,
+                                 coverage,
+                                 false);
+        }
+        else
+        {
+          RecordRevealPixel(data.revealContext, pixelIndex, coverage, false);
+        }
+      }
+
+      uint32_t& currentColor = *(bitmapBuffer + textureX);
+
+      // Output alpha already includes foreground and GradientSpan paint alpha.
+      // Keep raw glyph coverage/source alpha separate while the later glyph owns the paint.
+      uint8_t& accumulatedCoverage            = data.rawOverlapCoverageBuffer[pixelIndex];
+      accumulatedCoverage                     = std::max(accumulatedCoverage, coverage);
+      const uint8_t paintCoverage             = accumulatedCoverage;
+      const Vector4 gradient                  = SampleGradient(paint,
+                                                               (static_cast<float>(textureX) + 0.5f) * inverseWidth,
+                                                               (static_cast<float>(textureY) + 0.5f) * inverseHeight);
+      uint32_t      packedColor               = 0u;
+      uint8_t* __restrict__ packedColorBuffer = reinterpret_cast<uint8_t*>(&packedColor);
+      const float normalizedCoverage          = static_cast<float>(paintCoverage) / 255.0f;
+      const float effectiveCoverage           = normalizedCoverage * std::max(0.0f, std::min(1.0f, fallbackColor->a));
+      packedColorBuffer[0u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.r * effectiveCoverage)));
+      packedColorBuffer[1u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.g * effectiveCoverage)));
+      packedColorBuffer[2u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.b * effectiveCoverage)));
+      packedColorBuffer[3u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.a * effectiveCoverage)));
+
+      currentColor = packedColor;
+    }
+
+    bitmapBuffer += data.width;
+    END_GLYPH_SCANLINE_DECODE(data);
+  }
+
+  END_GLYPH_BITMAP();
 }
 
 /// Draws the background color to the buffer
@@ -824,6 +1037,9 @@ struct InputParameterForEachGlyph
   const Vector4* const __restrict__ colorsBuffer;
   const TextAbstraction::ColorIndex* const __restrict__ colorIndexBuffer;
 
+  const Internal::GradientSpanModelData* gradientSpanData;
+  const GradientRasterPaint*             gradientRasterPaints;
+
   const UnderlineStyleProperties     modelUnderlineProperties;
   const StrikethroughStyleProperties modelStrikethroughProperties;
 
@@ -836,6 +1052,188 @@ struct InputParameterForEachGlyph
 
   const bool useDefaultColor : 1;
 };
+
+std::vector<Internal::Gradient::Stop> PrepareGradientStops(const Internal::Gradient::Style& style)
+{
+  std::vector<Internal::Gradient::Stop> stops(style.stops.Begin(), style.stops.End());
+  if(stops.empty())
+  {
+    return stops;
+  }
+
+  for(auto& stop : stops)
+  {
+    stop.offset = std::max(0.0f, std::min(1.0f, stop.offset));
+    stop.color  = PremultiplyGradientColor(stop.color);
+  }
+  std::sort(stops.begin(),
+            stops.end(),
+            [](const Internal::Gradient::Stop& lhs, const Internal::Gradient::Stop& rhs)
+  {
+    return lhs.offset < rhs.offset;
+  });
+
+  if(stops.front().offset > 0.0f)
+  {
+    Internal::Gradient::Stop boundary{0.0f, stops.front().color};
+    if(style.spreadMethod == Dali::Ui::Gradient::SpreadMethod::REPEAT)
+    {
+      const float denominator = stops.front().offset + 1.0f - stops.back().offset;
+      if(denominator > Math::MACHINE_EPSILON_1000)
+      {
+        boundary.color = (stops.front().color * (1.0f - stops.back().offset) +
+                          stops.back().color * stops.front().offset) /
+                         denominator;
+      }
+    }
+    stops.insert(stops.begin(), boundary);
+  }
+  if(stops.back().offset < 1.0f)
+  {
+    Internal::Gradient::Stop boundary{1.0f,
+                                      style.spreadMethod == Dali::Ui::Gradient::SpreadMethod::REPEAT
+                                        ? stops.front().color
+                                        : stops.back().color};
+    stops.push_back(boundary);
+  }
+  return stops;
+}
+
+std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&                             viewModel,
+                                                             const Internal::GradientSpanModelData& data,
+                                                             uint32_t                               bufferWidth,
+                                                             uint32_t                               bufferHeight,
+                                                             bool                                   ignoreHorizontalAlignment,
+                                                             int32_t                                horizontalOffset,
+                                                             int32_t                                verticalOffset)
+{
+  std::vector<GradientRasterPaint> result(data.paints.Count());
+  if(data.paints.Empty() || data.glyphPaintIndices.Empty() || bufferWidth == 0u || bufferHeight == 0u)
+  {
+    return result;
+  }
+
+  struct PixelBounds
+  {
+    float minX{std::numeric_limits<float>::max()};
+    float minY{std::numeric_limits<float>::max()};
+    float maxX{-std::numeric_limits<float>::max()};
+    float maxY{-std::numeric_limits<float>::max()};
+    bool  valid{false};
+  };
+  std::vector<PixelBounds> spanBounds(data.paints.Count());
+
+  const LineRun*    lines               = viewModel.GetLines();
+  const Length      numberOfLines       = viewModel.GetNumberOfLines();
+  const GlyphInfo*  glyphs              = viewModel.GetGlyphs();
+  const Vector2*    positions           = viewModel.GetLayout();
+  const GlyphIndex* finalStyleSource    = viewModel.GetFinalGlyphStyleSourceIndices();
+  float             accumulatedVertical = static_cast<float>(verticalOffset);
+
+  for(LineIndex lineIndex = 0u; lineIndex < numberOfLines; ++lineIndex)
+  {
+    const LineRun& line           = lines[lineIndex];
+    const float    lineHorizontal = static_cast<float>(horizontalOffset) +
+                                 (ignoreHorizontalAlignment ? 0.0f
+                                                            : (line.ellipsis ? viewModel.GetElidedOffset()
+                                                                             : line.alignmentOffset));
+    accumulatedVertical += line.ascender + GetPreOffsetVerticalLineAlignment(line, viewModel.GetVerticalLineAlignment());
+
+    if(line.glyphRun.numberOfGlyphs > 0u || line.glyphRunSecondHalf.numberOfGlyphs > 0u)
+    {
+      const GlyphIndex firstGlyph       = line.glyphRun.glyphIndex;
+      const GlyphIndex lastGlyphPlusOne = line.isSplitToTwoHalves
+                                            ? line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs
+                                            : line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs;
+      for(GlyphIndex glyphIndex = firstGlyph; glyphIndex < lastGlyphPlusOne; ++glyphIndex)
+      {
+        GlyphIndex finalGlyphIndex = glyphIndex - viewModel.GetStartIndexOfElidedGlyphs();
+        if(viewModel.GetEllipsisPosition() == Text::EllipsisPosition::MIDDLE)
+        {
+          if(glyphIndex > viewModel.GetFirstMiddleIndexOfElidedGlyphs() &&
+             glyphIndex < viewModel.GetSecondMiddleIndexOfElidedGlyphs())
+          {
+            continue;
+          }
+          if(glyphIndex >= viewModel.GetSecondMiddleIndexOfElidedGlyphs())
+          {
+            finalGlyphIndex -= viewModel.GetSecondMiddleIndexOfElidedGlyphs() -
+                               viewModel.GetFirstMiddleIndexOfElidedGlyphs() - 1u;
+          }
+        }
+
+        const GlyphIndex styleGlyph = finalStyleSource
+                                        ? ResolveFinalStyleSourceGlyph(finalStyleSource, finalGlyphIndex)
+                                        : glyphIndex;
+        if(styleGlyph >= data.glyphPaintIndices.Count())
+        {
+          continue;
+        }
+        const Internal::GradientSpanPaintIndex paintIndex = data.glyphPaintIndices[styleGlyph];
+        if(paintIndex == 0u || paintIndex > data.paints.Count())
+        {
+          continue;
+        }
+
+        const GlyphInfo& glyph = glyphs[finalGlyphIndex];
+        if(IsSyntheticReplacementGlyph(glyph) || glyph.width <= 0.0f || glyph.height <= 0.0f)
+        {
+          continue;
+        }
+        const Vector2& position = positions[finalGlyphIndex];
+        const float    rawLeft  = lineHorizontal + position.x;
+        const float    rawTop   = accumulatedVertical + position.y;
+        const float    left     = std::max(0.0f, rawLeft);
+        const float    top      = std::max(0.0f, rawTop);
+        const float    right    = std::min(static_cast<float>(bufferWidth), rawLeft + glyph.width);
+        const float    bottom   = std::min(static_cast<float>(bufferHeight), rawTop + glyph.height);
+        if(right <= left || bottom <= top)
+        {
+          continue;
+        }
+
+        PixelBounds& bounds = spanBounds[paintIndex - 1u];
+        bounds.minX         = std::min(bounds.minX, left);
+        bounds.minY         = std::min(bounds.minY, top);
+        bounds.maxX         = std::max(bounds.maxX, right);
+        bounds.maxY         = std::max(bounds.maxY, bottom);
+        bounds.valid        = true;
+      }
+    }
+
+    accumulatedVertical += -line.descender +
+                           GetPostOffsetVerticalLineAlignment(line, viewModel.GetVerticalLineAlignment());
+  }
+
+  const Vector2 coordinateSize(static_cast<float>(bufferWidth), static_cast<float>(bufferHeight));
+  const Vector4 contentBounds = Internal::CalculateGradientContentBounds(coordinateSize,
+                                                                         viewModel.GetLayoutSize(),
+                                                                         lines,
+                                                                         numberOfLines,
+                                                                         viewModel.GetVerticalAlignment());
+  for(uint32_t index = 0u; index < data.paints.Count(); ++index)
+  {
+    const auto& source = data.paints[index];
+    Vector4     bounds = contentBounds;
+    if(source.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND)
+    {
+      bounds = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+    }
+    else if(source.boundsMode == GradientSpan::BoundsMode::SPAN_BOUND && spanBounds[index].valid)
+    {
+      const PixelBounds& pixels = spanBounds[index];
+      bounds                    = Vector4(pixels.minX / coordinateSize.width,
+                                          pixels.minY / coordinateSize.height,
+                                          std::max(pixels.maxX - pixels.minX, Math::MACHINE_EPSILON_1000) / coordinateSize.width,
+                                          std::max(pixels.maxY - pixels.minY, Math::MACHINE_EPSILON_1000) / coordinateSize.height);
+    }
+
+    result[index].renderData   = Internal::Gradient::ResolveRenderData(source.style, bounds, coordinateSize);
+    result[index].spreadMethod = source.style.spreadMethod;
+    result[index].stops        = PrepareGradientStops(source.style);
+  }
+  return result;
+}
 
 struct OutputParameterForEachGlyph
 {
@@ -858,16 +1256,33 @@ struct OutputParameterForEachGlyph
   FontId& lastFontId;
 };
 
-template<bool RECORD_REVEAL, bool PIXEL_REVEAL = false>
+template<bool RECORD_REVEAL, bool APPLY_GRADIENT_SPAN, bool PIXEL_REVEAL = false>
 void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, GlyphData& glyphData, GlyphIndex& glyphIndex,
                                    const GlyphIndex elidedGlyphIndex, const GlyphInfo* glyphInfo, const bool addHyphen,
                                    const InputParameterForEachGlyph& inputParamsForGlyph,
                                    OutputParameterForEachGlyph&      outputParamsForGlyph)
 {
-  const GlyphIndex styleGlyphIndex = inputParamsForGlyph.finalGlyphStyleSourceBuffer
-                                       ? ResolveFinalStyleSourceGlyph(inputParamsForGlyph.finalGlyphStyleSourceBuffer,
-                                                                      elidedGlyphIndex)
-                                       : glyphIndex;
+  const GlyphIndex           styleGlyphIndex = inputParamsForGlyph.finalGlyphStyleSourceBuffer
+                                                 ? ResolveFinalStyleSourceGlyph(inputParamsForGlyph.finalGlyphStyleSourceBuffer,
+                                                                                elidedGlyphIndex)
+                                                 : glyphIndex;
+  const GradientRasterPaint* gradientPaint   = nullptr;
+  if constexpr(APPLY_GRADIENT_SPAN)
+  {
+    if(inputParamsForGlyph.style == Typesetter::STYLE_NONE &&
+       inputParamsForGlyph.pixelFormat == Pixel::RGBA8888 &&
+       inputParamsForGlyph.gradientSpanData &&
+       inputParamsForGlyph.gradientRasterPaints &&
+       styleGlyphIndex < inputParamsForGlyph.gradientSpanData->glyphPaintIndices.Count())
+    {
+      const Internal::GradientSpanPaintIndex paintIndex =
+        inputParamsForGlyph.gradientSpanData->glyphPaintIndices[styleGlyphIndex];
+      if(paintIndex > 0u && paintIndex <= inputParamsForGlyph.gradientSpanData->paints.Count())
+      {
+        gradientPaint = inputParamsForGlyph.gradientRasterPaints + paintIndex - 1u;
+      }
+    }
+  }
   if constexpr(RECORD_REVEAL)
   {
     // Reveal plans are indexed by the canonical final glyph sequence. The
@@ -1050,7 +1465,21 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
     // The caller selects the specialization once per line. The ordinary Label
     // instantiation contains no reveal-specific branch in either its glyph or
     // per-pixel raster loops.
-    TypesetGlyph<RECORD_REVEAL, PIXEL_REVEAL>(glyphData, &position, &color, inputParamsForGlyph.style, inputParamsForGlyph.pixelFormat);
+    if constexpr(APPLY_GRADIENT_SPAN)
+    {
+      if(gradientPaint)
+      {
+        TypesetGradientGlyph<RECORD_REVEAL, PIXEL_REVEAL>(glyphData, &position, &color, *gradientPaint);
+      }
+      else
+      {
+        TypesetGlyph<RECORD_REVEAL, PIXEL_REVEAL>(glyphData, &position, &color, inputParamsForGlyph.style, inputParamsForGlyph.pixelFormat);
+      }
+    }
+    else
+    {
+      TypesetGlyph<RECORD_REVEAL, PIXEL_REVEAL>(glyphData, &position, &color, inputParamsForGlyph.style, inputParamsForGlyph.pixelFormat);
+    }
 
     if(inputParamsForGlyph.style == Typesetter::STYLE_OUTLINE)
     {
@@ -1069,7 +1498,7 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
   }
 }
 
-template<bool RECORD_REVEAL, bool PIXEL_REVEAL = false>
+template<bool RECORD_REVEAL, bool APPLY_GRADIENT_SPAN, bool PIXEL_REVEAL = false>
 void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphData& glyphData, Length& hyphenIndex,
                                   const LineRun& line, const bool isFirstLine,
                                   const InputParameterForEachLine&  inputParamsForLine,
@@ -1206,9 +1635,8 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
                                                      lastFontId};
     // clang-format on
 
-    CreateImageBufferForEachGlyph<RECORD_REVEAL, PIXEL_REVEAL>(fontClient, glyphData, glyphIndex, elidedGlyphIndex,
-                                                               glyphInfo, addHyphen, inputParamsForGlyph,
-                                                               outputParamsForGlyph);
+    CreateImageBufferForEachGlyph<RECORD_REVEAL, APPLY_GRADIENT_SPAN, PIXEL_REVEAL>(
+      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph);
 
     if(inputParamsForLine.hyphenIndices)
     {
@@ -1262,6 +1690,7 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
     -line.descender + GetPostOffsetVerticalLineAlignment(line, inputParamsForLine.verticalLineAlignType));
 }
 
+template<bool APPLY_GRADIENT_SPAN>
 void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient       fontClient,
                                                   GlyphData&                        glyphData,
                                                   Length&                           hyphenIndex,
@@ -1346,8 +1775,19 @@ void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient   
 
     const Internal::GradientGlyphInfo classification =
       Internal::ClassifyGradientGlyph(fontClient, *glyphInfo, gradientColorIndexBuffer, glyphIndex);
+    bool usesGradientSpan = false;
+    if constexpr(APPLY_GRADIENT_SPAN)
+    {
+      const GlyphIndex styleGlyphIndex = inputParamsForGlyph.finalGlyphStyleSourceBuffer
+                                           ? ResolveFinalStyleSourceGlyph(inputParamsForGlyph.finalGlyphStyleSourceBuffer,
+                                                                          elidedGlyphIndex)
+                                           : glyphIndex;
+      usesGradientSpan                 = styleGlyphIndex < inputParamsForGlyph.gradientSpanData->glyphPaintIndices.Count() &&
+                         inputParamsForGlyph.gradientSpanData->glyphPaintIndices[styleGlyphIndex] > 0u;
+    }
     const bool shouldRenderGlyph =
-      renderGradientTargets ? classification.usesGradientFill : !classification.usesGradientFill;
+      renderGradientTargets ? (classification.usesGradientFill && !usesGradientSpan)
+                            : (!classification.usesGradientFill || usesGradientSpan);
     if(!shouldRenderGlyph)
     {
       if(inputParamsForLine.hyphenIndices)
@@ -1386,8 +1826,8 @@ void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient   
 
                                                      lastFontId};
 
-    CreateImageBufferForEachGlyph<false>(fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen,
-                                         inputParamsForGlyph, outputParamsForGlyph);
+    CreateImageBufferForEachGlyph<false, APPLY_GRADIENT_SPAN>(
+      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph);
 
     if(inputParamsForLine.hyphenIndices)
     {
@@ -1796,6 +2236,22 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
   const Vector<CharacterSpacingGlyphRun>& __restrict__ characterSpacingGlyphRuns =
     viewModel.GetCharacterSpacingGlyphRuns();
 
+  const Internal::GradientSpanModelData* gradientSpanData =
+    (style == Typesetter::STYLE_NONE && pixelFormat == Pixel::RGBA8888)
+      ? viewModel.GetGradientSpanModelData()
+      : nullptr;
+  std::vector<GradientRasterPaint> gradientRasterPaints;
+  if(gradientSpanData)
+  {
+    gradientRasterPaints = ResolveGradientRasterPaints(viewModel,
+                                                       *gradientSpanData,
+                                                       bufferWidth,
+                                                       bufferHeight,
+                                                       ignoreHorizontalAlignment,
+                                                       horizontalOffset,
+                                                       verticalOffset);
+  }
+
   // clang-format off
   // Aggregate input parameter for each line from mModel
   const InputParameterForEachLine inputParamsForLine{bufferWidth,
@@ -1873,6 +2329,9 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
                                                        colorsBuffer,
                                                        colorIndexBuffer,
 
+                                                       gradientSpanData,
+                                                       gradientRasterPaints.empty() ? nullptr : gradientRasterPaints.data(),
+
                                                        modelUnderlineProperties,
                                                        modelStrikethroughProperties,
 
@@ -1886,6 +2345,14 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
                                                        // Whether to use the default color.
                                                        (nullptr == colorsBuffer)};
   // clang-format on
+
+  const bool           applyGradientSpan = gradientSpanData && !gradientRasterPaints.empty();
+  std::vector<uint8_t> rawOverlapCoverageBuffer;
+  if(applyGradientSpan)
+  {
+    rawOverlapCoverageBuffer.resize(static_cast<std::size_t>(bufferWidth) * static_cast<std::size_t>(bufferHeight), 0u);
+    glyphData.rawOverlapCoverageBuffer = rawOverlapCoverageBuffer.data();
+  }
 
   // Traverses the lines of the text.
   for(LineIndex lineIndex = 0u; lineIndex < modelNumberOfLines; ++lineIndex)
@@ -1906,21 +2373,40 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
         glyphData.verticalOffset = lineBottom;
         continue;
       }
-      if(glyphData.revealContext->plan && glyphData.revealContext->plan->HasPixelTiming())
+      const bool pixelReveal = glyphData.revealContext->plan && glyphData.revealContext->plan->HasPixelTiming();
+      if(applyGradientSpan && pixelReveal)
       {
-        CreateImageBufferForEachLine<true, true>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
-                                                 inputParamsForLine, inputParamsForGlyph);
+        CreateImageBufferForEachLine<true, true, true>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
+                                                       inputParamsForLine, inputParamsForGlyph);
+      }
+      else if(applyGradientSpan)
+      {
+        CreateImageBufferForEachLine<true, true, false>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
+                                                        inputParamsForLine, inputParamsForGlyph);
+      }
+      else if(pixelReveal)
+      {
+        CreateImageBufferForEachLine<true, false, true>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
+                                                        inputParamsForLine, inputParamsForGlyph);
       }
       else
       {
-        CreateImageBufferForEachLine<true, false>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
-                                                  inputParamsForLine, inputParamsForGlyph);
+        CreateImageBufferForEachLine<true, false, false>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
+                                                         inputParamsForLine, inputParamsForGlyph);
       }
     }
     else
     {
-      CreateImageBufferForEachLine<false>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
-                                          inputParamsForLine, inputParamsForGlyph);
+      if(applyGradientSpan)
+      {
+        CreateImageBufferForEachLine<false, true>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
+                                                  inputParamsForLine, inputParamsForGlyph);
+      }
+      else
+      {
+        CreateImageBufferForEachLine<false, false>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
+                                                   inputParamsForLine, inputParamsForGlyph);
+      }
     }
   }
 
@@ -2005,7 +2491,8 @@ PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uint32_t  
 
   const StrikethroughStyleProperties modelStrikethroughProperties{Vector4::ZERO, 0.0f, false, false};
 
-  const Vector4 maskColor(1.0f, 1.0f, 1.0f, 1.0f);
+  const Vector4                          maskColor(1.0f, 1.0f, 1.0f, 1.0f);
+  const Internal::GradientSpanModelData* gradientSpanData = viewModel.GetGradientSpanModelData();
 
   const InputParameterForEachGlyph inputParamsForGlyph{Typesetter::STYLE_NONE,
                                                        pixelFormat,
@@ -2030,6 +2517,9 @@ PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uint32_t  
                                                        nullptr,
                                                        nullptr,
 
+                                                       gradientSpanData,
+                                                       nullptr,
+
                                                        modelUnderlineProperties,
                                                        modelStrikethroughProperties,
 
@@ -2045,8 +2535,18 @@ PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uint32_t  
   for(LineIndex lineIndex = 0u; lineIndex < modelNumberOfLines; ++lineIndex)
   {
     const LineRun& line = *(modelLinesBuffer + lineIndex);
-    CreateTextGradientMaskImageBufferForEachLine(GetFontClient(), glyphData, hyphenIndex, line, inputParamsForLine,
-                                                 inputParamsForGlyph, colorIndexBuffer, true);
+    if(gradientSpanData)
+    {
+      CreateTextGradientMaskImageBufferForEachLine<true>(GetFontClient(), glyphData, hyphenIndex, line,
+                                                         inputParamsForLine, inputParamsForGlyph,
+                                                         colorIndexBuffer, true);
+    }
+    else
+    {
+      CreateTextGradientMaskImageBufferForEachLine<false>(GetFontClient(), glyphData, hyphenIndex, line,
+                                                          inputParamsForLine, inputParamsForGlyph,
+                                                          colorIndexBuffer, true);
+    }
   }
 
   return glyphData.bitmapBuffer;
@@ -2131,6 +2631,19 @@ PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint3
 
   const StrikethroughStyleProperties modelStrikethroughProperties{Vector4::ZERO, 0.0f, false, false};
 
+  const Internal::GradientSpanModelData* gradientSpanData = viewModel.GetGradientSpanModelData();
+  std::vector<GradientRasterPaint>       gradientRasterPaints;
+  if(gradientSpanData)
+  {
+    gradientRasterPaints = ResolveGradientRasterPaints(viewModel,
+                                                       *gradientSpanData,
+                                                       bufferWidth,
+                                                       bufferHeight,
+                                                       ignoreHorizontalAlignment,
+                                                       horizontalOffset,
+                                                       verticalOffset);
+  }
+
   const InputParameterForEachGlyph inputParamsForGlyph{Typesetter::STYLE_NONE,
                                                        pixelFormat,
 
@@ -2154,6 +2667,9 @@ PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint3
                                                        colorsBuffer,
                                                        colorIndexBuffer,
 
+                                                       gradientSpanData,
+                                                       gradientRasterPaints.empty() ? nullptr : gradientRasterPaints.data(),
+
                                                        modelUnderlineProperties,
                                                        modelStrikethroughProperties,
 
@@ -2166,11 +2682,29 @@ PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint3
 
                                                        nullptr == colorsBuffer || nullptr == colorIndexBuffer};
 
+  const bool           applyGradientSpan = gradientSpanData && !gradientRasterPaints.empty();
+  std::vector<uint8_t> rawOverlapCoverageBuffer;
+  if(applyGradientSpan)
+  {
+    rawOverlapCoverageBuffer.resize(static_cast<std::size_t>(bufferWidth) * static_cast<std::size_t>(bufferHeight), 0u);
+    glyphData.rawOverlapCoverageBuffer = rawOverlapCoverageBuffer.data();
+  }
+
   for(LineIndex lineIndex = 0u; lineIndex < modelNumberOfLines; ++lineIndex)
   {
     const LineRun& line = *(modelLinesBuffer + lineIndex);
-    CreateTextGradientMaskImageBufferForEachLine(GetFontClient(), glyphData, hyphenIndex, line, inputParamsForLine,
-                                                 inputParamsForGlyph, colorIndexBuffer, false);
+    if(applyGradientSpan)
+    {
+      CreateTextGradientMaskImageBufferForEachLine<true>(GetFontClient(), glyphData, hyphenIndex, line,
+                                                         inputParamsForLine, inputParamsForGlyph,
+                                                         colorIndexBuffer, false);
+    }
+    else
+    {
+      CreateTextGradientMaskImageBufferForEachLine<false>(GetFontClient(), glyphData, hyphenIndex, line,
+                                                          inputParamsForLine, inputParamsForGlyph,
+                                                          colorIndexBuffer, false);
+    }
   }
 
   return glyphData.bitmapBuffer;

@@ -81,6 +81,13 @@ public:
   virtual void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds);
 
   /**
+   * @brief Updates GradientSpan VIEW_BOUND uniforms without rebuilding text geometry.
+   *
+   * Unsupported renderer backends intentionally keep the default no-op behavior.
+   */
+  virtual void UpdateAtlasGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds);
+
+  /**
    * @brief Binds a control-owned source property to the atlas text gradient start offset uniform.
    *
    * Unsupported renderer backends intentionally keep the default no-op behavior.

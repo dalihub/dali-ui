@@ -26,6 +26,7 @@
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
 namespace Dali::Ui::Text
@@ -714,6 +715,26 @@ const Vector2& View::GetLayoutSize() const
   return Vector2::ZERO;
 }
 
+Length View::GetNumberOfLines() const
+{
+  const FinalElisionResult* finalResult = mImpl->mFinalElisionResult;
+  if(finalResult && finalResult->resolved && finalResult->textElided && finalResult->authoritativeLines)
+  {
+    return static_cast<Length>(finalResult->lines.Count());
+  }
+  return mImpl->mVisualModel ? static_cast<Length>(mImpl->mVisualModel->mLines.Count()) : 0u;
+}
+
+const LineRun* View::GetLines() const
+{
+  const FinalElisionResult* finalResult = mImpl->mFinalElisionResult;
+  if(finalResult && finalResult->resolved && finalResult->textElided && finalResult->authoritativeLines)
+  {
+    return finalResult->lines.Begin();
+  }
+  return mImpl->mVisualModel ? mImpl->mVisualModel->mLines.Begin() : nullptr;
+}
+
 Length View::GetNumberOfGlyphs() const
 {
   const FinalElisionResult* finalResult = mImpl->mFinalElisionResult;
@@ -1102,6 +1123,11 @@ const ColorIndex* View::GetColorIndices() const
   }
 
   return NULL;
+}
+
+const Internal::GradientSpanModelData* View::GetGradientSpanModelData() const
+{
+  return mImpl->mLogicalModel ? mImpl->mLogicalModel->mGradientSpanData.get() : nullptr;
 }
 
 const Vector4* View::GetBackgroundColors() const

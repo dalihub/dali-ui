@@ -16,8 +16,12 @@
  */
 
 // EXTERNAL INCLUDES
-#include <algorithm>
 #include <dali.h>
+#include <dali/integration-api/pixel-data-integ.h>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <limits>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
@@ -25,16 +29,22 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
+#include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
+#include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
+#include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
@@ -113,6 +123,165 @@ PublicText::LineThrough CreateLineThrough(const Vector4& color, float thickness)
   lineThrough.SetColor(Dali::Ui::UiColor(color));
   lineThrough.SetThickness(thickness);
   return lineThrough;
+}
+
+Dali::Ui::Gradient::Linear CreateGradient(const Vector4& first = Color::RED,
+                                          const Vector4& second = Color::BLUE)
+{
+  Dali::Ui::Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(first)),
+                         Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(second))});
+  return gradient;
+}
+
+Dali::Ui::Gradient::Radial CreateRadialGradient(const Vector4& first, const Vector4& second)
+{
+  Dali::Ui::Gradient::Radial gradient(Vector2(0.0f, 0.0f), 0.5f);
+  gradient.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(first)),
+                         Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(second))});
+  return gradient;
+}
+
+Dali::Ui::Gradient::Conic CreateConicGradient(const Vector4& first, const Vector4& second)
+{
+  Dali::Ui::Gradient::Conic gradient(Vector2(0.0f, 0.0f), Radian(0.0f));
+  gradient.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(first)),
+                         Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(second))});
+  return gradient;
+}
+
+bool ContainsColoredTextPixel(const PixelData& pixelData)
+{
+  if(pixelData.GetPixelFormat() != Pixel::RGBA8888)
+  {
+    return false;
+  }
+  const Dali::Integration::PixelDataBuffer pixels = Dali::Integration::GetPixelDataBuffer(pixelData);
+  if(!pixels.buffer)
+  {
+    return false;
+  }
+  for(uint32_t y = 0u; y < pixelData.GetHeight(); ++y)
+  {
+    const uint8_t* row = pixels.buffer + y * pixelData.GetStrideBytes();
+    for(uint32_t x = 0u; x < pixelData.GetWidth(); ++x)
+    {
+      const uint8_t* pixel = row + x * 4u;
+      if(pixel[3u] > 0u && (pixel[0u] > 0u || pixel[1u] > 0u || pixel[2u] > 0u))
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool ContainsVisibleTextPixel(const PixelData& pixelData)
+{
+  if(pixelData.GetPixelFormat() != Pixel::RGBA8888)
+  {
+    return false;
+  }
+  const Dali::Integration::PixelDataBuffer pixels = Dali::Integration::GetPixelDataBuffer(pixelData);
+  if(!pixels.buffer)
+  {
+    return false;
+  }
+  for(uint32_t y = 0u; y < pixelData.GetHeight(); ++y)
+  {
+    const uint8_t* row = pixels.buffer + y * pixelData.GetStrideBytes();
+    for(uint32_t x = 0u; x < pixelData.GetWidth(); ++x)
+    {
+      if(row[x * 4u + 3u] > 0u)
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+struct GradientUnitPixelEvidence
+{
+  bool     found{false};
+  uint32_t x{0u};
+  uint32_t y{0u};
+  float    objectExpected{0.0f};
+  float    userExpected{0.0f};
+  float    objectObserved{0.0f};
+  float    userObserved{0.0f};
+};
+
+GradientUnitPixelEvidence FindGradientUnitPixelEvidence(const PixelData& objectPixels,
+                                                        const PixelData& userPixels,
+                                                        float            spanLeft,
+                                                        float            spanWidth,
+                                                        float            userStart,
+                                                        float            userEnd)
+{
+  GradientUnitPixelEvidence evidence;
+  if(objectPixels.GetPixelFormat() != Pixel::RGBA8888 ||
+     userPixels.GetPixelFormat() != Pixel::RGBA8888 ||
+     objectPixels.GetWidth() != userPixels.GetWidth() ||
+     objectPixels.GetHeight() != userPixels.GetHeight() ||
+     spanWidth < Math::MACHINE_EPSILON_1000 ||
+     userEnd - userStart < Math::MACHINE_EPSILON_1000)
+  {
+    return evidence;
+  }
+
+  const Dali::Integration::PixelDataBuffer objectBuffer = Dali::Integration::GetPixelDataBuffer(objectPixels);
+  const Dali::Integration::PixelDataBuffer userBuffer   = Dali::Integration::GetPixelDataBuffer(userPixels);
+  if(!objectBuffer.buffer || !userBuffer.buffer)
+  {
+    return evidence;
+  }
+
+  for(uint32_t y = 0u; y < objectPixels.GetHeight(); ++y)
+  {
+    const uint8_t* objectRow = objectBuffer.buffer + y * objectPixels.GetStrideBytes();
+    const uint8_t* userRow   = userBuffer.buffer + y * userPixels.GetStrideBytes();
+    for(uint32_t x = 0u; x < objectPixels.GetWidth(); ++x)
+    {
+      const uint8_t* objectPixel = objectRow + x * 4u;
+      const uint8_t* userPixel   = userRow + x * 4u;
+      if(objectPixel[3u] < 192u || userPixel[3u] < 192u)
+      {
+        continue;
+      }
+
+      const float localX         = static_cast<float>(x) + 0.5f - spanLeft;
+      const float objectExpected = std::max(0.0f, std::min(1.0f, localX / spanWidth));
+      const float userExpected   = std::max(0.0f, std::min(1.0f, (localX - userStart) / (userEnd - userStart)));
+      if(std::fabs(objectExpected - userExpected) < 0.35f)
+      {
+        continue;
+      }
+
+      const float objectColorTotal = static_cast<float>(objectPixel[0u]) + objectPixel[2u];
+      const float userColorTotal   = static_cast<float>(userPixel[0u]) + userPixel[2u];
+      if(objectColorTotal < 1.0f || userColorTotal < 1.0f)
+      {
+        continue;
+      }
+
+      const float objectObserved = static_cast<float>(objectPixel[2u]) / objectColorTotal;
+      const float userObserved   = static_cast<float>(userPixel[2u]) / userColorTotal;
+      if(std::fabs(objectObserved - objectExpected) <= 0.06f &&
+         std::fabs(userObserved - userExpected) <= 0.06f)
+      {
+        evidence.found          = true;
+        evidence.x              = x;
+        evidence.y              = y;
+        evidence.objectExpected = objectExpected;
+        evidence.userExpected   = userExpected;
+        evidence.objectObserved = objectObserved;
+        evidence.userObserved   = userObserved;
+        return evidence;
+      }
+    }
+  }
+  return evidence;
 }
 
 void CheckUnderlineRun(const PublicText::UnderlinedCharacterRun& underlineRun, PublicText::CharacterIndex characterIndex, PublicText::Length numberOfCharacters, const PublicText::Underline& underline)
@@ -705,6 +874,433 @@ int UtcDaliStyledTextControllerSetStyledTextForegroundColorSpanP(void)
   DALI_TEST_EQUALS(logicalModel.mText.Count(), 5u, TEST_LOCATION);
   DALI_TEST_EQUALS(logicalModel.mColorRuns.Count(), 1u, TEST_LOCATION);
   CheckColorRun(logicalModel.mColorRuns[0u], 1u, 3u, Color::RED);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextControllerGradientSpanReachesRenderersP(void)
+{
+  UiTestApplication application;
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New("GradientSpan");
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::GradientSpan::New(CreateGradient()), 0u, 4u));
+  DALI_TEST_CHECK(builder.SetSpan(
+    PublicText::GradientSpan::New(CreateRadialGradient(Color::GREEN, Color::YELLOW),
+                                  PublicText::GradientSpan::BoundsMode::CONTENT_BOUND),
+    4u,
+    8u));
+  DALI_TEST_CHECK(builder.SetSpan(
+    PublicText::GradientSpan::New(CreateConicGradient(Color::MAGENTA, Color::CYAN),
+                                  PublicText::GradientSpan::BoundsMode::VIEW_BOUND),
+    8u,
+    12u));
+
+  PublicText::ControllerPtr controller = PublicText::Controller::New();
+  controller->SetDefaultFontSize(24.0f, PublicText::Controller::PIXEL_SIZE);
+  controller->SetStyledText(builder.Build());
+  RelayoutController(controller);
+
+  PublicText::LogicalModel& logicalModel = GetLogicalModel(controller);
+  PublicText::VisualModel&  visualModel  = GetVisualModel(controller);
+  DALI_TEST_CHECK(logicalModel.mGradientSpanData);
+  DALI_TEST_EQUALS(logicalModel.mGradientSpanData->paints.Count(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel.mGradientSpanData->glyphPaintIndices.Count(),
+                   visualModel.mGlyphs.Count(),
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(std::find(logicalModel.mGradientSpanData->glyphPaintIndices.Begin(),
+                            logicalModel.mGradientSpanData->glyphPaintIndices.End(),
+                            1u) != logicalModel.mGradientSpanData->glyphPaintIndices.End());
+  DALI_TEST_CHECK(std::find(logicalModel.mGradientSpanData->glyphPaintIndices.Begin(),
+                            logicalModel.mGradientSpanData->glyphPaintIndices.End(),
+                            2u) != logicalModel.mGradientSpanData->glyphPaintIndices.End());
+  DALI_TEST_CHECK(std::find(logicalModel.mGradientSpanData->glyphPaintIndices.Begin(),
+                            logicalModel.mGradientSpanData->glyphPaintIndices.End(),
+                            3u) != logicalModel.mGradientSpanData->glyphPaintIndices.End());
+
+  PublicText::TypesetterPtr typesetter = PublicText::Typesetter::New(&GetLogicalModelObject(controller));
+  PixelData texture = typesetter->Render(Size(320.0f, 120.0f),
+                                         PublicText::Direction::LEFT_TO_RIGHT,
+                                         PublicText::Typesetter::RENDER_TEXT_AND_STYLES,
+                                         false,
+                                         Pixel::RGBA8888);
+  DALI_TEST_CHECK(texture);
+  DALI_TEST_CHECK(ContainsColoredTextPixel(texture));
+
+  controller->SetDefaultColor(Color::TRANSPARENT);
+  RelayoutController(controller);
+  PixelData transparentTexture = typesetter->Render(Size(320.0f, 120.0f),
+                                                     PublicText::Direction::LEFT_TO_RIGHT,
+                                                     PublicText::Typesetter::RENDER_TEXT_AND_STYLES,
+                                                     false,
+                                                     Pixel::RGBA8888);
+  DALI_TEST_CHECK(transparentTexture);
+  DALI_TEST_CHECK(!ContainsVisibleTextPixel(transparentTexture));
+  controller->SetDefaultColor(Color::BLACK);
+  RelayoutController(controller);
+
+  PublicText::RendererPtr atlasRenderer = PublicText::AtlasRenderer::New();
+  Actor                   textControl   = Actor::New();
+  float                   alignmentOffset = 0.0f;
+  Actor atlasActor = atlasRenderer->Render(controller->GetView(),
+                                           textControl,
+                                           Property::INVALID_INDEX,
+                                           alignmentOffset,
+                                           0);
+  DALI_TEST_CHECK(atlasActor);
+  DALI_TEST_CHECK(atlasActor.GetChildCount() >= 3u);
+
+  uint32_t gradientRendererCount = 0u;
+  for(uint32_t childIndex = 0u; childIndex < atlasActor.GetChildCount(); ++childIndex)
+  {
+    Actor child = atlasActor.GetChildAt(childIndex);
+    if(child.GetRendererCount() == 0u)
+    {
+      continue;
+    }
+    Renderer renderer = child.GetRendererAt(0u);
+    if(renderer.GetPropertyIndex("uTextGradientType") != Property::INVALID_INDEX)
+    {
+      ++gradientRendererCount;
+      DALI_TEST_CHECK(renderer.GetTextures().GetTexture(1u));
+    }
+  }
+  DALI_TEST_CHECK(gradientRendererCount >= 3u);
+
+  const Vector2 updatedCoordinateSize(320.0f, 120.0f);
+  const Vector4 updatedViewBounds(0.125f, 0.25f, 0.5f, 0.375f);
+  atlasRenderer->UpdateAtlasGradientSpanViewBounds(updatedCoordinateSize, updatedViewBounds);
+
+  uint32_t updatedViewRendererCount = 0u;
+  for(uint32_t childIndex = 0u; childIndex < atlasActor.GetChildCount(); ++childIndex)
+  {
+    Actor child = atlasActor.GetChildAt(childIndex);
+    if(child.GetRendererCount() == 0u)
+    {
+      continue;
+    }
+    Renderer renderer = child.GetRendererAt(0u);
+    const Property::Index boundsIndex = renderer.GetPropertyIndex("uTextGradientBounds");
+    if(boundsIndex != Property::INVALID_INDEX && renderer.GetProperty<Vector4>(boundsIndex) == updatedViewBounds)
+    {
+      ++updatedViewRendererCount;
+    }
+  }
+  DALI_TEST_CHECK(updatedViewRendererCount >= 1u);
+
+  controller->SetText("Plain SetText source");
+  DALI_TEST_CHECK(!GetLogicalModel(controller).mGradientSpanData);
+
+  controller->SetStyledText(builder.Build());
+  DALI_TEST_CHECK(GetLogicalModel(controller).mGradientSpanData);
+  controller->SetStyledText(PublicText::StyledText::New("Plain StyledText source"));
+  DALI_TEST_CHECK(!GetLogicalModel(controller).mGradientSpanData);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextControllerGradientSpanUserSpaceRenderingP(void)
+{
+  UiTestApplication application;
+
+  constexpr float      USER_START = 8.0f;
+  constexpr float      USER_END   = 48.0f;
+  const std::string    text       = "MMMMMMMM";
+  const Vector2        renderSize(320.0f, 80.0f);
+  Dali::Ui::Gradient::Linear objectGradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  objectGradient.SetUnits(Dali::Ui::Gradient::Units::OBJECT_BOUNDING_BOX);
+  objectGradient.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(Color::RED)),
+                               Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(Color::BLUE))});
+  Dali::Ui::Gradient::Linear userGradient(Vector2(USER_START, 0.0f), Vector2(USER_END, 0.0f));
+  userGradient.SetUnits(Dali::Ui::Gradient::Units::USER_SPACE);
+  userGradient.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(Color::RED)),
+                             Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(Color::BLUE))});
+
+  auto makeController = [&](const Dali::Ui::Gradient::Base& gradient)
+  {
+    PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(text.c_str());
+    DALI_ASSERT_ALWAYS(builder.SetSpan(PublicText::GradientSpan::New(gradient),
+                                       0u,
+                                       static_cast<uint32_t>(text.size())));
+    PublicText::ControllerPtr controller = PublicText::Controller::New();
+    controller->SetDefaultFontSize(32.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetHorizontalAlignment(PublicText::Alignment::START);
+    controller->SetStyledText(builder.Build());
+    controller->Relayout(renderSize);
+    return controller;
+  };
+
+  PublicText::ControllerPtr objectController = makeController(objectGradient);
+  PublicText::ControllerPtr userController   = makeController(userGradient);
+  const auto*               userPaintData   = GetLogicalModel(userController).mGradientSpanData.get();
+  DALI_TEST_CHECK(userPaintData && userPaintData->paints.Count() == 1u);
+  DALI_TEST_EQUALS(userPaintData->paints[0u].style.units,
+                   Dali::Ui::Gradient::Units::USER_SPACE,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(userPaintData->paints[0u].style.linearStart, Vector2(USER_START, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(userPaintData->paints[0u].style.linearEnd, Vector2(USER_END, 0.0f), TEST_LOCATION);
+
+  PublicText::TypesetterPtr objectTypesetter = PublicText::Typesetter::New(&GetLogicalModelObject(objectController));
+  PublicText::TypesetterPtr userTypesetter   = PublicText::Typesetter::New(&GetLogicalModelObject(userController));
+  const PixelData objectPixels = objectTypesetter->Render(renderSize,
+                                                          PublicText::Direction::LEFT_TO_RIGHT,
+                                                          PublicText::Typesetter::RENDER_TEXT_AND_STYLES,
+                                                          false,
+                                                          Pixel::RGBA8888);
+  const PixelData userPixels = userTypesetter->Render(renderSize,
+                                                      PublicText::Direction::LEFT_TO_RIGHT,
+                                                      PublicText::Typesetter::RENDER_TEXT_AND_STYLES,
+                                                      false,
+                                                      Pixel::RGBA8888);
+  DALI_TEST_CHECK(objectPixels && userPixels);
+
+  const PublicText::VisualModel& userVisualModel = GetVisualModel(userController);
+  DALI_TEST_EQUALS(userVisualModel.mLines.Count(), 1u, TEST_LOCATION);
+  float spanLeft  = std::numeric_limits<float>::max();
+  float spanRight = -std::numeric_limits<float>::max();
+  for(uint32_t glyphIndex = 0u; glyphIndex < userVisualModel.mGlyphs.Count(); ++glyphIndex)
+  {
+    if(glyphIndex >= userPaintData->glyphPaintIndices.Count() || userPaintData->glyphPaintIndices[glyphIndex] == 0u)
+    {
+      continue;
+    }
+    const float left  = userVisualModel.mLines[0u].alignmentOffset + userVisualModel.mGlyphPositions[glyphIndex].x;
+    const float right = left + userVisualModel.mGlyphs[glyphIndex].width;
+    spanLeft          = std::min(spanLeft, std::max(0.0f, left));
+    spanRight         = std::max(spanRight, std::min(renderSize.width, right));
+  }
+  DALI_TEST_CHECK(spanRight > spanLeft);
+
+  const GradientUnitPixelEvidence evidence = FindGradientUnitPixelEvidence(objectPixels,
+                                                                            userPixels,
+                                                                            spanLeft,
+                                                                            spanRight - spanLeft,
+                                                                            USER_START,
+                                                                            USER_END);
+  DALI_TEST_CHECK(evidence.found);
+  DALI_TEST_EQUALS(evidence.objectObserved, evidence.objectExpected, 0.06f, TEST_LOCATION);
+  DALI_TEST_EQUALS(evidence.userObserved, evidence.userExpected, 0.06f, TEST_LOCATION);
+  DALI_TEST_CHECK(std::fabs(evidence.objectObserved - evidence.userObserved) > 0.3f);
+
+  PublicText::RendererPtr atlasRenderer   = PublicText::AtlasRenderer::New();
+  float                   alignmentOffset = 0.0f;
+  Actor                   atlasActor      = atlasRenderer->Render(userController->GetView(),
+                                             Actor::New(),
+                                             Property::INVALID_INDEX,
+                                             alignmentOffset,
+                                             0);
+  DALI_TEST_CHECK(atlasActor);
+  bool foundLinearAtlasGeometry = false;
+  for(uint32_t childIndex = 0u; childIndex < atlasActor.GetChildCount(); ++childIndex)
+  {
+    Actor child = atlasActor.GetChildAt(childIndex);
+    if(child.GetRendererCount() == 0u)
+    {
+      continue;
+    }
+    Renderer renderer = child.GetRendererAt(0u);
+    const Property::Index typeIndex = renderer.GetPropertyIndex("uTextGradientType");
+    if(typeIndex == Property::INVALID_INDEX ||
+       std::fabs(renderer.GetProperty<float>(typeIndex) - static_cast<float>(Dali::Ui::Gradient::Type::LINEAR)) > 0.1f)
+    {
+      continue;
+    }
+
+    const Vector2 coordinateSize = renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientLayoutSize"));
+    const Vector4 bounds         = renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uTextGradientBounds"));
+    const Vector2 boundsPixelSize(bounds.z * coordinateSize.x, bounds.w * coordinateSize.y);
+    const Vector2 expectedStart(USER_START / boundsPixelSize.x, 0.0f);
+    const Vector2 expectedEnd(USER_END / boundsPixelSize.x, 0.0f);
+    DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientStartPosition")),
+                     expectedStart,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientEndPosition")),
+                     expectedEnd,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    foundLinearAtlasGeometry = true;
+  }
+  DALI_TEST_CHECK(foundLinearAtlasGeometry);
+
+  Dali::Ui::Gradient::Radial radial(Vector2(24.0f, 16.0f), 32.0f);
+  radial.SetUnits(Dali::Ui::Gradient::Units::USER_SPACE);
+  radial.SetSpreadMethod(Dali::Ui::Gradient::SpreadMethod::REPEAT);
+  radial.SetStartOffset(0.125f);
+  radial.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(Color::GREEN)),
+                       Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(Color::BLUE))});
+  Dali::Ui::Gradient::Conic conic(Vector2(30.0f, 20.0f), Radian(0.75f));
+  conic.SetUnits(Dali::Ui::Gradient::Units::USER_SPACE);
+  conic.SetSpreadMethod(Dali::Ui::Gradient::SpreadMethod::REFLECT);
+  conic.SetStartOffset(-0.25f);
+  conic.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(Color::MAGENTA)),
+                      Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(Color::CYAN))});
+
+  PublicText::StyledTextBuilder typedBuilder = PublicText::StyledTextBuilder::New("RADIAL CONIC");
+  DALI_TEST_CHECK(typedBuilder.SetSpan(
+    PublicText::GradientSpan::New(radial, PublicText::GradientSpan::BoundsMode::CONTENT_BOUND), 0u, 6u));
+  DALI_TEST_CHECK(typedBuilder.SetSpan(
+    PublicText::GradientSpan::New(conic, PublicText::GradientSpan::BoundsMode::VIEW_BOUND), 7u, 12u));
+  PublicText::ControllerPtr typedController = PublicText::Controller::New();
+  typedController->SetDefaultFontSize(32.0f, PublicText::Controller::PIXEL_SIZE);
+  typedController->SetStyledText(typedBuilder.Build());
+  typedController->Relayout(renderSize);
+
+  PublicText::TypesetterPtr typedTypesetter = PublicText::Typesetter::New(&GetLogicalModelObject(typedController));
+  const PixelData typedPixels = typedTypesetter->Render(renderSize,
+                                                        PublicText::Direction::LEFT_TO_RIGHT,
+                                                        PublicText::Typesetter::RENDER_TEXT_AND_STYLES,
+                                                        false,
+                                                        Pixel::RGBA8888);
+  DALI_TEST_CHECK(typedPixels && ContainsColoredTextPixel(typedPixels));
+
+  PublicText::RendererPtr typedAtlasRenderer = PublicText::AtlasRenderer::New();
+  Actor typedAtlasActor = typedAtlasRenderer->Render(typedController->GetView(),
+                                                     Actor::New(),
+                                                     Property::INVALID_INDEX,
+                                                     alignmentOffset,
+                                                     0);
+  bool foundRadialGeometry = false;
+  bool foundConicGeometry  = false;
+  for(uint32_t childIndex = 0u; childIndex < typedAtlasActor.GetChildCount(); ++childIndex)
+  {
+    Actor child = typedAtlasActor.GetChildAt(childIndex);
+    if(child.GetRendererCount() == 0u)
+    {
+      continue;
+    }
+    Renderer renderer = child.GetRendererAt(0u);
+    const Property::Index typeIndex = renderer.GetPropertyIndex("uTextGradientType");
+    if(typeIndex == Property::INVALID_INDEX)
+    {
+      continue;
+    }
+    const float   type           = renderer.GetProperty<float>(typeIndex);
+    const Vector2 coordinateSize = renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientLayoutSize"));
+    const Vector4 bounds         = renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uTextGradientBounds"));
+    const Vector2 boundsPixelSize(bounds.z * coordinateSize.x, bounds.w * coordinateSize.y);
+    if(std::fabs(type - static_cast<float>(Dali::Ui::Gradient::Type::RADIAL)) < 0.1f)
+    {
+      DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientRadialCenter")),
+                       Vector2(24.0f / boundsPixelSize.x, 16.0f / boundsPixelSize.y),
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientRadialScale")),
+                       boundsPixelSize / 32.0f,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(renderer.GetProperty<float>(renderer.GetPropertyIndex("uTextGradientStartOffset")),
+                       0.125f,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      foundRadialGeometry = true;
+    }
+    else if(std::fabs(type - static_cast<float>(Dali::Ui::Gradient::Type::CONIC)) < 0.1f)
+    {
+      DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientConicCenter")),
+                       Vector2(30.0f / boundsPixelSize.x, 20.0f / boundsPixelSize.y),
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientConicScale")),
+                       boundsPixelSize,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(renderer.GetProperty<float>(renderer.GetPropertyIndex("uTextGradientConicStartAngle")),
+                       0.75f,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(renderer.GetProperty<float>(renderer.GetPropertyIndex("uTextGradientStartOffset")),
+                       -0.25f,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      foundConicGeometry = true;
+    }
+  }
+  DALI_TEST_CHECK(foundRadialGeometry);
+  DALI_TEST_CHECK(foundConicGeometry);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextControllerGradientSpanAtlasScalingP(void)
+{
+  UiTestApplication application;
+
+  constexpr std::array<uint32_t, 6u> PAINT_COUNTS{{1u, 2u, 5u, 10u, 20u, 50u}};
+  const std::string                  text(50u, 'M');
+  for(uint32_t paintCount : PAINT_COUNTS)
+  {
+    PublicText::StyledTextBuilder builder        = PublicText::StyledTextBuilder::New(text.c_str());
+    const auto                    sharedGradient = CreateGradient();
+    for(uint32_t index = 0u; index < paintCount; ++index)
+    {
+      DALI_TEST_CHECK(builder.SetSpan(PublicText::GradientSpan::New(sharedGradient), index, index + 1u));
+    }
+
+    PublicText::ControllerPtr controller = PublicText::Controller::New();
+    controller->SetDefaultFontSize(18.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetStyledText(builder.Build());
+    controller->Relayout(Size(1200.0f, 80.0f));
+    DALI_TEST_CHECK(GetLogicalModel(controller).mGradientSpanData);
+    DALI_TEST_EQUALS(GetLogicalModel(controller).mGradientSpanData->paints.Count(), paintCount, TEST_LOCATION);
+
+    PublicText::RendererPtr atlasRenderer   = PublicText::AtlasRenderer::New();
+    float                   alignmentOffset = 0.0f;
+    Actor                   atlasActor      = atlasRenderer->Render(controller->GetView(),
+                                                                    Actor::New(),
+                                                                    Property::INVALID_INDEX,
+                                                                    alignmentOffset,
+                                                                    0);
+    DALI_TEST_CHECK(atlasActor);
+
+    uint32_t gradientRendererCount = 0u;
+    for(uint32_t childIndex = 0u; childIndex < atlasActor.GetChildCount(); ++childIndex)
+    {
+      Actor child = atlasActor.GetChildAt(childIndex);
+      if(child.GetRendererCount() > 0u &&
+         child.GetRendererAt(0u).GetPropertyIndex("uTextGradientType") != Property::INVALID_INDEX)
+      {
+        ++gradientRendererCount;
+        DALI_TEST_EQUALS(child.GetRendererAt(0u).GetTextures().GetTextureCount(), 2u, TEST_LOCATION);
+      }
+    }
+    DALI_TEST_CHECK(gradientRendererCount >= paintCount);
+  }
+
+  for(uint32_t rangeCount : {5u, 10u, 50u})
+  {
+    PublicText::StyledTextBuilder builder        = PublicText::StyledTextBuilder::New(text.c_str());
+    const auto                    sharedGradient = CreateGradient();
+    for(uint32_t index = 0u; index < rangeCount; ++index)
+    {
+      DALI_TEST_CHECK(builder.SetSpan(
+        PublicText::GradientSpan::New(sharedGradient, PublicText::GradientSpan::BoundsMode::CONTENT_BOUND),
+        index,
+        index + 1u));
+    }
+
+    PublicText::ControllerPtr controller = PublicText::Controller::New();
+    controller->SetDefaultFontSize(18.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetStyledText(builder.Build());
+    controller->Relayout(Size(1200.0f, 80.0f));
+    DALI_TEST_CHECK(GetLogicalModel(controller).mGradientSpanData);
+    DALI_TEST_EQUALS(GetLogicalModel(controller).mGradientSpanData->paints.Count(), 1u, TEST_LOCATION);
+  }
+
+  for(uint32_t paintCount : {5u, 10u, 50u})
+  {
+    PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(text.c_str());
+    for(uint32_t index = 0u; index < paintCount; ++index)
+    {
+      auto gradient = CreateGradient();
+      gradient.SetStartOffset(static_cast<float>(index) / static_cast<float>(paintCount));
+      DALI_TEST_CHECK(builder.SetSpan(PublicText::GradientSpan::New(gradient), index, index + 1u));
+    }
+
+    PublicText::ControllerPtr controller = PublicText::Controller::New();
+    controller->SetStyledText(builder.Build());
+    DALI_TEST_CHECK(GetLogicalModel(controller).mGradientSpanData);
+    DALI_TEST_EQUALS(GetLogicalModel(controller).mGradientSpanData->paints.Count(), paintCount, TEST_LOCATION);
+  }
 
   END_TEST;
 }

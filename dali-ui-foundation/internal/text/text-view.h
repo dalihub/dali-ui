@@ -98,6 +98,16 @@ public:
   const Vector2& GetLayoutSize() const override;
 
   /**
+   * @copydoc Dali::Ui::Text::ViewInterface::GetNumberOfLines()
+   */
+  Length GetNumberOfLines() const override;
+
+  /**
+   * @copydoc Dali::Ui::Text::ViewInterface::GetLines()
+   */
+  const LineRun* GetLines() const override;
+
+  /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetNumberOfGlyphs()
    */
   Length GetNumberOfGlyphs() const override;
@@ -122,6 +132,11 @@ public:
    * @copydoc Dali::Ui::Text::ViewInterface::GetColorIndices()
    */
   const ColorIndex* GetColorIndices() const override;
+
+  /**
+   * @copydoc Dali::Ui::Text::ViewInterface::GetGradientSpanModelData()
+   */
+  const Internal::GradientSpanModelData* GetGradientSpanModelData() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetBackgroundColors()

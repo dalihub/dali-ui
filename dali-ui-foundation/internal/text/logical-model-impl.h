@@ -23,6 +23,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/ref-object.h>
+#include <memory>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/anchor.h>
@@ -53,6 +54,11 @@ struct InputStyle;
 
 namespace Text
 {
+namespace Internal
+{
+struct GradientSpanModelData;
+}
+
 class LogicalModel;
 typedef IntrusivePtr<LogicalModel> LogicalModelPtr;
 
@@ -253,17 +259,18 @@ private:
   LogicalModel& operator=(const LogicalModel& handle);
 
 public:
-  Vector<Character>                     mText;
-  Vector<ScriptRun>                     mScriptRuns;
-  Vector<FontRun>                       mFontRuns;
-  Vector<ColorRun>                      mColorRuns;
-  Vector<ColorRun>                      mBackgroundColorRuns;
-  Vector<FontDescriptionRun>            mFontDescriptionRuns;
-  Vector<LineBreakInfo>                 mLineBreakInfo;
-  Vector<ParagraphRun>                  mParagraphInfo;
-  Vector<BidirectionalParagraphInfoRun> mBidirectionalParagraphInfo;
-  Vector<CharacterDirection>            mCharacterDirections; ///< For each character, whether is right to left. ( @e flase is left
-                                                              ///< to right, @e true right to left ).
+  Vector<Character>                                mText;
+  Vector<ScriptRun>                                mScriptRuns;
+  Vector<FontRun>                                  mFontRuns;
+  Vector<ColorRun>                                 mColorRuns;
+  std::unique_ptr<Internal::GradientSpanModelData> mGradientSpanData; ///< Allocated only for renderable GradientSpan paint.
+  Vector<ColorRun>                                 mBackgroundColorRuns;
+  Vector<FontDescriptionRun>                       mFontDescriptionRuns;
+  Vector<LineBreakInfo>                            mLineBreakInfo;
+  Vector<ParagraphRun>                             mParagraphInfo;
+  Vector<BidirectionalParagraphInfoRun>            mBidirectionalParagraphInfo;
+  Vector<CharacterDirection>                       mCharacterDirections; ///< For each character, whether is right to left. ( @e flase is left
+                                                                         ///< to right, @e true right to left ).
   Vector<BidirectionalLineInfoRun> mBidirectionalLineInfo;
   Vector<Anchor>                   mAnchors;
   Vector<UnderlinedCharacterRun>   mUnderlinedCharacterRuns; ///< The underlined character run from markup-processor

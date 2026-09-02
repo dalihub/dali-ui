@@ -41,6 +41,7 @@
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 #include <dali-ui-foundation/internal/text/text-selection-handle-controller.h>
@@ -2712,6 +2713,7 @@ void Controller::Impl::ClearFontData()
 void Controller::Impl::ClearStyleData()
 {
   mModel->mLogicalModel->mColorRuns.Clear();
+  mModel->mLogicalModel->mGradientSpanData.reset();
   mModel->mLogicalModel->mBackgroundColorRuns.Clear();
   mModel->mLogicalModel->ClearFontDescriptionRuns();
   mModel->mLogicalModel->ClearStrikethroughRuns();

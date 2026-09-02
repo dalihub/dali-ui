@@ -43,6 +43,11 @@ bool IsRenderable(const Dali::Ui::Gradient::Base& gradient);
 
 bool IsRenderable(const Style& style);
 
+/**
+ * @brief Compares two immutable gradient rendering snapshots by value.
+ */
+bool EqualStyle(const Style& lhs, const Style& rhs);
+
 Dali::WrapMode::Type GetWrapMode(Dali::Ui::Gradient::SpreadMethod spread);
 
 struct RenderData

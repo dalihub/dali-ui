@@ -54,8 +54,22 @@ constexpr uint32_t POST_OPERATION_MEMORY_DELAY_MS = 1500u;
 
 enum class PerfRenderMode
 {
+  PLAIN,
   TEXT_GRADIENT,
+  GRADIENT_SPAN,
   MASK,
+};
+
+enum class GradientSpanScenario
+{
+  PARTIAL_ONE,
+  SPAN_FIVE,
+  SPAN_TEN,
+  CONTENT_FIVE,
+  CONTENT_TEN,
+  DIFFERENT_FIVE,
+  DIFFERENT_TEN,
+  GLOBAL_AND_SPAN,
 };
 
 enum class PendingOperation
@@ -98,12 +112,118 @@ struct MemorySnapshot
 
 const char* GetModeName(PerfRenderMode mode)
 {
-  return mode == PerfRenderMode::TEXT_GRADIENT ? "TextGradient" : "Mask";
+  switch(mode)
+  {
+    case PerfRenderMode::PLAIN:
+      return "Plain";
+    case PerfRenderMode::TEXT_GRADIENT:
+      return "TextGradient";
+    case PerfRenderMode::GRADIENT_SPAN:
+      return "GradientSpan";
+    case PerfRenderMode::MASK:
+    default:
+      return "Mask";
+  }
 }
 
 UiColor GetModeColor(PerfRenderMode mode)
 {
-  return mode == PerfRenderMode::TEXT_GRADIENT ? UiColor(0x0F5FA8) : UiColor(0xA32655);
+  switch(mode)
+  {
+    case PerfRenderMode::PLAIN:
+      return UiColor(0x475569);
+    case PerfRenderMode::TEXT_GRADIENT:
+      return UiColor(0x0F5FA8);
+    case PerfRenderMode::GRADIENT_SPAN:
+      return UiColor(0x047857);
+    case PerfRenderMode::MASK:
+    default:
+      return UiColor(0xA32655);
+  }
+}
+
+PerfRenderMode GetInitialRenderMode()
+{
+  const char* mode = std::getenv("DALI_TEXT_GRADIENT_PERF_MODE");
+  if(mode == nullptr)
+  {
+    return PerfRenderMode::TEXT_GRADIENT;
+  }
+  if(std::strcmp(mode, "0") == 0 || std::strcmp(mode, "Plain") == 0)
+  {
+    return PerfRenderMode::PLAIN;
+  }
+  if(std::strcmp(mode, "2") == 0 || std::strcmp(mode, "GradientSpan") == 0)
+  {
+    return PerfRenderMode::GRADIENT_SPAN;
+  }
+  if(std::strcmp(mode, "3") == 0 || std::strcmp(mode, "Mask") == 0)
+  {
+    return PerfRenderMode::MASK;
+  }
+  return PerfRenderMode::TEXT_GRADIENT;
+}
+
+uint32_t GetConfiguredLabelCount()
+{
+  const char* value = std::getenv("DALI_TEXT_GRADIENT_PERF_LABEL_COUNT");
+  if(value == nullptr)
+  {
+    return DEFAULT_LABEL_COUNT;
+  }
+
+  char*               end    = nullptr;
+  const unsigned long parsed = std::strtoul(value, &end, 10);
+  return (end != value && *end == '\0' && parsed > 0u && parsed <= 5000u)
+           ? static_cast<uint32_t>(parsed)
+           : DEFAULT_LABEL_COUNT;
+}
+
+bool GetInitialAsyncRendering()
+{
+  const char* value = std::getenv("DALI_TEXT_GRADIENT_PERF_ASYNC");
+  return value == nullptr || (std::strcmp(value, "0") != 0 && std::strcmp(value, "off") != 0);
+}
+
+GradientSpanScenario GetGradientSpanScenario()
+{
+  const char* value = std::getenv("DALI_TEXT_GRADIENT_PERF_SPAN_SCENARIO");
+  if(value == nullptr)
+  {
+    return GradientSpanScenario::PARTIAL_ONE;
+  }
+  if(std::strcmp(value, "span5") == 0) return GradientSpanScenario::SPAN_FIVE;
+  if(std::strcmp(value, "span10") == 0) return GradientSpanScenario::SPAN_TEN;
+  if(std::strcmp(value, "content5") == 0) return GradientSpanScenario::CONTENT_FIVE;
+  if(std::strcmp(value, "content10") == 0) return GradientSpanScenario::CONTENT_TEN;
+  if(std::strcmp(value, "different5") == 0) return GradientSpanScenario::DIFFERENT_FIVE;
+  if(std::strcmp(value, "different10") == 0) return GradientSpanScenario::DIFFERENT_TEN;
+  if(std::strcmp(value, "global") == 0) return GradientSpanScenario::GLOBAL_AND_SPAN;
+  return GradientSpanScenario::PARTIAL_ONE;
+}
+
+const char* GetGradientSpanScenarioName(GradientSpanScenario scenario)
+{
+  switch(scenario)
+  {
+    case GradientSpanScenario::SPAN_FIVE:
+      return "span5";
+    case GradientSpanScenario::SPAN_TEN:
+      return "span10";
+    case GradientSpanScenario::CONTENT_FIVE:
+      return "content5";
+    case GradientSpanScenario::CONTENT_TEN:
+      return "content10";
+    case GradientSpanScenario::DIFFERENT_FIVE:
+      return "different5";
+    case GradientSpanScenario::DIFFERENT_TEN:
+      return "different10";
+    case GradientSpanScenario::GLOBAL_AND_SPAN:
+      return "global";
+    case GradientSpanScenario::PARTIAL_ONE:
+    default:
+      return "partial1";
+  }
 }
 
 UiColor GetTimingColor(double elapsedMs, double stallMs)
@@ -255,6 +375,8 @@ public:
 private:
   void OnInit(Application application)
   {
+    mMode = GetInitialRenderMode();
+
     Window window = application.GetWindow();
     auto   positionSize = window.GetPositionSize();
     window.SetPositionSize(PositionSize(positionSize.x, positionSize.y, WINDOW_WIDTH, WINDOW_HEIGHT));
@@ -279,6 +401,7 @@ private:
     SetMemoryBaseline("startup");
     UpdateHud();
     StartHeartbeat();
+    SchedulePostOperationMemoryRefresh("startup");
   }
 
   void OnKeyEvent(Window, KeyEvent event)
@@ -294,11 +417,19 @@ private:
       mApplication.Quit();
       return;
     }
-    if(keyName == "1")
+    if(keyName == "0")
+    {
+      SwitchMode(PerfRenderMode::PLAIN);
+    }
+    else if(keyName == "1")
     {
       SwitchMode(PerfRenderMode::TEXT_GRADIENT);
     }
     else if(keyName == "2")
+    {
+      SwitchMode(PerfRenderMode::GRADIENT_SPAN);
+    }
+    else if(keyName == "3")
     {
       SwitchMode(PerfRenderMode::MASK);
     }
@@ -366,7 +497,7 @@ private:
   void SwitchMode(PerfRenderMode mode)
   {
     mMode = mode;
-    ScheduleRecreate(mode == PerfRenderMode::TEXT_GRADIENT ? "switch_text_gradient" : "switch_mask");
+    ScheduleRecreate(GetModeName(mode));
   }
 
   void ToggleAsyncRendering()
@@ -406,7 +537,14 @@ private:
     mTextIndex = (mTextIndex + 1u) % TEXT_PRESETS.size();
     for(auto& label : mLabels)
     {
-      label.SetText(TEXT_PRESETS[mTextIndex]);
+      if(mMode == PerfRenderMode::GRADIENT_SPAN)
+      {
+        label.SetStyledText(CreateGradientSpanText(TEXT_PRESETS[mTextIndex]));
+      }
+      else
+      {
+        label.SetText(TEXT_PRESETS[mTextIndex]);
+      }
     }
 
     mLastOperationMs = LogElapsed("set_text", start);
@@ -536,11 +674,11 @@ private:
     mGridRoot.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, HUD_HEIGHT, mWindowWidth, mWindowHeight - HUD_HEIGHT)));
     mRoot.Add(mGridRoot);
 
-    mLabels.reserve(DEFAULT_LABEL_COUNT);
-    mMaskViews.reserve(mMode == PerfRenderMode::MASK ? DEFAULT_LABEL_COUNT : 0u);
+    mLabels.reserve(mLabelCount);
+    mMaskViews.reserve(mMode == PerfRenderMode::MASK ? mLabelCount : 0u);
     mLabelSize = CalculateLabelSize();
 
-    for(uint32_t index = 0u; index < DEFAULT_LABEL_COUNT; ++index)
+    for(uint32_t index = 0u; index < mLabelCount; ++index)
     {
       Label label = CreateLabel(mLabelSize.x, mLabelSize.y);
       label.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(CalculateLabelBounds(index, mLabelSize)));
@@ -549,11 +687,22 @@ private:
       {
         label.SetTextGradient(CreateTextGradient());
       }
+      else if(mMode == PerfRenderMode::GRADIENT_SPAN)
+      {
+        label.SetStyledText(CreateGradientSpanText(TEXT_PRESETS[mTextIndex]));
+        if(mGradientSpanScenario == GradientSpanScenario::GLOBAL_AND_SPAN)
+        {
+          label.SetTextGradient(CreateTextGradient());
+        }
+      }
       else
       {
-        View maskView = CreateMaskGradientView(mLabelSize.x, mLabelSize.y);
-        label.SetMaskEffect(maskView);
-        mMaskViews.push_back(maskView);
+        if(mMode == PerfRenderMode::MASK)
+        {
+          View maskView = CreateMaskGradientView(mLabelSize.x, mLabelSize.y);
+          label.SetMaskEffect(maskView);
+          mMaskViews.push_back(maskView);
+        }
       }
 
       mGridRoot.Add(label);
@@ -593,7 +742,7 @@ private:
 
   Vector2 CalculateLabelSize() const
   {
-    const uint32_t rows            = (DEFAULT_LABEL_COUNT + GRID_COLUMNS - 1u) / GRID_COLUMNS;
+    const uint32_t rows            = (mLabelCount + GRID_COLUMNS - 1u) / GRID_COLUMNS;
     const float    availableWidth  = mWindowWidth;
     const float    availableHeight = mWindowHeight - HUD_HEIGHT;
     const float    cellWidth       = availableWidth / static_cast<float>(GRID_COLUMNS);
@@ -607,7 +756,7 @@ private:
 
   LayoutRect CalculateLabelBounds(uint32_t index, const Vector2& labelSize) const
   {
-    const uint32_t rows       = (DEFAULT_LABEL_COUNT + GRID_COLUMNS - 1u) / GRID_COLUMNS;
+    const uint32_t rows       = (mLabelCount + GRID_COLUMNS - 1u) / GRID_COLUMNS;
     const float    cellWidth  = mWindowWidth / static_cast<float>(GRID_COLUMNS);
     const float    cellHeight = (mWindowHeight - HUD_HEIGHT) / static_cast<float>(rows);
     const uint32_t column     = index % GRID_COLUMNS;
@@ -647,6 +796,65 @@ private:
     gradient.SetStartOffset(mGradientSpec.startOffset);
     SetCommonGradientStops(gradient);
     return gradient;
+  }
+
+  Text::StyledText CreateGradientSpanText(const char* text) const
+  {
+    Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(text);
+    const uint32_t          length  = Text::Utf8ToUtf32Length(text);
+    if(length == 0u)
+    {
+      return builder.Build();
+    }
+
+    uint32_t                       spanCount = 1u;
+    Text::GradientSpan::BoundsMode boundsMode{Text::GradientSpan::BoundsMode::SPAN_BOUND};
+    bool                           differentGradients = false;
+    switch(mGradientSpanScenario)
+    {
+      case GradientSpanScenario::SPAN_FIVE:
+        spanCount = 5u;
+        break;
+      case GradientSpanScenario::SPAN_TEN:
+        spanCount = 10u;
+        break;
+      case GradientSpanScenario::CONTENT_FIVE:
+        spanCount  = 5u;
+        boundsMode = Text::GradientSpan::BoundsMode::CONTENT_BOUND;
+        break;
+      case GradientSpanScenario::CONTENT_TEN:
+        spanCount  = 10u;
+        boundsMode = Text::GradientSpan::BoundsMode::CONTENT_BOUND;
+        break;
+      case GradientSpanScenario::DIFFERENT_FIVE:
+        spanCount          = 5u;
+        differentGradients = true;
+        break;
+      case GradientSpanScenario::DIFFERENT_TEN:
+        spanCount          = 10u;
+        differentGradients = true;
+        break;
+      case GradientSpanScenario::GLOBAL_AND_SPAN:
+      case GradientSpanScenario::PARTIAL_ONE:
+      default:
+        break;
+    }
+
+    spanCount                       = std::min(spanCount, length);
+    Gradient::Linear sharedGradient = CreateTextGradient();
+    for(uint32_t index = 0u; index < spanCount; ++index)
+    {
+      const uint32_t   begin    = spanCount == 1u ? length / 4u : (index * length) / spanCount;
+      const uint32_t   end      = spanCount == 1u ? std::max(begin + 1u, (length * 3u) / 4u)
+                                                  : ((index + 1u) * length) / spanCount;
+      Gradient::Linear gradient = sharedGradient;
+      if(differentGradients)
+      {
+        gradient.SetStartOffset(static_cast<float>(index) / static_cast<float>(spanCount));
+      }
+      builder.SetSpan(Text::GradientSpan::New(gradient, boundsMode), begin, std::min(end, length));
+    }
+    return builder.Build();
   }
 
   GradientVisual CreateGradientVisual() const
@@ -1019,6 +1227,7 @@ private:
     detailText << "Label " << static_cast<int>(mLabelSize.x) << "x" << static_cast<int>(mLabelSize.y)
                << "   Mask ratio " << mMaskBounds.xRatio << "/" << mMaskBounds.yRatio << "/" << mMaskBounds.widthRatio << "/" << mMaskBounds.heightRatio
                << "   Offset " << mGradientSpec.startOffset
+               << "   Span scenario " << GetGradientSpanScenarioName(mGradientSpanScenario)
                << "   Text " << TEXT_PRESETS[mTextIndex]
                << "   Resize R=recreate S=live"
                << "   Mem " << (mMemoryRefreshPending ? "settling" : "settled")
@@ -1028,11 +1237,11 @@ private:
 
     if(mHelpVisible)
     {
-      mHelpLabel.SetText("Keys: 1 TextGradient, 2 Mask, R Resize+Recreate, S Resize Live, D Delete, N New, T Text, C Recreate, Space Stress, A Async/Sync, G Offset, [/] Mask W, ;/' Mask H, HEAP Baseline, PSS Trim, H Help, Esc Quit");
+      mHelpLabel.SetText("Keys: 0 Plain, 1 TextGradient, 2 GradientSpan, 3 Mask, R Resize+Recreate, S Resize Live, D Delete, N New, T Text, C Recreate, Space Stress, A Async/Sync, G Offset, [/] Mask W, ;/' Mask H, HEAP Baseline, PSS Trim, H Help, Esc Quit");
     }
     else
     {
-      mHelpLabel.SetText("Keys: 1 TextGradient, 2 Mask, A Async/Sync, R Resize+Recreate, S Resize Live, D Delete, N New, T Text, C Recreate, HEAP/PSS Memory, Esc Quit, H More");
+      mHelpLabel.SetText("Keys: 0 Plain, 1 TextGradient, 2 GradientSpan, 3 Mask, A Async/Sync, R Resize+Recreate, S Resize Live, D Delete, N New, T Text, C Recreate, HEAP/PSS Memory, Esc Quit, H More");
     }
   }
 
@@ -1041,9 +1250,10 @@ private:
     const auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - start).count();
     const double elapsedMs = static_cast<double>(elapsed) / 1000.0;
     std::printf(
-      "TEXT_GRADIENT_PERF_EXAMPLE operation=%s mode=%s count=%zu async=%s elapsedMs=%.3f\n",
+      "TEXT_GRADIENT_PERF_EXAMPLE operation=%s mode=%s scenario=%s count=%zu async=%s elapsedMs=%.3f\n",
       operation,
       GetModeName(mMode),
+      GetGradientSpanScenarioName(mGradientSpanScenario),
       mLabels.size(),
       mAsyncRendering ? "on" : "off",
       elapsedMs);
@@ -1052,6 +1262,8 @@ private:
 
 private:
   Application&       mApplication;
+  const uint32_t             mLabelCount{GetConfiguredLabelCount()};
+  const GradientSpanScenario mGradientSpanScenario{GetGradientSpanScenario()};
   AbsoluteLayout     mRoot;
   AbsoluteLayout     mGridRoot;
   AbsoluteLayout     mHudRoot;
@@ -1088,7 +1300,7 @@ private:
   double             mLastStallMs{0.0};
   long               mPeakMemoryKb{0};
   uint32_t           mHeartbeatIndex{0u};
-  bool               mAsyncRendering{true};
+  bool                       mAsyncRendering{GetInitialAsyncRendering()};
   bool               mLargeSize{false};
   bool               mHelpVisible{false};
   bool               mRunningOperation{false};

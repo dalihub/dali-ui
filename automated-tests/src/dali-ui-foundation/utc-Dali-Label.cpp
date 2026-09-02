@@ -128,6 +128,20 @@ bool HasValidTextTexture(Actor actor)
   return false;
 }
 
+bool HasMultiColorTextRenderer(Actor actor)
+{
+  for(uint32_t rendererIndex = 0u; rendererIndex < actor.GetRendererCount(); ++rendererIndex)
+  {
+    Renderer              renderer = actor.GetRendererAt(rendererIndex);
+    const Property::Index index    = renderer.GetPropertyIndex("uHasMultipleTextColors");
+    if(index != Property::INVALID_INDEX && renderer.GetProperty<float>(index) > 0.5f)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 void CheckEmbossRendererProperties(Actor actor, const Vector2& direction, float strength, const Vector4& lightColor, const Vector4& shadowColor)
 {
   bool foundEmbossRenderer = false;
@@ -2499,6 +2513,303 @@ int UtcDaliLabelSetTextClearsStyledTextSourceP(void)
   DALI_TEST_EQUALS(label.GetText(), "Plain source", TEST_LOCATION);
   DALI_TEST_CHECK(!label.GetStyledText());
 
+  END_TEST;
+}
+
+int UtcDaliLabelAsyncGradientSpanSourceTransitionP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  const std::string styledSource = "Styled GradientSpan source";
+  Gradient::Linear  gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Color::RED)),
+                         Gradient::StopNode(0.5f, UiColor(Color::GREEN)),
+                         Gradient::StopNode(1.0f, UiColor(Color::BLUE))});
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(styledSource.c_str());
+  DALI_TEST_CHECK(builder.SetSpan(Text::GradientSpan::New(gradient),
+                                  0u,
+                                  static_cast<uint32_t>(styledSource.size())));
+  const Text::StyledText styledText = builder.Build();
+
+  Label label = Label::New();
+  label.SetRequestedWidth(320.0f);
+  label.SetRequestedHeight(80.0f);
+  label.SetFontSize(20.0f);
+  label.SetStyledText(styledText);
+  label.SetAsyncRendering(true);
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  application.GetScene().Add(label);
+
+  gAsyncRenderFinished = false;
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.GetStyledText());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+  DALI_TEST_CHECK(HasMultiColorTextRenderer(label));
+
+  gAsyncRenderFinished = false;
+  label.SetText("Plain source B");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_EQUALS(label.GetText(), "Plain source B", TEST_LOCATION);
+  DALI_TEST_CHECK(!label.GetStyledText());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+  DALI_TEST_CHECK(!HasMultiColorTextRenderer(label));
+
+  gAsyncRenderFinished = false;
+  label.SetStyledText(styledText);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.GetStyledText());
+  DALI_TEST_CHECK(HasMultiColorTextRenderer(label));
+
+  gAsyncRenderFinished = false;
+  label.SetText("Final plain source D");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(!label.GetStyledText());
+  DALI_TEST_CHECK(!HasMultiColorTextRenderer(label));
+
+  END_TEST;
+}
+
+int UtcDaliLabelGradientSpanViewBoundAllowsMarqueeP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  const std::string source = "A long GradientSpan marquee source that must overflow this narrow Label.";
+  Gradient::Linear  gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Color::RED)),
+                         Gradient::StopNode(1.0f, UiColor(Color::BLUE))});
+  auto makeStyledText = [&](const Gradient::Base& gradientValue, Text::GradientSpan::BoundsMode boundsMode)
+  {
+    Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(source.c_str());
+    DALI_ASSERT_ALWAYS(builder.SetSpan(Text::GradientSpan::New(gradientValue, boundsMode),
+                                       0u,
+                                       static_cast<uint32_t>(source.size())));
+    return builder.Build();
+  };
+
+  Text::StyledTextBuilder mixedBuilder = Text::StyledTextBuilder::New(source.c_str());
+  DALI_TEST_CHECK(mixedBuilder.SetSpan(Text::GradientSpan::New(gradient, Text::GradientSpan::BoundsMode::SPAN_BOUND),
+                                       0u,
+                                       10u));
+  DALI_TEST_CHECK(mixedBuilder.SetSpan(Text::GradientSpan::New(gradient, Text::GradientSpan::BoundsMode::CONTENT_BOUND),
+                                       10u,
+                                       24u));
+  DALI_TEST_CHECK(mixedBuilder.SetSpan(Text::GradientSpan::New(gradient, Text::GradientSpan::BoundsMode::VIEW_BOUND),
+                                       24u,
+                                       static_cast<uint32_t>(source.size())));
+  const Text::StyledText mixedStyledText = mixedBuilder.Build();
+
+  auto verifyMarquee = [&](const Text::StyledText& styledText, bool async)
+  {
+    Label label = Label::New();
+    label.SetRequestedWidth(100.0f);
+    label.SetRequestedHeight(48.0f);
+    label.SetFontSize(20.0f);
+    label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+    label.SetMarqueeLoopCount(0);
+    label.SetStyledText(styledText);
+    label.SetAsyncRendering(async);
+    if(async)
+    {
+      label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+      gAsyncRenderFinished = false;
+    }
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render(16);
+    if(async)
+    {
+      DALI_TEST_CHECK(WaitForAsyncRender(application));
+      gAsyncRenderFinished = false;
+    }
+
+    label.StartMarquee();
+    application.SendNotification();
+    application.Render(16);
+    if(async)
+    {
+      DALI_TEST_CHECK(WaitForAsyncRender(application));
+    }
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+    DALI_TEST_CHECK(HasValidTextTexture(label));
+
+    label.StopMarquee();
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(!label.IsMarqueeRunning());
+
+    if(async)
+    {
+      gAsyncRenderFinished = false;
+    }
+    label.StartMarquee();
+    application.SendNotification();
+    application.Render(16);
+    if(async)
+    {
+      DALI_TEST_CHECK(WaitForAsyncRender(application));
+    }
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+    label.StopMarquee();
+    application.GetScene().Remove(label);
+  };
+
+  const Text::StyledText viewStyledText = makeStyledText(gradient, Text::GradientSpan::BoundsMode::VIEW_BOUND);
+  verifyMarquee(viewStyledText, false);
+  verifyMarquee(viewStyledText, true);
+  verifyMarquee(mixedStyledText, false);
+  verifyMarquee(mixedStyledText, true);
+
+  Gradient::Linear userGradient(Vector2(12.0f, 8.0f), Vector2(76.0f, 8.0f));
+  userGradient.SetUnits(Gradient::Units::USER_SPACE);
+  userGradient.SetSpreadMethod(Gradient::SpreadMethod::REPEAT);
+  userGradient.SetStartOffset(0.125f);
+  userGradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Color::GREEN)),
+                             Gradient::StopNode(1.0f, UiColor(Color::MAGENTA))});
+  for(Text::GradientSpan::BoundsMode boundsMode : {Text::GradientSpan::BoundsMode::SPAN_BOUND,
+                                                    Text::GradientSpan::BoundsMode::CONTENT_BOUND,
+                                                    Text::GradientSpan::BoundsMode::VIEW_BOUND})
+  {
+    const Text::StyledText userStyledText = makeStyledText(userGradient, boundsMode);
+    verifyMarquee(userStyledText, false);
+    verifyMarquee(userStyledText, true);
+  }
+
+  END_TEST;
+}
+
+int UtcDaliLabelGradientSpanOverlaySyncAsyncP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Color::RED)),
+                         Gradient::StopNode(1.0f, UiColor(Color::BLUE))});
+  Gradient::Linear overlay(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  overlay.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Color::TRANSPARENT)),
+                        Gradient::StopNode(1.0f, UiColor(1.0f, 1.0f, 1.0f, 0.8f))});
+
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("BASE LOCAL COLOR LOCAL 😀");
+  DALI_TEST_CHECK(builder.SetSpan(Text::GradientSpan::New(gradient), 5u, 10u));
+  DALI_TEST_CHECK(builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(Color::BLACK)), 11u, 16u));
+  DALI_TEST_CHECK(builder.SetSpan(
+    Text::GradientSpan::New(gradient, Text::GradientSpan::BoundsMode::CONTENT_BOUND), 17u, 22u));
+  const Text::StyledText styledText = builder.Build();
+
+  for(Text::GradientOverlayMode mode : {Text::GradientOverlayMode::SRC_OVER,
+                                        Text::GradientOverlayMode::SCREEN})
+  {
+    for(bool async : {false, true})
+    {
+      Label label = Label::New();
+      label.SetRequestedWidth(320.0f);
+      label.SetRequestedHeight(72.0f);
+      label.SetFontSize(24.0f);
+      label.SetStyledText(styledText);
+      label.SetTextGradient(gradient);
+      label.SetTextGradientOverlay(overlay);
+      label.SetTextGradientOverlayMode(mode);
+      label.SetAsyncRendering(async);
+      if(async)
+      {
+        gAsyncRenderFinished = false;
+        label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+      }
+      application.GetScene().Add(label);
+      application.SendNotification();
+      application.Render(16);
+      if(async)
+      {
+        DALI_TEST_CHECK(WaitForAsyncRender(application));
+      }
+
+      DALI_TEST_CHECK(HasValidTextTexture(label));
+      DALI_TEST_CHECK(HasMultiColorTextRenderer(label));
+      bool foundCompositionRenderer = false;
+      for(uint32_t rendererIndex = 0u; rendererIndex < label.GetRendererCount(); ++rendererIndex)
+      {
+        Renderer              renderer         = label.GetRendererAt(rendererIndex);
+        const Property::Index overlayModeIndex = renderer.GetPropertyIndex("uTextGradientOverlayMode");
+        if(overlayModeIndex == Property::INVALID_INDEX)
+        {
+          continue;
+        }
+        foundCompositionRenderer = true;
+        DALI_TEST_EQUALS(renderer.GetProperty<float>(overlayModeIndex),
+                         mode == Text::GradientOverlayMode::SCREEN ? 1.0f : 0.0f,
+                         0.001f,
+                         TEST_LOCATION);
+        DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextGradientType") != Property::INVALID_INDEX);
+        DALI_TEST_CHECK(renderer.GetTextures().GetTextureCount() >= 3u);
+      }
+      DALI_TEST_CHECK(foundCompositionRenderer);
+      application.GetScene().Remove(label);
+    }
+  }
+
+  END_TEST;
+}
+
+int UtcDaliLabelGradientSpanLifecycleStressP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  auto makeStyledText = [](const Vector4& first, const Vector4& second)
+  {
+    Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+    gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(first)),
+                           Gradient::StopNode(1.0f, UiColor(second))});
+    Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("GradientSpan lifecycle stress text");
+    DALI_ASSERT_ALWAYS(builder.SetSpan(Text::GradientSpan::New(gradient), 0u, 12u));
+    DALI_ASSERT_ALWAYS(builder.SetSpan(
+      Text::GradientSpan::New(gradient, Text::GradientSpan::BoundsMode::CONTENT_BOUND), 13u, 28u));
+    return builder.Build();
+  };
+  const Text::StyledText styledA = makeStyledText(Color::RED, Color::BLUE);
+  const Text::StyledText styledB = makeStyledText(Color::GREEN, Color::MAGENTA);
+
+  constexpr uint32_t ITERATION_COUNT     = 100u;
+  uint32_t           completedIterations = 0u;
+  for(uint32_t iteration = 0u; iteration < ITERATION_COUNT; ++iteration)
+  {
+    Label label = Label::New();
+    label.SetRequestedWidth(240.0f);
+    label.SetRequestedHeight(64.0f);
+    label.SetAsyncRendering((iteration & 1u) != 0u);
+    label.SetStyledText(styledA);
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render();
+
+    label.SetText("plain source");
+    label.SetStyledText(styledB);
+    if(iteration % 3u == 0u)
+    {
+      label.SetText("final plain source");
+    }
+
+    application.GetScene().Remove(label);
+    label.Reset();
+    application.SendNotification();
+    application.Render();
+    ++completedIterations;
+  }
+
+  DALI_TEST_EQUALS(completedIterations, ITERATION_COUNT, TEST_LOCATION);
   END_TEST;
 }
 

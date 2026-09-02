@@ -16,12 +16,16 @@
  */
 
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-test-suite-utils.h>
-#include <dali/integration-api/pixel-data-integ.h>
+#include <dali-ui/test-font-glyph-constants.h>
 #include <dali.h>
+#include <dali/integration-api/pixel-data-integ.h>
 
+#include <algorithm>
 #include <cstdint>
+#include <cstdlib>
 #include <initializer_list>
 
 using namespace Dali;
@@ -112,6 +116,10 @@ public:
   const Vector2* GetLayout() const override { return mPositions.Begin(); }
   const Vector4* GetColors() const override { return mColors.Count() > 0u ? mColors.Begin() : nullptr; }
   const UiText::ColorIndex* GetColorIndices() const override { return mColorIndices.Count() > 0u ? mColorIndices.Begin() : nullptr; }
+  const UiText::Internal::GradientSpanModelData* GetGradientSpanModelData() const override
+  {
+    return mHasGradientSpan ? &mGradientSpanData : nullptr;
+  }
   const Vector4* GetBackgroundColors() const override { return nullptr; }
   const UiText::ColorIndex* GetBackgroundColorIndices() const override { return nullptr; }
   bool IsMarkupBackgroundColorSet() const override { return false; }
@@ -162,6 +170,134 @@ public:
   const Vector2& GetOffsetWithCutout() const override { return mZeroVector; }
   const Vector<UiText::CharacterDirection>& GetCharacterDirections() const override { return mCharacterDirections; }
 
+  void SetGradientSpanGlyphRange(UiText::GlyphIndex begin, UiText::Length count)
+  {
+    mGradientSpanData.paints.Resize(1u);
+    auto& style        = mGradientSpanData.paints[0u].style;
+    style.enabled      = true;
+    style.type         = Dali::Ui::Gradient::Type::LINEAR;
+    style.linearStart  = Vector2(0.0f, 0.0f);
+    style.linearEnd    = Vector2(1.0f, 0.0f);
+    style.stops.PushBack({0.0f, Color::RED});
+    style.stops.PushBack({1.0f, Color::BLUE});
+    mGradientSpanData.glyphPaintIndices.Resize(mGlyphs.Count());
+    const UiText::GlyphIndex end = std::min<UiText::GlyphIndex>(
+      begin + count,
+      static_cast<UiText::GlyphIndex>(mGlyphs.Count()));
+    for(UiText::GlyphIndex index = begin; index < end; ++index)
+    {
+      mGradientSpanData.glyphPaintIndices[index] = 1u;
+    }
+    mHasGradientSpan = true;
+  }
+
+  void SetSingleGradientSpan(const Vector4& color,
+                             const Vector2& position   = Vector2::ZERO,
+                             uint32_t       glyphIndex = 1u)
+  {
+    DALI_ASSERT_ALWAYS(mGlyphs.Count() >= 1u);
+
+    mPositions[0u]    = position;
+    mGlyphs[0u].index = glyphIndex;
+    mGradientSpanData.paints.Resize(1u);
+    auto& paint             = mGradientSpanData.paints[0u];
+    paint.style.enabled     = true;
+    paint.style.type        = Dali::Ui::Gradient::Type::LINEAR;
+    paint.style.linearStart = Vector2(0.0f, 0.0f);
+    paint.style.linearEnd   = Vector2(1.0f, 0.0f);
+    paint.style.stops.PushBack({0.0f, color});
+    paint.style.stops.PushBack({1.0f, color});
+
+    mGradientSpanData.glyphPaintIndices.Resize(mGlyphs.Count());
+    mGradientSpanData.glyphPaintIndices[0u] = 1u;
+    mHasGradientSpan                        = true;
+  }
+
+  void SetOverlappingGradientSpanGlyphs(const Vector4& firstColor,
+                                        const Vector4& secondColor,
+                                        const Vector2& secondOffset     = Vector2::ZERO,
+                                        uint32_t       secondGlyphIndex = 0u)
+  {
+    DALI_ASSERT_ALWAYS(mGlyphs.Count() >= 2u);
+
+    mPositions[1u]    = mPositions[0u] + secondOffset;
+    mGlyphs[1u].index = secondGlyphIndex == 0u ? mGlyphs[0u].index : secondGlyphIndex;
+
+    mGradientSpanData.paints.Resize(2u);
+    auto setSolidPaint = [](UiText::Internal::GradientSpanPaint& paint, const Vector4& color)
+    {
+      paint.style.enabled     = true;
+      paint.style.type        = Dali::Ui::Gradient::Type::LINEAR;
+      paint.style.linearStart = Vector2(0.0f, 0.0f);
+      paint.style.linearEnd   = Vector2(1.0f, 0.0f);
+      paint.style.stops.PushBack({0.0f, color});
+      paint.style.stops.PushBack({1.0f, color});
+    };
+    setSolidPaint(mGradientSpanData.paints[0u], firstColor);
+    setSolidPaint(mGradientSpanData.paints[1u], secondColor);
+
+    mGradientSpanData.glyphPaintIndices.Resize(mGlyphs.Count());
+    mGradientSpanData.glyphPaintIndices[0u] = 1u;
+    mGradientSpanData.glyphPaintIndices[1u] = 2u;
+    mHasGradientSpan                        = true;
+  }
+
+  void SetOverlappingMixedGlyphs(bool           firstUsesGradient,
+                                 bool           secondUsesGradient,
+                                 const Vector4& gradientColor,
+                                 const Vector4& ordinaryColor,
+                                 uint32_t       secondGlyphIndex)
+  {
+    DALI_ASSERT_ALWAYS(mGlyphs.Count() >= 2u);
+
+    mPositions[1u]    = mPositions[0u];
+    mGlyphs[1u].index = secondGlyphIndex;
+    mDefaultColor     = ordinaryColor;
+    DALI_ASSERT_ALWAYS(mColors.Count() > 0u);
+    mColors[0u] = ordinaryColor;
+
+    mGradientSpanData.paints.Resize(1u);
+    auto& paint             = mGradientSpanData.paints[0u];
+    paint.style.enabled     = true;
+    paint.style.type        = Dali::Ui::Gradient::Type::LINEAR;
+    paint.style.linearStart = Vector2(0.0f, 0.0f);
+    paint.style.linearEnd   = Vector2(1.0f, 0.0f);
+    paint.style.stops.PushBack({0.0f, gradientColor});
+    paint.style.stops.PushBack({1.0f, gradientColor});
+
+    mGradientSpanData.glyphPaintIndices.Resize(mGlyphs.Count());
+    for(UiText::GlyphIndex index = 0u; index < mGlyphs.Count(); ++index)
+    {
+      mGradientSpanData.glyphPaintIndices[index] = 0u;
+    }
+    mGradientSpanData.glyphPaintIndices[0u] = firstUsesGradient ? 1u : 0u;
+    mGradientSpanData.glyphPaintIndices[1u] = secondUsesGradient ? 1u : 0u;
+    mHasGradientSpan                        = true;
+  }
+
+  void SetGlyphPosition(UiText::GlyphIndex index, const Vector2& position)
+  {
+    DALI_ASSERT_ALWAYS(index < mPositions.Count());
+    mPositions[index] = position;
+  }
+
+  void SetGlyphBitmapIndex(UiText::GlyphIndex index, uint32_t bitmapIndex)
+  {
+    DALI_ASSERT_ALWAYS(index < mGlyphs.Count());
+    mGlyphs[index].index = bitmapIndex;
+  }
+
+  void SetDefaultColor(const Vector4& color)
+  {
+    mDefaultColor = color;
+  }
+
+  void SetForegroundColor(const Vector4& color)
+  {
+    DALI_ASSERT_ALWAYS(mColors.Count() > 0u);
+    mColors[0u] = color;
+  }
+
 private:
   Size    mControlSize{MASK_SIZE};
   Size    mLayoutSize{MASK_SIZE};
@@ -187,6 +323,8 @@ private:
   Vector<UiText::FontRun>                  mFontRuns;
   Vector<UiText::FontDescriptionRun>       mFontDescriptionRuns;
   Vector<UiText::CharacterDirection>       mCharacterDirections;
+  UiText::Internal::GradientSpanModelData  mGradientSpanData;
+  bool                                     mHasGradientSpan{false};
 };
 
 PixelData RenderTextGradientMask(const MaskModel& model)
@@ -393,6 +531,147 @@ int UtcDaliTextGradientTypesetterPreservedComplementsMaskP(void)
   DALI_TEST_CHECK(mixedMaskSum > 0u);
   DALI_TEST_CHECK(mixedMaskSum < plainMaskSum);
   DALI_TEST_CHECK(preservedAlphaSum > 0u);
+  END_TEST;
+}
+
+int UtcDaliTextGradientTypesetterGradientSpanOverridesGlobalGradientP(void)
+{
+  UiTestApplication application;
+
+  MaskModel plainModel(6u);
+  MaskModel gradientSpanModel(6u);
+  gradientSpanModel.SetGradientSpanGlyphRange(0u, 3u);
+
+  const uint64_t plainMaskSum        = SumMaskPixels(RenderTextGradientMask(plainModel));
+  const uint64_t gradientSpanMaskSum = SumMaskPixels(RenderTextGradientMask(gradientSpanModel));
+  const uint64_t preservedAlphaSum   = SumRgbaAlphaPixels(RenderTextGradientPreserved(gradientSpanModel));
+
+  DALI_TEST_CHECK(plainMaskSum > 0u);
+  DALI_TEST_CHECK(gradientSpanMaskSum > 0u);
+  DALI_TEST_CHECK(gradientSpanMaskSum < plainMaskSum);
+  DALI_TEST_CHECK(preservedAlphaSum > 0u);
+  END_TEST;
+}
+
+int UtcDaliTextGradientTypesetterGeometricOverlapUsesLaterPaintP(void)
+{
+  UiTestApplication application;
+
+  // Case A: with exactly overlapping bitmaps, the later semi-transparent blue
+  // paint owns RGB while alpha remains the glyph coverage times paint alpha.
+  MaskModel opaqueReferenceModel(1u);
+  opaqueReferenceModel.SetSingleGradientSpan(Color::BLUE);
+  const PixelData opaqueReference = RenderTextGradientPreserved(opaqueReferenceModel);
+
+  MaskModel exactOverlapModel(2u);
+  exactOverlapModel.SetOverlappingGradientSpanGlyphs(Color::RED, Vector4(0.0f, 0.0f, 1.0f, 0.5f));
+  const PixelData exactOverlap = RenderTextGradientPreserved(exactOverlapModel);
+
+  const auto opaqueReferenceBuffer = Dali::Integration::GetPixelDataBuffer(opaqueReference);
+  const auto exactOverlapBuffer    = Dali::Integration::GetPixelDataBuffer(exactOverlap);
+  DALI_TEST_CHECK(nullptr != opaqueReferenceBuffer.buffer);
+  DALI_TEST_CHECK(nullptr != exactOverlapBuffer.buffer);
+
+  uint32_t selectedX   = 0u;
+  uint32_t selectedY   = 0u;
+  uint8_t  maxCoverage = 0u;
+  for(uint32_t y = 0u; y < opaqueReference.GetHeight(); ++y)
+  {
+    const uint8_t* row = opaqueReferenceBuffer.buffer + y * opaqueReference.GetStrideBytes();
+    for(uint32_t x = 0u; x < opaqueReference.GetWidth(); ++x)
+    {
+      if(row[x * 4u + 3u] > maxCoverage)
+      {
+        maxCoverage = row[x * 4u + 3u];
+        selectedX   = x;
+        selectedY   = y;
+      }
+    }
+  }
+  DALI_TEST_CHECK(maxCoverage > 0u);
+
+  const uint8_t* exactPixel         = exactOverlapBuffer.buffer + selectedY * exactOverlap.GetStrideBytes() + selectedX * 4u;
+  const uint8_t  expectedExactAlpha = static_cast<uint8_t>(static_cast<float>(maxCoverage) * 0.5f);
+  DALI_TEST_EQUALS(exactPixel[0u], 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(exactPixel[2u]) - static_cast<int>(expectedExactAlpha)) <= 1);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(exactPixel[3u]) - static_cast<int>(expectedExactAlpha)) <= 1);
+
+  // Case B: the reserved test glyph has raw coverage 128. With an earlier
+  // alpha-0.25 paint and later alpha-0.5 paint, output alpha must be 255*0.5,
+  // not max(255*0.25, 128)*0.5.
+  constexpr uint32_t HALF_COVERAGE_GLYPH_INDEX = Dali::TextAbstraction::Test::HALF_COVERAGE_GLYPH_INDEX;
+  MaskModel          halfCoverageReferenceModel(1u);
+  halfCoverageReferenceModel.SetSingleGradientSpan(Color::BLUE, Vector2::ZERO, HALF_COVERAGE_GLYPH_INDEX);
+  const PixelData halfCoverageReference       = RenderTextGradientPreserved(halfCoverageReferenceModel);
+  const auto      halfCoverageReferenceBuffer = Dali::Integration::GetPixelDataBuffer(halfCoverageReference);
+  DALI_TEST_CHECK(nullptr != halfCoverageReferenceBuffer.buffer);
+  const uint8_t* halfCoveragePixel = halfCoverageReferenceBuffer.buffer + selectedY * halfCoverageReference.GetStrideBytes() + selectedX * 4u;
+  DALI_TEST_EQUALS(halfCoveragePixel[3u], 128u, TEST_LOCATION);
+
+  MaskModel lowerCoverageOverlapModel(2u);
+  lowerCoverageOverlapModel.SetOverlappingGradientSpanGlyphs(Vector4(1.0f, 0.0f, 0.0f, 0.25f),
+                                                             Vector4(0.0f, 0.0f, 1.0f, 0.5f),
+                                                             Vector2::ZERO,
+                                                             HALF_COVERAGE_GLYPH_INDEX);
+  const PixelData lowerCoverageOverlap       = RenderTextGradientPreserved(lowerCoverageOverlapModel);
+  const auto      lowerCoverageOverlapBuffer = Dali::Integration::GetPixelDataBuffer(lowerCoverageOverlap);
+  DALI_TEST_CHECK(nullptr != lowerCoverageOverlapBuffer.buffer);
+
+  const uint8_t* resultPixel   = lowerCoverageOverlapBuffer.buffer + selectedY * lowerCoverageOverlap.GetStrideBytes() + selectedX * 4u;
+  const uint8_t  expectedAlpha = static_cast<uint8_t>(static_cast<float>(maxCoverage) * 0.5f);
+  DALI_TEST_EQUALS(resultPixel[0u], 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(resultPixel[2u]) - static_cast<int>(expectedAlpha)) <= 1);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(resultPixel[3u]) - static_cast<int>(expectedAlpha)) <= 1);
+
+  // Case C: an ordinary opaque glyph contributes raw coverage before a later
+  // semi-transparent GradientSpan glyph takes paint ownership.
+  MaskModel ordinaryThenGradientModel(2u, {1u, 1u});
+  ordinaryThenGradientModel.SetOverlappingMixedGlyphs(false,
+                                                      true,
+                                                      Vector4(0.0f, 0.0f, 1.0f, 0.5f),
+                                                      Color::RED,
+                                                      HALF_COVERAGE_GLYPH_INDEX);
+  const PixelData ordinaryThenGradient       = RenderTextGradientPreserved(ordinaryThenGradientModel);
+  const auto      ordinaryThenGradientBuffer = Dali::Integration::GetPixelDataBuffer(ordinaryThenGradient);
+  DALI_TEST_CHECK(nullptr != ordinaryThenGradientBuffer.buffer);
+  const uint8_t* ordinaryThenGradientPixel = ordinaryThenGradientBuffer.buffer + selectedY * ordinaryThenGradient.GetStrideBytes() + selectedX * 4u;
+  DALI_TEST_EQUALS(ordinaryThenGradientPixel[0u], 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(ordinaryThenGradientPixel[2u]) - static_cast<int>(expectedAlpha)) <= 1);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(ordinaryThenGradientPixel[3u]) - static_cast<int>(expectedAlpha)) <= 1);
+
+  // Case D: a later ordinary glyph owns paint while retaining the earlier
+  // GradientSpan glyph's greater raw coverage.
+  MaskModel gradientThenOrdinaryModel(2u, {1u, 1u});
+  gradientThenOrdinaryModel.SetOverlappingMixedGlyphs(true,
+                                                      false,
+                                                      Color::RED,
+                                                      Vector4(0.0f, 0.0f, 1.0f, 0.5f),
+                                                      HALF_COVERAGE_GLYPH_INDEX);
+  const PixelData gradientThenOrdinary       = RenderTextGradientPreserved(gradientThenOrdinaryModel);
+  const auto      gradientThenOrdinaryBuffer = Dali::Integration::GetPixelDataBuffer(gradientThenOrdinary);
+  DALI_TEST_CHECK(nullptr != gradientThenOrdinaryBuffer.buffer);
+  const uint8_t* gradientThenOrdinaryPixel = gradientThenOrdinaryBuffer.buffer + selectedY * gradientThenOrdinary.GetStrideBytes() + selectedX * 4u;
+  DALI_TEST_EQUALS(gradientThenOrdinaryPixel[0u], 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(gradientThenOrdinaryPixel[2u]) - static_cast<int>(expectedAlpha)) <= 1);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(gradientThenOrdinaryPixel[3u]) - static_cast<int>(expectedAlpha)) <= 1);
+
+  // Case E: a distant GradientSpan activates the image-wide scratch buffer.
+  // Unrelated ordinary overlap still follows the intended maximum-raw-coverage rule.
+  MaskModel unrelatedOrdinaryOverlapModel(3u, {1u, 1u, 0u});
+  unrelatedOrdinaryOverlapModel.SetDefaultColor(Vector4(1.0f, 0.0f, 0.0f, 0.25f));
+  unrelatedOrdinaryOverlapModel.SetForegroundColor(Vector4(1.0f, 0.0f, 0.0f, 0.25f));
+  unrelatedOrdinaryOverlapModel.SetGlyphPosition(1u, Vector2::ZERO);
+  unrelatedOrdinaryOverlapModel.SetGlyphBitmapIndex(1u, HALF_COVERAGE_GLYPH_INDEX);
+  unrelatedOrdinaryOverlapModel.SetGradientSpanGlyphRange(2u, 1u);
+  const PixelData unrelatedOrdinaryOverlap       = RenderTextGradientPreserved(unrelatedOrdinaryOverlapModel);
+  const auto      unrelatedOrdinaryOverlapBuffer = Dali::Integration::GetPixelDataBuffer(unrelatedOrdinaryOverlap);
+  DALI_TEST_CHECK(nullptr != unrelatedOrdinaryOverlapBuffer.buffer);
+  const uint8_t* unrelatedOrdinaryOverlapPixel = unrelatedOrdinaryOverlapBuffer.buffer + selectedY * unrelatedOrdinaryOverlap.GetStrideBytes() + selectedX * 4u;
+  const uint8_t  expectedOrdinaryAlpha         = static_cast<uint8_t>(static_cast<float>(maxCoverage) * 0.25f);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(unrelatedOrdinaryOverlapPixel[0u]) - static_cast<int>(expectedOrdinaryAlpha)) <= 1);
+  DALI_TEST_EQUALS(unrelatedOrdinaryOverlapPixel[1u], 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(unrelatedOrdinaryOverlapPixel[2u], 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(std::abs(static_cast<int>(unrelatedOrdinaryOverlapPixel[3u]) - static_cast<int>(expectedOrdinaryAlpha)) <= 1);
   END_TEST;
 }
 

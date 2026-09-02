@@ -346,7 +346,7 @@ void LabelImpl::SetText(const Dali::String& text)
   if(hadInlineReplacements)
   {
     ClearInlineReplacementData();
-    // Removing replacements does not implicitly restart a previous marquee.
+    // Removing a marquee blocker does not implicitly restart previous scrolling.
     SuppressAutoMarqueeEvaluation();
     mLastMarqueeEnabled = false;
   }
@@ -3801,6 +3801,7 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
     InvalidateMarqueeStartGeometry();
   }
 
+  // FIXME: Baked VIEW_BOUND GradientSpan scrolls with marquee content until viewport-fixed span composition is supported.
   if(enabled && HasInlineReplacementSource())
   {
     InvalidateMarqueeStartGeometry();
@@ -4206,12 +4207,13 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
   parameters.isTextFitCandidatesEnabled   = mController->IsTextFitCandidatesEnabled();
   parameters.textFitCandidates            = mController->GetTextFitCandidates();
   parameters.isMarqueeEnabled             = mController->IsMarqueeEnabled();
-  if(HasInlineReplacementSource())
+  const bool hasMarqueeBlocker            = HasInlineReplacementSource();
+  if(hasMarqueeBlocker)
   {
     parameters.isMarqueeEnabled = false;
   }
   parameters.marqueeTriggerPolicy = mMarqueeTriggerPolicy;
-  parameters.suppressAutoMarquee  = mSuppressAutoMarquee;
+  parameters.suppressAutoMarquee  = mSuppressAutoMarquee || hasMarqueeBlocker;
   if(parameters.isMarqueeEnabled || parameters.marqueeTriggerPolicy == Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW)
   {
     parameters.marqueeStopMode    = GetTextScroller()->GetStopMode();

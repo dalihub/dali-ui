@@ -26,6 +26,7 @@
 #include <dali/public-api/rendering/geometry.h>
 #include <dali/public-api/rendering/renderer.h>
 #include <map>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
@@ -41,7 +42,9 @@
 #include <dali-ui-foundation/internal/text/rendering/styles/strikethrough-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
+#include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
@@ -74,6 +77,7 @@ void GradientOffsetConstraint(float& current, const PropertyInputContainer& inpu
     current = inputs[0]->GetFloat();
   }
 }
+
 } // namespace
 
 struct AtlasRenderer::Impl
@@ -96,10 +100,81 @@ struct AtlasRenderer::Impl
     {
     }
 
-    uint32_t             mAtlasId;
-    AtlasManager::Mesh2D mMesh;
-    Vector<float>        mGradientFlags;
-    bool                 mHasGradientFill{false};
+    uint32_t                         mAtlasId;
+    AtlasManager::Mesh2D             mMesh;
+    Vector<float>                    mGradientFlags;
+    bool                             mHasGradientFill{false};
+    Internal::GradientSpanPaintIndex mGradientSpanPaintIndex{0u};
+  };
+
+  struct GradientSpanAtlasResource
+  {
+    Internal::Gradient::Style style;
+    Texture                   lookupTexture;
+    Sampler                   lookupSampler;
+    Vector4                   bounds{0.0f, 0.0f, 1.0f, 1.0f};
+    GradientSpan::BoundsMode  boundsMode{GradientSpan::BoundsMode::SPAN_BOUND};
+    bool                      initialized{false};
+
+    void SetStyle(const Internal::Gradient::Style& newStyle)
+    {
+      if(initialized && Internal::Gradient::EqualStyle(style, newStyle))
+      {
+        return;
+      }
+
+      initialized   = true;
+      style         = newStyle;
+      lookupTexture = Internal::Gradient::CreateLookupTexture(style);
+      lookupSampler = Sampler();
+      if(lookupTexture)
+      {
+        lookupSampler = Sampler::New();
+        lookupSampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
+        lookupSampler.SetWrapMode(Internal::Gradient::GetWrapMode(style.spreadMethod), WrapMode::CLAMP_TO_EDGE);
+      }
+    }
+
+    bool IsEnabled() const
+    {
+      return Internal::Gradient::IsRenderable(style) && lookupTexture && lookupSampler;
+    }
+  };
+
+  struct GradientSpanRendererBinding
+  {
+    Dali::Renderer                   renderer;
+    Internal::GradientSpanPaintIndex paintIndex{0u};
+  };
+
+  struct PixelBounds
+  {
+    float minX{0.0f};
+    float minY{0.0f};
+    float maxX{0.0f};
+    float maxY{0.0f};
+    bool  valid{false};
+
+    void Add(float left, float top, float right, float bottom)
+    {
+      if(right <= left || bottom <= top)
+      {
+        return;
+      }
+      if(!valid)
+      {
+        minX  = left;
+        minY  = top;
+        maxX  = right;
+        maxY  = bottom;
+        valid = true;
+        return;
+      }
+      minX = std::min(minX, left);
+      minY = std::min(minY, top);
+      maxX = std::max(maxX, right);
+      maxY = std::max(maxY, bottom);
+    }
   };
 
   /**
@@ -312,13 +387,115 @@ struct AtlasRenderer::Impl
     }
   }
 
+  void PrepareGradientSpanResources(const Internal::GradientSpanModelData* data,
+                                    const Vector<Vector2>&                 positions,
+                                    const Vector<GlyphInfo>&               glyphs,
+                                    const GlyphIndex*                      finalStyleSourceIndices,
+                                    const Vector2&                         layoutSize,
+                                    const Vector2&                         controlSize,
+                                    const LineRun*                         lines,
+                                    Length                                 numberOfLines,
+                                    float                                  minLineOffset)
+  {
+    if(data == nullptr || data->paints.Empty() || data->glyphPaintIndices.Empty() ||
+       layoutSize.width < Math::MACHINE_EPSILON_1000 || layoutSize.height < Math::MACHINE_EPSILON_1000)
+    {
+      mGradientSpanResources.clear();
+      return;
+    }
+
+    mGradientSpanResources.resize(data->paints.Count());
+    std::vector<PixelBounds> spanBounds(data->paints.Count());
+
+    const uint32_t glyphCount = static_cast<uint32_t>(std::min(positions.Count(), glyphs.Count()));
+    for(uint32_t finalGlyphIndex = 0u; finalGlyphIndex < glyphCount; ++finalGlyphIndex)
+    {
+      const GlyphInfo& glyph = glyphs[finalGlyphIndex];
+      if(Text::IsSyntheticReplacementGlyph(glyph) || glyph.width <= 0.0f || glyph.height <= 0.0f)
+      {
+        continue;
+      }
+
+      const Vector2& position = positions[finalGlyphIndex];
+      const float    rawLeft  = position.x - minLineOffset;
+      const float    rawTop   = position.y;
+      const float    left     = std::max(0.0f, rawLeft);
+      const float    top      = std::max(0.0f, rawTop);
+      const float    right    = std::min(layoutSize.width, rawLeft + glyph.width);
+      const float    bottom   = std::min(layoutSize.height, rawTop + glyph.height);
+
+      const GlyphIndex styleGlyphIndex = ResolveFinalStyleSourceGlyph(finalStyleSourceIndices, finalGlyphIndex);
+      if(styleGlyphIndex >= data->glyphPaintIndices.Count())
+      {
+        continue;
+      }
+      const Internal::GradientSpanPaintIndex paintIndex = data->glyphPaintIndices[styleGlyphIndex];
+      if(paintIndex > 0u && paintIndex <= spanBounds.size())
+      {
+        spanBounds[paintIndex - 1u].Add(left, top, right, bottom);
+      }
+    }
+
+    const auto ToNormalizedBounds = [&layoutSize](const PixelBounds& pixels)
+    {
+      if(!pixels.valid)
+      {
+        return Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+      }
+      return Vector4(pixels.minX / layoutSize.width,
+                     pixels.minY / layoutSize.height,
+                     std::max(pixels.maxX - pixels.minX, Math::MACHINE_EPSILON_1000) / layoutSize.width,
+                     std::max(pixels.maxY - pixels.minY, Math::MACHINE_EPSILON_1000) / layoutSize.height);
+    };
+
+    const Vector4 normalizedContentBounds = Internal::CalculateAtlasGradientContentBounds(
+      layoutSize, lines, numberOfLines, minLineOffset);
+    const Vector4 normalizedViewBounds(
+      0.0f,
+      0.0f,
+      std::max(controlSize.width, Math::MACHINE_EPSILON_1000) / layoutSize.width,
+      std::max(controlSize.height, Math::MACHINE_EPSILON_1000) / layoutSize.height);
+
+    for(uint32_t index = 0u; index < data->paints.Count(); ++index)
+    {
+      GradientSpanAtlasResource&         destination = mGradientSpanResources[index];
+      const Internal::GradientSpanPaint& source      = data->paints[index];
+      if(!spanBounds[index].valid)
+      {
+        destination = {};
+        continue;
+      }
+      destination.SetStyle(source.style);
+      destination.boundsMode = source.boundsMode;
+      switch(source.boundsMode)
+      {
+        case GradientSpan::BoundsMode::VIEW_BOUND:
+        {
+          destination.bounds = normalizedViewBounds;
+          break;
+        }
+        case GradientSpan::BoundsMode::CONTENT_BOUND:
+        {
+          destination.bounds = normalizedContentBounds;
+          break;
+        }
+        case GradientSpan::BoundsMode::SPAN_BOUND:
+        default:
+        {
+          destination.bounds = ToNormalizedBounds(spanBounds[index]);
+          break;
+        }
+      }
+    }
+  }
+
   void GenerateMesh(const GlyphInfo& glyph, const Vector2& position, const Vector4& color, uint16_t outline,
                     AtlasManager::AtlasSlot& slot, std::vector<MeshRecord>& meshContainer,
                     Vector<TextCacheEntry>& newTextCache, bool isGlyphCached, float fontMetricsAscender,
                     bool underlineEnabled, uint32_t underlineChunkId, float underlinePosition, float underlineThickness,
                     Vector<Extent>& underlineExtents, bool strikethroughEnabled, uint32_t strikethroughChunkId,
                     float strikethroughThickness, Vector<Extent>& strikethroughExtents,
-                    bool usesGradientFill)
+                    bool usesGradientFill, Internal::GradientSpanPaintIndex gradientSpanPaintIndex)
   {
     // Generate mesh data for this quad, plugging in our supplied position
     AtlasManager::Mesh2D newMesh;
@@ -355,7 +532,8 @@ struct AtlasRenderer::Impl
 
     StitchTextMesh(slot, meshContainer, newMesh, baseLine, underlineEnabled, underlineChunkId, underlinePosition,
                    underlineThickness, underlineExtents, strikethroughEnabled, strikethroughChunkId,
-                   strikethroughPosition, strikethroughThickness, strikethroughExtents, usesGradientFill);
+                   strikethroughPosition, strikethroughThickness, strikethroughExtents, usesGradientFill,
+                   gradientSpanPaintIndex);
   }
 
   void CreateActors(const std::vector<MeshRecord>& meshContainer, const Size& textSize, const Vector4& color,
@@ -507,12 +685,22 @@ struct AtlasRenderer::Impl
     CalculateBlocksSize(glyphs);
 
     // Avoid emptying mTextCache (& removing references) until after incremented references for the new text
-    Vector<TextCacheEntry>  newTextCache;
-    const GlyphInfo* const  glyphsBuffer    = glyphs.Begin();
-    const Vector2* const    positionsBuffer = positions.Begin();
-    const Vector2           lineOffsetPosition(minLineOffset, 0.f);
-    uint32_t                hyphenIndex             = 0;
-    const GlyphIndex* const finalStyleSourceIndices = view.GetFinalGlyphStyleSourceIndices();
+    Vector<TextCacheEntry>                 newTextCache;
+    const GlyphInfo* const                 glyphsBuffer    = glyphs.Begin();
+    const Vector2* const                   positionsBuffer = positions.Begin();
+    const Vector2                          lineOffsetPosition(minLineOffset, 0.f);
+    uint32_t                               hyphenIndex             = 0;
+    const GlyphIndex* const                finalStyleSourceIndices = view.GetFinalGlyphStyleSourceIndices();
+    const Internal::GradientSpanModelData* gradientSpanData        = view.GetGradientSpanModelData();
+    PrepareGradientSpanResources(gradientSpanData,
+                                 positions,
+                                 glyphs,
+                                 finalStyleSourceIndices,
+                                 textSize,
+                                 view.GetControlSize(),
+                                 view.GetLines(),
+                                 view.GetNumberOfLines(),
+                                 minLineOffset);
 
     // For septated underlined chunks. (this is for Markup case)
     uint32_t underlineChunkId = 0u;    // give id for each chunk.
@@ -690,9 +878,22 @@ struct AtlasRenderer::Impl
           const ColorIndex colorIndex = useDefaultColor ? 0u : *(colorIndicesBuffer + i);
           const Vector4&   color =
             (useDefaultColor || (0u == colorIndex)) ? defaultColor : *(colorsBuffer + colorIndex - 1u);
-          const bool usesGradientFill = mGradientState.IsEnabled() &&
-                                        Internal::ClassifyGradientGlyph(mFontClient, glyph, colorIndicesBuffer, i)
-                                          .usesGradientFill;
+          const bool supportsGradientFill =
+            Internal::ClassifyGradientGlyph(mFontClient, glyph, colorIndicesBuffer, i).usesGradientFill;
+          Internal::GradientSpanPaintIndex gradientSpanPaintIndex = 0u;
+          if(supportsGradientFill && gradientSpanData != nullptr &&
+             styleGlyphIndex < gradientSpanData->glyphPaintIndices.Count())
+          {
+            const Internal::GradientSpanPaintIndex candidate =
+              gradientSpanData->glyphPaintIndices[styleGlyphIndex];
+            if(candidate > 0u && candidate <= mGradientSpanResources.size() &&
+               mGradientSpanResources[candidate - 1u].IsEnabled())
+            {
+              gradientSpanPaintIndex = candidate;
+            }
+          }
+          const bool usesGradientFill = supportsGradientFill &&
+                                        (gradientSpanPaintIndex > 0u || mGradientState.IsEnabled());
 
           // The new underlined chunk. Add new id if they are not consecutive indices (this is for Markup case)
           //  Examples: "Hello <u>World</u> Hello <u>World</u>", "<u>World</u> Hello <u>World</u>", "<u>   World</u>
@@ -735,7 +936,7 @@ struct AtlasRenderer::Impl
           GenerateMesh(glyph, positionPlusOutlineOffset, color, NO_OUTLINE, slot, meshContainer, newTextCache, false,
                        currentFontMetricsAscender, isGlyphUnderlined, underlineChunkId, currentUnderlinePosition,
                        maxUnderlineHeight, underlineExtents, isGlyphStrikethrough, strikethroughChunkId,
-                       maxStrikethroughHeight, strikethroughExtents, usesGradientFill);
+                       maxStrikethroughHeight, strikethroughExtents, usesGradientFill, gradientSpanPaintIndex);
 
           lastFontId = glyph.fontId; // Prevents searching for existing blocksizes when string of the same fontId.
         }
@@ -744,7 +945,7 @@ struct AtlasRenderer::Impl
         {
           GenerateMesh(glyph, position, outlineColor, outlineWidth, slotOutline, meshContainerOutline, newTextCache,
                        false, currentFontMetricsAscender, false, 0u, currentUnderlinePosition, maxUnderlineHeight,
-                       underlineExtents, false, 0u, maxStrikethroughHeight, strikethroughExtents, false);
+                       underlineExtents, false, 0u, maxStrikethroughHeight, strikethroughExtents, false, 0u);
         }
       }
 
@@ -879,6 +1080,39 @@ struct AtlasRenderer::Impl
     for(auto& renderer : mGradientRenderers)
     {
       ApplyGradientFrameProperties(renderer, coordinateChange, boundsChange, boundsSizeChange);
+    }
+  }
+
+  void UpdateGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds)
+  {
+    const bool coordinateChange = mGradientCoordinateSize != coordinateSize;
+    bool       viewBoundsChange = false;
+    mGradientCoordinateSize     = coordinateSize;
+
+    for(auto& resource : mGradientSpanResources)
+    {
+      if(resource.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND && resource.bounds != bounds)
+      {
+        resource.bounds  = bounds;
+        viewBoundsChange = true;
+      }
+    }
+    if(!coordinateChange && !viewBoundsChange)
+    {
+      return;
+    }
+
+    for(auto& binding : mGradientSpanRendererBindings)
+    {
+      if(binding.paintIndex == 0u || binding.paintIndex > mGradientSpanResources.size())
+      {
+        continue;
+      }
+      const GradientSpanAtlasResource& resource = mGradientSpanResources[binding.paintIndex - 1u];
+      if(coordinateChange || resource.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND)
+      {
+        ApplyGradientProperties(binding.renderer, resource.style, resource.bounds);
+      }
     }
   }
 
@@ -1037,9 +1271,30 @@ struct AtlasRenderer::Impl
       return;
     }
 
+    ApplyGradientProperties(renderer, mGradientState.style, mGradientBounds);
+  }
+
+  void ApplyGradientProperties(Dali::Renderer                   renderer,
+                               const Internal::Gradient::Style& style,
+                               const Vector4&                   bounds)
+  {
+    if(!renderer || !Internal::Gradient::IsRenderable(style))
+    {
+      return;
+    }
+
+    const auto data = Internal::Gradient::ResolveRenderData(style, bounds, mGradientCoordinateSize);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", mGradientCoordinateSize);
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", mGradientBounds);
-    ApplyGradientStyleProperties(renderer);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", bounds);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
+    Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, data.startOffset);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientStartPosition", data.startPosition);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEndPosition", data.endPosition);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialCenter", data.radialCenter);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialScale", data.radialScale);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicCenter", data.conicCenter);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicScale", data.conicScale);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicStartAngle", data.conicStartAngle);
   }
 
   Actor CreateMeshActor(Actor textControl, Property::Index animatablePropertyIndex, const Vector4& defaultColor,
@@ -1054,9 +1309,16 @@ struct AtlasRenderer::Impl
 
     const bool isColorShader =
       (STYLE_DROP_SHADOW != style) && (Pixel::BGRA8888 == mGlyphManager.GetPixelFormat(meshRecord.mAtlasId));
+    const GradientSpanAtlasResource* gradientSpanResource = nullptr;
+    if(meshRecord.mGradientSpanPaintIndex > 0u &&
+       meshRecord.mGradientSpanPaintIndex <= mGradientSpanResources.size())
+    {
+      gradientSpanResource = &mGradientSpanResources[meshRecord.mGradientSpanPaintIndex - 1u];
+    }
+    const bool gradientEnabled          = gradientSpanResource ? gradientSpanResource->IsEnabled() : mGradientState.IsEnabled();
     const bool hasCompleteGradientFlags = meshRecord.mGradientFlags.Count() == meshRecord.mMesh.mVertices.Count();
     const bool useGradientShader        = allowGradient && (STYLE_NORMAL == style) && !isColorShader &&
-                                   mGradientState.IsEnabled() && meshRecord.mHasGradientFill &&
+                                   gradientEnabled && meshRecord.mHasGradientFill &&
                                    hasCompleteGradientFlags;
     if(useGradientShader)
     {
@@ -1077,8 +1339,8 @@ struct AtlasRenderer::Impl
       {
         textureSet.SetSampler(0u, atlasSampler);
       }
-      textureSet.SetTexture(1u, mGradientState.lookupTexture);
-      textureSet.SetSampler(1u, mGradientState.lookupSampler);
+      textureSet.SetTexture(1u, gradientSpanResource ? gradientSpanResource->lookupTexture : mGradientState.lookupTexture);
+      textureSet.SetSampler(1u, gradientSpanResource ? gradientSpanResource->lookupSampler : mGradientState.lookupSampler);
     }
     else
     {
@@ -1151,8 +1413,16 @@ struct AtlasRenderer::Impl
     renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::CONTENT + mDepth);
     if(useGradientShader)
     {
-      mGradientRenderers.push_back(renderer);
-      ApplyAllGradientProperties(renderer);
+      if(gradientSpanResource)
+      {
+        ApplyGradientProperties(renderer, gradientSpanResource->style, gradientSpanResource->bounds);
+        mGradientSpanRendererBindings.push_back({renderer, meshRecord.mGradientSpanPaintIndex});
+      }
+      else
+      {
+        mGradientRenderers.push_back(renderer);
+        ApplyAllGradientProperties(renderer);
+      }
     }
 
     Actor actor = Actor::New();
@@ -1174,7 +1444,8 @@ struct AtlasRenderer::Impl
                       AtlasManager::Mesh2D& newMesh, float baseLine, bool underlineEnabled, uint32_t underlineChunkId,
                       float underlinePosition, float underlineThickness, Vector<Extent>& underlineExtents,
                       bool strikethroughEnabled, uint32_t strikethroughChunkId, float strikethroughPosition,
-                      float strikethroughThickness, Vector<Extent>& strikethroughExtents, bool usesGradientFill)
+                      float strikethroughThickness, Vector<Extent>& strikethroughExtents, bool usesGradientFill,
+                      Internal::GradientSpanPaintIndex gradientSpanPaintIndex)
   {
     if(slot.mImageId)
     {
@@ -1186,9 +1457,9 @@ struct AtlasRenderer::Impl
       for(std::vector<MeshRecord>::iterator mIt = meshContainer.begin(), mEndIt = meshContainer.end(); mIt != mEndIt;
           ++mIt, ++index)
       {
-        if(slot.mAtlasId == mIt->mAtlasId)
+        if(slot.mAtlasId == mIt->mAtlasId && gradientSpanPaintIndex == mIt->mGradientSpanPaintIndex)
         {
-          if(mGradientState.IsEnabled())
+          if(mGradientState.IsEnabled() || gradientSpanPaintIndex > 0u)
           {
             for(uint32_t vertex = 0u; vertex < newMesh.mVertices.Count(); ++vertex)
             {
@@ -1216,9 +1487,10 @@ struct AtlasRenderer::Impl
 
       // No mesh data object currently exists that references this atlas, so create a new one
       MeshRecord meshRecord;
-      meshRecord.mAtlasId = slot.mAtlasId;
-      meshRecord.mMesh    = newMesh;
-      if(mGradientState.IsEnabled())
+      meshRecord.mAtlasId                = slot.mAtlasId;
+      meshRecord.mMesh                   = newMesh;
+      meshRecord.mGradientSpanPaintIndex = gradientSpanPaintIndex;
+      if(mGradientState.IsEnabled() || gradientSpanPaintIndex > 0u)
       {
         for(uint32_t vertex = 0u; vertex < newMesh.mVertices.Count(); ++vertex)
         {
@@ -1588,25 +1860,27 @@ struct AtlasRenderer::Impl
     }
   }
 
-  Actor                                  mActor;            ///< The actor parent which renders the text
-  AtlasGlyphManager                      mGlyphManager;     ///< Glyph Manager to handle upload and caching
-  TextAbstraction::FontClient            mFontClient;       ///< The font client used to supply glyph information
-  Shader                                 mShaderL8;         ///< The shader for glyphs and emoji's shadows.
-  Shader                                 mShaderL8Gradient; ///< Gradient-enabled L8 shader variant.
-  Shader                                 mShaderRgba;       ///< The shader for emojis.
-  std::vector<MaxBlockSize>              mBlockSizes;       ///< Maximum size needed to contain a glyph in a block within a new atlas
-  Vector<TextCacheEntry>                 mTextCache;        ///< Caches data from previous render
-  Property::Map                          mQuadVertexFormat; ///< Describes the vertex format for text
-  Property::Map                          mGradientVertexFormat;
-  Internal::Gradient::AtlasRendererState mGradientState;
-  std::vector<Dali::Renderer>            mGradientRenderers;
-  std::vector<Dali::Constraint>          mGradientAnimConstraints;
-  WeakHandle<Actor>                      mGradientAnimSourceActor;
-  Property::Index                        mGradientAnimOffsetIndex{Property::INVALID_INDEX};
-  Vector2                                mGradientCoordinateSize{Vector2::ONE};
-  Vector4                                mGradientBounds{0.0f, 0.0f, 1.0f, 1.0f};
-  int                                    mDepth; ///< DepthIndex passed by control when connect to stage
-  bool                                   mGradientAnimApplyAlways{false};
+  Actor                                    mActor;            ///< The actor parent which renders the text
+  AtlasGlyphManager                        mGlyphManager;     ///< Glyph Manager to handle upload and caching
+  TextAbstraction::FontClient              mFontClient;       ///< The font client used to supply glyph information
+  Shader                                   mShaderL8;         ///< The shader for glyphs and emoji's shadows.
+  Shader                                   mShaderL8Gradient; ///< Gradient-enabled L8 shader variant.
+  Shader                                   mShaderRgba;       ///< The shader for emojis.
+  std::vector<MaxBlockSize>                mBlockSizes;       ///< Maximum size needed to contain a glyph in a block within a new atlas
+  Vector<TextCacheEntry>                   mTextCache;        ///< Caches data from previous render
+  Property::Map                            mQuadVertexFormat; ///< Describes the vertex format for text
+  Property::Map                            mGradientVertexFormat;
+  Internal::Gradient::AtlasRendererState   mGradientState;
+  std::vector<GradientSpanAtlasResource>   mGradientSpanResources;
+  std::vector<GradientSpanRendererBinding> mGradientSpanRendererBindings;
+  std::vector<Dali::Renderer>              mGradientRenderers;
+  std::vector<Dali::Constraint>            mGradientAnimConstraints;
+  WeakHandle<Actor>                        mGradientAnimSourceActor;
+  Property::Index                          mGradientAnimOffsetIndex{Property::INVALID_INDEX};
+  Vector2                                  mGradientCoordinateSize{Vector2::ONE};
+  Vector4                                  mGradientBounds{0.0f, 0.0f, 1.0f, 1.0f};
+  int                                      mDepth; ///< DepthIndex passed by control when connect to stage
+  bool                                     mGradientAnimApplyAlways{false};
 };
 
 Text::RendererPtr AtlasRenderer::New()
@@ -1624,6 +1898,7 @@ Actor AtlasRenderer::Render(Text::ViewInterface& view, Actor textControl, Proper
   UnparentAndReset(mImpl->mActor);
   mImpl->RemoveGradientAnimConstraints();
   mImpl->mGradientRenderers.clear();
+  mImpl->mGradientSpanRendererBindings.clear();
   mImpl->mGradientCoordinateSize = view.GetLayoutSize();
 
   Length numberOfGlyphs = view.GetNumberOfGlyphs();
@@ -1657,6 +1932,10 @@ Actor AtlasRenderer::Render(Text::ViewInterface& view, Actor textControl, Proper
       mImpl->mActor = Actor::New();
     }
   }
+  else
+  {
+    mImpl->mGradientSpanResources.clear();
+  }
 
   mImpl->RebindGradientAnimConstraints();
 
@@ -1672,6 +1951,11 @@ bool AtlasRenderer::SetAtlasGradientState(const Internal::Gradient::AtlasRendere
 void AtlasRenderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds)
 {
   mImpl->UpdateGradient(coordinateSize, bounds);
+}
+
+void AtlasRenderer::UpdateAtlasGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds)
+{
+  mImpl->UpdateGradientSpanViewBounds(coordinateSize, bounds);
 }
 
 void AtlasRenderer::SetAtlasGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex)

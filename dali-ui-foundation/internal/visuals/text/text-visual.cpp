@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-reveal-bridge.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-effects-style.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
@@ -908,7 +909,9 @@ void TextVisual::UpdateRenderer()
       const Text::GlyphInfo* const glyphsBuffer          = renderModel->GetGlyphs();
       const Text::Length           numberOfGlyphs        = renderModel->GetNumberOfGlyphs();
       const bool                   hasColorIndexBuffer   = nullptr != colorsBuffer && nullptr != colorIndices;
-      bool                         hasMultipleTextColors = false;
+      const auto*                  gradientSpanData      = renderModel->GetGradientSpanModelData();
+      const bool                   hasGradientSpan       = gradientSpanData && !gradientSpanData->glyphPaintIndices.Empty();
+      bool                         hasMultipleTextColors = hasGradientSpan;
       bool                         containsColorGlyph    = false;
       for(Text::Length glyphIndex = 0; glyphIndex < numberOfGlyphs; glyphIndex++)
       {

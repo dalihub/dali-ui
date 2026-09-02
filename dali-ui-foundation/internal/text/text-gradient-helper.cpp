@@ -94,6 +94,35 @@ bool IsRenderable(const Style& style)
   }
 }
 
+bool EqualStyle(const Style& lhs, const Style& rhs)
+{
+  if(lhs.enabled != rhs.enabled ||
+     lhs.type != rhs.type ||
+     lhs.units != rhs.units ||
+     lhs.spreadMethod != rhs.spreadMethod ||
+     lhs.startOffset != rhs.startOffset ||
+     lhs.linearStart != rhs.linearStart ||
+     lhs.linearEnd != rhs.linearEnd ||
+     lhs.radialCenter != rhs.radialCenter ||
+     lhs.radialRadius != rhs.radialRadius ||
+     lhs.conicCenter != rhs.conicCenter ||
+     lhs.conicStartAngle != rhs.conicStartAngle ||
+     lhs.stops.Count() != rhs.stops.Count())
+  {
+    return false;
+  }
+
+  for(uint32_t index = 0u; index < lhs.stops.Count(); ++index)
+  {
+    if(lhs.stops[index].offset != rhs.stops[index].offset ||
+       lhs.stops[index].color != rhs.stops[index].color)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 Dali::WrapMode::Type GetWrapMode(Dali::Ui::Gradient::SpreadMethod spread)
 {
   switch(spread)

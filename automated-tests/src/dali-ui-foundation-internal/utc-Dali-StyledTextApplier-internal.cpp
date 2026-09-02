@@ -17,6 +17,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali.h>
+#include <dali/integration-api/pixel-data-integ.h>
+#include <cstring>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
@@ -24,11 +26,14 @@
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/multi-language-helper-functions.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
+#include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
@@ -68,6 +73,15 @@ PublicText::LineThrough CreateLineThrough(const Vector4& color, float thickness)
   lineThrough.SetColor(Dali::Ui::UiColor(color));
   lineThrough.SetThickness(thickness);
   return lineThrough;
+}
+
+Dali::Ui::Gradient::Linear CreateGradient(const Vector4& first = Color::RED,
+                                          const Vector4& second = Color::BLUE)
+{
+  Dali::Ui::Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(first)),
+                         Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(second))});
+  return gradient;
 }
 
 void CheckUnderlineRun(const PublicText::UnderlinedCharacterRun& underlineRun, PublicText::CharacterIndex characterIndex, PublicText::Length numberOfCharacters, const PublicText::Underline& underline)
@@ -133,6 +147,19 @@ Dali::Ui::Text::AsyncTextParameters CreateAsyncRenderParameters(const std::strin
   parameters.maxTextureSize = 4096;
   parameters.requestType    = Dali::Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
   return parameters;
+}
+
+bool HaveSamePixels(const PixelData& left, const PixelData& right)
+{
+  if(!left || !right || left.GetWidth() != right.GetWidth() || left.GetHeight() != right.GetHeight() ||
+     left.GetPixelFormat() != right.GetPixelFormat() || left.GetStrideBytes() != right.GetStrideBytes())
+  {
+    return false;
+  }
+  const Dali::Integration::PixelDataBuffer leftBuffer  = Dali::Integration::GetPixelDataBuffer(left);
+  const Dali::Integration::PixelDataBuffer rightBuffer = Dali::Integration::GetPixelDataBuffer(right);
+  const size_t                             byteCount   = static_cast<size_t>(left.GetStrideBytes()) * left.GetHeight();
+  return leftBuffer.buffer && rightBuffer.buffer && memcmp(leftBuffer.buffer, rightBuffer.buffer, byteCount) == 0;
 }
 
 } // namespace
@@ -639,6 +666,96 @@ int UtcDaliStyledTextApplierApplyTextAndStyleRunsToLogicalModelP(void)
   END_TEST;
 }
 
+int UtcDaliStyledTextApplierGradientAndColorLaterWinsP(void)
+{
+  UiTestApplication application;
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New("abcdef");
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::ForegroundColorSpan::New(Dali::Ui::UiColor(Color::RED)), 0u, 6u));
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::GradientSpan::New(CreateGradient(),
+                                                               PublicText::GradientSpan::BoundsMode::CONTENT_BOUND),
+                                  1u,
+                                  5u));
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::ForegroundColorSpan::New(Dali::Ui::UiColor(Color::BLUE)), 3u, 4u));
+
+  const auto snapshot = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(), 96.0f);
+  DALI_TEST_CHECK(snapshot.gradientData);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(snapshot.gradientData->runs.size()), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.gradientData->runs[0u].boundsMode,
+                   PublicText::GradientSpan::BoundsMode::CONTENT_BOUND,
+                   TEST_LOCATION);
+
+  PublicText::LogicalModelPtr logicalModel = PublicText::LogicalModel::New();
+  StyledTextInternal::StyledTextApplier::ApplySnapshotToLogicalModel(snapshot, "abcdef", *logicalModel);
+
+  DALI_TEST_CHECK(logicalModel->mGradientSpanData);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->paints.Count(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns[0u].characterRun.characterIndex, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns[0u].characterRun.numberOfCharacters, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns[1u].characterRun.characterIndex, 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns[1u].characterRun.numberOfCharacters, 1u, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(logicalModel->mColorRuns.Count(), 3u, TEST_LOCATION);
+  CheckColorRun(logicalModel->mColorRuns[0u], 0u, 1u, Color::RED);
+  CheckColorRun(logicalModel->mColorRuns[1u], 3u, 1u, Color::BLUE);
+  CheckColorRun(logicalModel->mColorRuns[2u], 5u, 1u, Color::RED);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierGradientSnapshotIsCopySafeP(void)
+{
+  UiTestApplication application;
+
+  Dali::Ui::Gradient::Linear gradient = CreateGradient(Color::RED, Color::BLUE);
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New("gradient");
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::GradientSpan::New(gradient), 0u, 8u));
+
+  const auto snapshot = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(), 96.0f);
+  DALI_TEST_CHECK(snapshot.gradientData);
+  gradient.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(Color::GREEN)),
+                         Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(Color::YELLOW))});
+
+  DALI_TEST_EQUALS(snapshot.gradientData->runs[0u].style.stops[0u].color, Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.gradientData->runs[0u].style.stops[1u].color, Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierGradientPaintDeduplicationP(void)
+{
+  UiTestApplication application;
+
+  const auto gradient = CreateGradient(Color::RED, Color::BLUE);
+  PublicText::StyledTextBuilder contentBuilder = PublicText::StyledTextBuilder::New("abcdef");
+  DALI_TEST_CHECK(contentBuilder.SetSpan(
+    PublicText::GradientSpan::New(gradient, PublicText::GradientSpan::BoundsMode::CONTENT_BOUND), 0u, 2u));
+  DALI_TEST_CHECK(contentBuilder.SetSpan(
+    PublicText::GradientSpan::New(gradient, PublicText::GradientSpan::BoundsMode::CONTENT_BOUND), 4u, 6u));
+
+  PublicText::LogicalModelPtr logicalModel = PublicText::LogicalModel::New();
+  StyledTextInternal::StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(
+    contentBuilder.Build(), *logicalModel, 96.0f);
+  DALI_TEST_CHECK(logicalModel->mGradientSpanData);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->paints.Count(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns[0u].paintIndex, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns[1u].paintIndex, 1u, TEST_LOCATION);
+
+  PublicText::StyledTextBuilder spanBuilder = PublicText::StyledTextBuilder::New("abcdef");
+  DALI_TEST_CHECK(spanBuilder.SetSpan(PublicText::GradientSpan::New(gradient), 0u, 2u));
+  DALI_TEST_CHECK(spanBuilder.SetSpan(PublicText::GradientSpan::New(gradient), 4u, 6u));
+  StyledTextInternal::StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(
+    spanBuilder.Build(), *logicalModel, 96.0f);
+  DALI_TEST_CHECK(logicalModel->mGradientSpanData);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->paints.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns[0u].paintIndex, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mGradientSpanData->characterRuns[1u].paintIndex, 2u, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextApplierApplyFontSpanToLogicalModelP(void)
 {
   UiTestApplication application;
@@ -877,6 +994,122 @@ int UtcDaliStyledTextApplierAsyncSnapshotKeepsTextP(void)
 
   DALI_TEST_CHECK(baseSize.height > 0.0f);
   DALI_TEST_CHECK(styledSize.height > baseSize.height);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncGradientSpanRendersRgbaP(void)
+{
+  UiTestApplication application;
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New("async gradient");
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::GradientSpan::New(CreateGradient()), 0u, 14u));
+
+  Dali::Ui::Text::AsyncTextParameters parameters = CreateAsyncRenderParameters("async gradient");
+  parameters.hasStyledTextStyleSnapshot          = true;
+  parameters.styledTextStyleSnapshot =
+    StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(), 96.0f);
+
+  Dali::Ui::Text::AsyncTextLoader     loader = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo renderInfo = loader.RenderText(parameters, false, Size::ZERO);
+  DALI_TEST_CHECK(renderInfo.textPixelData);
+  DALI_TEST_EQUALS(renderInfo.textPixelData.GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+  DALI_TEST_CHECK(renderInfo.hasMultipleTextColors);
+
+  parameters.isMarqueeEnabled = true;
+  Dali::Ui::Text::AsyncTextRenderInfo marqueeInfo = loader.RenderMarquee(parameters, false, Size::ZERO);
+  DALI_TEST_CHECK(marqueeInfo.textPixelData);
+  DALI_TEST_EQUALS(marqueeInfo.textPixelData.GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+  DALI_TEST_CHECK(marqueeInfo.hasMultipleTextColors);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncSourceTransitionResetsGradientP(void)
+{
+  UiTestApplication application;
+
+  auto MakeGradientParameters = [](const std::string& text, const Vector4& first, const Vector4& second)
+  {
+    PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(text.c_str());
+    DALI_TEST_CHECK(builder.SetSpan(PublicText::GradientSpan::New(CreateGradient(first, second)),
+                                    0u,
+                                    static_cast<uint32_t>(text.size())));
+
+    Dali::Ui::Text::AsyncTextParameters parameters = CreateAsyncRenderParameters(text);
+    parameters.hasStyledTextStyleSnapshot          = true;
+    parameters.styledTextStyleSnapshot =
+      StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(), 96.0f);
+    return parameters;
+  };
+
+  auto MakeForegroundParameters = [](const std::string& text)
+  {
+    PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(text.c_str());
+    DALI_TEST_CHECK(builder.SetSpan(PublicText::ForegroundColorSpan::New(Dali::Ui::UiColor(Color::GREEN)),
+                                    0u,
+                                    static_cast<uint32_t>(text.size())));
+
+    Dali::Ui::Text::AsyncTextParameters parameters = CreateAsyncRenderParameters(text);
+    parameters.hasStyledTextStyleSnapshot          = true;
+    parameters.styledTextStyleSnapshot =
+      StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(), 96.0f);
+    return parameters;
+  };
+
+  Dali::Ui::Text::AsyncTextLoader loader = Dali::Ui::Text::AsyncTextLoader::New();
+
+  Dali::Ui::Text::AsyncTextParameters gradientA     = MakeGradientParameters("styled gradient A", Color::RED, Color::BLUE);
+  Dali::Ui::Text::AsyncTextRenderInfo gradientAInfo = loader.RenderText(gradientA, false, Size::ZERO);
+  DALI_TEST_CHECK(gradientAInfo.textPixelData);
+  DALI_TEST_EQUALS(gradientAInfo.textPixelData.GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+  DALI_TEST_CHECK(gradientAInfo.hasMultipleTextColors);
+
+  Dali::Ui::Text::AsyncTextParameters plainB          = CreateAsyncRenderParameters("plain source B");
+  Dali::Ui::Text::AsyncTextParameters freshPlainB     = plainB;
+  Dali::Ui::Text::AsyncTextRenderInfo plainBInfo      = loader.RenderText(plainB, false, Size::ZERO);
+  Dali::Ui::Text::AsyncTextLoader     freshLoaderB    = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo freshPlainBInfo = freshLoaderB.RenderText(freshPlainB, false, Size::ZERO);
+  DALI_TEST_CHECK(plainBInfo.textPixelData);
+  DALI_TEST_EQUALS(plainBInfo.textPixelData.GetPixelFormat(), Pixel::L8, TEST_LOCATION);
+  DALI_TEST_CHECK(!plainBInfo.hasMultipleTextColors);
+  DALI_TEST_CHECK(HaveSamePixels(plainBInfo.textPixelData, freshPlainBInfo.textPixelData));
+
+  Dali::Ui::Text::AsyncTextParameters gradientC     = MakeGradientParameters("styled gradient C", Color::GREEN, Color::MAGENTA);
+  Dali::Ui::Text::AsyncTextRenderInfo gradientCInfo = loader.RenderText(gradientC, false, Size::ZERO);
+  DALI_TEST_CHECK(gradientCInfo.textPixelData);
+  DALI_TEST_EQUALS(gradientCInfo.textPixelData.GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+  DALI_TEST_CHECK(gradientCInfo.hasMultipleTextColors);
+
+  for(uint32_t iteration = 0u; iteration < 2u; ++iteration)
+  {
+    const std::string                   styledText = "round trip gradient " + std::to_string(iteration);
+    Dali::Ui::Text::AsyncTextParameters styled     = MakeGradientParameters(styledText, Color::YELLOW, Color::CYAN);
+    Dali::Ui::Text::AsyncTextRenderInfo styledInfo = loader.RenderText(styled, false, Size::ZERO);
+    DALI_TEST_CHECK(styledInfo.hasMultipleTextColors);
+    DALI_TEST_EQUALS(styledInfo.textPixelData.GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+
+    const std::string                   plainText = "round trip plain " + std::to_string(iteration);
+    Dali::Ui::Text::AsyncTextParameters plain     = CreateAsyncRenderParameters(plainText);
+    Dali::Ui::Text::AsyncTextRenderInfo plainInfo = loader.RenderText(plain, false, Size::ZERO);
+    DALI_TEST_CHECK(!plainInfo.hasMultipleTextColors);
+    DALI_TEST_EQUALS(plainInfo.textPixelData.GetPixelFormat(), Pixel::L8, TEST_LOCATION);
+  }
+
+  Dali::Ui::Text::AsyncTextParameters foreground     = MakeForegroundParameters("styled foreground");
+  Dali::Ui::Text::AsyncTextRenderInfo foregroundInfo = loader.RenderText(foreground, false, Size::ZERO);
+  DALI_TEST_CHECK(foregroundInfo.hasMultipleTextColors);
+  DALI_TEST_EQUALS(foregroundInfo.textPixelData.GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+
+  Dali::Ui::Text::AsyncTextParameters finalPlain       = CreateAsyncRenderParameters("final plain source D");
+  Dali::Ui::Text::AsyncTextParameters freshFinalPlain  = finalPlain;
+  Dali::Ui::Text::AsyncTextRenderInfo finalPlainInfo   = loader.RenderText(finalPlain, false, Size::ZERO);
+  Dali::Ui::Text::AsyncTextLoader     freshFinalLoader = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo freshFinalPlainInfo =
+    freshFinalLoader.RenderText(freshFinalPlain, false, Size::ZERO);
+  DALI_TEST_CHECK(!finalPlainInfo.hasMultipleTextColors);
+  DALI_TEST_EQUALS(finalPlainInfo.textPixelData.GetPixelFormat(), Pixel::L8, TEST_LOCATION);
+  DALI_TEST_CHECK(HaveSamePixels(finalPlainInfo.textPixelData, freshFinalPlainInfo.textPixelData));
 
   END_TEST;
 }

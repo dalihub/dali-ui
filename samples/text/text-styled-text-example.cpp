@@ -48,7 +48,7 @@ constexpr float HEADER_HEIGHT       = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEA
 constexpr float FOOTER_HEIGHT       = FOOTER_PADDING + FOOTER_BADGE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_PADDING;
 constexpr int   WINDOW_WIDTH        = 920;
 constexpr int   WINDOW_HEIGHT       = 820;
-constexpr std::size_t CASE_COUNT     = 27u;
+constexpr std::size_t CASE_COUNT     = 29u;
 
 constexpr uint32_t BADGE_DISABLED_BACKGROUND = 0x1E293B;
 constexpr uint32_t BADGE_DISABLED_BORDER     = 0x475569;
@@ -91,7 +91,9 @@ enum class StyledTextCase
   MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY,
   MARKUP_TO_STYLED_TEXT_IMAGE,
   IMAGE_SPAN,
-  FUTURE_GRADIENT_SPAN_DISABLED,
+  GRADIENT_SPAN_VALUE_RANGE,
+  GRADIENT_SPAN_BOUNDS,
+  GRADIENT_SPAN_OVERLAP,
 };
 
 enum class StyledTextValueKind
@@ -103,6 +105,7 @@ enum class StyledTextValueKind
   UNDERLINE,
   LINE_THROUGH,
   FONT,
+  GRADIENT,
 };
 
 struct StyledTextCaseInfo
@@ -152,7 +155,9 @@ constexpr std::array<StyledTextCaseInfo, CASE_COUNT> CASES{{
   {StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY, "FromMarkup: anchor + entities", "Converts anchor markup and entities to AnchorSpan and decoded text.", true, StyledTextValueKind::NONE, false, false, true},
   {StyledTextCase::MARKUP_TO_STYLED_TEXT_IMAGE, "FromMarkup: ImageSpan", "All supported img forms insert one atomic ImageSpan while preserving following text.", true, StyledTextValueKind::NONE, false, false, true},
   {StyledTextCase::IMAGE_SPAN, "ImageSpan", "Recommended form: append one U+FFFC and attach one ImageSpan to its exact UTF-32 range.", true, StyledTextValueKind::NONE, false, false, false},
-  {StyledTextCase::FUTURE_GRADIENT_SPAN_DISABLED, "Future GradientSpan", "Disabled placeholder. GradientSpan is not implemented in this phase.", false, StyledTextValueKind::NONE, false, false, false},
+  {StyledTextCase::GRADIENT_SPAN_VALUE_RANGE, "GradientSpan value + range", "One GradientSpan. Value cycles gradient type/palette, Range changes its coverage, Clear removes it and Source compares SetText.", true, StyledTextValueKind::GRADIENT, true, true, true},
+  {StyledTextCase::GRADIENT_SPAN_BOUNDS, "GradientSpan bounds", "The same vivid gradient is applied with SPAN_BOUND, CONTENT_BOUND and VIEW_BOUND. Value, Range, Clear and Source remain available.", true, StyledTextValueKind::GRADIENT, true, true, true},
+  {StyledTextCase::GRADIENT_SPAN_OVERLAP, "GradientSpan overlap order", "Two gradients and a solid foreground overlap. The later attachment wins each segment; Range changes both overlap boundaries.", true, StyledTextValueKind::GRADIENT, true, true, true},
 }};
 
 constexpr const char* FROM_MARKUP_BASIC_TEXT =
@@ -201,6 +206,13 @@ constexpr std::array<float, 4u> FONT_SIZE_VALUES{{
   34.0f,
   42.0f,
   50.0f,
+}};
+
+constexpr std::array<const char*, 4u> GRADIENT_VALUE_NAMES{{
+  "linear rainbow",
+  "radial heat",
+  "conic spectrum",
+  "linear reflect",
 }};
 
 Label CreateLabel(const char* text, float fontSize, const UiColor& textColor)
@@ -665,6 +677,61 @@ private:
     return Text::FontSpan::New(attributes);
   }
 
+  Gradient::Base NewGradient(std::size_t valueIndex) const
+  {
+    switch(valueIndex % GRADIENT_VALUE_NAMES.size())
+    {
+      case 1u:
+      {
+        Gradient::Radial gradient(Vector2::ZERO, 0.68f);
+        gradient.SetSpreadMethod(Gradient::SpreadMethod::PAD);
+        gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(0xFFFFFF)),
+                               Gradient::StopNode(0.18f, UiColor(0xFFF000)),
+                               Gradient::StopNode(0.38f, UiColor(0xFF8A00)),
+                               Gradient::StopNode(0.58f, UiColor(0xFF1744)),
+                               Gradient::StopNode(0.78f, UiColor(0xD500F9)),
+                               Gradient::StopNode(1.0f, UiColor(0x1A237E))});
+        return gradient;
+      }
+      case 2u:
+      {
+        Gradient::Conic gradient(Vector2::ZERO, Radian(0.0f));
+        gradient.SetSpreadMethod(Gradient::SpreadMethod::PAD);
+        gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(0xFF1744)),
+                               Gradient::StopNode(0.2f, UiColor(0xFFEA00)),
+                               Gradient::StopNode(0.4f, UiColor(0x00E676)),
+                               Gradient::StopNode(0.6f, UiColor(0x00B0FF)),
+                               Gradient::StopNode(0.8f, UiColor(0x651FFF)),
+                               Gradient::StopNode(1.0f, UiColor(0xFF1744))});
+        return gradient;
+      }
+      case 3u:
+      {
+        Gradient::Linear gradient(Vector2(-0.18f, 0.0f), Vector2(0.18f, 0.0f));
+        gradient.SetSpreadMethod(Gradient::SpreadMethod::REFLECT);
+        gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(0xFF1744)),
+                               Gradient::StopNode(0.25f, UiColor(0xFFEA00)),
+                               Gradient::StopNode(0.5f, UiColor(0x00E5FF)),
+                               Gradient::StopNode(0.75f, UiColor(0x2979FF)),
+                               Gradient::StopNode(1.0f, UiColor(0xD500F9))});
+        return gradient;
+      }
+      case 0u:
+      default:
+      {
+        Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+        gradient.SetSpreadMethod(Gradient::SpreadMethod::PAD);
+        gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(0xFF1744)),
+                               Gradient::StopNode(0.2f, UiColor(0xFF8A00)),
+                               Gradient::StopNode(0.4f, UiColor(0xFFEA00)),
+                               Gradient::StopNode(0.6f, UiColor(0x00C853)),
+                               Gradient::StopNode(0.8f, UiColor(0x2979FF)),
+                               Gradient::StopNode(1.0f, UiColor(0xD500F9))});
+        return gradient;
+      }
+    }
+  }
+
   Text::AnchorSpan NewAnchorSpan(const char* href, bool explicitColor) const
   {
     Text::AnchorAttributes attributes;
@@ -1043,6 +1110,66 @@ private:
         state.valueInfo = "reserved size: 64x40 | alignment: TEXT_CENTER";
         return builder.Build();
       }
+      case StyledTextCase::GRADIENT_SPAN_VALUE_RANGE:
+      {
+        state.text = "VALUE GradientSpan RANGE";
+        const auto range = CurrentRange(6u, 18u, 0u, 24u);
+        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+        builder.SetSpan(Text::GradientSpan::New(NewGradient(mGradientIndex)), range.first, range.second);
+
+        state.spanMode  = "GradientSpan: SPAN_BOUND";
+        state.rangeInfo = "range: " + RangeText(range.first, range.second);
+        state.valueInfo = std::string("value: ") + GRADIENT_VALUE_NAMES[mGradientIndex];
+        return FinishBuilder(builder, state);
+      }
+      case StyledTextCase::GRADIENT_SPAN_BOUNDS:
+      {
+        state.text = "SPAN_BOUND----------------\n------CONTENT_BOUND-------\n----------------VIEW_BOUND";
+        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+        const Gradient::Base   gradient = NewGradient(mGradientIndex);
+
+        const auto spanRange    = CurrentRange(0u, 10u, 0u, 26u);
+        const auto contentRange = CurrentRange(33u, 46u, 27u, 53u);
+        const auto viewRange    = CurrentRange(70u, 80u, 54u, 80u);
+
+        builder.SetSpan(Text::GradientSpan::New(gradient), spanRange.first, spanRange.second);
+        builder.SetSpan(Text::GradientSpan::New(gradient,
+                                                Text::GradientSpan::BoundsMode::CONTENT_BOUND),
+                        contentRange.first,
+                        contentRange.second);
+        builder.SetSpan(Text::GradientSpan::New(gradient,
+                                                Text::GradientSpan::BoundsMode::VIEW_BOUND),
+                        viewRange.first,
+                        viewRange.second);
+
+        state.spanMode  = "GradientSpan: SPAN_BOUND + CONTENT_BOUND + VIEW_BOUND";
+        state.rangeInfo = std::string("ranges: ") + RangeText(spanRange.first, spanRange.second) + ", " +
+                          RangeText(contentRange.first, contentRange.second) + ", " +
+                          RangeText(viewRange.first, viewRange.second);
+        state.valueInfo = std::string("shared value: ") + GRADIENT_VALUE_NAMES[mGradientIndex];
+        return FinishBuilder(builder, state);
+      }
+      case StyledTextCase::GRADIENT_SPAN_OVERLAP:
+      {
+        state.text = "RAINBOW SOLID RAINBOW";
+        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+
+        const auto solidRange          = CurrentRange(8u, 13u, 5u, 16u);
+        const auto laterGradientRange  = CurrentRange(14u, 21u, 11u, 21u);
+
+        builder.SetSpan(Text::GradientSpan::New(NewGradient(mGradientIndex)), 0u, 21u);
+        builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(0x111827)), solidRange.first, solidRange.second);
+        builder.SetSpan(Text::GradientSpan::New(NewGradient(mGradientIndex + 2u)),
+                        laterGradientRange.first,
+                        laterGradientRange.second);
+
+        state.spanMode  = "GradientSpan -> ForegroundColorSpan -> GradientSpan (later wins)";
+        state.rangeInfo = std::string("ranges: gradient [0,21), solid ") + RangeText(solidRange.first, solidRange.second) +
+                          ", later gradient " + RangeText(laterGradientRange.first, laterGradientRange.second);
+        state.valueInfo = std::string("values: ") + GRADIENT_VALUE_NAMES[mGradientIndex] + " + solid dark + " +
+                          GRADIENT_VALUE_NAMES[(mGradientIndex + 2u) % GRADIENT_VALUE_NAMES.size()];
+        return FinishBuilder(builder, state);
+      }
       default:
       {
         state.text      = CurrentCase().title;
@@ -1184,6 +1311,10 @@ private:
       {
         return std::string("VALUE ") + FontValueText(CurrentFontValueIndex());
       }
+      case StyledTextValueKind::GRADIENT:
+      {
+        return std::string("VALUE ") + GRADIENT_VALUE_NAMES[mGradientIndex % GRADIENT_VALUE_NAMES.size()];
+      }
       case StyledTextValueKind::NONE:
       default:
       {
@@ -1298,6 +1429,11 @@ private:
         mDecorationIndex = (mDecorationIndex + 1u) % COLOR_VALUES.size();
         break;
       }
+      case StyledTextValueKind::GRADIENT:
+      {
+        mGradientIndex = (mGradientIndex + 1u) % GRADIENT_VALUE_NAMES.size();
+        break;
+      }
       case StyledTextValueKind::NONE:
       default:
       {
@@ -1348,6 +1484,7 @@ private:
     mColorIndex      = 0u;
     mBackgroundIndex = 0u;
     mDecorationIndex = 0u;
+    mGradientIndex   = 0u;
     mRangeVariant    = false;
     mCleared         = false;
     mPlainSource     = false;
@@ -1514,6 +1651,12 @@ private:
         return FROM_MARKUP_IMAGE_TEXT;
       case StyledTextCase::IMAGE_SPAN:
         return std::string("Before ") + Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER + " after";
+      case StyledTextCase::GRADIENT_SPAN_VALUE_RANGE:
+        return "VALUE GradientSpan RANGE";
+      case StyledTextCase::GRADIENT_SPAN_BOUNDS:
+        return "SPAN_BOUND----------------\n------CONTENT_BOUND-------\n----------------VIEW_BOUND";
+      case StyledTextCase::GRADIENT_SPAN_OVERLAP:
+        return "RAINBOW SOLID RAINBOW";
       default:
         return CurrentCase().title;
     }
@@ -1647,6 +1790,7 @@ private:
   std::size_t mColorIndex{0u};
   std::size_t mBackgroundIndex{0u};
   std::size_t mDecorationIndex{0u};
+  std::size_t mGradientIndex{0u};
   std::string mLastAnchorHref;
   bool        mRangeVariant{false};
   bool        mCleared{false};

@@ -824,6 +824,29 @@ int UtcDaliInputEditorSetStyledText(void)
   inputEditor.SetStyledText(builder.Build());
   DALI_TEST_EQUALS(inputEditor.GetText(), "Hello", TEST_LOCATION);
 
+  Gradient::Linear editorGradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  editorGradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  editorGradient.SetStopNodes({Gradient::StopNode(0.0f, Color::BLUE), Gradient::StopNode(1.0f, Color::MAGENTA)});
+  Text::StyledTextBuilder gradientBuilder = Text::StyledTextBuilder::New("Build beautiful interfaces\nwith responsive text effects");
+  DALI_TEST_CHECK(gradientBuilder.SetSpan(
+    Text::GradientSpan::New(editorGradient, Text::GradientSpan::BoundsMode::SPAN_BOUND), 6u, 15u));
+  DALI_TEST_CHECK(gradientBuilder.SetSpan(
+    Text::GradientSpan::New(editorGradient, Text::GradientSpan::BoundsMode::SPAN_BOUND), 32u, 42u));
+  inputEditor.SetStyledText(gradientBuilder.Build());
+  DALI_TEST_EQUALS(inputEditor.GetText(), "Build beautiful interfaces\nwith responsive text effects", TEST_LOCATION);
+
+  Gradient::Linear userSpaceGradient(Vector2(10.0f, 8.0f), Vector2(90.0f, 8.0f));
+  userSpaceGradient.SetUnits(Gradient::Units::USER_SPACE);
+  userSpaceGradient.SetSpreadMethod(Gradient::SpreadMethod::REPEAT);
+  userSpaceGradient.SetStartOffset(-0.125f);
+  userSpaceGradient.SetStopNodes({Gradient::StopNode(0.0f, Color::CYAN),
+                                  Gradient::StopNode(1.0f, Color::MAGENTA)});
+  Text::StyledTextBuilder userSpaceBuilder = Text::StyledTextBuilder::New("USER space editor\nsecond line");
+  DALI_TEST_CHECK(userSpaceBuilder.SetSpan(
+    Text::GradientSpan::New(userSpaceGradient, Text::GradientSpan::BoundsMode::VIEW_BOUND), 0u, 17u));
+  inputEditor.SetStyledText(userSpaceBuilder.Build());
+  DALI_TEST_EQUALS(inputEditor.GetText(), "USER space editor\nsecond line", TEST_LOCATION);
+
   Text::StyledTextBuilder replacementBuilder = Text::StyledTextBuilder::New("AiconB\nsecond line");
   DALI_TEST_CHECK(replacementBuilder.SetSpan(
     Text::ImageSpan::New(Text::ImageAttributes("unused.png", Vector2(32.0f, 24.0f))), 1u, 5u));

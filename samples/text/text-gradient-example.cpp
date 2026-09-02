@@ -48,7 +48,7 @@ constexpr float MATRIX_CAPTION_WIDTH = 76.0f;
 constexpr float MATRIX_CELL_WIDTH    = 188.0f;
 constexpr int   WINDOW_WIDTH     = 920;
 constexpr int   WINDOW_HEIGHT    = 880;
-constexpr std::size_t CASE_COUNT = 10u;
+constexpr std::size_t CASE_COUNT                         = 16u;
 constexpr std::size_t INITIAL_CASE_INDEX                 = 0u;
 constexpr std::size_t INITIAL_ALIGNMENT_INDEX            = 1u;
 constexpr std::size_t INITIAL_SPREAD_METHOD_INDEX        = 0u;
@@ -85,6 +85,17 @@ enum class OverlayFillMode
   FULL
 };
 
+enum class GradientSpanCase
+{
+  NONE,
+  BOUNDS,
+  TYPES,
+  PRIORITY,
+  GLOBAL_COMBINATION,
+  STYLES_LAYOUT,
+  HIGHLIGHT_MARQUEE,
+};
+
 struct CaseDefinition
 {
   const char*  title;
@@ -100,6 +111,7 @@ struct CaseDefinition
   Text::MarqueeOrientation marqueeOrientation{Text::MarqueeOrientation::HORIZONTAL};
   bool         marqueeDefaultRunning{true};
   bool         compactGradientSpan{false};
+  GradientSpanCase         gradientSpanCase{GradientSpanCase::NONE};
 };
 
 constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
@@ -234,6 +246,102 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
     false,
     true,
     Text::MarqueeOrientation::VERTICAL,
+  },
+  {
+    "GradientSpan Bounds",
+    "SPAN BOUND | CONTENT BOUND | VIEW BOUND",
+    "Expected: red/green/blue local gradients resolve against three visibly different bounds.",
+    "Notes: static SPAN_BOUND, CONTENT_BOUND and VIEW_BOUND in one sync/async comparison.",
+    GradientKind::NONE,
+    36.0f,
+    false,
+    false,
+    false,
+    false,
+    Text::MarqueeOrientation::HORIZONTAL,
+    false,
+    false,
+    GradientSpanCase::BOUNDS,
+  },
+  {
+    "GradientSpan Types And Spread",
+    "LINEAR | RADIAL | CONIC",
+    "Expected: three gradient evaluators remain distinct; P cycles PAD/REFLECT/REPEAT.",
+    "Notes: verifies CPU/async linear, radial and conic sampling with the same stop set.",
+    GradientKind::NONE,
+    44.0f,
+    false,
+    false,
+    false,
+    false,
+    Text::MarqueeOrientation::HORIZONTAL,
+    false,
+    false,
+    GradientSpanCase::TYPES,
+  },
+  {
+    "GradientSpan Priority",
+    "GRADIENT  COLOR  GRADIENT",
+    "Expected: attachment insertion order is later-wins in the deliberately overlapping center.",
+    "Notes: P intentionally rebuilds both GradientSpans, so the final GRADIENT changes spread too.",
+    GradientKind::NONE,
+    42.0f,
+    false,
+    false,
+    false,
+    false,
+    Text::MarqueeOrientation::HORIZONTAL,
+    false,
+    false,
+    GradientSpanCase::PRIORITY,
+  },
+  {
+    "TextGradient Plus GradientSpan",
+    "GLOBAL base | LOCAL static | COLOR | LOCAL static 😀",
+    "Expected: animated global fill excludes local GradientSpan/color/emoji ranges; A animates only global.",
+    "Notes: verifies global mask exclusion and static local foreground preservation.",
+    GradientKind::LINEAR,
+    34.0f,
+    false,
+    false,
+    false,
+    false,
+    Text::MarqueeOrientation::HORIZONTAL,
+    false,
+    false,
+    GradientSpanCase::GLOBAL_COMBINATION,
+  },
+  {
+    "GradientSpan Styles And Layout",
+    "LTR Gradient 😀\nRTL مرحبا Gradient\nMixed abc אבג 123",
+    "Expected: local fill preserves emoji and remains aligned with multiline bidi text and all decorations.",
+    "Notes: shadow, outline, background, underline and line-through; S/scale keys exercise resize.",
+    GradientKind::NONE,
+    34.0f,
+    true,
+    false,
+    true,
+    false,
+    Text::MarqueeOrientation::HORIZONTAL,
+    false,
+    false,
+    GradientSpanCase::STYLES_LAYOUT,
+  },
+  {
+    "GradientSpan Highlight Marquee",
+    "Explore premium movies, live sports, and personalized recommendations across your favorite services",
+    "Expected: plain black text scrolls with three independent high-contrast SPAN_BOUND word gradients.",
+    "Notes: movies=Linear, sports=Radial, recommendations=Conic; global gradient and overlay stay off.",
+    GradientKind::NONE,
+    38.0f,
+    false,
+    false,
+    false,
+    true,
+    Text::MarqueeOrientation::HORIZONTAL,
+    true,
+    false,
+    GradientSpanCase::HIGHLIGHT_MARQUEE,
   },
 }};
 
@@ -811,13 +919,13 @@ private:
     ConfigureHudBadge(mMenuTitleLabel, FOOTER_BADGE_HEIGHT, UiColor(0x1D4ED8), UiColor(0x93C5FD), UiColor(0xF8FAFC), Text::Alignment::CENTER);
 
     mCaseListLabel = CreateLabel(
-      "CASES  0 Matrix | 1 Simple | 2 Large | 3 Multi | 4 Markup | 5 Emoji | 6 Style | 7 Spread | 8 H Marquee | 9 V Marquee",
+      "CASES  0 Matrix | 1-10 TextGradient | 11-16 GradientSpan bounds/types/priority/global/styles/highlight",
       12.0f,
       UiColor(0xCBD5E1));
     ConfigureHudBadge(mCaseListLabel, FOOTER_BADGE_HEIGHT, UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1), Text::Alignment::START);
 
     mHelpLabel = CreateLabel(
-      "ACTIONS  D/P/B Base | Y/K/U/I/L Overlay | C Base OnOff | O Overlay OnOff | A TG Anim | N OV Anim | X Reset | M Marquee | ESC Quit",
+      "ACTIONS  D/P/B Base | Y/K/U/I/L Overlay | C/O OnOff | A/N Anim | J Source (GradientSpan) | X Reset | M Marquee | ESC Quit",
       12.0f,
       UiColor(0xCBD5E1));
     ConfigureHudBadge(mHelpLabel, FOOTER_LINE_HEIGHT, UiColor(0x0F172A), UiColor(0x334155), UiColor(0xCBD5E1), Text::Alignment::START);
@@ -883,6 +991,7 @@ private:
     mCaseIndex         = index % CASES.size();
     mGradientApplied   = true;
     mMarqueeRunning    = CASES[mCaseIndex].marqueeDefaultRunning;
+    mGradientSpanSourceStage = 0u;
     StopMarqueeMatrixLabels();
     SetMarqueeMatrixVisible(false);
 
@@ -927,6 +1036,27 @@ private:
     label.SetTextColor(textColor);
     label.SetBackgroundColor(backgroundColor);
     label.SetBorderlineColor(borderlineColor);
+  }
+
+  void SetActionBadge(Label              label,
+                      const std::string& text,
+                      bool               enabled,
+                      const UiColor&     backgroundColor,
+                      const UiColor&     borderlineColor)
+  {
+    if(enabled)
+    {
+      SetHudBadge(label, text, backgroundColor, borderlineColor, UiColor(BADGE_ON_TEXT));
+    }
+    else
+    {
+      SetHudBadge(label,
+                  text,
+                  UiColor(BADGE_DISABLED_BACKGROUND),
+                  UiColor(BADGE_DISABLED_BORDER),
+                  UiColor(BADGE_DISABLED_TEXT));
+    }
+    label.SetEnabled(enabled);
   }
 
   void SetBadgeBounds(Label label, float x, float y, float width, float height)
@@ -1258,6 +1388,9 @@ private:
     label.SetTextGradientOverlay(Gradient::Base::None());
     label.SetTextUnderline(Text::Underline::None());
     label.SetTextShadow(Text::Shadow::None());
+    label.SetTextOutline(Text::Outline::None());
+    label.SetTextLineThrough(Text::LineThrough::None());
+    label.SetTextBackgroundColor(UiColor(Color::TRANSPARENT));
     label.SetText("");
     label.SetTextColor(UiColor(0x111827));
     label.SetFontSize(item.fontSize);
@@ -1281,6 +1414,11 @@ private:
       label.SetText(item.text);
     }
 
+    if(item.gradientSpanCase != GradientSpanCase::NONE)
+    {
+      ApplyGradientSpanSource(label, item);
+    }
+
     if(item.style)
     {
       Text::Shadow shadow;
@@ -1298,6 +1436,20 @@ private:
       label.SetTextUnderline(underline);
     }
 
+    if(item.gradientSpanCase == GradientSpanCase::STYLES_LAYOUT)
+    {
+      Text::Outline outline;
+      outline.SetColor(UiColor(0x7C3AED));
+      outline.SetWidth(1.5f);
+      label.SetTextOutline(outline);
+
+      Text::LineThrough lineThrough;
+      lineThrough.SetColor(UiColor(0xDC2626));
+      lineThrough.SetThickness(2.0f);
+      label.SetTextLineThrough(lineThrough);
+      label.SetTextBackgroundColor(UiColor(0xFFF7D6));
+    }
+
     if(mGradientApplied)
     {
       ApplyGradientToLabel(label, item);
@@ -1308,6 +1460,185 @@ private:
     if(item.marquee && mMarqueeRunning)
     {
       label.StartMarquee();
+    }
+  }
+
+  Gradient::Base CreateGradientSpanGradient(GradientKind kind, float startOffset = 0.0f) const
+  {
+    Gradient::Base gradient;
+    switch(kind)
+    {
+      case GradientKind::RADIAL:
+      {
+        gradient = Gradient::Radial(Vector2(0.0f, 0.0f), 0.5f);
+        break;
+      }
+      case GradientKind::CONIC:
+      {
+        gradient = Gradient::Conic(Vector2(0.0f, 0.0f), Radian(0.0f));
+        break;
+      }
+      case GradientKind::LINEAR:
+      default:
+      {
+        gradient = Gradient::Linear(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+        break;
+      }
+    }
+    gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+    gradient.SetSpreadMethod(CurrentSpreadMethod());
+    gradient.SetStartOffset(startOffset);
+    SetCommonGradientStops(gradient);
+    return gradient;
+  }
+
+  Gradient::Base CreateHighlightGradient(GradientKind kind) const
+  {
+    Gradient::Base gradient;
+    switch(kind)
+    {
+      case GradientKind::RADIAL:
+      {
+        gradient = Gradient::Radial(Vector2(0.0f, 0.0f), 0.58f);
+        gradient.SetStopNodes({
+          Gradient::StopNode(0.0f, UiColor(0x16A34A)),
+          Gradient::StopNode(0.5f, UiColor(0x06B6D4)),
+          Gradient::StopNode(1.0f, UiColor(0x2563EB)),
+        });
+        break;
+      }
+      case GradientKind::CONIC:
+      {
+        gradient = Gradient::Conic(Vector2(0.0f, 0.0f), Radian(0.0f));
+        gradient.SetStopNodes({
+          Gradient::StopNode(0.0f, UiColor(0xDB2777)),
+          Gradient::StopNode(0.34f, UiColor(0x7C3AED)),
+          Gradient::StopNode(0.68f, UiColor(0x06B6D4)),
+          Gradient::StopNode(1.0f, UiColor(0xDB2777)),
+        });
+        break;
+      }
+      case GradientKind::LINEAR:
+      default:
+      {
+        gradient = Gradient::Linear(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+        gradient.SetStopNodes({
+          Gradient::StopNode(0.0f, UiColor(0xDC2626)),
+          Gradient::StopNode(0.5f, UiColor(0xF97316)),
+          Gradient::StopNode(1.0f, UiColor(0xFACC15)),
+        });
+        break;
+      }
+    }
+    gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+    gradient.SetSpreadMethod(CurrentSpreadMethod());
+    return gradient;
+  }
+
+  Text::StyledText BuildGradientSpanSource(const CaseDefinition& item) const
+  {
+    Text::StyledTextBuilder builder     = Text::StyledTextBuilder::New(item.text);
+    const uint32_t          length      = Text::Utf8ToUtf32Length(item.text);
+    auto                    addGradient = [&](uint32_t                       begin,
+                           uint32_t                       end,
+                           Text::GradientSpan::BoundsMode boundsMode,
+                           GradientKind                   kind        = GradientKind::LINEAR,
+                           float                          startOffset = 0.0f)
+    {
+      builder.SetSpan(Text::GradientSpan::New(CreateGradientSpanGradient(kind, startOffset), boundsMode),
+                      std::min(begin, length),
+                      std::min(end, length));
+    };
+    auto addHighlightWord = [&](const char* word, GradientKind kind)
+    {
+      const std::string text(item.text);
+      const std::size_t byteStart = text.find(word);
+      if(byteStart == std::string::npos)
+      {
+        return;
+      }
+
+      uint32_t utf32Start = 0u;
+      uint32_t utf32End   = 0u;
+      if(Text::Utf8ToUtf32Range(Dali::StringView(text.data(), static_cast<uint32_t>(text.size())),
+                                static_cast<uint32_t>(byteStart),
+                                static_cast<uint32_t>(byteStart + std::string(word).size()),
+                                utf32Start,
+                                utf32End))
+      {
+        builder.SetSpan(Text::GradientSpan::New(CreateHighlightGradient(kind), Text::GradientSpan::BoundsMode::SPAN_BOUND),
+                        utf32Start,
+                        utf32End);
+      }
+    };
+
+    switch(item.gradientSpanCase)
+    {
+      case GradientSpanCase::BOUNDS:
+      {
+        addGradient(0u, 10u, Text::GradientSpan::BoundsMode::SPAN_BOUND);
+        addGradient(13u, 26u, Text::GradientSpan::BoundsMode::CONTENT_BOUND, GradientKind::RADIAL);
+        addGradient(29u, 39u, Text::GradientSpan::BoundsMode::VIEW_BOUND, GradientKind::CONIC);
+        break;
+      }
+      case GradientSpanCase::TYPES:
+      {
+        addGradient(0u, 6u, Text::GradientSpan::BoundsMode::SPAN_BOUND, GradientKind::LINEAR);
+        addGradient(9u, 15u, Text::GradientSpan::BoundsMode::SPAN_BOUND, GradientKind::RADIAL);
+        addGradient(18u, 23u, Text::GradientSpan::BoundsMode::SPAN_BOUND, GradientKind::CONIC);
+        break;
+      }
+      case GradientSpanCase::PRIORITY:
+      {
+        addGradient(0u, 20u, Text::GradientSpan::BoundsMode::SPAN_BOUND);
+        builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(0x111111)), 8u, 17u);
+        addGradient(13u, 25u, Text::GradientSpan::BoundsMode::SPAN_BOUND, GradientKind::CONIC, 0.2f);
+        break;
+      }
+      case GradientSpanCase::GLOBAL_COMBINATION:
+      {
+        addGradient(14u, 26u, Text::GradientSpan::BoundsMode::SPAN_BOUND, GradientKind::RADIAL);
+        builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(0x111111)), 29u, 34u);
+        addGradient(37u, 49u, Text::GradientSpan::BoundsMode::CONTENT_BOUND, GradientKind::CONIC);
+        break;
+      }
+      case GradientSpanCase::STYLES_LAYOUT:
+      {
+        addGradient(0u, length, Text::GradientSpan::BoundsMode::CONTENT_BOUND, GradientKind::CONIC);
+        break;
+      }
+      case GradientSpanCase::HIGHLIGHT_MARQUEE:
+      {
+        addHighlightWord("movies", GradientKind::LINEAR);
+        addHighlightWord("sports", GradientKind::RADIAL);
+        addHighlightWord("recommendations", GradientKind::CONIC);
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
+    return builder.Build();
+  }
+
+  void ApplyGradientSpanSource(Label label, const CaseDefinition& item)
+  {
+    const Text::StyledText styled = BuildGradientSpanSource(item);
+    if(mGradientSpanSourceStage == 1u)
+    {
+      label.SetText("Plain source B: GradientSpan data must be cleared");
+    }
+    else if(mGradientSpanSourceStage == 3u)
+    {
+      label.SetStyledText(styled);
+      label.SetText("Plain source B");
+      label.SetStyledText(styled);
+      label.SetText("Rapid final plain source D");
+    }
+    else
+    {
+      label.SetStyledText(styled);
     }
   }
 
@@ -1326,9 +1657,9 @@ private:
     return IsOverlaySupportedForCase(CASES[mCaseIndex]);
   }
 
-  bool IsOverlaySupportedForCase(const CaseDefinition&) const
+  bool IsOverlaySupportedForCase(const CaseDefinition& item) const
   {
-    return true;
+    return item.gradientSpanCase != GradientSpanCase::HIGHLIGHT_MARQUEE;
   }
 
   void ApplyOverlayToLabel(Label label, const CaseDefinition& item)
@@ -1345,6 +1676,11 @@ private:
 
   void SetGradientNone()
   {
+    if(!CanConfigureBaseTextGradient())
+    {
+      return;
+    }
+
     StopGradientAnimation();
     mPreviewLabel.SetTextGradient(Gradient::Base::None());
     mAsyncPreviewLabel.SetTextGradient(Gradient::Base::None());
@@ -1355,6 +1691,11 @@ private:
 
   void ToggleBaseGradientApplied()
   {
+    if(!CanConfigureBaseTextGradient())
+    {
+      return;
+    }
+
     if(mGradientApplied)
     {
       SetGradientNone();
@@ -1367,6 +1708,11 @@ private:
 
   void ReapplyGradient()
   {
+    if(!CanConfigureBaseTextGradient())
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopAnimationForOptionChange();
     mGradientApplied = true;
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
@@ -1389,6 +1735,11 @@ private:
 
   void ToggleOverlayApplied()
   {
+    if(!IsOverlaySupportedForCurrentCase())
+    {
+      return;
+    }
+
     if(mOverlayApplied)
     {
       SetOverlayNone();
@@ -1467,6 +1818,11 @@ private:
 
   void ToggleMarqueeRunning()
   {
+    if(!CanToggleMarquee())
+    {
+      return;
+    }
+
     mMarqueeRunning = !mMarqueeRunning;
     if(mMarqueeMatrixMode)
     {
@@ -1500,6 +1856,11 @@ private:
 
   void ToggleGradientAnimation()
   {
+    if(!CanAnimateCurrentTextGradient())
+    {
+      return;
+    }
+
     if(IsGradientAnimationRunning())
     {
       StopGradientAnimation();
@@ -1528,6 +1889,11 @@ private:
 
   void ToggleGradientOverlayAnimation()
   {
+    if(!CanAnimateCurrentTextGradientOverlay())
+    {
+      return;
+    }
+
     if(IsGradientOverlayAnimationRunning())
     {
       StopGradientOverlayAnimation();
@@ -1556,6 +1922,11 @@ private:
 
   void ResetCurrentGradientState()
   {
+    if(!CanConfigureBaseTextGradient() || !mGradientApplied)
+    {
+      return;
+    }
+
     const bool wasMarqueeRunning = mMarqueeRunning;
 
     StopGradientAnimation();
@@ -1593,7 +1964,7 @@ private:
   {
     StopGradientOverlayAnimation();
 
-    if(mMarqueeMatrixMode || !IsOverlaySupportedForCurrentCase())
+    if(mMarqueeMatrixMode || !IsOverlaySupportedForCurrentCase() || !mOverlayApplied)
     {
       UpdateStatus();
       return;
@@ -1764,6 +2135,23 @@ private:
   static bool IsGradientTypeSwitchable(GradientKind gradient)
   {
     return gradient == GradientKind::LINEAR || gradient == GradientKind::RADIAL || gradient == GradientKind::CONIC;
+  }
+
+  bool CanConfigureBaseTextGradient() const
+  {
+    return mMarqueeMatrixMode || IsGradientTypeSwitchable(CASES[mCaseIndex].gradient);
+  }
+
+  bool CanCycleSpreadMethod() const
+  {
+    return mMarqueeMatrixMode ||
+           IsGradientTypeSwitchable(CASES[mCaseIndex].gradient) ||
+           CASES[mCaseIndex].gradientSpanCase != GradientSpanCase::NONE;
+  }
+
+  bool CanToggleMarquee() const
+  {
+    return mMarqueeMatrixMode || CASES[mCaseIndex].marquee;
   }
 
   GradientKind GetEffectiveCaseGradientKind(const CaseDefinition& item) const
@@ -1966,6 +2354,11 @@ private:
 
   void CycleSpreadMethod()
   {
+    if(!CanCycleSpreadMethod())
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopAnimationForOptionChange();
     mSpreadMethodIndex = (mSpreadMethodIndex + 1u) % SPREAD_METHODS.size();
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
@@ -1973,6 +2366,11 @@ private:
 
   void CycleGradientBoundsMode()
   {
+    if(!CanConfigureBaseTextGradient())
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopAnimationForOptionChange();
     mGradientBoundsModeIndex = (mGradientBoundsModeIndex + 1u) % GRADIENT_BOUNDS_MODES.size();
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
@@ -1980,6 +2378,11 @@ private:
 
   void CycleOverlayGradientType()
   {
+    if(!IsOverlaySupportedForCurrentCase())
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
     mOverlayGradientTypeIndex = (mOverlayGradientTypeIndex + 1u) % OVERLAY_GRADIENT_KINDS.size();
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
@@ -1987,6 +2390,11 @@ private:
 
   void ToggleOverlayFillMode()
   {
+    if(!IsOverlaySupportedForCurrentCase())
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
     mOverlayFillMode = mOverlayFillMode == OverlayFillMode::EFFECT ? OverlayFillMode::FULL : OverlayFillMode::EFFECT;
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
@@ -1994,6 +2402,11 @@ private:
 
   void CycleOverlaySpreadMethod()
   {
+    if(!IsOverlaySupportedForCurrentCase())
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
     mOverlaySpreadMethodIndex = (mOverlaySpreadMethodIndex + 1u) % SPREAD_METHODS.size();
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
@@ -2001,6 +2414,11 @@ private:
 
   void CycleOverlayBoundsMode()
   {
+    if(!IsOverlaySupportedForCurrentCase())
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
     mOverlayBoundsModeIndex = (mOverlayBoundsModeIndex + 1u) % GRADIENT_BOUNDS_MODES.size();
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
@@ -2008,13 +2426,36 @@ private:
 
   void CycleOverlayMode()
   {
+    if(!IsOverlaySupportedForCurrentCase())
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
     mOverlayModeIndex = (mOverlayModeIndex + 1u) % OVERLAY_MODES.size();
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
   }
 
+  void CycleGradientSpanSource()
+  {
+    if(mMarqueeMatrixMode || CASES[mCaseIndex].gradientSpanCase == GradientSpanCase::NONE)
+    {
+      return;
+    }
+
+    StopGradientAnimation();
+    StopGradientOverlayAnimation();
+    mGradientSpanSourceStage = (mGradientSpanSourceStage + 1u) % 4u;
+    ApplyCurrentCase();
+  }
+
   void CycleHorizontalAlignment()
   {
+    if(mMarqueeMatrixMode)
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopAnimationForOptionChange();
     mHorizontalAlignmentIndex = (mHorizontalAlignmentIndex + 1u) % ALIGNMENTS.size();
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
@@ -2022,6 +2463,11 @@ private:
 
   void CycleVerticalAlignment()
   {
+    if(mMarqueeMatrixMode)
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopAnimationForOptionChange();
     mVerticalAlignmentIndex = (mVerticalAlignmentIndex + 1u) % ALIGNMENTS.size();
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
@@ -2029,6 +2475,11 @@ private:
 
   void TogglePreviewSizeMode()
   {
+    if(mMarqueeMatrixMode)
+    {
+      return;
+    }
+
     const bool wasAnimationRunning = StopAnimationForOptionChange();
     mPreviewSizeMode = (mPreviewSizeMode == PreviewSizeMode::FIXED) ? PreviewSizeMode::WRAP : PreviewSizeMode::FIXED;
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
@@ -2063,7 +2514,7 @@ private:
   {
     if(!CanCycleGradientType())
     {
-      SetHudBadge(mGradientTypeBadge, "Gradient N/A", UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
+      SetActionBadge(mGradientTypeBadge, "Gradient N/A", false, UiColor(0x1E293B), UiColor(0x475569));
       return;
     }
 
@@ -2082,58 +2533,60 @@ private:
       backgroundColor = UiColor(0x92400E);
       borderlineColor = UiColor(0xFBBF24);
     }
-    SetHudBadge(mGradientTypeBadge, text, backgroundColor, borderlineColor);
+    SetActionBadge(mGradientTypeBadge, text, true, backgroundColor, borderlineColor);
   }
 
   void UpdateOverlayBadges(bool supported)
   {
     if(!supported)
     {
-      SetHudBadge(mOverlayTypeBadge, "Overlay N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
-      SetHudBadge(mOverlaySpreadBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
-      SetHudBadge(mOverlayBoundsBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
-      SetHudBadge(mOverlayAnimationBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
-      SetHudBadge(mOverlayToggleBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
-      SetHudBadge(mOverlayResetBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
-      SetHudBadge(mOverlayModeBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
-      SetHudBadge(mOverlayFillBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+      SetActionBadge(mOverlayTypeBadge, "Overlay N/A", false, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER));
+      SetActionBadge(mOverlaySpreadBadge, "N/A", false, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER));
+      SetActionBadge(mOverlayBoundsBadge, "N/A", false, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER));
+      SetActionBadge(mOverlayAnimationBadge, "N/A", false, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER));
+      SetActionBadge(mOverlayToggleBadge, "N/A", false, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER));
+      SetActionBadge(mOverlayResetBadge, "N/A", false, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER));
+      SetActionBadge(mOverlayModeBadge, "N/A", false, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER));
+      SetActionBadge(mOverlayFillBadge, "N/A", false, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER));
       return;
     }
 
     std::string type = "Overlay ";
     type += GetGradientName(CurrentOverlayGradientKind());
-    SetHudBadge(mOverlayTypeBadge, type, UiColor(0x155E75), UiColor(0x67E8F9));
+    SetActionBadge(mOverlayTypeBadge, type, true, UiColor(0x155E75), UiColor(0x67E8F9));
 
-    SetHudBadge(mOverlaySpreadBadge, GetSpreadMethodName(CurrentOverlaySpreadMethod()), UiColor(0x4C1D95), UiColor(0xC4B5FD));
-    SetHudBadge(mOverlayBoundsBadge, GetGradientBoundsModeBadgeName(CurrentOverlayBoundsMode()), UiColor(0x713F12), UiColor(0xFCD34D));
+    SetActionBadge(mOverlaySpreadBadge, GetSpreadMethodName(CurrentOverlaySpreadMethod()), true, UiColor(0x4C1D95), UiColor(0xC4B5FD));
+    SetActionBadge(mOverlayBoundsBadge, GetGradientBoundsModeBadgeName(CurrentOverlayBoundsMode()), true, UiColor(0x713F12), UiColor(0xFCD34D));
     const bool canAnimateOverlay = CanAnimateCurrentTextGradientOverlay();
-    SetHudBadge(mOverlayAnimationBadge,
-                mOverlayAnimationInfo ? "Run" : "Ready",
-                mOverlayAnimationInfo ? UiColor(0x0F766E) : (canAnimateOverlay ? UiColor(BADGE_READY_BACKGROUND) : UiColor(BADGE_DISABLED_BACKGROUND)),
-                mOverlayAnimationInfo ? UiColor(0x5EEAD4) : (canAnimateOverlay ? UiColor(BADGE_READY_BORDER) : UiColor(BADGE_DISABLED_BORDER)),
-                mOverlayAnimationInfo ? UiColor(BADGE_ON_TEXT) : (canAnimateOverlay ? UiColor(BADGE_ON_TEXT) : UiColor(BADGE_DISABLED_TEXT)));
+    SetActionBadge(mOverlayAnimationBadge,
+                   canAnimateOverlay ? (mOverlayAnimationInfo ? "Run" : "Ready") : "N/A",
+                   canAnimateOverlay,
+                   mOverlayAnimationInfo ? UiColor(0x0F766E) : UiColor(BADGE_READY_BACKGROUND),
+                   mOverlayAnimationInfo ? UiColor(0x5EEAD4) : UiColor(BADGE_READY_BORDER));
 
-    SetHudBadge(mOverlayToggleBadge,
-                mOverlayApplied ? "Clear" : "Apply",
-                mOverlayApplied ? UiColor(0x7F1D1D) : UiColor(BADGE_APPLY_BACKGROUND),
-                mOverlayApplied ? UiColor(0xFCA5A5) : UiColor(BADGE_APPLY_BORDER),
-                UiColor(BADGE_ON_TEXT));
-    SetHudBadge(mOverlayResetBadge, "Reset", UiColor(0x7C2D12), UiColor(0xFDBA74), UiColor(BADGE_ON_TEXT));
-    SetHudBadge(mOverlayModeBadge, GetGradientOverlayModeName(CurrentOverlayMode()), UiColor(0x9D174D), UiColor(0xF9A8D4));
+    SetActionBadge(mOverlayToggleBadge,
+                   mOverlayApplied ? "Clear" : "Apply",
+                   true,
+                   mOverlayApplied ? UiColor(0x7F1D1D) : UiColor(BADGE_APPLY_BACKGROUND),
+                   mOverlayApplied ? UiColor(0xFCA5A5) : UiColor(BADGE_APPLY_BORDER));
+    SetActionBadge(mOverlayResetBadge, mOverlayApplied ? "Reset" : "N/A", mOverlayApplied, UiColor(0x7C2D12), UiColor(0xFDBA74));
+    SetActionBadge(mOverlayModeBadge, GetGradientOverlayModeName(CurrentOverlayMode()), true, UiColor(0x9D174D), UiColor(0xF9A8D4));
 
     std::string fill = "FILL ";
     fill += GetOverlayFillModeName(CurrentOverlayFillMode());
-    SetHudBadge(mOverlayFillBadge, fill, UiColor(0x065F46), UiColor(0x34D399));
+    SetActionBadge(mOverlayFillBadge, fill, true, UiColor(0x065F46), UiColor(0x34D399));
   }
 
   void UpdateStatus()
   {
-    SetHudBadge(mResetBadge, "Reset", UiColor(0x7C2D12), UiColor(0xFDBA74));
-    SetHudBadge(mClearBadge,
-                mGradientApplied ? "Clear" : "Apply",
-                mGradientApplied ? UiColor(0x7F1D1D) : UiColor(BADGE_APPLY_BACKGROUND),
-                mGradientApplied ? UiColor(0xFCA5A5) : UiColor(BADGE_APPLY_BORDER),
-                UiColor(BADGE_ON_TEXT));
+    const bool baseGradientSupported = CanConfigureBaseTextGradient();
+    const bool canResetBaseGradient  = baseGradientSupported && mGradientApplied;
+    SetActionBadge(mResetBadge, canResetBaseGradient ? "Reset" : "N/A", canResetBaseGradient, UiColor(0x7C2D12), UiColor(0xFDBA74));
+    SetActionBadge(mClearBadge,
+                   baseGradientSupported ? (mGradientApplied ? "Clear" : "Apply") : "N/A",
+                   baseGradientSupported,
+                   mGradientApplied ? UiColor(0x7F1D1D) : UiColor(BADGE_APPLY_BACKGROUND),
+                   mGradientApplied ? UiColor(0xFCA5A5) : UiColor(BADGE_APPLY_BORDER));
     UpdateGradientTypeBadge();
 
     if(mMarqueeMatrixMode)
@@ -2143,27 +2596,28 @@ private:
 
       std::string spread;
       spread += GetSpreadMethodName(CurrentSpreadMethod());
-      SetHudBadge(mSpreadBadge, spread, UiColor(0x312E81), UiColor(0x818CF8));
+      SetActionBadge(mSpreadBadge, spread, true, UiColor(0x312E81), UiColor(0x818CF8));
 
       std::string bounds;
       bounds += GetGradientBoundsModeBadgeName(CurrentGradientBoundsMode());
-      SetHudBadge(mBoundsBadge, bounds, UiColor(0x164E63), UiColor(0x67E8F9));
+      SetActionBadge(mBoundsBadge, bounds, true, UiColor(0x164E63), UiColor(0x67E8F9));
 
-      std::string size = "SIZE ";
-      size += GetPreviewSizeModeBadgeName(mPreviewSizeMode);
-      SetHudBadge(mSizeBadge, size, UiColor(0x78350F), UiColor(0xFBBF24));
-
-      SetHudBadge(mHAlignBadge, "H ALIGN Matrix", UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
-      SetHudBadge(mVAlignBadge, "V ALIGN Matrix", UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
-      SetHudBadge(mMarqueeBadge, mMarqueeRunning ? "MARQUEE Run" : "MARQUEE Stop", mMarqueeRunning ? UiColor(0x065F46) : UiColor(0x7F1D1D), mMarqueeRunning ? UiColor(0x34D399) : UiColor(0xFCA5A5));
-      SetHudBadge(mMatrixBadge, "MATRIX On", UiColor(0x581C87), UiColor(0xC084FC));
+      SetActionBadge(mSizeBadge, "SIZE N/A", false, UiColor(0x78350F), UiColor(0xFBBF24));
+      SetActionBadge(mHAlignBadge, "H ALIGN N/A", false, UiColor(0x1E293B), UiColor(0x475569));
+      SetActionBadge(mVAlignBadge, "V ALIGN N/A", false, UiColor(0x1E293B), UiColor(0x475569));
+      SetActionBadge(mMarqueeBadge,
+                     mMarqueeRunning ? "MARQUEE Run" : "MARQUEE Stop",
+                     true,
+                     mMarqueeRunning ? UiColor(0x065F46) : UiColor(0x7F1D1D),
+                     mMarqueeRunning ? UiColor(0x34D399) : UiColor(0xFCA5A5));
+      SetActionBadge(mMatrixBadge, "MATRIX On", true, UiColor(0x581C87), UiColor(0xC084FC));
 
       const bool canAnimate = CanAnimateCurrentTextGradient();
-      SetHudBadge(mAnimationBadge,
-                  mAnimationInfo ? "Run" : "Ready",
-                  mAnimationInfo ? UiColor(0x0F766E) : (canAnimate ? UiColor(BADGE_READY_BACKGROUND) : UiColor(BADGE_DISABLED_BACKGROUND)),
-                  mAnimationInfo ? UiColor(0x5EEAD4) : (canAnimate ? UiColor(BADGE_READY_BORDER) : UiColor(BADGE_DISABLED_BORDER)),
-                  mAnimationInfo ? UiColor(BADGE_ON_TEXT) : (canAnimate ? UiColor(BADGE_ON_TEXT) : UiColor(BADGE_DISABLED_TEXT)));
+      SetActionBadge(mAnimationBadge,
+                     canAnimate ? (mAnimationInfo ? "Run" : "Ready") : "N/A",
+                     canAnimate,
+                     mAnimationInfo ? UiColor(0x0F766E) : UiColor(BADGE_READY_BACKGROUND),
+                     mAnimationInfo ? UiColor(0x5EEAD4) : UiColor(BADGE_READY_BORDER));
 
       std::string expected = "MATRIX  H/V, START/CENTER/END, short/long, sync/async | Expected: short cells align to text bounds; long cells use viewport bounds; async matches sync.";
       if(!mGradientApplied)
@@ -2197,51 +2651,72 @@ private:
 
     std::string spread;
     spread += GetSpreadMethodName(CurrentSpreadMethod());
-    SetHudBadge(mSpreadBadge, spread, UiColor(0x312E81), UiColor(0x818CF8));
+    SetActionBadge(mSpreadBadge, spread, CanCycleSpreadMethod(), UiColor(0x312E81), UiColor(0x818CF8));
 
-    std::string bounds;
-    bounds += GetGradientBoundsModeBadgeName(CurrentGradientBoundsMode());
-    SetHudBadge(mBoundsBadge, bounds, UiColor(0x164E63), UiColor(0x67E8F9));
+    std::string bounds = baseGradientSupported ? GetGradientBoundsModeBadgeName(CurrentGradientBoundsMode()) : "Bounds N/A";
+    SetActionBadge(mBoundsBadge, bounds, baseGradientSupported, UiColor(0x164E63), UiColor(0x67E8F9));
 
     std::string size = "SIZE ";
     size += GetPreviewSizeModeBadgeName(mPreviewSizeMode);
-    SetHudBadge(mSizeBadge, size, UiColor(0x78350F), UiColor(0xFBBF24));
+    SetActionBadge(mSizeBadge, size, true, UiColor(0x78350F), UiColor(0xFBBF24));
 
     std::string hAlign = "H ALIGN ";
     hAlign += GetAlignmentName(ALIGNMENTS[mHorizontalAlignmentIndex]);
-    SetHudBadge(mHAlignBadge, hAlign, UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
+    SetActionBadge(mHAlignBadge, hAlign, true, UiColor(0x1E293B), UiColor(0x475569));
 
     std::string vAlign = "V ALIGN ";
     vAlign += GetAlignmentName(ALIGNMENTS[mVerticalAlignmentIndex]);
-    SetHudBadge(mVAlignBadge, vAlign, UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
+    SetActionBadge(mVAlignBadge, vAlign, true, UiColor(0x1E293B), UiColor(0x475569));
 
     if(item.marquee)
     {
       std::string marquee = "MARQUEE ";
       marquee += item.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL ? "H" : "V";
       marquee += mMarqueeRunning ? " Run" : " Stop";
-      SetHudBadge(mMarqueeBadge, marquee, mMarqueeRunning ? UiColor(0x065F46) : UiColor(0x7F1D1D), mMarqueeRunning ? UiColor(0x34D399) : UiColor(0xFCA5A5));
+      SetActionBadge(mMarqueeBadge,
+                     marquee,
+                     true,
+                     mMarqueeRunning ? UiColor(0x065F46) : UiColor(0x7F1D1D),
+                     mMarqueeRunning ? UiColor(0x34D399) : UiColor(0xFCA5A5));
     }
     else
     {
-      SetHudBadge(mMarqueeBadge, "MARQUEE N/A", UiColor(0x334155), UiColor(0x64748B), UiColor(0xCBD5E1));
+      SetActionBadge(mMarqueeBadge, "MARQUEE N/A", false, UiColor(0x334155), UiColor(0x64748B));
     }
 
-    SetHudBadge(mMatrixBadge, "MATRIX Off", UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
+    SetActionBadge(mMatrixBadge, "MATRIX Off", true, UiColor(0x1E293B), UiColor(0x475569));
     const bool canAnimate = CanAnimateCurrentTextGradient();
-    SetHudBadge(mAnimationBadge,
-                mAnimationInfo ? "Run" : "Ready",
-                mAnimationInfo ? UiColor(0x0F766E) : (canAnimate ? UiColor(BADGE_READY_BACKGROUND) : UiColor(BADGE_DISABLED_BACKGROUND)),
-                mAnimationInfo ? UiColor(0x5EEAD4) : (canAnimate ? UiColor(BADGE_READY_BORDER) : UiColor(BADGE_DISABLED_BORDER)),
-                mAnimationInfo ? UiColor(BADGE_ON_TEXT) : (canAnimate ? UiColor(BADGE_ON_TEXT) : UiColor(BADGE_DISABLED_TEXT)));
+    SetActionBadge(mAnimationBadge,
+                   canAnimate ? (mAnimationInfo ? "Run" : "Ready") : "N/A",
+                   canAnimate,
+                   mAnimationInfo ? UiColor(0x0F766E) : UiColor(BADGE_READY_BACKGROUND),
+                   mAnimationInfo ? UiColor(0x5EEAD4) : UiColor(BADGE_READY_BORDER));
 
     std::string expected = "Coordinate: ";
-    expected += item.marquee ? "visible marquee viewport bounds" : "logical text bounds";
+    if(baseGradientSupported)
+    {
+      expected += item.marquee ? "visible marquee viewport bounds" : "logical text bounds";
+    }
+    else
+    {
+      expected += "authored GradientSpan bounds";
+    }
     expected += " | ";
     expected += item.expected;
     expected += " ";
     expected += item.notes;
-    if(!mGradientApplied)
+    if(item.gradientSpanCase != GradientSpanCase::NONE)
+    {
+      static constexpr std::array<const char*, 4u> SOURCE_STAGES{{"Styled", "Plain B", "Styled C", "Rapid A/B/C/D -> Plain D"}};
+      expected += " Source: ";
+      expected += SOURCE_STAGES[mGradientSpanSourceStage];
+      expected += "; J cycles.";
+    }
+    if(!baseGradientSupported)
+    {
+      expected += " Base TextGradient controls: N/A.";
+    }
+    else if(!mGradientApplied)
     {
       expected += " TG: cleared; C applies the selected type.";
     }
@@ -2370,6 +2845,10 @@ private:
     {
       ToggleGradientOverlayAnimation();
     }
+    else if(keyName == "j" || keyName == "J")
+    {
+      CycleGradientSpanSource();
+    }
     else if(keyName == "x" || keyName == "X")
     {
       ResetCurrentGradientState();
@@ -2492,6 +2971,7 @@ private:
   std::size_t        mOverlaySpreadMethodIndex{INITIAL_SPREAD_METHOD_INDEX};
   std::size_t        mOverlayBoundsModeIndex{INITIAL_GRADIENT_BOUNDS_MODE_INDEX};
   std::size_t        mOverlayModeIndex{0u};
+  std::size_t        mGradientSpanSourceStage{0u};
   PreviewSizeMode mPreviewSizeMode{PreviewSizeMode::FIXED};
   OverlayFillMode mOverlayFillMode{OverlayFillMode::EFFECT};
   GradientKind    mGradientTypeOverride{GradientKind::NONE};

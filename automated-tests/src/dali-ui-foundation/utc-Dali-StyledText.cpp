@@ -469,6 +469,42 @@ int UtcDaliForegroundColorSpanNewAndDownCastP(void)
   END_TEST;
 }
 
+int UtcDaliGradientSpanNewDownCastAndSnapshotP(void)
+{
+  UiTestApplication application;
+
+  Gradient::Linear source(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  source.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Color::RED)),
+                       Gradient::StopNode(1.0f, UiColor(Color::BLUE))});
+
+  GradientSpan span = GradientSpan::New(source, GradientSpan::BoundsMode::VIEW_BOUND);
+  DALI_TEST_CHECK(span);
+  DALI_TEST_EQUALS(span.GetBoundsMode(), GradientSpan::BoundsMode::VIEW_BOUND, TEST_LOCATION);
+  DALI_TEST_EQUALS(sizeof(GradientSpan::BoundsMode), sizeof(uint8_t), TEST_LOCATION);
+
+  Span baseSpan = Span::DownCast(span);
+  DALI_TEST_CHECK(baseSpan);
+  CheckSpanIdentity(baseSpan, span);
+  DALI_TEST_CHECK(GradientSpan::DownCast(baseSpan));
+
+  // The span owns an authored-value snapshot rather than retaining a mutable
+  // alias to the source gradient.
+  source.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Color::GREEN)),
+                       Gradient::StopNode(1.0f, UiColor(Color::YELLOW))});
+  const auto capturedStops = span.GetGradient().GetStopNodes();
+  DALI_TEST_EQUALS(capturedStops.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(capturedStops[0u].GetColor().GetRgba(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(capturedStops[1u].GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+
+  GradientSpan defaultBounds = GradientSpan::New(source);
+  DALI_TEST_EQUALS(defaultBounds.GetBoundsMode(), GradientSpan::BoundsMode::SPAN_BOUND, TEST_LOCATION);
+  DALI_TEST_CHECK(!GradientSpan::DownCast(BaseHandle()));
+  DALI_TEST_EQUALS(GradientSpan().GetGradient().GetType(), Gradient::Type::NONE, TEST_LOCATION);
+  DALI_TEST_EQUALS(GradientSpan().GetBoundsMode(), GradientSpan::BoundsMode::SPAN_BOUND, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliBackgroundColorSpanNewAndDownCastP(void)
 {
   UiTestApplication application;

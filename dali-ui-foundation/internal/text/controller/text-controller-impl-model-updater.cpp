@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 
 namespace Dali::Ui::Text
 {
@@ -674,6 +675,16 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
                              targetModel.mVisualModel->mGlyphsPerCharacter, startIndex,
                              updateInfo.mStartGlyphIndex, requestedNumberOfCharacters,
                              targetModel.mVisualModel->mColors, targetModel.mVisualModel->mColorIndices);
+
+    if(targetModel.mLogicalModel->mGradientSpanData)
+    {
+      Internal::SetGradientSpanSegmentationInfo(*targetModel.mLogicalModel->mGradientSpanData,
+                                                targetModel.mVisualModel->mCharactersToGlyph,
+                                                targetModel.mVisualModel->mGlyphsPerCharacter,
+                                                startIndex,
+                                                updateInfo.mStartGlyphIndex,
+                                                requestedNumberOfCharacters);
+    }
 
     // Set the background color runs in glyphs.
     SetColorSegmentationInfo(

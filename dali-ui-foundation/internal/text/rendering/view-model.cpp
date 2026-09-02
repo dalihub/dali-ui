@@ -343,6 +343,11 @@ const ColorIndex* ViewModel::GetColorIndices() const
            : mModel->GetColorIndices();
 }
 
+const Internal::GradientSpanModelData* ViewModel::GetGradientSpanModelData() const
+{
+  return mModel->GetGradientSpanModelData();
+}
+
 const Vector4* ViewModel::GetBackgroundColors() const
 {
   return mModel->GetBackgroundColors();

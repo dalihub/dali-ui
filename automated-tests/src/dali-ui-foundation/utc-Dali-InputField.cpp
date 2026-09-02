@@ -883,6 +883,27 @@ int UtcDaliInputFieldSetStyledText(void)
   inputField.SetStyledText(builder.Build());
   DALI_TEST_EQUALS(inputField.GetText(), "Hello", TEST_LOCATION);
 
+  Gradient::Linear fieldGradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  fieldGradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  fieldGradient.SetStopNodes({Gradient::StopNode(0.0f, Color::RED), Gradient::StopNode(1.0f, Color::YELLOW)});
+  Text::StyledTextBuilder gradientBuilder = Text::StyledTextBuilder::New("Search smart devices");
+  DALI_TEST_CHECK(gradientBuilder.SetSpan(
+    Text::GradientSpan::New(fieldGradient, Text::GradientSpan::BoundsMode::SPAN_BOUND), 0u, 6u));
+  inputField.SetStyledText(gradientBuilder.Build());
+  DALI_TEST_EQUALS(inputField.GetText(), "Search smart devices", TEST_LOCATION);
+
+  Gradient::Linear userSpaceGradient(Vector2(8.0f, 6.0f), Vector2(72.0f, 6.0f));
+  userSpaceGradient.SetUnits(Gradient::Units::USER_SPACE);
+  userSpaceGradient.SetSpreadMethod(Gradient::SpreadMethod::REFLECT);
+  userSpaceGradient.SetStartOffset(0.2f);
+  userSpaceGradient.SetStopNodes({Gradient::StopNode(0.0f, Color::GREEN),
+                                  Gradient::StopNode(1.0f, Color::BLUE)});
+  Text::StyledTextBuilder userSpaceBuilder = Text::StyledTextBuilder::New("USER space field");
+  DALI_TEST_CHECK(userSpaceBuilder.SetSpan(
+    Text::GradientSpan::New(userSpaceGradient, Text::GradientSpan::BoundsMode::CONTENT_BOUND), 0u, 10u));
+  inputField.SetStyledText(userSpaceBuilder.Build());
+  DALI_TEST_EQUALS(inputField.GetText(), "USER space field", TEST_LOCATION);
+
   Text::StyledTextBuilder replacementBuilder = Text::StyledTextBuilder::New("AiconB");
   DALI_TEST_CHECK(replacementBuilder.SetSpan(
     Text::ImageSpan::New(Text::ImageAttributes("unused.png", Vector2(24.0f, 18.0f))), 1u, 5u));

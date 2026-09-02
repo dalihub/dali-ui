@@ -38,6 +38,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-alignment.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
@@ -375,6 +376,7 @@ void AsyncTextLoader::ClearTextModelData()
   mTextModel->mLogicalModel->mScriptRuns.Clear();
   mTextModel->mLogicalModel->mFontRuns.Clear();
   mTextModel->mLogicalModel->mColorRuns.Clear();
+  mTextModel->mLogicalModel->mGradientSpanData.reset();
   mTextModel->mLogicalModel->mBackgroundColorRuns.Clear();
   mTextModel->mLogicalModel->mLineBreakInfo.Clear();
   mTextModel->mLogicalModel->mParagraphInfo.Clear();
@@ -775,6 +777,16 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   SetColorSegmentationInfo(mTextModel->mLogicalModel->mColorRuns, mTextModel->mVisualModel->mCharactersToGlyph,
                            mTextModel->mVisualModel->mGlyphsPerCharacter, 0u, 0u, numberOfCharacters,
                            mTextModel->mVisualModel->mColors, mTextModel->mVisualModel->mColorIndices);
+
+  if(mTextModel->mLogicalModel->mGradientSpanData)
+  {
+    Text::Internal::SetGradientSpanSegmentationInfo(*mTextModel->mLogicalModel->mGradientSpanData,
+                                                    mTextModel->mVisualModel->mCharactersToGlyph,
+                                                    mTextModel->mVisualModel->mGlyphsPerCharacter,
+                                                    0u,
+                                                    0u,
+                                                    numberOfCharacters);
+  }
 
   // Set the background color runs in glyphs.
   SetColorSegmentationInfo(mTextModel->mLogicalModel->mBackgroundColorRuns,
@@ -1332,7 +1344,9 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const Text::Length           numberOfGlyphs        = renderModel->GetNumberOfGlyphs();
   const bool                   hasColorIndexBuffer   = nullptr != colorsBuffer && nullptr != colorIndicesBuffer;
   TextAbstraction::FontClient& fontClient            = mModule.GetFontClient();
-  bool                         hasMultipleTextColors = false;
+  const auto*                  gradientSpanData      = renderModel->GetGradientSpanModelData();
+  const bool                   hasGradientSpan       = gradientSpanData && !gradientSpanData->glyphPaintIndices.Empty();
+  bool                         hasMultipleTextColors = hasGradientSpan;
   bool                         containsColorGlyph    = false;
   for(Text::Length glyphIndex = 0; glyphIndex < numberOfGlyphs; glyphIndex++)
   {

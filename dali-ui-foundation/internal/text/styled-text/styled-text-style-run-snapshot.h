@@ -19,13 +19,16 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/math/vector4.h>
+#include <memory>
 #include <string>
 #include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/strikethrough-style-properties.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
+#include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/text/underline-style-properties.h>
+#include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 
 namespace Dali
 {
@@ -41,6 +44,21 @@ struct StyledTextColorRunSnapshot
   Dali::Ui::Text::CharacterIndex characterIndex{0u};
   Dali::Ui::Text::Length         numberOfCharacters{0u};
   Vector4                        color{Color::BLACK};
+  uint32_t                       insertionOrder{0u};
+};
+
+struct StyledTextGradientRunSnapshot
+{
+  Dali::Ui::Text::CharacterIndex           characterIndex{0u};
+  Dali::Ui::Text::Length                   numberOfCharacters{0u};
+  Gradient::Style                          style{};
+  Dali::Ui::Text::GradientSpan::BoundsMode boundsMode{Dali::Ui::Text::GradientSpan::BoundsMode::SPAN_BOUND};
+  uint32_t                                 insertionOrder{0u};
+};
+
+struct StyledTextGradientSnapshotData
+{
+  std::vector<StyledTextGradientRunSnapshot> runs;
 };
 
 struct StyledTextFontRunSnapshot
@@ -91,12 +109,13 @@ struct StyledTextAnchorRunSnapshot
 
 struct StyledTextStyleRunSnapshot
 {
-  std::vector<StyledTextColorRunSnapshot>       foregroundColorRuns;
-  std::vector<StyledTextColorRunSnapshot>       backgroundColorRuns;
-  std::vector<StyledTextFontRunSnapshot>        fontRuns;
-  std::vector<StyledTextUnderlineRunSnapshot>   underlineRuns;
-  std::vector<StyledTextLineThroughRunSnapshot> lineThroughRuns;
-  std::vector<StyledTextAnchorRunSnapshot>      anchorRuns;
+  std::vector<StyledTextColorRunSnapshot>               foregroundColorRuns;
+  std::vector<StyledTextColorRunSnapshot>               backgroundColorRuns;
+  std::vector<StyledTextFontRunSnapshot>                fontRuns;
+  std::vector<StyledTextUnderlineRunSnapshot>           underlineRuns;
+  std::vector<StyledTextLineThroughRunSnapshot>         lineThroughRuns;
+  std::vector<StyledTextAnchorRunSnapshot>              anchorRuns;
+  std::shared_ptr<const StyledTextGradientSnapshotData> gradientData;
 };
 
 } // namespace Internal

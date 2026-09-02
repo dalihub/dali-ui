@@ -21,6 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/input-style.h>
 #include <dali-ui-foundation/internal/text/bounded-paragraph-helper-functions.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 
@@ -293,6 +294,20 @@ void LogicalModel::UpdateTextStyleRuns(CharacterIndex index, int numberOfCharact
   // Process the color runs.
   Vector<ColorRun> removedColorRuns;
   UpdateCharacterRuns<ColorRun>(index, numberOfCharacters, totalNumberOfCharacters, mColorRuns, removedColorRuns);
+
+  if(mGradientSpanData)
+  {
+    Vector<Internal::GradientSpanCharacterRun> removedGradientSpanRuns;
+    UpdateCharacterRuns<Internal::GradientSpanCharacterRun>(index,
+                                                            numberOfCharacters,
+                                                            totalNumberOfCharacters,
+                                                            mGradientSpanData->characterRuns,
+                                                            removedGradientSpanRuns);
+    if(mGradientSpanData->characterRuns.Empty())
+    {
+      mGradientSpanData.reset();
+    }
+  }
 
   // This is needed until now for underline tag in mark-up processor
   // Process the underlined runs.

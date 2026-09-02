@@ -30,14 +30,17 @@
 #include <dali-ui-foundation/internal/text/font-description-run.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
@@ -54,6 +57,11 @@ namespace Text
 namespace
 {
 constexpr float PIXEL_FORMAT_64_FACTOR = 64.0f;
+
+using CharacterIndex                 = Dali::Ui::Text::CharacterIndex;
+using Length                         = Dali::Ui::Text::Length;
+using ColorRun                       = Dali::Ui::Text::ColorRun;
+using StyledTextGradientSnapshotData = Dali::Ui::Text::Internal::StyledTextGradientSnapshotData;
 
 const StyledText* GetImplementation(const Dali::Ui::Text::StyledText& styledText)
 {
@@ -173,12 +181,16 @@ char* CopyToCString(const std::string& string)
   return copiedString;
 }
 
-StyledTextColorRunSnapshot ToColorRunSnapshot(uint32_t startIndex, uint32_t endIndex, const Vector4& color)
+StyledTextColorRunSnapshot ToColorRunSnapshot(uint32_t       startIndex,
+                                              uint32_t       endIndex,
+                                              const Vector4& color,
+                                              uint32_t       insertionOrder = 0u)
 {
   StyledTextColorRunSnapshot snapshot;
   snapshot.characterIndex     = startIndex;
   snapshot.numberOfCharacters = endIndex - startIndex;
   snapshot.color              = color;
+  snapshot.insertionOrder     = insertionOrder;
   return snapshot;
 }
 
@@ -359,6 +371,176 @@ void ReleaseFontDescriptionRunFamilyNames(Dali::Vector<Dali::Ui::Text::FontDescr
   fontDescriptionRuns.Clear();
 }
 
+enum class ForegroundPaintKind : uint8_t
+{
+  NONE,
+  COLOR,
+  GRADIENT
+};
+
+struct ForegroundPaintOwner
+{
+  ForegroundPaintKind kind{ForegroundPaintKind::NONE};
+  uint32_t            sourceIndex{0u};
+};
+
+struct ForegroundPaintOperation
+{
+  uint32_t            insertionOrder{0u};
+  ForegroundPaintKind kind{ForegroundPaintKind::NONE};
+  uint32_t            sourceIndex{0u};
+  CharacterIndex      characterIndex{0u};
+  Length              numberOfCharacters{0u};
+};
+
+void ApplyUnifiedForegroundPaint(const StyledTextStyleRunSnapshot& snapshot,
+                                 Length                            numberOfCharacters,
+                                 Dali::Ui::Text::LogicalModel&     logicalModel)
+{
+  const auto& gradientRuns = snapshot.gradientData->runs;
+
+  std::vector<ForegroundPaintOperation> operations;
+  operations.reserve(snapshot.foregroundColorRuns.size() + gradientRuns.size());
+  for(uint32_t index = 0u; index < snapshot.foregroundColorRuns.size(); ++index)
+  {
+    const auto& run = snapshot.foregroundColorRuns[index];
+    operations.push_back({run.insertionOrder,
+                          ForegroundPaintKind::COLOR,
+                          index,
+                          run.characterIndex,
+                          run.numberOfCharacters});
+  }
+  for(uint32_t index = 0u; index < gradientRuns.size(); ++index)
+  {
+    const auto& run = gradientRuns[index];
+    operations.push_back({run.insertionOrder,
+                          ForegroundPaintKind::GRADIENT,
+                          index,
+                          run.characterIndex,
+                          run.numberOfCharacters});
+  }
+  std::stable_sort(operations.begin(),
+                   operations.end(),
+                   [](const ForegroundPaintOperation& lhs, const ForegroundPaintOperation& rhs)
+  {
+    return lhs.insertionOrder < rhs.insertionOrder;
+  });
+
+  std::vector<ForegroundPaintOwner> owners(numberOfCharacters);
+  for(const auto& operation : operations)
+  {
+    const CharacterIndex begin     = std::min(operation.characterIndex, numberOfCharacters);
+    const Length         available = numberOfCharacters - begin;
+    const CharacterIndex end       = begin + std::min(operation.numberOfCharacters, available);
+    for(CharacterIndex character = begin; character < end; ++character)
+    {
+      owners[character] = {operation.kind, operation.sourceIndex};
+    }
+  }
+
+  // Anchor foreground is semantic link state and retains its existing higher
+  // priority. Its ColorRun is appended below, so only gradient ownership needs
+  // to be removed here.
+  for(const auto& anchor : snapshot.anchorRuns)
+  {
+    const CharacterIndex begin     = std::min(anchor.characterIndex, numberOfCharacters);
+    const Length         available = numberOfCharacters - begin;
+    const CharacterIndex end       = begin + std::min(anchor.numberOfCharacters, available);
+    for(CharacterIndex character = begin; character < end; ++character)
+    {
+      if(owners[character].kind == ForegroundPaintKind::GRADIENT)
+      {
+        owners[character] = {};
+      }
+    }
+  }
+
+  logicalModel.mColorRuns.Clear();
+  logicalModel.mGradientSpanData.reset();
+
+  bool              hasGradientOwner = false;
+  std::vector<bool> usedGradientSources(gradientRuns.size(), false);
+  for(const auto& owner : owners)
+  {
+    if(owner.kind == ForegroundPaintKind::GRADIENT)
+    {
+      hasGradientOwner                       = true;
+      usedGradientSources[owner.sourceIndex] = true;
+    }
+  }
+  std::vector<Dali::Ui::Text::Internal::GradientSpanPaintIndex> resolvedPaintIndices(gradientRuns.size(), 0u);
+  if(hasGradientOwner)
+  {
+    logicalModel.mGradientSpanData = std::make_unique<Dali::Ui::Text::Internal::GradientSpanModelData>();
+    auto& paints                   = logicalModel.mGradientSpanData->paints;
+    paints.Reserve(static_cast<uint32_t>(gradientRuns.size()));
+    for(uint32_t sourceIndex = 0u; sourceIndex < gradientRuns.size(); ++sourceIndex)
+    {
+      if(!usedGradientSources[sourceIndex])
+      {
+        continue;
+      }
+
+      const auto& gradientRun = gradientRuns[sourceIndex];
+      if(gradientRun.boundsMode != Dali::Ui::Text::GradientSpan::BoundsMode::SPAN_BOUND)
+      {
+        for(uint32_t previousIndex = 0u; previousIndex < sourceIndex; ++previousIndex)
+        {
+          if(usedGradientSources[previousIndex] &&
+             resolvedPaintIndices[previousIndex] > 0u &&
+             gradientRuns[previousIndex].boundsMode == gradientRun.boundsMode &&
+             Dali::Ui::Text::Internal::Gradient::EqualStyle(gradientRuns[previousIndex].style, gradientRun.style))
+          {
+            resolvedPaintIndices[sourceIndex] = resolvedPaintIndices[previousIndex];
+            break;
+          }
+        }
+      }
+      if(resolvedPaintIndices[sourceIndex] > 0u)
+      {
+        continue;
+      }
+
+      Dali::Ui::Text::Internal::GradientSpanPaint paint;
+      paint.style      = gradientRun.style;
+      paint.boundsMode = gradientRun.boundsMode;
+      paints.PushBack(std::move(paint));
+      resolvedPaintIndices[sourceIndex] = static_cast<Dali::Ui::Text::Internal::GradientSpanPaintIndex>(paints.Count());
+    }
+  }
+
+  CharacterIndex character = 0u;
+  while(character < numberOfCharacters)
+  {
+    const ForegroundPaintOwner owner = owners[character];
+    CharacterIndex             end   = character + 1u;
+    while(end < numberOfCharacters && owners[end].kind == owner.kind && owners[end].sourceIndex == owner.sourceIndex)
+    {
+      ++end;
+    }
+
+    if(owner.kind == ForegroundPaintKind::COLOR)
+    {
+      const auto& snapshotRun = snapshot.foregroundColorRuns[owner.sourceIndex];
+      ColorRun    colorRun;
+      colorRun.characterRun.characterIndex     = character;
+      colorRun.characterRun.numberOfCharacters = end - character;
+      colorRun.color                           = snapshotRun.color;
+      logicalModel.mColorRuns.PushBack(colorRun);
+    }
+    else if(owner.kind == ForegroundPaintKind::GRADIENT && logicalModel.mGradientSpanData)
+    {
+      Dali::Ui::Text::Internal::GradientSpanCharacterRun gradientRun;
+      gradientRun.characterRun.characterIndex     = character;
+      gradientRun.characterRun.numberOfCharacters = end - character;
+      gradientRun.paintIndex                      = resolvedPaintIndices[owner.sourceIndex];
+      logicalModel.mGradientSpanData->characterRuns.PushBack(gradientRun);
+    }
+
+    character = end;
+  }
+}
+
 } // unnamed namespace
 
 StyledTextApplyResult::StyledTextApplyResult() = default;
@@ -454,6 +636,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
   }
 
   std::vector<const SpanAttachment*> orderedForegroundColorAttachments;
+  std::vector<const SpanAttachment*> orderedGradientAttachments;
   std::vector<const SpanAttachment*> orderedBackgroundColorAttachments;
   std::vector<const SpanAttachment*> orderedFontAttachments;
   std::vector<const SpanAttachment*> orderedUnderlineAttachments;
@@ -461,6 +644,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
   std::vector<const SpanAttachment*> orderedAnchorAttachments;
   const auto&                        attachments = impl->GetAttachments();
   orderedForegroundColorAttachments.reserve(attachments.size());
+  orderedGradientAttachments.reserve(attachments.size());
   orderedBackgroundColorAttachments.reserve(attachments.size());
   orderedFontAttachments.reserve(attachments.size());
   orderedUnderlineAttachments.reserve(attachments.size());
@@ -476,6 +660,10 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
     if(Dali::Ui::Text::ForegroundColorSpan::DownCast(attachment.span))
     {
       orderedForegroundColorAttachments.push_back(&attachment);
+    }
+    else if(Dali::Ui::Text::GradientSpan::DownCast(attachment.span))
+    {
+      orderedGradientAttachments.push_back(&attachment);
     }
     else if(Dali::Ui::Text::BackgroundColorSpan::DownCast(attachment.span))
     {
@@ -502,6 +690,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
   // Preserve SpanAttachment insertionOrder per style category. Merging and
   // overlap resolution remain in the existing downstream style paths.
   SortAttachmentsByInsertionOrder(orderedForegroundColorAttachments);
+  SortAttachmentsByInsertionOrder(orderedGradientAttachments);
   SortAttachmentsByInsertionOrder(orderedBackgroundColorAttachments);
   SortAttachmentsByInsertionOrder(orderedFontAttachments);
   SortAttachmentsByInsertionOrder(orderedUnderlineAttachments);
@@ -519,8 +708,37 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
 
     snapshot.foregroundColorRuns.push_back(ToColorRunSnapshot(attachment->startIndex,
                                                               attachment->endIndex,
-                                                              foregroundColorSpan.GetColor().GetRgba()));
+                                                              foregroundColorSpan.GetColor().GetRgba(),
+                                                              attachment->insertionOrder));
   }
+
+  std::shared_ptr<StyledTextGradientSnapshotData> gradientData;
+  for(const SpanAttachment* attachment : orderedGradientAttachments)
+  {
+    const Dali::Ui::Text::GradientSpan gradientSpan = Dali::Ui::Text::GradientSpan::DownCast(attachment->span);
+    if(!gradientSpan || attachment->startIndex >= attachment->endIndex)
+    {
+      continue;
+    }
+
+    StyledTextGradientRunSnapshot gradientRun;
+    gradientRun.characterIndex     = attachment->startIndex;
+    gradientRun.numberOfCharacters = attachment->endIndex - attachment->startIndex;
+    gradientRun.style              = Dali::Ui::Text::Internal::Gradient::CreateStyle(gradientSpan.GetGradient());
+    gradientRun.boundsMode         = gradientSpan.GetBoundsMode();
+    gradientRun.insertionOrder     = attachment->insertionOrder;
+    if(!Dali::Ui::Text::Internal::Gradient::IsRenderable(gradientRun.style))
+    {
+      continue;
+    }
+
+    if(!gradientData)
+    {
+      gradientData = std::make_shared<StyledTextGradientSnapshotData>();
+    }
+    gradientData->runs.push_back(std::move(gradientRun));
+  }
+  snapshot.gradientData = std::move(gradientData);
 
   snapshot.backgroundColorRuns.reserve(orderedBackgroundColorAttachments.size());
   for(const SpanAttachment* attachment : orderedBackgroundColorAttachments)
@@ -690,11 +908,19 @@ void StyledTextApplier::ApplySnapshotToLogicalModel(const StyledTextStyleRunSnap
 {
   ConvertUtf8TextToUtf32(utf8Text, logicalModel.mText);
 
-  logicalModel.mColorRuns.Clear();
-  logicalModel.mColorRuns.Reserve(static_cast<uint32_t>(snapshot.foregroundColorRuns.size() + snapshot.anchorRuns.size()));
-  for(const auto& colorRunSnapshot : snapshot.foregroundColorRuns)
+  if(snapshot.gradientData && !snapshot.gradientData->runs.empty())
   {
-    logicalModel.mColorRuns.PushBack(ToColorRun(colorRunSnapshot));
+    ApplyUnifiedForegroundPaint(snapshot, static_cast<Length>(logicalModel.mText.Count()), logicalModel);
+  }
+  else
+  {
+    logicalModel.mGradientSpanData.reset();
+    logicalModel.mColorRuns.Clear();
+    logicalModel.mColorRuns.Reserve(static_cast<uint32_t>(snapshot.foregroundColorRuns.size() + snapshot.anchorRuns.size()));
+    for(const auto& colorRunSnapshot : snapshot.foregroundColorRuns)
+    {
+      logicalModel.mColorRuns.PushBack(ToColorRun(colorRunSnapshot));
+    }
   }
 
   logicalModel.mBackgroundColorRuns.Clear();

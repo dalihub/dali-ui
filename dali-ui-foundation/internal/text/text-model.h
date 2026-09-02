@@ -165,6 +165,11 @@ public:
   const ColorIndex* GetColorIndices() const override;
 
   /**
+   * @copydoc ModelInterface::GetGradientSpanModelData()
+   */
+  const Internal::GradientSpanModelData* GetGradientSpanModelData() const override;
+
+  /**
    * @copydoc ModelInterface::GetBackgroundColors()
    */
   const Vector4* GetBackgroundColors() const override;

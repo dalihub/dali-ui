@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,45 +16,38 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-impl.h>
 
 namespace Dali
 {
 namespace Ui
 {
+namespace Internal
+{
 namespace Text
 {
-Renderer::Renderer()
+
+GradientSpan::GradientSpan(const Dali::Ui::Gradient::Base&          gradient,
+                           Dali::Ui::Text::GradientSpan::BoundsMode boundsMode)
+: Span(),
+  mGradient(gradient),
+  mBoundsMode(boundsMode)
 {
 }
 
-Renderer::~Renderer()
+GradientSpan::~GradientSpan() = default;
+
+const Dali::Ui::Gradient::Base& GradientSpan::GetGradient() const
 {
+  return mGradient;
 }
 
-bool Renderer::SetAtlasGradientState(const Internal::Gradient::AtlasRendererState&)
+Dali::Ui::Text::GradientSpan::BoundsMode GradientSpan::GetBoundsMode() const
 {
-  return false;
-}
-
-void Renderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds)
-{
-}
-
-void Renderer::UpdateAtlasGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds)
-{
-}
-
-void Renderer::SetAtlasGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex)
-{
-}
-
-void Renderer::SetAtlasGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint)
-{
+  return mBoundsMode;
 }
 
 } // namespace Text
-
+} // namespace Internal
 } // namespace Ui
-
 } // namespace Dali

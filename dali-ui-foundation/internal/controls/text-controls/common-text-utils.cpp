@@ -62,27 +62,44 @@ void UpdateAtlasGradient(Ui::Text::RendererPtr                                re
                          const Ui::Text::Internal::Gradient::AtlasFrameState& state,
                          const Vector2&                                       viewSize)
 {
-  if(!renderer || !state.enabled)
+  if(!renderer)
   {
     return;
   }
 
-  const Vector2 layoutSize = controller->GetView().GetLayoutSize();
-  Vector4       bounds;
+  const auto model           = controller->GetRenderTextModel();
+  const bool hasGradientSpan = model->GetGradientSpanModelData() != nullptr;
+  if(!state.enabled && !hasGradientSpan)
+  {
+    return;
+  }
+
+  const Vector2 layoutSize    = controller->GetView().GetLayoutSize();
+  Vector2       contentOffset = renderablePosition;
+  if(stencil)
+  {
+    const Vector3 stencilPosition = stencil.GetProperty<Vector3>(Actor::Property::POSITION);
+    contentOffset += Vector2(stencilPosition.x, stencilPosition.y);
+  }
+
+  if(hasGradientSpan)
+  {
+    const Vector4 viewBounds = Ui::Text::Internal::CalculateGradientViewBounds(layoutSize, viewSize, contentOffset);
+    renderer->UpdateAtlasGradientSpanViewBounds(layoutSize, viewBounds);
+  }
+  if(!state.enabled)
+  {
+    return;
+  }
+
+  Vector4 bounds;
   if(state.boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
   {
-    Vector2 contentOffset = renderablePosition;
-    if(stencil)
-    {
-      const Vector3 stencilPosition = stencil.GetProperty<Vector3>(Actor::Property::POSITION);
-      contentOffset += Vector2(stencilPosition.x, stencilPosition.y);
-    }
     bounds = Ui::Text::Internal::CalculateGradientViewBounds(layoutSize, viewSize, contentOffset);
   }
   else
   {
-    const auto model = controller->GetRenderTextModel();
-    bounds           = Ui::Text::Internal::CalculateAtlasGradientContentBounds(
+    bounds = Ui::Text::Internal::CalculateAtlasGradientContentBounds(
       layoutSize, model->GetLines(), model->GetNumberOfLines(), minLineOffset);
   }
 

@@ -15,6 +15,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui/test-font-glyph-constants.h>
 #include <dali/devel-api/common/singleton-service.h>
 #include <dali/devel-api/text-abstraction/bidirectional-support.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
@@ -308,7 +309,10 @@ public:
     data.isColorBitmap   = false;
 
     uint8_t* newBuffer = (uint8_t*)malloc(data.width * data.height * Pixel::GetBytesPerPixel(data.format));
-    std::fill(newBuffer, newBuffer + (data.width * data.height), 255); // Fill with white pixels
+    // Keep the default opaque test glyph, with one explicitly reserved index
+    // for deterministic half-coverage antialiasing tests.
+    const uint8_t coverage = glyphIndex == Test::HALF_COVERAGE_GLYPH_INDEX ? 128u : 255u;
+    std::fill(newBuffer, newBuffer + (data.width * data.height), coverage);
 
     data.buffer          = newBuffer;
     data.isBufferOwned   = true;

@@ -41,6 +41,11 @@ namespace Ui
 {
 namespace Text
 {
+namespace Internal
+{
+struct GradientSpanModelData;
+}
+
 /**
  * @brief Interface class used to retrieve the text's model from the text-controller.
  */
@@ -207,6 +212,17 @@ public:
    * @return Pointer to a vector which stores for each glyph the index to the vector of colors.
    */
   virtual const ColorIndex* GetColorIndices() const = 0;
+
+  /**
+   * @brief Retrieves optional canonical GradientSpan paint data.
+   *
+   * The default keeps existing model implementations source-compatible and
+   * allocation-free when GradientSpan is not present.
+   */
+  virtual const Internal::GradientSpanModelData* GetGradientSpanModelData() const
+  {
+    return nullptr;
+  }
 
   /**
    * @brief Retrieves the vector of background colors.

@@ -48,6 +48,7 @@ namespace Text
 using StyledTextColorRunSnapshot       = Dali::Ui::Text::Internal::StyledTextColorRunSnapshot;
 using StyledTextAnchorRunSnapshot      = Dali::Ui::Text::Internal::StyledTextAnchorRunSnapshot;
 using StyledTextFontRunSnapshot        = Dali::Ui::Text::Internal::StyledTextFontRunSnapshot;
+using StyledTextGradientRunSnapshot    = Dali::Ui::Text::Internal::StyledTextGradientRunSnapshot;
 using StyledTextLineThroughRunSnapshot = Dali::Ui::Text::Internal::StyledTextLineThroughRunSnapshot;
 using StyledTextStyleRunSnapshot       = Dali::Ui::Text::Internal::StyledTextStyleRunSnapshot;
 using StyledTextUnderlineRunSnapshot   = Dali::Ui::Text::Internal::StyledTextUnderlineRunSnapshot;
@@ -98,9 +99,8 @@ struct StyledTextApplyResult
 /**
  * @brief Internal helper for Phase 2/3 StyledText normalization.
  *
- * This helper currently normalizes plain text, ForegroundColorSpan,
- * BackgroundColorSpan, FontSpan, UnderlineSpan, LineThroughSpan, and
- * AnchorSpan payloads. It does not apply future GradientSpan data.
+ * This helper normalizes plain text, foreground color and gradient fill,
+ * background, font, decoration, and anchor span payloads.
  */
 class StyledTextApplier
 {
