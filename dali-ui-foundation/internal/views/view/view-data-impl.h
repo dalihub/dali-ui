@@ -231,6 +231,27 @@ public:
   void InvalidateMeasure();
 
   /**
+   * @brief InvalidateMeasure() for the one caller that already holds the parent.
+   *
+   * Identical in every effect to InvalidateMeasure() -- same local invalidation, same
+   * generation short-circuit, same standalone boundary, same propagation -- but the
+   * parent's data is passed in instead of being re-derived from the actor tree. Valid only
+   * where @p parentData IS this view's parent when the call is made: OnChildAdded, which
+   * dali-core runs after it has already parented the child.
+   *
+   * A re-entrant reparent inside OnChildAdded -- NotifyChildReparented runs application
+   * code, before the subtree cache reset -- is tolerated rather than mis-propagated. The
+   * nested add invalidates the live chain through its own call to this entry; the outer
+   * call then walks the captured @p parentData, which is at worst a conservative extra
+   * invalidation of the OLD chain -- every step an idempotent cache drop plus a coalesced
+   * registration, with the generation stamp collapsing any overlap where the two chains
+   * meet. An invalidation can be repeated harmlessly; it can never be missed.
+   *
+   * @param[in] parentData The layout data of this view's parent
+   */
+  void InvalidateMeasureFromParentAdd(ViewDataImpl& parentData);
+
+  /**
    * @brief The arrange-axis counterpart of InvalidateMeasure().
    */
   void InvalidateArrange();

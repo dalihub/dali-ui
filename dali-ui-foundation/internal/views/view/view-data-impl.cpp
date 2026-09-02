@@ -2348,9 +2348,10 @@ void ViewDataImpl::InvalidateMeasure()
   // depth-sorted iteration, this lets the parent capture pre-change
   // bounds before the standalone child's own arrange updates them, so
   // a standalone child's RequestedWidth / RequestedHeight change
-  // surfaces as the parent's CHANGE slot. This is the SOLE carrier of the
-  // standalone+transition hook: OnChildAdded no longer repeats it, because the
-  // child's own InvalidateMeasure() on the add always reaches this branch.
+  // surfaces as the parent's CHANGE slot. Both invalidation entries carry this
+  // hook -- this branch for every path that re-derives the parent, and
+  // InvalidateMeasureFromParentAdd's mirror of it for the add -- which is why
+  // OnChildAdded itself never repeats it.
   if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
   {
     Ui::View parentView = GetParentView();
@@ -2376,6 +2377,61 @@ void ViewDataImpl::InvalidateMeasure()
   }
 
   RegisterWithLayoutController();
+}
+
+void ViewDataImpl::InvalidateMeasureFromParentAdd(ViewDataImpl& parentData)
+{
+  // A literal mirror of InvalidateMeasure() above, with one substitution: the parent is
+  // handed in rather than looked up. (The generic entry's parentless fallthrough to
+  // RegisterWithLayoutController() drops out with it -- a caller-supplied parent can
+  // never be absent, so that tail is unreachable here.) OnChildAdded is the single caller that already holds
+  // it, and dali-core parents the child BEFORE OnChildAdd runs (Actor::SetParent precedes
+  // the notification), so the GetParentView() the generic entry would do there provably
+  // resolves to the very view that is calling -- an Actor::GetParent plus two handle
+  // DownCasts per add, spent re-deriving something the caller has in hand.
+  //
+  // Everything else is repeated verbatim rather than delegated. The local half must run
+  // ahead of the generation short-circuit, and the standalone branch carries the
+  // standalone+transition hook for the add -- a standalone child whose parent has a
+  // LayoutTransition invalidates that parent's measure so the dispatcher's
+  // CaptureBeforeLayout / StartTransitionsAfterLayout runs in the same layout batch --
+  // which is why OnChildAdded itself never repeats it.
+  //
+  // The local drops are repeated on purpose too, even though OnChildAdded has just run
+  // ResetSubtreeScaleAndLayoutCaches() over this subtree. The reset deliberately raises
+  // no dirty bits, so the local half is not covered by it in any case; and keeping the
+  // body a verbatim mirror keeps this entry correct on its own terms instead of leaning
+  // on OnChildAdded's exact statement order (the dispatcher's re-entrant window sits
+  // BEFORE the reset today, and nothing here should depend on that).
+  //
+  // UtcDaliViewAddConfiguredOffSceneChildReMeasuresParentP,
+  // UtcDaliViewReparentChildInSameBatchReMeasuresNewParentChainP and
+  // UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP pin it.
+  DropCachedEffectiveScale();
+
+  InvalidateLayoutCaches();
+
+  mMeasureDirty = true;
+  mArrangeDirty = true;
+
+  const uint32_t generation = LayoutInvalidation::CurrentGeneration();
+  if(gActiveLayoutPassDepth == 0u && mMeasureKeyOrPropagation.propagationGeneration == generation)
+  {
+    return;
+  }
+  mMeasureKeyOrPropagation.propagationGeneration = generation;
+
+  if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    if(parentData.GetLayoutTransition())
+    {
+      parentData.InvalidateMeasure();
+    }
+    RegisterWithLayoutController();
+    return;
+  }
+
+  parentData.InvalidateMeasure();
 }
 
 void ViewDataImpl::InvalidateArrange()
@@ -3573,19 +3629,22 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // under a different parent's constraints and is no longer reliable.
     // Through the internal primitive, not ViewImpl::InvalidateMeasure(): this is
     // a framework-internal consistency invalidation, not an application call.
-    ViewDataImpl::Get(childImpl).InvalidateMeasure();
+    // And via the known-parent entry -- one parent lookup fewer, everything else
+    // identical: dali-core has already parented the child, so the lookup the generic
+    // entry would perform can only resolve to this very view.
+    ViewDataImpl::Get(childImpl).InvalidateMeasureFromParentAdd(*this);
 
     // No self-invalidation here for a CONTRIBUTING child, and none is needed: the child's
-    // own InvalidateMeasure() above reaches this view and does the whole job.
+    // own InvalidateMeasureFromParentAdd() above reaches this view and does the whole job.
     //
     // That is a guarantee, not a likelihood. The generation short-circuit
-    // (InvalidateMeasure's propagation-record generation return) is the
-    // only thing that could stop the walk short, and ResetSubtreeScaleAndLayoutCaches()
+    // (the propagation-record generation return, identical in both invalidation entries) is
+    // the only thing that could stop the walk short, and ResetSubtreeScaleAndLayoutCaches()
     // above zeroed the whole added subtree's propagation records -- 0 is the "never
     // propagated" sentinel that no live generation ever equals (the counter starts at 1
-    // and skips 0 on wrap). The child's walk therefore always runs in full, and dali-core
-    // has already parented the child (Actor::SetParent precedes OnChildAdd), so
-    // GetParentView() resolves to THIS view. When the walk arrives here it drops this
+    // and skips 0 on wrap). The child's walk therefore always runs in full, and this view
+    // IS the parent it is handed (dali-core has already parented the child --
+    // Actor::SetParent precedes OnChildAdd). When the walk arrives here it drops this
     // view's cached scale, retracts BOTH layout caches, poisons an in-progress pass and
     // raises both dirty bits before any short-circuit is even consulted -- everything the
     // removed call did.
@@ -3615,15 +3674,16 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
       InvalidateArrange();
 
       // No parent InvalidateMeasure() for the standalone+transition combination either.
-      // The child's InvalidateMeasure() above reaches its own boundary branch, which
-      // carries exactly this hook: a standalone view whose parent has a LayoutTransition
-      // attached invalidates that parent's measure before self-registering, so the
-      // dispatcher's CaptureBeforeLayout / StartTransitionsAfterLayout pass runs in the
-      // same layout batch as the child's. Same predicate (GetLayoutTransition() and
+      // The child's InvalidateMeasureFromParentAdd() above reaches its own boundary branch,
+      // which carries exactly this hook: a standalone view whose parent has a
+      // LayoutTransition attached invalidates that parent's measure before self-registering,
+      // so the dispatcher's CaptureBeforeLayout / StartTransitionsAfterLayout pass runs in
+      // the same layout batch as the child's. Same predicate (GetLayoutTransition() and
       // HasLayoutTransition() read the same member) and same action (the internal
-      // primitive on this very view), and it is reachable for the same reason as the
-      // contributing case above: the propagation record was zeroed a few lines up, so the
-      // walk cannot be short-circuited before it gets there.
+      // primitive on this very view -- the known-parent entry reads it off the parent it
+      // was handed instead of looking it up), and it is reachable for the same reason as
+      // the contributing case above: the propagation record was zeroed a few lines up, so
+      // the walk cannot be short-circuited before it gets there.
       // UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP
       // pins it.
     }
