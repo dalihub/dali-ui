@@ -1039,7 +1039,12 @@ Ui::View::FocusChangedSignalType& ViewImpl::FocusChangedSignal()
 
 Dali::Texture ViewImpl::GetOffScreenRenderingOutput() const
 {
-  return mImpl->GetOffScreenRenderingOutput();
+  return GetOffscreenRenderingOutput();
+}
+
+Dali::Texture ViewImpl::GetOffscreenRenderingOutput() const
+{
+  return mImpl->GetOffscreenRenderingOutput();
 }
 
 void ViewImpl::OnSceneDisconnection()

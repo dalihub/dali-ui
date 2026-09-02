@@ -1142,7 +1142,8 @@ private:
       box.SetBackgroundColor(UiColor(C_PURPLE));
       box.SetCornerRadius(ABS_CORNER_RADIUS);
       box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
-      box.SetProperty(Ui::View::Property::OFFSCREEN_RENDERING, Ui::View::OffScreenRenderingType::REFRESH_ALWAYS);
+      box.SetOffscreenRenderingRefreshRate(View::OffscreenRefreshRate::REFRESH_ALWAYS);
+      box.SetOffscreenRenderingEnabled(true);
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)));
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
@@ -1237,7 +1238,8 @@ private:
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
 
-      box.SetProperty(Ui::View::Property::OFFSCREEN_RENDERING, Ui::View::OffScreenRenderingType::REFRESH_ALWAYS);
+      box.SetOffscreenRenderingRefreshRate(View::OffscreenRefreshRate::REFRESH_ALWAYS);
+      box.SetOffscreenRenderingEnabled(true);
 
       rowRel.Add(MakeLabeled(box, "OffscreenRendering\nREL radius"));
     }

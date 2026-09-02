@@ -40,23 +40,23 @@ namespace Internal
 {
 /**
  * @brief This effect renders all children(including self) at off screen framebuffer.
- * This effect is handleless, so initiate an instance through setting View::Property::OFFSCREEN_RENDERING
+ * This effect is handleless, so initiate an instance through the View offscreen rendering API or property.
  * The instance will be saved internally, thus outer modification is impossible.
  */
-class OffScreenRenderingImpl : public RenderEffectImpl
+class OffscreenRenderingImpl : public RenderEffectImpl
 {
 public:
   /**
    * @brief Constructor
-   * @param[in] type Defines whether effect is enabled or not, and its refresh rate
+   * @param[in] refreshRate The offscreen rendering refresh rate
    */
-  OffScreenRenderingImpl(Ui::View::OffScreenRenderingType type);
+  OffscreenRenderingImpl(Ui::View::OffscreenRefreshRate refreshRate);
 
   /**
-   * @brief Set OffScreenRenderingType explicitly
-   * @param[in] type Defines whether effect is enabled or not, and its refresh rate
+   * @brief Sets the offscreen rendering refresh rate.
+   * @param[in] refreshRate The offscreen rendering refresh rate
    */
-  void SetType(Ui::View::OffScreenRenderingType type);
+  void SetRefreshRate(Ui::View::OffscreenRefreshRate refreshRate);
 
   // @copydoc Dali::Ui::Internal::RenderEffectImpl::GetOffScreenRenderableType
   OffScreenRenderable::Type GetOffScreenRenderableType() const override;
@@ -65,7 +65,7 @@ public:
   void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
 
   /**
-   * @brief Get rendered output. Only valid when type is set to OffScreenRenderingType::RENDER_ONCE
+   * @brief Get rendered output. Only valid when refresh rate is set to OffscreenRefreshRate::REFRESH_ONCE
    * @return mTexture, the output
    */
   Dali::Texture GetTexture() const;
@@ -110,10 +110,10 @@ private:
   void OnRenderFinished(Dali::RenderTask task);
 
 private:
-  RenderTask                       mRenderTask;
-  FrameBuffer                      mFrameBuffer;
-  Dali::Texture                    mTexture; // saved when render once
-  Ui::View::OffScreenRenderingType mType;
+  RenderTask                     mRenderTask;
+  FrameBuffer                    mFrameBuffer;
+  Dali::Texture                  mTexture; // saved when render once
+  Ui::View::OffscreenRefreshRate mRefreshRate;
 };
 } // namespace Internal
 } // namespace Ui

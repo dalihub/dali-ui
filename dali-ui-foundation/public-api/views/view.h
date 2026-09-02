@@ -1783,13 +1783,24 @@ public: // Not intended for application developers
 
 public:
   /**
-   * @brief OffScreenRenderingType enumeration.
+   * @brief Enumeration for the offscreen rendering mode.
+   * @deprecated Use SetOffscreenRenderingEnabled(), IsOffscreenRenderingEnabled(), SetOffscreenRenderingRefreshRate(), and
+   * GetOffscreenRenderingRefreshRate() instead. This type is planned for removal together with Property::OFFSCREEN_RENDERING.
    */
   enum OffScreenRenderingType
   {
     NONE,
     REFRESH_ONCE,
     REFRESH_ALWAYS
+  };
+
+  /**
+   * @brief Enumeration for the offscreen rendering refresh rate.
+   */
+  enum class OffscreenRefreshRate
+  {
+    REFRESH_ONCE   = 1,
+    REFRESH_ALWAYS = 2
   };
 
   /**
@@ -1875,9 +1886,11 @@ public:
       COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
 
       /**
-       * @brief Whether to draw on offscreen of not.
-       * @details Name "offscreenRendering", type Property::INTEGER.
-       * @note Default is false.
+       * @brief Whether to draw offscreen or not.
+       * @details Name "offScreenRendering", type Property::INTEGER.
+       * @note Use OffScreenRenderingType values to configure the mode.
+       * @deprecated Use SetOffscreenRenderingEnabled(), IsOffscreenRenderingEnabled(), SetOffscreenRenderingRefreshRate(), and
+       * GetOffscreenRenderingRefreshRate() instead. This property is planned for removal.
        */
       OFFSCREEN_RENDERING,
 
@@ -2008,8 +2021,14 @@ public:
   /// @brief ResourceReady signal type.
   typedef Signal<void(View)> ResourceReadySignalType;
 
-  /// @brief Offscreen rendering finished signal type.
+  /**
+   * @brief Offscreen rendering finished signal type.
+   * @deprecated Use OffscreenRenderingFinishedSignalType instead.
+   */
   typedef Signal<void(View)> OffScreenRenderingFinishedSignalType;
+
+  /// @brief Offscreen rendering finished signal type.
+  using OffscreenRenderingFinishedSignalType = Signal<void(View)>;
 
   /// @brief Accessibility reading lifecycle signal type.
   using AccessibilityReadingStatusChangedSignalType = Signal<void(View, Accessibility::ReadingStatus)>;
@@ -2502,7 +2521,8 @@ public:
    * @return The signal to connect to
    * @pre The View has been initialized.
    * @note This signal is emitted when the offscreen rendering task is completed.
-   * @note This signal is only emitted when OffScreenRenderingType is set to REFRESH_ONCE.
+   * @note This signal is only emitted when OffscreenRefreshRate is set to REFRESH_ONCE.
+   * @deprecated Use OffscreenRenderingFinishedSignal() instead.
    */
   OffScreenRenderingFinishedSignalType& OffScreenRenderingFinishedSignal();
 
@@ -2625,6 +2645,50 @@ public:
    * @param[in] innerShadow The inner shadow value to apply
    */
   void SetInnerShadow(const InnerShadow& innerShadow);
+
+  /**
+   * @brief Enables or disables offscreen rendering for this View.
+   *
+   * Enabling uses the refresh rate set by SetOffscreenRenderingRefreshRate().
+   * Disabling preserves the refresh rate for the next time offscreen rendering is enabled.
+   *
+   * @param[in] enabled True to enable offscreen rendering, false to disable it
+   */
+  void SetOffscreenRenderingEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether offscreen rendering is enabled for this View.
+   *
+   * @return True if offscreen rendering is enabled, false otherwise
+   */
+  bool IsOffscreenRenderingEnabled() const;
+
+  /**
+   * @brief Sets the offscreen rendering refresh rate for this View.
+   *
+   * Setting the refresh rate does not enable offscreen rendering.
+   * The default refresh rate is REFRESH_ALWAYS.
+   *
+   * @param[in] refreshRate The offscreen rendering refresh rate
+   */
+  void SetOffscreenRenderingRefreshRate(OffscreenRefreshRate refreshRate);
+
+  /**
+   * @brief Gets the offscreen rendering refresh rate for this View.
+   *
+   * @return The current offscreen rendering refresh rate
+   */
+  OffscreenRefreshRate GetOffscreenRenderingRefreshRate() const;
+
+  /**
+   * @brief This signal is emitted when offscreen rendering is finished.
+   *
+   * @return The signal to connect to
+   * @pre The View has been initialized.
+   * @note This signal is emitted when the offscreen rendering task is completed.
+   * @note This signal is only emitted when OffscreenRefreshRate is set to REFRESH_ONCE.
+   */
+  OffscreenRenderingFinishedSignalType& OffscreenRenderingFinishedSignal();
 
 public: // Templates for Deriving Classes
   /**

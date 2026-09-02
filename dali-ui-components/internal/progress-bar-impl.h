@@ -84,7 +84,7 @@ private:
   void CommitDividerSnapshot(std::vector<Vector2> positions);
   void QueueGeometryNotification();
   void EmitGeometryNotifications();
-  void SetIndeterminateOffScreenRendering(bool enabled);
+  void SetIndeterminateOffscreenRendering(bool enabled);
   void StartIndeterminateAnimation();
   void ClearIndeterminateAnimation();
   bool IsRightToLeft() const;

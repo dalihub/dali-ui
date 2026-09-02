@@ -239,10 +239,8 @@ void SetVisualOnScene(Internal::Visual::Base& visualImpl, ViewImpl& viewImpl)
   Actor self = viewImpl.Self();
   visualImpl.SetOnScene(self);
 
-  Ui::View                         handle = Ui::View(viewImpl.GetOwner());
-  Ui::View::OffScreenRenderingType offscreenRenderingType =
-    Ui::View::OffScreenRenderingType(handle.GetProperty<int32_t>(Ui::View::Property::OFFSCREEN_RENDERING));
-  if(offscreenRenderingType != Ui::View::OffScreenRenderingType::NONE)
+  Ui::View handle = Ui::View(viewImpl.GetOwner());
+  if(handle.IsOffscreenRenderingEnabled())
   {
     if(!visualImpl.IsOffscreenRenderingCaptureEnabled())
     {
@@ -262,10 +260,8 @@ void SetVisualOffScene(Internal::Visual::Base& visualImpl, ViewImpl& viewImpl)
 {
   Actor self = viewImpl.Self();
 
-  Ui::View                         handle = Ui::View(viewImpl.GetOwner());
-  Ui::View::OffScreenRenderingType offscreenRenderingType =
-    Ui::View::OffScreenRenderingType(handle.GetProperty<int32_t>(Ui::View::Property::OFFSCREEN_RENDERING));
-  if(offscreenRenderingType != Ui::View::OffScreenRenderingType::NONE)
+  Ui::View handle = Ui::View(viewImpl.GetOwner());
+  if(handle.IsOffscreenRenderingEnabled())
   {
     if(!visualImpl.IsOffscreenRenderingCaptureEnabled())
     {

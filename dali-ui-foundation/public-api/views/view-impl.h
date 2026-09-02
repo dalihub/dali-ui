@@ -1074,7 +1074,8 @@ protected:
   /**
    * @brief Gets texture output of offscreen rendering.
    * @return The offscreen rendering output texture
-   * @note Valid only inside OffScreenRenderingFinishedSignal() with REFRESH_ONCE type.
+   * @note Valid only inside OffscreenRenderingFinishedSignal() with REFRESH_ONCE type.
+   * @deprecated Use GetOffscreenRenderingOutput() instead.
    */
   Dali::Texture GetOffScreenRenderingOutput() const;
 
@@ -1169,6 +1170,13 @@ protected:
    * @return The OnArrange() execution policy
    */
   ArrangePolicy GetArrangePolicy() const;
+
+  /**
+   * @brief Gets texture output of offscreen rendering.
+   * @return The offscreen rendering output texture
+   * @note Valid only inside OffscreenRenderingFinishedSignal() with REFRESH_ONCE type.
+   */
+  Dali::Texture GetOffscreenRenderingOutput() const;
 
   // ============================================================
   // private

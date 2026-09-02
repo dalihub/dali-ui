@@ -549,14 +549,14 @@ int UtcDaliProgressBarIndeterminateResizeP(void)
 
   DALI_TEST_EQUALS(Width(track), 240.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(track.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING),
-                   static_cast<int32_t>(View::OffScreenRenderingType::REFRESH_ALWAYS),
+                   static_cast<int32_t>(View::OffscreenRefreshRate::REFRESH_ALWAYS),
                    TEST_LOCATION);
   DALI_TEST_EQUALS(track.GetChildCount(), 9u, TEST_LOCATION);
   DALI_TEST_CHECK(HasIndeterminateBarWithinTrack(track));
 
   progressBar.SetDeterminate(true);
   DALI_TEST_EQUALS(track.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING),
-                   static_cast<int32_t>(View::OffScreenRenderingType::NONE),
+                   0,
                    TEST_LOCATION);
   DALI_TEST_EQUALS(track.GetChildCount(), 8u, TEST_LOCATION);
   END_TEST;
@@ -586,16 +586,16 @@ int UtcDaliProgressBarDeterminateLifecycleP(void)
 
   View track = progressBar.GetChildViewAt(0u);
   const uint32_t componentChildCount = 8u;
-  const uint32_t offScreenChildCount = componentChildCount + 1u;
+  const uint32_t offscreenChildCount = componentChildCount + 1u;
   DALI_TEST_EQUALS(track.GetChildCount(), componentChildCount, TEST_LOCATION);
   DALI_TEST_EQUALS(track.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING),
-                   static_cast<int32_t>(View::OffScreenRenderingType::NONE),
+                   0,
                    TEST_LOCATION);
 
   progressBar.SetDeterminate(false);
-  DALI_TEST_EQUALS(track.GetChildCount(), offScreenChildCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(track.GetChildCount(), offscreenChildCount, TEST_LOCATION);
   DALI_TEST_EQUALS(track.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING),
-                   static_cast<int32_t>(View::OffScreenRenderingType::REFRESH_ALWAYS),
+                   static_cast<int32_t>(View::OffscreenRefreshRate::REFRESH_ALWAYS),
                    TEST_LOCATION);
   DALI_TEST_CHECK(!track.GetChildViewAt(0u).IsVisible());
   for(uint32_t index = 5u; index < componentChildCount; ++index)
@@ -620,13 +620,13 @@ int UtcDaliProgressBarDeterminateLifecycleP(void)
   DALI_TEST_CHECK(HasIndeterminateBarWithinTrack(track));
   progressBar.SetDeterminate(true);
   DALI_TEST_EQUALS(track.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING),
-                   static_cast<int32_t>(View::OffScreenRenderingType::NONE),
+                   0,
                    TEST_LOCATION);
   progressBar.SetDeterminate(false);
   DALI_TEST_EQUALS(track.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING),
-                   static_cast<int32_t>(View::OffScreenRenderingType::REFRESH_ALWAYS),
+                   static_cast<int32_t>(View::OffscreenRefreshRate::REFRESH_ALWAYS),
                    TEST_LOCATION);
-  DALI_TEST_EQUALS(track.GetChildCount(), offScreenChildCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(track.GetChildCount(), offscreenChildCount, TEST_LOCATION);
   for(uint32_t frame = 0u; frame < 9u; ++frame)
   {
     Rearrange(progressBar);
@@ -634,7 +634,7 @@ int UtcDaliProgressBarDeterminateLifecycleP(void)
     application.Render(100);
   }
   DALI_TEST_CHECK(HasIndeterminateBarWithinTrack(track));
-  DALI_TEST_EQUALS(track.GetChildCount(), offScreenChildCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(track.GetChildCount(), offscreenChildCount, TEST_LOCATION);
   application.RunIdles();
   DALI_TEST_EQUALS(trailSignalCount, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(dividerSignalCount, 0, TEST_LOCATION);
@@ -642,7 +642,7 @@ int UtcDaliProgressBarDeterminateLifecycleP(void)
   progressBar.SetDeterminate(true);
   DALI_TEST_EQUALS(track.GetChildCount(), componentChildCount, TEST_LOCATION);
   DALI_TEST_EQUALS(track.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING),
-                   static_cast<int32_t>(View::OffScreenRenderingType::NONE),
+                   0,
                    TEST_LOCATION);
   DALI_TEST_CHECK(track.GetChildViewAt(0u).IsVisible());
   for(uint32_t index = 1u; index < 5u; ++index)
@@ -661,11 +661,11 @@ int UtcDaliProgressBarDeterminateLifecycleP(void)
   progressBar.SetDeterminate(false);
   DALI_TEST_EQUALS(track.GetChildCount(), componentChildCount, TEST_LOCATION);
   DALI_TEST_EQUALS(track.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING),
-                   static_cast<int32_t>(View::OffScreenRenderingType::REFRESH_ALWAYS),
+                   static_cast<int32_t>(View::OffscreenRefreshRate::REFRESH_ALWAYS),
                    TEST_LOCATION);
   application.GetScene().Add(progressBar);
   application.SendNotification();
-  DALI_TEST_EQUALS(track.GetChildCount(), offScreenChildCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(track.GetChildCount(), offscreenChildCount, TEST_LOCATION);
   DALI_TEST_EQUALS(progressBar.GetTrailEndPosition(), trailPosition, TEST_LOCATION);
   DALI_TEST_EQUALS(progressBar.GetDividerPosition(0u), dividerPosition, TEST_LOCATION);
   application.GetScene().Remove(progressBar);

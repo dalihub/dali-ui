@@ -371,7 +371,7 @@ void ProgressBarImpl::OnDeterminateChanged(bool determinate)
   if(determinate)
   {
     ClearIndeterminateAnimation();
-    SetIndeterminateOffScreenRendering(false);
+    SetIndeterminateOffscreenRendering(false);
     mTrail.SetVisible(true);
     for(View divider : mDividers)
     {
@@ -386,7 +386,7 @@ void ProgressBarImpl::OnDeterminateChanged(bool determinate)
     {
       divider.SetVisible(false);
     }
-    SetIndeterminateOffScreenRendering(true);
+    SetIndeterminateOffscreenRendering(true);
     StartIndeterminateAnimation();
   }
 }
@@ -530,14 +530,13 @@ void ProgressBarImpl::EmitGeometryNotifications()
   }
 }
 
-void ProgressBarImpl::SetIndeterminateOffScreenRendering(bool enabled)
+void ProgressBarImpl::SetIndeterminateOffscreenRendering(bool enabled)
 {
   // TODO: View's public offscreen-rendering API must keep user and system values
-  // separately. Replace this temporary direct property write with a system-value
+  // separately. Replace this temporary public API call with a system-value
   // request so mode changes preserve the application-provided user value.
-  mTrack.SetProperty(Ui::View::Property::OFFSCREEN_RENDERING,
-                     enabled ? Ui::View::OffScreenRenderingType::REFRESH_ALWAYS
-                             : Ui::View::OffScreenRenderingType::NONE);
+  mTrack.SetOffscreenRenderingRefreshRate(Ui::View::OffscreenRefreshRate::REFRESH_ALWAYS);
+  mTrack.SetOffscreenRenderingEnabled(enabled);
 }
 
 void ProgressBarImpl::StartIndeterminateAnimation()

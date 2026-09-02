@@ -149,15 +149,14 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VIEW_DATA");
 #endif
 
-constexpr unsigned int OFF_SCREEN_RENDERING_TYPE_COUNT        = 3u;
-constexpr char         BACKGROUND_COLOR_BINDING_ID[]          = "BackgroundColor";
-constexpr char         BACKGROUND_GRADIENT_BINDING_ID[]       = "BackgroundGradient";
-constexpr char         COLOR_BINDING_ID[]                     = "Color";
-constexpr char         ACCESSIBILITY_NAME_BINDING_ID[]        = "Ui.View.AccessibilityName";
-constexpr char         ACCESSIBILITY_DESCRIPTION_BINDING_ID[] = "Ui.View.AccessibilityDescription";
-constexpr char         INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-highlight";
-constexpr char         COLLECTION_CONTAINER_ATTRIBUTE[]       = "collection_container";
-constexpr char         COLLECTION_INDEX_ATTRIBUTE[]           = "collection_index";
+constexpr char BACKGROUND_COLOR_BINDING_ID[]          = "BackgroundColor";
+constexpr char BACKGROUND_GRADIENT_BINDING_ID[]       = "BackgroundGradient";
+constexpr char COLOR_BINDING_ID[]                     = "Color";
+constexpr char ACCESSIBILITY_NAME_BINDING_ID[]        = "Ui.View.AccessibilityName";
+constexpr char ACCESSIBILITY_DESCRIPTION_BINDING_ID[] = "Ui.View.AccessibilityDescription";
+constexpr char INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-highlight";
+constexpr char COLLECTION_CONTAINER_ATTRIBUTE[]       = "collection_container";
+constexpr char COLLECTION_INDEX_ATTRIBUTE[]           = "collection_index";
 
 const TraitId ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID                    = TraitId::Alloc();
 const TraitId ACCESSIBILITY_ESCAPE_CALLBACK_TRAIT_ID                      = TraitId::Alloc();
@@ -1683,9 +1682,9 @@ Ui::View::ResourceReadySignalType& ViewDataImpl::ResourceReadySignal()
   return EnsureResourceReadyData().resourceReadySignal;
 }
 
-Ui::View::OffScreenRenderingFinishedSignalType& ViewDataImpl::OffScreenRenderingFinishedSignal()
+Ui::View::OffscreenRenderingFinishedSignalType& ViewDataImpl::OffscreenRenderingFinishedSignal()
 {
-  return EnsureRenderEffectData().offScreenRenderingFinishedSignal;
+  return EnsureRenderEffectData().offscreenRenderingFinishedSignal;
 }
 
 bool ViewDataImpl::HasLayoutFinishedSignalConnections() const
@@ -4083,22 +4082,23 @@ void ViewDataImpl::GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks
   {
     mRenderEffectData->renderEffect->GetOffScreenRenderTasks(tasks, isForward);
   }
-  if(mRenderEffectData->offScreenRendering)
+  if(mRenderEffectData->offscreenRendering)
   {
-    mRenderEffectData->offScreenRendering->GetOffScreenRenderTasks(tasks, isForward);
+    mRenderEffectData->offscreenRendering->GetOffScreenRenderTasks(tasks, isForward);
   }
 }
 
-Dali::Texture ViewDataImpl::GetOffScreenRenderingOutput() const
+Dali::Texture ViewDataImpl::GetOffscreenRenderingOutput() const
 {
   if(!mRenderEffectData ||
-     mRenderEffectData->offScreenRenderingType != Ui::View::OffScreenRenderingType::REFRESH_ONCE)
+     !mRenderEffectData->offscreenRendering ||
+     mRenderEffectData->offscreenRefreshRate != Ui::View::OffscreenRefreshRate::REFRESH_ONCE)
   {
     DALI_LOG_ERROR(
-      "Precondition unsatisfied: Set property OFFSCREEN_RENDERING to OffScreenRenderingType::REFRESH_ONCE\n");
+      "Precondition unsatisfied: Enable offscreen rendering and set OffscreenRefreshRate::REFRESH_ONCE\n");
     return Dali::Texture();
   }
-  return mRenderEffectData->offScreenRendering->GetTexture();
+  return mRenderEffectData->offscreenRendering->GetTexture();
 }
 
 Vector3 ViewDataImpl::GetBackgroundVisualNaturalSize()
@@ -4773,7 +4773,7 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
     {
       // SetProperty triggers ViewDataImpl::SetProperty(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), which:
       //   - updates the actor animatable so decoration constraints re-evaluate, and
-      //   - calls UpdateCornerRadius() for active RenderEffect / OffScreenRendering.
+      //   - calls UpdateCornerRadius() for active RenderEffect / OffscreenRendering.
       mViewImpl.Self().SetProperty(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, s);
     }
     mEffectiveScaleActorSynced = true;
@@ -6593,9 +6593,9 @@ void ViewDataImpl::OnSceneConnection()
     mVisualData->ConnectScene(self);
   }
 
-  if(mRenderEffectData && mRenderEffectData->offScreenRendering)
+  if(mRenderEffectData && mRenderEffectData->offscreenRendering)
   {
-    mRenderEffectData->offScreenRendering->SetOwnerView(Ui::View(mViewImpl.GetOwner()));
+    mRenderEffectData->offscreenRendering->SetOwnerView(Ui::View(mViewImpl.GetOwner()));
   }
 }
 
@@ -6610,9 +6610,9 @@ void ViewDataImpl::OnSceneDisconnection()
     mVisualData->ClearScene(self);
   }
 
-  if(mRenderEffectData && mRenderEffectData->offScreenRendering)
+  if(mRenderEffectData && mRenderEffectData->offscreenRendering)
   {
-    mRenderEffectData->offScreenRendering->ClearOwnerView();
+    mRenderEffectData->offscreenRendering->ClearOwnerView();
   }
 }
 
@@ -6907,10 +6907,10 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 
       case Ui::View::Property::OFFSCREEN_RENDERING:
       {
-        int32_t offscreenRenderingType;
-        if(value.Get(offscreenRenderingType))
+        int32_t offscreenRenderingValue;
+        if(value.Get(offscreenRenderingValue))
         {
-          viewImpl.GetViewDataImpl().SetOffScreenRendering(offscreenRenderingType);
+          viewImpl.GetViewDataImpl().SetOffscreenRendering(offscreenRenderingValue);
         }
         break;
       }
@@ -7318,7 +7318,9 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::OFFSCREEN_RENDERING:
       {
         const auto* renderEffectData = viewImpl.GetViewDataImpl().mRenderEffectData.get();
-        value                        = renderEffectData ? renderEffectData->offScreenRenderingType : Ui::View::OffScreenRenderingType::NONE;
+        value                        = renderEffectData && renderEffectData->offscreenRendering
+                                         ? static_cast<int32_t>(renderEffectData->offscreenRefreshRate)
+                                         : 0;
         break;
       }
 
@@ -8658,72 +8660,95 @@ void ViewDataImpl::RefreshRenderEffects()
     mRenderEffectData->renderEffect->Refresh();
   }
 
-  if(mRenderEffectData && mRenderEffectData->offScreenRendering)
+  if(mRenderEffectData && mRenderEffectData->offscreenRendering)
   {
-    mRenderEffectData->offScreenRendering->Refresh();
+    mRenderEffectData->offscreenRendering->Refresh();
   }
 }
 
-void ViewDataImpl::SetOffScreenRendering(int32_t offScreenRenderingType)
+void ViewDataImpl::SetOffscreenRendering(int32_t offscreenRenderingValue)
 {
-  // Validate input
+  if(offscreenRenderingValue == 0)
   {
-    constexpr int32_t count = static_cast<int32_t>(OFF_SCREEN_RENDERING_TYPE_COUNT);
-    if(0 > offScreenRenderingType || offScreenRenderingType >= count)
-    {
-      DALI_LOG_ERROR("Failed to set offscreen rendering. Type index is out of bound.\n");
-      return;
-    }
-  }
-
-  Ui::View::OffScreenRenderingType newType =
-    static_cast<Ui::View::OffScreenRenderingType>(offScreenRenderingType);
-
-  Dali::Ui::View handle(mViewImpl.GetOwner());
-
-  if(newType == Ui::View::OffScreenRenderingType::NONE)
-  {
-    if(mRenderEffectData && mRenderEffectData->offScreenRendering)
-    {
-      auto tempOffscreenRenderingImpl = std::move(mRenderEffectData->offScreenRendering);
-      tempOffscreenRenderingImpl->ClearOwnerView();
-
-      if(DALI_LIKELY(mVisualData))
-      {
-        mVisualData->OffscreenRenderingEnabled(false);
-      }
-    }
-  }
-  else
-  {
-    RenderEffectData& renderEffectData = EnsureRenderEffectData();
-    if(renderEffectData.offScreenRenderingType == Ui::View::OffScreenRenderingType::NONE)
-    {
-      renderEffectData.offScreenRendering = std::make_unique<OffScreenRenderingImpl>(newType);
-      renderEffectData.offScreenRendering->SetOwnerView(handle);
-
-      if(DALI_LIKELY(AreVisualsEnabled()))
-      {
-        EnsureVisualData().OffscreenRenderingEnabled(true);
-      }
-    }
-    else if(renderEffectData.offScreenRenderingType != newType)
-    {
-      renderEffectData.offScreenRendering->SetType(newType);
-    }
-    renderEffectData.offScreenRenderingType = newType;
+    SetOffscreenRenderingEnabled(false);
     return;
   }
 
-  if(mRenderEffectData)
+  if(offscreenRenderingValue != static_cast<int32_t>(Ui::View::OffscreenRefreshRate::REFRESH_ONCE) &&
+     offscreenRenderingValue != static_cast<int32_t>(Ui::View::OffscreenRefreshRate::REFRESH_ALWAYS))
   {
-    mRenderEffectData->offScreenRenderingType = newType;
+    DALI_LOG_ERROR("Failed to set offscreen rendering. Property value is invalid.\n");
+    return;
   }
+
+  SetOffscreenRenderingRefreshRate(static_cast<Ui::View::OffscreenRefreshRate>(offscreenRenderingValue));
+  SetOffscreenRenderingEnabled(true);
+}
+
+void ViewDataImpl::SetOffscreenRenderingEnabled(bool enabled)
+{
+  if(enabled == IsOffscreenRenderingEnabled())
+  {
+    return;
+  }
+
+  if(!enabled)
+  {
+    auto tempOffscreenRenderingImpl = std::move(mRenderEffectData->offscreenRendering);
+    tempOffscreenRenderingImpl->ClearOwnerView();
+
+    if(DALI_LIKELY(mVisualData))
+    {
+      mVisualData->OffscreenRenderingEnabled(false);
+    }
+    return;
+  }
+
+  RenderEffectData& renderEffectData  = EnsureRenderEffectData();
+  renderEffectData.offscreenRendering = std::make_unique<OffscreenRenderingImpl>(renderEffectData.offscreenRefreshRate);
+  renderEffectData.offscreenRendering->SetOwnerView(Dali::Ui::View(mViewImpl.GetOwner()));
+
+  if(DALI_LIKELY(AreVisualsEnabled()))
+  {
+    EnsureVisualData().OffscreenRenderingEnabled(true);
+  }
+}
+
+bool ViewDataImpl::IsOffscreenRenderingEnabled() const
+{
+  return mRenderEffectData && mRenderEffectData->offscreenRendering;
+}
+
+void ViewDataImpl::SetOffscreenRenderingRefreshRate(Ui::View::OffscreenRefreshRate refreshRate)
+{
+  if(refreshRate != Ui::View::OffscreenRefreshRate::REFRESH_ONCE &&
+     refreshRate != Ui::View::OffscreenRefreshRate::REFRESH_ALWAYS)
+  {
+    DALI_LOG_ERROR("Failed to set offscreen refresh rate. Value is invalid.\n");
+    return;
+  }
+
+  RenderEffectData& renderEffectData = EnsureRenderEffectData();
+  if(renderEffectData.offscreenRefreshRate == refreshRate)
+  {
+    return;
+  }
+
+  renderEffectData.offscreenRefreshRate = refreshRate;
+  if(renderEffectData.offscreenRendering)
+  {
+    renderEffectData.offscreenRendering->SetRefreshRate(refreshRate);
+  }
+}
+
+Ui::View::OffscreenRefreshRate ViewDataImpl::GetOffscreenRenderingRefreshRate() const
+{
+  return mRenderEffectData ? mRenderEffectData->offscreenRefreshRate : Ui::View::OffscreenRefreshRate::REFRESH_ALWAYS;
 }
 
 void ViewDataImpl::UpdateCornerRadius()
 {
-  if(mRenderEffectData && (mRenderEffectData->renderEffect || mRenderEffectData->offScreenRendering))
+  if(mRenderEffectData && (mRenderEffectData->renderEffect || mRenderEffectData->offscreenRendering))
   {
     Actor     self   = mViewImpl.Self();
     const int policy = self.GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY);
@@ -8741,9 +8766,9 @@ void ViewDataImpl::UpdateCornerRadius()
       mRenderEffectData->renderEffect->SetCornerConstants(map);
     }
 
-    if(mRenderEffectData->offScreenRendering)
+    if(mRenderEffectData->offscreenRendering)
     {
-      mRenderEffectData->offScreenRendering->SetCornerConstants(map);
+      mRenderEffectData->offscreenRendering->SetCornerConstants(map);
     }
   }
 }

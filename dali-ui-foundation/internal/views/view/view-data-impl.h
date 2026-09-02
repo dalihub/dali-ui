@@ -161,7 +161,7 @@ public:
   View::LayoutFinishedSignalType&             LayoutFinishedSignal();
   View::StateChangedSignalType&               StateChangedSignal();
   View::ResourceReadySignalType&              ResourceReadySignal();
-  View::OffScreenRenderingFinishedSignalType& OffScreenRenderingFinishedSignal();
+  View::OffscreenRenderingFinishedSignalType& OffscreenRenderingFinishedSignal();
   bool                                        HasLayoutFinishedSignalConnections() const;
   void                                        EmitLayoutFinishedSignal(const LayoutRect& bounds);
   PendingLayoutTransitionChanges              TakePendingLayoutTransitionChanges();
@@ -420,7 +420,32 @@ public:
   bool          TryGetLayoutParams(GridLayoutParams& params) const;
   bool          TryGetLayoutParams(StackLayoutParams& params) const;
   void          GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward);
-  Dali::Texture GetOffScreenRenderingOutput() const;
+  Dali::Texture GetOffscreenRenderingOutput() const;
+
+  /**
+   * @brief Enables or disables offscreen rendering.
+   * @param[in] enabled True to enable, false to disable
+   */
+  void SetOffscreenRenderingEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether offscreen rendering is enabled.
+   * @return True if offscreen rendering is enabled, false otherwise
+   */
+  bool IsOffscreenRenderingEnabled() const;
+
+  /**
+   * @brief Sets the offscreen rendering refresh rate without changing the enabled state.
+   * @param[in] refreshRate The offscreen rendering refresh rate
+   */
+  void SetOffscreenRenderingRefreshRate(View::OffscreenRefreshRate refreshRate);
+
+  /**
+   * @brief Gets the configured offscreen rendering refresh rate.
+   * @return The configured refresh rate
+   */
+  View::OffscreenRefreshRate GetOffscreenRenderingRefreshRate() const;
+
   /// Natural size of the background visual plus padding, or ZERO when the view has
   /// no background visual. Not an override and never virtually dispatched;
   /// Actor::GetNaturalSize() reaches it only through SizeNegotiatedViewImpl.
@@ -1560,12 +1585,12 @@ private:
   bool OnIdleCallback();
 
   /**
-   * Set off-screen rendering.
-   * @param[in] offScreenRenderingType enum OffScreenRenderingType
+   * Sets offscreen rendering from the legacy integer property value.
+   * @param[in] offscreenRenderingValue 0 to disable, or an OffscreenRefreshRate value to enable
    * @note When offscreen rendering is on, changing visual's depth index may not apply instantaneously. Turn it off and
    * on again.
    */
-  void SetOffScreenRendering(int32_t offScreenRenderingType);
+  void SetOffscreenRendering(int32_t offscreenRenderingValue);
 
   /**
    * Notify to this view's corner radius changed.
@@ -1623,10 +1648,10 @@ private:
     // Public effect set through View::SetRenderEffect().
     RenderEffectImplPtr renderEffect;
 
-    // Unlike renderEffect, this handleless effect is created only by the OFFSCREEN_RENDERING property.
-    std::unique_ptr<OffScreenRenderingImpl>    offScreenRendering;
-    View::OffScreenRenderingType               offScreenRenderingType{View::OffScreenRenderingType::NONE};
-    View::OffScreenRenderingFinishedSignalType offScreenRenderingFinishedSignal;
+    // Unlike renderEffect, this handleless effect is created by the offscreen rendering API or property.
+    std::unique_ptr<OffscreenRenderingImpl>    offscreenRendering;
+    View::OffscreenRefreshRate                 offscreenRefreshRate{View::OffscreenRefreshRate::REFRESH_ALWAYS};
+    View::OffscreenRenderingFinishedSignalType offscreenRenderingFinishedSignal;
   };
 
   struct ResourceReadyData

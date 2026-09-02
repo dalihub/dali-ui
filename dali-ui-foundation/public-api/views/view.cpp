@@ -465,6 +465,26 @@ void View::SetInnerShadow(const InnerShadow& innerShadow)
   GetImpl(*this).SetInnerShadow(innerShadow);
 }
 
+void View::SetOffscreenRenderingEnabled(bool enabled)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetOffscreenRenderingEnabled(enabled);
+}
+
+bool View::IsOffscreenRenderingEnabled() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).IsOffscreenRenderingEnabled();
+}
+
+void View::SetOffscreenRenderingRefreshRate(OffscreenRefreshRate refreshRate)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetOffscreenRenderingRefreshRate(refreshRate);
+}
+
+View::OffscreenRefreshRate View::GetOffscreenRenderingRefreshRate() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetOffscreenRenderingRefreshRate();
+}
+
 UiColor View::GetColorMultiplier() const
 {
   return GetImpl(*this).GetColorMultiplier();
@@ -1088,10 +1108,15 @@ View::ResourceReadySignalType& View::ResourceReadySignal()
 
 View::OffScreenRenderingFinishedSignalType& View::OffScreenRenderingFinishedSignal()
 {
+  return OffscreenRenderingFinishedSignal();
+}
+
+View::OffscreenRenderingFinishedSignalType& View::OffscreenRenderingFinishedSignal()
+{
   ViewImpl&               viewImpl     = Ui::GetImpl(*this);
   Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
 
-  return viewDataImpl.OffScreenRenderingFinishedSignal();
+  return viewDataImpl.OffscreenRenderingFinishedSignal();
 }
 
 View::KeyEventSignalType& View::KeyEventSignal()
