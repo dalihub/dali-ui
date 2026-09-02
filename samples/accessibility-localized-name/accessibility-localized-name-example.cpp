@@ -143,21 +143,21 @@ private:
     mFragmentButton = CreateTestButton("1  Compose IDS_WIFI + IDS_CONNECT + IDS_COMPLETE", 0xDDEEFFu);
     Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
       mFragmentButton,
-      Dali::Ui::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
+      Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
         this,
         &AccessibilityLocalizedNameController::OnRequestWifiConnectCompleteName));
 
     mCompleteFirstButton = CreateTestButton("2  Compose IDS_COMPLETE + IDS_CONNECT + IDS_WIFI", 0xFFF0D8u);
     Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
       mCompleteFirstButton,
-      Dali::Ui::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
+      Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
         this,
         &AccessibilityLocalizedNameController::OnRequestCompleteConnectWifiName));
 
     mConnectFirstButton = CreateTestButton("3  Compose IDS_CONNECT + IDS_WIFI + IDS_COMPLETE", 0xF0E3F7u);
     Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
       mConnectFirstButton,
-      Dali::Ui::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
+      Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
         this,
         &AccessibilityLocalizedNameController::OnRequestConnectWifiCompleteName));
 
@@ -165,7 +165,7 @@ private:
     mSentenceButton.SetTranslatableAccessibilityName(SENTENCE_RESOURCE_ID, LOCALIZATION_DOMAIN);
     Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
       mSentenceButton,
-      Dali::Ui::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
+      Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
         this,
         &AccessibilityLocalizedNameController::OnRequestSentenceName));
 

@@ -1155,7 +1155,7 @@ int UtcDaliMarkdownViewStyleDefaultAndBuilderP(void)
                                    .SetThematicBreakColor(customThematicBreak)
                                    .SetTableRuleColor(customTableRule)
                                    .SetTaskCheckBoxIconGenerator(
-                                     Ui::Callback<SelectableImageInterface()>::New(&CreateTaskCheckBoxIcon))
+                                     Dali::Callback<SelectableImageInterface()>::New(&CreateTaskCheckBoxIcon))
                                    .SetTaskCheckBoxIconColor(customTaskCheckBoxIconColor)
                                    .SetTaskCheckBoxSelectedIconColor(customTaskCheckBoxSelectedIconColor)
                                    .Build();
@@ -1230,11 +1230,11 @@ int UtcDaliMarkdownViewStyleDefaultAndBuilderP(void)
   DALI_TEST_ASSERTION(MarkdownViewStyle::Builder().SetTextFontSize(0.0f), "finite and greater than zero");
   DALI_TEST_ASSERTION(MarkdownViewStyle::Builder().SetHeading1FontSize(std::numeric_limits<float>::infinity()), "finite and greater than zero");
   DALI_TEST_ASSERTION(MarkdownViewStyle::Builder().SetTaskCheckBoxIconGenerator(
-                        Ui::Callback<SelectableImageInterface()>()),
+                        Dali::Callback<SelectableImageInterface()>()),
                       "must be initialized");
   MarkdownViewStyle emptyIconStyle = MarkdownViewStyle::Builder()
                                        .SetTaskCheckBoxIconGenerator(
-                                         Ui::Callback<SelectableImageInterface()>::New(&CreateEmptyTaskCheckBoxIcon))
+                                         Dali::Callback<SelectableImageInterface()>::New(&CreateEmptyTaskCheckBoxIcon))
                                        .Build();
   DALI_TEST_ASSERTION(emptyIconStyle.CreateTaskCheckBoxIcon(), "returned an empty SelectableImageInterface");
   DALI_TEST_ASSERTION(MarkdownView::New(MarkdownViewStyle()), "MarkdownViewStyle must be initialized");
@@ -1863,7 +1863,7 @@ int UtcDaliMarkdownViewTaskCheckBoxLifecycleP(void)
   MarkdownViewStyle markdownStyle = MarkdownViewStyle::Default()
                                       .Configure()
                                       .SetTaskCheckBoxIconGenerator(
-                                        Ui::Callback<SelectableImageInterface()>::New(&CreateTaskCheckBoxIcon))
+                                        Dali::Callback<SelectableImageInterface()>::New(&CreateTaskCheckBoxIcon))
                                       .Build();
   MarkdownView view = MarkdownView::New(markdownStyle);
 

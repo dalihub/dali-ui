@@ -18,12 +18,12 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/signals/callback.h>
 
 namespace Dali
 {
@@ -56,10 +56,10 @@ public:
    * The callback is invoked once for each RadioButton constructed from the style. Each
    * invocation must return a newly created SelectableImageInterface whose GetView() is also
    * initialized; a live selectable image or View must not be shared by multiple controls. A
-   * stateless free function is the preferred callback target because Ui::Callback is move-only
+   * stateless free function is the preferred callback target because Dali::Callback is move-only
    * and the callback is shared by style copies.
    */
-  using IconGenerator = Ui::Callback<SelectableImageInterface()>;
+  using IconGenerator = Dali::Callback<SelectableImageInterface()>;
 
   /**
    * @brief Creates an uninitialized style handle.

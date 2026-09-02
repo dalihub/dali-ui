@@ -67,7 +67,7 @@ UiStyle CreateCheckBoxOverride()
 }
 
 // Capture-less icon generator for CheckBoxStyle::SetIconGenerator(). Must be a free function
-// (IconGenerator = Ui::Callback<SelectableImageInterface()>); a capturing lambda would not convert.
+// (IconGenerator = Dali::Callback<SelectableImageInterface()>); a capturing lambda would not convert.
 SelectableImageInterface MakeTestIcon()
 {
   return SelectableLottieAnimationView::New(

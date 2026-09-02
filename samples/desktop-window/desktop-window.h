@@ -49,8 +49,8 @@
 class DesktopWindow : public Dali::ConnectionTracker
 {
 public:
-  using CloseCallback  = Dali::Ui::Callback<void()>;
-  using ActionCallback = Dali::Ui::Callback<void()>;
+  using CloseCallback  = Dali::Callback<void()>;
+  using ActionCallback = Dali::Callback<void()>;
 
   /**
    * @brief Builds the chrome and attaches it to a window.
@@ -130,7 +130,7 @@ private:
   Dali::Ui::WindowFrameCommandDisposition OnCommand(Dali::Ui::WindowFrame sender, const Dali::Ui::WindowFrameCommandRequest& request);
 
 private:
-  // Dali::Ui::Callback is move-only, so a click handler cannot capture one. The
+  // Dali::Callback is move-only, so a click handler cannot capture one. The
   // callbacks live here and each button's handler reaches its own by index.
   struct BarAction
   {

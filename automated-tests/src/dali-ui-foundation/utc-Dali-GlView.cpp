@@ -74,14 +74,14 @@ struct GlCallbackRecorder
   void Register(GlView view)
   {
     view.RegisterGlCallbacks(
-      Ui::Callback<void(const GlViewRenderInfo&)>::New(this, &GlCallbackRecorder::OnInit),
-      Ui::Callback<bool(const GlViewRenderInfo&)>::New(this, &GlCallbackRecorder::OnRenderFrame),
-      Ui::Callback<void()>::New(this, &GlCallbackRecorder::OnTerminate));
+      Dali::Callback<void(const GlViewRenderInfo&)>::New(this, &GlCallbackRecorder::OnInit),
+      Dali::Callback<bool(const GlViewRenderInfo&)>::New(this, &GlCallbackRecorder::OnRenderFrame),
+      Dali::Callback<void()>::New(this, &GlCallbackRecorder::OnTerminate));
   }
 
-  Ui::Callback<void()> CompletionCallback()
+  Dali::Callback<void()> CompletionCallback()
   {
-    return Ui::Callback<void()>::New(this, &GlCallbackRecorder::OnTerminated);
+    return Dali::Callback<void()>::New(this, &GlCallbackRecorder::OnTerminated);
   }
 
   uint32_t      initCount{0u};

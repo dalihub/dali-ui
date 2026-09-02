@@ -20,9 +20,9 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/rendering/texture.h>
+#include <dali/public-api/signals/callback.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/gl/gl-view-render-info.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -47,9 +47,9 @@ class GlViewImpl;
  * using namespace Dali::Ui;
  *
  * GlView glView = GlView::New(GlView::BackendMode::UNSAFE_DIRECT_RENDERING);
- * glView.RegisterGlCallbacks(Ui::Callback<void(const GlViewRenderInfo&)>::New(this, &MyApp::OnGlInit),
- *                            Ui::Callback<bool(const GlViewRenderInfo&)>::New(this, &MyApp::OnGlRenderFrame),
- *                            Ui::Callback<void()>::New(this, &MyApp::OnGlTerminate));
+ * glView.RegisterGlCallbacks(Dali::Callback<void(const GlViewRenderInfo&)>::New(this, &MyApp::OnGlInit),
+ *                            Dali::Callback<bool(const GlViewRenderInfo&)>::New(this, &MyApp::OnGlRenderFrame),
+ *                            Dali::Callback<void()>::New(this, &MyApp::OnGlTerminate));
  * parent.Add(glView);
  * @endcode
  *

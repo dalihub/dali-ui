@@ -17,8 +17,8 @@
 
 #include "window-frame-feature-config.h"
 
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali/public-api/adaptor-framework/window.h>
+#include <dali/public-api/signals/callback.h>
 
 #include <memory>
 #include <optional>
@@ -40,7 +40,7 @@ struct NativeWindowState
 class WindowOperationAdapter
 {
 public:
-  using CloseCallback = Dali::Ui::Callback<void()>;
+  using CloseCallback = Dali::Callback<void()>;
 
   virtual ~WindowOperationAdapter() = default;
 

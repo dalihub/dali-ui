@@ -93,9 +93,9 @@ GlViewImplPtr GlViewImpl::New(GlView::BackendMode backendMode)
 // Public API
 // ---------------------------------------------------------------------------
 
-void GlViewImpl::RegisterGlCallbacks(Ui::Callback<void(const GlViewRenderInfo&)> initCallback,
-                                     Ui::Callback<bool(const GlViewRenderInfo&)> renderFrameCallback,
-                                     Ui::Callback<void()>                        terminateCallback)
+void GlViewImpl::RegisterGlCallbacks(Dali::Callback<void(const GlViewRenderInfo&)> initCallback,
+                                     Dali::Callback<bool(const GlViewRenderInfo&)> renderFrameCallback,
+                                     Dali::Callback<void()>                        terminateCallback)
 {
   if(mTerminateRequested)
   {
@@ -146,7 +146,7 @@ GlView::BackendMode GlViewImpl::GetBackendMode() const
   return mBackendMode;
 }
 
-void GlViewImpl::Terminate(Ui::Callback<void()> onTerminated)
+void GlViewImpl::Terminate(Dali::Callback<void()> onTerminated)
 {
   if(mTerminateRequested)
   {
@@ -266,7 +266,7 @@ void GlViewImpl::OnTerminateCompleted()
 
   if(mTerminateCompletedCallback)
   {
-    Ui::Callback<void()> completed = std::move(mTerminateCompletedCallback);
+    Dali::Callback<void()> completed = std::move(mTerminateCompletedCallback);
     completed.Invoke();
   }
 

@@ -264,7 +264,7 @@ RadioButtonStyle customStyle = RadioButtonStyle::Default()
 ```
 
 Frame range, key path, color policy는 Lottie asset에 종속되므로 예제 값을 다른 asset에 그대로
-사용하면 안 됩니다. `Ui::Callback`은 move-only이고 style 복사본들이 generator를
+사용하면 안 됩니다. `Dali::Callback`은 move-only이고 style 복사본들이 generator를
 공유하므로 상태가 없는 free function을 generator target으로 사용하는 것을 권장합니다.
 
 ---

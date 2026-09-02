@@ -631,7 +631,7 @@ private:
   {
     if(mGlView)
     {
-      mGlView.Terminate(Ui::Callback<void()>::New(&Renderer(), &CubeRenderer::OnTerminateCompleted));
+      mGlView.Terminate(Dali::Callback<void()>::New(&Renderer(), &CubeRenderer::OnTerminateCompleted));
       mGlSlot.Remove(mGlView);
       mGlView.Reset();
     }
@@ -651,9 +651,9 @@ private:
     mGlView.SetLayoutParams(AbsoluteLayoutParams::New()
                               .SetBounds(LayoutRect(pad, pad, slot.width - pad * 2.0f, slot.height - pad * 2.0f)));
     mGlView.RegisterGlCallbacks(
-      Ui::Callback<void(const GlViewRenderInfo&)>::New(renderer, &CubeRenderer::OnGlInit),
-      Ui::Callback<bool(const GlViewRenderInfo&)>::New(renderer, &CubeRenderer::OnGlRenderFrame),
-      Ui::Callback<void()>::New(renderer, &CubeRenderer::OnGlTerminate));
+      Dali::Callback<void(const GlViewRenderInfo&)>::New(renderer, &CubeRenderer::OnGlInit),
+      Dali::Callback<bool(const GlViewRenderInfo&)>::New(renderer, &CubeRenderer::OnGlRenderFrame),
+      Dali::Callback<void()>::New(renderer, &CubeRenderer::OnGlTerminate));
     mGlView.SetRenderingMode(mRenderingMode);
 
     mGlSlot.Add(mGlView);
@@ -732,7 +732,7 @@ private:
     {
       if(mGlView && !mTerminated)
       {
-        mGlView.Terminate(Ui::Callback<void()>::New(&Renderer(), &CubeRenderer::OnTerminateCompleted));
+        mGlView.Terminate(Dali::Callback<void()>::New(&Renderer(), &CubeRenderer::OnTerminateCompleted));
         mTerminated = true;
       }
     }

@@ -25,6 +25,7 @@
 #include <dali/public-api/common/insets.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
 #include <initializer_list>
 
 // INTERNAL INCLUDES
@@ -38,7 +39,6 @@
 #include <dali-ui-foundation/public-api/traits/interactive-trait.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/inner-shadow.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>

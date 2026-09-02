@@ -352,7 +352,7 @@ public:
    * @return The installed button, for styling, or an uninitialized handle when
    *         the bottom bar could not take it
    */
-  Dali::Ui::View AddBarAction(Dali::StringView iconUrl, Dali::Ui::Callback<void()> onClick);
+  Dali::Ui::View AddBarAction(Dali::StringView iconUrl, Dali::Callback<void()> onClick);
 
   /**
    * @brief Returns the smallest frame this decoration lays out correctly.

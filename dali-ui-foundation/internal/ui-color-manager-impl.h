@@ -34,7 +34,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 
 namespace Dali

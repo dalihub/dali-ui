@@ -16,10 +16,10 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
 
@@ -107,7 +107,7 @@ public:
     MINIMIZED = 2  ///< Window is minimized and has no presented frame
   };
 
-  using CloseCallback = Dali::Ui::Callback<void()>;
+  using CloseCallback = Dali::Callback<void()>;
 
   /**
    * @brief Callback that can replace WindowFrame's default command handling.
@@ -115,7 +115,7 @@ public:
    * WindowFrame invokes this callback before dispatching its default native
    * operation. The callback can observe the request or take it over entirely.
    */
-  using CommandInterceptor                    = Dali::Ui::Callback<WindowFrameCommandDisposition(WindowFrame, const WindowFrameCommandRequest&)>;
+  using CommandInterceptor                    = Dali::Callback<WindowFrameCommandDisposition(WindowFrame, const WindowFrameCommandRequest&)>;
   using WindowStateChangedSignalType          = Dali::Signal<void(WindowFrame, WindowState)>;
   using WindowStatePresentedSignalType        = Dali::Signal<void(WindowFrame, WindowState)>;
   using GeometryChangedSignalType             = Dali::Signal<void(WindowFrame, const WindowFrameGeometry&)>;

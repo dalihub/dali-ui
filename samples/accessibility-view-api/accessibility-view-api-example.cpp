@@ -533,31 +533,31 @@ private:
 
     Dali::Ui::Extension::View::SetAccessibilityActivateCallback(
       callbackView,
-      Dali::Ui::Callback<bool(View)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnActivate));
+      Dali::Callback<bool(View)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnActivate));
     Dali::Ui::Extension::View::SetAccessibilityEscapeCallback(
       callbackView,
-      Dali::Ui::Callback<bool(View)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnEscape));
+      Dali::Callback<bool(View)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnEscape));
     Dali::Ui::Extension::View::SetAccessibilityValueChangeCallback(
       callbackView,
-      Dali::Ui::Callback<bool(View, bool)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnValueChange));
+      Dali::Callback<bool(View, bool)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnValueChange));
     Dali::Ui::Extension::View::SetAccessibilityScrollToChildCallback(
       callbackView,
-      Dali::Ui::Callback<bool(View, View)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnScrollToChild));
+      Dali::Callback<bool(View, View)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnScrollToChild));
     Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
       callbackView,
-      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestName));
+      Dali::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestName));
     Dali::Ui::Extension::View::SetAccessibilityRequestDefaultNameCallback(
       callbackView,
-      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestDefaultName));
+      Dali::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestDefaultName));
     Dali::Ui::Extension::View::SetAccessibilityRequestDescriptionCallback(
       callbackView,
-      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestDescription));
+      Dali::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestDescription));
     Dali::Ui::Extension::View::SetAccessibilityRequestDefaultDescriptionCallback(
       callbackView,
-      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestDefaultDescription));
+      Dali::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestDefaultDescription));
     Dali::Ui::Extension::View::SetAccessibilityRequestValueCallback(
       callbackView,
-      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestValue));
+      Dali::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestValue));
 
     Dali::Property::Map attributes;
     const bool          activated   = callbackView.DoAction("activate", attributes);

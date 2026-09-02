@@ -1091,7 +1091,7 @@ int UtcDaliDefaultWindowDecorationAddBarActionP(void)
   const Vector2 before = defaultDecoration.GetMinimumFrameSize();
 
   ActionObserver observer;
-  Dali::Ui::View action = defaultDecoration.AddBarAction("theme.png", Dali::Ui::Callback<void()>::New(&observer, &ActionObserver::OnAction));
+  Dali::Ui::View action = defaultDecoration.AddBarAction("theme.png", Dali::Callback<void()>::New(&observer, &ActionObserver::OnAction));
   DALI_TEST_CHECK(action);
   DALI_TEST_CHECK(title.GetParent() == defaultDecoration.GetMoveRegion());
 
@@ -1138,8 +1138,8 @@ int UtcDaliDefaultWindowDecorationAddBarActionOrderP(void)
 
   ActionObserver first;
   ActionObserver second;
-  Dali::Ui::View firstAction  = defaultDecoration.AddBarAction("theme.png", Dali::Ui::Callback<void()>::New(&first, &ActionObserver::OnAction));
-  Dali::Ui::View secondAction = defaultDecoration.AddBarAction("theme.png", Dali::Ui::Callback<void()>::New(&second, &ActionObserver::OnAction));
+  Dali::Ui::View firstAction  = defaultDecoration.AddBarAction("theme.png", Dali::Callback<void()>::New(&first, &ActionObserver::OnAction));
+  Dali::Ui::View secondAction = defaultDecoration.AddBarAction("theme.png", Dali::Callback<void()>::New(&second, &ActionObserver::OnAction));
 
   windowFrame.Attach();
   windowFrame.SetMinimumFrameSize(defaultDecoration.GetMinimumFrameSize());
@@ -1181,7 +1181,7 @@ int UtcDaliDefaultWindowDecorationBarActionIconIsTheCallersP(void)
 
   ActionObserver observer;
   const char*    url    = "/opt/usr/apps/example/res/share.png";
-  Dali::Ui::View action = defaultDecoration.AddBarAction(url, Dali::Ui::Callback<void()>::New(&observer, &ActionObserver::OnAction));
+  Dali::Ui::View action = defaultDecoration.AddBarAction(url, Dali::Callback<void()>::New(&observer, &ActionObserver::OnAction));
   DALI_TEST_CHECK(action);
 
   ImageView icon = ImageView::DownCast(action.GetChildAt(0u));
@@ -1208,7 +1208,7 @@ int UtcDaliDefaultWindowDecorationBarActionReleasesOwnerP(void)
 
   ReleasingActionObserver observer;
   observer.owner        = DefaultWindowDecoration::New(windowFrame);
-  Dali::Ui::View action = observer.owner.AddBarAction("theme.png", Dali::Ui::Callback<void()>::New(&observer, &ReleasingActionObserver::OnAction));
+  Dali::Ui::View action = observer.owner.AddBarAction("theme.png", Dali::Callback<void()>::New(&observer, &ReleasingActionObserver::OnAction));
 
   // The callback drops the last handle, so the border is destroyed while its own
   // click handler is still on the stack. The handler holds one on itself for the

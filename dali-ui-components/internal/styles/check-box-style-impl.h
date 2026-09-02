@@ -19,10 +19,10 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/styles/check-box-style.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/signals/callback.h>
 #include <memory>
 #include <utility>
 

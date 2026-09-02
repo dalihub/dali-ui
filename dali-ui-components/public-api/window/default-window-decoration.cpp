@@ -77,7 +77,7 @@ Dali::Ui::View DefaultWindowDecoration::GetTopArea() const
   return GetImplementation(*this).GetTopArea();
 }
 
-Dali::Ui::View DefaultWindowDecoration::AddBarAction(Dali::StringView iconUrl, Dali::Ui::Callback<void()> onClick)
+Dali::Ui::View DefaultWindowDecoration::AddBarAction(Dali::StringView iconUrl, Dali::Callback<void()> onClick)
 {
   return GetImplementation(*this).AddBarAction(iconUrl, std::move(onClick));
 }

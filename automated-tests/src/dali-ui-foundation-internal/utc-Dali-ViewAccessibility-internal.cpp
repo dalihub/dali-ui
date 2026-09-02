@@ -945,7 +945,7 @@ int UtcDaliViewAccessibilityActivateCallbackP(void)
   handler.expectedView = view;
   Extension::View::SetAccessibilityActivateCallback(
     view,
-    Ui::Callback<bool(View)>::New(&handler, &AccessibilityActivateCallbackHandler::OnActivate));
+    Dali::Callback<bool(View)>::New(&handler, &AccessibilityActivateCallbackHandler::OnActivate));
 
   DALI_TEST_CHECK(!view.DoAction("activate", actionAttributes));
   DALI_TEST_EQUALS(handler.callbackCount, 1, TEST_LOCATION);
@@ -984,19 +984,19 @@ int UtcDaliViewAccessibilityActionCallbacksP(void)
   handler.expectedView = view;
   Extension::View::SetAccessibilityEscapeCallback(
     view,
-    Ui::Callback<bool(View)>::New(&handler, &AccessibilityCallbacksHandler::OnEscape));
+    Dali::Callback<bool(View)>::New(&handler, &AccessibilityCallbacksHandler::OnEscape));
   Extension::View::SetAccessibilityPanCallback(
     view,
-    Ui::Callback<bool(View, PanGesture)>::New(&handler, &AccessibilityCallbacksHandler::OnPan));
+    Dali::Callback<bool(View, PanGesture)>::New(&handler, &AccessibilityCallbacksHandler::OnPan));
   Extension::View::SetAccessibilityValueChangeCallback(
     view,
-    Ui::Callback<bool(View, bool)>::New(&handler, &AccessibilityCallbacksHandler::OnValueChange));
+    Dali::Callback<bool(View, bool)>::New(&handler, &AccessibilityCallbacksHandler::OnValueChange));
   Extension::View::SetAccessibilityScrollToChildCallback(
     view,
-    Ui::Callback<bool(View, View)>::New(&handler, &AccessibilityCallbacksHandler::OnScrollToChild));
+    Dali::Callback<bool(View, View)>::New(&handler, &AccessibilityCallbacksHandler::OnScrollToChild));
   Extension::View::SetAccessibilityZoomCallback(
     view,
-    Ui::Callback<bool(View)>::New(&handler, &AccessibilityCallbacksHandler::OnZoom));
+    Dali::Callback<bool(View)>::New(&handler, &AccessibilityCallbacksHandler::OnZoom));
 
   Property::Map actionAttributes;
   DALI_TEST_CHECK(!view.DoAction("escape", actionAttributes));
@@ -1062,13 +1062,13 @@ int UtcDaliViewAccessibilityRequestCallbacksP(void)
   handler.expectedView = view;
   Extension::View::SetAccessibilityRequestNameCallback(
     view,
-    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestName));
+    Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestName));
   Extension::View::SetAccessibilityRequestDescriptionCallback(
     view,
-    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDescription));
+    Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDescription));
   Extension::View::SetAccessibilityRequestValueCallback(
     view,
-    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestValue));
+    Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestValue));
 
   DALI_TEST_EQUALS(accessible->GetName(), std::string("Property name"), TEST_LOCATION);
   DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Property description"), TEST_LOCATION);
@@ -1096,10 +1096,10 @@ int UtcDaliViewAccessibilityRequestCallbacksP(void)
 
   Extension::View::SetAccessibilityRequestDefaultNameCallback(
     view,
-    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDefaultName));
+    Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDefaultName));
   Extension::View::SetAccessibilityRequestDefaultDescriptionCallback(
     view,
-    Ui::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDefaultDescription));
+    Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDefaultDescription));
 
   DALI_TEST_EQUALS(accessible->GetName(), std::string("Callback default name"), TEST_LOCATION);
   DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Callback default description"), TEST_LOCATION);

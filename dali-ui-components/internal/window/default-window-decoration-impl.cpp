@@ -266,7 +266,7 @@ void DefaultWindowDecorationImpl::UpdateBarColumnLayout()
   }
 }
 
-Dali::Ui::View DefaultWindowDecorationImpl::AddBarAction(Dali::StringView iconUrl, Dali::Ui::Callback<void()> onClick)
+Dali::Ui::View DefaultWindowDecorationImpl::AddBarAction(Dali::StringView iconUrl, Dali::Callback<void()> onClick)
 {
   if(!mBar)
   {

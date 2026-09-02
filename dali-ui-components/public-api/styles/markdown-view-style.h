@@ -20,12 +20,12 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/signals/callback.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 
@@ -171,9 +171,9 @@ public:
   Builder&& SetTableRuleColor(const UiColor& value) &&;
 
   Builder& SetTaskCheckBoxIconGenerator(
-    Ui::Callback<SelectableImageInterface()>&& generator) &;
+    Dali::Callback<SelectableImageInterface()>&& generator) &;
   Builder&& SetTaskCheckBoxIconGenerator(
-    Ui::Callback<SelectableImageInterface()>&& generator) &&;
+    Dali::Callback<SelectableImageInterface()>&& generator) &&;
 
   Builder&  SetTaskCheckBoxIconColor(const UiColor& color) &;
   Builder&& SetTaskCheckBoxIconColor(const UiColor& color) &&;

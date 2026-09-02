@@ -51,7 +51,7 @@ Dali::String DefaultIconUrl()
 // with the segment layout from its markers — select plays [0,19] (the "on" marker), deselect
 // plays [20,38] (the "off" marker). The inner-fill key path targets the recoloured fill layer
 // ("check_box " has a trailing space, matching the asset layer name). Must be a free function
-// (IconGenerator = Ui::Callback<SelectableImageInterface()>).
+// (IconGenerator = Dali::Callback<SelectableImageInterface()>).
 SelectableImageInterface MakeDefaultCheckBoxIcon()
 {
   return SelectableLottieAnimationView::New(SelectableLottieImage(DefaultIconUrl(),
@@ -199,7 +199,7 @@ CBS_SETTER(SetTextUnderline, const Text::Underline&)
 CBS_SETTER(SetStateEffect, StateEffect)
 #undef CBS_SETTER
 
-// SetIconGenerator cannot use the by-value CBS_SETTER macro: IconGenerator (Ui::Callback) is
+// SetIconGenerator cannot use the by-value CBS_SETTER macro: IconGenerator (Dali::Callback) is
 // move-only, so it must be moved into the impl.
 CheckBoxStyle::Builder& CheckBoxStyle::Builder::SetIconGenerator(IconGenerator&& generator) &
 {

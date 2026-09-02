@@ -26,6 +26,7 @@
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/weak-handle.h>
+#include <dali/public-api/signals/callback.h>
 #include <limits> ///< for std::numeric_limits
 #include <memory> ///< for std::unique_ptr
 
@@ -36,7 +37,6 @@
 #include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>

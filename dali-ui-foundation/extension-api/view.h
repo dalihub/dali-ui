@@ -18,7 +18,6 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
 // EXTERNAL INCLUDES

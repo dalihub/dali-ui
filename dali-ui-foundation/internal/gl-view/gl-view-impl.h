@@ -22,11 +22,11 @@
 #include <dali/devel-api/signals/render-callback.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/rendering/renderer.h>
+#include <dali/public-api/signals/callback.h>
 #include <memory>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/gl-view/gl-view-render-info-impl.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/gl/gl-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -66,9 +66,9 @@ public:
   /**
    * @copydoc Dali::Ui::GlView::RegisterGlCallbacks
    */
-  void RegisterGlCallbacks(Ui::Callback<void(const GlViewRenderInfo&)> initCallback,
-                           Ui::Callback<bool(const GlViewRenderInfo&)> renderFrameCallback,
-                           Ui::Callback<void()>                        terminateCallback);
+  void RegisterGlCallbacks(Dali::Callback<void(const GlViewRenderInfo&)> initCallback,
+                           Dali::Callback<bool(const GlViewRenderInfo&)> renderFrameCallback,
+                           Dali::Callback<void()>                        terminateCallback);
 
   /**
    * @copydoc Dali::Ui::GlView::BindTextureResources
@@ -98,7 +98,7 @@ public:
   /**
    * @copydoc Dali::Ui::GlView::Terminate
    */
-  void Terminate(Ui::Callback<void()> onTerminated);
+  void Terminate(Dali::Callback<void()> onTerminated);
 
 protected:
   /**
@@ -154,10 +154,10 @@ private:
 
   Ui::GlViewRenderInfo mRenderInfo;
 
-  Ui::Callback<void(const GlViewRenderInfo&)> mInitCallback;
-  Ui::Callback<bool(const GlViewRenderInfo&)> mRenderFrameCallback;
-  Ui::Callback<void()>                        mTerminateCallback;
-  Ui::Callback<void()>                        mTerminateCompletedCallback;
+  Dali::Callback<void(const GlViewRenderInfo&)> mInitCallback;
+  Dali::Callback<bool(const GlViewRenderInfo&)> mRenderFrameCallback;
+  Dali::Callback<void()>                        mTerminateCallback;
+  Dali::Callback<void()>                        mTerminateCompletedCallback;
 
   std::unique_ptr<EventThreadCallback> mEventTrigger;
 

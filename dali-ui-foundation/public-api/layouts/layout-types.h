@@ -20,12 +20,12 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/math/vector2.h>
+#include <dali/public-api/signals/callback.h>
 #include <cfloat>
 #include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 
 namespace Dali
 {

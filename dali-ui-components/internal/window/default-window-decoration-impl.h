@@ -48,7 +48,7 @@ public:
   WindowFrameDecoration GetDecoration() const;
   Dali::Ui::View        GetMoveRegion() const;
   Dali::Ui::View        GetTopArea() const;
-  Dali::Ui::View        AddBarAction(Dali::StringView iconUrl, Dali::Ui::Callback<void()> onClick);
+  Dali::Ui::View        AddBarAction(Dali::StringView iconUrl, Dali::Callback<void()> onClick);
   Dali::Vector2         GetMinimumFrameSize() const;
 
 protected:
@@ -78,13 +78,13 @@ private:
   Dali::Ui::ImageView            mMaximizeRestoreIcon;
   Dali::Ui::GridLayout           mBar;
 
-  // Actions the application added, in the order it added them. Dali::Ui::Callback
+  // Actions the application added, in the order it added them. Dali::Callback
   // is move-only, so the callback lives here and the button's handler reaches it
   // by index rather than capturing a copy.
   struct BarAction
   {
-    Dali::Ui::GridLayout       button;
-    Dali::Ui::Callback<void()> onClick;
+    Dali::Ui::GridLayout   button;
+    Dali::Callback<void()> onClick;
   };
   std::vector<BarAction> mBarActions;
 };
