@@ -48,7 +48,7 @@ name | desc. | sample
 IconButton | (~10.2026) | -
 Checkbox | (~10.2026) | -
 Switch | (~10.2026) | -
-RadioButton | (~10.2026) | -
+[RadioButton](RadioButton.md) | Icon-only single-selection control with parent-auto and named grouping, selection animation modes, accessibility, RTL, and theme support. | [samples/radio-button](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/radio-button)
 ProgressBar | (~10.2026) | -
 ProgressCicle | (~10.2026) | -
 Loading | (~10.2026) | -
