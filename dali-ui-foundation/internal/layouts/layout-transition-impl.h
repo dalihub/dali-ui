@@ -70,10 +70,11 @@ public:
   /**
    * @brief Returns whether ANY LayoutTransitionImpl exists in this process.
    *
-   * The single global question the per-add transition bookkeeping needs answered cheaply.
-   * With no transition object in existence, every dispatcher notification an add could
-   * make is provably a no-op, so the whole Window -> LayoutController -> dispatcher hop
-   * is pure cost and can be skipped.
+   * The single global question the per-add and per-remove transition bookkeeping needs
+   * answered cheaply. With no transition object in existence, every dispatcher
+   * notification an add or a remove could make is provably a no-op, so the whole
+   * Window -> LayoutController -> dispatcher hop -- and the remove-side ancestor resolver
+   * walk -- is pure cost and can be skipped.
    *
    * LIVE INSTANCES, deliberately, and not "transitions currently attached to a view":
    * every dispatcher entry a notification can touch keeps a STRONG

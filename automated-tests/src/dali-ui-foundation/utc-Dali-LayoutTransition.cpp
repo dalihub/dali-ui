@@ -4561,3 +4561,54 @@ int UtcDaliLayoutTransitionSoleActiveAfterDetachCancelsExitOnReAddP(void)
   DALI_TEST_EQUALS(gExitOnFinishedCount, 0u, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliLayoutTransitionDormantInstanceKeepsRemoveImmediateP(void)
+{
+  // The remove-side zero-transition gate reads LayoutTransitionImpl::HasAnyInstance(),
+  // which counts LIVE impls rather than attached ones. A LayoutTransition that exists but
+  // was never attached to anything therefore holds the gate OPEN, and this test pins that
+  // opening it changes no outcome: a parent with no transition of its own, and no ancestor
+  // owner, still unparents its child synchronously on ANIMATE_EXIT.
+  //
+  // SCOPE, honestly: with the gate CLOSED the same assertions hold -- that is the point,
+  // the gate is behaviour-preserving in both directions. What this test adds over the
+  // gate-closed remove tests is the gate-OPEN half of that claim, which nothing else in
+  // this file covers because every other test here attaches the transition it creates.
+  UiTestApplication application;
+  ResetFinishedCaptures();
+
+  // Created, never attached to any view. The only thing it does is make HasAnyInstance()
+  // true. The OnFinished callback is registered so the "nothing fired" assertion below
+  // has a carrier to fire through, if the remove were wrongly routed to this transition.
+  LayoutTransition dormant = LayoutTransition::New();
+  dormant.SetOnFinished(LayoutLifecycleCallback::New(&CaptureSlotOnFinished));
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  parent.Add(child);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(parent.GetChildCount(), 1u, TEST_LOCATION);
+
+  // No transition on parent and none on any ancestor: the unparent is synchronous even
+  // under ANIMATE_EXIT, asserted before a frame is pumped.
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!child.GetParent());
+
+  // And no EXIT lifecycle is ever produced: the child left immediately, it is not a ghost
+  // waiting on an animation.
+  for(int i = 0; i < 20; ++i)
+  {
+    application.SendNotification();
+    application.Render(20);
+  }
+  DALI_TEST_EQUALS(gExitOnFinishedCount, 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!child.GetParent());
+
+  END_TEST;
+}

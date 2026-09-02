@@ -3159,63 +3159,88 @@ void ViewDataImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
       return;
     }
 
-    Actor      selfActor      = mViewImpl.Self();
-    Window     window         = Window::Get(selfActor);
-    auto       it             = std::find(mChildren.begin(), mChildren.end(), child);
-    const bool isCurrentChild = (it != mChildren.end());
+    Actor selfActor = mViewImpl.Self();
 
-    // Inherited (SUBTREE-scope) EXIT: this view does not handle EXIT through
-    // its own transition (otherwise the deferred branch above would have run).
-    // Walk up to the closest ancestor SUBTREE owner that carries an EXIT
-    // effect; if found, defer the child to that owner. The actor stays under
-    // this view -- the ghost's direct/visual parent -- while the owner's
-    // transition drives the EXIT effect (INV-GHOST-UNDER-DIRECT-PARENT). The
-    // closest-owner / standalone-boundary rules are enforced inside the
-    // resolver, so a child claimed by a closer (non-SUBTREE or non-EXIT)
-    // transition is not stolen by an ancestor.
-    // ANIMATE_EXIT only: inherited (SUBTREE-scope) EXIT defer. IMMEDIATE skips
-    // this and unparents synchronously below.
-    if(animateExit && window && isCurrentChild)
+    // The remove-side mirror of the OnChildAdded gate. With no LayoutTransition alive
+    // anywhere in the process, everything between here and the unparent below is provably
+    // a no-op, and none of it is cheap: Window::Get resolves the actor's Scene and scans
+    // the adaptor's window list, and the find is a linear walk of mChildren.
+    //
+    // Provable in both directions, like the add-side gate:
+    //  - FindGoverningSubtreeOwner reports an owner only through some ancestor's
+    //    GetLayoutTransition() being non-empty, and a non-empty handle IS a live impl. With
+    //    none alive the resolver cannot return one, so the inherited-EXIT defer is
+    //    unreachable and an ANIMATE_EXIT remove is the immediate unparent either way.
+    //  - Both SIBLING_REMOVED markers are written only under this view's own `transition`,
+    //    which is GetLayoutTransition() -- provably empty while the gate is closed. Neither
+    //    marker could have been set, so neither is skipped.
+    //  - window, it and isCurrentChild exist only to feed those two, so they go with them.
+    //
+    // The ghost re-remove guard above deliberately stays OUTSIDE. It keys on mChildren
+    // bookkeeping -- the actor still parented here while the logical child is already
+    // erased -- not on transition liveness, and that desync outlives the transition that
+    // created it: a ghost whose transition died mid-flight must still take the early
+    // return rather than fall through and synchronously unparent.
+    if(Internal::LayoutTransitionImpl::HasAnyInstance())
     {
-      ViewImpl* owner = Internal::FindGoverningSubtreeOwner(&mViewImpl, Internal::ReflowSlot::EXIT);
-      if(owner)
+      Window     window         = Window::Get(selfActor);
+      auto       it             = std::find(mChildren.begin(), mChildren.end(), child);
+      const bool isCurrentChild = (it != mChildren.end());
+
+      // Inherited (SUBTREE-scope) EXIT: this view does not handle EXIT through
+      // its own transition (otherwise the deferred branch above would have run).
+      // Walk up to the closest ancestor SUBTREE owner that carries an EXIT
+      // effect; if found, defer the child to that owner. The actor stays under
+      // this view -- the ghost's direct/visual parent -- while the owner's
+      // transition drives the EXIT effect (INV-GHOST-UNDER-DIRECT-PARENT). The
+      // closest-owner / standalone-boundary rules are enforced inside the
+      // resolver, so a child claimed by a closer (non-SUBTREE or non-EXIT)
+      // transition is not stolen by an ancestor.
+      // ANIMATE_EXIT only: inherited (SUBTREE-scope) EXIT defer. IMMEDIATE skips
+      // this and unparents synchronously below.
+      if(animateExit && window && isCurrentChild)
       {
-        ViewImpl& childImpl = GetImpl(child);
-        mChildren.Erase(it);
-        if(mLayoutTransitionData)
+        ViewImpl* owner = Internal::FindGoverningSubtreeOwner(&mViewImpl, Internal::ReflowSlot::EXIT);
+        if(owner)
         {
-          mLayoutTransitionData->pendingEnterChildren.erase(&childImpl);
-          mLayoutTransitionData->pendingReorderedChildren.erase(&childImpl);
+          ViewImpl& childImpl = GetImpl(child);
+          mChildren.Erase(it);
+          if(mLayoutTransitionData)
+          {
+            mLayoutTransitionData->pendingEnterChildren.erase(&childImpl);
+            mLayoutTransitionData->pendingReorderedChildren.erase(&childImpl);
+          }
+          // Remaining siblings under THIS direct parent reflow into the freed
+          // slot; tag their CHANGE as SIBLING_REMOVED on the next pass -- but only
+          // when THIS view owns a transition to consume the marker. For an
+          // inherited EXIT this view may have no transition, and the marker --
+          // consumed only by a transition-bearing view's layout pass -- would
+          // never be cleared and would mis-tag a future CHANGE if it later gains
+          // one.
+          if(transition)
+          {
+            mLayoutTransitionData->hasPendingChildRemoval = true;
+          }
+          InvalidateMeasure();
+          LayoutController::Get(window).ScheduleLayoutExit(&mViewImpl, child, owner);
+          return;
         }
-        // Remaining siblings under THIS direct parent reflow into the freed
-        // slot; tag their CHANGE as SIBLING_REMOVED on the next pass -- but only
-        // when THIS view owns a transition to consume the marker. For an
-        // inherited EXIT this view may have no transition, and the marker --
-        // consumed only by a transition-bearing view's layout pass -- would
-        // never be cleared and would mis-tag a future CHANGE if it later gains
-        // one.
-        if(transition)
-        {
-          mLayoutTransitionData->hasPendingChildRemoval = true;
-        }
-        InvalidateMeasure();
-        LayoutController::Get(window).ScheduleLayoutExit(&mViewImpl, child, owner);
-        return;
+      }
+
+      // Mark sibling removal for the next CHANGE pass when a transition is
+      // attached (without an EXIT slot) AND we have a window. The
+      // remaining children may reflow and should be tagged with
+      // SIBLING_REMOVED. Skip the marker when no transition is attached,
+      // or when no window is available -- without a window the marker
+      // cannot be consumed by the dispatcher in this pass (no layout
+      // pass runs), so it would leak across a later add-to-window event
+      // and mis-tag the first layout pass's CHANGE as SIBLING_REMOVED.
+      if(transition && window && isCurrentChild)
+      {
+        mLayoutTransitionData->hasPendingChildRemoval = true;
       }
     }
 
-    // Mark sibling removal for the next CHANGE pass when a transition is
-    // attached (without an EXIT slot) AND we have a window. The
-    // remaining children may reflow and should be tagged with
-    // SIBLING_REMOVED. Skip the marker when no transition is attached,
-    // or when no window is available -- without a window the marker
-    // cannot be consumed by the dispatcher in this pass (no layout
-    // pass runs), so it would leak across a later add-to-window event
-    // and mis-tag the first layout pass's CHANGE as SIBLING_REMOVED.
-    if(transition && window && isCurrentChild)
-    {
-      mLayoutTransitionData->hasPendingChildRemoval = true;
-    }
     selfActor.Remove(child);
   }
 }

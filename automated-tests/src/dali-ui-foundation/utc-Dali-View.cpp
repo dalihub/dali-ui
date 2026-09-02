@@ -10015,3 +10015,52 @@ int UtcDaliViewRequestedHeightPropertyEmitsPropertySetSignalExactlyOnceP(void)
   DALI_TEST_EQUALS(recorder.FirstFloatOf(Ui::View::Property::REQUESTED_HEIGHT), 80.0f, 0.0001f, TEST_LOCATION);
   END_TEST;
 }
+
+// ─── Remove with no transition alive: the gate skips only dead work ────────
+//
+// The remove-side zero-transition gate in Internal::ViewDataImpl::Remove skips the
+// window lookup, the mChildren find and the ancestor EXIT resolver when no
+// LayoutTransition exists anywhere in the process. Everything the caller can observe
+// must be unchanged: the child is unparented on the spot (never deferred as an EXIT
+// ghost), and the parent re-measures so its WRAP_CONTENT size follows the child set
+// it no longer has.
+int UtcDaliViewRemoveNoTransitionUnparentsAndReMeasuresParentP(void)
+{
+  UiTestApplication application;
+  tet_infoline("Remove with no LayoutTransition alive unparents at once and re-measures the parent");
+
+  gFirstParentMeasureProducerCount = 0;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(WRAP_CONTENT);
+  parent.SetRequestedHeight(WRAP_CONTENT);
+  parent.SetMeasureCallback(MeasureCallback::New(&FirstParentAccumulatingMeasure));
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(200.0f);
+  child.SetRequestedHeight(80.0f);
+  parent.Add(child);
+
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 80.0f, TEST_LOCATION);
+
+  const int baseCount = gFirstParentMeasureProducerCount;
+  DALI_TEST_CHECK(baseCount > 0);
+
+  // ANIMATE_EXIT, but with no transition in existence there is no EXIT to animate, so
+  // the unparent is synchronous -- asserted BEFORE any frame is pumped.
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!child.GetParent());
+
+  SettleLayout(application);
+
+  DALI_TEST_CHECK(gFirstParentMeasureProducerCount > baseCount);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 0.0f, TEST_LOCATION);
+
+  END_TEST;
+}
