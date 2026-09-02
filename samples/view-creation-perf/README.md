@@ -8,8 +8,16 @@ Keys:
 - `3` / `4`: create 100 / 10000 Views with individual Renderers
 - `5` / `6`: create 100 / 10000 Views with background colors
 - `7` / `8`: create 100 / 10000 plain STANDALONE Views
+- `t`: toggle a dormant, never-attached `LayoutTransition` on and off
+  (also clears the accumulated Average timings)
+- `n`: construct 10000 Views with `View::New()` only - no geometry, no scene
+- `r`: remove 10000 pre-created Views one by one
+- `a`: remove 10000 pre-created Views with a single `RemoveAll`
 - `9`: hide or show the timing labels
 - `Escape` / `Back`: quit
+
+The removal and creation-only cases take letter keys because every digit is already
+taken here.
 
 The measured interval covers View creation, geometry setup, optional visual or
 renderer setup, and adding each View to the scene-connected root. Bulk-created
@@ -25,13 +33,33 @@ It also acts as a control. With no `LayoutTransition` alive anywhere in the
 process, the zero-transition gate in `OnChildAdded` skips the window, controller
 and resolver hop altogether, so both root modes should now measure the same; the
 ancestor-walk cost that used to separate them returns only once a
-`LayoutTransition` exists. The toggle takes effect from the next `1`-`6` run, and
+`LayoutTransition` exists. The toggle takes effect from the next `1`-`8` run, and
 every result line, on stderr and in the on-screen log, is suffixed with
-`(root=STANDALONE)` or `(root=DEFAULT)` so it stays attributable.
+`(root=..., transitions=...)` so it stays attributable.
 
-The accumulated *Average* panel carries no mode dimension, so key `0` clears it. Every
-Average therefore describes runs from a single root mode; the per-run log lines above it
-keep the full history, each labelled with the mode it ran under.
+The remove keys `r` and `a` pre-create the same 10000 plain Views *unmeasured* and
+time only the removal: `r` calls `Remove(child, ANIMATE_EXIT)` once per child, `a`
+calls a single `RemoveAll(ANIMATE_EXIT)`. `n` measures `View::New()` on its own, with
+no geometry and no scene, so the constructor's cost can be read apart from the add
+path's.
+
+Removal here is dominated by per-child list maintenance, quadratic in the child count,
+so the gate's delta is small on this flat tree and grows with hierarchy depth.
+
+Key `t` creates one `LayoutTransition` and holds it without ever attaching it to a
+View, which flips `HasAnyInstance()` and nothing else. Pressing it around the same runs
+therefore measures gate-on against gate-off for *both* gates: the add-side one behind
+keys `1`-`8`, and the remove-side one behind `r` and `a`. The steady-state Add measured
+by `1`-`8` also exercises the known-parent invalidation entry `OnChildAdded` uses, so
+that path needs no key of its own.
+
+Unlike key `0`, key `t` does **not** rebuild the scene - there is nothing about the tree
+for it to change. It takes effect immediately, for the very next run.
+
+The accumulated *Average* panel carries neither a mode nor a gate dimension, so keys `0`
+and `t` both clear it. Every Average therefore describes runs from a single root mode and
+a single gate state; the per-run log lines above it keep the full history, each labelled
+with the mode and gate state it ran under.
 
 ## Ubuntu
 
