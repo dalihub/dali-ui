@@ -10064,3 +10064,93 @@ int UtcDaliViewRemoveNoTransitionUnparentsAndReMeasuresParentP(void)
 
   END_TEST;
 }
+
+// ─── Lazy VisualData: a view that never asks for a visual has none ────────
+//
+// VisualData is no longer allocated in ViewImpl::Initialize(). A fresh View therefore
+// holds a null context where it used to hold an empty one, and every read path has to
+// answer identically for the two. This pins the answers a fresh View gives, and that
+// the context materialises on the first visual write.
+int UtcDaliViewFreshViewVisualQueriesInertP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A fresh View answers every visual query without owning a visual context");
+
+  View view = View::New();
+
+  DALI_TEST_EQUALS(view.IsResourceReady(), true, TEST_LOCATION);
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(backgroundMap.Empty(), true, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+
+  // The first visual write creates the context, and the same query now reports it.
+  view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+
+  backgroundMap = view.GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(backgroundMap.Empty(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsResourceReady(), true, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ─── Lazy VisualData: a corner write BEFORE any visual still latches ──────
+//
+// The corner property funnels call NotifyConstraintPropertyChanged, which flips
+// VisualData's first-time corner latch (mCornerRadiusValueAdded) even with zero visuals
+// registered. With lazy creation those funnels have to CREATE the context rather than
+// skip on a null one, or the latch would never be set by a pre-background corner write.
+//
+// The latch is what EnableCornerPropertiesOverridden reads when a visual is registered
+// later: only with it set does the View's corner radius get pushed into that new visual.
+// So the decisive assertion is not the View's own corner radius roundtrip (which is a
+// plain actor property and survives either way) but the radius carried by the BACKGROUND
+// visual registered afterwards -- Vector4::ZERO if the latch was missed.
+int UtcDaliViewCornerRadiusBeforeBackgroundP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A corner radius set before any background survives the background that follows");
+
+  View          view = View::New();
+  const Vector4 testRadius(8.0f, 12.0f, 16.0f, 20.0f);
+
+  // Corner first, on a View that owns no visual context yet.
+  view.SetCornerRadius(testRadius);
+
+  Vector4 radius = view.GetCornerRadius();
+  DALI_TEST_EQUALS(radius.x, testRadius.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.y, testRadius.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.z, testRadius.z, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.w, testRadius.w, TEST_LOCATION);
+
+  // Now the first visual this View ever gets.
+  view.SetBackgroundColor(UiColor(0.0f, 1.0f, 0.0f, 1.0f));
+  application.GetWindow().Add(view);
+  SettleLayout(application);
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(backgroundMap.Empty(), false, TEST_LOCATION);
+
+  // The View's own property is unchanged by the background, as before.
+  radius = view.GetCornerRadius();
+  DALI_TEST_EQUALS(radius.x, testRadius.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.y, testRadius.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.z, testRadius.z, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.w, testRadius.w, TEST_LOCATION);
+
+  // ...and the radius actually reached the background visual, which is what the latch
+  // decides. This is the assertion that fails if the corner funnel skips a null context.
+  Property::Value* visualCornerRadius = backgroundMap.Find(Ui::Integration::Visual::Property::CORNER_RADIUS);
+  DALI_TEST_CHECK(visualCornerRadius);
+
+  Vector4 visualRadius;
+  DALI_TEST_CHECK(visualCornerRadius && visualCornerRadius->Get(visualRadius));
+  DALI_TEST_EQUALS(visualRadius.x, testRadius.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualRadius.y, testRadius.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualRadius.z, testRadius.z, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualRadius.w, testRadius.w, TEST_LOCATION);
+
+  END_TEST;
+}

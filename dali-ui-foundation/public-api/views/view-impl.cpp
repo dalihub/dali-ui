@@ -838,10 +838,18 @@ void ViewImpl::Initialize()
   // was not there before. It also still runs before any reorder of a tracked child is
   // possible, including for children a subclass adds from its own OnInitialize().
 
-  if(mImpl->AreVisualsEnabled())
-  {
-    mImpl->InitializeVisualData();
-  }
+  // No VisualData here. The context is allocated lazily, by the first visual mutation
+  // that actually needs it (EnsureVisualData), because every default View was paying a
+  // heap allocation plus the context's own construction for a facility most views never
+  // touch -- no background, no shadow, no borderline, no corner radius -- and in a large
+  // tree those views are the bulk of the tree.
+  //
+  // DISABLE_VISUALS still means never-allocated, exactly as before; what widened is that
+  // an ENABLED view is now null too until it first asks for a visual. Every read path
+  // already answers a null context and an empty one identically (no visual found, count
+  // 0, resources ready), so the widening is invisible to them -- the single place where
+  // the two would have parted, GetVisualResourceStatus's fallback, now branches on
+  // AreVisualsEnabled() to keep each case's original answer.
 
   Integration::ViewAccessibility::Register();
 

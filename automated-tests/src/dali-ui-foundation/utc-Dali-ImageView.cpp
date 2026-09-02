@@ -527,6 +527,24 @@ int UtcDaliImageViewGetLoadingStatusP(void)
   END_TEST;
 }
 
+// Lazy VisualData: with no URL, the ImageView registers no IMAGE visual, so its
+// VisualData context is never allocated. The status query must still answer PREPARING --
+// the same answer the allocated-but-empty context gave before the context became lazy
+// (VisualData's own FindVisual-miss fallback), not the READY that a visuals-DISABLED view
+// gets. ImageViewImpl::UpdatePlaceholderVisual is the consumer that makes the difference
+// load-bearing: it suppresses the placeholder only on READY, so a READY answer here would
+// silently drop placeholders for images that have not loaded.
+int UtcDaliImageViewNoUrlLoadingStatusPreparingP(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New();
+
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLoadingStatus()),
+                   static_cast<int>(Ui::Visual::ResourceStatus::PREPARING),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliImageViewSignalsP(void)
 {
   UiTestApplication application;

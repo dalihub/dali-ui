@@ -1302,9 +1302,13 @@ void ViewDataImpl::Destroy()
   ClearRenderEffect();
 }
 
-void ViewDataImpl::InitializeVisualData()
+ViewDataImpl::VisualData& ViewDataImpl::EnsureVisualData()
 {
-  mVisualData = std::make_unique<ViewDataImpl::VisualData>(*this);
+  if(!mVisualData)
+  {
+    mVisualData = std::make_unique<VisualData>(*this);
+  }
+  return *mVisualData;
 }
 
 MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightConstraint)
@@ -6381,33 +6385,33 @@ void ViewDataImpl::ResourceReady()
 
 void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->RegisterVisual(index, visual);
+    EnsureVisualData().RegisterVisual(index, visual);
   }
 }
 
 void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, int depthIndex)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->RegisterVisual(index, visual, depthIndex);
+    EnsureVisualData().RegisterVisual(index, visual, depthIndex);
   }
 }
 
 void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->RegisterVisual(index, visual, enabled);
+    EnsureVisualData().RegisterVisual(index, visual, enabled);
   }
 }
 
 void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled, int depthIndex)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->RegisterVisual(index, visual, enabled, depthIndex);
+    EnsureVisualData().RegisterVisual(index, visual, enabled, depthIndex);
   }
 }
 
@@ -6487,9 +6491,9 @@ void ViewDataImpl::EnableCornerPropertiesOverridden(Ui::Integration::Visual::Bas
 
 void ViewDataImpl::EnableVisual(Property::Index index, bool enable)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->EnableVisual(index, enable);
+    EnsureVisualData().EnableVisual(index, enable);
   }
 }
 
@@ -6508,7 +6512,10 @@ Ui::Visual::ResourceStatus ViewDataImpl::GetVisualResourceStatus(Property::Index
   {
     return mVisualData->GetVisualResourceStatus(index);
   }
-  return Ui::Visual::ResourceStatus::READY;
+  // Null now also means "enabled, but no visual has been touched yet", and for THAT view
+  // the allocated-but-empty context this replaces answered PREPARING -- VisualData's own
+  // FindVisual-miss fallback. Only a DISABLE_VISUALS view keeps the READY answer.
+  return AreVisualsEnabled() ? Ui::Visual::ResourceStatus::PREPARING : Ui::Visual::ResourceStatus::READY;
 }
 
 void ViewDataImpl::DoAction(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
@@ -6531,18 +6538,18 @@ void ViewDataImpl::DoActionExtension(Dali::Property::Index visualIndex, Dali::Pr
 
 bool ViewDataImpl::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    return mVisualData->AddVisualObject(visualBase, internalContainerRangeType);
+    return EnsureVisualData().AddVisualObject(visualBase, internalContainerRangeType);
   }
   return false;
 }
 
 bool ViewDataImpl::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    return mVisualData->AddShadowVisualObject(visualBase, internalContainerRangeType);
+    return EnsureVisualData().AddShadowVisualObject(visualBase, internalContainerRangeType);
   }
   return false;
 }
@@ -6817,10 +6824,14 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         Vector4 radius;
         if(value.Get(radius))
         {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
+          // Gated on AreVisualsEnabled(), not on the context already existing:
+          // NotifyConstraintPropertyChanged flips the corner first-time latches even with
+          // zero visuals registered, so a corner write made BEFORE any background must keep
+          // today's latch timeline rather than be dropped until the first visual arrives.
+          if(DALI_LIKELY(viewImpl.GetViewDataImpl().AreVisualsEnabled()))
           {
-            viewImpl.GetViewDataImpl().mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_RADIUS,
-                                                                                    false);
+            viewImpl.GetViewDataImpl().EnsureVisualData().NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_RADIUS,
+                                                                                          false);
           }
           viewImpl.GetViewDataImpl().UpdateCornerRadius();
         }
@@ -6832,10 +6843,14 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         int policy;
         if(value.Get(policy))
         {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
+          // Gated on AreVisualsEnabled(), not on the context already existing:
+          // NotifyConstraintPropertyChanged flips the corner first-time latches even with
+          // zero visuals registered, so a corner write made BEFORE any background must keep
+          // today's latch timeline rather than be dropped until the first visual arrives.
+          if(DALI_LIKELY(viewImpl.GetViewDataImpl().AreVisualsEnabled()))
           {
-            viewImpl.GetViewDataImpl().mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_RADIUS_POLICY,
-                                                                                    false);
+            viewImpl.GetViewDataImpl().EnsureVisualData().NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_RADIUS_POLICY,
+                                                                                          false);
           }
           viewImpl.GetViewDataImpl().UpdateCornerRadius();
         }
@@ -6856,10 +6871,14 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         Vector4 squareness;
         if(value.Get(squareness))
         {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
+          // Gated on AreVisualsEnabled(), not on the context already existing:
+          // NotifyConstraintPropertyChanged flips the corner first-time latches even with
+          // zero visuals registered, so a corner write made BEFORE any background must keep
+          // today's latch timeline rather than be dropped until the first visual arrives.
+          if(DALI_LIKELY(viewImpl.GetViewDataImpl().AreVisualsEnabled()))
           {
-            viewImpl.GetViewDataImpl().mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_SQUARENESS,
-                                                                                    false);
+            viewImpl.GetViewDataImpl().EnsureVisualData().NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_SQUARENESS,
+                                                                                          false);
           }
           viewImpl.GetViewDataImpl().UpdateCornerRadius();
         }
@@ -7268,8 +7287,8 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
 Ui::View::VisualEventSignalType& ViewDataImpl::VisualEventSignal()
 {
-  DALI_ASSERT_ALWAYS(mVisualData && "Visual Disabled view cannot use VisualEventSignal!!");
-  return mVisualData->VisualEventSignal();
+  DALI_ASSERT_ALWAYS(AreVisualsEnabled() && "Visual Disabled view cannot use VisualEventSignal!!");
+  return EnsureVisualData().VisualEventSignal();
 }
 
 ViewDataImpl::AccessibilityData& ViewDataImpl::GetOrCreateAccessibilityData()
@@ -8043,7 +8062,7 @@ void ViewDataImpl::OnLayoutFinished(Ui::View view, LayoutRect bounds)
 
 void ViewDataImpl::SetBackground(const Property::Map& map)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
     Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
     visual.SetName("background");
@@ -8052,7 +8071,7 @@ void ViewDataImpl::SetBackground(const Property::Map& map)
     {
       // Ignore corner radius for offscreen case.
       Ui::GetImplementation(visual).CornerRadiusIgnoredAtOffscreenRendering(true);
-      mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
+      EnsureVisualData().RegisterVisual(Ui::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
       EnableCornerPropertiesOverridden(visual, true);
 
       if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
@@ -8071,14 +8090,14 @@ void ViewDataImpl::SetShadow(const Property::Map& map)
 
 void ViewDataImpl::SetFirstShadow(const Property::Map& map)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
     Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
     visual.SetName("shadow");
 
     if(visual)
     {
-      mVisualData->RegisterVisual(Ui::View::Property::SHADOW, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT);
+      EnsureVisualData().RegisterVisual(Ui::View::Property::SHADOW, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT);
       EnableCornerPropertiesOverridden(visual, true);
 
       if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
@@ -8143,13 +8162,13 @@ void ViewDataImpl::SetInnerShadow(const Ui::InnerShadow& innerShadow)
 
 void ViewDataImpl::RegisterInnerShadowVisual(Ui::Integration::Visual::Base visual)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
     visual.SetName("innerShadow");
 
     if(visual)
     {
-      mVisualData->RegisterVisual(Ui::View::Property::INNER_SHADOW, visual, INNER_SHADOW_DEPTH_INDEX);
+      EnsureVisualData().RegisterVisual(Ui::View::Property::INNER_SHADOW, visual, INNER_SHADOW_DEPTH_INDEX);
 
       Ui::Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
 
@@ -8192,8 +8211,14 @@ void ViewDataImpl::ClearInnerShadow()
   if(DALI_LIKELY(mVisualData))
   {
     mVisualData->UnregisterVisual(Ui::View::Property::INNER_SHADOW);
+  }
 
-    // Trigger a size negotiation request that may be needed when unregistering a visual.
+  // Trigger a size negotiation request that may be needed when unregistering a visual.
+  // Gated on AreVisualsEnabled(), not on the lazy context: before the context became
+  // lazy every enabled view had one, so an enabled view ALWAYS issued this request here
+  // even with nothing registered -- and a visuals-disabled view never did.
+  if(AreVisualsEnabled())
+  {
     if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
     {
       sizeNegotiatedViewImpl->RelayoutRequest();
@@ -8203,20 +8228,22 @@ void ViewDataImpl::ClearInnerShadow()
 
 void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
+    VisualData& visualData = EnsureVisualData();
+
     if(!forciblyCreate)
     {
       Ui::Internal::Visual::Base* previousVisualImplPtr =
-        mVisualData->GetVisualImplPtr(Ui::View::Property::BORDERLINE);
+        visualData.GetVisualImplPtr(Ui::View::Property::BORDERLINE);
       if(previousVisualImplPtr)
       {
         previousVisualImplPtr->DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
 
         // Trigger borderline relative constraints once
-        mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_WIDTH, false);
-        mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_COLOR, false);
-        mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_OFFSET, false);
+        visualData.NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_WIDTH, false);
+        visualData.NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_COLOR, false);
+        visualData.NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_OFFSET, false);
         return;
       }
     }
@@ -8225,7 +8252,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
 
     if(visual)
     {
-      mVisualData->RegisterVisual(Ui::View::Property::BORDERLINE, visual, BORDERLINE_DEPTH_INDEX);
+      visualData.RegisterVisual(Ui::View::Property::BORDERLINE, visual, BORDERLINE_DEPTH_INDEX);
 
       // Create constraint only if we set Borderline property as DevelView::BORDERLINE_XXX.
       if(!forciblyCreate)
@@ -8304,8 +8331,14 @@ void ViewDataImpl::ClearBorderline()
   if(DALI_LIKELY(mVisualData))
   {
     mVisualData->UnregisterVisual(Ui::View::Property::BORDERLINE);
+  }
 
-    // Trigger a size negotiation request that may be needed when unregistering a visual.
+  // Trigger a size negotiation request that may be needed when unregistering a visual.
+  // Gated on AreVisualsEnabled(), not on the lazy context: before the context became
+  // lazy every enabled view had one, so an enabled view ALWAYS issued this request here
+  // even with nothing registered -- and a visuals-disabled view never did.
+  if(AreVisualsEnabled())
+  {
     if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
     {
       sizeNegotiatedViewImpl->RelayoutRequest();
@@ -8450,7 +8483,21 @@ Dali::Vector<Dali::Devel::Accessibility::Relation> ViewDataImpl::GetAccessibilit
 
 void ViewDataImpl::RegisterProcessorOnce()
 {
-  if(DALI_LIKELY(mVisualData))
+  // AreVisualsEnabled(), NOT mVisualData, and deliberately no EnsureVisualData() here:
+  // registering must not allocate. The predicate keeps the pre-lazy registration TIMING
+  // exactly -- enabled implies registered on the first size/scale change, whether or not
+  // a visual exists yet -- because before lazy creation an enabled view always had a
+  // context and so always registered here.
+  //
+  // That timing is load-bearing, not incidental. The registration opens a same-event-cycle
+  // window: a visual registered AFTER the resize but before the processor runs still gets
+  // its fitting applied on that frame. Gating registration on the context existing would
+  // close the window for the first visual a view ever gets, and its fitting would slip to
+  // whatever later size or scale change happened to re-register.
+  //
+  // Process() tolerates the context still being null when it runs (it null-guards
+  // ApplyFittingMode), so registering ahead of any allocation costs a no-op pass at worst.
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
     if(!mProcessorRegistered)
     {
@@ -8519,9 +8566,9 @@ void ViewDataImpl::SetOffScreenRendering(int32_t offScreenRenderingType)
       renderEffectData.offScreenRendering = std::make_unique<OffScreenRenderingImpl>(newType);
       renderEffectData.offScreenRendering->SetOwnerView(handle);
 
-      if(DALI_LIKELY(mVisualData))
+      if(DALI_LIKELY(AreVisualsEnabled()))
       {
-        mVisualData->OffscreenRenderingEnabled(true);
+        EnsureVisualData().OffscreenRenderingEnabled(true);
       }
     }
     else if(renderEffectData.offScreenRenderingType != newType)
@@ -8585,20 +8632,26 @@ void ViewDataImpl::UpdateBorderline()
 
 void ViewDataImpl::CreateAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
+    // Ensured up front, not inside the borderline branch: the context is needed by the
+    // unconditional call at the bottom either way, and taking the reference before
+    // UpdateBorderline() keeps it valid across that re-entry (EnsureVisualData hands back
+    // the same object once it exists, so the nested SetBorderline cannot replace it).
+    VisualData& visualData = EnsureVisualData();
+
     if(index == Ui::View::Property::BORDERLINE_WIDTH || index == Ui::View::Property::BORDERLINE_COLOR ||
        index == Ui::View::Property::BORDERLINE_OFFSET)
     {
       Ui::Internal::Visual::Base* previousVisualImplPtr =
-        mVisualData->GetVisualImplPtr(Ui::View::Property::BORDERLINE);
+        visualData.GetVisualImplPtr(Ui::View::Property::BORDERLINE);
       if(!previousVisualImplPtr)
       {
         // Create visual and constraint for borderline first.
         UpdateBorderline();
       }
     }
-    mVisualData->CreateAnimationConstraints(animationObject, index);
+    visualData.CreateAnimationConstraints(animationObject, index);
   }
 }
 

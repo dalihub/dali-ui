@@ -533,9 +533,16 @@ public:
   void SetColorInternal(const Vector4& color);
 
   /**
-   * @brief Initialize private VisualData context for this impl.
+   * @brief Returns this impl's private VisualData context, creating it on first use.
+   *
+   * The context is allocated lazily, so a view that never touches a visual never pays for
+   * one. Every caller must gate on AreVisualsEnabled() first: a DISABLE_VISUALS view must
+   * never reach this function, because reaching it would allocate the very context that
+   * flag exists to suppress.
+   *
+   * @return The VisualData context of this impl
    */
-  void InitializeVisualData();
+  VisualData& EnsureVisualData();
 
   // Trait management (delegated from ViewImpl)
 
@@ -1692,7 +1699,7 @@ private:
   float                                mRequestedWidth;       ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f). PACKING: parked here to fill the 4-byte pad in front of mTraits; it belongs logically with mRequestedHeight, which sits in the layout group further down.
   TraitEntries                         mTraits;
   Internal::CoreInteractionObject*     mCoreInteractionObject;
-  std::unique_ptr<VisualData>          mVisualData;
+  std::unique_ptr<VisualData>          mVisualData; ///< Visual context, allocated on first use by EnsureVisualData(). Null means EITHER visuals are disabled (DISABLE_VISUALS) OR no visual has been touched yet -- read paths answer both the same way.
   std::unique_ptr<AttachmentContainer> mAttachments;
   std::unique_ptr<FocusNavigationData> mFocusNavigationData;
   std::unique_ptr<RenderEffectData>    mRenderEffectData;
