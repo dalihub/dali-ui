@@ -44,9 +44,12 @@ class RadioButtonImpl;
  *
  * @note RadioButton is icon-only. To compose a labelled option, use an outer
  * GroupSelectableView as the click, grouping, focus, and accessibility owner. Make the
- * child RadioButton touch-transparent with SetSensitive(false), remove it from focus with
- * SetFocusable(false), hide it from accessibility, and mirror the outer row's selection to
- * the child. SetClickable(false) alone does not remove a View from hit testing.
+ * display-only child RadioButton touch-transparent with SetSensitive(false), remove it from
+ * focus with SetFocusable(false), hide it from accessibility, and mirror the outer row's
+ * selection to the child. SetClickable(false) allows unhandled touch to propagate to the
+ * parent, but does not remove a View from hit testing. Enabled long-press handling continues
+ * to consume its touch stream independently of clicking; use SetLongPressEnabled(false) to
+ * stop it while keeping its signal handlers connected.
  */
 class DALI_UI_COMPONENTS_API RadioButton : public GroupSelectableView
 {

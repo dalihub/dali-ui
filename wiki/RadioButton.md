@@ -312,10 +312,15 @@ GroupSelectableView SettingsPage::MakeRadioRow(const Dali::String& text)
 }
 ```
 
-`SetClickable(false)` only disables the child's click action; it does not remove the child
-from hit testing. `SetSensitive(false)` is what allows a pointer over the indicator to target
-the outer row. Hiding both children from accessibility ensures that the row is exposed as one
-radio option rather than duplicate nodes.
+`SetClickable(false)` disables the child's built-in tap/click action and allows an unhandled
+touch to propagate to the outer row, but it does not disable connected long-press handling or
+remove the child from hit testing. Use `SetSensitive(false)` when the display-only indicator and
+its subtree should be excluded from hit testing entirely. Hiding both children from accessibility
+ensures that the row is exposed as one radio option rather than duplicate nodes.
+
+If long-press handling is enabled on the child, the child consumes the touch stream so that the
+gesture can be recognized even while clicking is blocked. Call `SetLongPressEnabled(false)` to
+stop long-press recognition without disconnecting its signal handlers.
 
 ---
 

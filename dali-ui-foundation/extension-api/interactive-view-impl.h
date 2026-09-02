@@ -117,6 +117,16 @@ public:
   void SetClickable(bool clickable);
 
   /**
+   * @copydoc InteractiveView::IsLongPressEnabled()
+   */
+  bool IsLongPressEnabled() const;
+
+  /**
+   * @copydoc InteractiveView::SetLongPressEnabled()
+   */
+  void SetLongPressEnabled(bool enabled);
+
+  /**
    * @copydoc InteractiveView::GetKeyClickPolicy()
    */
   KeyClickPolicy GetKeyClickPolicy() const;

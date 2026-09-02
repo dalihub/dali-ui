@@ -134,6 +134,7 @@ public: // Signals
    *
    * @note If the handler returns true to consume the event, the Clicked signal will not be emitted.
    * @note This signal is not emitted when ClickedKeyType is set to PRESS.
+   * @note This signal is not emitted when long-press handling is disabled.
    *
    * @return The long pressed signal
    */
@@ -189,9 +190,36 @@ public: // API
   /**
    * @brief Sets whether clicking is allowed.
    *
+   * When clicking is blocked, the built-in tap interaction does not emit ClickedSignal or consume
+   * the touch event when no other built-in interaction is active. When long-press handling is
+   * enabled and a LongPressedSignal handler is connected, long-press detection remains active,
+   * including pressed state tracking, and consumes the touch stream while recognizing it. The View
+   * remains eligible for hit testing, and an explicitly connected TouchEventSignal callback may
+   * still consume the event. Use the sensitive property when the View should be excluded from touch
+   * hit testing.
+   *
    * @param[in] clickable True to allow clicking, false to block clicking
    */
   void SetClickable(bool clickable);
+
+  /**
+   * @brief Returns whether long-press handling is enabled.
+   *
+   * @return True if long-press handling is enabled
+   */
+  bool IsLongPressEnabled() const;
+
+  /**
+   * @brief Sets whether long-press handling is enabled.
+   *
+   * This controls both touch and key long-press recognition without disconnecting LongPressedSignal
+   * handlers. The setting is enabled by default. When disabled, a connected LongPressedSignal
+   * handler is not invoked and does not cause intrinsic touch consumption. Tap/click handling is
+   * controlled independently by SetClickable().
+   *
+   * @param[in] enabled True to enable long-press handling, false to disable it
+   */
+  void SetLongPressEnabled(bool enabled);
 
   /**
    * @brief Retrieves the current key click policy.

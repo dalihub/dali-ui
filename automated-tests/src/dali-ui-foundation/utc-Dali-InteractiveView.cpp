@@ -701,9 +701,15 @@ int UtcDaliInteractiveViewImplSubclassSmokeP(void)
 
   DALI_TEST_CHECK(view.IsInteractive());
   DALI_TEST_CHECK(view.IsClickable());
+  DALI_TEST_CHECK(view.IsLongPressEnabled());
 
   view.SetClickable(false);
   DALI_TEST_CHECK(!view.IsClickable());
+
+  view.SetLongPressEnabled(false);
+  DALI_TEST_CHECK(!view.IsLongPressEnabled());
+  view.SetLongPressEnabled(true);
+  DALI_TEST_CHECK(view.IsLongPressEnabled());
 
   view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
   DALI_TEST_EQUALS(static_cast<uint32_t>(view.GetKeyClickPolicy()),

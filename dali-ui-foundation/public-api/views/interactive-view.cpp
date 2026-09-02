@@ -117,6 +117,16 @@ void InteractiveView::SetClickable(bool clickable)
   Extension::GetImpl(*this).SetClickable(clickable);
 }
 
+bool InteractiveView::IsLongPressEnabled() const
+{
+  return Extension::GetImpl(*this).IsLongPressEnabled();
+}
+
+void InteractiveView::SetLongPressEnabled(bool enabled)
+{
+  Extension::GetImpl(*this).SetLongPressEnabled(enabled);
+}
+
 KeyClickPolicy InteractiveView::GetKeyClickPolicy() const
 {
   return Extension::GetImpl(*this).GetKeyClickPolicy();

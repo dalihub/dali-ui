@@ -193,7 +193,6 @@ private:
     indicator.SetRequestedWidth(RADIO_SIZE);
     indicator.SetRequestedHeight(RADIO_SIZE);
     indicator.SetClickable(false);
-    indicator.SetSensitive(false);
     indicator.SetFocusable(false);
     indicator.SetSelectionAnimationMode(SelectionAnimationMode::ENABLED);
     indicator.SetAccessibilityHidden(true);

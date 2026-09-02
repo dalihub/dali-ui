@@ -45,6 +45,7 @@ InteractiveTraitImpl::InteractiveTraitImpl()
   mPendingKeyAction(PendingKeyAction::NONE),
   mPseudoDisabled(false),
   mClickable(true),
+  mLongPressEnabled(true),
   mClickBlockedByTouch(false),
   mClickBlockedByKey(false)
 {
@@ -133,6 +134,16 @@ bool InteractiveTraitImpl::IsClickable() const
 void InteractiveTraitImpl::SetClickable(bool clickable)
 {
   mClickable = clickable;
+}
+
+bool InteractiveTraitImpl::IsLongPressEnabled() const
+{
+  return mLongPressEnabled;
+}
+
+void InteractiveTraitImpl::SetLongPressEnabled(bool enabled)
+{
+  mLongPressEnabled = enabled;
 }
 
 KeyClickPolicy InteractiveTraitImpl::GetKeyClickPolicy() const
@@ -358,7 +369,8 @@ bool InteractiveTraitImpl::OnTouch(View view, TouchEvent touchEvent)
 {
   mPendingTouchEvent.Reset();
 
-  if(!view.IsEnabled())
+  const bool longPressDetectionActive = IsLongPressDetectionActive();
+  if(!view.IsEnabled() || (!mClickable && !longPressDetectionActive))
   {
     return false;
   }
@@ -429,8 +441,11 @@ void InteractiveTraitImpl::FinalizeTouchEventDispatch(View view, const TouchEven
     return;
   }
 
-  mTapGestureDetector.HandleEvent(view, event);
-  if(mLongPressGestureDetector)
+  if(mClickable)
+  {
+    mTapGestureDetector.HandleEvent(view, event);
+  }
+  if(IsLongPressDetectionActive())
   {
     mLongPressGestureDetector.HandleEvent(view, event);
   }
@@ -479,8 +494,9 @@ void InteractiveTraitImpl::OnLongPressedInternal(Actor actor, LongPressGesture e
   {
     View view = View::DownCast(actor);
     Internal::PendingPressManager::Get().FlushPendingPress(*this);
-    InputEvent inputEvent = InputEvent::New(event);
-    mClickBlockedByTouch  = OnLongPressed(view, inputEvent);
+    InputEvent inputEvent    = InputEvent::New(event);
+    const bool eventConsumed = OnLongPressed(view, inputEvent);
+    mClickBlockedByTouch     = mClickable && eventConsumed;
   }
 }
 
@@ -550,6 +566,11 @@ bool InteractiveTraitImpl::IsPressedByHoveringDevice(const InputEvent& event) co
          touchEvent.GetDeviceId(0u) == mHoveringDeviceId;
 }
 
+bool InteractiveTraitImpl::IsLongPressDetectionActive() const
+{
+  return mLongPressEnabled && mLongPressGestureDetector && !mLongPressedSignal.Empty();
+}
+
 void InteractiveTraitImpl::SetHoveredInternal(bool value, InputEvent event)
 {
   View owner = mOwner.GetHandle();
@@ -590,7 +611,7 @@ bool InteractiveTraitImpl::ShouldKeyPressTriggerClicked() const
 
 bool InteractiveTraitImpl::ShouldKeyPressTriggerLongPressed() const
 {
-  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
+  return mLongPressEnabled && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
          (mPressedExecutionKeyCount >= UiConfig::GetCurrent().GetLongPressKeyEventMinimumCount());
 }
 
