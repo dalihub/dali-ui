@@ -158,6 +158,11 @@ public: // API
   void SetMinMaxFrame(int minFrame, int maxFrame);
 
   /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetMinMaxFrame
+   */
+  void GetMinMaxFrame(int& minFrame, int& maxFrame) const;
+
+  /**
    * @copydoc Dali::Ui::LottieAnimationView::SetMinMaxFrameByMarker
    */
   void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker);
@@ -281,6 +286,11 @@ public: // API
    * @copydoc Dali::Ui::LottieAnimationView::SetDynamicProperty
    */
   void SetDynamicProperty(const Ui::LottieAnimation::DynamicPropertyInfo& info);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetNaturalSize
+   */
+  Vector3 GetNaturalSize() const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetDesiredWidth

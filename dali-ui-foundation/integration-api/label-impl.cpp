@@ -163,6 +163,23 @@ constexpr const char* TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME         = "uTextG
 constexpr const char* TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME = "uTextGradientOverlayStartOffset";
 constexpr const char* TEXT_REVEAL_PROGRESS_PROPERTY_NAME               = "uTextRevealProgress";
 
+const AttachmentId LABEL_MASK_DATA_ATTACHMENT_ID              = AttachmentId::Alloc();
+const AttachmentId LABEL_TRANSLATABLE_TEXT_DATA_ATTACHMENT_ID = AttachmentId::Alloc();
+
+template<typename T>
+T& GetOrCreateLabelData(Ui::View owner, AttachmentId id)
+{
+  T* data = owner.GetAttachment<T>(id);
+  if(!data)
+  {
+    owner.SetAttachment(id, Dali::MakeUnique<T>());
+    data = owner.GetAttachment<T>(id);
+  }
+
+  DALI_ASSERT_ALWAYS(data && "Label attachment creation failed");
+  return *data;
+}
+
 float GetDpi()
 {
   static uint32_t horizontalDpi = 0u;
@@ -252,7 +269,9 @@ UiConfig::SystemFontSize ToUiConfigSystemFontSize(Dali::Integration::SystemSetti
 
 LabelImplPtr LabelImpl::New()
 {
-  return LabelImplPtr(new LabelImpl());
+  LabelImplPtr impl(new LabelImpl());
+
+  return impl;
 }
 
 LabelImpl::LabelImpl()
@@ -260,7 +279,6 @@ LabelImpl::LabelImpl()
   mSize(),
   mLastMeasureConstraints(-1.0f, -1.0f),
   mLastMeasureRequestedSize(-1.0f, -1.0f),
-  mTouchPosition(),
   mLineHeight(Ui::Text::LINE_HEIGHT_AUTO),
   mLineHeightMode(Ui::Text::LineHeightMode::RELATIVE),
   mOverflowMode(Ui::Text::OverflowMode::ELLIPSIS),
@@ -275,7 +293,6 @@ LabelImpl::LabelImpl()
   mLastMarqueeEnabled(false),
   mRestartMarquee(false),
   mHasLastMeasureMetrics(false),
-  mIsTouchDown(false),
   mHasStyledTextSource(false),
   mHasVariationProperties(false),
   mHasAnchors(false),
@@ -324,7 +341,7 @@ void LabelImpl::SetText(const Dali::String& text)
   ClearStyledTextSourceState();
   ClearAnchorInteractionState();
   mController->SetText(ToStdString(text));
-  UpdateAnchorTouchInterception();
+  UpdateAnchorConnections();
   InvalidateTextMeasure();
   if(hadInlineReplacements)
   {
@@ -359,7 +376,7 @@ void LabelImpl::SetStyledText(const Ui::Text::StyledText& styledText)
   ClearAnchorInteractionState();
 
   mController->SetStyledText(styledText);
-  UpdateAnchorTouchInterception();
+  UpdateAnchorConnections();
   InvalidateTextMeasure();
   if(hadInlineReplacements)
   {
@@ -514,6 +531,16 @@ void LabelImpl::SetMultiLine(bool multiLine)
 bool LabelImpl::IsMultiLine() const
 {
   return mController->IsMultiLineEnabled();
+}
+
+void LabelImpl::SetMaximumLines(int maximumLines)
+{
+  mController->SetMaximumNumberOfLines(maximumLines);
+}
+
+int LabelImpl::GetMaximumLines() const
+{
+  return mController->GetMaximumNumberOfLines();
 }
 
 void LabelImpl::SetLineWrapMode(Ui::Text::LineWrapMode mode)
@@ -1632,7 +1659,7 @@ void LabelImpl::SetMaskEffect(View view)
   View selfView = Ui::View::DownCast(Self());
 
   Self().Add(view);
-  mMaskSourceView = view;
+  GetOrCreateLabelData<WeakHandle<Ui::View>>(selfView, LABEL_MASK_DATA_ATTACHMENT_ID) = view;
 
   MaskEffect maskEffect = MaskEffect::New(view);
   GetImplementation(maskEffect).SetReverseMaskDirection(true);
@@ -1643,13 +1670,14 @@ void LabelImpl::ClearMaskEffect()
 {
   View selfView = Ui::View::DownCast(Self());
 
-  View view = mMaskSourceView.GetHandle();
+  WeakHandle<Ui::View>* sourceView = selfView.GetAttachment<WeakHandle<Ui::View>>(LABEL_MASK_DATA_ATTACHMENT_ID);
+  View                  view       = sourceView ? sourceView->GetHandle() : View();
   if(view)
   {
     Self().Remove(view);
   }
 
-  mMaskSourceView.Reset();
+  selfView.RemoveAttachment(LABEL_MASK_DATA_ATTACHMENT_ID);
   selfView.ClearRenderEffect();
 }
 
@@ -1676,7 +1704,7 @@ void LabelImpl::SetAsyncRendering(bool asyncRendering)
   if(!asyncRendering)
   {
     ClearAnchorInteractionState();
-    UpdateAnchorTouchInterception();
+    UpdateAnchorConnections();
   }
 }
 
@@ -1703,8 +1731,9 @@ void LabelImpl::SetTranslatableText(StringView resourceId)
 
 void LabelImpl::SetTranslatableText(StringView resourceId, StringView domain)
 {
-  mTranslatableText = resourceId;
-  auto manager      = UiLocalizationManager::Get();
+  Ui::View selfView                                                                        = Ui::View::DownCast(Self());
+  GetOrCreateLabelData<Dali::String>(selfView, LABEL_TRANSLATABLE_TEXT_DATA_ATTACHMENT_ID) = resourceId;
+  auto manager                                                                             = UiLocalizationManager::Get();
   if(manager)
   {
     manager.SetBindingResource(Self(),
@@ -1717,12 +1746,14 @@ void LabelImpl::SetTranslatableText(StringView resourceId, StringView domain)
 
 Dali::String LabelImpl::GetTranslatableText() const
 {
-  return mTranslatableText;
+  Ui::View            selfView = Ui::View::DownCast(Self());
+  const Dali::String* text     = selfView.GetAttachment<Dali::String>(LABEL_TRANSLATABLE_TEXT_DATA_ATTACHMENT_ID);
+  return text ? *text : Dali::String();
 }
 
 void LabelImpl::ClearTranslatableText()
 {
-  mTranslatableText.Clear();
+  Ui::View::DownCast(Self()).RemoveAttachment(LABEL_TRANSLATABLE_TEXT_DATA_ATTACHMENT_ID);
   auto manager = UiLocalizationManager::Get();
   if(manager)
   {
@@ -2065,8 +2096,6 @@ void LabelImpl::OnInitialize()
   mController->SetVerticalLineAlignment(Ui::Text::Alignment::CENTER);
 
   Ui::View::DownCast(self).SetAccessibilityRole(Accessibility::Role::LABEL);
-  Dali::Integration::Accessibility::Bridge::EnabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
-  Dali::Integration::Accessibility::Bridge::DisabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
 
   ApplyInitialConfig();
 }
@@ -2548,7 +2577,11 @@ void LabelImpl::InvalidateTextMeasure()
     // Invalidate measure only when the label size depends on text measurement.
     if((GetRequestedWidth() == WRAP_CONTENT) || (GetRequestedHeight() == WRAP_CONTENT))
     {
-      InvalidateMeasure();
+      // Through the internal primitive, not ViewImpl::InvalidateMeasure(): the
+      // mMeasureInvalidated latch below is only released by OnMeasure, so this
+      // framework-internal invalidation must never be routed through the public
+      // entry point.
+      Internal::ViewDataImpl::Get(*this).InvalidateMeasure();
       mMeasureInvalidated = true;
     }
     EnableAutoMarqueeEvaluation();
@@ -2805,8 +2838,12 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
 void LabelImpl::AsyncTextFitChanged(float pointSize)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async text fit point size:%f\n", mController.Get(), pointSize);
-  if(mController->IsTextFitEnabled())
+  if(mController->IsTextFitEnabled() || mController->IsTextFitCandidatesEnabled())
   {
+    if(mController->IsTextFitCandidatesEnabled())
+    {
+      mController->SetDefaultLineSize(mController->GetCurrentLineSize());
+    }
     mController->SetTextFitPointSize(pointSize);
     EmitTextFitChanged();
   }
@@ -2844,7 +2881,7 @@ void LabelImpl::AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo)
       UpdateA11yAnchors(false);
     }
   }
-  UpdateAnchorTouchInterception();
+  UpdateAnchorConnections();
 
   // Image visuals are event-thread objects. Worker output is applied only when
   // both immutable source and render request generations are still current.
@@ -3147,21 +3184,23 @@ void LabelImpl::OnLocaleChanged(std::string locale)
 bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
 {
   const PointState::Type state = touch.GetState(0);
+  Ui::View               self  = Ui::View::DownCast(Self());
 
   if(state == PointState::STARTED)
   {
-    mIsTouchDown   = true;
-    mTouchPosition = touch.GetScreenPosition(0);
+    Internal::Text::GetOrCreateAnchorInteractionData(self).StartTouch(touch.GetScreenPosition(0));
     return false;
   }
 
-  if(state == PointState::FINISHED)
+  if(state == PointState::FINISHED || state == PointState::INTERRUPTED)
   {
-    if(mIsTouchDown && mHasAnchors)
+    Internal::Text::AnchorInteractionData* data = Internal::Text::GetAnchorInteractionData(self);
+    if(state == PointState::FINISHED && data && data->IsTouchDown() && mHasAnchors)
     {
-      const Vector2 screen = touch.GetScreenPosition(0);
-      const float   deltaX = std::abs(mTouchPosition.x - screen.x);
-      const float   deltaY = std::abs(mTouchPosition.y - screen.y);
+      const Vector2 screen        = touch.GetScreenPosition(0);
+      const Vector2 touchPosition = data->GetTouchPosition();
+      const float   deltaX        = std::abs(touchPosition.x - screen.x);
+      const float   deltaY        = std::abs(touchPosition.y - screen.y);
 
       if(deltaX < 20.0f && deltaY < 20.0f)
       {
@@ -3181,7 +3220,7 @@ bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
             if(asyncAnchorGeometryUsable)
             {
               const Internal::Text::AnchorHitResult asyncAnchor =
-                Internal::Text::HitTestAnchor(Ui::View::DownCast(Self()), contentPoint);
+                Internal::Text::HitTestAnchor(self, contentPoint);
               if(asyncAnchor.hit)
               {
                 if(asyncAnchor.newlyClicked)
@@ -3201,22 +3240,35 @@ bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
         }
       }
     }
-    mIsTouchDown = false;
+    if(data)
+    {
+      data->EndTouch();
+    }
   }
   return false;
 }
 
-void LabelImpl::UpdateAnchorTouchInterception()
+void LabelImpl::UpdateAnchorConnections()
 {
-  if(mController->HasAnchors() || mHasAsyncAnchorHitRegions)
+  const bool hasAnchors = mController->HasAnchors() || mHasAsyncAnchorHitRegions;
+  if(hasAnchors == mHasAnchors)
   {
-    mHasAnchors = true;
+    return;
+  }
+
+  mHasAnchors = hasAnchors;
+  if(hasAnchors)
+  {
     Self().InterceptTouchEventSignal().Connect(this, &LabelImpl::OnInterceptTouched);
+    Dali::Integration::Accessibility::Bridge::EnabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
+    Dali::Integration::Accessibility::Bridge::DisabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
   }
   else
   {
-    mHasAnchors = false;
+    ClearA11yAnchors();
     Self().InterceptTouchEventSignal().Disconnect(this, &LabelImpl::OnInterceptTouched);
+    Dali::Integration::Accessibility::Bridge::EnabledSignal().Disconnect(this, &LabelImpl::OnAccessibilityStatusChanged);
+    Dali::Integration::Accessibility::Bridge::DisabledSignal().Disconnect(this, &LabelImpl::OnAccessibilityStatusChanged);
   }
 }
 
@@ -3235,12 +3287,9 @@ Vector2 LabelImpl::GetTextContentOffset() const
 
 void LabelImpl::ClearAnchorInteractionState()
 {
-  if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
-  {
-    Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
-    mHasAsyncAnchorHitRegions = false;
-    mHasA11yAnchors           = false;
-  }
+  Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
+  mHasAsyncAnchorHitRegions = false;
+  mHasA11yAnchors           = false;
 
   mAsyncAnchorGeometryDirty = false;
 }
@@ -4070,54 +4119,56 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
     }
   }
 
-  parameters.maxTextureSize             = Dali::GetMaxTextureSize();
-  parameters.fontSize                   = mController->GetDefaultFontSize(Ui::Text::Controller::POINT_SIZE);
-  parameters.textColor                  = mController->GetDefaultColor();
-  parameters.anchorColor                = mController->GetAnchorColor();
-  parameters.anchorClickedColor         = mController->GetAnchorClickedColor();
-  parameters.fontFamily                 = mController->GetDefaultFontFamily();
-  parameters.fontWeight                 = mController->GetDefaultFontWeight();
-  parameters.fontWidth                  = mController->GetDefaultFontWidth();
-  parameters.fontSlant                  = mController->GetDefaultFontSlant();
-  parameters.isMultiLine                = mController->IsMultiLineEnabled();
-  parameters.ellipsis                   = mController->IsTextElideEnabled();
-  parameters.minLineSize                = mController->GetDefaultLineSize();
-  parameters.relativeLineSize           = mController->GetRelativeLineSize();
-  parameters.characterSpacing           = mController->GetCharacterSpacing();
-  parameters.effectiveTextScale         = mController->GetEffectiveTextScale();
-  parameters.horizontalAlignment        = mController->GetHorizontalAlignment();
-  parameters.verticalAlignment          = mController->GetVerticalAlignment();
-  parameters.verticalLineAlignment      = mController->GetVerticalLineAlignment();
-  parameters.lineWrapMode               = mController->GetLineWrapMode();
-  parameters.layoutDirectionPolicy      = mController->GetLayoutDirectionMode();
-  parameters.ellipsisPosition           = mController->GetEllipsisPosition();
-  parameters.isUnderlineEnabled         = mController->IsUnderlineEnabled();
-  parameters.underlineType              = mController->GetUnderlineType();
-  parameters.underlineColor             = mController->GetUnderlineColor();
-  parameters.underlineHeight            = mController->GetUnderlineHeight();
-  parameters.dashedUnderlineWidth       = mController->GetDashedUnderlineWidth();
-  parameters.dashedUnderlineGap         = mController->GetDashedUnderlineGap();
-  parameters.isStrikethroughEnabled     = mController->IsStrikethroughEnabled();
-  parameters.strikethroughColor         = mController->GetStrikethroughColor();
-  parameters.strikethroughHeight        = mController->GetStrikethroughHeight();
-  parameters.isTextBackgroundEnabled    = mController->IsBackgroundEnabled();
-  parameters.textBackgroundColor        = mController->GetBackgroundColor();
-  parameters.isShadowEnabled            = mController->IsShadowEnabled();
-  parameters.shadowBlurRadius           = mController->GetShadowBlurRadius();
-  parameters.shadowColor                = mController->GetShadowColor();
-  parameters.shadowOffset               = mController->GetShadowOffset();
-  parameters.isOutlineEnabled           = mController->IsOutlineEnabled();
-  parameters.outlineWidth               = mController->GetOutlineWidth();
-  parameters.outlineColor               = mController->GetOutlineColor();
-  parameters.outlineBlurRadius          = mController->GetOutlineBlurRadius();
-  parameters.outlineOffset              = mController->GetOutlineOffset();
-  parameters.isTextFitEnabled           = mController->IsTextFitEnabled();
-  parameters.textFitMinSize             = mController->GetTextFitMinSize(Ui::Text::Controller::POINT_SIZE);
-  parameters.textFitMaxSize             = mController->GetTextFitMaxSize(Ui::Text::Controller::POINT_SIZE);
-  parameters.textFitStepSize            = mController->GetTextFitStepSize(Ui::Text::Controller::POINT_SIZE);
-  parameters.isTextFitCandidatesEnabled = mController->IsTextFitCandidatesEnabled();
-  parameters.textFitCandidates          = mController->GetTextFitCandidates();
-  parameters.isMarqueeEnabled           = mController->IsMarqueeEnabled();
+  parameters.maxTextureSize               = Dali::GetMaxTextureSize();
+  parameters.maximumNumberOfLines         = static_cast<Ui::Text::Length>(mController->GetMaximumNumberOfLines());
+  parameters.maximumNumberOfLinesRevision = mController->GetMaximumNumberOfLinesRevision();
+  parameters.fontSize                     = mController->GetDefaultFontSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.textColor                    = mController->GetDefaultColor();
+  parameters.anchorColor                  = mController->GetAnchorColor();
+  parameters.anchorClickedColor           = mController->GetAnchorClickedColor();
+  parameters.fontFamily                   = mController->GetDefaultFontFamily();
+  parameters.fontWeight                   = mController->GetDefaultFontWeight();
+  parameters.fontWidth                    = mController->GetDefaultFontWidth();
+  parameters.fontSlant                    = mController->GetDefaultFontSlant();
+  parameters.isMultiLine                  = mController->IsMultiLineEnabled();
+  parameters.ellipsis                     = mController->IsTextElideEnabled();
+  parameters.minLineSize                  = mController->GetDefaultLineSize();
+  parameters.relativeLineSize             = mController->GetRelativeLineSize();
+  parameters.characterSpacing             = mController->GetCharacterSpacing();
+  parameters.effectiveTextScale           = mController->GetEffectiveTextScale();
+  parameters.horizontalAlignment          = mController->GetHorizontalAlignment();
+  parameters.verticalAlignment            = mController->GetVerticalAlignment();
+  parameters.verticalLineAlignment        = mController->GetVerticalLineAlignment();
+  parameters.lineWrapMode                 = mController->GetLineWrapMode();
+  parameters.layoutDirectionPolicy        = mController->GetLayoutDirectionMode();
+  parameters.ellipsisPosition             = mController->GetEllipsisPosition();
+  parameters.isUnderlineEnabled           = mController->IsUnderlineEnabled();
+  parameters.underlineType                = mController->GetUnderlineType();
+  parameters.underlineColor               = mController->GetUnderlineColor();
+  parameters.underlineHeight              = mController->GetUnderlineHeight();
+  parameters.dashedUnderlineWidth         = mController->GetDashedUnderlineWidth();
+  parameters.dashedUnderlineGap           = mController->GetDashedUnderlineGap();
+  parameters.isStrikethroughEnabled       = mController->IsStrikethroughEnabled();
+  parameters.strikethroughColor           = mController->GetStrikethroughColor();
+  parameters.strikethroughHeight          = mController->GetStrikethroughHeight();
+  parameters.isTextBackgroundEnabled      = mController->IsBackgroundEnabled();
+  parameters.textBackgroundColor          = mController->GetBackgroundColor();
+  parameters.isShadowEnabled              = mController->IsShadowEnabled();
+  parameters.shadowBlurRadius             = mController->GetShadowBlurRadius();
+  parameters.shadowColor                  = mController->GetShadowColor();
+  parameters.shadowOffset                 = mController->GetShadowOffset();
+  parameters.isOutlineEnabled             = mController->IsOutlineEnabled();
+  parameters.outlineWidth                 = mController->GetOutlineWidth();
+  parameters.outlineColor                 = mController->GetOutlineColor();
+  parameters.outlineBlurRadius            = mController->GetOutlineBlurRadius();
+  parameters.outlineOffset                = mController->GetOutlineOffset();
+  parameters.isTextFitEnabled             = mController->IsTextFitEnabled();
+  parameters.textFitMinSize               = mController->GetTextFitMinSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.textFitMaxSize               = mController->GetTextFitMaxSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.textFitStepSize              = mController->GetTextFitStepSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.isTextFitCandidatesEnabled   = mController->IsTextFitCandidatesEnabled();
+  parameters.textFitCandidates            = mController->GetTextFitCandidates();
+  parameters.isMarqueeEnabled             = mController->IsMarqueeEnabled();
   if(HasInlineReplacementSource())
   {
     parameters.isMarqueeEnabled = false;
@@ -4195,20 +4246,29 @@ void LabelImpl::EmitTextFitChanged()
 
 void LabelImpl::EmitAsyncRenderFinished(float width, float height)
 {
-  Ui::View handle(GetOwner());
-  mAsyncRenderFinishedSignal.Emit(handle, width, height);
+  if(!mAsyncRenderFinishedSignal.Empty())
+  {
+    Ui::View handle(GetOwner());
+    mAsyncRenderFinishedSignal.Emit(handle, width, height);
+  }
 }
 
 void LabelImpl::EmitAsyncNaturalSizeComputed(float width, float height)
 {
-  Ui::View handle(GetOwner());
-  mAsyncNaturalSizeComputedSignal.Emit(handle, width, height);
+  if(!mAsyncNaturalSizeComputedSignal.Empty())
+  {
+    Ui::View handle(GetOwner());
+    mAsyncNaturalSizeComputedSignal.Emit(handle, width, height);
+  }
 }
 
 void LabelImpl::EmitAsyncHeightForWidthComputed(float width, float height)
 {
-  Ui::View handle(GetOwner());
-  mAsyncHeightForWidthComputedSignal.Emit(handle, width, height);
+  if(!mAsyncHeightForWidthComputedSignal.Empty())
+  {
+    Ui::View handle(GetOwner());
+    mAsyncHeightForWidthComputedSignal.Emit(handle, width, height);
+  }
 }
 
 // =============================================================================

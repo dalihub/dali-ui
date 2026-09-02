@@ -64,7 +64,7 @@ public:
     mParent = AbsoluteLayout::New();
     mParent.SetRequestedWidth(WRAP_CONTENT);
     mParent.SetRequestedHeight(WRAP_CONTENT);
-    mParent.SetPadding(Extents(50, 50, 50, 50));
+    mParent.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     mParent.SetBackgroundColor(Color::RED);
     root.Add(mParent);
 

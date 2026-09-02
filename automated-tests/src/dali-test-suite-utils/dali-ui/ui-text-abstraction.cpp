@@ -1052,7 +1052,11 @@ void Segmentation::GetLineBreakPositions(unsigned int const* text, unsigned int 
   {
     for(unsigned int i = 0; i < length - 1; ++i)
     {
-      if(IsWhiteSpace(text[i]))
+      if(IsNewParagraph(text[i]))
+      {
+        breakInfo[i] = TextAbstraction::LINE_MUST_BREAK;
+      }
+      else if(IsWhiteSpace(text[i]))
       {
         breakInfo[i] = TextAbstraction::LINE_ALLOW_BREAK;
       }

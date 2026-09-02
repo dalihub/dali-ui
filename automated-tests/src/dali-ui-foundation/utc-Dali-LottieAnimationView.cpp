@@ -15,8 +15,12 @@
  *
  */
 
+#include <chrono>
+#include <thread>
+
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali-ui/ui-event-thread-callback.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 
@@ -56,6 +60,26 @@ int UtcDaliLottieAnimationViewNewWithUrlP(void)
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New("test.json");
   DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewGetNaturalSizeP(void)
+{
+  UiTestApplication    application;
+  LottieAnimationView view = LottieAnimationView::New("test.json");
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(32);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+
+  const LottieAnimationView constView(view);
+  DALI_TEST_EQUALS(constView.GetNaturalSize(), Vector3(64.0f, 32.0f, 0.0f), TEST_LOCATION);
+
+  view.Measure(200.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  DALI_TEST_EQUALS(view.GetSize(), Vector3(200.0f, 100.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(constView.GetNaturalSize(), Vector3(64.0f, 32.0f, 0.0f), TEST_LOCATION);
   END_TEST;
 }
 
@@ -376,15 +400,27 @@ int UtcDaliLottieAnimationViewSetMinMaxFrameP(void)
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
 
+  int minFrame = -1;
+  int maxFrame = -1;
+  view.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 0, TEST_LOCATION);
+
   // Should not crash even without visual
   view.SetMinMaxFrame(0, 30);
-  DALI_TEST_CHECK(view);
+  view.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 30, TEST_LOCATION);
 
   view.SetMinMaxFrame(10, 50);
-  DALI_TEST_CHECK(view);
+  view.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 10, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 50, TEST_LOCATION);
 
   view.SetMinMaxFrame(0, 100);
-  DALI_TEST_CHECK(view);
+  view.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 100, TEST_LOCATION);
   END_TEST;
 }
 
@@ -422,6 +458,43 @@ int UtcDaliLottieAnimationViewGetPlayStateP(void)
 
   view.Stop();
   DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::STOPPED, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewIgnoreFinishedWhilePlayStatePending(void)
+{
+  UiTestApplication application;
+
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.SetSynchronousLoading(true);
+  view.SetLoopCount(1);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(2), true, TEST_LOCATION);
+
+  view.Play();
+  application.SendNotification();
+  application.Render();
+
+  // Let the worker finish without consuming its event-thread callback.
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+  // Queue another Play before handling the previous Finished callback.
+  view.Play();
+  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1), true, TEST_LOCATION);
+
+  // The previous Finished callback must not stop the new play request.
+  DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::PLAYING, TEST_LOCATION);
+
+  application.SendNotification();
+  application.Render();
+
   END_TEST;
 }
 

@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -355,6 +356,7 @@ void AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
     // Re-measure MATCH_PARENT children with their final (scaled) size.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
+      Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
       childImpl.Measure(w, h);
     }
     childImpl.Arrange(childBounds);

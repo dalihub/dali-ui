@@ -68,10 +68,14 @@
 #include <dali-ui-foundation/internal/layouts/flex-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
+#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
+#include <dali-ui-foundation/internal/layouts/layout-direction-utils.h>
+#include <dali-ui-foundation/internal/layouts/layout-invalidation-generation.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
 #include <dali-ui-foundation/internal/layouts/stack-layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/standalone-bounds-utils.h>
 #include <dali-ui-foundation/internal/ui-color-manager-impl.h>
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
 #include <dali-ui-foundation/internal/views/state-effect-target-trait.h>
@@ -148,7 +152,6 @@ constexpr unsigned int OFF_SCREEN_RENDERING_TYPE_COUNT        = 3u;
 constexpr char         BACKGROUND_COLOR_BINDING_ID[]          = "BackgroundColor";
 constexpr char         BACKGROUND_GRADIENT_BINDING_ID[]       = "BackgroundGradient";
 constexpr char         COLOR_BINDING_ID[]                     = "Color";
-constexpr float        MEASURE_CACHE_DIRTY                    = -1.0f;
 constexpr char         ACCESSIBILITY_NAME_BINDING_ID[]        = "Ui.View.AccessibilityName";
 constexpr char         ACCESSIBILITY_DESCRIPTION_BINDING_ID[] = "Ui.View.AccessibilityDescription";
 constexpr char         INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-highlight";
@@ -324,7 +327,10 @@ bool GetInsetsFromPropertyValue(const Property::Value& value, Insets& insets)
   Extents extentsValue;
   if(value.Get(extentsValue))
   {
-    insets = Insets(extentsValue);
+    insets = Insets(static_cast<float>(extentsValue.start),
+                    static_cast<float>(extentsValue.end),
+                    static_cast<float>(extentsValue.top),
+                    static_cast<float>(extentsValue.bottom));
     return true;
   }
 
@@ -358,32 +364,100 @@ View FindStateEffectTarget(View owner, int32_t targetId)
   return View::DownCast(owner.FindChildById(targetId));
 }
 
-void ArrangeStandaloneChild(ViewImpl& childImpl, float parentFullWidth, float parentFullHeight)
+void ArrangeStandaloneChild(ViewImpl& owner, ViewImpl& childImpl, float parentFullWidth, float parentFullHeight, bool slotUnconsumed)
 {
-  float        childScale = childImpl.GetEffectiveScale();
-  Insets       margin     = childImpl.GetMargin();
-  float        marginW    = static_cast<float>(margin.start + margin.end) * childScale;
-  float        marginH    = static_cast<float>(margin.top + margin.bottom) * childScale;
-  MeasuredSize measured   = childImpl.GetMeasuredSize();
-  float        childW     = measured.width;
-  float        childH     = measured.height;
+  // Snapshotted BEFORE the re-measures below: the available extent and the slot
+  // derivation at the end must be fed the same values, even if the child's own measure
+  // producer mutates its scale, margin or requested size mid-pass.
+  const StandaloneSlotInputs inputs = SnapshotStandaloneSlotInputs(childImpl);
 
-  if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+  const float marginW = static_cast<float>(inputs.margin.start + inputs.margin.end) * inputs.scale;
+  const float marginH = static_cast<float>(inputs.margin.top + inputs.margin.bottom) * inputs.scale;
+
+  // The extent this parent makes available to the child: the parent's own final
+  // size less the child's margin. It is the constraint BOTH re-measures below use,
+  // and for a WRAP_CONTENT / MATCH_PARENT child it is also the one
+  // LayoutController::ProcessLayoutRoot derives (parent SIZE - margin) when the
+  // same view is driven as a layout root in its own right -- so a standalone root
+  // takes a measure cache HIT here rather than re-running its producer.
+  //
+  // The ARRANGE bounds now converge for EVERY shape, because both paths end on the
+  // same DeriveStandaloneRootBounds() call. What is still divergent is the MEASURE
+  // constraint, and the divergent term is WHICH parent extent it is taken from:
+  // MeasureStandaloneChildren measures a standalone child against the parent's INCOMING
+  // constraint (visEffW/visEffH), while this function measures it against the parent's
+  // ARRANGED extent (availW/availH). A MATCH axis converges regardless, but only
+  // because the re-measure below rewrites the measure cache KEY last, at the extent the
+  // child is actually placed in. A FIXED or WRAP axis diverges whenever the two parent
+  // extents differ, so an unconsumed pass may re-run the child's producer once here.
+  // There is no geometry change (the slot is derived from the snapshot above, not from
+  // this re-measure) and no thrash, so unification stays out. The candidates considered
+  // and rejected:
+  //   - re-measure here against the parent's incoming constraint instead: changes the
+  //     constraint every existing standalone producer is run at, even at s == 1;
+  //   - measure a FIXED-size root at the parent extent in ProcessLayoutRoot rather than
+  //     at its requested size: violates the constraint-priority chain, in which an
+  //     explicit requested size outranks the parent extent;
+  //   - drive MeasureStandaloneChildren from the parent's own measured size so that
+  //     both sites agree: a MATCH_PARENT parent measures to min * s, so its standalone
+  //     children would be measured against that and collapse.
+  const float availW = std::max(0.0f, parentFullWidth - marginW);
+  const float availH = std::max(0.0f, parentFullHeight - marginH);
+
+  // Both Measure() calls below are arrange-time producers issued by this parent, so
+  // each carries an owner scope like every other arrange-owned re-measure (owner ==
+  // the arranging parent, threaded in because this is a free function). For the
+  // standalone child's OWN measure the owner frame is never the ancestor walk's stop:
+  // the walk starts at the measured view's DIRECT parent -- which IS the owner
+  // recorded here -- but reaching the owner test requires first getting past the
+  // self-standalone early return, which only a standalone view takes, and only
+  // standalone children ever get here; the two are contradictory. (Were a producer
+  // here to reach out and measure some OTHER, non-standalone child of this parent,
+  // that child's walk would meet the owner on its first node -- but the direct-parent
+  // arrange-in-progress safety net stops at that very same node, so behaviour is
+  // identical either way.) The scopes are kept regardless: they keep every
+  // arrange-owned re-measure uniform (nothing has to special-case this site), and
+  // their identity is pinned by a white-box owner test rather than by walk behaviour
+  // -- UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP.
+  //
+  // The corrective re-measure. A standalone child is excluded from every ancestor's
+  // measure accumulation, so the ancestor-invalidation walk deliberately returns
+  // early for it (InvalidateAncestorLayoutCachesForMeasureMiss) and the parent keeps
+  // serving its measure cache HIT -- which means MeasureStandaloneChildren does not
+  // re-run and the slot left behind by an out-of-band View::Measure() would be
+  // arranged as-is. The unconsumed bit says exactly that: nothing has consumed the
+  // current slot, so re-measure it here, at the extent it is about to be placed in.
+  // Skipped when the child is MATCH_PARENT on BOTH axes, because then the measured
+  // value is discarded on both axes anyway and the re-measure below already runs at
+  // exactly this constraint (the first-party standalone views -- ScrollBar and the
+  // focus indicator -- are that shape, so this is a strict no-op for them).
+  if(slotUnconsumed && !(inputs.matchWidth && inputs.matchHeight))
   {
-    childW = std::max(0.0f, parentFullWidth - marginW);
+    LayoutDependency::ArrangeOwnedMeasureScope ownerScope(&owner);
+    childImpl.Measure(availW, availH);
   }
-  if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+
+  const MeasuredSize measured = childImpl.GetMeasuredSize();
+  const float        childW   = ResolveStandaloneExtent(inputs.matchWidth, availW, measured.width);
+  const float        childH   = ResolveStandaloneExtent(inputs.matchHeight, availH, measured.height);
+
+  // A MATCH_PARENT axis is placed at the parent's extent rather than at the measured
+  // size, so the child is re-measured against the size it will actually get. The
+  // UNCLAMPED extent is used deliberately: ProcessLayoutRoot re-measures a boundary
+  // root at the same unclamped value, so the measure cache KEY converges too.
+  if(inputs.matchWidth || inputs.matchHeight)
   {
-    childH = std::max(0.0f, parentFullHeight - marginH);
-  }
-  if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
-  {
+    LayoutDependency::ArrangeOwnedMeasureScope ownerScope(&owner);
     childImpl.Measure(childW, childH);
   }
 
-  LayoutRect bounds(childImpl.GetRequestedX() * childScale + static_cast<float>(margin.start) * childScale,
-                    childImpl.GetRequestedY() * childScale + static_cast<float>(margin.top) * childScale,
-                    childW, childH);
+  // THE shared derivation, the same call LayoutController::ProcessLayoutRoot makes for
+  // a boundary view driven as a layout root -- which is what makes the two results
+  // converge by construction. It re-resolves the extents from the `measured` SNAPSHOT
+  // taken above, so the re-measure in between cannot change them, and it applies the
+  // child's own min/max clamp: that clamp is new on this path and is exactly what makes
+  // it identical to ProcessLayoutRoot.
+  const LayoutRect bounds = DeriveStandaloneRootBounds(inputs, availW, availH, measured);
   childImpl.Arrange(bounds);
 }
 
@@ -418,7 +492,7 @@ inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 // THE single place the global UI-scale master switch is read. Every scale that
 // enters the layout system does so through one of the two calls to this function
 // in ComputeEffectiveScale() -- every other Measure/Arrange site, every
-// measure-cache key (mLastMeasureScale) and the actor-side VIEW_EFFECTIVE_SCALE
+// measure-cache scale key and the actor-side VIEW_EFFECTIVE_SCALE
 // push obtain the scale via GetEffectiveScale(), which memoizes what
 // ComputeEffectiveScale() returns. So collapsing the system scale to 1.0f here
 // is what makes the whole system behave as unscaled, with no change at any call
@@ -456,6 +530,24 @@ inline bool IsValidLayoutRect(const LayoutRect& b)
   return std::isfinite(b.x) && std::isfinite(b.y) && IsValidSizeBound(b.width) && IsValidSizeBound(b.height);
 }
 
+// Equality of two arrange rects, used as the arrange cache KEY comparison.
+//
+// EXACT, deliberately not an epsilon compare (LayoutRect has no operator==, so
+// this is spelled out here). The arrange cache serves a stored rect in place of
+// re-running a producer, and the same rect is then written to the actor by
+// ApplySelfBoundsIfChanged, whose write suppression is itself an exact `!=`
+// test. An epsilon key would let a sub-epsilon slot change hit the cache and
+// then be silently applied as the OLD geometry, i.e. a wrong result rather than
+// a missed optimisation. Exact matching keeps the two tests in agreement.
+//
+// NaN-safe by construction: a NaN field compares false against everything,
+// including itself, so a NaN never produces a hit. (IsValidLayoutRect rejects
+// NaN inputs anyway, but only in DEBUG.)
+inline bool SameLayoutRect(const LayoutRect& a, const LayoutRect& b)
+{
+  return a.x == b.x && a.y == b.y && a.width == b.width && a.height == b.height;
+}
+
 // The returned rect is a new trust boundary: a customization hook may return an
 // invalid rect. Valid returns are adopted whole; invalid returns fall back to
 // the full input rect (no per-field clamp, no min/max reapply).
@@ -471,7 +563,9 @@ inline LayoutRect ResolveReturnedBounds(const LayoutRect& inputBounds, const Lay
 }
 
 // RAII: sets a flag true for the enclosing scope, restoring on exit (including
-// exception/assertion unwind). Used to guard against same-view re-entrant Arrange.
+// exception/assertion unwind). Used to guard against same-view re-entrant key
+// event dispatch. The layout passes use the richer MeasurePassGuard /
+// ArrangePassGuard below, which additionally own the pass-local cache state.
 struct ScopedTrueFlag
 {
   bool& mFlag;
@@ -715,7 +809,334 @@ Dali::Integration::Accessibility::RelationType ToIntegrationRelationType(Dali::U
   return static_cast<Dali::Integration::Accessibility::RelationType>(relation);
 }
 
+/// Field-wise equality for the four per-child layout params value types, used by
+/// ViewDataImpl::SetLayoutParams to drop a write that changes nothing.
+///
+/// Defined here rather than as a public operator== on the params types: those are
+/// pimpl value types in the public API, and adding operators to them is an API
+/// change this does not need. Every public field is compared, so an addition to
+/// any params type has to be mirrored here.
+///
+/// Floats are compared EXACTLY (`==`), not through FloatEqual. These functions answer
+/// "is the stored value the value being written?", which is a question about VALUE
+/// IDENTITY, not about whether two numbers are close enough to behave the same. A
+/// tolerance here silently drops a real state change:
+///  - StackLayoutParams::SetWeight and FlexLayoutParams::SetFlexGrow document 0 as a
+///    distinct MODE ("measured normally" vs "sized entirely from the weight/grow
+///    proportion"), so 0 -> 0.0005 is a mode switch that a 0.001 epsilon would eat;
+///  - AbsoluteLayoutParams bounds are PROPORTIONS of the parent under the
+///    *_PROPORTIONAL flags, so their whole meaningful range is 0..1 and 0.001 is a
+///    tenth of a percent of the parent -- pixels on any real surface.
+/// The property setters further down this file do use FloatEqual, and correctly: they
+/// compare pixel-space sizes against a stored pixel-space size. Nothing about their
+/// choice transfers here.
+bool IsSameLayoutParams(const AbsoluteLayoutParams& lhs, const AbsoluteLayoutParams& rhs)
+{
+  const LayoutRect lhsBounds = lhs.GetBounds();
+  const LayoutRect rhsBounds = rhs.GetBounds();
+  return lhsBounds.x == rhsBounds.x &&
+         lhsBounds.y == rhsBounds.y &&
+         lhsBounds.width == rhsBounds.width &&
+         lhsBounds.height == rhsBounds.height &&
+         lhs.GetFlags() == rhs.GetFlags();
+}
+
+bool IsSameLayoutParams(const FlexLayoutParams& lhs, const FlexLayoutParams& rhs)
+{
+  return lhs.GetFlexGrow() == rhs.GetFlexGrow() &&
+         lhs.GetFlexShrink() == rhs.GetFlexShrink() &&
+         lhs.GetFlexBasis() == rhs.GetFlexBasis() &&
+         lhs.GetAlignSelf() == rhs.GetAlignSelf();
+}
+
+bool IsSameLayoutParams(const GridLayoutParams& lhs, const GridLayoutParams& rhs)
+{
+  return lhs.GetRow() == rhs.GetRow() &&
+         lhs.GetColumn() == rhs.GetColumn() &&
+         lhs.GetRowSpan() == rhs.GetRowSpan() &&
+         lhs.GetColumnSpan() == rhs.GetColumnSpan() &&
+         lhs.GetHorizontalAlignment() == rhs.GetHorizontalAlignment() &&
+         lhs.GetVerticalAlignment() == rhs.GetVerticalAlignment();
+}
+
+bool IsSameLayoutParams(const StackLayoutParams& lhs, const StackLayoutParams& rhs)
+{
+  return lhs.GetWeight() == rhs.GetWeight() &&
+         lhs.GetAlignment() == rhs.GetAlignment();
+}
+
+/// How many Measure()/Arrange() passes -- on ANY view -- are currently on the stack.
+///
+/// Maintained by MeasurePassGuard / ArrangePassGuard below, and read by
+/// InvalidateMeasure() / InvalidateArrange() for one purpose: while it is non-zero,
+/// the invalidation propagation generation short-circuit is DISABLED and every
+/// invalidation walks its ancestor chain in full.
+///
+/// That is not conservatism, it is required. The generation says "the walk this call would
+/// make has already been made and its registration is still pending", which is a
+/// statement about the layout ROOT. It is not a statement about the intermediate
+/// ancestors, and mid-pass the walk does more than register: it sets each ancestor's
+/// dirty bit and POISONS any ancestor whose pass is currently running, which is what
+/// stops that ancestor publishing a cache entry over a subtree that has just changed
+/// underneath it. An ancestor can start its pass AFTER an earlier walk in the same
+/// generation consumed that ancestor's dirty, so a later short-circuited invalidation would
+/// leave it un-poisoned. Skipping the walk is only safe when no pass is running.
+///
+/// Thread-local, matching LayoutDependency's owner stack and for the same reason: a
+/// layout pass and every nested Measure()/Arrange() it issues run synchronously on the
+/// same (event) thread, so a per-thread counter is the accurate description of "is a
+/// pass on MY stack". A shared counter would additionally fail in the dangerous
+/// direction if a pass ever ran off-thread -- reading zero while a pass is live is
+/// what re-enables the short-circuit mid-pass.
+thread_local uint32_t gActiveLayoutPassDepth = 0u;
+
 } // unnamed namespace
+
+/**
+ * RAII transaction guard for one Measure() pass on a single view.
+ *
+ * Entry establishes the pass-local state:
+ *  - mMeasureInProgress marks this view's Measure() as being on the stack, so a
+ *    re-entrant call on the SAME view is detected in release builds too.
+ *  - mMeasurePassPoisoned is cleared here rather than at publish time, so poison
+ *    is strictly PER-PASS instead of latching across passes. The cache-hit test
+ *    runs before the guard is constructed, so a poison raised by the previous
+ *    pass still forces this pass to miss.
+ *  - mMeasureDirty is CONSUMED here: this pass exists precisely to service the
+ *    invalidation that raised it. Consuming at entry (rather than clearing at
+ *    publish) is what makes a re-invalidation raised DURING the pass survive it:
+ *    the flag goes false(entry) -> true(re-invalidation) and the conditional
+ *    publish then declines to cache, so the next Measure() misses and recomputes
+ *    the post-invalidation value instead of pinning the pre-invalidation one.
+ *  - mMeasureCacheValid is cleared so nothing can reuse a half-produced result
+ *    while the pass is running.
+ *  - mArrangeCacheValid is cleared because a full Measure can change this view's
+ *    measured size, which is an input to its own arrangement; an arrange result
+ *    produced against the previous measurement must not survive it
+ *    (plan34 3.1, measure invariant 8).
+ *
+ * Entry sets mMeasureCacheValid = false, so a pass left without reaching its
+ * publish point (exception, assertion unwind, early return) is never treated as
+ * a valid cached result: the next Measure() simply misses and recomputes. That
+ * abnormal exit also leaves mMeasureDirty consumed. No stale result can be
+ * served (the invalid cache forces the recompute), and any later invalidation
+ * still propagates and registers because InvalidateMeasure() has no
+ * already-dirty short-circuit. The only thing lost versus re-arming dirty is the
+ * standalone-view scene-reconnect self-registration (OnViewSceneConnection's
+ * isDirty branch); it only matters after an exception aborts a pass, and a
+ * standalone view is re-driven by its parent's MeasureStandaloneChildren and
+ * re-invalidated by any reparent, so the abort recovers. Exit only
+ * restores mMeasureInProgress; it must NOT re-arm mMeasureDirty, because the
+ * guard cannot also register the view with the LayoutController, so a re-armed
+ * view would sit dirty with no pass scheduled to consume it until some
+ * unrelated invalidation happened to arrive. The destructor must stay
+ * non-throwing: it can run during unwinding, so it must not call into
+ * LayoutController (whose accessors assert).
+ */
+struct ViewDataImpl::MeasurePassGuard
+{
+  explicit MeasurePassGuard(ViewDataImpl& data)
+  : mData(data)
+  {
+    ++gActiveLayoutPassDepth;
+    mData.mMeasureInProgress   = true;
+    mData.mMeasureDirty        = false;
+    mData.mMeasurePassPoisoned = false;
+    mData.DropMeasureCacheEntry();
+    mData.DropArrangeCacheEntry();
+  }
+
+  ~MeasurePassGuard()
+  {
+    mData.mMeasureInProgress = false;
+
+    // Leaving the OUTERMOST pass ends the invalidation propagation generation, exactly as
+    // the controller's drain does. Load-bearing, not tidiness: a pass is the only
+    // thing that consumes dirty bits, so a generation record written BEFORE a pass no
+    // longer proves "the chain I walked is still marked" AFTER one -- a manual
+    // Measure()/Arrange() on an ancestor (both are public API) can consume the whole
+    // chain's dirty without any drain. Ending the generation here makes the next
+    // invalidation walk in full.
+    //
+    // "Outermost" is decided by gActiveLayoutPassDepth, which an arrange cache-HIT
+    // REPLAY also holds (ReplayPassScope). A replay consumes no dirty of its own, so it
+    // never creates the staleness this ends -- but it can HOST a re-entered producer pass
+    // that does, and that inner guard would see the depth fall to 1 rather than 0. Every
+    // frame that can be outermost therefore ends the generation, and a settled steady
+    // state pays at most one extra full ancestor walk on the next invalidation.
+    if(--gActiveLayoutPassDepth == 0u)
+    {
+      LayoutInvalidation::AdvanceGeneration();
+    }
+  }
+
+  MeasurePassGuard(const MeasurePassGuard&)            = delete;
+  MeasurePassGuard& operator=(const MeasurePassGuard&) = delete;
+
+  ViewDataImpl& mData;
+};
+
+/**
+ * RAII transaction guard for one Arrange() pass on a single view.
+ *
+ * Mirrors MeasurePassGuard over the arrange axis and additionally clears
+ * mEffectiveScaleInvalidatedDuringPass, which is likewise pass-local: it records
+ * that a reparent / scale-context reset invalidated the cached effective scale WHILE
+ * this pass was running, and mArrangeCacheBlockedDuringPass, the pass-local
+ * record of a FRESHNESS-only invalidation (a cache-only ancestor drop, which
+ * raises no dirty bit and schedules nothing). The latter blocks this pass's
+ * cache publish but must stay invisible to the pure-poison follow-up branch:
+ * a cache-only invalidation must never turn into a scheduled layout.
+ *
+ * As with the measure guard, mArrangeDirty is CONSUMED at entry, so an
+ * InvalidateArrange() raised while this pass is running survives it and blocks
+ * the conditional publish at the end. The destructor only restores
+ * mArrangeInProgress and must not re-arm mArrangeDirty (same reason as
+ * MeasurePassGuard) nor throw.
+ *
+ * The arrange cache-HIT test runs BEFORE this guard is constructed (again
+ * mirroring the measure side): entry clears mArrangeCacheValid and consumes the
+ * dirty / poison bits, so constructing the guard first would destroy the very
+ * cache entry the hit is there to serve, and would hide a poison left by the
+ * previous pass.
+ */
+struct ViewDataImpl::ArrangePassGuard
+{
+  explicit ArrangePassGuard(ViewDataImpl& data)
+  : mData(data)
+  {
+    ++gActiveLayoutPassDepth;
+    mData.mArrangeInProgress                   = true;
+    mData.mArrangeDirty                        = false;
+    mData.mArrangePassPoisoned                 = false;
+    mData.mArrangeCacheBlockedDuringPass       = false;
+    mData.mEffectiveScaleInvalidatedDuringPass = false;
+    mData.DropArrangeCacheEntry();
+  }
+
+  ~ArrangePassGuard()
+  {
+    mData.mArrangeInProgress = false;
+
+    // See MeasurePassGuard: leaving the outermost pass ends the propagation generation,
+    // so no generation record can outlive the dirty bits its walk set.
+    if(--gActiveLayoutPassDepth == 0u)
+    {
+      LayoutInvalidation::AdvanceGeneration();
+    }
+  }
+
+  ArrangePassGuard(const ArrangePassGuard&)            = delete;
+  ArrangePassGuard& operator=(const ArrangePassGuard&) = delete;
+
+  ViewDataImpl& mData;
+};
+
+/**
+ * RAII transaction scope for one arrange cache-HIT replay SUBTREE.
+ *
+ * Constructed exactly once, at the hit site in ArrangeImpl, and it owns nothing but the
+ * thread-local layout-pass depth. Holding that depth open for the whole replay is what
+ * puts a replay INSIDE the layout processing window:
+ *
+ *  - the replay WRITES actor properties (ApplySelfBoundsIfChanged), and every such write
+ *    goes Actor::SetPositionX/SetWidth -> Object::SetProperty -> OnPropertySet plus a
+ *    synchronous PropertySetSignal emit, so arbitrary application code runs inside it;
+ *  - an invalidation raised by that code must therefore be PARKED, not allowed to arm an
+ *    idle wake. LayoutController::RequestIdleWakeIfAllowed reads exactly this depth
+ *    (ViewDataImpl::IsLayoutPassOnStack). Before this scope existed the hit path ran with
+ *    depth 0 and such an invalidation woke the loop from inside layout processing;
+ *  - the same depth disables the propagation-generation short-circuit in
+ *    InvalidateMeasure/InvalidateArrange, so a mid-replay invalidation walks its ancestor
+ *    chain IN FULL and poisons every in-progress ancestor rather than trusting a
+ *    registration recorded before the replay began.
+ *
+ * NOT ArrangePassGuard: that guard's entry consumes mArrangeDirty and clears
+ * mArrangeCacheValid -- the very entry this hit exists to serve. A replay must leave the
+ * cache, the dirty bits and the poison bits exactly as it found them, so that an
+ * invalidation raised mid-replay survives the unwind untouched.
+ */
+struct ViewDataImpl::ReplayPassScope
+{
+  ReplayPassScope()
+  {
+    ++gActiveLayoutPassDepth;
+  }
+
+  ~ReplayPassScope()
+  {
+    // The generation is ended by whichever frame is OUTERMOST, and a replay can be that
+    // frame (the controller's arrange step reaches the hit with the measure guard already
+    // unwound). A replay of its own consumes no dirty bit and would not need to end the
+    // generation -- but a producer pass RE-ENTERED from a property-set observer inside the
+    // replay does consume one, and its own guard sees the depth fall to 1, not 0. Ending
+    // it here is what keeps "no generation record outlives the dirty bits its walk set"
+    // true for that nesting. The cost is at most one extra full ancestor walk on the next
+    // invalidation, which is idempotent; the alternative failure mode is a swallowed
+    // registration.
+    if(--gActiveLayoutPassDepth == 0u)
+    {
+      LayoutInvalidation::AdvanceGeneration();
+    }
+  }
+
+  ReplayPassScope(const ReplayPassScope&)            = delete;
+  ReplayPassScope& operator=(const ReplayPassScope&) = delete;
+};
+
+/**
+ * RAII scope for ONE node visited by an arrange cache-HIT replay.
+ *
+ * Raises mArrangeInProgress for the whole of that node's replay -- its self apply, its
+ * child recursion and its LayoutFinished registration -- so the release-mode re-entrancy
+ * guard at the top of ArrangeImpl covers a replay exactly as it covers a producer pass.
+ * Without it a PropertySetSignal observer woken by the self apply could call Arrange() on
+ * the very view being replayed, re-run its producer underneath the replay and publish a
+ * result the replay then writes over.
+ *
+ * mArrangeReplayInProgress rides alongside so the three OWNERSHIP tests that read
+ * mArrangeInProgress can tell a replay from a producer; see that member's documentation.
+ *
+ * SAVE/RESTORE rather than set/clear, because the scope genuinely NESTS on itself. A
+ * legal application pattern reaches that nesting:
+ *
+ *   1. a replay writes this node's POSITION_X;
+ *   2. a PropertySetSignal observer wakes and calls Arrange(sameSlot) on this node's
+ *      PARENT -- a public call on a view that is not itself in progress;
+ *   3. the parent's hit gate cannot see the replay underneath it, because a replay leaves
+ *      mArrangeCacheValid untouched, so the parent hits and starts its own replay;
+ *   4. that replay descends into this node, whose mArrangeInProgress is still true.
+ *
+ * Save/restore is what makes the re-entry benign: the inner scope restores the outer
+ * scope's flags instead of clearing them, so the outer replay's re-entrancy protection
+ * survives its own inner one, and the writes themselves are same-value applies against
+ * the same cached geometry -- idempotent by construction. This is also the shape
+ * ManualProcessScope and ActiveLayoutFinishedScope use in LayoutController.
+ */
+struct ViewDataImpl::ReplayNodeScope
+{
+  explicit ReplayNodeScope(ViewDataImpl& data)
+  : mData(data),
+    mPreviousInProgress(data.mArrangeInProgress),
+    mPreviousReplay(data.mArrangeReplayInProgress)
+  {
+    mData.mArrangeInProgress       = true;
+    mData.mArrangeReplayInProgress = true;
+  }
+
+  ~ReplayNodeScope()
+  {
+    mData.mArrangeReplayInProgress = mPreviousReplay;
+    mData.mArrangeInProgress       = mPreviousInProgress;
+  }
+
+  ReplayNodeScope(const ReplayNodeScope&)            = delete;
+  ReplayNodeScope& operator=(const ReplayNodeScope&) = delete;
+
+  ViewDataImpl& mData;
+  bool          mPreviousInProgress;
+  bool          mPreviousReplay;
+};
 
 // clang-format off
 // Properties registered without macro to use specific member variables.
@@ -759,6 +1180,11 @@ const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_7(typeReg
 
 ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
 : mViewImpl(viewImpl),
+  // mLayoutMode and mRequestedWidth are initialised here, out of their logical
+  // group, because -Wreorder requires declaration order and both are parked at the
+  // top of the class for packing. See the PACKING notes in view-data-impl.h.
+  mLayoutMode(Ui::LayoutMode::DEFAULT),
+  mRequestedWidth(WRAP_CONTENT),
   mCoreInteractionObject(nullptr),
   mVisualData(nullptr),
   mAttachments(nullptr),
@@ -768,31 +1194,61 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mRequestedX(0.0f),
   mRequestedY(0.0f),
   mMeasuredSize{0.0f, 0.0f},
-  // NaN is distinct from MEASURE_CACHE_DIRTY (-1.0f), so the first
-  // InvalidateMeasure still propagates. See view-impl.cpp for details.
-  mLastMeasuredConstraint{std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()},
+  // Pure cache keys; their initial values are never consulted because
+  // mMeasureCacheValid starts false. NaN is nevertheless the fail-safe choice for the
+  // constraint: it compares unequal to everything, including itself, so a predicate
+  // that somehow reached it without the validity bit would MISS rather than serve.
+  // The scale and input KEYS get no such sentinel: they share their slots with the
+  // propagation records (see the unions in the header), whose default construction
+  // is 0 = "never propagated", which no live generation ever equals, so the first
+  // invalidation on each axis always walks.
+  mLastMeasureConstraint{std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
   mMargin(),
   mPadding(),
-  mRequestedWidth(WRAP_CONTENT),
-  mRequestedHeight(WRAP_CONTENT),
-  mLayoutMode(Ui::LayoutMode::DEFAULT),
   mSize(0, 0),
   mLastArrangedRenderEffectSize(0, 0),
+  mRequestedHeight(WRAP_CONTENT),
   mAccessibilityData(nullptr),
   mAccessibleObjectCreator(nullptr),
   mAccessibilityRole{static_cast<int32_t>(Accessibility::Role::NONE)},
   mSkipChildrenUpdate(false),
+  mMeasureCacheValid(false),
+  mMeasureDirty(false),
+  mMeasureInProgress(false),
+  mMeasurePassPoisoned(false),
+  mMeasuredSlotUnconsumed(false),
+  mArrangeCacheValid(false),
   mArrangeDirty(false),
   mArrangeInProgress(false),
-  mKeyEventDispatchInProgress(false),
+  mArrangeReplayInProgress(false),
+  mArrangePassPoisoned(false),
+  mArrangeCacheBlockedDuringPass(false),
+  mArrangeResultAvailable(false),
+  // ArrangePolicy::IF_CHANGED is the default for OnArrange, callbacks and managers.
+  // These bits record only the ArrangePolicy::ALWAYS opt-out; the active producer's bit is
+  // derived whenever producer selection or policy changes.
+  mArrangeOverrideAlways(false),
+  mArrangeCallbackAlways(false),
+  mArrangeProducerAlways(false),
+  mEffectiveScaleValid(false),
+  mEffectiveScaleActorSynced(false),
+  mEffectiveScaleInvalidatedDuringPass(false),
   mInitialLayoutDone(false),
+  mInitialEnterSettled(false),
   mIsFocusGroup(false),
   mDispatchKeyEvents(true),
   mAccessibleCreatable(true),
   mProcessorRegistered(false),
   mFittingModeLayoutFinishedSignalConnected(false),
   mDefaultFocusIndicatorSuppressedByStateEffect(false),
+  mLayoutDirectionSignalConnected(false),
+  mInPassInvalidationWarned(false),
+  mChildOrderSignalConnected(false),
+  // Pure cache key; its initial value is never consulted because
+  // mArrangeCacheValid starts false.
+  mLastArrangeDirection(Dali::LayoutDirection::LEFT_TO_RIGHT),
+  mKeyEventDispatchInProgress(false),
   mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT))
 {
 }
@@ -866,7 +1322,33 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
   float contentWidth  = std::max(0.0f, effectiveWidth - pw);
   float contentHeight = std::max(0.0f, effectiveHeight - ph);
 
-  if(!mChildren.Empty())
+  // The branch key is "does this view have a child that CONTRIBUTES to its measured
+  // size", not "does it have any child at all". Standalone children are excluded from
+  // this accumulation -- the loop below skips them, and View's public contract
+  // (view.h) says a standalone child does not affect its parent's measurement --
+  // so a view whose ONLY children are standalone accumulates nothing. Keying the branch on
+  // mChildren.Empty() sent such a view down the accumulation path with maxRight/maxBottom
+  // still 0, skipping the background natural-size path below entirely and measuring
+  // 0 x 0 where the same view with NO children measures its background.
+  //
+  // One O(direct children) pre-scan rather than a flag set by the loop: the branch has to
+  // choose its formula BEFORE the loop runs. Each step is a layout-mode read with no
+  // property access, and it stops at the first contributing child, so the ordinary case
+  // costs one iteration.
+  //
+  // NOT fixed by adding a parent invalidation anywhere: the value is wrong on the very
+  // first measurement, so there is nothing to invalidate.
+  bool hasContributingChild = false;
+  for(Dali::Vector<View>::ConstIterator it = mChildren.Begin(), end = mChildren.End(); it != end; ++it)
+  {
+    if(!IntegrationView::IsLayoutModeStandalone(GetImpl(*it)))
+    {
+      hasContributingChild = true;
+      break;
+    }
+  }
+
+  if(hasContributingChild)
   {
     float                 maxRight  = 0.0f;
     float                 maxBottom = 0.0f;
@@ -1019,6 +1501,7 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
 
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
+        LayoutDependency::ArrangeOwnedMeasureScope ownerScope(&mViewImpl);
         childImpl.Measure(childW, childH);
       }
 
@@ -1115,7 +1598,7 @@ void ViewDataImpl::HandleFocusChangedDefault(bool focused)
 
 void ViewDataImpl::RelayoutDefault(const Vector2& size, RelayoutContainer& container)
 {
-  if(IntegrationView::HasLayoutCapability(mViewImpl) || GetParentLayout() || GetParentView())
+  if(IntegrationView::HasLayoutCapability(mViewImpl) || GetParentView())
   {
     return;
   }
@@ -1764,7 +2247,7 @@ void ViewDataImpl::SetUiScalePolicy(UiScalePolicy policy)
   if(mScalePolicy != policy)
   {
     mScalePolicy = policy;
-    ResetEffectiveScaleRecursive();
+    ResetSubtreeScaleAndLayoutCaches();
     InvalidateMeasure();
   }
 }
@@ -1776,34 +2259,79 @@ UiScalePolicy ViewDataImpl::GetUiScalePolicy() const
 
 float ViewDataImpl::GetEffectiveScale() const
 {
-  if(mEffectiveScale < 0.0f)
+  // mEffectiveScaleValid -- not a value sentinel on mEffectiveScale itself -- is
+  // what says whether the cached scale is usable. Every scale-context
+  // invalidation clears that bit; this is the only place that sets it, which is
+  // exactly what makes "bit true" mean "mEffectiveScale is what
+  // ComputeEffectiveScale() would return now".
+  if(!mEffectiveScaleValid)
   {
-    mEffectiveScale = ComputeEffectiveScale();
+    mEffectiveScale      = ComputeEffectiveScale();
+    mEffectiveScaleValid = true;
   }
   return mEffectiveScale;
 }
 
 void ViewDataImpl::InvalidateMeasure()
 {
-  // Early-exit guard: if already dirty, the ancestor chain has already been
-  // invalidated and the layout root has been registered, so re-propagation is
-  // redundant. "Never measured" state (NaN) still requires propagation because
-  // the chain has never been walked from this view.
+  // Invalidation ALWAYS propagates to the layout root and registers there --
+  // there is deliberately no "already dirty, so return early" short-circuit.
   //
-  // NOTE: Callers that change the view's ancestor-chain structure
-  // (e.g. reparenting) must not rely on this view's InvalidateMeasure to reach
-  // the new parent chain — the guard may skip propagation. Instead, the
-  // reparenting site should invalidate the new parent directly. See
-  // OnChildAdd / OnChildRemove where this is done.
-  if(Dali::Equals(mLastMeasuredConstraint.width, MEASURE_CACHE_DIRTY))
+  // The local dirty flag only records that THIS view has layout work that has
+  // not been consumed yet. It is not evidence that the ancestor chain was
+  // walked or that a layout root was registered, because:
+  //   - Nothing clears a child's dirty except the child's own pass, so a custom
+  //     parent that never arranges a dirty child leaves that dirty standing
+  //     indefinitely. Short-circuiting on it would swallow every later
+  //     invalidation of that child forever.
+  //   - The ancestor chain can change under a standing dirty (reparenting), so
+  //     the chain that was walked is not necessarily the chain that must be
+  //     reached now.
+  //   - A re-invalidation raised while a pass is running must still poison that
+  //     pass and re-register the follow-up layout (see the in-progress writes
+  //     below), which a short-circuit above them would skip.
+  //
+  // Repeating the walk on an already-dirty subtree is O(depth) work that is
+  // idempotent: each level sets its own flags and calls its parent exactly
+  // once, and LayoutController::RequestLayout inserts into a pending set, so
+  // duplicate registrations coalesce. See plan34 27.5.
+  //
+  // Drop the cached effective scale: whatever changed may have moved this view's
+  // effective scale (a reparent re-roots the INHERIT chain), so the next
+  // GetEffectiveScale() must recompute rather than serve the cached value.
+  DropCachedEffectiveScale();
+
+  // Both caches go with it: a cached measured size or arranged bounds produced
+  // under the previous context is not a result this call may leave standing.
+  InvalidateLayoutCaches();
+
+  // ...and, unlike a pure freshness drop, this call also records that there is
+  // now unconsumed layout work here. That is exactly the part
+  // InvalidateLayoutCaches() must not do on its own.
+  mMeasureDirty = true;
+  mArrangeDirty = true;
+
+  // Everything ABOVE this point is the local half and always runs. Everything BELOW
+  // is the walk to the layout root, which is idempotent and can therefore be skipped
+  // while the registration it would make is already pending -- see
+  // LayoutInvalidation and the measure propagation record. This is what keeps a batch of
+  // invalidations before one layout pass at O(1) each instead of O(depth) each, with
+  // two handle DownCasts per level and a Window lookup at the root.
+  //
+  // Disabled outright while any layout pass is on the stack (gActiveLayoutPassDepth),
+  // because mid-pass the walk also poisons in-progress ancestors, which is not
+  // something the root's registration stands in for.
+  //
+  // Every step of the walk below recurses into this internal primitive
+  // (ViewDataImpl::Get(...).Invalidate*()) rather than into the public
+  // ViewImpl::Invalidate*() entry point, so the walk never re-enters the public
+  // API on the framework's own behalf.
+  const uint32_t generation = LayoutInvalidation::CurrentGeneration();
+  if(gActiveLayoutPassDepth == 0u && mMeasureKeyOrPropagation.propagationGeneration == generation)
   {
     return;
   }
-
-  mEffectiveScale                = -1.0f;
-  mLastMeasuredConstraint.width  = MEASURE_CACHE_DIRTY;
-  mLastMeasuredConstraint.height = MEASURE_CACHE_DIRTY;
-  mArrangeDirty                  = true;
+  mMeasureKeyOrPropagation.propagationGeneration = generation;
 
   // Layout boundary: a standalone view is excluded from its parent's
   // OnMeasure/OnArrange accumulation, so its measure result cannot change
@@ -1816,30 +2344,30 @@ void ViewDataImpl::InvalidateMeasure()
   // depth-sorted iteration, this lets the parent capture pre-change
   // bounds before the standalone child's own arrange updates them, so
   // a standalone child's RequestedWidth / RequestedHeight change
-  // surfaces as the parent's CHANGE slot. Mirrors the existing
-  // OnChildAdd guard for the standalone+transition combination.
+  // surfaces as the parent's CHANGE slot. This is the SOLE carrier of the
+  // standalone+transition hook: OnChildAdded no longer repeats it, because the
+  // child's own InvalidateMeasure() on the add always reaches this branch.
   if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
   {
     Ui::View parentView = GetParentView();
     if(parentView && GetImpl(parentView).GetLayoutTransition())
     {
-      GetImpl(parentView).InvalidateMeasure();
+      ViewDataImpl::Get(GetImpl(parentView)).InvalidateMeasure();
     }
     RegisterWithLayoutController();
     return;
   }
 
-  Ui::Layout parentLayout = GetParentLayout();
-  if(parentLayout)
-  {
-    GetImpl(parentLayout).InvalidateMeasure();
-    return;
-  }
-
+  // ONE parent lookup, not two. Ui::Layout derives from Ui::View and LayoutImpl from
+  // ViewImpl, so Ui::View::DownCast also matches a Layout parent and
+  // ViewDataImpl::Get(GetImpl(parentView)) reaches the very same ViewDataImpl that the
+  // Layout branch used to reach. The removed Layout branch cost an extra
+  // Actor::GetParent() plus a Layout::DownCast that FAILS for a plain-View parent --
+  // the overwhelmingly common case, and the expensive direction for a dynamic_cast.
   Ui::View parentView = GetParentView();
   if(parentView)
   {
-    GetImpl(parentView).InvalidateMeasure();
+    ViewDataImpl::Get(GetImpl(parentView)).InvalidateMeasure();
     return;
   }
 
@@ -1848,16 +2376,32 @@ void ViewDataImpl::InvalidateMeasure()
 
 void ViewDataImpl::InvalidateArrange()
 {
-  // Early-exit guard mirrors InvalidateMeasure: if already dirty, the
-  // ancestor chain has already been invalidated. Only the Dirty state
-  // short-circuits; NeverArranged (mArrangeDirty=false, but never arranged)
-  // still propagates on its first invalidation.
-  if(mArrangeDirty)
+  // Mirrors InvalidateMeasure: invalidation ALWAYS propagates to the layout
+  // root and registers there, with no "already dirty, so return early"
+  // short-circuit. mArrangeDirty is cleared only by this view's own arrange
+  // pass, so a custom parent that never arranges a dirty child would otherwise
+  // pin that dirty forever and swallow every subsequent invalidation.
+  //
+  // The repeated walk is O(depth) and idempotent -- each level sets its flags
+  // and calls its parent once -- and LayoutController::RequestLayout coalesces
+  // duplicate registrations in its pending set. See plan34 27.5.
+  mArrangeDirty = true;
+  DropArrangeCacheEntry();
+
+  if(mArrangeInProgress)
+  {
+    mArrangePassPoisoned = true;
+  }
+
+  // Propagation coalescing, exactly as in InvalidateMeasure and with the same two
+  // conditions -- see the comment there, and the KEY/record union docs for why the
+  // measure and arrange records must stay separate.
+  const uint32_t generation = LayoutInvalidation::CurrentGeneration();
+  if(gActiveLayoutPassDepth == 0u && mArrangeKeyOrPropagation.propagationGeneration == generation)
   {
     return;
   }
-
-  mArrangeDirty = true;
+  mArrangeKeyOrPropagation.propagationGeneration = generation;
 
   // Layout boundary: standalone child's arrange result does not feed back
   // into the parent's arrangement — stop here and self-register.
@@ -1867,23 +2411,110 @@ void ViewDataImpl::InvalidateArrange()
     return;
   }
 
-  Ui::Layout parentLayout = GetParentLayout();
-  if(parentLayout)
-  {
-    GetImpl(parentLayout).InvalidateArrange();
-    return;
-  }
-
-  // Propagate to parent View (no LayoutManager)
+  // One parent lookup; see the identical collapse in InvalidateMeasure above.
   Ui::View parentView = GetParentView();
   if(parentView)
   {
-    GetImpl(parentView).InvalidateArrange();
+    ViewDataImpl::Get(GetImpl(parentView)).InvalidateArrange();
     return;
   }
 
   // Reached top of View tree → register with LayoutController
   RegisterWithLayoutController();
+}
+
+bool ViewDataImpl::IsLayoutPassOnStack()
+{
+  return gActiveLayoutPassDepth != 0u;
+}
+
+void ViewDataImpl::InvalidateMeasureFromPublicApi()
+{
+  InvalidateMeasureFromPublicApi("View::InvalidateMeasure");
+}
+
+void ViewDataImpl::InvalidateMeasureFromPublicApi(const char* apiName)
+{
+  if(gActiveLayoutPassDepth != 0u || LayoutInvalidation::IsLayoutFinishedEmitInProgress())
+  {
+    LogInPassInvalidation(apiName);
+  }
+
+  // Always execute the complete invalidation transaction. During layout
+  // processing the controller retains the propagated root as pending but
+  // suppresses only the idle wake, matching dali-core's relayout policy.
+  InvalidateMeasure();
+}
+
+void ViewDataImpl::InvalidateArrangeFromPublicApi()
+{
+  InvalidateArrangeFromPublicApi("View::InvalidateArrange");
+}
+
+void ViewDataImpl::InvalidateArrangeFromPublicApi(const char* apiName)
+{
+  if(gActiveLayoutPassDepth != 0u || LayoutInvalidation::IsLayoutFinishedEmitInProgress())
+  {
+    LogInPassInvalidation(apiName);
+  }
+
+  // See InvalidateMeasureFromPublicApi(): dirtying, cache invalidation,
+  // pass-poisoning, ancestor propagation, and root registration all remain
+  // intact; only the controller's self-wake is suppressed.
+  InvalidateArrange();
+}
+
+void ViewDataImpl::RearmLayoutDirtyForAbortedPass()
+{
+  mMeasureDirty = true;
+  mArrangeDirty = true;
+}
+
+void ViewDataImpl::LogInPassInvalidation(const char* apiName)
+{
+  // Per-view latch, deliberately never cleared. A call from inside layout processing is
+  // a code defect at a fixed call site, not a runtime condition, so one diagnostic per
+  // View says everything the developer needs; repeating it every frame would bury the
+  // rest of the log. There is no global cap on top of the latch: a global cap would
+  // leave a later offending View undiagnosed, which is the worse failure.
+  if(mInPassInvalidationWarned)
+  {
+    return;
+  }
+  mInPassInvalidationWarned = true;
+
+  // Identify the view as helpfully as the handle allows. The latch means this runs at
+  // most once per View, so neither property read is on any hot path. Self() can still
+  // hand back an EMPTY handle (a derived constructor invalidating before the
+  // CustomActor exists), and reading a property off an empty handle aborts, so the
+  // handle test comes first and "View" is the last-resort label.
+  Dali::CustomActor self = mViewImpl.Self();
+  Dali::String      viewName;
+  if(self)
+  {
+    viewName = self.GetProperty<Dali::String>(Dali::Actor::Property::NAME);
+    if(viewName.Empty())
+    {
+      viewName = self.GetTypeName();
+    }
+  }
+  const char* name = viewName.Empty() ? "View" : viewName.CStr();
+
+  // Which half of the layout processing window was open. A pass on the stack shadows
+  // the emit half: an emit that re-entered a pass is reported as the pass it is in.
+  const char* context = gActiveLayoutPassDepth != 0u
+                          ? "while a Measure/Arrange pass is running"
+                          : "from a LayoutFinished signal handler";
+
+  DALI_LOG_ERROR(
+    "%s() called on '%s' %s. The requested layout work was retained rather than "
+    "discarded, but layout processing does not request another idle ProcessEvents cycle "
+    "for work it produces itself. The work remains pending and LayoutFinished remains "
+    "deferred until a later independently triggered ProcessEvents cycle services it. "
+    "Avoid unconditional invalidation from layout callbacks.\n",
+    apiName,
+    name,
+    context);
 }
 
 MeasuredSize ViewDataImpl::GetMeasuredSize() const
@@ -1958,7 +2589,7 @@ UiColor ViewDataImpl::GetColor() const
   {
     return outColor;
   }
-  return UiColor(mViewImpl.Self().GetProperty<Vector4>(Actor::Property::COLOR));
+  return UiColor(mViewImpl.Self().GetProperty<Vector4>(Actor::Property::COLOR_MULTIPLIER));
 }
 
 void ViewDataImpl::SetColor(const UiColor& color)
@@ -1972,7 +2603,7 @@ void ViewDataImpl::SetColor(const UiColor& color)
 
 UiColor ViewDataImpl::GetCurrentColor() const
 {
-  return UiColor(mViewImpl.Self().GetCurrentProperty<Vector4>(Actor::Property::COLOR));
+  return UiColor(mViewImpl.Self().GetCurrentProperty<Vector4>(Actor::Property::COLOR_MULTIPLIER));
 }
 
 Vector4 ViewDataImpl::GetCornerRadius() const
@@ -2077,9 +2708,123 @@ void ViewDataImpl::SetShadow(const ShadowStack& shadowStack)
   }
 }
 
+void ViewDataImpl::ApplyRequestedWidth(float width)
+{
+  if(!IsValidRequestedSize(width))
+  {
+    return;
+  }
+  // Snap a near-sentinel input to the exact sentinel so downstream
+  // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
+  if(FloatEqual(width, WRAP_CONTENT))
+  {
+    width = WRAP_CONTENT;
+  }
+  else if(FloatEqual(width, MATCH_PARENT))
+  {
+    width = MATCH_PARENT;
+  }
+  if(!FloatEqual(mRequestedWidth, width))
+  {
+    mRequestedWidth = width;
+    InvalidateMeasure();
+    // !GetParentView() alone: Layout derives from View, so a null View parent
+    // already implies a null Layout parent. The dropped GetParentLayout() call
+    // was a second Actor::GetParent() plus a DownCast that can never succeed
+    // when this one failed.
+    if(width >= 0 && !GetParentView() &&
+       !IntegrationView::HasLayoutCapability(mViewImpl) && mViewImpl.GetChildViewCount() == 0)
+    {
+      mViewImpl.Self().SetSizeWidth(width);
+    }
+  }
+}
+
+void ViewDataImpl::ApplyRequestedHeight(float height)
+{
+  if(!IsValidRequestedSize(height))
+  {
+    return;
+  }
+  // Snap a near-sentinel input to the exact sentinel so downstream
+  // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
+  if(FloatEqual(height, WRAP_CONTENT))
+  {
+    height = WRAP_CONTENT;
+  }
+  else if(FloatEqual(height, MATCH_PARENT))
+  {
+    height = MATCH_PARENT;
+  }
+  if(!FloatEqual(mRequestedHeight, height))
+  {
+    mRequestedHeight = height;
+    InvalidateMeasure();
+    // Same collapse as ApplyRequestedWidth above.
+    if(height >= 0 && !GetParentView() &&
+       !IntegrationView::HasLayoutCapability(mViewImpl) && mViewImpl.GetChildViewCount() == 0)
+    {
+      mViewImpl.Self().SetSizeHeight(height);
+    }
+  }
+}
+
+void ViewDataImpl::NotifyPropertySet(Dali::Handle& self, Property::Index index, const Property::Value& value)
+{
+  // Reproduce, in order, the two OBSERVABLE tails dali-core runs after a registered
+  // property's set function: the OnPropertySet virtual and then the guarded
+  // PropertySetSignal emit (Object::SetProperty, dali-core object-impl.cpp). Everything
+  // BETWEEN a C++ setter and its property case -- the Actor handle copy, the second
+  // Handle construction, the TypeInfo lookup, the registered callback's own handle
+  // DownCast and the switch -- is routing with no observable effect, and is exactly
+  // what calling the case body directly skips.
+  //
+  // The event-thread assert on that path is NOT in that list: on a worker thread the
+  // old route aborted deterministically with a message, which is observable behaviour.
+  // The setters replay it explicitly (see SetRequestedWidth), so the diagnostic
+  // contract is unchanged and this route does not assert twice.
+  //
+  // The OnPropertySet call is NOT optional: it is a protected virtual that a deriving
+  // ViewImpl may override (InputEditorImpl and InputFieldImpl already do), so dropping
+  // it would be a silent contract change. Neither is the emit:
+  // UtcDaliViewSetRequestedWidthFiresPropertySetSignalP pins it, and the accessibility
+  // bridge connects to the same signal.
+  //
+  // KNOWN LIMITATION, accepted by design: this replays THIS registration's tails.
+  // dali-core's TypeInfo::SetProperty prefers a same-index setter registered on a MORE
+  // DERIVED TypeInfo, and its duplicate-index check only covers one TypeInfo at a time,
+  // so a deriving type could mechanically shadow-register REQUESTED_WIDTH /
+  // REQUESTED_HEIGHT. Such a type would see the property route reach its shadow setter
+  // while this C++ setter still reaches ApplyRequested*. Shadow-registering a View
+  // property is an UNSUPPORTED pattern and predates this route: the C++ getters read
+  // the member directly, and SetRequestedX / SetRequestedY write it directly, so the
+  // whole C++ accessor layer has always assumed no shadowing.
+  mViewImpl.OnPropertySet(index, value);
+
+  auto& signal = self.PropertySetSignal();
+  if(!signal.Empty())
+  {
+    signal.Emit(self, index, value);
+  }
+}
+
 void ViewDataImpl::SetRequestedWidth(float width)
 {
-  mViewImpl.Self().SetProperty(Ui::View::Property::REQUESTED_WIDTH, width);
+  // Pin FIRST, exactly as dali-core does (Dali::Handle handle(this) is the second line
+  // of Object::SetProperty). The tail below re-enters application code --
+  // NotifyPropertySet calls the OnPropertySet virtual and then emits -- and a caller
+  // that reached this impl without a handle of its own would otherwise leave nothing
+  // holding the object across that re-entry.
+  // The handle is created once and carried through, so it is a MOVE of the Self() call
+  // NotifyPropertySet already made, not an addition. The assert IS an addition: it
+  // deliberately replays the diagnostic the old property route gave for free (see
+  // NotifyPropertySet), and sits after the pin because Self() runs no application code.
+  Dali::Handle self = mViewImpl.Self();
+
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
+
+  ApplyRequestedWidth(width);
+  NotifyPropertySet(self, Ui::View::Property::REQUESTED_WIDTH, width);
 }
 
 float ViewDataImpl::GetRequestedWidth() const
@@ -2089,7 +2834,13 @@ float ViewDataImpl::GetRequestedWidth() const
 
 void ViewDataImpl::SetRequestedHeight(float height)
 {
-  mViewImpl.Self().SetProperty(Ui::View::Property::REQUESTED_HEIGHT, height);
+  // Same pin-then-assert prologue as SetRequestedWidth above.
+  Dali::Handle self = mViewImpl.Self();
+
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
+
+  ApplyRequestedHeight(height);
+  NotifyPropertySet(self, Ui::View::Property::REQUESTED_HEIGHT, height);
 }
 
 float ViewDataImpl::GetRequestedHeight() const
@@ -2231,9 +2982,24 @@ LayoutRect ViewDataImpl::GetArrangedBounds() const
   return mArrangedBounds;
 }
 
+bool ViewDataImpl::HasArrangeResult() const
+{
+  return mArrangeResultAvailable;
+}
+
 bool ViewDataImpl::IsInitialLayoutDone() const
 {
   return mInitialLayoutDone;
+}
+
+bool ViewDataImpl::IsInitialEnterSettled() const
+{
+  return mInitialEnterSettled;
+}
+
+void ViewDataImpl::MarkInitialEnterSettled()
+{
+  mInitialEnterSettled = true;
 }
 
 uint32_t ViewDataImpl::GetChildViewCount() const
@@ -2626,12 +3392,60 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
       mChildren.Insert(mChildren.Begin() + logicalIndex, view);
     }
 
+    // Connect the actor child-order signal HERE rather than in ViewImpl::Initialize:
+    // a leaf View that never gains a child paid a heap callback, the signal's first
+    // connection-pool block and a ConnectionTracker entry for an event that could
+    // never concern it. This is the earliest moment a reorder of a TRACKED child can
+    // happen: every ChildOrderChangedSignal emit site in dali-core
+    // (ActorParentImpl::RaiseChild .. InsertChild) moves an actor that is already a
+    // child, and a fresh Actor::Add / InsertAbove emits nothing at all -- which is why
+    // the logical-index sync above exists in the first place.
+    //
+    // Nothing is lost before the connection either: mChildren grows ONLY at the insert
+    // above, and OnChildOrderChanged's rebuild copies only views already in mChildren,
+    // so with mChildren empty the handler rebuilds an empty list, compares equal and
+    // returns without touching anything. A reorder among non-View actor children is
+    // exactly that case.
+    if(!mChildOrderSignalConnected)
+    {
+      DevelActor::ChildOrderChangedSignal(mViewImpl.Self()).Connect(this, &ViewDataImpl::OnChildOrderChanged);
+      mChildOrderSignalConnected = true;
+    }
+
     ViewImpl& childImpl = GetImpl(view);
 
     // If this child still has an in-flight transition under an old parent
     // (reparent during EXIT), cancel it before we mark the child for
     // ENTER under this view. Otherwise the orphan callback / animation
     // would keep driving the actor against the old parent's coord system.
+    //
+    // Gated on the process having ANY live LayoutTransition, because with none the
+    // whole block is provably a no-op and it is not cheap: Window::Get resolves the
+    // actor's Scene and scans the adaptor's window list, LayoutController::Get hashes
+    // the window pointer, and the two notifications below are five more map lookups
+    // and an ancestor walk. Every add in a transition-free application paid all of it.
+    //
+    // The gate is conservative, in both directions:
+    //  - NotifyChildReparented cancels entries in mActiveAnimations / mActiveAnimators /
+    //    mPendingExits. EVERY entry in those three maps holds a strong
+    //    Ui::LayoutTransition (see the entry structs in layout-transition-dispatcher.h),
+    //    so a non-empty map implies a live impl and the gate is open. Detaching a
+    //    transition from its view mid-EXIT does not close it -- the ghost's own handle
+    //    keeps the impl alive.
+    //  - NotifyChildAdded records nothing unless FindGoverningSubtreeOwner returns an
+    //    owner, and that requires some ancestor's GetLayoutTransition() to be non-empty,
+    //    which again implies a live impl.
+    // So "no live impl" implies "both calls do nothing", which is exactly what makes
+    // skipping them behaviour-preserving rather than merely usually-harmless.
+    //
+    // Skipping LayoutController::Get's incidental create-if-absent / ReplaceCurrentWindow
+    // side effect is safe too: it is routing, not contract. The child's own
+    // InvalidateMeasure() below reaches a layout root's RegisterWithLayoutController,
+    // which performs the same Window::Get + LayoutController::Get whenever a
+    // registration is actually needed; and when the walk short-circuits on the
+    // propagation generation instead, that generation was stamped by an earlier walk in
+    // this same generation that DID reach a root and DID resolve the controller.
+    if(Internal::LayoutTransitionImpl::HasAnyInstance())
     {
       Actor  self   = mViewImpl.Self();
       Window window = Window::Get(self);
@@ -2684,49 +3498,105 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // producing incorrect font sizes, paddings, and decorations even though
     // the layout container size updates correctly.
     //
-    // ResetEffectiveScaleRecursive() sets mEffectiveScale = -1.0f and
-    // mLastMeasuredConstraint = NaN for every node in the subtree, guaranteeing:
+    // ResetSubtreeScaleAndLayoutCaches() clears the effective-scale sync bit
+    // (mEffectiveScaleValid) and both layout caches (mMeasureCacheValid and
+    // mArrangeCacheValid) for every node in the subtree, guaranteeing:
     //   (a) scale is recomputed from the new parent chain on next GetEffectiveScale(), and
-    //   (b) the NaN constraint forces a cache miss in Measure() so all nodes
-    //       fully re-measure with the new scale.
+    //   (b) the invalid measure cache forces a cache miss in Measure() so all
+    //       nodes fully re-measure with the new scale.
     //
-    // After this, InvalidateMeasure() transitions the direct child from NaN to
-    // DIRTY (the guard passes because NaN != DIRTY per IEEE 754) and propagates
-    // up to the new layout root.
-    ViewDataImpl::Get(childImpl).ResetEffectiveScaleRecursive();
+    // After this, InvalidateMeasure() marks the direct child dirty and
+    // propagates up to the new layout root. Invalidation always propagates and
+    // registers now (there is no dirty short-circuit), so this reaches the new
+    // root regardless of the child's prior dirty state.
+    ViewDataImpl::Get(childImpl).ResetSubtreeScaleAndLayoutCaches();
+
+    // Retract the moved child's arrange RESULT record, not only its caches.
+    // mArrangedBounds is a parent-local rect, so under a NEW parent the record
+    // describes nothing; yet mArrangeResultAvailable would otherwise stay true
+    // forever, and it is the bit three consumers key on:
+    //  - the arrange cache-HIT gate treats any result-holding child as part of
+    //    the replay set and requires its cache to be valid -- a child this
+    //    parent's producer never arranges can never revalidate, so ONE
+    //    reparented-in child would keep a producer that ignores its children
+    //    (a Label, a leaf-style OnArrange) out of the hit PERMANENTLY;
+    //  - the replay itself would re-apply the OLD parent's rect;
+    //  - the RTL resolver would mirror the OLD parent's logical x against the
+    //    NEW parent's width.
+    // Clearing it makes the child "never arranged" again, which is exactly what
+    // it is in this parent's coordinate space: the gate and the replay skip it,
+    // and the first pass in which any producer arranges it re-establishes the
+    // record. Direct child only, NOT recursive -- descendants' rects are
+    // relative to the child and stay meaningful -- and deliberately NOT inside
+    // ResetSubtreeScaleAndLayoutCaches(), whose other callers (scale changes,
+    // scene reconnection) move no view between parents.
+    ViewDataImpl::Get(childImpl).mArrangeResultAvailable = false;
+
+    // And retract the one-shot ENTER settle latch, for the same reason and in the same
+    // breath. A reparent is the ONLY way the transition that governs this child -- and
+    // therefore the ENTER spec SettleInitialEnter baked onto it -- can change, so a
+    // latch set under the old parent must not suppress the settle the NEW parent's spec
+    // needs. Scoped to the direct child exactly like the retraction above, and for the
+    // same reason: this is the node whose governing transition this call moves.
+    ViewDataImpl::Get(childImpl).mInitialEnterSettled = false;
 
     // Invalidate the child's measure cache -- its previous cache was computed
     // under a different parent's constraints and is no longer reliable.
-    childImpl.InvalidateMeasure();
+    // Through the internal primitive, not ViewImpl::InvalidateMeasure(): this is
+    // a framework-internal consistency invalidation, not an application call.
+    ViewDataImpl::Get(childImpl).InvalidateMeasure();
 
-    if(childAffectsSelf)
+    // No self-invalidation here for a CONTRIBUTING child, and none is needed: the child's
+    // own InvalidateMeasure() above reaches this view and does the whole job.
+    //
+    // That is a guarantee, not a likelihood. The generation short-circuit
+    // (InvalidateMeasure's propagation-record generation return) is the
+    // only thing that could stop the walk short, and ResetSubtreeScaleAndLayoutCaches()
+    // above zeroed the whole added subtree's propagation records -- 0 is the "never
+    // propagated" sentinel that no live generation ever equals (the counter starts at 1
+    // and skips 0 on wrap). The child's walk therefore always runs in full, and dali-core
+    // has already parented the child (Actor::SetParent precedes OnChildAdd), so
+    // GetParentView() resolves to THIS view. When the walk arrives here it drops this
+    // view's cached scale, retracts BOTH layout caches, poisons an in-progress pass and
+    // raises both dirty bits before any short-circuit is even consulted -- everything the
+    // removed call did.
+    //
+    // UtcDaliViewAddConfiguredOffSceneChildReMeasuresParentP and
+    // UtcDaliViewReparentChildInSameBatchReMeasuresNewParentChainP pin it.
+    if(!childAffectsSelf)
     {
-      // Also invalidate this view's chain directly. The child's
-      // InvalidateMeasure may early-exit via the dirty guard if the child was
-      // already invalidated under its previous parent (reparenting of a dirty
-      // child), in which case the new parent chain would not be reached.
-      // Calling InvalidateMeasure on self guarantees the new ancestor chain
-      // is marked and the new layout root is registered. If self is already
-      // dirty, the guard makes this a no-op.
+      // Adding a standalone child changes neither this view's measured size nor its
+      // arranged bounds -- but it DOES add work to this view's ARRANGE pass:
+      // ArrangeStandaloneChildren must place the new child, and that placement lives
+      // on the arrange path only. Without a signal here, an arrange cache entry
+      // published for a child set that did not include this child stays live, and
+      // the arrange cache HIT would serve it and skip the placement entirely.
       //
-      // For standalone (boundary) children, this fallback is unnecessary: the
-      // child's own InvalidateMeasure registers it as a layout root (Phase 2
-      // boundary rule), and OnSceneConnection re-registers dirty boundaries
-      // that were already dirty when reparented.
-      InvalidateMeasure();
-    }
-    else if(HasLayoutTransition())
-    {
-      // Standalone child + transition-attached parent: the standalone
-      // path above does not dirty self, so this view would not be
-      // reached by ProcessLayouts and the dispatcher would never run
-      // its CaptureBeforeLayout / StartTransitionsAfterLayout pass for
-      // this parent -- meaning the ENTER (and any subsequent CHANGE)
-      // would never be dispatched, while the pending-enter set
-      // accumulates entries that fire late on the next unrelated
-      // dirty event. Force the parent dirty so its dispatcher pass
-      // runs in the same layout batch as the standalone child's.
-      InvalidateMeasure();
+      // The predicate's !HasUnconsumedStandaloneChild() term does NOT cover this
+      // case: mMeasuredSlotUnconsumed is false until the child's first measure
+      // publish, so a freshly added, never-measured standalone child does not raise
+      // it. The add-side invalidation is what closes the gap.
+      //
+      // InvalidateArrange() rather than InvalidateMeasure() is the exact signal: the
+      // measured size genuinely is unaffected (see the comment above), while
+      // InvalidateArrange retracts the arrange cache entry, marks the arrange dirty
+      // and registers a pass -- respecting the standalone boundary rule on the way
+      // up. It is idempotent, and the transition branch below is strictly stronger,
+      // so the two compose.
+      InvalidateArrange();
+
+      // No parent InvalidateMeasure() for the standalone+transition combination either.
+      // The child's InvalidateMeasure() above reaches its own boundary branch, which
+      // carries exactly this hook: a standalone view whose parent has a LayoutTransition
+      // attached invalidates that parent's measure before self-registering, so the
+      // dispatcher's CaptureBeforeLayout / StartTransitionsAfterLayout pass runs in the
+      // same layout batch as the child's. Same predicate (GetLayoutTransition() and
+      // HasLayoutTransition() read the same member) and same action (the internal
+      // primitive on this very view), and it is reachable for the same reason as the
+      // contributing case above: the propagation record was zeroed a few lines up, so the
+      // walk cannot be short-circuited before it gets there.
+      // UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP
+      // pins it.
     }
   }
   else
@@ -2788,11 +3658,25 @@ void ViewDataImpl::OnChildRemoved(Actor& child)
         mLayoutTransitionData->hasPendingChildRemoval = true;
       }
 
+      // Removal re-roots the removed subtree's effective-scale chain: an INHERIT
+      // node's ComputeEffectiveScale walks its parent chain, and severing this
+      // link re-roots that chain (ultimately at UiScaleManager's global scale).
+      // So the whole removed subtree's cached effective scale is now stale. The
+      // InvalidateMeasure() below drops it on the direct child ONLY and
+      // propagates upward, never into the subtree -- the mirror of OnChildAdded's
+      // recursive reset. Without this, a subtree removed from a scale-DISABLED
+      // parent and re-added under a plain Actor / Window (which fires no
+      // ViewDataImpl::OnChildAdded) renders torn: the root at the new scale, its
+      // descendants at the old one.
+      ViewDataImpl::Get(childImpl).ResetSubtreeScaleAndLayoutCaches();
+
       // Invalidate the removed child's measure cache so that it gets
       // re-measured when re-parented to a different container.
       // Note: Actor parent-child relationship is already severed at this
       // point, so child's InvalidateMeasure cannot propagate to us.
-      childImpl.InvalidateMeasure();
+      // Through the internal primitive, not ViewImpl::InvalidateMeasure(): this
+      // is a framework-internal consistency invalidation, not an application call.
+      ViewDataImpl::Get(childImpl).InvalidateMeasure();
       mChildren.Erase(it);
 
       if(childWasAffectingSelf)
@@ -2835,9 +3719,25 @@ void ViewDataImpl::OnViewSceneConnection()
   // (RegisterWithLayoutController silently no-ops without a window). Once
   // connected to a scene here, it must register so the pending state is
   // picked up in the new window's controller.
-  const bool isDirty = Dali::Equals(mLastMeasuredConstraint.width, MEASURE_CACHE_DIRTY) ||
-                       mArrangeDirty;
-  if(!GetParentView() || (IntegrationView::IsLayoutModeStandalone(mViewImpl) && isDirty))
+  const bool isLayoutRoot = !GetParentView();
+
+  // Off-scene scale gap. While this view is a detached layout root it is not in
+  // UiScaleManager's root set, so a global SetScale() cannot reach it -- its
+  // cached effective scale, and the whole subtree's for INHERIT chains, may be
+  // stale (computed against the scale in force before it was detached). On
+  // (re)connection re-derive the subtree's effective scale so the layout pass
+  // registered below measures and arranges at the CURRENT scale. On a first-ever
+  // connection this is a cheap no-op (the caches are empty and the scale merely
+  // recomputes to the same value). This is the mirror, for the Window/Actor
+  // remove-then-add path, of OnChildRemoved's recursive invalidation for the
+  // View reparent path.
+  if(isLayoutRoot)
+  {
+    ResetSubtreeScaleAndLayoutCaches();
+  }
+
+  const bool isDirty = mMeasureDirty || mArrangeDirty;
+  if(isLayoutRoot || (IntegrationView::IsLayoutModeStandalone(mViewImpl) && isDirty))
   {
     RegisterWithLayoutController();
   }
@@ -2878,9 +3778,10 @@ void ViewDataImpl::OnViewSceneDisconnection()
 
   // Remove from UiScaleManager if this view was registered as a layout root.
   // Two cases match the registration paths in RegisterWithLayoutController:
-  //   (a) tree root: no parent view and no parent layout
+  //   (a) tree root: no parent view -- which also means no parent LAYOUT, since
+  //       Ui::Layout derives from Ui::View and View::DownCast matches both
   //   (b) standalone: boundary views self-register regardless of their parent
-  if((!GetParentView() && !GetParentLayout()) || IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  if(!GetParentView() || IntegrationView::IsLayoutModeStandalone(mViewImpl))
   {
     UiScaleManager::Get().UnregisterLayoutRoot(View::DownCast(mViewImpl.Self()));
   }
@@ -2927,6 +3828,40 @@ void ViewDataImpl::OnPropertySet(Property::Index index, const Property::Value& p
           interactiveTraitImpl->OnEnabledChanged(self, enabled);
         }
       }
+      break;
+    }
+    // The layout-direction WRITE interception: this is what covers a mid-tree View
+    // that is not a layout root and therefore holds no signal hook of its own.
+    // LAYOUT_DIRECTION does reach here even though it is a core DEFAULT property --
+    // Object::SetProperty invokes this virtual for those too -- and every documented
+    // way of moving the direction lands on one of these three indices
+    // (Actor::SetLayoutDirection routes through SetProperty on the first).
+    // DevelActor::Property::LAYOUT_DIRECTION is an alias of the same index, so it is
+    // deliberately not listed a second time.
+    case Dali::Actor::Property::LAYOUT_DIRECTION:
+    case Dali::DevelActor::Property::LAYOUT_DIRECTION_LEGACY:
+    case Dali::DevelActor::Property::INHERIT_LAYOUT_DIRECTION_LEGACY:
+    {
+      // A hooked layout root has already been covered: the signal fires inside the
+      // core inherit walk, BEFORE OnPropertySet, whenever the resolved direction
+      // actually moved. Skip the second walk.
+      if(mLayoutDirectionSignalConnected)
+      {
+        break;
+      }
+
+      // Redundant-write guard. mLastArrangeDirection is the direction the last
+      // published arrange used; at this point the resolved value is already the
+      // new one, so equality means nothing moved -- and if THIS view's resolved
+      // direction did not move, no inheriting descendant's did either.
+      if(mArrangeCacheValid &&
+         mLastArrangeDirection == mViewImpl.Self().GetEffectiveLayoutDirection())
+      {
+        break;
+      }
+
+      InvalidateSubtreeLayoutForDirectionChange();
+      InvalidateMeasure();
       break;
     }
   }
@@ -3025,8 +3960,118 @@ void ViewDataImpl::SetMeasureCallback(MeasureCallback callback)
 
 void ViewDataImpl::SetArrangeCallback(ArrangeCallback callback)
 {
+  // The one-argument API uses the framework default policy.
+  SetArrangeCallback(std::move(callback), ArrangePolicy::IF_CHANGED);
+}
+
+void ViewDataImpl::SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy)
+{
   EnsureLayoutCallbacksObject(*this)->SetArrangeCallback(std::move(callback));
+
+  mArrangeCallbackAlways = (policy == ArrangePolicy::ALWAYS);
+  RefreshArrangeProducerPolicy();
+
+  // Pair the policy change with invalidation so a view that has already
+  // published a cache entry cannot be served from it under the new policy.
   InvalidateArrange();
+}
+
+void ViewDataImpl::SetArrangePolicy(ArrangePolicy policy)
+{
+  // Value guard, matching the manager side, which already refuses to notify its owner for
+  // a policy that does not move (LayoutManager::SetArrangePolicy ->
+  // LayoutManager::Impl::SetArrangePolicy returns false). Re-selecting the policy a view
+  // already has retracts nothing and schedules nothing. Safe to return early: the derived
+  // bit is refreshed by every path that can change WHICH producer is active -- the two
+  // mutators and the public trait swap funnel (OnTraitChanged) -- so it is never stale in
+  // a way a redundant policy write would have repaired.
+  const bool overrideAlways = (policy == ArrangePolicy::ALWAYS);
+  if(overrideAlways == mArrangeOverrideAlways)
+  {
+    return;
+  }
+  mArrangeOverrideAlways = overrideAlways;
+
+  // The cache predicate reads only the EFFECTIVE producer policy, and this override is
+  // the third-ranked input to it (callback > LayoutManager > OnArrange). While a callback
+  // or a manager is installed, changing the override moves nothing the predicate can see,
+  // so compare the derived bit across the refresh and invalidate only on a real move.
+  const bool producerAlwaysBefore = mArrangeProducerAlways;
+
+  // Safe with no handle: both lookups it performs are plain trait-table reads
+  // (ViewDataImpl::GetTrait walks mTraits), so a derived implementation may select
+  // its policy from its constructor.
+  RefreshArrangeProducerPolicy();
+
+  // Invalidate only when there is a published entry that the new policy could make
+  // unsafe to serve. Before the CustomActor handle exists, InvalidateArrange() cannot
+  // walk to a layout root; at that point mArrangeCacheValid is necessarily false.
+  // InvalidateArrange() walks to the layout root, and the FIRST thing that walk does
+  // on a handle-less view is GetParentView() -> mViewImpl.Self().GetParent(), where
+  // Self() hands back an empty Actor and dali-core's GetImplementation(Actor&) aborts
+  // on `DALI_ASSERT_ALWAYS(actor && "Actor handle is empty")`. (The later
+  // RegisterWithLayoutController() -> Window::Get(self) would abort for the same
+  // reason, but the walk never reaches it.)
+  //
+  // Skipping it there is sound, not merely convenient: mArrangeCacheValid is false
+  // until a pass publishes, so at construction there is provably nothing to serve.
+  // A later policy change on a settled view still invalidates, which is the case
+  // the guard exists to keep.
+  if(mArrangeProducerAlways != producerAlwaysBefore && mArrangeCacheValid)
+  {
+    InvalidateArrange();
+  }
+}
+
+ArrangePolicy ViewDataImpl::GetArrangePolicy() const
+{
+  return mArrangeOverrideAlways ? ArrangePolicy::ALWAYS : ArrangePolicy::IF_CHANGED;
+}
+
+void ViewDataImpl::OnLayoutManagerArrangePolicyChanged()
+{
+  // The manager owns the policy, while the hot cache predicate keeps a derived bit
+  // on its View. Keep those two pieces of state synchronized for policy changes made
+  // after the manager has been attached.
+  //
+  // The manager side has already dropped a same-value write, so what reaches here is
+  // always a real change to the MANAGER's policy -- but not necessarily to the EFFECTIVE
+  // one: an installed ArrangeCallback outranks the manager, so a policy change on an
+  // INACTIVE manager must retract nothing.
+  const bool producerAlwaysBefore = mArrangeProducerAlways;
+
+  RefreshArrangeProducerPolicy();
+
+  // Gated exactly as in SetArrangePolicy(), and for the same two reasons: with no
+  // published entry there is provably nothing the new policy could make unsafe to
+  // serve, and a manager attached before the CustomActor handle exists must be able
+  // to change its policy without InvalidateArrange() walking off an empty Self().
+  if(mArrangeProducerAlways != producerAlwaysBefore && mArrangeCacheValid)
+  {
+    InvalidateArrange();
+  }
+}
+
+void ViewDataImpl::RefreshArrangeProducerPolicy()
+{
+  // Mirrors the producer dispatch order in Arrange(): callback > LayoutManager >
+  // OnArrange. The trait lookups below (GetArrangeCallback / GetLayoutManager) are
+  // why this is computed HERE, at the rare mutation points, and not inside the
+  // per-pass hit predicate.
+  if(GetArrangeCallback() != nullptr)
+  {
+    mArrangeProducerAlways = mArrangeCallbackAlways;
+  }
+  else if(LayoutManager* manager = mViewImpl.GetLayoutManager())
+  {
+    // The manager is the active producer, so its own policy replaces the view's
+    // OnArrange policy. Manager policy is stored outside the frozen virtual API.
+    mArrangeProducerAlways = (manager->GetArrangePolicy() == ArrangePolicy::ALWAYS);
+  }
+  else
+  {
+    mArrangeProducerAlways = mArrangeOverrideAlways;
+  }
 }
 
 MeasureCallback* ViewDataImpl::GetMeasureCallback()
@@ -3048,6 +4093,29 @@ void ViewDataImpl::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
 
   IntrusivePtr<TraitObject> object(new LayoutManagerObject(std::move(manager)));
   IntegrationView::SetTrait(mViewImpl, Integration::ReservedTraitId::LAYOUT_MANAGER, object);
+
+  // Wire the back-pointer that lets the manager invalidate US from its own setters
+  // (LayoutManager::InvalidateOwnerMeasure / InvalidateOwnerArrange). Without it a
+  // manager's private state -- a stack orientation, a grid's row definitions --
+  // could change with nothing to retract the measure/arrange result computed against
+  // the old value, and the arrange cache would keep serving that result. Read back
+  // through GetLayoutManager() rather than kept from the argument, which was moved
+  // into the trait object above.
+  //
+  // One-shot: the assert above makes attach a single transition, so there is no
+  // detach to clear this on. The pointee also strictly outlives the pointer -- this
+  // view owns the manager through the trait -- so the raw pointer cannot dangle.
+  if(LayoutManager* attached = mViewImpl.GetLayoutManager())
+  {
+    attached->SetOwnerView(&mViewImpl);
+  }
+
+  // The producer may have just changed from OnArrange to the manager (it does unless
+  // an ArrangeCallback outranks both), so the derived bit has to follow. The assert
+  // above makes this a one-shot transition: a manager can never be replaced or
+  // detached, so there is no reverse edge to mirror.
+  RefreshArrangeProducerPolicy();
+
   InvalidateMeasure();
 }
 
@@ -3071,6 +4139,18 @@ bool ViewDataImpl::HasLayoutCallback() const
 
 void ViewDataImpl::SetLayoutParams(const AbsoluteLayoutParams& params)
 {
+  // Value guard, as on the property setters: a re-write of the params already in
+  // place has nothing to retract and nothing to schedule. Motivating recurrence:
+  // ScrollBarImpl::SetVBarBounds re-writes its bar's AbsoluteLayoutParams on every
+  // bar position/size update, and today only that function's own hand-rolled 0.01f
+  // epsilon test -- commented "avoid infinite relayout loop" -- stops the write from
+  // re-arming layout every pass. That check belongs on this side too.
+  AbsoluteLayoutParams current;
+  if(TryGetLayoutParams(current) && IsSameLayoutParams(current, params))
+  {
+    return;
+  }
+
   IntrusivePtr<TraitObject> object(new AbsoluteLayoutParamsImpl(params));
   SetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, object);
   InvalidateMeasure();
@@ -3078,6 +4158,12 @@ void ViewDataImpl::SetLayoutParams(const AbsoluteLayoutParams& params)
 
 void ViewDataImpl::SetLayoutParams(const FlexLayoutParams& params)
 {
+  FlexLayoutParams current;
+  if(TryGetLayoutParams(current) && IsSameLayoutParams(current, params))
+  {
+    return;
+  }
+
   IntrusivePtr<TraitObject> object(new FlexLayoutParamsImpl(params));
   SetTrait(Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, object);
   InvalidateMeasure();
@@ -3085,6 +4171,12 @@ void ViewDataImpl::SetLayoutParams(const FlexLayoutParams& params)
 
 void ViewDataImpl::SetLayoutParams(const GridLayoutParams& params)
 {
+  GridLayoutParams current;
+  if(TryGetLayoutParams(current) && IsSameLayoutParams(current, params))
+  {
+    return;
+  }
+
   IntrusivePtr<TraitObject> object(new GridLayoutParamsImpl(params));
   SetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, object);
   InvalidateMeasure();
@@ -3092,6 +4184,12 @@ void ViewDataImpl::SetLayoutParams(const GridLayoutParams& params)
 
 void ViewDataImpl::SetLayoutParams(const StackLayoutParams& params)
 {
+  StackLayoutParams current;
+  if(TryGetLayoutParams(current) && IsSameLayoutParams(current, params))
+  {
+    return;
+  }
+
   IntrusivePtr<TraitObject> object(new StackLayoutParamsImpl(params));
   SetTrait(Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, object);
   InvalidateMeasure();
@@ -3183,20 +4281,337 @@ void ViewDataImpl::ClearRenderEffect()
   }
 }
 
+void ViewDataImpl::BlockArrangeCachePublishDuringPass()
+{
+  // Setting this outside a pass would latch a block that nothing clears until the
+  // NEXT arrange entry (ArrangePassGuard clears it there), silently declining that
+  // unrelated pass's publish. The only caller is the ancestor-invalidation walk,
+  // which tests mArrangeInProgress first.
+  DALI_ASSERT_DEBUG(mArrangeInProgress &&
+                    "mArrangeCacheBlockedDuringPass is pass-local; only set it while arranging");
+  mArrangeCacheBlockedDuringPass = true;
+}
+
+/**
+ * Drop the ANCESTOR measure/arrange cache entries after a confirmed full
+ * Measure() miss on this view.
+ *
+ * Why it is needed: a completed Measure() republishes this view's measured
+ * slot UNCONDITIONALLY (see the "RESULT is published unconditionally" block in
+ * Measure()), and every ancestor consumes that stored slot while arranging
+ * (ArrangeDefault reads childImpl.GetMeasuredSize(), as do all five layout
+ * managers). No producer on the MEASURE side reads a stored slot -- each
+ * consumes the value Measure() returns -- so an ancestor's measured result is a
+ * deterministic function of its own constraint, and re-running it reproduces
+ * the same value. What is NOT reproducible is the slot: if an ancestor serves a
+ * measure cache HIT it never re-measures this view, and then arranges it from
+ * whatever the out-of-band Measure() left behind. Invalidating only the
+ * ancestor ARRANGE cache would not help; the arrange would re-run and re-read
+ * the same corrupted slot.
+ *
+ * This is therefore a CACHE-ONLY invalidation: it clears cache-valid bits and
+ * nothing else. It deliberately does NOT touch mMeasureDirty / mArrangeDirty,
+ * does not call InvalidateMeasure()/InvalidateArrange(), and does not
+ * RegisterWithLayoutController(), so it cannot schedule a layout pass and
+ * therefore cannot spin. It also does not touch mMeasurePassPoisoned /
+ * mArrangePassPoisoned (which would trip the one-shot follow-up registration at
+ * the end of a pass), mEffectiveScaleValid, or mEffectiveScale.
+ *
+ * Ownership is tested two ways, and the ascent stops at whichever applies
+ * first: an explicit owner scope (LayoutDependency::Top(), pushed around every
+ * arrange-time re-measure and around the RecyclerView/ItemsLayouter boundary),
+ * plus the (a) measure-in-progress bit, which covers the plain top-down measure
+ * recursion -- that recursion pushes no scope, so the bit is its only stop.
+ * Iterative, never recursive; the actor tree is finite and acyclic and each
+ * node is visited at most once, so this is O(depth) with no re-entry.
+ */
+void ViewDataImpl::InvalidateAncestorLayoutCachesForMeasureMiss()
+{
+  // Self is a standalone view: it is excluded from every ancestor's
+  // OnMeasure/OnArrange ACCUMULATION (MeasureDefault and ArrangeDefault both skip
+  // standalone children), so re-measuring it changes no ancestor's measured value
+  // and its ancestors need no invalidation from here. The boundary stop in
+  // InvalidateMeasure() / InvalidateArrange() is analogous, though those also do
+  // transition / controller-registration work this cache-only walk omits.
+  //
+  // COMPLETE, not a partial stop. The one ancestor that does consume this view's
+  // stored slot is ArrangeStandaloneChild(), and it no longer depends on an
+  // ancestor cache clear to be correct: the publish at the end of every measure
+  // pass marks the slot unconsumed (mMeasuredSlotUnconsumed), and the parent's next
+  // arrange re-measures this view against its own extent before placing it. That
+  // correction sits on the ARRANGE side on purpose -- it is reached even on a pass
+  // where the parent's measure cache hits and MeasureStandaloneChildren never runs,
+  // which is exactly the case an ancestor cache clear could not have fixed here
+  // anyway. The arrange cache-HIT path does not open a hole in this: the parent's
+  // hit predicate tests !HasUnconsumedStandaloneChild(), so a parent holding such a
+  // child always misses and always reaches ArrangeStandaloneChildren.
+  if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    return;
+  }
+
+  // (c) The explicit owner boundary. A producer that deliberately issues a
+  // Measure() on a descendant while running its own pass pushes an owner frame
+  // around exactly that call (LayoutDependency::ArrangeOwnedMeasureScope /
+  // RecyclerLayoutOwnerScope), so it already accounts for the result and needs
+  // no invalidation -- and neither does anything above it.
+  //
+  // Only the INNERMOST frame is consulted: every nested owner pushes its own
+  // frame, and a producer only ever owns the measurements it issues directly, so
+  // an enclosing frame can never be the right stop for a measurement issued
+  // under an inner one. A null frame (or a null owner in it) simply means "no
+  // owner", which leaves the other stops to do their work.
+  const LayoutDependency::Frame* const frame = LayoutDependency::Top();
+  const ViewImpl* const                owner = frame ? frame->owner : nullptr;
+
+  // Only the DIRECT parent can be the owner of an arrange-time re-measure (every
+  // owned arrange site re-measures one of its own children), which is what makes
+  // the safety-net stop below precise: it fires for the re-measuring parent but not
+  // for a distant arrange-in-progress ancestor (that distant node is the Δ1 case,
+  // and must be cleared).
+  bool isDirectParent = true;
+
+  // GetParentView() DownCasts the actor parent, which also covers Ui::Layout
+  // (Layout derives from View). A non-View parent (e.g. the window's root
+  // layer) yields an empty handle and ends the ascent.
+  Ui::View node = GetParentView();
+  while(node)
+  {
+    ViewImpl&     nodeImpl = GetImpl(node);
+    ViewDataImpl& nodeData = ViewDataImpl::Get(nodeImpl);
+
+    // The owner test precedes (a), the safety-net stop and the clears on purpose:
+    // the explicit owner must never be cleared. It is load-bearing for the RECYCLER
+    // scope, whose owner (the recycler) is NOT arrange-in-progress and so would not
+    // be caught by the direct-parent safety-net stop below.
+    if(&nodeImpl == owner)
+    {
+      break;
+    }
+
+    // (a) The ancestor is running its own MEASURE pass, so it owns this
+    // measurement -- typically this Measure() is a step of that pass's own
+    // top-down recursion, and the ancestor's conditional publish decides its own
+    // cache when its pass ends. Stop here.
+    //
+    // This stop stays load-bearing even now that owner scopes exist: the plain
+    // top-down measure recursion pushes NO scope (a parent measuring its own
+    // children inside OnMeasure is not an out-of-band measure), so removing this
+    // would strand every node of every ordinary measure pass.
+    //
+    // Read no more into it than "the owner is mid-measure": an ancestor that has
+    // ALREADY finished an earlier sibling has published that sibling's subtree,
+    // so this stop does not cover a producer that reaches out of its own subtree
+    // to measure such a node. No first-party code does that (producers measure
+    // only their own direct children).
+    if(nodeData.mMeasureInProgress)
+    {
+      break;
+    }
+
+    // Safety net for arrange-time re-measures. An ARRANGING DIRECT parent owns the
+    // re-measure of its own child whether or not it pushed an ArrangeOwnedMeasureScope,
+    // so the walk stops here exactly as it stops at an explicit owner. First-party
+    // arrange sites also push a scope (the owner break above fires first for them);
+    // this stop is what protects THIRD-PARTY LayoutManager / View subclasses, which
+    // cannot push a scope because the scope header is internal -- they get the same
+    // protection with no opt-in. Kept DIRECT-parent-only on purpose: a DISTANT
+    // arrange-in-progress ancestor is the legitimate out-of-band case this walk exists
+    // to clear (Δ1), so it must fall through to the clears below rather than stop here.
+    //
+    // A REPLAYING parent is excluded: a cache-hit replay runs no producer and issues no
+    // Measure(), so it can never be the owner of one. Its own subtree gate has already
+    // certified the descendants, and the cache-clear below is what retracts that
+    // certification when an unowned measure rewrites a slot underneath it.
+    if(isDirectParent && nodeData.mArrangeInProgress && !nodeData.mArrangeReplayInProgress)
+    {
+      break;
+    }
+    isDirectParent = false;
+
+    nodeData.DropMeasureCacheEntry();
+    nodeData.DropArrangeCacheEntry();
+
+    // The ancestor is mid-ARRANGE and unowned, so it has already consumed this
+    // view's previous slot: the cache clear just above must survive to the end of
+    // that pass instead of being overwritten by its own publish. Declining the
+    // publish is all that is needed -- this is a cache-only invalidation, so it
+    // must not poison the pass and must not register a follow-up layout.
+    //
+    // ...and a REPLAYING ancestor has no publish to block: the replay leaves
+    // mArrangeCacheValid exactly as it found it. Setting the bit there would latch a
+    // block that only the NEXT real ArrangePassGuard entry clears, silently declining
+    // that unrelated pass's publish.
+    if(nodeData.mArrangeInProgress && !nodeData.mArrangeReplayInProgress)
+    {
+      nodeData.BlockArrangeCachePublishDuringPass();
+    }
+
+    // The ancestor is itself a standalone view: its measured size does not feed
+    // its own parent's accumulation, so nothing ABOVE it can go stale because of
+    // this view; stop. (Its cache was cleared just above; that clear is consumed
+    // only if its own parent later re-measures it via MeasureStandaloneChildren,
+    // i.e. on that parent's measure MISS. Its own slot needs nothing from this
+    // walk: its parent's ArrangeStandaloneChild corrects it from the unconsumed
+    // bit -- see the self-standalone early return at the top of this function.)
+    if(IntegrationView::IsLayoutModeStandalone(nodeImpl))
+    {
+      break;
+    }
+
+    node = nodeData.GetParentView();
+  }
+}
+
+/**
+ * Drop the DIRECT PARENT's arrange cache entry before an UNOWNED arrange pass
+ * rewrites this view's arrange records.
+ *
+ * Why it is needed: Arrange() publishes mArrangedBounds and (on a clean pass)
+ * the arrange input key unconditionally, and an ancestor's cache HIT replays this
+ * view FROM those records -- CanReplayArrangeSubtreeFromCache deliberately skips
+ * the cache-KEY comparison for descendants on the premise that each descendant's
+ * recorded slot is the one the ancestor's own producer chain handed it. A public
+ * out-of-band Arrange() breaks that premise: after it, the parent's HIT would
+ * keep replaying the foreign bounds while a forced MISS would re-run the
+ * producer and restore the parent-derived slot -- the hit/miss divergence
+ * View::Arrange()'s contract rules out. This is the arrange-side twin of
+ * InvalidateAncestorLayoutCachesForMeasureMiss(), with two deliberate
+ * asymmetries:
+ *
+ *  - ARRANGE caches only. An arrange rewrites no measured slot, so every
+ *    ancestor's MEASURE entry stays exactly as reproducible as it was.
+ *  - ONE node, not a chain. The measure hit predicate is node-local, so the
+ *    measure walk must clear every level itself; the arrange hit gate is
+ *    RECURSIVE (it re-tests mArrangeCacheValid at every descendant it would
+ *    elide), so one cleared parent already refuses every ancestor's hit, and
+ *    the misses that follow re-publish level by level.
+ *
+ * Cache-only, like the measure walk: no dirty, no poison, no registration --
+ * this must never schedule (or spin) a layout pass. The next pass that reaches
+ * the parent simply misses once and re-hands every child its parent-derived
+ * slot, which is exactly the pre-cache behaviour.
+ */
+void ViewDataImpl::InvalidateParentArrangeCacheForOutOfBandArrange(bool frameworkLayoutRootPass)
+{
+  // A standalone view is its own layout root, but that alone does NOT make every
+  // Arrange() owned: an application can call the public View::Arrange() with
+  // arbitrary bounds, and the parent's next MISS would replace them with the slot
+  // ArrangeStandaloneChild derives. Only LayoutController's root entry point proves
+  // that this pass used the framework derivation.
+  //
+  // And that derivation converging with the parent's is now a CALL-GRAPH fact rather
+  // than a coincidence of two hand-written expressions: ProcessLayoutRoot and
+  // ArrangeStandaloneChild both end on Internal::DeriveStandaloneRootBounds(), so the
+  // framework root pass hands the view exactly the bounds the parent's next miss
+  // would. An application calling the public View::Arrange() carries no such
+  // ownership, which is why the exemption is gated on the root entry point and not on
+  // the layout mode alone.
+  if(frameworkLayoutRootPass && IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    return;
+  }
+
+  // Only a RECYCLER frame owns Arrange calls. An ARRANGE frame is deliberately a
+  // Measure-only scope (ArrangeOwnedMeasureScope): treating its mere presence as
+  // arrange ownership would let a nested, unrelated public Arrange() retain a stale
+  // parent entry.
+  const LayoutDependency::Frame* const frame = LayoutDependency::Top();
+  if(frame != nullptr && frame->owner != nullptr && frame->kind == LayoutDependency::OwnerKind::RECYCLER)
+  {
+    return;
+  }
+
+  Ui::View parentView = GetParentView();
+  if(!parentView)
+  {
+    return; // A layout root: there is no parent entry to go stale.
+  }
+
+  ViewDataImpl& parentData = ViewDataImpl::Get(GetImpl(parentView));
+
+  // The direct parent is mid-arrange: this call came from its own producer
+  // chain (the normal recursion, every layout manager, or a third-party
+  // producer arranging its own child). Whatever a producer does inside its own
+  // pass IS its output -- a re-run would reproduce it -- so the parent's
+  // about-to-publish entry stays a faithful replay premise.
+  //
+  // A REPLAYING parent does NOT qualify. "Whatever a producer does inside its own pass IS
+  // its output" is a statement about a producer; a replay runs none, so a foreign
+  // Arrange() reaching a descendant mid-replay really does invalidate the premise the
+  // replay is built on -- CanReplayArrangeSubtreeFromCache assumes every descendant's
+  // recorded slot was written by THIS chain.
+  if(parentData.mArrangeInProgress && !parentData.mArrangeReplayInProgress)
+  {
+    return;
+  }
+
+  parentData.DropArrangeCacheEntry();
+}
+
 MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
 {
+  // Same-view re-entrancy is guarded in RELEASE, not just DEBUG: Measure() is
+  // reachable from untrusted customization (MeasureCallback / OnMeasure /
+  // LayoutManager) and from the public, nestable LayoutController::ProcessLayouts(),
+  // so an app can re-enter a view that is mid-pass. Running the producer again
+  // here would recurse without bound and would let the inner pass publish a
+  // result the outer pass then overwrites. Instead: poison the outer pass (so it
+  // cannot serve a cache hit afterwards) and hand back the last COMPLETED result.
+  // This check precedes the actor read and the cache-hit test on purpose - a hit
+  // served to a re-entrant call would hide the poison.
+  if(mMeasureInProgress)
+  {
+    mMeasurePassPoisoned = true;
+    DALI_LOG_ERROR("Re-entrant Measure() on the same View; returning last completed result\n");
+    return mMeasuredSize; // {0,0} until a pass completes
+  }
+
   float s = mViewImpl.GetEffectiveScale();
 
   // Push effective scale to the actor animatable property so that decoration
   // constraints (corner radius, borderline width) can read it as a scale input.
-  // Read back the current actor property value to skip redundant scene-graph writes.
-  // This also naturally corrects any value set externally on EFFECTIVE_SCALE.
-  if(!Dali::Equals(s, mViewImpl.Self().GetProperty<float>(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX)))
+  //
+  // GATED by mEffectiveScaleActorSynced, the sync bit for that ACTOR-side copy --
+  // the second half of the pair whose first half, mEffectiveScaleValid, is the sync
+  // bit for mEffectiveScale itself. While the bit is true the property is known to
+  // hold `s`, so the read-back below is skipped. That read sits ABOVE the cache-hit
+  // test (it has to: `s` is an input to the KEY computed just after it), so before
+  // the gate it ran on every HIT as well -- the one actor property access left on
+  // the settled measure path.
+  //
+  // The gate is BEHAVIOUR-NEUTRAL rather than merely cheaper, because every way the
+  // property can stop matching `s` from the event side clears the bit:
+  //   - the cached scale moving: DropCachedEffectiveScale() clears BOTH bits in one
+  //     breath, which is also why this bit stores no value of its own. Every
+  //     scale-context change routes through it (InvalidateMeasure,
+  //     ResetSubtreeScaleAndLayoutCaches), so the same subtree-wide invalidation
+  //     the arrange cache relies on for Corollary C covers this bit too.
+  //   - anyone writing the property: it is a REGISTERED animatable property with a
+  //     set function (ANIMATABLE_PROPERTY_7 at the top of this file), so every
+  //     event-side write -- the push below included -- is routed by dali-core
+  //     through ViewDataImpl::SetProperty, which clears the bit. An external clobber
+  //     is therefore still corrected by the very next Measure(), cache HIT or MISS,
+  //     exactly as it was before the gate.
+  // The bit is set AFTER the write for precisely that reason: the push re-enters
+  // ViewDataImpl::SetProperty and clears it first.
+  //
+  // Known gap, deliberately left open: an Animation targeting this property updates
+  // the event-side cached value through Object::NotifyPropertyAnimation, which does
+  // NOT run the registered setter, so the bit survives. Animating a framework-owned
+  // property was never supported (the push below has always fought it).
+  if(!mEffectiveScaleActorSynced)
   {
-    // SetProperty triggers ViewDataImpl::SetProperty(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), which:
-    //   - updates the actor animatable so decoration constraints re-evaluate, and
-    //   - calls UpdateCornerRadius() for active RenderEffect / OffScreenRendering.
-    mViewImpl.Self().SetProperty(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, s);
+    // Read back the current actor property value to skip redundant scene-graph writes.
+    // This also naturally corrects any value set externally on EFFECTIVE_SCALE.
+    if(!Dali::Equals(s, mViewImpl.Self().GetProperty<float>(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX)))
+    {
+      // SetProperty triggers ViewDataImpl::SetProperty(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), which:
+      //   - updates the actor animatable so decoration constraints re-evaluate, and
+      //   - calls UpdateCornerRadius() for active RenderEffect / OffScreenRendering.
+      mViewImpl.Self().SetProperty(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, s);
+    }
+    mEffectiveScaleActorSynced = true;
   }
 
   float natW = (visualW > 0.f) ? visualW / s : visualW;
@@ -3210,11 +4625,57 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   float effNatW = std::min(std::max(natW, GetMinimumWidth()), GetMaximumWidth());
   float effNatH = std::min(std::max(natH, GetMinimumHeight()), GetMaximumHeight());
 
-  if(mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mLastMeasuredConstraint.width, effNatW) &&
-     FloatEqual(mLastMeasuredConstraint.height, effNatH))
+  // The effective scale is a KEY term here, where the ARRANGE cache instead relies on
+  // invalidation plus a DEBUG assert (Corollary C). The asymmetry is deliberate:
+  //
+  //  - As a KEY, a missed invalidation degrades to a MISS -- one recomputed
+  //    measurement -- and can never produce a measured size computed for a different
+  //    scale. That is the same reasoning mLastArrangeDirection applies to
+  //    arrange x direction, and `s` is already in hand here (it is read above the
+  //    predicate because the constraint normalisation needs it), so the term costs one
+  //    float compare and no extra property access.
+  //  - Under the CURRENT invariant this term cannot fire: every path that moves the
+  //    cached scale pairs DropCachedEffectiveScale() with InvalidateLayoutCaches(),
+  //    which clears mMeasureCacheValid first. It is therefore defence in depth, and it
+  //    exists so that a future unpaired caller degrades to a miss instead of serving a
+  //    result produced at the old scale.
+  //
+  // Compared EXACTLY rather than with FloatEqual: this is a copy of the very
+  // computation the producer was run under, with no arithmetic in between, so an
+  // epsilon compare would only widen the key -- it would let a sub-epsilon scale change
+  // serve a result computed for a different producer input. The constraint terms below
+  // do need the tolerance: they arrive through a /s normalisation and a min/max clamp.
+  // NaN (the constructed value) equals nothing, so the never-measured state fails safe.
+  //
+  // Cost order: after the three bit tests, which are cheaper and reject more often;
+  // before the FloatEqual calls, which are not.
+  //
+  // The width term is a plain FloatEqual: the published key is the clamped
+  // effective natural constraint, which min/max clamping (both validated non-negative)
+  // keeps >= 0, and the NaN the constructor plants is unreachable behind
+  // mMeasureCacheValid. The old `>= 0.0f` pre-test could therefore never reject anything
+  // FloatEqual would have accepted.
+  if(mMeasureCacheValid && !mMeasureDirty && !mMeasurePassPoisoned &&
+     mMeasureKeyOrPropagation.scaleKey == s &&
+     FloatEqual(mLastMeasureConstraint.width, effNatW) &&
+     FloatEqual(mLastMeasureConstraint.height, effNatH))
   {
     return mMeasuredSize;
   }
+
+  // Miss: open the measure transaction. The guard owns mMeasureInProgress /
+  // mMeasurePassPoisoned / mMeasureCacheValid for this scope; leaving it with
+  // mMeasureCacheValid still false (no publish reached) makes the next Measure
+  // miss and recompute.
+  MeasurePassGuard pass(*this);
+
+  // This pass will rewrite the measured slot that every ancestor arranges from,
+  // so any ancestor cache entry that was produced against the previous slot has
+  // to stop being servable. Runs only on a confirmed full miss (after the
+  // re-entrancy return and after the cache-hit return) and only once the guard
+  // is open, so an ancestor that owns this measurement is recognised by its own
+  // in-progress flag and the walk stops there.
+  InvalidateAncestorLayoutCachesForMeasureMiss();
 
   // OnMeasure receives and returns visual (scale-applied) sizes, consistent with OnArrange.
   float        effVisW = (effNatW >= 0.f) ? effNatW * s : effNatW;
@@ -3233,11 +4694,51 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   {
     visual = mViewImpl.OnMeasure(effVisW, effVisH);
   }
-  visual                         = ApplyConstraints(visual);
-  mMeasuredSize.width            = visual.width;
-  mMeasuredSize.height           = visual.height;
-  mLastMeasuredConstraint.width  = effNatW;
-  mLastMeasuredConstraint.height = effNatH;
+  visual = ApplyConstraints(visual);
+
+  // The RESULT is published unconditionally: mMeasuredSize is "the last
+  // completed measurement" and is read outside the cache path (GetMeasuredSize(),
+  // and every layout manager placing a non-MATCH_PARENT child during Arrange),
+  // so it must reflect the work this pass just did regardless of cache state.
+  mMeasuredSize.width  = visual.width;
+  mMeasuredSize.height = visual.height;
+
+  // The freshly written slot has not been consumed by this view's parent yet.
+  // Set unconditionally, exactly like the publish above: only the standalone
+  // path reads it (ArrangeStandaloneChild), and testing the layout mode here
+  // would cost more than the store it would save.
+  mMeasuredSlotUnconsumed = true;
+
+  // The cache KEY is published CONDITIONALLY. mMeasureDirty was consumed at pass
+  // entry, so seeing it true here means an InvalidateMeasure() arrived while the
+  // producer was running: the value just computed is already known to be stale,
+  // and caching it would pin it until some later, unrelated invalidation. Same
+  // for a poisoned pass (re-entrancy / scale-context reset). Declining to
+  // publish leaves mMeasureCacheValid false, so the next Measure() misses and
+  // recomputes with the new state.
+  if(!mMeasureDirty && !mMeasurePassPoisoned)
+  {
+    mLastMeasureConstraint.width      = effNatW;
+    mLastMeasureConstraint.height     = effNatH;
+    mMeasureKeyOrPropagation.scaleKey = s;
+    mMeasureCacheValid                = true;
+  }
+  else if(mMeasurePassPoisoned && !mMeasureDirty)
+  {
+    // Pure poison: the pass was invalidated by something that did not go
+    // through InvalidateMeasure() on this view (re-entrancy, scale-context
+    // reset), so nothing propagated to the layout root or registered a
+    // follow-up. Schedule exactly one. A declarative mid-pass re-dirty
+    // (mMeasureDirty true) already propagated and registered inside
+    // InvalidateMeasure(), so it must NOT be registered a second time here.
+    //
+    // Caveat: a producer that re-enters its own on-scene Measure() on every
+    // pass turns this one-shot follow-up into a per-frame layout loop. As with
+    // the LayoutFinished-slot re-invalidation case (see LayoutController), this
+    // app-level non-convergence is deliberately not capped here; the re-entry is
+    // logged above on every occurrence. No first-party producer does this.
+    InvalidateMeasure();
+  }
 
   // Ensure standalone children are measured even when OnMeasure (e.g. in
   // leaf views like Label) does not iterate children. The measure cache
@@ -3247,7 +4748,266 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   return mMeasuredSize;
 }
 
+bool ViewDataImpl::HasUnconsumedStandaloneChild() const
+{
+  // Const iteration: this is a pure query on the arrange cache-hit path and must
+  // not touch any child state. Dali::Vector<View>::ConstIterator yields a
+  // const View&, which resolves to the const GetImpl / const ViewDataImpl::Get
+  // overloads, so constness is carried all the way to the two reads below.
+  for(Dali::Vector<View>::ConstIterator it = mChildren.Begin(), end = mChildren.End(); it != end; ++it)
+  {
+    const ViewImpl&     childImpl = GetImpl(*it);
+    const ViewDataImpl& childData = ViewDataImpl::Get(childImpl);
+
+    // Selective term first. mMeasuredSlotUnconsumed is set unconditionally at every
+    // measure publish and cleared only by the parent's own MeasureStandaloneChildren
+    // / ArrangeStandaloneChildren, both of which skip non-standalone children -- so
+    // it is TRUE for every regular child in the steady state and rejects nothing.
+    // IsLayoutModeStandalone is the term that actually decides, so it runs first and
+    // the bit only qualifies the few standalone children. Both operands are
+    // side-effect-free reads, so the order is a pure cost choice.
+    if(IntegrationView::IsLayoutModeStandalone(childImpl) && childData.mMeasuredSlotUnconsumed)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ViewDataImpl::CanServeArrangeFromCache(const LayoutRect& bounds) const
+{
+  // The NODE-LOCAL half of the arrange cache-HIT predicate; see the term list in
+  // Arrange(), which is the only caller that supplies a candidate `bounds`. Factored
+  // out so the subtree gate below can re-state the same terms for a descendant
+  // without duplicating them, and so the one line a future increment might edit is
+  // in one place.
+  //
+  // Cost-ordered, and HasUnconsumedStandaloneChild() is deliberately LAST: it is the
+  // only O(direct children) term here, every other one being a bit test, a four-float
+  // compare or a single cached-member read on the actor. Every cheaper term therefore
+  // gets its chance to reject before the scan runs.
+  return mArrangeCacheValid &&
+         !mArrangeProducerAlways &&
+         !mArrangeDirty &&
+         !mArrangePassPoisoned &&
+         !mArrangeCacheBlockedDuringPass &&
+         SameLayoutRect(mArrangeKeyOrPropagation.inputKey, bounds) &&
+         mLastArrangeDirection == mViewImpl.Self().GetEffectiveLayoutDirection() &&
+         !HasUnconsumedStandaloneChild();
+}
+
+bool ViewDataImpl::CanReplayArrangeSubtreeFromCache() const
+{
+  // Read-only, and it visits exactly the nodes ReplayArrangeSubtreeFromCache would:
+  // the two walks must agree, or the gate would clear a node the replay then writes
+  // (or refuse on a node the replay never touches).
+  for(Dali::Vector<View>::ConstIterator it = mChildren.Begin(), end = mChildren.End(); it != end; ++it)
+  {
+    const ViewImpl&     childImpl = GetImpl(*it);
+    const ViewDataImpl& childData = ViewDataImpl::Get(childImpl);
+
+    // Not arranged by this view's producer in the pass that published the entry, so
+    // the replay does not touch it and it constrains nothing. This is the shape of a
+    // Label's children: LabelImpl::OnArrange returns its bounds and never delegates,
+    // so its children hold no arrange result and a MISS leaves them alone too.
+    //
+    // This is sound only because no child can JOIN the set after the entry was
+    // published: adding a contributing child invalidates this view's measure, and
+    // adding a standalone child invalidates this view's arrange (OnChildAdded). So a
+    // live entry implies the child set is the one the producer last arranged.
+    if(!childData.mArrangeResultAvailable)
+    {
+      continue;
+    }
+
+    // The node-local terms of CanServeArrangeFromCache, minus two:
+    //
+    //  - the cache KEY (SameLayoutRect). A descendant has no candidate `bounds` to
+    //    key against, and it does not need one: with this view's own key matched and
+    //    its producer ArrangePolicy::IF_CHANGED, the producer would hand each child the same slot it
+    //    handed it last time -- the slot that child recorded as its arrange input key and
+    //    resolved into the mArrangedBounds the replay is about to apply. The key
+    //    match is implied by the parent's key match plus policy, which is why policy
+    //    is required at every node and not only at the top.
+    //
+    //    That "recorded by THIS chain's producers" premise is ENFORCED, not
+    //    assumed: an unowned out-of-band Arrange() on any descendant rewrites
+    //    those records and, in the same breath, retracts its direct parent's
+    //    entry (InvalidateParentArrangeCacheForOutOfBandArrange) -- which this
+    //    recursive walk then sees as an invalid node and refuses the whole hit.
+    //    So a hit can never replay a record this chain did not write.
+    //  - mChildren.Empty(), which is what this increment removes.
+    //
+    // !mArrangeProducerAlways is the term that carries the implication above.
+    // mArrangeCacheValid is what catches a STANDALONE descendant whose invalidation
+    // stopped at its own boundary and never reached this view; the dirty / poison /
+    // blocked bits beside it are defence in depth in exactly the sense the node-local
+    // list describes -- every writer that raises one clears mArrangeCacheValid in the
+    // same breath, so they are implied today and are tested so that the hit stays
+    // correct if that pairing is ever broken.
+    // !HasUnconsumedStandaloneChild() is I4 restored for descendants: it is
+    // O(direct children), so only a per-node evaluation covers a subtree. It is the
+    // one term here that decides on its own -- a standalone view is its own layout
+    // root, so it can end a pass with a live entry AND a slot its parent has not
+    // consumed.
+    // The direction read is Actor::GetEffectiveLayoutDirection() on the child's own
+    // actor -- the single resolved-direction read the framework uses everywhere.
+    //
+    // Ordered as in CanServeArrangeFromCache, and for the same reason: the
+    // O(direct children) scan goes last so every bit test gets to reject first.
+    if(!(childData.mArrangeCacheValid &&
+         !childData.mArrangeProducerAlways &&
+         !childData.mArrangeDirty &&
+         !childData.mArrangePassPoisoned &&
+         !childData.mArrangeCacheBlockedDuringPass &&
+         childData.mLastArrangeDirection == childData.mViewImpl.Self().GetEffectiveLayoutDirection() &&
+         !childData.HasUnconsumedStandaloneChild()))
+    {
+      return false;
+    }
+
+    if(!childData.CanReplayArrangeSubtreeFromCache())
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void ViewDataImpl::ReplayArrangeSubtreeFromCache(bool mirrorUnderParentRtl, float parentArrangedWidth)
+{
+  // Corollary C, checked live and per node: a valid arrange cache implies a valid
+  // cached effective scale, because every scale-context reset clears both for the WHOLE
+  // subtree (ResetSubtreeScaleAndLayoutCaches). The replay skips the
+  // GetEffectiveScale() the MISS path performs at every level, so this assert is
+  // what makes the reliance visible. DEBUG-only, like every other first-party layout
+  // invariant on this hot path. It runs BEFORE the node scope below on purpose: it
+  // reads nothing the scope owns, and throwing out of it leaves no flag to restore.
+  DALI_ASSERT_DEBUG(mEffectiveScaleValid);
+
+  // A valid cache is published only at the end of a pass that also published
+  // mArrangedBounds, so a result must exist to serve. For a descendant this is the
+  // gate's own filter, restated as an invariant.
+  DALI_ASSERT_DEBUG(mArrangeResultAvailable);
+
+  // Open this node's slice of the replay transaction BEFORE the first actor write. Every
+  // write below can reach application code through OnPropertySet / PropertySetSignal, and
+  // this is what makes that code see the same same-view re-entrancy guard a producer pass
+  // would give it. Scoped to the end of the function so it also covers the recursion and
+  // the LayoutFinished registration; unwound by RAII, so a DEBUG assert thrown deeper in
+  // the subtree restores every level on the way out.
+  ReplayNodeScope node(*this);
+
+  // Snapshot before applying: ApplySelfBoundsIfChanged takes its argument by const
+  // reference, so passing mArrangedBounds directly would hand it an alias of the very
+  // member it reconciles against. The copy is also what keeps mArrangedBounds LOGICAL
+  // while the value applied below may be its physical resolution.
+  const LayoutRect cached = mArrangedBounds;
+
+  // 1. Self reconciliation -- the SAME call the MISS path ends on, and the ONE actor
+  //    write this node performs. NOT skippable: it is an UNCONDITIONAL per-pass
+  //    reconciliation, not a one-time apply, and it is what restores geometry clobbered
+  //    outside layout (Extension::SetPositionX, a transition frame). Its exact `!=` write
+  //    suppression makes the settled case free -- four property reads and no scene-graph
+  //    write -- and that is now true for a right-to-left subtree too, because the mirror
+  //    is folded in here instead of being re-applied afterwards by the parent.
+  //
+  //    mArrangedBounds itself stays LOGICAL (invariant: the arranged rect and Arrange()'s
+  //    return value are parent-local logical, and the transition dispatcher's
+  //    VisualBoundsOf re-derives the physical x from it through the same MirrorX). Only
+  //    `applied` carries the physical x, and only as far as the actor.
+  //
+  //    The MISS path also applies the INPUT bounds provisionally before running the
+  //    producer. That write is observable only to the producer, which is elided, so
+  //    the single apply of the final bounds is equivalent.
+  LayoutRect applied = cached;
+  if(mirrorUnderParentRtl)
+  {
+    applied.x = MirrorX(parentArrangedWidth, cached.x, cached.width);
+  }
+  ApplySelfBoundsIfChanged(applied);
+
+  // 2. Descendants, in mChildren order -- the order ArrangeDefault's snapshot preserves,
+  //    and the order every layout manager iterates.
+  //
+  //    A SNAPSHOT, like every other child traversal in this file. The apply above is an
+  //    actor property write, which reaches OnPropertySet and a synchronous
+  //    PropertySetSignal emit and hence application code that may unparent a child --
+  //    dali-core erases from its container BEFORE notifying (ActorParentImpl::Remove), so
+  //    an index loop that re-read Count() would shift every following sibling down by one
+  //    and silently skip the last one. The snapshot also keeps each child alive across the
+  //    recursive call. Guarded by Empty() so a leaf, which is the common hit shape, pays
+  //    no allocation.
+  //
+  //    A child removed DURING the walk is still visited from the snapshot, exactly as
+  //    ArrangeDefault's and ArrangeStandaloneChildren's snapshots visit theirs. A REPARENT
+  //    is fully covered: OnChildAdded clears the moved child's mArrangeResultAvailable, so
+  //    the test below skips it and no old-parent rect is applied under a new parent. A
+  //    plain removal leaves one write on a detached actor, which its next add re-derives.
+  //
+  //    Standalone children are NOT filtered out of the walk: the MISS path reaches them
+  //    through ArrangeStandaloneChildren -> ArrangeStandaloneChild -> childImpl.Arrange(),
+  //    which likewise ends at the child's own mArrangedBounds. They are excluded only from
+  //    the MIRROR, exactly as ApplyLayoutDirection excludes them.
+  if(!mChildren.Empty())
+  {
+    // THIS node's own resolved direction decides the mirror for its direct children --
+    // the same read, on the same actor, that ApplyLayoutDirection performs on the MISS
+    // path. Read once per node rather than once per child.
+    const bool selfIsRightToLeft =
+      (mViewImpl.Self().GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT);
+
+    std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
+    for(auto& childView : childSnapshot)
+    {
+      ViewImpl&     childImpl = GetImpl(childView);
+      ViewDataImpl& childData = ViewDataImpl::Get(childImpl);
+
+      // Not arranged by this view's producer in the pass that published the entry, so
+      // there is no parent-owned logical result to re-apply and none to mirror. The MISS
+      // path leaves such a child untouched for the same reason (ApplyLayoutDirection's
+      // mArrangeResultAvailable skip).
+      if(!childData.mArrangeResultAvailable)
+      {
+        continue;
+      }
+
+      // The MISS path's mirror-eligibility rule, evaluated by the parent because only the
+      // parent knows the direction and the width it mirrors about.
+      const bool mirrorChild =
+        selfIsRightToLeft && !IntegrationView::IsLayoutModeStandalone(childImpl);
+
+      childData.ReplayArrangeSubtreeFromCache(mirrorChild, cached.width);
+    }
+  }
+
+  // Already true on any path that could reach a hit (the cache was published by a
+  // completed pass, which sets this). Kept unconditional so the flag's meaning stays
+  // "at least one arrange pass has completed", independent of hit/miss.
+  mInitialLayoutDone = true;
+
+  // LayoutFinished semantics are pass-based, not work-based: a subscriber is told its
+  // view was arranged in this pass, and being replayed from cache IS an arrange of
+  // that view. Emitting it per visited node is what keeps the controller's
+  // arrangedViews set identical to the one a MISS would produce.
+  if(HasLayoutFinishedSignalConnections())
+  {
+    LayoutController::NotifyViewArranged(&mViewImpl);
+  }
+}
+
 LayoutRect ViewDataImpl::Arrange(const LayoutRect& bounds)
+{
+  return ArrangeImpl(bounds, false);
+}
+
+LayoutRect ViewDataImpl::ArrangeAsLayoutRoot(const LayoutRect& bounds)
+{
+  return ArrangeImpl(bounds, true);
+}
+
+LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLayoutRootPass)
 {
   // Validate first-party layout invariants in DEBUG only: this runs on the
   // per-frame, per-view layout hot path (including deep child recursion), so a
@@ -3255,9 +5015,202 @@ LayoutRect ViewDataImpl::Arrange(const LayoutRect& bounds)
   // app-terminating exception. The untrusted customization RETURN is still
   // guarded in release by ResolveReturnedBounds (log + fall back to input).
   DALI_ASSERT_DEBUG(IsValidLayoutRect(bounds));
-  DALI_ASSERT_DEBUG(!mArrangeInProgress); // same-view re-entrant Arrange is unsupported
-  ScopedTrueFlag arrangeGuard(mArrangeInProgress);
 
+  // Same-view re-entrancy is guarded in RELEASE, not just DEBUG (this used to be
+  // a debug-only assertion, i.e. undefined behaviour in release). An arrange
+  // customization can call Arrange() on its own view, directly or through the
+  // public, nestable LayoutController::ProcessLayouts(). Re-running the producer
+  // would recurse without bound and corrupt the outer pass's self geometry, so:
+  // poison the outer pass and return the last COMPLETED bounds, falling back to
+  // the caller's input while no pass has completed yet.
+  if(mArrangeInProgress)
+  {
+    mArrangePassPoisoned = true;
+    DALI_LOG_ERROR("Re-entrant Arrange() on the same View\n");
+    return mArrangeResultAvailable ? mArrangedBounds : bounds;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Arrange cache HIT.
+  //
+  // Placed here, ABOVE ArrangePassGuard, for the same reason the measure hit sits
+  // above MeasurePassGuard: the guard clears mArrangeCacheValid (and consumes
+  // mArrangeDirty / the poison bits) at entry, so this is the last point at which
+  // the previous pass's cache state can still be read. Constructing the guard and
+  // then returning would also destroy the very cache entry being served.
+  //
+  // A HIT IS NOT A PRUNE. Skipping this view's producer also skips the child
+  // recursion it would have driven, and that recursion does more than recompute:
+  // every level ends in ApplySelfBoundsIfChanged, an UNCONDITIONAL per-pass
+  // reconciliation that silently REPAIRS any external actor-geometry write below it
+  // (the sanctioned Extension::SetPositionX escape hatch used by ScrollView /
+  // RecyclerView, and the layout transition dispatcher). It also mirrors under RTL
+  // and registers every arranged view for LayoutFinished. Dropping all of that for a
+  // subtree would break the promise View::Arrange documents -- "the arranged geometry
+  // is reconciled either way, so the outcome is the same" -- and the clobber channel
+  // cannot be closed by bookkeeping, because Ui::View publicly derives from
+  // Dali::Actor and any holder can write POSITION_X without going through
+  // Extension::.
+  //
+  // So the hit REPLAYS the settled subtree from cache instead of pruning it:
+  // ReplayArrangeSubtreeFromCache walks the same nodes the producer recursion would
+  // have reached and performs, per node, exactly the observable work the MISS path
+  // performs -- self reconciliation (with the right-to-left mirror folded into that
+  // single apply), the LayoutFinished registration -- while eliding only the PRODUCER (and with it two
+  // heap allocations, the producer dispatch, ResolveReturnedBounds and the publish
+  // gate). What is skipped is recomputation; what is kept is every write and every
+  // notification.
+  //
+  // Eliding a producer is result-identical to the miss it replaces only when its
+  // result depends on the input bounds, effective layout direction, effective scale,
+  // and state tracked by layout invalidation. The first two are cache-key terms, the
+  // third is carried by Corollary C, and the fourth by mArrangeCacheValid.
+  // ArrangePolicy::IF_CHANGED assumes that contract by default. A producer outside the
+  // envelope -- one that reads ancestor/world geometry or pushes state outside the
+  // actor tree -- must explicitly select ArrangePolicy::ALWAYS. See the term list.
+  //
+  // TWO GATES, in this order:
+  //  1. CanServeArrangeFromCache(bounds) -- the NODE-LOCAL predicate below: may THIS
+  //     view's producer be elided for THIS input?
+  //  2. CanReplayArrangeSubtreeFromCache() -- the recursive SUBTREE gate: may every
+  //     descendant the replay would touch have ITS producer elided too? It re-tests
+  //     the same node-local terms (minus the key, which is implied -- see the
+  //     function) at every node, so policy, dirtiness and the unconsumed-standalone
+  //     correction are checked per node rather than only at the top. Skipped
+  //     entirely for a childless view, which keeps a leaf's hit exactly as cheap as
+  //     it was when the hit was childless-only.
+  //
+  // Validate-then-replay, not a fused bail-out walk: a walk that gave up half way
+  // would already have written cached bounds into part of the subtree, and the MISS
+  // that follows does not necessarily revisit every node it wrote (a Label's
+  // children, for instance), so a partial replay would not be provably neutral. Two
+  // phases keep "hit" atomic.
+  //
+  // Predicate terms, cost-ordered (cheapest / most selective first):
+  //  - mArrangeCacheValid: the entry exists. Cleared by every layout invalidation
+  //    and by a full Measure pass on this view, so it carries all the freshness the
+  //    hit relies on for its own inputs.
+  //  - !mArrangeProducerAlways: the active producer permits unchanged-result reuse.
+  //    Producers that read untracked geometry or update an external surface use
+  //    ArrangePolicy::ALWAYS and therefore reject this cache hit at every subtree level.
+  //  - !mArrangeDirty / !mArrangePassPoisoned / !mArrangeCacheBlockedDuringPass:
+  //    defence in depth. Each of these is raised by a writer that also clears
+  //    mArrangeCacheValid in the same breath, so they are implied today; testing
+  //    them keeps the hit correct if that pairing is ever broken.
+  //  - SameLayoutRect(inputKey, bounds): the cache KEY. Exact compare,
+  //    see SameLayoutRect.
+  //  - !HasUnconsumedStandaloneChild(): the corrective re-measure for a standalone
+  //    child's slot lives further down this function (ArrangeStandaloneChildren),
+  //    so a hit must not skip it. It is O(direct children) only, which is why the
+  //    subtree gate re-evaluates it at every node it would elide -- a DESCENDANT
+  //    holding an unconsumed slot is invisible from here. The other half of the
+  //    standalone story, a child ADDED after the entry was published, is closed on
+  //    the add side: OnChildAdded invalidates this view's arrange for a standalone
+  //    child (the measured slot of a never-measured child does not raise this term).
+  //  - mLastArrangeDirection == GetEffectiveLayoutDirection(): belt and braces for
+  //    the direction key. The direction lives in dali-core and can move through
+  //    actors dali-ui does not own, so a missed invalidating subtree walk must
+  //    degrade to a MISS here, never to a wrongly mirrored arrangement.
+  //
+  // Deliberately NOT terms:
+  //  - the effective scale. A scale change goes through
+  //    ResetSubtreeScaleAndLayoutCaches / DropCachedEffectiveScale, both of which
+  //    clear the layout caches, so mArrangeCacheValid already implies "scale in
+  //    sync" (Corollary C). The DEBUG assert in the body is that implication's
+  //    live check rather than a re-test.
+  //
+  //    The four (axis, input) pairs are handled three different ways, and the choice
+  //    is per pair rather than per axis or per input:
+  //      measure x scale     -- KEY (the scale key). `s` is already read above
+  //                             that predicate for the constraint normalisation, so
+  //                             the term is one float compare.
+  //      arrange x scale     -- invalidation + DEBUG assert (this bullet). Reading it
+  //                             here would be a fresh call on a path that needs it for
+  //                             nothing else.
+  //      arrange x direction -- KEY (mLastArrangeDirection). The direction lives in
+  //                             dali-core and can move through actors dali-ui does not
+  //                             own, so a missed hook must not mirror the wrong way.
+  //      measure x direction -- invalidation (the direction-change subtree walk
+  //                             invalidates the MEASURE axis). A key term would put a
+  //                             layout-direction read into the per-view, per-pass
+  //                             measure predicate to cover a producer shape no
+  //                             first-party view has.
+  //    The rule behind the split: a KEY where the value is already in hand or the
+  //    failure mode is a wrong RESULT; invalidation where reading it would cost a
+  //    property access on a hot path and the failure mode is only a stale one.
+  //  - mMeasureCacheValid. A full Measure pass clears mArrangeCacheValid from
+  //    MeasurePassGuard, so the two are cleared as a pair.
+  if(CanServeArrangeFromCache(bounds) &&
+     (mChildren.Empty() || CanReplayArrangeSubtreeFromCache()))
+  {
+    // Snapshot the entry before anything is applied. The replay below reconciles
+    // this view's actor against mArrangedBounds, and nothing on this path writes
+    // that member -- the copy is what keeps that a local fact instead of a
+    // precondition the return value silently depends on.
+    const LayoutRect cached = mArrangedBounds;
+
+    // Open the replay TRANSACTION for the whole subtree. See ReplayPassScope: the replay
+    // writes actor properties and therefore runs application code, so it has to be inside
+    // the layout processing window (park an invalidation raised from it, and make the
+    // per-node re-entrancy guard reachable). It is NOT ArrangePassGuard, whose entry would
+    // consume mArrangeDirty and clear the very mArrangeCacheValid this hit is serving.
+    ReplayPassScope replayPass;
+
+    // The whole hit: this view and every descendant the elided producers would have
+    // reached, reconciled in the MISS path's own order. Per-node Corollary C and
+    // result-availability asserts live inside it.
+    //
+    // LOGICAL at the top: this view's own right-to-left mirror is owned by its PARENT,
+    // which is not running here -- exactly as on the MISS path, where the producer applies
+    // logical bounds and the parent's ApplyLayoutDirection mirrors afterwards. Folding a
+    // mirror in here would apply it twice.
+    // UtcDaliViewArrangeCacheHitReAppliesLogicalBoundsUnderRtlP pins it.
+    ReplayArrangeSubtreeFromCache(false, 0.0f);
+
+    // The cached rect, NOT `bounds`. The publishing pass returned its
+    // ResolveReturnedBounds() result, which an arrange customization may have
+    // moved away from its input; mArrangedBounds is exactly that value, so
+    // returning it makes the hit indistinguishable from re-running the producer.
+    return cached;
+  }
+  // ---------------------------------------------------------------------------
+
+  // Open the arrange transaction. The guard owns mArrangeInProgress /
+  // mArrangePassPoisoned / mEffectiveScaleInvalidatedDuringPass / mArrangeCacheValid
+  // for this scope.
+  ArrangePassGuard pass(*this);
+
+  // This pass will rewrite the arrange records every ancestor's cache HIT
+  // replays this view from (mArrangedBounds is published unconditionally
+  // below). If no producer above owns this pass -- an out-of-band public
+  // Arrange() -- the direct parent's cache entry must stop being servable, or
+  // its next HIT would replay the foreign result where a MISS would restore the
+  // parent-derived slot. Owned passes (parent mid-arrange, recycler scope, and a
+  // framework-owned standalone root pass) return without touching anything.
+  InvalidateParentArrangeCacheForOutOfBandArrange(frameworkLayoutRootPass);
+
+  // Establish this view's cached effective scale for the pass, exactly as
+  // Measure() does at its own entry. Every arrange producer that touches
+  // children reads the effective scale anyway, but the DEFAULT arrange of a
+  // CHILDLESS view never does (ArrangeDefault's scale read sits behind its
+  // child loop), so without this read the sync bit would still be false at the
+  // publish gate below and a settled leaf could never cache. Amortised O(1):
+  // the walk stops at the first ancestor whose bit is already live. Return value
+  // intentionally discarded -- called for its side effect of establishing the bit.
+  (void)mViewImpl.GetEffectiveScale();
+
+  // ApplySelfBoundsIfChanged is an UNCONDITIONAL per-pass reconciliation of the
+  // actor's geometry against the arranged bounds, not a one-time apply: it
+  // silently repairs any external clobber of POSITION/SIZE -- including the
+  // sanctioned first-party scroll writes (ScrollViewImpl/RecyclerViewImpl move the
+  // content actor directly via Extension::SetPositionX to bypass layout). The
+  // cache HIT above performs this reconciliation itself, with the LOGICAL
+  // mArrangedBounds and never a mirrored value (C4-B1 / C4-B2: mirroring stays the
+  // parent's job in ApplyLayoutDirection), which is why it returns from the middle
+  // of this function instead of the top.
+  // UtcDaliViewArrangeRestoresExternallyMovedSelfGeometry{,Rtl}P pin this, and
+  // UtcDaliViewArrangeCacheHitStillReconcilesSelfGeometryP pins it for the hit.
+  //
   // Phase 1: apply the input bounds as provisional self geometry, so a
   // customization hook that reads back self event-side geometry observes the
   // input (as before this refactor), not stale prior-pass geometry.
@@ -3283,18 +5236,85 @@ LayoutRect ViewDataImpl::Arrange(const LayoutRect& bounds)
   const LayoutRect finalBounds = ResolveReturnedBounds(bounds, returnedBounds);
   ApplySelfBoundsIfChanged(finalBounds);
 
-  mArrangedBounds = finalBounds;
-  mArrangeDirty   = false;
+  // The RESULT is published unconditionally: mArrangedBounds is "the last
+  // completed arrangement", read outside the cache path (GetArrangedBounds(),
+  // the transition dispatcher, the re-entrancy fallback), so it must reflect the
+  // work this pass just did. mArrangeDirty was consumed at pass ENTRY, so it is
+  // NOT cleared here; see the conditional cache publish after the direction
+  // resolver below.
+  mArrangedBounds         = finalBounds;
+  mArrangeResultAvailable = true; // A completed rect now exists for the re-entrancy fallback.
 
   // Ensure standalone children are arranged even when OnArrange (e.g. in
   // leaf views like Label) does not iterate children.
   ArrangeStandaloneChildren(finalBounds);
 
   // Mirror direct children when the effective layout direction resolves to
-  // RIGHT_TO_LEFT. Runs once per Arrange after every OnArrange variant
-  // (LayoutManager / ArrangeCallback / default), keeping layout managers
-  // direction-agnostic.
+  // RIGHT_TO_LEFT. Runs once per arrange MISS, after every producer variant
+  // (LayoutManager / ArrangeCallback / default OnArrange), keeping layout managers
+  // direction-agnostic. A cache HIT returns above and reaches the mirror by a different
+  // route: ReplayArrangeSubtreeFromCache does NOT call this function at all. It FUSES the
+  // mirror into each visited node's single self apply, resolving that node's mirrored x
+  // from its parent's cached width and writing it in the same store as the rest of the
+  // node's geometry. The result is the same mirrored placement in one write per node
+  // rather than a write followed by a corrective rewrite. Children that have no arranged
+  // result are ignored on both paths because no logical position belongs to this parent,
+  // and both paths exclude standalone children.
   ApplyLayoutDirection(finalBounds.width);
+
+  // Conditional cache publish, mirroring Measure.
+  //
+  // The input KEY is published only when every premise of this pass still
+  // holds at its end: no re-invalidation (mArrangeDirty was consumed at entry,
+  // so seeing it true means one arrived mid-pass), no poison, a valid logical
+  // context, and a valid measure cache -- an arrange run before this view was
+  // ever measured used default/stale measured sizes for its children and must
+  // not be frozen into the cache (plan34 11).
+  //
+  // The cached effective scale is READ here, never written: mEffectiveScaleValid is the
+  // effective-scale sync bit, owned solely by GetEffectiveScale() and the
+  // invalidation paths. Both logical terms are required and neither implies the
+  // other. mEffectiveScaleValid alone would accept a pass whose context was
+  // reset mid-flight and then re-validated by a later GetEffectiveScale() -- the
+  // work done before that reset used the OLD scale. mEffectiveScaleInvalidatedDuringPass
+  // alone would accept a pass that simply never established a context (the bit
+  // still false at entry), which is what the GetEffectiveScale() at pass entry
+  // rules out for the childless-default case.
+  //
+  // What this block writes is LIVE: mArrangeCacheValid / the arrange input key /
+  // mLastArrangeDirection are exactly what the cache-HIT test at the top of this
+  // function reads on the next pass. Declining the publish here is therefore how a
+  // pass whose premises did not survive forces the next Arrange() to recompute. It
+  // is also what the subtree gate reads on every DESCENDANT it would elide, so
+  // declining the publish here withdraws this view from any ancestor's hit too.
+  //
+  // mArrangeCacheBlockedDuringPass is the freshness-only member of this
+  // predicate: a cache-only invalidation that arrived mid-pass declines the
+  // publish but, unlike a poison, registers NO follow-up (the follow-up branch
+  // below deliberately does not test it -- a cache-only invalidation must never
+  // turn into a scheduled layout). The ancestor-invalidation walk sets it on an
+  // unowned arrange-in-progress ancestor it clears, so this view's arrange cache
+  // cannot be re-published over that clear before the pass ends.
+  if(!mArrangeDirty && !mArrangePassPoisoned && !mArrangeCacheBlockedDuringPass && mEffectiveScaleValid && !mEffectiveScaleInvalidatedDuringPass && mMeasureCacheValid)
+  {
+    mArrangeKeyOrPropagation.inputKey = bounds;
+    mLastArrangeDirection             = mViewImpl.Self().GetEffectiveLayoutDirection();
+    mArrangeCacheValid                = true;
+  }
+  else if(mArrangePassPoisoned && !mArrangeDirty)
+  {
+    // Pure poison (re-entrancy / scale-context reset): nothing propagated an
+    // invalidation of its own, so no follow-up layout is registered yet.
+    // Register exactly one. A mid-pass InvalidateArrange() (mArrangeDirty true)
+    // already registered inside that call, so it must not be registered twice.
+    //
+    // Caveat: an on-scene producer that re-enters its own Arrange() every pass
+    // turns this one-shot follow-up into a per-frame loop; like the analogous
+    // measure case and the LayoutFinished-slot case (see LayoutController), this
+    // app-level non-convergence is deliberately not capped here. No first-party
+    // producer does this.
+    InvalidateArrange();
+  }
 
   // Mark this view as having completed an arrange pass. Read by the layout
   // transition dispatcher to suppress ENTER on initial mount: the dispatcher
@@ -3333,9 +5353,31 @@ void ViewDataImpl::MeasureStandaloneChildren(float visEffW, float visEffH)
     float  childVisW  = std::max(0.0f, visEffW - visMarginW);
     float  childVisH  = std::max(0.0f, visEffH - visMarginH);
     childImpl.Measure(childVisW, childVisH);
+
+    // LOAD-BEARING, not bookkeeping. This measurement IS the parent's consumption of
+    // the child's slot, so the corrective re-measure in ArrangeStandaloneChild must
+    // not fire for it. Without this clear the publish inside the Measure() above
+    // would leave the bit set and every standalone child would be re-measured once
+    // more per pass, at the (generally different) arrange extent -- extra producer
+    // runs, and a steady-state geometry that follows the arrange constraint instead
+    // of the measure constraint.
+    ViewDataImpl::Get(childImpl).mMeasuredSlotUnconsumed = false;
   }
 }
 
+// The corrective re-measure for an unconsumed standalone slot lives on the arrange
+// path, so an Arrange() that returned early on a cache HIT would silently skip it.
+// That is why !HasUnconsumedStandaloneChild() is a term of the arrange cache-hit
+// predicate: a view with such a child always MISSES and therefore always reaches
+// here. The bit is cleared below, so the correction costs at most one declined hit
+// per out-of-band Measure().
+//
+// The term is O(direct children), so it is re-evaluated at every node of
+// CanReplayArrangeSubtreeFromCache: a DESCENDANT holding an unconsumed slot refuses
+// the ancestor's hit, which is what keeps this reachable under a subtree replay.
+// The other way a standalone child can be missed -- being ADDED after the entry was
+// published, when its slot bit is still false because it has never been measured --
+// is closed on the add side, by the InvalidateArrange() in OnChildAdded.
 void ViewDataImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
 {
   // Snapshot: a child's Arrange() may mutate mImpl->mChildren.
@@ -3347,7 +5389,14 @@ void ViewDataImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
     {
       continue;
     }
-    ArrangeStandaloneChild(childImpl, bounds.width, bounds.height);
+    ViewDataImpl& childData = ViewDataImpl::Get(childImpl);
+    ArrangeStandaloneChild(mViewImpl, childImpl, bounds.width, bounds.height, childData.mMeasuredSlotUnconsumed);
+
+    // Consumed: the slot has now been read against this parent's arrange extent
+    // (and corrected first if it was unconsumed). Cleared unconditionally, so the
+    // correction is paid for only after a fresh out-of-band Measure() and the
+    // steady state costs nothing.
+    childData.mMeasuredSlotUnconsumed = false;
   }
 }
 
@@ -3358,7 +5407,20 @@ void ViewDataImpl::ApplyLayoutDirection(float parentWidth)
     return;
   }
 
-  for(auto& childView : mChildren)
+  // A SNAPSHOT, like every other child traversal in this file (ArrangeDefault,
+  // MeasureStandaloneChildren, ArrangeStandaloneChildren, the cache-hit replay). The
+  // SetPositionX below is an actor write that reaches OnPropertySet and a synchronous
+  // PropertySetSignal emit, and hence application code that may add or remove children.
+  // dali-core erases the child from its container BEFORE notifying
+  // (ActorParentImpl::Remove), and ViewDataImpl::OnChildRemoved then erases it from
+  // mChildren, so an index loop that re-read Count() would shift every following sibling
+  // down one position and skip the last one entirely. Re-reading Count() keeps the index
+  // in bounds; it does NOT keep the traversal complete, which is what this needs.
+  //
+  // This is the MISS path only: a cache-hit replay folds the mirror into each child's own
+  // self apply and never calls here.
+  std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
+  for(auto& childView : childSnapshot)
   {
     ViewImpl& childImpl = GetImpl(childView);
     if(IntegrationView::IsLayoutModeStandalone(childImpl))
@@ -3366,10 +5428,35 @@ void ViewDataImpl::ApplyLayoutDirection(float parentWidth)
       continue;
     }
 
-    Actor child  = childImpl.Self();
-    float oldX   = child.GetProperty<float>(Actor::Property::POSITION_X);
-    float childW = child.GetProperty<float>(Actor::Property::SIZE_WIDTH);
-    child.SetPositionX(parentWidth - oldX - childW);
+    Actor         child     = childImpl.Self();
+    ViewDataImpl& childData = ViewDataImpl::Get(childImpl);
+
+    // A producer that does not arrange this child has supplied no logical bounds
+    // for the framework to mirror. Reading the actor's current (already physical)
+    // position as if it were logical makes repeated identical passes alternate
+    // between x and MirrorX(x). Leave the actor untouched until some producer
+    // actually arranges the child and publishes a parent-local logical result.
+    if(!childData.mArrangeResultAvailable)
+    {
+      continue;
+    }
+
+    // Mirror from the child's LOGICAL arranged bounds, never from the actor. This
+    // is a pure function of the result the child published and is therefore
+    // idempotent and immune to external actor-position writes.
+    const LayoutRect logical  = childData.GetArrangedBounds();
+    const float      mirrored = MirrorX(parentWidth, logical.x, logical.width);
+
+    // Read-compare-write, exactly as ApplySelfBoundsIfChanged does it and with the same
+    // exact `!=`. The value above is a pure function of the child's published logical
+    // bounds and of this parent's arranged width, so a pass that changes nothing about
+    // this child computes the value the actor already holds and the write is suppressed.
+    // Reconciliation is unaffected: an external clobber still differs from the computed
+    // value and is still repaired.
+    if(child.GetProperty<float>(Actor::Property::POSITION_X) != mirrored)
+    {
+      child.SetPositionX(mirrored);
+    }
   }
 }
 
@@ -3384,13 +5471,13 @@ float ViewDataImpl::ComputeEffectiveScale() const
     return GetSystemScale();
   }
 
-  // INHERIT: walk up the parent chain (Layout first, consistent with InvalidateMeasure)
-  Ui::Layout parentLayout = GetParentLayout();
-  if(parentLayout)
-  {
-    return GetImpl(parentLayout).GetEffectiveScale();
-  }
-
+  // INHERIT: walk up the parent chain. ONE parent lookup, the same collapse
+  // InvalidateMeasure makes: Ui::Layout derives from Ui::View and LayoutImpl from
+  // ViewImpl, so Ui::View::DownCast also matches a Layout parent and GetImpl reaches
+  // the very same ViewImpl -- and GetEffectiveScale is a non-virtual ViewImpl member,
+  // so the Layout branch resolved to this exact call. The dropped branch cost a second
+  // Actor::GetParent() plus a Layout::DownCast that FAILS for the common plain-View
+  // parent, once per node on every effective-scale cache miss.
   Ui::View parentView = GetParentView();
   if(parentView)
   {
@@ -3405,25 +5492,139 @@ float ViewDataImpl::ComputeEffectiveScale() const
   return GetSystemScale();
 }
 
-void ViewDataImpl::ResetEffectiveScaleRecursive()
+void ViewDataImpl::DropCachedEffectiveScale()
 {
-  mEffectiveScale = -1.0f;
+  // Clearing mEffectiveScaleValid IS the scale drop: it is the sync bit for
+  // mEffectiveScale, so the next GetEffectiveScale() on this node recomputes
+  // from the (possibly re-rooted) parent chain.
+  mEffectiveScaleValid = false;
 
-  // Reset measure cache to the NaN "never measured" initial state (not to
-  // MEASURE_CACHE_DIRTY = -1.0f). This forces a cache miss in Measure() so
-  // every node re-measures with the new scale.
+  // The ACTOR-side copy goes with it. That bit's claim is "the animatable
+  // VIEW_EFFECTIVE_SCALE property holds mEffectiveScale", and mEffectiveScale is
+  // exactly what has just been retracted -- the recompute may land on a different
+  // value, which Measure() must then push. Clearing the two together is what makes
+  // the bit mean "in sync with the CURRENT effective scale" rather than "in sync
+  // with whatever scale was current when it was set", and it is why this bit needs
+  // no invalidation path of its own: every scale-context change already comes
+  // through here.
   //
-  // NaN is required here (not DIRTY) because the caller follows this with
-  // InvalidateMeasure() on the root. DIRTY would trigger InvalidateMeasure's
-  // early-exit guard on the root and skip RegisterWithLayoutController().
-  // NaN != DIRTY, so the guard does not fire; Dali::Equals(NaN, DIRTY) is
-  // false per IEEE 754.
-  mLastMeasuredConstraint.width  = std::numeric_limits<float>::quiet_NaN();
-  mLastMeasuredConstraint.height = std::numeric_limits<float>::quiet_NaN();
+  // What this clear is still REQUIRED for, and what it no longer is:
+  //  - the ARRANGE cache: required. Its hit predicate carries no scale term at all,
+  //    so Corollary C -- "a valid arrange entry implies the scale has not moved" --
+  //    is only true because every caller pairs this with InvalidateLayoutCaches().
+  //  - the actor push: required. The bit cleared just above is the ONLY record that
+  //    the animatable VIEW_EFFECTIVE_SCALE property is behind, so without this clear
+  //    the next Measure() would skip the push and leave decoration constraints on the
+  //    old scale.
+  //  - the MEASURE cache: no longer required for CORRECTNESS. That cache keys on the
+  //    effective scale (the scale key), so a caller that forgot the pairing would
+  //    take a miss rather than serve a size computed at the old scale. The pairing is
+  //    still the contract; the key is the second line of defence, not a licence.
+  mEffectiveScaleActorSynced = false;
+
+  if(mArrangeInProgress)
+  {
+    // The running pass has already arranged part of this view against the OLD
+    // scale, so its result must not be published even if a later
+    // GetEffectiveScale() re-validates the bit before the pass ends.
+    mEffectiveScaleInvalidatedDuringPass = true;
+  }
+}
+
+void ViewDataImpl::InvalidateLayoutCaches()
+{
+  DropMeasureCacheEntry();
+  DropArrangeCacheEntry();
+
+  // mMeasureDirty is deliberately NOT touched here.
+  //
+  // Dirty and cache-valid are different bits with different owners. "Cache
+  // valid" is a FRESHNESS claim about a stored result and is exactly what an
+  // invalidation must retract. "Dirty" is a record that this view has layout
+  // work which has not been consumed yet; it is consumed at pass entry
+  // (MeasurePassGuard) and re-armed only by InvalidateMeasure(). Clearing it
+  // from an invalidation does not invalidate anything -- it DISCARDS pending
+  // work.
+  //
+  // This function used to clear it (a leftover from the era when this reset
+  // restored the "never measured" state wholesale). On the recursive path that
+  // was wrong: the callers follow the reset with InvalidateMeasure(), which
+  // re-arms the node it is called on and propagates UPWARD only, so a
+  // DESCENDANT that was dirty before the reset lost that dirty with nothing to
+  // give it back -- the one place it is still read (OnViewSceneConnection's
+  // standalone `isDirty` self-registration) would then decline to re-register a
+  // reconnecting standalone descendant that genuinely had work pending.
+  if(mMeasureInProgress)
+  {
+    mMeasurePassPoisoned = true;
+  }
+  if(mArrangeInProgress)
+  {
+    mArrangePassPoisoned = true;
+  }
+}
+
+void ViewDataImpl::ResetSubtreeScaleAndLayoutCaches()
+{
+  // The two concerns of a scale-context reset, applied in order: the cached
+  // scale itself, then every cached layout result that was derived from it.
+  DropCachedEffectiveScale();
+  InvalidateLayoutCaches();
+
+  // Retract the invalidation propagation records for the whole subtree.
+  //
+  // This is THE reparent hook for them, and it has to be here rather than in
+  // DropCachedEffectiveScale (which InvalidateMeasure calls on every invalidation and
+  // where retracting them would defeat the coalescing entirely). Every path that can
+  // move a View's ancestor chain runs through here -- OnChildAdded and OnChildRemoved
+  // on the moved child, OnViewSceneConnection on a (re)connecting root -- and a record
+  // written against the OLD chain must not authorise skipping a walk that now has a
+  // DIFFERENT root to reach.
+  //
+  // Recursive because the chain change is subtree-wide: a descendant's record names
+  // the same old root as the moved node's.
+  mMeasureKeyOrPropagation.propagationGeneration = 0u;
+  mArrangeKeyOrPropagation.propagationGeneration = 0u;
 
   for(auto& childView : mChildren)
   {
-    ViewDataImpl::Get(GetImpl(childView)).ResetEffectiveScaleRecursive();
+    ViewDataImpl::Get(GetImpl(childView)).ResetSubtreeScaleAndLayoutCaches();
+  }
+}
+
+void ViewDataImpl::InvalidateSubtreeLayoutForDirectionChange()
+{
+  // Same recursion SHAPE as ResetSubtreeScaleAndLayoutCaches above, three
+  // deliberate differences: no cached effective scale is dropped (a direction
+  // change moves no scale), no propagation generation is retracted (an unwritten
+  // generation can only cost an extra later ancestor walk, never a missed
+  // registration), and the dirty bits are SET here rather than left alone -- the
+  // caller of that one follows it with an InvalidateMeasure() that re-arms only the
+  // node it is called on, whereas here every affected DESCENDANT genuinely has
+  // unconsumed layout work.
+  if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    // Scheduling boundary: a standalone view's invalidation does not propagate
+    // to its parent, so raise the same full InvalidateMeasure the old per-View
+    // handler raised -- it self-registers and nudges a transition-bearing parent.
+    InvalidateMeasure();
+  }
+  else
+  {
+    InvalidateLayoutCaches();
+    mMeasureDirty = true; // SET, never clear: dirty is pending work, and the
+    mArrangeDirty = true; // white-box direction tests assert it on the child.
+  }
+
+  for(uint32_t i = 0; i < mChildren.Count(); ++i)
+  {
+    Ui::View child = mChildren[i]; // keep the handle alive across app re-entry
+    if(child.GetLayoutDirection() != Dali::LayoutDirection::INHERIT)
+    {
+      continue; // mirror of the core inherit-walk prune: a locally-set child's
+                // resolved direction did not move, nor did its subtree's
+    }
+    ViewDataImpl::Get(GetImpl(child)).InvalidateSubtreeLayoutForDirectionChange();
   }
 }
 
@@ -3493,12 +5694,42 @@ void ViewDataImpl::RegisterWithLayoutController()
   Actor  self   = mViewImpl.Self();
   Window window = Window::Get(self);
 
-  DALI_LOG_DEBUG_INFO("[ViewImpl] RegisterWithLayoutController: hasWindow=%d\n", window ? 1 : 0);
-
   if(window)
   {
+    // Lazy, once, and only for a view that registers with a LIVE window: an
+    // on-scene layout root, or an on-scene standalone boundary. Such a view pays
+    // the signal-connection cost (the callback, the signal's first pool block and
+    // the BaseSignal itself); nothing else in the tree does, which is most of the
+    // per-View memory this series once cost.
+    //
+    // INSIDE the window check, not above it. InvalidateMeasure falls through to
+    // this function for ANY parentless view, so connecting before the check would
+    // hook nearly every view in a build-then-add tree -- configure a view, and its
+    // first layout property write invalidates it while it still has no parent --
+    // and would forfeit the saving entirely.
+    //
+    // A live window is the EXACT predicate rather than a convenient
+    // approximation: it is also the precondition for any layout pass to run at all
+    // (LayoutController::Get takes a Window), so a view that cannot be hooked here
+    // is a view no pass can reach either.
+    //
+    // Nothing is lost off-scene. The OnPropertySet interception is
+    // window-independent and covers a direction WRITE on any View wherever it
+    // happens; and a direction that moved while this subtree was detached cannot
+    // outlive reconnection, because OnViewSceneConnection's layout-root path runs
+    // ResetSubtreeScaleAndLayoutCaches() -- dropping every cached measure and
+    // arrange result in the subtree -- before it registers here. Never
+    // disconnected either; see mLayoutDirectionSignalConnected.
+    if(!mLayoutDirectionSignalConnected)
+    {
+      self.LayoutDirectionChangedSignal().Connect(this, &ViewDataImpl::OnLayoutDirectionChanged);
+      mLayoutDirectionSignalConnected = true;
+    }
+
     LayoutController& controller = LayoutController::Get(window);
-    controller.RequestLayout(&mViewImpl);
+    // The internal registration path: this is the invalidation walk reaching its
+    // layout root, not an application asking for a layout.
+    controller.RequestLayoutInternal(&mViewImpl);
 
     // Register as a layout root in UiScaleManager so it gets invalidated when
     // the system scale changes. Duplicate registration is silently ignored.
@@ -3518,16 +5749,6 @@ MeasuredSize ViewDataImpl::ApplyConstraints(const MeasuredSize& size) const
   return constrained;
 }
 
-Ui::Layout ViewDataImpl::GetParentLayout() const
-{
-  Actor parent = mViewImpl.Self().GetParent();
-  if(parent)
-  {
-    return Ui::Layout::DownCast(parent);
-  }
-  return Ui::Layout();
-}
-
 Ui::View ViewDataImpl::GetParentView() const
 {
   Actor parent = mViewImpl.Self().GetParent();
@@ -3545,7 +5766,7 @@ void ViewDataImpl::SetBackgroundGradientInternal(const Gradient::Base& gradient)
 
 void ViewDataImpl::SetColorInternal(const Vector4& color)
 {
-  mViewImpl.Self().SetProperty(Actor::Property::COLOR, color);
+  mViewImpl.Self().SetProperty(Actor::Property::COLOR_MULTIPLIER, color);
 }
 
 void ViewDataImpl::SetBorderlineColorInternal(const Vector4& color)
@@ -3636,8 +5857,10 @@ void ViewDataImpl::ApplySelfBoundsIfChanged(const LayoutRect& bounds)
   Actor self = mViewImpl.Self();
 
   // Read the event-side target property and write only axes that actually
-  // differ. Exact comparison (not epsilon): the returned rect is authoritative
-  // geometry and must equal mArrangedBounds / the actor target exactly.
+  // differ. Exact comparison (not epsilon): the rect handed in is authoritative
+  // geometry -- the MISS path's final bounds, or a cache-hit replay's physical
+  // resolution of them (the same rect with x mirrored about the parent width) -- and the
+  // actor target must equal it exactly.
   if(self.GetProperty<float>(Actor::Property::POSITION_X) != bounds.x)
   {
     self.SetPositionX(bounds.x);
@@ -3648,17 +5871,17 @@ void ViewDataImpl::ApplySelfBoundsIfChanged(const LayoutRect& bounds)
   }
   if(self.GetProperty<float>(Actor::Property::SIZE_WIDTH) != bounds.width)
   {
-    self.SetWidth(bounds.width);
+    self.SetSizeWidth(bounds.width);
   }
   if(self.GetProperty<float>(Actor::Property::SIZE_HEIGHT) != bounds.height)
   {
-    self.SetHeight(bounds.height);
+    self.SetSizeHeight(bounds.height);
   }
 
-  // The layout engine applies self size via SetWidth/SetHeight, which does not
-  // route through Actor::OnSizeSet (only Actor::SetSize does). Drive the same
-  // render-effect refresh OnSizeSet would, so render effects (e.g. blur) that
-  // read the final layout size refresh for layout-sized views that never
+  // The layout engine applies self size via SetSizeWidth/SetSizeHeight, which
+  // does not route through Actor::OnSizeSet (only Actor::SetSize does). Drive
+  // the same render-effect refresh OnSizeSet would, so render effects (e.g.
+  // blur) that read the final layout size refresh for layout-sized views that never
   // receive an explicit SetSize. Fitting mode is intentionally not re-applied
   // here: it is already driven for layout-arranged views by the
   // layout-finished signal, and re-registering it here would apply it twice.
@@ -3715,9 +5938,32 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
       auto it = std::find(mChildren.begin(), mChildren.end(), view);
       if(it != mChildren.end())
       {
-        newChildren.PushBack(std::move(*it));
+        // Copied rather than moved out of mChildren, so mChildren still holds the
+        // PREVIOUS order for the comparison below. The move-assignment further
+        // down releases the old container anyway.
+        newChildren.PushBack(*it);
       }
     }
+  }
+
+  // dali-core does NOT suppress every reorder signal that moves nothing. RaiseToTop /
+  // LowerToBottom do gate their emit on an actual move, but RaiseChildAbove and
+  // LowerChildBelow set their `raised` / `lowered` flag OUTSIDE the guard that performs
+  // the move (ActorParentImpl::RaiseChildAbove / LowerChildBelow), so asking to raise a
+  // child above one it is already above emits all the same. Convergence for the
+  // repeat-every-pass callers (RecyclerViewImpl::OnArrange raises its scroll bar to the
+  // top on every arrange) therefore rests on THIS guard, not on an external invariant.
+  //
+  // The guard also catches what dali-core could not suppress in any case: a reorder among
+  // the NON-View actor children, which really does move an actor while leaving the
+  // View-only sequence rebuilt above identical to mChildren.
+  //
+  // Skipping the reorder tagging as well as the invalidation is intentional: no
+  // View moved, so no View's dispatch should be tagged REORDERED.
+  if(newChildren.Count() == mChildren.Count() &&
+     std::equal(newChildren.Begin(), newChildren.End(), mChildren.Begin()))
+  {
+    return;
   }
 
   mChildren = std::move(newChildren);
@@ -3740,7 +5986,42 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
   // A logical child-order change can alter the measured size (e.g. a wrap
   // layout where line-breaking depends on child order), so invalidate measure
   // — not just arrange — for the whole reorder path.
-  mViewImpl.InvalidateMeasure();
+  // This view's own internal primitive, not mViewImpl.InvalidateMeasure(): an
+  // actor-side reorder is a framework-internal event, not an application call.
+  InvalidateMeasure();
+}
+
+void ViewDataImpl::OnLayoutDirectionChanged(Dali::Actor /* actor */, Dali::LayoutDirection::Type /* type */)
+{
+  // BOTH axes, via InvalidateMeasure (which raises the arrange dirty too).
+  //
+  // Arrange alone would be enough for every FIRST-PARTY producer -- the direction is
+  // consumed by ApplyLayoutDirection, which mirrors the x of this view's
+  // non-standalone children, and no in-library measure producer sizes on it. But
+  // GetEffectiveLayoutDirection() is public and OnMeasure() is virtual, so an
+  // application's measure producer CAN size on the direction, and the measure cache
+  // key has no direction term: invalidating arrange alone would leave such a producer
+  // pinned at its pre-change measured size until some unrelated invalidation arrived.
+  //
+  // Closing that here rather than by contract costs nothing that matters. The
+  // alternative -- a direction term in the measure cache KEY -- was rejected because
+  // it would put a layout-direction read into the measure HIT predicate, which runs
+  // per view per pass; this call is on the direction-CHANGE path, which runs on a
+  // locale or explicit direction switch and is idle otherwise. The extra work is one
+  // re-measure of the affected subtree per such switch, and in exchange no
+  // application has to know that measure and arrange key on different inputs.
+  //
+  // Core has already filtered this signal down to the actors whose RESOLVED direction
+  // actually changed, so there is no value-change guard to repeat here.
+  //
+  // The subtree walk is this handler's own job now: only a LAYOUT ROOT holds this
+  // connection (RegisterWithLayoutController), so the per-View connections that used
+  // to deliver the signal to every affected descendant individually are gone.
+  // InvalidateSubtreeLayoutForDirectionChange drops the caches and raises the dirty
+  // bits down the inherit chain; the InvalidateMeasure() after it is what propagates
+  // upward from this node and schedules the pass.
+  InvalidateSubtreeLayoutForDirectionChange();
+  InvalidateMeasure();
 }
 
 // =============================================================================
@@ -3792,6 +6073,7 @@ void ViewDataImpl::SetTrait(TraitId id, IntrusivePtr<TraitObject> object)
       {
         entry.second->OnAttached(id, self);
       }
+      OnLayoutProducerTraitChanged(id);
       return;
     }
   }
@@ -3800,6 +6082,67 @@ void ViewDataImpl::SetTrait(TraitId id, IntrusivePtr<TraitObject> object)
   if(mTraits.back().second)
   {
     mTraits.back().second->OnAttached(id, self);
+  }
+  OnLayoutProducerTraitChanged(id);
+}
+
+void ViewDataImpl::OnLayoutProducerTraitChanged(TraitId id)
+{
+  // Two reserved traits carry a view's layout producers: LAYOUT_SIGNALS holds the
+  // ArrangeCallback and LAYOUT_MANAGER the LayoutManager, the first two rungs of the
+  // dispatch order in Arrange() (ArrangeCallback > LayoutManager > OnArrange).
+  // Swapping either changes WHICH producer runs, so the derived policy bit must not
+  // be left describing the one that just went away.
+  //
+  // The in-library mutators (SetArrangeCallback / AttachLayoutManager) already do this
+  // for themselves; this covers the public Integration::View::SetTrait/RemoveTrait
+  // surface, which can reach the same trait ids with no other bookkeeping. Nothing in
+  // the library relies on it today -- it is here so the derived bit cannot describe
+  // a producer that has just been replaced.
+  //
+  // The in-library mutators do also LAND here once: the first SetArrangeCallback /
+  // SetMeasureCallback creates the LAYOUT_SIGNALS trait through
+  // EnsureLayoutCallbacksObject -> SetTrait, and AttachLayoutManager installs
+  // LAYOUT_MANAGER the same way. On that first-install path the invalidation below is
+  // redundant with the mutator's own (and broader: measure, not just arrange) --
+  // deliberate over-invalidation on a cold path, accepted for one funnel instead of
+  // two exemption lists.
+  if(id != Integration::ReservedTraitId::LAYOUT_SIGNALS &&
+     id != Integration::ReservedTraitId::LAYOUT_MANAGER)
+  {
+    return;
+  }
+
+  // A LAYOUT_SIGNALS swap replaces the callback and its policy. Reset the policy
+  // to ArrangePolicy::IF_CHANGED before deriving the active producer again.
+  if(id == Integration::ReservedTraitId::LAYOUT_SIGNALS)
+  {
+    mArrangeCallbackAlways = false;
+  }
+
+  RefreshArrangeProducerPolicy();
+
+  // Pair the change with an invalidation so a view that has already published an entry
+  // cannot be served from it under the new producer.
+  //
+  // The MEASURE axis has to go too, and that is why this is InvalidateMeasure() rather
+  // than InvalidateArrange(): both trait ids carry a measure producer as well as an
+  // arrange one. LAYOUT_MANAGER supplies LayoutManager::Measure(), and LAYOUT_SIGNALS
+  // holds the MeasureCallback and the ArrangeCallback in ONE LayoutCallbacksObject, so
+  // removing it removes both. Leaving the measured slot cached is worse than leaving the
+  // arranged one: the slot is what every ancestor arranges FROM, so a stale slot
+  // survives as geometry after the view's own arrange has been recomputed.
+  // InvalidateMeasure() supersedes InvalidateArrange() here -- it clears both cache bits
+  // and raises both dirty bits.
+  //
+  // Gated exactly as in SetArrangePolicy(), and for the same reason: this can run before
+  // the CustomActor handle exists (the first SetMeasureCallback/SetArrangeCallback
+  // creates the LAYOUT_SIGNALS trait) and the invalidation walk dereferences Self().
+  // Neither cache bit can be true without a handle, because only a completed pass sets
+  // them, so the gate cannot suppress a needed invalidation.
+  if(mMeasureCacheValid || mArrangeCacheValid)
+  {
+    InvalidateMeasure();
   }
 }
 
@@ -3833,6 +6176,7 @@ bool ViewDataImpl::RemoveTrait(TraitId id)
         it->second->OnDetaching(id, self);
       }
       mTraits.erase(it);
+      OnLayoutProducerTraitChanged(id);
       return true;
     }
   }
@@ -4208,11 +6552,30 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 {
   DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
-  Ui::View view = Ui::View::DownCast(BaseHandle(object));
+  // Two casts, and each one earns its place.
+  //
+  // The HANDLE cast stops at CustomActor rather than going on to Ui::View: it is
+  // unavoidable (Dali::Internal::CustomActor is not a complete type outside dali-core),
+  // but the View handle the old code built on top of it was not -- that was a second
+  // handle and a reference-count round trip on every event-side property write, and
+  // `custom` is all the CORNER_RADIUS / CORNER_SQUARENESS re-entries below need.
+  //
+  // The IMPL cast stays a dynamic_cast in EVERY build. Registration makes it
+  // near-certain to succeed -- these callbacks are registered only on the View type
+  // (DALI_TYPE_REGISTRATION_BEGIN_FULL above), and dali-core resolves a CustomActor's
+  // TypeInfo from the RTTI of its own CustomActorImpl, so an impl that is not a
+  // registered View descendant falls back to the plain CustomActor type whose base
+  // chain never reaches here. But the type registry does NOT verify that a registered
+  // inheritance chain matches the actual C++ one, so an impl falsely registered as a
+  // View descendant is reachable. Under the old Ui::View::DownCast that was a silent
+  // no-op; a static_cast would make it release-build undefined behaviour. Failing
+  // silently, as before, is worth one dynamic_cast on the scripting / styling route.
+  Dali::CustomActor custom      = Dali::CustomActor::DownCast(BaseHandle(object));
+  ViewImpl*         viewImplPtr = custom ? dynamic_cast<ViewImpl*>(&custom.GetImplementation()) : nullptr;
 
-  if(view)
+  if(viewImplPtr)
   {
-    ViewImpl& viewImpl(GetImpl(view));
+    ViewImpl& viewImpl(*viewImplPtr);
 
     switch(index)
     {
@@ -4291,7 +6654,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(dataImpl.mMargin != marginInsets)
           {
             dataImpl.mMargin = marginInsets;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -4306,7 +6669,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(dataImpl.mPadding != paddingInsets)
           {
             dataImpl.mPadding = paddingInsets;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -4418,8 +6781,11 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         float radiusFloat = 0.0f;
         if(value.Get(radiusFloat))
         {
-          view.SetProperty(Ui::View::Property::CORNER_RADIUS,
-                           Vector4(radiusFloat, radiusFloat, radiusFloat, radiusFloat));
+          // Re-enter through the handle we already hold. Handle::SetProperty is not
+          // hidden or overridden by Ui::View, so this is the same Object::SetProperty
+          // the Ui::View handle used to reach -- one fewer handle, same dispatch.
+          custom.SetProperty(Ui::View::Property::CORNER_RADIUS,
+                             Vector4(radiusFloat, radiusFloat, radiusFloat, radiusFloat));
           break;
         }
 
@@ -4456,8 +6822,9 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         float squarenessFloat = 0.0f;
         if(value.Get(squarenessFloat))
         {
-          view.SetProperty(Ui::View::Property::CORNER_SQUARENESS,
-                           Vector4(squarenessFloat, squarenessFloat, squarenessFloat, squarenessFloat));
+          // Same re-entry as CORNER_RADIUS above.
+          custom.SetProperty(Ui::View::Property::CORNER_SQUARENESS,
+                             Vector4(squarenessFloat, squarenessFloat, squarenessFloat, squarenessFloat));
           break;
         }
 
@@ -4506,37 +6873,35 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 
       case VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX:
       {
+        ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
+
+        // This is the single funnel for EVERY event-side write of the property --
+        // the framework's own push from Measure() and any external clobber alike,
+        // because dali-core routes a registered animatable property's writes
+        // through its set function. So it is the one place that can retract the
+        // actor-side sync bit, and retracting it is what keeps Measure()'s
+        // corrective push reachable on a cache HIT (see the gate there). Measure()
+        // sets the bit AFTER its own SetProperty, so this clear does not fight it.
+        dataImpl.mEffectiveScaleActorSynced = false;
+
         // We don't need to hold data for it. But need to apply fitting mode now.
-        viewImpl.GetViewDataImpl().SizeOrUiScaleChanged();
+        dataImpl.SizeOrUiScaleChanged();
         break;
       }
 
+      // The two REQUESTED_* cases keep ONLY the type-coercion half here -- the part a
+      // C++ setter, which already holds a float, does not need. Everything after it
+      // (validation, sentinel snap, change guard, invalidation, parentless-leaf apply)
+      // lives in ViewDataImpl::ApplyRequested*, the single implementation both routes
+      // share, so the scripting route and Ui::GetImpl(view).SetRequested*() cannot
+      // drift. IsValidRequestedSize moved INSIDE Apply*, so the composed predicate
+      // `value.Get(w) && IsValidRequestedSize(w)` is preserved exactly.
       case Ui::View::Property::REQUESTED_WIDTH:
       {
         float width;
-        if(value.Get(width) && IsValidRequestedSize(width))
+        if(value.Get(width))
         {
-          // Snap a near-sentinel input to the exact sentinel so downstream
-          // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
-          if(FloatEqual(width, WRAP_CONTENT))
-          {
-            width = WRAP_CONTENT;
-          }
-          else if(FloatEqual(width, MATCH_PARENT))
-          {
-            width = MATCH_PARENT;
-          }
-          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
-          if(!FloatEqual(dataImpl.mRequestedWidth, width))
-          {
-            dataImpl.mRequestedWidth = width;
-            viewImpl.InvalidateMeasure();
-            if(width >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
-               !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
-            {
-              viewImpl.Self().SetWidth(width);
-            }
-          }
+          viewImpl.GetViewDataImpl().ApplyRequestedWidth(width);
         }
         break;
       }
@@ -4544,29 +6909,9 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       case Ui::View::Property::REQUESTED_HEIGHT:
       {
         float height;
-        if(value.Get(height) && IsValidRequestedSize(height))
+        if(value.Get(height))
         {
-          // Snap a near-sentinel input to the exact sentinel so downstream
-          // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
-          if(FloatEqual(height, WRAP_CONTENT))
-          {
-            height = WRAP_CONTENT;
-          }
-          else if(FloatEqual(height, MATCH_PARENT))
-          {
-            height = MATCH_PARENT;
-          }
-          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
-          if(!FloatEqual(dataImpl.mRequestedHeight, height))
-          {
-            dataImpl.mRequestedHeight = height;
-            viewImpl.InvalidateMeasure();
-            if(height >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
-               !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
-            {
-              viewImpl.Self().SetHeight(height);
-            }
-          }
+          viewImpl.GetViewDataImpl().ApplyRequestedHeight(height);
         }
         break;
       }
@@ -4580,7 +6925,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.GetMinimumWidth(), width))
           {
             dataImpl.EnsureSizeConstraints().minWidth = width;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -4595,7 +6940,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.GetMinimumHeight(), height))
           {
             dataImpl.EnsureSizeConstraints().minHeight = height;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -4610,7 +6955,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.GetMaximumWidth(), width))
           {
             dataImpl.EnsureSizeConstraints().maxWidth = width;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -4625,7 +6970,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(!FloatEqual(dataImpl.GetMaximumHeight(), height))
           {
             dataImpl.EnsureSizeConstraints().maxHeight = height;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
           }
         }
         break;
@@ -4641,7 +6986,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(dataImpl.mLayoutMode != mode)
           {
             dataImpl.mLayoutMode = mode;
-            viewImpl.InvalidateMeasure();
+            dataImpl.InvalidateMeasure();
 
             // A layout-mode transition (DEFAULT <-> STANDALONE) changes
             // whether this view contributes to the parent's measure/arrange.
@@ -4653,7 +6998,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             Ui::View parentView = dataImpl.GetParentView();
             if(parentView)
             {
-              GetImpl(parentView).InvalidateMeasure();
+              ViewDataImpl::Get(GetImpl(parentView)).InvalidateMeasure();
             }
           }
         }
@@ -4679,11 +7024,13 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
   Property::Value value;
 
-  Ui::View view = Ui::View::DownCast(BaseHandle(object));
+  // See the equivalent note in SetProperty above.
+  Dali::CustomActor custom      = Dali::CustomActor::DownCast(BaseHandle(object));
+  ViewImpl*         viewImplPtr = custom ? dynamic_cast<ViewImpl*>(&custom.GetImplementation()) : nullptr;
 
-  if(view)
+  if(viewImplPtr)
   {
-    ViewImpl& viewImpl(GetImpl(view));
+    ViewImpl& viewImpl(*viewImplPtr);
 
     switch(index)
     {
@@ -6240,12 +8587,26 @@ void ViewDataImpl::ClearAnimationConstraints(const Dali::BaseObject& animationOb
 
 void ViewDataImpl::Process(bool postProcessor)
 {
+  // Consume the registration BEFORE doing the work, never after.
+  //
+  // RegisterProcessorOnce() is guarded by this very flag, so as long as it stays
+  // set the guard swallows every new request. ApplyFittingMode() runs arbitrary
+  // visual code and can itself raise one (a fitting apply that resizes a visual
+  // whose readiness or size feeds back into this view), and with the flag cleared
+  // afterwards that request was silently dropped: nothing re-registered, and the
+  // fitting stayed one step behind until some unrelated size or scale change came
+  // along. Clearing first makes the re-request re-register for the next pass.
+  //
+  // There is deliberately no persistent "pending logical size" to go with it: the
+  // re-registered run reads mSize at the time it runs, so it uses the CURRENT size
+  // rather than replaying whatever size was current when the request was raised.
+  mProcessorRegistered = false;
+
   if(DALI_LIKELY(mVisualData))
   {
     // Call ApplyFittingMode
     mVisualData->ApplyFittingMode(mSize, false);
   }
-  mProcessorRegistered = false;
 }
 
 } // namespace Internal

@@ -16,7 +16,13 @@
 #include "manual-test-case.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
+#include <dali/devel-api/animation/animation-devel.h>
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
 #include <string>
+#include <unistd.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -128,6 +134,32 @@ Text::StyledText BuildHighlightedText(const Dali::String& text, const std::strin
   }
   return builder.Build();
 }
+
+/**
+ * Test-time quiescence telemetry, published by the APP over the existing
+ * PropertyBridge string-getter hook (no library change): UI automation reads
+ * "dalium:animationCount" through the a11y bridge (e.g. aurum
+ * getStringProperty) and gets the number of running Dali::Animations.
+ *
+ * Gate: DALI_UI_A11Y_TELEMETRY=1 env, or the /tmp/dalium-telemetry flag file.
+ */
+void DaliumTestStringGetter(void* /*obj*/, const char* propertyName, std::string* result)
+{
+  if(propertyName && result && std::strcmp(propertyName, "dalium:animationCount") == 0)
+  {
+    *result = std::to_string(Dali::DevelAnimation::GetAnimationCount());
+  }
+}
+
+bool DaliumTelemetryEnabled()
+{
+  const char* v = std::getenv("DALI_UI_A11Y_TELEMETRY");
+  if(v && *v == '1')
+  {
+    return true;
+  }
+  return access("/tmp/dalium-telemetry", F_OK) == 0;
+}
 } // namespace
 
 /**
@@ -153,11 +185,20 @@ private:
 
   void OnCreate(Application application)
   {
+    if(DaliumTelemetryEnabled())
+    {
+      Dali::Ui::Integration::PropertyBridgeRegisterStringGetter(DaliumTestStringGetter);
+    }
+
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(COLOR_APP_BG));
     window.KeyEventSignal().Connect(this, &ManualTestLauncher::OnKeyEvent);
 
     mTestCases = ManualTest::Registry::Get().CreateAll();
+    // Registration order is link order; the list must follow the TC numbers
+    // in the names ("01. ...", zero-padded so lexicographic == numeric).
+    std::sort(mTestCases.begin(), mTestCases.end(), [](const auto& a, const auto& b)
+    { return ToStdString(a->GetName()) < ToStdString(b->GetName()); });
     mSearchCache.reserve(mTestCases.size());
     for(const auto& tc : mTestCases)
     {
@@ -212,7 +253,7 @@ private:
     header.SetRequestedWidth(MATCH_PARENT);
     header.SetRequestedHeight(HEADER_HEIGHT);
     header.SetBackgroundColor(UiColor(COLOR_HEADER_BG));
-    header.SetPadding(Extents(PADDING_H, PADDING_H, 0, 0));
+    header.SetPadding(Insets(PADDING_H, PADDING_H, 0.0f, 0.0f));
     header.Add(titleLabel);
     return header;
   }
@@ -225,8 +266,8 @@ private:
     mSearchField.SetBackgroundColor(UiColor(0xFFFFFF, 0.72f));
     mSearchField.SetBorderlineWidth(1.0f);
     mSearchField.SetBorderlineColor(UiColor(0xD9E5FF));
-    mSearchField.SetMargin(Extents(8.0f, 8.0f, 8.0f, 8.0f));
-    mSearchField.SetPadding(Extents(16.0f, 16.0f, 0.0f, 0.0f));
+    mSearchField.SetMargin(Insets(8.0f, 8.0f, 8.0f, 8.0f));
+    mSearchField.SetPadding(Insets(16.0f, 16.0f, 0.0f, 0.0f));
     mSearchField.SetFontSize(FONT_SEARCH);
     mSearchField.SetTextColor(UiColor(COLOR_SEARCH_TEXT));
     mSearchField.SetPlaceholder("What are you looking for?");
@@ -255,7 +296,7 @@ private:
       emptyLabel.SetFontSize(FONT_TC_NAME);
       emptyLabel.SetRequestedWidth(MATCH_PARENT);
       emptyLabel.SetRequestedHeight(WRAP_CONTENT);
-      emptyLabel.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
+      emptyLabel.SetPadding(Insets(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
       mListContent.Add(emptyLabel);
       return;
     }
@@ -279,7 +320,7 @@ private:
       emptyLabel.SetFontSize(FONT_TC_NAME);
       emptyLabel.SetRequestedWidth(MATCH_PARENT);
       emptyLabel.SetRequestedHeight(WRAP_CONTENT);
-      emptyLabel.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
+      emptyLabel.SetPadding(Insets(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
       mListContent.Add(emptyLabel);
     }
   }
@@ -311,7 +352,7 @@ private:
     item.SetRequestedWidth(MATCH_PARENT);
     item.SetRequestedHeight(WRAP_CONTENT);
     item.SetBackgroundColor(UiColor(COLOR_ITEM_BG));
-    item.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V, PADDING_V));
+    item.SetPadding(Insets(PADDING_H, PADDING_H, PADDING_V, PADDING_V));
     item.SetFocusable(true);
     item.SetStateEffect(OverlayEffect::ListItem());
     InteractiveTrait interactive = item.AsInteractive();
@@ -360,7 +401,7 @@ private:
     backLabel.SetFontSize(FONT_HEADER);
     backLabel.SetRequestedWidth(WRAP_CONTENT);
     backLabel.SetRequestedHeight(MATCH_PARENT);
-    backLabel.SetPadding(Extents(PADDING_H, PADDING_H * 2, 0, 0));
+    backLabel.SetPadding(Insets(PADDING_H, PADDING_H * 2, 0.0f, 0.0f));
     backLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     backLabel.SetFocusable(true);
     backLabel.SetStateEffect(OverlayEffect::ListItem());

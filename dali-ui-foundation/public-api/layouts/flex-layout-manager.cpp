@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/flex-layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -244,7 +245,9 @@ FlexJustifyOffsets GetFlexJustifyOffsets(float freeSpace, FlexJustify justify, s
   return out;
 }
 
-void ArrangeOneFlexLine(FlexLine& line, std::vector<View>& children,
+// @param[in] owner The arranging View, threaded through so the final MATCH_PARENT
+//                  re-measure below can be attributed to it. nullptr makes the scope inert.
+void ArrangeOneFlexLine(ViewImpl* owner, FlexLine& line, std::vector<View>& children,
                         std::vector<MeasuredSize>& workingSizes, const LayoutRect& bounds,
                         float contentWidth, float contentHeight, float& crossOffsetInOut, float& mainOffsetInOut,
                         float spacing, FlexAlign alignItems, bool isMainAxisHorizontal, bool isMainAxisReversed)
@@ -351,6 +354,7 @@ void ArrangeOneFlexLine(FlexLine& line, std::vector<View>& children,
 
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
+      Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(owner);
       childImpl.Measure(childBounds.width, childBounds.height);
     }
     childImpl.Arrange(childBounds);
@@ -391,7 +395,18 @@ FlexLayoutManager::~FlexLayoutManager()
 
 void FlexLayoutManager::SetDirection(FlexDirection direction)
 {
-  GetImplAs<Impl>()->mDirection = direction;
+  Impl* impl = GetImplAs<Impl>();
+  if(impl->mDirection == direction)
+  {
+    return;
+  }
+  impl->mDirection = direction;
+
+  // A MEASURE input: the direction maps which constraint is the main axis, so
+  // line breaking and the accumulated extents both change with it. Neither cache
+  // key can see this manager's own state, so the owner has to be told. See
+  // LayoutManager::InvalidateOwnerMeasure.
+  InvalidateOwnerMeasure();
 }
 
 FlexDirection FlexLayoutManager::GetDirection() const
@@ -401,7 +416,16 @@ FlexDirection FlexLayoutManager::GetDirection() const
 
 void FlexLayoutManager::SetWrap(FlexWrap wrap)
 {
-  GetImplAs<Impl>()->mWrap = wrap;
+  Impl* impl = GetImplAs<Impl>();
+  if(impl->mWrap == wrap)
+  {
+    return;
+  }
+  impl->mWrap = wrap;
+
+  // A MEASURE input, like the direction: wrapping decides how many lines the
+  // children break into, which is what the measured extents accumulate.
+  InvalidateOwnerMeasure();
 }
 
 FlexWrap FlexLayoutManager::GetWrap() const
@@ -411,7 +435,20 @@ FlexWrap FlexLayoutManager::GetWrap() const
 
 void FlexLayoutManager::SetJustifyContent(FlexJustify justify)
 {
-  GetImplAs<Impl>()->mJustifyContent = justify;
+  Impl* impl = GetImplAs<Impl>();
+  if(impl->mJustifyContent == justify)
+  {
+    return;
+  }
+  impl->mJustifyContent = justify;
+
+  // PLACEMENT-only: Measure() reads the direction and the wrap but never this
+  // value -- justification distributes the free space of an already-measured
+  // line, so no measured size can change. Invalidating the ARRANGE axis alone
+  // keeps every measure cache in the subtree warm; the pass this schedules
+  // re-runs only Arrange (and its arrange-owned re-measures, which hit their
+  // measure caches at the unchanged constraints).
+  InvalidateOwnerArrange();
 }
 
 FlexJustify FlexLayoutManager::GetJustifyContent() const
@@ -421,7 +458,17 @@ FlexJustify FlexLayoutManager::GetJustifyContent() const
 
 void FlexLayoutManager::SetAlignItems(FlexAlign align)
 {
-  GetImplAs<Impl>()->mAlignItems = align;
+  Impl* impl = GetImplAs<Impl>();
+  if(impl->mAlignItems == align)
+  {
+    return;
+  }
+  impl->mAlignItems = align;
+
+  // PLACEMENT-only, like the justification: cross-axis alignment (stretching
+  // included) is applied while placing a line and never feeds the measured
+  // extents. See SetJustifyContent.
+  InvalidateOwnerArrange();
 }
 
 FlexAlign FlexLayoutManager::GetAlignItems() const
@@ -431,7 +478,16 @@ FlexAlign FlexLayoutManager::GetAlignItems() const
 
 void FlexLayoutManager::SetAlignContent(FlexAlign align)
 {
-  GetImplAs<Impl>()->mAlignContent = align;
+  Impl* impl = GetImplAs<Impl>();
+  if(impl->mAlignContent == align)
+  {
+    return;
+  }
+  impl->mAlignContent = align;
+
+  // PLACEMENT-only: line distribution along the cross axis within the bounds
+  // handed to Arrange(). See SetJustifyContent.
+  InvalidateOwnerArrange();
 }
 
 FlexAlign FlexLayoutManager::GetAlignContent() const
@@ -646,7 +702,7 @@ void FlexLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
       float contentMain = IsMainAxisHorizontal() ? contentWidth : contentHeight;
       mainOffset        = contentMain - justify.mainOffset;
     }
-    ArrangeOneFlexLine(line, children, workingSizes, bounds, contentWidth, contentHeight, crossOffset, mainOffset,
+    ArrangeOneFlexLine(view, line, children, workingSizes, bounds, contentWidth, contentHeight, crossOffset, mainOffset,
                        justify.spacing, impl->mAlignItems, IsMainAxisHorizontal(), IsMainAxisReversed());
   }
 }

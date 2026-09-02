@@ -21,8 +21,11 @@
 #include <dali/public-api/actors/custom-actor.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/common/extents.h> // TODO: Remove after Insets migration
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
 #include <initializer_list>
 
 // INTERNAL INCLUDES
@@ -36,9 +39,7 @@
 #include <dali-ui-foundation/public-api/traits/interactive-trait.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/inner-shadow.h>
-#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/types/unique-any.h>
@@ -156,7 +157,22 @@ public: // Measure / Arrange API
    * @brief Measures the view with the given constraints.
    *
    * This method implements caching to avoid redundant calculations.
-   * It calls OnMeasure internally (Template Method pattern).
+   * It calls the view's measure implementation -- OnMeasure(), an attached
+   * LayoutManager, or a MeasureCallback set through SetMeasureCallback() -- following
+   * the Template Method pattern, and caches the result. When the view is re-measured
+   * with the same normalised constraint and nothing has invalidated its layout, the
+   * cached result is served and that implementation is not called.
+   *
+   * Unlike arrange, measure has no ArrangePolicy::ALWAYS opt-out: measure caching
+   * applies to every measure implementation including one written outside this library.
+   * A measure implementation is REQUIRED to be a pure function of its
+   * constraints, the view's effective scale, the view's own layout-tracked state, the
+   * effective layout direction and its children's measured sizes. An implementation
+   * that reads anything else owns the invalidation and must call InvalidateMeasure()
+   * when that state changes. See ViewImpl::OnMeasure().
+   *
+   * The framework keys the measure cache on the effective scale as well as on the
+   * constraint, so a scale change alone forces a re-measure.
    *
    * @param[in] widthConstraint The width constraint for measurement
    * @param[in] heightConstraint The height constraint for measurement
@@ -167,7 +183,39 @@ public: // Measure / Arrange API
   /**
    * @brief Arranges the view within the given bounds.
    *
-   * This method calls OnArrange internally (Template Method pattern).
+   * This method calls the view's arrange implementation -- OnArrange(), an attached
+   * LayoutManager, or an ArrangeCallback set through SetArrangeCallback() --
+   * following the Template
+   * Method pattern, and caches the result. When the view is re-arranged with the
+   * same bounds, the same effective layout direction and the same effective scale,
+   * and nothing has invalidated its layout, the cached result is served and that
+   * implementation is not called. The arranged geometry is reconciled either way, so
+   * the outcome is the same.
+   *
+   * That holds for a view WITH children too: serving the cache replays the settled
+   * subtree, so every descendant the arrange implementation would have arranged ends
+   * the pass at exactly the geometry a re-run would have left it at -- including
+   * geometry that was written outside layout since the previous pass -- and every
+   * descendant subscribed to LayoutFinishedSignal() is still notified. Serving the
+   * cache is an optimisation of the WORK, never of the RESULT.
+   *
+   * ArrangePolicy::IF_CHANGED is the default for OnArrange(),
+   * one-argument ArrangeCallback registration, and LayoutManager::Arrange(). Use
+   * ArrangePolicy::ALWAYS when an arrange implementation reads ancestor or world
+   * geometry, depends on mutable state that does not invalidate arrange, or performs
+   * work that must happen on every arrange pass. VideoView and WebView are first-party
+   * examples.
+   *
+   * An ArrangePolicy::ALWAYS view refuses the cache hit of every ancestor ABOVE it:
+   * each of those ancestors misses and re-runs its own arrange implementation. It does
+   * not force the whole subtree to re-run -- a sibling subtree that a re-running
+   * ancestor re-enters still evaluates its own predicate and can serve its own hit, in
+   * which case it is replayed rather than re-run. The cost is the ancestor PATH, not
+   * every view beneath the ancestor.
+   *
+   * @note An ArrangePolicy::IF_CHANGED arrange implementation must arrange the same set
+   * of children for the same tracked inputs. If that set depends on untracked state,
+   * use ArrangePolicy::ALWAYS or invalidate arrange whenever the state changes.
    *
    * @param[in] bounds The bounds to arrange the view in
    * @return The final arranged bounds (parent-local, pre-RTL logical)
@@ -179,11 +227,37 @@ public: // Measure / Arrange API
    *
    * This propagates to the parent layout while one exists,
    * until the layout root is reached (no parent Layout).
+   *
+   * @note Calling this DURING layout processing -- from inside any Measure/Arrange
+   * implementation (OnMeasure, OnArrange, a measure/arrange callback, a LayoutManager
+   * producer), or from a LayoutFinishedSignal slot -- is a contract violation and is
+   * logged once for this View. The invalidation is retained, not ignored: the relevant
+   * caches are revoked, dirty state propagates to the layout root, and that root remains
+   * pending. To prevent a self-sustaining layout pump, it does not request an idle
+   * ProcessEvents wake. A not-yet-started turn for that root in the current batch may
+   * consume the work immediately; otherwise a later independently triggered
+   * ProcessEvents, an explicit LayoutController::ProcessLayouts(), or an
+   * out-of-processing request drains or wakes it. Such an out-of-processing request
+   * arms at most one coalesced outstanding wake. Until that pass runs, the last
+   * completed measured or arranged geometry may remain observable. On a quiescent
+   * application (no input, animation or timer) that next cycle may be INDEFINITELY
+   * later. In-processing invalidation is prohibited in principle and honoured only
+   * best-effort -- mirroring dali-core's relayout policy -- so never rely on it for
+   * the correctness of the current frame. Change state and invalidate at event time
+   * when prompt relayout is required.
    */
   void InvalidateMeasure();
 
   /**
    * @brief Invalidates the arrange of this view.
+   *
+   * @note Calling this DURING layout processing (any Measure/Arrange pass, or a
+   * LayoutFinishedSignal slot) has the same retained-but-parked semantics as
+   * InvalidateMeasure(): it is a contract violation and is logged once, the arrange
+   * invalidation propagates and remains pending, but it does not request its own idle
+   * ProcessEvents wake. The last completed geometry may remain observable until an
+   * independently triggered ProcessEvents, an explicit LayoutController::ProcessLayouts(),
+   * or an out-of-processing request drains or wakes the pending work.
    */
   void InvalidateArrange();
 
@@ -199,6 +273,14 @@ public: // Measure / Arrange API
    *
    * When set, the callback replaces the default measurement behavior
    * during the layout pass. Pass a default-constructed callback to remove.
+   *
+   * @note The callback becomes this view's measure implementation, so the measure
+   * contract documented on Measure() applies to it unchanged: it must be a pure function
+   * of its constraints, the view's effective scale, the view's own layout-tracked state,
+   * the effective layout direction and its children's measured sizes, and it is NOT
+   * called on a measure-cache hit. There is no ArrangePolicy::ALWAYS-style opt-out --
+   * caching is always on -- so a callback that depends on anything else must call
+   * View::InvalidateMeasure() itself when that state changes.
    *
    * @param[in] callback The measure callback (ownership transferred)
    *
@@ -228,6 +310,13 @@ public: // Measure / Arrange API
    * resolves to RIGHT_TO_LEFT, so callbacks must not apply RTL mirroring
    * themselves.
    *
+   * @note The callback replaces OnArrange() as this view's arrange implementation. This
+   * one-argument overload uses ArrangePolicy::IF_CHANGED, so the framework
+   * may reuse an unchanged result without invoking the callback. Use the two-argument
+   * overload with ArrangePolicy::ALWAYS when the callback reads state that is
+   * not tracked by layout invalidation or performs externally visible work on every
+   * arrange pass.
+   *
    * @param[in] callback The arrange callback (ownership transferred)
    *
    * @code
@@ -242,6 +331,27 @@ public: // Measure / Arrange API
    * @endcode
    */
   void SetArrangeCallback(ArrangeCallback callback);
+
+  /**
+   * @brief Sets a custom arrange callback and its execution policy.
+   *
+   * The default policy used by the one-argument overload is
+   * ArrangePolicy::IF_CHANGED. Pass ArrangePolicy::ALWAYS when the
+   * callback reads ancestor or world geometry, depends on mutable state that is not
+   * accompanied by InvalidateArrange(), or pushes state to a surface outside the
+   * actor tree.
+   *
+   * Installing a callback replaces the policy of the previously installed callback.
+   *
+   * @param[in] callback The arrange callback (ownership transferred)
+   * @param[in] policy   When the callback runs
+   *
+   * @code
+   * view.SetArrangeCallback(ArrangeCallback::New(&MyArrange),
+   *                         ArrangePolicy::ALWAYS);
+   * @endcode
+   */
+  void SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy);
 
   /**
    * @brief Attaches a LayoutTransition to this view.
@@ -482,6 +592,16 @@ public: // Properties
   void SetMargin(const Insets& margin);
 
   /**
+   * @brief Sets the view margin from Extents.
+   *
+   * TODO: Temporary overload kept so out-of-tree callers still
+   * passing Extents keep compiling. Remove once they have migrated to Insets.
+   *
+   * @param[in] margin The margin to set
+   */
+  void SetMargin(const Extents& margin);
+
+  /**
    * @brief Sets the view margin for each edge.
    *
    * @param[in] start The start margin
@@ -539,6 +659,16 @@ public: // Properties
    * @param[in] padding The padding to set
    */
   void SetPadding(const Insets& padding);
+
+  /**
+   * @brief Sets the view padding from Extents.
+   *
+   * TODO: Temporary overload kept so out-of-tree callers still
+   * passing Extents keep compiling. Remove once they have migrated to Insets.
+   *
+   * @param[in] padding The padding to set
+   */
+  void SetPadding(const Extents& padding);
 
   /**
    * @brief Sets the view padding for each edge.
@@ -603,9 +733,9 @@ public: // Properties
   // Dali::Ui::Extension geometry setters instead.
 private:
   void SetSize(const Vector3& size)         = delete;
-  void SetWidth(float width)                = delete;
-  void SetHeight(float height)              = delete;
-  void SetDepth(float depth)                = delete;
+  void SetSizeWidth(float width)            = delete;
+  void SetSizeHeight(float height)          = delete;
+  void SetSizeDepth(float depth)            = delete;
   void SetPosition(const Vector3& position) = delete;
   void SetPositionX(float x)                = delete;
   void SetPositionY(float y)                = delete;
@@ -776,23 +906,61 @@ public:
   void SetShadow(const ShadowStack& shadowStack);
 
   /**
+   * @brief Gets the target component-wise color multiplier of this View.
+   *
+   * @return The target color multiplier
+   */
+  UiColor GetColorMultiplier() const;
+
+  /**
    * @brief Gets the color.
    *
+   * @deprecated Use GetColorMultiplier() instead.
    * @return The color
    */
   UiColor GetColor() const;
 
   /**
+   * @brief Sets the component-wise color multiplier for this View's rendered content.
+   *
+   * This does not draw content or change the background. The resolved red, green, blue,
+   * and alpha components are multiplied with the corresponding components of the View's
+   * rendered content. For example:
+   * @code
+   * view.SetBackgroundColor(UiColor(0xFFFFFF));
+   * view.SetColorMultiplier(UiColor(0xFF0000));
+   * // The rendered background is (1, 0, 0, 1):
+   * // (1, 1, 1, 1) * (1, 0, 0, 1).
+   * @endcode
+   *
+   * The default multiplier is (1, 1, 1, 1), which leaves rendered colors unchanged.
+   * UiColor values created from hexadecimal RGB values are resolved to components in
+   * the range [0, 1] before multiplication.
+   *
+   * @param[in] multiplier The color multiplier to set
+   * @see SetBackgroundColor()
+   */
+  void SetColorMultiplier(const UiColor& multiplier);
+
+  /**
    * @brief Sets the color.
    *
+   * @deprecated Use SetColorMultiplier() instead.
    * @param[in] color The color to set
-   * @return Reference to this View for fluent chaining
    */
   void SetColor(const UiColor& color);
 
   /**
+   * @brief Gets the current component-wise color multiplier from the previous update.
+   *
+   * @return The current color multiplier
+   */
+  UiColor GetCurrentColorMultiplier() const;
+
+  /**
    * @brief Gets the current color.
    *
+   * @deprecated Use GetCurrentColorMultiplier() instead.
    * @return The current color
    */
   UiColor GetCurrentColor() const;
@@ -997,6 +1165,11 @@ public:
    * The View stores an independent copy of the parameters and invalidates its
    * measure cache. Changes made to @p params after this call do not affect the
    * View.
+   *
+   * Writing params that compare equal, field by field, to the ones already attached is
+   * a NO-OP: nothing is stored again, no cache is retracted and no layout is scheduled.
+   * The comparison is exact, so a change too small to see is still a change -- a weight
+   * of 0 and a weight of 0.0005 are different states, not the same one.
    *
    * @param[in] params The layout parameters to attach to this View
    *
@@ -1392,24 +1565,28 @@ public: // State API (non-chaining)
    * the mirrored (final) position. The bounds are the PRE-transition target,
    * snapshotted during arrange, not intermediate animated values.
    *
-   * Recurs: if a slot invalidates layout again, the View is re-arranged and the
-   * signal fires again on a later settled pass. Connecting after a layout pass
-   * does not replay the previous result.
+   * Recurs: the signal fires again on a later settled pass whenever this View is
+   * re-arranged. Connecting after a layout pass does not replay the previous result.
    *
-   * @warning A slot that UNCONDITIONALLY triggers a layout recalculation (e.g.
-   * always sets a size/position/layout property, calls a method that invalidates
-   * measure/arrange, or adds/removes children) will spin an ENDLESS
-   * dirty->settled->emit cycle: each emit re-invalidates layout, which schedules
-   * another settled pass that emits again, and so on (the event loop is kept
-   * awake via the idle-process request). There is intentionally no iteration cap
-   * (as with LayoutController::LayoutFinishedSignal and equivalents in other
-   * toolkits). Also note this signal fires whenever the View is (re-)arranged in
-   * a settled pass, INCLUDING when its bounds did NOT change (e.g. it was
-   * re-arranged only because a sibling or ancestor changed) -- do NOT assume
-   * "signal fired" means "this View's geometry changed". Guard any layout-
-   * affecting work in the slot behind a real condition, e.g. compare @p bounds
-   * against a value you cached from the previous emit and act only on an actual
-   * change, or use a one-shot flag.
+   * A slot may NOT invalidate layout. The emit runs inside the layout processing
+   * window, so a direct InvalidateMeasure() / InvalidateArrange() call is a contract
+   * violation and is logged once for that View. The invalidation is nevertheless
+   * retained in full: affected caches and ancestors are invalidated and the layout root
+   * remains pending. It is PARKED rather than allowed to request an idle ProcessEvents
+   * wake, which prevents a dirty->settled->emit loop from keeping the main loop awake.
+   * Parked work counts as pending, so no later completion notification is emitted until
+   * an independently triggered ProcessEvents, an explicit LayoutController::ProcessLayouts(),
+   * or an out-of-processing request drains it. The callback already being delivered
+   * cannot be withdrawn. Property changes and tree mutations from a slot (Add / Remove)
+   * follow the same scheduling rule; framework-internal routing is not an exemption.
+   * Defer layout-affecting work to event time when a prompt follow-up is required.
+   *
+   * @warning This signal fires whenever the View is (re-)arranged in a settled pass,
+   * INCLUDING when its bounds did NOT change (e.g. it was re-arranged only because a
+   * sibling or ancestor changed) -- do NOT assume "signal fired" means "this View's
+   * geometry changed". Guard any layout-affecting work in the slot behind a real
+   * condition, e.g. compare @p bounds against a value you cached from the previous emit
+   * and act only on an actual change, or use a one-shot flag.
    *
    * @note Fires only for a View whose own Arrange() runs during the pass. All
    * built-in LayoutManagers and the default arrange route through child.Arrange().

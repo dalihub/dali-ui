@@ -139,7 +139,7 @@ public:
     label.SetBackgroundColor(Color::BLACK);
     label.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     // 5px on each side gives a 10px visual gap between adjacent buttons.
-    label.SetMargin(Extents(5, 5, 0, 0));
+    label.SetMargin(Insets(5.0f, 5.0f, 0.0f, 0.0f));
     return label;
   }
 

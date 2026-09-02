@@ -198,7 +198,7 @@ private:
     contents.SetSpacing(STACK_SPACING);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    contents.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     mTitleLabel          = CreateTitleLabel();
     mSubtitleLabel       = CreateSubtitleLabel();
@@ -224,7 +224,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
     return label;
   }
@@ -236,7 +236,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(0xEFEFEF));
     return label;
   }
@@ -258,7 +258,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_RED));
     return label;
   }
@@ -271,7 +271,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
     return label;
   }
@@ -284,7 +284,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     label.SetBackgroundColor(UiColor(0xF0F0F0));
     return label;
   }
@@ -298,7 +298,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     label.SetBackgroundColor(UiColor(0xFFF7E6));
 
     UiLocalizationManager::Get().SetBindingResource(
@@ -329,7 +329,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     label.SetBackgroundColor(UiColor(0xEFFFF2));
 
     UiLocalizationManager::Get().SetBindingResource(
@@ -358,7 +358,7 @@ private:
     label.SetTextColor(UiColor(COLOR_DARK_TEXT));
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(0xFAFAFA));
     return label;
   }

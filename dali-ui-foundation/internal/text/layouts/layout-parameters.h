@@ -64,25 +64,29 @@ struct Parameters
     numberOfGlyphs{0u},
     startLineIndex{0u},
     estimatedNumberOfLines{0u},
+    maximumNumberOfLines{static_cast<Length>(MAXIMUM_LINES_UNLIMITED)},
     interGlyphExtraAdvance{0.f},
     replacementLayoutData{nullptr},
+    maximumNumberOfLinesExceeded{false},
     isLastNewParagraph{false}
   {
   }
 
-  Vector2                               boundingBox;                     ///< The size of the box containing the text.
-  ModelPtr                              textModel;                       ///< The text's model.
-  TextAbstraction::FontClient           fontClient;                      ///< FontClient to use obtain glyph information.
-  TextAbstraction::BidirectionalSupport bidirectionalSupport;            ///< BidirectionalSupport for using lines reorders.
-  BidirectionalLineInfoRun*             lineBidirectionalInfoRunsBuffer; ///< Bidirectional conversion tables per line.
-  Length                                numberOfBidirectionalInfoRuns;   ///< The number of lines with bidirectional info.
-  GlyphIndex                            startGlyphIndex;                 ///< Index to the first glyph to layout.
-  Length                                numberOfGlyphs;                  ///< The number of glyphs to layout.
-  LineIndex                             startLineIndex;                  ///< The line index where to insert the new lines.
-  Length                                estimatedNumberOfLines;          ///< The estimated number of lines.
-  float                                 interGlyphExtraAdvance;          ///< Extra advance added to each glyph.
-  const ReplacementLayoutData*          replacementLayoutData;           ///< Optional synthetic replacement metrics.
-  bool                                  isLastNewParagraph : 1;          ///< Whether the last character is a new paragraph character.
+  Vector2                               boundingBox;                      ///< The size of the box containing the text.
+  ModelPtr                              textModel;                        ///< The text's model.
+  TextAbstraction::FontClient           fontClient;                       ///< FontClient to use obtain glyph information.
+  TextAbstraction::BidirectionalSupport bidirectionalSupport;             ///< BidirectionalSupport for using lines reorders.
+  BidirectionalLineInfoRun*             lineBidirectionalInfoRunsBuffer;  ///< Bidirectional conversion tables per line.
+  Length                                numberOfBidirectionalInfoRuns;    ///< The number of lines with bidirectional info.
+  GlyphIndex                            startGlyphIndex;                  ///< Index to the first glyph to layout.
+  Length                                numberOfGlyphs;                   ///< The number of glyphs to layout.
+  LineIndex                             startLineIndex;                   ///< The line index where to insert the new lines.
+  Length                                estimatedNumberOfLines;           ///< The estimated number of lines.
+  Length                                maximumNumberOfLines;             ///< Maximum laid-out lines, or zero for unlimited.
+  float                                 interGlyphExtraAdvance;           ///< Extra advance added to each glyph.
+  const ReplacementLayoutData*          replacementLayoutData;            ///< Optional synthetic replacement metrics.
+  bool                                  maximumNumberOfLinesExceeded : 1; ///< Whether laying out all content requires more than the maximum lines.
+  bool                                  isLastNewParagraph : 1;           ///< Whether the last character is a new paragraph character.
 };
 
 } // namespace Layout

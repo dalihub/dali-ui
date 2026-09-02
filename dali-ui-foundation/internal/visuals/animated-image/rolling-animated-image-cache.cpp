@@ -96,11 +96,30 @@ RollingAnimatedImageCache::~RollingAnimatedImageCache()
 
 TextureSet RollingAnimatedImageCache::Frame(uint32_t frameIndex)
 {
+  // A newer request supersedes a jump waiting for an in-flight decode.
+  mPendingFrameIndex = -1;
+
   bool popExist = false;
   while(!mQueue.IsEmpty() && mQueue.Front().mFrameNumber != frameIndex)
   {
+    if(!mQueue.Front().mReady)
+    {
+      // Removing an entry that is still loading unregisters this cache from
+      // its completion callback. Keep it until the callback arrives, then
+      // continue with the most recently requested frame.
+      mPendingFrameIndex = static_cast<int32_t>(frameIndex);
+      break;
+    }
     PopFrontCache();
     popExist = true;
+  }
+
+  if(mPendingFrameIndex >= 0)
+  {
+    mLoadWaitingQueue.clear();
+    mLoadWaitingQueue.push_back(frameIndex);
+    LOG_CACHE;
+    return TextureSet();
   }
 
   TextureSet textureSet;
@@ -315,7 +334,8 @@ void RollingAnimatedImageCache::ClearCache(bool keepUnusedTexture)
     }
   }
   mLoadWaitingQueue.clear();
-  mLoadState = TextureManager::LoadState::NOT_STARTED;
+  mLoadState         = TextureManager::LoadState::NOT_STARTED;
+  mPendingFrameIndex = -1;
 }
 
 void RollingAnimatedImageCache::MakeFrameReady(bool loadSuccess, TextureSet textureSet, uint32_t frameCount,
@@ -344,9 +364,24 @@ void RollingAnimatedImageCache::MakeFrameReady(bool loadSuccess, TextureSet text
     // mQueue.Back() is always the frame currently loaded.
     mQueue.Back().mReady                   = true;
     mIntervals[mQueue.Back().mFrameNumber] = interval;
+    if(mPendingFrameIndex >= 0)
+    {
+      // The old frame was retained only to preserve its completion callback.
+      // Discard it now and notify once the requested frame reaches the front.
+      while(!mQueue.IsEmpty() && mQueue.Front().mReady &&
+            mQueue.Front().mFrameNumber != static_cast<uint32_t>(mPendingFrameIndex))
+      {
+        PopFrontCache();
+      }
+      if(IsFrontReady() && mQueue.Front().mFrameNumber == static_cast<uint32_t>(mPendingFrameIndex))
+      {
+        mPendingFrameIndex = -1;
+        mObserver.FrameReady(textureSet, interval, preMultiplied);
+      }
+    }
     // Check whether currently loaded frame is front of queue or not.
     // If it is, notify frame ready to observer.
-    if(frontFrameReady == false && IsFrontReady())
+    else if(frontFrameReady == false && IsFrontReady())
     {
       mObserver.FrameReady(textureSet, interval, preMultiplied);
     }

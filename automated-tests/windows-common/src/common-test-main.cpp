@@ -113,6 +113,7 @@ constexpr UnsupportedTest WINDOWS_UNSUPPORTED_TESTS[] = {
   {"UtcDaliViewAccessibilityHighlightCommandsP", WINDOWS_ACCESSIBILITY_REASON},
   {"UtcDaliViewAccessibilityActionCallbacksP", WINDOWS_ACCESSIBILITY_REASON},
   {"UtcDaliViewAccessibilityRequestCallbacksP", WINDOWS_ACCESSIBILITY_REASON},
+  {"UtcDaliViewAccessibilityExtensionNotificationsP", WINDOWS_ACCESSIBILITY_REASON},
   {"UtcDaliAccessibilityTextControlsInterfacesInternalP", WINDOWS_ACCESSIBILITY_REASON},
   {"UtcDaliAccessibilityTextUnicodeCharacterOffsetsInternalP", WINDOWS_ACCESSIBILITY_REASON},
   {"UtcDaliAccessibilityTextUnicodeRangeGeometryInternalP", WINDOWS_ACCESSIBILITY_REASON},

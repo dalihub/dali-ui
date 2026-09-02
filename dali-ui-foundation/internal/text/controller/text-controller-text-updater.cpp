@@ -242,8 +242,8 @@ void Controller::TextUpdater::SetStyledText(Controller& controller, const Styled
     Dali::Ui::Internal::Text::StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(styledText,
                                                                                      *logicalModel,
                                                                                      GetDpi(),
-                                                                                     impl.mAnchorColor,
-                                                                                     impl.mAnchorClickedColor);
+                                                                                     impl.GetAnchorColor(),
+                                                                                     impl.GetAnchorClickedColor());
 
     const Length characterCount = static_cast<Dali::Ui::Text::Length>(logicalModel->mText.Count());
 
@@ -867,9 +867,6 @@ void Controller::TextUpdater::ResetText(Controller& controller)
   {
     impl.ClearReplacementData();
   }
-  // Reset the embedded images buffer.
-  logicalModel->ClearEmbeddedImages();
-
   // Reset the anchors buffer.
   logicalModel->ClearAnchors();
 

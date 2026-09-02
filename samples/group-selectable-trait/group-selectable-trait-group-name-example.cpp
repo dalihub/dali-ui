@@ -95,7 +95,7 @@ public:
     grandparent.SetRequestedWidth(MATCH_PARENT);
     grandparent.SetRequestedHeight(MATCH_PARENT);
     grandparent.SetSpacing(PARENT_SPACING);
-    grandparent.SetPadding(Extents(40, 40, 40, 40)); // start, end, top, bottom
+    grandparent.SetPadding(Insets(40.0f, 40.0f, 40.0f, 40.0f)); // start, end, top, bottom
 
     // Status label at the top, reporting the current selection.
     mLabel = Label::New("No View is selected");

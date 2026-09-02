@@ -20,12 +20,12 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/math/vector2.h>
+#include <dali/public-api/signals/callback.h>
 #include <cfloat>
 #include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 
 namespace Dali
 {
@@ -328,9 +328,45 @@ using MeasureCallback = Callback<MeasuredSize(View, float, float)>;
  * view.SetArrangeCallback(ArrangeCallback::New(this, &MyClass::OnArrange));
  * @endcode
  *
- * @note Signature: MeasuredSize(View view, const LayoutRect& bounds)
+ * @note Signature: LayoutRect(View view, const LayoutRect& bounds)
+ *
+ * @note A callback installed through the one-argument SetArrangeCallback() uses
+ *       ArrangePolicy::IF_CHANGED. Use the two-argument overload with
+ *       ArrangePolicy::ALWAYS when the callback reads state that is not
+ *       tracked by layout invalidation or performs externally visible work on
+ *       every arrange pass.
  */
 using ArrangeCallback = Callback<LayoutRect(View, const LayoutRect&)>;
+
+/**
+ * @brief Controls when a view's arrange implementation runs.
+ *
+ * The framework caches arrange results. When a view is re-arranged with the same
+ * bounds, the same effective layout direction and the same effective scale, and
+ * nothing has invalidated its layout, the cached result may be served WITHOUT
+ * running the view's arrange implementation -- its OnArrange() override, an attached
+ * LayoutManager, or an ArrangeCallback set through SetArrangeCallback() -- at all.
+ *
+ * ArrangePolicy::IF_CHANGED is the default. An arrange implementation must use
+ * ArrangePolicy::ALWAYS when it reads state outside the layout invalidation system or
+ * performs work that must happen on every arrange pass.
+ *
+ * @see Ui::ViewImpl::SetArrangePolicy()
+ * @see Ui::View::SetArrangeCallback(ArrangeCallback, ArrangePolicy)
+ */
+enum class ArrangePolicy : uint8_t
+{
+  /**
+   * @brief Default. Runs the arrange implementation when no reusable unchanged result
+   * exists.
+   */
+  IF_CHANGED = 0,
+
+  /**
+   * @brief Runs the arrange implementation on every arrange pass that reaches this view.
+   */
+  ALWAYS = 1
+};
 
 /**
  * @brief Enumeration for stack layout orientation.

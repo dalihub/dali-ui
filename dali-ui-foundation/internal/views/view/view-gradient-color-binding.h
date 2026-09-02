@@ -19,10 +19,10 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/signals/callback.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 
 namespace Dali
 {

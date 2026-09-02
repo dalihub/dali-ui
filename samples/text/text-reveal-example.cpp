@@ -133,7 +133,7 @@ Label NewButton(const char* text)
   button.SetBorderlineWidth(1.0f);
   button.SetBorderlineOffset(-1.0f);
   button.SetBorderlineColor(UiColor(BUTTON_BORDER_COLOR));
-  button.SetPadding(Extents(4u, 4u, 0u, 0u));
+  button.SetPadding(Insets(4.0f, 4.0f, 0.0f, 0.0f));
   button.SetMultiLine(false);
   button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
   button.SetVerticalTextAlignment(Text::Alignment::CENTER);
@@ -152,7 +152,7 @@ Label NewMenuTitle(const char* text)
   title.SetBorderlineWidth(1.0f);
   title.SetBorderlineOffset(-1.0f);
   title.SetBorderlineColor(UiColor(SELECTED_BORDER_COLOR));
-  title.SetPadding(Extents(8u, 8u, 0u, 0u));
+  title.SetPadding(Insets(8.0f, 8.0f, 0.0f, 0.0f));
   title.SetMultiLine(false);
   title.SetHorizontalTextAlignment(Text::Alignment::START);
   title.SetVerticalTextAlignment(Text::Alignment::CENTER);
@@ -204,12 +204,12 @@ private:
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(MATCH_PARENT);
-    content.SetPadding(Extents(16u, 16u, 16u, 16u));
+    content.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
     content.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 
     mPreview = NewLabel(TEXT_CASES[mTextCaseIndex], 28.0f, 0x0F172A);
     mPreview.SetLineHeight(1.25f);
-    mPreview.SetPadding(Extents(18u, 18u, 16u, 16u));
+    mPreview.SetPadding(Insets(18.0f, 18.0f, 16.0f, 16.0f));
     mPreview.SetBackgroundColor(UiColor(0xFFFFFF));
     mPreview.SetBorderlineWidth(1.0f);
     mPreview.SetBorderlineOffset(-1.0f);
@@ -278,7 +278,7 @@ private:
     mStatus.SetBorderlineWidth(1.0f);
     mStatus.SetBorderlineOffset(-1.0f);
     mStatus.SetBorderlineColor(UiColor(BUTTON_BORDER_COLOR));
-    mStatus.SetPadding(Extents(10u, 10u, 6u, 6u));
+    mStatus.SetPadding(Insets(10.0f, 10.0f, 6.0f, 6.0f));
     mStatus.SetRequestedHeight(STATUS_HEIGHT);
     mStatus.SetCornerRadius(7.0f);
 
@@ -286,7 +286,7 @@ private:
     controlsPanel.SetRequestedWidth(MATCH_PARENT);
     controlsPanel.SetRequestedHeight(CONTROLS_PANEL_HEIGHT);
     controlsPanel.SetBackgroundColor(UiColor(PANEL_COLOR));
-    controlsPanel.SetPadding(Extents(12u, 12u, 12u, 12u));
+    controlsPanel.SetPadding(Insets(12.0f, 12.0f, 12.0f, 12.0f));
     controlsPanel.SetSpacing(CONTROL_SPACING);
     controlsPanel.Add(configurationControls);
     controlsPanel.Add(textControls);

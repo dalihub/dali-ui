@@ -4,23 +4,90 @@
 
 
 ## Table of Contents
-1. [TouchEvent](#touchevent)
-2. [InterceptTouchEvent](#intercepttouchevent)
-3. [HoverEvent](#hoverevent)
-4. [Gesture Detection by HandleEvent](#gesture-detection-by-handleevent)
-5. [Gesture Propagation](#gesture-propagation)
-6. [Example 1: Basic Gesture Recognition](#example-1-basic-gesture-recognition)
-7. [Example 2: Gesture Handling Using InterceptTouchEvent](#example-2-gesture-handling-using-intercepttouchevent)
+1. [Scope](#scope)
+2. [TouchEvent](#touchevent)
+3. [InterceptTouchEvent](#intercepttouchevent)
+4. [HoverEvent](#hoverevent)
+5. [Gesture Detection by HandleEvent](#gesture-detection-by-handleevent)
+6. [Gesture Propagation](#gesture-propagation)
+7. [Example 1: Basic Gesture Recognition](#example-1-basic-gesture-recognition)
+8. [Example 2: Gesture Handling Using InterceptTouchEvent](#example-2-gesture-handling-using-intercepttouchevent)
+
+---
+
+## Scope
+
+This document describes **GEOMETRY touch propagation**, which DALi UI enables by default when the
+application is created. Setting `GeometryHittestEnabled` to `false` selects PARENT propagation from
+the primary hit Actor toward its parents; that mode does not use the coordinate-candidate and late-consume
+behavior described below. Select this setting during application startup and do not change it after input
+event processing has started.
+
+This document uses the following terms:
+
+- **device**: the device ID that identifies a point in a `TouchEvent`, normally for the lifetime of one pointer
+- **initial routing group**: the Actor ID hit by the initial DOWN; devices starting with the same ID join the same stream
+- **stream**: the TouchEvent delivery unit that owns the devices, candidates, recipients, and owner state for one initial routing group
+- **coordinate candidate**: a front-to-back TouchEvent candidate selected by the geometry hit test at the initial DOWN coordinate
+- **owner**: the first Actor to consume a TouchEvent and handle delivery until stream termination or interception by an ancestor
+- **recipient**: an Actor whose TouchEvent callback has actually been invoked at least once for the stream
+- **interceptor**: an Actor that returns `true` from an InterceptTouchEvent callback on the ancestor path and restricts the previous delivery range
+- **ancestor path**: the actual parent-child path from the root toward a target
+
+Devices and streams are related as follows:
+
+```text
+device 4 ─┐
+          ├─ same initial hit Actor ID ──> Stream 1
+device 7 ─┘
+
+device 9 ─── different initial hit ID ──> Stream 2
+
+Each Stream
+├─ coordinate candidates
+├─ ACTIVE/TERMINATED recipients
+└─ owner / interceptor
+
+Stream 1 and Stream 2 remain separate even if they later select the same owner.
+```
+
+The main stream lifetime phases and ownership selection are shown below. Interception is separate arbitration
+that changes the TouchEvent delivery range rather than being a phase itself.
+
+```text
+initial DOWN
+   │
+   ▼
+UNOWNED ── TouchEvent true ──> OWNED
+   │                            │
+   │ TouchEvent false           │ later TouchEvents go only to the owner
+   │ actual receivers are ACTIVE │
+   └─ retry on the next event   │
+                                │
+UNOWNED or OWNED ── last UP / forced cancellation ──> FINISHING ──> FINISHED
+
+InterceptTouchEvent true
+   └─ restricts normal Touch delivery to the interceptor→root path
+      └─ the first TouchEvent consumer on that path becomes the owner
+```
 
 ---
 
 ## TouchEvent
 
-Hit testing and event propagation occur along the geometry Z-axis.
+The initial DOWN coordinate is geometry hit-tested. Before interception, normal TouchEvents in a stream
+without an owner follow the coordinate candidates from front to back, independently of their parent-child
+relationships.
+
+The normal TouchEvent delivery range depends on the current stream state:
+
+- no owner and not intercepted: initial-DOWN coordinate candidates, from front to back
+- owner selected: only the current owner
+- intercepted but no new owner: the fixed interceptor-to-root path
 
 ### Handling Touch Events
 
-A View receives touch events via `TouchedSignal`. Note that the callback receives an `Actor` (not a `View`), so you need to downcast it if you want to use View-specific APIs.
+A View receives touch events via `TouchEventSignal`. Note that the callback receives an `Actor` (not a `View`), so you need to downcast it if you want to use View-specific APIs.
 
 Using a member function:
 
@@ -30,7 +97,7 @@ class MyController : public ConnectionTracker
 public:
   void SetupTouchHandler(View view)
   {
-    view.TouchedSignal().Connect(this, &MyController::OnTouched);
+    view.TouchEventSignal().Connect(this, &MyController::OnTouched);
   }
 
 private:
@@ -42,9 +109,9 @@ private:
     if(touch.GetState(0) == PointState::DOWN)
     {
       // Handle touch down
-      return true;  // consumed — this View will receive subsequent touch events
+      return true;  // consumed — this View becomes the owner
     }
-    return false;  // let the event propagate to views below
+    return false;  // keep an existing owner; otherwise continue to the next candidate
   }
 };
 ```
@@ -52,7 +119,7 @@ private:
 The same can be written concisely with a lambda:
 
 ```cpp
-view.TouchedSignal().Connect(&tracker, [](Actor actor, const TouchEvent& touch) -> bool {
+view.TouchEventSignal().Connect(&tracker, [](Actor actor, const TouchEvent& touch) -> bool {
   View view = View::DownCast(actor);
 
   if(touch.GetState(0) == PointState::DOWN)
@@ -60,18 +127,22 @@ view.TouchedSignal().Connect(&tracker, [](Actor actor, const TouchEvent& touch) 
     // Handle touch down
     return true;  // consumed
   }
-  return false;  // let the event propagate
+  return false;  // keep an existing owner; otherwise continue to the next candidate
 });
 ```
 
 > [!NOTE]
-> Return `true` (consume) to continue receiving subsequent touch events (Motion, Finished) on this View. If you return `false`, the event propagates to the next View in the geometry Z-order, and you will **not** receive follow-up events for this touch sequence.
+> While there is no owner, the first Actor to return `true` becomes the stable owner. Returning `false`
+> continues delivery to the next coordinate candidate, but the Actor remains an active recipient and may
+> receive later events and consume them. When another Actor becomes the owner, each previous active recipient
+> receives exactly one `INTERRUPTED` and then leaves the stream.
 
 <br/>
 
 ### Event Propagation Method
 
-When touching the screen with 4 views overlapping as shown in the figure below, hit testing is performed along the geometry direction based on the touched coordinates.
+When four Views overlap on screen as shown below, the DOWN coordinate determines the geometry hit-test
+result. The drawing represents screen overlap; it does not imply a parent-child relationship.
 
 ```
 ┌─────────────────────────────────────┐
@@ -88,14 +159,16 @@ When touching the screen with 4 views overlapping as shown in the figure below, 
 └─────────────────────────────────────┘
 ```
 
-- If a TouchEvent is registered on the "Red" view, the "Red" view is hit, and the event propagates from the "Red" view in the geometry child direction.
-- If `return false` is used in the "Red" view's TouchEvent, the event propagates in the direction: "Red" → "Yellow" → "Blue".
+- For example, if Red, Yellow, and Blue are candidates at the coordinate, delivery proceeds Red → Yellow → Blue.
+- When Red returns `false`, the same event proceeds to Yellow. If no Actor consumes, Red remains eligible
+  to receive the next Motion event.
 
 ### Consume Behavior
 
-Returning `true` in TouchEvent means consume, indicating that this view will receive all subsequent TouchEvents.
+The first Actor to return `true` from a TouchEvent becomes the owner.
 
-If `return true` is used in the "Yellow" view's TouchEvent, it means the Yellow view will consume the TouchEvent, so only the Yellow view will receive subsequent TouchEvents.
+When Yellow returns `true`, subsequent TouchEvents are delivered to Yellow. Returning `false` from a later
+owner callback does not release ownership. An ancestor of the owner may still intercept a later event.
 
 ### Event Propagation Example
 
@@ -104,28 +177,47 @@ The sequence will be as follows:
 ```
 Red View TouchDown return false
 Yellow View TouchDown return true
+Red View Interrupted
 Yellow View TouchMotion return true
 Yellow View TouchMotion return true
 Yellow View TouchFinished return true
 ```
 
+Red already received the same DOWN and is therefore an active recipient. It receives `INTERRUPTED`
+immediately after Yellow becomes the owner. If several recipients received this or an earlier event, every
+previous active recipient other than the new owner receives exactly one `INTERRUPTED`. An Actor that received
+only an intercept callback, but no normal TouchEvent callback, is not a recipient for this rule.
+
+```text
+Red TouchEvent false   ──> Red = ACTIVE recipient
+Yellow TouchEvent true ──> Yellow = ACTIVE recipient + owner
+                            Red receives INTERRUPTED and becomes TERMINATED
+```
+
 ### Touch Event Propagation Characteristics
 
-- Touch event propagation occurs along the geometry Z-axis regardless of parent-child relationships.
-- By default, a view can only continue to receive touch events that started from itself.
-- This is equivalent to having both `AllowOnlyOwnTouch` and `GrabTouchAfterLeave` options enabled.
-- These two options are not separately provided in the new touch system. They are enabled by default.
-- `Leaved` has been removed.
+- The coordinate-candidate order created on the initial DOWN is independent of parent-child relationships.
+- Until an owner is selected, the initial candidates may continue competing on later events. Actors newly
+  encountered at a Motion coordinate are not added to the stream.
+- The owner remains selected even when the pointer moves outside the Actor's bounds.
+- GEOMETRY Touch does not emit `PointState::LEAVE` when the pointer leaves an Actor. HoverEvent continues
+  to use `PointState::LEAVE`.
 
 ### Parent Area and Touch Events
 
-When a touch event is delivered, if the touch occurs outside the parent's area, the touch event is not delivered. (Same as Android)
+A child's hit-test area is not automatically restricted to its parent's bounds. A child outside the parent
+may still be a normal TouchEvent coordinate candidate if it is hittable at that coordinate. The child is
+excluded outside the parent only when the parent uses `CLIP_CHILDREN` or `CLIP_TO_BOUNDING_BOX`.
 
 #### Example: When Red is the parent and Orange is the child
 
-- When touching Orange, if the touched coordinate is outside the parent's area, the touch event is not delivered.
-- When touching an area where Red and Orange overlap, both Red and Orange can receive intercept and touch events.
-- When touching an Orange area outside the Red area, Orange cannot receive intercept or touch events.
+- At a coordinate where Red and Orange overlap, both may be normal TouchEvent coordinate candidates.
+- Without clipping, Orange can receive a normal TouchEvent even at a coordinate outside Red.
+- Red can receive InterceptTouchEvent because it is Orange's ancestor, even if Red is not a coordinate candidate.
+- If Red does not intercept, its normal TouchEvent callback is not invoked unless Red is also a coordinate candidate.
+- If Red intercepts, previous active recipients other than Red receive `INTERRUPTED`. If Red has a Touch
+  callback, normal TouchEvent delivery begins at Red and proceeds toward the root. Red becomes the owner only
+  if its Touch callback returns `true`.
 
 ```
           Blue
@@ -140,19 +232,22 @@ When a touch event is delivered, if the touch occurs outside the parent's area, 
 
 ## InterceptTouchEvent
 
-Hit testing and event propagation occur along the geometry Z-axis.
+InterceptTouchEvent follows an actual parent-child path, not the flat list of geometrically overlapping Actors.
 
 ### Event Propagation Method
 
-- InterceptTouchEvent propagates through **parent-child relationships**. (Same as Android)
-- When sibling ViewA (below) and ViewB (above) overlap, if ViewA intercepts, ViewB will not receive touch events.
+- Before an owner exists, the initial hit Actor's ancestor path is checked from the root toward the target.
+- After an owner is selected, the current owner's ancestor path is checked from the root up to, but excluding,
+  the owner. The owner does not receive its own intercept callback.
+- An overlapping sibling branch is not visited because it is not part of the owner's ancestry.
 
-**InterceptTouchEvent propagates from parent to child based on the hit View, while TouchEvent propagates in Z-order.**
+**InterceptTouchEvent follows hierarchy order. Normal TouchEvent follows coordinate-candidate order before
+interception and the fixed interceptor-to-root order afterward.**
 
 
 ### Event Propagation Example
 
-When touching with 4 views overlapping as shown in the figure below, hit testing is performed along the child geometry direction based on the touched coordinates.
+The following example assumes that Blue → Yellow → Red → Orange is an actual parent-child hierarchy.
 
 ```
 ┌─────────────────────────────────────┐
@@ -169,14 +264,33 @@ When touching with 4 views overlapping as shown in the figure below, hit testing
 └─────────────────────────────────────┘
 ```
 
-- If an InterceptTouchEvent is registered on the "Blue" view based on the touched coordinates, the InterceptTouchEvent is called on the "Blue" view, and the event propagates in the parent geometry direction to children.
-- If `return false` is used in the "Blue" view's InterceptTouchEvent, the event propagates in the direction: "Blue" → "Yellow" → "Red".
+- If Red is the current owner, InterceptTouchEvent is called on Blue → Yellow. Red's own intercept callback is excluded.
+- If there is no owner and Orange is the initial hit Actor, the Blue → Yellow → Red → Orange path may be checked.
+- If every intercept callback returns `false`, normal TouchEvent delivery continues.
 
 ### Consume Behavior
 
-Returning `true` in InterceptTouchEvent means consume, indicating that this view will receive all subsequent TouchEvents.
+Returning `true` from InterceptTouchEvent does not automatically make the interceptor the owner. It fixes the
+normal TouchEvent delivery range to the `root → interceptor` hierarchy path.
 
-If `return true` is used in the "Yellow" view's InterceptTouchEvent, the Yellow view has intercepted the touch, so only the Yellow view will receive subsequent TouchEvents.
+When Yellow intercepts a later event from an existing owner, processing continues in this order:
+
+1. The existing owner and previous ACTIVE recipients other than Yellow receive exactly one `INTERRUPTED`.
+2. The current normal TouchEvent is delivered from Yellow to Yellow's parents and then toward the root.
+3. The first Actor on this restricted path to return `true` becomes the new owner.
+4. If no Actor consumes, the stream remains without an owner and later events reuse the same restricted path.
+5. After a stream has been successfully intercepted, InterceptTouchEvent callbacks are not traversed again.
+
+Therefore, Yellow becomes the owner in the common case where it has a Touch callback and that callback returns
+`true`, but the InterceptTouchEvent result alone does not establish ownership.
+
+```text
+actual hierarchy: Root → Blue → Yellow → Red(owner)
+
+intercept traversal: Root → Blue → Yellow(true)   [Red owner is excluded]
+previous delivery:   Red → INTERRUPTED
+normal Touch:        Yellow → Blue → Root         [first Actor returning true is the new owner]
+```
 
 ### Event Propagation Example
 
@@ -193,18 +307,22 @@ Yellow View TouchFinished return true
 
 ### Sample: Using InterceptTouchEvent
 
-InterceptTouchEvent is registered on Blue and Yellow. Additionally, Yellow consumes the InterceptTouch.
+Blue and Yellow are actual ancestors of Red, and both have InterceptTouchEvent callbacks. Yellow consumes
+the InterceptTouch.
 
 **Behavior Process:**
-1. On touch, Blue and Yellow receive InterceptTouch.
-2. Since Yellow consumed the interceptTouch, Yellow will receive all subsequent touches.
-3. Therefore, even if TouchEvent is registered on Red, Yellow receives the TouchEvent.
+1. Blue and Yellow receive InterceptTouch in root-to-target order.
+2. When Yellow consumes it, traversal toward descendants and delivery to the existing target stop.
+3. If Red was already an active normal TouchEvent recipient, Red first receives `INTERRUPTED`.
+4. Normal TouchEvent delivery for the same event proceeds from Yellow toward Blue.
+5. When Yellow's Touch callback returns `true`, as in this example, Yellow becomes the owner and handles the
+   rest of the stream.
 
 ---
 
 ## HoverEvent
 
-Event propagation occurs along the geometry Z-axis.
+HoverEvent follows the geometry candidates at the coordinate from front to back.
 
 ### Event States
 
@@ -246,9 +364,9 @@ If the hover moves back from right to left:
 Register HoverEvent on Yellow, Red, and Orange.
 
 **Moving mouse from left to right:**
-1. When entering Yellow, Yellow receives "Down" ("Started").
-2. When entering Red, Red receives "Down". Existing Yellow continues to receive Motion.
-3. When entering Orange, Orange receives "Down". Existing Yellow and Red continue to receive Motion.
+1. When entering Yellow, Yellow receives "Started".
+2. When entering Red, Red receives "Started". Existing Yellow continues to receive Motion.
+3. When entering Orange, Orange receives "Started". Existing Yellow and Red continue to receive Motion.
 
 **Moving mouse from right to left:**
 1. When exiting Orange, Orange receives "Leave". Existing Yellow and Red continue to receive Motion.
@@ -257,57 +375,74 @@ Register HoverEvent on Yellow, Red, and Orange.
 
 ### Consume Behavior
 
-- When consuming, child views do not receive events.
+- When an Actor consumes, geometry candidates behind it do not receive that event.
 - Unlike touch, consuming does not mean the consuming view receives all subsequent Hover events.
-- It only blocks event propagation to child views. (Same as Android)
+- It only stops the current event from advancing to candidates behind it.
 
 ---
 
 ## Gesture Detection by HandleEvent
 
-Gestures are performed by calling `HandleEvent` within TouchEvent.
+There are two ways to use a GestureDetector in GEOMETRY mode:
+
+1. `GestureDetector::Attach(view)` connects the detector to the View's TouchEvent.
+2. Calling `GestureDetector::HandleEvent()` from a Touch callback enables custom arbitration, including interception.
+
+Do not combine both methods for the same detector because doing so may feed the same event twice. The
+following example does not call `Attach()` and manually feeds the detector from a Touch callback.
 
 ### Basic Usage
 
-```csharp
-// Create PanGestureDetector and connect signal
-PanGestureDetector panGestureDetector = PanGestureDetector::New();
-panGestureDetector.DetectedSignal().Connect(this, &YourClass::OnPan);
+```cpp
+// Create PanGestureDetector and connect its signal. Do not call Attach(view).
+mPanGestureDetector = PanGestureDetector::New();
+mPanGestureDetector.DetectedSignal().Connect(this, &YourClass::OnPan);
 
 // Call HandleEvent in TouchEvent callback
 bool YourClass::OnTouched(Actor actor, const TouchEvent& touch)
 {
-    // Must return true for the actor to continue receiving touch events for gesture recognition
-    bool consumed = tapGestureDetector.HandleEvent(actor, touch);
-    return consumed;
+  // This may return false before the gesture is recognized.
+  // A View whose callback ran remains an ACTIVE recipient while there is no owner.
+  return mPanGestureDetector.HandleEvent(actor, touch);
 }
 
-
-void YourClass::OnPan(Actor actor, const PanGesture& pan)
+void YourClass::OnPan(Actor /*actor*/, const PanGesture& /*pan*/)
 {
-    DALI_LOG_ERROR("OnPan\n");
+  // Update the UI according to the Pan state.
 }
 ```
 
 ### How It Works
 
-1. **Receive TouchEvent**: When receiving a TouchEvent, call `HandleEvent` on the desired GestureDetector. Pass the view where the gesture should be recognized and the touch event as arguments.
+1. **Receive TouchEvent**: Call `HandleEvent` on the desired GestureDetector, passing the View that should
+   recognize the gesture and the TouchEvent.
 
-2. **Touch Consume Required**: After `HandleEvent`, the view must **consume** the subsequent touch events to continue receiving touches for gesture recognition.
+2. **Analysis while UNOWNED**: Before the detector recognizes a gesture, `HandleEvent()` may return `false`.
+   A View whose Touch callback ran remains an ACTIVE recipient and can continue receiving TouchEvents.
 
-3. **If Not Consumed**: If `return false` is used to pass the TouchEvent after `GestureDetector.HandleEvent`, the view will not receive subsequent TouchEvents and cannot recognize gestures.
+3. **Ownership selection**: When the detector recognizes a gesture and `HandleEvent()` returns `true`, the
+   View becomes the owner. Previous active recipients receive `INTERRUPTED` and clean up their recognizers.
+
+4. **Owner retention**: A later `false` result from `HandleEvent()` does not release ownership. The View keeps
+   receiving TouchEvents until stream termination or interception by an ancestor.
 
 ---
 
 ## Gesture Propagation
 
-To recognize a gesture in a View's TouchEvent, the View must **consume** the touch. Therefore, gestures cannot be propagated to child views.
+A gesture signal itself does not propagate to another View. Before an owner is selected, however, several
+Touch candidates at the coordinate may receive the same stream and advance their own GestureDetectors. This
+is **gesture arbitration between touch candidates**, not gesture-signal propagation.
 
 ### Limitations of Gesture Recognition
 
 - Gesture recognition requires **continuous touch events**.
-- Whether a gesture is recognized or not, the consume decision for TouchEvent cannot be changed later.
-- If a specific View calls `HandleEvent` for gesture recognition, child views will not receive touch events and cannot recognize gestures.
+- While there is no owner, a candidate that returned `false` on DOWN may recognize a gesture on Motion and
+  become a late consumer.
+- The first View to consume becomes the owner; other active recipients receive `INTERRUPTED`.
+- After ownership is selected, normal TouchEvents no longer continue to other coordinate candidates.
+- An actual ancestor of the owner may intercept a later Motion, restrict the delivery path, and let a new
+  Touch consumer on that path become the owner.
 
 ---
 
@@ -315,8 +450,11 @@ To recognize a gesture in a View's TouchEvent, the View must **consume** the tou
 
 ### Scenario Description
 
-- Register TouchEvent on all Blue, Yellow, Red, and Orange views.
-- Register `TapGestureDetector` on Red and `LongPressGestureDetector` on Yellow.
+- Orange, Red, and Yellow overlap at the same coordinate in front-to-back order.
+- Orange's Touch callback returns `false`.
+- Red's Touch callback returns the result of `TapGestureDetector::HandleEvent()`.
+- Yellow's Touch callback returns the result of `LongPressGestureDetector::HandleEvent()`.
+- Neither detector uses `Attach()`; each is fed manually from its Touch callback.
 
 ### Event Flow
 
@@ -339,35 +477,41 @@ To recognize a gesture in a View's TouchEvent, the View must **consume** the tou
 
 ### Detailed Behavior
 
-1. On touch, **Orange first** receives the touch event, and since it didn't consume it, the next **RedView** receives the touch event.
+1. When Orange returns `false` on DOWN, Red and Yellow may also receive the same TouchEvent in order.
 
-2. In RedView's TouchEvent, gesture recognition starts through `GestureDetector.HandleEvent()`.
+2. Even if `HandleEvent()` on Red and Yellow still returns `false`, both remain ACTIVE recipients for later
+   events while there is no owner.
 
-3. For gesture recognition to work, the View must consume the event, so **TouchEvent is consumed in RedView**.
+3. When either detector first returns `true`, its View becomes the owner. Every previous active recipient
+   other than the new owner receives `INTERRUPTED`.
 
 ### RedView TouchEvent Callback
 
-```csharp
+```cpp
 bool RedTouched(Actor actor, const TouchEvent& touch)
 {
-    DALI_LOG_ERROR(" ->Red View %d\n", touch.GetState(0));
-    return redConsumed || tapGestureDetector.HandleEvent(actor, touch);
+  return mTapGestureDetector.HandleEvent(actor, touch);
+}
+
+bool YellowTouched(Actor actor, const TouchEvent& touch)
+{
+  return mLongPressGestureDetector.HandleEvent(actor, touch);
 }
 ```
 
 ### Result
 
-- **YellowView below does not receive touch events.**
-
-- If you tap/release Orange once, RedView receives TapGesture and `OnTap` log is printed.
-
-- If you long-press on YellowView, LongPressGesture is received and `OnLong` log is printed.
-
-- **If you long-press on RedView**: Since RedView consumed TouchEvent for TapGesture, TouchEvent is not delivered to YellowView, and YellowView cannot receive LongPressGestureEvent.
+- If Red does not consume DOWN in advance, Yellow can receive later TouchEvents and analyze a LongPress.
+- If Red's Tap selects ownership first, previous active recipients, including Yellow, are terminated.
+- If Yellow's LongPress selects ownership first during a delivered TouchEvent, Red and Orange receive
+  `INTERRUPTED`, and Yellow handles the rest of the stream.
+- If Red must be exclusive from DOWN, its callback should return `true` regardless of the `HandleEvent()`
+  result. Yellow then receives no later TouchEvent for that stream.
 
 ### Key Point
 
-> If a specific View calls `HandleEvent` for gesture recognition, child views will not receive touch events and cannot recognize gestures. This is the same in Android, which does not provide gesture propagation separately.
+> Calling `HandleEvent()` does not by itself select an owner. In GEOMETRY mode, ownership is selected when
+> a callback actually returns `true`; until then, several coordinate candidates can analyze the gesture.
 
 ---
 
@@ -375,79 +519,102 @@ bool RedTouched(Actor actor, const TouchEvent& touch)
 
 ### Scenario
 
-When OrangeView should receive LongPressGesture, and YellowView below should receive PanGesture, how can this be achieved?
+OrangeView should receive LongPressGesture, while **YellowView, an actual ancestor of OrangeView**, should
+recognize PanGesture.
 
-- When you long-press OrangeView and then move the touch, the LongPress is released, and you want YellowView to receive PanGesture.
+- After a LongPress on OrangeView, crossing the pan threshold causes YellowView to intercept the stream and
+  cancel OrangeView's LongPress.
+- If YellowView is merely an overlapping sibling behind OrangeView, its InterceptTouchEvent is not called.
+
+```text
+YellowView (parent, Pan)
+└── OrangeView (child, LongPress)
+```
 
 ### Implementation Code
 
-```csharp
-class LongPanGestureTest
+```cpp
+class LongPanGestureTest : public ConnectionTracker
 {
 public:
-    void Setup()
-    {
-        // OrangeView TouchEvent setup
-        orangeView.TouchedSignal().Connect(this, &LongPanGestureTest::OnOrangeTouched);
+  void Setup(View yellow, View orange)
+  {
+    mYellowView = yellow;
+    mOrangeView = orange;
+    mYellowView.Add(mOrangeView); // Establish the hierarchy required for interception.
 
-        // Create PanGestureDetector and connect signal
-        mPanGestureDetector = PanGestureDetector::New();
-        mPanGestureDetector.DetectedSignal().Connect(this, &LongPanGestureTest::OnPan);
+    mOrangeView.TouchEventSignal().Connect(this, &LongPanGestureTest::OnOrangeTouched);
 
-        // YellowView InterceptTouchEvent setup
-        yellowView.InterceptTouchedSignal().Connect(this, &LongPanGestureTest::OnYellowInterceptTouch);
+    // Feed both detectors manually; do not call Attach().
+    mLongPressGestureDetector = LongPressGestureDetector::New();
+    mLongPressGestureDetector.DetectedSignal().Connect(this, &LongPanGestureTest::OnLongPress);
 
-        // YellowView TouchEvent setup
-        yellowView.TouchedSignal().Connect(this, &LongPanGestureTest::OnYellowTouched);
+    mPanGestureDetector = PanGestureDetector::New();
+    mPanGestureDetector.DetectedSignal().Connect(this, &LongPanGestureTest::OnPan);
 
-        mIsDetected = false;
-    }
+    mYellowView.InterceptTouchEventSignal().Connect(this, &LongPanGestureTest::OnYellowInterceptTouch);
+    mYellowView.TouchEventSignal().Connect(this, &LongPanGestureTest::OnYellowTouched);
 
-private:
-    bool OnOrangeTouched(Actor actor, const TouchEvent& touch)
-    {
-        DALI_LOG_ERROR(" ->orangeView touch %d\n", touch.GetState(0));
-        mLongPressGestureDetector.HandleEvent(actor, touch);
-        return true;
-    }
-
-    void OnPan(Actor actor, const PanGesture& pan)
-    {
-        DALI_LOG_ERROR(" ->yellowView OnPan %d %d\n", pan.GetState(), mIsDetected);
-        if (pan.GetState() == GestureState::FINISHED || pan.GetState() == GestureState::CANCELLED)
-        {
-            mIsDetected = false;
-            yellowView.SetProperty(Actor::Property::COLOR, Color::YELLOW);
-        }
-        else
-        {
-            mIsDetected = true;
-            yellowView.SetProperty(Actor::Property::COLOR, Color::YELLOW * 0.7f);
-        }
-    }
-
-    // YellowView intercepts touch and consumes it when Pan gesture is recognized.
-    // Then all subsequent touches will be received by yellowView.
-    bool OnYellowInterceptTouch(Actor actor, const TouchEvent& touch)
-    {
-        DALI_LOG_ERROR(" ->yellowView intercepted %d!!! %d\n", mIsDetected, touch.GetState(0));
-        mPanGestureDetector.HandleEvent(actor, touch);
-        return mIsDetected;
-    }
-
-    bool OnYellowTouched(Actor actor, const TouchEvent& touch)
-    {
-        DALI_LOG_ERROR(" ->yellowView TouchEvent!!! %d\n", touch.GetState(0));
-        mPanGestureDetector.HandleEvent(actor, touch);
-        return true;
-    }
+    mIsDetected      = false;
+    mJustIntercepted = false;
+  }
 
 private:
-    Actor               orangeView;
-    Actor               yellowView;
-    LongPressGestureDetector mLongPressGestureDetector;
-    PanGestureDetector  mPanGestureDetector;
-    bool                mIsDetected;
+  bool OnOrangeTouched(Actor actor, const TouchEvent& touch)
+  {
+    mLongPressGestureDetector.HandleEvent(actor, touch);
+    return true; // Keep Orange as the owner from DOWN.
+  }
+
+  void OnLongPress(Actor /*actor*/, const LongPressGesture& /*gesture*/)
+  {
+    // Update the Orange UI according to the LongPress state.
+  }
+
+  void OnPan(Actor /*actor*/, const PanGesture& pan)
+  {
+    if(pan.GetState() == GestureState::FINISHED || pan.GetState() == GestureState::CANCELLED)
+    {
+      mIsDetected = false;
+      mYellowView.SetProperty(Actor::Property::COLOR_MULTIPLIER, Color::YELLOW);
+    }
+    else
+    {
+      mIsDetected = true;
+      mYellowView.SetProperty(Actor::Property::COLOR_MULTIPLIER, Color::YELLOW * 0.7f);
+    }
+  }
+
+  // Yellow is an ancestor of the Orange owner, so it can observe later events.
+  // On the event that recognizes Pan, restrict normal Touch delivery to Yellow→root.
+  bool OnYellowInterceptTouch(Actor actor, const TouchEvent& touch)
+  {
+    const bool wasDetected = mIsDetected;
+    mPanGestureDetector.HandleEvent(actor, touch);
+    mJustIntercepted = !wasDetected && mIsDetected;
+    return mIsDetected;
+  }
+
+  bool OnYellowTouched(Actor actor, const TouchEvent& touch)
+  {
+    // The event that begins interception was already fed in the callback above.
+    if(mJustIntercepted)
+    {
+      mJustIntercepted = false;
+      return true; // Normal Touch consumption makes Yellow the owner.
+    }
+
+    mPanGestureDetector.HandleEvent(actor, touch);
+    return true;
+  }
+
+private:
+  View                     mOrangeView;
+  View                     mYellowView;
+  LongPressGestureDetector mLongPressGestureDetector;
+  PanGestureDetector       mPanGestureDetector;
+  bool                     mIsDetected;
+  bool                     mJustIntercepted;
 };
 ```
 
@@ -457,13 +624,14 @@ private:
 ┌─────────────────────────────────────────────────────────────────┐
 │  1. LongPress on OrangeView → LongPressGesture occurs           │
 │                                                                 │
-│  2. Touch movement starts → YellowView's InterceptTouchEvent    │
-│     monitors                                                    │
+│  2. Touch movement starts → ancestor YellowView observes the    │
+│     event along the intercept path                              │
 │                                                                 │
 │  3. Movement exceeds threshold → PanGesture recognized          │
 │     - YellowView.InterceptTouchEvent return true (consume)      │
 │     - OrangeView receives Interrupted                           │
 │     - LongPressGesture ends                                     │
+│     - YellowView.TouchEvent return true → Yellow becomes owner  │
 │                                                                 │
 │  4. Subsequent touches → YellowView receives PanGesture         │
 └─────────────────────────────────────────────────────────────────┘
@@ -473,16 +641,28 @@ private:
 
 1. **Long-pressing OrangeView**: LongPressGesture occurs.
 
-2. **Moving touch in this state**: When movement exceeds a certain threshold, YellowView's `InterceptTouchEvent` consumes the event, OrangeView receives `Interrupted`, and LongPressGesture ends simultaneously.
+2. **Moving touch in this state**: After the threshold is crossed, YellowView returns `true` from
+   `InterceptTouchEvent`. Because OrangeView is an active recipient, it receives exactly one `Interrupted`
+   and cleans up its LongPressGesture.
 
-3. **YellowView now receives PanGesture.**
+3. **When Yellow's Touch callback returns `true` for the same event**, YellowView becomes the new owner and
+   receives later PanGesture input. If only the Intercept callback returns `true` and no normal Touch callback
+   consumes, Yellow's ownership is not established.
 
 ### Role of InterceptTouchEvent
 
-`InterceptTouchEvent` is a mechanism where a parent view intercepts touch events being delivered to child views:
+`InterceptTouchEvent` lets an actual ancestor on the path to the current owner restrict normal Touch delivery
+to itself and the path toward the root:
 
 - **return false**: Deliver touch event to child view (default behavior)
-- **return true**: Intercept touch event and handle it in parent view
+- **return true**: Terminate previous active recipients other than the interceptor with `INTERRUPTED`, then
+  begin normal Touch delivery from the interceptor toward the root
+
+The first Actor to return `true` during that normal Touch delivery becomes the new owner. The interceptor
+usually becomes the owner by consuming its own Touch callback, but that is a separate consume decision.
+
+An overlapping sibling is not part of this path. To let a sibling behind the owner recognize a gesture
+later, use normal TouchEvent coordinate candidates and late consumption.
 
 This allows flexible control of touch events in complex gesture scenarios.
 
@@ -492,10 +672,65 @@ This allows flexible control of touch events in complex gesture scenarios.
 
 | Situation | Behavior |
 |------|------|
-| TouchEvent consume | View continues to receive touch events |
-| TouchEvent not consumed | Cannot receive subsequent touch events, cannot recognize gestures |
-| Gesture recognition in parent view | Touch cannot propagate to child views |
-| Using InterceptTouchEvent | Parent view can intercept touch and transition gestures |
+| TouchEvent `true` while there is no owner | The first consumer becomes the stable owner |
+| TouchEvent `false` while there is no owner | Delivery continues to the next coordinate candidate; late consumption remains possible |
+| Another Actor becomes owner | Every previous active recipient except the new owner receives exactly one `INTERRUPTED` |
+| Owner returns `false` on a later TouchEvent | Ownership remains and the owner continues receiving the stream |
+| InterceptTouchEvent `true` | An actual ancestor of the current owner restricts normal Touch delivery to the interceptor→root path |
+| TouchEvent `true` after interception | The first consumer on the restricted path becomes the new owner |
+| InterceptTouchEvent on an overlapping sibling | Not called because the sibling is not in the ancestry path |
+
+### Stream Termination, Multi-touch, and TouchEvent Data
+
+- `UP` detaches its device from the stream; the last active device's `UP` ends the stream.
+- A raw `INTERRUPTED` is a global cancellation delivered to every active geometry stream without first
+  splitting the event by point route. In a stream without a fixed interceptor, intercept callbacks run from
+  the root before terminal TouchEvents are delivered to ACTIVE recipients. An intercept result cannot suppress
+  termination or create a new owner.
+- If a new DOWN arrives from a device ID already attached to an active stream, the entire old stream is
+  cancelled first. Every ACTIVE recipient in that stream receives exactly one `INTERRUPTED`, and only then
+  does hit testing and routing begin for the new DOWN.
+- If the tracked initial hit or current owner becomes insensitive or unhittable, that ACTIVE recipient is
+  terminated with `INTERRUPTED` during the next processing pass. Disconnecting a tracked Actor from the Scene
+  terminates all ACTIVE recipients and clears the stream.
+- A different non-owner ACTIVE recipient becoming temporarily ineligible does not transfer ownership. It is
+  excluded from normal TouchEvent delivery while ineligible and remains subject to terminal cleanup when a
+  new owner is selected or the stream ends.
+- The first `Actor` argument of a Touch callback is the actual recipient.
+- `TouchEvent::GetHitActor(pointIndex)` remains the stream's initial geometry hit Actor, not the callback
+  recipient. Use `GetHitActor(0)` for the first point.
+- Every point's local position is transformed into the actual callback recipient's coordinate system.
+- An Actor with `DISPATCH_TOUCH_MOTION=false` still receives an event that mixes Motion with `UP` or
+  `INTERRUPTED`, so a terminal point is not lost.
+- Multi-touch points starting with the same initial hit Actor ID, or initial routing group, share one stream.
+  Different initial routing groups remain independent even if they later select the same owner, and one
+  pointer's UP does not terminate the remaining pointers.
+
+```text
+device 4 DOWN on Actor A ─┐
+                         ├─ Stream 1 (initial routing group = Actor A ID)
+device 7 DOWN on Actor A ─┘
+
+device 9 DOWN on Actor B ─── Stream 2 (initial routing group = Actor B ID)
+
+Stream 1 owner = Parent P
+Stream 2 owner = Parent P    ← streams remain independent even with the same owner
+```
+
+#### Scene TouchEventSignal
+
+`Scene::TouchEventSignal()` is emitted once for a raw physical boundary, independently of whether an Actor
+callback consumes an event.
+
+| Raw device-state transition | Scene signal |
+|------|------|
+| Zero active devices → one or more | Emit the first DOWN event once |
+| Motion, intermediate device addition, or device termination while another remains active | Do not emit |
+| One or more active devices → zero | Emit the last UP event once |
+| Raw `INTERRUPTED` | Emit once and clear all active-device state |
+
+Splitting one raw event across several geometry streams does not increase the Scene signal count. All Actor
+callbacks for those streams run before the Scene callback.
 
 ### Coordinating ScrollView with a Child Drag
 

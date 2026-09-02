@@ -35,7 +35,7 @@ public:
     Layout root = Layout::New();
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(32, 32, 32, 32));
+    root.SetPadding(Insets(32.0f, 32.0f, 32.0f, 32.0f));
     window.Add(root);
 
     Label title = Label::New("Default UiConfig");

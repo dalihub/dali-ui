@@ -48,6 +48,11 @@ class AnimatedImageViewImpl;
  * view.SetLoopCount(3);
  * view.Play();
  * @endcode
+ *
+ * @note Setters that change decoded or rendered content, including resource,
+ * cache, timing, desired-size, sampling, masking, and loading options, recreate
+ * the internal visual. Playback does not survive that rebuild; call Play() again
+ * to resume after changing one of those options.
  */
 class DALI_UI_API AnimatedImageView : public View
 {
@@ -385,7 +390,17 @@ public: // Visual Appearance
    */
   bool IsPreMultipliedAlpha() const;
 
-public: // Loading Behavior
+public: // Size & Loading Behavior
+  /**
+   * @brief Returns the natural size of the animated image content.
+   *
+   * The returned size reflects the animated image Visual, including the desired
+   * size or decoded image size when applicable. It may differ from the laid-out View size.
+   *
+   * @return The natural size of the animated image content
+   */
+  Vector3 GetNaturalSize() const;
+
   /**
    * @brief Sets the desired image width used as a hint for the image loader.
    *

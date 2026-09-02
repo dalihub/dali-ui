@@ -19,6 +19,7 @@
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h>
 #include <dali/integration-api/string-utils.h>
 #include <stdlib.h>
 #include <cmath>
@@ -77,15 +78,35 @@ const char* const PROPERTY_NAME_PIXEL_SNAP_FACTOR = "pixelSnapFactor";
 
 constexpr int ASYNC_TEXT_THREAD_TIMEOUT = 5;
 
-bool  gAsyncNaturalSizeComputed = false;
-float gAsyncNaturalSizeWidth    = 0.0f;
-float gAsyncNaturalSizeHeight   = 0.0f;
+bool  gAsyncNaturalSizeComputed    = false;
+float gAsyncNaturalSizeWidth       = 0.0f;
+float gAsyncNaturalSizeHeight      = 0.0f;
+bool  gAsyncHeightForWidthComputed = false;
+float gAsyncHeightForWidthWidth    = 0.0f;
+float gAsyncHeightForWidthHeight   = 0.0f;
+bool  gAsyncRenderFinished         = false;
+float gAsyncRenderWidth            = 0.0f;
+float gAsyncRenderHeight           = 0.0f;
 
 void OnAsyncNaturalSizeComputed(View, float width, float height)
 {
   gAsyncNaturalSizeComputed = true;
   gAsyncNaturalSizeWidth    = width;
   gAsyncNaturalSizeHeight   = height;
+}
+
+void OnAsyncHeightForWidthComputed(View, float width, float height)
+{
+  gAsyncHeightForWidthComputed = true;
+  gAsyncHeightForWidthWidth    = width;
+  gAsyncHeightForWidthHeight   = height;
+}
+
+void OnAsyncRenderFinished(View, float width, float height)
+{
+  gAsyncRenderFinished = true;
+  gAsyncRenderWidth    = width;
+  gAsyncRenderHeight   = height;
 }
 
 bool HasValidTextTexture(Actor actor)
@@ -105,6 +126,27 @@ bool HasValidTextTexture(Actor actor)
     }
   }
   return false;
+}
+
+void CheckEmbossRendererProperties(Actor actor, const Vector2& direction, float strength, const Vector4& lightColor, const Vector4& shadowColor)
+{
+  bool foundEmbossRenderer = false;
+  for(uint32_t rendererIndex = 0u; rendererIndex < actor.GetRendererCount(); ++rendererIndex)
+  {
+    Renderer              renderer       = actor.GetRendererAt(rendererIndex);
+    const Property::Index directionIndex = renderer.GetPropertyIndex("uEmbossDirection");
+    if(directionIndex == Property::INVALID_INDEX)
+    {
+      continue;
+    }
+
+    foundEmbossRenderer = true;
+    DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(directionIndex), direction, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetProperty<float>(renderer.GetPropertyIndex("uEmbossStrength")), strength, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uEmbossLightColor")), lightColor, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uEmbossShadowColor")), shadowColor, TEST_LOCATION);
+  }
+  DALI_TEST_CHECK(foundEmbossRenderer);
 }
 
 bool WaitForValidTextTexture(UiTestApplication& application, Label label)
@@ -135,6 +177,36 @@ bool WaitForAsyncNaturalSize(UiTestApplication& application)
     application.Render();
   }
   return gAsyncNaturalSizeComputed;
+}
+
+bool WaitForAsyncHeightForWidth(UiTestApplication& application)
+{
+  constexpr uint32_t MAX_TRIGGER_COUNT = 4u;
+  for(uint32_t trigger = 0u; trigger < MAX_TRIGGER_COUNT && !gAsyncHeightForWidthComputed; ++trigger)
+  {
+    if(!Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT))
+    {
+      return false;
+    }
+    application.SendNotification();
+    application.Render();
+  }
+  return gAsyncHeightForWidthComputed;
+}
+
+bool WaitForAsyncRender(UiTestApplication& application)
+{
+  constexpr uint32_t MAX_TRIGGER_COUNT = 4u;
+  for(uint32_t trigger = 0u; trigger < MAX_TRIGGER_COUNT && !gAsyncRenderFinished; ++trigger)
+  {
+    if(!Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT))
+    {
+      return false;
+    }
+    application.SendNotification();
+    application.Render();
+  }
+  return gAsyncRenderFinished;
 }
 } // namespace
 
@@ -190,6 +262,849 @@ int UtcDaliLabelGetHeightForWidthP(void)
   Label             label = Label::New("Height for width");
 
   DALI_TEST_CHECK(label.GetHeightForWidth(100.0f) > 0.0f);
+  END_TEST;
+}
+
+int UtcDaliLabelMaximumLinesPublicApiP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("A\nB\nC");
+
+  DALI_TEST_EQUALS(label.GetMaximumLines(), Text::MAXIMUM_LINES_UNLIMITED, TEST_LOCATION);
+
+  label.SetMaximumLines(1);
+  DALI_TEST_EQUALS(label.GetMaximumLines(), 1, TEST_LOCATION);
+  label.SetMaximumLines(3);
+  DALI_TEST_EQUALS(label.GetMaximumLines(), 3, TEST_LOCATION);
+  label.SetMaximumLines(Text::MAXIMUM_LINES_UNLIMITED);
+  DALI_TEST_EQUALS(label.GetMaximumLines(), Text::MAXIMUM_LINES_UNLIMITED, TEST_LOCATION);
+  label.SetMaximumLines(-1);
+  DALI_TEST_EQUALS(label.GetMaximumLines(), Text::MAXIMUM_LINES_UNLIMITED, TEST_LOCATION);
+
+  DALI_TEST_CHECK(!label.IsMultiLine());
+  label.SetMaximumLines(3);
+  DALI_TEST_CHECK(!label.IsMultiLine());
+  label.SetMultiLine(true);
+  label.SetMaximumLines(1);
+  DALI_TEST_CHECK(label.IsMultiLine());
+  DALI_TEST_EQUALS(label.GetMaximumLines(), 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelMaximumLinesMeasurementP(void)
+{
+  UiTestApplication application;
+  constexpr float   WIDTH        = 500.0f;
+  constexpr float   SIZE_EPSILON = 0.01f;
+  const char* const FIVE_LINES   = "A\nB\nC\nD\nE";
+
+  auto makeLabel = [](const char* text, int maximumLines)
+  {
+    Label label = Label::New(text);
+    label.SetMultiLine(true);
+    label.SetTextOverflowMode(Text::OverflowMode::CLIP);
+    label.SetMaximumLines(maximumLines);
+    return label;
+  };
+
+  Label         threeLineReference = makeLabel("A\nB\nC", Text::MAXIMUM_LINES_UNLIMITED);
+  const Vector3 threeLineNatural   = threeLineReference.GetNaturalSize();
+  const float   threeLineHfw       = threeLineReference.GetHeightForWidth(WIDTH);
+
+  Label         legacyUnlimited = makeLabel(FIVE_LINES, Text::MAXIMUM_LINES_UNLIMITED);
+  const Vector3 legacyNatural   = legacyUnlimited.GetNaturalSize();
+  const float   legacyHfw       = legacyUnlimited.GetHeightForWidth(WIDTH);
+  const int     legacyLineCount = legacyUnlimited.GetLineCount(WIDTH);
+  DALI_TEST_EQUALS(legacyLineCount, 5, TEST_LOCATION);
+
+  Label explicitUnlimited = makeLabel(FIVE_LINES, Text::MAXIMUM_LINES_UNLIMITED);
+  explicitUnlimited.SetMaximumLines(Text::MAXIMUM_LINES_UNLIMITED);
+  DALI_TEST_EQUALS(explicitUnlimited.GetNaturalSize(), legacyNatural, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitUnlimited.GetHeightForWidth(WIDTH), legacyHfw, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitUnlimited.GetLineCount(WIDTH), legacyLineCount, TEST_LOCATION);
+
+  Label capped = makeLabel(FIVE_LINES, 3);
+  DALI_TEST_EQUALS(capped.GetNaturalSize().height, threeLineNatural.height, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(capped.GetHeightForWidth(WIDTH), threeLineHfw, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(capped.GetLineCount(WIDTH), 3, TEST_LOCATION);
+
+  Label equalLimit  = makeLabel(FIVE_LINES, 5);
+  Label largerLimit = makeLabel(FIVE_LINES, 10);
+  DALI_TEST_EQUALS(equalLimit.GetNaturalSize(), legacyNatural, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(largerLimit.GetNaturalSize(), legacyNatural, SIZE_EPSILON, TEST_LOCATION);
+
+  Label         hiddenLongLine    = makeLabel("A\nB\nC\nTHIS_IS_A_VERY_VERY_VERY_LONG_HIDDEN_FOURTH_LINE", 3);
+  const Vector3 hiddenLongNatural = hiddenLongLine.GetNaturalSize();
+  DALI_TEST_EQUALS(hiddenLongNatural.width, threeLineNatural.width, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(hiddenLongNatural.height, threeLineNatural.height, SIZE_EPSILON, TEST_LOCATION);
+
+  Label ellipsisReference = makeLabel("A\nB\nC\nD", 3);
+  ellipsisReference.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+  Label hiddenLongEllipsis =
+    makeLabel("A\nB\nC\nTHIS_IS_A_VERY_VERY_VERY_LONG_HIDDEN_FOURTH_LINE", 3);
+  hiddenLongEllipsis.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+  DALI_TEST_EQUALS(hiddenLongEllipsis.GetNaturalSize(),
+                   ellipsisReference.GetNaturalSize(),
+                   SIZE_EPSILON,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(hiddenLongEllipsis.GetHeightForWidth(WIDTH),
+                   ellipsisReference.GetHeightForWidth(WIDTH),
+                   SIZE_EPSILON,
+                   TEST_LOCATION);
+
+  Label styledReference = Label::New();
+  styledReference.SetStyledText(Text::StyledText::FromMarkup("<b>A</b>\nB\n<i>C</i>"));
+  styledReference.SetMultiLine(true);
+  styledReference.SetTextOverflowMode(Text::OverflowMode::CLIP);
+  const Vector3 styledReferenceNatural = styledReference.GetNaturalSize();
+  const float   styledReferenceHfw     = styledReference.GetHeightForWidth(WIDTH);
+
+  Label styled = Label::New();
+  styled.SetStyledText(Text::StyledText::FromMarkup("<b>A</b>\nB\n<i>C</i>\nD\nE"));
+  styled.SetMultiLine(true);
+  styled.SetTextOverflowMode(Text::OverflowMode::CLIP);
+  styled.SetMaximumLines(3);
+  DALI_TEST_EQUALS(styled.GetNaturalSize(), styledReferenceNatural, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(styled.GetHeightForWidth(WIDTH), styledReferenceHfw, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(styled.GetLineCount(WIDTH), 3, TEST_LOCATION);
+
+  Label paddedReference = makeLabel("A\nB\nC", Text::MAXIMUM_LINES_UNLIMITED);
+  paddedReference.SetPadding(Insets(11.0f, 13.0f, 7.0f, 17.0f));
+  Label paddedCapped = makeLabel(FIVE_LINES, 3);
+  paddedCapped.SetPadding(Insets(11.0f, 13.0f, 7.0f, 17.0f));
+  DALI_TEST_EQUALS(paddedCapped.GetNaturalSize(), paddedReference.GetNaturalSize(), SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(paddedCapped.GetHeightForWidth(WIDTH),
+                   paddedReference.GetHeightForWidth(WIDTH),
+                   SIZE_EPSILON,
+                   TEST_LOCATION);
+
+  Label wrapReference = makeLabel("A\nB\nC", Text::MAXIMUM_LINES_UNLIMITED);
+  wrapReference.SetRequestedWidth(WRAP_CONTENT);
+  wrapReference.SetRequestedHeight(WRAP_CONTENT);
+  Label wrapCapped = makeLabel("A\nB\nC\nTHIS_IS_A_VERY_VERY_VERY_LONG_HIDDEN_FOURTH_LINE", 3);
+  wrapCapped.SetRequestedWidth(WRAP_CONTENT);
+  wrapCapped.SetRequestedHeight(WRAP_CONTENT);
+  const MeasuredSize wrapReferenceSize = wrapReference.Measure(1000.0f, 1000.0f);
+  const MeasuredSize wrapCappedSize    = wrapCapped.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(wrapCappedSize.GetWidth(), wrapReferenceSize.GetWidth(), SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(wrapCappedSize.GetHeight(), wrapReferenceSize.GetHeight(), SIZE_EPSILON, TEST_LOCATION);
+
+  // LineCount follows the same capped HFW layout without changing its semantic state.
+  const float cappedHfwBefore = capped.GetHeightForWidth(WIDTH);
+  DALI_TEST_EQUALS(capped.GetLineCount(WIDTH), 3, TEST_LOCATION);
+  const float cappedHfwAfter = capped.GetHeightForWidth(WIDTH);
+  DALI_TEST_EQUALS(cappedHfwBefore, cappedHfwAfter, SIZE_EPSILON, TEST_LOCATION);
+
+  Label       reverseOrder           = makeLabel(FIVE_LINES, 3);
+  const int   reverseLineCountBefore = reverseOrder.GetLineCount(WIDTH);
+  const float reverseHfw             = reverseOrder.GetHeightForWidth(WIDTH);
+  const int   reverseLineCountAfter  = reverseOrder.GetLineCount(WIDTH);
+  DALI_TEST_EQUALS(reverseLineCountBefore, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(reverseLineCountAfter, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(reverseHfw, threeLineHfw, SIZE_EPSILON, TEST_LOCATION);
+
+  // Changing MaximumLines invalidates both NaturalSize and HFW caches.
+  Label invalidation = makeLabel(FIVE_LINES, Text::MAXIMUM_LINES_UNLIMITED);
+  DALI_TEST_EQUALS(invalidation.GetNaturalSize(), legacyNatural, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(invalidation.GetHeightForWidth(WIDTH), legacyHfw, SIZE_EPSILON, TEST_LOCATION);
+  invalidation.SetMaximumLines(3);
+  DALI_TEST_EQUALS(invalidation.GetNaturalSize().height, threeLineNatural.height, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(invalidation.GetHeightForWidth(WIDTH), threeLineHfw, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(invalidation.GetLineCount(WIDTH), 3, TEST_LOCATION);
+  invalidation.SetMaximumLines(Text::MAXIMUM_LINES_UNLIMITED);
+  DALI_TEST_EQUALS(invalidation.GetNaturalSize(), legacyNatural, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(invalidation.GetHeightForWidth(WIDTH), legacyHfw, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(invalidation.GetLineCount(WIDTH), 5, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelMaximumLinesMeasurementSequenceP(void)
+{
+  UiTestApplication application;
+  constexpr float   WIDTH      = 500.0f;
+  constexpr float   HEIGHT     = 500.0f;
+  const char* const FIVE_LINES = "A\nB\nC\nD\nE";
+
+  auto render = [&](Label label)
+  {
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render();
+  };
+
+  auto verifySequence = [&](int maximumNumberOfLines, int sequence)
+  {
+    Label label = Label::New(FIVE_LINES);
+    label.SetMultiLine(true);
+    label.SetTextOverflowMode(Text::OverflowMode::CLIP);
+    label.SetRequestedWidth(WIDTH);
+    label.SetRequestedHeight(HEIGHT);
+    label.SetMaximumLines(maximumNumberOfLines);
+
+    switch(sequence)
+    {
+      case 0: // NaturalSize -> HFW -> LineCount -> Render
+      {
+        label.GetNaturalSize();
+        label.GetHeightForWidth(WIDTH);
+        label.GetLineCount(WIDTH);
+        render(label);
+        break;
+      }
+      case 1: // Render -> LineCount
+      {
+        render(label);
+        label.GetLineCount(WIDTH);
+        break;
+      }
+      case 2: // Render -> HFW -> LineCount
+      {
+        render(label);
+        label.GetHeightForWidth(WIDTH);
+        label.GetLineCount(WIDTH);
+        break;
+      }
+      case 3: // LineCount -> Render
+      {
+        label.GetLineCount(WIDTH);
+        render(label);
+        break;
+      }
+      case 4: // HFW -> Render -> LineCount
+      {
+        label.GetHeightForWidth(WIDTH);
+        render(label);
+        label.GetLineCount(WIDTH);
+        break;
+      }
+    }
+
+    const int expectedLineCount = maximumNumberOfLines == Text::MAXIMUM_LINES_UNLIMITED ? 5 : 3;
+    DALI_TEST_EQUALS(label.GetLineCount(), expectedLineCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetLineCount(WIDTH), expectedLineCount, TEST_LOCATION);
+    application.GetScene().Remove(label);
+  };
+
+  for(int sequence = 0; sequence < 5; ++sequence)
+  {
+    verifySequence(Text::MAXIMUM_LINES_UNLIMITED, sequence);
+    verifySequence(3, sequence);
+  }
+
+  END_TEST;
+}
+
+int UtcDaliLabelMaximumLinesSoftWrapAndNewlineP(void)
+{
+  UiTestApplication application;
+  constexpr float   WRAP_WIDTH = 90.0f;
+
+  struct WrapCase
+  {
+    Text::LineWrapMode mode;
+    const char*        text;
+  };
+  const WrapCase wrapCases[] = {
+    {Text::LineWrapMode::WORD,
+     "one two three four five six seven eight nine ten eleven twelve thirteen fourteen"},
+    {Text::LineWrapMode::CHARACTER,
+     "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"},
+  };
+
+  for(const WrapCase& wrapCase : wrapCases)
+  {
+    auto makeLabel = [&]()
+    {
+      Label label = Label::New(wrapCase.text);
+      label.SetMultiLine(true);
+      label.SetLineWrapMode(wrapCase.mode);
+      label.SetTextOverflowMode(Text::OverflowMode::CLIP);
+      return label;
+    };
+
+    Label     unlimited         = makeLabel();
+    const int requiredLineCount = unlimited.GetLineCount(WRAP_WIDTH);
+    DALI_TEST_CHECK(requiredLineCount >= 4);
+
+    for(int limit : {requiredLineCount - 1, requiredLineCount, requiredLineCount + 1})
+    {
+      Label capped = makeLabel();
+      capped.SetMaximumLines(limit);
+      DALI_TEST_EQUALS(capped.GetLineCount(WRAP_WIDTH), std::min(requiredLineCount, limit), TEST_LOCATION);
+    }
+  }
+
+  auto makeNewlineLabel = [](const char* text)
+  {
+    Label label = Label::New(text);
+    label.SetMultiLine(true);
+    label.SetTextOverflowMode(Text::OverflowMode::CLIP);
+    label.SetMaximumLines(2);
+    return label;
+  };
+
+  Label exact            = makeNewlineLabel("A\nB");
+  Label trailingNewline  = makeNewlineLabel("A\nB\n");
+  Label explicitOverflow = makeNewlineLabel("A\nB\nC");
+  DALI_TEST_EQUALS(exact.GetLineCount(500.0f), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(trailingNewline.GetLineCount(500.0f), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitOverflow.GetLineCount(500.0f), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(trailingNewline.GetNaturalSize().height, exact.GetNaturalSize().height, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitOverflow.GetNaturalSize().height, exact.GetNaturalSize().height, 0.01f, TEST_LOCATION);
+
+  // Every character classified as a paragraph separator must obey the same
+  // exact-N, N+1 and trailing-empty-line MaximumLines contract as LF.
+  const std::string paragraphSeparators[] = {
+    "\n",
+    "\v",
+    "\f",
+    "\r",
+    "\xC2\x85",       // NEL
+    "\xE2\x80\xA8", // LINE SEPARATOR
+    "\xE2\x80\xA9", // PARAGRAPH SEPARATOR
+  };
+  for(const std::string& separator : paragraphSeparators)
+  {
+    const std::string exactText    = std::string("A") + separator + "B";
+    const std::string overflowText = exactText + separator + "C";
+    const std::string trailingText = exactText + separator;
+    Label             exactSeparator = makeNewlineLabel(exactText.c_str());
+    Label             overflowSeparator = makeNewlineLabel(overflowText.c_str());
+    Label             trailingSeparator = makeNewlineLabel(trailingText.c_str());
+    DALI_TEST_EQUALS(exactSeparator.GetLineCount(500.0f), 2, TEST_LOCATION);
+    DALI_TEST_EQUALS(overflowSeparator.GetLineCount(500.0f), 2, TEST_LOCATION);
+    DALI_TEST_EQUALS(trailingSeparator.GetLineCount(500.0f), 2, TEST_LOCATION);
+    DALI_TEST_EQUALS(overflowSeparator.GetNaturalSize().height,
+                     exactSeparator.GetNaturalSize().height,
+                     0.01f,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(trailingSeparator.GetNaturalSize().height,
+                     exactSeparator.GetNaturalSize().height,
+                     0.01f,
+                     TEST_LOCATION);
+  }
+
+  // The second retained line may be empty. A later authored line must not leak
+  // into measurement merely because the retained boundary contains no glyphs.
+  Label interiorEmptyReference = makeNewlineLabel("A\n");
+  Label interiorEmptyOverflow  = makeNewlineLabel("A\n\nB");
+  DALI_TEST_EQUALS(interiorEmptyOverflow.GetLineCount(500.0f), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(interiorEmptyOverflow.GetNaturalSize(),
+                   interiorEmptyReference.GetNaturalSize(),
+                   0.01f,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(interiorEmptyOverflow.GetHeightForWidth(500.0f),
+                   interiorEmptyReference.GetHeightForWidth(500.0f),
+                   0.01f,
+                   TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelMaximumLinesAsyncAndStaleResultP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  // Ensure FontClient is initialized before worker text work starts.
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  constexpr float WIDTH        = 500.0f;
+  constexpr float HEIGHT       = 500.0f;
+  constexpr float SIZE_EPSILON = 1.0f;
+
+  Label label = Label::New("A\nB\nC\nD\nE");
+  label.SetMultiLine(true);
+  label.SetTextOverflowMode(Text::OverflowMode::CLIP);
+  label.SetRequestedWidth(WIDTH);
+  label.SetRequestedHeight(HEIGHT);
+  label.SetMaximumLines(5);
+  label.SetAsyncRendering(true);
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  label.AsyncNaturalSizeComputedSignal().Connect(&OnAsyncNaturalSizeComputed);
+  label.AsyncHeightForWidthComputedSignal().Connect(&OnAsyncHeightForWidthComputed);
+
+  gAsyncRenderFinished = false;
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(); // Request A snapshots MaximumLines=5.
+
+  // Request B supersedes A. Completion from A must not publish five lines.
+  label.SetMaximumLines(2);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_EQUALS(label.GetAsyncLineCount(), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetLineCount(), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetLineCount(WIDTH), 2, TEST_LOCATION);
+
+  const Vector3 syncNatural = label.GetNaturalSize();
+  gAsyncNaturalSizeComputed = false;
+  label.RequestAsyncNaturalSize();
+  DALI_TEST_CHECK(WaitForAsyncNaturalSize(application));
+  DALI_TEST_EQUALS(gAsyncNaturalSizeWidth, syncNatural.width, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(gAsyncNaturalSizeHeight, syncNatural.height, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetAsyncLineCount(), 2, TEST_LOCATION);
+
+  const float syncHeightForWidth = label.GetHeightForWidth(WIDTH);
+  gAsyncHeightForWidthComputed   = false;
+  label.RequestAsyncHeightForWidth(WIDTH);
+  DALI_TEST_CHECK(WaitForAsyncHeightForWidth(application));
+  DALI_TEST_EQUALS(gAsyncHeightForWidthWidth, WIDTH, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(gAsyncHeightForWidthHeight, syncHeightForWidth, SIZE_EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetAsyncLineCount(), 2, TEST_LOCATION);
+
+  // A value-only stale check cannot distinguish 5 -> 2 -> 5. The old
+  // natural-size result must still be rejected by its MaximumLines revision.
+  label.SetMaximumLines(5);
+  gAsyncNaturalSizeComputed = false;
+  label.RequestAsyncNaturalSize();
+  label.SetMaximumLines(2);
+  label.SetMaximumLines(5);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(!gAsyncNaturalSizeComputed);
+
+  // Rejecting the stale completion must not leave the request lifecycle stuck.
+  label.RequestAsyncNaturalSize();
+  DALI_TEST_CHECK(WaitForAsyncNaturalSize(application));
+  DALI_TEST_EQUALS(label.GetAsyncLineCount(), 5, TEST_LOCATION);
+
+  // HFW owns an independent request lifecycle and must also reject a true
+  // same-value ABA completion, not only a value-different stale result.
+  label.SetMaximumLines(5);
+  gAsyncHeightForWidthComputed = false;
+  label.RequestAsyncHeightForWidth(WIDTH);
+  label.SetMaximumLines(2);
+  label.SetMaximumLines(5);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(!gAsyncHeightForWidthComputed);
+
+  label.RequestAsyncHeightForWidth(WIDTH);
+  DALI_TEST_CHECK(WaitForAsyncHeightForWidth(application));
+  DALI_TEST_EQUALS(label.GetAsyncLineCount(), 5, TEST_LOCATION);
+
+  // Render requests use a third revision owner. Start request A, return to the
+  // same MaximumLines value without publishing an intermediate frame, and verify
+  // that A cannot emit completion or replace the latest renderer.
+  gAsyncRenderFinished = false;
+  label.SetRequestedWidth(WIDTH - 1.0f); // Force request A while MaximumLines remains 5.
+  application.SendNotification();
+  application.Render(); // Request A snapshots MaximumLines=5.
+  label.SetMaximumLines(2);
+  label.SetMaximumLines(5);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(!gAsyncRenderFinished);
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_EQUALS(label.GetAsyncLineCount(), 5, TEST_LOCATION);
+
+  gAsyncRenderFinished = false;
+  const int rapidLimits[] = {5, 2, 5, 1, Text::MAXIMUM_LINES_UNLIMITED};
+  for(uint32_t index = 0u; index < sizeof(rapidLimits) / sizeof(rapidLimits[0]); ++index)
+  {
+    label.SetMaximumLines(rapidLimits[index]);
+    label.SetRequestedWidth(WIDTH - static_cast<float>(index * 10u));
+    application.SendNotification();
+    application.Render();
+  }
+  constexpr uint32_t RAPID_UPDATE_MAX_TRIGGER_COUNT = 12u;
+  for(uint32_t trigger = 0u; trigger < RAPID_UPDATE_MAX_TRIGGER_COUNT && !gAsyncRenderFinished; ++trigger)
+  {
+    if(!Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT))
+    {
+      break;
+    }
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_CHECK(gAsyncRenderFinished);
+  DALI_TEST_EQUALS(label.GetMaximumLines(), Text::MAXIMUM_LINES_UNLIMITED, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetAsyncLineCount(), 5, TEST_LOCATION);
+
+  label.SetAsyncRendering(false);
+  label.SetMaximumLines(3);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(label.GetLineCount(WIDTH), 3, TEST_LOCATION);
+
+  label.SetAsyncRendering(true);
+  gAsyncRenderFinished = false;
+  label.SetMaximumLines(2);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_EQUALS(label.GetAsyncLineCount(), 2, TEST_LOCATION);
+
+  label.SetAsyncRendering(false);
+  label.SetMaximumLines(Text::MAXIMUM_LINES_UNLIMITED);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(label.GetLineCount(WIDTH), 5, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelMaximumLinesEdgeCasesP(void)
+{
+  UiTestApplication application;
+  constexpr float   WIDTH        = 240.0f;
+  constexpr float   HEIGHT       = 120.0f;
+  constexpr float   SIZE_EPSILON = 0.01f;
+
+  auto makeLabel = [](const char* text, int maximumNumberOfLines)
+  {
+    Label label = Label::New(text);
+    label.SetMultiLine(true);
+    label.SetTextOverflowMode(Text::OverflowMode::CLIP);
+    label.SetMaximumLines(maximumNumberOfLines);
+    return label;
+  };
+
+  Label singleLineReference = Label::New("A\nB\nC");
+  singleLineReference.SetMultiLine(false);
+  singleLineReference.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+  const Vector3 singleLineNatural = singleLineReference.GetNaturalSize();
+  const float   singleLineHfw     = singleLineReference.GetHeightForWidth(WIDTH);
+  for(int maximumNumberOfLines : {1, 3})
+  {
+    Label singleLine = Label::New("A\nB\nC");
+    singleLine.SetMultiLine(false);
+    singleLine.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+    singleLine.SetMaximumLines(maximumNumberOfLines);
+    DALI_TEST_CHECK(!singleLine.IsMultiLine());
+    DALI_TEST_EQUALS(singleLine.GetNaturalSize(), singleLineNatural, SIZE_EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(singleLine.GetHeightForWidth(WIDTH), singleLineHfw, SIZE_EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(singleLine.GetLineCount(WIDTH), 1, TEST_LOCATION);
+  }
+
+  for(const char* text : {"", "A", "\n", "A\n"})
+  {
+    for(int maximumNumberOfLines : {Text::MAXIMUM_LINES_UNLIMITED, 1, 2, 3})
+    {
+      Label label = makeLabel(text, maximumNumberOfLines);
+      const Vector3 natural = label.GetNaturalSize();
+      DALI_TEST_CHECK(std::isfinite(natural.width));
+      DALI_TEST_CHECK(std::isfinite(natural.height));
+      DALI_TEST_CHECK(natural.width >= 0.0f);
+      DALI_TEST_CHECK(natural.height >= 0.0f);
+      for(float width : {0.0f, Math::MACHINE_EPSILON_1000, WIDTH})
+      {
+        const float hfw       = label.GetHeightForWidth(width);
+        const int   lineCount = label.GetLineCount(width);
+        DALI_TEST_CHECK(std::isfinite(hfw));
+        DALI_TEST_CHECK(hfw >= 0.0f);
+        DALI_TEST_CHECK(lineCount >= 0);
+        if(maximumNumberOfLines > Text::MAXIMUM_LINES_UNLIMITED)
+        {
+          DALI_TEST_CHECK(lineCount <= maximumNumberOfLines);
+        }
+      }
+    }
+  }
+
+  for(float width : {0.0f, Math::MACHINE_EPSILON_1000})
+  {
+    for(float height : {0.0f, Math::MACHINE_EPSILON_1000})
+    {
+      for(int maximumNumberOfLines : {Text::MAXIMUM_LINES_UNLIMITED, 1, 3})
+      {
+        for(Text::OverflowMode overflow : {Text::OverflowMode::CLIP, Text::OverflowMode::ELLIPSIS})
+        {
+          Label label = makeLabel("A\nB\nC\nD", maximumNumberOfLines);
+          label.SetTextOverflowMode(overflow);
+          label.SetRequestedWidth(width);
+          label.SetRequestedHeight(height);
+          application.GetScene().Add(label);
+        }
+      }
+    }
+  }
+  Label zeroAreaFit = makeLabel("A long text-fit value that wraps across several lines", 3);
+  zeroAreaFit.SetLineWrapMode(Text::LineWrapMode::CHARACTER);
+  zeroAreaFit.SetTextFit(Text::Fit::Range(8.0f, 40.0f, 4.0f));
+  zeroAreaFit.SetRequestedWidth(Math::MACHINE_EPSILON_1000);
+  zeroAreaFit.SetRequestedHeight(0.0f);
+  application.GetScene().Add(zeroAreaFit);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(zeroAreaFit.GetLineCount(Math::MACHINE_EPSILON_1000) <= 3);
+
+  const Insets paddings[] = {
+    Insets(),
+    Insets(8.0f, 8.0f, 8.0f, 8.0f),
+    Insets(3.0f, 17.0f, 5.0f, 11.0f),
+  };
+  for(const Insets& padding : paddings)
+  {
+    Label reference = makeLabel("A\nB\nC", Text::MAXIMUM_LINES_UNLIMITED);
+    Label capped    = makeLabel("A\nB\nC\nTHIS_IS_A_VERY_LONG_HIDDEN_LINE", 3);
+    reference.SetPadding(padding);
+    capped.SetPadding(padding);
+    DALI_TEST_EQUALS(capped.GetNaturalSize(), reference.GetNaturalSize(), SIZE_EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(capped.GetHeightForWidth(WIDTH),
+                     reference.GetHeightForWidth(WIDTH),
+                     SIZE_EPSILON,
+                     TEST_LOCATION);
+  }
+
+  struct MeasureCase
+  {
+    float requestedWidth;
+    float requestedHeight;
+  };
+  const MeasureCase measureCases[] = {
+    {WRAP_CONTENT, WRAP_CONTENT},
+    {WIDTH, WRAP_CONTENT},
+    {MATCH_PARENT, WRAP_CONTENT},
+  };
+  for(const MeasureCase& measureCase : measureCases)
+  {
+    Label reference = makeLabel("A\nB\nC", Text::MAXIMUM_LINES_UNLIMITED);
+    Label capped    = makeLabel("A\nB\nC\nTHIS_IS_A_VERY_LONG_HIDDEN_LINE", 3);
+    reference.SetRequestedWidth(measureCase.requestedWidth);
+    reference.SetRequestedHeight(measureCase.requestedHeight);
+    capped.SetRequestedWidth(measureCase.requestedWidth);
+    capped.SetRequestedHeight(measureCase.requestedHeight);
+    const MeasuredSize referenceSize = reference.Measure(WIDTH, HEIGHT);
+    const MeasuredSize cappedSize    = capped.Measure(WIDTH, HEIGHT);
+    DALI_TEST_EQUALS(cappedSize.GetWidth(), referenceSize.GetWidth(), SIZE_EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(cappedSize.GetHeight(), referenceSize.GetHeight(), SIZE_EPSILON, TEST_LOCATION);
+  }
+
+  Label wrapFit = makeLabel("A\nB\nC\nTHIS_IS_A_VERY_LONG_HIDDEN_LINE", 3);
+  wrapFit.SetRequestedWidth(WRAP_CONTENT);
+  wrapFit.SetRequestedHeight(WRAP_CONTENT);
+  wrapFit.SetTextFit(Text::Fit::Range(8.0f, 40.0f, 4.0f));
+  const MeasuredSize wrapFitSize = wrapFit.Measure(WIDTH, HEIGHT);
+  DALI_TEST_CHECK(std::isfinite(wrapFitSize.GetWidth()));
+  DALI_TEST_CHECK(std::isfinite(wrapFitSize.GetHeight()));
+  DALI_TEST_CHECK(wrapFitSize.GetWidth() <= WIDTH);
+  DALI_TEST_CHECK(wrapFitSize.GetHeight() <= HEIGHT);
+
+  END_TEST;
+}
+
+int UtcDaliLabelMaximumLinesTextFitP(void)
+{
+  UiTestApplication application;
+  constexpr float   WIDTH  = 200.0f;
+  constexpr float   HEIGHT = 1000.0f;
+  const char* const TEXT   = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+  auto makeLabel = [&](int maximumNumberOfLines)
+  {
+    Label label = Label::New(TEXT);
+    label.SetRequestedWidth(WIDTH);
+    label.SetRequestedHeight(HEIGHT);
+    label.SetMultiLine(true);
+    label.SetLineWrapMode(Text::LineWrapMode::CHARACTER);
+    label.SetMaximumLines(maximumNumberOfLines);
+    application.GetScene().Add(label);
+    return label;
+  };
+
+  Label rangeUnlimited = makeLabel(Text::MAXIMUM_LINES_UNLIMITED);
+  rangeUnlimited.SetTextFit(Text::Fit::Range(8.0f, 40.0f, 4.0f));
+  Label rangeCapped = makeLabel(2);
+  rangeCapped.SetTextFit(Text::Fit::Range(8.0f, 40.0f, 4.0f));
+
+  Dali::Vector<Text::Fit::Candidate> candidates;
+  candidates.PushBack(Text::Fit::Candidate(8.0f, 10.0f));
+  candidates.PushBack(Text::Fit::Candidate(16.0f, 18.0f));
+  candidates.PushBack(Text::Fit::Candidate(24.0f, 26.0f));
+  candidates.PushBack(Text::Fit::Candidate(32.0f, 34.0f));
+  candidates.PushBack(Text::Fit::Candidate(40.0f, 42.0f));
+
+  Label candidatesUnlimited = makeLabel(Text::MAXIMUM_LINES_UNLIMITED);
+  candidatesUnlimited.SetTextFit(candidates);
+  Label candidatesCapped = makeLabel(2);
+  candidatesCapped.SetTextFit(candidates);
+
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(rangeUnlimited.GetLineCount(WIDTH) > 2);
+  DALI_TEST_CHECK(rangeCapped.GetLineCount(WIDTH) <= 2);
+  DALI_TEST_CHECK(candidatesUnlimited.GetLineCount(WIDTH) > 2);
+  DALI_TEST_CHECK(candidatesCapped.GetLineCount(WIDTH) <= 2);
+
+  const Vector3 rangeUnlimitedNatural = rangeUnlimited.GetNaturalSize();
+  const float   rangeUnlimitedHfw     = rangeUnlimited.GetHeightForWidth(WIDTH);
+  const Vector3 rangeCappedNatural    = rangeCapped.GetNaturalSize();
+  const float   rangeCappedHfw        = rangeCapped.GetHeightForWidth(WIDTH);
+  rangeUnlimited.SetMaximumLines(2);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(rangeUnlimited.GetLineCount(WIDTH) <= 2);
+  DALI_TEST_EQUALS(rangeUnlimited.GetNaturalSize(), rangeCappedNatural, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeUnlimited.GetHeightForWidth(WIDTH), rangeCappedHfw, 0.01f, TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(rangeUnlimited.GetNaturalSize(), rangeCappedNatural, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeUnlimited.GetHeightForWidth(WIDTH), rangeCappedHfw, 0.01f, TEST_LOCATION);
+  rangeUnlimited.SetMaximumLines(Text::MAXIMUM_LINES_UNLIMITED);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(rangeUnlimited.GetLineCount(WIDTH) > 2);
+  DALI_TEST_EQUALS(rangeUnlimited.GetNaturalSize(), rangeUnlimitedNatural, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeUnlimited.GetHeightForWidth(WIDTH), rangeUnlimitedHfw, 0.01f, TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(rangeUnlimited.GetNaturalSize(), rangeUnlimitedNatural, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeUnlimited.GetHeightForWidth(WIDTH), rangeUnlimitedHfw, 0.01f, TEST_LOCATION);
+
+  const Vector3 candidatesUnlimitedNatural = candidatesUnlimited.GetNaturalSize();
+  const float   candidatesUnlimitedHfw     = candidatesUnlimited.GetHeightForWidth(WIDTH);
+  const Vector3 candidatesCappedNatural    = candidatesCapped.GetNaturalSize();
+  const float   candidatesCappedHfw        = candidatesCapped.GetHeightForWidth(WIDTH);
+  candidatesUnlimited.SetMaximumLines(2);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(candidatesUnlimited.GetLineCount(WIDTH) <= 2);
+  DALI_TEST_EQUALS(candidatesUnlimited.GetNaturalSize(), candidatesCappedNatural, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(candidatesUnlimited.GetHeightForWidth(WIDTH), candidatesCappedHfw, 0.01f, TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(candidatesUnlimited.GetNaturalSize(), candidatesCappedNatural, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(candidatesUnlimited.GetHeightForWidth(WIDTH), candidatesCappedHfw, 0.01f, TEST_LOCATION);
+  candidatesUnlimited.SetMaximumLines(Text::MAXIMUM_LINES_UNLIMITED);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(candidatesUnlimited.GetLineCount(WIDTH) > 2);
+  DALI_TEST_EQUALS(candidatesUnlimited.GetNaturalSize(), candidatesUnlimitedNatural, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(candidatesUnlimited.GetHeightForWidth(WIDTH), candidatesUnlimitedHfw, 0.01f, TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(candidatesUnlimited.GetNaturalSize(), candidatesUnlimitedNatural, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(candidatesUnlimited.GetHeightForWidth(WIDTH), candidatesUnlimitedHfw, 0.01f, TEST_LOCATION);
+
+  auto verifyAsyncTransition = [&](Label          label,
+                                   const Vector3& cappedNatural,
+                                   float          cappedHfw,
+                                   const Vector3& unlimitedNatural,
+                                   float          unlimitedHfw)
+  {
+    label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+    label.SetAsyncRendering(true);
+
+    gAsyncRenderFinished = false;
+    label.SetMaximumLines(2);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(WaitForAsyncRender(application));
+    DALI_TEST_CHECK(label.GetAsyncLineCount() <= 2);
+    DALI_TEST_CHECK(label.GetLineCount(WIDTH) <= 2);
+    DALI_TEST_EQUALS(label.GetNaturalSize(), cappedNatural, 1.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetHeightForWidth(WIDTH), cappedHfw, 1.0f, TEST_LOCATION);
+
+    gAsyncRenderFinished = false;
+    label.SetMaximumLines(Text::MAXIMUM_LINES_UNLIMITED);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(WaitForAsyncRender(application));
+    DALI_TEST_CHECK(label.GetAsyncLineCount() > 2);
+    DALI_TEST_CHECK(label.GetLineCount(WIDTH) > 2);
+    DALI_TEST_EQUALS(label.GetNaturalSize(), unlimitedNatural, 1.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetHeightForWidth(WIDTH), unlimitedHfw, 1.0f, TEST_LOCATION);
+
+    label.SetAsyncRendering(false);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(label.GetLineCount(WIDTH) > 2);
+  };
+
+  verifyAsyncTransition(rangeUnlimited,
+                        rangeCappedNatural,
+                        rangeCappedHfw,
+                        rangeUnlimitedNatural,
+                        rangeUnlimitedHfw);
+  verifyAsyncTransition(candidatesUnlimited,
+                        candidatesCappedNatural,
+                        candidatesCappedHfw,
+                        candidatesUnlimitedNatural,
+                        candidatesUnlimitedHfw);
+
+  // MaximumLines is inert while multiline is disabled. Preserve the legacy
+  // single-line TextFit result for both APIs, including MaximumLines=1 where a
+  // careless line-cap check could reject every fitting candidate.
+  auto makeSingleLineFit = [&](int maximumNumberOfLines, bool useCandidates)
+  {
+    Label label = Label::New(TEXT);
+    label.SetRequestedWidth(WIDTH);
+    label.SetRequestedHeight(120.0f);
+    label.SetMultiLine(false);
+    label.SetMaximumLines(maximumNumberOfLines);
+    if(useCandidates)
+    {
+      label.SetTextFit(candidates);
+    }
+    else
+    {
+      label.SetTextFit(Text::Fit::Range(8.0f, 40.0f, 4.0f));
+    }
+    application.GetScene().Add(label);
+    return label;
+  };
+
+  for(bool useCandidates : {false, true})
+  {
+    Label legacySingleLine = makeSingleLineFit(Text::MAXIMUM_LINES_UNLIMITED, useCandidates);
+    Label maxOneSingleLine = makeSingleLineFit(1, useCandidates);
+    Label maxThreeSingleLine = makeSingleLineFit(3, useCandidates);
+    application.SendNotification();
+    application.Render();
+    const Vector3 legacyNatural = legacySingleLine.GetNaturalSize();
+    const float   legacyHfw     = legacySingleLine.GetHeightForWidth(WIDTH);
+    for(Label constrained : {maxOneSingleLine, maxThreeSingleLine})
+    {
+      DALI_TEST_EQUALS(constrained.GetLineCount(WIDTH), 1, TEST_LOCATION);
+      DALI_TEST_EQUALS(constrained.GetNaturalSize(), legacyNatural, 0.01f, TEST_LOCATION);
+      DALI_TEST_EQUALS(constrained.GetHeightForWidth(WIDTH), legacyHfw, 0.01f, TEST_LOCATION);
+    }
+  }
+
+  auto makeImpossibleLabel = [&]()
+  {
+    Label label = Label::New("A\nB\nC");
+    label.SetRequestedWidth(WIDTH);
+    label.SetRequestedHeight(HEIGHT);
+    label.SetMultiLine(true);
+    label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+    label.SetMaximumLines(2);
+    application.GetScene().Add(label);
+    return label;
+  };
+
+  Label impossibleRange = makeImpossibleLabel();
+  impossibleRange.SetTextFit(Text::Fit::Range(8.0f, 40.0f, 4.0f));
+  Label impossibleCandidates = makeImpossibleLabel();
+  impossibleCandidates.SetTextFit(candidates);
+  application.SendNotification();
+  application.Render();
+
+  for(Label label : {impossibleRange, impossibleCandidates})
+  {
+    DALI_TEST_EQUALS(label.GetLineCount(WIDTH), 2, TEST_LOCATION);
+    const Vector3 natural = label.GetNaturalSize();
+    const float   hfw     = label.GetHeightForWidth(WIDTH);
+    DALI_TEST_CHECK(std::isfinite(natural.width));
+    DALI_TEST_CHECK(std::isfinite(natural.height));
+    DALI_TEST_CHECK(std::isfinite(hfw));
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(label.GetLineCount(WIDTH), 2, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetNaturalSize(), natural, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetHeightForWidth(WIDTH), hfw, 0.01f, TEST_LOCATION);
+  }
+
   END_TEST;
 }
 
@@ -1582,7 +2497,7 @@ int UtcDaliLabelAsyncStyledTextLiteralMarkupP(void)
   Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
   (void)fontClient;
 
-  Label             label = Label::New();
+  Label label = Label::New();
   DALI_TEST_CHECK(label);
   application.GetScene().Add(label);
 
@@ -1815,6 +2730,73 @@ int UtcDaliLabelAnchorClickedColor(void)
   UiColor color2(Color::YELLOW);
   label.SetAnchorClickedColor(color2);
   DALI_TEST_EQUALS(label.GetAnchorClickedColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelAnchorAccessibilitySignalsP(void)
+{
+  UiTestApplication application;
+
+  auto& enabledSignal  = Dali::Integration::Accessibility::Bridge::EnabledSignal();
+  auto& disabledSignal = Dali::Integration::Accessibility::Bridge::DisabledSignal();
+
+  const std::size_t enabledCount  = enabledSignal.GetConnectionCount();
+  const std::size_t disabledCount = disabledSignal.GetConnectionCount();
+
+  {
+    Label label = Label::New();
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 0u, TEST_LOCATION);
+
+    enabledSignal.Emit();
+    disabledSignal.Emit();
+
+    const Text::StyledText anchorText = Text::StyledText::FromMarkup("<a href='docs'>link</a>");
+    label.SetStyledText(anchorText);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+
+    label.SetStyledText(anchorText);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+    enabledSignal.Emit();
+    disabledSignal.Emit();
+
+    label.SetText("plain");
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 0u, TEST_LOCATION);
+    enabledSignal.Emit();
+    disabledSignal.Emit();
+
+    label.SetAsyncRendering(true);
+    label.SetStyledText(anchorText);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+
+    label.SetText("plain");
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 0u, TEST_LOCATION);
+
+    label.SetStyledText(anchorText);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+
+    label.SetAsyncRendering(false);
+    DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+  }
+
+  DALI_TEST_EQUALS(enabledSignal.GetConnectionCount(), enabledCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(disabledSignal.GetConnectionCount(), disabledCount, TEST_LOCATION);
 
   END_TEST;
 }
@@ -2066,6 +3048,47 @@ int UtcDaliLabelTextStyleNoneP(void)
   END_TEST;
 }
 
+int UtcDaliLabelTextBevelSyncAsyncP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  const Vector2 direction(-0.75f, 0.25f);
+  const float   strength = 2.5f;
+  const Vector4 lightColor(0.8f, 0.7f, 0.6f, 0.5f);
+  const Vector4 shadowColor(0.1f, 0.2f, 0.3f, 0.4f);
+
+  Text::Bevel bevel;
+  bevel.SetDirection(direction);
+  bevel.SetIntensity(strength);
+  bevel.SetLightColor(UiColor(lightColor));
+  bevel.SetShadowColor(UiColor(shadowColor));
+
+  Label label = Label::New("Emboss state must survive synchronous and asynchronous rendering");
+  label.SetRequestedWidth(420.0f);
+  label.SetRequestedHeight(96.0f);
+  label.SetTextBevel(bevel);
+  DALI_TEST_CHECK(label.GetTextBevel() == bevel);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+  CheckEmbossRendererProperties(label, direction, strength, lightColor, shadowColor);
+
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  label.SetAsyncRendering(true);
+  gAsyncRenderFinished = false;
+  label.SetText("Emboss values are copied into each asynchronous request");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.GetTextBevel() == bevel);
+  CheckEmbossRendererProperties(label, direction, strength, lightColor, shadowColor);
+
+  END_TEST;
+}
+
 int UtcDaliLabelFontWeight(void)
 {
   UiTestApplication application;
@@ -2221,6 +3244,56 @@ int UtcDaliLabelCutoutEnabled(void)
   END_TEST;
 }
 
+int UtcDaliLabelCutoutSyncAsyncLifecycleP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  const Vector4 backgroundColor(0.15f, 0.25f, 0.35f, 0.8f);
+  Label         label = Label::New("Cutout must survive synchronous and asynchronous rendering transitions");
+  label.SetRequestedWidth(360.0f);
+  label.SetRequestedHeight(88.0f);
+  label.SetBackgroundColor(UiColor(backgroundColor));
+  label.SetTextCutoutEnabled(true);
+  DALI_TEST_CHECK(label.IsTextCutoutEnabled());
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  label.SetAsyncRendering(true);
+  gAsyncRenderFinished = false;
+  label.SetText("The first asynchronous request keeps cutout enabled");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+
+  gAsyncRenderFinished = false;
+  label.SetTextCutoutEnabled(false);
+  label.SetText("The next request resets the reused worker to ordinary text");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(!label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+
+  gAsyncRenderFinished = false;
+  label.SetTextCutoutEnabled(true);
+  label.SetText("The final request enables cutout again without stale state");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+  DALI_TEST_EQUALS(label.GetBackgroundColor().GetRgba(), backgroundColor, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliLabelTextFit(void)
 {
   UiTestApplication application;
@@ -2265,6 +3338,73 @@ int UtcDaliLabelTextFit(void)
 
   fit = label.GetTextFit();
   DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::NONE);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextFitRenderingP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("TextFit should preserve its state across synchronous and asynchronous rendering");
+  DALI_TEST_CHECK(label);
+
+  label.SetMultiLine(true);
+  label.SetRequestedWidth(180.0f);
+  label.SetRequestedHeight(80.0f);
+
+  const Text::Fit::Range range(10.0f, 36.0f, 2.0f);
+  label.SetTextFit(range);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  label.SetAsyncRendering(true);
+
+  gAsyncRenderFinished = false;
+  gAsyncRenderWidth    = 0.0f;
+  gAsyncRenderHeight   = 0.0f;
+  label.SetRequestedWidth(160.0f);
+  label.SetRequestedHeight(70.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(gAsyncRenderWidth > 0.0f);
+  DALI_TEST_CHECK(gAsyncRenderHeight > 0.0f);
+
+  Text::Fit fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::RANGE);
+  DALI_TEST_EQUALS(fit.GetRange().GetMinimumFontSize(), 10.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetRange().GetMaximumFontSize(), 36.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetRange().GetFontSizeStep(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  Dali::Vector<Text::Fit::Candidate> candidates;
+  candidates.PushBack(Text::Fit::Candidate(12.0f, 16.0f));
+  candidates.PushBack(Text::Fit::Candidate(24.0f, 30.0f));
+
+  gAsyncRenderFinished = false;
+  label.SetTextFit(candidates);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+
+  fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::CANDIDATES);
+  DALI_TEST_EQUALS(fit.GetCandidates().Count(), 2u, TEST_LOCATION);
+
+  label.SetTextFit(Text::Fit::None());
+  DALI_TEST_CHECK(label.GetTextFit().GetType() == Text::Fit::Type::NONE);
+
+  label.SetAsyncRendering(false);
+  label.SetTextFit(range);
+  label.SetRequestedWidth(140.0f);
+  label.SetRequestedHeight(60.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+  DALI_TEST_CHECK(label.GetTextFit().GetType() == Text::Fit::Type::RANGE);
 
   END_TEST;
 }
@@ -2624,7 +3764,7 @@ void CleanupLocalization(Label& label)
 int UtcDaliLabelTranslatableTextP(void)
 {
   TestApplication application;
-  Label label = Label::New();
+  Label           label = Label::New();
   application.GetScene().Add(label);
 
   UiLocalizationManager locManager = UiLocalizationManager::Get();
@@ -2641,7 +3781,7 @@ int UtcDaliLabelTranslatableTextP(void)
 int UtcDaliLabelSetTranslatableTextDefaultDomainAfterExplicitDomainP(void)
 {
   TestApplication application;
-  Label label = Label::New();
+  Label           label = Label::New();
   application.GetScene().Add(label);
 
   UiLocalizationManager locManager = UiLocalizationManager::Get();
@@ -2670,7 +3810,7 @@ int UtcDaliLabelSetTranslatableTextDefaultDomainAfterExplicitDomainP(void)
 int UtcDaliLabelTranslatableTextWithDomainP(void)
 {
   TestApplication application;
-  Label label = Label::New();
+  Label           label = Label::New();
   application.GetScene().Add(label);
 
   UiLocalizationManager locManager = UiLocalizationManager::Get();
@@ -2690,7 +3830,7 @@ int UtcDaliLabelTranslatableTextWithDomainP(void)
 int UtcDaliLabelTranslatableTextWithDomainChainingP(void)
 {
   TestApplication application;
-  Label label = Label::New();
+  Label           label = Label::New();
   application.GetScene().Add(label);
 
   UiLocalizationManager locManager = UiLocalizationManager::Get();
@@ -2708,7 +3848,7 @@ int UtcDaliLabelTranslatableTextWithDomainChainingP(void)
 int UtcDaliLabelClearTranslatableTextP(void)
 {
   TestApplication application;
-  Label label = Label::New();
+  Label           label = Label::New();
   application.GetScene().Add(label);
 
   UiLocalizationManager locManager = UiLocalizationManager::Get();
@@ -2733,7 +3873,7 @@ int UtcDaliLabelClearTranslatableTextP(void)
 int UtcDaliLabelSetTextDoesNotClearTranslatableTextP(void)
 {
   TestApplication application;
-  Label label = Label::New();
+  Label           label = Label::New();
   application.GetScene().Add(label);
 
   UiLocalizationManager locManager = UiLocalizationManager::Get();
@@ -2758,7 +3898,7 @@ int UtcDaliLabelSetTextDoesNotClearTranslatableTextP(void)
 int UtcDaliLabelLocalizationBypassP(void)
 {
   TestApplication application;
-  Label label = Label::New();
+  Label           label = Label::New();
   application.GetScene().Add(label);
 
   UiLocalizationManager locManager = UiLocalizationManager::Get();
@@ -2781,7 +3921,7 @@ int UtcDaliLabelLocalizationBypassP(void)
 int UtcDaliLabelDefaultDomainChangeP(void)
 {
   TestApplication application;
-  Label label = Label::New();
+  Label           label = Label::New();
   application.GetScene().Add(label);
 
   UiLocalizationManager locManager = UiLocalizationManager::Get();
@@ -2804,7 +3944,7 @@ int UtcDaliLabelDefaultDomainChangeP(void)
 int UtcDaliLabelExplicitDomainUnaffectedByDefaultDomainP(void)
 {
   TestApplication application;
-  Label label = Label::New();
+  Label           label = Label::New();
   application.GetScene().Add(label);
 
   UiLocalizationManager locManager = UiLocalizationManager::Get();
@@ -2826,7 +3966,7 @@ int UtcDaliLabelImageSpanAuthoritativeNaturalSizeAndFallbackP(void)
   UiTestApplication application;
 
   Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("A[icon]B");
-  Text::ImageSpan image = Text::ImageSpan::New(
+  Text::ImageSpan         image   = Text::ImageSpan::New(
     Text::ImageAttributes("/path/that/does/not/exist.png", Vector2(180.0f, 32.0f)));
   DALI_TEST_CHECK(builder.SetSpan(image, 1u, 7u));
 
@@ -2847,7 +3987,7 @@ int UtcDaliLabelImageSpanAuthoritativeNaturalSizeAndFallbackP(void)
   DALI_TEST_CHECK(replacementNaturalSize.height >= 32.0f);
 
   Text::StyledTextBuilder invalidBuilder = Text::StyledTextBuilder::New("A[icon]B");
-  Text::ImageAttributes invalidAttributes("", Vector2(180.0f, 32.0f));
+  Text::ImageAttributes   invalidAttributes("", Vector2(180.0f, 32.0f));
   DALI_TEST_CHECK(invalidBuilder.SetSpan(Text::ImageSpan::New(invalidAttributes), 1u, 7u));
   label.SetStyledText(invalidBuilder.Build());
   const Vector3 fallbackNaturalSize = label.GetNaturalSize();
@@ -2932,9 +4072,9 @@ int UtcDaliLabelImageSpanAsyncNaturalSizeParityP(void)
 
   Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("before [icon] after");
   DALI_TEST_CHECK(builder.SetSpan(Text::ImageSpan::New(
-                                   Text::ImageAttributes("missing-image.png", Vector2(160.0f, 30.0f))),
-                                 7u,
-                                 13u));
+                                    Text::ImageAttributes("missing-image.png", Vector2(160.0f, 30.0f))),
+                                  7u,
+                                  13u));
 
   Label label = Label::New();
   label.SetFontSize(16.0f);
@@ -2943,7 +4083,7 @@ int UtcDaliLabelImageSpanAsyncNaturalSizeParityP(void)
   application.SendNotification();
   application.Render();
 
-  const Vector3 syncSize = label.GetNaturalSize();
+  const Vector3 syncSize    = label.GetNaturalSize();
   gAsyncNaturalSizeComputed = false;
   gAsyncNaturalSizeWidth    = 0.0f;
   gAsyncNaturalSizeHeight   = 0.0f;
@@ -2978,9 +4118,9 @@ int UtcDaliLabelImageSpanBlocksMarqueeAndDoesNotAutoRestartP(void)
 
   Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("A [icon] replacement");
   DALI_TEST_CHECK(builder.SetSpan(Text::ImageSpan::New(
-                                   Text::ImageAttributes("missing-image.png", Vector2(24.0f, 24.0f))),
-                                 2u,
-                                 8u));
+                                    Text::ImageAttributes("missing-image.png", Vector2(24.0f, 24.0f))),
+                                  2u,
+                                  8u));
   label.SetStyledText(builder.Build());
   application.SendNotification();
   application.Render(16);

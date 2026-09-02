@@ -105,7 +105,7 @@ private:
     mUrlBar.SetCursorWidth(2);
     mUrlBar.SetRequestedWidth(0.0f);
     mUrlBar.SetRequestedHeight(TOOLBAR_HEIGHT);
-    mUrlBar.SetPadding(Extents(10, 10, 0, 0));
+    mUrlBar.SetPadding(Insets(10.0f, 10.0f, 0.0f, 0.0f));
     mUrlBar.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mUrlBar.SetFocusable(true);
     mUrlBar.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
@@ -140,7 +140,7 @@ private:
     mStatusLabel.SetBackgroundColor(Color::DEEP_PINK);
     mStatusLabel.SetRequestedWidth(MATCH_PARENT);
     mStatusLabel.SetRequestedHeight(STATUS_HEIGHT);
-    mStatusLabel.SetPadding(Extents(8, 8, 0, 0));
+    mStatusLabel.SetPadding(Insets(8.0f, 8.0f, 0.0f, 0.0f));
 
     float webViewHeight = static_cast<float>(mWindowSize.height) - TOOLBAR_HEIGHT - STATUS_HEIGHT;
     mWebView = WebView::New();

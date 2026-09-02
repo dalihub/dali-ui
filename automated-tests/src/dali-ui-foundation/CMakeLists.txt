@@ -6,9 +6,11 @@ SET(RPM_NAME "core-${PKG_NAME}-tests")
 SET(CAPI_LIB "dali-ui-foundation")
 
 SET(TC_SOURCES
+        utc-Dali-GlView.cpp
         utc-Dali-UniqueAny.cpp
         utc-Dali-UiStyle.cpp
         utc-Dali-ScrollView.cpp
+        utc-Dali-RecyclerView.cpp
         utc-Dali-ScrollBar.cpp
         utc-Dali-GroupAdapter.cpp
         utc-Dali-AnimatedImageVisual.cpp
@@ -30,6 +32,7 @@ SET(TC_SOURCES
         utc-Dali-LottieAnimationView.cpp
         utc-Dali-LottieAnimationVisual.cpp
         utc-Dali-UiColor.cpp
+        utc-Dali-SelectableLottieColorBinding.cpp
         utc-Dali-SelectableLottieImage.cpp
         utc-Dali-SelectableLottieAnimationView.cpp
         utc-Dali-UiColorManager.cpp

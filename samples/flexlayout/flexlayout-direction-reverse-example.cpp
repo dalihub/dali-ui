@@ -55,7 +55,7 @@ public:
     outer.SetRequestedWidth(MATCH_PARENT);
     outer.SetRequestedHeight(MATCH_PARENT);
     outer.SetSpacing(50);
-    outer.SetPadding(Extents(50, 50, 50, 50));
+    outer.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     // Section 1: RowReverse
     FlexLayout rowReverse = FlexLayout::New();
@@ -63,7 +63,7 @@ public:
     rowReverse.SetDirection(FlexDirection::ROW_REVERSE);
     rowReverse.SetJustifyContent(FlexJustify::FLEX_START);
     rowReverse.SetAlignItems(FlexAlign::CENTER);
-    rowReverse.SetPadding(Extents(50, 50, 50, 50));
+    rowReverse.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     rowReverse.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
     View rrBox1 = View::New();
@@ -92,7 +92,7 @@ public:
     columnReverse.SetDirection(FlexDirection::COLUMN_REVERSE);
     columnReverse.SetJustifyContent(FlexJustify::FLEX_START);
     columnReverse.SetAlignItems(FlexAlign::CENTER);
-    columnReverse.SetPadding(Extents(50, 50, 50, 50));
+    columnReverse.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     columnReverse.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
     View crBox1 = View::New();

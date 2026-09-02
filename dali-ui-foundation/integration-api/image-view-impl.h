@@ -155,6 +155,11 @@ public: // API — Image
 
 public: // API — Size & Fitting Control
   /**
+   * @copydoc Dali::Ui::ImageView::GetNaturalSize
+   */
+  Vector3 GetNaturalSize() const;
+
+  /**
    * @copydoc Dali::Ui::ImageView::SetSamplingMode
    */
   void SetSamplingMode(Ui::Image::SamplingMode samplingMode);

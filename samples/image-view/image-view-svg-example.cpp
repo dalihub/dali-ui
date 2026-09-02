@@ -84,7 +84,7 @@ private:
     StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.SetPadding(Extents(12, 12, 12, 12));
+    contents.SetPadding(Insets(12.0f, 12.0f, 12.0f, 12.0f));
     contents.SetSpacing(8.0f);
     contents.Add(CreateInfoLabel());
     contents.Add(CreateImageArea());
@@ -110,7 +110,7 @@ private:
     frame.SetRequestedWidth(MATCH_PARENT);
     frame.SetRequestedHeight(WRAP_CONTENT);
     frame.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    frame.SetPadding(Extents(16, 16, 16, 16));
+    frame.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
     frame.SetBackgroundColor(UiColor(0x30343B));
 
     mImage = ImageView::New(SVGS[mSvgIndex].url);
@@ -154,7 +154,7 @@ private:
     button.SetRequestedWidth(WRAP_CONTENT);
     button.SetRequestedHeight(MATCH_PARENT);
     button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
     button.SetBackgroundColor(UiColor(0x1565C0));
 
     buttonLabel = Label::New("");

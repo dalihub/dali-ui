@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/view-accessibility.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -127,7 +128,14 @@ const ChildContainer& GetChildren(const ViewImpl& viewImpl)
 
 bool IsLayout(ViewImpl& viewImpl)
 {
-  return !!Ui::Layout::DownCast(viewImpl.Self());
+  // Ui::Layout::DownCast(viewImpl.Self()) is three handle constructions and TWO
+  // dynamic_casts: Self() wraps the owner, CustomActor::DownCast casts BaseObject ->
+  // Internal::CustomActor (always succeeds for an owned impl), and only then does the
+  // LayoutImpl cast that actually decides the answer. Ask that one question directly.
+  // The owner test reproduces the empty-handle leg exactly: an impl with no owner
+  // yields an empty Self(), for which the old expression returned false regardless of
+  // the impl's real type.
+  return viewImpl.GetOwner() != nullptr && dynamic_cast<Integration::LayoutImpl*>(&viewImpl) != nullptr;
 }
 
 bool HasLayoutCapability(ViewImpl& viewImpl)

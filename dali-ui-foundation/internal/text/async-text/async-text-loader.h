@@ -29,11 +29,11 @@
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/types/insets.h>
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/public-api/actors/actor-enumerations.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
@@ -123,6 +123,8 @@ struct AsyncTextParameters
     renderScaleWidth{0.f},
     renderScaleHeight{0.f},
     maxTextureSize{0},
+    maximumNumberOfLines{static_cast<Length>(MAXIMUM_LINES_UNLIMITED)},
+    maximumNumberOfLinesRevision{0u},
     replacementLayoutGeneration{0u},
     textRevealRevision{0u},
     marqueeSpeed{1},
@@ -223,10 +225,12 @@ struct AsyncTextParameters
   float renderScaleWidth;            ///< The requested original textWidth when using render scale.
   float renderScaleHeight;           ///< The requested original textHeight when using render scale.
 
-  int      maxTextureSize;              ///< The maximum size of texture.
-  uint64_t replacementLayoutGeneration; ///< UI request generation copied to final replacement placements.
-  uint64_t textRevealRevision;          ///< Rejects stale reveal configuration results on commit.
-  int      marqueeSpeed;                ///< marquee properties.
+  int      maxTextureSize;               ///< The maximum size of texture.
+  Length   maximumNumberOfLines;         ///< Maximum laid-out lines, or zero for unlimited.
+  uint64_t maximumNumberOfLinesRevision; ///< Revision used to reject stale MaximumLines results.
+  uint64_t replacementLayoutGeneration;  ///< UI request generation copied to final replacement placements.
+  uint64_t textRevealRevision;           ///< Rejects stale reveal configuration results on commit.
+  int      marqueeSpeed;                 ///< marquee properties.
   int      marqueeLoopCount;
   int      marqueeGap;
 

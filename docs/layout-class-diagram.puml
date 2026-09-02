@@ -166,7 +166,7 @@ package "Dali::Ui::Integration (Implementation)" as integration {
     + OnMeasure(w, h) : MeasuredSize
     + OnArrange(bounds) : MeasuredSize
     + InvalidateMeasure()
-    + GetParentLayout() : Ui::Layout
+    + GetParentView() : Ui::View
     + IsLayout() : bool
     + RegisterWithLayoutController()
     # GetChildren() : ChildContainer&

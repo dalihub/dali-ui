@@ -145,14 +145,14 @@ void ConfigureBand(Label label, float height, const UiColor& background, const U
   label.SetBorderlineColor(border);
   label.SetCornerRadius(6.0f);
   label.SetTextColor(color);
-  label.SetPadding(Extents(static_cast<int16_t>(10.0f), static_cast<int16_t>(10.0f), static_cast<int16_t>(0.0f), static_cast<int16_t>(0.0f)));
+  label.SetPadding(Insets(10.0f, 10.0f, 0.0f, 0.0f));
 }
 
 void StyleInputControl(View control, float height)
 {
   control.SetRequestedWidth(MATCH_PARENT);
   control.SetRequestedHeight(height);
-  control.SetPadding(Extents(static_cast<int16_t>(22.0f), static_cast<int16_t>(22.0f), static_cast<int16_t>(14.0f), static_cast<int16_t>(14.0f)));
+  control.SetPadding(Insets(22.0f, 22.0f, 14.0f, 14.0f));
   control.SetBackgroundColor(UiColor(0xF8FAFC));
   control.SetBorderlineWidth(1.0f);
   control.SetBorderlineOffset(-1.0f);
@@ -323,7 +323,7 @@ private:
     mRoot = StackLayout::New(StackOrientation::VERTICAL);
     mRoot.SetRequestedWidth(MATCH_PARENT);
     mRoot.SetRequestedHeight(MATCH_PARENT);
-    mRoot.SetPadding(Extents(static_cast<int16_t>(ROOT_PADDING), static_cast<int16_t>(ROOT_PADDING), static_cast<int16_t>(ROOT_PADDING), static_cast<int16_t>(ROOT_PADDING)));
+    mRoot.SetPadding(Insets(ROOT_PADDING, ROOT_PADDING, ROOT_PADDING, ROOT_PADDING));
     mRoot.SetSpacing(STACK_SPACING);
     mRoot.SetBackgroundColor(UiColor(0x0B1120));
 
@@ -347,7 +347,7 @@ private:
     mContent.SetRequestedWidth(MATCH_PARENT);
     mContent.SetRequestedHeight(MATCH_PARENT);
     mContent.SetSpacing(STACK_SPACING);
-    mContent.SetPadding(Extents(static_cast<int16_t>(16.0f), static_cast<int16_t>(16.0f), static_cast<int16_t>(16.0f), static_cast<int16_t>(16.0f)));
+    mContent.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
     mContent.SetBackgroundColor(UiColor(0xFFFFFF));
     mContent.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 
@@ -543,7 +543,7 @@ private:
       .TextGradientStartOffset(NORMAL_GRADIENT_END_OFFSET, Duration(NORMAL_ANIMATION_DURATION_SECONDS), AlphaFunction::LINEAR);
     mEditor.Animate(mNormalAnimation)
       .TextGradientStartOffset(NORMAL_GRADIENT_END_OFFSET, Duration(NORMAL_ANIMATION_DURATION_SECONDS), AlphaFunction::LINEAR);
-    mNormalAnimation.SetLooping(true);
+    mNormalAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mNormalAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mNormalAnimation.Play();
   }
@@ -573,7 +573,7 @@ private:
       .PlaceholderTextGradientStartOffset(PLACEHOLDER_GRADIENT_END_OFFSET, Duration(PLACEHOLDER_ANIMATION_DURATION_SECONDS), AlphaFunction::LINEAR);
     mEditor.Animate(mPlaceholderAnimation)
       .PlaceholderTextGradientStartOffset(PLACEHOLDER_GRADIENT_END_OFFSET, Duration(PLACEHOLDER_ANIMATION_DURATION_SECONDS), AlphaFunction::LINEAR);
-    mPlaceholderAnimation.SetLooping(true);
+    mPlaceholderAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mPlaceholderAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mPlaceholderAnimation.Play();
   }

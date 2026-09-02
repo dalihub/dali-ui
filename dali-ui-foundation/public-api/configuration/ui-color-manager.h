@@ -21,11 +21,11 @@
 #include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 
 namespace Dali

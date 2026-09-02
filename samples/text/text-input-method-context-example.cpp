@@ -226,7 +226,7 @@ Label CreateButton(const char* text, uint32_t bgColor)
   button.SetTextColor(UiColor(0xFFFFFF));
   button.SetRequestedWidth(0.0f);
   button.SetRequestedHeight(BUTTON_HEIGHT);
-  button.SetPadding(Extents(4, 4, 4, 4));
+  button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
   button.SetLayoutParams(CreateFillWeightParams());
   return button;
 }
@@ -253,7 +253,7 @@ Label CreateSectionTitle(const char* text)
   title.SetBackgroundColor(UiColor(0x34495E));
   title.SetRequestedWidth(MATCH_PARENT);
   title.SetRequestedHeight(28);
-  title.SetPadding(Extents(8, 8, 4, 4));
+  title.SetPadding(Insets(8.0f, 8.0f, 4.0f, 4.0f));
   return title;
 }
 
@@ -285,7 +285,7 @@ private:
     mStatusLeftLabel.SetMultiLine(true);
     mStatusLeftLabel.SetFocusable(false);
     mStatusLeftLabel.SetBackgroundColor(UiColor(0xE8E8E8));
-    mStatusLeftLabel.SetPadding(Extents(8, 8, 6, 6));
+    mStatusLeftLabel.SetPadding(Insets(8.0f, 8.0f, 6.0f, 6.0f));
     mStatusLeftLabel.SetLayoutParams(CreateFillWeightParams());
 
     mStatusRightLabel = Label::New();
@@ -295,7 +295,7 @@ private:
     mStatusRightLabel.SetMultiLine(true);
     mStatusRightLabel.SetFocusable(false);
     mStatusRightLabel.SetBackgroundColor(UiColor(0xE8E8E8));
-    mStatusRightLabel.SetPadding(Extents(8, 8, 6, 6));
+    mStatusRightLabel.SetPadding(Insets(8.0f, 8.0f, 6.0f, 6.0f));
     mStatusRightLabel.SetLayoutParams(CreateFillWeightParams());
 
     // InputField - single line context test
@@ -306,7 +306,7 @@ private:
     mInputField.SetRequestedHeight(48);
     mInputField.SetBackgroundColor(UiColor(0xFFFFFF));
     mInputField.SetTextColor(UiColor(0x222222));
-    mInputField.SetPadding(Extents(12, 12, 8, 8));
+    mInputField.SetPadding(Insets(12.0f, 12.0f, 8.0f, 8.0f));
     mInputField.SetFocusable(true);
     mInputField.SetLayoutParams(CreateFillWeightParams());
 
@@ -318,7 +318,7 @@ private:
     mInputEditor.SetRequestedHeight(48);
     mInputEditor.SetBackgroundColor(UiColor(0xFFFFFF));
     mInputEditor.SetTextColor(UiColor(0x222222));
-    mInputEditor.SetPadding(Extents(12, 12, 8, 8));
+    mInputEditor.SetPadding(Insets(12.0f, 12.0f, 8.0f, 8.0f));
     mInputEditor.SetFocusable(true);
     mInputEditor.SetLayoutParams(CreateFillWeightParams());
 
@@ -433,7 +433,7 @@ private:
     mLogLabel.SetMultiLine(true);
     mLogLabel.SetBackgroundColor(UiColor(0x202020));
     mLogLabel.SetTextColor(UiColor(0xFFFFFF));
-    mLogLabel.SetPadding(Extents(8, 8, 6, 6));
+    mLogLabel.SetPadding(Insets(8.0f, 8.0f, 6.0f, 6.0f));
 
     // --- Build layout ---
 
@@ -464,7 +464,7 @@ private:
     scrollContent.SetSpacing(STACK_SPACING);
     scrollContent.SetRequestedWidth(MATCH_PARENT);
     scrollContent.SetRequestedHeight(WRAP_CONTENT);
-    scrollContent.SetPadding(Extents(0, 0, 0, static_cast<int16_t>(STACK_PADDING)));
+    scrollContent.SetPadding(Insets(0.0f, 0.0f, 0.0f, STACK_PADDING));
     scrollContent.Add(CreateSectionTitle("Panel Visibility"));
     scrollContent.Add(panelRow);
     scrollContent.Add(CreateSectionTitle("Auto / Restore / Return"));
@@ -506,7 +506,7 @@ private:
     rootLayout.SetSpacing(STACK_SPACING);
     rootLayout.SetRequestedWidth(MATCH_PARENT);
     rootLayout.SetRequestedHeight(MATCH_PARENT);
-    rootLayout.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    rootLayout.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
     rootLayout.Add(fixedHeader);
     rootLayout.Add(scrollView);
 

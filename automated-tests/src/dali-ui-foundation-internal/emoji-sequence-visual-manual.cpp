@@ -1750,7 +1750,7 @@ private:
     mHeader.SetRequestedWidth(MATCH_PARENT);
     mHeader.SetRequestedHeight(HeaderHeightForText(BuildHeaderText()));
     mHeader.SetBackgroundColor(Vector4(0.92f, 0.94f, 0.96f, 1.0f));
-    mHeader.SetPadding(Extents(12, 12, 7, 7));
+    mHeader.SetPadding(Insets(12.0f, 12.0f, 7.0f, 7.0f));
     mRoot.Add(mHeader);
 
     BuildNavigationBar();
@@ -1871,10 +1871,7 @@ private:
     mNavigation.SetDirection(FlexDirection::ROW);
     mNavigation.SetWrap(FlexWrap::WRAP);
     mNavigation.SetAlignItems(FlexAlign::FLEX_START);
-    mNavigation.SetPadding(Extents(static_cast<uint16_t>(NAV_PADDING_X),
-                                   static_cast<uint16_t>(NAV_PADDING_X),
-                                   static_cast<uint16_t>(NAV_PADDING_Y),
-                                   static_cast<uint16_t>(NAV_PADDING_Y)));
+    mNavigation.SetPadding(Insets(static_cast<uint16_t>(NAV_PADDING_X), static_cast<uint16_t>(NAV_PADDING_X), static_cast<uint16_t>(NAV_PADDING_Y), static_cast<uint16_t>(NAV_PADDING_Y)));
     mNavigation.SetBackgroundColor(Vector4(0.96f, 0.97f, 0.99f, 1.0f));
 
     PopulateNavigationBar();
@@ -1975,11 +1972,8 @@ private:
     button.SetParentOrigin(ParentOrigin::TOP_LEFT);
     button.SetPivot(Pivot::TOP_LEFT);
     button.SetBackgroundColor(backgroundColor);
-    button.SetMargin(Extents(0,
-                             static_cast<uint16_t>(NAV_BUTTON_GAP_X),
-                             0,
-                             static_cast<uint16_t>(NAV_BUTTON_GAP_Y)));
-    button.SetPadding(Extents(4, 4, 0, 0));
+    button.SetMargin(Insets(0.0f, static_cast<uint16_t>(NAV_BUTTON_GAP_X), 0.0f, static_cast<uint16_t>(NAV_BUTTON_GAP_Y)));
+    button.SetPadding(Insets(4.0f, 4.0f, 0.0f, 0.0f));
     button.TouchEventSignal().Connect(this, [action, backgroundColor](Actor actor, const TouchEvent& touch) {
       Label button = Label::DownCast(actor);
       if(button)
@@ -2508,7 +2502,7 @@ private:
     mEmptyLabel.SetRequestedWidth(RowWidth());
     mEmptyLabel.SetRequestedHeight(ROW_HEIGHT);
     mEmptyLabel.SetBackgroundColor(Vector4(0.98f, 0.88f, 0.88f, 1.0f));
-    mEmptyLabel.SetPadding(Extents(16, 16, 10, 10));
+    mEmptyLabel.SetPadding(Insets(16.0f, 16.0f, 10.0f, 10.0f));
     mEmptyLabel.SetProperty(Actor::Property::VISIBLE, mShownCount == 0u);
     mEmptyLabelParams = AbsoluteLayoutParams::New();
     mEmptyLabel.SetLayoutParams(mEmptyLabelParams);
@@ -2568,7 +2562,7 @@ private:
     mSearchInput.SetShowPlaceholderOnFocus(true);
     mSearchInput.SetCursorWidth(2);
     mSearchInput.SetCursorColor(Color::BLACK);
-    mSearchInput.SetPadding(Extents(14, 14, 8, 8));
+    mSearchInput.SetPadding(Insets(14.0f, 14.0f, 8.0f, 8.0f));
     mSearchInput.SetHorizontalTextAlignment(Text::Alignment::START);
     mSearchInput.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mSearchInput.SetTextOverflowMode(Text::OverflowMode::CLIP);
@@ -3173,7 +3167,7 @@ private:
       actors.sampleSetLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
       actors.sampleSetLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
       actors.sampleSetLabel.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.62f));
-      actors.sampleSetLabel.SetPadding(Extents(4, 4, 0, 0));
+      actors.sampleSetLabel.SetPadding(Insets(4.0f, 4.0f, 0.0f, 0.0f));
       actors.sampleSetLabelParams = AbsoluteLayoutParams::New();
       actors.sampleSetLabel.SetLayoutParams(actors.sampleSetLabelParams);
       actors.sampleContainer.Add(actors.sampleSetLabel);
@@ -3185,7 +3179,7 @@ private:
     actors.detail.SetFontFamily("Ubuntu Mono");
     actors.detail.SetRequestedWidth(DetailWidth(RowWidth()));
     actors.detail.SetRequestedHeight(RowContentHeight());
-    actors.detail.SetPadding(Extents(14, 8, 0, 0));
+    actors.detail.SetPadding(Insets(14.0f, 8.0f, 0.0f, 0.0f));
     actors.detailParams = AbsoluteLayoutParams::New();
     actors.detail.SetLayoutParams(actors.detailParams);
     actors.detail.TouchEventSignal().Connect(this, &EmojiVisualController::OnDetailTouched);

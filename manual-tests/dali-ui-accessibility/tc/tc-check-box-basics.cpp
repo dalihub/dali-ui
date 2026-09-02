@@ -64,7 +64,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(WRAP_CONTENT);
     root.SetSpacing(12.0f);
-    root.SetPadding(Extents(16, 16, 16, 16));
+    root.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
     mRoot = root;
 
     root.Add(MakeLabel("각 체크박스를 눌러 선택 상태를 바꿔 보세요.", 14.0f, COLOR_BODY));

@@ -19,7 +19,7 @@
 #include <iostream>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
+#include <dali/public-api/signals/callback.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>

@@ -104,6 +104,11 @@ void LottieAnimationView::SetMinMaxFrame(int minFrame, int maxFrame)
   Ui::GetImpl(*this).SetMinMaxFrame(minFrame, maxFrame);
 }
 
+void LottieAnimationView::GetMinMaxFrame(int& minFrame, int& maxFrame) const
+{
+  Ui::GetImpl(*this).GetMinMaxFrame(minFrame, maxFrame);
+}
+
 void LottieAnimationView::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
 {
   Ui::GetImpl(*this).SetMinMaxFrameByMarker(minMarker, maxMarker);
@@ -226,6 +231,11 @@ Dali::Property::Map LottieAnimationView::GetMarkerInfo()
 void LottieAnimationView::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
 {
   Ui::GetImpl(*this).SetDynamicProperty(info);
+}
+
+Vector3 LottieAnimationView::GetNaturalSize() const
+{
+  return Ui::GetImpl(*this).GetNaturalSize();
 }
 
 void LottieAnimationView::SetDesiredWidth(int width)

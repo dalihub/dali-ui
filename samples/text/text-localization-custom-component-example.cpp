@@ -136,7 +136,7 @@ public:
     SetSpacing(6.0f);
     SetRequestedWidth(MATCH_PARENT);
     SetRequestedHeight(WRAP_CONTENT);
-    SetPadding(Extents(18, 18, 16, 16));
+    SetPadding(Insets(18.0f, 18.0f, 16.0f, 16.0f));
     SetBackgroundColor(UiColor(COLOR_CARD_BACKGROUND));
     SetCornerRadius(16.0f);
 
@@ -276,7 +276,7 @@ private:
     contents.SetSpacing(STACK_SPACING);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    contents.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     mDefaultCard = CreateDefaultCard();
     mAltCard     = CreateAltCard();
@@ -303,7 +303,7 @@ private:
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
     return label;
   }
@@ -317,7 +317,7 @@ private:
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
     label.SetMultiLine(true);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
     return label;
   }
@@ -422,7 +422,7 @@ private:
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
     label.SetMultiLine(true);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
     return label;
   }

@@ -118,6 +118,13 @@ enum class LineHeightMode : uint8_t
 constexpr float LINE_HEIGHT_AUTO = -1.0f;
 
 /**
+ * @brief Special value for unlimited text layout lines.
+ *
+ * When used with Label::SetMaximumLines(), no maximum line-count constraint is applied.
+ */
+constexpr int MAXIMUM_LINES_UNLIMITED = 0;
+
+/**
  * @brief Special value for infinite marquee looping.
  *
  * When used with SetMarqueeLoopCount(), the marquee repeats indefinitely.

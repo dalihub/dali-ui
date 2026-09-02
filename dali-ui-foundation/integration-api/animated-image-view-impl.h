@@ -321,6 +321,11 @@ public: // API
   int GetTotalFrame() const;
 
   /**
+   * @copydoc Dali::Ui::AnimatedImageView::GetNaturalSize
+   */
+  Vector3 GetNaturalSize() const;
+
+  /**
    * @copydoc Dali::Ui::AnimatedImageView::SetDesiredWidth
    */
   void SetDesiredWidth(int width);

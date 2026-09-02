@@ -88,7 +88,7 @@ private:
     StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.SetPadding(Extents(10, 10, 10, 10));
+    contents.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     contents.SetSpacing(8.0f);
     contents.Add(CreateTypeButton());
     contents.Add(CreateImageGrid());
@@ -124,7 +124,7 @@ private:
     card.SetRequestedHeight(MATCH_PARENT);
     card.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     card.SetBackgroundColor(UiColor(0x303134));
-    card.SetPadding(Extents(8, 8, 8, 8));
+    card.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     card.SetSpacing(6.0f);
 
     Label title = Label::New(RADIUS_CASES[radiusIndex].label);

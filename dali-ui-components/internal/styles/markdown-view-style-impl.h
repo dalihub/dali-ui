@@ -128,9 +128,9 @@ public:
   DALI_MARKDOWN_STYLE_COLOR_PROPERTY(TableRuleColor)
 #undef DALI_MARKDOWN_STYLE_COLOR_PROPERTY
 
-  void SetTaskCheckBoxIconGenerator(Ui::Callback<SelectableImageInterface()>&& generator)
+  void SetTaskCheckBoxIconGenerator(Dali::Callback<SelectableImageInterface()>&& generator)
   {
-    mTaskCheckBoxIconGenerator = std::make_shared<Ui::Callback<SelectableImageInterface()>>(std::move(generator));
+    mTaskCheckBoxIconGenerator = std::make_shared<Dali::Callback<SelectableImageInterface()>>(std::move(generator));
   }
 
   bool HasTaskCheckBoxIconGenerator() const
@@ -209,11 +209,11 @@ private:
   UiColor mThematicBreakColor{MarkdownViewDefaults::THEMATIC_BREAK_COLOR};
   UiColor mTableRuleColor{MarkdownViewDefaults::TABLE_RULE_COLOR};
 
-  std::shared_ptr<Ui::Callback<SelectableImageInterface()>> mTaskCheckBoxIconGenerator;
-  UiColor                                                   mTaskCheckBoxIconColor;
-  UiColor                                                   mTaskCheckBoxSelectedIconColor;
-  bool                                                      mHasTaskCheckBoxIconColor{false};
-  bool                                                      mHasTaskCheckBoxSelectedIconColor{false};
+  std::shared_ptr<Dali::Callback<SelectableImageInterface()>> mTaskCheckBoxIconGenerator;
+  UiColor                                                     mTaskCheckBoxIconColor;
+  UiColor                                                     mTaskCheckBoxSelectedIconColor;
+  bool                                                        mHasTaskCheckBoxIconColor{false};
+  bool                                                        mHasTaskCheckBoxSelectedIconColor{false};
 };
 
 } // namespace Internal

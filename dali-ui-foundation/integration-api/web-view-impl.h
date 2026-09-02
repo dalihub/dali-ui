@@ -29,12 +29,12 @@
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/property-notification.h>
+#include <dali/public-api/signals/callback.h>
 #include <functional>
 #include <memory>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
@@ -54,7 +54,7 @@ using WebViewImplPtr = IntrusivePtr<WebViewImpl>;
  *
  * WebViewImpl wraps the dali-adaptor WebEngine and adapts its interface to
  * the dali-ui conventions: Dali::String instead of std::string, and
- * Dali::Ui::Callback<> instead of std::function.
+ * Dali::Callback<> instead of std::function.
  *
  * @see Dali::Ui::WebView
  */

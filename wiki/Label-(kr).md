@@ -36,6 +36,7 @@ label.SetTextColor(UiColor::PRIMARY);
 | API | 설명 |
 |---|---|
 | `SetMultiLine()` | multi-line 활성화 |
+| `SetMaximumLines()` | multi-line layout에 사용할 최대 line 수 설정 |
 | `SetLineWrapMode()` | 줄바꿈 모드 (`WORD`, `CHARACTER`, `HYPHENATION`, `MIXED`) |
 | `SetHorizontalTextAlignment()` | 수평 정렬 (`START`, `CENTER`, `END`) |
 | `SetVerticalTextAlignment()` | 수직 정렬 (`START`, `CENTER`, `END`) |
@@ -47,6 +48,39 @@ label.SetMultiLine(true);
 label.SetLineWrapMode(Text::LineWrapMode::WORD);
 label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
 ~~~
+
+<br/>
+
+### Maximum Lines
+
+`SetMaximumLines()`는 multi-line text layout에 사용할 최대 line 수를 설정합니다. 양수 값을 설정하면 rendering과 size 측정은 지정한 line 수까지의 layout 결과를 사용합니다. 기본값인 `Text::MAXIMUM_LINES_UNLIMITED` (`0`)를 설정하면 line 수를 제한하지 않습니다. 음수 값도 `Text::MAXIMUM_LINES_UNLIMITED`로 처리됩니다.
+
+~~~cpp
+Label label = Label::New("First line\nSecond line\nThird line\nFourth line");
+label.SetMultiLine(true);
+label.SetMaximumLines(3);
+label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+~~~
+
+`ELLIPSIS` mode에서는 최대 3개 line이 표시되고, 이후 text는 마지막 line 끝의 ellipsis로 처리됩니다.
+
+~~~text
+First line
+Second line
+Third line…
+~~~
+
+`CLIP` mode에서는 ellipsis 없이 최대 3개 line까지만 표시됩니다.
+
+~~~text
+First line
+Second line
+Third line
+~~~
+
+`SetMaximumLines()`는 multi-line을 자동으로 활성화하지 않습니다. `SetMultiLine(false)`인 경우 Label은 기존과 같이 single-line으로 layout됩니다. 최대 line 수를 초과한 text의 표시는 `SetTextOverflowMode()`에 설정된 `ELLIPSIS` 또는 `CLIP` mode를 따릅니다.
+
+최대 line 수는 `GetNaturalSize()`, `GetHeightForWidth()`, `GetLineCount()`, `GetLineCount(width)`의 결과에 반영되며, Text Fit 계산에도 함께 적용됩니다. 자세한 측정 동작은 [Text Size 측정](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-(kr)#text-size-측정)을 참고하세요.
 
 <br/>
 
@@ -546,6 +580,9 @@ Async Size Computation은 sync API인 `GetNaturalSize()`와 `GetHeightForWidth(w
 > [!NOTE]
 > sync rendering mode일 때도 비동기 size 계산 API를 사용할 수 있습니다.
 
+> [!NOTE]
+> `SetMaximumLines()`로 최대 line 수를 설정한 경우 async natural size와 height-for-width 계산에도 동일한 제한이 적용됩니다.
+
 ~~~cpp
 label.AsyncNaturalSizeComputedSignal().Connect(
   [](View view, float width, float height)
@@ -703,6 +740,7 @@ Progress를 `0.0`에서 `1.0`까지 전체 시간 `T` 동안 `LINEAR`로 animate
 | Font variation | [text-font-variation-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-font-variation-example.cpp) |
 | Text fit | [text-fit-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-fit-example.cpp) |
 | Text fit candidate | [text-fit-candidate-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-fit-candidate-example.cpp) |
+| Maximum lines | [text-maximum-lines-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-maximum-lines-example.cpp) |
 | Marquee | [text-marquee-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-marquee-example.cpp) |
 | Render scale | [text-render-scale-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-render-scale-example.cpp) |
 | Cutout / Mask | [text-cutout-mask-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-cutout-mask-example.cpp) |

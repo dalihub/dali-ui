@@ -60,7 +60,7 @@ void ProcessTouch(UiTestApplication& application, PointState::Type state, uint32
   application.ProcessEvent(touchEvent);
 }
 
-constexpr float OVERLAY_RECOIL_SCALE_FACTOR = 0.98f;
+constexpr float OVERLAY_RECOIL_SCALE_FACTOR = 0.96f;
 
 void FinishRecoilAnimation(UiTestApplication& application)
 {

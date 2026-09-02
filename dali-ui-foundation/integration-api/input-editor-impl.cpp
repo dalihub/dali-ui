@@ -309,7 +309,9 @@ float ClampWithMinPriority(float value, float minValue, float maxValue)
 
 InputEditorImplPtr InputEditorImpl::New()
 {
-  return InputEditorImplPtr(new InputEditorImpl());
+  InputEditorImplPtr impl(new InputEditorImpl());
+
+  return impl;
 }
 
 InputEditorImpl::InputEditorImpl()
@@ -2203,7 +2205,11 @@ void InputEditorImpl::InvalidateTextMeasure()
     // Only invalidate measure when size depends on content.
     if(GetRequestedWidth() == WRAP_CONTENT || GetRequestedHeight() == WRAP_CONTENT)
     {
-      InvalidateMeasure();
+      // Through the internal primitive, not ViewImpl::InvalidateMeasure(): the
+      // mMeasureInvalidated latch below is only released by OnMeasure, so this
+      // framework-internal invalidation must never be routed through the public
+      // entry point.
+      Internal::ViewDataImpl::Get(*this).InvalidateMeasure();
       mMeasureInvalidated = true;
     }
   }

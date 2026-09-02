@@ -51,7 +51,7 @@ public:
     StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
     outer.SetRequestedWidth(MATCH_PARENT);
     outer.SetRequestedHeight(MATCH_PARENT);
-    outer.SetPadding(Extents(50, 50, 50, 50));
+    outer.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     FlexLayout first = FlexLayout::New();
     first.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));

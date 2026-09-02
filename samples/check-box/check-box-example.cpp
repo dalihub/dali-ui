@@ -49,7 +49,7 @@ constexpr float CHECKBOX_HEIGHT = 56.0f;
 // inner-fill recolour key path. Here we reuse the shipped asset (via the default style's icon)
 // and pass the same [0,19] / [20,38] segments and key path ("check_box " has a trailing space,
 // matching the asset layer); a real app can swap in its own asset. Must be a free function
-// (IconGenerator = Ui::Callback<SelectableImageInterface()>).
+// (IconGenerator = Dali::Callback<SelectableImageInterface()>).
 SelectableImageInterface MakeSampleIcon()
 {
   // Recover the shipped checkbox.json url from the default icon's drawing view.
@@ -96,7 +96,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(12.0f);
-    root.SetPadding(Extents(24, 24, 24, 24));
+    root.SetPadding(Insets(24.0f, 24.0f, 24.0f, 24.0f));
     mRoot = root;
 
     root.Add(MakeLabel("CheckBox Sample", 24.0f, 0x202124u));

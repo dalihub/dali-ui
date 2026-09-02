@@ -55,11 +55,14 @@ public:
   static constexpr float    DEFAULT_OVERLAY_COLOR_ALPHA = 0.1f;
 
   OverlayEffectImpl();
-  OverlayEffectImpl(const UiColor& overlayColor, const Vector4& cornerRadius, CornerRadiusPolicy cornerRadiusPolicy, bool useTargetCornerRadius, RecoilScope recoilScope);
+  OverlayEffectImpl(const UiColor& overlayColor, const Insets& overlayPadding, const Vector4& cornerRadius, CornerRadiusPolicy cornerRadiusPolicy, bool useTargetCornerRadius, RecoilScope recoilScope, float recoilScaleFactor);
   OverlayEffectImpl(const OverlayEffectImpl& other);
 
   void    SetOverlayColor(const UiColor& color);
   UiColor GetOverlayColor() const;
+
+  void   SetOverlayPadding(const Insets& padding);
+  Insets GetOverlayPadding() const;
 
   void    SetCornerRadius(const Vector4& radius);
   Vector4 GetCornerRadius() const;
@@ -72,6 +75,8 @@ public:
 
   void        SetRecoilScope(RecoilScope scope);
   RecoilScope GetRecoilScope() const;
+  void        SetRecoilScaleFactor(float factor);
+  float       GetRecoilScaleFactor() const;
 
 protected:
   ~OverlayEffectImpl() override;
@@ -94,9 +99,11 @@ private:
 
 private:
   UiColor            mOverlayColor;
+  Insets             mOverlayPadding;
   Vector4            mCornerRadius;
   CornerRadiusPolicy mCornerRadiusPolicy;
   RecoilScope        mRecoilScope;
+  float              mRecoilScaleFactor;
   bool               mUseTargetCornerRadius;
 };
 
@@ -121,7 +128,7 @@ public:
   void        SetState(const ViewState& state);
   void        ApplyDisabledOpacity(View owner);
   void        RestoreDisabledOpacity(View owner);
-  void        ApplyRecoil(View overlayTarget, RecoilScope scope);
+  void        ApplyRecoil(View overlayTarget, RecoilScope scope, float scaleFactor);
   void        RestoreRecoil(RecoilRestoreMode restoreMode = RecoilRestoreMode::ANIMATE);
   bool        HasRunningRecoilAnimation() const;
   void        SetPendingRelease();
@@ -151,6 +158,7 @@ private:
   RecoilScope                                       mRecoilScope;
   std::array<RecoilTarget, MAX_RECOIL_TARGET_COUNT> mRecoilTargets;
   Animation                                         mRecoilAnimation;
+  float                                             mRecoilScaleFactor;
   float                                             mDisabledOriginalOpacity;
   uint32_t                                          mPendingReleaseAnimationId;
   uint32_t                                          mRecoilTargetCount;

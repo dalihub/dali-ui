@@ -157,7 +157,7 @@ private:
     contents.SetSpacing(STACK_SPACING);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    contents.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     mHeaderLabel = CreateHeaderLabel();
     mStatusLabel = CreateStatusLabel();
@@ -180,7 +180,7 @@ private:
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
     return label;
   }
@@ -226,7 +226,7 @@ private:
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
     label.SetMultiLine(true);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
     return label;
   }

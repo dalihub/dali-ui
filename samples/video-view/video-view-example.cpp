@@ -602,7 +602,7 @@ private:
     positions.Add(0.5f, Vector3(600.0f, 100.0f, 0.0f));
     positions.Add(1.0f, Vector3(100.0f, 100.0f, 0.0f));
     mAnimation.AnimateBetween(Property(mVideoView, Actor::Property::POSITION), positions, AlphaFunction::LINEAR);
-    mAnimation.SetLooping(true);
+    mAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mAnimation.Play();
   }
 

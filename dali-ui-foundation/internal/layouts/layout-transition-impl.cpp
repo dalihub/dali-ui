@@ -35,6 +35,8 @@ constexpr float DEFAULT_ENTER_DURATION_SEC  = 0.3f;
 constexpr float DEFAULT_EXIT_DURATION_SEC   = 0.2f;
 } // namespace
 
+uint32_t LayoutTransitionImpl::gInstanceCount = 0u;
+
 LayoutTransitionImplPtr LayoutTransitionImpl::New()
 {
   return LayoutTransitionImplPtr(new LayoutTransitionImpl());
@@ -56,9 +58,13 @@ LayoutTransitionImpl::LayoutTransitionImpl()
   mEnterOnInitialMount(false),
   mReflowScope(LayoutReflowScope::DIRECT_CHILDREN)
 {
+  ++gInstanceCount;
 }
 
-LayoutTransitionImpl::~LayoutTransitionImpl() = default;
+LayoutTransitionImpl::~LayoutTransitionImpl()
+{
+  --gInstanceCount;
+}
 
 // ─── Visual property animation channel ───────────────────────────────────────
 

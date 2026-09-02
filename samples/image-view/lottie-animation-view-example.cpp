@@ -74,7 +74,7 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(4.0f);
-    root.SetPadding(Extents(8, 8, 8, 8));
+    root.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     root.Add(CreateAnimationArea());
     root.Add(CreateStatusLabel());
     root.Add(CreatePlaybackRow());

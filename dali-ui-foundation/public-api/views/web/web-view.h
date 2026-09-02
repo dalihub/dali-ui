@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/views/web/web-back-forward-list.h>
@@ -30,6 +29,7 @@
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
+#include <dali/public-api/signals/callback.h>
 
 namespace Dali
 {

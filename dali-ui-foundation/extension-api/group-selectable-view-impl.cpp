@@ -22,6 +22,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/group-selectable-view-impl.h>
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
+#include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
 
@@ -56,6 +57,9 @@ void GroupSelectableViewImpl::OnInitialize()
 {
   SelectableViewImpl::OnInitialize();
   EnsureGroupSelectableTrait();
+
+  SelectableTrait selectable = GetSelectableTrait();
+  Dali::Ui::GetImpl(selectable).EnablePersistentSelectOnlyByClick();
 }
 
 void GroupSelectableViewImpl::SetGroupName(const Dali::String& name)

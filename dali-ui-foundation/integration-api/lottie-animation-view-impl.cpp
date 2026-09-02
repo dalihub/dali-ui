@@ -123,7 +123,9 @@ LottieAnimationViewImpl::~LottieAnimationViewImpl() = default;
 
 LottieAnimationViewImplPtr LottieAnimationViewImpl::New()
 {
-  return new LottieAnimationViewImpl();
+  LottieAnimationViewImplPtr impl(new LottieAnimationViewImpl());
+
+  return impl;
 }
 
 void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value)
@@ -379,22 +381,12 @@ void LottieAnimationViewImpl::OnInitialize()
 
 MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  if(mVisualDirty)
-  {
-    mVisualDirty = false;
-    UpdateVisual();
-  }
-
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
   float s    = GetEffectiveScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
-  Vector2 naturalSize;
-  if(mVisual)
-  {
-    mVisual.GetNaturalSize(naturalSize);
-  }
+  Vector2 naturalSize = GetNaturalSize().GetVectorXY();
 
   float w = naturalSize.width;
   float h = naturalSize.height;
@@ -446,6 +438,23 @@ LayoutRect LottieAnimationViewImpl::OnArrange(const LayoutRect& bounds)
   return result;
 }
 
+Vector3 LottieAnimationViewImpl::GetNaturalSize() const
+{
+  LottieAnimationViewImpl& self = *const_cast<LottieAnimationViewImpl*>(this);
+  if(self.mVisualDirty)
+  {
+    self.mVisualDirty = false;
+    self.UpdateVisual();
+  }
+
+  Vector2 naturalSize;
+  if(self.mVisual)
+  {
+    self.mVisual.GetNaturalSize(naturalSize);
+  }
+  return Vector3(naturalSize);
+}
+
 void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)
 {
   if(!mVisual)
@@ -458,7 +467,8 @@ void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)
 
 void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)
 {
-  if(mUrl != url)
+  const bool reloadCurrentResource = (mUrl == url && !url.Empty());
+  if(mUrl != url || reloadCurrentResource)
   {
     mUrl = url;
     // Re-show placeholder while new animation loads
@@ -560,6 +570,19 @@ void LottieAnimationViewImpl::SetMinMaxFrame(int minFrame, int maxFrame)
   range.PushBack(mMinFrame);
   range.PushBack(mMaxFrame);
   UpdateVisualProperty(Ui::ImageVisualPropertyIndex::PLAY_RANGE, range);
+}
+
+void LottieAnimationViewImpl::GetMinMaxFrame(int& minFrame, int& maxFrame) const
+{
+  if(mPlayRangeType == PlayRangeType::FRAME)
+  {
+    minFrame = mMinFrame;
+    maxFrame = mMaxFrame;
+    return;
+  }
+
+  minFrame = 0;
+  maxFrame = GetTotalFrame();
 }
 
 void LottieAnimationViewImpl::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
@@ -1075,7 +1098,9 @@ void LottieAnimationViewImpl::OnViewResourceReady(Ui::View view)
   viewData.UnregisterVisual(LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE);
 
   // Request a re-layout now that the natural size is known, so aspect-ratio adjustment applies.
-  InvalidateMeasure();
+  // Through the internal primitive, not ViewImpl::InvalidateMeasure(): a resource
+  // becoming ready is a framework-internal event, not an application call.
+  viewData.InvalidateMeasure();
 }
 
 } // namespace Integration

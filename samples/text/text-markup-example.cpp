@@ -55,7 +55,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     mAnchorLabel      = CreateStyledTextLabel("클릭하면 사이트로 이동 합니다: <a href='https://www.samsung.com'>Samsung Electronics</a>");
     mAnchorColorLabel = CreateStyledTextLabel("색깔이 다른 Anchor: <a href='https://research.samsung.com'>Samsung Research</a>");
@@ -120,7 +120,7 @@ private:
     inputField.SetRequestedWidth(MATCH_PARENT);
     inputField.SetRequestedHeight(INPUT_FIELD_HEIGHT);
     inputField.SetBackgroundColor(UiColor(0xF3F3F3));
-    inputField.SetPadding(Extents(12, 12, 8, 8));
+    inputField.SetPadding(Insets(12.0f, 12.0f, 8.0f, 8.0f));
     inputField.SetVerticalTextAlignment(Text::Alignment::CENTER);
     inputField.SetFocusable(true);
     inputField.SetMaximumLength(500);
@@ -140,7 +140,7 @@ private:
     inputEditor.SetRequestedWidth(MATCH_PARENT);
     inputEditor.SetRequestedHeight(INPUT_EDITOR_HEIGHT);
     inputEditor.SetBackgroundColor(UiColor(0xF3F3F3));
-    inputEditor.SetPadding(Extents(12, 12, 8, 8));
+    inputEditor.SetPadding(Insets(12.0f, 12.0f, 8.0f, 8.0f));
     inputEditor.SetFocusable(true);
     inputEditor.SetMaximumLength(500);
     return inputEditor;

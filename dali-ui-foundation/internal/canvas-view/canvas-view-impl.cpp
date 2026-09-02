@@ -102,7 +102,9 @@ CanvasViewImpl::~CanvasViewImpl()
 
 CanvasViewImplPtr CanvasViewImpl::New(const Vector2& viewBox)
 {
-  return new CanvasViewImpl(viewBox);
+  CanvasViewImplPtr impl(new CanvasViewImpl(viewBox));
+
+  return impl;
 }
 
 // ---------------------------------------------------------------------------

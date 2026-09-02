@@ -173,6 +173,16 @@ bool Label::IsMultiLine() const
   return GetImpl(*this).IsMultiLine();
 }
 
+void Label::SetMaximumLines(int maximumLines)
+{
+  GetImpl(*this).SetMaximumLines(maximumLines);
+}
+
+int Label::GetMaximumLines() const
+{
+  return GetImpl(*this).GetMaximumLines();
+}
+
 void Label::SetLineWrapMode(Text::LineWrapMode mode)
 {
   GetImpl(*this).SetLineWrapMode(mode);

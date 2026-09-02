@@ -23,6 +23,7 @@
 #include <dali/integration-api/processor-interface.h>
 #include <dali/public-api/adaptor-framework/clipboard.h>
 #include <dali/public-api/events/gesture.h>
+#include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/text-anchor-control-interface.h>
@@ -351,6 +352,30 @@ public: // Configure the text controller.
   bool IsMultiLineEnabled() const;
 
   /**
+   * @brief Sets the maximum number of lines used during text layout.
+   *
+   * Negative values are normalized to Text::MAXIMUM_LINES_UNLIMITED.
+   *
+   * @param[in] maximumNumberOfLines The maximum line count, or
+   * Text::MAXIMUM_LINES_UNLIMITED for no limit.
+   */
+  void SetMaximumNumberOfLines(int maximumNumberOfLines);
+
+  /**
+   * @brief Gets the maximum number of lines used during text layout.
+   *
+   * @return The maximum line count, or Text::MAXIMUM_LINES_UNLIMITED for no limit.
+   */
+  int GetMaximumNumberOfLines() const;
+
+  /**
+   * @brief Gets the revision of the maximum line count.
+   *
+   * @return The revision incremented by each effective MaximumLines change.
+   */
+  uint64_t GetMaximumNumberOfLinesRevision() const;
+
+  /**
    * @brief Sets the text's horizontal alignment.
    *
    * @param[in] alignment The horizontal alignment.
@@ -547,6 +572,9 @@ public: // Configure the text controller.
 
   /**
    * @brief Retrieves the text fit candidates.
+   *
+   * @note Do not retain the returned reference across calls that change the
+   * text fit candidates.
    *
    * @return The list of text fit candidates.
    */
@@ -1216,6 +1244,8 @@ public: // Default style & Input style
   /**
    * @brief Retrieves the anchor's default color.
    *
+   * @note Do not retain the returned reference across SetAnchorColor() calls.
+   *
    * @return The anchor color.
    */
   const Vector4& GetAnchorColor() const;
@@ -1229,6 +1259,9 @@ public: // Default style & Input style
 
   /**
    * @brief Retrieves the anchor's clicked color.
+   *
+   * @note Do not retain the returned reference across SetAnchorClickedColor()
+   * calls.
    *
    * @return The anchor color.
    */

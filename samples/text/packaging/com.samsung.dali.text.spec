@@ -98,6 +98,7 @@ exit 0
 %manifest %{app_root_dir}/%{name}.manifest
 %defattr(-,root,root,-)
 %{app_exe_dir}/text.example
+%{app_exe_dir}/text-maximum-lines.example
 %{app_exe_dir}/text-layout-direction.example
 %{app_exe_dir}/text-markup.example
 %{app_exe_dir}/text-marquee.example
@@ -105,6 +106,7 @@ exit 0
 %{app_exe_dir}/text-style-clear.example
 %{app_exe_dir}/text-style-bevel.example
 %{app_exe_dir}/text-effect.example
+%{app_exe_dir}/text-effect-demo.example
 %{app_exe_dir}/text-fit.example
 %{app_exe_dir}/text-fit-candidate.example
 %{app_exe_dir}/text-scale.example

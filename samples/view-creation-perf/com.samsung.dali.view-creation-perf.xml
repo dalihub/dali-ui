@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://tizen.org/ns/packages" api-version="10.0" package="com.samsung.dali.view-creation-perf" version="2.0.0">
+	<profile name="tizen" />
+	<ui-application appid="com.samsung.dali.view-creation-perf" exec="/usr/apps/com.samsung.dali.view-creation-perf/bin/view-creation-perf.example" type="dali-c++app" multiple="false" taskmanage="true" nodisplay="false">
+		<label>DALi UI View Creation Perf</label>
+	</ui-application>
+</manifest>

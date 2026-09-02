@@ -24,6 +24,7 @@
 #include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <test-gesture-generator.h>
 
 using namespace Dali;
@@ -556,6 +557,73 @@ int UtcDaliGroupSelectableTraitRemoveRestoresToggleP(void)
   DALI_TEST_CHECK(selectable.IsSelected());
   TestGenerateTap(application, 50.0f, 50.0f, 300);
   DALI_TEST_CHECK(!selectable.IsSelected());
+  END_TEST;
+}
+
+int UtcDaliGroupSelectableViewPersistentSelectOnlyClickP(void)
+{
+  UiTestApplication   application;
+  GroupSelectableView view                  = GroupSelectableView::New();
+  int                 clickedCount          = 0;
+  int                 selectionChangedCount = 0;
+
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+
+  view.ClickedSignal().Connect(&application, [&clickedCount](View, InputEvent)
+  {
+    ++clickedCount;
+  });
+  view.SelectionChangedSignal().Connect(&application, [&selectionChangedCount](View, bool, InputEvent)
+  {
+    ++selectionChangedCount;
+  });
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  // A GroupSelectableView has radio-style click behavior even when the scene root leaves it
+  // without an automatic group.
+  DALI_TEST_CHECK(!view.GetGroup());
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+  DALI_TEST_CHECK(view.IsSelected());
+  DALI_TEST_EQUALS(clickedCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(selectionChangedCount, 1, TEST_LOCATION);
+  TestGenerateTap(application, 50.0f, 50.0f, 300);
+  DALI_TEST_CHECK(view.IsSelected());
+  DALI_TEST_EQUALS(clickedCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(selectionChangedCount, 1, TEST_LOCATION);
+
+  // The persistent policy gates only the click path.
+  view.SetSelected(false);
+  DALI_TEST_CHECK(!view.IsSelected());
+  DALI_TEST_EQUALS(selectionChangedCount, 2, TEST_LOCATION);
+
+  // Toggle-by-click remains an independent public setting. Disabling it makes the selection
+  // handler inert without clearing the persistent policy.
+  view.SetToggleByClickEnabled(false);
+  TestGenerateTap(application, 50.0f, 50.0f, 500);
+  DALI_TEST_CHECK(!view.IsSelected());
+  DALI_TEST_EQUALS(clickedCount, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(selectionChangedCount, 2, TEST_LOCATION);
+  view.SetToggleByClickEnabled(true);
+
+  // Joining and leaving a group changes only the group-owned source. The radio-style policy
+  // inherited from GroupSelectableView remains active afterward.
+  view.SetGroupName("UtcPersistentPolicy");
+  DALI_TEST_CHECK(view.GetGroup());
+  view.SetGroupName("");
+  DALI_TEST_CHECK(!view.GetGroup());
+
+  TestGenerateTap(application, 50.0f, 50.0f, 700);
+  DALI_TEST_CHECK(view.IsSelected());
+  TestGenerateTap(application, 50.0f, 50.0f, 900);
+  DALI_TEST_CHECK(view.IsSelected());
+  DALI_TEST_EQUALS(clickedCount, 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(selectionChangedCount, 3, TEST_LOCATION);
   END_TEST;
 }
 

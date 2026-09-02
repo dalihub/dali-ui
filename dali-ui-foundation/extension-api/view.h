@@ -18,7 +18,6 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
 // EXTERNAL INCLUDES
@@ -320,13 +319,34 @@ DALI_UI_API bool GrabAccessibilityHighlight(Ui::View view);
 DALI_UI_API bool ClearAccessibilityHighlight(Ui::View view);
 
 /**
+ * @brief Explicitly notifies accessibility clients that a View's value changed.
+ *
+ * This can be used when the current value must be announced again without
+ * changing the value stored on the View.
+ *
+ * @param[in] view The View whose value-change event should be emitted
+ * @return True if the View had an accessible object to notify
+ */
+DALI_UI_API bool NotifyAccessibilityValueChanged(Ui::View view);
+
+/**
+ * @brief Explicitly notifies accessibility clients that a View's showing state changed.
+ *
+ * @param[in] view The View whose showing-state event should be emitted
+ * @param[in] showing The new showing state
+ * @return True if the View had an accessible object to notify
+ */
+DALI_UI_API bool NotifyAccessibilityShowingChanged(Ui::View view, bool showing);
+
+/**
  * @brief Sets the rendered X position of the view.
  *
  * The raw Dali::Actor geometry setters (SetPosition, SetSize, SetPositionX/Y/Z,
- * SetWidth, SetHeight, SetDepth) are deleted on the public View handle because a
- * View's rendered geometry is owned by the layout system. These extension-api
- * free functions give custom-view / component authors a sanctioned way to drive
- * the rendered position and size of a View handle directly.
+ * SetSizeWidth, SetSizeHeight, SetSizeDepth) are deleted on the public View
+ * handle because a View's rendered geometry is owned by the layout system.
+ * These extension-api free functions give custom-view / component authors a
+ * sanctioned way to drive the rendered position and size of a View handle
+ * directly.
  *
  * @param[in] view The view to modify
  * @param[in] x The rendered X position
@@ -349,6 +369,17 @@ DALI_UI_API void SetPositionX(Ui::View view, float x);
 DALI_UI_API void SetPositionY(Ui::View view, float y);
 
 /**
+ * @brief Sets the rendered Z position of the view.
+ *
+ * @param[in] view The view to modify
+ * @param[in] z The rendered Z position
+ * @warning Writes the Actor render property POSITION_Z directly and bypasses
+ * layout.
+ * @see SetPositionX
+ */
+DALI_UI_API void SetPositionZ(Ui::View view, float z);
+
+/**
  * @brief Sets the rendered width of the view.
  *
  * @param[in] view The view to modify
@@ -369,6 +400,17 @@ DALI_UI_API void SetSizeWidth(Ui::View view, float width);
  * @see SetPositionX
  */
 DALI_UI_API void SetSizeHeight(Ui::View view, float height);
+
+/**
+ * @brief Sets the rendered depth of the view.
+ *
+ * @param[in] view The view to modify
+ * @param[in] depth The rendered depth
+ * @warning Writes the Actor render property SIZE_DEPTH directly and bypasses
+ * layout.
+ * @see SetSizeWidth
+ */
+DALI_UI_API void SetSizeDepth(Ui::View view, float depth);
 
 } // namespace View
 } // namespace Extension

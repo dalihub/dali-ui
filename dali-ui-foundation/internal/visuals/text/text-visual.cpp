@@ -317,6 +317,9 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mTextLoadingTaskId(0u),
   mNaturalSizeTaskId(0u),
   mHeightForWidthTaskId(0u),
+  mTextLoadingMaximumLinesRevision(0u),
+  mNaturalSizeMaximumLinesRevision(0u),
+  mHeightForWidthMaximumLinesRevision(0u),
   mRendererUpdateNeeded(false),
   mApplyingFittingMode(false),
   mTextRequireRender(false),
@@ -1096,6 +1099,48 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 #endif
 
   const bool isRenderRequest = IsAsyncRenderRequest(parameters.requestType);
+  if(parameters.maximumNumberOfLinesRevision != mController->GetMaximumNumberOfLinesRevision() ||
+     parameters.maximumNumberOfLines != static_cast<Text::Length>(mController->GetMaximumNumberOfLines()))
+  {
+    // The maximum line count changed after this request was captured. Clear a
+    // running flag only when this completion still owns the latest request of
+    // its type; a newer request may already own that flag.
+    switch(parameters.requestType)
+    {
+      case Ui::Integration::Text::Async::RENDER_FIXED_SIZE:
+      case Ui::Integration::Text::Async::RENDER_FIXED_WIDTH:
+      case Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT:
+      case Ui::Integration::Text::Async::RENDER_CONSTRAINT:
+      {
+        if(parameters.maximumNumberOfLinesRevision == mTextLoadingMaximumLinesRevision)
+        {
+          mIsTextLoadingTaskRunning = false;
+        }
+        break;
+      }
+      case Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE:
+      {
+        if(parameters.maximumNumberOfLinesRevision == mNaturalSizeMaximumLinesRevision)
+        {
+          mIsNaturalSizeTaskRunning = false;
+        }
+        break;
+      }
+      case Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+      {
+        if(parameters.maximumNumberOfLinesRevision == mHeightForWidthMaximumLinesRevision)
+        {
+          mIsHeightForWidthTaskRunning = false;
+        }
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
+    return;
+  }
   if(isRenderRequest && !mController->IsAsyncRendering())
   {
     // A render that completed after switching back to the synchronous path is
@@ -1566,8 +1611,13 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       mAsyncTextInterface->AsyncInitializeMarquee(renderInfo);
     }
 
-    if(mAsyncTextInterface && parameters.isTextFitEnabled)
+    if(mAsyncTextInterface &&
+       (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled))
     {
+      if(parameters.isTextFitCandidatesEnabled)
+      {
+        mController->SetCurrentLineSize(parameters.minLineSize);
+      }
       mAsyncTextInterface->AsyncTextFitChanged(parameters.fontSize);
     }
 
@@ -2111,7 +2161,8 @@ void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& paramete
       {
         Text::AsyncTextManager::Get().RequestCancel(mNaturalSizeTaskId);
       }
-      mIsNaturalSizeTaskRunning = true;
+      mIsNaturalSizeTaskRunning        = true;
+      mNaturalSizeMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
 
       TextLoadObserver* textLoadObserver = this;
       mNaturalSizeTaskId                 = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
@@ -2123,7 +2174,8 @@ void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& paramete
       {
         Text::AsyncTextManager::Get().RequestCancel(mHeightForWidthTaskId);
       }
-      mIsHeightForWidthTaskRunning = true;
+      mIsHeightForWidthTaskRunning        = true;
+      mHeightForWidthMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
 
       TextLoadObserver* textLoadObserver = this;
       mHeightForWidthTaskId              = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
@@ -2215,6 +2267,7 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
 #endif
 
   mIsTextLoadingTaskRunning          = true;
+  mTextLoadingMaximumLinesRevision   = parameters.maximumNumberOfLinesRevision;
   TextLoadObserver* textLoadObserver = this;
   mTextLoadingTaskId                 = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
 

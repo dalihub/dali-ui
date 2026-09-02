@@ -119,7 +119,9 @@ ImageViewImpl::~ImageViewImpl() = default;
 
 ImageViewImplPtr ImageViewImpl::New()
 {
-  return new ImageViewImpl();
+  ImageViewImplPtr impl(new ImageViewImpl());
+
+  return impl;
 }
 
 void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value)
@@ -845,22 +847,12 @@ void ImageViewImpl::SetImageColorInternal(const Vector4& color)
 
 MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  if(mVisualDirty)
-  {
-    mVisualDirty = false;
-    UpdateVisual();
-  }
-
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
   float s    = GetEffectiveScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
-  Vector2 naturalSize;
-  if(mVisual)
-  {
-    mVisual.GetNaturalSize(naturalSize);
-  }
+  Vector2 naturalSize = GetNaturalSize().GetVectorXY();
 
   float w = naturalSize.width;
   float h = naturalSize.height;
@@ -913,6 +905,23 @@ LayoutRect ImageViewImpl::OnArrange(const LayoutRect& bounds)
   DALI_LOG_DEBUG_INFO("[ImageViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f) hasVisual=%d\n",
                       bounds.x, bounds.y, bounds.width, bounds.height, mVisual ? 1 : 0);
   return ViewImpl::OnArrange(bounds);
+}
+
+Vector3 ImageViewImpl::GetNaturalSize() const
+{
+  ImageViewImpl& self = *const_cast<ImageViewImpl*>(this);
+  if(self.mVisualDirty)
+  {
+    self.mVisualDirty = false;
+    self.UpdateVisual();
+  }
+
+  Vector2 naturalSize;
+  if(self.mVisual)
+  {
+    self.mVisual.GetNaturalSize(naturalSize);
+  }
+  return Vector3(naturalSize);
 }
 
 void ImageViewImpl::UpdateVisual()

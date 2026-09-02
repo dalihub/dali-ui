@@ -298,6 +298,11 @@ LineIndex VisualModel::GetLineOfCharacter(CharacterIndex characterIndex)
 void VisualModel::GetUnderlineRuns(UnderlinedGlyphRun* underlineRuns, UnderlineRunIndex index,
                                    Length numberOfRuns) const
 {
+  if(numberOfRuns == 0u)
+  {
+    return;
+  }
+
   memcpy(underlineRuns, mUnderlineRuns.Begin() + index, numberOfRuns * sizeof(UnderlinedGlyphRun));
 }
 
@@ -650,6 +655,11 @@ float VisualModel::GetStrikethroughHeight() const
 void VisualModel::GetStrikethroughRuns(StrikethroughGlyphRun* strikethroughRuns, StrikethroughRunIndex index,
                                        Length numberOfRuns) const
 {
+  if(numberOfRuns == 0u)
+  {
+    return;
+  }
+
   memcpy(strikethroughRuns, mStrikethroughRuns.Begin() + index, numberOfRuns * sizeof(StrikethroughGlyphRun));
 }
 
@@ -700,67 +710,41 @@ bool VisualModel::IsBackgroundWithCutoutEnabled() const
 
 void VisualModel::SetBackgroundColorWithCutout(const Vector4& color)
 {
-  mBackgroundColorWithCutout = color;
+  if(mCutoutData || color != Vector4::ZERO)
+  {
+    if(!mCutoutData)
+    {
+      mCutoutData = new CutoutData();
+    }
+    mCutoutData->backgroundColor = color;
+  }
 }
 
 const Vector4& VisualModel::GetBackgroundColorWithCutout() const
 {
-  return mBackgroundColorWithCutout;
+  return mCutoutData ? mCutoutData->backgroundColor : Vector4::ZERO;
 }
 
 void VisualModel::SetOffsetWithCutout(const Vector2& offset)
 {
-  mOffsetWithCutout = offset;
+  if(mCutoutData || offset != Vector2::ZERO)
+  {
+    if(!mCutoutData)
+    {
+      mCutoutData = new CutoutData();
+    }
+    mCutoutData->offset = offset;
+  }
 }
 
 const Vector2& VisualModel::GetOffsetWithCutout() const
 {
-  return mOffsetWithCutout;
-}
-
-bool VisualModel::IsEmbossEnabled() const
-{
-  return mEmbossEnabled;
-}
-void VisualModel::SetEmbossEnabled(const bool enable)
-{
-  mEmbossEnabled = enable;
-}
-const Vector2& VisualModel::GetEmbossDirection() const
-{
-  return mEmbossDirection;
-}
-void VisualModel::SetEmbossDirection(const Vector2& direction)
-{
-  mEmbossDirection = direction;
-}
-float VisualModel::GetEmbossStrength() const
-{
-  return mEmbossStrength;
-}
-void VisualModel::SetEmbossStrength(const float strength)
-{
-  mEmbossStrength = strength;
-}
-const Vector4& VisualModel::GetEmbossLightColor() const
-{
-  return mEmbossLightColor;
-}
-void VisualModel::SetEmbossLightColor(const Vector4& lightColor)
-{
-  mEmbossLightColor = lightColor;
-}
-const Vector4& VisualModel::GetEmbossShadowColor() const
-{
-  return mEmbossShadowColor;
-}
-void VisualModel::SetEmbossShadowColor(const Vector4& shadowColor)
-{
-  mEmbossShadowColor = shadowColor;
+  return mCutoutData ? mCutoutData->offset : Vector2::ZERO;
 }
 
 VisualModel::~VisualModel()
 {
+  delete mCutoutData;
 }
 
 VisualModel::VisualModel()
@@ -788,7 +772,7 @@ VisualModel::VisualModel()
   mShadowBlurRadius(0.0f),
   mOutlineBlurRadius(0.0f),
   mOutlineWidth(0u),
-  mEmbossStrength(0.0f),
+  mCutoutData(nullptr),
   mNaturalSize(),
   mLayoutSize(),
   mCachedLayoutSize(),
@@ -810,8 +794,7 @@ VisualModel::VisualModel()
   mStrikethroughColorSet(false),
   mCharacterSpacing(0.0f),
   mCutoutEnabled(false),
-  mBackgroundWithCutoutEnabled(false),
-  mEmbossEnabled(false)
+  mBackgroundWithCutoutEnabled(false)
 {
 }
 

@@ -1,0 +1,1368 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WindowFrame 사용 및 DesktopWindow 커스텀 가이드</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17212b;
+      --muted: #5c6975;
+      --line: #d9e0e5;
+      --paper: #ffffff;
+      --canvas: #f4f6f7;
+      --panel: #eef2f3;
+      --deep: #15222b;
+      --teal: #00897b;
+      --teal-soft: #dff3ef;
+      --coral: #d84a4a;
+      --coral-soft: #fde9e7;
+      --amber: #a76500;
+      --amber-soft: #fff1cf;
+      --blue: #286aa6;
+      --blue-soft: #e5f0fa;
+      --radius: 8px;
+      --sidebar: 268px;
+      --content: 1040px;
+      font-family: Inter, "Noto Sans KR", "Noto Sans CJK KR", system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      line-height: 1.68;
+    }
+    button, input { font: inherit; letter-spacing: 0; }
+    a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    code, pre { font-family: "JetBrains Mono", "Noto Sans Mono CJK KR", Consolas, monospace; }
+    code {
+      padding: 0.12em 0.34em;
+      border: 1px solid #dce3e7;
+      border-radius: 4px;
+      background: #f2f5f6;
+      font-size: 0.9em;
+    }
+    pre {
+      position: relative;
+      overflow: auto;
+      margin: 0;
+      padding: 20px;
+      border: 1px solid #293b46;
+      border-radius: var(--radius);
+      background: #14212a;
+      color: #eef6f7;
+      line-height: 1.55;
+      tab-size: 2;
+    }
+    pre code { padding: 0; border: 0; background: transparent; color: inherit; font-size: 13px; }
+    h1, h2, h3, h4 { margin: 0; line-height: 1.3; letter-spacing: 0; }
+    h1 { max-width: 780px; font-size: 34px; }
+    h2 { font-size: 25px; }
+    h3 { font-size: 18px; }
+    h4 { font-size: 15px; }
+    p { margin: 10px 0; }
+    ul, ol { margin: 10px 0; padding-left: 22px; }
+    li + li { margin-top: 5px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #edf1f3; color: #34414b; font-size: 12px; text-transform: uppercase; }
+
+    .progress {
+      position: fixed;
+      z-index: 100;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background: var(--teal);
+    }
+    .shell { min-height: 100vh; }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 20;
+      width: var(--sidebar);
+      overflow-y: auto;
+      border-right: 1px solid #ccd5da;
+      background: #17242d;
+      color: #dbe7e9;
+    }
+    .brand {
+      padding: 24px 22px 18px;
+      border-bottom: 1px solid #31414b;
+    }
+    .brand strong { display: block; color: white; font-size: 18px; }
+    .brand small { display: block; margin-top: 3px; color: #99abb5; }
+    .search-wrap { padding: 16px 16px 8px; }
+    .search-wrap label { display: block; margin-bottom: 6px; color: #9eb0b9; font-size: 12px; }
+    .search {
+      width: 100%;
+      height: 38px;
+      padding: 0 11px;
+      border: 1px solid #40525d;
+      border-radius: 6px;
+      outline: none;
+      background: #22333d;
+      color: white;
+    }
+    .search:focus { border-color: #46c3b6; box-shadow: 0 0 0 2px rgba(70,195,182,.2); }
+    nav { padding: 8px 10px 24px; }
+    nav a {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      padding: 8px 12px;
+      border-left: 3px solid transparent;
+      color: #bdcbd1;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    nav a span { min-width: 22px; color: #718791; font-variant-numeric: tabular-nums; }
+    nav a:hover, nav a.active { border-left-color: #4bc5b7; background: #21343e; color: white; }
+    .sidebar-footer { padding: 0 22px 24px; color: #81949e; font-size: 11px; }
+
+    main { margin-left: var(--sidebar); }
+    .hero {
+      min-height: 390px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+    .hero-inner, .section-inner {
+      width: min(calc(100% - 48px), var(--content));
+      margin: 0 auto;
+    }
+    .hero-inner { padding: 50px 0 38px; }
+    .eyebrow { color: var(--teal); font-size: 13px; font-weight: 800; text-transform: uppercase; }
+    .lede { max-width: 760px; margin-top: 14px; color: var(--muted); font-size: 17px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 26px; }
+    .chip { padding: 5px 9px; border: 1px solid var(--line); border-radius: 5px; background: #f7f9fa; font-size: 12px; }
+    .hero-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: white;
+    }
+    .flow-step { position: relative; min-height: 92px; padding: 16px; border-right: 1px solid var(--line); }
+    .flow-step:last-child { border-right: 0; }
+    .flow-step b { display: block; margin-bottom: 4px; font-size: 14px; }
+    .flow-step small { color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .flow-step em { display: block; margin-bottom: 5px; color: var(--teal); font-size: 11px; font-style: normal; font-weight: 800; }
+
+    .band { border-bottom: 1px solid var(--line); background: var(--paper); }
+    .band.alt { background: var(--canvas); }
+    .section-inner { padding: 52px 0; }
+    .section-head { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 28px; }
+    .section-head p { max-width: 600px; margin: 0; color: var(--muted); }
+    .section-number { color: var(--teal); font-size: 12px; font-weight: 800; }
+    .section-hidden { display: none !important; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .info-card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: white;
+    }
+    .info-card h3 { margin-bottom: 8px; }
+    .info-card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .info-card.teal { border-top: 4px solid var(--teal); }
+    .info-card.coral { border-top: 4px solid var(--coral); }
+    .info-card.amber { border-top: 4px solid #d89b22; }
+    .callout { margin: 20px 0; padding: 16px 18px; border-left: 4px solid var(--teal); background: var(--teal-soft); }
+    .callout.warning { border-left-color: #d79216; background: var(--amber-soft); }
+    .callout.danger { border-left-color: var(--coral); background: var(--coral-soft); }
+    .callout strong { display: block; margin-bottom: 3px; }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+    .architecture .app {
+      display: grid;
+      place-content: center;
+      min-height: 260px;
+      padding: 22px;
+      border: 2px solid var(--blue);
+      border-radius: var(--radius);
+      background: var(--blue-soft);
+      text-align: center;
+    }
+    .architecture .stack { display: grid; gap: 10px; }
+    .layer { padding: 15px 18px; border: 1px solid var(--line); border-radius: 6px; background: white; }
+    .layer.primary { border-color: #30a99d; background: var(--teal-soft); }
+    .layer.dark { border-color: #243743; background: var(--deep); color: white; }
+    .layer small { display: block; margin-top: 3px; color: var(--muted); }
+    .layer.dark small { color: #a8b8c0; }
+
+    .window-diagram {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #dfe6e8;
+    }
+    .native-surface { padding: 24px 30px 30px; border: 2px dashed #71828c; background: #f7f9fa; }
+    .frame { overflow: hidden; border: 4px solid #00a98f; border-radius: 8px; background: #fff; box-shadow: 0 12px 22px rgba(24,36,44,.24); }
+    .top-slot, .bottom-slot { padding: 12px 15px; background: #18262f; color: white; }
+    .middle { display: grid; grid-template-columns: 12px 1fr 12px; min-height: 130px; }
+    .side-slot { background: #00a98f; }
+    .content-host { display: grid; place-content: center; color: #40505b; background: white; text-align: center; }
+    .bottom-slot { display: grid; grid-template-columns: 36px 1fr repeat(3, 36px) 36px; gap: 6px; align-items: center; }
+    .role { display: grid; place-items: center; height: 32px; border: 1px solid #53636d; border-radius: 5px; color: #dce8ea; font-size: 11px; }
+    .role.move { border-style: dashed; }
+    .role.close { border-color: #de5b5b; background: #c84040; color: white; }
+    .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; color: var(--muted); font-size: 12px; }
+    .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; }
+
+    .formula-grid { display: grid; grid-template-columns: 1fr 50px 1fr; align-items: center; gap: 12px; }
+    .formula-box { min-height: 190px; padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: white; }
+    .formula-box b { display: block; margin-bottom: 12px; }
+    .formula-box .rect { display: grid; place-content: center; height: 90px; border: 16px solid #1b3039; background: #e9f6f3; color: #12685e; font-weight: 700; }
+    .formula-box.overlay .rect { position: relative; border: 0; background: #dff3ef; }
+    .formula-box.overlay .rect::before { content: "overlay border"; position: absolute; inset: 0; padding: 8px; border: 8px solid rgba(27,48,57,.86); color: white; font-size: 10px; }
+    .formula-arrow { color: var(--teal); text-align: center; font-size: 28px; }
+    .equation { margin-top: 10px; color: var(--muted); font-family: monospace; font-size: 12px; }
+
+    .api-block { margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--line); }
+    .api-title { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: baseline; margin-bottom: 14px; }
+    .api-title h3 { font-size: 20px; }
+    .api-title code { color: #086f64; }
+    .inset-values { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0; }
+    .inset-value { padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: white; text-align: center; }
+    .inset-value b { display: block; color: var(--teal); font-size: 13px; }
+    .inset-value span { font-family: monospace; font-size: 18px; }
+    .inset-visual { margin: 18px 0 24px; }
+    .inset-visual-stage {
+      position: relative;
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 48px 72px;
+      border: 1px solid #c9d4d9;
+      border-radius: var(--radius);
+      background: #e8edef;
+    }
+    .inset-frame-visual {
+      display: grid;
+      grid-template:
+        "top top top" 64fr
+        "left content right" 140fr
+        "bottom bottom bottom" 56fr /
+        8fr 384fr 8fr;
+      width: 100%;
+      aspect-ratio: 400 / 260;
+      overflow: hidden;
+      border: 2px solid #172832;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 14px 24px rgba(24, 38, 47, .22);
+    }
+    .inset-top-visual { grid-area: top; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px 13px; background: #172832; color: white; }
+    .inset-top-visual strong, .inset-bottom-visual strong { font-size: 12px; }
+    .inset-top-actions { display: flex; gap: 5px; }
+    .inset-top-actions i { display: grid; place-content: center; height: 28px; padding: 0 7px; border-radius: 4px; background: #344a56; color: #dce7ea; font-size: 9px; font-style: normal; }
+    .inset-left-visual { grid-area: left; background: #00a878; }
+    .inset-right-visual { grid-area: right; background: #00a878; }
+    .inset-content-visual { grid-area: content; display: grid; place-content: center; padding: 12px; background: #fff; color: #31434d; text-align: center; }
+    .inset-content-visual strong { font-size: 17px; }
+    .inset-content-visual span { color: var(--teal); font-family: monospace; font-size: 13px; }
+    .inset-bottom-visual { grid-area: bottom; display: grid; grid-template-columns: 36px 1fr repeat(3, 40px) 36px; align-items: center; background: #20313a; color: white; }
+    .inset-bottom-visual > i { display: grid; place-content: center; height: 100%; border-left: 1px solid #465a65; color: #dce7ea; font-size: 11px; font-style: normal; }
+    .inset-bottom-visual > i:first-child { border-left: 0; background: #087e63; }
+    .inset-bottom-visual > i:last-child { background: #087e63; }
+    .inset-bottom-visual > i.close { background: #c43d3d; color: white; }
+    .inset-bottom-visual strong { padding-left: 12px; color: #cbd7dc; }
+    .inset-side-tag {
+      position: absolute;
+      top: 50%;
+      min-width: 50px;
+      padding: 5px 7px;
+      border: 1px solid #16a187;
+      border-radius: 5px;
+      background: white;
+      color: #08705f;
+      font-size: 10px;
+      font-weight: 800;
+      text-align: center;
+      transform: translateY(-50%);
+    }
+    .inset-side-tag.left { left: 11px; }
+    .inset-side-tag.right { right: 11px; }
+    .inset-visual figcaption { margin-top: 9px; color: var(--muted); font-size: 12px; text-align: center; }
+    .install-flow { display: grid; grid-template-columns: repeat(3, 1fr) 52px 1.15fr; gap: 10px; align-items: stretch; margin: 16px 0; }
+    .install-node { display: grid; place-content: center; min-height: 92px; padding: 13px; border: 1px solid var(--line); border-radius: 6px; background: white; text-align: center; }
+    .install-node b { display: block; font-size: 13px; }
+    .install-node small { margin-top: 4px; color: var(--muted); line-height: 1.4; }
+    .install-node.result { border-color: #29a99b; background: var(--teal-soft); }
+    .install-arrow { display: grid; place-content: center; color: var(--teal); font-size: 26px; }
+    .placement-map { margin: 16px 0 24px; }
+    .placement-label { display: flex; justify-content: space-between; gap: 12px; margin: 12px 0 6px; color: var(--muted); font-size: 12px; }
+    .bar-layout { display: grid; overflow: hidden; border: 1px solid #243640; border-radius: 6px; background: #1b2b34; color: white; }
+    .bar-layout.top-map { grid-template-columns: minmax(80px, 1fr) 54px 64px 58px 8px; min-height: 64px; }
+    .bar-layout.bottom-map { grid-template-columns: 36px minmax(80px, 1fr) 40px 40px 40px 36px; min-height: 56px; }
+    .map-cell { display: grid; place-content: center; min-width: 0; padding: 5px 3px; border-right: 1px solid #53636c; text-align: center; font-size: 10px; line-height: 1.25; overflow-wrap: anywhere; }
+    .map-cell:last-child { border-right: 0; }
+    .map-cell.flex { background: #213640; }
+    .map-cell.action { background: #344451; }
+    .map-cell.close { background: #c43d3d; }
+    .map-cell.resize { background: #087e63; }
+    .map-cell.spacer { padding: 0; background: #17212b; }
+    .map-cell b { display: block; font-size: 11px; }
+    .map-cell small { color: #becbd0; font-size: 9px; }
+    .icon-explainer { display: grid; grid-template-columns: 150px 1fr; gap: 22px; align-items: center; }
+    .hit-target-demo { display: grid; place-content: center; width: 80px; height: 112px; margin: 0 auto; border: 2px dashed var(--blue); background: var(--blue-soft); }
+    .button-visual-demo { display: grid; place-content: center; width: 68px; height: 68px; border-radius: 8px; background: #344451; }
+    .icon-demo { display: grid; place-content: center; width: 48px; height: 48px; border: 1px solid #d9e5e8; color: white; font-size: 24px; }
+    .dimension-list { display: grid; gap: 8px; }
+    .dimension-item { display: grid; grid-template-columns: 88px 1fr; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .dimension-item b { color: var(--teal); }
+    .role-map { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; margin-top: 16px; }
+    .role-map .install-node { min-height: 76px; }
+
+    .timeline { position: relative; display: grid; gap: 12px; margin-top: 18px; }
+    .event {
+      display: grid;
+      grid-template-columns: 148px 1fr 132px;
+      gap: 16px;
+      align-items: center;
+      min-height: 58px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--blue);
+      border-radius: 6px;
+      background: white;
+    }
+    .event.request { border-left-color: #d9931c; }
+    .event.confirm { border-left-color: var(--teal); }
+    .event.present { border-left-color: var(--coral); }
+    .event b { font-size: 13px; }
+    .event p { margin: 0; color: var(--muted); font-size: 13px; }
+    .event time { color: #63727b; font-family: monospace; font-size: 11px; text-align: right; }
+
+    .disposition-list { display: grid; gap: 12px; margin: 18px 0; }
+    .disposition-panel { padding: 20px; border: 1px solid var(--line); border-left: 4px solid var(--teal); border-radius: var(--radius); background: white; }
+    .disposition-panel h3 { margin-bottom: 8px; }
+    .disposition-panel p { color: var(--muted); }
+    .disposition-panel small { display: block; margin-top: 10px; color: #63727b; }
+
+    .code-wrap { position: relative; margin-top: 16px; }
+    .copy {
+      position: absolute;
+      z-index: 2;
+      top: 9px;
+      right: 9px;
+      min-width: 62px;
+      height: 30px;
+      border: 1px solid #4d606b;
+      border-radius: 5px;
+      background: #21333e;
+      color: #d8e5e8;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .copy:hover { background: #2b4350; }
+    details { margin-top: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: white; }
+    summary { padding: 13px 16px; cursor: pointer; font-weight: 700; }
+    details > div { padding: 0 16px 16px; }
+
+    .mapping td:first-child { width: 38%; font-family: monospace; color: #8c3434; }
+    .mapping td:nth-child(2) { font-family: monospace; color: #096c61; }
+    .checklist { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px 20px; padding: 0; list-style: none; }
+    .checklist li { position: relative; margin: 0; padding: 10px 12px 10px 38px; border-bottom: 1px solid var(--line); }
+    .checklist li::before { content: ""; position: absolute; left: 11px; top: 15px; width: 13px; height: 13px; border: 2px solid var(--teal); border-radius: 3px; }
+
+    .source-links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .source-link { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: white; overflow-wrap: anywhere; }
+    .source-link b { display: block; margin-bottom: 5px; }
+    .source-link code { border: 0; padding: 0; background: transparent; color: var(--muted); }
+    .empty { display: none; padding: 70px 24px; text-align: center; color: var(--muted); }
+
+    @media (max-width: 940px) {
+      .sidebar { position: sticky; top: 0; width: 100%; height: auto; overflow: visible; }
+      .brand { display: none; }
+      .search-wrap { display: none; }
+      nav { display: flex; overflow-x: auto; padding: 8px; background: #17242d; }
+      nav a { flex: 0 0 auto; border-left: 0; border-bottom: 3px solid transparent; white-space: nowrap; }
+      nav a:hover, nav a.active { border-left-color: transparent; border-bottom-color: #4bc5b7; }
+      .sidebar-footer { display: none; }
+      main { margin-left: 0; }
+      .hero-inner, .section-inner { width: min(calc(100% - 32px), var(--content)); }
+      .hero-flow { grid-template-columns: repeat(2, 1fr); }
+      .flow-step:nth-child(2) { border-right: 0; }
+      .flow-step:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+    }
+    @media (max-width: 700px) {
+      h1 { font-size: 28px; }
+      h2 { font-size: 22px; }
+      .hero-inner { padding-top: 34px; }
+      .section-inner { padding: 40px 0; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 8px; }
+      .grid-2, .grid-3, .source-links, .architecture, .formula-grid { grid-template-columns: 1fr; }
+      .formula-arrow { transform: rotate(90deg); }
+      .event { grid-template-columns: 1fr; gap: 3px; }
+      .event time { text-align: left; }
+      .checklist { grid-template-columns: 1fr; }
+      .inset-values { grid-template-columns: repeat(2, 1fr); }
+      .install-flow { grid-template-columns: 1fr; }
+      .install-arrow { transform: rotate(90deg); min-height: 34px; }
+      .icon-explainer, .role-map { grid-template-columns: 1fr; }
+      .role-map .install-arrow { transform: rotate(90deg); }
+      .inset-visual-stage { padding: 40px 38px; }
+      .inset-side-tag { min-width: 30px; padding: 4px; font-size: 9px; }
+      .inset-side-tag.left { left: 4px; }
+      .inset-side-tag.right { right: 4px; }
+      .inset-top-visual { padding: 6px 8px; }
+      .inset-top-actions i { height: 22px; padding: 0 4px; font-size: 8px; }
+      .inset-bottom-visual { grid-template-columns: 24px 1fr repeat(3, 28px) 24px; }
+      .inset-bottom-visual strong { padding-left: 7px; font-size: 10px; }
+      .inset-content-visual strong { font-size: 14px; }
+      .bottom-slot { grid-template-columns: 30px 1fr repeat(3, 30px) 30px; gap: 3px; }
+      .role { font-size: 9px; }
+      .architecture .app { min-height: 130px; }
+    }
+    @media print {
+      .sidebar, .progress, .copy { display: none !important; }
+      main { margin: 0; }
+      .band, .hero { break-inside: avoid; }
+      details > div { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <strong>WindowFrame Guide</strong>
+        <small>DALi UI · sample to product</small>
+      </div>
+      <div class="search-wrap">
+        <label for="search">문서에서 찾기</label>
+        <input class="search" id="search" type="search" placeholder="overlay, resize, signal...">
+      </div>
+      <nav aria-label="문서 목차">
+        <a href="#overview"><span>01</span>한눈에 보기</a>
+        <a href="#default-window-decoration"><span>02</span>기본 창 장식</a>
+        <a href="#architecture"><span>03</span>구조와 책임</a>
+        <a href="#layout"><span>04</span>View와 Layout</a>
+        <a href="#bootstrap"><span>05</span>초기화 순서</a>
+        <a href="#style"><span>06</span>Style과 Shadow</a>
+        <a href="#commands"><span>07</span>Command 확장</a>
+        <a href="#timing"><span>08</span>Signal 타이밍</a>
+        <a href="#public-api"><span>09</span>Public API</a>
+        <a href="#desktop"><span>10</span>DesktopWindow</a>
+        <a href="#mapping"><span>11</span>NUI 대응표</a>
+        <a href="#checklist"><span>12</span>적용 체크</a>
+      </nav>
+      <div class="sidebar-footer">WindowFrame public API<br>HTML visual edition</div>
+    </aside>
+
+    <main>
+      <header class="hero" id="overview" data-search="한눈에 보기 핵심 content root WindowFrame facade">
+        <div class="hero-inner">
+          <div class="eyebrow">DALi UI implementation guide</div>
+          <h1>WindowFrame 사용 및 DesktopWindow 커스텀 가이드</h1>
+          <p class="lede">샘플 한 파일이 어떤 순서로 native window, decoration UI, command와 상태를 연결하는지 시각적으로 정리했습니다. 제품에서는 샘플을 상속하기보다 <code>WindowFrame</code>을 포함하는 wrapper를 만드는 것이 핵심입니다.</p>
+          <div class="meta">
+            <span class="chip">초기 frame 400 × 260</span>
+            <span class="chip">최소 frame 200 × 130</span>
+            <span class="chip">bottom move + 2 resize handles</span>
+            <span class="chip">overlay auto-hide</span>
+          </div>
+          <div class="hero-flow" aria-label="WindowFrame 기본 사용 순서">
+            <div class="flow-step"><em>01</em><b>Dali::Window 준비</b><small>transparent surface와 launch geometry</small></div>
+            <div class="flow-step"><em>02</em><b>WindowFrame::New</b><small>option, close callback, signal 연결</small></div>
+            <div class="flow-step"><em>03</em><b>SetDecoration</b><small>decoration + layout + style 설치</small></div>
+            <div class="flow-step"><em>04</em><b>GetContentRoot().Add</b><small>앱 UI는 항상 persistent host 아래에 배치</small></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="band" id="default-window-decoration" data-search="DefaultWindowDecoration 기본 창 장식 default window decoration ready made DefaultWindowDecorationOptions DefaultWindowDecorationTheme GetMoveRegion GetTopArea AddBarAction SetTopAreaHeight 상단 영역 액션 GetDecoration GetMinimumFrameSize 최소 크기 minimum shadow icon 한 줄">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">02 · DEFAULT DECORATION</div><h2>기본 창 장식으로 바로 시작하기</h2></div>
+            <p>직접 decoration을 만들기 전에, 완성된 창 장식을 먼저 붙여 보십시오. <code>DefaultWindowDecoration</code>는 decoration, layout, style을 만들고 설치한 뒤 창 상태에 맞춰 유지까지 합니다.</p>
+          </div>
+
+          <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">#include &lt;dali-ui-components/public-api/window/default-window-decoration.h&gt;
+
+// shadow가 frame 바깥 surface에 그려지므로 창은 투명해야 합니다.
+window.SetBackgroundColor(Color::TRANSPARENT);
+window.SetTransparency(true);
+
+mWindowFrame  = WindowFrame::New(window, closeCallback);
+mDefaultDecoration = DefaultWindowDecoration::New(mWindowFrame);   // 기본 창 장식
+mWindowFrame.Attach();
+
+mWindowFrame.GetContentRoot().Add(myContent);</code></pre></div>
+
+          <div class="callout warning"><strong><code>mDefaultDecoration</code> handle을 멤버로 보관하십시오</strong>앱 action callback과 window 상태를 따라가는 연결을 이 handle이 소유합니다. 해제해도 <code>WindowFrame</code>이 소유한 decoration은 계속 그려지고 기본 minimize/maximize/close도 동작하지만, <code>AddBarAction()</code> callback과 maximize 아이콘·corner radius의 상태 동기화는 멈춥니다.</div>
+          <div class="callout"><strong>기본 하단 bar 배치</strong>왼쪽부터 bottom-left resize handle, 남은 폭을 채우는 move region, 앱 action, 기본 제공 minimize, maximize/restore, close 버튼, bottom-right resize handle 순서입니다. 여기서 기본 버튼 셋을 window controls라고 부릅니다.</div>
+          <div class="callout"><strong>상단 영역과 앱 액션</strong>기본 창 장식을 그대로 쓰면서 두 가지를 더할 수 있습니다. <code>DefaultWindowDecorationOptions::SetTopAreaHeight()</code>는 얇은 상단 테두리를 앱이 채우는 영역으로 바꾸고 <code>GetTopArea()</code>로 돌려줍니다. <code>GetMoveRegion()</code>은 하단 bar에서 남은 폭을 차지하며 title이나 branding을 넣을 수 있습니다. <code>AddBarAction(iconUrl, onClick)</code>은 move region과 기본 제공 minimize, maximize/restore, close 버튼 사이에 자기 컬럼을 잡아 버튼을 넣습니다. Top area와 앱 action은 move region이 아니므로 <b>최대화 상태에서도 눌립니다.</b> <code>iconUrl</code>에는 앱 resource의 full URL을 전달하며 앱 아이콘에는 theme tint가 적용되지 않습니다. 액션 추가 후 커진 <code>GetMinimumFrameSize()</code>를 다시 적용하십시오.</div>
+          <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">DefaultWindowDecorationOptions options;
+options.SetTopAreaHeight(44.0f);
+mDefaultDecoration = DefaultWindowDecoration::New(mWindowFrame, options);
+mDefaultDecoration.GetTopArea().Add(myBranding);
+
+const Dali::String iconUrl = Dali::String(RESOURCES_DIR) + "share.png";
+mDefaultDecoration.AddBarAction(
+  iconUrl, Dali::Callback&lt;void()&gt;::New(this, &amp;App::Share));
+mWindowFrame.SetMinimumFrameSize(mDefaultDecoration.GetMinimumFrameSize());</code></pre></div>
+          <div class="callout"><strong>최소 크기는 물어보십시오</strong>바는 컨트롤과 코너 리사이즈 핸들마다 고정 폭 열을 잡습니다. 그보다 좁아지면 move region 폭이 0이 되고 close 버튼이 코너 핸들 밑으로 들어갑니다. <code>mWindowFrame.SetMinimumFrameSize(mDefaultDecoration.GetMinimumFrameSize())</code>로 적용하십시오. 기본 옵션에서는 <code>276 x 55</code>이고, 컨트롤이나 핸들을 끄면 줄어듭니다. 창의 크기 제약은 앱의 몫이므로 decoration이 스스로 적용하지는 않습니다.</div>
+
+          <h3 style="margin:32px 0 14px">무엇이 만들어지는가</h3>
+          <div class="grid-3">
+            <article class="info-card teal"><h3>Bottom bar</h3><p>minimize, maximize/restore, close가 오른쪽에 놓이고 남은 영역 전체가 move region입니다.</p></article>
+            <article class="info-card amber"><h3>Top / Left / Right edge</h3><p>같은 두께의 얇은 edge로 frame을 사방에서 감쌉니다.</p></article>
+            <article class="info-card coral"><h3>Bottom corner handle</h3><p>양쪽 하단 코너에 명시적 resize handle을 놓습니다. 8방향 hit region은 없습니다.</p></article>
+          </div>
+
+          <div class="callout"><strong>칠하는 것은 decoration뿐입니다</strong>frame 배경은 투명하므로 앱이 그리는 영역에는 색이 입혀지지 않고, 투명한 창은 앱이 그리지 않은 곳에서 계속 비쳐 보입니다. frame은 cut-out shadow를 그리는데, cut-out이 없으면 투명한 frame 때문에 blur가 content 영역까지 어둡게 만듭니다.</div>
+
+          <h3 style="margin:32px 0 14px">DefaultWindowDecorationOptions</h3>
+          <div style="overflow-x:auto">
+            <table class="mapping">
+              <thead><tr><th>옵션</th><th>기본값</th><th>메모</th></tr></thead>
+              <tbody>
+                <tr><td><code>SetTheme()</code></td><td><code>DARK</code></td><td>전체 decoration 색상 기준입니다. <code>DARK</code>는 어두운 frame과 밝은 icon, <code>LIGHT</code>는 밝은 frame과 어두운 icon을 사용합니다.</td></tr>
+                <tr><td><code>SetBarHeight()</code></td><td><code>50</code></td><td>bar 아이콘 크기가 이 값을 따라갑니다.</td></tr>
+                <tr><td><code>SetEdgeThickness()</code></td><td><code>5</code></td><td>상단과 좌우에 적용됩니다. <code>0</code>이면 세 edge가 모두 사라집니다.</td></tr>
+                <tr><td><code>SetTopAreaHeight()</code></td><td><code>0</code></td><td><code>0</code>이면 얇은 top edge를 유지하고 <code>GetTopArea()</code>는 빈 handle을 반환합니다. 양수이면 앱이 채우는 top area가 됩니다.</td></tr>
+                <tr><td><code>SetCornerRadius()</code></td><td><code>12</code></td><td>maximized 상태에서는 0이 됩니다. frame root뿐 아니라 코너를 직접 칠하는 decoration slot의 radius도 함께 0이 되므로 모서리가 파이지 않습니다.</td></tr>
+                <tr><td><code>SetBackgroundColor()</code></td><td>theme가 결정</td><td>bar와 edge 색입니다.</td></tr>
+                <tr><td><code>SetShadowEnabled()</code></td><td><code>true</code></td><td>투명한 창이 필요합니다. 불투명한 창이면 shadow 공간에 불투명 배경이 여백처럼 드러납니다.</td></tr>
+                <tr><td><code>SetMinimizeControlEnabled()</code><br><code>SetMaximizeRestoreControlEnabled()</code><br><code>SetCloseControlEnabled()</code></td><td>모두 <code>true</code></td><td>끈 control은 bar에서 자리까지 사라집니다.</td></tr>
+                <tr><td><code>SetResizeHandlesEnabled()</code></td><td><code>true</code></td><td>끄면 코너 handle과 그 자리가 사라집니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin:32px 0 14px">어디까지 바꿀 수 있는가</h3>
+          <div class="grid-3">
+            <article class="info-card teal"><h3><code>GetMoveRegion()</code></h3><p>bottom bar의 move region을 반환합니다. 입력이 필요 없는 제목이나 branding을 넣을 수 있습니다. 최대화 중에도 눌려야 하는 아이콘은 <code>AddBarAction()</code>, 자유로운 interactive content는 <code>GetTopArea()</code>를 사용합니다.</p></article>
+            <article class="info-card amber"><h3><code>GetDecoration()</code></h3><p>설치된 <code>WindowFrameDecoration</code>의 <b>복사본</b>입니다. 같은 view handle을 들고 있으므로 view의 property를 바꾸면 설치된 보더가 바뀝니다. slot이나 role에 다른 view를 대입하는 것은 복사본만 고치므로, 교체하려면 그 복사본을 <code>SetDecoration()</code>으로 다시 설치해야 합니다.</p></article>
+            <article class="info-card coral"><h3>직접 만들기</h3><p>모양을 통째로 바꿀 것이라면 아래 03~06 절대로 <code>WindowFrameDecoration</code>을 만들어 <code>SetDecoration()</code>으로 설치합니다. handle은 먼저 해제합니다.</p></article>
+          </div>
+
+          <div class="callout"><strong>아이콘 자산</strong>아이콘은 컴포넌트와 함께 <code>&lt;dataReadOnlyDir&gt;/ui/images/components/border/</code>에 설치됩니다. 기본 리소스 디렉터리를 쓰지 않는 빌드는 <code>DALI_UI_COMPONENTS_IMAGE_DIR</code> 환경 변수로 경로를 찾습니다. 알파 채널을 가진 흰색 glyph라 한 세트가 두 theme를 모두 처리합니다.</div>
+        </div>
+      </section>
+
+      <section class="band alt" id="architecture" data-search="구조 책임 facade application native surface wrapper view controller">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">03 · ARCHITECTURE</div><h2>무엇을 만들고, 누가 무엇을 소유하는가</h2></div>
+            <p><code>WindowFrame</code>은 새 native window가 아니라 기존 <code>Dali::Window</code>를 꾸미고 제어하는 facade입니다.</p>
+          </div>
+          <div class="architecture">
+            <div class="app"><strong>Application / 3rd party</strong><small>제품 UI와 정책</small></div>
+            <div class="stack">
+              <div class="layer primary"><strong>ProductDesktopWindow</strong><small>선택 계층: virtual factory, typed hook, 앱 친화 API</small></div>
+              <div class="layer"><strong>Dali::Ui::WindowFrame</strong><small>layout, role input, overlay, state, geometry의 공통 구현</small></div>
+              <div class="layer"><strong>Decoration Views + Content View</strong><small>앱이 제공하는 top/bottom/side/role과 실제 화면</small></div>
+              <div class="layer dark"><strong>Dali::Window / compositor</strong><small>native surface, maximize/restore geometry, move/resize 완료</small></div>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>가장 중요한 사용 계약</strong>
+            앱 content는 root layer에 직접 넣지 않고 <code>mWindowFrame.GetContentRoot().Add(appContent)</code>로 추가합니다. 그러면 border와 shadow 크기를 앱 좌표 계산에서 직접 빼지 않아도 됩니다.
+          </div>
+          <div class="grid-3">
+            <article class="info-card teal"><h3>WindowFrame이 담당</h3><p>frame/content layout, role 입력 연결, overlay, operation/state signal, size constraint</p></article>
+            <article class="info-card amber"><h3>Compositor가 담당</h3><p>일반 maximize 이후 restore 위치와 크기, native move/resize의 실제 geometry와 완료</p></article>
+            <article class="info-card coral"><h3>제품 wrapper가 담당</h3><p>브랜드 UI, button 구성, command 전처리, 앱 상태 후처리, product-specific policy</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="band" id="layout" data-search="view layout top bottom left right role move resize content shadow inset overlay topology">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">04 · ACTOR & LAYOUT</div><h2>Frame 안의 View 구조</h2></div>
+            <p>slot은 보이는 영역이고 role은 동작을 지정합니다. <code>SetMoveRegion()</code>과 세 <code>Set...Control()</code> API는 새 layout 영역을 만들지 않고 slot tree 안의 View에 동작만 부여합니다. 여기서 control은 일반적인 window title bar의 최소화, 최대화/복원, 종료 버튼 역할을 뜻합니다.</p>
+          </div>
+          <div class="grid-2">
+            <div class="window-diagram">
+              <div class="native-surface">
+                <div class="frame">
+                  <div class="top-slot">TOP · title / style / overlay</div>
+                  <div class="middle"><div class="side-slot"></div><div class="content-host"><b>Persistent Content Root</b><small>앱 좌표계 (0, 0)</small></div><div class="side-slot"></div></div>
+                  <div class="bottom-slot">
+                    <div class="role">↙</div><div class="role move">MOVE</div><div class="role">−</div><div class="role">□</div><div class="role close">×</div><div class="role">↘</div>
+                  </div>
+                </div>
+              </div>
+              <div class="legend"><span><i style="background:#f7f9fa;border:1px dashed #71828c"></i>native surface / shadow outset</span><span><i style="background:#00a98f"></i>side border</span><span><i style="background:#18262f"></i>top / bottom slot</span></div>
+            </div>
+            <div>
+              <h3>샘플의 bottom 역할 배치</h3>
+              <p><code>[left resize 36] [move *] [min 40] [max 40] [close 40] [right resize 36]</code></p>
+              <ul>
+                <li>top/bottom/left/right slot root는 설치 전에 parent가 없어야 합니다.</li>
+                <li>move/minimize/maximize/close role은 네 slot 중 하나의 자손이어야 합니다.</li>
+                <li>bottom resize handle은 독립 slot이자 role이므로 unparented View로 전달합니다.</li>
+                <li>이미 이 WindowFrame에 설치되어 있는 slot은 그대로 다시 제출할 수 있습니다. 새 layout나 style과 함께 재설치할 때 view를 다시 만들 필요가 없습니다. 다른 부모가 소유한 slot은 계속 <code>SLOT_ALREADY_PARENTED</code>로 거부됩니다.</li>
+                <li>동일 View를 서로 다른 command role에 중복 등록하지 않습니다.</li>
+              </ul>
+              <div class="callout warning"><strong>Role control에는 click callback을 중복 연결하지 않습니다.</strong>Decoration role로 등록하면 WindowFrame이 기본 command를 연결합니다. 앱 callback까지 붙이면 한 번의 입력에서 두 동작이 실행될 수 있습니다.</div>
+            </div>
+          </div>
+
+          <div class="api-block">
+            <div class="api-title">
+              <h3>샘플의 border와 control 배치</h3>
+              <code>BuildDecoration()</code>
+            </div>
+            <p>top과 bottom은 각각 한 줄짜리 <code>GridLayout</code>입니다. <code>*</code> column은 남은 공간을 채우고 숫자가 적힌 column은 고정 폭입니다. left/right border는 top과 bottom 사이에서 각각 8픽셀 폭을 차지합니다. 14픽셀 corner radius는 top의 위쪽 두 모서리와 bottom의 아래쪽 두 모서리에 나누어 적용됩니다.</p>
+            <div class="placement-map">
+              <div class="placement-label"><b>TOP SLOT</b><span>frame 전체 너비 × 64</span></div>
+              <div class="bar-layout top-map" aria-label="상단 border column 배치">
+                <div class="map-cell flex"><b>Move region</b><small>* · 남은 폭</small></div>
+                <div class="map-cell action"><b>Style</b><small>54</small></div>
+                <div class="map-cell action"><b>Overlay</b><small>64</small></div>
+                <div class="map-cell action"><b>Resize</b><small>58</small></div>
+                <div class="map-cell spacer" title="오른쪽 여백 8"></div>
+              </div>
+
+              <div class="placement-label"><b>MIDDLE</b><span>높이 = frame − top 64 − bottom 56</span></div>
+              <div class="bar-layout" style="grid-template-columns:8px 1fr 8px;min-height:92px" aria-label="가운데 border와 content 배치">
+                <div class="map-cell resize"><small>LEFT<br>8</small></div>
+                <div class="map-cell" style="background:#f8fbfb;color:#263842"><b>CONTENT ROOT</b><small style="color:#65747c">앱 UI가 사용하는 독립 좌표계</small></div>
+                <div class="map-cell resize"><small>RIGHT<br>8</small></div>
+              </div>
+
+              <div class="placement-label"><b>BOTTOM SLOT</b><span>frame 전체 너비 × 56</span></div>
+              <div class="bar-layout bottom-map" aria-label="하단 border와 control column 배치">
+                <div class="map-cell resize"><b>↙</b><small>36</small></div>
+                <div class="map-cell flex"><b>Move region</b><small>* · status label</small></div>
+                <div class="map-cell action"><b>−</b><small>min · 40</small></div>
+                <div class="map-cell action"><b>□</b><small>max · 40</small></div>
+                <div class="map-cell close"><b>×</b><small>close · 40</small></div>
+                <div class="map-cell resize"><b>↘</b><small>36</small></div>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="info-card">
+                <h3 style="margin-bottom:14px">Window control 한 개의 구조</h3>
+                <div class="icon-explainer">
+                  <div class="hit-target-demo" aria-label="40 곱하기 56 입력 영역 안에 34 곱하기 34 버튼과 24 곱하기 24 아이콘">
+                    <div class="button-visual-demo"><div class="icon-demo">□</div></div>
+                  </div>
+                  <div class="dimension-list">
+                    <div class="dimension-item"><b>40 × 56</b><span>bottom grid cell 전체가 실제 hit target</span></div>
+                    <div class="dimension-item"><b>34 × 34</b><span>둥근 배경을 가진 button visual</span></div>
+                    <div class="dimension-item"><b>24 × 24</b><span>중앙 정렬된 PNG icon</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="info-card">
+                <h3>Resize handle은 별도 view</h3>
+                <p>bottom grid의 양 끝 36픽셀은 icon과 겹치지 않도록 공간을 예약합니다. 실제 resize 입력 view는 <code>SetBottomLeftResizeHandle()</code>와 <code>SetBottomRightResizeHandle()</code>로 별도 등록되고 frame 하단 모서리에 <strong>36×36</strong>으로 배치됩니다.</p>
+                <p style="margin-top:12px">최소화, 최대화, 종료는 grid cell 자체가 role view입니다. 최대화 상태가 바뀌면 같은 <code>ImageView</code>의 resource만 <code>maximize.png</code>와 <code>restore.png</code> 사이에서 교체합니다.</p>
+              </div>
+            </div>
+
+            <div class="role-map">
+              <div class="install-node"><b>보이는 View tree</b><small>top / bottom / left / right와 그 자식 control</small></div>
+              <div class="install-arrow">→</div>
+              <div class="install-node result"><b>WindowFrameDecoration role 등록</b><small>어느 View가 move, resize, minimize, maximize, close인지 연결</small></div>
+            </div>
+            <div class="callout">
+              <strong>Top button과 bottom icon의 성격이 다릅니다.</strong>
+              Style, Overlay, Resize는 샘플 기능을 실행하는 일반 button이라 앱 callback을 직접 연결합니다. Minimize, Maximize/Restore, Close와 두 resize icon은 <code>WindowFrameDecoration</code> role로 등록하여 WindowFrame의 window command와 연결합니다.
+            </div>
+            <details>
+              <summary>Slot과 role을 연결하는 코드</summary>
+              <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">decoration.SetTopSlot(top);
+decoration.SetBottomSlot(bottom);
+decoration.SetLeftSlot(left);
+decoration.SetRightSlot(right);
+
+decoration.SetMoveRegion(moveRegion);
+decoration.SetMinimizeControl(minimizeButton);
+decoration.SetMaximizeRestoreControl(maximizeButton);
+decoration.SetCloseControl(closeButton);
+decoration.SetBottomLeftResizeHandle(
+  MakeResizeHandle("resize-bottom-left.png"));
+decoration.SetBottomRightResizeHandle(
+  MakeResizeHandle("resize-bottom-right.png"));</code></pre></div>
+            </details>
+          </div>
+
+          <div class="api-block">
+            <div class="api-title">
+              <h3>SetDecorationInsets()</h3>
+              <code>Insets(start, end, top, bottom)</code>
+            </div>
+            <p><code>SetDecorationInsets()</code>는 border를 그리는 API가 아니라, <strong>frame 내부에서 네 decoration slot이 차지할 공간</strong>을 선언합니다. 이 값으로 각 slot의 bounds와 normal mode의 content root 영역을 계산합니다.</p>
+            <figure class="inset-visual">
+              <div class="inset-visual-stage">
+                <span class="inset-side-tag left">LEFT<br>8</span>
+                <span class="inset-side-tag right">RIGHT<br>8</span>
+                <div class="inset-frame-visual" role="img" aria-label="400 곱하기 260 frame 안에 top 64, bottom 56, left와 right 각각 8, content 384 곱하기 140이 배치된 모습">
+                  <div class="inset-top-visual">
+                    <strong>TOP BORDER · 64</strong>
+                    <div class="inset-top-actions"><i>Style</i><i>Overlay</i><i>Resize</i></div>
+                  </div>
+                  <div class="inset-left-visual"></div>
+                  <div class="inset-content-visual"><strong>Content Root</strong><span>384 × 140</span></div>
+                  <div class="inset-right-visual"></div>
+                  <div class="inset-bottom-visual">
+                    <i>↙</i><strong>BOTTOM BORDER · 56</strong><i>−</i><i>□</i><i class="close">×</i><i>↘</i>
+                  </div>
+                </div>
+              </div>
+              <figcaption>400 × 260 frame의 normal inset mode · shadow outsets는 frame 바깥쪽에 별도 적용</figcaption>
+            </figure>
+            <div class="grid-2">
+              <div>
+                <div class="inset-values" aria-label="샘플 decoration inset 값">
+                  <div class="inset-value"><b>start · left</b><span>8</span></div>
+                  <div class="inset-value"><b>end · right</b><span>8</span></div>
+                  <div class="inset-value"><b>top</b><span>64</span></div>
+                  <div class="inset-value"><b>bottom</b><span>56</span></div>
+                </div>
+                <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">WindowFrameLayout layout;
+layout.SetDecorationInsets(
+  Insets(8.0f, 8.0f, 64.0f, 56.0f));</code></pre></div>
+              </div>
+              <div class="info-card teal">
+                <h3>400 × 260 frame 계산</h3>
+                <p><code>content width = 400 - 8 - 8 = 384</code></p>
+                <p><code>content height = 260 - 64 - 56 = 140</code></p>
+                <p style="margin-top:10px">따라서 샘플 status에 표시되는 content 크기는 <strong>384 × 140</strong>입니다. 앱 content의 <code>(0, 0)</code>은 이 content root의 좌상단입니다.</p>
+              </div>
+            </div>
+            <div class="callout warning">
+              <strong>Padding, shadow, resize handle 크기와는 다른 값입니다.</strong>
+              slot 안쪽 button 간격은 각 slot layout이 정합니다. Shadow 바깥 공간은 <code>SetShadowOutsets()</code>, 두 resize handle 크기는 <code>SetBottomLeftResizeHandleSize()</code>와 <code>SetBottomRightResizeHandleSize()</code>가 담당합니다.
+            </div>
+          </div>
+
+          <h3 style="margin:34px 0 14px">Inset mode와 maximized overlay mode</h3>
+          <div class="formula-grid">
+            <div class="formula-box"><b>Normal · inset</b><div class="rect">content root</div><div class="equation">content = frame - decorationInsets</div></div>
+            <div class="formula-arrow">→</div>
+            <div class="formula-box overlay"><b>Maximized · overlay</b><div class="rect">full-frame content</div><div class="equation">border = content 위 overlay, delay 후 hide</div></div>
+          </div>
+          <div class="callout"><strong>가려지는 양은 geometry가 알려줍니다</strong>overlay에서 <code>GetContentBounds()</code>는 frame 전체입니다. decoration이 content를 얼마나 덮는지는 <code>WindowFrameGeometry::GetDecorationOverlayInsets()</code>로 읽습니다. inset mode에서는 decoration이 content 밖에 있으므로 0입니다. 이 값은 <strong>가려지면 안 되는 개별 요소에만</strong> 적용하십시오. content 루트 전체를 이 값만큼 들여쓰면 overlay 배치가 일반 inset 배치와 같아집니다.</div>
+          <div class="callout"><strong>크기 정의</strong><code>frame size</code>는 shadow를 제외하고 border를 포함합니다. <code>content size</code>는 border를 제외합니다. client shadow가 활성화되면 native surface는 frame보다 shadow outsets만큼 더 큽니다.</div>
+        </div>
+      </section>
+
+      <section class="band alt" id="bootstrap" data-search="초기화 OnInit New options restore size signals SetDecoration Attach RequestFrameResize minimum content">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">05 · BOOTSTRAP</div><h2>샘플 초기화 순서</h2></div>
+            <p>순서가 중요한 이유는 view topology 검증, 초기 native geometry, attach 이후 signal과 constraint가 서로 연결되기 때문입니다.</p>
+          </div>
+          <div class="timeline">
+            <div class="event request"><b>1. Native window</b><p>transparent 설정, 필요한 경우 <code>SetPositionSize(80, 80, 400, 260)</code></p><time>OnInit · window</time></div>
+            <div class="event"><b>2. New &amp; Configure</b><p>생성 전용 launch/feature option을 전달하고, 생성된 handle에 overlay와 resize 정책 설정</p><time>OnInit · New</time></div>
+            <div class="event"><b>3. Observe</b><p>state, presented, geometry, overlay, command signal과 interceptor 연결</p><time>OnInit · callbacks</time></div>
+            <div class="event confirm"><b>4. Install frame</b><p><code>DefaultWindowDecoration::New()</code>로 완성된 보더를 붙이거나, unparented decoration tree + layout + style을 원자적으로 검증/설치</p><time>InstallDefaultDecoration() / InstallFrame()</time></div>
+            <div class="event confirm"><b>5. Size & Attach</b><p>frame 400×260, attach, frame min 200×130, frame max 설정</p><time>OnInit · attach</time></div>
+            <div class="event present"><b>6. Content</b><p>앱 UI를 <code>GetContentRoot()</code> 아래에 추가</p><time>CreateContent()</time></div>
+          </div>
+          <div class="callout warning">
+            <strong><code>SetInitialRestoreFrameSize(400, 260)</code>의 범위</strong>
+            앱이 geometry를 지정하지 않아 처음부터 target full size로 런칭되고 compositor가 normal geometry를 모를 때만 보관합니다. 런칭 maximize는 일반 요청이며, 이 크기는 최초 restore에 한 번 전달된 뒤 소비됩니다. 이후 maximize/restore에는 앱이 복원 위치와 크기를 강제하지 않습니다.
+          </div>
+          <details open>
+            <summary>최소 사용 코드 보기</summary>
+            <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">void MyWindowController::OnInit(Dali::Application app)
+{
+  mWindow = app.GetWindow();
+  mWindow.SetBackgroundColor(Dali::Color::TRANSPARENT);
+  mWindow.SetTransparency(true);
+
+  Dali::Ui::WindowFrameOptions options;
+  options.SetInitialRestoreFrameSize(Dali::Vector2(400.0f, 260.0f));
+  mWindowFrame = Dali::Ui::WindowFrame::New(mWindow, closeCallback, options);
+  mWindowFrame.SetOverlayEnabled(true);
+  mWindowFrame.SetOverlayAutoHideDelay(2500u);
+
+  Dali::Ui::WindowFrameLayout layout;
+  layout.SetDecorationInsets(Dali::Ui::Insets(8.0f, 8.0f, 64.0f, 56.0f));
+
+  const auto result = mWindowFrame.SetDecoration(
+    CreateMyDecoration(), layout, CreateMyFrameStyle(),
+    Dali::Ui::WindowFrameSizePolicy::KEEP_WINDOW_SIZE);
+  if(result != Dali::Ui::WindowFrameDecorationResult::INSTALLED)
+  {
+    return;
+  }
+
+  mWindowFrame.RequestFrameResize(Dali::Vector2(400.0f, 260.0f));
+  mWindowFrame.Attach();
+  mWindowFrame.SetMinimumFrameSize(Dali::Vector2(200.0f, 130.0f));
+  mWindowFrame.GetContentRoot().Add(CreateApplicationContent());
+}</code></pre></div>
+          </details>
+          <details>
+            <summary><code>window-frame-example.cpp</code> 코드 파일 지도</summary>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>함수/영역</th><th>역할</th><th>읽을 때 확인할 것</th></tr></thead>
+                <tbody>
+                  <tr><td>helper 함수</td><td>resource와 label 생성</td><td>resource URL, label, resize icon은 샘플 편의 코드</td></tr>
+                  <tr><td><code>WindowFrameExample</code></td><td>샘플 controller</td><td>Application 수명과 두 virtual hook</td></tr>
+                  <tr><td><code>OnInit()</code></td><td>초기화</td><td>Window → New → signal → frame → attach → content 순서</td></tr>
+                  <tr><td><code>CreateContent()</code></td><td>content 생성</td><td>마지막 <code>GetContentRoot().Add()</code>가 실제 사용 계약</td></tr>
+                  <tr><td><code>MakeButton()</code> / <code>MakeIconButton()</code></td><td>button factory</td><td>일반 button callback과 role control의 차이</td></tr>
+                  <tr><td><code>BuildDecoration()</code></td><td>border 구성</td><td>slot, insets, move/resize/control role topology</td></tr>
+                  <tr><td><code>BuildFrameStyle()</code></td><td>frame style</td><td>shadow source, outsets, corner radius</td></tr>
+                  <tr><td><code>InstallFrame()</code> / <code>CycleDecorationStyle()</code></td><td>frame 설치/교체</td><td>원자적 설치와 size preservation policy</td></tr>
+                  <tr><td><code>UpdateStatus()</code> / <code>UpdateWindowControlIcons()</code></td><td>상태 표시</td><td>responsive visibility와 maximize/restore icon 갱신</td></tr>
+                  <tr><td><code>OnKeyEvent()</code> / member / <code>main()</code></td><td>입력과 수명</td><td>샘플 조작, handle 수명, main-loop 소유 관계</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="band" id="style" data-search="style shadow n-patch view shadow corner radius dynamic KEEP_CONTENT_SIZE KEEP_WINDOW_SIZE overlay">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">06 · STYLE & SHADOW</div><h2>Border UI와 shadow를 동적으로 바꾸기</h2></div>
+            <p><code>SetDecoration()</code>은 decoration, layout, style을 한 번에 설치하므로 교체 중간의 불완전한 frame을 노출하지 않습니다.</p>
+          </div>
+          <h3 style="margin:0 0 14px">프레임을 바꾸는 다섯 경로</h3>
+          <p>필요한 일을 하는 <strong>가장 좁은 것</strong>을 고르십시오. 좁은 호출은 설치된 view를 그대로 두므로 앱이 거기에 붙여둔 내용과 signal 연결이 살아남습니다.</p>
+          <div style="overflow-x:auto">
+            <table class="mapping">
+              <thead><tr><th>호출</th><th>교체</th><th>유지</th><th>반환</th></tr></thead>
+              <tbody>
+                <tr><td><code>SetDecoration(decoration, layout, sizePolicy)</code></td><td>decoration view, layout</td><td>frame style</td><td><code>WindowFrameDecorationResult</code></td></tr>
+                <tr><td><code>SetDecoration(decoration, layout, style, sizePolicy)</code></td><td>decoration view, layout, style</td><td>&mdash;</td><td><code>WindowFrameDecorationResult</code></td></tr>
+                <tr><td><code>SetDecorationLayout(layout, sizePolicy)</code></td><td>layout</td><td><strong>decoration view</strong>, style</td><td><code>void</code></td></tr>
+                <tr><td><code>SetFrameStyle(style, sizePolicy)</code></td><td>style</td><td><strong>decoration view</strong>, layout</td><td><code>void</code></td></tr>
+                <tr><td><code>ClearDecoration()</code></td><td>decoration view와 layout을 빈 값으로</td><td>frame style</td><td><code>void</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="overflow-x:auto; margin-top:14px">
+            <table class="mapping">
+              <thead><tr><th>하려는 일</th><th>사용할 것</th></tr></thead>
+              <tbody>
+                <tr><td>첫 프레임 설치, 또는 외형 전체 교체</td><td>style을 포함한 <code>SetDecoration()</code></td></tr>
+                <tr><td>view만 바꾸고 색과 shadow는 유지</td><td>style 없는 <code>SetDecoration()</code></td></tr>
+                <tr><td>바 높이, inset, handle 크기 변경</td><td><code>SetDecorationLayout()</code></td></tr>
+                <tr><td>색, corner radius, shadow 변경</td><td><code>SetFrameStyle()</code></td></tr>
+                <tr><td>장식 없이 content가 프레임 전체를 쓰게</td><td><code>ClearDecoration()</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout"><strong>검증과 실패는 view를 받는 쪽에만 있습니다</strong>slot/role 토폴로지를 검증하는 것은 <code>SetDecoration()</code> 두 형태뿐이고, 확인할 만한 결과를 돌려주는 것도 이 둘뿐입니다. 좁은 setter 두 개는 실패할 수 없습니다. 또 <code>ClearDecoration()</code>은 항상 window 크기를 유지하므로 content root가 장식이 차지하던 공간까지 커집니다.</div>
+
+          <div class="api-title">
+            <h3>SetDecoration()</h3>
+            <code>decoration + layout + style + size policy</code>
+          </div>
+          <p>하나의 완성된 border frame 구성을 검증하고 설치하는 중심 API입니다. 여러 setter를 순서대로 적용하는 대신, UI tree와 geometry 값, visual style을 한 번에 전달하므로 성공할 때만 기존 frame이 새 구성으로 교체됩니다.</p>
+          <div class="install-flow" aria-label="SetDecoration 입력과 결과">
+            <div class="install-node"><b>WindowFrameDecoration</b><small>top/bottom/left/right View와 move, resize, window control role</small></div>
+            <div class="install-node"><b>WindowFrameLayout</b><small>decoration insets와 bottom resize handle 크기</small></div>
+            <div class="install-node"><b>FrameStyle</b><small>shadow, outsets, background, corner radius</small></div>
+            <div class="install-arrow">→</div>
+            <div class="install-node result"><b>검증 후 원자적 설치</b><small>성공: INSTALLED<br>실패: 기존 frame 유지</small></div>
+          </div>
+          <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">const auto result = mWindowFrame.SetDecoration(
+  decoration,
+  layout,
+  style,
+  WindowFrameSizePolicy::KEEP_WINDOW_SIZE);
+
+if(result != WindowFrameDecorationResult::INSTALLED)
+{
+  // 로그를 남기거나 fallback decoration을 선택한다.
+  return;
+}</code></pre></div>
+          <div class="grid-3" style="margin-top:16px">
+            <article class="info-card teal"><h3>Decoration 검증</h3><p>slot 중복/parent 여부, role 중복, role이 decoration 밖에 있는지 검사합니다.</p></article>
+            <article class="info-card amber"><h3>Geometry 계산</h3><p><code>SetDecorationInsets()</code> 값으로 slot과 content bounds를 다시 계산합니다.</p></article>
+            <article class="info-card coral"><h3>설치 실패</h3><p><code>SLOT_ALREADY_PARENTED</code>, <code>DUPLICATE_SLOT</code>, <code>DUPLICATE_ROLE</code>, <code>ROLE_OUTSIDE_DECORATION</code> 등을 반환하고 현재 frame을 유지합니다.</p></article>
+          </div>
+          <div class="callout">
+            <strong>언제 다시 호출하는가?</strong>
+            top/bottom 구조, role 배치, insets 또는 frame style을 하나의 새 테마로 바꿀 때 호출합니다. text, color, icon처럼 기존 view property만 바뀌는 경우에는 전체 frame을 다시 설치하지 않고 해당 View를 직접 갱신할 수 있습니다.
+          </div>
+          <h3 style="margin:30px 0 14px">교체할 때 유지할 크기 선택</h3>
+          <div class="grid-2">
+            <article class="info-card teal"><h3>KEEP_CONTENT_SIZE</h3><p>border 두께나 shadow가 바뀌어도 앱 content 크기를 유지합니다. attached normal 상태에서 native surface를 조정하므로 일반적인 테마 변경에 적합합니다.</p></article>
+            <article class="info-card amber"><h3>KEEP_WINDOW_SIZE</h3><p>외부에서 결정한 window 크기를 유지합니다. border 변화에 따라 content 크기가 달라질 수 있으며 초기 frame 설치에 적합합니다.</p></article>
+          </div>
+          <div class="callout"><strong>호출별 policy입니다</strong>Size policy는 WindowFrame에 저장되어 다음 변경으로 이어지는 설정이 아닙니다. <code>SetDecorationLayout(layout, KEEP_CONTENT_SIZE)</code> 뒤에 <code>SetFrameStyle(style, KEEP_WINDOW_SIZE)</code>를 호출하면 첫 호출은 content를 보존하고, 두 번째 호출은 그 시점의 window surface를 독립적으로 보존합니다. 따라서 두 번째 style의 shadow outsets에 따라 frame과 content 크기는 달라질 수 있습니다.</div>
+          <h3 style="margin:30px 0 14px">FrameStyle 기본값</h3>
+          <div style="overflow-x:auto">
+            <table class="mapping">
+              <thead><tr><th>속성</th><th>기본값</th><th>의미</th></tr></thead>
+              <tbody>
+                <tr><td>Shadow source</td><td><code>NONE</code></td><td>기본 상태에서는 client shadow를 그리지 않음</td></tr>
+                <tr><td>Shadow outsets</td><td>모든 방향 <code>0</code></td><td>추가 native surface 공간 없음</td></tr>
+                <tr><td>Frame background</td><td>transparent</td><td>frame 전체 배경이 투명</td></tr>
+                <tr><td>Corner radius / policy</td><td><code>0</code> / <code>ABSOLUTE</code></td><td>기본 frame은 사각형</td></tr>
+                <tr><td>Shadow image</td><td>빈 URL, zero border, border-only <code>false</code></td><td>일반 이미지와 N-patch image를 모두 설정 가능</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout"><strong>별도의 ownership/backend 설정은 없습니다.</strong><code>SetShadow()</code>가 <code>Dali::Ui::Shadow</code>의 color, blur, offset, extents, cutout으로 생성하는 <code>WindowFrameShadowSource::COLOR</code>를 선택하고, 비어 있지 않은 <code>SetShadowImageUrl()</code>이 <code>IMAGE</code>를 선택합니다. <code>ClearShadow()</code> 또는 빈 image URL은 shadow를 끕니다.</div>
+          <div class="grid-2" style="margin-top:20px">
+            <div>
+              <h3>Image shadow</h3>
+              <table>
+                <tbody>
+                  <tr><td><code>SetShadowImageUrl()</code></td><td>image shadow를 선택하며 빈 URL은 shadow를 끔</td></tr>
+                  <tr><td><code>SetShadowImageBorder()</code></td><td><code>Insets(start, end, top, bottom)</code> stretch border 설정</td></tr>
+                  <tr><td><code>SetShadowImageBorderOnly()</code></td><td>true이면 image center를 생략</td></tr>
+                </tbody>
+              </table>
+              <p style="margin-top:12px">Client shadow는 normal 상태에서만 표시됩니다. Maximized 상태에서는 client effect, shadow outset, corner radius를 제거하고 normal로 복원되면 설정값을 다시 적용합니다.</p>
+              <div class="callout"><strong>NUI식 N-patch도 가능</strong>비어 있지 않은 image URL, stretch border, shadow outsets를 설정합니다. 일반 이미지는 border-only 기본값인 <code>false</code>를 유지합니다.</div>
+            </div>
+            <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">WindowFrameStyle style;
+style.SetShadowOutsets(
+  Insets(20.0f, 20.0f, 20.0f, 24.0f));
+style.SetShadowImageBorder(
+  Insets(start, end, top, bottom));
+style.SetShadowImageBorderOnly(true);
+style.SetShadowImageUrl(
+  "/opt/usr/apps/.../res/window-shadow.9.png");
+style.SetFrameCornerRadius(
+  Vector4(14.0f, 14.0f, 14.0f, 14.0f));</code></pre></div>
+          </div>
+          <div class="callout"><strong>Shadow image 값의 의미</strong><code>SetShadowImageBorder()</code>는 공개 layout 순서인 <code>Insets(start, end, top, bottom)</code>을 받습니다. WindowFrame은 N-patch renderer 경계에서 <code>Vector4(start, top, end, bottom)</code>으로 변환합니다. <code>SetShadowImageBorderOnly(true)</code>는 image center를 생략하고 border 영역만 렌더링합니다.</div>
+          <h3 style="margin:30px 0 14px">Shadow outset과 native surface</h3>
+          <div class="install-flow" aria-label="Shadow outset과 frame 크기 관계">
+            <div class="install-node"><b>Start / Top outset</b><small>frame 앞과 위에 확보한 effect 공간</small></div>
+            <div class="install-arrow">+</div>
+            <div class="install-node result"><b>Frame</b><small>border + content, GetFrameSize() 기준</small></div>
+            <div class="install-arrow">+</div>
+            <div class="install-node"><b>End / Bottom outset</b><small>frame 뒤와 아래에 확보한 effect 공간</small></div>
+          </div>
+          <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-text">surface width  = start outset + frame width  + end outset
+surface height = top outset   + frame height + bottom outset</code></pre></div>
+          <div class="callout warning"><strong>Outset은 blur 값이 아니라 geometry입니다.</strong>Color shadow나 N-patch image가 잘리지 않을 만큼 지정합니다. 음수 성분은 0으로 보정되고 maximized 상태에서는 모든 client shadow outset이 0이 됩니다.</div>
+          <h3 style="margin:30px 0 14px">Color shadow와 frame 표현</h3>
+          <div class="grid-2">
+            <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">WindowFrameStyle style;
+style.SetShadowOutsets(
+  Insets(14.0f, 14.0f, 14.0f, 18.0f));
+style.SetShadow(Shadow(
+  14.0f, Vector2(0.0f, 3.0f),
+  UiColor(0x000000, 0.48f), Vector2::ZERO,
+  CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS));
+style.SetFrameBackgroundColor(UiColor(0x17212B));
+style.SetFrameCornerRadius(
+  Vector4(14.0f, 14.0f, 14.0f, 14.0f));
+style.SetFrameCornerRadiusPolicy(
+  CornerRadiusPolicy::ABSOLUTE);</code></pre></div>
+            <div>
+              <article class="info-card teal"><h3>Frame background</h3><p><code>SetFrameBackgroundColor()</code>는 frame 전체 배경을 칠합니다. 앱이 제공한 top/bottom/left/right slot의 개별 색상은 각 View에서 설정합니다.</p></article>
+              <article class="info-card amber" style="margin-top:12px"><h3>Corner radius</h3><p>Normal 상태에서는 frame root, background, color shadow에 적용되고 maximized 상태에서는 0이 됩니다. 값 해석은 <code>SetFrameCornerRadiusPolicy()</code>로 선택합니다.</p></article>
+            </div>
+          </div>
+          <h3 style="margin:30px 0 14px">Style만 동적으로 변경</h3>
+          <p>Decoration과 layout을 유지하고 시각 표현만 바꾸려면 frame 전체를 다시 설치하지 않고 <code>SetFrameStyle()</code>을 사용합니다.</p>
+          <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">mWindowFrame.SetFrameStyle(
+  style,
+  WindowFrameSizePolicy::KEEP_CONTENT_SIZE);</code></pre></div>
+          <div class="callout"><strong>값 객체 의미</strong><code>WindowFrameStyle</code>은 private implementation을 깊은 복사합니다. 복사본을 수정해도 이미 설치된 style은 바뀌지 않으며, 이동한 원본 객체에는 다시 접근하지 않습니다.</div>
+        </div>
+      </section>
+
+      <section class="band alt" id="commands" data-search="command interceptor continue default handled requested result recursion close async compositor 명시적 요청 전달">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">07 · COMMAND POLICY</div><h2>DesktopWindow처럼 기본 동작 사이에 정책 넣기</h2></div>
+            <p>subclass override 대신 command interceptor가 move, resize, minimize, maximize, restore, close 직전의 정책 지점을 제공합니다.</p>
+          </div>
+          <div class="disposition-list">
+            <article class="disposition-panel">
+              <h3><code>CONTINUE_DEFAULT</code></h3>
+              <p>제품별 사전 처리를 수행한 뒤 WindowFrame의 기본 native command를 계속합니다. 대부분의 maximize, restore, move, resize 확장은 이 값을 사용합니다.</p>
+              <small>기본값 · native request와 이후 state/geometry 추적을 WindowFrame이 담당</small>
+            </article>
+            <article class="disposition-panel">
+              <h3><code>HANDLED</code></h3>
+              <p>앱이 command를 넘겨받았으므로 기본 동작을 막습니다. 직접 처리하든, 거절하든, 다른 native API로 자체 동작을 시작하든 모두 여기에 해당합니다. 저장 확인이 필요한 close가 대표적인 예입니다.</p>
+              <small>기본 native request 없음 · WindowFrame은 이후 아무 것도 추적하지 않음</small>
+            </article>
+          </div>
+          <div class="callout danger"><strong>Interceptor 재귀 진입 금지</strong><code>OnCommand()</code> 안에서 같은 <code>mWindowFrame.RequestMaximize()</code> 같은 API를 다시 호출하지 않습니다. 기본 native 요청을 계속하려면 단순히 <code>CONTINUE_DEFAULT</code>를 반환합니다.</div>
+          <h3 style="margin:32px 0 14px">제품별 사전 처리 예제</h3>
+          <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">WindowFrameCommandDisposition OnCommand(
+  WindowFrame sender,
+  const WindowFrameCommandRequest&amp; request)
+{
+  if(request.GetCommand() == WindowFrameCommand::MAXIMIZE)
+  {
+    HideTransientPopup();
+  }
+
+  if(request.GetCommand() == WindowFrameCommand::CLOSE &amp;&amp;
+     HasUnsavedData())
+  {
+    ShowSaveConfirmation();
+    return WindowFrameCommandDisposition::HANDLED;
+  }
+
+  return WindowFrameCommandDisposition::CONTINUE_DEFAULT;
+}</code></pre></div>
+        </div>
+      </section>
+
+      <section class="band" id="timing" data-search="signal timing maximize restore state changed presented frame callback geometry interaction requested confirmed completed">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">08 · CALLBACK TIMING</div><h2>요청, compositor 확인, 화면 표시를 구분하기</h2></div>
+            <p>“요청을 보냈다”와 “native 상태가 바뀌었다”, “그 상태가 화면에 보였다”는 서로 다른 시점입니다.</p>
+          </div>
+          <h3>Maximize / restore</h3>
+          <div class="timeline">
+            <div class="event request"><b>Interceptor</b><p>앱 정책 적용 또는 default command 허용</p><time>COMMAND</time></div>
+            <div class="event"><b>DISPATCHED</b><p><code>CommandProcessedSignal</code> · underlying operation 호출까지. 수락도 완료도 아님</p><time>DISPATCH</time></div>
+            <div class="event confirm"><b>STATE CHANGED</b><p><code>WindowStateChangedSignal</code> · compositor가 native 상태 확정</p><time>COMPOSITOR</time></div>
+            <div class="event present"><b>STATE PRESENTED</b><p><code>WindowStatePresentedSignal</code> · 새로 관찰된 NORMAL/MAXIMIZED 상태가 frame으로 그려짐</p><time>FRAME</time></div>
+          </div>
+          <div class="callout"><strong>NUI의 <code>OnMaximize()</code>와 가장 가까운 시점</strong>maximize/restore가 실제 frame에 반영된 뒤 후처리하려면 <code>WindowStatePresentedSignal()</code>을 사용합니다. 이 signal은 <code>WindowStateChangedSignal()</code> 뒤에 같은 상태를 실어 보내므로 compositor가 주도한 변경에도 발생합니다. 두 경우에만 발생하지 않습니다. <code>MINIMIZED</code>는 표시할 frame이 없어서, 그리고 frame을 기다리는 동안 더 최신 상태가 도착하면 이전 상태는 건너뜁니다. 내부 frame callback은 signal에 observer가 있을 때만 등록됩니다.</div>
+          <div class="callout"><strong>활성화된 명시적 요청은 항상 전달됩니다</strong><code>RequestMinimize()</code>, <code>RequestMaximize()</code>, <code>RequestRestore()</code>는 창이 이미 그 상태로 보이더라도 window system까지 전달됩니다. 걸러내려면 마지막으로 보고된 상태와 비교해야 하는데, 그러면 <code>RequestMaximize()</code> 직후의 <code>RequestRestore()</code>처럼 이전 요청이 보고되기 전에 보낸 요청이 버려집니다. 이미 적용된 요청을 다시 보내는 것은 무해하므로 걸러내지 않습니다. <code>ToggleMaximize()</code>만 예외로, 토글은 자체 목표가 없어 마지막으로 보고된 상태를 읽습니다.</div>
+          <h3 style="margin-top:32px">Move / resize</h3>
+          <div class="grid-3" style="margin-top:14px">
+            <article class="info-card amber"><h3>STARTED</h3><p>role touch down 후 move/resize 요청과 interaction tracking이 시작됐습니다.</p></article>
+            <article class="info-card teal"><h3>CHANGED</h3><p>compositor가 geometry를 바꾸는 동안 최신 geometry가 여러 번 올 수 있습니다.</p></article>
+            <article class="info-card coral"><h3>COMPLETED</h3><p>pointer release와 compositor 완료를 거쳐 최종 geometry가 전달됩니다.</p></article>
+          </div>
+          <p style="color:var(--muted)">GeometryChanged 횟수는 backend마다 다릅니다. 앱은 횟수를 가정하지 않고 항상 최신 geometry를 사용해야 합니다.</p>
+        </div>
+      </section>
+
+      <section class="band alt" id="public-api" data-search="public api content root decoration frame layout command resize direction operation gate state signal geometry overlay">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">09 · PUBLIC API</div><h2>API 이름보다 먼저 사용 목적 이해하기</h2></div>
+            <p>일반 앱은 content root와 frame 설정을 주로 사용하고, 제품 wrapper는 command와 typed signal까지 사용합니다.</p>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="mapping">
+              <thead><tr><th>API 그룹</th><th>왜 필요한가</th><th>언제 사용하는가</th></tr></thead>
+              <tbody>
+                <tr><td><code>New()</code>, <code>Attach()</code>, <code>Detach()</code></td><td>기존 native window에 frame view tree와 native callback 수명을 연결합니다.</td><td>window와 option 준비 후 한 번 attach하고, wrapper 종료 시 detach합니다.</td></tr>
+                <tr><td><code>DownCast()</code>, handle copy</td><td>BaseHandle에서 안전하게 타입을 복구하고 동일 WindowFrame 구현을 공유합니다.</td><td>실패한 DownCast와 기본 생성 handle은 비어 있으므로 instance API를 호출하지 않습니다.</td></tr>
+                <tr><td><code>GetContentRoot()</code></td><td>앱이 decoration inset을 직접 계산하지 않도록 안정적인 content 전용 부모를 제공합니다.</td><td>모든 앱 View를 이 root 아래에 추가합니다.</td></tr>
+                <tr><td><code>SetDecoration()</code></td><td>decoration, layout, style을 원자적으로 검증하고 설치합니다.</td><td>초기 frame 설치 또는 구조가 바뀌는 동적 테마 교체에 사용합니다.</td></tr>
+                <tr><td><code>SetFrameStyle()</code>, <code>ClearDecoration()</code></td><td>view 구조를 유지한 style 교체와 decoration/layout 제거를 구분합니다.</td><td>Style만 바꾸면 전자를, frame slot을 모두 비우면 후자를 사용합니다.</td></tr>
+                <tr><td><code>SetDecorationInsets()</code></td><td>top, bottom, left, right slot이 frame 안에서 예약할 공간을 layout에 알립니다.</td><td>border UI의 두께나 header/footer 높이를 정할 때 사용합니다.</td></tr>
+                <tr><td><code>RequestFrameResize()</code>, <code>RequestContentResize()</code></td><td>shadow를 제외한 frame 기준과 실제 앱 content 기준 크기를 구분합니다.</td><td>제품 요구가 어느 좌표 공간을 기준으로 하는지 선택해 하나만 사용합니다.</td></tr>
+                <tr><td><code>SetMinimumFrameSize()</code>, <code>SetMaximumFrameSize()</code></td><td>interactive resize와 native geometry에 적용할 frame 기준 제약을 보관합니다.</td><td>setter가 <code>false</code>를 반환하면 이전 제약이 유지됩니다. Optional getter의 bool을 먼저 확인합니다.</td></tr>
+                <tr><td><code>RequestMinimize()</code>, <code>RequestMaximize()</code>, <code>RequestRestore()</code>, <code>RequestClose()</code></td><td>role button과 외부 wrapper가 같은 command 경로를 사용하게 합니다.</td><td>반환값은 dispatch 결과입니다. 완료를 관찰하는 곳은 command마다 다릅니다. minimize/maximize/restore는 <code>WindowStateChangedSignal()</code>, move/resize는 <code>InteractionChangedSignal()</code>과 geometry signal, close는 <code>CloseCallback</code>입니다.</td></tr>
+                <tr><td><code>ToggleMaximize()</code></td><td>현재 상태의 반대를 요청합니다.</td><td><code>IsMaximized()</code>로 직접 분기하는 것보다 안전합니다. 최소화된 창처럼 토글할 수 없는 상태까지 함께 판단합니다.</td></tr>
+                <tr><td><code>CloseCallback</code></td><td>Default close command가 호출할 앱 소유 종료 정책입니다.</td><td>WindowFrame은 window를 파괴하거나 앱을 자동 종료하지 않습니다. Callback에서 확인, cleanup, <code>Application::Quit()</code> 등을 수행합니다.</td></tr>
+                <tr><td><code>WindowStateChangedSignal()</code>, <code>WindowStatePresentedSignal()</code></td><td>상태 확인 시점과 그 상태가 화면에 그려진 시점을 구분합니다.</td><td>상태 변화 자체는 Changed, 실제 표시 후 처리는 Presented를 사용합니다. 둘 다 compositor 주도 변경에도 발생합니다.</td></tr>
+                <tr><td><code>GeometryChangedSignal()</code>, <code>GeometryChangeCompletedSignal()</code></td><td>move/resize 중간 geometry와 최종 geometry를 구분합니다.</td><td>실시간 layout 반응과 저장할 최종 위치/크기를 나눕니다.</td></tr>
+                <tr><td><code>Window::FocusChangedSignal()</code></td><td>window focus 획득/상실을 알려줍니다.</td><td>active/inactive decoration 표현이 필요할 때 underlying window에서 직접 관찰합니다.</td></tr>
+                <tr><td><code>InteractionChangedSignal()</code>, <code>CommandProcessedSignal()</code></td><td>pointer/native interaction lifecycle과 command dispatch 결과를 별도로 관찰합니다.</td><td>입력 진행 여부와 native 완료 여부를 operation 반환값 하나로 추측하지 않습니다.</td></tr>
+                <tr><td><code>SetFeatureEnabled()</code>, <code>IsFeatureEnabled()</code></td><td>제품이 제공할 기능을 선언합니다. runtime backend 탐지가 아닙니다.</td><td>기본값은 모두 true이며 제공하지 않을 기능만 <code>New()</code> 전에 끕니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout"><strong>Callback과 signal은 sender-first입니다</strong><code>CommandInterceptor</code>와 모든 WindowFrame signal은 이벤트를 발생시킨 <code>WindowFrame</code>을 첫 번째 인자로 전달합니다. 하나의 policy나 observer를 여러 frame에 연결해도 sender로 발생 대상을 구분할 수 있습니다.</div>
+
+          <h3 style="margin:32px 0 14px">Handle과 attach 수명</h3>
+          <div class="grid-3">
+            <article class="info-card teal"><h3>생성 전</h3><p>기본 생성 handle과 실패한 <code>DownCast()</code> 결과는 비어 있습니다. Instance API는 <code>New()</code>로 초기화한 뒤 사용합니다.</p></article>
+            <article class="info-card amber"><h3>Attach</h3><p>Frame을 window에 parent하고 native callback과 저장된 size constraint를 연결합니다. 이미 attached이면 추가 작업 없이 유지됩니다.</p></article>
+            <article class="info-card coral"><h3>Detach</h3><p>Interaction과 callback을 끊고 native constraint를 해제하지만 content, decoration, style은 보존합니다. 다음 <code>Attach()</code>에서 다시 연결됩니다.</p></article>
+          </div>
+          <div class="callout"><strong>Handle 복사는 새 window를 만들지 않습니다</strong>복사한 <code>WindowFrame</code>은 같은 구현, <code>ContentRoot</code>, frame, signal을 공유합니다. 독립 window가 필요하면 native <code>Window</code>마다 <code>New()</code>를 호출합니다.</div>
+
+          <h3 style="margin:32px 0 14px">Public value type의 기본 계약</h3>
+          <div style="overflow-x:auto">
+            <table class="mapping">
+              <thead><tr><th>타입</th><th>기본값 / 복사 의미</th><th>사용 판단</th></tr></thead>
+              <tbody>
+                <tr><td><code>WindowFrameOptions</code></td><td><code>AUTO</code>, restore size 없음, 모든 feature true. <code>New()</code>가 값을 복사합니다.</td><td>생성 시점 정책만 넣고, 생성 뒤 runtime 설정은 WindowFrame에 적용합니다.</td></tr>
+                <tr><td><code>WindowFrameDecoration</code></td><td>모든 slot/role이 empty View입니다. 복사는 View handle을 공유하며 view tree를 clone하지 않습니다.</td><td>독립 frame을 동시에 설치하려면 parent 없는 새 View tree를 만듭니다.</td></tr>
+                <tr><td><code>WindowFrameLayout</code></td><td>Inset <code>(8, 8, 56, 30)</code>, 좌우 handle <code>28 x 28</code>입니다.</td><td>보이는 View와 별개로 content 예약 공간과 handle layout 크기를 정의합니다.</td></tr>
+                <tr><td><code>WindowFrameStyle</code></td><td><code>NONE</code> shadow source, zero outset/radius, empty shadow image, transparent frame, <code>ABSOLUTE</code> radius입니다.</td><td>Theme preset을 복사·수정한 뒤 명시적으로 다시 적용합니다.</td></tr>
+                <tr><td><code>WindowFrameGeometry</code></td><td>읽기 전용 snapshot이며 기본 bounds는 모두 0입니다.</td><td>Signal 이후에도 보관 가능한 관찰값이며 live geometry reference가 아닙니다.</td></tr>
+                <tr><td><code>WindowFrameCommandRequest</code></td><td>WindowFrame이 생성하는 읽기 전용 command metadata입니다.</td><td>일반 앱은 직접 만들지 않고 interceptor/signal로 받은 값을 읽습니다. 비어 있는 저장 값은 <code>std::optional</code>을 사용합니다.</td></tr>
+                <tr><td><code>WindowFrameInteraction</code></td><td>읽기 전용 interaction snapshot이며 기본값은 <code>NONE</code>, <code>CANCELLED</code>입니다.</td><td><code>InteractionChangedSignal()</code>에서 <code>GetType()</code>, <code>GetState()</code>로 입력 lifecycle을 읽습니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout warning"><strong>Move된 value object</strong>Pimpl 기반 value type은 copy/move가 가능하지만, move된 원본에는 getter/setter를 호출하지 않고 파괴하거나 새 값을 대입해야 합니다.</div>
+
+          <h3 style="margin:32px 0 14px">Geometry 좌표계</h3>
+          <div class="grid-3">
+            <article class="info-card coral"><h3>Surface bounds</h3><p><strong>Screen 좌표</strong><br>Native surface의 위치와 크기이며 client shadow 공간을 포함할 수 있습니다.</p></article>
+            <article class="info-card amber"><h3>Frame bounds</h3><p><strong>Surface-local 좌표</strong><br>Client shadow outsets를 제외한 전체 frame입니다.</p></article>
+            <article class="info-card teal"><h3>Content bounds</h3><p><strong>Surface-local 좌표</strong><br>Decoration/overlay 계산이 끝난 앱 content 영역입니다.</p></article>
+          </div>
+          <div class="callout"><strong>앱 View는 항상 ContentRoot-local</strong><code>GetContentBounds()</code>의 surface-local offset을 앱 child 좌표에 더하지 않습니다. 앱 View의 원점은 <code>GetContentRoot()</code> 안의 <code>(0, 0)</code>입니다.</div>
+
+          <h3 style="margin:32px 0 14px">Setter와 getter가 답하는 질문</h3>
+          <div style="overflow-x:auto">
+            <table class="mapping">
+              <thead><tr><th>설정</th><th>조회할 때 주의할 의미</th></tr></thead>
+              <tbody>
+                <tr><td><code>SetDecorationVisible()</code></td><td><code>IsDecorationVisible()</code>는 auto-hide까지 반영한 effective visibility입니다.</td></tr>
+                <tr><td><code>SetFrameStyle()</code></td><td><code>GetFrameStyle()</code>은 요청한 style의 복사본입니다. Maximized 상태에 맞춰 해석된 view snapshot은 아닙니다.</td></tr>
+                <tr><td><code>SetOverlayEnabled()</code></td><td><code>IsOverlayEnabled()</code>는 요청 policy입니다. Overlay layout은 attached + maximized 상태에서만 적용됩니다.</td></tr>
+                <tr><td><code>SetOverlayAutoHideDelay()</code></td><td><code>GetOverlayAutoHideDelay()</code>는 설정값 그대로이며, <code>0</code>은 auto-hide를 끈 상태를 뜻합니다. <code>0</code>을 넣으면 auto-hide로 이미 숨겨져 있던 decoration도 다시 나타납니다.</td></tr>
+                <tr><td><code>SetInteractiveResizePolicy()</code></td><td><code>GetInteractiveResizePolicy()</code>는 <code>FREE</code>, <code>KEEP_ASPECT_RATIO</code>, <code>DISABLED</code>를 반환합니다. Interactive resize만 제어하며 programmatic size API는 허용합니다.</td></tr>
+                <tr><td><code>SetDecorationLayout()</code></td><td>설치된 slot view와 그 안의 내용, 앱이 연결한 signal을 유지한 채 inset과 handle 크기만 바꿉니다. <code>SetDecoration()</code>은 view를 교체합니다.</td></tr>
+                <tr><td><code>RequestFrameResize()</code> / <code>RequestContentResize()</code></td><td>maximized geometry는 compositor 소유이므로 그 상태에서는 <code>false</code>를 반환하고 요청을 받지 않습니다.</td></tr>
+                <tr><td>상태 조회</td><td><code>GetWindowState()</code>, <code>IsMaximized()</code>, <code>IsMinimized()</code>는 window system이 보고한 상태입니다. client가 따로 추정하는 상태는 없습니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin:32px 0 14px">Resize policy 선택</h3>
+          <div class="grid-3">
+            <article class="info-card teal"><h3><code>FREE</code></h3><p>두 resize handle을 활성화하고 고정 비율 없이 compositor resize를 요청합니다.</p></article>
+            <article class="info-card amber"><h3><code>KEEP_ASPECT_RATIO</code></h3><p>Handle은 그대로 활성화하며 native surface 비율 유지를 window system에 요청합니다.</p></article>
+            <article class="info-card coral"><h3><code>DISABLED</code></h3><p>진행 중 resize를 취소하고 두 handle을 숨겨 interactive resize를 차단합니다.</p></article>
+          </div>
+          <div class="code-wrap" style="margin-top:18px"><button class="copy" type="button">복사</button><pre><code class="language-cpp">windowFrame.SetInteractiveResizePolicy(
+  WindowFrameInteractiveResizePolicy::KEEP_ASPECT_RATIO);</code></pre></div>
+          <div class="callout"><strong>Tizen native 연결</strong><code>KEEP_ASPECT_RATIO</code>는 <code>wm.policy.win.resize_aspect_ratio=1</code> auxiliary hint를 사용합니다. 비율 유지 정책을 적용할 때 기존 hint 값을 보관하고, policy가 <code>FREE</code> 또는 <code>DISABLED</code>로 바뀌거나 detach될 때 원래 값을 복원합니다. 기본 <code>FREE</code> policy는 앱이 소유한 hint를 변경하지 않습니다. Backend가 hint를 거부하면 handle resize는 자유 비율로 계속 동작할 수 있습니다.</div>
+          <div class="callout warning"><strong>Surface 비율과 content 비율은 다를 수 있습니다</strong>Compositor는 client shadow outset을 포함한 native surface 비율을 유지합니다. Visible frame의 정확한 비율이 필요하면 client-shadow outset을 0으로 두거나 system shadow를 사용합니다.</div>
+
+          <h3 style="margin:32px 0 14px">Interaction과 overlay 상태 읽기</h3>
+          <div style="overflow-x:auto">
+            <table class="mapping">
+              <thead><tr><th>상태/API</th><th>정확한 의미</th></tr></thead>
+              <tbody>
+                <tr><td><code>STARTED</code></td><td>Move/resize request를 발행하고 interaction tracking을 시작했습니다.</td></tr>
+                <tr><td><code>POINTER_RELEASED</code></td><td>입력 pointer는 끝났지만 compositor completion은 아직 올 수 있습니다.</td></tr>
+                <tr><td><code>COMPLETED</code> / <code>CANCELLED</code></td><td>Native 완료 event를 받았거나 focus loss, hide, maximize, detach, policy 변경 등으로 tracking이 중단됐습니다.</td></tr>
+                <tr><td><code>IsOverlayEnabled()</code></td><td>Normal 상태에서도 유지되는 요청 policy입니다.</td></tr>
+                <tr><td><code>IsOverlayAutoHidden()</code></td><td>Active overlay가 timeout 원인으로 숨겨졌는지 나타냅니다.</td></tr>
+                <tr><td><code>IsDecorationVisible()</code></td><td>앱 visibility 요청과 auto-hide를 모두 반영한 실제 표시 상태입니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin:32px 0 14px">Resize direction API가 따로 있는 이유</h3>
+          <div class="grid-2">
+            <article class="info-card teal"><h3><code>GetResizeDirection(out)</code></h3><p>방향이 있으면 <code>true</code>와 값을 반환하고, 없으면 <code>false</code>이며 out 값을 바꾸지 않습니다. Feature 활성화나 native 완료 여부를 뜻하지 않습니다.</p></article>
+            <article class="info-card amber"><h3>Resize metadata</h3><p>bottom-left와 bottom-right 중 어느 handle에서 요청됐는지 wrapper에 전달합니다. 별도의 Has API나 assert precondition이 필요하지 않습니다.</p></article>
+          </div>
+          <div class="code-wrap" style="margin-top:18px"><button class="copy" type="button">복사</button><pre><code class="language-cpp">WindowFrameCommandDisposition OnCommand(
+  WindowFrame sender,
+  const WindowFrameCommandRequest&amp; request)
+{
+  WindowResizeDirection direction;
+  if(request.GetResizeDirection(direction))
+  {
+    BeforeProductResize(direction);
+  }
+
+  // WindowFrame이 같은 방향으로 기본 native resize를 계속 요청합니다.
+  return WindowFrameCommandDisposition::CONTINUE_DEFAULT;
+}</code></pre></div>
+          <div class="callout warning"><strong>이 getter가 resize를 실행하지는 않습니다</strong><code>GetResizeDirection(direction)</code>은 request metadata를 읽을 뿐입니다. 자체 native resize를 시작한 경우에만 <code>HANDLED</code>을 반환하고, 단순 로깅이나 선행 UI 작업이면 <code>CONTINUE_DEFAULT</code>을 반환합니다.</div>
+        </div>
+      </section>
+
+      <section class="band alt" id="desktop" data-search="DesktopWindow wrapper composition virtual factory hook subclass third party product custom header footer">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">10 · PRODUCT WRAPPER</div><h2>제품용 DesktopWindow는 composition으로</h2></div>
+            <p>샘플의 <code>WindowFrameExample</code>은 학습용입니다. 제품은 <code>WindowFrame</code>을 멤버로 가진 wrapper에서 factory와 typed hook을 공개하는 편이 단순하고 ABI 부담도 작습니다.</p>
+          </div>
+          <div class="grid-3">
+            <article class="info-card teal"><h3>Virtual factories</h3><p><code>CreateDecoration()</code>, <code>CreateFrameStyle()</code>, <code>CreateOptions()</code>로 제품별 모양을 교체합니다.</p></article>
+            <article class="info-card amber"><h3>Typed hooks</h3><p><code>OnCommand</code>, maximize/restore용 <code>OnStatePresented</code>, <code>OnGeometryCompleted</code> 등 필요한 지점만 override합니다.</p></article>
+            <article class="info-card coral"><h3>Forwarding API</h3><p><code>Maximize()</code>, <code>Restore()</code>, <code>Minimize()</code>, <code>Close()</code>, <code>GetContentRoot()</code>를 앱 친화적으로 노출합니다.</p></article>
+          </div>
+          <details open>
+            <summary>권장 wrapper 골격</summary>
+            <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">class DesktopWindow : public Dali::ConnectionTracker
+{
+public:
+  explicit DesktopWindow(Dali::Application application);
+  virtual ~DesktopWindow();
+
+  Dali::Ui::View GetContentRoot() const;
+  Dali::Ui::WindowFrameCommandResult Maximize();
+  Dali::Ui::WindowFrameCommandResult Restore();
+  Dali::Ui::WindowFrameCommandResult Minimize();
+  Dali::Ui::WindowFrameCommandResult Close();
+
+protected:
+  virtual Dali::Ui::WindowFrameDecoration CreateDecoration(
+    Dali::Ui::WindowFrameLayout&amp; layout) = 0;
+  virtual Dali::Ui::WindowFrameStyle CreateFrameStyle();
+  virtual Dali::Ui::WindowFrameOptions CreateOptions();
+  virtual void ConfigureWindowFrame(Dali::Ui::WindowFrame&amp; windowFrame) {}
+  virtual Dali::Ui::WindowFrameCommandDisposition OnCommand(
+    Dali::Ui::WindowFrame sender,
+    const Dali::Ui::WindowFrameCommandRequest&amp; request);
+  virtual void OnStateChanged(Dali::Ui::WindowFrame::WindowState) {}
+  virtual void OnStatePresented(Dali::Ui::WindowFrame::WindowState) {}
+  virtual void OnGeometryCompleted(
+    const Dali::Ui::WindowFrameGeometry&amp;) {}
+  virtual void OnDecorationVisibilityChanged(bool) {}
+  virtual void OnReady() {}
+
+  Dali::Application      mApplication;
+  Dali::Window           mWindow;
+  Dali::Ui::WindowFrame mWindowFrame;
+};</code></pre></div>
+          </details>
+          <div class="callout warning"><strong>동적 Header/Footer 교체</strong>구조나 role이 바뀌면 새 unparented View tree를 만들어 <code>SetDecoration(..., KEEP_CONTENT_SIZE)</code>로 교체합니다. 현재 WindowFrame에 설치된 slot은 새 layout나 style과 함께 그대로 다시 제출할 수 있지만, 다른 parent가 소유한 slot은 <code>SLOT_ALREADY_PARENTED</code>로 거부됩니다. 색상, text, icon만 바뀌면 기존 View property를 수정하는 편이 효율적입니다.</div>
+        </div>
+      </section>
+
+      <section class="band" id="mapping" data-search="NUI DesktopWindow mapping Header Footer OnMaximize Overlay BorderDisappearTime KeepRatio API 비교">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">11 · NUI MAPPING</div><h2>NUI DesktopWindow와 대응 관계</h2></div>
+            <p>기능은 대부분 대응되지만 상속 지점 대신 decoration model, interceptor, typed signal로 역할이 나뉩니다.</p>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="mapping">
+              <thead><tr><th>NUI DesktopWindow</th><th>DALi UI WindowFrame</th><th>메모</th></tr></thead>
+              <tbody>
+                <tr><td><code>Header</code> / <code>Footer</code></td><td><code>WindowFrameDecoration::SetTopSlot()</code>, <code>WindowFrameDecoration::SetBottomSlot()</code>, <code>WindowFrame::SetDecoration()</code></td><td>구조 변경 시 새 tree 설치</td></tr>
+                <tr><td><code>Maximize()</code> / <code>Restore()</code></td><td><code>WindowFrame::RequestMaximize()</code> / <code>WindowFrame::RequestRestore()</code></td><td>일반 restore geometry는 compositor 소유</td></tr>
+                <tr><td><code>Minimize()</code> / <code>Close()</code></td><td><code>WindowFrame::RequestMinimize()</code> / <code>WindowFrame::RequestClose()</code></td><td>role control에서도 같은 command 사용</td></tr>
+                <tr><td><code>OnMaximize()</code></td><td><code>WindowFrame::WindowStateChangedSignal()</code> / <code>WindowFrame::WindowStatePresentedSignal()</code></td><td>상태 확인 시점과 화면 표시 완료 시점을 선택</td></tr>
+                <tr><td><code>OnRequestResize()</code></td><td><code>WindowFrame::InteractionChangedSignal()</code>의 <code>STARTED</code> state</td><td>native operation 시작</td></tr>
+                <tr><td><code>OnResized()</code></td><td><code>WindowFrame::GeometryChangedSignal()</code> / <code>WindowFrame::GeometryChangeCompletedSignal()</code></td><td>중간 geometry와 최종 geometry 분리</td></tr>
+                <tr><td><code>OnOverlayMode()</code></td><td><code>WindowFrame::DecorationVisibilityChangedSignal()</code></td><td>visible/hidden 상태 관찰</td></tr>
+                <tr><td><code>OverlayBorderShow()</code></td><td><code>WindowFrame::ShowOverlayTemporarily()</code></td><td>surface touch로 재표시 가능</td></tr>
+                <tr><td><code>BorderDisappearTime</code></td><td><code>WindowFrame::SetOverlayAutoHideDelay()</code></td><td>maximized overlay auto-hide</td></tr>
+                <tr><td>Minimum / Maximum size</td><td><code>WindowFrame::SetMinimumFrameSize()</code> / <code>WindowFrame::SetMaximumFrameSize()</code></td><td>shadow를 제외한 window frame 기준</td></tr>
+                <tr><td><code>SetDefaultRestoreSizeOnce()</code></td><td><code>WindowFrameOptions::SetInitialRestoreFrameSize()</code></td><td>initial full-size launch 뒤 최초 restore에 한 번만</td></tr>
+                <tr><td><code>KeepRatio</code></td><td><code>WindowFrame::SetInteractiveResizePolicy(WindowFrameInteractiveResizePolicy::KEEP_ASPECT_RATIO)</code></td><td><code>wm.policy.win.resize_aspect_ratio=1</code> native policy 사용</td></tr>
+                <tr><td>NUI <code>DefaultBorder</code></td><td><code>DefaultWindowDecoration::New()</code></td><td>상속 대신 handle 하나로 설치하고 유지</td></tr>
+                <tr><td><code>UpdateIcons()</code></td><td><code>DefaultWindowDecoration</code>가 내부에서 처리</td><td>보고된 상태를 따라 maximize/restore 아이콘 교체</td></tr>
+                <tr><td>Border 위 focus 색 전환</td><td><code>Window::FocusChangedSignal()</code></td><td>active/inactive 표현을 앱이 선택</td></tr>
+
+              </tbody>
+            </table>
+          </div>
+          <div class="callout"><strong>의도적으로 단순화한 resize UX</strong>8방향 hit region과 top corner handle은 제공하지 않습니다. 현재 제품 요구처럼 bottom-left/right 아이콘을 직접 누르고 드래그하는 명시적 resize만 제공합니다.</div>
+          <div class="callout warning"><strong>Feature는 제품이 선언하는 operation gate이지 backend 탐지가 아닙니다</strong>모든 feature는 backend와 무관하게 기본 true이고, 이를 바꾸는 것은 호출자뿐입니다. 켜져 있다는 것은 요청을 발행한다는 뜻이지 window system이 그것을 수행한다는 뜻이 아닙니다. 아직 구현하지 않은 backend에서도 UI는 sensitive하고 <code>DISPATCHED</code>가 반환됩니다. 제공하지 않을 기능은 생성 전에 <code>options.SetFeatureEnabled(feature, false)</code>로 끄고, 생성 후에는 <code>IsFeatureEnabled()</code>로 적용 값을 확인합니다.</div>
+          <div class="code-wrap"><button class="copy" type="button">복사</button><pre><code class="language-cpp">WindowFrameOptions options;
+options.SetFeatureEnabled(
+  WindowFrameFeature::RESIZE, false);
+
+WindowFrame windowFrame =
+  WindowFrame::New(window, closeCallback, options);</code></pre></div>
+          <div style="overflow-x:auto; margin-top:18px">
+            <table class="mapping">
+              <thead><tr><th>Feature 종류</th><th><code>false</code>일 때</th></tr></thead>
+              <tbody>
+                <tr><td><code>MOVE</code>, <code>RESIZE</code>, <code>MINIMIZE</code>, <code>MAXIMIZE_RESTORE</code></td><td>관련 role 입력을 비활성화하고 해당 기본 operation을 <code>NOT_DISPATCHED</code>로 처리합니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="band alt" id="checklist" data-search="체크리스트 operation gate validation testing product apply unsupported API source">
+        <div class="section-inner">
+          <div class="section-head">
+            <div><div class="section-number">12 · SHIP CHECKLIST</div><h2>제품 적용 전 확인</h2></div>
+            <p>API 사용 계약과 compositor 경계를 마지막으로 점검합니다.</p>
+          </div>
+          <ul class="checklist">
+            <li>native Window가 transparent로 구성되어 있다.</li>
+            <li>앱 UI는 <code>GetContentRoot()</code>에만 추가한다.</li>
+            <li>slot root는 설치 전에 unparented 상태이거나, 이 WindowFrame에 이미 설치된 slot이다.</li>
+            <li>command role은 decoration slot 내부에 있다.</li>
+            <li>role control에 앱 click callback을 중복 연결하지 않는다.</li>
+            <li><code>SetDecoration()</code> 결과를 검사한다.</li>
+            <li>frame 크기와 content 크기의 기준을 구분한다.</li>
+            <li>decoration 교체 size policy를 의도적으로 선택한다.</li>
+            <li>일반 restore geometry를 앱이 덮어쓰지 않는다.</li>
+            <li>dispatch 완료와 compositor 완료를 구분한다.</li>
+            <li>presented signal과 state signal의 타이밍 차이를 확인한다.</li>
+            <li>interceptor에서 동일 request API를 재호출하지 않는다.</li>
+            <li>overlay auto-hide 후 mouse/touch 재표시를 검증한다.</li>
+            <li>양쪽 handle에서 <code>KEEP_ASPECT_RATIO</code> native surface 비율 유지를 검증한다.</li>
+            <li><code>KEEP_ASPECT_RATIO</code>에서 <code>FREE</code>로 바꾼 뒤 자유 비율 resize를 검증한다.</li>
+            <li>N-patch/View shadow와 corner clipping을 실기기에서 확인한다.</li>
+            <li><code>DefaultWindowDecoration</code>를 쓴다면 handle을 멤버로 들고 있고, shadow를 켠 창은 투명하게 만들었다.</li>
+            <li>아이콘이 실기기에서 보인다. 컴포넌트 이미지가 <code>&lt;dataReadOnlyDir&gt;/ui/images/components/border/</code>에 설치되어 있다.</li>
+                        <li>이동을 시작할 때 <code>CANCELLED</code>가 먼저 오지 않는다. compositor grab이 focus를 가져가는 backend에서 확인한다.</li>
+          </ul>
+          <div class="source-links" style="margin-top:28px">
+            <div class="source-link"><b>English Wiki</b><a href="../../WindowFrame.md">WindowFrame.md</a></div>
+            <div class="source-link"><b>한국어 Wiki</b><a href="../../WindowFrame-(kr).md">WindowFrame-(kr).md</a></div>
+            <div class="source-link"><b>샘플 소스</b><a href="https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/window-frame/window-frame-example.cpp">samples/window-frame/window-frame-example.cpp</a></div>
+            <div class="source-link"><b>핵심 public API</b><a href="https://github.sec.samsung.net/NUI/dali-ui/blob/devel/dali-ui-components/public-api/window/window-frame.h">window-frame.h</a></div>
+            <div class="source-link"><b>문서 기준</b><code>WindowFrame public API</code></div>
+          </div>
+        </div>
+      </section>
+      <div class="empty" id="empty">검색어와 일치하는 섹션이 없습니다.</div>
+    </main>
+  </div>
+
+  <script>
+    document.querySelectorAll('.copy').forEach(button => {
+      button.addEventListener('click', async () => {
+        const code = button.parentElement.querySelector('code').innerText;
+        try {
+          await navigator.clipboard.writeText(code);
+          button.textContent = '완료';
+          setTimeout(() => { button.textContent = '복사'; }, 1200);
+        } catch (_) {
+          button.textContent = '선택';
+          const range = document.createRange();
+          range.selectNodeContents(button.parentElement.querySelector('code'));
+          window.getSelection().removeAllRanges();
+          window.getSelection().addRange(range);
+        }
+      });
+    });
+
+    const navLinks = [...document.querySelectorAll('nav a')];
+    const observedSections = navLinks.map(link => document.querySelector(link.getAttribute('href')));
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if(!visible) return;
+      navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${visible.target.id}`));
+    }, { rootMargin: '-20% 0px -65% 0px', threshold: [0, .2, .5] });
+    observedSections.forEach(section => observer.observe(section));
+
+    const progress = document.getElementById('progress');
+    window.addEventListener('scroll', () => {
+      const available = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = `${available > 0 ? (window.scrollY / available) * 100 : 0}%`;
+    }, { passive: true });
+
+    const search = document.getElementById('search');
+    const searchable = [...document.querySelectorAll('[data-search]')];
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLocaleLowerCase('ko');
+      let visibleCount = 0;
+      searchable.forEach(section => {
+        const haystack = `${section.dataset.search} ${section.innerText}`.toLocaleLowerCase('ko');
+        const matches = !query || haystack.includes(query);
+        section.classList.toggle('section-hidden', !matches);
+        if(matches) visibleCount += 1;
+      });
+      document.getElementById('empty').style.display = visibleCount ? 'none' : 'block';
+    });
+
+  </script>
+</body>
+</html>

@@ -160,7 +160,7 @@ public:
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     label.SetBackgroundColor(Color::BLACK);
     label.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
-    label.SetMargin(Extents(5, 5, 0, 0));
+    label.SetMargin(Insets(5.0f, 5.0f, 0.0f, 0.0f));
     return label;
   }
 

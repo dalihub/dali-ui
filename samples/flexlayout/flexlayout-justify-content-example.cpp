@@ -51,7 +51,7 @@ public:
     outer.SetRequestedWidth(MATCH_PARENT);
     outer.SetRequestedHeight(MATCH_PARENT);
     outer.SetSpacing(50.0f);
-    outer.SetPadding(Extents(50, 50, 50, 50));
+    outer.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     // Row 1: FlexEnd
     FlexLayout rowEnd = FlexLayout::New();

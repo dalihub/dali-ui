@@ -225,8 +225,9 @@ private:
   /**
    * @brief Applies the membership-GATED select-only click policy.
    *
-   * Sets the sibling SelectableTrait's INTERNAL select-only flag so its OnClickedForToggle
-   * handler keeps an already-selected member selected (a re-click on the winner is a no-op).
+   * Sets the sibling SelectableTrait's group-owned select-only policy so its
+   * OnClickedForToggle handler keeps an already-selected member selected (a re-click on the
+   * winner is a no-op).
    * Grouping NEVER changes the sibling's public toggle-by-click setting: it is neither saved
    * nor restored. If toggle-by-click was disabled the click path stays inert; programmatic
    * arbitration still works through SetSelected/SelectionChangedSignal.
@@ -236,9 +237,8 @@ private:
   /**
    * @brief Reverts the click policy applied by ApplyGroupClickPolicy().
    *
-   * Clears the sibling SelectableTrait's internal select-only flag, so an ungrouped member
-   * behaves exactly as a plain Selectable again. Toggle-by-click is untouched (grouping
-   * never changed it).
+   * Clears only the sibling SelectableTrait's group-owned select-only policy. An independent
+   * persistent policy remains active. Toggle-by-click is untouched (grouping never changed it).
    */
   void RestoreClickPolicy();
 

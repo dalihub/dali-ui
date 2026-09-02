@@ -109,26 +109,45 @@ struct Controller::Relayouter
    *
    * @param[in] impl A reference to the controller impl class
    * @param[in] size The size to set
+   * @param[in] maximumNumberOfLines The maximum number of lines, or zero for unlimited.
    * @param[in] operationsRequired The operations we need to do
    * @param[in/out] layoutSize The Layout size which can be updated depending on the result of the performed operations
    * @return whether view updated after relayout
    */
 
-  static bool DoRelayout(Controller::Impl& impl, const Size& size, OperationsMask operationsRequired, Size& layoutSize);
+  static bool DoRelayout(Controller::Impl& impl, const Size& size, Length maximumNumberOfLines,
+                         OperationsMask operationsRequired, Size& layoutSize);
 
   /**
    * @brief Called by the Controller to do certain operations when relayouting.
    *
    * @param[in] impl A reference to the controller impl class
    * @param[in] size The size to set
+   * @param[in] maximumNumberOfLines The maximum number of lines, or zero for unlimited.
    * @param[in] operationsRequired The operations we need to do
    * @param[in/out] layoutSize The Layout size which can be updated depending on the result of the performed operations
    * @param[out] layoutTooSmall True if layout is too small to render one glyph, else false.
    * @return whether view updated after relayout
    */
 
-  static bool DoRelayout(Controller::Impl& impl, const Size& size, OperationsMask operationsRequired, Size& layoutSize,
-                         bool& layoutTooSmall);
+  static bool DoRelayout(Controller::Impl& impl, const Size& size, Length maximumNumberOfLines,
+                         OperationsMask operationsRequired, Size& layoutSize, bool& layoutTooSmall);
+
+  /**
+   * @brief Relayout overload which also reports whether the content exceeds the line limit.
+   *
+   * @param[in] impl A reference to the controller impl class
+   * @param[in] size The size to set
+   * @param[in] maximumNumberOfLines The maximum number of lines, or zero for unlimited.
+   * @param[in] operationsRequired The operations we need to do
+   * @param[in/out] layoutSize The Layout size which can be updated depending on the result of the performed operations
+   * @param[out] layoutTooSmall True if layout is too small to render one glyph, else false.
+   * @param[out] maximumNumberOfLinesExceeded Set when the content requires more than the maximum lines.
+   * @return whether view updated after relayout
+   */
+  static bool DoRelayout(Controller::Impl& impl, const Size& size, Length maximumNumberOfLines,
+                         OperationsMask operationsRequired, Size& layoutSize, bool& layoutTooSmall,
+                         bool& maximumNumberOfLinesExceeded);
 
   /**
    * @brief Called by the Controller to calculate the veritcal offset give the control size.
@@ -150,6 +169,7 @@ struct Controller::Relayouter
    * @return The calculated layout-size.
    */
   static Size CalculateLayoutSizeOnRequiredControllerSize(Controller& controller, const Size& requestedControllerSize,
+                                                          Length                maximumNumberOfLines,
                                                           const OperationsMask& requestedOperationsMask);
 
 private:

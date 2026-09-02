@@ -36,6 +36,7 @@ Representative text layout APIs.
 | API | Description |
 |---|---|
 | `SetMultiLine()` | Enable multi-line |
+| `SetMaximumLines()` | Set the maximum number of lines for multi-line layout |
 | `SetLineWrapMode()` | Line wrap mode (`WORD`, `CHARACTER`, `HYPHENATION`, `MIXED`) |
 | `SetHorizontalTextAlignment()` | Horizontal alignment (`START`, `CENTER`, `END`) |
 | `SetVerticalTextAlignment()` | Vertical alignment (`START`, `CENTER`, `END`) |
@@ -47,6 +48,39 @@ label.SetMultiLine(true);
 label.SetLineWrapMode(Text::LineWrapMode::WORD);
 label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
 ~~~
+
+<br/>
+
+### Maximum Lines
+
+`SetMaximumLines()` sets the maximum number of lines used for multi-line text layout. With a positive value, rendering and size measurement use layout results up to the specified number of lines. The default value, `Text::MAXIMUM_LINES_UNLIMITED` (`0`), applies no line-count limit. Negative values are also treated as `Text::MAXIMUM_LINES_UNLIMITED`.
+
+~~~cpp
+Label label = Label::New("First line\nSecond line\nThird line\nFourth line");
+label.SetMultiLine(true);
+label.SetMaximumLines(3);
+label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+~~~
+
+In `ELLIPSIS` mode, up to three lines are displayed, and remaining text is represented by an ellipsis at the end of the last line.
+
+~~~text
+First line
+Second line
+Third line…
+~~~
+
+In `CLIP` mode, only up to three lines are displayed without an ellipsis.
+
+~~~text
+First line
+Second line
+Third line
+~~~
+
+`SetMaximumLines()` does not enable multi-line layout automatically. When `SetMultiLine(false)` is used, the Label continues to use single-line layout. Text beyond the maximum line count follows the `ELLIPSIS` or `CLIP` mode configured with `SetTextOverflowMode()`.
+
+The maximum line count is reflected in `GetNaturalSize()`, `GetHeightForWidth()`, `GetLineCount()`, and `GetLineCount(width)`. It is also applied during Text Fit calculation. See [Text Size Measurement](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text#text-size-measurement) for details.
 
 <br/>
 
@@ -546,6 +580,9 @@ Async Size Computation performs the same calculation as the sync APIs `GetNatura
 > [!NOTE]
 > Async size computation APIs can be used even when synchronous rendering mode is used.
 
+> [!NOTE]
+> When a maximum line count is set with `SetMaximumLines()`, the same limit is applied to async natural-size and height-for-width computations.
+
 ~~~cpp
 label.AsyncNaturalSizeComputedSignal().Connect(
   [](View view, float width, float height)
@@ -703,6 +740,7 @@ See also: [text-reveal-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/t
 | Font variation | [text-font-variation-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-font-variation-example.cpp) |
 | Text fit | [text-fit-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-fit-example.cpp) |
 | Text fit candidate | [text-fit-candidate-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-fit-candidate-example.cpp) |
+| Maximum lines | [text-maximum-lines-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-maximum-lines-example.cpp) |
 | Marquee | [text-marquee-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-marquee-example.cpp) |
 | Render scale | [text-render-scale-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-render-scale-example.cpp) |
 | Cutout / Mask | [text-cutout-mask-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-cutout-mask-example.cpp) |

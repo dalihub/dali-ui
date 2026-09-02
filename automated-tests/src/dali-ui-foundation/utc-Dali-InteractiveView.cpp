@@ -268,8 +268,9 @@ void SetFocusIndicated(View view)
   ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 }
 
-constexpr auto OVERLAY_VISUAL_RANGE = Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT;
-constexpr float OVERLAY_RECOIL_SCALE_FACTOR = 0.98f;
+constexpr auto  OVERLAY_VISUAL_RANGE            = Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT;
+constexpr float OVERLAY_RECOIL_SCALE_FACTOR     = 0.96f;
+constexpr float LIST_ITEM_RECOIL_SCALE_FACTOR   = 0.98f;
 constexpr float OVERLAY_DISABLED_OPACITY_FACTOR = 0.4f;
 
 ColorVisual GetOverlayVisual(View view)
@@ -756,11 +757,17 @@ int UtcDaliInteractiveViewOverlayEffectTargetP(void)
   target.SetRequestedHeight(80.0f);
   owner.Add(target);
   owner.SetStateEffectTarget(target);
+  owner.SetStateEffect(OverlayEffect::Plain().Configure().SetOverlayPadding(Insets(1.0f, 2.0f, 3.0f, 4.0f)).Build());
 
   ProcessTouch(application, PointState::DOWN);
 
   DALI_TEST_EQUALS(owner.GetVisualCount(OVERLAY_VISUAL_RANGE), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(target.GetVisualCount(OVERLAY_VISUAL_RANGE), 1u, TEST_LOCATION);
+  ColorVisual overlay = GetOverlayVisual(target);
+  DALI_TEST_EQUALS(overlay.GetOffsetX(), -1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(overlay.GetOffsetY(), -3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(overlay.GetExtraWidth(), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(overlay.GetExtraHeight(), 7.0f, TEST_LOCATION);
 
   ProcessTouch(application, PointState::FINISHED, 120u);
 
@@ -922,6 +929,7 @@ int UtcDaliInteractiveViewOverlayEffectConfigureP(void)
 {
   OverlayEffect configured = OverlayEffect::Plain().Configure()
                                .SetOverlayColor(UiColor(0x000000, 0.2f))
+                               .SetOverlayPadding(Insets(1.0f, 2.0f, 3.0f, 4.0f))
                                .SetRecoilScope(RecoilScope::OVERLAY_TARGET_CHILDREN)
                                .Build();
   OverlayEffect explicitCorner = OverlayEffect::Plain().Configure().SetCornerRadius(12.0f).Build();
@@ -932,14 +940,19 @@ int UtcDaliInteractiveViewOverlayEffectConfigureP(void)
   OverlayEffect targetCornerBuilder = OverlayEffect::Builder().SetCornerRadiusPolicyRelative().SetUseTargetCornerRadius(true).Build();
 
   DALI_TEST_EQUALS(OverlayEffect::Plain().GetOverlayColor().GetRgba(), UiColor(0x000000, 0.1f).GetRgba(), TEST_LOCATION);
+  DALI_TEST_EQUALS(OverlayEffect::Plain().GetOverlayPadding(), Insets(), TEST_LOCATION);
   DALI_TEST_EQUALS(OverlayEffect::Plain().GetRecoilScope(), RecoilScope::OVERLAY_TARGET, TEST_LOCATION);
+  DALI_TEST_EQUALS(OverlayEffect::Plain().GetRecoilScaleFactor(), OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
   DALI_TEST_CHECK(OverlayEffect::Plain().IsUsingTargetCornerRadius());
   DALI_TEST_CHECK(!OverlayEffect::Plain().IsNone());
   DALI_TEST_EQUALS(OverlayEffect::ListItem().GetOverlayColor().GetRgba(), UiColor(0x000000, 0.1f).GetRgba(), TEST_LOCATION);
+  DALI_TEST_EQUALS(OverlayEffect::ListItem().GetOverlayPadding(), Insets(), TEST_LOCATION);
   DALI_TEST_EQUALS(OverlayEffect::ListItem().GetRecoilScope(), RecoilScope::OVERLAY_TARGET_CHILDREN, TEST_LOCATION);
+  DALI_TEST_EQUALS(OverlayEffect::ListItem().GetRecoilScaleFactor(), LIST_ITEM_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
   DALI_TEST_CHECK(OverlayEffect::ListItem().IsUsingTargetCornerRadius());
   DALI_TEST_CHECK(!OverlayEffect::ListItem().IsNone());
   DALI_TEST_EQUALS(configured.GetOverlayColor().GetRgba(), UiColor(0x000000, 0.2f).GetRgba(), TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetOverlayPadding(), Insets(1.0f, 2.0f, 3.0f, 4.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(configured.GetRecoilScope(), RecoilScope::OVERLAY_TARGET_CHILDREN, TEST_LOCATION);
   DALI_TEST_CHECK(configured.IsUsingTargetCornerRadius());
   DALI_TEST_CHECK(!explicitCorner.IsUsingTargetCornerRadius());
@@ -1081,10 +1094,10 @@ int UtcDaliInteractiveViewOverlayEffectRecoilChildrenP(void)
   Vector3 child2Scale = child2.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
   DALI_TEST_EQUALS(viewScale.x, 1.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(viewScale.y, 1.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child1Scale.x, 2.0f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child1Scale.y, OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child2Scale.x, OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child2Scale.y, OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child1Scale.x, 2.0f * LIST_ITEM_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child1Scale.y, LIST_ITEM_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child2Scale.x, LIST_ITEM_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child2Scale.y, LIST_ITEM_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(child1.GetPivot(), Vector3(2.0f, 1.5f, child1OriginalPivot.z), TEST_LOCATION);
   DALI_TEST_EQUALS(child2.GetPivot(), Vector3(0.0f, 0.333333f, child2OriginalPivot.z), 0.001f, TEST_LOCATION);
 

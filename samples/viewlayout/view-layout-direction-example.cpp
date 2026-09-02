@@ -59,7 +59,7 @@ public:
     child1.SetBackgroundColor(Color::RED);
     child1.SetRequestedWidth(MATCH_PARENT);
     child1.SetRequestedHeight(200.0f);
-    child1.SetMargin(Extents(50, 50, 50, 50));
+    child1.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     mRoot.Add(child1);
 
     // Child 2: Green, width=WRAP_CONTENT, height=200, pos=(0,300), margin=50
@@ -68,7 +68,7 @@ public:
     child2.SetRequestedWidth(WRAP_CONTENT);
     child2.SetRequestedHeight(200.0f);
     child2.SetRequestedY(300.0f);
-    child2.SetMargin(Extents(50, 50, 50, 50));
+    child2.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
 
     // Child 2's child: Yellow, 100x100
     View grandchild = View::New();
@@ -85,7 +85,7 @@ public:
     child3.SetRequestedWidth(200.0f);
     child3.SetRequestedHeight(MATCH_PARENT);
     child3.SetRequestedY(600.0f);
-    child3.SetMargin(Extents(50, 50, 50, 50));
+    child3.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     mRoot.Add(child3);
 
     // Toggle button: 200x50 translucent-black standalone child at top-left

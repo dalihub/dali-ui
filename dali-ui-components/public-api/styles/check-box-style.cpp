@@ -19,16 +19,15 @@
 #include <dali-ui-components/public-api/styles/check-box-style.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-components/internal/component-image-path.h>
 #include <dali-ui-components/internal/styles/check-box-style-impl.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
-#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 
 // EXTERNAL INCLUDES
-#include <string>
 #include <utility>
 
 namespace Dali
@@ -46,14 +45,13 @@ StateEffect CreateDefaultCheckBoxStateEffect()
 // <dali image dir>/components/checkbox.json; resolve that path at runtime.
 Dali::String DefaultIconUrl()
 {
-  const std::string path = Dali::Ui::Integration::AssetManager::GetDaliImagePath() + "components/checkbox.json";
-  return Dali::String(path.c_str());
+  return Internal::ResolveComponentImageUrl("checkbox.json");
 }
 // The default icon generator: builds a selectable Lottie image from the shipped checkbox.json
 // with the segment layout from its markers — select plays [0,19] (the "on" marker), deselect
 // plays [20,38] (the "off" marker). The inner-fill key path targets the recoloured fill layer
 // ("check_box " has a trailing space, matching the asset layer name). Must be a free function
-// (IconGenerator = Ui::Callback<SelectableImageInterface()>).
+// (IconGenerator = Dali::Callback<SelectableImageInterface()>).
 SelectableImageInterface MakeDefaultCheckBoxIcon()
 {
   return SelectableLottieAnimationView::New(SelectableLottieImage(DefaultIconUrl(),
@@ -201,7 +199,7 @@ CBS_SETTER(SetTextUnderline, const Text::Underline&)
 CBS_SETTER(SetStateEffect, StateEffect)
 #undef CBS_SETTER
 
-// SetIconGenerator cannot use the by-value CBS_SETTER macro: IconGenerator (Ui::Callback) is
+// SetIconGenerator cannot use the by-value CBS_SETTER macro: IconGenerator (Dali::Callback) is
 // move-only, so it must be moved into the impl.
 CheckBoxStyle::Builder& CheckBoxStyle::Builder::SetIconGenerator(IconGenerator&& generator) &
 {

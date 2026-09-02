@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/system/system-settings.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <cstdint>
 #include <memory>
@@ -44,7 +45,6 @@
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
@@ -164,6 +164,16 @@ public:
    * @copydoc Dali::Ui::Label::IsMultiLine
    */
   bool IsMultiLine() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetMaximumLines
+   */
+  void SetMaximumLines(int maximumLines);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMaximumLines
+   */
+  int GetMaximumLines() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetLineWrapMode
@@ -1097,9 +1107,9 @@ private: // Implementation
   bool OnInterceptTouched(Actor actor, TouchEvent touch);
 
   /**
-   * @brief Updates touch interception based on anchor presence.
+   * @brief Updates event connections based on anchor presence.
    */
-  void UpdateAnchorTouchInterception();
+  void UpdateAnchorConnections();
 
   /**
    * @brief Clears the stored StyledText source state.
@@ -1400,9 +1410,6 @@ private:
   Signal<void(View, float, float)>        mAsyncNaturalSizeComputedSignal;
   Signal<void(View, float, float)>        mAsyncHeightForWidthComputedSignal;
 
-  WeakHandle<Ui::View> mMaskSourceView;
-  Dali::String         mTranslatableText; ///< Stored resourceId for localization binding
-
   Internal::Text::TextGradientPropertyDataPtr mTextGradientPropertyData;
   Internal::Text::StyledTextSourceDataPtr     mStyledTextSourceData;
   Internal::Text::TextRevealDataPtr           mTextRevealData;
@@ -1414,7 +1421,6 @@ private:
   Vector2                               mSize;
   Vector2                               mLastMeasureConstraints;
   Vector2                               mLastMeasureRequestedSize;
-  Vector2                               mTouchPosition; ///< The initial touch down position.
   float                                 mLineHeight;
   Ui::Text::LineHeightMode              mLineHeightMode;
   Ui::Text::OverflowMode                mOverflowMode;
@@ -1432,7 +1438,6 @@ private:
   bool mLastMarqueeEnabled : 1;       // whether manual marquee was enabled in the previous state.
   bool mRestartMarquee : 1;           // whether sync marquee needs one-shot restart after measure-affecting changes.
   bool mHasLastMeasureMetrics : 1;    // whether the last OnMeasure inputs have been captured.
-  bool mIsTouchDown : 1;              // whether the currently intercepted touch is in the down state.
   bool mHasStyledTextSource : 1;      // whether current text source was set by SetStyledText().
   bool mHasVariationProperties : 1;   // whether font variation custom properties have been registered.
   bool mHasAnchors : 1;               // whether the text has anchors.

@@ -22,7 +22,7 @@ The three components do not all provide the same APIs, but dali-ui text features
 
 | Category | Related Features | Main Components |
 |---|---|---|
-| Text layout | multi-line, wrap, alignment, overflow, line height | Label, InputEditor |
+| Text layout | multi-line, wrap, alignment, overflow, line height, maximum lines | Label, InputEditor |
 | Text style | color, underline, shadow, outline, background, styled text | Label, InputField, InputEditor |
 | Font | font family, size, weight, width, slant, variation | Label, InputField, InputEditor |
 | Text input | placeholder, cursor, selection, input filter | InputField, InputEditor |
@@ -58,6 +58,9 @@ int lineCount = label.GetLineCount(300.0f);
 
 > [!NOTE]
 > Values that depend on the current layout width, such as `GetLineCount()`, may not be accurate before layout is resolved. Use the width-explicit variant like `GetLineCount(width)` when needed.
+
+> [!NOTE]
+> When multi-line is enabled on a `Label` and a positive value is set with `SetMaximumLines()`, `GetNaturalSize()`, `GetHeightForWidth()`, `GetLineCount()`, and `GetLineCount(width)` all return layout results with the maximum line count applied. Lines hidden by the limit are not included in the measured size or line count. Set `Text::MAXIMUM_LINES_UNLIMITED` to apply no line-count limit.
 
 <br/>
 
@@ -120,6 +123,7 @@ For simple partial styling, DALi markup can be converted to `StyledText`. For pr
 | Font variation | [text-font-variation-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-font-variation-example.cpp) |
 | Text fit | [text-fit-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-fit-example.cpp) |
 | Text fit candidate | [text-fit-candidate-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-fit-candidate-example.cpp) |
+| Maximum lines | [text-maximum-lines-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-maximum-lines-example.cpp) |
 | Marquee | [text-marquee-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-marquee-example.cpp) |
 | Render scale | [text-render-scale-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-render-scale-example.cpp) |
 | Cutout / Mask | [text-cutout-mask-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-cutout-mask-example.cpp) |

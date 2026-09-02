@@ -560,7 +560,7 @@ private:
     content.SetRequestedWidth(WINDOW_W);
     content.SetRequestedHeight(CONTENT_H);
     content.SetSpacing(ITEM_SPACING);
-    content.SetPadding(Extents(16, 16, 16, 16));
+    content.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
 
     for(int i = 0; i < ITEM_COUNT; ++i)
     {

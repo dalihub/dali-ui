@@ -72,12 +72,37 @@ public:
    *
    * Layout roots are views that have a LayoutManager and are at the top
    * of the layout hierarchy (e.g. directly under the window).
-   * The controller will batch these requests and process them
-   * during the next frame.
+   * Outside layout processing, the controller batches these requests and arms one
+   * coalesced outstanding ProcessEvents wake so they are processed during the next
+   * frame.
+   *
+   * @note Calling this DURING layout processing -- from inside any Measure/Arrange
+   * implementation, or from a LayoutFinishedSignal slot (either this controller's or a
+   * View's) -- is a contract violation and is logged once for the view. The request is
+   * retained in the pending set, but it does not request an idle ProcessEvents wake. A
+   * not-yet-started turn for that root in the current batch may consume it immediately;
+   * otherwise the request remains PARKED until a later independently triggered
+   * ProcessEvents, an explicit ProcessLayouts(), or an out-of-processing request drains
+   * or wakes it. The latter arms at most one coalesced outstanding wake. On a quiescent
+   * application that can be indefinitely later: in-processing scheduling is prohibited
+   * in principle and honoured only best-effort, mirroring dali-core's relayout policy.
+   * Defer the request to event time when a prompt layout pass is required.
    *
    * @param[in] view The view with layout capability to schedule
    */
   void RequestLayout(ViewImpl* view);
+
+  /**
+   * @brief Schedules a view for layout processing on the framework's behalf.
+   *
+   * @note For internal framework use only; applications must use RequestLayout().
+   * This is the registration path taken by the invalidation walk itself. "Internal"
+   * describes API visibility only: it is subject to the same processing-window wake
+   * policy as RequestLayout(), so framework routing cannot bypass PARK semantics.
+   *
+   * @param[in] view The view with layout capability to schedule
+   */
+  void RequestLayoutInternal(ViewImpl* view);
 
   /**
    * @brief Removes the layout controller for the given window.
@@ -144,9 +169,10 @@ public:
    *
    * Semantics:
    * - Fires once per "dirty -> quiescent" transition, i.e. each time pending
-   *   layout work drains to nothing. It recurs whenever layout is invalidated
-   *   again and settles again; it is not a one-shot for the application
-   *   lifetime.
+   *   layout work drains to nothing. Parked work is still pending even though it has
+   *   not armed an idle wake, so it delays this signal until a later processing cycle
+   *   drains it -- on a quiescent application, indefinitely. The signal recurs whenever layout is invalidated and settles again; it
+   *   is not a one-shot for the application lifetime.
    * - Emitted during the post-process phase, i.e. AFTER DALi core size
    *   negotiation (Relayout) for the frame in which layout settled. Measure and
    *   Arrange still run in the pre-process phase; only the emit is deferred to
@@ -156,10 +182,17 @@ public:
    * - Reflects Measure/Arrange completion ONLY. It does NOT wait for layout
    *   transition animations to finish; use a transition-finished callback if
    *   post-animation geometry is required.
-   * - If a slot invalidates layout again (e.g. triggers InvalidateMeasure),
-   *   that schedules another pass and this signal fires again on a later
-   *   frame. Avoid unconditionally re-laying-out inside the slot, which
-   *   creates a self-perpetuating per-frame emit cycle.
+   * - A slot may NOT invalidate layout. The emit runs inside the layout processing
+   *   window, so a direct View::InvalidateMeasure() / View::InvalidateArrange() /
+   *   LayoutController::RequestLayout() call is a contract violation and is logged
+   *   once for that view. The work is retained, but it is PARKED and does not request
+   *   an idle ProcessEvents wake. The callback already being delivered cannot be
+   *   withdrawn; the parked work begins or extends a dirty episode whose next
+   *   completion signal is delayed until an independently triggered ProcessEvents, an
+   *   explicit ProcessLayouts(), or an out-of-processing request drains it. Defer
+   *   layout-affecting work to event time when prompt processing is required.
+   * - Property changes and tree mutations from a slot (Add / Remove) follow the same
+   *   scheduling rule. A framework-internal invalidation path is not an exemption.
    * - Destroying this controller from within the slot (LayoutController::Remove)
    *   is supported. The controller is detached immediately - it stops processing
    *   and emitting at once - but the object is not freed until the event loop

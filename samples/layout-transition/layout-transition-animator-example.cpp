@@ -118,7 +118,7 @@ public:
     label.SetBackgroundColor(Color::BLACK);
     label.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     // 5px on each side gives a 10px visual gap between adjacent buttons.
-    label.SetMargin(Extents(5, 5, 0, 0));
+    label.SetMargin(Insets(5.0f, 5.0f, 0.0f, 0.0f));
     return label;
   }
 
@@ -134,7 +134,7 @@ public:
     }
     const float p = ctx.progress;
     actor.SetProperty(Actor::Property::OPACITY, p);
-    actor.SetHeight(ctx.toBounds.height * p);
+    actor.SetSizeHeight(ctx.toBounds.height * p);
   }
 
   /// EXIT animator: height fromBounds.height → 0 anchored at the TOP edge,
@@ -148,7 +148,7 @@ public:
     }
     const float p = ctx.progress;
     actor.SetProperty(Actor::Property::OPACITY, 1.0f - p);
-    actor.SetHeight(ctx.fromBounds.height * (1.0f - p));
+    actor.SetSizeHeight(ctx.fromBounds.height * (1.0f - p));
   }
 
   /// CHANGE animator: linear interpolation of arranged bounds.
@@ -166,8 +166,8 @@ public:
     const float h   = ctx.fromBounds.height + (ctx.toBounds.height - ctx.fromBounds.height) * p;
     actor.SetPositionX(x);
     actor.SetPositionY(y);
-    actor.SetWidth(w);
-    actor.SetHeight(h);
+    actor.SetSizeWidth(w);
+    actor.SetSizeHeight(h);
   }
 
   void AppendChild()

@@ -785,16 +785,19 @@ private:
   float                    mLineHeight;
   Ui::Text::LineHeightMode mLineHeightMode;
   Ui::Text::OverflowMode   mOverflowMode;
-  uint32_t                 mTextLoadingTaskId;               ///< The currently requested text loading(render) task Id.
-  uint32_t                 mNaturalSizeTaskId;               ///< The currently requested natural size task Id.
-  uint32_t                 mHeightForWidthTaskId;            ///< The currently requested height for width task Id.
-  bool                     mRendererUpdateNeeded : 1;        ///< The flag to indicate whether the renderer needs to be updated.
-  bool                     mApplyingFittingMode : 1;         ///< Whether renderer update is running from OnApplyFittingMode().
-  bool                     mTextRequireRender : 1;           ///< The flag to indicate whether the text needs to be rendered.
-  bool                     mIsConstraintAppliedAlways : 1;   ///< Whether the constraint need to be applied always.
-  bool                     mIsTextLoadingTaskRunning : 1;    ///< Whether the requested text loading task is running or not.
-  bool                     mIsNaturalSizeTaskRunning : 1;    ///< Whether the requested natural size task is running or not.
-  bool                     mIsHeightForWidthTaskRunning : 1; ///< Whether the requested height for width task is running or not.
+  uint32_t                 mTextLoadingTaskId;                  ///< The currently requested text loading(render) task Id.
+  uint32_t                 mNaturalSizeTaskId;                  ///< The currently requested natural size task Id.
+  uint32_t                 mHeightForWidthTaskId;               ///< The currently requested height for width task Id.
+  uint64_t                 mTextLoadingMaximumLinesRevision;    ///< MaximumLines revision owned by the latest render task.
+  uint64_t                 mNaturalSizeMaximumLinesRevision;    ///< MaximumLines revision owned by the latest natural-size task.
+  uint64_t                 mHeightForWidthMaximumLinesRevision; ///< MaximumLines revision owned by the latest HFW task.
+  bool                     mRendererUpdateNeeded : 1;           ///< The flag to indicate whether the renderer needs to be updated.
+  bool                     mApplyingFittingMode : 1;            ///< Whether renderer update is running from OnApplyFittingMode().
+  bool                     mTextRequireRender : 1;              ///< The flag to indicate whether the text needs to be rendered.
+  bool                     mIsConstraintAppliedAlways : 1;      ///< Whether the constraint need to be applied always.
+  bool                     mIsTextLoadingTaskRunning : 1;       ///< Whether the requested text loading task is running or not.
+  bool                     mIsNaturalSizeTaskRunning : 1;       ///< Whether the requested natural size task is running or not.
+  bool                     mIsHeightForWidthTaskRunning : 1;    ///< Whether the requested height for width task is running or not.
 };
 
 } // namespace Internal

@@ -58,6 +58,7 @@ public:
   using TouchEventSignalType        = Signal<void(Window, TouchEvent)>;
   using WheelEventSignalType        = Signal<void(Window, WheelEvent)>;
   using ResizedSignalType            = Signal<void(Window, WindowSize)>;
+  using MovedSignalType              = Signal<void(Window, WindowPosition)>;
   using VisibilityChangedSignalType = Signal<void(Window, bool)>;
 
   static Window New(PositionSize windowPosition, const Dali::String& name, bool isTransparent = false);
@@ -89,10 +90,22 @@ public:
   bool                                       IsVisible() const;
   FocusChangedSignalType&                     FocusChangedSignal();
   ResizedSignalType&                          ResizedSignal();
+  MovedSignalType&                            MovedSignal();
+  MovedSignalType&                            MoveCompletedSignal();
+  ResizedSignalType&                          ResizeCompletedSignal();
   KeyEventSignalType&                        KeyEventSignal();
   TouchEventSignalType&                      TouchEventSignal();
   WheelEventSignalType&                      WheelEventSignal();
   VisibilityChangedSignalType&               VisibilityChangedSignal();
+
+  bool IsMaximized() const;
+  void Maximize(bool maximize);
+  bool IsMinimized() const;
+  void Minimize(bool minimize);
+  void SetMinimumSize(WindowSize size);
+  void SetMaximumSize(WindowSize size);
+  void AddFramePresentedCallback(CallbackBase* callback, int32_t frameId);
+
 
   Dali::RenderTaskList GetRenderTaskList();
   void                 KeepRendering(float durationSeconds);

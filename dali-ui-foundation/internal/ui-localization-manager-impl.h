@@ -22,6 +22,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
+#include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/slot-delegate.h>
 
 #include <memory>
@@ -33,7 +34,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 
 namespace Dali
 {

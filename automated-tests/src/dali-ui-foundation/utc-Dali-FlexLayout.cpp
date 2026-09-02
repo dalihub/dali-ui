@@ -598,11 +598,11 @@ int UtcDaliFlexLayoutStandaloneIgnoresParentPaddingP(void)
 {
   UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
-  layout.SetPadding(Extents(10, 10, 10, 10));
+  layout.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
 
   View standalone = View::New();
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
-  standalone.SetMargin(Extents(5, 5, 7, 7));
+  standalone.SetMargin(Insets(5.0f, 5.0f, 7.0f, 7.0f));
   standalone.SetRequestedWidth(MATCH_PARENT);
   standalone.SetRequestedHeight(MATCH_PARENT);
   layout.Add(standalone);

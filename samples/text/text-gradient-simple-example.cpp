@@ -123,7 +123,7 @@ private:
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetSpacing(STACK_SPACING);
-    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(0xF8FAFC));
@@ -177,7 +177,7 @@ private:
     mAnimation = Animation::New(ANIMATION_TIME);
     mAnimatedLabel.Animate(mAnimation)
       .TextGradientStartOffset(ANIMATED_GRADIENT_END_OFFSET, Duration(ANIMATION_TIME));
-    mAnimation.SetLooping(true);
+    mAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mAnimation.Play();
     mAnimationRunning = true;

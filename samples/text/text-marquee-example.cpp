@@ -47,7 +47,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     Label title = Label::New("Text Marquee Example\n"
                              "Test options:\n"
@@ -62,7 +62,7 @@ private:
     StackLayout manualSection = StackLayout::New(StackOrientation::VERTICAL);
     manualSection.SetRequestedWidth(MATCH_PARENT);
     manualSection.SetSpacing(STACK_SPACING);
-    manualSection.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    manualSection.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
     manualSection.SetBackgroundColor(UiColor(0xEFEFEF));
     Label manualTitle = Label::New("MarqueeTriggerPolicy::MANUAL");
     manualTitle.SetFontSize(14.0f);
@@ -87,7 +87,7 @@ private:
     StackLayout overflowSection = StackLayout::New(StackOrientation::VERTICAL);
     overflowSection.SetRequestedWidth(MATCH_PARENT);
     overflowSection.SetSpacing(STACK_SPACING);
-    overflowSection.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    overflowSection.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
     overflowSection.SetBackgroundColor(UiColor(0xEFEFEF));
     Label overflowTitle = Label::New("MarqueeTriggerPolicy::ON_OVERFLOW");
     overflowTitle.SetFontSize(14.0f);
@@ -112,7 +112,7 @@ private:
     StackLayout alignmentSection = StackLayout::New(StackOrientation::HORIZONTAL);
     alignmentSection.SetRequestedWidth(MATCH_PARENT);
     alignmentSection.SetSpacing(STACK_SPACING);
-    alignmentSection.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
+    alignmentSection.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
     alignmentSection.SetBackgroundColor(UiColor(0xEFEFEF));
     mLabelVerticalStart = CreateMarqueeLabel(TEXT_LTR, true, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::VERTICAL);
     mLabelVerticalStart.SetRequestedHeight(200);
@@ -150,7 +150,7 @@ private:
     label.SetTextColor(UiColor(0xFFFFFF));
     label.SetBackgroundColor(UiColor(0x000000));
     label.SetRequestedWidth(MATCH_PARENT);
-    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
     label.SetMultiLine(multiLine);
     label.SetMarqueeTriggerPolicy(policy);
     label.SetMarqueeOrientation(orientation);

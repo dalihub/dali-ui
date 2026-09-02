@@ -23,6 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
@@ -75,7 +76,7 @@ public:
    * @brief Shared plain overlay effect preset.
    *
    * Uses UiColor(0x000000, 0.1f), follows the target View corner radius, and
-   * applies recoil feedback to the overlay target itself.
+   * applies 0.96-scale recoil feedback to the overlay target itself.
    *
    * @return A shared plain overlay effect preset
    */
@@ -94,9 +95,9 @@ public:
    * @brief Shared list item overlay effect preset.
    *
    * Uses UiColor(0x000000, 0.1f), follows the target View corner radius, and
-   * applies recoil feedback to the target View's direct children. Child recoil
-   * is skipped when the resolved overlay target has no direct children or more
-   * than three direct children.
+   * applies 0.98-scale recoil feedback to the target View's direct children.
+   * Child recoil is skipped when the resolved overlay target has no direct
+   * children or more than three direct children.
    *
    * @return A shared list item overlay effect preset
    */
@@ -121,6 +122,16 @@ public:
    * @return The overlay color
    */
   UiColor GetOverlayColor() const;
+
+  /**
+   * @brief Gets the space by which the overlay visual extends beyond its target.
+   *
+   * The padding affects only the overlay visual. It does not change the target
+   * View's measured size, layout bounds, hit area, or recoil target.
+   *
+   * @return The overlay padding
+   */
+  Insets GetOverlayPadding() const;
 
   /**
    * @brief Gets the configured corner radius.
@@ -165,6 +176,13 @@ public:
    */
   RecoilScope GetRecoilScope() const;
 
+  /**
+   * @brief Gets the scale multiplier applied to each recoil target while pressed.
+   *
+   * @return The recoil scale factor
+   */
+  float GetRecoilScaleFactor() const;
+
 private:
   explicit OverlayEffect(Internal::OverlayEffectImpl* impl);
 
@@ -205,6 +223,25 @@ public:
    * @return Rvalue reference to this builder
    */
   Builder&& SetOverlayColor(const UiColor& color) &&;
+
+  /**
+   * @brief Sets the space by which the overlay visual extends beyond its target.
+   *
+   * All values must be finite and non-negative. The default is zero on every
+   * side. Start and end follow the target View's effective layout direction.
+   *
+   * @param[in] padding The overlay padding
+   * @return Reference to this builder
+   */
+  Builder& SetOverlayPadding(const Insets& padding) &;
+
+  /**
+   * @brief Sets the overlay padding on a temporary builder.
+   *
+   * @param[in] padding The overlay padding
+   * @return Rvalue reference to this builder
+   */
+  Builder&& SetOverlayPadding(const Insets& padding) &&;
 
   /**
    * @brief Sets a uniform explicit corner radius.
@@ -350,6 +387,25 @@ public:
    * @return Rvalue reference to this builder
    */
   Builder&& SetRecoilScope(RecoilScope scope) &&;
+
+  /**
+   * @brief Sets the scale multiplier applied to each recoil target while pressed.
+   *
+   * The value must be finite and non-negative. A value of 1.0 keeps the
+   * target at its original size.
+   *
+   * @param[in] factor The recoil target scale multiplier
+   * @return Reference to this builder
+   */
+  Builder& SetRecoilScaleFactor(float factor) &;
+
+  /**
+   * @brief Sets the recoil target scale multiplier on a temporary builder.
+   *
+   * @param[in] factor The recoil target scale multiplier
+   * @return Rvalue reference to this builder
+   */
+  Builder&& SetRecoilScaleFactor(float factor) &&;
 
 private:
   explicit Builder(Internal::OverlayEffectImpl* impl);

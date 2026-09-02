@@ -42,6 +42,11 @@ class GroupSelectableViewImpl;
  *
  * GroupSelectableView is intended as a base class for radio-style UI components
  * whose members belong to a SelectionGroup that enforces "only one selected".
+ * Its click behavior is select-only for the lifetime of the view: clicking an
+ * unselected view selects it, while clicking it again does not clear the selection,
+ * even when it is not currently a group member. The selection can still be cleared
+ * programmatically with SetSelected(false), by SelectionGroup::ClearSelection(), or
+ * when another member of the same group is selected.
  *
  * @see GroupSelectableTrait
  * @see SelectableView

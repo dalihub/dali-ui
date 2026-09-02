@@ -300,7 +300,7 @@ public:
     mTaskMarkerOffset       = node.taskMarkerOffset;
 
     mMarkerHost = NewStack(StackOrientation::HORIZONTAL, 0.0f);
-    mMarkerHost.SetMargin(Extents(0, static_cast<int16_t>(LIST_CONTENT_GAP), 0, 0));
+    mMarkerHost.SetMargin(Insets(0.0f, LIST_CONTENT_GAP, 0.0f, 0.0f));
     mMarkerHost.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
 
     mMarkerLabel = NewLabel(Dali::String(),
@@ -410,7 +410,7 @@ private:
       const Vector3 markerNaturalSize = mMarkerLabel.GetNaturalSize();
       const float   markerLabelWidth  = std::max(markerColumnWidth, markerNaturalSize.width);
       mMarkerLabel.SetRequestedWidth(markerLabelWidth);
-      mMarkerLabel.SetMargin(Extents());
+      mMarkerLabel.SetMargin(Insets());
       mMarkerHost.Add(mMarkerLabel);
       mMarkerLabelAttached = true;
       markerHostWidth      = markerLabelWidth;
@@ -592,20 +592,17 @@ private:
 
   void ApplyItemMargin(const MarkdownRenderNode& node)
   {
-    mItem.SetMargin(Extents(static_cast<int16_t>(ListItemStartIndent(node)),
-                            0,
-                            0,
-                            0));
+    mItem.SetMargin(Insets(ListItemStartIndent(node), 0.0f, 0.0f, 0.0f));
   }
 
   void ApplyTextMargin()
   {
     if(mTextComponent)
     {
-      mTextComponent->GetView().SetMargin(Extents(0,
-                                                  0,
-                                                  0,
-                                                  static_cast<int16_t>(MarkdownViewDefaults::LIST_ITEM_MARGIN_BOTTOM)));
+      mTextComponent->GetView().SetMargin(Insets(0.0f,
+                                                 0.0f,
+                                                 0.0f,
+                                                 MarkdownViewDefaults::LIST_ITEM_MARGIN_BOTTOM));
     }
   }
 
@@ -718,14 +715,11 @@ public:
   explicit QuoteComponent(const MarkdownViewStyle& style)
   {
     Ui::StackLayout quote = NewStack(StackOrientation::HORIZONTAL, 0.0f);
-    quote.SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::QUOTE_PADDING),
-                             static_cast<int16_t>(MarkdownViewDefaults::QUOTE_PADDING),
-                             static_cast<int16_t>(MarkdownViewDefaults::QUOTE_PADDING),
-                             static_cast<int16_t>(MarkdownViewDefaults::QUOTE_PADDING)));
+    quote.SetPadding(Insets(MarkdownViewDefaults::QUOTE_PADDING, MarkdownViewDefaults::QUOTE_PADDING));
 
     Ui::View decoration = NewColorBox(style.GetQuoteBarColor(), MarkdownViewDefaults::QUOTE_BAR_CORNER_RADIUS);
     decoration.SetRequestedWidth(MarkdownViewDefaults::QUOTE_BAR_WIDTH);
-    decoration.SetMargin(Extents(0, static_cast<int16_t>(QUOTE_CONTENT_GAP), 0, 0));
+    decoration.SetMargin(Insets(0.0f, QUOTE_CONTENT_GAP, 0.0f, 0.0f));
     decoration.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
 
     mContentHost = NewStack(StackOrientation::VERTICAL, MarkdownViewDefaults::BLOCK_SPACING);
@@ -762,10 +756,7 @@ public:
 
     mCodeContentHost = NewStack(StackOrientation::VERTICAL, 0.0f);
     mCodeContentHost.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
-    mCodeContentHost.SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
-                                        static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
-                                        static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
-                                        static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING)));
+    mCodeContentHost.SetPadding(Insets(MarkdownViewDefaults::CODE_PADDING, MarkdownViewDefaults::CODE_PADDING));
 
     mTextComponent = CreateMarkdownLabelTextComponent(style);
     mTextView      = mTextComponent->GetView();
@@ -810,10 +801,7 @@ private:
 
     mLanguageHost = NewStack(StackOrientation::HORIZONTAL, 0.0f);
     mLanguageHost.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
-    mLanguageHost.SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
-                                     static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
-                                     static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
-                                     static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING)));
+    mLanguageHost.SetPadding(Insets(MarkdownViewDefaults::CODE_PADDING, MarkdownViewDefaults::CODE_PADDING));
     mLanguageHost.SetBackgroundColor(mStyle.GetCodeBlockTitleBackgroundColor());
     mLanguageHost.SetCornerRadius(MarkdownViewDefaults::CODE_CORNER_RADIUS,
                                   MarkdownViewDefaults::CODE_CORNER_RADIUS,
@@ -901,10 +889,7 @@ public:
   : mStyle(style)
   {
     Ui::StackLayout cell = NewStack(StackOrientation::VERTICAL, MarkdownViewDefaults::BLOCK_SPACING);
-    cell.SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::TABLE_CELL_PADDING),
-                            static_cast<int16_t>(MarkdownViewDefaults::TABLE_CELL_PADDING),
-                            static_cast<int16_t>(MarkdownViewDefaults::TABLE_CELL_PADDING),
-                            static_cast<int16_t>(MarkdownViewDefaults::TABLE_CELL_PADDING)));
+    cell.SetPadding(Insets(MarkdownViewDefaults::TABLE_CELL_PADDING, MarkdownViewDefaults::TABLE_CELL_PADDING));
     SetStackWeightFill(cell);
     mRoot        = cell;
     mContentHost = cell;

@@ -336,22 +336,13 @@ struct TextUpdateInfo
   }
 };
 
-struct UnderlineDefaults
+struct EmbossData
 {
   std::string properties;
-  // TODO: complete with underline parameters.
-};
-
-struct ShadowDefaults
-{
-  std::string properties;
-  // TODO: complete with shadow parameters.
-};
-
-struct EmbossDefaults
-{
-  std::string properties;
-  // TODO: complete with emboss parameters.
+  Vector2     direction;
+  float       strength{0.0f};
+  Vector4     lightColor;
+  Vector4     shadowColor;
 };
 
 struct OutlineDefaults
@@ -373,6 +364,76 @@ public:
     uint64_t                  layoutGeneration{0u};
   };
 
+  /**
+   * @brief Stores customized anchor colors.
+   */
+  struct AnchorColorData
+  {
+    Vector4 color{Color::MEDIUM_BLUE};
+    Vector4 clickedColor{Color::DARK_MAGENTA};
+  };
+
+  /**
+   * @brief Stores TextFit state allocated for controllers that use TextFit.
+   */
+  struct TextFitData
+  {
+    Dali::Vector<Text::Fit::Candidate> candidates;
+    Vector2                            contentSize{Vector2::ZERO};
+    int                                maxCandidateIndex{-1};
+    float                              currentLineSize{0.0f};
+    float                              minSize{DEFAULT_TEXTFIT_MIN};
+    float                              maxSize{DEFAULT_TEXTFIT_MAX};
+    float                              stepSize{DEFAULT_TEXTFIT_STEP};
+    bool                               enabled{false};
+    bool                               changed{false};
+    bool                               candidatesEnabled{false};
+  };
+
+  /**
+   * @brief Gets TextFit data if it exists.
+   *
+   * @return The TextFit data, or nullptr if TextFit has not been used
+   */
+  const TextFitData* GetTextFitData() const
+  {
+    return mTextFitData.get();
+  }
+
+  /**
+   * @brief Gets TextFit data, creating it if necessary.
+   *
+   * @return The TextFit data
+   */
+  TextFitData& GetOrCreateTextFitData()
+  {
+    if(!mTextFitData)
+    {
+      mTextFitData = std::make_unique<TextFitData>();
+    }
+    return *mTextFitData;
+  }
+
+  /**
+   * @brief Checks whether range-based TextFit is enabled.
+   *
+   * @return True if range-based TextFit is enabled
+   */
+  bool IsTextFitEnabled() const
+  {
+    return mTextFitData && mTextFitData->enabled;
+  }
+
+  /**
+   * @brief Checks whether candidate-based TextFit is enabled.
+   *
+   * @return True if candidate-based TextFit is enabled
+   */
+  bool IsTextFitCandidatesEnabled() const
+  {
+    return mTextFitData && mTextFitData->candidatesEnabled;
+  }
+
   enum class ClearFocusOnEscapeState
   {
     ENABLE  = 0,
@@ -391,9 +452,7 @@ public:
     mAnchorControlInterface(anchorControlInterface),
     mModel(),
     mFontDefaults(NULL),
-    mUnderlineDefaults(NULL),
-    mShadowDefaults(NULL),
-    mEmbossDefaults(NULL),
+    mEmbossData(NULL),
     mOutlineDefaults(NULL),
     mEventData(NULL),
     mIdleCallback(NULL),
@@ -404,22 +463,17 @@ public:
     mClipboard(),
     mView(),
     mModifyEvents(),
-    mTextFitCandidates(),
     mTextUpdateInfo(),
     mReplacementData(),
     mEndEllipsisResult(),
+    mAnchorColorData(),
+    mTextFitData(),
     mTextColor(Color::BLACK),
-    mAnchorColor(Color::MEDIUM_BLUE),
-    mAnchorClickedColor(Color::DARK_MAGENTA),
-    mTextFitContentSize(),
     mOperationsPending(NO_OPERATION),
     mMaximumNumberOfCharacters(50u),
-    mMaxFitCandidateIndex(-1),
+    mMaximumNumberOfLines(static_cast<Length>(MAXIMUM_LINES_UNLIMITED)),
+    mMaximumLinesRevision(0u),
     mLayoutDirection(LayoutDirection::LEFT_TO_RIGHT),
-    mCurrentLineSize(0.f),
-    mTextFitMinSize(DEFAULT_TEXTFIT_MIN),
-    mTextFitMaxSize(DEFAULT_TEXTFIT_MAX),
-    mTextFitStepSize(DEFAULT_TEXTFIT_STEP),
     mUiScale(DEFAULT_UI_SCALE),
     mFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
     mMinFontSizeScale(DEFAULT_MIN_FONT_SIZE_SCALE),
@@ -444,12 +498,10 @@ public:
     mFontStyleSetByString(false),
     mStrikethroughSetByString(false),
     mSystemFontSizeScaleEnabled(false),
-    mTextFitEnabled(false),
-    mTextFitChanged(false),
-    mTextFitCandidatesEnabled(false),
     mIsLayoutDirectionChanged(false),
     mIsUserInteractionEnabled(true),
     mProcessorRegistered(false),
+    mEmbossEnabled(false),
     mTextCutout(false),
     mIsCursorInsetEnabled(false),
     mIsAsyncRendering(false)
@@ -484,9 +536,7 @@ public:
     }
     delete mHiddenInput;
     delete mFontDefaults;
-    delete mUnderlineDefaults;
-    delete mShadowDefaults;
-    delete mEmbossDefaults;
+    delete mEmbossData;
     delete mOutlineDefaults;
     delete mEventData;
   }
@@ -1336,6 +1386,11 @@ public:
   void SetMultiLineEnabled(bool enable);
 
   /**
+   * @copydoc Controller::SetMaximumNumberOfLines()
+   */
+  void SetMaximumNumberOfLines(int maximumNumberOfLines);
+
+  /**
    * @copydoc Controller::SetHorizontalAlignment()
    */
   void SetHorizontalAlignment(Alignment alignment);
@@ -1548,9 +1603,7 @@ public:
   Ui::Integration::Text::AnchorControlInterface*     mAnchorControlInterface;     ///< Reference to the anchor controller.
   ModelPtr                                           mModel;                      ///< Pointer to the text's model.
   FontDefaults*                                      mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
-  UnderlineDefaults*                                 mUnderlineDefaults;          ///< Avoid allocating this when the user does not specify underline parameters.
-  ShadowDefaults*                                    mShadowDefaults;             ///< Avoid allocating this when the user does not specify shadow parameters.
-  EmbossDefaults*                                    mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
+  EmbossData*                                        mEmbossData;                 ///< Emboss properties allocated on demand.
   OutlineDefaults*                                   mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
   EventData*                                         mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().
   CallbackBase*                                      mIdleCallback;               ///< Callback what would be called at idler
@@ -1567,28 +1620,23 @@ public:
 
   // Containers / complex values
   Vector<ModifyEvent>                 mModifyEvents;      ///< Temporary stores the text set until the next relayout.
-  Dali::Vector<Text::Fit::Candidate>  mTextFitCandidates; ///< List of Text::Fit::Candidate for TextFitCandidates operation.
   TextUpdateInfo                      mTextUpdateInfo;    ///< Info of the characters updated.
   std::unique_ptr<ReplacementData>    mReplacementData;   ///< Replacement data allocated on demand.
   std::unique_ptr<FinalElisionResult> mEndEllipsisResult; ///< Non-replacement END result, alive only while elision is active.
+  std::unique_ptr<AnchorColorData>    mAnchorColorData;   ///< Customized anchor colors allocated on demand.
+  std::unique_ptr<TextFitData>        mTextFitData;       ///< TextFit state allocated on demand.
 
   // Geometry / colors
-  Vector4 mTextColor;          ///< The regular text color
-  Vector4 mAnchorColor;        ///< The anchor color
-  Vector4 mAnchorClickedColor; ///< The anchor clicked color
-  Vector2 mTextFitContentSize; ///< Size of Text fit content
+  Vector4 mTextColor; ///< The regular text color
 
   // Integer / enum-like values
   OperationsMask        mOperationsPending;         ///< Operations pending to be done to layout the text.
   Length                mMaximumNumberOfCharacters; ///< Maximum number of characters that can be inserted.
-  int                   mMaxFitCandidateIndex;
-  LayoutDirection::Type mLayoutDirection; ///< Current system language direction
+  Length                mMaximumNumberOfLines;      ///< Maximum number of laid-out lines, or zero for unlimited.
+  uint64_t              mMaximumLinesRevision;      ///< Revision used to reject stale async MaximumLines results.
+  LayoutDirection::Type mLayoutDirection;           ///< Current system language direction
 
   // Floating-point values
-  float mCurrentLineSize;       ///< Used to store the MinLineSize set by user when TextFitCandidates is enabled.
-  float mTextFitMinSize;        ///< Minimum Font Size for text fit. Default 10
-  float mTextFitMaxSize;        ///< Maximum Font Size for text fit. Default 100
-  float mTextFitStepSize;       ///< Step Size for font intervalse. Default 1
   float mUiScale;               ///< Scale value for text-specific UI metrics. Default 1.0
   float mFontSizeScale;         ///< Scale value for Font Size. Default 1.0
   float mMinFontSizeScale;      ///< Minimum scale value for Font Size. Default 0.01
@@ -1617,12 +1665,10 @@ public:
   bool               mFontStyleSetByString : 1;        ///< Set when font style is set by string (legacy) instead of map
   bool               mStrikethroughSetByString : 1;    ///< Set when strikethrough is set by string (legacy) instead of map
   bool               mSystemFontSizeScaleEnabled : 1;  ///< Whether the system font size scale is applied.
-  bool               mTextFitEnabled : 1;              ///< Whether the text's fit is enabled.
-  bool               mTextFitChanged : 1;              ///< Whether the text fit property has changed.
-  bool               mTextFitCandidatesEnabled : 1;    ///< Whether the text's fit Candidates is enabled.
   bool               mIsLayoutDirectionChanged : 1;    ///< Whether the layout has changed.
   bool               mIsUserInteractionEnabled : 1;    ///< Whether the user interaction is enabled.
   bool               mProcessorRegistered : 1;         ///< Whether the text controller registered into processor or not.
+  bool               mEmbossEnabled : 1;               ///< Whether emboss is enabled.
   bool               mTextCutout : 1;                  ///< Whether the text cutout enabled.
   bool               mIsCursorInsetEnabled : 1;        ///< Whether the cursor inset is enabled.
   bool               mIsAsyncRendering : 1;            ///< whether asynchronous text rendering is enabled.

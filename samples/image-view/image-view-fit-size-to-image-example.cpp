@@ -118,7 +118,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
     button.SetRequestedWidth(MATCH_PARENT);
     button.SetRequestedHeight(56.0f);
-    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
     button.SetBackgroundColor(UiColor(0x444444));
     button.Add(mFitSizeLabel);
 

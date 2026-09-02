@@ -56,6 +56,32 @@ class AnchorInteractionData
 public:
   ~AnchorInteractionData();
 
+  /**
+   * @brief Stores the position of an intercepted touch down event.
+   *
+   * @param[in] position The touch position in screen coordinates
+   */
+  void StartTouch(const Vector2& position);
+
+  /**
+   * @brief Checks whether an intercepted touch is down.
+   *
+   * @return True if the touch is down
+   */
+  bool IsTouchDown() const;
+
+  /**
+   * @brief Gets the intercepted touch down position.
+   *
+   * @return The touch position in screen coordinates
+   */
+  const Vector2& GetTouchPosition() const;
+
+  /**
+   * @brief Clears the intercepted touch down state.
+   */
+  void EndTouch();
+
   bool HasHitRegions() const;
 
   void Clear();
@@ -89,6 +115,8 @@ private:
   std::vector<Dali::Ui::Text::AsyncAnchorHitRegion>    mHitRegions;
   std::vector<Dali::Ui::Text::AsyncAnchorClickedState> mClickedAnchors;
   std::vector<Dali::Ui::TextAnchor>                    mTextAnchorActors;
+  Vector2                                              mTouchPosition;
+  bool                                                 mIsTouchDown{false};
 };
 
 AnchorInteractionData* GetAnchorInteractionData(Dali::Ui::View owner);

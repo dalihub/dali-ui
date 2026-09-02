@@ -166,7 +166,8 @@ bool IsReplacementElideEnabled(const Controller::Impl& impl)
   return enabled;
 }
 
-void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSize)
+void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSize, Length maximumNumberOfLines,
+                                  bool& maximumNumberOfLinesExceeded)
 {
   if(!impl.HasValidReplacementSource())
   {
@@ -226,7 +227,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
                     static_cast<float>(pointsPerUnit);
   if(impl.mFontDefaults != nullptr)
   {
-    pointSize = (impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
+    pointSize = (impl.IsTextFitEnabled() || impl.IsTextFitCandidatesEnabled())
                   ? impl.mFontDefaults->mFitPointSize
                   : impl.mFontDefaults->mDefaultPointSize * impl.GetEffectiveTextScale();
   }
@@ -272,6 +273,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
                                       bidirectionalSupport);
   layoutParameters.numberOfGlyphs         = glyphCount;
   layoutParameters.estimatedNumberOfLines = 1u;
+  layoutParameters.maximumNumberOfLines   = maximumNumberOfLines;
   layoutParameters.replacementLayoutData  = &replacementLayoutData;
   const Vector<Character>& processingText = result.processingModel->mLogicalModel->mText;
   layoutParameters.isLastNewParagraph     = !processingText.Empty() &&
@@ -287,6 +289,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
                                 impl.mIsMarqueeMaxTextureExceeded,
                                 false,
                                 result.processingModel->mEllipsisPosition);
+  maximumNumberOfLinesExceeded |= layoutParameters.maximumNumberOfLinesExceeded;
   impl.mIsMarqueeEnabled = marqueeEnabled;
   projectedVisual.SetLayoutSize(result.layoutSize);
 
@@ -321,6 +324,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
 
 Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Controller&           controller,
                                                                          const Size&           requestedControllerSize,
+                                                                         Length                maximumNumberOfLines,
                                                                          const OperationsMask& requestedOperationsMask)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->CalculateLayoutSizeOnRequiredControllerSize\n");
@@ -374,8 +378,8 @@ Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Control
     // Layout the text for the new width.
     operationsPending = static_cast<OperationsMask>(operationsPending | requestedOperationsMask);
 
-    DoRelayout(impl, requestedControllerSize, static_cast<OperationsMask>(onlyOnceOperations | requestedOperationsMask),
-               calculatedLayoutSize);
+    DoRelayout(impl, requestedControllerSize, maximumNumberOfLines,
+               static_cast<OperationsMask>(onlyOnceOperations | requestedOperationsMask), calculatedLayoutSize);
 
     textUpdateInfo.Clear();
     textUpdateInfo.mClearAll = true;
@@ -393,8 +397,8 @@ Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Control
     // Make sure the model is up-to-date before layouting
     impl.UpdateModel(static_cast<OperationsMask>(operationsPending & ~UPDATE_LAYOUT_SIZE));
 
-    DoRelayout(impl, requestedControllerSize, static_cast<OperationsMask>(operationsPending & ~UPDATE_LAYOUT_SIZE),
-               calculatedLayoutSize);
+    DoRelayout(impl, requestedControllerSize, maximumNumberOfLines,
+               static_cast<OperationsMask>(operationsPending & ~UPDATE_LAYOUT_SIZE), calculatedLayoutSize);
 
     // Clear the update info. This info will be set the next time the text is updated.
     textUpdateInfo.Clear();
@@ -455,7 +459,8 @@ Vector3 Controller::Relayouter::GetNaturalSize(Controller& controller, bool conv
     Size           sizeMaxWidthAndMaxHeight = Size(MAX_FLOAT, MAX_FLOAT);
 
     naturalSize =
-      CalculateLayoutSizeOnRequiredControllerSize(controller, sizeMaxWidthAndMaxHeight, requestedOperationsMask);
+      CalculateLayoutSizeOnRequiredControllerSize(controller, sizeMaxWidthAndMaxHeight,
+                                                  impl.mMaximumNumberOfLines, requestedOperationsMask);
 
     // Editable multi-line layout can overestimate the height when the last line is empty.
     // Use the effective height to correct the overestimation during TextChangedSignal emission.
@@ -510,15 +515,18 @@ bool Controller::Relayouter::CheckForTextFit(Controller& controller, float point
   // Make sure the model is up-to-date before layouting
   impl.UpdateModel(onlyOnceOperations);
 
-  bool layoutTooSmall = false;
-  DoRelayout(impl, Size(layoutSize.width, MAX_FLOAT), static_cast<OperationsMask>(onlyOnceOperations | LAYOUT),
-             textSize, layoutTooSmall);
+  bool layoutTooSmall               = false;
+  bool maximumNumberOfLinesExceeded = false;
+  DoRelayout(impl, Size(layoutSize.width, MAX_FLOAT), impl.mMaximumNumberOfLines,
+             static_cast<OperationsMask>(onlyOnceOperations | LAYOUT), textSize, layoutTooSmall,
+             maximumNumberOfLinesExceeded);
 
   // Clear the update info. This info will be set the next time the text is updated.
   textUpdateInfo.Clear();
   textUpdateInfo.mClearAll = true;
 
-  if(layoutTooSmall || textSize.width > layoutSize.width || textSize.height > layoutSize.height)
+  if(layoutTooSmall || maximumNumberOfLinesExceeded ||
+     textSize.width > layoutSize.width || textSize.height > layoutSize.height)
   {
     return false;
   }
@@ -527,14 +535,15 @@ bool Controller::Relayouter::CheckForTextFit(Controller& controller, float point
 
 void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& controller, const Size& layoutSize)
 {
-  Controller::Impl& impl = *controller.mImpl;
+  Controller::Impl&              impl    = *controller.mImpl;
+  Controller::Impl::TextFitData& textFit = impl.GetOrCreateTextFitData();
 
   const OperationsMask operations = impl.mOperationsPending;
-  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
+  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || textFit.contentSize != layoutSize)
   {
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_CANDIDATES_LAYOUT", "[%p]", static_cast<void*>(&controller));
 
-    Dali::Vector<Ui::Text::Fit::Candidate> fitCandidates  = impl.mTextFitCandidates;
+    Dali::Vector<Ui::Text::Fit::Candidate> fitCandidates  = textFit.candidates;
     const int                              candidateCount = static_cast<int>(fitCandidates.Count());
 
     if(candidateCount == 0)
@@ -643,19 +652,20 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
 
 void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const Size& layoutSize)
 {
-  Controller::Impl& impl = *controller.mImpl;
+  Controller::Impl&              impl    = *controller.mImpl;
+  Controller::Impl::TextFitData& textFit = impl.GetOrCreateTextFitData();
 
   const OperationsMask operations = impl.mOperationsPending;
-  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
+  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || textFit.contentSize != layoutSize)
   {
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_LAYOUT", "[%p]", static_cast<void*>(&controller));
     ModelPtr& model = impl.mModel;
 
     bool  actualellipsis      = model->mElideEnabled;
     float effectiveTextScale  = impl.GetEffectiveTextScale();
-    float minPointSize        = impl.mTextFitMinSize * effectiveTextScale;
-    float maxPointSize        = impl.mTextFitMaxSize * effectiveTextScale;
-    float pointInterval       = impl.mTextFitStepSize * effectiveTextScale;
+    float minPointSize        = textFit.minSize * effectiveTextScale;
+    float maxPointSize        = textFit.maxSize * effectiveTextScale;
+    float pointInterval       = textFit.stepSize * effectiveTextScale;
     float currentFitPointSize = impl.mFontDefaults->mFitPointSize;
     bool  isMultiLine         = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
 
@@ -744,8 +754,8 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
         // Make sure the model is up-to-date before layouting
         impl.UpdateModel(onlyOnceOperations);
 
-        DoRelayout(impl, Size(layoutSize.width, MAX_FLOAT), static_cast<OperationsMask>(onlyOnceOperations | LAYOUT),
-                   textSize);
+        DoRelayout(impl, Size(layoutSize.width, MAX_FLOAT), impl.mMaximumNumberOfLines,
+                   static_cast<OperationsMask>(onlyOnceOperations | LAYOUT), textSize);
 
         // Clear the update info. This info will be set the next time the text is updated.
         textUpdateInfo.Clear();
@@ -791,7 +801,7 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
     model->mElideEnabled = actualellipsis;
     if(!Dali::Equals(currentFitPointSize, bestPointSize))
     {
-      impl.mTextFitChanged = true;
+      textFit.changed = true;
     }
 
     impl.mFontDefaults->mFitPointSize = bestPointSize;
@@ -830,6 +840,7 @@ float Controller::Relayouter::GetHeightForWidth(Controller& controller, float wi
 
     layoutSize = CalculateLayoutSizeOnRequiredControllerSize(controller,
                                                              sizeRequestedWidthAndMaxHeight,
+                                                             impl.mMaximumNumberOfLines,
                                                              requestedOperationsMask);
 
     // Editable multi-line layout can overestimate the height when the last line is empty.
@@ -877,7 +888,8 @@ Vector2 Controller::Relayouter::CalculateLayoutSize(Controller& controller, floa
     Size           sizeFixedWidthAndFixedHeight = Size(width, height);
 
     layoutSize =
-      CalculateLayoutSizeOnRequiredControllerSize(controller, sizeFixedWidthAndFixedHeight, requestedOperationsMask);
+      CalculateLayoutSizeOnRequiredControllerSize(controller, sizeFixedWidthAndFixedHeight,
+                                                  impl.mMaximumNumberOfLines, requestedOperationsMask);
 
     // Stores the layout size to avoid recalculate it again
     visualModel->SetCachedLayoutSize(layoutSize);
@@ -997,7 +1009,7 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
 
   // Layout the text.
   Size layoutSize;
-  updated = DoRelayout(impl, size, operationsPending, layoutSize) || updated;
+  updated = DoRelayout(impl, size, impl.mMaximumNumberOfLines, operationsPending, layoutSize) || updated;
 
   const ReplacementRenderState& replacement = impl.GetReplacementRenderState();
   if(replacement.processingModel && replacement.projection.HasReplacements())
@@ -1082,21 +1094,33 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
   return updateTextType;
 }
 
-bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size, OperationsMask operationsRequired,
-                                        Size& layoutSize)
+bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size, Length maximumNumberOfLines,
+                                        OperationsMask operationsRequired, Size& layoutSize)
 {
-  bool layoutTooSmall = false;
-  return DoRelayout(impl, size, operationsRequired, layoutSize, layoutTooSmall);
+  bool layoutTooSmall               = false;
+  bool maximumNumberOfLinesExceeded = false;
+  return DoRelayout(impl, size, maximumNumberOfLines, operationsRequired, layoutSize, layoutTooSmall,
+                    maximumNumberOfLinesExceeded);
 }
 
-bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size, OperationsMask operationsRequired,
-                                        Size& layoutSize, bool& layoutTooSmall)
+bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size, Length maximumNumberOfLines,
+                                        OperationsMask operationsRequired, Size& layoutSize, bool& layoutTooSmall)
+{
+  bool maximumNumberOfLinesExceeded = false;
+  return DoRelayout(impl, size, maximumNumberOfLines, operationsRequired, layoutSize, layoutTooSmall,
+                    maximumNumberOfLinesExceeded);
+}
+
+bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size, Length maximumNumberOfLines,
+                                        OperationsMask operationsRequired, Size& layoutSize, bool& layoutTooSmall,
+                                        bool& maximumNumberOfLinesExceeded)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::Relayouter::DoRelayout %p size %f,%f\n", &impl, size.width,
                 size.height);
   DALI_TRACE_SCOPE(gTraceFilter2, "DALI_TEXT_DORELAYOUT");
   bool viewUpdated(false);
   bool endEllipsisFinalizedInLayout{false};
+  maximumNumberOfLinesExceeded = false;
 
   // Calculate the operations to be done.
   const OperationsMask operations = static_cast<OperationsMask>(impl.mOperationsPending & operationsRequired);
@@ -1121,7 +1145,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
   if(impl.HasValidReplacementSource() &&
      NO_OPERATION != ((LAYOUT | ALIGN) & operations))
   {
-    UpdateReplacementRenderState(impl, size);
+    UpdateReplacementRenderState(impl, size, maximumNumberOfLines, maximumNumberOfLinesExceeded);
     const ReplacementRenderState& replacement = impl.GetReplacementRenderState();
     if(replacement.processingModel && replacement.projection.HasReplacements())
     {
@@ -1193,7 +1217,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
       // Nothing else to do if there is no glyphs.
       if(impl.HasValidReplacementSource())
       {
-        UpdateReplacementRenderState(impl, size);
+        UpdateReplacementRenderState(impl, size, maximumNumberOfLines, maximumNumberOfLinesExceeded);
       }
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "<--Controller::DoRelayout no glyphs, view updated true\n");
       return true;
@@ -1203,6 +1227,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
 
     // Set the layout parameters.
     Layout::Parameters layoutParameters(size, impl.mModel, impl.GetFontClient(), bidirectionalSupport);
+    layoutParameters.maximumNumberOfLines = maximumNumberOfLines;
 
     // Resize the vector of positions to have the same size than the vector of glyphs.
     Vector<Vector2>& glyphPositions = visualModel->mGlyphPositions;
@@ -1221,7 +1246,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     layoutParameters.estimatedNumberOfLines = textUpdateInfo.mEstimatedNumberOfLines;
 
     float fontPointSize =
-      (impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
+      (impl.IsTextFitEnabled() || impl.IsTextFitCandidatesEnabled())
         ? (impl.mFontDefaults ? impl.mFontDefaults->mFitPointSize : 0.f)
         : (impl.mFontDefaults ? impl.mFontDefaults->mDefaultPointSize : 0.f) * impl.GetEffectiveTextScale();
     impl.mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize));
@@ -1266,6 +1291,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     }
     viewUpdated = impl.mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, elideTextEnabled, isMarqueeEnabled,
                                                 isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
+    maximumNumberOfLinesExceeded |= layoutParameters.maximumNumberOfLinesExceeded;
 
     const auto hasEndEllipsisCandidate = [visualModel]()
     {
@@ -1366,7 +1392,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
   if(impl.HasValidReplacementSource() && NO_OPERATION != ((LAYOUT | ALIGN) & operations))
   {
     // Replacement placements are produced after the final layout/alignment used by this relayout request.
-    UpdateReplacementRenderState(impl, size);
+    UpdateReplacementRenderState(impl, size, maximumNumberOfLines, maximumNumberOfLinesExceeded);
   }
 #if defined(DEBUG_ENABLED)
   std::string currentText;

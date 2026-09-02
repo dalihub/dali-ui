@@ -180,6 +180,11 @@ int AnimatedImageView::GetTotalFrame() const
   return Ui::GetImpl(*this).GetTotalFrame();
 }
 
+Vector3 AnimatedImageView::GetNaturalSize() const
+{
+  return Ui::GetImpl(*this).GetNaturalSize();
+}
+
 void AnimatedImageView::SetDesiredWidth(int width)
 {
   Ui::GetImpl(*this).SetDesiredWidth(width);

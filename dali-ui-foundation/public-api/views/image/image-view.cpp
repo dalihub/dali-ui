@@ -141,6 +141,11 @@ Ui::Image::FittingMode ImageView::GetFittingMode() const
   return Ui::GetImpl(*this).GetFittingMode();
 }
 
+Vector3 ImageView::GetNaturalSize() const
+{
+  return Ui::GetImpl(*this).GetNaturalSize();
+}
+
 void ImageView::SetDesiredWidth(int width)
 {
   Ui::GetImpl(*this).SetDesiredWidth(width);

@@ -39,6 +39,18 @@ namespace Dali
 
 namespace Ui
 {
+namespace
+{
+// TODO: Remove together with the temporary Extents overloads of
+// View::SetMargin() and View::SetPadding().
+Insets ToInsets(const Extents& extents)
+{
+  return Insets(static_cast<float>(extents.start),
+                static_cast<float>(extents.end),
+                static_cast<float>(extents.top),
+                static_cast<float>(extents.bottom));
+}
+} // unnamed namespace
 
 View::View()
 {
@@ -111,6 +123,11 @@ void View::SetMeasureCallback(MeasureCallback callback)
 void View::SetArrangeCallback(ArrangeCallback callback)
 {
   GetImpl(*this).SetArrangeCallback(std::move(callback));
+}
+
+void View::SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy)
+{
+  GetImpl(*this).SetArrangeCallback(std::move(callback), policy);
 }
 
 void View::SetLayoutTransition(LayoutTransition transition)
@@ -227,6 +244,11 @@ void View::SetMargin(const Insets& margin)
   GetImpl(*this).SetMargin(margin);
 }
 
+void View::SetMargin(const Extents& margin)
+{
+  SetMargin(ToInsets(margin));
+}
+
 void View::SetMargin(float start, float end, float top, float bottom)
 {
   SetMargin(Insets(start, end, top, bottom));
@@ -278,6 +300,11 @@ Insets View::GetMargin() const
 void View::SetPadding(const Insets& padding)
 {
   GetImpl(*this).SetPadding(padding);
+}
+
+void View::SetPadding(const Extents& padding)
+{
+  SetPadding(ToInsets(padding));
 }
 
 void View::SetPadding(float start, float end, float top, float bottom)
@@ -418,19 +445,34 @@ void View::SetInnerShadow(const InnerShadow& innerShadow)
   GetImpl(*this).SetInnerShadow(innerShadow);
 }
 
+UiColor View::GetColorMultiplier() const
+{
+  return GetImpl(*this).GetColorMultiplier();
+}
+
 UiColor View::GetColor() const
 {
-  return GetImpl(*this).GetColor();
+  return GetColorMultiplier();
+}
+
+void View::SetColorMultiplier(const UiColor& multiplier)
+{
+  GetImpl(*this).SetColorMultiplier(multiplier);
 }
 
 void View::SetColor(const UiColor& color)
 {
-  GetImpl(*this).SetColor(color);
+  SetColorMultiplier(color);
+}
+
+UiColor View::GetCurrentColorMultiplier() const
+{
+  return GetImpl(*this).GetCurrentColorMultiplier();
 }
 
 UiColor View::GetCurrentColor() const
 {
-  return GetImpl(*this).GetCurrentColor();
+  return GetCurrentColorMultiplier();
 }
 
 bool View::IsEffectivelyFocused() const

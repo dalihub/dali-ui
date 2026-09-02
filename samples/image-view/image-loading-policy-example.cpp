@@ -118,7 +118,7 @@ private:
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(44.0f);
-    row.SetPadding(Extents(4, 4, 4, 4));
+    row.SetPadding(Insets(4.0f, 4.0f, 4.0f, 4.0f));
     row.SetBackgroundColor(UiColor(0x111111));
     for(int i = 0; i < TYPE_COUNT; ++i)
     {
@@ -178,7 +178,7 @@ private:
     controls.SetSpacing(2.0f);
     controls.SetRequestedWidth(MATCH_PARENT);
     controls.SetRequestedHeight(WRAP_CONTENT);
-    controls.SetPadding(Extents(2, 2, 2, 2));
+    controls.SetPadding(Insets(2.0f, 2.0f, 2.0f, 2.0f));
     controls.Add(CreateImageControlRow());
     controls.Add(CreateLoadingToggleRow());
     controls.Add(CreateReleasePolicyRow());

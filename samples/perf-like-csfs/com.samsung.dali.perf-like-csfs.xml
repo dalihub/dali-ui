@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://tizen.org/ns/packages" api-version="10.0" package="com.samsung.dali.perf-like-csfs" version="2.0.0">
+	<profile name="tizen" />
+	<ui-application appid="com.samsung.dali.perf-like-csfs" exec="/usr/apps/com.samsung.dali.perf-like-csfs/bin/perf-like-csfs.example" type="dali-c++app" multiple="false" taskmanage="true" nodisplay="false">
+		<label>DALi UI Perf Like CSFS</label>
+	</ui-application>
+</manifest>

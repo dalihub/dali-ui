@@ -19,12 +19,12 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 
 namespace Dali
 {

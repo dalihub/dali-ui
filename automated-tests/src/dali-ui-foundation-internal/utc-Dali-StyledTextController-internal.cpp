@@ -16,9 +16,11 @@
  */
 
 // EXTERNAL INCLUDES
+#include <algorithm>
 #include <dali.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
@@ -32,6 +34,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
@@ -172,6 +175,516 @@ void utc_dali_styled_text_controller_internal_cleanup(void)
   test_return_value = TET_PASS;
 }
 
+int UtcDaliLabelAnchorTouchInterruptedP(void)
+{
+  UiTestApplication application;
+  Dali::Ui::Label   label = Dali::Ui::Label::New();
+
+  label.SetStyledText(PublicText::StyledText::FromMarkup("<a href='docs'>link</a>"));
+  DALI_TEST_EQUALS(label.InterceptTouchEventSignal().GetConnectionCount(), 1u, TEST_LOCATION);
+
+  TouchEvent started = TouchEvent::New(1u);
+  started.AddPoint(1, PointState::STARTED, Vector2(10.0f, 10.0f));
+  label.InterceptTouchEventSignal().Emit(label, started);
+
+  Dali::Ui::Internal::Text::AnchorInteractionData* data =
+    Dali::Ui::Internal::Text::GetAnchorInteractionData(label);
+  DALI_TEST_CHECK(data && data->IsTouchDown());
+
+  TouchEvent interrupted = TouchEvent::New(2u);
+  interrupted.AddPoint(1, PointState::INTERRUPTED, Vector2(10.0f, 10.0f));
+  label.InterceptTouchEventSignal().Emit(label, interrupted);
+  DALI_TEST_CHECK(data && !data->IsTouchDown());
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextControllerAnchorColorsP(void)
+{
+  UiTestApplication application;
+
+  PublicText::ControllerPtr   controller = PublicText::Controller::New();
+  PublicText::Controller::Impl& impl       = PublicText::Controller::Impl::GetImplementation(*controller.Get());
+
+  DALI_TEST_CHECK(!impl.mAnchorColorData);
+  DALI_TEST_EQUALS(controller->GetAnchorColor(), Color::MEDIUM_BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetAnchorClickedColor(), Color::DARK_MAGENTA, TEST_LOCATION);
+
+  controller->SetAnchorColor(Color::MEDIUM_BLUE);
+  controller->SetAnchorClickedColor(Color::DARK_MAGENTA);
+  DALI_TEST_CHECK(!impl.mAnchorColorData);
+
+  controller->SetAnchorColor(Color::RED);
+  controller->SetAnchorClickedColor(Color::GREEN);
+  DALI_TEST_CHECK(impl.mAnchorColorData);
+  DALI_TEST_EQUALS(controller->GetAnchorColor(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetAnchorClickedColor(), Color::GREEN, TEST_LOCATION);
+
+  const auto*    colorData          = impl.mAnchorColorData.get();
+  const Vector4& anchorColor        = controller->GetAnchorColor();
+  const Vector4& anchorClickedColor = controller->GetAnchorClickedColor();
+
+  controller->SetAnchorColor(Color::MEDIUM_BLUE);
+  controller->SetAnchorClickedColor(Color::DARK_MAGENTA);
+  DALI_TEST_CHECK(impl.mAnchorColorData.get() == colorData);
+  DALI_TEST_EQUALS(anchorColor, Color::MEDIUM_BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(anchorClickedColor, Color::DARK_MAGENTA, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextControllerEmbossDataLifecycleP(void)
+{
+  UiTestApplication application;
+
+  PublicText::ControllerPtr     controller = PublicText::Controller::New();
+  PublicText::Controller::Impl& impl       = PublicText::Controller::Impl::GetImplementation(*controller.Get());
+
+  DALI_TEST_CHECK(!impl.mEmbossData);
+  DALI_TEST_CHECK(!controller->IsEmbossEnabled());
+  DALI_TEST_EQUALS(controller->GetEmbossDirection(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossStrength(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossLightColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossShadowColor(), Vector4::ZERO, TEST_LOCATION);
+
+  controller->SetDefaultEmbossProperties("");
+  controller->SetEmbossDirection(Vector2::ZERO);
+  controller->SetEmbossStrength(0.0f);
+  controller->SetEmbossLightColor(Vector4::ZERO);
+  controller->SetEmbossShadowColor(Vector4::ZERO);
+  controller->SetEmbossEnabled(false);
+  DALI_TEST_CHECK(!impl.mEmbossData);
+
+  controller->SetEmbossEnabled(true);
+  DALI_TEST_CHECK(controller->IsEmbossEnabled());
+  DALI_TEST_CHECK(!impl.mEmbossData);
+  DALI_TEST_EQUALS(controller->GetEmbossDirection(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossStrength(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossLightColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossShadowColor(), Vector4::ZERO, TEST_LOCATION);
+
+  controller->SetDefaultEmbossProperties("emboss-properties");
+  DALI_TEST_CHECK(impl.mEmbossData);
+  PublicText::EmbossData* const embossData = impl.mEmbossData;
+  DALI_TEST_EQUALS(controller->GetDefaultEmbossProperties(), "emboss-properties", TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossDirection(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossStrength(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossLightColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossShadowColor(), Vector4::ZERO, TEST_LOCATION);
+
+  const Vector2 direction(-0.75f, 0.25f);
+  const Vector4 lightColor(0.8f, 0.7f, 0.6f, 0.5f);
+  const Vector4 shadowColor(0.1f, 0.2f, 0.3f, 0.4f);
+  controller->SetEmbossDirection(direction);
+  controller->SetEmbossStrength(2.5f);
+  controller->SetEmbossLightColor(lightColor);
+  controller->SetEmbossShadowColor(shadowColor);
+
+  DALI_TEST_CHECK(impl.mEmbossData == embossData);
+  const Vector2* const directionReference   = &controller->GetEmbossDirection();
+  const Vector4* const lightColorReference  = &controller->GetEmbossLightColor();
+  const Vector4* const shadowColorReference = &controller->GetEmbossShadowColor();
+
+  controller->SetEmbossEnabled(false);
+  DALI_TEST_CHECK(!controller->IsEmbossEnabled());
+  DALI_TEST_CHECK(impl.mEmbossData == embossData);
+  DALI_TEST_EQUALS(controller->GetEmbossDirection(), direction, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossStrength(), 2.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossLightColor(), lightColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetEmbossShadowColor(), shadowColor, TEST_LOCATION);
+
+  controller->SetEmbossEnabled(true);
+  DALI_TEST_CHECK(impl.mEmbossData == embossData);
+  DALI_TEST_CHECK(&controller->GetEmbossDirection() == directionReference);
+  DALI_TEST_CHECK(&controller->GetEmbossLightColor() == lightColorReference);
+  DALI_TEST_CHECK(&controller->GetEmbossShadowColor() == shadowColorReference);
+
+  const Vector2 updatedDirection(0.5f, -0.5f);
+  const Vector4 updatedLightColor(0.4f, 0.5f, 0.6f, 0.7f);
+  const Vector4 updatedShadowColor(0.7f, 0.6f, 0.5f, 0.4f);
+  controller->SetEmbossDirection(updatedDirection);
+  controller->SetEmbossLightColor(updatedLightColor);
+  controller->SetEmbossShadowColor(updatedShadowColor);
+  DALI_TEST_EQUALS(*directionReference, updatedDirection, TEST_LOCATION);
+  DALI_TEST_EQUALS(*lightColorReference, updatedLightColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(*shadowColorReference, updatedShadowColor, TEST_LOCATION);
+
+  controller->SetDefaultEmbossProperties("");
+  DALI_TEST_CHECK(impl.mEmbossData == embossData);
+  DALI_TEST_EQUALS(controller->GetDefaultEmbossProperties(), "", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliVisualModelCutoutDataLifecycleP(void)
+{
+  UiTestApplication application;
+
+  PublicText::VisualModelPtr visualModel = PublicText::VisualModel::New();
+  DALI_TEST_CHECK(!visualModel->mCutoutData);
+  DALI_TEST_CHECK(!visualModel->IsCutoutEnabled());
+  DALI_TEST_CHECK(!visualModel->IsBackgroundWithCutoutEnabled());
+  DALI_TEST_EQUALS(visualModel->GetBackgroundColorWithCutout(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel->GetOffsetWithCutout(), Vector2::ZERO, TEST_LOCATION);
+
+  const Vector4* const defaultColorReference  = &visualModel->GetBackgroundColorWithCutout();
+  const Vector2* const defaultOffsetReference = &visualModel->GetOffsetWithCutout();
+  visualModel->SetCutoutEnabled(false);
+  visualModel->SetBackgroundWithCutoutEnabled(false);
+  visualModel->SetBackgroundColorWithCutout(Vector4::ZERO);
+  visualModel->SetOffsetWithCutout(Vector2::ZERO);
+  DALI_TEST_CHECK(!visualModel->mCutoutData);
+
+  visualModel->SetCutoutEnabled(true);
+  visualModel->SetBackgroundWithCutoutEnabled(true);
+  DALI_TEST_CHECK(!visualModel->mCutoutData);
+  DALI_TEST_EQUALS(visualModel->GetBackgroundColorWithCutout(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel->GetOffsetWithCutout(), Vector2::ZERO, TEST_LOCATION);
+
+  const Vector4 backgroundColor(0.1f, 0.2f, 0.3f, 0.4f);
+  const Vector2 offset(7.0f, 11.0f);
+  visualModel->SetBackgroundColorWithCutout(backgroundColor);
+  DALI_TEST_CHECK(visualModel->mCutoutData);
+  PublicText::CutoutData* const cutoutData = visualModel->mCutoutData;
+  visualModel->SetOffsetWithCutout(offset);
+
+  DALI_TEST_EQUALS(*defaultColorReference, Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(*defaultOffsetReference, Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel->GetBackgroundColorWithCutout(), backgroundColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel->GetOffsetWithCutout(), offset, TEST_LOCATION);
+
+  const Vector4* const colorReference  = &visualModel->GetBackgroundColorWithCutout();
+  const Vector2* const offsetReference = &visualModel->GetOffsetWithCutout();
+  visualModel->SetCutoutEnabled(false);
+  visualModel->SetBackgroundWithCutoutEnabled(false);
+  DALI_TEST_CHECK(visualModel->mCutoutData == cutoutData);
+  DALI_TEST_EQUALS(*colorReference, backgroundColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offsetReference, offset, TEST_LOCATION);
+
+  visualModel->SetBackgroundColorWithCutout(Vector4::ZERO);
+  visualModel->SetOffsetWithCutout(Vector2::ZERO);
+  DALI_TEST_CHECK(visualModel->mCutoutData == cutoutData);
+  DALI_TEST_CHECK(&visualModel->GetBackgroundColorWithCutout() == colorReference);
+  DALI_TEST_CHECK(&visualModel->GetOffsetWithCutout() == offsetReference);
+  DALI_TEST_EQUALS(*colorReference, Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offsetReference, Vector2::ZERO, TEST_LOCATION);
+
+  PublicText::VisualModelPtr offsetOnlyModel = PublicText::VisualModel::New();
+  offsetOnlyModel->SetOffsetWithCutout(offset);
+  DALI_TEST_CHECK(offsetOnlyModel->mCutoutData);
+  DALI_TEST_EQUALS(offsetOnlyModel->GetBackgroundColorWithCutout(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(offsetOnlyModel->GetOffsetWithCutout(), offset, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextControllerTextFitDataP(void)
+{
+  UiTestApplication application;
+
+  PublicText::ControllerPtr     controller = PublicText::Controller::New();
+  PublicText::Controller::Impl& impl       = PublicText::Controller::Impl::GetImplementation(*controller.Get());
+
+  DALI_TEST_CHECK(!impl.mTextFitData);
+  DALI_TEST_CHECK(!controller->IsTextFitEnabled());
+  DALI_TEST_CHECK(!controller->IsTextFitCandidatesEnabled());
+  DALI_TEST_EQUALS(controller->GetTextFitMinSize(PublicText::Controller::POINT_SIZE), PublicText::DEFAULT_TEXTFIT_MIN, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitMaxSize(PublicText::Controller::POINT_SIZE), PublicText::DEFAULT_TEXTFIT_MAX, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitStepSize(PublicText::Controller::POINT_SIZE), PublicText::DEFAULT_TEXTFIT_STEP, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitContentSize(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_CHECK(controller->GetTextFitCandidates().Empty());
+
+  controller->SetTextFitEnabled(false);
+  controller->SetTextFitCandidatesEnabled(false);
+  controller->SetTextFitChanged(false);
+  controller->SetCurrentLineSize(0.0f);
+  controller->SetTextFitMinSize(PublicText::DEFAULT_TEXTFIT_MIN, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitMaxSize(PublicText::DEFAULT_TEXTFIT_MAX, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitStepSize(PublicText::DEFAULT_TEXTFIT_STEP, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitContentSize(Vector2::ZERO);
+  controller->ClearTextFitCandidates();
+  DALI_TEST_CHECK(!impl.mTextFitData);
+
+  controller->SetTextFitEnabled(true);
+  controller->SetTextFitMinSize(12.0f, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitMaxSize(36.0f, PublicText::Controller::POINT_SIZE);
+  controller->SetTextFitStepSize(2.0f, PublicText::Controller::POINT_SIZE);
+  controller->SetCurrentLineSize(1.5f);
+  controller->SetTextFitContentSize(Vector2(100.0f, 50.0f));
+  controller->SetTextFitChanged(true);
+  DALI_TEST_CHECK(impl.mTextFitData);
+  DALI_TEST_CHECK(controller->IsTextFitEnabled());
+  DALI_TEST_CHECK(controller->IsTextFitChanged());
+  DALI_TEST_EQUALS(controller->GetTextFitMinSize(PublicText::Controller::POINT_SIZE), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitMaxSize(PublicText::Controller::POINT_SIZE), 36.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitStepSize(PublicText::Controller::POINT_SIZE), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetCurrentLineSize(), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetTextFitContentSize(), Vector2(100.0f, 50.0f), TEST_LOCATION);
+
+  Dali::Vector<PublicText::Fit::Candidate> candidates;
+  candidates.PushBack(PublicText::Fit::Candidate(16.0f, 32.0f));
+  candidates.PushBack(PublicText::Fit::Candidate(24.0f, 40.0f));
+  controller->SetTextFitEnabled(false);
+  controller->SetTextFitCandidatesEnabled(true);
+  controller->SetTextFitCandidates(candidates);
+  DALI_TEST_CHECK(!controller->IsTextFitEnabled());
+  DALI_TEST_CHECK(controller->IsTextFitCandidatesEnabled());
+  DALI_TEST_EQUALS(controller->GetTextFitCandidates().Count(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(controller->GetMaxFitCandidate());
+  DALI_TEST_EQUALS(controller->GetMaxFitCandidate()->GetFontSize(), 24.0f, TEST_LOCATION);
+
+  controller->SetText("TextFit should select a candidate that fits the available layout size");
+  controller->SetDefaultFontSize(20.0f, PublicText::Controller::POINT_SIZE);
+  controller->SetMultiLineEnabled(false);
+  controller->FitCandidatesPointSizeForLayout(Size(1000.0f, 200.0f));
+  DALI_TEST_EQUALS(controller->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE), 24.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  controller->SetTextFitCandidatesEnabled(false);
+  controller->ClearTextFitCandidates();
+  DALI_TEST_CHECK(controller->GetTextFitCandidates().Empty());
+  DALI_TEST_EQUALS(controller->GetTextFitMinSize(PublicText::Controller::POINT_SIZE), 12.0f, TEST_LOCATION);
+
+  controller->SetTextFitEnabled(true);
+  controller->FitPointSizeforLayout(Size(320.0f, 80.0f));
+  const float wideFitSize = controller->GetTextFitFontSize(PublicText::Controller::POINT_SIZE);
+  DALI_TEST_CHECK(wideFitSize >= 12.0f && wideFitSize <= 36.0f);
+
+  controller->SetTextFitContentSize(Size(320.0f, 80.0f));
+  controller->FitPointSizeforLayout(Size(100.0f, 40.0f));
+  const float narrowFitSize = controller->GetTextFitFontSize(PublicText::Controller::POINT_SIZE);
+  DALI_TEST_CHECK(narrowFitSize >= 12.0f && narrowFitSize <= wideFitSize);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextControllerMaximumLinesTextFitP(void)
+{
+  UiTestApplication application;
+  constexpr float   WIDTH          = 200.0f;
+  constexpr float   HEIGHT         = 1000.0f;
+  constexpr float   MIN_POINT_SIZE = 6.0f;
+  constexpr float   MAX_POINT_SIZE = 30.0f;
+  const char* const LONG_TEXT      = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+  auto makeRangeController = [&](const char* text, int maximumNumberOfLines, bool setMaximumNumberOfLines = true)
+  {
+    PublicText::ControllerPtr controller = PublicText::Controller::New();
+    controller->SetText(text);
+    controller->SetDefaultFontSize(18.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetLineWrapMode(PublicText::LineWrapMode::CHARACTER);
+    if(setMaximumNumberOfLines)
+    {
+      controller->SetMaximumNumberOfLines(maximumNumberOfLines);
+    }
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(PublicText::EllipsisPosition::END);
+    controller->SetTextFitEnabled(true);
+    controller->SetTextFitMinSize(MIN_POINT_SIZE, PublicText::Controller::POINT_SIZE);
+    controller->SetTextFitMaxSize(MAX_POINT_SIZE, PublicText::Controller::POINT_SIZE);
+    controller->SetTextFitStepSize(3.0f, PublicText::Controller::POINT_SIZE);
+    controller->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+    return controller;
+  };
+
+  PublicText::ControllerPtr rangeDefault =
+    makeRangeController(LONG_TEXT, PublicText::MAXIMUM_LINES_UNLIMITED, false);
+  PublicText::ControllerPtr rangeUnlimited =
+    makeRangeController(LONG_TEXT, PublicText::MAXIMUM_LINES_UNLIMITED);
+  DALI_TEST_EQUALS(rangeUnlimited->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   rangeDefault->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeUnlimited->GetLineCount(WIDTH), rangeDefault->GetLineCount(WIDTH), TEST_LOCATION);
+  const float unlimitedRangeSize =
+    rangeUnlimited->GetTextFitFontSize(PublicText::Controller::POINT_SIZE);
+  DALI_TEST_CHECK(rangeUnlimited->GetLineCount(WIDTH) > 2);
+
+  PublicText::ControllerPtr rangeCapped     = makeRangeController(LONG_TEXT, 2);
+  const float               cappedRangeSize = rangeCapped->GetTextFitFontSize(PublicText::Controller::POINT_SIZE);
+  DALI_TEST_CHECK(cappedRangeSize < unlimitedRangeSize);
+  DALI_TEST_CHECK(rangeCapped->GetLineCount(WIDTH) <= 2);
+
+  rangeUnlimited->SetMaximumNumberOfLines(2);
+  rangeUnlimited->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(rangeUnlimited->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   cappedRangeSize,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  rangeUnlimited->SetMaximumNumberOfLines(PublicText::MAXIMUM_LINES_UNLIMITED);
+  rangeUnlimited->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(rangeUnlimited->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   unlimitedRangeSize,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  auto makeCandidateController = [&](int maximumNumberOfLines, bool setMaximumNumberOfLines = true)
+  {
+    PublicText::ControllerPtr controller = PublicText::Controller::New();
+    controller->SetText(LONG_TEXT);
+    controller->SetDefaultFontSize(18.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetLineWrapMode(PublicText::LineWrapMode::CHARACTER);
+    if(setMaximumNumberOfLines)
+    {
+      controller->SetMaximumNumberOfLines(maximumNumberOfLines);
+    }
+    controller->SetTextFitCandidatesEnabled(true);
+
+    Dali::Vector<PublicText::Fit::Candidate> candidates;
+    candidates.PushBack(PublicText::Fit::Candidate(8.0f, 10.0f));
+    candidates.PushBack(PublicText::Fit::Candidate(16.0f, 18.0f));
+    candidates.PushBack(PublicText::Fit::Candidate(24.0f, 26.0f));
+    candidates.PushBack(PublicText::Fit::Candidate(32.0f, 34.0f));
+    candidates.PushBack(PublicText::Fit::Candidate(40.0f, 42.0f));
+    controller->SetTextFitCandidates(candidates);
+    controller->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+    return controller;
+  };
+
+  PublicText::ControllerPtr candidatesDefault =
+    makeCandidateController(PublicText::MAXIMUM_LINES_UNLIMITED, false);
+  PublicText::ControllerPtr candidatesUnlimited =
+    makeCandidateController(PublicText::MAXIMUM_LINES_UNLIMITED);
+  DALI_TEST_EQUALS(candidatesUnlimited->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE),
+                   candidatesDefault->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE),
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(candidatesUnlimited->GetLineCount(WIDTH),
+                   candidatesDefault->GetLineCount(WIDTH),
+                   TEST_LOCATION);
+  const float unlimitedCandidateSize =
+    candidatesUnlimited->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE);
+  DALI_TEST_CHECK(candidatesUnlimited->GetLineCount(WIDTH) > 2);
+
+  PublicText::ControllerPtr candidatesCapped = makeCandidateController(2);
+  const float               cappedCandidateSize =
+    candidatesCapped->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE);
+  DALI_TEST_CHECK(cappedCandidateSize < unlimitedCandidateSize);
+  DALI_TEST_CHECK(candidatesCapped->GetLineCount(WIDTH) <= 2);
+
+  candidatesUnlimited->SetMaximumNumberOfLines(2);
+  candidatesUnlimited->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(candidatesUnlimited->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE),
+                   cappedCandidateSize,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  candidatesUnlimited->SetMaximumNumberOfLines(PublicText::MAXIMUM_LINES_UNLIMITED);
+  candidatesUnlimited->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(candidatesUnlimited->GetTextFitFontSize(PublicText::Controller::PIXEL_SIZE),
+                   unlimitedCandidateSize,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  // Exactly N authored lines still fit at the largest size. Both an N+1
+  // authored line and the empty line created by a trailing newline must not.
+  PublicText::ControllerPtr exact = makeRangeController("A\nB", 2);
+  DALI_TEST_EQUALS(exact->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   MAX_POINT_SIZE,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  PublicText::ControllerPtr explicitOverflow = makeRangeController("A\nB\nC", 2);
+  DALI_TEST_EQUALS(explicitOverflow->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   MIN_POINT_SIZE,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  explicitOverflow->Relayout(Size(WIDTH, HEIGHT));
+  DALI_TEST_EQUALS(explicitOverflow->GetRenderTextModel()->GetNumberOfLines(), 2, TEST_LOCATION);
+  DALI_TEST_CHECK(std::any_of(GetVisualModel(explicitOverflow).mLines.Begin(),
+                              GetVisualModel(explicitOverflow).mLines.End(),
+                              [](const PublicText::LineRun& line)
+  { return line.ellipsis; }));
+  DALI_TEST_EQUALS(explicitOverflow->GetLineCount(WIDTH), 2, TEST_LOCATION);
+
+  PublicText::ControllerPtr trailingNewline = makeRangeController("A\nB\n", 2);
+  DALI_TEST_EQUALS(trailingNewline->GetTextFitFontSize(PublicText::Controller::POINT_SIZE),
+                   MIN_POINT_SIZE,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(trailingNewline->GetLineCount(WIDTH), 2, TEST_LOCATION);
+
+  // Exercise the real StyledText path rather than relying on this test file's
+  // plain SetText coverage. Spans cross soft-wrap and MaximumLines boundaries while
+  // both fitting APIs must select the same result as an independently built
+  // capped controller and restore the unlimited result exactly.
+  const char* const STYLED_MARKUP =
+    "<font weight='bold'>AAAAAAAAAAAAAAAAAAAA</font>"
+    "<u>BBBBBBBBBBBBBBBBBBBB</u>"
+    "<font slant='italic'>CCCCCCCCCCCCCCCCCCCC</font>";
+  auto makeStyledFitController = [&](int maximumNumberOfLines, bool useCandidates)
+  {
+    PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::FromMarkup(STYLED_MARKUP);
+    PublicText::ControllerPtr     controller = PublicText::Controller::New();
+    controller->SetStyledText(builder.Build());
+    controller->SetDefaultFontSize(18.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetLineWrapMode(PublicText::LineWrapMode::CHARACTER);
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(PublicText::EllipsisPosition::END);
+    controller->SetMaximumNumberOfLines(maximumNumberOfLines);
+    if(useCandidates)
+    {
+      controller->SetTextFitCandidatesEnabled(true);
+      controller->SetTextFitCandidates(candidatesDefault->GetTextFitCandidates());
+      controller->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+    }
+    else
+    {
+      controller->SetTextFitEnabled(true);
+      controller->SetTextFitMinSize(MIN_POINT_SIZE, PublicText::Controller::POINT_SIZE);
+      controller->SetTextFitMaxSize(MAX_POINT_SIZE, PublicText::Controller::POINT_SIZE);
+      controller->SetTextFitStepSize(3.0f, PublicText::Controller::POINT_SIZE);
+      controller->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+    }
+    return controller;
+  };
+
+  for(bool useCandidates : {false, true})
+  {
+    PublicText::ControllerPtr styledUnlimited =
+      makeStyledFitController(PublicText::MAXIMUM_LINES_UNLIMITED, useCandidates);
+    PublicText::ControllerPtr styledCapped = makeStyledFitController(2, useCandidates);
+    const PublicText::Controller::FontSizeType unit =
+      useCandidates ? PublicText::Controller::PIXEL_SIZE : PublicText::Controller::POINT_SIZE;
+    const float unlimitedFitSize = styledUnlimited->GetTextFitFontSize(unit);
+    const float cappedFitSize    = styledCapped->GetTextFitFontSize(unit);
+    DALI_TEST_CHECK(styledUnlimited->GetLineCount(WIDTH) > 2);
+    DALI_TEST_CHECK(styledCapped->GetLineCount(WIDTH) <= 2);
+    DALI_TEST_CHECK(cappedFitSize < unlimitedFitSize);
+
+    styledUnlimited->SetMaximumNumberOfLines(2);
+    if(useCandidates)
+    {
+      styledUnlimited->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+    }
+    else
+    {
+      styledUnlimited->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+    }
+    DALI_TEST_EQUALS(styledUnlimited->GetTextFitFontSize(unit),
+                     cappedFitSize,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+
+    styledUnlimited->SetMaximumNumberOfLines(PublicText::MAXIMUM_LINES_UNLIMITED);
+    if(useCandidates)
+    {
+      styledUnlimited->FitCandidatesPointSizeForLayout(Size(WIDTH, HEIGHT));
+    }
+    else
+    {
+      styledUnlimited->FitPointSizeforLayout(Size(WIDTH, HEIGHT));
+    }
+    DALI_TEST_EQUALS(styledUnlimited->GetTextFitFontSize(unit),
+                     unlimitedFitSize,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextControllerSetStyledTextForegroundColorSpanP(void)
 {
   UiTestApplication application;
@@ -279,7 +792,10 @@ int UtcDaliStyledTextControllerUnderlineSpanReachesVisualModelP(void)
 
   PublicText::VisualModel& visualModel = GetVisualModel(controller);
   DALI_TEST_EQUALS(visualModel.GetNumberOfUnderlineRuns(), 1u, TEST_LOCATION);
-  CheckUnderlineGlyphRun(visualModel, visualModel.mUnderlineRuns[0u], 1u, 3u, underline);
+  PublicText::UnderlinedGlyphRun underlineRun{};
+  visualModel.GetUnderlineRuns(&underlineRun, 0u, 1u);
+  CheckUnderlineGlyphRun(visualModel, underlineRun, 1u, 3u, underline);
+  visualModel.GetStrikethroughRuns(nullptr, 0u, 0u);
   CheckTypesetterDecorationInput(GetLogicalModelObject(controller), true, false);
 
   END_TEST;
@@ -301,7 +817,10 @@ int UtcDaliStyledTextControllerLineThroughSpanReachesVisualModelP(void)
 
   PublicText::VisualModel& visualModel = GetVisualModel(controller);
   DALI_TEST_EQUALS(visualModel.GetNumberOfStrikethroughRuns(), 1u, TEST_LOCATION);
-  CheckLineThroughGlyphRun(visualModel, visualModel.mStrikethroughRuns[0u], 0u, 5u, lineThrough);
+  PublicText::StrikethroughGlyphRun lineThroughRun{};
+  visualModel.GetStrikethroughRuns(&lineThroughRun, 0u, 1u);
+  CheckLineThroughGlyphRun(visualModel, lineThroughRun, 0u, 5u, lineThrough);
+  visualModel.GetUnderlineRuns(nullptr, 0u, 0u);
   CheckTypesetterDecorationInput(GetLogicalModelObject(controller), false, true);
 
   END_TEST;

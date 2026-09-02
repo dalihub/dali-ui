@@ -143,7 +143,7 @@ Label MakeLabel(const char* text, float fontSize, uint32_t color, float height)
   label.SetTextColor(UiColor(color));
   label.SetMultiLine(true);
   label.SetLineWrapMode(Text::LineWrapMode::CHARACTER);
-  label.SetPadding(Extents(8, 8, 3, 3));
+  label.SetPadding(Insets(8.0f, 8.0f, 3.0f, 3.0f));
   return label;
 }
 } // namespace
@@ -193,7 +193,7 @@ private:
     mInputField.SetBackgroundColor(UiColor(0xFFFFFF));
     mInputField.SetTextColor(UiColor(0x111111));
     mInputField.SetPlaceholderColor(UiColor(0x777777));
-    mInputField.SetPadding(Extents(10, 10, 6, 6));
+    mInputField.SetPadding(Insets(10.0f, 10.0f, 6.0f, 6.0f));
     mInputField.SetFocusable(true);
     mInputField.TextChangedSignal().Connect(this, &KeyInputController::OnTextChanged);
 
@@ -217,7 +217,7 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(4.0f);
-    root.SetPadding(Extents(8, 8, 8, 8));
+    root.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     root.Add(title);
     root.Add(guide);
     root.Add(mInputField);

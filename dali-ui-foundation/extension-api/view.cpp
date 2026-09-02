@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/extension-api/view.h>
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/accessibility-events.h>
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
@@ -108,6 +109,40 @@ bool ClearAccessibilityHighlight(Ui::View view)
   return DALI_LIKELY(accessible) && accessible->ClearHighlight();
 }
 
+bool NotifyAccessibilityValueChanged(Ui::View view)
+{
+  if(!view)
+  {
+    return false;
+  }
+
+  auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
+  if(!accessible)
+  {
+    return false;
+  }
+
+  accessible->Emit(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::VALUE);
+  return true;
+}
+
+bool NotifyAccessibilityShowingChanged(Ui::View view, bool showing)
+{
+  if(!view)
+  {
+    return false;
+  }
+
+  auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
+  if(!accessible)
+  {
+    return false;
+  }
+
+  accessible->EmitShowing(showing);
+  return true;
+}
+
 void SetState(ViewImpl& viewImpl, ViewState stateToChange, bool on, InputEvent cause)
 {
   Ui::Internal::ViewDataImpl::Get(viewImpl).SetState(stateToChange, on, cause);
@@ -138,14 +173,24 @@ void SetPositionY(Ui::View view, float y)
   static_cast<Dali::Actor&>(view).SetPositionY(y);
 }
 
+void SetPositionZ(Ui::View view, float z)
+{
+  static_cast<Dali::Actor&>(view).SetPositionZ(z);
+}
+
 void SetSizeWidth(Ui::View view, float width)
 {
-  static_cast<Dali::Actor&>(view).SetWidth(width);
+  static_cast<Dali::Actor&>(view).SetSizeWidth(width);
 }
 
 void SetSizeHeight(Ui::View view, float height)
 {
-  static_cast<Dali::Actor&>(view).SetHeight(height);
+  static_cast<Dali::Actor&>(view).SetSizeHeight(height);
+}
+
+void SetSizeDepth(Ui::View view, float depth)
+{
+  static_cast<Dali::Actor&>(view).SetSizeDepth(depth);
 }
 
 } // namespace View

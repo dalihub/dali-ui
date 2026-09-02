@@ -16,10 +16,12 @@
  * limitations under the License.
  */
 
+// EXTERNAL INCLUDES
+#include <dali/public-api/signals/callback.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/focus-manager/focus-navigation-context.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-navigation-result.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 
 namespace Dali
 {

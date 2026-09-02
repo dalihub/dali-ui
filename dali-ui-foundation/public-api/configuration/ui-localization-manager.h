@@ -20,12 +20,12 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
 
 #include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 
 namespace Dali
 {

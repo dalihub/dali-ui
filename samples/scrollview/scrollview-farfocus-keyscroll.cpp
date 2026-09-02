@@ -220,9 +220,7 @@ private:
     content.SetRequestedWidth(WINDOW_W);
     content.SetRequestedHeight(CONTENT_H);
     content.SetSpacing(ITEM_SPACING);
-    content.SetPadding(Extents(
-      static_cast<uint16_t>(CONTENT_PAD), static_cast<uint16_t>(CONTENT_PAD),
-      static_cast<uint16_t>(CONTENT_PAD), static_cast<uint16_t>(CONTENT_PAD)));
+    content.SetPadding(Insets(static_cast<uint16_t>(CONTENT_PAD), static_cast<uint16_t>(CONTENT_PAD), static_cast<uint16_t>(CONTENT_PAD), static_cast<uint16_t>(CONTENT_PAD)));
 
     // Top area — NON-focusable
     View topArea = View::New();

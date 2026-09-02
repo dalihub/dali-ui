@@ -60,6 +60,26 @@ int UtcDaliAnimatedImageViewNewWithUrlP(void)
   END_TEST;
 }
 
+int UtcDaliAnimatedImageViewGetNaturalSizeP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New("test.gif");
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(32);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+
+  const AnimatedImageView constView(view);
+  DALI_TEST_EQUALS(constView.GetNaturalSize(), Vector3(64.0f, 32.0f, 0.0f), TEST_LOCATION);
+
+  view.Measure(200.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  DALI_TEST_EQUALS(view.GetSize(), Vector3(200.0f, 100.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(constView.GetNaturalSize(), Vector3(64.0f, 32.0f, 0.0f), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliAnimatedImageViewCopyConstructorP(void)
 {
   UiTestApplication application;

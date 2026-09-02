@@ -588,7 +588,7 @@ int UtcDaliWebViewAddJavaScriptMessageHandlerWithNameP(void)
 {
   UiTestApplication application;
   WebView view = WebView::New();
-  auto callback = Dali::Ui::Callback<void(const Dali::String&, const Dali::String&)>::New(OnJavaScriptMessageWithNameCallback);
+  auto callback = Dali::Callback<void(const Dali::String&, const Dali::String&)>::New(OnJavaScriptMessageWithNameCallback);
   view.AddJavaScriptMessageHandler(Dali::String("testObject"), std::move(callback));
   DALI_TEST_CHECK(view);
   END_TEST;
