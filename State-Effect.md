@@ -15,6 +15,7 @@ dali-ui provides `OverlayEffect` as a built-in effect.
 ### Plain
 
 Shows dimming and scale-down feedback for `FOCUSED`, `PRESSED`, and `DISABLED`.
+The default press scale factor is `0.96`.
 
 ```cpp
 view.AsInteractive();
@@ -28,7 +29,8 @@ view.SetStateEffect(OverlayEffect::Plain());
 
 ### ListItem
 
-Same as `Plain`, except the scale-down target on press is limited to the View's children.
+Same as `Plain`, except the scale-down target on press is limited to the View's
+children and uses a `0.98` scale factor suitable for list content.
 
 ```cpp
 view.AsInteractive();
@@ -79,6 +81,28 @@ StateEffect brandOverlay =
 
 view.SetStateEffect(brandOverlay);
 ```
+
+<br/>
+
+### Expanding the Overlay Visual
+
+`SetOverlayPadding()` expands only the overlay visual beyond its target. It
+does not change the target View's layout size, touch area, or recoil target.
+The default padding is zero. Start and end follow the target's effective layout
+direction.
+
+```cpp
+OverlayEffect paddedOverlay =
+  OverlayEffect::Round()
+    .Configure()
+    .SetOverlayPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f))
+    .Build();
+
+view.SetStateEffect(paddedOverlay);
+```
+
+If the target clips its visuals, ensure its surrounding bounds leave enough
+room for the configured padding.
 
 <br/>
 

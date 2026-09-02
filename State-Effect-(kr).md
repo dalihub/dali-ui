@@ -15,6 +15,7 @@ dali-ui는 built-in 효과로 `OverlayEffect`를 제공합니다.
 ### Plain
 
 `FOCUSED`와 `PRESSED`, `DISABLED`에 대응해 dim 및 scale down 효과를 보여줍니다.
+기본 press scale factor는 `0.96`입니다.
 
 ```cpp
 view.AsInteractive();
@@ -27,7 +28,8 @@ view.SetStateEffect(OverlayEffect::Plain());
 
 ### ListItem
 
-`Plain`과 동일하지만, press 되었을때 scale down 되는 타겟이 chlidren으로 한정됩니다.
+`Plain`과 동일하지만 press 시 scale down target이 child로 한정되며, list content에
+적합한 `0.98` scale factor를 사용합니다.
 
 ```cpp
 view.AsInteractive();
@@ -78,6 +80,26 @@ StateEffect brandOverlay =
 
 view.SetStateEffect(brandOverlay);
 ```
+
+<br/>
+
+### Overlay visual 확장
+
+`SetOverlayPadding()`은 target 바깥으로 overlay visual만 확장합니다. Target View의
+layout 크기, touch 영역 및 recoil target은 변경하지 않습니다. 기본 padding은 0이며,
+start와 end는 target의 effective layout direction을 따릅니다.
+
+```cpp
+OverlayEffect paddedOverlay =
+  OverlayEffect::Round()
+    .Configure()
+    .SetOverlayPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f))
+    .Build();
+
+view.SetStateEffect(paddedOverlay);
+```
+
+Target이 visual을 clipping한다면 설정한 padding이 들어갈 주변 영역을 확보해야 합니다.
 
 <br/>
 
