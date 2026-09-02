@@ -17,7 +17,11 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/public-api/images/pixel.h>
 #include <dali/public-api/math/math-utils.h>
+#include <dali/public-api/object/property-array.h>
+#include <dali/public-api/rendering/shader.h>
+#include <dali/public-api/rendering/texture-set.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -25,6 +29,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/internal/text/replacement/inline-replacement-image-reveal-shader.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
@@ -43,6 +48,16 @@ namespace Text
 namespace
 {
 constexpr const char* INLINE_REPLACEMENT_REVEAL_BASE_OPACITY = "__dali_ui_inline_replacement_reveal_base_opacity";
+constexpr const char* INLINE_REPLACEMENT_REVEAL_PROGRESS     = "uInlineReplacementRevealProgress";
+constexpr const char* INLINE_REPLACEMENT_REVEAL_TIMING       = "uInlineReplacementRevealTiming";
+
+struct ReplacementRevealProgressConstraint
+{
+  void operator()(float& current, const PropertyInputContainer& inputs)
+  {
+    current = std::max(0.0f, std::min(1.0f, inputs[0]->GetFloat()));
+  }
+};
 
 struct ReplacementRevealOpacityConstraint
 {
@@ -88,6 +103,42 @@ bool IsSupportedStaticImageSource(const std::string& source)
   // The factory's static-only option keeps GIF/WebP on ImageVisual (first
   // frame), but JSON would still create AnimatedVectorImageVisual.
   return Ui::Internal::VisualUrl(source).GetType() != Ui::Internal::VisualUrl::JSON;
+}
+
+bool CanUsePixelRevealCustomShader(const std::string& source)
+{
+  const Ui::Internal::VisualUrl::Type type = Ui::Internal::VisualUrl(source).GetType();
+  return type == Ui::Internal::VisualUrl::REGULAR_IMAGE ||
+         type == Ui::Internal::VisualUrl::GIF ||
+         type == Ui::Internal::VisualUrl::WEBP;
+}
+
+bool UsesMultiPlaneYuvTexture(const VisualRenderer& renderer)
+{
+  const TextureSet textures = renderer ? renderer.GetTextures() : TextureSet{};
+  if(!textures || textures.GetTextureCount() < 3u)
+  {
+    return false;
+  }
+  const Texture luminance    = textures.GetTexture(0u);
+  const Texture chrominanceU = textures.GetTexture(1u);
+  const Texture chrominanceV = textures.GetTexture(2u);
+  return luminance && chrominanceU && chrominanceV &&
+         luminance.GetPixelFormat() == Pixel::L8 &&
+         chrominanceU.GetPixelFormat() == Pixel::CHROMINANCE_U &&
+         chrominanceV.GetPixelFormat() == Pixel::CHROMINANCE_V;
+}
+
+Property::Map CreatePixelRevealCustomShaderMap()
+{
+  Property::Map shaderMap;
+  shaderMap.Insert(Ui::Visual::Shader::Property::FRAGMENT_SHADER,
+                   Dali::String(INLINE_REPLACEMENT_IMAGE_REVEAL_FRAGMENT_SHADER));
+  shaderMap.Insert(Ui::Visual::Shader::Property::HINTS,
+                   static_cast<int>(Dali::Shader::Hint::OUTPUT_IS_TRANSPARENT));
+  shaderMap.Insert(Ui::Visual::Shader::Property::NAME,
+                   Dali::String("INLINE_REPLACEMENT_IMAGE_PIXEL_REVEAL"));
+  return shaderMap;
 }
 
 bool RectanglesIntersect(const Vector2& firstOffset,
@@ -201,6 +252,12 @@ bool InlineReplacementManager::CreateEntryVisual(InlineReplacementViewHost& host
   visualMap.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE,
                    static_cast<int>(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO));
   visualMap.Insert(Ui::ImageVisualPropertyIndex::ORIENTATION_CORRECTION, true);
+  const bool requestPixelRevealShader = mPixelRevealRequested &&
+                                        CanUsePixelRevealCustomShader(entry.descriptor.source);
+  if(requestPixelRevealShader)
+  {
+    visualMap.Insert(Ui::VisualBasePropertyIndex::SHADER, CreatePixelRevealCustomShaderMap());
+  }
   entry.visual = Ui::Integration::VisualFactory::Get().CreateVisual(
     visualMap,
     Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY);
@@ -271,7 +328,8 @@ void InlineReplacementManager::SetEntryVisible(Entry& entry, bool visible)
 
   entry.currentlyVisible  = visible;
   VisualRenderer renderer = entry.visual.GetRenderer();
-  if(entry.revealConstraint && renderer && entry.revealBaseOpacityIndex != Property::INVALID_INDEX)
+  if(entry.revealConstraint && !entry.revealPixelSpatial && renderer &&
+     entry.revealBaseOpacityIndex != Property::INVALID_INDEX)
   {
     renderer.SetProperty(entry.revealBaseOpacityIndex, visible ? 1.0f : 0.0f);
   }
@@ -283,13 +341,30 @@ void InlineReplacementManager::SetEntryVisible(Entry& entry, bool visible)
   }
 }
 
-void InlineReplacementManager::RemoveEntryRevealConstraint(Entry& entry)
+void InlineReplacementManager::UpdateEntryVisibility(Entry& entry)
+{
+  const bool resourceReady = entry.visual &&
+                             Ui::GetImplementation(entry.visual).GetResourceStatus() == Ui::Visual::ResourceStatus::READY;
+  const bool geometryReady      = entry.transformApplied && entry.pixelAreaApplied;
+  const bool revealBindingReady = !mRevealBindingRequired ||
+                                  (mRevealSourceRevision == mEntrySourceRevision && entry.revealConstraint &&
+                                   entry.revealProgressPropertyIndex == mRevealProgressPropertyIndex);
+  SetEntryVisible(entry, resourceReady && geometryReady && revealBindingReady);
+}
+
+void InlineReplacementManager::RemoveEntryRevealConstraint(Entry& entry, bool removePixelShader)
 {
   if(entry.revealConstraint)
   {
     entry.revealConstraint.Remove();
     entry.revealConstraint.Reset();
   }
+  if(removePixelShader && entry.visual && Ui::GetImplementation(entry.visual).IsUsingCustomShader())
+  {
+    SetEntryPixelRevealShader(entry, false);
+  }
+  entry.revealPixelSpatial          = false;
+  entry.revealPixelProgressIndex    = Property::INVALID_INDEX;
   entry.revealProgressPropertyIndex = Property::INVALID_INDEX;
   if(entry.visual)
   {
@@ -299,35 +374,187 @@ void InlineReplacementManager::RemoveEntryRevealConstraint(Entry& entry)
   }
 }
 
-bool InlineReplacementManager::ApplyEntryRevealConstraint(Entry& entry)
+bool InlineReplacementManager::SetEntryPixelRevealShader(Entry& entry, bool enabled)
+{
+  if(!entry.visual)
+  {
+    return !enabled;
+  }
+  auto& visualImpl = Ui::GetImplementation(entry.visual);
+  if(enabled)
+  {
+    if(visualImpl.GetType() != Ui::Integration::InternalVisualType::IMAGE ||
+       !CanUsePixelRevealCustomShader(entry.descriptor.source))
+    {
+      return false;
+    }
+    if(UsesMultiPlaneYuvTexture(entry.visual.GetRenderer()))
+    {
+      if(visualImpl.IsUsingCustomShader())
+      {
+        Property::Array emptyShaderArray;
+        Property::Map   visualMap;
+        visualMap.Insert(Ui::VisualBasePropertyIndex::SHADER, emptyShaderArray);
+        entry.visual.SetProperties(visualMap);
+      }
+      return false;
+    }
+    if(!visualImpl.IsUsingCustomShader())
+    {
+      Property::Map visualMap;
+      visualMap.Insert(Ui::VisualBasePropertyIndex::SHADER, CreatePixelRevealCustomShaderMap());
+      entry.visual.SetProperties(visualMap);
+    }
+    return visualImpl.IsUsingCustomShader();
+  }
+
+  if(visualImpl.IsUsingCustomShader())
+  {
+    Property::Array emptyShaderArray;
+    Property::Map   visualMap;
+    visualMap.Insert(Ui::VisualBasePropertyIndex::SHADER, emptyShaderArray);
+    entry.visual.SetProperties(visualMap);
+  }
+  return !visualImpl.IsUsingCustomShader();
+}
+
+bool InlineReplacementManager::UpdateEntryPixelRevealTiming(Entry& entry)
+{
+  if(!entry.revealPixelSpatial || !entry.visual || !std::isfinite(entry.reservedSize.x) ||
+     entry.reservedSize.x <= Math::MACHINE_EPSILON_1 || !entry.pixelAreaApplied ||
+     !std::isfinite(entry.lastPixelArea.x) || !std::isfinite(entry.lastPixelArea.z) ||
+     entry.lastPixelArea.z <= Math::MACHINE_EPSILON_1)
+  {
+    return false;
+  }
+  VisualRenderer renderer = entry.visual.GetRenderer();
+  if(!renderer)
+  {
+    return false;
+  }
+
+  const float reservedLeft  = entry.reservedOffset.x;
+  const float reservedWidth = entry.reservedSize.x;
+  const float visibleLeft   = std::max(0.0f,
+                                       std::min(1.0f,
+                                                (entry.lastTransformOffset.x - reservedLeft) / reservedWidth));
+  const float visibleRight =
+    std::max(visibleLeft,
+             std::min(1.0f,
+                      (entry.lastTransformOffset.x + entry.lastTransformSize.x - reservedLeft) / reservedWidth));
+  const float unitStart   = entry.revealStart - 0.5f * entry.revealProgressionSpan;
+  const float startAtLeft = unitStart + entry.revealProgressionSpan *
+                                          (entry.revealRightToLeft ? 1.0f - visibleLeft : visibleLeft);
+  const float startDelta = entry.revealProgressionSpan * (visibleRight - visibleLeft) *
+                           (entry.revealRightToLeft ? -1.0f : 1.0f);
+  // The standard ImageVisual vertex shader maps the quad coordinate q to
+  // vTexCoord.x = pixelArea.x + pixelArea.z * q. Precompose the inverse here
+  // so the fragment does not redeclare the vertex-owned pixelArea uniform.
+  const float timingSlope     = startDelta / entry.lastPixelArea.z;
+  const float timingIntercept = startAtLeft - timingSlope * entry.lastPixelArea.x;
+  if(!std::isfinite(timingIntercept) || !std::isfinite(timingSlope))
+  {
+    return false;
+  }
+  const Vector3 timing(timingIntercept, timingSlope, entry.revealFadeDuration);
+
+  Property::Index timingIndex = renderer.GetPropertyIndex(INLINE_REPLACEMENT_REVEAL_TIMING);
+  if(timingIndex == Property::INVALID_INDEX)
+  {
+    timingIndex = renderer.RegisterProperty(INLINE_REPLACEMENT_REVEAL_TIMING, timing);
+  }
+  else
+  {
+    renderer.SetProperty(timingIndex, timing);
+  }
+  return timingIndex != Property::INVALID_INDEX;
+}
+
+InlineReplacementManager::RevealBindingResult InlineReplacementManager::ApplyEntryRevealConstraint(Entry& entry)
 {
   if(!mHost || !entry.visual || mRevealProgressPropertyIndex == Property::INVALID_INDEX)
   {
     RemoveEntryRevealConstraint(entry);
-    return false;
+    return RevealBindingResult::INVALID;
   }
   const auto timing = mRevealTimings.find(entry.occurrenceIdentity);
   if(timing == mRevealTimings.end())
   {
     RemoveEntryRevealConstraint(entry);
-    return false;
+    return RevealBindingResult::INVALID;
   }
-  Ui::View       owner    = mHost->GetOwner();
-  VisualRenderer renderer = entry.visual.GetRenderer();
-  if(!owner || !renderer)
+  Ui::View owner = mHost->GetOwner();
+  if(!owner)
   {
     RemoveEntryRevealConstraint(entry);
-    return false;
+    return RevealBindingResult::INVALID;
+  }
+  VisualRenderer renderer = entry.visual.GetRenderer();
+  if(!renderer)
+  {
+    SetEntryVisible(entry, false);
+    return RevealBindingResult::DEFERRED;
   }
 
-  const float start        = timing->second.start;
-  const float fadeDuration = timing->second.fadeDuration;
+  const float start           = timing->second.start;
+  const float fadeDuration    = timing->second.fadeDuration;
+  const float progressionSpan = timing->second.progressionSpan;
+  const bool  rightToLeft     = timing->second.rightToLeft;
+  const auto& visualImpl      = Ui::GetImplementation(entry.visual);
+  const bool  pixelSpatial =
+    mPixelRevealRequested && progressionSpan > 0.0f &&
+    visualImpl.GetType() == Ui::Integration::InternalVisualType::IMAGE &&
+    CanUsePixelRevealCustomShader(entry.descriptor.source) &&
+    !UsesMultiPlaneYuvTexture(renderer);
   if(entry.revealConstraint && entry.revealProgressPropertyIndex == mRevealProgressPropertyIndex &&
-     Dali::Equals(entry.revealStart, start) && Dali::Equals(entry.revealFadeDuration, fadeDuration))
+     Dali::Equals(entry.revealStart, start) && Dali::Equals(entry.revealFadeDuration, fadeDuration) &&
+     Dali::Equals(entry.revealProgressionSpan, progressionSpan) && entry.revealRightToLeft == rightToLeft &&
+     entry.revealPixelSpatial == pixelSpatial)
   {
-    return true;
+    UpdateEntryVisibility(entry);
+    return RevealBindingResult::APPLIED;
   }
-  RemoveEntryRevealConstraint(entry);
+
+  // A creation-time PIXEL shader is already the desired shader. Preserve it
+  // while replacing only the binding so fast-ready resources never force a
+  // READY-state shader remove/reinstall cycle.
+  const bool preservePixelShader = pixelSpatial && visualImpl.IsUsingCustomShader();
+  RemoveEntryRevealConstraint(entry, !preservePixelShader);
+  entry.revealStart           = start;
+  entry.revealFadeDuration    = fadeDuration;
+  entry.revealProgressionSpan = progressionSpan;
+  entry.revealRightToLeft     = rightToLeft;
+
+  if(pixelSpatial && SetEntryPixelRevealShader(entry, true))
+  {
+    entry.revealPixelSpatial       = true;
+    entry.revealPixelProgressIndex = renderer.GetPropertyIndex(INLINE_REPLACEMENT_REVEAL_PROGRESS);
+    if(entry.revealPixelProgressIndex == Property::INVALID_INDEX)
+    {
+      entry.revealPixelProgressIndex = renderer.RegisterProperty(
+        INLINE_REPLACEMENT_REVEAL_PROGRESS,
+        std::max(0.0f, std::min(1.0f, owner.GetCurrentProperty<float>(mRevealProgressPropertyIndex))));
+    }
+    if(entry.revealPixelProgressIndex != Property::INVALID_INDEX && UpdateEntryPixelRevealTiming(entry))
+    {
+      entry.revealConstraint = Constraint::New<float>(renderer,
+                                                      entry.revealPixelProgressIndex,
+                                                      ReplacementRevealProgressConstraint());
+      entry.revealConstraint.AddSource(Source(owner, mRevealProgressPropertyIndex));
+      entry.revealConstraint.SetRemoveAction(Constraint::DISCARD);
+      entry.revealConstraint.SetApplyRate(Dali::Constraint::APPLY_ALWAYS);
+      entry.revealConstraint.Apply();
+      entry.revealProgressPropertyIndex = mRevealProgressPropertyIndex;
+      UpdateEntryVisibility(entry);
+      return RevealBindingResult::APPLIED;
+    }
+    // Geometry and pixel-area publication can legitimately follow timing
+    // publication. Keep the accepted timing, custom shader and registered
+    // progress property so Update()/Refresh() can complete the same binding.
+    SetEntryVisible(entry, false);
+    return RevealBindingResult::DEFERRED;
+  }
+
   entry.revealBaseOpacityIndex = renderer.GetPropertyIndex(INLINE_REPLACEMENT_REVEAL_BASE_OPACITY);
   if(entry.revealBaseOpacityIndex == Property::INVALID_INDEX)
   {
@@ -340,7 +567,8 @@ bool InlineReplacementManager::ApplyEntryRevealConstraint(Entry& entry)
   }
   if(entry.revealBaseOpacityIndex == Property::INVALID_INDEX)
   {
-    return false;
+    SetEntryVisible(entry, false);
+    return RevealBindingResult::DEFERRED;
   }
 
   entry.revealConstraint = Constraint::New<float>(renderer,
@@ -348,12 +576,12 @@ bool InlineReplacementManager::ApplyEntryRevealConstraint(Entry& entry)
                                                   ReplacementRevealOpacityConstraint(start, fadeDuration));
   entry.revealConstraint.AddSource(Source(renderer, entry.revealBaseOpacityIndex));
   entry.revealConstraint.AddSource(Source(owner, mRevealProgressPropertyIndex));
+  entry.revealConstraint.SetRemoveAction(Constraint::DISCARD);
   entry.revealConstraint.SetApplyRate(Dali::Constraint::APPLY_ALWAYS);
   entry.revealConstraint.Apply();
   entry.revealProgressPropertyIndex = mRevealProgressPropertyIndex;
-  entry.revealStart                 = start;
-  entry.revealFadeDuration          = fadeDuration;
-  return true;
+  UpdateEntryVisibility(entry);
+  return RevealBindingResult::APPLIED;
 }
 
 bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
@@ -369,6 +597,12 @@ bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
     return false;
   }
   const bool readyToReveal = status == Ui::Visual::ResourceStatus::READY;
+  if(readyToReveal && entry.revealPixelSpatial && UsesMultiPlaneYuvTexture(entry.visual.GetRenderer()))
+  {
+    SetEntryPixelRevealShader(entry, false);
+    entry.revealPixelSpatial = false;
+    ApplyEntryRevealConstraint(entry);
+  }
   if(!readyToReveal)
   {
     SetEntryVisible(entry, false);
@@ -454,8 +688,14 @@ bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
     entry.transformApplied    = true;
   }
 
-  // Geometry and sampling are committed before the first visible frame.
-  SetEntryVisible(entry, readyToReveal);
+  if(entry.revealPixelSpatial)
+  {
+    UpdateEntryPixelRevealTiming(entry);
+  }
+
+  // Geometry, sampling and an authored PIXEL binding are committed before
+  // the first visible frame, independently of resource completion order.
+  UpdateEntryVisibility(entry);
   return true;
 }
 
@@ -466,7 +706,8 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
                                       const Vector2&                                contentSize,
                                       const Vector2&                                ownerSize,
                                       float                                         effectiveScale,
-                                      uint64_t                                      expectedSourceRevision)
+                                      uint64_t                                      expectedSourceRevision,
+                                      bool                                          pixelRevealRequested)
 {
   return Update(host,
                 source,
@@ -476,7 +717,8 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
                 contentSize,
                 ownerSize,
                 effectiveScale,
-                expectedSourceRevision);
+                expectedSourceRevision,
+                pixelRevealRequested);
 }
 
 bool InlineReplacementManager::Update(InlineReplacementViewHost&                    host,
@@ -487,7 +729,8 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
                                       const Vector2&                                contentSize,
                                       const Vector2&                                ownerSize,
                                       float                                         effectiveScale,
-                                      uint64_t                                      expectedSourceRevision)
+                                      uint64_t                                      expectedSourceRevision,
+                                      bool                                          pixelRevealRequested)
 {
   Ui::View owner = host.GetOwner();
   if(!owner || source.sourceRevision != expectedSourceRevision)
@@ -504,6 +747,8 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
   }
   mHost                              = &host;
   mEntrySourceRevision               = expectedSourceRevision;
+  mPixelRevealRequested              = pixelRevealRequested;
+  mRevealBindingRequired             = pixelRevealRequested;
   const std::size_t requiredCapacity = mEntries.size() + placements.Count();
   if(requiredCapacity > mEntries.capacity())
   {
@@ -571,14 +816,11 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
     }
     const RuntimeImageDescriptor descriptor = BuildRuntimeImageDescriptor(run, effectiveScale);
     Entry*                       entry      = findEntry(run.occurrenceIdentity);
+    bool                         entryCreated{false};
     if(entry && !IsSameRuntimeImageDescriptor(entry->descriptor, descriptor))
     {
       ReleaseEntryVisual(*entry);
       entry->descriptor = descriptor;
-      if(!CreateEntryVisual(host, *entry))
-      {
-        continue;
-      }
     }
 
     if(!entry)
@@ -587,18 +829,17 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
       created.occurrenceIdentity = run.occurrenceIdentity;
       created.descriptor         = descriptor;
       mEntries.push_back(created);
-      entry = &mEntries.back();
-      if(!CreateEntryVisual(host, *entry))
-      {
-        mEntries.pop_back();
-        continue;
-      }
+      entry        = &mEntries.back();
+      entryCreated = true;
       if(useEntryIndex)
       {
         mEntryIndex.emplace(run.occurrenceIdentity, mEntries.size() - 1u);
       }
     }
 
+    // A texture-backed ImageUrl can report READY synchronously from
+    // RegisterVisual(). Publish authoritative placement first so its reentrant
+    // Refresh() never observes an entry with zero/default geometry.
     entry->lastSeenGeneration = updateGeneration;
     entry->reservedOffset     = reservedOffset;
     entry->reservedSize       = placement.size;
@@ -606,13 +847,38 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
     entry->clipSize           = contentSize;
     entry->ownerSize          = ownerSize;
     entry->effectiveScale     = effectiveScale;
+    if(!entry->visual && !CreateEntryVisual(host, *entry))
+    {
+      if(entryCreated)
+      {
+        if(useEntryIndex)
+        {
+          mEntryIndex.erase(run.occurrenceIdentity);
+        }
+        mEntries.pop_back();
+      }
+      else
+      {
+        entry->lastSeenGeneration = 0u;
+      }
+      continue;
+    }
+
+    if(mPixelRevealRequested)
+    {
+      SetEntryPixelRevealShader(*entry, true);
+    }
+
     if(!ApplyEntryTransform(*entry))
     {
       ReleaseEntryVisual(*entry);
     }
     else if(mRevealSourceRevision == expectedSourceRevision && !mRevealTimings.empty())
     {
-      ApplyEntryRevealConstraint(*entry);
+      if(ApplyEntryRevealConstraint(*entry) == RevealBindingResult::INVALID)
+      {
+        ClearReveal();
+      }
     }
   }
 
@@ -643,20 +909,26 @@ bool InlineReplacementManager::ApplyRevealTimings(
 
   std::unordered_map<uint64_t, Ui::Text::ReplacementRevealTiming> validated;
   validated.reserve(timings.Count());
+  bool pixelRevealRequested = false;
   for(const Ui::Text::ReplacementRevealTiming& timing : timings)
   {
     if(timing.occurrenceIdentity == 0u || !std::isfinite(timing.start) || !std::isfinite(timing.fadeDuration) ||
+       !std::isfinite(timing.progressionSpan) ||
        timing.start < 0.0f || timing.start > 1.0f || timing.fadeDuration < 0.0f || timing.fadeDuration > 1.0f ||
+       timing.progressionSpan < 0.0f || timing.progressionSpan > 1.0f ||
        !validated.emplace(timing.occurrenceIdentity, timing).second)
     {
       ClearReveal();
       return false;
     }
+    pixelRevealRequested = pixelRevealRequested || timing.progressionSpan > 0.0f;
   }
 
   mRevealTimings               = std::move(validated);
   mRevealSourceRevision        = sourceRevision;
   mRevealProgressPropertyIndex = progressPropertyIndex;
+  mPixelRevealRequested        = pixelRevealRequested;
+  mRevealBindingRequired       = pixelRevealRequested;
   if(!mEntries.empty() && mEntrySourceRevision != sourceRevision)
   {
     // Async publication may arrive before the event-thread placement update.
@@ -667,23 +939,25 @@ bool InlineReplacementManager::ApplyRevealTimings(
     }
     return true;
   }
-  bool complete = true;
+  bool valid = true;
   for(Entry& entry : mEntries)
   {
-    complete = ApplyEntryRevealConstraint(entry) && complete;
+    valid = ApplyEntryRevealConstraint(entry) != RevealBindingResult::INVALID && valid;
   }
-  if(!complete)
+  if(!valid)
   {
     ClearReveal();
   }
-  return complete;
+  return valid;
 }
 
 void InlineReplacementManager::ClearReveal()
 {
+  mRevealBindingRequired = false;
   for(Entry& entry : mEntries)
   {
     RemoveEntryRevealConstraint(entry);
+    UpdateEntryVisibility(entry);
   }
   mRevealTimings.clear();
   mRevealSourceRevision        = 0u;
@@ -705,7 +979,11 @@ void InlineReplacementManager::Refresh()
     }
     else if(!mRevealTimings.empty())
     {
-      ApplyEntryRevealConstraint(entry);
+      if(ApplyEntryRevealConstraint(entry) == RevealBindingResult::INVALID)
+      {
+        ClearReveal();
+        break;
+      }
     }
   }
 }
@@ -734,6 +1012,8 @@ void InlineReplacementManager::PrepareOwnerDestruction()
   mEntrySourceRevision         = 0u;
   mRevealSourceRevision        = 0u;
   mRevealProgressPropertyIndex = Property::INVALID_INDEX;
+  mPixelRevealRequested        = false;
+  mRevealBindingRequired       = false;
 }
 
 void InlineReplacementManager::Clear()
@@ -745,8 +1025,10 @@ void InlineReplacementManager::Clear()
   }
   mHost = nullptr;
   mEntryIndex.clear();
-  mUpdateGeneration    = 0u;
-  mEntrySourceRevision = 0u;
+  mUpdateGeneration      = 0u;
+  mEntrySourceRevision   = 0u;
+  mPixelRevealRequested  = false;
+  mRevealBindingRequired = false;
 }
 
 } // namespace Text

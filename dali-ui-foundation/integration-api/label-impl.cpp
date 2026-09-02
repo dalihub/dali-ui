@@ -475,6 +475,10 @@ void LabelImpl::UpdateInlineReplacementData(const InlineReplacementUpdateData& u
     owner.ResourceReadySignal().Connect(this, &LabelImpl::OnInlineReplacementResourcesReady);
     data->resourceReadyConnected = true;
   }
+  const Internal::Text::TextRevealData* revealData           = Internal::Text::GetTextRevealData(mTextRevealData);
+  const bool                            pixelRevealRequested = revealData && revealData->enabled &&
+                                    revealData->unit == Ui::Text::Reveal::Unit::PIXEL &&
+                                    !mController->IsTextCutout();
   data->manager.Update(data->host,
                        updateData.source,
                        updateData.placements,
@@ -485,7 +489,8 @@ void LabelImpl::UpdateInlineReplacementData(const InlineReplacementUpdateData& u
                                         ownerSize.y - static_cast<float>(padding.top + padding.bottom))),
                        ownerSize,
                        GetEffectiveScale(),
-                       updateData.sourceRevision);
+                       updateData.sourceRevision,
+                       pixelRevealRequested);
 }
 
 void LabelImpl::OnInlineReplacementResourcesReady(Ui::View)
@@ -791,11 +796,11 @@ void LabelImpl::SetTextReveal(const Ui::Text::Reveal& reveal)
     return;
   }
 
-  data                        = &Internal::Text::GetOrCreateTextRevealData(mTextRevealData);
-  data->enabled               = enabled;
-  data->unit                  = authoredUnit;
-  data->sequence              = authoredSequence;
-  data->fadeDurationRatio     = authoredFadeDurationRatio;
+  data                       = &Internal::Text::GetOrCreateTextRevealData(mTextRevealData);
+  data->enabled              = enabled;
+  data->unit                 = authoredUnit;
+  data->sequence             = authoredSequence;
+  data->fadeDurationRatio    = authoredFadeDurationRatio;
   data->sequenceStaggerRatio = authoredSequenceStaggerRatio;
   ++data->revision;
 
@@ -4230,10 +4235,10 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
                                    !parameters.isCutoutEnabled;
   if(parameters.isTextRevealEnabled)
   {
-    parameters.textRevealUnit                       = Ui::Text::Internal::Reveal::ToInternalUnit(revealData->unit);
-    parameters.textRevealSequence                   = Ui::Text::Internal::Reveal::ToInternalSequence(revealData->sequence);
-    parameters.textRevealFadeDurationRatio          = revealData->fadeDurationRatio;
-    parameters.textRevealSequenceStaggerRatio       = revealData->sequenceStaggerRatio;
+    parameters.textRevealUnit                 = Ui::Text::Internal::Reveal::ToInternalUnit(revealData->unit);
+    parameters.textRevealSequence             = Ui::Text::Internal::Reveal::ToInternalSequence(revealData->sequence);
+    parameters.textRevealFadeDurationRatio    = revealData->fadeDurationRatio;
+    parameters.textRevealSequenceStaggerRatio = revealData->sequenceStaggerRatio;
   }
   Property::Map variationsMap;
   mController->GetVariationsMap(variationsMap);

@@ -76,6 +76,31 @@ public:
     return iterator == manager.mEntries.end() ? Property::INVALID_INDEX : iterator->revealBaseOpacityIndex;
   }
 
+  static bool IsRevealPixelSpatial(const InlineReplacementManager& manager,
+                                   uint64_t                        occurrenceIdentity)
+  {
+    const auto iterator = std::find_if(manager.mEntries.begin(),
+                                       manager.mEntries.end(),
+                                       [occurrenceIdentity](const InlineReplacementManager::Entry& entry)
+    {
+      return entry.occurrenceIdentity == occurrenceIdentity;
+    });
+    return iterator != manager.mEntries.end() && iterator->revealPixelSpatial;
+  }
+
+  static bool GetRevealTiming(const InlineReplacementManager&    manager,
+                              uint64_t                           occurrenceIdentity,
+                              Ui::Text::ReplacementRevealTiming& timing)
+  {
+    const auto iterator = manager.mRevealTimings.find(occurrenceIdentity);
+    if(iterator == manager.mRevealTimings.end())
+    {
+      return false;
+    }
+    timing = iterator->second;
+    return true;
+  }
+
   static uint64_t GetEntrySourceRevision(const InlineReplacementManager& manager)
   {
     return manager.mEntrySourceRevision;
@@ -84,6 +109,40 @@ public:
   static uint64_t GetRevealSourceRevision(const InlineReplacementManager& manager)
   {
     return manager.mRevealSourceRevision;
+  }
+
+  static bool IsRevealBindingRequired(const InlineReplacementManager& manager)
+  {
+    return manager.mRevealBindingRequired;
+  }
+
+  static bool IsEntryVisible(const InlineReplacementManager& manager,
+                             uint64_t                        occurrenceIdentity)
+  {
+    const auto iterator = std::find_if(manager.mEntries.begin(),
+                                       manager.mEntries.end(),
+                                       [occurrenceIdentity](const InlineReplacementManager::Entry& entry)
+    {
+      return entry.occurrenceIdentity == occurrenceIdentity;
+    });
+    return iterator != manager.mEntries.end() && iterator->currentlyVisible;
+  }
+
+  static void ResetEntryGeometry(InlineReplacementManager& manager,
+                                 uint64_t                  occurrenceIdentity)
+  {
+    const auto iterator = std::find_if(manager.mEntries.begin(),
+                                       manager.mEntries.end(),
+                                       [occurrenceIdentity](const InlineReplacementManager::Entry& entry)
+    {
+      return entry.occurrenceIdentity == occurrenceIdentity;
+    });
+    if(iterator != manager.mEntries.end())
+    {
+      iterator->transformApplied = false;
+      iterator->pixelAreaApplied = false;
+      iterator->lastPixelArea    = Vector4::ZERO;
+    }
   }
 };
 } // namespace Dali::Ui::Internal::Text

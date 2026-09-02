@@ -158,6 +158,8 @@ struct ReplacementRevealTiming
   uint64_t occurrenceIdentity{0u};
   float    start{0.0f};
   float    fadeDuration{0.0f};
+  float    progressionSpan{0.0f};
+  bool     rightToLeft{false};
 };
 
 } // namespace Dali::Ui::Text

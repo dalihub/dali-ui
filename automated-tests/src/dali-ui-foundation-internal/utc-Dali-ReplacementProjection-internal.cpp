@@ -20,6 +20,7 @@
 #include <limits>
 #include <vector>
 #include <dali/devel-api/rendering/renderer-devel.h>
+#include <dali/public-api/rendering/texture.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
@@ -38,6 +39,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
@@ -2026,7 +2028,8 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      7u));
+                                      7u,
+                                      true));
   DALI_TEST_EQUALS(Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealConstraintCount(firstManager), 1u, TEST_LOCATION);
   checkRevealOpacity(0.3f, 0.5f);
 
@@ -2040,7 +2043,8 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      7u));
+                                      7u,
+                                      true));
   inlineVisual = firstViewData.GetVisual(firstVisualIndex);
   getTransform(inlineSize, inlineOffset);
   DALI_TEST_EQUALS(inlineOffset, Vector2(0.0f, 9.0f), TEST_LOCATION);
@@ -2050,6 +2054,46 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
   DALI_TEST_EQUALS(clippedPixelArea.y, 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
   DALI_TEST_EQUALS(clippedPixelArea.z, 2.0f / 3.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
   DALI_TEST_EQUALS(clippedPixelArea.w, 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // PIXEL Reveal keeps its visual-local schedule when ImageVisual sampling is
+  // cropped. The manager precomposes the inverse pixel-area transform into
+  // the fragment timing coefficients instead of redeclaring pixelArea there.
+  revealTimings[0u].progressionSpan = 0.3f;
+  revealTimings[0u].rightToLeft     = false;
+  DALI_TEST_CHECK(firstManager.ApplyRevealTimings(revealTimings, 7u, progressIndex));
+  VisualRenderer pixelRevealRenderer = inlineVisual.GetRenderer();
+  DALI_TEST_CHECK(pixelRevealRenderer);
+  const Property::Index pixelTimingIndex =
+    pixelRevealRenderer.GetPropertyIndex("uInlineReplacementRevealTiming");
+  DALI_TEST_CHECK(pixelTimingIndex != Property::INVALID_INDEX);
+  const Vector3 pixelTiming = pixelRevealRenderer.GetProperty<Vector3>(pixelTimingIndex);
+  DALI_TEST_EQUALS(pixelTiming.x,
+                   revealTimings[0u].start - 0.5f * revealTimings[0u].progressionSpan,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(pixelTiming.y,
+                   revealTimings[0u].progressionSpan,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(pixelTiming.z,
+                   revealTimings[0u].fadeDuration,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  TextureSet yuvTextures = TextureSet::New();
+  yuvTextures.SetTexture(0u, Texture::New(TextureType::TEXTURE_2D, Pixel::L8, 24u, 18u));
+  yuvTextures.SetTexture(1u, Texture::New(TextureType::TEXTURE_2D, Pixel::CHROMINANCE_U, 12u, 9u));
+  yuvTextures.SetTexture(2u, Texture::New(TextureType::TEXTURE_2D, Pixel::CHROMINANCE_V, 12u, 9u));
+  pixelRevealRenderer.SetTextures(yuvTextures);
+  firstManager.Refresh();
+  DALI_TEST_CHECK(!Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::IsRevealPixelSpatial(
+    firstManager,
+    run.occurrenceIdentity));
+  DALI_TEST_CHECK(!Ui::GetImplementation(inlineVisual).IsUsingCustomShader());
+  DALI_TEST_EQUALS(
+    Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor::GetRevealConstraintCount(firstManager),
+    1u,
+    TEST_LOCATION);
 
   // Decode-size identity changes recreate the visual while reusing the owner-local slot.
   source.runs[0u].metrics.width  = 30.0f;
@@ -2189,6 +2233,596 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
   secondManager.Refresh();
   secondManager.Clear();
   secondManager.Clear();
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerPixelBindingOrderingP(void)
+{
+  UiTestApplication application;
+  using Accessor = Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor;
+
+  Texture      texture  = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 48u, 32u);
+  Ui::ImageUrl imageUrl = Ui::ImageUrl::New(texture, true);
+
+  Text::ReplacementSourceSnapshot source;
+  source.sourceRevision            = 101u;
+  Text::ReplacementRunSnapshot run = Candidate(1u, 1u, 48.0f, 32.0f, 901u);
+  run.type                         = Text::ReplacementType::IMAGE;
+  run.occurrenceIdentity           = 901u;
+  run.image.source                 = imageUrl.GetUrl().CStr();
+  source.runs.PushBack(run);
+
+  Vector<Text::ReplacementPlacement> placements;
+  Text::ReplacementPlacement         placement;
+  placement.logicalCharacterRange = run.logicalCharacterRange;
+  placement.sourceRunIndex        = 0u;
+  placement.occurrenceIdentity    = run.occurrenceIdentity;
+  placement.position              = Vector2(7.0f, 5.0f);
+  placement.size                  = Vector2(48.0f, 32.0f);
+  placement.visible               = true;
+  placements.PushBack(placement);
+
+  View owner = View::New();
+  application.GetScene().Add(owner);
+  Dali::Ui::Internal::Text::InlineReplacementViewHost host(
+    owner,
+    Ui::Integration::DepthIndex::CONTENT + 1);
+  Dali::Ui::Internal::Text::InlineReplacementManager manager;
+
+  const Property::Index visualIndex = host.AllocateVisualSlot();
+  DALI_TEST_CHECK(visualIndex != Property::INVALID_INDEX);
+  host.ReleaseVisualSlot(visualIndex);
+  auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(owner));
+
+  const Property::Index progressIndex = owner.RegisterProperty("uInlinePixelOrderingProgress", 0.4f);
+  Vector<Text::ReplacementRevealTiming> timings;
+  timings.PushBack({run.occurrenceIdentity, 0.35f, 0.2f, 0.3f, false});
+
+  // Texture-backed ImageUrl can synchronously report READY from
+  // RegisterVisual(). Placement must already be authoritative, while the
+  // visual remains hidden until the PIXEL binding is complete.
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(120.0f, 60.0f),
+                                 Vector2(120.0f, 60.0f),
+                                 1.0f,
+                                 source.sourceRevision,
+                                 true));
+  Ui::Integration::Visual::Base visual   = viewData.GetVisual(visualIndex);
+  VisualRenderer                renderer = visual.GetRenderer();
+  DALI_TEST_CHECK(visual && renderer);
+  DALI_TEST_EQUALS(Ui::GetImplementation(visual).GetResourceStatus(),
+                   Ui::Visual::ResourceStatus::READY,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(Ui::GetImplementation(visual).IsUsingCustomShader());
+  DALI_TEST_CHECK(Accessor::IsRevealBindingRequired(manager));
+  DALI_TEST_CHECK(!Accessor::IsEntryVisible(manager, run.occurrenceIdentity));
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 0u, TEST_LOCATION);
+
+  Property::Map visualMap;
+  visual.CreatePropertyMap(visualMap);
+  Property::Map transform;
+  Vector2       transformSize;
+  Vector2       transformOffset;
+  DALI_TEST_CHECK(visualMap.Find(Ui::VisualBasePropertyIndex::TRANSFORM)->Get(transform));
+  DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::SIZE)->Get(transformSize));
+  DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::OFFSET)->Get(transformOffset));
+  DALI_TEST_EQUALS(transformSize, placement.size, TEST_LOCATION);
+  DALI_TEST_EQUALS(transformOffset, placement.position, TEST_LOCATION);
+
+  Shader creationShader = renderer.GetShader();
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  DALI_TEST_CHECK(Accessor::IsEntryVisible(manager, run.occurrenceIdentity));
+  DALI_TEST_CHECK(Ui::GetImplementation(visual).IsUsingCustomShader());
+  DALI_TEST_CHECK(renderer.GetShader() == creationShader);
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+  Constraint pixelConstraint = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+  const Property::Index pixelProgressIndex = renderer.GetPropertyIndex("uInlineReplacementRevealProgress");
+  DALI_TEST_CHECK(pixelConstraint);
+  DALI_TEST_EQUALS(pixelConstraint.GetTargetProperty(), pixelProgressIndex, TEST_LOCATION);
+  DALI_TEST_CHECK(pixelConstraint.GetTargetProperty() != Dali::DevelRenderer::Property::OPACITY);
+
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(pixelProgressIndex), 0.4f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY),
+                   1.0f,
+                   0.01f,
+                   TEST_LOCATION);
+
+  // Valid timing published before geometry is accepted as DEFERRED. It must
+  // survive unchanged and complete on the next placement Update without a
+  // custom shader remove/reinstall cycle.
+  manager.ClearReveal();
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(120.0f, 60.0f),
+                                 Vector2(120.0f, 60.0f),
+                                 1.0f,
+                                 source.sourceRevision,
+                                 true));
+  Accessor::ResetEntryGeometry(manager, run.occurrenceIdentity);
+  Shader deferredShader = renderer.GetShader();
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(manager), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealSourceRevision(manager), source.sourceRevision, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!Accessor::IsEntryVisible(manager, run.occurrenceIdentity));
+  DALI_TEST_CHECK(Ui::GetImplementation(visual).IsUsingCustomShader());
+  DALI_TEST_CHECK(renderer.GetShader() == deferredShader);
+
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(120.0f, 60.0f),
+                                 Vector2(120.0f, 60.0f),
+                                 1.0f,
+                                 source.sourceRevision,
+                                 true));
+  DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(manager), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(Accessor::IsEntryVisible(manager, run.occurrenceIdentity));
+  DALI_TEST_CHECK(renderer.GetShader() == deferredShader);
+
+  // Exercise the update-thread value when a partially applied atomic opacity
+  // constraint is replaced by the PIXEL progress constraint.
+  timings[0u].progressionSpan = 0.0f;
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(120.0f, 60.0f),
+                                 Vector2(120.0f, 60.0f),
+                                 1.0f,
+                                 source.sourceRevision,
+                                 false));
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraint(manager, run.occurrenceIdentity).GetRemoveAction(),
+                   Constraint::DISCARD,
+                   TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(renderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY) < 0.99f);
+
+  timings[0u].progressionSpan = 0.3f;
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(120.0f, 60.0f),
+                                 Vector2(120.0f, 60.0f),
+                                 1.0f,
+                                 source.sourceRevision,
+                                 true));
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraint(manager, run.occurrenceIdentity).GetRemoveAction(),
+                   Constraint::DISCARD,
+                   TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY),
+                   1.0f,
+                   0.01f,
+                   TEST_LOCATION);
+
+  // The zero endpoint used to bake complete transparency and leave the PIXEL
+  // image invisible after the atomic constraint was removed.
+  owner.SetProperty(progressIndex, 0.0f);
+  timings[0u].progressionSpan = 0.0f;
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(120.0f, 60.0f),
+                                 Vector2(120.0f, 60.0f),
+                                 1.0f,
+                                 source.sourceRevision,
+                                 false));
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY),
+                   0.0f,
+                   0.01f,
+                   TEST_LOCATION);
+
+  timings[0u].progressionSpan = 0.3f;
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(120.0f, 60.0f),
+                                 Vector2(120.0f, 60.0f),
+                                 1.0f,
+                                 source.sourceRevision,
+                                 true));
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY),
+                   1.0f,
+                   0.01f,
+                   TEST_LOCATION);
+  owner.SetProperty(progressIndex, 1.0f);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(renderer.GetPropertyIndex("uInlineReplacementRevealProgress")),
+                   1.0f,
+                   0.01f,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY),
+                   1.0f,
+                   0.01f,
+                   TEST_LOCATION);
+
+  // Atomic and spatial modes own mutually exclusive targets. None removes
+  // both the binding and replacement-owned shader without hiding a READY image.
+  for(uint32_t cycle = 0u; cycle < 100u; ++cycle)
+  {
+    timings[0u].progressionSpan = 0.0f;
+    DALI_TEST_CHECK(manager.Update(host,
+                                   source,
+                                   placements,
+                                   Vector2::ZERO,
+                                   Vector2(120.0f, 60.0f),
+                                   Vector2(120.0f, 60.0f),
+                                   1.0f,
+                                   source.sourceRevision,
+                                   false));
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    Constraint atomicConstraint = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(atomicConstraint);
+    DALI_TEST_EQUALS(atomicConstraint.GetTargetProperty(),
+                     static_cast<Property::Index>(Dali::DevelRenderer::Property::OPACITY),
+                     TEST_LOCATION);
+    DALI_TEST_CHECK(!Ui::GetImplementation(visual).IsUsingCustomShader());
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+
+    timings[0u].progressionSpan = 0.3f;
+    DALI_TEST_CHECK(manager.Update(host,
+                                   source,
+                                   placements,
+                                   Vector2::ZERO,
+                                   Vector2(120.0f, 60.0f),
+                                   Vector2(120.0f, 60.0f),
+                                   1.0f,
+                                   source.sourceRevision,
+                                   true));
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    pixelConstraint = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(pixelConstraint);
+    DALI_TEST_EQUALS(pixelConstraint.GetTargetProperty(),
+                     renderer.GetPropertyIndex("uInlineReplacementRevealProgress"),
+                     TEST_LOCATION);
+    DALI_TEST_CHECK(Ui::GetImplementation(visual).IsUsingCustomShader());
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+
+    manager.ClearReveal();
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 0u, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(manager), 0u, TEST_LOCATION);
+    DALI_TEST_CHECK(!Accessor::IsRevealBindingRequired(manager));
+    DALI_TEST_CHECK(!Ui::GetImplementation(visual).IsUsingCustomShader());
+    DALI_TEST_CHECK(Accessor::IsEntryVisible(manager, run.occurrenceIdentity));
+  }
+
+  // CHARACTER and WORD share this atomic replacement binding. Exercise its
+  // full transition matrix against PIXEL and None at representative progress
+  // values so temporary constraints can never leave baked renderer state.
+  const float transitionProgresses[]{0.0f, 0.1f, 0.25f, 0.5f, 0.75f, 0.9f, 1.0f};
+  for(const float progress : transitionProgresses)
+  {
+    owner.SetProperty(progressIndex, progress);
+    timings[0u].start           = 0.25f;
+    timings[0u].fadeDuration    = 0.25f;
+    timings[0u].progressionSpan = 0.0f;
+    DALI_TEST_CHECK(manager.Update(host,
+                                   source,
+                                   placements,
+                                   Vector2::ZERO,
+                                   Vector2(120.0f, 60.0f),
+                                   Vector2(120.0f, 60.0f),
+                                   1.0f,
+                                   source.sourceRevision,
+                                   false));
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    Constraint atomicTransition = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(atomicTransition);
+    DALI_TEST_EQUALS(atomicTransition.GetTargetProperty(),
+                     static_cast<Property::Index>(Dali::DevelRenderer::Property::OPACITY),
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(atomicTransition.GetRemoveAction(), Constraint::DISCARD, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(!Ui::GetImplementation(visual).IsUsingCustomShader());
+
+    // Atomic -> PIXEL must discard the constrained opacity at every progress.
+    timings[0u].progressionSpan = 0.3f;
+    DALI_TEST_CHECK(manager.Update(host,
+                                   source,
+                                   placements,
+                                   Vector2::ZERO,
+                                   Vector2(120.0f, 60.0f),
+                                   Vector2(120.0f, 60.0f),
+                                   1.0f,
+                                   source.sourceRevision,
+                                   true));
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    Constraint pixelTransition = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(pixelTransition);
+    DALI_TEST_EQUALS(atomicTransition.GetState(), Constraint::State::INITIALIZED, TEST_LOCATION);
+    DALI_TEST_EQUALS(pixelTransition.GetTargetProperty(), pixelProgressIndex, TEST_LOCATION);
+    DALI_TEST_EQUALS(pixelTransition.GetRemoveAction(), Constraint::DISCARD, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(Ui::GetImplementation(visual).IsUsingCustomShader());
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY),
+                     1.0f,
+                     0.01f,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(pixelProgressIndex), progress, 0.01f, TEST_LOCATION);
+
+    // PIXEL -> atomic must remove the shader and let only the new opacity
+    // constraint determine the result.
+    timings[0u].progressionSpan = 0.0f;
+    DALI_TEST_CHECK(manager.Update(host,
+                                   source,
+                                   placements,
+                                   Vector2::ZERO,
+                                   Vector2(120.0f, 60.0f),
+                                   Vector2(120.0f, 60.0f),
+                                   1.0f,
+                                   source.sourceRevision,
+                                   false));
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    atomicTransition = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(atomicTransition);
+    DALI_TEST_EQUALS(pixelTransition.GetState(), Constraint::State::INITIALIZED, TEST_LOCATION);
+    DALI_TEST_EQUALS(atomicTransition.GetTargetProperty(),
+                     static_cast<Property::Index>(Dali::DevelRenderer::Property::OPACITY),
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(atomicTransition.GetRemoveAction(), Constraint::DISCARD, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(!Ui::GetImplementation(visual).IsUsingCustomShader());
+
+    // Return to PIXEL, then cover PIXEL -> None -> PIXEL.
+    timings[0u].progressionSpan = 0.3f;
+    DALI_TEST_CHECK(manager.Update(host,
+                                   source,
+                                   placements,
+                                   Vector2::ZERO,
+                                   Vector2(120.0f, 60.0f),
+                                   Vector2(120.0f, 60.0f),
+                                   1.0f,
+                                   source.sourceRevision,
+                                   true));
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    pixelTransition = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(pixelTransition);
+    manager.ClearReveal();
+    DALI_TEST_EQUALS(pixelTransition.GetState(), Constraint::State::INITIALIZED, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 0u, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(manager), 0u, TEST_LOCATION);
+    DALI_TEST_CHECK(!Ui::GetImplementation(visual).IsUsingCustomShader());
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY),
+                     1.0f,
+                     0.01f,
+                     TEST_LOCATION);
+
+    DALI_TEST_CHECK(manager.Update(host,
+                                   source,
+                                   placements,
+                                   Vector2::ZERO,
+                                   Vector2(120.0f, 60.0f),
+                                   Vector2(120.0f, 60.0f),
+                                   1.0f,
+                                   source.sourceRevision,
+                                   true));
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    pixelTransition = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(pixelTransition);
+    DALI_TEST_EQUALS(pixelTransition.GetTargetProperty(), pixelProgressIndex, TEST_LOCATION);
+    DALI_TEST_EQUALS(pixelTransition.GetRemoveAction(), Constraint::DISCARD, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(Ui::GetImplementation(visual).IsUsingCustomShader());
+
+    // PIXEL -> PIXEL timing replacement may replace one Constraint, but must
+    // never stack it or disturb the unconstrained opacity.
+    Constraint previousPixelTransition = pixelTransition;
+    timings[0u].start                   = 0.2f;
+    DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+    pixelTransition = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+    DALI_TEST_CHECK(pixelTransition && pixelTransition != previousPixelTransition);
+    DALI_TEST_EQUALS(previousPixelTransition.GetState(), Constraint::State::INITIALIZED, TEST_LOCATION);
+    DALI_TEST_EQUALS(pixelTransition.GetTargetProperty(), pixelProgressIndex, TEST_LOCATION);
+    DALI_TEST_EQUALS(pixelTransition.GetRemoveAction(), Constraint::DISCARD, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(manager), 1u, TEST_LOCATION);
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY),
+                     1.0f,
+                     0.01f,
+                     TEST_LOCATION);
+
+    manager.ClearReveal();
+  }
+
+  // Pending resources cover GTR, TGR and GRT. A binding completed while the
+  // resource is pending stays hidden, and the first READY frame consumes the
+  // current progress. A resource completed before timing likewise stays
+  // hidden until that timing is accepted.
+  for(uint32_t ordering = 0u; ordering < 3u; ++ordering)
+  {
+    const bool timingBeforePlacement = ordering == 1u;
+    const bool readyBeforeTiming     = ordering == 2u;
+    View delayedOwner = View::New();
+    application.GetScene().Add(delayedOwner);
+    Dali::Ui::Internal::Text::InlineReplacementViewHost delayedHost(
+      delayedOwner,
+      Ui::Integration::DepthIndex::CONTENT + 1);
+    Dali::Ui::Internal::Text::InlineReplacementManager delayedManager;
+
+    Text::ReplacementSourceSnapshot delayedSource = source;
+    delayedSource.sourceRevision              = 201u + ordering;
+    delayedSource.runs[0u].occurrenceIdentity = 902u + ordering;
+    delayedSource.runs[0u].image.source        = "missing-inline-pixel-ordering.png";
+    Vector<Text::ReplacementPlacement> delayedPlacements = placements;
+    delayedPlacements[0u].occurrenceIdentity = delayedSource.runs[0u].occurrenceIdentity;
+    const Property::Index delayedProgressIndex =
+      delayedOwner.RegisterProperty("uInlinePixelDelayedProgress", 0.0f);
+    Vector<Text::ReplacementRevealTiming> delayedTimings;
+    delayedTimings.PushBack({delayedSource.runs[0u].occurrenceIdentity, 0.35f, 0.2f, 0.3f, false});
+
+    if(timingBeforePlacement)
+    {
+      DALI_TEST_CHECK(delayedManager.ApplyRevealTimings(delayedTimings,
+                                                        delayedSource.sourceRevision,
+                                                        delayedProgressIndex));
+      DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(delayedManager), 1u, TEST_LOCATION);
+    }
+    DALI_TEST_CHECK(delayedManager.Update(delayedHost,
+                                          delayedSource,
+                                          delayedPlacements,
+                                          Vector2::ZERO,
+                                          Vector2(120.0f, 60.0f),
+                                          Vector2(120.0f, 60.0f),
+                                          1.0f,
+                                          delayedSource.sourceRevision,
+                                          true));
+    const Property::Index delayedVisualIndex = delayedOwner.GetPropertyIndex("__dali_ui_inline_replacement_0");
+    DALI_TEST_CHECK(delayedVisualIndex != Property::INVALID_INDEX);
+    auto& delayedViewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(delayedOwner));
+    Ui::Integration::Visual::Base delayedVisual = delayedViewData.GetVisual(delayedVisualIndex);
+    VisualRenderer delayedRenderer = delayedVisual.GetRenderer();
+    DALI_TEST_CHECK(delayedVisual && delayedRenderer);
+    if(readyBeforeTiming)
+    {
+      DALI_TEST_EQUALS(delayedOwner.GetRendererCount(), 0u, TEST_LOCATION);
+      delayedOwner.AddRenderer(delayedRenderer);
+      Ui::GetImplementation(delayedVisual).ResourceReady(Ui::Visual::ResourceStatus::READY);
+      delayedManager.Refresh();
+      DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(delayedManager), 0u, TEST_LOCATION);
+      DALI_TEST_CHECK(!Accessor::IsEntryVisible(delayedManager,
+                                                delayedSource.runs[0u].occurrenceIdentity));
+    }
+    if(!timingBeforePlacement)
+    {
+      DALI_TEST_CHECK(delayedManager.ApplyRevealTimings(delayedTimings,
+                                                        delayedSource.sourceRevision,
+                                                        delayedProgressIndex));
+    }
+
+    DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(delayedManager), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(delayedManager), 1u, TEST_LOCATION);
+    Constraint delayedConstraint = Accessor::GetRevealConstraint(
+      delayedManager,
+      delayedSource.runs[0u].occurrenceIdentity);
+    DALI_TEST_CHECK(delayedConstraint);
+    DALI_TEST_CHECK(delayedConstraint.GetTargetObject() == delayedRenderer);
+    DALI_TEST_EQUALS(delayedConstraint.GetTargetProperty(),
+                     delayedRenderer.GetPropertyIndex("uInlineReplacementRevealProgress"),
+                     TEST_LOCATION);
+    // VisualRenderer owns its scene object before ImageVisual adds it to the
+    // actor's renderer list, so the binding is already live while loading.
+    DALI_TEST_EQUALS(delayedConstraint.GetState(), Constraint::State::APPLIED, TEST_LOCATION);
+
+    // Distinguish a live binding from a renderer uniform frozen at its
+    // registration value while the resource is pending and the renderer has
+    // not yet been added to the owner's renderer list.
+    Animation delayedAnimation = Animation::New(0.05f);
+    delayedAnimation.AnimateTo(Property(delayedOwner, delayedProgressIndex), 0.8f);
+    delayedAnimation.Play();
+    application.SendNotification();
+    application.Render(32u);
+    application.SendNotification();
+    application.Render(32u);
+    DALI_TEST_EQUALS(delayedOwner.GetCurrentProperty<float>(delayedProgressIndex),
+                     0.8f,
+                     0.01f,
+                     TEST_LOCATION);
+    if(!readyBeforeTiming)
+    {
+      DALI_TEST_CHECK(!Accessor::IsEntryVisible(delayedManager,
+                                                delayedSource.runs[0u].occurrenceIdentity));
+      DALI_TEST_EQUALS(delayedOwner.GetRendererCount(), 0u, TEST_LOCATION);
+      delayedOwner.AddRenderer(delayedRenderer);
+      Ui::GetImplementation(delayedVisual).ResourceReady(Ui::Visual::ResourceStatus::READY);
+      delayedManager.Refresh();
+    }
+    DALI_TEST_CHECK(Accessor::IsEntryVisible(delayedManager,
+                                             delayedSource.runs[0u].occurrenceIdentity));
+    const Property::Index delayedPixelProgressIndex =
+      delayedRenderer.GetPropertyIndex("uInlineReplacementRevealProgress");
+    DALI_TEST_CHECK(delayedPixelProgressIndex != Property::INVALID_INDEX);
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(delayedConstraint.GetState(), Constraint::State::APPLIED, TEST_LOCATION);
+    DALI_TEST_EQUALS(delayedRenderer.GetCurrentProperty<float>(delayedPixelProgressIndex),
+                     0.8f,
+                     0.01f,
+                     TEST_LOCATION);
+  }
+
+  // TRG is the timing-first form of the synchronous Texture/ImageUrl path:
+  // READY re-enters during RegisterVisual(), then commits final geometry and
+  // the already accepted timing before the visual can become visible.
+  View timingFirstReadyOwner = View::New();
+  application.GetScene().Add(timingFirstReadyOwner);
+  Dali::Ui::Internal::Text::InlineReplacementViewHost timingFirstReadyHost(
+    timingFirstReadyOwner,
+    Ui::Integration::DepthIndex::CONTENT + 1);
+  Dali::Ui::Internal::Text::InlineReplacementManager timingFirstReadyManager;
+  Text::ReplacementSourceSnapshot timingFirstReadySource = source;
+  timingFirstReadySource.sourceRevision                  = 204u;
+  timingFirstReadySource.runs[0u].occurrenceIdentity     = 905u;
+  Vector<Text::ReplacementPlacement> timingFirstReadyPlacements = placements;
+  timingFirstReadyPlacements[0u].occurrenceIdentity = timingFirstReadySource.runs[0u].occurrenceIdentity;
+  const Property::Index timingFirstReadyProgressIndex =
+    timingFirstReadyOwner.RegisterProperty("uInlinePixelTimingFirstReadyProgress", 0.4f);
+  Vector<Text::ReplacementRevealTiming> timingFirstReadyTimings;
+  timingFirstReadyTimings.PushBack(
+    {timingFirstReadySource.runs[0u].occurrenceIdentity, 0.35f, 0.2f, 0.3f, false});
+  DALI_TEST_CHECK(timingFirstReadyManager.ApplyRevealTimings(timingFirstReadyTimings,
+                                                             timingFirstReadySource.sourceRevision,
+                                                             timingFirstReadyProgressIndex));
+  DALI_TEST_CHECK(timingFirstReadyManager.Update(timingFirstReadyHost,
+                                                 timingFirstReadySource,
+                                                 timingFirstReadyPlacements,
+                                                 Vector2::ZERO,
+                                                 Vector2(120.0f, 60.0f),
+                                                 Vector2(120.0f, 60.0f),
+                                                 1.0f,
+                                                 timingFirstReadySource.sourceRevision,
+                                                 true));
+  DALI_TEST_EQUALS(Accessor::GetRevealTimingCount(timingFirstReadyManager), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Accessor::GetRevealConstraintCount(timingFirstReadyManager), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(Accessor::IsEntryVisible(timingFirstReadyManager,
+                                           timingFirstReadySource.runs[0u].occurrenceIdentity));
+
   END_TEST;
 }
 

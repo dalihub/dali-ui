@@ -138,6 +138,7 @@ public:
    * @param[in] ownerSize The size of the visual owner.
    * @param[in] effectiveScale The effective visual scale.
    * @param[in] expectedSourceRevision The source revision accepted by the owner.
+   * @param[in] pixelRevealRequested True when PIXEL Reveal requires a spatial image shader.
    * @return true if the source revision is valid.
    */
   bool Update(InlineReplacementViewHost&                    host,
@@ -147,13 +148,15 @@ public:
               const Vector2&                                contentSize,
               const Vector2&                                ownerSize,
               float                                         effectiveScale,
-              uint64_t                                      expectedSourceRevision);
+              uint64_t                                      expectedSourceRevision,
+              bool                                          pixelRevealRequested = false);
 
   /**
    * @brief Applies a shared Label progress binding to visible image visuals.
    *
    * The source revision and occurrence identities form the publication key.
-   * Empty or incomplete timing clears all replacement Reveal bindings.
+   * Empty or invalid timing clears all replacement Reveal bindings. Valid
+   * timing is retained while renderer or geometry prerequisites are pending.
    */
   bool ApplyRevealTimings(const Vector<Ui::Text::ReplacementRevealTiming>& timings,
                           uint64_t                                         sourceRevision,
@@ -176,6 +179,7 @@ public:
    * @param[in] ownerSize The size of the visual owner.
    * @param[in] effectiveScale The effective visual scale.
    * @param[in] expectedSourceRevision The source revision accepted by the owner.
+   * @param[in] pixelRevealRequested True when PIXEL Reveal requires a spatial image shader.
    * @return true if the source revision is valid.
    */
   bool Update(InlineReplacementViewHost&                    host,
@@ -186,7 +190,8 @@ public:
               const Vector2&                                contentSize,
               const Vector2&                                ownerSize,
               float                                         effectiveScale,
-              uint64_t                                      expectedSourceRevision);
+              uint64_t                                      expectedSourceRevision,
+              bool                                          pixelRevealRequested = false);
 
   /**
    * @brief Removes and discards all registered visuals.
@@ -215,6 +220,13 @@ private:
     int32_t     desiredHeight{0};
   };
 
+  enum class RevealBindingResult
+  {
+    APPLIED,
+    DEFERRED,
+    INVALID
+  };
+
   struct Entry
   {
     uint64_t                      occurrenceIdentity{0u};
@@ -240,9 +252,13 @@ private:
     bool                          pixelAreaApplied{false};
     Constraint                    revealConstraint;
     Property::Index               revealBaseOpacityIndex{Property::INVALID_INDEX};
+    Property::Index               revealPixelProgressIndex{Property::INVALID_INDEX};
     Property::Index               revealProgressPropertyIndex{Property::INVALID_INDEX};
     float                         revealStart{0.0f};
     float                         revealFadeDuration{0.0f};
+    float                         revealProgressionSpan{0.0f};
+    bool                          revealRightToLeft{false};
+    bool                          revealPixelSpatial{false};
   };
 
   std::vector<Entry>::iterator  RemoveEntry(std::vector<Entry>::iterator iterator);
@@ -250,8 +266,11 @@ private:
   bool                          CreateEntryVisual(InlineReplacementViewHost& host, Entry& entry);
   bool                          ApplyEntryTransform(Entry& entry);
   void                          SetEntryVisible(Entry& entry, bool visible);
-  void                          RemoveEntryRevealConstraint(Entry& entry);
-  bool                          ApplyEntryRevealConstraint(Entry& entry);
+  void                          UpdateEntryVisibility(Entry& entry);
+  void                          RemoveEntryRevealConstraint(Entry& entry, bool removePixelShader = true);
+  RevealBindingResult           ApplyEntryRevealConstraint(Entry& entry);
+  bool                          SetEntryPixelRevealShader(Entry& entry, bool enabled);
+  bool                          UpdateEntryPixelRevealTiming(Entry& entry);
   static void                   ResetEntryResourceState(Entry& entry);
   static RuntimeImageDescriptor BuildRuntimeImageDescriptor(const Ui::Text::ReplacementRunSnapshot& run,
                                                             float                                   effectiveScale);
@@ -267,6 +286,8 @@ private:
   uint64_t                                                        mEntrySourceRevision{0u};
   uint64_t                                                        mRevealSourceRevision{0u};
   Property::Index                                                 mRevealProgressPropertyIndex{Property::INVALID_INDEX};
+  bool                                                            mPixelRevealRequested{false};
+  bool                                                            mRevealBindingRequired{false};
 };
 
 } // namespace Text

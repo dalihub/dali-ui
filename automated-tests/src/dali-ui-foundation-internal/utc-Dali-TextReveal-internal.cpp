@@ -82,6 +82,18 @@ uint64_t GetInlineReplacementRevealSourceRevision(Ui::View owner)
   const Text::InlineReplacementData* data = Text::GetInlineReplacementData(owner);
   return data ? Text::InlineReplacementManagerTestAccessor::GetRevealSourceRevision(data->manager) : 0u;
 }
+
+bool IsInlineReplacementRevealPixelSpatial(Ui::View owner)
+{
+  const Text::InlineReplacementData* data = Text::GetInlineReplacementData(owner);
+  return data && Text::InlineReplacementManagerTestAccessor::IsRevealPixelSpatial(data->manager, 1u);
+}
+
+bool GetInlineReplacementRevealTiming(Ui::View owner, Ui::Text::ReplacementRevealTiming& timing)
+{
+  const Text::InlineReplacementData* data = Text::GetInlineReplacementData(owner);
+  return data && Text::InlineReplacementManagerTestAccessor::GetRevealTiming(data->manager, 1u, timing);
+}
 } // namespace Dali::Ui::Internal
 
 namespace
@@ -1020,13 +1032,13 @@ int UtcDaliTextRevealSyntheticReplacementDoesNotConsumeTimingP(void)
     DALI_TEST_EQUALS(explicitRatio.fadeDuration, 0.2f, EPSILON, TEST_LOCATION);
 
     UiText::TypesetterPtr primaryTypesetter = UiText::Typesetter::New(primaryModel);
-    const Reveal::Plan    linePlan = primaryTypesetter->CreateFinalRevealPlan(automatic,
+    const Reveal::Plan    perLinePlan = primaryTypesetter->CreateFinalRevealPlan(automatic,
                                                                               unit,
                                                                               Reveal::Sequence::PER_LINE,
                                                                               0.5f);
-    DALI_TEST_CHECK(linePlan.glyphToUnit == automatic.glyphToUnit);
-    DALI_TEST_CHECK(linePlan.unitStart == automatic.unitStart);
-    DALI_TEST_EQUALS(linePlan.fadeDuration, automatic.fadeDuration, EPSILON, TEST_LOCATION);
+    DALI_TEST_CHECK(perLinePlan.glyphToUnit == automatic.glyphToUnit);
+    DALI_TEST_CHECK(perLinePlan.unitStart == automatic.unitStart);
+    DALI_TEST_EQUALS(perLinePlan.fadeDuration, automatic.fadeDuration, EPSILON, TEST_LOCATION);
   }
 
   UiText::ControllerPtr replacementOnlyLine = BuildReplacementController(
@@ -1389,14 +1401,14 @@ int UtcDaliTextRevealEllipsisMetadataP(void)
 
     UiText::TypesetterPtr typesetter = UiText::Typesetter::New(model);
     typesetter->SetFinalElisionResult(finalElision);
-    const Reveal::Plan textPlan = typesetter->CreateFinalRevealPlan(source, unit);
+    const Reveal::Plan wholeTextPlan = typesetter->CreateFinalRevealPlan(source, unit);
     const Reveal::Plan finalPlan = typesetter->CreateFinalRevealPlan(source,
                                                                      unit,
                                                                      Reveal::Sequence::PER_LINE,
                                                                      0.5f);
-    DALI_TEST_CHECK(finalPlan.glyphToUnit == textPlan.glyphToUnit);
-    DALI_TEST_CHECK(finalPlan.unitStart == textPlan.unitStart);
-    DALI_TEST_EQUALS(finalPlan.fadeDuration, textPlan.fadeDuration, EPSILON, TEST_LOCATION);
+    DALI_TEST_CHECK(finalPlan.glyphToUnit == wholeTextPlan.glyphToUnit);
+    DALI_TEST_CHECK(finalPlan.unitStart == wholeTextPlan.unitStart);
+    DALI_TEST_EQUALS(finalPlan.fadeDuration, wholeTextPlan.fadeDuration, EPSILON, TEST_LOCATION);
     UiText::ViewModel* viewModel = typesetter->GetViewModel();
     DALI_TEST_CHECK(viewModel);
     const UiText::GlyphIndex ellipsisGlyph = viewModel->GetEllipsisFinalGlyphIndex();
@@ -1753,16 +1765,16 @@ int UtcDaliTextRevealPixelP(void)
   DALI_TEST_CHECK(spatialAuto.fadeDuration > 0.0f);
   DALI_TEST_CHECK(spatialAuto.fadeDuration <= 1.0f);
 
-  // LINE uses final layout lines and the existing fixed stagger ratio,
+  // PER_LINE uses final layout lines and the existing fixed stagger ratio,
   // while retaining width-proportional progression inside each sequence.
   UiText::ControllerPtr lineController = UiText::Controller::New();
   lineController->SetText("WWWW WWWW\nI");
   lineController->SetDefaultFontSize(32.0f, UiText::Controller::PIXEL_SIZE);
   lineController->SetMultiLineEnabled(true);
   lineController->Relayout(Size(400.0f, 160.0f));
-  const Reveal::Plan linePlan = BuildFinalPixelPlan(lineController, 0.25f, Reveal::Sequence::PER_LINE, 0.25f);
-  DALI_TEST_CHECK(linePlan.HasPixelTiming());
-  DALI_TEST_CHECK(linePlan.GetUnitCount() > 2u);
+  const Reveal::Plan perLinePlan = BuildFinalPixelPlan(lineController, 0.25f, Reveal::Sequence::PER_LINE, 0.25f);
+  DALI_TEST_CHECK(perLinePlan.HasPixelTiming());
+  DALI_TEST_CHECK(perLinePlan.GetUnitCount() > 2u);
   const UiText::ModelInterface* lineModel = lineController->GetRenderTextModel();
   DALI_TEST_CHECK(lineModel && lineModel->GetNumberOfLines() == 2u);
   UiText::TypesetterPtr lineTypesetter = UiText::Typesetter::New(lineModel);
@@ -1779,20 +1791,20 @@ int UtcDaliTextRevealPixelP(void)
       glyph < finalLines[0u].glyphRun.glyphIndex + finalLines[0u].glyphRun.numberOfGlyphs;
       ++glyph)
   {
-    const uint32_t unit = linePlan.glyphToUnit[glyph];
+    const uint32_t unit = perLinePlan.glyphToUnit[glyph];
     if(unit != Reveal::NO_UNIT)
     {
-      firstLineStart = std::min(firstLineStart, linePlan.unitStart[unit]);
+      firstLineStart = std::min(firstLineStart, perLinePlan.unitStart[unit]);
     }
   }
   for(UiText::GlyphIndex glyph = finalLines[1u].glyphRun.glyphIndex;
       glyph < finalLines[1u].glyphRun.glyphIndex + finalLines[1u].glyphRun.numberOfGlyphs;
       ++glyph)
   {
-    const uint32_t unit = linePlan.glyphToUnit[glyph];
+    const uint32_t unit = perLinePlan.glyphToUnit[glyph];
     if(unit != Reveal::NO_UNIT)
     {
-      secondLineStart = std::min(secondLineStart, linePlan.unitStart[unit]);
+      secondLineStart = std::min(secondLineStart, perLinePlan.unitStart[unit]);
     }
   }
   DALI_TEST_EQUALS(firstLineStart, 0.0f, EPSILON, TEST_LOCATION);
@@ -2216,11 +2228,11 @@ int UtcDaliTextRevealPixelSpatialReferenceP(void)
     }
   }
 
-  const Reveal::Plan oneLineText = BuildFinalPixelPlan(trimmed, 0.25f, Reveal::Sequence::WHOLE_TEXT);
-  const Reveal::Plan oneLineLine = BuildFinalPixelPlan(trimmed, 0.25f, Reveal::Sequence::PER_LINE);
-  DALI_TEST_CHECK(oneLineText.glyphToUnit == oneLineLine.glyphToUnit);
-  DALI_TEST_CHECK(oneLineText.unitStart == oneLineLine.unitStart);
-  DALI_TEST_EQUALS(oneLineText.fadeDuration, oneLineLine.fadeDuration, EPSILON, TEST_LOCATION);
+  const Reveal::Plan oneLineWholeText = BuildFinalPixelPlan(trimmed, 0.25f, Reveal::Sequence::WHOLE_TEXT);
+  const Reveal::Plan oneLinePerLine = BuildFinalPixelPlan(trimmed, 0.25f, Reveal::Sequence::PER_LINE);
+  DALI_TEST_CHECK(oneLineWholeText.glyphToUnit == oneLinePerLine.glyphToUnit);
+  DALI_TEST_CHECK(oneLineWholeText.unitStart == oneLinePerLine.unitStart);
+  DALI_TEST_EQUALS(oneLineWholeText.fadeDuration, oneLinePerLine.fadeDuration, EPSILON, TEST_LOCATION);
 
   for(float largeSize : {40.0f, 84.0f})
   {
@@ -2338,6 +2350,13 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
                      workerOwned.second[0u].fadeDuration,
                      EPSILON,
                      TEST_LOCATION);
+    DALI_TEST_EQUALS(sync.second[0u].progressionSpan,
+                     workerOwned.second[0u].progressionSpan,
+                     EPSILON,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(sync.second[0u].rightToLeft,
+                     workerOwned.second[0u].rightToLeft,
+                     TEST_LOCATION);
   }
 
   for(Reveal::Unit unit : {Reveal::Unit::CHARACTER, Reveal::Unit::WORD, Reveal::Unit::PIXEL})
@@ -2368,6 +2387,18 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
                          0.5f * plan.pixelUnitTiming[replacementUnit].progressionSpan,
                        EPSILON,
                        TEST_LOCATION);
+      DALI_TEST_EQUALS(timings[0u].progressionSpan,
+                       plan.pixelUnitTiming[replacementUnit].progressionSpan,
+                       EPSILON,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(timings[0u].rightToLeft,
+                       plan.pixelUnitTiming[replacementUnit].rightToLeft,
+                       TEST_LOCATION);
+    }
+    else
+    {
+      DALI_TEST_EQUALS(timings[0u].progressionSpan, 0.0f, EPSILON, TEST_LOCATION);
+      DALI_TEST_CHECK(!timings[0u].rightToLeft);
     }
   }
 
@@ -2459,6 +2490,17 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
     DALI_TEST_EQUALS(inverseResult.second.Count(), 1u, TEST_LOCATION);
     DALI_TEST_CHECK(inverseResult.second[0u].start > 0.0f && inverseResult.second[0u].start < 1.0f);
   }
+  UiText::ControllerPtr rtlReplacement = BuildReplacementController(
+    u8"א ב ג", {{2u, 1u}}, Size(420.0f, 120.0f));
+  UiText::ModelPtr rtlProcessingModel = rtlReplacement->GetReplacementRenderState().processingModel;
+  DALI_TEST_CHECK(rtlProcessingModel);
+  auto& rtlDirections = rtlProcessingModel->mLogicalModel->mCharacterDirections;
+  rtlDirections.Resize(rtlProcessingModel->mLogicalModel->mText.Count());
+  std::fill(rtlDirections.Begin(), rtlDirections.End(), true);
+  const auto rtlPixel = build(rtlReplacement, Reveal::Unit::PIXEL);
+  DALI_TEST_EQUALS(rtlPixel.second.Count(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(rtlPixel.second[0u].progressionSpan > 0.0f);
+  DALI_TEST_CHECK(rtlPixel.second[0u].rightToLeft);
 
   for(const auto& wordCase : {
         std::make_tuple("helloXworld", 5u, 3u),
@@ -2495,6 +2537,7 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
 
   float autoLineReplacementStart        = 0.0f;
   float autoLineReplacementFadeDuration = 0.0f;
+  float autoLineReplacementSpan         = 0.0f;
   for(Reveal::Sequence sequence : {Reveal::Sequence::WHOLE_TEXT, Reveal::Sequence::PER_LINE})
   {
     asyncParameters.textRevealSequence           = sequence;
@@ -2535,10 +2578,18 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
                      parityTimings[0u].fadeDuration,
                      EPSILON,
                      TEST_LOCATION);
+    DALI_TEST_EQUALS(autoInfo.replacementRevealTimings[0u].progressionSpan,
+                     parityTimings[0u].progressionSpan,
+                     EPSILON,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(autoInfo.replacementRevealTimings[0u].rightToLeft,
+                     parityTimings[0u].rightToLeft,
+                     TEST_LOCATION);
     if(sequence == Reveal::Sequence::PER_LINE)
     {
       autoLineReplacementStart        = autoInfo.replacementRevealTimings[0u].start;
       autoLineReplacementFadeDuration = autoInfo.replacementRevealTimings[0u].fadeDuration;
+      autoLineReplacementSpan         = autoInfo.replacementRevealTimings[0u].progressionSpan;
     }
   }
 
@@ -2561,6 +2612,163 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
                    TEST_LOCATION);
   DALI_TEST_EQUALS(scaledInfo.replacementRevealTimings[0u].fadeDuration,
                    autoLineReplacementFadeDuration,
+                   EPSILON,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(scaledInfo.replacementRevealTimings[0u].progressionSpan,
+                   autoLineReplacementSpan,
+                   EPSILON,
+                   TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextRevealImageReplacementPixelFragmentP(void)
+{
+  UiTestApplication application;
+
+  Texture      imageTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
+  Ui::ImageUrl imageUrl     = Ui::ImageUrl::New(imageTexture, true);
+  UiText::StyledTextBuilder builder = UiText::StyledTextBuilder::New("A X B");
+  DALI_TEST_CHECK(builder.SetSpan(
+    UiText::ImageSpan::New(UiText::ImageAttributes(imageUrl.GetUrl(), Vector2(120.0f, 40.0f))),
+    2u,
+    3u));
+
+  Ui::Label label = Ui::Label::New();
+  label.SetStyledText(builder.Build());
+  label.SetProperty(Actor::Property::SIZE, Vector2(360.0f, 100.0f));
+  UiText::Reveal reveal;
+  reveal.SetUnit(UiText::Reveal::Unit::PIXEL);
+  reveal.SetSequence(UiText::Reveal::Sequence::WHOLE_TEXT);
+  reveal.SetFadeDurationRatio(0.0f);
+  label.SetTextReveal(reveal);
+  label.SetTextRevealProgress(0.0f);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealConstraintCount(label),
+                   1u,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(Dali::Ui::Internal::IsInlineReplacementRevealPixelSpatial(label));
+  Renderer renderer = FindInlineReplacementRevealRenderer(label);
+  DALI_TEST_CHECK(renderer);
+  Ui::Integration::Visual::Base replacementVisual = FindInlineReplacementVisual(label);
+  DALI_TEST_CHECK(replacementVisual);
+  DALI_TEST_CHECK(Ui::GetImplementation(replacementVisual).IsUsingCustomShader());
+  const Property::Value shaderProgramValue = renderer.GetShader().GetProperty(Shader::Property::PROGRAM);
+  const Property::Map*  shaderProgram      = shaderProgramValue.GetMap();
+  DALI_TEST_CHECK(shaderProgram);
+  Dali::String fragmentSource;
+  Dali::String shaderHints;
+  DALI_TEST_CHECK(shaderProgram->Find("fragment") &&
+                  shaderProgram->Find("fragment")->Get(fragmentSource));
+  DALI_TEST_CHECK(shaderProgram->Find("hints") &&
+                  shaderProgram->Find("hints")->Get(shaderHints));
+  const std::string fragmentSourceString(fragmentSource.CStr());
+  const std::string shaderHintsString(shaderHints.CStr());
+  DALI_TEST_CHECK(fragmentSourceString.find("uInlineReplacementRevealProgress") != std::string::npos);
+  DALI_TEST_CHECK(fragmentSourceString.find("vTexCoord.x") != std::string::npos);
+  DALI_TEST_CHECK(fragmentSourceString.find("pixelArea") == std::string::npos);
+  DALI_TEST_CHECK(shaderHintsString.find("OUTPUT_IS_TRANSPARENT") != std::string::npos);
+  const Property::Index progressIndex = renderer.GetPropertyIndex("uInlineReplacementRevealProgress");
+  const Property::Index timingIndex   = renderer.GetPropertyIndex("uInlineReplacementRevealTiming");
+  DALI_TEST_CHECK(progressIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(timingIndex != Property::INVALID_INDEX);
+  const Vector3 timing = renderer.GetProperty<Vector3>(timingIndex);
+  DALI_TEST_CHECK(timing.y > 0.0f);
+  UiText::ReplacementRevealTiming revealTiming;
+  DALI_TEST_CHECK(Dali::Ui::Internal::GetInlineReplacementRevealTiming(label, revealTiming));
+  DALI_TEST_EQUALS(timing.y, revealTiming.progressionSpan / 3.0f, EPSILON, TEST_LOCATION);
+
+  TestGlAbstraction& gl = application.GetGlAbstraction();
+  gl.EnableTextureCallTrace(true);
+  for(float progress : {0.0f, 0.25f, 0.5f, 0.75f, 1.0f})
+  {
+    gl.ResetTextureCallStack();
+    label.SetTextRevealProgress(progress);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(progressIndex), progress, EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexImage2D"), 0, TEST_LOCATION);
+    DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexSubImage2D"), 0, TEST_LOCATION);
+  }
+
+  reveal.SetFadeDurationRatio(0.25f);
+  label.SetTextReveal(reveal);
+  application.SendNotification();
+  application.Render();
+  const Vector3 fadedTiming = renderer.GetProperty<Vector3>(timingIndex);
+  DALI_TEST_CHECK(fadedTiming.z > 0.0f);
+  DALI_TEST_CHECK(Dali::Ui::Internal::IsInlineReplacementRevealPixelSpatial(label));
+
+  label.SetTextCutoutEnabled(true);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(!Dali::Ui::Internal::IsInlineReplacementRevealPixelSpatial(label));
+  replacementVisual = FindInlineReplacementVisual(label);
+  DALI_TEST_CHECK(replacementVisual);
+  DALI_TEST_CHECK(!Ui::GetImplementation(replacementVisual).IsUsingCustomShader());
+  DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealConstraintCount(label),
+                   0u,
+                   TEST_LOCATION);
+
+  label.SetTextCutoutEnabled(false);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(Dali::Ui::Internal::IsInlineReplacementRevealPixelSpatial(label));
+  replacementVisual = FindInlineReplacementVisual(label);
+  DALI_TEST_CHECK(replacementVisual);
+  DALI_TEST_CHECK(Ui::GetImplementation(replacementVisual).IsUsingCustomShader());
+
+  reveal.SetUnit(UiText::Reveal::Unit::WORD);
+  label.SetTextReveal(reveal);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(!Dali::Ui::Internal::IsInlineReplacementRevealPixelSpatial(label));
+  replacementVisual = FindInlineReplacementVisual(label);
+  DALI_TEST_CHECK(replacementVisual);
+  DALI_TEST_CHECK(!Ui::GetImplementation(replacementVisual).IsUsingCustomShader());
+  DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealConstraintCount(label),
+                   1u,
+                   TEST_LOCATION);
+
+  label.SetTextReveal(UiText::Reveal::None());
+  DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealConstraintCount(label),
+                   0u,
+                   TEST_LOCATION);
+
+  UiText::StyledTextBuilder matchingBuilder = UiText::StyledTextBuilder::New("X");
+  DALI_TEST_CHECK(matchingBuilder.SetSpan(
+    UiText::ImageSpan::New(UiText::ImageAttributes(imageUrl.GetUrl(), Vector2(40.0f, 40.0f))),
+    0u,
+    1u));
+  Ui::Label matchingLabel = Ui::Label::New();
+  matchingLabel.SetStyledText(matchingBuilder.Build());
+  matchingLabel.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
+  reveal.SetUnit(UiText::Reveal::Unit::PIXEL);
+  reveal.SetFadeDurationRatio(0.0f);
+  matchingLabel.SetTextReveal(reveal);
+  matchingLabel.SetTextRevealProgress(0.5f);
+  application.GetScene().Add(matchingLabel);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  Renderer matchingRenderer = FindInlineReplacementRevealRenderer(matchingLabel);
+  DALI_TEST_CHECK(matchingRenderer);
+  const Property::Index matchingTimingIndex =
+    matchingRenderer.GetPropertyIndex("uInlineReplacementRevealTiming");
+  DALI_TEST_CHECK(matchingTimingIndex != Property::INVALID_INDEX);
+  UiText::ReplacementRevealTiming matchingRevealTiming;
+  DALI_TEST_CHECK(Dali::Ui::Internal::GetInlineReplacementRevealTiming(matchingLabel,
+                                                                       matchingRevealTiming));
+  const Vector3 matchingTiming = matchingRenderer.GetProperty<Vector3>(matchingTimingIndex);
+  DALI_TEST_EQUALS(matchingTiming.y,
+                   matchingRevealTiming.progressionSpan,
                    EPSILON,
                    TEST_LOCATION);
 
@@ -2702,7 +2910,7 @@ int UtcDaliTextRevealImageReplacementVisibilityP(void)
   END_TEST;
 }
 
-int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
+int UtcDaliTextRevealImageReplacementEndEllipsisPerLineSequenceP(void)
 {
   UiTestApplication application;
 
@@ -2737,13 +2945,13 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
                                                                         segmentation,
                                                                         sourceSnapshot,
                                                                         placements);
-    const Reveal::Plan textPlan = typesetter->CreateFinalRevealPlan(source,
+    const Reveal::Plan wholeTextPlan = typesetter->CreateFinalRevealPlan(source,
                                                                     unit,
-                                                                    Reveal::Sequence::TEXT,
+                                                                    Reveal::Sequence::WHOLE_TEXT,
                                                                     0.25f);
-    const Reveal::Plan linePlan = typesetter->CreateFinalRevealPlan(source,
+    const Reveal::Plan perLinePlan = typesetter->CreateFinalRevealPlan(source,
                                                                     unit,
-                                                                    Reveal::Sequence::LINE,
+                                                                    Reveal::Sequence::PER_LINE,
                                                                     0.25f);
 
     UiText::ViewModel* viewModel = typesetter->GetViewModel();
@@ -2751,15 +2959,16 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
     const uint32_t glyphCount = viewModel->GetNumberOfGlyphs();
     const uint32_t lineCount  = viewModel->GetNumberOfLines();
     DALI_TEST_CHECK(glyphCount > 0u && lineCount >= 2u);
-    DALI_TEST_EQUALS(linePlan.glyphToUnit.size(), static_cast<std::size_t>(glyphCount), TEST_LOCATION);
-    DALI_TEST_EQUALS(linePlan.unitStart.size(),
-                     static_cast<std::size_t>(linePlan.GetUnitCount()),
+    DALI_TEST_EQUALS(perLinePlan.glyphToUnit.size(), static_cast<std::size_t>(glyphCount), TEST_LOCATION);
+    DALI_TEST_EQUALS(perLinePlan.unitStart.size(),
+                     static_cast<std::size_t>(perLinePlan.GetUnitCount()),
                      TEST_LOCATION);
-    DALI_TEST_CHECK(linePlan.unitStart != textPlan.unitStart);
-    DALI_TEST_CHECK(std::isfinite(linePlan.fadeDuration) && linePlan.fadeDuration > 0.0f);
+    DALI_TEST_CHECK(perLinePlan.unitStart != wholeTextPlan.unitStart);
+    DALI_TEST_CHECK(std::isfinite(perLinePlan.fadeDuration) && perLinePlan.fadeDuration > 0.0f);
 
-    // Call the scheduler explicitly so a valid LINE request can never regress
-    // to CreateFinalRevealPlan's safe TEXT-like fallback without failing here.
+    // Call the scheduler explicitly so a valid PER_LINE request can never
+    // regress to CreateFinalRevealPlan's safe WHOLE_TEXT-like fallback without
+    // failing here.
     Reveal::Plan scheduled = Reveal::ProjectToFinalGlyphs(source,
                                                            glyphCount,
                                                            viewModel->GetFinalToSourceGlyphIndices(),
@@ -2771,16 +2980,16 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
                                                                           {},
                                                                           viewModel->GetFinalToSourceGlyphIndices(),
                                                                           viewModel->GetEllipsisFinalGlyphIndex(),
-                                                                          Reveal::Sequence::LINE,
+                                                                          Reveal::Sequence::PER_LINE,
                                                                           0.25f)
-                                      : Reveal::ApplyLineSequenceSchedule(scheduled,
+                                      : Reveal::ApplyPerLineSequenceSchedule(scheduled,
                                                                           viewModel->GetLines(),
                                                                           lineCount,
                                                                           0.25f);
     DALI_TEST_CHECK(schedulerSucceeded);
-    DALI_TEST_CHECK(scheduled.glyphToUnit == linePlan.glyphToUnit);
-    DALI_TEST_CHECK(scheduled.unitStart == linePlan.unitStart);
-    DALI_TEST_CHECK(scheduled.imageReplacementUnitMask == linePlan.imageReplacementUnitMask);
+    DALI_TEST_CHECK(scheduled.glyphToUnit == perLinePlan.glyphToUnit);
+    DALI_TEST_CHECK(scheduled.unitStart == perLinePlan.unitStart);
+    DALI_TEST_CHECK(scheduled.imageReplacementUnitMask == perLinePlan.imageReplacementUnitMask);
 
     const UiText::LineRun* lines = viewModel->GetLines();
     DALI_TEST_CHECK(lines);
@@ -2806,7 +3015,7 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
     }
     for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
     {
-      if(linePlan.glyphToUnit[glyph] != Reveal::NO_UNIT)
+      if(perLinePlan.glyphToUnit[glyph] != Reveal::NO_UNIT)
       {
         DALI_TEST_CHECK(glyphToLine[glyph] != Reveal::NO_UNIT);
       }
@@ -2815,11 +3024,11 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
     std::vector<float> lineStart(lineCount, std::numeric_limits<float>::max());
     for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
     {
-      const uint32_t revealUnit = linePlan.glyphToUnit[glyph];
+      const uint32_t revealUnit = perLinePlan.glyphToUnit[glyph];
       const uint32_t line       = glyphToLine[glyph];
       if(revealUnit != Reveal::NO_UNIT && line != Reveal::NO_UNIT)
       {
-        lineStart[line] = std::min(lineStart[line], linePlan.unitStart[revealUnit]);
+        lineStart[line] = std::min(lineStart[line], perLinePlan.unitStart[revealUnit]);
       }
     }
     uint32_t activeLineCount = 0u;
@@ -2852,12 +3061,12 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
     }
     DALI_TEST_CHECK(imageFinalGlyph < glyphCount);
     DALI_TEST_EQUALS(glyphToLine[imageFinalGlyph], expectedImageLine, TEST_LOCATION);
-    const uint32_t imageUnit = linePlan.glyphToUnit[imageFinalGlyph];
-    DALI_TEST_CHECK(imageUnit < linePlan.GetUnitCount());
-    DALI_TEST_EQUALS(linePlan.imageReplacementUnitMask[imageUnit], 1u, TEST_LOCATION);
+    const uint32_t imageUnit = perLinePlan.glyphToUnit[imageFinalGlyph];
+    DALI_TEST_CHECK(imageUnit < perLinePlan.GetUnitCount());
+    DALI_TEST_EQUALS(perLinePlan.imageReplacementUnitMask[imageUnit], 1u, TEST_LOCATION);
 
     Vector<UiText::ReplacementRevealTiming> timings;
-    DALI_TEST_CHECK(typesetter->ExtractReplacementRevealTimings(linePlan,
+    DALI_TEST_CHECK(typesetter->ExtractReplacementRevealTimings(perLinePlan,
                                                                  sourceSnapshot,
                                                                  placements,
                                                                  timings));
@@ -2865,7 +3074,7 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
     DALI_TEST_EQUALS(timings[0u].occurrenceIdentity,
                      placements[0u].occurrenceIdentity,
                      TEST_LOCATION);
-    DALI_TEST_EQUALS(timings[0u].fadeDuration, linePlan.fadeDuration, EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(timings[0u].fadeDuration, perLinePlan.fadeDuration, EPSILON, TEST_LOCATION);
 
     if(expectEllipsis)
     {
@@ -2873,9 +3082,9 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
       const UiText::GlyphIndex ellipsisGlyph = viewModel->GetEllipsisFinalGlyphIndex();
       DALI_TEST_CHECK(ellipsisGlyph < glyphCount);
       DALI_TEST_EQUALS(glyphToLine[ellipsisGlyph], expectedEllipsisLine, TEST_LOCATION);
-      const uint32_t ellipsisUnit = linePlan.glyphToUnit[ellipsisGlyph];
-      DALI_TEST_CHECK(ellipsisUnit < linePlan.GetUnitCount());
-      DALI_TEST_EQUALS(linePlan.imageReplacementUnitMask[ellipsisUnit], 0u, TEST_LOCATION);
+      const uint32_t ellipsisUnit = perLinePlan.glyphToUnit[ellipsisGlyph];
+      DALI_TEST_CHECK(ellipsisUnit < perLinePlan.GetUnitCount());
+      DALI_TEST_EQUALS(perLinePlan.imageReplacementUnitMask[ellipsisUnit], 0u, TEST_LOCATION);
       if(unit == Reveal::Unit::WORD && requireSeparateWordUnits)
       {
         DALI_TEST_CHECK(imageUnit != ellipsisUnit);
@@ -2884,11 +3093,11 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
 
     if(unit == Reveal::Unit::PIXEL)
     {
-      DALI_TEST_CHECK(linePlan.HasPixelTiming());
-      DALI_TEST_EQUALS(linePlan.pixelUnitTiming.size(),
-                       static_cast<std::size_t>(linePlan.GetUnitCount()),
+      DALI_TEST_CHECK(perLinePlan.HasPixelTiming());
+      DALI_TEST_EQUALS(perLinePlan.pixelUnitTiming.size(),
+                       static_cast<std::size_t>(perLinePlan.GetUnitCount()),
                        TEST_LOCATION);
-      const Reveal::PixelUnitTiming& pixelTiming = linePlan.pixelUnitTiming[imageUnit];
+      const Reveal::PixelUnitTiming& pixelTiming = perLinePlan.pixelUnitTiming[imageUnit];
       DALI_TEST_CHECK(std::isfinite(pixelTiming.visualMinimum));
       DALI_TEST_CHECK(std::isfinite(pixelTiming.visualMaximum));
       DALI_TEST_CHECK(std::isfinite(pixelTiming.progressionSpan));
@@ -3037,8 +3246,8 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
     }
   }
 
-  // Sync and worker-owned async paths must publish the same LINE timing from
-  // the same ImageSpan-immediately-before-ellipsis final layout.
+  // Sync and worker-owned async paths must publish the same PER_LINE timing
+  // from the same ImageSpan-immediately-before-ellipsis final layout.
   DALI_TEST_CHECK(parityController);
   const char* parityText = "alpha\nbeta X\nhidden continuation";
   for(Reveal::Unit unit : {Reveal::Unit::CHARACTER, Reveal::Unit::WORD, Reveal::Unit::PIXEL})
@@ -3066,7 +3275,7 @@ int UtcDaliTextRevealImageReplacementEndEllipsisLineSequenceP(void)
     parameters.isMultiLine                   = true;
     parameters.isTextRevealEnabled           = true;
     parameters.textRevealUnit                = unit;
-    parameters.textRevealSequence            = Reveal::Sequence::LINE;
+    parameters.textRevealSequence            = Reveal::Sequence::PER_LINE;
     parameters.textRevealFadeDurationRatio   = 0.25f;
     parameters.textRevealSequenceStaggerRatio = 0.25f;
     parameters.replacementSourceSnapshot     = parityController->GetReplacementSourceSnapshot();
@@ -3209,6 +3418,9 @@ int UtcDaliTextRevealImageReplacementIntegrationP(void)
   application.Render();
   application.SendNotification();
   application.Render();
+  Ui::Integration::Visual::Base localPixelVisual = FindInlineReplacementVisual(label);
+  DALI_TEST_CHECK(localPixelVisual);
+  DALI_TEST_CHECK(Ui::GetImplementation(localPixelVisual).IsUsingCustomShader());
   DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealTimingCount(label),
                    1u,
                    TEST_LOCATION);
@@ -3570,31 +3782,46 @@ int UtcDaliTextRevealImageReplacementReconfigurationAtomicityP(void)
                    TEST_LOCATION);
   DALI_TEST_CHECK(imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY) < 0.99f);
 
+  auto checkPartialRevealBinding = [&]()
+  {
+    if(Dali::Ui::Internal::IsInlineReplacementRevealPixelSpatial(label))
+    {
+      const Property::Index progressIndex =
+        imageRenderer.GetPropertyIndex("uInlineReplacementRevealProgress");
+      DALI_TEST_CHECK(progressIndex != Property::INVALID_INDEX);
+      DALI_TEST_EQUALS(imageRenderer.GetCurrentProperty<float>(progressIndex),
+                       0.2f,
+                       EPSILON,
+                       TEST_LOCATION);
+    }
+    else
+    {
+      DALI_TEST_CHECK(imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY) < 0.99f);
+    }
+  };
+
   auto applyConfiguration = [&]()
   {
-    const float before = imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY);
+    checkPartialRevealBinding();
     label.SetTextReveal(reveal);
 
     // An enabled-to-enabled change retains the old valid binding until the
-    // replacement schedule is ready. In particular, it must not restore the
-    // resource-ready opacity between publications.
+    // replacement schedule is ready. The atomic path must not restore full
+    // opacity, and the PIXEL path must retain the authored shader progress.
     DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealConstraintCount(label),
                      1u,
                      TEST_LOCATION);
-    const float immediate = imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY);
-    DALI_TEST_CHECK(before < 0.99f && immediate < 0.99f);
+    checkPartialRevealBinding();
 
     application.SendNotification();
     application.Render();
     imageRenderer = FindInlineReplacementRevealRenderer(label);
     DALI_TEST_CHECK(imageRenderer);
-    const float frameOne = imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY);
-    DALI_TEST_CHECK(frameOne < 0.99f);
+    checkPartialRevealBinding();
 
     application.SendNotification();
     application.Render();
-    const float frameTwo = imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY);
-    DALI_TEST_CHECK(frameTwo < 0.99f);
+    checkPartialRevealBinding();
     DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.2f, EPSILON, TEST_LOCATION);
     DALI_TEST_EQUALS(label.GetCurrentProperty<float>(label.GetPropertyIndex("uTextRevealProgress")),
                      0.2f,
@@ -3642,7 +3869,7 @@ int UtcDaliTextRevealImageReplacementReconfigurationAtomicityP(void)
   imageRenderer = FindInlineReplacementRevealRenderer(label);
   DALI_TEST_CHECK(imageRenderer);
   DALI_TEST_CHECK(imageRenderer != oldImageRenderer);
-  DALI_TEST_CHECK(imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY) < 0.99f);
+  checkPartialRevealBinding();
   const uint64_t sourceRevisionB = Dali::Ui::Internal::GetInlineReplacementEntrySourceRevision(label);
   DALI_TEST_CHECK(sourceRevisionB > sourceRevisionA);
   DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealSourceRevision(label),
@@ -3670,7 +3897,7 @@ int UtcDaliTextRevealImageReplacementReconfigurationAtomicityP(void)
   application.Render();
   imageRenderer = FindInlineReplacementRevealRenderer(label);
   DALI_TEST_CHECK(imageRenderer);
-  DALI_TEST_CHECK(imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY) < 0.99f);
+  checkPartialRevealBinding();
   const uint64_t asyncBaseSourceRevision = Dali::Ui::Internal::GetInlineReplacementEntrySourceRevision(label);
   DALI_TEST_CHECK(asyncBaseSourceRevision > sourceRevisionB);
   DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealSourceRevision(label),
@@ -3685,7 +3912,7 @@ int UtcDaliTextRevealImageReplacementReconfigurationAtomicityP(void)
   application.Render();
   imageRenderer = FindInlineReplacementRevealRenderer(label);
   DALI_TEST_CHECK(imageRenderer);
-  DALI_TEST_CHECK(imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY) < 0.99f);
+  checkPartialRevealBinding();
 
   reveal.SetFadeDurationRatio(0.25f);
   applyConfiguration();
@@ -3694,7 +3921,7 @@ int UtcDaliTextRevealImageReplacementReconfigurationAtomicityP(void)
   application.Render();
   imageRenderer = FindInlineReplacementRevealRenderer(label);
   DALI_TEST_CHECK(imageRenderer);
-  DALI_TEST_CHECK(imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY) < 0.99f);
+  checkPartialRevealBinding();
   DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealConstraintCount(label),
                    1u,
                    TEST_LOCATION);
@@ -3739,7 +3966,7 @@ int UtcDaliTextRevealImageReplacementReconfigurationAtomicityP(void)
   imageRenderer = FindInlineReplacementRevealRenderer(label);
   DALI_TEST_CHECK(imageRenderer);
   DALI_TEST_CHECK(imageRenderer != oldImageRenderer);
-  DALI_TEST_CHECK(imageRenderer.GetCurrentProperty<float>(Dali::DevelRenderer::Property::OPACITY) < 0.99f);
+  checkPartialRevealBinding();
   const uint64_t sourceRevisionC = Dali::Ui::Internal::GetInlineReplacementEntrySourceRevision(label);
   DALI_TEST_CHECK(sourceRevisionC > asyncBaseSourceRevision);
   DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealSourceRevision(label),
@@ -3753,18 +3980,21 @@ int UtcDaliTextRevealImageReplacementReconfigurationAtomicityP(void)
                    TEST_LOCATION);
   DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.2f, EPSILON, TEST_LOCATION);
 
-  const Property::Index baseOpacityIndex =
-    imageRenderer.GetPropertyIndex("__dali_ui_inline_replacement_reveal_base_opacity");
-  DALI_TEST_CHECK(baseOpacityIndex != Property::INVALID_INDEX);
+  const bool pixelSpatial = Dali::Ui::Internal::IsInlineReplacementRevealPixelSpatial(label);
+  const Property::Index resourceOpacityIndex =
+    pixelSpatial
+      ? Dali::DevelRenderer::Property::OPACITY
+      : imageRenderer.GetPropertyIndex("__dali_ui_inline_replacement_reveal_base_opacity");
+  DALI_TEST_CHECK(resourceOpacityIndex != Property::INVALID_INDEX);
   for(uint32_t completion = 0u;
-      completion < 4u && imageRenderer.GetCurrentProperty<float>(baseOpacityIndex) < 0.99f;
+      completion < 4u && imageRenderer.GetCurrentProperty<float>(resourceOpacityIndex) < 0.99f;
       ++completion)
   {
     DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
     application.SendNotification();
     application.Render();
   }
-  DALI_TEST_CHECK(imageRenderer.GetCurrentProperty<float>(baseOpacityIndex) >= 0.99f);
+  DALI_TEST_CHECK(imageRenderer.GetCurrentProperty<float>(resourceOpacityIndex) >= 0.99f);
   label.SetAsyncRendering(false);
 
   // Reveal -> None is intentionally different: remove the constraint and
@@ -3838,7 +4068,7 @@ int UtcDaliTextRevealImageReplacementStressP(void)
                      static_cast<std::size_t>(imageCount),
                      TEST_LOCATION);
     DALI_TEST_EQUALS(CountInlineReplacementRevealBaseOpacityProperties(label, imageCount),
-                     static_cast<std::size_t>(imageCount),
+                     0u,
                      TEST_LOCATION);
 
     gl.ResetTextureCallStack();
@@ -3854,7 +4084,7 @@ int UtcDaliTextRevealImageReplacementStressP(void)
                      static_cast<std::size_t>(imageCount),
                      TEST_LOCATION);
     DALI_TEST_EQUALS(CountInlineReplacementRevealBaseOpacityProperties(label, imageCount),
-                     static_cast<std::size_t>(imageCount),
+                     0u,
                      TEST_LOCATION);
 
     label.SetTextReveal(UiText::Reveal::None());
@@ -3870,7 +4100,7 @@ int UtcDaliTextRevealImageReplacementStressP(void)
                      static_cast<std::size_t>(imageCount),
                      TEST_LOCATION);
     DALI_TEST_EQUALS(CountInlineReplacementRevealBaseOpacityProperties(label, imageCount),
-                     static_cast<std::size_t>(imageCount),
+                     0u,
                      TEST_LOCATION);
     application.GetScene().Remove(label);
   }
@@ -3954,7 +4184,7 @@ int UtcDaliTextRevealPixelMixedLineAutoP(void)
   UiTestApplication application;
 
   // The long 20px line is identical in all fixtures. Changing or reordering
-  // the unrelated short line must not change that line's LINE AUTO cadence.
+  // the unrelated short line must not change that line's PER_LINE AUTO cadence.
   const std::string longLine =
     "Your reservation is confirmed. Check in before 18:30 and keep your boarding pass ready.";
 
@@ -4060,8 +4290,8 @@ int UtcDaliTextRevealPixelMixedLineAutoP(void)
                      TEST_LOCATION);
   }
 
-  const Reveal::Plan explicitTextPlan = buildPlan(mixed, 0.25f, Reveal::Sequence::WHOLE_TEXT);
-  DALI_TEST_EQUALS(explicitTextPlan.fadeDuration, 0.25f, EPSILON, TEST_LOCATION);
+  const Reveal::Plan explicitWholeTextPlan = buildPlan(mixed, 0.25f, Reveal::Sequence::WHOLE_TEXT);
+  DALI_TEST_EQUALS(explicitWholeTextPlan.fadeDuration, 0.25f, EPSILON, TEST_LOCATION);
 
   // Per-line text scale remains text-only when replacement geometry inflates
   // a line: 24px and 240px ImageSpan heights resolve the same text cadence.

@@ -676,9 +676,9 @@ int UtcDaliTextVisualRevealSequenceRejectsOlderCompletionP(void)
                   1u,
                   UiText::Internal::Reveal::Sequence::WHOLE_TEXT);
   const auto staleWholeText = MakeRevealParameters("stale WHOLE_TEXT sequence",
-                                              1u,
-                                              UiText::Internal::Reveal::Unit::CHARACTER,
-                                              0.25f);
+                                                   1u,
+                                                   UiText::Internal::Reveal::Unit::CHARACTER,
+                                                   0.25f);
 
   ConfigureReveal(rendered,
                   UiText::Internal::Reveal::Unit::CHARACTER,
@@ -690,11 +690,11 @@ int UtcDaliTextVisualRevealSequenceRejectsOlderCompletionP(void)
   DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
 
   const auto stalePerLine = MakeRevealParameters("stale PER_LINE sequence",
-                                              2u,
-                                              UiText::Internal::Reveal::Unit::CHARACTER,
-                                              0.25f,
-                                              UiText::Internal::Reveal::Sequence::PER_LINE,
-                                              0.25f);
+                                                 2u,
+                                                 UiText::Internal::Reveal::Unit::CHARACTER,
+                                                 0.25f,
+                                                 UiText::Internal::Reveal::Sequence::PER_LINE,
+                                                 0.25f);
   ConfigureReveal(rendered,
                   UiText::Internal::Reveal::Unit::CHARACTER,
                   0.25f,
@@ -709,7 +709,7 @@ int UtcDaliTextVisualRevealSequenceRejectsOlderCompletionP(void)
                   4u,
                   UiText::Internal::Reveal::Sequence::PER_LINE,
                   0.25f);
-  const auto staleStagger = MakeRevealParameters("stale LINE stagger",
+  const auto staleStagger = MakeRevealParameters("stale PER_LINE stagger",
                                                  4u,
                                                  UiText::Internal::Reveal::Unit::CHARACTER,
                                                  0.25f,
@@ -725,7 +725,7 @@ int UtcDaliTextVisualRevealSequenceRejectsOlderCompletionP(void)
   DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
 
   PublishDirect(rendered,
-                MakeRevealParameters("current LINE stagger",
+                MakeRevealParameters("current PER_LINE stagger",
                                      5u,
                                      UiText::Internal::Reveal::Unit::CHARACTER,
                                      0.25f,

@@ -2088,7 +2088,7 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit     unit,
   data->unit                  = unit;
   data->sequence              = sequence;
   data->fadeDurationRatio     = fadeDurationRatio;
-  data->sequenceStaggerRatio = sequenceStaggerRatio;
+  data->sequenceStaggerRatio  = sequenceStaggerRatio;
   data->progressPropertyIndex = progressPropertyIndex;
   data->revision              = revision;
   mRendererUpdateNeeded       = true;
@@ -2993,12 +2993,12 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     DALI_ASSERT_ALWAYS(revealData);
     Vector<Text::ReplacementRevealTiming> replacementTimings;
     uint64_t                              replacementSourceRevision = 0u;
-    const auto                            finalPlan = BuildFinalTextRevealPlan(replacementTimings,
-                                                                              replacementSourceRevision);
+    const auto                            finalPlan                 = BuildFinalTextRevealPlan(replacementTimings,
+                                                                                               replacementSourceRevision);
     PixelData                             metadata                  = mTypesetter->RenderTextRevealMetadata(size,
-                                                                                                             textDirection,
-                                                                                                             finalPlan,
-                                                                                                             revealData->fadeDuration);
+                                                                                                            textDirection,
+                                                                                                            finalPlan,
+                                                                                                            revealData->fadeDuration);
 
     DALI_ASSERT_ALWAYS(metadata && metadata.GetPixelFormat() == Pixel::RGBA8888 &&
                        metadata.GetWidth() == static_cast<uint32_t>(size.width) &&

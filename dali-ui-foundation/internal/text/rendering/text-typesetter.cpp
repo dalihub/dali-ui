@@ -714,9 +714,9 @@ Internal::Reveal::Plan Typesetter::CreateFinalRevealPlan(const Internal::Reveal:
   else if(sequence == Internal::Reveal::Sequence::PER_LINE)
   {
     Internal::Reveal::ApplyPerLineSequenceSchedule(finalPlan,
-                                                viewModel.GetLines(),
-                                                viewModel.GetNumberOfLines(),
-                                                sequenceStaggerRatio);
+                                                   viewModel.GetLines(),
+                                                   viewModel.GetNumberOfLines(),
+                                                   sequenceStaggerRatio);
   }
   return finalPlan;
 }
@@ -777,12 +777,20 @@ bool Typesetter::ExtractReplacementRevealTimings(const Internal::Reveal::Plan&  
       return false;
     }
 
-    float start = finalPlan.unitStart[unit];
+    float start           = finalPlan.unitStart[unit];
+    float progressionSpan = 0.0f;
+    bool  rightToLeft     = false;
     if(unit < finalPlan.pixelUnitTiming.size())
     {
-      start += 0.5f * finalPlan.pixelUnitTiming[unit].progressionSpan;
+      progressionSpan = finalPlan.pixelUnitTiming[unit].progressionSpan;
+      rightToLeft     = finalPlan.pixelUnitTiming[unit].rightToLeft;
+      start += 0.5f * progressionSpan;
     }
-    timings.PushBack({placement.occurrenceIdentity, start, finalPlan.fadeDuration});
+    timings.PushBack({placement.occurrenceIdentity,
+                      start,
+                      finalPlan.fadeDuration,
+                      progressionSpan,
+                      rightToLeft});
   }
   return timings.Count() == expectedTimingCount;
 }

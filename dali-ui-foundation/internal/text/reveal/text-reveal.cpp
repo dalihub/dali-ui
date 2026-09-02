@@ -1241,9 +1241,9 @@ float ResolvePixelStart(const Plan& plan, uint32_t unit, float visualX)
 }
 
 bool ApplyPerLineSequenceSchedule(Plan&          plan,
-                               const LineRun* lines,
-                               Length         lineCount,
-                               float          sequenceStaggerRatio)
+                                  const LineRun* lines,
+                                  Length         lineCount,
+                                  float          sequenceStaggerRatio)
 {
   const uint32_t oldUnitCount = plan.GetUnitCount();
   const uint32_t glyphCount   = static_cast<uint32_t>(plan.glyphToUnit.size());
@@ -1329,7 +1329,7 @@ bool ApplyPerLineSequenceSchedule(Plan&          plan,
     if(plan.glyphToUnit[glyph] != NO_UNIT && glyphToPair[glyph] == NO_UNIT)
     {
       // A final unit outside the supplied line runs cannot be scheduled
-      // without guessing its visual line. Keep the existing TEXT plan.
+      // without guessing its visual line. Keep the existing WHOLE_TEXT plan.
       return false;
     }
   }
@@ -1435,13 +1435,13 @@ bool ApplyPerLineSequenceSchedule(Plan&          plan,
   }
 
   plan.unitStart.assign(orderedPairs.size(), 0.0f);
-  std::vector<uint32_t> lineSequenceIndex(lineCount, NO_UNIT);
+  std::vector<uint32_t> perLineSequenceIndex(lineCount, NO_UNIT);
   uint32_t              activeSequence = 0u;
   for(uint32_t lineIndex = 0u; lineIndex < lineCount; ++lineIndex)
   {
     if(lineUnitCount[lineIndex] > 0u)
     {
-      lineSequenceIndex[lineIndex] = activeSequence++;
+      perLineSequenceIndex[lineIndex] = activeSequence++;
     }
   }
 
@@ -1455,7 +1455,7 @@ bool ApplyPerLineSequenceSchedule(Plan&          plan,
       currentLine = pair.lineIndex;
       localRank   = 0u;
     }
-    const float offset      = static_cast<float>(lineSequenceIndex[pair.lineIndex]) * sequenceStaggerRatio;
+    const float offset      = static_cast<float>(perLineSequenceIndex[pair.lineIndex]) * sequenceStaggerRatio;
     plan.unitStart[newUnit] = (offset + static_cast<float>(localRank++) * startInterval) / totalDuration;
   }
   plan.fadeDuration = fadeDuration / totalDuration;

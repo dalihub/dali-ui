@@ -46,8 +46,9 @@ namespace Text
  * no sequence stagger, and an automatically selected fade duration. These
  * options can be configured explicitly.
  *
- * Reveal affects the text foreground and inline ImageSpan content. An
- * ImageSpan participates as one atomic reveal item and fades as a whole.
+ * Reveal affects the text foreground and inline ImageSpan content. ImageSpan
+ * content reveals as an atomic item in CHARACTER and WORD modes, and reveals
+ * spatially across the rendered image in PIXEL mode.
  * Text decorations and other style layers such as shadow, outline, underline,
  * strikethrough, and background are not affected. When content is elided,
  * hidden source content does not consume reveal units and the ellipsis
@@ -95,7 +96,7 @@ public:
      * PIXEL follows the same logical text order and shaping boundaries as
      * CHARACTER while distributing reveal timing continuously in pixel space.
      * Inline ImageSpan content contributes its reserved width to the
-     * progression and fades as an atomic item.
+     * progression and reveals spatially across the rendered image.
      * The progression is normalized and does not correspond one-to-one with
      * physical framebuffer pixels.
      */

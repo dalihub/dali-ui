@@ -242,16 +242,17 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
  * @return True if the final line mapping was valid, including no-op schedules.
  */
 bool ApplyPerLineSequenceSchedule(Plan&          plan,
-                               const LineRun* lines,
-                               Length         lineCount,
-                               float          sequenceStaggerRatio);
+                                  const LineRun* lines,
+                                  Length         lineCount,
+                                  float          sequenceStaggerRatio);
 
 /**
  * @brief Builds and schedules final PIXEL descriptors from final layout data.
  *
- * This is separate from ApplyPerLineSequenceSchedule() so CHARACTER and WORD keep
- * their existing count-based path unchanged. Scheduling commits atomically;
- * failure leaves the projected CHARACTER-compatible plan unchanged.
+ * This is separate from ApplyPerLineSequenceSchedule() so CHARACTER and WORD
+ * keep their existing count-based path unchanged. Scheduling commits
+ * atomically; failure leaves the projected CHARACTER-compatible plan
+ * unchanged.
  *
  * @param[in,out] plan The final-glyph plan to schedule.
  * @param[in] finalModel The final render model.
