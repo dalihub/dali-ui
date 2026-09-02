@@ -1515,16 +1515,25 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                                                                 parameters.replacementSourceSnapshot,
                                                                 replacementState->placements);
       }
-      return parameters.textRevealUnit == Internal::Reveal::Unit::WORD
-               ? Internal::Reveal::BuildPlan(*renderModel,
+      switch(parameters.textRevealUnit)
+      {
+        case Internal::Reveal::Unit::WORD:
+          return Internal::Reveal::BuildPlan(*renderModel,
                                              parameters.textRevealUnit,
                                              parameters.textRevealFadeDurationRatio,
-                                             mModule.GetSegmentation())
-             : parameters.textRevealUnit == Internal::Reveal::Unit::PIXEL
-               ? Internal::Reveal::BuildPixelPlan(*renderModel,
-                                                  parameters.textRevealFadeDurationRatio)
-               : Internal::Reveal::BuildCharacterPlan(*renderModel,
+                                             mModule.GetSegmentation());
+        case Internal::Reveal::Unit::LINE:
+          return Internal::Reveal::BuildLinePlan(*renderModel,
+                                                 parameters.textRevealFadeDurationRatio);
+        case Internal::Reveal::Unit::PIXEL:
+          return Internal::Reveal::BuildPixelPlan(*renderModel,
+                                                  parameters.textRevealFadeDurationRatio);
+        case Internal::Reveal::Unit::CHARACTER:
+        case Internal::Reveal::Unit::DISABLED:
+        default:
+          return Internal::Reveal::BuildCharacterPlan(*renderModel,
                                                       parameters.textRevealFadeDurationRatio);
+      }
     };
     auto sourceRevealPlan = buildSourcePlan(hasReplacementProjection);
     auto revealPlan       = mTypesetter->CreateFinalRevealPlan(sourceRevealPlan,

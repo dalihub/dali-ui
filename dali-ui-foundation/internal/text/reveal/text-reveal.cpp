@@ -156,11 +156,18 @@ void PopulateSchedule(Plan& plan, uint32_t unitCount, float authoredRatio)
 
 Unit ToInternalUnit(Text::Reveal::Unit unit)
 {
-  if(unit == Text::Reveal::Unit::WORD)
+  switch(unit)
   {
-    return Unit::WORD;
+    case Text::Reveal::Unit::WORD:
+      return Unit::WORD;
+    case Text::Reveal::Unit::LINE:
+      return Unit::LINE;
+    case Text::Reveal::Unit::PIXEL:
+      return Unit::PIXEL;
+    case Text::Reveal::Unit::CHARACTER:
+    default:
+      return Unit::CHARACTER;
   }
-  return unit == Text::Reveal::Unit::PIXEL ? Unit::PIXEL : Unit::CHARACTER;
 }
 
 Sequence ToInternalSequence(Text::Reveal::Sequence sequence)
@@ -184,7 +191,7 @@ Plan BuildPlan(const Character*      text,
     return plan;
   }
 
-  if(unit == Unit::CHARACTER || unit == Unit::PIXEL)
+  if(unit == Unit::CHARACTER || unit == Unit::LINE || unit == Unit::PIXEL)
   {
     // glyphToCharacter contains shaping-cluster starts. Reusing that identity
     // keeps combining sequences and indivisible ligatures/emoji clusters atomic.
@@ -555,6 +562,11 @@ Plan BuildCharacterPlan(const ModelInterface& model, float fadeDurationRatio)
   return BuildModelPlan(model, Unit::CHARACTER, fadeDurationRatio, nullptr);
 }
 
+Plan BuildLinePlan(const ModelInterface& model, float fadeDurationRatio)
+{
+  return BuildModelPlan(model, Unit::LINE, fadeDurationRatio, nullptr);
+}
+
 Plan BuildPixelPlan(const ModelInterface& model, float fadeDurationRatio)
 {
   return BuildModelPlan(model, Unit::PIXEL, fadeDurationRatio, nullptr);
@@ -607,7 +619,7 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
 
   std::vector<uint32_t> oldToNew(oldUnitCount, NO_UNIT);
   uint32_t              finalUnitCount = static_cast<uint32_t>(visibleOldUnits.size());
-  if(hasEllipsis && (unit == Unit::CHARACTER || unit == Unit::PIXEL || ellipsisFollowsReplacement))
+  if(hasEllipsis && (unit == Unit::CHARACTER || unit == Unit::LINE || unit == Unit::PIXEL || ellipsisFollowsReplacement))
   {
     ++finalUnitCount;
   }
@@ -656,7 +668,7 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
 
   if(hasEllipsis)
   {
-    if(unit == Unit::CHARACTER || unit == Unit::PIXEL || visibleOldUnits.empty() || ellipsisFollowsReplacement)
+    if(unit == Unit::CHARACTER || unit == Unit::LINE || unit == Unit::PIXEL || visibleOldUnits.empty() || ellipsisFollowsReplacement)
     {
       finalPlan.glyphToUnit[ellipsisFinalGlyph] = static_cast<uint32_t>(visibleOldUnits.size());
     }
@@ -670,6 +682,114 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
 
   PopulateSchedule(finalPlan, finalUnitCount, finalPlan.fadeDurationRatio);
   return finalPlan;
+}
+
+bool ApplyLineUnitSchedule(Plan&          plan,
+                           const LineRun* lines,
+                           Length         lineCount)
+{
+  const uint32_t oldUnitCount = plan.GetUnitCount();
+  const uint32_t glyphCount   = static_cast<uint32_t>(plan.glyphToUnit.size());
+  if(oldUnitCount == 0u)
+  {
+    return std::all_of(plan.glyphToUnit.begin(), plan.glyphToUnit.end(), [](uint32_t unit)
+    {
+      return unit == NO_UNIT;
+    });
+  }
+  if(glyphCount == 0u || !lines || lineCount == 0u)
+  {
+    return false;
+  }
+  if(!plan.imageReplacementUnitMask.empty() && plan.imageReplacementUnitMask.size() != oldUnitCount)
+  {
+    return false;
+  }
+
+  std::vector<uint32_t> glyphToLine(glyphCount, NO_UNIT);
+  auto                  mapRun = [&](uint32_t lineIndex, const GlyphRun& run)
+  {
+    const uint32_t begin = run.glyphIndex;
+    const uint32_t count = run.numberOfGlyphs;
+    if(begin > glyphCount || count > glyphCount - begin)
+    {
+      return false;
+    }
+    for(uint32_t glyph = begin; glyph < begin + count; ++glyph)
+    {
+      if(glyphToLine[glyph] != NO_UNIT && glyphToLine[glyph] != lineIndex)
+      {
+        return false;
+      }
+      glyphToLine[glyph] = lineIndex;
+    }
+    return true;
+  };
+
+  for(uint32_t lineIndex = 0u; lineIndex < lineCount; ++lineIndex)
+  {
+    if(!mapRun(lineIndex, lines[lineIndex].glyphRun) ||
+       (lines[lineIndex].isSplitToTwoHalves && !mapRun(lineIndex, lines[lineIndex].glyphRunSecondHalf)))
+    {
+      return false;
+    }
+  }
+
+  std::vector<uint8_t> activeLines(lineCount, 0u);
+  std::vector<uint8_t> backedUnits(oldUnitCount, 0u);
+  for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
+  {
+    const uint32_t oldUnit = plan.glyphToUnit[glyph];
+    if(oldUnit == NO_UNIT)
+    {
+      continue;
+    }
+    if(oldUnit >= oldUnitCount || glyphToLine[glyph] == NO_UNIT)
+    {
+      return false;
+    }
+    backedUnits[oldUnit]            = 1u;
+    activeLines[glyphToLine[glyph]] = 1u;
+  }
+  if(std::find(backedUnits.begin(), backedUnits.end(), 0u) != backedUnits.end())
+  {
+    return false;
+  }
+
+  std::vector<uint32_t> lineToUnit(lineCount, NO_UNIT);
+  uint32_t              lineUnitCount = 0u;
+  for(uint32_t lineIndex = 0u; lineIndex < lineCount; ++lineIndex)
+  {
+    if(activeLines[lineIndex] != 0u)
+    {
+      lineToUnit[lineIndex] = lineUnitCount++;
+    }
+  }
+
+  Plan linePlan;
+  linePlan.fadeDurationRatio = plan.fadeDurationRatio;
+  linePlan.glyphToUnit.assign(glyphCount, NO_UNIT);
+  if(!plan.imageReplacementUnitMask.empty())
+  {
+    linePlan.imageReplacementUnitMask.assign(lineUnitCount, 0u);
+  }
+  for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
+  {
+    const uint32_t oldUnit = plan.glyphToUnit[glyph];
+    if(oldUnit == NO_UNIT)
+    {
+      continue;
+    }
+    const uint32_t lineUnit     = lineToUnit[glyphToLine[glyph]];
+    linePlan.glyphToUnit[glyph] = lineUnit;
+    if(oldUnit < plan.imageReplacementUnitMask.size() && plan.imageReplacementUnitMask[oldUnit] != 0u)
+    {
+      linePlan.imageReplacementUnitMask[lineUnit] = 1u;
+    }
+  }
+  PopulateSchedule(linePlan, lineUnitCount, linePlan.fadeDurationRatio);
+  plan = std::move(linePlan);
+  return true;
 }
 
 bool ApplyPixelSpatialSchedule(Plan&                       plan,

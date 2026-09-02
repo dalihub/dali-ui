@@ -51,6 +51,7 @@ enum class Unit : uint8_t
   DISABLED,
   CHARACTER,
   WORD,
+  LINE,
   PIXEL
 };
 
@@ -79,8 +80,8 @@ struct PixelUnitTiming
  * preserves the authored AUTO sentinel or explicit duration through final
  * projection so the schedule can be resolved from the final visible unit
  * count before metadata is rasterized. imageReplacementUnitMask remains empty
- * for text-only plans. When present, it has one entry per unit and contains at
- * least one eligible visible ImageSpan marker.
+ * for text-only plans. When present, it has one entry per unit and identifies
+ * units containing at least one eligible visible ImageSpan marker.
  */
 struct Plan
 {
@@ -157,7 +158,8 @@ Plan BuildPlan(const Character*      text,
  * WORD mode invokes the supplied Segmentation handle. The caller must provide
  * a valid instance owned by the current execution context; this function does
  * not acquire the event-thread SingletonService and does not share the handle
- * between workers. CHARACTER mode does not access segmentation.
+ * between workers. CHARACTER, LINE, and PIXEL modes do not access
+ * segmentation.
  *
  * @param[in] model The shaped text model used as the source sequence.
  * @param[in] unit The reveal unit to build.
@@ -197,6 +199,19 @@ Plan BuildPlanWithImageReplacements(const ModelInterface&               model,
 Plan BuildCharacterPlan(const ModelInterface& model, float fadeDurationRatio);
 
 /**
+ * @brief Builds the CHARACTER-compatible source skeleton used by LINE.
+ *
+ * Final visible LineRun data is intentionally unavailable here. The source
+ * plan only carries revealable glyph identity until ApplyLineUnitSchedule()
+ * collapses it to one unit per active final layout line.
+ *
+ * @param[in] model The shaped text model used as the source sequence.
+ * @param[in] fadeDurationRatio The authored automatic sentinel or normalized fade duration.
+ * @return A source plan indexed by source glyph.
+ */
+Plan BuildLinePlan(const ModelInterface& model, float fadeDurationRatio);
+
+/**
  * @brief Builds the CHARACTER logical skeleton used by PIXEL.
  *
  * The returned source plan contains no spatial descriptors. Those are derived
@@ -210,9 +225,11 @@ Plan BuildPixelPlan(const ModelInterface& model, float fadeDurationRatio);
  * The projection removes elided source units, preserves their logical order,
  * assigns deterministic END ellipsis ownership, and redistributes the
  * remaining schedule over the normalized timeline. A nullptr mapping means
- * that final and source glyph indices are identical. In CHARACTER mode the
- * ellipsis owns the last unit. In WORD mode it joins the last preceding unit,
- * or owns unit zero when no ordinary glyph survives.
+ * that final and source glyph indices are identical. In CHARACTER, LINE, and
+ * PIXEL modes the ellipsis first receives a revealable carrier unit. LINE
+ * later collapses it with other visible content on the same final line. In
+ * WORD mode it joins the last preceding unit, or owns unit zero when no
+ * ordinary glyph survives.
  *
  * @param[in] sourcePlan The plan indexed by source glyph.
  * @param[in] finalGlyphCount The number of glyphs in the final rendered sequence.
@@ -226,6 +243,24 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
                           const GlyphIndex* finalToSourceGlyph,
                           GlyphIndex        ellipsisFinalGlyph,
                           Unit              unit);
+
+/**
+ * @brief Collapses a projected source skeleton to final visible line units.
+ *
+ * Each final LineRun containing at least one revealable glyph becomes one
+ * unit in line order. Empty or whitespace-only lines do not consume a unit.
+ * Both halves of split bidi lines are mapped to the same unit. The operation
+ * commits atomically; invalid or incomplete line mappings leave the input
+ * plan unchanged.
+ *
+ * @param[in,out] plan The projected final-glyph plan to collapse.
+ * @param[in] lines The authoritative final visual lines.
+ * @param[in] lineCount The number of entries in lines.
+ * @return True if the final line mapping was valid, including empty plans.
+ */
+bool ApplyLineUnitSchedule(Plan&          plan,
+                           const LineRun* lines,
+                           Length         lineCount);
 
 /**
  * @brief Applies PER_LINE sequence scheduling to a projected reveal plan.

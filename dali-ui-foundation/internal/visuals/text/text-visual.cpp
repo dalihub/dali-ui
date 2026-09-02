@@ -2195,6 +2195,10 @@ Text::Internal::Reveal::Plan TextVisual::BuildTextRevealSourcePlan(bool includeI
   {
     return Text::Internal::Reveal::BuildPixelPlan(model, data->fadeDurationRatio);
   }
+  if(data->unit == Text::Internal::Reveal::Unit::LINE)
+  {
+    return Text::Internal::Reveal::BuildLinePlan(model, data->fadeDurationRatio);
+  }
   return Text::Internal::Reveal::BuildCharacterPlan(model, data->fadeDurationRatio);
 }
 

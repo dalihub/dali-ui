@@ -39,16 +39,18 @@ namespace Text
  * Sequence controls how those units share the normalized reveal timeline.
  * For example, CHARACTER with WHOLE_TEXT progresses by character across all
  * visible content, while CHARACTER with PER_LINE gives each final visible line
- * its own character progression. PIXEL follows the same whole-text or per-line
- * distinction using spatial progression.
+ * its own character progression. LINE with WHOLE_TEXT reveals final visible
+ * lines in order. LINE with PER_LINE treats every active line as an independent
+ * singleton sequence. PIXEL follows the same whole-text or per-line distinction
+ * using spatial progression.
  *
  * By default, content is revealed by character using one whole-text sequence,
  * no sequence stagger, and an automatically selected fade duration. These
  * options can be configured explicitly.
  *
  * Reveal affects the text foreground and inline ImageSpan content. ImageSpan
- * content reveals as an atomic item in CHARACTER and WORD modes, and reveals
- * spatially across the rendered image in PIXEL mode.
+ * content reveals as an atomic item in CHARACTER, WORD, and LINE modes, and
+ * reveals spatially across the rendered image in PIXEL mode.
  * Text decorations and other style layers such as shadow, outline, underline,
  * strikethrough, and background are not affected. When content is elided,
  * hidden source content does not consume reveal units and the ellipsis
@@ -89,6 +91,17 @@ public:
      * Whitespace does not create a reveal step.
      */
     WORD,
+
+    /**
+     * @brief Reveals one final visible layout line as a unit.
+     *
+     * Lines are determined after shaping, wrapping, maximum-line limiting,
+     * ellipsis, bidirectional layout, and ImageSpan placement. A line without
+     * revealable visible content does not consume a reveal unit. With
+     * WHOLE_TEXT, active lines reveal in final line order. With PER_LINE, each
+     * active line is an independent singleton sequence.
+     */
+    LINE,
 
     /**
      * @brief Reveals visible text continuously across its rendered foreground.
@@ -228,9 +241,10 @@ public:
    * active sequences from overlapping.
    *
    * PER_LINE creates consecutive active sequences from final visible layout
-   * lines. WHOLE_TEXT has one sequence, so the stagger has no visual effect,
-   * but the authored value is retained. Values outside [0.0, 1.0] are clamped,
-   * and NaN is normalized to 0.0.
+   * lines. With LINE, those sequences each contain one line unit. WHOLE_TEXT
+   * has one sequence, so the stagger has no visual effect, but the authored
+   * value is retained. Values outside [0.0, 1.0] are clamped, and NaN is
+   * normalized to 0.0.
    *
    * @param[in] ratio The sequence stagger ratio in [0.0, 1.0].
    */

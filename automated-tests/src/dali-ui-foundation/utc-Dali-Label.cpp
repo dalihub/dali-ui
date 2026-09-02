@@ -1249,6 +1249,13 @@ int UtcDaliLabelTextRevealPublicApiP(void)
   DALI_TEST_CHECK(label.GetRendererAt(0u).GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
   DALI_TEST_CHECK(label.GetRendererAt(0u).GetPropertyIndex("uTextRevealFadeDuration") != Property::INVALID_INDEX);
 
+  reveal.SetUnit(Text::Reveal::Unit::LINE);
+  label.SetTextReveal(reveal);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_EQUALS(label.GetTextReveal().GetUnit(), Text::Reveal::Unit::LINE, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+
   label.SetText("Changed text keeps normalized progress");
   application.SendNotification();
   application.Render(16);
@@ -1307,6 +1314,7 @@ int UtcDaliLabelTextRevealForegroundOnlyStyleResourcesP(void)
   label.SetTextLineThrough(lineThrough);
   label.SetTextBackgroundColor(UiColor(Color::MAGENTA));
   Text::Reveal reveal;
+  reveal.SetUnit(Text::Reveal::Unit::LINE);
   reveal.SetSequence(Text::Reveal::Sequence::PER_LINE);
   reveal.SetSequenceStaggerRatio(0.5f);
   label.SetTextReveal(reveal);
@@ -1367,6 +1375,7 @@ int UtcDaliLabelTextRevealEndEllipsisIntegrationSmokeP(void)
 
   for(Text::Reveal::Unit unit : {Text::Reveal::Unit::CHARACTER,
                                  Text::Reveal::Unit::WORD,
+                                 Text::Reveal::Unit::LINE,
                                  Text::Reveal::Unit::PIXEL})
   {
     Label label = Label::New("Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa Lambda");
@@ -1934,6 +1943,10 @@ int UtcDaliLabelTextRevealLifecycleStressP(void)
     0.25f,
     1.0f};
   const float progressValues[] = {0.1f, 0.8f, 0.0f, 1.0f};
+  const Text::Reveal::Unit units[] = {
+    Text::Reveal::Unit::CHARACTER,
+    Text::Reveal::Unit::WORD,
+    Text::Reveal::Unit::LINE};
 
   Label label = Label::New(texts[1]);
   label.SetRequestedWidth(360.0f);
@@ -2030,7 +2043,7 @@ int UtcDaliLabelTextRevealLifecycleStressP(void)
       }
       case 1u:
       {
-        reveal.SetUnit((iteration & 8u) ? Text::Reveal::Unit::WORD : Text::Reveal::Unit::CHARACTER);
+        reveal.SetUnit(units[(iteration / 8u) % (sizeof(units) / sizeof(units[0]))]);
         label.SetTextReveal(reveal);
         revealEnabled = true;
         break;
@@ -2044,7 +2057,7 @@ int UtcDaliLabelTextRevealLifecycleStressP(void)
       case 3u:
       {
         label.SetAsyncRendering(false);
-        reveal.SetUnit((iteration & 8u) ? Text::Reveal::Unit::CHARACTER : Text::Reveal::Unit::WORD);
+        reveal.SetUnit(units[(iteration / 8u + 1u) % (sizeof(units) / sizeof(units[0]))]);
         label.SetTextReveal(reveal);
         revealEnabled = true;
         break;

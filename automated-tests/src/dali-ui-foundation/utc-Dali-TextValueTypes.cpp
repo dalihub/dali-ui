@@ -83,6 +83,19 @@ int UtcDaliTextRevealValueTypeP(void)
   pixelMoveAssigned = std::move(pixelAssigned);
   DALI_TEST_CHECK(pixelMoveAssigned == reveal);
 
+  reveal.SetUnit(Text::Reveal::Unit::LINE);
+  DALI_TEST_EQUALS(reveal.GetUnit(), Text::Reveal::Unit::LINE, TEST_LOCATION);
+  Text::Reveal lineCopied(reveal);
+  DALI_TEST_CHECK(lineCopied == reveal);
+  Text::Reveal lineAssigned;
+  lineAssigned = lineCopied;
+  DALI_TEST_CHECK(lineAssigned == reveal);
+  Text::Reveal lineMoved(std::move(lineCopied));
+  DALI_TEST_CHECK(lineMoved == reveal);
+  Text::Reveal lineMoveAssigned;
+  lineMoveAssigned = std::move(lineAssigned);
+  DALI_TEST_CHECK(lineMoveAssigned == reveal);
+
   reveal.SetUnit(Text::Reveal::Unit::WORD);
   reveal.SetSequence(Text::Reveal::Sequence::PER_LINE);
   reveal.SetSequenceStaggerRatio(0.25f);

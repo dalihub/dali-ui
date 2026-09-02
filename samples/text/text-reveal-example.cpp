@@ -380,6 +380,10 @@ private:
       }
       else if(mUnit == Text::Reveal::Unit::WORD)
       {
+        mUnit = Text::Reveal::Unit::LINE;
+      }
+      else if(mUnit == Text::Reveal::Unit::LINE)
+      {
         mUnit = Text::Reveal::Unit::PIXEL;
       }
       else
@@ -477,6 +481,8 @@ private:
     {
       case Text::Reveal::Unit::WORD:
         return "Unit: Word";
+      case Text::Reveal::Unit::LINE:
+        return "Unit: Line";
       case Text::Reveal::Unit::PIXEL:
         return "Unit: Pixel";
       case Text::Reveal::Unit::CHARACTER:
@@ -491,6 +497,8 @@ private:
     {
       case Text::Reveal::Unit::WORD:
         return "WORD";
+      case Text::Reveal::Unit::LINE:
+        return "LINE";
       case Text::Reveal::Unit::PIXEL:
         return "PIXEL";
       case Text::Reveal::Unit::CHARACTER:
@@ -688,16 +696,24 @@ private:
     switch(mFadeDurationRatioIndex)
     {
       case 0u:
-        return mUnit == Text::Reveal::Unit::PIXEL
-                 ? "AUTO adapts the fade to the visible spatial progression and text scale."
+        if(mUnit == Text::Reveal::Unit::PIXEL)
+        {
+          return "AUTO adapts the fade to the visible spatial progression and text scale.";
+        }
+        return mUnit == Text::Reveal::Unit::LINE
+                 ? "AUTO uses the active final visible line count."
                  : "AUTO uses the final visible character or word count.";
       case 1u:
         if(mUnit == Text::Reveal::Unit::PIXEL)
         {
           return "Fade 0: the foreground advances continuously as a hard reveal front.";
         }
-        return mUnit == Text::Reveal::Unit::CHARACTER
-                 ? "Fade 0: each shaping cluster appears immediately at its scheduled progress."
+        if(mUnit == Text::Reveal::Unit::CHARACTER)
+        {
+          return "Fade 0: each shaping cluster appears immediately at its scheduled progress.";
+        }
+        return mUnit == Text::Reveal::Unit::LINE
+                 ? "Fade 0: each active final layout line appears at its scheduled progress."
                  : "Fade 0: each word appears immediately at its scheduled progress.";
       case 2u:
         return "Fade 0.10: each unit fades for 10% of the normalized timeline; fades overlap briefly.";

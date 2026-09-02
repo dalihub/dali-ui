@@ -692,7 +692,20 @@ Internal::Reveal::Plan Typesetter::CreateFinalRevealPlan(const Internal::Reveal:
                                                                             viewModel.GetFinalToSourceGlyphIndices(),
                                                                             viewModel.GetEllipsisFinalGlyphIndex(),
                                                                             unit);
-  if(unit == Internal::Reveal::Unit::PIXEL)
+  if(unit == Internal::Reveal::Unit::LINE)
+  {
+    if(Internal::Reveal::ApplyLineUnitSchedule(finalPlan,
+                                               viewModel.GetLines(),
+                                               viewModel.GetNumberOfLines()) &&
+       sequence == Internal::Reveal::Sequence::PER_LINE)
+    {
+      Internal::Reveal::ApplyPerLineSequenceSchedule(finalPlan,
+                                                     viewModel.GetLines(),
+                                                     viewModel.GetNumberOfLines(),
+                                                     sequenceStaggerRatio);
+    }
+  }
+  else if(unit == Internal::Reveal::Unit::PIXEL)
   {
     TextAbstraction::FontClient fontClient;
     if(finalPlan.fadeDurationRatio == Text::Reveal::AUTO_FADE_DURATION_RATIO)
