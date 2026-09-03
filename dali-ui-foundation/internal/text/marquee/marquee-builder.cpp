@@ -339,7 +339,8 @@ bool MarqueeBuilder::TryApplyMixedGradientContent(PreparedContent&              
   TextScrollerGradient mixedGradient =
     Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.baseStyle,
                                                       request.baseBounds.bounds,
-                                                      request.baseBounds.coordinateSize);
+                                                      request.baseBounds.coordinateSize,
+                                                      request.baseBounds.useTextureCoordinates);
   mixedGradient.mixedTextGradient = true;
   ApplyBaseAnimationState(mixedGradient, request.animationState);
 
@@ -350,7 +351,8 @@ bool MarqueeBuilder::TryApplyMixedGradientContent(PreparedContent&              
     const TextScrollerGradient textGradientOverlay =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.overlayStyle,
                                                         request.overlayBounds.bounds,
-                                                        request.overlayBounds.coordinateSize);
+                                                        request.overlayBounds.coordinateSize,
+                                                        request.overlayBounds.useTextureCoordinates);
 
     Internal::GradientMarquee::SetOverlayGradient(mixedGradient,
                                                   textGradientOverlay,
@@ -416,7 +418,8 @@ bool MarqueeBuilder::TryApplySimpleStyleContent(PreparedContent&                
     textGradient =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.baseStyle,
                                                         request.baseBounds.bounds,
-                                                        request.baseBounds.coordinateSize);
+                                                        request.baseBounds.coordinateSize,
+                                                        request.baseBounds.useTextureCoordinates);
     ApplyBaseAnimationState(textGradient, request.animationState);
   }
 
@@ -426,7 +429,8 @@ bool MarqueeBuilder::TryApplySimpleStyleContent(PreparedContent&                
     const TextScrollerGradient textGradientOverlay =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.overlayStyle,
                                                         request.overlayBounds.bounds,
-                                                        request.overlayBounds.coordinateSize);
+                                                        request.overlayBounds.coordinateSize,
+                                                        request.overlayBounds.useTextureCoordinates);
     Internal::GradientMarquee::SetOverlayGradient(textGradient,
                                                   textGradientOverlay,
                                                   request.overlayMode);
@@ -453,7 +457,8 @@ void MarqueeBuilder::ApplySimpleGradientContent(PreparedContent&                
     content.textGradient =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.baseStyle,
                                                         request.baseBounds.bounds,
-                                                        request.baseBounds.coordinateSize);
+                                                        request.baseBounds.coordinateSize,
+                                                        request.baseBounds.useTextureCoordinates);
     ApplyBaseAnimationState(content.textGradient, request.animationState);
   }
 
@@ -464,7 +469,8 @@ void MarqueeBuilder::ApplySimpleGradientContent(PreparedContent&                
     const TextScrollerGradient textGradientOverlay =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.overlayStyle,
                                                         request.overlayBounds.bounds,
-                                                        request.overlayBounds.coordinateSize);
+                                                        request.overlayBounds.coordinateSize,
+                                                        request.overlayBounds.useTextureCoordinates);
 
     Internal::GradientMarquee::SetOverlayGradient(content.textGradient,
                                                   textGradientOverlay,

@@ -224,8 +224,8 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
   {
     "Horizontal Marquee TextGradient",
     "Horizontal marquee text gradient keeps moving with the scrolling content",
-    "Expected: moving text fill keeps the selected gradient type while scrolling horizontally.",
-    "Notes: verifies horizontal marquee shader with TextGradient.",
+    "Expected: CONTENT moves and repeats with text; B switches to viewport-fixed VIEW.",
+    "Notes: verifies distinct horizontal marquee coordinate spaces in sync and async.",
     GradientKind::LINEAR,
     42.0f,
     false,
@@ -237,8 +237,8 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
   {
     "Vertical Marquee TextGradient",
     "Vertical\nmarquee\ntext\ngradient\nscrolls\nwith\ncontent",
-    "Expected: moving text fill keeps the selected gradient type while scrolling vertically.",
-    "Notes: verifies vertical marquee shader with TextGradient.",
+    "Expected: CONTENT moves and repeats with text; B switches to viewport-fixed VIEW.",
+    "Notes: verifies distinct vertical marquee coordinate spaces in sync and async.",
     GradientKind::LINEAR,
     38.0f,
     true,
@@ -2619,7 +2619,7 @@ private:
                      mAnimationInfo ? UiColor(0x0F766E) : UiColor(BADGE_READY_BACKGROUND),
                      mAnimationInfo ? UiColor(0x5EEAD4) : UiColor(BADGE_READY_BORDER));
 
-      std::string expected = "MATRIX  H/V, START/CENTER/END, short/long, sync/async | Expected: short cells align to text bounds; long cells use viewport bounds; async matches sync.";
+      std::string expected = "MATRIX  H/V, START/CENTER/END, short/long, sync/async | Expected: CONTENT follows each scrolling texture copy; VIEW stays fixed; async matches sync.";
       if(!mGradientApplied)
       {
         expected += " TG: cleared; C applies the selected type.";
@@ -2695,7 +2695,14 @@ private:
     std::string expected = "Coordinate: ";
     if(baseGradientSupported)
     {
-      expected += item.marquee ? "visible marquee viewport bounds" : "logical text bounds";
+      if(CurrentGradientBoundsMode() == Text::GradientBoundsMode::VIEW_BOUND)
+      {
+        expected += "Label viewport (fixed during marquee)";
+      }
+      else
+      {
+        expected += item.marquee ? "laid-out content (moves and repeats with marquee)" : "laid-out content";
+      }
     }
     else
     {

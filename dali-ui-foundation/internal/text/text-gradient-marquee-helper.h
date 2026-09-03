@@ -113,7 +113,8 @@ bool IsCompositionSupported(bool hasMultipleTextColors,
 
 Dali::Ui::Text::TextScrollerGradient CreateScrollerGradient(const Gradient::Style& style,
                                                             const Vector4&         bounds,
-                                                            const Vector2&         coordinateSize);
+                                                            const Vector2&         coordinateSize,
+                                                            bool                   useTextureCoordinates = false);
 
 void SetOverlayGradient(Dali::Ui::Text::TextScrollerGradient&       textGradient,
                         const Dali::Ui::Text::TextScrollerGradient& overlayGradient,

@@ -1474,7 +1474,9 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                                                                 renderModel->mVisualModel->GetLayoutSize(),
                                                                 renderModel->mVisualModel->mLines.Begin(),
                                                                 static_cast<Dali::Ui::Text::Length>(renderModel->mVisualModel->mLines.Count()),
-                                                                parameters.verticalAlignment);
+                                                                parameters.verticalAlignment,
+                                                                parameters.isMarqueeEnabled &&
+                                                                  parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL);
   const Text::ReplacementProjection* activeProjection =
     (replacementState && replacementState->processingModel && replacementState->projection.HasReplacements())
       ? &replacementState->projection
@@ -2026,7 +2028,9 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   if(isHorizontal)
   {
     // As relayout of text may not be done at this point natural size is used to get size. Single line scrolling only.
-    Size textNaturalSize = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
+    Size textNaturalSize   = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
+    textNaturalSize.width  = ConvertToEven(textNaturalSize.width);
+    textNaturalSize.height = ConvertToEven(textNaturalSize.height);
 
     isTextContentOverflow = textNaturalSize.width > controlSize.width;
 
@@ -2152,13 +2156,6 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   parameters.textHeight = verifiedSize.height;
 
   AsyncTextRenderInfo renderInfo = Render(parameters);
-  renderInfo.textGradientMarqueeViewportBounds =
-    CalculateMarqueeGradientViewportBounds(controlSize,
-                                           mTextModel->mVisualModel->GetLayoutSize(),
-                                           mTextModel->mVisualModel->mLines.Begin(),
-                                           static_cast<Dali::Ui::Text::Length>(mTextModel->mVisualModel->mLines.Count()),
-                                           parameters.horizontalAlignment,
-                                           parameters.verticalAlignment);
 
   parameters.textWidth  = static_cast<float>(actualWidth);
   parameters.textHeight = static_cast<float>(actualHeight);

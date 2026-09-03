@@ -243,18 +243,17 @@ enum class GradientBoundsMode : uint8_t
   /**
    * @brief Use laid-out text content bounds.
    *
-   * This is the default mode. The exact scrolling behavior depends on the text
-   * view. Label marquee uses the visible marquee content viewport so the
-   * gradient remains stable while marquee scrolling. InputField and InputEditor
-   * use content-relative bounds, so a scrolling glyph keeps the same position
-   * inside the gradient.
+   * This is the default mode. The gradient belongs to the laid-out content, so
+   * scrolling content keeps the same position inside the gradient. Repeated
+   * marquee copies repeat the same content-relative gradient.
    */
   CONTENT_BOUND = 0,
 
   /**
    * @brief Use the text view bounds.
    *
-   * The full text view size is used, including padding.
+   * The full text view size is used, including padding. The gradient remains
+   * fixed to the view while text content scrolls through it.
    */
   VIEW_BOUND = 1
 };

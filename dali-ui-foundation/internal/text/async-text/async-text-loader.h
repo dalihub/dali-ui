@@ -295,7 +295,6 @@ struct AsyncTextRenderInfo
     revealMetadataTiles(),
     size(),
     textLogicalBounds(0.0f, 0.0f, 1.0f, 1.0f),
-    textGradientMarqueeViewportBounds(0.0f, 0.0f, 1.0f, 1.0f),
     controlSize(),
     renderedSize(),
     anchorHitRegions(),
@@ -339,15 +338,14 @@ struct AsyncTextRenderInfo
   PixelData                                 overlayStylePixelData;
   PixelData                                 maskPixelData;
   PixelData                                 marqueePixelData;
-  std::vector<PixelData>                    revealMetadataTiles;               ///< One RGBA8888 buffer per height tile.
-  Size                                      size;                              ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
-  Vector4                                   textLogicalBounds;                 ///< Normalized logical text bounds inside @p size.
-  Vector4                                   textGradientMarqueeViewportBounds; ///< Normalized TextGradient bounds inside the visible marquee viewport.
-  Size                                      controlSize;                       ///< View size used to display the rendered text.
-  Size                                      renderedSize;                      ///< Final displayed size reported back to the caller.
-  std::vector<AsyncAnchorHitRegion>         anchorHitRegions;                  ///< Anchor hit regions in text content local coordinates.
-  Vector<ReplacementPlacement>              replacementPlacements;             ///< Final-layout values; no image runtime objects.
-  Vector<ReplacementRevealTiming>           replacementRevealTimings;          ///< Atomic ImageSpan timing from the shared final Reveal plan.
+  std::vector<PixelData>                    revealMetadataTiles;      ///< One RGBA8888 buffer per height tile.
+  Size                                      size;                     ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
+  Vector4                                   textLogicalBounds;        ///< Normalized logical text bounds inside @p size.
+  Size                                      controlSize;              ///< View size used to display the rendered text.
+  Size                                      renderedSize;             ///< Final displayed size reported back to the caller.
+  std::vector<AsyncAnchorHitRegion>         anchorHitRegions;         ///< Anchor hit regions in text content local coordinates.
+  Vector<ReplacementPlacement>              replacementPlacements;    ///< Final-layout values; no image runtime objects.
+  Vector<ReplacementRevealTiming>           replacementRevealTimings; ///< Atomic ImageSpan timing from the shared final Reveal plan.
   uint64_t                                  replacementSourceRevision;
   uint64_t                                  replacementLayoutGeneration;
   int                                       lineCount;

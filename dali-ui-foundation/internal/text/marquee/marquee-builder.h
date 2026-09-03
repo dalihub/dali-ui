@@ -91,6 +91,7 @@ struct MarqueeBuilder
   {
     Vector4 bounds{0.0f, 0.0f, 1.0f, 1.0f};
     Vector2 coordinateSize{Vector2::ZERO};
+    bool    useTextureCoordinates{false};
   };
 
   struct MixedGradientContentRequest

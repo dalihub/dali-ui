@@ -2760,59 +2760,62 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
       Ui::Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
     if(compositionPlan.HasWork())
     {
-      auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
+      const bool hasContentBoundGradient =
+        (compositionPlan.needsBaseBounds && textGradientBoundsMode == Ui::Text::GradientBoundsMode::CONTENT_BOUND) ||
+        (compositionPlan.needsOverlayBounds && textGradientOverlayBoundsMode == Ui::Text::GradientBoundsMode::CONTENT_BOUND);
+      if(isHorizontal && hasContentBoundGradient)
       {
-        coordinateSize = renderInfo.controlSize;
+        const Vector2 visualCoordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
+        if(visualCoordinateSize.width > Math::MACHINE_EPSILON_1000 &&
+           visualCoordinateSize.height > Math::MACHINE_EPSILON_1000)
+        {
+          // Async controlSize can describe the allocated Label while the text visual is
+          // fitted to the rendered marquee height. Keep scroller geometry on the visual;
+          // gradient evaluation independently uses content texture coordinates.
+          textScrollerControlSize = visualCoordinateSize;
+        }
+      }
+
+      auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode,
+                                              Vector2&                     coordinateSize,
+                                              bool&                        useTextureCoordinates) -> Vector4
+      {
+        useTextureCoordinates = false;
         if(boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
         {
           coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
           return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
         }
 
-        if(isHorizontal)
-        {
-          const Vector2 visualCoordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
-          if(visualCoordinateSize.width > Math::MACHINE_EPSILON_1000 &&
-             visualCoordinateSize.height > Math::MACHINE_EPSILON_1000)
-          {
-            // Remove the horizontal marquee wrap gap to recover the actual text content size.
-            const Vector2 contentSize(std::max(verifiedSize.width - wrapGap, 0.0f),
-                                      verifiedSize.height);
-            const Vector2 xBounds =
-              Ui::Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.width,
-                                                                      contentSize.width,
-                                                                      mController->GetHorizontalAlignment());
-            const Vector2 yBounds =
-              Ui::Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.height,
-                                                                      contentSize.height,
-                                                                      mController->GetVerticalAlignment());
-            coordinateSize          = visualCoordinateSize;
-            textScrollerControlSize = coordinateSize;
-            return Vector4(xBounds.x, yBounds.x, xBounds.y, yBounds.y);
-          }
-        }
-
-        return renderInfo.textGradientMarqueeViewportBounds;
+        coordinateSize        = verifiedSize;
+        useTextureCoordinates = true;
+        return renderInfo.textLogicalBounds;
       };
 
       if(compositionPlan.needsBaseBounds)
       {
         Vector2       textGradientCoordinateSize;
-        const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(textGradientBoundsMode,
-                                                                                    textGradientCoordinateSize);
-        compositionRequest.baseBoundsResolved        = true;
-        compositionRequest.baseBounds.bounds         = textGradientBounds;
-        compositionRequest.baseBounds.coordinateSize = textGradientCoordinateSize;
+        bool          textGradientUseTextureCoordinates     = false;
+        const Vector4 textGradientBounds                    = resolveMarqueeGradientBounds(textGradientBoundsMode,
+                                                                                           textGradientCoordinateSize,
+                                                                                           textGradientUseTextureCoordinates);
+        compositionRequest.baseBoundsResolved               = true;
+        compositionRequest.baseBounds.bounds                = textGradientBounds;
+        compositionRequest.baseBounds.coordinateSize        = textGradientCoordinateSize;
+        compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
       }
 
       if(compositionPlan.needsOverlayBounds)
       {
         Vector2       textGradientOverlayCoordinateSize;
-        const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
-                                                                                       textGradientOverlayCoordinateSize);
-        compositionRequest.overlayBoundsResolved        = true;
-        compositionRequest.overlayBounds.bounds         = textGradientOverlayBounds;
-        compositionRequest.overlayBounds.coordinateSize = textGradientOverlayCoordinateSize;
+        bool          textGradientOverlayUseTextureCoordinates = false;
+        const Vector4 textGradientOverlayBounds                = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
+                                                                                              textGradientOverlayCoordinateSize,
+                                                                                              textGradientOverlayUseTextureCoordinates);
+        compositionRequest.overlayBoundsResolved               = true;
+        compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
+        compositionRequest.overlayBounds.coordinateSize        = textGradientOverlayCoordinateSize;
+        compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
       }
 
       Ui::Text::MarqueeBuilder::PixelDataBundle pixels;
@@ -3558,42 +3561,53 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     {
       if(compositionPlan.needsBaseBounds || compositionPlan.needsOverlayBounds)
       {
-        const Vector4 textGradientViewportBounds =
-          Ui::Text::Internal::CalculateMarqueeGradientViewportBounds(controlSize,
-                                                                     textModel->GetLayoutSize(),
-                                                                     textModel->GetLines(),
-                                                                     textModel->GetNumberOfLines(),
-                                                                     mController->GetHorizontalAlignment(),
-                                                                     mController->GetVerticalAlignment());
-        auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
+        const Vector4 textGradientContentBounds =
+          Ui::Text::Internal::CalculateGradientContentBounds(verifiedSize,
+                                                             textModel->GetLayoutSize(),
+                                                             textModel->GetLines(),
+                                                             textModel->GetNumberOfLines(),
+                                                             mController->GetVerticalAlignment(),
+                                                             isHorizontal);
+        auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode,
+                                                Vector2&                     coordinateSize,
+                                                bool&                        useTextureCoordinates) -> Vector4
         {
-          coordinateSize = controlSize;
+          useTextureCoordinates = false;
           if(boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
           {
             coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
             return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
           }
-          return textGradientViewportBounds;
+
+          coordinateSize        = verifiedSize;
+          useTextureCoordinates = true;
+          return textGradientContentBounds;
         };
 
         if(compositionPlan.needsBaseBounds)
         {
           Vector2       textGradientCoordinateSize;
-          const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(textGradientBoundsMode,
-                                                                                      textGradientCoordinateSize);
-          compositionRequest.baseBoundsResolved        = true;
-          compositionRequest.baseBounds.bounds         = textGradientBounds;
-          compositionRequest.baseBounds.coordinateSize = textGradientCoordinateSize;
+          bool          textGradientUseTextureCoordinates     = false;
+          const Vector4 textGradientBounds                    = resolveMarqueeGradientBounds(textGradientBoundsMode,
+                                                                                             textGradientCoordinateSize,
+                                                                                             textGradientUseTextureCoordinates);
+          compositionRequest.baseBoundsResolved               = true;
+          compositionRequest.baseBounds.bounds                = textGradientBounds;
+          compositionRequest.baseBounds.coordinateSize        = textGradientCoordinateSize;
+          compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
         }
 
         if(compositionPlan.needsOverlayBounds)
         {
           Vector2       textGradientOverlayCoordinateSize;
-          const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
-                                                                                         textGradientOverlayCoordinateSize);
-          compositionRequest.overlayBoundsResolved        = true;
-          compositionRequest.overlayBounds.bounds         = textGradientOverlayBounds;
-          compositionRequest.overlayBounds.coordinateSize = textGradientOverlayCoordinateSize;
+          bool          textGradientOverlayUseTextureCoordinates = false;
+          const Vector4 textGradientOverlayBounds                = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
+                                                                                                textGradientOverlayCoordinateSize,
+                                                                                                textGradientOverlayUseTextureCoordinates);
+          compositionRequest.overlayBoundsResolved               = true;
+          compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
+          compositionRequest.overlayBounds.coordinateSize        = textGradientOverlayCoordinateSize;
+          compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
         }
       }
 
