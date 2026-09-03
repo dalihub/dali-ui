@@ -195,10 +195,35 @@ public: // API
   /**
    * @brief Sets whether clicking is allowed.
    *
+   * When clicking is blocked, the built-in tap interaction does not emit ClickedSignal or consume
+   * touch events when no other built-in interaction is active. When long-press handling is enabled
+   * and a LongPressedSignal handler is connected, long-press detection remains active and consumes
+   * the touch stream while recognizing it. The View remains eligible for hit testing, and an
+   * explicitly connected TouchEventSignal callback may still consume the event.
+   *
    * @param[in] clickable True to allow clicking
    * @see InteractiveTrait::SetClickable
    */
   void SetClickable(bool clickable);
+
+  /**
+   * @brief Returns whether long-press handling is enabled.
+   *
+   * @return True if long-press handling is enabled
+   * @see InteractiveTrait::IsLongPressEnabled
+   */
+  bool IsLongPressEnabled() const;
+
+  /**
+   * @brief Sets whether long-press handling is enabled.
+   *
+   * This controls both touch and key long-press recognition without disconnecting LongPressedSignal
+   * handlers. It does not change the clickable setting.
+   *
+   * @param[in] enabled True to enable long-press handling, false to disable it
+   * @see InteractiveTrait::SetLongPressEnabled
+   */
+  void SetLongPressEnabled(bool enabled);
 
   /**
    * @brief Returns the current key click policy.

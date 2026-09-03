@@ -347,6 +347,22 @@ int UtcDaliViewEnsureInteractiveTraitP(void)
 // State API tests
 // ============================================================================
 
+int UtcDaliInteractiveTraitLongPressEnabledP(void)
+{
+  UiTestApplication application;
+  View              view        = CreateInteractiveView(application);
+  InteractiveTrait  interactive = view.AsInteractive();
+
+  DALI_TEST_CHECK(interactive.IsLongPressEnabled());
+
+  interactive.SetLongPressEnabled(false);
+  DALI_TEST_CHECK(!interactive.IsLongPressEnabled());
+
+  interactive.SetLongPressEnabled(true);
+  DALI_TEST_CHECK(interactive.IsLongPressEnabled());
+  END_TEST;
+}
+
 // ============================================================================
 // Tap gesture → ClickedSignal
 // ============================================================================
@@ -400,6 +416,219 @@ int UtcDaliInteractiveTraitSetClickableFalseBlocksTapP(void)
   END_TEST;
 }
 
+int UtcDaliInteractiveTraitSetClickableFalsePassesTouchToParentP(void)
+{
+  UiTestApplication application;
+  View              parent = CreateInteractiveView(application);
+  View              child  = View::New();
+
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(100.0f);
+  child.SetPivot(Pivot::TOP_LEFT);
+  child.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  parent.Add(child);
+
+  InteractiveTrait parentInteractive = parent.AsInteractive();
+  InteractiveTrait childInteractive  = child.AsInteractive();
+  childInteractive.SetClickable(false);
+
+  application.SendNotification();
+  application.Render();
+
+  ClickedSignalData    parentClickedData;
+  ClickedSignalFunctor parentClickedFunctor(parentClickedData);
+  parentInteractive.ClickedSignal().Connect(&application, parentClickedFunctor);
+
+  ClickedSignalData    childClickedData;
+  ClickedSignalFunctor childClickedFunctor(childClickedData);
+  childInteractive.ClickedSignal().Connect(&application, childClickedFunctor);
+
+  PressedChangedSignalData    childPressedData;
+  PressedChangedSignalFunctor childPressedFunctor(childPressedData);
+  childInteractive.PressedChangedSignal().Connect(&application, childPressedFunctor);
+
+  uint32_t childTouchCount = 0u;
+  child.TouchEventSignal().Connect(&application, [&childTouchCount](Actor, const TouchEvent&)
+  {
+    ++childTouchCount;
+    return false;
+  });
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100u);
+
+  DALI_TEST_CHECK(childTouchCount > 0u);
+  DALI_TEST_CHECK(parentClickedData.called);
+  DALI_TEST_CHECK(!childClickedData.called);
+  DALI_TEST_CHECK(!childPressedData.called);
+  DALI_TEST_CHECK(!childInteractive.IsPressed());
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitSetClickableFalseAllowsExplicitTouchConsumptionP(void)
+{
+  UiTestApplication application;
+  View              parent = CreateInteractiveView(application);
+  View              child  = View::New();
+
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(100.0f);
+  child.SetPivot(Pivot::TOP_LEFT);
+  child.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  parent.Add(child);
+
+  InteractiveTrait parentInteractive = parent.AsInteractive();
+  InteractiveTrait childInteractive  = child.AsInteractive();
+  childInteractive.SetClickable(false);
+
+  application.SendNotification();
+  application.Render();
+
+  ClickedSignalData    parentClickedData;
+  ClickedSignalFunctor parentClickedFunctor(parentClickedData);
+  parentInteractive.ClickedSignal().Connect(&application, parentClickedFunctor);
+
+  ClickedSignalData    childClickedData;
+  ClickedSignalFunctor childClickedFunctor(childClickedData);
+  childInteractive.ClickedSignal().Connect(&application, childClickedFunctor);
+
+  uint32_t childTouchCount = 0u;
+  child.TouchEventSignal().Connect(&application, [&childTouchCount](Actor, const TouchEvent&)
+  {
+    ++childTouchCount;
+    return true;
+  });
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100u);
+
+  DALI_TEST_CHECK(childTouchCount > 0u);
+  DALI_TEST_CHECK(!parentClickedData.called);
+  DALI_TEST_CHECK(!childClickedData.called);
+  DALI_TEST_CHECK(!childInteractive.IsPressed());
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitSetClickableFalseAllowsLongPressP(void)
+{
+  UiTestApplication application;
+  View              parent = CreateInteractiveView(application);
+  View              child  = View::New();
+
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(100.0f);
+  child.SetPivot(Pivot::TOP_LEFT);
+  child.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  parent.Add(child);
+
+  InteractiveTrait parentInteractive = parent.AsInteractive();
+  InteractiveTrait childInteractive  = child.AsInteractive();
+  childInteractive.SetClickable(false);
+
+  application.SendNotification();
+  application.Render();
+
+  ClickedSignalData    childClickedData;
+  ClickedSignalFunctor childClickedFunctor(childClickedData);
+  childInteractive.ClickedSignal().Connect(&application, childClickedFunctor);
+
+  LongPressedSignalData    childLongPressedData;
+  LongPressedSignalFunctor childLongPressedFunctor(childLongPressedData, true);
+  childInteractive.LongPressedSignal().Connect(&application, childLongPressedFunctor);
+
+  PressedChangedSignalData    childPressedData;
+  PressedChangedSignalFunctor childPressedFunctor(childPressedData);
+  childInteractive.PressedChangedSignal().Connect(&application, childPressedFunctor);
+
+  PressedChangedSignalData    parentPressedData;
+  PressedChangedSignalFunctor parentPressedFunctor(parentPressedData);
+  parentInteractive.PressedChangedSignal().Connect(&application, parentPressedFunctor);
+
+  TestGenerateLongPress(application, 50.0f, 50.0f, 100u);
+
+  DALI_TEST_CHECK(childPressedData.called);
+  DALI_TEST_CHECK(childPressedData.pressed);
+  DALI_TEST_CHECK(!parentPressedData.called);
+  DALI_TEST_CHECK(childLongPressedData.called);
+  DALI_TEST_CHECK(!childClickedData.called);
+
+  TestEndLongPress(application, 50.0f, 50.0f, 600u);
+
+  DALI_TEST_CHECK(!childInteractive.IsPressed());
+  DALI_TEST_CHECK(!childClickedData.called);
+
+  childInteractive.SetClickable(true);
+  TestGenerateTap(application, 50.0f, 50.0f, 700u);
+  DALI_TEST_CHECK(childClickedData.called);
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitSetClickableFalseLongPressEnabledControlsTouchP(void)
+{
+  UiTestApplication application;
+  View              parent = CreateInteractiveView(application);
+  View              child  = View::New();
+
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(100.0f);
+  child.SetPivot(Pivot::TOP_LEFT);
+  child.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  parent.Add(child);
+
+  InteractiveTrait parentInteractive = parent.AsInteractive();
+  InteractiveTrait childInteractive  = child.AsInteractive();
+  childInteractive.SetClickable(false);
+
+  application.SendNotification();
+  application.Render();
+
+  ClickedSignalData    parentClickedData;
+  ClickedSignalFunctor parentClickedFunctor(parentClickedData);
+  parentInteractive.ClickedSignal().Connect(&application, parentClickedFunctor);
+
+  ClickedSignalData    childClickedData;
+  ClickedSignalFunctor childClickedFunctor(childClickedData);
+  childInteractive.ClickedSignal().Connect(&application, childClickedFunctor);
+
+  LongPressedSignalData    childLongPressedData;
+  LongPressedSignalFunctor childLongPressedFunctor(childLongPressedData);
+  childInteractive.LongPressedSignal().Connect(&application, childLongPressedFunctor);
+
+  PressedChangedSignalData    childPressedData;
+  PressedChangedSignalFunctor childPressedFunctor(childPressedData);
+  childInteractive.PressedChangedSignal().Connect(&application, childPressedFunctor);
+
+  childInteractive.SetLongPressEnabled(false);
+  TestGenerateTap(application, 50.0f, 50.0f, 100u);
+
+  DALI_TEST_CHECK(parentClickedData.called);
+  DALI_TEST_CHECK(!childPressedData.called);
+  DALI_TEST_CHECK(!childLongPressedData.called);
+
+  parentClickedData.Reset();
+  childInteractive.SetClickable(true);
+  TestGenerateTap(application, 50.0f, 50.0f, 200u);
+
+  DALI_TEST_CHECK(!parentClickedData.called);
+  DALI_TEST_CHECK(childClickedData.called);
+  DALI_TEST_CHECK(!childLongPressedData.called);
+
+  childClickedData.Reset();
+  childPressedData.Reset();
+  childLongPressedData.Reset();
+  childInteractive.SetClickable(false);
+  childInteractive.SetLongPressEnabled(true);
+  TestGenerateLongPress(application, 50.0f, 50.0f, 300u);
+
+  DALI_TEST_CHECK(!parentClickedData.called);
+  DALI_TEST_CHECK(childPressedData.called);
+  DALI_TEST_CHECK(childPressedData.pressed);
+  DALI_TEST_CHECK(childLongPressedData.called);
+  DALI_TEST_CHECK(!childClickedData.called);
+
+  TestEndLongPress(application, 50.0f, 50.0f, 800u);
+  DALI_TEST_CHECK(!childInteractive.IsPressed());
+  END_TEST;
+}
+
 // ============================================================================
 // Accessibility activation → ClickedSignal
 // ============================================================================
@@ -407,7 +636,7 @@ int UtcDaliInteractiveTraitSetClickableFalseBlocksTapP(void)
 int UtcDaliInteractiveTraitAccessibilityActivateP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
   view.SetFocusable(true);
 
   ClickedSignalData data;
@@ -1267,6 +1496,56 @@ int UtcDaliInteractiveTraitKeyEventDisabledPolicyP(void)
   application.ProcessEvent(keyUp);
 
   DALI_TEST_CHECK(!data.called); // DISABLED: no click from keyboard
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitLongPressEnabledControlsKeyP(void)
+{
+  UiConfig config = UiConfig::New();
+  config.SetLongPressKeyEventMinimumCount(2u);
+
+  UiTestApplication application(config);
+  View              view        = CreateInteractiveView(application);
+  InteractiveTrait  interactive = view.AsInteractive();
+  interactive.SetClickable(false);
+  interactive.SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+
+  LongPressedSignalData    longPressedData;
+  LongPressedSignalFunctor longPressedFunctor(longPressedData);
+  interactive.LongPressedSignal().Connect(&application, longPressedFunctor);
+
+  FocusManager::Get().SetCurrentFocusView(view);
+  application.SendNotification();
+  application.Render();
+
+  interactive.SetLongPressEnabled(false);
+  Dali::Integration::KeyEvent firstKeyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  Dali::Integration::KeyEvent firstKeyRepeat(
+    "Return", "", "", 0, 0, 120, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  Dali::Integration::KeyEvent firstKeyUp(
+    "Return", "", "", 0, 0, 140, Dali::Integration::KeyEvent::UP, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(firstKeyDown);
+  application.ProcessEvent(firstKeyRepeat);
+  application.ProcessEvent(firstKeyUp);
+
+  DALI_TEST_CHECK(!longPressedData.called);
+
+  interactive.SetLongPressEnabled(true);
+  Dali::Integration::KeyEvent secondKeyDown(
+    "Return", "", "", 0, 0, 200, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  Dali::Integration::KeyEvent secondKeyRepeat(
+    "Return", "", "", 0, 0, 220, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  Dali::Integration::KeyEvent secondKeyUp(
+    "Return", "", "", 0, 0, 240, Dali::Integration::KeyEvent::UP, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(secondKeyDown);
+  application.ProcessEvent(secondKeyRepeat);
+
+  DALI_TEST_CHECK(longPressedData.called);
+  DALI_TEST_CHECK(longPressedData.view == view);
+
+  application.ProcessEvent(secondKeyUp);
+  DALI_TEST_CHECK(!interactive.IsPressed());
   END_TEST;
 }
 

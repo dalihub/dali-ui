@@ -348,6 +348,10 @@ view.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
 });
 ```
 
+롱프레스 처리는 기본적으로 활성화됩니다. Signal handler 연결을 유지한 채 touch와 key
+`LongPressedSignal` 전달을 모두 일시 중지하려면 `SetLongPressEnabled(false)`를 사용합니다.
+Tap/click은 `SetClickable()`로 독립적으로 제어합니다.
+
 ### 일반 View를 Interactive로 만들기
 
 `InteractiveView`를 사용하지 않더라도 일반 `View`에 `AsInteractive()`를 호출하면 동일한 인터랙션 기능을 부여할 수 있습니다. focusable도 자동으로 활성화됩니다:

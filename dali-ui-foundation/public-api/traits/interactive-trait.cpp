@@ -144,6 +144,16 @@ void InteractiveTrait::SetClickable(bool clickable)
   GetImpl(*this).SetClickable(clickable);
 }
 
+bool InteractiveTrait::IsLongPressEnabled() const
+{
+  return GetImpl(*this).IsLongPressEnabled();
+}
+
+void InteractiveTrait::SetLongPressEnabled(bool enabled)
+{
+  GetImpl(*this).SetLongPressEnabled(enabled);
+}
+
 KeyClickPolicy InteractiveTrait::GetKeyClickPolicy() const
 {
   return GetImpl(*this).GetKeyClickPolicy();

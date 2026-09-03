@@ -122,6 +122,16 @@ public: // API
   void SetClickable(bool clickable);
 
   /**
+   * @copydoc Dali::Ui::InteractiveTrait::IsLongPressEnabled
+   */
+  bool IsLongPressEnabled() const;
+
+  /**
+   * @copydoc Dali::Ui::InteractiveTrait::SetLongPressEnabled
+   */
+  void SetLongPressEnabled(bool enabled);
+
+  /**
    * @copydoc Dali::Ui::InteractiveTrait::GetKeyClickPolicy
    */
   KeyClickPolicy GetKeyClickPolicy() const;
@@ -236,6 +246,7 @@ private:
   void SetPressedInternal(bool value, InputEvent event);
   void SetHoveredInternal(bool value, InputEvent event);
   bool IsPressedByHoveringDevice(const InputEvent& event) const;
+  bool IsLongPressDetectionActive() const;
   bool ShouldTapTriggerClicked() const;
   bool ShouldKeyReleaseTriggerClicked() const;
   bool ShouldKeyPressTriggerClicked() const;
@@ -269,6 +280,7 @@ private:
   PendingKeyAction                     mPendingKeyAction;
   bool                                 mPseudoDisabled : 1;
   bool                                 mClickable : 1;
+  bool                                 mLongPressEnabled : 1;
   bool                                 mClickBlockedByTouch : 1;
   bool                                 mClickBlockedByKey : 1;
 };

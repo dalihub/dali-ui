@@ -312,10 +312,15 @@ GroupSelectableView SettingsPage::MakeRadioRow(const Dali::String& text)
 }
 ```
 
-`SetClickable(false)`는 자식의 click action만 끄며 hit testing 대상에서는 제거하지 않습니다.
-Indicator 위의 pointer 입력이 외부 row를 대상으로 하게 만드는 설정은
-`SetSensitive(false)`입니다. 두 자식을 모두 accessibility에서 숨기면 중복 node 대신
-외부 row 하나만 radio option으로 노출됩니다.
+`SetClickable(false)`는 자식의 기본 tap/click action을 끄고, 소비되지 않은 touch가 외부
+row로 전달되도록 하지만 연결된 long-press 처리를 끄거나 자식을 hit testing 대상에서
+제거하지는 않습니다. 표시 전용 indicator와 그 subtree를 hit testing에서 완전히
+제외하려면 `SetSensitive(false)`를 사용합니다. 두 자식을 모두 accessibility에서 숨기면
+중복 node 대신 외부 row 하나만 radio option으로 노출됩니다.
+
+자식에서 long-press 처리가 활성화되어 있으면 clickable=false여도 gesture 인식을 위해
+자식이 touch stream을 소비합니다. Signal handler 연결을 유지한 채 인식을 중지하려면
+`SetLongPressEnabled(false)`를 호출합니다.
 
 ---
 
