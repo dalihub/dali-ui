@@ -226,8 +226,8 @@ Bounds AccessibilityHighlightOverlay::GetOverlayExtents(Dali::Actor& sceneView, 
     return Bounds(-1.0f, -1.0f, -1.0f, -1.0f);
   }
 
-  auto actualSceneExtent = sceneView.CalculateScreenExtents();
-  auto actualExtent      = model.CalculateScreenExtents();
+  auto actualSceneExtent = DevelActor::CalculateCurrentScreenExtents(sceneView);
+  auto actualExtent      = DevelActor::CalculateCurrentScreenExtents(model);
   auto x                 = actualExtent.x - actualSceneExtent.x + (actualExtent.width / 2);
   auto y                 = actualExtent.y - actualSceneExtent.y + (actualExtent.height / 2);
 

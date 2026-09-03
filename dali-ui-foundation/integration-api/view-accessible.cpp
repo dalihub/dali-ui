@@ -99,7 +99,10 @@ Dali::Actor CreateHighlightIndicatorActor()
   // Create the default if it hasn't been set and one that's shared by all the
   // keyboard focusable actors
   auto imageView = Ui::ImageView::New(ToDaliString(focusBorderImagePath));
-  DevelActor::SetResizePolicy(imageView, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+  imageView.SetFittingMode(Ui::Image::FittingMode::FILL);
+  imageView.SetRequestedWidth(MATCH_PARENT);
+  imageView.SetRequestedHeight(MATCH_PARENT);
+  imageView.SetLayoutMode(LayoutMode::STANDALONE);
 
   imageView.SetAccessibilityHighlightable(false);
 
@@ -585,11 +588,6 @@ bool ViewAccessible::GrabHighlight()
   highlight.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   highlight.SetProperty(Actor::Property::POSITION_Z, 1.0f);
   highlight.SetProperty(Actor::Property::POSITION, Vector2(0.0f, 0.0f));
-
-  // Need to set resize policy again, to update SIZE property which is set by
-  // NUIViewAccessible. The highlight could move from NUIViewAccessible to
-  // ViewAccessible. In this case, highlight has incorrect size.
-  DevelActor::SetResizePolicy(highlight, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
 
   // Remember the highlight actor, so that when the default is changed with
   // SetHighlightActor(), the currently displayed highlight can still be cleared.
