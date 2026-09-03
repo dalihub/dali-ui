@@ -57,6 +57,7 @@
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
+#include <dali-ui-foundation/public-api/views/progress-view.h>
 #include <dali-ui-foundation/public-api/views/recycler/group-adapter.h>
 #include <dali-ui-foundation/public-api/views/recycler/group-body-decoration.h>
 #include <dali-ui-foundation/public-api/views/recycler/group-data-source.h>

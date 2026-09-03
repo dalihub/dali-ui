@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/styles/markdown-view-style.h>
+#include <dali-ui-components/public-api/styles/progress-bar-style.h>
 
 namespace Dali
 {
@@ -37,12 +38,18 @@ UiStyle CreateDefaultMarkdownViewStyle()
   return MarkdownViewStyle::DefaultPreset();
 }
 
+UiStyle CreateDefaultProgressBarStyle()
+{
+  return ProgressBarStyle::DefaultPreset();
+}
+
 } // namespace
 
 UiStyleSheet New()
 {
   UiStyleSheet styleSheet = UiStyleSheet::New();
   styleSheet.SetStyle(MarkdownViewStyle::DefaultKey(), &CreateDefaultMarkdownViewStyle);
+  styleSheet.SetStyle(ProgressBarStyle::DefaultKey(), &CreateDefaultProgressBarStyle);
   return styleSheet;
 }
 

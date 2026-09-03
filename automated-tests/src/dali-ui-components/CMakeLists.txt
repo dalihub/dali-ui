@@ -13,6 +13,7 @@ SET(TC_SOURCES
     utc-Dali-CheckBox.cpp
     utc-Dali-RadioButton.cpp
     utc-Dali-Switch.cpp
+    utc-Dali-ProgressBar.cpp
     utc-Dali-Toast.cpp
     utc-Dali-ChartView.cpp
     utc-Dali-ChartSeries.cpp
