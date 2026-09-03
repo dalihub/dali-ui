@@ -78,24 +78,24 @@ public:
   void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
 
   /**
-   * @copydoc Ui::MaskEffect::SetTargetMaskOnce
+   * @copydoc Ui::MaskEffect::SetTargetRenderOnce
    */
-  void SetTargetMaskOnce(bool targetMaskOnce);
+  void SetTargetRenderOnce(bool renderOnce);
 
   /**
-   * @copydoc Ui::MaskEffect::GetTargetMaskOnce
+   * @copydoc Ui::MaskEffect::IsTargetRenderOnce
    */
-  bool GetTargetMaskOnce() const;
+  bool IsTargetRenderOnce() const;
 
   /**
-   * @copydoc Ui::MaskEffect::SetSourceMaskOnce
+   * @copydoc Ui::MaskEffect::SetSourceRenderOnce
    */
-  void SetSourceMaskOnce(bool sourceMaskOnce);
+  void SetSourceRenderOnce(bool renderOnce);
 
   /**
-   * @copydoc Ui::MaskEffect::GetSourceMaskOnce
+   * @copydoc Ui::MaskEffect::IsSourceRenderOnce
    */
-  bool GetSourceMaskOnce() const;
+  bool IsSourceRenderOnce() const;
 
   /**
    * @brief Reverses target and source roles to alter masking direction
@@ -179,14 +179,14 @@ private:
 
   /**
    * @brief Emits render finished signal of the target,
-   * when mTargetMaskOnce is true and finished signal of the target render task(mMaskTargetRenderTask) is emitted.
+   * when mTargetRenderOnce is true and finished signal of the target render task(mMaskTargetRenderTask) is emitted.
    * @param[in] renderTask that emits target signal.
    */
   void OnTargetRenderFinished(Dali::RenderTask renderTask);
 
   /**
    * @brief Emits render finished signal of the source,
-   * when mSourceMaskOnce is true and finished signal of the source render task(mMaskSourceRenderTask) is emitted.
+   * when mSourceRenderOnce is true and finished signal of the source render task(mMaskSourceRenderTask) is emitted.
    * @param[in] renderTask that emits source signal.
    */
   void OnSourceRenderFinished(Dali::RenderTask renderTask);
@@ -213,8 +213,8 @@ private:
   MaskEffect::MaskMode mMaskMode;
   Vector2              mMaskPosition;
   Vector2              mMaskScale;
-  bool                 mTargetMaskOnce : 1;
-  bool                 mSourceMaskOnce : 1;
+  bool                 mTargetRenderOnce : 1;
+  bool                 mSourceRenderOnce : 1;
   bool                 mReverseMaskDirection : 1;
 
   // Cached shader

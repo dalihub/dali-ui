@@ -38,11 +38,10 @@ class RenderEffectImpl;
  * @brief
  * RenderEffect is an interface for visual effects.
  *
- * Each effect has a single owner View.
+ * An effect is put on a View by Ui::View::SetRenderEffect() and taken off it by
+ * Ui::View::ClearRenderEffect(). Each effect has a single owner View at a time; setting the same
+ * effect on another View moves it, leaving the previous owner without an effect.
  *
- * Used internal at:
- * Ui::View::SetRenderEffect(Ui::RenderEffect effect);
- * Ui::View::ClearRenderEffect();
  * @note RenderEffect is interface class without constructor. Create resource by subclass.
  */
 class DALI_UI_API RenderEffect : public BaseHandle
@@ -65,22 +64,40 @@ public:
   RenderEffect(const RenderEffect& handle);
 
   /**
-   * @brief Activates effect on owner View
+   * @brief Activates effect on owner View.
+   *
+   * @pre The effect must be set on a View by Ui::View::SetRenderEffect() beforehand. This call has
+   * no effect while the effect has no owner View.
+   *
+   * @note Ui::View::SetRenderEffect() activates the effect on its own, so this is only needed to turn
+   * an effect back on after Deactivate().
+   * @note Activation is also skipped while the owner View is off-scene, not visible, or has zero size.
+   * The effect is activated automatically once the View becomes visible again.
    */
   void Activate();
 
   /**
-   * @brief Deactivates effect
+   * @brief Deactivates effect.
+   *
+   * The effect stays set on its owner View, so it can be turned back on by Activate().
+   * To remove the effect from the View entirely, use Ui::View::ClearRenderEffect().
    */
   void Deactivate();
 
   /**
-   * @brief Refreshes effect rendering
+   * @brief Refreshes effect rendering.
+   *
+   * Re-reads the owner View's size and brings the effect back in line with it: the effect is
+   * activated if it can be activated now but is not yet, deactivated if it can no longer be
+   * activated, and otherwise its offscreen rendering is refreshed in place.
+   *
+   * @note This is called for you when the owner View is re-arranged, so an application rarely
+   * needs it. It has no effect while the effect has no owner View.
    */
   void Refresh();
 
   /**
-   * @brief Get whether this effect activated or not.
+   * @brief Retrieves whether this effect is currently activated.
    * @return True if effect is activated. False otherwise.
    */
   bool IsActivated();
@@ -89,7 +106,7 @@ public: // Not intended for Application developers
   ///@cond internal
   /**
    * @brief Creates a handle using the Ui::Internal implementation.
-   * @param[in] renderEffectImpl The RenderEffect 4implementation.
+   * @param[in] renderEffectImpl The RenderEffect implementation.
    */
   explicit DALI_INTERNAL RenderEffect(Internal::RenderEffectImpl* renderEffectImpl);
   ///@endcond

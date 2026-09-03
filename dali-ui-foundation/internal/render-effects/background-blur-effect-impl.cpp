@@ -822,19 +822,19 @@ void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRende
   }
 
   bool        isExclusiveRequired = false;
-  bool        useUserSourceActor  = false;
-  Dali::Actor userSourceActor     = mUserSourceActor.GetHandle();
+  bool        useUserSourceView   = false;
+  Ui::View    userSourceView      = mUserSourceView.GetHandle();
+  Ui::View    userStopperView     = mUserStopperView.GetHandle();
   Dali::Actor sourceActor         = sourceView;
-  Dali::Actor stopperActor =
-    mUserStopperActor.GetHandle() ? mUserStopperActor.GetHandle() : Dali::Actor::DownCast(sourceView);
+  Dali::Actor stopperActor        = userStopperView ? Dali::Actor(userStopperView) : Dali::Actor::DownCast(sourceView);
 
   while(sourceActor && sourceActor.GetParent())
   {
     sourceActor = sourceActor.GetParent();
 
-    if(userSourceActor == sourceActor)
+    if(userSourceView == sourceActor)
     {
-      useUserSourceActor = true;
+      useUserSourceView = true;
     }
 
     Ui::View view = Ui::View::DownCast(sourceActor);
@@ -847,10 +847,10 @@ void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRende
     }
   }
 
-  // Use user defined source actor only if it is parent of sourceView.
-  if(useUserSourceActor)
+  // Use user defined source view only if it is parent of sourceView.
+  if(useUserSourceView)
   {
-    sourceActor = userSourceActor;
+    sourceActor = userSourceView;
   }
 
   sourceRenderTask.SetExclusive(isExclusiveRequired);
@@ -863,9 +863,9 @@ Dali::Ui::BackgroundBlurEffect::FinishedSignalType& BackgroundBlurEffectImpl::Fi
   return mFinishedSignal;
 }
 
-void BackgroundBlurEffectImpl::SetSourceActor(Dali::Actor sourceActor)
+void BackgroundBlurEffectImpl::SetSourceView(Ui::View sourceView)
 {
-  mUserSourceActor = sourceActor;
+  mUserSourceView = sourceView;
 
   if(mSourceRenderTask)
   {
@@ -875,9 +875,9 @@ void BackgroundBlurEffectImpl::SetSourceActor(Dali::Actor sourceActor)
   }
 }
 
-void BackgroundBlurEffectImpl::SetStopperActor(Dali::Actor stopperActor)
+void BackgroundBlurEffectImpl::SetStopperView(Ui::View stopperView)
 {
-  mUserStopperActor = stopperActor;
+  mUserStopperView = stopperView;
 
   if(mSourceRenderTask)
   {

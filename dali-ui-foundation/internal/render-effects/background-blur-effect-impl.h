@@ -126,14 +126,14 @@ public:
   Dali::Ui::BackgroundBlurEffect::FinishedSignalType& FinishedSignal();
 
   /**
-   * @copydoc Ui::BackgroundBlurEffect::SetSourceActor
+   * @copydoc Ui::BackgroundBlurEffect::SetSourceView
    */
-  void SetSourceActor(Dali::Actor sourceActor);
+  void SetSourceView(Ui::View sourceView);
 
   /**
-   * @copydoc Ui::BackgroundBlurEffect::SetStopperActor
+   * @copydoc Ui::BackgroundBlurEffect::SetStopperView
    */
-  void SetStopperActor(Dali::Actor stopperActor);
+  void SetStopperView(Ui::View stopperView);
 
 protected:
   /**
@@ -253,8 +253,8 @@ private:
   float    mDownscaleFactor;
   uint32_t mBlurRadius;
 
-  Dali::WeakHandle<Dali::Actor> mUserSourceActor;  ///< Weakhandle of source actor from user.
-  Dali::WeakHandle<Dali::Actor> mUserStopperActor; ///< Weakhandle of stopper actor from user.
+  Dali::WeakHandle<Ui::View> mUserSourceView;  ///< Weakhandle of source view from user.
+  Dali::WeakHandle<Ui::View> mUserStopperView; ///< Weakhandle of stopper view from user.
 
   float    mInternalDownscaleFactor;
   uint32_t mInternalBlurRadius;

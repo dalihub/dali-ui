@@ -77,8 +77,8 @@ MaskEffectImpl::MaskEffectImpl(Ui::View maskView, MaskEffect::MaskMode maskMode,
   mMaskMode(maskMode),
   mMaskPosition(maskPosition),
   mMaskScale(maskScale),
-  mTargetMaskOnce(false),
-  mSourceMaskOnce(false),
+  mTargetRenderOnce(false),
+  mSourceRenderOnce(false),
   mReverseMaskDirection(false)
 {
   if(mMaskScale.x < Math::MACHINE_EPSILON_100)
@@ -134,9 +134,9 @@ void MaskEffectImpl::GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tas
   }
 }
 
-void MaskEffectImpl::SetTargetMaskOnce(bool targetMaskOnce)
+void MaskEffectImpl::SetTargetRenderOnce(bool renderOnce)
 {
-  mTargetMaskOnce = targetMaskOnce;
+  mTargetRenderOnce = renderOnce;
   if(IsActivated())
   {
     if(!mMaskTargetRenderTask || !mMaskTargetRenderTask.GetFrameBuffer())
@@ -145,7 +145,7 @@ void MaskEffectImpl::SetTargetMaskOnce(bool targetMaskOnce)
     }
     else
     {
-      if(mTargetMaskOnce)
+      if(mTargetRenderOnce)
       {
         mMaskTargetRenderTask.SetRefreshRate(RenderTask::RefreshRate::REFRESH_ONCE);
 
@@ -166,14 +166,14 @@ void MaskEffectImpl::SetTargetMaskOnce(bool targetMaskOnce)
   }
 }
 
-bool MaskEffectImpl::GetTargetMaskOnce() const
+bool MaskEffectImpl::IsTargetRenderOnce() const
 {
-  return mTargetMaskOnce;
+  return mTargetRenderOnce;
 }
 
-void MaskEffectImpl::SetSourceMaskOnce(bool sourceMaskOnce)
+void MaskEffectImpl::SetSourceRenderOnce(bool renderOnce)
 {
-  mSourceMaskOnce = sourceMaskOnce;
+  mSourceRenderOnce = renderOnce;
   if(IsActivated())
   {
     if(!mMaskSourceRenderTask || !mMaskSourceRenderTask.GetFrameBuffer())
@@ -182,7 +182,7 @@ void MaskEffectImpl::SetSourceMaskOnce(bool sourceMaskOnce)
     }
     else
     {
-      if(mSourceMaskOnce)
+      if(mSourceRenderOnce)
       {
         mMaskSourceRenderTask.SetRefreshRate(RenderTask::RefreshRate::REFRESH_ONCE);
         if(mMaskSourceRenderTask.FinishedSignal().Empty())
@@ -202,9 +202,9 @@ void MaskEffectImpl::SetSourceMaskOnce(bool sourceMaskOnce)
   }
 }
 
-bool MaskEffectImpl::GetSourceMaskOnce() const
+bool MaskEffectImpl::IsSourceRenderOnce() const
 {
-  return mSourceMaskOnce;
+  return mSourceRenderOnce;
 }
 
 void MaskEffectImpl::SetReverseMaskDirection(bool reverseMaskDirection)
@@ -322,7 +322,7 @@ void MaskEffectImpl::CreateFrameBuffers(const ImageDimensions size)
   {
     std::ostringstream oss;
     oss.imbue(std::locale::classic());
-    oss << "MaskEffect m:" << mMaskMode << " once: " << mTargetMaskOnce << "/" << mSourceMaskOnce << " r:" << mReverseMaskDirection;
+    oss << "MaskEffect m:" << mMaskMode << " once: " << mTargetRenderOnce << "/" << mSourceRenderOnce << " r:" << mReverseMaskDirection;
     std::string prefix = oss.str();
 
     Dali::Integration::TextureUploadWithContent(mMaskTargetTexture, Dali::PixelData(), ToDaliString(prefix + "(T)"), Dali::Integration::TextureContextTypeHint::FBO_ATTACHED_COLOR_TEXTURE, true);
@@ -350,7 +350,7 @@ void MaskEffectImpl::CreateRenderTasks(Ui::View ownerView)
   mMaskTargetRenderTask.SetClearColor(Color::TRANSPARENT);
   mMaskTargetRenderTask.SetRenderPassTag(GetRenderPassTag());
 
-  if(mTargetMaskOnce)
+  if(mTargetRenderOnce)
   {
     mMaskTargetRenderTask.SetRefreshRate(RenderTask::RefreshRate::REFRESH_ONCE);
 
@@ -375,7 +375,7 @@ void MaskEffectImpl::CreateRenderTasks(Ui::View ownerView)
   mMaskSourceRenderTask.SetClearColor(Color::TRANSPARENT);
   mMaskSourceRenderTask.SetRenderPassTag(GetRenderPassTag());
 
-  if(mSourceMaskOnce)
+  if(mSourceRenderOnce)
   {
     mMaskSourceRenderTask.SetRefreshRate(RenderTask::RefreshRate::REFRESH_ONCE);
 

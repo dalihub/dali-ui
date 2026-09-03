@@ -55,14 +55,14 @@ public:
   }
 
   /**
-   * @brief Retrives the control's size.
+   * @brief Retrieves the control's size.
    *
    * @return The control's size.
    */
   virtual const Size& GetControlSize() const = 0;
 
   /**
-   * @brief Retrives the layout's size.
+   * @brief Retrieves the layout's size.
    *
    * @return The layout's size.
    */

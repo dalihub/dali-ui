@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {
@@ -39,10 +40,10 @@ class BackgroundBlurEffectImpl;
  *
  * @code
  * BackgroundBlurEffect effect = BackgroundBlurEffect::New();
- * view.SetRenderEffect(effect); // Activate
- * effect.Deactivate();
- * effect.Activate();
- * view.ClearRenderEffect(); // Deactivate
+ * view.SetRenderEffect(effect); // Set on the view, activated automatically
+ * effect.Deactivate();          // Turn off, but stay set on the view
+ * effect.Activate();            // Turn back on
+ * view.ClearRenderEffect();     // Remove from the view, deactivated automatically
  * @endcode
  *
  * @note The owner view owns at most one render effect.
@@ -57,7 +58,7 @@ public:
   typedef Signal<void()> FinishedSignalType;
 
   /**
-   * @brief Creates an initialized BackgroundBlurEffect, using default settings. As default, blur radius is set to 10u.
+   * @brief Creates an initialized BackgroundBlurEffect, using default settings. As default, blur radius is set to 40u.
    * @return A handle to a newly allocated Dali resource
    */
   static BackgroundBlurEffect New();
@@ -95,7 +96,7 @@ public:
   void SetBlurOnce(bool blurOnce);
 
   /**
-   * @brief Retrives whether effect rendering is done once(true) or every frame(false)
+   * @brief Retrieves whether effect rendering is done once(true) or every frame(false)
    * @return Whether blur is rendered once or every frame.
    */
   bool GetBlurOnce() const;
@@ -123,7 +124,7 @@ public:
   void SetBlurDownscaleFactor(float downscaleFactor);
 
   /**
-   * @brief Retrives blur downscale factor.
+   * @brief Retrieves blur downscale factor.
    * @return The blur downscale factor.
    */
   float GetBlurDownscaleFactor() const;
@@ -173,24 +174,42 @@ public:
                                float fromValue, float toValue);
 
   /**
-   * @brief Set specific source actor of background blur effects. If empty handle, works same as normal.
-   * @note If given source actor is not a parent of source view, it has no efforts.
-   * @warning RenderEffect didn't hold source actor reference.
-   * @param[in] sourceActor The source actor of background blur effects.
+   * @brief Set the view the background capture starts from.
+   *
+   * By default the whole ancestor chain above the owner view is captured as the background. Setting
+   * a source view narrows that down, so only the subtree under it is blurred. Pass an empty handle
+   * to go back to the default.
+   *
+   * @param[in] sourceView The view the background capture starts from.
+   * @note The source view must be an ancestor of the owner view, otherwise it is ignored. An
+   * ancestor with its own forward offscreen effect also cuts the search short, in which case this
+   * setting has no effect either.
+   * @warning The effect keeps only a weak reference to the source view, so the caller must keep the
+   * view alive.
    */
-  void SetSourceActor(Dali::Actor sourceActor);
+  void SetSourceView(Ui::View sourceView);
 
   /**
-   * @brief Set specific stopper actor of background blur effects. If empty handle, works same as normal.
-   * @warning RenderEffect didn't hold stopper actor reference.
-   * @param[in] stopperActor The stopper actor of background blur effects.
+   * @brief Set the view the background capture stops at.
+   *
+   * The background is captured in traversal order and stops once this view is reached, so this view
+   * and everything drawn after it are left out of the blur. Pass an empty handle to capture the
+   * whole background again.
+   *
+   * @param[in] stopperView The view the background capture stops at.
+   * @warning The effect keeps only a weak reference to the stopper view, so the caller must keep the
+   * view alive.
    */
-  void SetStopperActor(Dali::Actor stopperActor);
+  void SetStopperView(Ui::View stopperView);
 
 public: // Signals
   /**
-   * @brief If blurOnce is true and effect is activated, then connect to this signal to be notified when the
-   * target actor has been rendered.
+   * @brief Connect to this signal to be notified when the blur has been rendered.
+   *
+   * Only emitted while blur-once is enabled and the effect is activated, since a blur that
+   * refreshes every frame never finishes. The offscreen resources are released right after the
+   * signal is emitted.
+   *
    * @return The finished signal
    */
   FinishedSignalType& FinishedSignal();
@@ -199,7 +218,7 @@ public: // Not intended for use by Application developers
   ///@cond internal
   /**
    * @brief Creates a handle using the Ui::Internal implementation.
-   * @param[in]  blurEffectImpl The BackgroundBlurEffect implementation.
+   * @param[in] backgroundBlurEffectImpl The BackgroundBlurEffect implementation.
    */
   explicit DALI_INTERNAL BackgroundBlurEffect(Internal::BackgroundBlurEffectImpl* backgroundBlurEffectImpl);
   ///@endcond

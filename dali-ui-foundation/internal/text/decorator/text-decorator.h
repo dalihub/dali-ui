@@ -541,7 +541,7 @@ public:
   bool IsHighlightActive() const;
 
   /**
-   * @brief Retreives whether the highlight is shown or not.
+   * @brief Retrieves whether the highlight is shown or not.
    *
    * @return true if the highlight is visible, false otherwise.
    */

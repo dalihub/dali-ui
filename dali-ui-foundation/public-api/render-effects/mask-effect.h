@@ -34,13 +34,15 @@ class MaskEffectImpl;
 /**
  * @brief MaskEffect is a visual effect that masks owner View.
  * This class is a concrete class from RenderEffect interface.
- * Add this effect to a view, clear manually to deactivate.
+ * Set this effect on a view, clear it manually to remove.
  *
+ * @code
  * Ui::View view = Ui::View::New();
  * parent.Add(view);
- * view.SetRenderEffect(MaskEffect::New(maskView)); // Activate
+ * view.SetRenderEffect(MaskEffect::New(maskView)); // Set on the view, activated automatically
  * ...
- * view.ClearRenderEffect(); // Deactivate
+ * view.ClearRenderEffect(); // Remove from the view, deactivated automatically
+ * @endcode
  */
 class DALI_UI_API MaskEffect : public RenderEffect
 {
@@ -61,7 +63,7 @@ public:
    * maskPosition = Vector2(0.f, 0.f)
    * maskScale = Vector2(1.f, 1.f)
    *
-   * @param[in] maskView The source View to affect mask.
+   * @param[in] maskView The View used as the mask source.
    *
    * @return A handle to a newly allocated Dali resource
    */
@@ -70,12 +72,14 @@ public:
   /**
    * @brief Creates an initialized MaskEffect.
    *
-   * @param[in] maskView The source View to affect mask.
+   * @param[in] maskView The View used as the mask source.
    * @param[in] maskMode Defines pixel data type (alpha, luminance) used as the mask source.
-   * @param[in] maskPosition The Position of mask source.
-   * @param[in] maskScale The Scale of mask source.
+   * @param[in] maskPosition The offset of the mask source against the owner View, in pixels.
+   * @param[in] maskScale The scale of the mask source. Vector2(1.f, 1.f) leaves it at its own size.
    *
    * @return A handle to a newly allocated Dali resource
+   * @note A zero component in maskScale is clamped to a small non-zero value internally, so it
+   * neither divides by zero nor disables the effect.
    */
   static MaskEffect New(Ui::View maskView, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale);
 
@@ -95,26 +99,32 @@ public:
   ~MaskEffect();
 
   /**
-   * @brief Set whether the target should be rendered once(true) or every frame(false).
-   * @param[in] targetMaskOnce If true, renders target once, else updates every frame.
+   * @brief Set whether the target, the owner View of this effect, is rendered once or every frame.
+   * @param[in] renderOnce If true, renders target once, else updates every frame.
+   * @note The masking itself is still applied every frame. This only controls how often the target
+   * is captured into the offscreen buffer used as the mask input.
    */
-  void SetTargetMaskOnce(bool targetMaskOnce);
+  void SetTargetRenderOnce(bool renderOnce);
 
   /**
-   * @brief Retrives whether the target should be rendered once(true) or every frame(false).
+   * @brief Retrieves whether the target is rendered once(true) or every frame(false).
+   * @return Whether the target is rendered once or every frame.
    */
-  bool GetTargetMaskOnce() const;
+  bool IsTargetRenderOnce() const;
 
   /**
-   * @brief Set whether the source should be rendered once(true) or every frame(false).
-   * @param[in] sourceMaskOnce If true, renders source once, else updates every frame.
+   * @brief Set whether the source, the mask View, is rendered once or every frame.
+   * @param[in] renderOnce If true, renders source once, else updates every frame.
+   * @note The masking itself is still applied every frame. This only controls how often the source
+   * is captured into the offscreen buffer used as the mask input.
    */
-  void SetSourceMaskOnce(bool sourceMaskOnce);
+  void SetSourceRenderOnce(bool renderOnce);
 
   /**
-   * @brief Retrives whether the source should be rendered once(true) or every frame(false).
+   * @brief Retrieves whether the source is rendered once(true) or every frame(false).
+   * @return Whether the source is rendered once or every frame.
    */
-  bool GetSourceMaskOnce() const;
+  bool IsSourceRenderOnce() const;
 
 public: // Not intended for use by Application developers
   ///@cond internal

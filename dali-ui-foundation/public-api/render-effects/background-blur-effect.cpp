@@ -99,14 +99,14 @@ void BackgroundBlurEffect::AddBlurOpacityAnimation(Animation& animation, AlphaFu
   GetImplementation(*this).AddBlurOpacityAnimation(animation, alphaFunction, timePeriod, fromValue, toValue);
 }
 
-void BackgroundBlurEffect::SetSourceActor(Dali::Actor sourceActor)
+void BackgroundBlurEffect::SetSourceView(Ui::View sourceView)
 {
-  GetImplementation(*this).SetSourceActor(sourceActor);
+  GetImplementation(*this).SetSourceView(sourceView);
 }
 
-void BackgroundBlurEffect::SetStopperActor(Dali::Actor stopperActor)
+void BackgroundBlurEffect::SetStopperView(Ui::View stopperView)
 {
-  GetImplementation(*this).SetStopperActor(stopperActor);
+  GetImplementation(*this).SetStopperView(stopperView);
 }
 
 BackgroundBlurEffect::FinishedSignalType& BackgroundBlurEffect::FinishedSignal()
