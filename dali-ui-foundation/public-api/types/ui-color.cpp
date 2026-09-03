@@ -40,6 +40,7 @@ const UiColor UiColor::ON_PRIMARY("OnPrimary");
 const UiColor UiColor::BACKGROUND("Background");
 const UiColor UiColor::SURFACE("Surface");
 const UiColor UiColor::ON_SURFACE("OnSurface");
+const UiColor UiColor::ON_SURFACE_CONTAINER_HIGHEST("OnSurfaceContainerHighest");
 const UiColor UiColor::OUTLINE("Outline");
 const UiColor UiColor::SHADOW("Shadow");
 const UiColor UiColor::BLUR_SURFACE("BlurSurface");

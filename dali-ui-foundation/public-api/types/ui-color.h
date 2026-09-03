@@ -59,6 +59,11 @@ public:
   static const UiColor BACKGROUND;
   static const UiColor SURFACE;
   static const UiColor ON_SURFACE;
+
+  /**
+   * @brief Theme color for content displayed on the highest surface container.
+   */
+  static const UiColor ON_SURFACE_CONTAINER_HIGHEST;
   static const UiColor OUTLINE;
   static const UiColor SHADOW;
   static const UiColor BLUR_SURFACE;

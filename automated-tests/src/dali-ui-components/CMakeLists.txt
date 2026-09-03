@@ -9,6 +9,7 @@ SET(TC_SOURCES
     utc-Dali-Components.cpp
     utc-Dali-DummyComponent.cpp
     utc-Dali-TextButton.cpp
+    utc-Dali-IconButton.cpp
     utc-Dali-CheckBox.cpp
     utc-Dali-RadioButton.cpp
     utc-Dali-Switch.cpp
