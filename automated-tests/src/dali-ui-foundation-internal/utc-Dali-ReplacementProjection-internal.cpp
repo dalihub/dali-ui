@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <memory>
 #include <vector>
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/public-api/rendering/texture.h>
@@ -36,11 +37,16 @@
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
 #include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-data.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
@@ -64,6 +70,71 @@ Text::ReplacementRunSnapshot Candidate(Text::CharacterIndex start, Text::Length 
   candidate.metrics.height        = height;
   candidate.occurrenceIdentity    = id;
   return candidate;
+}
+
+Text::ReplacementRunSnapshot ImageCandidate(Text::CharacterIndex start, Text::Length length, uint32_t id)
+{
+  Text::ReplacementRunSnapshot candidate = Candidate(start, length, 20.0f, 18.0f, id);
+  candidate.type                         = Text::ReplacementType::IMAGE;
+  candidate.image.source                 = "replacement.png";
+  return candidate;
+}
+
+Text::Internal::GradientSpanPaint CreateGradientSpanPaint(Dali::Ui::Gradient::Type         type,
+                                                          Text::GradientSpan::BoundsMode   boundsMode,
+                                                          Dali::Ui::Gradient::Units        units,
+                                                          Dali::Ui::Gradient::SpreadMethod spreadMethod,
+                                                          float                            seed)
+{
+  Text::Internal::GradientSpanPaint paint;
+  paint.boundsMode                    = boundsMode;
+  paint.style.enabled                 = true;
+  paint.style.type                    = type;
+  paint.style.units                   = units;
+  paint.style.spreadMethod            = spreadMethod;
+  paint.style.startOffset             = seed;
+  paint.style.linearStart             = Vector2(seed, seed + 1.0f);
+  paint.style.linearEnd               = Vector2(seed + 2.0f, seed + 3.0f);
+  paint.style.radialCenter            = Vector2(seed + 4.0f, seed + 5.0f);
+  paint.style.radialRadius            = seed + 6.0f;
+  paint.style.conicCenter             = Vector2(seed + 7.0f, seed + 8.0f);
+  paint.style.conicStartAngle         = Radian(seed + 9.0f);
+  Text::Internal::Gradient::Stop stop = {0.0f, Vector4(seed, 0.1f, 0.2f, 1.0f)};
+  paint.style.stops.PushBack(stop);
+  stop = {0.45f, Vector4(0.3f, seed, 0.4f, 0.8f)};
+  paint.style.stops.PushBack(stop);
+  stop = {1.0f, Vector4(0.5f, 0.6f, seed, 0.7f)};
+  paint.style.stops.PushBack(stop);
+  return paint;
+}
+
+void AddGradientSpanRun(Text::Internal::GradientSpanModelData& data,
+                        Text::CharacterIndex                   start,
+                        Text::Length                           length,
+                        Text::Internal::GradientSpanPaintIndex paintIndex)
+{
+  Text::Internal::GradientSpanCharacterRun run;
+  run.characterRun = Text::CharacterRun{start, length};
+  run.paintIndex   = paintIndex;
+  data.characterRuns.PushBack(run);
+}
+
+void CheckGradientSpanRun(const Text::Internal::GradientSpanCharacterRun& run,
+                          Text::CharacterIndex                            start,
+                          Text::Length                                    length,
+                          Text::Internal::GradientSpanPaintIndex          paintIndex)
+{
+  DALI_TEST_EQUALS(run.characterRun.characterIndex, start, TEST_LOCATION);
+  DALI_TEST_EQUALS(run.characterRun.numberOfCharacters, length, TEST_LOCATION);
+  DALI_TEST_EQUALS(run.paintIndex, paintIndex, TEST_LOCATION);
+}
+
+void CheckGradientSpanPaint(const Text::Internal::GradientSpanPaint& actual,
+                            const Text::Internal::GradientSpanPaint& expected)
+{
+  DALI_TEST_EQUALS(static_cast<uint32_t>(actual.boundsMode),
+                   static_cast<uint32_t>(expected.boundsMode), TEST_LOCATION);
+  DALI_TEST_CHECK(Text::Internal::Gradient::EqualStyle(actual.style, expected.style));
 }
 
 Vector<Text::Character> Utf32(const std::string& utf8)
@@ -433,6 +504,186 @@ int UtcDaliReplacementProjectionPathsAndMappingP(void)
   DALI_TEST_EQUALS(adjacent.GetReplacementRuns()[0u].projectedCharacterIndex, 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(adjacent.GetReplacementRuns()[1u].projectedCharacterIndex, 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(adjacent.GetProcessingCharacterCount(), 4u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliReplacementProcessingSourceGradientSpanProjectionP(void)
+{
+  Text::ModelPtr model          = Text::Model::New();
+  model->mLogicalModel->mText   = Utf32("AAAxxxxBBBByyCCCC");
+  auto& gradientData            = model->mLogicalModel->mGradientSpanData;
+  gradientData                  = std::make_unique<Text::Internal::GradientSpanModelData>();
+  const auto linearPaint        = CreateGradientSpanPaint(Dali::Ui::Gradient::Type::LINEAR,
+                                                          Text::GradientSpan::BoundsMode::SPAN_BOUND,
+                                                          Dali::Ui::Gradient::Units::USER_SPACE,
+                                                          Dali::Ui::Gradient::SpreadMethod::REPEAT,
+                                                          0.1f);
+  const auto radialPaint        = CreateGradientSpanPaint(Dali::Ui::Gradient::Type::RADIAL,
+                                                          Text::GradientSpan::BoundsMode::CONTENT_BOUND,
+                                                          Dali::Ui::Gradient::Units::OBJECT_BOUNDING_BOX,
+                                                          Dali::Ui::Gradient::SpreadMethod::REFLECT,
+                                                          0.2f);
+  const auto conicPaint         = CreateGradientSpanPaint(Dali::Ui::Gradient::Type::CONIC,
+                                                          Text::GradientSpan::BoundsMode::VIEW_BOUND,
+                                                          Dali::Ui::Gradient::Units::USER_SPACE,
+                                                          Dali::Ui::Gradient::SpreadMethod::PAD,
+                                                          0.3f);
+  const auto fullyReplacedPaint = CreateGradientSpanPaint(Dali::Ui::Gradient::Type::LINEAR,
+                                                          Text::GradientSpan::BoundsMode::SPAN_BOUND,
+                                                          Dali::Ui::Gradient::Units::OBJECT_BOUNDING_BOX,
+                                                          Dali::Ui::Gradient::SpreadMethod::PAD,
+                                                          0.4f);
+  gradientData->paints.PushBack(linearPaint);
+  gradientData->paints.PushBack(radialPaint);
+  gradientData->paints.PushBack(conicPaint);
+  gradientData->paints.PushBack(fullyReplacedPaint);
+  AddGradientSpanRun(*gradientData, 0u, 3u, 1u);
+  AddGradientSpanRun(*gradientData, 3u, 4u, 4u);
+  AddGradientSpanRun(*gradientData, 7u, 4u, 2u);
+  AddGradientSpanRun(*gradientData, 13u, 4u, 3u);
+  gradientData->glyphPaintIndices.PushBack(1u); // Derived source data must not be copied before shaping.
+
+  Vector<Text::ReplacementRunSnapshot> candidates;
+  candidates.PushBack(ImageCandidate(3u, 4u, 101u));
+  candidates.PushBack(ImageCandidate(11u, 2u, 102u));
+  Text::ReplacementProjection projection =
+    Text::ReplacementProjection::Build(model->mLogicalModel->mText, candidates);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(projection.GetMode()),
+                   static_cast<uint32_t>(Text::ReplacementProjection::Mode::COMPACT), TEST_LOCATION);
+
+  Text::ProjectedTextProcessingSource projectedSource;
+  DALI_TEST_CHECK(Text::PrepareProjectedTextProcessingSource(*model, projection, projectedSource));
+  DALI_TEST_CHECK(projectedSource.gradientSpanData);
+  DALI_TEST_CHECK(projectedSource.source.gradientSpanData == projectedSource.gradientSpanData.get());
+  const auto& projectedGradientData = *projectedSource.gradientSpanData;
+  DALI_TEST_EQUALS(projectedGradientData.paints.Count(), 4u, TEST_LOCATION);
+  CheckGradientSpanPaint(projectedGradientData.paints[0u], linearPaint);
+  CheckGradientSpanPaint(projectedGradientData.paints[1u], radialPaint);
+  CheckGradientSpanPaint(projectedGradientData.paints[2u], conicPaint);
+  CheckGradientSpanPaint(projectedGradientData.paints[3u], fullyReplacedPaint);
+  DALI_TEST_EQUALS(projectedGradientData.characterRuns.Count(), 3u, TEST_LOCATION);
+  CheckGradientSpanRun(projectedGradientData.characterRuns[0u], 0u, 3u, 1u);
+  CheckGradientSpanRun(projectedGradientData.characterRuns[1u], 4u, 4u, 2u);
+  CheckGradientSpanRun(projectedGradientData.characterRuns[2u], 9u, 4u, 3u);
+  DALI_TEST_CHECK(projectedGradientData.glyphPaintIndices.Empty());
+  DALI_TEST_EQUALS(projectedSource.source.text->Count(), 13u, TEST_LOCATION);
+  DALI_TEST_EQUALS((*projectedSource.source.text)[3u],
+                   Text::ReplacementProjection::OBJECT_REPLACEMENT_CHARACTER, TEST_LOCATION);
+  DALI_TEST_EQUALS((*projectedSource.source.text)[8u],
+                   Text::ReplacementProjection::OBJECT_REPLACEMENT_CHARACTER, TEST_LOCATION);
+
+  // Applying a processing source owns a deep snapshot and leaves glyph paint IDs for the shaping pass.
+  Text::ModelPtr appliedModel = Text::Model::New();
+  Text::ApplyTextProcessingSource(projectedSource.source, *appliedModel->mLogicalModel);
+  DALI_TEST_CHECK(appliedModel->mLogicalModel->mGradientSpanData);
+  DALI_TEST_CHECK(appliedModel->mLogicalModel->mGradientSpanData.get() != projectedSource.gradientSpanData.get());
+  DALI_TEST_CHECK(appliedModel->mLogicalModel->mGradientSpanData->paints[0u].style.stops.Begin() !=
+                  projectedSource.gradientSpanData->paints[0u].style.stops.Begin());
+  DALI_TEST_EQUALS(appliedModel->mLogicalModel->mGradientSpanData->characterRuns.Count(), 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(appliedModel->mLogicalModel->mGradientSpanData->glyphPaintIndices.Empty());
+
+  // Canonical one-character ImageSpan projection keeps indices but still excludes the image unit from paint runs.
+  Text::ModelPtr identityModel        = Text::Model::New();
+  identityModel->mLogicalModel->mText = Utf32("AAAA\uFFFCBBBB");
+  identityModel->mLogicalModel->mGradientSpanData =
+    std::make_unique<Text::Internal::GradientSpanModelData>();
+  identityModel->mLogicalModel->mGradientSpanData->paints.PushBack(linearPaint);
+  identityModel->mLogicalModel->mGradientSpanData->paints.PushBack(radialPaint);
+  AddGradientSpanRun(*identityModel->mLogicalModel->mGradientSpanData, 0u, 4u, 1u);
+  AddGradientSpanRun(*identityModel->mLogicalModel->mGradientSpanData, 5u, 4u, 2u);
+  Vector<Text::ReplacementRunSnapshot> identityCandidates;
+  identityCandidates.PushBack(ImageCandidate(4u, 1u, 103u));
+  Text::ReplacementProjection identityProjection =
+    Text::ReplacementProjection::Build(identityModel->mLogicalModel->mText, identityCandidates);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(identityProjection.GetMode()),
+                   static_cast<uint32_t>(Text::ReplacementProjection::Mode::IDENTITY), TEST_LOCATION);
+  Text::ProjectedTextProcessingSource identitySource;
+  DALI_TEST_CHECK(Text::PrepareProjectedTextProcessingSource(*identityModel, identityProjection, identitySource));
+  DALI_TEST_CHECK(identitySource.gradientSpanData);
+  DALI_TEST_EQUALS(identitySource.gradientSpanData->characterRuns.Count(), 2u, TEST_LOCATION);
+  CheckGradientSpanRun(identitySource.gradientSpanData->characterRuns[0u], 0u, 4u, 1u);
+  CheckGradientSpanRun(identitySource.gradientSpanData->characterRuns[1u], 5u, 4u, 2u);
+
+  // A run crossing a replacement is split around the native replacement unit, matching other glyph styles.
+  Text::ModelPtr crossingModel        = Text::Model::New();
+  crossingModel->mLogicalModel->mText = Utf32("AAxxxxBBBB");
+  crossingModel->mLogicalModel->mGradientSpanData =
+    std::make_unique<Text::Internal::GradientSpanModelData>();
+  crossingModel->mLogicalModel->mGradientSpanData->paints.PushBack(conicPaint);
+  AddGradientSpanRun(*crossingModel->mLogicalModel->mGradientSpanData, 1u, 7u, 1u);
+  Vector<Text::ReplacementRunSnapshot> crossingCandidates;
+  crossingCandidates.PushBack(ImageCandidate(2u, 4u, 104u));
+  Text::ReplacementProjection crossingProjection =
+    Text::ReplacementProjection::Build(crossingModel->mLogicalModel->mText, crossingCandidates);
+  Text::ProjectedTextProcessingSource crossingSource;
+  DALI_TEST_CHECK(Text::PrepareProjectedTextProcessingSource(*crossingModel, crossingProjection, crossingSource));
+  DALI_TEST_CHECK(crossingSource.gradientSpanData);
+  DALI_TEST_EQUALS(crossingSource.gradientSpanData->characterRuns.Count(), 2u, TEST_LOCATION);
+  CheckGradientSpanRun(crossingSource.gradientSpanData->characterRuns[0u], 1u, 1u, 1u);
+  CheckGradientSpanRun(crossingSource.gradientSpanData->characterRuns[1u], 3u, 2u, 1u);
+
+  // A sidecar with no text left after projection is dropped rather than retaining a zero-length run.
+  Text::ModelPtr coveredModel        = Text::Model::New();
+  coveredModel->mLogicalModel->mText = Utf32("AAxxxxBB");
+  coveredModel->mLogicalModel->mGradientSpanData =
+    std::make_unique<Text::Internal::GradientSpanModelData>();
+  coveredModel->mLogicalModel->mGradientSpanData->paints.PushBack(linearPaint);
+  AddGradientSpanRun(*coveredModel->mLogicalModel->mGradientSpanData, 2u, 4u, 1u);
+  Vector<Text::ReplacementRunSnapshot> coveredCandidates;
+  coveredCandidates.PushBack(ImageCandidate(2u, 4u, 105u));
+  Text::ReplacementProjection coveredProjection =
+    Text::ReplacementProjection::Build(coveredModel->mLogicalModel->mText, coveredCandidates);
+  // Reusing storage must clear both the owned sidecar and its non-owning source pointer.
+  DALI_TEST_CHECK(Text::PrepareProjectedTextProcessingSource(*coveredModel, coveredProjection, crossingSource));
+  DALI_TEST_CHECK(!crossingSource.gradientSpanData);
+  DALI_TEST_CHECK(crossingSource.source.gradientSpanData == nullptr);
+
+  END_TEST;
+}
+
+int UtcDaliReplacementProcessingSourceGradientSpanFastPathsP(void)
+{
+  Text::ModelPtr gradientModel        = Text::Model::New();
+  gradientModel->mLogicalModel->mText = Utf32("Gradient");
+  gradientModel->mLogicalModel->mGradientSpanData =
+    std::make_unique<Text::Internal::GradientSpanModelData>();
+  gradientModel->mLogicalModel->mGradientSpanData->paints.PushBack(
+    CreateGradientSpanPaint(Dali::Ui::Gradient::Type::LINEAR,
+                            Text::GradientSpan::BoundsMode::SPAN_BOUND,
+                            Dali::Ui::Gradient::Units::USER_SPACE,
+                            Dali::Ui::Gradient::SpreadMethod::PAD,
+                            0.25f));
+  AddGradientSpanRun(*gradientModel->mLogicalModel->mGradientSpanData, 0u, 8u, 1u);
+
+  const Text::TextProcessingSource ordinarySource = Text::MakeTextProcessingSource(*gradientModel);
+  DALI_TEST_CHECK(ordinarySource.gradientSpanData == gradientModel->mLogicalModel->mGradientSpanData.get());
+  Vector<Text::ReplacementRunSnapshot> noCandidates;
+  Text::ReplacementProjection          noProjection =
+    Text::ReplacementProjection::Build(gradientModel->mLogicalModel->mText, noCandidates);
+  Text::ProjectedTextProcessingSource noProjectionStorage;
+  DALI_TEST_CHECK(!Text::PrepareProjectedTextProcessingSource(*gradientModel,
+                                                              noProjection,
+                                                              noProjectionStorage));
+  DALI_TEST_CHECK(!noProjectionStorage.gradientSpanData);
+
+  Text::ModelPtr plainModel        = Text::Model::New();
+  plainModel->mLogicalModel->mText = Utf32("AAxxxxBB");
+  Vector<Text::ReplacementRunSnapshot> candidates;
+  candidates.PushBack(ImageCandidate(2u, 4u, 106u));
+  Text::ReplacementProjection projection =
+    Text::ReplacementProjection::Build(plainModel->mLogicalModel->mText, candidates);
+  Text::ProjectedTextProcessingSource projectedSource;
+  DALI_TEST_CHECK(Text::PrepareProjectedTextProcessingSource(*plainModel, projection, projectedSource));
+  DALI_TEST_CHECK(!projectedSource.gradientSpanData);
+  DALI_TEST_CHECK(projectedSource.source.gradientSpanData == nullptr);
+
+  // Applying plain replacement content must also clear old projected gradient state.
+  Text::ModelPtr targetModel = Text::Model::New();
+  targetModel->mLogicalModel->mGradientSpanData =
+    std::make_unique<Text::Internal::GradientSpanModelData>();
+  Text::ApplyTextProcessingSource(projectedSource.source, *targetModel->mLogicalModel);
+  DALI_TEST_CHECK(!targetModel->mLogicalModel->mGradientSpanData);
 
   END_TEST;
 }
@@ -3610,6 +3861,124 @@ int UtcDaliReplacementProductionSyncAsyncParityP(void)
 
   controller->SetText("plain");
   DALI_TEST_CHECK(!controllerImpl.mReplacementData);
+
+  END_TEST;
+}
+
+int UtcDaliReplacementGradientSpanSyncAsyncParityP(void)
+{
+  UiTestApplication application;
+
+  const std::string          sourceText = "Left\uFFFCRight";
+  Dali::Ui::Gradient::Linear gradient(Vector2(12.0f, 4.0f), Vector2(180.0f, 36.0f));
+  gradient.SetUnits(Dali::Ui::Gradient::Units::USER_SPACE);
+  gradient.SetSpreadMethod(Dali::Ui::Gradient::SpreadMethod::REFLECT);
+  gradient.SetStartOffset(0.2f);
+  gradient.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, UiColor(Color::RED)),
+                         Dali::Ui::Gradient::StopNode(0.5f, UiColor(Color::GREEN)),
+                         Dali::Ui::Gradient::StopNode(1.0f, UiColor(Color::BLUE))});
+
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(sourceText.c_str());
+  DALI_TEST_CHECK(builder.SetSpan(
+    Text::GradientSpan::New(gradient, Text::GradientSpan::BoundsMode::SPAN_BOUND), 0u, 10u));
+  DALI_TEST_CHECK(builder.SetSpan(
+    Text::ImageSpan::New(Text::ImageAttributes("unused-gradient-replacement.png", Vector2(24.0f, 18.0f))),
+    4u,
+    5u));
+  const Text::StyledText styledText = builder.Build();
+
+  Text::ControllerPtr     controller     = Text::Controller::New();
+  Text::Controller::Impl& controllerImpl = Text::Controller::Impl::GetImplementation(*controller.Get());
+  controller->SetDefaultFontSize(18.0f, Text::Controller::PIXEL_SIZE);
+  controller->SetStyledText(styledText);
+  controller->Relayout(Size(240.0f, 80.0f));
+
+  const Text::ReplacementRenderState& sync = controllerImpl.GetReplacementRenderState();
+  DALI_TEST_CHECK(sync.attempted);
+  DALI_TEST_CHECK(sync.processingModel);
+  DALI_TEST_EQUALS(sync.placements.Count(), 1u, TEST_LOCATION);
+  const auto* syncGradientData = sync.processingModel->GetGradientSpanModelData();
+  DALI_TEST_CHECK(syncGradientData);
+  DALI_TEST_EQUALS(syncGradientData->paints.Count(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(syncGradientData->characterRuns.Count(), 2u, TEST_LOCATION);
+  CheckGradientSpanRun(syncGradientData->characterRuns[0u], 0u, 4u, 1u);
+  CheckGradientSpanRun(syncGradientData->characterRuns[1u], 5u, 5u, 1u);
+  DALI_TEST_EQUALS(syncGradientData->glyphPaintIndices.Count(),
+                   sync.processingModel->mVisualModel->mGlyphs.Count(), TEST_LOCATION);
+  DALI_TEST_EQUALS(syncGradientData->glyphPaintIndices[sync.placements[0u].syntheticGlyphIndex],
+                   0u,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(std::find(syncGradientData->glyphPaintIndices.Begin(),
+                            syncGradientData->glyphPaintIndices.End(),
+                            1u) != syncGradientData->glyphPaintIndices.End());
+  DALI_TEST_EQUALS(static_cast<uint32_t>(syncGradientData->paints[0u].style.units),
+                   static_cast<uint32_t>(Dali::Ui::Gradient::Units::USER_SPACE), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(syncGradientData->paints[0u].boundsMode),
+                   static_cast<uint32_t>(Text::GradientSpan::BoundsMode::SPAN_BOUND), TEST_LOCATION);
+
+  Text::AsyncTextParameters parameters;
+  parameters.text                       = sourceText;
+  parameters.fontSize                   = 18.0f;
+  parameters.textColor                  = Color::BLACK;
+  parameters.textWidth                  = 240.0f;
+  parameters.textHeight                 = 80.0f;
+  parameters.originWidth                = parameters.textWidth;
+  parameters.originHeight               = parameters.textHeight;
+  parameters.maxTextureSize             = 4096;
+  parameters.requestType                = Dali::Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
+  parameters.hasStyledTextStyleSnapshot = true;
+  parameters.styledTextStyleSnapshot =
+    Dali::Ui::Internal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(styledText, 96.0f);
+  parameters.replacementSourceSnapshot =
+    Dali::Ui::Internal::Text::StyledTextApplier::BuildReplacementSourceSnapshot(styledText, 901u);
+  parameters.replacementLayoutGeneration = 801u;
+
+  Text::AsyncTextLoader           asyncLoader = Text::AsyncTextLoader::New();
+  const Text::AsyncTextRenderInfo asyncInfo   = asyncLoader.RenderText(parameters, false, Size::ZERO);
+  DALI_TEST_CHECK(asyncInfo.textPixelData);
+  DALI_TEST_EQUALS(asyncInfo.textPixelData.GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+  DALI_TEST_CHECK(asyncInfo.hasMultipleTextColors);
+  const Text::ReplacementRenderState* async = Text::GetImplementation(asyncLoader).GetReplacementRenderState();
+  DALI_TEST_CHECK(async);
+  DALI_TEST_CHECK(async->processingModel);
+  const auto* asyncGradientData = async->processingModel->GetGradientSpanModelData();
+  DALI_TEST_CHECK(asyncGradientData);
+  DALI_TEST_EQUALS(asyncGradientData->characterRuns.Count(), 2u, TEST_LOCATION);
+  CheckGradientSpanRun(asyncGradientData->characterRuns[0u], 0u, 4u, 1u);
+  CheckGradientSpanRun(asyncGradientData->characterRuns[1u], 5u, 5u, 1u);
+  DALI_TEST_EQUALS(asyncGradientData->glyphPaintIndices.Count(),
+                   async->processingModel->mVisualModel->mGlyphs.Count(), TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncGradientData->glyphPaintIndices[async->placements[0u].syntheticGlyphIndex],
+                   0u,
+                   TEST_LOCATION);
+
+  // One loader is reused across styled replacement -> plain -> styled replacement transitions.
+  Text::AsyncTextParameters plainParameters;
+  plainParameters.text                      = "plain source";
+  plainParameters.fontSize                  = parameters.fontSize;
+  plainParameters.textColor                 = parameters.textColor;
+  plainParameters.textWidth                 = parameters.textWidth;
+  plainParameters.textHeight                = parameters.textHeight;
+  plainParameters.originWidth               = parameters.originWidth;
+  plainParameters.originHeight              = parameters.originHeight;
+  plainParameters.maxTextureSize            = parameters.maxTextureSize;
+  plainParameters.requestType               = parameters.requestType;
+  const Text::AsyncTextRenderInfo plainInfo = asyncLoader.RenderText(plainParameters, false, Size::ZERO);
+  DALI_TEST_CHECK(plainInfo.textPixelData);
+  DALI_TEST_CHECK(!plainInfo.hasMultipleTextColors);
+  DALI_TEST_CHECK(Text::GetImplementation(asyncLoader).GetReplacementRenderState() == nullptr);
+
+  parameters.replacementLayoutGeneration       = 802u;
+  const Text::AsyncTextRenderInfo restoredInfo = asyncLoader.RenderText(parameters, false, Size::ZERO);
+  DALI_TEST_CHECK(restoredInfo.textPixelData);
+  DALI_TEST_EQUALS(restoredInfo.textPixelData.GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+  DALI_TEST_CHECK(restoredInfo.hasMultipleTextColors);
+  const Text::ReplacementRenderState* restored = Text::GetImplementation(asyncLoader).GetReplacementRenderState();
+  DALI_TEST_CHECK(restored);
+  DALI_TEST_CHECK(restored->processingModel->GetGradientSpanModelData());
+  DALI_TEST_EQUALS(restored->processingModel->GetGradientSpanModelData()->characterRuns.Count(),
+                   2u,
+                   TEST_LOCATION);
 
   END_TEST;
 }

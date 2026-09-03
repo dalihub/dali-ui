@@ -17,8 +17,12 @@
  * limitations under the License.
  */
 
+// EXTERNAL INCLUDES
+#include <memory>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
 namespace Dali::Ui::Text
@@ -37,6 +41,7 @@ struct TextProcessingSource
   const Vector<UnderlinedCharacterRun>*       underlineRuns{nullptr};
   const Vector<StrikethroughCharacterRun>*    strikethroughRuns{nullptr};
   const Vector<CharacterSpacingCharacterRun>* characterSpacingRuns{nullptr};
+  const Internal::GradientSpanModelData*      gradientSpanData{nullptr};
   const ReplacementProjection*                replacementProjection{nullptr};
   const Vector<ProjectedReplacementRun>*      replacementRuns{nullptr};
 
@@ -56,13 +61,14 @@ struct TextProcessingSource
  */
 struct ProjectedTextProcessingSource
 {
-  TextProcessingSource                 source;
-  Vector<FontDescriptionRun>           fontDescriptionRuns;
-  Vector<ColorRun>                     colorRuns;
-  Vector<ColorRun>                     backgroundRuns;
-  Vector<UnderlinedCharacterRun>       underlineRuns;
-  Vector<StrikethroughCharacterRun>    strikethroughRuns;
-  Vector<CharacterSpacingCharacterRun> characterSpacingRuns;
+  TextProcessingSource                             source;
+  Vector<FontDescriptionRun>                       fontDescriptionRuns;
+  Vector<ColorRun>                                 colorRuns;
+  Vector<ColorRun>                                 backgroundRuns;
+  Vector<UnderlinedCharacterRun>                   underlineRuns;
+  Vector<StrikethroughCharacterRun>                strikethroughRuns;
+  Vector<CharacterSpacingCharacterRun>             characterSpacingRuns;
+  std::unique_ptr<Internal::GradientSpanModelData> gradientSpanData;
 };
 
 /**

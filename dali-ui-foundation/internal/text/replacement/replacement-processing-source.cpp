@@ -16,6 +16,7 @@
 
 // EXTERNAL INCLUDES
 #include <algorithm>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
@@ -98,6 +99,7 @@ TextProcessingSource MakeTextProcessingSource(const Model& model)
   source.underlineRuns        = &logical.mUnderlinedCharacterRuns;
   source.strikethroughRuns    = &logical.mStrikethroughCharacterRuns;
   source.characterSpacingRuns = &logical.mCharacterSpacingCharacterRuns;
+  source.gradientSpanData     = logical.mGradientSpanData.get();
   return source;
 }
 
@@ -118,6 +120,17 @@ bool PrepareProjectedTextProcessingSource(const Model&                   origina
   ProjectGlyphStyleRuns(logical.mUnderlinedCharacterRuns, projection, storage.underlineRuns);
   ProjectGlyphStyleRuns(logical.mStrikethroughCharacterRuns, projection, storage.strikethroughRuns);
   ProjectGlyphStyleRuns(logical.mCharacterSpacingCharacterRuns, projection, storage.characterSpacingRuns);
+  if(logical.mGradientSpanData)
+  {
+    Vector<Internal::GradientSpanCharacterRun> projectedGradientRuns;
+    ProjectGlyphStyleRuns(logical.mGradientSpanData->characterRuns, projection, projectedGradientRuns);
+    if(!projectedGradientRuns.Empty())
+    {
+      storage.gradientSpanData                = std::make_unique<Internal::GradientSpanModelData>();
+      storage.gradientSpanData->paints        = logical.mGradientSpanData->paints;
+      storage.gradientSpanData->characterRuns = std::move(projectedGradientRuns);
+    }
+  }
 
   storage.source.text                  = &projection.GetProcessingText();
   storage.source.fontDescriptionRuns   = &storage.fontDescriptionRuns;
@@ -126,6 +139,7 @@ bool PrepareProjectedTextProcessingSource(const Model&                   origina
   storage.source.underlineRuns         = &storage.underlineRuns;
   storage.source.strikethroughRuns     = &storage.strikethroughRuns;
   storage.source.characterSpacingRuns  = &storage.characterSpacingRuns;
+  storage.source.gradientSpanData      = storage.gradientSpanData.get();
   storage.source.replacementProjection = &projection;
   storage.source.replacementRuns       = &projection.GetReplacementRuns();
   return true;
@@ -133,6 +147,15 @@ bool PrepareProjectedTextProcessingSource(const Model&                   origina
 
 void ApplyTextProcessingSource(const TextProcessingSource& source, LogicalModel& target)
 {
+  std::unique_ptr<Internal::GradientSpanModelData> gradientSpanData;
+  if(source.gradientSpanData)
+  {
+    gradientSpanData                = std::make_unique<Internal::GradientSpanModelData>();
+    gradientSpanData->paints        = source.gradientSpanData->paints;
+    gradientSpanData->characterRuns = source.gradientSpanData->characterRuns;
+    // glyphPaintIndices is derived from the projected character runs after shaping.
+  }
+
   target.mText                          = *source.text;
   target.mFontDescriptionRuns           = *source.fontDescriptionRuns;
   target.mColorRuns                     = *source.colorRuns;
@@ -140,6 +163,7 @@ void ApplyTextProcessingSource(const TextProcessingSource& source, LogicalModel&
   target.mUnderlinedCharacterRuns       = *source.underlineRuns;
   target.mStrikethroughCharacterRuns    = *source.strikethroughRuns;
   target.mCharacterSpacingCharacterRuns = *source.characterSpacingRuns;
+  target.mGradientSpanData              = std::move(gradientSpanData);
 }
 
 void CopyTextProcessingProperties(const Model& source, Model& target)

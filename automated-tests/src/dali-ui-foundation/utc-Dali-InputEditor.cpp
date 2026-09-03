@@ -849,6 +849,8 @@ int UtcDaliInputEditorSetStyledText(void)
 
   Text::StyledTextBuilder replacementBuilder = Text::StyledTextBuilder::New("AiconB\nsecond line");
   DALI_TEST_CHECK(replacementBuilder.SetSpan(
+    Text::GradientSpan::New(userSpaceGradient, Text::GradientSpan::BoundsMode::VIEW_BOUND), 0u, 6u));
+  DALI_TEST_CHECK(replacementBuilder.SetSpan(
     Text::ImageSpan::New(Text::ImageAttributes("unused.png", Vector2(32.0f, 24.0f))), 1u, 5u));
   inputEditor.SetStyledText(replacementBuilder.Build());
 
