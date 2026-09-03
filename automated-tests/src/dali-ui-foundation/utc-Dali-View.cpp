@@ -10088,6 +10088,7 @@ int UtcDaliViewFreshViewVisualQueriesInertP(void)
 
   // The first visual write creates the context, and the same query now reports it.
   view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+  application.GetWindow().Add(view);
 
   backgroundMap = view.GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
   DALI_TEST_EQUALS(backgroundMap.Empty(), false, TEST_LOCATION);
