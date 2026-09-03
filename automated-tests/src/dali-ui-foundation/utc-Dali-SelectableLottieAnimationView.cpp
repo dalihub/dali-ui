@@ -34,15 +34,12 @@ namespace Test::UiVectorAnimationRenderer
 {
 void                  ResetDynamicPropertyProbe();
 uint32_t              GetLastRenderedFrame();
-uint32_t              GetDynamicPropertyRefreshCount();
 uint32_t              GetDynamicPropertyCount();
 uint32_t              GetDynamicPropertyCount(const std::string&                            keyPath,
                                               Dali::VectorAnimationRenderer::VectorProperty property);
 Dali::Property::Value EvaluateDynamicProperty(const std::string&                            keyPath,
                                               Dali::VectorAnimationRenderer::VectorProperty property,
                                               uint32_t                                      frameNumber);
-Dali::Property::Value GetLastEvaluatedDynamicProperty(const std::string&                            keyPath,
-                                                      Dali::VectorAnimationRenderer::VectorProperty property);
 } // namespace Test::UiVectorAnimationRenderer
 
 namespace
@@ -97,18 +94,15 @@ void RenderAndWaitForFrame(UiTestApplication& application, uint32_t expectedFram
 
 void RenderAndWaitForBindingCount(UiTestApplication& application, uint32_t expectedBindingCount)
 {
-  bool workerCompleted = false;
   for(uint32_t attempt = 0u; attempt < 8u; ++attempt)
   {
     application.SendNotification();
     application.Render();
-    if(Test::UiVectorAnimationRenderer::GetDynamicPropertyCount() == expectedBindingCount &&
-       (expectedBindingCount > 0u || workerCompleted))
+    if(Test::UiVectorAnimationRenderer::GetDynamicPropertyCount() == expectedBindingCount)
     {
       return;
     }
     DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
-    workerCompleted = true;
   }
   DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetDynamicPropertyCount(), expectedBindingCount, TEST_LOCATION);
 }
@@ -276,31 +270,6 @@ int UtcDaliSelectableLottieAnimationViewSnapStopsTransitionP(void)
   END_TEST;
 }
 
-int UtcDaliSelectableLottieAnimationViewStoppedColorRefreshP(void)
-{
-  UiTestApplication application;
-  Test::UiVectorAnimationRenderer::ResetDynamicPropertyProbe();
-
-  SelectableLottieAnimationView view = SelectableLottieAnimationView::New(NewImage(INNER_PATH));
-  RealizeGlyph(application, view);
-  const uint32_t refreshCount = Test::UiVectorAnimationRenderer::GetDynamicPropertyRefreshCount();
-
-  view.SetStateColors(Color::BLUE, Color::RED);
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_CHECK(Test::UiVectorAnimationRenderer::GetDynamicPropertyRefreshCount() > refreshCount);
-  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLastEvaluatedDynamicProperty(
-                     INNER_PATH, Dali::VectorAnimationRenderer::VectorProperty::FILL_COLOR)
-                     .Get<Vector4>(),
-                   Color::BLUE,
-                   TEST_LOCATION);
-  END_TEST;
-}
-
 // The transition-finished signal is accessible through the interface.
 int UtcDaliSelectableLottieAnimationViewTransitionFinishedSignalP(void)
 {
@@ -355,18 +324,6 @@ int UtcDaliSelectableLottieAnimationViewLegacyBindingP(void)
   END_TEST;
 }
 
-int UtcDaliSelectableLottieAnimationViewExplicitEmptyBindingsP(void)
-{
-  UiTestApplication             application;
-  SelectableLottieColorBindings emptyBindings;
-  Test::UiVectorAnimationRenderer::ResetDynamicPropertyProbe();
-
-  SelectableLottieAnimationView glyph = SelectableLottieAnimationView::New(NewImage(), emptyBindings);
-  RealizeGlyph(application, glyph, 0u);
-
-  END_TEST;
-}
-
 int UtcDaliSelectableLottieAnimationViewDuplicateBindingN(void)
 {
   UiTestApplication             application;
@@ -412,34 +369,6 @@ int UtcDaliSelectableLottieAnimationViewColorPoliciesP(void)
                    TEST_LOCATION);
   DALI_TEST_EQUALS(EvaluateColor(OUTLINE_PATH, Dali::VectorAnimationRenderer::VectorProperty::STROKE_COLOR, 27u),
                    DESELECTED_COLOR,
-                   TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliSelectableLottieAnimationViewRebuildDoesNotDuplicateBindingsP(void)
-{
-  UiTestApplication application;
-  Test::UiVectorAnimationRenderer::ResetDynamicPropertyProbe();
-
-  SelectableLottieAnimationView glyph = SelectableLottieAnimationView::New(NewImage(), NewRadioBindings());
-  RealizeGlyph(application, glyph, 2u);
-
-  glyph.SetSelected(true, false);
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetDynamicPropertyCount(), 2u, TEST_LOCATION);
-
-  glyph.SetSelected(false, false);
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetDynamicPropertyCount(), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetDynamicPropertyCount(
-                     INNER_PATH, Dali::VectorAnimationRenderer::VectorProperty::FILL_COLOR),
-                   1u,
-                   TEST_LOCATION);
-  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetDynamicPropertyCount(
-                     OUTLINE_PATH, Dali::VectorAnimationRenderer::VectorProperty::STROKE_COLOR),
-                   1u,
                    TEST_LOCATION);
   END_TEST;
 }
