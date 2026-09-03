@@ -29,6 +29,9 @@ artifact_type: TEST_PLAN
 - automated-first approach:
 - manual exception cases and automation blockers:
 - required automation artifacts to create/update:
+- `rules/test-and-sample-development.md` applicability and compliance checks:
+- manual-test source/scenario pairs to execute:
+- sample source/README pairs to build or execute:
 
 ## 6. Automated Environment and Data Setup
 - detected stack / package manager:
@@ -44,6 +47,7 @@ artifact_type: TEST_PLAN
 
 ## 8. Entry / Exit Criteria
 - entry:
+- test/sample authoring rule compliance:
 - multi-unit integration entry gate:
   - all required units implemented: yes / no
   - automated unit tests PASS for every required unit: yes / no

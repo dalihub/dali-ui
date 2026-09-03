@@ -11,6 +11,12 @@ For every workflow executed against `dali-ui`, load
 `rules/dali-ui-context.md`. Its Ubuntu development baseline applies to planning,
 implementation, build, and validation activities.
 
+Whenever an activity plans, creates, substantially modifies, or verifies files
+under `automated-tests/`, `manual-tests/`, or `samples/`, load
+`rules/test-and-sample-development.md`. Apply it during C1 planning, C2/C3
+authoring, C4 execution, and Construction Review as applicable. Untouched legacy
+files remain subject to the exceptions documented by that rule.
+
 When the active profile is `dali_component_feature`, apply this additional
 routing before executing each activity:
 
@@ -20,10 +26,10 @@ routing before executing each activity:
 | A0 | Inspect existing DALi component patterns and OneUIComponents source, tests, and samples; record the reference commit |
 | A1, A2 | Load `rules/component-development.md`; derive component behavior and acceptance criteria from the reference |
 | A4 | Load component development, public API/ABI, Handle-Body, and component-boundary rules; document intentional reference differences |
-| C1 | Apply component structure, style, builder, construction-time style, configuration, naming, and test-design rules |
-| C2 | Implement against the approved design and applicable component rules |
-| C3 | Load `rules/build-and-test.md`; verify rule compliance and reference behavior with executable unit evidence on the Ubuntu baseline |
-| C4 | Load `rules/build-and-test.md`; run the integrated Ubuntu build and approved test scope; record environment and exact commands |
+| C1 | Apply component structure, style, builder, construction-time style, configuration, naming, and test-design rules; load `rules/test-and-sample-development.md` when tests or samples are planned |
+| C2 | Implement against the approved design and applicable component rules; create required manual-test scenario pairs and sample READMEs, and preserve automated-test generation/registration targets for C3 |
+| C3 | Load `rules/test-and-sample-development.md` and `rules/build-and-test.md`; verify authoring-rule compliance and reference behavior with executable unit evidence on the Ubuntu baseline |
+| C4 | Load `rules/test-and-sample-development.md` and `rules/build-and-test.md`; run the integrated Ubuntu build and approved automated/manual/sample scope; record environment and exact commands |
 | C5 | Skipped by default; if explicitly added for release preparation, record the OneUIComponents reference commit and intentional differences in release evidence |
 
 These requirements apply only to `dali_component_feature`. Other profiles do
@@ -50,10 +56,10 @@ integration API contract:
 | A0 | Identify API level, exported declarations, consumers, subclasses, call sites, ABI-sensitive layout, and affected tests, samples, and documentation |
 | A1, A2 | Load `rules/public-api-abi.md`; classify ordinary work versus explicit pre-release redesign; record compatibility, ABI, migration, and approval requirements |
 | A4 | Load `rules/handle-body-pattern.md`, `rules/component-boundaries.md`, and `rules/api-naming.md`; design the target API and implementation boundary |
-| C1 | List each API addition, removal, or change and map it to implementation, migration, documentation, and test work |
-| C2 | Implement only the approved API shape and keep public handles, exports, and API-level dependencies compliant |
-| C3 | Load `rules/validation-checks.md` and `rules/build-and-test.md`; inspect the actual public-header diff, run applicable checks, and record rule-by-rule evidence |
-| C4 | Execute the integrated Ubuntu build and approved regression scope; include affected samples and manual-tests where applicable |
+| C1 | List each API addition, removal, or change and map it to implementation, migration, documentation, and test work; load `rules/test-and-sample-development.md` for planned test/sample artifacts |
+| C2 | Implement only the approved API shape, keep public handles, exports, and API-level dependencies compliant, create required manual/sample companion documentation, and preserve automated-test generation/registration targets for C3 |
+| C3 | Load `rules/validation-checks.md`, `rules/test-and-sample-development.md`, and `rules/build-and-test.md`; inspect the actual public-header diff, verify test registration/document pairs, run applicable checks, and record rule-by-rule evidence |
+| C4 | Load `rules/test-and-sample-development.md` and `rules/build-and-test.md`; execute the integrated Ubuntu build and approved regression scope, including affected samples and manual-tests where applicable |
 
 This routing is conditional within `org_standard`; it does not require a
 separate API-refactoring workflow profile. If no API contract is affected,
@@ -233,6 +239,15 @@ review requirements.
 
 **Executor**: ai-sdlc-core/skills/implementation-design/SKILL.md
 
+**DALi Test and Sample Authoring Requirements**:
+
+- Load `rules/test-and-sample-development.md` when the implementation plan adds
+  or substantially modifies automated tests, manual tests, or samples.
+- Identify automated-test source registration, manual-test source/scenario
+  pairs, and sample source/README pairs that C2 or C3 must create.
+- Separate expected manual behavior from runtime evidence that can only be
+  captured during C4.
+
 **Inputs**:
 - ai-sdlc-docs/inception/requirements/requirements-analysis.md
 - ai-sdlc-docs/inception/workflow/workflow-planning.md
@@ -257,6 +272,16 @@ review requirements.
 - Prepare for verification
 
 **Executor**: ai-sdlc-core/skills/code-generation/SKILL.md
+
+**DALi Test and Sample Authoring Requirements**:
+
+- Load `rules/test-and-sample-development.md` when the approved change scope
+  includes tests or samples.
+- Create each applicable manual-test Markdown scenario and sample README in the
+  same change as its source. Record automated-test source and registration
+  targets for generation during C3 Code Verification.
+- Verify source/document consistency and do not present unexecuted tests or
+  manual scenarios as runtime evidence.
 
 **Inputs**:
 - ai-sdlc-docs/construction/implementation-design/{unit-name}-implementation-design.md
@@ -284,9 +309,16 @@ review requirements.
 
 **DALi Execution Requirements**:
 
+- Load `rules/test-and-sample-development.md`.
 - Load `rules/build-and-test.md`.
+- Generate and register automated unit-test sources according to the test
+  harness contract, and verify applicable manual-test/source and sample/README
+  pairs in the affected scope.
 - Build and install the current `dali-ui` source before building or executing
   affected automated tests.
+- Update the unit row in `state-log.md` with lifecycle state, automated test
+  result, blocking items, and the code-verification summary as evidence. This
+  row is required in single-unit mode even when A5 is skipped.
 - Use targeted test modules or cases only when the approved implementation
   design establishes a reliable unit boundary.
 - Keep C3 `BLOCKED` when current build/install or automated unit-test evidence
@@ -319,12 +351,15 @@ review requirements.
 
 **DALi Execution Requirements**:
 
+- Load `rules/test-and-sample-development.md`.
 - Load `rules/build-and-test.md`.
 - Execute the integrated Ubuntu build and install after all required units pass
   C3 and the Integration Ready Check.
 - Build and run the complete automated-test suite unless the approved test plan
   records a justified regression scope.
 - Include affected manual-tests and samples in the approved validation scope.
+- Execute applicable manual scenario documents against their matching sources,
+  and keep expected behavior separate from dated runtime evidence.
 - Record environment, exact commands, outcomes, exclusions, and residual risks.
 
 **Inputs**:

@@ -14,9 +14,9 @@ artifact_type: STATE_LOG
 - release readiness: N/A when C5 is skipped
 
 ## Unit Status Summary
-| Unit ID | Unit Name | Owner | State | Implementation Complete | Automated Unit Test Result | Dependency | Blocker |
-|---------|-----------|-------|-------|-------------------------|----------------------------|------------|---------|
-|         |           |       |       |                         |                            |            |         |
+| Unit ID | Unit Name | Owner | State | Automated Unit Test Result | Blocking Items | Evidence |
+|---------|-----------|-------|-------|----------------------------|----------------|----------|
+|         |           |       |       |                            | []             |          |
 
 ## Review Status
 | Review | Status | Evidence | Blocker / Notes |

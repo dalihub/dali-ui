@@ -49,17 +49,23 @@ A workflow has eight state fields:
 | `current_activity` | string | Activity code (A0-A5, C1-C5) | Updated before/after each activity |
 | `overall_status` | enum | `new`, `in_progress`, `blocked`, `paused`, `completed`, `released` | Aggregated from loop statuses |
 
-### Unit State Summary (Multi-Unit Mode)
+### Unit State Summary
 
-When `operating_mode = team` (multiple units):
+Maintain one row per required unit in every operating mode. In
+`single_developer` mode the summary contains exactly one row and is the live
+source used by organization checklists when A5 is skipped. In `team` mode it is
+a roll-up of the A5 unit roster and per-unit status artifacts.
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `units[]` | array | Array of unit objects |
 | `units[].unit_id` | string | Unit identifier |
-| `units[].status` | enum | Unit status (`in_progress`, `blocked`, `completed`) |
-| `units[].code_verification_verdict` | enum | `PASS`, `BLOCKED`, `FAIL` (set by code-verification C3, evaluated by integration-ready-check-rule) |
-| `units[].last_activity` | string | Last completed activity for this unit |
+| `units[].unit_name` | string | Unit name used by construction artifacts |
+| `units[].owner` | string | Responsible developer/session |
+| `units[].state` | enum | Lifecycle state (`planned`, `design_ready`, `code_generated`, `code_verified`, `integrated`, `released`, `blocked`) |
+| `units[].automated_unit_test_result` | enum | `PASS`, `FAIL`, `NOT_EXECUTED` |
+| `units[].blocking_items` | list | Unresolved blockers; empty list means none |
+| `units[].evidence` | path/reference | Artifact supporting the current state and test result |
 
 ### Review State
 
@@ -88,7 +94,7 @@ Final summary state before release:
 **Location:** `ai-sdlc-docs/state/state-log.md`  
 **Template:** See `templates/11-state-log.md`
 
-The file must contain all the state fields listed above in a human-readable format (typically a YAML header + markdown table for unit summary).
+The file must contain all the state fields listed above in a human-readable format (typically a YAML header + markdown table for unit summary). Code Verification must update the affected row before Integration Ready Check runs.
 
 ---
 
@@ -130,8 +136,8 @@ The file must contain all the state fields listed above in a human-readable form
    - Record timestamp
 
 2. **Integration Ready Check** (after C3, per unit):
-   - Update `units[unit_id].code_verification_verdict: [PASS / BLOCKED / FAIL]`
-   - If multi-unit: check if all units PASS → update `all_units_pass_integration_ready_check: true/false`
+   - Evaluate each unit's current `state`, `automated_unit_test_result`, and `blocking_items` from the organization checklist's active source mapping; do not rewrite the evidence while evaluating it
+   - Check if all required units PASS → update `all_units_pass_integration_ready_check: true/false`
    - Update gate verdict `integration_ready_check_verdict: [PASS / BLOCKED / FAIL]`
 
 3. **Construction Review** (after C5):

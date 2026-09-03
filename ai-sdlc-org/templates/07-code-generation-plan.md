@@ -21,7 +21,12 @@ artifact_type: CODE_GENERATION_PLAN
 - explicit exclusions:
 
 ## 4. Unit Test / Verification Additions
-- 
+- `rules/test-and-sample-development.md` applicability:
+- automated-test source and owning module registration:
+- manual-test source and same-basename scenario document:
+- sample source and colocated README:
+- code-verification framework and exact command:
+- expected manual behavior pending runtime evidence:
 
 ## 5. Traceability
 | Requirement ID | Acceptance Criteria | Planned Change |

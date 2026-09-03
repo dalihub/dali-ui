@@ -36,6 +36,11 @@ Verify that required Construction deliverables are complete. This checklist is *
 
 ## Required Deliverables (Customize This Section)
 
+When the change adds or substantially modifies files under `automated-tests/`,
+`manual-tests/`, or `samples/`, load
+`rules/test-and-sample-development.md` before evaluating the applicable checks
+below. Untouched legacy files use the exceptions in that rule.
+
 ### 1. Detailed Design Document
 
 **Evidence Location:** `ai-sdlc-docs/construction/implementation-design/{unit-name}-implementation-design.md`
@@ -81,6 +86,7 @@ Minimum Checks:
   - ✓ Contains section: ## Summary
   - ✓ Contains section: ## Results
   - ✓ Contains field: test_verdict (PASS / FAIL / BLOCKED)
+  - ✓ Applicable test and sample authoring-rule result recorded
 ```
 
 **Example Customization (Level 3):**
@@ -95,6 +101,10 @@ Minimum Checks:
   - ✓ Contains field: passed_tests (number)
   - ✓ Contains field: failed_tests (number)
   - ✓ Contains field: test_verdict (PASS / FAIL / BLOCKED)
+  - ✓ New automated tests registered in their owning harness/module
+  - ✓ New or substantially modified manual-test sources have same-basename scenario documents
+  - ✓ New or substantially modified user-facing samples have a README beside their source
+  - ✓ Runtime PASS, screenshots, logs, and measurements are claimed only when executed or captured
 ```
 
 **Status:** ☐
@@ -160,7 +170,7 @@ Minimum Checks:
   - ✓ Ubuntu execution environment and exact build/test commands recorded
   - ✓ OneUIComponents reference behavior covered by tests or documented evidence
   - ✓ Reference commit and intentional differences recorded
-  - ✓ Applicable wiki, samples, and tests updated
+  - ✓ Applicable wiki, samples, and tests updated in compliance with `rules/test-and-sample-development.md`
 ```
 
 **Status:** ☐
@@ -187,7 +197,7 @@ Minimum Checks:
   - ✓ Public handles, implementation state, exports, and dependencies comply with rules
   - ✓ Applicable validation checks executed with results recorded
   - ✓ Current dali-ui built and installed before affected tests executed
-  - ✓ Tests, samples, manual-tests, and wiki updated where applicable
+  - ✓ Tests, samples, manual-tests, and wiki updated where applicable, including required source/document pairs
   - ✓ No unapproved API or ABI break remains
 ```
 

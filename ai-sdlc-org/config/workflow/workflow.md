@@ -60,7 +60,8 @@ When triggered:
 
 - Load `rules/public-api-abi.md`, `rules/handle-body-pattern.md`,
   `rules/api-naming.md`, `rules/docs-and-wiki.md`, and
-  `rules/validation-checks.md`.
+  `rules/validation-checks.md`. Load `rules/test-and-sample-development.md`
+  whenever affected tests, manual tests, or samples are planned or changed.
 - Classify the change as ordinary compatibility-preserving work or an explicit
   pre-release redesign.
 - Do not pass Inception Review without API-level, consumer, compatibility, ABI,
@@ -134,6 +135,7 @@ C4 → C5[SKIP]
 - `rules/component-boundaries.md`
 - `rules/api-naming.md`
 - `rules/docs-and-wiki.md`
+- `rules/test-and-sample-development.md`
 - `rules/build-and-test.md`
 - `rules/validation-checks.md`
 

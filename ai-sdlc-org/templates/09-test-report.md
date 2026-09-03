@@ -41,6 +41,17 @@ artifact_type: TEST_REPORT
 - automated unit tests PASS for every required unit?: yes / no
 - integration test execution status: not-started / blocked / executed
 - blocking units or missing evidence:
+
+## 4.2 Test and Sample Authoring Compliance
+
+| Changed Artifact | Applicable Rule | Companion / Registration Evidence | Result |
+|---|---|---|---|
+| | `rules/test-and-sample-development.md` | | PASS / FAIL / N/A |
+
+- manual scenario runtime evidence captured?: yes / no / N/A
+- sample runtime evidence captured?: yes / no / N/A
+- unexecuted expected behavior represented as runtime PASS?: yes / no
+
 ## 5. Defects / Issues Observed
 | ID | Description | Severity | Status |
 |----|-------------|----------|--------|

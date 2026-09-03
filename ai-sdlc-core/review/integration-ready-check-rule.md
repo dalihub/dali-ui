@@ -15,7 +15,6 @@ skip-allowed: false
 enforcement: ai-sdlc.md Step 3 must pause and execute this rule. No exceptions.
 depends_on:
   - {org-dir}/config/review/integration-ready-checklist.md
-  - ai-sdlc-docs/inception/units/unit-generation.md
   - ai-sdlc-docs/state/state-log.md
 trigger_condition: |
   MANDATORY execution point in ai-sdlc.md Step 3.
@@ -25,6 +24,7 @@ trigger_condition: |
 allowed-exceptions: None
 auto-halt-conditions:
   - integration-ready-checklist.md missing
+  - A source required by the checklist's active operating-mode mapping is missing
   - Any Required condition violated for any unit (→ BLOCKED)
   - Any Conditional condition triggered but violated (→ BLOCKED)
   - Evidence contradiction detected (→ FAIL)
@@ -50,15 +50,22 @@ evaluation runs. If the checklist is missing → **HALT** (verdict = BLOCKED).
 
 ## Evaluation Procedure
 
-Read `unit-generation.md` Unit Summary and each `{unit-id}-team-status.md` for all required units.
+Read `operating_mode` from `state-log.md`, then resolve the required-unit roster
+and condition sources from the checklist's mapping for that mode. The core rule
+does not assume that A5 or team-status artifacts exist in every workflow.
 
 For each required unit:
 1. For each condition in the checklist:
-   - Read the condition's source field from the live tracking file
+   - Select the source declared for the active operating mode
+   - Read the condition's source field from that live tracking file
    - Apply the operator against the expected value
    - Mark ✓ (holds) / ✗ (violated) / ⊘ (N/A — only if a Conditional trigger is false)
 2. Evaluate project-level conditions (e.g. Integration Owner) once
 3. Advisory (WARN) conditions are logged but do not block
+
+If the active mode has no source mapping, or a mapped required source/field is
+missing, record the affected condition as ✗ and return `BLOCKED`. Do not borrow
+a source from another operating mode or infer a PASS from an unrelated artifact.
 
 ## Verdict (calculated from checklist results, not hardcoded)
 
@@ -109,7 +116,9 @@ When team mode is active:
 
 ## Single-Unit Mode
 
-Single-unit projects follow the same checklist (only 1 unit evaluated)
+Single-unit projects evaluate exactly one required unit. Resolve its roster and
+condition fields from the checklist's `single_developer` source mapping. Do not
+require A5 or team-status artifacts unless that mapping explicitly names them.
 
 ## If BLOCKED or FAIL
 
