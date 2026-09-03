@@ -351,6 +351,10 @@ view.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
 });
 ```
 
+Long-press handling is enabled by default. Use `SetLongPressEnabled(false)` to pause both touch
+and key `LongPressedSignal` delivery without disconnecting handlers; `SetClickable()` continues to
+control tap/click independently.
+
 <br/>
 
 ### Making a Plain View Interactive
