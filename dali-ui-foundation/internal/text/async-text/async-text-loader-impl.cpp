@@ -979,7 +979,8 @@ void AsyncTextLoader::UpdateReplacementProcessing(AsyncTextParameters& parameter
     authoritativeEndEllipsisResolved = ResolveEndEllipsis(*mTextModel,
                                                           textLayoutArea,
                                                           mModule.GetFontClient(),
-                                                          replacementState.finalElision);
+                                                          replacementState.finalElision,
+                                                          defaultFontId);
     DALI_ASSERT_DEBUG(authoritativeEndEllipsisResolved && replacementState.finalElision.resolved &&
                       "Supported async replacement END layout must publish an authoritative final result");
     if(authoritativeEndEllipsisResolved)

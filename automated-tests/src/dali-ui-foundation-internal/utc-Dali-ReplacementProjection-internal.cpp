@@ -33,6 +33,7 @@
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-planner.h>
 #include <dali-ui-foundation/internal/text/final-glyph-geometry.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
@@ -5005,6 +5006,357 @@ int UtcDaliReplacementProductionParityMatrixP(void)
                 horizontalAlignment,
                 verticalAlignment);
     }
+  }
+
+  END_TEST;
+}
+
+int UtcDaliReplacementEndEllipsisFontContextP(void)
+{
+  UiTestApplication                   application;
+  Text::ReplacementLayoutTestServices services = MakeLayoutServices();
+  const uint32_t                       pointsPerUnit = services.fontClient.GetNumberOfPointsPerOneUnitOfPointSize();
+  uint32_t                             horizontalDpi = 0u;
+  uint32_t                             verticalDpi   = 0u;
+  services.fontClient.GetDpi(horizontalDpi, verticalDpi);
+
+  enum class FitMode
+  {
+    NONE,
+    RANGE,
+    CANDIDATES
+  };
+
+  TextAbstraction::FontDescription defaultDescription;
+  const Text::FontId font20 = services.fontClient.GetFontId(defaultDescription, 20u * pointsPerUnit);
+  const Text::FontId font40 = services.fontClient.GetFontId(defaultDescription, 40u * pointsPerUnit);
+  DALI_TEST_CHECK(font20 != 0u && font40 != 0u);
+
+  // Freeze the existing END policy used by EllipsisFontSearch: surrounding
+  // lookup is synthetic-only, selects the nearest font, and prefers the
+  // preceding font at equal distance.
+  Text::GlyphInfo policyGlyphs[4];
+  policyGlyphs[0u].fontId = font20;
+  policyGlyphs[1u].fontId = 0u;
+  policyGlyphs[1u].index  = Text::SYNTHETIC_REPLACEMENT_GLYPH_ID;
+  policyGlyphs[2u].fontId = font40;
+  policyGlyphs[3u].fontId = 0u;
+  DALI_TEST_EQUALS(Text::ResolveEndEllipsisFontId(policyGlyphs, 4u, 1u), font20, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::ResolveEndEllipsisFontId(policyGlyphs, 4u, 0u), font20, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::ResolveEndEllipsisFontId(policyGlyphs, 4u, 3u), 0u, TEST_LOCATION);
+
+  policyGlyphs[0u].fontId = 0u;
+  policyGlyphs[0u].index  = Text::SYNTHETIC_REPLACEMENT_GLYPH_ID;
+  DALI_TEST_EQUALS(Text::ResolveEndEllipsisFontId(policyGlyphs, 4u, 0u), font40, TEST_LOCATION);
+
+  policyGlyphs[0u].fontId = font20;
+  policyGlyphs[1u].fontId = 0u;
+  policyGlyphs[1u].index  = 1u;
+  policyGlyphs[2u].fontId = 0u;
+  policyGlyphs[2u].index  = Text::SYNTHETIC_REPLACEMENT_GLYPH_ID;
+  policyGlyphs[3u].fontId = font40;
+  DALI_TEST_EQUALS(Text::ResolveEndEllipsisFontId(policyGlyphs, 4u, 2u), font40, TEST_LOCATION);
+
+  const auto finalEllipsisGlyph = [](const Text::FinalElisionResult& finalElision)
+  {
+    DALI_TEST_CHECK(finalElision.applied);
+    DALI_TEST_CHECK(finalElision.ellipsisFinalGlyphIndex < finalElision.glyphs.Count());
+    return finalElision.glyphs[finalElision.ellipsisFinalGlyphIndex];
+  };
+
+  const auto compareEllipsisMetrics = [&services](const Text::GlyphInfo& actual,
+                                                   const Text::GlyphInfo& expected)
+  {
+    DALI_TEST_EQUALS(services.fontClient.GetPointSize(actual.fontId),
+                     services.fontClient.GetPointSize(expected.fontId),
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.index, expected.index, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.advance, expected.advance, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.width, expected.width, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.height, expected.height, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.xBearing, expected.xBearing, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.yBearing, expected.yBearing, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  };
+
+  const auto layoutOrdinary = [](float pointSize)
+  {
+    Text::ControllerPtr controller = Text::Controller::New();
+    controller->SetText("ABC ordinary trailing text");
+    controller->SetDefaultFontSize(pointSize, Text::Controller::POINT_SIZE);
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(Text::EllipsisPosition::END);
+    controller->Relayout(Size(100.0f, 100.0f));
+    const Text::FinalElisionResult* finalElision = controller->GetFinalElisionResult();
+    DALI_TEST_CHECK(finalElision);
+    DALI_TEST_CHECK(finalElision->applied);
+    return finalElision->glyphs[finalElision->ellipsisFinalGlyphIndex];
+  };
+
+  struct SyncReplacementResult
+  {
+    Text::GlyphInfo ellipsis;
+    Vector2         replacementSize{Vector2::ZERO};
+    uint32_t        finalGlyphCount{0u};
+    bool            replacementVisible{false};
+    bool            replacementElided{false};
+    float           selectedPointSize{0.0f};
+  };
+
+  const auto layoutReplacementOnly = [horizontalDpi](float pointSize, float effectiveScale, FitMode fitMode)
+  {
+    Text::ReplacementSourceSnapshot source;
+    source.runs.PushBack(Candidate(0u, 1u, 120.0f, 60.0f, 9800u));
+    source.hasValidReplacementSource = true;
+
+    Text::ControllerPtr     controller = Text::Controller::New();
+    Text::Controller::Impl& impl       = Text::Controller::Impl::GetImplementation(*controller.Get());
+    controller->SetText("\xEF\xBF\xBC");
+    controller->SetDefaultFontSize(pointSize, Text::Controller::POINT_SIZE);
+    controller->SetFontSizeScale(effectiveScale);
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(Text::EllipsisPosition::END);
+    impl.GetOrCreateReplacementSourceSnapshot() = source;
+    if(fitMode == FitMode::RANGE)
+    {
+      controller->SetTextFitEnabled(true);
+      controller->SetTextFitMinSize(pointSize, Text::Controller::POINT_SIZE);
+      controller->SetTextFitMaxSize(pointSize, Text::Controller::POINT_SIZE);
+      controller->SetTextFitStepSize(1.0f, Text::Controller::POINT_SIZE);
+      controller->SetTextFitContentSize(Size(50.0f, 100.0f));
+      controller->SetTextFitChanged(true);
+      controller->FitPointSizeforLayout(Size(50.0f, 100.0f));
+    }
+    else if(fitMode == FitMode::CANDIDATES)
+    {
+      Dali::Vector<Text::Fit::Candidate> candidates;
+      candidates.PushBack(Text::Fit::Candidate(pointSize * static_cast<float>(horizontalDpi) / 72.0f, 0.0f));
+      controller->SetTextFitCandidatesEnabled(true);
+      controller->SetTextFitCandidates(candidates);
+      controller->FitCandidatesPointSizeForLayout(Size(50.0f, 100.0f));
+    }
+    controller->Relayout(Size(50.0f, 100.0f));
+
+    const Text::ReplacementRenderState& state = impl.GetReplacementRenderState();
+    DALI_TEST_CHECK(state.finalElision.applied);
+    DALI_TEST_EQUALS(state.placements.Count(), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(state.processingModel);
+    DALI_TEST_EQUALS(state.processingModel->mVisualModel->mGlyphs.Count(), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(Text::IsSyntheticReplacementGlyph(state.processingModel->mVisualModel->mGlyphs[0u]));
+    DALI_TEST_EQUALS(state.processingModel->mVisualModel->mGlyphs[0u].width,
+                     120.0f * effectiveScale,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    const Text::FinalElisionResult& finalElision = state.finalElision;
+    DALI_TEST_EQUALS(finalElision.glyphs.Count(), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(finalElision.finalToSourceGlyphIndices[finalElision.ellipsisFinalGlyphIndex],
+                     Text::FinalElisionResult::INVALID_GLYPH_INDEX,
+                     TEST_LOCATION);
+    return SyncReplacementResult{finalElision.glyphs[finalElision.ellipsisFinalGlyphIndex],
+                                 state.placements[0u].size,
+                                 static_cast<uint32_t>(finalElision.glyphs.Count()),
+                                 state.placements[0u].visible,
+                                 state.placements[0u].elided,
+                                 fitMode == FitMode::NONE
+                                   ? pointSize * effectiveScale
+                                   : controller->GetTextFitFontSize(Text::Controller::POINT_SIZE)};
+  };
+
+  // Both cache orders and all authored sizes must produce the same glyph as
+  // ordinary END ellipsis at the effective point size.
+  for(const bool replacementFirst : {false, true})
+  {
+    services.fontClient.ClearCache();
+    const float sizes[] = {20.0f, 28.0f, 40.0f};
+    for(uint32_t order = 0u; order < 3u; ++order)
+    {
+      const float pointSize = replacementFirst ? sizes[2u - order] : sizes[order];
+      Text::GlyphInfo ordinary;
+      SyncReplacementResult replacement;
+      if(replacementFirst)
+      {
+        replacement = layoutReplacementOnly(pointSize, 1.0f, FitMode::NONE);
+        ordinary    = layoutOrdinary(pointSize);
+      }
+      else
+      {
+        ordinary    = layoutOrdinary(pointSize);
+        replacement = layoutReplacementOnly(pointSize, 1.0f, FitMode::NONE);
+      }
+      compareEllipsisMetrics(replacement.ellipsis, ordinary);
+      DALI_TEST_EQUALS(services.fontClient.GetPointSize(replacement.ellipsis.fontId),
+                       static_cast<TextAbstraction::PointSize26Dot6>(pointSize * pointsPerUnit),
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(replacement.replacementSize, Vector2(120.0f, 60.0f), TEST_LOCATION);
+      DALI_TEST_EQUALS(replacement.finalGlyphCount, 1u, TEST_LOCATION);
+      DALI_TEST_CHECK(!replacement.replacementVisible && replacement.replacementElided);
+    }
+  }
+
+  const Text::GlyphInfo effectiveOrdinary = layoutOrdinary(42.0f);
+  const SyncReplacementResult effectiveReplacement = layoutReplacementOnly(28.0f, 1.5f, FitMode::NONE);
+  compareEllipsisMetrics(effectiveReplacement.ellipsis, effectiveOrdinary);
+  DALI_TEST_EQUALS(services.fontClient.GetPointSize(effectiveReplacement.ellipsis.fontId),
+                   42u * pointsPerUnit,
+                   TEST_LOCATION);
+  for(FitMode fitMode : {FitMode::RANGE, FitMode::CANDIDATES})
+  {
+    const SyncReplacementResult fitReplacement = layoutReplacementOnly(28.0f, 1.5f, fitMode);
+    DALI_TEST_EQUALS(services.fontClient.GetPointSize(fitReplacement.ellipsis.fontId),
+                     static_cast<TextAbstraction::PointSize26Dot6>(fitReplacement.selectedPointSize * pointsPerUnit),
+                     TEST_LOCATION);
+  }
+
+  // Retained replacement: preserve its visibility, box and source mapping;
+  // only the generated ellipsis uses the surrounding END font policy.
+  Vector<Text::Character> retainedText = Utf32("ABC \xEF\xBF\xBC\nhidden");
+  Vector<Text::ReplacementRunSnapshot> retainedCandidates;
+  retainedCandidates.PushBack(Candidate(4u, 1u, 40.0f, 40.0f, 9801u));
+  const Text::ReplacementProjection retainedProjection =
+    Text::ReplacementProjection::Build(retainedText, retainedCandidates);
+  Text::ReplacementLayoutTestOptions retainedOptions;
+  retainedOptions.contentSize      = Size(300.0f, 50.0f);
+  retainedOptions.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
+  retainedOptions.elideText        = true;
+  retainedOptions.ellipsisPosition = Text::EllipsisPosition::END;
+  retainedOptions.fontPointSize    = 28u * pointsPerUnit;
+  retainedOptions.fontPixelSize    = 28.0f * 4.0f / 3.0f;
+  Text::ReplacementRenderState retained;
+  DALI_TEST_CHECK(Text::LayoutReplacementForTest(retainedProjection, services, retainedOptions, retained));
+  DALI_TEST_EQUALS(retained.placements.Count(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(retained.placements[0u].visible && !retained.placements[0u].elided);
+  DALI_TEST_EQUALS(retained.placements[0u].size, Vector2(40.0f, 40.0f), TEST_LOCATION);
+  Text::GlyphIndex retainedFinalIndex = Text::FinalElisionResult::INVALID_GLYPH_INDEX;
+  DALI_TEST_CHECK(retained.finalElision.FindFinalGlyphIndex(retained.placements[0u].syntheticGlyphIndex,
+                                                            retainedFinalIndex));
+  DALI_TEST_EQUALS(retainedFinalIndex + 1u,
+                   retained.finalElision.ellipsisFinalGlyphIndex,
+                   TEST_LOCATION);
+  compareEllipsisMetrics(finalEllipsisGlyph(retained.finalElision), layoutOrdinary(28.0f));
+  retained.Clear(services.bidirectionalSupport);
+
+  // FontSpan sizes on either side follow the same existing glyph-order
+  // policy. The preceding 20pt run wins before the 40pt text in the next
+  // paragraph; the synthetic glyph itself never becomes a font source.
+  Text::ModelPtr styledModel              = Text::Model::New();
+  styledModel->mLogicalModel->mText       = Utf32("A \xEF\xBF\xBC\nB");
+  Text::FontDescriptionRun precedingRun;
+  precedingRun.characterRun              = Text::CharacterRun{0u, 2u};
+  precedingRun.size                      = 20u * pointsPerUnit;
+  precedingRun.sizeDefined               = true;
+  styledModel->mLogicalModel->mFontDescriptionRuns.PushBack(precedingRun);
+  Text::FontDescriptionRun followingRun;
+  followingRun.characterRun              = Text::CharacterRun{4u, 1u};
+  followingRun.size                      = 40u * pointsPerUnit;
+  followingRun.sizeDefined               = true;
+  styledModel->mLogicalModel->mFontDescriptionRuns.PushBack(followingRun);
+  Vector<Text::ReplacementRunSnapshot> styledCandidates;
+  styledCandidates.PushBack(Candidate(2u, 1u, 40.0f, 40.0f, 9803u));
+  const Text::ReplacementProjection styledProjection =
+    Text::ReplacementProjection::Build(styledModel->mLogicalModel->mText, styledCandidates);
+  Text::ReplacementRenderState styled;
+  DALI_TEST_CHECK(Text::LayoutReplacementForTest(*styledModel,
+                                                 styledProjection,
+                                                 services,
+                                                 retainedOptions,
+                                                 styled));
+  DALI_TEST_CHECK(styled.placements[0u].visible);
+  compareEllipsisMetrics(finalEllipsisGlyph(styled.finalElision), layoutOrdinary(20.0f));
+  styled.Clear(services.bidirectionalSupport);
+
+  // Script/fallback sentinels: a synthetic boundary must not collapse the
+  // selected font context to DEFAULT_POINT_SIZE for any surrounding script.
+  const std::string scriptPrefixes[] = {
+    "Latin",
+    "\xED\x95\x9C\xEA\xB8\x80",                         // Korean
+    "\xD8\xA7\xD9\x84\xD8\xB9\xD8\xB1\xD8\xA8\xD9\x8A\xD8\xA9", // Arabic
+    "\xF0\x9F\x98\x80",                                 // Emoji
+    "Latin \xED\x95\x9C\xEA\xB8\x80 \xF0\x9F\x98\x80"};       // Mixed fallback
+  for(uint32_t scriptIndex = 0u; scriptIndex < 5u; ++scriptIndex)
+  {
+    const Vector<Text::Character> prefix = Utf32(scriptPrefixes[scriptIndex]);
+    const Vector<Text::Character> text   = Utf32(scriptPrefixes[scriptIndex] + "\xEF\xBF\xBC\nhidden");
+    Vector<Text::ReplacementRunSnapshot> candidates;
+    candidates.PushBack(Candidate(prefix.Count(), 1u, 40.0f, 40.0f, 9810u + scriptIndex));
+    const Text::ReplacementProjection projection = Text::ReplacementProjection::Build(text, candidates);
+    Text::ReplacementRenderState      state;
+    DALI_TEST_CHECK(Text::LayoutReplacementForTest(projection,
+                                                    services,
+                                                    retainedOptions,
+                                                    state));
+    DALI_TEST_CHECK(state.finalElision.applied);
+    DALI_TEST_EQUALS(services.fontClient.GetPointSize(finalEllipsisGlyph(state.finalElision).fontId),
+                     28u * pointsPerUnit,
+                     TEST_LOCATION);
+    state.Clear(services.bidirectionalSupport);
+  }
+
+  const auto layoutAsyncReplacementOnly = [horizontalDpi, pointsPerUnit, &services](float   pointSize,
+                                                                                    float   effectiveScale,
+                                                                                    float   renderScale,
+                                                                                    FitMode fitMode)
+  {
+    Text::AsyncTextParameters parameters;
+    parameters.text               = "\xEF\xBF\xBC";
+    parameters.fontSize           = pointSize;
+    parameters.textWidth          = 50.0f;
+    parameters.textHeight         = 100.0f;
+    parameters.originWidth        = parameters.textWidth;
+    parameters.originHeight       = parameters.textHeight;
+    parameters.ellipsis           = true;
+    parameters.ellipsisPosition   = Text::EllipsisPosition::END;
+    parameters.renderScale        = renderScale;
+    parameters.effectiveTextScale = effectiveScale;
+    parameters.maxTextureSize     = 4096;
+    if(fitMode == FitMode::RANGE)
+    {
+      parameters.isTextFitEnabled = true;
+      parameters.textFitMinSize   = pointSize;
+      parameters.textFitMaxSize   = pointSize;
+      parameters.textFitStepSize  = 1.0f;
+    }
+    else if(fitMode == FitMode::CANDIDATES)
+    {
+      parameters.isTextFitCandidatesEnabled = true;
+      parameters.textFitCandidates.PushBack(
+        Text::Fit::Candidate(pointSize * static_cast<float>(horizontalDpi) / 72.0f, 0.0f));
+    }
+    parameters.replacementSourceSnapshot.runs.PushBack(Candidate(0u, 1u, 120.0f, 60.0f, 9802u));
+    parameters.replacementSourceSnapshot.hasValidReplacementSource = true;
+
+    Text::AsyncTextLoader loader = Text::AsyncTextLoader::New();
+    bool                  cached = false;
+    Size                  naturalSize = Size::ZERO;
+    if(renderScale > 1.0f)
+    {
+      naturalSize = loader.SetupRenderScale(parameters, cached);
+    }
+    if(fitMode == FitMode::NONE)
+    {
+      loader.RenderText(parameters, cached, naturalSize);
+    }
+    else
+    {
+      loader.RenderTextFit(parameters, cached, naturalSize);
+    }
+    const Text::ReplacementRenderState* state = Text::GetImplementation(loader).GetReplacementRenderState();
+    DALI_TEST_CHECK(state && state->finalElision.applied);
+    DALI_TEST_EQUALS(state->placements.Count(), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(state->placements[0u].elided);
+    const Text::GlyphInfo& ellipsis =
+      state->finalElision.glyphs[state->finalElision.ellipsisFinalGlyphIndex];
+    const auto expectedPoint = static_cast<TextAbstraction::PointSize26Dot6>(
+      pointSize * effectiveScale * renderScale * static_cast<float>(pointsPerUnit));
+    DALI_TEST_EQUALS(services.fontClient.GetPointSize(ellipsis.fontId), expectedPoint, TEST_LOCATION);
+  };
+
+  for(float renderScale : {1.0f, 2.0f})
+  {
+    for(float effectiveScale : {1.0f, 1.5f})
+    {
+      layoutAsyncReplacementOnly(28.0f, effectiveScale, renderScale, FitMode::NONE);
+    }
+    layoutAsyncReplacementOnly(28.0f, 1.5f, renderScale, FitMode::RANGE);
+    layoutAsyncReplacementOnly(28.0f, 1.5f, renderScale, FitMode::CANDIDATES);
   }
 
   END_TEST;

@@ -328,7 +328,8 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
     authoritativeEndEllipsisResolved = ResolveEndEllipsis(*result.processingModel,
                                                           contentSize,
                                                           impl.GetFontClient(),
-                                                          result.finalElision);
+                                                          result.finalElision,
+                                                          defaultFontId);
     DALI_ASSERT_DEBUG(authoritativeEndEllipsisResolved && result.finalElision.resolved &&
                       "Supported replacement END layout must publish an authoritative final result");
     if(authoritativeEndEllipsisResolved)

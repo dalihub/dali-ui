@@ -24,10 +24,12 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-metrics.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-planner.h>
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/text-alignment.h>
 
 namespace Dali::Ui::Text
@@ -283,12 +285,29 @@ GlyphIndex ResolveStyleSourceGlyph(const Model&   model,
 bool ResolveEllipsisGlyph(const Model&                 model,
                           GlyphIndex                   styleGlyph,
                           TextAbstraction::FontClient& fontClient,
+                          FontId                       syntheticReplacementDefaultFontId,
                           GlyphInfo&                   ellipsisGlyph,
                           float&                       ellipsisAdvance)
 {
-  const VisualModel& visual = *model.mVisualModel;
-  FontId             fontId = styleGlyph < visual.mGlyphs.Count() ? visual.mGlyphs[styleGlyph].fontId : 0u;
-  if(!ResolveFontClientEllipsisMetrics(fontClient, fontId, true, ellipsisGlyph) || ellipsisGlyph.fontId == 0u)
+  const VisualModel& visual                     = *model.mVisualModel;
+  FontId             fontId                     = styleGlyph < visual.mGlyphs.Count() ? visual.mGlyphs[styleGlyph].fontId : 0u;
+  const bool         syntheticReplacementSource = styleGlyph < visual.mGlyphs.Count() &&
+                                          IsSyntheticReplacementGlyph(visual.mGlyphs[styleGlyph]);
+  if(syntheticReplacementSource)
+  {
+    fontId = ResolveEndEllipsisFontId(visual.mGlyphs.Begin(),
+                                      static_cast<Length>(visual.mGlyphs.Count()),
+                                      styleGlyph);
+    if(fontId == 0u)
+    {
+      fontId = syntheticReplacementDefaultFontId;
+    }
+  }
+  if(!ResolveFontClientEllipsisMetrics(fontClient,
+                                       fontId,
+                                       !syntheticReplacementSource,
+                                       ellipsisGlyph) ||
+     ellipsisGlyph.fontId == 0u)
   {
     return false;
   }
@@ -645,7 +664,8 @@ void BuildFinalResult(const Model&                      sourceModel,
 bool ResolveEndEllipsis(const Model&                 model,
                         const Size&                  controlSize,
                         TextAbstraction::FontClient& fontClient,
-                        FinalElisionResult&          result)
+                        FinalElisionResult&          result,
+                        FontId                       syntheticReplacementDefaultFontId)
 {
   result.Clear();
   if(model.mEllipsisPosition != EllipsisPosition::END || !model.mVisualModel || !model.mLogicalModel)
@@ -696,6 +716,7 @@ bool ResolveEndEllipsis(const Model&                 model,
   if(!ResolveEllipsisGlyph(model,
                            ellipsisStyleGlyph,
                            fontClient,
+                           syntheticReplacementDefaultFontId,
                            ellipsisGlyph,
                            ellipsisAdvance))
   {

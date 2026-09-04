@@ -40,13 +40,16 @@ namespace Dali::Ui::Text
  *
  * The caller supplies a model for which effective elision is enabled and
  * LayoutEngine has either marked an END candidate or produced no visible line.
+ * @p syntheticReplacementDefaultFontId is used only when a synthetic
+ * replacement boundary has no font-backed source glyph.
  *
  * @return true when an authoritative END result, including an intentional omission, was resolved.
  */
 bool ResolveEndEllipsis(const Model&                 model,
                         const Size&                  controlSize,
                         TextAbstraction::FontClient& fontClient,
-                        FinalElisionResult&          result);
+                        FinalElisionResult&          result,
+                        FontId                       syntheticReplacementDefaultFontId = 0u);
 
 /**
  * @brief Aligns final-domain lines and builds View/atlas coordinates.

@@ -67,6 +67,22 @@ struct EndEllipsisPlan
 };
 
 /**
+ * @brief Resolves the existing END ellipsis font policy for a source glyph.
+ *
+ * A font-backed source is returned directly. A synthetic replacement source
+ * uses the nearest font-backed glyph, with the preceding glyph preferred at
+ * equal distance. Other font-free glyphs do not trigger a surrounding search.
+ *
+ * @param[in] glyphs The source glyph buffer.
+ * @param[in] numberOfGlyphs The number of source glyphs.
+ * @param[in] glyphIndex The END ellipsis font source.
+ * @return The resolved font id, or zero when no valid source exists.
+ */
+FontId ResolveEndEllipsisFontId(const TextAbstraction::GlyphInfo* glyphs,
+                                Length                            numberOfGlyphs,
+                                GlyphIndex                        glyphIndex);
+
+/**
  * @brief Resolves the END ellipsis removal boundary without modifying the input.
  *
  * @param[in] input The END ellipsis input.

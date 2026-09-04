@@ -171,6 +171,24 @@ const Vector2* GetGlyphPosition(const EndEllipsisInputView& input, GlyphIndex gl
 }
 } // unnamed namespace
 
+FontId ResolveEndEllipsisFontId(const GlyphInfo* glyphs,
+                                Length           numberOfGlyphs,
+                                GlyphIndex       glyphIndex)
+{
+  if(!glyphs || glyphIndex >= numberOfGlyphs)
+  {
+    return 0u;
+  }
+
+  EndEllipsisInputView input;
+  input.glyphs         = glyphs;
+  input.numberOfGlyphs = numberOfGlyphs;
+  EllipsisFontSearch fontSearch(input);
+  return fontSearch.Resolve(glyphIndex,
+                            EndEllipsisPlan::INVALID_GLYPH_INDEX,
+                            0u);
+}
+
 EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView&  input,
                                        TextAbstraction::FontClient& fontClient)
 {
