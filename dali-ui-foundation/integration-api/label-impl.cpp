@@ -4256,9 +4256,7 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
     parameters.textRevealFadeDurationRatio    = revealData->fadeDurationRatio;
     parameters.textRevealSequenceStaggerRatio = revealData->sequenceStaggerRatio;
   }
-  Property::Map variationsMap;
-  mController->GetVariationsMap(variationsMap);
-  parameters.variationsMap                  = variationsMap;
+  mController->GetVariationsMap(parameters.variationsMap);
   parameters.renderScale                    = mController->GetRenderScale();
   parameters.isEmbossEnabled                = mController->IsEmbossEnabled();
   parameters.embossDirection                = mController->GetEmbossDirection();
