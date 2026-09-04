@@ -70,6 +70,18 @@ struct ProjectedLine
   float                finalBoundaryCoordinate{0.0f};
 };
 
+struct ResolvedEndEllipsisLine
+{
+  std::vector<SourceCluster>                 clusters;
+  size_t                                     retainedClusterCount{0u};
+  GlyphIndex                                 ellipsisStyleGlyph{FinalElisionResult::INVALID_GLYPH_INDEX};
+  GlyphInfo                                  ellipsisGlyph{};
+  ProjectedLine                              projected{};
+  FinalElisionResult::EllipsisOmissionReason omissionReason{FinalElisionResult::EllipsisOmissionReason::NONE};
+  bool                                       resolved{false};
+  bool                                       applied{false};
+};
+
 enum class EndEllipsisBoundaryKind : uint8_t
 {
   NONE,
@@ -122,6 +134,19 @@ LineIndex FindEllipsisLine(const VisualModel& visual)
   return FinalElisionResult::INVALID_LINE_INDEX;
 }
 
+const Vector2* GetSourceGlyphPosition(const VisualModel&                  visual,
+                                      GlyphIndex                          glyphIndex,
+                                      const EndEllipsisGlyphPositionView& positionView)
+{
+  if(positionView.glyphPositions &&
+     glyphIndex >= positionView.startIndex &&
+     glyphIndex - positionView.startIndex < positionView.numberOfGlyphs)
+  {
+    return positionView.glyphPositions + glyphIndex - positionView.startIndex;
+  }
+  return glyphIndex < visual.mGlyphPositions.Count() ? visual.mGlyphPositions.Begin() + glyphIndex : nullptr;
+}
+
 GlyphIndex SourceGlyphForCharacter(const VisualModel& visual, CharacterIndex characterIndex)
 {
   return characterIndex < visual.mCharactersToGlyph.Count()
@@ -163,7 +188,9 @@ void AssignSourcePhysicalOrder(std::vector<SourceCluster>& clusters)
   }
 }
 
-std::vector<SourceCluster> CollectSourceClusters(const Model& model, const LineRun& line)
+std::vector<SourceCluster> CollectSourceClusters(const Model&                        model,
+                                                 const LineRun&                      line,
+                                                 const EndEllipsisGlyphPositionView& positionView)
 {
   const LogicalModel&  logical      = *model.mLogicalModel;
   const VisualModel&   visual       = *model.mVisualModel;
@@ -208,9 +235,9 @@ std::vector<SourceCluster> CollectSourceClusters(const Model& model, const LineR
     cluster.characterEnd   = clusterCharacterEnd;
     cluster.glyphStart     = groupStart;
     cluster.glyphEnd       = groupEnd;
-    if(groupStart < visual.mGlyphPositions.Count())
+    if(const Vector2* glyphPosition = GetSourceGlyphPosition(visual, groupStart, positionView))
     {
-      cluster.sourcePen = visual.mGlyphPositions[groupStart].x - visual.mGlyphs[groupStart].xBearing;
+      cluster.sourcePen = glyphPosition->x - visual.mGlyphs[groupStart].xBearing;
     }
     for(GlyphIndex sourceGlyph = groupStart; sourceGlyph < groupEnd; ++sourceGlyph)
     {
@@ -354,13 +381,14 @@ EndEllipsisBoundary MakeBoundaryToken(const Model&                      model,
   return boundary;
 }
 
-ProjectedLine ProjectFinalLine(const Model&                      model,
-                               const std::vector<SourceCluster>& clusters,
-                               size_t                            retainedClusterCount,
-                               const GlyphInfo&                  ellipsisGlyph,
-                               float                             ellipsisAdvance,
-                               const EndEllipsisBoundary&        boundary,
-                               bool                              keepPositions)
+ProjectedLine ProjectFinalLine(const Model&                        model,
+                               const std::vector<SourceCluster>&   clusters,
+                               size_t                              retainedClusterCount,
+                               const GlyphInfo&                    ellipsisGlyph,
+                               float                               ellipsisAdvance,
+                               const EndEllipsisBoundary&          boundary,
+                               const EndEllipsisGlyphPositionView& positionView,
+                               bool                                keepPositions)
 {
   const VisualModel& source = *model.mVisualModel;
   struct PhysicalItem
@@ -395,16 +423,16 @@ ProjectedLine ProjectFinalLine(const Model&                      model,
     return lhs.ellipsis && !rhs.ellipsis;
   });
 
-  std::vector<size_t> retainedOffsets(retainedClusterCount + 1u, 0u);
-  for(size_t clusterIndex = 0u; clusterIndex < retainedClusterCount; ++clusterIndex)
-  {
-    retainedOffsets[clusterIndex + 1u] = retainedOffsets[clusterIndex] +
-                                         clusters[clusterIndex].glyphEnd - clusters[clusterIndex].glyphStart;
-  }
-
-  ProjectedLine projected;
+  ProjectedLine       projected;
+  std::vector<size_t> retainedOffsets;
   if(keepPositions)
   {
+    retainedOffsets.resize(retainedClusterCount + 1u, 0u);
+    for(size_t clusterIndex = 0u; clusterIndex < retainedClusterCount; ++clusterIndex)
+    {
+      retainedOffsets[clusterIndex + 1u] = retainedOffsets[clusterIndex] +
+                                           clusters[clusterIndex].glyphEnd - clusters[clusterIndex].glyphStart;
+    }
     projected.retainedGlyphPositions.resize(retainedOffsets.back());
   }
 
@@ -434,10 +462,11 @@ ProjectedLine ProjectFinalLine(const Model&                      model,
     const float          shift   = cursor - cluster.sourcePen;
     for(GlyphIndex sourceGlyph = cluster.glyphStart; sourceGlyph < cluster.glyphEnd; ++sourceGlyph)
     {
-      Vector2 position = sourceGlyph < source.mGlyphPositions.Count()
-                           ? source.mGlyphPositions[sourceGlyph]
-                           : Vector2(cluster.sourcePen + source.mGlyphs[sourceGlyph].xBearing,
-                                     -source.mGlyphs[sourceGlyph].yBearing);
+      const Vector2* sourcePosition = GetSourceGlyphPosition(source, sourceGlyph, positionView);
+      Vector2        position       = sourcePosition
+                                        ? *sourcePosition
+                                        : Vector2(cluster.sourcePen + source.mGlyphs[sourceGlyph].xBearing,
+                                                  -source.mGlyphs[sourceGlyph].yBearing);
       position.x += shift;
       if(keepPositions)
       {
@@ -659,7 +688,197 @@ void BuildFinalResult(const Model&                      sourceModel,
   CopyFinalColorIndices(source, result);
 }
 
+void ResolveEndEllipsisLine(const Model&                        model,
+                            const LineRun&                      line,
+                            const Size&                         controlSize,
+                            TextAbstraction::FontClient&        fontClient,
+                            FontId                              syntheticReplacementDefaultFontId,
+                            const EndEllipsisGlyphPositionView& positionView,
+                            bool                                keepPositions,
+                            ResolvedEndEllipsisLine&            resolved)
+{
+  resolved          = ResolvedEndEllipsisLine{};
+  resolved.clusters = CollectSourceClusters(model, line, positionView);
+  if(resolved.clusters.empty())
+  {
+    resolved.omissionReason = FinalElisionResult::EllipsisOmissionReason::NO_VISIBLE_LINE;
+    resolved.resolved       = true;
+    return;
+  }
+
+  // Style is fixed at the original source END boundary. Candidate correction
+  // cannot change U+2026's authored style or font while searching.
+  const CharacterIndex originalBoundary = resolved.clusters.back().characterEnd;
+  resolved.ellipsisStyleGlyph           = ResolveStyleSourceGlyph(model, line, originalBoundary);
+  float ellipsisAdvance{0.0f};
+  if(!ResolveEllipsisGlyph(model,
+                           resolved.ellipsisStyleGlyph,
+                           fontClient,
+                           syntheticReplacementDefaultFontId,
+                           resolved.ellipsisGlyph,
+                           ellipsisAdvance))
+  {
+    resolved.omissionReason = FinalElisionResult::EllipsisOmissionReason::ELLIPSIS_CANNOT_FIT;
+    resolved.resolved       = true;
+    return;
+  }
+
+  std::vector<float> prefixAdvances(resolved.clusters.size() + 1u, 0.0f);
+  bool               monotonicAdvances = true;
+  for(size_t index = 0u; index < resolved.clusters.size(); ++index)
+  {
+    prefixAdvances[index + 1u] = prefixAdvances[index] + resolved.clusters[index].advance;
+    monotonicAdvances          = monotonicAdvances && prefixAdvances[index + 1u] >= prefixAdvances[index];
+  }
+  const float  availableForPrefix = controlSize.width - ellipsisAdvance;
+  const size_t maximumCandidate   = resolved.clusters.size() - 1u;
+  size_t       candidate{0u};
+  if(monotonicAdvances)
+  {
+    candidate = static_cast<size_t>(std::upper_bound(prefixAdvances.begin(),
+                                                     prefixAdvances.end(),
+                                                     availableForPrefix + FIT_EPSILON) -
+                                    prefixAdvances.begin());
+    candidate = candidate == 0u ? 0u : candidate - 1u;
+  }
+  else
+  {
+    // Character spacing can theoretically make advances non-monotonic. Keep
+    // selection deterministic instead of applying an arbitrary retry limit.
+    for(size_t index = 0u; index <= maximumCandidate; ++index)
+    {
+      if(prefixAdvances[index] <= availableForPrefix + FIT_EPSILON)
+      {
+        candidate = index;
+      }
+    }
+  }
+  candidate = std::min(candidate, maximumCandidate);
+
+  const auto project = [&](size_t retainedClusterCount, bool preservePositions)
+  {
+    const EndEllipsisBoundary boundary = MakeBoundaryToken(model, resolved.clusters, retainedClusterCount);
+    return ProjectFinalLine(model,
+                            resolved.clusters,
+                            retainedClusterCount,
+                            resolved.ellipsisGlyph,
+                            ellipsisAdvance,
+                            boundary,
+                            positionView,
+                            preservePositions);
+  };
+  const auto fits = [&](size_t retainedClusterCount)
+  {
+    return project(retainedClusterCount, false).width <= controlSize.width + FIT_EPSILON;
+  };
+
+  // APPEND is the maximal semantic candidate: preserve every drawable source
+  // cluster and project U+2026 at the last retained cluster's logical END.
+  // A complete source line cannot manufacture an ellipsis this way; the
+  // source LineRun must be followed by hidden logical content.
+  const bool hasHiddenLogicalContinuation = HasHiddenLogicalContinuation(*model.mLogicalModel, line);
+  if(hasHiddenLogicalContinuation && fits(resolved.clusters.size()))
+  {
+    const EndEllipsisBoundary boundary = MakeBoundaryToken(model, resolved.clusters, resolved.clusters.size());
+    DALI_ASSERT_DEBUG(boundary.kind == EndEllipsisBoundaryKind::APPEND &&
+                      "APPEND requires a retained drawable anchor and removes no source glyph");
+    resolved.retainedClusterCount = resolved.clusters.size();
+    if(keepPositions)
+    {
+      resolved.projected = ProjectFinalLine(model,
+                                            resolved.clusters,
+                                            resolved.retainedClusterCount,
+                                            resolved.ellipsisGlyph,
+                                            ellipsisAdvance,
+                                            boundary,
+                                            positionView,
+                                            true);
+    }
+    resolved.resolved = true;
+    resolved.applied  = true;
+    return;
+  }
+
+  const auto isValidCandidate = [&](size_t retainedClusterCount)
+  {
+    return retainedClusterCount < resolved.clusters.size() && fits(retainedClusterCount);
+  };
+  while(candidate > 0u && !isValidCandidate(candidate))
+  {
+    --candidate;
+  }
+  if(!isValidCandidate(candidate))
+  {
+    resolved.omissionReason = FinalElisionResult::EllipsisOmissionReason::ELLIPSIS_CANNOT_FIT;
+    resolved.resolved       = true;
+    return;
+  }
+  while(candidate < maximumCandidate && isValidCandidate(candidate + 1u))
+  {
+    ++candidate;
+  }
+
+  DALI_ASSERT_DEBUG((candidate == maximumCandidate || !isValidCandidate(candidate + 1u)) &&
+                    "END ellipsis candidate is not maximal in the projected-fit domain");
+  const EndEllipsisBoundary boundary = MakeBoundaryToken(model, resolved.clusters, candidate);
+  DALI_ASSERT_DEBUG(boundary.kind == EndEllipsisBoundaryKind::REPLACE &&
+                    "Applied END ellipsis requires a drawable source boundary owner");
+  resolved.retainedClusterCount = candidate;
+  if(keepPositions)
+  {
+    resolved.projected = ProjectFinalLine(model,
+                                          resolved.clusters,
+                                          resolved.retainedClusterCount,
+                                          resolved.ellipsisGlyph,
+                                          ellipsisAdvance,
+                                          boundary,
+                                          positionView,
+                                          true);
+  }
+  resolved.resolved = true;
+  resolved.applied  = true;
+}
+
 } // unnamed namespace
+
+EndEllipsisSourceRetention ResolveEndEllipsisRetention(
+  const Model&                        model,
+  const LineRun&                      line,
+  const Size&                         controlSize,
+  TextAbstraction::FontClient&        fontClient,
+  FontId                              syntheticReplacementDefaultFontId,
+  const EndEllipsisGlyphPositionView& glyphPositionView)
+{
+  EndEllipsisSourceRetention retention;
+  if(model.mEllipsisPosition != EllipsisPosition::END || !model.mVisualModel || !model.mLogicalModel)
+  {
+    return retention;
+  }
+
+  ResolvedEndEllipsisLine resolved;
+  ResolveEndEllipsisLine(model,
+                         line,
+                         controlSize,
+                         fontClient,
+                         syntheticReplacementDefaultFontId,
+                         glyphPositionView,
+                         false,
+                         resolved);
+  retention.resolved = resolved.resolved;
+  if(!resolved.resolved)
+  {
+    return retention;
+  }
+  if(!resolved.applied)
+  {
+    retention.firstRemovedCharacterIndex = line.characterRun.characterIndex;
+  }
+  else if(resolved.retainedClusterCount < resolved.clusters.size())
+  {
+    retention.firstRemovedCharacterIndex = resolved.clusters[resolved.retainedClusterCount].characterStart;
+  }
+  return retention;
+}
 
 bool ResolveEndEllipsis(const Model&                 model,
                         const Size&                  controlSize,
@@ -687,166 +906,29 @@ bool ResolveEndEllipsis(const Model&                 model,
     }
     return false;
   }
-  const LineRun& line = visual.mLines[ellipsisLineIndex];
-  if(line.glyphRun.numberOfGlyphs == 0u || line.characterRun.numberOfCharacters == 0u)
+  const LineRun&          line = visual.mLines[ellipsisLineIndex];
+  ResolvedEndEllipsisLine resolved;
+  ResolveEndEllipsisLine(model,
+                         line,
+                         controlSize,
+                         fontClient,
+                         syntheticReplacementDefaultFontId,
+                         {},
+                         true,
+                         resolved);
+  if(!resolved.applied)
   {
-    BuildOmissionResult(model,
-                        ellipsisLineIndex,
-                        FinalElisionResult::EllipsisOmissionReason::NO_VISIBLE_LINE,
-                        result);
+    BuildOmissionResult(model, ellipsisLineIndex, resolved.omissionReason, result);
     return true;
   }
 
-  const std::vector<SourceCluster> clusters = CollectSourceClusters(model, line);
-  if(clusters.empty())
-  {
-    BuildOmissionResult(model,
-                        ellipsisLineIndex,
-                        FinalElisionResult::EllipsisOmissionReason::NO_VISIBLE_LINE,
-                        result);
-    return true;
-  }
-
-  // Style is fixed at the original source END boundary. Candidate correction
-  // cannot change U+2026's authored style or font while searching.
-  const CharacterIndex originalBoundary   = clusters.back().characterEnd;
-  const GlyphIndex     ellipsisStyleGlyph = ResolveStyleSourceGlyph(model, line, originalBoundary);
-  GlyphInfo            ellipsisGlyph;
-  float                ellipsisAdvance{0.0f};
-  if(!ResolveEllipsisGlyph(model,
-                           ellipsisStyleGlyph,
-                           fontClient,
-                           syntheticReplacementDefaultFontId,
-                           ellipsisGlyph,
-                           ellipsisAdvance))
-  {
-    BuildOmissionResult(model,
-                        ellipsisLineIndex,
-                        FinalElisionResult::EllipsisOmissionReason::ELLIPSIS_CANNOT_FIT,
-                        result);
-    return true;
-  }
-
-  std::vector<float> prefixAdvances(clusters.size() + 1u, 0.0f);
-  bool               monotonicAdvances = true;
-  for(size_t index = 0u; index < clusters.size(); ++index)
-  {
-    prefixAdvances[index + 1u] = prefixAdvances[index] + clusters[index].advance;
-    monotonicAdvances          = monotonicAdvances && prefixAdvances[index + 1u] >= prefixAdvances[index];
-  }
-  const float  availableForPrefix = controlSize.width - ellipsisAdvance;
-  const size_t maximumCandidate   = clusters.size() - 1u;
-  size_t       candidate{0u};
-  if(monotonicAdvances)
-  {
-    candidate = static_cast<size_t>(std::upper_bound(prefixAdvances.begin(),
-                                                     prefixAdvances.end(),
-                                                     availableForPrefix + FIT_EPSILON) -
-                                    prefixAdvances.begin());
-    candidate = candidate == 0u ? 0u : candidate - 1u;
-  }
-  else
-  {
-    // Character spacing can theoretically make advances non-monotonic. Keep
-    // selection deterministic instead of applying an arbitrary retry limit.
-    for(size_t index = 0u; index <= maximumCandidate; ++index)
-    {
-      if(prefixAdvances[index] <= availableForPrefix + FIT_EPSILON)
-      {
-        candidate = index;
-      }
-    }
-  }
-  candidate = std::min(candidate, maximumCandidate);
-
-  const auto fits = [&](size_t retainedClusterCount)
-  {
-    const EndEllipsisBoundary boundary = MakeBoundaryToken(model, clusters, retainedClusterCount);
-    return ProjectFinalLine(model,
-                            clusters,
-                            retainedClusterCount,
-                            ellipsisGlyph,
-                            ellipsisAdvance,
-                            boundary,
-                            false)
-             .width <= controlSize.width + FIT_EPSILON;
-  };
-
-  // APPEND is the maximal semantic candidate: preserve every drawable source
-  // cluster and project U+2026 at the last retained cluster's logical END.
-  // A complete source line cannot manufacture an ellipsis this way; the
-  // source LineRun must be followed by hidden logical content.
-  const bool hasHiddenLogicalContinuation = HasHiddenLogicalContinuation(*model.mLogicalModel, line);
-  bool       appendFits                   = false;
-  if(hasHiddenLogicalContinuation)
-  {
-    appendFits = fits(clusters.size());
-  }
-  if(hasHiddenLogicalContinuation && appendFits)
-  {
-    EndEllipsisBoundary boundary = MakeBoundaryToken(model, clusters, clusters.size());
-    DALI_ASSERT_DEBUG(boundary.kind == EndEllipsisBoundaryKind::APPEND &&
-                      "APPEND requires a retained drawable anchor and removes no source glyph");
-    const ProjectedLine projected = ProjectFinalLine(model,
-                                                     clusters,
-                                                     clusters.size(),
-                                                     ellipsisGlyph,
-                                                     ellipsisAdvance,
-                                                     boundary,
-                                                     true);
-    BuildFinalResult(model,
-                     ellipsisLineIndex,
-                     clusters,
-                     clusters.size(),
-                     ellipsisStyleGlyph,
-                     ellipsisGlyph,
-                     projected,
-                     result);
-    return true;
-  }
-
-  const auto isValidCandidate = [&](size_t retainedClusterCount)
-  {
-    return retainedClusterCount < clusters.size() && fits(retainedClusterCount);
-  };
-
-  while(candidate > 0u && !isValidCandidate(candidate))
-  {
-    --candidate;
-  }
-  if(!isValidCandidate(candidate))
-  {
-    BuildOmissionResult(model,
-                        ellipsisLineIndex,
-                        FinalElisionResult::EllipsisOmissionReason::ELLIPSIS_CANNOT_FIT,
-                        result);
-    return true;
-  }
-  while(candidate < maximumCandidate && isValidCandidate(candidate + 1u))
-  {
-    ++candidate;
-  }
-
-  DALI_ASSERT_DEBUG((candidate == maximumCandidate || !isValidCandidate(candidate + 1u)) &&
-                    "END ellipsis candidate is not maximal in the projected-fit domain");
-
-  EndEllipsisBoundary boundary = MakeBoundaryToken(model, clusters, candidate);
-  DALI_ASSERT_DEBUG(boundary.kind == EndEllipsisBoundaryKind::REPLACE &&
-                    "Applied END ellipsis requires a drawable source boundary owner");
-  const ProjectedLine projected = ProjectFinalLine(model,
-                                                   clusters,
-                                                   candidate,
-                                                   ellipsisGlyph,
-                                                   ellipsisAdvance,
-                                                   boundary,
-                                                   true);
   BuildFinalResult(model,
                    ellipsisLineIndex,
-                   clusters,
-                   candidate,
-                   ellipsisStyleGlyph,
-                   ellipsisGlyph,
-                   projected,
+                   resolved.clusters,
+                   resolved.retainedClusterCount,
+                   resolved.ellipsisStyleGlyph,
+                   resolved.ellipsisGlyph,
+                   resolved.projected,
                    result);
   return true;
 }

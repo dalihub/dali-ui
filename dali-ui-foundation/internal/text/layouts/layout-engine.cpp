@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/internal/text/bidirectional-support.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-planner.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine-helper-functions.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
@@ -396,15 +397,23 @@ struct Engine::Impl
    * @param[in] lineLayout The candidate line.
    * @param[out] glyphPositionsBuffer The glyph position buffer.
    * @param[out] lineDirection The candidate line direction.
+   * @param[in] resolveMetricRetention Whether to resolve authoritative multiline source retention.
    * @return The resolved END ellipsis plan.
    */
-  EndEllipsisPlan ResolveEndEllipsisCandidatePlan(const Parameters&     parameters,
-                                                  LayoutBidiParameters& bidiParameters,
-                                                  const LineLayout&     lineLayout,
-                                                  Vector2*              glyphPositionsBuffer,
-                                                  CharacterDirection&   lineDirection)
+  struct EndEllipsisCandidatePlan
   {
-    EndEllipsisPlan plan;
+    EndEllipsisPlan            legacyWidthPlan;
+    EndEllipsisSourceRetention metricRetention;
+  };
+
+  EndEllipsisCandidatePlan ResolveEndEllipsisCandidatePlan(const Parameters&     parameters,
+                                                           LayoutBidiParameters& bidiParameters,
+                                                           const LineLayout&     lineLayout,
+                                                           Vector2*              glyphPositionsBuffer,
+                                                           CharacterDirection&   lineDirection,
+                                                           bool                  resolveMetricRetention)
+  {
+    EndEllipsisCandidatePlan plan;
     if(parameters.replacementLayoutData == nullptr || lineLayout.numberOfGlyphs == 0u)
     {
       return plan;
@@ -443,7 +452,37 @@ struct Engine::Impl
     input.lineWidth             = lineLayout.length;
     input.positionOffset        = alignmentLine.alignmentOffset;
     input.modelCharacterSpacing = visualModel.GetCharacterSpacing();
-    return ResolveEndEllipsisPlan(input, fontClient);
+    if(resolveMetricRetention)
+    {
+      LineRun candidateLine;
+      candidateLine.glyphRun                      = GlyphRun{lineLayout.glyphIndex, lineLayout.numberOfGlyphs};
+      candidateLine.characterRun                  = CharacterRun{lineLayout.characterIndex, lineLayout.numberOfCharacters};
+      candidateLine.width                         = lineLayout.length;
+      candidateLine.extraLength                   = std::ceil(lineLayout.whiteSpaceLengthEndOfLine);
+      candidateLine.direction                     = lineDirection;
+      candidateLine.isSplitToTwoHalves            = lineLayout.isSplitToTwoHalves;
+      candidateLine.glyphRunSecondHalf            = GlyphRun{lineLayout.glyphIndexInSecondHalfLine,
+                                                  lineLayout.numberOfGlyphsInSecondHalfLine};
+      candidateLine.characterRunForSecondHalfLine = CharacterRun{lineLayout.characterIndexInSecondHalfLine,
+                                                                 lineLayout.numberOfCharactersInSecondHalfLine};
+      const EndEllipsisGlyphPositionView positionView{glyphPositionsBuffer,
+                                                      parameters.startGlyphIndex,
+                                                      parameters.numberOfGlyphs};
+      plan.metricRetention = ResolveEndEllipsisRetention(*parameters.textModel,
+                                                         candidateLine,
+                                                         parameters.boundingBox,
+                                                         fontClient,
+                                                         parameters.replacementLayoutData->defaultFontId,
+                                                         positionView);
+    }
+    if(!plan.metricRetention.resolved)
+    {
+      // Single-line END keeps the legacy width-removal contract. Multiline
+      // uses it only as a fallback when authoritative source retention could
+      // not be resolved.
+      plan.legacyWidthPlan = ResolveEndEllipsisPlan(input, fontClient);
+    }
+    return plan;
   }
 
   /**
@@ -454,12 +493,14 @@ struct Engine::Impl
    *
    * @param[in] parameters The current layout parameters.
    * @param[in,out] lineLayout The candidate line metrics to update.
+   * @param[in] metricRetention Optional authoritative END source-retention boundary.
    */
   void ApplyReplacementLineMetrics(
-    const Parameters& parameters,
-    LineLayout&       lineLayout,
-    GlyphIndex        firstExcludedReplacementGlyph = EndEllipsisPlan::INVALID_GLYPH_INDEX,
-    GlyphIndex        lastExcludedReplacementGlyph  = EndEllipsisPlan::INVALID_GLYPH_INDEX)
+    const Parameters&                 parameters,
+    LineLayout&                       lineLayout,
+    const EndEllipsisSourceRetention* metricRetention               = nullptr,
+    GlyphIndex                        firstExcludedReplacementGlyph = EndEllipsisPlan::INVALID_GLYPH_INDEX,
+    GlyphIndex                        lastExcludedReplacementGlyph  = EndEllipsisPlan::INVALID_GLYPH_INDEX)
   {
     if(parameters.replacementLayoutData == nullptr || parameters.replacementLayoutData->runs == nullptr)
     {
@@ -531,9 +572,13 @@ struct Engine::Impl
         {
           continue;
         }
-        if(firstExcludedReplacementGlyph != EndEllipsisPlan::INVALID_GLYPH_INDEX &&
-           index >= firstExcludedReplacementGlyph &&
-           index <= lastExcludedReplacementGlyph)
+        const bool excludedByFinalRetention = metricRetention && metricRetention->resolved &&
+                                              !metricRetention->IsRetained(visualModel.mGlyphsToCharacters[index]);
+        const bool excludedByWidthPlan = (!metricRetention || !metricRetention->resolved) &&
+                                         firstExcludedReplacementGlyph != EndEllipsisPlan::INVALID_GLYPH_INDEX &&
+                                         index >= firstExcludedReplacementGlyph &&
+                                         index <= lastExcludedReplacementGlyph;
+        if(excludedByFinalRetention || excludedByWidthPlan)
         {
           hasExcludedReplacement = true;
           continue;
@@ -1761,24 +1806,26 @@ struct Engine::Impl
       const LayoutBidiParameters bidiParametersBeforeEllipsis = layoutBidiParameters;
       GetLineLayoutForBox(layoutParameters, layoutBidiParameters, ellipsisLayout, true, ellipsisPosition,
                           enforceEllipsisInSingleLine, true, isHiddenInputEnabled);
-      CharacterDirection ellipsisLineDirection         = LTR;
-      bool               ellipsisLinePositionsPrepared = false;
-      EndEllipsisPlan    endEllipsisPlan;
+      CharacterDirection       ellipsisLineDirection         = LTR;
+      bool                     ellipsisLinePositionsPrepared = false;
+      EndEllipsisCandidatePlan endEllipsisPlan;
       if(ellipsisPosition == Text::EllipsisPosition::END && hasReplacementLayout)
       {
         endEllipsisPlan               = ResolveEndEllipsisCandidatePlan(layoutParameters,
                                                                         layoutBidiParameters,
                                                                         ellipsisLayout,
                                                                         glyphPositionsBuffer,
-                                                                        ellipsisLineDirection);
+                                                                        ellipsisLineDirection,
+                                                                        isMultiline);
         ellipsisLinePositionsPrepared = ellipsisLayout.numberOfGlyphs > 0u;
       }
       if(hasReplacementLayout)
       {
         ApplyReplacementLineMetrics(layoutParameters,
                                     ellipsisLayout,
-                                    endEllipsisPlan.firstRemovedReplacementGlyphIndex,
-                                    endEllipsisPlan.lastRemovedReplacementGlyphIndex);
+                                    isMultiline ? &endEllipsisPlan.metricRetention : nullptr,
+                                    endEllipsisPlan.legacyWidthPlan.firstRemovedReplacementGlyphIndex,
+                                    endEllipsisPlan.legacyWidthPlan.lastRemovedReplacementGlyphIndex);
       }
 
       // Completely filling the previous line may pull an oversized
@@ -1827,16 +1874,18 @@ struct Engine::Impl
           LayoutBidiParameters boundedBidiParameters = bidiParametersBeforeEllipsis;
           GetLineLayoutForBox(boundedParameters, boundedBidiParameters, boundedEllipsisLayout, true,
                               ellipsisPosition, enforceEllipsisInSingleLine, true, isHiddenInputEnabled);
-          CharacterDirection    boundedLineDirection         = LTR;
-          const EndEllipsisPlan boundedEndEllipsisPlan       = ResolveEndEllipsisCandidatePlan(boundedParameters,
-                                                                                               boundedBidiParameters,
-                                                                                               boundedEllipsisLayout,
-                                                                                               glyphPositionsBuffer,
-                                                                                               boundedLineDirection);
-          const bool            boundedLinePositionsPrepared = boundedEllipsisLayout.numberOfGlyphs > 0u;
+          CharacterDirection             boundedLineDirection         = LTR;
+          const EndEllipsisCandidatePlan boundedEndEllipsisPlan       = ResolveEndEllipsisCandidatePlan(boundedParameters,
+                                                                                                        boundedBidiParameters,
+                                                                                                        boundedEllipsisLayout,
+                                                                                                        glyphPositionsBuffer,
+                                                                                                        boundedLineDirection,
+                                                                                                        true);
+          const bool                     boundedLinePositionsPrepared = boundedEllipsisLayout.numberOfGlyphs > 0u;
           ApplyReplacementLineMetrics(boundedParameters, boundedEllipsisLayout,
-                                      boundedEndEllipsisPlan.firstRemovedReplacementGlyphIndex,
-                                      boundedEndEllipsisPlan.lastRemovedReplacementGlyphIndex);
+                                      &boundedEndEllipsisPlan.metricRetention,
+                                      boundedEndEllipsisPlan.legacyWidthPlan.firstRemovedReplacementGlyphIndex,
+                                      boundedEndEllipsisPlan.legacyWidthPlan.lastRemovedReplacementGlyphIndex);
           if(boundedEllipsisLayout.numberOfGlyphs + boundedEllipsisLayout.numberOfGlyphsInSecondHalfLine > 0u)
           {
             ellipsisLayout                = boundedEllipsisLayout;

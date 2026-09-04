@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/public-api/actors/actor-enumerations.h>
+#include <limits>
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/final-elision-result.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
@@ -27,6 +28,53 @@
 
 namespace Dali::Ui::Text
 {
+
+/**
+ * @brief Provides request-local glyph positions for an END candidate line.
+ *
+ * LayoutEngine can resolve a candidate into a temporary position buffer before
+ * that buffer is committed to VisualModel. Positions outside this view continue
+ * to come from the model.
+ */
+struct EndEllipsisGlyphPositionView
+{
+  const Vector2* glyphPositions{nullptr};
+  GlyphIndex     startIndex{0u};
+  Length         numberOfGlyphs{0u};
+};
+
+/**
+ * @brief Stores the authoritative source-retention boundary for an END line.
+ */
+struct EndEllipsisSourceRetention
+{
+  static constexpr CharacterIndex INVALID_CHARACTER_INDEX = std::numeric_limits<CharacterIndex>::max();
+
+  CharacterIndex firstRemovedCharacterIndex{INVALID_CHARACTER_INDEX};
+  bool           resolved{false};
+
+  bool IsRetained(CharacterIndex characterIndex) const
+  {
+    return resolved &&
+           (firstRemovedCharacterIndex == INVALID_CHARACTER_INDEX ||
+            characterIndex < firstRemovedCharacterIndex);
+  }
+};
+
+/**
+ * @brief Resolves only the authoritative source-retention boundary for an END candidate.
+ *
+ * This uses the same candidate selection as ResolveEndEllipsis(). It exists so
+ * replacement-aware line metrics can exclude only source units that the final
+ * END result actually removes.
+ */
+EndEllipsisSourceRetention ResolveEndEllipsisRetention(
+  const Model&                        model,
+  const LineRun&                      line,
+  const Size&                         controlSize,
+  TextAbstraction::FontClient&        fontClient,
+  FontId                              syntheticReplacementDefaultFontId,
+  const EndEllipsisGlyphPositionView& glyphPositionView = {});
 
 /**
  * @brief Resolves an END-elided line from source-layout topology.

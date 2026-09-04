@@ -5361,3 +5361,410 @@ int UtcDaliReplacementEndEllipsisFontContextP(void)
 
   END_TEST;
 }
+
+int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
+{
+  UiTestApplication                   application;
+  Text::ReplacementLayoutTestServices services = MakeLayoutServices();
+  const uint32_t                       pointsPerUnit = services.fontClient.GetNumberOfPointsPerOneUnitOfPointSize();
+
+  struct GeometrySummary
+  {
+    Text::GlyphIndex sourceGlyph{Text::FinalElisionResult::INVALID_GLYPH_INDEX};
+    float            lineTop{0.0f};
+    float            ascender{0.0f};
+    float            descender{0.0f};
+    float            lineSpacing{0.0f};
+    float            lineHeight{0.0f};
+    float            baseline{0.0f};
+    float            replacementY{0.0f};
+    Vector2          replacementSize{Vector2::ZERO};
+  };
+
+  const auto findReplacement = [](const Vector<Text::Character>& text)
+  {
+    Text::CharacterIndex index = 0u;
+    while(index < text.Count() && text[index] != Text::ReplacementProjection::OBJECT_REPLACEMENT_CHARACTER)
+    {
+      ++index;
+    }
+    DALI_TEST_CHECK(index < text.Count());
+    return index;
+  };
+
+  const auto layout = [&](const std::string&                       utf8,
+                          const Vector2&                           replacementSize,
+                          Text::ReplacementVerticalAlignment      alignment,
+                          const Size&                              contentSize,
+                          bool                                     elideText)
+  {
+    const Vector<Text::Character> text             = Utf32(utf8);
+    const Text::CharacterIndex    replacementIndex = findReplacement(text);
+    Vector<Text::ReplacementRunSnapshot> candidates;
+    candidates.PushBack(Candidate(replacementIndex,
+                                  1u,
+                                  replacementSize.width,
+                                  replacementSize.height,
+                                  9900u));
+    candidates[0u].metrics.verticalAlignment = alignment;
+    const Text::ReplacementProjection projection = Text::ReplacementProjection::Build(text, candidates);
+
+    Text::ReplacementLayoutTestOptions options;
+    options.contentSize      = contentSize;
+    options.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
+    options.lineWrapMode     = Text::LineWrapMode::CHARACTER;
+    options.elideText        = elideText;
+    options.ellipsisPosition = Text::EllipsisPosition::END;
+    options.fontPointSize    = 28u * pointsPerUnit;
+    options.fontPixelSize    = 28.0f;
+    options.relativeLineSize = -1.0f;
+    Text::ReplacementRenderState result;
+    DALI_TEST_CHECK(Text::LayoutReplacementForTest(projection, services, options, result));
+    DALI_TEST_EQUALS(result.placements.Count(), 1u, TEST_LOCATION);
+    return result;
+  };
+
+  const auto summarize = [](const Text::ReplacementRenderState& state, float scale = 1.0f)
+  {
+    DALI_TEST_CHECK(state.processingModel && state.placements.Count() == 1u);
+    const Text::ReplacementPlacement& placement = state.placements[0u];
+    DALI_TEST_CHECK(placement.visible && !placement.elided);
+    DALI_TEST_CHECK(placement.lineIndex < state.processingModel->mVisualModel->mLines.Count());
+    const Text::LineRun& line = state.processingModel->mVisualModel->mLines[placement.lineIndex];
+    return GeometrySummary{placement.syntheticGlyphIndex,
+                           (placement.baseline - line.ascender) / scale,
+                           line.ascender / scale,
+                           line.descender / scale,
+                           line.lineSpacing / scale,
+                           Text::GetLineHeight(line, true) / scale,
+                           placement.baseline / scale,
+                           placement.position.y / scale,
+                           placement.size / scale};
+  };
+
+  const auto checkGeometry = [](const GeometrySummary& actual, const GeometrySummary& expected)
+  {
+    DALI_TEST_EQUALS(actual.sourceGlyph, expected.sourceGlyph, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.lineTop, expected.lineTop, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.ascender, expected.ascender, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.descender, expected.descender, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.lineSpacing, expected.lineSpacing, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.lineHeight, expected.lineHeight, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.baseline, expected.baseline, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.replacementY, expected.replacementY, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.replacementSize, expected.replacementSize, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  };
+
+  const std::string retainedSourceText = "ordinary\n\xEF\xBF\xBC";
+  const std::string referenceText      = "ordinary\n\xEF\xBF\xBC\nfollowing\nhidden";
+  const std::string targetText         = "ordinary\n\xEF\xBF\xBC\nhidden";
+  const auto checkRetainedAppend = [&](const Vector2&                      replacementSize,
+                                       Text::ReplacementVerticalAlignment alignment)
+  {
+    Text::ReplacementRenderState retainedNatural = layout(retainedSourceText,
+                                                           replacementSize,
+                                                           alignment,
+                                                           Size(200.0f, 500.0f),
+                                                           false);
+    const float retainedHeight = std::ceil(retainedNatural.processingModel->mVisualModel->GetLayoutSize().height);
+    retainedNatural.Clear(services.bidirectionalSupport);
+
+    Text::ReplacementRenderState referenceNatural = layout("ordinary\n\xEF\xBF\xBC\nfollowing",
+                                                            replacementSize,
+                                                            alignment,
+                                                            Size(200.0f, 500.0f),
+                                                            false);
+    const float referenceHeight = std::ceil(referenceNatural.processingModel->mVisualModel->GetLayoutSize().height);
+    referenceNatural.Clear(services.bidirectionalSupport);
+
+    Text::ReplacementRenderState reference = layout(referenceText,
+                                                     replacementSize,
+                                                     alignment,
+                                                     Size(200.0f, referenceHeight),
+                                                     true);
+    Text::ReplacementRenderState target = layout(targetText,
+                                                  replacementSize,
+                                                  alignment,
+                                                  Size(200.0f, retainedHeight),
+                                                  true);
+    DALI_TEST_CHECK(reference.finalElision.applied);
+    DALI_TEST_CHECK(reference.placements[0u].visible && !reference.placements[0u].elided);
+    DALI_TEST_CHECK(reference.finalElision.ellipsisLineIndex > reference.placements[0u].lineIndex);
+    DALI_TEST_CHECK(target.finalElision.applied);
+    DALI_TEST_CHECK(target.placements[0u].visible && !target.placements[0u].elided);
+    Text::GlyphIndex finalReplacementGlyph = Text::FinalElisionResult::INVALID_GLYPH_INDEX;
+    DALI_TEST_CHECK(target.finalElision.FindFinalGlyphIndex(target.placements[0u].syntheticGlyphIndex,
+                                                            finalReplacementGlyph));
+    DALI_TEST_EQUALS(finalReplacementGlyph + 1u,
+                     target.finalElision.ellipsisFinalGlyphIndex,
+                     TEST_LOCATION);
+    checkGeometry(summarize(target), summarize(reference));
+    reference.Clear(services.bidirectionalSupport);
+    target.Clear(services.bidirectionalSupport);
+  };
+
+  // The reported failure: a 90x46 replacement retained by authoritative
+  // APPEND must keep the same line box and placement as a later-boundary END.
+  for(const Text::ReplacementVerticalAlignment alignment : {
+        Text::ReplacementVerticalAlignment::TEXT_BASELINE,
+        Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
+        Text::ReplacementVerticalAlignment::TEXT_CENTER})
+  {
+    checkRetainedAppend(Vector2(90.0f, 46.0f), alignment);
+  }
+
+  for(const Vector2& replacementSize : {
+        Vector2(8.0f, 8.0f),
+        Vector2(40.0f, 40.0f),
+        Vector2(90.0f, 46.0f),
+        Vector2(120.0f, 60.0f),
+        Vector2(120.0f, 120.0f)})
+  {
+    checkRetainedAppend(replacementSize, Text::ReplacementVerticalAlignment::TEXT_BOTTOM);
+  }
+
+  // A replacement that does not fit beside U+2026 is a true REMOVE. Its large
+  // box must not survive in the authoritative ellipsis line metrics.
+  Text::ReplacementRenderState removed = layout(targetText,
+                                                 Vector2(120.0f, 60.0f),
+                                                 Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
+                                                 Size(100.0f, 120.0f),
+                                                 true);
+  DALI_TEST_CHECK(removed.finalElision.applied);
+  DALI_TEST_CHECK(!removed.placements[0u].visible && removed.placements[0u].elided);
+  DALI_TEST_CHECK(!removed.finalElision.IsOriginalGlyphVisible(removed.placements[0u].syntheticGlyphIndex));
+  const Text::LineIndex removedLineIndex = FindEllipsisLine(*removed.processingModel->mVisualModel);
+  DALI_TEST_CHECK(removedLineIndex < removed.processingModel->mVisualModel->mLines.Count());
+  DALI_TEST_CHECK(Text::GetLineHeight(removed.processingModel->mVisualModel->mLines[removedLineIndex], true) < 60.0f);
+  removed.Clear(services.bidirectionalSupport);
+
+  // A replacement beyond the visible END line remains fully elided and cannot
+  // contribute metrics to that line.
+  Text::ReplacementRenderState fullyElided = layout("ordinary first line\nsecond visible line\n\xEF\xBF\xBC",
+                                                     Vector2(120.0f, 120.0f),
+                                                     Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
+                                                     Size(200.0f, 70.0f),
+                                                     true);
+  DALI_TEST_CHECK(fullyElided.finalElision.applied);
+  DALI_TEST_CHECK(!fullyElided.placements[0u].visible && fullyElided.placements[0u].elided);
+  DALI_TEST_CHECK(!fullyElided.finalElision.IsOriginalGlyphVisible(fullyElided.placements[0u].syntheticGlyphIndex));
+  fullyElided.Clear(services.bidirectionalSupport);
+
+  // Omission discards the complete candidate line. Its replacement metrics
+  // and final source visibility must therefore agree for both supported
+  // omission reasons.
+  Text::ReplacementRenderState cannotFit = layout("\xEF\xBF\xBC\nhidden",
+                                                   Vector2(40.0f, 40.0f),
+                                                   Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
+                                                   Size(2.0f, 60.0f),
+                                                   true);
+  DALI_TEST_CHECK(cannotFit.finalElision.resolved && !cannotFit.finalElision.applied);
+  DALI_TEST_EQUALS(cannotFit.finalElision.ellipsisOmissionReason,
+                   Text::FinalElisionResult::EllipsisOmissionReason::ELLIPSIS_CANNOT_FIT,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(!cannotFit.placements[0u].visible && cannotFit.placements[0u].elided);
+  DALI_TEST_CHECK(!cannotFit.finalElision.IsOriginalGlyphVisible(cannotFit.placements[0u].syntheticGlyphIndex));
+  cannotFit.Clear(services.bidirectionalSupport);
+
+  const auto layoutMultiple = [&](const std::string&          utf8,
+                                  const std::vector<Vector2>& replacementSizes,
+                                  const Size&                 contentSize,
+                                  bool                        elideText)
+  {
+    const Vector<Text::Character> text = Utf32(utf8);
+    Vector<Text::ReplacementRunSnapshot> candidates;
+    for(Text::CharacterIndex index = 0u; index < text.Count(); ++index)
+    {
+      if(text[index] != Text::ReplacementProjection::OBJECT_REPLACEMENT_CHARACTER)
+      {
+        continue;
+      }
+      DALI_TEST_CHECK(candidates.Count() < replacementSizes.size());
+      const Vector2& replacementSize = replacementSizes[candidates.Count()];
+      candidates.PushBack(Candidate(index,
+                                    1u,
+                                    replacementSize.width,
+                                    replacementSize.height,
+                                    9950u + candidates.Count()));
+      candidates[candidates.Count() - 1u].metrics.verticalAlignment =
+        Text::ReplacementVerticalAlignment::TEXT_BOTTOM;
+    }
+    DALI_TEST_EQUALS(candidates.Count(), replacementSizes.size(), TEST_LOCATION);
+
+    const Text::ReplacementProjection projection = Text::ReplacementProjection::Build(text, candidates);
+    Text::ReplacementLayoutTestOptions options;
+    options.contentSize      = contentSize;
+    options.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
+    options.lineWrapMode     = Text::LineWrapMode::CHARACTER;
+    options.elideText        = elideText;
+    options.ellipsisPosition = Text::EllipsisPosition::END;
+    options.fontPointSize    = 28u * pointsPerUnit;
+    options.fontPixelSize    = 28.0f;
+    options.relativeLineSize = -1.0f;
+    Text::ReplacementRenderState result;
+    DALI_TEST_CHECK(Text::LayoutReplacementForTest(projection, services, options, result));
+    DALI_TEST_EQUALS(result.placements.Count(), replacementSizes.size(), TEST_LOCATION);
+    return result;
+  };
+
+  const auto checkRetainedGeometry = [](const Text::ReplacementRenderState& actual,
+                                        uint32_t                            actualIndex,
+                                        const Text::ReplacementRenderState& reference,
+                                        uint32_t                            referenceIndex)
+  {
+    const Text::ReplacementPlacement& actualPlacement    = actual.placements[actualIndex];
+    const Text::ReplacementPlacement& referencePlacement = reference.placements[referenceIndex];
+    DALI_TEST_CHECK(actualPlacement.visible && !actualPlacement.elided);
+    DALI_TEST_CHECK(referencePlacement.visible && !referencePlacement.elided);
+    DALI_TEST_CHECK(actual.finalElision.IsOriginalGlyphVisible(actualPlacement.syntheticGlyphIndex));
+    DALI_TEST_CHECK(actualPlacement.lineIndex < actual.processingModel->mVisualModel->mLines.Count());
+    DALI_TEST_CHECK(referencePlacement.lineIndex < reference.processingModel->mVisualModel->mLines.Count());
+    const Text::LineRun& actualLine = actual.processingModel->mVisualModel->mLines[actualPlacement.lineIndex];
+    const Text::LineRun& referenceLine =
+      reference.processingModel->mVisualModel->mLines[referencePlacement.lineIndex];
+    DALI_TEST_EQUALS(actualLine.ascender, referenceLine.ascender, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actualLine.descender, referenceLine.descender, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actualLine.lineSpacing, referenceLine.lineSpacing, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(Text::GetLineHeight(actualLine, true),
+                     Text::GetLineHeight(referenceLine, true),
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(actualPlacement.baseline,
+                     referencePlacement.baseline,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(actualPlacement.position.y,
+                     referencePlacement.position.y,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(actualPlacement.size, referencePlacement.size, TEST_LOCATION);
+  };
+
+  // Multiple replacements use the same authoritative source boundary for
+  // visibility and line-metric composition. Cover all-retained APPEND,
+  // retained-prefix REMOVE, and true removal of the whole replacement set.
+  const std::vector<Vector2> multipleSizes = {Vector2(40.0f, 40.0f), Vector2(55.0f, 46.0f)};
+  Text::ReplacementRenderState multipleReference = layoutMultiple("ordinary\nA \xEF\xBF\xBC \xEF\xBF\xBC",
+                                                                   multipleSizes,
+                                                                   Size(240.0f, 500.0f),
+                                                                   false);
+  Text::ReplacementRenderState multipleAppend = layoutMultiple("ordinary\nA \xEF\xBF\xBC \xEF\xBF\xBC\nhidden continuation",
+                                                                multipleSizes,
+                                                                Size(240.0f, 100.0f),
+                                                                true);
+  DALI_TEST_CHECK(multipleAppend.finalElision.applied);
+  checkRetainedGeometry(multipleAppend, 0u, multipleReference, 0u);
+  checkRetainedGeometry(multipleAppend, 1u, multipleReference, 1u);
+  multipleReference.Clear(services.bidirectionalSupport);
+  multipleAppend.Clear(services.bidirectionalSupport);
+
+  Text::ReplacementRenderState prefixReference = layoutMultiple("ordinary\nA \xEF\xBF\xBC",
+                                                                 {multipleSizes[0u]},
+                                                                 Size(125.0f, 500.0f),
+                                                                 false);
+  Text::ReplacementRenderState prefixRetained = layoutMultiple("ordinary\nA \xEF\xBF\xBC \xEF\xBF\xBC\nhidden continuation",
+                                                                multipleSizes,
+                                                                Size(125.0f, 100.0f),
+                                                                true);
+  DALI_TEST_CHECK(prefixRetained.finalElision.applied);
+  checkRetainedGeometry(prefixRetained, 0u, prefixReference, 0u);
+  DALI_TEST_CHECK(!prefixRetained.placements[1u].visible && prefixRetained.placements[1u].elided);
+  DALI_TEST_CHECK(!prefixRetained.finalElision.IsOriginalGlyphVisible(
+    prefixRetained.placements[1u].syntheticGlyphIndex));
+  prefixReference.Clear(services.bidirectionalSupport);
+  prefixRetained.Clear(services.bidirectionalSupport);
+
+  Text::ReplacementRenderState allRemoved = layoutMultiple("ordinary\n\xEF\xBF\xBC \xEF\xBF\xBC\nhidden continuation",
+                                                            {Vector2(50.0f, 42.0f), Vector2(55.0f, 46.0f)},
+                                                            Size(48.0f, 100.0f),
+                                                            true);
+  DALI_TEST_CHECK(allRemoved.finalElision.applied);
+  for(const Text::ReplacementPlacement& placement : allRemoved.placements)
+  {
+    DALI_TEST_CHECK(!placement.visible && placement.elided);
+    DALI_TEST_CHECK(!allRemoved.finalElision.IsOriginalGlyphVisible(placement.syntheticGlyphIndex));
+  }
+  const Text::LineIndex allRemovedLineIndex = FindEllipsisLine(*allRemoved.processingModel->mVisualModel);
+  DALI_TEST_CHECK(allRemovedLineIndex < allRemoved.processingModel->mVisualModel->mLines.Count());
+  DALI_TEST_CHECK(Text::GetLineHeight(allRemoved.processingModel->mVisualModel->mLines[allRemovedLineIndex], true) <
+                  42.0f);
+  allRemoved.Clear(services.bidirectionalSupport);
+
+  const auto captureProduction = [&](const Text::ReplacementRenderState& state, float scale)
+  {
+    DALI_TEST_CHECK(state.finalElision.applied);
+    return summarize(state, scale);
+  };
+
+  Text::ReplacementSourceSnapshot source;
+  source.runs.PushBack(Candidate(9u, 1u, 90.0f, 46.0f, 9901u));
+  source.runs[0u].metrics.verticalAlignment = Text::ReplacementVerticalAlignment::TEXT_BOTTOM;
+  source.hasValidReplacementSource          = true;
+
+  const auto layoutSyncProduction = [&](const std::string& text, float height, bool elideText)
+  {
+    Text::ControllerPtr     controller = Text::Controller::New();
+    Text::Controller::Impl& impl       = Text::Controller::Impl::GetImplementation(*controller.Get());
+    controller->SetText(text);
+    controller->SetDefaultFontSize(28.0f, Text::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetLineWrapMode(Text::LineWrapMode::CHARACTER);
+    controller->SetRelativeLineSize(-1.0f);
+    controller->SetTextElideEnabled(elideText);
+    controller->SetEllipsisPosition(Text::EllipsisPosition::END);
+    impl.GetOrCreateReplacementSourceSnapshot() = source;
+    controller->Relayout(Size(200.0f, height));
+    return std::move(impl.GetOrCreateReplacementRenderState());
+  };
+
+  Text::ReplacementRenderState syncNatural = layoutSyncProduction(retainedSourceText, 500.0f, false);
+  const float syncRetainedHeight = std::ceil(syncNatural.processingModel->mVisualModel->GetLayoutSize().height);
+  syncNatural.Clear(services.bidirectionalSupport);
+  const float retained90x46Height = syncRetainedHeight + 1.0f;
+  Text::ReplacementRenderState syncState = layoutSyncProduction(targetText, retained90x46Height, true);
+  DALI_TEST_CHECK(syncState.placements[0u].visible && !syncState.placements[0u].elided);
+  const GeometrySummary sync = captureProduction(syncState, 1.0f);
+
+  uint32_t horizontalDpi = 0u;
+  uint32_t verticalDpi   = 0u;
+  services.fontClient.GetDpi(horizontalDpi, verticalDpi);
+  const auto renderAsync = [&](float renderScale)
+  {
+    Text::AsyncTextParameters parameters;
+    parameters.text                        = targetText;
+    parameters.fontSize                    = 28.0f * 72.0f / static_cast<float>(horizontalDpi);
+    parameters.textWidth                   = 200.0f;
+    parameters.textHeight                  = retained90x46Height;
+    parameters.originWidth                 = parameters.textWidth;
+    parameters.originHeight                = parameters.textHeight;
+    parameters.isMultiLine                 = true;
+    parameters.lineWrapMode                = Text::LineWrapMode::CHARACTER;
+    parameters.relativeLineSize            = -1.0f;
+    parameters.ellipsis                    = true;
+    parameters.ellipsisPosition            = Text::EllipsisPosition::END;
+    parameters.renderScale                 = renderScale;
+    parameters.replacementSourceSnapshot   = source;
+    parameters.replacementLayoutGeneration = static_cast<uint64_t>(renderScale * 100.0f);
+
+    Text::AsyncTextLoader loader = Text::AsyncTextLoader::New();
+    bool                  cached = false;
+    Size                  naturalSize = Size::ZERO;
+    if(renderScale > 1.0f)
+    {
+      naturalSize = loader.SetupRenderScale(parameters, cached);
+    }
+    loader.RenderText(parameters, cached, naturalSize);
+    const Text::ReplacementRenderState* state = Text::GetImplementation(loader).GetReplacementRenderState();
+    DALI_TEST_CHECK(state);
+    DALI_TEST_CHECK(state->placements[0u].visible && !state->placements[0u].elided);
+    return captureProduction(*state, renderScale);
+  };
+
+  const GeometrySummary asyncScaleOne = renderAsync(1.0f);
+  const GeometrySummary asyncScaleTwo = renderAsync(2.0f);
+  checkGeometry(asyncScaleOne, sync);
+  checkGeometry(asyncScaleTwo, asyncScaleOne);
+  syncState.Clear(services.bidirectionalSupport);
+
+  END_TEST;
+}
