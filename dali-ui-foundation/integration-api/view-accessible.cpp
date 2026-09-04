@@ -595,15 +595,17 @@ bool ViewAccessible::GrabHighlight()
   ScrollToSelf();
   self.Add(highlight);
   SetCurrentlyHighlightedActor(self);
-  EmitHighlighted(true);
   RegisterPositionPropertyNotification();
   RegisterPropertySetSignal();
 
+  // Let the application update accessibility metadata before AT-SPI clients
+  // are notified that this object became highlighted.
   auto view = Dali::Ui::View::DownCast(self);
   if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Empty())
   {
     GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(view, true);
   }
+  EmitHighlighted(true);
 
   mHighlightOverlay.UpdateOverlay(highlight);
 
@@ -625,12 +627,13 @@ bool ViewAccessible::ClearHighlight()
     self.Remove(mCurrentHighlightActor.GetHandle());
     mCurrentHighlightActor = {};
     SetCurrentlyHighlightedActor({});
-    EmitHighlighted(false);
+    // Keep the application callback ahead of the matching AT-SPI notification.
     auto view = Dali::Ui::View::DownCast(self);
     if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Empty())
     {
       GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(view, false);
     }
+    EmitHighlighted(false);
     mHighlightOverlay.HideOverlay();
     return true;
   }
