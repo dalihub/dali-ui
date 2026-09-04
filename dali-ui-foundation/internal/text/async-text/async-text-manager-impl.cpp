@@ -247,7 +247,7 @@ uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoad
   auto task =
     new Dali::Ui::Internal::TextLoadingTask(mTaskId, parameters, MakeCallback(this, &AsyncTextManager::LoadComplete));
 
-  LoadElement element(task, observer, parameters);
+  LoadElement element(task, observer);
 
   if(observer)
   {

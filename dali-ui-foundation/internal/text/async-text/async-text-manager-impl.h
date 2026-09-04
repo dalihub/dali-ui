@@ -109,22 +109,18 @@ private:
   {
     LoadElement()
     : mTask(),
-      mObserver(nullptr),
-      mParameters()
+      mObserver(nullptr)
     {
     }
 
-    LoadElement(Ui::Internal::TextLoadingTaskPtr task, TextLoadObserver* observer,
-                const AsyncTextParameters& parameters)
+    LoadElement(Ui::Internal::TextLoadingTaskPtr task, TextLoadObserver* observer)
     : mTask(task),
-      mObserver(observer),
-      mParameters(parameters)
+      mObserver(observer)
     {
     }
 
-    Ui::Internal::TextLoadingTaskPtr mTask;       ///< Task.
-    TextLoadObserver*                mObserver;   ///< Observer of text load.
-    AsyncTextParameters              mParameters; ///< Text parameters to load.
+    Ui::Internal::TextLoadingTaskPtr mTask;     ///< Task.
+    TextLoadObserver*                mObserver; ///< Observer of text load.
   };
 
   /**
