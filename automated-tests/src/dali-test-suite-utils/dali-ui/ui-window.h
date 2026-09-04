@@ -81,6 +81,7 @@ public:
   void                                       Add(Dali::Actor actor);
   void                                       Remove(Dali::Actor actor);
   Dali::Layer                                GetRootLayer() const;
+  Dali::Layer                                 GetOverlayLayer();
   void                                       SetBackgroundColor(const Vector4& color);
   Vector4                                    GetBackgroundColor() const;
   void                                       Raise();

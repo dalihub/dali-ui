@@ -267,6 +267,11 @@ Dali::Layer Window::GetRootLayer() const
   return GetImplementation(*this).GetRootLayer();
 }
 
+Dali::Layer Window::GetOverlayLayer()
+{
+  return GetImplementation(*this).GetScene().GetOverlayLayer();
+}
+
 void Window::SetBackgroundColor(const Vector4& color)
 {
   GetImplementation(*this).SetBackgroundColor(color);
