@@ -17,15 +17,16 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <string>
 #include <vector>
 
-#include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
-#include <test-gesture-generator.h>
+#include <dali.h>
 #include <dali/integration-api/events/hover-event-integ.h>
 #include <dali/integration-api/events/key-event-integ.h>
 #include <dali/integration-api/events/touch-event-integ.h>
+#include <test-gesture-generator.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -54,9 +55,9 @@ struct ClickedSignalData
     event    = InputEvent();
   }
 
-  bool called;
-  bool consumed;
-  View view;
+  bool       called;
+  bool       consumed;
+  View       view;
   InputEvent event;
 };
 
@@ -95,9 +96,9 @@ struct PressedChangedSignalData
     event   = InputEvent();
   }
 
-  bool called;
-  bool pressed;
-  View view;
+  bool       called;
+  bool       pressed;
+  View       view;
   InputEvent event;
 };
 
@@ -135,9 +136,9 @@ struct HoveredChangedSignalData
     event   = InputEvent();
   }
 
-  bool called;
-  bool hovered;
-  View view;
+  bool       called;
+  bool       hovered;
+  View       view;
   InputEvent event;
 };
 
@@ -150,10 +151,10 @@ struct HoveredChangedSignalFunctor
 
   void operator()(View view, bool hovered, InputEvent event)
   {
-    signalData.called = true;
+    signalData.called  = true;
     signalData.hovered = hovered;
-    signalData.view = view;
-    signalData.event = event;
+    signalData.view    = view;
+    signalData.event   = event;
   }
 
   HoveredChangedSignalData& signalData;
@@ -263,8 +264,8 @@ void utc_dali_interactivetrait_cleanup(void)
 int UtcDaliInteractiveTraitDownCastN(void)
 {
   UiTestApplication application;
-  BaseHandle     handle;
-  InteractiveTrait downcast = InteractiveTrait::DownCast(handle);
+  BaseHandle        handle;
+  InteractiveTrait  downcast = InteractiveTrait::DownCast(handle);
   DALI_TEST_CHECK(!downcast);
   END_TEST;
 }
@@ -276,7 +277,7 @@ int UtcDaliInteractiveTraitDownCastN(void)
 int UtcDaliViewAsInteractiveP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   InteractiveTrait result = view.AsInteractive();
   DALI_TEST_CHECK(result);
@@ -288,9 +289,9 @@ int UtcDaliViewAsInteractiveP(void)
 int UtcDaliViewAsInteractiveWithConfigureP(void)
 {
   UiTestApplication application;
-  bool configureCalled = false;
+  bool              configureCalled = false;
 
-  View view = View::New();
+  View             view            = View::New();
   InteractiveTrait configuredTrait = view.AsInteractive();
   configureCalled                  = true;
   configuredTrait.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
@@ -308,7 +309,7 @@ int UtcDaliViewAsInteractiveWithConfigureP(void)
 int UtcDaliViewAsInteractiveIdempotentP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   view.AsInteractive();
   InteractiveTrait first = view.AsInteractive();
@@ -323,7 +324,7 @@ int UtcDaliViewAsInteractiveIdempotentP(void)
 int UtcDaliViewIsInteractiveWithoutAttachN(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   DALI_TEST_CHECK(!view.IsInteractive());
   END_TEST;
@@ -332,7 +333,7 @@ int UtcDaliViewIsInteractiveWithoutAttachN(void)
 int UtcDaliViewEnsureInteractiveTraitP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
 
   InteractiveTrait clickable = view.AsInteractive();
   DALI_TEST_CHECK(clickable);
@@ -370,7 +371,7 @@ int UtcDaliInteractiveTraitLongPressEnabledP(void)
 int UtcDaliInteractiveTraitTapClickedSignalP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
 
   ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
@@ -387,7 +388,7 @@ int UtcDaliInteractiveTraitTapClickedSignalP(void)
 int UtcDaliInteractiveTraitTapOutsideN(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
 
   ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
@@ -403,7 +404,7 @@ int UtcDaliInteractiveTraitTapOutsideN(void)
 int UtcDaliInteractiveTraitSetClickableFalseBlocksTapP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
   view.AsInteractive().SetClickable(false);
 
   ClickedSignalData    data;
@@ -639,16 +640,17 @@ int UtcDaliInteractiveTraitAccessibilityActivateP(void)
   View              view = CreateInteractiveView(application);
   view.SetFocusable(true);
 
-  ClickedSignalData data;
-  ClickedSignalFunctor functor(data);
-  PressedChangedSignalData pressedData;
+  ClickedSignalData           data;
+  ClickedSignalFunctor        functor(data);
+  PressedChangedSignalData    pressedData;
   PressedChangedSignalFunctor pressedFunctor(pressedData);
-  InteractiveTrait interactive = view.AsInteractive();
+  InteractiveTrait            interactive = view.AsInteractive();
   interactive.ClickedSignal().Connect(&application, functor);
   interactive.PressedChangedSignal().Connect(&application, pressedFunctor);
 
   InputEvent focusCause;
-  view.StateChangedSignal().Connect(&application, [&](View, const StateEvent& event) {
+  view.StateChangedSignal().Connect(&application, [&](View, const StateEvent& event)
+  {
     if(ViewState::FOCUSED.WasAdded(event.GetPrev(), event.GetCurrent()))
     {
       focusCause = event.GetCause();
@@ -673,12 +675,12 @@ int UtcDaliInteractiveTraitAccessibilityActivateP(void)
 int UtcDaliInteractiveViewAccessibilityActivateP(void)
 {
   UiTestApplication application;
-  InteractiveView view = InteractiveView::New();
+  InteractiveView   view = InteractiveView::New();
   application.GetScene().Add(view);
   application.SendNotification();
   application.Render();
 
-  ClickedSignalData data;
+  ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
   view.ClickedSignal().Connect(&application, functor);
 
@@ -693,11 +695,11 @@ int UtcDaliInteractiveViewAccessibilityActivateP(void)
 int UtcDaliInteractiveTraitAccessibilityActivateRespectsEnabledAndClickableP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
 
-  ClickedSignalData data;
+  ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
-  InteractiveTrait    interactive = view.AsInteractive();
+  InteractiveTrait     interactive = view.AsInteractive();
   interactive.ClickedSignal().Connect(&application, functor);
 
   Property::Map attributes;
@@ -722,7 +724,7 @@ int UtcDaliInteractiveTraitAccessibilityActivateRespectsEnabledAndClickableP(voi
 int UtcDaliViewAccessibilityActivateRetainsDefaultFocusBehaviorP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
   view.SetFocusable(true);
   application.GetScene().Add(view);
   application.SendNotification();
@@ -741,7 +743,7 @@ int UtcDaliViewAccessibilityActivateRetainsDefaultFocusBehaviorP(void)
 int UtcDaliInteractiveTraitPressedChangedSignalP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
 
   PressedChangedSignalData    data;
   PressedChangedSignalFunctor functor(data);
@@ -773,21 +775,24 @@ int UtcDaliInteractiveTraitTouchHookRunsBeforeTouchSignalP(void)
   std::vector<Dali::String> dispatchOrder;
   view.AsInteractive().PressedChangedSignal().Connect(
     &application,
-    [&dispatchOrder](View, bool pressed, InputEvent) {
-      dispatchOrder.push_back(pressed ? "pressed" : "released");
-    });
+    [&dispatchOrder](View, bool pressed, InputEvent)
+  {
+    dispatchOrder.push_back(pressed ? "pressed" : "released");
+  });
   view.TouchEventSignal().Connect(
     &application,
-    [&dispatchOrder, view](Actor, const TouchEvent& event) mutable {
-      DALI_TEST_EQUALS(view.AsInteractive().IsPressed(), event.GetState(0) == PointState::STARTED, TEST_LOCATION);
-      dispatchOrder.push_back("touch");
-      return true;
-    });
+    [&dispatchOrder, view](Actor, const TouchEvent& event) mutable
+  {
+    DALI_TEST_EQUALS(view.AsInteractive().IsPressed(), event.GetState(0) == PointState::STARTED, TEST_LOCATION);
+    dispatchOrder.push_back("touch");
+    return true;
+  });
   view.AsInteractive().ClickedSignal().Connect(
     &application,
-    [&dispatchOrder](View, InputEvent) {
-      dispatchOrder.push_back("clicked");
-    });
+    [&dispatchOrder](View, InputEvent)
+  {
+    dispatchOrder.push_back("clicked");
+  });
 
   Dali::Integration::TouchEvent touchDown;
   Dali::Integration::Point      point;
@@ -1015,7 +1020,7 @@ int UtcDaliInteractiveTraitHoveredChangedSignalP(void)
 int UtcDaliInteractiveTraitHoverMovesBetweenViewsP(void)
 {
   UiTestApplication application;
-  View              firstView = View::New();
+  View              firstView  = View::New();
   View              secondView = View::New();
 
   firstView.SetRequestedWidth(100.0f);
@@ -1060,10 +1065,229 @@ int UtcDaliInteractiveTraitHoverMovesBetweenViewsP(void)
   END_TEST;
 }
 
+int UtcDaliInteractiveTraitHoverMovesAcrossOverlappingSiblingsP(void)
+{
+  UiTestApplication application;
+  View              viewA = View::New();
+  View              viewB = View::New();
+  View              viewC = View::New();
+
+  viewA.SetRequestedWidth(150.0f);
+  viewA.SetRequestedHeight(100.0f);
+  viewA.SetProperty(Actor::Property::SIZE, Vector2(150.0f, 100.0f));
+  viewA.SetPivot(Pivot::TOP_LEFT);
+  viewA.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  viewA.SetLayoutMode(LayoutMode::STANDALONE);
+  viewA.SetRequestedX(0.0f);
+  viewA.SetRequestedY(0.0f);
+
+  viewB.SetRequestedWidth(150.0f);
+  viewB.SetRequestedHeight(100.0f);
+  viewB.SetProperty(Actor::Property::SIZE, Vector2(150.0f, 100.0f));
+  viewB.SetPivot(Pivot::TOP_LEFT);
+  viewB.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  viewB.SetLayoutMode(LayoutMode::STANDALONE);
+  viewB.SetRequestedX(75.0f);
+  viewB.SetRequestedY(0.0f);
+
+  viewC.SetRequestedWidth(150.0f);
+  viewC.SetRequestedHeight(100.0f);
+  viewC.SetProperty(Actor::Property::SIZE, Vector2(150.0f, 100.0f));
+  viewC.SetPivot(Pivot::TOP_LEFT);
+  viewC.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  viewC.SetLayoutMode(LayoutMode::STANDALONE);
+  viewC.SetRequestedX(150.0f);
+  viewC.SetRequestedY(0.0f);
+
+  // Later siblings are visually in front, so the target order is C, B, A.
+  application.GetScene().Add(viewA);
+  application.GetScene().Add(viewB);
+  application.GetScene().Add(viewC);
+
+  InteractiveTrait         interactiveA = viewA.AsInteractive();
+  InteractiveTrait         interactiveB = viewB.AsInteractive();
+  InteractiveTrait         interactiveC = viewC.AsInteractive();
+  std::vector<std::string> trace;
+
+  interactiveA.HoveredChangedSignal().Connect(&application, [&trace](View, bool hovered, InputEvent)
+  {
+    trace.push_back(hovered ? "A ON" : "A OFF");
+  });
+  interactiveB.HoveredChangedSignal().Connect(&application, [&trace](View, bool hovered, InputEvent)
+  {
+    trace.push_back(hovered ? "B ON" : "B OFF");
+  });
+  interactiveC.HoveredChangedSignal().Connect(&application, [&trace](View, bool hovered, InputEvent)
+  {
+    trace.push_back(hovered ? "C ON" : "C OFF");
+  });
+
+  application.SendNotification();
+  application.Render();
+
+  ProcessHover(application, PointState::STARTED, Vector2(25.0f, 50.0f), 100u);
+  DALI_TEST_CHECK(interactiveA.IsHovered());
+  DALI_TEST_CHECK(!interactiveB.IsHovered());
+  DALI_TEST_CHECK(!interactiveC.IsHovered());
+  DALI_TEST_EQUALS(trace.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[0], std::string("A ON"), TEST_LOCATION);
+  trace.clear();
+
+  // InteractiveView intrinsically consumes hover. B enters first and the previously
+  // active A leaves after the current candidate dispatch finishes.
+  ProcessHover(application, PointState::MOTION, Vector2(100.0f, 50.0f), 120u);
+  DALI_TEST_CHECK(!interactiveA.IsHovered());
+  DALI_TEST_CHECK(interactiveB.IsHovered());
+  DALI_TEST_CHECK(!interactiveC.IsHovered());
+  DALI_TEST_EQUALS(trace.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[0], std::string("B ON"), TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[1], std::string("A OFF"), TEST_LOCATION);
+  trace.clear();
+
+  // C consumes intrinsically, so B is no longer in the visited prefix.
+  ProcessHover(application, PointState::MOTION, Vector2(175.0f, 50.0f), 140u);
+  DALI_TEST_CHECK(!interactiveA.IsHovered());
+  DALI_TEST_CHECK(!interactiveB.IsHovered());
+  DALI_TEST_CHECK(interactiveC.IsHovered());
+  DALI_TEST_EQUALS(trace.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[0], std::string("C ON"), TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[1], std::string("B OFF"), TEST_LOCATION);
+  trace.clear();
+
+  // Expose B, then A again. No unrelated sibling remains hovered.
+  ProcessHover(application, PointState::MOTION, Vector2(100.0f, 50.0f), 160u);
+  DALI_TEST_CHECK(!interactiveA.IsHovered());
+  DALI_TEST_CHECK(interactiveB.IsHovered());
+  DALI_TEST_CHECK(!interactiveC.IsHovered());
+  DALI_TEST_EQUALS(trace.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[0], std::string("B ON"), TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[1], std::string("C OFF"), TEST_LOCATION);
+  trace.clear();
+
+  ProcessHover(application, PointState::MOTION, Vector2(25.0f, 50.0f), 180u);
+  DALI_TEST_CHECK(interactiveA.IsHovered());
+  DALI_TEST_CHECK(!interactiveB.IsHovered());
+  DALI_TEST_CHECK(!interactiveC.IsHovered());
+  DALI_TEST_EQUALS(trace.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[0], std::string("A ON"), TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[1], std::string("B OFF"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGeometryHoverFallsThroughOverlappingSiblingsP(void)
+{
+  UiTestApplication application;
+  View              viewA = View::New();
+  View              viewB = View::New();
+
+  viewA.SetRequestedWidth(150.0f);
+  viewA.SetRequestedHeight(100.0f);
+  viewA.SetProperty(Actor::Property::SIZE, Vector2(150.0f, 100.0f));
+  viewA.SetPivot(Pivot::TOP_LEFT);
+  viewA.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  viewA.SetLayoutMode(LayoutMode::STANDALONE);
+
+  viewB.SetRequestedWidth(150.0f);
+  viewB.SetRequestedHeight(100.0f);
+  viewB.SetProperty(Actor::Property::SIZE, Vector2(150.0f, 100.0f));
+  viewB.SetPivot(Pivot::TOP_LEFT);
+  viewB.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  viewB.SetLayoutMode(LayoutMode::STANDALONE);
+  viewB.SetRequestedX(75.0f);
+
+  application.GetScene().Add(viewA);
+  application.GetScene().Add(viewB);
+
+  bool                     hoveredA = false;
+  bool                     hoveredB = false;
+  bool                     consumeB = false;
+  std::vector<std::string> trace;
+
+  auto updateHover = [](bool& hovered, PointState::Type state)
+  {
+    if(state == PointState::STARTED)
+    {
+      hovered = true;
+    }
+    else if(state == PointState::LEAVE || state == PointState::FINISHED || state == PointState::INTERRUPTED)
+    {
+      hovered = false;
+    }
+  };
+  auto pointStateName = [](PointState::Type state)
+  {
+    switch(state)
+    {
+      case PointState::STARTED:
+        return "STARTED";
+      case PointState::MOTION:
+        return "MOTION";
+      case PointState::LEAVE:
+        return "LEAVE";
+      case PointState::FINISHED:
+        return "FINISHED";
+      case PointState::INTERRUPTED:
+        return "INTERRUPTED";
+      case PointState::STATIONARY:
+        return "STATIONARY";
+    }
+    return "UNKNOWN";
+  };
+
+  viewA.HoverEventSignal().Connect(&application, [&](Actor, HoverEvent event)
+  {
+    updateHover(hoveredA, event.GetState(0));
+    trace.push_back(std::string("A ") + pointStateName(event.GetState(0)));
+    return true;
+  });
+  viewB.HoverEventSignal().Connect(&application, [&](Actor, HoverEvent event)
+  {
+    updateHover(hoveredB, event.GetState(0));
+    trace.push_back(std::string("B ") + pointStateName(event.GetState(0)));
+    return consumeB;
+  });
+
+  application.SendNotification();
+  application.Render();
+
+  ProcessHover(application, PointState::STARTED, Vector2(25.0f, 50.0f), 100u);
+  DALI_TEST_CHECK(hoveredA);
+  DALI_TEST_CHECK(!hoveredB);
+  trace.clear();
+
+  ProcessHover(application, PointState::MOTION, Vector2(100.0f, 50.0f), 120u);
+  DALI_TEST_CHECK(hoveredA);
+  DALI_TEST_CHECK(hoveredB);
+  DALI_TEST_EQUALS(trace.size(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[0], std::string("B STARTED"), TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[1], std::string("B MOTION"), TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[2], std::string("A MOTION"), TEST_LOCATION);
+  trace.clear();
+
+  consumeB = true;
+  ProcessHover(application, PointState::MOTION, Vector2(101.0f, 50.0f), 140u);
+  DALI_TEST_CHECK(!hoveredA);
+  DALI_TEST_CHECK(hoveredB);
+  DALI_TEST_EQUALS(trace.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[0], std::string("B MOTION"), TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[1], std::string("A LEAVE"), TEST_LOCATION);
+  trace.clear();
+
+  consumeB = false;
+  ProcessHover(application, PointState::MOTION, Vector2(102.0f, 50.0f), 160u);
+  DALI_TEST_CHECK(hoveredA);
+  DALI_TEST_CHECK(hoveredB);
+  DALI_TEST_EQUALS(trace.size(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[0], std::string("B MOTION"), TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[1], std::string("A STARTED"), TEST_LOCATION);
+  DALI_TEST_EQUALS(trace[2], std::string("A MOTION"), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliInteractiveTraitHoveredCombinesWithPressedP(void)
 {
   UiTestApplication application;
-  View              view = CreateInteractiveView(application);
+  View              view        = CreateInteractiveView(application);
   InteractiveTrait  interactive = view.AsInteractive();
 
   ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
@@ -1079,44 +1303,48 @@ int UtcDaliInteractiveTraitHoveredCombinesWithPressedP(void)
 int UtcDaliInteractiveTraitHoveredTransitionsToPressedForSameDeviceP(void)
 {
   UiTestApplication application;
-  View              view = CreateInteractiveView(application);
+  View              view        = CreateInteractiveView(application);
   InteractiveTrait  interactive = view.AsInteractive();
 
   ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u, 5);
 
-  uint32_t stateChangedCount = 0u;
-  ViewState previousState;
-  ViewState currentState;
-  InputEvent stateCause;
-  bool sawPressedRelease = false;
+  uint32_t                 stateChangedCount = 0u;
+  ViewState                previousState;
+  ViewState                currentState;
+  InputEvent               stateCause;
+  bool                     sawPressedRelease = false;
   std::vector<std::string> signalOrder;
 
   HoveredChangedSignalData hoveredData;
   PressedChangedSignalData pressedData;
 
-  view.StateChangedSignal().Connect(&application, [&](View, const StateEvent& event) {
+  view.StateChangedSignal().Connect(&application, [&](View, const StateEvent& event)
+  {
     ++stateChangedCount;
-    previousState = event.GetPrev();
-    currentState = event.GetCurrent();
-    stateCause = event.GetCause();
+    previousState     = event.GetPrev();
+    currentState      = event.GetCurrent();
+    stateCause        = event.GetCause();
     sawPressedRelease = sawPressedRelease ||
                         (event.GetPrev().Contains(ViewState::PRESSED) &&
                          !event.GetCurrent().Contains(ViewState::PRESSED));
     signalOrder.push_back("state");
   });
-  interactive.HoveredChangedSignal().Connect(&application, [&](View, bool hovered, InputEvent event) {
-    hoveredData.called = true;
+  interactive.HoveredChangedSignal().Connect(&application, [&](View, bool hovered, InputEvent event)
+  {
+    hoveredData.called  = true;
     hoveredData.hovered = hovered;
-    hoveredData.event = event;
+    hoveredData.event   = event;
     signalOrder.push_back("hovered");
   });
-  interactive.PressedChangedSignal().Connect(&application, [&](View, bool pressed, InputEvent event) {
-    pressedData.called = true;
+  interactive.PressedChangedSignal().Connect(&application, [&](View, bool pressed, InputEvent event)
+  {
+    pressedData.called  = true;
     pressedData.pressed = pressed;
-    pressedData.event = event;
+    pressedData.event   = event;
     signalOrder.push_back("pressed");
   });
-  view.TouchEventSignal().Connect(&application, [&](Actor, TouchEvent) {
+  view.TouchEventSignal().Connect(&application, [&](Actor, TouchEvent)
+  {
     signalOrder.push_back("touch");
     return false;
   });
@@ -1168,7 +1396,7 @@ int UtcDaliInteractiveTraitHoveredTransitionsToPressedForSameDeviceP(void)
 int UtcDaliInteractiveTraitClickableFalseAllowsHoveredP(void)
 {
   UiTestApplication application;
-  View              view = CreateInteractiveView(application);
+  View              view        = CreateInteractiveView(application);
   InteractiveTrait  interactive = view.AsInteractive();
   interactive.SetClickable(false);
 
@@ -1182,7 +1410,7 @@ int UtcDaliInteractiveTraitClickableFalseAllowsHoveredP(void)
 int UtcDaliInteractiveTraitPseudoDisabledBlocksHoveredP(void)
 {
   UiTestApplication application;
-  View              view = CreateInteractiveView(application);
+  View              view        = CreateInteractiveView(application);
   InteractiveTrait  interactive = view.AsInteractive();
   interactive.SetPseudoDisabled(true);
 
@@ -1196,7 +1424,7 @@ int UtcDaliInteractiveTraitPseudoDisabledBlocksHoveredP(void)
 int UtcDaliInteractiveTraitDisabledBlocksHoveredP(void)
 {
   UiTestApplication application;
-  View              view = CreateInteractiveView(application);
+  View              view        = CreateInteractiveView(application);
   InteractiveTrait  interactive = view.AsInteractive();
   view.SetEnabled(false);
 
@@ -1284,7 +1512,7 @@ int UtcDaliInteractiveTraitParentSensitiveFalseClearsHoveredP(void)
 {
   UiTestApplication application;
   View              parent = View::New();
-  View              view = View::New();
+  View              view   = View::New();
 
   parent.SetRequestedWidth(100.0f);
   parent.SetRequestedHeight(100.0f);
@@ -1326,7 +1554,7 @@ int UtcDaliInteractiveTraitParentSensitiveFalseClearsHoveredP(void)
 int UtcDaliInteractiveTraitKeyEventClickedOnReleaseP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
   view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
 
   ClickedSignalData    data;
@@ -1366,23 +1594,26 @@ int UtcDaliInteractiveTraitKeyDispatchOrderAndConsumptionP(void)
 
   view.AsInteractive().PressedChangedSignal().Connect(
     &application,
-    [&dispatchOrder](View, bool pressed, InputEvent) {
-      dispatchOrder.push_back(pressed ? "pressed" : "released");
-    });
+    [&dispatchOrder](View, bool pressed, InputEvent)
+  {
+    dispatchOrder.push_back(pressed ? "pressed" : "released");
+  });
   view.KeyEventSignal().Connect(
     &application,
-    [&dispatchOrder, &clicked, view](View, const KeyEvent& event) mutable {
-      DALI_TEST_EQUALS(view.AsInteractive().IsPressed(), event.GetState() == KeyEvent::State::DOWN, TEST_LOCATION);
-      DALI_TEST_CHECK(!clicked);
-      dispatchOrder.push_back("key");
-      return true;
-    });
+    [&dispatchOrder, &clicked, view](View, const KeyEvent& event) mutable
+  {
+    DALI_TEST_EQUALS(view.AsInteractive().IsPressed(), event.GetState() == KeyEvent::State::DOWN, TEST_LOCATION);
+    DALI_TEST_CHECK(!clicked);
+    dispatchOrder.push_back("key");
+    return true;
+  });
   view.AsInteractive().ClickedSignal().Connect(
     &application,
-    [&dispatchOrder, &clicked](View, InputEvent) {
-      clicked = true;
-      dispatchOrder.push_back("clicked");
-    });
+    [&dispatchOrder, &clicked](View, InputEvent)
+  {
+    clicked = true;
+    dispatchOrder.push_back("clicked");
+  });
 
   FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
@@ -1415,7 +1646,7 @@ int UtcDaliInteractiveTraitKeyDispatchOrderAndConsumptionP(void)
 int UtcDaliInteractiveTraitKeyEventClickedOnPressP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
   view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
 
   ClickedSignalData    data;
@@ -1441,9 +1672,9 @@ int UtcDaliInteractiveTraitKeyEventOnPressPolicyReleasesPressedStateP(void)
   View              view = CreateInteractiveView(application);
   view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
 
-  ClickedSignalData        clickedData;
-  ClickedSignalFunctor     clickedFunctor(clickedData);
-  PressedChangedSignalData pressedData;
+  ClickedSignalData           clickedData;
+  ClickedSignalFunctor        clickedFunctor(clickedData);
+  PressedChangedSignalData    pressedData;
   PressedChangedSignalFunctor pressedFunctor(pressedData);
   view.AsInteractive().ClickedSignal().Connect(&application, clickedFunctor);
   view.AsInteractive().PressedChangedSignal().Connect(&application, pressedFunctor);
@@ -1476,7 +1707,7 @@ int UtcDaliInteractiveTraitKeyEventOnPressPolicyReleasesPressedStateP(void)
 int UtcDaliInteractiveTraitKeyEventDisabledPolicyP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
   view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::DISABLED);
 
   ClickedSignalData    data;
@@ -1556,7 +1787,7 @@ int UtcDaliInteractiveTraitLongPressEnabledControlsKeyP(void)
 int UtcDaliInteractiveTraitLongPressedSignalP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
 
   LongPressedSignalData    data;
   LongPressedSignalFunctor functor(data);
@@ -1572,7 +1803,7 @@ int UtcDaliInteractiveTraitLongPressedSignalP(void)
 int UtcDaliInteractiveTraitLongPressBlocksClickP(void)
 {
   UiTestApplication application;
-  View view = CreateInteractiveView(application);
+  View              view = CreateInteractiveView(application);
 
   LongPressedSignalData    lpData;
   LongPressedSignalFunctor lpFunctor(lpData, true); // consume the long press
@@ -1597,7 +1828,7 @@ int UtcDaliInteractiveTraitLongPressBlocksClickP(void)
 int UtcDaliViewAsInteractiveWithLambdaP(void)
 {
   UiTestApplication application;
-  View view = View::New();
+  View              view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.SetPivot(Pivot::TOP_LEFT);
@@ -1605,9 +1836,10 @@ int UtcDaliViewAsInteractiveWithLambdaP(void)
 
   application.GetScene().Add(view);
 
-  bool clicked = false;
+  bool             clicked     = false;
   InteractiveTrait interactive = view.AsInteractive();
-  interactive.ClickedSignal().Connect(&application, [&clicked](View v, InputEvent e) -> bool {
+  interactive.ClickedSignal().Connect(&application, [&clicked](View v, InputEvent e) -> bool
+  {
     clicked = true;
     return false;
   });
