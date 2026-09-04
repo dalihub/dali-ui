@@ -171,6 +171,36 @@ struct AsyncTextParameters
   {
   }
 
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] rhs The async text parameters to copy.
+   */
+  AsyncTextParameters(const AsyncTextParameters& rhs) = default;
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs The async text parameters to move.
+   */
+  AsyncTextParameters(AsyncTextParameters&& rhs) = default;
+
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] rhs The async text parameters to copy.
+   * @return A reference to this instance.
+   */
+  AsyncTextParameters& operator=(const AsyncTextParameters& rhs) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs The async text parameters to move.
+   * @return A reference to this instance.
+   */
+  AsyncTextParameters& operator=(AsyncTextParameters&& rhs) = default;
+
   ~AsyncTextParameters() = default;
 
   std::string text;       ///< The text to be rendered encoded in utf8.

@@ -76,7 +76,7 @@ public:
   /**
    * @copydoc Dali::AsyncTextManager::RequestLoad()
    */
-  uint32_t RequestLoad(AsyncTextParameters& parameters, TextLoadObserver* observer);
+  uint32_t RequestLoad(AsyncTextParameters&& parameters, TextLoadObserver* observer);
 
   /**
    * @copydoc Dali::AsyncTextManager::RequestCancel()

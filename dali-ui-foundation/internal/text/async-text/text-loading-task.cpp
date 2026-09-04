@@ -25,6 +25,8 @@
 #include <dali/integration-api/trace.h>
 #include <dali/public-api/signals/callback.h>
 
+#include <utility>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager-impl.h> ///< To call AsyncTextManager::ReleaseLoader
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
@@ -40,10 +42,10 @@ namespace
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_ASYNC, false);
 } // namespace
 
-TextLoadingTask::TextLoadingTask(const uint32_t id, const Text::AsyncTextParameters& parameters, CallbackBase* callback)
+TextLoadingTask::TextLoadingTask(const uint32_t id, Text::AsyncTextParameters&& parameters, CallbackBase* callback)
 : AsyncTask(callback),
   mId(id),
-  mParameters(parameters),
+  mParameters(std::move(parameters)),
   mRenderInfo(),
   mIsReady(false),
   mMutex()

@@ -40,10 +40,10 @@ public:
   /**
    * Constructor.
    * @param [in] id The task id assigned from async text manager.
-   * @param [in] paramaters The async text parameters.
+   * @param [in] parameters The async text parameters whose ownership is transferred to the task.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  TextLoadingTask(const uint32_t id, const Text::AsyncTextParameters& paramaters, CallbackBase* callback);
+  TextLoadingTask(const uint32_t id, Text::AsyncTextParameters&& parameters, CallbackBase* callback);
 
   /**
    * Destructor.

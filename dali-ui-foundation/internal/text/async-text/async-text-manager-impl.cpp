@@ -24,6 +24,7 @@
 #include <dali/public-api/math/math-utils.h>
 
 #include <mutex>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager-impl.h>
@@ -239,15 +240,15 @@ Text::AsyncTextLoader AsyncTextManager::GetAvailableLoader()
   return avaiableLoader;
 }
 
-uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoadObserver* observer)
+uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters&& parameters, TextLoadObserver* observer)
 {
   // Each task must have its own unique id.
   mTaskId++;
 
-  auto task =
-    new Dali::Ui::Internal::TextLoadingTask(mTaskId, parameters, MakeCallback(this, &AsyncTextManager::LoadComplete));
-
-  LoadElement element(task, observer);
+  auto           task   = new Dali::Ui::Internal::TextLoadingTask(mTaskId, std::move(parameters),
+                                                                  MakeCallback(this, &AsyncTextManager::LoadComplete));
+  const uint32_t taskId = task->GetId();
+  LoadElement    element(task, observer);
 
   if(observer)
   {
@@ -255,7 +256,7 @@ uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoad
     if(gTraceFilter && gTraceFilter->IsTraceEnabled())
     {
       DALI_LOG_RELEASE_INFO("RequestLoad -> connect DestructionSignal to observer : %p, task : %u\n", observer,
-                            mTaskId);
+                            taskId);
     }
 #endif
     observer->ConnectDestructionSignal();
@@ -269,7 +270,7 @@ uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoad
     if(loader)
     {
       // Add element to running map.
-      mRunningTasks[mTaskId] = element;
+      mRunningTasks[taskId] = element;
 
       // Loader move available list -> running list.
       task->SetLoader(loader);
@@ -277,18 +278,18 @@ uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoad
 #ifdef TRACE_ENABLED
       if(gTraceFilter && gTraceFilter->IsTraceEnabled())
       {
-        DALI_LOG_RELEASE_INFO("RequestLoad -> ob : %p, add task : %u\n", element.mObserver, mTaskId);
+        DALI_LOG_RELEASE_INFO("RequestLoad -> ob : %p, add task : %u\n", element.mObserver, taskId);
       }
 #endif
     }
     else
     {
       // There is no available loader, add element to waiting queue.
-      mWaitingTasks[mTaskId] = element;
+      mWaitingTasks[taskId] = element;
 #ifdef TRACE_ENABLED
       if(gTraceFilter && gTraceFilter->IsTraceEnabled())
       {
-        DALI_LOG_RELEASE_INFO("RequestLoad -> ob : %p, add waiting task : %u\n", element.mObserver, mTaskId);
+        DALI_LOG_RELEASE_INFO("RequestLoad -> ob : %p, add waiting task : %u\n", element.mObserver, taskId);
       }
 #endif
     }
@@ -297,7 +298,7 @@ uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoad
   // We need to add task now, due to task completed callback could trace this task.
   Dali::AsyncTaskManager::Get().AddTask(task);
 
-  return mTaskId;
+  return taskId;
 }
 
 void AsyncTextManager::RequestCancel(uint32_t taskId)

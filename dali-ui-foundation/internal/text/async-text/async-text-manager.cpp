@@ -18,6 +18,8 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
 
+#include <utility>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager-impl.h>
 
@@ -45,9 +47,9 @@ AsyncTextManager AsyncTextManager::Get()
   return Internal::AsyncTextManager::Get();
 }
 
-uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoadObserver* observer)
+uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters parameters, TextLoadObserver* observer)
 {
-  return GetImplementation(*this).RequestLoad(parameters, observer);
+  return GetImplementation(*this).RequestLoad(std::move(parameters), observer);
 }
 
 void AsyncTextManager::RequestCancel(uint32_t taskId)

@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
@@ -314,12 +315,14 @@ public:
 
   void AsyncSizeComputed(const UiText::AsyncTextRenderInfo&) override
   {
+    ++mSizeCompletionCount;
   }
 
   Dali::Ui::Integration::Visual::Base mVisual;
   Actor                               mActor;
   UiText::AsyncTextParameters         mNextParameters;
   uint32_t                            mCompletionCount{0u};
+  uint32_t                            mSizeCompletionCount{0u};
   uint32_t                            mMarqueeInitializationCount{0u};
   bool                                mFirstResultValid{false};
   bool                                mNextRequestAccepted{false};
@@ -336,6 +339,34 @@ void utc_dali_text_visual_async_publication_internal_startup(void)
 void utc_dali_text_visual_async_publication_internal_cleanup(void)
 {
   test_return_value = TET_PASS;
+}
+
+int UtcDaliTextVisualInvalidAsyncSizeRequestDoesNotSubmitP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  RenderedTextVisual      rendered = CreateTextVisual(application);
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+
+  UiText::AsyncTextParameters invalid = MakeParameters("render request is invalid for size computation");
+  UiInternal::TextVisual::RequestAsyncSizeComputation(rendered.visual, invalid);
+  DALI_TEST_CHECK(!Test::WaitForEventThreadTrigger(1, 0));
+  DALI_TEST_EQUALS(observer.mSizeCompletionCount, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(invalid.requestType, UiIntegrationText::Async::RENDER_FIXED_SIZE, TEST_LOCATION);
+
+  UiText::AsyncTextParameters valid = MakeParameters("valid natural size after rejected request");
+  valid.requestType                 = UiIntegrationText::Async::COMPUTE_NATURAL_SIZE;
+  UiInternal::TextVisual::RequestAsyncSizeComputationOwned(rendered.visual, std::move(valid));
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_EQUALS(observer.mSizeCompletionCount, 1u, TEST_LOCATION);
+
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
 }
 
 int UtcDaliTextVisualReentrantAsyncPublicationKeepsTextureP(void)

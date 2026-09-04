@@ -1875,7 +1875,7 @@ void LabelImpl::RequestAsyncNaturalSize()
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
   Ui::Text::AsyncTextParameters     parameters =
     GetAsyncTextParameters(Text::Async::COMPUTE_NATURAL_SIZE, Size::ZERO, GetEffectiveTextPadding(), layoutDirection);
-  Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
+  Internal::TextVisual::RequestAsyncSizeComputationOwned(mVisual, std::move(parameters));
 }
 
 void LabelImpl::RequestAsyncHeightForWidth(float width)
@@ -1887,7 +1887,7 @@ void LabelImpl::RequestAsyncHeightForWidth(float width)
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
   Ui::Text::AsyncTextParameters     parameters =
     GetAsyncTextParameters(Text::Async::COMPUTE_HEIGHT_FOR_WIDTH, Size(contentWidth, 0.0f), padding, layoutDirection);
-  Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
+  Internal::TextVisual::RequestAsyncSizeComputationOwned(mVisual, std::move(parameters));
 }
 
 // =============================================================================
@@ -1911,7 +1911,7 @@ void LabelImpl::RequestAsyncRenderWithFixedSize(float width, float height)
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, Size(contentWidth, contentHeight), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
 }
@@ -1934,7 +1934,7 @@ void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstr
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_FIXED_WIDTH, Size(contentWidth, contentHeightConstraint), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
 }
@@ -1957,7 +1957,7 @@ void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float h
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_FIXED_HEIGHT, Size(contentWidthConstraint, contentHeight), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
 }
@@ -1980,7 +1980,7 @@ void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float h
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_CONSTRAINT, Size(contentWidthConstraint, contentHeightConstraint), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
 }
@@ -2201,7 +2201,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request async render, size:%f,%f\n", mController.Get(), contentSize.width, contentSize.height);
 
     Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
-    Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+    Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
     mRendererUpdateNeeded   = false;
     mIsAsyncRenderRequested = false;
     return;

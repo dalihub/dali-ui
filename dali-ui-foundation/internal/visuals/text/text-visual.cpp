@@ -2264,7 +2264,7 @@ void TextVisual::PublishReplacementRevealTimings(
                                         data->progressPropertyIndex);
 }
 
-void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& parameters)
+bool TextVisual::PrepareAsyncSizeComputationRequest(Text::AsyncTextParameters& parameters)
 {
 #ifdef TRACE_ENABLED
   if(gTraceFilter2 && gTraceFilter2->IsTraceEnabled())
@@ -2283,10 +2283,7 @@ void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& paramete
       }
       mIsNaturalSizeTaskRunning        = true;
       mNaturalSizeMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
-
-      TextLoadObserver* textLoadObserver = this;
-      mNaturalSizeTaskId                 = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
-      break;
+      return true;
     }
     case Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
     {
@@ -2296,29 +2293,64 @@ void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& paramete
       }
       mIsHeightForWidthTaskRunning        = true;
       mHeightForWidthMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
-
-      TextLoadObserver* textLoadObserver = this;
-      mHeightForWidthTaskId              = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
-      break;
+      return true;
     }
     default:
     {
       DALI_LOG_ERROR("Unexpected request type : %d\n", parameters.requestType);
+      return false;
+    }
+  }
+}
+
+void TextVisual::StoreAsyncSizeTaskId(Ui::Integration::Text::Async::RequestType requestType, uint32_t taskId)
+{
+  switch(requestType)
+  {
+    case Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE:
+    {
+      mNaturalSizeTaskId = taskId;
+      break;
+    }
+    case Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+    {
+      mHeightForWidthTaskId = taskId;
+      break;
+    }
+    default:
+    {
+      // requestType was validated by PrepareAsyncSizeComputationRequest().
       break;
     }
   }
 }
 
-bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
+void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& parameters)
 {
-  Actor control = mControl.GetHandle();
-  if(!control)
+  if(!PrepareAsyncSizeComputationRequest(parameters))
   {
-    // Nothing to do.
-    ResourceReady(Ui::Visual::ResourceStatus::READY);
-    return false;
+    return;
   }
 
+  const auto     requestType = parameters.requestType;
+  const uint32_t taskId      = Text::AsyncTextManager::Get().RequestLoad(parameters, this);
+  StoreAsyncSizeTaskId(requestType, taskId);
+}
+
+void TextVisual::RequestAsyncSizeComputationOwned(Text::AsyncTextParameters&& parameters)
+{
+  if(!PrepareAsyncSizeComputationRequest(parameters))
+  {
+    return;
+  }
+
+  const auto     requestType = parameters.requestType;
+  const uint32_t taskId      = Text::AsyncTextManager::Get().RequestLoad(std::move(parameters), this);
+  StoreAsyncSizeTaskId(requestType, taskId);
+}
+
+bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextParameters& parameters)
+{
   if((fabsf(parameters.textWidth) < Math::MACHINE_EPSILON_1000) ||
      (fabsf(parameters.textHeight) < Math::MACHINE_EPSILON_1000) || parameters.text.empty())
   {
@@ -2357,7 +2389,7 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
       mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
     }
 
-    return true;
+    return false;
   }
 
   // Get the maximum texture size.
@@ -2386,10 +2418,44 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
   }
 #endif
 
-  mIsTextLoadingTaskRunning          = true;
-  mTextLoadingMaximumLinesRevision   = parameters.maximumNumberOfLinesRevision;
-  TextLoadObserver* textLoadObserver = this;
-  mTextLoadingTaskId                 = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
+  mIsTextLoadingTaskRunning        = true;
+  mTextLoadingMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
+
+  return true;
+}
+
+bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
+{
+  Actor control = mControl.GetHandle();
+  if(!control)
+  {
+    // Nothing to do.
+    ResourceReady(Ui::Visual::ResourceStatus::READY);
+    return false;
+  }
+
+  if(PrepareAsyncRendererRequest(control, parameters))
+  {
+    mTextLoadingTaskId = Text::AsyncTextManager::Get().RequestLoad(parameters, this);
+  }
+
+  return true;
+}
+
+bool TextVisual::UpdateAsyncRendererOwned(Text::AsyncTextParameters&& parameters)
+{
+  Actor control = mControl.GetHandle();
+  if(!control)
+  {
+    // Nothing to do.
+    ResourceReady(Ui::Visual::ResourceStatus::READY);
+    return false;
+  }
+
+  if(PrepareAsyncRendererRequest(control, parameters))
+  {
+    mTextLoadingTaskId = Text::AsyncTextManager::Get().RequestLoad(std::move(parameters), this);
+  }
 
   return true;
 }

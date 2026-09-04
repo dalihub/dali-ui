@@ -75,12 +75,14 @@ public:
    * TextLoadingTask is created and registered with the AsyncTaskManager.
    * The result is received through the AsyncTextManager::LoadComplete.
    *
-   * @param[in] parameters A parameters to load text.
+   * Passing an lvalue copies the parameters. Passing an rvalue transfers their ownership.
+   *
+   * @param[in] parameters The parameters to load text.
    * @param[in] observer An observer to notify load complete.
    *
    * @return A requested task id.
    */
-  uint32_t RequestLoad(AsyncTextParameters& parameters, TextLoadObserver* observer);
+  uint32_t RequestLoad(AsyncTextParameters parameters, TextLoadObserver* observer);
 
   /**
    * @brief Request to cancel the task.
