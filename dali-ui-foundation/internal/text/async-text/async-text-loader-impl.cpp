@@ -1093,11 +1093,20 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
   mLayoutEngine.SetDefaultLineSpacing(0.0f);
   mLayoutEngine.SetRelativeLineSize(parameters.relativeLineSize);
 
+  const ReplacementRenderState* replacementState     = mReplacementData ? &mReplacementData->renderState : nullptr;
+  const bool                    hasActiveReplacement = replacementState && replacementState->projection.HasReplacements();
+
   // Text fit and fit candidates are already converted to effective scaled font sizes
   // before CheckForTextFit(). Avoid applying effectiveTextScale again here.
   float fontPointSize = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled)
                           ? parameters.fontSize
                           : parameters.fontSize * parameters.effectiveTextScale;
+  if(hasActiveReplacement && parameters.renderScale > 1.0f && parameters.relativeLineSize >= 0.0f)
+  {
+    // Replacement glyph metrics are in worker coordinates. Scale only the
+    // relative-line-height reference used by that same replacement layout.
+    fontPointSize *= parameters.renderScale;
+  }
   mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize, mModule.GetFontClient()));
 
   // Set vertical line alignment.
@@ -1111,11 +1120,8 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
   mTextModel->mLineWrapMode = parameters.lineWrapMode;
 
   // Set the layout parameters.
-  Layout::Parameters            layoutParameters(textLayoutArea, mTextModel, mModule.GetFontClient(),
-                                                 mModule.GetBidirectionalSupport());
-  const ReplacementRenderState* replacementState     = mReplacementData ? &mReplacementData->renderState : nullptr;
-  const bool                    hasActiveReplacement = replacementState && replacementState->projection.HasReplacements();
-
+  Layout::Parameters layoutParameters(textLayoutArea, mTextModel, mModule.GetFontClient(),
+                                      mModule.GetBidirectionalSupport());
   // Resize the vector of positions to have the same size than the vector of glyphs.
   Vector<Vector2>& glyphPositions = mTextModel->mVisualModel->mGlyphPositions;
   glyphPositions.Resize(totalNumberOfGlyphs);
