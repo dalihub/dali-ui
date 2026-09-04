@@ -34,9 +34,8 @@ SetDynamicProperty로 프레임 단위 동적 색상 변경을 확인한다. 워
 ## 테스트 2: DynamicProperty 해제
 
 1. [Clear Dynamic] 버튼을 탭한다
-2. **기대 결과**: 같은 URL로 SetResourceUrl을 다시 불러 컴포지션이 리로드되고, 동적 속성이
-   초기화되어 원래 색상이 복원됨 (같은 URL 재설정 = 명시적 리로드 요청 — rlottie /
-   lottie-android / lottie-ios 모두 동적 속성 제거 API가 없어 리로드가 표준 해제 경로다)
+2. **기대 결과**: Reload()로 컴포지션이 다시 로드되고, 동적 속성이 초기화되어 원래 색상이
+   복원됨 (벡터 애니메이션 엔진에 동적 속성 제거 API가 없어 리로드가 표준 해제 경로다)
 
 ## 통과 기준
 

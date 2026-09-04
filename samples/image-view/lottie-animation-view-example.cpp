@@ -435,8 +435,9 @@ private:
   {
     mLottieView.SetPlaceholderUrl(RESOURCES_DIR "placeholder_image.png");
     mLottieView.SetResourceUrl(RESOURCES_DIR "jolly_walker.json");
+    mLottieView.Reload();
     UpdateStatus("Placeholder set - reloading");
-    DALI_LOG_RELEASE_INFO("[LottieAnimationView] SetPlaceholderUrl + reload\n");
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] SetPlaceholderUrl + Reload\n");
   }
 
   void OnClearUrl()

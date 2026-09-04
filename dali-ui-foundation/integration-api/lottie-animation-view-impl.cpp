@@ -467,8 +467,7 @@ void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)
 
 void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)
 {
-  const bool reloadCurrentResource = (mUrl == url && !url.Empty());
-  if(mUrl != url || reloadCurrentResource)
+  if(mUrl != url)
   {
     mUrl = url;
     // Re-show placeholder while new animation loads
@@ -481,6 +480,21 @@ void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)
 Dali::String LottieAnimationViewImpl::GetResourceUrl() const
 {
   return mUrl;
+}
+
+void LottieAnimationViewImpl::Reload()
+{
+  if(mUrl.Empty())
+  {
+    return;
+  }
+
+  // The animated vector image visual has no RELOAD action, so reloading is a visual
+  // rebuild: the next measure recreates the visual from mUrl. Dynamic property
+  // callbacks belong to the old visual and are therefore dropped with it.
+  UpdatePlaceholderVisual();
+  mVisualDirty = true;
+  InvalidateMeasure();
 }
 
 void LottieAnimationViewImpl::Play()

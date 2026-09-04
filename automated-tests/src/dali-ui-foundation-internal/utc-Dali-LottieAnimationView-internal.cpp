@@ -102,6 +102,17 @@ const char* const LOTTIE_TEST_URL = "animation.json";
 Ui::LottieAnimationView gInPassLottie;
 int                     gInPassProducerCount = 0;
 
+MeasuredSize SetSameUrlDuringMeasure(View, float widthConstraint, float heightConstraint)
+{
+  ++gInPassProducerCount;
+  if(gInPassLottie)
+  {
+    gInPassLottie.SetResourceUrl(LOTTIE_TEST_URL); // the anti-pattern under test
+    gInPassLottie.Measure(widthConstraint, heightConstraint);
+  }
+  return MeasuredSize(120.0f, 120.0f);
+}
+
 MeasuredSize TouchVisualDuringMeasure(View, float widthConstraint, float heightConstraint)
 {
   ++gInPassProducerCount;
@@ -196,7 +207,7 @@ int UtcDaliLottieAnimationViewJumpToFramePreservedAfterDesiredSizeChange(void)
   END_TEST;
 }
 
-int UtcDaliLottieAnimationViewSameResourceUrlReloadsVisual(void)
+int UtcDaliLottieAnimationViewSameResourceUrlKeepsVisual(void)
 {
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New("animation.json");
@@ -209,7 +220,38 @@ int UtcDaliLottieAnimationViewSameResourceUrlReloadsVisual(void)
   view.SetResourceUrl("animation.json");
   view.Measure(100.0f, 100.0f);
 
+  DALI_TEST_EQUALS(viewData.GetVisual(LottieAnimationView::Property::IMAGE), originalVisual, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewReloadRecreatesVisual(void)
+{
+  UiTestApplication application;
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.Measure(100.0f, 100.0f);
+
+  auto& viewData       = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  auto  originalVisual = viewData.GetVisual(LottieAnimationView::Property::IMAGE);
+  DALI_TEST_CHECK(originalVisual);
+
+  view.Reload();
+  view.Measure(100.0f, 100.0f);
+
   DALI_TEST_CHECK(viewData.GetVisual(LottieAnimationView::Property::IMAGE) != originalVisual);
+  DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("animation.json"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewReloadWithoutUrlIsNoOp(void)
+{
+  UiTestApplication application;
+  LottieAnimationView view = LottieAnimationView::New();
+
+  view.Reload();
+  view.Measure(100.0f, 100.0f);
+
+  auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  DALI_TEST_CHECK(!viewData.GetVisual(LottieAnimationView::Property::IMAGE));
   END_TEST;
 }
 
@@ -271,6 +313,59 @@ int UtcDaliLottieAnimationViewRuntimePropertiesDoNotRecreateVisual(void)
   view.Measure(100.0f, 100.0f);
 
   DALI_TEST_EQUALS(viewData.GetVisual(LottieAnimationView::Property::IMAGE), originalVisual, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewSetSameUrlInMeasureDoesNotWakeIdle(void)
+{
+  UiTestApplication       application;
+  Window                  window = application.GetWindow();
+  ScopedGlobalHandleReset resetGlobal(gInPassLottie);
+  tet_infoline("SetResourceUrl with the current URL from a measure producer neither rebuilds the visual nor wakes the main loop");
+
+  gInPassProducerCount = 0;
+  int                         emitCount = 0;
+  WindowLayoutFinishedCounter counter(emitCount);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
+
+  LottieAnimationView lottie = LottieAnimationView::New(LOTTIE_TEST_URL);
+  gInPassLottie              = lottie;
+
+  View host = View::New();
+  host.SetRequestedWidth(200.0f);
+  host.SetRequestedHeight(200.0f);
+  host.SetMeasureCallback(MeasureCallback::New(&SetSameUrlDuringMeasure));
+  host.Add(lottie);
+  window.Add(host);
+
+  // The event-time mount request wakes the first pass; that pass must not arm another.
+  SendRequestedProcessEvents(application);
+  DALI_TEST_EQUALS(gInPassProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // The first pass CREATES the visual, and putting it on scene raises an in-pass
+  // RelayoutRequest -> InvalidateMeasure, so this pass parks a follow-up instead of
+  // settling. What matters is that it parks WITHOUT arming a wake (asserted above).
+  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+
+  auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(lottie));
+  auto  visual   = viewData.GetVisual(LottieAnimationView::Property::IMAGE);
+  DALI_TEST_CHECK(visual);
+
+  // An independently triggered cycle drains the parked follow-up. The same-URL setter
+  // is now a no-op, so nothing is rebuilt, nothing re-parks, no wake is armed, and the
+  // layout settles.
+  SendIndependentProcessEvents(application);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewData.GetVisual(LottieAnimationView::Property::IMAGE), visual, TEST_LOCATION);
+
+  // ...and it STAYS settled: a further cycle neither re-runs layout nor wakes.
+  SendIndependentProcessEvents(application);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewData.GetVisual(LottieAnimationView::Property::IMAGE), visual, TEST_LOCATION);
+
   END_TEST;
 }
 

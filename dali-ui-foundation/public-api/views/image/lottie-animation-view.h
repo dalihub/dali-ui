@@ -147,11 +147,10 @@ public: // Image
   /**
    * @brief Sets the resource URL of the Lottie animation file.
    *
-   * Setting the currently configured non-empty URL reloads the animation and
-   * clears dynamic property callbacks registered on the previous visual.
+   * Setting the URL that is already configured has no effect. Use Reload() to load
+   * the current URL again.
    *
    * @param[in] url The URL of the Lottie JSON file
-   * @return Reference to this for fluent chaining
    */
   void SetResourceUrl(const Dali::String& url);
 
@@ -161,6 +160,18 @@ public: // Image
    * @return The URL of the Lottie JSON file currently set on this view
    */
   Dali::String GetResourceUrl() const;
+
+  /**
+   * @brief Reloads the animation from the current resource URL.
+   *
+   * The animation is rebuilt, so dynamic property callbacks registered on the previous
+   * animation are cleared, and playback does not resume by itself -- call Play() after
+   * this if the animation should keep running. A placeholder image, when one is set and
+   * the animation is not currently loaded, is shown again while the reload is in flight.
+   *
+   * Has no effect if no resource URL has been set.
+   */
+  void Reload();
 
 public: // Playback Control
   /**

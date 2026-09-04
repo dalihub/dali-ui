@@ -69,6 +69,11 @@ Dali::String LottieAnimationView::GetResourceUrl() const
   return Ui::GetImpl(*this).GetResourceUrl();
 }
 
+void LottieAnimationView::Reload()
+{
+  Ui::GetImpl(*this).Reload();
+}
+
 void LottieAnimationView::Play()
 {
   Ui::GetImpl(*this).Play();

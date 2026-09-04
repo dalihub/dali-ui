@@ -234,6 +234,33 @@ int UtcDaliLottieAnimationViewGetResourceUrlP(void)
   END_TEST;
 }
 
+int UtcDaliLottieAnimationViewSetSameResourceUrlP(void)
+{
+  UiTestApplication   application;
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+
+  view.SetResourceUrl("animation.json"); // idempotent: no crash, no URL change
+  DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("animation.json"), TEST_LOCATION);
+  END_TEST;
+}
+
+// Reload
+
+int UtcDaliLottieAnimationViewReloadP(void)
+{
+  UiTestApplication   application;
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+
+  view.Reload();
+  DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("animation.json"), TEST_LOCATION);
+
+  // No URL set: Reload() must be a safe no-op.
+  LottieAnimationView empty = LottieAnimationView::New();
+  empty.Reload();
+  DALI_TEST_CHECK(empty);
+  END_TEST;
+}
+
 // StopBehavior
 
 int UtcDaliLottieAnimationViewSetGetStopBehaviorP(void)

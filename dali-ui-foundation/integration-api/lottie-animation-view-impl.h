@@ -123,6 +123,11 @@ public: // API
   Dali::String GetResourceUrl() const;
 
   /**
+   * @copydoc Dali::Ui::LottieAnimationView::Reload
+   */
+  void Reload();
+
+  /**
    * @copydoc Dali::Ui::LottieAnimationView::Play
    */
   void Play();

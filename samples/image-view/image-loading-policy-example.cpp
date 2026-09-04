@@ -433,7 +433,9 @@ private:
   void OnStopClicked(View, InputEvent)  { StopAnimView(mCurrentView); }
   void OnReloadClicked(View, InputEvent)
   {
-    if(auto v = ImageView::DownCast(mCurrentView)) v.Reload();
+    if(auto v = ImageView::DownCast(mCurrentView))                v.Reload();
+    else if(auto v = AnimatedImageView::DownCast(mCurrentView))   v.Reload();
+    else if(auto v = LottieAnimationView::DownCast(mCurrentView)) v.Reload();
   }
 
   void OnSyncClicked(View, InputEvent)

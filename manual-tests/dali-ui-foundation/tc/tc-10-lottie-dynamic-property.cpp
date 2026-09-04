@@ -134,8 +134,8 @@ private:
 
   void OnClearDynamic()
   {
-    // Reset dynamic properties by reloading the URL
-    mView.SetResourceUrl(LOTTIE_WALKER);
+    // Reset dynamic properties by reloading the current URL
+    mView.Reload();
     mView.Play();
     mStatusLabel.SetText("DynamicProperty: cleared (reloaded)");
   }
