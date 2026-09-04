@@ -1475,7 +1475,9 @@ int UtcDaliBlurEffectBlurOnce(void)
     DALI_TEST_EQUALS(INT32_MIN + 2, taskList.GetTask(taskList.GetTaskCount() - 1).GetOrderIndex(), TEST_LOCATION);
   }
   {
+    ResizeView(application, view, 100.0f, 100.0f);
     GaussianBlurEffect effect = GaussianBlurEffect::New(20u);
+    effect.SetBlurDownscaleFactor(0.25f);
     DALI_TEST_EQUALS(effect.GetBlurOnce(), false, TEST_LOCATION);
 
     effect.SetBlurOnce(true);
@@ -1494,7 +1496,22 @@ int UtcDaliBlurEffectBlurOnce(void)
     application.SendNotification();
     application.Render();
 
-    DALI_TEST_EQUALS(GetRenderTaskCount(application), baseTaskCount, TEST_LOCATION);
+    // Only the empty source task remains as the exclusive-rendering marker.
+    DALI_TEST_EQUALS(GetRenderTaskCount(application), baseTaskCount + 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(!taskList.GetTask(taskList.GetTaskCount() - 1u).GetFrameBuffer());
+
+    effect.Refresh();
+    DALI_TEST_EQUALS(GetRenderTaskCount(application), baseTaskCount + DEFAULT_BLUR_RENDER_TASK_COUNT + 1u, TEST_LOCATION);
+
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+
+    DALI_TEST_EQUALS(GetRenderTaskCount(application), baseTaskCount + 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(!taskList.GetTask(taskList.GetTaskCount() - 1u).GetFrameBuffer());
 
     effect.SetBlurOnce(false);
     effect.SetBlurOnce(false);
@@ -1503,7 +1520,7 @@ int UtcDaliBlurEffectBlurOnce(void)
     effect.SetBlurOnce(false);
     DALI_TEST_EQUALS(effect.GetBlurOnce(), false, TEST_LOCATION);
 
-    DALI_TEST_EQUALS(GetRenderTaskCount(application), baseTaskCount + DEFAULT_BLUR_RENDER_TASK_COUNT, TEST_LOCATION);
+    DALI_TEST_EQUALS(GetRenderTaskCount(application), baseTaskCount + DEFAULT_BLUR_RENDER_TASK_COUNT + 1u, TEST_LOCATION);
   }
 
   END_TEST;
