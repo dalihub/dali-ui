@@ -873,7 +873,7 @@ private:
     View gradientView = View::New();
     gradientView.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     gradientView.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-    gradientView.AddVisual(CreateGradientVisual(), Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    gradientView.AddVisual(CreateGradientVisual(), Visual::DepthLayer::BACKGROUND);
     ResizeMaskGradientView(gradientView, labelWidth, labelHeight);
     return gradientView;
   }

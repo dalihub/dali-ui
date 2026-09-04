@@ -49,10 +49,10 @@ public:
    * @brief Creates a VisualsContainer object.
    *
    * @param[in] view The view that owns this VisualsContainer.
-   * @param[in] rangeType The range type of this VisualsContainer.
+   * @param[in] depthLayer The depth layer of this VisualsContainer.
    * @return The newly created visual object container.
    */
-  static VisualsContainerPtr New(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType);
+  static VisualsContainerPtr New(Dali::Ui::View view, Dali::Ui::Visual::DepthLayer depthLayer);
 
 public: ///< Public API
   /**
@@ -61,9 +61,9 @@ public: ///< Public API
   Dali::Ui::View GetOwner() const;
 
   /**
-   * @copydoc Dali::VisualsContainer::GetContainerRangeType()
+   * @copydoc Dali::VisualsContainer::GetDepthLayer()
    */
-  Dali::Ui::Integration::Visual::InternalContainerRangeType GetContainerRangeType() const;
+  Dali::Ui::Visual::DepthLayer GetDepthLayer() const;
 
   /**
    * @copydoc Dali::VisualsContainer::GetVisualBasesCount()
@@ -113,9 +113,9 @@ protected:
    * @brief Constructor - creates a VisualsContainer.
    *
    * @param[in] control The control that owns this VisualsContainer.
-   * @param[in] rangeType The range type of this VisualsContainer.
+   * @param[in] depthLayer The depth layer of this VisualsContainer.
    */
-  VisualsContainer(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType);
+  VisualsContainer(Dali::Ui::View view, Dali::Ui::Visual::DepthLayer depthLayer);
 
 public:
   /**
@@ -127,7 +127,7 @@ private:
   std::vector<Dali::Ui::VisualBase> mVisualBases;
   Dali::WeakHandle<Dali::Ui::View>  mView;
 
-  const Dali::Ui::Integration::Visual::InternalContainerRangeType mRangeType;
+  const Dali::Ui::Visual::DepthLayer mDepthLayer;
 
   Dali::FreeList mVisualIndexConverter; ///< Convert from virtual visual index of VisualBase to actual visual index of mView.
 };

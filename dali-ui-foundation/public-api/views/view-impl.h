@@ -505,7 +505,7 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @copydoc Ui::View::AddVisual()
    */
-  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType);
+  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer);
 
   /**
    * @copydoc Ui::View::RemoveVisual()
@@ -515,12 +515,12 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @copydoc Ui::View::GetVisualCount()
    */
-  uint32_t GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const;
+  uint32_t GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const;
 
   /**
    * @copydoc Ui::View::GetVisualAt()
    */
-  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const;
+  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const;
 
   // Measure / Arrange
 

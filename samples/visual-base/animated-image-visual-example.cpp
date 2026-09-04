@@ -146,14 +146,14 @@ ColorVisual CreateCustomInnerShadow2()
 void AddDecorativeVisuals(View view)
 {
   view.AddVisuals(
-    Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND,
+    Visual::DepthLayer::BACKGROUND_EFFECT,
     {
       CreateCustomShadow1(),
       CreateCustomShadow2(),
       CreateCustomShadow3(),
     });
   view.AddVisuals(
-    Visual::ContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT,
+    Visual::DepthLayer::DECORATION,
     {
       CreateCustomInnerShadow1(),
       CreateCustomInnerShadow2(),
@@ -246,7 +246,7 @@ private:
     mRightBorder.SetBorderSize(20_spx);
 
     mView.AddVisuals( // AnimatedImageVisual
-      Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
+      Visual::DepthLayer::BACKGROUND,
       {mLeftVisual, mLeftBorder, mRightVisual, mRightBorder});
     root.Add(mView);
 

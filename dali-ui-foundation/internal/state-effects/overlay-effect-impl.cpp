@@ -300,14 +300,14 @@ void OverlayEffectImpl::HandleStateChanged(OverlayEffectData& data, View owner, 
     // If overlay ColorVisual creation becomes a measured hot path, consider
     // applying an object pool at this creation point.
     overlay = ColorVisual::New();
-    target.AddVisual(overlay, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    target.AddVisual(overlay, Visual::DepthLayer::BACKGROUND);
     data.SetActiveOverlay(overlay);
     data.SetActiveTarget(target);
   }
   else if(data.GetActiveTarget() != target)
   {
     overlay.Detach();
-    target.AddVisual(overlay, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    target.AddVisual(overlay, Visual::DepthLayer::BACKGROUND);
     data.SetActiveTarget(target);
   }
 

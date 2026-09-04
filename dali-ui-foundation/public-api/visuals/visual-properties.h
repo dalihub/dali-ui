@@ -389,21 +389,26 @@ enum class ResourceStatus
 };
 
 /**
- * @brief Enumeration for the visual range when attached to the View.
- * It will be used when we determine the visual's depth index.
+ * @brief Enumeration for the layer that a visual is drawn in when attached to a View.
+ *
+ * A View draws its own visuals in a fixed order: background effect, background, content,
+ * decoration, then foreground effect. Each value selects one of those layers. A visual attached to
+ * a layer is drawn above the View's own visual of that layer and below the next layer.
+ *
+ * @note Sibling order reorders visuals sharing the same DepthLayer. A visual can never be drawn
+ * outside of the layer it is attached to.
  */
-enum class ContainerRangeType
+enum class DepthLayer
 {
-  UNDER_BACKGROUND_EFFECT,                  ///< The visual object exist under Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT
-  BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, ///< The visual object exist between Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT and Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND
-  BETWEEN_BACKGROUND_AND_CONTENT,           ///< The visual object exist between Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND and Dali::Ui::Integration::DepthIndex::Ranges::CONTENT
-  BETWEEN_CONTENT_AND_DECORATION,           ///< The visual object exist between Dali::Ui::Integration::DepthIndex::Ranges::CONTENT and Dali::Ui::Integration::DepthIndex::Ranges::DECORATION
-  BETWEEN_DECORATION_AND_FOREGROUND_EFFECT, ///< The visual object exist between Dali::Ui::Integration::DepthIndex::Ranges::DECORATION and Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT
-  OVER_FOREGROUND_EFFECT,                   ///< The visual object exist over Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT
+  BACKGROUND_EFFECT, ///< The background effect layer. The bottom-most layer.
+  BACKGROUND,        ///< The background layer.
+  CONTENT,           ///< The content layer.
+  DECORATION,        ///< The decoration layer.
+  FOREGROUND_EFFECT, ///< The foreground effect layer. The top-most layer.
 
-  MAX_COUNT,
+  MAX_COUNT, ///< Sentinel value used to validate depth layer values. Not a layer itself.
 
-  INVALID = -1,
+  NONE = -1, ///< The visual is not attached to any View.
 };
 
 } // namespace Visual

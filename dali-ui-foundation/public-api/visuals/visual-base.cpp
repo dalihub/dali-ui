@@ -49,17 +49,9 @@ View VisualBase::GetOwner() const
   return GetImplementation(*this).GetOwner();
 }
 
-Dali::Ui::Visual::ContainerRangeType VisualBase::GetContainerRangeType() const
+Dali::Ui::Visual::DepthLayer VisualBase::GetDepthLayer() const
 {
-  auto rangeType = GetImplementation(*this).GetInternalContainerRangeType();
-
-  if(rangeType == Dali::Ui::Integration::Visual::InternalContainerRangeType::INVALID ||
-     static_cast<int>(rangeType) >= static_cast<int>(Dali::Ui::Visual::ContainerRangeType::MAX_COUNT)) ///< Use Internal::VisualBase::GetInternalContainerRangeType() if we are internal API
-  {
-    return Dali::Ui::Visual::ContainerRangeType::INVALID;
-  }
-
-  return static_cast<Dali::Ui::Visual::ContainerRangeType>(static_cast<int>(rangeType));
+  return GetImplementation(*this).GetDepthLayer();
 }
 
 void VisualBase::Detach()

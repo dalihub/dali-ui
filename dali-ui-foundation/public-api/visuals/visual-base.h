@@ -50,9 +50,8 @@ class View;
  *
  * It represents the base visual object that can be attached to a Dali::Ui::View.
  * VisualBase manages attachment/detachment, sibling order, and property updates.
- * A VisualBase can belong to only one View's ContainerRangeType; adding it to
- * another View or ContainerRangeType will automatically remove it from the
- * previous one.
+ * A VisualBase can belong to only one depth layer of one View; adding it to another
+ * View, or to another depth layer, automatically removes it from the previous one.
  *
  * @code
  * Dali::Ui::View view = Dali::Ui::View::New();
@@ -60,52 +59,52 @@ class View;
  *                                  .SetColor(UiColor("Primary"))
  *                                  .SetOffsetX(0.5f)
  *                                  .SetWidth(0.5f);
- * view.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+ * view.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
  *
- * // view.GetVisualCount(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT) == 1u.
+ * // view.GetVisualCount(Dali::Ui::Visual::DepthLayer::BACKGROUND) == 1u.
  * // visual.GetOwner() == view.
  *
- * anotherView.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_CONTENT_AND_DECORATION)
+ * anotherView.AddVisual(visual, Dali::Ui::Visual::DepthLayer::CONTENT)
  *
- * // view.GetVisualCount(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT) == 0u.
+ * // view.GetVisualCount(Dali::Ui::Visual::DepthLayer::BACKGROUND) == 0u.
  * // visual.GetOwner() == anotherView.
  * @endcode
  *
  * VisualBase could change sibling order. It will change the rendering order at view.
- * Sibling order only works at same type of ContainerRangeType. VisualBase could not
- * over the container.
+ * Sibling order only reorders visuals sharing the same DepthLayer. A VisualBase can
+ * never be drawn outside of the layer it is attached to.
  *
- * For example, if ContainerRangeType added at BETWEEN_BACKGROUND_AND_CONTENT,
- * this visual could not be rendered under the background, or over the content.
+ * For example, a visual attached to DepthLayer::BACKGROUND can not be rendered
+ * under the View's background, nor over its content.
  *
  * @code
- * view.AddVisual(visual1, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
- * view.AddVisual(visual2, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+ * view.AddVisual(visual1, Dali::Ui::Visual::DepthLayer::BACKGROUND);
+ * view.AddVisual(visual2, Dali::Ui::Visual::DepthLayer::BACKGROUND);
  *
  * // visual1.GetSiblingOrder() == 0u, visual2.GetSiblingOrder() == 1u.
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u) == visual1;
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 1u) == visual2;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 0u) == visual1;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 1u) == visual2;
  * // Rendering order = view's Background -> visual1 -> visual2 -> Content (e.g. Text for Label, Image for ImageView)
  *
  * visual1.RaiseToTop();
  *
  * // visual1.GetSiblingOrder() == 1u, visual2.GetSiblingOrder() == 0u.
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u) == visual2;
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 1u) == visual1;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 0u) == visual2;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 1u) == visual1;
  * // Rendering order = view's Background -> visual2 -> visual1 -> Content
  *
  * visual2.Detach();
  *
  * // visual1.GetSiblingOrder() == 0u.
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u) == visual1;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 0u) == visual1;
  * // Rendering order = view's Background -> visual1 -> Content
  *
- * view.AddVisual(visual2, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND);
+ * view.AddVisual(visual2, Dali::Ui::Visual::DepthLayer::BACKGROUND_EFFECT);
  *
  * // visual1.GetSiblingOrder() == 0u.
  * // visual2.GetSiblingOrder() == 0u.
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, 0u) == visual2;
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u) == visual1;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND_EFFECT, 0u) == visual2;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 0u) == visual1;
  * // Rendering order = visual2 -> view's Background -> visual1 -> Content
  * @endcode
  *
@@ -152,11 +151,11 @@ public: ///< Public API
   Dali::Ui::View GetOwner() const;
 
   /**
-   * @brief Get the attached container range type. INVALID if this visual is not be attached.
+   * @brief Get the attached depth layer. NONE if this visual is not attached.
    *
-   * @return The attached container range type, or INVALID if not be attached.
+   * @return The attached depth layer, or NONE if not attached.
    */
-  Dali::Ui::Visual::ContainerRangeType GetContainerRangeType() const;
+  Dali::Ui::Visual::DepthLayer GetDepthLayer() const;
 
   /**
    * @brief Detach from the attached view.
@@ -169,7 +168,7 @@ public: ///< Public API
    * Visuals will have actions, this API is used to perform one of these actions with the given attributes.
    * @note If visual is not been registered to the view, action should be ignored.
    *
-   * @param[in] actionId The action to perform.  See Visual to find supported actions.
+   * @param[in] actionId The action to perform. See Visual to find supported actions.
    * @param[in] attributes Optional attributes for the action.
    */
   void DoAction(Dali::Property::Index actionId, const Dali::Property::Value& attributes);

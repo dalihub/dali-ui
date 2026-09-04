@@ -328,7 +328,7 @@ private:
     baseGradient.SetStopNodes(CreateBaseFillStops());
 
     // Compose the visible fill first, then mask the result once with the text label.
-    AddVisual(baseGradient, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    AddVisual(baseGradient, Visual::DepthLayer::BACKGROUND);
 
     View                  shimmerBand = CreateShimmerBand();
     Dali::Property::Index progress    = shimmerBand.RegisterProperty(SHIMMER_PROGRESS_PROPERTY, 0.0f);
@@ -368,7 +368,7 @@ private:
     GradientVisual shimmerGradient = GradientVisual::New();
     shimmerGradient.SetLinearGradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
     shimmerGradient.SetStopNodes(CreateMaskEffectShimmerStops());
-    shimmerBand.AddVisual(shimmerGradient, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    shimmerBand.AddVisual(shimmerGradient, Visual::DepthLayer::BACKGROUND);
 
     return shimmerBand;
   }

@@ -71,9 +71,9 @@ public: ///< Public API
   Dali::Ui::View GetOwner() const;
 
   /**
-   * @copydoc Dali::Ui::VisualBase::GetContainerRangeType()
+   * @copydoc Dali::Ui::VisualBase::GetDepthLayer()
    */
-  Dali::Ui::Integration::Visual::InternalContainerRangeType GetInternalContainerRangeType() const;
+  Dali::Ui::Visual::DepthLayer GetDepthLayer() const;
 
   /**
    * @copydoc Dali::Ui::VisualBase::Detach()
@@ -541,7 +541,7 @@ private:
 
   Dali::Ui::Integration::Visual::Base mVisual; ///< Created visual by CreateVisual API
 
-  Dali::Ui::Integration::Visual::InternalContainerRangeType mRangeType{Dali::Ui::Integration::Visual::InternalContainerRangeType::INVALID};
+  Dali::Ui::Visual::DepthLayer mDepthLayer{Dali::Ui::Visual::DepthLayer::NONE};
 
   Dali::Ui::Integration::VisualsContainer::ShadowType mShadowType{Dali::Ui::Integration::VisualsContainer::ShadowType::NONE};
 

@@ -42,6 +42,8 @@ namespace Dali::Ui::Internal
 {
 namespace
 {
+// Half the gap between two adjacent DepthIndex::Ranges anchors, so that a layer splits evenly into
+// a View half and an application half. See VisualBaseImpl::GetDepthIndex for what each half is for.
 constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::Integration::DepthIndex::Ranges::CONTENT - Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND) / 2;
 
 Vector4 ToVector4(const Insets& insets)
@@ -145,9 +147,9 @@ Dali::Ui::View VisualBaseImpl::GetOwner() const
   return result;
 }
 
-Dali::Ui::Integration::Visual::InternalContainerRangeType VisualBaseImpl::GetInternalContainerRangeType() const
+Dali::Ui::Visual::DepthLayer VisualBaseImpl::GetDepthLayer() const
 {
-  return mRangeType;
+  return mDepthLayer;
 }
 
 void VisualBaseImpl::DetachFromContainer()
@@ -681,8 +683,8 @@ Dali::Ui::Integration::VisualsContainer VisualBaseImpl::GetContainer() const
 
 void VisualBaseImpl::AttachToContainerInternal(Dali::Ui::Integration::VisualsContainer container)
 {
-  mContainer = WeakHandle(container);
-  mRangeType = container.GetContainerRangeType();
+  mContainer  = WeakHandle(container);
+  mDepthLayer = container.GetDepthLayer();
 
   // Request to create visuals if we never create visuals before.
   if(DALI_UNLIKELY(!mVisual))
@@ -698,7 +700,7 @@ void VisualBaseImpl::AttachToContainerInternal(Dali::Ui::Integration::VisualsCon
 void VisualBaseImpl::DetachFromContainerInternal()
 {
   mContainer.Reset();
-  mRangeType        = Dali::Ui::Integration::Visual::InternalContainerRangeType::INVALID;
+  mDepthLayer       = Dali::Ui::Visual::DepthLayer::NONE;
   mSiblingOrder     = 0u;
   mVisualPropertyId = INVALID_VISUAL_PROPERTY_ID;
 }
@@ -713,67 +715,50 @@ void VisualBaseImpl::SetSiblingOrderInternal(uint32_t siblingOrder)
   }
 }
 
+// A layer's depth budget is split in two. The lower half, starting at the anchor itself, belongs to
+// the View's own visuals; the upper half, starting at anchor + MAXIMUM_VISUAL_OBJECTS_COUNT, holds
+// the visuals an application attached. Keeping the halves apart is what makes an application's
+// sibling orders independent of the View's own visuals, which appear and disappear at runtime (a
+// shadow being toggled, a placeholder shown only while an image loads).
+//
+// TODO : The View's own visuals do not use containers yet. They are still registered directly with a
+// fixed depth index; grep for RegisterVisual callers passing DepthIndex::Ranges values. When they
+// move onto containers they belong in the LOWER half. Express which half a visual goes to with an
+// internal-only owner parameter, NOT by adding values to Dali::Ui::Visual::DepthLayer -- that enum
+// names layers only, and a second parallel range enum is what this code carried before. Two known
+// obstacles: VisualBaseImpl builds its own Visual::Base from a VisualType, so an existing
+// Integration::Visual::Base cannot be wrapped; and INNER_SHADOW (DECORATION - 1) and BORDERLINE
+// (FOREGROUND_EFFECT - 1) sit below their anchor where no container reaches, while tying with the
+// top of the application half.
 int32_t VisualBaseImpl::GetDepthIndex() const
 {
   int32_t baseDepthIndex = 0;
-  switch(mRangeType)
+  switch(mDepthLayer)
   {
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::UNDER_BACKGROUND_EFFECT:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::MINIMUM_DEPTH_INDEX;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND:
+    case Dali::Ui::Visual::DepthLayer::BACKGROUND_EFFECT:
     {
       baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT:
+    case Dali::Ui::Visual::DepthLayer::BACKGROUND:
     default:
     {
       baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_CONTENT_AND_DECORATION:
+    case Dali::Ui::Visual::DepthLayer::CONTENT:
     {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::CONTENT + MAXIMUM_VISUAL_OBJECTS_COUNT;
+      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::CONTENT + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT:
+    case Dali::Ui::Visual::DepthLayer::DECORATION:
     {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::DECORATION + MAXIMUM_VISUAL_OBJECTS_COUNT;
+      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::DECORATION + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::OVER_FOREGROUND_EFFECT:
+    case Dali::Ui::Visual::DepthLayer::FOREGROUND_EFFECT:
     {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT + MAXIMUM_VISUAL_OBJECTS_COUNT;
-      break;
-    }
-
-    // Internal container cases
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BACKGROUND_EFFECT:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BACKGROUND:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::CONTENT:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::CONTENT;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::DECORATION:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::DECORATION;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::FOREGROUND_EFFECT:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT;
+      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
   }

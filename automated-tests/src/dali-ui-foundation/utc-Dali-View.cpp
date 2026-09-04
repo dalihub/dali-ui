@@ -1370,7 +1370,7 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
   Shadow shadow3(12.0f, Vector2(9.0f, 10.0f), UiColor(0.0f, 0.0f, 0.0f, 0.6f), Vector2(11.0f, 12.0f));
 
   view.SetShadow(shadow1);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
 
   ShadowStack stack{shadow2, shadow3};
@@ -1382,61 +1382,61 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
   DALI_TEST_EQUALS(stack.GetShadowCount(), 0u, TEST_LOCATION);
 
   view.SetShadow(copiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow2.GetBlurRadius(), TEST_LOCATION);
 
   copiedStack.Add(shadow1);
   view.SetShadow(copiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow2.GetBlurRadius(), TEST_LOCATION);
 
   view.SetProperty(View::Property::SHADOW, Extension::Shadow::CreatePropertyMap(shadow1));
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
 
   view.SetShadow(copiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 2u, TEST_LOCATION);
   view.SetProperty(View::Property::SHADOW, Property::Map());
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   Property::Value emptyShadowPropertyValue = view.GetProperty(View::Property::SHADOW);
   DALI_TEST_CHECK(emptyShadowPropertyValue.GetMap() && emptyShadowPropertyValue.GetMap()->Empty());
 
   ShadowStack deepCopiedStack{shadow2};
   shadow2.SetBlurRadius(99.0f);
   view.SetShadow(deepCopiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), 8.0f, TEST_LOCATION);
 
   ShadowStack assignedStack;
   assignedStack = deepCopiedStack;
   deepCopiedStack.Clear();
   view.SetShadow(assignedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), 8.0f, TEST_LOCATION);
 
   view.SetShadow(stack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   Property::Value emptyShadowStackValue = view.GetProperty(View::Property::SHADOW);
   DALI_TEST_CHECK(emptyShadowStackValue.GetMap() && emptyShadowStackValue.GetMap()->Empty());
 
   view.SetShadow(shadow1);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
 
   view.SetShadow(Shadow::None());
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   Property::Value shadowValue = view.GetProperty(View::Property::SHADOW);
   DALI_TEST_CHECK(shadowValue.GetMap() && shadowValue.GetMap()->Empty());
 
   ColorVisual visual = ColorVisual::New();
-  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::BACKGROUND_EFFECT), true, TEST_LOCATION);
 
   view.SetShadow(copiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 3u, TEST_LOCATION);
 
   view.SetShadow(Shadow::None());
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, 0u), visual, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::BACKGROUND_EFFECT, 0u), visual, TEST_LOCATION);
   END_TEST;
 }
 
@@ -10083,8 +10083,8 @@ int UtcDaliViewFreshViewVisualQueriesInertP(void)
   Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
   DALI_TEST_EQUALS(backgroundMap.Empty(), true, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
 
   // The first visual write creates the context, and the same query now reports it.
   view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));

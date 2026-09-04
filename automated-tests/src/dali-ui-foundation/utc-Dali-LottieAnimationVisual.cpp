@@ -49,23 +49,23 @@ int UtcDaliLottieAnimationVisualCreateAndOwner(void)
 
   // Initially, the visual is not attached to any view.
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::INVALID, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
 
   View view = View::New();
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::BACKGROUND), true, TEST_LOCATION);
 
   DALI_TEST_EQUALS(visual.GetOwner(), view, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u), visual, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::BACKGROUND, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::BACKGROUND, 0u), visual, TEST_LOCATION);
 
   visual.Detach();
 
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::INVALID, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
 
   END_TEST;
 }
@@ -248,7 +248,7 @@ int UtcDaliLottieAnimationVisualPlayState(void)
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.AddVisuals(
-    Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
+    Visual::DepthLayer::BACKGROUND,
     {visual});
   
   application.GetScene().Add(view);
@@ -309,7 +309,7 @@ int UtcDaliLottieAnimationVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.SetProperty(Property::INVALID_INDEX, Property::Value());});
 
   TestAssertFunction([&](){empty.GetOwner();});
-  TestAssertFunction([&](){empty.GetContainerRangeType();});
+  TestAssertFunction([&](){empty.GetDepthLayer();});
   TestAssertFunction([&](){empty.GetName();});
   TestAssertFunction([&](){empty.GetOffsetX();});
   TestAssertFunction([&](){empty.GetOffsetY();});

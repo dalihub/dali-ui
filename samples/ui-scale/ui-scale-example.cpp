@@ -683,7 +683,7 @@ private:
       visual.SetWidth(ABS_SIZE);
       visual.SetHeight(ABS_SIZE);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::NONE);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row1.Add(MakeLabeled(container, "NONE\nOffset:10px\nSize:60px"));
     }
@@ -703,7 +703,7 @@ private:
       visual.SetWidth(REL_SIZE);
       visual.SetHeight(REL_SIZE);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::ALL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row1.Add(MakeLabeled(container, "ALL\nOffset:0.1\nSize:0.5"));
     }
@@ -723,7 +723,7 @@ private:
       visual.SetWidth(ABS_SIZE);
       visual.SetHeight(ABS_SIZE);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::OFFSET_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row1.Add(MakeLabeled(container, "OFFSET\nOffset:0.1\nSize:60px"));
     }
@@ -748,7 +748,7 @@ private:
       visual.SetWidth(0.8f);
       visual.SetHeight(0.8f);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row2.Add(MakeLabeled(container, "No Extra\nSize:0.8"));
     }
@@ -768,7 +768,7 @@ private:
       visual.SetExtraWidth(EXTRA_SIZE);
       visual.SetExtraHeight(EXTRA_SIZE);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row2.Add(MakeLabeled(container, "Extra +10\nSize:0.6+10"));
     }
@@ -796,7 +796,7 @@ private:
       visual.SetWidth(0.7f);
       visual.SetHeight(0.7f);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row3.Add(MakeLabeled(container, "Blur 15px\nABS radius"));
     }
@@ -817,7 +817,7 @@ private:
       visual.SetWidth(0.7f);
       visual.SetHeight(0.7f);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row3.Add(MakeLabeled(container, "Blur 15px\nREL radius"));
     }
@@ -839,7 +839,7 @@ private:
       visual.SetWidth(0.7f);
       visual.SetHeight(0.7f);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row3.Add(MakeLabeled(container, "Border 4px\nABS radius"));
     }
@@ -871,7 +871,7 @@ private:
       visual.SetOrigin(Ui::Align::CENTER);
       visual.SetPivot(Ui::Align::CENTER);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row4.Add(MakeLabeled(container, "Blur 15px\nABS contaier\nABS radius"));
     }
@@ -896,7 +896,7 @@ private:
       visual.SetOrigin(Ui::Align::CENTER);
       visual.SetPivot(Ui::Align::CENTER);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row4.Add(MakeLabeled(container, "Blur 15px\nABS contaier\nABS relative"));
     }
@@ -921,7 +921,7 @@ private:
       visual.SetOrigin(Ui::Align::CENTER);
       visual.SetPivot(Ui::Align::CENTER);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row4.Add(MakeLabeled(container, "Blur 15px\nREL contaier\nABS radius"));
     }
@@ -946,7 +946,7 @@ private:
       visual.SetOrigin(Ui::Align::CENTER);
       visual.SetPivot(Ui::Align::CENTER);
       visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row4.Add(MakeLabeled(container, "Blur 15px\nREL contaier\nABS relative"));
     }
@@ -987,7 +987,7 @@ private:
       BorderVisual borderVisual = BorderVisual::New();
       borderVisual.SetColor(UiColor(C_DARK_TEXT));
       borderVisual.SetBorderSize(BORDER_WIDTH);
-      container.AddVisual(borderVisual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(borderVisual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       TextVisual textVisual = TextVisual::New();
       textVisual.SetText("BORDER and TEXT");
@@ -996,7 +996,7 @@ private:
       textVisual.SetHorizontalAlignment(Text::Alignment::CENTER);
       textVisual.SetMultiLine(true);
       textVisual.SetLineWrapMode(Text::LineWrapMode::WORD);
-      container.AddVisual(textVisual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      container.AddVisual(textVisual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row5.Add(MakeLabeled(container, "BorderVisual 4px\n"));
     }

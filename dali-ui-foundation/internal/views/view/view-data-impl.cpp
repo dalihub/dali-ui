@@ -6596,20 +6596,20 @@ void ViewDataImpl::DoActionExtension(Dali::Property::Index visualIndex, Dali::Pr
   }
 }
 
-bool ViewDataImpl::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer)
 {
   if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    return EnsureVisualData().AddVisualObject(visualBase, internalContainerRangeType);
+    return EnsureVisualData().AddVisualObject(visualBase, internalDepthLayer);
   }
   return false;
 }
 
-bool ViewDataImpl::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer)
 {
   if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    return EnsureVisualData().AddShadowVisualObject(visualBase, internalContainerRangeType);
+    return EnsureVisualData().AddShadowVisualObject(visualBase, internalDepthLayer);
   }
   return false;
 }
@@ -6622,20 +6622,20 @@ void ViewDataImpl::RemoveVisualObject(Dali::Ui::VisualBase visualBase)
   }
 }
 
-uint32_t ViewDataImpl::GetVisualObjectCount(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType) const
+uint32_t ViewDataImpl::GetVisualObjectCount(Dali::Ui::Visual::DepthLayer internalDepthLayer) const
 {
   if(DALI_LIKELY(mVisualData))
   {
-    return mVisualData->GetVisualObjectCount(internalContainerRangeType);
+    return mVisualData->GetVisualObjectCount(internalDepthLayer);
   }
   return 0u;
 }
 
-Dali::Ui::VisualBase ViewDataImpl::GetVisualObjectAt(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const
+Dali::Ui::VisualBase ViewDataImpl::GetVisualObjectAt(Dali::Ui::Visual::DepthLayer internalDepthLayer, uint32_t siblingOrder) const
 {
   if(DALI_LIKELY(mVisualData))
   {
-    return mVisualData->GetVisualObjectAt(internalContainerRangeType, siblingOrder);
+    return mVisualData->GetVisualObjectAt(internalDepthLayer, siblingOrder);
   }
   return Dali::Ui::VisualBase();
 }
@@ -8181,7 +8181,7 @@ void ViewDataImpl::AppendShadow(const Dali::Ui::Shadow& shadow)
 
   ColorVisual visual = Extension::Shadow::CreateVisual(shadow);
   visual.SetName("shadow");
-  if(AddShadowVisualObject(visual, Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND))
+  if(AddShadowVisualObject(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND_EFFECT))
   {
     if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
     {

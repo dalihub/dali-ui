@@ -721,9 +721,9 @@ bool ViewImpl::TryGetLayoutParams(StackLayoutParams& params) const
 // VisualBase API
 // =============================================================================
 
-bool ViewImpl::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)
+bool ViewImpl::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer)
 {
-  return mImpl->AddVisualObject(visualBase, static_cast<Dali::Ui::Integration::Visual::InternalContainerRangeType>(containerRangeType));
+  return mImpl->AddVisualObject(visualBase, depthLayer);
 }
 
 void ViewImpl::RemoveVisual(Dali::Ui::VisualBase visualBase)
@@ -731,14 +731,14 @@ void ViewImpl::RemoveVisual(Dali::Ui::VisualBase visualBase)
   mImpl->RemoveVisualObject(visualBase);
 }
 
-uint32_t ViewImpl::GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const
+uint32_t ViewImpl::GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const
 {
-  return mImpl->GetVisualObjectCount(static_cast<Dali::Ui::Integration::Visual::InternalContainerRangeType>(containerRangeType));
+  return mImpl->GetVisualObjectCount(depthLayer);
 }
 
-Dali::Ui::VisualBase ViewImpl::GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const
+Dali::Ui::VisualBase ViewImpl::GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const
 {
-  return mImpl->GetVisualObjectAt(static_cast<Dali::Ui::Integration::Visual::InternalContainerRangeType>(containerRangeType), siblingOrder);
+  return mImpl->GetVisualObjectAt(depthLayer, siblingOrder);
 }
 
 // =============================================================================

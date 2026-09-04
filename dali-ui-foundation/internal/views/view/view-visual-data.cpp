@@ -1446,39 +1446,39 @@ void ViewDataImpl::VisualData::OffscreenRenderingEnabled(bool enabled)
   mCornerRadiusValueAdded = true;
 }
 
-bool ViewDataImpl::VisualData::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::VisualData::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer)
 {
-  int containerIndex = static_cast<int>(internalContainerRangeType);
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  int rangeIndex = static_cast<int>(internalDepthLayer);
+  DALI_ASSERT_ALWAYS(0 <= rangeIndex && rangeIndex < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
 
-  if(!mVisualObjectsContainer[containerIndex])
+  if(!mVisualObjectsContainer[rangeIndex])
   {
     Dali::Ui::View handle(mOuter.mViewImpl.GetOwner());
-    mVisualObjectsContainer[containerIndex] = Dali::Ui::Integration::VisualsContainer::New(handle, internalContainerRangeType);
+    mVisualObjectsContainer[rangeIndex] = Dali::Ui::Integration::VisualsContainer::New(handle, internalDepthLayer);
   }
 
-  return mVisualObjectsContainer[containerIndex].AddVisualBase(visualBase);
+  return mVisualObjectsContainer[rangeIndex].AddVisualBase(visualBase);
 }
 
-bool ViewDataImpl::VisualData::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::VisualData::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer)
 {
-  int containerIndex = static_cast<int>(internalContainerRangeType);
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  int rangeIndex = static_cast<int>(internalDepthLayer);
+  DALI_ASSERT_ALWAYS(0 <= rangeIndex && rangeIndex < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
 
-  if(!mVisualObjectsContainer[containerIndex])
+  if(!mVisualObjectsContainer[rangeIndex])
   {
     Dali::Ui::View handle(mOuter.mViewImpl.GetOwner());
-    mVisualObjectsContainer[containerIndex] = Dali::Ui::Integration::VisualsContainer::New(handle, internalContainerRangeType);
+    mVisualObjectsContainer[rangeIndex] = Dali::Ui::Integration::VisualsContainer::New(handle, internalDepthLayer);
   }
 
-  return mVisualObjectsContainer[containerIndex].AddShadowVisualBase(visualBase, Dali::Ui::Integration::VisualsContainer::ShadowType::BOX_SHADOW);
+  return mVisualObjectsContainer[rangeIndex].AddShadowVisualBase(visualBase, Dali::Ui::Integration::VisualsContainer::ShadowType::BOX_SHADOW);
 }
 
 void ViewDataImpl::VisualData::RemoveBoxShadowVisualObjects()
 {
-  constexpr auto rangeType      = Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND;
-  const int      containerIndex = static_cast<int>(rangeType);
-  auto&          container      = mVisualObjectsContainer[containerIndex];
+  constexpr auto depthLayer = Dali::Ui::Visual::DepthLayer::BACKGROUND_EFFECT;
+  const int      rangeIndex = static_cast<int>(depthLayer);
+  auto&          container  = mVisualObjectsContainer[rangeIndex];
 
   for(uint32_t index = container ? container.GetVisualBasesCount() : 0u; index > 0u;)
   {
@@ -1503,35 +1503,35 @@ void ViewDataImpl::VisualData::RemoveVisualObject(Dali::Ui::VisualBase visualBas
     return;
   }
 
-  int containerIndex = static_cast<int>(container.GetContainerRangeType());
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  int rangeIndex = static_cast<int>(container.GetDepthLayer());
+  DALI_ASSERT_ALWAYS(0 <= rangeIndex && rangeIndex < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
 
-  if(DALI_LIKELY(mVisualObjectsContainer[containerIndex] == container))
+  if(DALI_LIKELY(mVisualObjectsContainer[rangeIndex] == container))
   {
-    mVisualObjectsContainer[containerIndex].RemoveVisualBase(visualBase);
+    mVisualObjectsContainer[rangeIndex].RemoveVisualBase(visualBase);
   }
 }
 
-uint32_t ViewDataImpl::VisualData::GetVisualObjectCount(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType) const
+uint32_t ViewDataImpl::VisualData::GetVisualObjectCount(Dali::Ui::Visual::DepthLayer internalDepthLayer) const
 {
-  int containerIndex = static_cast<int>(internalContainerRangeType);
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  int rangeIndex = static_cast<int>(internalDepthLayer);
+  DALI_ASSERT_ALWAYS(0 <= rangeIndex && rangeIndex < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
 
-  if(mVisualObjectsContainer[containerIndex])
+  if(mVisualObjectsContainer[rangeIndex])
   {
-    return mVisualObjectsContainer[containerIndex].GetVisualBasesCount();
+    return mVisualObjectsContainer[rangeIndex].GetVisualBasesCount();
   }
   return 0u;
 }
 
-Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const
+Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::Visual::DepthLayer internalDepthLayer, uint32_t siblingOrder) const
 {
-  int containerIndex = static_cast<int>(internalContainerRangeType);
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  int rangeIndex = static_cast<int>(internalDepthLayer);
+  DALI_ASSERT_ALWAYS(0 <= rangeIndex && rangeIndex < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
 
-  if(mVisualObjectsContainer[containerIndex])
+  if(mVisualObjectsContainer[rangeIndex])
   {
-    return mVisualObjectsContainer[containerIndex].GetVisualBaseAt(siblingOrder);
+    return mVisualObjectsContainer[rangeIndex].GetVisualBaseAt(siblingOrder);
   }
   return Dali::Ui::VisualBase();
 }

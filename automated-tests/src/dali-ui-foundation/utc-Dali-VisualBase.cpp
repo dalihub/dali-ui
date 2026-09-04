@@ -53,57 +53,57 @@ int UtcDaliVisualBaseCreateAndOwner(void)
 
   // Initially, the visual is not attached to any view.
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::INVALID, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
 
   View view = View::New();
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::BACKGROUND), true, TEST_LOCATION);
 
   DALI_TEST_EQUALS(visual.GetOwner(), view, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u), visual, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::BACKGROUND, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::BACKGROUND, 0u), visual, TEST_LOCATION);
 
   visual.Detach();
 
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::INVALID, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::FOREGROUND_EFFECT), true, TEST_LOCATION);
 
   DALI_TEST_EQUALS(visual.GetOwner(), view, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualAt(Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT, 0u), visual, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::FOREGROUND_EFFECT, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::FOREGROUND_EFFECT), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::FOREGROUND_EFFECT, 0u), visual, TEST_LOCATION);
 
   // Already added visual. Return false.
-  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::FOREGROUND_EFFECT), false, TEST_LOCATION);
 
   DALI_TEST_EQUALS(visual.GetOwner(), view, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualAt(Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT, 0u), visual, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::FOREGROUND_EFFECT, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::FOREGROUND_EFFECT), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::FOREGROUND_EFFECT, 0u), visual, TEST_LOCATION);
 
   // Change anther view. Owner of visual be changed.
   View anotherView = View::New();
-  DALI_TEST_EQUALS(anotherView.AddVisual(visual, Visual::ContainerRangeType::UNDER_BACKGROUND_EFFECT), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(anotherView.AddVisual(visual, Visual::DepthLayer::BACKGROUND_EFFECT), true, TEST_LOCATION);
 
   DALI_TEST_EQUALS(visual.GetOwner(), anotherView, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::UNDER_BACKGROUND_EFFECT, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(anotherView.GetVisualCount(Visual::ContainerRangeType::UNDER_BACKGROUND_EFFECT), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(anotherView.GetVisualAt(Visual::ContainerRangeType::UNDER_BACKGROUND_EFFECT, 0u), visual, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::BACKGROUND_EFFECT, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::FOREGROUND_EFFECT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(anotherView.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(anotherView.GetVisualAt(Visual::DepthLayer::BACKGROUND_EFFECT, 0u), visual, TEST_LOCATION);
 
-  for(int type = static_cast<int>(Visual::ContainerRangeType::UNDER_BACKGROUND_EFFECT) + 1; type < static_cast<int>(Visual::ContainerRangeType::MAX_COUNT); ++type)
+  for(int type = static_cast<int>(Visual::DepthLayer::BACKGROUND_EFFECT) + 1; type < static_cast<int>(Visual::DepthLayer::MAX_COUNT); ++type)
   {
-    auto rangeType = static_cast<Visual::ContainerRangeType>(type);
-    DALI_TEST_EQUALS(anotherView.AddVisual(visual, rangeType), true, TEST_LOCATION);
-    DALI_TEST_EQUALS(visual.GetContainerRangeType(), rangeType, TEST_LOCATION);
-    DALI_TEST_EQUALS(anotherView.GetVisualCount(rangeType), 1u, TEST_LOCATION);
-    DALI_TEST_EQUALS(anotherView.GetVisualAt(rangeType, 0u), visual, TEST_LOCATION);
+    auto depthLayer = static_cast<Visual::DepthLayer>(type);
+    DALI_TEST_EQUALS(anotherView.AddVisual(visual, depthLayer), true, TEST_LOCATION);
+    DALI_TEST_EQUALS(visual.GetDepthLayer(), depthLayer, TEST_LOCATION);
+    DALI_TEST_EQUALS(anotherView.GetVisualCount(depthLayer), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(anotherView.GetVisualAt(depthLayer, 0u), visual, TEST_LOCATION);
   }
 
   // No effort if we try to remove from another view.
@@ -114,7 +114,7 @@ int UtcDaliVisualBaseCreateAndOwner(void)
   anotherView.RemoveVisual(visual);
 
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::INVALID, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -371,7 +371,7 @@ int UtcDaliVisualBaseSiblingOrder(void)
   VisualBase visual3 = ColorVisual::New();
   VisualBase visual4 = ColorVisual::New();
 
-  auto type = Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT;
+  auto type = Visual::DepthLayer::BACKGROUND;
 
   // Add visuals to the view.
   view.AddVisual(visual1, type);
@@ -460,7 +460,7 @@ int UtcDaliVisualBaseRecreateBorderVisual01(void)
   View       view    = View::New();
   VisualBase visual = BorderVisual::New();
 
-  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+  view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
 
   application.GetScene().Add(view);
 
@@ -516,7 +516,7 @@ int UtcDaliVisualBaseRecreateColorVisual01(void)
   View       view    = View::New();
   VisualBase visual = ColorVisual::New();
 
-  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+  view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
 
   application.GetScene().Add(view);
 
@@ -593,7 +593,7 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
   });
   VisualBase visual = gradientVisual;
 
-  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+  view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
 
   application.GetScene().Add(view);
 
@@ -686,7 +686,7 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
   View       view    = View::New();
   VisualBase visual = GradientVisual::New();
 
-  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+  view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
 
   application.GetScene().Add(view);
 
@@ -785,7 +785,7 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
   visual.SetText("Hello");
   visual.SetFontSize(20.0f);
 
-  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+  view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
 
   application.GetScene().Add(view);
 
@@ -879,7 +879,7 @@ int UtcDaliVisualBaseInvalidHandle(void)
   TestAssertFunction([&](){empty.SetProperty(Property::INVALID_INDEX, Property::Value());});
 
   TestAssertFunction([&](){empty.GetOwner();});
-  TestAssertFunction([&](){empty.GetContainerRangeType();});
+  TestAssertFunction([&](){empty.GetDepthLayer();});
   TestAssertFunction([&](){empty.GetName();});
   TestAssertFunction([&](){empty.GetOffsetX();});
   TestAssertFunction([&](){empty.GetOffsetY();});

@@ -167,33 +167,6 @@ enum Type
 
 } // namespace Transform
 
-/**
- * @brief Internal enumeration for the container range type.
- *
- * This enum be used when internal view want to use VisualBase class.
- *
- * @note This enum is for internal use only.
- */
-enum class InternalContainerRangeType
-{
-  UNDER_BACKGROUND_EFFECT                  = static_cast<int>(Dali::Ui::Visual::ContainerRangeType::UNDER_BACKGROUND_EFFECT),
-  BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND = static_cast<int>(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND),
-  BETWEEN_BACKGROUND_AND_CONTENT           = static_cast<int>(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT),
-  BETWEEN_CONTENT_AND_DECORATION           = static_cast<int>(Dali::Ui::Visual::ContainerRangeType::BETWEEN_CONTENT_AND_DECORATION),
-  BETWEEN_DECORATION_AND_FOREGROUND_EFFECT = static_cast<int>(Dali::Ui::Visual::ContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT),
-  OVER_FOREGROUND_EFFECT                   = static_cast<int>(Dali::Ui::Visual::ContainerRangeType::OVER_FOREGROUND_EFFECT),
-
-  BACKGROUND_EFFECT = static_cast<int>(Dali::Ui::Visual::ContainerRangeType::MAX_COUNT), ///< Matches Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT
-  BACKGROUND,                                                                            ///< Matches Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND
-  CONTENT,                                                                               ///< Matches Dali::Ui::Integration::DepthIndex::Ranges::CONTENT
-  DECORATION,                                                                            ///< Matches Dali::Ui::Integration::DepthIndex::Ranges::DECORATION
-  FOREGROUND_EFFECT,                                                                     ///< Matches Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT
-
-  MAX_COUNT,
-
-  INVALID = static_cast<int>(Dali::Ui::Visual::ContainerRangeType::INVALID),
-};
-
 } // namespace Visual
 
 } // namespace Integration

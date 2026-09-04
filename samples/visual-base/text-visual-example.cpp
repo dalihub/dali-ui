@@ -165,14 +165,14 @@ ColorVisual CreateCustomInnerShadow2()
 void AddDecorativeVisuals(View view)
 {
   view.AddVisuals(
-    Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND,
+    Visual::DepthLayer::BACKGROUND_EFFECT,
     {
       CreateCustomShadow1(),
       CreateCustomShadow2(),
       CreateCustomShadow3(),
     });
   view.AddVisuals(
-    Visual::ContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT,
+    Visual::DepthLayer::DECORATION,
     {
       CreateCustomInnerShadow1(),
       CreateCustomInnerShadow2(),
@@ -312,16 +312,16 @@ private:
     visual.SetOffsetY(GetRandomFloat() * 0.2f - 0.1f);
     visual.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);
 
-    mView.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    mView.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
     UpdateVisualCount();
   }
 
   void PopVisual()
   {
-    uint32_t visualCount = mView.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    uint32_t visualCount = mView.GetVisualCount(Visual::DepthLayer::BACKGROUND);
     if(visualCount > 0u)
     {
-      auto visual = mView.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, visualCount - 1u);
+      auto visual = mView.GetVisualAt(Visual::DepthLayer::BACKGROUND, visualCount - 1u);
       mView.RemoveVisual(visual);
       UpdateVisualCount();
     }
@@ -329,7 +329,7 @@ private:
 
   void UpdateVisualCount()
   {
-    std::string numberOfVisuals = std::to_string(mView.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT));
+    std::string numberOfVisuals = std::to_string(mView.GetVisualCount(Visual::DepthLayer::BACKGROUND));
     mVisualCounter.SetText((std::string("Visuals Count : #") + numberOfVisuals).c_str());
   }
 

@@ -725,9 +725,9 @@ void View::LowerBelow(View target, LayoutOrderPolicy policy)
   GetImpl(*this).LowerBelow(target, policy);
 }
 
-bool View::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)
+bool View::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer)
 {
-  return GetImpl(*this).AddVisual(visualBase, containerRangeType);
+  return GetImpl(*this).AddVisual(visualBase, depthLayer);
 }
 
 void View::RemoveVisual(Dali::Ui::VisualBase visualBase)
@@ -735,14 +735,14 @@ void View::RemoveVisual(Dali::Ui::VisualBase visualBase)
   GetImpl(*this).RemoveVisual(visualBase);
 }
 
-uint32_t View::GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const
+uint32_t View::GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const
 {
-  return GetImpl(*this).GetVisualCount(containerRangeType);
+  return GetImpl(*this).GetVisualCount(depthLayer);
 }
 
-Dali::Ui::VisualBase View::GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const
+Dali::Ui::VisualBase View::GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const
 {
-  return GetImpl(*this).GetVisualAt(containerRangeType, siblingOrder);
+  return GetImpl(*this).GetVisualAt(depthLayer, siblingOrder);
 }
 
 void View::ClearBackground()

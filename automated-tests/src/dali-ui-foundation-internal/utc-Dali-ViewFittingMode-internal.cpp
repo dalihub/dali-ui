@@ -389,7 +389,7 @@ int UtcDaliTextVisualStandaloneFittingStillApplies(void)
   visual.SetWidth(0.75f);
   visual.SetHeight(0.5f);
   visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+  view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
 
   application.GetScene().Add(view);
   application.SendNotification();

@@ -1193,14 +1193,14 @@ public:
    * Assert if too many visuals are added, or duplicated VisualBase added.
    * Please use AddVisual() API if you need to control error cases.
    *
-   * @param[in] containerRangeType The range of visuals to be added.
+   * @param[in] depthLayer The layer to add the visual to.
    * @param[in] visuals The initializer list containing VisualBase handles to be added.
    */
-  void AddVisuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals)
+  void AddVisuals(Dali::Ui::Visual::DepthLayer depthLayer, std::initializer_list<Dali::Ui::VisualBase> visuals)
   {
     for(const auto& visual : visuals)
     {
-      bool added = AddVisual(visual, containerRangeType);
+      bool added = AddVisual(visual, depthLayer);
       DALI_ASSERT_ALWAYS(added && "Too many visuals are added by declarative method, or try to add duplicated VisualBase!");
     }
   }
@@ -1633,10 +1633,10 @@ public: // VisualBase (non-chaining)
    * visual will be detached from old view and added to this view.
    *
    * @param[in] visualBase The visual to add.
-   * @param[in] containerRangeType The range of visuals to be added.
+   * @param[in] depthLayer The layer to add the visual to.
    * @return True if the visual was added successfully, false otherwise.
    */
-  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType);
+  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer);
 
   /**
    * @brief Remove a Dali::Ui::VisualBase from the view.
@@ -1651,19 +1651,19 @@ public: // VisualBase (non-chaining)
   /**
    * @brief Get total number of Dali::Ui::VisualBase which we added using AddVisual().
    *
-   * @param[in] containerRangeType The range of visuals to get.
+   * @param[in] depthLayer The layer to get the visual from.
    * @return Get the number of visual base.
    */
-  uint32_t GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const;
+  uint32_t GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const;
 
   /**
    * @brief Get a Dali::Ui::VisualBase by sibling order.
    *
-   * @param[in] containerRangeType The range of visuals to get.
+   * @param[in] depthLayer The layer to get the visual from.
    * @param[in] siblingOrder The sibling order to get.
    * @return Get visual base by sibling order. Empty handle if not exist.
    */
-  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const;
+  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const;
 
 public: // Not intended for application developers
   /// @cond internal

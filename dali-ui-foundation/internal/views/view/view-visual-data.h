@@ -317,16 +317,16 @@ public:
   /**
    * @copydoc Ui::View::AddVisual()
    */
-  bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType);
+  bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer);
 
   /**
    * @brief Adds a shadow visual object to this view.
    *
    * @param[in] visualBase The shadow visual to add
-   * @param[in] internalContainerRangeType The range of visuals to be added
+   * @param[in] internalDepthLayer The layer to add the visual to
    * @return True if the visual was added successfully, false otherwise
    */
-  bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType);
+  bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer);
 
   /**
    * @brief Removes all box shadow visuals from the background effect container.
@@ -341,12 +341,12 @@ public:
   /**
    * @copydoc Ui::View::GetVisualCount()
    */
-  uint32_t GetVisualObjectCount(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType) const;
+  uint32_t GetVisualObjectCount(Dali::Ui::Visual::DepthLayer internalDepthLayer) const;
 
   /**
    * @copydoc Ui::View::GetVisualAt()
    */
-  Dali::Ui::VisualBase GetVisualObjectAt(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t index) const;
+  Dali::Ui::VisualBase GetVisualObjectAt(Dali::Ui::Visual::DepthLayer internalDepthLayer, uint32_t index) const;
 
 private:
   /**
@@ -399,7 +399,7 @@ public:
   RegisteredVisualContainer       mRemoveVisuals; ///< List of visuals that are being replaced by another visual once ready
 
 public:
-  Ui::Integration::VisualsContainer mVisualObjectsContainer[static_cast<uint32_t>(Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT)]; ///< The containers for VisualBase class.
+  Ui::Integration::VisualsContainer mVisualObjectsContainer[static_cast<uint32_t>(Dali::Ui::Visual::DepthLayer::MAX_COUNT)]; ///< The containers for VisualBase class.
 
 private:
   ViewDataImpl& mOuter;

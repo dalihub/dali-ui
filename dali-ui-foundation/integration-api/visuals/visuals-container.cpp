@@ -36,9 +36,9 @@ VisualsContainer::VisualsContainer(Dali::Ui::Internal::VisualsContainer* object)
 {
 }
 
-VisualsContainer VisualsContainer::New(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType)
+VisualsContainer VisualsContainer::New(Dali::Ui::View view, Dali::Ui::Visual::DepthLayer depthLayer)
 {
-  Dali::Ui::Internal::VisualsContainerPtr internal = Dali::Ui::Internal::VisualsContainer::New(view, rangeType);
+  Dali::Ui::Internal::VisualsContainerPtr internal = Dali::Ui::Internal::VisualsContainer::New(view, depthLayer);
   return VisualsContainer(internal.Get());
 }
 
@@ -54,9 +54,9 @@ Dali::Ui::View VisualsContainer::GetOwner() const
   return GetImplementation(*this).GetOwner();
 }
 
-Dali::Ui::Integration::Visual::InternalContainerRangeType VisualsContainer::GetContainerRangeType() const
+Dali::Ui::Visual::DepthLayer VisualsContainer::GetDepthLayer() const
 {
-  return GetImplementation(*this).GetContainerRangeType();
+  return GetImplementation(*this).GetDepthLayer();
 }
 
 uint32_t VisualsContainer::GetVisualBasesCount() const

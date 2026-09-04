@@ -43,15 +43,15 @@ namespace Integration
  * @brief VisualsContainer is a container for visual objects for dali-ui specific policy.
  *
  * For each VisualBaseContainer, there is a corresponding view.
- * Each view can has only one VisualsContainer per each ContainerRangeType.
+ * Each view can has only one VisualsContainer per each DepthLayer.
  *
  * It is used to manage visual objects properties to owned view;
  * e.g. SiblingOrder of visual objects to DepthIndex of visual.
  *
  * To avoid the collision between internal visual logic and dali-ui specific policy,
- * there is some limitation of visual object counts per each ContainerRangeType.
+ * there is some limitation of visual object counts per each DepthLayer.
  *
- * For example, if ContainerRangeType is ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
+ * For example, if DepthLayer is DepthLayer::BACKGROUND,
  * it will use visual object's depth index only between
  * Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND and Dali::Ui::Integration::DepthIndex::Ranges::CONTENT.
  * If user try to add over the Dali::Ui::Integration::DepthIndex::Ranges::CONTENT, it will be ignored.
@@ -77,11 +77,11 @@ public:
    * @brief Creates a VisualsContainer object.
    *
    * @param[in] view The view that owns this VisualsContainer.
-   * @param[in] rangeType The range type of this VisualsContainer.
+   * @param[in] depthLayer The depth layer of this VisualsContainer.
    * @return The newly created visual objects container
-   * @post The view should not create another VisualsContainer for each rangeType.
+   * @post The view should not create another VisualsContainer for each depthLayer.
    */
-  static VisualsContainer New(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType);
+  static VisualsContainer New(Dali::Ui::View view, Dali::Ui::Visual::DepthLayer depthLayer);
 
 public: ///< Public API
   /**
@@ -92,11 +92,11 @@ public: ///< Public API
   Dali::Ui::View GetOwner() const;
 
   /**
-   * @brief Gets the range type of VisualsContainer.
+   * @brief Gets the depth layer of VisualsContainer.
    *
-   * @return The range type of VisualsContainer.
+   * @return The depth layer of VisualsContainer.
    */
-  Dali::Ui::Integration::Visual::InternalContainerRangeType GetContainerRangeType() const;
+  Dali::Ui::Visual::DepthLayer GetDepthLayer() const;
 
   /**
    * @brief Gets the number of visual objects in the container.

@@ -737,21 +737,21 @@ public:
   void DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                          const Dali::Any& attributes);
 
-  bool AddVisualObject(VisualBase visualBase, Integration::Visual::InternalContainerRangeType internalContainerRangeType);
+  bool AddVisualObject(VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer);
 
   /**
    * @brief Adds a shadow visual object.
    * @param[in] visualBase The shadow visual to add
-   * @param[in] internalContainerRangeType The range of visuals to be added
+   * @param[in] internalDepthLayer The layer to add the visual to
    * @return True if the visual was added successfully, false otherwise
    */
-  bool AddShadowVisualObject(VisualBase visualBase, Integration::Visual::InternalContainerRangeType internalContainerRangeType);
+  bool AddShadowVisualObject(VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer);
 
   void RemoveVisualObject(VisualBase visualBase);
 
-  uint32_t GetVisualObjectCount(Integration::Visual::InternalContainerRangeType internalContainerRangeType) const;
+  uint32_t GetVisualObjectCount(Dali::Ui::Visual::DepthLayer internalDepthLayer) const;
 
-  VisualBase GetVisualObjectAt(Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const;
+  VisualBase GetVisualObjectAt(Dali::Ui::Visual::DepthLayer internalDepthLayer, uint32_t siblingOrder) const;
 
   /**
    * @brief Function used to set view properties.
