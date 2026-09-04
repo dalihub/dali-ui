@@ -32,6 +32,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-signals-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h> ///< For Internal::ViewDataImpl::IsLayoutPassOnStack()
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-manager.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
@@ -1035,7 +1036,31 @@ void AnimatedVectorImageVisual::TriggerVectorRasterization()
     auto& vectorAnimationManager = mFactoryCache.GetVectorAnimationManager();
     vectorAnimationManager.RegisterEventCallback(mEventCallback);
 
-    Dali::Adaptor::Get().RequestProcessEventsAndUpdate(); // Trigger event processing
+    // LAYOUT PROCESSING WINDOW, pass half. This method is reachable from inside a
+    // Measure/Arrange pass -- a visual created from a view's OnMeasure, a fitting-mode
+    // transform applied from its OnArrange, or any DoAction on this visual -- and an
+    // unconditional main-loop wake there lets a per-pass producer drive ProcessEvents
+    // forever. Only the WAKE is parked; the callback registered above is always kept,
+    // so no work is lost:
+    //  - the manager registers itself as a ONCE POST processor, and a registration made
+    //    during the pre phase is drained by RunPostProcessors() in the SAME ProcessEvents
+    //    cycle, so the animation data still reaches the task this frame;
+    //  - the rasterized frame comes back on the vector animation thread's own event-thread
+    //    trigger, which wakes the main loop independently of this request.
+    // A pass driven by an explicit View::Measure()/Arrange() outside ProcessEvents parks
+    // like every other in-window request: retained, and serviced by the next independently
+    // triggered cycle (docs/layout-structure.md, "The layout processing window").
+    // The LayoutFinished half is deliberately NOT gated: a slot runs in the post phase,
+    // after the once-post bucket has been swapped and drained, so its registration lands in
+    // the next cycle and this wake is the only thing that can service it. The framework's
+    // own post-phase entry -- ViewDataImpl::OnLayoutFinished -> ApplyFittingMode ->
+    // OnSetTransform on a fitting-mode visual -- runs at pass depth 0 and stays ungated for
+    // the same reason; it converges because OnSetTransform only triggers when the visual
+    // size actually changed.
+    if(!Internal::ViewDataImpl::IsLayoutPassOnStack())
+    {
+      Dali::Adaptor::Get().RequestProcessEventsAndUpdate(); // Trigger event processing
+    }
   }
 }
 
