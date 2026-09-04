@@ -88,6 +88,14 @@ float ConvertPointToPixel(float point, TextAbstraction::FontClient& fontClient)
   return point * GetDpi(fontClient) / 72.0f;
 }
 
+bool UseLogicalReplacementAutoLineMetrics(const Text::AsyncTextParameters& parameters, bool hasActiveReplacement)
+{
+  return hasActiveReplacement &&
+         parameters.renderScale > 1.0f &&
+         parameters.relativeLineSize < 0.0f &&
+         parameters.minLineSize == 0.0f;
+}
+
 std::string AnchorHrefToString(const Text::Anchor& anchor)
 {
   return anchor.href == nullptr ? std::string() : std::string(anchor.href);
@@ -681,6 +689,35 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                      numberOfCharacters,
                                      validFonts,
                                      variationsMapPtr);
+
+    // AUTO replacement layout needs the exact scale-1 font choices in order
+    // to make the same line-boundary decision at higher raster resolutions.
+    // Keep this data request-local and use the normal validation path so
+    // fallback, emoji and variable-font selection are not reconstructed from
+    // a scaled FontId.
+    if(UseLogicalReplacementAutoLineMetrics(parameters, true))
+    {
+      const float                            logicalFontScale = effectiveTextScale;
+      const TextAbstraction::PointSize26Dot6 logicalDefaultPointSize =
+        static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * logicalFontScale * numberOfPointsPerOneUnitOfPointSize);
+      ValidateFontsForProcessingSource(mModule.GetMultilanguageSupport(),
+                                       mModule.GetFontClient(),
+                                       processingSource,
+                                       scripts,
+                                       defaultFontDescription,
+                                       logicalDefaultPointSize,
+                                       logicalFontScale,
+                                       0u,
+                                       numberOfCharacters,
+                                       mReplacementData->logicalFontRuns,
+                                       variationsMapPtr);
+      mReplacementData->logicalDefaultFontId =
+        mModule.GetFontClient().GetFontId(defaultFontDescription,
+                                          logicalDefaultPointSize,
+                                          0u,
+                                          variationsMapPtr);
+      mReplacementData->lineMetricRenderScale = parameters.renderScale;
+    }
   }
   else
   {
@@ -971,12 +1008,29 @@ void AsyncTextLoader::UpdateReplacementProcessing(AsyncTextParameters& parameter
   result.sourceRevision          = parameters.replacementSourceSnapshot.sourceRevision;
   result.layoutGeneration        = parameters.replacementLayoutGeneration;
 
-  ExtractReplacementPlacements(*mTextModel,
-                               result.projection,
-                               result.finalElision,
-                               mModule.GetFontClient(),
-                               defaultFontId,
-                               result.placements);
+  if(mReplacementData->lineMetricRenderScale > 1.0f && !mReplacementData->logicalFontRuns.Empty())
+  {
+    ReplacementLineMetricData lineMetricData;
+    lineMetricData.logicalFontRuns      = &mReplacementData->logicalFontRuns;
+    lineMetricData.logicalDefaultFontId = mReplacementData->logicalDefaultFontId;
+    lineMetricData.renderScale          = mReplacementData->lineMetricRenderScale;
+    ExtractReplacementPlacements(*mTextModel,
+                                 result.projection,
+                                 result.finalElision,
+                                 mModule.GetFontClient(),
+                                 defaultFontId,
+                                 lineMetricData,
+                                 result.placements);
+  }
+  else
+  {
+    ExtractReplacementPlacements(*mTextModel,
+                                 result.projection,
+                                 result.finalElision,
+                                 mModule.GetFontClient(),
+                                 defaultFontId,
+                                 result.placements);
+  }
 }
 
 void AsyncTextLoader::CopyReplacementResult(AsyncTextRenderInfo& renderInfo, float renderScale) const
@@ -1189,6 +1243,14 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
     replacementLayoutData.layoutDirection     = parameters.layoutDirection;
     replacementLayoutData.matchLayoutDirection =
       mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS;
+    if(UseLogicalReplacementAutoLineMetrics(parameters, true) &&
+       mReplacementData->lineMetricRenderScale == parameters.renderScale &&
+       !mReplacementData->logicalFontRuns.Empty())
+    {
+      replacementLayoutData.lineMetricData.logicalFontRuns      = &mReplacementData->logicalFontRuns;
+      replacementLayoutData.lineMetricData.logicalDefaultFontId = mReplacementData->logicalDefaultFontId;
+      replacementLayoutData.lineMetricData.renderScale          = mReplacementData->lineMetricRenderScale;
+    }
     layoutText(&replacementLayoutData);
   }
   else

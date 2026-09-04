@@ -159,6 +159,9 @@ private:
   {
     ReplacementRenderState renderState;
     Vector<Character>      originalLogicalText;
+    Vector<FontRun>        logicalFontRuns;
+    FontId                 logicalDefaultFontId{0u};
+    float                  lineMetricRenderScale{1.0f};
     uint64_t               finalElisionGeneration{0u};
   };
 

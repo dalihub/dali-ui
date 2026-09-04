@@ -18,11 +18,69 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/font-run.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali::Ui::Text
 {
+/**
+ * @brief Request-local scale-1 font ids for replacement AUTO line geometry.
+ *
+ * The logical runs are produced by the normal font validation path. They are
+ * present only while an async RenderScale replacement request is laid out.
+ */
+struct ReplacementLineMetricData
+{
+  const Vector<FontRun>* logicalFontRuns{nullptr};
+  FontId                 logicalDefaultFontId{0u};
+  float                  renderScale{1.0f};
+
+  bool IsEnabled() const
+  {
+    return logicalFontRuns != nullptr && renderScale > 1.0f;
+  }
+
+  FontId FindLogicalFontId(CharacterIndex characterIndex) const
+  {
+    if(logicalFontRuns == nullptr)
+    {
+      return 0u;
+    }
+    for(const FontRun& run : *logicalFontRuns)
+    {
+      if(characterIndex >= run.characterRun.characterIndex &&
+         characterIndex < run.characterRun.characterIndex + run.characterRun.numberOfCharacters)
+      {
+        return run.fontId;
+      }
+      if(run.characterRun.characterIndex > characterIndex)
+      {
+        break;
+      }
+    }
+    return 0u;
+  }
+
+  /**
+   * @brief Resolves the font and scale used for replacement line metrics.
+   *
+   * A shared font id is kept at its native metric size. This preserves the
+   * fixed metrics of registered bitmap fonts, whose id is independent of the
+   * requested point size.
+   */
+  FontId ResolveFontId(CharacterIndex characterIndex, FontId renderedFontId, float& metricScale) const
+  {
+    metricScale                = 1.0f;
+    const FontId logicalFontId = FindLogicalFontId(characterIndex);
+    if(logicalFontId != 0u && logicalFontId != renderedFontId)
+    {
+      metricScale = renderScale;
+    }
+    return logicalFontId != 0u ? logicalFontId : renderedFontId;
+  }
+};
+
 /**
  * @brief Stores optional, non-owning replacement data used during layout.
  *
@@ -35,6 +93,7 @@ struct ReplacementLayoutData
   Alignment                              horizontalAlignment{Alignment::START};
   Dali::LayoutDirection::Type            layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT};
   bool                                   matchLayoutDirection{false};
+  ReplacementLineMetricData              lineMetricData;
 
   /**
    * @brief Finds the replacement at a projected character index.

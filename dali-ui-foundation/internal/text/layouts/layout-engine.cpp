@@ -312,18 +312,21 @@ struct Engine::Impl
   /**
    * @brief Updates the ordinary-text metrics used by replacement layout.
    *
-   * @param[in] glyphMetrics The metrics of the new font.
+   * @param[in] metricFontId The font id whose metrics are used.
+   * @param[in] metricScale The scale applied to its ascender and descender.
    * @param[in,out] lineLayout The line layout.
    */
-  void UpdateReplacementTextMetrics(const GlyphMetrics& glyphMetrics, LineLayout& lineLayout)
+  void UpdateReplacementTextMetrics(FontId metricFontId, float metricScale, LineLayout& lineLayout)
   {
-    if(0u == glyphMetrics.fontId)
+    if(0u == metricFontId)
     {
       return;
     }
 
     Text::FontMetrics fontMetrics;
-    mMetrics->GetFontMetrics(glyphMetrics.fontId, fontMetrics);
+    mMetrics->GetFontMetrics(metricFontId, fontMetrics);
+    fontMetrics.ascender *= metricScale;
+    fontMetrics.descender *= metricScale;
     lineLayout.textAscender   = lineLayout.hasTextMetrics
                                   ? std::max(lineLayout.textAscender, fontMetrics.ascender)
                                   : fontMetrics.ascender;
@@ -480,8 +483,17 @@ struct Engine::Impl
 
       if(parameters.replacementLayoutData->defaultFontId != 0u)
       {
-        Text::FontMetrics fontMetrics;
-        mMetrics->GetFontMetrics(parameters.replacementLayoutData->defaultFontId, fontMetrics);
+        Text::FontMetrics                fontMetrics;
+        const ReplacementLineMetricData& lineMetricData = parameters.replacementLayoutData->lineMetricData;
+        const FontId                     metricFontId   = lineMetricData.IsEnabled() && lineMetricData.logicalDefaultFontId != 0u
+                                                            ? lineMetricData.logicalDefaultFontId
+                                                            : parameters.replacementLayoutData->defaultFontId;
+        mMetrics->GetFontMetrics(metricFontId, fontMetrics);
+        if(metricFontId != parameters.replacementLayoutData->defaultFontId)
+        {
+          fontMetrics.ascender *= lineMetricData.renderScale;
+          fontMetrics.descender *= lineMetricData.renderScale;
+        }
         ordinaryAscender  = fontMetrics.ascender;
         ordinaryDescender = fontMetrics.descender;
       }
@@ -1125,12 +1137,26 @@ struct Engine::Impl
     tmpLineLayout.relativeLineSize = lineLayout.relativeLineSize;
 
     // Calculate the line height if there is no characters.
-    FontId     lastFontId         = glyphMetrics.fontId;
-    const bool collectTextMetrics = parameters.replacementLayoutData != nullptr;
+    FontId     lastFontId                  = glyphMetrics.fontId;
+    FontId     lastReplacementMetricFontId = glyphMetrics.fontId;
+    float      lastReplacementMetricScale  = 1.0f;
+    const bool collectTextMetrics          = parameters.replacementLayoutData != nullptr;
+    const bool collectLogicalTextMetrics   = collectTextMetrics &&
+                                           parameters.replacementLayoutData->lineMetricData.IsEnabled();
     UpdateLineHeight(glyphMetrics, tmpLineLayout);
     if(collectTextMetrics)
     {
-      UpdateReplacementTextMetrics(glyphMetrics, tmpLineLayout);
+      if(collectLogicalTextMetrics &&
+         lineLayout.glyphIndex < parameters.textModel->mVisualModel->mGlyphsToCharacters.Count())
+      {
+        lastReplacementMetricFontId = parameters.replacementLayoutData->lineMetricData.ResolveFontId(
+          parameters.textModel->mVisualModel->mGlyphsToCharacters[lineLayout.glyphIndex],
+          glyphMetrics.fontId,
+          lastReplacementMetricScale);
+      }
+      UpdateReplacementTextMetrics(lastReplacementMetricFontId,
+                                   lastReplacementMetricScale,
+                                   tmpLineLayout);
     }
 
     bool       oneWordLaidOut   = false;
@@ -1160,11 +1186,31 @@ struct Engine::Impl
       if(lastFontId != glyphMetrics.fontId)
       {
         UpdateLineHeight(glyphMetrics, tmpLineLayout);
-        if(collectTextMetrics)
+        if(collectTextMetrics && !collectLogicalTextMetrics)
         {
-          UpdateReplacementTextMetrics(glyphMetrics, tmpLineLayout);
+          UpdateReplacementTextMetrics(glyphMetrics.fontId, 1.0f, tmpLineLayout);
         }
         lastFontId = glyphMetrics.fontId;
+      }
+
+      // Logical and rendered validation normally produce matching run
+      // boundaries, but size-dependent fallback is allowed to segment them
+      // differently. The target RenderScale path must therefore follow the
+      // logical boundary rather than the rendered font-id transition.
+      if(DALI_UNLIKELY(collectLogicalTextMetrics) &&
+         glyphIndex < parameters.textModel->mVisualModel->mGlyphsToCharacters.Count())
+      {
+        float        metricScale  = 1.0f;
+        const FontId metricFontId = parameters.replacementLayoutData->lineMetricData.ResolveFontId(
+          parameters.textModel->mVisualModel->mGlyphsToCharacters[glyphIndex],
+          glyphMetrics.fontId,
+          metricScale);
+        if(metricFontId != lastReplacementMetricFontId || metricScale != lastReplacementMetricScale)
+        {
+          UpdateReplacementTextMetrics(metricFontId, metricScale, tmpLineLayout);
+          lastReplacementMetricFontId = metricFontId;
+          lastReplacementMetricScale  = metricScale;
+        }
       }
 
       // Get the character indices for the current glyph. The last character index is needed

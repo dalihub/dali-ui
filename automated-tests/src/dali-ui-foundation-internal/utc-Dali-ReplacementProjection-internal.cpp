@@ -19,6 +19,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <utility>
 #include <vector>
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/public-api/rendering/texture.h>
@@ -4202,6 +4203,443 @@ int UtcDaliReplacementAsyncRenderScalePlacementP(void)
                    TEST_LOCATION);
   DALI_TEST_EQUALS(renderInfo.replacementSourceRevision, 51u, TEST_LOCATION);
   DALI_TEST_EQUALS(renderInfo.replacementLayoutGeneration, 81u, TEST_LOCATION);
+
+  struct LineHeightSummary
+  {
+    float    lineHeight{0.0f};
+    float    textHeight{0.0f};
+    float    lineSpacing{0.0f};
+    float    selectedPointSize{0.0f};
+    uint32_t lineCount{0u};
+  };
+
+  enum class LineHeightFitMode
+  {
+    NONE,
+    RANGE,
+    CANDIDATES
+  };
+
+  auto renderLineHeight = [horizontalDpi](float renderScale, float effectiveTextScale,
+                                          float relativeLineSize, float minimumLineSize,
+                                          LineHeightFitMode fitMode)
+  {
+    Text::AsyncTextParameters lineParameters;
+    lineParameters.text               = "First line\nSecond \xEF\xBF\xBC line";
+    lineParameters.fontSize           = 18.0f * 72.0f / static_cast<float>(horizontalDpi);
+    lineParameters.textWidth          = 300.0f;
+    lineParameters.textHeight         = 200.0f;
+    lineParameters.isMultiLine        = true;
+    lineParameters.renderScale        = renderScale;
+    lineParameters.effectiveTextScale = effectiveTextScale;
+    lineParameters.relativeLineSize   = relativeLineSize;
+    lineParameters.minLineSize        = minimumLineSize;
+    if(fitMode == LineHeightFitMode::RANGE)
+    {
+      lineParameters.isTextFitEnabled = true;
+      lineParameters.textFitMinSize   = lineParameters.fontSize;
+      lineParameters.textFitMaxSize   = lineParameters.fontSize;
+      lineParameters.textFitStepSize  = 1.0f;
+    }
+    else if(fitMode == LineHeightFitMode::CANDIDATES)
+    {
+      lineParameters.isTextFitCandidatesEnabled = true;
+      lineParameters.textFitCandidates.PushBack(Text::Fit::Candidate(18.0f, 0.0f));
+    }
+    lineParameters.replacementSourceSnapshot.runs.PushBack(Candidate(18u, 1u, 8.0f, 8.0f, 901u));
+    lineParameters.replacementSourceSnapshot.hasValidReplacementSource = true;
+
+    Text::AsyncTextLoader lineLoader  = Text::AsyncTextLoader::New();
+    bool                  cached      = false;
+    Size                  naturalSize = Size::ZERO;
+    if(renderScale > 1.0f)
+    {
+      naturalSize = lineLoader.SetupRenderScale(lineParameters, cached);
+    }
+    if(fitMode == LineHeightFitMode::NONE)
+    {
+      lineLoader.RenderText(lineParameters, cached, naturalSize);
+    }
+    else
+    {
+      lineLoader.RenderTextFit(lineParameters, cached, naturalSize);
+    }
+
+    const Text::ReplacementRenderState* state = Text::GetImplementation(lineLoader).GetReplacementRenderState();
+    DALI_TEST_CHECK(state && state->processingModel);
+    const Text::Model*           model = state->processingModel.Get();
+    const Vector<Text::LineRun>& lines = model->mVisualModel->mLines;
+    DALI_TEST_CHECK(lines.Count() >= 2u);
+    const Text::LineRun& firstLine = lines[0u];
+    return LineHeightSummary{Text::GetLineHeight(firstLine, false),
+                             firstLine.ascender - firstLine.descender,
+                             firstLine.lineSpacing,
+                             lineParameters.fontSize,
+                             static_cast<uint32_t>(lines.Count())};
+  };
+
+  // RenderScale changes raster resolution only. After normalizing worker
+  // coordinates, explicit relative line height must match scale 1.
+  for(float effectiveTextScale : {1.0f, 1.5f})
+  {
+    for(float renderScale : {1.0f, 1.25f, 1.5f, 2.0f})
+    {
+      const LineHeightSummary summary =
+        renderLineHeight(renderScale, effectiveTextScale, 1.6f, 0.0f, LineHeightFitMode::NONE);
+      const float expectedLineHeight = std::floor(18.0f * effectiveTextScale * renderScale * 1.6f);
+      DALI_TEST_EQUALS(summary.lineHeight,
+                       expectedLineHeight,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_CHECK(summary.lineSpacing > 0.0f);
+    }
+  }
+
+  // TextFit selects an effective point size before Layout(). RenderScale is
+  // applied exactly once to the relative line-height reference for both fit
+  // algorithms.
+  for(LineHeightFitMode fitMode : {LineHeightFitMode::RANGE, LineHeightFitMode::CANDIDATES})
+  {
+    const LineHeightSummary scaleOne = renderLineHeight(1.0f, 1.5f, 1.6f, 0.0f, fitMode);
+    const LineHeightSummary scaleTwo = renderLineHeight(2.0f, 1.5f, 1.6f, 0.0f, fitMode);
+    DALI_TEST_EQUALS(scaleTwo.selectedPointSize,
+                     scaleOne.selectedPointSize,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(scaleTwo.lineHeight,
+                     std::floor(scaleOne.lineHeight * 2.0f),
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+  }
+
+  // AUTO and absolute line height already use scaled text/minimum metrics and
+  // remain compatibility sentinels for the narrowly scoped relative fix.
+  for(const auto& mode : {std::pair<float, float>{-1.0f, 0.0f},
+                          std::pair<float, float>{-1.0f, 40.0f}})
+  {
+    const LineHeightSummary scaleOne =
+      renderLineHeight(1.0f, 1.0f, mode.first, mode.second, LineHeightFitMode::NONE);
+    const LineHeightSummary scaleTwo =
+      renderLineHeight(2.0f, 1.0f, mode.first, mode.second, LineHeightFitMode::NONE);
+    DALI_TEST_EQUALS(scaleTwo.lineCount, scaleOne.lineCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(scaleTwo.lineHeight / 2.0f, scaleOne.lineHeight,
+                     Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  }
+
+  struct BoundarySummary
+  {
+    float ordinaryLineHeight{0.0f};
+    bool  replacementVisible{false};
+  };
+
+  auto renderBoundary = [horizontalDpi](float renderScale, float textHeight, LineHeightFitMode fitMode)
+  {
+    Text::AsyncTextParameters boundaryParameters;
+    boundaryParameters.text = "first\nsecond\nthird\n\xEF\xBF\xBC";
+    // A fractional 26.6 point size makes the mock font expose the same
+    // high-resolution metric rounding which real hinted fonts exhibit.
+    boundaryParameters.fontSize         = 13.337f;
+    boundaryParameters.textWidth        = 300.0f;
+    boundaryParameters.textHeight       = textHeight;
+    boundaryParameters.isMultiLine      = true;
+    boundaryParameters.ellipsis         = true;
+    boundaryParameters.ellipsisPosition = Text::EllipsisPosition::END;
+    boundaryParameters.relativeLineSize = -1.0f;
+    boundaryParameters.renderScale      = renderScale;
+    if(fitMode == LineHeightFitMode::RANGE)
+    {
+      boundaryParameters.isTextFitEnabled = true;
+      boundaryParameters.textFitMinSize   = boundaryParameters.fontSize;
+      boundaryParameters.textFitMaxSize   = boundaryParameters.fontSize;
+      boundaryParameters.textFitStepSize  = 1.0f;
+    }
+    else if(fitMode == LineHeightFitMode::CANDIDATES)
+    {
+      boundaryParameters.isTextFitCandidatesEnabled = true;
+      boundaryParameters.textFitCandidates.PushBack(
+        Text::Fit::Candidate(boundaryParameters.fontSize * static_cast<float>(horizontalDpi) / 72.0f, 0.0f));
+    }
+    boundaryParameters.replacementSourceSnapshot.runs.PushBack(Candidate(19u, 1u, 120.0f, 120.0f, 902u));
+    boundaryParameters.replacementSourceSnapshot.hasValidReplacementSource = true;
+
+    Text::AsyncTextLoader boundaryLoader = Text::AsyncTextLoader::New();
+    bool                  cached         = false;
+    Size                  naturalSize    = Size::ZERO;
+    if(renderScale > 1.0f)
+    {
+      naturalSize = boundaryLoader.SetupRenderScale(boundaryParameters, cached);
+    }
+    if(fitMode == LineHeightFitMode::NONE)
+    {
+      boundaryLoader.RenderText(boundaryParameters, cached, naturalSize);
+    }
+    else
+    {
+      boundaryLoader.RenderTextFit(boundaryParameters, cached, naturalSize);
+    }
+
+    const Text::ReplacementRenderState* state = Text::GetImplementation(boundaryLoader).GetReplacementRenderState();
+    DALI_TEST_CHECK(state && state->processingModel);
+    DALI_TEST_EQUALS(state->placements.Count(), 1u, TEST_LOCATION);
+    const Vector<Text::LineRun>& lines = state->processingModel->mVisualModel->mLines;
+    DALI_TEST_CHECK(!lines.Empty());
+    return BoundarySummary{Text::GetLineHeight(lines[0u], false) / renderScale,
+                           state->placements[0u].visible};
+  };
+
+  // AUTO must make the same boundary decision at every raster scale. The
+  // fourth line fits exactly at scale 1 and contains the replacement.
+  const BoundarySummary unconstrained = renderBoundary(1.0f, 500.0f, LineHeightFitMode::NONE);
+  const float           exactHeight   = std::ceil(unconstrained.ordinaryLineHeight * 3.0f + 120.0f);
+  const BoundarySummary scaleOne      = renderBoundary(1.0f, exactHeight, LineHeightFitMode::NONE);
+  DALI_TEST_CHECK(scaleOne.replacementVisible);
+  DALI_TEST_CHECK(!renderBoundary(1.0f, exactHeight - 1.0f, LineHeightFitMode::NONE).replacementVisible);
+  for(float renderScale : {1.25f, 1.5f, 2.0f})
+  {
+    const BoundarySummary scaled = renderBoundary(renderScale, exactHeight, LineHeightFitMode::NONE);
+    DALI_TEST_CHECK(scaled.replacementVisible);
+    DALI_TEST_EQUALS(scaled.ordinaryLineHeight,
+                     scaleOne.ordinaryLineHeight,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+  }
+
+  // TextFit changes the selected point size but not the RenderScale contract:
+  // AUTO must retain the same exact replacement boundary for both fit modes.
+  for(LineHeightFitMode fitMode : {LineHeightFitMode::RANGE, LineHeightFitMode::CANDIDATES})
+  {
+    const BoundarySummary fitScaleOne = renderBoundary(1.0f, exactHeight, fitMode);
+    DALI_TEST_CHECK(fitScaleOne.replacementVisible);
+    DALI_TEST_CHECK(!renderBoundary(1.0f, exactHeight - 1.0f, fitMode).replacementVisible);
+    for(float renderScale : {1.25f, 1.5f, 2.0f})
+    {
+      const BoundarySummary scaled = renderBoundary(renderScale, exactHeight, fitMode);
+      DALI_TEST_CHECK(scaled.replacementVisible);
+      DALI_TEST_CHECK(std::fabs(scaled.ordinaryLineHeight - fitScaleOne.ordinaryLineHeight) <= 0.5f);
+    }
+  }
+
+  struct PlacementSummary
+  {
+    Vector2 position;
+    Vector2 size;
+  };
+  const auto renderPlacement = [](float renderScale, Text::ReplacementVerticalAlignment alignment)
+  {
+    const std::string placementText = "Latin 😀 مرحبا before \xEF\xBF\xBC 한국어 after";
+    const Vector<Text::Character> characters = Utf32(placementText);
+    Text::CharacterIndex replacementIndex = 0u;
+    while(replacementIndex < characters.Count() && characters[replacementIndex] != 0xFFFCu)
+    {
+      ++replacementIndex;
+    }
+    DALI_TEST_CHECK(replacementIndex < characters.Count());
+
+    Text::AsyncTextParameters placementParameters;
+    placementParameters.text             = placementText;
+    placementParameters.fontSize         = 13.337f;
+    placementParameters.textWidth        = 500.0f;
+    placementParameters.textHeight       = 120.0f;
+    placementParameters.originWidth      = placementParameters.textWidth;
+    placementParameters.originHeight     = placementParameters.textHeight;
+    placementParameters.isMultiLine      = true;
+    placementParameters.relativeLineSize = -1.0f;
+    placementParameters.renderScale      = renderScale;
+    placementParameters.maxTextureSize   = 4096;
+    placementParameters.replacementSourceSnapshot.runs.PushBack(
+      Candidate(replacementIndex, 1u, 42.0f, 30.0f, 904u));
+    placementParameters.replacementSourceSnapshot.runs[0u].metrics.verticalAlignment = alignment;
+    placementParameters.replacementSourceSnapshot.hasValidReplacementSource = true;
+
+    Text::AsyncTextLoader placementLoader = Text::AsyncTextLoader::New();
+    bool                  cached          = false;
+    Size                  naturalSize     = Size::ZERO;
+    if(renderScale > 1.0f)
+    {
+      naturalSize = placementLoader.SetupRenderScale(placementParameters, cached);
+    }
+    placementLoader.RenderText(placementParameters, cached, naturalSize);
+    const Text::ReplacementRenderState* state =
+      Text::GetImplementation(placementLoader).GetReplacementRenderState();
+    DALI_TEST_CHECK(state && state->placements.Count() == 1u);
+    DALI_TEST_CHECK(state->placements[0u].visible);
+    return PlacementSummary{state->placements[0u].position / renderScale,
+                            state->placements[0u].size / renderScale};
+  };
+
+  for(const Text::ReplacementVerticalAlignment alignment : {
+        Text::ReplacementVerticalAlignment::TEXT_BASELINE,
+        Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
+        Text::ReplacementVerticalAlignment::TEXT_CENTER})
+  {
+    const PlacementSummary logical = renderPlacement(1.0f, alignment);
+    for(float renderScale : {1.25f, 1.5f, 2.0f})
+    {
+      const PlacementSummary scaled = renderPlacement(renderScale, alignment);
+      DALI_TEST_EQUALS(scaled.position.y, logical.position.y, 0.01f, TEST_LOCATION);
+      DALI_TEST_EQUALS(scaled.size, logical.size, 0.01f, TEST_LOCATION);
+    }
+  }
+
+  struct ReuseLineSummary
+  {
+    float ascender{0.0f};
+    float descender{0.0f};
+    float lineSpacing{0.0f};
+  };
+  struct ReuseSummary
+  {
+    std::vector<ReuseLineSummary> lines;
+    Size                          renderedSize;
+    Size                          layoutSize;
+    Vector2                       replacementPosition;
+    Text::ReplacementCaretMetric  leadingCaret;
+    Text::ReplacementCaretMetric  trailingCaret;
+    Text::LineIndex               replacementLine{0u};
+    Text::LineIndex               ellipsisLine{Text::FinalElisionResult::INVALID_LINE_INDEX};
+    int                           renderLineCount{0};
+    bool                          hasReplacement{false};
+    bool                          replacementVisible{false};
+    bool                          textElided{false};
+  };
+  struct ReuseCase
+  {
+    float renderScale;
+    float relativeLineSize;
+    float minimumLineSize;
+    bool  replacement;
+  };
+
+  const auto renderReuseCase = [](Text::AsyncTextLoader& reuseLoader, const ReuseCase& testCase)
+  {
+    Text::AsyncTextParameters reuseParameters;
+    reuseParameters.text             = "first\nsecond\nthird\n\xEF\xBF\xBC trailing words";
+    reuseParameters.fontSize         = 13.337f;
+    reuseParameters.textWidth        = 300.0f;
+    reuseParameters.textHeight       = 170.0f;
+    reuseParameters.originWidth      = reuseParameters.textWidth;
+    reuseParameters.originHeight     = reuseParameters.textHeight;
+    reuseParameters.isMultiLine      = true;
+    reuseParameters.ellipsis         = true;
+    reuseParameters.ellipsisPosition = Text::EllipsisPosition::END;
+    reuseParameters.relativeLineSize = testCase.relativeLineSize;
+    reuseParameters.minLineSize      = testCase.minimumLineSize;
+    reuseParameters.renderScale      = testCase.renderScale;
+    reuseParameters.maxTextureSize   = 4096;
+    if(testCase.replacement)
+    {
+      reuseParameters.replacementSourceSnapshot.runs.PushBack(Candidate(19u, 1u, 120.0f, 120.0f, 903u));
+      reuseParameters.replacementSourceSnapshot.hasValidReplacementSource = true;
+    }
+
+    bool cached      = false;
+    Size naturalSize = Size::ZERO;
+    if(testCase.renderScale > 1.0f)
+    {
+      naturalSize = reuseLoader.SetupRenderScale(reuseParameters, cached);
+    }
+    const Text::AsyncTextRenderInfo renderInfo = reuseLoader.RenderText(reuseParameters, cached, naturalSize);
+
+    ReuseSummary summary;
+    summary.renderedSize    = renderInfo.renderedSize;
+    summary.renderLineCount = renderInfo.lineCount;
+    const Text::ReplacementRenderState* state =
+      Text::GetImplementation(reuseLoader).GetReplacementRenderState();
+    if(!testCase.replacement)
+    {
+      DALI_TEST_CHECK(state == nullptr);
+      DALI_TEST_CHECK(renderInfo.replacementPlacements.Empty());
+      return summary;
+    }
+
+    DALI_TEST_CHECK(state && state->processingModel);
+    DALI_TEST_EQUALS(state->placements.Count(), 1u, TEST_LOCATION);
+    summary.hasReplacement      = true;
+    summary.layoutSize          = state->layoutSize;
+    summary.replacementVisible  = state->placements[0u].visible;
+    summary.textElided          = state->finalElision.textElided;
+    summary.ellipsisLine        = state->finalElision.ellipsisLineIndex;
+    summary.replacementLine     = state->placements[0u].lineIndex;
+    summary.replacementPosition = state->placements[0u].position;
+    summary.leadingCaret        = state->placements[0u].leadingCaretMetric;
+    summary.trailingCaret       = state->placements[0u].trailingCaretMetric;
+    for(const Text::LineRun& line : state->processingModel->mVisualModel->mLines)
+    {
+      summary.lines.push_back(ReuseLineSummary{line.ascender, line.descender, line.lineSpacing});
+    }
+    return summary;
+  };
+
+  const auto compareReuseSummary = [](const ReuseSummary& actual, const ReuseSummary& expected)
+  {
+    DALI_TEST_EQUALS(actual.renderedSize, expected.renderedSize, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.renderLineCount, expected.renderLineCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.hasReplacement, expected.hasReplacement, TEST_LOCATION);
+    if(!expected.hasReplacement)
+    {
+      return;
+    }
+    DALI_TEST_EQUALS(actual.layoutSize, expected.layoutSize, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.replacementVisible, expected.replacementVisible, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.textElided, expected.textElided, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.ellipsisLine, expected.ellipsisLine, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.replacementLine, expected.replacementLine, TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.replacementPosition,
+                     expected.replacementPosition,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.leadingCaret.ascender,
+                     expected.leadingCaret.ascender,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.leadingCaret.height,
+                     expected.leadingCaret.height,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.trailingCaret.ascender,
+                     expected.trailingCaret.ascender,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.trailingCaret.height,
+                     expected.trailingCaret.height,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(actual.lines.size(), expected.lines.size(), TEST_LOCATION);
+    for(std::size_t index = 0u; index < expected.lines.size(); ++index)
+    {
+      DALI_TEST_EQUALS(actual.lines[index].ascender,
+                       expected.lines[index].ascender,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(actual.lines[index].descender,
+                       expected.lines[index].descender,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(actual.lines[index].lineSpacing,
+                       expected.lines[index].lineSpacing,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+    }
+  };
+
+  // A pooled loader is reused for dissimilar jobs. Every result must match a
+  // fresh loader, proving that request-local AUTO metric data cannot leak.
+  const ReuseCase reuseCases[] = {
+    {2.0f, -1.0f, 0.0f, true},  // replacement AUTO
+    {2.0f, -1.0f, 0.0f, false}, // ordinary AUTO
+    {2.0f, 1.6f, 0.0f, true},   // replacement RELATIVE
+    {2.0f, -1.0f, 40.0f, true}, // replacement ABSOLUTE
+    {1.0f, -1.0f, 0.0f, true},  // scale 1 replacement AUTO
+    {2.0f, -1.0f, 0.0f, true},  // replacement AUTO again
+  };
+  Text::AsyncTextLoader reusedLoader = Text::AsyncTextLoader::New();
+  for(const ReuseCase& testCase : reuseCases)
+  {
+    Text::AsyncTextLoader freshLoader = Text::AsyncTextLoader::New();
+    const ReuseSummary    fresh       = renderReuseCase(freshLoader, testCase);
+    const ReuseSummary    reused      = renderReuseCase(reusedLoader, testCase);
+    compareReuseSummary(reused, fresh);
+  }
 
   END_TEST;
 }

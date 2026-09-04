@@ -129,13 +129,33 @@ ReplacementCaretMetric ResolveBoundaryCaretMetric(const VisualModel&            
   return metric.height > 0.0f ? metric : fallback;
 }
 
-void IncludeGlyphMetrics(const VisualModel&           visual,
-                         const FinalElisionResult&    finalElision,
-                         TextAbstraction::FontClient& fontClient,
-                         const GlyphRun&              glyphRun,
-                         SurroundingMetrics&          surrounding)
+FontId ResolveLineMetricFontId(const VisualModel&               visual,
+                               GlyphIndex                       glyphIndex,
+                               const ReplacementLineMetricData* lineMetricData,
+                               float&                           metricScale)
 {
-  FontId                       lastFontId = 0u;
+  const GlyphInfo& glyph = visual.mGlyphs[glyphIndex];
+  metricScale            = 1.0f;
+  if(lineMetricData == nullptr || !lineMetricData->IsEnabled() ||
+     glyphIndex >= visual.mGlyphsToCharacters.Count())
+  {
+    return glyph.fontId;
+  }
+
+  return lineMetricData->ResolveFontId(visual.mGlyphsToCharacters[glyphIndex],
+                                       glyph.fontId,
+                                       metricScale);
+}
+
+void IncludeGlyphMetrics(const VisualModel&               visual,
+                         const FinalElisionResult&        finalElision,
+                         TextAbstraction::FontClient&     fontClient,
+                         const ReplacementLineMetricData* lineMetricData,
+                         const GlyphRun&                  glyphRun,
+                         SurroundingMetrics&              surrounding)
+{
+  FontId                       lastMetricFontId = 0u;
+  float                        lastMetricScale  = 1.0f;
   TextAbstraction::FontMetrics fontMetrics;
   const GlyphIndex             end =
     std::min<GlyphIndex>(glyphRun.glyphIndex + glyphRun.numberOfGlyphs, static_cast<GlyphIndex>(visual.mGlyphs.Count()));
@@ -148,10 +168,15 @@ void IncludeGlyphMetrics(const VisualModel&           visual,
       continue;
     }
 
-    if(glyph.fontId != lastFontId)
+    float        metricScale  = 1.0f;
+    const FontId metricFontId = ResolveLineMetricFontId(visual, glyphIndex, lineMetricData, metricScale);
+    if(metricFontId != lastMetricFontId || metricScale != lastMetricScale)
     {
-      fontClient.GetFontMetrics(glyph.fontId, fontMetrics);
-      lastFontId = glyph.fontId;
+      fontClient.GetFontMetrics(metricFontId, fontMetrics);
+      fontMetrics.ascender *= metricScale;
+      fontMetrics.descender *= metricScale;
+      lastMetricFontId = metricFontId;
+      lastMetricScale  = metricScale;
     }
     surrounding.ascender       = surrounding.hasVisibleText
                                    ? std::max(surrounding.ascender, fontMetrics.ascender)
@@ -163,37 +188,47 @@ void IncludeGlyphMetrics(const VisualModel&           visual,
   }
 }
 
-Vector<SurroundingMetrics> ResolveSurroundingMetrics(const VisualModel&           visual,
-                                                     const FinalElisionResult&    finalElision,
-                                                     TextAbstraction::FontClient& fontClient,
-                                                     FontId                       defaultFontId)
+Vector<SurroundingMetrics> ResolveSurroundingMetrics(const VisualModel&               visual,
+                                                     const FinalElisionResult&        finalElision,
+                                                     TextAbstraction::FontClient&     fontClient,
+                                                     const ReplacementLineMetricData* lineMetricData,
+                                                     FontId                           defaultFontId)
 {
-  Vector<SurroundingMetrics> metrics;
-  metrics.Resize(visual.mLines.Count());
+  Vector<SurroundingMetrics> lineMetrics;
+  lineMetrics.Resize(visual.mLines.Count());
 
   TextAbstraction::FontMetrics defaultFontMetrics;
-  const bool                   hasDefaultFont = defaultFontId != 0u;
+  const FontId                 metricDefaultFontId =
+    lineMetricData != nullptr && lineMetricData->IsEnabled() && lineMetricData->logicalDefaultFontId != 0u
+                      ? lineMetricData->logicalDefaultFontId
+                      : defaultFontId;
+  const bool hasDefaultFont = metricDefaultFontId != 0u;
   if(hasDefaultFont)
   {
-    fontClient.GetFontMetrics(defaultFontId, defaultFontMetrics);
+    fontClient.GetFontMetrics(metricDefaultFontId, defaultFontMetrics);
+    if(lineMetricData != nullptr && lineMetricData->IsEnabled() && metricDefaultFontId != defaultFontId)
+    {
+      defaultFontMetrics.ascender *= lineMetricData->renderScale;
+      defaultFontMetrics.descender *= lineMetricData->renderScale;
+    }
   }
 
   for(LineIndex lineIndex = 0u; lineIndex < visual.mLines.Count(); ++lineIndex)
   {
     const LineRun& line = visual.mLines[lineIndex];
-    IncludeGlyphMetrics(visual, finalElision, fontClient, line.glyphRun, metrics[lineIndex]);
+    IncludeGlyphMetrics(visual, finalElision, fontClient, lineMetricData, line.glyphRun, lineMetrics[lineIndex]);
     if(line.isSplitToTwoHalves)
     {
-      IncludeGlyphMetrics(visual, finalElision, fontClient, line.glyphRunSecondHalf, metrics[lineIndex]);
+      IncludeGlyphMetrics(visual, finalElision, fontClient, lineMetricData, line.glyphRunSecondHalf, lineMetrics[lineIndex]);
     }
-    if(!metrics[lineIndex].hasVisibleText && hasDefaultFont)
+    if(!lineMetrics[lineIndex].hasVisibleText && hasDefaultFont)
     {
-      metrics[lineIndex].ascender       = defaultFontMetrics.ascender;
-      metrics[lineIndex].descender      = defaultFontMetrics.descender;
-      metrics[lineIndex].hasVisibleText = true;
+      lineMetrics[lineIndex].ascender       = defaultFontMetrics.ascender;
+      lineMetrics[lineIndex].descender      = defaultFontMetrics.descender;
+      lineMetrics[lineIndex].hasVisibleText = true;
     }
   }
-  return metrics;
+  return lineMetrics;
 }
 
 float GetReplacementTop(const ReplacementMetrics& replacement, const SurroundingMetrics& surrounding)
@@ -211,14 +246,13 @@ float GetReplacementTop(const ReplacementMetrics& replacement, const Surrounding
   }
 }
 
-} // unnamed namespace
-
-void ExtractReplacementPlacements(const Model&                  model,
-                                  const ReplacementProjection&  projection,
-                                  const FinalElisionResult&     finalElision,
-                                  TextAbstraction::FontClient&  fontClient,
-                                  FontId                        defaultFontId,
-                                  Vector<ReplacementPlacement>& placements)
+void ExtractReplacementPlacementsImpl(const Model&                     model,
+                                      const ReplacementProjection&     projection,
+                                      const FinalElisionResult&        finalElision,
+                                      TextAbstraction::FontClient&     fontClient,
+                                      FontId                           defaultFontId,
+                                      const ReplacementLineMetricData* lineMetricData,
+                                      Vector<ReplacementPlacement>&    placements)
 {
   placements.Clear();
   if(!finalElision.resolved)
@@ -229,7 +263,7 @@ void ExtractReplacementPlacements(const Model&                  model,
   }
   const VisualModel&               visual = *model.mVisualModel;
   const Vector<SurroundingMetrics> lineMetrics =
-    ResolveSurroundingMetrics(visual, finalElision, fontClient, defaultFontId);
+    ResolveSurroundingMetrics(visual, finalElision, fontClient, lineMetricData, defaultFontId);
   ReplacementCaretMetric defaultCaretMetric;
   if(defaultFontId != 0u)
   {
@@ -284,6 +318,41 @@ void ExtractReplacementPlacements(const Model&                  model,
     placement.elided = finalElision.textElided && !placement.visible;
     placements.PushBack(placement);
   }
+}
+
+} // unnamed namespace
+
+void ExtractReplacementPlacements(const Model&                  model,
+                                  const ReplacementProjection&  projection,
+                                  const FinalElisionResult&     finalElision,
+                                  TextAbstraction::FontClient&  fontClient,
+                                  FontId                        defaultFontId,
+                                  Vector<ReplacementPlacement>& placements)
+{
+  ExtractReplacementPlacementsImpl(model,
+                                   projection,
+                                   finalElision,
+                                   fontClient,
+                                   defaultFontId,
+                                   nullptr,
+                                   placements);
+}
+
+void ExtractReplacementPlacements(const Model&                     model,
+                                  const ReplacementProjection&     projection,
+                                  const FinalElisionResult&        finalElision,
+                                  TextAbstraction::FontClient&     fontClient,
+                                  FontId                           defaultFontId,
+                                  const ReplacementLineMetricData& lineMetricData,
+                                  Vector<ReplacementPlacement>&    placements)
+{
+  ExtractReplacementPlacementsImpl(model,
+                                   projection,
+                                   finalElision,
+                                   fontClient,
+                                   defaultFontId,
+                                   &lineMetricData,
+                                   placements);
 }
 
 } // namespace Dali::Ui::Text
