@@ -1632,8 +1632,9 @@ struct Engine::Impl
                     const LineLayout& layout, Size& layoutSize, LineRun* linesBuffer, Vector2* glyphPositionsBuffer,
                     Length& numberOfLines, float penY, bool& isMarqueeEnabled, bool isMarqueeMaxTextureExceeded,
                     bool isHiddenInputEnabled, Text::EllipsisPosition::Type ellipsisPosition,
-                    bool enforceEllipsisInSingleLine)
+                    bool enforceEllipsisInSingleLine, bool& retainedReplacement)
   {
+    retainedReplacement             = false;
     const bool hasReplacementLayout = layoutParameters.replacementLayoutData != nullptr;
     const bool maximumNumberOfLinesExceeded =
       layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
@@ -1804,6 +1805,8 @@ struct Engine::Impl
       {
         lineRun->glyphRun.glyphIndex = ellipsisLayout.glyphIndex;
       }
+
+      retainedReplacement = hasReplacementLayout && ellipsisLayout.containsReplacement;
 
       lineRun->glyphRun.numberOfGlyphs         = ellipsisLayout.numberOfGlyphs;
       lineRun->characterRun.characterIndex     = ellipsisLayout.characterIndex;
@@ -2368,7 +2371,8 @@ struct Engine::Impl
 
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  pen y %f\n", penY);
 
-      bool ellipsis = false;
+      bool ellipsis                        = false;
+      bool ellipsisLineContainsReplacement = false;
       if(elideTextEnabled)
       {
         layoutBidiParameters.paragraphDirection = currentParagraphDirection;
@@ -2376,7 +2380,8 @@ struct Engine::Impl
         // Does the ellipsis of the last line.
         ellipsis = EllipsisLine(layoutParameters, layoutBidiParameters, layout, layoutSize, linesBuffer,
                                 glyphPositionsBuffer, numberOfLines, penY, isMarqueeEnabled,
-                                isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, false);
+                                isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, false,
+                                ellipsisLineContainsReplacement);
       }
 
       if(ellipsis && ((ellipsisPosition == Text::EllipsisPosition::END) || (numberOfLines == 1u)))
@@ -2386,7 +2391,8 @@ struct Engine::Impl
         {
           ellipsis = EllipsisLine(layoutParameters, layoutBidiParameters, layout, layoutSize, linesBuffer,
                                   glyphPositionsBuffer, numberOfLines, penY, isMarqueeEnabled,
-                                  isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, true);
+                                  isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, true,
+                                  ellipsisLineContainsReplacement);
         }
 
         // clear hyphen from ellipsis line
@@ -2404,10 +2410,15 @@ struct Engine::Impl
 
         if(!isMultiline)
         {
-          // Recalculate line spacing and line height
+          // Preserve replacement-aware spacing only when the final ellipsis
+          // line actually retained a replacement. A source replacement that
+          // was fully removed must follow the legacy ordinary-text formula.
           LineRun& firstLineRun = *(lines.Begin());
-          firstLineRun.lineSpacing =
-            GetLineSpacing(firstLineRun.ascender + -firstLineRun.descender, layout.relativeLineSize);
+          if(!ellipsisLineContainsReplacement)
+          {
+            firstLineRun.lineSpacing =
+              GetLineSpacing(firstLineRun.ascender + -firstLineRun.descender, layout.relativeLineSize);
+          }
           layoutSize.height = GetLineHeight(firstLineRun, false);
         }
 

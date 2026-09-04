@@ -3479,6 +3479,177 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
   DALI_TEST_CHECK(sawVisibleAtThreshold);
   DALI_TEST_CHECK(sawElidedAtThreshold);
 
+  // A retained replacement expands the line box independently of relative
+  // text height. Single-line END ellipsis must preserve that replacement-aware
+  // spacing instead of recomputing it from the expanded box.
+  const Vector<Text::Character> mixedSizeText = Utf32("Sizes \uFFFC then \uFFFC then \uFFFC and ordinary trailing words");
+  Vector<Text::ReplacementRunSnapshot> mixedSizeCandidates;
+  mixedSizeCandidates.PushBack(Candidate(6u, 1u, 8.0f, 8.0f, 510u));
+  mixedSizeCandidates.PushBack(Candidate(13u, 1u, 120.0f, 60.0f, 511u));
+  mixedSizeCandidates.PushBack(Candidate(20u, 1u, 40.0f, 40.0f, 512u));
+  mixedSizeCandidates[0u].metrics.verticalAlignment = Text::ReplacementVerticalAlignment::TEXT_BASELINE;
+  mixedSizeCandidates[1u].metrics.verticalAlignment = Text::ReplacementVerticalAlignment::TEXT_BOTTOM;
+  mixedSizeCandidates[2u].metrics.verticalAlignment = Text::ReplacementVerticalAlignment::TEXT_CENTER;
+  const Text::ReplacementProjection mixedSizeProjection =
+    Text::ReplacementProjection::Build(mixedSizeText, mixedSizeCandidates);
+
+  struct LineHeightMode
+  {
+    float relative;
+    float minimum;
+  };
+  const LineHeightMode lineHeightModes[] = {
+    {-1.0f, 0.0f}, // AUTO
+    {0.8f, 0.0f},
+    {1.0f, 0.0f},
+    {1.6f, 0.0f},
+    {-1.0f, 40.0f}, // absolute minimum
+  };
+  const float widths[] = {90.0f, 260.0f, 493.0f};
+  bool        sawVisibleReplacement = false;
+  bool        sawElidedReplacement  = false;
+  for(const LineHeightMode& lineHeightMode : lineHeightModes)
+  {
+    for(float width : widths)
+    {
+      Text::ReplacementLayoutTestOptions mixedSizeOptions;
+      mixedSizeOptions.contentSize      = Vector2(width, 472.0f);
+      mixedSizeOptions.layoutType       = Text::Layout::Engine::SINGLE_LINE_BOX;
+      mixedSizeOptions.elideText        = true;
+      mixedSizeOptions.ellipsisPosition = Text::EllipsisPosition::END;
+      mixedSizeOptions.fontPointSize    = 28u * 64u;
+      mixedSizeOptions.fontPixelSize    = 28.0f;
+      mixedSizeOptions.relativeLineSize = lineHeightMode.relative;
+      mixedSizeOptions.defaultLineSize  = lineHeightMode.minimum;
+
+      Text::ReplacementRenderState mixedSizeResult;
+      DALI_TEST_CHECK(Text::LayoutReplacementForTest(mixedSizeProjection, services, mixedSizeOptions, mixedSizeResult));
+      DALI_TEST_CHECK(mixedSizeResult.finalElision.textElided);
+      const Vector<Text::LineRun>& mixedSizeLines = mixedSizeResult.processingModel->mVisualModel->mLines;
+      DALI_TEST_EQUALS(mixedSizeLines.Count(), 1u, TEST_LOCATION);
+      const Text::LineRun& mixedSizeLine = mixedSizeLines[0u];
+      DALI_TEST_CHECK(mixedSizeLine.lineSpacing >= 0.0f);
+      const float mixedSizeLineHeight = Text::GetLineHeight(mixedSizeLine, false);
+      for(const Text::ReplacementPlacement& placement : mixedSizeResult.placements)
+      {
+        sawVisibleReplacement |= placement.visible;
+        sawElidedReplacement |= placement.elided;
+        if(placement.visible)
+        {
+          DALI_TEST_CHECK(placement.position.y >= -Math::MACHINE_EPSILON_1000);
+          DALI_TEST_CHECK(placement.position.y + placement.size.y <=
+                          mixedSizeLineHeight + Math::MACHINE_EPSILON_1000);
+        }
+      }
+      mixedSizeResult.Clear(services.bidirectionalSupport);
+    }
+  }
+  DALI_TEST_CHECK(sawVisibleReplacement);
+  DALI_TEST_CHECK(sawElidedReplacement);
+
+  uint32_t horizontalDpi = 0u;
+  uint32_t verticalDpi   = 0u;
+  TextAbstraction::FontClient::Get().GetDpi(horizontalDpi, verticalDpi);
+  bool sawAsyncVisibleReplacement = false;
+  bool sawAsyncElidedReplacement  = false;
+  for(const LineHeightMode& lineHeightMode : lineHeightModes)
+  {
+    for(float width : widths)
+    {
+      Text::AsyncTextParameters asyncParameters;
+      asyncParameters.text                                                = "Sizes \xEF\xBF\xBC then \xEF\xBF\xBC then \xEF\xBF\xBC and ordinary trailing words";
+      asyncParameters.fontSize                                            = 28.0f * 72.0f / static_cast<float>(horizontalDpi);
+      asyncParameters.textWidth                                           = width;
+      asyncParameters.textHeight                                          = 472.0f;
+      asyncParameters.ellipsis                                            = true;
+      asyncParameters.ellipsisPosition                                    = Text::EllipsisPosition::END;
+      asyncParameters.relativeLineSize                                    = lineHeightMode.relative;
+      asyncParameters.minLineSize                                         = lineHeightMode.minimum;
+      asyncParameters.replacementSourceSnapshot.runs                      = mixedSizeCandidates;
+      asyncParameters.replacementSourceSnapshot.hasValidReplacementSource = true;
+
+      Text::AsyncTextLoader asyncLoader = Text::AsyncTextLoader::New();
+      asyncLoader.RenderText(asyncParameters, false, Size::ZERO);
+      const Text::ReplacementRenderState* asyncResult =
+        Text::GetImplementation(asyncLoader).GetReplacementRenderState();
+      DALI_TEST_CHECK(asyncResult && asyncResult->processingModel);
+      const Vector<Text::LineRun>& asyncLines = asyncResult->processingModel->mVisualModel->mLines;
+      DALI_TEST_EQUALS(asyncLines.Count(), 1u, TEST_LOCATION);
+      DALI_TEST_CHECK(asyncLines[0u].lineSpacing >= 0.0f);
+      const float asyncLineHeight = Text::GetLineHeight(asyncLines[0u], false);
+      for(const Text::ReplacementPlacement& placement : asyncResult->placements)
+      {
+        sawAsyncVisibleReplacement |= placement.visible;
+        sawAsyncElidedReplacement |= placement.elided;
+        if(placement.visible)
+        {
+          DALI_TEST_CHECK(placement.position.y >= -Math::MACHINE_EPSILON_1000);
+          DALI_TEST_CHECK(placement.position.y + placement.size.y <=
+                          asyncLineHeight + Math::MACHINE_EPSILON_1000);
+        }
+      }
+    }
+  }
+  DALI_TEST_CHECK(sawAsyncVisibleReplacement);
+  DALI_TEST_CHECK(sawAsyncElidedReplacement);
+
+  // A source replacement that is completely outside the retained END result
+  // must use the exact legacy ordinary-text spacing formula. This distinguishes
+  // source presence from final line geometry.
+  const Vector<Text::Character> fullyElidedText  = Utf32("ordinary prefix words before replacement \uFFFC trailing");
+  Text::CharacterIndex          fullyElidedIndex = 0u;
+  while(fullyElidedIndex < fullyElidedText.Count() &&
+        fullyElidedText[fullyElidedIndex] != Text::ReplacementProjection::OBJECT_REPLACEMENT_CHARACTER)
+  {
+    ++fullyElidedIndex;
+  }
+  Vector<Text::ReplacementRunSnapshot> fullyElidedCandidates;
+  fullyElidedCandidates.PushBack(Candidate(fullyElidedIndex, 1u, 120.0f, 60.0f, 520u));
+  const Text::ReplacementProjection fullyElidedProjection =
+    Text::ReplacementProjection::Build(fullyElidedText, fullyElidedCandidates);
+  for(const LineHeightMode& lineHeightMode : lineHeightModes)
+  {
+    Text::ReplacementLayoutTestOptions fullyElidedOptions;
+    fullyElidedOptions.contentSize      = Vector2(120.0f, 200.0f);
+    fullyElidedOptions.layoutType       = Text::Layout::Engine::SINGLE_LINE_BOX;
+    fullyElidedOptions.elideText        = true;
+    fullyElidedOptions.ellipsisPosition = Text::EllipsisPosition::END;
+    fullyElidedOptions.fontPointSize    = 28u * 64u;
+    fullyElidedOptions.fontPixelSize    = 28.0f;
+    fullyElidedOptions.relativeLineSize = lineHeightMode.relative;
+    fullyElidedOptions.defaultLineSize  = lineHeightMode.minimum;
+
+    Text::ReplacementRenderState fullyElidedResult;
+    DALI_TEST_CHECK(Text::LayoutReplacementForTest(fullyElidedProjection,
+                                                   services,
+                                                   fullyElidedOptions,
+                                                   fullyElidedResult));
+    DALI_TEST_EQUALS(fullyElidedResult.placements.Count(), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(fullyElidedResult.placements[0u].elided);
+    const Vector<Text::LineRun>& lines = fullyElidedResult.processingModel->mVisualModel->mLines;
+    DALI_TEST_EQUALS(lines.Count(), 1u, TEST_LOCATION);
+
+    DALI_TEST_CHECK(Text::GetLineHeight(lines[0u], false) < 60.0f);
+    fullyElidedResult.Clear(services.bidirectionalSupport);
+  }
+
+  // Multiline remains a sentinel: the single-line post-ellipsis correction is
+  // never entered, including when the replacement is fully elided.
+  Text::ReplacementLayoutTestOptions multilineOptions;
+  multilineOptions.contentSize      = Vector2(120.0f, 45.0f);
+  multilineOptions.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
+  multilineOptions.elideText        = true;
+  multilineOptions.ellipsisPosition = Text::EllipsisPosition::END;
+  Text::ReplacementRenderState multilineResult;
+  DALI_TEST_CHECK(Text::LayoutReplacementForTest(fullyElidedProjection,
+                                                 services,
+                                                 multilineOptions,
+                                                 multilineResult));
+  DALI_TEST_CHECK(multilineResult.finalElision.textElided);
+  DALI_TEST_EQUALS(multilineResult.placements.Count(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(multilineResult.placements[0u].elided);
+  multilineResult.Clear(services.bidirectionalSupport);
+
   END_TEST;
 }
 
