@@ -149,7 +149,7 @@ float GetEffectiveEditableLayoutHeight(Controller::Impl& impl, float layoutHeigh
   return (lineHeightSum < layoutHeight) ? lineHeightSum : layoutHeight;
 }
 
-bool IsReplacementElideEnabled(const Controller::Impl& impl)
+bool IsEffectiveElideEnabled(const Controller::Impl& impl)
 {
   bool enabled = impl.mModel->mElideEnabled;
   if(impl.mEventData != nullptr)
@@ -190,7 +190,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   // projected atomic boxes and use CLIP instead of exposing their underlying
   // source text through a non-replacement ellipsis pass.
   const bool useReplacementClipFallback =
-    IsReplacementElideEnabled(impl) && impl.mModel->mEllipsisPosition != EllipsisPosition::END;
+    IsEffectiveElideEnabled(impl) && impl.mModel->mEllipsisPosition != EllipsisPosition::END;
 
   ReplacementRenderState&               result               = impl.GetOrCreateReplacementRenderState();
   TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
@@ -256,7 +256,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   VisualModel& projectedVisual = *result.processingModel->mVisualModel;
   const Length glyphCount      = static_cast<Dali::Ui::Text::Length>(projectedVisual.mGlyphs.Count());
   projectedVisual.mGlyphPositions.Resize(glyphCount);
-  result.processingModel->mElideEnabled = IsReplacementElideEnabled(impl) && !useReplacementClipFallback;
+  result.processingModel->mElideEnabled = IsEffectiveElideEnabled(impl) && !useReplacementClipFallback;
   projectedVisual.SetTextElideEnabled(result.processingModel->mElideEnabled);
   projectedVisual.SetEllipsisPosition(result.processingModel->mEllipsisPosition);
 
@@ -1174,6 +1174,15 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     layoutSize = endEllipsis->layoutSize;
   }
 
+  // Reset before replacement layout can return with the editing scroll.
+  if(NO_OPERATION != (LAYOUT & operations) &&
+     impl.mEventData &&
+     EventData::INACTIVE == impl.mEventData->mState &&
+     IsEffectiveElideEnabled(impl))
+  {
+    impl.ResetScrollPosition();
+  }
+
   // A valid replacement projection owns the complete layout/alignment pass.
   // Do not first lay out the underlying glyph stream and then mix its result
   // with replacement placements: natural size, wrapping and ellipsis must all
@@ -1301,12 +1310,6 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
       {
         // Disable ellipsis when editing
         elideTextEnabled = false;
-      }
-
-      // Reset the scroll position in inactive state
-      if(elideTextEnabled && (impl.mEventData->mState == EventData::INACTIVE))
-      {
-        impl.ResetScrollPosition();
       }
     }
 

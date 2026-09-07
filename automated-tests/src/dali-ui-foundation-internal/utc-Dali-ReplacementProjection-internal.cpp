@@ -1533,6 +1533,47 @@ int UtcDaliReplacementControllerModelGeometryAndAffinityContractP(void)
   END_TEST;
 }
 
+int UtcDaliReplacementEditableEllipsisFocusLossResetsScrollP(void)
+{
+  UiTestApplication application;
+
+  Text::ControllerPtr controller = Text::Controller::New();
+  Text::DecoratorPtr  decorator  = Text::Decorator::New(*controller, *controller);
+  InputMethodContext  inputMethodContext;
+  controller->EnableTextInput(decorator, inputMethodContext);
+  controller->GetLayoutEngine().SetLayout(Text::Layout::Engine::SINGLE_LINE_BOX);
+  controller->SetHorizontalScrollEnabled(true);
+  controller->SetTextElideEnabled(true);
+  controller->SetEllipsisPosition(Text::EllipsisPosition::END);
+  controller->SetDefaultFontSize(18.0f, Text::Controller::PIXEL_SIZE);
+  controller->SetText("Leading replacement text that is wider than the control");
+
+  Text::Controller::Impl& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+  Text::ReplacementSourceSnapshot source;
+  source.runs.PushBack(Candidate(8u, 11u, 96.0f, 24.0f, 530u));
+  source.sourceRevision                       = 30u;
+  source.hasValidReplacementSource            = true;
+  impl.GetOrCreateReplacementSourceSnapshot() = source;
+
+  const Size controlSize(140.0f, 50.0f);
+  controller->KeyboardFocusGainEvent(false);
+  controller->Relayout(controlSize);
+
+  impl.mModel->mScrollPosition.x = -48.0f;
+  impl.SyncReplacementScrollPosition();
+  DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(), 48.0f, TEST_LOCATION);
+
+  controller->KeyboardFocusLostEvent();
+  controller->Relayout(controlSize);
+
+  DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(), 0.0f, TEST_LOCATION);
+  const Text::ReplacementRenderState& state = impl.GetReplacementRenderState();
+  DALI_TEST_CHECK(state.processingModel);
+  DALI_TEST_EQUALS(state.processingModel->mScrollPosition, Vector2::ZERO, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
 {
   UiTestApplication application;
