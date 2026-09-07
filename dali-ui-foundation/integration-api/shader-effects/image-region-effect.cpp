@@ -21,6 +21,7 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -37,9 +38,9 @@ Property::Map CreateImageRegionEffect()
   Property::Map map;
 
   Property::Map customShader;
-  customShader[Visual::Shader::Property::VERTEX_SHADER] = ToPropertyValue(SHADER_IMAGE_REGION_EFFECT_VERT.data());
+  customShader[Dali::Ui::Integration::Visual::Shader::Property::VERTEX_SHADER] = ToPropertyValue(SHADER_IMAGE_REGION_EFFECT_VERT.data());
 
-  map[Ui::VisualBasePropertyIndex::SHADER] = customShader;
+  map[Ui::Integration::Visual::Property::SHADER] = customShader;
   return map;
 }
 

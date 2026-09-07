@@ -55,10 +55,10 @@ class View;
  *
  * @code
  * Dali::Ui::View view = Dali::Ui::View::New();
- * Dali::Ui::ColorVisual visual = Dali::Ui::ColorVisual::New()
- *                                  .SetColor(UiColor("Primary"))
- *                                  .SetOffsetX(0.5f)
- *                                  .SetWidth(0.5f);
+ * Dali::Ui::ColorVisual visual = Dali::Ui::ColorVisual::New();
+ * visual.SetColor(UiColor("Primary"));
+ * visual.SetOffsetX(0.5f);
+ * visual.SetWidth(0.5f);
  * view.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
  *
  * // view.GetVisualCount(Dali::Ui::Visual::DepthLayer::BACKGROUND) == 1u.
@@ -164,57 +164,11 @@ public: ///< Public API
   void Detach();
 
   /**
-   * @brief Perform an action on a visual registered to this view.
-   * Visuals will have actions, this API is used to perform one of these actions with the given attributes.
-   * @note If visual is not been registered to the view, action should be ignored.
-   *
-   * @param[in] actionId The action to perform. See Visual to find supported actions.
-   * @param[in] attributes Optional attributes for the action.
-   */
-  void DoAction(Dali::Property::Index actionId, const Dali::Property::Value& attributes);
-
-  /**
    * @brief Get the type of this VisualBase.
    *
    * @return The type of this VisualBase
    */
   Dali::Ui::VisualType GetVisualType() const;
-
-public: // GetProperty / SetProperty
-  /**
-   * @brief Retrieves a property value.
-   * @note BaseHandle is not subclass of Handle. So this API is not use Handle.SetProperty
-   *
-   * @param[in] index The index of the property
-   * @return The property value
-   * @note This returns the value set by SetProperty() or the animation target value if it is being animated.
-   */
-  Dali::Property::Value GetProperty(Dali::Property::Index index) const;
-
-  /**
-   * @brief Convenience function for obtaining a property of a known type.
-   *
-   * @param[in] index The index of the property
-   * @return The property value
-   * @pre The property types match i.e. PropertyTypes::Get<T>() is equal to GetPropertyType(index).
-   * @see GetProperty()
-   */
-  template<typename T>
-  T GetProperty(Dali::Property::Index index) const
-  {
-    Dali::Property::Value value = GetProperty(index);
-
-    return T(value.Get<T>());
-  }
-
-  /**
-   * @brief Sets the value of an existing property.
-   * @note BaseHandle is not subclass of Handle. So this API is not use Handle.SetProperty
-   *
-   * @param[in] index The index of the property
-   * @param[in] propertyValue The new value of the property
-   */
-  void SetProperty(Dali::Property::Index index, Dali::Property::Value propertyValue);
 
 public: // Setters
   /**

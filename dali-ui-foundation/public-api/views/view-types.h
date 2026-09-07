@@ -28,7 +28,7 @@ namespace Ui
 /**
  * @brief Specifies how corner radius values are interpreted.
  *
- * @note Enum values match Ui::Visual::Transform::Policy::Type internally.
+ * @note The values match the transform policy used internally by the visual system.
  */
 enum class CornerRadiusPolicy
 {

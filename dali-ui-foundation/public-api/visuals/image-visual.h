@@ -24,7 +24,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 // TODO : Seperate it as n-patch / animated-image / animated-vector-image
@@ -49,49 +48,6 @@ namespace Ui
 class DALI_UI_API ImageVisual : public VisualBase
 {
 public:
-  /**
-   * @brief Property indices for ImageVisual.
-   *
-   * These can be used with Dali::Ui::VisualBase::GetProperty() and SetProperty().
-   */
-  struct Property
-  {
-    enum
-    {
-      // For simple images
-      URL                    = ImageVisualPropertyIndex::URL,
-      SYNCHRONOUS_LOADING    = ImageVisualPropertyIndex::SYNCHRONOUS_LOADING,
-      DESIRED_WIDTH          = ImageVisualPropertyIndex::DESIRED_WIDTH,
-      DESIRED_HEIGHT         = ImageVisualPropertyIndex::DESIRED_HEIGHT,
-      SAMPLING_MODE          = ImageVisualPropertyIndex::SAMPLING_MODE,
-      PIXEL_AREA             = ImageVisualPropertyIndex::PIXEL_AREA,
-      WRAP_MODE_U            = ImageVisualPropertyIndex::WRAP_MODE_U,
-      WRAP_MODE_V            = ImageVisualPropertyIndex::WRAP_MODE_V,
-      ENABLE_BROKEN_IMAGE    = ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE,
-      LOAD_POLICY            = ImageVisualPropertyIndex::LOAD_POLICY,
-      RELEASE_POLICY         = ImageVisualPropertyIndex::RELEASE_POLICY,
-      FITTING_MODE           = ImageVisualPropertyIndex::FITTING_MODE,
-      ORIENTATION_CORRECTION = ImageVisualPropertyIndex::ORIENTATION_CORRECTION,
-      SYNCHRONOUS_SIZING     = ImageVisualPropertyIndex::SYNCHRONOUS_SIZING,
-
-      // For Image
-      FAST_TRACK_UPLOADING = ImageVisualPropertyIndex::FAST_TRACK_UPLOADING,
-
-      // For n-patch images
-      BORDER                = ImageVisualPropertyIndex::BORDER,
-      BORDER_ONLY           = ImageVisualPropertyIndex::BORDER_ONLY,
-      AUXILIARY_IMAGE       = ImageVisualPropertyIndex::AUXILIARY_IMAGE,
-      AUXILIARY_IMAGE_ALPHA = ImageVisualPropertyIndex::AUXILIARY_IMAGE_ALPHA,
-
-      // For both Image and AnimatedImage
-      PRE_MULTIPLIED_ALPHA = ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA,
-      ALPHA_MASK_URL       = ImageVisualPropertyIndex::ALPHA_MASK_URL,
-      MASK_CONTENT_SCALE   = ImageVisualPropertyIndex::MASK_CONTENT_SCALE,
-      CROP_TO_MASK         = ImageVisualPropertyIndex::CROP_TO_MASK,
-      MASKING_TYPE         = ImageVisualPropertyIndex::MASKING_TYPE,
-    };
-  };
-
 public:
   /**
    * @brief Creates a ImageVisual object.
@@ -450,6 +406,13 @@ public: // Setters
    * @param[in] maskingType The masking type to set
    */
   void SetMaskingType(Image::MaskingType maskingType);
+
+  /**
+   * @brief Forces the image to be reloaded.
+   *
+   * @note Every visual using the same image will get the latest one.
+   */
+  void Reload();
 
 public:
   ImageVisual()                                      = default;

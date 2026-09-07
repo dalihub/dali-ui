@@ -22,8 +22,8 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -96,13 +96,13 @@ Property::Map CreatePropertyMap(const Ui::InnerShadow& innerShadow)
   const VisualParameters parameters = CalculateVisualParameters(innerShadow);
 
   Property::Map transform;
-  transform.Add(Visual::Transform::Property::ORIGIN, Align::CENTER)
-    .Add(Visual::Transform::Property::PIVOT, Align::CENTER);
+  transform.Add(Dali::Ui::Integration::Visual::Transform::Property::ORIGIN, Align::CENTER)
+    .Add(Dali::Ui::Integration::Visual::Transform::Property::PIVOT, Align::CENTER);
   if(parameters.offset != Vector2::ZERO)
   {
-    transform.Add(Visual::Transform::Property::OFFSET_POLICY,
-                  Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE))
-      .Add(Visual::Transform::Property::OFFSET, parameters.offset);
+    transform.Add(Dali::Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+                  Vector2(Dali::Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Dali::Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Dali::Ui::Integration::Visual::Transform::Property::OFFSET, parameters.offset);
   }
   if(parameters.extraSize != Vector2::ZERO)
   {
@@ -110,14 +110,14 @@ Property::Map CreatePropertyMap(const Ui::InnerShadow& innerShadow)
   }
 
   Property::Map map;
-  map.Add(VisualBasePropertyIndex::TYPE, VisualType::COLOR)
-    .Add(VisualBasePropertyIndex::MIX_COLOR, Color::TRANSPARENT)
-    .Add(ColorVisualPropertyIndex::BLUR_RADIUS, innerShadow.GetBlurRadius())
-    .Add(ColorVisualPropertyIndex::CUTOUT_POLICY, static_cast<int>(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS))
+  map.Add(Dali::Ui::Integration::Visual::Property::TYPE, VisualType::COLOR)
+    .Add(Dali::Ui::Integration::Visual::Property::MIX_COLOR, Color::TRANSPARENT)
+    .Add(Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS, innerShadow.GetBlurRadius())
+    .Add(Dali::Ui::Integration::ColorVisual::Property::CUTOUT_POLICY, static_cast<int>(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS))
     .Add(Dali::Ui::Integration::Visual::Property::BORDERLINE_COLOR, innerShadow.GetColor().GetRgba())
     .Add(Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH, parameters.shadowWidth)
     .Add(Dali::Ui::Integration::Visual::Property::BORDERLINE_OFFSET, BORDERLINE_OFFSET)
-    .Add(VisualBasePropertyIndex::TRANSFORM, transform);
+    .Add(Dali::Ui::Integration::Visual::Property::TRANSFORM, transform);
   return map;
 }
 

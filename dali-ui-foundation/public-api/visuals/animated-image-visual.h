@@ -26,7 +26,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 // TODO : Seperate it as n-patch / animated-image / animated-vector-image
@@ -50,56 +49,6 @@ namespace Ui
 class DALI_UI_API AnimatedImageVisual : public VisualBase
 {
 public:
-  /**
-   * @brief Property indices for AnimatedImageVisual.
-   *
-   * These can be used with Dali::Ui::VisualBase::GetProperty() and SetProperty().
-   */
-  struct Property
-  {
-    enum
-    {
-      // For simple images
-      URL                    = ImageVisualPropertyIndex::URL,
-      SYNCHRONOUS_LOADING    = ImageVisualPropertyIndex::SYNCHRONOUS_LOADING,
-      DESIRED_WIDTH          = ImageVisualPropertyIndex::DESIRED_WIDTH,
-      DESIRED_HEIGHT         = ImageVisualPropertyIndex::DESIRED_HEIGHT,
-      SAMPLING_MODE          = ImageVisualPropertyIndex::SAMPLING_MODE,
-      PIXEL_AREA             = ImageVisualPropertyIndex::PIXEL_AREA,
-      WRAP_MODE_U            = ImageVisualPropertyIndex::WRAP_MODE_U,
-      WRAP_MODE_V            = ImageVisualPropertyIndex::WRAP_MODE_V,
-      ENABLE_BROKEN_IMAGE    = ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE,
-      LOAD_POLICY            = ImageVisualPropertyIndex::LOAD_POLICY,
-      RELEASE_POLICY         = ImageVisualPropertyIndex::RELEASE_POLICY,
-      FITTING_MODE           = ImageVisualPropertyIndex::FITTING_MODE,
-      ORIENTATION_CORRECTION = ImageVisualPropertyIndex::ORIENTATION_CORRECTION,
-      SYNCHRONOUS_SIZING     = ImageVisualPropertyIndex::SYNCHRONOUS_SIZING,
-
-      // For both Image and AnimatedImage
-      PRE_MULTIPLIED_ALPHA = ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA,
-      ALPHA_MASK_URL       = ImageVisualPropertyIndex::ALPHA_MASK_URL,
-      MASK_CONTENT_SCALE   = ImageVisualPropertyIndex::MASK_CONTENT_SCALE,
-      CROP_TO_MASK         = ImageVisualPropertyIndex::CROP_TO_MASK,
-      MASKING_TYPE         = ImageVisualPropertyIndex::MASKING_TYPE,
-
-      // For both AnimatedImage and LottieAnimation
-      LOOP_COUNT         = ImageVisualPropertyIndex::LOOP_COUNT,
-      PLAY_RANGE         = ImageVisualPropertyIndex::PLAY_RANGE,
-      STOP_BEHAVIOR      = ImageVisualPropertyIndex::STOP_BEHAVIOR,
-      FRAME_SPEED_FACTOR = ImageVisualPropertyIndex::FRAME_SPEED_FACTOR,
-
-      // For AnimatedImage
-      BATCH_SIZE  = ImageVisualPropertyIndex::BATCH_SIZE,
-      CACHE_SIZE  = ImageVisualPropertyIndex::CACHE_SIZE,
-      FRAME_DELAY = ImageVisualPropertyIndex::FRAME_DELAY,
-
-      // Read-only
-      PLAY_STATE           = ImageVisualPropertyIndex::PLAY_STATE,
-      CURRENT_FRAME_NUMBER = ImageVisualPropertyIndex::CURRENT_FRAME_NUMBER,
-      TOTAL_FRAME_NUMBER   = ImageVisualPropertyIndex::TOTAL_FRAME_NUMBER,
-    };
-  };
-
 public:
   /**
    * @brief Creates a AnimatedImageVisual object.

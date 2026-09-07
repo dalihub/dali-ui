@@ -310,7 +310,7 @@ Dali::Property::Value VisualBaseImpl::GetProperty(Dali::Property::Index index) c
   // Some properties has non-empty default value.
   switch(index)
   {
-    case Ui::VisualBasePropertyIndex::MIX_COLOR:
+    case Ui::Integration::Visual::Property::MIX_COLOR:
     {
       return mCachedVisualPropertyMap[index] = Color::WHITE;
     }
@@ -346,7 +346,7 @@ UiColor VisualBaseImpl::GetColor() const
   {
     return outColor;
   }
-  return GetProperty(Dali::Ui::VisualBasePropertyIndex::MIX_COLOR).Get<Vector4>();
+  return GetProperty(Dali::Ui::Integration::Visual::Property::MIX_COLOR).Get<Vector4>();
 }
 
 void VisualBaseImpl::SetColor(const UiColor& color)
@@ -767,7 +767,7 @@ int32_t VisualBaseImpl::GetDepthIndex() const
 
 void VisualBaseImpl::SetColorInternal(const Vector4& color)
 {
-  SetProperty(Dali::Ui::VisualBasePropertyIndex::MIX_COLOR, color);
+  SetProperty(Dali::Ui::Integration::Visual::Property::MIX_COLOR, color);
 }
 
 void VisualBaseImpl::SetBorderlineColorInternal(const Vector4& borderlineColor)
@@ -784,7 +784,7 @@ void VisualBaseImpl::ApplyTransfromToPropertyMap()
     Property::Map transformProperties;
     mTransform->GetPropertyMap(transformProperties);
 
-    SetProperty(Dali::Ui::VisualBasePropertyIndex::TRANSFORM, transformProperties);
+    SetProperty(Dali::Ui::Integration::Visual::Property::TRANSFORM, transformProperties);
   }
 }
 
@@ -917,7 +917,7 @@ VisualBaseImpl::VisualBaseImpl(Dali::Ui::VisualType type)
 : mContainer(),
   mVisualType(type),
   mName(),
-  mCachedVisualPropertyMap(Dali::CreatePropertyMap({{Dali::Ui::VisualBasePropertyIndex::TYPE, mVisualType}, {Dali::Ui::VisualBasePropertyIndex::MIX_COLOR, Color::WHITE}})),
+  mCachedVisualPropertyMap(Dali::CreatePropertyMap({{Dali::Ui::Integration::Visual::Property::TYPE, mVisualType}, {Dali::Ui::Integration::Visual::Property::MIX_COLOR, Color::WHITE}})),
   mUpdatedMutableVisualProperties(),
   mTransform(nullptr),
   mVisual(),

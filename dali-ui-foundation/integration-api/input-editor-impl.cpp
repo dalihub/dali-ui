@@ -41,6 +41,8 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
@@ -65,7 +67,6 @@
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace IntegrationView   = Dali::Ui::Integration::View;
@@ -2245,11 +2246,11 @@ void InputEditorImpl::AddDecoration(Actor& actor, Text::DecorationType type, boo
 
 void InputEditorImpl::GetControlBackgroundColor(Vector4& color) const
 {
-  Property::Value propValue = Self().GetProperty(Ui::View::Property::BACKGROUND);
+  Property::Value propValue = Self().GetProperty(Ui::Integration::View::Property::BACKGROUND);
   Property::Map*  resultMap = propValue.GetMap();
 
   Property::Value* colorValue = nullptr;
-  if(resultMap && (colorValue = resultMap->Find(Ui::VisualBasePropertyIndex::MIX_COLOR)))
+  if(resultMap && (colorValue = resultMap->Find(Ui::Integration::Visual::Property::MIX_COLOR)))
   {
     colorValue->Get(color);
   }

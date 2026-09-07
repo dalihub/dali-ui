@@ -248,7 +248,7 @@ void RenderEffectImpl::Activate()
       Property::Map map;
       map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS, cornerRadius);
       map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY,
-                 static_cast<Ui::Visual::Transform::Policy::Type>(cornerRadiusPolicy));
+                 static_cast<Ui::Integration::Visual::Transform::Policy::Type>(cornerRadiusPolicy));
       map.Insert(Ui::Integration::Visual::Property::CORNER_SQUARENESS, cornerSquareness);
 
       SetCornerConstants(map);
@@ -385,7 +385,7 @@ void RenderEffectImpl::SetCornerConstants(const Property::Map& map)
   Vector4 squareness = Vector4::ZERO;
   map[Ui::Integration::Visual::Property::CORNER_SQUARENESS].Get(squareness);
 
-  Ui::Visual::Transform::Policy::Type policy = Ui::Visual::Transform::Policy::Type::ABSOLUTE;
+  Ui::Integration::Visual::Transform::Policy::Type policy = Ui::Integration::Visual::Transform::Policy::Type::ABSOLUTE;
   map[Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY].Get(policy);
 
   Renderer renderer = GetTargetRenderer();

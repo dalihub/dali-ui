@@ -28,13 +28,14 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-image-reveal-shader.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -132,11 +133,11 @@ bool UsesMultiPlaneYuvTexture(const VisualRenderer& renderer)
 Property::Map CreatePixelRevealCustomShaderMap()
 {
   Property::Map shaderMap;
-  shaderMap.Insert(Ui::Visual::Shader::Property::FRAGMENT_SHADER,
+  shaderMap.Insert(Ui::Integration::Visual::Shader::Property::FRAGMENT_SHADER,
                    Dali::String(INLINE_REPLACEMENT_IMAGE_REVEAL_FRAGMENT_SHADER));
-  shaderMap.Insert(Ui::Visual::Shader::Property::HINTS,
+  shaderMap.Insert(Ui::Integration::Visual::Shader::Property::HINTS,
                    static_cast<int>(Dali::Shader::Hint::OUTPUT_IS_TRANSPARENT));
-  shaderMap.Insert(Ui::Visual::Shader::Property::NAME,
+  shaderMap.Insert(Ui::Integration::Visual::Shader::Property::NAME,
                    Dali::String("INLINE_REPLACEMENT_IMAGE_PIXEL_REVEAL"));
   return shaderMap;
 }
@@ -245,18 +246,18 @@ bool InlineReplacementManager::CreateEntryVisual(InlineReplacementViewHost& host
   }
 
   Property::Map visualMap;
-  visualMap.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
-  visualMap.Insert(Ui::ImageVisualPropertyIndex::URL, Dali::String(entry.descriptor.source.c_str()));
-  visualMap.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, entry.descriptor.desiredWidth);
-  visualMap.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, entry.descriptor.desiredHeight);
-  visualMap.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE,
+  visualMap.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+  visualMap.Insert(Ui::Integration::ImageVisual::Property::URL, Dali::String(entry.descriptor.source.c_str()));
+  visualMap.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, entry.descriptor.desiredWidth);
+  visualMap.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, entry.descriptor.desiredHeight);
+  visualMap.Insert(Ui::Integration::ImageVisual::Property::FITTING_MODE,
                    static_cast<int>(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO));
-  visualMap.Insert(Ui::ImageVisualPropertyIndex::ORIENTATION_CORRECTION, true);
+  visualMap.Insert(Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, true);
   const bool requestPixelRevealShader = mPixelRevealRequested &&
                                         CanUsePixelRevealCustomShader(entry.descriptor.source);
   if(requestPixelRevealShader)
   {
-    visualMap.Insert(Ui::VisualBasePropertyIndex::SHADER, CreatePixelRevealCustomShaderMap());
+    visualMap.Insert(Ui::Integration::Visual::Property::SHADER, CreatePixelRevealCustomShaderMap());
   }
   entry.visual = Ui::Integration::VisualFactory::Get().CreateVisual(
     visualMap,
@@ -275,7 +276,7 @@ bool InlineReplacementManager::CreateEntryVisual(InlineReplacementViewHost& host
   visualImpl.SetResourceReadyRelayoutRequired(false);
   visualImpl.SetTransformMapUsageForFittingMode(true);
   Property::Map opacityMap;
-  opacityMap.Insert(Ui::VisualBasePropertyIndex::OPACITY, 0.0f);
+  opacityMap.Insert(Ui::Integration::Visual::Property::OPACITY, 0.0f);
   entry.visual.SetProperties(opacityMap);
   ResetEntryResourceState(entry);
   host.RegisterVisual(entry.propertyIndex, entry.visual);
@@ -336,7 +337,7 @@ void InlineReplacementManager::SetEntryVisible(Entry& entry, bool visible)
   else
   {
     Property::Map opacityMap;
-    opacityMap.Insert(Ui::VisualBasePropertyIndex::OPACITY, visible ? 1.0f : 0.0f);
+    opacityMap.Insert(Ui::Integration::Visual::Property::OPACITY, visible ? 1.0f : 0.0f);
     entry.visual.SetProperties(opacityMap);
   }
 }
@@ -369,7 +370,7 @@ void InlineReplacementManager::RemoveEntryRevealConstraint(Entry& entry, bool re
   if(entry.visual)
   {
     Property::Map opacityMap;
-    opacityMap.Insert(Ui::VisualBasePropertyIndex::OPACITY, entry.currentlyVisible ? 1.0f : 0.0f);
+    opacityMap.Insert(Ui::Integration::Visual::Property::OPACITY, entry.currentlyVisible ? 1.0f : 0.0f);
     entry.visual.SetProperties(opacityMap);
   }
 }
@@ -394,7 +395,7 @@ bool InlineReplacementManager::SetEntryPixelRevealShader(Entry& entry, bool enab
       {
         Property::Array emptyShaderArray;
         Property::Map   visualMap;
-        visualMap.Insert(Ui::VisualBasePropertyIndex::SHADER, emptyShaderArray);
+        visualMap.Insert(Ui::Integration::Visual::Property::SHADER, emptyShaderArray);
         entry.visual.SetProperties(visualMap);
       }
       return false;
@@ -402,7 +403,7 @@ bool InlineReplacementManager::SetEntryPixelRevealShader(Entry& entry, bool enab
     if(!visualImpl.IsUsingCustomShader())
     {
       Property::Map visualMap;
-      visualMap.Insert(Ui::VisualBasePropertyIndex::SHADER, CreatePixelRevealCustomShaderMap());
+      visualMap.Insert(Ui::Integration::Visual::Property::SHADER, CreatePixelRevealCustomShaderMap());
       entry.visual.SetProperties(visualMap);
     }
     return visualImpl.IsUsingCustomShader();
@@ -412,7 +413,7 @@ bool InlineReplacementManager::SetEntryPixelRevealShader(Entry& entry, bool enab
   {
     Property::Array emptyShaderArray;
     Property::Map   visualMap;
-    visualMap.Insert(Ui::VisualBasePropertyIndex::SHADER, emptyShaderArray);
+    visualMap.Insert(Ui::Integration::Visual::Property::SHADER, emptyShaderArray);
     entry.visual.SetProperties(visualMap);
   }
   return !visualImpl.IsUsingCustomShader();
@@ -662,7 +663,7 @@ bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
   if(!entry.pixelAreaApplied || entry.lastPixelArea != pixelArea)
   {
     Property::Map pixelAreaMap;
-    pixelAreaMap.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, pixelArea);
+    pixelAreaMap.Insert(Ui::Integration::ImageVisual::Property::PIXEL_AREA, pixelArea);
     entry.visual.SetProperties(pixelAreaMap);
     entry.lastPixelArea    = pixelArea;
     entry.pixelAreaApplied = true;
@@ -672,14 +673,14 @@ bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
      entry.lastOwnerSize != entry.ownerSize || entry.lastEffectiveScale != entry.effectiveScale)
   {
     Property::Map transform;
-    transform.Add(Ui::Visual::Transform::Property::SIZE, visualSize)
-      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::OFFSET, visualOffset)
-      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+    transform.Add(Ui::Integration::Visual::Transform::Property::SIZE, visualSize)
+      .Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET, visualOffset)
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
     visualImpl.SetTransformAndSize(transform, entry.ownerSize, entry.effectiveScale);
     entry.lastTransformOffset = visualOffset;
     entry.lastTransformSize   = visualSize;

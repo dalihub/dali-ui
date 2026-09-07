@@ -30,6 +30,10 @@
 // Implement of VisualBase
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -501,8 +505,8 @@ int UtcDaliVisualBaseRecreateBorderVisual01(void)
   TestVisualBaseChanged([](VisualBase visual){visual.SetPivot(Align::BOTTOM_END);}, false);
 
   // For BorderVisual.
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(BorderVisual::Property::BORDER_SIZE, 0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(BorderVisual::Property::ANTI_ALIASING, true);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::BorderVisual::Property::BORDER_SIZE, 0.1f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::BorderVisual::Property::ANTI_ALIASING, true);}, false);
 
   END_TEST;
 }
@@ -567,12 +571,12 @@ int UtcDaliVisualBaseRecreateColorVisual01(void)
   // For ColorVisual.
   // Change BlurRadius didn't change visual base
   TestVisualBaseChanged([](VisualBase visual){
-    visual.SetProperty(ColorVisual::Property::BLUR_RADIUS, 0.1f);
+    Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS, 0.1f);
   }, false);
 
   // Change CutoutPolicy change visual base!
   TestVisualBaseChanged([](VisualBase visual){
-    visual.SetProperty(ColorVisual::Property::CUTOUT_POLICY, CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
+    Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::ColorVisual::Property::CUTOUT_POLICY, CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
   }, true);
 
   END_TEST;
@@ -643,7 +647,7 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
 
   // For GradientVisual.
   // Change MutableProperty didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){ visual.SetProperty(Ui::GradientVisual::Property::START_OFFSET, 0.1f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){ Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::START_OFFSET, 0.1f);}, false);
   TestVisualBaseChanged([](VisualBase visual){
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetStopNodes({
@@ -736,7 +740,7 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
 
   // For GradientVisual.
   // Change MutableProperty didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){ visual.SetProperty(Ui::GradientVisual::Property::START_OFFSET, 0.1f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){ Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::START_OFFSET, 0.1f);}, false);
   TestVisualBaseChanged([](VisualBase visual){
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetStopNodes({
@@ -827,20 +831,20 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
 
   // For TextVisual.
   // All properties of TextVisual are mutable, so changing them should NOT recreate visual base.
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::TEXT, "World");}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_FAMILY, "Arial");}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_SIZE, 30.0f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_WEIGHT, Text::FontWeight::BOLD);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_WIDTH, Text::FontWidth::EXPANDED);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_SLANT, Text::FontSlant::ITALIC);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::MULTI_LINE, true);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_WRAP_MODE, Text::LineWrapMode::CHARACTER);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::HORIZONTAL_ALIGNMENT, Text::Alignment::CENTER);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::VERTICAL_ALIGNMENT, Text::Alignment::END);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::OVERFLOW_MODE, Text::OverflowMode::ELLIPSIS);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_HEIGHT, 1.5f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_HEIGHT_MODE, Text::LineHeightMode::RELATIVE);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::TEXT_COLOR, Vector4(1.0f, 0.0f, 0.0f, 1.0f));}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT, "World");}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_FAMILY, "Arial");}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE, 30.0f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WEIGHT, Text::FontWeight::BOLD);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WIDTH, Text::FontWidth::EXPANDED);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SLANT, Text::FontSlant::ITALIC);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::MULTI_LINE, true);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_WRAP_MODE, Text::LineWrapMode::CHARACTER);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT, Text::Alignment::CENTER);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT, Text::Alignment::END);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::OVERFLOW_MODE, Text::OverflowMode::ELLIPSIS);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT, 1.5f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE, Text::LineHeightMode::RELATIVE);}, false);
+  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT_COLOR, Vector4(1.0f, 0.0f, 0.0f, 1.0f));}, false);
 
   END_TEST;
 }
@@ -876,7 +880,6 @@ int UtcDaliVisualBaseInvalidHandle(void)
   TestAssertFunction([&](){empty.SetOrigin(Align::CENTER_BEGIN);});
   TestAssertFunction([&](){empty.SetPivot(Align::CENTER_BEGIN);});
   TestAssertFunction([&](){empty.SetSiblingOrder(0u);});
-  TestAssertFunction([&](){empty.SetProperty(Property::INVALID_INDEX, Property::Value());});
 
   TestAssertFunction([&](){empty.GetOwner();});
   TestAssertFunction([&](){empty.GetDepthLayer();});
@@ -891,7 +894,6 @@ int UtcDaliVisualBaseInvalidHandle(void)
   TestAssertFunction([&](){empty.GetOrigin();});
   TestAssertFunction([&](){empty.GetPivot();});
   TestAssertFunction([&](){empty.GetSiblingOrder();});
-  TestAssertFunction([&](){empty.GetProperty(Property::INVALID_INDEX);});
 
   END_TEST;
 }

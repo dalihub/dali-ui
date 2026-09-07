@@ -30,6 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/video/video-source-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -38,7 +39,6 @@
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/video/video-source.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -308,8 +308,8 @@ void VideoViewImpl::EnsureUnderlayVisual()
   }
 
   Property::Map properties;
-  properties.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::COLOR);
-  properties.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, Color::BLACK);
+  properties.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::COLOR);
+  properties.Insert(Ui::Integration::Visual::Property::MIX_COLOR, Color::BLACK);
 
   mUnderlayVisual = Ui::Integration::VisualFactory::Get().CreateVisual(properties);
   if(!mUnderlayVisual)
@@ -363,8 +363,8 @@ void VideoViewImpl::EnsureNativeImageVisual()
   Dali::Ui::ImageUrl nativeImageUrl = Dali::Ui::ImageUrlUtils::GenerateUrl(mNativeImagePtr);
 
   Property::Map properties;
-  properties.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
-  properties.Insert(Ui::ImageVisualPropertyIndex::URL, nativeImageUrl.GetUrl());
+  properties.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+  properties.Insert(Ui::Integration::ImageVisual::Property::URL, nativeImageUrl.GetUrl());
 
   mNativeImageVisual = Ui::Integration::VisualFactory::Get().CreateVisual(properties);
   if(!mNativeImageVisual)

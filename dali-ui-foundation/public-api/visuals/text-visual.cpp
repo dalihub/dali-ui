@@ -23,6 +23,7 @@
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 namespace Dali
@@ -51,144 +52,144 @@ TextVisual TextVisual::DownCast(BaseHandle handle)
 
 Dali::String TextVisual::GetText() const
 {
-  return VisualBase::GetProperty<Dali::String>(TextVisual::Property::TEXT);
+  return GetImplementation(*this).GetProperty<Dali::String>(Dali::Ui::Integration::TextVisual::Property::TEXT);
 }
 
 void TextVisual::SetText(const Dali::String& text)
 {
-  VisualBase::SetProperty(TextVisual::Property::TEXT, text);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT, text);
 }
 
 Dali::String TextVisual::GetFontFamily() const
 {
-  return VisualBase::GetProperty<Dali::String>(TextVisual::Property::FONT_FAMILY);
+  return GetImplementation(*this).GetProperty<Dali::String>(Dali::Ui::Integration::TextVisual::Property::FONT_FAMILY);
 }
 
 void TextVisual::SetFontFamily(const Dali::String& fontFamily)
 {
-  VisualBase::SetProperty(TextVisual::Property::FONT_FAMILY, fontFamily);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_FAMILY, fontFamily);
 }
 
 float TextVisual::GetFontSize() const
 {
-  return VisualBase::GetProperty<float>(TextVisual::Property::FONT_SIZE);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE);
 }
 
 void TextVisual::SetFontSize(float fontSize)
 {
-  VisualBase::SetProperty(TextVisual::Property::FONT_SIZE, fontSize);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE, fontSize);
 }
 
 Dali::Ui::Text::FontWeight TextVisual::GetFontWeight() const
 {
-  return VisualBase::GetProperty<Dali::Ui::Text::FontWeight>(TextVisual::Property::FONT_WEIGHT);
+  return GetImplementation(*this).GetProperty<Dali::Ui::Text::FontWeight>(Dali::Ui::Integration::TextVisual::Property::FONT_WEIGHT);
 }
 
 void TextVisual::SetFontWeight(Dali::Ui::Text::FontWeight fontWeight)
 {
-  VisualBase::SetProperty(TextVisual::Property::FONT_WEIGHT, fontWeight);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WEIGHT, fontWeight);
 }
 
 Dali::Ui::Text::FontWidth TextVisual::GetFontWidth() const
 {
-  return VisualBase::GetProperty<Dali::Ui::Text::FontWidth>(TextVisual::Property::FONT_WIDTH);
+  return GetImplementation(*this).GetProperty<Dali::Ui::Text::FontWidth>(Dali::Ui::Integration::TextVisual::Property::FONT_WIDTH);
 }
 
 void TextVisual::SetFontWidth(Dali::Ui::Text::FontWidth fontWidth)
 {
-  VisualBase::SetProperty(TextVisual::Property::FONT_WIDTH, fontWidth);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WIDTH, fontWidth);
 }
 
 Dali::Ui::Text::FontSlant TextVisual::GetFontSlant() const
 {
-  return VisualBase::GetProperty<Dali::Ui::Text::FontSlant>(TextVisual::Property::FONT_SLANT);
+  return GetImplementation(*this).GetProperty<Dali::Ui::Text::FontSlant>(Dali::Ui::Integration::TextVisual::Property::FONT_SLANT);
 }
 
 void TextVisual::SetFontSlant(Dali::Ui::Text::FontSlant fontSlant)
 {
-  VisualBase::SetProperty(TextVisual::Property::FONT_SLANT, fontSlant);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SLANT, fontSlant);
 }
 
 bool TextVisual::IsMultiLine() const
 {
-  return VisualBase::GetProperty<bool>(TextVisual::Property::MULTI_LINE);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::TextVisual::Property::MULTI_LINE);
 }
 
 void TextVisual::SetMultiLine(bool multiLine)
 {
-  VisualBase::SetProperty(TextVisual::Property::MULTI_LINE, multiLine);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::MULTI_LINE, multiLine);
 }
 
 Dali::Ui::Text::LineWrapMode TextVisual::GetLineWrapMode() const
 {
-  return VisualBase::GetProperty<Dali::Ui::Text::LineWrapMode>(TextVisual::Property::LINE_WRAP_MODE);
+  return GetImplementation(*this).GetProperty<Dali::Ui::Text::LineWrapMode>(Dali::Ui::Integration::TextVisual::Property::LINE_WRAP_MODE);
 }
 
 void TextVisual::SetLineWrapMode(Dali::Ui::Text::LineWrapMode lineWrapMode)
 {
-  VisualBase::SetProperty(TextVisual::Property::LINE_WRAP_MODE, lineWrapMode);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_WRAP_MODE, lineWrapMode);
 }
 
 Dali::Ui::Text::Alignment TextVisual::GetHorizontalAlignment() const
 {
-  return VisualBase::GetProperty<Dali::Ui::Text::Alignment>(TextVisual::Property::HORIZONTAL_ALIGNMENT);
+  return GetImplementation(*this).GetProperty<Dali::Ui::Text::Alignment>(Dali::Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT);
 }
 
 void TextVisual::SetHorizontalAlignment(Dali::Ui::Text::Alignment alignment)
 {
-  VisualBase::SetProperty(TextVisual::Property::HORIZONTAL_ALIGNMENT, alignment);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT, alignment);
 }
 
 Dali::Ui::Text::Alignment TextVisual::GetVerticalAlignment() const
 {
-  return VisualBase::GetProperty<Dali::Ui::Text::Alignment>(TextVisual::Property::VERTICAL_ALIGNMENT);
+  return GetImplementation(*this).GetProperty<Dali::Ui::Text::Alignment>(Dali::Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT);
 }
 
 void TextVisual::SetVerticalAlignment(Dali::Ui::Text::Alignment alignment)
 {
-  VisualBase::SetProperty(TextVisual::Property::VERTICAL_ALIGNMENT, alignment);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT, alignment);
 }
 
 Dali::Ui::Text::OverflowMode TextVisual::GetTextOverflowMode() const
 {
-  return VisualBase::GetProperty<Dali::Ui::Text::OverflowMode>(TextVisual::Property::OVERFLOW_MODE);
+  return GetImplementation(*this).GetProperty<Dali::Ui::Text::OverflowMode>(Dali::Ui::Integration::TextVisual::Property::OVERFLOW_MODE);
 }
 
 void TextVisual::SetTextOverflowMode(Dali::Ui::Text::OverflowMode overflowMode)
 {
-  VisualBase::SetProperty(TextVisual::Property::OVERFLOW_MODE, overflowMode);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::OVERFLOW_MODE, overflowMode);
 }
 
 float TextVisual::GetLineHeight() const
 {
-  return VisualBase::GetProperty<float>(TextVisual::Property::LINE_HEIGHT);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT);
 }
 
 void TextVisual::SetLineHeight(float lineHeight)
 {
-  VisualBase::SetProperty(TextVisual::Property::LINE_HEIGHT, lineHeight);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT, lineHeight);
 }
 
 Dali::Ui::Text::LineHeightMode TextVisual::GetLineHeightMode() const
 {
-  return VisualBase::GetProperty<Dali::Ui::Text::LineHeightMode>(TextVisual::Property::LINE_HEIGHT_MODE);
+  return GetImplementation(*this).GetProperty<Dali::Ui::Text::LineHeightMode>(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE);
 }
 
 void TextVisual::SetLineHeightMode(Dali::Ui::Text::LineHeightMode lineHeightMode)
 {
-  VisualBase::SetProperty(TextVisual::Property::LINE_HEIGHT_MODE, lineHeightMode);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE, lineHeightMode);
 }
 
 UiColor TextVisual::GetTextColor() const
 {
   // Note: Property system doesn't support UiColor with string token, so we use Vector4 internally.
-  return UiColor(VisualBase::GetProperty<Dali::Vector4>(TextVisual::Property::TEXT_COLOR));
+  return UiColor(GetImplementation(*this).GetProperty<Dali::Vector4>(Dali::Ui::Integration::TextVisual::Property::TEXT_COLOR));
 }
 
 void TextVisual::SetTextColor(const UiColor& textColor)
 {
   // Note: Property system doesn't support UiColor with string token, so we use GetRgba() directly.
-  VisualBase::SetProperty(TextVisual::Property::TEXT_COLOR, textColor.GetRgba());
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT_COLOR, textColor.GetRgba());
 }
 
 // =============================================================================

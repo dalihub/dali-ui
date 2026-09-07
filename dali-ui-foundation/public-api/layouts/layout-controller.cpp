@@ -182,8 +182,8 @@ public:
    */
   struct LayoutRootEntry
   {
-    WeakHandle<View> weakHandle; ///< Non-ref-counted weak reference; auto-nullified on destruction
-    ViewImpl*        view;       ///< Raw pointer for direct access
+    WeakHandle<Ui::View> weakHandle; ///< Non-ref-counted weak reference; auto-nullified on destruction
+    ViewImpl*            view;       ///< Raw pointer for direct access
   };
 
   /**
@@ -582,8 +582,8 @@ public:
     }
 
     // Track this layout root (weak handle for validity checking without extending lifetime)
-    View handle           = View::DownCast(view->Self());
-    mAllLayoutRoots[view] = LayoutRootEntry{WeakHandle<View>(handle), view};
+    Ui::View handle       = Ui::View::DownCast(view->Self());
+    mAllLayoutRoots[view] = LayoutRootEntry{WeakHandle<Ui::View>(handle), view};
 
     // Add to pending (dirty) set
     mPendingViews.insert(view);

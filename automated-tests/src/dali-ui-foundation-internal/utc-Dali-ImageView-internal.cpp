@@ -19,10 +19,11 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -230,12 +231,12 @@ int UtcDaliImageViewFixedSizeSetUrlPreservesLayoutFinishedFitting(void)
   visual.CreatePropertyMap(visualMap);
 
   Property::Map transform;
-  DALI_TEST_CHECK(visualMap.Find(Ui::VisualBasePropertyIndex::TRANSFORM)->Get(transform));
+  DALI_TEST_CHECK(visualMap.Find(Ui::Integration::Visual::Property::TRANSFORM)->Get(transform));
 
   Vector2 fittedSize;
   Vector2 fittedOffset;
-  DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::SIZE)->Get(fittedSize));
-  DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::OFFSET)->Get(fittedOffset));
+  DALI_TEST_CHECK(transform.Find(Ui::Integration::Visual::Transform::Property::SIZE)->Get(fittedSize));
+  DALI_TEST_CHECK(transform.Find(Ui::Integration::Visual::Transform::Property::OFFSET)->Get(fittedOffset));
   DALI_TEST_EQUALS(fittedSize, Vector2(200.0f, 100.0f), 0.01f, TEST_LOCATION);
   DALI_TEST_EQUALS(fittedOffset, Vector2(0.0f, 50.0f), 0.01f, TEST_LOCATION);
 

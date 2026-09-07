@@ -51,7 +51,7 @@ DALI_UI_API ColorVisual CreateVisual(const Ui::Shadow& shadow);
 DALI_UI_API Ui::Shadow CreateShadow(const Property::Map& map);
 
 /**
- * @brief Creates a property map for View::Property::SHADOW.
+ * @brief Creates a property map describing the View's shadow.
  *
  * @param[in] shadow The shadow value
  * @return A color visual property map describing the shadow

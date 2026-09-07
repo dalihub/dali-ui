@@ -33,6 +33,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-accessible.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
@@ -931,7 +932,7 @@ public:
   /**
    * @brief Replaces all shadows with a single shadow described by a property map.
    *
-   * This is the View::Property::SHADOW setter path. It clears both the first
+   * This is the Dali::Ui::Integration::View::Property::SHADOW setter path. It clears both the first
    * shadow and any additional shadows, then installs @p map as the first shadow.
    *
    * @param[in] map The shadow property map
@@ -941,7 +942,7 @@ public:
   /**
    * @brief Sets only the first shadow visual.
    *
-   * The first shadow is registered as View::Property::SHADOW so property lookup
+   * The first shadow is registered as Dali::Ui::Integration::View::Property::SHADOW so property lookup
    * and typed shadow animations can target it directly.
    *
    * @param[in] map The shadow property map
@@ -952,7 +953,7 @@ public:
    * @brief Appends a shadow value to the shadow stack.
    *
    * The first appended shadow is installed through SetFirstShadow() so it keeps
-   * the View::Property::SHADOW identity used by property lookup and typed
+   * the Dali::Ui::Integration::View::Property::SHADOW identity used by property lookup and typed
    * shadow animations. Later shadows are appended as container visuals.
    *
    * @param[in] shadow The shadow value to append

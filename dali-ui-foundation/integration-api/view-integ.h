@@ -23,6 +23,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
@@ -40,6 +41,60 @@ namespace Integration
 {
 namespace View
 {
+
+/**
+ * @brief Properties of a View that are not part of the public API.
+ *
+ * Every value of Dali::Ui::View::Property is repeated here, so that integration code has a single
+ * vocabulary, and the properties below are added on top of it.
+ *
+ * Those extra properties each describe a visual as a Property::Map. A map cannot say which keys it
+ * accepts, so they are kept out of the public API until a typed setter covers them the way
+ * View::SetShadow() and View::SetInnerShadow() already do. Adding a property later is possible;
+ * removing one is not, which is why they start here.
+ */
+namespace Property
+{
+enum Type
+{
+  // Dali::Ui::View::Property
+  MARGIN                              = Dali::Ui::View::Property::MARGIN,
+  PADDING                             = Dali::Ui::View::Property::PADDING,
+  LEFT_FOCUSABLE_VIEW_ID              = Dali::Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID,
+  RIGHT_FOCUSABLE_VIEW_ID             = Dali::Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID,
+  UP_FOCUSABLE_VIEW_ID                = Dali::Ui::View::Property::UP_FOCUSABLE_VIEW_ID,
+  DOWN_FOCUSABLE_VIEW_ID              = Dali::Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID,
+  DISPATCH_KEY_EVENTS                 = Dali::Ui::View::Property::DISPATCH_KEY_EVENTS,
+  CLOCKWISE_FOCUSABLE_VIEW_ID         = Dali::Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID,
+  COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID = Dali::Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
+  OFFSCREEN_RENDERING                 = Dali::Ui::View::Property::OFFSCREEN_RENDERING,
+  REQUESTED_WIDTH                     = Dali::Ui::View::Property::REQUESTED_WIDTH,
+  REQUESTED_HEIGHT                    = Dali::Ui::View::Property::REQUESTED_HEIGHT,
+  MINIMUM_WIDTH                       = Dali::Ui::View::Property::MINIMUM_WIDTH,
+  MINIMUM_HEIGHT                      = Dali::Ui::View::Property::MINIMUM_HEIGHT,
+  MAXIMUM_WIDTH                       = Dali::Ui::View::Property::MAXIMUM_WIDTH,
+  MAXIMUM_HEIGHT                      = Dali::Ui::View::Property::MAXIMUM_HEIGHT,
+  LAYOUT_MODE                         = Dali::Ui::View::Property::LAYOUT_MODE,
+  FOCUS_GROUP                         = Dali::Ui::View::Property::FOCUS_GROUP,
+  FORWARD_FOCUSABLE_VIEW_ID           = Dali::Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID,
+  BACKWARD_FOCUSABLE_VIEW_ID          = Dali::Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID,
+
+  // Integration only. Each of these takes a Property::Map describing a visual.
+  BACKGROUND,   ///< The background of the View. Name "background", type Property::MAP, or Dali::String for a URL, or Property::VECTOR4 for a colour.
+  SHADOW,       ///< The shadow of the View. Name "shadow", type Property::MAP. See View::SetShadow().
+  INNER_SHADOW, ///< The inner shadow of the View. Name "innerShadow", type Property::MAP. See View::SetInnerShadow().
+  BORDERLINE,   ///< The inset borderline of the View. Name "borderline", type Property::MAP.
+
+  // Dali::Ui::View::Property, animatable range
+  CORNER_RADIUS        = Dali::Ui::View::Property::CORNER_RADIUS,
+  CORNER_RADIUS_POLICY = Dali::Ui::View::Property::CORNER_RADIUS_POLICY,
+  CORNER_SQUARENESS    = Dali::Ui::View::Property::CORNER_SQUARENESS,
+  BORDERLINE_WIDTH     = Dali::Ui::View::Property::BORDERLINE_WIDTH,
+  BORDERLINE_COLOR     = Dali::Ui::View::Property::BORDERLINE_COLOR,
+  BORDERLINE_OFFSET    = Dali::Ui::View::Property::BORDERLINE_OFFSET,
+};
+
+} // namespace Property
 
 /**
  * @brief Container of child view handles (in add order).
@@ -133,8 +188,8 @@ DALI_UI_API bool RemoveTrait(ViewImpl& viewImpl, TraitId id);
  * Property::INVALID_INDEX.
  *
  * @param[in] view              The view to query.
- * @param[in] index             The property index that owns the visual (e.g. View::Property::BACKGROUND).
- * @param[in] visualPropertyKey The visual sub-property key (e.g. Ui::VisualBasePropertyIndex::MIX_COLOR).
+ * @param[in] index             The property index that owns the visual (e.g. Dali::Ui::Integration::View::Property::BACKGROUND).
+ * @param[in] visualPropertyKey The visual sub-property key (e.g. Ui::Integration::Visual::Property::MIX_COLOR).
  * @return A Property targeting the visual sub-property, or an invalid Property.
  */
 DALI_UI_API Dali::Property GetVisualProperty(Ui::View view, Dali::Property::Index index, Dali::Property::Key visualPropertyKey);

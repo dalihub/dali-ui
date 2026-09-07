@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/builder/style.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
@@ -76,8 +77,8 @@ void Style::ApplyVisual(Handle handle, const std::string& visualName, const Prop
     // merge them into the visual map
     if(instancedProperties)
     {
-      Property::Value* instanceTypeValue = instancedProperties->Find(Ui::VisualBasePropertyIndex::TYPE);
-      Property::Value* newTypeValue      = visualMap.Find(Ui::VisualBasePropertyIndex::TYPE, VISUAL_TYPE);
+      Property::Value* instanceTypeValue = instancedProperties->Find(Ui::Integration::Visual::Property::TYPE);
+      Property::Value* newTypeValue      = visualMap.Find(Ui::Integration::Visual::Property::TYPE, VISUAL_TYPE);
       if(instanceTypeValue && newTypeValue)
       {
         int instanceVisualType = -1;

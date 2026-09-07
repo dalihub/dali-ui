@@ -33,9 +33,10 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 using namespace Dali;
 
@@ -79,9 +80,9 @@ RenderedTextVisual CreateRenderedInternalTextVisualWithView(UiTestApplication& a
   view.SetProperty(Actor::Property::SIZE, Vector3(VISUAL_WIDTH, VISUAL_HEIGHT, 0.0f));
 
   Dali::Property::Map propertyMap;
-  propertyMap.Add(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::Integration::InternalVisualType::TEXT);
-  propertyMap.Add(Dali::Ui::TextVisualPropertyIndex::TEXT, text);
-  propertyMap.Add(Dali::Ui::TextVisualPropertyIndex::FONT_SIZE, 12.0f);
+  propertyMap.Add(Dali::Ui::Integration::Visual::Property::TYPE, Dali::Ui::Integration::InternalVisualType::TEXT);
+  propertyMap.Add(Dali::Ui::Integration::TextVisual::Property::TEXT, text);
+  propertyMap.Add(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE, 12.0f);
 
   Dali::Ui::Integration::Visual::Base internalVisual = Dali::Ui::Integration::VisualFactory::Get().CreateVisual(propertyMap);
   DALI_TEST_CHECK(internalVisual);

@@ -35,6 +35,8 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/web-back-forward-list-impl.h>
@@ -44,8 +46,6 @@
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 #if defined(_MSC_VER)
@@ -129,8 +129,8 @@ DALI_TYPE_REGISTRATION_END()
 Dali::Property::Map CreateTransparentColorVisualProperties()
 {
   Dali::Property::Map map;
-  map.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::Integration::InternalVisualType::COLOR);
-  map.Insert(Dali::Ui::VisualBasePropertyIndex::MIX_COLOR, Color::TRANSPARENT);
+  map.Insert(Dali::Ui::Integration::Visual::Property::TYPE, Dali::Ui::Integration::InternalVisualType::COLOR);
+  map.Insert(Dali::Ui::Integration::Visual::Property::MIX_COLOR, Color::TRANSPARENT);
   return map;
 }
 
@@ -604,11 +604,11 @@ void WebViewImpl::OnFrameRendered()
   Dali::Ui::ImageUrl nativeImageUrl = Dali::Ui::ImageUrlUtils::GenerateUrl(nativeImagePtr, /*useNativeImage=*/true);
 
   Dali::Property::Map imageVisualMap;
-  imageVisualMap.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::Integration::InternalVisualType::IMAGE);
-  imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::URL, nativeImageUrl.GetUrl());
-  imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::PIXEL_AREA, FULL_TEXTURE_RECT);
-  imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::WRAP_MODE_U, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
-  imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::WRAP_MODE_V, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
+  imageVisualMap.Insert(Dali::Ui::Integration::Visual::Property::TYPE, Dali::Ui::Integration::InternalVisualType::IMAGE);
+  imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::URL, nativeImageUrl.GetUrl());
+  imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::PIXEL_AREA, FULL_TEXTURE_RECT);
+  imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_U, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
+  imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_V, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
 
   mVisual = Ui::Integration::VisualFactory::Get().CreateVisual(imageVisualMap);
 #if defined(_MSC_VER)
@@ -674,9 +674,9 @@ void WebViewImpl::SetDisplayArea(const Dali::BoundsInteger& displayArea)
         Dali::EqualsZero(textureRatio.y) ? 1.0f : std::min(1.0f, 1.0f / textureRatio.y));
 
       Dali::Property::Map updateMap;
-      updateMap.Insert(Dali::Ui::ImageVisualPropertyIndex::PIXEL_AREA, pixelArea);
-      updateMap.Insert(Dali::Ui::VisualBasePropertyIndex::TRANSFORM,
-                       Dali::CreatePropertyMap({{Dali::Ui::Visual::Transform::Property::SIZE, transformSize}}));
+      updateMap.Insert(Dali::Ui::Integration::ImageVisual::Property::PIXEL_AREA, pixelArea);
+      updateMap.Insert(Dali::Ui::Integration::Visual::Property::TRANSFORM,
+                       Dali::CreatePropertyMap({{Dali::Ui::Integration::Visual::Transform::Property::SIZE, transformSize}}));
 
       auto& viewData = Internal::ViewDataImpl::Get(*this);
       viewData.DoAction(WebViewImpl::Property::URL, Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, updateMap);

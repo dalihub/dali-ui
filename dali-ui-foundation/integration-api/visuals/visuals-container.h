@@ -23,6 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -56,7 +57,7 @@ namespace Integration
  * Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND and Dali::Ui::Integration::DepthIndex::Ranges::CONTENT.
  * If user try to add over the Dali::Ui::Integration::DepthIndex::Ranges::CONTENT, it will be ignored.
  */
-class VisualsContainer : public Dali::BaseHandle
+class DALI_UI_API VisualsContainer : public Dali::BaseHandle
 {
 public:
   /**

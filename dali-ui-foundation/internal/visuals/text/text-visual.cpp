@@ -30,6 +30,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-reveal-bridge.h>
@@ -46,7 +48,6 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
-#include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 using Dali::Integration::ToDaliString;
@@ -196,20 +197,20 @@ struct NameIndexMatch
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-  {TEXT_PROPERTY, Ui::TextVisualPropertyIndex::TEXT},
-  {FONT_FAMILY_PROPERTY, Ui::TextVisualPropertyIndex::FONT_FAMILY},
-  {FONT_SIZE_PROPERTY, Ui::TextVisualPropertyIndex::FONT_SIZE},
-  {FONT_WEIGHT_PROPERTY, Ui::TextVisualPropertyIndex::FONT_WEIGHT},
-  {FONT_WIDTH_PROPERTY, Ui::TextVisualPropertyIndex::FONT_WIDTH},
-  {FONT_SLANT_PROPERTY, Ui::TextVisualPropertyIndex::FONT_SLANT},
-  {MULTI_LINE_PROPERTY, Ui::TextVisualPropertyIndex::MULTI_LINE},
-  {LINE_WRAP_MODE_PROPERTY, Ui::TextVisualPropertyIndex::LINE_WRAP_MODE},
-  {HORIZONTAL_ALIGNMENT_PROPERTY, Ui::TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT},
-  {VERTICAL_ALIGNMENT_PROPERTY, Ui::TextVisualPropertyIndex::VERTICAL_ALIGNMENT},
-  {OVERFLOW_MODE_PROPERTY, Ui::TextVisualPropertyIndex::OVERFLOW_MODE},
-  {LINE_HEIGHT_PROPERTY, Ui::TextVisualPropertyIndex::LINE_HEIGHT},
-  {LINE_HEIGHT_MODE_PROPERTY, Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE},
-  {TEXT_COLOR_PROPERTY, Ui::TextVisualPropertyIndex::TEXT_COLOR},
+  {TEXT_PROPERTY, Ui::Integration::TextVisual::Property::TEXT},
+  {FONT_FAMILY_PROPERTY, Ui::Integration::TextVisual::Property::FONT_FAMILY},
+  {FONT_SIZE_PROPERTY, Ui::Integration::TextVisual::Property::FONT_SIZE},
+  {FONT_WEIGHT_PROPERTY, Ui::Integration::TextVisual::Property::FONT_WEIGHT},
+  {FONT_WIDTH_PROPERTY, Ui::Integration::TextVisual::Property::FONT_WIDTH},
+  {FONT_SLANT_PROPERTY, Ui::Integration::TextVisual::Property::FONT_SLANT},
+  {MULTI_LINE_PROPERTY, Ui::Integration::TextVisual::Property::MULTI_LINE},
+  {LINE_WRAP_MODE_PROPERTY, Ui::Integration::TextVisual::Property::LINE_WRAP_MODE},
+  {HORIZONTAL_ALIGNMENT_PROPERTY, Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT},
+  {VERTICAL_ALIGNMENT_PROPERTY, Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT},
+  {OVERFLOW_MODE_PROPERTY, Ui::Integration::TextVisual::Property::OVERFLOW_MODE},
+  {LINE_HEIGHT_PROPERTY, Ui::Integration::TextVisual::Property::LINE_HEIGHT},
+  {LINE_HEIGHT_MODE_PROPERTY, Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE},
+  {TEXT_COLOR_PROPERTY, Ui::Integration::TextVisual::Property::TEXT_COLOR},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -266,38 +267,38 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   Property::Value value;
 
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::TEXT);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::TEXT);
 
   std::string text;
   mController->GetText(text);
-  map.Insert(Ui::TextVisualPropertyIndex::TEXT, ToPropertyValue(text));
+  map.Insert(Ui::Integration::TextVisual::Property::TEXT, ToPropertyValue(text));
 
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_FAMILY, ToPropertyValue(mController->GetDefaultFontFamily()));
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_SIZE, mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE));
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_WEIGHT, Text::ToFontWeight(mController->GetDefaultFontWeight()));
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_WIDTH, Text::ToFontWidth(mController->GetDefaultFontWidth()));
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_SLANT, Text::ToFontSlant(mController->GetDefaultFontSlant()));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_FAMILY, ToPropertyValue(mController->GetDefaultFontFamily()));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_SIZE, mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_WEIGHT, Text::ToFontWeight(mController->GetDefaultFontWeight()));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_WIDTH, Text::ToFontWidth(mController->GetDefaultFontWidth()));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_SLANT, Text::ToFontSlant(mController->GetDefaultFontSlant()));
 
-  map.Insert(Ui::TextVisualPropertyIndex::MULTI_LINE, mController->IsMultiLineEnabled());
-  map.Insert(Ui::TextVisualPropertyIndex::LINE_WRAP_MODE, mController->GetLineWrapMode());
+  map.Insert(Ui::Integration::TextVisual::Property::MULTI_LINE, mController->IsMultiLineEnabled());
+  map.Insert(Ui::Integration::TextVisual::Property::LINE_WRAP_MODE, mController->GetLineWrapMode());
 
-  map.Insert(Ui::TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT, mController->GetHorizontalAlignment());
-  map.Insert(Ui::TextVisualPropertyIndex::VERTICAL_ALIGNMENT, mController->GetVerticalAlignment());
+  map.Insert(Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT, mController->GetHorizontalAlignment());
+  map.Insert(Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT, mController->GetVerticalAlignment());
 
-  map.Insert(Ui::TextVisualPropertyIndex::OVERFLOW_MODE, mOverflowMode);
-  map.Insert(Ui::TextVisualPropertyIndex::LINE_HEIGHT, mLineHeight);
-  map.Insert(Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE, mLineHeightMode);
+  map.Insert(Ui::Integration::TextVisual::Property::OVERFLOW_MODE, mOverflowMode);
+  map.Insert(Ui::Integration::TextVisual::Property::LINE_HEIGHT, mLineHeight);
+  map.Insert(Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE, mLineHeightMode);
 
-  map.Insert(Ui::TextVisualPropertyIndex::TEXT_COLOR, mController->GetDefaultColor());
+  map.Insert(Ui::Integration::TextVisual::Property::TEXT_COLOR, mController->GetDefaultColor());
 }
 
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::TEXT);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::TEXT);
   std::string text;
   mController->GetText(text);
-  map.Insert(Ui::TextVisualPropertyIndex::TEXT, ToPropertyValue(text));
+  map.Insert(Ui::Integration::TextVisual::Property::TEXT, ToPropertyValue(text));
 }
 
 TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory& shaderFactory)
@@ -651,17 +652,17 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
 {
   switch(index)
   {
-    case Ui::TextVisualPropertyIndex::TEXT:
+    case Ui::Integration::TextVisual::Property::TEXT:
     {
       mController->SetText(ToStdString(propertyValue));
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_FAMILY:
+    case Ui::Integration::TextVisual::Property::FONT_FAMILY:
     {
       SetFontFamilyProperty(mController, propertyValue);
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_SIZE:
+    case Ui::Integration::TextVisual::Property::FONT_SIZE:
     {
       const float fontSize = propertyValue.Get<float>();
       if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize))
@@ -670,7 +671,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_WEIGHT:
+    case Ui::Integration::TextVisual::Property::FONT_WEIGHT:
     {
       Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontWeightEnumeration(propertyValue, weight))
@@ -679,7 +680,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_WIDTH:
+    case Ui::Integration::TextVisual::Property::FONT_WIDTH:
     {
       Text::FontWidth width(static_cast<Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontWidthEnumeration(propertyValue, width))
@@ -688,7 +689,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_SLANT:
+    case Ui::Integration::TextVisual::Property::FONT_SLANT:
     {
       Text::FontSlant slant(static_cast<Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontSlantEnumeration(propertyValue, slant))
@@ -697,12 +698,12 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::MULTI_LINE:
+    case Ui::Integration::TextVisual::Property::MULTI_LINE:
     {
       mController->SetMultiLineEnabled(propertyValue.Get<bool>());
       break;
     }
-    case Ui::TextVisualPropertyIndex::LINE_WRAP_MODE:
+    case Ui::Integration::TextVisual::Property::LINE_WRAP_MODE:
     {
       Text::LineWrapMode mode(static_cast<Text::LineWrapMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetLineWrapModeEnumeration(propertyValue, mode))
@@ -711,7 +712,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT:
+    case Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT:
     {
       if(mController)
       {
@@ -723,7 +724,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::VERTICAL_ALIGNMENT:
+    case Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT:
     {
       if(mController)
       {
@@ -735,7 +736,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::OVERFLOW_MODE:
+    case Ui::Integration::TextVisual::Property::OVERFLOW_MODE:
     {
       Text::OverflowMode mode(static_cast<Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetOverflowModeEnumeration(propertyValue, mode))
@@ -760,7 +761,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::LINE_HEIGHT:
+    case Ui::Integration::TextVisual::Property::LINE_HEIGHT:
     {
       float lineHeight = 0.0f;
       if(propertyValue.Get(lineHeight))
@@ -773,7 +774,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE:
+    case Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE:
     {
       Text::LineHeightMode mode(static_cast<Text::LineHeightMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetLineHeightModeEnumeration(propertyValue, mode))
@@ -786,7 +787,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::TEXT_COLOR:
+    case Ui::Integration::TextVisual::Property::TEXT_COLOR:
     {
       const Vector4& textColor = propertyValue.Get<Vector4>();
       if(mController->GetDefaultColor() != textColor)
@@ -1297,14 +1298,14 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     // Transform offset is used for subpixel data upload in text tiling.
     // We should set the transform before creating a tiling texture.
     Property::Map visualTransform;
-    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, layoutSize)
-      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
-      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+    visualTransform.Add(Ui::Integration::Visual::Transform::Property::SIZE, layoutSize)
+      .Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET, visualTransformOffset)
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
     SetTransformAndSize(visualTransform, textControlSize, parameters.effectiveTextScale);
 
     // Get the maximum texture size.
@@ -1497,7 +1498,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       if(mImpl->mTransform)
       {
         mImpl->mTransform->GetPropertyMap(retMap);
-        Property::Value* offsetValue = retMap.Find(Dali::Ui::Visual::Transform::Property::OFFSET);
+        Property::Value* offsetValue = retMap.Find(Dali::Ui::Integration::Visual::Transform::Property::OFFSET);
         if(offsetValue)
         {
           offsetValue->Get(info.transformOffset);
@@ -2816,7 +2817,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     if(mImpl->mTransform)
     {
       mImpl->mTransform->GetPropertyMap(retMap);
-      Property::Value* offsetValue = retMap.Find(Dali::Ui::Visual::Transform::Property::OFFSET);
+      Property::Value* offsetValue = retMap.Find(Dali::Ui::Integration::Visual::Transform::Property::OFFSET);
       if(offsetValue)
       {
         offsetValue->Get(info.transformOffset);

@@ -23,8 +23,11 @@
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
+
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -245,28 +248,28 @@ int UtcDaliGradientVisualSetGetPropertyValue(void)
   // Test StartOffset
   visual.SetStartOffset(0.3f);
   DALI_TEST_EQUALS(visual.GetStartOffset(), 0.3f, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<float>(GradientVisual::Property::START_OFFSET), 0.3f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::GradientVisual::Property::START_OFFSET).Get<float>(), 0.3f, TEST_LOCATION);
 
-  visual.SetProperty(GradientVisual::Property::START_OFFSET, 0.7f);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::GradientVisual::Property::START_OFFSET, 0.7f);
   DALI_TEST_EQUALS(visual.GetStartOffset(), 0.7f, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<float>(GradientVisual::Property::START_OFFSET), 0.7f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::GradientVisual::Property::START_OFFSET).Get<float>(), 0.7f, TEST_LOCATION);
 
   // Test RadialGradient
   visual.SetRadialGradient(Vector2(0.5f, 0.3f), 0.4f);
   DALI_TEST_EQUALS(visual.GetCenter(), Vector2(0.5f, 0.3f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetRadius(), 0.4f, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Vector2>(GradientVisual::Property::CENTER), Vector2(0.5f, 0.3f), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<float>(GradientVisual::Property::RADIUS), 0.4f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::GradientVisual::Property::CENTER).Get<Vector2>(), Vector2(0.5f, 0.3f), TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::GradientVisual::Property::RADIUS).Get<float>(), 0.4f, TEST_LOCATION);
 
   // Test SpreadMethod
   visual.SetSpreadMethod(Ui::Gradient::SpreadMethod::REFLECT);
   DALI_TEST_EQUALS(visual.GetSpreadMethod(), Ui::Gradient::SpreadMethod::REFLECT, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Ui::Gradient::SpreadMethod>(GradientVisual::Property::SPREAD_METHOD), Ui::Gradient::SpreadMethod::REFLECT, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::GradientVisual::Property::SPREAD_METHOD).Get<Ui::Gradient::SpreadMethod>(), Ui::Gradient::SpreadMethod::REFLECT, TEST_LOCATION);
 
   // Test Units
   visual.SetUnits(Ui::Gradient::Units::USER_SPACE);
   DALI_TEST_EQUALS(visual.GetUnits(), Ui::Gradient::Units::USER_SPACE, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Ui::Gradient::Units>(GradientVisual::Property::UNITS), Ui::Gradient::Units::USER_SPACE, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::GradientVisual::Property::UNITS).Get<Ui::Gradient::Units>(), Ui::Gradient::Units::USER_SPACE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -324,7 +327,6 @@ int UtcDaliGradientVisualInvalidHandle(void)
   TestAssertFunction([&]() { empty.SetOrigin(Align::CENTER_BEGIN); });
   TestAssertFunction([&]() { empty.SetPivot(Align::CENTER_BEGIN); });
   TestAssertFunction([&]() { empty.SetSiblingOrder(0u); });
-  TestAssertFunction([&]() { empty.SetProperty(Property::INVALID_INDEX, Property::Value()); });
 
   TestAssertFunction([&]() { empty.GetOwner(); });
   TestAssertFunction([&]() { empty.GetDepthLayer(); });
@@ -339,7 +341,6 @@ int UtcDaliGradientVisualInvalidHandle(void)
   TestAssertFunction([&]() { empty.GetOrigin(); });
   TestAssertFunction([&]() { empty.GetPivot(); });
   TestAssertFunction([&]() { empty.GetSiblingOrder(); });
-  TestAssertFunction([&]() { empty.GetProperty(Property::INVALID_INDEX); });
 
   // GradientVisual specific
   TestAssertFunction([&]() { empty.SetStartOffset(0.0f); });

@@ -433,7 +433,7 @@ private: // Internal methods
    *
    * Used to intercept ANIMATION_FINISHED and forward it as AnimationFinishedSignal.
    */
-  void OnVisualEvent(View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId);
+  void OnVisualEvent(Ui::View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId);
 
   /**
    * @brief Called when the view's resource becomes ready.

@@ -125,7 +125,7 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   mName     = "";
 
   Property::Value* vertexShaderValue =
-    shaderMap.Find(Ui::Visual::Shader::Property::VERTEX_SHADER, CUSTOM_VERTEX_SHADER);
+    shaderMap.Find(Ui::Integration::Visual::Shader::Property::VERTEX_SHADER, CUSTOM_VERTEX_SHADER);
   if(vertexShaderValue)
   {
     if(!GetStringFromProperty(*vertexShaderValue, mVertexShader))
@@ -135,7 +135,7 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   }
 
   Property::Value* fragmentShaderValue =
-    shaderMap.Find(Ui::Visual::Shader::Property::FRAGMENT_SHADER, CUSTOM_FRAGMENT_SHADER);
+    shaderMap.Find(Ui::Integration::Visual::Shader::Property::FRAGMENT_SHADER, CUSTOM_FRAGMENT_SHADER);
   if(fragmentShaderValue)
   {
     if(!GetStringFromProperty(*fragmentShaderValue, mFragmentShader))
@@ -145,7 +145,7 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   }
 
   Property::Value* subdivideXValue =
-    shaderMap.Find(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_X, CUSTOM_SUBDIVIDE_GRID_X);
+    shaderMap.Find(Ui::Integration::Visual::Shader::Property::SUBDIVIDE_GRID_X, CUSTOM_SUBDIVIDE_GRID_X);
   if(subdivideXValue)
   {
     int subdivideX;
@@ -160,7 +160,7 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   }
 
   Property::Value* subdivideYValue =
-    shaderMap.Find(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_Y, CUSTOM_SUBDIVIDE_GRID_Y);
+    shaderMap.Find(Ui::Integration::Visual::Shader::Property::SUBDIVIDE_GRID_Y, CUSTOM_SUBDIVIDE_GRID_Y);
   if(subdivideYValue)
   {
     int subdivideY;
@@ -175,7 +175,7 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   }
 
   Property::Value* renderPassTagValue =
-    shaderMap.Find(Ui::Visual::Shader::Property::RENDER_PASS_TAG, CUSTOM_RENDER_PASS_TAG);
+    shaderMap.Find(Ui::Integration::Visual::Shader::Property::RENDER_PASS_TAG, CUSTOM_RENDER_PASS_TAG);
   if(renderPassTagValue)
   {
     if(!renderPassTagValue->Get(mRenderPassTag) || mRenderPassTag < 0)
@@ -185,7 +185,7 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
     }
   }
 
-  Property::Value* hintsValue = shaderMap.Find(Ui::Visual::Shader::Property::HINTS, CUSTOM_SHADER_HINTS);
+  Property::Value* hintsValue = shaderMap.Find(Ui::Integration::Visual::Shader::Property::HINTS, CUSTOM_SHADER_HINTS);
   if(hintsValue)
   {
     if(!Scripting::GetBitmaskEnumerationProperty(*hintsValue, SHADER_HINT_TABLE, SHADER_HINT_TABLE_COUNT, mHints))
@@ -195,7 +195,7 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
     }
   }
 
-  Property::Value* nameValue = shaderMap.Find(Ui::Visual::Shader::Property::NAME, CUSTOM_SHADER_NAME);
+  Property::Value* nameValue = shaderMap.Find(Ui::Integration::Visual::Shader::Property::NAME, CUSTOM_SHADER_NAME);
   if(nameValue)
   {
     if(!GetStringFromProperty(*nameValue, mName))
@@ -212,35 +212,35 @@ Property::Map Internal::Visual::Base::Impl::CustomShader::CreatePropertyMap() co
   {
     if(!mVertexShader.empty())
     {
-      customShader.Insert(Ui::Visual::Shader::Property::VERTEX_SHADER, ToPropertyValue(mVertexShader));
+      customShader.Insert(Ui::Integration::Visual::Shader::Property::VERTEX_SHADER, ToPropertyValue(mVertexShader));
     }
     if(!mFragmentShader.empty())
     {
-      customShader.Insert(Ui::Visual::Shader::Property::FRAGMENT_SHADER, ToPropertyValue(mFragmentShader));
+      customShader.Insert(Ui::Integration::Visual::Shader::Property::FRAGMENT_SHADER, ToPropertyValue(mFragmentShader));
     }
 
     if(mGridSize.GetWidth() != 1)
     {
-      customShader.Insert(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_X, mGridSize.GetWidth());
+      customShader.Insert(Ui::Integration::Visual::Shader::Property::SUBDIVIDE_GRID_X, mGridSize.GetWidth());
     }
     if(mGridSize.GetHeight() != 1)
     {
-      customShader.Insert(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_Y, mGridSize.GetHeight());
+      customShader.Insert(Ui::Integration::Visual::Shader::Property::SUBDIVIDE_GRID_Y, mGridSize.GetHeight());
     }
 
     if(mRenderPassTag >= 0)
     {
-      customShader.Insert(Ui::Visual::Shader::Property::RENDER_PASS_TAG, mRenderPassTag);
+      customShader.Insert(Ui::Integration::Visual::Shader::Property::RENDER_PASS_TAG, mRenderPassTag);
     }
 
     if(mHints != Dali::Shader::Hint::NONE)
     {
-      customShader.Insert(Ui::Visual::Shader::Property::HINTS, static_cast<int>(mHints));
+      customShader.Insert(Ui::Integration::Visual::Shader::Property::HINTS, static_cast<int>(mHints));
     }
 
     if(!mName.empty())
     {
-      customShader.Insert(Ui::Visual::Shader::Property::NAME, ToPropertyValue(mName));
+      customShader.Insert(Ui::Integration::Visual::Shader::Property::NAME, ToPropertyValue(mName));
     }
   }
   return customShader;

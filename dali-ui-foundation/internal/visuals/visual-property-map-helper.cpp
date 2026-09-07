@@ -22,12 +22,12 @@
 #include <dali/public-api/object/property-array.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
-#include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -40,8 +40,8 @@ namespace Internal
 Property::Map CreateColorVisualPropertyMap(const Vector4& color)
 {
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::COLOR);
-  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, color);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::COLOR);
+  map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, color);
   return map;
 }
 
@@ -53,18 +53,18 @@ Property::Map CreateColorVisualPropertyMap(const UiColor& color)
 Property::Map CreateImageVisualPropertyMap(const Dali::String& url)
 {
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
-  map.Insert(Ui::ImageVisualPropertyIndex::URL, url);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+  map.Insert(Ui::Integration::ImageVisual::Property::URL, url);
   return map;
 }
 
 Property::Map CreateGradientVisualPropertyMap(const Gradient::Base& gradient)
 {
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::GRADIENT);
-  map.Insert(Ui::GradientVisualPropertyIndex::START_OFFSET, gradient.GetStartOffset());
-  map.Insert(Ui::GradientVisualPropertyIndex::UNITS, gradient.GetUnits());
-  map.Insert(Ui::GradientVisualPropertyIndex::SPREAD_METHOD, gradient.GetSpreadMethod());
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::GRADIENT);
+  map.Insert(Ui::Integration::GradientVisual::Property::START_OFFSET, gradient.GetStartOffset());
+  map.Insert(Ui::Integration::GradientVisual::Property::UNITS, gradient.GetUnits());
+  map.Insert(Ui::Integration::GradientVisual::Property::SPREAD_METHOD, gradient.GetSpreadMethod());
 
   const Vector<Gradient::StopNode> stopNodes = gradient.GetStopNodes();
 
@@ -79,32 +79,32 @@ Property::Map CreateGradientVisualPropertyMap(const Gradient::Base& gradient)
     colors.PushBack(stopNodes[i].GetColor().GetRgba());
   }
 
-  map.Insert(Ui::GradientVisualPropertyIndex::STOP_OFFSET, offsets);
-  map.Insert(Ui::GradientVisualPropertyIndex::STOP_COLOR, colors);
+  map.Insert(Ui::Integration::GradientVisual::Property::STOP_OFFSET, offsets);
+  map.Insert(Ui::Integration::GradientVisual::Property::STOP_COLOR, colors);
 
   switch(gradient.GetType())
   {
     case Gradient::Type::LINEAR:
     {
       Gradient::Linear linear = Gradient::Linear::DownCast(gradient);
-      map.Insert(Ui::GradientVisualPropertyIndex::START_POSITION, linear.GetStartPosition());
-      map.Insert(Ui::GradientVisualPropertyIndex::END_POSITION, linear.GetEndPosition());
+      map.Insert(Ui::Integration::GradientVisual::Property::START_POSITION, linear.GetStartPosition());
+      map.Insert(Ui::Integration::GradientVisual::Property::END_POSITION, linear.GetEndPosition());
       break;
     }
 
     case Gradient::Type::RADIAL:
     {
       Gradient::Radial radial = Gradient::Radial::DownCast(gradient);
-      map.Insert(Ui::GradientVisualPropertyIndex::CENTER, radial.GetCenter());
-      map.Insert(Ui::GradientVisualPropertyIndex::RADIUS, radial.GetRadius());
+      map.Insert(Ui::Integration::GradientVisual::Property::CENTER, radial.GetCenter());
+      map.Insert(Ui::Integration::GradientVisual::Property::RADIUS, radial.GetRadius());
       break;
     }
 
     case Gradient::Type::CONIC:
     {
       Gradient::Conic conic = Gradient::Conic::DownCast(gradient);
-      map.Insert(Ui::GradientVisualPropertyIndex::CENTER, conic.GetCenter());
-      map.Insert(Ui::GradientVisualPropertyIndex::START_ANGLE, conic.GetStartAngle().radian);
+      map.Insert(Ui::Integration::GradientVisual::Property::CENTER, conic.GetCenter());
+      map.Insert(Ui::Integration::GradientVisual::Property::START_ANGLE, conic.GetStartAngle().radian);
       break;
     }
 

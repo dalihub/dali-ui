@@ -17,8 +17,10 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -125,14 +127,14 @@ int UtcDaliInnerShadowVisualConversionP(void)
   // width = 2 * (max(30, 0) + 8 + 1) = 78
   // offset = ((20 - -10) / 2, (30 - 5) / 2) = (15, 12.5)
   // extraSize = (2 * 78 - 20 - -10, 2 * 78 - 30 - 5) = (146, 121)
-  const Property::Value innerShadowValue = view.GetProperty(View::Property::INNER_SHADOW);
+  const Property::Value innerShadowValue = view.GetProperty(Dali::Ui::Integration::View::Property::INNER_SHADOW);
   const Property::Map* map = innerShadowValue.GetMap();
   DALI_TEST_CHECK(map);
 
-  const Property::Value* visualTypeValue = map->Find(VisualBasePropertyIndex::TYPE);
-  const Property::Value* mixColorValue = map->Find(VisualBasePropertyIndex::MIX_COLOR);
-  const Property::Value* blurRadiusValue = map->Find(ColorVisualPropertyIndex::BLUR_RADIUS);
-  const Property::Value* cutoutPolicyValue = map->Find(ColorVisualPropertyIndex::CUTOUT_POLICY);
+  const Property::Value* visualTypeValue = map->Find(Dali::Ui::Integration::Visual::Property::TYPE);
+  const Property::Value* mixColorValue = map->Find(Dali::Ui::Integration::Visual::Property::MIX_COLOR);
+  const Property::Value* blurRadiusValue = map->Find(Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS);
+  const Property::Value* cutoutPolicyValue = map->Find(Dali::Ui::Integration::ColorVisual::Property::CUTOUT_POLICY);
   const Property::Value* borderlineColorValue = map->Find(Dali::Ui::Integration::Visual::Property::BORDERLINE_COLOR);
   const Property::Value* borderlineWidthValue = map->Find(Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH);
   const Property::Value* borderlineOffsetValue = map->Find(Dali::Ui::Integration::Visual::Property::BORDERLINE_OFFSET);
@@ -151,15 +153,15 @@ int UtcDaliInnerShadowVisualConversionP(void)
   DALI_TEST_EQUALS(borderlineWidthValue->Get<float>(), 78.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(borderlineOffsetValue->Get<float>(), -1.0f, TEST_LOCATION);
 
-  const Property::Value* transformValue = map->Find(VisualBasePropertyIndex::TRANSFORM);
+  const Property::Value* transformValue = map->Find(Dali::Ui::Integration::Visual::Property::TRANSFORM);
   const Property::Map* transformMap = transformValue ? transformValue->GetMap() : nullptr;
   DALI_TEST_CHECK(transformMap);
 
-  const Property::Value* offsetValue = transformMap->Find(Visual::Transform::Property::OFFSET);
-  const Property::Value* offsetPolicyValue = transformMap->Find(Visual::Transform::Property::OFFSET_POLICY);
+  const Property::Value* offsetValue = transformMap->Find(Dali::Ui::Integration::Visual::Transform::Property::OFFSET);
+  const Property::Value* offsetPolicyValue = transformMap->Find(Dali::Ui::Integration::Visual::Transform::Property::OFFSET_POLICY);
   const Property::Value* extraSizeValue = transformMap->Find(Dali::Ui::Integration::Visual::Transform::Property::EXTRA_SIZE);
-  const Property::Value* originValue = transformMap->Find(Visual::Transform::Property::ORIGIN);
-  const Property::Value* pivotValue = transformMap->Find(Visual::Transform::Property::PIVOT);
+  const Property::Value* originValue = transformMap->Find(Dali::Ui::Integration::Visual::Transform::Property::ORIGIN);
+  const Property::Value* pivotValue = transformMap->Find(Dali::Ui::Integration::Visual::Transform::Property::PIVOT);
   DALI_TEST_CHECK(offsetValue);
   DALI_TEST_CHECK(offsetPolicyValue);
   DALI_TEST_CHECK(extraSizeValue);
@@ -167,7 +169,7 @@ int UtcDaliInnerShadowVisualConversionP(void)
   DALI_TEST_CHECK(pivotValue);
   DALI_TEST_EQUALS(offsetValue->Get<Vector2>(), Vector2(15.0f, 12.5f), TEST_LOCATION);
   DALI_TEST_EQUALS(offsetPolicyValue->Get<Vector2>(),
-                   Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE),
+                   Vector2(Dali::Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Dali::Ui::Integration::Visual::Transform::Policy::ABSOLUTE),
                    TEST_LOCATION);
   DALI_TEST_EQUALS(extraSizeValue->Get<Vector2>(), Vector2(146.0f, 121.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(originValue->Get<int>(), static_cast<int>(Align::CENTER), TEST_LOCATION);
@@ -183,7 +185,7 @@ int UtcDaliViewSetInnerShadowP(void)
 
   view.SetInnerShadow(InnerShadow(Insets(12.0f, 12.0f, 12.0f, 12.0f), 6.0f, UiColor(0.0f, 0.0f, 0.0f, 0.6f)));
 
-  const Property::Value innerShadowValue = view.GetProperty(View::Property::INNER_SHADOW);
+  const Property::Value innerShadowValue = view.GetProperty(Dali::Ui::Integration::View::Property::INNER_SHADOW);
   const Property::Map* innerShadowMap = innerShadowValue.GetMap();
   DALI_TEST_CHECK(innerShadowMap && !innerShadowMap->Empty());
 
@@ -195,7 +197,7 @@ int UtcDaliViewSetInnerShadowP(void)
   DALI_TEST_EQUALS(borderlineOffset->Get<float>(), -1.0f, TEST_LOCATION);
 
   view.SetInnerShadow(InnerShadow::None());
-  const Property::Value clearedValue = view.GetProperty(View::Property::INNER_SHADOW);
+  const Property::Value clearedValue = view.GetProperty(Dali::Ui::Integration::View::Property::INNER_SHADOW);
   DALI_TEST_CHECK(clearedValue.GetMap() && clearedValue.GetMap()->Empty());
 
   END_TEST;

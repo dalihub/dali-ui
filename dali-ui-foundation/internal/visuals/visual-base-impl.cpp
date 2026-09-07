@@ -28,6 +28,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/primitive-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
@@ -35,8 +37,6 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include "visual-base-impl.h"
 
@@ -113,10 +113,10 @@ struct StringProperty
   Property::Index   index;
 };
 StringProperty PROPERTY_NAME_INDEX_TABLE[] = {
-  {CUSTOM_SHADER, Ui::VisualBasePropertyIndex::SHADER},
-  {TRANSFORM, Ui::VisualBasePropertyIndex::TRANSFORM},
-  {MIX_COLOR, Ui::VisualBasePropertyIndex::MIX_COLOR},
-  {OPACITY, Ui::VisualBasePropertyIndex::OPACITY},
+  {CUSTOM_SHADER, Ui::Integration::Visual::Property::SHADER},
+  {TRANSFORM, Ui::Integration::Visual::Property::TRANSFORM},
+  {MIX_COLOR, Ui::Integration::Visual::Property::MIX_COLOR},
+  {OPACITY, Ui::Integration::Visual::Property::OPACITY},
   {BORDERLINE_WIDTH, Ui::Integration::Visual::Property::BORDERLINE_WIDTH},
   {BORDERLINE_COLOR, Ui::Integration::Visual::Property::BORDERLINE_COLOR},
   {BORDERLINE_OFFSET, Ui::Integration::Visual::Property::BORDERLINE_OFFSET},
@@ -239,7 +239,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
 
     switch(GetVisualPropertyIndex(key))
     {
-      case Ui::VisualBasePropertyIndex::SHADER:
+      case Ui::Integration::Visual::Property::SHADER:
       {
         if(value.GetType() == Property::MAP)
         {
@@ -260,7 +260,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         break;
       }
 
-      case Ui::VisualBasePropertyIndex::TRANSFORM:
+      case Ui::Integration::Visual::Property::TRANSFORM:
       {
         Property::Map map;
         if(value.Get(map))
@@ -300,7 +300,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         break;
       }
 
-      case Ui::VisualBasePropertyIndex::MIX_COLOR:
+      case Ui::Integration::Visual::Property::MIX_COLOR:
       {
         Vector4 mixColor;
         if(value.Get(mixColor))
@@ -317,7 +317,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         }
         break;
       }
-      case Ui::VisualBasePropertyIndex::OPACITY:
+      case Ui::Integration::Visual::Property::OPACITY:
       {
         float opacity;
         if(value.Get(opacity))
@@ -466,8 +466,8 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         {
           switch(policy)
           {
-            case Ui::Visual::Transform::Policy::RELATIVE:
-            case Ui::Visual::Transform::Policy::ABSOLUTE:
+            case Ui::Integration::Visual::Transform::Policy::RELATIVE:
+            case Ui::Integration::Visual::Transform::Policy::ABSOLUTE:
             {
               mImpl->SetCornerRadiusPolicy(policy);
               if(DALI_UNLIKELY(mImpl->mRenderer))
@@ -763,12 +763,12 @@ void Visual::Base::CreatePropertyMap(Property::Map& map) const
   {
     transform = Transform::GetDefaultTransformMap();
   }
-  map.Insert(Ui::VisualBasePropertyIndex::TRANSFORM, transform);
+  map.Insert(Ui::Integration::Visual::Property::TRANSFORM, transform);
 
   // Note, Color and Primitive will also insert their own mix color into the map
   // which is ok, because they have a different key value range, but uses same cached value anyway.
-  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImpl->mMixColor); // vec4
-  map.Insert(Ui::VisualBasePropertyIndex::OPACITY, mImpl->mMixColor.a);
+  map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, mImpl->mMixColor); // vec4
+  map.Insert(Ui::Integration::Visual::Property::OPACITY, mImpl->mMixColor.a);
 
   if(IsTypeAvailableForBorderline(mImpl->mType))
   {
@@ -1100,8 +1100,8 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Insets& 
         finalSize                = naturalSize * std::min((!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
                                                           (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0.0f));
         finalOffset += (availableVisualSize - finalSize) * 0.5f;
-        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
-          .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
+        transformMap.Add(Ui::Integration::Visual::Transform::Property::OFFSET, finalOffset)
+          .Add(Ui::Integration::Visual::Transform::Property::SIZE, finalSize);
         break;
       }
       case Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO:
@@ -1119,8 +1119,8 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Insets& 
           Vector4 pixelArea(x, y, widthRatio, heightRatio);
           SetPixelAreaForFittingMode(pixelArea);
         }
-        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, originalOffset)
-          .Add(Ui::Visual::Transform::Property::SIZE, availableVisualSize);
+        transformMap.Add(Ui::Integration::Visual::Transform::Property::OFFSET, originalOffset)
+          .Add(Ui::Integration::Visual::Transform::Property::SIZE, availableVisualSize);
         break;
       }
       case Ui::Image::FittingMode::CENTER:
@@ -1137,36 +1137,36 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Insets& 
                                              (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0.0f));
         }
         finalOffset += (availableVisualSize - finalSize) * 0.5f;
-        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
-          .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
+        transformMap.Add(Ui::Integration::Visual::Transform::Property::OFFSET, finalOffset)
+          .Add(Ui::Integration::Visual::Transform::Property::SIZE, finalSize);
         break;
       }
       case Ui::Image::FittingMode::FILL:
       default:
       {
-        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
-          .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
+        transformMap.Add(Ui::Integration::Visual::Transform::Property::OFFSET, finalOffset)
+          .Add(Ui::Integration::Visual::Transform::Property::SIZE, finalSize);
         break;
       }
     }
 
     transformMap
-      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
-      .Add(Ui::Visual::Transform::Property::PIVOT, Align::TOP_BEGIN)
-      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE));
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Align::TOP_BEGIN)
+      .Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE));
   }
   else if(IsTransformMapSetForFittingMode() && zeroPadding)
   {
     SetTransformMapUsageForFittingMode(false);
-    transformMap.Add(Ui::Visual::Transform::Property::OFFSET, Vector2::ZERO)
-      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::RELATIVE, Ui::Visual::Transform::Policy::RELATIVE))
-      .Add(Ui::Visual::Transform::Property::SIZE, Vector2::ONE)
-      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::RELATIVE, Ui::Visual::Transform::Policy::RELATIVE));
+    transformMap.Add(Ui::Integration::Visual::Transform::Property::OFFSET, Vector2::ZERO)
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::RELATIVE, Ui::Integration::Visual::Transform::Policy::RELATIVE))
+      .Add(Ui::Integration::Visual::Transform::Property::SIZE, Vector2::ONE)
+      .Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::RELATIVE, Ui::Integration::Visual::Transform::Policy::RELATIVE));
   }
 
   SetTransformAndSize(transformMap, controlSize, effectiveScale);
@@ -1198,19 +1198,19 @@ Property::Index Visual::Base::GetIntKey(Property::Key key)
 
   if(key.stringKey == MIX_COLOR)
   {
-    return Ui::VisualBasePropertyIndex::MIX_COLOR;
+    return Ui::Integration::Visual::Property::MIX_COLOR;
   }
   else if(key.stringKey == OPACITY)
   {
-    return Ui::VisualBasePropertyIndex::OPACITY;
+    return Ui::Integration::Visual::Property::OPACITY;
   }
   else if(key.stringKey == CUSTOM_SHADER)
   {
-    return Ui::VisualBasePropertyIndex::SHADER;
+    return Ui::Integration::Visual::Property::SHADER;
   }
   else if(key.stringKey == TRANSFORM)
   {
-    return Ui::VisualBasePropertyIndex::TRANSFORM;
+    return Ui::Integration::Visual::Property::TRANSFORM;
   }
   else if(key.stringKey == CORNER_RADIUS)
   {
@@ -1244,27 +1244,27 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
 {
   switch(GetIntKey(key))
   {
-    case Dali::Ui::Visual::Transform::Property::OFFSET:
+    case Dali::Ui::Integration::Visual::Transform::Property::OFFSET:
     {
       return VisualRenderer::Property::TRANSFORM_OFFSET;
     }
-    case Dali::Ui::Visual::Transform::Property::SIZE:
+    case Dali::Ui::Integration::Visual::Transform::Property::SIZE:
     {
       return VisualRenderer::Property::TRANSFORM_SIZE;
     }
-    case Dali::Ui::Visual::Transform::Property::ORIGIN:
+    case Dali::Ui::Integration::Visual::Transform::Property::ORIGIN:
     {
       return VisualRenderer::Property::TRANSFORM_ORIGIN;
     }
-    case Dali::Ui::Visual::Transform::Property::PIVOT:
+    case Dali::Ui::Integration::Visual::Transform::Property::PIVOT:
     {
       return VisualRenderer::Property::TRANSFORM_PIVOT;
     }
-    case Dali::Ui::VisualBasePropertyIndex::MIX_COLOR:
+    case Dali::Ui::Integration::Visual::Property::MIX_COLOR:
     {
       return Renderer::Property::MIX_COLOR;
     }
-    case Dali::Ui::VisualBasePropertyIndex::OPACITY:
+    case Dali::Ui::Integration::Visual::Property::OPACITY:
     {
       return Renderer::Property::OPACITY;
     }
@@ -1360,15 +1360,15 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
   switch(GetIntKey(key))
   {
     // Default animatable properties from VisualRenderer
-    case Ui::VisualBasePropertyIndex::MIX_COLOR:
+    case Ui::Integration::Visual::Property::MIX_COLOR:
     {
       return Dali::Property(mImpl->mRenderer, Renderer::Property::MIX_COLOR);
     }
-    case Ui::VisualBasePropertyIndex::OPACITY:
+    case Ui::Integration::Visual::Property::OPACITY:
     {
       return Dali::Property(mImpl->mRenderer, Renderer::Property::OPACITY);
     }
-    case Ui::Visual::Transform::Property::OFFSET:
+    case Ui::Integration::Visual::Transform::Property::OFFSET:
     {
       // Need to change visual transform is not default anymore.
       if(changeProperties && mImpl->mTransformMapUsingDefault)
@@ -1378,7 +1378,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
 
       return Dali::Property(mImpl->mRenderer, VisualRenderer::Property::TRANSFORM_OFFSET);
     }
-    case Ui::Visual::Transform::Property::SIZE:
+    case Ui::Integration::Visual::Transform::Property::SIZE:
     {
       // Need to change visual transform is not default anymore.
       if(changeProperties && mImpl->mTransformMapUsingDefault)
@@ -1509,7 +1509,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
 
       // Special case for PRE_MULTIPLIED_ALPHA (It is not animatable, but keep it just for logical flow)
       if((mImpl->mType == Ui::Integration::InternalVisualType::IMAGE || mImpl->mType == Ui::Integration::InternalVisualType::ANIMATED_IMAGE || mImpl->mType == Ui::Integration::InternalVisualType::N_PATCH) &&
-         ((key.type == Property::Key::INDEX && key.indexKey == ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA) ||
+         ((key.type == Property::Key::INDEX && key.indexKey == Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA) ||
           (key.type == Property::Key::STRING && key.stringKey == PRE_MULTIPLIED_ALPHA)))
       {
         return Dali::Property(mImpl->mRenderer, Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA);
@@ -1517,7 +1517,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
 
       // Special case for BLUR_RADIUS
       if(mImpl->mType == Ui::Integration::InternalVisualType::COLOR &&
-         ((key.type == Property::Key::INDEX && key.indexKey == ColorVisualPropertyIndex::BLUR_RADIUS) ||
+         ((key.type == Property::Key::INDEX && key.indexKey == Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS) ||
           (key.type == Property::Key::STRING && key.stringKey == BLUR_RADIUS_NAME)))
       {
         // Request to color-visual class

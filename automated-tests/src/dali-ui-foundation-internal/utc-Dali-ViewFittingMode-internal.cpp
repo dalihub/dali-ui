@@ -27,6 +27,7 @@
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
@@ -132,8 +133,8 @@ int UtcDaliViewFittingModeAppliedAfterLayout(void)
   Dali::Ui::Integration::Visual::Base visualB(fittingVisualB.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, visualA);
-  viewData.RegisterVisual(View::Property::SHADOW, visualB);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visualA);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::SHADOW, visualB);
 
   window.Add(view);
 
@@ -174,8 +175,8 @@ int UtcDaliViewFittingModeAfterLayoutSkipsText(void)
   Dali::Ui::Integration::Visual::Base textVisual(fittingTextVisual.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, imageVisual);
-  viewData.RegisterVisual(View::Property::SHADOW, textVisual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, imageVisual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::SHADOW, textVisual);
 
   viewData.EmitLayoutFinishedSignal(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
 
@@ -202,7 +203,7 @@ int UtcDaliViewFittingModeProcessorRunsOncePerRequest(void)
   Dali::Ui::Integration::Visual::Base visual(fittingVisual.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visual);
 
   viewData.SizeOrUiScaleChanged();
 
@@ -721,7 +722,7 @@ int UtcDaliViewFittingModeRequestDuringProcessingIsHonoured(void)
   Dali::Ui::Integration::Visual::Base visual(fittingVisual.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visual);
 
   // Kept off-scene deliberately: no layout pass runs, so the LayoutFinished-driven
   // fitting path cannot contribute an apply and every count below comes from the

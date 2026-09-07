@@ -59,6 +59,9 @@
 
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
@@ -72,7 +75,6 @@
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
@@ -1681,7 +1683,7 @@ float LabelImpl::GetLetterSpacing() const
   return mController->GetCharacterSpacing();
 }
 
-void LabelImpl::SetMaskEffect(View view)
+void LabelImpl::SetMaskEffect(Ui::View view)
 {
   if(!view)
   {
@@ -1691,7 +1693,7 @@ void LabelImpl::SetMaskEffect(View view)
 
   ClearMaskEffect();
 
-  View selfView = Ui::View::DownCast(Self());
+  Ui::View selfView = Ui::View::DownCast(Self());
 
   Self().Add(view);
   GetOrCreateLabelData<WeakHandle<Ui::View>>(selfView, LABEL_MASK_DATA_ATTACHMENT_ID) = view;
@@ -1703,10 +1705,10 @@ void LabelImpl::SetMaskEffect(View view)
 
 void LabelImpl::ClearMaskEffect()
 {
-  View selfView = Ui::View::DownCast(Self());
+  Ui::View selfView = Ui::View::DownCast(Self());
 
   WeakHandle<Ui::View>* sourceView = selfView.GetAttachment<WeakHandle<Ui::View>>(LABEL_MASK_DATA_ATTACHMENT_ID);
-  View                  view       = sourceView ? sourceView->GetHandle() : View();
+  Ui::View              view       = sourceView ? sourceView->GetHandle() : Ui::View();
   if(view)
   {
     Self().Remove(view);
@@ -1853,7 +1855,7 @@ void LabelImpl::StopMarquee()
 
 void LabelImpl::SetPixelSnapFactor(float factor)
 {
-  View                  owner = View::DownCast(Self());
+  Ui::View              owner = Ui::View::DownCast(Self());
   const Property::Index index = Internal::EnsureTextPixelSnapFactorProperty(owner);
   if(index != Property::INVALID_INDEX)
   {
@@ -1863,7 +1865,7 @@ void LabelImpl::SetPixelSnapFactor(float factor)
 
 float LabelImpl::GetPixelSnapFactor() const
 {
-  View                  owner = View::DownCast(Self());
+  Ui::View              owner = Ui::View::DownCast(Self());
   const Property::Index index = Internal::GetTextPixelSnapFactorPropertyIndex(owner);
   return index != Property::INVALID_INDEX ? owner.GetProperty<float>(index) : 0.0f;
 }
@@ -1988,22 +1990,22 @@ void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float h
 // =============================================================================
 // Signals
 // =============================================================================
-Signal<void(View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
+Signal<void(Ui::View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
 {
   return mAnchorClickedSignal;
 }
 
-Signal<void(View, float, float)>& LabelImpl::AsyncRenderFinishedSignal()
+Signal<void(Ui::View, float, float)>& LabelImpl::AsyncRenderFinishedSignal()
 {
   return mAsyncRenderFinishedSignal;
 }
 
-Signal<void(View, float, float)>& LabelImpl::AsyncNaturalSizeComputedSignal()
+Signal<void(Ui::View, float, float)>& LabelImpl::AsyncNaturalSizeComputedSignal()
 {
   return mAsyncNaturalSizeComputedSignal;
 }
 
-Signal<void(View, float, float)>& LabelImpl::AsyncHeightForWidthComputedSignal()
+Signal<void(Ui::View, float, float)>& LabelImpl::AsyncHeightForWidthComputedSignal()
 {
   return mAsyncHeightForWidthComputedSignal;
 }
@@ -2091,10 +2093,10 @@ void LabelImpl::OnInitialize()
   Actor self = Self();
 
   Dali::Property::Map propertyMap;
-  propertyMap.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::TEXT);
+  propertyMap.Add(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::TEXT);
 
-  mVisual   = Ui::Integration::VisualFactory::Get().CreateVisual(propertyMap);
-  View view = Ui::View::DownCast(self);
+  mVisual       = Ui::Integration::VisualFactory::Get().CreateVisual(propertyMap);
+  Ui::View view = Ui::View::DownCast(self);
   Internal::ViewDataImpl::Get(GetImpl(view)).RegisterVisual(Ui::Text::LabelPropertyIndex::TEXT, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
 
   Internal::TextVisual::SetAsyncTextInterface(mVisual, this);
@@ -2318,14 +2320,14 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     }
 
     Dali::Property::Map visualTransform;
-    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, visualTransformSize)
-      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
-      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+    visualTransform.Add(Ui::Integration::Visual::Transform::Property::SIZE, visualTransformSize)
+      .Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET, visualTransformOffset)
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
     visualImpl.SetTransformAndSize(visualTransform, size, GetEffectiveScale());
 
     if(mController->IsMarqueeEnabled())
@@ -4059,9 +4061,9 @@ void LabelImpl::SetCutoutEnabledInternal(bool enabled)
 
 void LabelImpl::SetViewBackgroundEnabled(bool enabled)
 {
-  View view = Ui::View::DownCast(Self());
+  Ui::View view = Ui::View::DownCast(Self());
   // Avoid unnecessary updates when no background visual exists.
-  if(!Internal::ViewDataImpl::Get(GetImpl(view)).GetVisual(Ui::View::Property::BACKGROUND))
+  if(!Internal::ViewDataImpl::Get(GetImpl(view)).GetVisual(Ui::Integration::View::Property::BACKGROUND))
   {
     return;
   }
@@ -4069,13 +4071,13 @@ void LabelImpl::SetViewBackgroundEnabled(bool enabled)
   if(mIsViewBackgroundEnabled != enabled)
   {
     mIsViewBackgroundEnabled = enabled;
-    Internal::ViewDataImpl::Get(GetImpl(view)).EnableVisual(Ui::View::Property::BACKGROUND, enabled);
+    Internal::ViewDataImpl::Get(GetImpl(view)).EnableVisual(Ui::Integration::View::Property::BACKGROUND, enabled);
   }
 }
 
 bool LabelImpl::GetViewBackgroundColor(Vector4& backgroundColor) const
 {
-  const Property::Value backgroundValue = Self().GetProperty(Ui::View::Property::BACKGROUND);
+  const Property::Value backgroundValue = Self().GetProperty(Ui::Integration::View::Property::BACKGROUND);
 
   if(backgroundValue.GetType() == Property::VECTOR4)
   {
@@ -4086,7 +4088,7 @@ bool LabelImpl::GetViewBackgroundColor(Vector4& backgroundColor) const
   if(backgroundValue.GetType() == Property::MAP)
   {
     const Property::Map& backgroundMap = backgroundValue.Get<Property::Map>();
-    Property::Value*     mixColorValue = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
+    Property::Value*     mixColorValue = backgroundMap.Find(Ui::Integration::Visual::Property::MIX_COLOR);
     if(mixColorValue)
     {
       backgroundColor = mixColorValue->Get<Vector4>();

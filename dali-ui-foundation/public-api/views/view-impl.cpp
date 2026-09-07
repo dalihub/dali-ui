@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/integration-api/view-accessibility.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
@@ -43,8 +44,8 @@
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 // Verify CornerRadiusPolicy values stay in sync with Ui::Integration::Visual::Policy::Type.
-static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::RELATIVE) == Dali::Ui::Visual::Transform::Policy::RELATIVE);
-static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::ABSOLUTE) == Dali::Ui::Visual::Transform::Policy::ABSOLUTE);
+static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::RELATIVE) == Dali::Ui::Integration::Visual::Transform::Policy::RELATIVE);
+static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::ABSOLUTE) == Dali::Ui::Integration::Visual::Transform::Policy::ABSOLUTE);
 
 namespace Dali
 {

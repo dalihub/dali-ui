@@ -23,7 +23,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 namespace Dali
@@ -44,32 +43,6 @@ namespace Ui
 class DALI_UI_API TextVisual : public VisualBase
 {
 public:
-  /**
-   * @brief Property indices for TextVisual.
-   *
-   * These can be used with Dali::Ui::VisualBase::GetProperty() and SetProperty().
-   */
-  struct Property
-  {
-    enum
-    {
-      TEXT                 = TextVisualPropertyIndex::TEXT,
-      FONT_FAMILY          = TextVisualPropertyIndex::FONT_FAMILY,
-      FONT_SIZE            = TextVisualPropertyIndex::FONT_SIZE,
-      FONT_WEIGHT          = TextVisualPropertyIndex::FONT_WEIGHT,
-      FONT_WIDTH           = TextVisualPropertyIndex::FONT_WIDTH,
-      FONT_SLANT           = TextVisualPropertyIndex::FONT_SLANT,
-      MULTI_LINE           = TextVisualPropertyIndex::MULTI_LINE,
-      LINE_WRAP_MODE       = TextVisualPropertyIndex::LINE_WRAP_MODE,
-      HORIZONTAL_ALIGNMENT = TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT,
-      VERTICAL_ALIGNMENT   = TextVisualPropertyIndex::VERTICAL_ALIGNMENT,
-      OVERFLOW_MODE        = TextVisualPropertyIndex::OVERFLOW_MODE,
-      LINE_HEIGHT          = TextVisualPropertyIndex::LINE_HEIGHT,
-      LINE_HEIGHT_MODE     = TextVisualPropertyIndex::LINE_HEIGHT_MODE,
-      TEXT_COLOR           = TextVisualPropertyIndex::TEXT_COLOR,
-    };
-  };
-
 public:
   /**
    * @brief Creates a TextVisual object.

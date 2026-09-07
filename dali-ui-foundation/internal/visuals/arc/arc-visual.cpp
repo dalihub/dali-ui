@@ -169,7 +169,7 @@ void ArcVisual::DoCreatePropertyMap(Property::Map& map) const
   }
 
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::ARC);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::ARC);
   map.Insert(Ui::Integration::ArcVisual::Property::THICKNESS, thickness);
   map.Insert(Ui::Integration::ArcVisual::Property::START_ANGLE, startAngle);
   map.Insert(Ui::Integration::ArcVisual::Property::SWEEP_ANGLE, sweepAngle);

@@ -24,6 +24,8 @@
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
+
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
@@ -319,7 +321,6 @@ int UtcDaliAnimatedImageVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.SetOrigin(Align::CENTER_BEGIN);});
   TestAssertFunction([&](){empty.SetPivot(Align::CENTER_BEGIN);});
   TestAssertFunction([&](){empty.SetSiblingOrder(0u);});
-  TestAssertFunction([&](){empty.SetProperty(Property::INVALID_INDEX, Property::Value());});
 
   TestAssertFunction([&](){empty.GetOwner();});
   TestAssertFunction([&](){empty.GetDepthLayer();});
@@ -334,7 +335,6 @@ int UtcDaliAnimatedImageVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.GetOrigin();});
   TestAssertFunction([&](){empty.GetPivot();});
   TestAssertFunction([&](){empty.GetSiblingOrder();});
-  TestAssertFunction([&](){empty.GetProperty(Property::INVALID_INDEX);});
 
   END_TEST;
 }

@@ -417,7 +417,7 @@ private: // Internal methods
   /**
    * @brief Called when a visual event signal is emitted.
    */
-  void OnVisualEvent(View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId);
+  void OnVisualEvent(Ui::View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId);
 
   /**
    * @brief Rebuilds and re-registers the placeholder visual.

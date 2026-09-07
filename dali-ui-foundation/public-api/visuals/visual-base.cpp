@@ -59,11 +59,6 @@ void VisualBase::Detach()
   GetImplementation(*this).DetachFromContainer();
 }
 
-void VisualBase::DoAction(Dali::Property::Index actionId, const Dali::Property::Value& attributes)
-{
-  GetImplementation(*this).DoAction(actionId, attributes);
-}
-
 Dali::Ui::VisualType VisualBase::GetVisualType() const
 {
   return GetImplementation(*this).GetVisualType();
@@ -72,16 +67,6 @@ Dali::Ui::VisualType VisualBase::GetVisualType() const
 // =============================================================================
 // Properties
 // =============================================================================
-
-Dali::Property::Value VisualBase::GetProperty(Dali::Property::Index index) const
-{
-  return GetImplementation(*this).GetProperty(index);
-}
-
-void VisualBase::SetProperty(Dali::Property::Index index, Dali::Property::Value propertyValue)
-{
-  GetImplementation(*this).SetProperty(index, propertyValue);
-}
 
 const Dali::String& VisualBase::GetName() const
 {
@@ -198,37 +183,37 @@ void VisualBase::SetPivot(Align::Type pivot)
 
 Vector4 VisualBase::GetCornerRadius() const
 {
-  return GetProperty<Vector4>(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS);
+  return GetImplementation(*this).GetProperty<Vector4>(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS);
 }
 
 void VisualBase::SetCornerRadius(float radius)
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, Vector4(radius, radius, radius, radius));
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, Vector4(radius, radius, radius, radius));
 }
 
 void VisualBase::SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft)
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, Vector4(topLeft, topRight, bottomRight, bottomLeft));
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, Vector4(topLeft, topRight, bottomRight, bottomLeft));
 }
 
 void VisualBase::SetCornerRadius(const Vector4& radius)
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, radius);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, radius);
 }
 
 CornerRadiusPolicy VisualBase::GetCornerRadiusPolicy() const
 {
-  return GetProperty<CornerRadiusPolicy>(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY);
+  return GetImplementation(*this).GetProperty<CornerRadiusPolicy>(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY);
 }
 
 void VisualBase::SetCornerRadiusPolicy(CornerRadiusPolicy policy)
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY, policy);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY, policy);
 }
 
 void VisualBase::SetCornerRadiusPolicyRelative()
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY, CornerRadiusPolicy::RELATIVE);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY, CornerRadiusPolicy::RELATIVE);
 }
 
 bool VisualBase::IsCornerRadiusPolicyRelative() const
@@ -238,32 +223,32 @@ bool VisualBase::IsCornerRadiusPolicyRelative() const
 
 Vector4 VisualBase::GetCornerSquareness() const
 {
-  return GetProperty<Vector4>(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS);
+  return GetImplementation(*this).GetProperty<Vector4>(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS);
 }
 
 void VisualBase::SetCornerSquareness(float squareness)
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS, Vector4(squareness, squareness, squareness, squareness));
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS, Vector4(squareness, squareness, squareness, squareness));
 }
 
 void VisualBase::SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft)
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS, Vector4(topLeft, topRight, bottomRight, bottomLeft));
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS, Vector4(topLeft, topRight, bottomRight, bottomLeft));
 }
 
 void VisualBase::SetCornerSquareness(const Vector4& squareness)
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS, squareness);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS, squareness);
 }
 
 float VisualBase::GetBorderlineWidth() const
 {
-  return GetProperty<float>(Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH);
 }
 
 void VisualBase::SetBorderlineWidth(float width)
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH, width);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH, width);
 }
 
 UiColor VisualBase::GetBorderlineColor() const
@@ -278,12 +263,12 @@ void VisualBase::SetBorderlineColor(const UiColor& color)
 
 float VisualBase::GetBorderlineOffset() const
 {
-  return GetProperty<float>(Dali::Ui::Integration::Visual::Property::BORDERLINE_OFFSET);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::Visual::Property::BORDERLINE_OFFSET);
 }
 
 void VisualBase::SetBorderlineOffset(float offset)
 {
-  SetProperty(Dali::Ui::Integration::Visual::Property::BORDERLINE_OFFSET, offset);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::Visual::Property::BORDERLINE_OFFSET, offset);
 }
 
 // =============================================================================

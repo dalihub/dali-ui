@@ -23,6 +23,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali::Ui::Internal
@@ -46,7 +47,7 @@ void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputConta
   const float borderlineWidth  = inputs[3]->GetFloat();
   const float borderlineOffset = inputs[4]->GetFloat();
 
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
+  if(viewCornerRadiusPolicy == Ui::Integration::Visual::Transform::Policy::RELATIVE)
   {
     const float minViewSize = std::min(visualSize.x, visualSize.y);
     viewCornerRadius *= minViewSize;
@@ -61,7 +62,7 @@ void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputConta
   current.z = viewCornerRadius.z < Dali::Math::MACHINE_EPSILON_100 ? 0.0f : viewCornerRadius.z + expendedRadius;
   current.w = viewCornerRadius.w < Dali::Math::MACHINE_EPSILON_100 ? 0.0f : viewCornerRadius.w + expendedRadius;
 
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
+  if(viewCornerRadiusPolicy == Ui::Integration::Visual::Transform::Policy::RELATIVE)
   {
     const float minVisualSize = std::min(visualSize.x + expendedRadius, visualSize.y + expendedRadius);
     if(DALI_LIKELY(minVisualSize > Math::MACHINE_EPSILON_100))
@@ -89,7 +90,7 @@ void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputCont
   Vector2     extraSize       = inputs[3]->GetVector2();
   const float borderlineWidth = inputs[4]->GetFloat(); // inner shadow's own borderline
 
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
+  if(viewCornerRadiusPolicy == Ui::Integration::Visual::Transform::Policy::RELATIVE)
   {
     const float minViewSize = std::min(visualSize.x, visualSize.y);
     viewCornerRadius *= minViewSize;
@@ -103,7 +104,7 @@ void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputCont
   current.z = viewCornerRadius.z + borderlineWidth;
   current.w = viewCornerRadius.w + borderlineWidth;
 
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
+  if(viewCornerRadiusPolicy == Ui::Integration::Visual::Transform::Policy::RELATIVE)
   {
     const float minInnerShadowSize = std::min(visualSize.x + extraSize.x, visualSize.y + extraSize.y);
     if(DALI_LIKELY(minInnerShadowSize > Math::MACHINE_EPSILON_100))

@@ -24,8 +24,11 @@
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
+
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -138,20 +141,20 @@ int UtcDaliColorVisualSetGetPropertyValue(void)
 
   visual.SetBlurRadius(5.5f);
   DALI_TEST_EQUALS(visual.GetBlurRadius(), 5.5f, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<float>(ColorVisual::Property::BLUR_RADIUS), 5.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS).Get<float>(), 5.5f, TEST_LOCATION);
 
-  visual.SetProperty(ColorVisual::Property::BLUR_RADIUS, 3.3f);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS, 3.3f);
   DALI_TEST_EQUALS(visual.GetBlurRadius(), 3.3f, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<float>(ColorVisual::Property::BLUR_RADIUS), 3.3f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS).Get<float>(), 3.3f, TEST_LOCATION);
 
 
   visual.SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE);
   DALI_TEST_EQUALS(visual.GetCutoutPolicy(), CutoutPolicy::CUTOUT_OUTSIDE, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<CutoutPolicy>(ColorVisual::Property::CUTOUT_POLICY), CutoutPolicy::CUTOUT_OUTSIDE, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::ColorVisual::Property::CUTOUT_POLICY).Get<CutoutPolicy>(), CutoutPolicy::CUTOUT_OUTSIDE, TEST_LOCATION);
 
-  visual.SetProperty(ColorVisual::Property::CUTOUT_POLICY, CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::ColorVisual::Property::CUTOUT_POLICY, CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
   DALI_TEST_EQUALS(visual.GetCutoutPolicy(), CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<CutoutPolicy>(ColorVisual::Property::CUTOUT_POLICY), CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::ColorVisual::Property::CUTOUT_POLICY).Get<CutoutPolicy>(), CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS, TEST_LOCATION);
 
   END_TEST;
 }
@@ -209,7 +212,6 @@ int UtcDaliColorVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.SetOrigin(Align::CENTER_BEGIN);});
   TestAssertFunction([&](){empty.SetPivot(Align::CENTER_BEGIN);});
   TestAssertFunction([&](){empty.SetSiblingOrder(0u);});
-  TestAssertFunction([&](){empty.SetProperty(Property::INVALID_INDEX, Property::Value());});
 
   TestAssertFunction([&](){empty.GetOwner();});
   TestAssertFunction([&](){empty.GetDepthLayer();});
@@ -224,7 +226,6 @@ int UtcDaliColorVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.GetOrigin();});
   TestAssertFunction([&](){empty.GetPivot();});
   TestAssertFunction([&](){empty.GetSiblingOrder();});
-  TestAssertFunction([&](){empty.GetProperty(Property::INVALID_INDEX);});
 
   // ColorVisual specific
   TestAssertFunction([&](){empty.SetBlurRadius(0u);});

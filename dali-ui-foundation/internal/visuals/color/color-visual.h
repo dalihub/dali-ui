@@ -23,9 +23,10 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/color-visual.h>
 
 namespace Dali
 {

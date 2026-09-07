@@ -26,7 +26,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-stop-node.h>
-#include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 namespace Dali
@@ -48,29 +47,6 @@ namespace Ui
 class DALI_UI_API GradientVisual : public VisualBase
 {
 public:
-  /**
-   * @brief Property indices for GradientVisual.
-   *
-   * These can be used with Dali::Ui::VisualBase::GetProperty() and SetProperty().
-   */
-  struct Property
-  {
-    enum
-    {
-      START_OFFSET  = GradientVisualPropertyIndex::START_OFFSET,
-      STOP_OFFSET   = GradientVisualPropertyIndex::STOP_OFFSET,
-      STOP_COLOR    = GradientVisualPropertyIndex::STOP_COLOR,
-      UNITS         = GradientVisualPropertyIndex::UNITS,
-      SPREAD_METHOD = GradientVisualPropertyIndex::SPREAD_METHOD,
-
-      START_POSITION = GradientVisualPropertyIndex::START_POSITION,
-      END_POSITION   = GradientVisualPropertyIndex::END_POSITION,
-      CENTER         = GradientVisualPropertyIndex::CENTER,
-      RADIUS         = GradientVisualPropertyIndex::RADIUS,
-      START_ANGLE    = GradientVisualPropertyIndex::START_ANGLE,
-    };
-  };
-
 public:
   /**
    * @brief Creates a GradientVisual object.

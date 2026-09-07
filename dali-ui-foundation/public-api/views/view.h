@@ -1818,18 +1818,11 @@ public:
     enum
     {
       /**
-       * @brief The background of the View.
-       *
-       * @details Name "background", type Property::MAP or Dali::String for URL or Property::VECTOR4 for Color.
-       */
-      BACKGROUND = PROPERTY_START_INDEX,
-
-      /**
        * @brief The outer space around the View.
        * @details Name "margin", type Property::VECTOR4, ordered as start, end, top, bottom.
        * @note Margin property is to be supported by Layout algorithms and containers in future.
        */
-      MARGIN,
+      MARGIN = PROPERTY_START_INDEX,
 
       /**
        * @brief The inner space of the View.
@@ -1862,12 +1855,6 @@ public:
       DOWN_FOCUSABLE_VIEW_ID,
 
       /**
-       * @brief The shadow of the View.
-       * @details Name "shadow", type Property::MAP.
-       */
-      SHADOW,
-
-      /**
        * @brief Whether a View and its descendants can emit key signals.
        * @details Name "dispatchKeyEvents", type Property::BOOLEAN
        * @note If a View's dispatchKeyEvents is set to false, then it's children will not emit a key event signal
@@ -1893,18 +1880,6 @@ public:
        * @note Default is false.
        */
       OFFSCREEN_RENDERING,
-
-      /**
-       * @brief The inner shadow of the View. The visual will use Dali::Ui::Integration::DepthIndex::Ranges::DECORATION - 2
-       * @details Name "innerShadow", type Property::MAP.
-       */
-      INNER_SHADOW,
-
-      /**
-       * @brief The inset borderline of the View. The visual will use Dali::Ui::Integration::DepthIndex::Ranges::DECORATION - 1
-       * @details Name "borderline", type Property::MAP.
-       */
-      BORDERLINE,
 
       /**
        * @brief The width requested by the View for measurement.
@@ -1977,7 +1952,6 @@ public:
        * @note By default, it is Vector::ZERO.
        * @note Applies to specific visuals inside the View.
        * @note Only Property::Vector4 can be animated.
-       * @see Dali::Ui::Integration::Visual::Property::Type::CORNER_RADIUS
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       CORNER_RADIUS = ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX,
@@ -1987,7 +1961,6 @@ public:
        * (in world units).
        * @details Name "viewCornerRadiusPolicy", type Property::INTEGER.
        * @see Policy::Type
-       * @see Dali::Ui::Integration::Visual::Property::Type::CORNER_RADIUS_POLICY
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       CORNER_RADIUS_POLICY,
@@ -1998,7 +1971,6 @@ public:
        * @note By default, it is Vector::ZERO.
        * @note Applies to specific visuals inside the View.
        * @note Only Property::Vector4 can be animated.
-       * @see Dali::Ui::Integration::Visual::Property::Type::CORNER_SQUARENESS
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       CORNER_SQUARENESS,
@@ -2006,7 +1978,6 @@ public:
       /**
        * @brief The width for the borderline of the View. It will update borderline visual
        * @details Name "viewBorderlineWidth", type Property::FLOAT.
-       * @see Dali::Ui::Integration::Visual::Property::Type::BORDERLINE_WIDTH
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       BORDERLINE_WIDTH,
@@ -2014,7 +1985,6 @@ public:
       /**
        * @brief The color for the borderline of the View. It will update borderline visual
        * @details Name "viewBorderlineColor", type Property::VECTOR4
-       * @see Dali::Ui::Integration::Visual::Property::Type::BORDERLINE_COLOR
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       BORDERLINE_COLOR,
@@ -2022,7 +1992,6 @@ public:
       /**
        * @brief The offset for the borderline of the View. It will update borderline visual
        * @details Name "viewBorderlineOffset", type Property::FLOAT.
-       * @see Dali::Ui::Integration::Visual::Property::Type::BORDERLINE_OFFSET
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       BORDERLINE_OFFSET,

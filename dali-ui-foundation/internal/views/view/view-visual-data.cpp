@@ -28,13 +28,15 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include "view-data-impl.h"
 #include "view-visual-data.h"
@@ -688,7 +690,7 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integra
   // dali-ui measure cache. Placed on this five-argument overload because every
   // RegisterVisual() overload and every caller (SetBackground(), the BACKGROUND
   // property setter, integration code) funnels through it.
-  if(index == Ui::View::Property::BACKGROUND)
+  if(index == Ui::Integration::View::Property::BACKGROUND)
   {
     mOuter.InvalidateMeasure();
   }
@@ -717,7 +719,7 @@ void ViewDataImpl::VisualData::UnregisterVisual(Property::Index index)
     // longer describes this view. Inside the "was actually registered" branch, so a
     // no-op unregister invalidates nothing. Teardown does not reach this: the
     // destructor goes through ClearVisuals(), not UnregisterVisual().
-    if(index == Ui::View::Property::BACKGROUND)
+    if(index == Ui::Integration::View::Property::BACKGROUND)
     {
       mOuter.InvalidateMeasure();
     }

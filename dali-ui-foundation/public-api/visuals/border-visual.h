@@ -22,7 +22,6 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 namespace Dali
@@ -43,20 +42,6 @@ namespace Ui
 class DALI_UI_API BorderVisual : public VisualBase
 {
 public:
-  /**
-   * @brief Property indices for BorderVisual.
-   *
-   * These can be used with Dali::Ui::VisualBase::GetProperty() and SetProperty().
-   */
-  struct Property
-  {
-    enum
-    {
-      BORDER_SIZE   = BorderVisualPropertyIndex::BORDER_SIZE,
-      ANTI_ALIASING = BorderVisualPropertyIndex::ANTI_ALIASING,
-    };
-  };
-
 public:
   /**
    * @brief Creates a BorderVisual object.

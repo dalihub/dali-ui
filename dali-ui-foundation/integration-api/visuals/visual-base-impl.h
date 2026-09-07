@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-transform.h>
 #include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
@@ -50,7 +51,7 @@ namespace Internal
 class VisualBaseImpl;
 using VisualBaseImplPtr = Dali::IntrusivePtr<VisualBaseImpl>;
 
-class VisualBaseImpl : public Dali::BaseObject, public Dali::ConnectionTracker, public Dali::Integration::Processor
+class DALI_UI_API VisualBaseImpl : public Dali::BaseObject, public Dali::ConnectionTracker, public Dali::Integration::Processor
 {
 public:
   using VisualPropertyId                                       = uint32_t;
@@ -81,7 +82,14 @@ public: ///< Public API
   void DetachFromContainer();
 
   /**
-   * @copydoc Dali::Ui::VisualBase::DoAction()
+   * @brief Performs an action on the visual.
+   *
+   * @note Not exposed to applications. A concrete visual class wraps each action it supports in a
+   * typed method, e.g. LottieAnimationVisual::Play(), because an action usually needs pending
+   * property changes flushed first and an unknown action id is silently ignored.
+   *
+   * @param[in] actionId The action to perform. See the visual's actions header for supported ids.
+   * @param[in] attributes Optional attributes for the action.
    */
   void DoAction(Dali::Property::Index actionId, const Dali::Property::Value& attributes);
 
@@ -103,6 +111,21 @@ public: // SetProperty / GetProperty
    * @copydoc Dali::Ui::VisualBase::GetProperty()
    */
   Dali::Property::Value GetProperty(Dali::Property::Index index) const;
+
+  /**
+   * @brief Convenience function for obtaining a property of a known type.
+   *
+   * @param[in] index The index of the property
+   * @return The property value
+   * @pre The property types match i.e. PropertyTypes::Get<T>() is equal to GetPropertyType(index).
+   */
+  template<typename T>
+  T GetProperty(Dali::Property::Index index) const
+  {
+    Dali::Property::Value value = GetProperty(index);
+
+    return T(value.Get<T>());
+  }
 
 public:
   /**

@@ -59,11 +59,21 @@ namespace Property
 {
 enum Type
 {
-  TRANSFORM = Dali::Ui::VisualBasePropertyIndex::TRANSFORM,
-  SHADER    = Dali::Ui::VisualBasePropertyIndex::SHADER,
-  MIX_COLOR = Dali::Ui::VisualBasePropertyIndex::MIX_COLOR,
-  OPACITY   = Dali::Ui::VisualBasePropertyIndex::OPACITY,
-  TYPE      = Dali::Ui::VisualBasePropertyIndex::TYPE,
+  MUTABLE_PROPERTY_START_INDEX = Dali::Ui::VISUAL_MUTABLE_PROPERTY_START_INDEX,
+  MUTABLE_PROPERTY_END_INDEX   = static_cast<int>(MUTABLE_PROPERTY_START_INDEX) + static_cast<int>(Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION) - 1, ///< Reserve property indices.
+
+  IMMUTABLE_PROPERTY_START_INDEX = Dali::Ui::VISUAL_IMMUTABLE_PROPERTY_START_INDEX,
+  IMMUTABLE_PROPERTY_END_INDEX   = static_cast<int>(IMMUTABLE_PROPERTY_START_INDEX) + static_cast<int>(Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION) - 1, ///< Reserve property indices.
+
+  READ_ONLY_PROPERTY_START_INDEX = Dali::Ui::VISUAL_READ_ONLY_PROPERTY_START_INDEX,
+  READ_ONLY_PROPERTY_END_INDEX   = static_cast<int>(READ_ONLY_PROPERTY_START_INDEX) + static_cast<int>(Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION) - 1, ///< Reserve property indices.
+
+  TRANSFORM = MUTABLE_PROPERTY_START_INDEX, ///< The transform of the visual. Name "transform", type Property::MAP.
+  SHADER,                                   ///< The custom shader of the visual. Name "shader", type Property::MAP.
+  MIX_COLOR,                                ///< The mix colour of the visual. Name "mixColor", type Property::VECTOR4, animatable.
+  OPACITY,                                  ///< The opacity of the visual. Name "opacity", type Property::FLOAT, animatable.
+
+  TYPE = READ_ONLY_PROPERTY_START_INDEX, ///< The type of the visual. Name "visualType", type Ui::VisualType.
 
   /**
    * @brief The radius for the rounded corners of the visual.
@@ -138,6 +148,22 @@ enum Type
 namespace Transform
 {
 /**
+ * @brief Policies used by the transform for the offset or size.
+ */
+namespace Policy
+{
+/**
+ * @brief Enumeration for the type of Transform Policy.
+ */
+enum Type
+{
+  RELATIVE = 0, ///< Relative to the control (percentage [0.0f to 1.0f] of the control).
+  ABSOLUTE = 1  ///< Absolute value in world units.
+};
+
+} // namespace Policy
+
+/**
  * @brief Visual Transform Property.
  */
 namespace Property
@@ -147,7 +173,84 @@ namespace Property
  */
 enum Type
 {
-  SIZE_POLICY = Dali::Ui::Visual::Transform::Property::SIZE_POLICY,
+  /**
+   * @brief Offset of the visual, which can be either relative (percentage [0.0f to 1.0f] of the parent) or absolute (in
+   * world units).
+   * @details Name "offset", type Property::VECTOR2, animatable.
+   *
+   * @see OFFSET_POLICY
+   */
+  OFFSET,
+
+  /**
+   * @brief Size of the visual, which can be either relative (percentage [0.0f to 1.0f] of the parent) or absolute (in
+   * world units).
+   * @details Name "size", type Property::VECTOR2, animatable.
+   * @see SIZE_POLICY
+   */
+  SIZE,
+
+  /**
+   * @brief The origin of the visual within its control area.
+   * @details Name "origin", type Align::Type (Property::INTEGER) or Property::STRING.
+   * @see Ui::Align
+   * @note The default is Align::TOP_BEGIN.
+   */
+  ORIGIN,
+
+  /**
+   * @brief The pivot of the visual
+   * @details Name "pivot", type Align::Type (Property::INTEGER) or Property::STRING.
+   * @see Ui::Align
+   * @note The default is Align::TOP_BEGIN.
+   */
+  PIVOT,
+
+  /**
+   * @brief Whether the x or y OFFSET values are relative (percentage [0.0f to 1.0f] of the control) or absolute (in
+   * world units).
+   * @details Name "offsetPolicy", type Vector2 or Property::ARRAY of Property::STRING.
+   *          If Property::ARRAY then 2 strings expected for the x and y.
+   *
+   * C++:
+   * @code
+   * control.SetProperty( ..., // Some visual based property
+   *                      Property::Map().Add( ... ) // Properties to set up visual
+   *                                     .Add( Ui::VisualBasePropertyIndex::TRANSFORM,
+   *                                           Property::Array().Add(
+   * Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2( Policy::ABSOLUTE, Policy::RELATIVE ) ) ) .Add(
+   * Ui::Visual::Transform::Property::OFFSET, Vector2( 10, 1.0f ) ) );
+   * @endcode
+   *
+   * JSON:
+   * @code
+   * {
+   *   ...
+   *   "transition":
+   *   {
+   *     "offsetPolicy" : [ "ABSOLUTE", "RELATIVE" ],
+   *     "offset" : [ 10, 1.0 ]
+   *   }
+   *   ...
+   * }
+   *
+   * @endcode
+   * @see Policy::Type
+   * @note By default, both the x and the y offset is RELATIVE.
+   */
+  OFFSET_POLICY,
+
+  /**
+   * @brief Whether the width or height SIZE values are relative (percentage [0.0f to 1.0f] of the control) or absolute
+   * (in world units).
+   * @details Name "sizePolicy", type Vector2 or Property::ARRAY of Property::STRING.
+   *          If Property::ARRAY then 2 strings expected for the width and height.
+   *
+   * @see Policy::Type
+   * @see OFFSET_POLICY for example
+   * @note By default, both the width and the height is RELATIVE to the control's size.
+   */
+  SIZE_POLICY,
 
   /**
    * @brief Extra size value that will be added to the computed visual size.
@@ -166,6 +269,88 @@ enum Type
 } // namespace Property
 
 } // namespace Transform
+
+/**
+ * @brief Shader for Visuals.
+ */
+namespace Shader
+{
+/**
+ * @brief Shader Property.
+ */
+namespace Property
+{
+/**
+ * @brief The type of Shader.
+ */
+enum
+{
+  /**
+   * @brief The vertex shader.
+   * @details Name "vertexShader", type Property::STRING or Property::ARRAY of Property::STRING.
+   *          A Property::ARRAY of Property::STRING values can be used to split the shader string over multiple lines.
+   * @note Optional
+   * @note If not supplied, the visual's already set vertex shader is used.
+   */
+  VERTEX_SHADER,
+
+  /**
+   * @brief The fragment shader.
+   * @details Name "fragmentShader", type Property::STRING or Property::ARRAY of Property::STRING.
+   *          A Property::ARRAY of Property::STRING values can be used to split the shader string over multiple lines.
+   * @note Optional
+   * @note If not supplied, the visual's already set fragment shader is used.
+   */
+  FRAGMENT_SHADER,
+
+  /**
+   * @brief How to subdivide the grid along the X-Axis.
+   * @details Name "subdivideGridX", type Property::INTEGER.
+   * @note Optional
+   * @note If not supplied, the default is 1.
+   * @note Value should be greater than or equal to 1.
+   */
+  SUBDIVIDE_GRID_X,
+
+  /**
+   * @brief How to subdivide the grid along the Y-Axis.
+   * @details Name "subdivideGridY", type Property::INTEGER.
+   * @note Optional
+   * @note If not supplied, the default is 1.
+   * @note Value should be greater than or equal to 1.
+   */
+  SUBDIVIDE_GRID_Y,
+
+  /**
+   * @brief Render Pass key to synchonize Shader and RenderTask.
+   * @details Name "renderPassTag", type Property::INTEGER.
+   * @note Optional
+   * @note If not supplied, the default is 0.
+   * @note Value should be greater than or equal to 0.
+   */
+  RENDER_PASS_TAG,
+
+  /**
+   * @brief Hints for rendering.
+   * @details Name "hints", type Dali::Shader::Hint (Property::INTEGER), Property::STRING or Property::ARRAY of
+   * Property::STRING.
+   * @note Optional
+   * @note If not supplied, the default is Dali::Shader::Hint::NONE.
+   */
+  HINTS,
+
+  /**
+   * @brief Name for shader.
+   * @details Name "name", type Property::STRING. Once set, the value should not change afterwards(for caching).
+   * @note Optional
+   * @note If not supplied, the default is empty string.
+   */
+  NAME,
+};
+
+} // namespace Property
+
+} // namespace Shader
 
 } // namespace Visual
 

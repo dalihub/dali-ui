@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -1046,7 +1047,7 @@ int UtcDaliRenderEffectSynchronizeViewCornerRadius(void)
   view.SetRequestedWidth(1.0f);
   view.SetRequestedHeight(1.0f);
   view.SetProperty(View::Property::CORNER_RADIUS, Vector4(30.0f, 30.0f, 30.0f, 30.0f));
-  view.SetProperty(View::Property::CORNER_RADIUS_POLICY, Ui::Visual::Transform::Policy::ABSOLUTE);
+  view.SetProperty(View::Property::CORNER_RADIUS_POLICY, Ui::Integration::Visual::Transform::Policy::ABSOLUTE);
   view.SetProperty(View::Property::CORNER_SQUARENESS, Vector4(0.7f, 0.7f, 0.7f, 0.7f));
   application.GetScene().Add(view);
 
@@ -1070,9 +1071,9 @@ int UtcDaliRenderEffectSynchronizeViewCornerRadius(void)
   Vector4 squareness = Vector4::ZERO;
   renderer.GetProperty(renderer.GetPropertyIndex(Dali::String("uCornerSquareness"))).Get(squareness);
 
-  Ui::Visual::Transform::Policy::Type policy;
+  Ui::Integration::Visual::Transform::Policy::Type policy;
   renderer.GetProperty(renderer.GetPropertyIndex(Dali::String("uCornerRadiusPolicy"))).Get(policy);
-  DALI_TEST_CHECK(policy == Ui::Visual::Transform::Policy::ABSOLUTE);
+  DALI_TEST_CHECK(policy == Ui::Integration::Visual::Transform::Policy::ABSOLUTE);
 
   DALI_TEST_EQUALS(radius, Vector4(30.0f, 30.0f, 30.0f, 30.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(squareness, Vector4(0.7f, 0.7f, 0.7f, 0.7f), TEST_LOCATION);

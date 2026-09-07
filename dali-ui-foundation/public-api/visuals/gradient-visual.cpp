@@ -23,6 +23,7 @@
 #include <utility>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 namespace Dali
@@ -53,71 +54,71 @@ void GradientVisual::SetLinearGradient(const Dali::Vector2& startPosition, const
 {
   // Remove other caches first if exist
   auto& visualBaseImpl = GetImplementation(*this);
-  visualBaseImpl.RemoveCache(GradientVisual::Property::CENTER);
-  visualBaseImpl.RemoveCache(GradientVisual::Property::RADIUS);
-  visualBaseImpl.RemoveCache(GradientVisual::Property::START_ANGLE);
+  visualBaseImpl.RemoveCache(Dali::Ui::Integration::GradientVisual::Property::CENTER);
+  visualBaseImpl.RemoveCache(Dali::Ui::Integration::GradientVisual::Property::RADIUS);
+  visualBaseImpl.RemoveCache(Dali::Ui::Integration::GradientVisual::Property::START_ANGLE);
 
-  VisualBase::SetProperty(GradientVisual::Property::START_POSITION, startPosition);
-  VisualBase::SetProperty(GradientVisual::Property::END_POSITION, endPosition);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::START_POSITION, startPosition);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::END_POSITION, endPosition);
 }
 
 void GradientVisual::SetRadialGradient(const Dali::Vector2& center, float radius)
 {
   // Remove other caches first if exist
   auto& visualBaseImpl = GetImplementation(*this);
-  visualBaseImpl.RemoveCache(GradientVisual::Property::START_POSITION);
-  visualBaseImpl.RemoveCache(GradientVisual::Property::END_POSITION);
-  visualBaseImpl.RemoveCache(GradientVisual::Property::START_ANGLE);
+  visualBaseImpl.RemoveCache(Dali::Ui::Integration::GradientVisual::Property::START_POSITION);
+  visualBaseImpl.RemoveCache(Dali::Ui::Integration::GradientVisual::Property::END_POSITION);
+  visualBaseImpl.RemoveCache(Dali::Ui::Integration::GradientVisual::Property::START_ANGLE);
 
-  VisualBase::SetProperty(GradientVisual::Property::CENTER, center);
-  VisualBase::SetProperty(GradientVisual::Property::RADIUS, radius);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::CENTER, center);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::RADIUS, radius);
 }
 
 void GradientVisual::SetConicGradient(const Dali::Vector2& center, Dali::Radian startAngle)
 {
   // Remove other caches first if exist
   auto& visualBaseImpl = GetImplementation(*this);
-  visualBaseImpl.RemoveCache(GradientVisual::Property::START_POSITION);
-  visualBaseImpl.RemoveCache(GradientVisual::Property::END_POSITION);
-  visualBaseImpl.RemoveCache(GradientVisual::Property::RADIUS);
+  visualBaseImpl.RemoveCache(Dali::Ui::Integration::GradientVisual::Property::START_POSITION);
+  visualBaseImpl.RemoveCache(Dali::Ui::Integration::GradientVisual::Property::END_POSITION);
+  visualBaseImpl.RemoveCache(Dali::Ui::Integration::GradientVisual::Property::RADIUS);
 
-  VisualBase::SetProperty(GradientVisual::Property::CENTER, center);
-  VisualBase::SetProperty(GradientVisual::Property::START_ANGLE, startAngle.radian);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::CENTER, center);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::START_ANGLE, startAngle.radian);
 }
 
 float GradientVisual::GetStartOffset() const
 {
-  return VisualBase::GetProperty<float>(GradientVisual::Property::START_OFFSET);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::GradientVisual::Property::START_OFFSET);
 }
 
 void GradientVisual::SetStartOffset(float startOffset)
 {
-  VisualBase::SetProperty(GradientVisual::Property::START_OFFSET, startOffset);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::START_OFFSET, startOffset);
 }
 
 Dali::Vector2 GradientVisual::GetStartPosition() const
 {
-  return VisualBase::GetProperty<Dali::Vector2>(GradientVisual::Property::START_POSITION);
+  return GetImplementation(*this).GetProperty<Dali::Vector2>(Dali::Ui::Integration::GradientVisual::Property::START_POSITION);
 }
 
 Dali::Vector2 GradientVisual::GetEndPosition() const
 {
-  return VisualBase::GetProperty<Dali::Vector2>(GradientVisual::Property::END_POSITION);
+  return GetImplementation(*this).GetProperty<Dali::Vector2>(Dali::Ui::Integration::GradientVisual::Property::END_POSITION);
 }
 
 Dali::Vector2 GradientVisual::GetCenter() const
 {
-  return VisualBase::GetProperty<Dali::Vector2>(GradientVisual::Property::CENTER);
+  return GetImplementation(*this).GetProperty<Dali::Vector2>(Dali::Ui::Integration::GradientVisual::Property::CENTER);
 }
 
 float GradientVisual::GetRadius() const
 {
-  return VisualBase::GetProperty<float>(GradientVisual::Property::RADIUS);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::GradientVisual::Property::RADIUS);
 }
 
 Dali::Radian GradientVisual::GetStartAngle() const
 {
-  return Dali::Radian(VisualBase::GetProperty<float>(GradientVisual::Property::START_ANGLE));
+  return Dali::Radian(GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::GradientVisual::Property::START_ANGLE));
 }
 
 Dali::Vector<Ui::Gradient::StopNode> GradientVisual::GetStopNodes() const
@@ -125,8 +126,8 @@ Dali::Vector<Ui::Gradient::StopNode> GradientVisual::GetStopNodes() const
   Dali::Vector<Ui::Gradient::StopNode> convertedStopNodes;
 
   // TODO : We need to support string color for the stop node color
-  auto offsetArray = VisualBase::GetProperty<Dali::Property::Array>(GradientVisual::Property::STOP_OFFSET);
-  auto colorArray  = VisualBase::GetProperty<Dali::Property::Array>(GradientVisual::Property::STOP_COLOR);
+  auto offsetArray = GetImplementation(*this).GetProperty<Dali::Property::Array>(Dali::Ui::Integration::GradientVisual::Property::STOP_OFFSET);
+  auto colorArray  = GetImplementation(*this).GetProperty<Dali::Property::Array>(Dali::Ui::Integration::GradientVisual::Property::STOP_COLOR);
 
   const uint32_t nodesCount = std::min(offsetArray.Count(), colorArray.Count());
   convertedStopNodes.Reserve(nodesCount);
@@ -155,28 +156,28 @@ void GradientVisual::SetStopNodes(const Dali::Vector<Ui::Gradient::StopNode>& st
     offsetArray.PushBack(stopNodes[i].GetOffset());
     colorArray.PushBack(stopNodes[i].GetColor().GetRgba());
   }
-  VisualBase::SetProperty(GradientVisual::Property::STOP_OFFSET, offsetArray);
-  VisualBase::SetProperty(GradientVisual::Property::STOP_COLOR, colorArray);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::STOP_OFFSET, offsetArray);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::STOP_COLOR, colorArray);
 }
 
 Ui::Gradient::Units GradientVisual::GetUnits() const
 {
-  return VisualBase::GetProperty<Ui::Gradient::Units>(GradientVisual::Property::UNITS);
+  return GetImplementation(*this).GetProperty<Ui::Gradient::Units>(Dali::Ui::Integration::GradientVisual::Property::UNITS);
 }
 
 void GradientVisual::SetUnits(Ui::Gradient::Units gradientUnits)
 {
-  VisualBase::SetProperty(GradientVisual::Property::UNITS, gradientUnits);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::UNITS, gradientUnits);
 }
 
 Ui::Gradient::SpreadMethod GradientVisual::GetSpreadMethod() const
 {
-  return VisualBase::GetProperty<Ui::Gradient::SpreadMethod>(GradientVisual::Property::SPREAD_METHOD);
+  return GetImplementation(*this).GetProperty<Ui::Gradient::SpreadMethod>(Dali::Ui::Integration::GradientVisual::Property::SPREAD_METHOD);
 }
 
 void GradientVisual::SetSpreadMethod(Ui::Gradient::SpreadMethod spreadMethod)
 {
-  VisualBase::SetProperty(GradientVisual::Property::SPREAD_METHOD, spreadMethod);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::GradientVisual::Property::SPREAD_METHOD, spreadMethod);
 }
 
 // =============================================================================

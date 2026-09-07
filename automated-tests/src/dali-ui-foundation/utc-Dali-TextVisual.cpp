@@ -24,8 +24,11 @@
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
+
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -310,120 +313,120 @@ int UtcDaliTextVisualSetGetPropertyValue(void)
   // TEXT
   visual.SetText("Hello");
   DALI_TEST_EQUALS(visual.GetText(), "Hello", TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Dali::String>(TextVisual::Property::TEXT), "Hello", TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT).Get<Dali::String>(), "Hello", TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::TEXT, "World");
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT, "World");
   DALI_TEST_EQUALS(visual.GetText(), "World", TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Dali::String>(TextVisual::Property::TEXT), "World", TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT).Get<Dali::String>(), "World", TEST_LOCATION);
 
   // FONT_FAMILY
   visual.SetFontFamily("Arial");
   DALI_TEST_EQUALS(visual.GetFontFamily(), "Arial", TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Dali::String>(TextVisual::Property::FONT_FAMILY), "Arial", TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_FAMILY).Get<Dali::String>(), "Arial", TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::FONT_FAMILY, "Courier");
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_FAMILY, "Courier");
   DALI_TEST_EQUALS(visual.GetFontFamily(), "Courier", TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Dali::String>(TextVisual::Property::FONT_FAMILY), "Courier", TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_FAMILY).Get<Dali::String>(), "Courier", TEST_LOCATION);
 
   // FONT_SIZE
   visual.SetFontSize(20.0f);
   DALI_TEST_EQUALS(visual.GetFontSize(), 20.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<float>(TextVisual::Property::FONT_SIZE), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE).Get<float>(), 20.0f, TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::FONT_SIZE, 30.0f);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE, 30.0f);
   DALI_TEST_EQUALS(visual.GetFontSize(), 30.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<float>(TextVisual::Property::FONT_SIZE), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE).Get<float>(), 30.0f, TEST_LOCATION);
 
   // FONT_WEIGHT
   visual.SetFontWeight(Text::FontWeight::BOLD);
   DALI_TEST_EQUALS(visual.GetFontWeight(), Text::FontWeight::BOLD, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::FontWeight>(TextVisual::Property::FONT_WEIGHT), Text::FontWeight::BOLD, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WEIGHT).Get<Text::FontWeight>(), Text::FontWeight::BOLD, TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::FONT_WEIGHT, Text::FontWeight::LIGHT);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WEIGHT, Text::FontWeight::LIGHT);
   DALI_TEST_EQUALS(visual.GetFontWeight(), Text::FontWeight::LIGHT, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::FontWeight>(TextVisual::Property::FONT_WEIGHT), Text::FontWeight::LIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WEIGHT).Get<Text::FontWeight>(), Text::FontWeight::LIGHT, TEST_LOCATION);
 
   // FONT_WIDTH
   visual.SetFontWidth(Text::FontWidth::EXPANDED);
   DALI_TEST_EQUALS(visual.GetFontWidth(), Text::FontWidth::EXPANDED, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::FontWidth>(TextVisual::Property::FONT_WIDTH), Text::FontWidth::EXPANDED, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WIDTH).Get<Text::FontWidth>(), Text::FontWidth::EXPANDED, TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::FONT_WIDTH, Text::FontWidth::CONDENSED);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WIDTH, Text::FontWidth::CONDENSED);
   DALI_TEST_EQUALS(visual.GetFontWidth(), Text::FontWidth::CONDENSED, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::FontWidth>(TextVisual::Property::FONT_WIDTH), Text::FontWidth::CONDENSED, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WIDTH).Get<Text::FontWidth>(), Text::FontWidth::CONDENSED, TEST_LOCATION);
 
   // FONT_SLANT
   visual.SetFontSlant(Text::FontSlant::ITALIC);
   DALI_TEST_EQUALS(visual.GetFontSlant(), Text::FontSlant::ITALIC, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::FontSlant>(TextVisual::Property::FONT_SLANT), Text::FontSlant::ITALIC, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SLANT).Get<Text::FontSlant>(), Text::FontSlant::ITALIC, TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::FONT_SLANT, Text::FontSlant::OBLIQUE);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SLANT, Text::FontSlant::OBLIQUE);
   DALI_TEST_EQUALS(visual.GetFontSlant(), Text::FontSlant::OBLIQUE, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::FontSlant>(TextVisual::Property::FONT_SLANT), Text::FontSlant::OBLIQUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SLANT).Get<Text::FontSlant>(), Text::FontSlant::OBLIQUE, TEST_LOCATION);
 
   // MULTI_LINE
   visual.SetMultiLine(true);
   DALI_TEST_EQUALS(visual.IsMultiLine(), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<bool>(TextVisual::Property::MULTI_LINE), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::MULTI_LINE).Get<bool>(), true, TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::MULTI_LINE, false);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::MULTI_LINE, false);
   DALI_TEST_EQUALS(visual.IsMultiLine(), false, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<bool>(TextVisual::Property::MULTI_LINE), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::MULTI_LINE).Get<bool>(), false, TEST_LOCATION);
 
   // LINE_WRAP_MODE
   visual.SetLineWrapMode(Text::LineWrapMode::CHARACTER);
   DALI_TEST_EQUALS(visual.GetLineWrapMode(), Text::LineWrapMode::CHARACTER, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::LineWrapMode>(TextVisual::Property::LINE_WRAP_MODE), Text::LineWrapMode::CHARACTER, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_WRAP_MODE).Get<Text::LineWrapMode>(), Text::LineWrapMode::CHARACTER, TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::LINE_WRAP_MODE, Text::LineWrapMode::WORD);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_WRAP_MODE, Text::LineWrapMode::WORD);
   DALI_TEST_EQUALS(visual.GetLineWrapMode(), Text::LineWrapMode::WORD, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::LineWrapMode>(TextVisual::Property::LINE_WRAP_MODE), Text::LineWrapMode::WORD, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_WRAP_MODE).Get<Text::LineWrapMode>(), Text::LineWrapMode::WORD, TEST_LOCATION);
 
   // HORIZONTAL_ALIGNMENT
   visual.SetHorizontalAlignment(Text::Alignment::CENTER);
   DALI_TEST_EQUALS(visual.GetHorizontalAlignment(), Text::Alignment::CENTER, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::Alignment>(TextVisual::Property::HORIZONTAL_ALIGNMENT), Text::Alignment::CENTER, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT).Get<Text::Alignment>(), Text::Alignment::CENTER, TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::HORIZONTAL_ALIGNMENT, Text::Alignment::END);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT, Text::Alignment::END);
   DALI_TEST_EQUALS(visual.GetHorizontalAlignment(), Text::Alignment::END, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::Alignment>(TextVisual::Property::HORIZONTAL_ALIGNMENT), Text::Alignment::END, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT).Get<Text::Alignment>(), Text::Alignment::END, TEST_LOCATION);
 
   // VERTICAL_ALIGNMENT
   visual.SetVerticalAlignment(Text::Alignment::CENTER);
   DALI_TEST_EQUALS(visual.GetVerticalAlignment(), Text::Alignment::CENTER, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::Alignment>(TextVisual::Property::VERTICAL_ALIGNMENT), Text::Alignment::CENTER, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT).Get<Text::Alignment>(), Text::Alignment::CENTER, TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::VERTICAL_ALIGNMENT, Text::Alignment::END);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT, Text::Alignment::END);
   DALI_TEST_EQUALS(visual.GetVerticalAlignment(), Text::Alignment::END, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::Alignment>(TextVisual::Property::VERTICAL_ALIGNMENT), Text::Alignment::END, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT).Get<Text::Alignment>(), Text::Alignment::END, TEST_LOCATION);
 
   // OVERFLOW_MODE
   visual.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
   DALI_TEST_EQUALS(visual.GetTextOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::OverflowMode>(TextVisual::Property::OVERFLOW_MODE), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::OVERFLOW_MODE).Get<Text::OverflowMode>(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
 
   // LINE_HEIGHT
   visual.SetLineHeight(1.5f);
   DALI_TEST_EQUALS(visual.GetLineHeight(), 1.5f, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<float>(TextVisual::Property::LINE_HEIGHT), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT).Get<float>(), 1.5f, TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::LINE_HEIGHT, 2.0f);
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT, 2.0f);
   DALI_TEST_EQUALS(visual.GetLineHeight(), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<float>(TextVisual::Property::LINE_HEIGHT), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT).Get<float>(), 2.0f, TEST_LOCATION);
 
   // LINE_HEIGHT_MODE
   visual.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
   DALI_TEST_EQUALS(visual.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Text::LineHeightMode>(TextVisual::Property::LINE_HEIGHT_MODE), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE).Get<Text::LineHeightMode>(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
 
   // TEXT_COLOR
   visual.SetTextColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
   DALI_TEST_EQUALS(visual.GetTextColor().GetRgba(), Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Vector4>(TextVisual::Property::TEXT_COLOR), Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT_COLOR).Get<Vector4>(), Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
 
-  visual.SetProperty(TextVisual::Property::TEXT_COLOR, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+  Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT_COLOR, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
   DALI_TEST_EQUALS(visual.GetTextColor().GetRgba(), Vector4(0.0f, 1.0f, 0.0f, 1.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<Vector4>(TextVisual::Property::TEXT_COLOR), Vector4(0.0f, 1.0f, 0.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT_COLOR).Get<Vector4>(), Vector4(0.0f, 1.0f, 0.0f, 1.0f), TEST_LOCATION);
 
   END_TEST;
 }
@@ -520,7 +523,6 @@ int UtcDaliTextVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.SetOrigin(Align::CENTER_BEGIN);});
   TestAssertFunction([&](){empty.SetPivot(Align::CENTER_BEGIN);});
   TestAssertFunction([&](){empty.SetSiblingOrder(0u);});
-  TestAssertFunction([&](){empty.SetProperty(Property::INVALID_INDEX, Property::Value());});
 
   TestAssertFunction([&](){empty.GetOwner();});
   TestAssertFunction([&](){empty.GetDepthLayer();});
@@ -535,7 +537,6 @@ int UtcDaliTextVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.GetOrigin();});
   TestAssertFunction([&](){empty.GetPivot();});
   TestAssertFunction([&](){empty.GetSiblingOrder();});
-  TestAssertFunction([&](){empty.GetProperty(Property::INVALID_INDEX);});
 
   // TextVisual specific
   TestAssertFunction([&](){empty.SetText("Hello");});

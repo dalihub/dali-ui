@@ -22,6 +22,7 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 namespace Dali
@@ -50,22 +51,22 @@ BorderVisual BorderVisual::DownCast(BaseHandle handle)
 
 float BorderVisual::GetBorderSize() const
 {
-  return VisualBase::GetProperty<float>(BorderVisual::Property::BORDER_SIZE);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::BorderVisual::Property::BORDER_SIZE);
 }
 
 void BorderVisual::SetBorderSize(float borderSize)
 {
-  VisualBase::SetProperty(BorderVisual::Property::BORDER_SIZE, borderSize);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::BorderVisual::Property::BORDER_SIZE, borderSize);
 }
 
 bool BorderVisual::IsAntiAliasingEnabled() const
 {
-  return VisualBase::GetProperty<bool>(BorderVisual::Property::ANTI_ALIASING);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::BorderVisual::Property::ANTI_ALIASING);
 }
 
 void BorderVisual::SetAntiAliasingEnabled(bool enable)
 {
-  VisualBase::SetProperty(BorderVisual::Property::ANTI_ALIASING, enable);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::BorderVisual::Property::ANTI_ALIASING, enable);
 }
 
 // =============================================================================

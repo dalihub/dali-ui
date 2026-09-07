@@ -1,0 +1,157 @@
+#ifndef DALI_UI_INTEGRATION_API_VISUALS_GRADIENT_VISUAL_PROPERTIES_INTEG_H
+#define DALI_UI_INTEGRATION_API_VISUALS_GRADIENT_VISUAL_PROPERTIES_INTEG_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Integration
+{
+namespace GradientVisual
+{
+/**
+ * @brief GradientVisual Properties.
+ */
+namespace Property
+{
+/**
+ * @brief Enumeration for the start and end property ranges for this visual.
+ */
+enum
+{
+  MUTABLE_PROPERTY_START_INDEX = Ui::Integration::Visual::Property::MUTABLE_PROPERTY_END_INDEX + 1,
+  MUTABLE_PROPERTY_END_INDEX   = MUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+
+  IMMUTABLE_PROPERTY_START_INDEX = Ui::Integration::Visual::Property::IMMUTABLE_PROPERTY_END_INDEX + 1,
+  IMMUTABLE_PROPERTY_END_INDEX   = IMMUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+
+  READ_ONLY_PROPERTY_START_INDEX = Ui::Integration::Visual::Property::READ_ONLY_PROPERTY_END_INDEX + 1,
+  READ_ONLY_PROPERTY_END_INDEX   = READ_ONLY_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+
+  /**
+   * @brief Enumeration for the instance of properties belonging to the GradientVisual.
+   */
+  /**
+   * @brief The offset value that shifts the starting value of offset of the gradient.
+   * It will decide the offset value at START_POSITION (for Linear) or CENTER (for Radial) or START_ANGLE (or Conic)
+   * @see STOP_OFFSET
+   * @details Name "startOffset", type Property::FLOAT.
+   * @note Optional. If not supplied, default is 0.
+   */
+  START_OFFSET = MUTABLE_PROPERTY_START_INDEX,
+
+  /**
+   * @brief All the stop offsets.
+   * @details Name "stopOffset", type Property::ARRAY of Property::FLOAT.
+   * @note Optional. If not supplied, default is 0.0 and 1.0.
+   */
+  STOP_OFFSET,
+
+  /**
+   * @brief The color at the stop offsets.
+   * @details Name "stopColor", type Property::ARRAY of Property::VECTOR4.
+   * @note Mandatory. At least 2 values required to show a gradient.
+   */
+  STOP_COLOR,
+
+  /**
+   * @brief Defines the coordinate system for certain attributes of the points in a gradient.
+   * @details Name "gradientUnits", type Units (Property::INTEGER) or Property::STRING.
+   * @note Optional. If not supplied, default is Units::OBJECT_BOUNDING_BOX.
+   * @see Units
+   */
+  UNITS,
+
+  /**
+   * @brief Indicates what happens if the gradient starts or ends inside the bounds of the target rectangle.
+   * @details Name "spreadMethod", type SpreadMethod (Property::INTEGER) or Property::STRING.
+   * @note Optional. If not supplied, default is SpreadMethod::PAD.
+   * @see SpreadMethod
+   */
+  SPREAD_METHOD,
+
+  /**
+   * @brief The start position of a linear gradient.
+   * @details Name "startPosition", type Property::VECTOR2.
+   * Gradient is drawn in a rectangular area, depend on Units type.
+   * For Units::OBJECT_BOUNDING_BOX case, TopLeft is (-0.5, -0.5) and BottomRight is (0.5, 0.5).
+   * The outside of the entered Start Position and End Position is extended to the value of the border.
+   * Even if the range between Start Position and End Position is greater than (-0.5, -0.5) to (0.5, 0.5),
+   * only the corresponding area is drawn.
+   * @note Recommand to use GradientVisual::SetLinearGradient()
+   * @note Must set END_POSITION at the same time if you are change it by SetProperty. If not, property will be ignored.
+   * @note Mandatory for Linear.
+   */
+  START_POSITION,
+
+  /**
+   * @brief The end position of a linear gradient.
+   * @details Name "endPosition", type Property::VECTOR2.
+   * Gradient is drawn in a rectangular area, depend on Units type.
+   * For Units::OBJECT_BOUNDING_BOX case, TopLeft is (-0.5, -0.5) and BottomRight is (0.5, 0.5).
+   * The outside of the entered Start Position and End Position is extended to the value of the border.
+   * Even if the range between Start Position and End Position is greater than (-0.5, -0.5) to (0.5, 0.5),
+   * only the corresponding area is drawn.
+   * @note Recommand to use GradientVisual::SetLinearGradient()
+   * @note Must set START_POSITION at the same time if you are change it by SetProperty. If not, property will be ignored.
+   * @note Mandatory for Linear.
+   */
+  END_POSITION,
+
+  /**
+   * @brief The center point of a radial gradient.
+   * @details Name "center", type Property::VECTOR2.
+   * @note Mandatory for Radial and Conic.
+   * @note Recommand to use GradientVisual::SetRadialGradient() or GradientVisual::SetConicGradient()
+   * @note Must set RADIUS or START_ANGLE at the same time if you are change it by SetProperty. If not, property will be ignored.
+   */
+  CENTER,
+
+  /**
+   * @brief The size of the radius of a radial gradient.
+   * @details Name "radius", type Property::FLOAT.
+   * @note Mandatory for Radial.
+   * @note Recommand to use GradientVisual::SetRadialGradient()
+   * @note Must set CENTER at the same time if you are change it by SetProperty. If not, property will be ignored.
+   */
+  RADIUS,
+
+  /**
+   * @brief The initial angle from which the conic gradient begins.
+   * @details Name "startAngle", type Property::FLOAT.
+   * @note Mandatory for Conic.
+   * @note Recommand to use GradientVisual::SetConicGradient()
+   * @note Must set CENTER at the same time if you are change it by SetProperty. If not, property will be ignored.
+   */
+  START_ANGLE,
+};
+} // namespace Property
+
+} // namespace GradientVisual
+
+} // namespace Integration
+} // namespace Ui
+
+} // namespace Dali
+
+#endif // DALI_UI_INTEGRATION_API_VISUALS_GRADIENT_VISUAL_PROPERTIES_INTEG_H

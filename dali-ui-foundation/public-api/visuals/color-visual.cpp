@@ -22,6 +22,7 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 namespace Dali
@@ -50,22 +51,22 @@ ColorVisual ColorVisual::DownCast(BaseHandle handle)
 
 float ColorVisual::GetBlurRadius() const
 {
-  return VisualBase::GetProperty<float>(ColorVisual::Property::BLUR_RADIUS);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS);
 }
 
 void ColorVisual::SetBlurRadius(float blurRadius)
 {
-  VisualBase::SetProperty(ColorVisual::Property::BLUR_RADIUS, blurRadius);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS, blurRadius);
 }
 
 CutoutPolicy ColorVisual::GetCutoutPolicy() const
 {
-  return VisualBase::GetProperty<CutoutPolicy>(ColorVisual::Property::CUTOUT_POLICY);
+  return GetImplementation(*this).GetProperty<CutoutPolicy>(Dali::Ui::Integration::ColorVisual::Property::CUTOUT_POLICY);
 }
 
 void ColorVisual::SetCutoutPolicy(CutoutPolicy cutoutPolicy)
 {
-  VisualBase::SetProperty(ColorVisual::Property::CUTOUT_POLICY, cutoutPolicy);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ColorVisual::Property::CUTOUT_POLICY, cutoutPolicy);
 }
 
 // =============================================================================

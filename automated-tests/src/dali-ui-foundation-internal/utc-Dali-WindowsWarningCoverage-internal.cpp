@@ -33,6 +33,9 @@
 #include <dali-ui-foundation/internal/visuals/svg/svg-visual.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #undef protected
 #undef private
 
@@ -56,8 +59,8 @@ TextureSet CreateTextureSet(uint32_t width, uint32_t height)
 UiIntegration::Visual::Base CreateVisual(UiIntegration::InternalVisualType type, const char* url)
 {
   Property::Map properties;
-  properties.Add(VisualBasePropertyIndex::TYPE, type);
-  properties.Add(ImageVisualPropertyIndex::URL, url);
+  properties.Add(Dali::Ui::Integration::Visual::Property::TYPE, type);
+  properties.Add(Dali::Ui::Integration::ImageVisual::Property::URL, url);
   return UiIntegration::VisualFactory::Get().CreateVisual(properties);
 }
 
@@ -124,12 +127,12 @@ int UtcDaliWindowsWarningCoverageImageVisualsP(void)
   UiTestApplication application;
 
   Property::Map animatedProperties;
-  animatedProperties.Add(VisualBasePropertyIndex::TYPE, UiIntegration::InternalVisualType::ANIMATED_IMAGE);
-  animatedProperties.Add(ImageVisualPropertyIndex::URL, "coverage.gif");
-  animatedProperties.Add(ImageVisualPropertyIndex::DESIRED_WIDTH, 20);
-  animatedProperties.Add(ImageVisualPropertyIndex::DESIRED_HEIGHT, 30);
-  animatedProperties.Add(ImageVisualPropertyIndex::WRAP_MODE_U, WrapMode::REPEAT);
-  animatedProperties.Add(ImageVisualPropertyIndex::WRAP_MODE_V, WrapMode::MIRRORED_REPEAT);
+  animatedProperties.Add(Dali::Ui::Integration::Visual::Property::TYPE, UiIntegration::InternalVisualType::ANIMATED_IMAGE);
+  animatedProperties.Add(Dali::Ui::Integration::ImageVisual::Property::URL, "coverage.gif");
+  animatedProperties.Add(Dali::Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 20);
+  animatedProperties.Add(Dali::Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, 30);
+  animatedProperties.Add(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_U, WrapMode::REPEAT);
+  animatedProperties.Add(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_V, WrapMode::MIRRORED_REPEAT);
   UiIntegration::Visual::Base animatedVisual = UiIntegration::VisualFactory::Get().CreateVisual(animatedProperties);
   auto&                       animatedImage = static_cast<UiInternal::AnimatedImageVisual&>(GetVisualObject(animatedVisual));
   TextureSet                  animatedTextures = CreateTextureSet(41u, 43u);
@@ -194,8 +197,8 @@ int UtcDaliWindowsWarningCoverageTextVisualMaxTextureP(void)
   View              view = View::New();
 
   Property::Map properties;
-  properties.Add(VisualBasePropertyIndex::TYPE, UiIntegration::InternalVisualType::TEXT);
-  properties.Add(TextVisualPropertyIndex::TEXT, "maximum texture size coverage");
+  properties.Add(Dali::Ui::Integration::Visual::Property::TYPE, UiIntegration::InternalVisualType::TEXT);
+  properties.Add(Dali::Ui::Integration::TextVisual::Property::TEXT, "maximum texture size coverage");
   UiIntegration::Visual::Base visual = UiIntegration::VisualFactory::Get().CreateVisual(properties);
   UiInternal::ViewDataImpl::Get(Dali::Ui::GetImpl(view)).RegisterVisual(1, visual, UiIntegration::DepthIndex::CONTENT);
   application.GetScene().Add(view);

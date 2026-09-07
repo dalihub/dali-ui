@@ -23,12 +23,12 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader-observer.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 
 namespace Dali
 {

@@ -53,8 +53,9 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include "replacement-layout-test-adapter.h"
 #include "inline-replacement-manager-test-accessor.h"
 
@@ -2086,7 +2087,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
     inlineVisual.CreatePropertyMap(visualMap);
 
     int fittingMode = -1;
-    DALI_TEST_CHECK(visualMap.Find(Ui::ImageVisualPropertyIndex::FITTING_MODE)->Get(fittingMode));
+    DALI_TEST_CHECK(visualMap.Find(Ui::Integration::ImageVisual::Property::FITTING_MODE)->Get(fittingMode));
     DALI_TEST_EQUALS(fittingMode,
                      static_cast<int>(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO),
                      TEST_LOCATION);
@@ -2094,17 +2095,17 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
     int  desiredWidth          = 0;
     int  desiredHeight         = 0;
     bool orientationCorrection = false;
-    DALI_TEST_CHECK(visualMap.Find(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH)->Get(desiredWidth));
-    DALI_TEST_CHECK(visualMap.Find(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT)->Get(desiredHeight));
-    DALI_TEST_CHECK(visualMap.Find(Ui::ImageVisualPropertyIndex::ORIENTATION_CORRECTION)->Get(orientationCorrection));
+    DALI_TEST_CHECK(visualMap.Find(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH)->Get(desiredWidth));
+    DALI_TEST_CHECK(visualMap.Find(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT)->Get(desiredHeight));
+    DALI_TEST_CHECK(visualMap.Find(Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION)->Get(orientationCorrection));
     DALI_TEST_EQUALS(desiredWidth, expectedDesiredWidth, TEST_LOCATION);
     DALI_TEST_EQUALS(desiredHeight, expectedDesiredHeight, TEST_LOCATION);
     DALI_TEST_CHECK(orientationCorrection);
 
     Property::Map transform;
-    DALI_TEST_CHECK(visualMap.Find(Ui::VisualBasePropertyIndex::TRANSFORM)->Get(transform));
-    DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::SIZE)->Get(size));
-    DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::OFFSET)->Get(offset));
+    DALI_TEST_CHECK(visualMap.Find(Ui::Integration::Visual::Property::TRANSFORM)->Get(transform));
+    DALI_TEST_CHECK(transform.Find(Ui::Integration::Visual::Transform::Property::SIZE)->Get(size));
+    DALI_TEST_CHECK(transform.Find(Ui::Integration::Visual::Transform::Property::OFFSET)->Get(offset));
   };
 
   auto getPixelArea = [&inlineVisual]()
@@ -2112,7 +2113,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
     Property::Map visualMap;
     inlineVisual.CreatePropertyMap(visualMap);
     Vector4 pixelArea;
-    DALI_TEST_CHECK(visualMap.Find(Ui::ImageVisualPropertyIndex::PIXEL_AREA)->Get(pixelArea));
+    DALI_TEST_CHECK(visualMap.Find(Ui::Integration::ImageVisual::Property::PIXEL_AREA)->Get(pixelArea));
     return pixelArea;
   };
 
@@ -2121,7 +2122,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
     Property::Map visualMap;
     inlineVisual.CreatePropertyMap(visualMap);
     float opacity = 1.0f;
-    DALI_TEST_CHECK(visualMap.Find(Ui::VisualBasePropertyIndex::OPACITY)->Get(opacity));
+    DALI_TEST_CHECK(visualMap.Find(Ui::Integration::Visual::Property::OPACITY)->Get(opacity));
     return opacity;
   };
 
@@ -2559,9 +2560,9 @@ int UtcDaliInlineReplacementManagerPixelBindingOrderingP(void)
   Property::Map transform;
   Vector2       transformSize;
   Vector2       transformOffset;
-  DALI_TEST_CHECK(visualMap.Find(Ui::VisualBasePropertyIndex::TRANSFORM)->Get(transform));
-  DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::SIZE)->Get(transformSize));
-  DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::OFFSET)->Get(transformOffset));
+  DALI_TEST_CHECK(visualMap.Find(Ui::Integration::Visual::Property::TRANSFORM)->Get(transform));
+  DALI_TEST_CHECK(transform.Find(Ui::Integration::Visual::Transform::Property::SIZE)->Get(transformSize));
+  DALI_TEST_CHECK(transform.Find(Ui::Integration::Visual::Transform::Property::OFFSET)->Get(transformOffset));
   DALI_TEST_EQUALS(transformSize, placement.size, TEST_LOCATION);
   DALI_TEST_EQUALS(transformOffset, placement.position, TEST_LOCATION);
 

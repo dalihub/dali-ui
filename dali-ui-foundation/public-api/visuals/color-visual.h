@@ -22,7 +22,6 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 namespace Dali
@@ -36,6 +35,18 @@ namespace Ui
  */
 
 /**
+ * @brief Enumeration for cutout policy.
+ */
+enum class CutoutPolicy
+{
+  NONE,                              ///< Fully render the visual area (Default)
+  CUTOUT_VIEW,                       ///< Cutout the area of the view.
+  CUTOUT_VIEW_WITH_CORNER_RADIUS,    ///< Cutout the area of the view include view's corner radius.
+  CUTOUT_OUTSIDE,                    ///< Cutout the outside area of the view.
+  CUTOUT_OUTSIDE_WITH_CORNER_RADIUS, ///< Cutout the outside area of the view include view's corner radius.
+};
+
+/**
  * @brief ColorVisual is a owner of Visual::Base with Visual::COLOR, to render simple color.
  *
  * It can use CornerRadius / CornerSquareness / Borderline feature.
@@ -43,20 +54,6 @@ namespace Ui
 class DALI_UI_API ColorVisual : public VisualBase
 {
 public:
-  /**
-   * @brief Property indices for ColorVisual.
-   *
-   * These can be used with Dali::Ui::VisualBase::GetProperty() and SetProperty().
-   */
-  struct Property
-  {
-    enum
-    {
-      BLUR_RADIUS   = ColorVisualPropertyIndex::BLUR_RADIUS,
-      CUTOUT_POLICY = ColorVisualPropertyIndex::CUTOUT_POLICY,
-    };
-  };
-
 public:
   /**
    * @brief Creates a ColorVisual object.

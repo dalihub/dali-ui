@@ -23,6 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 namespace Dali
@@ -51,7 +52,7 @@ AnimatedImageVisual AnimatedImageVisual::DownCast(BaseHandle handle)
 
 Dali::String AnimatedImageVisual::GetResourceUrl() const
 {
-  Dali::Property::Value value = VisualBase::GetProperty(AnimatedImageVisual::Property::URL);
+  Dali::Property::Value value = GetImplementation(*this).GetProperty(Dali::Ui::Integration::ImageVisual::Property::URL);
   if(value.GetType() == Dali::Property::STRING)
   {
     return value.Get<Dali::String>();
@@ -61,13 +62,13 @@ Dali::String AnimatedImageVisual::GetResourceUrl() const
 
 void AnimatedImageVisual::SetResourceUrl(const Dali::String& resourceUrl)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::URL, resourceUrl);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::URL, resourceUrl);
 }
 
 Dali::Vector<Dali::String> AnimatedImageVisual::GetResourceUrlList() const
 {
   Dali::Vector<Dali::String> result;
-  Dali::Property::Value      value = VisualBase::GetProperty(AnimatedImageVisual::Property::URL);
+  Dali::Property::Value      value = GetImplementation(*this).GetProperty(Dali::Ui::Integration::ImageVisual::Property::URL);
   if(value.GetType() == Dali::Property::ARRAY)
   {
     const Dali::Property::Array& array = *(value.GetArray());
@@ -93,202 +94,202 @@ void AnimatedImageVisual::SetResourceUrlList(const Dali::Vector<Dali::String>& r
   {
     array.PushBack(resourceUrl);
   }
-  VisualBase::SetProperty(AnimatedImageVisual::Property::URL, array);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::URL, array);
 }
 
 bool AnimatedImageVisual::IsSynchronousLoading() const
 {
-  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::SYNCHRONOUS_LOADING);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING);
 }
 
 void AnimatedImageVisual::SetSynchronousLoading(bool synchronous)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::SYNCHRONOUS_LOADING, synchronous);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, synchronous);
 }
 
 int AnimatedImageVisual::GetDesiredWidth() const
 {
-  return VisualBase::GetProperty<int>(AnimatedImageVisual::Property::DESIRED_WIDTH);
+  return GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::DESIRED_WIDTH);
 }
 
 void AnimatedImageVisual::SetDesiredWidth(int desiredWidth)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::DESIRED_WIDTH, desiredWidth);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, desiredWidth);
 }
 
 int AnimatedImageVisual::GetDesiredHeight() const
 {
-  return VisualBase::GetProperty<int>(AnimatedImageVisual::Property::DESIRED_HEIGHT);
+  return GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT);
 }
 
 void AnimatedImageVisual::SetDesiredHeight(int desiredHeight)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::DESIRED_HEIGHT, desiredHeight);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, desiredHeight);
 }
 
 Image::SamplingMode AnimatedImageVisual::GetSamplingMode() const
 {
-  return VisualBase::GetProperty<Image::SamplingMode>(AnimatedImageVisual::Property::SAMPLING_MODE);
+  return GetImplementation(*this).GetProperty<Image::SamplingMode>(Dali::Ui::Integration::ImageVisual::Property::SAMPLING_MODE);
 }
 
 void AnimatedImageVisual::SetSamplingMode(Image::SamplingMode samplingMode)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::SAMPLING_MODE, samplingMode);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::SAMPLING_MODE, samplingMode);
 }
 
 Dali::Vector4 AnimatedImageVisual::GetPixelArea() const
 {
-  return VisualBase::GetProperty<Dali::Vector4>(AnimatedImageVisual::Property::PIXEL_AREA);
+  return GetImplementation(*this).GetProperty<Dali::Vector4>(Dali::Ui::Integration::ImageVisual::Property::PIXEL_AREA);
 }
 
 void AnimatedImageVisual::SetPixelArea(const Dali::Vector4& pixelArea)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::PIXEL_AREA, pixelArea);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PIXEL_AREA, pixelArea);
 }
 
 Dali::WrapMode::Type AnimatedImageVisual::GetWrapModeU() const
 {
-  return VisualBase::GetProperty<Dali::WrapMode::Type>(AnimatedImageVisual::Property::WRAP_MODE_U);
+  return GetImplementation(*this).GetProperty<Dali::WrapMode::Type>(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_U);
 }
 
 void AnimatedImageVisual::SetWrapModeU(Dali::WrapMode::Type wrapModeU)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::WRAP_MODE_U, wrapModeU);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_U, wrapModeU);
 }
 
 Dali::WrapMode::Type AnimatedImageVisual::GetWrapModeV() const
 {
-  return VisualBase::GetProperty<Dali::WrapMode::Type>(AnimatedImageVisual::Property::WRAP_MODE_V);
+  return GetImplementation(*this).GetProperty<Dali::WrapMode::Type>(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_V);
 }
 
 void AnimatedImageVisual::SetWrapModeV(Dali::WrapMode::Type wrapModeV)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::WRAP_MODE_V, wrapModeV);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_V, wrapModeV);
 }
 
 bool AnimatedImageVisual::IsBrokenImageEnabled() const
 {
-  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::ENABLE_BROKEN_IMAGE);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ENABLE_BROKEN_IMAGE);
 }
 
 void AnimatedImageVisual::SetBrokenImageEnabled(bool brokenImageEnabled)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::ENABLE_BROKEN_IMAGE, brokenImageEnabled);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ENABLE_BROKEN_IMAGE, brokenImageEnabled);
 }
 
 Image::LoadPolicy AnimatedImageVisual::GetLoadPolicy() const
 {
-  return VisualBase::GetProperty<Image::LoadPolicy>(AnimatedImageVisual::Property::LOAD_POLICY);
+  return GetImplementation(*this).GetProperty<Image::LoadPolicy>(Dali::Ui::Integration::ImageVisual::Property::LOAD_POLICY);
 }
 
 void AnimatedImageVisual::SetLoadPolicy(Image::LoadPolicy loadPolicy)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::LOAD_POLICY, loadPolicy);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::LOAD_POLICY, loadPolicy);
 }
 
 Image::ReleasePolicy AnimatedImageVisual::GetReleasePolicy() const
 {
-  return VisualBase::GetProperty<Image::ReleasePolicy>(AnimatedImageVisual::Property::RELEASE_POLICY);
+  return GetImplementation(*this).GetProperty<Image::ReleasePolicy>(Dali::Ui::Integration::ImageVisual::Property::RELEASE_POLICY);
 }
 
 void AnimatedImageVisual::SetReleasePolicy(Image::ReleasePolicy releasePolicy)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::RELEASE_POLICY, releasePolicy);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::RELEASE_POLICY, releasePolicy);
 }
 
 Image::FittingMode AnimatedImageVisual::GetFittingMode() const
 {
-  return VisualBase::GetProperty<Image::FittingMode>(AnimatedImageVisual::Property::FITTING_MODE);
+  return GetImplementation(*this).GetProperty<Image::FittingMode>(Dali::Ui::Integration::ImageVisual::Property::FITTING_MODE);
 }
 
 void AnimatedImageVisual::SetFittingMode(Image::FittingMode fittingMode)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::FITTING_MODE, fittingMode);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::FITTING_MODE, fittingMode);
 }
 
 bool AnimatedImageVisual::IsOrientationCorrection() const
 {
-  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::ORIENTATION_CORRECTION);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION);
 }
 
 void AnimatedImageVisual::SetOrientationCorrection(bool orientationCorrection)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
 }
 
 bool AnimatedImageVisual::IsSynchronousSizing() const
 {
-  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::SYNCHRONOUS_SIZING);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING);
 }
 
 void AnimatedImageVisual::SetSynchronousSizing(bool synchronousSizing)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::SYNCHRONOUS_SIZING, synchronousSizing);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING, synchronousSizing);
 }
 
 bool AnimatedImageVisual::IsPreMultipliedAlpha() const
 {
-  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::PRE_MULTIPLIED_ALPHA);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA);
 }
 
 void AnimatedImageVisual::SetPreMultipliedAlpha(bool preMultiplied)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::PRE_MULTIPLIED_ALPHA, preMultiplied);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, preMultiplied);
 }
 
 Dali::String AnimatedImageVisual::GetAlphaMaskUrl() const
 {
-  return VisualBase::GetProperty<Dali::String>(AnimatedImageVisual::Property::ALPHA_MASK_URL);
+  return GetImplementation(*this).GetProperty<Dali::String>(Dali::Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL);
 }
 
 void AnimatedImageVisual::SetAlphaMaskUrl(const Dali::String& alphaMaskUrl)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::ALPHA_MASK_URL, alphaMaskUrl);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL, alphaMaskUrl);
 }
 
 float AnimatedImageVisual::GetMaskContentScale() const
 {
-  return VisualBase::GetProperty<float>(AnimatedImageVisual::Property::MASK_CONTENT_SCALE);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::ImageVisual::Property::MASK_CONTENT_SCALE);
 }
 
 void AnimatedImageVisual::SetMaskContentScale(float maskContentScale)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::MASK_CONTENT_SCALE, maskContentScale);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::MASK_CONTENT_SCALE, maskContentScale);
 }
 
 bool AnimatedImageVisual::IsCropToMask() const
 {
-  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::CROP_TO_MASK);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::CROP_TO_MASK);
 }
 
 void AnimatedImageVisual::SetCropToMask(bool cropToMask)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::CROP_TO_MASK, cropToMask);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::CROP_TO_MASK, cropToMask);
 }
 
 Image::MaskingType AnimatedImageVisual::GetMaskingType() const
 {
-  return VisualBase::GetProperty<Image::MaskingType>(AnimatedImageVisual::Property::MASKING_TYPE);
+  return GetImplementation(*this).GetProperty<Image::MaskingType>(Dali::Ui::Integration::ImageVisual::Property::MASKING_TYPE);
 }
 
 void AnimatedImageVisual::SetMaskingType(Image::MaskingType maskingType)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::MASKING_TYPE, maskingType);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::MASKING_TYPE, maskingType);
 }
 
 int AnimatedImageVisual::GetLoopCount() const
 {
-  return VisualBase::GetProperty<int>(AnimatedImageVisual::Property::LOOP_COUNT);
+  return GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::LOOP_COUNT);
 }
 
 void AnimatedImageVisual::SetLoopCount(int loopCount)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::LOOP_COUNT, loopCount);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::LOOP_COUNT, loopCount);
 }
 
 Dali::Property::Array AnimatedImageVisual::GetPlayRange() const
 {
-  Dali::Property::Value  value    = VisualBase::GetProperty(AnimatedImageVisual::Property::PLAY_RANGE);
+  Dali::Property::Value  value    = GetImplementation(*this).GetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE);
   Dali::Property::Array* arrayPtr = value.GetArray();
   if(arrayPtr)
   {
@@ -299,57 +300,57 @@ Dali::Property::Array AnimatedImageVisual::GetPlayRange() const
 
 void AnimatedImageVisual::SetPlayRange(const Dali::Property::Array& playRange)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::PLAY_RANGE, playRange);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE, playRange);
 }
 
 AnimatedImage::StopBehavior AnimatedImageVisual::GetStopBehavior() const
 {
-  return VisualBase::GetProperty<AnimatedImage::StopBehavior>(AnimatedImageVisual::Property::STOP_BEHAVIOR);
+  return GetImplementation(*this).GetProperty<AnimatedImage::StopBehavior>(Dali::Ui::Integration::ImageVisual::Property::STOP_BEHAVIOR);
 }
 
 void AnimatedImageVisual::SetStopBehavior(AnimatedImage::StopBehavior stopBehavior)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::STOP_BEHAVIOR, stopBehavior);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::STOP_BEHAVIOR, stopBehavior);
 }
 
 float AnimatedImageVisual::GetFrameSpeedFactor() const
 {
-  return VisualBase::GetProperty<float>(AnimatedImageVisual::Property::FRAME_SPEED_FACTOR);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::ImageVisual::Property::FRAME_SPEED_FACTOR);
 }
 
 void AnimatedImageVisual::SetFrameSpeedFactor(float frameSpeedFactor)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::FRAME_SPEED_FACTOR, frameSpeedFactor);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::FRAME_SPEED_FACTOR, frameSpeedFactor);
 }
 
 int AnimatedImageVisual::GetBatchSize() const
 {
-  return VisualBase::GetProperty<int>(AnimatedImageVisual::Property::BATCH_SIZE);
+  return GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::BATCH_SIZE);
 }
 
 void AnimatedImageVisual::SetBatchSize(int batchSize)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::BATCH_SIZE, batchSize);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::BATCH_SIZE, batchSize);
 }
 
 int AnimatedImageVisual::GetCacheSize() const
 {
-  return VisualBase::GetProperty<int>(AnimatedImageVisual::Property::CACHE_SIZE);
+  return GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::CACHE_SIZE);
 }
 
 void AnimatedImageVisual::SetCacheSize(int cacheSize)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::CACHE_SIZE, cacheSize);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::CACHE_SIZE, cacheSize);
 }
 
 int AnimatedImageVisual::GetFrameDelay() const
 {
-  return VisualBase::GetProperty<int>(AnimatedImageVisual::Property::FRAME_DELAY);
+  return GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::FRAME_DELAY);
 }
 
 void AnimatedImageVisual::SetFrameDelay(int frameDelay)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::FRAME_DELAY, frameDelay);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::FRAME_DELAY, frameDelay);
 }
 
 // =============================================================================
@@ -358,29 +359,29 @@ void AnimatedImageVisual::SetFrameDelay(int frameDelay)
 
 AnimatedImage::PlayState AnimatedImageVisual::GetPlayState() const
 {
-  AnimatedImage::PlayState result = VisualBase::GetProperty<AnimatedImage::PlayState>(AnimatedImageVisual::Property::PLAY_STATE);
+  AnimatedImage::PlayState result = GetImplementation(*this).GetProperty<AnimatedImage::PlayState>(Dali::Ui::Integration::ImageVisual::Property::PLAY_STATE);
   // We should not cache this property. Remove cache now.
   // TODO : Maybe need to make API to get proeprty without cache as method.
-  GetImplementation(*this).RemoveCache(AnimatedImageVisual::Property::PLAY_STATE);
+  GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::PLAY_STATE);
   return result;
 }
 
 int AnimatedImageVisual::GetCurrentFrameNumber() const
 {
-  int result = VisualBase::GetProperty<int>(AnimatedImageVisual::Property::CURRENT_FRAME_NUMBER);
+  int result = GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::CURRENT_FRAME_NUMBER);
   // We should not cache this property. Remove cache now.
   // TODO : Maybe need to make API to get proeprty without cache as method.
-  GetImplementation(*this).RemoveCache(AnimatedImageVisual::Property::CURRENT_FRAME_NUMBER);
+  GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::CURRENT_FRAME_NUMBER);
   return result;
 }
 
 int AnimatedImageVisual::GetTotalFrameNumber() const
 {
-  int result = VisualBase::GetProperty<int>(AnimatedImageVisual::Property::TOTAL_FRAME_NUMBER);
+  int result = GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::TOTAL_FRAME_NUMBER);
   if(result == -1)
   {
     // We should not cache this property only if result is -1. Remove cache now.
-    GetImplementation(*this).RemoveCache(AnimatedImageVisual::Property::TOTAL_FRAME_NUMBER);
+    GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::TOTAL_FRAME_NUMBER);
   }
   return result;
 }
@@ -393,28 +394,28 @@ void AnimatedImageVisual::Play()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::Integration::AnimatedImageVisual::Action::PLAY, Dali::Property::Value());
+  GetImplementation(*this).DoAction(Ui::Integration::AnimatedImageVisual::Action::PLAY, Dali::Property::Value());
 }
 
 void AnimatedImageVisual::Pause()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::Integration::AnimatedImageVisual::Action::PAUSE, Dali::Property::Value());
+  GetImplementation(*this).DoAction(Ui::Integration::AnimatedImageVisual::Action::PAUSE, Dali::Property::Value());
 }
 
 void AnimatedImageVisual::Stop()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::Integration::AnimatedImageVisual::Action::STOP, Dali::Property::Value());
+  GetImplementation(*this).DoAction(Ui::Integration::AnimatedImageVisual::Action::STOP, Dali::Property::Value());
 }
 
 void AnimatedImageVisual::JumpTo(int frame)
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::Integration::AnimatedImageVisual::Action::JUMP_TO, static_cast<int32_t>(frame));
+  GetImplementation(*this).DoAction(Ui::Integration::AnimatedImageVisual::Action::JUMP_TO, static_cast<int32_t>(frame));
 }
 
 // =============================================================================

@@ -26,7 +26,8 @@
 #include <dali/public-api/rendering/texture.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
+#include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
 
 namespace Dali
 {

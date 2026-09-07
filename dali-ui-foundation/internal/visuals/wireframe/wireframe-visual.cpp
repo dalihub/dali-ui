@@ -19,6 +19,7 @@
 #include "wireframe-visual.h"
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
@@ -57,7 +58,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
   WireframeVisualPtr wireframeVisual(new WireframeVisual(factoryCache, actualVisual));
 
   // Instead of calling SetProperties, looking for the only valid property 'transform'
-  Property::Value* transformValue = properties.Find(Ui::VisualBasePropertyIndex::TRANSFORM, TRANSFORM);
+  Property::Value* transformValue = properties.Find(Ui::Integration::Visual::Property::TRANSFORM, TRANSFORM);
   Property::Map    transformMap;
   if(transformValue && transformValue->Get(transformMap))
   {
@@ -111,7 +112,7 @@ void WireframeVisual::DoCreatePropertyMap(Property::Map& map) const
   else
   {
     map.Clear();
-    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::WIREFRAME);
+    map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::WIREFRAME);
   }
 }
 
@@ -122,7 +123,7 @@ void WireframeVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 
 void WireframeVisual::DoSetProperties(const Property::Map& propertyMap)
 {
-  Property::Value* mixValue = propertyMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR, MIX_COLOR);
+  Property::Value* mixValue = propertyMap.Find(Ui::Integration::Visual::Property::MIX_COLOR, MIX_COLOR);
   if(mixValue)
   {
     Vector4 mixColor;

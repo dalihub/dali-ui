@@ -28,6 +28,7 @@
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -36,7 +37,6 @@
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -804,8 +804,8 @@ void ImageViewImpl::UpdatePlaceholderVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
-  map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+  map.Insert(Ui::Integration::ImageVisual::Property::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);
   if(visual)
@@ -834,7 +834,7 @@ void ImageViewImpl::SetImageColorInternal(const Vector4& color)
   if(mVisual)
   {
     Dali::Property::Map map;
-    map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, color);
+    map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, color);
     mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
   }
   else
@@ -959,37 +959,37 @@ void ImageViewImpl::UpdateVisual()
   if(visualFactory)
   {
     Dali::Property::Map map;
-    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
-    map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
-    map.Insert(Ui::ImageVisualPropertyIndex::SAMPLING_MODE, static_cast<int>(mSamplingMode));
-    map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
-    map.Insert(Ui::ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
+    map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+    map.Insert(Ui::Integration::ImageVisual::Property::URL, mUrl);
+    map.Insert(Ui::Integration::ImageVisual::Property::SAMPLING_MODE, static_cast<int>(mSamplingMode));
+    map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, mImageColor.GetRgba());
+    map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
 
     if(mDesiredWidth > 0 || mDesiredHeight > 0)
     {
-      map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredWidth);
-      map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredHeight);
+      map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, mDesiredWidth);
+      map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, mDesiredHeight);
     }
 
-    map.Insert(Ui::ImageVisualPropertyIndex::LOAD_POLICY, static_cast<int>(mLoadPolicy));
-    map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
-    map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, mSynchronousLoading);
-    map.Insert(Ui::ImageVisualPropertyIndex::FAST_TRACK_UPLOADING, mFastTrackUploading);
-    map.Insert(Ui::ImageVisualPropertyIndex::ORIENTATION_CORRECTION, mOrientationCorrection);
-    map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
-    map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, static_cast<int>(mFittingMode));
+    map.Insert(Ui::Integration::ImageVisual::Property::LOAD_POLICY, static_cast<int>(mLoadPolicy));
+    map.Insert(Ui::Integration::ImageVisual::Property::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
+    map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
+    map.Insert(Ui::Integration::ImageVisual::Property::FAST_TRACK_UPLOADING, mFastTrackUploading);
+    map.Insert(Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, mOrientationCorrection);
+    map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
+    map.Insert(Ui::Integration::ImageVisual::Property::FITTING_MODE, static_cast<int>(mFittingMode));
 
     if(!mAlphaMaskUrl.Empty())
     {
-      map.Insert(Ui::ImageVisualPropertyIndex::ALPHA_MASK_URL, mAlphaMaskUrl);
-      map.Insert(Ui::ImageVisualPropertyIndex::CROP_TO_MASK, mCropToMask);
-      map.Insert(Ui::ImageVisualPropertyIndex::MASKING_TYPE, static_cast<int>(mMaskingMode));
+      map.Insert(Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL, mAlphaMaskUrl);
+      map.Insert(Ui::Integration::ImageVisual::Property::CROP_TO_MASK, mCropToMask);
+      map.Insert(Ui::Integration::ImageVisual::Property::MASKING_TYPE, static_cast<int>(mMaskingMode));
     }
 
     if(mNPatchBorder != Vector4::ZERO)
     {
-      map.Insert(Ui::ImageVisualPropertyIndex::BORDER, mNPatchBorder);
-      map.Insert(Ui::ImageVisualPropertyIndex::BORDER_ONLY, mNPatchBorderOnly);
+      map.Insert(Ui::Integration::ImageVisual::Property::BORDER, mNPatchBorder);
+      map.Insert(Ui::Integration::ImageVisual::Property::BORDER_ONLY, mNPatchBorderOnly);
     }
 
     // ImageView is a static image widget: always use ImageVisual (or NPatchVisual)

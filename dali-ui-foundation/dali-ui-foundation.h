@@ -137,11 +137,6 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 
-#include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>

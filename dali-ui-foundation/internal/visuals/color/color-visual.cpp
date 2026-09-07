@@ -31,7 +31,9 @@
 #include <locale>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
@@ -39,7 +41,6 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 using Dali::Integration::ToDaliString;
@@ -81,7 +82,7 @@ public:
   : mVisual(visual)
   {
     mCutoutCornerRadiusIndex       = renderer.RegisterUniqueProperty(CUTOUT_CORNER_RADIUS_UNIFORM_NAME, Vector4::ZERO);
-    mCutoutCornerRadiusPolicyIndex = renderer.RegisterUniqueProperty(CUTOUT_CORNER_RADIUS_POLICY_UNIFORM_NAME, Property::Value(static_cast<float>(Ui::Visual::Transform::Policy::ABSOLUTE)));
+    mCutoutCornerRadiusPolicyIndex = renderer.RegisterUniqueProperty(CUTOUT_CORNER_RADIUS_POLICY_UNIFORM_NAME, Property::Value(static_cast<float>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE)));
     mCutoutCornerSquarenessIndex   = renderer.RegisterUniqueProperty(CUTOUT_CORNER_SQUARENESS_UNIFORM_NAME, Vector4::ZERO);
   }
 
@@ -186,8 +187,8 @@ ColorVisual::~ColorVisual()
 void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // By virtue of DoSetProperties being called last, this will override
-  // anything set by Ui::VisualBasePropertyIndex::MIX_COLOR
-  Property::Value* colorValue = propertyMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR, MIX_COLOR);
+  // anything set by Ui::Integration::Visual::Property::MIX_COLOR
+  Property::Value* colorValue = propertyMap.Find(Ui::Integration::Visual::Property::MIX_COLOR, MIX_COLOR);
   if(colorValue)
   {
     Vector4 color;
@@ -210,7 +211,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* blurRadiusValue = propertyMap.Find(Ui::ColorVisualPropertyIndex::BLUR_RADIUS, BLUR_RADIUS_NAME);
+  Property::Value* blurRadiusValue = propertyMap.Find(Ui::Integration::ColorVisual::Property::BLUR_RADIUS, BLUR_RADIUS_NAME);
   if(blurRadiusValue)
   {
     if(!blurRadiusValue->Get(mBlurRadius))
@@ -248,7 +249,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
   }
 
   Property::Value* cutoutPolicyValue =
-    propertyMap.Find(Ui::ColorVisualPropertyIndex::CUTOUT_POLICY, CUTOUT_POLICY_NAME);
+    propertyMap.Find(Ui::Integration::ColorVisual::Property::CUTOUT_POLICY, CUTOUT_POLICY_NAME);
   if(cutoutPolicyValue)
   {
     int cutoutPolicy = static_cast<int>(Dali::Ui::CutoutPolicy::NONE) - 1; ///< Make always invalid
@@ -298,19 +299,19 @@ void ColorVisual::DoSetOffScene(Actor& actor)
 void ColorVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::COLOR);
-  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImpl->mMixColor);
-  map.Insert(Ui::ColorVisualPropertyIndex::CUTOUT_POLICY, mCutoutPolicy);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::COLOR);
+  map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, mImpl->mMixColor);
+  map.Insert(Ui::Integration::ColorVisual::Property::CUTOUT_POLICY, mCutoutPolicy);
 
   if(mImpl->mRenderer)
   {
     // Update values from Renderer
     float blurRadius = mImpl->mRenderer.GetProperty<float>(DecoratedVisualRenderer::Property::BLUR_RADIUS);
-    map.Insert(Ui::ColorVisualPropertyIndex::BLUR_RADIUS, blurRadius);
+    map.Insert(Ui::Integration::ColorVisual::Property::BLUR_RADIUS, blurRadius);
   }
   else
   {
-    map.Insert(Ui::ColorVisualPropertyIndex::BLUR_RADIUS, mBlurRadius);
+    map.Insert(Ui::Integration::ColorVisual::Property::BLUR_RADIUS, mBlurRadius);
   }
 }
 
@@ -451,7 +452,7 @@ Dali::Property ColorVisual::OnGetPropertyObject(Dali::Property::Key key, bool ch
     return Dali::Property(handle, Property::INVALID_INDEX);
   }
 
-  if((key.type == Property::Key::INDEX && key.indexKey == ColorVisualPropertyIndex::BLUR_RADIUS) ||
+  if((key.type == Property::Key::INDEX && key.indexKey == Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS) ||
      (key.type == Property::Key::STRING && key.stringKey == BLUR_RADIUS_NAME))
   {
     if(changeProperties)

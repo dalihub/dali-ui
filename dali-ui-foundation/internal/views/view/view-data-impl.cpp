@@ -60,7 +60,9 @@
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/input-event-impl.h>
@@ -100,7 +102,6 @@
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <algorithm>
 
@@ -1140,20 +1141,20 @@ struct ViewDataImpl::ReplayNodeScope
 
 // clang-format off
 // Properties registered without macro to use specific member variables.
-const PropertyRegistration ViewDataImpl::PROPERTY_5(typeRegistration,  "background",                     Ui::View::Property::BACKGROUND,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_5(typeRegistration,  "background",                     Ui::Integration::View::Property::BACKGROUND,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_6(typeRegistration,  "margin",                         Ui::View::Property::MARGIN,                           Property::VECTOR4, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_7(typeRegistration,  "padding",                        Ui::View::Property::PADDING,                          Property::VECTOR4, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_11(typeRegistration, "leftFocusableViewId",           Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_12(typeRegistration, "rightFocusableViewId",          Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID,         Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_13(typeRegistration, "upFocusableViewId",             Ui::View::Property::UP_FOCUSABLE_VIEW_ID,            Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_14(typeRegistration, "downFocusableViewId",           Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_15(typeRegistration, "shadow",                         Ui::View::Property::SHADOW,                           Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_15(typeRegistration, "shadow",                         Ui::Integration::View::Property::SHADOW,                           Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_22(typeRegistration, "dispatchKeyEvents",              Ui::View::Property::DISPATCH_KEY_EVENTS,              Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_24(typeRegistration, "clockwiseFocusableViewId",      Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID,     Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_25(typeRegistration, "counterClockwiseFocusableViewId", Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID, Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_31(typeRegistration, "offScreenRendering",             Ui::View::Property::OFFSCREEN_RENDERING,              Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerShadow",                    Ui::View::Property::INNER_SHADOW,                     Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_33(typeRegistration, "borderline",                     Ui::View::Property::BORDERLINE,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerShadow",                    Ui::Integration::View::Property::INNER_SHADOW,                     Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_33(typeRegistration, "borderline",                     Ui::Integration::View::Property::BORDERLINE,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_34(typeRegistration, "requestedWidth",                 Ui::View::Property::REQUESTED_WIDTH,                  Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_35(typeRegistration, "requestedHeight",                Ui::View::Property::REQUESTED_HEIGHT,                 Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_36(typeRegistration, "minimumWidth",                   Ui::View::Property::MINIMUM_WIDTH,                    Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -1167,7 +1168,7 @@ const PropertyRegistration ViewDataImpl::PROPERTY_44(typeRegistration, "backward
 
 // Animatable without uniform
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_1(typeRegistration, "viewCornerRadius",       Ui::View::Property::CORNER_RADIUS,        Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
-const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
+const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_3(typeRegistration, "viewCornerSquareness",   Ui::View::Property::CORNER_SQUARENESS,    Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_4(typeRegistration, "viewBorderlineWidth",    Ui::View::Property::BORDERLINE_WIDTH,     Property::FLOAT,   &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_5(typeRegistration, "viewBorderlineColor",    Ui::View::Property::BORDERLINE_COLOR,     Property::Value(Color::BLACK), &ViewDataImpl::SetProperty, nullptr);
@@ -2591,15 +2592,15 @@ UiColor ViewDataImpl::GetBackgroundColor() const
     return outColor;
   }
 
-  Property::Map    backgroundMap = mViewImpl.Self().GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
-  Property::Value* typeValue     = backgroundMap.Find(Ui::VisualBasePropertyIndex::TYPE);
+  Property::Map    backgroundMap = mViewImpl.Self().GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  Property::Value* typeValue     = backgroundMap.Find(Ui::Integration::Visual::Property::TYPE);
   int              type          = static_cast<int>(Ui::Integration::InternalVisualType::COLOR);
   if(typeValue && typeValue->Get(type) && type != static_cast<int>(Ui::Integration::InternalVisualType::COLOR))
   {
     return UiColor();
   }
 
-  Property::Value* colorValue = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
+  Property::Value* colorValue = backgroundMap.Find(Ui::Integration::Visual::Property::MIX_COLOR);
   Vector4          color;
   return colorValue && colorValue->Get(color) ? UiColor(color) : UiColor();
 }
@@ -2738,7 +2739,7 @@ void ViewDataImpl::SetBorderlineOffset(float offset)
 
 void ViewDataImpl::ClearBackground()
 {
-  UnregisterVisual(Ui::View::Property::BACKGROUND);
+  UnregisterVisual(Ui::Integration::View::Property::BACKGROUND);
   ClearBackgroundBinding();
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
@@ -4104,7 +4105,7 @@ Vector3 ViewDataImpl::GetBackgroundVisualNaturalSize()
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "ViewDataImpl::GetBackgroundVisualNaturalSize for %s\n",
                 mViewImpl.Self().GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
-  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::View::Property::BACKGROUND);
+  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::Integration::View::Property::BACKGROUND);
   if(visualImplPtr)
   {
     Vector2 naturalSize;
@@ -5942,7 +5943,7 @@ void ViewDataImpl::SetBackgroundColorInternal(const Vector4& color)
 {
   Property::Map map = Internal::CreateColorVisualPropertyMap(color);
 
-  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::View::Property::BACKGROUND);
+  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::Integration::View::Property::BACKGROUND);
   if(visualImplPtr && visualImplPtr->GetType() == Ui::Integration::InternalVisualType::COLOR)
   {
     // Update background color only
@@ -6786,7 +6787,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       }
       break;
 
-      case Ui::View::Property::BACKGROUND:
+      case Ui::Integration::View::Property::BACKGROUND:
       {
         std::string          url;
         Vector4              color;
@@ -6807,7 +6808,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         else
         {
           // The background is an empty property map, so unregister the background visual.
-          viewImpl.GetViewDataImpl().UnregisterVisual(Ui::View::Property::BACKGROUND);
+          viewImpl.GetViewDataImpl().UnregisterVisual(Ui::Integration::View::Property::BACKGROUND);
         }
         break;
       }
@@ -6842,7 +6843,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::SHADOW:
+      case Ui::Integration::View::Property::SHADOW:
       {
         const Property::Map* map = value.GetMap();
         if(map && !map->Empty())
@@ -6914,7 +6915,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::INNER_SHADOW:
+      case Ui::Integration::View::Property::INNER_SHADOW:
       {
         const Property::Map* map = value.GetMap();
         if(map && !map->Empty())
@@ -6929,7 +6930,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::BORDERLINE:
+      case Ui::Integration::View::Property::BORDERLINE:
       {
         const Property::Map* map = value.GetMap();
         if(map && !map->Empty())
@@ -7237,14 +7238,14 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::BACKGROUND:
+      case Ui::Integration::View::Property::BACKGROUND:
       {
         Property::Map map;
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
           const Ui::Internal::Visual::Base* visualImplPtr =
-            viewImpl.GetViewDataImpl().mVisualData->GetVisualImplPtr(Ui::View::Property::BACKGROUND);
+            viewImpl.GetViewDataImpl().mVisualData->GetVisualImplPtr(Ui::Integration::View::Property::BACKGROUND);
           if(visualImplPtr)
           {
             visualImplPtr->CreatePropertyMap(map);
@@ -7267,13 +7268,13 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::SHADOW:
+      case Ui::Integration::View::Property::SHADOW:
       {
         Property::Map map;
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
-          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::SHADOW);
+          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::Integration::View::Property::SHADOW);
           if(visual)
           {
             visual.CreatePropertyMap(map);
@@ -7321,13 +7322,13 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::INNER_SHADOW:
+      case Ui::Integration::View::Property::INNER_SHADOW:
       {
         Property::Map map;
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
-          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::INNER_SHADOW);
+          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::Integration::View::Property::INNER_SHADOW);
           if(visual)
           {
             visual.CreatePropertyMap(map);
@@ -7338,13 +7339,13 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::BORDERLINE:
+      case Ui::Integration::View::Property::BORDERLINE:
       {
         Property::Map map;
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
-          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::BORDERLINE);
+          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::Integration::View::Property::BORDERLINE);
           if(visual)
           {
             visual.CreatePropertyMap(map);
@@ -8206,7 +8207,7 @@ void ViewDataImpl::SetBackground(const Property::Map& map)
     {
       // Ignore corner radius for offscreen case.
       Ui::GetImplementation(visual).CornerRadiusIgnoredAtOffscreenRendering(true);
-      EnsureVisualData().RegisterVisual(Ui::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
+      EnsureVisualData().RegisterVisual(Ui::Integration::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
       EnableCornerPropertiesOverridden(visual, true);
 
       if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
@@ -8232,7 +8233,7 @@ void ViewDataImpl::SetFirstShadow(const Property::Map& map)
 
     if(visual)
     {
-      EnsureVisualData().RegisterVisual(Ui::View::Property::SHADOW, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT);
+      EnsureVisualData().RegisterVisual(Ui::Integration::View::Property::SHADOW, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT);
       EnableCornerPropertiesOverridden(visual, true);
 
       if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
@@ -8245,9 +8246,9 @@ void ViewDataImpl::SetFirstShadow(const Property::Map& map)
 
 void ViewDataImpl::AppendShadow(const Dali::Ui::Shadow& shadow)
 {
-  if(!GetVisualImplPtr(Ui::View::Property::SHADOW))
+  if(!GetVisualImplPtr(Ui::Integration::View::Property::SHADOW))
   {
-    // Keep the first shadow as the View::Property::SHADOW visual. That makes
+    // Keep the first shadow as the Dali::Ui::Integration::View::Property::SHADOW visual. That makes
     // property lookup and shadow blur/opacity animations target the primary
     // shadow directly, while later shadows can live in the visual container.
     SetFirstShadow(Extension::Shadow::CreatePropertyMap(shadow));
@@ -8269,7 +8270,7 @@ void ViewDataImpl::ClearShadow()
 {
   if(DALI_LIKELY(mVisualData))
   {
-    mVisualData->UnregisterVisual(Ui::View::Property::SHADOW);
+    mVisualData->UnregisterVisual(Ui::Integration::View::Property::SHADOW);
     mVisualData->RemoveBoxShadowVisualObjects();
   }
 
@@ -8303,7 +8304,7 @@ void ViewDataImpl::RegisterInnerShadowVisual(Ui::Integration::Visual::Base visua
 
     if(visual)
     {
-      EnsureVisualData().RegisterVisual(Ui::View::Property::INNER_SHADOW, visual, INNER_SHADOW_DEPTH_INDEX);
+      EnsureVisualData().RegisterVisual(Ui::Integration::View::Property::INNER_SHADOW, visual, INNER_SHADOW_DEPTH_INDEX);
 
       Ui::Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
 
@@ -8345,7 +8346,7 @@ void ViewDataImpl::ClearInnerShadow()
 {
   if(DALI_LIKELY(mVisualData))
   {
-    mVisualData->UnregisterVisual(Ui::View::Property::INNER_SHADOW);
+    mVisualData->UnregisterVisual(Ui::Integration::View::Property::INNER_SHADOW);
   }
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
@@ -8370,7 +8371,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
     if(!forciblyCreate)
     {
       Ui::Internal::Visual::Base* previousVisualImplPtr =
-        visualData.GetVisualImplPtr(Ui::View::Property::BORDERLINE);
+        visualData.GetVisualImplPtr(Ui::Integration::View::Property::BORDERLINE);
       if(previousVisualImplPtr)
       {
         previousVisualImplPtr->DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
@@ -8387,7 +8388,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
 
     if(visual)
     {
-      visualData.RegisterVisual(Ui::View::Property::BORDERLINE, visual, BORDERLINE_DEPTH_INDEX);
+      visualData.RegisterVisual(Ui::Integration::View::Property::BORDERLINE, visual, BORDERLINE_DEPTH_INDEX);
 
       // Create constraint only if we set Borderline property as DevelView::BORDERLINE_XXX.
       if(!forciblyCreate)
@@ -8465,7 +8466,7 @@ void ViewDataImpl::ClearBorderline()
 {
   if(DALI_LIKELY(mVisualData))
   {
-    mVisualData->UnregisterVisual(Ui::View::Property::BORDERLINE);
+    mVisualData->UnregisterVisual(Ui::Integration::View::Property::BORDERLINE);
   }
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
@@ -8752,8 +8753,8 @@ void ViewDataImpl::UpdateBorderline()
   Actor self = mViewImpl.Self();
 
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::COLOR);
-  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, Color::TRANSPARENT);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::COLOR);
+  map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, Color::TRANSPARENT);
   // Scale natural-pixel width to visual pixels for the initial visual creation.
   map.Insert(Ui::Integration::Visual::Property::BORDERLINE_WIDTH,
              self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH));
@@ -8779,7 +8780,7 @@ void ViewDataImpl::CreateAnimationConstraints(const Dali::BaseObject& animationO
        index == Ui::View::Property::BORDERLINE_OFFSET)
     {
       Ui::Internal::Visual::Base* previousVisualImplPtr =
-        visualData.GetVisualImplPtr(Ui::View::Property::BORDERLINE);
+        visualData.GetVisualImplPtr(Ui::Integration::View::Property::BORDERLINE);
       if(!previousVisualImplPtr)
       {
         // Create visual and constraint for borderline first.

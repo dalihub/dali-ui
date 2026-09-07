@@ -128,7 +128,7 @@ void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
   }
 
   // By virtue of DoSetProperties being called last, this will override
-  // anything set by Ui::VisualBasePropertyIndex::MIX_COLOR
+  // anything set by Ui::Integration::Visual::Property::MIX_COLOR
   Property::Value* colorValue = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::MIX_COLOR, MIX_COLOR);
   if(colorValue)
   {
@@ -336,7 +336,7 @@ void PrimitiveVisual::DoSetOnScene(Actor& actor)
 void PrimitiveVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::PRIMITIVE);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::PRIMITIVE);
   map.Insert(Ui::Integration::PrimitiveVisual::Property::MIX_COLOR, mImpl->mMixColor);
   map.Insert(Ui::Integration::PrimitiveVisual::Property::SHAPE, mPrimitiveType);
   map.Insert(Ui::Integration::PrimitiveVisual::Property::SLICES, mSlices);
