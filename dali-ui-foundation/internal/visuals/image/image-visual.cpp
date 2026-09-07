@@ -1076,6 +1076,25 @@ void ImageVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
 
 void ImageVisual::OnApplyFittingMode(const Vector2& controlSize, const Insets& padding, float effectiveScale)
 {
+  const bool hasSynchronousSize = mUseSynchronousSizing &&
+                                  mLastRequiredSize.GetWidth() > 0 &&
+                                  mLastRequiredSize.GetHeight() > 0;
+  const bool hasDesiredSize = mDesiredSize.GetWidth() > 0 &&
+                              mDesiredSize.GetHeight() > 0;
+
+  // Aspect-ratio fitting needs the image's natural size. Avoid synchronously
+  // reading the image header while the resource is still loading and no usable
+  // size is already known. Resource-ready invalidation will apply the fitting
+  // mode again with the decoded texture size.
+  if(mFittingMode != Ui::Image::FittingMode::FILL &&
+     GetResourceStatus() == Ui::Visual::ResourceStatus::PREPARING &&
+     !hasSynchronousSize &&
+     !hasDesiredSize)
+  {
+    Visual::Base::OnApplyFittingMode(controlSize, padding, effectiveScale);
+    return;
+  }
+
   DoApplyFittingMode(controlSize, padding, effectiveScale, mFittingMode);
 }
 

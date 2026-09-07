@@ -414,6 +414,11 @@ protected: // From ViewImpl
 
 private: // Internal methods
   /**
+   * @brief Creates or refreshes the animated image visual when its properties are dirty.
+   */
+  void EnsureVisualUpdated();
+
+  /**
    * @brief Rebuilds and re-registers the image visual from current property values.
    */
   void UpdateVisual();

@@ -346,6 +346,11 @@ protected: // From ViewImpl
 
 private: // Internal methods
   /**
+   * @brief Creates or refreshes the image visual when its properties are dirty.
+   */
+  void EnsureVisualUpdated();
+
+  /**
    * @brief Applies a resource URL without changing the stored ImageUrl attachment.
    */
   void SetResourceUrlInternal(const Dali::String& url);

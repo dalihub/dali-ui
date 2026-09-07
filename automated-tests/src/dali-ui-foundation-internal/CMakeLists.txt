@@ -7,6 +7,7 @@ SET(RPM_NAME "core-${PKG_NAME}-tests")
 # include this file in source-list-only mode without configuring Unix targets.
 SET(TC_SOURCES
     utc-Dali-AnimatedImageReleasePolicy-internal.cpp
+    utc-Dali-AnimatedImageView-internal.cpp
     utc-Dali-FocusManager-internal.cpp
     utc-Dali-ImageCache-internal.cpp
     utc-Dali-ImageUrl-internal.cpp
