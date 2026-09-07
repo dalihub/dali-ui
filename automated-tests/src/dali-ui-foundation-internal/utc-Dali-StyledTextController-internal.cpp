@@ -27,6 +27,7 @@
 #include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
@@ -481,6 +482,111 @@ int UtcDaliTextControllerEmbossDataLifecycleP(void)
   controller->SetDefaultEmbossProperties("");
   DALI_TEST_CHECK(impl.mEmbossData == embossData);
   DALI_TEST_EQUALS(controller->GetDefaultEmbossProperties(), "", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextControllerPanCancellationRestoresEditingP(void)
+{
+  UiTestApplication application;
+
+  PublicText::ControllerPtr controller = PublicText::Controller::New();
+  PublicText::DecoratorPtr  decorator  = PublicText::Decorator::New(*controller, *controller);
+  InputMethodContext        inputMethodContext;
+  controller->EnableTextInput(decorator, inputMethodContext);
+  controller->SetHorizontalScrollEnabled(true);
+  controller->SetText("Text that remains manually scrolled after a pan");
+  controller->KeyboardFocusGainEvent(false);
+  controller->Relayout(Size(160.0f, 50.0f));
+
+  PublicText::Controller::Impl& impl = PublicText::Controller::Impl::GetImplementation(*controller.Get());
+  impl.mModel->mScrollPosition.x     = -32.0f;
+
+  controller->PanEvent(GestureState::STARTED, Vector2::ZERO);
+  controller->Relayout(Size(160.0f, 50.0f));
+  DALI_TEST_EQUALS(impl.mEventData->mState, PublicText::EventData::TEXT_PANNING, TEST_LOCATION);
+  DALI_TEST_EQUALS(decorator->GetActiveCursor(), static_cast<unsigned int>(PublicText::ACTIVE_CURSOR_NONE), TEST_LOCATION);
+
+  // A displacement beyond the boundary is not itself scrollable, but it still has to be delivered so the controller
+  // can clamp the text at the boundary.
+  DALI_TEST_CHECK(!controller->IsScrollable(Vector2(-10000.0f, 0.0f)));
+  controller->PanEvent(GestureState::CONTINUING, Vector2(-10000.0f, 0.0f));
+  controller->Relayout(Size(160.0f, 50.0f));
+  const float clampedScrollPosition = controller->GetHorizontalScrollPosition();
+  DALI_TEST_CHECK(clampedScrollPosition > 32.0f);
+
+  controller->PanEvent(GestureState::FINISHED, Vector2::ZERO);
+  controller->Relayout(Size(160.0f, 50.0f));
+  DALI_TEST_EQUALS(impl.mEventData->mState, PublicText::EventData::EDITING, TEST_LOCATION);
+  DALI_TEST_EQUALS(decorator->GetActiveCursor(), static_cast<unsigned int>(PublicText::ACTIVE_CURSOR_PRIMARY), TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(), clampedScrollPosition, TEST_LOCATION);
+
+  controller->PanEvent(GestureState::STARTED, Vector2::ZERO);
+  controller->Relayout(Size(160.0f, 50.0f));
+  controller->PanEvent(GestureState::CANCELLED, Vector2::ZERO);
+  controller->Relayout(Size(160.0f, 50.0f));
+  DALI_TEST_EQUALS(impl.mEventData->mState, PublicText::EventData::EDITING, TEST_LOCATION);
+
+  // A propagated pan can generate another terminal notification. It must not toggle the controller back into the
+  // panning state.
+  controller->PanEvent(GestureState::CANCELLED, Vector2::ZERO);
+  controller->Relayout(Size(160.0f, 50.0f));
+  DALI_TEST_EQUALS(impl.mEventData->mState, PublicText::EventData::EDITING, TEST_LOCATION);
+  DALI_TEST_EQUALS(decorator->GetActiveCursor(), static_cast<unsigned int>(PublicText::ACTIVE_CURSOR_PRIMARY), TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(), clampedScrollPosition, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextControllerFocusGainDuringPanRestoresEditingP(void)
+{
+  UiTestApplication application;
+
+  PublicText::ControllerPtr controller = PublicText::Controller::New();
+  PublicText::DecoratorPtr  decorator  = PublicText::Decorator::New(*controller, *controller);
+  InputMethodContext        inputMethodContext;
+  controller->EnableTextInput(decorator, inputMethodContext);
+  controller->GetLayoutEngine().SetLayout(PublicText::Layout::Engine::SINGLE_LINE_BOX);
+  controller->SetHorizontalScrollEnabled(true);
+  controller->SetTextElideEnabled(true);
+  controller->SetText("Text that remains manually scrolled after gaining focus during a pan");
+
+  const Size controlSize(160.0f, 50.0f);
+  controller->Relayout(controlSize);
+
+  PublicText::Controller::Impl& impl = PublicText::Controller::Impl::GetImplementation(*controller.Get());
+  controller->PanEvent(GestureState::STARTED, Vector2::ZERO);
+  controller->Relayout(controlSize);
+  DALI_TEST_EQUALS(impl.mEventData->mState, PublicText::EventData::TEXT_PANNING, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.mEventData->mPreviousState, PublicText::EventData::INACTIVE, TEST_LOCATION);
+
+  controller->PanEvent(GestureState::CONTINUING, Vector2(-48.0f, 0.0f));
+  controller->Relayout(controlSize);
+  const float manualScrollPosition = controller->GetHorizontalScrollPosition();
+  DALI_TEST_CHECK(manualScrollPosition > 0.0f);
+
+  // Focus-on-touch is delivered on touch-up, before the queued terminal pan event is processed. Even when the caller
+  // requests cursor scrolling, the active manual pan must keep its scroll position.
+  controller->KeyboardFocusGainEvent(true);
+  DALI_TEST_EQUALS(impl.mEventData->mState, PublicText::EventData::TEXT_PANNING, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.mEventData->mPreviousState, PublicText::EventData::EDITING, TEST_LOCATION);
+
+  controller->PanEvent(GestureState::FINISHED, Vector2::ZERO);
+  controller->Relayout(controlSize);
+  DALI_TEST_EQUALS(impl.mEventData->mState, PublicText::EventData::EDITING, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(), manualScrollPosition, TEST_LOCATION);
+
+  // Starting another pan must not run the inactive ellipsis scroll reset.
+  controller->PanEvent(GestureState::STARTED, Vector2::ZERO);
+  controller->Relayout(controlSize);
+  DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(), manualScrollPosition, TEST_LOCATION);
+
+  // An actual focus loss during the next pan must take precedence over the deferred pan restore state.
+  controller->KeyboardFocusLostEvent();
+  controller->PanEvent(GestureState::CANCELLED, Vector2::ZERO);
+  controller->Relayout(controlSize);
+  DALI_TEST_EQUALS(impl.mEventData->mState, PublicText::EventData::INACTIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(), 0.0f, TEST_LOCATION);
 
   END_TEST;
 }

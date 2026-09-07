@@ -648,8 +648,11 @@ void ControllerImplEventHandler::OnPanEvent(Controller::Impl& impl, const Event&
       case GestureState::FINISHED:
       case GestureState::CANCELLED: // FALLTHROUGH
       {
-        // Will go back to the previous state to show the cursor, handles, the text's popup, ...
-        impl.ChangeState(eventData.mPreviousState);
+        if(EventData::TEXT_PANNING == eventData.mState)
+        {
+          // Will go back to the previous state to show the cursor, handles, the text's popup, ...
+          impl.ChangeState(eventData.mPreviousState);
+        }
         break;
       }
       default:
