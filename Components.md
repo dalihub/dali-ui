@@ -53,7 +53,7 @@ ProgressBar | (~10.2026) | -
 ProgressCicle | (~10.2026) | -
 Loading | (~10.2026) | -
 Slider | (~10.2026) | -
-Toast | (~10.2026) | -
+[Toast](Toast.md) | A non-modal Window-overlay message with timeout, explicit dismissal, two-stage action expansion, and `ToastStyle` customization. | [samples/toast](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/toast)
 
 <br/>
 
