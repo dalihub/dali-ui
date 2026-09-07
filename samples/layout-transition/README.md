@@ -34,9 +34,10 @@ bounds change.
   white root holds a translucent rounded panel at (80, 80) with a
   right-aligned notification / edit row, a Wi-Fi / Bluetooth button row,
   and a scrollable 3-column `GridLayout` of SVG icons (each with its
-  file-name label). Long-pressing a cell floats it under the window while
-  an invisible proxy reserves its slot; dragging moves the proxy to the
-  cell under the finger and reassigns every cell's `Row` / `Column`, so
+  file-name label). Long-pressing a cell keeps the original in the grid as
+  an invisible proxy while a non-interactive preview floats under the
+  window; dragging moves the hidden original to the cell under the finger
+  and reassigns every cell's `Row` / `Column`, so
   the CHANGE slot animates the reflow. Dragging near the top / bottom of
   the grid auto-scrolls. Because the cell captures the touch stream once a
   drag can start, free scrolling uses the empty margins between cells; the

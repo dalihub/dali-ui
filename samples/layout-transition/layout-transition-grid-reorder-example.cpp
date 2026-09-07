@@ -43,19 +43,16 @@ using namespace Dali::Ui;
  * The GridLayout owns a LayoutTransition whose CHANGE slot shares the
  * 0.4s EASE_IN_OUT_SINE timing used by the other layout-transition
  * samples. The reorder interaction follows layout-transition-reorder:
- * long-pressing a cell floats it under the window at its press-time world
- * bounds and inserts a same-sized invisible (OPACITY 0) proxy into its
- * logical slot to reserve the grid space. Dragging moves the floating
- * cell by RequestedX/Y; once the floating cell's world position moves
- * past another cell's position by more than half a cell, the proxy is
+ * long-pressing a cell hides the original in place so it remains the touch
+ * target and creates a matching non-interactive preview under the window.
+ * Dragging moves the preview by RequestedX/Y; once its world position moves
+ * past another cell's position by more than half a cell, the hidden original is
  * moved to that cell's linear index and every cell's GridLayoutParams
  * Row/Column is reassigned, so the CHANGE slot animates the reflow.
  * Dragging near the top / bottom edge of the
  * ScrollView viewport auto-scrolls so reorder keeps tracking the finger
- * as content scrolls underneath. On release the proxy is removed and the
- * cell returns to the grid at the proxy's index, with its arranged bounds
- * pre-baked so the slide-into-slot animation starts from the on-screen
- * drop position.
+ * as content scrolls underneath. On release the preview is removed and the
+ * original cell becomes visible at its new grid index.
  *
  *   - Long-press a grid cell, then drag to reorder.
  *       Drag near the top / bottom of the grid to auto-scroll.
@@ -70,12 +67,11 @@ public:
     mDraggedIndex(0u),
     mDragBounds{},
     mDragGrabOffset(0.0f, 0.0f),
-    mDraggedOriginalReqW(0.0f),
-    mDraggedOriginalReqH(0.0f),
     mLastTouchRootPosition(0.0f, 0.0f),
     mLongPressArmed(false),
     mPressIndex(0u),
-    mPressRootPosition(0.0f, 0.0f)
+    mPressRootPosition(0.0f, 0.0f),
+    mPressLocalPosition(0.0f, 0.0f)
   {
     mApplication.InitSignal().Connect(this, &LayoutTransitionGridReorderController::Create);
   }
@@ -217,9 +213,10 @@ public:
 
   // Grid cell: 100x100 icon with the file-name label below it. The icon and
   // label are insensitive so the cell itself is the touch / capture target.
-  View MakeGridCell(const Dali::String& name)
+  View MakeGridCell(const Dali::String& name, bool interactive = true)
   {
     StackLayout cell = StackLayout::New(StackOrientation::VERTICAL);
+    cell.SetProperty(Actor::Property::NAME, name);
     cell.SetRequestedWidth(WRAP_CONTENT);
     cell.SetRequestedHeight(WRAP_CONTENT);
     cell.SetSpacing(4.0f);
@@ -237,12 +234,27 @@ public:
     label.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
     cell.Add(label);
 
-    // Capture all touch on the cell after the initial DOWN so the drag stream
-    // stays on the cell once it is reparented under the window and bypasses
-    // the ScrollView's gesture intercept during a reorder.
-    cell.SetProperty(DevelActor::Property::CAPTURE_ALL_TOUCH_AFTER_START, true);
-    cell.TouchEventSignal().Connect(this, &LayoutTransitionGridReorderController::OnItemTouched);
+    if(interactive)
+    {
+      // Keep the stream on the original grid cell while the pointer moves
+      // outside its bounds and while the cell changes logical grid slots.
+      cell.SetProperty(DevelActor::Property::CAPTURE_ALL_TOUCH_AFTER_START, true);
+      cell.TouchEventSignal().Connect(this, &LayoutTransitionGridReorderController::OnItemTouched);
+    }
+    else
+    {
+      cell.SetProperty(Actor::Property::SENSITIVE, false);
+    }
     return cell;
+  }
+
+  void SetCellContentOpacity(View cell, float opacity)
+  {
+    const uint32_t childCount = cell.GetChildCount();
+    for(uint32_t i = 0u; i < childCount; ++i)
+    {
+      cell.GetChildAt(i).SetProperty(Actor::Property::OPACITY, opacity);
+    }
   }
 
   // Reassigns every logical item's grid cell from its index in mGridItems.
@@ -292,6 +304,7 @@ public:
         mPressedItem           = cell;
         mPressIndex            = static_cast<uint32_t>(itemIndex);
         mPressRootPosition     = rootPosition;
+        mPressLocalPosition    = touch.GetLocalPosition(0u);
         mLastTouchRootPosition = rootPosition;
         mLongPressArmed        = true;
         StartLongPressTimer();
@@ -326,7 +339,10 @@ public:
     }
     if(IsUpState(state))
     {
-      UpdateDrag(rootPosition);
+      if(state != PointState::INTERRUPTED)
+      {
+        UpdateDrag(rootPosition);
+      }
       FinishDrag();
       return true;
     }
@@ -351,16 +367,11 @@ private:
     return state == PointState::DOWN || state == PointState::STARTED;
   }
 
-  // INTERRUPTED is deliberately NOT treated as a release. Reparenting the
-  // pressed cell from the grid to the window in BeginDrag (driven by the
-  // long-press timer, i.e. outside touch-event processing) makes the touch
-  // framework deliver a spurious INTERRUPTED on the captured stream. Treating
-  // it as a release would finish the drag the instant it starts. The capture
-  // keeps delivering MOTION / UP, so a real release still arrives as UP.
   static bool IsUpState(PointState::Type state)
   {
     return state == PointState::UP ||
            state == PointState::FINISHED ||
+           state == PointState::INTERRUPTED ||
            state == PointState::LEAVE;
   }
 
@@ -389,37 +400,20 @@ private:
     return -1;
   }
 
-  // World X / Y of mGrid's top-left in mRoot-local (== window) space. mGrid is
-  // the ScrollView content, so the ScrollView's offset inside mOuterStack and
-  // mOuterStack's offset inside mRoot are added; mGrid.POSITION already folds
-  // in the scroll offset (ScrollView scrolls by writing its content POSITION).
-  // This mirrors layout-transition-reorder's GetStackWorldX/Y.
+  // World X / Y of mGrid's top-left in mRoot-local space. Screen extents
+  // include every layout and ScrollView transform, avoiding assumptions about
+  // how individual hierarchy positions encode arranged bounds.
   float GetGridWorldX() const
   {
-    return mOuterStack.GetCurrentProperty<float>(Actor::Property::POSITION_X) +
-           mScrollView.GetCurrentProperty<float>(Actor::Property::POSITION_X) +
-           mGrid.GetCurrentProperty<float>(Actor::Property::POSITION_X);
+    return mGrid.CalculateScreenExtents().x - mRoot.CalculateScreenExtents().x;
   }
 
   float GetGridWorldY() const
   {
-    return mOuterStack.GetCurrentProperty<float>(Actor::Property::POSITION_Y) +
-           mScrollView.GetCurrentProperty<float>(Actor::Property::POSITION_Y) +
-           mGrid.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+    return mGrid.CalculateScreenExtents().y - mRoot.CalculateScreenExtents().y;
   }
 
-  // Cell bounds in mRoot-local (== window) space.
-  LayoutRect GetItemRootBounds(View cell) const
-  {
-    LayoutRect bounds;
-    bounds.x      = GetGridWorldX() + cell.GetCurrentProperty<float>(Actor::Property::POSITION_X);
-    bounds.y      = GetGridWorldY() + cell.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
-    bounds.width  = cell.GetCurrentProperty<float>(Actor::Property::SIZE_WIDTH);
-    bounds.height = cell.GetCurrentProperty<float>(Actor::Property::SIZE_HEIGHT);
-    return bounds;
-  }
-
-  // Row-major target index for the dragged cell. The floating cell's world
+  // Row-major target index for the dragged cell. The preview's world
   // centre is mapped into mGrid-local space (by subtracting the grid origin)
   // and quantised to the grid cell it sits over, so a cell only changes slot
   // once the dragged centre has crossed more than half a cell past a neighbour
@@ -449,48 +443,37 @@ private:
   // guards with !mDragging).
   void BeginDrag(View cell, uint32_t itemIndex, const Vector2& rootPosition)
   {
-    // World bounds of the pressed cell in mRoot-local (== window) space. The
-    // floating cell uses these directly as its position and size, and the grab
-    // offset is the finger relative to the cell's top-left in the same space —
-    // exactly how layout-transition-reorder floats its dragged child.
-    const LayoutRect bounds = GetItemRootBounds(cell);
+    // Derive the cell's window-local top-left from the DOWN event. Summing
+    // current hierarchy positions is unreliable while ScrollView/layout
+    // transforms are active, whereas the event already supplies the exact
+    // pointer offset inside the hit cell.
+    LayoutRect bounds;
+    bounds.x      = rootPosition.x - mPressLocalPosition.x;
+    bounds.y      = rootPosition.y - mPressLocalPosition.y;
+    bounds.width  = cell.GetCurrentProperty<float>(Actor::Property::SIZE_WIDTH);
+    bounds.height = cell.GetCurrentProperty<float>(Actor::Property::SIZE_HEIGHT);
 
     mDraggedChild          = cell;
     mDraggedIndex          = itemIndex;
     mDragBounds            = bounds;
-    mDragGrabOffset        = rootPosition - Vector2(bounds.x, bounds.y);
-    mDraggedOriginalReqW   = cell.GetRequestedWidth();
-    mDraggedOriginalReqH   = cell.GetRequestedHeight();
+    mDragGrabOffset        = mPressLocalPosition;
     mLastTouchRootPosition = rootPosition;
     mDragging              = true;
+    mScrollView.SetPanScrollEnabled(false);
 
-    // Swap the pressed cell for a same-sized invisible proxy with no
-    // transition so the swap is visually silent; re-attach right after so the
-    // in-drag reorders animate through the CHANGE slot.
-    LayoutTransition savedTransition = mGrid.GetLayoutTransition();
-    mGrid.SetLayoutTransition(LayoutTransition());
-    mGrid.Remove(cell, RemovePolicy::IMMEDIATE);
-
-    mDragProxy = View::New();
-    mDragProxy.SetRequestedWidth(bounds.width);
-    mDragProxy.SetRequestedHeight(bounds.height);
-    mDragProxy.SetProperty(Actor::Property::OPACITY, 0.0f);
-    mDragProxy.SetProperty(Actor::Property::SENSITIVE, false);
-    mGridItems[itemIndex] = mDragProxy;
-    mGrid.Add(mDragProxy);
-    ApplyGridOrder();
-
-    mGrid.SetLayoutTransition(savedTransition);
-
-    // Float the cell under the window at its press-time position.
-    cell.SetRequestedWidth(mDragBounds.width);
-    cell.SetRequestedHeight(mDragBounds.height);
-    cell.SetRequestedX(mDragBounds.x);
-    cell.SetRequestedY(mDragBounds.y);
-    mWindow.Add(cell);
-    cell.RaiseToTop(LayoutOrderPolicy::PRESERVE);
-    // Force the floating cell's layout pass so it lands at its requested world
-    // position immediately rather than after the next frame's pass.
+    // Keep the pressed cell scene-connected so DALi's active touch stream is
+    // not interrupted. The hidden original reserves and moves between grid
+    // slots, while a separate insensitive preview follows the pointer.
+    SetCellContentOpacity(cell, 0.0f);
+    const Dali::String name = cell.GetProperty<Dali::String>(Actor::Property::NAME);
+    mDragPreview            = MakeGridCell(name, false);
+    mDragPreview.SetLayoutMode(LayoutMode::STANDALONE);
+    mDragPreview.SetRequestedWidth(mDragBounds.width);
+    mDragPreview.SetRequestedHeight(mDragBounds.height);
+    mDragPreview.SetRequestedX(mDragBounds.x);
+    mDragPreview.SetRequestedY(mDragBounds.y);
+    mWindow.Add(mDragPreview);
+    mDragPreview.RaiseToTop(LayoutOrderPolicy::PRESERVE);
     LayoutController::Get(mWindow).ProcessLayouts();
 
     StartAutoScrollTimer();
@@ -498,18 +481,19 @@ private:
 
   void UpdateDrag(const Vector2& rootPosition)
   {
-    if(!mDragging || !mDraggedChild)
+    if(!mDragging || !mDraggedChild || !mDragPreview)
     {
       return;
     }
 
     mLastTouchRootPosition = rootPosition;
 
-    // Clamp the floating cell to the visible ScrollView viewport (Y) and to the
+    // Clamp the preview to the visible ScrollView viewport (Y) and to the
     // grid's column band (X) so it stays on screen.
-    const float viewportTop    = mOuterStack.GetCurrentProperty<float>(Actor::Property::POSITION_Y) +
-                                 mScrollView.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
-    const float viewportHeight = mScrollView.GetCurrentProperty<float>(Actor::Property::SIZE_HEIGHT);
+    const Bounds rootExtents     = mRoot.CalculateScreenExtents();
+    const Bounds viewportExtents = mScrollView.CalculateScreenExtents();
+    const float viewportTop      = viewportExtents.y - rootExtents.y;
+    const float viewportHeight   = viewportExtents.height;
     const float minY           = viewportTop;
     const float maxY           = std::max(minY, viewportTop + viewportHeight - mDragBounds.height);
 
@@ -521,13 +505,13 @@ private:
     mDragBounds.x = std::clamp(rootPosition.x - mDragGrabOffset.x, minX, maxX);
     mDragBounds.y = std::clamp(rootPosition.y - mDragGrabOffset.y, minY, maxY);
 
-    mDraggedChild.SetRequestedX(mDragBounds.x);
-    mDraggedChild.SetRequestedY(mDragBounds.y);
+    mDragPreview.SetRequestedX(mDragBounds.x);
+    mDragPreview.SetRequestedY(mDragBounds.y);
 
     const uint32_t targetIndex = ComputeTargetIndex(mDragBounds);
     if(targetIndex != mDraggedIndex)
     {
-      MoveProxy(mDraggedIndex, targetIndex);
+      MoveDraggedItem(mDraggedIndex, targetIndex);
       mDraggedIndex = targetIndex;
       // Reassign every cell's Row/Column for the new order. SetLayoutParams
       // marks the grid dirty, but its InvalidateMeasure early-exits if the grid
@@ -548,68 +532,36 @@ private:
 
     StopAutoScrollTimer();
 
-    View             droppedChild = mDraggedChild;
-    View             proxyToRemove = mDragProxy;
-    const uint32_t   targetIndex   = mDraggedIndex;
-    const float      originalReqW  = mDraggedOriginalReqW;
-    const float      originalReqH  = mDraggedOriginalReqH;
-    const LayoutRect dragBounds    = mDragBounds;
+    View draggedChild = mDraggedChild;
+    View dragPreview  = mDragPreview;
 
-    mDragging            = false;
-    mDraggedChild        = View();
-    mDragProxy           = View();
-    mDraggedIndex        = 0u;
-    mDraggedOriginalReqW = 0.0f;
-    mDraggedOriginalReqH = 0.0f;
-    mDragGrabOffset      = Vector2(0.0f, 0.0f);
-    mDragBounds          = {};
+    mDragging       = false;
+    mDraggedChild   = View();
+    mDragPreview    = View();
+    mDraggedIndex   = 0u;
+    mDragGrabOffset = Vector2(0.0f, 0.0f);
+    mDragBounds     = {};
 
-    if(!droppedChild || !proxyToRemove)
+    if(dragPreview && dragPreview.GetParent())
     {
-      return;
+      dragPreview.Unparent();
     }
-
-    // Pre-bake the dropped cell's arranged bounds to the drop position
-    // expressed in mGrid-local coordinates while it is still a layout root
-    // under the window, so the CHANGE animation starts from the on-screen drop
-    // position rather than teleporting before sliding into the slot.
-    const float dropGridX = dragBounds.x - GetGridWorldX();
-    const float dropGridY = dragBounds.y - GetGridWorldY();
-    droppedChild.SetRequestedX(dropGridX);
-    droppedChild.SetRequestedY(dropGridY);
-    LayoutController::Get(mWindow).ProcessLayouts();
-
-    // Mirror BeginDrag's swap: detach the transition so removing the proxy and
-    // re-inserting the dropped cell is silent, then re-attach so the next
-    // layout pass dispatches CHANGE from the pre-baked snapshot.
-    LayoutTransition savedTransition = mGrid.GetLayoutTransition();
-    mGrid.SetLayoutTransition(LayoutTransition());
-
-    mGrid.Remove(proxyToRemove, RemovePolicy::IMMEDIATE);
-    if(droppedChild.GetParent())
+    if(draggedChild)
     {
-      droppedChild.Unparent();
+      SetCellContentOpacity(draggedChild, 1.0f);
     }
-    droppedChild.SetRequestedWidth(originalReqW);
-    droppedChild.SetRequestedHeight(originalReqH);
-    droppedChild.SetRequestedX(0.0f);
-    droppedChild.SetRequestedY(0.0f);
-    mGridItems[targetIndex] = droppedChild;
-    mGrid.Add(droppedChild);
-    ApplyGridOrder();
-
-    mGrid.SetLayoutTransition(savedTransition);
+    mScrollView.SetPanScrollEnabled(true);
   }
 
-  void MoveProxy(uint32_t from, uint32_t to)
+  void MoveDraggedItem(uint32_t from, uint32_t to)
   {
     if(from == to || from >= mGridItems.size() || to >= mGridItems.size())
     {
       return;
     }
-    View proxy = mGridItems[from];
+    View draggedItem = mGridItems[from];
     mGridItems.erase(mGridItems.begin() + from);
-    mGridItems.insert(mGridItems.begin() + to, proxy);
+    mGridItems.insert(mGridItems.begin() + to, draggedItem);
   }
 
   // ── Long press ─────────────────────────────────────────────────────────────
@@ -700,7 +652,7 @@ private:
     {
       const Vector2 current = mScrollView.GetScrollPosition();
       mScrollView.ScrollTo(Vector2(current.x, current.y + scrollStepY), false);
-      // Finger has not moved but content has, so re-evaluate the proxy slot.
+      // Finger has not moved but content has, so re-evaluate the target slot.
       UpdateDrag(mLastTouchRootPosition);
     }
 
@@ -728,16 +680,14 @@ private:
   StackLayout      mOuterStack;
   ScrollView       mScrollView;
   GridLayout       mGrid;
-  std::vector<View> mGridItems; ///< Logical order of grid cells (proxy swapped in during a drag)
+  std::vector<View> mGridItems; ///< Logical order of grid cells
 
   bool       mDragging;
-  View       mDraggedChild;        ///< The dragged cell, floating under the window during a drag
-  View       mDragProxy;           ///< Invisible slot reserving the dragged cell's place in the grid
-  uint32_t   mDraggedIndex;        ///< Current index of mDragProxy in mGridItems
-  LayoutRect mDragBounds;          ///< Dragged cell's world bounds (driven by the finger)
+  View       mDraggedChild;   ///< Hidden original that stays in the grid as the touch target
+  View       mDragPreview;    ///< Insensitive visual copy floating under the window
+  uint32_t   mDraggedIndex;   ///< Current index of mDraggedChild in mGridItems
+  LayoutRect mDragBounds;     ///< Preview world bounds (driven by the finger)
   Vector2    mDragGrabOffset;
-  float      mDraggedOriginalReqW; ///< Restored to mDraggedChild on FinishDrag
-  float      mDraggedOriginalReqH; ///< Restored to mDraggedChild on FinishDrag
   Vector2    mLastTouchRootPosition;
 
   Timer    mAutoScrollTimer; ///< Fires while a drag is in flight to apply edge-zone auto-scroll
@@ -746,6 +696,7 @@ private:
   View     mPressedItem;
   uint32_t mPressIndex;
   Vector2  mPressRootPosition;
+  Vector2  mPressLocalPosition;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
