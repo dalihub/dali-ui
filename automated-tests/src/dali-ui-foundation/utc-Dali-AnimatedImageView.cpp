@@ -80,6 +80,33 @@ int UtcDaliAnimatedImageViewGetNaturalSizeP(void)
   END_TEST;
 }
 
+int UtcDaliAnimatedImageViewMeasureExplicitSizeP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New("test.gif");
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+
+  const MeasuredSize measuredSize = view.Measure(400.0f, 300.0f);
+  DALI_TEST_EQUALS(measuredSize.width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measuredSize.height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewMeasureSingleExplicitDimensionP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New("test.gif");
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(32);
+  view.SetRequestedWidth(200.0f);
+
+  const MeasuredSize measuredSize = view.Measure(400.0f, 300.0f);
+  DALI_TEST_EQUALS(measuredSize.width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measuredSize.height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliAnimatedImageViewCopyConstructorP(void)
 {
   UiTestApplication application;

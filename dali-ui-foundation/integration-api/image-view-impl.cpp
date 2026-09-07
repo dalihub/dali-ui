@@ -852,13 +852,21 @@ MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstra
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
+  float layoutW = GetRequestedWidth();
+  float layoutH = GetRequestedHeight();
+
+  // Both dimensions are already resolved, so measuring the image cannot affect
+  // the view size. Still create the visual so asynchronous loading can start.
+  if(layoutW > 0.0f && layoutH > 0.0f)
+  {
+    EnsureVisualUpdated();
+    return MeasuredSize(layoutW * s, layoutH * s);
+  }
+
   Vector2 naturalSize = GetNaturalSize().GetVectorXY();
 
   float w = naturalSize.width;
   float h = naturalSize.height;
-
-  float layoutW = GetRequestedWidth();
-  float layoutH = GetRequestedHeight();
 
   if(layoutW == MATCH_PARENT)
   {
@@ -910,11 +918,7 @@ LayoutRect ImageViewImpl::OnArrange(const LayoutRect& bounds)
 Vector3 ImageViewImpl::GetNaturalSize() const
 {
   ImageViewImpl& self = *const_cast<ImageViewImpl*>(this);
-  if(self.mVisualDirty)
-  {
-    self.mVisualDirty = false;
-    self.UpdateVisual();
-  }
+  self.EnsureVisualUpdated();
 
   Vector2 naturalSize;
   if(self.mVisual)
@@ -922,6 +926,15 @@ Vector3 ImageViewImpl::GetNaturalSize() const
     self.mVisual.GetNaturalSize(naturalSize);
   }
   return Vector3(naturalSize);
+}
+
+void ImageViewImpl::EnsureVisualUpdated()
+{
+  if(mVisualDirty)
+  {
+    mVisualDirty = false;
+    UpdateVisual();
+  }
 }
 
 void ImageViewImpl::UpdateVisual()

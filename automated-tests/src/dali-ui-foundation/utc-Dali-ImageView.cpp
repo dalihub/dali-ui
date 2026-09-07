@@ -81,6 +81,33 @@ int UtcDaliImageViewGetNaturalSizeP(void)
   END_TEST;
 }
 
+int UtcDaliImageViewMeasureExplicitSizeP(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New("test.jpg");
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+
+  const MeasuredSize measuredSize = view.Measure(400.0f, 300.0f);
+  DALI_TEST_EQUALS(measuredSize.width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measuredSize.height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewMeasureSingleExplicitDimensionP(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New("test.jpg");
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(32);
+  view.SetRequestedWidth(200.0f);
+
+  const MeasuredSize measuredSize = view.Measure(400.0f, 300.0f);
+  DALI_TEST_EQUALS(measuredSize.width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measuredSize.height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliImageViewNewWithImageUrlP(void)
 {
   UiTestApplication application;
