@@ -1,0 +1,137 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "manual-test-case.h"
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * FlexLayout flex-shrink sample.
+ *
+ * Demonstrates the FlexShrink property which controls how items shrink
+ * when their total size exceeds the container.
+ *
+ * Layout: two horizontal FlexLayout rows stacked vertically:
+ *
+ *   Row 1 (default shrink):
+ *     - All items have flex-basis 250px (total > container width)
+ *     - Default shrink (1.0) means all items shrink equally
+ *
+ *   Row 2 (varied shrink):
+ *     - All items have flex-basis 250px
+ *     - Item 1: shrink 0 (will NOT shrink, keeps 250px)
+ *     - Item 2: shrink 1 (shrinks normally)
+ *     - Item 3: shrink 3 (shrinks 3x more than item 2)
+ *
+ */
+class TcFlexLayoutShrink : public ManualTest::TestCase, public ConnectionTracker
+{
+public:
+  Dali::String GetName() const override
+  {
+    return "62. FlexLayout: Shrink";
+  }
+
+  Dali::String GetDescription() const override
+  {
+    return "Compare default and weighted shrink behavior";
+  }
+
+  void OnEnter(View contentArea) override
+  {
+
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
+    outer.SetRequestedWidth(MATCH_PARENT);
+    outer.SetRequestedHeight(MATCH_PARENT);
+    outer.SetSpacing(16.0f);
+    outer.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
+
+    // Row 1: Default shrink - all items shrink equally
+    FlexLayout row1 = FlexLayout::New();
+    row1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    row1.SetDirection(FlexDirection::ROW);
+    row1.SetWrap(FlexWrap::NO_WRAP);
+    row1.SetAlignItems(FlexAlign::STRETCH);
+    row1.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
+    row1.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
+
+    // All three items: basis 250, default shrink (1.0)
+    View r1box1 = View::New();
+    r1box1.SetBackgroundColor(Color::RED);
+    r1box1.SetRequestedHeight(100.0f);
+    r1box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
+    row1.Add(r1box1);
+
+    View r1box2 = View::New();
+    r1box2.SetBackgroundColor(Color::GREEN);
+    r1box2.SetRequestedHeight(100.0f);
+    r1box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
+    row1.Add(r1box2);
+
+    View r1box3 = View::New();
+    r1box3.SetBackgroundColor(Color::BLUE);
+    r1box3.SetRequestedHeight(100.0f);
+    r1box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
+    row1.Add(r1box3);
+
+    outer.Add(row1);
+
+    // Row 2: Varied shrink values
+    FlexLayout row2 = FlexLayout::New();
+    row2.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    row2.SetDirection(FlexDirection::ROW);
+    row2.SetWrap(FlexWrap::NO_WRAP);
+    row2.SetAlignItems(FlexAlign::STRETCH);
+    row2.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
+    row2.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
+
+    // Item 1: shrink 0 (will not shrink)
+    View r2box1 = View::New();
+    r2box1.SetBackgroundColor(Color::YELLOW);
+    r2box1.SetRequestedHeight(100.0f);
+    r2box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f).SetFlexShrink(0.0f));
+    row2.Add(r2box1);
+
+    // Item 2: shrink 1 (normal shrink)
+    View r2box2 = View::New();
+    r2box2.SetBackgroundColor(Color::CYAN);
+    r2box2.SetRequestedHeight(100.0f);
+    r2box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
+    row2.Add(r2box2);
+
+    // Item 3: shrink 3 (shrinks 3x more)
+    View r2box3 = View::New();
+    r2box3.SetBackgroundColor(Color::MAGENTA);
+    r2box3.SetRequestedHeight(100.0f);
+    r2box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f).SetFlexShrink(3.0f));
+    row2.Add(r2box3);
+
+    outer.Add(row2);
+
+    contentArea.Add(outer);
+  }
+
+  void OnExit() override
+  {
+    DisconnectAll();
+  }
+
+};
+
+REGISTER_MANUAL_TEST(TcFlexLayoutShrink)

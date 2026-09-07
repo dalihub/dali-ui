@@ -25,10 +25,10 @@ using namespace Dali::Ui;
  * Demonstrates SpaceBetween justify and Center cross-axis alignment
  * in a horizontal flex row.
  *
- * - Three fixed-size boxes with different heights
+ * - Six fixed-size boxes with per-child AlignSelf overrides
  * - JustifyContent: SpaceBetween (even spacing between items)
  * - AlignItems: Center (vertically centered on the cross axis)
- * - One child uses AlignSelf to override to FlexEnd
+ * - Green, blue, yellow, and cyan override AlignSelf
  *
  * Press Escape or Back to quit.
  */

@@ -21,7 +21,7 @@ using namespace Dali::Ui;
 /**
  * GridLayout sample: basic 2-column, 3-row grid with fixed sizes.
  *
- * - 3 rows (100px, 120px, 80px) x 2 columns (200px, 160px)
+ * - 3 rows (50px, 100px, 200px) x 2 columns (50px, 100px)
  * - 6 colored cells placed at explicit row/column positions
  * - Row and column spacing of 10px
  *

@@ -22,9 +22,9 @@ using namespace Dali::Ui;
 /**
  * FlexLayout sample: margin and padding.
  *
- * All margin and padding values use a uniform 25px for easy visual verification.
+ * All margin and padding values use a uniform 50px for easy visual verification.
  *
- * 1. Padding: root FlexLayout has 25px padding (content inset from window edges).
+ * 1. Padding: root FlexLayout has 50px padding (content inset from window edges).
  * 2. Margin: children alternate between no margin and 50px uniform margin.
  *    - Red box: no margin (flush with padding edge).
  *    - Green box: 50px margin all sides.

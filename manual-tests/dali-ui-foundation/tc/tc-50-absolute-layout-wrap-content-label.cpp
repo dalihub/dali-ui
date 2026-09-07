@@ -1,0 +1,158 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include "manual-test-case.h"
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/public-api/adaptor-framework/ui-context.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+constexpr float TOGGLE_BUTTON_WIDTH  = 220.0f;
+constexpr float TOGGLE_BUTTON_HEIGHT = 50.0f;
+constexpr float FIXED_PARENT_WIDTH   = 400.0f;
+constexpr float FIXED_PARENT_HEIGHT  = 200.0f;
+} // namespace
+
+/**
+ * AbsoluteLayout sample: WRAP_CONTENT parent with a position-proportional label.
+ *
+ * Demonstrates that a WRAP_CONTENT AbsoluteLayout parent sizes to a WRAP_CONTENT
+ * Label child when the child's bounds use a proportional x/y position and
+ * WRAP_CONTENT width/height.
+ *
+ *   - Root view is MATCH_PARENT and green.
+ *   - Parent AbsoluteLayout is WRAP_CONTENT and red.
+ *   - Child Label is WRAP_CONTENT and blue.
+ *   - Child bounds are (0.5, 0.5, -1.0, -1.0) with POSITION_PROPORTIONAL.
+ *
+ */
+class TcAbsoluteLayoutWrapContentLabel : public ManualTest::TestCase, public ConnectionTracker
+{
+public:
+  Dali::String GetName() const override
+  {
+    return "50. AbsoluteLayout: Wrap Content Label";
+  }
+
+  Dali::String GetDescription() const override
+  {
+    return "Verify a proportional-position wrap-content label and parent size changes";
+  }
+
+  void OnEnter(View contentArea) override
+  {
+    mFixedSize = false;
+    Window window = UiContext::Get().GetDefaultWindow();
+
+    View root = View::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetBackgroundColor(Color::GREEN);
+
+    mParent = AbsoluteLayout::New();
+    mParent.SetRequestedWidth(WRAP_CONTENT);
+    mParent.SetRequestedHeight(WRAP_CONTENT);
+    mParent.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
+    mParent.SetBackgroundColor(Color::RED);
+    root.Add(mParent);
+
+    Label child = Label::New("WRAP Label");
+    child.SetRequestedWidth(WRAP_CONTENT);
+    child.SetRequestedHeight(WRAP_CONTENT);
+    child.SetBackgroundColor(Color::BLUE);
+    child.SetTextColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f));
+    child.SetLayoutParams(AbsoluteLayoutParams::New()
+                            .SetBounds(LayoutRect(0.5f, 0.5f, -1.0f, -1.0f))
+                            .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+    mParent.Add(child);
+
+    CreateToggleButton(window, root);
+
+    contentArea.Add(root);
+    window.ResizedSignal().Connect(this, &TcAbsoluteLayoutWrapContentLabel::OnWindowResized);
+  }
+
+void OnWindowResized(Window, Window::WindowSize windowSize)
+  {
+    PositionToggleButton(windowSize);
+  }
+
+  void OnExit() override
+  {
+    DisconnectAll();
+    mParent.Reset();
+    mToggleButton.Reset();
+    mToggleLabel.Reset();
+  }
+
+private:
+  void CreateToggleButton(Window window, View root)
+  {
+    mToggleButton = InteractiveView::New();
+    mToggleButton.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.65f));
+    mToggleButton.SetRequestedWidth(TOGGLE_BUTTON_WIDTH);
+    mToggleButton.SetRequestedHeight(TOGGLE_BUTTON_HEIGHT);
+    mToggleButton.SetRequestedY(0.0f);
+    mToggleButton.SetLayoutMode(LayoutMode::STANDALONE);
+    mToggleButton.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
+
+    mToggleLabel = Label::New("Click to set size");
+    mToggleLabel.SetTextColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f));
+    mToggleLabel.SetRequestedWidth(MATCH_PARENT);
+    mToggleLabel.SetRequestedHeight(MATCH_PARENT);
+    mToggleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mToggleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mToggleButton.Add(mToggleLabel);
+
+    PositionSize positionSize = window.GetPositionSize();
+    PositionToggleButton(Window::WindowSize(positionSize.width, positionSize.height));
+    mToggleButton.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+      mFixedSize = !mFixedSize;
+
+      if(mFixedSize)
+      {
+        mParent.SetRequestedWidth(FIXED_PARENT_WIDTH);
+        mParent.SetRequestedHeight(FIXED_PARENT_HEIGHT);
+        mToggleLabel.SetText("Click to set wrap");
+      }
+      else
+      {
+        mParent.SetRequestedWidth(WRAP_CONTENT);
+        mParent.SetRequestedHeight(WRAP_CONTENT);
+        mToggleLabel.SetText("Click to set size");
+      }
+
+      return true;
+    });
+    root.Add(mToggleButton);
+  }
+
+  void PositionToggleButton(Window::WindowSize windowSize)
+  {
+    mToggleButton.SetRequestedX((static_cast<float>(windowSize.GetWidth()) - TOGGLE_BUTTON_WIDTH) * 0.5f);
+  }
+  AbsoluteLayout mParent;
+  InteractiveView mToggleButton;
+  Label          mToggleLabel;
+  bool           mFixedSize{false};
+};
+
+REGISTER_MANUAL_TEST(TcAbsoluteLayoutWrapContentLabel)

@@ -133,6 +133,21 @@ REGISTER_MANUAL_TEST(TcMyFeature)
 - 높이: 헤더를 제외한 나머지 화면 전체 (`weight = 1`)
 - `contentArea.Add(view)` 로 자식 뷰를 추가합니다
 
+### 상태형 TC 정리
+
+TC 객체는 launcher가 실행되는 동안 유지되므로, 재진입 가능한 초기 상태는
+`OnEnter()`에서 명시적으로 설정합니다. 다음 항목을 사용하는 TC는 `OnExit()`에서
+반드시 정리합니다.
+
+- 실행 중인 `Timer`와 `Animation` 중지 및 handle reset
+- Window 또는 장수명 객체에 연결한 signal 해제
+- drag 중인 actor, proxy, overlay handle reset
+- 다음 진입에 영향을 주는 counter, toggle, collection 초기화
+
+드래그 항목처럼 테스트 콘텐츠 위에 떠야 하는 actor는 Window에 직접 추가하지 않고
+TC가 소유한 overlay container에 추가합니다. 이렇게 하면 launcher header의 좌표계와
+충돌하지 않고 TC 종료 시 콘텐츠와 함께 제거됩니다.
+
 ---
 
 ## 파일 네이밍 규칙
