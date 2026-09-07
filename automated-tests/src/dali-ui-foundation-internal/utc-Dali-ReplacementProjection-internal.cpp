@@ -1574,6 +1574,100 @@ int UtcDaliReplacementEditableEllipsisFocusLossResetsScrollP(void)
   END_TEST;
 }
 
+int UtcDaliReplacementEditableTrailingCursorRemainsVisibleAfterPanP(void)
+{
+  UiTestApplication application;
+
+  Text::ControllerPtr controller = Text::Controller::New();
+  Text::DecoratorPtr  decorator  = Text::Decorator::New(*controller, *controller);
+  InputMethodContext  inputMethodContext;
+  controller->EnableTextInput(decorator, inputMethodContext);
+  controller->GetLayoutEngine().SetLayout(Text::Layout::Engine::SINGLE_LINE_BOX);
+  controller->SetHorizontalScrollEnabled(true);
+  controller->SetTextElideEnabled(true);
+  controller->SetDefaultFontSize(18.0f, Text::Controller::PIXEL_SIZE);
+  controller->SetText("Leading icon and trailing text that is wider than the control");
+  decorator->SetCursorWidth(6);
+  controller->GetLayoutEngine().SetCursorWidth(6);
+
+  Text::Controller::Impl& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+  Text::ReplacementSourceSnapshot source;
+  source.runs.PushBack(Candidate(8u, 4u, 72.0f, 24.0f, 531u));
+  source.sourceRevision                       = 31u;
+  source.hasValidReplacementSource            = true;
+  impl.GetOrCreateReplacementSourceSnapshot() = source;
+
+  const Size controlSize(140.0f, 50.0f);
+  controller->KeyboardFocusGainEvent(false);
+  controller->Relayout(controlSize);
+
+  impl.mEventData->mPrimaryCursorPosition =
+    static_cast<Text::CharacterIndex>(impl.mModel->mLogicalModel->mText.Count());
+  Text::CursorInfo cursorInfo;
+  impl.GetCursorPosition(impl.mEventData->mPrimaryCursorPosition, cursorInfo);
+  impl.ScrollToMakePositionVisible(cursorInfo.primaryPosition, cursorInfo.lineHeight);
+  impl.UpdateCursorPosition(cursorInfo);
+  impl.SyncReplacementScrollPosition();
+
+  const float cursorWidth          = decorator->GetEffectiveCursorWidth();
+  const float cursorVisibleScroll  = controller->GetHorizontalScrollPosition();
+  const float cursorRightBeforePan = cursorInfo.primaryPosition.x + impl.mModel->mScrollPosition.x + cursorWidth;
+  DALI_TEST_CHECK(cursorVisibleScroll > 0.0f);
+  DALI_TEST_EQUALS(cursorRightBeforePan,
+                   controlSize.width,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  controller->PanEvent(GestureState::STARTED, Vector2::ZERO);
+  controller->Relayout(controlSize);
+  controller->PanEvent(GestureState::CONTINUING, Vector2(-10000.0f, 0.0f));
+  controller->Relayout(controlSize);
+
+  const float cursorRightAfterPan = cursorInfo.primaryPosition.x + impl.mModel->mScrollPosition.x + cursorWidth;
+  DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(),
+                   cursorVisibleScroll,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(cursorRightAfterPan,
+                   controlSize.width,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  controller->PanEvent(GestureState::FINISHED, Vector2::ZERO);
+  controller->Relayout(controlSize);
+  DALI_TEST_EQUALS(decorator->GetActiveCursor(),
+                   static_cast<unsigned int>(Text::ACTIVE_CURSOR_PRIMARY),
+                   TEST_LOCATION);
+
+  const Vector2& layoutSize            = impl.GetEditableGeometryModel()->mVisualModel->GetLayoutSize();
+  const float    textOnlyScrollRange   = layoutSize.width - controlSize.width;
+  const float    cursorOnlyScrollRange = cursorVisibleScroll - textOnlyScrollRange;
+  DALI_TEST_CHECK(cursorOnlyScrollRange > 0.0f);
+
+  // Gesture propagation must use the same cursor-extended boundary as scroll clamping.
+  impl.mModel->mScrollPosition.x = -(textOnlyScrollRange + 0.5f * cursorOnlyScrollRange);
+  DALI_TEST_CHECK(controller->IsScrollable(Vector2(-0.25f * cursorOnlyScrollRange, 0.0f)));
+  impl.mModel->mScrollPosition.x = -cursorVisibleScroll;
+  DALI_TEST_CHECK(!controller->IsScrollable(Vector2(-0.25f * cursorOnlyScrollRange, 0.0f)));
+  DALI_TEST_CHECK(controller->IsScrollable(Vector2(0.25f * cursorOnlyScrollRange, 0.0f)));
+
+  // A cursor away from the trailing edge must not add blank space to the existing text scroll range.
+  impl.mEventData->mPrimaryCursorPosition = 0u;
+  const float expectedTextBoundary = layoutSize.width + impl.mModel->mAlignmentOffset - controlSize.width;
+  controller->PanEvent(GestureState::STARTED, Vector2::ZERO);
+  controller->Relayout(controlSize);
+  controller->PanEvent(GestureState::CONTINUING, Vector2(-10000.0f, 0.0f));
+  controller->Relayout(controlSize);
+  DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(),
+                   expectedTextBoundary,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  controller->PanEvent(GestureState::FINISHED, Vector2::ZERO);
+  controller->Relayout(controlSize);
+
+  END_TEST;
+}
+
 int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
 {
   UiTestApplication application;
