@@ -462,7 +462,7 @@ void GaussianBlurEffectImpl::OnActivate()
   CreateRenderTasks(GetSceneHolder(), ownerView, sourceDownscaleFactor);
 
   // Reset shader constants
-  auto&    blurShader             = GaussianBlurAlgorithm::GetGaussianBlurShader(mDownscaledBlurRadius);
+  auto&    blurShader             = GaussianBlurAlgorithm::GetShader(mDownscaledBlurRadius);
   Renderer horizontalBlurRenderer = mHorizontalBlurActor.GetRendererAt(0);
   horizontalBlurRenderer.SetShader(blurShader);
   SetRendererTexture(horizontalBlurRenderer, useIntermediateDownsample ? mDownsampledInputFrameBuffer : mInputFrameBuffer);

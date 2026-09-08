@@ -21,8 +21,10 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/common/constants.h>
+#include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/rendering/renderer.h>
+#include <dali/public-api/rendering/shader.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
@@ -42,6 +44,14 @@ class GaussianBlurAlgorithm
 {
 public:
   /**
+   * @brief Checks the kernel range before any fixed-size cache access.
+   *
+   * Zero-sample kernels are unsupported. Valid odd radii retain the existing
+   * integer sample-count conversion; invalid inputs are not clamped.
+   */
+  static bool IsSupportedRadius(uint32_t blurRadius);
+
+  /**
    * @brief Creates gaussian blur renderer.
    * @param[in] blurRadius Blur intensity
    * @return Gaussian blur renderer
@@ -53,7 +63,29 @@ public:
    * @param[in] blurRadius Blur intensity
    * @return Gaussian blur shader
    */
-  static Dali::Shader& GetGaussianBlurShader(const uint32_t blurRadius);
+  static Dali::Shader& GetShader(const uint32_t blurRadius);
+
+  /**
+   * @brief Creates an uncached shader with the shared Gaussian kernel.
+   *
+   * Prepends NUM_SAMPLES (blurRadius >> 1) to the fragment source and connects
+   * GaussianBlurSampleBlock at creation. The source uses uSampleOffsets and
+   * uSampleWeights arrays of that size and must not redefine NUM_SAMPLES.
+   * The kernel cache remains internal; no uniform block handle is exposed.
+   * Callers own shader caching and any renderer-specific properties.
+   *
+   * @param[in] blurRadius Radius using the range accepted by IsSupportedRadius()
+   * @param[in] vertexSource Vertex shader source
+   * @param[in] fragmentSource Fragment shader source without the sample-count definition
+   * @param[in] hints Shader hints
+   * @param[in] shaderName Shader name used for identification and file caching
+   * @return A new shader connected to the cached Gaussian kernel
+   */
+  static Dali::Shader CreateShader(uint32_t                  blurRadius,
+                                   Dali::StringView          vertexSource,
+                                   Dali::StringView          fragmentSource,
+                                   Dali::Shader::Hint::Value hints,
+                                   Dali::StringView          shaderName);
 
   /**
    * @brief Gets blur radius in a downscaled size. If the value is too big, fit arguments in desired range.

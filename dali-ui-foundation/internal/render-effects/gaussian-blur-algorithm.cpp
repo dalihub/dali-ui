@@ -21,9 +21,10 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/shader-integ.h>
 #include <dali/integration-api/string-utils.h>
+#include <cmath>
 #include <cstdint>
 #include <locale>
-#include <random>
+#include <sstream>
 #include <vector>
 
 using Dali::Integration::ToDaliString;
@@ -145,7 +146,33 @@ inline static Dali::UniformBlock& GetCachedUniformBlock(const uint32_t numSample
 {
   thread_local static Dali::UniformBlock gPredefinedUniformBlock[MAXIMUM_NUMBER_OF_SAMPLES + 1u];
   DALI_ASSERT_DEBUG(numSamples <= MAXIMUM_NUMBER_OF_SAMPLES && "numSamples too big!");
-  return gPredefinedUniformBlock[numSamples];
+  auto& cachedUniformBlock = gPredefinedUniformBlock[numSamples];
+  if(!cachedUniformBlock)
+  {
+    std::vector<float> weights;
+    std::vector<float> offsets;
+    CalculateGaussianConstants(numSamples, weights, offsets);
+
+    Dali::UniformBlock sharedUBO = Dali::UniformBlock::New("GaussianBlurSampleBlock");
+
+    for(uint32_t i = 0; i < numSamples; i++)
+    {
+      {
+        std::stringstream oss;
+        oss.imbue(std::locale::classic());
+        oss << "uSampleOffsets[" << i << "]";
+        sharedUBO.RegisterProperty(ToDaliString(oss.str()), offsets[i]);
+      }
+      {
+        std::stringstream oss;
+        oss.imbue(std::locale::classic());
+        oss << "uSampleWeights[" << i << "]";
+        sharedUBO.RegisterProperty(ToDaliString(oss.str()), weights[i]);
+      }
+    }
+    cachedUniformBlock = sharedUBO;
+  }
+  return cachedUniformBlock;
 }
 
 /**
@@ -214,14 +241,24 @@ namespace Ui
 {
 namespace Internal
 {
+bool GaussianBlurAlgorithm::IsSupportedRadius(uint32_t blurRadius)
+{
+  return blurRadius >= 2u && blurRadius <= MAXIMUM_BLUR_RADIUS;
+}
+
 Dali::Renderer GaussianBlurAlgorithm::CreateRenderer(const uint32_t blurRadius)
 {
+  auto shader = GetShader(blurRadius);
+  if(!shader)
+  {
+    return {};
+  }
   Dali::Renderer   renderer   = Dali::Renderer::New();
   Dali::TextureSet textureSet = Dali::TextureSet::New();
 
   renderer.SetTextures(textureSet);
   renderer.SetGeometry(GetCachedGeometry());
-  renderer.SetShader(GetGaussianBlurShader(blurRadius));
+  renderer.SetShader(shader);
   renderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, true); // Always use premultiplied alpha
 
   // Make textureSet use WrapMode::MIRRORED_REPEAT
@@ -229,58 +266,66 @@ Dali::Renderer GaussianBlurAlgorithm::CreateRenderer(const uint32_t blurRadius)
   return renderer;
 }
 
-Dali::Shader& GaussianBlurAlgorithm::GetGaussianBlurShader(const uint32_t blurRadius)
+Dali::Shader& GaussianBlurAlgorithm::GetShader(const uint32_t blurRadius)
 {
+  if(blurRadius == 0u)
+  {
+    // Ordinary effects initialize their renderers even when zero radius keeps
+    // the effect inactive. Retain that valid-handle contract without creating
+    // a GLSL zero-length Gaussian array. Custom kernel callers still reject 0.
+    auto& shader = GetCachedShader(0u);
+    if(!shader)
+    {
+      shader = Dali::Shader::New(ToDaliStringView(BASIC_VERTEX_SOURCE), ToDaliStringView(BASIC_FRAGMENT_SOURCE));
+    }
+    return shader;
+  }
+  if(!IsSupportedRadius(blurRadius))
+  {
+    thread_local Dali::Shader invalid;
+    invalid.Reset();
+    return invalid;
+  }
   uint32_t numSamples = blurRadius >> 1;
 
   auto& cachedShader = GetCachedShader(numSamples);
   if(!cachedShader)
   {
-    auto& cachedUniformBlock = GetCachedUniformBlock(numSamples);
-    if(!cachedUniformBlock)
-    {
-      std::vector<float> weights;
-      std::vector<float> offsets;
-      CalculateGaussianConstants(numSamples, weights, offsets);
-
-      Dali::UniformBlock sharedUBO = Dali::UniformBlock::New("GaussianBlurSampleBlock");
-
-      for(uint32_t i = 0; i < numSamples; i++)
-      {
-        {
-          std::stringstream oss;
-          oss.imbue(std::locale::classic());
-          oss << "uSampleOffsets[" << i << "]";
-          sharedUBO.RegisterProperty(ToDaliString(oss.str()), offsets[i]);
-        }
-        {
-          std::stringstream oss;
-          oss.imbue(std::locale::classic());
-          oss << "uSampleWeights[" << i << "]";
-          sharedUBO.RegisterProperty(ToDaliString(oss.str()), weights[i]);
-        }
-      }
-      cachedUniformBlock = sharedUBO;
-    }
-
     std::ostringstream shaderNameBuilder;
     shaderNameBuilder.imbue(std::locale::classic());
     shaderNameBuilder << "GaussianBlurShader_" << numSamples;
 
-    std::ostringstream fragmentStringStream;
-    fragmentStringStream.imbue(std::locale::classic());
-    fragmentStringStream << "#define NUM_SAMPLES " << numSamples << "\n";
-    fragmentStringStream << SHADER_BLUR_EFFECT_FRAG;
-    std::string fragmentSource(fragmentStringStream.str());
-
-    cachedShader = Dali::Integration::ShaderNewWithUniformBlock(ToDaliStringView(BASIC_VERTEX_SOURCE), ToDaliStringView(fragmentSource),
-                                                                Dali::Shader::Hint::FILE_CACHE_SUPPORT,
-                                                                ToDaliStringView(shaderNameBuilder.str()), {cachedUniformBlock});
+    cachedShader = CreateShader(blurRadius, ToDaliStringView(BASIC_VERTEX_SOURCE), ToDaliStringView(SHADER_BLUR_EFFECT_FRAG),
+                                Dali::Shader::Hint::FILE_CACHE_SUPPORT, ToDaliStringView(shaderNameBuilder.str()));
 
     cachedShader.ReserveCustomProperties(1);
     cachedShader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   }
   return cachedShader;
+}
+
+Dali::Shader GaussianBlurAlgorithm::CreateShader(uint32_t                  blurRadius,
+                                                 Dali::StringView          vertexSource,
+                                                 Dali::StringView          fragmentSource,
+                                                 Dali::Shader::Hint::Value hints,
+                                                 Dali::StringView          shaderName)
+{
+  if(!IsSupportedRadius(blurRadius))
+  {
+    return {};
+  }
+  const uint32_t numSamples   = blurRadius >> 1;
+  const auto&    uniformBlock = GetCachedUniformBlock(numSamples);
+
+  std::ostringstream fragmentStringStream;
+  fragmentStringStream.imbue(std::locale::classic());
+  fragmentStringStream << "#define NUM_SAMPLES " << numSamples << "\n";
+  fragmentStringStream << Dali::Integration::ToStdStringView(fragmentSource);
+
+  // Bind at creation, without exposing the shared block or invalidating the
+  // program cache through a later ConnectToShader() call.
+  return Dali::Integration::ShaderNewWithUniformBlock(vertexSource, ToDaliStringView(fragmentStringStream.str()),
+                                                      hints, shaderName, {uniformBlock});
 }
 
 uint32_t GaussianBlurAlgorithm::GetDownscaledBlurRadius(float& downscaleFactor, uint32_t& blurRadius)
