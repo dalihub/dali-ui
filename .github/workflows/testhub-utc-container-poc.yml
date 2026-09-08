@@ -1,0 +1,127 @@
+name: "Unittest container PoC"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: [ code-linux ]
+    container:
+      image: tizen-nui-docker-local.bart.sec.samsung.net/dali-ci-env:ubuntu22.04-v1
+      credentials:
+        username: ${{ secrets.BART_USERNAME }}
+        password: ${{ secrets.BART_IDENTITY_TOKEN }}
+    env:
+      CC: gcc
+      CXX: g++
+
+    steps:
+    - uses: code-actions/checkout@v3
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Setup SSH
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Clone DALi dependencies
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        git clone --depth 1 --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        git clone --depth 1 --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+        git clone --depth 1 --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
+
+    - name: Prepare DALi prefix
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        install -m 0755 dali-core/build/scripts/fastcov.py "$DESKTOP_PREFIX/bin/fastcov.py"
+        echo "DESKTOP_PREFIX=$DESKTOP_PREFIX"
+        gcc --version | head -1
+        cmake --version | head -1
+
+    - name: Build DALi
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        meson setup tizenvg/builddir \
+          -Dtools=svg2png \
+          --prefix "$DESKTOP_PREFIX" \
+          --libdir "$DESKTOP_PREFIX/lib"
+        ninja -C tizenvg/builddir install
+
+        cmake \
+          -S dali-core/build/tizen \
+          -B dali-core/build/tizen \
+          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_FLAGS='-g -O0 --coverage' \
+          -DCMAKE_CXX_FLAGS='-g -O0 --coverage' \
+          -DCMAKE_EXE_LINKER_FLAGS='--coverage' \
+          -DCMAKE_SHARED_LINKER_FLAGS='--coverage'
+        make -C dali-core/build/tizen install -j8
+
+        cmake \
+          -S dali-adaptor/build/tizen \
+          -B dali-adaptor/build/tizen \
+          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_GRAPHICS_BACKEND=GLES \
+          -DCMAKE_C_FLAGS='-g -O0 --coverage' \
+          -DCMAKE_CXX_FLAGS='-g -O0 --coverage' \
+          -DCMAKE_EXE_LINKER_FLAGS='--coverage' \
+          -DCMAKE_SHARED_LINKER_FLAGS='--coverage'
+        make -C dali-adaptor/build/tizen install -j8
+
+        cmake \
+          -S build/tizen \
+          -B build/tizen \
+          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_FLAGS='-g -O0 --coverage' \
+          -DCMAKE_CXX_FLAGS='-g -O0 --coverage' \
+          -DCMAKE_EXE_LINKER_FLAGS='--coverage' \
+          -DCMAKE_SHARED_LINKER_FLAGS='--coverage'
+        make -C build/tizen install -j8
+
+        cmake \
+          -S manual-tests \
+          -B manual-tests \
+          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_FLAGS='-g -O0 --coverage' \
+          -DCMAKE_CXX_FLAGS='-g -O0 --coverage' \
+          -DCMAKE_EXE_LINKER_FLAGS='--coverage' \
+          -DCMAKE_SHARED_LINKER_FLAGS='--coverage'
+        make -C manual-tests install -j8
+
+        (
+          cd samples
+          ./build.sh
+        )
+
+    - name: Run automated test
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        (
+          cd automated-tests
+          ./build.sh
+          xvfb-run ./execute.sh
+          ./coverage.sh
+        )
