@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -28,24 +29,14 @@ jobs:
         fetch-depth: 0
         persist-credentials: false
 
-    - name: Setup SSH
-      uses: code-actions/webfactory-ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
     - name: Clone DALi dependencies
       shell: bash
-      env:
-        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
       run: |
         set -euo pipefail
 
-        install -d -m 0700 "$HOME/.ssh"
-        printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-        chmod 0600 "$HOME/.ssh/known_hosts"
-        git clone --depth 1 --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
-        git clone --depth 1 --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
-        git clone --depth 1 --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
+        git clone --depth 1 --branch devel/master git://review.tizen.org/git/platform/core/uifw/dali-core
+        git clone --depth 1 --branch devel/master git://review.tizen.org/git/platform/core/uifw/dali-adaptor
+        git clone --depth 1 --branch tizen git://review.tizen.org/git/platform/core/graphics/tizenvg
 
     - name: Prepare DALi prefix
       shell: bash
@@ -129,3 +120,72 @@ jobs:
           xvfb-run ./execute.sh
           ./coverage.sh
         )
+
+    - name: Collect artifacts
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        mkdir test_results coverage
+        chmod +x automated-tests/scripts/convert-to-gtest.py
+        python3 automated-tests/scripts/convert-to-gtest.py test-results.xml
+        cp test-results.xml test_results/
+        cp -rf build/tizen/doc/coverage/. coverage/
+        cp build/tizen/dali.info coverage/
+
+    - name: Upload artifacts (test_results)
+      uses: CODE-Actions/upload-artifact@v2
+      with:
+        name: test_results
+        path: test_results
+        retention-days: 1
+
+    - name: Upload artifacts (coverage)
+      uses: CODE-Actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: coverage
+        retention-days: 1
+
+    - name: Release build check
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        cmake \
+          -S build/tizen \
+          -B build/tizen \
+          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DENABLE_GRAPHICS_BACKEND=GLES
+        make -C build/tizen install -j8
+
+        (
+          cd automated-tests
+          ./build.sh
+        )
+
+        cmake \
+          -S manual-tests \
+          -B manual-tests \
+          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
+          -DCMAKE_BUILD_TYPE=Release
+        make -C manual-tests install -j8
+
+        (
+          cd samples
+          ./build.sh Release
+        )
+
+  testhub:
+    runs-on: [ code-linux ]
+    needs: [ build ]
+    if: success()
+    steps:
+    - name: Send to TestHub
+      uses: CODE-Actions/testhub@v1
+      with:
+        test-tool: gtest
+        test-artifact-name: test_results
+        coverage-tool: lcov
+        coverage-artifact-name: coverage
