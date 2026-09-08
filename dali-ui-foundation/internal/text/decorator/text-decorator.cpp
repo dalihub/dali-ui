@@ -36,8 +36,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/integration-api/view-integ.h>
-
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
@@ -48,8 +46,6 @@
 #define DECORATOR_DEBUG
 
 #endif
-
-namespace IntegrationView = Dali::Ui::Integration::View;
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToDaliStringView;
@@ -71,8 +67,7 @@ Dali::Integration::Log::Filter* gLogFilter(Dali::Integration::Log::Filter::New(D
 // Local Data
 namespace
 {
-const Dali::Vector3 DEFAULT_GRAB_HANDLE_RELATIVE_SIZE(1.25f, 1.5f, 1.0f);
-const Dali::Vector3 DEFAULT_SELECTION_HANDLE_RELATIVE_SIZE(1.25f, 1.5f, 1.0f);
+const Dali::Vector2 DEFAULT_HANDLE_RELATIVE_HIT_AREA(1.25f, 1.5f);
 const Dali::Vector3 ACTIVE_LAYER_ANCHOR_POINT(0.5f, 0.5f, 0.5f);
 
 const Dali::Vector4 LIGHT_BLUE(0.75f, 0.96f, 1.f,
@@ -176,7 +171,6 @@ struct Decorator::Impl : public ConnectionTracker
     }
 
     ImageView actor;
-    Actor     grabArea;
     ImageView markerActor;
 
     Vector2 position;
@@ -872,26 +866,20 @@ struct Decorator::Impl : public ConnectionTracker
         grabHandle.actor.SetProperty(Dali::Actor::Property::NAME, "GrabHandleActor");
 #endif
 
-        // Area that Grab handle responds to, larger than actual handle so easier to move
-        grabHandle.grabArea = Actor::New();
-        grabHandle.grabArea.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
-        grabHandle.grabArea.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
-        DevelActor::SetResizePolicy(grabHandle.grabArea, ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS);
-        grabHandle.grabArea.SetProperty(DevelActor::Property::SIZE_MODE_FACTOR, DEFAULT_GRAB_HANDLE_RELATIVE_SIZE);
-
-        IntegrationView::AddActorChild(grabHandle.actor, grabHandle.grabArea);
         grabHandle.actor.SetProperty(Actor::Property::COLOR_MULTIPLIER, mHandleColor);
+        SetHandleTouchHitAreaMargin(grabHandle);
 
-        grabHandle.grabArea.TouchEventSignal().Connect(this, &Decorator::Impl::OnGrabHandleTouched);
+        grabHandle.actor.TouchEventSignal().Connect(this, &Decorator::Impl::OnGrabHandleTouched);
 
         // The grab handle's actor is attached to the tap and long press detectors in order to consume these events.
         // Note that no callbacks are connected to any signal emitted by the tap and long press detectors.
         mTapDetector.Attach(grabHandle.actor);
         mLongPressDetector.Attach(grabHandle.actor);
 
-        // The grab handle's area is attached to the pan detector.
+        // The visible handle is attached to the pan detector. Its touch hit-area margin makes
+        // the handle easier to move without adding another gesture target.
         // The OnPan() method is connected to the signals emitted by the pan detector.
-        mPanDetector.Attach(grabHandle.grabArea);
+        mPanDetector.Attach(grabHandle.actor);
 
         mActiveLayer.Add(grabHandle.actor);
       }
@@ -950,28 +938,19 @@ struct Decorator::Impl : public ConnectionTracker
         // primary.actor.SetDepthIndex(Dali::Ui::Integration::DepthIndex::DECORATION); ///< TODO : Add this as an ImageVisual in the View's own half of the decoration layer, once built-in visuals use containers.
         primary.actor.SetProperty(Actor::Property::COLOR_MULTIPLIER, mHandleColor);
 
-        primary.grabArea =
-          Actor::New(); // Area that Grab handle responds to, larger than actual handle so easier to move
-#ifdef DECORATOR_DEBUG
-        primary.grabArea.SetProperty(Dali::Actor::Property::NAME, "SelectionHandleOneGrabArea");
-#endif
-        DevelActor::SetResizePolicy(primary.grabArea, ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS);
-        primary.grabArea.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
-        primary.grabArea.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
-        primary.grabArea.SetProperty(DevelActor::Property::SIZE_MODE_FACTOR, DEFAULT_SELECTION_HANDLE_RELATIVE_SIZE);
+        SetHandleTouchHitAreaMargin(primary);
 
-        primary.grabArea.TouchEventSignal().Connect(this, &Decorator::Impl::OnHandleOneTouched);
+        primary.actor.TouchEventSignal().Connect(this, &Decorator::Impl::OnHandleOneTouched);
 
         // The handle's actor is attached to the tap and long press detectors in order to consume these events.
         // Note that no callbacks are connected to any signal emitted by the tap and long press detectors.
         mTapDetector.Attach(primary.actor);
         mLongPressDetector.Attach(primary.actor);
 
-        // The handle's area is attached to the pan detector.
+        // The visible handle is attached to the pan detector. Its touch hit-area margin makes
+        // the handle easier to move without adding another gesture target.
         // The OnPan() method is connected to the signals emitted by the pan detector.
-        mPanDetector.Attach(primary.grabArea);
-
-        IntegrationView::AddActorChild(primary.actor, primary.grabArea);
+        mPanDetector.Attach(primary.actor);
 
         CreateHandleMarker(primary, mHandleImages[LEFT_SELECTION_HANDLE_MARKER][HANDLE_IMAGE_RELEASED],
                            LEFT_SELECTION_HANDLE);
@@ -1002,28 +981,19 @@ struct Decorator::Impl : public ConnectionTracker
         // secondary.actor.SetDepthIndex(Dali::Ui::Integration::DepthIndex::DECORATION); ///< TODO : Add this as an ImageVisual in the View's own half of the decoration layer, once built-in visuals use containers.
         secondary.actor.SetProperty(Actor::Property::COLOR_MULTIPLIER, mHandleColor);
 
-        secondary.grabArea =
-          Actor::New(); // Area that Grab handle responds to, larger than actual handle so easier to move
-#ifdef DECORATOR_DEBUG
-        secondary.grabArea.SetProperty(Dali::Actor::Property::NAME, "SelectionHandleTwoGrabArea");
-#endif
-        DevelActor::SetResizePolicy(secondary.grabArea, ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS);
-        secondary.grabArea.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
-        secondary.grabArea.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
-        secondary.grabArea.SetProperty(DevelActor::Property::SIZE_MODE_FACTOR, DEFAULT_SELECTION_HANDLE_RELATIVE_SIZE);
+        SetHandleTouchHitAreaMargin(secondary);
 
-        secondary.grabArea.TouchEventSignal().Connect(this, &Decorator::Impl::OnHandleTwoTouched);
+        secondary.actor.TouchEventSignal().Connect(this, &Decorator::Impl::OnHandleTwoTouched);
 
         // The handle's actor is attached to the tap and long press detectors in order to consume these events.
         // Note that no callbacks are connected to any signal emitted by the tap and long press detectors.
         mTapDetector.Attach(secondary.actor);
         mLongPressDetector.Attach(secondary.actor);
 
-        // The handle's area is attached to the pan detector.
+        // The visible handle is attached to the pan detector. Its touch hit-area margin makes
+        // the handle easier to move without adding another gesture target.
         // The OnPan() method is connected to the signals emitted by the pan detector.
-        mPanDetector.Attach(secondary.grabArea);
-
-        IntegrationView::AddActorChild(secondary.actor, secondary.grabArea);
+        mPanDetector.Attach(secondary.actor);
 
         CreateHandleMarker(secondary, mHandleImages[RIGHT_SELECTION_HANDLE_MARKER][HANDLE_IMAGE_RELEASED],
                            RIGHT_SELECTION_HANDLE);
@@ -1517,15 +1487,15 @@ struct Decorator::Impl : public ConnectionTracker
     HandleImpl& primarySelectionHandle   = mHandle[LEFT_SELECTION_HANDLE];
     HandleImpl& secondarySelectionHandle = mHandle[RIGHT_SELECTION_HANDLE];
 
-    if(actor == grabHandle.grabArea)
+    if(actor == grabHandle.actor)
     {
       DoPan(grabHandle, GRAB_HANDLE, gesture);
     }
-    else if(actor == primarySelectionHandle.grabArea)
+    else if(actor == primarySelectionHandle.actor)
     {
       DoPan(primarySelectionHandle, LEFT_SELECTION_HANDLE, gesture);
     }
-    else if(actor == secondarySelectionHandle.grabArea)
+    else if(actor == secondarySelectionHandle.actor)
     {
       DoPan(secondarySelectionHandle, RIGHT_SELECTION_HANDLE, gesture);
     }
@@ -1937,7 +1907,25 @@ struct Decorator::Impl : public ConnectionTracker
     HandleImpl& handle = mHandle[handleType];
     handle.size        = Size(dimensions.GetWidth(), dimensions.GetHeight());
 
+    if(handle.actor)
+    {
+      SetHandleTouchHitAreaMargin(handle);
+    }
+
     mHandleImages[handleType][handleImageType] = imageFileName;
+  }
+
+  void SetHandleTouchHitAreaMargin(HandleImpl& handle)
+  {
+    if(handle.actor)
+    {
+      const int16_t horizontalMargin =
+        static_cast<int16_t>(0.5f * (DEFAULT_HANDLE_RELATIVE_HIT_AREA.x - 1.0f) * handle.size.width);
+      const int16_t bottomMargin =
+        static_cast<int16_t>((DEFAULT_HANDLE_RELATIVE_HIT_AREA.y - 1.0f) * handle.size.height);
+      handle.actor.SetProperty(Actor::Property::TOUCH_HIT_AREA_MARGIN,
+                               Extents(horizontalMargin, horizontalMargin, 0, bottomMargin));
+    }
   }
 
   void SetScrollThreshold(float threshold)
