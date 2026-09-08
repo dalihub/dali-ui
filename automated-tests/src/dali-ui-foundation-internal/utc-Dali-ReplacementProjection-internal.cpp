@@ -5173,10 +5173,13 @@ int UtcDaliReplacementEndEllipsisFontContextP(void)
   // preceding font at equal distance.
   Text::GlyphInfo policyGlyphs[4];
   policyGlyphs[0u].fontId = font20;
+  policyGlyphs[0u].index  = 0u;
   policyGlyphs[1u].fontId = 0u;
   policyGlyphs[1u].index  = Text::SYNTHETIC_REPLACEMENT_GLYPH_ID;
   policyGlyphs[2u].fontId = font40;
+  policyGlyphs[2u].index  = 0u;
   policyGlyphs[3u].fontId = 0u;
+  policyGlyphs[3u].index  = 0u;
   DALI_TEST_EQUALS(Text::ResolveEndEllipsisFontId(policyGlyphs, 4u, 1u), font20, TEST_LOCATION);
   DALI_TEST_EQUALS(Text::ResolveEndEllipsisFontId(policyGlyphs, 4u, 0u), font20, TEST_LOCATION);
   DALI_TEST_EQUALS(Text::ResolveEndEllipsisFontId(policyGlyphs, 4u, 3u), 0u, TEST_LOCATION);
