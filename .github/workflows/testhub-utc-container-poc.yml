@@ -66,61 +66,33 @@ jobs:
       run: |
         set -euo pipefail
 
-        meson setup tizenvg/builddir \
-          -Dtools=svg2png \
-          --prefix "$DESKTOP_PREFIX" \
-          --libdir "$DESKTOP_PREFIX/lib"
-        ninja -C tizenvg/builddir install
+        cd tizenvg
+        meson setup builddir -Dtools=svg2png --prefix "$DESKTOP_PREFIX" --libdir "$DESKTOP_PREFIX/lib"
+        ninja -C builddir install
+        cd -
 
-        cmake \
-          -S dali-core/build/tizen \
-          -B dali-core/build/tizen \
-          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DCMAKE_C_FLAGS='-g -O0 --coverage' \
-          -DCMAKE_CXX_FLAGS='-g -O0 --coverage' \
-          -DCMAKE_EXE_LINKER_FLAGS='--coverage' \
-          -DCMAKE_SHARED_LINKER_FLAGS='--coverage'
-        make -C dali-core/build/tizen install -j8
+        cd dali-core/build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
 
-        cmake \
-          -S dali-adaptor/build/tizen \
-          -B dali-adaptor/build/tizen \
-          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DENABLE_GRAPHICS_BACKEND=GLES \
-          -DCMAKE_C_FLAGS='-g -O0 --coverage' \
-          -DCMAKE_CXX_FLAGS='-g -O0 --coverage' \
-          -DCMAKE_EXE_LINKER_FLAGS='--coverage' \
-          -DCMAKE_SHARED_LINKER_FLAGS='--coverage'
-        make -C dali-adaptor/build/tizen install -j8
+        cd dali-adaptor/build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug -DENABLE_GRAPHICS_BACKEND=GLES
+        make install -j8
+        cd -
 
-        cmake \
-          -S build/tizen \
-          -B build/tizen \
-          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DCMAKE_C_FLAGS='-g -O0 --coverage' \
-          -DCMAKE_CXX_FLAGS='-g -O0 --coverage' \
-          -DCMAKE_EXE_LINKER_FLAGS='--coverage' \
-          -DCMAKE_SHARED_LINKER_FLAGS='--coverage'
-        make -C build/tizen install -j8
+        cd build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
+        make -j8 install
+        cd -
 
-        cmake \
-          -S manual-tests \
-          -B manual-tests \
-          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DCMAKE_C_FLAGS='-g -O0 --coverage' \
-          -DCMAKE_CXX_FLAGS='-g -O0 --coverage' \
-          -DCMAKE_EXE_LINKER_FLAGS='--coverage' \
-          -DCMAKE_SHARED_LINKER_FLAGS='--coverage'
-        make -C manual-tests install -j8
+        cd manual-tests
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
 
-        (
-          cd samples
-          ./build.sh
-        )
+        cd samples
+        ./build.sh
 
     - name: Run automated test
       shell: bash
@@ -142,8 +114,8 @@ jobs:
         mkdir test_results coverage
         chmod +x automated-tests/scripts/convert-to-gtest.py
         python3 automated-tests/scripts/convert-to-gtest.py test-results.xml
-        cp test-results.xml test_results/
-        cp -rf build/tizen/doc/coverage/. coverage/
+        cp test-results.xml test_results
+        cp -rf build/tizen/doc/coverage/* coverage/
         cp build/tizen/dali.info coverage/
 
     - name: Upload artifacts (test_results)
@@ -165,30 +137,22 @@ jobs:
       run: |
         set -euo pipefail
 
-        cmake \
-          -S build/tizen \
-          -B build/tizen \
-          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DENABLE_GRAPHICS_BACKEND=GLES
-        make -C build/tizen install -j8
+        cd build/tizen
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release -DENABLE_GRAPHICS_BACKEND=GLES
+        make install -j8
+        cd -
 
-        (
-          cd automated-tests
-          ./build.sh
-        )
+        cd automated-tests
+        ./build.sh
+        cd -
 
-        cmake \
-          -S manual-tests \
-          -B manual-tests \
-          -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" \
-          -DCMAKE_BUILD_TYPE=Release
-        make -C manual-tests install -j8
+        cd manual-tests
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release
+        make install -j8
+        cd -
 
-        (
-          cd samples
-          ./build.sh Release
-        )
+        cd samples
+        ./build.sh Release
 
   testhub:
     runs-on: [ code-linux ]
