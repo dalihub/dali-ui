@@ -6069,7 +6069,7 @@ int UtcDaliReplacementEndEllipsisFontContextP(void)
     const Vector<Text::Character> prefix = Utf32(scriptPrefixes[scriptIndex]);
     const Vector<Text::Character> text   = Utf32(scriptPrefixes[scriptIndex] + "\xEF\xBF\xBC\nhidden");
     Vector<Text::ReplacementRunSnapshot> candidates;
-    candidates.PushBack(Candidate(prefix.Count(), 1u, 40.0f, 40.0f, 9810u + scriptIndex));
+    candidates.PushBack(Candidate(static_cast<Text::CharacterIndex>(prefix.Count()), 1u, 40.0f, 40.0f, 9810u + scriptIndex));
     const Text::ReplacementProjection projection = Text::ReplacementProjection::Build(text, candidates);
     Text::ReplacementRenderState      state;
     DALI_TEST_CHECK(Text::LayoutReplacementForTest(projection,
@@ -6378,7 +6378,7 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
                                     1u,
                                     replacementSize.width,
                                     replacementSize.height,
-                                    9950u + candidates.Count()));
+                                    9950u + static_cast<uint32_t>(candidates.Count())));
       candidates[candidates.Count() - 1u].metrics.verticalAlignment =
         Text::ReplacementVerticalAlignment::TEXT_BOTTOM;
     }

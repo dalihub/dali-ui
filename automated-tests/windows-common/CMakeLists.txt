@@ -78,7 +78,7 @@ TARGET_COMPILE_DEFINITIONS(dali-ui-foundation-test-objects PRIVATE
 )
 TARGET_COMPILE_OPTIONS(dali-ui-foundation-test-objects PRIVATE
   /FI "${DALI_WINDOWS_DEPENDENCIES_INCLUDE_DIR}/dali-windows-dependencies.h"
-  /vmg /utf-8 /W3 /wd4251 /wd4275
+  /vmg /utf-8 /W3 /wd4251 /wd4275 /WX
 )
 TARGET_LINK_LIBRARIES(dali-ui-foundation-test-objects PRIVATE
   dali-windows-dependencies::dali-windows-dependencies
@@ -267,7 +267,7 @@ SET_SOURCE_FILES_PROPERTIES("${INTERNAL_TEST_DIR}/utc-Dali-ViewDebug-internal.cp
   PROPERTIES COMPILE_DEFINITIONS DEBUG_ENABLED)
 TARGET_COMPILE_OPTIONS(tct-dali-ui-foundation-internal-core PRIVATE
   /FI "${DALI_WINDOWS_DEPENDENCIES_INCLUDE_DIR}/dali-windows-dependencies.h"
-  /vmg /utf-8 /W3 /wd4251 /wd4275
+  /vmg /utf-8 /W3 /wd4251 /wd4275 /WX
 )
 TARGET_LINK_LIBRARIES(tct-dali-ui-foundation-internal-core PRIVATE
   dali-windows-dependencies::dali-windows-dependencies

@@ -76,7 +76,7 @@ int UtcDaliTextRunContainerCharacterOperationsP(void)
   runs.PushBack(MakeFontRun(4u, 3u));
   runs.PushBack(MakeFontRun(8u, 2u));
 
-  uint32_t first = runs.Count();
+  uint32_t first = static_cast<uint32_t>(runs.Count());
   uint32_t last  = first;
   Text::ClearCharacterRuns(2u, 5u, runs, first, last);
   DALI_TEST_EQUALS(first, 0u, TEST_LOCATION);
@@ -121,7 +121,7 @@ int UtcDaliTextRunContainerGlyphOperationsP(void)
   runs.PushBack(MakeLineRun(4u, 3u));
   runs.PushBack(MakeLineRun(8u, 2u));
 
-  uint32_t first = runs.Count();
+  uint32_t first = static_cast<uint32_t>(runs.Count());
   uint32_t last  = first;
   Text::ClearGlyphRuns(2u, 5u, runs, first, last);
   DALI_TEST_EQUALS(first, 0u, TEST_LOCATION);
