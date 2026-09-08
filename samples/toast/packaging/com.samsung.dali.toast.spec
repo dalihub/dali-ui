@@ -75,5 +75,6 @@ exit 0
 %manifest %{name}.manifest
 %defattr(-,root,root,-)
 %{app_exe_dir}/toast.example
+%{app_res_dir}/*
 %{xml_file_dir}/%{name}.xml
 #%license LICENSE

@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-// INTERNAL INCLUDES
 #include <dali-ui-components/public-api/styles/toast-style.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 
@@ -26,106 +25,150 @@ namespace Ui
 {
 namespace Internal
 {
-
 class ToastStyleImpl : public Extension::UiStyleImpl
 {
 public:
   ToastStyleImpl();
   ToastStyleImpl(const ToastStyleImpl& rhs);
 
-#define DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(Name) \
-  void  Set##Name(float value);                           \
-  float Get##Name() const;
+  void SetMaximumWidthRatio(float value);
+  void SetMaximumHeight(float value);
+  void SetBottomOffsetRatio(float value);
+  void SetItemSpacing(float value);
+  void SetCornerRadius(const Vector4& value);
+  void SetPadding(const Insets& value);
+  void SetBackgroundColor(const UiColor& value)
+  {
+    mBackgroundColor = value;
+  }
+  void SetTextColor(const UiColor& value)
+  {
+    mTextColor = value;
+  }
+  void SetFontSize(float value);
+  void SetFontFamily(const Dali::String& value)
+  {
+    mFontFamily = value;
+  }
+  void SetIconWidth(float value);
+  void SetIconHeight(float value);
+  void SetIconCornerRadius(const Vector4& value);
+  void SetIconColor(const UiColor& value)
+  {
+    mIconColor = value;
+  }
+  void SetShadow(const ShadowStack& value)
+  {
+    mShadow = value;
+  }
+  void SetBorderlineWidth(float value);
+  void SetBorderlineOffset(float value);
+  void SetBorderlineColor(const UiColor& value)
+  {
+    mBorderlineColor = value;
+  }
 
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(InitialWidth)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(InitialHeight)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(MinimumWidth)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(MinimumHeight)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(ExpandedHeight)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(MaximumHeight)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(MaximumWidthRatio)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(MaximumWidth)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(BottomOffsetRatio)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(BottomOffset)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(ItemSpacing)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(ExpandedItemSpacing)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(FontSize)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(BorderlineWidth)
-  DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION(BorderlineOffset)
-
-#undef DALI_TOAST_STYLE_FLOAT_ACCESSOR_DECLARATION
-
-  void               SetCornerRadius(const Vector4& radius);
-  Vector4            GetCornerRadius() const;
-  void               SetCornerRadiusPolicy(CornerRadiusPolicy policy);
-  CornerRadiusPolicy GetCornerRadiusPolicy() const;
-  void               SetPadding(const Insets& padding);
-  Insets             GetPadding() const;
-  void               SetExpandedPadding(const Insets& padding);
-  Insets             GetExpandedPadding() const;
-
-  void         SetBackgroundColor(const UiColor& color);
-  UiColor      GetBackgroundColor() const;
-  void         SetTextColor(const UiColor& color);
-  UiColor      GetTextColor() const;
-  void         SetFontFamily(const Dali::String& fontFamily);
-  Dali::String GetFontFamily() const;
-  void         SetShadow(const ShadowStack& shadow);
-  ShadowStack  GetShadow() const;
-
-  void            SetBorderlineColor(const UiColor& color);
-  UiColor         GetBorderlineColor() const;
-  void            SetActionButtonStyle(TextButtonStyle style);
-  TextButtonStyle GetActionButtonStyle() const;
+  float GetMaximumWidthRatio() const
+  {
+    return mMaximumWidthRatio;
+  }
+  float GetMaximumHeight() const
+  {
+    return mMaximumHeight;
+  }
+  float GetBottomOffsetRatio() const
+  {
+    return mBottomOffsetRatio;
+  }
+  float GetItemSpacing() const
+  {
+    return mItemSpacing;
+  }
+  Vector4 GetCornerRadius() const
+  {
+    return mCornerRadius;
+  }
+  Insets GetPadding() const
+  {
+    return mPadding;
+  }
+  UiColor GetBackgroundColor() const
+  {
+    return mBackgroundColor;
+  }
+  UiColor GetTextColor() const
+  {
+    return mTextColor;
+  }
+  float GetFontSize() const
+  {
+    return mFontSize;
+  }
+  Dali::String GetFontFamily() const
+  {
+    return mFontFamily;
+  }
+  float GetIconWidth() const
+  {
+    return mIconWidth;
+  }
+  float GetIconHeight() const
+  {
+    return mIconHeight;
+  }
+  Vector4 GetIconCornerRadius() const
+  {
+    return mIconCornerRadius;
+  }
+  UiColor GetIconColor() const
+  {
+    return mIconColor;
+  }
+  ShadowStack GetShadow() const
+  {
+    return mShadow;
+  }
+  float GetBorderlineWidth() const
+  {
+    return mBorderlineWidth;
+  }
+  float GetBorderlineOffset() const
+  {
+    return mBorderlineOffset;
+  }
+  UiColor GetBorderlineColor() const
+  {
+    return mBorderlineColor;
+  }
 
 protected:
-  ~ToastStyleImpl() override;
+  ~ToastStyleImpl() override = default;
 
 private:
-  float mInitialWidth{0.0f};
-  float mInitialHeight{0.0f};
-  float mMinimumWidth{0.0f};
-  float mMinimumHeight{0.0f};
-  float mExpandedHeight{0.0f};
-  float mMaximumHeight{0.0f};
-  float mMaximumWidthRatio{0.0f};
-  float mMaximumWidth{0.0f};
-  float mBottomOffsetRatio{0.0f};
-  float mBottomOffset{0.0f};
-
-  Vector4            mCornerRadius;
-  CornerRadiusPolicy mCornerRadiusPolicy{CornerRadiusPolicy::ABSOLUTE};
-  Insets             mPadding;
-  Insets             mExpandedPadding;
-  float              mItemSpacing{0.0f};
-  float              mExpandedItemSpacing{0.0f};
-
-  UiColor      mBackgroundColor;
-  UiColor      mTextColor;
-  float        mFontSize{0.0f};
-  Dali::String mFontFamily;
+  float        mMaximumWidthRatio{0.68f};
+  float        mMaximumHeight{112.0f};
+  float        mBottomOffsetRatio{0.05f};
+  float        mItemSpacing{16.0f};
+  Vector4      mCornerRadius{36.0f, 36.0f, 36.0f, 36.0f};
+  Insets       mPadding{32.0f, 32.0f, 16.0f, 16.0f};
+  UiColor      mBackgroundColor{UiColor("SurfaceFixed")};
+  UiColor      mTextColor{UiColor("OnSurfaceContainerFixedVariantBright")};
+  float        mFontSize{28.0f};
+  Dali::String mFontFamily{"SamsungOneUI400"};
+  float        mIconWidth{36.0f};
+  float        mIconHeight{36.0f};
+  Vector4      mIconCornerRadius{Vector4::ZERO};
+  UiColor      mIconColor{Color::WHITE};
   ShadowStack  mShadow;
-
-  float   mBorderlineWidth{0.0f};
-  UiColor mBorderlineColor;
-  float   mBorderlineOffset{0.0f};
-
-  TextButtonStyle mActionButtonStyle;
+  float        mBorderlineWidth{2.0f};
+  float        mBorderlineOffset{-1.0f};
+  UiColor      mBorderlineColor{UiColor("OutlineACC")};
 };
 
+inline const ToastStyleImpl& GetImpl(const Ui::ToastStyle& style)
+{
+  return static_cast<const ToastStyleImpl&>(style.GetBaseObject());
+}
 } // namespace Internal
-
-inline Internal::ToastStyleImpl& GetImpl(Ui::ToastStyle& style)
-{
-  BaseObject& handle = style.GetBaseObject();
-  return static_cast<Internal::ToastStyleImpl&>(handle);
-}
-
-inline const Internal::ToastStyleImpl& GetImpl(const Ui::ToastStyle& style)
-{
-  const BaseObject& handle = style.GetBaseObject();
-  return static_cast<const Internal::ToastStyleImpl&>(handle);
-}
-
 } // namespace Ui
 } //namespace DALI_NAMESPACE

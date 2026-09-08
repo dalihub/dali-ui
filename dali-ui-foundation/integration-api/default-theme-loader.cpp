@@ -41,17 +41,20 @@ namespace Integration
 
 DefaultThemeLoader::DefaultThemeLoader()
 {
-  mColors["Primary"]                   = HexToColor(0x387AFF);
-  mColors["OnPrimary"]                 = HexToColor(0xFCFCFF);
-  mColors["Background"]                = HexToColor(0xF1F1F3);
-  mColors["Surface"]                   = HexToColor(0xE4E4E7);
-  mColors["SurfaceContainerHigher"]    = HexToColor(0xA3A3A7);
-  mColors["OnSurface"]                 = HexToColor(0x4D4D52);
-  mColors["OnSurfaceContainerFixed"]   = HexToColor(0xFCFCFF);
-  mColors["OnSurfaceContainerHighest"] = HexToColor(0x010102);
-  mColors["Outline"]                   = HexToColor(0xB7B7BB);
-  mColors["Shadow"]                    = HexToColor(0x000000, 0.1f);
-  mColors["BlurSurface"]               = HexToColor(0xFCFCFF, 0.8f);
+  mColors["Primary"]                              = HexToColor(0x387AFF);
+  mColors["OnPrimary"]                            = HexToColor(0xFCFCFF);
+  mColors["Background"]                           = HexToColor(0xF1F1F3);
+  mColors["Surface"]                              = HexToColor(0xE4E4E7);
+  mColors["SurfaceFixed"]                         = HexToColor(0x4D4D52);
+  mColors["SurfaceContainerHigher"]               = HexToColor(0xA3A3A7);
+  mColors["OnSurface"]                            = HexToColor(0x4D4D52);
+  mColors["OnSurfaceContainerFixed"]              = HexToColor(0xFCFCFF);
+  mColors["OnSurfaceContainerFixedVariantBright"] = HexToColor(0xFCFCFF);
+  mColors["OnSurfaceContainerHighest"]            = HexToColor(0x010102);
+  mColors["Outline"]                              = HexToColor(0xB7B7BB);
+  mColors["OutlineACC"]                           = HexToColor(0xFFFFFF, 0.0f);
+  mColors["Shadow"]                               = HexToColor(0x000000, 0.1f);
+  mColors["BlurSurface"]                          = HexToColor(0xFCFCFF, 0.8f);
 }
 
 DefaultThemeLoader::~DefaultThemeLoader() = default;

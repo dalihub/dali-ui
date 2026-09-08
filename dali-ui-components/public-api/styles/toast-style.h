@@ -16,18 +16,14 @@
  * limitations under the License.
  */
 
-// EXTERNAL INCLUDES
-#include <dali/public-api/common/intrusive-ptr.h>
-#include <dali/public-api/math/vector4.h>
-
-// INTERNAL INCLUDES
-#include <dali-ui-components/public-api/styles/text-button-style.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/effects/shadow-stack.h>
-#include <dali-ui-foundation/public-api/views/view-types.h>
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/math/vector4.h>
 
 namespace DALI_NAMESPACE
 {
@@ -39,117 +35,169 @@ class ToastStyleImpl;
 }
 
 /**
- * @brief Immutable visual and layout values used to initialize Toast.
+ * @brief Immutable visual and layout values for a Toast.
  *
- * Transition timing and easing are intrinsic Toast behavior and are not
- * exposed as style values. Window-relative values are resolved when Toast is
- * posted to an explicit Window.
+ * Use Builder to create a custom style, or Configure() to derive one from an
+ * existing style.
  */
 class DALI_UI_COMPONENTS_API ToastStyle : public UiStyle
 {
 public:
-  /** @brief Mutable builder used to create ToastStyle handles. */
+  /** @brief Builder type used to create a ToastStyle. */
   class Builder;
 
-  /** @brief Creates an uninitialized ToastStyle handle. */
+  /**
+   * @brief Creates an uninitialized ToastStyle handle.
+   */
   ToastStyle() = default;
 
-  /** @brief Returns the style key for the default Toast style. */
+  /**
+   * @brief Returns the style key for the default Toast style.
+   * @return The default Toast style key
+   */
   static UiStyleKey<ToastStyle> DefaultKey();
-  /** @brief Gets the cached built-in default Toast style.
-   * @note Requires UiConfig::Apply().
+
+  /**
+   * @brief Gets the cached built-in default Toast style.
+   * @return The built-in default Toast style
    */
   static ToastStyle DefaultPreset();
-  /** @brief Gets the default Toast style from the current UiConfig.
-   * @note Requires UiConfig::Apply().
+
+  /**
+   * @brief Gets the default Toast style from the current UiConfig.
+   * @return The configured default Toast style
    */
   static ToastStyle Default();
-  /** @brief Downcasts a base handle to ToastStyle.
+
+  /**
+   * @brief Downcasts a base handle to ToastStyle.
    * @param[in] handle The handle to downcast
-   * @return A ToastStyle handle, or an uninitialized handle if the types do not match
+   * @return A valid ToastStyle on success, or an uninitialized handle
    */
   static ToastStyle DownCast(BaseHandle handle);
-  /** @brief Casts a UiStyle handle to ToastStyle.
-   * @param[in] style The style to cast
-   * @pre @p style must contain a ToastStyle.
+
+  /**
+   * @brief Casts a UiStyle handle to ToastStyle without a runtime type check.
+   * @param[in] style The ToastStyle-compatible UiStyle handle
+   * @return The ToastStyle handle
    */
   static ToastStyle StaticDownCast(UiStyle style);
 
-  /** @brief Creates a builder initialized with this style's values.
-   * @return A ToastStyle builder
+  /**
+   * @brief Creates a builder initialized with this style's values.
+   * @return A mutable builder containing a copy of this style
    */
   Builder Configure() const;
 
-  /** @name Geometry and layout values
-   * @{
+  /**
+   * @brief Returns the maximum Toast width as a ratio of the Window width.
+   * @return A value greater than zero and no greater than one
    */
-  /** @brief Returns the initial width in logical pixels. */
-  float GetInitialWidth() const;
-  /** @brief Returns the initial height in logical pixels. */
-  float GetInitialHeight() const;
-  /** @brief Returns the minimum width in logical pixels. */
-  float GetMinimumWidth() const;
-  /** @brief Returns the minimum height in logical pixels. */
-  float GetMinimumHeight() const;
-  /** @brief Returns the expanded height in logical pixels. */
-  float GetExpandedHeight() const;
-  /** @brief Returns the maximum height in logical pixels. */
-  float GetMaximumHeight() const;
-  /** @brief Returns the maximum Window-width ratio. */
   float GetMaximumWidthRatio() const;
-  /** @brief Returns the maximum width in logical pixels, or zero when ratio-based. */
-  float GetMaximumWidth() const;
-  /** @brief Returns the bottom offset as a Window-height ratio. */
+
+  /**
+   * @brief Returns the maximum Toast height used to constrain wrapped content.
+   *
+   * Toast does not impose a separate fixed line-count limit.
+   * @return The non-negative maximum height in logical pixels
+   */
+  float GetMaximumHeight() const;
+
+  /**
+   * @brief Returns the Toast bottom offset as a ratio of the Window height.
+   * @return A value greater than zero and no greater than one
+   */
   float GetBottomOffsetRatio() const;
-  /** @brief Returns the bottom offset in logical pixels. */
-  float GetBottomOffset() const;
-  /** @} */
 
-  /** @name Content layout values
-   * @{
+  /**
+   * @brief Returns the spacing between the optional icon and message text.
+   * @return The non-negative spacing in logical pixels
    */
-  /** @brief Returns the Toast corner radii. */
-  Vector4 GetCornerRadius() const;
-  /** @brief Returns the corner-radius interpretation policy. */
-  CornerRadiusPolicy GetCornerRadiusPolicy() const;
-  /** @brief Returns padding for the default presentation. */
-  Insets GetPadding() const;
-  /** @brief Returns padding for the expanded presentation. */
-  Insets GetExpandedPadding() const;
-  /** @brief Returns item spacing for the default presentation. */
   float GetItemSpacing() const;
-  /** @brief Returns item spacing for the expanded presentation. */
-  float GetExpandedItemSpacing() const;
-  /** @} */
 
-  /** @name Visual and text values
-   * @{
+  /**
+   * @brief Returns the Toast corner radii.
+   * @return The non-negative radius of each corner
    */
-  /** @brief Returns the Toast background color. */
+  Vector4 GetCornerRadius() const;
+
+  /**
+   * @brief Returns the padding around the Toast content.
+   * @return The non-negative content padding
+   */
+  Insets GetPadding() const;
+
+  /**
+   * @brief Returns the Toast background color.
+   * @return The background color
+   */
   UiColor GetBackgroundColor() const;
-  /** @brief Returns the message text color. */
-  UiColor GetTextColor() const;
-  /** @brief Returns the message font size in logical pixels. */
-  float GetFontSize() const;
-  /** @brief Returns the message font family. */
-  Dali::String GetFontFamily() const;
-  /** @brief Returns the Toast shadow stack. */
-  ShadowStack GetShadow() const;
-  /** @} */
 
-  /** @name Border values
-   * @{
+  /**
+   * @brief Returns the message text color.
+   * @return The text color
    */
-  /** @brief Returns the borderline width in logical pixels. */
-  float GetBorderlineWidth() const;
-  /** @brief Returns the borderline color. */
-  UiColor GetBorderlineColor() const;
-  /** @brief Returns the borderline offset. */
-  float GetBorderlineOffset() const;
-  /** @} */
+  UiColor GetTextColor() const;
 
-  /** @brief Returns the style used by the action button. */
-  TextButtonStyle GetActionButtonStyle() const;
+  /**
+   * @brief Returns the message font size.
+   * @return The non-negative font size in logical pixels
+   */
+  float GetFontSize() const;
+
+  /**
+   * @brief Returns the message font family.
+   * @return The font family name
+   */
+  Dali::String GetFontFamily() const;
+
+  /**
+   * @brief Returns the optional icon width.
+   * @return The non-negative width in logical pixels
+   */
+  float GetIconWidth() const;
+
+  /**
+   * @brief Returns the optional icon height.
+   * @return The non-negative height in logical pixels
+   */
+  float GetIconHeight() const;
+
+  /**
+   * @brief Returns the optional icon corner radii.
+   * @return The non-negative radius of each corner
+   */
+  Vector4 GetIconCornerRadius() const;
+
+  /**
+   * @brief Returns the optional icon color.
+   * @return The icon color
+   */
+  UiColor GetIconColor() const;
+
+  /**
+   * @brief Returns the Toast shadow stack.
+   * @return The shadow stack
+   */
+  ShadowStack GetShadow() const;
+
+  /**
+   * @brief Returns the Toast borderline width.
+   * @return The non-negative width in logical pixels
+   */
+  float GetBorderlineWidth() const;
+
+  /**
+   * @brief Returns the Toast borderline offset.
+   * @return The borderline offset, where -1 places it fully inside
+   */
+  float GetBorderlineOffset() const;
+
+  /**
+   * @brief Returns the Toast borderline color.
+   * @return The borderline color
+   */
+  UiColor GetBorderlineColor() const;
 
 public: // Not intended for application developers
   /// @cond internal
@@ -158,178 +206,312 @@ public: // Not intended for application developers
 };
 
 /**
- * @brief Mutable builder used to create complete immutable ToastStyle handles.
+ * @brief Mutable builder used to create immutable ToastStyle handles.
  */
 class DALI_UI_COMPONENTS_API ToastStyle::Builder
 {
 public:
-  /** @brief Creates a ToastStyle builder with the default values. */
+  /**
+   * @brief Creates a builder initialized with the built-in Toast defaults.
+   */
   Builder();
-  /** @brief Move constructor.
-   * @param[in] rhs The builder to move
+
+  /**
+   * @brief Move constructor.
+   * @param[in] rhs The builder to move from
    */
   Builder(Builder&& rhs) noexcept;
-  /** @brief Move assignment operator.
-   * @param[in] rhs The builder to move
+
+  /**
+   * @brief Move assignment operator.
+   * @param[in] rhs The builder to move from
    * @return A reference to this builder
    */
   Builder& operator=(Builder&& rhs) noexcept;
-  Builder(const Builder&)            = delete;
-  Builder& operator=(const Builder&) = delete;
-  /** @brief Destructor. */
+
+  /**
+   * @brief Copy construction is not supported.
+   * @param[in] rhs The builder that would be copied
+   */
+  Builder(const Builder& rhs) = delete;
+
+  /**
+   * @brief Copy assignment is not supported.
+   * @param[in] rhs The builder that would be copied
+   * @return A reference to this builder
+   */
+  Builder& operator=(const Builder& rhs) = delete;
+
+  /**
+   * @brief Destructor.
+   */
   ~Builder();
 
-  /** @brief Sets a scalar Toast style value.
+  /**
+   * @brief Sets the maximum Toast width as a ratio of the Window width.
+   * @param[in] value A finite value greater than zero and no greater than one
+   * @return A reference to this builder
+   */
+  Builder& SetMaximumWidthRatio(float value) &;
+
+  /**
+   * @brief Sets the maximum Toast width as a ratio of the Window width.
+   * @param[in] value A finite value greater than zero and no greater than one
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetMaximumWidthRatio(float value) &&;
+
+  /**
+   * @brief Sets the maximum Toast height used to constrain wrapped content.
    *
-   * Each overload returns this builder and validates the value for its named
-   * property (for example, a size, ratio, or spacing).
+   * Toast does not impose a separate fixed line-count limit.
+   * @param[in] value The finite, non-negative height in logical pixels
+   * @return A reference to this builder
    */
-#define DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(Name) \
-  /** @brief Sets the named scalar Toast style value.    \
-   * @param[in] value The value to apply.                \
-   * @return This builder.                               \
-   */                                                    \
-  Builder& Set##Name(float value) &;                     \
-  /** @brief Sets the named scalar Toast style value.    \
-   * @param[in] value The value to apply.                \
-   * @return This builder.                               \
-   */                                                    \
-  Builder&& Set##Name(float value) &&;
+  Builder& SetMaximumHeight(float value) &;
 
-  /** @brief Sets the initial width in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(InitialWidth)
-  /** @brief Sets the initial height in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(InitialHeight)
-  /** @brief Sets the minimum width in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(MinimumWidth)
-  /** @brief Sets the minimum height in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(MinimumHeight)
-  /** @brief Sets the expanded height in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(ExpandedHeight)
-  /** @brief Sets the maximum height in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(MaximumHeight)
-  /** @brief Sets the maximum Window-width ratio. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(MaximumWidthRatio)
-  /** @brief Sets the maximum width in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(MaximumWidth)
-  /** @brief Sets the bottom offset as a Window-height ratio. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(BottomOffsetRatio)
-  /** @brief Sets the bottom offset in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(BottomOffset)
-  /** @brief Sets item spacing for the default presentation. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(ItemSpacing)
-  /** @brief Sets item spacing for the expanded presentation. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(ExpandedItemSpacing)
-  /** @brief Sets the message font size in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(FontSize)
-  /** @brief Sets the borderline width in logical pixels. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(BorderlineWidth)
-  /** @brief Sets the borderline offset. */
-  DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION(BorderlineOffset)
-
-#undef DALI_TOAST_STYLE_FLOAT_BUILDER_DECLARATION
-
-  /** @brief Sets the initial Toast size.
-   * @param[in] width The width in logical pixels
-   * @param[in] height The height in logical pixels
-   * @return This builder
+  /**
+   * @brief Sets the maximum Toast height used to constrain wrapped content.
+   *
+   * Toast does not impose a separate fixed line-count limit.
+   * @param[in] value The finite, non-negative height in logical pixels
+   * @return An rvalue reference to this builder
    */
-  Builder& SetInitialSize(float width, float height) &;
-  /** @copydoc SetInitialSize(float, float) */
-  Builder&& SetInitialSize(float width, float height) &&;
-  /** @brief Sets the minimum Toast size.
-   * @param[in] width The width in logical pixels
-   * @param[in] height The height in logical pixels
-   * @return This builder
-   */
-  Builder& SetMinimumSize(float width, float height) &;
-  /** @copydoc SetMinimumSize(float, float) */
-  Builder&& SetMinimumSize(float width, float height) &&;
+  Builder&& SetMaximumHeight(float value) &&;
 
-  /** @brief Sets the Toast corner radii.
-   * @param[in] radius The corner radii
-   * @return This builder
+  /**
+   * @brief Sets the Toast bottom offset as a ratio of the Window height.
+   * @param[in] value A finite value greater than zero and no greater than one
+   * @return A reference to this builder
+   */
+  Builder& SetBottomOffsetRatio(float value) &;
+
+  /**
+   * @brief Sets the Toast bottom offset as a ratio of the Window height.
+   * @param[in] value A finite value greater than zero and no greater than one
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetBottomOffsetRatio(float value) &&;
+
+  /**
+   * @brief Sets the spacing between the optional icon and message text.
+   * @param[in] value The finite, non-negative spacing in logical pixels
+   * @return A reference to this builder
+   */
+  Builder& SetItemSpacing(float value) &;
+
+  /**
+   * @brief Sets the spacing between the optional icon and message text.
+   * @param[in] value The finite, non-negative spacing in logical pixels
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetItemSpacing(float value) &&;
+
+  /**
+   * @brief Sets the radius of each Toast corner.
+   * @param[in] radius The finite, non-negative corner radii
+   * @return A reference to this builder
    */
   Builder& SetCornerRadius(const Vector4& radius) &;
-  /** @copydoc SetCornerRadius(const Vector4&) */
-  Builder&& SetCornerRadius(const Vector4& radius) &&;
-  /** @brief Sets the corner-radius interpretation policy.
-   * @param[in] policy The policy to apply
-   * @return This builder
+
+  /**
+   * @brief Sets the radius of each Toast corner.
+   * @param[in] radius The finite, non-negative corner radii
+   * @return An rvalue reference to this builder
    */
-  Builder& SetCornerRadiusPolicy(CornerRadiusPolicy policy) &;
-  /** @copydoc SetCornerRadiusPolicy(CornerRadiusPolicy) */
-  Builder&& SetCornerRadiusPolicy(CornerRadiusPolicy policy) &&;
-  /** @brief Sets padding for the default Toast presentation.
-   * @param[in] padding The padding to apply
-   * @return This builder
+  Builder&& SetCornerRadius(const Vector4& radius) &&;
+
+  /**
+   * @brief Sets the padding around the Toast content.
+   * @param[in] padding The finite, non-negative content padding
+   * @return A reference to this builder
    */
   Builder& SetPadding(const Insets& padding) &;
-  /** @copydoc SetPadding(const Insets&) */
-  Builder&& SetPadding(const Insets& padding) &&;
-  /** @brief Sets padding for the expanded Toast presentation.
-   * @param[in] padding The padding to apply
-   * @return This builder
-   */
-  Builder& SetExpandedPadding(const Insets& padding) &;
-  /** @copydoc SetExpandedPadding(const Insets&) */
-  Builder&& SetExpandedPadding(const Insets& padding) &&;
 
-  /** @brief Sets the Toast background color.
-   * @param[in] color The color to apply
-   * @return This builder
+  /**
+   * @brief Sets the padding around the Toast content.
+   * @param[in] padding The finite, non-negative content padding
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetPadding(const Insets& padding) &&;
+
+  /**
+   * @brief Sets the Toast background color.
+   * @param[in] color The background color
+   * @return A reference to this builder
    */
   Builder& SetBackgroundColor(const UiColor& color) &;
-  /** @copydoc SetBackgroundColor(const UiColor&) */
+
+  /**
+   * @brief Sets the Toast background color.
+   * @param[in] color The background color
+   * @return An rvalue reference to this builder
+   */
   Builder&& SetBackgroundColor(const UiColor& color) &&;
-  /** @brief Sets the message text color.
-   * @param[in] color The color to apply
-   * @return This builder
+
+  /**
+   * @brief Sets the message text color.
+   * @param[in] color The text color
+   * @return A reference to this builder
    */
   Builder& SetTextColor(const UiColor& color) &;
-  /** @copydoc SetTextColor(const UiColor&) */
+
+  /**
+   * @brief Sets the message text color.
+   * @param[in] color The text color
+   * @return An rvalue reference to this builder
+   */
   Builder&& SetTextColor(const UiColor& color) &&;
-  /** @brief Sets the message font family.
+
+  /**
+   * @brief Sets the message font size.
+   * @param[in] value The finite, non-negative size in logical pixels
+   * @return A reference to this builder
+   */
+  Builder& SetFontSize(float value) &;
+
+  /**
+   * @brief Sets the message font size.
+   * @param[in] value The finite, non-negative size in logical pixels
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetFontSize(float value) &&;
+
+  /**
+   * @brief Sets the message font family.
    * @param[in] fontFamily The font family name
-   * @return This builder
+   * @return A reference to this builder
    */
   Builder& SetFontFamily(const Dali::String& fontFamily) &;
-  /** @copydoc SetFontFamily(const Dali::String&) */
+
+  /**
+   * @brief Sets the message font family.
+   * @param[in] fontFamily The font family name
+   * @return An rvalue reference to this builder
+   */
   Builder&& SetFontFamily(const Dali::String& fontFamily) &&;
-  /** @brief Sets the Toast shadow stack.
-   * @param[in] shadow The shadow stack to apply
-   * @return This builder
+
+  /**
+   * @brief Sets the optional icon width.
+   * @param[in] value The finite, non-negative width in logical pixels
+   * @return A reference to this builder
+   */
+  Builder& SetIconWidth(float value) &;
+
+  /**
+   * @brief Sets the optional icon width.
+   * @param[in] value The finite, non-negative width in logical pixels
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetIconWidth(float value) &&;
+
+  /**
+   * @brief Sets the optional icon height.
+   * @param[in] value The finite, non-negative height in logical pixels
+   * @return A reference to this builder
+   */
+  Builder& SetIconHeight(float value) &;
+
+  /**
+   * @brief Sets the optional icon height.
+   * @param[in] value The finite, non-negative height in logical pixels
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetIconHeight(float value) &&;
+
+  /**
+   * @brief Sets the optional icon corner radii.
+   * @param[in] radius The finite, non-negative corner radii
+   * @return A reference to this builder
+   */
+  Builder& SetIconCornerRadius(const Vector4& radius) &;
+
+  /**
+   * @brief Sets the optional icon corner radii.
+   * @param[in] radius The finite, non-negative corner radii
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetIconCornerRadius(const Vector4& radius) &&;
+
+  /**
+   * @brief Sets the optional icon color.
+   * @param[in] color The icon color
+   * @return A reference to this builder
+   */
+  Builder& SetIconColor(const UiColor& color) &;
+
+  /**
+   * @brief Sets the optional icon color.
+   * @param[in] color The icon color
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetIconColor(const UiColor& color) &&;
+
+  /**
+   * @brief Sets the Toast shadow stack.
+   * @param[in] shadow The shadow stack
+   * @return A reference to this builder
    */
   Builder& SetShadow(const ShadowStack& shadow) &;
-  /** @copydoc SetShadow(const ShadowStack&) */
+
+  /**
+   * @brief Sets the Toast shadow stack.
+   * @param[in] shadow The shadow stack
+   * @return An rvalue reference to this builder
+   */
   Builder&& SetShadow(const ShadowStack& shadow) &&;
 
-  /** @brief Sets the borderline color.
-   * @param[in] color The color to apply
-   * @return This builder
+  /**
+   * @brief Sets the Toast borderline width.
+   * @param[in] value The finite, non-negative width in logical pixels
+   * @return A reference to this builder
+   */
+  Builder& SetBorderlineWidth(float value) &;
+
+  /**
+   * @brief Sets the Toast borderline width.
+   * @param[in] value The finite, non-negative width in logical pixels
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetBorderlineWidth(float value) &&;
+
+  /**
+   * @brief Sets the Toast borderline offset.
+   * @param[in] value The finite offset, where -1 places it fully inside
+   * @return A reference to this builder
+   */
+  Builder& SetBorderlineOffset(float value) &;
+
+  /**
+   * @brief Sets the Toast borderline offset.
+   * @param[in] value The finite offset, where -1 places it fully inside
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetBorderlineOffset(float value) &&;
+
+  /**
+   * @brief Sets the Toast borderline color.
+   * @param[in] color The borderline color
+   * @return A reference to this builder
    */
   Builder& SetBorderlineColor(const UiColor& color) &;
-  /** @copydoc SetBorderlineColor(const UiColor&) */
-  Builder&& SetBorderlineColor(const UiColor& color) &&;
-  /** @brief Sets the action-button style.
-   * @param[in] style The style to apply
-   * @return This builder
-   * @pre @p style must be initialized.
-   */
-  Builder& SetActionButtonStyle(TextButtonStyle style) &;
-  /** @copydoc SetActionButtonStyle(TextButtonStyle) */
-  Builder&& SetActionButtonStyle(TextButtonStyle style) &&;
 
-  /** @brief Creates a ToastStyle from the configured values.
-   * @return The configured ToastStyle
+  /**
+   * @brief Sets the Toast borderline color.
+   * @param[in] color The borderline color
+   * @return An rvalue reference to this builder
+   */
+  Builder&& SetBorderlineColor(const UiColor& color) &&;
+
+  /**
+   * @brief Creates a ToastStyle from the configured values.
+   * @return The immutable ToastStyle
    */
   ToastStyle Build() &&;
 
 private:
   explicit Builder(Internal::ToastStyleImpl* impl);
   friend class ToastStyle;
-
-private:
   IntrusivePtr<Internal::ToastStyleImpl> mImpl;
 };
 

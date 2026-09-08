@@ -88,14 +88,20 @@ Toast& Toast::operator=(Toast&& rhs) noexcept = default;
 
 DALI_TOAST_FORWARD_SET_GET(const Dali::String&, Text)
 DALI_TOAST_FORWARD_SET_GET(uint32_t, Duration)
-DALI_TOAST_FORWARD_SET_GET(const UiColor&, TextColor)
-DALI_TOAST_FORWARD_SET_GET(float, FontSize)
-DALI_TOAST_FORWARD_SET_GET(const Dali::String&, FontFamily)
-DALI_TOAST_FORWARD_SET_GET(const Dali::String&, ActionButtonText)
-DALI_TOAST_FORWARD_SET_GET(const UiColor&, ActionButtonTextColor)
-DALI_TOAST_FORWARD_SET_GET(float, ItemSpacing)
+DALI_TOAST_FORWARD_SET_GET(const Dali::String&, IconResourceUrl)
+DALI_TOAST_FORWARD_SET_GET(const UiColor&, IconColor)
 
 #undef DALI_TOAST_FORWARD_SET_GET
+
+void Toast::SetIconSynchronousLoading(bool synchronous)
+{
+  GetImpl(*this).SetIconSynchronousLoading(synchronous);
+}
+
+bool Toast::IsIconSynchronousLoading() const
+{
+  return GetImpl(*this).IsIconSynchronousLoading();
+}
 
 void Toast::Post(Dali::Window window)
 {
@@ -115,11 +121,6 @@ Toast::ShownSignalType& Toast::ShownSignal()
 Toast::HiddenSignalType& Toast::HiddenSignal()
 {
   return GetImpl(*this).HiddenSignal();
-}
-
-Toast::ActionButtonClickedSignalType& Toast::ActionButtonClickedSignal()
-{
-  return GetImpl(*this).ActionButtonClickedSignal();
 }
 
 Toast::Toast(Internal::ToastImpl& implementation)

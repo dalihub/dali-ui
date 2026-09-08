@@ -209,9 +209,12 @@ int UtcDaliUiColorManagerGetColorP(void)
   DALI_TEST_EQUALS(manager.GetColor("OnPrimary"), Vector4(0xFC / 255.0f, 0xFC / 255.0f, 0xFF / 255.0f, 1.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(manager.GetColor("Background"), Vector4(0xF1 / 255.0f, 0xF1 / 255.0f, 0xF3 / 255.0f, 1.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(manager.GetColor("Surface"), Vector4(0xE4 / 255.0f, 0xE4 / 255.0f, 0xE7 / 255.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("SurfaceFixed"), Vector4(0x4D / 255.0f, 0x4D / 255.0f, 0x52 / 255.0f, 1.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(manager.GetColor("OnSurface"), Vector4(0x4D / 255.0f, 0x4D / 255.0f, 0x52 / 255.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("OnSurfaceContainerFixedVariantBright"), Vector4(0xFC / 255.0f, 0xFC / 255.0f, 0xFF / 255.0f, 1.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(manager.GetColor("OnSurfaceContainerHighest"), Vector4(0x01 / 255.0f, 0x01 / 255.0f, 0x02 / 255.0f, 1.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(manager.GetColor("Outline"), Vector4(0xB7 / 255.0f, 0xB7 / 255.0f, 0xBB / 255.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("OutlineACC"), Vector4(1.0f, 1.0f, 1.0f, 0.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(manager.GetColor("Shadow"), Vector4(0.0f, 0.0f, 0.0f, 0.1f), TEST_LOCATION);
   DALI_TEST_EQUALS(manager.GetColor("BlurSurface"), Vector4(0xFC / 255.0f, 0xFC / 255.0f, 0xFF / 255.0f, 0.8f), TEST_LOCATION);
 

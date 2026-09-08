@@ -1,7 +1,8 @@
 # Toast sample
 
-This sample verifies the `Toast` post, timeout, action expansion, explicit
-dismissal, signals, action-less mode, and custom `ToastStyle` paths.
+This sample demonstrates text-only and optional-icon `Toast` presentations,
+short and long timeouts, naturally wrapped long text, explicit dismissal, lifecycle
+signals, and a custom `ToastStyle`.
 
 ## Local build
 

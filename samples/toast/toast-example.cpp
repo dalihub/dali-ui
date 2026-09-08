@@ -45,6 +45,11 @@ TextButton MakeButton(const Dali::String& text)
   return button;
 }
 
+Dali::String GetSampleIconUrl()
+{
+  return Dali::String(RESOURCES_DIR "ic_dummy_icon.svg");
+}
+
 } // namespace
 
 class ToastExample : public ConnectionTracker
@@ -69,7 +74,7 @@ private:
     root.SetPadding(Insets(32.0f, 32.0f, 32.0f, 32.0f));
     root.SetSpacing(12.0f);
     root.Add(MakeLabel("Toast Sample", 30.0f, 0x202124u));
-    root.Add(MakeLabel("Most buttons repost one Toast instance. Post the indefinite Toast, then post the custom Toast to verify distinct-instance coexistence. The first action click expands and the second dismisses.", 17.0f, 0x55565Bu));
+    root.Add(MakeLabel("Post text or icon Toast variants, try a long-text message, or customize the ToastStyle. Toasts disappear automatically and can also be dismissed explicitly.", 17.0f, 0x55565Bu));
 
     TextButton shortButton = MakeButton("Post SHORT toast (1.5 s)");
     shortButton.ConnectClickedSignal(this, &ToastExample::PostShort);
@@ -79,13 +84,13 @@ private:
     longButton.ConnectClickedSignal(this, &ToastExample::PostLong);
     root.Add(longButton);
 
-    TextButton indefiniteButton = MakeButton("Post INDEFINITE toast with action");
-    indefiniteButton.ConnectClickedSignal(this, &ToastExample::PostIndefinite);
-    root.Add(indefiniteButton);
+    TextButton iconButton = MakeButton("Post toast with icon");
+    iconButton.ConnectClickedSignal(this, &ToastExample::PostWithIcon);
+    root.Add(iconButton);
 
-    TextButton noActionButton = MakeButton("Post toast without action");
-    noActionButton.ConnectClickedSignal(this, &ToastExample::PostWithoutAction);
-    root.Add(noActionButton);
+    TextButton multiLineButton = MakeButton("Post long-text toast");
+    multiLineButton.ConnectClickedSignal(this, &ToastExample::PostMultiLine);
+    root.Add(multiLineButton);
 
     TextButton customButton = MakeButton("Post custom-style toast");
     customButton.ConnectClickedSignal(this, &ToastExample::PostCustom);
@@ -95,12 +100,12 @@ private:
     dismissButton.ConnectClickedSignal(this, &ToastExample::DismissCurrent);
     root.Add(dismissButton);
 
-    mStatus = MakeLabel("Shown: 0 | Hidden: 0 | Action(default): 0 | Action(expanded): 0", 16.0f, 0x0057B8u);
+    mStatus = MakeLabel("Shown: 0 | Hidden: 0", 16.0f, 0x0057B8u);
     root.Add(mStatus);
     mLastEvent = MakeLabel("Last event: none", 16.0f, 0x444449u);
     root.Add(mLastEvent);
 
-    mDefaultToast = Toast::New("Saved successfully", Toast::Duration::INDEFINITE);
+    mDefaultToast = Toast::New("Saved successfully");
     ConnectSignals(mDefaultToast);
 
     ToastStyle customStyle = ToastStyle::Default()
@@ -119,36 +124,40 @@ private:
   {
     toast.ShownSignal().Connect(this, &ToastExample::OnShown);
     toast.HiddenSignal().Connect(this, &ToastExample::OnHidden);
-    toast.ActionButtonClickedSignal().Connect(this, &ToastExample::OnAction);
   }
 
-  void PrepareDefault(const Dali::String& text, uint32_t duration, const Dali::String& actionText)
+  void PrepareDefault(const Dali::String& text, uint32_t duration)
   {
     mCurrentToast = mDefaultToast;
+    mDefaultToast.SetIconResourceUrl("");
     mDefaultToast.SetText(text);
     mDefaultToast.SetDuration(duration);
-    mDefaultToast.SetActionButtonText(actionText);
     mDefaultToast.Post(mWindow);
   }
 
   void PostShort(View, InputEvent)
   {
-    PrepareDefault("A short informational Toast", Toast::Duration::SHORT, "Details");
+    PrepareDefault("Saved successfully", Toast::Duration::SHORT);
   }
 
   void PostLong(View, InputEvent)
   {
-    PrepareDefault("A longer notification gives the user more reading time", Toast::Duration::LONG, "Review");
+    PrepareDefault("A longer message gives the user more reading time", Toast::Duration::LONG);
   }
 
-  void PostIndefinite(View, InputEvent)
+  void PostWithIcon(View, InputEvent)
   {
-    PrepareDefault("Tap Action once to expand this message. Tap it again to confirm and dismiss.", Toast::Duration::INDEFINITE, "Action");
+    mCurrentToast = mDefaultToast;
+    mDefaultToast.SetText("Item removed");
+    mDefaultToast.SetDuration(Toast::Duration::SHORT);
+    mDefaultToast.SetIconResourceUrl(GetSampleIconUrl());
+    mDefaultToast.SetIconColor(UiColor(Color::WHITE));
+    mDefaultToast.Post(mWindow);
   }
 
-  void PostWithoutAction(View, InputEvent)
+  void PostMultiLine(View, InputEvent)
   {
-    PrepareDefault("This Toast has no action button", Toast::Duration::LONG, "");
+    PrepareDefault("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard", Toast::Duration::LONG);
   }
 
   void PostCustom(View, InputEvent)
@@ -179,27 +188,10 @@ private:
     UpdateStatus();
   }
 
-  void OnAction(Toast, Toast::ActionStage stage)
-  {
-    if(stage == Toast::ActionStage::CONFIRM_IN_DEFAULT_MODE)
-    {
-      ++mDefaultActionCount;
-      mLastEvent.SetText("Last event: action in default mode (expanding)");
-    }
-    else
-    {
-      ++mExpandedActionCount;
-      mLastEvent.SetText("Last event: action in expanded mode (dismissing)");
-    }
-    UpdateStatus();
-  }
-
   void UpdateStatus()
   {
     const std::string status = "Shown: " + std::to_string(mShownCount) +
-                               " | Hidden: " + std::to_string(mHiddenCount) +
-                               " | Action(default): " + std::to_string(mDefaultActionCount) +
-                               " | Action(expanded): " + std::to_string(mExpandedActionCount);
+                               " | Hidden: " + std::to_string(mHiddenCount);
     mStatus.SetText(status.c_str());
   }
 
@@ -213,8 +205,6 @@ private:
   Label        mLastEvent;
   uint32_t     mShownCount{0u};
   uint32_t     mHiddenCount{0u};
-  uint32_t     mDefaultActionCount{0u};
-  uint32_t     mExpandedActionCount{0u};
 };
 
 int main(int argc, char** argv)
