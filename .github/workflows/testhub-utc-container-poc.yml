@@ -29,14 +29,27 @@ jobs:
         fetch-depth: 0
         persist-credentials: false
 
+    - name: Setup SSH
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
     - name: Clone DALi dependencies
       shell: bash
+      env:
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
       run: |
         set -euo pipefail
 
-        git clone --depth 1 --branch devel/master git://review.tizen.org/git/platform/core/uifw/dali-core
-        git clone --depth 1 --branch devel/master git://review.tizen.org/git/platform/core/uifw/dali-adaptor
-        git clone --depth 1 --branch tizen git://review.tizen.org/git/platform/core/graphics/tizenvg
+        KNOWN_HOSTS_FILE="$RUNNER_TEMP/review-tizen-known-hosts"
+        printf '%s\n' "$SSH_KNOWN_HOSTS" > "$KNOWN_HOSTS_FILE"
+        chmod 0600 "$KNOWN_HOSTS_FILE"
+
+        export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=$KNOWN_HOSTS_FILE -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=yes"
+
+        git clone --depth 1 --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        git clone --depth 1 --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+        git clone --depth 1 --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
 
     - name: Prepare DALi prefix
       shell: bash
