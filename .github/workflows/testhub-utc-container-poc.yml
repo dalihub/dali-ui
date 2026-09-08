@@ -35,10 +35,14 @@ jobs:
 
     - name: Clone DALi dependencies
       shell: bash
+      env:
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
       run: |
         set -euo pipefail
 
-        echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        install -d -m 0700 "$HOME/.ssh"
+        printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+        chmod 0600 "$HOME/.ssh/known_hosts"
         git clone --depth 1 --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
         git clone --depth 1 --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
         git clone --depth 1 --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
