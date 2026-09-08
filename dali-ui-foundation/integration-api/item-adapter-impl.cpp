@@ -17,7 +17,7 @@
 
 #include <dali-ui-foundation/integration-api/item-adapter-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -130,4 +130,4 @@ void ItemAdapterImpl::NotifyAdapterReplaced()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

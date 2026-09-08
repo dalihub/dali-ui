@@ -34,7 +34,7 @@
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -765,4 +765,4 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
   return updated;
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

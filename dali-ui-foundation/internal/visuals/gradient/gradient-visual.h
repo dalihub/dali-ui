@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/visuals/gradient/gradient.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -206,6 +206,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif /* DALI_UI_INTERNAL_GRADIENT_VISUAL_H */

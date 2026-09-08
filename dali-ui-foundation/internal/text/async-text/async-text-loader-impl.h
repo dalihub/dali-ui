@@ -36,7 +36,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -337,6 +337,6 @@ inline static const Internal::AsyncTextLoader& GetImplementation(const AsyncText
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_ASYNC_TEXT_LOADER_IMPL_H

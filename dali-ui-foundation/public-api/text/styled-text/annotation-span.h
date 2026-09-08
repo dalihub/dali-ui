@@ -23,7 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/styled-text/span.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -91,4 +91,4 @@ private:
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/character-run.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Stores a replacement in the logical and processing domains.
@@ -265,6 +265,6 @@ private:
   Vector<ProjectedReplacementRun> mReplacementRuns;
 };
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_PROJECTION_H

@@ -19,7 +19,7 @@
 
 #include <dali-ui-foundation/internal/controls/text-controls/editable-text-view-accessible.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 /**
  * @brief Connects InputEditorImpl with the common editable-text accessibility implementation.
@@ -51,6 +51,6 @@ protected:
   void RequestTextRelayout() override;
 };
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration
 
 #endif // DALI_UI_INTERNAL_INPUT_EDITOR_ACCESSIBLE_H

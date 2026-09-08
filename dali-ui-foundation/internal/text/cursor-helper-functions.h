@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/text/metrics.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -179,6 +179,6 @@ bool FindSelectionIndices(VisualModelPtr visualModel, LogicalModelPtr logicalMod
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_CURSOR_HELPER_FUNCTIONS_H

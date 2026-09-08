@@ -24,7 +24,7 @@
 #include <dali/public-api/object/weak-handle.h>
 #include <memory>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class WebEngineBackForwardListItem;
 
@@ -77,4 +77,4 @@ inline const WebBackForwardListImpl& GetImpl(const WebBackForwardList& list)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

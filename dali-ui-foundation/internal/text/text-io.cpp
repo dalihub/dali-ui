@@ -23,7 +23,7 @@
 #include <dali/devel-api/text-abstraction/script.h>
 #include <iostream>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -117,4 +117,4 @@ std::ostream& operator<<(std::ostream& o, const Vector<LineRun>& lineRuns)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

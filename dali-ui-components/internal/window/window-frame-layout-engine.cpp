@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -178,4 +178,4 @@ bool IsSameWindowFrameGeometry(const WindowFrameGeometry& lhs, const WindowFrame
          leftInsets.top == rightInsets.top && leftInsets.bottom == rightInsets.bottom;
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

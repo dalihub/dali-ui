@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -134,4 +134,4 @@ AsyncTextRenderInfo AsyncTextLoader::GetHeightForWidth(AsyncTextParameters& para
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

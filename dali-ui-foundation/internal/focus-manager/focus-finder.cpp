@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -616,4 +616,4 @@ View GetNextFocusableViewInOrder(Actor rootActor, View focusedView, Ui::FocusDir
 } // namespace FocusFinder
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

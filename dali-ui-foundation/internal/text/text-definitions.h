@@ -25,7 +25,7 @@
 #include <dali/devel-api/text-abstraction/script.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -70,6 +70,6 @@ typedef uint32_t ParagraphRunIndex;         ///< An index into an array of parag
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_TEXT_ABSTRACTION_TEXT_TYPE_DEFINITIONS_H

@@ -6,7 +6,7 @@
 
 #include <utility>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace
 {
@@ -128,4 +128,4 @@ IconButtonStyle IconButtonStyle::Builder::Build() &&
   mImpl.Reset();
   return style;
 }
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

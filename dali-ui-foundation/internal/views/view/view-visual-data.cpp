@@ -44,7 +44,7 @@
 
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1579,4 +1579,4 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, bool isLayo
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

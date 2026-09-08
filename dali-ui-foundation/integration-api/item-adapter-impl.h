@@ -26,7 +26,7 @@
 #include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -91,4 +91,4 @@ private:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

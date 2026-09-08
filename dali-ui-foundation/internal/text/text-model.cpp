@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -434,4 +434,4 @@ Model::~Model()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/selectable-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -179,4 +179,4 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

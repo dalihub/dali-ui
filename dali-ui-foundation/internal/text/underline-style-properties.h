@@ -26,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -191,6 +191,6 @@ struct UnderlineStyleProperties
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_UNDERLINE_STYLE_PROPERTIES_H

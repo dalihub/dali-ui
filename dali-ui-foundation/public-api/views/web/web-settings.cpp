@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/integration-api/web-settings-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-settings.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -83,4 +83,4 @@ WebSettings::WebSettings(Integration::WebSettingsImpl& implementation)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

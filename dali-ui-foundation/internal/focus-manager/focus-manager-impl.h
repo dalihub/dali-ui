@@ -33,7 +33,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Integration
 {
@@ -462,4 +462,4 @@ inline const Internal::FocusManager& GetImpl(const Dali::Ui::FocusManager& obj)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

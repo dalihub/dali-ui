@@ -32,7 +32,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -235,6 +235,6 @@ inline const Ui::Internal::MaskEffectImpl& GetImplementation(const Ui::MaskEffec
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_BACKGROUND_MASK_EFFECT_H

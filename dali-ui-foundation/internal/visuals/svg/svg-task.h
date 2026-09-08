@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali/devel-api/adaptor-framework/async-task-manager.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -248,6 +248,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_SVG_TASK_H

@@ -47,7 +47,7 @@ Debug::Filter* gVisualBaseLogFilter = Debug::Filter::New(Debug::NoLogging, false
 #endif
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1603,4 +1603,4 @@ void Visual::Base::StopConstraintFeature(Property::Index index)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

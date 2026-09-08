@@ -29,7 +29,7 @@
 
 namespace ExtensionView = Dali::Ui::Extension::View;
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 InteractiveTraitImpl::InteractiveTraitImpl()
@@ -615,4 +615,4 @@ bool InteractiveTraitImpl::ShouldKeyPressTriggerLongPressed() const
          (mPressedExecutionKeyCount >= UiConfig::GetCurrent().GetLongPressKeyEventMinimumCount());
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

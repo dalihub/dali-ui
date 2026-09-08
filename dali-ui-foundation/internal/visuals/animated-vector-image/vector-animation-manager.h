@@ -27,7 +27,7 @@
 
 // INTERNAL INCLUDES
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -110,6 +110,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_VECTOR_ANIMATION_MANAGER_H

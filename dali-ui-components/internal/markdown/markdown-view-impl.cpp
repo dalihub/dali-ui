@@ -30,7 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/markdown/markdown-view-defaults.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -506,4 +506,4 @@ Ui::View MarkdownViewImpl::GetSelfView() const
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -31,7 +31,7 @@
 
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -70,4 +70,4 @@ Property::Map CreateMotionStretchEffect()
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

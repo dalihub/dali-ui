@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/views/state-effect-target-trait.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -71,4 +71,4 @@ int32_t StateEffectTargetTraitImpl::GetTargetId() const
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

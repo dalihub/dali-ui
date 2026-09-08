@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -703,4 +703,4 @@ bool MarqueeBuilder::IsPixelDataSizeEqual(PixelData data, const Size& size)
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

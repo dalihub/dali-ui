@@ -19,7 +19,7 @@
 // FILE HEADER
 #include <dali-ui-foundation/internal/text/emoji-helper.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -554,4 +554,4 @@ Character GetVariationSelectorByScript(const TextAbstraction::Script& script)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

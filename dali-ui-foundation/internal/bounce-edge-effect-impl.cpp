@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -216,4 +216,4 @@ void BounceEdgeEffectImpl::OnFinishImpl()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

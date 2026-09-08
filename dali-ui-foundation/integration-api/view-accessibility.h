@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 class ViewAccessible;
 class ViewImpl;
@@ -53,4 +53,4 @@ DALI_UI_API void SetAccessibleObjectCreator(ViewImpl& viewImpl, AccessibleObject
 DALI_UI_API void Register();
 
 } // namespace Integration::ViewAccessibility
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

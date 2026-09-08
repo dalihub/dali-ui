@@ -53,7 +53,7 @@ constexpr const char* UNIFORM_MASK_POSITION_NAME = "uMaskPosition";
 constexpr const char* UNIFORM_MASK_SCALE_NAME    = "uMaskScale";
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -464,4 +464,4 @@ void MaskEffectImpl::OnSourceRenderFinished(Dali::RenderTask renderTask)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

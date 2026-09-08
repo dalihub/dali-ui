@@ -33,7 +33,7 @@
 
 using AdaptorImpl = Dali::Internal::Adaptor::Adaptor;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 ///////////////////////////////////////////////////////////////////////////////
 //

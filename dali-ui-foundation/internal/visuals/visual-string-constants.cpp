@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -482,4 +482,4 @@ const char* const CAP_NAME("cap");
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -26,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -318,4 +318,4 @@ ViewAnimationBridge& ViewAnimationBridge::BorderlineOffsetBy(float relative, Dur
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

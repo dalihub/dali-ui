@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -111,6 +111,6 @@ public: // Not intended for application developers
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_BACKEND_H

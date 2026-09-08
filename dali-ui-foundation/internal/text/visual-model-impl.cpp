@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <memory.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -802,4 +802,4 @@ VisualModel::VisualModel()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

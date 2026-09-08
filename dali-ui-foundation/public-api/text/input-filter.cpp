@@ -24,7 +24,7 @@
 #define DALI_ASSERT_VALID_INPUT_FILTER(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from InputFilter object")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -146,6 +146,6 @@ const Dali::String& InputFilter::GetDenyPattern() const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_INPUT_FILTER

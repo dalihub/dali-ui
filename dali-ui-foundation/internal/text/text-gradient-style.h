@@ -27,7 +27,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -83,6 +83,6 @@ Style CreateStyle(const Dali::Ui::Gradient::Base& gradient);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_INTERNAL_TEXT_GRADIENT_STYLE_H

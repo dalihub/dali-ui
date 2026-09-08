@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -133,6 +133,6 @@ enum Value
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_MESH_VISUAL_PROPERTIES_H

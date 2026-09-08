@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/layouts/layout-bounds-effects.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -117,4 +117,4 @@ LayoutBoundsEffect ShrinkTo(LayoutBoundsEdge              anchor,
 
 } // namespace LayoutBoundsEffects
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/integration-api/web-cookie-manager-impl.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-cookie-manager.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -52,4 +52,4 @@ bool WebCookieManagerImpl::IsEqual(const WebCookieManagerImpl& rhs) const
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

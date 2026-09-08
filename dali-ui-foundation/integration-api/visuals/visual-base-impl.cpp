@@ -38,7 +38,7 @@
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -959,4 +959,4 @@ VisualBaseImpl::~VisualBaseImpl()
   }
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

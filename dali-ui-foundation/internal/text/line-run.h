@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/text/character-run.h>
 #include <dali-ui-foundation/internal/text/glyph-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -72,6 +72,6 @@ float GetLineWidth(const LineRun& lineRun);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_LINE_RUN_H

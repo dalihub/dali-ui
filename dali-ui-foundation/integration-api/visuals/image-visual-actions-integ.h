@@ -19,7 +19,7 @@
  */
 #include <dali-ui-foundation/integration-api/ui-action-index-ranges.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -50,6 +50,6 @@ enum Type
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTEGRATION_API_VISUALS_IMAGE_VISUAL_ACTIONS_INTEG_H

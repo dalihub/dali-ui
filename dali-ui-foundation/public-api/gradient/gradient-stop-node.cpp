@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -133,4 +133,4 @@ StopNode& StopNode::SetColor(const UiColor& color)
 
 } // namespace Gradient
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

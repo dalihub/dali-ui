@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 using AccessibilityStates = uint32_t; // LCOV_EXCL_LINE
@@ -295,6 +295,6 @@ private:
   AccessibilityHighlightOverlay mHighlightOverlay;
 };
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #endif // DALI_UI_VIEW_ACCESSIBLE_H

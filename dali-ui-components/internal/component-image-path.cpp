@@ -23,7 +23,7 @@
 
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -68,4 +68,4 @@ Dali::String ResolveComponentImageUrl(Dali::StringView fileName)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

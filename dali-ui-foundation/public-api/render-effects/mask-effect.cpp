@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -69,4 +69,4 @@ MaskEffect MaskEffect::New(Ui::View maskView, MaskMode maskMode, Vector2 maskPos
   return MaskEffect(internal.Get());
 }
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

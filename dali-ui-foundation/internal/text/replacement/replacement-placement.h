@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Extracts replacement placements from the final text layout.
@@ -60,6 +60,6 @@ void ExtractReplacementPlacements(const Model&                     model,
                                   const ReplacementLineMetricData& lineMetricData,
                                   Vector<ReplacementPlacement>&    placements);
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_PLACEMENT_H

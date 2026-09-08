@@ -29,7 +29,7 @@
 #include <dali-ui/ui-adaptor-impl.h>
 #include <dali-ui/ui-lifecycle-controller.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 bool UiTestApplication::ADD_IDLE_SUCCESS = true;
 

@@ -41,7 +41,7 @@
 
 using Dali::Integration::GetStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1020,4 +1020,4 @@ void VectorAnimationTask::OnLoadCompleted(uint32_t /* not used */)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

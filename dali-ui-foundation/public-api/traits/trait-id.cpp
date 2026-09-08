@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <atomic>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -33,4 +33,4 @@ TraitId TraitId::Alloc()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

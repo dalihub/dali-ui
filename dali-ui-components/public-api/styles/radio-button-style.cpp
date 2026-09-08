@@ -32,7 +32,7 @@
 #include <cmath>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -420,4 +420,4 @@ StateEffect RadioButtonStyleImpl::GetStateEffect() const
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

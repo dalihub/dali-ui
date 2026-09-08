@@ -28,7 +28,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -180,4 +180,4 @@ private:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

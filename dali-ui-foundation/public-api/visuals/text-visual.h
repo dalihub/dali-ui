@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -282,6 +282,6 @@ public:
  * @}
  */
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_VISUAL_OBJECT_H

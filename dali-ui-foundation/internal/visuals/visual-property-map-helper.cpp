@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -120,4 +120,4 @@ Property::Map CreateGradientVisualPropertyMap(const Gradient::Base& gradient)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

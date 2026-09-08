@@ -33,7 +33,7 @@
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -145,4 +145,4 @@ bool ViewStateManager::IsEffectivelyFocused(const ViewImpl& viewImpl) const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

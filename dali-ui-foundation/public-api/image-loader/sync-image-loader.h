@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -100,6 +100,6 @@ DALI_UI_API PixelData Load(const Dali::String& url, ImageDimensions dimensions,
  */
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_SYNC_IMAGE_LOADER_H

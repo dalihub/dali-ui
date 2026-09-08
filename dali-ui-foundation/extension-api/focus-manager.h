@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -83,4 +83,4 @@ DALI_UI_API bool IsKeyInputTarget(Ui::View view);
 } // namespace FocusManager
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

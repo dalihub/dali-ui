@@ -31,7 +31,7 @@
 #define DALI_UI_NAVIGATOR_HAS_MODAL_TRANSITION_SPEC 1
 #define DALI_UI_NAVIGATOR_HAS_MODAL_ANIMATION_SWITCH 1
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -276,4 +276,4 @@ public: // Not intended for application developers
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

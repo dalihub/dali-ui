@@ -46,7 +46,7 @@
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -2684,4 +2684,4 @@ void LayoutTransitionDispatcher::OnAnimationFinished(Animation finished)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

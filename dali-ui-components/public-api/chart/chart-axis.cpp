@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/chart-axis-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -230,4 +230,4 @@ ChartAxis::ChartAxis(Integration::ChartAxis* impl)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

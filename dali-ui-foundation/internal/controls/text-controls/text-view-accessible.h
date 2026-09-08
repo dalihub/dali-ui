@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 /**
  * @brief Common accessibility implementation for Views that expose text.
@@ -191,6 +191,6 @@ protected:
   virtual bool SupportsSelection() const;
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal
 
 #endif // DALI_UI_INTERNAL_TEXT_CONTROLS_TEXT_VIEW_ACCESSIBLE_H

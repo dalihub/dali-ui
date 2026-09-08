@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 #include <dali/public-api/common/constants.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -119,4 +119,4 @@ inline const Internal::TextButtonStyleImpl& GetImpl(const Ui::TextButtonStyle& s
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

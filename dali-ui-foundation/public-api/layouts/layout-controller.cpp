@@ -41,7 +41,7 @@
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <algorithm>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1609,4 +1609,4 @@ void LayoutController::ReplaceCurrentWindow(Dali::Window window)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/layouts/flex-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -93,4 +93,4 @@ inline const Integration::FlexLayoutImpl& GetImpl(const FlexLayout& layout)
   return static_cast<const Integration::FlexLayoutImpl&>(handle);
 }
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

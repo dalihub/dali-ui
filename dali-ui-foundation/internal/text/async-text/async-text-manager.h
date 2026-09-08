@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/async-text/text-load-observer.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -106,6 +106,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_ASYNC_TEXT_MANAGER_H

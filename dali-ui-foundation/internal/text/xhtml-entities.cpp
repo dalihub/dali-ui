@@ -20,9 +20,10 @@
 #include <cstring> // for strlen()
 
 // FILE HEADER
+#include <dali/public-api/common/dali-namespace.h>
 #include "xhtml-entities.h"
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -353,4 +354,4 @@ const char* const NamedEntityToUtf8(const char* const markupText, unsigned int l
 
 } //namespace Ui
 
-} // namespace  Dali
+} //namespace DALI_NAMESPACE

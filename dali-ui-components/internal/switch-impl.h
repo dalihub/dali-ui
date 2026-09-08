@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -116,4 +116,4 @@ inline const Internal::SwitchImpl& GetImpl(const Ui::Switch& control)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

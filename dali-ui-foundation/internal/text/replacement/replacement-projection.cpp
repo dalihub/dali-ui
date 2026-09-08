@@ -21,7 +21,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -512,4 +512,4 @@ bool ReplacementProjection::ProjectGlyphStyleRuns(const Vector<CharacterRun>&   
   return true;
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

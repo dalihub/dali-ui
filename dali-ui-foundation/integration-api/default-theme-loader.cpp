@@ -32,7 +32,7 @@ Dali::Vector4 HexToColor(uint32_t rgb, float a = 1.0f)
 
 } // unnamed namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -79,4 +79,4 @@ DefaultThemeLoader::ThemeChangedSignalType& DefaultThemeLoader::ThemeChangedSign
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -28,7 +28,7 @@
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -2117,4 +2117,4 @@ DragAndDropDetector::~DragAndDropDetector()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

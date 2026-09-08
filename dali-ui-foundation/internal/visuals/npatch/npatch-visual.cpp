@@ -47,7 +47,7 @@ using Dali::Integration::GetStdString;
 using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -737,4 +737,4 @@ void NPatchVisual::LoadComplete(bool loadSuccess, TextureInformation textureInfo
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

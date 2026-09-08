@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/animation/input-field-animation-spec-impl.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -354,4 +354,4 @@ InputFieldAnimationSpec& InputFieldAnimationSpec::PlaceholderTextGradientStartOf
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

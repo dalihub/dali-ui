@@ -40,7 +40,7 @@
 #include <dali-ui-foundation/internal/text/strikethrough-character-run.h>
 #include <dali-ui-foundation/internal/text/underlined-character-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -291,6 +291,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_LOGICAL_MODEL_IMPL_H

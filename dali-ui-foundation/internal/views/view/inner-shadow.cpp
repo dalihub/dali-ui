@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -124,4 +124,4 @@ Property::Map CreatePropertyMap(const Ui::InnerShadow& innerShadow)
 } // namespace InnerShadow
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

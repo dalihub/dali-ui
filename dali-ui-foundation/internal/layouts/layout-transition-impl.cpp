@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/layout-transition-validation.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -381,4 +381,4 @@ LayoutLifecycleCallback* LayoutTransitionImpl::GetOnFinishedCallback()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

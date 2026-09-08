@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Stores immutable source buffers consumed by a model updater.
@@ -110,6 +110,6 @@ void ApplyTextProcessingSource(const TextProcessingSource& source, LogicalModel&
  */
 void CopyTextProcessingProperties(const Model& source, Model& target);
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_PROCESSING_SOURCE_H

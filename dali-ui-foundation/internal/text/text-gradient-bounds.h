@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -325,6 +325,6 @@ inline Vector4 CalculateAtlasGradientContentBounds(const Vector2& layoutSize,
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_INTERNAL_TEXT_GRADIENT_BOUNDS_H

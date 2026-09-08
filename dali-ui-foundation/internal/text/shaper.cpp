@@ -24,7 +24,7 @@
 #include <dali/integration-api/trace.h>
 #include <chrono>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -325,4 +325,4 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

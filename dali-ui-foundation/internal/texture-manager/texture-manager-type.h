@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-upload-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -309,6 +309,6 @@ struct ExternalTextureInfo
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXTURE_MANAGER_TYPE_H

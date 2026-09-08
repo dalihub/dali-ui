@@ -6,7 +6,7 @@
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/insets.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace Internal
 {
@@ -246,4 +246,4 @@ private:
 private:
   IntrusivePtr<Internal::IconButtonStyleImpl> mImpl;
 };
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

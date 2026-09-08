@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/character-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Enumerates the replacement types known by the text processing layer.
@@ -162,6 +162,6 @@ struct ReplacementRevealTiming
   bool     rightToLeft{false};
 };
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_RUN_SNAPSHOT_H

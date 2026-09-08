@@ -29,7 +29,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/builder/tree-node.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -255,6 +255,6 @@ char* CopyString(const char* fromString, VectorCharIter& iter, const VectorCharI
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_SCRIPT_TREE_NODE_MANIPULATOR_H

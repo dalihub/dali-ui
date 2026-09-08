@@ -35,7 +35,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -311,4 +311,4 @@ inline const Internal::UiLocalizationManagerImpl& GetImpl(const UiLocalizationMa
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -23,7 +23,7 @@
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/property-key.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -153,6 +153,6 @@ private:                   // Data members
 } // namespace Internal
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_TRANSITION_DATA_H

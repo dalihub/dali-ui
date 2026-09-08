@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 namespace
 {
@@ -570,4 +570,4 @@ Property::Value InputEditorImpl::PropertyHandler::GetProperty(Ui::View view, Pro
   return value;
 }
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration

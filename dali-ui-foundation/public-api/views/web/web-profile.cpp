@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-profile.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -67,4 +67,4 @@ WebProfile::WebProfile(Integration::WebProfileImpl& implementation)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

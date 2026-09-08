@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -229,4 +229,4 @@ private:
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

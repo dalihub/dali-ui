@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali/public-api/common/unique-ptr.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -56,4 +56,4 @@ private:
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

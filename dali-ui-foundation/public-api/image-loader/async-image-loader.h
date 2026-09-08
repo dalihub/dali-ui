@@ -26,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class PixelData;
 
@@ -242,6 +242,6 @@ public: // Not intended for developer use
  */
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_ASYNC_IMAGE_LOADER_H

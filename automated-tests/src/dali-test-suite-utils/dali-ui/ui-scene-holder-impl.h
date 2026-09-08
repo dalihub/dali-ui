@@ -28,7 +28,7 @@
 #include <dali/devel-api/events/touch-point.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Internal
 {

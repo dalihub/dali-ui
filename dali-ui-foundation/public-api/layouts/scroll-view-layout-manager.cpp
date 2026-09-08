@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -166,4 +166,4 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

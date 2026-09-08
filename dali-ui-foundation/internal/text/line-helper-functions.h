@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -56,6 +56,6 @@ float GetPostOffsetVerticalLineAlignment(const LineRun&   line,
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_LINE_HELPER_FUNCTIONS_H

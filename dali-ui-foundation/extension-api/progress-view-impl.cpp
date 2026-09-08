@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/extension-api/progress-view-impl.h>
 #include <dali-ui-foundation/extension-api/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -320,4 +320,4 @@ bool ProgressViewImpl::OnAccessibilityRequestValue(Dali::String& value)
 
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

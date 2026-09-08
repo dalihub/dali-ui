@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/check-box-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -168,4 +168,4 @@ CheckBox::CheckBox(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

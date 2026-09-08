@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/image-loader/image-url-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -69,4 +69,4 @@ ImageUrl::ImageUrl(Ui::Internal::ImageUrl* internal)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

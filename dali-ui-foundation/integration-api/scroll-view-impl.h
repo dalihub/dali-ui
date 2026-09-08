@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -837,4 +837,4 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

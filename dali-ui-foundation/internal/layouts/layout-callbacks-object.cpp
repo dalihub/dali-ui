@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -55,4 +55,4 @@ ArrangeCallback* LayoutCallbacksObject::GetArrangeCallback()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -18,7 +18,7 @@
 // FILE HEADER
 #include <dali-ui-foundation/internal/text/abstract-style-character-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -43,4 +43,4 @@ CharacterIndex AbstractStyleCharacterRun::GetEndCharacterIndex() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

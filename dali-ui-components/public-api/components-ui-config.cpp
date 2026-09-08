@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/components-ui-config-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -41,4 +41,4 @@ UiConfig::UiConfig(Internal::UiConfigImpl* impl)
 
 } // namespace Components
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

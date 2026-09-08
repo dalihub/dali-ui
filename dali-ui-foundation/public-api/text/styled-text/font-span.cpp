@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/styled-text/font-span-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -51,4 +51,4 @@ FontSpan::FontSpan(BaseObject* impl)
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

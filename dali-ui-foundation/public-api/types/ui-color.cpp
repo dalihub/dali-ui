@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/internal/ui-color-cache.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -432,4 +432,4 @@ void UiColor::SetTokenAlpha(float alpha)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

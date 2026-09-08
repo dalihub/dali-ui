@@ -48,7 +48,7 @@ using Dali::Integration::ToDaliString;
 using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1182,4 +1182,4 @@ Shader AnimatedVectorImageVisual::GenerateShader() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

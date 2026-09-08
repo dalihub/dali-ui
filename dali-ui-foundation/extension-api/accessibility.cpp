@@ -28,7 +28,7 @@
 // std::string but does not include <string> itself (breaks MSVC otherwise).
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-service.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -66,4 +66,4 @@ void SayAccessibilityText(
 } // namespace Accessibility
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

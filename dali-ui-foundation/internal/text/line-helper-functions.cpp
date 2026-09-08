@@ -18,7 +18,7 @@
 // FILE HEADER
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -86,4 +86,4 @@ float GetPostOffsetVerticalLineAlignment(const LineRun&   line,
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

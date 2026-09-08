@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -308,6 +308,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_NPATCH_DATA_H

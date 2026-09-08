@@ -26,7 +26,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/adaptor-framework/window.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -287,4 +287,4 @@ void GlViewImpl::KeepRendering()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -75,7 +75,7 @@ namespace ViewAccessibility = Dali::Ui::Integration::ViewAccessibility;
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -3057,4 +3057,4 @@ Dali::Property::Value InputEditorImpl::GetProperty(BaseObject* object, Dali::Pro
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

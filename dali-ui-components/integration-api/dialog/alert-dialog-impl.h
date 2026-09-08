@@ -24,7 +24,7 @@
 #include <dali-ui-components/integration-api/dialog/dialog-impl.h>
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -82,4 +82,4 @@ inline const Integration::AlertDialogImpl& GetImpl(const Ui::AlertDialog& alertD
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

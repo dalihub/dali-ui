@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/styled-text/annotation-span-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -49,4 +49,4 @@ const Dali::String& AnnotationSpan::GetValue() const
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

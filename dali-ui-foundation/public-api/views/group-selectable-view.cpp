@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/extension-api/group-selectable-view-impl.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -80,4 +80,4 @@ SelectionGroup GroupSelectableView::GetGroup() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

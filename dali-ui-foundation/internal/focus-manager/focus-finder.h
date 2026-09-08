@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/views/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -53,6 +53,6 @@ View GetNextFocusableViewInOrder(Actor root, View focusedView, Ui::FocusDirectio
 } // namespace FocusFinder
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_FOCUS_FINDER_H

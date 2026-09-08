@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -460,6 +460,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_MODEL_H

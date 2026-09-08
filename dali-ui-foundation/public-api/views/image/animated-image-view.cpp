@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
 #include <dali/public-api/common/dali-vector.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -361,4 +361,4 @@ AnimatedImageView::AnimatedImageView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::AnimatedImageViewImpl>(internal);
 }
 } //namespace Ui
-} //namespace Dali
+} //namespace DALI_NAMESPACE

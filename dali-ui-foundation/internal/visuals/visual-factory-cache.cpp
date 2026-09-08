@@ -44,7 +44,7 @@
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToDaliStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -660,4 +660,4 @@ int32_t VisualFactoryCache::GetProperBrokenImageIndex(const Vector2& size)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

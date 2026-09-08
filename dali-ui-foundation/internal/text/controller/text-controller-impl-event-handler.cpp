@@ -35,7 +35,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1178,4 +1178,4 @@ void ControllerImplEventHandler::OnHandleScrolling(Controller::Impl& impl, const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

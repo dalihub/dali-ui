@@ -22,7 +22,7 @@
 
 #include <utility>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -224,4 +224,4 @@ std::unique_ptr<WindowOperationAdapter> CreateDaliWindowOperationAdapter(Dali::W
   return std::make_unique<DaliWindowOperationAdapter>(window, std::move(closeCallback), options);
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

@@ -47,7 +47,7 @@
 static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::RELATIVE) == Dali::Ui::Integration::Visual::Transform::Policy::RELATIVE);
 static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::ABSOLUTE) == Dali::Ui::Integration::Visual::Transform::Policy::ABSOLUTE);
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -1136,4 +1136,4 @@ void AllowToAddActorToChildEnd(Ui::View view)
 } // namespace View
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

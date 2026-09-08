@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/multi-language-support-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -101,4 +101,4 @@ void MultilanguageSupport::UpdateICULineBreak(const std::string& text, TextAbstr
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

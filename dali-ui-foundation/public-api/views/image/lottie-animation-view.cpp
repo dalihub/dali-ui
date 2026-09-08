@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/integration-api/lottie-animation-view-impl.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -340,4 +340,4 @@ LottieAnimationView::LottieAnimationView(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

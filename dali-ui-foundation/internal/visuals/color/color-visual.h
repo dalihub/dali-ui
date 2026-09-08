@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -162,6 +162,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif /* DALI_UI_INTERNAL_COLOR_VISUAL_H */

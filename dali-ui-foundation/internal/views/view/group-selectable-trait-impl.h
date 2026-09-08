@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/public-api/views/selection-group.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -311,4 +311,4 @@ const Internal::GroupSelectableTraitImpl& GetImpl(const GroupSelectableTrait& ob
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

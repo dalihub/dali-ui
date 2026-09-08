@@ -34,7 +34,7 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -1141,4 +1141,4 @@ const UniqueAny* View::GetAttachmentInternal(AttachmentId id) const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

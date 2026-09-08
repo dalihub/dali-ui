@@ -2,7 +2,7 @@
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -81,4 +81,4 @@ Vector4 IconButtonImpl::GetIconCornerRadius() const
 {
   return mIcon.GetCornerRadius();
 }
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

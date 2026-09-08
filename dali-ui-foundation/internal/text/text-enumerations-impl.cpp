@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -241,4 +241,4 @@ bool GetMarqueeOrientationEnumeration(const Property::Value& propertyValue, Marq
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

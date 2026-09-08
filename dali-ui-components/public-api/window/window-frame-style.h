@@ -28,7 +28,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 /**
@@ -171,4 +171,4 @@ private:
   Dali::UniquePtr<Impl> mImpl;
 };
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

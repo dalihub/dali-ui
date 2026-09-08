@@ -29,7 +29,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -225,4 +225,4 @@ bool KeyInputFocusManagerImpl::DoConnectSignal(BaseObject* object, ConnectionTra
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

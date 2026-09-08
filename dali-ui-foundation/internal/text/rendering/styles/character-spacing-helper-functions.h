@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/character-spacing-glyph-run.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -49,6 +49,6 @@ float GetGlyphCharacterSpacing(const GlyphIndex&                       index,
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_RENDERING_STYLES_CHARACTER_SPACING_HELPER_FUNCTIONS_H

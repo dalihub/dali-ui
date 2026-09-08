@@ -41,7 +41,7 @@
 
 using Dali::Integration::ToDaliString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -335,4 +335,4 @@ void FastTrackLoadingTask::UploadToTexture()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

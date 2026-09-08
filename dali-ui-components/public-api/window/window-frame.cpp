@@ -20,7 +20,7 @@
 
 #include <utility>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 WindowFrame::WindowFrame()                                      = default;
@@ -276,4 +276,4 @@ WindowFrame::WindowFrame(Internal::WindowFrameImpl* impl)
 {
 }
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

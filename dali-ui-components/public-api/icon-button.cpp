@@ -1,7 +1,7 @@
 #include <dali-ui-components/internal/icon-button-impl.h>
 #include <dali-ui-components/public-api/icon-button.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 IconButton::IconButton()  = default;
 IconButton::~IconButton() = default;
@@ -87,4 +87,4 @@ IconButton::IconButton(Dali::Internal::CustomActor* internal)
 {
   VerifyCustomActorPointer<Internal::IconButtonImpl>(internal);
 }
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

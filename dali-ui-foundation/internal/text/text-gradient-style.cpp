@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -108,4 +108,4 @@ Style CreateStyle(const Dali::Ui::Gradient::Base& gradient)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

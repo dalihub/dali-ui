@@ -20,7 +20,7 @@
 #include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/common/dali-string.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -33,4 +33,4 @@ Dali::String ResolveComponentImageUrl(Dali::StringView fileName);
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

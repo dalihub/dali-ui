@@ -58,7 +58,7 @@ uint64_t NextReplacementSourceRevision()
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -896,4 +896,4 @@ void Controller::TextUpdater::ResetText(Controller& controller)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

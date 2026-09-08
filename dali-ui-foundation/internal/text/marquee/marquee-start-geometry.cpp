@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 MarqueeStartAnchor ResolveMarqueeStartAnchor(const FinalElisionResult* finalElision,
                                              const VisualModel*        sourceModel)
@@ -174,4 +174,4 @@ MarqueeFittingStartGeometry ResolveMarqueeFittingStartGeometry(const ModelInterf
   return MarqueeFittingStartGeometry{staticTranslation, true};
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

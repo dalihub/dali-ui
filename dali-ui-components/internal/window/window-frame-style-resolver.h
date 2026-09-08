@@ -17,7 +17,7 @@
 
 #include <dali-ui-components/public-api/window/window-frame-style.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 struct ResolvedWindowFrameStyle
 {
@@ -29,4 +29,4 @@ struct ResolvedWindowFrameStyle
 ResolvedWindowFrameStyle ResolveWindowFrameStyle(const WindowFrameStyle& style, bool maximized);
 Dali::Vector4            ToNPatchBorder(const Dali::Ui::Insets& border);
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

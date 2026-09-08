@@ -59,7 +59,7 @@
 
 using namespace Dali;
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 std::size_t GetInlineReplacementRevealConstraintCount(Ui::View owner)
 {

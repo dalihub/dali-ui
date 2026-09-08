@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -299,4 +299,4 @@ Geometry BorderVisual::CreateBorderGeometry()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

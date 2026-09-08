@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/character-spacing-glyph-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Provides non-owning input for END ellipsis planning.
@@ -92,6 +92,6 @@ FontId ResolveEndEllipsisFontId(const TextAbstraction::GlyphInfo* glyphs,
 EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView&  input,
                                        TextAbstraction::FontClient& fontClient);
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_ELLIPSIS_PLANNER_H

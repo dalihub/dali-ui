@@ -45,7 +45,7 @@
 
 using Dali::Integration::ToDaliString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -503,4 +503,4 @@ bool ColorVisual::IsCutoutRequired() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

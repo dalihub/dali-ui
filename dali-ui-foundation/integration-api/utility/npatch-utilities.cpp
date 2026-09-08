@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -357,4 +357,4 @@ Dali::Uint16Pair GetValidStrechPointFromBorder(uint32_t maxRangeSize, uint32_t r
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

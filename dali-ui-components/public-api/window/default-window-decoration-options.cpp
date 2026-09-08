@@ -22,7 +22,7 @@
 #define DALI_ASSERT_VALID_DEFAULT_WINDOW_DECORATION_OPTIONS(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from DefaultWindowDecorationOptions object")
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace
 {
@@ -169,6 +169,6 @@ DALI_DEFINE_DEFAULT_WINDOW_DECORATION_FLAG(ResizeHandles, resizeHandlesEnabled)
 
 #undef DALI_DEFINE_DEFAULT_WINDOW_DECORATION_FLAG
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #undef DALI_ASSERT_VALID_DEFAULT_WINDOW_DECORATION_OPTIONS

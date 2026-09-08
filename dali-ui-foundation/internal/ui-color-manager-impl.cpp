@@ -28,7 +28,7 @@
 #include <dali/devel-api/common/singleton-service.h>
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -318,4 +318,4 @@ void UiColorManagerImpl::RefreshBindings()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

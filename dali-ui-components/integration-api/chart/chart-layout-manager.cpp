@@ -32,7 +32,7 @@
 #include <dali-ui-components/public-api/chart/chart-view.h>
 #include <dali-ui-components/public-api/chart/pie-series.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -264,4 +264,4 @@ ChartLayoutManager::LayoutResult ChartLayoutManager::ComputeLayout(
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -23,7 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/chart/chart-series.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -153,4 +153,4 @@ public:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

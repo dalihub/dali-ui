@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -57,4 +57,4 @@ void Renderer::SetAtlasGradientAnimApplyAlways(bool applyAlways, bool notifyToCo
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

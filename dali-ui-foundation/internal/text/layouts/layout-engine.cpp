@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/internal/text/layouts/layout-parameters.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -2975,4 +2975,4 @@ float Engine::GetLineSpacing(float textSize, float relativeLineSize) const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

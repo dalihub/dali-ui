@@ -43,7 +43,7 @@
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -332,4 +332,4 @@ VisualsContainer::~VisualsContainer()
   }
 }
 
-} //namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

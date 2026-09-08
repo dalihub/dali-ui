@@ -35,7 +35,7 @@ using Dali::Integration::ToDaliString;
 using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -45,7 +45,7 @@ extern Animation CreateAnimation(const TreeNode& child, Dali::Ui::Internal::Buil
 extern void      DeterminePropertyFromNode(const TreeNode& node, Property::Value& value);
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 namespace
 {
@@ -707,7 +707,7 @@ float GetConditionArg1(const TreeNode& child)
 
 }; // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -826,4 +826,4 @@ Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

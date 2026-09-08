@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputContainer& inputs)
@@ -114,4 +114,4 @@ void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputCont
   }
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

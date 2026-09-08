@@ -47,7 +47,7 @@
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1892,4 +1892,4 @@ bool ChartViewImpl::OnHover(Actor actor, HoverEvent event)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

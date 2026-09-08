@@ -5,7 +5,7 @@
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali/public-api/common/dali-string.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace Internal
 {
@@ -164,4 +164,4 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL IconButton(Dali::Internal::CustomActor* internal);
   /// @endcond
 };
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

@@ -23,7 +23,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -163,4 +163,4 @@ private:
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

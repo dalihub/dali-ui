@@ -22,7 +22,7 @@
 #include <dali/devel-api/common/vector-wrapper.h>
 #include <algorithm>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -197,4 +197,4 @@ void LineSeries::SetSmoothness(float value)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

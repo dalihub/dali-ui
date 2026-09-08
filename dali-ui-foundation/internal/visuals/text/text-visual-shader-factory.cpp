@@ -25,7 +25,7 @@
 
 using Dali::Integration::ToDaliStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -386,7 +386,7 @@ Shader TextVisualShaderFactory::GetShader(VisualFactoryCache&                   
     return shader;
   }
 
-  shader                                    = factoryCache.GetShader(shaderType);
+  shader = factoryCache.GetShader(shaderType);
 
   if(!shader)
   {
@@ -544,4 +544,4 @@ bool TextVisualShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderTyp
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

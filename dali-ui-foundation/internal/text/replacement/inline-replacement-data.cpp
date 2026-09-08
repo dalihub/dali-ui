@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
 
-namespace Dali::Ui::Internal::Text
+namespace DALI_NAMESPACE::Ui::Internal::Text
 {
 namespace
 {
@@ -78,9 +78,9 @@ void RemoveInlineReplacementData(Ui::ViewImpl& owner)
   Internal::ViewDataImpl::Get(owner).RemoveAttachment(INLINE_REPLACEMENT_DATA_ATTACHMENT_ID);
 }
 
-} // namespace Dali::Ui::Internal::Text
+} //namespace DALI_NAMESPACE::Ui::Internal::Text
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 bool PublishInlineReplacementRevealTimings(
   Ui::View                                         owner,
@@ -106,4 +106,4 @@ bool IsCurrentInlineReplacementRender(Ui::View owner, uint64_t layoutGeneration)
   return data && data->lastRenderGeneration == layoutGeneration;
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

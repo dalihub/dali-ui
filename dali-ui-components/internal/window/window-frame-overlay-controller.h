@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+#include <dali/public-api/common/dali-namespace.h>
 #include <cstdint>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 struct OverlayStateUpdate
@@ -65,4 +66,4 @@ private:
   uint32_t mAutoHideDelayMilliseconds{3000u};
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/video/video-source.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -86,4 +86,4 @@ inline const Ui::Internal::VideoSource& GetImpl(const Dali::Ui::VideoSource& sou
   return static_cast<const Ui::Internal::VideoSource&>(handle);
 }
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

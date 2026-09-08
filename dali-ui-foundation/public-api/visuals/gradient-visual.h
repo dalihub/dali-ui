@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/public-api/gradient/gradient-stop-node.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -229,6 +229,6 @@ public:
  * @}
  */
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VISUAL_OBJECT_H

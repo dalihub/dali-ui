@@ -38,7 +38,7 @@
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -647,6 +647,6 @@ inline Internal::Visual::Base& GetImplementation(Ui::Integration::Visual::Base& 
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_VISUAL_BASE_IMPL_H

@@ -33,7 +33,7 @@
 
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -263,4 +263,4 @@ void Internal::Visual::Base::Impl::SetTransformUniformsInternal(const Transform&
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

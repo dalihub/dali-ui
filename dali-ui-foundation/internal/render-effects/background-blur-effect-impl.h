@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/public-api/render-effects/background-blur-effect.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -295,6 +295,6 @@ inline const Ui::Internal::BackgroundBlurEffectImpl& GetImplementation(const Ui:
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_BACKGROUND_BLUR_EFFECT_H

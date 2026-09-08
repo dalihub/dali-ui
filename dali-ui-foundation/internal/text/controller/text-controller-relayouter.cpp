@@ -79,7 +79,7 @@ float ConvertPointToPixel(float point)
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1575,4 +1575,4 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

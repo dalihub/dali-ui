@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-upload-observer.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -154,6 +154,6 @@ protected:
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_IMAGE_CACHE_H

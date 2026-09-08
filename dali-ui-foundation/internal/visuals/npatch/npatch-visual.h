@@ -33,7 +33,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -236,6 +236,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_N_PATCH_VISUAL_H

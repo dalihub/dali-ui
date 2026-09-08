@@ -30,7 +30,7 @@
 // EXTERNAL INCLUDES
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -374,4 +374,4 @@ CheckBoxStyleImpl::~CheckBoxStyleImpl() = default;
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

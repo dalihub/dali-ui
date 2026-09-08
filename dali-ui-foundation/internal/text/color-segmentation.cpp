@@ -24,7 +24,7 @@
 
 #include <iostream>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -127,4 +127,4 @@ void SetColorSegmentationInfo(const Vector<ColorRun>& colorRuns, const Vector<Gl
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

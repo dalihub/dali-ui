@@ -26,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -105,6 +105,6 @@ inline const Internal::PropertyBridge& GetImplementation(const Dali::Ui::Integra
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_PROPERTY_BRIDGE_H

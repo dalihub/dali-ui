@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -117,6 +117,6 @@ void GetCharactersDirection(TextAbstraction::BidirectionalSupport&       bidirec
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_BIDIRECTIONAL_SUPPORT_H

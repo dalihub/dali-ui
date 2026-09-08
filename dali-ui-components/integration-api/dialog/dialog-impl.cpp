@@ -25,7 +25,7 @@
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/common/unique-ptr.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -200,4 +200,4 @@ void DialogImpl::ApplyAlignment(Ui::View view)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

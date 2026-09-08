@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1109,4 +1109,4 @@ const Vector<CharacterDirection>& ViewModel::GetCharacterDirections() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

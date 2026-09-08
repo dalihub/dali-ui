@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <cstddef>
 
-namespace Dali::Ui::Internal::Text
+namespace DALI_NAMESPACE::Ui::Internal::Text
 {
 class InlineReplacementManagerTestAccessor
 {

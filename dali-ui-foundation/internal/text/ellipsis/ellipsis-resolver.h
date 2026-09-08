@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 
 /**
@@ -109,6 +109,6 @@ void FinalizeEndEllipsisGeometry(const Model&                model,
                                  Layout::Engine&             layoutEngine,
                                  FinalElisionResult&         result);
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_ELLIPSIS_RESOLVER_H

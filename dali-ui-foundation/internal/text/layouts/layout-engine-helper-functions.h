@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -90,6 +90,6 @@ void TraversesCharactersForGlyphPositionsRTL(const VisualModelPtr& visualModel, 
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_LAYOUT_ENGINE_HELPER_FUNCTIONS_H

@@ -28,7 +28,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -246,4 +246,4 @@ float ResolveTextForegroundReferencePixelSize(const ModelInterface&       model,
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

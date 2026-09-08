@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui/ui-adaptor-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 class Adaptor;

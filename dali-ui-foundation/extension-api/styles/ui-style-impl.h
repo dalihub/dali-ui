@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -79,4 +79,4 @@ inline const UiStyleImpl& GetImpl(const UiStyle& obj)
 
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

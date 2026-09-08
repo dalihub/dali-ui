@@ -19,7 +19,7 @@
 
 #include <optional>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 const char* WindowFrameInteractionTypeName(WindowFrameInteractionType type);
@@ -57,4 +57,4 @@ private:
   bool                       mPointerReleased{false};
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

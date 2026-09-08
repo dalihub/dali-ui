@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -118,4 +118,4 @@ inline const Integration::DialogImpl& GetImpl(const Ui::Dialog& dialog)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

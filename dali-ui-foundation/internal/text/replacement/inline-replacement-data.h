@@ -24,12 +24,12 @@
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 class ViewImpl;
 }
 
-namespace Dali::Ui::Internal::Text
+namespace DALI_NAMESPACE::Ui::Internal::Text
 {
 /**
  * @brief Stores on-demand inline replacement data for a Label.
@@ -88,6 +88,6 @@ void RemoveInlineReplacementData(Ui::View owner);
  */
 void RemoveInlineReplacementData(Ui::ViewImpl& owner);
 
-} // namespace Dali::Ui::Internal::Text
+} //namespace DALI_NAMESPACE::Ui::Internal::Text
 
 #endif // DALI_UI_INLINE_REPLACEMENT_DATA_H

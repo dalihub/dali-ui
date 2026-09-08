@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 namespace
 {
@@ -482,4 +482,4 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
   return value;
 }
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration

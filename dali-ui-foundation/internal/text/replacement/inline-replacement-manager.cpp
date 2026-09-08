@@ -38,7 +38,7 @@
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1035,4 +1035,4 @@ void InlineReplacementManager::Clear()
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

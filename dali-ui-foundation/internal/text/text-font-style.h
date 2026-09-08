@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -253,6 +253,6 @@ bool GetFontSlantEnumeration(const Property::Value& propertyValue, FontSlant& fo
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_TEXT_FONT_STYLE_H

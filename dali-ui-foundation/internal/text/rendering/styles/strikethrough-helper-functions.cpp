@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/rendering/styles/strikethrough-helper-functions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -96,4 +96,4 @@ void CalcualteStrikethroughHeight(float& currentStrikethroughHeight, float& maxS
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

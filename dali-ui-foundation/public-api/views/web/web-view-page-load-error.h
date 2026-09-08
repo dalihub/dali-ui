@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/web/web-view-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -104,4 +104,4 @@ private:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

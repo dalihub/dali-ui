@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -65,6 +65,6 @@ struct Controller::PlaceholderHandler
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_CONTROLLER_PLACEHOLDER_HANDLER_H

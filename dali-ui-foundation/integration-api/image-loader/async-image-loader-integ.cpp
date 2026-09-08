@@ -17,7 +17,7 @@
 #include <dali-ui-foundation/integration-api/image-loader/async-image-loader-integ.h>
 #include <dali-ui-foundation/internal/image-loader/async-image-loader-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -53,4 +53,4 @@ PixelBufferLoadedSignalType& PixelBufferLoadedSignal(AsyncImageLoader asyncImage
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

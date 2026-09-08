@@ -30,7 +30,7 @@
 
 using namespace Dali;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class Adaptor;
 

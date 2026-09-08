@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -151,6 +151,6 @@ AnchorHitResult ActivateAnchor(Dali::Ui::View owner, Dali::Ui::Text::CharacterIn
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_TEXT_ANCHOR_INTERACTION_DATA_H

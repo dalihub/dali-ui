@@ -21,7 +21,7 @@
 #include <dali/public-api/adaptor-framework/image-options.h>
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -91,4 +91,4 @@ enum class ReleasePolicy : uint8_t
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

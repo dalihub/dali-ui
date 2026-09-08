@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -307,4 +307,4 @@ void ImageVisual::Reload()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

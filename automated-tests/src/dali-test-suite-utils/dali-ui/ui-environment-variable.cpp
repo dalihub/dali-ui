@@ -19,8 +19,9 @@
 // EXTERNAL INCLUDE
 #include <map>
 #include <string>
+#include <dali/public-api/common/dali-namespace.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace EnvironmentVariable
 {

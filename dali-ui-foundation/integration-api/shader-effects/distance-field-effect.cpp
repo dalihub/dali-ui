@@ -29,7 +29,7 @@
 
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -60,4 +60,4 @@ Dali::Property::Map CreateDistanceFieldEffect()
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

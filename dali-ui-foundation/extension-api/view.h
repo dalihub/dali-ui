@@ -27,7 +27,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -415,4 +415,4 @@ DALI_UI_API void SetSizeDepth(Ui::View view, float depth);
 } // namespace View
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

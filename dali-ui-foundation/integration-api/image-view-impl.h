@@ -27,7 +27,7 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/signals/dali-signal.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -418,4 +418,4 @@ private: // Data
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

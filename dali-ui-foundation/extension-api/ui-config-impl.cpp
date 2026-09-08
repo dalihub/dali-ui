@@ -42,7 +42,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_UI_
 
 } // unnamed namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -698,4 +698,4 @@ FocusIndicationPolicy::Function UiConfigImpl::GetFocusIndicationPolicy() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

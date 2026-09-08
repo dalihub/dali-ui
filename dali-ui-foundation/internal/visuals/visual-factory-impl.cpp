@@ -61,7 +61,7 @@
 using Dali::Integration::GetStdString;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -682,4 +682,4 @@ void VisualFactory::RegisterDiscardCallback()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

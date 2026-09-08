@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -253,4 +253,4 @@ void ArcVisual::OnInitialize()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

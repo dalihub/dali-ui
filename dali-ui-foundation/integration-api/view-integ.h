@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -236,4 +236,4 @@ DALI_UI_API bool HasLayoutCapability(ViewImpl& viewImpl);
 } // namespace View
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 constexpr std::size_t DECORATION_SLOT_COUNT = 6u;
 constexpr std::size_t DECORATION_ROLE_COUNT = 6u;
@@ -50,4 +50,4 @@ WindowFrameDecorationResult ValidateDecorationTopology(const DecorationTopology&
 WindowFrameDecorationResult ValidateWindowFrameDecoration(const WindowFrameDecoration& decoration, Dali::Actor installedSlotParent = Dali::Actor());
 const char*                 WindowFrameDecorationResultName(WindowFrameDecorationResult result);
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

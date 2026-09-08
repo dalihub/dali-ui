@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/integration-api/web-cookie-manager-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -62,4 +62,4 @@ WebCookieManager::WebCookieManager(Integration::WebCookieManagerImpl& implementa
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

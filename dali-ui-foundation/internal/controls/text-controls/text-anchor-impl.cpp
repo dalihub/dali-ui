@@ -33,7 +33,7 @@ using Dali::Integration::GetStdString;
 using Dali::Integration::ToPropertyValue;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -242,4 +242,4 @@ bool TextAnchorImpl::OnAccessibilityActivate()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

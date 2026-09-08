@@ -21,7 +21,7 @@
 // INTERAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -129,4 +129,4 @@ Dali::VisualRenderer Visual::Base::GetRenderer() const
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

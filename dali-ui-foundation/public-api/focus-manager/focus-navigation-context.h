@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/views/view-focus-enums.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class Window;
 
@@ -92,4 +92,4 @@ private:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

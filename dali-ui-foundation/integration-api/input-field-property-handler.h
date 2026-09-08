@@ -19,7 +19,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 /**
  * Class to manage properties for the InputFieldImpl
@@ -45,4 +45,4 @@ struct InputFieldImpl::PropertyHandler
   static Property::Value GetProperty(Ui::View view, Property::Index index);
 };
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration

@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-shader-factory-interface.h>
 #include <string_view>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -119,6 +119,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_IMAGE_VISUAL_SHADER_FACTORY_H

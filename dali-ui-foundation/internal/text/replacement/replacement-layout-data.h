@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Request-local scale-1 font ids for replacement AUTO line geometry.
@@ -146,6 +146,6 @@ struct ReplacementLayoutData
   }
 };
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_LAYOUT_DATA_H

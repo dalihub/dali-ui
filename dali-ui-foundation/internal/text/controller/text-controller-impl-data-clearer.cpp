@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 
 void ControllerImplDataClearer::ClearFullModelData(Controller::Impl& impl, Controller::OperationsMask operations)
@@ -345,4 +345,4 @@ void ControllerImplDataClearer::ClearModelData(Controller::Impl& impl, Character
   model->mVisualModel->ClearCaches();
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -51,6 +51,6 @@ struct SelectionHandleController
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_SELECTION_HANDLE_CONTROLLER_H

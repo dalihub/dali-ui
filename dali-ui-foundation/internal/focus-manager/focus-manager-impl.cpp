@@ -56,7 +56,7 @@
 namespace ExtensionView   = Dali::Ui::Extension::View;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1393,4 +1393,4 @@ void FocusManager::OnSceneDisconnection(Dali::Actor actor)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

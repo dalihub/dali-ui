@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -150,4 +150,4 @@ public: // Not intended for application developers
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

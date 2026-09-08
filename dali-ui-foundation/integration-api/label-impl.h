@@ -47,7 +47,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -1458,4 +1458,4 @@ protected:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

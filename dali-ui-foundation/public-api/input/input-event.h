@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/input/input-event-type.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -222,4 +222,4 @@ public: // Not intended for Application developers
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -19,11 +19,12 @@
 
 #include <dali/devel-api/common/vector-wrapper.h>
 
+#include <dali/public-api/common/dali-namespace.h>
 #include <algorithm>
 #include <string>
 #include <string_view>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 extern bool CaseInsensitiveStringCompare(std::string_view a, std::string_view b);
 
@@ -225,6 +226,6 @@ public:
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_BUILDER_DICTIONARY_H

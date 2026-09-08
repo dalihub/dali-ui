@@ -20,7 +20,7 @@
 #define DALI_ASSERT_VALID_WINDOW_FRAME_INTERACTION(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from WindowFrameInteraction object")
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 struct WindowFrameInteraction::Impl
@@ -72,6 +72,6 @@ WindowFrameInteractionState WindowFrameInteraction::GetState() const
   return mImpl->state;
 }
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #undef DALI_ASSERT_VALID_WINDOW_FRAME_INTERACTION

@@ -38,7 +38,7 @@
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -562,4 +562,4 @@ void CanvasViewImpl::RequestRasterization()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

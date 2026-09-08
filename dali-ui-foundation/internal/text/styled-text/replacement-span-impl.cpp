@@ -17,7 +17,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/styled-text/replacement-span-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -30,4 +30,4 @@ ReplacementSpan::~ReplacementSpan() = default;
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

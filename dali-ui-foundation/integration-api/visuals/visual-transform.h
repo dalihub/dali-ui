@@ -26,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 
-namespace Dali::Ui::Internal::Visual
+namespace DALI_NAMESPACE::Ui::Internal::Visual
 {
 struct Transform
 {
@@ -75,6 +75,6 @@ struct Transform
   Ui::Align::Type mOrigin;
   Ui::Align::Type mPivot;
 };
-} // namespace Dali::Ui::Internal::Visual
+} //namespace DALI_NAMESPACE::Ui::Internal::Visual
 
 #endif // DALI_UI_INTERNAL_VISUAL_TRANSFORM_H

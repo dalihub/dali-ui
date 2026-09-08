@@ -26,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 class TextLoadingTask;
 using TextLoadingTaskPtr = IntrusivePtr<TextLoadingTask>;
@@ -110,6 +110,6 @@ private:
   Mutex mMutex;
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal
 
 #endif // DALI_UI_TEXT_LOADING_TASK_H

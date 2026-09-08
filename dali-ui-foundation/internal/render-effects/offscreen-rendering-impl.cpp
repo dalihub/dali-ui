@@ -35,7 +35,7 @@ namespace IntegrationView = Dali::Ui::Integration::View;
 
 using Dali::Integration::ToDaliString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -228,4 +228,4 @@ void OffScreenRenderingImpl::OnRenderFinished(Dali::RenderTask task)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

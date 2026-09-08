@@ -31,7 +31,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::Concise, true, "LOG_TEXT_R
 
 } // unnamed namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -267,4 +267,4 @@ AtlasGlyphManager::~AtlasGlyphManager()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -294,4 +294,4 @@ inline size_t LayoutChangeCauseIndex(LayoutChangeCause cause)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

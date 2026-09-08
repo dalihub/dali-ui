@@ -28,7 +28,7 @@
 #include <cmath>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -246,4 +246,4 @@ MarkdownViewStyle::Builder::Builder(Internal::MarkdownViewStyleImpl* impl)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

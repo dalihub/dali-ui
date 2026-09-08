@@ -20,7 +20,7 @@
 // EXTERNAL INCLUDES
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -74,4 +74,4 @@ View FocusNavigationContextImpl::GetFocusGroup() const
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -160,4 +160,4 @@ bool FocusManager::IsClearFocusIndicationOnHoverEnabled() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

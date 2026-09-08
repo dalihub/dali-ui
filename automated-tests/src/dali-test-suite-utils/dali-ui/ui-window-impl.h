@@ -29,7 +29,7 @@
 #include <dali-ui/ui-scene-holder-impl.h>
 #include <dali-ui/ui-window.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 using PositionSize = Dali::BoundsInteger;
 

@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -395,4 +395,4 @@ void GroupAdapterImpl::OnRecycleViewHolder(ItemViewHolder& holder)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

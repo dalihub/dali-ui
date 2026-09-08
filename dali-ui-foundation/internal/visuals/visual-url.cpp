@@ -24,7 +24,7 @@
 // INTERNAL HEADERS
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -94,8 +94,8 @@ VisualUrl::ProtocolType ResolveLocation(const std::string& url)
 VisualUrl::Type ResolveType(const std::string& url)
 {
   // if only one char in string, can only be regular image
-  const uint32_t    count      = static_cast<uint32_t>(url.size());
-  VisualUrl::Type   returnType = VisualUrl::REGULAR_IMAGE;
+  const uint32_t  count      = static_cast<uint32_t>(url.size());
+  VisualUrl::Type returnType = VisualUrl::REGULAR_IMAGE;
   if(count > 0)
   {
     // parsing from the end for better chance of early outs
@@ -425,4 +425,4 @@ std::string VisualUrl::GetLocationWithoutExtension(const std::string& url)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

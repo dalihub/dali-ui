@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali/public-api/common/dali-vector.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -212,4 +212,4 @@ public:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

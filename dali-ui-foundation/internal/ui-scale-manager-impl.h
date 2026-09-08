@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -139,4 +139,4 @@ inline const Internal::UiScaleManagerImpl& GetImpl(const UiScaleManager& obj)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

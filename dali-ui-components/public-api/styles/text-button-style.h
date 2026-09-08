@@ -33,7 +33,7 @@
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -203,4 +203,4 @@ private:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

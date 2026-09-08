@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/text-alignment.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -983,4 +983,4 @@ void FinalizeEndEllipsisGeometry(const Model&                model,
   }
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

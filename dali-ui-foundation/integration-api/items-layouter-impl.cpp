@@ -17,7 +17,7 @@
 
 #include <dali-ui-foundation/integration-api/items-layouter-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -45,4 +45,4 @@ void ItemsLayouterImpl::InvalidateLayout()
 } // namespace Integration
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

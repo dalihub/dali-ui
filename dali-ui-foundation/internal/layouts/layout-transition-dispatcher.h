@@ -36,7 +36,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -598,4 +598,4 @@ private:
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

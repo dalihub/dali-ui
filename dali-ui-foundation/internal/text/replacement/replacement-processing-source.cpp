@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -215,4 +215,4 @@ void CopyTextProcessingProperties(const Model& source, Model& target)
   targetVisual.SetVerticalLineAlignment(source.GetVerticalLineAlignment());
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 #include <dali-ui-foundation/public-api/traits/interactive-trait.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -166,4 +166,4 @@ void InteractiveTrait::SetKeyClickPolicy(KeyClickPolicy policy)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

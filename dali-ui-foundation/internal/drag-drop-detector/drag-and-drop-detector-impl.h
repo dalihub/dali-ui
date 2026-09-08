@@ -35,7 +35,7 @@
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -433,6 +433,6 @@ inline const Internal::DragAndDropDetector& GetImplementation(const Dali::Ui::Dr
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_INTERNAL_DRAG_AND_DROP_DETECTOR_H

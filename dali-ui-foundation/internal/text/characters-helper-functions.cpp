@@ -4,7 +4,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/emoji-helper.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -57,4 +57,4 @@ CharacterRun RetrieveClusteredCharactersOfCharacterIndex(const VisualModelPtr&  
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

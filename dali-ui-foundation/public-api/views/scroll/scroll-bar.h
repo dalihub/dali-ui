@@ -24,7 +24,7 @@
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/object/property-map.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -202,6 +202,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_SCROLL_BAR_H

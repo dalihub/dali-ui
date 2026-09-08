@@ -53,7 +53,7 @@ using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToPropertyValue;
 using Dali::Integration::ToStdStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1669,4 +1669,4 @@ void ImageVisual::UpdateNativeTextureInfomation(TextureSet textureSet)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

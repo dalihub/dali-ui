@@ -44,7 +44,7 @@
 #include <dali-ui-foundation/public-api/text/input-filter.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 class Controller;
 struct MarqueeStartAnchor;
@@ -2839,6 +2839,6 @@ private:
   std::unique_ptr<Impl> mImpl{nullptr};
 };
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_CONTROLLER_H

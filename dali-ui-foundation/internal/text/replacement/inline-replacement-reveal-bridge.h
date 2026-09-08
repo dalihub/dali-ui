@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 bool PublishInlineReplacementRevealTimings(Ui::View                                         owner,
                                            const Vector<Ui::Text::ReplacementRevealTiming>& timings,
@@ -37,6 +37,6 @@ void ClearInlineReplacementReveal(Ui::View owner);
 
 bool IsCurrentInlineReplacementRender(Ui::View owner, uint64_t layoutGeneration);
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal
 
 #endif // DALI_UI_INLINE_REPLACEMENT_REVEAL_BRIDGE_H

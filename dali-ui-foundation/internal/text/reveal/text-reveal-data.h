@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/style/reveal.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -78,4 +78,4 @@ inline TextRevealData& GetOrCreateTextRevealData(TextRevealDataPtr& data)
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

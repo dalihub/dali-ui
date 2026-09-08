@@ -23,7 +23,7 @@
 
 // INTERNAL INCLUDES
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 // Forward declaration
 struct Vector2;
@@ -60,6 +60,6 @@ void ParsePropertyString(const std::string& property, Property::Map& map);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_PROPERTY_STRING_PARSER_H

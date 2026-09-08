@@ -36,7 +36,7 @@
 
 using Dali::Integration::ToDaliString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1359,4 +1359,4 @@ void SvgLoader::RasterizeObserverDestroyed(SvgLoaderObserver* observer)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

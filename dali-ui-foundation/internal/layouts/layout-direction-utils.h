@@ -17,7 +17,10 @@
  *
  */
 
-namespace Dali
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
+
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -56,4 +59,4 @@ inline float MirrorX(float parentWidth, float logicalX, float childWidth)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

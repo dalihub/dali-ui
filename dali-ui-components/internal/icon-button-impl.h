@@ -4,7 +4,7 @@
 #include <dali-ui-foundation/extension-api/interactive-view-impl.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 class IconButtonImpl : public Extension::InteractiveViewImpl
 {
@@ -39,4 +39,4 @@ inline const IconButtonImpl& GetImpl(const Ui::IconButton& button)
 {
   return static_cast<const IconButtonImpl&>(button.GetImplementation());
 }
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

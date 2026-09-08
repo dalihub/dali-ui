@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -85,4 +85,4 @@ RendererPtr Backend::NewRenderer()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

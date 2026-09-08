@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -129,6 +129,6 @@ inline static const Internal::AsyncTextModule& GetImplementation(const AsyncText
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_ASYNC_TEXT_MODULE_IMPL_H

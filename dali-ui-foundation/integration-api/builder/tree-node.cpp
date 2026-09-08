@@ -25,7 +25,7 @@
 #include "dali-ui-foundation/integration-api/builder/tree-node.h"
 #include "dali-ui-foundation/internal/builder/tree-node-manipulator.h"
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 /**
  * return true if the lower cased ASCII strings are equal.
@@ -213,4 +213,4 @@ bool TreeNode::ConstIterator::operator!=(const TreeNode::ConstIterator& rhs) con
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/public-api/views/selectable-view.h>
 #include <dali/public-api/common/dali-string.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -109,4 +109,4 @@ public: // Not intended for application developers
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

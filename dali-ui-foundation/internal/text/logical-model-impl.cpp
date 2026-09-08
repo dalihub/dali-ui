@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -668,4 +668,4 @@ LogicalModel::LogicalModel()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

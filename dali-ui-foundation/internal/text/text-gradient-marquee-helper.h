@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -124,6 +124,6 @@ void SetOverlayGradient(Dali::Ui::Text::TextScrollerGradient&       textGradient
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_INTERNAL_TEXT_GRADIENT_MARQUEE_HELPER_H

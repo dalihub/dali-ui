@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -67,4 +67,4 @@ TextGradientPropertyData& GetOrCreateTextGradientPropertyData(TextGradientProper
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

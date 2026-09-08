@@ -20,7 +20,7 @@
 #define DALI_ASSERT_VALID_WINDOW_FRAME_STYLE(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from WindowFrameStyle object")
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 struct WindowFrameStyle::Impl
@@ -142,7 +142,7 @@ DALI_DEFINE_FRAME_STYLE_REFERENCE_ACCESSORS(Dali::Ui::UiColor, FrameBackgroundCo
 DALI_DEFINE_FRAME_STYLE_REFERENCE_ACCESSORS(Dali::Vector4, FrameCornerRadius, frameCornerRadius)
 DALI_DEFINE_FRAME_STYLE_VALUE_ACCESSORS(Dali::Ui::CornerRadiusPolicy, FrameCornerRadiusPolicy, frameCornerRadiusPolicy)
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #undef DALI_DEFINE_FRAME_STYLE_REFERENCE_ACCESSORS
 #undef DALI_DEFINE_FRAME_STYLE_VALUE_ACCESSORS

@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/extension-api/progress-view-impl.h>
 #include <dali-ui-foundation/public-api/views/progress-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -98,4 +98,4 @@ ProgressView::ProgressView(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

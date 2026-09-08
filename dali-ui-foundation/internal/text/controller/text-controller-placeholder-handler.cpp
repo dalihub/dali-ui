@@ -98,7 +98,7 @@ static Dali::Property::Index GetIntKey(const Dali::Property::Key& key)
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -638,4 +638,4 @@ bool Controller::PlaceholderHandler::IsPlaceholderShownOnFocus(const Controller&
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -20,7 +20,7 @@
 #include <dali-ui-components/public-api/styles/toast-style.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -128,4 +128,4 @@ inline const Internal::ToastStyleImpl& GetImpl(const Ui::ToastStyle& style)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

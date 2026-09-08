@@ -33,7 +33,7 @@
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -182,4 +182,4 @@ inline const Internal::OverlayEffectImpl& GetImpl(const OverlayEffect& obj)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

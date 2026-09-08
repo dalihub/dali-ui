@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/views/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -330,4 +330,4 @@ public: // Signals
  */
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

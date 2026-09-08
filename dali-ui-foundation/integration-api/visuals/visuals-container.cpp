@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/visuals/visuals-container-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -85,4 +85,4 @@ void VisualsContainer::RemoveVisualBase(Dali::Ui::VisualBase visualObject)
 }
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

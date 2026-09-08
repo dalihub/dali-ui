@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/common/dali-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -111,4 +111,4 @@ bool LayoutManager::IsStandalone(ViewImpl* child) const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

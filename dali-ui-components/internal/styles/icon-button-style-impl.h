@@ -3,7 +3,7 @@
 #include <dali-ui-components/public-api/styles/icon-button-style.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 class IconButtonStyleImpl : public Extension::UiStyleImpl
 {
@@ -72,4 +72,4 @@ inline const IconButtonStyleImpl& GetImpl(const Ui::IconButtonStyle& style)
 {
   return static_cast<const IconButtonStyleImpl&>(style.GetBaseObject());
 }
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

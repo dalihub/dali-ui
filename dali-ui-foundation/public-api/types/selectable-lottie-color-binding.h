@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -158,4 +158,4 @@ using SelectableLottieColorBindings = Dali::Vector<SelectableLottieColorBinding>
 /** @} */
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

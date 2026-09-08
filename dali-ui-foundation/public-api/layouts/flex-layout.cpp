@@ -17,7 +17,7 @@
 #include <dali-ui-foundation/integration-api/layouts/flex-layout-impl.h>
 #include <dali-ui-foundation/public-api/layouts/flex-layout.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -131,4 +131,4 @@ FlexAlign FlexLayout::GetAlignContent() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

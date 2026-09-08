@@ -25,13 +25,13 @@
 #include <cstdint>
 #include <vector>
 
-namespace Dali::TextAbstraction
+namespace DALI_NAMESPACE::TextAbstraction
 {
 class FontClient;
 class Segmentation;
-} //namespace Dali::TextAbstraction
+} //namespace DALI_NAMESPACE::TextAbstraction
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -315,6 +315,6 @@ float ResolvePixelStart(const Plan& plan, uint32_t unit, float visualX);
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_TEXT_REVEAL_H

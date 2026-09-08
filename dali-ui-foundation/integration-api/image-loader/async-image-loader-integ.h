@@ -25,7 +25,7 @@
 // INTERNAL HEADER
 #include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -100,6 +100,6 @@ DALI_UI_API PixelBufferLoadedSignalType& PixelBufferLoadedSignal(AsyncImageLoade
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif

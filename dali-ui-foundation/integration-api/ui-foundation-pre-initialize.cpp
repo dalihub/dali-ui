@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace
 {
@@ -55,7 +55,7 @@ void Preload()
 }
 
 } // namespace
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 extern "C" void DaliUiFoundationPreInitialize(int* argc, char** argv[], void* /* not in used */)
 {

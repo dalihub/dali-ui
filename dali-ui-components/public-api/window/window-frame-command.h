@@ -22,7 +22,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 /**
@@ -137,4 +137,4 @@ enum class WindowFrameCommandResult
   HANDLED        = 2  ///< Command interceptor handled the command
 };
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

@@ -25,7 +25,7 @@
 #include <dali/public-api/signals/callback.h>
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -91,6 +91,6 @@ struct DynamicPropertyInfo
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTEGRATION_API_VISUALS_ANIMATED_VECTOR_IMAGE_VISUAL_ACTIONS_INTEG_H

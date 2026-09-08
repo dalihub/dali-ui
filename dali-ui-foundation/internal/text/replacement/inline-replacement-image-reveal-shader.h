@@ -17,7 +17,10 @@
  * limitations under the License.
  */
 
-namespace Dali::Ui::Internal::Text
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
+
+namespace DALI_NAMESPACE::Ui::Internal::Text
 {
 /**
  * @brief Fragment shader for spatial PIXEL Reveal of a texture-backed inline replacement.
@@ -71,6 +74,6 @@ void main()
   gl_FragColor = textureColor;
 }
 )SHADER";
-} // namespace Dali::Ui::Internal::Text
+} //namespace DALI_NAMESPACE::Ui::Internal::Text
 
 #endif // DALI_UI_INLINE_REPLACEMENT_IMAGE_REVEAL_SHADER_H

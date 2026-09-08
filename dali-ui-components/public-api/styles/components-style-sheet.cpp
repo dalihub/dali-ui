@@ -22,7 +22,7 @@
 #include <dali-ui-components/public-api/styles/markdown-view-style.h>
 #include <dali-ui-components/public-api/styles/progress-bar-style.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -56,4 +56,4 @@ UiStyleSheet New()
 } // namespace StyleSheet
 } // namespace Components
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

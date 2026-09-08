@@ -31,7 +31,7 @@
 
 using AdaptorImpl = Dali::Internal::Adaptor::Adaptor;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class Window;
 
@@ -403,7 +403,7 @@ void EmitFramePresented(Dali::Window window)
 
 } // namespace Test
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 Dali::RenderTaskList Window::GetRenderTaskList()

@@ -27,7 +27,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -84,6 +84,6 @@ DALI_UI_API Uint16Pair GetValidStrechPointFromBorder(uint32_t maxRangeSize, uint
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_NPATCH_UTILITIES_H

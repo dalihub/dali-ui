@@ -43,7 +43,7 @@
 #include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1226,4 +1226,4 @@ void AnimatedImageViewImpl::OnViewResourceReady(Ui::View view)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

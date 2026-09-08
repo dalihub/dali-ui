@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -60,5 +60,5 @@ private:
 };
 } // namespace Gradient
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 #endif

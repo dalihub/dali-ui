@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/glyph-run.h>
 #include <dali-ui-foundation/internal/text/underline-style-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -53,6 +53,6 @@ struct UnderlinedGlyphRun
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_UNDERLINED_GLYPH_RUN_H

@@ -36,7 +36,7 @@
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -398,4 +398,4 @@ void ApplyImageVisualShaderDebugScriptCode(std::string& vertexShader, std::strin
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

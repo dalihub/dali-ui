@@ -20,7 +20,7 @@
 #include <dali-ui-components/public-api/styles/radio-button-style.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -162,4 +162,4 @@ public: // Not intended for application developers
 /** @} */
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

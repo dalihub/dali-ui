@@ -17,7 +17,7 @@
 #include <dali-ui-foundation/integration-api/layouts/grid-layout-impl.h>
 #include <dali-ui-foundation/public-api/layouts/grid-layout.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -151,4 +151,4 @@ float GridLayout::GetColumnSpacing() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -20,7 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/signals/render-callback.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -39,4 +39,4 @@ struct GlViewRenderInfoImpl
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

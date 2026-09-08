@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -660,4 +660,4 @@ inline const Extension::UiConfigImpl& GetImpl(const UiConfig& obj)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

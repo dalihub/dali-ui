@@ -27,7 +27,7 @@
 // EXTERNAL INCLUDES
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -637,4 +637,4 @@ TextButtonStyleImpl::~TextButtonStyleImpl() = default;
 } // namespace Internal
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

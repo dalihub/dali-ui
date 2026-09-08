@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/internal/linear-items-layouter-impl.h>
 #include <dali-ui-foundation/public-api/views/recycler/group-adapter.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -63,4 +63,4 @@ private:
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -29,7 +29,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -181,4 +181,4 @@ private:                           // Data
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

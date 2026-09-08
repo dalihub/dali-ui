@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -144,4 +144,4 @@ void UiLocalizationManager::RefreshBindings()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

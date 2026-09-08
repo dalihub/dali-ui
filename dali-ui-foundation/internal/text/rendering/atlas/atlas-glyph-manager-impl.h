@@ -27,7 +27,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -186,6 +186,6 @@ inline Internal::AtlasGlyphManager& GetImplementation(Ui::AtlasGlyphManager& man
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_ATLAS_GLYPH_MANAGER_IMPL_H

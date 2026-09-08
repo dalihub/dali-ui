@@ -19,7 +19,7 @@
 
 #include <dali-ui-components/internal/progress-bar-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -145,4 +145,4 @@ ProgressBar::ProgressBar(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

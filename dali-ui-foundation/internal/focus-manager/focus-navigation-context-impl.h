@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/focus-manager/focus-navigation-context.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -76,4 +76,4 @@ inline const FocusNavigationContextImpl& GetImpl(const FocusNavigationContext& c
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

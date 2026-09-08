@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-context.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -64,4 +64,4 @@ bool WebProfileImpl::IsEqual(const WebProfileImpl& rhs) const
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

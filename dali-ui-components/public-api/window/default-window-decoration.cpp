@@ -19,7 +19,7 @@
 
 #include <dali/integration-api/debug.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 DefaultWindowDecoration::DefaultWindowDecoration()                                                  = default;
@@ -87,4 +87,4 @@ Dali::Vector2 DefaultWindowDecoration::GetMinimumFrameSize() const
   return GetImplementation(*this).GetMinimumFrameSize();
 }
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

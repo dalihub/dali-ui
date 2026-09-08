@@ -18,12 +18,13 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
 #include <cstdint>
 #include <limits>
 #include <string>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -295,4 +296,4 @@ const char* MarkdownRenderRoleName(MarkdownRenderRole role);
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

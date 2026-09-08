@@ -18,9 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -478,4 +479,4 @@ enum Mask
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

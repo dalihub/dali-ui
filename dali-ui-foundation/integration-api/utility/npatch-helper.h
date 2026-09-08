@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/integration-api/utility/npatch-utilities.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -95,6 +95,6 @@ void ApplyTextureAndUniforms(Renderer& renderer, const Dali::Ui::Internal::NPatc
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_NPATCH_HELPER_H

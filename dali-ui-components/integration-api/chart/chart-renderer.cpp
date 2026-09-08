@@ -40,7 +40,7 @@
 #include <map>
 #include <numeric>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1422,4 +1422,4 @@ void DataRenderer::RenderGauge(Dali::CanvasRenderer::DrawableGroup&    group,
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

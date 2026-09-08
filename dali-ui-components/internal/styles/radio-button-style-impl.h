@@ -24,7 +24,7 @@
 #include <memory>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -96,4 +96,4 @@ inline const Internal::RadioButtonStyleImpl& GetImpl(const Ui::RadioButtonStyle&
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

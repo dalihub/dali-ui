@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader-observer.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 SvgLoaderObserver::~SvgLoaderObserver()
 {
@@ -31,4 +31,4 @@ SvgLoaderObserver::~SvgLoaderObserver()
     mRasterizeDestructionSignal.Emit(this);
   }
 }
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

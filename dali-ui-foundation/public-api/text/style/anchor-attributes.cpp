@@ -24,7 +24,7 @@
 #define DALI_ASSERT_VALID_ANCHOR_ATTRIBUTES(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from AnchorAttributes object")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -207,6 +207,6 @@ bool AnchorAttributes::operator!=(const AnchorAttributes& rhs) const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_ANCHOR_ATTRIBUTES

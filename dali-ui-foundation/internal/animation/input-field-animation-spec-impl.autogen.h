@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h>
 #include <dali-ui-foundation/public-api/animation/input-field-animation-spec.autogen.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {

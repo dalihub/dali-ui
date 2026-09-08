@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -250,6 +250,6 @@ private:
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_HIDDEN_TEXT_H

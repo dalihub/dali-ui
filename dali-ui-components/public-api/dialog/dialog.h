@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -172,4 +172,4 @@ public: // Not intended for application developers
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

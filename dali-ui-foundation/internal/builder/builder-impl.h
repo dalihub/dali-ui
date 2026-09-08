@@ -46,7 +46,7 @@
 #define DALI_SCRIPT_VERBOSE(format, ...) \
   DALI_LOG_INFO(Dali::Ui::Internal::gFilterScript, Debug::Verbose, "Script:" format, ##__VA_ARGS__)
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -369,6 +369,6 @@ inline const Internal::Builder& GetImpl(const Dali::Ui::Integration::Builder& ob
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_BUILDER_H

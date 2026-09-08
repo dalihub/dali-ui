@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/views/scroll/edge-effect.h>
 #include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -124,6 +124,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_BOUNCE_EDGE_EFFECT_H

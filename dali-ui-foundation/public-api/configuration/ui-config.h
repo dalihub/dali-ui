@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/web/web-engine-type.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -984,4 +984,4 @@ public: // Not intended for Application developers
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

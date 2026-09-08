@@ -23,7 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -55,4 +55,4 @@ enum class StopBehavior : uint8_t
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

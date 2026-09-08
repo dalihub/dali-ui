@@ -20,7 +20,7 @@
 #define DALI_ASSERT_VALID_WINDOW_FRAME_OPTIONS(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from WindowFrameOptions object")
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 struct WindowFrameOptions::Impl
@@ -133,6 +133,6 @@ bool WindowFrameOptions::IsFeatureEnabled(WindowFrameFeature feature) const
   return false;
 }
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #undef DALI_ASSERT_VALID_WINDOW_FRAME_OPTIONS

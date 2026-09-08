@@ -22,7 +22,7 @@
 
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -47,4 +47,4 @@ AttachmentId AttachmentId::Alloc()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

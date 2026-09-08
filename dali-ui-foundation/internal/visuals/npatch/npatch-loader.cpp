@@ -26,7 +26,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/trace.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -344,4 +344,4 @@ NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Dali::Exte
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

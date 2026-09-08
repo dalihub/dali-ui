@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/public-api/render-effects/background-blur-effect.h>
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h>
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -115,4 +115,4 @@ BackgroundBlurEffect::FinishedSignalType& BackgroundBlurEffect::FinishedSignal()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

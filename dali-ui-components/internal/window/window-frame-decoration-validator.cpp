@@ -15,7 +15,7 @@
 
 #include "window-frame-decoration-validator.h"
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -156,4 +156,4 @@ const char* WindowFrameDecorationResultName(WindowFrameDecorationResult result)
   return "unknown";
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

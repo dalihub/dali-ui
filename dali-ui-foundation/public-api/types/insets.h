@@ -20,7 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/insets.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -32,4 +32,4 @@ namespace Ui
 using Insets = Dali::Insets;
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

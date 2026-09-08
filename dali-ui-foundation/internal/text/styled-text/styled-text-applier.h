@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/internal/text/underlined-character-run.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -210,4 +210,4 @@ public:
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

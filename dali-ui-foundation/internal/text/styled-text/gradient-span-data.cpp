@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <algorithm>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -79,4 +79,4 @@ void SetGradientSpanSegmentationInfo(GradientSpanModelData&    data,
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

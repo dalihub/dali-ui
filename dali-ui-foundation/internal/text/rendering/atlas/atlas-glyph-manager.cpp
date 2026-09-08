@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -127,4 +127,4 @@ void AtlasGlyphManager::InvalidateGlyphCache()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

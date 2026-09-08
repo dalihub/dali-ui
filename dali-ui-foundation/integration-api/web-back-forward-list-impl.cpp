@@ -20,7 +20,7 @@
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-back-forward-list.h>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -128,4 +128,4 @@ Dali::Vector<WebBackForwardListItem> WebBackForwardListImpl::GetForwardItems(int
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -17,7 +17,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -256,4 +256,4 @@ bool FeatureBuilder::IsEnabledAlphaMaskingOnRendering() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

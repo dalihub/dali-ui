@@ -21,7 +21,7 @@
 #include <dali/integration-api/debug.h>
 #include <algorithm>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 #define DALI_ASSERT_VALID_SELECTABLE_LOTTIE_COLOR_BINDING(impl) \
@@ -110,4 +110,4 @@ SelectableLottieImage::FrameRange SelectableLottieColorBinding::GetSelectedColor
 
 #undef DALI_ASSERT_VALID_SELECTABLE_LOTTIE_COLOR_BINDING
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

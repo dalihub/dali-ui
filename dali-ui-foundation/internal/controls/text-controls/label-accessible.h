@@ -19,7 +19,7 @@
 
 #include <dali-ui-foundation/internal/controls/text-controls/text-view-accessible.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 /**
  * @brief Connects LabelImpl with the common text accessibility implementation.
@@ -51,6 +51,6 @@ protected:
   Ui::Text::ControllerPtr GetTextController() const override;
 };
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration
 
 #endif // DALI_UI_INTERNAL_LABEL_ACCESSIBLE_H

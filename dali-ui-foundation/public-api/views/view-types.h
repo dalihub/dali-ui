@@ -18,9 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -91,4 +92,4 @@ enum class LayoutTransitionMode : uint8_t
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -76,7 +76,7 @@ inline static Dali::Sampler GetCachedLinearSampler()
 }
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -950,4 +950,4 @@ void BackgroundBlurEffectImpl::SetStopperView(Ui::View stopperView)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

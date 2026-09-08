@@ -25,7 +25,7 @@
 #include <dali-ui-components/integration-api/chart/chart-series-impl.h>
 #include <dali-ui-components/public-api/chart/scatter-series.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -90,4 +90,4 @@ inline const Integration::ScatterSeries& GetImplementation(const Ui::ScatterSeri
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

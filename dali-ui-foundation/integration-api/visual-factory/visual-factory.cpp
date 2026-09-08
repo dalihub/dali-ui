@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -162,4 +162,4 @@ Dali::Geometry VisualFactory::CreateGridGeometry(Dali::Uint16Pair gridSize, bool
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

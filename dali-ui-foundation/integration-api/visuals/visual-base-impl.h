@@ -42,7 +42,7 @@
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -607,6 +607,6 @@ inline static const Internal::VisualBaseImpl& GetImplementation(const Dali::Ui::
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VISUAL_BASE_IMPL_H

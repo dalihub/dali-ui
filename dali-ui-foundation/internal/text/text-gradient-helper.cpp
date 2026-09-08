@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/visuals/gradient/linear-gradient.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -230,4 +230,4 @@ void AddLookupTexture(TextureSet& textureSet, uint32_t& textureSetIndex, const S
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

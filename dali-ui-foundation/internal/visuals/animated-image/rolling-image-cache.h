@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/visuals/animated-image/image-cache.h>
 #include <dali/devel-api/common/circular-queue.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -147,6 +147,6 @@ private:
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif

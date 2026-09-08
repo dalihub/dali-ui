@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -65,5 +65,5 @@ public:
 };
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 #endif // DALI_UI_INTERNAL_BLUR_ALGORITHM_H

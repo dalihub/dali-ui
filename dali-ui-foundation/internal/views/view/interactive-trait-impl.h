@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/traits/interactive-trait.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -292,4 +292,4 @@ const Internal::InteractiveTraitImpl& GetImpl(const InteractiveTrait& obj);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

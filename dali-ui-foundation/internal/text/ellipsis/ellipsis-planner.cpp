@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -346,4 +346,4 @@ EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView&  input,
   }
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

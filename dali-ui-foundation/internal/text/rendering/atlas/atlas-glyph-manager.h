@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-manager.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -200,6 +200,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_ATLAS_GLYPH_MANAGER_H

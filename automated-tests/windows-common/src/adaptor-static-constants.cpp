@@ -11,7 +11,7 @@
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/public-api/math/math-utils.h>
 
-namespace Dali::TextAbstraction
+namespace DALI_NAMESPACE::TextAbstraction
 {
 const PointSize26Dot6 FontClient::DEFAULT_POINT_SIZE   = 768u;
 const float           FontClient::DEFAULT_ITALIC_ANGLE = 12.0f * Dali::Math::PI_OVER_180;

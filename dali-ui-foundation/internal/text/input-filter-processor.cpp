@@ -19,9 +19,10 @@
 #include <dali-ui-foundation/internal/text/input-filter-processor.h>
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
 #include <regex>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -125,4 +126,4 @@ bool InputFilterProcessor::ApplyDenyPattern(std::string& text) const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

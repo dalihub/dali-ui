@@ -18,9 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -80,4 +81,4 @@ constexpr float THEMATIC_BREAK_HEIGHT   = 1.0f;
 } // namespace MarkdownViewDefaults
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

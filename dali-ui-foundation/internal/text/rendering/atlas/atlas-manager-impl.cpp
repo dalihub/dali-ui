@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-mesh-factory.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -561,4 +561,4 @@ void AtlasManager::SetTextures(AtlasId atlas, TextureSet& textureSet)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

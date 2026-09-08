@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/gl-view/gl-view-render-info-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -86,4 +86,4 @@ const Dali::Vector<uint32_t>& GlViewRenderInfo::GetBoundTextureNativeHandles() c
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

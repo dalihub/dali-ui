@@ -21,7 +21,7 @@
 
 #include <optional>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 enum class LaunchStateResolution
@@ -74,4 +74,4 @@ private:
 
 const char* LaunchStateResolutionName(LaunchStateResolution resolution);
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

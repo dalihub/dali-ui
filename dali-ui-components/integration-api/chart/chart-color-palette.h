@@ -20,7 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/math/vector4.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -40,4 +40,4 @@ private:
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

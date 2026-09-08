@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/visuals/text/text-visual-gradient-data.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -54,4 +54,4 @@ TextVisualGradientData& GetOrCreateTextVisualGradientData(TextVisualGradientData
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

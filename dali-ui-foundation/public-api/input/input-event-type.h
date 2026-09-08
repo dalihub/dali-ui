@@ -17,9 +17,10 @@
  *
  */
 
+#include <dali/public-api/common/dali-namespace.h>
 #include <cstdint>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 /**
  * @brief Defines the type of input events.
@@ -71,4 +72,4 @@ enum class InputEventType : uint32_t
    */
   RESERVED = 99
 };
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

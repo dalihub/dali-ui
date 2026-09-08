@@ -54,7 +54,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Internal
 {

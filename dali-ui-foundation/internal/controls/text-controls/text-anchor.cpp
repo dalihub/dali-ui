@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -70,4 +70,4 @@ TextAnchor::TextAnchor(Dali::Internal::CustomActor* internal)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

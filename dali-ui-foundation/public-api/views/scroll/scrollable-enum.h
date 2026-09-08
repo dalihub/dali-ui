@@ -15,9 +15,12 @@
  *
  */
 
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
+
 #pragma once
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -66,4 +69,4 @@ enum class OverScrollMode
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

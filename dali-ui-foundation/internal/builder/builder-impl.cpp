@@ -55,7 +55,7 @@ using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToPropertyValue;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1608,4 +1608,4 @@ void Builder::SetCustomProperties(const TreeNode& node, Handle& handle, const Re
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -25,7 +25,7 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/ref-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -129,6 +129,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_RENDERER_H

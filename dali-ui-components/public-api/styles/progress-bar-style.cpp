@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -287,4 +287,4 @@ UiColor ProgressBarStyleImpl::GetDividerColor() const
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

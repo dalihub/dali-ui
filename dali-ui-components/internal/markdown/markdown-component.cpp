@@ -34,7 +34,7 @@
 #include <dali-ui-components/internal/styles/markdown-view-style-impl.h>
 #include <dali-ui-components/public-api/check-box.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1102,4 +1102,4 @@ std::unique_ptr<MarkdownComponent> CreateMarkdownComponent(const MarkdownRenderN
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

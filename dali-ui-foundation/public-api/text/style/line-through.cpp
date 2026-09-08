@@ -29,7 +29,7 @@
 #define DALI_ASSERT_LINETHROUGH_NOT_NONE(impl, message) \
   DALI_ASSERT_ALWAYS(!(impl)->mIsNone && message)
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -170,7 +170,7 @@ float LineThrough::GetThickness() const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_LINETHROUGH_NOT_NONE
 #undef DALI_ASSERT_VALID_LINETHROUGH

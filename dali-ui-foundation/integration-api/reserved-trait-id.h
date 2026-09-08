@@ -19,7 +19,7 @@
 
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -54,4 +54,4 @@ DALI_UI_API extern const TraitId STATE_EFFECT_TARGET;
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

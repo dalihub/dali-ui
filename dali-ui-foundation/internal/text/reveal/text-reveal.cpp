@@ -30,7 +30,7 @@
 #include <limits>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1600,4 +1600,4 @@ bool ApplyPerLineSequenceSchedule(Plan&          plan,
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

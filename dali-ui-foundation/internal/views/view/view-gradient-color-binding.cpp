@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/public-api/types/unique-any.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -179,4 +179,4 @@ bool Clear(ViewImpl& viewImpl, StringView bindingId)
 } // namespace ViewGradientColorBinding
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

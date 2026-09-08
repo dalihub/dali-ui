@@ -24,7 +24,7 @@
 
 #include <dali-ui-foundation/integration-api/builder/tree-node.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -186,12 +186,12 @@ TreeNode* TreeNodeManipulator::Copy(const TreeNode& tree, int& numberNodes, int&
 
   if(tree.mName)
   {
-      numberChars = static_cast<int32_t>(numberChars + std::strlen(tree.mName) + 1u);
+    numberChars = static_cast<int32_t>(numberChars + std::strlen(tree.mName) + 1u);
   }
 
   if(TreeNode::STRING == tree.mType)
   {
-      numberChars = static_cast<int32_t>(numberChars + std::strlen(tree.mStringValue) + 1u);
+    numberChars = static_cast<int32_t>(numberChars + std::strlen(tree.mStringValue) + 1u);
   }
 
   ++numberNodes;
@@ -211,12 +211,12 @@ void TreeNodeManipulator::CopyChildren(const TreeNode* from, TreeNode* to, int& 
     const TreeNode* child = &((*iter).second);
     if(child->mName)
     {
-        numberChars = static_cast<int32_t>(numberChars + std::strlen(child->mName) + 1u);
+      numberChars = static_cast<int32_t>(numberChars + std::strlen(child->mName) + 1u);
     }
 
     if(TreeNode::STRING == child->mType)
     {
-        numberChars = static_cast<int32_t>(numberChars + std::strlen(child->mStringValue) + 1u);
+      numberChars = static_cast<int32_t>(numberChars + std::strlen(child->mStringValue) + 1u);
     }
 
     TreeNode* newNode = NewTreeNode();
@@ -595,4 +595,4 @@ char* CopyString(const char* fromString, VectorCharIter& iter, const VectorCharI
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

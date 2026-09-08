@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -78,4 +78,4 @@ BorderVisual::BorderVisual(Dali::Ui::Internal::VisualBaseImpl* object)
 {
 }
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -73,7 +73,7 @@ std::string DemangleTypeInfoName(const char* typeIdName)
 
 } // unnamed namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -134,4 +134,4 @@ Dali::String UniqueAny::DemangleTypeName(const char* mangledName)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

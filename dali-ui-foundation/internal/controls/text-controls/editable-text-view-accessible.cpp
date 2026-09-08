@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/internal/controls/text-controls/editable-text-view-accessible.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 void EditableTextViewAccessible::InitDefaultFeatures()
 {
@@ -147,4 +147,4 @@ bool EditableTextViewAccessible::SupportsSelection() const
   return true;
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

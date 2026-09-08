@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h> // public GetImpl(Ui::View&)
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -504,4 +504,4 @@ CheckBoxImpl::~CheckBoxImpl() = default;
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

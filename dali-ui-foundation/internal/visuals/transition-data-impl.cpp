@@ -60,7 +60,7 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(ALPHA_FUNCTION_BUILTIN)
 DALI_ENUM_TO_STRING_TABLE_END(ALPHA_FUNCTION_BUILTIN)
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -412,4 +412,4 @@ Property::Map TransitionData::GetAnimatorAt(size_t index)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

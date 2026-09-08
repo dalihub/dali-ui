@@ -51,7 +51,7 @@
 #include <dali-ui-foundation/integration-api/visuals/primitive-visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -352,6 +352,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif /* DALI_UI_INTERNAL_PRIMITIVE_VISUAL_H */

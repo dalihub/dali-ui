@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/types/inner-shadow.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -53,4 +53,4 @@ Property::Map CreatePropertyMap(const Ui::InnerShadow& innerShadow);
 } // namespace InnerShadow
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

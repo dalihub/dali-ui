@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -53,4 +53,4 @@ struct DynamicPropertyInfo
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/public-api/views/effects/shadow-stack.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -334,4 +334,4 @@ private:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

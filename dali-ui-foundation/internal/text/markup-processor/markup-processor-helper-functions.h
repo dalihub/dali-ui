@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 struct Vector2;
 struct Vector4;
@@ -219,6 +219,6 @@ bool HorizontalAlignmentTypeStringToTypeValue(const char* const typeStr, Length 
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_MARKUP_PROCESSOR_HELPER_FUNCTIONS_H

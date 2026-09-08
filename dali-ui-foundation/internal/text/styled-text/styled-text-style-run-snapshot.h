@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/internal/text/underline-style-properties.h>
 #include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -121,4 +121,4 @@ struct StyledTextStyleRunSnapshot
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

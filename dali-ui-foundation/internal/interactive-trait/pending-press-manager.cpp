@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -303,4 +303,4 @@ void PendingPressManager::CancelPendingRelease()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

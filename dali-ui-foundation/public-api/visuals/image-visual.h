@@ -28,7 +28,7 @@
 
 // TODO : Seperate it as n-patch / animated-image / animated-vector-image
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -437,6 +437,6 @@ public:
  * @}
  */
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_IMAGE_VISUAL_OBJECT_H

@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/internal/controls/text-controls/input-editor-accessible.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 std::pair<std::string, bool> InputEditorAccessible::GetNameRaw() const
 {
@@ -51,4 +51,4 @@ void InputEditorAccessible::RequestTextRelayout()
   impl.RequestTextRelayout();
 }
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration

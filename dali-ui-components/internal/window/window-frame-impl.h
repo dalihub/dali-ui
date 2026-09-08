@@ -34,7 +34,7 @@
 #include <optional>
 #include <string>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace Internal
 {
@@ -221,4 +221,4 @@ inline const Internal::WindowFrameImpl& GetImplementation(const WindowFrame& han
   return static_cast<const Internal::WindowFrameImpl&>(handle.GetBaseObject());
 }
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

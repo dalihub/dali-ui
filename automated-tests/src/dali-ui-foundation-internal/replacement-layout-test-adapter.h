@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Stores real text services used by the replacement layout diagnostics.

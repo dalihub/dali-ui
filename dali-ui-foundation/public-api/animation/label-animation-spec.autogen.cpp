@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/animation/label-animation-spec-impl.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -426,4 +426,4 @@ LabelAnimationSpec& LabelAnimationSpec::PixelSnapFactorBy(float relative, Durati
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

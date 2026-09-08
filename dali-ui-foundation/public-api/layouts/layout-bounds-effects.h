@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -122,4 +122,4 @@ DALI_UI_API LayoutBoundsEffect ShrinkTo(LayoutBoundsEdge              anchor,
 } // namespace LayoutBoundsEffects
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

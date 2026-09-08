@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -47,6 +47,6 @@ CharacterRun RetrieveClusteredCharactersOfCharacterIndex(const VisualModelPtr&  
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_CHARACTERS_HELPER_FUNCTIONS_H

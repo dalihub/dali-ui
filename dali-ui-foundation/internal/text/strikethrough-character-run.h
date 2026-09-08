@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/abstract-style-character-run.h>
 #include <dali-ui-foundation/internal/text/strikethrough-style-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -63,6 +63,6 @@ struct TypeTraits<Dali::Ui::Text::StrikethroughCharacterRun>
   };
 };
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_STRIKETHROUGH_CHARACTER_RUN_H

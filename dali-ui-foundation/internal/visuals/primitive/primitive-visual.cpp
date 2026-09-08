@@ -36,7 +36,7 @@
 
 using Dali::Integration::ToDaliStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1448,4 +1448,4 @@ void PrimitiveVisual::FormBevelledCubeTriangles(Vector<unsigned short>& indices)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

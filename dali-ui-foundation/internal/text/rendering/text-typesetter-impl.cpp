@@ -49,7 +49,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -2731,4 +2731,4 @@ void Typesetter::Impl::SetFinalElisionResult(const FinalElisionResult* result)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

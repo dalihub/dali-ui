@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -54,4 +54,4 @@ UiThemeManager::ThemeChangedSignalType& UiThemeManager::ThemeChangedSignal()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

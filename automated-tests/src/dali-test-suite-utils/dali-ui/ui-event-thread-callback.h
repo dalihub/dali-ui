@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/signals/callback.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class EventThreadCallback
 {

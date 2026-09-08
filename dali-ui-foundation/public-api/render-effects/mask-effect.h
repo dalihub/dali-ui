@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -136,6 +136,6 @@ public: // Not intended for use by Application developers
   ///@endcond
 };
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_MASK_EFFECT_H

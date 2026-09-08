@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -443,4 +443,4 @@ float Controller::InputFontHandler::GetInputFontPointSize(const Controller& cont
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali::Ui::Integration::Text::Gradient
+namespace DALI_NAMESPACE::Ui::Integration::Text::Gradient
 {
 /**
  * @brief Result state for applying an atlas gradient resource to a renderer.
@@ -89,6 +89,6 @@ struct DALI_UI_API AtlasApplyState
   void Reset();
 };
 
-} // namespace Dali::Ui::Integration::Text::Gradient
+} //namespace DALI_NAMESPACE::Ui::Integration::Text::Gradient
 
 #endif // DALI_UI_INTEGRATION_TEXT_ATLAS_GRADIENT_APPLY_STATE_H

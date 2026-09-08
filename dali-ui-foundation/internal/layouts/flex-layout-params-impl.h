@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -108,4 +108,4 @@ private:
 } // namespace Internal
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -17,7 +17,7 @@
 #include <dali-ui-components/integration-api/chart/chart-view-impl.h>
 #include <dali-ui-components/public-api/chart/chart-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -453,4 +453,4 @@ ChartView::ChartView(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

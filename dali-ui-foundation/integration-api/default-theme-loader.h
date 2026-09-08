@@ -27,7 +27,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/theme-loader-interface.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -120,4 +120,4 @@ private:
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

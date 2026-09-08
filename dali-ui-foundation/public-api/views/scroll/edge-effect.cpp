@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/integration-api/edge-effect-impl.h>
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -108,4 +108,4 @@ EdgeEffect::FinishedSignalType& EdgeEffect::FinishedSignal()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

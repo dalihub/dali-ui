@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -316,4 +316,4 @@ RadioButtonImpl::~RadioButtonImpl() = default;
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

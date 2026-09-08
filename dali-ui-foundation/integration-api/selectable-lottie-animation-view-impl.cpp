@@ -27,7 +27,7 @@
 #include <mutex>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -315,4 +315,4 @@ SelectableLottieAnimationViewImpl::~SelectableLottieAnimationViewImpl()
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -28,7 +28,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -98,6 +98,6 @@ Property::Index SetRendererProperty(RendererType renderer, const char* name, con
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_INTERNAL_TEXT_GRADIENT_HELPER_H

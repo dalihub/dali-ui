@@ -17,7 +17,7 @@
 
 #include <atomic>
 
-namespace Dali::Ui::Text::Internal::Gradient
+namespace DALI_NAMESPACE::Ui::Text::Internal::Gradient
 {
 namespace
 {
@@ -148,9 +148,9 @@ Sampler CreateSampler(Dali::Ui::Gradient::SpreadMethod spread)
 }
 } // namespace
 
-} // namespace Dali::Ui::Text::Internal::Gradient
+} //namespace DALI_NAMESPACE::Ui::Text::Internal::Gradient
 
-namespace Dali::Ui::Integration::Text::Gradient
+namespace DALI_NAMESPACE::Ui::Integration::Text::Gradient
 {
 bool AtlasApplyState::Matches(uint64_t resourceId, uint64_t styleRevision, uint64_t lookupRevision) const
 {
@@ -185,9 +185,9 @@ void AtlasApplyState::Reset()
   *this = AtlasApplyState{};
 }
 
-} // namespace Dali::Ui::Integration::Text::Gradient
+} //namespace DALI_NAMESPACE::Ui::Integration::Text::Gradient
 
-namespace Dali::Ui::Text::Internal::Gradient
+namespace DALI_NAMESPACE::Ui::Text::Internal::Gradient
 {
 bool AtlasRendererState::IsEnabled() const
 {
@@ -341,4 +341,4 @@ AtlasFrameState EditableAtlasResources::GetFrameState(bool placeholder, const Ui
   return frameState;
 }
 
-} // namespace Dali::Ui::Text::Internal::Gradient
+} //namespace DALI_NAMESPACE::Ui::Text::Internal::Gradient

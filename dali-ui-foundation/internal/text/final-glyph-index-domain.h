@@ -19,7 +19,7 @@
 
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Resolves a final glyph index to its authored style glyph.
@@ -33,6 +33,6 @@ inline GlyphIndex ResolveFinalStyleSourceGlyph(const GlyphIndex* finalToStyleGly
   return finalToStyleGlyphIndices ? finalToStyleGlyphIndices[finalGlyphIndex] : finalGlyphIndex;
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_FINAL_GLYPH_INDEX_DOMAIN_H

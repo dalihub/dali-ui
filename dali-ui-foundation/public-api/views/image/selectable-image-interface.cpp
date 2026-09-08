@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/selectable-image-interface-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -67,4 +67,4 @@ SelectableImageInterface::SelectableImageInterface(Integration::SelectableImageI
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

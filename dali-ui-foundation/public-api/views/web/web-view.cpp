@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/integration-api/web-view-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -528,4 +528,4 @@ WebView::WebProcessCrashedSignalType& WebView::WebProcessCrashedSignal()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -58,4 +58,4 @@ private:
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

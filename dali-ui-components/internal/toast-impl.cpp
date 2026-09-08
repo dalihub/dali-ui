@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -810,4 +810,4 @@ Ui::Toast ToastImpl::GetHandle()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

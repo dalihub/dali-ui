@@ -15,10 +15,13 @@
  *
  */
 
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
+
 #ifndef DALI_UI_FOUNDATION_INTEGRATION_API_VISUALS_ANIMATED_IMAGE_VISUAL_SIGNALS_INTEG_H
 #define DALI_UI_FOUNDATION_INTEGRATION_API_VISUALS_ANIMATED_IMAGE_VISUAL_SIGNALS_INTEG_H
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -48,6 +51,6 @@ enum Type
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_INTEGRATION_API_VISUALS_ANIMATED_IMAGE_VISUAL_SIGNALS_INTEG_H

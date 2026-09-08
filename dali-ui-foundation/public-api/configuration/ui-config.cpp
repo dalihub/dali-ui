@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -497,4 +497,4 @@ void UiConfig::DefaultViewInitializer(View view)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

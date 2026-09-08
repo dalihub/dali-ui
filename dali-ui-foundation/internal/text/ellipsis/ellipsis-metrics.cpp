@@ -17,7 +17,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-metrics.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 bool ResolveFontClientEllipsisMetrics(TextAbstraction::FontClient& fontClient,
                                       FontId                       fontId,
@@ -39,4 +39,4 @@ bool ResolveFontClientEllipsisMetrics(TextAbstraction::FontClient& fontClient,
   return true;
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

@@ -33,7 +33,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -452,6 +452,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VECTOR_ANIMATION_TASK_H

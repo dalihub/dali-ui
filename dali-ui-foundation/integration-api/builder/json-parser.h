@@ -27,7 +27,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/builder/tree-node.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -142,6 +142,6 @@ public: // Not intended for application developers
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_JSON_PARSER_H

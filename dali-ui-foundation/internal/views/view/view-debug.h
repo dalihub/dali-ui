@@ -23,7 +23,7 @@
 #include <iostream>
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -59,7 +59,7 @@ void DumpViewHierarchy(std::ostream& outputStream, Actor rootActor);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif
 

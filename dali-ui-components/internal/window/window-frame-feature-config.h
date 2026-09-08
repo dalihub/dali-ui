@@ -1,3 +1,6 @@
+
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
 #pragma once
 
 /* Copyright (c) 2026 Samsung Electronics Co., Ltd.
@@ -15,7 +18,7 @@
  * limitations under the License.
  */
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 struct WindowFrameFeatureConfig
@@ -26,4 +29,4 @@ struct WindowFrameFeatureConfig
   bool maximizeRestoreEnabled{true};
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-types.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -834,6 +834,6 @@ public: // Not intended for application developers
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_DRAG_AND_DROP_DETECTOR_H

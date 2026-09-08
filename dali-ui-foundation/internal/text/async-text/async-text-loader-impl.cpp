@@ -45,7 +45,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -2497,4 +2497,4 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

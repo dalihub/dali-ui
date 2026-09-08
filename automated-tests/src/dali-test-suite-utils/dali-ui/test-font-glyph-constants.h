@@ -17,8 +17,9 @@
  */
 
 #include <cstdint>
+#include <dali/public-api/common/dali-namespace.h>
 
-namespace Dali::TextAbstraction::Test
+namespace DALI_NAMESPACE::TextAbstraction::Test
 {
 // Reserved by the test FontClient for deterministic half-coverage bitmaps.
 // Keep this distinct from UINT32_MAX, which text code uses as an invalid or synthetic glyph sentinel.

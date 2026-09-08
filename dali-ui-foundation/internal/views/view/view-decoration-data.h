@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 struct DecorationData
 {
@@ -115,6 +115,6 @@ struct DecorationData
   }
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal
 
 #endif // DALI_UI_VIEW_DECORATION_DATA_H

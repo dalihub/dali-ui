@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -191,4 +191,4 @@ void LabelAnimationSpecImpl::ApplyTextRevealProgressBy(Animation& animation, Lab
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

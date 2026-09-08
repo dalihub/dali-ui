@@ -50,7 +50,7 @@ using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToPropertyValue;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1777,4 +1777,4 @@ void AnimatedImageVisual::OnApplyFittingMode(const Vector2& controlSize, const I
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -24,7 +24,7 @@
 #include <dali/public-api/object/type-info-id.h>
 #include <typeinfo>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -153,7 +153,7 @@ public:
 private:
   struct DALI_UI_API HolderBase
   {
-    virtual ~HolderBase() = default;
+    virtual ~HolderBase()                     = default;
     virtual const TypeInfoId& GetType() const = 0;
   };
 
@@ -197,4 +197,4 @@ private:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

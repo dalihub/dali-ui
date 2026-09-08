@@ -15,7 +15,7 @@
 
 #include "window-frame-state-controller.h"
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 WindowFrameStateController::WindowFrameStateController(WindowFrameInitialStatePolicy policy, float fullSizeTolerance)
@@ -98,4 +98,4 @@ bool WindowFrameStateController::IsMinimized() const
   return GetState() == WindowFrame::WindowState::MINIMIZED;
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

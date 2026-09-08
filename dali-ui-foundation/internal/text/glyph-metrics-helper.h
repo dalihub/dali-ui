@@ -25,7 +25,7 @@
 
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -138,6 +138,6 @@ void GetGlyphMetricsFromCharacterIndex(CharacterIndex index, const VisualModelPt
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_GLYPH_METRICS_HELPER_H

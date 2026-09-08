@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -84,4 +84,4 @@ RecyclerLayoutOwnerScope::~RecyclerLayoutOwnerScope()
 } // namespace LayoutDependency
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

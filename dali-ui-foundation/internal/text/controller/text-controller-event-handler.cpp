@@ -47,7 +47,7 @@ const char* KEY_INSERT_NAME = "Insert";
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1100,4 +1100,4 @@ void Controller::EventHandler::TextPopupButtonTouched(Controller&               
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/styled-text/markup-to-styled-text.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-builder-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -195,4 +195,4 @@ StyledTextBuilder::StyledTextBuilder(BaseObject* impl)
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

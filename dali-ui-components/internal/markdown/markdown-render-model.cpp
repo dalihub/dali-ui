@@ -17,8 +17,9 @@
 
 // CLASS HEADER
 #include <dali-ui-components/internal/markdown/markdown-render-model.h>
+#include <dali/public-api/common/dali-namespace.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -156,4 +157,4 @@ const char* MarkdownRenderRoleName(MarkdownRenderRole role)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -32,7 +32,7 @@
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -282,4 +282,4 @@ void CommonTextUtils::UpdateTextRenderPosition(
   UpdateAtlasGradient(renderer, controller, stencil, position, alignmentOffset, atlasFrameState, viewSize);
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

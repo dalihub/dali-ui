@@ -25,7 +25,7 @@
 #define DALI_ASSERT_VALID_FIT_CANDIDATE(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Text::Fit::Candidate object")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -139,6 +139,6 @@ float Fit::Candidate::GetLineHeight() const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_FIT_CANDIDATE

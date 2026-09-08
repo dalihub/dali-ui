@@ -23,7 +23,7 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -109,4 +109,4 @@ void PropertyBridge::RegisterStringGetter(StringGetterDelegate getter)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

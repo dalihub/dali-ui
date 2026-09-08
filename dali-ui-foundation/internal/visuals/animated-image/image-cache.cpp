@@ -17,7 +17,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/visuals/animated-image/image-cache.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -58,4 +58,4 @@ void ImageCache::SetDesiredSize(Dali::ImageDimensions desiredSize)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

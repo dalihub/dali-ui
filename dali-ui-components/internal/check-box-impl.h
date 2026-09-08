@@ -31,7 +31,7 @@
 // EXTERNAL INCLUDES
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -122,4 +122,4 @@ inline const Internal::CheckBoxImpl& GetImpl(const Ui::CheckBox& checkBox)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

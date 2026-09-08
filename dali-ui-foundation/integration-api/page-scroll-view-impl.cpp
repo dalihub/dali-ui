@@ -26,7 +26,7 @@
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -493,4 +493,4 @@ void PageScrollViewImpl::NotifyPagesRemoved(int atIndex, int removedCount)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

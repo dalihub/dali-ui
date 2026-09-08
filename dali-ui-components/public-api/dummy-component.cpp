@@ -18,7 +18,7 @@
 #include <dali-ui-components/public-api/dummy-component.h>
 #include <dali/devel-api/object/type-registry.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -91,4 +91,4 @@ DummyComponent::DummyComponent(Dali::Internal::CustomActor* internal)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

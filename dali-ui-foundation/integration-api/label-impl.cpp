@@ -79,7 +79,7 @@
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -4470,4 +4470,4 @@ Dali::Property::Value LabelImpl::GetProperty(BaseObject* object, Dali::Property:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

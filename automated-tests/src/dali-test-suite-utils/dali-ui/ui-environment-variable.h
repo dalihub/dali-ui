@@ -19,8 +19,9 @@
 #define DALI_ENVIRONMENT_VARIABLE_H
 
 #include <cstddef>
+#include <dali/public-api/common/dali-namespace.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace EnvironmentVariable
 {

@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali/public-api/math/vector2.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -150,4 +150,4 @@ private:
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

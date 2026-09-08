@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -76,4 +76,4 @@ StateEffect::StateEffect(Integration::StateEffectImpl* impl)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

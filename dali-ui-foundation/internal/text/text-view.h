@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/text-view-interface.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -375,6 +375,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_VIEW_H

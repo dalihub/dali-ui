@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/ui-scale-manager-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -75,4 +75,4 @@ void UiScaleManager::UnregisterLayoutRoot(View root)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

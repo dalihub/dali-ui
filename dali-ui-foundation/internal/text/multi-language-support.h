@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/font-run.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -177,6 +177,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_MULTI_LANGUAGE_SUPPORT_H

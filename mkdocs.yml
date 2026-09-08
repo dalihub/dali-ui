@@ -55,6 +55,13 @@ plugins:
             INCLUDE_PATH: "dali-ui-foundation dali-ui-components"
             ENABLE_PREPROCESSING: "YES"
             MACRO_EXPANSION: "YES"
+            # DALI_NAMESPACE stands in for the namespace name at every namespace
+            # definition in DALi, and dali-namespace.h that defines it is not on
+            # INCLUDE_PATH, so without this the API would be documented as
+            # DALI_NAMESPACE::Ui::X. Set it to Tizen::Dali to document a build made
+            # with ENABLE_TIZEN_NAMESPACE. DALI_DOXYGEN hides the compatibility
+            # namespace alias, which doxygen reports as recursive.
+            PREDEFINED: "DALI_NAMESPACE=Dali DALI_TIZEN_NAMESPACE=0 DALI_DOXYGEN"
             SEARCH_INCLUDES: "YES"
             SHOW_FILES: "NO"
 

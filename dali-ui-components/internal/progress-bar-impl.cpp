@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -610,4 +610,4 @@ bool ProgressBarImpl::IsRightToLeft() const
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

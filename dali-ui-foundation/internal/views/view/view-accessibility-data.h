@@ -23,7 +23,7 @@
 #include <dali/devel-api/adaptor-framework/accessibility-devel.h>                     // LCOV_EXCL_LINE
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h> // LCOV_EXCL_LINE
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -189,5 +189,5 @@ private:
 };
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 #endif // DALI_UI_VIEW_ACCESSIBILITY_DATA_H

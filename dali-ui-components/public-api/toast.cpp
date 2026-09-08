@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/toast-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -134,4 +134,4 @@ Toast::Toast(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali::Ui::Text::Internal::Gradient
+namespace DALI_NAMESPACE::Ui::Text::Internal::Gradient
 {
 /**
  * @brief Stores the renderer-facing values for one prepared atlas resource.
@@ -124,6 +124,6 @@ private:
   Text::GradientBoundsMode mBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
 };
 
-} // namespace Dali::Ui::Text::Internal::Gradient
+} //namespace DALI_NAMESPACE::Ui::Text::Internal::Gradient
 
 #endif // DALI_UI_FOUNDATION_INTERNAL_TEXT_ATLAS_GRADIENT_STATE_H

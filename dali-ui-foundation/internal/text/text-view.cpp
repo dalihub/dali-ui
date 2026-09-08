@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -1513,4 +1513,4 @@ Alignment View::GetVerticalLineAlignment() const
   return Alignment::CENTER;
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/public-api/views/web/web-back-forward-list-item.h>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -92,4 +92,4 @@ WebBackForwardListItem::WebBackForwardListItem(Dali::String url, Dali::String ti
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

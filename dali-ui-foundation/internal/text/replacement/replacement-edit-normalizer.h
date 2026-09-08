@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Normalizes logical edits around atomic replacement ranges.
@@ -106,6 +106,6 @@ public:
                         Length                          insertedLength);
 };
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_EDIT_NORMALIZER_H

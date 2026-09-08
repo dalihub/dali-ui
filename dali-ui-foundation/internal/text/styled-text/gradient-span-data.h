@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -85,4 +85,4 @@ void SetGradientSpanSegmentationInfo(GradientSpanModelData&    data,
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -36,7 +36,7 @@
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -365,4 +365,4 @@ void ViewAnimationSpecImpl::ApplyOpacityBy(Animation& animation, View view, cons
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

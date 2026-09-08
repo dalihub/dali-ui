@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/image-loader/loading-task.h>
 #include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -187,6 +187,6 @@ inline Internal::AsyncImageLoader& GetImplementation(Ui::AsyncImageLoader& handl
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_ASYNC_IMAGE_LOADER_IMPL_H

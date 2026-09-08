@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
 #include <dali/public-api/math/vector2.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -206,6 +206,6 @@ public: // Not intended for application developers
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_PAGE_SCROLL_VIEW_H

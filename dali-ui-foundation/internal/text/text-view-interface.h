@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 struct Vector2;
 struct Vector4;
@@ -468,6 +468,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_VIEW_INTERFACE_H

@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/bounded-paragraph-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -48,6 +48,6 @@ void MergeBoundedParagraphRunsWhenRemoveCharacters(const Vector<Character>& text
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_BOUNDED_PARAGRAPH_HELPER_FUNCTIONS_H

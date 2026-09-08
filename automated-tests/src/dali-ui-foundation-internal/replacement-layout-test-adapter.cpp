@@ -28,7 +28,7 @@
 #include <limits>
 #include <vector>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {

@@ -21,7 +21,7 @@
 #include <dali/public-api/object/property.h>
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 struct Vector4;
 
@@ -53,6 +53,6 @@ bool ConvertPropertyToColor(const Property::Value& colorValue, Vector4& outColor
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_COLOR_CONVERSION_H

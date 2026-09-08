@@ -41,7 +41,7 @@
 #include <dali-ui-foundation/public-api/video/video-source.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -450,4 +450,4 @@ void VideoViewImpl::OnWindowResized(Dali::Window /* window */, Dali::Window::Win
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

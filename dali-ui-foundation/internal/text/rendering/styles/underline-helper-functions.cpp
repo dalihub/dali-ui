@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -120,4 +120,4 @@ void CalcualteUnderlineHeight(const FontMetrics& fontMetrics, float& currentUnde
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

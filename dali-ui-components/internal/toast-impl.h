@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -174,4 +174,4 @@ inline const Internal::ToastImpl& GetImpl(const Ui::Toast& toast)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

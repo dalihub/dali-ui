@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-namespace Dali::Ui::Internal::Visual
+namespace DALI_NAMESPACE::Ui::Internal::Visual
 {
 namespace
 {
@@ -233,4 +233,4 @@ const Property::Map& Transform::GetDefaultTransformMap()
 
   return sDefaultTransformMap;
 }
-} // namespace Dali::Ui::Internal::Visual
+} //namespace DALI_NAMESPACE::Ui::Internal::Visual

@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -49,4 +49,4 @@ float GetGlyphCharacterSpacing(const GlyphIndex&                       index,
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

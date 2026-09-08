@@ -59,7 +59,7 @@ Dali::Ui::Internal::ViewDataImpl& GetViewImplementation(Dali::Ui::View view)
 
 } // unnamed namespace
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace
 {
@@ -823,4 +823,4 @@ void ViewAccessible::ResetCustomHighlightOverlay()
 {
   mHighlightOverlay.ResetCustomHighlight();
 }
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

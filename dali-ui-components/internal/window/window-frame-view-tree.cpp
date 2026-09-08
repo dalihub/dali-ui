@@ -17,7 +17,7 @@
 #include "window-frame-layout-engine.h"
 #include "window-frame-style-resolver.h"
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -240,4 +240,4 @@ void WindowFrameViewTree::RemoveDecorationViews()
   if(mDecoration.GetBottomRightResizeHandle()) mDecoration.GetBottomRightResizeHandle().Unparent();
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

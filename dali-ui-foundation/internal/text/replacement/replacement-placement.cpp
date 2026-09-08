@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -355,4 +355,4 @@ void ExtractReplacementPlacements(const Model&                     model,
                                    placements);
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

@@ -43,7 +43,7 @@ std::mutex                                        gDynamicPropertyProbeMutex;
 Dali::Internal::Adaptor::VectorAnimationRenderer* gLatestVectorAnimationRenderer{nullptr};
 } // unnamed namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Internal
 {

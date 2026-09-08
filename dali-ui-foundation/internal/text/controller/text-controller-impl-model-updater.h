@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * Contains methods for updating the models in the TextController
@@ -59,6 +59,6 @@ struct ControllerImplModelUpdater
                      OperationsMask              operationsRequired);
 };
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_CONTROLLER_IMPL_MODEL_UPDATER_H

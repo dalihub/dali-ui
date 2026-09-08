@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Stores the final glyph and elision state for one layout generation.
@@ -169,6 +169,6 @@ struct FinalElisionResult
   bool     applied{false};    ///< Exactly one ellipsis unit exists in the final sequence.
 };
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_FINAL_ELISION_RESULT_H

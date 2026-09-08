@@ -76,7 +76,7 @@ static void WriteWebViewDebugLog(const char* format, ...)
 }
 #endif
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1580,4 +1580,4 @@ void WebViewImpl::EmitWebProcessCrashed()
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

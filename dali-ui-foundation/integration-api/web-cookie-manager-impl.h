@@ -21,7 +21,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class WebEngineCookieManager;
 
@@ -66,4 +66,4 @@ inline const WebCookieManagerImpl& GetImpl(const WebCookieManager& manager)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

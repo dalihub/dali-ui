@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/text-backend-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -62,4 +62,4 @@ Backend::Backend(Internal::Backend* internal)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

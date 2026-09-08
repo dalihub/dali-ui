@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -117,5 +117,5 @@ private:
 };
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 #endif // DALI_UI_INTERNAL_OFFSCREEN_RENDERING_IMPL

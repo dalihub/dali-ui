@@ -22,7 +22,7 @@
 
 // INTERNAL INCLUDES
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -92,4 +92,4 @@ void TextVerticalScroller::SetDuration(float duration)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

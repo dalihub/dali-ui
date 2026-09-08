@@ -25,7 +25,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/signals/callback.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -418,4 +418,4 @@ private:
 /** @} */
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

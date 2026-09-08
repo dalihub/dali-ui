@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/integration-api/text/text-decoration-types.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 struct Vector2;
 struct Vector4;
@@ -709,6 +709,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_DECORATOR_H

@@ -37,7 +37,7 @@
 // DEVEL INCLUDES
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -843,6 +843,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_VISUAL_MODEL_IMPL_H

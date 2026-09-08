@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 /**
@@ -259,4 +259,4 @@ enum class WindowFrameDecorationResult
   ROLE_OUTSIDE_DECORATION = 4
 };
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/image-loader/async-image-loader-impl.h>
 #include <dali-ui-foundation/public-api/image-loader/sync-image-loader.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -104,4 +104,4 @@ void TextureAsyncLoadingHelper::AsyncLoadComplete(LoadingTaskPtr task)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

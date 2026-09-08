@@ -41,7 +41,7 @@
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1119,4 +1119,4 @@ void LottieAnimationViewImpl::OnViewResourceReady(Ui::View view)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

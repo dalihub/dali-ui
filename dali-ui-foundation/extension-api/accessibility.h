@@ -24,7 +24,7 @@
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/signals/callback.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -62,4 +62,4 @@ DALI_UI_API void SayAccessibilityText(
 } // namespace Accessibility
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

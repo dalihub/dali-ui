@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -112,6 +112,6 @@ DALI_UI_API Dali::Ui::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuf
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_IMAGE_H

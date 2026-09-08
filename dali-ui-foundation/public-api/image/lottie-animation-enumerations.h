@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -63,4 +63,4 @@ enum class VectorProperty : uint8_t
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

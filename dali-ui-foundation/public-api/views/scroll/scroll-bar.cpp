@@ -20,7 +20,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/actors/actor.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -205,4 +205,4 @@ void ScrollBar::SetBarCornerRadius(const Vector4& radius)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -53,7 +53,7 @@ static constexpr uint32_t FIRST_FRAME_INDEX = 0u;
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -269,4 +269,4 @@ void RollingImageCache::LoadComplete(bool loadSuccess, TextureInformation textur
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

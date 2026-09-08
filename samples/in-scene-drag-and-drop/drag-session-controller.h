@@ -14,7 +14,7 @@
 #include <string>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {

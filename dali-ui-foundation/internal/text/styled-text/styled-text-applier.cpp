@@ -45,7 +45,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1040,4 +1040,4 @@ void StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(const Dali::Ui::Text
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/public-api/animation/duration.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {

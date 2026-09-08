@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 CoreInteractionObject::CoreInteractionObject() = default;
@@ -229,4 +229,4 @@ void CoreInteractionObject::OnViewDestroying(ViewImpl* viewImpl)
   }
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

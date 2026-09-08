@@ -51,7 +51,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1450,4 +1450,4 @@ Dali::Ui::Text::StyledText MarkupToStyledText(const Dali::String& markup, Markup
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

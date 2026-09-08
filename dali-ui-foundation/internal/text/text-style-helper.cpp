@@ -18,7 +18,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -185,4 +185,4 @@ bool ApplyBevelStyle(ControllerPtr controller, const Bevel& bevel)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

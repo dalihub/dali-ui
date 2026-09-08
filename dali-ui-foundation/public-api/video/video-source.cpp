@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/video/video-source-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -81,4 +81,4 @@ VideoSource VideoSource::New(Dali::StringView     providerId,
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

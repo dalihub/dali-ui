@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/glyph-run.h>
 #include <dali-ui-foundation/internal/text/strikethrough-style-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -53,6 +53,6 @@ struct StrikethroughGlyphRun
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_STRIKETHROUGH_GLYPH_RUN_H

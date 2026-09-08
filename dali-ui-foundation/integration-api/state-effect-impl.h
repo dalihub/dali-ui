@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/views/state-event.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -131,4 +131,4 @@ inline const Integration::StateEffectImpl& GetImpl(const StateEffect& obj)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
