@@ -241,11 +241,10 @@ jobs:
       run: |
         set -euo pipefail
 
-        mkdir -p test_results coverage
+        mkdir -p test_results
         chmod +x automated-tests/scripts/convert-to-gtest.py
         python3 automated-tests/scripts/convert-to-gtest.py test-results.xml
         cp test-results.xml test_results/
-        cp build/tizen/dali.info coverage/
 
     - name: Upload artifacts (test_results)
       uses: CODE-Actions/upload-artifact@v2
@@ -258,7 +257,7 @@ jobs:
       uses: CODE-Actions/upload-artifact@v2
       with:
         name: coverage
-        path: coverage
+        path: build/tizen/dali.info
         retention-days: 1
 
     - name: Release build check
