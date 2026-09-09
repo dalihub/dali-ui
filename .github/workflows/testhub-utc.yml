@@ -235,16 +235,31 @@ jobs:
 
         cmake --build build/tizen --target cov_data
         test -s build/tizen/dali.info
+        genhtml \
+          --branch-coverage \
+          --no-sort \
+          --output-directory build/tizen/doc/coverage \
+          build/tizen/dali.info
+        test -s build/tizen/doc/coverage/index.html
 
     - name: Collect artifacts
       shell: bash
       run: |
         set -euo pipefail
 
-        mkdir -p test_results
+        rm -rf coverage
+        mkdir -p test_results coverage
         chmod +x automated-tests/scripts/convert-to-gtest.py
         python3 automated-tests/scripts/convert-to-gtest.py test-results.xml
         cp test-results.xml test_results/
+        cp build/tizen/dali.info coverage/
+        (
+          cd build/tizen/doc/coverage
+          find . -type f \( -name 'index.html' -o -name '*.func.html' \) \
+            -exec cp --parents '{}' "$GITHUB_WORKSPACE/coverage/" \;
+        )
+        test -s coverage/index.html
+        test "$(find coverage -name '*.func.html' | wc -l)" -gt 0
 
     - name: Upload artifacts (test_results)
       uses: CODE-Actions/upload-artifact@v2
@@ -257,7 +272,7 @@ jobs:
       uses: CODE-Actions/upload-artifact@v2
       with:
         name: coverage
-        path: build/tizen/dali.info
+        path: coverage
         retention-days: 1
 
     - name: Release build check
