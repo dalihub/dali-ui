@@ -32,6 +32,9 @@ jobs:
     env:
       CC: gcc
       CXX: g++
+    defaults:
+      run:
+        shell: bash
 
     steps:
     - uses: code-actions/checkout@v3
