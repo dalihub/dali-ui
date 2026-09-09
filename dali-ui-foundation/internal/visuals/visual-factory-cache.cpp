@@ -620,8 +620,14 @@ void VisualFactoryCache::UpdateBrokenImageRenderer(VisualRenderer& renderer, con
       renderer.SetGeometry(geometry);
       renderer.SetShader(shader);
     }
-    Texture    brokenImage = GetBrokenVisualImage(brokenIndex);
-    TextureSet textureSet  = TextureSet::New();
+    Texture brokenImage = GetBrokenVisualImage(brokenIndex);
+    if(!brokenImage)
+    {
+      DALI_LOG_ERROR("Failed to load broken image: %s\n", mBrokenImageInfoContainer[brokenIndex].url.c_str());
+      renderer.RemoveTextures();
+      return;
+    }
+    TextureSet textureSet = TextureSet::New();
     textureSet.SetTexture(0u, brokenImage);
     renderer.SetTextures(textureSet);
   }

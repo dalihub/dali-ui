@@ -637,9 +637,14 @@ void ImageVisual::GetNaturalSize(Vector2& naturalSize)
 
         mUseBrokenImageRenderer = true;
         mFactoryCache.UpdateBrokenImageRenderer(mImpl->mRenderer, imageSize);
-        Texture brokenImage = mImpl->mRenderer.GetTextures().GetTexture(0);
-        naturalSize.x       = static_cast<float>(brokenImage.GetWidth());
-        naturalSize.y       = static_cast<float>(brokenImage.GetWidth());
+        auto textureSet  = mImpl->mRenderer.GetTextures();
+        auto brokenImage = textureSet ? textureSet.GetTexture(0u) : Texture();
+        naturalSize      = Vector2::ZERO;
+        if(brokenImage)
+        {
+          naturalSize.x = static_cast<float>(brokenImage.GetWidth());
+          naturalSize.y = static_cast<float>(brokenImage.GetHeight());
+        }
       }
       return;
     }
@@ -1564,7 +1569,8 @@ void ImageVisual::ShowBrokenImage()
 
     mUseBrokenImageRenderer = true;
     mFactoryCache.UpdateBrokenImageRenderer(mImpl->mRenderer, imageSize);
-    if(actor)
+    auto textureSet = mImpl->mRenderer.GetTextures();
+    if(actor && textureSet && textureSet.GetTexture(0u))
     {
       actor.AddRenderer(mImpl->mRenderer);
       mRendererAdded = true;

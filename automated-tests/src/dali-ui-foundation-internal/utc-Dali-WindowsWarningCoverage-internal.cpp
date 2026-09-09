@@ -167,7 +167,28 @@ int UtcDaliWindowsWarningCoverageImageVisualsP(void)
   brokenImageInfo.width      = 67u;
   brokenImageInfo.height     = 71u;
   imageVisual.GetNaturalSize(naturalSize);
-  DALI_TEST_EQUALS(naturalSize, Vector2(67.0f, 67.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(naturalSize, Vector2(67.0f, 71.0f), TEST_LOCATION);
+
+  // Neither the requested image nor its fallback exists. Clear the previously
+  // cached fallback and verify that no stale texture or renderer is displayed.
+  std::string missingBrokenImage = "/invalid/missing-broken.png";
+  image.mFactoryCache.SetBrokenImageUrl(missingBrokenImage, {});
+  imageVisual.GetNaturalSize(naturalSize);
+  DALI_TEST_EQUALS(naturalSize, Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_CHECK(!image.mImpl->mRenderer.GetTextures());
+
+  Actor actor = Actor::New();
+  actor.AddRenderer(image.mImpl->mRenderer);
+  image.mRendererAdded  = true;
+  image.mPlacementActor = actor;
+  image.LoadComplete(false, Ui::TextureUploadObserver::TextureInformation(
+                              Ui::TextureUploadObserver::ReturnType::TEXTURE,
+                              UiInternal::TextureManager::INVALID_TEXTURE_ID, TextureSet(), false));
+  DALI_TEST_EQUALS(actor.GetRendererCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(image.mImpl->mResourceStatus, Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+
+  imageVisual.GetNaturalSize(naturalSize);
+  DALI_TEST_EQUALS(naturalSize, Vector2::ZERO, TEST_LOCATION);
 
   END_TEST;
 }
