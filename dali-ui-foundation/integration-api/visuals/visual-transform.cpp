@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,16 +34,18 @@ namespace DALI_NAMESPACE::Ui::Internal::Visual
 {
 namespace
 {
+// One table serves VisualOrigin and VisualPivot: it maps strings to integers, and the two
+// enumerations are required to share names, values and order.
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ALIGN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_END)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_END)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_END)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, TOP_LEFT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, TOP_CENTER)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, TOP_RIGHT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, CENTER_LEFT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, CENTER)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, CENTER_RIGHT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, BOTTOM_LEFT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, BOTTOM_CENTER)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, BOTTOM_RIGHT)
 DALI_ENUM_TO_STRING_TABLE_END(ALIGN)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(POLICY)
@@ -88,8 +90,8 @@ Transform::Transform()
   mSize(1.0f, 1.0f),
   mExtraSize(0.0f, 0.0f),
   mOffsetSizeMode(0.0f, 0.0f, 0.0f, 0.0f),
-  mOrigin(Ui::Align::TOP_BEGIN),
-  mPivot(Ui::Align::TOP_BEGIN)
+  mOrigin(Ui::VisualOrigin::TOP_LEFT),
+  mPivot(Ui::VisualPivot::TOP_LEFT)
 {
 }
 
@@ -100,8 +102,8 @@ void Transform::SetPropertyMap(const Property::Map& map)
   mSize           = Vector2(1.0f, 1.0f);
   mExtraSize      = Vector2(0.0f, 0.0f);
   mOffsetSizeMode = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
-  mOrigin         = Ui::Align::TOP_BEGIN;
-  mPivot          = Ui::Align::TOP_BEGIN;
+  mOrigin         = Ui::VisualOrigin::TOP_LEFT;
+  mPivot          = Ui::VisualPivot::TOP_LEFT;
 
   UpdatePropertyMap(map);
 }
@@ -125,12 +127,12 @@ void Transform::UpdatePropertyMap(const Property::Map& map)
       }
       case Ui::Integration::Visual::Transform::Property::ORIGIN:
       {
-        Scripting::GetEnumerationProperty<Ui::Align::Type>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT, mOrigin);
+        Scripting::GetEnumerationProperty<Ui::VisualOrigin>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT, mOrigin);
         break;
       }
       case Ui::Integration::Visual::Transform::Property::PIVOT:
       {
-        Scripting::GetEnumerationProperty<Ui::Align::Type>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT, mPivot);
+        Scripting::GetEnumerationProperty<Ui::VisualPivot>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT, mPivot);
         break;
       }
       case Ui::Integration::Visual::Transform::Property::OFFSET_POLICY:
@@ -224,8 +226,8 @@ const Property::Map& Transform::GetDefaultTransformMap()
   static const Property::Map sDefaultTransformMap = Dali::CreatePropertyMap({
     {Ui::Integration::Visual::Transform::Property::OFFSET, Vector2::ZERO},
     {Ui::Integration::Visual::Transform::Property::SIZE, Vector2::ONE},
-    {Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN},
-    {Ui::Integration::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN},
+    {Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT},
+    {Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT},
     {Ui::Integration::Visual::Transform::Property::OFFSET_POLICY, Vector2::ZERO},
     {Ui::Integration::Visual::Transform::Property::SIZE_POLICY, Vector2::ZERO},
     {Ui::Integration::Visual::Transform::Property::EXTRA_SIZE, Vector2::ZERO},

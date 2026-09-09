@@ -25,10 +25,10 @@
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
+#include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
-#include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -151,7 +151,6 @@ int UtcDaliBorderVisualSetGetPropertyValue(void)
   DALI_TEST_EQUALS(visual.GetBorderSize(), 3.3f, TEST_LOCATION);
   DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::BorderVisual::Property::BORDER_SIZE).Get<float>(), 3.3f, TEST_LOCATION);
 
-
   visual.SetAntiAliasingEnabled(true);
   DALI_TEST_EQUALS(visual.IsAntiAliasingEnabled(), true, TEST_LOCATION);
   DALI_TEST_EQUALS(Dali::Ui::GetImplementation(visual).GetProperty(Dali::Ui::Integration::BorderVisual::Property::ANTI_ALIASING).Get<bool>(), true, TEST_LOCATION);
@@ -192,7 +191,8 @@ int UtcDaliBorderVisualInvalidHandle(void)
   // Empty BorderVisual handle.
   BorderVisual empty;
 
-  auto TestAssertFunction = [&](std::function<void(void)> func){
+  auto TestAssertFunction = [&](std::function<void(void)> func)
+  {
     try
     {
       func();
@@ -205,38 +205,66 @@ int UtcDaliBorderVisualInvalidHandle(void)
   };
 
   // Inherit
-  TestAssertFunction([&](){empty.SetName("ShouldBeCrash");});
-  TestAssertFunction([&](){empty.SetOffsetX(1.0f);});
-  TestAssertFunction([&](){empty.SetOffsetY(1.0f);});
-  TestAssertFunction([&](){empty.SetWidth(100.0f);});
-  TestAssertFunction([&](){empty.SetHeight(100.0f);});
-  TestAssertFunction([&](){empty.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);});
-  TestAssertFunction([&](){empty.SetExtraWidth(10.0f);});
-  TestAssertFunction([&](){empty.SetExtraHeight(10.0f);});
-  TestAssertFunction([&](){empty.SetOrigin(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetPivot(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetSiblingOrder(0u);});
+  TestAssertFunction([&]()
+  { empty.SetName("ShouldBeCrash"); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetX(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetY(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetWidth(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetHeight(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetTransformProportionFlags(Visual::Transform::ProportionFlags::ALL); });
+  TestAssertFunction([&]()
+  { empty.SetExtraWidth(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetExtraHeight(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOrigin(VisualOrigin::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetPivot(VisualPivot::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetSiblingOrder(0u); });
 
-  TestAssertFunction([&](){empty.GetOwner();});
-  TestAssertFunction([&](){empty.GetDepthLayer();});
-  TestAssertFunction([&](){empty.GetName();});
-  TestAssertFunction([&](){empty.GetOffsetX();});
-  TestAssertFunction([&](){empty.GetOffsetY();});
-  TestAssertFunction([&](){empty.GetWidth();});
-  TestAssertFunction([&](){empty.GetHeight();});
-  TestAssertFunction([&](){empty.GetProportionFlags();});
-  TestAssertFunction([&](){empty.GetExtraWidth();});
-  TestAssertFunction([&](){empty.GetExtraHeight();});
-  TestAssertFunction([&](){empty.GetOrigin();});
-  TestAssertFunction([&](){empty.GetPivot();});
-  TestAssertFunction([&](){empty.GetSiblingOrder();});
+  TestAssertFunction([&]()
+  { empty.GetOwner(); });
+  TestAssertFunction([&]()
+  { empty.GetDepthLayer(); });
+  TestAssertFunction([&]()
+  { empty.GetName(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetX(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetY(); });
+  TestAssertFunction([&]()
+  { empty.GetWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetTransformProportionFlags(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetOrigin(); });
+  TestAssertFunction([&]()
+  { empty.GetPivot(); });
+  TestAssertFunction([&]()
+  { empty.GetSiblingOrder(); });
 
   // BorderVisual specific
-  TestAssertFunction([&](){empty.SetBorderSize(0.0f);});
-  TestAssertFunction([&](){empty.SetAntiAliasingEnabled(false);});
+  TestAssertFunction([&]()
+  { empty.SetBorderSize(0.0f); });
+  TestAssertFunction([&]()
+  { empty.SetAntiAliasingEnabled(false); });
 
-  TestAssertFunction([&](){empty.GetBorderSize();});
-  TestAssertFunction([&](){empty.IsAntiAliasingEnabled();});
+  TestAssertFunction([&]()
+  { empty.GetBorderSize(); });
+  TestAssertFunction([&]()
+  { empty.IsAntiAliasingEnabled(); });
 
   END_TEST;
 }

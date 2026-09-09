@@ -291,7 +291,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
 void SvgVisual::DoSetOnScene(Actor& actor)
 {
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 
   // Defer the rasterisation task until we get given a size (by Size Negotiation algorithm)
 
@@ -557,7 +557,7 @@ void SvgVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer);
   }
 
   if(IsOnScene() && !mLoadFailed)

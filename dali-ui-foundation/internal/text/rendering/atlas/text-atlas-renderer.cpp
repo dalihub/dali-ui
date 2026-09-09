@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
@@ -47,7 +48,6 @@
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -68,7 +68,7 @@ const uint32_t DOUBLE_PIXEL_PADDING = 4u; // Padding will be added twice to Atla
 const uint16_t NO_OUTLINE           = 0u;
 
 constexpr const char*     UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME("uTextGradientStartOffset");
-static constexpr uint32_t TEXT_ATLAS_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 28u);
+static constexpr uint32_t TEXT_ATLAS_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 28u);
 
 void GradientOffsetConstraint(float& current, const PropertyInputContainer& inputs)
 {

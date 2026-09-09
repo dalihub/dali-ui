@@ -19,7 +19,7 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
+#include <dali-ui-foundation/integration-api/ui-property-index-ranges.h>
 
 namespace DALI_NAMESPACE
 {

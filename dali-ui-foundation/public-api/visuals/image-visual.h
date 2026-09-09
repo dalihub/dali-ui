@@ -39,7 +39,7 @@ namespace Ui
  */
 
 /**
- * @brief ImageVisual is a owner of Visual::Base with Visual::IMAGE, to render simple image.
+ * @brief A VisualBase of type VisualType::IMAGE, to render a simple image.
  *
  * It can use CornerRadius / CornerSquareness / Borderline feature only if image is not n-patch image
  * or set BORDER property.

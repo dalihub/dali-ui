@@ -493,7 +493,7 @@ void OverlayEffectImpl::ApplyOverlayProperties(ColorVisual overlay, View target)
   const float bottom        = mOverlayPadding.bottom;
 
   overlay.SetColor(mOverlayColor);
-  overlay.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  overlay.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   overlay.SetOffsetX(-left);
   overlay.SetOffsetY(-top);
   overlay.SetWidth(1.0f);

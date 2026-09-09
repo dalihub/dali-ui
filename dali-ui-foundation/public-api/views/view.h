@@ -52,7 +52,7 @@
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/views/view-with.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE
 {

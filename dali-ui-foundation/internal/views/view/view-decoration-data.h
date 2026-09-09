@@ -2,7 +2,7 @@
 #define DALI_UI_VIEW_DECORATION_DATA_H
 
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/constants.h> ///< for Color::BLACK
 #include <dali/public-api/math/vector4.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE::Ui::Internal
 {

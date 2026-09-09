@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/animated-image-view-properties.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/math/vector4.h>

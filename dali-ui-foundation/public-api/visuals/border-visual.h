@@ -35,7 +35,7 @@ namespace Ui
  */
 
 /**
- * @brief BorderVisual is a owner of Visual::Base with Visual::BORDER, to render simple rectangle borderline.
+ * @brief A VisualBase of type VisualType::BORDER, to render a simple rectangular borderline.
  *
  * It cannot use CornerRadius / CornerSquareness / Borderline feature.
  */

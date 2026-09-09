@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include <locale>
 
 // INTERNAL
+#include <dali-ui-foundation/integration-api/ui-property-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
@@ -34,9 +35,10 @@
 #include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visuals-container-impl.h>
+#include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE::Ui::Internal
 {
@@ -55,14 +57,19 @@ Vector4 ToVector4(const Insets& insets)
 Debug::Filter* gVisualBaseLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VISUAL_BASE");
 #endif
 
+// VISUAL_READ_ONLY is the highest range ui-foundation reserves, so bounding it bounds them all.
+static_assert(static_cast<int>(Dali::Ui::Integration::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_END_INDEX) <=
+                static_cast<int>(Dali::Ui::PropertyRanges::UI_FOUNDATION_PROPERTY_MAX),
+              "ui-foundation property indices must stay within UI_FOUNDATION_PROPERTY_MAX");
+
 inline bool IsMutableVisualPropertyIndex(Dali::Property::Index index)
 {
-  return (index >= Dali::Ui::PropertyRanges::VISUAL_MUTABLE_PROPERTY_START_INDEX && index <= Dali::Ui::PropertyRanges::VISUAL_MUTABLE_PROPERTY_END_INDEX);
+  return (index >= Dali::Ui::Integration::PropertyRanges::VISUAL_MUTABLE_PROPERTY_START_INDEX && index <= Dali::Ui::Integration::PropertyRanges::VISUAL_MUTABLE_PROPERTY_END_INDEX);
 }
 
 inline bool IsReadOnlyVisualPropertyIndex(Dali::Property::Index index)
 {
-  return (index >= Dali::Ui::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_START_INDEX && index <= Dali::Ui::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_END_INDEX);
+  return (index >= Dali::Ui::Integration::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_START_INDEX && index <= Dali::Ui::Integration::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_END_INDEX);
 }
 
 inline Vector4 ConvertProportionFlagsToOffsetSizeMode(Dali::Ui::Visual::Transform::ProportionFlags flags)
@@ -431,12 +438,12 @@ void VisualBaseImpl::SetHeight(float height)
   }
 }
 
-Dali::Ui::Visual::Transform::ProportionFlags VisualBaseImpl::GetProportionFlags() const
+Dali::Ui::Visual::Transform::ProportionFlags VisualBaseImpl::GetTransformProportionFlags() const
 {
   return ConvertOffsetSizeModeToProportionFlags(mTransform ? mTransform->mOffsetSizeMode : Vector4::ZERO);
 }
 
-void VisualBaseImpl::SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags)
+void VisualBaseImpl::SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags)
 {
   if(mTransform || flags != Dali::Ui::Visual::Transform::ProportionFlags::ALL)
   {
@@ -489,14 +496,14 @@ void VisualBaseImpl::SetExtraHeight(float extraHeight)
   }
 }
 
-Align::Type VisualBaseImpl::GetOrigin() const
+VisualOrigin VisualBaseImpl::GetOrigin() const
 {
-  return mTransform ? mTransform->mOrigin : Align::TOP_BEGIN;
+  return mTransform ? mTransform->mOrigin : VisualOrigin::TOP_LEFT;
 }
 
-void VisualBaseImpl::SetOrigin(Align::Type origin)
+void VisualBaseImpl::SetOrigin(VisualOrigin origin)
 {
-  if(mTransform || origin != Align::TOP_BEGIN)
+  if(mTransform || origin != VisualOrigin::TOP_LEFT)
   {
     if(!mTransform || mTransform->mOrigin != origin)
     {
@@ -508,14 +515,14 @@ void VisualBaseImpl::SetOrigin(Align::Type origin)
   }
 }
 
-Align::Type VisualBaseImpl::GetPivot() const
+VisualPivot VisualBaseImpl::GetPivot() const
 {
-  return mTransform ? mTransform->mPivot : Align::TOP_BEGIN;
+  return mTransform ? mTransform->mPivot : VisualPivot::TOP_LEFT;
 }
 
-void VisualBaseImpl::SetPivot(Align::Type pivot)
+void VisualBaseImpl::SetPivot(VisualPivot pivot)
 {
-  if(mTransform || pivot != Align::TOP_BEGIN)
+  if(mTransform || pivot != VisualPivot::TOP_LEFT)
   {
     if(!mTransform || mTransform->mPivot != pivot)
     {

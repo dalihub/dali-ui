@@ -25,10 +25,10 @@
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
-#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -499,7 +499,8 @@ int UtcDaliTextVisualInvalidHandle(void)
   // Empty TextVisual handle.
   TextVisual empty;
 
-  auto TestAssertFunction = [&](std::function<void(void)> func){
+  auto TestAssertFunction = [&](std::function<void(void)> func)
+  {
     try
     {
       func();
@@ -512,62 +513,114 @@ int UtcDaliTextVisualInvalidHandle(void)
   };
 
   // Inherit
-  TestAssertFunction([&](){empty.SetName("ShouldBeCrash");});
-  TestAssertFunction([&](){empty.SetOffsetX(1.0f);});
-  TestAssertFunction([&](){empty.SetOffsetY(1.0f);});
-  TestAssertFunction([&](){empty.SetWidth(100.0f);});
-  TestAssertFunction([&](){empty.SetHeight(100.0f);});
-  TestAssertFunction([&](){empty.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);});
-  TestAssertFunction([&](){empty.SetExtraWidth(10.0f);});
-  TestAssertFunction([&](){empty.SetExtraHeight(10.0f);});
-  TestAssertFunction([&](){empty.SetOrigin(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetPivot(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetSiblingOrder(0u);});
+  TestAssertFunction([&]()
+  { empty.SetName("ShouldBeCrash"); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetX(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetY(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetWidth(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetHeight(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetTransformProportionFlags(Visual::Transform::ProportionFlags::ALL); });
+  TestAssertFunction([&]()
+  { empty.SetExtraWidth(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetExtraHeight(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOrigin(VisualOrigin::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetPivot(VisualPivot::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetSiblingOrder(0u); });
 
-  TestAssertFunction([&](){empty.GetOwner();});
-  TestAssertFunction([&](){empty.GetDepthLayer();});
-  TestAssertFunction([&](){empty.GetName();});
-  TestAssertFunction([&](){empty.GetOffsetX();});
-  TestAssertFunction([&](){empty.GetOffsetY();});
-  TestAssertFunction([&](){empty.GetWidth();});
-  TestAssertFunction([&](){empty.GetHeight();});
-  TestAssertFunction([&](){empty.GetProportionFlags();});
-  TestAssertFunction([&](){empty.GetExtraWidth();});
-  TestAssertFunction([&](){empty.GetExtraHeight();});
-  TestAssertFunction([&](){empty.GetOrigin();});
-  TestAssertFunction([&](){empty.GetPivot();});
-  TestAssertFunction([&](){empty.GetSiblingOrder();});
+  TestAssertFunction([&]()
+  { empty.GetOwner(); });
+  TestAssertFunction([&]()
+  { empty.GetDepthLayer(); });
+  TestAssertFunction([&]()
+  { empty.GetName(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetX(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetY(); });
+  TestAssertFunction([&]()
+  { empty.GetWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetTransformProportionFlags(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetOrigin(); });
+  TestAssertFunction([&]()
+  { empty.GetPivot(); });
+  TestAssertFunction([&]()
+  { empty.GetSiblingOrder(); });
 
   // TextVisual specific
-  TestAssertFunction([&](){empty.SetText("Hello");});
-  TestAssertFunction([&](){empty.SetFontFamily("Arial");});
-  TestAssertFunction([&](){empty.SetFontSize(20.0f);});
-  TestAssertFunction([&](){empty.SetFontWeight(Text::FontWeight::BOLD);});
-  TestAssertFunction([&](){empty.SetFontWidth(Text::FontWidth::EXPANDED);});
-  TestAssertFunction([&](){empty.SetFontSlant(Text::FontSlant::ITALIC);});
-  TestAssertFunction([&](){empty.SetMultiLine(true);});
-  TestAssertFunction([&](){empty.SetLineWrapMode(Text::LineWrapMode::CHARACTER);});
-  TestAssertFunction([&](){empty.SetHorizontalAlignment(Text::Alignment::CENTER);});
-  TestAssertFunction([&](){empty.SetVerticalAlignment(Text::Alignment::CENTER);});
-  TestAssertFunction([&](){empty.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);});
-  TestAssertFunction([&](){empty.SetLineHeight(1.5f);});
-  TestAssertFunction([&](){empty.SetLineHeightMode(Text::LineHeightMode::RELATIVE);});
-  TestAssertFunction([&](){empty.SetTextColor(UiColor(Vector4::ONE));});
+  TestAssertFunction([&]()
+  { empty.SetText("Hello"); });
+  TestAssertFunction([&]()
+  { empty.SetFontFamily("Arial"); });
+  TestAssertFunction([&]()
+  { empty.SetFontSize(20.0f); });
+  TestAssertFunction([&]()
+  { empty.SetFontWeight(Text::FontWeight::BOLD); });
+  TestAssertFunction([&]()
+  { empty.SetFontWidth(Text::FontWidth::EXPANDED); });
+  TestAssertFunction([&]()
+  { empty.SetFontSlant(Text::FontSlant::ITALIC); });
+  TestAssertFunction([&]()
+  { empty.SetMultiLine(true); });
+  TestAssertFunction([&]()
+  { empty.SetLineWrapMode(Text::LineWrapMode::CHARACTER); });
+  TestAssertFunction([&]()
+  { empty.SetHorizontalAlignment(Text::Alignment::CENTER); });
+  TestAssertFunction([&]()
+  { empty.SetVerticalAlignment(Text::Alignment::CENTER); });
+  TestAssertFunction([&]()
+  { empty.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS); });
+  TestAssertFunction([&]()
+  { empty.SetLineHeight(1.5f); });
+  TestAssertFunction([&]()
+  { empty.SetLineHeightMode(Text::LineHeightMode::RELATIVE); });
+  TestAssertFunction([&]()
+  { empty.SetTextColor(UiColor(Vector4::ONE)); });
 
-  TestAssertFunction([&](){empty.GetText();});
-  TestAssertFunction([&](){empty.GetFontFamily();});
-  TestAssertFunction([&](){empty.GetFontSize();});
-  TestAssertFunction([&](){empty.GetFontWeight();});
-  TestAssertFunction([&](){empty.GetFontWidth();});
-  TestAssertFunction([&](){empty.GetFontSlant();});
-  TestAssertFunction([&](){empty.IsMultiLine();});
-  TestAssertFunction([&](){empty.GetLineWrapMode();});
-  TestAssertFunction([&](){empty.GetHorizontalAlignment();});
-  TestAssertFunction([&](){empty.GetVerticalAlignment();});
-  TestAssertFunction([&](){empty.GetTextOverflowMode();});
-  TestAssertFunction([&](){empty.GetLineHeight();});
-  TestAssertFunction([&](){empty.GetLineHeightMode();});
-  TestAssertFunction([&](){empty.GetTextColor();});
+  TestAssertFunction([&]()
+  { empty.GetText(); });
+  TestAssertFunction([&]()
+  { empty.GetFontFamily(); });
+  TestAssertFunction([&]()
+  { empty.GetFontSize(); });
+  TestAssertFunction([&]()
+  { empty.GetFontWeight(); });
+  TestAssertFunction([&]()
+  { empty.GetFontWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetFontSlant(); });
+  TestAssertFunction([&]()
+  { empty.IsMultiLine(); });
+  TestAssertFunction([&]()
+  { empty.GetLineWrapMode(); });
+  TestAssertFunction([&]()
+  { empty.GetHorizontalAlignment(); });
+  TestAssertFunction([&]()
+  { empty.GetVerticalAlignment(); });
+  TestAssertFunction([&]()
+  { empty.GetTextOverflowMode(); });
+  TestAssertFunction([&]()
+  { empty.GetLineHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetLineHeightMode(); });
+  TestAssertFunction([&]()
+  { empty.GetTextColor(); });
 
   END_TEST;
 }

@@ -129,14 +129,14 @@ void VisualBase::SetHeight(float height)
   GetImplementation(*this).SetHeight(height);
 }
 
-Dali::Ui::Visual::Transform::ProportionFlags VisualBase::GetProportionFlags() const
+Dali::Ui::Visual::Transform::ProportionFlags VisualBase::GetTransformProportionFlags() const
 {
-  return GetImplementation(*this).GetProportionFlags();
+  return GetImplementation(*this).GetTransformProportionFlags();
 }
 
-void VisualBase::SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags)
+void VisualBase::SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags)
 {
-  GetImplementation(*this).SetProportionFlags(flags);
+  GetImplementation(*this).SetTransformProportionFlags(flags);
 }
 
 float VisualBase::GetExtraWidth() const
@@ -159,22 +159,22 @@ void VisualBase::SetExtraHeight(float extraHeight)
   GetImplementation(*this).SetExtraHeight(extraHeight);
 }
 
-Align::Type VisualBase::GetOrigin() const
+VisualOrigin VisualBase::GetOrigin() const
 {
   return GetImplementation(*this).GetOrigin();
 }
 
-void VisualBase::SetOrigin(Align::Type origin)
+void VisualBase::SetOrigin(VisualOrigin origin)
 {
   GetImplementation(*this).SetOrigin(origin);
 }
 
-Align::Type VisualBase::GetPivot() const
+VisualPivot VisualBase::GetPivot() const
 {
   return GetImplementation(*this).GetPivot();
 }
 
-void VisualBase::SetPivot(Align::Type pivot)
+void VisualBase::SetPivot(VisualPivot pivot)
 {
   GetImplementation(*this).SetPivot(pivot);
 }

@@ -36,7 +36,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view-properties.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE
 {

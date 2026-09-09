@@ -56,7 +56,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/internal/visuals/wireframe/wireframe-visual.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::GetStdString;
 using Dali::Integration::ToStdString;

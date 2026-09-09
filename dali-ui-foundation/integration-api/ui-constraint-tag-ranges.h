@@ -1,8 +1,8 @@
-#ifndef DALI_UI_CONSTRAINT_TAG_RANGES_H
-#define DALI_UI_CONSTRAINT_TAG_RANGES_H
+#ifndef DALI_INTEGRATION_UI_CONSTRAINT_TAG_RANGES_H
+#define DALI_INTEGRATION_UI_CONSTRAINT_TAG_RANGES_H
 
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/animation/constraint-tag-ranges.h>
 
-namespace DALI_NAMESPACE::Ui
+namespace DALI_NAMESPACE::Ui::Integration
 {
 /**
- * @brief Enumeration for the start and end property ranges.
+ * @brief Enumeration for the start and end constraint tag ranges reserved by dali-ui.
  */
 enum ConstraintTagRanges
 {
@@ -33,6 +33,6 @@ enum ConstraintTagRanges
   UI_CONSTRAINT_TAG_END = UI_CONSTRAINT_TAG_START + Dali::ConstraintTagRanges::INTERNAL_TAG_MAX_COUNT_PER_DERIVATION,
 };
 
-} //namespace DALI_NAMESPACE::Ui
+} //namespace DALI_NAMESPACE::Ui::Integration
 
-#endif // DALI_UI_CONSTRAINT_TAG_RANGES_H
+#endif // DALI_INTEGRATION_UI_CONSTRAINT_TAG_RANGES_H

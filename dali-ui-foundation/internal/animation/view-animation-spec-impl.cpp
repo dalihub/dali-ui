@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 

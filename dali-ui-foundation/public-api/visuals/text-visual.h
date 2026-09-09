@@ -36,7 +36,7 @@ namespace Ui
  */
 
 /**
- * @brief TextVisual is a owner of Visual::Base with Visual::TEXT, to render simple text.
+ * @brief A VisualBase of type VisualType::TEXT, to render simple text.
  *
  * It cannot use CornerRadius / CornerSquareness / Borderline feature.
  */

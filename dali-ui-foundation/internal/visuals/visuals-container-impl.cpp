@@ -30,12 +30,12 @@
 #include <locale>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h> ///< To get viewDataImpl by Internal::ViewDataImpl::Get()
 #include <dali-ui-foundation/internal/views/view/visual-constraint-functions.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
@@ -53,7 +53,7 @@ constexpr std::string_view VISUAL_OBJECT_PROPERTY_NAME_PREFIX("VisualBase");
 // a View half and an application half. See VisualBaseImpl::GetDepthIndex for what each half is for.
 constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::Integration::DepthIndex::Ranges::CONTENT - Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND) / 2;
 
-static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
+static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
 
 Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Internal::VisualBaseImpl& visualObjectImpl)
 {

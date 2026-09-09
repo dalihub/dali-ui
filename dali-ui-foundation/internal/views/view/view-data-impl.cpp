@@ -59,6 +59,7 @@
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
@@ -101,8 +102,7 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <algorithm>
 
 using Dali::Integration::GetStdString;
@@ -607,13 +607,13 @@ private:
 };
 
 static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(
-  Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
+  Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
 static constexpr uint32_t BORDERLINE_CORNER_RADIUS_CONSTRAINT_TAG(
-  Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 11);
+  Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 11);
 
-static constexpr uint32_t BORDERLINE_WIDTH_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 12);
-static constexpr uint32_t BORDERLINE_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 13);
-static constexpr uint32_t BORDERLINE_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 14);
+static constexpr uint32_t BORDERLINE_WIDTH_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 12);
+static constexpr uint32_t BORDERLINE_COLOR_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 13);
+static constexpr uint32_t BORDERLINE_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 14);
 
 bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName)
 {

@@ -41,7 +41,7 @@ namespace Ui
  */
 
 /**
- * @brief AnimatedImageVisual is a owner of Visual::Base with Visual::ANIMATED_IMAGE, to render sequence of images.
+ * @brief A VisualBase of type VisualType::ANIMATED_IMAGE, to render an animated image or a sequence of images.
  *
  * It can use CornerRadius / CornerSquareness / Borderline feature
  *

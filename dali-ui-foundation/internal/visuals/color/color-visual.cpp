@@ -31,6 +31,7 @@
 #include <locale>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
@@ -39,9 +40,8 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToDaliString;
 
@@ -62,7 +62,7 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(CUTOUT_POLICY)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::CutoutPolicy, CUTOUT_OUTSIDE_WITH_CORNER_RADIUS)
 DALI_ENUM_TO_STRING_TABLE_END(CUTOUT_POLICY)
 
-static constexpr uint32_t CUTOUT_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
+static constexpr uint32_t CUTOUT_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                               20);
 
 constexpr int CUSTOM_CUTOUT_PROPERTY_COUNT(2);        // uCutoutWithCornerRadius, uCutoutOutside
@@ -324,7 +324,7 @@ void ColorVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer);
   }
 }
 
@@ -370,7 +370,7 @@ void ColorVisual::OnInitialize()
   }
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 }
 
 Shader ColorVisual::GenerateShader() const

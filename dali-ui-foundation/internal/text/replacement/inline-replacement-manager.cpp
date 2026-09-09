@@ -36,7 +36,7 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE
 {
@@ -679,8 +679,8 @@ bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
       .Add(Ui::Integration::Visual::Transform::Property::OFFSET, visualOffset)
       .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
            Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT);
     visualImpl.SetTransformAndSize(transform, entry.ownerSize, entry.effectiveScale);
     entry.lastTransformOffset = visualOffset;
     entry.lastTransformSize   = visualSize;

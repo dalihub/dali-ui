@@ -24,10 +24,10 @@
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
+#include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
-#include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -130,7 +130,7 @@ int UtcDaliGradientVisualSetRadialGradient(void)
   GradientVisual visual = GradientVisual::New();
 
   Vector2 center(0.0f, 0.0f);
-  float radius(0.5f);
+  float   radius(0.5f);
   visual.SetRadialGradient(center, radius);
   DALI_TEST_EQUALS(visual.GetCenter(), center, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetRadius(), radius, TEST_LOCATION);
@@ -144,7 +144,7 @@ int UtcDaliGradientVisualSetConicGradient(void)
 
   GradientVisual visual = GradientVisual::New();
 
-  Vector2 center(0.0f, 0.0f);
+  Vector2      center(0.0f, 0.0f);
   Dali::Radian startAngle(Math::PI_2);
   visual.SetConicGradient(center, startAngle);
   DALI_TEST_EQUALS(visual.GetCenter(), center, TEST_LOCATION);
@@ -303,7 +303,8 @@ int UtcDaliGradientVisualInvalidHandle(void)
   // Empty GradientVisual handle.
   GradientVisual empty;
 
-  auto TestAssertFunction = [&](std::function<void(void)> func) {
+  auto TestAssertFunction = [&](std::function<void(void)> func)
+  {
     try
     {
       func();
@@ -316,50 +317,90 @@ int UtcDaliGradientVisualInvalidHandle(void)
   };
 
   // Inherit
-  TestAssertFunction([&]() { empty.SetName("ShouldBeCrash"); });
-  TestAssertFunction([&]() { empty.SetOffsetX(1.0f); });
-  TestAssertFunction([&]() { empty.SetOffsetY(1.0f); });
-  TestAssertFunction([&]() { empty.SetWidth(100.0f); });
-  TestAssertFunction([&]() { empty.SetHeight(100.0f); });
-  TestAssertFunction([&]() { empty.SetProportionFlags(Visual::Transform::ProportionFlags::ALL); });
-  TestAssertFunction([&]() { empty.SetExtraWidth(10.0f); });
-  TestAssertFunction([&]() { empty.SetExtraHeight(10.0f); });
-  TestAssertFunction([&]() { empty.SetOrigin(Align::CENTER_BEGIN); });
-  TestAssertFunction([&]() { empty.SetPivot(Align::CENTER_BEGIN); });
-  TestAssertFunction([&]() { empty.SetSiblingOrder(0u); });
+  TestAssertFunction([&]()
+  { empty.SetName("ShouldBeCrash"); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetX(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetY(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetWidth(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetHeight(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetTransformProportionFlags(Visual::Transform::ProportionFlags::ALL); });
+  TestAssertFunction([&]()
+  { empty.SetExtraWidth(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetExtraHeight(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOrigin(VisualOrigin::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetPivot(VisualPivot::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetSiblingOrder(0u); });
 
-  TestAssertFunction([&]() { empty.GetOwner(); });
-  TestAssertFunction([&]() { empty.GetDepthLayer(); });
-  TestAssertFunction([&]() { empty.GetName(); });
-  TestAssertFunction([&]() { empty.GetOffsetX(); });
-  TestAssertFunction([&]() { empty.GetOffsetY(); });
-  TestAssertFunction([&]() { empty.GetWidth(); });
-  TestAssertFunction([&]() { empty.GetHeight(); });
-  TestAssertFunction([&]() { empty.GetProportionFlags(); });
-  TestAssertFunction([&]() { empty.GetExtraWidth(); });
-  TestAssertFunction([&]() { empty.GetExtraHeight(); });
-  TestAssertFunction([&]() { empty.GetOrigin(); });
-  TestAssertFunction([&]() { empty.GetPivot(); });
-  TestAssertFunction([&]() { empty.GetSiblingOrder(); });
+  TestAssertFunction([&]()
+  { empty.GetOwner(); });
+  TestAssertFunction([&]()
+  { empty.GetDepthLayer(); });
+  TestAssertFunction([&]()
+  { empty.GetName(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetX(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetY(); });
+  TestAssertFunction([&]()
+  { empty.GetWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetTransformProportionFlags(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetOrigin(); });
+  TestAssertFunction([&]()
+  { empty.GetPivot(); });
+  TestAssertFunction([&]()
+  { empty.GetSiblingOrder(); });
 
   // GradientVisual specific
-  TestAssertFunction([&]() { empty.SetStartOffset(0.0f); });
-  TestAssertFunction([&]() { empty.SetLinearGradient(Vector2::ZERO, Vector2::ZERO); });
-  TestAssertFunction([&]() { empty.SetRadialGradient(Vector2::ZERO, 1.0f); });
-  TestAssertFunction([&]() { empty.SetConicGradient(Vector2::ZERO, Dali::Radian(1.0f)); });
-  TestAssertFunction([&]() { empty.SetStopNodes({{0.0f, UiColor()}, {1.0f, UiColor()}}); });
-  TestAssertFunction([&]() { empty.SetUnits(Ui::Gradient::Units::OBJECT_BOUNDING_BOX); });
-  TestAssertFunction([&]() { empty.SetSpreadMethod(Ui::Gradient::SpreadMethod::PAD); });
+  TestAssertFunction([&]()
+  { empty.SetStartOffset(0.0f); });
+  TestAssertFunction([&]()
+  { empty.SetLinearGradient(Vector2::ZERO, Vector2::ZERO); });
+  TestAssertFunction([&]()
+  { empty.SetRadialGradient(Vector2::ZERO, 1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetConicGradient(Vector2::ZERO, Dali::Radian(1.0f)); });
+  TestAssertFunction([&]()
+  { empty.SetStopNodes({{0.0f, UiColor()}, {1.0f, UiColor()}}); });
+  TestAssertFunction([&]()
+  { empty.SetUnits(Ui::Gradient::Units::OBJECT_BOUNDING_BOX); });
+  TestAssertFunction([&]()
+  { empty.SetSpreadMethod(Ui::Gradient::SpreadMethod::PAD); });
 
-  TestAssertFunction([&]() { empty.GetStartOffset(); });
-  TestAssertFunction([&]() { empty.GetStartPosition(); });
-  TestAssertFunction([&]() { empty.GetEndPosition(); });
-  TestAssertFunction([&]() { empty.GetCenter(); });
-  TestAssertFunction([&]() { empty.GetRadius(); });
-  TestAssertFunction([&]() { empty.GetStartAngle(); });
-  TestAssertFunction([&]() { empty.GetStopNodes(); });
-  TestAssertFunction([&]() { empty.GetUnits(); });
-  TestAssertFunction([&]() { empty.GetSpreadMethod(); });
+  TestAssertFunction([&]()
+  { empty.GetStartOffset(); });
+  TestAssertFunction([&]()
+  { empty.GetStartPosition(); });
+  TestAssertFunction([&]()
+  { empty.GetEndPosition(); });
+  TestAssertFunction([&]()
+  { empty.GetCenter(); });
+  TestAssertFunction([&]()
+  { empty.GetRadius(); });
+  TestAssertFunction([&]()
+  { empty.GetStartAngle(); });
+  TestAssertFunction([&]()
+  { empty.GetStopNodes(); });
+  TestAssertFunction([&]()
+  { empty.GetUnits(); });
+  TestAssertFunction([&]()
+  { empty.GetSpreadMethod(); });
 
   END_TEST;
 }

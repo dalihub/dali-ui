@@ -2,7 +2,7 @@
 #define DALI_UI_VISUAL_BASE_IMPL_H
 
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@
 #include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE
 {
@@ -190,14 +190,14 @@ public:
   void SetHeight(float height);
 
   /**
-   * @copydoc Dali::Ui::VisualBase::GetProportionFlags()
+   * @copydoc Dali::Ui::VisualBase::GetTransformProportionFlags()
    */
-  Dali::Ui::Visual::Transform::ProportionFlags GetProportionFlags() const;
+  Dali::Ui::Visual::Transform::ProportionFlags GetTransformProportionFlags() const;
 
   /**
-   * @copydoc Dali::Ui::VisualBase::SetProportionFlags()
+   * @copydoc Dali::Ui::VisualBase::SetTransformProportionFlags()
    */
-  void SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags);
+  void SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags);
 
   /**
    * @copydoc Dali::Ui::VisualBase::GetExtraWidth()
@@ -222,22 +222,22 @@ public:
   /**
    * @copydoc Dali::Ui::VisualBase::GetOrigin()
    */
-  Dali::Ui::Align::Type GetOrigin() const;
+  Dali::Ui::VisualOrigin GetOrigin() const;
 
   /**
    * @copydoc Dali::Ui::VisualBase::SetOrigin()
    */
-  void SetOrigin(Dali::Ui::Align::Type origin);
+  void SetOrigin(Dali::Ui::VisualOrigin origin);
 
   /**
    * @copydoc Dali::Ui::VisualBase::GetPivot()
    */
-  Dali::Ui::Align::Type GetPivot() const;
+  Dali::Ui::VisualPivot GetPivot() const;
 
   /**
    * @copydoc Dali::Ui::VisualBase::SetPivot()
    */
-  void SetPivot(Dali::Ui::Align::Type pivot);
+  void SetPivot(Dali::Ui::VisualPivot pivot);
 
   // Decorated properties (CornerRadius / Borderline)
   /**

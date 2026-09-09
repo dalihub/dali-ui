@@ -34,8 +34,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-event-observer.h>
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE
 {
@@ -352,11 +351,11 @@ struct Base::Impl
    * @brief Set the uniform properties onto the renderer.
    * And Register visual transform uniforms if neccessary.
    */
-  void SetTransformUniforms(VisualRenderer renderer, Ui::Integration::Direction::Type direction)
+  void SetTransformUniforms(VisualRenderer renderer)
   {
-    if(!mTransformMapUsingDefault || direction != Ui::Integration::Direction::LEFT_TO_RIGHT)
+    if(!mTransformMapUsingDefault)
     {
-      SetTransformUniformsInternal(GetOrCreateTransform(), renderer, direction);
+      SetTransformUniformsInternal(GetOrCreateTransform(), renderer);
     }
   }
 
@@ -494,7 +493,7 @@ struct Base::Impl
   }
 
 private:
-  static void SetTransformUniformsInternal(const Transform& transform, VisualRenderer renderer, Ui::Integration::Direction::Type direction);
+  static void SetTransformUniformsInternal(const Transform& transform, VisualRenderer renderer);
 
 public:
   VisualRenderer                             mRenderer;

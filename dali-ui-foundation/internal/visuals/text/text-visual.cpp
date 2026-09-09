@@ -29,6 +29,7 @@
 #include <string.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
@@ -47,8 +48,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToPropertyValue;
@@ -67,12 +67,12 @@ DALI_INIT_TRACE_FILTER(gTraceFilter2, DALI_TRACE_TEXT_ASYNC, false);
 
 const int CUSTOM_PROPERTY_COUNT(24); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, gradient uniforms
 
-static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
-static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
+static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
+static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                              22);
-static constexpr uint32_t TEXT_VISUAL_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 23);
-static constexpr uint32_t TEXT_VISUAL_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 24);
-static constexpr uint32_t TEXT_VISUAL_REVEAL_PROGRESS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 25);
+static constexpr uint32_t TEXT_VISUAL_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 23);
+static constexpr uint32_t TEXT_VISUAL_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 24);
+static constexpr uint32_t TEXT_VISUAL_REVEAL_PROGRESS_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 25);
 
 const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
   0.0f, // Text::Alignment::START
@@ -376,7 +376,7 @@ void TextVisual::OnInitialize()
   engine.SetCursorWidth(0u); // Do not layout space for the cursor.
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, static_cast<Ui::Integration::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 }
 
 void TextVisual::DoSetProperties(const Property::Map& propertyMap)
@@ -1304,8 +1304,8 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       .Add(Ui::Integration::Visual::Transform::Property::OFFSET, visualTransformOffset)
       .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
            Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT);
     SetTransformAndSize(visualTransform, textControlSize, parameters.effectiveTextScale);
 
     // Get the maximum texture size.
@@ -1552,7 +1552,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       if(renderer)
       {
         // Register transform properties
-        mImpl->SetTransformUniforms(renderer, static_cast<Ui::Integration::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+        mImpl->SetTransformUniforms(renderer);
 
         control.AddRenderer(renderer);
 
@@ -2885,7 +2885,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     if(renderer)
     {
       // Register transform properties
-      mImpl->SetTransformUniforms(renderer, static_cast<Ui::Integration::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+      mImpl->SetTransformUniforms(renderer);
 
       // Note, AddRenderer will ignore renderer if it is already added.
       actor.AddRenderer(renderer);

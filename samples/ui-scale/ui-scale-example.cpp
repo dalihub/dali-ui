@@ -85,22 +85,22 @@ constexpr uint32_t C_ZONE_C_BG  = 0xE8F5E9; // light green
 constexpr uint32_t C_ZONE_TITLE = 0x37474F;
 
 // Box colors
-constexpr uint32_t C_RED        = 0xE53935;
-constexpr uint32_t C_GREEN      = 0x43A047;
-constexpr uint32_t C_BLUE       = 0x1E88E5;
-constexpr uint32_t C_ORANGE     = 0xFB8C00;
-constexpr uint32_t C_PURPLE     = 0x8E24AA;
-constexpr uint32_t C_DEEP_ORG   = 0xE64A19; // "ENABLED in DISABLED subtree"
+constexpr uint32_t C_RED      = 0xE53935;
+constexpr uint32_t C_GREEN    = 0x43A047;
+constexpr uint32_t C_BLUE     = 0x1E88E5;
+constexpr uint32_t C_ORANGE   = 0xFB8C00;
+constexpr uint32_t C_PURPLE   = 0x8E24AA;
+constexpr uint32_t C_DEEP_ORG = 0xE64A19; // "ENABLED in DISABLED subtree"
 
 // Grid cell colors
-constexpr uint32_t C_GRID[4]    = {0xEF9A9A, 0x90CAF9, 0xA5D6A7, 0xFFCC80};
+constexpr uint32_t C_GRID[4] = {0xEF9A9A, 0x90CAF9, 0xA5D6A7, 0xFFCC80};
 
 // Misc
-constexpr float    BOX_SIZE     = 60.0f;  // natural size of each demo box
-constexpr float    ZONE_RADIUS  = 10.0f;
-constexpr float    BOX_RADIUS   = 6.0f;
-constexpr float    BTN_RADIUS   = 8.0f;
-constexpr float    BTN_HEIGHT   = 44.0f;
+constexpr float BOX_SIZE    = 60.0f; // natural size of each demo box
+constexpr float ZONE_RADIUS = 10.0f;
+constexpr float BOX_RADIUS  = 6.0f;
+constexpr float BTN_RADIUS  = 8.0f;
+constexpr float BTN_HEIGHT  = 44.0f;
 } // namespace
 
 // ──────────────────── float → "1.23" helper ──────────────────────────────────
@@ -244,12 +244,13 @@ private:
     static constexpr float kPresets[] = {0.8f, 1.0f, 1.2f, 1.5f, 2.0f};
     for(float preset : kPresets)
     {
-      std::string label = "x" + Fmt(preset);
-      InteractiveView btn = MakeButton(label, UiColor(C_BTN));
+      std::string     label = "x" + Fmt(preset);
+      InteractiveView btn   = MakeButton(label, UiColor(C_BTN));
       btn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 
       const float capturedScale = preset;
-      btn.ConnectClickedSignal(this, [this, capturedScale](View, const InputEvent&) {
+      btn.ConnectClickedSignal(this, [this, capturedScale](View, const InputEvent&)
+      {
         ApplyScale(capturedScale);
       });
       btnRow.Add(btn);
@@ -278,7 +279,8 @@ private:
 
     InteractiveView applyBtn = MakeButton("Apply", UiColor(C_BTN_APPLY));
     applyBtn.SetRequestedWidth(70.0f);
-    applyBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+    applyBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
       OnApplyCustomScale();
     });
 
@@ -304,7 +306,8 @@ private:
     mScalableBtnLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mScalableBtn.Add(mScalableBtnLabel);
 
-    mScalableBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+    mScalableBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
       OnToggleScalable();
     });
     panel.Add(mScalableBtn);
@@ -363,9 +366,9 @@ private:
 
     // Three boxes — all INHERIT
     StackLayout row = MakeHStack();
-    row.Add(MakePolicyBox("INHERIT", UiColor(C_RED),   UiScalePolicy::INHERIT, BOX_SIZE));
+    row.Add(MakePolicyBox("INHERIT", UiColor(C_RED), UiScalePolicy::INHERIT, BOX_SIZE));
     row.Add(MakePolicyBox("INHERIT", UiColor(C_GREEN), UiScalePolicy::INHERIT, BOX_SIZE));
-    row.Add(MakePolicyBox("INHERIT", UiColor(C_BLUE),  UiScalePolicy::INHERIT, BOX_SIZE));
+    row.Add(MakePolicyBox("INHERIT", UiColor(C_BLUE), UiScalePolicy::INHERIT, BOX_SIZE));
     zone.Add(row);
 
     // Nested 2×2 GridLayout (also INHERIT)
@@ -527,10 +530,10 @@ private:
   View BuildZoneD()
   {
     constexpr uint32_t C_ZONE_D_BG   = 0xFCE4EC; // light pink
-    constexpr float    DECO_BOX_SIZE = 80.0f;     // natural box size
-    constexpr float    ABS_RADIUS    = 20.0f;     // natural corner radius (ABSOLUTE)
-    constexpr float    REL_RADIUS    = 0.3f;      // corner radius fraction (RELATIVE)
-    constexpr float    BORDER_WIDTH  = 5.0f;      // natural borderline width (px)
+    constexpr float    DECO_BOX_SIZE = 80.0f;    // natural box size
+    constexpr float    ABS_RADIUS    = 20.0f;    // natural corner radius (ABSOLUTE)
+    constexpr float    REL_RADIUS    = 0.3f;     // corner radius fraction (RELATIVE)
+    constexpr float    BORDER_WIDTH  = 5.0f;     // natural borderline width (px)
 
     StackLayout zone = BuildZoneContainer(UiColor(C_ZONE_D_BG));
 
@@ -654,7 +657,7 @@ private:
     constexpr float    CORNER_RADIUS   = 12.0f;    // corner radius
     constexpr float    BORDER_WIDTH    = 4.0f;     // borderline width
 
-    constexpr float CONTAINER_CORNER_RADIUS   = 20.0f;    // corner radius
+    constexpr float CONTAINER_CORNER_RADIUS = 20.0f; // corner radius
 
     StackLayout zone = BuildZoneContainer(UiColor(C_ZONE_E_BG));
 
@@ -682,7 +685,7 @@ private:
       visual.SetOffsetY(ABS_OFFSET);
       visual.SetWidth(ABS_SIZE);
       visual.SetHeight(ABS_SIZE);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::NONE);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::NONE);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row1.Add(MakeLabeled(container, "NONE\nOffset:10px\nSize:60px"));
@@ -702,7 +705,7 @@ private:
       visual.SetOffsetY(0.1f);
       visual.SetWidth(REL_SIZE);
       visual.SetHeight(REL_SIZE);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::ALL);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::ALL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row1.Add(MakeLabeled(container, "ALL\nOffset:0.1\nSize:0.5"));
@@ -722,7 +725,7 @@ private:
       visual.SetOffsetY(0.1f);
       visual.SetWidth(ABS_SIZE);
       visual.SetHeight(ABS_SIZE);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::OFFSET_PROPORTIONAL);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::OFFSET_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row1.Add(MakeLabeled(container, "OFFSET\nOffset:0.1\nSize:60px"));
@@ -747,7 +750,7 @@ private:
       visual.SetColor(UiColor(C_PURPLE));
       visual.SetWidth(0.8f);
       visual.SetHeight(0.8f);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row2.Add(MakeLabeled(container, "No Extra\nSize:0.8"));
@@ -767,7 +770,7 @@ private:
       visual.SetHeight(0.6f);
       visual.SetExtraWidth(EXTRA_SIZE);
       visual.SetExtraHeight(EXTRA_SIZE);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row2.Add(MakeLabeled(container, "Extra +10\nSize:0.6+10"));
@@ -795,7 +798,7 @@ private:
       visual.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
       visual.SetWidth(0.7f);
       visual.SetHeight(0.7f);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row3.Add(MakeLabeled(container, "Blur 15px\nABS radius"));
@@ -816,7 +819,7 @@ private:
       visual.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
       visual.SetWidth(0.7f);
       visual.SetHeight(0.7f);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row3.Add(MakeLabeled(container, "Blur 15px\nREL radius"));
@@ -838,7 +841,7 @@ private:
       visual.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
       visual.SetWidth(0.7f);
       visual.SetHeight(0.7f);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row3.Add(MakeLabeled(container, "Border 4px\nABS radius"));
@@ -868,9 +871,9 @@ private:
       visual.SetCutoutPolicy(Ui::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
       visual.SetWidth(1.2f);
       visual.SetHeight(1.2f);
-      visual.SetOrigin(Ui::Align::CENTER);
-      visual.SetPivot(Ui::Align::CENTER);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      visual.SetOrigin(Ui::VisualOrigin::CENTER);
+      visual.SetPivot(Ui::VisualPivot::CENTER);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row4.Add(MakeLabeled(container, "Blur 15px\nABS contaier\nABS radius"));
@@ -893,9 +896,9 @@ private:
       visual.SetCutoutPolicy(Ui::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
       visual.SetWidth(1.2f);
       visual.SetHeight(1.2f);
-      visual.SetOrigin(Ui::Align::CENTER);
-      visual.SetPivot(Ui::Align::CENTER);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      visual.SetOrigin(Ui::VisualOrigin::CENTER);
+      visual.SetPivot(Ui::VisualPivot::CENTER);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row4.Add(MakeLabeled(container, "Blur 15px\nABS contaier\nABS relative"));
@@ -918,9 +921,9 @@ private:
       visual.SetCutoutPolicy(Ui::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
       visual.SetWidth(1.2f);
       visual.SetHeight(1.2f);
-      visual.SetOrigin(Ui::Align::CENTER);
-      visual.SetPivot(Ui::Align::CENTER);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      visual.SetOrigin(Ui::VisualOrigin::CENTER);
+      visual.SetPivot(Ui::VisualPivot::CENTER);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row4.Add(MakeLabeled(container, "Blur 15px\nREL contaier\nABS radius"));
@@ -943,9 +946,9 @@ private:
       visual.SetCutoutPolicy(Ui::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
       visual.SetWidth(1.2f);
       visual.SetHeight(1.2f);
-      visual.SetOrigin(Ui::Align::CENTER);
-      visual.SetPivot(Ui::Align::CENTER);
-      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      visual.SetOrigin(Ui::VisualOrigin::CENTER);
+      visual.SetPivot(Ui::VisualPivot::CENTER);
+      visual.SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
       container.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
 
       row4.Add(MakeLabeled(container, "Blur 15px\nREL contaier\nABS relative"));
@@ -1049,7 +1052,7 @@ private:
     constexpr uint32_t C_ZONE_F_BG       = 0xDCF4DC; // light green
     constexpr float    EFFECT_BOX_SIZE   = 80.0f;    // box size for effect tests
     constexpr float    ABS_CORNER_RADIUS = 20.0f;    // ABSOLUTE corner radius
-    constexpr float    REL_CORNER_RADIUS = 0.25f;     // RELATIVE corner radius
+    constexpr float    REL_CORNER_RADIUS = 0.25f;    // RELATIVE corner radius
     constexpr uint32_t BLUR_RADIUS       = 60u;      // blur radius for effects
 
     StackLayout zone = BuildZoneContainer(UiColor(C_ZONE_F_BG));
@@ -1074,9 +1077,9 @@ private:
       box.SetCornerRadius(ABS_CORNER_RADIUS);
       box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
 
       GaussianBlurEffect blurEffect = GaussianBlurEffect::New(BLUR_RADIUS);
       box.SetRenderEffect(blurEffect);
@@ -1094,10 +1097,10 @@ private:
       bgBlurBox.SetCornerRadius(ABS_CORNER_RADIUS);
       bgBlurBox.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
-    box.Add(bgBlurBox);
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
+      box.Add(bgBlurBox);
 
       BackgroundBlurEffect bgBlurEffect = BackgroundBlurEffect::New(BLUR_RADIUS);
       bgBlurBox.SetRenderEffect(bgBlurEffect);
@@ -1141,9 +1144,9 @@ private:
       box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
       box.SetProperty(Ui::View::Property::OFFSCREEN_RENDERING, Ui::View::OffScreenRenderingType::REFRESH_ALWAYS);
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
 
       rowAbs.Add(MakeLabeled(box, "OffscreenRendering\nABS radius"));
     }
@@ -1164,9 +1167,9 @@ private:
       box.SetCornerRadius(REL_CORNER_RADIUS);
       box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
 
       GaussianBlurEffect blurEffect = GaussianBlurEffect::New(BLUR_RADIUS);
       box.SetRenderEffect(blurEffect);
@@ -1184,10 +1187,10 @@ private:
       bgBlurBox.SetCornerRadius(REL_CORNER_RADIUS);
       bgBlurBox.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
-    box.Add(bgBlurBox);
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
+      box.Add(bgBlurBox);
 
       BackgroundBlurEffect bgBlurEffect = BackgroundBlurEffect::New(BLUR_RADIUS);
       bgBlurBox.SetRenderEffect(bgBlurEffect);
@@ -1230,9 +1233,9 @@ private:
       box.SetCornerRadius(REL_CORNER_RADIUS);
       box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
       box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
-    box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)));
+      box.Add(MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)));
 
       box.SetProperty(Ui::View::Property::OFFSCREEN_RENDERING, Ui::View::OffScreenRenderingType::REFRESH_ALWAYS);
 
@@ -1309,7 +1312,8 @@ private:
 
     InteractiveView toInheritBtn = MakeButton("→ INHERIT 부모로", UiColor(0x00695C));
     toInheritBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    toInheritBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+    toInheritBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
       if(mBoxInDisabled)
       {
         mDisabledSlot.Remove(mReparentBox);
@@ -1320,7 +1324,8 @@ private:
 
     InteractiveView toDisabledBtn = MakeButton("← DISABLED 부모로", UiColor(0xC62828));
     toDisabledBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    toDisabledBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+    toDisabledBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
       if(!mBoxInDisabled)
       {
         mInheritSlot.Remove(mReparentBox);
@@ -1393,7 +1398,8 @@ private:
 
     InteractiveView unparentBtn = MakeButton("① Unparent", UiColor(0xE53935));
     unparentBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    unparentBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+    unparentBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
       if(mIsParented)
       {
         mHContainer.Remove(mScaleChangeBox);
@@ -1404,11 +1410,12 @@ private:
 
     InteractiveView readdBtn = MakeButton("③ Re-add", UiColor(0x2E7D32));
     readdBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    readdBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+    readdBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
       if(!mIsParented)
       {
         mHContainer.Add(mScaleChangeBox);
-        mIsParented = true;
+        mIsParented   = true;
         std::string s = "상태: 부모에 연결됨 — Scale " + Fmt(UiScaleManager::Get().GetScale()) + " 적용됨";
         mHStatusLabel.SetText(s.c_str());
       }
@@ -1555,7 +1562,7 @@ private:
 
 private:
   Application&    mApplication;
-  Label           mScaleLabel;  // updated on every ApplyScale()
+  Label           mScaleLabel; // updated on every ApplyScale()
   InputField      mScaleInput;
   InteractiveView mScalableBtn;      // global master switch toggle
   Label           mScalableBtnLabel; // toggle button caption (ON/OFF)
@@ -1577,7 +1584,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   UiScaleController controller(application);

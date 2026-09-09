@@ -19,7 +19,8 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/integration-api/ui-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE
 {
@@ -59,13 +60,13 @@ namespace Property
 {
 enum Type
 {
-  MUTABLE_PROPERTY_START_INDEX = Dali::Ui::VISUAL_MUTABLE_PROPERTY_START_INDEX,
+  MUTABLE_PROPERTY_START_INDEX = VISUAL_MUTABLE_PROPERTY_START_INDEX,
   MUTABLE_PROPERTY_END_INDEX   = static_cast<int>(MUTABLE_PROPERTY_START_INDEX) + static_cast<int>(Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION) - 1, ///< Reserve property indices.
 
-  IMMUTABLE_PROPERTY_START_INDEX = Dali::Ui::VISUAL_IMMUTABLE_PROPERTY_START_INDEX,
+  IMMUTABLE_PROPERTY_START_INDEX = VISUAL_IMMUTABLE_PROPERTY_START_INDEX,
   IMMUTABLE_PROPERTY_END_INDEX   = static_cast<int>(IMMUTABLE_PROPERTY_START_INDEX) + static_cast<int>(Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION) - 1, ///< Reserve property indices.
 
-  READ_ONLY_PROPERTY_START_INDEX = Dali::Ui::VISUAL_READ_ONLY_PROPERTY_START_INDEX,
+  READ_ONLY_PROPERTY_START_INDEX = VISUAL_READ_ONLY_PROPERTY_START_INDEX,
   READ_ONLY_PROPERTY_END_INDEX   = static_cast<int>(READ_ONLY_PROPERTY_START_INDEX) + static_cast<int>(Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION) - 1, ///< Reserve property indices.
 
   TRANSFORM = MUTABLE_PROPERTY_START_INDEX, ///< The transform of the visual. Name "transform", type Property::MAP.
@@ -192,17 +193,17 @@ enum Type
 
   /**
    * @brief The origin of the visual within its control area.
-   * @details Name "origin", type Align::Type (Property::INTEGER) or Property::STRING.
-   * @see Ui::Align
-   * @note The default is Align::TOP_BEGIN.
+   * @details Name "origin", type VisualOrigin (Property::INTEGER) or Property::STRING.
+   * @see Ui::VisualOrigin
+   * @note The default is VisualOrigin::TOP_LEFT.
    */
   ORIGIN,
 
   /**
    * @brief The pivot of the visual
-   * @details Name "pivot", type Align::Type (Property::INTEGER) or Property::STRING.
-   * @see Ui::Align
-   * @note The default is Align::TOP_BEGIN.
+   * @details Name "pivot", type VisualPivot (Property::INTEGER) or Property::STRING.
+   * @see Ui::VisualPivot
+   * @note The default is VisualPivot::TOP_LEFT.
    */
   PIVOT,
 

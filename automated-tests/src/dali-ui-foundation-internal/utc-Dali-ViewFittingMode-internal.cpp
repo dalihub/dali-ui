@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
@@ -27,7 +28,6 @@
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
-#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
@@ -41,7 +41,7 @@ class FittingModeTestVisual : public Dali::Ui::Internal::Visual::Base
 public:
   using Ptr = IntrusivePtr<FittingModeTestVisual>;
 
-  static Ptr New(Dali::Ui::Internal::VisualFactoryCache&         factoryCache,
+  static Ptr New(Dali::Ui::Internal::VisualFactoryCache&   factoryCache,
                  Dali::Ui::Integration::InternalVisualType type = Dali::Ui::Integration::InternalVisualType::IMAGE)
   {
     Ptr visual(new FittingModeTestVisual(factoryCache, type));
@@ -59,7 +59,7 @@ public:
   int                               reRequestLimit{0};
 
 protected:
-  FittingModeTestVisual(Dali::Ui::Internal::VisualFactoryCache& factoryCache,
+  FittingModeTestVisual(Dali::Ui::Internal::VisualFactoryCache&   factoryCache,
                         Dali::Ui::Integration::InternalVisualType type)
   : Dali::Ui::Internal::Visual::Base(factoryCache, type)
   {
@@ -389,7 +389,7 @@ int UtcDaliTextVisualStandaloneFittingStillApplies(void)
   visual.SetOffsetY(7.0f);
   visual.SetWidth(0.75f);
   visual.SetHeight(0.5f);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
 
   application.GetScene().Add(view);
@@ -514,9 +514,9 @@ int UtcDaliTextVisualSameSizePaddingChangeInvalidatesResource(void)
 
   auto& ellipsisViewData =
     Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(ellipsisLabel));
-  auto ellipsisVisual = ellipsisViewData.GetVisual(Ui::Text::LabelPropertyIndex::TEXT);
-  auto ellipsisController = Dali::Ui::Internal::TextVisual::GetController(ellipsisVisual);
-  const auto* ellipsisModel = ellipsisController->GetRenderTextModel();
+  auto        ellipsisVisual     = ellipsisViewData.GetVisual(Ui::Text::LabelPropertyIndex::TEXT);
+  auto        ellipsisController = Dali::Ui::Internal::TextVisual::GetController(ellipsisVisual);
+  const auto* ellipsisModel      = ellipsisController->GetRenderTextModel();
   DALI_TEST_CHECK(ellipsisModel && ellipsisModel->GetNumberOfLines() > 0u);
   DALI_TEST_CHECK(!ellipsisModel->GetLines()[0u].ellipsis);
 

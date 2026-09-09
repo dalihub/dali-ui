@@ -46,7 +46,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 #if defined(_MSC_VER)
 #include <dali/integration-api/scene.h>

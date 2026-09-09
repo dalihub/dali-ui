@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE
 {
@@ -76,9 +76,9 @@ ColorVisual CreateVisual(const Ui::InnerShadow& innerShadow)
   visual.SetOffsetY(parameters.offset.y);
   visual.SetExtraWidth(parameters.extraSize.width);
   visual.SetExtraHeight(parameters.extraSize.height);
-  visual.SetOrigin(Align::CENTER);
-  visual.SetPivot(Align::CENTER);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetOrigin(VisualOrigin::CENTER);
+  visual.SetPivot(VisualPivot::CENTER);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   visual.SetBorderlineColor(innerShadow.GetColor());
   visual.SetBorderlineWidth(parameters.shadowWidth);
   visual.SetBorderlineOffset(BORDERLINE_OFFSET);
@@ -96,8 +96,8 @@ Property::Map CreatePropertyMap(const Ui::InnerShadow& innerShadow)
   const VisualParameters parameters = CalculateVisualParameters(innerShadow);
 
   Property::Map transform;
-  transform.Add(Dali::Ui::Integration::Visual::Transform::Property::ORIGIN, Align::CENTER)
-    .Add(Dali::Ui::Integration::Visual::Transform::Property::PIVOT, Align::CENTER);
+  transform.Add(Dali::Ui::Integration::Visual::Transform::Property::ORIGIN, VisualOrigin::CENTER)
+    .Add(Dali::Ui::Integration::Visual::Transform::Property::PIVOT, VisualPivot::CENTER);
   if(parameters.offset != Vector2::ZERO)
   {
     transform.Add(Dali::Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,

@@ -72,9 +72,9 @@
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
@@ -2326,8 +2326,8 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       .Add(Ui::Integration::Visual::Transform::Property::OFFSET, visualTransformOffset)
       .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
            Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT);
     visualImpl.SetTransformAndSize(visualTransform, size, GetEffectiveScale());
 
     if(mController->IsMarqueeEnabled())

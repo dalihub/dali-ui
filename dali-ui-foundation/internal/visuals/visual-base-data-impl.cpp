@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToPropertyValue;
 
@@ -47,7 +47,7 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(SHADER_HINT)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Shader::Hint, MODIFIES_GEOMETRY)
 DALI_ENUM_TO_STRING_TABLE_END(SHADER_HINT)
 
-Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Integration::Direction::Type direction)
+Dali::Vector2 PointToVector2(uint8_t point)
 {
   // clang-format off
   static const float pointToVector2[] = {0.0f,0.0f,
@@ -62,13 +62,34 @@ Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Integration::Direction::
 
   // clang-format on
 
-  Vector2 result(&pointToVector2[point * 2]);
-  if(direction == Dali::Ui::Integration::Direction::RIGHT_TO_LEFT)
-  {
-    result.x = 1.0f - result.x;
-  }
+  return Vector2(&pointToVector2[static_cast<uint32_t>(point) * 2u]);
+}
 
-  return result;
+// VisualOrigin and VisualPivot are separate types so an origin cannot be passed as a pivot, but
+// they index the same table above and serialise as the same integers, so their enumerators must
+// stay in lockstep. Enforced here rather than left to a comment on the public enums.
+#define DALI_UI_ASSERT_SAME_POINT(name)                                                                      \
+  static_assert(static_cast<uint8_t>(Ui::VisualOrigin::name) == static_cast<uint8_t>(Ui::VisualPivot::name), \
+                "VisualOrigin and VisualPivot must keep the same enumerator values")
+DALI_UI_ASSERT_SAME_POINT(TOP_LEFT);
+DALI_UI_ASSERT_SAME_POINT(TOP_CENTER);
+DALI_UI_ASSERT_SAME_POINT(TOP_RIGHT);
+DALI_UI_ASSERT_SAME_POINT(CENTER_LEFT);
+DALI_UI_ASSERT_SAME_POINT(CENTER);
+DALI_UI_ASSERT_SAME_POINT(CENTER_RIGHT);
+DALI_UI_ASSERT_SAME_POINT(BOTTOM_LEFT);
+DALI_UI_ASSERT_SAME_POINT(BOTTOM_CENTER);
+DALI_UI_ASSERT_SAME_POINT(BOTTOM_RIGHT);
+#undef DALI_UI_ASSERT_SAME_POINT
+
+Dali::Vector2 PointToVector2(Ui::VisualOrigin point)
+{
+  return PointToVector2(static_cast<uint8_t>(point));
+}
+
+Dali::Vector2 PointToVector2(Ui::VisualPivot point)
+{
+  return PointToVector2(static_cast<uint8_t>(point));
 }
 
 } // unnamed namespace
@@ -246,16 +267,15 @@ Property::Map Internal::Visual::Base::Impl::CustomShader::CreatePropertyMap() co
   return customShader;
 }
 
-void Internal::Visual::Base::Impl::SetTransformUniformsInternal(const Transform& transform, Dali::VisualRenderer renderer, Ui::Integration::Direction::Type direction)
+void Internal::Visual::Base::Impl::SetTransformUniformsInternal(const Transform& transform, Dali::VisualRenderer renderer)
 {
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_SIZE, transform.mSize);
-  renderer.SetProperty(VisualRenderer::Property::TRANSFORM_OFFSET,
-                       direction == Ui::Integration::Direction::LEFT_TO_RIGHT ? transform.mOffset : transform.mOffset * Vector2(-1.0f, 1.0f));
+  renderer.SetProperty(VisualRenderer::Property::TRANSFORM_OFFSET, transform.mOffset);
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_OFFSET_SIZE_MODE, transform.mOffsetSizeMode);
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_ORIGIN,
-                       PointToVector2(transform.mOrigin, direction) - Vector2(0.5, 0.5));
+                       PointToVector2(transform.mOrigin) - Vector2(0.5, 0.5));
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_PIVOT,
-                       Vector2(0.5, 0.5) - PointToVector2(transform.mPivot, direction));
+                       Vector2(0.5, 0.5) - PointToVector2(transform.mPivot));
   renderer.SetProperty(VisualRenderer::Property::EXTRA_SIZE, transform.mExtraSize);
 }
 

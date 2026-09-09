@@ -42,7 +42,7 @@ namespace Ui
  */
 
 /**
- * @brief LottieAnimationVisual is a owner of Visual::Base with Visual::ANIMATED_VECTOR_IMAGE, to render lottie image.
+ * @brief A VisualBase of type VisualType::ANIMATED_VECTOR_IMAGE, to render a Lottie animation.
  *
  * It can use CornerRadius / CornerSquareness / Borderline feature.
  *

@@ -26,7 +26,6 @@
 #include <dali-ui-foundation/integration-api/builder/builder.h>
 #include <dali-ui-foundation/integration-api/builder/json-parser.h>
 #include <dali-ui-foundation/integration-api/builder/tree-node.h>
-#include <dali-ui-foundation/integration-api/direction-enums.h>
 #include <dali-ui-foundation/integration-api/image-loader/async-image-loader-integ.h>
 #include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
 #include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
@@ -37,6 +36,7 @@
 #include <dali-ui-foundation/integration-api/shader-effects/motion-blur-effect.h>
 #include <dali-ui-foundation/integration-api/shader-effects/motion-stretch-effect.h>
 #include <dali-ui-foundation/integration-api/ui-action-index-ranges.h>
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/ui-foundation-pre-initialize.h>
 #include <dali-ui-foundation/integration-api/ui-property-index-ranges.h>
 #include <dali-ui-foundation/integration-api/utility/npatch-helper.h>

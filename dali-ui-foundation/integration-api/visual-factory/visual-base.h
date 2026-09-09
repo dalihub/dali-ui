@@ -26,7 +26,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE
 {
@@ -60,24 +60,24 @@ namespace Visual
  * | transform               | MAP              |
  *
  * where \b customShader is a map with at least one of the following properties:
- * | %Property Name          | Type                       | Required | Default | Description |
- * |-------------------------|----------------------------|----------|---------|-----------------------------------------|
- * | vertexShader            | STRING                     | No       | ""      | Vertex shader code | | fragmentShader
- * | STRING                     | No       | ""      | Fragment shader code                    | | subdivideGridX |
- * INTEGER                    | No       | 1       | How to subdivide the grid along X       | | subdivideGridY |
- * INTEGER                    | No       | 1       | How to subdivide the grid along Y       | | shaderHints | INTEGER
- * or ARRAY of STRING | No       | NONE    | Bitmask of hints @sa Dali::Shader::Hint |
+ * | %Property Name | Type                       | Required | Default | Description                             |
+ * |----------------|----------------------------|----------|---------|-----------------------------------------|
+ * | vertexShader   | STRING                     | No       | ""      | Vertex shader code                      |
+ * | fragmentShader | STRING                     | No       | ""      | Fragment shader code                    |
+ * | subdivideGridX | INTEGER                    | No       | 1       | How to subdivide the grid along X       |
+ * | subdivideGridY | INTEGER                    | No       | 1       | How to subdivide the grid along Y       |
+ * | shaderHints    | INTEGER or ARRAY of STRING | No       | NONE    | Bitmask of hints @sa Dali::Shader::Hint |
  *
  * and \b transform is a map with the following properties:
- * | %Property Name          | Type              | Required | Default                | Description |
- * |-------------------------|-------------------|----------|------------------------|-----------------------------------------------------|
- * | offset                  | VECTOR2           | No       | (0,0)                  | Offset of visual from origin | |
- * size                    | VECTOR2           | No       | (1,1)                  | size of visual | | origin | INTEGER
- * or STRING | No       | CENTER                 | origin of the visual @sa Dali::Ui::Align       | | pivot
- * | INTEGER or STRING | No       | CENTER                 | pivot of the visual @sa Dali::Ui::Align | |
- * offsetPolicy            | VECTOR2           | No       | ( RELATIVE, RELATIVE ) | @sa
- * Dali::Ui::Visual::Transform::Policy   | | sizePolicy              | VECTOR2           | No       | ( RELATIVE,
- * RELATIVE ) | @sa Dali::Ui::Visual::Transform::Policy   |
+ * | %Property Name | Type              | Required | Default                | Description                                             |
+ * |----------------|-------------------|----------|------------------------|---------------------------------------------------------|
+ * | offset         | VECTOR2           | No       | (0,0)                  | Offset of the visual from the origin                    |
+ * | size           | VECTOR2           | No       | (1,1)                  | Size of the visual                                      |
+ * | extraSize      | VECTOR2           | No       | (0,0)                  | Absolute size added to the visual, ignoring the policies |
+ * | origin         | INTEGER or STRING | No       | TOP_LEFT               | Origin of the visual @sa Dali::Ui::VisualOrigin         |
+ * | pivot          | INTEGER or STRING | No       | TOP_LEFT               | Pivot of the visual @sa Dali::Ui::VisualPivot           |
+ * | offsetPolicy   | VECTOR2           | No       | ( RELATIVE, RELATIVE ) | @sa Dali::Ui::Integration::Visual::Transform::Policy    |
+ * | sizePolicy     | VECTOR2           | No       | ( RELATIVE, RELATIVE ) | @sa Dali::Ui::Integration::Visual::Transform::Policy    |
  *
  * Relative means that the component describes a factor of the parent control size;
  * size.x = 1 means full width; size.y = 0.5 means half height.

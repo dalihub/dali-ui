@@ -29,11 +29,11 @@
 
 // Implement of VisualBase
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
-#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -210,28 +210,28 @@ int UtcDaliVisualBaseSetGetProportionFlags(void)
   VisualBase visual = ColorVisual::New();
 
   // Default value is ALL
-  DALI_TEST_EQUALS(visual.GetProportionFlags(), Visual::Transform::ProportionFlags::ALL, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetTransformProportionFlags(), Visual::Transform::ProportionFlags::ALL, TEST_LOCATION);
 
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::X_PROPORTIONAL | Visual::Transform::ProportionFlags::WIDTH_PROPORTIONAL);
-  DALI_TEST_EQUALS(visual.GetProportionFlags(), Visual::Transform::ProportionFlags::X_PROPORTIONAL | Visual::Transform::ProportionFlags::WIDTH_PROPORTIONAL, TEST_LOCATION);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::X_PROPORTIONAL | Visual::Transform::ProportionFlags::WIDTH_PROPORTIONAL);
+  DALI_TEST_EQUALS(visual.GetTransformProportionFlags(), Visual::Transform::ProportionFlags::X_PROPORTIONAL | Visual::Transform::ProportionFlags::WIDTH_PROPORTIONAL, TEST_LOCATION);
 
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::Y_PROPORTIONAL | Visual::Transform::ProportionFlags::HEIGHT_PROPORTIONAL);
-  DALI_TEST_EQUALS(visual.GetProportionFlags(), Visual::Transform::ProportionFlags::Y_PROPORTIONAL | Visual::Transform::ProportionFlags::HEIGHT_PROPORTIONAL, TEST_LOCATION);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::Y_PROPORTIONAL | Visual::Transform::ProportionFlags::HEIGHT_PROPORTIONAL);
+  DALI_TEST_EQUALS(visual.GetTransformProportionFlags(), Visual::Transform::ProportionFlags::Y_PROPORTIONAL | Visual::Transform::ProportionFlags::HEIGHT_PROPORTIONAL, TEST_LOCATION);
 
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::OFFSET_PROPORTIONAL);
-  DALI_TEST_EQUALS(visual.GetProportionFlags(), Visual::Transform::ProportionFlags::OFFSET_PROPORTIONAL, TEST_LOCATION);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::OFFSET_PROPORTIONAL);
+  DALI_TEST_EQUALS(visual.GetTransformProportionFlags(), Visual::Transform::ProportionFlags::OFFSET_PROPORTIONAL, TEST_LOCATION);
 
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-  DALI_TEST_EQUALS(visual.GetProportionFlags(), Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL, TEST_LOCATION);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  DALI_TEST_EQUALS(visual.GetTransformProportionFlags(), Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL, TEST_LOCATION);
 
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::X_PROPORTIONAL);
-  DALI_TEST_EQUALS(visual.GetProportionFlags(), Visual::Transform::ProportionFlags::X_PROPORTIONAL, TEST_LOCATION);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::X_PROPORTIONAL);
+  DALI_TEST_EQUALS(visual.GetTransformProportionFlags(), Visual::Transform::ProportionFlags::X_PROPORTIONAL, TEST_LOCATION);
 
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::NONE);
-  DALI_TEST_EQUALS(visual.GetProportionFlags(), Visual::Transform::ProportionFlags::NONE, TEST_LOCATION);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::NONE);
+  DALI_TEST_EQUALS(visual.GetTransformProportionFlags(), Visual::Transform::ProportionFlags::NONE, TEST_LOCATION);
 
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);
-  DALI_TEST_EQUALS(visual.GetProportionFlags(), Visual::Transform::ProportionFlags::ALL, TEST_LOCATION);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::ALL);
+  DALI_TEST_EQUALS(visual.GetTransformProportionFlags(), Visual::Transform::ProportionFlags::ALL, TEST_LOCATION);
 
   END_TEST;
 }
@@ -263,17 +263,17 @@ int UtcDaliVisualBaseSetGetOriginPivot(void)
 
   VisualBase visual = ColorVisual::New();
 
-  // Default value is Align::TOP_BEGIN
-  DALI_TEST_EQUALS(visual.GetOrigin(), Align::TOP_BEGIN, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetPivot(), Align::TOP_BEGIN, TEST_LOCATION);
+  // Default value is TOP_LEFT
+  DALI_TEST_EQUALS(visual.GetOrigin(), VisualOrigin::TOP_LEFT, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetPivot(), VisualPivot::TOP_LEFT, TEST_LOCATION);
 
-  visual.SetOrigin(Align::BOTTOM_END);
-  DALI_TEST_EQUALS(visual.GetOrigin(), Align::BOTTOM_END, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetPivot(), Align::TOP_BEGIN, TEST_LOCATION);
+  visual.SetOrigin(VisualOrigin::BOTTOM_RIGHT);
+  DALI_TEST_EQUALS(visual.GetOrigin(), VisualOrigin::BOTTOM_RIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetPivot(), VisualPivot::TOP_LEFT, TEST_LOCATION);
 
-  visual.SetPivot(Align::CENTER);
-  DALI_TEST_EQUALS(visual.GetOrigin(), Align::BOTTOM_END, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetPivot(), Align::CENTER, TEST_LOCATION);
+  visual.SetPivot(VisualPivot::CENTER);
+  DALI_TEST_EQUALS(visual.GetOrigin(), VisualOrigin::BOTTOM_RIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetPivot(), VisualPivot::CENTER, TEST_LOCATION);
 
   END_TEST;
 }
@@ -318,19 +318,22 @@ int UtcDaliVisualBaseSetGetCornerRadius(void)
   DALI_TEST_EQUALS(visual.GetCornerRadius(), Vector4(0.6f, 0.6f, 0.6f, 0.6f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetCornerSquareness(), Vector4(0.4f, 0.3f, 0.2f, 0.1f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetCornerRadiusPolicy(), CornerRadiusPolicy::RELATIVE, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.IsCornerRadiusPolicyRelative(), true, TEST_LOCATION);;
+  DALI_TEST_EQUALS(visual.IsCornerRadiusPolicyRelative(), true, TEST_LOCATION);
+  ;
 
   visual.SetCornerSquareness(0.1f, 0.2f, 0.3f, 0.4f);
   DALI_TEST_EQUALS(visual.GetCornerRadius(), Vector4(0.6f, 0.6f, 0.6f, 0.6f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetCornerSquareness(), Vector4(0.1f, 0.2f, 0.3f, 0.4f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetCornerRadiusPolicy(), CornerRadiusPolicy::RELATIVE, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.IsCornerRadiusPolicyRelative(), true, TEST_LOCATION);;
+  DALI_TEST_EQUALS(visual.IsCornerRadiusPolicyRelative(), true, TEST_LOCATION);
+  ;
 
   visual.SetCornerSquareness(0.2f);
   DALI_TEST_EQUALS(visual.GetCornerRadius(), Vector4(0.6f, 0.6f, 0.6f, 0.6f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetCornerSquareness(), Vector4(0.2f, 0.2f, 0.2f, 0.2f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetCornerRadiusPolicy(), CornerRadiusPolicy::RELATIVE, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.IsCornerRadiusPolicyRelative(), true, TEST_LOCATION);;
+  DALI_TEST_EQUALS(visual.IsCornerRadiusPolicyRelative(), true, TEST_LOCATION);
+  ;
 
   END_TEST;
 }
@@ -461,7 +464,7 @@ int UtcDaliVisualBaseRecreateBorderVisual01(void)
 
   tet_infoline("Test that visual update without newly create Visual::Base for BorderVisual\n");
 
-  View       view    = View::New();
+  View       view   = View::New();
   VisualBase visual = BorderVisual::New();
 
   view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
@@ -471,7 +474,8 @@ int UtcDaliVisualBaseRecreateBorderVisual01(void)
   application.SendNotification();
   application.Render();
 
-  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
+  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false)
+  {
     // Hold original visual base
     Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
@@ -491,22 +495,34 @@ int UtcDaliVisualBaseRecreateBorderVisual01(void)
   };
 
   // Change the basic info didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetName("Hello");}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetColor(UiColor("Primary"));}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetName("Hello"); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetColor(UiColor("Primary")); }, false);
 
   // Change the transform didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetX(0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetY(0.2f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetWidth(0.3f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetHeight(0.4f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraWidth(0.5f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraHeight(0.6f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOrigin(Align::CENTER);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetPivot(Align::BOTTOM_END);}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetX(0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetY(0.2f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetWidth(0.3f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetHeight(0.4f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraWidth(0.5f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraHeight(0.6f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOrigin(VisualOrigin::CENTER); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetPivot(VisualPivot::BOTTOM_RIGHT); }, false);
 
   // For BorderVisual.
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::BorderVisual::Property::BORDER_SIZE, 0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::BorderVisual::Property::ANTI_ALIASING, true);}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::BorderVisual::Property::BORDER_SIZE, 0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::BorderVisual::Property::ANTI_ALIASING, true); }, false);
 
   END_TEST;
 }
@@ -517,7 +533,7 @@ int UtcDaliVisualBaseRecreateColorVisual01(void)
 
   tet_infoline("Test that visual update without newly create Visual::Base for ColorVisual\n");
 
-  View       view    = View::New();
+  View       view   = View::New();
   VisualBase visual = ColorVisual::New();
 
   view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
@@ -527,7 +543,8 @@ int UtcDaliVisualBaseRecreateColorVisual01(void)
   application.SendNotification();
   application.Render();
 
-  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
+  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false)
+  {
     // Hold original visual base
     Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
@@ -547,35 +564,53 @@ int UtcDaliVisualBaseRecreateColorVisual01(void)
   };
 
   // Change the basic info didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetName("Hello");}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetColor(UiColor("Primary"));}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetName("Hello"); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetColor(UiColor("Primary")); }, false);
 
   // Change the transform didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetX(0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetY(0.2f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetWidth(0.3f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetHeight(0.4f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraWidth(0.5f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraHeight(0.6f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOrigin(Align::CENTER);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetPivot(Align::BOTTOM_END);}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetX(0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetY(0.2f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetWidth(0.3f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetHeight(0.4f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraWidth(0.5f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraHeight(0.6f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOrigin(VisualOrigin::CENTER); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetPivot(VisualPivot::BOTTOM_RIGHT); }, false);
 
   // Change decoration didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerRadius(0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerSquareness(0.2f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerRadiusPolicyRelative();}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineWidth(0.3f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineColor(UiColor("Secondary"));}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineOffset(0.4f);}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetCornerRadius(0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetCornerSquareness(0.2f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetCornerRadiusPolicyRelative(); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetBorderlineWidth(0.3f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetBorderlineColor(UiColor("Secondary")); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetBorderlineOffset(0.4f); }, false);
 
   // For ColorVisual.
   // Change BlurRadius didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS, 0.1f);
   }, false);
 
   // Change CutoutPolicy change visual base!
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::ColorVisual::Property::CUTOUT_POLICY, CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
   }, true);
 
@@ -604,7 +639,8 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
   application.SendNotification();
   application.Render();
 
-  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
+  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false)
+  {
     // Hold original visual base
     Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
@@ -624,31 +660,49 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
   };
 
   // Change the basic info didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetName("Hello");}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetColor(UiColor("Primary"));}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetName("Hello"); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetColor(UiColor("Primary")); }, false);
 
   // Change the transform didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetX(0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetY(0.2f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetWidth(0.3f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetHeight(0.4f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraWidth(0.5f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraHeight(0.6f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOrigin(Align::CENTER);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetPivot(Align::BOTTOM_END);}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetX(0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetY(0.2f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetWidth(0.3f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetHeight(0.4f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraWidth(0.5f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraHeight(0.6f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOrigin(VisualOrigin::CENTER); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetPivot(VisualPivot::BOTTOM_RIGHT); }, false);
 
   // Change decoration didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerRadius(0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerSquareness(0.2f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerRadiusPolicyRelative();}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineWidth(0.3f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineColor(UiColor("Secondary"));}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineOffset(0.4f);}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetCornerRadius(0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetCornerSquareness(0.2f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetCornerRadiusPolicyRelative(); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetBorderlineWidth(0.3f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetBorderlineColor(UiColor("Secondary")); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetBorderlineOffset(0.4f); }, false);
 
   // For GradientVisual.
   // Change MutableProperty didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){ Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::START_OFFSET, 0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::START_OFFSET, 0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetStopNodes({
       {0.0f, UiColor("#FF0000")},
@@ -656,24 +710,29 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
       {1.0f, UiColor("#0000FF")},
     });
   }, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetUnits(Ui::Gradient::Units::USER_SPACE);
   }, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetSpreadMethod(Ui::Gradient::SpreadMethod::REFLECT);
   }, false);
 
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetConicGradient(Vector2::ZERO, Dali::Radian(2.0f));
   }, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetLinearGradient(Vector2::ZERO, Vector2::ONE);
   }, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetRadialGradient(Vector2::ZERO, 5.0f);
   }, false);
@@ -687,7 +746,7 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
 
   tet_infoline("Test that visual update without newly create Visual::Base for GradientVisual, with in-completed property case\n");
 
-  View       view    = View::New();
+  View       view   = View::New();
   VisualBase visual = GradientVisual::New();
 
   view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
@@ -697,7 +756,8 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
   application.SendNotification();
   application.Render();
 
-  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
+  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false)
+  {
     // Hold original visual base
     Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
@@ -717,31 +777,49 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
   };
 
   // Change the basic info didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetName("Hello");}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetColor(UiColor("Primary"));}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetName("Hello"); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetColor(UiColor("Primary")); }, false);
 
   // Change the transform didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetX(0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetY(0.2f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetWidth(0.3f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetHeight(0.4f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraWidth(0.5f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraHeight(0.6f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOrigin(Align::CENTER);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetPivot(Align::BOTTOM_END);}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetX(0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetY(0.2f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetWidth(0.3f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetHeight(0.4f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraWidth(0.5f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraHeight(0.6f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOrigin(VisualOrigin::CENTER); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetPivot(VisualPivot::BOTTOM_RIGHT); }, false);
 
   // Change decoration didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerRadius(0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerSquareness(0.2f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerRadiusPolicyRelative();}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineWidth(0.3f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineColor(UiColor("Secondary"));}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineOffset(0.4f);}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetCornerRadius(0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetCornerSquareness(0.2f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetCornerRadiusPolicyRelative(); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetBorderlineWidth(0.3f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetBorderlineColor(UiColor("Secondary")); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetBorderlineOffset(0.4f); }, false);
 
   // For GradientVisual.
   // Change MutableProperty didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){ Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::START_OFFSET, 0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::START_OFFSET, 0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetStopNodes({
       {0.0f, UiColor("#FF0000")},
@@ -749,24 +827,29 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
       {1.0f, UiColor("#0000FF")},
     });
   }, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetUnits(Ui::Gradient::Units::USER_SPACE);
   }, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetSpreadMethod(Ui::Gradient::SpreadMethod::REFLECT);
   }, false);
 
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetConicGradient(Vector2::ZERO, Dali::Radian(2.0f));
   }, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetLinearGradient(Vector2::ZERO, Vector2::ONE);
   }, false);
-  TestVisualBaseChanged([](VisualBase visual){
+  TestVisualBaseChanged([](VisualBase visual)
+  {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetRadialGradient(Vector2::ZERO, 5.0f);
   }, false);
@@ -780,7 +863,7 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
 
   tet_infoline("Test that visual update without newly create Visual::Base for TextVisual\n");
 
-  View       view   = View::New();
+  View view = View::New();
   view.SetRequestedWidth(200.0f);
   view.SetRequestedHeight(200.0f);
   TextVisual visual = TextVisual::New();
@@ -796,7 +879,8 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
   application.SendNotification();
   application.Render();
 
-  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
+  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false)
+  {
     // Hold original visual base
     Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
@@ -816,35 +900,59 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
   };
 
   // Change the basic info didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetName("Hello");}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetColor(UiColor("Primary"));}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetName("Hello"); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetColor(UiColor("Primary")); }, false);
 
   // Change the transform didn't change visual base
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetX(0.1f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetY(0.2f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetWidth(0.3f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetHeight(0.4f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraWidth(0.5f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraHeight(0.6f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetOrigin(Align::CENTER);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetPivot(Align::BOTTOM_END);}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetX(0.1f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOffsetY(0.2f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetWidth(0.3f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetHeight(0.4f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraWidth(0.5f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetExtraHeight(0.6f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetOrigin(VisualOrigin::CENTER); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { visual.SetPivot(VisualPivot::BOTTOM_RIGHT); }, false);
 
   // For TextVisual.
   // All properties of TextVisual are mutable, so changing them should NOT recreate visual base.
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT, "World");}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_FAMILY, "Arial");}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE, 30.0f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WEIGHT, Text::FontWeight::BOLD);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WIDTH, Text::FontWidth::EXPANDED);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SLANT, Text::FontSlant::ITALIC);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::MULTI_LINE, true);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_WRAP_MODE, Text::LineWrapMode::CHARACTER);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT, Text::Alignment::CENTER);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT, Text::Alignment::END);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::OVERFLOW_MODE, Text::OverflowMode::ELLIPSIS);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT, 1.5f);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE, Text::LineHeightMode::RELATIVE);}, false);
-  TestVisualBaseChanged([](VisualBase visual){Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT_COLOR, Vector4(1.0f, 0.0f, 0.0f, 1.0f));}, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT, "World"); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_FAMILY, "Arial"); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE, 30.0f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WEIGHT, Text::FontWeight::BOLD); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_WIDTH, Text::FontWidth::EXPANDED); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::FONT_SLANT, Text::FontSlant::ITALIC); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::MULTI_LINE, true); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_WRAP_MODE, Text::LineWrapMode::CHARACTER); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT, Text::Alignment::CENTER); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT, Text::Alignment::END); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::OVERFLOW_MODE, Text::OverflowMode::ELLIPSIS); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT, 1.5f); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE, Text::LineHeightMode::RELATIVE); }, false);
+  TestVisualBaseChanged([](VisualBase visual)
+  { Dali::Ui::GetImplementation(visual).SetProperty(Dali::Ui::Integration::TextVisual::Property::TEXT_COLOR, Vector4(1.0f, 0.0f, 0.0f, 1.0f)); }, false);
 
   END_TEST;
 }
@@ -856,7 +964,8 @@ int UtcDaliVisualBaseInvalidHandle(void)
   // Default constructed VisualBase is an empty handle.
   VisualBase empty;
 
-  auto TestAssertFunction = [&](std::function<void(void)> func){
+  auto TestAssertFunction = [&](std::function<void(void)> func)
+  {
     try
     {
       func();
@@ -868,32 +977,57 @@ int UtcDaliVisualBaseInvalidHandle(void)
     }
   };
 
-  TestAssertFunction([&](){empty.SetName("ShouldBeCrash");});
-  TestAssertFunction([&](){empty.SetOffsetX(1.0f);});
-  TestAssertFunction([&](){empty.SetOffsetY(1.0f);});
-  TestAssertFunction([&](){empty.SetWidth(100.0f);});
-  TestAssertFunction([&](){empty.SetHeight(100.0f);});
-  TestAssertFunction([&](){empty.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);});
-  TestAssertFunction([&](){empty.SetExtraWidth(10.0f);});
-  TestAssertFunction([&](){empty.SetExtraHeight(10.0f);});
-  TestAssertFunction([&](){empty.SetExtraHeight(10.0f);});
-  TestAssertFunction([&](){empty.SetOrigin(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetPivot(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetSiblingOrder(0u);});
+  TestAssertFunction([&]()
+  { empty.SetName("ShouldBeCrash"); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetX(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetY(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetWidth(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetHeight(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetTransformProportionFlags(Visual::Transform::ProportionFlags::ALL); });
+  TestAssertFunction([&]()
+  { empty.SetExtraWidth(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetExtraHeight(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetExtraHeight(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOrigin(VisualOrigin::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetPivot(VisualPivot::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetSiblingOrder(0u); });
 
-  TestAssertFunction([&](){empty.GetOwner();});
-  TestAssertFunction([&](){empty.GetDepthLayer();});
-  TestAssertFunction([&](){empty.GetName();});
-  TestAssertFunction([&](){empty.GetOffsetX();});
-  TestAssertFunction([&](){empty.GetOffsetY();});
-  TestAssertFunction([&](){empty.GetWidth();});
-  TestAssertFunction([&](){empty.GetHeight();});
-  TestAssertFunction([&](){empty.GetProportionFlags();});
-  TestAssertFunction([&](){empty.GetExtraWidth();});
-  TestAssertFunction([&](){empty.GetExtraHeight();});
-  TestAssertFunction([&](){empty.GetOrigin();});
-  TestAssertFunction([&](){empty.GetPivot();});
-  TestAssertFunction([&](){empty.GetSiblingOrder();});
+  TestAssertFunction([&]()
+  { empty.GetOwner(); });
+  TestAssertFunction([&]()
+  { empty.GetDepthLayer(); });
+  TestAssertFunction([&]()
+  { empty.GetName(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetX(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetY(); });
+  TestAssertFunction([&]()
+  { empty.GetWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetTransformProportionFlags(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetOrigin(); });
+  TestAssertFunction([&]()
+  { empty.GetPivot(); });
+  TestAssertFunction([&]()
+  { empty.GetSiblingOrder(); });
 
   END_TEST;
 }

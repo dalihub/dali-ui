@@ -37,7 +37,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include "visual-base-impl.h"
 
 namespace
@@ -1153,8 +1153,8 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Insets& 
     transformMap
       .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
            Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
-      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Align::TOP_BEGIN)
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, VisualOrigin::TOP_LEFT)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, VisualPivot::TOP_LEFT)
       .Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY,
            Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE));
   }

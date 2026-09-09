@@ -47,7 +47,7 @@ enum class CutoutPolicy
 };
 
 /**
- * @brief ColorVisual is a owner of Visual::Base with Visual::COLOR, to render simple color.
+ * @brief A VisualBase of type VisualType::COLOR, to render a simple solid color.
  *
  * It can use CornerRadius / CornerSquareness / Borderline feature.
  */

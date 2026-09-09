@@ -47,18 +47,6 @@ enum PropertyRanges
   VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX = Dali::PropertyRanges::ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_REGISTRATION_START_INDEX,                                     ///< Start index of View animatable properties without uniforms.
   VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX   = VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION, ///< Reserving 1000 property indices.
 
-  /**
-   * @brief Enumeration for the start and end property ranges for VisualBase.
-   */
-  VISUAL_MUTABLE_PROPERTY_START_INDEX = Dali::PropertyRanges::CORE_PROPERTY_MAX_INDEX + 1,                                                          ///< Mutable Visual Property Start Index. (Could be changed without create new visual)
-  VISUAL_MUTABLE_PROPERTY_END_INDEX   = VISUAL_MUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION * 10, ///< Mutable Visual Property End Index.
-
-  VISUAL_IMMUTABLE_PROPERTY_START_INDEX = VISUAL_MUTABLE_PROPERTY_END_INDEX + 1,                                                                        ///< Immutable Visual Property Start Index. (Must create new visual)
-  VISUAL_IMMUTABLE_PROPERTY_END_INDEX   = VISUAL_IMMUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION * 10, ///< Immutable Visual Property End Index.
-
-  VISUAL_READ_ONLY_PROPERTY_START_INDEX = VISUAL_IMMUTABLE_PROPERTY_END_INDEX + 1,                                                                      ///< Read-only Visual Property Start Index.
-  VISUAL_READ_ONLY_PROPERTY_END_INDEX   = VISUAL_READ_ONLY_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION * 10, ///< Read-only Visual Property End Index.
-
   UI_FOUNDATION_PROPERTY_MAX = Dali::PropertyRanges::CORE_PROPERTY_MAX_INDEX + 10000000, ///< The maximum index that ui-foundation properties can go up to
 };
 

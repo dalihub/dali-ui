@@ -39,8 +39,8 @@ namespace Ui
  */
 
 /**
- * @brief GradientVisual is a owner of Visual::Base with Visual::GRADIENT,
- * to render a smooth transition of colors to the visual's quad.
+ * @brief A VisualBase of type VisualType::GRADIENT,
+ * to render a smooth transition of colors over the visual's quad.
  *
  * It can use CornerRadius / CornerSquareness / Borderline feature.
  */

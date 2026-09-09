@@ -137,7 +137,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/border-visual.h>
@@ -172,7 +172,6 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 
 #include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>

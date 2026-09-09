@@ -28,6 +28,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
@@ -35,9 +36,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include "view-data-impl.h"
 #include "view-visual-data.h"
 #include "visual-constraint-functions.h"
@@ -52,10 +51,10 @@ namespace Internal
 {
 namespace
 {
-static constexpr uint32_t DEFAULT_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
+static constexpr uint32_t DEFAULT_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                                8);
 static constexpr uint32_t DEFAULT_CORNER_SQUARENESS_CONSTRAINT_TAG(
-  Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 9);
+  Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 9);
 
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VIEW_VISUALS");

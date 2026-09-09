@@ -21,7 +21,9 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
@@ -33,10 +35,8 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <dali-ui-test-suite-utils.h>
-#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 using namespace Dali;
 
@@ -48,12 +48,12 @@ namespace UiText       = Dali::Ui::Text;
 namespace TextInternal = Dali::Ui::Text::Internal;
 namespace Gradient     = Dali::Ui::Gradient;
 
-constexpr float VISUAL_WIDTH  = 240.0f;
-constexpr float VISUAL_HEIGHT = 96.0f;
-constexpr float EPSILON       = 0.001f;
-constexpr const char* UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME = "uTextGradientStartOffset";
+constexpr float       VISUAL_WIDTH                                    = 240.0f;
+constexpr float       VISUAL_HEIGHT                                   = 96.0f;
+constexpr float       EPSILON                                         = 0.001f;
+constexpr const char* UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME         = "uTextGradientStartOffset";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME = "uTextGradientOverlayStartOffset";
-constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME = "uTextGradientOverlayMode";
+constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME         = "uTextGradientOverlayMode";
 
 TextInternal::Gradient::Style MakeEnabledGradientStyle(float startOffset = 0.0f)
 {
@@ -219,7 +219,7 @@ int UtcDaliTextGradientOverlayVisualDefaultModeUniformP(void)
 
   UpdateTextVisual(internalVisual);
 
-  Dali::VisualRenderer renderer = internalVisual.GetRenderer();
+  Dali::VisualRenderer  renderer  = internalVisual.GetRenderer();
   const Property::Index modeIndex = renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME);
   DALI_TEST_CHECK(modeIndex != Property::INVALID_INDEX);
   DALI_TEST_EQUALS(renderer.GetProperty<float>(modeIndex), 0.0f, EPSILON, TEST_LOCATION);
@@ -237,7 +237,7 @@ int UtcDaliTextGradientOverlayVisualScreenModeUniformP(void)
 
   UpdateTextVisual(internalVisual);
 
-  Dali::VisualRenderer renderer = internalVisual.GetRenderer();
+  Dali::VisualRenderer  renderer  = internalVisual.GetRenderer();
   const Property::Index modeIndex = renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME);
   DALI_TEST_CHECK(modeIndex != Property::INVALID_INDEX);
   DALI_TEST_EQUALS(renderer.GetProperty<float>(modeIndex), 1.0f, EPSILON, TEST_LOCATION);
@@ -288,7 +288,7 @@ int UtcDaliTextGradientOverlayVisualStartOffsetAnimSourceP(void)
   UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.internalVisual, MakeEnabledGradientStyle(0.25f));
   UpdateTextVisual(rendered.internalVisual);
 
-  Dali::VisualRenderer renderer = rendered.internalVisual.GetRenderer();
+  Dali::VisualRenderer  renderer = rendered.internalVisual.GetRenderer();
   const Property::Index overlayRendererOffsetIndex =
     renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME);
   DALI_TEST_CHECK(overlayRendererOffsetIndex != Property::INVALID_INDEX);
@@ -329,7 +329,7 @@ int UtcDaliTextGradientVisualStartOffsetStyleResetP(void)
   application.SendNotification();
   application.Render(16);
 
-  Dali::VisualRenderer renderer            = rendered.internalVisual.GetRenderer();
+  Dali::VisualRenderer  renderer            = rendered.internalVisual.GetRenderer();
   const Property::Index rendererOffsetIndex = renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME);
   DALI_TEST_CHECK(rendererOffsetIndex != Property::INVALID_INDEX);
   DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(rendererOffsetIndex), 0.75f, EPSILON, TEST_LOCATION);
@@ -345,7 +345,7 @@ int UtcDaliTextGradientVisualStartOffsetStyleResetP(void)
   application.SendNotification();
   application.Render(16);
 
-  renderer = rendered.internalVisual.GetRenderer();
+  renderer                                       = rendered.internalVisual.GetRenderer();
   const Property::Index resetRendererOffsetIndex = renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME);
   DALI_TEST_CHECK(resetRendererOffsetIndex != Property::INVALID_INDEX);
   DALI_TEST_EQUALS(renderer.GetProperty<float>(resetRendererOffsetIndex), 0.25f, EPSILON, TEST_LOCATION);
@@ -373,7 +373,7 @@ int UtcDaliTextGradientVisualMaskDisabledClearsStoredMaskP(void)
 {
   UiTestApplication application;
 
-  RenderedTextVisual rendered = CreateRenderedFromMarkupTextVisual(application);
+  RenderedTextVisual                  rendered       = CreateRenderedFromMarkupTextVisual(application);
   Dali::Ui::Integration::Visual::Base internalVisual = rendered.internalVisual;
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 
@@ -390,7 +390,7 @@ int UtcDaliTextGradientVisualMaskStyleSetterReappliesAfterDisabledP(void)
 {
   UiTestApplication application;
 
-  RenderedTextVisual rendered = CreateRenderedFromMarkupTextVisual(application);
+  RenderedTextVisual                  rendered       = CreateRenderedFromMarkupTextVisual(application);
   Dali::Ui::Integration::Visual::Base internalVisual = rendered.internalVisual;
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 

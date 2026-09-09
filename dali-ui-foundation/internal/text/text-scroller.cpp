@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 
 using Dali::Integration::ToDaliStringView;
 
@@ -58,8 +58,8 @@ static constexpr const char* TEXT_STYLE_SHADER_DEFINE                          =
 static constexpr const char* TEXT_OVERLAY_STYLE_SHADER_DEFINE                  = "#define IS_REQUIRED_TEXT_OVERLAY_STYLE\n";
 // Keep this tag separate from TextVisual gradient constraint tags because
 // TextScroller reuses the visual renderer while marquee is active.
-static constexpr uint32_t TEXT_SCROLLER_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 26u);
-static constexpr uint32_t TEXT_SCROLLER_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 27u);
+static constexpr uint32_t TEXT_SCROLLER_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 26u);
+static constexpr uint32_t TEXT_SCROLLER_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 27u);
 constexpr const char*     UNIFORM_TEXT_GRADIENT_START_POSITION_NAME("uTextGradientStartPosition");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_END_POSITION_NAME("uTextGradientEndPosition");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME("uTextGradientStartOffset");

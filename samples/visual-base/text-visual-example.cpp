@@ -27,7 +27,7 @@ constexpr float STACK_SPACING = 10.0f;
 constexpr float STACK_PADDING = 20.0f;
 
 constexpr int16_t VIEW_PADDING = 40;
-constexpr int16_t VIEW_MARGIN = 40;
+constexpr int16_t VIEW_MARGIN  = 40;
 
 const char* SAMPLE_TEXTS[] = {
   "Hello World",
@@ -56,7 +56,7 @@ int GetRandomInteger(int from, int to)
 float GetRandomFloat()
 {
   constexpr int MAX_INTEGER = 10000;
-  int rand = GetRandomInteger(0, MAX_INTEGER);
+  int           rand        = GetRandomInteger(0, MAX_INTEGER);
   return static_cast<float>(rand) / static_cast<float>(MAX_INTEGER);
 }
 
@@ -68,11 +68,11 @@ ColorVisual CreateCustomShadow1()
   visual.SetOffsetY(-10_spx);
   visual.SetWidth(1.01f);
   visual.SetHeight(1.0f);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   visual.SetExtraWidth(50_spx);
   visual.SetExtraHeight(-20_spx);
-  visual.SetOrigin(Align::TOP_CENTER);
-  visual.SetPivot(Align::TOP_CENTER);
+  visual.SetOrigin(VisualOrigin::TOP_CENTER);
+  visual.SetPivot(VisualPivot::TOP_CENTER);
   visual.SetBlurRadius(12_spx);
   visual.SetCornerRadius(12_spx);
   visual.SetColor(UiColor(0x3F0F0F).WithAlpha(0.2f));
@@ -88,11 +88,11 @@ ColorVisual CreateCustomShadow2()
   visual.SetOffsetY(-20_spx);
   visual.SetWidth(1.01f);
   visual.SetHeight(1.01f);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   visual.SetExtraWidth(0_spx);
   visual.SetExtraHeight(0_spx);
-  visual.SetOrigin(Align::TOP_BEGIN);
-  visual.SetPivot(Align::TOP_BEGIN);
+  visual.SetOrigin(VisualOrigin::TOP_LEFT);
+  visual.SetPivot(VisualPivot::TOP_LEFT);
   visual.SetBlurRadius(15_spx);
   visual.SetCornerRadius(15_spx);
   visual.SetColor(UiColor(0x7F7FCF).WithAlpha(0.3f));
@@ -108,11 +108,11 @@ ColorVisual CreateCustomShadow3()
   visual.SetOffsetY(20_spx);
   visual.SetWidth(1.0f);
   visual.SetHeight(1.01f);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   visual.SetExtraWidth(10_spx);
   visual.SetExtraHeight(-10_spx);
-  visual.SetOrigin(Align::TOP_END);
-  visual.SetPivot(Align::TOP_END);
+  visual.SetOrigin(VisualOrigin::TOP_RIGHT);
+  visual.SetPivot(VisualPivot::TOP_RIGHT);
   visual.SetBlurRadius(10_spx);
   visual.SetCornerRadius(10_spx);
   visual.SetColor(UiColor(0x0F040F).WithAlpha(0.3f));
@@ -126,9 +126,9 @@ ColorVisual CreateCustomInnerShadow1()
   visual.SetName("CustomInnerShadow1");
   visual.SetOffsetX(10_spx);
   visual.SetOffsetY(20_spx);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-  visual.SetOrigin(Align::CENTER);
-  visual.SetPivot(Align::CENTER);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetOrigin(VisualOrigin::CENTER);
+  visual.SetPivot(VisualPivot::CENTER);
   visual.SetCornerRadius(0.25f);
   visual.SetCornerSquareness(0.6f);
   visual.SetCornerRadiusPolicyRelative();
@@ -147,9 +147,9 @@ ColorVisual CreateCustomInnerShadow2()
   visual.SetName("CustomInnerShadow2");
   visual.SetOffsetX(-10_spx);
   visual.SetOffsetY(-20_spx);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-  visual.SetOrigin(Align::CENTER);
-  visual.SetPivot(Align::CENTER);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetOrigin(VisualOrigin::CENTER);
+  visual.SetPivot(VisualPivot::CENTER);
   visual.SetCornerRadius(0.25f);
   visual.SetCornerSquareness(0.6f);
   visual.SetCornerRadiusPolicyRelative();
@@ -297,8 +297,8 @@ private:
 
   void PushTextVisual()
   {
-    const char* text = SAMPLE_TEXTS[GetRandomInteger(0, SAMPLE_TEXT_COUNT)];
-    float fontSize = GetRandomFloat() * 30.0f + 15.0f;
+    const char* text     = SAMPLE_TEXTS[GetRandomInteger(0, SAMPLE_TEXT_COUNT)];
+    float       fontSize = GetRandomFloat() * 30.0f + 15.0f;
 
     TextVisual visual = TextVisual::New();
     visual.SetText(text);
@@ -310,7 +310,7 @@ private:
     visual.SetHeight(GetRandomFloat() * 0.2f + 0.1f);
     visual.SetOffsetX(GetRandomFloat() * 0.2f - 0.1f);
     visual.SetOffsetY(GetRandomFloat() * 0.2f - 0.1f);
-    visual.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);
+    visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::ALL);
 
     mView.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
     UpdateVisualCount();
@@ -357,14 +357,14 @@ private:
 
 private:
   Application& mApplication;
-  View mView;
-  Label mVisualCounter;
+  View         mView;
+  Label        mVisualCounter;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
 

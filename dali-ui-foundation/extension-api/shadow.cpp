@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE
 {
@@ -50,7 +50,7 @@ ColorVisual CreateVisual(const Ui::Shadow& shadow)
   visual.SetOffsetY(shadow.GetOffset().y);
   visual.SetExtraWidth(shadow.GetExtents().width);
   visual.SetExtraHeight(shadow.GetExtents().height);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   return visual;
 }
 
