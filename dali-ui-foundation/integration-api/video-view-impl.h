@@ -27,8 +27,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/public-api/video/video-source.h>
-#include <dali-ui-foundation/public-api/video/video-view.h>
+#include <dali-ui-foundation/public-api/views/video/video-source.h>
+#include <dali-ui-foundation/public-api/views/video/video-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace DALI_NAMESPACE

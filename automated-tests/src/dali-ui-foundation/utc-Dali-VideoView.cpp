@@ -16,8 +16,8 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/video/video-source.h>
-#include <dali-ui-foundation/public-api/video/video-view.h>
+#include <dali-ui-foundation/public-api/views/video/video-source.h>
+#include <dali-ui-foundation/public-api/views/video/video-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 

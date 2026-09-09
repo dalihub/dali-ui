@@ -37,8 +37,8 @@
 #include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
-#include <dali-ui-foundation/public-api/video/video-source.h>
-#include <dali-ui-foundation/public-api/video/video-view.h>
+#include <dali-ui-foundation/public-api/views/video/video-source.h>
+#include <dali-ui-foundation/public-api/views/video/video-view.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
 #include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>

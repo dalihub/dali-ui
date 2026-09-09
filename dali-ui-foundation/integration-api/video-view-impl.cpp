@@ -38,7 +38,7 @@
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
-#include <dali-ui-foundation/public-api/video/video-source.h>
+#include <dali-ui-foundation/public-api/views/video/video-source.h>
 #include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace DALI_NAMESPACE

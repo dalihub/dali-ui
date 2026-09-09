@@ -23,7 +23,7 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/video/video-source.h>
+#include <dali-ui-foundation/public-api/views/video/video-source.h>
 
 namespace DALI_NAMESPACE
 {

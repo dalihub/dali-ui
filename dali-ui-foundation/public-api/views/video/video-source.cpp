@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/video/video-source.h>
+#include <dali-ui-foundation/public-api/views/video/video-source.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/video/video-source-impl.h>
