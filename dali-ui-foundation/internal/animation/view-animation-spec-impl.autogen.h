@@ -147,4 +147,4 @@ inline const Internal::ViewAnimationSpecImpl& GetImpl(const ViewAnimationSpec& o
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

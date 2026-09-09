@@ -78,4 +78,4 @@ inline const Internal::LabelAnimationSpecImpl& GetImpl(const LabelAnimationSpec&
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

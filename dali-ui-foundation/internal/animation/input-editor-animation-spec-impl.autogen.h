@@ -74,4 +74,4 @@ inline const Internal::InputEditorAnimationSpecImpl& GetImpl(const InputEditorAn
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

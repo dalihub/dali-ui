@@ -74,4 +74,4 @@ inline const Internal::InputFieldAnimationSpecImpl& GetImpl(const InputFieldAnim
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
