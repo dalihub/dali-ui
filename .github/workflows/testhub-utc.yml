@@ -23,7 +23,16 @@ concurrency:
 jobs:
 
   build:
-    runs-on: code-linux
+    runs-on: [ code-linux ]
+    container:
+      image: tizen-nui-docker-local.bart.sec.samsung.net/dali-ci-env:ubuntu22.04-v1
+      credentials:
+        username: ${{ secrets.BART_USERNAME }}
+        password: ${{ secrets.BART_IDENTITY_TOKEN }}
+    env:
+      CC: gcc
+      CXX: g++
+
     steps:
     - uses: code-actions/checkout@v3
       with:
@@ -49,14 +58,21 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Clone and resolve DALi dependencies
+      shell: bash
       env:
         PR_BODY: ${{ github.event.pull_request.body }}
         DALI_CORE_CHANGE_INPUT: ${{ github.event.inputs.dali_core_change }}
         DALI_ADAPTOR_CHANGE_INPUT: ${{ github.event.inputs.dali_adaptor_change }}
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
       run: |
         set -euo pipefail
 
-        echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        KNOWN_HOSTS_FILE="$RUNNER_TEMP/review-tizen-known-hosts"
+        printf '%s\n' "$SSH_KNOWN_HOSTS" > "$KNOWN_HOSTS_FILE"
+        chmod 0600 "$KNOWN_HOSTS_FILE"
+
+        export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=$KNOWN_HOSTS_FILE -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=yes"
+
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
         # git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-toolkit.git
@@ -155,86 +171,77 @@ jobs:
           'ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git' \
           "$DALI_ADAPTOR_CHANGE"
 
-    - name: Setup environment for DALi
+    - name: Prepare DALi prefix
+      shell: bash
       run: |
-        sudo apt-get update
-        yes | sudo apt-get install xvfb dbus-x11
-        sudo apt-get install libfile-copy-recursive-perl
-        dali-core/build/scripts/dali_env -c
-        dali-env/opt/bin/dali_env -s > setenv
-        . setenv
-        sudo apt install meson ninja-build
+        set -euo pipefail
+
+        install -m 0755 dali-core/build/scripts/fastcov.py "$DESKTOP_PREFIX/bin/fastcov.py"
+        echo "DESKTOP_PREFIX=$DESKTOP_PREFIX"
+        gcc --version | head -1
+        cmake --version | head -1
 
     - name: Build DALi
+      shell: bash
       run: |
-        . setenv
+        set -euo pipefail
+
         cd tizenvg
-        meson setup builddir -Dtools=svg2png --prefix $DESKTOP_PREFIX --libdir $DESKTOP_PREFIX/lib
+        meson setup builddir -Dtools=svg2png --prefix "$DESKTOP_PREFIX" --libdir "$DESKTOP_PREFIX/lib"
         ninja -C builddir install
         cd -
-        export CC=gcc
-        export CXX=g++
+
         cd dali-core/build/tizen
-        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
         make install -j8
         cd -
+
         cd dali-adaptor/build/tizen
-        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug -DENABLE_GRAPHICS_BACKEND="GLES"
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug -DENABLE_GRAPHICS_BACKEND=GLES
         make install -j8
-        # cd -
-        # cd dali-toolkit/build/tizen
-        # CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
-        # make install -j8
         cd -
+
         cd build/tizen
-        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
         make -j8 install
         cd -
+
         cd manual-tests
-        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
         make install -j8
         cd -
+
         cd samples
         ./build.sh
-        cd -
-        # cd lottie-player
-        # cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DLIB_INSTALL_DIR=$DESKTOP_PREFIX/lib .
-        # make install -j8
-        # cd -
-        # cd dali-extension/build/ubuntu
-        # cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX .
-        # make install -j8
-        # cd -
 
     - name: Run automated test
+      shell: bash
       run: |
-        . setenv
-        cd automated-tests
-        ./build.sh
-        xvfb-run ./execute.sh
-        ./coverage.sh
+        set -euo pipefail
 
-    # - name: LCOV Report
-    #   uses: CODE-Actions/romeovs-lcov-reporter-action@v0.3.1
-    #   with:
-    #     github-token: ${{ secrets.GITHUB_TOKEN }}
-    #     lcov-file: ./build/tizen/dali.info
-    #     filter-changed-files: true
-    #     base: ${{ github.event.pull_request.base.sha }}
-    #     head: ${{ github.event.pull_request.head.sha }}
+        (
+          cd automated-tests
+          ./build.sh
+          xvfb-run ./execute.sh
+        )
 
-    - name: Setup Python
-      uses: code-actions/setup-python@v5
-      with:
-        python-version: '3.x'
+    - name: Generate LCOV coverage data
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        cmake --build build/tizen --target cov_data
+        test -s build/tizen/dali.info
 
     - name: Collect artifacts
+      shell: bash
       run: |
-        mkdir test_results coverage
+        set -euo pipefail
+
+        mkdir -p test_results coverage
         chmod +x automated-tests/scripts/convert-to-gtest.py
         python3 automated-tests/scripts/convert-to-gtest.py test-results.xml
-        cp test-results.xml test_results
-        cp -rf build/tizen/doc/coverage/* coverage/
+        cp test-results.xml test_results/
         cp build/tizen/dali.info coverage/
 
     - name: Upload artifacts (test_results)
@@ -252,13 +259,12 @@ jobs:
         retention-days: 1
 
     - name: Release build check
+      shell: bash
       run: |
-        . setenv
-        export CC=gcc
-        export CXX=g++
+        set -euo pipefail
 
         cd build/tizen
-        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Release -DENABLE_GRAPHICS_BACKEND="GLES"
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release -DENABLE_GRAPHICS_BACKEND=GLES
         make install -j8
         cd -
 
@@ -267,24 +273,22 @@ jobs:
         cd -
 
         cd manual-tests
-        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Release
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release
         make install -j8
         cd -
 
         cd samples
         ./build.sh Release
-        cd -
 
   testhub:
-    runs-on: [ code-linux ]          # runner whatever you want
-    if: always()                     # run testhub job even if there are failed testcases
+    runs-on: [ code-linux ]
     needs: [ build ]
+    if: success()
     steps:
-      - name: Send to TestHub
-        uses: CODE-Actions/testhub@v1
-        if: always()
-        with:
-          test-tool: gtest
-          test-artifact-name: test_results
-          coverage-tool: lcov
-          coverage-artifact-name: coverage
+    - name: Send to TestHub
+      uses: CODE-Actions/testhub@v1
+      with:
+        test-tool: gtest
+        test-artifact-name: test_results
+        coverage-tool: lcov
+        coverage-artifact-name: coverage
