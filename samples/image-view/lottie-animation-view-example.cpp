@@ -35,7 +35,7 @@ using namespace Dali::Ui;
  *   - SetMinMaxFrame  (full / first-half / second-half)
  *   - RenderScale  (0.5x / 1.0x / 2.0x)
  *   - PlaceholderUrl  (show placeholder while new URL loads)
- *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)
+ *   - GetPlayState / GetCurrentFrameNumber / GetTotalFrameCount  (logged on each button press)
  *   - AnimationFinishedSignal
  *
  * Resources:
@@ -320,8 +320,8 @@ private:
     UpdateStatus("Playing");
     DALI_LOG_RELEASE_INFO("[LottieAnimationView] Play() - state=%d frame=%d/%d\n",
                           static_cast<int>(mLottieView.GetPlayState()),
-                          mLottieView.GetCurrentFrame(),
-                          mLottieView.GetTotalFrame());
+                          mLottieView.GetCurrentFrameNumber(),
+                          mLottieView.GetTotalFrameCount());
   }
 
   void OnPause()
@@ -330,8 +330,8 @@ private:
     UpdateStatus("Paused");
     DALI_LOG_RELEASE_INFO("[LottieAnimationView] Pause() - state=%d frame=%d/%d\n",
                           static_cast<int>(mLottieView.GetPlayState()),
-                          mLottieView.GetCurrentFrame(),
-                          mLottieView.GetTotalFrame());
+                          mLottieView.GetCurrentFrameNumber(),
+                          mLottieView.GetTotalFrameCount());
   }
 
   void OnStop()
@@ -340,8 +340,8 @@ private:
     UpdateStatus("Stopped");
     DALI_LOG_RELEASE_INFO("[LottieAnimationView] Stop() - state=%d frame=%d/%d\n",
                           static_cast<int>(mLottieView.GetPlayState()),
-                          mLottieView.GetCurrentFrame(),
-                          mLottieView.GetTotalFrame());
+                          mLottieView.GetCurrentFrameNumber(),
+                          mLottieView.GetTotalFrameCount());
   }
 
   void OnJumpTo()
@@ -350,7 +350,7 @@ private:
     UpdateStatus("Jumped to frame " + std::to_string(JUMP_FRAME));
     DALI_LOG_RELEASE_INFO("[LottieAnimationView] JumpToFrame(%d) - currentFrame=%d\n",
                           JUMP_FRAME,
-                          mLottieView.GetCurrentFrame());
+                          mLottieView.GetCurrentFrameNumber());
   }
 
   void OnJumpAndResize()
@@ -405,7 +405,7 @@ private:
   void OnFrameRangeToggle()
   {
     mFrameRangeIndex = (mFrameRangeIndex + 1) % 3;
-    int total = mLottieView.GetTotalFrame();
+    int total = mLottieView.GetTotalFrameCount();
     switch(mFrameRangeIndex)
     {
       case 0: // full range
@@ -449,7 +449,7 @@ private:
 
   void OnResourceReady(View view)
   {
-    int total = mLottieView.GetTotalFrame();
+    int total = mLottieView.GetTotalFrameCount();
     UpdateStatus("Ready - total frames: " + std::to_string(total));
     DALI_LOG_RELEASE_INFO("[LottieAnimationView] ResourceReady - totalFrame=%d\n", total);
 
@@ -476,7 +476,7 @@ private:
   {
     if(mDesiredSizeCheckPending)
     {
-      const int currentFrame = mLottieView.GetCurrentFrame();
+      const int currentFrame = mLottieView.GetCurrentFrameNumber();
       UpdateStatus("Desired size " + std::to_string(mDesiredSize) + " - frame " + std::to_string(currentFrame) + " (expected 10)");
       DALI_LOG_RELEASE_INFO("[LottieAnimationView] DesiredSize result - expectedFrame=%d currentFrame=%d size=%dx%d\n",
                             JUMP_FRAME,
@@ -489,8 +489,8 @@ private:
     if(mLottieView && mLottieView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
     {
       DALI_LOG_RELEASE_INFO("[LottieAnimationView] Monitor - frame=%d/%d state=%d\n",
-                            mLottieView.GetCurrentFrame(),
-                            mLottieView.GetTotalFrame(),
+                            mLottieView.GetCurrentFrameNumber(),
+                            mLottieView.GetTotalFrameCount(),
                             static_cast<int>(mLottieView.GetPlayState()));
     }
     return true; // continuous

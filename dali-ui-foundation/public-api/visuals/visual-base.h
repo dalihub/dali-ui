@@ -183,16 +183,22 @@ public: // Accessors
   void SetName(const Dali::String& name);
 
   /**
-   * @brief Gets the color of the VisualBase.
+   * @brief Gets the color of this VisualBase.
    *
-   * @return The color of the VisualBase
+   * @return The color of this VisualBase
    */
   UiColor GetColor() const;
 
   /**
    * @brief Sets the color of this VisualBase.
    *
+   * For a VisualBase that draws no content of its own, such as ColorVisual or BorderVisual,
+   * this is the rendered color. For a VisualBase that draws content, such as ImageVisual or
+   * TextVisual, the red, green, blue and alpha components are multiplied with the
+   * corresponding components of that content, tinting it.
+   *
    * @param[in] color The UiColor to apply
+   * @note The default color is white, which leaves drawn content unchanged.
    */
   void SetColor(const UiColor& color);
 
@@ -592,18 +598,20 @@ public:
   VisualBase& operator=(VisualBase&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL VisualBase(Dali::Ui::Internal::VisualBaseImpl* object);
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} //namespace DALI_NAMESPACE
+} // namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VISUAL_BASE_H

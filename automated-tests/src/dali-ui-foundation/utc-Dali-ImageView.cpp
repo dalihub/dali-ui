@@ -354,8 +354,8 @@ int UtcDaliImageViewSetGetSynchronousLoadingP(void)
 int UtcDaliImageViewSetGetNPatchBorderP(void)
 {
   UiTestApplication application;
-  ImageView view   = ImageView::New();
-  Vector4   border = Vector4(10.0f, 10.0f, 10.0f, 10.0f);
+  ImageView    view   = ImageView::New();
+  Dali::Insets border = Dali::Insets(10.0f, 10.0f, 10.0f, 10.0f);
   view.SetNPatchBorder(border);
   DALI_TEST_EQUALS(view.GetNPatchBorder(), border, TEST_LOCATION);
   END_TEST;
@@ -473,7 +473,7 @@ int UtcDaliImageViewPropertyReleasePolicyP(void)
   END_TEST;
 }
 
-// AlphaMaskUrl / CropToMask / MaskingMode
+// AlphaMaskUrl / CropToMask / MaskingPolicy
 
 int UtcDaliImageViewSetGetAlphaMaskUrlP(void)
 {
@@ -498,10 +498,10 @@ int UtcDaliImageViewSetGetMaskingModeP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_LOADING, TEST_LOCATION);
-  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
+  view.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_LOADING);
+  DALI_TEST_EQUALS(view.GetMaskingPolicy(), Ui::Image::MaskingPolicy::ON_LOADING, TEST_LOCATION);
+  view.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_RENDERING);
+  DALI_TEST_EQUALS(view.GetMaskingPolicy(), Ui::Image::MaskingPolicy::ON_RENDERING, TEST_LOCATION);
   END_TEST;
 }
 

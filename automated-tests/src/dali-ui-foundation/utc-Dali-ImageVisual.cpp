@@ -167,14 +167,14 @@ int UtcDaliImageVisualSetGetProperties01(void)
   visual.SetAlphaMaskUrl("mask.png");
   DALI_TEST_EQUALS(visual.GetAlphaMaskUrl(), Dali::String("mask.png"), TEST_LOCATION);
 
-  visual.SetMaskContentScale(2.0f);
-  DALI_TEST_EQUALS(visual.GetMaskContentScale(), 2.0f, TEST_LOCATION);
+  visual.SetContentScaleForMasking(2.0f);
+  DALI_TEST_EQUALS(visual.GetContentScaleForMasking(), 2.0f, TEST_LOCATION);
 
   visual.SetCropToMask(false);
   DALI_TEST_EQUALS(visual.IsCropToMask(), false, TEST_LOCATION);
 
-  visual.SetMaskingType(Image::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(visual.GetMaskingType(), Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
+  visual.SetMaskingPolicy(Image::MaskingPolicy::ON_RENDERING);
+  DALI_TEST_EQUALS(visual.GetMaskingPolicy(), Image::MaskingPolicy::ON_RENDERING, TEST_LOCATION);
 
   visual.SetBrokenImageEnabled(false);
   DALI_TEST_EQUALS(visual.IsBrokenImageEnabled(), false, TEST_LOCATION);
@@ -189,10 +189,10 @@ int UtcDaliImageVisualSetGetProperties01(void)
   DALI_TEST_EQUALS(visual.GetFittingMode(), Image::FittingMode::CENTER, TEST_LOCATION);
 
   visual.SetOrientationCorrection(false);
-  DALI_TEST_EQUALS(visual.IsOrientationCorrection(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.IsOrientationCorrectionEnabled(), false, TEST_LOCATION);
 
-  visual.SetSynchronousSizing(true);
-  DALI_TEST_EQUALS(visual.IsSynchronousSizing(), true, TEST_LOCATION);
+  visual.SetImageLoadWithViewSize(true);
+  DALI_TEST_EQUALS(visual.IsImageLoadWithViewSizeEnabled(), true, TEST_LOCATION);
 
   application.SendNotification();
   application.Render();
@@ -206,11 +206,11 @@ int UtcDaliImageVisualSetGetProperties02(void)
 
   ImageVisual visual = ImageVisual::New();
 
-  visual.SetFastTrackUploading(true);
-  DALI_TEST_EQUALS(visual.IsFastTrackUploading(), true, TEST_LOCATION);
+  visual.SetFastTrackUpload(true);
+  DALI_TEST_EQUALS(visual.IsFastTrackUploadEnabled(), true, TEST_LOCATION);
 
-  visual.SetNPatchBorder(Extents(1, 2, 3, 4));
-  DALI_TEST_EQUALS(visual.GetNPatchBorder(), Extents(1, 2, 3, 4), TEST_LOCATION);
+  visual.SetNPatchBorder(Dali::Insets(1.0f, 2.0f, 3.0f, 4.0f));
+  DALI_TEST_EQUALS(visual.GetNPatchBorder(), Dali::Insets(1.0f, 2.0f, 3.0f, 4.0f), TEST_LOCATION);
 
   visual.SetNPatchBorderOnly(true);
   DALI_TEST_EQUALS(visual.IsNPatchBorderOnly(), true, TEST_LOCATION);

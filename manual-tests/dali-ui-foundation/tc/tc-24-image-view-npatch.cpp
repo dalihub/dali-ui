@@ -55,17 +55,17 @@ const SizeEntry SIZES[] = {
 };
 constexpr int SIZE_COUNT = 4;
 
-// Vector4 order is left, right, top, bottom. Both manual values stay inside the smallest
+// Insets order is start(left), end(right), top, bottom. Both manual values stay inside the smallest
 // preview (120x90) and, more importantly, inside the artwork's own frame, which reaches
 // about 25-26px on every side. A border wider than that pulls the white interior into the
 // border band, which reads as broken rendering even though the geometry is exact.
 // The symmetric value is deliberately NOT 30: the auto-detected border is 31/30/31/30, so
 // B(30) would render identically to Auto and prove nothing about the override.
-struct BorderEntry { Vector4 border; const char* label; };
+struct BorderEntry { Dali::Insets border; const char* label; };
 const BorderEntry BORDERS[] = {
-  {Vector4(0,0,0,0),      "Auto"},
-  {Vector4(20,20,20,20),  "B(20)"},
-  {Vector4(30,20,30,20),  "B(30,20)"},
+  {Dali::Insets(0,0,0,0),     "Auto"},
+  {Dali::Insets(20,20,20,20), "B(20)"},
+  {Dali::Insets(30,20,30,20), "B(30,20)"},
 };
 constexpr int BORDER_COUNT = 3;
 } // namespace
@@ -201,19 +201,19 @@ private:
 
   void UpdateStatus()
   {
-    Vector4 b = mImage.GetNPatchBorder();
+    Dali::Insets b = mImage.GetNPatchBorder();
     Dali::String borderStr;
-    if(b.x == 0.f && b.y == 0.f && b.z == 0.f && b.w == 0.f)
+    if(b.start == 0.f && b.end == 0.f && b.top == 0.f && b.bottom == 0.f)
     {
       borderStr = "auto";
     }
     else
     {
       borderStr = Dali::String("(") +
-                  Dali::String(std::to_string((int)b.x).c_str()) + Dali::String(",") +
-                  Dali::String(std::to_string((int)b.y).c_str()) + Dali::String(",") +
-                  Dali::String(std::to_string((int)b.z).c_str()) + Dali::String(",") +
-                  Dali::String(std::to_string((int)b.w).c_str()) + Dali::String(")");
+                  Dali::String(std::to_string((int)b.start).c_str()) + Dali::String(",") +
+                  Dali::String(std::to_string((int)b.end).c_str()) + Dali::String(",") +
+                  Dali::String(std::to_string((int)b.top).c_str()) + Dali::String(",") +
+                  Dali::String(std::to_string((int)b.bottom).c_str()) + Dali::String(")");
     }
 
     // Read the size back from the component, not from the app's own member: a label that

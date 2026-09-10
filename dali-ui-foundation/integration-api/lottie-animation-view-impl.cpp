@@ -24,6 +24,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/property-array.h>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
@@ -74,13 +75,22 @@ LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("releasePolicy",            INTEGER,
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("synchronousLoading",       BOOLEAN, SYNCHRONOUS_LOADING)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("redrawInScalingDown",      BOOLEAN, REDRAW_IN_SCALING_DOWN)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("redrawInScalingUp",        BOOLEAN, REDRAW_IN_SCALING_UP)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("enableFrameCache",         BOOLEAN, ENABLE_FRAME_CACHE)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("notifyAfterRasterization", BOOLEAN, NOTIFY_AFTER_RASTERIZATION)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("renderScale",              FLOAT,   RENDER_SCALE)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("enableAspectFit",          BOOLEAN, ENABLE_ASPECT_FIT)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("placeholderImage",         STRING,  PLACEHOLDER_IMAGE)
 
 DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui::Integration, LottieAnimationViewImpl, "pixelArea", VECTOR4, PIXEL_AREA)
+
+// Registered by hand rather than through LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION: that macro
+// asserts each index sits at its registration position within the public index range, which an
+// integration-only property deliberately does not.
+Dali::PropertyRegistration propertyEnableFrameCache(typeRegistration,
+                                                    "enableFrameCache",
+                                                    LottieAnimationViewImpl::Property::ENABLE_FRAME_CACHE,
+                                                    Dali::Property::BOOLEAN,
+                                                    &Ui::Integration::LottieAnimationViewImpl::SetProperty,
+                                                    &LottieAnimationViewImpl::GetProperty);
 
 DALI_TYPE_REGISTRATION_END()
 #undef LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION
@@ -257,7 +267,7 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
         bool notify;
         if(value.Get(notify))
         {
-          impl.SetNotifyAfterRasterization(notify);
+          impl.SetNotifyAfterRasterizationEnabled(notify);
         }
         break;
       }
@@ -595,7 +605,7 @@ void LottieAnimationViewImpl::GetMinMaxFrame(int& minFrame, int& maxFrame) const
   }
 
   minFrame = 0;
-  maxFrame = GetTotalFrame();
+  maxFrame = GetTotalFrameCount();
 }
 
 void LottieAnimationViewImpl::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
@@ -673,7 +683,7 @@ Dali::Ui::AnimatedImage::PlayState LottieAnimationViewImpl::GetPlayState() const
   return Dali::Ui::AnimatedImage::PlayState::STOPPED;
 }
 
-int LottieAnimationViewImpl::GetCurrentFrame() const
+int LottieAnimationViewImpl::GetCurrentFrameNumber() const
 {
   if(mVisual)
   {
@@ -687,13 +697,13 @@ int LottieAnimationViewImpl::GetCurrentFrame() const
   return 0;
 }
 
-int LottieAnimationViewImpl::GetTotalFrame() const
+int LottieAnimationViewImpl::GetTotalFrameCount() const
 {
   if(mVisual)
   {
     Dali::Property::Map map;
     mVisual.CreatePropertyMap(map);
-    if(auto* value = map.Find(Ui::Integration::ImageVisual::Property::TOTAL_FRAME_NUMBER))
+    if(auto* value = map.Find(Ui::Integration::ImageVisual::Property::TOTAL_FRAME_COUNT))
     {
       return value->Get<int>();
     }
@@ -743,7 +753,7 @@ bool LottieAnimationViewImpl::IsFrameCacheEnabled() const
   return mFrameCacheEnabled;
 }
 
-void LottieAnimationViewImpl::SetNotifyAfterRasterization(bool notify)
+void LottieAnimationViewImpl::SetNotifyAfterRasterizationEnabled(bool notify)
 {
   if(mNotifyAfterRasterization != notify)
   {
@@ -785,7 +795,7 @@ bool LottieAnimationViewImpl::IsAspectFitEnabled() const
   return mAspectFitEnabled;
 }
 
-Dali::Property::Map LottieAnimationViewImpl::GetContentInfo()
+Dali::Property::Map LottieAnimationViewImpl::GetContentInfo() const
 {
   Dali::Property::Map result;
   if(mVisual)
@@ -800,7 +810,7 @@ Dali::Property::Map LottieAnimationViewImpl::GetContentInfo()
   return result;
 }
 
-Dali::Property::Map LottieAnimationViewImpl::GetMarkerInfo()
+Dali::Property::Map LottieAnimationViewImpl::GetMarkerInfo() const
 {
   Dali::Property::Map result;
   if(mVisual)
@@ -815,7 +825,7 @@ Dali::Property::Map LottieAnimationViewImpl::GetMarkerInfo()
   return result;
 }
 
-void LottieAnimationViewImpl::SetDynamicProperty(const Ui::LottieAnimation::DynamicPropertyInfo& info)
+void LottieAnimationViewImpl::SetDynamicProperty(Ui::LottieAnimation::DynamicProperty info)
 {
   if(mVisualDirty)
   {
@@ -825,11 +835,11 @@ void LottieAnimationViewImpl::SetDynamicProperty(const Ui::LottieAnimation::Dyna
 
   if(mVisual)
   {
-    Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo dynamicInfo;
-    dynamicInfo.id       = info.id;
-    dynamicInfo.keyPath  = info.keyPath.CStr();
-    dynamicInfo.property = static_cast<int32_t>(info.property);
-    dynamicInfo.callback = info.callback;
+    Ui::Integration::AnimatedVectorImageVisual::DynamicProperty dynamicInfo;
+    dynamicInfo.id       = info.GetId();
+    dynamicInfo.keyPath  = info.GetKeyPath().CStr();
+    dynamicInfo.property = static_cast<int32_t>(info.GetProperty());
+    dynamicInfo.callback = Ui::Integration::AnimatedVectorImageVisual::WrapDynamicPropertyCallback(std::move(info.GetCallback()));
     auto& viewData       = Internal::ViewDataImpl::Get(*this);
     viewData.DoActionExtension(LottieAnimationViewImpl::Property::IMAGE,
                                Ui::Integration::AnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY,
@@ -878,7 +888,7 @@ void LottieAnimationViewImpl::UpdateVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::LOTTIE_ANIMATION);
   map.Insert(Ui::Integration::ImageVisual::Property::URL, mUrl);
 
   map.Insert(Ui::Integration::ImageVisual::Property::LOOP_COUNT, mLoopCount);

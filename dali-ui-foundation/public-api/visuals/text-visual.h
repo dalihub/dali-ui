@@ -36,13 +36,13 @@ namespace Ui
  */
 
 /**
- * @brief A VisualBase of type VisualType::TEXT, to render simple text.
+ * @brief TextVisual renders text.
  *
- * It cannot use CornerRadius / CornerSquareness / Borderline feature.
+ * Its visual type is VisualType::TEXT. It cannot use the CornerRadius, CornerSquareness
+ * or Borderline features of VisualBase.
  */
 class DALI_UI_API TextVisual : public VisualBase
 {
-public:
 public:
   /**
    * @brief Creates a TextVisual object.
@@ -62,7 +62,7 @@ public:
    */
   static TextVisual DownCast(BaseHandle handle);
 
-public: // Setters
+public: // Properties
   /**
    * @brief Gets the text.
    *
@@ -268,20 +268,20 @@ public:
   TextVisual& operator=(TextVisual&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL TextVisual(Dali::Ui::Internal::VisualBaseImpl* object);
-
-public:
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} //namespace DALI_NAMESPACE
+} // namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_VISUAL_OBJECT_H

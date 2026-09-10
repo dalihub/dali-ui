@@ -125,7 +125,7 @@ void WindowFrameViewTree::SetFrameStyle(const WindowFrameStyle& style)
   else if(resolved.shadowSource == WindowFrameShadowSource::IMAGE)
   {
     Dali::Ui::ImageView shadowImage = Dali::Ui::ImageView::New(style.GetShadowImageUrl());
-    shadowImage.SetNPatchBorder(ToNPatchBorder(style.GetShadowImageBorder()));
+    shadowImage.SetNPatchBorder(style.GetShadowImageBorder());
     shadowImage.SetNPatchBorderOnly(style.IsShadowImageBorderOnly());
     mFrameEffectContent = shadowImage;
   }

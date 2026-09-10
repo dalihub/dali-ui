@@ -60,7 +60,7 @@ public:
   using ResourceReadySignalType = Signal<void(ResourceStatus)>;
 
   using TimePoint           = std::chrono::time_point<std::chrono::steady_clock>;
-  using DynamicPropertyType = std::vector<Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo>;
+  using DynamicPropertyType = std::vector<Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicProperty>;
 
   /**
    * Flags for re-sending data to the vector animation thread
@@ -201,10 +201,10 @@ public:
   uint32_t GetCurrentFrameNumber() const;
 
   /**
-   * @brief Retrieves the total frame number of the animation.
-   * @return The total frame number
+   * @brief Retrieves how many frames the animation has.
+   * @return The number of frames
    */
-  uint32_t GetTotalFrameNumber() const;
+  uint32_t GetTotalFrameCount() const;
 
   /**
    * @brief Gets the default size of the file,.

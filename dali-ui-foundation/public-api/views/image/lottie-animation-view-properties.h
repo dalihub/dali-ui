@@ -160,16 +160,9 @@ struct LottieAnimationViewPropertyIndex
     REDRAW_IN_SCALING_UP,
 
     /**
-     * @brief Whether to cache each rasterized frame to avoid re-rasterization.
-     * @details Name "enableFrameCache", type Property::BOOLEAN.
-     * @note See also: LottieAnimationView::SetFrameCacheEnabled(), LottieAnimationView::IsFrameCacheEnabled().
-     */
-    ENABLE_FRAME_CACHE,
-
-    /**
      * @brief Whether to notify ResourceReadySignal after each rasterization completes.
      * @details Name "notifyAfterRasterization", type Property::BOOLEAN.
-     * @note See also: LottieAnimationView::SetNotifyAfterRasterization(), LottieAnimationView::IsNotifyAfterRasterizationEnabled().
+     * @note See also: LottieAnimationView::SetNotifyAfterRasterizationEnabled(), LottieAnimationView::IsNotifyAfterRasterizationEnabled().
      */
     NOTIFY_AFTER_RASTERIZATION,
 

@@ -19,8 +19,8 @@
 
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-dynamic-property.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
-#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view-properties.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -74,7 +74,6 @@ public:
       SYNCHRONOUS_LOADING        = LottieAnimationViewPropertyIndex::SYNCHRONOUS_LOADING,
       REDRAW_IN_SCALING_DOWN     = LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_DOWN,
       REDRAW_IN_SCALING_UP       = LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_UP,
-      ENABLE_FRAME_CACHE         = LottieAnimationViewPropertyIndex::ENABLE_FRAME_CACHE,
       NOTIFY_AFTER_RASTERIZATION = LottieAnimationViewPropertyIndex::NOTIFY_AFTER_RASTERIZATION,
       RENDER_SCALE               = LottieAnimationViewPropertyIndex::RENDER_SCALE,
       PLACEHOLDER_IMAGE          = LottieAnimationViewPropertyIndex::PLACEHOLDER_IMAGE,
@@ -175,23 +174,25 @@ public: // Image
 
 public: // Playback Control
   /**
-   * @brief Starts or resumes playback of the animation.
-   *
-   * @return Reference to this for fluent chaining
+   * @brief Starts the animation, or resumes it if it was paused.
    */
   void Play();
 
   /**
-   * @brief Pauses playback of the animation.
+   * @brief Pauses the animation on the frame being shown.
    *
-   * @return Reference to this for fluent chaining
+   * The loop it is on is kept, so Play() carries on from here rather than starting over.
    */
   void Pause();
 
   /**
-   * @brief Stops playback of the animation.
+   * @brief Stops the animation and returns it to its first loop.
    *
-   * @return Reference to this for fluent chaining
+   * Which frame is left on screen is decided by SetStopBehavior(): by default it is the one
+   * being shown, so a stopped animation does not necessarily look different from a paused
+   * one.
+   *
+   * @see SetStopBehavior()
    */
   void Stop();
 
@@ -202,7 +203,6 @@ public: // Playback Control
    * will not play. A positive value specifies an exact loop count.
    *
    * @param[in] count The loop count (-1 for infinite)
-   * @return Reference to this for fluent chaining
    */
   void SetLoopCount(int count);
 
@@ -219,7 +219,6 @@ public: // Playback Control
    * A frame outside the current playback range is clamped to the nearest endpoint.
    *
    * @param[in] frame The frame index to jump to
-   * @return Reference to this for fluent chaining
    */
   void JumpToFrame(int frame);
 
@@ -231,7 +230,6 @@ public: // Frame Range
    *
    * @param[in] minFrame The start frame index
    * @param[in] maxFrame The end frame index
-   * @return Reference to this for fluent chaining
    */
   void SetMinMaxFrame(int minFrame, int maxFrame);
 
@@ -239,7 +237,7 @@ public: // Frame Range
    * @brief Gets the numerically configured playback frame range.
    *
    * When no numerical range is configured, including when marker names were
-   * used, this returns the composition range `[0, GetTotalFrame()]`.
+   * used, this returns the composition range `[0, GetTotalFrameCount()]`.
    *
    * @param[out] minFrame The configured start frame index
    * @param[out] maxFrame The configured end frame index
@@ -255,7 +253,6 @@ public: // Frame Range
    *
    * @param[in] minMarker Name of the start marker
    * @param[in] maxMarker Name of the end marker (optional)
-   * @return Reference to this for fluent chaining
    */
   void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker = "");
 
@@ -264,7 +261,6 @@ public: // Playback Options
    * @brief Sets the behavior of the animation when it is stopped.
    *
    * @param[in] behavior The stop behavior
-   * @return Reference to this for fluent chaining
    */
   void SetStopBehavior(AnimatedImage::StopBehavior behavior);
 
@@ -279,7 +275,6 @@ public: // Playback Options
    * @brief Sets the looping mode.
    *
    * @param[in] mode RESTART or AUTO_REVERSE
-   * @return Reference to this for fluent chaining
    */
   void SetLoopingMode(LottieAnimation::LoopingMode mode);
 
@@ -297,7 +292,6 @@ public: // Playback Options
    * The actual clamping to [0.01, 100.0] is handled by the underlying animation renderer.
    *
    * @param[in] factor The speed multiplier (default: 1.0)
-   * @return Reference to this for fluent chaining
    */
   void SetFrameSpeedFactor(float factor);
 
@@ -321,12 +315,32 @@ public: // State Queries (read-only, requires live visual)
    *
    * @return The current frame index
    */
-  int GetCurrentFrame() const;
+  int GetCurrentFrameNumber() const;
 
   /**
    * @brief Gets the total number of frames in the animation.
    *
    * @return The total frame count
+   */
+  int GetTotalFrameCount() const;
+
+  /**
+   * @brief Gets the number of the frame being shown.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @see GetCurrentFrameNumber()
+   */
+  int GetCurrentFrame() const;
+
+  /**
+   * @brief Gets how many frames the animation has.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @see GetTotalFrameCount()
    */
   int GetTotalFrame() const;
 
@@ -335,7 +349,6 @@ public: // Performance Options
    * @brief Sets whether to redraw when the visual is scaled down.
    *
    * @param[in] redraw True to redraw on scale-down (default: true)
-   * @return Reference to this for fluent chaining
    */
   void SetRedrawOnScaleDown(bool redraw);
 
@@ -350,7 +363,6 @@ public: // Performance Options
    * @brief Sets whether to redraw when the visual is scaled up.
    *
    * @param[in] redraw True to redraw on scale-up (default: true)
-   * @return Reference to this for fluent chaining
    */
   void SetRedrawOnScaleUp(bool redraw);
 
@@ -362,30 +374,22 @@ public: // Performance Options
   bool IsRedrawOnScaleUp() const;
 
   /**
-   * @brief Enables or disables frame caching.
-   *
-   * When enabled, all decoded frames are cached in memory to reduce CPU cost
-   * during looping, at the expense of higher memory usage.
-   *
-   * @param[in] enable True to enable frame caching (default: false)
-   * @return Reference to this for fluent chaining
-   */
-  void SetFrameCacheEnabled(bool enable);
-
-  /**
-   * @brief Returns whether frame caching is enabled.
-   *
-   * @return True if frame caching is enabled
-   */
-  bool IsFrameCacheEnabled() const;
-
-  /**
    * @brief Sets whether to notify the render thread after each rasterization.
    *
    * Useful for low-fps Lottie files to avoid unnecessary render thread wakeups.
    *
    * @param[in] notify True to notify after rasterization (default: false)
-   * @return Reference to this for fluent chaining
+   */
+  void SetNotifyAfterRasterizationEnabled(bool notify);
+
+  /**
+   * @brief Sets whether the view is redrawn only once a new frame is ready.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @param[in] notify True to redraw only once a new frame is ready
+   * @see SetNotifyAfterRasterizationEnabled()
    */
   void SetNotifyAfterRasterization(bool notify);
 
@@ -397,15 +401,18 @@ public: // Performance Options
   bool IsNotifyAfterRasterizationEnabled() const;
 
   /**
-   * @brief Sets the scale factor applied to the rasterization size.
+   * @brief Sets the factor the animation is rasterized at.
    *
-   * A value of 2.0 rasterizes at twice the visual dimensions, producing
-   * sharper output on high-density displays at the cost of higher memory usage.
-   * Negative values flip the image. The actual clamping is handled by the
-   * underlying animation renderer.
+   * The texture is produced at this multiple of the size the view occupies, so a value above
+   * 1.0 draws it in more detail than it is shown at and stays sharp if it is later enlarged.
+   * The default is 1.0, which rasterizes at the size shown.
    *
-   * @param[in] scale The render scale multiplier (default: 1.0)
-   * @return Reference to this for fluent chaining
+   * @param[in] scale The multiplier to rasterize at
+   * @note Only the magnitude is used, so a negative value behaves as its positive
+   *       counterpart rather than flipping the animation.
+   * @note This multiplies with the view's own scale rather than replacing it: a render scale
+   *       of 1.5 under a scale of 2.0 rasterizes at 3.0.
+   * @see SetRedrawOnScaleUp()
    */
   void SetRenderScale(float scale);
 
@@ -438,33 +445,45 @@ public: // Content Info
   /**
    * @brief Gets layer information embedded in the Lottie file.
    *
-   * The returned map contains layer names as keys and a two-element integer
-   * array [startFrame, endFrame] as values.
+   * The returned map holds one entry per layer:
    *
-   * @return A Property::Map of layer info
+   * |       | Type                         | Content                                    |
+   * |-------|------------------------------|--------------------------------------------|
+   * | Key   | Property::STRING             | The layer's name                           |
+   * | Value | Property::ARRAY of 2 INTEGER | The first and last frame numbers it covers |
+   *
+   * @return A Property::Map of layer info, or an empty map until the file has loaded
+   * @note This property is read-only.
    */
-  Dali::Property::Map GetContentInfo();
+  Dali::Property::Map GetContentInfo() const;
 
   /**
    * @brief Gets marker information embedded in the Lottie file.
    *
-   * The returned map contains marker names as keys and a two-element integer
-   * array [startFrame, endFrame] as values.
+   * The returned map holds one entry per marker:
    *
-   * @return A Property::Map of marker info
+   * |       | Type                         | Content                                    |
+   * |-------|------------------------------|--------------------------------------------|
+   * | Key   | Property::STRING             | The marker's name                          |
+   * | Value | Property::ARRAY of 2 INTEGER | The first and last frame numbers it covers |
+   *
+   * A key taken from this map can be passed straight to SetMinMaxFrameByMarker().
+   *
+   * @return A Property::Map of marker info, or an empty map until the file has loaded
+   * @note This property is read-only.
+   * @see SetMinMaxFrameByMarker()
    */
-  Dali::Property::Map GetMarkerInfo();
+  Dali::Property::Map GetMarkerInfo() const;
 
 public: // Advanced
   /**
    * @brief Sets a per-frame dynamic property callback on a specific layer/element.
    *
-   * Ownership of DynamicPropertyInfo::callback is transferred to the visual.
+   * The info is consumed: its callback is handed to the visual, so pass it with std::move().
    *
    * @param[in] info The dynamic property info
-   * @return Reference to this for fluent chaining
    */
-  void SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
+  void SetDynamicProperty(LottieAnimation::DynamicProperty info);
 
 public: // Visual Appearance
   /**
@@ -473,7 +492,6 @@ public: // Visual Appearance
    * For per-layer color control, use SetDynamicProperty() instead.
    *
    * @param[in] color The RGBA color to multiply with the animation
-   * @return Reference to this for fluent chaining
    */
   void SetImageColor(const UiColor& color);
 
@@ -499,7 +517,6 @@ public: // Size & Loading Behavior
    * @brief Sets the desired rasterization width as a hint for the renderer.
    *
    * @param[in] width The desired width in pixels (0 to use natural size)
-   * @return Reference to this for fluent chaining
    */
   void SetDesiredWidth(int width);
 
@@ -514,7 +531,6 @@ public: // Size & Loading Behavior
    * @brief Sets the desired rasterization height as a hint for the renderer.
    *
    * @param[in] height The desired height in pixels (0 to use natural size)
-   * @return Reference to this for fluent chaining
    */
   void SetDesiredHeight(int height);
 
@@ -529,7 +545,6 @@ public: // Size & Loading Behavior
    * @brief Sets the release policy for the animation resource.
    *
    * @param[in] releasePolicy The release policy to use
-   * @return Reference to this for fluent chaining
    */
   void SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
 
@@ -544,7 +559,6 @@ public: // Size & Loading Behavior
    * @brief Sets whether the animation JSON is loaded synchronously.
    *
    * @param[in] synchronous True to load synchronously on the main thread
-   * @return Reference to this for fluent chaining
    */
   void SetSynchronousLoading(bool synchronous);
 
@@ -560,7 +574,6 @@ public: // Placeholder
    * @brief Sets the URL of a placeholder image shown while loading.
    *
    * @param[in] url The URL of the placeholder image
-   * @return Reference to this for fluent chaining
    */
   void SetPlaceholderUrl(const Dali::String& url);
 
@@ -578,7 +591,6 @@ public: // Placeholder
    * where each component is in the range [0, 1].
    *
    * @param[in] pixelArea The normalized sub-region of the animation to display
-   * @return Reference to this for fluent chaining
    */
   void SetPixelArea(const Dali::Vector4& pixelArea);
 

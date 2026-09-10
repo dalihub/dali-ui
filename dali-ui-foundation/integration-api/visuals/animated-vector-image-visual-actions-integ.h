@@ -22,6 +22,8 @@
 #include <dali-ui-foundation/integration-api/ui-action-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-dynamic-property.h>
 #include <dali/public-api/signals/callback.h>
 #include <string>
 
@@ -77,7 +79,7 @@ enum Type
  * The callback will be called on the worker thread. You MUST not call other DALi methods in the callback.
  * And the object must still be alive when the callback occurs if you make the callback from a class member function.
  */
-struct DynamicPropertyInfo
+struct DynamicProperty
 {
   int32_t       id;       ///< The Id to specify the callback. It should be unique and will be passed when the callback is called.
   std::string   keyPath;  ///< The key path used to target a specific content or a set of contents that will be updated.
@@ -85,6 +87,17 @@ struct DynamicPropertyInfo
   CallbackBase* callback; ///< The callback that gets called every time the animation is rendered. Ownership of the
                           ///< callback is passed onto the visual.
 };
+
+/**
+ * @brief Wraps a dali-ui dynamic property callback so the animation renderer can call it.
+ *
+ * The renderer passes its own ContentProperty enumeration, which dali-ui does not expose, so the
+ * returned callback converts that argument before forwarding to @p callback.
+ *
+ * @param[in] callback The dali-ui callback to wrap; its ownership is taken
+ * @return A callback owned by the caller, suitable for DynamicProperty::callback
+ */
+DALI_UI_API CallbackBase* WrapDynamicPropertyCallback(Ui::LottieAnimation::DynamicPropertyCallback callback);
 
 } // namespace AnimatedVectorImageVisual
 

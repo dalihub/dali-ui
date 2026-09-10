@@ -198,9 +198,9 @@ int UtcDaliAnimatedImageViewSetGetResourceUrlsP(void)
   urls.PushBack("frame2.png");
   urls.PushBack("frame3.png");
 
-  view.SetResourceUrls(urls);
+  view.SetResourceUrlList(urls);
 
-  const auto result = view.GetResourceUrls();
+  const auto result = view.GetResourceUrlList();
   DALI_TEST_EQUALS(result.Size(), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(result[0], Dali::String("frame1.png"), TEST_LOCATION);
   DALI_TEST_EQUALS(result[1], Dali::String("frame2.png"), TEST_LOCATION);
@@ -632,7 +632,7 @@ int UtcDaliAnimatedImageViewGetPlayStateP(void)
   END_TEST;
 }
 
-// GetCurrentFrame / GetTotalFrame
+// GetCurrentFrameNumber / GetTotalFrameCount
 
 int UtcDaliAnimatedImageViewGetCurrentFrameP(void)
 {
@@ -640,7 +640,7 @@ int UtcDaliAnimatedImageViewGetCurrentFrameP(void)
   AnimatedImageView view = AnimatedImageView::New();
 
   // Without visual, should return 0
-  DALI_TEST_EQUALS(view.GetCurrentFrame(), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 0, TEST_LOCATION);
   END_TEST;
 }
 
@@ -650,7 +650,7 @@ int UtcDaliAnimatedImageViewGetTotalFrameP(void)
   AnimatedImageView view = AnimatedImageView::New();
 
   // Without visual, should return 0
-  DALI_TEST_EQUALS(view.GetTotalFrame(), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetTotalFrameCount(), 0, TEST_LOCATION);
   END_TEST;
 }
 
@@ -882,11 +882,11 @@ int UtcDaliAnimatedImageViewSetGetMaskingModeP(void)
   UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
 
-  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_LOADING, TEST_LOCATION);
+  view.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_LOADING);
+  DALI_TEST_EQUALS(view.GetMaskingPolicy(), Ui::Image::MaskingPolicy::ON_LOADING, TEST_LOCATION);
 
-  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
+  view.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_RENDERING);
+  DALI_TEST_EQUALS(view.GetMaskingPolicy(), Ui::Image::MaskingPolicy::ON_RENDERING, TEST_LOCATION);
   END_TEST;
 }
 

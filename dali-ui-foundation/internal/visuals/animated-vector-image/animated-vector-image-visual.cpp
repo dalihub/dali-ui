@@ -151,7 +151,7 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&        
                                                      Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                                      const VisualUrl&                                imageUrl,
                                                      ImageDimensions                                 size)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::LOTTIE_ANIMATION),
   mImageUrl(imageUrl),
   mAnimationData(),
   mVectorAnimationTask(new VectorAnimationTask(factoryCache)),
@@ -271,7 +271,7 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
 void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::LOTTIE_ANIMATION);
   if(mImageUrl.IsValid())
   {
     map.Insert(Ui::Integration::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
@@ -289,8 +289,8 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::Integration::ImageVisual::Property::PLAY_STATE, static_cast<int32_t>(mPlayState));
   map.Insert(Ui::Integration::ImageVisual::Property::CURRENT_FRAME_NUMBER,
              static_cast<int32_t>(mVectorAnimationTask->GetCurrentFrameNumber()));
-  map.Insert(Ui::Integration::ImageVisual::Property::TOTAL_FRAME_NUMBER,
-             static_cast<int32_t>(mVectorAnimationTask->GetTotalFrameNumber()));
+  map.Insert(Ui::Integration::ImageVisual::Property::TOTAL_FRAME_COUNT,
+             static_cast<int32_t>(mVectorAnimationTask->GetTotalFrameCount()));
 
   map.Insert(Ui::Integration::ImageVisual::Property::STOP_BEHAVIOR, mAnimationData.stopBehavior);
   map.Insert(Ui::Integration::ImageVisual::Property::LOOPING_MODE, mAnimationData.loopingMode);
@@ -830,8 +830,8 @@ void AnimatedVectorImageVisual::OnDoActionExtension(const Property::Index action
   {
     case Dali::Ui::Integration::AnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY:
     {
-      Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo info =
-        AnyCast<Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo>(attributes);
+      Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicProperty info =
+        AnyCast<Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicProperty>(attributes);
       mAnimationData.dynamicProperties.push_back(info);
       mAnimationData.resendFlag |= VectorAnimationTask::RESEND_DYNAMIC_PROPERTY;
       break;

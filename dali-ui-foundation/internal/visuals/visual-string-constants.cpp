@@ -36,7 +36,7 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(VISUAL_TYPE)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, TEXT)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, IMAGE)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, ANIMATED_IMAGE)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, ANIMATED_VECTOR_IMAGE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, LOTTIE_ANIMATION)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, MESH)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, PRIMITIVE)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, WIREFRAME)
@@ -379,7 +379,7 @@ const char* const BATCH_SIZE_NAME("batchSize");
 const char* const CACHE_SIZE_NAME("cacheSize");
 const char* const FRAME_DELAY_NAME("frameDelay");
 const char* const LOOP_COUNT_NAME("loopCount");
-const char* const MASK_CONTENT_SCALE_NAME("maskContentScale");
+const char* const CONTENT_SCALE_FOR_MASKING_NAME("contentScaleForMasking");
 const char* const CROP_TO_MASK_NAME("cropToMask");
 const char* const LOAD_POLICY_NAME("loadPolicy");
 const char* const RELEASE_POLICY_NAME("releasePolicy");
@@ -389,7 +389,7 @@ const char* const AUXILIARY_IMAGE_ALPHA_NAME("auxiliaryImageAlpha");
 const char* const PLAY_RANGE_NAME("playRange");
 const char* const PLAY_STATE_NAME("playState");
 const char* const CURRENT_FRAME_NUMBER_NAME("currentFrameNumber");
-const char* const TOTAL_FRAME_NUMBER_NAME("totalFrameNumber");
+const char* const TOTAL_FRAME_COUNT_NAME("totalFrameCount");
 const char* const STOP_BEHAVIOR_NAME("stopBehavior");
 const char* const LOOPING_MODE_NAME("loopingMode");
 const char* const SYNCHRONOUS_LOADING("synchronousLoading");
@@ -400,13 +400,13 @@ const char* const ALPHA_MASK_URL("alphaMaskUrl");
 const char* const REDRAW_IN_SCALING_DOWN_NAME("redrawInScalingDown");
 const char* const REDRAW_IN_SCALING_UP_NAME("redrawInScalingUp");
 const char* const RENDER_SCALE_NAME("renderScale");
-const char* const MASKING_TYPE_NAME("maskingType");
+const char* const MASKING_POLICY_NAME("maskingPolicy");
 const char* const MASK_TEXTURE_RATIO_NAME("maskTextureRatio");
 const char* const FAST_TRACK_UPLOADING_NAME("fastTrackUploading");
 const char* const ENABLE_BROKEN_IMAGE("enableBrokenImage");
 const char* const ENABLE_FRAME_CACHE("enableFrameCache");
 const char* const NOTIFY_AFTER_RASTERIZATION("notifyAfterRasterization");
-const char* const SYNCHRONOUS_SIZING("synchronousSizing");
+const char* const IMAGE_LOAD_WITH_VIEW_SIZE("imageLoadWithViewSize");
 const char* const FRAME_SPEED_FACTOR("frameSpeedFactor");
 const char* const ENABLE_ASPECT_FIT_NAME("enableAspectFit");
 

@@ -30,7 +30,7 @@ namespace DALI_NAMESPACE::Ui
 struct SelectableLottieColorBinding::Impl
 {
   Impl(Dali::StringView                         bindingKeyPath,
-       LottieAnimation::VectorProperty          bindingProperty,
+       LottieAnimation::ContentProperty         bindingProperty,
        ColorPolicy                              bindingColorPolicy,
        const SelectableLottieImage::FrameRange& bindingSelectedColorRange)
   : keyPath(bindingKeyPath),
@@ -42,21 +42,21 @@ struct SelectableLottieColorBinding::Impl
   }
 
   Dali::String                      keyPath;
-  LottieAnimation::VectorProperty   property;
+  LottieAnimation::ContentProperty  property;
   ColorPolicy                       colorPolicy;
   SelectableLottieImage::FrameRange selectedColorRange;
 };
 
 SelectableLottieColorBinding::SelectableLottieColorBinding(
   Dali::StringView                         keyPath,
-  LottieAnimation::VectorProperty          property,
+  LottieAnimation::ContentProperty         property,
   ColorPolicy                              colorPolicy,
   const SelectableLottieImage::FrameRange& selectedColorRange)
 : mImpl(nullptr)
 {
   DALI_ASSERT_ALWAYS(!keyPath.Empty() && "SelectableLottieColorBinding key path must not be empty");
-  DALI_ASSERT_ALWAYS((property == LottieAnimation::VectorProperty::FILL_COLOR ||
-                      property == LottieAnimation::VectorProperty::STROKE_COLOR) &&
+  DALI_ASSERT_ALWAYS((property == LottieAnimation::ContentProperty::FILL_COLOR ||
+                      property == LottieAnimation::ContentProperty::STROKE_COLOR) &&
                      "SelectableLottieColorBinding supports only fill and stroke color properties");
   mImpl = Dali::MakeUnique<Impl>(keyPath, property, colorPolicy, selectedColorRange);
 }
@@ -90,7 +90,7 @@ Dali::String SelectableLottieColorBinding::GetKeyPath() const
   return mImpl->keyPath;
 }
 
-LottieAnimation::VectorProperty SelectableLottieColorBinding::GetProperty() const
+LottieAnimation::ContentProperty SelectableLottieColorBinding::GetProperty() const
 {
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_COLOR_BINDING(mImpl);
   return mImpl->property;

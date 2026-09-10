@@ -35,13 +35,13 @@ enum class InternalVisualType
 {
   INVALID = static_cast<int>(Dali::Ui::VisualType::INVALID),
 
-  BORDER                = static_cast<int>(Dali::Ui::VisualType::BORDER),
-  COLOR                 = static_cast<int>(Dali::Ui::VisualType::COLOR),
-  GRADIENT              = static_cast<int>(Dali::Ui::VisualType::GRADIENT),
-  TEXT                  = static_cast<int>(Dali::Ui::VisualType::TEXT),
-  IMAGE                 = static_cast<int>(Dali::Ui::VisualType::IMAGE),
-  ANIMATED_IMAGE        = static_cast<int>(Dali::Ui::VisualType::ANIMATED_IMAGE),
-  ANIMATED_VECTOR_IMAGE = static_cast<int>(Dali::Ui::VisualType::ANIMATED_VECTOR_IMAGE),
+  BORDER           = static_cast<int>(Dali::Ui::VisualType::BORDER),
+  COLOR            = static_cast<int>(Dali::Ui::VisualType::COLOR),
+  GRADIENT         = static_cast<int>(Dali::Ui::VisualType::GRADIENT),
+  TEXT             = static_cast<int>(Dali::Ui::VisualType::TEXT),
+  IMAGE            = static_cast<int>(Dali::Ui::VisualType::IMAGE),
+  ANIMATED_IMAGE   = static_cast<int>(Dali::Ui::VisualType::ANIMATED_IMAGE),
+  LOTTIE_ANIMATION = static_cast<int>(Dali::Ui::VisualType::LOTTIE_ANIMATION),
 
   MESH,      ///< Renders a mesh using an "obj" file, optionally with textures provided by an "mtl" file.
   PRIMITIVE, ///< Renders a simple 3D shape, such as a cube or sphere.

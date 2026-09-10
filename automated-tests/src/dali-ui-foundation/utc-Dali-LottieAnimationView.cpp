@@ -525,7 +525,7 @@ int UtcDaliLottieAnimationViewIgnoreFinishedWhilePlayStatePending(void)
   END_TEST;
 }
 
-// GetCurrentFrame / GetTotalFrame
+// GetCurrentFrameNumber / GetTotalFrameCount
 
 int UtcDaliLottieAnimationViewGetCurrentFrameP(void)
 {
@@ -533,7 +533,7 @@ int UtcDaliLottieAnimationViewGetCurrentFrameP(void)
   LottieAnimationView view = LottieAnimationView::New();
 
   // Without visual, should return 0
-  DALI_TEST_EQUALS(view.GetCurrentFrame(), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 0, TEST_LOCATION);
   END_TEST;
 }
 
@@ -543,7 +543,7 @@ int UtcDaliLottieAnimationViewGetTotalFrameP(void)
   LottieAnimationView view = LottieAnimationView::New();
 
   // Without visual, should return 0
-  DALI_TEST_EQUALS(view.GetTotalFrame(), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetTotalFrameCount(), 0, TEST_LOCATION);
   END_TEST;
 }
 
@@ -583,24 +583,6 @@ int UtcDaliLottieAnimationViewSetGetRedrawOnScaleUpP(void)
 
 // EnableFrameCache
 
-int UtcDaliLottieAnimationViewSetGetEnableFrameCacheP(void)
-{
-  UiTestApplication application;
-  LottieAnimationView view = LottieAnimationView::New();
-
-  // Default should be false
-  DALI_TEST_CHECK(!view.IsFrameCacheEnabled());
-
-  view.SetFrameCacheEnabled(true);
-  DALI_TEST_CHECK(view.IsFrameCacheEnabled());
-
-  view.SetFrameCacheEnabled(false);
-  DALI_TEST_CHECK(!view.IsFrameCacheEnabled());
-  END_TEST;
-}
-
-// NotifyAfterRasterization
-
 int UtcDaliLottieAnimationViewSetGetNotifyAfterRasterizationP(void)
 {
   UiTestApplication application;
@@ -609,10 +591,10 @@ int UtcDaliLottieAnimationViewSetGetNotifyAfterRasterizationP(void)
   // Default should be false
   DALI_TEST_CHECK(!view.IsNotifyAfterRasterizationEnabled());
 
-  view.SetNotifyAfterRasterization(true);
+  view.SetNotifyAfterRasterizationEnabled(true);
   DALI_TEST_CHECK(view.IsNotifyAfterRasterizationEnabled());
 
-  view.SetNotifyAfterRasterization(false);
+  view.SetNotifyAfterRasterizationEnabled(false);
   DALI_TEST_CHECK(!view.IsNotifyAfterRasterizationEnabled());
   END_TEST;
 }
@@ -838,21 +820,6 @@ int UtcDaliLottieAnimationViewPropertyRedrawInScalingUpP(void)
 
   view.SetProperty(index, true);
   DALI_TEST_CHECK(view.GetProperty(index).Get<bool>());
-  END_TEST;
-}
-
-int UtcDaliLottieAnimationViewPropertyEnableFrameCacheP(void)
-{
-  UiTestApplication application;
-  LottieAnimationView view = LottieAnimationView::New();
-
-  const int index = LottieAnimationView::Property::ENABLE_FRAME_CACHE;
-
-  view.SetProperty(index, true);
-  DALI_TEST_CHECK(view.GetProperty(index).Get<bool>());
-
-  view.SetProperty(index, false);
-  DALI_TEST_CHECK(!view.GetProperty(index).Get<bool>());
   END_TEST;
 }
 

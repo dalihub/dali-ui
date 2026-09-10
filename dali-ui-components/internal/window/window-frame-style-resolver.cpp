@@ -51,9 +51,4 @@ ResolvedWindowFrameStyle ResolveWindowFrameStyle(const WindowFrameStyle& style, 
   return resolved;
 }
 
-Dali::Vector4 ToNPatchBorder(const Dali::Ui::Insets& border)
-{
-  return Dali::Vector4(border.start, border.top, border.end, border.bottom);
-}
-
 } //namespace DALI_NAMESPACE::Ui::Internal

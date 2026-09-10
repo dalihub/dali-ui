@@ -20,15 +20,12 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali/public-api/object/property-array.h> ///< Dali::Property::Array
-#include <dali/public-api/rendering/sampling.h>    ///< Dali::WrapMode::Type
+#include <dali/public-api/rendering/sampling.h> ///< Dali::WrapMode::Type
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
-
-// TODO : Seperate it as n-patch / animated-image / animated-vector-image
 
 namespace DALI_NAMESPACE
 {
@@ -41,14 +38,13 @@ namespace Ui
  */
 
 /**
- * @brief A VisualBase of type VisualType::ANIMATED_IMAGE, to render an animated image or a sequence of images.
+ * @brief AnimatedImageVisual renders a sequence of images.
  *
- * It can use CornerRadius / CornerSquareness / Borderline feature
- *
+ * Its visual type is VisualType::ANIMATED_IMAGE. It can use the CornerRadius,
+ * CornerSquareness and Borderline features of VisualBase.
  */
 class DALI_UI_API AnimatedImageVisual : public VisualBase
 {
-public:
 public:
   /**
    * @brief Creates a AnimatedImageVisual object.
@@ -68,13 +64,12 @@ public:
    */
   static AnimatedImageVisual DownCast(BaseHandle handle);
 
-public: // Setters
+public: // Properties
   /**
    * @brief Gets the resource url of the AnimatedImageVisual.
-   * @note Only valid value returns if SetResourceUrl called.
-   * Return empty string if SetResourceUrl called.
    *
-   * @return The resource url of the AnimatedImageVisual
+   * @return The url set by SetResourceUrl(), or an empty string when the frames came from
+   *         SetResourceUrlList() instead
    */
   Dali::String GetResourceUrl() const;
 
@@ -90,10 +85,9 @@ public: // Setters
 
   /**
    * @brief Gets the list of resource urls of the AnimatedImageVisual.
-   * @note Only valid value returns if SetResourceUrlList called.
-   * Return empty list if SetResourceUrl called.
    *
-   * @return The list of resource urls of the AnimatedImageVisual
+   * @return The urls set by SetResourceUrlList(), or an empty list when a single url was set
+   *         with SetResourceUrl() instead
    */
   Dali::Vector<Dali::String> GetResourceUrlList() const;
 
@@ -103,6 +97,7 @@ public: // Setters
    * @param[in] resourceUrlList The list of resource URLs to set
    */
   void SetResourceUrlList(const Dali::Vector<Dali::String>& resourceUrlList);
+
   /**
    * @brief Sets a list of resource URLs for an animated image sequence.
    *
@@ -131,9 +126,13 @@ public: // Setters
   bool IsSynchronousLoading() const;
 
   /**
-   * @brief Sets whether the image is loaded synchronously.
+   * @brief Sets whether the image is loaded on the calling thread.
    *
-   * @param[in] synchronous True to load the image on the main thread synchronously
+   * Loading synchronously blocks until the image is ready, so nothing is drawn without it
+   * and no loading signal is needed. It also stalls whatever thread asked, so it suits small
+   * local files and little else. The default is false, which loads on a worker thread.
+   *
+   * @param[in] synchronous True to load on the calling thread
    */
   void SetSynchronousLoading(bool synchronous);
 
@@ -145,9 +144,17 @@ public: // Setters
   int GetDesiredWidth() const;
 
   /**
-   * @brief Sets the desired width of the AnimatedImageVisual.
+   * @brief Sets the width the image is loaded at.
+   *
+   * The image is resampled to this width as it loads, which bounds the memory a large
+   * source costs. Both a width and a height must be set for either to take effect; the
+   * default, 0, loads the image at its own size.
    *
    * @param[in] desiredWidth The desired width to set
+   * @note Ignored while SetImageLoadWithViewSize() is enabled, which loads at the View's
+   *       size instead.
+   * @see SetDesiredHeight()
+   * @see SetSamplingMode()
    */
   void SetDesiredWidth(int desiredWidth);
 
@@ -159,9 +166,16 @@ public: // Setters
   int GetDesiredHeight() const;
 
   /**
-   * @brief Sets the desired height of the AnimatedImageVisual.
+   * @brief Sets the height the image is loaded at.
+   *
+   * The image is resampled to this height as it loads, which bounds the memory a large
+   * source costs. Both a width and a height must be set for either to take effect; the
+   * default, 0, loads the image at its own size.
    *
    * @param[in] desiredHeight The desired height to set
+   * @note Ignored while SetImageLoadWithViewSize() is enabled, which loads at the View's
+   *       size instead.
+   * @see SetDesiredWidth()
    */
   void SetDesiredHeight(int desiredHeight);
 
@@ -173,9 +187,14 @@ public: // Setters
   Image::SamplingMode GetSamplingMode() const;
 
   /**
-   * @brief Sets the sampling mode of the AnimatedImageVisual.
+   * @brief Sets the filter used when the image is resampled to the desired size.
+   *
+   * It only has an effect where a resample happens, which is when a desired size or
+   * SetImageLoadWithViewSize() asks for a size other than the source's own. The default is
+   * Image::SamplingMode::BOX_THEN_LINEAR.
    *
    * @param[in] samplingMode The sampling mode to set
+   * @see SetDesiredWidth()
    */
   void SetSamplingMode(Image::SamplingMode samplingMode);
 
@@ -189,7 +208,12 @@ public: // Setters
   /**
    * @brief Sets the pixel area of the AnimatedImageVisual.
    *
+   * The area is given in texture coordinates as (x, y, width, height): the first two
+   * elements are its top-left corner and the last two its size. The default,
+   * [0.0, 0.0, 1.0, 1.0], is the whole image.
+   *
    * @param[in] pixelArea The pixel area to set
+   * @see SetWrapModeU()
    */
   void SetPixelArea(const Dali::Vector4& pixelArea);
 
@@ -203,7 +227,15 @@ public: // Setters
   /**
    * @brief Sets the wrap mode for u coordinate of the AnimatedImageVisual.
    *
+   * u and v are the coordinates the image is sampled with: u runs from 0.0 at the left
+   * edge of the image to 1.0 at the right edge, and v from 0.0 at the top edge to 1.0 at
+   * the bottom. The wrap mode decides how the image is sampled where the coordinate falls
+   * outside that range, which is what a pixel area reaching beyond the image asks for.
+   * Dali::WrapMode::REPEAT tiles the image and Dali::WrapMode::MIRRORED_REPEAT tiles it
+   * alternately flipped, while the default clamps to the edge pixel.
+   *
    * @param[in] wrapModeU The wrap mode for u coordinate to set
+   * @see SetPixelArea()
    */
   void SetWrapModeU(Dali::WrapMode::Type wrapModeU);
 
@@ -217,21 +249,32 @@ public: // Setters
   /**
    * @brief Sets the wrap mode for v coordinate of the AnimatedImageVisual.
    *
+   * v is the vertical coordinate, running from 0.0 at the top edge of the image to 1.0 at
+   * the bottom. See SetWrapModeU() for how a wrap mode is applied.
+   *
    * @param[in] wrapModeV The wrap mode for v coordinate to set
+   * @see SetWrapModeU()
    */
   void SetWrapModeV(Dali::WrapMode::Type wrapModeV);
 
   /**
-   * @brief Gets whether broken image is enabled.
+   * @brief Gets whether the broken image is enabled.
    *
-   * @return True if broken image is enabled
+   * @return True if a broken image is shown when loading fails
    */
   bool IsBrokenImageEnabled() const;
 
   /**
-   * @brief Sets whether to enable broken image.
+   * @brief Sets whether to show a broken image when the image fails to load.
    *
-   * @param[in] brokenImageEnabled True to enable broken image
+   * The broken image is a placeholder drawn in place of an image that could not be loaded,
+   * so that the failure is visible rather than leaving an empty area. Which image is used is
+   * configured per view size with UiConfig::SetBrokenImageUrl().
+   *
+   * This is enabled by default. Disable it where a failure should simply draw nothing.
+   *
+   * @param[in] brokenImageEnabled True to show a broken image when loading fails
+   * @see UiConfig::SetBrokenImageUrl()
    */
   void SetBrokenImageEnabled(bool brokenImageEnabled);
 
@@ -243,9 +286,14 @@ public: // Setters
   Image::LoadPolicy GetLoadPolicy() const;
 
   /**
-   * @brief Sets the load policy of the AnimatedImageVisual.
+   * @brief Sets when the image starts loading.
+   *
+   * The default is Image::LoadPolicy::ATTACHED, which waits until the visual is on the
+   * scene. Image::LoadPolicy::IMMEDIATE starts as soon as the url is set, trading memory
+   * held earlier for a shorter wait when the visual does appear.
    *
    * @param[in] loadPolicy The load policy to set
+   * @see SetReleasePolicy()
    */
   void SetLoadPolicy(Image::LoadPolicy loadPolicy);
 
@@ -257,9 +305,14 @@ public: // Setters
   Image::ReleasePolicy GetReleasePolicy() const;
 
   /**
-   * @brief Sets the release policy of the AnimatedImageVisual.
+   * @brief Sets when the loaded texture is dropped from the cache.
+   *
+   * The default is Image::ReleasePolicy::DETACHED, which frees it once the visual leaves the
+   * scene. The other values keep it until the visual is destroyed, or until it is released
+   * explicitly, which avoids reloading a image that comes and goes.
    *
    * @param[in] releasePolicy The release policy to set
+   * @see SetLoadPolicy()
    */
   void SetReleasePolicy(Image::ReleasePolicy releasePolicy);
 
@@ -282,28 +335,36 @@ public: // Setters
    *
    * @return True if orientation correction is enabled
    */
-  bool IsOrientationCorrection() const;
+  bool IsOrientationCorrectionEnabled() const;
 
   /**
-   * @brief Sets whether to correct the image orientation.
+   * @brief Sets whether the EXIF orientation recorded in the file is applied.
    *
-   * @param[in] orientationCorrection True to correct the image orientation
+   * A photograph taken sideways records how it should be turned rather than storing the
+   * turned pixels. Correcting it, the default, rotates and flips the image on load so that
+   * it is shown the way it was taken. Disabling this draws the pixels as they are stored.
+   *
+   * @param[in] orientationCorrection True to apply the recorded orientation
    */
   void SetOrientationCorrection(bool orientationCorrection);
 
   /**
-   * @brief Gets whether synchronous sizing is enabled.
+   * @brief Gets whether the image is loaded at the view size.
    *
-   * @return True if synchronous sizing is enabled
+   * @return True if loading the image with the view size is enabled
    */
-  bool IsSynchronousSizing() const;
+  bool IsImageLoadWithViewSizeEnabled() const;
 
   /**
-   * @brief Sets whether to use synchronous sizing.
+   * @brief Sets whether the image is loaded at the size of the View it is drawn in.
    *
-   * @param[in] synchronousSizing True to use synchronous sizing
+   * When enabled, the image is loaded at the View's size rather than at the desired size,
+   * so it is resampled whenever that size changes.
+   *
+   * @param[in] enabled True to load the image with the view size
+   * @see SetDesiredWidth()
    */
-  void SetSynchronousSizing(bool synchronousSizing);
+  void SetImageLoadWithViewSize(bool enabled);
 
   /**
    * @brief Gets whether pre-multiplied alpha is enabled.
@@ -327,25 +388,40 @@ public: // Setters
   Dali::String GetAlphaMaskUrl() const;
 
   /**
-   * @brief Sets the alpha mask url of the AnimatedImageVisual.
+   * @brief Sets the url of the image to use as an alpha mask.
+   *
+   * The alpha channel of the mask image becomes the alpha of this visual's own image, so
+   * the mask decides which parts of it are drawn. How the two images are fitted to each
+   * other is decided by SetCropToMask(), and when the mask is applied by SetMaskingPolicy().
+   * Setting this once the image has finished loading may make it load again.
    *
    * @param[in] alphaMaskUrl The alpha mask url to set
+   * @see SetCropToMask()
+   * @see SetMaskingPolicy()
    */
   void SetAlphaMaskUrl(const Dali::String& alphaMaskUrl);
 
   /**
-   * @brief Gets the mask content scale of the AnimatedImageVisual.
+   * @brief Gets the scale factor applied to the content image before it is masked.
    *
-   * @return The mask content scale of the AnimatedImageVisual
+   * @return The scale factor applied to the content image before it is masked
    */
-  float GetMaskContentScale() const;
+  float GetContentScaleForMasking() const;
 
   /**
-   * @brief Sets the mask content scale of the AnimatedImageVisual.
+   * @brief Sets the scale factor applied to the content image before it is masked.
    *
-   * @param[in] maskContentScale The mask content scale to set
+   * This scales the image being masked, not the mask itself. The scaled image is then
+   * cropped to the size of the alpha mask. The default is 1.0, which leaves the image at
+   * its own size, and the value has no effect unless an alpha mask is set.
+   *
+   * @param[in] contentScale The content scale to set
+   * @note With Image::MaskingPolicy::ON_RENDERING the scale is applied only while
+   *       crop to mask is enabled.
+   * @see SetAlphaMaskUrl()
+   * @see SetCropToMask()
    */
-  void SetMaskContentScale(float maskContentScale);
+  void SetContentScaleForMasking(float contentScale);
 
   /**
    * @brief Gets whether crop to mask is enabled.
@@ -357,61 +433,67 @@ public: // Setters
   /**
    * @brief Sets whether to crop to mask.
    *
+   * When enabled, the default, the image is cropped to the size of the alpha mask. When
+   * disabled, the image keeps its own size and the mask is scaled to fit it instead.
+   *
    * @param[in] cropToMask True to crop to mask
+   * @see SetAlphaMaskUrl()
    */
   void SetCropToMask(bool cropToMask);
 
   /**
    * @brief Gets the masking type of the AnimatedImageVisual.
    *
-   * @return The masking type of the AnimatedImageVisual
+   * @return Whether the alpha mask is applied as the image loads or as it is drawn
    */
-  Image::MaskingType GetMaskingType() const;
+  Image::MaskingPolicy GetMaskingPolicy() const;
 
   /**
-   * @brief Sets the masking type of the AnimatedImageVisual.
+   * @brief Sets whether the alpha mask is applied as the image loads or as it is drawn.
    *
-   * @param[in] maskingType The masking type to set
+   * Image::MaskingPolicy::ON_LOADING, the default, applies the mask to the pixel data
+   * while loading, so a single masked texture is uploaded.
+   * Image::MaskingPolicy::ON_RENDERING keeps the image and the mask as two textures
+   * and combines them while drawing.
+   *
+   * @param[in] maskingPolicy The masking policy to set
+   * @note An image backed by an external texture, such as one from
+   *       ImageUrlUtils::GenerateUrl(), can only be masked while drawing, and the value is
+   *       forced to Image::MaskingPolicy::ON_RENDERING.
+   * @see SetAlphaMaskUrl()
    */
-  void SetMaskingType(Image::MaskingType maskingType);
+  void SetMaskingPolicy(Image::MaskingPolicy maskingPolicy);
 
   /**
    * @brief Gets the loop count of the AnimatedImageVisual.
    *
-   * @return The loop count of the AnimatedImageVisual
+   * @return How many times the animation plays, or a negative value for no limit
    */
   int GetLoopCount() const;
 
   /**
-   * @brief Sets the loop count of the AnimatedImageVisual.
+   * @brief Sets how many times the animation plays.
+   *
+   * A negative value, the default, plays it without limit. Zero or more plays it that many
+   * times and then stops, leaving the frame chosen by SetStopBehavior().
    *
    * @param[in] loopCount The loop count to set
+   * @see SetStopBehavior()
    */
   void SetLoopCount(int loopCount);
 
   /**
-   * @brief Gets the play range of the AnimatedImageVisual.
-   *
-   * @return The play range of the AnimatedImageVisual
-   */
-  Dali::Property::Array GetPlayRange() const;
-
-  /**
-   * @brief Sets the play range of the AnimatedImageVisual.
-   *
-   * @param[in] playRange The play range to set
-   */
-  void SetPlayRange(const Dali::Property::Array& playRange);
-
-  /**
    * @brief Gets the stop behavior of the AnimatedImageVisual.
    *
-   * @return The stop behavior of the AnimatedImageVisual
+   * @return Which frame is shown once playback stops
    */
   AnimatedImage::StopBehavior GetStopBehavior() const;
 
   /**
-   * @brief Sets the stop behavior of the AnimatedImageVisual.
+   * @brief Sets which frame is shown once playback stops.
+   *
+   * The default is AnimatedImage::StopBehavior::CURRENT_FRAME, which leaves whichever frame
+   * was being shown; the other values jump to the first or the last frame instead.
    *
    * @param[in] stopBehavior The stop behavior to set
    */
@@ -420,64 +502,88 @@ public: // Setters
   /**
    * @brief Gets the frame speed factor of the AnimatedImageVisual.
    *
-   * @return The frame speed factor of the AnimatedImageVisual
+   * @return The multiplier applied to the playback speed
    */
   float GetFrameSpeedFactor() const;
 
   /**
-   * @brief Sets the frame speed factor of the AnimatedImageVisual.
+   * @brief Sets a multiplier for the playback speed.
+   *
+   * Each frame is shown for its own interval divided by this factor, so 2.0 plays the
+   * animation twice as fast and 0.5 at half speed. The default is 1.0. It applies both to
+   * the interval set by SetFrameDelay() and to the timing an animated image file carries
+   * itself.
    *
    * @param[in] frameSpeedFactor The frame speed factor to set
+   * @note The value is limited to the range 0.01 to 100.0.
+   * @see SetFrameDelay()
    */
   void SetFrameSpeedFactor(float frameSpeedFactor);
 
   /**
    * @brief Gets the batch size of the AnimatedImageVisual.
    *
-   * @return The batch size of the AnimatedImageVisual
+   * @return The number of frames loaded at a time
    */
   int GetBatchSize() const;
 
   /**
-   * @brief Sets the batch size of the AnimatedImageVisual.
+   * @brief Sets how many frames are loaded at a time.
+   *
+   * Frames are fetched in batches of this size: one batch is loaded before playback starts,
+   * and a further batch each time playback catches up. A larger batch loads further ahead
+   * at the cost of more work per fetch. The default is 2.
    *
    * @param[in] batchSize The batch size to set
+   * @note Values below 2 are ignored, and the batch never exceeds the number of frames.
+   * @see SetCacheSize()
    */
   void SetBatchSize(int batchSize);
 
   /**
    * @brief Gets the cache size of the AnimatedImageVisual.
    *
-   * @return The cache size of the AnimatedImageVisual
+   * @return The number of frames kept loaded
    */
   int GetCacheSize() const;
 
   /**
-   * @brief Sets the cache size of the AnimatedImageVisual.
+   * @brief Sets how many frames are kept loaded ahead of the one being shown.
+   *
+   * This bounds how much memory the frames occupy. The default is 2, which is deliberately
+   * small: an animation that stutters usually wants a larger cache and batch tuned to it.
    *
    * @param[in] cacheSize The cache size to set
+   * @note Values below 2 are ignored. The cache is never smaller than the batch size, and
+   *       never exceeds the number of frames.
+   * @see SetBatchSize()
    */
   void SetCacheSize(int cacheSize);
 
   /**
    * @brief Gets the frame delay of the AnimatedImageVisual.
    *
-   * @return The frame delay of the AnimatedImageVisual
+   * @return How long each frame is shown, in milliseconds
    */
   int GetFrameDelay() const;
 
   /**
-   * @brief Sets the frame delay of the AnimatedImageVisual.
+   * @brief Sets how long each frame is shown, in milliseconds.
    *
-   * This property is only relevant when using SetResourceUrlList (animated sequence).
-   * It specifies the delay between frames in milliseconds.
+   * This applies only to a sequence built from SetResourceUrlList(), where the frames are
+   * separate images and carry no timing of their own. An animated image file such as a GIF
+   * carries a delay per frame and is played with those instead, so this value is ignored.
    *
    * @param[in] frameDelay The frame delay to set
+   * @see SetResourceUrlList()
+   * @see SetFrameSpeedFactor()
    */
   void SetFrameDelay(int frameDelay);
 
   /**
-   * @brief Gets the play state of the AnimatedImageVisual.
+   * @brief Gets whether the animation is playing, paused or stopped.
+   *
+   * Play(), Pause() and Stop() each move it to the matching state; it starts out stopped.
    *
    * @return The play state of the AnimatedImageVisual
    * @note This property is read-only.
@@ -485,46 +591,61 @@ public: // Setters
   AnimatedImage::PlayState GetPlayState() const;
 
   /**
-   * @brief Gets the current frame number of the AnimatedImageVisual.
+   * @brief Gets the number of the frame being shown.
    *
-   * @return The current frame number of the AnimatedImageVisual
+   * @return A frame number from 0 to GetTotalFrameCount() - 1, or -1 while the image has not
+   *         finished decoding
    * @note This property is read-only.
+   * @see GetTotalFrameCount()
    */
   int GetCurrentFrameNumber() const;
 
   /**
-   * @brief Gets the total frame number of the AnimatedImageVisual.
+   * @brief Gets how many frames the AnimatedImageVisual has.
    *
-   * @return The total frame number of the AnimatedImageVisual. -1 if image decode is not completed yet.
+   * Frame numbers run from 0 to one less than this count.
+   *
+   * @return The number of frames, or -1 while the image has not finished decoding
    * @note This property is read-only.
+   * @see GetCurrentFrameNumber()
    */
-  int GetTotalFrameNumber() const;
+  int GetTotalFrameCount() const;
 
 public: // API to control play state
   /**
-   * @brief Play animation
-   *
+   * @brief Starts the animation, or resumes it if it was paused.
    */
   void Play();
 
   /**
-   * @brief Pause animation
+   * @brief Pauses the animation on the frame being shown.
    *
+   * The loop it is on is kept, so Play() carries on from here rather than starting over.
    */
   void Pause();
 
   /**
-   * @brief Stop animation
+   * @brief Stops the animation and returns it to its first loop.
    *
+   * Which frame is left on screen is decided by SetStopBehavior(): by default it is the one
+   * being shown, so a stopped animation does not necessarily look different from a paused
+   * one.
+   *
+   * @see SetStopBehavior()
    */
   void Stop();
 
   /**
-   * @brief Jump to specific frame
+   * @brief Shows a specific frame.
    *
-   * @param[in] frame The frame to jump
+   * This does not start or stop playback: a playing animation carries on from the frame
+   * jumped to, and a paused or stopped one stays where it is put.
+   *
+   * @param[in] frame The frame number to show
+   * @note A frame outside 0 to GetTotalFrameCount() - 1 is ignored.
+   * @see GetTotalFrameCount()
    */
-  void JumpTo(int frame);
+  void JumpToFrame(int frame);
 
 public:
   AnimatedImageVisual()                                              = default;
@@ -535,20 +656,20 @@ public:
   AnimatedImageVisual& operator=(AnimatedImageVisual&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL AnimatedImageVisual(Dali::Ui::Internal::VisualBaseImpl* object);
-
-public:
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} //namespace DALI_NAMESPACE
+} // namespace DALI_NAMESPACE
 
 #endif // DALI_UI_ANIMATED_IMAGE_VISUAL_OBJECT_H

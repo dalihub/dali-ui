@@ -70,7 +70,7 @@ IMAGE_VIEW_PROPERTY_REGISTRATION("preMultipliedAlpha",    BOOLEAN, PRE_MULTIPLIE
 IMAGE_VIEW_PROPERTY_REGISTRATION("placeholderImage",      STRING,  PLACEHOLDER_IMAGE)
 IMAGE_VIEW_PROPERTY_REGISTRATION("alphaMaskUrl",          STRING,  ALPHA_MASK_URL)
 IMAGE_VIEW_PROPERTY_REGISTRATION("cropToMask",            BOOLEAN, CROP_TO_MASK)
-IMAGE_VIEW_PROPERTY_REGISTRATION("maskingMode",           INTEGER, MASKING_MODE)
+IMAGE_VIEW_PROPERTY_REGISTRATION("maskingPolicy",           INTEGER, MASKING_POLICY)
 IMAGE_VIEW_PROPERTY_REGISTRATION("desiredWidth",          INTEGER, DESIRED_WIDTH)
 IMAGE_VIEW_PROPERTY_REGISTRATION("desiredHeight",         INTEGER, DESIRED_HEIGHT)
 IMAGE_VIEW_PROPERTY_REGISTRATION("loadPolicy",            INTEGER, LOAD_POLICY)
@@ -98,7 +98,7 @@ ImageViewImpl::ImageViewImpl()
   mImageColor(Color::WHITE),
   mSamplingMode(Ui::Image::SamplingMode::BOX_THEN_LINEAR),
   mFittingMode(Ui::Image::FittingMode::FILL),
-  mMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING),
+  mMaskingPolicy(Ui::Image::MaskingPolicy::ON_RENDERING),
   mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mDesiredWidth(0),
@@ -230,12 +230,12 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         }
         break;
       }
-      case Property::MASKING_MODE:
+      case Property::MASKING_POLICY:
       {
-        int maskingMode;
-        if(value.Get(maskingMode))
+        int maskingPolicy;
+        if(value.Get(maskingPolicy))
         {
-          impl.SetMaskingMode(static_cast<Ui::Image::MaskingType>(maskingMode));
+          impl.SetMaskingPolicy(static_cast<Ui::Image::MaskingPolicy>(maskingPolicy));
         }
         break;
       }
@@ -289,7 +289,7 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         Vector4 border;
         if(value.Get(border))
         {
-          impl.SetNPatchBorder(border);
+          impl.SetNPatchBorder(Dali::Insets(border.x, border.y, border.z, border.w));
         }
         break;
       }
@@ -357,8 +357,8 @@ Dali::Property::Value ImageViewImpl::GetProperty(Dali::BaseObject* object, Dali:
       case Property::CROP_TO_MASK:
         value = impl.IsCropToMask();
         break;
-      case Property::MASKING_MODE:
-        value = static_cast<int>(impl.GetMaskingMode());
+      case Property::MASKING_POLICY:
+        value = static_cast<int>(impl.GetMaskingPolicy());
         break;
       case Property::LOAD_POLICY:
         value = static_cast<int>(impl.GetLoadPolicy());
@@ -376,8 +376,11 @@ Dali::Property::Value ImageViewImpl::GetProperty(Dali::BaseObject* object, Dali:
         value = impl.IsOrientationCorrectionEnabled();
         break;
       case Property::N_PATCH_BORDER:
-        value = impl.GetNPatchBorder();
+      {
+        const Dali::Insets border = impl.GetNPatchBorder();
+        value                     = Vector4(border.start, border.end, border.top, border.bottom);
         break;
+      }
       case Property::N_PATCH_BORDER_ONLY:
         value = impl.IsNPatchBorderOnly();
         break;
@@ -623,19 +626,19 @@ bool ImageViewImpl::IsCropToMask() const
   return mCropToMask;
 }
 
-void ImageViewImpl::SetMaskingMode(Ui::Image::MaskingType maskingMode)
+void ImageViewImpl::SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy)
 {
-  if(mMaskingMode != maskingMode)
+  if(mMaskingPolicy != maskingPolicy)
   {
-    mMaskingMode = maskingMode;
-    mVisualDirty = true;
+    mMaskingPolicy = maskingPolicy;
+    mVisualDirty   = true;
     InvalidateMeasure();
   }
 }
 
-Ui::Image::MaskingType ImageViewImpl::GetMaskingMode() const
+Ui::Image::MaskingPolicy ImageViewImpl::GetMaskingPolicy() const
 {
-  return mMaskingMode;
+  return mMaskingPolicy;
 }
 
 void ImageViewImpl::SetImageColor(const UiColor& color)
@@ -736,7 +739,7 @@ bool ImageViewImpl::IsOrientationCorrectionEnabled() const
   return mOrientationCorrection;
 }
 
-void ImageViewImpl::SetNPatchBorder(const Vector4& border)
+void ImageViewImpl::SetNPatchBorder(const Dali::Insets& border)
 {
   if(mNPatchBorder != border)
   {
@@ -746,7 +749,7 @@ void ImageViewImpl::SetNPatchBorder(const Vector4& border)
   }
 }
 
-Vector4 ImageViewImpl::GetNPatchBorder() const
+Dali::Insets ImageViewImpl::GetNPatchBorder() const
 {
   return mNPatchBorder;
 }
@@ -975,19 +978,20 @@ void ImageViewImpl::UpdateVisual()
     map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
     map.Insert(Ui::Integration::ImageVisual::Property::FAST_TRACK_UPLOADING, mFastTrackUploading);
     map.Insert(Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, mOrientationCorrection);
-    map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
+    map.Insert(Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, mImageLoadWithViewSize);
     map.Insert(Ui::Integration::ImageVisual::Property::FITTING_MODE, static_cast<int>(mFittingMode));
 
     if(!mAlphaMaskUrl.Empty())
     {
       map.Insert(Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL, mAlphaMaskUrl);
       map.Insert(Ui::Integration::ImageVisual::Property::CROP_TO_MASK, mCropToMask);
-      map.Insert(Ui::Integration::ImageVisual::Property::MASKING_TYPE, static_cast<int>(mMaskingMode));
+      map.Insert(Ui::Integration::ImageVisual::Property::MASKING_POLICY, static_cast<int>(mMaskingPolicy));
     }
 
-    if(mNPatchBorder != Vector4::ZERO)
+    if(mNPatchBorder != Dali::Insets())
     {
-      map.Insert(Ui::Integration::ImageVisual::Property::BORDER, mNPatchBorder);
+      map.Insert(Ui::Integration::ImageVisual::Property::BORDER,
+                 Vector4(mNPatchBorder.start, mNPatchBorder.end, mNPatchBorder.top, mNPatchBorder.bottom));
       map.Insert(Ui::Integration::ImageVisual::Property::BORDER_ONLY, mNPatchBorderOnly);
     }
 

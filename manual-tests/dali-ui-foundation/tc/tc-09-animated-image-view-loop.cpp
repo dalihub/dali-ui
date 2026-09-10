@@ -148,7 +148,7 @@ private:
     // Loop index: the component exposes no current-loop getter, so count frame
     // wrap-arounds while playing. At 100ms/frame and a 100ms poll every loop is
     // sampled ~8 times, so a 7->0 wrap cannot slip between two samples.
-    int frame = mView.GetCurrentFrame();
+    int frame = mView.GetCurrentFrameNumber();
     if(mView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING && frame < mPrevFrame)
     {
       ++mLoopIndex;

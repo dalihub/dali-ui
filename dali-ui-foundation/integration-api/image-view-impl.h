@@ -65,7 +65,7 @@ public: // Properties
       IMAGE_LOAD_WITH_VIEW_SIZE = Ui::ImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
       ALPHA_MASK_URL            = Ui::ImageViewPropertyIndex::ALPHA_MASK_URL,
       CROP_TO_MASK              = Ui::ImageViewPropertyIndex::CROP_TO_MASK,
-      MASKING_MODE              = Ui::ImageViewPropertyIndex::MASKING_MODE,
+      MASKING_POLICY            = Ui::ImageViewPropertyIndex::MASKING_POLICY,
       LOAD_POLICY               = Ui::ImageViewPropertyIndex::LOAD_POLICY,
       RELEASE_POLICY            = Ui::ImageViewPropertyIndex::RELEASE_POLICY,
       SYNCHRONOUS_LOADING       = Ui::ImageViewPropertyIndex::SYNCHRONOUS_LOADING,
@@ -241,14 +241,14 @@ public: // API — Advanced Rendering & Masking
   bool IsCropToMask() const;
 
   /**
-   * @copydoc Dali::Ui::ImageView::SetMaskingMode
+   * @copydoc Dali::Ui::ImageView::SetMaskingPolicy
    */
-  void SetMaskingMode(Ui::Image::MaskingType maskingMode);
+  void SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetMaskingMode
+   * @copydoc Dali::Ui::ImageView::GetMaskingPolicy
    */
-  Ui::Image::MaskingType GetMaskingMode() const;
+  Ui::Image::MaskingPolicy GetMaskingPolicy() const;
 
 public: // API — Loading Behavior
   /**
@@ -305,12 +305,12 @@ public: // API — N-Patch Border
   /**
    * @copydoc Dali::Ui::ImageView::SetNPatchBorder
    */
-  void SetNPatchBorder(const Vector4& border);
+  void SetNPatchBorder(const Dali::Insets& border);
 
   /**
    * @copydoc Dali::Ui::ImageView::GetNPatchBorder
    */
-  Vector4 GetNPatchBorder() const;
+  Dali::Insets GetNPatchBorder() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetNPatchBorderOnly
@@ -393,14 +393,14 @@ private: // Data
   Dali::String mPlaceholderUrl;
   Dali::String mAlphaMaskUrl;
 
-  Vector4 mPixelArea;
-  Vector4 mNPatchBorder;
+  Vector4      mPixelArea;
+  Dali::Insets mNPatchBorder;
 
   UiColor mImageColor;
 
   Ui::Image::SamplingMode  mSamplingMode;
   Ui::Image::FittingMode   mFittingMode;
-  Ui::Image::MaskingType   mMaskingMode;
+  Ui::Image::MaskingPolicy mMaskingPolicy;
   Ui::Image::LoadPolicy    mLoadPolicy;
   Ui::Image::ReleasePolicy mReleasePolicy;
   int                      mDesiredWidth;

@@ -71,7 +71,7 @@ static bool IsTypeAvailableForCornerRadius(Ui::Integration::InternalVisualType t
     case Ui::Integration::InternalVisualType::IMAGE:
     case Ui::Integration::InternalVisualType::SVG:
     case Ui::Integration::InternalVisualType::ANIMATED_IMAGE:
-    case Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE:
+    case Ui::Integration::InternalVisualType::LOTTIE_ANIMATION:
     {
       return true;
     }
@@ -96,7 +96,7 @@ static bool IsTypeAvailableForBorderline(Ui::Integration::InternalVisualType typ
     case Ui::Integration::InternalVisualType::IMAGE:
     case Ui::Integration::InternalVisualType::SVG:
     case Ui::Integration::InternalVisualType::ANIMATED_IMAGE:
-    case Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE:
+    case Ui::Integration::InternalVisualType::LOTTIE_ANIMATION:
     {
       return true;
     }

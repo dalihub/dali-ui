@@ -29,6 +29,13 @@ namespace DALI_NAMESPACE
 namespace Ui
 {
 
+/**
+ * @brief Enumerations shared by every image that animates.
+ *
+ * That covers both kinds: a raster animation, meaning a GIF, a WebP or a list of images drawn
+ * by AnimatedImageVisual, and a vector animation, meaning a Lottie file drawn by
+ * LottieAnimationVisual. A still image has none of these.
+ */
 namespace AnimatedImage
 {
 /**

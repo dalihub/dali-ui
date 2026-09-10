@@ -156,7 +156,7 @@ private:
   struct ColorBindingData
   {
     Dali::String                              keyPath;
-    LottieAnimation::VectorProperty           property;
+    LottieAnimation::ContentProperty          property;
     SelectableLottieColorBinding::ColorPolicy colorPolicy;
     int32_t                                   selectedColorStart;
     int32_t                                   selectedColorEnd;

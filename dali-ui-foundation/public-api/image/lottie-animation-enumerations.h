@@ -43,9 +43,13 @@ enum class LoopingMode : uint8_t
 };
 
 /**
- * @brief Enumeration for animatable vector properties used with SetDynamicProperty.
+ * @brief Identifies which property inside the Lottie content a dynamic property drives.
+ *
+ * These name properties of the shapes and layers in the animation file. They are not DALi
+ * properties: they carry no property index and cannot be set with SetProperty(). The only way
+ * to give one a value is the callback passed to SetDynamicProperty().
  */
-enum class VectorProperty : uint8_t
+enum class ContentProperty : uint8_t
 {
   FILL_COLOR = 0,     ///< Fill color of a shape
   FILL_OPACITY,       ///< Fill opacity of a shape

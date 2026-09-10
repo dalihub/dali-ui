@@ -43,9 +43,9 @@ constexpr int32_t PROP_ID_GREEN  = 3;
 /**
  * @note Called on a worker thread — do not call DALi APIs here.
  */
-static Dali::Property::Value OnGetFillColor(int32_t                                     id,
-                                             Dali::VectorAnimationRenderer::VectorProperty /*property*/,
-                                             uint32_t /*frameNumber*/)
+static Dali::Property::Value OnGetFillColor(int32_t id,
+                                            Ui::LottieAnimation::ContentProperty /*property*/,
+                                            uint32_t /*frameNumber*/)
 {
   if(id == PROP_ID_RED)   return Dali::Property::Value(Dali::Vector4(1.f, 0.f, 0.f, 1.f));
   if(id == PROP_ID_BLUE)  return Dali::Property::Value(Dali::Vector4(0.f, 0.f, 1.f, 1.f));
@@ -122,12 +122,11 @@ public:
 private:
   void OnDynamicFill(int32_t propId, const char* colorName)
   {
-    Ui::LottieAnimation::DynamicPropertyInfo info;
-    info.id       = propId;
-    info.keyPath  = "**";
-    info.property = Ui::LottieAnimation::VectorProperty::FILL_COLOR;
-    info.callback = MakeCallback(&OnGetFillColor);
-    mView.SetDynamicProperty(info);
+    Ui::LottieAnimation::DynamicProperty info(propId,
+                                                 "**",
+                                                 Ui::LottieAnimation::ContentProperty::FILL_COLOR,
+                                                 Ui::LottieAnimation::DynamicPropertyCallback::New(&OnGetFillColor));
+    mView.SetDynamicProperty(std::move(info));
 
     mStatusLabel.SetText(Dali::String("DynamicProperty: FILL_COLOR = ") + Dali::String(colorName));
   }

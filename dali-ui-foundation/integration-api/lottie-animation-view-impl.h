@@ -21,8 +21,8 @@
 #include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-dynamic-property.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
-#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view-properties.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/common/dali-string.h>
@@ -55,19 +55,21 @@ public: // Properties
   {
     enum
     {
-      IMAGE                      = Ui::LottieAnimationViewPropertyIndex::IMAGE,
-      LOOP_COUNT                 = Ui::LottieAnimationViewPropertyIndex::LOOP_COUNT,
-      LOOPING_MODE               = Ui::LottieAnimationViewPropertyIndex::LOOPING_MODE,
-      STOP_BEHAVIOR              = Ui::LottieAnimationViewPropertyIndex::STOP_BEHAVIOR,
-      FRAME_SPEED_FACTOR         = Ui::LottieAnimationViewPropertyIndex::FRAME_SPEED_FACTOR,
-      IMAGE_COLOR                = Ui::LottieAnimationViewPropertyIndex::IMAGE_COLOR,
-      DESIRED_WIDTH              = Ui::LottieAnimationViewPropertyIndex::DESIRED_WIDTH,
-      DESIRED_HEIGHT             = Ui::LottieAnimationViewPropertyIndex::DESIRED_HEIGHT,
-      RELEASE_POLICY             = Ui::LottieAnimationViewPropertyIndex::RELEASE_POLICY,
-      SYNCHRONOUS_LOADING        = Ui::LottieAnimationViewPropertyIndex::SYNCHRONOUS_LOADING,
-      REDRAW_IN_SCALING_DOWN     = Ui::LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_DOWN,
-      REDRAW_IN_SCALING_UP       = Ui::LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_UP,
-      ENABLE_FRAME_CACHE         = Ui::LottieAnimationViewPropertyIndex::ENABLE_FRAME_CACHE,
+      IMAGE                  = Ui::LottieAnimationViewPropertyIndex::IMAGE,
+      LOOP_COUNT             = Ui::LottieAnimationViewPropertyIndex::LOOP_COUNT,
+      LOOPING_MODE           = Ui::LottieAnimationViewPropertyIndex::LOOPING_MODE,
+      STOP_BEHAVIOR          = Ui::LottieAnimationViewPropertyIndex::STOP_BEHAVIOR,
+      FRAME_SPEED_FACTOR     = Ui::LottieAnimationViewPropertyIndex::FRAME_SPEED_FACTOR,
+      IMAGE_COLOR            = Ui::LottieAnimationViewPropertyIndex::IMAGE_COLOR,
+      DESIRED_WIDTH          = Ui::LottieAnimationViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT         = Ui::LottieAnimationViewPropertyIndex::DESIRED_HEIGHT,
+      RELEASE_POLICY         = Ui::LottieAnimationViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING    = Ui::LottieAnimationViewPropertyIndex::SYNCHRONOUS_LOADING,
+      REDRAW_IN_SCALING_DOWN = Ui::LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_DOWN,
+      REDRAW_IN_SCALING_UP   = Ui::LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_UP,
+      /// Integration-only, deliberately absent from LottieAnimationView::Property.
+      /// Allocated from the top of the reserved range so the public indices stay contiguous.
+      ENABLE_FRAME_CACHE         = Ui::LottieAnimationViewPropertyIndex::PROPERTY_END_INDEX - 1,
       NOTIFY_AFTER_RASTERIZATION = Ui::LottieAnimationViewPropertyIndex::NOTIFY_AFTER_RASTERIZATION,
       RENDER_SCALE               = Ui::LottieAnimationViewPropertyIndex::RENDER_SCALE,
       PLACEHOLDER_IMAGE          = Ui::LottieAnimationViewPropertyIndex::PLACEHOLDER_IMAGE,
@@ -208,14 +210,14 @@ public: // API
   Ui::AnimatedImage::PlayState GetPlayState() const;
 
   /**
-   * @copydoc Dali::Ui::LottieAnimationView::GetCurrentFrame
+   * @copydoc Dali::Ui::LottieAnimationView::GetCurrentFrameNumber
    */
-  int GetCurrentFrame() const;
+  int GetCurrentFrameNumber() const;
 
   /**
-   * @copydoc Dali::Ui::LottieAnimationView::GetTotalFrame
+   * @copydoc Dali::Ui::LottieAnimationView::GetTotalFrameCount
    */
-  int GetTotalFrame() const;
+  int GetTotalFrameCount() const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetRedrawOnScaleDown
@@ -248,9 +250,9 @@ public: // API
   bool IsFrameCacheEnabled() const;
 
   /**
-   * @copydoc Dali::Ui::LottieAnimationView::SetNotifyAfterRasterization
+   * @copydoc Dali::Ui::LottieAnimationView::SetNotifyAfterRasterizationEnabled
    */
-  void SetNotifyAfterRasterization(bool notify);
+  void SetNotifyAfterRasterizationEnabled(bool notify);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::IsNotifyAfterRasterizationEnabled
@@ -280,17 +282,17 @@ public: // API
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetContentInfo
    */
-  Dali::Property::Map GetContentInfo();
+  Dali::Property::Map GetContentInfo() const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetMarkerInfo
    */
-  Dali::Property::Map GetMarkerInfo();
+  Dali::Property::Map GetMarkerInfo() const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetDynamicProperty
    */
-  void SetDynamicProperty(const Ui::LottieAnimation::DynamicPropertyInfo& info);
+  void SetDynamicProperty(Ui::LottieAnimation::DynamicProperty info);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetNaturalSize

@@ -25,11 +25,9 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-dynamic-property.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
-#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
-
-// TODO : Seperate it as n-patch / animated-image / animated-vector-image
 
 namespace DALI_NAMESPACE
 {
@@ -42,14 +40,13 @@ namespace Ui
  */
 
 /**
- * @brief A VisualBase of type VisualType::ANIMATED_VECTOR_IMAGE, to render a Lottie animation.
+ * @brief LottieAnimationVisual renders a Lottie animation.
  *
- * It can use CornerRadius / CornerSquareness / Borderline feature.
- *
+ * Its visual type is VisualType::LOTTIE_ANIMATION. It can use the CornerRadius,
+ * CornerSquareness and Borderline features of VisualBase.
  */
 class DALI_UI_API LottieAnimationVisual : public VisualBase
 {
-public:
 public:
   /**
    * @brief Creates a LottieAnimationVisual object.
@@ -69,7 +66,7 @@ public:
    */
   static LottieAnimationVisual DownCast(BaseHandle handle);
 
-public: // Setters
+public: // Properties
   /**
    * @brief Gets the resource url of the LottieAnimationVisual.
    *
@@ -92,9 +89,13 @@ public: // Setters
   bool IsSynchronousLoading() const;
 
   /**
-   * @brief Sets whether the image is loaded synchronously.
+   * @brief Sets whether the animation is loaded on the calling thread.
    *
-   * @param[in] synchronous True to load the image on the main thread synchronously
+   * Loading synchronously blocks until the animation is ready, so nothing is drawn without it
+   * and no loading signal is needed. It also stalls whatever thread asked, so it suits small
+   * local files and little else. The default is false, which loads on a worker thread.
+   *
+   * @param[in] synchronous True to load on the calling thread
    */
   void SetSynchronousLoading(bool synchronous);
 
@@ -106,9 +107,17 @@ public: // Setters
   int GetDesiredWidth() const;
 
   /**
-   * @brief Sets the desired width of the LottieAnimationVisual.
+   * @brief Sets the width the animation is loaded at.
+   *
+   * The animation is resampled to this width as it loads, which bounds the memory a large
+   * source costs. Both a width and a height must be set for either to take effect; the
+   * default, 0, loads the animation at its own size.
    *
    * @param[in] desiredWidth The desired width to set
+   * @note Ignored while SetImageLoadWithViewSize() is enabled, which loads at the View's
+   *       size instead.
+   * @see SetDesiredHeight()
+   * @see SetSamplingMode()
    */
   void SetDesiredWidth(int desiredWidth);
 
@@ -120,9 +129,16 @@ public: // Setters
   int GetDesiredHeight() const;
 
   /**
-   * @brief Sets the desired height of the LottieAnimationVisual.
+   * @brief Sets the height the animation is loaded at.
+   *
+   * The animation is resampled to this height as it loads, which bounds the memory a large
+   * source costs. Both a width and a height must be set for either to take effect; the
+   * default, 0, loads the animation at its own size.
    *
    * @param[in] desiredHeight The desired height to set
+   * @note Ignored while SetImageLoadWithViewSize() is enabled, which loads at the View's
+   *       size instead.
+   * @see SetDesiredWidth()
    */
   void SetDesiredHeight(int desiredHeight);
 
@@ -134,9 +150,14 @@ public: // Setters
   Image::SamplingMode GetSamplingMode() const;
 
   /**
-   * @brief Sets the sampling mode of the LottieAnimationVisual.
+   * @brief Sets the filter used when the animation is resampled to the desired size.
+   *
+   * It only has an effect where a resample happens, which is when a desired size or
+   * SetImageLoadWithViewSize() asks for a size other than the source's own. The default is
+   * Image::SamplingMode::BOX_THEN_LINEAR.
    *
    * @param[in] samplingMode The sampling mode to set
+   * @see SetDesiredWidth()
    */
   void SetSamplingMode(Image::SamplingMode samplingMode);
 
@@ -150,7 +171,12 @@ public: // Setters
   /**
    * @brief Sets the pixel area of the LottieAnimationVisual.
    *
+   * The area is given in texture coordinates as (x, y, width, height): the first two
+   * elements are its top-left corner and the last two its size. The default,
+   * [0.0, 0.0, 1.0, 1.0], is the whole animation.
+   *
    * @param[in] pixelArea The pixel area to set
+   * @see SetWrapModeU()
    */
   void SetPixelArea(const Dali::Vector4& pixelArea);
 
@@ -164,7 +190,15 @@ public: // Setters
   /**
    * @brief Sets the wrap mode for u coordinate of the LottieAnimationVisual.
    *
+   * u and v are the coordinates the rasterized animation is sampled with: u runs from 0.0 at
+   * its left edge to 1.0 at the right edge, and v from 0.0 at the top edge to 1.0 at the
+   * bottom. The wrap mode decides how it is sampled where the coordinate falls outside that
+   * range, which is what a pixel area reaching beyond it asks for.
+   * Dali::WrapMode::REPEAT tiles the animation and Dali::WrapMode::MIRRORED_REPEAT tiles it
+   * alternately flipped, while the default clamps to the edge pixel.
+   *
    * @param[in] wrapModeU The wrap mode for u coordinate to set
+   * @see SetPixelArea()
    */
   void SetWrapModeU(Dali::WrapMode::Type wrapModeU);
 
@@ -178,21 +212,32 @@ public: // Setters
   /**
    * @brief Sets the wrap mode for v coordinate of the LottieAnimationVisual.
    *
+   * v is the vertical coordinate, running from 0.0 at the top edge to 1.0 at the bottom. See
+   * SetWrapModeU() for how a wrap mode is applied.
+   *
    * @param[in] wrapModeV The wrap mode for v coordinate to set
+   * @see SetWrapModeU()
    */
   void SetWrapModeV(Dali::WrapMode::Type wrapModeV);
 
   /**
-   * @brief Gets whether broken image is enabled.
+   * @brief Gets whether the broken image is enabled.
    *
-   * @return True if broken image is enabled
+   * @return True if a broken image is shown when loading fails
    */
   bool IsBrokenImageEnabled() const;
 
   /**
-   * @brief Sets whether to enable broken image.
+   * @brief Sets whether to show a broken image when the image fails to load.
    *
-   * @param[in] brokenImageEnabled True to enable broken image
+   * The broken image is a placeholder drawn in place of an image that could not be loaded,
+   * so that the failure is visible rather than leaving an empty area. Which image is used is
+   * configured per view size with UiConfig::SetBrokenImageUrl().
+   *
+   * This is enabled by default. Disable it where a failure should simply draw nothing.
+   *
+   * @param[in] brokenImageEnabled True to show a broken image when loading fails
+   * @see UiConfig::SetBrokenImageUrl()
    */
   void SetBrokenImageEnabled(bool brokenImageEnabled);
 
@@ -204,9 +249,14 @@ public: // Setters
   Image::LoadPolicy GetLoadPolicy() const;
 
   /**
-   * @brief Sets the load policy of the LottieAnimationVisual.
+   * @brief Sets when the animation starts loading.
+   *
+   * The default is Image::LoadPolicy::ATTACHED, which waits until the visual is on the
+   * scene. Image::LoadPolicy::IMMEDIATE starts as soon as the url is set, trading memory
+   * held earlier for a shorter wait when the visual does appear.
    *
    * @param[in] loadPolicy The load policy to set
+   * @see SetReleasePolicy()
    */
   void SetLoadPolicy(Image::LoadPolicy loadPolicy);
 
@@ -218,9 +268,14 @@ public: // Setters
   Image::ReleasePolicy GetReleasePolicy() const;
 
   /**
-   * @brief Sets the release policy of the LottieAnimationVisual.
+   * @brief Sets when the loaded texture is dropped from the cache.
+   *
+   * The default is Image::ReleasePolicy::DETACHED, which frees it once the visual leaves the
+   * scene. The other values keep it until the visual is destroyed, or until it is released
+   * explicitly, which avoids reloading a animation that comes and goes.
    *
    * @param[in] releasePolicy The release policy to set
+   * @see SetLoadPolicy()
    */
   void SetReleasePolicy(Image::ReleasePolicy releasePolicy);
 
@@ -229,66 +284,103 @@ public: // Setters
    *
    * @return True if orientation correction is enabled
    */
-  bool IsOrientationCorrection() const;
+  bool IsOrientationCorrectionEnabled() const;
 
   /**
-   * @brief Sets whether to correct the image orientation.
+   * @brief Sets whether the EXIF orientation recorded in the file is applied.
    *
-   * @param[in] orientationCorrection True to correct the image orientation
+   * A photograph taken sideways records how it should be turned rather than storing the
+   * turned pixels. Correcting it, the default, rotates and flips the image on load so that
+   * it is shown the way it was taken. Disabling this draws the pixels as they are stored.
+   *
+   * @param[in] orientationCorrection True to apply the recorded orientation
    */
   void SetOrientationCorrection(bool orientationCorrection);
 
   /**
-   * @brief Gets whether synchronous sizing is enabled.
+   * @brief Gets whether the image is loaded at the view size.
    *
-   * @return True if synchronous sizing is enabled
+   * @return True if loading the image with the view size is enabled
    */
-  bool IsSynchronousSizing() const;
+  bool IsImageLoadWithViewSizeEnabled() const;
 
   /**
-   * @brief Sets whether to use synchronous sizing.
+   * @brief Sets whether the image is loaded at the size of the View it is drawn in.
    *
-   * @param[in] synchronousSizing True to use synchronous sizing
+   * When enabled, the image is loaded at the View's size rather than at the desired size,
+   * so it is resampled whenever that size changes.
+   *
+   * @param[in] enabled True to load the image with the view size
+   * @see SetDesiredWidth()
    */
-  void SetSynchronousSizing(bool synchronousSizing);
+  void SetImageLoadWithViewSize(bool enabled);
 
   /**
    * @brief Gets the loop count of the LottieAnimationVisual.
    *
-   * @return The loop count of the LottieAnimationVisual
+   * @return How many times the animation plays, or a negative value for no limit
    */
   int GetLoopCount() const;
 
   /**
-   * @brief Sets the loop count of the LottieAnimationVisual.
+   * @brief Sets how many times the animation plays.
+   *
+   * A negative value, the default, plays it without limit. Zero or more plays it that many
+   * times and then stops, leaving the frame chosen by SetStopBehavior().
    *
    * @param[in] loopCount The loop count to set
+   * @see SetStopBehavior()
    */
   void SetLoopCount(int loopCount);
 
   /**
-   * @brief Gets the play range of the LottieAnimationVisual.
+   * @brief Sets the playback range by frame numbers.
    *
-   * @return The play range of the LottieAnimationVisual
+   * The animation plays between @p minFrame and @p maxFrame. A frame past the end is
+   * clamped to the last one, and a reversed pair is put back in order. By default the whole
+   * animation is played.
+   *
+   * @param[in] minFrame The start frame number
+   * @param[in] maxFrame The end frame number
+   * @see SetMinMaxFrameByMarker()
    */
-  Dali::Property::Array GetPlayRange() const;
+  void SetMinMaxFrame(int minFrame, int maxFrame);
 
   /**
-   * @brief Sets the play range of the LottieAnimationVisual.
+   * @brief Gets the playback range as frame numbers.
    *
-   * @param[in] playRange The play range to set
+   * When the range was set by marker names instead, this returns the whole animation,
+   * `[0, GetTotalFrameCount()]`.
+   *
+   * @param[out] minFrame The start frame number
+   * @param[out] maxFrame The end frame number
    */
-  void SetPlayRange(const Dali::Property::Array& playRange);
+  void GetMinMaxFrame(int& minFrame, int& maxFrame) const;
+
+  /**
+   * @brief Sets the playback range using marker names embedded in the animation.
+   *
+   * With only @p minMarker, the animation plays that marker's own range. With both, it
+   * plays from the start of @p minMarker to the end of @p maxMarker.
+   *
+   * @param[in] minMarker Name of the start marker
+   * @param[in] maxMarker Name of the end marker, or empty to use only @p minMarker
+   * @see GetMarkerInfo()
+   */
+  void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker = "");
 
   /**
    * @brief Gets the stop behavior of the LottieAnimationVisual.
    *
-   * @return The stop behavior of the LottieAnimationVisual
+   * @return Which frame is shown once playback stops
    */
   AnimatedImage::StopBehavior GetStopBehavior() const;
 
   /**
-   * @brief Sets the stop behavior of the LottieAnimationVisual.
+   * @brief Sets which frame is shown once playback stops.
+   *
+   * The default is AnimatedImage::StopBehavior::CURRENT_FRAME, which leaves whichever frame
+   * was being shown; the other values jump to the first or the last frame instead.
    *
    * @param[in] stopBehavior The stop behavior to set
    */
@@ -297,14 +389,19 @@ public: // Setters
   /**
    * @brief Gets the frame speed factor of the LottieAnimationVisual.
    *
-   * @return The frame speed factor of the LottieAnimationVisual
+   * @return The multiplier applied to the playback speed
    */
   float GetFrameSpeedFactor() const;
 
   /**
-   * @brief Sets the frame speed factor of the LottieAnimationVisual.
+   * @brief Sets a multiplier for the playback speed.
+   *
+   * Each frame is shown for its own duration divided by this factor, so 2.0 plays the
+   * animation twice as fast and 0.5 at half speed. The default is 1.0, which plays it at
+   * the frame rate the animation file declares.
    *
    * @param[in] frameSpeedFactor The frame speed factor to set
+   * @note The value is limited to the range 0.01 to 100.0.
    */
   void SetFrameSpeedFactor(float frameSpeedFactor);
 
@@ -323,72 +420,84 @@ public: // Setters
   void SetLoopingMode(LottieAnimation::LoopingMode loopingMode);
 
   /**
-   * @brief Gets whether redraw in scaling down is enabled.
+   * @brief Gets whether the animation is rasterized again when it is scaled down.
    *
-   * @return True if redraw in scaling down is enabled
+   * @return True if a scale down triggers a fresh rasterization
    */
-  bool IsRedrawInScalingDown() const;
+  bool IsRedrawOnScaleDown() const;
 
   /**
-   * @brief Sets whether to redraw when the visual is scaled down.
+   * @brief Sets whether the animation is rasterized again when it is scaled down.
    *
-   * @param[in] redrawInScalingDown True to redraw when scaled down
+   * A Lottie animation is drawn by rasterizing it into an image at the size it occupies.
+   * When the View's scale then shrinks, this decides whether that image is produced again at
+   * the smaller size, or whether the existing one is kept and simply shown smaller. The
+   * default is true.
+   *
+   * @param[in] redrawOnScaleDown True to rasterize again when scaled down
+   * @see SetRedrawOnScaleUp()
    */
-  void SetRedrawInScalingDown(bool redrawInScalingDown);
+  void SetRedrawOnScaleDown(bool redrawOnScaleDown);
 
   /**
-   * @brief Gets whether redraw in scaling up is enabled.
+   * @brief Gets whether the animation is rasterized again when it is scaled up.
    *
-   * @return True if redraw in scaling up is enabled
+   * @return True if a scale up triggers a fresh rasterization
    */
-  bool IsRedrawInScalingUp() const;
+  bool IsRedrawOnScaleUp() const;
 
   /**
-   * @brief Sets whether to redraw when the visual is scaled up.
+   * @brief Sets whether the animation is rasterized again when it is scaled up.
    *
-   * @param[in] redrawInScalingUp True to redraw when scaled up
+   * Without this the existing image is stretched to the larger size, which blurs an
+   * animation that could have been drawn sharply. Producing it again keeps it sharp, at the
+   * cost of the extra work and the memory a larger image takes. The default is true.
+   *
+   * @param[in] redrawOnScaleUp True to rasterize again when scaled up
+   * @note Combining this with SetRenderScale() scales twice: a render scale of 1.5 under a
+   *       View scale of 2.0 rasterizes at 3.0.
+   * @see SetRedrawOnScaleDown()
+   * @see SetRenderScale()
    */
-  void SetRedrawInScalingUp(bool redrawInScalingUp);
+  void SetRedrawOnScaleUp(bool redrawOnScaleUp);
 
   /**
-   * @brief Gets whether frame cache is enabled.
+   * @brief Gets whether the visual is redrawn only once a new frame is ready.
    *
-   * @return True if frame cache is enabled
+   * @return True if redrawing waits for a new frame
    */
-  bool IsFrameCacheEnabled() const;
+  bool IsNotifyAfterRasterizationEnabled() const;
 
   /**
-   * @brief Sets whether to enable frame cache.
+   * @brief Sets whether the visual is redrawn only once a new frame is ready.
    *
-   * @param[in] frameCacheEnabled True to enable frame cache
+   * By default the visual is redrawn continuously, whether or not a new frame of the
+   * animation has been produced yet. Enabling this redraws it only once a new frame is
+   * actually ready, which spares that repeated work when the animation runs at a low frame
+   * rate. The default is false.
+   *
+   * @param[in] notifyAfterRasterization True to redraw only once a new frame is ready
    */
-  void SetFrameCacheEnabled(bool frameCacheEnabled);
+  void SetNotifyAfterRasterizationEnabled(bool notifyAfterRasterization);
 
   /**
-   * @brief Gets whether notify after rasterization is enabled.
+   * @brief Gets the factor the animation is rasterized at.
    *
-   * @return True if notify after rasterization is enabled
-   */
-  bool IsNotifyAfterRasterization() const;
-
-  /**
-   * @brief Sets whether to notify after rasterization.
-   *
-   * @param[in] notifyAfterRasterization True to notify after rasterization
-   */
-  void SetNotifyAfterRasterization(bool notifyAfterRasterization);
-
-  /**
-   * @brief Gets the render scale of the LottieAnimationVisual.
-   *
-   * @return The render scale of the LottieAnimationVisual
+   * @return The multiplier applied to the rasterization size
    */
   float GetRenderScale() const;
 
   /**
-   * @brief Sets the render scale of the LottieAnimationVisual.
+   * @brief Sets the factor the animation is rasterized at.
    *
-   * @param[in] renderScale The render scale to set
+   * The texture is produced at this multiple of the size the visual occupies, so a value
+   * above 1.0 draws it in more detail than it is shown at and stays sharp if it is later
+   * enlarged. The default is 1.0, which rasterizes at the size shown.
+   *
+   * @param[in] renderScale The multiplier to rasterize at
+   * @note This multiplies with the View's own scale rather than replacing it: a render
+   *       scale of 1.5 under a View scale of 2.0 rasterizes at 3.0.
+   * @see SetRedrawOnScaleUp()
    */
   void SetRenderScale(float renderScale);
 
@@ -411,7 +520,9 @@ public: // Setters
   void SetAspectFitEnabled(bool aspectFitEnabled);
 
   /**
-   * @brief Gets the play state of the LottieAnimationVisual.
+   * @brief Gets whether the animation is playing, paused or stopped.
+   *
+   * Play(), Pause() and Stop() each move it to the matching state; it starts out stopped.
    *
    * @return The play state of the LottieAnimationVisual
    * @note This property is read-only.
@@ -419,81 +530,104 @@ public: // Setters
   AnimatedImage::PlayState GetPlayState() const;
 
   /**
-   * @brief Gets the current frame number of the LottieAnimationVisual.
+   * @brief Gets the number of the frame being shown.
    *
-   * @return The current frame number of the LottieAnimationVisual
+   * @return A frame number from 0 to GetTotalFrameCount() - 1, or -1 while the image has not
+   *         finished decoding
    * @note This property is read-only.
+   * @see GetTotalFrameCount()
    */
   int GetCurrentFrameNumber() const;
 
   /**
-   * @brief Gets the total frame number of the LottieAnimationVisual.
+   * @brief Gets how many frames the LottieAnimationVisual has.
    *
-   * @return The total frame number of the LottieAnimationVisual. -1 if image decode is not completed yet.
+   * Frame numbers run from 0 to one less than this count.
+   *
+   * @return The number of frames, or -1 while the image has not finished decoding
    * @note This property is read-only.
+   * @see GetCurrentFrameNumber()
    */
-  int GetTotalFrameNumber() const;
+  int GetTotalFrameCount() const;
 
   /**
-   * @brief Gets the content info of the LottieAnimationVisual.
+   * @brief Gets layer information embedded in the Lottie file.
    *
-   * @return The content info of the LottieAnimationVisual
+   * The returned map holds one entry per layer:
+   *
+   * |       | Type                         | Content                                    |
+   * |-------|------------------------------|--------------------------------------------|
+   * | Key   | Property::STRING             | The layer's name                           |
+   * | Value | Property::ARRAY of 2 INTEGER | The first and last frame numbers it covers |
+   *
+   * @return A Property::Map of layer info, or an empty map until the file has loaded
    * @note This property is read-only.
    */
   Dali::Property::Map GetContentInfo() const;
 
   /**
-   * @brief Gets the marker info of the LottieAnimationVisual.
+   * @brief Gets marker information embedded in the Lottie file.
    *
-   * @return The marker info of the LottieAnimationVisual
+   * The returned map holds one entry per marker:
+   *
+   * |       | Type                         | Content                                    |
+   * |-------|------------------------------|--------------------------------------------|
+   * | Key   | Property::STRING             | The marker's name                          |
+   * | Value | Property::ARRAY of 2 INTEGER | The first and last frame numbers it covers |
+   *
+   * A key taken from this map can be passed straight to SetMinMaxFrameByMarker().
+   *
+   * @return A Property::Map of marker info, or an empty map until the file has loaded
    * @note This property is read-only.
+   * @see SetMinMaxFrameByMarker()
    */
   Dali::Property::Map GetMarkerInfo() const;
 
 public: // API to control play state
   /**
-   * @brief Play animation
-   *
+   * @brief Starts the animation, or resumes it if it was paused.
    */
   void Play();
 
   /**
-   * @brief Pause animation
+   * @brief Pauses the animation on the frame being shown.
    *
+   * The loop it is on is kept, so Play() carries on from here rather than starting over.
    */
   void Pause();
 
   /**
-   * @brief Stop animation
+   * @brief Stops the animation and returns it to its first loop.
    *
+   * Which frame is left on screen is decided by SetStopBehavior(): by default it is the one
+   * being shown, so a stopped animation does not necessarily look different from a paused
+   * one.
+   *
+   * @see SetStopBehavior()
    */
   void Stop();
 
   /**
-   * @brief Jump to specific frame
+   * @brief Shows a specific frame.
    *
-   * A frame outside the current playback range is clamped to the nearest endpoint.
+   * This does not start or stop playback: a playing animation carries on from the frame
+   * jumped to, and a paused or stopped one stays where it is put.
    *
-   * @param[in] frame The frame to jump
+   * @param[in] frame The frame number to show
+   * @note A frame outside the playback range is clamped to the nearest end of it.
+   * @see SetMinMaxFrame()
    */
-  void JumpTo(int frame);
+  void JumpToFrame(int frame);
 
 public: // Advanced
   /**
    * @brief Sets a per-frame dynamic property callback on a specific layer/element.
    *
-   * Ownership of DynamicPropertyInfo::callback is transferred to the visual.
+   * The info is consumed: its callback is handed to the visual, so pass it with std::move().
    *
    * @param[in] info The dynamic property info
    */
-  void SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
-
-  /**
-   * @brief Flushes pending animation data.
-   *
-   * Ensures that changes to the animation properties are applied to the rendered frame.
-   */
-  void Flush();
+  void SetDynamicProperty(LottieAnimation::DynamicProperty info);
 
 public:
   LottieAnimationVisual()                                                = default;
@@ -504,20 +638,20 @@ public:
   LottieAnimationVisual& operator=(LottieAnimationVisual&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL LottieAnimationVisual(Dali::Ui::Internal::VisualBaseImpl* object);
-
-public:
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} //namespace DALI_NAMESPACE
+} // namespace DALI_NAMESPACE
 
 #endif // DALI_UI_IMAGE_VISUAL_OBJECT_H

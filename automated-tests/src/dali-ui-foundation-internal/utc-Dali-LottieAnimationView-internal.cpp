@@ -40,7 +40,7 @@ uint32_t GetLastHeight();
 namespace
 {
 Dali::Property::Value TestFillColor(int32_t,
-                                    Dali::VectorAnimationRenderer::VectorProperty,
+                                    Ui::LottieAnimation::ContentProperty,
                                     uint32_t)
 {
   return Dali::Property::Value(Dali::Vector4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -164,7 +164,7 @@ int UtcDaliLottieAnimationViewJumpToFramePreservedAfterDesiredSizeChange(void)
   application.Render();
 
   DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(2), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetTotalFrame(), 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetTotalFrameCount(), 5, TEST_LOCATION);
 
   int minFrame = -1;
   int maxFrame = -1;
@@ -178,7 +178,7 @@ int UtcDaliLottieAnimationViewJumpToFramePreservedAfterDesiredSizeChange(void)
   application.Render();
 
   DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(2), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentFrame(), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 3, TEST_LOCATION);
 
   auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
   auto  visualBeforeDesiredSizeChange = viewData.GetVisual(LottieAnimationView::Property::IMAGE);
@@ -198,7 +198,7 @@ int UtcDaliLottieAnimationViewJumpToFramePreservedAfterDesiredSizeChange(void)
   application.SendNotification();
   application.Render();
 
-  DALI_TEST_EQUALS(view.GetCurrentFrame(), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 3, TEST_LOCATION);
   DALI_TEST_EQUALS(viewData.GetVisual(LottieAnimationView::Property::IMAGE), visualBeforeDesiredSizeChange, TEST_LOCATION);
 
   view.SetResourceUrl("other-animation.json");
@@ -274,12 +274,11 @@ int UtcDaliLottieAnimationViewDynamicPropertyRendersWhilePaused(void)
   application.SendNotification();
   application.Render();
 
-  Ui::LottieAnimation::DynamicPropertyInfo info;
-  info.id       = 1;
-  info.keyPath  = "**";
-  info.property = Ui::LottieAnimation::VectorProperty::FILL_COLOR;
-  info.callback = MakeCallback(&TestFillColor);
-  view.SetDynamicProperty(info);
+  Ui::LottieAnimation::DynamicProperty info(1,
+                                               "**",
+                                               Ui::LottieAnimation::ContentProperty::FILL_COLOR,
+                                               Ui::LottieAnimation::DynamicPropertyCallback::New(&TestFillColor));
+  view.SetDynamicProperty(std::move(info));
   application.SendNotification();
   application.Render();
 
@@ -304,8 +303,7 @@ int UtcDaliLottieAnimationViewRuntimePropertiesDoNotRecreateVisual(void)
   view.SetFrameSpeedFactor(0.5f);
   view.SetRedrawOnScaleDown(false);
   view.SetRedrawOnScaleUp(false);
-  view.SetFrameCacheEnabled(true);
-  view.SetNotifyAfterRasterization(true);
+  view.SetNotifyAfterRasterizationEnabled(true);
   view.SetRenderScale(0.5f);
   view.SetAspectFitEnabled(false);
   view.SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);

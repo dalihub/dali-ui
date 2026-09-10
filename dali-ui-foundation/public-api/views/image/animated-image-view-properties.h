@@ -69,7 +69,7 @@ struct AnimatedImageViewPropertyIndex
     /**
      * @brief Array of image URLs for frame-by-frame animation.
      * @details Name "imageUrls", type Property::ARRAY of STRING.
-     * @note Setting this overrides IMAGE. See also: AnimatedImageView::SetResourceUrls().
+     * @note Setting this overrides IMAGE. See also: AnimatedImageView::SetResourceUrlList().
      */
     IMAGE_URLS,
 
@@ -221,10 +221,10 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The masking mode.
-     * @details Name "maskingMode", type Ui::Image::MaskingType (Property::INTEGER).
-     * @note See also: AnimatedImageView::SetMaskingMode(), AnimatedImageView::GetMaskingMode().
+     * @details Name "maskingPolicy", type Ui::Image::MaskingPolicy (Property::INTEGER).
+     * @note See also: AnimatedImageView::SetMaskingPolicy(), AnimatedImageView::GetMaskingPolicy().
      */
-    MASKING_MODE,
+    MASKING_POLICY,
 
     /**
      * @brief The URL of the placeholder image shown while loading.

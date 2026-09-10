@@ -89,12 +89,6 @@ int UtcDaliWindowFrameStyleSetShadowImageUrlSelectsImage(void)
   DALI_TEST_EQUALS(border.top, 2.0f, EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(border.bottom, 4.0f, EPSILON, TEST_LOCATION);
 
-  const Dali::Vector4 nPatchBorder = ToNPatchBorder(border);
-  DALI_TEST_EQUALS(nPatchBorder.x, 1.0f, EPSILON, TEST_LOCATION);
-  DALI_TEST_EQUALS(nPatchBorder.y, 2.0f, EPSILON, TEST_LOCATION);
-  DALI_TEST_EQUALS(nPatchBorder.z, 3.0f, EPSILON, TEST_LOCATION);
-  DALI_TEST_EQUALS(nPatchBorder.w, 4.0f, EPSILON, TEST_LOCATION);
-
   style.SetShadowImageUrl("");
   DALI_TEST_CHECK(style.GetShadowSource() == WindowFrameShadowSource::NONE);
   END_TEST;

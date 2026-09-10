@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/signals/dali-signal.h>
 
@@ -73,7 +74,7 @@ public:
       IMAGE_LOAD_WITH_VIEW_SIZE = ImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
       ALPHA_MASK_URL            = ImageViewPropertyIndex::ALPHA_MASK_URL,
       CROP_TO_MASK              = ImageViewPropertyIndex::CROP_TO_MASK,
-      MASKING_MODE              = ImageViewPropertyIndex::MASKING_MODE,
+      MASKING_POLICY            = ImageViewPropertyIndex::MASKING_POLICY,
       LOAD_POLICY               = ImageViewPropertyIndex::LOAD_POLICY,
       RELEASE_POLICY            = ImageViewPropertyIndex::RELEASE_POLICY,
       SYNCHRONOUS_LOADING       = ImageViewPropertyIndex::SYNCHRONOUS_LOADING,
@@ -183,7 +184,6 @@ public: // Image
    * notified when loading completes.
    *
    * @param[in] url The URL of the image resource
-   * @return Reference to this for fluent chaining
    */
   void SetResourceUrl(const Dali::String& url);
 
@@ -216,7 +216,6 @@ public: // Image
    * @brief Sets the URL of a placeholder image shown while the main image is loading.
    *
    * @param[in] url The URL of the placeholder image resource
-   * @return Reference to this for fluent chaining
    */
   void SetPlaceholderUrl(const Dali::String& url);
 
@@ -233,7 +232,6 @@ public: // Image
    * Accepts both direct RGBA values and theme color tokens via UiColor.
    *
    * @param[in] color The color to multiply with the image
-   * @return Reference to this for fluent chaining
    */
   void SetImageColor(const UiColor& color);
 
@@ -251,7 +249,6 @@ public: // Image
    * where each component is in the range [0, 1].
    *
    * @param[in] pixelArea The normalized sub-region of the image to display
-   * @return Reference to this for fluent chaining
    */
   void SetPixelArea(const Vector4& pixelArea);
 
@@ -277,7 +274,6 @@ public: // Size & Fitting Control
    * @brief Sets the sampling mode used when scaling the image.
    *
    * @param[in] samplingMode The sampling mode to use
-   * @return Reference to this for fluent chaining
    */
   void SetSamplingMode(Image::SamplingMode samplingMode);
 
@@ -294,7 +290,6 @@ public: // Size & Fitting Control
    * The default fitting mode is Ui::Image::FittingMode::FILL (stretch to fill).
    *
    * @param[in] fittingMode The fitting mode to use
-   * @return Reference to this for fluent chaining
    */
   void SetFittingMode(Image::FittingMode fittingMode);
 
@@ -309,7 +304,6 @@ public: // Size & Fitting Control
    * @brief Sets the desired rasterization width as a hint for the image loader.
    *
    * @param[in] width The desired width in pixels (0 to use natural size)
-   * @return Reference to this for fluent chaining
    */
   void SetDesiredWidth(int width);
 
@@ -324,7 +318,6 @@ public: // Size & Fitting Control
    * @brief Sets the desired rasterization height as a hint for the image loader.
    *
    * @param[in] height The desired height in pixels (0 to use natural size)
-   * @return Reference to this for fluent chaining
    */
   void SetDesiredHeight(int height);
 
@@ -349,7 +342,6 @@ public: // Size & Fitting Control
    *       instead of the true image dimensions, making aspect-ratio adjustment ineffective.
    *
    * @param[in] enabled True to enable loading image with view size
-   * @return Reference to this for fluent chaining
    */
   void SetImageLoadWithViewSize(bool enabled);
 
@@ -365,7 +357,6 @@ public: // Advanced Rendering & Masking
    * @brief Sets whether the image uses pre-multiplied alpha.
    *
    * @param[in] preMultiplied True if the image has pre-multiplied alpha
-   * @return Reference to this for fluent chaining
    */
   void SetPreMultipliedAlpha(bool preMultiplied);
 
@@ -382,7 +373,6 @@ public: // Advanced Rendering & Masking
    * When set, the alpha channel of the mask image is applied to the main image.
    *
    * @param[in] maskUrl The URL of the alpha mask image
-   * @return Reference to this for fluent chaining
    */
   void SetAlphaMaskUrl(const Dali::String& maskUrl);
 
@@ -397,7 +387,6 @@ public: // Advanced Rendering & Masking
    * @brief Sets whether the image should be cropped to the mask bounds.
    *
    * @param[in] cropToMask True to crop the image to the mask
-   * @return Reference to this for fluent chaining
    */
   void SetCropToMask(bool cropToMask);
 
@@ -411,17 +400,37 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Sets the masking mode.
    *
-   * @param[in] maskingMode The masking mode to use
-   * @return Reference to this for fluent chaining
+   * @param[in] maskingPolicy The masking mode to use
    */
-  void SetMaskingMode(Image::MaskingType maskingMode);
+  void SetMaskingPolicy(Image::MaskingPolicy maskingPolicy);
 
   /**
    * @brief Gets the masking mode.
    *
    * @return The current masking mode
    */
-  Image::MaskingType GetMaskingMode() const;
+  Image::MaskingPolicy GetMaskingPolicy() const;
+
+  /**
+   * @brief Sets when the alpha mask is applied.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @param[in] maskingPolicy The masking policy to set
+   * @see SetMaskingPolicy()
+   */
+  void SetMaskingMode(Image::MaskingPolicy maskingPolicy);
+
+  /**
+   * @brief Gets when the alpha mask is applied.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @see GetMaskingPolicy()
+   */
+  Image::MaskingPolicy GetMaskingMode() const;
 
 public: // Loading Behavior
   /**
@@ -431,7 +440,6 @@ public: // Loading Behavior
    * or deferred until the view is attached to the scene (ATTACHED).
    *
    * @param[in] loadPolicy The load policy to use
-   * @return Reference to this for fluent chaining
    */
   void SetLoadPolicy(Image::LoadPolicy loadPolicy);
 
@@ -448,7 +456,6 @@ public: // Loading Behavior
    * Controls when the image texture is released from memory.
    *
    * @param[in] releasePolicy The release policy to use
-   * @return Reference to this for fluent chaining
    */
   void SetReleasePolicy(Image::ReleasePolicy releasePolicy);
 
@@ -463,7 +470,6 @@ public: // Loading Behavior
    * @brief Sets whether the image is loaded synchronously.
    *
    * @param[in] synchronous True to load the image on the main thread synchronously
-   * @return Reference to this for fluent chaining
    */
   void SetSynchronousLoading(bool synchronous);
 
@@ -475,20 +481,31 @@ public: // Loading Behavior
   bool IsSynchronousLoading() const;
 
   /**
-   * @brief Sets whether fast-track uploading is enabled.
+   * @brief Sets whether the loaded image is uploaded straight to the render thread.
    *
-   * When enabled, the image is uploaded to the GPU on a background thread
-   * to reduce main-thread stalls.
+   * Normally a decoded image travels back through the event thread before it is uploaded,
+   * so it cannot appear while that thread is busy. With this enabled the loading thread
+   * hands the image to the render thread directly, and it is drawn as soon as it is ready.
    *
-   * @param[in] fastTrack True to enable fast-track uploading
-   * @return Reference to this for fluent chaining
+   * The shortcut costs the steps it skips, so it is off by default:
+   *  - the texture is not cached, and is uploaded again for every visual that asks for it;
+   *  - its size is not known until the upload finishes, so a layout that depends on the
+   *    image's natural size settles late;
+   *  - the image cannot be swapped seamlessly for another.
+   *
+   * @param[in] fastTrack True to upload straight to the render thread
+   * @note The request is dropped, without failing, whenever the shortcut cannot be taken:
+   *       when an alpha mask, a custom shader, synchronous loading or
+   *       SetImageLoadWithViewSize() is in use, when the load policy is not
+   *       Image::LoadPolicy::ATTACHED or the release policy is not
+   *       Image::ReleasePolicy::DETACHED, or when the url is not a local or remote image.
    */
   void SetFastTrackUpload(bool fastTrack);
 
   /**
-   * @brief Gets whether fast-track uploading is enabled.
+   * @brief Gets whether the loaded image is uploaded straight to the render thread.
    *
-   * @return True if fast-track uploading is enabled
+   * @return True if the upload skips the event thread
    */
   bool IsFastTrackUploadEnabled() const;
 
@@ -496,7 +513,6 @@ public: // Loading Behavior
    * @brief Sets whether EXIF orientation metadata is applied automatically.
    *
    * @param[in] orientationCorrection True to apply orientation correction
-   * @return Reference to this for fluent chaining
    */
   void SetOrientationCorrection(bool orientationCorrection);
 
@@ -509,37 +525,43 @@ public: // Loading Behavior
 
 public: // N-Patch Border
   /**
-   * @brief Sets the N-patch border insets.
+   * @brief Sets which part of the image is a fixed frame that does not stretch.
    *
-   * The border is specified as (left, top, right, bottom) pixel values.
-   * Setting a non-zero border activates N-patch rendering.
+   * Each value is a distance measured inward from its own edge of the source image, in
+   * source pixels. What lies outside them keeps its size, while the region they enclose is
+   * stretched to fill the view. Giving an ordinary image a non-zero border makes it behave
+   * as an n-patch image.
    *
-   * @param[in] border The border insets as (left, top, right, bottom)
-   * @return Reference to this for fluent chaining
+   * @param[in] border The frame widths as start, end, top and bottom distances
+   * @note The values are rounded to whole source pixels, since they select which columns
+   *       and rows of the image stretch.
+   * @see SetNPatchBorderOnly()
    */
-  void SetNPatchBorder(const Vector4& border);
+  void SetNPatchBorder(const Dali::Insets& border);
 
   /**
-   * @brief Gets the N-patch border insets.
+   * @brief Gets the N-patch border.
    *
-   * @return The current border as (left, top, right, bottom)
+   * @return The width of the fixed frame at each edge, in source image pixels
    */
-  Vector4 GetNPatchBorder() const;
+  Dali::Insets GetNPatchBorder() const;
 
   /**
-   * @brief Sets whether only the N-patch border regions are rendered.
+   * @brief Sets whether to draw only the border regions.
    *
-   * When enabled, the center region of the N-patch is not rendered.
+   * When enabled, the region inside the border is not drawn at all, leaving a hollow frame
+   * that whatever sits behind shows through — it is not filled with a colour. The default is
+   * false, which draws the whole image with the inside stretched.
    *
-   * @param[in] borderOnly True to render only the border regions
-   * @return Reference to this for fluent chaining
+   * @param[in] borderOnly True to draw only the border regions
+   * @see SetNPatchBorder()
    */
   void SetNPatchBorderOnly(bool borderOnly);
 
   /**
-   * @brief Gets whether border-only rendering is enabled.
+   * @brief Gets whether only the border regions are drawn.
    *
-   * @return True if only the border regions are rendered
+   * @return True if the region inside the border is left undrawn
    */
   bool IsNPatchBorderOnly() const;
 

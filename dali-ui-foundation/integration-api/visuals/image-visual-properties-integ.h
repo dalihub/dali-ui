@@ -91,7 +91,7 @@ enum
   /**
    * @brief Filtering options, used when resizing images to sample original pixels.
    * @details Name "samplingMode", type Dali::SamplingMode (Property::INTEGER) or Property::STRING.
-   * @note Optional. If not supplied, default is SamplingMode::BOX.
+   * @note Optional. If not supplied, default is SamplingMode::BOX_THEN_LINEAR.
    * @note For Normal Quad images only.
    * @see Dali::SamplingMode
    */
@@ -166,12 +166,13 @@ enum
   ORIENTATION_CORRECTION,
 
   /**
-   * @brief Whether to synchronize image texture size to visual size.
-   * @details Name "synchronousSizing", type Property::BOOLEAN.
-   * If this property is true, ImageVisual ignores mDesiredSize.
-   * @note Used by the ImageVisual. The default is false.
+   * @brief Whether the image is loaded at the size of the View it is drawn in.
+   * @details Name "imageLoadWithViewSize", type Property::BOOLEAN.
+   * If this property is true, the desired width and height are ignored and the image is
+   * loaded at the View's size, so it is resampled whenever that size changes.
+   * @note The default is false.
    */
-  SYNCHRONOUS_SIZING,
+  IMAGE_LOAD_WITH_VIEW_SIZE,
 
   // For Image only.
 
@@ -219,7 +220,8 @@ enum
    * larger.
    *
    * @details Name "auxiliaryImage", Type Property::STRING, URL of the image.
-   * @note Default true
+   * @note Optional. The auxiliary image is stretched evenly over the visual, unlike the
+   * n-patch beneath it, and is hidden until AUXILIARY_IMAGE_ALPHA is raised above 0.
    */
   AUXILIARY_IMAGE,
 
@@ -253,12 +255,12 @@ enum
 
   /**
    * @brief The scale factor to apply to the content image before masking
-   * @details Name "maskContentScale", type Property::FLOAT, The scale factor
+   * @details Name "contentScaleForMasking", type Property::FLOAT, The scale factor
    * to apply to the content before masking. Note, scaled images are cropped to
    * the same size as the alpha mask.
    * @note Optional.
    */
-  MASK_CONTENT_SCALE,
+  CONTENT_SCALE_FOR_MASKING,
 
   /**
    * @brief Whether to crop image to mask or scale mask to fit image
@@ -271,14 +273,14 @@ enum
 
   /**
    * @brief Whether to apply mask in loading time or rendering time.
-   * @details Name "maskingType", type Ui::Image::MaskingType (Property::INTEGER).
-   * In general, Ui::Image::MASKING_ON_LOADING is the default behavior.
-   * However, if the visual uses an external texture, only MASKING_ON_RENDERING is possible.
-   * So we change its value to MASKING_ON_RENDERING even if the visual sets the MASKING_TYPE as MASKING_ON_LOADING when
+   * @details Name "maskingPolicy", type Ui::Image::MaskingPolicy (Property::INTEGER).
+   * In general, Ui::Image::MaskingPolicy::ON_LOADING is the default behavior.
+   * However, if the visual uses an external texture, only ON_RENDERING is possible.
+   * So we change its value to ON_RENDERING even if the visual sets the MASKING_POLICY as ON_LOADING when
    * it uses external texture.
-   * @note The default is Ui::Image::MASKING_ON_LOADING.
+   * @note The default is Ui::Image::MaskingPolicy::ON_LOADING.
    */
-  MASKING_TYPE,
+  MASKING_POLICY,
 
   // For both AnimatedImage and LottieAnimation
 
@@ -294,7 +296,7 @@ enum
    *
    * Animation will play between the values specified. The array can have two integer values.
    * Or it can have one or two strings, which are markers. More will be ignored.
-   * Both values should be between 0 and the total frame number, otherwise they will be ignored.
+   * Both values are clamped to the last frame, which is one less than the total frame count.
    * If the range provided is not in proper order ( minimum, maximum ), it will be reordered.
    *
    * A marker has its start frame and end frame.
@@ -304,7 +306,7 @@ enum
    *
    * @details Name "playRange", Type Property::ARRAY of Property::INTEGER or Property::ARRAY of Property::STRING or
    * Property::STRING (one marker).
-   * @note Default 0 and the total frame number.
+   * @note Default 0 and the last frame.
    */
   PLAY_RANGE,
 
@@ -443,11 +445,12 @@ enum
   CURRENT_FRAME_NUMBER,
 
   /**
-   * @brief The total frame number the AnimatedImageVisual and AnimatedVectorImageVisual will use.
-   * @details Name "totalFrameNumber", Type Property::INTEGER.
+   * @brief The number of frames the AnimatedImageVisual and AnimatedVectorImageVisual has.
+   * @details Name "totalFrameCount", Type Property::INTEGER. Frame numbers run from 0 to one
+   * less than this count.
    * @note This property is read-only.
    */
-  TOTAL_FRAME_NUMBER,
+  TOTAL_FRAME_COUNT,
 
   // For LottieAnimation only
 

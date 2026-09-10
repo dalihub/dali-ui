@@ -127,16 +127,16 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {PRE_MULTIPLIED_ALPHA, Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA},
   {SYNCHRONOUS_LOADING, Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING},
   {ALPHA_MASK_URL, Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL},
-  {MASK_CONTENT_SCALE_NAME, Ui::Integration::ImageVisual::Property::MASK_CONTENT_SCALE},
+  {CONTENT_SCALE_FOR_MASKING_NAME, Ui::Integration::ImageVisual::Property::CONTENT_SCALE_FOR_MASKING},
   {CROP_TO_MASK_NAME, Ui::Integration::ImageVisual::Property::CROP_TO_MASK},
-  {MASKING_TYPE_NAME, Ui::Integration::ImageVisual::Property::MASKING_TYPE},
+  {MASKING_POLICY_NAME, Ui::Integration::ImageVisual::Property::MASKING_POLICY},
   {ENABLE_BROKEN_IMAGE, Ui::Integration::ImageVisual::Property::ENABLE_BROKEN_IMAGE},
   {LOAD_POLICY_NAME, Ui::Integration::ImageVisual::Property::LOAD_POLICY},
   {RELEASE_POLICY_NAME, Ui::Integration::ImageVisual::Property::RELEASE_POLICY},
   {FITTING_MODE, Ui::Integration::ImageVisual::Property::FITTING_MODE},
   {ORIENTATION_CORRECTION_NAME, Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION},
   {FAST_TRACK_UPLOADING_NAME, Ui::Integration::ImageVisual::Property::FAST_TRACK_UPLOADING},
-  {SYNCHRONOUS_SIZING, Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING},
+  {IMAGE_LOAD_WITH_VIEW_SIZE, Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -207,7 +207,7 @@ ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFact
   mUseFastTrackUploading(false),
   mRendererAdded(false),
   mUseBrokenImageRenderer(false),
-  mUseSynchronousSizing(false)
+  mImageLoadWithViewSize(false)
 {
   EnablePreMultipliedAlpha(mFactoryCache.GetPreMultiplyOnLoad());
 
@@ -404,7 +404,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case Ui::Integration::ImageVisual::Property::MASK_CONTENT_SCALE:
+    case Ui::Integration::ImageVisual::Property::CONTENT_SCALE_FOR_MASKING:
     {
       float scale = 1.0f;
       if(value.Get(scale))
@@ -426,10 +426,10 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case Ui::Integration::ImageVisual::Property::MASKING_TYPE:
+    case Ui::Integration::ImageVisual::Property::MASKING_POLICY:
     {
-      int maskingType = 0;
-      if(value.Get(maskingType))
+      int maskingPolicy = 0;
+      if(value.Get(maskingPolicy))
       {
         AllocateMaskData();
 
@@ -447,13 +447,13 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
         if(externalTextureUsed)
         {
           // For external textures, only gpu masking is available.
-          // Therefore, MASKING_TYPE is set to MASKING_ON_RENDERING forcelly.
+          // Therefore, MASKING_POLICY is set to ON_RENDERING forcelly.
           mMaskingData->mPreappliedMasking = false;
         }
         else
         {
-          mMaskingData->mPreappliedMasking = (Ui::Image::MaskingType(maskingType) ==
-                                              Ui::Image::MaskingType::MASKING_ON_LOADING);
+          mMaskingData->mPreappliedMasking = (Ui::Image::MaskingPolicy(maskingPolicy) ==
+                                              Ui::Image::MaskingPolicy::ON_LOADING);
         }
       }
       break;
@@ -513,12 +513,12 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING:
+    case Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE:
     {
-      bool useSynchronousSizing = false;
-      if(value.Get(useSynchronousSizing))
+      bool imageLoadWithViewSize = false;
+      if(value.Get(imageLoadWithViewSize))
       {
-        mUseSynchronousSizing = useSynchronousSizing;
+        mImageLoadWithViewSize = imageLoadWithViewSize;
       }
       break;
     }
@@ -539,7 +539,7 @@ void ImageVisual::AllocateMaskData()
 
 void ImageVisual::GetNaturalSize(Vector2& naturalSize)
 {
-  if(mUseSynchronousSizing && (mLastRequiredSize.GetWidth() > 0 && mLastRequiredSize.GetHeight() > 0))
+  if(mImageLoadWithViewSize && (mLastRequiredSize.GetWidth() > 0 && mLastRequiredSize.GetHeight() > 0))
   {
     if(mImpl->mRenderer)
     {
@@ -736,7 +736,7 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
        mReleasePolicy == Ui::Image::ReleasePolicy::DETACHED &&
        forceReload == TextureManager::ReloadPolicy::CACHED &&
        (mImageUrl.GetProtocolType() == VisualUrl::LOCAL || mImageUrl.GetProtocolType() == VisualUrl::REMOTE) &&
-       !synchronousLoading && !mUseSynchronousSizing && !IsUsingCustomShader() &&
+       !synchronousLoading && !mImageLoadWithViewSize && !IsUsingCustomShader() &&
        !(mMaskingData && mMaskingData->mAlphaMaskUrl.IsValid()))
     {
       return true;
@@ -751,7 +751,7 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
         (!(mImageUrl.GetProtocolType() == VisualUrl::LOCAL || mImageUrl.GetProtocolType() == VisualUrl::REMOTE))
           ? "/ url is not image"
           : "",
-        (synchronousLoading) ? "/ synchronousLoading" : "", (mUseSynchronousSizing) ? "/ useSynchronousSizing " : "",
+        (synchronousLoading) ? "/ synchronousLoading" : "", (mImageLoadWithViewSize) ? "/ imageLoadWithViewSize " : "",
         (IsUsingCustomShader()) ? "/ use customs shader" : "",
         (mMaskingData && mMaskingData->mAlphaMaskUrl.IsValid()) ? "/ use masking url" : "");
     }
@@ -844,7 +844,7 @@ void ImageVisual::InitializeRenderer()
   {
     if(mTextureId == TextureManager::INVALID_TEXTURE_ID)
     {
-      LoadTexture(mTextures, mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize,
+      LoadTexture(mTextures, mImageLoadWithViewSize ? mLastRequiredSize : mDesiredSize,
                   TextureManager::ReloadPolicy::CACHED);
     }
     else
@@ -966,7 +966,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, sync);
   if(mImageUrl.IsValid())
   {
-    Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
+    Dali::ImageDimensions size = mImageLoadWithViewSize ? mLastRequiredSize : mDesiredSize;
 
     map.Insert(Ui::Integration::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
     map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, size.GetWidth());
@@ -994,11 +994,11 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
   if(mMaskingData != NULL)
   {
     map.Insert(Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL, ToPropertyValue(mMaskingData->mAlphaMaskUrl.GetUrl()));
-    map.Insert(Ui::Integration::ImageVisual::Property::MASK_CONTENT_SCALE, mMaskingData->mContentScaleFactor);
+    map.Insert(Ui::Integration::ImageVisual::Property::CONTENT_SCALE_FOR_MASKING, mMaskingData->mContentScaleFactor);
     map.Insert(Ui::Integration::ImageVisual::Property::CROP_TO_MASK, mMaskingData->mCropToMask);
-    map.Insert(Ui::Integration::ImageVisual::Property::MASKING_TYPE, mMaskingData->mPreappliedMasking
-                                                                       ? Ui::Image::MaskingType::MASKING_ON_LOADING
-                                                                       : Ui::Image::MaskingType::MASKING_ON_RENDERING);
+    map.Insert(Ui::Integration::ImageVisual::Property::MASKING_POLICY, mMaskingData->mPreappliedMasking
+                                                                         ? Ui::Image::MaskingPolicy::ON_LOADING
+                                                                         : Ui::Image::MaskingPolicy::ON_RENDERING);
   }
 
   map.Insert(Ui::Integration::ImageVisual::Property::LOAD_POLICY, mLoadPolicy);
@@ -1008,7 +1008,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::Integration::ImageVisual::Property::ENABLE_BROKEN_IMAGE, mBrokenImageEnabled);
 
   map.Insert(Ui::Integration::ImageVisual::Property::FAST_TRACK_UPLOADING, mUseFastTrackUploading);
-  map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING, mUseSynchronousSizing);
+  map.Insert(Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, mImageLoadWithViewSize);
 }
 
 void ImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -1017,7 +1017,7 @@ void ImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
   map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
   if(mImageUrl.IsValid())
   {
-    Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
+    Dali::ImageDimensions size = mImageLoadWithViewSize ? mLastRequiredSize : mDesiredSize;
     map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, size.GetWidth());
     map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, size.GetHeight());
   }
@@ -1068,7 +1068,7 @@ void ImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::P
       mTextures.Reset();
       UpdateNativeTextureInfomation(Dali::TextureSet());
 
-      Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
+      Dali::ImageDimensions size = mImageLoadWithViewSize ? mLastRequiredSize : mDesiredSize;
       LoadTexture(mTextures, size, TextureManager::ReloadPolicy::FORCED);
       break;
     }
@@ -1082,9 +1082,9 @@ void ImageVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
 
 void ImageVisual::OnApplyFittingMode(const Vector2& controlSize, const Insets& padding, float effectiveScale)
 {
-  const bool hasSynchronousSize = mUseSynchronousSizing &&
-                                  mLastRequiredSize.GetWidth() > 0 &&
-                                  mLastRequiredSize.GetHeight() > 0;
+  const bool hasViewSize = mImageLoadWithViewSize &&
+                           mLastRequiredSize.GetWidth() > 0 &&
+                           mLastRequiredSize.GetHeight() > 0;
   const bool hasDesiredSize = mDesiredSize.GetWidth() > 0 &&
                               mDesiredSize.GetHeight() > 0;
 
@@ -1094,7 +1094,7 @@ void ImageVisual::OnApplyFittingMode(const Vector2& controlSize, const Insets& p
   // mode again with the decoded texture size.
   if(mFittingMode != Ui::Image::FittingMode::FILL &&
      GetResourceStatus() == Ui::Visual::ResourceStatus::PREPARING &&
-     !hasSynchronousSize &&
+     !hasViewSize &&
      !hasDesiredSize)
   {
     Visual::Base::OnApplyFittingMode(controlSize, padding, effectiveScale);
@@ -1111,7 +1111,7 @@ void ImageVisual::OnSetTransform()
     mImpl->SetTransformUniforms(mImpl->mRenderer);
   }
 
-  if(mUseSynchronousSizing)
+  if(mImageLoadWithViewSize)
   {
     // Get current visual size
     Vector2  size                    = mImpl->GetTransformVisualSize(mImpl->mControlSize);

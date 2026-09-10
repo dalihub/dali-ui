@@ -271,7 +271,7 @@ private:
 
   /**
    * @brief Check whether the mask texture is loaded or not.
-   * If MaskingType is MASKING_ON_LOADING and mask texture is failed to load, update shader.
+   * If MaskingPolicy is ON_LOADING and mask texture is failed to load, update shader.
    * @note Should call at SetTexturesToRenderer() only.
    * @return true if we need to update shader. false otherwise.
    */
@@ -370,7 +370,7 @@ private:
   bool mBrokenImageEnabled : 1;     ///< True if broken image is enabled.
   bool mRendererAdded : 1;          ///< True if renderer added into actor.
   bool mUseBrokenImageRenderer : 1; ///< True if renderer changed as broken image.
-  bool mUseSynchronousSizing : 1;   ///< True if we need to synchronize image texture size to visual size, otherwise use
+  bool mImageLoadWithViewSize : 1;  ///< True if we need to synchronize image texture size to visual size, otherwise use
                                     ///< mDesiredSize.
 };
 

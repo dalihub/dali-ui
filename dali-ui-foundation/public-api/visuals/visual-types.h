@@ -40,13 +40,13 @@ enum class VisualType
 {
   INVALID = -1, ///< Not a valid visual type.
 
-  BORDER = 0,            ///< Renders a solid color as a border inside the visual's quad. @see BorderVisual
-  COLOR,                 ///< Renders a solid color over the visual's quad. @see ColorVisual
-  GRADIENT,              ///< Renders a smooth transition of colors over the visual's quad. @see GradientVisual
-  TEXT,                  ///< Renders text. @see TextVisual
-  IMAGE,                 ///< Renders an image. @see ImageVisual
-  ANIMATED_IMAGE,        ///< Renders an animated image or a sequence of images. @see AnimatedImageVisual
-  ANIMATED_VECTOR_IMAGE, ///< Renders an animated vector (Lottie) image. @see LottieAnimationVisual
+  BORDER = 0,       ///< Renders a solid color as a border inside the visual's quad. @see BorderVisual
+  COLOR,            ///< Renders a solid color over the visual's quad. @see ColorVisual
+  GRADIENT,         ///< Renders a smooth transition of colors over the visual's quad. @see GradientVisual
+  TEXT,             ///< Renders text. @see TextVisual
+  IMAGE,            ///< Renders an image. @see ImageVisual
+  ANIMATED_IMAGE,   ///< Renders an animated image or a sequence of images. @see AnimatedImageVisual
+  LOTTIE_ANIMATION, ///< Renders a Lottie animation. @see LottieAnimationVisual
 };
 
 /**

@@ -260,7 +260,7 @@ private:
   /**
    * @brief Load the texture.
    * @param[out] textures resulting texture set from the image loading.
-   * @param[in] size if mUseSynchronousSizing is true this is the size of visual, else it is mDesiredSize
+   * @param[in] size if mImageLoadWithViewSize is true this is the size of visual, else it is mDesiredSize
    * @param[in] forceReload flag determines if the texture should be reloaded from its source or use the cached texture.
    */
   void LoadTexture(TextureSet& textures, const Dali::ImageDimensions& size, TextureManager::ReloadPolicy forceReload);
@@ -308,7 +308,7 @@ private:
 
   /**
    * @brief Check whether the mask texture is loaded or not.
-   * If MaskingType is MASKING_ON_LOADING and mask texture is failed to load, update shader.
+   * If MaskingPolicy is ON_LOADING and mask texture is failed to load, update shader.
    */
   void CheckMaskTexture();
 
@@ -386,7 +386,7 @@ private:
   bool mUseFastTrackUploading : 1;  ///< True if we use fast tack feature.
   bool mRendererAdded : 1;          ///< True if renderer added into actor.
   bool mUseBrokenImageRenderer : 1; ///< True if renderer changed as broken image.
-  bool mUseSynchronousSizing : 1;   ///< True if we need to synchronize image texture size to visual size, otherwise use
+  bool mImageLoadWithViewSize : 1;  ///< True if we need to synchronize image texture size to visual size, otherwise use
                                     ///< mDesiredSize.
 };
 

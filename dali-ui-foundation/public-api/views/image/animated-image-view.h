@@ -86,7 +86,7 @@ public:
       IMAGE_LOAD_WITH_VIEW_SIZE = AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
       ALPHA_MASK_URL            = AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
       CROP_TO_MASK              = AnimatedImageViewPropertyIndex::CROP_TO_MASK,
-      MASKING_MODE              = AnimatedImageViewPropertyIndex::MASKING_MODE,
+      MASKING_POLICY            = AnimatedImageViewPropertyIndex::MASKING_POLICY,
       PLACEHOLDER_IMAGE         = AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
       PIXEL_AREA                = AnimatedImageViewPropertyIndex::PIXEL_AREA,
     };
@@ -126,7 +126,6 @@ public: // Image
    * @brief Sets the URL of the animated image resource to display.
    *
    * @param[in] url The URL of the image resource
-   * @return Reference to this for fluent chaining
    */
   void SetResourceUrl(const Dali::String& url);
 
@@ -151,22 +150,61 @@ public: // Image
    * The images are played in sequence as animation frames.
    *
    * @param[in] urls Array of image URLs
-   * @return Reference to this for fluent chaining
    */
-  void SetResourceUrls(const Dali::Vector<Dali::String>& urls);
+  void SetResourceUrlList(const Dali::Vector<Dali::String>& urls);
+
+  /**
+   * @brief Sets an array of image URLs for frame-by-frame animation.
+   *
+   * Setting this overrides any single URL set via SetResourceUrl().
+   * The images are played in sequence as animation frames.
+   *
+   * @param[in] urls Array of image URLs
+   */
+  void SetResourceUrlList(std::initializer_list<Dali::String> urls)
+  {
+    Dali::Vector<Dali::String> list;
+    list.Reserve(urls.size());
+
+    for(auto&& url : urls)
+    {
+      list.PushBack(std::move(url));
+    }
+    SetResourceUrlList(list);
+  }
 
   /**
    * @brief Gets the array of image URLs.
    *
    * @return The current array of image URLs, or empty if not set
    */
-  const Dali::Vector<Dali::String>& GetResourceUrls() const;
+  Dali::Vector<Dali::String> GetResourceUrlList() const;
+
+  /**
+   * @brief Sets an array of image URLs for frame-by-frame animation.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @param[in] urls Array of image URLs
+   * @see SetResourceUrlList()
+   */
+  void SetResourceUrls(const Dali::Vector<Dali::String>& urls);
+
+  /**
+   * @brief Gets the array of image URLs.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @see GetResourceUrlList()
+   */
+  Dali::Vector<Dali::String> GetResourceUrls() const;
 
   /**
    * @brief Sets whether the image is loaded synchronously at the current view size.
    *
    * @param[in] enabled True to enable loading image with view size
-   * @return Reference to this for fluent chaining
    */
   void SetImageLoadWithViewSize(bool enabled);
 
@@ -179,23 +217,25 @@ public: // Image
 
 public: // Playback Control
   /**
-   * @brief Starts or resumes playback of the animation.
-   *
-   * @return Reference to this for fluent chaining
+   * @brief Starts the animation, or resumes it if it was paused.
    */
   void Play();
 
   /**
-   * @brief Pauses playback of the animation.
+   * @brief Pauses the animation on the frame being shown.
    *
-   * @return Reference to this for fluent chaining
+   * The loop it is on is kept, so Play() carries on from here rather than starting over.
    */
   void Pause();
 
   /**
-   * @brief Stops playback of the animation and resets to the first frame.
+   * @brief Stops the animation and returns it to its first loop.
    *
-   * @return Reference to this for fluent chaining
+   * Which frame is left on screen is decided by SetStopBehavior(): by default it is the one
+   * being shown, so a stopped animation does not necessarily look different from a paused
+   * one.
+   *
+   * @see SetStopBehavior()
    */
   void Stop();
 
@@ -206,7 +246,6 @@ public: // Playback Control
    * will not play. A positive value specifies an exact loop count.
    *
    * @param[in] count The loop count (-1 for infinite)
-   * @return Reference to this for fluent chaining
    */
   void SetLoopCount(int count);
 
@@ -222,7 +261,6 @@ public: // Frame Control
    * @brief Jumps to the specified frame number.
    *
    * @param[in] frame The frame index to jump to
-   * @return Reference to this for fluent chaining
    */
   void JumpToFrame(int frame);
 
@@ -230,7 +268,6 @@ public: // Frame Control
    * @brief Sets the behavior of the animation when it is stopped.
    *
    * @param[in] behavior The stop behavior (CURRENT_FRAME, FIRST_FRAME, or LAST_FRAME)
-   * @return Reference to this for fluent chaining
    */
   void SetStopBehavior(AnimatedImage::StopBehavior behavior);
 
@@ -248,7 +285,6 @@ public: // Frame Control
    * The actual clamping to [0.01, 100.0] is handled by the underlying animation renderer.
    *
    * @param[in] factor The speed multiplier (default: 1.0)
-   * @return Reference to this for fluent chaining
    */
   void SetFrameSpeedFactor(float factor);
 
@@ -263,7 +299,6 @@ public: // Frame Control
    * @brief Sets the number of frames to pre-load in each batch.
    *
    * @param[in] size The batch size (default: 1)
-   * @return Reference to this for fluent chaining
    */
   void SetBatchSize(int size);
 
@@ -278,7 +313,6 @@ public: // Frame Control
    * @brief Sets the number of frames to keep in cache.
    *
    * @param[in] size The cache size (default: 1)
-   * @return Reference to this for fluent chaining
    */
   void SetCacheSize(int size);
 
@@ -295,7 +329,6 @@ public: // Frame Control
    * Overrides the frame delay embedded in the image file.
    *
    * @param[in] milliseconds The delay between frames in milliseconds
-   * @return Reference to this for fluent chaining
    */
   void SetFrameDelay(int milliseconds);
 
@@ -318,12 +351,32 @@ public: // Frame Control
    *
    * @return The current frame index
    */
-  int GetCurrentFrame() const;
+  int GetCurrentFrameNumber() const;
 
   /**
    * @brief Gets the total number of frames in the animation.
    *
    * @return The total frame count
+   */
+  int GetTotalFrameCount() const;
+
+  /**
+   * @brief Gets the number of the frame being shown.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @see GetCurrentFrameNumber()
+   */
+  int GetCurrentFrame() const;
+
+  /**
+   * @brief Gets how many frames the animation has.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @see GetTotalFrameCount()
    */
   int GetTotalFrame() const;
 
@@ -332,7 +385,6 @@ public: // Visual Appearance
    * @brief Sets the color applied to the image.
    *
    * @param[in] color The color to apply
-   * @return Reference to this for fluent chaining
    */
   void SetImageColor(const UiColor& color);
 
@@ -349,7 +401,6 @@ public: // Visual Appearance
    * The default fitting mode is Ui::Image::FittingMode::FILL (stretch to fill).
    *
    * @param[in] fittingMode The fitting mode to use
-   * @return Reference to this for fluent chaining
    */
   void SetFittingMode(Ui::Image::FittingMode fittingMode);
 
@@ -364,7 +415,6 @@ public: // Visual Appearance
    * @brief Sets the sampling mode used when scaling the image.
    *
    * @param[in] samplingMode The sampling mode to use
-   * @return Reference to this for fluent chaining
    */
   void SetSamplingMode(Ui::Image::SamplingMode samplingMode);
 
@@ -379,7 +429,6 @@ public: // Visual Appearance
    * @brief Sets whether the image uses pre-multiplied alpha.
    *
    * @param[in] preMultiplied True if the image has pre-multiplied alpha
-   * @return Reference to this for fluent chaining
    */
   void SetPreMultipliedAlpha(bool preMultiplied);
 
@@ -405,7 +454,6 @@ public: // Size & Loading Behavior
    * @brief Sets the desired image width used as a hint for the image loader.
    *
    * @param[in] width The desired width in pixels (0 to use natural size)
-   * @return Reference to this for fluent chaining
    */
   void SetDesiredWidth(int width);
 
@@ -420,7 +468,6 @@ public: // Size & Loading Behavior
    * @brief Sets the desired image height used as a hint for the image loader.
    *
    * @param[in] height The desired height in pixels (0 to use natural size)
-   * @return Reference to this for fluent chaining
    */
   void SetDesiredHeight(int height);
 
@@ -435,7 +482,6 @@ public: // Size & Loading Behavior
    * @brief Sets the load policy for the image resource.
    *
    * @param[in] loadPolicy The load policy to use
-   * @return Reference to this for fluent chaining
    */
   void SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
 
@@ -450,7 +496,6 @@ public: // Size & Loading Behavior
    * @brief Sets the release policy for the image resource.
    *
    * @param[in] releasePolicy The release policy to use
-   * @return Reference to this for fluent chaining
    */
   void SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
 
@@ -465,7 +510,6 @@ public: // Size & Loading Behavior
    * @brief Sets whether the image is loaded synchronously.
    *
    * @param[in] synchronous True to load the image on the main thread synchronously
-   * @return Reference to this for fluent chaining
    */
   void SetSynchronousLoading(bool synchronous);
 
@@ -481,7 +525,6 @@ public: // Advanced Rendering & Masking
    * @brief Sets the URL of an alpha mask image.
    *
    * @param[in] maskUrl The URL of the alpha mask image
-   * @return Reference to this for fluent chaining
    */
   void SetAlphaMaskUrl(const Dali::String& maskUrl);
 
@@ -496,7 +539,6 @@ public: // Advanced Rendering & Masking
    * @brief Sets whether the image should be cropped to the mask bounds.
    *
    * @param[in] cropToMask True to crop the image to the mask
-   * @return Reference to this for fluent chaining
    */
   void SetCropToMask(bool cropToMask);
 
@@ -510,23 +552,42 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Sets the masking mode.
    *
-   * @param[in] maskingMode The masking mode to use
-   * @return Reference to this for fluent chaining
+   * @param[in] maskingPolicy The masking mode to use
    */
-  void SetMaskingMode(Ui::Image::MaskingType maskingMode);
+  void SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy);
 
   /**
    * @brief Gets the masking mode.
    *
    * @return The current masking mode
    */
-  Ui::Image::MaskingType GetMaskingMode() const;
+  Ui::Image::MaskingPolicy GetMaskingPolicy() const;
+
+  /**
+   * @brief Sets when the alpha mask is applied.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @param[in] maskingPolicy The masking policy to set
+   * @see SetMaskingPolicy()
+   */
+  void SetMaskingMode(Ui::Image::MaskingPolicy maskingPolicy);
+
+  /**
+   * @brief Gets when the alpha mask is applied.
+   *
+   * TODO: remove. Kept only so applications written against the old name keep
+   * compiling.
+   *
+   * @see GetMaskingPolicy()
+   */
+  Ui::Image::MaskingPolicy GetMaskingMode() const;
 
   /**
    * @brief Sets the URL of a placeholder image shown while loading.
    *
    * @param[in] url The URL of the placeholder image
-   * @return Reference to this for fluent chaining
    */
   void SetPlaceholderUrl(const Dali::String& url);
 
@@ -544,7 +605,6 @@ public: // Advanced Rendering & Masking
    * where each component is in the range [0, 1].
    *
    * @param[in] pixelArea The normalized sub-region of the image to display
-   * @return Reference to this for fluent chaining
    */
   void SetPixelArea(const Vector4& pixelArea);
 

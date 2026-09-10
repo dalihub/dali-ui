@@ -133,10 +133,10 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The masking mode.
-     * @details Name "maskingMode", type Ui::Image::MaskingType (Property::INTEGER).
-     * @note See also: ImageView::SetMaskingMode(), ImageView::GetMaskingMode().
+     * @details Name "maskingPolicy", type Ui::Image::MaskingPolicy (Property::INTEGER).
+     * @note See also: ImageView::SetMaskingPolicy(), ImageView::GetMaskingPolicy().
      */
-    MASKING_MODE,
+    MASKING_POLICY,
 
     ///////////////////////////////////////////////////////////////////////////////
     // Loading behavior
@@ -203,7 +203,7 @@ struct ImageViewPropertyIndex
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @brief The N-patch border insets as (left, top, right, bottom).
+     * @brief The widths of the fixed n-patch frame as (left, right, top, bottom).
      * @details Name "nPatchBorder", type Property::VECTOR4.
      * @note See also: ImageView::SetNPatchBorder(), ImageView::GetNPatchBorder().
      */

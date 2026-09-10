@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/object/property-array.h>
+#include <cmath>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
@@ -171,7 +172,7 @@ void ImageVisual::SetFittingMode(Image::FittingMode fittingMode)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::FITTING_MODE, fittingMode);
 }
 
-bool ImageVisual::IsOrientationCorrection() const
+bool ImageVisual::IsOrientationCorrectionEnabled() const
 {
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION);
 }
@@ -181,34 +182,43 @@ void ImageVisual::SetOrientationCorrection(bool orientationCorrection)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
 }
 
-bool ImageVisual::IsSynchronousSizing() const
+bool ImageVisual::IsImageLoadWithViewSizeEnabled() const
 {
-  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE);
 }
 
-void ImageVisual::SetSynchronousSizing(bool synchronousSizing)
+void ImageVisual::SetImageLoadWithViewSize(bool enabled)
 {
-  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING, synchronousSizing);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, enabled);
 }
 
-bool ImageVisual::IsFastTrackUploading() const
+bool ImageVisual::IsFastTrackUploadEnabled() const
 {
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::FAST_TRACK_UPLOADING);
 }
 
-void ImageVisual::SetFastTrackUploading(bool fastTrackUploading)
+void ImageVisual::SetFastTrackUpload(bool fastTrackUploading)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::FAST_TRACK_UPLOADING, fastTrackUploading);
 }
 
-Dali::Extents ImageVisual::GetNPatchBorder() const
+Dali::Insets ImageVisual::GetNPatchBorder() const
 {
-  return GetImplementation(*this).GetProperty<Dali::Extents>(Dali::Ui::Integration::ImageVisual::Property::BORDER);
+  const Dali::Extents border = GetImplementation(*this).GetProperty<Dali::Extents>(Dali::Ui::Integration::ImageVisual::Property::BORDER);
+  return Dali::Insets(static_cast<float>(border.start),
+                      static_cast<float>(border.end),
+                      static_cast<float>(border.top),
+                      static_cast<float>(border.bottom));
 }
 
-void ImageVisual::SetNPatchBorder(const Dali::Extents& border)
+void ImageVisual::SetNPatchBorder(const Dali::Insets& border)
 {
-  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::BORDER, border);
+  // The border selects whole columns and rows of the source image, so it is stored as Extents.
+  const Dali::Extents rounded(static_cast<int16_t>(std::roundf(border.start)),
+                              static_cast<int16_t>(std::roundf(border.end)),
+                              static_cast<int16_t>(std::roundf(border.top)),
+                              static_cast<int16_t>(std::roundf(border.bottom)));
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::BORDER, rounded);
 }
 
 bool ImageVisual::IsNPatchBorderOnly() const
@@ -261,14 +271,14 @@ void ImageVisual::SetAlphaMaskUrl(const Dali::String& alphaMaskUrl)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL, alphaMaskUrl);
 }
 
-float ImageVisual::GetMaskContentScale() const
+float ImageVisual::GetContentScaleForMasking() const
 {
-  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::ImageVisual::Property::MASK_CONTENT_SCALE);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::ImageVisual::Property::CONTENT_SCALE_FOR_MASKING);
 }
 
-void ImageVisual::SetMaskContentScale(float maskContentScale)
+void ImageVisual::SetContentScaleForMasking(float contentScale)
 {
-  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::MASK_CONTENT_SCALE, maskContentScale);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::CONTENT_SCALE_FOR_MASKING, contentScale);
 }
 
 bool ImageVisual::IsCropToMask() const
@@ -281,14 +291,14 @@ void ImageVisual::SetCropToMask(bool cropToMask)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::CROP_TO_MASK, cropToMask);
 }
 
-Image::MaskingType ImageVisual::GetMaskingType() const
+Image::MaskingPolicy ImageVisual::GetMaskingPolicy() const
 {
-  return GetImplementation(*this).GetProperty<Image::MaskingType>(Dali::Ui::Integration::ImageVisual::Property::MASKING_TYPE);
+  return GetImplementation(*this).GetProperty<Image::MaskingPolicy>(Dali::Ui::Integration::ImageVisual::Property::MASKING_POLICY);
 }
 
-void ImageVisual::SetMaskingType(Image::MaskingType maskingType)
+void ImageVisual::SetMaskingPolicy(Image::MaskingPolicy maskingPolicy)
 {
-  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::MASKING_TYPE, maskingType);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::MASKING_POLICY, maskingPolicy);
 }
 
 // =============================================================================

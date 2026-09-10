@@ -170,14 +170,14 @@ Ui::AnimatedImage::PlayState AnimatedImageView::GetPlayState() const
   return Ui::GetImpl(*this).GetPlayState();
 }
 
-int AnimatedImageView::GetCurrentFrame() const
+int AnimatedImageView::GetCurrentFrameNumber() const
 {
-  return Ui::GetImpl(*this).GetCurrentFrame();
+  return Ui::GetImpl(*this).GetCurrentFrameNumber();
 }
 
-int AnimatedImageView::GetTotalFrame() const
+int AnimatedImageView::GetTotalFrameCount() const
 {
-  return Ui::GetImpl(*this).GetTotalFrame();
+  return Ui::GetImpl(*this).GetTotalFrameCount();
 }
 
 Vector3 AnimatedImageView::GetNaturalSize() const
@@ -295,14 +295,14 @@ bool AnimatedImageView::IsCropToMask() const
   return Ui::GetImpl(*this).IsCropToMask();
 }
 
-void AnimatedImageView::SetMaskingMode(Ui::Image::MaskingType maskingMode)
+void AnimatedImageView::SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy)
 {
-  Ui::GetImpl(*this).SetMaskingMode(maskingMode);
+  Ui::GetImpl(*this).SetMaskingPolicy(maskingPolicy);
 }
 
-Ui::Image::MaskingType AnimatedImageView::GetMaskingMode() const
+Ui::Image::MaskingPolicy AnimatedImageView::GetMaskingPolicy() const
 {
-  return Ui::GetImpl(*this).GetMaskingMode();
+  return Ui::GetImpl(*this).GetMaskingPolicy();
 }
 
 void AnimatedImageView::SetPlaceholderUrl(const Dali::String& url)
@@ -315,14 +315,14 @@ Dali::String AnimatedImageView::GetPlaceholderUrl() const
   return Ui::GetImpl(*this).GetPlaceholderUrl();
 }
 
-void AnimatedImageView::SetResourceUrls(const Dali::Vector<Dali::String>& urls)
+void AnimatedImageView::SetResourceUrlList(const Dali::Vector<Dali::String>& urls)
 {
-  Ui::GetImpl(*this).SetResourceUrls(urls);
+  Ui::GetImpl(*this).SetResourceUrlList(urls);
 }
 
-const Dali::Vector<Dali::String>& AnimatedImageView::GetResourceUrls() const
+Dali::Vector<Dali::String> AnimatedImageView::GetResourceUrlList() const
 {
-  return Ui::GetImpl(*this).GetResourceUrls();
+  return Ui::GetImpl(*this).GetResourceUrlList();
 }
 
 void AnimatedImageView::SetPixelArea(const Vector4& pixelArea)
@@ -360,5 +360,38 @@ AnimatedImageView::AnimatedImageView(Dali::Internal::CustomActor* internal)
 {
   VerifyCustomActorPointer<Integration::AnimatedImageViewImpl>(internal);
 }
+
+// TODO: remove these together with the old names they keep alive.
+
+void AnimatedImageView::SetResourceUrls(const Dali::Vector<Dali::String>& urls)
+{
+  SetResourceUrlList(urls);
+}
+
+Dali::Vector<Dali::String> AnimatedImageView::GetResourceUrls() const
+{
+  return GetResourceUrlList();
+}
+
+int AnimatedImageView::GetCurrentFrame() const
+{
+  return GetCurrentFrameNumber();
+}
+
+int AnimatedImageView::GetTotalFrame() const
+{
+  return GetTotalFrameCount();
+}
+
+void AnimatedImageView::SetMaskingMode(Ui::Image::MaskingPolicy maskingPolicy)
+{
+  SetMaskingPolicy(maskingPolicy);
+}
+
+Ui::Image::MaskingPolicy AnimatedImageView::GetMaskingMode() const
+{
+  return GetMaskingPolicy();
+}
+
 } //namespace Ui
 } //namespace DALI_NAMESPACE

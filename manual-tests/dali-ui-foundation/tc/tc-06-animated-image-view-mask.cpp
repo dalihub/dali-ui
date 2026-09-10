@@ -42,7 +42,7 @@ constexpr uint32_t C_BG          = 0x1A1A1A;
  * @brief Verifies AnimatedImageView alpha masking:
  *   SetAlphaMaskUrl / GetAlphaMaskUrl
  *   SetCropToMask / IsCropToMask
- *   SetMaskingMode / GetMaskingMode
+ *   SetMaskingPolicy / GetMaskingPolicy
  *
  * Steps:
  *   [AlphaMask verification]:
@@ -64,7 +64,7 @@ class TcAnimatedImageViewMask : public ManualTest::TestCase, public ConnectionTr
 public:
   Dali::String GetName() const override
   {
-    return "06. AnimatedImageView: AlphaMask / CropToMask / MaskingMode";
+    return "06. AnimatedImageView: AlphaMask / CropToMask / MaskingPolicy";
   }
 
   Dali::String GetDescription() const override
@@ -80,7 +80,7 @@ public:
 
     mView.Play();
 
-    mStatusLabel = MakeStatusLabel("Mask: none | CropToMask: OFF | MaskingMode: ON_RENDERING");
+    mStatusLabel = MakeStatusLabel("Mask: none | CropToMask: OFF | MaskingPolicy: ON_RENDERING");
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
@@ -105,8 +105,8 @@ public:
       MakeButton("CropToMask\nOFF", [this] { mView.SetCropToMask(false); UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Masking:\nON_RENDERING", [this] { mView.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING); UpdateLabel(); }),
-      MakeButton("Masking:\nON_LOADING",   [this] { mView.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);   UpdateLabel(); }),
+      MakeButton("Masking:\nON_RENDERING", [this] { mView.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_RENDERING); UpdateLabel(); }),
+      MakeButton("Masking:\nON_LOADING",   [this] { mView.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_LOADING);   UpdateLabel(); }),
     }));
 
     contentArea.Add(content);
@@ -121,8 +121,8 @@ private:
 
   void UpdateLabel()
   {
-    auto mode = mView.GetMaskingMode();
-    Dali::String modeStr = (mode == Ui::Image::MaskingType::MASKING_ON_LOADING) ? "ON_LOADING" : "ON_RENDERING";
+    auto mode = mView.GetMaskingPolicy();
+    Dali::String modeStr = (mode == Ui::Image::MaskingPolicy::ON_LOADING) ? "ON_LOADING" : "ON_RENDERING";
     // Print GetAlphaMaskUrl()'s return value, not a local copy of the button
     // name: a local string still reads "circle" with SetAlphaMaskUrl deleted,
     // so it could never verify the getter.
@@ -130,7 +130,7 @@ private:
     mStatusLabel.SetText(
       Dali::String("Mask: ") + (maskUrl.Empty() ? Dali::String("none") : maskUrl) +
       Dali::String("\nCropToMask: ") + Dali::String(mView.IsCropToMask() ? "ON" : "OFF") +
-      Dali::String(" | MaskingMode: ") + modeStr);
+      Dali::String(" | MaskingPolicy: ") + modeStr);
   }
 
   View MakeCentered(View child)

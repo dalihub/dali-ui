@@ -477,7 +477,7 @@ void VectorAnimationTask::SetPlayRange(const Property::Array& playRange)
     return;
   }
 
-  // Make sure the range specified is between 0 and the total frame number
+  // Make sure the range specified is between 0 and the last frame
   startFrame = std::min(startFrame, mTotalFrame - 1);
   endFrame   = std::min(endFrame, mTotalFrame - 1);
 
@@ -564,7 +564,7 @@ uint32_t VectorAnimationTask::GetCurrentFrameNumber() const
   return mCurrentFrame;
 }
 
-uint32_t VectorAnimationTask::GetTotalFrameNumber() const
+uint32_t VectorAnimationTask::GetTotalFrameCount() const
 {
   return mTotalFrame;
 }

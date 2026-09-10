@@ -145,8 +145,8 @@ private:
     mStatusLabel.SetText(
       Dali::String("Speed: ") + Dali::String(std::to_string(mView.GetFrameSpeedFactor()).c_str()) +
       Dali::String(" | Delay: ") + Dali::String(std::to_string(mView.GetFrameDelay()).c_str()) + Dali::String("ms") +
-      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
-      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()));
+      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrameNumber()).c_str()) +
+      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrameCount()).c_str()));
     return true;
   }
 
@@ -154,7 +154,7 @@ private:
   {
     Dali::Vector<Dali::String> urls;
     for(int i = 0; i < DOG_URL_COUNT; ++i) urls.PushBack(DOG_URLS[i]);
-    mView.SetResourceUrls(urls);
+    mView.SetResourceUrlList(urls);
     mView.Play();
   }
 

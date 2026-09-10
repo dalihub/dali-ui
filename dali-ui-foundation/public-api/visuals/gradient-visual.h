@@ -39,14 +39,13 @@ namespace Ui
  */
 
 /**
- * @brief A VisualBase of type VisualType::GRADIENT,
- * to render a smooth transition of colors over the visual's quad.
+ * @brief GradientVisual renders a smooth transition of colors.
  *
- * It can use CornerRadius / CornerSquareness / Borderline feature.
+ * Its visual type is VisualType::GRADIENT. It can use the CornerRadius, CornerSquareness
+ * and Borderline features of VisualBase.
  */
 class DALI_UI_API GradientVisual : public VisualBase
 {
-public:
 public:
   /**
    * @brief Creates a GradientVisual object.
@@ -66,7 +65,7 @@ public:
    */
   static GradientVisual DownCast(BaseHandle handle);
 
-public: // Setters
+public: // Properties
   /**
    * @brief Sets the start position and end position of the GradientVisual.
    * It will make linear gradient
@@ -215,20 +214,20 @@ public:
   GradientVisual& operator=(GradientVisual&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL GradientVisual(Dali::Ui::Internal::VisualBaseImpl* object);
-
-public:
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} //namespace DALI_NAMESPACE
+} // namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VISUAL_OBJECT_H

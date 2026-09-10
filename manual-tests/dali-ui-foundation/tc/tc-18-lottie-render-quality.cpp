@@ -50,10 +50,9 @@ const char* PlayStateName(Ui::AnimatedImage::PlayState state)
 /**
  * @brief Verifies LottieAnimationView render quality settings:
  *   SetRenderScale / GetRenderScale
- *   SetFrameCacheEnabled / IsFrameCacheEnabled
  *   SetRedrawOnScaleDown / IsRedrawOnScaleDown
  *   SetRedrawOnScaleUp / IsRedrawOnScaleUp
- *   SetNotifyAfterRasterization / IsNotifyAfterRasterizationEnabled
+ *   SetNotifyAfterRasterizationEnabled / IsNotifyAfterRasterizationEnabled
  *
  * Steps:
  *   [RenderScale verification]:
@@ -62,9 +61,6 @@ const char* PlayStateName(Ui::AnimatedImage::PlayState state)
  *   3. [Scale 2.0x] -> higher resolution (sharper but uses more memory)
  *   4. Confirm GetRenderScale return value in label
  *
- *   [FrameCache verification]:
- *   1. [FrameCache ON] -> performance improves when reusing same size
- *   2. [FrameCache OFF] -> re-rasterises every frame
  *
  *   [RedrawOnScale verification]:
  *   1. [RedrawSD OFF] -> no re-rasterisation on scale-down (existing texture scaled)
@@ -80,12 +76,12 @@ class TcLottieRenderQuality : public ManualTest::TestCase, public ConnectionTrac
 public:
   Dali::String GetName() const override
   {
-    return "18. Lottie: RenderScale / FrameCache / RedrawOnScale";
+    return "18. Lottie: RenderScale / RedrawOnScale";
   }
 
   Dali::String GetDescription() const override
   {
-    return "Visual quality comparison of RenderScale; verify Get* return values for FrameCache/RedrawOnScale flags";
+    return "Visual quality comparison of RenderScale; verify Get* return values for RedrawOnScale flags";
   }
 
   void OnEnter(View contentArea) override
@@ -96,7 +92,7 @@ public:
 
     mView.Play();
 
-    mScaleLabel = MakeStatusLabel("RenderScale: 1.0 | FrameCache: OFF");
+    mScaleLabel = MakeStatusLabel("RenderScale: 1.0");
     mFlagsLabel = MakeStatusLabel("RedrawSD: ON | RedrawSU: ON | NotifyRast: OFF");
     mPlayLabel  = MakeStatusLabel("State: PLAYING | Frame: 0/0");
 
@@ -128,8 +124,6 @@ public:
       MakeButton("Scale\n2.0x",  [this] { OnRenderScale(2.0f); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("FrameCache\nON",  [this] { mView.SetFrameCacheEnabled(true);  UpdateLabels(); }),
-      MakeButton("FrameCache\nOFF", [this] { mView.SetFrameCacheEnabled(false); UpdateLabels(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("RedrawSD\nON",  [this] { mView.SetRedrawOnScaleDown(true);  UpdateLabels(); }),
@@ -138,8 +132,8 @@ public:
       MakeButton("RedrawSU\nOFF", [this] { mView.SetRedrawOnScaleUp(false);   UpdateLabels(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("NotifyRast\nON",  [this] { mView.SetNotifyAfterRasterization(true);  UpdateLabels(); }),
-      MakeButton("NotifyRast\nOFF", [this] { mView.SetNotifyAfterRasterization(false); UpdateLabels(); }),
+      MakeButton("NotifyRast\nON",  [this] { mView.SetNotifyAfterRasterizationEnabled(true);  UpdateLabels(); }),
+      MakeButton("NotifyRast\nOFF", [this] { mView.SetNotifyAfterRasterizationEnabled(false); UpdateLabels(); }),
     }));
 
     contentArea.Add(content);
@@ -158,8 +152,8 @@ private:
   bool OnPollTick()
   {
     const std::string text = std::string("State: ") + PlayStateName(mView.GetPlayState()) +
-                             " | Frame: " + std::to_string(mView.GetCurrentFrame()) +
-                             "/" + std::to_string(mView.GetTotalFrame());
+                             " | Frame: " + std::to_string(mView.GetCurrentFrameNumber()) +
+                             "/" + std::to_string(mView.GetTotalFrameCount());
     if(text != mLastPlayText)
     {
       mLastPlayText = text;
@@ -177,8 +171,7 @@ private:
   void UpdateLabels()
   {
     mScaleLabel.SetText(
-      Dali::String("RenderScale: ") + Dali::String(std::to_string(mView.GetRenderScale()).c_str()) +
-      Dali::String(" | FrameCache: ") + Dali::String(mView.IsFrameCacheEnabled() ? "ON" : "OFF"));
+      Dali::String("RenderScale: ") + Dali::String(std::to_string(mView.GetRenderScale()).c_str()));
     mFlagsLabel.SetText(
       Dali::String("RedrawSD: ") + Dali::String(mView.IsRedrawOnScaleDown() ? "ON" : "OFF") +
       Dali::String(" | RedrawSU: ") + Dali::String(mView.IsRedrawOnScaleUp() ? "ON" : "OFF") +

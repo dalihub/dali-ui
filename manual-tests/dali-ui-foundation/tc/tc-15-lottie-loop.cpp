@@ -182,8 +182,8 @@ private:
     {
       return;
     }
-    int frame = mView.GetCurrentFrame();
-    int total = mView.GetTotalFrame();
+    int frame = mView.GetCurrentFrameNumber();
+    int total = mView.GetTotalFrameCount();
     if(frame == mPrevFrame)
     {
       return;
@@ -215,8 +215,8 @@ private:
       Dali::String(" | Idx: ") + Dali::String(std::to_string(mLoopIndex).c_str()) +
       Dali::String("/") + totalStr +
       Dali::String("\nStop: ") + Dali::String(StopBehaviorName(mView.GetStopBehavior())) +
-      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
-      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()) +
+      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrameNumber()).c_str()) +
+      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrameCount()).c_str()) +
       Dali::String(" | Finished: ") + Dali::String(std::to_string(mFinishedCount).c_str()));
   }
 

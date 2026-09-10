@@ -167,14 +167,14 @@ int UtcDaliAnimatedImageVisualSetGetProperties01(void)
   visual.SetAlphaMaskUrl("mask.png");
   DALI_TEST_EQUALS(visual.GetAlphaMaskUrl(), Dali::String("mask.png"), TEST_LOCATION);
 
-  visual.SetMaskContentScale(2.0f);
-  DALI_TEST_EQUALS(visual.GetMaskContentScale(), 2.0f, TEST_LOCATION);
+  visual.SetContentScaleForMasking(2.0f);
+  DALI_TEST_EQUALS(visual.GetContentScaleForMasking(), 2.0f, TEST_LOCATION);
 
   visual.SetCropToMask(false);
   DALI_TEST_EQUALS(visual.IsCropToMask(), false, TEST_LOCATION);
 
-  visual.SetMaskingType(Image::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(visual.GetMaskingType(), Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
+  visual.SetMaskingPolicy(Image::MaskingPolicy::ON_RENDERING);
+  DALI_TEST_EQUALS(visual.GetMaskingPolicy(), Image::MaskingPolicy::ON_RENDERING, TEST_LOCATION);
 
   visual.SetBrokenImageEnabled(false);
   DALI_TEST_EQUALS(visual.IsBrokenImageEnabled(), false, TEST_LOCATION);
@@ -189,10 +189,10 @@ int UtcDaliAnimatedImageVisualSetGetProperties01(void)
   DALI_TEST_EQUALS(visual.GetFittingMode(), Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO, TEST_LOCATION);
 
   visual.SetOrientationCorrection(false);
-  DALI_TEST_EQUALS(visual.IsOrientationCorrection(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.IsOrientationCorrectionEnabled(), false, TEST_LOCATION);
 
-  visual.SetSynchronousSizing(true);
-  DALI_TEST_EQUALS(visual.IsSynchronousSizing(), true, TEST_LOCATION);
+  visual.SetImageLoadWithViewSize(true);
+  DALI_TEST_EQUALS(visual.IsImageLoadWithViewSizeEnabled(), true, TEST_LOCATION);
 
   application.SendNotification();
   application.Render();
@@ -219,16 +219,6 @@ int UtcDaliAnimatedImageVisualSetGetProperties02(void)
   // Loop count
   visual.SetLoopCount(3);
   DALI_TEST_EQUALS(visual.GetLoopCount(), 3, TEST_LOCATION);
-
-  // Play range (two integers)
-  Dali::Property::Array range;
-  range.PushBack(10);
-  range.PushBack(20);
-  visual.SetPlayRange(range);
-  const auto resultRange = visual.GetPlayRange();
-  DALI_TEST_EQUALS(resultRange.Size(), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(resultRange[0].Get<int32_t>(), 10, TEST_LOCATION);
-  DALI_TEST_EQUALS(resultRange[1].Get<int32_t>(), 20, TEST_LOCATION);
 
   // Stop behavior
   visual.SetStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME);
@@ -283,7 +273,7 @@ int UtcDaliAnimatedImageVisualPlayState(void)
   visual.Play();
   DALI_TEST_EQUALS(visual.GetPlayState(), AnimatedImage::PlayState::PLAYING, TEST_LOCATION);
 
-  visual.JumpTo(1);
+  visual.JumpToFrame(1);
   // TODO : Need to prepare real valid images for UTC.
 
   END_TEST;

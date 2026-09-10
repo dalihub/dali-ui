@@ -236,14 +236,14 @@ bool ImageView::IsImageLoadWithViewSizeEnabled() const
   return Ui::GetImpl(*this).IsImageLoadWithViewSizeEnabled();
 }
 
-void ImageView::SetMaskingMode(Ui::Image::MaskingType maskingMode)
+void ImageView::SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy)
 {
-  Ui::GetImpl(*this).SetMaskingMode(maskingMode);
+  Ui::GetImpl(*this).SetMaskingPolicy(maskingPolicy);
 }
 
-Ui::Image::MaskingType ImageView::GetMaskingMode() const
+Ui::Image::MaskingPolicy ImageView::GetMaskingPolicy() const
 {
-  return Ui::GetImpl(*this).GetMaskingMode();
+  return Ui::GetImpl(*this).GetMaskingPolicy();
 }
 
 void ImageView::SetImageColor(const UiColor& color)
@@ -276,12 +276,12 @@ bool ImageView::IsOrientationCorrectionEnabled() const
   return Ui::GetImpl(*this).IsOrientationCorrectionEnabled();
 }
 
-void ImageView::SetNPatchBorder(const Vector4& border)
+void ImageView::SetNPatchBorder(const Dali::Insets& border)
 {
   Ui::GetImpl(*this).SetNPatchBorder(border);
 }
 
-Vector4 ImageView::GetNPatchBorder() const
+Dali::Insets ImageView::GetNPatchBorder() const
 {
   return Ui::GetImpl(*this).GetNPatchBorder();
 }
@@ -315,6 +315,18 @@ ImageView::ImageView(Dali::Internal::CustomActor* internal)
 : View(internal)
 {
   VerifyCustomActorPointer<Integration::ImageViewImpl>(internal);
+}
+
+// TODO: remove these together with the old names they keep alive.
+
+void ImageView::SetMaskingMode(Image::MaskingPolicy maskingPolicy)
+{
+  SetMaskingPolicy(maskingPolicy);
+}
+
+Image::MaskingPolicy ImageView::GetMaskingMode() const
+{
+  return GetMaskingPolicy();
 }
 
 } // namespace Ui

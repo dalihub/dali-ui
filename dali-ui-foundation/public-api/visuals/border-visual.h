@@ -35,13 +35,13 @@ namespace Ui
  */
 
 /**
- * @brief A VisualBase of type VisualType::BORDER, to render a simple rectangular borderline.
+ * @brief BorderVisual renders a rectangular borderline.
  *
- * It cannot use CornerRadius / CornerSquareness / Borderline feature.
+ * Its visual type is VisualType::BORDER. It cannot use the CornerRadius, CornerSquareness
+ * or Borderline features of VisualBase.
  */
 class DALI_UI_API BorderVisual : public VisualBase
 {
-public:
 public:
   /**
    * @brief Creates a BorderVisual object.
@@ -61,7 +61,7 @@ public:
    */
   static BorderVisual DownCast(BaseHandle handle);
 
-public: // Setters
+public: // Properties
   /**
    * @brief Gets the size of border of the BorderVisual.
    *
@@ -99,20 +99,20 @@ public:
   BorderVisual& operator=(BorderVisual&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL BorderVisual(Dali::Ui::Internal::VisualBaseImpl* object);
-
-public:
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} //namespace DALI_NAMESPACE
+} // namespace DALI_NAMESPACE
 
 #endif // DALI_UI_BORDER_VISUAL_OBJECT_H

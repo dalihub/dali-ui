@@ -280,7 +280,7 @@ Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&  
       break;
     }
 
-    case Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE:
+    case Ui::Integration::InternalVisualType::LOTTIE_ANIMATION:
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::Integration::ImageVisual::Property::URL, IMAGE_URL_NAME);
       std::string      imageUrl;

@@ -43,7 +43,7 @@ const char* const DEFAULT_INNER_FILL_KEY_PATH = "checked-fill.fill-group.fill-co
 // Per-frame color callback plumbing.
 //
 // MakeCallback wraps a capture-less free function, so per-instance colours are reached
-// through the DynamicPropertyInfo.id via a small process-wide registry. The callback runs
+// through the DynamicProperty.id via a small process-wide registry. The callback runs
 // on a worker thread and must read ONLY pre-resolved Vector4 colours (no DALi API calls).
 //
 // The registry/mutex are leaked singletons (never destroyed) so a worker-thread callback
@@ -80,8 +80,8 @@ void ValidateColorBindings(const SelectableLottieColorBindings& colorBindings)
 {
   for(uint32_t bindingIndex = 0u; bindingIndex < colorBindings.Count(); ++bindingIndex)
   {
-    const Dali::String                    keyPath  = colorBindings[bindingIndex].GetKeyPath();
-    const LottieAnimation::VectorProperty property = colorBindings[bindingIndex].GetProperty();
+    const Dali::String                     keyPath  = colorBindings[bindingIndex].GetKeyPath();
+    const LottieAnimation::ContentProperty property = colorBindings[bindingIndex].GetProperty();
     for(uint32_t previousIndex = 0u; previousIndex < bindingIndex; ++previousIndex)
     {
       DALI_ASSERT_ALWAYS(!(colorBindings[previousIndex].GetKeyPath() == keyPath &&
@@ -92,7 +92,7 @@ void ValidateColorBindings(const SelectableLottieColorBindings& colorBindings)
 }
 
 Dali::Property::Value OnBindingColor(int32_t id,
-                                     Dali::VectorAnimationRenderer::VectorProperty /*property*/,
+                                     Ui::LottieAnimation::ContentProperty /*property*/,
                                      uint32_t frameNumber)
 {
   // Worker thread: copy plain pre-resolved state under lock, then make no DALi API calls.
@@ -143,7 +143,7 @@ SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(const 
   SelectableLottieColorBindings colorBindings;
   colorBindings.PushBack(SelectableLottieColorBinding(
     keyPath.Empty() ? Dali::String(DEFAULT_INNER_FILL_KEY_PATH) : keyPath,
-    LottieAnimation::VectorProperty::FILL_COLOR,
+    LottieAnimation::ContentProperty::FILL_COLOR,
     SelectableLottieColorBinding::ColorPolicy::BY_SELECTION_STATE));
   return New(url, selectRange, deselectRange, colorBindings);
 }
@@ -242,7 +242,7 @@ void SelectableLottieAnimationViewImpl::NormalizeFrameRange(int& start, int& end
   start = std::max(start, 0);
   end   = std::max(end, 0);
 
-  const int totalFrame = mLottie.GetTotalFrame();
+  const int totalFrame = mLottie.GetTotalFrameCount();
   if(totalFrame > 0)
   {
     const int lastFrame = totalFrame - 1;
@@ -282,12 +282,11 @@ void SelectableLottieAnimationViewImpl::ApplyColorBindings()
 
   for(const auto& binding : mColorBindings)
   {
-    Ui::LottieAnimation::DynamicPropertyInfo info;
-    info.id       = binding.dynamicPropertyId;
-    info.keyPath  = binding.keyPath;
-    info.property = binding.property;
-    info.callback = MakeCallback(&OnBindingColor);
-    mLottie.SetDynamicProperty(info);
+    Ui::LottieAnimation::DynamicProperty info(binding.dynamicPropertyId,
+                                              binding.keyPath,
+                                              binding.property,
+                                              Ui::LottieAnimation::DynamicPropertyCallback::New(&OnBindingColor));
+    mLottie.SetDynamicProperty(std::move(info));
   }
 }
 

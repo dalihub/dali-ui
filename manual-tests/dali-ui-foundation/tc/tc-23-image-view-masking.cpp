@@ -45,7 +45,7 @@ constexpr uint32_t C_LABEL_BG    = 0x333333;
  * @brief Verifies ImageView alpha masking API:
  *   SetAlphaMaskUrl / GetAlphaMaskUrl
  *   SetCropToMask / IsCropToMask
- *   SetMaskingMode / GetMaskingMode
+ *   SetMaskingPolicy / GetMaskingPolicy
  *
  * Two ImageViews are shown side by side:
  *   Left:  CropToMask = OFF
@@ -62,13 +62,13 @@ public:
 
   Dali::String GetDescription() const override
   {
-    return "Verifies AlphaMaskUrl, CropToMask, MaskingMode (ON_RENDERING vs ON_LOADING)";
+    return "Verifies AlphaMaskUrl, CropToMask, MaskingPolicy (ON_RENDERING vs ON_LOADING)";
   }
 
   void OnEnter(View contentArea) override
   {
     mMaskUrl     = "";
-    mMaskingMode = Ui::Image::MaskingType::MASKING_ON_RENDERING;
+    mMaskingMode = Ui::Image::MaskingPolicy::ON_RENDERING;
 
     // Left: CropToMask OFF
     mImageLeft = ImageView::New(IMG_A);
@@ -86,7 +86,7 @@ public:
     mImageRight.SetAccessibilityName("PreviewCropOn");
     mImageRight.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
-    mStatusLabel = MakeStatusLabel("Mask: none | MaskingMode: ON_RENDERING");
+    mStatusLabel = MakeStatusLabel("Mask: none | MaskingPolicy: ON_RENDERING");
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
     content.SetRequestedWidth(MATCH_PARENT);
@@ -170,10 +170,10 @@ public:
       MakeButton("No Mask",     [this] { OnSetMask("", "none"); }),
     }));
 
-    // Row 2: MaskingMode
+    // Row 2: MaskingPolicy
     content.Add(MakeButtonRow({
-      MakeButton("MaskingMode\nON_RENDERING", [this] { OnMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING); }),
-      MakeButton("MaskingMode\nON_LOADING",   [this] { OnMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING); }),
+      MakeButton("MaskingPolicy\nON_RENDERING", [this] { OnMaskingMode(Ui::Image::MaskingPolicy::ON_RENDERING); }),
+      MakeButton("MaskingPolicy\nON_LOADING",   [this] { OnMaskingMode(Ui::Image::MaskingPolicy::ON_LOADING); }),
     }));
 
     ScrollView scrollView = ScrollView::New();
@@ -193,18 +193,18 @@ private:
   {
     mMaskUrl = maskUrl;
     mImageLeft.SetAlphaMaskUrl(maskUrl);
-    mImageLeft.SetMaskingMode(mMaskingMode);
+    mImageLeft.SetMaskingPolicy(mMaskingMode);
     mImageRight.SetAlphaMaskUrl(maskUrl);
-    mImageRight.SetMaskingMode(mMaskingMode);
+    mImageRight.SetMaskingPolicy(mMaskingMode);
     (void)displayName;
     UpdateStatus();
   }
 
-  void OnMaskingMode(Ui::Image::MaskingType mode)
+  void OnMaskingMode(Ui::Image::MaskingPolicy mode)
   {
     mMaskingMode = mode;
-    mImageLeft.SetMaskingMode(mode);
-    mImageRight.SetMaskingMode(mode);
+    mImageLeft.SetMaskingPolicy(mode);
+    mImageRight.SetMaskingPolicy(mode);
     // Re-apply mask to trigger reload with new mode
     if(!mMaskUrl.Empty())
     {
@@ -218,10 +218,10 @@ private:
   {
     // Both fields come from the component now. The old label printed the
     // button's own word: the mode buttons routed their mode string into the
-    // mask-name slot (so [MaskingMode ON_LOADING] showed "Mask: ON_LOADING"),
-    // and GetMaskingMode() was never called anywhere on this screen — a
+    // mask-name slot (so [MaskingPolicy ON_LOADING] showed "Mask: ON_LOADING"),
+    // and GetMaskingPolicy() was never called anywhere on this screen — a
     // stubbed setter kept both lines green (review 23).
-    Dali::String modeStr = (mImageLeft.GetMaskingMode() == Ui::Image::MaskingType::MASKING_ON_RENDERING) ? "ON_RENDERING" : "ON_LOADING";
+    Dali::String modeStr = (mImageLeft.GetMaskingPolicy() == Ui::Image::MaskingPolicy::ON_RENDERING) ? "ON_RENDERING" : "ON_LOADING";
     Dali::String maskUrl = mImageLeft.GetAlphaMaskUrl();
     Dali::String maskStr;
     if(maskUrl.Empty())
@@ -237,7 +237,7 @@ private:
 
     mStatusLabel.SetText(
       Dali::String("Mask: ") + maskStr +
-      Dali::String(" | MaskingMode: ") + modeStr +
+      Dali::String(" | MaskingPolicy: ") + modeStr +
       Dali::String(" | CropL: ") + Dali::String(mImageLeft.IsCropToMask() ? "ON" : "OFF") +
       Dali::String(" | CropR: ") + Dali::String(mImageRight.IsCropToMask() ? "ON" : "OFF"));
   }
@@ -313,7 +313,7 @@ private:
   ImageView             mImageRight;
   Label                 mStatusLabel;
   Dali::String          mMaskUrl;
-  Ui::Image::MaskingType mMaskingMode{Ui::Image::MaskingType::MASKING_ON_RENDERING};
+  Ui::Image::MaskingPolicy mMaskingMode{Ui::Image::MaskingPolicy::ON_RENDERING};
 };
 
 REGISTER_MANUAL_TEST(TcImageViewMasking)

@@ -68,10 +68,10 @@ SelectableLottieColorBindings NewRadioBindings()
 {
   SelectableLottieColorBindings bindings;
   bindings.PushBack(Binding(INNER_PATH,
-                            LottieAnimation::VectorProperty::FILL_COLOR,
+                            LottieAnimation::ContentProperty::FILL_COLOR,
                             Policy::ALWAYS_SELECTED));
   bindings.PushBack(Binding(OUTLINE_PATH,
-                            LottieAnimation::VectorProperty::STROKE_COLOR,
+                            LottieAnimation::ContentProperty::STROKE_COLOR,
                             Policy::SELECTED_IN_FRAME_RANGE,
                             FrameRange(7, 26)));
   return bindings;
@@ -328,8 +328,8 @@ int UtcDaliSelectableLottieAnimationViewDuplicateBindingN(void)
 {
   UiTestApplication             application;
   SelectableLottieColorBindings bindings;
-  bindings.PushBack(Binding(INNER_PATH, LottieAnimation::VectorProperty::FILL_COLOR, Policy::ALWAYS_SELECTED));
-  bindings.PushBack(Binding(INNER_PATH, LottieAnimation::VectorProperty::FILL_COLOR, Policy::ALWAYS_DESELECTED));
+  bindings.PushBack(Binding(INNER_PATH, LottieAnimation::ContentProperty::FILL_COLOR, Policy::ALWAYS_SELECTED));
+  bindings.PushBack(Binding(INNER_PATH, LottieAnimation::ContentProperty::FILL_COLOR, Policy::ALWAYS_DESELECTED));
 
   DALI_TEST_ASSERTION(SelectableLottieAnimationView::New(NewImage(), bindings),
                       "unique key-path and property pairs");

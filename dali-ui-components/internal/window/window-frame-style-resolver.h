@@ -27,6 +27,5 @@ struct ResolvedWindowFrameStyle
 };
 
 ResolvedWindowFrameStyle ResolveWindowFrameStyle(const WindowFrameStyle& style, bool maximized);
-Dali::Vector4            ToNPatchBorder(const Dali::Ui::Insets& border);
 
 } //namespace DALI_NAMESPACE::Ui::Internal

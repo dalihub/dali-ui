@@ -72,7 +72,7 @@ int UtcDaliLottieAnimationVisualCreateAndOwner(void)
   END_TEST;
 }
 
-/* Test that the visual type is ANIMATED_VECTOR_IMAGE */
+/* Test that the visual type is LOTTIE_ANIMATION */
 int UtcDaliLottieAnimationVisualGetVisualType(void)
 {
   UiTestApplication application;
@@ -82,7 +82,7 @@ int UtcDaliLottieAnimationVisualGetVisualType(void)
   // Upcast the handle
   VisualBase visualBase = visual;
 
-  DALI_TEST_EQUALS(visualBase.GetVisualType(), Ui::VisualType::ANIMATED_VECTOR_IMAGE, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualBase.GetVisualType(), Ui::VisualType::LOTTIE_ANIMATION, TEST_LOCATION);
 
   END_TEST;
 }
@@ -171,10 +171,10 @@ int UtcDaliLottieAnimationVisualSetGetProperties01(void)
   DALI_TEST_EQUALS(visual.GetReleasePolicy(), Image::ReleasePolicy::DETACHED, TEST_LOCATION);
 
   visual.SetOrientationCorrection(false);
-  DALI_TEST_EQUALS(visual.IsOrientationCorrection(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.IsOrientationCorrectionEnabled(), false, TEST_LOCATION);
 
-  visual.SetSynchronousSizing(true);
-  DALI_TEST_EQUALS(visual.IsSynchronousSizing(), true, TEST_LOCATION);
+  visual.SetImageLoadWithViewSize(true);
+  DALI_TEST_EQUALS(visual.IsImageLoadWithViewSizeEnabled(), true, TEST_LOCATION);
 
   application.SendNotification();
   application.Render();
@@ -195,15 +195,12 @@ int UtcDaliLottieAnimationVisualSetGetProperties02(void)
   visual.SetLoopCount(3);
   DALI_TEST_EQUALS(visual.GetLoopCount(), 3, TEST_LOCATION);
 
-  // Play range (two integers)
-  Dali::Property::Array range;
-  range.PushBack(10);
-  range.PushBack(20);
-  visual.SetPlayRange(range);
-  const auto resultRange = visual.GetPlayRange();
-  DALI_TEST_EQUALS(resultRange.Size(), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(resultRange[0].Get<int32_t>(), 10, TEST_LOCATION);
-  DALI_TEST_EQUALS(resultRange[1].Get<int32_t>(), 20, TEST_LOCATION);
+  // Play range (frame numbers)
+  int minFrame = 0, maxFrame = 0;
+  visual.SetMinMaxFrame(10, 20);
+  visual.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 10, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 20, TEST_LOCATION);
 
   // Stop behavior
   visual.SetStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME);
@@ -217,17 +214,14 @@ int UtcDaliLottieAnimationVisualSetGetProperties02(void)
   visual.SetLoopingMode(Ui::LottieAnimation::LoopingMode::AUTO_REVERSE);
   DALI_TEST_EQUALS(visual.GetLoopingMode(), Ui::LottieAnimation::LoopingMode::AUTO_REVERSE, TEST_LOCATION);
 
-  visual.SetRedrawInScalingDown(false);
-  DALI_TEST_EQUALS(visual.IsRedrawInScalingUp(), false, TEST_LOCATION);
+  visual.SetRedrawOnScaleDown(false);
+  DALI_TEST_EQUALS(visual.IsRedrawOnScaleUp(), false, TEST_LOCATION);
 
-  visual.SetRedrawInScalingUp(false);
-  DALI_TEST_EQUALS(visual.IsRedrawInScalingUp(), false, TEST_LOCATION);
+  visual.SetRedrawOnScaleUp(false);
+  DALI_TEST_EQUALS(visual.IsRedrawOnScaleUp(), false, TEST_LOCATION);
 
-  visual.SetFrameCacheEnabled(true);
-  DALI_TEST_EQUALS(visual.IsFrameCacheEnabled(), true, TEST_LOCATION);
-
-  visual.SetNotifyAfterRasterization(true);
-  DALI_TEST_EQUALS(visual.IsNotifyAfterRasterization(), true, TEST_LOCATION);
+  visual.SetNotifyAfterRasterizationEnabled(true);
+  DALI_TEST_EQUALS(visual.IsNotifyAfterRasterizationEnabled(), true, TEST_LOCATION);
 
   visual.SetRenderScale(1.5f);
   DALI_TEST_EQUALS(visual.GetRenderScale(), 1.5f, TEST_LOCATION);
@@ -270,7 +264,7 @@ int UtcDaliLottieAnimationVisualPlayState(void)
   visual.Play();
   // DALI_TEST_EQUALS(visual.GetPlayState(), AnimatedImage::PlayState::PLAYING, TEST_LOCATION);
 
-  visual.JumpTo(1);
+  visual.JumpToFrame(1);
   // TODO : Need to prepare ui-vector-animation-renderer.cpp for UTC.
 
   END_TEST;

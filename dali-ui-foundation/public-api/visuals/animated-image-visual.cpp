@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
+#include <dali/public-api/object/property-array.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-actions-integ.h>
@@ -207,7 +208,7 @@ void AnimatedImageVisual::SetFittingMode(Image::FittingMode fittingMode)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::FITTING_MODE, fittingMode);
 }
 
-bool AnimatedImageVisual::IsOrientationCorrection() const
+bool AnimatedImageVisual::IsOrientationCorrectionEnabled() const
 {
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION);
 }
@@ -217,14 +218,14 @@ void AnimatedImageVisual::SetOrientationCorrection(bool orientationCorrection)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
 }
 
-bool AnimatedImageVisual::IsSynchronousSizing() const
+bool AnimatedImageVisual::IsImageLoadWithViewSizeEnabled() const
 {
-  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE);
 }
 
-void AnimatedImageVisual::SetSynchronousSizing(bool synchronousSizing)
+void AnimatedImageVisual::SetImageLoadWithViewSize(bool enabled)
 {
-  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_SIZING, synchronousSizing);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, enabled);
 }
 
 bool AnimatedImageVisual::IsPreMultipliedAlpha() const
@@ -247,14 +248,14 @@ void AnimatedImageVisual::SetAlphaMaskUrl(const Dali::String& alphaMaskUrl)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL, alphaMaskUrl);
 }
 
-float AnimatedImageVisual::GetMaskContentScale() const
+float AnimatedImageVisual::GetContentScaleForMasking() const
 {
-  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::ImageVisual::Property::MASK_CONTENT_SCALE);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::ImageVisual::Property::CONTENT_SCALE_FOR_MASKING);
 }
 
-void AnimatedImageVisual::SetMaskContentScale(float maskContentScale)
+void AnimatedImageVisual::SetContentScaleForMasking(float contentScale)
 {
-  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::MASK_CONTENT_SCALE, maskContentScale);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::CONTENT_SCALE_FOR_MASKING, contentScale);
 }
 
 bool AnimatedImageVisual::IsCropToMask() const
@@ -267,14 +268,14 @@ void AnimatedImageVisual::SetCropToMask(bool cropToMask)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::CROP_TO_MASK, cropToMask);
 }
 
-Image::MaskingType AnimatedImageVisual::GetMaskingType() const
+Image::MaskingPolicy AnimatedImageVisual::GetMaskingPolicy() const
 {
-  return GetImplementation(*this).GetProperty<Image::MaskingType>(Dali::Ui::Integration::ImageVisual::Property::MASKING_TYPE);
+  return GetImplementation(*this).GetProperty<Image::MaskingPolicy>(Dali::Ui::Integration::ImageVisual::Property::MASKING_POLICY);
 }
 
-void AnimatedImageVisual::SetMaskingType(Image::MaskingType maskingType)
+void AnimatedImageVisual::SetMaskingPolicy(Image::MaskingPolicy maskingPolicy)
 {
-  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::MASKING_TYPE, maskingType);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::MASKING_POLICY, maskingPolicy);
 }
 
 int AnimatedImageVisual::GetLoopCount() const
@@ -285,22 +286,6 @@ int AnimatedImageVisual::GetLoopCount() const
 void AnimatedImageVisual::SetLoopCount(int loopCount)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::LOOP_COUNT, loopCount);
-}
-
-Dali::Property::Array AnimatedImageVisual::GetPlayRange() const
-{
-  Dali::Property::Value  value    = GetImplementation(*this).GetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE);
-  Dali::Property::Array* arrayPtr = value.GetArray();
-  if(arrayPtr)
-  {
-    return *arrayPtr;
-  }
-  return Dali::Property::Array();
-}
-
-void AnimatedImageVisual::SetPlayRange(const Dali::Property::Array& playRange)
-{
-  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE, playRange);
 }
 
 AnimatedImage::StopBehavior AnimatedImageVisual::GetStopBehavior() const
@@ -375,13 +360,13 @@ int AnimatedImageVisual::GetCurrentFrameNumber() const
   return result;
 }
 
-int AnimatedImageVisual::GetTotalFrameNumber() const
+int AnimatedImageVisual::GetTotalFrameCount() const
 {
-  int result = GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::TOTAL_FRAME_NUMBER);
+  int result = GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::TOTAL_FRAME_COUNT);
   if(result == -1)
   {
     // We should not cache this property only if result is -1. Remove cache now.
-    GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::TOTAL_FRAME_NUMBER);
+    GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::TOTAL_FRAME_COUNT);
   }
   return result;
 }
@@ -411,7 +396,7 @@ void AnimatedImageVisual::Stop()
   GetImplementation(*this).DoAction(Ui::Integration::AnimatedImageVisual::Action::STOP, Dali::Property::Value());
 }
 
-void AnimatedImageVisual::JumpTo(int frame)
+void AnimatedImageVisual::JumpToFrame(int frame)
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
