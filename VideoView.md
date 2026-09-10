@@ -181,7 +181,7 @@ descriptor.SetNativeSession(Dali::Any(static_cast<void*>(player)));
 descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
 ```
 
-2. The **bridge** `Dali::Ui::CreateVideoSource()`, declared in `<dali-ui-foundation/public-api/video/video-source.h>`, turns that descriptor into a `VideoSource`:
+2. The **bridge** `Dali::Ui::CreateVideoSource()`, declared in `<dali-ui-foundation/public-api/views/video/video-source.h>`, turns that descriptor into a `VideoSource`:
 
 ```cpp
 VideoSource CreateVideoSource(const SourceDescriptor& descriptor, VideoSourceOwnership ownership = VideoSourceOwnership::EXTERNAL);
