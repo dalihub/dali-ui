@@ -25,6 +25,7 @@
 #include <dali/integration-api/input-options.h>
 #include <dali/public-api/common/dali-common.h>
 #include <array>
+#include <limits>
 #include <optional>
 
 // INTERNAL INCLUDES
@@ -121,6 +122,13 @@ public:
   std::optional<uint32_t>         mTapGestureMaximumMultiTapInterval;
   std::optional<uint32_t>         mTapGestureMaximumHoldingTime;
   std::optional<float>            mTapGestureMaximumMotionDistance;
+  std::optional<int>              mPanGestureMinimumDistance;
+  std::optional<uint32_t>         mPanGestureMinimumPanEvents;
+  std::optional<float>            mPinchGestureMinimumDistance;
+  std::optional<uint32_t>         mPinchGestureMinimumTouchEvents;
+  std::optional<uint32_t>         mPinchGestureMinimumTouchEventsAfterStart;
+  std::optional<uint32_t>         mRotationGestureMinimumTouchEvents;
+  std::optional<uint32_t>         mRotationGestureMinimumTouchEventsAfterStart;
   uint32_t                        mAmbiguousPressDelay;
   uint32_t                        mAmbiguousPressDuration;
   WebEngineType                   mWebEngineType;
@@ -249,7 +257,14 @@ uint32_t UiConfigImpl::GetLongPressKeyEventMinimumCount() const
 void UiConfigImpl::SetLongPressGestureMinimumHoldingTime(uint32_t timeMs)
 {
   DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mImpl->mLongPressGestureMinimumHoldingTime = timeMs;
+  if(timeMs > 0u)
+  {
+    mImpl->mLongPressGestureMinimumHoldingTime = timeMs;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Long press gesture minimum holding time must be greater than zero.\n");
+  }
 }
 
 uint32_t UiConfigImpl::GetLongPressGestureMinimumHoldingTime() const
@@ -260,7 +275,14 @@ uint32_t UiConfigImpl::GetLongPressGestureMinimumHoldingTime() const
 void UiConfigImpl::SetTapGestureMaximumMultiTapInterval(uint32_t intervalMs)
 {
   DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mImpl->mTapGestureMaximumMultiTapInterval = intervalMs;
+  if(intervalMs > 0u)
+  {
+    mImpl->mTapGestureMaximumMultiTapInterval = intervalMs;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Tap gesture maximum multi-tap interval must be greater than zero.\n");
+  }
 }
 
 uint32_t UiConfigImpl::GetTapGestureMaximumMultiTapInterval() const
@@ -271,7 +293,14 @@ uint32_t UiConfigImpl::GetTapGestureMaximumMultiTapInterval() const
 void UiConfigImpl::SetTapGestureMaximumHoldingTime(uint32_t timeMs)
 {
   DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mImpl->mTapGestureMaximumHoldingTime = timeMs;
+  if(timeMs > 0u)
+  {
+    mImpl->mTapGestureMaximumHoldingTime = timeMs;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Tap gesture maximum holding time must be greater than zero.\n");
+  }
 }
 
 uint32_t UiConfigImpl::GetTapGestureMaximumHoldingTime() const
@@ -282,12 +311,145 @@ uint32_t UiConfigImpl::GetTapGestureMaximumHoldingTime() const
 void UiConfigImpl::SetTapGestureMaximumMotionDistance(float distance)
 {
   DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mImpl->mTapGestureMaximumMotionDistance = distance;
+  if(distance >= 0.0f)
+  {
+    mImpl->mTapGestureMaximumMotionDistance = distance;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Tap gesture maximum motion distance must be greater than or equal to zero.\n");
+  }
 }
 
 float UiConfigImpl::GetTapGestureMaximumMotionDistance() const
 {
   return mImpl->mTapGestureMaximumMotionDistance.value_or(Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MOTION_DISTANCE);
+}
+
+void UiConfigImpl::SetPanGestureMinimumDistance(int distance)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  if(distance >= 0)
+  {
+    mImpl->mPanGestureMinimumDistance = distance;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Pan gesture minimum distance must be greater than or equal to zero.\n");
+  }
+}
+
+int UiConfigImpl::GetPanGestureMinimumDistance() const
+{
+  return mImpl->mPanGestureMinimumDistance.value_or(Dali::Integration::DEFAULT_PAN_GESTURE_MINIMUM_DISTANCE);
+}
+
+void UiConfigImpl::SetPanGestureMinimumPanEvents(uint32_t count)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  if(count >= 1u && count <= static_cast<uint32_t>(std::numeric_limits<int>::max()))
+  {
+    mImpl->mPanGestureMinimumPanEvents = count;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Pan gesture minimum pan events must be between 1 and INT_MAX.\n");
+  }
+}
+
+uint32_t UiConfigImpl::GetPanGestureMinimumPanEvents() const
+{
+  return mImpl->mPanGestureMinimumPanEvents.value_or(static_cast<uint32_t>(Dali::Integration::DEFAULT_PAN_GESTURE_MINIMUM_PAN_EVENTS));
+}
+
+void UiConfigImpl::SetPinchGestureMinimumDistance(float distance)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  if(distance >= 0.0f)
+  {
+    mImpl->mPinchGestureMinimumDistance = distance;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Pinch gesture minimum distance must be greater than or equal to zero.\n");
+  }
+}
+
+float UiConfigImpl::GetPinchGestureMinimumDistance() const
+{
+  return mImpl->mPinchGestureMinimumDistance.value_or(Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_DISTANCE);
+}
+
+void UiConfigImpl::SetPinchGestureMinimumTouchEvents(uint32_t count)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  if(count > 1u)
+  {
+    mImpl->mPinchGestureMinimumTouchEvents = count;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Pinch gesture minimum touch events must be greater than 1.\n");
+  }
+}
+
+uint32_t UiConfigImpl::GetPinchGestureMinimumTouchEvents() const
+{
+  return mImpl->mPinchGestureMinimumTouchEvents.value_or(Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_TOUCH_EVENTS);
+}
+
+void UiConfigImpl::SetPinchGestureMinimumTouchEventsAfterStart(uint32_t count)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  if(count > 1u)
+  {
+    mImpl->mPinchGestureMinimumTouchEventsAfterStart = count;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Pinch gesture minimum touch events after start must be greater than 1.\n");
+  }
+}
+
+uint32_t UiConfigImpl::GetPinchGestureMinimumTouchEventsAfterStart() const
+{
+  return mImpl->mPinchGestureMinimumTouchEventsAfterStart.value_or(Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_TOUCH_EVENTS_AFTER_START);
+}
+
+void UiConfigImpl::SetRotationGestureMinimumTouchEvents(uint32_t count)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  if(count > 1u)
+  {
+    mImpl->mRotationGestureMinimumTouchEvents = count;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Rotation gesture minimum touch events must be greater than 1.\n");
+  }
+}
+
+uint32_t UiConfigImpl::GetRotationGestureMinimumTouchEvents() const
+{
+  return mImpl->mRotationGestureMinimumTouchEvents.value_or(Dali::Integration::DEFAULT_ROTATION_GESTURE_MINIMUM_TOUCH_EVENTS);
+}
+
+void UiConfigImpl::SetRotationGestureMinimumTouchEventsAfterStart(uint32_t count)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  if(count > 1u)
+  {
+    mImpl->mRotationGestureMinimumTouchEventsAfterStart = count;
+  }
+  else
+  {
+    DALI_LOG_ERROR("Rotation gesture minimum touch events after start must be greater than 1.\n");
+  }
+}
+
+uint32_t UiConfigImpl::GetRotationGestureMinimumTouchEventsAfterStart() const
+{
+  return mImpl->mRotationGestureMinimumTouchEventsAfterStart.value_or(Dali::Integration::DEFAULT_ROTATION_GESTURE_MINIMUM_TOUCH_EVENTS_AFTER_START);
 }
 
 void UiConfigImpl::SetAmbiguousPressDelay(uint32_t timeMs)
@@ -675,6 +837,69 @@ void UiConfigImpl::ApplyGestureOptions()
   else
   {
     mImpl->mTapGestureMaximumMotionDistance = Dali::Integration::GetTapGestureMaximumMotionDistance();
+  }
+
+  if(mImpl->mPanGestureMinimumDistance.has_value())
+  {
+    Dali::Integration::SetPanGestureMinimumDistance(mImpl->mPanGestureMinimumDistance.value());
+  }
+  else
+  {
+    mImpl->mPanGestureMinimumDistance = Dali::Integration::GetPanGestureMinimumDistance();
+  }
+
+  if(mImpl->mPanGestureMinimumPanEvents.has_value())
+  {
+    Dali::Integration::SetPanGestureMinimumPanEvents(static_cast<int>(mImpl->mPanGestureMinimumPanEvents.value()));
+  }
+  else
+  {
+    mImpl->mPanGestureMinimumPanEvents = static_cast<uint32_t>(Dali::Integration::GetPanGestureMinimumPanEvents());
+  }
+
+  if(mImpl->mPinchGestureMinimumDistance.has_value())
+  {
+    Dali::Integration::SetPinchGestureMinimumDistance(mImpl->mPinchGestureMinimumDistance.value());
+  }
+  else
+  {
+    mImpl->mPinchGestureMinimumDistance = Dali::Integration::GetPinchGestureMinimumDistance();
+  }
+
+  if(mImpl->mPinchGestureMinimumTouchEvents.has_value())
+  {
+    Dali::Integration::SetPinchGestureMinimumTouchEvents(mImpl->mPinchGestureMinimumTouchEvents.value());
+  }
+  else
+  {
+    mImpl->mPinchGestureMinimumTouchEvents = Dali::Integration::GetPinchGestureMinimumTouchEvents();
+  }
+
+  if(mImpl->mPinchGestureMinimumTouchEventsAfterStart.has_value())
+  {
+    Dali::Integration::SetPinchGestureMinimumTouchEventsAfterStart(mImpl->mPinchGestureMinimumTouchEventsAfterStart.value());
+  }
+  else
+  {
+    mImpl->mPinchGestureMinimumTouchEventsAfterStart = Dali::Integration::GetPinchGestureMinimumTouchEventsAfterStart();
+  }
+
+  if(mImpl->mRotationGestureMinimumTouchEvents.has_value())
+  {
+    Dali::Integration::SetRotationGestureMinimumTouchEvents(mImpl->mRotationGestureMinimumTouchEvents.value());
+  }
+  else
+  {
+    mImpl->mRotationGestureMinimumTouchEvents = Dali::Integration::GetRotationGestureMinimumTouchEvents();
+  }
+
+  if(mImpl->mRotationGestureMinimumTouchEventsAfterStart.has_value())
+  {
+    Dali::Integration::SetRotationGestureMinimumTouchEventsAfterStart(mImpl->mRotationGestureMinimumTouchEventsAfterStart.value());
+  }
+  else
+  {
+    mImpl->mRotationGestureMinimumTouchEventsAfterStart = Dali::Integration::GetRotationGestureMinimumTouchEventsAfterStart();
   }
 }
 

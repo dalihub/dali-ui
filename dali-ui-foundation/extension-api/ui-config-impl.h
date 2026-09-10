@@ -222,6 +222,76 @@ public:
   float GetTapGestureMaximumMotionDistance() const;
 
   /**
+   * @copydoc UiConfig::SetPanGestureMinimumDistance
+   */
+  void SetPanGestureMinimumDistance(int distance);
+
+  /**
+   * @copydoc UiConfig::GetPanGestureMinimumDistance
+   */
+  int GetPanGestureMinimumDistance() const;
+
+  /**
+   * @copydoc UiConfig::SetPanGestureMinimumPanEvents
+   */
+  void SetPanGestureMinimumPanEvents(uint32_t count);
+
+  /**
+   * @copydoc UiConfig::GetPanGestureMinimumPanEvents
+   */
+  uint32_t GetPanGestureMinimumPanEvents() const;
+
+  /**
+   * @copydoc UiConfig::SetPinchGestureMinimumDistance
+   */
+  void SetPinchGestureMinimumDistance(float distance);
+
+  /**
+   * @copydoc UiConfig::GetPinchGestureMinimumDistance
+   */
+  float GetPinchGestureMinimumDistance() const;
+
+  /**
+   * @copydoc UiConfig::SetPinchGestureMinimumTouchEvents
+   */
+  void SetPinchGestureMinimumTouchEvents(uint32_t count);
+
+  /**
+   * @copydoc UiConfig::GetPinchGestureMinimumTouchEvents
+   */
+  uint32_t GetPinchGestureMinimumTouchEvents() const;
+
+  /**
+   * @copydoc UiConfig::SetPinchGestureMinimumTouchEventsAfterStart
+   */
+  void SetPinchGestureMinimumTouchEventsAfterStart(uint32_t count);
+
+  /**
+   * @copydoc UiConfig::GetPinchGestureMinimumTouchEventsAfterStart
+   */
+  uint32_t GetPinchGestureMinimumTouchEventsAfterStart() const;
+
+  /**
+   * @copydoc UiConfig::SetRotationGestureMinimumTouchEvents
+   */
+  void SetRotationGestureMinimumTouchEvents(uint32_t count);
+
+  /**
+   * @copydoc UiConfig::GetRotationGestureMinimumTouchEvents
+   */
+  uint32_t GetRotationGestureMinimumTouchEvents() const;
+
+  /**
+   * @copydoc UiConfig::SetRotationGestureMinimumTouchEventsAfterStart
+   */
+  void SetRotationGestureMinimumTouchEventsAfterStart(uint32_t count);
+
+  /**
+   * @copydoc UiConfig::GetRotationGestureMinimumTouchEventsAfterStart
+   */
+  uint32_t GetRotationGestureMinimumTouchEventsAfterStart() const;
+
+  /**
    * @copydoc UiConfig::SetBrokenImageUrl
    */
   void SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const Dali::String& brokenImageUrl);

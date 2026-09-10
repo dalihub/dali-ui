@@ -341,7 +341,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] timeMs The time value in milliseconds
    * @note If not set, Dali::Integration::DEFAULT_LONG_PRESS_GESTURE_MINIMUM_HOLDING_TIME is used.
-   *       A value of 0 is ignored and the previous value is kept.
+   *       A value of 0 is ignored, an error is logged, and the previous value is kept.
    */
   void SetLongPressGestureMinimumHoldingTime(uint32_t timeMs);
 
@@ -369,7 +369,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] intervalMs The interval in milliseconds
    * @note If not set, Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MULTI_TAP_INTERVAL is used.
-   *       A value of 0 is ignored and the previous value is kept.
+   *       A value of 0 is ignored, an error is logged, and the previous value is kept.
    * @see SetTapGestureMaximumHoldingTime()
    */
   void SetTapGestureMaximumMultiTapInterval(uint32_t intervalMs);
@@ -397,7 +397,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] timeMs The time value in milliseconds
    * @note If not set, Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_HOLDING_TIME is used.
-   *       A value of 0 is ignored and the previous value is kept.
+   *       A value of 0 is ignored, an error is logged, and the previous value is kept.
    * @see SetTapGestureMaximumMultiTapInterval()
    */
   void SetTapGestureMaximumHoldingTime(uint32_t timeMs);
@@ -425,7 +425,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] distance The distance in pixels
    * @note If not set, Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MOTION_DISTANCE is used.
-   *       A negative value is ignored and the previous value is kept.
+   *       A negative value is ignored, an error is logged, and the previous value is kept.
    */
   void SetTapGestureMaximumMotionDistance(float distance);
 
@@ -438,6 +438,145 @@ public: // Properties
    * @return The distance in pixels
    */
   float GetTapGestureMaximumMotionDistance() const;
+
+  /**
+   * @brief Sets the minimum distance required to start a pan gesture.
+   *
+   * Raising this value reduces accidental pans but delays drag and scroll startup.
+   * See SetLongPressGestureMinimumHoldingTime() for how gesture options are applied.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] distance The distance in pixels
+   * @note If not set, Dali::Integration::DEFAULT_PAN_GESTURE_MINIMUM_DISTANCE is used.
+   *       A negative value is ignored, an error is logged, and the previous value is kept.
+   */
+  void SetPanGestureMinimumDistance(int distance);
+
+  /**
+   * @brief Retrieves the minimum distance required to start a pan gesture.
+   *
+   * Before the application is created this returns the requested value, or the DALi
+   * default if nothing has been set. Afterwards it returns the value in effect.
+   *
+   * @return The distance in pixels
+   */
+  int GetPanGestureMinimumDistance() const;
+
+  /**
+   * @brief Sets the minimum number of touch events required to start a pan gesture.
+   *
+   * The initial touch-down event is included in this count. Raising the value filters
+   * more input noise but delays pan startup.
+   * See SetLongPressGestureMinimumHoldingTime() for how gesture options are applied.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] count The number of touch events, including the initial touch-down event
+   * @note If not set, Dali::Integration::DEFAULT_PAN_GESTURE_MINIMUM_PAN_EVENTS is used.
+   *       A value of 0 or a value greater than INT_MAX is ignored, an error is logged,
+   *       and the previous value is kept.
+   */
+  void SetPanGestureMinimumPanEvents(uint32_t count);
+
+  /**
+   * @brief Retrieves the minimum number of touch events required to start a pan gesture.
+   *
+   * Before the application is created this returns the requested value, or the DALi
+   * default if nothing has been set. Afterwards it returns the value in effect.
+   *
+   * @return The number of touch events, including the initial touch-down event
+   */
+  uint32_t GetPanGestureMinimumPanEvents() const;
+
+  /**
+   * @brief Sets the minimum distance required to start a pinch gesture.
+   *
+   * Raising this value reduces accidental pinches but delays pinch startup.
+   * See SetLongPressGestureMinimumHoldingTime() for how gesture options are applied.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] distance The distance in pixels
+   * @note If not set, DALi calculates the distance automatically from the scene DPI.
+   *       A negative value is ignored, an error is logged, and the previous value is kept.
+   */
+  void SetPinchGestureMinimumDistance(float distance);
+
+  /**
+   * @brief Retrieves the minimum distance required to start a pinch gesture.
+   *
+   * A negative return value means that DALi calculates the distance automatically
+   * from the scene DPI.
+   *
+   * @return The distance in pixels, or a negative value when automatic calculation is used
+   */
+  float GetPinchGestureMinimumDistance() const;
+
+  /**
+   * @brief Sets the minimum number of touch events required before a pinch can start.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] count The number of touch events
+   * @note If not set, Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_TOUCH_EVENTS is used.
+   *       A value less than 2 is ignored, an error is logged, and the previous value is kept.
+   */
+  void SetPinchGestureMinimumTouchEvents(uint32_t count);
+
+  /**
+   * @brief Retrieves the minimum number of touch events required before a pinch can start.
+   *
+   * @return The number of touch events
+   */
+  uint32_t GetPinchGestureMinimumTouchEvents() const;
+
+  /**
+   * @brief Sets the minimum number of touch events required for updates after a pinch has started.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] count The number of touch events accumulated between pinch updates
+   * @note If not set, Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_TOUCH_EVENTS_AFTER_START is used.
+   *       A value less than 2 is ignored, an error is logged, and the previous value is kept.
+   */
+  void SetPinchGestureMinimumTouchEventsAfterStart(uint32_t count);
+
+  /**
+   * @brief Retrieves the minimum number of touch events required for updates after a pinch has started.
+   *
+   * @return The number of touch events accumulated between pinch updates
+   */
+  uint32_t GetPinchGestureMinimumTouchEventsAfterStart() const;
+
+  /**
+   * @brief Sets the minimum number of touch events required before a rotation can start.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] count The number of touch events
+   * @note If not set, Dali::Integration::DEFAULT_ROTATION_GESTURE_MINIMUM_TOUCH_EVENTS is used.
+   *       A value less than 2 is ignored, an error is logged, and the previous value is kept.
+   */
+  void SetRotationGestureMinimumTouchEvents(uint32_t count);
+
+  /**
+   * @brief Retrieves the minimum number of touch events required before a rotation can start.
+   *
+   * @return The number of touch events
+   */
+  uint32_t GetRotationGestureMinimumTouchEvents() const;
+
+  /**
+   * @brief Sets the minimum number of touch events required for updates after a rotation has started.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] count The number of touch events accumulated between rotation updates
+   * @note If not set, Dali::Integration::DEFAULT_ROTATION_GESTURE_MINIMUM_TOUCH_EVENTS_AFTER_START is used.
+   *       A value less than 2 is ignored, an error is logged, and the previous value is kept.
+   */
+  void SetRotationGestureMinimumTouchEventsAfterStart(uint32_t count);
+
+  /**
+   * @brief Retrieves the minimum number of touch events required for updates after a rotation has started.
+   *
+   * @return The number of touch events accumulated between rotation updates
+   */
+  uint32_t GetRotationGestureMinimumTouchEventsAfterStart() const;
 
   /**
    * @brief Sets an image to be displayed when image loading fails.

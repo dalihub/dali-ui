@@ -222,6 +222,76 @@ float UiConfig::GetTapGestureMaximumMotionDistance() const
   return GetImpl(*this).GetTapGestureMaximumMotionDistance();
 }
 
+void UiConfig::SetPanGestureMinimumDistance(int distance)
+{
+  GetImpl(*this).SetPanGestureMinimumDistance(distance);
+}
+
+int UiConfig::GetPanGestureMinimumDistance() const
+{
+  return GetImpl(*this).GetPanGestureMinimumDistance();
+}
+
+void UiConfig::SetPanGestureMinimumPanEvents(uint32_t count)
+{
+  GetImpl(*this).SetPanGestureMinimumPanEvents(count);
+}
+
+uint32_t UiConfig::GetPanGestureMinimumPanEvents() const
+{
+  return GetImpl(*this).GetPanGestureMinimumPanEvents();
+}
+
+void UiConfig::SetPinchGestureMinimumDistance(float distance)
+{
+  GetImpl(*this).SetPinchGestureMinimumDistance(distance);
+}
+
+float UiConfig::GetPinchGestureMinimumDistance() const
+{
+  return GetImpl(*this).GetPinchGestureMinimumDistance();
+}
+
+void UiConfig::SetPinchGestureMinimumTouchEvents(uint32_t count)
+{
+  GetImpl(*this).SetPinchGestureMinimumTouchEvents(count);
+}
+
+uint32_t UiConfig::GetPinchGestureMinimumTouchEvents() const
+{
+  return GetImpl(*this).GetPinchGestureMinimumTouchEvents();
+}
+
+void UiConfig::SetPinchGestureMinimumTouchEventsAfterStart(uint32_t count)
+{
+  GetImpl(*this).SetPinchGestureMinimumTouchEventsAfterStart(count);
+}
+
+uint32_t UiConfig::GetPinchGestureMinimumTouchEventsAfterStart() const
+{
+  return GetImpl(*this).GetPinchGestureMinimumTouchEventsAfterStart();
+}
+
+void UiConfig::SetRotationGestureMinimumTouchEvents(uint32_t count)
+{
+  GetImpl(*this).SetRotationGestureMinimumTouchEvents(count);
+}
+
+uint32_t UiConfig::GetRotationGestureMinimumTouchEvents() const
+{
+  return GetImpl(*this).GetRotationGestureMinimumTouchEvents();
+}
+
+void UiConfig::SetRotationGestureMinimumTouchEventsAfterStart(uint32_t count)
+{
+  GetImpl(*this).SetRotationGestureMinimumTouchEventsAfterStart(count);
+}
+
+uint32_t UiConfig::GetRotationGestureMinimumTouchEventsAfterStart() const
+{
+  return GetImpl(*this).GetRotationGestureMinimumTouchEventsAfterStart();
+}
+
 void UiConfig::SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)
 {
   GetImpl(*this).SetBrokenImageUrl(brokenImageType, brokenImageUrl);
