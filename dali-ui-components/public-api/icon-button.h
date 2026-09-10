@@ -110,26 +110,31 @@ public:
   Dali::String GetIconUrl() const;
 
   /**
-   * @brief Sets the requested width of the icon.
-   * @param[in] width The requested width in logical pixels
+   * @brief Sets the icon's requested width.
+   * @param[in] width The size in logical pixels. Zero is an explicit size;
+   * WRAP_CONTENT prefers the natural size (or 56 if unavailable), while MATCH_PARENT uses the parent constraint.
+   * A positive size on one axis with WRAP_CONTENT on the other preserves the image's aspect ratio.
+   * @pre The size must be finite and non-negative or WRAP_CONTENT/MATCH_PARENT; a violation triggers an assertion.
    */
   void SetIconWidth(float width);
 
   /**
    * @brief Returns the requested width of the icon.
-   * @return The requested width in logical pixels
+   * @return The requested logical-pixel value or layout sentinel, not the actual measured width.
    */
   float GetIconWidth() const;
 
   /**
-   * @brief Sets the requested height of the icon.
-   * @param[in] height The requested height in logical pixels
+   * @brief Sets the icon's requested height.
+   * @param[in] height The size in logical pixels. Zero is an explicit size;
+   * WRAP_CONTENT prefers the natural size (or 56 if unavailable), while MATCH_PARENT uses the parent constraint.
+   * @pre The size must be finite and non-negative or WRAP_CONTENT/MATCH_PARENT; a violation triggers an assertion.
    */
   void SetIconHeight(float height);
 
   /**
    * @brief Returns the requested height of the icon.
-   * @return The requested height in logical pixels
+   * @return The requested logical-pixel value or layout sentinel, not the actual measured height.
    */
   float GetIconHeight() const;
 
@@ -149,6 +154,7 @@ public:
    * @brief Sets the corner radii of the icon.
    * @param[in] radius The corner radii in top-left, top-right, bottom-right,
    * and bottom-left order
+   * @pre Each component must be finite and non-negative; a violation triggers an assertion. Zero means no rounding.
    */
   void SetIconCornerRadius(const Vector4& radius);
 

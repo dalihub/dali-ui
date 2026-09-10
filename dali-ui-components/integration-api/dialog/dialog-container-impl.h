@@ -18,8 +18,11 @@
  */
 
 // EXTERNAL INCLUDES
+#include <cstdint>
+
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali/public-api/object/property-notification.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog-container.h>
@@ -38,6 +41,7 @@ class DALI_UI_COMPONENTS_API DialogContainerImpl : public ViewImpl
 {
 public:
   static Ui::DialogContainer New();
+  static Ui::DialogContainer New(Ui::DialogContainerStyle style);
 
   void     SetModalContent(Ui::View modalContent);
   Ui::View GetModalContent() const;
@@ -54,10 +58,17 @@ protected:
   virtual ~DialogContainerImpl();
 
   void OnInitialize() override;
+  void OnDestroy() override;
+  void OnChildRemove(Actor& child) override;
 
 private:
   void CreateDefaultScrim();
   void OnScrimClicked(Ui::View view, Ui::InputEvent event);
+  void ObserveModalContent();
+  void ReleaseModalContent();
+  void UpdateModalShowing();
+  void OnModalVisibilityChanged(Actor actor, bool visible);
+  void OnModalPropertyChanged(PropertyNotification notification);
 
   DialogContainerImpl(const DialogContainerImpl&)            = delete;
   DialogContainerImpl(DialogContainerImpl&&)                 = delete;
@@ -66,7 +77,14 @@ private:
 
 private:
   Ui::View                                    mScrim;
+  Ui::DialogContainerStyle                    mStyle;
   Ui::View                                    mModalContent;
+  PropertyNotification                        mModalAlphaNotification;
+  PropertyNotification                        mModalCulledNotification;
+  bool                                        mOriginalModal{false};
+  bool                                        mModalShowing{false};
+  bool                                        mModalStateAcquired{false};
+  uint64_t                                    mModalChangeGeneration{0u};
   Ui::DialogContainer::ScrimClickedSignalType mScrimClickedSignal;
 };
 

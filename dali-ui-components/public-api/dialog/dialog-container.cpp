@@ -32,7 +32,12 @@ DialogContainer::DialogContainer()
 
 DialogContainer DialogContainer::New()
 {
-  return Integration::DialogContainerImpl::New();
+  return New(DialogContainerStyle::Default());
+}
+
+DialogContainer DialogContainer::New(DialogContainerStyle style)
+{
+  return Integration::DialogContainerImpl::New(style);
 }
 
 DialogContainer::DialogContainer(const DialogContainer& dialogContainer)

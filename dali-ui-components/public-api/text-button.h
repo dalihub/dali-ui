@@ -69,6 +69,11 @@ public:
   void    SetTextColor(const UiColor& color);
   UiColor GetTextColor() const;
 
+  /**
+   * @brief Sets the font size.
+   * @pre The size must be finite and non-negative; a violation triggers an assertion.
+   * @note Zero is also passed unchanged to the internal Label, without substituting the default preset size.
+   */
   void  SetFontSize(float fontSize);
   float GetFontSize() const;
 

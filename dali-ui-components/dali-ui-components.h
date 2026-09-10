@@ -41,8 +41,11 @@
 #include <dali-ui-components/public-api/progress-bar.h>
 #include <dali-ui-components/public-api/radio-button.h>
 #include <dali-ui-components/public-api/selection-animation-mode.h>
+#include <dali-ui-components/public-api/styles/alert-dialog-style.h>
 #include <dali-ui-components/public-api/styles/check-box-style.h>
 #include <dali-ui-components/public-api/styles/components-style-sheet.h>
+#include <dali-ui-components/public-api/styles/dialog-container-style.h>
+#include <dali-ui-components/public-api/styles/dialog-style.h>
 #include <dali-ui-components/public-api/styles/icon-button-style.h>
 #include <dali-ui-components/public-api/styles/markdown-view-style.h>
 #include <dali-ui-components/public-api/styles/progress-bar-style.h>

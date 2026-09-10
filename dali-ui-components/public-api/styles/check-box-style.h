@@ -93,6 +93,12 @@ public: // Not intended for application developers
 
 /**
  * @brief Mutable builder used to create CheckBoxStyle handles.
+ *
+ * Minimum sizes, each padding component, icon sizes, label gap, and font size must be finite and non-negative.
+ * Negative values, NaN, and infinity are rejected by assertions in the corresponding setters.
+ * A zero minimum size means no lower bound; zero padding/gap means no padding/spacing.
+ * A zero icon size remains unset: the width follows the resolved height, and the height follows the content height.
+ * A zero font size is passed unchanged to the internal Label, without substituting the default preset size.
  */
 class DALI_UI_COMPONENTS_API CheckBoxStyle::Builder
 {

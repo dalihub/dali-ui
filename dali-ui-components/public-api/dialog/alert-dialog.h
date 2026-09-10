@@ -19,6 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog.h>
+#include <dali-ui-components/public-api/styles/alert-dialog-style.h>
 #include <dali-ui-components/public-api/text-button.h>
 
 // EXTERNAL INCLUDES
@@ -52,6 +53,9 @@ public:
    * @return A handle to a newly allocated Dali resource
    */
   static AlertDialog New();
+
+  /** @brief Creates an AlertDialog with the specified immutable style. Empty styles are not allowed. */
+  static AlertDialog New(AlertDialogStyle style);
 
   /**
    * @brief Copy constructor.

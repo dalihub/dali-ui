@@ -35,7 +35,12 @@ AlertDialog::AlertDialog()
 
 AlertDialog AlertDialog::New()
 {
-  return Integration::AlertDialogImpl::New();
+  return New(AlertDialogStyle::Default());
+}
+
+AlertDialog AlertDialog::New(AlertDialogStyle style)
+{
+  return Integration::AlertDialogImpl::New(style);
 }
 
 AlertDialog::AlertDialog(const AlertDialog& alertDialog)

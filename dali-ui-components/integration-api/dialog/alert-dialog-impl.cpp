@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include <dali-ui-components/integration-api/dialog/alert-dialog-impl.h>
+#include <dali-ui-components/internal/styles/alert-dialog-style-impl.h>
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -49,10 +50,17 @@ DALI_TYPE_REGISTRATION_END()
 
 Ui::AlertDialog AlertDialogImpl::New()
 {
+  return New(Ui::AlertDialogStyle::Default());
+}
+
+Ui::AlertDialog AlertDialogImpl::New(Ui::AlertDialogStyle style)
+{
+  DALI_ASSERT_ALWAYS(style && "AlertDialog style must be initialized");
   IntrusivePtr<AlertDialogImpl> impl = new AlertDialogImpl();
 
   Ui::AlertDialog handle = Ui::AlertDialog(*impl);
 
+  impl->mStyle = style;
   impl->Initialize();
 
   return handle;
@@ -67,18 +75,42 @@ AlertDialogImpl::~AlertDialogImpl()
 {
 }
 
+void AlertDialogImpl::OnInitialize()
+{
+  DialogImpl::OnInitialize();
+  // Preserve protected-constructor factories used by integration subclasses.
+  if(!mStyle)
+  {
+    mStyle = Ui::AlertDialogStyle::Default();
+  }
+  auto dialogStyle = mStyle.GetDialogStyle();
+  ApplyInitialStyle(dialogStyle ? dialogStyle : DialogStyle::Default());
+  mActionStyle = Internal::ResolveAlertActionButtonStyle(mStyle);
+}
+
 void AlertDialogImpl::SetTitle(const Dali::String& title)
 {
   mTitle = title;
   if(title.Empty())
   {
     SetHeaderView(Ui::View());
+    mTitleLabel.Reset();
+    return;
+  }
+  if(mTitleLabel && GetHeaderView() == mTitleLabel)
+  {
+    Ui::Label::DownCast(mTitleLabel).SetText(title);
     return;
   }
   Ui::Label label = Ui::Label::New(title);
   label.SetRequestedWidth(MATCH_PARENT);
-  label.SetFontSize(22.0f);
-  label.SetTextColor(UiColor(0x202124u));
+  label.SetFontSize(mStyle.GetTitleFontSize());
+  label.SetTextColor(mStyle.GetTitleTextColor());
+  if(!mStyle.GetTitleFontFamily().Empty())
+  {
+    label.SetFontFamily(mStyle.GetTitleFontFamily());
+  }
+  mTitleLabel = label;
   SetHeaderView(label);
 }
 
@@ -93,12 +125,23 @@ void AlertDialogImpl::SetMessage(const Dali::String& message)
   if(message.Empty())
   {
     SetBodyView(Ui::View());
+    mMessageLabel.Reset();
+    return;
+  }
+  if(mMessageLabel && GetBodyView() == mMessageLabel)
+  {
+    Ui::Label::DownCast(mMessageLabel).SetText(message);
     return;
   }
   Ui::Label label = Ui::Label::New(message);
   label.SetRequestedWidth(MATCH_PARENT);
-  label.SetFontSize(16.0f);
-  label.SetTextColor(UiColor(0x5F6368u));
+  label.SetFontSize(mStyle.GetMessageFontSize());
+  label.SetTextColor(mStyle.GetMessageTextColor());
+  if(!mStyle.GetMessageFontFamily().Empty())
+  {
+    label.SetFontFamily(mStyle.GetMessageFontFamily());
+  }
+  mMessageLabel = label;
   SetBodyView(label);
 }
 
@@ -114,16 +157,13 @@ Ui::TextButton AlertDialogImpl::AddActionButton(const Dali::String& text)
   {
     row = StackLayout::New(StackOrientation::HORIZONTAL);
     row.SetRequestedWidth(MATCH_PARENT);
-    row.SetRequestedHeight(64.0f);
-    row.SetSpacing(8.0f);
+    row.SetRequestedHeight(mStyle.GetActionRowHeight());
+    row.SetSpacing(mStyle.GetActionButtonSpacing());
     mActionButtonRow = row;
     SetFooterView(row);
   }
 
-  Ui::TextButton button = Ui::TextButton::New(text);
-  button.SetBackgroundColor(UiColor(0x3367D6u));
-  button.SetTextColor(UiColor(0xFFFFFFu));
-  button.SetFontSize(16.0f);
+  Ui::TextButton button = Ui::TextButton::New(text, mActionStyle);
   button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
   row.Add(button);
 

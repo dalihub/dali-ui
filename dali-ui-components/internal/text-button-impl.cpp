@@ -16,6 +16,7 @@
  */
 
 // CLASS HEADER
+#include <dali-ui-components/internal/styles/style-validation.h>
 #include <dali-ui-components/internal/text-button-impl.h>
 
 // EXTERNAL INCLUDES
@@ -119,6 +120,7 @@ UiColor TextButtonImpl::GetTextColor() const
 
 void TextButtonImpl::SetFontSize(float fontSize)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(fontSize) && "TextButton font size must be finite and non-negative");
   mLabel.SetFontSize(fontSize);
 }
 

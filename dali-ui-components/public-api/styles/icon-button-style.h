@@ -1,5 +1,6 @@
 #pragma once
 
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
@@ -96,6 +97,12 @@ public:
   static IconButtonStyle StaticDownCast(UiStyle style);
 
   /**
+   * @brief Copies existing values into an independent Builder without modifying the original style.
+   * @return A Builder that preserves all values, including unset dimensions
+   */
+  Builder Configure() const;
+
+  /**
    * @brief Returns the resource URL of the icon.
    * @return The icon resource URL
    */
@@ -103,13 +110,13 @@ public:
 
   /**
    * @brief Returns the requested width of the icon.
-   * @return The requested width in logical pixels
+   * @return The requested logical-pixel value or layout sentinel; WRAP_CONTENT when omitted.
    */
   float GetIconWidth() const;
 
   /**
    * @brief Returns the requested height of the icon.
-   * @return The requested height in logical pixels
+   * @return The requested logical-pixel value or layout sentinel; WRAP_CONTENT when omitted.
    */
   float GetIconHeight() const;
 
@@ -133,12 +140,20 @@ public: // Not intended for application developers
 
 /**
  * @brief Mutable builder used to create IconButtonStyle handles.
+ *
+ * Icon width and height must be finite and non-negative or WRAP_CONTENT/MATCH_PARENT.
+ * Each padding component must be finite and non-negative. A violation triggers an assertion in the corresponding setter.
+ * Zero is an explicit size, distinct from omission (WRAP_CONTENT). Zero padding means no padding.
  */
 class DALI_UI_COMPONENTS_API IconButtonStyle::Builder
 {
 public:
   /**
-   * @brief Creates an IconButtonStyle builder.
+   * @brief Creates an IconButtonStyle Builder.
+   *
+   * Omitted width and height default to WRAP_CONTENT. IconButton uses the image's natural size,
+   * falling back to the built-in value of 56 on each axis whose size is unknown.
+   * An explicit zero differs from omission; explicit sizes in existing presets are preserved.
    */
   Builder();
 

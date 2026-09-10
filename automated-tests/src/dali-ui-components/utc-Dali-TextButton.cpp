@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-components/dali-ui-components.h>
+#include <limits>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali-ui-test-suite-utils.h>
@@ -33,6 +34,140 @@ void utc_dali_text_button_startup(void)
 void utc_dali_text_button_cleanup(void)
 {
   test_return_value = TET_PASS;
+}
+
+int UtcDaliTextButtonStyleMinimumValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetMinimumWidth(value), "minimum size must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetMinimumHeight(value), "minimum size must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetMinimumSize(Vector2(value, 0.0f)), "minimum size must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetMinimumSize(Vector2(0.0f, value)), "minimum size must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliTextButtonStyleMaximumValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetMaximumWidth(value), "maximum size must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetMaximumHeight(value), "maximum size must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetMaximumSize(Vector2(value, 0.0f)), "maximum size must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetMaximumSize(Vector2(0.0f, value)), "maximum size must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliTextButtonStyleCornerRadiusValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetCornerRadius(value), "corner radius must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetCornerRadius(Vector4(value, 0.0f, 0.0f, 0.0f)), "corner radius must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetCornerRadius(Vector4(0.0f, value, 0.0f, 0.0f)), "corner radius must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetCornerRadius(Vector4(0.0f, 0.0f, value, 0.0f)), "corner radius must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetCornerRadius(Vector4(0.0f, 0.0f, 0.0f, value)), "corner radius must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliTextButtonStylePaddingValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetPadding(value), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetPadding(value, 0.0f), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetPadding(0.0f, value), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetPadding(Insets(value, 0.0f, 0.0f, 0.0f)), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetPadding(Insets(0.0f, value, 0.0f, 0.0f)), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetPadding(Insets(0.0f, 0.0f, value, 0.0f)), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetPadding(Insets(0.0f, 0.0f, 0.0f, value)), "padding must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliTextButtonStyleFontValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(TextButtonStyle::Builder().SetFontSize(value), "font size must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliTextButtonRuntimeNumericValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  TextButton button = TextButton::New();
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(button.SetFontSize(value), "font size must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliTextButtonStyleMinMaxRelationshipN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto width = TextButtonStyle::Builder();
+  width.SetMinimumWidth(12.0f).SetMaximumWidth(11.0f);
+  DALI_TEST_ASSERTION(std::move(width).Build(), "minimum size must not exceed constrained maximum size");
+  // A failed Build must not consume the builder.
+  auto repaired = std::move(width).SetMaximumWidth(12.0f).Build();
+  DALI_TEST_EQUALS(repaired.GetMaximumWidth(), 12.0f, TEST_LOCATION);
+  auto height = TextButtonStyle::Builder();
+  height.SetMaximumHeight(11.0f).SetMinimumHeight(12.0f);
+  DALI_TEST_ASSERTION(std::move(height).Build(), "minimum size must not exceed constrained maximum size");
+  END_TEST;
+}
+
+int UtcDaliTextButtonNumericBoundariesP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto zero = TextButtonStyle::Builder().SetMinimumSize(Vector2::ZERO).SetMaximumSize(Vector2::ZERO)
+                .SetCornerRadius(0.0f).SetPadding(0.0f).SetFontSize(0.0f).Build();
+  TextButton button = TextButton::New(zero);
+  DALI_TEST_EQUALS(button.GetMinimumWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetMinimumHeight(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetMaximumWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetMaximumHeight(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetCornerRadius(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetPadding(), Insets(0.0f, 0.0f), TEST_LOCATION);
+  button.SetFontSize(0.0f);
+  DALI_TEST_EQUALS(button.GetFontSize(), 0.0f, TEST_LOCATION);
+
+  // Cross-field checks belong to Build, not individual setters: both orders work.
+  auto maximumFirst = TextButtonStyle::Builder().SetMaximumSize(Vector2(5.0f, 6.0f))
+                        .SetMinimumSize(Vector2(5.0f, 6.0f)).Build();
+  auto minimumFirst = TextButtonStyle::Builder().SetMinimumSize(Vector2(5.0f, 6.0f))
+                        .SetMaximumSize(Vector2(5.0f, 6.0f)).Build();
+  DALI_TEST_EQUALS(maximumFirst.GetMinimumWidth(), 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(minimumFirst.GetMaximumHeight(), 6.0f, TEST_LOCATION);
+  auto unconstrained = minimumFirst.Configure().SetMaximumSize(Vector2(UNCONSTRAINED_MAX_SIZE, UNCONSTRAINED_MAX_SIZE))
+                         .SetMinimumSize(Vector2(20.0f, 30.0f)).Build();
+  DALI_TEST_EQUALS(unconstrained.GetMaximumWidth(), UNCONSTRAINED_MAX_SIZE, TEST_LOCATION);
+  DALI_TEST_EQUALS(unconstrained.GetMaximumHeight(), UNCONSTRAINED_MAX_SIZE, TEST_LOCATION);
+  DALI_TEST_EQUALS(minimumFirst.GetMinimumWidth(), 5.0f, TEST_LOCATION);
+  END_TEST;
 }
 
 int UtcDaliTextButtonConstructorP(void)

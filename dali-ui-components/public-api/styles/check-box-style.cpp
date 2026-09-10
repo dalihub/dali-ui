@@ -21,6 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/component-image-path.h>
 #include <dali-ui-components/internal/styles/check-box-style-impl.h>
+#include <dali-ui-components/internal/styles/style-validation.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
@@ -230,6 +231,7 @@ namespace Internal
 // Trivial member get/set forwarders.
 void CheckBoxStyleImpl::SetMinimumWidth(float v)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(v) && "CheckBoxStyle minimum size must be finite and non-negative");
   mMinimumWidth = v;
 }
 float CheckBoxStyleImpl::GetMinimumWidth() const
@@ -238,6 +240,7 @@ float CheckBoxStyleImpl::GetMinimumWidth() const
 }
 void CheckBoxStyleImpl::SetMinimumHeight(float v)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(v) && "CheckBoxStyle minimum size must be finite and non-negative");
   mMinimumHeight = v;
 }
 float CheckBoxStyleImpl::GetMinimumHeight() const
@@ -246,6 +249,7 @@ float CheckBoxStyleImpl::GetMinimumHeight() const
 }
 void CheckBoxStyleImpl::SetPadding(const Insets& v)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(v) && "CheckBoxStyle padding must be finite and non-negative");
   mPadding = v;
 }
 Insets CheckBoxStyleImpl::GetPadding() const
@@ -254,6 +258,7 @@ Insets CheckBoxStyleImpl::GetPadding() const
 }
 void CheckBoxStyleImpl::SetIconWidth(float v)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(v) && "CheckBoxStyle icon dimension must be finite and non-negative");
   mIconWidth = v;
 }
 float CheckBoxStyleImpl::GetIconWidth() const
@@ -262,6 +267,7 @@ float CheckBoxStyleImpl::GetIconWidth() const
 }
 void CheckBoxStyleImpl::SetIconHeight(float v)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(v) && "CheckBoxStyle icon dimension must be finite and non-negative");
   mIconHeight = v;
 }
 float CheckBoxStyleImpl::GetIconHeight() const
@@ -270,6 +276,7 @@ float CheckBoxStyleImpl::GetIconHeight() const
 }
 void CheckBoxStyleImpl::SetLabelGap(float v)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(v) && "CheckBoxStyle label gap must be finite and non-negative");
   mLabelGap = v;
 }
 float CheckBoxStyleImpl::GetLabelGap() const
@@ -302,6 +309,7 @@ UiColor CheckBoxStyleImpl::GetTextColor() const
 }
 void CheckBoxStyleImpl::SetFontSize(float v)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(v) && "CheckBoxStyle font size must be finite and non-negative");
   mFontSize = v;
 }
 float CheckBoxStyleImpl::GetFontSize() const

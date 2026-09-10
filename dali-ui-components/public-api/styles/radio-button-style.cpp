@@ -21,6 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/component-image-path.h>
 #include <dali-ui-components/internal/styles/radio-button-style-impl.h>
+#include <dali-ui-components/internal/styles/style-validation.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-color-binding.h>
@@ -340,6 +341,7 @@ RadioButtonStyleImpl::~RadioButtonStyleImpl() = default;
 
 void RadioButtonStyleImpl::SetMinimumWidth(float width)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(width) && "RadioButtonStyle minimum size must be finite and non-negative");
   mMinimumWidth = width;
 }
 
@@ -350,6 +352,7 @@ float RadioButtonStyleImpl::GetMinimumWidth() const
 
 void RadioButtonStyleImpl::SetMinimumHeight(float height)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(height) && "RadioButtonStyle minimum size must be finite and non-negative");
   mMinimumHeight = height;
 }
 
@@ -360,6 +363,7 @@ float RadioButtonStyleImpl::GetMinimumHeight() const
 
 void RadioButtonStyleImpl::SetPadding(const Insets& padding)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(padding) && "RadioButtonStyle padding must be finite and non-negative");
   mPadding = padding;
 }
 

@@ -21,9 +21,11 @@
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/stack-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+#include <dali-ui-foundation/public-api/render-effects/background-blur-effect.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/common/unique-ptr.h>
+#include <cmath>
 
 namespace DALI_NAMESPACE
 {
@@ -47,11 +49,18 @@ DALI_TYPE_REGISTRATION_END()
 
 Ui::Dialog DialogImpl::New()
 {
+  return New(Ui::DialogStyle::Default());
+}
+
+Ui::Dialog DialogImpl::New(Ui::DialogStyle style)
+{
+  DALI_ASSERT_ALWAYS(style && "Dialog style must be initialized");
   IntrusivePtr<DialogImpl> impl = new DialogImpl();
 
   Ui::Dialog handle = Ui::Dialog(*impl);
 
   impl->Initialize();
+  impl->ApplyInitialStyle(style);
 
   return handle;
 }
@@ -65,9 +74,38 @@ DialogImpl::~DialogImpl()
 {
 }
 
+void DialogImpl::ApplyInitialStyle(Ui::DialogStyle style)
+{
+  DALI_ASSERT_ALWAYS(style && "Dialog style must be initialized");
+  Ui::View self = Ui::View::DownCast(Self());
+  self.SetRequestedWidth(style.GetRequestedWidth());
+  self.SetRequestedHeight(style.GetRequestedHeight());
+  self.SetPadding(style.GetPadding());
+  // Keep an empty background on the legacy transparent default path.
+  if(style.GetBackgroundColor() != UiColor(0x000000u, 0.0f))
+  {
+    self.SetBackgroundColor(style.GetBackgroundColor());
+  }
+  self.SetCornerRadius(style.GetCornerRadius());
+  self.SetCornerRadiusPolicy(style.GetCornerRadiusPolicy());
+  self.SetBorderlineWidth(style.GetBorderlineWidth());
+  self.SetBorderlineOffset(style.GetBorderlineOffset());
+  self.SetBorderlineColor(style.GetBorderlineColor());
+  if(style.GetShadow().GetShadowCount() > 0u)
+  {
+    self.SetShadow(style.GetShadow());
+  }
+  if(style.GetBackgroundBlurRadius() > 0.0f)
+  {
+    self.SetRenderEffect(BackgroundBlurEffect::New(static_cast<uint32_t>(style.GetBackgroundBlurRadius())));
+  }
+  SetSpacing(style.GetSpacing());
+}
+
 void DialogImpl::OnInitialize()
 {
   ViewImpl::OnInitialize();
+  Ui::View::DownCast(Self()).SetAccessibilityRole(Ui::Accessibility::Role::DIALOG);
 
   // The dialog stacks its sections vertically.
   AttachLayoutManager(Dali::MakeUnique<StackLayoutManager>(StackOrientation::VERTICAL, 0.0f));
@@ -123,6 +161,7 @@ Ui::View DialogImpl::GetFooterView() const
 
 void DialogImpl::SetSpacing(float spacing)
 {
+  DALI_ASSERT_ALWAYS(std::isfinite(spacing) && spacing >= 0.0f && "Dialog spacing must be finite and non-negative");
   auto* manager = static_cast<StackLayoutManager*>(GetLayoutManager());
   if(manager && manager->GetSpacing() != spacing)
   {

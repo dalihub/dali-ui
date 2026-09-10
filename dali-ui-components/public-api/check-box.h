@@ -76,9 +76,9 @@ public:
   /**
    * @brief Sets/gets the icon (glyph) width/height in logical pixels.
    *
-   * These mirror CheckBoxStyle and can be changed at runtime. A non-positive value is "unset":
-   * the width then follows the resolved icon height and the height follows the content height
-   * (square glyph). The getters return the requested value (0 when unset), not the laid-out size.
+   * Runtime changes follow the same contract as CheckBoxStyle. Only finite, non-negative values are allowed;
+   * a violation triggers an assertion. Zero means unset: the width follows the resolved icon height,
+   * and the height follows the content height (square glyph). Getters return requested values, not actual arranged sizes.
    */
   void  SetIconWidth(float width);
   float GetIconWidth() const;
@@ -92,6 +92,11 @@ public:
   void    SetTextColor(const UiColor& color);
   UiColor GetTextColor() const;
 
+  /**
+   * @brief Sets the font size.
+   * @pre The size must be finite and non-negative; a violation triggers an assertion.
+   * @note Zero is also passed unchanged to the internal Label, without substituting the default preset size.
+   */
   void  SetFontSize(float fontSize);
   float GetFontSize() const;
 

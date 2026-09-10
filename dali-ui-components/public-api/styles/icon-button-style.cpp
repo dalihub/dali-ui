@@ -69,6 +69,10 @@ IconButtonStyle IconButtonStyle::StaticDownCast(UiStyle style)
 {
   return IconButtonStyle(static_cast<Internal::IconButtonStyleImpl*>(style.GetObjectPtr()));
 }
+IconButtonStyle::Builder IconButtonStyle::Configure() const
+{
+  return Builder().SetIconUrl(GetIconUrl()).SetIconWidth(GetIconWidth()).SetIconHeight(GetIconHeight()).SetIconColor(GetIconColor()).SetPadding(GetPadding());
+}
 Dali::String IconButtonStyle::GetIconUrl() const
 {
   return Internal::GetImpl(*this).GetIconUrl();

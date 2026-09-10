@@ -31,7 +31,11 @@ class DummyComponentImpl;
 }
 
 /**
- * @brief Dummy
+ * @brief A minimal example type demonstrating a View-based component structure.
+ *
+ * DummyComponent has no dedicated behavior, style, or signals.
+ * Use View::New() for a general-purpose visual element or child view container.
+ * Its public header and creation and casting APIs are retained for compatibility with existing client code.
  */
 class DALI_UI_COMPONENTS_API DummyComponent : public View
 {
@@ -40,15 +44,15 @@ public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized DummyComponent handle.
    *
-   * Only derived versions can be instantiated. Calling member
-   * functions with an uninitialized Dali::Object is not allowed.
+   * Use New() to create the underlying object; no derived type is required.
+   * Do not call member functions that access the underlying object on an uninitialized handle.
    */
   DummyComponent();
 
   /**
    * @brief Creates an initialized DummyComponent.
    *
-   * @return A handle to a newly allocated Dali resource
+   * @return A handle to the newly created object. Default behavior is inherited from View.
    */
   static DummyComponent New();
 
@@ -68,9 +72,9 @@ public: // Creation & Destruction
   DummyComponent(DummyComponent&& rhs) noexcept;
 
   /**
-   * @brief Virtual destructor.
+   * @brief Destroys the DummyComponent handle.
    *
-   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * This destructor is non-virtual. Do not add data or virtual functions to derived handle types.
    */
   ~DummyComponent();
 

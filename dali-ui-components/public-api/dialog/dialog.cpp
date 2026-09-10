@@ -32,7 +32,12 @@ Dialog::Dialog()
 
 Dialog Dialog::New()
 {
-  return Integration::DialogImpl::New();
+  return New(DialogStyle::Default());
+}
+
+Dialog Dialog::New(DialogStyle style)
+{
+  return Integration::DialogImpl::New(style);
 }
 
 Dialog::Dialog(const Dialog& dialog)

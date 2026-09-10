@@ -19,6 +19,7 @@
 #include <dali-ui-components/public-api/styles/text-button-style.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-components/internal/styles/style-validation.h>
 #include <dali-ui-components/internal/styles/text-button-style-impl.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
@@ -419,6 +420,9 @@ TextButtonStyle::Builder&& TextButtonStyle::Builder::SetTextUnderline(const Text
 TextButtonStyle TextButtonStyle::Builder::Build() &&
 {
   DALI_ASSERT_ALWAYS(mImpl && "TextButtonStyle::Builder has already been consumed");
+  DALI_ASSERT_ALWAYS((mImpl->GetMaximumWidth() == UNCONSTRAINED_MAX_SIZE || mImpl->GetMinimumWidth() <= mImpl->GetMaximumWidth()) &&
+                     (mImpl->GetMaximumHeight() == UNCONSTRAINED_MAX_SIZE || mImpl->GetMinimumHeight() <= mImpl->GetMaximumHeight()) &&
+                     "TextButtonStyle minimum size must not exceed constrained maximum size");
   TextButtonStyle style(mImpl.Get());
   mImpl.Reset();
   return style;
@@ -434,6 +438,7 @@ namespace Internal
 
 void TextButtonStyleImpl::SetMinimumWidth(float width)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(width) && "TextButtonStyle minimum size must be finite and non-negative");
   mMinimumWidth = width;
 }
 
@@ -444,6 +449,7 @@ float TextButtonStyleImpl::GetMinimumWidth() const
 
 void TextButtonStyleImpl::SetMinimumHeight(float height)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(height) && "TextButtonStyle minimum size must be finite and non-negative");
   mMinimumHeight = height;
 }
 
@@ -454,6 +460,7 @@ float TextButtonStyleImpl::GetMinimumHeight() const
 
 void TextButtonStyleImpl::SetMaximumWidth(float width)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsMaximumDimension(width) && "TextButtonStyle maximum size must be finite and non-negative");
   mMaximumWidth = width;
 }
 
@@ -464,6 +471,7 @@ float TextButtonStyleImpl::GetMaximumWidth() const
 
 void TextButtonStyleImpl::SetMaximumHeight(float height)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsMaximumDimension(height) && "TextButtonStyle maximum size must be finite and non-negative");
   mMaximumHeight = height;
 }
 
@@ -474,18 +482,21 @@ float TextButtonStyleImpl::GetMaximumHeight() const
 
 void TextButtonStyleImpl::SetMinimumSize(const Vector2& size)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(size) && "TextButtonStyle minimum size must be finite and non-negative");
   mMinimumWidth  = size.width;
   mMinimumHeight = size.height;
 }
 
 void TextButtonStyleImpl::SetMaximumSize(const Vector2& size)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsMaximumDimension(size.x) && StyleValidation::IsMaximumDimension(size.y) && "TextButtonStyle maximum size must be finite and non-negative");
   mMaximumWidth  = size.width;
   mMaximumHeight = size.height;
 }
 
 void TextButtonStyleImpl::SetCornerRadius(const Vector4& radius)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(radius) && "TextButtonStyle corner radius must be finite and non-negative");
   mCornerRadius = radius;
 }
 
@@ -506,6 +517,7 @@ CornerRadiusPolicy TextButtonStyleImpl::GetCornerRadiusPolicy() const
 
 void TextButtonStyleImpl::SetPadding(const Insets& padding)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(padding) && "TextButtonStyle padding must be finite and non-negative");
   mPadding = padding;
 }
 
@@ -556,6 +568,7 @@ UiColor TextButtonStyleImpl::GetTextColor() const
 
 void TextButtonStyleImpl::SetFontSize(float fontSize)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(fontSize) && "TextButtonStyle font size must be finite and non-negative");
   mFontSize = fontSize;
 }
 

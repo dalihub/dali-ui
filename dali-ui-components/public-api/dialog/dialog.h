@@ -19,6 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog-properties.h>
+#include <dali-ui-components/public-api/styles/dialog-style.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -52,6 +53,9 @@ public:
    * @return A handle to a newly allocated Dali resource
    */
   static Dialog New();
+
+  /** @brief Creates a Dialog with the specified immutable style. Empty styles are not allowed. */
+  static Dialog New(DialogStyle style);
 
   /**
    * @brief Copy constructor.
@@ -96,6 +100,7 @@ public:
 public: // Sections
   /**
    * @brief Sets the header section view (shown at the top).
+   * @note The supplied view retains its padding and appearance; Dialog manages section layout.
    * @param[in] headerView The view to use as the header, or an empty handle to clear it
    */
   void SetHeaderView(View headerView);
@@ -108,6 +113,7 @@ public: // Sections
 
   /**
    * @brief Sets the body section view (shown in the middle).
+   * @note The supplied view retains its padding and appearance; Dialog manages section layout.
    * @param[in] bodyView The view to use as the body, or an empty handle to clear it
    */
   void SetBodyView(View bodyView);
@@ -120,6 +126,7 @@ public: // Sections
 
   /**
    * @brief Sets the footer section view (shown at the bottom).
+   * @note The supplied view retains its padding and appearance; Dialog manages section layout.
    * @param[in] footerView The view to use as the footer, or an empty handle to clear it
    */
   void SetFooterView(View footerView);

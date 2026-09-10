@@ -94,7 +94,7 @@ public:
   Dali::HoverEvent                              mLastHoverEvent;
 
   uint32_t                 mId;             ///< A unique ID to identify the SceneHolder starting from 0
-  Dali::Integration::Scene mScene{nullptr}; ///< The Scene
+  Dali::Integration::Scene  mScene{};        ///< The Scene
   std::string              mName;           ///< The name of the SceneHolder
 
   std::unique_ptr<TestRenderSurface>                              mRenderSurface;

@@ -28,6 +28,7 @@ protected:
 
 private:
   void          ApplyInitialStyle(IconButtonStyle style);
+  void          OnViewStateChanged(Ui::View view, StateEvent event);
   Ui::ImageView mIcon;
 };
 

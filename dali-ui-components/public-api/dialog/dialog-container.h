@@ -19,6 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog-properties.h>
+#include <dali-ui-components/public-api/styles/dialog-container-style.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -51,6 +52,9 @@ class DALI_UI_COMPONENTS_API DialogContainer : public View
 public:
   DialogContainer();
   static DialogContainer New();
+
+  /** @brief Creates a DialogContainer with the specified immutable style. Empty styles are not allowed. */
+  static DialogContainer New(DialogContainerStyle style);
   DialogContainer(const DialogContainer& dialogContainer);
   DialogContainer(DialogContainer&& rhs) noexcept;
   ~DialogContainer();
@@ -67,6 +71,10 @@ public: // Content
    *
    * The content's position and size follow its own layout parameters; set
    * AbsoluteLayoutParams with POSITION_PROPORTIONAL to center it.
+   * @note Enables accessibility modality while held and restores the original explicit value on removal, transfer, or container destruction.
+   * The role is unchanged. Setting the same handle again has no effect.
+   * If called again from a synchronous scene callback on the content, the latest request takes precedence.
+   * The caller is responsible for focus movement and restoration, key handling, and dismissal policy.
    * @param[in] modalContent The content view, or an empty handle to clear it
    */
   void SetModalContent(View modalContent);

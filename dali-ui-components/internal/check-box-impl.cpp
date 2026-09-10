@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include <dali-ui-components/internal/check-box-impl.h>
+#include <dali-ui-components/internal/styles/style-validation.h>
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry-helper.h>
@@ -91,6 +92,7 @@ SelectionAnimationMode CheckBoxImpl::GetSelectionAnimationMode() const
 
 void CheckBoxImpl::SetIconWidth(float width)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(width) && "CheckBox icon dimension must be finite and non-negative");
   mIconWidth = width;
   InvalidateMeasure(); // the glyph column width changes the measured size
 }
@@ -102,6 +104,7 @@ float CheckBoxImpl::GetIconWidth() const
 
 void CheckBoxImpl::SetIconHeight(float height)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(height) && "CheckBox icon dimension must be finite and non-negative");
   mIconHeight = height;
   InvalidateMeasure(); // the glyph row height changes the measured size
 }
@@ -123,6 +126,7 @@ UiColor CheckBoxImpl::GetTextColor() const
 
 void CheckBoxImpl::SetFontSize(float fontSize)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(fontSize) && "CheckBox font size must be finite and non-negative");
   mLabel.SetFontSize(fontSize);
 }
 

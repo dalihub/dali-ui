@@ -118,6 +118,14 @@ public: // Not intended for application developers
 
 /**
  * @brief Mutable builder used to create TextButtonStyle handles.
+ *
+ * Each minimum-size, padding, corner-radius, and font-size component must be finite and non-negative;
+ * a violation triggers an assertion in the corresponding setter. Scalar and vector overloads share this contract.
+ * Zero is allowed: a zero minimum size means no lower bound, and zero padding/radius means no padding/rounding.
+ * A zero font size is passed unchanged to the internal Label, without substituting the default preset size.
+ * Maximum sizes must be finite and non-negative or UNCONSTRAINED_MAX_SIZE (no upper bound).
+ * Build() checks that each axis's minimum does not exceed its constrained maximum, so setters can be called in any order.
+ * If Build() fails because of an invalid size relationship, the Builder is not consumed and can be corrected and built again.
  */
 class DALI_UI_COMPONENTS_API TextButtonStyle::Builder
 {
@@ -191,6 +199,10 @@ public:
   Builder&  SetTextUnderline(const Text::Underline& underline) &;
   Builder&& SetTextUnderline(const Text::Underline& underline) &&;
 
+  /**
+   * @brief Builds an immutable style from the configured values.
+   * @pre Each axis's minimum size must not exceed its constrained maximum size.
+   */
   TextButtonStyle Build() &&;
 
 private:
