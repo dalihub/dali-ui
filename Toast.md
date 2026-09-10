@@ -2,13 +2,12 @@
 
 # DALi UI Components - Toast
 
-`Dali::Ui::Toast` presents a transient, non-modal message above a specific
-`Window`. Its behavior and visual proportions follow the OneUI Snackbar model,
-while its API, immutable `ToastStyle`, and handle/body implementation follow
-DALi UI component conventions.
+`Dali::Ui::Toast` displays brief, non-modal feedback above a specific `Window`.
+It follows the One UI Toast structure with message text and an optional icon,
+requires no response, and disappears after a finite duration.
 
-Toast is not a `Navigator` page or a dialog. `Post(window)` attaches it to that
-Window's overlay layer; `Dismiss()` removes it after the exit animation.
+Toast does not provide Snackbar actions or an expanded state. Use another
+component when the user must make a choice or invoke an action.
 
 ## 1. Setup and basic use
 
@@ -24,117 +23,122 @@ Toast toast = Toast::New("Saved", Toast::Duration::SHORT);
 toast.Post(window);
 ```
 
-`Post()` intentionally requires an initialized `Window`. There is no no-argument
-overload and an empty Window triggers a DALi assertion.
+`Post()` requires an initialized `Window` and attaches the Toast to that
+Window's overlay layer. An empty Window triggers a DALi assertion.
 
-## 2. Duration and dismissal
+## 2. Content and duration
 
-The built-in millisecond values are:
+A Toast contains one text message and may also contain an icon. Text wraps
+naturally without a fixed line-count limit. The configured maximum Toast height
+constrains visible content, and overflowing text is ellipsized.
+
+```cpp
+toast.SetText("Network connection restored");
+toast.SetDuration(Toast::Duration::LONG);
+toast.Post(window);
+```
+
+Set an icon URL to use the icon-and-text variant. The icon is created lazily
+and appears before the text. Setting an empty URL removes it from layout.
+
+```cpp
+toast.SetIconResourceUrl("images/saved.png");
+toast.SetIconColor(UiColor(Color::WHITE));
+toast.SetIconSynchronousLoading(false);
+
+toast.SetIconResourceUrl(""); // Return to the text-only variant.
+```
+
+The predefined durations are:
 
 | Value | Duration |
 |---|---:|
 | `Toast::Duration::SHORT` | 1500 ms |
 | `Toast::Duration::LONG` | 2500 ms |
-| `Toast::Duration::INDEFINITE` | No automatic timeout |
 
-```cpp
-toast.SetDuration(Toast::Duration::LONG);
-toast.Post(window);
+All durations are finite and must be greater than zero. As in One UI Components,
+the timeout starts when `Post()` is called, in parallel with the entrance
+transition. Changing the duration while a Toast is posted restarts its timeout.
 
-// May be called while posting, shown, or expanding.
-toast.Dismiss();
-```
-
-The timeout starts when posting begins and the first action click stops it.
-Calling `Post(window)` again on the same Toast replaces its active presentation
-without emitting `HiddenSignal()` for the superseded presentation.
-
-## 3. Optional two-stage action
-
-The action button defaults to the text `Button`. Set an empty string to hide it.
-
-```cpp
-toast.SetActionButtonText("Details");
-toast.ActionButtonClickedSignal().Connect(
-  this,
-  [](Toast toast, Toast::ActionStage stage) {
-    if(stage == Toast::ActionStage::CONFIRM_IN_DEFAULT_MODE)
-    {
-      // The first click is followed by expansion.
-    }
-    else
-    {
-      // The second click is followed by dismissal.
-    }
-  });
-```
-
-The first action click emits `CONFIRM_IN_DEFAULT_MODE`, stops the current
-timeout, and expands the Toast. The second emits
-`CONFIRM_IN_EXPANDED_MODE` and dismisses it.
-
-## 4. Lifecycle signals
+## 3. Dismissal and lifecycle signals
 
 ```cpp
 toast.ShownSignal().Connect(this, &Controller::OnToastShown);
 toast.HiddenSignal().Connect(this, &Controller::OnToastHidden);
+
+toast.Post(window);
+toast.Dismiss();
 ```
 
-- `ShownSignal()` is emitted once per post lifecycle after visible content is
-  ready. If expansion interrupts posting, expansion completion emits it.
-- `HiddenSignal()` is emitted after explicit, timeout, action, or external
-  removal cleanup completes.
-- Destroying an already detached Toast does not emit lifecycle signals.
+- `ShownSignal()` is emitted after the entrance transition finishes.
+- `HiddenSignal()` is emitted after timeout, explicit dismissal, or external
+  removal cleanup finishes.
+- `Dismiss()` has no effect when the Toast is already detached or dismissing.
+- Reposting the same Toast replaces its active presentation without emitting
+  `HiddenSignal()` for the superseded presentation.
 
-Different Toast instances may coexist because this component does not provide
-a global queue or manager.
+Different Toast instances may coexist because the component does not provide a
+global queue or manager.
 
-## 5. Content properties
+## 4. ToastStyle
 
-The following properties can be changed before or during presentation:
+`ToastStyle` holds the visual and layout values used by Toast:
 
-```cpp
-toast.SetText("Network connection restored");
-toast.SetTextColor(UiColor(0xFFFFFFu));
-toast.SetFontSize(28.0f);
-toast.SetFontFamily("SamsungOneUI400");
-toast.SetActionButtonText("Open");
-toast.SetActionButtonTextColor(UiColor(0x010102u));
-toast.SetItemSpacing(20.0f);
-```
+- maximum width ratio
+- maximum height and Window-relative bottom offset ratio
+- content padding, icon/text spacing, and corner radius
+- background and text colors
+- font size and family
+- icon size, corner radius, and color
+- shadow and borderline
 
-## 6. ToastStyle
-
-Clone the configured default and build an immutable style:
+Create a custom immutable style by configuring an existing style:
 
 ```cpp
 ToastStyle style = ToastStyle::Default()
                      .Configure()
+                     .SetMaximumWidthRatio(0.75f)
+                     .SetMaximumHeight(120.0f)
+                     .SetBottomOffsetRatio(0.08f)
+                     .SetItemSpacing(12.0f)
+                     .SetPadding(Insets(24.0f, 24.0f, 12.0f, 12.0f))
                      .SetBackgroundColor(UiColor(0x23465Du))
                      .SetTextColor(UiColor(0xFFFFFFu))
                      .SetCornerRadius(Vector4(20.0f, 20.0f, 20.0f, 20.0f))
-                     .SetMaximumWidthRatio(0.75f)
                      .Build();
 
 Toast toast = Toast::New("Custom style", Toast::Duration::LONG, style);
 ```
 
-`ToastStyle` contains geometry, padding, spacing, color, typography, shadow,
-border, and action-button style values. Transition durations and easing are
-intrinsic Toast behavior and are deliberately not style properties.
+The built-in One UI values are:
 
-The default maximum width is 68% of the Window width. A non-zero absolute
-maximum additionally caps it. The default bottom offset is 5% of Window
-height. Window resize recomputes these values.
+| Value | Default |
+|---|---:|
+| Maximum width | 68% of Window width |
+| Maximum height | 112 |
+| Bottom offset | 5% of Window height |
+| Padding | horizontal 32, vertical 16 |
+| Icon/text spacing | 16 |
+| Corner radius | 36 |
+| Icon size / radius | 36 × 36 / 0 |
+| Font | SamsungOneUI400, 28 |
+| Borderline | width 2, offset -1, `OutlineACC` |
+| Background / text | `SurfaceFixed` / `OnSurfaceContainerFixedVariantBright` |
 
-## 7. Accessibility and localization
+The Toast recomputes its position and size when the Window is resized. It also
+moves above a visible input panel when the focused view is an `InputField` or
+`InputEditor`. Entrance and exit each use the One UI 300 ms opacity-and-vertical
+motion curve; transition timing is intrinsic behavior rather than a style
+property.
 
-The root uses the `NOTIFICATION` accessibility role and is not independently
-highlightable. The message Label is hidden from the accessibility tree while
-the optional action remains operable.
+## 5. Accessibility and localization
+
+The Toast uses the `NOTIFICATION` accessibility role. Its accessible name is
+the message text; the internal Label is hidden from the accessibility tree to
+avoid duplicate announcements.
 
 Toast has no Toast-specific translation type. Bind application resources to
-its ordinary setters with `UiLocalizationManager`:
+`SetText()` with `UiLocalizationManager`:
 
 ```cpp
 UiLocalizationManager::Get().SetBindingResource(
@@ -153,12 +157,10 @@ void MyApp::ApplyToastText(BaseHandle target, const Dali::String& text)
 }
 ```
 
-The same mechanism can bind the action-button text.
+## 6. Sample and GBS package
 
-## 8. Sample and GBS package
-
-The interactive sample covers short, long, indefinite, action-less, custom
-style, explicit dismissal, and signal-count paths.
+The interactive sample covers text-only, optional-icon, short, long,
+long-text, custom-style, explicit-dismissal, and lifecycle-signal paths.
 
 ```sh
 cmake -S samples/toast -B samples/toast/build
