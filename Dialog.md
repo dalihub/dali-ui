@@ -7,6 +7,82 @@ dialog content above a scrim.
 
 Dialogs are usually shown modally through [Navigator](Navigator.md).
 
+## Reusable styles
+
+For an interactive comparison and modal lifecycle checks, see the registered
+[Dialog manual scenario](../manual-tests/dali-ui-components/tc/tc-dialog-basics.md).
+
+All three types accept an immutable typed style: `Dialog::New(DialogStyle)`,
+`AlertDialog::New(AlertDialogStyle)`, and `DialogContainer::New(DialogContainerStyle)`.
+`New()` uses the matching `Default()`. Each style supports `DefaultKey()`,
+`DefaultPreset()`, `Default()`, `Configure()`, and a move-only `Builder`.
+`Build()` consumes the builder. Passing an empty style to `New(style)` asserts.
+
+```cpp
+auto appearance = DialogStyle::Default().Configure()
+  .SetBackgroundColor(UiColor::SURFACE)
+  .SetPadding(Insets(24.0f, 16.0f))
+  .SetSpacing(12.0f).Build();
+auto actions = TextButtonStyle::Default().Configure()
+  .SetTextColor(UiColor::PRIMARY).Build();
+auto style = AlertDialogStyle::Default().Configure()
+  .SetDialogStyle(appearance).SetActionButtonStyle(actions)
+  .SetTitleFontSize(24.0f).Build();
+auto alert = AlertDialog::New(style);
+alert.SetTitle("Delete item?");
+alert.SetMessage("This action cannot be undone.");
+alert.AddActionButton("Cancel");
+
+auto container = DialogContainer::New(DialogContainerStyle::Default().Configure()
+  .SetScrimColor(UiColor(0x000000u, 0.6f)).Build());
+container.SetModalContent(alert);
+```
+
+Register custom default creators with `config.StyleSheet().SetStyle(TypeStyle::DefaultKey(), creator)`
+before applying the Components config. A creator must use `DefaultPreset()` or a
+builder, not recursively call its own `Default()`.
+
+`DialogStyle` owns the dialog's requested size, background, overall padding,
+section spacing, corners, shadows, borders, and blur. The supplied header, body,
+and footer Views own their padding and appearance. Configure each View directly
+before attaching it; Dialog does not override those values when attaching,
+replacing, or reordering sections. Section layout and alignment remain managed
+by Dialog.
+
+```cpp
+auto header = Label::New("Custom header");
+header.SetPadding(Insets(8.0f, 4.0f));
+dialog.SetHeaderView(header);
+```
+
+`AlertDialogStyle` composes a `DialogStyle` and `TextButtonStyle`, and adds title/message
+font/color and action-row height/spacing. Empty nested styles select the documented
+defaults at creation. An explicit action style is used without Alert's legacy color/font
+overrides. The implicit action style retains configured TextButton geometry/effects
+and the existing Alert color/font defaults. Existing generated labels retain their
+identity and custom font/color on text updates; clearing text removes that section.
+
+`DialogContainerStyle` affects only its generated scrim. Replacing the scrim preserves
+the supplied view's color/effect. The default scrim remains clickable but does not take
+keyboard or touch focus.
+
+Both blur-radius setters accept finite values in `[0, 4096]`; zero disables blur,
+and fractional parts are truncated when creating the effect. Larger values assert
+to prevent unsafe conversion and excessive renderer-side radius reduction.
+
+`Dialog` and `AlertDialog` expose the accessibility Dialog role. `DialogContainer`
+temporarily marks its content modal, preserves its role, and restores the prior
+explicit modal flag on removal, transfer, or destruction. Reinstalling the same
+handle is a no-op. This is distinct from the implicit modal state of a Dialog role.
+Showing notifications follow actual accessible visibility, including scene removal,
+ancestor visibility, world alpha, and culling. Applications still own focus placement,
+focus restoration, accessible names, dismissal callbacks, and keyboard policy.
+State UTCs are not evidence of actual screen-reader speech or D-Bus delivery.
+
+These APIs preserve the existing default appearance; they do not silently apply OneUI
+pixel values. `UiColor` tokens remain tokens. Styles apply at construction, not as a
+live replacement of subsequent instance overrides. See the [buildable sample](../samples/dialog/README.md).
+
 ---
 
 ## Basic Setup
