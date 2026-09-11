@@ -2071,7 +2071,11 @@ void InputFieldImpl::OnPanDetected(Actor actor, PanGesture gesture)
 
 void InputFieldImpl::OnLongPressDetected(Actor actor, LongPressGesture gesture)
 {
-  if(mInputMethodContext && IsEditable())
+  // A background long press may update a deferred target, but must not activate
+  // its IME before the Window owns input. Retained key focus alone is not enough.
+  auto focusManager = Ui::FocusManager::Get();
+  if(mInputMethodContext && IsEditable() && focusManager &&
+     GetImpl(focusManager).IsActiveWindow(Dali::Integration::SceneHolder::Get(Self())))
   {
     Dali::Integration::InputMethodContext::Activate(mInputMethodContext);
   }

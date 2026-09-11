@@ -89,6 +89,7 @@ public:
   void                                       Show();
   void                                       Hide();
   bool                                       IsVisible() const;
+  bool IsFocused() const;
   FocusChangedSignalType&                     FocusChangedSignal();
   ResizedSignalType&                          ResizedSignal();
   MovedSignalType&                            MovedSignal();

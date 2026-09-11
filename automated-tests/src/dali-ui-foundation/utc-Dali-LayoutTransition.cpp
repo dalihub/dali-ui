@@ -37,6 +37,180 @@ void utc_dali_layouttransition_cleanup(void)
   test_return_value = TET_PASS;
 }
 
+namespace
+{
+struct ExitFocusProbe : ConnectionTracker
+{
+  void Animate(const LayoutAnimatorContext&)
+  {
+  }
+
+  void OnStart(View, LayoutTransitionSlot)
+  {
+    ++starts;
+  }
+
+  void OnFocusChanged(View previous, View current)
+  {
+    ++focusChanges;
+    if(reparentOnLoss && previous && !current && !reparented)
+    {
+      reparented = true;
+      destination.Add(previous);
+    }
+  }
+
+  FocusNavigationResult Navigate(View current, FocusNavigationContext)
+  {
+    ++navigationCalls;
+    navigationSource = current;
+    return FocusNavigationResult::Stay();
+  }
+
+  View destination;
+  View navigationSource;
+  int starts{0};
+  int focusChanges{0};
+  int navigationCalls{0};
+  bool reparentOnLoss{false};
+  bool reparented{false};
+};
+
+// mode 0: retained A exits while B is reserved; mode 1: reserved B exits;
+// mode 2: focus-lost reparents A while its EXIT state is being registered.
+void CheckExitFocusInvalidation(bool animator, int mode)
+{
+  UiTestApplication application;
+  ExitFocusProbe probe;
+  Window window = application.GetWindow();
+  FocusManager manager = FocusManager::Get();
+  manager.SetClearFocusOnWindowFocusLost(false);
+  View parent = View::New();
+  parent.SetRequestedWidth(300.0f);
+  parent.SetRequestedHeight(100.0f);
+  window.Add(parent);
+  View current = View::New();
+  View deferred = View::New();
+  for(View view : {current, deferred})
+  {
+    view.SetFocusable(true);
+    view.SetRequestedWidth(50.0f);
+    view.SetRequestedHeight(50.0f);
+    parent.Add(view);
+  }
+  probe.destination = View::New();
+  window.Add(probe.destination);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition transition = LayoutTransition::New();
+  if(animator)
+  {
+    LayoutAnimatorTiming timing{Duration(60.0f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+    transition.SetExitAnimator(LayoutAnimatorCallback::New(&probe, &ExitFocusProbe::Animate), timing);
+  }
+  else
+  {
+    ViewAnimationSpec exitSpec = ViewAnimationSpec::New();
+    exitSpec.Opacity(0.0f, Duration(60.0f));
+    transition.SetExitVisualSpec(exitSpec);
+  }
+  transition.SetOnStart(LayoutLifecycleCallback::New(&probe, &ExitFocusProbe::OnStart));
+  parent.SetLayoutTransition(transition);
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(current));
+  if(mode != 2)
+  {
+    window.Lower();
+    DALI_TEST_CHECK(manager.SetCurrentFocusView(deferred));
+  }
+  probe.reparentOnLoss = mode == 2;
+  manager.FocusChangedSignal().Connect(&probe, &ExitFocusProbe::OnFocusChanged);
+
+  View exiting = mode == 1 ? deferred : current;
+  parent.Remove(exiting, RemovePolicy::ANIMATE_EXIT);
+  if(mode == 2)
+  {
+    DALI_TEST_CHECK(probe.reparented);
+    DALI_TEST_CHECK(current.GetParent() == probe.destination);
+    DALI_TEST_CHECK(current.IsFocusable());
+    DALI_TEST_CHECK(probe.focusChanges == 1);
+    DALI_TEST_CHECK(probe.starts == 0);
+    DALI_TEST_CHECK(!manager.GetCurrentFocusView());
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(current.GetParent() == probe.destination);
+    DALI_TEST_CHECK(probe.starts == 0);
+    return;
+  }
+
+  // The ghost has not disconnected yet: invalidation must happen at EXIT entry.
+  DALI_TEST_CHECK(exiting.IsConnectedToScene());
+  DALI_TEST_CHECK(exiting.GetParent() == parent);
+  DALI_TEST_CHECK(!exiting.IsFocusable());
+  DALI_TEST_CHECK(probe.starts == 1);
+  if(mode == 0)
+  {
+    DALI_TEST_CHECK(!manager.GetCurrentFocusView());
+    DALI_TEST_CHECK(probe.focusChanges == 1);
+    window.Raise();
+    DALI_TEST_CHECK(manager.GetCurrentFocusView() == deferred);
+    DALI_TEST_CHECK(deferred.GetState().Contains(ViewState::FOCUSED));
+    DALI_TEST_CHECK(probe.focusChanges == 2);
+  }
+  else
+  {
+    DALI_TEST_CHECK(manager.GetCurrentFocusView() == current);
+    DALI_TEST_CHECK(probe.focusChanges == 0);
+    // A Stay fallback observes the saved cursor without replacing it. It must
+    // already be empty, rather than retaining the non-focusable EXIT ghost.
+    manager.SetFocusNavigationFallback(FocusNavigationCallback::New(&probe, &ExitFocusProbe::Navigate));
+    DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::RIGHT));
+    DALI_TEST_CHECK(probe.navigationCalls == 1);
+    DALI_TEST_CHECK(!probe.navigationSource);
+    manager.SetFocusNavigationFallback({});
+    window.Raise();
+    DALI_TEST_CHECK(!manager.GetCurrentFocusView());
+    DALI_TEST_CHECK(probe.focusChanges == 1);
+  }
+}
+} // namespace
+
+int UtcDaliLayoutTransitionExitSpecPreservesOtherDeferredFocusP(void)
+{
+  CheckExitFocusInvalidation(false, 0);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionExitAnimatorPreservesOtherDeferredFocusP(void)
+{
+  CheckExitFocusInvalidation(true, 0);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionExitSpecCancelsDeferredGhostFocusP(void)
+{
+  CheckExitFocusInvalidation(false, 1);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionExitAnimatorCancelsDeferredGhostFocusP(void)
+{
+  CheckExitFocusInvalidation(true, 1);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionExitSpecFocusLostReparentCancelsBeforeStartP(void)
+{
+  CheckExitFocusInvalidation(false, 2);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionExitAnimatorFocusLostReparentCancelsBeforeStartP(void)
+{
+  CheckExitFocusInvalidation(true, 2);
+  END_TEST;
+}
+
 // ─── Handle lifecycle ─────────────────────────────────────────────────────
 
 int UtcDaliLayoutTransitionConstructorN(void)

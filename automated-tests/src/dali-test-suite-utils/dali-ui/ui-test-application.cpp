@@ -107,6 +107,8 @@ void UiTestApplication::EmitApplicationInitialize()
   AdaptorImpl::GetImpl(*mAdaptor).SetApplication(*this);
 
   Dali::LifecycleController lifecycleController = Dali::LifecycleController::Get();
+  // The initial Window is focused before FocusManager starts observing events.
+  mMainWindow.Raise();
   lifecycleController.PreInitSignal().Emit();
   lifecycleController.InitSignal().Emit();
 }

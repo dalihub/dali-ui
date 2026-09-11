@@ -32,6 +32,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
+#include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-direction-utils.h>
 #include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
@@ -348,7 +349,7 @@ LayoutTransitionDispatcher::InteractionSnapshot
 LayoutTransitionDispatcher::SaveAndDisableGhostInteraction(Dali::Actor actor)
 {
   // Snapshot + property writes only. Focus clearing is intentionally NOT
-  // performed here: ClearFocus emits FocusChangedSignal synchronously, and
+  // performed here: invalidating actual focus emits FocusChangedSignal synchronously, and
   // an application listener that mutates the view tree (e.g. reparents the
   // ghost child to another parent) would re-enter the dispatcher before the
   // EXIT state has been registered, leaving CancelActiveAnimator /
@@ -372,7 +373,7 @@ LayoutTransitionDispatcher::SaveAndDisableGhostInteraction(Dali::Actor actor)
 
 void LayoutTransitionDispatcher::ClearGhostFocusIfHeld(Dali::Actor actor)
 {
-  // Called AFTER the EXIT state has been registered. ClearFocus emits
+  // Called AFTER the EXIT state has been registered. Actual-focus invalidation emits
   // FocusChangedSignal synchronously, so a listener that reparents the
   // ghost child re-enters NotifyChildReparented → OnChildReparented, which
   // can now find the registered state and cancel it cleanly. The caller
@@ -384,9 +385,13 @@ void LayoutTransitionDispatcher::ClearGhostFocusIfHeld(Dali::Actor actor)
     return;
   }
   Ui::FocusManager fm = Ui::FocusManager::Get();
-  if(fm && fm.GetCurrentFocusView() == view)
+  if(fm)
   {
-    fm.ClearFocus();
+    // With clear-on-loss=false, exiting retained A must not cancel a different
+    // reserved B as explicit ClearFocus() would. Invalidate only the ghost.
+    // Also cancel a reservation held by the ghost itself, even when it has no
+    // actual focus: ANIMATE_EXIT keeps it on scene until the animation finishes.
+    GetImpl(fm).InvalidateFocusView(view);
   }
 }
 
@@ -1963,7 +1968,7 @@ void LayoutTransitionDispatcher::StartAnimatorExit(ViewImpl*             parent,
   // Clear focus AFTER registration so the synchronous FocusChangedSignal
   // re-entry (reparent of the ghost child to a new parent) reaches
   // OnChildReparented → CancelActiveAnimator and finds the just-inserted
-  // entry to remove. Without this ordering, a reparent during ClearFocus
+  // entry to remove. Without this ordering, a reparent during focus invalidation
   // would leave a stale EXIT animator driving the child under its new
   // parent and emit a spurious OnStart.
   ClearGhostFocusIfHeld(child);

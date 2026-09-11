@@ -89,6 +89,7 @@ public:
   std::vector<std::pair<std::unique_ptr<Dali::CallbackBase>, int32_t>> mFramePresentedCallbacks;
   bool                                      mMaximized{false};
   bool                                      mMinimized{false};
+  bool mFocused{false};
 };
 
 } // namespace Adaptor

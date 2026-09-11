@@ -417,8 +417,8 @@ private:
   /// and cancelled by @c OnChildReparented.
   static InteractionSnapshot SaveAndDisableGhostInteraction(Dali::Actor actor);
 
-  /// If @p actor currently holds keyboard focus, clears it via
-  /// @c FocusManager::ClearFocus. Must be called only AFTER the EXIT
+  /// Invalidates @p actor's actual focus and saved target without cancelling
+  /// another View's reservation. Must be called only AFTER the EXIT
   /// state has been registered (see @c SaveAndDisableGhostInteraction
   /// note); the caller must re-check that its registration still exists
   /// before emitting @c OnStart or arming the animator timer.

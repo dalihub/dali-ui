@@ -3978,9 +3978,12 @@ void ViewDataImpl::OnPropertySet(Property::Index index, const Property::Value& p
       const bool enabled = propertyValue.Get<bool>();
       View       self    = View::DownCast(mViewImpl.Self());
 
-      if(!enabled && self == Dali::Ui::FocusManager::Get().GetCurrentFocusView())
+      if(!enabled)
       {
-        Dali::Ui::FocusManager::Get().ClearFocus();
+        // Disabling retained A is not an application's request to cancel a
+        // different deferred B. Invalidate only this View and its own record.
+        auto focusManager = Dali::Ui::FocusManager::Get();
+        GetImpl(focusManager).InvalidateFocusView(self);
       }
 
       ExtensionView::SetState(mViewImpl, ViewState::DISABLED, !enabled);

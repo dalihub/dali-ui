@@ -318,18 +318,55 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
      (currentWindow = Dali::Integration::SceneHolder::Get(view))) ///< Note : SceneHolder might not be valid even if view is connected to scene.
                                                                   ///         (e.g. Adaptor Stopped, SceneHolder removed but Scene is still alive)
   {
+    View               currentFocusedView = GetCurrentFocusView();
+    FocusChangeContext effectiveContext   = context;
+    if(IsActiveWindow(currentWindow) && view != currentFocusedView)
+    {
+      const bool previousFocusIndicated = currentFocusedView && GetImpl(currentFocusedView).GetState().Contains(ViewState::FOCUS_INDICATED);
+      const bool proposedIndicated      = ShouldIndicateFocus(context, previousFocusIndicated);
+      effectiveContext.focusIndicated   = mFocusIndicationPolicy({currentFocusedView, view, context.device, context.inputEvent, previousFocusIndicated, proposedIndicated});
+    }
+
+    // The indication policy can request focus on another View reentrantly.
+    // Storing before that callback would leave its nested target as the saved
+    // cursor even though this outer request applies actual focus afterward.
+    // Store after the callback so navigation starts from the actual focus View.
+    Layer targetRootLayer    = currentWindow.GetRootLayer();
+    bool  focusedWindowFound = false;
+    View  previousStoredView;
+    for(unsigned int i = 0; i < mCurrentFocusViews.size(); i++)
+    {
+      if(mCurrentFocusViews[i].first.GetHandle() == targetRootLayer)
+      {
+        previousStoredView           = mCurrentFocusViews[i].second.GetHandle();
+        mCurrentFocusViews[i].second = view;
+        focusedWindowFound           = true;
+        break;
+      }
+    }
+    if(!focusedWindowFound)
+    {
+      // Store the first requested focus target for this Window.
+      mCurrentFocusViews.push_back(std::pair<WeakHandle<Layer>, WeakHandle<View>>(targetRootLayer, view));
+    }
+
+    // Deferred targets must also be observed. Otherwise removing and reattaching
+    // one before activation makes a cancelled request look valid again.
+    view.SceneDisconnectedSignal().Connect(mSlotDelegate, &FocusManager::OnStoredFocusViewDisconnection);
+    DisconnectFocusViewIfUnused(previousStoredView);
+
+    // Recheck activation after the callback. A background request only stores.
+    if(!IsActiveWindow(currentWindow))
+    {
+      return true;
+    }
+
     // If developer set focus on same view, doing nothing
-    View currentFocusedView = GetCurrentFocusView();
     DALI_LOG_DEBUG_INFO("current focused view : [%p] new focused view : [%p]\n", currentFocusedView.GetObjectPtr(), view.GetObjectPtr());
     if(view == currentFocusedView)
     {
       return true;
     }
-
-    FocusChangeContext effectiveContext       = context;
-    const bool         previousFocusIndicated = currentFocusedView && GetImpl(currentFocusedView).GetState().Contains(ViewState::FOCUS_INDICATED);
-    const bool         proposedIndicated      = ShouldIndicateFocus(context, previousFocusIndicated);
-    effectiveContext.focusIndicated           = mFocusIndicationPolicy({currentFocusedView, view, context.device, context.inputEvent, previousFocusIndicated, proposedIndicated});
 
     if(currentWindow.GetRootLayer() != mCurrentFocusedWindow.GetHandle())
     {
@@ -338,29 +375,13 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
       mCurrentWindowId      = static_cast<uint32_t>(currentWindow.GetNativeId());
     }
 
-    view.SceneDisconnectedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
-
     // Save the current focused view
+    view.SceneDisconnectedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
     mCurrentFocusView = view;
+    DisconnectFocusViewIfUnused(currentFocusedView);
 
     // Save the last focus change context before KeyInputFocusManager notifies Views.
     mLastFocusChangeContext = effectiveContext;
-
-    bool focusedWindowFound = false;
-    for(unsigned int i = 0; i < mCurrentFocusViews.size(); i++)
-    {
-      if(mCurrentFocusViews[i].first == mCurrentFocusedWindow)
-      {
-        mCurrentFocusViews[i].second = view;
-        focusedWindowFound           = true;
-        break;
-      }
-    }
-    if(!focusedWindowFound)
-    {
-      // A new window gains the focus, so store the focused view in that window.
-      mCurrentFocusViews.push_back(std::pair<WeakHandle<Layer>, WeakHandle<View>>(mCurrentFocusedWindow, view));
-    }
 
     if(currentFocusedView && currentFocusedView.IsConnectedToScene())
     {
@@ -380,8 +401,12 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
       mFocusChangedSignal.Emit(currentFocusedView, view);
     }
 
-    // Push Current Focused View to FocusHistory
-    mFocusHistory.push_back(view);
+    // Backward keeps its selected entry even for a deferred request. Restoring
+    // that target must not duplicate the entry and consume the next backward.
+    if(mFocusHistory.empty() || mFocusHistory.back().GetHandle() != view)
+    {
+      mFocusHistory.push_back(view);
+    }
 
     // Delete first element before add new element when Stack is full.
     if(mFocusHistory.size() > MAX_HISTORY_AMOUNT)
@@ -414,24 +439,40 @@ View FocusManager::GetCurrentFocusView()
   return view;
 }
 
-View FocusManager::GetFocusViewFromCurrentWindow()
+bool FocusManager::IsActiveWindow(Dali::Integration::SceneHolder sceneHolder) const
+{
+  Window window = Window::DownCast(sceneHolder);
+  if(!window || !window.IsFocused())
+  {
+    return false;
+  }
+
+  // A new focus-in may precede the old Window's focus-out notification.
+  Layer  rootLayer     = mCurrentFocusedWindow.GetHandle();
+  Window currentWindow = rootLayer ? Window::DownCast(Dali::Integration::SceneHolder::Get(rootLayer)) : Window();
+  return !currentWindow || currentWindow == window || !currentWindow.IsFocused();
+}
+
+View FocusManager::GetFocusViewFromWindow(Layer rootLayer)
 {
   View         view;
   unsigned int index;
   for(index = 0; index < mCurrentFocusViews.size(); index++)
   {
-    if(mCurrentFocusViews[index].first == mCurrentFocusedWindow)
+    if(mCurrentFocusViews[index].first.GetHandle() == rootLayer)
     {
       view = mCurrentFocusViews[index].second.GetHandle();
       break;
     }
   }
 
-  if(view && !view.IsConnectedToScene())
+  auto sceneHolder = view && view.IsConnectedToScene() ? Dali::Integration::SceneHolder::Get(view) : Dali::Integration::SceneHolder();
+  if(index < mCurrentFocusViews.size() && (!sceneHolder || sceneHolder.GetRootLayer() != rootLayer))
   {
-    // If the view has been removed from the window, then the window doesn't have any focused view
-    view.Reset();
+    // Discard a removed View or a target that now belongs to another Window.
     mCurrentFocusViews.erase(mCurrentFocusViews.begin() + index);
+    DisconnectFocusViewIfUnused(view);
+    view.Reset();
   }
 
   return view;
@@ -439,6 +480,12 @@ View FocusManager::GetFocusViewFromCurrentWindow()
 
 void FocusManager::MoveFocusBackward()
 {
+  if(mNavigationInProgress)
+  {
+    DALI_LOG_WARNING("Backward navigation is not allowed from a focus navigation callback\n");
+    return;
+  }
+
   // Find Pre Focused View when the list size is more than 1
   if(mFocusHistory.size() > 1)
   {
@@ -453,10 +500,13 @@ void FocusManager::MoveFocusBackward()
 
       if(target && target.IsConnectedToScene())
       {
-        // Delete pre focused view in history because it will pushed again by SetCurrentFocusView()
+        // A deferred setter succeeds without appending history. Keep the chosen
+        // entry so repeated backward requests consume one step, not two.
+        if(SetCurrentFocusView(target))
+        {
+          break;
+        }
         mFocusHistory.pop_back();
-        SetCurrentFocusView(target);
-        break;
       }
       else
       {
@@ -469,7 +519,10 @@ void FocusManager::MoveFocusBackward()
     if(mFocusHistory.size() == 0)
     {
       View currentFocusedView = GetCurrentFocusView();
-      mFocusHistory.push_back(currentFocusedView);
+      if(currentFocusedView)
+      {
+        mFocusHistory.push_back(currentFocusedView);
+      }
     }
   }
 }
@@ -524,7 +577,8 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
     bool& flag;
   } guard(mNavigationInProgress);
 
-  View                   currentFocusView  = GetCurrentFocusView();
+  Layer                  rootLayer         = context.window ? context.window.GetRootLayer() : mCurrentFocusedWindow.GetHandle();
+  View                   currentFocusView  = rootLayer ? GetFocusViewFromWindow(rootLayer) : GetCurrentFocusView();
   FocusNavigationContext navigationContext = CreateFocusNavigationContext(currentFocusView, direction, context);
   if(!navigationContext)
   {
@@ -692,7 +746,7 @@ bool FocusManager::ApplyFocusNavigationResult(const FocusNavigationResult& resul
     return false;
   }
 
-  if(GetCurrentFocusView() != originalFocusView)
+  if(GetFocusViewFromWindow(context.GetWindow().GetRootLayer()) != originalFocusView)
   {
     DALI_LOG_WARNING("Focus changed while a focus navigation policy was running\n");
     return false;
@@ -790,26 +844,33 @@ View FocusManager::FindNextFocusByFinder(View currentFocusView, FocusNavigationC
   return View();
 }
 
-void FocusManager::ClearFocus(View view)
+void FocusManager::ClearFocus(View view, bool clearStoredFocus)
 {
   // Reset context for this system-triggered focus loss.
   mLastFocusChangeContext = {};
 
-  if(view)
+  View storedView;
+  if(clearStoredFocus)
   {
-    DALI_LOG_RELEASE_INFO("ClearFocus id:(%d)\n", view.GetProperty<int32_t>(Dali::Actor::Property::ID));
-    view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
-
-    // Remove the view from mCurrentFocusViews if present
+    // Explicit clear also removes a deferred replacement in this Window.
     for(auto iter = mCurrentFocusViews.begin(); iter != mCurrentFocusViews.end(); ++iter)
     {
-      if(iter->first == mCurrentFocusedWindow && iter->second.GetHandle() == view)
+      if(iter->first == mCurrentFocusedWindow)
       {
+        storedView = iter->second.GetHandle();
         mCurrentFocusViews.erase(iter);
         break;
       }
     }
+  }
 
+  if(view)
+  {
+    DALI_LOG_RELEASE_INFO("ClearFocus id:(%d)\n", view.GetProperty<int32_t>(Dali::Actor::Property::ID));
+    // A focus-lost callback can remove this View. Stop actual-focus observation
+    // before notifying it to avoid recursive ClearFocus, but keep the separate
+    // stored-target observer so that removal still cancels its reservation.
+    view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
     if(view.IsConnectedToScene())
     {
       Internal::KeyInputFocusManager::Get().RemoveFocus(view);
@@ -822,6 +883,26 @@ void FocusManager::ClearFocus(View view)
     }
   }
   mCurrentFocusView.Reset();
+  // Focus-out clears actual focus but retains its reservation. Keep observing
+  // that saved View so removal while the Window is inactive cancels the record.
+  DisconnectFocusViewIfUnused(view);
+  DisconnectFocusViewIfUnused(storedView);
+}
+
+void FocusManager::DisconnectFocusViewIfUnused(View view)
+{
+  if(view && view != mCurrentFocusView.GetHandle())
+  {
+    for(const auto& entry : mCurrentFocusViews)
+    {
+      if(entry.second.GetHandle() == view)
+      {
+        return;
+      }
+    }
+    view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
+    view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnStoredFocusViewDisconnection);
+  }
 }
 
 void FocusManager::DetachFocusIndicator(View view)
@@ -943,15 +1024,12 @@ uint32_t FocusManager::GetCurrentWindowId() const
 
 void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEvent event)
 {
-  if(mCurrentFocusedWindow.GetHandle())
+  // Injected keys may navigate a background Window's stored target, but
+  // must belong to the SceneHolder that delivered them.
+  uint32_t eventWindowId = event.GetWindowId();
+  if(eventWindowId > 0 && eventWindowId != static_cast<uint32_t>(sceneHolder.GetNativeId()))
   {
-    // If it is a key event that occurred in another window, it returns.
-    uint32_t eventWindowId = event.GetWindowId();
-    if(eventWindowId > 0 && GetCurrentWindowId() != eventWindowId)
-    {
-      DALI_LOG_RELEASE_INFO("CurrentFocusedWindow id %d, window ID where key event occurred %d : key event skip\n", GetCurrentWindowId(), eventWindowId);
-      return;
-    }
+    return;
   }
 
   const Dali::String& keyName        = event.GetKeyName();
@@ -1054,7 +1132,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
     }
   }
 
-  if(isFocusStartableKey)
+  if(isFocusStartableKey && IsActiveWindow(sceneHolder))
   {
     View focusedView = GetCurrentFocusView();
     if(focusedView)
@@ -1228,7 +1306,7 @@ bool FocusManager::EmitCustomWheelSignals(View view, const WheelEvent& event)
 
 void FocusManager::OnWindowFocusChanged(Window window, bool focusIn)
 {
-  if(focusIn && mCurrentFocusedWindow.GetHandle() != window.GetRootLayer())
+  if(focusIn)
   {
     // Change Current Focused Window
     Layer rootLayer       = window.GetRootLayer();
@@ -1236,11 +1314,24 @@ void FocusManager::OnWindowFocusChanged(Window window, bool focusIn)
     mCurrentWindowId      = static_cast<uint32_t>(Dali::Integration::SceneHolder::Get(rootLayer).GetNativeId());
 
     // Get Current Focused View from window
-    View currentFocusedView = GetFocusViewFromCurrentWindow();
-    if(currentFocusedView)
+    View currentFocusedView = GetFocusViewFromWindow(rootLayer);
+    // Focus-in can arrive while a navigation callback is running. The public
+    // setter rejects requests during navigation; treating that rejection as an
+    // invalid target here would clear valid actual focus and its saved record.
+    // Validate and restore directly for this platform event, while keeping the
+    // public setters' restriction on application requests during navigation.
+    if(currentFocusedView && currentFocusedView.IsVisible() && !currentFocusedView.HasAncestorBlockingFocus() &&
+       DoSetCurrentFocusView(currentFocusedView, {Ui::FocusDevice::PROGRAMMATIC, "", Ui::InputEvent::Programmatic()}))
     {
-      SetCurrentFocusView(currentFocusedView);
       RefreshFocusIndicator(currentFocusedView);
+    }
+    else
+    {
+      // No valid stored target: discard this Window's record and release
+      // any actual focus retained by the clear-on-loss=false policy.
+      View previousView = GetCurrentFocusView();
+      DetachFocusIndicator(previousView);
+      ClearFocus(previousView);
     }
   }
 }
@@ -1252,8 +1343,10 @@ void FocusManager::OnSceneHolderFocusChanged(Dali::Integration::SceneHolder scen
   {
     if(!focusIn && mCurrentFocusedWindow.GetHandle() == window.GetRootLayer() && mClearFocusOnWindowFocusLost)
     {
-      mCurrentFocusedWindow.Reset();
-      ClearFocus();
+      // Keep the Window as the navigation scope, and preserve its record.
+      View currentView = GetCurrentFocusView();
+      DetachFocusIndicator(currentView);
+      ClearFocus(currentView, false);
     }
   }
 }
@@ -1380,13 +1473,43 @@ void FocusManager::RefreshFocusIndicator(View view)
 
 void FocusManager::OnSceneDisconnection(Dali::Actor actor)
 {
-  View view = View::DownCast(actor);
+  InvalidateFocusView(View::DownCast(actor));
+}
+
+void FocusManager::InvalidateFocusView(View view)
+{
+  OnStoredFocusViewDisconnection(view);
   if(view && view == mCurrentFocusView.GetHandle())
   {
-    DALI_LOG_RELEASE_INFO("ClearFocus due to view id:(%d) removed from scene\n", view.GetProperty<int32_t>(Dali::Actor::Property::ID));
     DetachFocusIndicator(view);
-    ClearFocus(view);
+    ClearFocus(view, false);
   }
+  DisconnectFocusViewIfUnused(view);
+}
+
+void FocusManager::OnStoredFocusViewDisconnection(Dali::Actor actor)
+{
+  View view = View::DownCast(actor);
+  if(!view)
+  {
+    return;
+  }
+
+  // Disabling/removing retained A must not cancel a different deferred B.
+  // Conversely, invalidating B must cancel its reservation without clearing A.
+  // An explicit ClearFocus() intentionally has the wider cancellation contract.
+  for(auto iter = mCurrentFocusViews.begin(); iter != mCurrentFocusViews.end();)
+  {
+    if(iter->second.GetHandle() == view)
+    {
+      iter = mCurrentFocusViews.erase(iter);
+    }
+    else
+    {
+      ++iter;
+    }
+  }
+  DisconnectFocusViewIfUnused(view);
 }
 
 } // namespace Internal

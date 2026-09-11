@@ -28,6 +28,7 @@
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 namespace DALI_NAMESPACE
 {
@@ -70,9 +71,23 @@ void KeyInputFocusManagerImpl::OnSceneHolderCreated(Dali::Integration::SceneHold
 
 void KeyInputFocusManagerImpl::SetFocus(Ui::View view)
 {
-  if(!view)
+  if(!view || !view.IsConnectedToScene())
   {
     // No-op
+    return;
+  }
+
+  // Text-input taps, long presses and cursor APIs can bypass FocusManager and
+  // arrive after it accepted a deferred request. Do not let that direct call
+  // steal actual key focus or clear the foreground View's FOCUSED state.
+  // Key-only requests must not create navigation reservations: converting a
+  // rejected SetKeyInputTarget(Y) to SetCurrentFocusView(Y) would overwrite a
+  // saved X even though the extension call returns false. Reassigning a retained
+  // key target must likewise leave a different deferred navigation target intact.
+  // Callers that intend navigation focus must request it explicitly.
+  auto focusManager = Ui::FocusManager::Get();
+  if(focusManager && !GetImpl(focusManager).IsActiveWindow(Dali::Integration::SceneHolder::Get(view)))
+  {
     return;
   }
 
