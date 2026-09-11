@@ -104,6 +104,6 @@ exit 0
 %{app_exe_dir}/web-view.example
 %{app_exe_dir}/web-view-lwe.example
 %{app_exe_dir}/web-browser.example
-%{app_ro_dir}share/dali/samples/web-view/res/*
+%{app_res_dir}*
 %{xml_file_dir}/%{name}.xml
 #%license LICENSE

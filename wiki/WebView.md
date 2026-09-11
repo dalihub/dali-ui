@@ -28,6 +28,8 @@ Create a `WebView` using the static factory method `New()`.
 
 ```cpp
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <dali/integration-api/debug.h>
 
 using namespace Dali::Ui;
 
@@ -44,6 +46,8 @@ webView.SetRequestedHeight(600.0f);
 // Add to the scene
 window.Add(webView);
 ```
+
+Run this code after application initialization, with `window` referring to the application's `Dali::Window`. The later examples use these headers and `webView`. The umbrella header does not include WebView, so include its header explicitly.
 
 ### Selecting a Web Engine
 
@@ -68,7 +72,7 @@ webView.LoadUrl("https://www.example.com");
 ### Load HTML String
 
 ```cpp
-std::string html = "<html><body><h1>Hello World</h1></body></html>";
+Dali::String html = "<html><body><h1>Hello World</h1></body></html>";
 webView.LoadHtmlString(html);
 ```
 
@@ -85,10 +89,12 @@ webView.LoadHtmlStringOverrideCurrentEntry(
 ### Load Raw Content
 
 ```cpp
-const int8_t* content = reinterpret_cast<const int8_t*>("raw data");
+const char htmlContent[] = "<html><body>Raw content</body></html>";
+const int8_t* content = reinterpret_cast<const int8_t*>(htmlContent);
+const uint32_t contentSize = static_cast<uint32_t>(sizeof(htmlContent) - 1);
 webView.LoadContents(
   content,
-  content_size,
+  contentSize,
   "text/html",
   "UTF-8",
   "https://base.uri.com"
@@ -126,6 +132,8 @@ webView.StopLoading();
 
 ## 4. JavaScript Integration
 
+Use the callback type expected by the API, such as `WebView::JavaScriptCallback::New(...)`. A noncapturing lambda can be passed to `New(...)`. For instance state, bind a member function with `New(this, &Controller::Method)`, as shown in the dialog example below.
+
 ### Evaluate JavaScript
 
 Execute JavaScript and optionally receive the result:
@@ -137,9 +145,10 @@ webView.EvaluateJavaScript("console.log('Hello from C++');");
 // Execute and receive result via callback
 webView.EvaluateJavaScript(
   "document.title",
-  [](const Dali::String& result) {
-    Dali::DALI_LOG_INFO("Title: %s", result.c_str());
-  }
+  WebView::JavaScriptCallback::New(
+    [](const Dali::String& result) {
+      DALI_LOG_RELEASE_INFO("Title: %s\n", result.CStr());
+    })
 );
 ```
 
@@ -150,10 +159,11 @@ Register a handler to receive messages from JavaScript:
 ```cpp
 webView.AddJavaScriptMessageHandler(
   "nativeObject",
-  [](const Dali::String& message) {
-    Dali::DALI_LOG_INFO("Message from JS: %s", message.c_str());
-  }
-  );
+  WebView::JavaScriptCallback::New(
+    [](const Dali::String& message) {
+      DALI_LOG_RELEASE_INFO("Message from JS: %s\n", message.CStr());
+    })
+);
 ```
 
 JavaScript can then send messages:
@@ -161,44 +171,60 @@ JavaScript can then send messages:
 ```javascript
 // In the web page
 if (window.nativeObject) {
-  window.nativeObject("Hello from JavaScript");
+  window.nativeObject.postMessage("Hello from JavaScript");
 }
+```
+
+```cpp
+// Remove the handler when it is no longer needed
+webView.RemoveJavaScriptMessageHandler("nativeObject");
 ```
 
 ### JavaScript Dialogs
 
 Handle JavaScript alert, confirm, and prompt dialogs:
 
+Use a controller whose member functions reply through the WebView. Construct it with the existing `webView` before loading the page, and keep it alive for as long as the WebView has these callbacks registered. This example replies to alerts immediately, accepts confirms, and returns fixed text for prompts.
+
 ```cpp
-// Alert callback
-webView.RegisterJavaScriptAlertCallback(
-  [webView](const Dali::String& message) {
-    Dali::DALI_LOG_INFO("Alert: %s", message.c_str());
-    webView.JavaScriptAlertReply();
+class WebViewDialogController
+{
+public:
+  explicit WebViewDialogController(WebView webView)
+  : mWebView(webView)
+  {
+    mWebView.RegisterJavaScriptAlertCallback(
+      WebView::JavaScriptAlertCallback::New(this, &WebViewDialogController::OnAlert));
+    mWebView.RegisterJavaScriptConfirmCallback(
+      WebView::JavaScriptConfirmCallback::New(this, &WebViewDialogController::OnConfirm));
+    mWebView.RegisterJavaScriptPromptCallback(
+      WebView::JavaScriptPromptCallback::New(this, &WebViewDialogController::OnPrompt));
+  }
+
+private:
+  bool OnAlert(const Dali::String& message)
+  {
+    DALI_LOG_RELEASE_INFO("Alert: %s\n", message.CStr());
+    mWebView.JavaScriptAlertReply();
     return true;
   }
-);
 
-// Confirm callback
-webView.RegisterJavaScriptConfirmCallback(
-  [webView](const Dali::String& message) {
-    Dali::DALI_LOG_INFO("Confirm: %s", message.c_str());
-    webView.JavaScriptConfirmReply(true); // or false
+  bool OnConfirm(const Dali::String& message)
+  {
+    DALI_LOG_RELEASE_INFO("Confirm: %s\n", message.CStr());
+    mWebView.JavaScriptConfirmReply(true); // or false
     return true;
   }
-);
 
-// Prompt callback
-webView.RegisterJavaScriptPromptCallback(
-  [webView](const Dali::String& message, const Dali::String& defaultText) {
-    Dali::DALI_LOG_INFO("Prompt: %s, Default: %s", message.c_str(), defaultText.c_str());
-    webView.JavaScriptPromptReply("user input");
+  bool OnPrompt(const Dali::String& message, const Dali::String& defaultText)
+  {
+    DALI_LOG_RELEASE_INFO("Prompt: %s, Default: %s\n", message.CStr(), defaultText.CStr());
+    mWebView.JavaScriptPromptReply("user input");
     return true;
   }
-);
 
-// Remove the handler when it is no longer needed
-webView.RemoveJavaScriptMessageHandler("nativeObject");
+  WebView mWebView;
+};
 ```
 
 ---
@@ -210,32 +236,32 @@ Connect to WebView signals to handle page load events and other notifications:
 ```cpp
 webView.PageLoadStartedSignal().Connect(
   [](WebView view, const Dali::String& url) {
-    Dali::DALI_LOG_INFO("Page load started: %s", url.c_str());
+    DALI_LOG_RELEASE_INFO("Page load started: %s\n", url.CStr());
   }
 );
 
 webView.PageLoadInProgressSignal().Connect(
   [](WebView view, const Dali::String& url) {
     // Called periodically during loading
-    Dali::DALI_LOG_INFO("Loading in progress...");
+    DALI_LOG_RELEASE_INFO("Loading in progress...\n");
   }
 );
 
 webView.PageLoadFinishedSignal().Connect(
   [](WebView view, const Dali::String& url) {
-    Dali::DALI_LOG_INFO("Page load finished: %s", url.c_str());
+    DALI_LOG_RELEASE_INFO("Page load finished: %s\n", url.CStr());
   }
 );
 
 webView.PageLoadErrorSignal().Connect(
   [](WebView view, const WebViewPageLoadError& error) {
-    Dali::DALI_LOG_ERROR("Load error: %s", error.description.c_str());
+    DALI_LOG_ERROR("Load error: %s\n", error.GetDescription().CStr());
   }
 );
 
 webView.UrlChangedSignal().Connect(
   [](WebView view, const Dali::String& url) {
-    Dali::DALI_LOG_INFO("URL changed: %s", url.c_str());
+    DALI_LOG_RELEASE_INFO("URL changed: %s\n", url.CStr());
   }
 );
 ```
@@ -276,16 +302,14 @@ bool keyEnabled   = webView.IsKeyEventsEnabled();
 
 ### Feed Events Manually
 
-Forward touch and key events to the web engine:
+Forward `keyEvent` (`Dali::KeyEvent`) and `touchEvent` (`Dali::TouchEvent`) received by your input handlers to the web engine:
 
 ```cpp
 // Forward a key event
-const KeyEvent& keyEvent = ...;
-bool consumed = webView.FeedKeyEvent(keyEvent);
+bool keyConsumed = webView.FeedKeyEvent(keyEvent);
 
 // Forward a touch event
-const TouchEvent& touchEvent = ...;
-bool consumed = webView.FeedTouchEvent(touchEvent);
+bool touchConsumed = webView.FeedTouchEvent(touchEvent);
 
 // Send a mouse wheel event
 webView.FeedMouseWheel(true, 3, 100, 200); // yDirection, step, x, y
@@ -404,10 +428,11 @@ Dali::Ui::ImageView screenshot = webView.GetScreenshot(area, 1.0f);
 webView.GetScreenshotAsynchronously(
   area,
   1.0f,
-  [](Dali::Ui::ImageView image) {
-    // Use the screenshot
-    Dali::DALI_LOG_INFO("Screenshot captured");
-  }
+  WebView::ScreenshotCapturedCallback::New(
+    [](Dali::Ui::ImageView image) {
+      // Use the screenshot
+      DALI_LOG_RELEASE_INFO("Screenshot captured\n");
+    })
 );
 ```
 
@@ -423,9 +448,10 @@ Retrieve all visible text from the page asynchronously:
 
 ```cpp
 webView.GetPlainTextAsynchronously(
-  [](const Dali::String& text) {
-    Dali::DALI_LOG_INFO("Plain text: %s", text.c_str());
-  }
+  WebView::PlainTextCallback::New(
+    [](const Dali::String& text) {
+      DALI_LOG_RELEASE_INFO("Plain text: %s\n", text.CStr());
+    })
 );
 ```
 
@@ -435,9 +461,10 @@ Check if video is currently playing on the page:
 
 ```cpp
 webView.CheckVideoPlayingAsynchronously(
-  [](bool isPlaying) {
-    Dali::DALI_LOG_INFO("Video playing: %s", isPlaying ? "yes" : "no");
-  }
+  WebView::VideoPlayingCallback::New(
+    [](bool isPlaying) {
+      DALI_LOG_RELEASE_INFO("Video playing: %s\n", isPlaying ? "yes" : "no");
+    })
 );
 ```
 
@@ -452,7 +479,7 @@ Search for and highlight text within the page:
 uint32_t maxMatches = 100;
 bool result = webView.FindText(
   "search term",
-  Dali::Ui::WebViewFindOption::CASE_INSENSITIVE | 
+  Dali::Ui::WebViewFindOption::CASE_INSENSITIVE |
   Dali::Ui::WebViewFindOption::SHOW_HIGHLIGHT,
   maxMatches
 );
@@ -460,7 +487,7 @@ bool result = webView.FindText(
 // Receive results via signal
 webView.TextFoundSignal().Connect(
   [](WebView view, uint32_t matchCount) {
-    Dali::DALI_LOG_INFO("Found %u matches", matchCount);
+    DALI_LOG_RELEASE_INFO("Found %u matches\n", matchCount);
   }
 );
 ```
