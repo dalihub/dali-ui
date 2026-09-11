@@ -41,6 +41,18 @@ namespace Ui
 {
 namespace Internal
 {
+namespace
+{
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
+// clang-format off
+#define GET_OFFSCREEN_REFRESH_RATE(refreshRate) \
+  (refreshRate == Ui::View::OffscreenRefreshRate::REFRESH_ALWAYS) ? "REFRESH_ALWAYS" : \
+  (refreshRate == Ui::View::OffscreenRefreshRate::REFRESH_ONCE)   ? "REFRESH_ONCE"   : \
+                                                                    "UNKNOWN"
+// clang-format on
+#endif
+} //namespace
+
 OffscreenRenderingImpl::OffscreenRenderingImpl(Ui::View::OffscreenRefreshRate refreshRate)
 : mRefreshRate(refreshRate)
 {
@@ -157,7 +169,7 @@ void OffscreenRenderingImpl::CreateFrameBuffer()
   {
     std::ostringstream oss;
     oss.imbue(std::locale::classic());
-    oss << "OffscreenRendering refresh rate:" << mRefreshRate;
+    oss << "OffscreenRendering refresh rate:" << GET_OFFSCREEN_REFRESH_RATE(mRefreshRate);
 
     Dali::Integration::TextureUploadWithContent(texture, Dali::PixelData(), ToDaliString(oss.str()), Dali::Integration::TextureContextTypeHint::FBO_ATTACHED_COLOR_TEXTURE, true);
   }
