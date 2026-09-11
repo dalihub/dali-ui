@@ -111,14 +111,14 @@ Vector4 ImageView::GetPixelArea() const
   return Ui::GetImpl(*this).GetPixelArea();
 }
 
-void ImageView::SetPreMultipliedAlpha(bool preMultiplied)
+void ImageView::SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied)
 {
-  Ui::GetImpl(*this).SetPreMultipliedAlpha(preMultiplied);
+  Ui::GetImpl(*this).SetPreMultiplyAlphaOnLoadEnabled(preMultiplied);
 }
 
-bool ImageView::IsPreMultipliedAlpha() const
+bool ImageView::IsPreMultiplyAlphaOnLoadEnabled() const
 {
-  return Ui::GetImpl(*this).IsPreMultipliedAlpha();
+  return Ui::GetImpl(*this).IsPreMultiplyAlphaOnLoadEnabled();
 }
 
 void ImageView::SetSamplingMode(Ui::Image::SamplingMode samplingMode)
@@ -226,9 +226,9 @@ Dali::String ImageView::GetPlaceholderUrl() const
   return Ui::GetImpl(*this).GetPlaceholderUrl();
 }
 
-void ImageView::SetImageLoadWithViewSize(bool enabled)
+void ImageView::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
-  Ui::GetImpl(*this).SetImageLoadWithViewSize(enabled);
+  Ui::GetImpl(*this).SetImageLoadWithViewSizeEnabled(enabled);
 }
 
 bool ImageView::IsImageLoadWithViewSizeEnabled() const
@@ -256,9 +256,9 @@ UiColor ImageView::GetImageColor() const
   return Ui::GetImpl(*this).GetImageColor();
 }
 
-void ImageView::SetFastTrackUpload(bool fastTrack)
+void ImageView::SetFastTrackUploadEnabled(bool fastTrack)
 {
-  Ui::GetImpl(*this).SetFastTrackUpload(fastTrack);
+  Ui::GetImpl(*this).SetFastTrackUploadEnabled(fastTrack);
 }
 
 bool ImageView::IsFastTrackUploadEnabled() const
@@ -266,9 +266,9 @@ bool ImageView::IsFastTrackUploadEnabled() const
   return Ui::GetImpl(*this).IsFastTrackUploadEnabled();
 }
 
-void ImageView::SetOrientationCorrection(bool orientationCorrection)
+void ImageView::SetOrientationCorrectionEnabled(bool orientationCorrection)
 {
-  Ui::GetImpl(*this).SetOrientationCorrection(orientationCorrection);
+  Ui::GetImpl(*this).SetOrientationCorrectionEnabled(orientationCorrection);
 }
 
 bool ImageView::IsOrientationCorrectionEnabled() const

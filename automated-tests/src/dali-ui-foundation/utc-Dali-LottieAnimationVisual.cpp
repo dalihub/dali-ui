@@ -170,10 +170,10 @@ int UtcDaliLottieAnimationVisualSetGetProperties01(void)
   visual.SetReleasePolicy(Image::ReleasePolicy::DETACHED);
   DALI_TEST_EQUALS(visual.GetReleasePolicy(), Image::ReleasePolicy::DETACHED, TEST_LOCATION);
 
-  visual.SetOrientationCorrection(false);
+  visual.SetOrientationCorrectionEnabled(false);
   DALI_TEST_EQUALS(visual.IsOrientationCorrectionEnabled(), false, TEST_LOCATION);
 
-  visual.SetImageLoadWithViewSize(true);
+  visual.SetImageLoadWithViewSizeEnabled(true);
   DALI_TEST_EQUALS(visual.IsImageLoadWithViewSizeEnabled(), true, TEST_LOCATION);
 
   application.SendNotification();

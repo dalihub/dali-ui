@@ -213,7 +213,7 @@ bool AnimatedImageVisual::IsOrientationCorrectionEnabled() const
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION);
 }
 
-void AnimatedImageVisual::SetOrientationCorrection(bool orientationCorrection)
+void AnimatedImageVisual::SetOrientationCorrectionEnabled(bool orientationCorrection)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
 }
@@ -223,17 +223,17 @@ bool AnimatedImageVisual::IsImageLoadWithViewSizeEnabled() const
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE);
 }
 
-void AnimatedImageVisual::SetImageLoadWithViewSize(bool enabled)
+void AnimatedImageVisual::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, enabled);
 }
 
-bool AnimatedImageVisual::IsPreMultipliedAlpha() const
+bool AnimatedImageVisual::IsPreMultiplyAlphaOnLoadEnabled() const
 {
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA);
 }
 
-void AnimatedImageVisual::SetPreMultipliedAlpha(bool preMultiplied)
+void AnimatedImageVisual::SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, preMultiplied);
 }

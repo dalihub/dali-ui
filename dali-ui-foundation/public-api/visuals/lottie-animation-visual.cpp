@@ -167,7 +167,7 @@ bool LottieAnimationVisual::IsOrientationCorrectionEnabled() const
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION);
 }
 
-void LottieAnimationVisual::SetOrientationCorrection(bool orientationCorrection)
+void LottieAnimationVisual::SetOrientationCorrectionEnabled(bool orientationCorrection)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
 }
@@ -177,7 +177,7 @@ bool LottieAnimationVisual::IsImageLoadWithViewSizeEnabled() const
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE);
 }
 
-void LottieAnimationVisual::SetImageLoadWithViewSize(bool enabled)
+void LottieAnimationVisual::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, enabled);
 }

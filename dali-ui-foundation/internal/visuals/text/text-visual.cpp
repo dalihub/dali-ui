@@ -331,9 +331,6 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mIsNaturalSizeTaskRunning(false),
   mIsHeightForWidthTaskRunning(false)
 {
-  // Enable the pre-multiplied alpha to improve the text quality
-  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
-
   // Enable fitting mode, to acquire effectiveScale value.
   mImpl->mFittingModeRequired = true;
 }

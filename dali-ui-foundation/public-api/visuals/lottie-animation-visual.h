@@ -114,7 +114,7 @@ public: // Properties
    * default, 0, loads the animation at its own size.
    *
    * @param[in] desiredWidth The desired width to set
-   * @note Ignored while SetImageLoadWithViewSize() is enabled, which loads at the View's
+   * @note Ignored while SetImageLoadWithViewSizeEnabled() is enabled, which loads at the View's
    *       size instead.
    * @see SetDesiredHeight()
    * @see SetSamplingMode()
@@ -136,7 +136,7 @@ public: // Properties
    * default, 0, loads the animation at its own size.
    *
    * @param[in] desiredHeight The desired height to set
-   * @note Ignored while SetImageLoadWithViewSize() is enabled, which loads at the View's
+   * @note Ignored while SetImageLoadWithViewSizeEnabled() is enabled, which loads at the View's
    *       size instead.
    * @see SetDesiredWidth()
    */
@@ -153,7 +153,7 @@ public: // Properties
    * @brief Sets the filter used when the animation is resampled to the desired size.
    *
    * It only has an effect where a resample happens, which is when a desired size or
-   * SetImageLoadWithViewSize() asks for a size other than the source's own. The default is
+   * SetImageLoadWithViewSizeEnabled() asks for a size other than the source's own. The default is
    * Image::SamplingMode::BOX_THEN_LINEAR.
    *
    * @param[in] samplingMode The sampling mode to set
@@ -295,7 +295,7 @@ public: // Properties
    *
    * @param[in] orientationCorrection True to apply the recorded orientation
    */
-  void SetOrientationCorrection(bool orientationCorrection);
+  void SetOrientationCorrectionEnabled(bool orientationCorrection);
 
   /**
    * @brief Gets whether the image is loaded at the view size.
@@ -313,7 +313,7 @@ public: // Properties
    * @param[in] enabled True to load the image with the view size
    * @see SetDesiredWidth()
    */
-  void SetImageLoadWithViewSize(bool enabled);
+  void SetImageLoadWithViewSizeEnabled(bool enabled);
 
   /**
    * @brief Gets the loop count of the LottieAnimationVisual.

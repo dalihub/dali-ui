@@ -163,7 +163,6 @@ GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
   mGradientType(LINEAR),
   mStartOffsetIndex(Property::INVALID_INDEX)
 {
-  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 GradientVisual::~GradientVisual()

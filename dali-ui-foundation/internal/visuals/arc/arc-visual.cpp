@@ -67,6 +67,8 @@ ArcVisual::ArcVisual(VisualFactoryCache& factoryCache)
   mSweepAngleIndex(Property::INVALID_INDEX),
   mCapType(Dali::Ui::Integration::ArcVisual::Cap::BUTT)
 {
+  // This visual's shader emits straight (non pre-multiplied) alpha, so opt out of the default.
+  mImpl->mFlags &= ~Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 ArcVisual::~ArcVisual()

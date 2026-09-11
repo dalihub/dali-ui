@@ -177,9 +177,6 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&        
   mUseNativeImage(false),
   mNotifyAfterRasterization(false)
 {
-  // the rasterized image is with pre-multiplied alpha format
-  mImpl->mFlags |= Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
-
   // By default, load a file synchronously
   mImpl->mFlags |= Visual::Base::Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
 

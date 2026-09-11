@@ -175,8 +175,6 @@ ColorVisual::ColorVisual(VisualFactoryCache& factoryCache, ColorVisualShaderFact
   mAlwaysUsingBlurRadius(false),
   mColorVisualShaderFactory(shaderFactory)
 {
-  // Make we always use premultiplied alpha.
-  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 ColorVisual::~ColorVisual()

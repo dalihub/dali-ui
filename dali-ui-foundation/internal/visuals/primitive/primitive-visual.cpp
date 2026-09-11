@@ -108,6 +108,9 @@ PrimitiveVisual::PrimitiveVisual(VisualFactoryCache& factoryCache)
   mPrimitiveType(Ui::Integration::PrimitiveVisual::Shape::SPHERE)
 {
   mImpl->mMixColor = DEFAULT_COLOR;
+
+  // This visual's shader emits straight (non pre-multiplied) alpha, so opt out of the default.
+  mImpl->mFlags &= ~Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 PrimitiveVisual::~PrimitiveVisual()

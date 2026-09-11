@@ -235,14 +235,14 @@ bool AnimatedImageView::IsSynchronousLoading() const
   return Ui::GetImpl(*this).IsSynchronousLoading();
 }
 
-void AnimatedImageView::SetPreMultipliedAlpha(bool preMultiplied)
+void AnimatedImageView::SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied)
 {
-  Ui::GetImpl(*this).SetPreMultipliedAlpha(preMultiplied);
+  Ui::GetImpl(*this).SetPreMultiplyAlphaOnLoadEnabled(preMultiplied);
 }
 
-bool AnimatedImageView::IsPreMultipliedAlpha() const
+bool AnimatedImageView::IsPreMultiplyAlphaOnLoadEnabled() const
 {
-  return Ui::GetImpl(*this).IsPreMultipliedAlpha();
+  return Ui::GetImpl(*this).IsPreMultiplyAlphaOnLoadEnabled();
 }
 
 void AnimatedImageView::SetFittingMode(Ui::Image::FittingMode fittingMode)
@@ -265,9 +265,9 @@ Ui::Image::SamplingMode AnimatedImageView::GetSamplingMode() const
   return Ui::GetImpl(*this).GetSamplingMode();
 }
 
-void AnimatedImageView::SetImageLoadWithViewSize(bool enabled)
+void AnimatedImageView::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
-  Ui::GetImpl(*this).SetImageLoadWithViewSize(enabled);
+  Ui::GetImpl(*this).SetImageLoadWithViewSizeEnabled(enabled);
 }
 
 bool AnimatedImageView::IsImageLoadWithViewSizeEnabled() const

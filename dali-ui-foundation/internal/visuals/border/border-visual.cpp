@@ -60,8 +60,6 @@ BorderVisual::BorderVisual(VisualFactoryCache& factoryCache)
   mBorderSizeIndex(Property::INVALID_INDEX),
   mAntiAliasingEnabled(false)
 {
-  // Enable the pre-multiplied alpha
-  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 BorderVisual::~BorderVisual()

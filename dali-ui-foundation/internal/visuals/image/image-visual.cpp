@@ -199,6 +199,7 @@ ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFact
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mFittingMode(Ui::Image::FittingMode::FILL),
   mLoadState(TextureManager::LoadState::NOT_STARTED),
+  mPreMultiplyAlphaOnLoad(mFactoryCache.GetPreMultiplyOnLoad()),
   mOrientationCorrection(true),
   mNeedYuvToRgb(false),
   mNeedYuva(false),
@@ -209,8 +210,6 @@ ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFact
   mUseBrokenImageRenderer(false),
   mImageLoadWithViewSize(false)
 {
-  EnablePreMultipliedAlpha(mFactoryCache.GetPreMultiplyOnLoad());
-
   mImpl->mFittingModeRequired = true;
 
   if(creationOptions & Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
@@ -374,7 +373,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       bool premultipliedAlpha = false;
       if(value.Get(premultipliedAlpha))
       {
-        EnablePreMultipliedAlpha(premultipliedAlpha);
+        mPreMultiplyAlphaOnLoad = premultipliedAlpha;
       }
       break;
     }
@@ -679,7 +678,7 @@ void ImageVisual::OnInitialize()
   // Register transform properties
   mImpl->SetTransformUniforms(mImpl->mRenderer);
 
-  EnablePreMultipliedAlpha(IsPreMultipliedAlphaEnabled());
+  ApplyPreMultipliedAlphaToRenderer();
 
   if(mMaskingData)
   {
@@ -696,7 +695,7 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
   mLastRequiredSize = size;
 
   auto textureObserver   = this;
-  auto preMultiplyOnLoad = IsPreMultipliedAlphaEnabled() && !IsUsingCustomShader()
+  auto preMultiplyOnLoad = mPreMultiplyAlphaOnLoad && !IsUsingCustomShader()
                              ? TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
                              : TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
 
@@ -760,8 +759,9 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
 
   if(IsFastTrackUploadingAvailable())
   {
-    // Enable PremultipliedAlpha first.
-    EnablePreMultipliedAlpha(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
+    // The render thread can draw the uploaded texture before FastLoadComplete() runs here, so set
+    // the expected state up front to get the first frame right.
+    SetTexturePreMultiplied(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
 
     // Set new TextureSet with fast track loading task
     mFastTrackLoadingTask =
@@ -814,7 +814,10 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
       mLoadState = TextureManager::LoadState::LOAD_FINISHED;
     }
 
-    EnablePreMultipliedAlpha(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
+    // preMultiplyOnLoad is an in/out parameter, so this is the load result, not the request.
+    // Synchronous loading gets no LoadComplete(), so this is its only completion point.
+    SetTexturePreMultiplied(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
+
     if(mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT)
     {
       Sampler sampler = Sampler::New();
@@ -973,7 +976,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
     map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, size.GetHeight());
   }
 
-  map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled());
+  map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultiplyAlphaOnLoad);
 
   map.Insert(Ui::Integration::ImageVisual::Property::SAMPLING_MODE, mSamplingMode);
 
@@ -1023,25 +1026,8 @@ void ImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
   }
 }
 
-void ImageVisual::EnablePreMultipliedAlpha(bool preMultiplied)
+void ImageVisual::SetTexturePreMultiplied(bool preMultiplied)
 {
-  if(mImpl->mRenderer)
-  {
-    if(mPreMultipliedAlphaIndex != Property::INVALID_INDEX)
-    {
-      mImpl->mRenderer.SetProperty(mPreMultipliedAlphaIndex, preMultiplied ? 1.0f : 0.0f);
-    }
-    else if(!preMultiplied)
-    {
-      // Register PRE_MULTIPLIED_ALPHA only if it become false.
-      // Default PRE_MULTIPLIED_ALPHA value is 1.0f, at image-visual-shader-factory.cpp
-      mPreMultipliedAlphaIndex =
-        mImpl->mRenderer.RegisterProperty(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA, 0.0f);
-    }
-
-    mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, preMultiplied);
-  }
-
   if(preMultiplied)
   {
     mImpl->mFlags |= Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
@@ -1050,6 +1036,32 @@ void ImageVisual::EnablePreMultipliedAlpha(bool preMultiplied)
   {
     mImpl->mFlags &= ~Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
   }
+
+  ApplyPreMultipliedAlphaToRenderer();
+}
+
+void ImageVisual::ApplyPreMultipliedAlphaToRenderer()
+{
+  if(!mImpl->mRenderer)
+  {
+    return;
+  }
+
+  const bool preMultiplied = IsPreMultipliedAlphaEnabled();
+
+  if(mPreMultipliedAlphaIndex != Property::INVALID_INDEX)
+  {
+    mImpl->mRenderer.SetProperty(mPreMultipliedAlphaIndex, preMultiplied ? 1.0f : 0.0f);
+  }
+  else if(!preMultiplied)
+  {
+    // Register PRE_MULTIPLIED_ALPHA only if it become false.
+    // Default PRE_MULTIPLIED_ALPHA value is 1.0f, at image-visual-shader-factory.cpp
+    mPreMultipliedAlphaIndex =
+      mImpl->mRenderer.RegisterProperty(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA, 0.0f);
+  }
+
+  mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, preMultiplied);
 }
 
 void ImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::Property::Value& attributes)
@@ -1162,13 +1174,13 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
     mLoadState     = TextureManager::LoadState::LOAD_FINISHED;
 
     // Change premultiplied alpha flag after change renderer.
-    EnablePreMultipliedAlpha(mFastTrackLoadingTask->mPremultiplied);
+    SetTexturePreMultiplied(mFastTrackLoadingTask->mPremultiplied);
 
     if(mFastTrackLoadingTask->mLoadPlanesAvailable)
     {
       if(mFastTrackLoadingTask->mPlanesLoaded)
       {
-        // Let we use regular yuv cases.
+        // Use regular yuv cases.
         mNeedYuvToRgb = true;
         if(!mFastTrackLoadingTask->mHasAlpha)
         {
@@ -1183,7 +1195,7 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
       }
       else
       {
-        // Let we use regular image cases.
+        // Use regular image cases.
         mNeedYuvToRgb = false;
 
         auto textureSet = mImpl->mRenderer.GetTextures();
@@ -1238,8 +1250,6 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
 
   if(mImpl->mRenderer)
   {
-    EnablePreMultipliedAlpha(textureInformation.preMultiplied);
-
     Actor actor = mPlacementActor.GetHandle();
     if(!loadingSuccess)
     {
@@ -1248,6 +1258,8 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
     }
     else
     {
+      SetTexturePreMultiplied(textureInformation.preMultiplied);
+
       if(mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT)
       {
         Sampler sampler = Sampler::New();

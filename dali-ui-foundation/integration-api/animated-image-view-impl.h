@@ -58,29 +58,29 @@ public: // Properties
   {
     enum
     {
-      IMAGE                     = Ui::AnimatedImageViewPropertyIndex::IMAGE,
-      IMAGE_URLS                = Ui::AnimatedImageViewPropertyIndex::IMAGE_URLS,
-      LOOP_COUNT                = Ui::AnimatedImageViewPropertyIndex::LOOP_COUNT,
-      STOP_BEHAVIOR             = Ui::AnimatedImageViewPropertyIndex::STOP_BEHAVIOR,
-      FRAME_SPEED_FACTOR        = Ui::AnimatedImageViewPropertyIndex::FRAME_SPEED_FACTOR,
-      BATCH_SIZE                = Ui::AnimatedImageViewPropertyIndex::BATCH_SIZE,
-      CACHE_SIZE                = Ui::AnimatedImageViewPropertyIndex::CACHE_SIZE,
-      FRAME_DELAY               = Ui::AnimatedImageViewPropertyIndex::FRAME_DELAY,
-      IMAGE_COLOR               = Ui::AnimatedImageViewPropertyIndex::IMAGE_COLOR,
-      PRE_MULTIPLIED_ALPHA      = Ui::AnimatedImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
-      FITTING_MODE              = Ui::AnimatedImageViewPropertyIndex::FITTING_MODE,
-      SAMPLING_MODE             = Ui::AnimatedImageViewPropertyIndex::SAMPLING_MODE,
-      DESIRED_WIDTH             = Ui::AnimatedImageViewPropertyIndex::DESIRED_WIDTH,
-      DESIRED_HEIGHT            = Ui::AnimatedImageViewPropertyIndex::DESIRED_HEIGHT,
-      LOAD_POLICY               = Ui::AnimatedImageViewPropertyIndex::LOAD_POLICY,
-      RELEASE_POLICY            = Ui::AnimatedImageViewPropertyIndex::RELEASE_POLICY,
-      SYNCHRONOUS_LOADING       = Ui::AnimatedImageViewPropertyIndex::SYNCHRONOUS_LOADING,
-      IMAGE_LOAD_WITH_VIEW_SIZE = Ui::AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
-      ALPHA_MASK_URL            = Ui::AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
-      CROP_TO_MASK              = Ui::AnimatedImageViewPropertyIndex::CROP_TO_MASK,
-      MASKING_POLICY            = Ui::AnimatedImageViewPropertyIndex::MASKING_POLICY,
-      PLACEHOLDER_IMAGE         = Ui::AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
-      PIXEL_AREA                = Ui::AnimatedImageViewPropertyIndex::PIXEL_AREA,
+      IMAGE                      = Ui::AnimatedImageViewPropertyIndex::IMAGE,
+      IMAGE_URLS                 = Ui::AnimatedImageViewPropertyIndex::IMAGE_URLS,
+      LOOP_COUNT                 = Ui::AnimatedImageViewPropertyIndex::LOOP_COUNT,
+      STOP_BEHAVIOR              = Ui::AnimatedImageViewPropertyIndex::STOP_BEHAVIOR,
+      FRAME_SPEED_FACTOR         = Ui::AnimatedImageViewPropertyIndex::FRAME_SPEED_FACTOR,
+      BATCH_SIZE                 = Ui::AnimatedImageViewPropertyIndex::BATCH_SIZE,
+      CACHE_SIZE                 = Ui::AnimatedImageViewPropertyIndex::CACHE_SIZE,
+      FRAME_DELAY                = Ui::AnimatedImageViewPropertyIndex::FRAME_DELAY,
+      IMAGE_COLOR                = Ui::AnimatedImageViewPropertyIndex::IMAGE_COLOR,
+      PRE_MULTIPLY_ALPHA_ON_LOAD = Ui::AnimatedImageViewPropertyIndex::PRE_MULTIPLY_ALPHA_ON_LOAD,
+      FITTING_MODE               = Ui::AnimatedImageViewPropertyIndex::FITTING_MODE,
+      SAMPLING_MODE              = Ui::AnimatedImageViewPropertyIndex::SAMPLING_MODE,
+      DESIRED_WIDTH              = Ui::AnimatedImageViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT             = Ui::AnimatedImageViewPropertyIndex::DESIRED_HEIGHT,
+      LOAD_POLICY                = Ui::AnimatedImageViewPropertyIndex::LOAD_POLICY,
+      RELEASE_POLICY             = Ui::AnimatedImageViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING        = Ui::AnimatedImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+      IMAGE_LOAD_WITH_VIEW_SIZE  = Ui::AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+      ALPHA_MASK_URL             = Ui::AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
+      CROP_TO_MASK               = Ui::AnimatedImageViewPropertyIndex::CROP_TO_MASK,
+      MASKING_POLICY             = Ui::AnimatedImageViewPropertyIndex::MASKING_POLICY,
+      PLACEHOLDER_IMAGE          = Ui::AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+      PIXEL_AREA                 = Ui::AnimatedImageViewPropertyIndex::PIXEL_AREA,
     };
   };
 
@@ -191,9 +191,9 @@ public: // API
   Ui::Image::SamplingMode GetSamplingMode() const;
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::SetImageLoadWithViewSize
+   * @copydoc Dali::Ui::AnimatedImageView::SetImageLoadWithViewSizeEnabled
    */
-  void SetImageLoadWithViewSize(bool enabled);
+  void SetImageLoadWithViewSizeEnabled(bool enabled);
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::IsImageLoadWithViewSizeEnabled
@@ -376,14 +376,14 @@ public: // API
   bool IsSynchronousLoading() const;
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::SetPreMultipliedAlpha
+   * @copydoc Dali::Ui::AnimatedImageView::SetPreMultiplyAlphaOnLoadEnabled
    */
-  void SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied);
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::IsPreMultipliedAlpha
+   * @copydoc Dali::Ui::AnimatedImageView::IsPreMultiplyAlphaOnLoadEnabled
    */
-  bool IsPreMultipliedAlpha() const;
+  bool IsPreMultiplyAlphaOnLoadEnabled() const;
 
 public: // Loading Status & Signals
   /**
@@ -475,7 +475,7 @@ private:                                 // Data
   int                             mDesiredHeight;
   float                           mFrameSpeedFactor;
 
-  bool mPreMultipliedAlpha;
+  bool mPreMultiplyAlphaOnLoad;
   bool mImageLoadWithViewSize;
   bool mCropToMask;
   bool mSynchronousLoading;

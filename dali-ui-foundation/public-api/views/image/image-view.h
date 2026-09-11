@@ -63,26 +63,26 @@ public:
   {
     enum
     {
-      IMAGE                     = ImageViewPropertyIndex::IMAGE,
-      FITTING_MODE              = ImageViewPropertyIndex::FITTING_MODE,
-      SAMPLING_MODE             = ImageViewPropertyIndex::SAMPLING_MODE,
-      DESIRED_WIDTH             = ImageViewPropertyIndex::DESIRED_WIDTH,
-      DESIRED_HEIGHT            = ImageViewPropertyIndex::DESIRED_HEIGHT,
-      IMAGE_COLOR               = ImageViewPropertyIndex::IMAGE_COLOR,
-      PRE_MULTIPLIED_ALPHA      = ImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
-      PLACEHOLDER_IMAGE         = ImageViewPropertyIndex::PLACEHOLDER_IMAGE,
-      IMAGE_LOAD_WITH_VIEW_SIZE = ImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
-      ALPHA_MASK_URL            = ImageViewPropertyIndex::ALPHA_MASK_URL,
-      CROP_TO_MASK              = ImageViewPropertyIndex::CROP_TO_MASK,
-      MASKING_POLICY            = ImageViewPropertyIndex::MASKING_POLICY,
-      LOAD_POLICY               = ImageViewPropertyIndex::LOAD_POLICY,
-      RELEASE_POLICY            = ImageViewPropertyIndex::RELEASE_POLICY,
-      SYNCHRONOUS_LOADING       = ImageViewPropertyIndex::SYNCHRONOUS_LOADING,
-      FAST_TRACK_UPLOADING      = ImageViewPropertyIndex::FAST_TRACK_UPLOADING,
-      ORIENTATION_CORRECTION    = ImageViewPropertyIndex::ORIENTATION_CORRECTION,
-      N_PATCH_BORDER            = ImageViewPropertyIndex::N_PATCH_BORDER,
-      N_PATCH_BORDER_ONLY       = ImageViewPropertyIndex::N_PATCH_BORDER_ONLY,
-      PIXEL_AREA                = ImageViewPropertyIndex::PIXEL_AREA,
+      IMAGE                      = ImageViewPropertyIndex::IMAGE,
+      FITTING_MODE               = ImageViewPropertyIndex::FITTING_MODE,
+      SAMPLING_MODE              = ImageViewPropertyIndex::SAMPLING_MODE,
+      DESIRED_WIDTH              = ImageViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT             = ImageViewPropertyIndex::DESIRED_HEIGHT,
+      IMAGE_COLOR                = ImageViewPropertyIndex::IMAGE_COLOR,
+      PRE_MULTIPLY_ALPHA_ON_LOAD = ImageViewPropertyIndex::PRE_MULTIPLY_ALPHA_ON_LOAD,
+      PLACEHOLDER_IMAGE          = ImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+      IMAGE_LOAD_WITH_VIEW_SIZE  = ImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+      ALPHA_MASK_URL             = ImageViewPropertyIndex::ALPHA_MASK_URL,
+      CROP_TO_MASK               = ImageViewPropertyIndex::CROP_TO_MASK,
+      MASKING_POLICY             = ImageViewPropertyIndex::MASKING_POLICY,
+      LOAD_POLICY                = ImageViewPropertyIndex::LOAD_POLICY,
+      RELEASE_POLICY             = ImageViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING        = ImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+      FAST_TRACK_UPLOADING       = ImageViewPropertyIndex::FAST_TRACK_UPLOADING,
+      ORIENTATION_CORRECTION     = ImageViewPropertyIndex::ORIENTATION_CORRECTION,
+      N_PATCH_BORDER             = ImageViewPropertyIndex::N_PATCH_BORDER,
+      N_PATCH_BORDER_ONLY        = ImageViewPropertyIndex::N_PATCH_BORDER_ONLY,
+      PIXEL_AREA                 = ImageViewPropertyIndex::PIXEL_AREA,
     };
   };
 
@@ -343,7 +343,7 @@ public: // Size & Fitting Control
    *
    * @param[in] enabled True to enable loading image with view size
    */
-  void SetImageLoadWithViewSize(bool enabled);
+  void SetImageLoadWithViewSizeEnabled(bool enabled);
 
   /**
    * @brief Gets whether the image is loaded with the view size.
@@ -354,18 +354,29 @@ public: // Size & Fitting Control
 
 public: // Advanced Rendering & Masking
   /**
-   * @brief Sets whether the image uses pre-multiplied alpha.
+   * @brief Enables multiplying the colour channels of the image by its alpha channel as it is loaded.
    *
-   * @param[in] preMultiplied True if the image has pre-multiplied alpha
+   * This is a request made at load time, so it must be set before the image starts loading;
+   * changing it afterwards does not re-load the image.
+   *
+   * The request is not always honoured. It is ignored when a custom shader is set, and it is
+   * dropped when the loaded image uses a compressed pixel format, which cannot be pre-multiplied.
+   *
+   * @param[in] enabled True to pre-multiply alpha while loading
+   * @note Default is true.
    */
-  void SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultiplyAlphaOnLoadEnabled(bool enabled);
 
   /**
-   * @brief Gets whether pre-multiplied alpha is enabled.
+   * @brief Queries whether alpha is requested to be pre-multiplied as the image is loaded.
    *
-   * @return True if pre-multiplied alpha is enabled
+   * This returns the requested value, which is not necessarily what happened to the loaded
+   * image. See SetPreMultiplyAlphaOnLoadEnabled() for when a request is not honoured.
+   *
+   * @return True if alpha is requested to be pre-multiplied while loading
+   * @see SetPreMultiplyAlphaOnLoadEnabled()
    */
-  bool IsPreMultipliedAlpha() const;
+  bool IsPreMultiplyAlphaOnLoadEnabled() const;
 
   /**
    * @brief Sets the URL of an alpha mask image.
@@ -496,11 +507,11 @@ public: // Loading Behavior
    * @param[in] fastTrack True to upload straight to the render thread
    * @note The request is dropped, without failing, whenever the shortcut cannot be taken:
    *       when an alpha mask, a custom shader, synchronous loading or
-   *       SetImageLoadWithViewSize() is in use, when the load policy is not
+   *       SetImageLoadWithViewSizeEnabled() is in use, when the load policy is not
    *       Image::LoadPolicy::ATTACHED or the release policy is not
    *       Image::ReleasePolicy::DETACHED, or when the url is not a local or remote image.
    */
-  void SetFastTrackUpload(bool fastTrack);
+  void SetFastTrackUploadEnabled(bool fastTrack);
 
   /**
    * @brief Gets whether the loaded image is uploaded straight to the render thread.
@@ -514,7 +525,7 @@ public: // Loading Behavior
    *
    * @param[in] orientationCorrection True to apply orientation correction
    */
-  void SetOrientationCorrection(bool orientationCorrection);
+  void SetOrientationCorrectionEnabled(bool orientationCorrection);
 
   /**
    * @brief Gets whether orientation correction is enabled.

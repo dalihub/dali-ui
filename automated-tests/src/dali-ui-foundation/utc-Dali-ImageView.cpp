@@ -327,13 +327,13 @@ int UtcDaliImageViewSetGetPreMultipliedAlphaP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
   // Default should be true
-  DALI_TEST_CHECK(view.IsPreMultipliedAlpha());
+  DALI_TEST_CHECK(view.IsPreMultiplyAlphaOnLoadEnabled());
 
-  view.SetPreMultipliedAlpha(false);
-  DALI_TEST_EQUALS(view.IsPreMultipliedAlpha(), false, TEST_LOCATION);
+  view.SetPreMultiplyAlphaOnLoadEnabled(false);
+  DALI_TEST_EQUALS(view.IsPreMultiplyAlphaOnLoadEnabled(), false, TEST_LOCATION);
 
-  view.SetPreMultipliedAlpha(true);
-  DALI_TEST_EQUALS(view.IsPreMultipliedAlpha(), true, TEST_LOCATION);
+  view.SetPreMultiplyAlphaOnLoadEnabled(true);
+  DALI_TEST_EQUALS(view.IsPreMultiplyAlphaOnLoadEnabled(), true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -512,7 +512,7 @@ int UtcDaliImageViewSetGetImageLoadWithViewSizeP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.IsImageLoadWithViewSizeEnabled(), false, TEST_LOCATION);
-  view.SetImageLoadWithViewSize(true);
+  view.SetImageLoadWithViewSizeEnabled(true);
   DALI_TEST_EQUALS(view.IsImageLoadWithViewSizeEnabled(), true, TEST_LOCATION);
   END_TEST;
 }
@@ -524,7 +524,7 @@ int UtcDaliImageViewSetGetFastTrackUploadingP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.IsFastTrackUploadEnabled(), false, TEST_LOCATION);
-  view.SetFastTrackUpload(true);
+  view.SetFastTrackUploadEnabled(true);
   DALI_TEST_EQUALS(view.IsFastTrackUploadEnabled(), true, TEST_LOCATION);
   END_TEST;
 }
@@ -536,7 +536,7 @@ int UtcDaliImageViewSetGetOrientationCorrectionP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.IsOrientationCorrectionEnabled(), true, TEST_LOCATION);
-  view.SetOrientationCorrection(false);
+  view.SetOrientationCorrectionEnabled(false);
   DALI_TEST_EQUALS(view.IsOrientationCorrectionEnabled(), false, TEST_LOCATION);
   END_TEST;
 }

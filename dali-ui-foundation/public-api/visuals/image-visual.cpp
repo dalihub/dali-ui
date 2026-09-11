@@ -177,7 +177,7 @@ bool ImageVisual::IsOrientationCorrectionEnabled() const
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION);
 }
 
-void ImageVisual::SetOrientationCorrection(bool orientationCorrection)
+void ImageVisual::SetOrientationCorrectionEnabled(bool orientationCorrection)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
 }
@@ -187,7 +187,7 @@ bool ImageVisual::IsImageLoadWithViewSizeEnabled() const
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE);
 }
 
-void ImageVisual::SetImageLoadWithViewSize(bool enabled)
+void ImageVisual::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, enabled);
 }
@@ -197,7 +197,7 @@ bool ImageVisual::IsFastTrackUploadEnabled() const
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::FAST_TRACK_UPLOADING);
 }
 
-void ImageVisual::SetFastTrackUpload(bool fastTrackUploading)
+void ImageVisual::SetFastTrackUploadEnabled(bool fastTrackUploading)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::FAST_TRACK_UPLOADING, fastTrackUploading);
 }
@@ -251,12 +251,12 @@ void ImageVisual::SetNPatchAuxiliaryImageAlpha(float auxiliaryImageAlpha)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::AUXILIARY_IMAGE_ALPHA, auxiliaryImageAlpha);
 }
 
-bool ImageVisual::IsPreMultipliedAlpha() const
+bool ImageVisual::IsPreMultiplyAlphaOnLoadEnabled() const
 {
   return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA);
 }
 
-void ImageVisual::SetPreMultipliedAlpha(bool preMultiplied)
+void ImageVisual::SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied)
 {
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, preMultiplied);
 }

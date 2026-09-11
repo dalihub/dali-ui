@@ -161,8 +161,8 @@ int UtcDaliAnimatedImageVisualSetGetProperties01(void)
   visual.SetWrapModeV(Dali::WrapMode::MIRRORED_REPEAT);
   DALI_TEST_EQUALS(visual.GetWrapModeV(), Dali::WrapMode::MIRRORED_REPEAT, TEST_LOCATION);
 
-  visual.SetPreMultipliedAlpha(true);
-  DALI_TEST_EQUALS(visual.IsPreMultipliedAlpha(), true, TEST_LOCATION);
+  visual.SetPreMultiplyAlphaOnLoadEnabled(true);
+  DALI_TEST_EQUALS(visual.IsPreMultiplyAlphaOnLoadEnabled(), true, TEST_LOCATION);
 
   visual.SetAlphaMaskUrl("mask.png");
   DALI_TEST_EQUALS(visual.GetAlphaMaskUrl(), Dali::String("mask.png"), TEST_LOCATION);
@@ -188,10 +188,10 @@ int UtcDaliAnimatedImageVisualSetGetProperties01(void)
   visual.SetFittingMode(Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
   DALI_TEST_EQUALS(visual.GetFittingMode(), Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO, TEST_LOCATION);
 
-  visual.SetOrientationCorrection(false);
+  visual.SetOrientationCorrectionEnabled(false);
   DALI_TEST_EQUALS(visual.IsOrientationCorrectionEnabled(), false, TEST_LOCATION);
 
-  visual.SetImageLoadWithViewSize(true);
+  visual.SetImageLoadWithViewSizeEnabled(true);
   DALI_TEST_EQUALS(visual.IsImageLoadWithViewSizeEnabled(), true, TEST_LOCATION);
 
   application.SendNotification();

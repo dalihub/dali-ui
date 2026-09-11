@@ -372,6 +372,9 @@ private:
   bool mUseBrokenImageRenderer : 1; ///< True if renderer changed as broken image.
   bool mImageLoadWithViewSize : 1;  ///< True if we need to synchronize image texture size to visual size, otherwise use
                                     ///< mDesiredSize.
+  bool mPreMultiplyAlphaOnLoad : 1; ///< The requested pre-multiply-on-load value. Kept apart from the
+                                    ///< IS_PRE_MULTIPLIED_ALPHA flag, which tracks what the loaded frames
+                                    ///< actually ended up as, so that a re-load still honours the request.
 };
 
 } // namespace Internal

@@ -115,6 +115,8 @@ MeshVisual::MeshVisual(VisualFactoryCache& factoryCache)
   mUseMipmapping(true),
   mUseSoftNormals(true)
 {
+  // This visual's shader emits straight (non pre-multiplied) alpha, so opt out of the default.
+  mImpl->mFlags &= ~Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 MeshVisual::~MeshVisual()

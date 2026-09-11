@@ -582,13 +582,13 @@ int UtcDaliAnimatedImageViewSetGetPreMultipliedAlphaP(void)
   AnimatedImageView view = AnimatedImageView::New();
 
   // Default should be false
-  DALI_TEST_CHECK(!view.IsPreMultipliedAlpha());
+  DALI_TEST_CHECK(!view.IsPreMultiplyAlphaOnLoadEnabled());
 
-  view.SetPreMultipliedAlpha(true);
-  DALI_TEST_CHECK(view.IsPreMultipliedAlpha());
+  view.SetPreMultiplyAlphaOnLoadEnabled(true);
+  DALI_TEST_CHECK(view.IsPreMultiplyAlphaOnLoadEnabled());
 
-  view.SetPreMultipliedAlpha(false);
-  DALI_TEST_CHECK(!view.IsPreMultipliedAlpha());
+  view.SetPreMultiplyAlphaOnLoadEnabled(false);
+  DALI_TEST_CHECK(!view.IsPreMultiplyAlphaOnLoadEnabled());
   END_TEST;
 }
 
@@ -805,7 +805,7 @@ int UtcDaliAnimatedImageViewPropertyPreMultipliedAlphaP(void)
   UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
 
-  const int index = AnimatedImageView::Property::PRE_MULTIPLIED_ALPHA;
+  const int index = AnimatedImageView::Property::PRE_MULTIPLY_ALPHA_ON_LOAD;
 
   view.SetProperty(index, true);
   DALI_TEST_CHECK(view.GetProperty(index).Get<bool>());

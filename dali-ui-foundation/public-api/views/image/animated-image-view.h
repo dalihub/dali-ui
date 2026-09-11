@@ -66,29 +66,29 @@ public:
   {
     enum
     {
-      IMAGE                     = AnimatedImageViewPropertyIndex::IMAGE,
-      IMAGE_URLS                = AnimatedImageViewPropertyIndex::IMAGE_URLS,
-      LOOP_COUNT                = AnimatedImageViewPropertyIndex::LOOP_COUNT,
-      STOP_BEHAVIOR             = AnimatedImageViewPropertyIndex::STOP_BEHAVIOR,
-      FRAME_SPEED_FACTOR        = AnimatedImageViewPropertyIndex::FRAME_SPEED_FACTOR,
-      BATCH_SIZE                = AnimatedImageViewPropertyIndex::BATCH_SIZE,
-      CACHE_SIZE                = AnimatedImageViewPropertyIndex::CACHE_SIZE,
-      FRAME_DELAY               = AnimatedImageViewPropertyIndex::FRAME_DELAY,
-      IMAGE_COLOR               = AnimatedImageViewPropertyIndex::IMAGE_COLOR,
-      PRE_MULTIPLIED_ALPHA      = AnimatedImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
-      FITTING_MODE              = AnimatedImageViewPropertyIndex::FITTING_MODE,
-      SAMPLING_MODE             = AnimatedImageViewPropertyIndex::SAMPLING_MODE,
-      DESIRED_WIDTH             = AnimatedImageViewPropertyIndex::DESIRED_WIDTH,
-      DESIRED_HEIGHT            = AnimatedImageViewPropertyIndex::DESIRED_HEIGHT,
-      LOAD_POLICY               = AnimatedImageViewPropertyIndex::LOAD_POLICY,
-      RELEASE_POLICY            = AnimatedImageViewPropertyIndex::RELEASE_POLICY,
-      SYNCHRONOUS_LOADING       = AnimatedImageViewPropertyIndex::SYNCHRONOUS_LOADING,
-      IMAGE_LOAD_WITH_VIEW_SIZE = AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
-      ALPHA_MASK_URL            = AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
-      CROP_TO_MASK              = AnimatedImageViewPropertyIndex::CROP_TO_MASK,
-      MASKING_POLICY            = AnimatedImageViewPropertyIndex::MASKING_POLICY,
-      PLACEHOLDER_IMAGE         = AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
-      PIXEL_AREA                = AnimatedImageViewPropertyIndex::PIXEL_AREA,
+      IMAGE                      = AnimatedImageViewPropertyIndex::IMAGE,
+      IMAGE_URLS                 = AnimatedImageViewPropertyIndex::IMAGE_URLS,
+      LOOP_COUNT                 = AnimatedImageViewPropertyIndex::LOOP_COUNT,
+      STOP_BEHAVIOR              = AnimatedImageViewPropertyIndex::STOP_BEHAVIOR,
+      FRAME_SPEED_FACTOR         = AnimatedImageViewPropertyIndex::FRAME_SPEED_FACTOR,
+      BATCH_SIZE                 = AnimatedImageViewPropertyIndex::BATCH_SIZE,
+      CACHE_SIZE                 = AnimatedImageViewPropertyIndex::CACHE_SIZE,
+      FRAME_DELAY                = AnimatedImageViewPropertyIndex::FRAME_DELAY,
+      IMAGE_COLOR                = AnimatedImageViewPropertyIndex::IMAGE_COLOR,
+      PRE_MULTIPLY_ALPHA_ON_LOAD = AnimatedImageViewPropertyIndex::PRE_MULTIPLY_ALPHA_ON_LOAD,
+      FITTING_MODE               = AnimatedImageViewPropertyIndex::FITTING_MODE,
+      SAMPLING_MODE              = AnimatedImageViewPropertyIndex::SAMPLING_MODE,
+      DESIRED_WIDTH              = AnimatedImageViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT             = AnimatedImageViewPropertyIndex::DESIRED_HEIGHT,
+      LOAD_POLICY                = AnimatedImageViewPropertyIndex::LOAD_POLICY,
+      RELEASE_POLICY             = AnimatedImageViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING        = AnimatedImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+      IMAGE_LOAD_WITH_VIEW_SIZE  = AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+      ALPHA_MASK_URL             = AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
+      CROP_TO_MASK               = AnimatedImageViewPropertyIndex::CROP_TO_MASK,
+      MASKING_POLICY             = AnimatedImageViewPropertyIndex::MASKING_POLICY,
+      PLACEHOLDER_IMAGE          = AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+      PIXEL_AREA                 = AnimatedImageViewPropertyIndex::PIXEL_AREA,
     };
   };
 
@@ -206,7 +206,7 @@ public: // Image
    *
    * @param[in] enabled True to enable loading image with view size
    */
-  void SetImageLoadWithViewSize(bool enabled);
+  void SetImageLoadWithViewSizeEnabled(bool enabled);
 
   /**
    * @brief Gets whether the image is loaded with the view size.
@@ -426,18 +426,29 @@ public: // Visual Appearance
   Ui::Image::SamplingMode GetSamplingMode() const;
 
   /**
-   * @brief Sets whether the image uses pre-multiplied alpha.
+   * @brief Enables multiplying the colour channels of the image by its alpha channel as it is loaded.
    *
-   * @param[in] preMultiplied True if the image has pre-multiplied alpha
+   * This is a request made at load time, so it must be set before the image starts loading;
+   * changing it afterwards does not re-load the image.
+   *
+   * The request is not always honoured. It is ignored when a custom shader is set, and it is
+   * dropped when the loaded image uses a compressed pixel format, which cannot be pre-multiplied.
+   *
+   * @param[in] enabled True to pre-multiply alpha while loading
+   * @note Default is false.
    */
-  void SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultiplyAlphaOnLoadEnabled(bool enabled);
 
   /**
-   * @brief Gets whether pre-multiplied alpha is enabled.
+   * @brief Queries whether alpha is requested to be pre-multiplied as the image is loaded.
    *
-   * @return True if pre-multiplied alpha is enabled
+   * This returns the requested value, which is not necessarily what happened to the loaded
+   * image. See SetPreMultiplyAlphaOnLoadEnabled() for when a request is not honoured.
+   *
+   * @return True if alpha is requested to be pre-multiplied while loading
+   * @see SetPreMultiplyAlphaOnLoadEnabled()
    */
-  bool IsPreMultipliedAlpha() const;
+  bool IsPreMultiplyAlphaOnLoadEnabled() const;
 
 public: // Size & Loading Behavior
   /**

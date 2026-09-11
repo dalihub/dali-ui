@@ -118,7 +118,7 @@ public: // Properties
    * default, 0, loads the image at its own size.
    *
    * @param[in] desiredWidth The desired width to set
-   * @note Ignored while SetImageLoadWithViewSize() is enabled, which loads at the View's
+   * @note Ignored while SetImageLoadWithViewSizeEnabled() is enabled, which loads at the View's
    *       size instead.
    * @see SetDesiredHeight()
    * @see SetSamplingMode()
@@ -140,7 +140,7 @@ public: // Properties
    * default, 0, loads the image at its own size.
    *
    * @param[in] desiredHeight The desired height to set
-   * @note Ignored while SetImageLoadWithViewSize() is enabled, which loads at the View's
+   * @note Ignored while SetImageLoadWithViewSizeEnabled() is enabled, which loads at the View's
    *       size instead.
    * @see SetDesiredWidth()
    */
@@ -157,7 +157,7 @@ public: // Properties
    * @brief Sets the filter used when the image is resampled to the desired size.
    *
    * It only has an effect where a resample happens, which is when a desired size or
-   * SetImageLoadWithViewSize() asks for a size other than the source's own. The default is
+   * SetImageLoadWithViewSizeEnabled() asks for a size other than the source's own. The default is
    * Image::SamplingMode::BOX_THEN_LINEAR.
    *
    * @param[in] samplingMode The sampling mode to set
@@ -316,7 +316,7 @@ public: // Properties
    *
    * @param[in] orientationCorrection True to apply the recorded orientation
    */
-  void SetOrientationCorrection(bool orientationCorrection);
+  void SetOrientationCorrectionEnabled(bool orientationCorrection);
 
   /**
    * @brief Gets whether the image is loaded at the view size.
@@ -334,7 +334,7 @@ public: // Properties
    * @param[in] enabled True to load the image with the view size
    * @see SetDesiredWidth()
    */
-  void SetImageLoadWithViewSize(bool enabled);
+  void SetImageLoadWithViewSizeEnabled(bool enabled);
 
   /**
    * @brief Gets whether the loaded image is uploaded straight to the render thread.
@@ -359,11 +359,11 @@ public: // Properties
    * @param[in] fastTrackUploading True to upload straight to the render thread
    * @note The request is dropped, without failing, whenever the shortcut cannot be taken:
    *       when an alpha mask, a custom shader, synchronous loading or
-   *       SetImageLoadWithViewSize() is in use, when the load policy is not
+   *       SetImageLoadWithViewSizeEnabled() is in use, when the load policy is not
    *       Image::LoadPolicy::ATTACHED or the release policy is not
    *       Image::ReleasePolicy::DETACHED, or when the url is not a local or remote image.
    */
-  void SetFastTrackUpload(bool fastTrackUploading);
+  void SetFastTrackUploadEnabled(bool fastTrackUploading);
 
   /**
    * @brief Gets the NPatch border of the ImageVisual.
@@ -453,18 +453,29 @@ public: // Properties
   void SetNPatchAuxiliaryImageAlpha(float auxiliaryImageAlpha);
 
   /**
-   * @brief Gets whether pre-multiplied alpha is enabled.
+   * @brief Queries whether alpha is requested to be pre-multiplied as the image is loaded.
    *
-   * @return True if pre-multiplied alpha is enabled
+   * This returns the requested value, which is not necessarily what happened to the loaded
+   * image. See SetPreMultiplyAlphaOnLoadEnabled() for when a request is not honoured.
+   *
+   * @return True if alpha is requested to be pre-multiplied while loading
+   * @see SetPreMultiplyAlphaOnLoadEnabled()
    */
-  bool IsPreMultipliedAlpha() const;
+  bool IsPreMultiplyAlphaOnLoadEnabled() const;
 
   /**
-   * @brief Sets whether the image uses pre-multiplied alpha.
+   * @brief Enables multiplying the colour channels of the image by its alpha channel as it is loaded.
    *
-   * @param[in] preMultiplied True if the image has pre-multiplied alpha
+   * This is a request made at load time, so it must be set before the image starts loading;
+   * changing it afterwards does not re-load the image.
+   *
+   * The request is not always honoured. It is ignored when a custom shader is set, and it is
+   * dropped when the loaded image uses a compressed pixel format, which cannot be pre-multiplied.
+   *
+   * @param[in] enabled True to pre-multiply alpha while loading
+   * @note Default is true.
    */
-  void SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultiplyAlphaOnLoadEnabled(bool enabled);
 
   /**
    * @brief Gets the alpha mask url of the ImageVisual.

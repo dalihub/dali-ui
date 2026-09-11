@@ -131,11 +131,11 @@ struct AnimatedImageViewPropertyIndex
     IMAGE_COLOR,
 
     /**
-     * @brief Whether to apply pre-multiplied alpha to the rendered output.
-     * @details Name "preMultipliedAlpha", type Property::BOOLEAN.
-     * @note See also: AnimatedImageView::SetPreMultipliedAlpha(), AnimatedImageView::IsPreMultipliedAlpha().
+     * @brief Whether to multiply the colour channels of each frame by its alpha channel as it is loaded.
+     * @details Name "preMultiplyAlphaOnLoad", type Property::BOOLEAN.
+     * @note See also: AnimatedImageView::SetPreMultiplyAlphaOnLoadEnabled(), AnimatedImageView::IsPreMultiplyAlphaOnLoadEnabled().
      */
-    PRE_MULTIPLIED_ALPHA,
+    PRE_MULTIPLY_ALPHA_ON_LOAD,
 
     ///////////////////////////////////////////////////////////////////////////////
     // Size & Fitting
@@ -197,7 +197,7 @@ struct AnimatedImageViewPropertyIndex
     /**
      * @brief Whether the image is loaded at the current view size.
      * @details Name "imageLoadWithViewSize", type Property::BOOLEAN.
-     * @note See also: AnimatedImageView::SetImageLoadWithViewSize(), AnimatedImageView::IsImageLoadWithViewSizeEnabled().
+     * @note See also: AnimatedImageView::SetImageLoadWithViewSizeEnabled(), AnimatedImageView::IsImageLoadWithViewSizeEnabled().
      */
     IMAGE_LOAD_WITH_VIEW_SIZE,
 

@@ -343,11 +343,23 @@ private:
   void UpdateNativeTextureInfomation(TextureSet textureSet);
 
   /**
-   * @brief Set whether the Pre-multiplied Alpha Blending is required
+   * @brief Records whether the loaded texture has its colour channels pre-multiplied by its alpha,
+   * and applies that to the renderer.
    *
-   * @param[in] preMultiplied whether alpha is pre-multiplied.
+   * Only call this from a load completion point. Before the texture is loaded there is no result
+   * to record; the load-time request is held separately in mPreMultiplyAlphaOnLoad.
+   *
+   * @param[in] preMultiplied whether the loaded texture is pre-multiplied.
    */
-  void EnablePreMultipliedAlpha(bool preMultiplied);
+  void SetTexturePreMultiplied(bool preMultiplied);
+
+  /**
+   * @brief Applies the current pre-multiplied alpha state to the renderer's uniform and blend
+   * equation.
+   *
+   * A newly created renderer does not inherit the state, so call this after creating one.
+   */
+  void ApplyPreMultipliedAlphaToRenderer();
 
 private:
   Vector4         mPixelArea;
@@ -378,6 +390,9 @@ private:
   Dali::Ui::Image::FittingMode   mFittingMode; ///< How the contents should fit the view
   TextureManager::LoadState      mLoadState;   ///< The texture loading state
 
+  bool mPreMultiplyAlphaOnLoad : 1; ///< The requested pre-multiply-on-load value. Kept apart from the
+                                    ///< IS_PRE_MULTIPLIED_ALPHA flag, which tracks what the loaded texture
+                                    ///< actually ended up as, so that a re-load still honours the request.
   bool mOrientationCorrection : 1;  ///< true if the image will have it's orientation corrected.
   bool mNeedYuvToRgb : 1;           ///< true if we need to convert yuv to rgb.
   bool mNeedYuva : 1;               ///< true if the yuv texture has alpha.

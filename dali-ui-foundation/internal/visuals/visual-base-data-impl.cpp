@@ -102,7 +102,7 @@ Internal::Visual::Base::Impl::Impl(Ui::Integration::InternalVisualType type)
   mControlSize(Vector2::ZERO),
   mDecorationData(nullptr),
   mDepthIndex(Ui::Integration::DepthIndex::AUTO_INDEX),
-  mFlags(0),
+  mFlags(IS_PRE_MULTIPLIED_ALPHA),
   mViewEffectiveScale(1.0f),
   mResourceStatus(Ui::Visual::ResourceStatus::PREPARING),
   mType(type),

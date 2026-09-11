@@ -325,7 +325,7 @@ void AnimatedImageVisual::CreateImageCache(TextureManager::ReloadPolicy reloadPo
   {
     mImageCache = new RollingAnimatedImageCache(
       textureManager, mDesiredSize, static_cast<Dali::SamplingMode::Type>(mSamplingMode), mAnimatedImageLoading, mMaskingData, *this,
-      mCacheSize, mBatchSize, mWrapModeU, mWrapModeV, IsSynchronousLoadingRequired(), IsPreMultipliedAlphaEnabled(), reloadPolicy);
+      mCacheSize, mBatchSize, mWrapModeU, mWrapModeV, IsSynchronousLoadingRequired(), mPreMultiplyAlphaOnLoad, reloadPolicy);
   }
   else if(mImageUrls)
   {
@@ -339,12 +339,12 @@ void AnimatedImageVisual::CreateImageCache(TextureManager::ReloadPolicy reloadPo
     {
       mImageCache =
         new RollingImageCache(textureManager, mDesiredSize, static_cast<Dali::SamplingMode::Type>(mSamplingMode), *mImageUrls, mMaskingData,
-                              *this, cacheSize, batchSize, mFrameDelay, IsPreMultipliedAlphaEnabled());
+                              *this, cacheSize, batchSize, mFrameDelay, mPreMultiplyAlphaOnLoad);
     }
     else
     {
       mImageCache = new FixedImageCache(textureManager, mDesiredSize, static_cast<Dali::SamplingMode::Type>(mSamplingMode), *mImageUrls,
-                                        mMaskingData, *this, batchSize, mFrameDelay, IsPreMultipliedAlphaEnabled());
+                                        mMaskingData, *this, batchSize, mFrameDelay, mPreMultiplyAlphaOnLoad);
     }
   }
 
@@ -399,10 +399,10 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mBrokenImageEnabled(true),
   mRendererAdded(false),
   mUseBrokenImageRenderer(false),
-  mImageLoadWithViewSize(false)
+  mImageLoadWithViewSize(false),
+  mPreMultiplyAlphaOnLoad(false) // Default PRE_MULTIPLIED_ALPHA is false.
 {
-  // Default PRE_MULTIPLIED_ALPHA is false.
-  EnablePreMultipliedAlpha(false);
+  EnablePreMultipliedAlpha(mPreMultiplyAlphaOnLoad);
 
   mImpl->mFittingModeRequired = true;
 
@@ -550,7 +550,7 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
     map.Insert(Ui::Integration::ImageVisual::Property::URL, value);
   }
 
-  map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled());
+  map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultiplyAlphaOnLoad);
 
   if(mImpl->mRenderer && mPixelAreaIndex != Property::INVALID_INDEX)
   {
@@ -847,6 +847,7 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
       bool premultipliedAlpha = false;
       if(value.Get(premultipliedAlpha))
       {
+        mPreMultiplyAlphaOnLoad = premultipliedAlpha;
         EnablePreMultipliedAlpha(premultipliedAlpha);
       }
       break;
@@ -1325,7 +1326,7 @@ void AnimatedImageVisual::OnInitialize()
   }
 
   // Enable PreMultipliedAlpha if it need.
-  auto preMultiplyOnLoad = IsPreMultipliedAlphaEnabled() && !IsUsingCustomShader()
+  auto preMultiplyOnLoad = mPreMultiplyAlphaOnLoad && !IsUsingCustomShader()
                              ? TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
                              : TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
   EnablePreMultipliedAlpha(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);

@@ -34,7 +34,7 @@ using namespace Dali::Ui;
  *      match the image's aspect ratio via a second layout pass
  *      (ResourceReady → InvalidateMeasure).
  *
- * @note Do NOT use together with SetImageLoadWithViewSize(true).
+ * @note Do NOT use together with SetImageLoadWithViewSizeEnabled(true).
  *       ImageLoadWithViewSize causes GetNaturalSize to return the current view size
  *       instead of the image's true dimensions, making FitSizeToImage ineffective.
  *
@@ -83,7 +83,7 @@ private:
     mFitImage.SetRequestedWidth(MATCH_PARENT);
     mFitImage.SetRequestedHeight(WRAP_CONTENT);
     mFitImage.SetFitSizeToImage(mFitSizeToImage);
-    mFitImage.SetImageLoadWithViewSize(false);
+    mFitImage.SetImageLoadWithViewSizeEnabled(false);
 
     StackLayout container = StackLayout::New(StackOrientation::VERTICAL);
     container.SetRequestedWidth(MATCH_PARENT);

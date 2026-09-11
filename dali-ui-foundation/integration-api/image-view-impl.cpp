@@ -66,7 +66,7 @@ IMAGE_VIEW_PROPERTY_REGISTRATION("image",                 STRING,  IMAGE)
 IMAGE_VIEW_PROPERTY_REGISTRATION("fittingMode",           INTEGER, FITTING_MODE)
 IMAGE_VIEW_PROPERTY_REGISTRATION("samplingMode",          INTEGER, SAMPLING_MODE)
 IMAGE_VIEW_PROPERTY_REGISTRATION("imageColor",            VECTOR4, IMAGE_COLOR)
-IMAGE_VIEW_PROPERTY_REGISTRATION("preMultipliedAlpha",    BOOLEAN, PRE_MULTIPLIED_ALPHA)
+IMAGE_VIEW_PROPERTY_REGISTRATION("preMultiplyAlphaOnLoad",    BOOLEAN, PRE_MULTIPLY_ALPHA_ON_LOAD)
 IMAGE_VIEW_PROPERTY_REGISTRATION("placeholderImage",      STRING,  PLACEHOLDER_IMAGE)
 IMAGE_VIEW_PROPERTY_REGISTRATION("alphaMaskUrl",          STRING,  ALPHA_MASK_URL)
 IMAGE_VIEW_PROPERTY_REGISTRATION("cropToMask",            BOOLEAN, CROP_TO_MASK)
@@ -103,7 +103,7 @@ ImageViewImpl::ImageViewImpl()
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mDesiredWidth(0),
   mDesiredHeight(0),
-  mPreMultipliedAlpha(true), ///< Default as true for ImageView.
+  mPreMultiplyAlphaOnLoad(true), ///< Default as true for ImageView.
   mImageLoadWithViewSize(false),
   mCropToMask(false),
   mSynchronousLoading(false),
@@ -185,12 +185,12 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         }
         break;
       }
-      case Property::PRE_MULTIPLIED_ALPHA:
+      case Property::PRE_MULTIPLY_ALPHA_ON_LOAD:
       {
         bool preMultiplied;
         if(value.Get(preMultiplied))
         {
-          impl.SetPreMultipliedAlpha(preMultiplied);
+          impl.SetPreMultiplyAlphaOnLoadEnabled(preMultiplied);
         }
         break;
       }
@@ -208,7 +208,7 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         bool imageLoadWithViewSize;
         if(value.Get(imageLoadWithViewSize))
         {
-          impl.SetImageLoadWithViewSize(imageLoadWithViewSize);
+          impl.SetImageLoadWithViewSizeEnabled(imageLoadWithViewSize);
         }
         break;
       }
@@ -271,7 +271,7 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         bool fastTrack;
         if(value.Get(fastTrack))
         {
-          impl.SetFastTrackUpload(fastTrack);
+          impl.SetFastTrackUploadEnabled(fastTrack);
         }
         break;
       }
@@ -280,7 +280,7 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         bool orientationCorrection;
         if(value.Get(orientationCorrection))
         {
-          impl.SetOrientationCorrection(orientationCorrection);
+          impl.SetOrientationCorrectionEnabled(orientationCorrection);
         }
         break;
       }
@@ -342,8 +342,8 @@ Dali::Property::Value ImageViewImpl::GetProperty(Dali::BaseObject* object, Dali:
       case Property::IMAGE_COLOR:
         value = impl.GetImageColor().GetRgba();
         break;
-      case Property::PRE_MULTIPLIED_ALPHA:
-        value = impl.IsPreMultipliedAlpha();
+      case Property::PRE_MULTIPLY_ALPHA_ON_LOAD:
+        value = impl.IsPreMultiplyAlphaOnLoadEnabled();
         break;
       case Property::PLACEHOLDER_IMAGE:
         value = impl.GetPlaceholderUrl();
@@ -471,19 +471,19 @@ Vector4 ImageViewImpl::GetPixelArea() const
   return mPixelArea;
 }
 
-void ImageViewImpl::SetPreMultipliedAlpha(bool preMultiplied)
+void ImageViewImpl::SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied)
 {
-  if(mPreMultipliedAlpha != preMultiplied)
+  if(mPreMultiplyAlphaOnLoad != preMultiplied)
   {
-    mPreMultipliedAlpha = preMultiplied;
-    mVisualDirty        = true;
+    mPreMultiplyAlphaOnLoad = preMultiplied;
+    mVisualDirty            = true;
     InvalidateMeasure();
   }
 }
 
-bool ImageViewImpl::IsPreMultipliedAlpha() const
+bool ImageViewImpl::IsPreMultiplyAlphaOnLoadEnabled() const
 {
-  return mPreMultipliedAlpha;
+  return mPreMultiplyAlphaOnLoad;
 }
 
 void ImageViewImpl::SetPlaceholderUrl(const Dali::String& url)
@@ -581,7 +581,7 @@ int ImageViewImpl::GetDesiredHeight() const
   return mDesiredHeight;
 }
 
-void ImageViewImpl::SetImageLoadWithViewSize(bool enabled)
+void ImageViewImpl::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
   if(mImageLoadWithViewSize != enabled)
   {
@@ -709,7 +709,7 @@ bool ImageViewImpl::IsSynchronousLoading() const
   return mSynchronousLoading;
 }
 
-void ImageViewImpl::SetFastTrackUpload(bool fastTrack)
+void ImageViewImpl::SetFastTrackUploadEnabled(bool fastTrack)
 {
   if(mFastTrackUploading != fastTrack)
   {
@@ -724,7 +724,7 @@ bool ImageViewImpl::IsFastTrackUploadEnabled() const
   return mFastTrackUploading;
 }
 
-void ImageViewImpl::SetOrientationCorrection(bool orientationCorrection)
+void ImageViewImpl::SetOrientationCorrectionEnabled(bool orientationCorrection)
 {
   if(mOrientationCorrection != orientationCorrection)
   {
@@ -965,7 +965,7 @@ void ImageViewImpl::UpdateVisual()
     map.Insert(Ui::Integration::ImageVisual::Property::URL, mUrl);
     map.Insert(Ui::Integration::ImageVisual::Property::SAMPLING_MODE, static_cast<int>(mSamplingMode));
     map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, mImageColor.GetRgba());
-    map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
+    map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultiplyAlphaOnLoad);
 
     if(mDesiredWidth > 0 || mDesiredHeight > 0)
     {

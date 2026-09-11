@@ -73,7 +73,7 @@ ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("batchSize",             INTEGER, BATC
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("cacheSize",             INTEGER, CACHE_SIZE)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("frameDelay",            INTEGER, FRAME_DELAY)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("imageColor",            VECTOR4, IMAGE_COLOR)
-ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("preMultipliedAlpha",    BOOLEAN, PRE_MULTIPLIED_ALPHA)
+ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("preMultiplyAlphaOnLoad",    BOOLEAN, PRE_MULTIPLY_ALPHA_ON_LOAD)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("fittingMode",           INTEGER, FITTING_MODE)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("samplingMode",          INTEGER, SAMPLING_MODE)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("desiredWidth",          INTEGER, DESIRED_WIDTH)
@@ -116,7 +116,7 @@ AnimatedImageViewImpl::AnimatedImageViewImpl()
   mDesiredWidth(0),
   mDesiredHeight(0),
   mFrameSpeedFactor(1.0f),
-  mPreMultipliedAlpha(false), ///< Default as false for AnimatedImageView.
+  mPreMultiplyAlphaOnLoad(false), ///< Default as false for AnimatedImageView.
   mImageLoadWithViewSize(false),
   mCropToMask(false),
   mSynchronousLoading(false),
@@ -278,12 +278,12 @@ void AnimatedImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property
         }
         break;
       }
-      case AnimatedImageViewImpl::Property::PRE_MULTIPLIED_ALPHA:
+      case AnimatedImageViewImpl::Property::PRE_MULTIPLY_ALPHA_ON_LOAD:
       {
         bool preMultiplied;
         if(value.Get(preMultiplied))
         {
-          impl.SetPreMultipliedAlpha(preMultiplied);
+          impl.SetPreMultiplyAlphaOnLoadEnabled(preMultiplied);
         }
         break;
       }
@@ -310,7 +310,7 @@ void AnimatedImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property
         bool enabled;
         if(value.Get(enabled))
         {
-          impl.SetImageLoadWithViewSize(enabled);
+          impl.SetImageLoadWithViewSizeEnabled(enabled);
         }
         break;
       }
@@ -429,8 +429,8 @@ Dali::Property::Value AnimatedImageViewImpl::GetProperty(Dali::BaseObject* objec
       case AnimatedImageViewImpl::Property::SYNCHRONOUS_LOADING:
         value = impl.IsSynchronousLoading();
         break;
-      case AnimatedImageViewImpl::Property::PRE_MULTIPLIED_ALPHA:
-        value = impl.IsPreMultipliedAlpha();
+      case AnimatedImageViewImpl::Property::PRE_MULTIPLY_ALPHA_ON_LOAD:
+        value = impl.IsPreMultiplyAlphaOnLoadEnabled();
         break;
       case AnimatedImageViewImpl::Property::FITTING_MODE:
         value = static_cast<int>(impl.GetFittingMode());
@@ -921,19 +921,19 @@ bool AnimatedImageViewImpl::IsSynchronousLoading() const
   return mSynchronousLoading;
 }
 
-void AnimatedImageViewImpl::SetPreMultipliedAlpha(bool preMultiplied)
+void AnimatedImageViewImpl::SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied)
 {
-  if(mPreMultipliedAlpha != preMultiplied)
+  if(mPreMultiplyAlphaOnLoad != preMultiplied)
   {
-    mPreMultipliedAlpha = preMultiplied;
-    mVisualDirty        = true;
+    mPreMultiplyAlphaOnLoad = preMultiplied;
+    mVisualDirty            = true;
     InvalidateMeasure();
   }
 }
 
-bool AnimatedImageViewImpl::IsPreMultipliedAlpha() const
+bool AnimatedImageViewImpl::IsPreMultiplyAlphaOnLoadEnabled() const
 {
-  return mPreMultipliedAlpha;
+  return mPreMultiplyAlphaOnLoad;
 }
 
 void AnimatedImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
@@ -987,7 +987,7 @@ Ui::Image::SamplingMode AnimatedImageViewImpl::GetSamplingMode() const
   return mSamplingMode;
 }
 
-void AnimatedImageViewImpl::SetImageLoadWithViewSize(bool enabled)
+void AnimatedImageViewImpl::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
   if(mImageLoadWithViewSize != enabled)
   {
@@ -1128,7 +1128,7 @@ void AnimatedImageViewImpl::UpdateVisual()
   }
 
   map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, mImageColor.GetRgba());
-  map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
+  map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultiplyAlphaOnLoad);
 
   if(mDesiredWidth > 0)
   {

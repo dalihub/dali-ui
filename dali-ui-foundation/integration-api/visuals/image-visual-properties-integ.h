@@ -235,10 +235,15 @@ enum
   // For both Image and AnimatedImage
 
   /**
-   * @brief Enables/disables premultiplied alpha.
+   * @brief Requests that the colour channels of the image be multiplied by its alpha channel as
+   * it is loaded.
    * @details Name "premultipliedAlpha", type Property::BOOLEAN.
    * @note Optional.
-   * @note The premultiplied alpha is true for ImageVisual, and false for AnimatedImageVisual.
+   * @note Default is true for ImageVisual, and false for AnimatedImageVisual.
+   * @note This is a request applied at load time, so it must be set before the image starts
+   * loading; setting it afterwards does not re-load the image. The request is ignored when a
+   * custom shader is set, and dropped when the loaded image uses a compressed pixel format.
+   * Reading this property returns the requested value, not what the loaded image ended up as.
    */
   PRE_MULTIPLIED_ALPHA,
 

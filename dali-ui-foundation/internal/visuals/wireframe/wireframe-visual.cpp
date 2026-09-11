@@ -73,6 +73,8 @@ WireframeVisual::WireframeVisual(VisualFactoryCache& factoryCache, Visual::BaseP
 : Visual::Base(factoryCache, actualVisual ? actualVisual->GetType() : Ui::Integration::InternalVisualType::WIREFRAME),
   mActualVisual(actualVisual)
 {
+  // This visual's shader emits straight (non pre-multiplied) alpha, so opt out of the default.
+  mImpl->mFlags &= ~Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 WireframeVisual::~WireframeVisual()
