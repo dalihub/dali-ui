@@ -19,7 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-vector.h>
-#include <dali/public-api/common/extents.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/events/pan-gesture.h>

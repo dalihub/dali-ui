@@ -62,7 +62,7 @@ public:
    * @brief An inclusive integer frame span [startFrame, endFrame].
    *
    * The public members map directly onto the signed-int Lottie frame API, following
-   * the Dali::Extents value-struct convention (public members + a plain constructor).
+   * the Dali::Insets value-struct convention (public members + a plain constructor).
    */
   struct FrameRange
   {

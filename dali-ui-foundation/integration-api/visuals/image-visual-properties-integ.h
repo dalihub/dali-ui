@@ -197,8 +197,8 @@ enum
 
   /**
    * @brief The border of the image.
-   * @details Name "border", type Property::EXTENTS, Property::RECTANGLE or Property::VECTOR4.
-   *          The border of the image in the order: left, right, top, bottom.
+   * @details Name "border", type Property::INSETS, Property::RECTANGLE or Property::VECTOR4.
+   *          The border of the image in the order: left, right, top, bottom, rounded to whole pixels.
    * @note Optional.
    * @note For N-Patch images only.
    */

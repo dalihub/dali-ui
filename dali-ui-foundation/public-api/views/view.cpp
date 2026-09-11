@@ -39,19 +39,6 @@ namespace DALI_NAMESPACE
 
 namespace Ui
 {
-namespace
-{
-// TODO: Remove together with the temporary Extents overloads of
-// View::SetMargin() and View::SetPadding().
-Insets ToInsets(const Extents& extents)
-{
-  return Insets(static_cast<float>(extents.start),
-                static_cast<float>(extents.end),
-                static_cast<float>(extents.top),
-                static_cast<float>(extents.bottom));
-}
-} // unnamed namespace
-
 View::View()
 {
 }
@@ -264,11 +251,6 @@ void View::SetMargin(const Insets& margin)
   GetImpl(*this).SetMargin(margin);
 }
 
-void View::SetMargin(const Extents& margin)
-{
-  SetMargin(ToInsets(margin));
-}
-
 void View::SetMargin(float start, float end, float top, float bottom)
 {
   SetMargin(Insets(start, end, top, bottom));
@@ -320,11 +302,6 @@ Insets View::GetMargin() const
 void View::SetPadding(const Insets& padding)
 {
   GetImpl(*this).SetPadding(padding);
-}
-
-void View::SetPadding(const Extents& padding)
-{
-  SetPadding(ToInsets(padding));
 }
 
 void View::SetPadding(float start, float end, float top, float bottom)

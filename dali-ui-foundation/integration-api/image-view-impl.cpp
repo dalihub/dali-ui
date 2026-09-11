@@ -990,8 +990,7 @@ void ImageViewImpl::UpdateVisual()
 
     if(mNPatchBorder != Dali::Insets())
     {
-      map.Insert(Ui::Integration::ImageVisual::Property::BORDER,
-                 Vector4(mNPatchBorder.start, mNPatchBorder.end, mNPatchBorder.top, mNPatchBorder.bottom));
+      map.Insert(Ui::Integration::ImageVisual::Property::BORDER, mNPatchBorder);
       map.Insert(Ui::Integration::ImageVisual::Property::BORDER_ONLY, mNPatchBorderOnly);
     }
 

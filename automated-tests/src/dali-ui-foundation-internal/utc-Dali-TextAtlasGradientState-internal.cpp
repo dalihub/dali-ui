@@ -440,7 +440,7 @@ int UtcDaliTextAtlasGradientCommonTextUtilsBackgroundScrollP(void)
 
   Dali::Ui::View textActor = Dali::Ui::View::New();
   textActor.SetProperty(Actor::Property::SIZE, Vector2(120.0f, 48.0f));
-  textActor.SetProperty(Dali::Ui::View::Property::PADDING, Extents(0, 0, 0, 0));
+  textActor.SetProperty(Dali::Ui::View::Property::PADDING, Insets(0.0f, 0.0f, 0.0f, 0.0f));
   application.GetWindow().Add(textActor);
 
   Dali::Ui::Text::ControllerPtr controller = Dali::Ui::Text::Controller::New();

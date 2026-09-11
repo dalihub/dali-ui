@@ -173,23 +173,20 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
   Property::Value* borderValue = propertyMap.Find(Ui::Integration::ImageVisual::Property::BORDER, BORDER);
   if(borderValue)
   {
-    if(!borderValue->Get(mBorder)) // If value exists and is Extents (or Vector4), just set mBorder
+    if(!borderValue->Get(mBorder)) // If value exists and is Insets (or Vector4), just set mBorder
     {
-      // Not a extents so try rect
+      // Not insets so try rect
       Rect<int32_t> rect;
       if(borderValue->Get(rect))
       {
-        mBorder.start  = static_cast<int16_t>(rect.x);
-        mBorder.end    = static_cast<int16_t>(rect.y);
-        mBorder.top    = static_cast<int16_t>(rect.width);
-        mBorder.bottom = static_cast<int16_t>(rect.height);
+        mBorder = Insets(static_cast<float>(rect.x), static_cast<float>(rect.y), static_cast<float>(rect.width), static_cast<float>(rect.height));
       }
     }
-    // Ensure the range of border valid.
-    Dali::ClampInPlace(mBorder.start, static_cast<int16_t>(0), static_cast<int16_t>(0x7FFF));
-    Dali::ClampInPlace(mBorder.end, static_cast<int16_t>(0), static_cast<int16_t>(0x7FFF));
-    Dali::ClampInPlace(mBorder.top, static_cast<int16_t>(0), static_cast<int16_t>(0x7FFF));
-    Dali::ClampInPlace(mBorder.bottom, static_cast<int16_t>(0), static_cast<int16_t>(0x7FFF));
+    // The border selects whole columns and rows of the source image, so keep it in whole pixels within the valid range.
+    mBorder.start  = Dali::Clamp(std::round(mBorder.start), 0.0f, 32767.0f);
+    mBorder.end    = Dali::Clamp(std::round(mBorder.end), 0.0f, 32767.0f);
+    mBorder.top    = Dali::Clamp(std::round(mBorder.top), 0.0f, 32767.0f);
+    mBorder.bottom = Dali::Clamp(std::round(mBorder.bottom), 0.0f, 32767.0f);
   }
 
   Property::Value* auxImage = propertyMap.Find(Ui::Integration::ImageVisual::Property::AUXILIARY_IMAGE, AUXILIARY_IMAGE_NAME);

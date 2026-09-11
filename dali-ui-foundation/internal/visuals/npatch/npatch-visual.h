@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/common/extents.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/rendering/geometry.h>
@@ -226,7 +226,7 @@ private:
   Ui::Visual::ResourceStatus   mAuxiliaryResourceStatus; ///< resource status for auxiliary mask image
   Property::Index              mPreMultipliedAlphaIndex; ///< Index of premultipliedAlpha uniform. Only be used for auxiliary image.
   bool                         mBorderOnly;              ///< if only border is desired
-  Extents                      mBorder;                  ///< The size of the border
+  Insets                       mBorder;                  ///< The size of the border
   float                        mAuxiliaryImageAlpha;     ///< The alpha value for the auxiliary image only
   Ui::Image::ReleasePolicy     mReleasePolicy;           ///< The release policy to determine when an image should no longer be cached.
   Dali::Ui::Image::FittingMode mFittingMode;             ///< How the contents should fit the view

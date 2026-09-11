@@ -203,7 +203,7 @@ Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&  
               case VisualUrl::REGULAR_IMAGE:
               {
                 Property::Value* borderValue = propertyMap.Find(Ui::Integration::ImageVisual::Property::BORDER, BORDER);
-                if(DALI_UNLIKELY(borderValue && borderValue->Get<Dali::Extents>() != Dali::Extents()))
+                if(DALI_UNLIKELY(borderValue && borderValue->Get<Dali::Insets>() != Dali::Insets()))
                 {
                   visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap);
                 }

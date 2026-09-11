@@ -324,17 +324,7 @@ bool GetInsetsFromPropertyValue(const Property::Value& value, Insets& insets)
     return true;
   }
 
-  Extents extentsValue;
-  if(value.Get(extentsValue))
-  {
-    insets = Insets(static_cast<float>(extentsValue.start),
-                    static_cast<float>(extentsValue.end),
-                    static_cast<float>(extentsValue.top),
-                    static_cast<float>(extentsValue.bottom));
-    return true;
-  }
-
-  return false;
+  return value.Get(insets);
 }
 
 void ResetStateEffect(ViewDataImpl& viewDataImpl, StateEffect effect)

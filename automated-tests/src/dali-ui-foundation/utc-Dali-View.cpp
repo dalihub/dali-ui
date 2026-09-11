@@ -3762,13 +3762,13 @@ int UtcDaliViewTypedSetterAndSetPropertyConvergeP(void)
   END_TEST;
 }
 
-int UtcDaliViewSetPropertyAcceptsExtentsForSpacingP(void)
+int UtcDaliViewSetPropertyAcceptsInsetsForSpacingP(void)
 {
   UiTestApplication application;
 
   Ui::View view = Ui::View::New();
-  Dali::Handle(view).SetProperty(Ui::View::Property::MARGIN, Extents(1, 2, 3, 4));
-  Dali::Handle(view).SetProperty(Ui::View::Property::PADDING, Extents(5, 6, 7, 8));
+  Dali::Handle(view).SetProperty(Ui::View::Property::MARGIN, Insets(1.0f, 2.0f, 3.0f, 4.0f));
+  Dali::Handle(view).SetProperty(Ui::View::Property::PADDING, Insets(5.0f, 6.0f, 7.0f, 8.0f));
 
   DALI_TEST_EQUALS(view.GetMargin(), Insets(1.0f, 2.0f, 3.0f, 4.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetPadding(), Insets(5.0f, 6.0f, 7.0f, 8.0f), TEST_LOCATION);

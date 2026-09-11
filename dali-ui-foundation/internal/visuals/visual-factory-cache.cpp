@@ -547,7 +547,7 @@ void VisualFactoryCache::UpdateBrokenImageRenderer(VisualRenderer& renderer, con
         if(mBrokenImageInfoContainer[index].visualType == VisualUrl::Type::N_PATCH)
         {
           NPatchDataPtr data;
-          Extents       border;
+          Insets        border;
           mBrokenImageInfoContainer[index].npatchId = mNPatchLoader.Load(
             mTextureManager, NULL, mBrokenImageInfoContainer[index].url, border, mPreMultiplyOnLoad, true);
           if(mNPatchLoader.GetNPatchData(mBrokenImageInfoContainer[index].npatchId, data) &&

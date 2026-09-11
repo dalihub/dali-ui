@@ -187,10 +187,10 @@ int UtcDaliTextDecoratorHandlesReceivePanWithHitTestModesP(void)
       const Bounds screenExtents = handle.CalculateScreenExtents();
       Vector2      panStart(screenExtents.x + 0.5f * screenExtents.width,
                             screenExtents.y + 0.5f * screenExtents.height);
-      const Extents touchHitAreaMargin =
-        handle.GetProperty<Extents>(Actor::Property::TOUCH_HIT_AREA_MARGIN);
-      DALI_TEST_CHECK(touchHitAreaMargin.start > 0);
-      DALI_TEST_CHECK(touchHitAreaMargin.bottom > 0);
+      const Insets touchHitAreaMargin =
+        handle.GetProperty<Insets>(Actor::Property::TOUCH_HIT_AREA_MARGIN);
+      DALI_TEST_CHECK(touchHitAreaMargin.start > 0.0f);
+      DALI_TEST_CHECK(touchHitAreaMargin.bottom > 0.0f);
       panStart.x = screenExtents.x - 0.5f * touchHitAreaMargin.start;
 
       const Vector2      panEnd(panStart.x + 30.0f, panStart.y);

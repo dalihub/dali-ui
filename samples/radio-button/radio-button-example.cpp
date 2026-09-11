@@ -91,7 +91,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(7.0f);
-    root.SetPadding(Extents(24, 24, 120, 20));
+    root.SetPadding(Insets(24.0f, 24.0f, 120.0f, 20.0f));
 
     mStatus = MakeLabel("Select an option", 14.0f);
     mStatus.SetTextColor(UiColor(0x137333u));
@@ -183,7 +183,7 @@ private:
     row.AttachLayoutManager(Dali::MakeUnique<StackLayoutManager>(StackOrientation::HORIZONTAL, 8.0f));
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(56.0f);
-    row.SetPadding(Extents(8, 8, 2, 2));
+    row.SetPadding(Insets(8.0f, 8.0f, 2.0f, 2.0f));
     row.SetAccessibilityRole(Accessibility::Role::RADIO_BUTTON);
     row.SetGroupName("radio-button-sample-text");
     row.SetAccessibilityName(text);

@@ -204,20 +204,16 @@ void ImageVisual::SetFastTrackUploadEnabled(bool fastTrackUploading)
 
 Dali::Insets ImageVisual::GetNPatchBorder() const
 {
-  const Dali::Extents border = GetImplementation(*this).GetProperty<Dali::Extents>(Dali::Ui::Integration::ImageVisual::Property::BORDER);
-  return Dali::Insets(static_cast<float>(border.start),
-                      static_cast<float>(border.end),
-                      static_cast<float>(border.top),
-                      static_cast<float>(border.bottom));
+  return GetImplementation(*this).GetProperty<Dali::Insets>(Dali::Ui::Integration::ImageVisual::Property::BORDER);
 }
 
 void ImageVisual::SetNPatchBorder(const Dali::Insets& border)
 {
-  // The border selects whole columns and rows of the source image, so it is stored as Extents.
-  const Dali::Extents rounded(static_cast<int16_t>(std::roundf(border.start)),
-                              static_cast<int16_t>(std::roundf(border.end)),
-                              static_cast<int16_t>(std::roundf(border.top)),
-                              static_cast<int16_t>(std::roundf(border.bottom)));
+  // The border selects whole columns and rows of the source image, so it is stored in whole pixels.
+  const Dali::Insets rounded(std::roundf(border.start),
+                             std::roundf(border.end),
+                             std::roundf(border.top),
+                             std::roundf(border.bottom));
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::BORDER, rounded);
 }
 

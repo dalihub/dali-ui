@@ -1919,12 +1919,10 @@ struct Decorator::Impl : public ConnectionTracker
   {
     if(handle.actor)
     {
-      const int16_t horizontalMargin =
-        static_cast<int16_t>(0.5f * (DEFAULT_HANDLE_RELATIVE_HIT_AREA.x - 1.0f) * handle.size.width);
-      const int16_t bottomMargin =
-        static_cast<int16_t>((DEFAULT_HANDLE_RELATIVE_HIT_AREA.y - 1.0f) * handle.size.height);
+      const float horizontalMargin = 0.5f * (DEFAULT_HANDLE_RELATIVE_HIT_AREA.x - 1.0f) * handle.size.width;
+      const float bottomMargin     = (DEFAULT_HANDLE_RELATIVE_HIT_AREA.y - 1.0f) * handle.size.height;
       handle.actor.SetProperty(Actor::Property::TOUCH_HIT_AREA_MARGIN,
-                               Extents(horizontalMargin, horizontalMargin, 0, bottomMargin));
+                               Insets(horizontalMargin, horizontalMargin, 0.0f, bottomMargin));
     }
   }
 
