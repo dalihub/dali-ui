@@ -373,22 +373,24 @@ private:
   {
     int gradientType = GetRandomInteger(0, 3);
 
-    // Set gradient type specific properties
+    // Build a gradient value of a random type. The concrete type decides what kind of
+    // gradient the visual renders.
+    Ui::Gradient::Base gradient;
     switch(gradientType)
     {
       case 0: // Linear gradient
       {
-        gradientVisual.SetLinearGradient(Vector2(-0.5f + GetRandomFloat(), -0.5f + GetRandomFloat() * 0.5f), Vector2(0.5f - GetRandomFloat() * 0.5f, 0.5f - GetRandomFloat()));
+        gradient = Ui::Gradient::Linear(Vector2(-0.5f + GetRandomFloat(), -0.5f + GetRandomFloat() * 0.5f), Vector2(0.5f - GetRandomFloat() * 0.5f, 0.5f - GetRandomFloat()));
         break;
       }
       case 1: // Radial gradient
       {
-        gradientVisual.SetRadialGradient(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), GetRandomFloat() * 0.5f + 0.25f);
+        gradient = Ui::Gradient::Radial(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), GetRandomFloat() * 0.5f + 0.25f);
         break;
       }
       case 2: // Conic gradient
       {
-        gradientVisual.SetConicGradient(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), Dali::Radian(GetRandomFloat() * Math::PI * 2.0f));
+        gradient = Ui::Gradient::Conic(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), Dali::Radian(GetRandomFloat() * Math::PI * 2.0f));
         break;
       }
     }
@@ -408,27 +410,27 @@ private:
         spreadMethod = Ui::Gradient::SpreadMethod::REPEAT;
         break;
     }
-    gradientVisual.SetSpreadMethod(spreadMethod);
+    gradient.SetSpreadMethod(spreadMethod);
 
     // Set random stop nodes (2-4 colors)
     int numStops = GetRandomInteger(2, 5);
     switch(numStops)
     {
       case 2:
-        gradientVisual.SetStopNodes({
+        gradient.SetStopNodes({
           {0.0f, GetRandomColor()},
           {1.0f, GetRandomColor()},
         });
         break;
       case 3:
-        gradientVisual.SetStopNodes({
+        gradient.SetStopNodes({
           {0.0f, GetRandomColor()},
           {0.5f, GetRandomColor()},
           {1.0f, GetRandomColor()},
         });
         break;
       case 4:
-        gradientVisual.SetStopNodes({
+        gradient.SetStopNodes({
           {0.0f, GetRandomColor()},
           {0.33f, GetRandomColor()},
           {0.66f, GetRandomColor()},
@@ -436,12 +438,14 @@ private:
         });
         break;
       default:
-        gradientVisual.SetStopNodes({
+        gradient.SetStopNodes({
           {0.0f, GetRandomColor()},
           {1.0f, GetRandomColor()},
         });
         break;
     }
+
+    gradientVisual.SetGradient(gradient);
   }
 
 private:

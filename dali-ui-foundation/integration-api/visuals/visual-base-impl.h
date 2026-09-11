@@ -405,8 +405,22 @@ public: ///< Called from other internal class
   Dali::Property GetPropertyObject(Dali::Property::Key visualPropertyKey);
 
   /**
+   * @brief Whether the given property currently holds a value.
+   * @note Unlike GetProperty(), this never queries the visual. A property that was
+   * dropped by RemoveCache() stays absent until it is set again, even while the visual
+   * still holds the previous value because the update has not been applied yet.
+   *
+   * @param[in] index The index of the property.
+   * @return True if the property holds a value.
+   */
+  bool HasCachedProperty(Dali::Property::Index index) const;
+
+  /**
    * @brief Remove cached data of given index.
    * @note We can call this function at const case since cache is mutable.
+   * @note This also drops the value from the pending mutable property updates, so the
+   * property is forgotten even if it was set during the current frame and has not been
+   * applied to the visual yet.
    *
    * @param[in] index The index want to remove cache.
    */
@@ -558,7 +572,7 @@ private:
 
   Dali::String          mName;
   mutable Property::Map mCachedVisualPropertyMap;        ///< Whole collected map of properties.
-  Property::Map         mUpdatedMutableVisualProperties; ///< Temporal properties that was
+  mutable Property::Map mUpdatedMutableVisualProperties; ///< Temporal properties that was
 
   std::unique_ptr<Internal::Visual::Transform> mTransform;
 

@@ -98,7 +98,7 @@ enum
    * The outside of the entered Start Position and End Position is extended to the value of the border.
    * Even if the range between Start Position and End Position is greater than (-0.5, -0.5) to (0.5, 0.5),
    * only the corresponding area is drawn.
-   * @note Recommand to use GradientVisual::SetLinearGradient()
+   * @note Recommand to use GradientVisual::SetGradient() with a Gradient::Linear value.
    * @note Must set END_POSITION at the same time if you are change it by SetProperty. If not, property will be ignored.
    * @note Mandatory for Linear.
    */
@@ -112,7 +112,7 @@ enum
    * The outside of the entered Start Position and End Position is extended to the value of the border.
    * Even if the range between Start Position and End Position is greater than (-0.5, -0.5) to (0.5, 0.5),
    * only the corresponding area is drawn.
-   * @note Recommand to use GradientVisual::SetLinearGradient()
+   * @note Recommand to use GradientVisual::SetGradient() with a Gradient::Linear value.
    * @note Must set START_POSITION at the same time if you are change it by SetProperty. If not, property will be ignored.
    * @note Mandatory for Linear.
    */
@@ -122,7 +122,7 @@ enum
    * @brief The center point of a radial gradient.
    * @details Name "center", type Property::VECTOR2.
    * @note Mandatory for Radial and Conic.
-   * @note Recommand to use GradientVisual::SetRadialGradient() or GradientVisual::SetConicGradient()
+   * @note Recommand to use GradientVisual::SetGradient() with a Gradient::Radial or Gradient::Conic value.
    * @note Must set RADIUS or START_ANGLE at the same time if you are change it by SetProperty. If not, property will be ignored.
    */
   CENTER,
@@ -131,7 +131,7 @@ enum
    * @brief The size of the radius of a radial gradient.
    * @details Name "radius", type Property::FLOAT.
    * @note Mandatory for Radial.
-   * @note Recommand to use GradientVisual::SetRadialGradient()
+   * @note Recommand to use GradientVisual::SetGradient() with a Gradient::Radial value.
    * @note Must set CENTER at the same time if you are change it by SetProperty. If not, property will be ignored.
    */
   RADIUS,
@@ -140,7 +140,7 @@ enum
    * @brief The initial angle from which the conic gradient begins.
    * @details Name "startAngle", type Property::FLOAT.
    * @note Mandatory for Conic.
-   * @note Recommand to use GradientVisual::SetConicGradient()
+   * @note Recommand to use GradientVisual::SetGradient() with a Gradient::Conic value.
    * @note Must set CENTER at the same time if you are change it by SetProperty. If not, property will be ignored.
    */
   START_ANGLE,

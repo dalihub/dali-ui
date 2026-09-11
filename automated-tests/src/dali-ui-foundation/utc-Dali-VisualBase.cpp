@@ -15,6 +15,9 @@
  *
  */
 
+#include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
+#include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
+#include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/border-visual.h>
@@ -625,11 +628,12 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
 
   View           view           = View::New();
   GradientVisual gradientVisual = GradientVisual::New();
-  gradientVisual.SetLinearGradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
-  gradientVisual.SetStopNodes({
+  Ui::Gradient::Linear initialGradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  initialGradient.SetStopNodes({
     {0.0f, UiColor("#000000")},
     {1.0f, UiColor("#FFFFFF")},
   });
+  gradientVisual.SetGradient(initialGradient);
   VisualBase visual = gradientVisual;
 
   view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
@@ -703,38 +707,48 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
   { Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::START_OFFSET, 0.1f); }, false);
   TestVisualBaseChanged([](VisualBase visual)
   {
-    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetStopNodes({
+    GradientVisual     gradientVisual = GradientVisual::DownCast(visual);
+    Ui::Gradient::Base gradient       = gradientVisual.GetGradient();
+    gradient.SetStopNodes({
       {0.0f, UiColor("#FF0000")},
       {0.5f, UiColor("#00FF00")},
       {1.0f, UiColor("#0000FF")},
     });
+    gradientVisual.SetGradient(gradient);
   }, false);
   TestVisualBaseChanged([](VisualBase visual)
   {
-    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetUnits(Ui::Gradient::Units::USER_SPACE);
+    GradientVisual     gradientVisual = GradientVisual::DownCast(visual);
+    Ui::Gradient::Base gradient       = gradientVisual.GetGradient();
+    gradient.SetUnits(Ui::Gradient::Units::USER_SPACE);
+    gradientVisual.SetGradient(gradient);
   }, false);
   TestVisualBaseChanged([](VisualBase visual)
   {
-    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetSpreadMethod(Ui::Gradient::SpreadMethod::REFLECT);
+    GradientVisual     gradientVisual = GradientVisual::DownCast(visual);
+    Ui::Gradient::Base gradient       = gradientVisual.GetGradient();
+    gradient.SetSpreadMethod(Ui::Gradient::SpreadMethod::REFLECT);
+    gradientVisual.SetGradient(gradient);
   }, false);
 
+  // Changing the gradient type must not create a new visual either.
   TestVisualBaseChanged([](VisualBase visual)
   {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetConicGradient(Vector2::ZERO, Dali::Radian(2.0f));
+    gradientVisual.SetGradient(Ui::Gradient::Conic(Vector2::ZERO, Dali::Radian(2.0f)));
+    DALI_TEST_EQUALS(gradientVisual.GetGradient().GetType(), Ui::Gradient::Type::CONIC, TEST_LOCATION);
   }, false);
   TestVisualBaseChanged([](VisualBase visual)
   {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetLinearGradient(Vector2::ZERO, Vector2::ONE);
+    gradientVisual.SetGradient(Ui::Gradient::Linear(Vector2::ZERO, Vector2::ONE));
+    DALI_TEST_EQUALS(gradientVisual.GetGradient().GetType(), Ui::Gradient::Type::LINEAR, TEST_LOCATION);
   }, false);
   TestVisualBaseChanged([](VisualBase visual)
   {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetRadialGradient(Vector2::ZERO, 5.0f);
+    gradientVisual.SetGradient(Ui::Gradient::Radial(Vector2::ZERO, 5.0f));
+    DALI_TEST_EQUALS(gradientVisual.GetGradient().GetType(), Ui::Gradient::Type::RADIAL, TEST_LOCATION);
   }, false);
 
   END_TEST;
@@ -820,38 +834,36 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
   { Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::START_OFFSET, 0.1f); }, false);
   TestVisualBaseChanged([](VisualBase visual)
   {
-    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetStopNodes({
-      {0.0f, UiColor("#FF0000")},
-      {0.5f, UiColor("#00FF00")},
-      {1.0f, UiColor("#0000FF")},
-    });
+    Property::Array offsets;
+    Property::Array colors;
+    offsets.PushBack(0.0f);
+    offsets.PushBack(0.5f);
+    offsets.PushBack(1.0f);
+    colors.PushBack(UiColor("#FF0000").GetRgba());
+    colors.PushBack(UiColor("#00FF00").GetRgba());
+    colors.PushBack(UiColor("#0000FF").GetRgba());
+    Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::STOP_OFFSET, offsets);
+    Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::STOP_COLOR, colors);
   }, false);
   TestVisualBaseChanged([](VisualBase visual)
-  {
-    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetUnits(Ui::Gradient::Units::USER_SPACE);
-  }, false);
+  { Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::UNITS, Ui::Gradient::Units::USER_SPACE); }, false);
   TestVisualBaseChanged([](VisualBase visual)
-  {
-    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetSpreadMethod(Ui::Gradient::SpreadMethod::REFLECT);
-  }, false);
+  { Dali::Ui::GetImplementation(visual).SetProperty(Ui::Integration::GradientVisual::Property::SPREAD_METHOD, Ui::Gradient::SpreadMethod::REFLECT); }, false);
 
   TestVisualBaseChanged([](VisualBase visual)
   {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetConicGradient(Vector2::ZERO, Dali::Radian(2.0f));
+    gradientVisual.SetGradient(Ui::Gradient::Conic(Vector2::ZERO, Dali::Radian(2.0f)));
   }, false);
   TestVisualBaseChanged([](VisualBase visual)
   {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetLinearGradient(Vector2::ZERO, Vector2::ONE);
+    gradientVisual.SetGradient(Ui::Gradient::Linear(Vector2::ZERO, Vector2::ONE));
   }, false);
   TestVisualBaseChanged([](VisualBase visual)
   {
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetRadialGradient(Vector2::ZERO, 5.0f);
+    gradientVisual.SetGradient(Ui::Gradient::Radial(Vector2::ZERO, 5.0f));
   }, false);
 
   END_TEST;

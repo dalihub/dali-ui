@@ -664,9 +664,30 @@ Dali::Property VisualBaseImpl::GetPropertyObject(Dali::Property::Key visualPrope
   return Dali::Property(handle, Property::INVALID_INDEX);
 }
 
+bool VisualBaseImpl::HasCachedProperty(Dali::Property::Index index) const
+{
+  if(mPropertyUpdatedStatus == PropertyUpdatedStatus::MUTABLE_PROPERTY_CHANGED)
+  {
+    if(mUpdatedMutableVisualProperties.Find(index))
+    {
+      return true;
+    }
+  }
+
+  // GetProperty() stores an empty value for a property that has no result, so an entry
+  // does not imply a value.
+  const auto* valuePtr = mCachedVisualPropertyMap.Find(index);
+  return valuePtr && valuePtr->GetType() != Property::NONE;
+}
+
 void VisualBaseImpl::RemoveCache(Dali::Property::Index index) const
 {
   mCachedVisualPropertyMap.Remove(index);
+
+  // The property could have been set during the current frame and be waiting in the
+  // pending mutable updates. GetProperty() queries that map first, and UpdateProperty()
+  // sends it to the visual, so it has to be dropped here as well.
+  mUpdatedMutableVisualProperties.Remove(index);
 }
 
 void VisualBaseImpl::UpdateProperty()

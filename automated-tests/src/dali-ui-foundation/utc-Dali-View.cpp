@@ -1293,6 +1293,74 @@ int UtcDaliViewSetBackgroundGradientP(void)
   END_TEST;
 }
 
+int UtcDaliViewSetBackgroundGradientRadialP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  Gradient::Radial gradient(Vector2(0.25f, -0.25f), 0.75f);
+  gradient.SetStopNodes({
+    {0.0f, UiColor(Color::RED)},
+    {1.0f, UiColor(Color::BLUE)},
+  });
+
+  view.SetBackgroundGradient(gradient);
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(GetVisualType(backgroundMap), static_cast<int>(Ui::Integration::InternalVisualType::GRADIENT), TEST_LOCATION);
+
+  Property::Value* centerValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::CENTER);
+  DALI_TEST_CHECK(centerValue);
+  Vector2 center;
+  DALI_TEST_CHECK(centerValue && centerValue->Get(center));
+  DALI_TEST_EQUALS(center, Vector2(0.25f, -0.25f), TEST_LOCATION);
+
+  Property::Value* radiusValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::RADIUS);
+  DALI_TEST_CHECK(radiusValue);
+  float radius = 0.0f;
+  DALI_TEST_CHECK(radiusValue && radiusValue->Get(radius));
+  DALI_TEST_EQUALS(radius, 0.75f, TEST_LOCATION);
+
+  // A radial gradient must not carry any linear geometry.
+  DALI_TEST_CHECK(!backgroundMap.Find(Ui::Integration::GradientVisual::Property::START_POSITION));
+  DALI_TEST_CHECK(!backgroundMap.Find(Ui::Integration::GradientVisual::Property::START_ANGLE));
+  END_TEST;
+}
+
+int UtcDaliViewSetBackgroundGradientConicP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  Gradient::Conic gradient(Vector2(0.5f, 0.5f), Dali::Radian(Math::PI_2));
+  gradient.SetStopNodes({
+    {0.0f, UiColor(Color::RED)},
+    {1.0f, UiColor(Color::BLUE)},
+  });
+
+  view.SetBackgroundGradient(gradient);
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(GetVisualType(backgroundMap), static_cast<int>(Ui::Integration::InternalVisualType::GRADIENT), TEST_LOCATION);
+
+  Property::Value* centerValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::CENTER);
+  DALI_TEST_CHECK(centerValue);
+  Vector2 center;
+  DALI_TEST_CHECK(centerValue && centerValue->Get(center));
+  DALI_TEST_EQUALS(center, Vector2(0.5f, 0.5f), TEST_LOCATION);
+
+  Property::Value* startAngleValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::START_ANGLE);
+  DALI_TEST_CHECK(startAngleValue);
+  float startAngle = 0.0f;
+  DALI_TEST_CHECK(startAngleValue && startAngleValue->Get(startAngle));
+  DALI_TEST_EQUALS(startAngle, Dali::Radian(Math::PI_2).radian, TEST_LOCATION);
+
+  // A conic gradient must not carry any radial or linear geometry.
+  DALI_TEST_CHECK(!backgroundMap.Find(Ui::Integration::GradientVisual::Property::RADIUS));
+  DALI_TEST_CHECK(!backgroundMap.Find(Ui::Integration::GradientVisual::Property::START_POSITION));
+  END_TEST;
+}
+
 int UtcDaliViewBackgroundGradientTokenBindingRefreshP(void)
 {
   UiTestApplication application;

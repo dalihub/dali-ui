@@ -20,12 +20,9 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali/public-api/math/radian.h>
-#include <dali/public-api/object/property-array.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
-#include <dali-ui-foundation/public-api/gradient/gradient-stop-node.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 namespace DALI_NAMESPACE
@@ -40,6 +37,19 @@ namespace Ui
 
 /**
  * @brief GradientVisual renders a smooth transition of colors.
+ *
+ * The gradient is described by a Gradient::Base value. The concrete value passed to
+ * SetGradient() decides which kind of gradient is rendered, and carries the stop nodes,
+ * the coordinate units and the spread method along with the type specific geometry.
+ *
+ * @code
+ * GradientVisual visual = GradientVisual::New();
+ *
+ * Gradient::Radial gradient(Vector2::ZERO, 0.5f);
+ * gradient.SetStopNodes({{0.0f, Color::RED}, {1.0f, Color::BLUE}});
+ * gradient.SetStartOffset(0.25f);
+ * visual.SetGradient(gradient);
+ * @endcode
  *
  * Its visual type is VisualType::GRADIENT. It can use the CornerRadius, CornerSquareness
  * and Borderline features of VisualBase.
@@ -67,143 +77,29 @@ public:
 
 public: // Properties
   /**
-   * @brief Sets the start position and end position of the GradientVisual.
-   * It will make linear gradient
+   * @brief Sets the gradient of the GradientVisual.
    *
-   * @param[in] startPosition The start position to set
-   * @param[in] endPosition The end position to set
+   * The gradient type is decided by the value that is passed in, i.e. pass a
+   * Gradient::Linear, Gradient::Radial or Gradient::Conic to render that kind of gradient.
+   * Setting a gradient of a different type discards the geometry of the previous type.
+   *
+   * @param[in] gradient The gradient to set
+   * @note A gradient whose type is Gradient::Type::NONE is ignored, since a gradient
+   * visual has no geometry to fall back to. The visual keeps the gradient it already has.
+   * @note At least 2 stop nodes are required to render a gradient.
    */
-  void SetLinearGradient(const Dali::Vector2& startPosition, const Dali::Vector2& endPosition);
+  void SetGradient(const Gradient::Base& gradient);
 
   /**
-   * @brief Sets the center position and radius of the GradientVisual.
-   * It will make radial gradient
+   * @brief Gets the gradient of the GradientVisual.
    *
-   * @param[in] center The center to set
-   * @param[in] radius The radius to set
-   */
-  void SetRadialGradient(const Dali::Vector2& center, float radius);
-
-  /**
-   * @brief Sets the center position and start angle of the GradientVisual.
-   * It will make conic gradient
+   * Use Gradient::Linear::DownCast(), Gradient::Radial::DownCast() or
+   * Gradient::Conic::DownCast() on the returned value to read the type specific geometry.
    *
-   * @param[in] center The center to set
-   * @param[in] startAngle The start angle to set
+   * @return The gradient of the GradientVisual, or a gradient whose GetType() is
+   * Gradient::Type::NONE if no gradient has been set
    */
-  void SetConicGradient(const Dali::Vector2& center, Dali::Radian startAngle);
-
-  /**
-   * @brief Gets the start offset of the GradientVisual.
-   *
-   * @return The start offset of the GradientVisual
-   */
-  float GetStartOffset() const;
-
-  /**
-   * @brief Sets the start offset of the GradientVisual.
-   *
-   * @param[in] startOffset The start offset to set
-   */
-  void SetStartOffset(float startOffset);
-
-  /**
-   * @brief Gets the start position of the GradientVisual.
-   *
-   * @return The start position of the GradientVisual
-   */
-  Dali::Vector2 GetStartPosition() const;
-
-  /**
-   * @brief Gets the end position of the GradientVisual.
-   *
-   * @return The end position of the GradientVisual
-   */
-  Dali::Vector2 GetEndPosition() const;
-
-  /**
-   * @brief Gets the center of the GradientVisual.
-   *
-   * @return The center of the GradientVisual
-   */
-  Dali::Vector2 GetCenter() const;
-
-  /**
-   * @brief Gets the radius of the GradientVisual.
-   *
-   * @return The radius of the GradientVisual
-   */
-  float GetRadius() const;
-
-  /**
-   * @brief Gets the start angle of the GradientVisual.
-   *
-   * @return The start angle of the GradientVisual
-   */
-  Dali::Radian GetStartAngle() const;
-
-  /**
-   * @brief Gets the stop nodes of the GradientVisual.
-   *
-   * @return The stop nodes of the GradientVisual
-   */
-  Dali::Vector<Ui::Gradient::StopNode> GetStopNodes() const;
-
-  /**
-   * @brief Sets the stop nodes of the GradientVisual.
-   * @note Stop nodes must have at least 2 items.
-   *
-   * @param[in] stopOffset The stop nodes to set.
-   */
-  void SetStopNodes(const Dali::Vector<Ui::Gradient::StopNode>& stopNodes);
-  /**
-   * @brief Sets the stop nodes of the GradientVisual in a declarative way.
-   * This method allows for set stop nodes construction by passing
-   * a brace-enclosed initializer list of Gradient::StopNode objects.
-   * @note Stop nodes must have at least 2 items.
-   *
-   * @param[in] stopOffset The stop nodes to set
-   */
-  void SetStopNodes(std::initializer_list<Ui::Gradient::StopNode> stopNodes)
-  {
-    Dali::Vector<Ui::Gradient::StopNode> convertedStopNodes;
-    convertedStopNodes.Reserve(stopNodes.size());
-
-    for(auto&& stopNode : stopNodes)
-    {
-      convertedStopNodes.PushBack(std::move(stopNode));
-    }
-
-    SetStopNodes(convertedStopNodes);
-  }
-
-  /**
-   * @brief Gets the gradient units of the GradientVisual.
-   *
-   * @return The gradient units of the GradientVisual
-   */
-  Ui::Gradient::Units GetUnits() const;
-
-  /**
-   * @brief Sets the gradient units of the GradientVisual.
-   *
-   * @param[in] gradientUnits The gradient units to set
-   */
-  void SetUnits(Ui::Gradient::Units gradientUnits);
-
-  /**
-   * @brief Gets the spread method of the GradientVisual.
-   *
-   * @return The spread method of the GradientVisual
-   */
-  Ui::Gradient::SpreadMethod GetSpreadMethod() const;
-
-  /**
-   * @brief Sets the spread method of the GradientVisual.
-   *
-   * @param[in] spreadMethod The spread method to set
-   */
-  void SetSpreadMethod(Ui::Gradient::SpreadMethod spreadMethod);
+  Gradient::Base GetGradient() const;
 
 public:
   GradientVisual()                                         = default;

@@ -860,11 +860,7 @@ private:
   GradientVisual CreateGradientVisual() const
   {
     GradientVisual visual = GradientVisual::New();
-    visual.SetLinearGradient(mGradientSpec.start, mGradientSpec.end);
-    visual.SetUnits(mGradientSpec.units);
-    visual.SetSpreadMethod(mGradientSpec.spreadMethod);
-    visual.SetStartOffset(mGradientSpec.startOffset);
-    SetCommonGradientStops(visual);
+    visual.SetGradient(CreateTextGradient());
     return visual;
   }
 
