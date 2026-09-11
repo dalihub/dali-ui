@@ -991,8 +991,8 @@ void ImageViewImpl::UpdateVisual()
     if(mNPatchBorder != Dali::Insets())
     {
       map.Insert(Ui::Integration::ImageVisual::Property::BORDER, mNPatchBorder);
-      map.Insert(Ui::Integration::ImageVisual::Property::BORDER_ONLY, mNPatchBorderOnly);
     }
+    map.Insert(Ui::Integration::ImageVisual::Property::BORDER_ONLY, mNPatchBorderOnly);
 
     // ImageView is a static image widget: always use ImageVisual (or NPatchVisual)
     // even when the URL points to an animated format such as GIF or WebP.

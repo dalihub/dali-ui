@@ -242,3 +242,28 @@ int UtcDaliImageViewFixedSizeSetUrlPreservesLayoutFinishedFitting(void)
 
   END_TEST;
 }
+
+int UtcDaliImageViewAutoNPatchBorderOnlyReachesVisual(void)
+{
+  UiTestApplication application;
+
+  ImageView view = ImageView::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetNPatchBorderOnly(true);
+  view.SetResourceUrl("image.9.png");
+
+  auto visual = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+  DALI_TEST_CHECK(visual);
+
+  Property::Map visualMap;
+  visual.CreatePropertyMap(visualMap);
+
+  bool borderOnly = false;
+  auto borderOnlyValue = visualMap.Find(Ui::Integration::ImageVisual::Property::BORDER_ONLY);
+  DALI_TEST_CHECK(borderOnlyValue);
+  DALI_TEST_CHECK(borderOnlyValue->Get(borderOnly));
+  DALI_TEST_EQUALS(borderOnly, true, TEST_LOCATION);
+
+  END_TEST;
+}
