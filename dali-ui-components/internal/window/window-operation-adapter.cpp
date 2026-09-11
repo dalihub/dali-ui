@@ -17,8 +17,8 @@
 
 #include <dali-ui-components/public-api/window/window-frame-options.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
-#include <dali/devel-api/adaptor-framework/window-system-devel.h>
 #include <dali/integration-api/debug.h>
+#include <dali/public-api/adaptor-framework/window-system.h>
 
 #include <utility>
 
@@ -66,9 +66,9 @@ public:
 
   std::optional<Dali::PositionSize> GetTargetMaximizedBounds() const override
   {
-    int32_t width  = 0;
-    int32_t height = 0;
-    Dali::DevelWindowSystem::GetScreenSize(width, height);
+    Dali::Int32Pair screenSize = Dali::WindowSystem::GetMainScreenSize();
+    int32_t         width      = screenSize.GetWidth();
+    int32_t         height     = screenSize.GetHeight();
     if(width <= 0 || height <= 0)
     {
       return std::nullopt;
