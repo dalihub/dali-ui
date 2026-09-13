@@ -208,7 +208,7 @@ inline static Dali::Sampler GetCachedSampler()
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -316,4 +316,4 @@ uint32_t GaussianBlurAlgorithm::GetDownscaledBlurRadius(float& downscaleFactor, 
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

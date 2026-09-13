@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Validates fonts while preserving synthetic replacement units.
@@ -109,6 +109,6 @@ void GetGlyphMetricsForProcessingSource(Metrics&                    metrics,
  */
 void CopyProcessingCharacterStylesToVisual(const LogicalModel& logicalModel, VisualModel& visualModel);
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_GLYPH_HELPER_H

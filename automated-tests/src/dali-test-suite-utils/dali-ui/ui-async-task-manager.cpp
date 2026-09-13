@@ -38,7 +38,7 @@
 #include <dali-ui/ui-test-application.h>
 #include "dali-test-suite-utils.h"
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Internal
 {

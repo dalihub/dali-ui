@@ -27,7 +27,7 @@
 #include <utility>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1079,4 +1079,4 @@ DragAndDropDetector::DragAndDropDetector(Dali::Ui::Internal::DragAndDropDetector
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

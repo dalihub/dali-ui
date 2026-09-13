@@ -23,7 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -69,7 +69,7 @@ struct AnimatedImageViewPropertyIndex
     /**
      * @brief Array of image URLs for frame-by-frame animation.
      * @details Name "imageUrls", type Property::ARRAY of STRING.
-     * @note Setting this overrides IMAGE. See also: AnimatedImageView::SetResourceUrls().
+     * @note Setting this overrides IMAGE. See also: AnimatedImageView::SetResourceUrlList().
      */
     IMAGE_URLS,
 
@@ -131,11 +131,11 @@ struct AnimatedImageViewPropertyIndex
     IMAGE_COLOR,
 
     /**
-     * @brief Whether to apply pre-multiplied alpha to the rendered output.
-     * @details Name "preMultipliedAlpha", type Property::BOOLEAN.
-     * @note See also: AnimatedImageView::SetPreMultipliedAlpha(), AnimatedImageView::IsPreMultipliedAlpha().
+     * @brief Whether to multiply the colour channels of each frame by its alpha channel as it is loaded.
+     * @details Name "preMultiplyAlphaOnLoad", type Property::BOOLEAN.
+     * @note See also: AnimatedImageView::SetPreMultiplyAlphaOnLoadEnabled(), AnimatedImageView::IsPreMultiplyAlphaOnLoadEnabled().
      */
-    PRE_MULTIPLIED_ALPHA,
+    PRE_MULTIPLY_ALPHA_ON_LOAD,
 
     ///////////////////////////////////////////////////////////////////////////////
     // Size & Fitting
@@ -197,7 +197,7 @@ struct AnimatedImageViewPropertyIndex
     /**
      * @brief Whether the image is loaded at the current view size.
      * @details Name "imageLoadWithViewSize", type Property::BOOLEAN.
-     * @note See also: AnimatedImageView::SetImageLoadWithViewSize(), AnimatedImageView::IsImageLoadWithViewSizeEnabled().
+     * @note See also: AnimatedImageView::SetImageLoadWithViewSizeEnabled(), AnimatedImageView::IsImageLoadWithViewSizeEnabled().
      */
     IMAGE_LOAD_WITH_VIEW_SIZE,
 
@@ -221,10 +221,10 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The masking mode.
-     * @details Name "maskingMode", type Ui::Image::MaskingType (Property::INTEGER).
-     * @note See also: AnimatedImageView::SetMaskingMode(), AnimatedImageView::GetMaskingMode().
+     * @details Name "maskingPolicy", type Ui::Image::MaskingPolicy (Property::INTEGER).
+     * @note See also: AnimatedImageView::SetMaskingPolicy(), AnimatedImageView::GetMaskingPolicy().
      */
-    MASKING_MODE,
+    MASKING_POLICY,
 
     /**
      * @brief The URL of the placeholder image shown while loading.
@@ -247,4 +247,4 @@ struct AnimatedImageViewPropertyIndex
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

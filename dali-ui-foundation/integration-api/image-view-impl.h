@@ -27,7 +27,7 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/signals/dali-signal.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -54,26 +54,26 @@ public: // Properties
   {
     enum
     {
-      IMAGE                     = Ui::ImageViewPropertyIndex::IMAGE,
-      FITTING_MODE              = Ui::ImageViewPropertyIndex::FITTING_MODE,
-      SAMPLING_MODE             = Ui::ImageViewPropertyIndex::SAMPLING_MODE,
-      DESIRED_WIDTH             = Ui::ImageViewPropertyIndex::DESIRED_WIDTH,
-      DESIRED_HEIGHT            = Ui::ImageViewPropertyIndex::DESIRED_HEIGHT,
-      IMAGE_COLOR               = Ui::ImageViewPropertyIndex::IMAGE_COLOR,
-      PRE_MULTIPLIED_ALPHA      = Ui::ImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
-      PLACEHOLDER_IMAGE         = Ui::ImageViewPropertyIndex::PLACEHOLDER_IMAGE,
-      IMAGE_LOAD_WITH_VIEW_SIZE = Ui::ImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
-      ALPHA_MASK_URL            = Ui::ImageViewPropertyIndex::ALPHA_MASK_URL,
-      CROP_TO_MASK              = Ui::ImageViewPropertyIndex::CROP_TO_MASK,
-      MASKING_MODE              = Ui::ImageViewPropertyIndex::MASKING_MODE,
-      LOAD_POLICY               = Ui::ImageViewPropertyIndex::LOAD_POLICY,
-      RELEASE_POLICY            = Ui::ImageViewPropertyIndex::RELEASE_POLICY,
-      SYNCHRONOUS_LOADING       = Ui::ImageViewPropertyIndex::SYNCHRONOUS_LOADING,
-      FAST_TRACK_UPLOADING      = Ui::ImageViewPropertyIndex::FAST_TRACK_UPLOADING,
-      ORIENTATION_CORRECTION    = Ui::ImageViewPropertyIndex::ORIENTATION_CORRECTION,
-      N_PATCH_BORDER            = Ui::ImageViewPropertyIndex::N_PATCH_BORDER,
-      N_PATCH_BORDER_ONLY       = Ui::ImageViewPropertyIndex::N_PATCH_BORDER_ONLY,
-      PIXEL_AREA                = Ui::ImageViewPropertyIndex::PIXEL_AREA,
+      IMAGE                      = Ui::ImageViewPropertyIndex::IMAGE,
+      FITTING_MODE               = Ui::ImageViewPropertyIndex::FITTING_MODE,
+      SAMPLING_MODE              = Ui::ImageViewPropertyIndex::SAMPLING_MODE,
+      DESIRED_WIDTH              = Ui::ImageViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT             = Ui::ImageViewPropertyIndex::DESIRED_HEIGHT,
+      IMAGE_COLOR                = Ui::ImageViewPropertyIndex::IMAGE_COLOR,
+      PRE_MULTIPLY_ALPHA_ON_LOAD = Ui::ImageViewPropertyIndex::PRE_MULTIPLY_ALPHA_ON_LOAD,
+      PLACEHOLDER_IMAGE          = Ui::ImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+      IMAGE_LOAD_WITH_VIEW_SIZE  = Ui::ImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+      ALPHA_MASK_URL             = Ui::ImageViewPropertyIndex::ALPHA_MASK_URL,
+      CROP_TO_MASK               = Ui::ImageViewPropertyIndex::CROP_TO_MASK,
+      MASKING_POLICY             = Ui::ImageViewPropertyIndex::MASKING_POLICY,
+      LOAD_POLICY                = Ui::ImageViewPropertyIndex::LOAD_POLICY,
+      RELEASE_POLICY             = Ui::ImageViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING        = Ui::ImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+      FAST_TRACK_UPLOADING       = Ui::ImageViewPropertyIndex::FAST_TRACK_UPLOADING,
+      ORIENTATION_CORRECTION     = Ui::ImageViewPropertyIndex::ORIENTATION_CORRECTION,
+      N_PATCH_BORDER             = Ui::ImageViewPropertyIndex::N_PATCH_BORDER,
+      N_PATCH_BORDER_ONLY        = Ui::ImageViewPropertyIndex::N_PATCH_BORDER_ONLY,
+      PIXEL_AREA                 = Ui::ImageViewPropertyIndex::PIXEL_AREA,
     };
   };
 
@@ -200,9 +200,9 @@ public: // API — Size & Fitting Control
   int GetDesiredHeight() const;
 
   /**
-   * @copydoc Dali::Ui::ImageView::SetImageLoadWithViewSize
+   * @copydoc Dali::Ui::ImageView::SetImageLoadWithViewSizeEnabled
    */
-  void SetImageLoadWithViewSize(bool enabled);
+  void SetImageLoadWithViewSizeEnabled(bool enabled);
 
   /**
    * @copydoc Dali::Ui::ImageView::IsImageLoadWithViewSizeEnabled
@@ -211,14 +211,14 @@ public: // API — Size & Fitting Control
 
 public: // API — Advanced Rendering & Masking
   /**
-   * @copydoc Dali::Ui::ImageView::SetPreMultipliedAlpha
+   * @copydoc Dali::Ui::ImageView::SetPreMultiplyAlphaOnLoadEnabled
    */
-  void SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied);
 
   /**
-   * @copydoc Dali::Ui::ImageView::IsPreMultipliedAlpha
+   * @copydoc Dali::Ui::ImageView::IsPreMultiplyAlphaOnLoadEnabled
    */
-  bool IsPreMultipliedAlpha() const;
+  bool IsPreMultiplyAlphaOnLoadEnabled() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetAlphaMaskUrl
@@ -241,14 +241,14 @@ public: // API — Advanced Rendering & Masking
   bool IsCropToMask() const;
 
   /**
-   * @copydoc Dali::Ui::ImageView::SetMaskingMode
+   * @copydoc Dali::Ui::ImageView::SetMaskingPolicy
    */
-  void SetMaskingMode(Ui::Image::MaskingType maskingMode);
+  void SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetMaskingMode
+   * @copydoc Dali::Ui::ImageView::GetMaskingPolicy
    */
-  Ui::Image::MaskingType GetMaskingMode() const;
+  Ui::Image::MaskingPolicy GetMaskingPolicy() const;
 
 public: // API — Loading Behavior
   /**
@@ -282,9 +282,9 @@ public: // API — Loading Behavior
   bool IsSynchronousLoading() const;
 
   /**
-   * @copydoc Dali::Ui::ImageView::SetFastTrackUpload
+   * @copydoc Dali::Ui::ImageView::SetFastTrackUploadEnabled
    */
-  void SetFastTrackUpload(bool fastTrack);
+  void SetFastTrackUploadEnabled(bool fastTrack);
 
   /**
    * @copydoc Dali::Ui::ImageView::IsFastTrackUploadEnabled
@@ -292,9 +292,9 @@ public: // API — Loading Behavior
   bool IsFastTrackUploadEnabled() const;
 
   /**
-   * @copydoc Dali::Ui::ImageView::SetOrientationCorrection
+   * @copydoc Dali::Ui::ImageView::SetOrientationCorrectionEnabled
    */
-  void SetOrientationCorrection(bool orientationCorrection);
+  void SetOrientationCorrectionEnabled(bool orientationCorrection);
 
   /**
    * @copydoc Dali::Ui::ImageView::IsOrientationCorrectionEnabled
@@ -305,12 +305,12 @@ public: // API — N-Patch Border
   /**
    * @copydoc Dali::Ui::ImageView::SetNPatchBorder
    */
-  void SetNPatchBorder(const Vector4& border);
+  void SetNPatchBorder(const Dali::Insets& border);
 
   /**
    * @copydoc Dali::Ui::ImageView::GetNPatchBorder
    */
-  Vector4 GetNPatchBorder() const;
+  Dali::Insets GetNPatchBorder() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetNPatchBorderOnly
@@ -345,6 +345,11 @@ protected: // From ViewImpl
   LayoutRect OnArrange(const LayoutRect& bounds) override;
 
 private: // Internal methods
+  /**
+   * @brief Creates or refreshes the image visual when its properties are dirty.
+   */
+  void EnsureVisualUpdated();
+
   /**
    * @brief Applies a resource URL without changing the stored ImageUrl attachment.
    */
@@ -388,20 +393,20 @@ private: // Data
   Dali::String mPlaceholderUrl;
   Dali::String mAlphaMaskUrl;
 
-  Vector4 mPixelArea;
-  Vector4 mNPatchBorder;
+  Vector4      mPixelArea;
+  Dali::Insets mNPatchBorder;
 
   UiColor mImageColor;
 
   Ui::Image::SamplingMode  mSamplingMode;
   Ui::Image::FittingMode   mFittingMode;
-  Ui::Image::MaskingType   mMaskingMode;
+  Ui::Image::MaskingPolicy mMaskingPolicy;
   Ui::Image::LoadPolicy    mLoadPolicy;
   Ui::Image::ReleasePolicy mReleasePolicy;
   int                      mDesiredWidth;
   int                      mDesiredHeight;
 
-  bool mPreMultipliedAlpha;
+  bool mPreMultiplyAlphaOnLoad;
   bool mImageLoadWithViewSize;
   bool mCropToMask;
   bool mSynchronousLoading;
@@ -413,4 +418,4 @@ private: // Data
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

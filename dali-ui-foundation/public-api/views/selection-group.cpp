@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/internal/views/view/selection-group-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -188,4 +188,4 @@ void SelectionGroup::ClearSelection()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

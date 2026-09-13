@@ -28,7 +28,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace TextAbstraction
 {
@@ -290,6 +290,6 @@ inline static const Internal::MultilanguageSupport& GetImplementation(const Mult
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_MULTI_LANGUAGE_SUPPORT_IMPL_H

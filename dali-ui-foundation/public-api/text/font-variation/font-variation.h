@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -102,4 +102,4 @@ DALI_UI_API Dali::String ToString(const Dali::Vector<Axis>& axes);
 } // namespace FontVariation
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

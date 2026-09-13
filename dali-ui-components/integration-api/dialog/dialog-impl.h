@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -45,6 +45,7 @@ public:
    * @brief Creates a new Dialog.
    */
   static Ui::Dialog New();
+  static Ui::Dialog New(Ui::DialogStyle style);
 
   // Section accessors
   void     SetHeaderView(Ui::View headerView);
@@ -61,6 +62,7 @@ public:
   LayoutAlignment GetLayoutAlignment() const;
 
 protected:
+  void ApplyInitialStyle(Ui::DialogStyle style);
   /**
    * @brief Constructor.
    */
@@ -118,4 +120,4 @@ inline const Integration::DialogImpl& GetImpl(const Ui::Dialog& dialog)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

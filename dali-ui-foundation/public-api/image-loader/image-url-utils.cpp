@@ -25,7 +25,7 @@
 #include <dali/devel-api/rendering/frame-buffer-devel.h>
 #include <dali/integration-api/texture-integ.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -85,4 +85,4 @@ Dali::Ui::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

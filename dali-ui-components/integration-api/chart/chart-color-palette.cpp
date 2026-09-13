@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-components/integration-api/chart/chart-color-palette.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -43,4 +43,4 @@ Vector4 ChartColorPalette::Get(int seriesIndex)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

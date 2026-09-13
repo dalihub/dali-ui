@@ -23,7 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -34,4 +34,4 @@ inline void DebugAssertStyleConfigApplied()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

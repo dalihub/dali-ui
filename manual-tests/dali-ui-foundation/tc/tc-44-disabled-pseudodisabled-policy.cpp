@@ -102,7 +102,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
-    root.SetPadding(Extents(PAD, PAD, PAD, PAD));
+    root.SetPadding(Insets(PAD, PAD, PAD, PAD));
     root.SetSpacing(GAP);
 
     Label header = Label::New("Tap the card in each policy state and compare what happens.");
@@ -123,7 +123,7 @@ public:
     mLog.SetRequestedWidth(MATCH_PARENT);
     mLog.SetRequestedHeight(LOG_H);
     mLog.SetBackgroundColor(UiColor(COLOR_WHITE));
-    mLog.SetPadding(Extents(12.0f, 12.0f, 10.0f, 10.0f));
+    mLog.SetPadding(Insets(12.0f, 12.0f, 10.0f, 10.0f));
     root.Add(mLog);
 
     UpdateTarget();
@@ -138,7 +138,7 @@ private:
     mTarget.SetRequestedWidth(MATCH_PARENT);
     mTarget.SetRequestedHeight(TARGET_H);
     mTarget.SetBackgroundColor(UiColor(COLOR_NORMAL));
-    mTarget.SetPadding(Extents(16.0f, 16.0f, 12.0f, 12.0f));
+    mTarget.SetPadding(Insets(16.0f, 16.0f, 12.0f, 12.0f));
     mTarget.SetFocusable(true);
 
     mTrait = mTarget.AsInteractive();

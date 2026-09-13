@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 namespace Internal
@@ -131,4 +131,4 @@ private:
 
 } // namespace Integration
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

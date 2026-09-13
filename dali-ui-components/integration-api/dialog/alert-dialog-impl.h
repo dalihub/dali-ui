@@ -24,7 +24,7 @@
 #include <dali-ui-components/integration-api/dialog/dialog-impl.h>
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -41,6 +41,7 @@ class DALI_UI_COMPONENTS_API AlertDialogImpl : public DialogImpl
 {
 public:
   static Ui::AlertDialog New();
+  static Ui::AlertDialog New(Ui::AlertDialogStyle style);
 
   void           SetTitle(const Dali::String& title);
   Dali::String   GetTitle() const;
@@ -52,6 +53,7 @@ public:
 protected:
   AlertDialogImpl();
   virtual ~AlertDialogImpl();
+  void OnInitialize() override;
 
 private:
   AlertDialogImpl(const AlertDialogImpl&)            = delete;
@@ -60,9 +62,13 @@ private:
   AlertDialogImpl& operator=(AlertDialogImpl&&)      = delete;
 
 private:
-  Dali::String mTitle;
-  Dali::String mMessage;
-  Ui::View     mActionButtonRow;
+  Dali::String         mTitle;
+  Ui::AlertDialogStyle mStyle;
+  Ui::TextButtonStyle  mActionStyle;
+  Dali::String         mMessage;
+  Ui::View             mActionButtonRow;
+  Ui::View             mTitleLabel;
+  Ui::View             mMessageLabel;
 };
 
 } // namespace Integration
@@ -82,4 +88,4 @@ inline const Integration::AlertDialogImpl& GetImpl(const Ui::AlertDialog& alertD
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -21,7 +21,7 @@
 #include <dali/public-api/common/dali-vector.h>
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -148,4 +148,4 @@ private:
 } // namespace Internal
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

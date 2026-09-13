@@ -17,7 +17,7 @@
 #include <dali-ui-foundation/internal/canvas-view/canvas-view-impl.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -167,4 +167,4 @@ CanvasView::CanvasView(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/abstract-style-character-run.h>
 #include <dali-ui-foundation/internal/text/underline-style-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -63,6 +63,6 @@ struct TypeTraits<Dali::Ui::Text::UnderlinedCharacterRun>
   };
 };
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_UNDERLINED_CHARACTER_RUN_H

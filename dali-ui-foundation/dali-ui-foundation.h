@@ -41,6 +41,7 @@
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/types/cutout-policy.h>
 #include <dali-ui-foundation/public-api/types/inner-shadow.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-color-binding.h>
@@ -57,6 +58,7 @@
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
+#include <dali-ui-foundation/public-api/views/progress-view.h>
 #include <dali-ui-foundation/public-api/views/recycler/group-adapter.h>
 #include <dali-ui-foundation/public-api/views/recycler/group-body-decoration.h>
 #include <dali-ui-foundation/public-api/views/recycler/group-data-source.h>
@@ -94,8 +96,8 @@
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-cache-utils.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-dynamic-property.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
-#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
 
 #include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
@@ -125,6 +127,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/replacement-span.h>
@@ -135,12 +138,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 
-#include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/border-visual.h>
@@ -151,8 +149,8 @@
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-#include <dali-ui-foundation/public-api/video/video-source.h>
-#include <dali-ui-foundation/public-api/video/video-view.h>
+#include <dali-ui-foundation/public-api/views/video/video-source.h>
+#include <dali-ui-foundation/public-api/views/video/video-view.h>
 
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
@@ -175,7 +173,6 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 
 #include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>

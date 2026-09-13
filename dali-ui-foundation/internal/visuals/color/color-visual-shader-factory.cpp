@@ -21,11 +21,12 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -254,7 +255,7 @@ Shader ColorVisualShaderFactory::GetShader(VisualFactoryCache&                  
     {
       shader.ReserveCustomProperties(CUSTOM_CUTOUT_CORNER_PROPERTY_COUNT + 2);
       shader.RegisterUniqueProperty(CUTOUT_CORNER_RADIUS_UNIFORM_NAME, Vector4::ZERO);
-      shader.RegisterUniqueProperty(CUTOUT_CORNER_RADIUS_POLICY_UNIFORM_NAME, Property::Value(static_cast<float>(Ui::Visual::Transform::Policy::ABSOLUTE)));
+      shader.RegisterUniqueProperty(CUTOUT_CORNER_RADIUS_POLICY_UNIFORM_NAME, Property::Value(static_cast<float>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE)));
       shader.RegisterUniqueProperty(CUTOUT_CORNER_SQUARENESS_UNIFORM_NAME, Vector4::ZERO);
     }
     else
@@ -431,4 +432,4 @@ bool ColorVisualShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderTy
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

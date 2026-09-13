@@ -25,7 +25,7 @@
 #define DALI_ASSERT_VALID_LAYOUT_PARAMS(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use moved-from GridLayoutParams")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -181,6 +181,6 @@ LayoutAlignment GridLayoutParams::GetVerticalAlignment() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_LAYOUT_PARAMS

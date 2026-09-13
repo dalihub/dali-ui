@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/script-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -74,6 +74,6 @@ std::ostream& operator<<(std::ostream& o, const Vector<LineRun>& lineRuns);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_TEXT_ABSTRACTION_TEXT_IO_H

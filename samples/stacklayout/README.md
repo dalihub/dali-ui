@@ -5,9 +5,9 @@ This sample demonstrates the use of **StackLayout** to arrange child views in a 
 ## Features
 
 - **Root**: A vertical `StackLayout` that fills the window, with padding and spacing between children.
-- **Top bar**: Fixed-height red view (80 px).
+- **Top bar**: Fixed-height red view (100 px).
 - **Middle**: Green view with layout weight 1, taking the remaining space.
-- **Bottom bar**: Fixed-height blue view (60 px).
+- **Bottom bar**: Fixed-height blue view (100 px).
 
 ## Build
 

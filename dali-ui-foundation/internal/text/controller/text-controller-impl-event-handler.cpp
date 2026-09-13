@@ -35,7 +35,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -648,8 +648,11 @@ void ControllerImplEventHandler::OnPanEvent(Controller::Impl& impl, const Event&
       case GestureState::FINISHED:
       case GestureState::CANCELLED: // FALLTHROUGH
       {
-        // Will go back to the previous state to show the cursor, handles, the text's popup, ...
-        impl.ChangeState(eventData.mPreviousState);
+        if(EventData::TEXT_PANNING == eventData.mState)
+        {
+          // Will go back to the previous state to show the cursor, handles, the text's popup, ...
+          impl.ChangeState(eventData.mPreviousState);
+        }
         break;
       }
       default:
@@ -1175,4 +1178,4 @@ void ControllerImplEventHandler::OnHandleScrolling(Controller::Impl& impl, const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

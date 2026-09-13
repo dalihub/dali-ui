@@ -24,6 +24,8 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/animated-image-visual.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/image-cache.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #undef protected
 #undef private
 
@@ -116,8 +118,8 @@ bool IsTextureCached(UiInternal::TextureManager& textureManager, UiInternal::Tex
 bool DestroyNeverVisualWithFrameCount(uint32_t frameCount)
 {
   Dali::Property::Map properties;
-  properties.Add(Dali::Ui::VisualBasePropertyIndex::TYPE, UiIntegration::InternalVisualType::ANIMATED_IMAGE);
-  properties.Add(Dali::Ui::ImageVisualPropertyIndex::URL, "release-policy.gif");
+  properties.Add(Dali::Ui::Integration::Visual::Property::TYPE, UiIntegration::InternalVisualType::ANIMATED_IMAGE);
+  properties.Add(Dali::Ui::Integration::ImageVisual::Property::URL, "release-policy.gif");
 
   UiIntegration::Visual::Base visual        = UiIntegration::VisualFactory::Get().CreateVisual(properties);
   auto&                       animatedImage = static_cast<UiInternal::AnimatedImageVisual&>(
@@ -163,8 +165,8 @@ int UtcDaliAnimatedImageReleasePolicyNeverSingleFrameClearedExplicitly(void)
   UiTestApplication application;
 
   Dali::Property::Map properties;
-  properties.Add(Dali::Ui::VisualBasePropertyIndex::TYPE, UiIntegration::InternalVisualType::ANIMATED_IMAGE);
-  properties.Add(Dali::Ui::ImageVisualPropertyIndex::URL, "release-policy.gif");
+  properties.Add(Dali::Ui::Integration::Visual::Property::TYPE, UiIntegration::InternalVisualType::ANIMATED_IMAGE);
+  properties.Add(Dali::Ui::Integration::ImageVisual::Property::URL, "release-policy.gif");
 
   UiIntegration::Visual::Base visual        = UiIntegration::VisualFactory::Get().CreateVisual(properties);
   auto&                       animatedImage = static_cast<UiInternal::AnimatedImageVisual&>(

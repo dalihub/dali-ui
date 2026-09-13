@@ -41,6 +41,8 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
@@ -61,12 +63,10 @@
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 namespace IntegrationView   = Dali::Ui::Integration::View;
 namespace ViewAccessibility = Dali::Ui::Integration::ViewAccessibility;
@@ -74,7 +74,7 @@ namespace ViewAccessibility = Dali::Ui::Integration::ViewAccessibility;
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -2093,7 +2093,11 @@ void InputEditorImpl::OnPanDetected(Actor actor, PanGesture gesture)
 
 void InputEditorImpl::OnLongPressDetected(Actor actor, LongPressGesture gesture)
 {
-  if(mInputMethodContext && IsEditable())
+  // A background long press may update a deferred target, but must not activate
+  // its IME before the Window owns input. Retained key focus alone is not enough.
+  auto focusManager = Ui::FocusManager::Get();
+  if(mInputMethodContext && IsEditable() && focusManager &&
+     GetImpl(focusManager).IsActiveWindow(Dali::Integration::SceneHolder::Get(Self())))
   {
     Dali::Integration::InputMethodContext::Activate(mInputMethodContext);
   }
@@ -2245,11 +2249,11 @@ void InputEditorImpl::AddDecoration(Actor& actor, Text::DecorationType type, boo
 
 void InputEditorImpl::GetControlBackgroundColor(Vector4& color) const
 {
-  Property::Value propValue = Self().GetProperty(Ui::View::Property::BACKGROUND);
+  Property::Value propValue = Self().GetProperty(Ui::Integration::View::Property::BACKGROUND);
   Property::Map*  resultMap = propValue.GetMap();
 
   Property::Value* colorValue = nullptr;
-  if(resultMap && (colorValue = resultMap->Find(Ui::VisualBasePropertyIndex::MIX_COLOR)))
+  if(resultMap && (colorValue = resultMap->Find(Ui::Integration::Visual::Property::MIX_COLOR)))
   {
     colorValue->Get(color);
   }
@@ -3056,4 +3060,4 @@ Dali::Property::Value InputEditorImpl::GetProperty(BaseObject* object, Dali::Pro
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

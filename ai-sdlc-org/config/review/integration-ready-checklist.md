@@ -44,15 +44,21 @@ required value?", not "how deeply do we inspect a file?".
 
 ---
 
-## Evaluation Source
+## Evaluation Sources
 
-All values are read from live tracking files (NOT static deliverables):
+All asserted values are read from live tracking files. Verification summaries
+are supporting evidence for those values, not a replacement for a missing live
+state entry.
 
-| Source File | Provides |
-|---|---|
-| `ai-sdlc-docs/inception/units/unit-generation.md` | Unit Summary: state, owner |
-| `ai-sdlc-docs/state/units/{unit-id}-team-status.md` | test result, blocking items |
-| `ai-sdlc-docs/state/state-log.md` | `operating_mode`, unit roster |
+| Operating Mode | Required-Unit Roster | Condition Values | Supporting Evidence |
+|---|---|---|---|
+| `single_developer` | `state-log.md > Unit Status Summary` (exactly one row) | The same row's `State`, `Automated Unit Test Result`, and `Blocking Items` | The row's code-verification summary reference |
+| `team` | `unit-generation.md > Unit Summary` | `unit.state` from Unit Summary; test result and blockers from `{unit-id}-team-status.md` | Per-unit code-verification summary and team-status history |
+
+`state-log.md > operating_mode` selects exactly one mapping. A5 and per-unit
+team-status artifacts are not required in `single_developer` mode. If the
+selected mapping, unit row, field, or referenced supporting evidence is missing,
+the affected Required condition is ✗ and the verdict is `BLOCKED`.
 
 ---
 
@@ -60,7 +66,7 @@ All values are read from live tracking files (NOT static deliverables):
 
 ### 1. Code Verification Complete
 
-**Field:** `unit.state` (from unit-generation.md Unit Summary)
+**Field:** `unit.state`
 **Operator:** `==`
 **Expected Value:** `code_verified`
 **Enforcement Mode:** Required
@@ -68,7 +74,9 @@ All values are read from live tracking files (NOT static deliverables):
 
 ```yaml
 Assertion:
-  source: unit-generation.md > Unit Summary > {unit-id}.state
+  source_by_mode:
+    single_developer: state-log.md > Unit Status Summary > {unit-id}.State
+    team: unit-generation.md > Unit Summary > {unit-id}.state
   operator: "=="
   expected: "code_verified"
   on_violation: BLOCKED
@@ -80,7 +88,7 @@ Assertion:
 
 ### 2. Automated Unit Tests Passing
 
-**Field:** `unit.automated_unit_test_result` (from {unit-id}-team-status.md)
+**Field:** `unit.automated_unit_test_result`
 **Operator:** `==`
 **Expected Value:** `PASS`
 **Enforcement Mode:** Required
@@ -88,7 +96,9 @@ Assertion:
 
 ```yaml
 Assertion:
-  source: "{unit-id}-team-status.md > automated_unit_test_result"
+  source_by_mode:
+    single_developer: state-log.md > Unit Status Summary > {unit-id}.Automated Unit Test Result
+    team: "{unit-id}-team-status.md > automated_unit_test_result"
   operator: "=="
   expected: "PASS"
   on_violation: BLOCKED
@@ -100,7 +110,7 @@ Assertion:
 
 ### 3. No Blocking Items
 
-**Field:** `unit.blocking_items` (from {unit-id}-team-status.md)
+**Field:** `unit.blocking_items`
 **Operator:** `is_empty`
 **Expected Value:** `[]`
 **Enforcement Mode:** Required
@@ -108,7 +118,9 @@ Assertion:
 
 ```yaml
 Assertion:
-  source: "{unit-id}-team-status.md > blocking_items"
+  source_by_mode:
+    single_developer: state-log.md > Unit Status Summary > {unit-id}.Blocking Items
+    team: "{unit-id}-team-status.md > blocking_items"
   operator: "is_empty"
   expected: []
   on_violation: BLOCKED
@@ -178,12 +190,13 @@ Assertion:
 ## AI Evaluation
 
 integration-ready-check-rule.md loads this checklist and, for each required unit:
-1. Read the source field from the live tracking file
-2. Apply the operator against the expected value
-3. Mark ✓ (holds) / ✗ (violated) / ⊘ (N/A with justification)
-4. After all units: if any Required ✗ → BLOCKED; if contradiction → FAIL;
+1. Read `operating_mode` and select its roster/source mapping
+2. Read the mapped source field from the live tracking file
+3. Verify that the row's supporting evidence exists
+4. Apply the operator and mark ✓ (holds), ✗ (violated), or ⊘ (N/A with justification)
+5. After all units: if any Required ✗ → BLOCKED; if contradiction → FAIL;
    else PASS
-5. Write `integration_ready_check_verdict` to state-log.md and `INT-READY-###`
+6. Write `integration_ready_check_verdict` to state-log.md and `INT-READY-###`
    to audit.md
 
 ---

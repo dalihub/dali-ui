@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -170,6 +170,24 @@ const Vector2* GetGlyphPosition(const EndEllipsisInputView& input, GlyphIndex gl
   return positionIndex < input.numberOfGlyphPositions ? input.glyphPositions + positionIndex : nullptr;
 }
 } // unnamed namespace
+
+FontId ResolveEndEllipsisFontId(const GlyphInfo* glyphs,
+                                Length           numberOfGlyphs,
+                                GlyphIndex       glyphIndex)
+{
+  if(!glyphs || glyphIndex >= numberOfGlyphs)
+  {
+    return 0u;
+  }
+
+  EndEllipsisInputView input;
+  input.glyphs         = glyphs;
+  input.numberOfGlyphs = numberOfGlyphs;
+  EllipsisFontSearch fontSearch(input);
+  return fontSearch.Resolve(glyphIndex,
+                            EndEllipsisPlan::INVALID_GLYPH_INDEX,
+                            0u);
+}
 
 EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView&  input,
                                        TextAbstraction::FontClient& fontClient)
@@ -328,4 +346,4 @@ EndEllipsisPlan ResolveEndEllipsisPlan(const EndEllipsisInputView&  input,
   }
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

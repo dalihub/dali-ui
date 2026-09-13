@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 struct Vector2;
 struct Vector4;
@@ -39,7 +39,13 @@ namespace Ui
 namespace Text
 {
 struct GlyphRun;
+struct LineRun;
 struct StrikethroughGlyphRun;
+
+namespace Internal
+{
+struct GradientSpanModelData;
+}
 
 /**
  * @brief Abstract interface to provide the information necessary to display text.
@@ -76,6 +82,28 @@ public:
    * in the case where text is scrolling/clipped.
    */
   virtual const Vector2& GetLayoutSize() const = 0;
+
+  /**
+   * @brief Retrieves the number of laid-out lines used by content-bound gradients.
+   *
+   * The default keeps existing ViewInterface test doubles source compatible.
+   *
+   * @return The number of laid-out lines
+   */
+  virtual Length GetNumberOfLines() const
+  {
+    return 0u;
+  }
+
+  /**
+   * @brief Retrieves the laid-out lines used by content-bound gradients.
+   *
+   * @return A pointer to the line buffer, or nullptr when unavailable
+   */
+  virtual const LineRun* GetLines() const
+  {
+    return nullptr;
+  }
 
   /**
    * Retrieves the number of glyphs.
@@ -122,6 +150,16 @@ public:
    * @return Pointer to a vector which stores for each glyph the index to the vector of colors.
    */
   virtual const ColorIndex* GetColorIndices() const = 0;
+
+  /**
+   * @brief Retrieves the optional resolved GradientSpan paint data.
+   *
+   * @return The model-owned sidecar, or nullptr when no GradientSpan is active.
+   */
+  virtual const Internal::GradientSpanModelData* GetGradientSpanModelData() const
+  {
+    return nullptr;
+  }
 
   /**
    * @brief Retrieves the vector of background colors.
@@ -430,6 +468,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_VIEW_INTERFACE_H

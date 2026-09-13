@@ -34,10 +34,9 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-event-observer.h>
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -323,7 +322,7 @@ struct Base::Impl
 
     if(mCustomShaders.size() == 1)
     {
-      map.Insert(Ui::VisualBasePropertyIndex::SHADER, mCustomShaders[0]->CreatePropertyMap());
+      map.Insert(Ui::Integration::Visual::Property::SHADER, mCustomShaders[0]->CreatePropertyMap());
     }
     else
     {
@@ -332,7 +331,7 @@ struct Base::Impl
       {
         shaderArray.PushBack(customShader->CreatePropertyMap());
       }
-      map.Insert(Ui::VisualBasePropertyIndex::SHADER, shaderArray);
+      map.Insert(Ui::Integration::Visual::Property::SHADER, shaderArray);
     }
   }
 
@@ -352,11 +351,11 @@ struct Base::Impl
    * @brief Set the uniform properties onto the renderer.
    * And Register visual transform uniforms if neccessary.
    */
-  void SetTransformUniforms(VisualRenderer renderer, Ui::Integration::Direction::Type direction)
+  void SetTransformUniforms(VisualRenderer renderer)
   {
-    if(!mTransformMapUsingDefault || direction != Ui::Integration::Direction::LEFT_TO_RIGHT)
+    if(!mTransformMapUsingDefault)
     {
-      SetTransformUniformsInternal(GetOrCreateTransform(), renderer, direction);
+      SetTransformUniformsInternal(GetOrCreateTransform(), renderer);
     }
   }
 
@@ -494,7 +493,7 @@ struct Base::Impl
   }
 
 private:
-  static void SetTransformUniformsInternal(const Transform& transform, VisualRenderer renderer, Ui::Integration::Direction::Type direction);
+  static void SetTransformUniformsInternal(const Transform& transform, VisualRenderer renderer);
 
 public:
   VisualRenderer                             mRenderer;
@@ -535,6 +534,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_VISUAL_BASE_DATA_IMPL_H

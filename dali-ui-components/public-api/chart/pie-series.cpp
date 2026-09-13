@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/pie-series-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -110,4 +110,4 @@ float PieSeries::GetDataLabelMinAngle() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

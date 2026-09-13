@@ -22,10 +22,9 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -36,27 +35,13 @@ namespace Ui
  */
 
 /**
- * @brief BorderVisual is a owner of Visual::Base with Visual::BORDER, to render simple rectangle borderline.
+ * @brief BorderVisual renders a rectangular borderline.
  *
- * It cannot use CornerRadius / CornerSquareness / Borderline feature.
+ * Its visual type is VisualType::BORDER. It cannot use the CornerRadius, CornerSquareness
+ * or Borderline features of VisualBase.
  */
 class DALI_UI_API BorderVisual : public VisualBase
 {
-public:
-  /**
-   * @brief Property indices for BorderVisual.
-   *
-   * These can be used with Dali::Ui::VisualBase::GetProperty() and SetProperty().
-   */
-  struct Property
-  {
-    enum
-    {
-      BORDER_SIZE   = BorderVisualPropertyIndex::BORDER_SIZE,
-      ANTI_ALIASING = BorderVisualPropertyIndex::ANTI_ALIASING,
-    };
-  };
-
 public:
   /**
    * @brief Creates a BorderVisual object.
@@ -76,7 +61,7 @@ public:
    */
   static BorderVisual DownCast(BaseHandle handle);
 
-public: // Setters
+public: // Properties
   /**
    * @brief Gets the size of border of the BorderVisual.
    *
@@ -114,20 +99,20 @@ public:
   BorderVisual& operator=(BorderVisual&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL BorderVisual(Dali::Ui::Internal::VisualBaseImpl* object);
-
-public:
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} // namespace Dali
+} // namespace DALI_NAMESPACE
 
 #endif // DALI_UI_BORDER_VISUAL_OBJECT_H

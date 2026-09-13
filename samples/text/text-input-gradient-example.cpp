@@ -54,10 +54,11 @@ struct CaseDefinition
   const char* editorPlaceholder;
   bool        password;
   bool        styledText;
+  bool        gradientSpanText;
   bool        normalTextGradient;
 };
 
-constexpr std::array<CaseDefinition, 4u> CASES{{
+constexpr std::array<CaseDefinition, 5u> CASES{{
   {
     "Basic normal text",
     "Expected: InputField and InputEditor both show the same animated text gradient.",
@@ -67,6 +68,7 @@ constexpr std::array<CaseDefinition, 4u> CASES{{
     "Editor text swapped while animation runs\nrenderer recreation should preserve animation",
     "Field placeholder gradient",
     "Editor placeholder gradient",
+    false,
     false,
     false,
     true,
@@ -83,6 +85,7 @@ constexpr std::array<CaseDefinition, 4u> CASES{{
     false,
     false,
     false,
+    false,
   },
   {
     "Password field",
@@ -94,6 +97,7 @@ constexpr std::array<CaseDefinition, 4u> CASES{{
     "Password field placeholder",
     "Password case editor placeholder",
     true,
+    false,
     false,
     true,
   },
@@ -108,7 +112,22 @@ constexpr std::array<CaseDefinition, 4u> CASES{{
     "StyledText editor placeholder",
     false,
     true,
+    false,
     true,
+  },
+  {
+    "GradientSpan editable ranges",
+    "Expected: local SPAN_BOUND gradients survive supported edits; unspanned text stays black and emoji keeps native color.",
+    "Search smart devices 😀",
+    "Build beautiful interfaces\nwith responsive text effects 😀",
+    "Find connected devices 😀",
+    "Compose adaptive interfaces\nwith vivid text effects 🚀",
+    "Type to replace the GradientSpan field",
+    "Type to replace the GradientSpan editor",
+    false,
+    false,
+    true,
+    false,
   },
 }};
 
@@ -302,6 +321,52 @@ const char* GetSpreadMethodName(Gradient::SpreadMethod spreadMethod)
   }
 }
 
+void AddGradientSpanForWord(Text::StyledTextBuilder& builder,
+                            const std::string&       text,
+                            const char*              word,
+                            GradientKind             kind,
+                            Gradient::SpreadMethod   spreadMethod)
+{
+  const std::size_t byteStart = text.find(word);
+  if(byteStart == std::string::npos)
+  {
+    return;
+  }
+
+  uint32_t               utf32Start = 0u;
+  uint32_t               utf32End   = 0u;
+  const Dali::StringView textView(text.data(), static_cast<uint32_t>(text.size()));
+  if(Text::Utf8ToUtf32Range(textView,
+                            static_cast<uint32_t>(byteStart),
+                            static_cast<uint32_t>(byteStart + std::string(word).size()),
+                            utf32Start,
+                            utf32End))
+  {
+    builder.SetSpan(Text::GradientSpan::New(MakeGradient(kind, 0.0f, spreadMethod, GradientPalette::NORMAL),
+                                            Text::GradientSpan::BoundsMode::SPAN_BOUND),
+                    utf32Start,
+                    utf32End);
+  }
+}
+
+Text::StyledText BuildGradientSpanText(const char* text, Gradient::SpreadMethod spreadMethod)
+{
+  const std::string       source(text);
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(Dali::String(text));
+
+  AddGradientSpanForWord(builder, source, "Search", GradientKind::LINEAR, spreadMethod);
+  AddGradientSpanForWord(builder, source, "smart", GradientKind::RADIAL, spreadMethod);
+  AddGradientSpanForWord(builder, source, "Find", GradientKind::LINEAR, spreadMethod);
+  AddGradientSpanForWord(builder, source, "connected", GradientKind::CONIC, spreadMethod);
+  AddGradientSpanForWord(builder, source, "Build", GradientKind::LINEAR, spreadMethod);
+  AddGradientSpanForWord(builder, source, "beautiful", GradientKind::RADIAL, spreadMethod);
+  AddGradientSpanForWord(builder, source, "responsive", GradientKind::CONIC, spreadMethod);
+  AddGradientSpanForWord(builder, source, "Compose", GradientKind::LINEAR, spreadMethod);
+  AddGradientSpanForWord(builder, source, "adaptive", GradientKind::RADIAL, spreadMethod);
+  AddGradientSpanForWord(builder, source, "vivid", GradientKind::CONIC, spreadMethod);
+  return builder.Build();
+}
+
 } // namespace
 
 class InputGradientController : public ConnectionTracker
@@ -316,9 +381,9 @@ public:
 private:
   void OnInit(Application application)
   {
-    Window window = application.GetWindow();
-    window.SetPositionSize(PositionSize(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
-    window.SetBackgroundColor(UiColor(0x0B1120));
+    mWindow = application.GetWindow();
+    mWindow.SetPositionSize(PositionSize(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
+    mWindow.SetBackgroundColor(UiColor(0x0B1120));
 
     mRoot = StackLayout::New(StackOrientation::VERTICAL);
     mRoot.SetRequestedWidth(MATCH_PARENT);
@@ -356,6 +421,7 @@ private:
     mField.SetFontSize(31.0f);
     mField.SetTextColor(UiColor(0x111827));
     mField.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mField.KeyEventSignal().Connect(this, &InputGradientController::OnEditableKeyEvent);
     mContent.Add(mField);
 
     mEditor = InputEditor::New();
@@ -363,6 +429,7 @@ private:
     mEditor.SetFontSize(28.0f);
     mEditor.SetTextColor(UiColor(0x111827));
     mEditor.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    mEditor.KeyEventSignal().Connect(this, &InputGradientController::OnEditableKeyEvent);
     mContent.Add(mEditor);
 
     mFooter = StackLayout::New(StackOrientation::VERTICAL);
@@ -370,11 +437,11 @@ private:
     mFooter.SetRequestedHeight(FOOTER_HEIGHT);
     mFooter.SetSpacing(6.0f);
 
-    mCaseHelpLabel = CreateLabel("CASES  Left/Right or 1-4  Basic | Placeholder | Password | StyledText", 12.0f, UiColor(0xCBD5E1));
+    mCaseHelpLabel = CreateLabel("CASES  Left/Right or 1-5  Basic | Placeholder | Password | StyledText | GradientSpan", 12.0f, UiColor(0xCBD5E1));
     ConfigureBand(mCaseHelpLabel, 30.0f, UiColor(0x111827), UiColor(0x334155), UiColor(0xCBD5E1));
     mActionHelpLabel = CreateLabel("ACTIONS  G Type | S Spread | B Bounds | A/P Anim | C Base | O Placeholder", 12.0f, UiColor(0xCBD5E1));
     ConfigureBand(mActionHelpLabel, 30.0f, UiColor(0x111827), UiColor(0x334155), UiColor(0xCBD5E1));
-    mDiagHelpLabel = CreateLabel("VIEW  Left/Right Case | T Text swap/recreate | X Reset options | ESC Quit", 12.0f, UiColor(0xCBD5E1));
+    mDiagHelpLabel = CreateLabel("EDIT  Click focus; type/delete/select/cursor | F5 Clear | F6 Width | F7 Height | ESC Unfocus | T Restore", 12.0f, UiColor(0xCBD5E1));
     ConfigureBand(mDiagHelpLabel, 30.0f, UiColor(0x111827), UiColor(0x334155), UiColor(0xCBD5E1));
 
     mFooter.Add(mCaseHelpLabel);
@@ -385,8 +452,8 @@ private:
     mRoot.Add(mContent);
     mRoot.Add(mFooter);
 
-    window.Add(mRoot);
-    window.KeyEventSignal().Connect(this, &InputGradientController::OnKeyEvent);
+    mWindow.Add(mRoot);
+    mWindow.KeyEventSignal().Connect(this, &InputGradientController::OnKeyEvent);
 
     ShowCase(0u);
   }
@@ -397,6 +464,7 @@ private:
     StopPlaceholderAnimation();
     mCaseIndex       = index % CASES.size();
     mTextSwapEnabled = false;
+    mCleared         = false;
     ApplyCurrentCase();
   }
 
@@ -466,8 +534,14 @@ private:
   {
     const char* fieldText  = mTextSwapEnabled ? item.alternateFieldText : item.fieldText;
     const char* editorText = mTextSwapEnabled ? item.alternateEditorText : item.editorText;
+    mCleared               = false;
 
-    if(item.styledText)
+    if(item.gradientSpanText && mGradientApplied)
+    {
+      mField.SetStyledText(BuildGradientSpanText(fieldText, CurrentSpreadMethod()));
+      mEditor.SetStyledText(BuildGradientSpanText(editorText, CurrentSpreadMethod()));
+    }
+    else if(item.styledText)
     {
       mField.SetStyledText(Text::StyledText::FromMarkup(fieldText));
       mEditor.SetStyledText(Text::StyledText::FromMarkup(editorText));
@@ -636,7 +710,30 @@ private:
   void ToggleTextSwap()
   {
     mTextSwapEnabled = !mTextSwapEnabled;
+    mCleared         = false;
     ApplyCurrentCase();
+  }
+
+  void ClearText()
+  {
+    mField.SetText("");
+    mEditor.SetText("");
+    mCleared = true;
+    UpdateStatus();
+  }
+
+  void ToggleWindowWidth()
+  {
+    mCompactWidth = !mCompactWidth;
+    mWindow.SetPositionSize(PositionSize(0, 0, mCompactWidth ? 700 : WINDOW_WIDTH, mCompactHeight ? 700 : WINDOW_HEIGHT));
+    UpdateStatus();
+  }
+
+  void ToggleWindowHeight()
+  {
+    mCompactHeight = !mCompactHeight;
+    mWindow.SetPositionSize(PositionSize(0, 0, mCompactWidth ? 700 : WINDOW_WIDTH, mCompactHeight ? 700 : WINDOW_HEIGHT));
+    UpdateStatus();
   }
 
   void UpdateStatus()
@@ -652,7 +749,11 @@ private:
     state += " | S ";
     state += GetSpreadMethodName(CurrentSpreadMethod());
     state += mViewBounds ? " | B VIEW" : " | B CONTENT";
-    if(CurrentCase().normalTextGradient)
+    if(CurrentCase().gradientSpanText)
+    {
+      state += mGradientApplied ? " | C Spans ON" : " | C Spans OFF";
+    }
+    else if(CurrentCase().normalTextGradient)
     {
       state += mGradientApplied ? " | C Base ON" : " | C Base OFF";
     }
@@ -664,6 +765,9 @@ private:
     state += mNormalAnimationEnabled ? " | A ON" : " | A OFF";
     state += mPlaceholderAnimationEnabled ? "/P ON" : "/P OFF";
     state += mTextSwapEnabled ? " | T Swap" : " | T Primary";
+    state += mCleared ? " | F5 EMPTY" : "";
+    state += mCompactWidth ? " | F6 700w" : " | F6 920w";
+    state += mCompactHeight ? " | F7 700h" : " | F7 880h";
     mStateLabel.SetText(Dali::String(state.c_str()));
 
     mExpectedLabel.SetText(Dali::String(item.expected));
@@ -687,7 +791,14 @@ private:
   void CycleSpreadMethod()
   {
     mSpreadMethodIndex = (mSpreadMethodIndex + 1u) % SPREAD_METHODS.size();
-    RestartAnimationsForOptionChange();
+    if(CurrentCase().gradientSpanText)
+    {
+      ApplyCurrentCase();
+    }
+    else
+    {
+      RestartAnimationsForOptionChange();
+    }
   }
 
   void ToggleBoundsMode()
@@ -699,7 +810,14 @@ private:
   void ToggleBaseGradient()
   {
     mGradientApplied = !mGradientApplied;
-    RestartAnimationsForOptionChange();
+    if(CurrentCase().gradientSpanText)
+    {
+      ApplyCurrentCase();
+    }
+    else
+    {
+      RestartAnimationsForOptionChange();
+    }
   }
 
   void TogglePlaceholderGradient()
@@ -717,15 +835,49 @@ private:
     mPlaceholderAnimationEnabled  = true;
     mSpreadMethodIndex            = 0u;
     mViewBounds                   = false;
+    mCleared                      = false;
+    mCompactWidth                 = false;
+    mCompactHeight                = false;
+    mWindow.SetPositionSize(PositionSize(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
     ApplyCurrentCase();
   }
 
   bool IsNumberKey(const KeyEvent& event, std::size_t& index) const
   {
     const std::string keyName = event.GetKeyName().CStr();
-    if(keyName.size() == 1u && keyName[0] >= '1' && keyName[0] <= '4')
+    if(keyName.size() == 1u && keyName[0] >= '1' && keyName[0] <= '5')
     {
       index = static_cast<std::size_t>(keyName[0] - '1');
+      return true;
+    }
+    return false;
+  }
+
+  bool OnEditableKeyEvent(View, KeyEvent event)
+  {
+    if(event.GetState() != KeyEvent::UP)
+    {
+      return false;
+    }
+
+    if(event.GetKeyName() == "F5")
+    {
+      ClearText();
+      return true;
+    }
+    if(event.GetKeyName() == "F6")
+    {
+      ToggleWindowWidth();
+      return true;
+    }
+    if(event.GetKeyName() == "F7")
+    {
+      ToggleWindowHeight();
+      return true;
+    }
+    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+    {
+      FocusManager::Get().ClearFocus();
       return true;
     }
     return false;
@@ -787,6 +939,18 @@ private:
     {
       ToggleTextSwap();
     }
+    else if(event.GetKeyName() == "F5")
+    {
+      ClearText();
+    }
+    else if(event.GetKeyName() == "F6")
+    {
+      ToggleWindowWidth();
+    }
+    else if(event.GetKeyName() == "F7")
+    {
+      ToggleWindowHeight();
+    }
     else if(event.GetKeyName() == "x" || event.GetKeyName() == "X" || event.GetKeyName() == "r" || event.GetKeyName() == "R")
     {
       ResetCurrentOptions();
@@ -795,6 +959,7 @@ private:
 
 private:
   Application mApplication;
+  Window      mWindow;
   StackLayout mRoot;
   StackLayout mHeader;
   StackLayout mContent;
@@ -819,6 +984,9 @@ private:
   bool         mNormalAnimationEnabled{true};
   bool         mPlaceholderAnimationEnabled{true};
   bool         mTextSwapEnabled{false};
+  bool         mCleared{false};
+  bool         mCompactWidth{false};
+  bool         mCompactHeight{false};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

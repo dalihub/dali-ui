@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-components/integration-api/chart/pie-series-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -42,4 +42,4 @@ void PieSeries::ClearSlices()
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

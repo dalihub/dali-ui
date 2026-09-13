@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/selectable-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -127,4 +127,4 @@ inline const SelectableViewImpl& GetImpl(const SelectableView& view)
 } // namespace Extension
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

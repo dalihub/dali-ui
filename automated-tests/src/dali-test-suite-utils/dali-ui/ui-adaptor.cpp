@@ -50,7 +50,7 @@ extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentProcessId();
 #endif
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 #if defined(_WIN32)
 namespace DevelWindowSystem

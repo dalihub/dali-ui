@@ -27,7 +27,7 @@
 
 // INTERNAL HEADERS
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -815,4 +815,4 @@ void TextureCacheManager::RemoveHashId(const TextureCacheManager::TextureHash te
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -22,7 +22,7 @@
 #include <dali/public-api/signals/dali-signal.h>
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Internal
 {

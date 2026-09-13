@@ -2,7 +2,7 @@
 #define DALI_UI_VIEW_DECORATION_DATA_H
 
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/constants.h> ///< for Color::BLACK
 #include <dali/public-api/math/vector4.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 struct DecorationData
 {
@@ -35,7 +37,7 @@ struct DecorationData
     mCornerSquareness(Vector4::ZERO),
     mBorderlineWidth(0.0f),
     mBorderlineOffset(0.0f),
-    mCornerRadiusPolicy(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE))
+    mCornerRadiusPolicy(static_cast<int>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
   {
   }
   Vector4 mBorderlineColor;
@@ -97,7 +99,7 @@ struct DecorationData
 
   static int GetCornerRadiusPolicy(const DecorationData* const data)
   {
-    return data ? data->mCornerRadiusPolicy : static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE);
+    return data ? data->mCornerRadiusPolicy : static_cast<int>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE);
   }
   static void SetCornerRadiusPolicy(DecorationData*& data, int value)
   {
@@ -114,6 +116,6 @@ struct DecorationData
   }
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal
 
 #endif // DALI_UI_VIEW_DECORATION_DATA_H

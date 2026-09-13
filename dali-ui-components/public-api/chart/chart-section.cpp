@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/chart-section-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -99,4 +99,4 @@ float ChartSection::GetStrokeWidth() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -18,7 +18,10 @@
  *
  */
 
-namespace Dali::Ui::Integration::Text
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
+
+namespace DALI_NAMESPACE::Ui::Integration::Text
 {
 /**
  * @brief Enumerates which text rendering state changed during relayout.
@@ -38,6 +41,6 @@ enum Type
  */
 using UpdateTextType = TextUpdate::Type;
 
-} // namespace Dali::Ui::Integration::Text
+} //namespace DALI_NAMESPACE::Ui::Integration::Text
 
 #endif // DALI_UI_INTEGRATION_TEXT_UPDATE_TYPE_H

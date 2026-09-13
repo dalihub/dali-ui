@@ -44,7 +44,7 @@
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToDaliStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -289,8 +289,8 @@ Dali::UniformBlock& VisualFactoryCache::GetDefaultUniformBlock()
     mDefaultUniformBlock.RegisterUniqueProperty("offset", Vector2::ZERO);
     mDefaultUniformBlock.RegisterUniqueProperty("size", Vector2::ONE);
     mDefaultUniformBlock.RegisterUniqueProperty("offsetSizeMode", Vector4::ZERO);
-    mDefaultUniformBlock.RegisterUniqueProperty("origin", -Vector2(0.5f, 0.5f)); ///< TOP_BEGIN for LTR
-    mDefaultUniformBlock.RegisterUniqueProperty("pivot", Vector2(0.5f, 0.5f));   ///< TOP_BEGIN for LTR
+    mDefaultUniformBlock.RegisterUniqueProperty("origin", -Vector2(0.5f, 0.5f)); ///< VisualOrigin::TOP_LEFT
+    mDefaultUniformBlock.RegisterUniqueProperty("pivot", Vector2(0.5f, 0.5f));   ///< VisualPivot::TOP_LEFT
     mDefaultUniformBlock.RegisterUniqueProperty("extraSize", Vector2::ZERO);
   }
   return mDefaultUniformBlock;
@@ -547,7 +547,7 @@ void VisualFactoryCache::UpdateBrokenImageRenderer(VisualRenderer& renderer, con
         if(mBrokenImageInfoContainer[index].visualType == VisualUrl::Type::N_PATCH)
         {
           NPatchDataPtr data;
-          Extents       border;
+          Insets        border;
           mBrokenImageInfoContainer[index].npatchId = mNPatchLoader.Load(
             mTextureManager, NULL, mBrokenImageInfoContainer[index].url, border, mPreMultiplyOnLoad, true);
           if(mNPatchLoader.GetNPatchData(mBrokenImageInfoContainer[index].npatchId, data) &&
@@ -620,8 +620,14 @@ void VisualFactoryCache::UpdateBrokenImageRenderer(VisualRenderer& renderer, con
       renderer.SetGeometry(geometry);
       renderer.SetShader(shader);
     }
-    Texture    brokenImage = GetBrokenVisualImage(brokenIndex);
-    TextureSet textureSet  = TextureSet::New();
+    Texture brokenImage = GetBrokenVisualImage(brokenIndex);
+    if(!brokenImage)
+    {
+      DALI_LOG_ERROR("Failed to load broken image: %s\n", mBrokenImageInfoContainer[brokenIndex].url.c_str());
+      renderer.RemoveTextures();
+      return;
+    }
+    TextureSet textureSet = TextureSet::New();
     textureSet.SetTexture(0u, brokenImage);
     renderer.SetTextures(textureSet);
   }
@@ -660,4 +666,4 @@ int32_t VisualFactoryCache::GetProperBrokenImageIndex(const Vector2& size)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

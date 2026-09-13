@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -122,4 +122,4 @@ inline const Integration::StackLayoutImpl& GetImpl(const StackLayout& layout)
   return static_cast<const Integration::StackLayoutImpl&>(handle);
 }
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

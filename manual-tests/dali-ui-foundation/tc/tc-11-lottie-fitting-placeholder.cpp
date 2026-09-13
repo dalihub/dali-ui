@@ -137,7 +137,9 @@ private:
 
   void OnReload()
   {
+    // Restore the good URL and force a reload even when it is already current.
     mView.SetResourceUrl(LOTTIE_WALKER);
+    mView.Reload();
     mView.Play();
     UpdateHolderLabel("reloading...");
   }

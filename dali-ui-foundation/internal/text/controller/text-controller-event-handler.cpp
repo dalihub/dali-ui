@@ -47,7 +47,7 @@ const char* KEY_INSERT_NAME = "Insert";
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -67,6 +67,16 @@ void Controller::EventHandler::KeyboardFocusGainEvent(Controller& controller, bo
         true; // If editing started without tap event, cursor update must be triggered.
       controller.mImpl->mEventData->mUpdateInputStyle          = true;
       controller.mImpl->mEventData->mScrollAfterUpdatePosition = scrollToCursor;
+    }
+    else if(EventData::TEXT_PANNING == controller.mImpl->mEventData->mState &&
+            ((EventData::INACTIVE == controller.mImpl->mEventData->mPreviousState) ||
+             (EventData::INTERRUPTED == controller.mImpl->mEventData->mPreviousState)))
+    {
+      // Focus can be gained on touch-up while the pan is still active. Keep panning, but restore editing when it ends.
+      controller.mImpl->mEventData->mPreviousState             = EventData::EDITING;
+      controller.mImpl->mEventData->mUpdateCursorPosition      = true;
+      controller.mImpl->mEventData->mUpdateInputStyle          = true;
+      controller.mImpl->mEventData->mScrollAfterUpdatePosition = false;
     }
     controller.mImpl->NotifyInputMethodContextMultiLineStatus();
     if(controller.mImpl->IsShowingPlaceholderText())
@@ -1090,4 +1100,4 @@ void Controller::EventHandler::TextPopupButtonTouched(Controller&               
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

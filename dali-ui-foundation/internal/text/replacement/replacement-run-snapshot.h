@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/character-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Enumerates the replacement types known by the text processing layer.
@@ -147,6 +147,21 @@ struct ReplacementPlacement
   bool                   elided{false};
 };
 
-} // namespace Dali::Ui::Text
+/**
+ * @brief Stores normalized Reveal timing for one visible replacement visual.
+ *
+ * The occurrence identity is stable within the corresponding source revision.
+ * Runtime visual handles and final glyph indices are deliberately excluded.
+ */
+struct ReplacementRevealTiming
+{
+  uint64_t occurrenceIdentity{0u};
+  float    start{0.0f};
+  float    fadeDuration{0.0f};
+  float    progressionSpan{0.0f};
+  bool     rightToLeft{false};
+};
+
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_RUN_SNAPSHOT_H

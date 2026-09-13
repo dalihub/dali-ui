@@ -19,8 +19,9 @@
  */
 
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-signals-integ.h>
+#include <dali/public-api/common/dali-namespace.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -48,6 +49,6 @@ enum Type
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTEGRATION_API_VISUALS_ANIMATED_VECTOR_IMAGE_VISUAL_SIGNALS_INTEG_H

@@ -139,7 +139,7 @@ private:
   {
     Dali::Vector<Dali::String> urls;
     for(int i = 0; i < DOG_URL_COUNT; ++i) urls.PushBack(DOG_URLS[i]);
-    mView.SetResourceUrls(urls);
+    mView.SetResourceUrlList(urls);
     mView.Play();
     UpdateLabel();
   }
@@ -161,8 +161,8 @@ private:
     mStatusLabel.SetText(
       Dali::String("Batch: ") + Dali::String(std::to_string(mView.GetBatchSize()).c_str()) +
       Dali::String(" | Cache: ") + Dali::String(std::to_string(mView.GetCacheSize()).c_str()) +
-      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
-      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()));
+      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrameNumber()).c_str()) +
+      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrameCount()).c_str()));
   }
 
   View MakeCentered(View child)

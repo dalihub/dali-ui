@@ -16,7 +16,7 @@
 
 #include <dali-ui-foundation/internal/text/text-alignment.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 void AlignTextLines(Layout::Engine&             layoutEngine,
                     const Size&                 controlSize,
@@ -117,4 +117,4 @@ void AlignTextLines(Layout::Engine&             layoutEngine,
   }
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -114,4 +114,4 @@ bool IsTimedEffect(const Dali::Ui::LayoutBoundsEffect& effect);
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/ui-color-manager-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -109,4 +109,4 @@ UiColorManager::ColorTableChangedSignalType& UiColorManager::ColorTableChangedSi
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

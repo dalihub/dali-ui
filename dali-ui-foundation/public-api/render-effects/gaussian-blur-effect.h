@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -39,10 +39,10 @@ class GaussianBlurEffectImpl;
  *
  * @code
  * GaussianBlurEffect effect = GaussianBlurEffect::New();
- * view.SetRenderEffect(effect); // Activate
- * effect.Deactivate();
- * effect.Activate();
- * view.ClearRenderEffect(); // Deactivate
+ * view.SetRenderEffect(effect); // Set on the view, activated automatically
+ * effect.Deactivate();          // Turn off, but stay set on the view
+ * effect.Activate();            // Turn back on
+ * view.ClearRenderEffect();     // Remove from the view, deactivated automatically
  * @endcode
  */
 class DALI_UI_API GaussianBlurEffect : public RenderEffect
@@ -54,7 +54,7 @@ public:
   typedef Signal<void()> FinishedSignalType;
 
   /**
-   * @brief Creates an initialized GaussianBlurEffect, with default blur radius 10u.
+   * @brief Creates an initialized GaussianBlurEffect, with default blur radius 40u.
    * @return A handle to a newly allocated Dali resource
    */
   static GaussianBlurEffect New();
@@ -92,7 +92,7 @@ public:
   void SetBlurOnce(bool blurOnce);
 
   /**
-   * @brief Retrives whether effect rendering is done once(true) or every frame(false)
+   * @brief Retrieves whether effect rendering is done once(true) or every frame(false)
    * @return Whether blur is rendered once or every frame.
    */
   bool GetBlurOnce() const;
@@ -120,7 +120,7 @@ public:
   void SetBlurDownscaleFactor(float downscaleFactor);
 
   /**
-   * @brief Retrives blur downscale factor.
+   * @brief Retrieves blur downscale factor.
    * @return The blur downscale factor.
    */
   float GetBlurDownscaleFactor() const;
@@ -152,6 +152,9 @@ public:
    * @param[in] toValue End value of blur strength. Must be in range of [0.0f, 1.0f]
    * @note If toValue is smaller than fromValue, animation would show reversed(blurred->clarified) animation.
    * @note When choosing alpha function, note that gaussian curve itself is innately non-linear.
+   * @note Blur passes use full-resolution buffers while the animation is active so that low-strength output does not
+   * expose an upscaled downsampled image. If the animation finishes at strength 1, the configured downscale factor is
+   * restored. If it finishes at strength 0, blur rendering is bypassed until another strength animation is added.
    */
   void AddBlurStrengthAnimation(Animation& animation, AlphaFunction alphaFunction, TimePeriod timePeriod,
                                 float fromValue, float toValue);
@@ -171,8 +174,12 @@ public:
 
 public: // Signals
   /**
-   * @brief If blurOnce is true and effect is activated, then connect to this signal to be notified when the
-   * target actor has been rendered.
+   * @brief Connect to this signal to be notified when the blur has been rendered.
+   *
+   * Only emitted while blur-once is enabled and the effect is activated, since a blur that
+   * refreshes every frame never finishes. The offscreen resources are released right after the
+   * signal is emitted.
+   *
    * @return The finished signal
    */
   FinishedSignalType& FinishedSignal();
@@ -181,11 +188,11 @@ public: // Not intended for use by Application developers
   ///@cond internal
   /**
    * @brief Creates a handle using the Ui::Internal implementation.
-   * @param[in]  blurEffectImpl The GaussianBlurEffect implementation.
+   * @param[in] gaussianBlurEffectImpl The GaussianBlurEffect implementation.
    */
   explicit DALI_INTERNAL GaussianBlurEffect(Internal::GaussianBlurEffectImpl* gaussianBlurEffectImpl);
   ///@endcond
 };
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 #endif // DALI_UI_BLUR_EFFECT_H

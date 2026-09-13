@@ -20,7 +20,7 @@
 #define DALI_ASSERT_VALID_WINDOW_FRAME_VALUE(impl, Type) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from " Type " object")
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 struct WindowFrameGeometry::Impl
@@ -87,6 +87,6 @@ Dali::Ui::Insets WindowFrameGeometry::GetDecorationOverlayInsets() const
   return mImpl->decorationOverlayInsets;
 }
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #undef DALI_ASSERT_VALID_WINDOW_FRAME_VALUE

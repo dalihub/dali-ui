@@ -124,7 +124,7 @@ void UpdateCursorPosition(Dali::Ui::Text::EventData* eventData)
 
 } // namespace
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 void Controller::EnableTextInput(DecoratorPtr decorator, InputMethodContext& inputMethodContext)
 {
@@ -2911,4 +2911,4 @@ Controller::~Controller()
   }
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

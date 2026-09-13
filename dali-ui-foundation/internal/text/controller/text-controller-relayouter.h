@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -195,6 +195,6 @@ inline bool compareByPointSize(const Ui::Text::Fit::Candidate& lhs, const Ui::Te
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_CONTROLLER_RELAYOUTER_H

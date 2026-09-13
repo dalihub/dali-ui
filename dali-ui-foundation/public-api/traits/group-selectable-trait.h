@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/selection-group.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -174,4 +174,4 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

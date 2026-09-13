@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -203,4 +203,4 @@ void GroupBodyDecoration::OnItemBoundsUpdated(const ItemViewHolder& holder, cons
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

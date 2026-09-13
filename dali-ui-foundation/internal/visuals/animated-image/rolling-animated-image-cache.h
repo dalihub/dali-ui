@@ -23,7 +23,7 @@
 #include <dali/devel-api/adaptor-framework/animated-image-loading.h>
 #include <dali/devel-api/common/circular-queue.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -192,13 +192,13 @@ private:
   };
   std::vector<TextureManager::TextureId> mTextureIds;
 
-  VisualUrl                    mImageUrl;
-  Dali::AnimatedImageLoading   mAnimatedImageLoading;
-  uint32_t                     mFrameCount;
-  uint32_t                     mCacheSize;
-  std::vector<int32_t>         mIntervals;
-  std::vector<uint32_t>        mLoadWaitingQueue;
-  CircularQueue<ImageFrame>    mQueue;
+  VisualUrl                  mImageUrl;
+  Dali::AnimatedImageLoading mAnimatedImageLoading;
+  uint32_t                   mFrameCount;
+  uint32_t                   mCacheSize;
+  std::vector<int32_t>       mIntervals;
+  std::vector<uint32_t>      mLoadWaitingQueue;
+  CircularQueue<ImageFrame>  mQueue;
   // Frame requested while another frame's decode is still in flight (-1: none).
   // Keep the in-flight entry until LoadComplete() so its observer is not removed.
   int32_t                      mPendingFrameIndex{-1};
@@ -212,6 +212,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_ROLLING_ANIMATED_IMAGE_CACHE_H

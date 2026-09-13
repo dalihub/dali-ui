@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/chart/chart-section.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -121,4 +121,4 @@ inline const Integration::ChartSection& GetImplementation(const Ui::ChartSection
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

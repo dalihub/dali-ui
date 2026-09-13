@@ -30,7 +30,7 @@
 
 #include <dali-ui-foundation/internal/builder/builder-get-is.inl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -152,6 +152,6 @@ inline Internal::JsonParser& GetImplementation(Ui::Integration::JsonParser& pars
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_JSON_PARSER_IMPL_H

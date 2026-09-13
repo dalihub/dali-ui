@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/input/input-event.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -187,4 +187,4 @@ inline const Internal::InputEventImpl& GetImpl(const InputEvent& obj)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -25,7 +25,7 @@
 
 #include <cstring> // for strcmp
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -63,4 +63,4 @@ Vector<bool> GetWordHyphens(TextAbstraction::Hyphenation& hyphenation, const Cha
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

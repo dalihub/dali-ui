@@ -21,7 +21,6 @@
 #include <dali/public-api/actors/custom-actor.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/common/extents.h> // TODO: Remove after Insets migration
 #include <dali/public-api/common/insets.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/object/base-handle.h>
@@ -52,9 +51,9 @@
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/views/view-with.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -388,6 +387,105 @@ public: // Measure / Arrange API
   LayoutTransition GetLayoutTransition() const;
 
   /**
+   * @brief Attaches a LayoutTransition that governs THIS view as a layout child.
+   *
+   * The transition attached here animates this view's own ENTER / EXIT / CHANGE
+   * inside its parent's layout frame, and takes precedence over the transition
+   * its parent attached with @c SetLayoutTransition as well as over any
+   * @c LayoutReflowScope::SUBTREE ancestor transition.
+   *
+   * The precedence is wholesale: once a self transition is set it alone governs
+   * every slot of this view. Slots it leaves unconfigured are NOT inherited from
+   * the parent — they simply do not animate (CHANGE snaps to the new bounds,
+   * EXIT unparents immediately, ENTER is skipped).
+   *
+   * Pass an uninitialized handle to detach and return to the parent / ancestor
+   * rules. An uninitialized handle is NOT an opt-out: to declare that this view
+   * must never be animated by a layout transition, call
+   * @c SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH).
+   *
+   * A self transition works whether or not any ancestor carries one.
+   *
+   * @note The two roles are independent and may coexist on one view: the handle
+   * passed to @c SetLayoutTransition governs this view's children, the handle
+   * passed here governs this view itself. @c LayoutTransition::SetReflowScope has
+   * no effect in the self role.
+   *
+   * @note Lifecycle callbacks are emitted by the winning transition only. While a
+   * self transition governs this view, the parent's @c OnStart / @c OnFinished are
+   * NOT emitted for it.
+   *
+   * @note The self transition animates this view inside its parent's frame, so it
+   * is inert while the view has no parent View (for example while it is parented
+   * directly to the window).
+   *
+   * @note Replacing the transition at runtime does not interrupt in-flight
+   * transitions — the same contract as @c SetLayoutTransition.
+   *
+   * @warning Do NOT call @c SetSelfLayoutTransition from inside a custom
+   * @c ArrangeCallback: the dispatcher has already captured the pre-pass bounds
+   * and resolves the governing transition when the pass ends.
+   *
+   * @param[in] transition The transition to attach (uninitialized to detach)
+   */
+  void SetSelfLayoutTransition(LayoutTransition transition);
+
+  /**
+   * @brief Returns the LayoutTransition attached to this view's self role, or an
+   * uninitialized handle.
+   *
+   * Independent of @c GetLayoutTransition(), which returns the handle governing
+   * this view's CHILDREN.
+   *
+   * @return The attached self LayoutTransition handle
+   */
+  LayoutTransition GetSelfLayoutTransition() const;
+
+  /**
+   * @brief Declares how layout transitions treat this view.
+   *
+   * The mode is a POLICY and is evaluated BEFORE any transition handle is
+   * resolved, so it wins over every handle — including one this view attached
+   * with @c SetSelfLayoutTransition. Handles are not detached: they are simply
+   * not consulted, @c GetSelfLayoutTransition() keeps returning them, and
+   * @c LayoutTransitionMode::AUTO restores their effect.
+   *
+   * @c LayoutTransitionMode::PASS_THROUGH lets layout transitions pass through
+   * THIS VIEW: it is never their target, not even of the handle it attached
+   * itself. CHANGE snaps to the arranged bounds, EXIT unparents immediately,
+   * ENTER is skipped and nothing is settled onto the view (a pre-set opacity
+   * survives). Inheritance keeps flowing to its descendants, and this view's own
+   * children-role transition keeps governing its children.
+   *
+   * @c LayoutTransitionMode::ISOLATE_SUBTREE isolates this view and its whole
+   * subtree from every owner at or above it — this view's own children-role
+   * transition included: nothing from above animates anything inside.
+   * Declarations made strictly BELOW the gate still work — a descendant's self
+   * transition still animates it, and a descendant's children-role transition
+   * still governs its own children.
+   *
+   * @note Changing the mode does NOT interrupt in-flight transitions — the same
+   * contract as replacing a transition handle. Each in-flight ENTER / EXIT /
+   * CHANGE finishes on its own timing; the new policy applies from the next
+   * per-(view, slot) event. Returning to @c AUTO does not retroactively fire an
+   * ENTER for an add that happened under the previous mode.
+   *
+   * @warning Do NOT call @c SetLayoutTransitionMode from inside a custom
+   * @c ArrangeCallback: the dispatcher has already captured the pre-pass bounds
+   * and resolves the governing transition when the pass ends.
+   *
+   * @param[in] mode The policy to apply (default @c LayoutTransitionMode::AUTO)
+   */
+  void SetLayoutTransitionMode(LayoutTransitionMode mode);
+
+  /**
+   * @brief Returns this view's layout transition policy.
+   *
+   * @return The current LayoutTransitionMode (@c AUTO unless set)
+   */
+  LayoutTransitionMode GetLayoutTransitionMode() const;
+
+  /**
    * @brief Attaches a LayoutManager to this View.
    *
    * After attach, the View's layout pass dispatches to LayoutManager::Measure
@@ -592,16 +690,6 @@ public: // Properties
   void SetMargin(const Insets& margin);
 
   /**
-   * @brief Sets the view margin from Extents.
-   *
-   * TODO: Temporary overload kept so out-of-tree callers still
-   * passing Extents keep compiling. Remove once they have migrated to Insets.
-   *
-   * @param[in] margin The margin to set
-   */
-  void SetMargin(const Extents& margin);
-
-  /**
    * @brief Sets the view margin for each edge.
    *
    * @param[in] start The start margin
@@ -659,16 +747,6 @@ public: // Properties
    * @param[in] padding The padding to set
    */
   void SetPadding(const Insets& padding);
-
-  /**
-   * @brief Sets the view padding from Extents.
-   *
-   * TODO: Temporary overload kept so out-of-tree callers still
-   * passing Extents keep compiling. Remove once they have migrated to Insets.
-   *
-   * @param[in] padding The padding to set
-   */
-  void SetPadding(const Extents& padding);
 
   /**
    * @brief Sets the view padding for each edge.
@@ -1193,14 +1271,14 @@ public:
    * Assert if too many visuals are added, or duplicated VisualBase added.
    * Please use AddVisual() API if you need to control error cases.
    *
-   * @param[in] containerRangeType The range of visuals to be added.
+   * @param[in] depthLayer The layer to add the visual to.
    * @param[in] visuals The initializer list containing VisualBase handles to be added.
    */
-  void AddVisuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals)
+  void AddVisuals(Dali::Ui::Visual::DepthLayer depthLayer, std::initializer_list<Dali::Ui::VisualBase> visuals)
   {
     for(const auto& visual : visuals)
     {
-      bool added = AddVisual(visual, containerRangeType);
+      bool added = AddVisual(visual, depthLayer);
       DALI_ASSERT_ALWAYS(added && "Too many visuals are added by declarative method, or try to add duplicated VisualBase!");
     }
   }
@@ -1633,10 +1711,10 @@ public: // VisualBase (non-chaining)
    * visual will be detached from old view and added to this view.
    *
    * @param[in] visualBase The visual to add.
-   * @param[in] containerRangeType The range of visuals to be added.
+   * @param[in] depthLayer The layer to add the visual to.
    * @return True if the visual was added successfully, false otherwise.
    */
-  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType);
+  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer);
 
   /**
    * @brief Remove a Dali::Ui::VisualBase from the view.
@@ -1651,19 +1729,19 @@ public: // VisualBase (non-chaining)
   /**
    * @brief Get total number of Dali::Ui::VisualBase which we added using AddVisual().
    *
-   * @param[in] containerRangeType The range of visuals to get.
+   * @param[in] depthLayer The layer to get the visual from.
    * @return Get the number of visual base.
    */
-  uint32_t GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const;
+  uint32_t GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const;
 
   /**
    * @brief Get a Dali::Ui::VisualBase by sibling order.
    *
-   * @param[in] containerRangeType The range of visuals to get.
+   * @param[in] depthLayer The layer to get the visual from.
    * @param[in] siblingOrder The sibling order to get.
    * @return Get visual base by sibling order. Empty handle if not exist.
    */
-  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const;
+  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const;
 
 public: // Not intended for application developers
   /// @cond internal
@@ -1684,13 +1762,24 @@ public: // Not intended for application developers
 
 public:
   /**
-   * @brief OffScreenRenderingType enumeration.
+   * @brief Enumeration for the offscreen rendering mode.
+   * @deprecated Use SetOffscreenRenderingEnabled(), IsOffscreenRenderingEnabled(), SetOffscreenRenderingRefreshRate(), and
+   * GetOffscreenRenderingRefreshRate() instead. This type is planned for removal together with Property::OFFSCREEN_RENDERING.
    */
   enum OffScreenRenderingType
   {
     NONE,
     REFRESH_ONCE,
     REFRESH_ALWAYS
+  };
+
+  /**
+   * @brief Enumeration for the offscreen rendering refresh rate.
+   */
+  enum class OffscreenRefreshRate
+  {
+    REFRESH_ONCE   = 1,
+    REFRESH_ALWAYS = 2
   };
 
   /**
@@ -1719,18 +1808,11 @@ public:
     enum
     {
       /**
-       * @brief The background of the View.
-       *
-       * @details Name "background", type Property::MAP or Dali::String for URL or Property::VECTOR4 for Color.
-       */
-      BACKGROUND = PROPERTY_START_INDEX,
-
-      /**
        * @brief The outer space around the View.
        * @details Name "margin", type Property::VECTOR4, ordered as start, end, top, bottom.
        * @note Margin property is to be supported by Layout algorithms and containers in future.
        */
-      MARGIN,
+      MARGIN = PROPERTY_START_INDEX,
 
       /**
        * @brief The inner space of the View.
@@ -1763,12 +1845,6 @@ public:
       DOWN_FOCUSABLE_VIEW_ID,
 
       /**
-       * @brief The shadow of the View.
-       * @details Name "shadow", type Property::MAP.
-       */
-      SHADOW,
-
-      /**
        * @brief Whether a View and its descendants can emit key signals.
        * @details Name "dispatchKeyEvents", type Property::BOOLEAN
        * @note If a View's dispatchKeyEvents is set to false, then it's children will not emit a key event signal
@@ -1789,23 +1865,13 @@ public:
       COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
 
       /**
-       * @brief Whether to draw on offscreen of not.
-       * @details Name "offscreenRendering", type Property::INTEGER.
-       * @note Default is false.
+       * @brief Whether to draw offscreen or not.
+       * @details Name "offScreenRendering", type Property::INTEGER.
+       * @note Use OffScreenRenderingType values to configure the mode.
+       * @deprecated Use SetOffscreenRenderingEnabled(), IsOffscreenRenderingEnabled(), SetOffscreenRenderingRefreshRate(), and
+       * GetOffscreenRenderingRefreshRate() instead. This property is planned for removal.
        */
       OFFSCREEN_RENDERING,
-
-      /**
-       * @brief The inner shadow of the View. The visual will use Dali::Ui::Integration::DepthIndex::Ranges::DECORATION - 2
-       * @details Name "innerShadow", type Property::MAP.
-       */
-      INNER_SHADOW,
-
-      /**
-       * @brief The inset borderline of the View. The visual will use Dali::Ui::Integration::DepthIndex::Ranges::DECORATION - 1
-       * @details Name "borderline", type Property::MAP.
-       */
-      BORDERLINE,
 
       /**
        * @brief The width requested by the View for measurement.
@@ -1878,7 +1944,6 @@ public:
        * @note By default, it is Vector::ZERO.
        * @note Applies to specific visuals inside the View.
        * @note Only Property::Vector4 can be animated.
-       * @see Dali::Ui::Integration::Visual::Property::Type::CORNER_RADIUS
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       CORNER_RADIUS = ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX,
@@ -1888,7 +1953,6 @@ public:
        * (in world units).
        * @details Name "viewCornerRadiusPolicy", type Property::INTEGER.
        * @see Policy::Type
-       * @see Dali::Ui::Integration::Visual::Property::Type::CORNER_RADIUS_POLICY
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       CORNER_RADIUS_POLICY,
@@ -1899,7 +1963,6 @@ public:
        * @note By default, it is Vector::ZERO.
        * @note Applies to specific visuals inside the View.
        * @note Only Property::Vector4 can be animated.
-       * @see Dali::Ui::Integration::Visual::Property::Type::CORNER_SQUARENESS
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       CORNER_SQUARENESS,
@@ -1907,7 +1970,6 @@ public:
       /**
        * @brief The width for the borderline of the View. It will update borderline visual
        * @details Name "viewBorderlineWidth", type Property::FLOAT.
-       * @see Dali::Ui::Integration::Visual::Property::Type::BORDERLINE_WIDTH
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       BORDERLINE_WIDTH,
@@ -1915,7 +1977,6 @@ public:
       /**
        * @brief The color for the borderline of the View. It will update borderline visual
        * @details Name "viewBorderlineColor", type Property::VECTOR4
-       * @see Dali::Ui::Integration::Visual::Property::Type::BORDERLINE_COLOR
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       BORDERLINE_COLOR,
@@ -1923,7 +1984,6 @@ public:
       /**
        * @brief The offset for the borderline of the View. It will update borderline visual
        * @details Name "viewBorderlineOffset", type Property::FLOAT.
-       * @see Dali::Ui::Integration::Visual::Property::Type::BORDERLINE_OFFSET
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       BORDERLINE_OFFSET,
@@ -1940,8 +2000,14 @@ public:
   /// @brief ResourceReady signal type.
   typedef Signal<void(View)> ResourceReadySignalType;
 
-  /// @brief Offscreen rendering finished signal type.
+  /**
+   * @brief Offscreen rendering finished signal type.
+   * @deprecated Use OffscreenRenderingFinishedSignalType instead.
+   */
   typedef Signal<void(View)> OffScreenRenderingFinishedSignalType;
+
+  /// @brief Offscreen rendering finished signal type.
+  using OffscreenRenderingFinishedSignalType = Signal<void(View)>;
 
   /// @brief Accessibility reading lifecycle signal type.
   using AccessibilityReadingStatusChangedSignalType = Signal<void(View, Accessibility::ReadingStatus)>;
@@ -2434,7 +2500,8 @@ public:
    * @return The signal to connect to
    * @pre The View has been initialized.
    * @note This signal is emitted when the offscreen rendering task is completed.
-   * @note This signal is only emitted when OffScreenRenderingType is set to REFRESH_ONCE.
+   * @note This signal is only emitted when OffscreenRefreshRate is set to REFRESH_ONCE.
+   * @deprecated Use OffscreenRenderingFinishedSignal() instead.
    */
   OffScreenRenderingFinishedSignalType& OffScreenRenderingFinishedSignal();
 
@@ -2558,6 +2625,50 @@ public:
    */
   void SetInnerShadow(const InnerShadow& innerShadow);
 
+  /**
+   * @brief Enables or disables offscreen rendering for this View.
+   *
+   * Enabling uses the refresh rate set by SetOffscreenRenderingRefreshRate().
+   * Disabling preserves the refresh rate for the next time offscreen rendering is enabled.
+   *
+   * @param[in] enabled True to enable offscreen rendering, false to disable it
+   */
+  void SetOffscreenRenderingEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether offscreen rendering is enabled for this View.
+   *
+   * @return True if offscreen rendering is enabled, false otherwise
+   */
+  bool IsOffscreenRenderingEnabled() const;
+
+  /**
+   * @brief Sets the offscreen rendering refresh rate for this View.
+   *
+   * Setting the refresh rate does not enable offscreen rendering.
+   * The default refresh rate is REFRESH_ALWAYS.
+   *
+   * @param[in] refreshRate The offscreen rendering refresh rate
+   */
+  void SetOffscreenRenderingRefreshRate(OffscreenRefreshRate refreshRate);
+
+  /**
+   * @brief Gets the offscreen rendering refresh rate for this View.
+   *
+   * @return The current offscreen rendering refresh rate
+   */
+  OffscreenRefreshRate GetOffscreenRenderingRefreshRate() const;
+
+  /**
+   * @brief This signal is emitted when offscreen rendering is finished.
+   *
+   * @return The signal to connect to
+   * @pre The View has been initialized.
+   * @note This signal is emitted when the offscreen rendering task is completed.
+   * @note This signal is only emitted when OffscreenRefreshRate is set to REFRESH_ONCE.
+   */
+  OffscreenRenderingFinishedSignalType& OffscreenRenderingFinishedSignal();
+
 public: // Templates for Deriving Classes
   /**
    * @brief Template to allow deriving Views to DownCast handles to deriving handle classes.
@@ -2613,4 +2724,4 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

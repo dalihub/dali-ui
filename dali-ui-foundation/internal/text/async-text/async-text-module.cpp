@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-module-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -86,4 +86,4 @@ Text::MultilanguageSupport& AsyncTextModule::GetMultilanguageSupport()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

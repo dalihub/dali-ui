@@ -28,7 +28,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -42,6 +42,11 @@ namespace Gradient
 bool IsRenderable(const Dali::Ui::Gradient::Base& gradient);
 
 bool IsRenderable(const Style& style);
+
+/**
+ * @brief Compares two immutable gradient rendering snapshots by value.
+ */
+bool EqualStyle(const Style& lhs, const Style& rhs);
 
 Dali::WrapMode::Type GetWrapMode(Dali::Ui::Gradient::SpreadMethod spread);
 
@@ -93,6 +98,6 @@ Property::Index SetRendererProperty(RendererType renderer, const char* name, con
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_INTERNAL_TEXT_GRADIENT_HELPER_H

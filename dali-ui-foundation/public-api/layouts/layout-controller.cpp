@@ -41,7 +41,7 @@
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <algorithm>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -182,8 +182,8 @@ public:
    */
   struct LayoutRootEntry
   {
-    WeakHandle<View> weakHandle; ///< Non-ref-counted weak reference; auto-nullified on destruction
-    ViewImpl*        view;       ///< Raw pointer for direct access
+    WeakHandle<Ui::View> weakHandle; ///< Non-ref-counted weak reference; auto-nullified on destruction
+    ViewImpl*            view;       ///< Raw pointer for direct access
   };
 
   /**
@@ -582,8 +582,8 @@ public:
     }
 
     // Track this layout root (weak handle for validity checking without extending lifetime)
-    View handle           = View::DownCast(view->Self());
-    mAllLayoutRoots[view] = LayoutRootEntry{WeakHandle<View>(handle), view};
+    Ui::View handle       = Ui::View::DownCast(view->Self());
+    mAllLayoutRoots[view] = LayoutRootEntry{WeakHandle<Ui::View>(handle), view};
 
     // Add to pending (dirty) set
     mPendingViews.insert(view);
@@ -647,6 +647,14 @@ public:
     if(mTransitionDispatcher)
     {
       mTransitionDispatcher->ClearPendingInheritedEnters(owner);
+    }
+  }
+
+  void ClearDetachedSelfState(ViewImpl* child)
+  {
+    if(mTransitionDispatcher)
+    {
+      mTransitionDispatcher->ClearDetachedSelfState(child);
     }
   }
 
@@ -1585,6 +1593,11 @@ void LayoutController::ClearPendingInheritedEnters(ViewImpl* owner)
   mImpl->ClearPendingInheritedEnters(owner);
 }
 
+void LayoutController::ClearDetachedSelfState(ViewImpl* child)
+{
+  mImpl->ClearDetachedSelfState(child);
+}
+
 Dali::Window LayoutController::GetCurrentWindow() const
 {
   return mImpl->GetCurrentWindow();
@@ -1596,4 +1609,4 @@ void LayoutController::ReplaceCurrentWindow(Dali::Window window)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

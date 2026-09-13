@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -61,4 +61,4 @@ const Dali::String& SelectableLottieImage::GetInnerFillKeyPath() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -50,4 +50,4 @@ const TraitId STATE_EFFECT_TARGET = TraitId::Alloc();
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

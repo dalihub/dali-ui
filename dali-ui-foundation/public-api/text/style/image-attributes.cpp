@@ -23,7 +23,7 @@
 #define DALI_ASSERT_VALID_IMAGE_ATTRIBUTES(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from ImageAttributes object")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -210,6 +210,6 @@ bool ImageAttributes::operator!=(const ImageAttributes& rhs) const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_IMAGE_ATTRIBUTES

@@ -34,7 +34,7 @@
 #include <cmath>
 #include <limits>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1830,4 +1830,4 @@ void RecyclerViewImpl::OnPanGesture(Actor /*actor*/, PanGesture gesture)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

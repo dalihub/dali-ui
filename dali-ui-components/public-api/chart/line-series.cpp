@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/line-series-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -224,4 +224,4 @@ LineSeries::LineSeries(Integration::LineSeries* impl)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

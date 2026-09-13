@@ -30,13 +30,25 @@ bounds change.
   own still has its inner items reflow. Toggle the scope back to
   `DIRECT_CHILDREN` to see the inner items snap while only the card
   animates.
+- **layout-transition-self-override.example**: per-view override sample. One
+  transition on the root governs all three items, but each item declares its
+  own policy with `View::SetSelfLayoutTransition`: A inherits the root's
+  0.25s timing, B overrides it with a slow 0.8s transition plus its own
+  ENTER / EXIT effects, and C opts out entirely with
+  `View::SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH)` —
+  transitions pass through C, so it snaps on every layout change and is
+  unparented instantly even though the root carries an EXIT effect. Toggling
+  B's override off passes an uninitialized handle, which returns B to the
+  root's rules rather than silencing it. Each item has its own add / remove
+  button, so the three ENTER / EXIT policies can be compared side by side.
 - **layout-transition-grid-reorder.example**: grid reorder sample. A
   white root holds a translucent rounded panel at (80, 80) with a
   right-aligned notification / edit row, a Wi-Fi / Bluetooth button row,
   and a scrollable 3-column `GridLayout` of SVG icons (each with its
-  file-name label). Long-pressing a cell floats it under the window while
-  an invisible proxy reserves its slot; dragging moves the proxy to the
-  cell under the finger and reassigns every cell's `Row` / `Column`, so
+  file-name label). Long-pressing a cell keeps the original in the grid as
+  an invisible proxy while a non-interactive preview floats under the
+  window; dragging moves the hidden original to the cell under the finger
+  and reassigns every cell's `Row` / `Column`, so
   the CHANGE slot animates the reflow. Dragging near the top / bottom of
   the grid auto-scrolls. Because the cell captures the touch stream once a
   drag can start, free scrolling uses the empty margins between cells; the
@@ -102,5 +114,6 @@ Run:
 ./bin/layout-transition-animator.example
 ./bin/layout-transition-reorder.example
 ./bin/layout-transition-subtree.example
+./bin/layout-transition-self-override.example
 ./bin/layout-transition-grid-reorder.example
 ```

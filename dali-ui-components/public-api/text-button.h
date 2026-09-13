@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali/public-api/common/dali-string.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -69,6 +69,11 @@ public:
   void    SetTextColor(const UiColor& color);
   UiColor GetTextColor() const;
 
+  /**
+   * @brief Sets the font size.
+   * @pre The size must be finite and non-negative; a violation triggers an assertion.
+   * @note Zero is also passed unchanged to the internal Label, without substituting the default preset size.
+   */
   void  SetFontSize(float fontSize);
   float GetFontSize() const;
 
@@ -86,4 +91,4 @@ public: // Not intended for application developers
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

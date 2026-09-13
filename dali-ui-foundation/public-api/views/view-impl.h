@@ -19,7 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-vector.h>
-#include <dali/public-api/common/extents.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/events/pan-gesture.h>
@@ -44,7 +44,7 @@
 #include <dali-ui-foundation/public-api/views/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -505,7 +505,7 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @copydoc Ui::View::AddVisual()
    */
-  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType);
+  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer);
 
   /**
    * @copydoc Ui::View::RemoveVisual()
@@ -515,12 +515,12 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @copydoc Ui::View::GetVisualCount()
    */
-  uint32_t GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const;
+  uint32_t GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const;
 
   /**
    * @copydoc Ui::View::GetVisualAt()
    */
-  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const;
+  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const;
 
   // Measure / Arrange
 
@@ -709,6 +709,26 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::GetLayoutTransition()
    */
   LayoutTransition GetLayoutTransition() const;
+
+  /**
+   * @copydoc Ui::View::SetSelfLayoutTransition()
+   */
+  void SetSelfLayoutTransition(LayoutTransition transition);
+
+  /**
+   * @copydoc Ui::View::GetSelfLayoutTransition()
+   */
+  LayoutTransition GetSelfLayoutTransition() const;
+
+  /**
+   * @copydoc Ui::View::SetLayoutTransitionMode()
+   */
+  void SetLayoutTransitionMode(LayoutTransitionMode mode);
+
+  /**
+   * @copydoc Ui::View::GetLayoutTransitionMode()
+   */
+  LayoutTransitionMode GetLayoutTransitionMode() const;
 
   /**
    * @brief Returns the bounds last applied during the layout pass.
@@ -1054,7 +1074,8 @@ protected:
   /**
    * @brief Gets texture output of offscreen rendering.
    * @return The offscreen rendering output texture
-   * @note Valid only inside OffScreenRenderingFinishedSignal() with REFRESH_ONCE type.
+   * @note Valid only inside OffscreenRenderingFinishedSignal() with REFRESH_ONCE type.
+   * @deprecated Use GetOffscreenRenderingOutput() instead.
    */
   Dali::Texture GetOffScreenRenderingOutput() const;
 
@@ -1150,6 +1171,13 @@ protected:
    */
   ArrangePolicy GetArrangePolicy() const;
 
+  /**
+   * @brief Gets texture output of offscreen rendering.
+   * @return The offscreen rendering output texture
+   * @note Valid only inside OffscreenRenderingFinishedSignal() with REFRESH_ONCE type.
+   */
+  Dali::Texture GetOffscreenRenderingOutput() const;
+
   // ============================================================
   // private
   // ============================================================
@@ -1205,4 +1233,4 @@ inline const ViewImpl& GetImpl(const Ui::View& view)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

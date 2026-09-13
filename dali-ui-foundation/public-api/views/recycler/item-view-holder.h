@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <limits>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -63,4 +63,4 @@ struct DALI_UI_API ItemViewHolder
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

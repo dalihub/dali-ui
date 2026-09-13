@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/replacement-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -123,4 +123,4 @@ StyledText EditableStyledTextData::Build(const std::string& text) const
   return builder.Build();
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

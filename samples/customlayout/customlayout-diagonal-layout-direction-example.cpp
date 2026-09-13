@@ -21,7 +21,7 @@ using namespace Dali::Ui;
 /**
  * Custom layout sample with a clickable LayoutDirection toggle.
  *
- * Same content as customlayout-diagonal-example. A 100x50 yellow
+ * Same content as customlayout-diagonal-example. A 200x50 yellow
  * standalone child at the top-left toggles the root view's
  * LayoutDirection between LEFT_TO_RIGHT and RIGHT_TO_LEFT on click.
  *

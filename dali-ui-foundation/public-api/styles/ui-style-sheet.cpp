@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -200,4 +200,4 @@ UiStyleSheet::UiStyleSheet(Internal::UiStyleSheetImpl* impl)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

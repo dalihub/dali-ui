@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/views/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -83,4 +83,4 @@ DALI_UI_API bool FollowFocus(const FocusIndicationContext& context);
 } // namespace FocusIndicationPolicy
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

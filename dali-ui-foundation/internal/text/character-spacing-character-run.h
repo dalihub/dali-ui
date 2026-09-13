@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/abstract-style-character-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -63,6 +63,6 @@ struct TypeTraits<Dali::Ui::Text::CharacterSpacingCharacterRun>
   };
 };
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_CHARACTER_SPACING_CHARACTER_RUN_H

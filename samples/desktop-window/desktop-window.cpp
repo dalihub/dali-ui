@@ -169,7 +169,7 @@ void DesktopWindow::BuildDecoration()
   mTitle.SetFontSize(15.0f);
   mTitle.SetTextColor(TITLE_COLOR);
   mTitle.SetVerticalTextAlignment(Text::Alignment::CENTER);
-  mTitle.SetMargin(Extents(14u, 0u, 0u, 0u));
+  mTitle.SetMargin(Insets(14.0f, 0.0f, 0.0f, 0.0f));
   mTitle.SetSensitive(false);
   mTopArea.Add(mTitle);
 

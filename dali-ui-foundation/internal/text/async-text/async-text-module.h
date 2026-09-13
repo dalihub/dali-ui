@@ -32,7 +32,7 @@
 #include <dali/devel-api/text-abstraction/shaping.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -125,6 +125,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_ASYNC_TEXT_MODULE_H

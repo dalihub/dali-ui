@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/focus-manager/focus-navigation-context.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-navigation-result.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -45,4 +45,4 @@ class View;
 using FocusNavigationCallback = Callback<FocusNavigationResult(View, FocusNavigationContext)>;
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

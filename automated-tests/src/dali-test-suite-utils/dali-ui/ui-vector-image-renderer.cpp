@@ -23,7 +23,7 @@
 #include <dali/devel-api/adaptor-framework/vector-image-renderer.h>
 #include <dali/public-api/object/base-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Internal
 {

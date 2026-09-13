@@ -99,5 +99,6 @@ exit 0
 %{app_exe_dir}/layout-transition-animator.example
 %{app_exe_dir}/layout-transition-reorder.example
 %{app_exe_dir}/layout-transition-subtree.example
+%{app_exe_dir}/layout-transition-self-override.example
 %{app_res_dir}/*
 %{xml_file_dir}/%{name}.xml

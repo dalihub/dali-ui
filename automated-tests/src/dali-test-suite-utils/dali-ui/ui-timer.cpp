@@ -21,7 +21,7 @@
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/dali-signal.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Internal

@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -81,4 +81,4 @@ void ScrollStateObserver::NotifyScrollFinished()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

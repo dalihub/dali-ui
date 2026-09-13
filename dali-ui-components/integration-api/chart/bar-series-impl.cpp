@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-components/integration-api/chart/bar-series-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -29,4 +29,4 @@ BarSeries::BarSeries() = default;
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

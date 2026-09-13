@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -93,4 +93,4 @@ bool CustomShaderFactory::SavePrecompileShader(std::string&& shaderName, std::st
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -24,6 +24,8 @@
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
+
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
@@ -49,23 +51,23 @@ int UtcDaliImageVisualCreateAndOwner(void)
 
   // Initially, the visual is not attached to any view.
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::INVALID, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
 
   View view = View::New();
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::BACKGROUND), true, TEST_LOCATION);
 
   DALI_TEST_EQUALS(visual.GetOwner(), view, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u), visual, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::BACKGROUND, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::BACKGROUND, 0u), visual, TEST_LOCATION);
 
   visual.Detach();
 
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::INVALID, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
 
   END_TEST;
 }
@@ -159,20 +161,20 @@ int UtcDaliImageVisualSetGetProperties01(void)
   visual.SetWrapModeV(Dali::WrapMode::MIRRORED_REPEAT);
   DALI_TEST_EQUALS(visual.GetWrapModeV(), Dali::WrapMode::MIRRORED_REPEAT, TEST_LOCATION);
 
-  visual.SetPreMultipliedAlpha(true);
-  DALI_TEST_EQUALS(visual.IsPreMultipliedAlpha(), true, TEST_LOCATION);
+  visual.SetPreMultiplyAlphaOnLoadEnabled(true);
+  DALI_TEST_EQUALS(visual.IsPreMultiplyAlphaOnLoadEnabled(), true, TEST_LOCATION);
 
   visual.SetAlphaMaskUrl("mask.png");
   DALI_TEST_EQUALS(visual.GetAlphaMaskUrl(), Dali::String("mask.png"), TEST_LOCATION);
 
-  visual.SetMaskContentScale(2.0f);
-  DALI_TEST_EQUALS(visual.GetMaskContentScale(), 2.0f, TEST_LOCATION);
+  visual.SetContentScaleForMasking(2.0f);
+  DALI_TEST_EQUALS(visual.GetContentScaleForMasking(), 2.0f, TEST_LOCATION);
 
   visual.SetCropToMask(false);
   DALI_TEST_EQUALS(visual.IsCropToMask(), false, TEST_LOCATION);
 
-  visual.SetMaskingType(Image::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(visual.GetMaskingType(), Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
+  visual.SetMaskingPolicy(Image::MaskingPolicy::ON_RENDERING);
+  DALI_TEST_EQUALS(visual.GetMaskingPolicy(), Image::MaskingPolicy::ON_RENDERING, TEST_LOCATION);
 
   visual.SetBrokenImageEnabled(false);
   DALI_TEST_EQUALS(visual.IsBrokenImageEnabled(), false, TEST_LOCATION);
@@ -186,11 +188,11 @@ int UtcDaliImageVisualSetGetProperties01(void)
   visual.SetFittingMode(Image::FittingMode::CENTER);
   DALI_TEST_EQUALS(visual.GetFittingMode(), Image::FittingMode::CENTER, TEST_LOCATION);
 
-  visual.SetOrientationCorrection(false);
-  DALI_TEST_EQUALS(visual.IsOrientationCorrection(), false, TEST_LOCATION);
+  visual.SetOrientationCorrectionEnabled(false);
+  DALI_TEST_EQUALS(visual.IsOrientationCorrectionEnabled(), false, TEST_LOCATION);
 
-  visual.SetSynchronousSizing(true);
-  DALI_TEST_EQUALS(visual.IsSynchronousSizing(), true, TEST_LOCATION);
+  visual.SetImageLoadWithViewSizeEnabled(true);
+  DALI_TEST_EQUALS(visual.IsImageLoadWithViewSizeEnabled(), true, TEST_LOCATION);
 
   application.SendNotification();
   application.Render();
@@ -204,11 +206,11 @@ int UtcDaliImageVisualSetGetProperties02(void)
 
   ImageVisual visual = ImageVisual::New();
 
-  visual.SetFastTrackUploading(true);
-  DALI_TEST_EQUALS(visual.IsFastTrackUploading(), true, TEST_LOCATION);
+  visual.SetFastTrackUploadEnabled(true);
+  DALI_TEST_EQUALS(visual.IsFastTrackUploadEnabled(), true, TEST_LOCATION);
 
-  visual.SetNPatchBorder(Extents(1,2,3,4));
-  DALI_TEST_EQUALS(visual.GetNPatchBorder(), Extents(1,2,3,4), TEST_LOCATION);
+  visual.SetNPatchBorder(Dali::Insets(1.0f, 2.0f, 3.0f, 4.0f));
+  DALI_TEST_EQUALS(visual.GetNPatchBorder(), Dali::Insets(1.0f, 2.0f, 3.0f, 4.0f), TEST_LOCATION);
 
   visual.SetNPatchBorderOnly(true);
   DALI_TEST_EQUALS(visual.IsNPatchBorderOnly(), true, TEST_LOCATION);
@@ -230,7 +232,8 @@ int UtcDaliImageVisualInvalidHandle(void)
   // Empty ImageVisual handle.
   ImageVisual empty;
 
-  auto TestAssertFunction = [&](std::function<void(void)> func){
+  auto TestAssertFunction = [&](std::function<void(void)> func)
+  {
     try
     {
       func();
@@ -243,33 +246,55 @@ int UtcDaliImageVisualInvalidHandle(void)
   };
 
   // Inherit
-  TestAssertFunction([&](){empty.SetName("ShouldBeCrash");});
-  TestAssertFunction([&](){empty.SetOffsetX(1.0f);});
-  TestAssertFunction([&](){empty.SetOffsetY(1.0f);});
-  TestAssertFunction([&](){empty.SetWidth(100.0f);});
-  TestAssertFunction([&](){empty.SetHeight(100.0f);});
-  TestAssertFunction([&](){empty.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);});
-  TestAssertFunction([&](){empty.SetExtraWidth(10.0f);});
-  TestAssertFunction([&](){empty.SetExtraHeight(10.0f);});
-  TestAssertFunction([&](){empty.SetOrigin(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetPivot(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetSiblingOrder(0u);});
-  TestAssertFunction([&](){empty.SetProperty(Property::INVALID_INDEX, Property::Value());});
+  TestAssertFunction([&]()
+  { empty.SetName("ShouldBeCrash"); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetX(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetY(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetWidth(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetHeight(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetTransformProportionFlags(Visual::Transform::ProportionFlags::ALL); });
+  TestAssertFunction([&]()
+  { empty.SetExtraWidth(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetExtraHeight(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOrigin(VisualOrigin::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetPivot(VisualPivot::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetSiblingOrder(0u); });
 
-  TestAssertFunction([&](){empty.GetOwner();});
-  TestAssertFunction([&](){empty.GetContainerRangeType();});
-  TestAssertFunction([&](){empty.GetName();});
-  TestAssertFunction([&](){empty.GetOffsetX();});
-  TestAssertFunction([&](){empty.GetOffsetY();});
-  TestAssertFunction([&](){empty.GetWidth();});
-  TestAssertFunction([&](){empty.GetHeight();});
-  TestAssertFunction([&](){empty.GetProportionFlags();});
-  TestAssertFunction([&](){empty.GetExtraWidth();});
-  TestAssertFunction([&](){empty.GetExtraHeight();});
-  TestAssertFunction([&](){empty.GetOrigin();});
-  TestAssertFunction([&](){empty.GetPivot();});
-  TestAssertFunction([&](){empty.GetSiblingOrder();});
-  TestAssertFunction([&](){empty.GetProperty(Property::INVALID_INDEX);});
+  TestAssertFunction([&]()
+  { empty.GetOwner(); });
+  TestAssertFunction([&]()
+  { empty.GetDepthLayer(); });
+  TestAssertFunction([&]()
+  { empty.GetName(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetX(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetY(); });
+  TestAssertFunction([&]()
+  { empty.GetWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetTransformProportionFlags(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetOrigin(); });
+  TestAssertFunction([&]()
+  { empty.GetPivot(); });
+  TestAssertFunction([&]()
+  { empty.GetSiblingOrder(); });
 
   END_TEST;
 }

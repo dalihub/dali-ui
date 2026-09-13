@@ -22,7 +22,7 @@
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -237,7 +237,6 @@ public: // Rasterization control
    * @brief Sets the logical coordinate space (viewbox) of the canvas.
    *
    * @param[in] viewBox The new width and height of the viewbox
-   * @return Reference to this for fluent chaining
    */
   void SetViewBox(const Vector2& viewBox);
 
@@ -252,7 +251,6 @@ public: // Rasterization control
    * @brief Sets whether rasterization is performed synchronously on the main thread.
    *
    * @param[in] synchronous True to rasterize synchronously, false for background thread
-   * @return Reference to this for fluent chaining
    */
   void SetSynchronousLoading(bool synchronous);
 
@@ -270,7 +268,6 @@ public: // Rasterization control
    * When false (default), rasterization is triggered automatically on canvas changes.
    *
    * @param[in] manually True to require explicit RequestRasterization() calls
-   * @return Reference to this for fluent chaining
    */
   void SetRasterizationRequestManually(bool manually);
 
@@ -301,4 +298,4 @@ public:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -43,24 +43,24 @@ MaskEffect MaskEffect::New(Ui::View maskView)
   return MaskEffect(internal.Get());
 }
 
-void MaskEffect::SetTargetMaskOnce(bool targetMaskOnce)
+void MaskEffect::SetTargetRenderOnce(bool renderOnce)
 {
-  GetImplementation(*this).SetTargetMaskOnce(targetMaskOnce);
+  GetImplementation(*this).SetTargetRenderOnce(renderOnce);
 }
 
-bool MaskEffect::GetTargetMaskOnce() const
+bool MaskEffect::IsTargetRenderOnce() const
 {
-  return GetImplementation(*this).GetTargetMaskOnce();
+  return GetImplementation(*this).IsTargetRenderOnce();
 }
 
-void MaskEffect::SetSourceMaskOnce(bool sourceMaskOnce)
+void MaskEffect::SetSourceRenderOnce(bool renderOnce)
 {
-  GetImplementation(*this).SetSourceMaskOnce(sourceMaskOnce);
+  GetImplementation(*this).SetSourceRenderOnce(renderOnce);
 }
 
-bool MaskEffect::GetSourceMaskOnce() const
+bool MaskEffect::IsSourceRenderOnce() const
 {
-  return GetImplementation(*this).GetSourceMaskOnce();
+  return GetImplementation(*this).IsSourceRenderOnce();
 }
 
 MaskEffect MaskEffect::New(Ui::View maskView, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale)
@@ -69,4 +69,4 @@ MaskEffect MaskEffect::New(Ui::View maskView, MaskMode maskMode, Vector2 maskPos
   return MaskEffect(internal.Get());
 }
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

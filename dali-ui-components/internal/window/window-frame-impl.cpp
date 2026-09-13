@@ -25,7 +25,7 @@
 #include <map>
 #include <utility>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace Internal
 {
@@ -1356,4 +1356,4 @@ void WindowFrameImpl::OnVisibilityChanged(Dali::Window /*window*/, bool visible)
 }
 
 } // namespace Internal
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

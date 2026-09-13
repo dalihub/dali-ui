@@ -26,8 +26,8 @@
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
-#include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
+#include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
@@ -40,6 +40,7 @@
 #include <iostream>
 #include <limits>
 #include <vector>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 
@@ -878,7 +879,7 @@ MeasuredSize NarrowParentMeasure(View, float, float)
 
 Shadow GetShadowProperty(View view)
 {
-  Property::Value      shadowValue = view.GetProperty(View::Property::SHADOW);
+  Property::Value      shadowValue = view.GetProperty(Dali::Ui::Integration::View::Property::SHADOW);
   const Property::Map* shadowMap   = shadowValue.GetMap();
   DALI_TEST_CHECK(shadowMap);
   return shadowMap ? Extension::Shadow::CreateShadow(*shadowMap) : Shadow::None();
@@ -886,7 +887,7 @@ Shadow GetShadowProperty(View view)
 
 int GetVisualType(const Property::Map& map)
 {
-  Property::Value* typeValue = map.Find(Ui::VisualBasePropertyIndex::TYPE);
+  Property::Value* typeValue = map.Find(Ui::Integration::Visual::Property::TYPE);
   DALI_TEST_CHECK(typeValue);
 
   int type = static_cast<int>(Ui::Integration::InternalVisualType::INVALID);
@@ -947,7 +948,7 @@ Gradient::Linear CreateBackgroundTokenGradient()
 
 Property::Map GetBackgroundPropertyMap(View view)
 {
-  Property::Value      backgroundValue = view.GetProperty(Ui::View::Property::BACKGROUND);
+  Property::Value      backgroundValue = view.GetProperty(Ui::Integration::View::Property::BACKGROUND);
   const Property::Map* backgroundMap   = backgroundValue.GetMap();
   DALI_TEST_CHECK(backgroundMap);
   return backgroundMap ? *backgroundMap : Property::Map();
@@ -956,7 +957,7 @@ Property::Map GetBackgroundPropertyMap(View view)
 Vector4 GetBackgroundMixColor(View view)
 {
   Property::Map    backgroundMap = GetBackgroundPropertyMap(view);
-  Property::Value* colorValue    = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
+  Property::Value* colorValue    = backgroundMap.Find(Ui::Integration::Visual::Property::MIX_COLOR);
   DALI_TEST_CHECK(colorValue);
 
   Vector4 color;
@@ -967,7 +968,7 @@ Vector4 GetBackgroundMixColor(View view)
 Vector4 GetBackgroundGradientStopColor(View view, uint32_t index)
 {
   Property::Map    backgroundMap  = GetBackgroundPropertyMap(view);
-  Property::Value* stopColorValue = backgroundMap.Find(Ui::GradientVisualPropertyIndex::STOP_COLOR);
+  Property::Value* stopColorValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::STOP_COLOR);
   DALI_TEST_CHECK(stopColorValue);
 
   const Property::Array* stopColors = stopColorValue ? stopColorValue->GetArray() : nullptr;
@@ -982,7 +983,7 @@ Vector4 GetBackgroundGradientStopColor(View view, uint32_t index)
 bool HasBackgroundVisual(View view)
 {
   Property::Map backgroundMap = GetBackgroundPropertyMap(view);
-  return !backgroundMap.Empty() && backgroundMap.Find(Ui::VisualBasePropertyIndex::TYPE);
+  return !backgroundMap.Empty() && backgroundMap.Find(Ui::Integration::Visual::Property::TYPE);
 }
 
 } // namespace
@@ -1245,11 +1246,11 @@ int UtcDaliViewSetBackgroundImageP(void)
   view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
   view.SetBackgroundImage(Dali::String(imageUrl));
 
-  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
   DALI_TEST_EQUALS(GetVisualType(backgroundMap), static_cast<int>(Ui::Integration::InternalVisualType::IMAGE), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), UiColor().GetRgba(), TEST_LOCATION);
 
-  Property::Value* urlValue = backgroundMap.Find(Ui::ImageVisualPropertyIndex::URL);
+  Property::Value* urlValue = backgroundMap.Find(Ui::Integration::ImageVisual::Property::URL);
   DALI_TEST_CHECK(urlValue);
 
   Dali::String url;
@@ -1274,21 +1275,89 @@ int UtcDaliViewSetBackgroundGradientP(void)
   view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
   view.SetBackgroundGradient(gradient);
 
-  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
   DALI_TEST_EQUALS(GetVisualType(backgroundMap), static_cast<int>(Ui::Integration::InternalVisualType::GRADIENT), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), UiColor().GetRgba(), TEST_LOCATION);
 
-  Property::Value* startPositionValue = backgroundMap.Find(Ui::GradientVisualPropertyIndex::START_POSITION);
+  Property::Value* startPositionValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::START_POSITION);
   DALI_TEST_CHECK(startPositionValue);
   Vector2 startPosition;
   DALI_TEST_CHECK(startPositionValue && startPositionValue->Get(startPosition));
   DALI_TEST_EQUALS(startPosition, Vector2(-0.5f, -0.5f), TEST_LOCATION);
 
-  Property::Value* stopColorValue = backgroundMap.Find(Ui::GradientVisualPropertyIndex::STOP_COLOR);
+  Property::Value* stopColorValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::STOP_COLOR);
   DALI_TEST_CHECK(stopColorValue);
   const Property::Array* stopColors = stopColorValue ? stopColorValue->GetArray() : nullptr;
   DALI_TEST_CHECK(stopColors);
   DALI_TEST_EQUALS(stopColors ? stopColors->Count() : 0u, 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetBackgroundGradientRadialP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  Gradient::Radial gradient(Vector2(0.25f, -0.25f), 0.75f);
+  gradient.SetStopNodes({
+    {0.0f, UiColor(Color::RED)},
+    {1.0f, UiColor(Color::BLUE)},
+  });
+
+  view.SetBackgroundGradient(gradient);
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(GetVisualType(backgroundMap), static_cast<int>(Ui::Integration::InternalVisualType::GRADIENT), TEST_LOCATION);
+
+  Property::Value* centerValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::CENTER);
+  DALI_TEST_CHECK(centerValue);
+  Vector2 center;
+  DALI_TEST_CHECK(centerValue && centerValue->Get(center));
+  DALI_TEST_EQUALS(center, Vector2(0.25f, -0.25f), TEST_LOCATION);
+
+  Property::Value* radiusValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::RADIUS);
+  DALI_TEST_CHECK(radiusValue);
+  float radius = 0.0f;
+  DALI_TEST_CHECK(radiusValue && radiusValue->Get(radius));
+  DALI_TEST_EQUALS(radius, 0.75f, TEST_LOCATION);
+
+  // A radial gradient must not carry any linear geometry.
+  DALI_TEST_CHECK(!backgroundMap.Find(Ui::Integration::GradientVisual::Property::START_POSITION));
+  DALI_TEST_CHECK(!backgroundMap.Find(Ui::Integration::GradientVisual::Property::START_ANGLE));
+  END_TEST;
+}
+
+int UtcDaliViewSetBackgroundGradientConicP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  Gradient::Conic gradient(Vector2(0.5f, 0.5f), Dali::Radian(Math::PI_2));
+  gradient.SetStopNodes({
+    {0.0f, UiColor(Color::RED)},
+    {1.0f, UiColor(Color::BLUE)},
+  });
+
+  view.SetBackgroundGradient(gradient);
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(GetVisualType(backgroundMap), static_cast<int>(Ui::Integration::InternalVisualType::GRADIENT), TEST_LOCATION);
+
+  Property::Value* centerValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::CENTER);
+  DALI_TEST_CHECK(centerValue);
+  Vector2 center;
+  DALI_TEST_CHECK(centerValue && centerValue->Get(center));
+  DALI_TEST_EQUALS(center, Vector2(0.5f, 0.5f), TEST_LOCATION);
+
+  Property::Value* startAngleValue = backgroundMap.Find(Ui::Integration::GradientVisual::Property::START_ANGLE);
+  DALI_TEST_CHECK(startAngleValue);
+  float startAngle = 0.0f;
+  DALI_TEST_CHECK(startAngleValue && startAngleValue->Get(startAngle));
+  DALI_TEST_EQUALS(startAngle, Dali::Radian(Math::PI_2).radian, TEST_LOCATION);
+
+  // A conic gradient must not carry any radial or linear geometry.
+  DALI_TEST_CHECK(!backgroundMap.Find(Ui::Integration::GradientVisual::Property::RADIUS));
+  DALI_TEST_CHECK(!backgroundMap.Find(Ui::Integration::GradientVisual::Property::START_POSITION));
   END_TEST;
 }
 
@@ -1370,7 +1439,7 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
   Shadow shadow3(12.0f, Vector2(9.0f, 10.0f), UiColor(0.0f, 0.0f, 0.0f, 0.6f), Vector2(11.0f, 12.0f));
 
   view.SetShadow(shadow1);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
 
   ShadowStack stack{shadow2, shadow3};
@@ -1382,61 +1451,61 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
   DALI_TEST_EQUALS(stack.GetShadowCount(), 0u, TEST_LOCATION);
 
   view.SetShadow(copiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow2.GetBlurRadius(), TEST_LOCATION);
 
   copiedStack.Add(shadow1);
   view.SetShadow(copiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow2.GetBlurRadius(), TEST_LOCATION);
 
-  view.SetProperty(View::Property::SHADOW, Extension::Shadow::CreatePropertyMap(shadow1));
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  view.SetProperty(Dali::Ui::Integration::View::Property::SHADOW, Extension::Shadow::CreatePropertyMap(shadow1));
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
 
   view.SetShadow(copiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 2u, TEST_LOCATION);
-  view.SetProperty(View::Property::SHADOW, Property::Map());
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
-  Property::Value emptyShadowPropertyValue = view.GetProperty(View::Property::SHADOW);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 2u, TEST_LOCATION);
+  view.SetProperty(Dali::Ui::Integration::View::Property::SHADOW, Property::Map());
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
+  Property::Value emptyShadowPropertyValue = view.GetProperty(Dali::Ui::Integration::View::Property::SHADOW);
   DALI_TEST_CHECK(emptyShadowPropertyValue.GetMap() && emptyShadowPropertyValue.GetMap()->Empty());
 
   ShadowStack deepCopiedStack{shadow2};
   shadow2.SetBlurRadius(99.0f);
   view.SetShadow(deepCopiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), 8.0f, TEST_LOCATION);
 
   ShadowStack assignedStack;
   assignedStack = deepCopiedStack;
   deepCopiedStack.Clear();
   view.SetShadow(assignedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), 8.0f, TEST_LOCATION);
 
   view.SetShadow(stack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
-  Property::Value emptyShadowStackValue = view.GetProperty(View::Property::SHADOW);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
+  Property::Value emptyShadowStackValue = view.GetProperty(Dali::Ui::Integration::View::Property::SHADOW);
   DALI_TEST_CHECK(emptyShadowStackValue.GetMap() && emptyShadowStackValue.GetMap()->Empty());
 
   view.SetShadow(shadow1);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
 
   view.SetShadow(Shadow::None());
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
-  Property::Value shadowValue = view.GetProperty(View::Property::SHADOW);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
+  Property::Value shadowValue = view.GetProperty(Dali::Ui::Integration::View::Property::SHADOW);
   DALI_TEST_CHECK(shadowValue.GetMap() && shadowValue.GetMap()->Empty());
 
   ColorVisual visual = ColorVisual::New();
-  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::BACKGROUND_EFFECT), true, TEST_LOCATION);
 
   view.SetShadow(copiedStack);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 3u, TEST_LOCATION);
 
   view.SetShadow(Shadow::None());
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, 0u), visual, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::BACKGROUND_EFFECT, 0u), visual, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1474,8 +1543,8 @@ int UtcDaliViewShadowAnimationPrimaryShadowP(void)
   application.SendNotification();
   application.Render();
 
-  Dali::Property blurProperty    = IntegrationView::GetVisualProperty(view, View::Property::SHADOW, ColorVisualPropertyIndex::BLUR_RADIUS);
-  Dali::Property opacityProperty = IntegrationView::GetVisualProperty(view, View::Property::SHADOW, VisualBasePropertyIndex::OPACITY);
+  Dali::Property blurProperty    = IntegrationView::GetVisualProperty(view, Dali::Ui::Integration::View::Property::SHADOW, Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS);
+  Dali::Property opacityProperty = IntegrationView::GetVisualProperty(view, Dali::Ui::Integration::View::Property::SHADOW, Dali::Ui::Integration::Visual::Property::OPACITY);
   DALI_TEST_CHECK(blurProperty.propertyIndex != Property::INVALID_INDEX);
   DALI_TEST_CHECK(opacityProperty.propertyIndex != Property::INVALID_INDEX);
 
@@ -3671,7 +3740,7 @@ int UtcDaliViewBackgroundTypedSettersDoNotFirePropertySetSignalP(void)
   view.SetBackgroundImage(Dali::String("background-image.png"));
   view.SetBackgroundGradient(gradient);
 
-  DALI_TEST_CHECK(!recorder.Saw(Ui::View::Property::BACKGROUND));
+  DALI_TEST_CHECK(!recorder.Saw(Ui::Integration::View::Property::BACKGROUND));
   END_TEST;
 }
 
@@ -3693,13 +3762,13 @@ int UtcDaliViewTypedSetterAndSetPropertyConvergeP(void)
   END_TEST;
 }
 
-int UtcDaliViewSetPropertyAcceptsExtentsForSpacingP(void)
+int UtcDaliViewSetPropertyAcceptsInsetsForSpacingP(void)
 {
   UiTestApplication application;
 
   Ui::View view = Ui::View::New();
-  Dali::Handle(view).SetProperty(Ui::View::Property::MARGIN, Extents(1, 2, 3, 4));
-  Dali::Handle(view).SetProperty(Ui::View::Property::PADDING, Extents(5, 6, 7, 8));
+  Dali::Handle(view).SetProperty(Ui::View::Property::MARGIN, Insets(1.0f, 2.0f, 3.0f, 4.0f));
+  Dali::Handle(view).SetProperty(Ui::View::Property::PADDING, Insets(5.0f, 6.0f, 7.0f, 8.0f));
 
   DALI_TEST_EQUALS(view.GetMargin(), Insets(1.0f, 2.0f, 3.0f, 4.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetPadding(), Insets(5.0f, 6.0f, 7.0f, 8.0f), TEST_LOCATION);
@@ -4361,11 +4430,11 @@ int UtcDaliViewWrapBackgroundNaturalSizePlusPaddingP(void)
   // natural size, so the expected measure result is deterministic without
   // needing the image itself to be decodable.
   Property::Map backgroundMap;
-  backgroundMap.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
-  backgroundMap.Insert(Ui::ImageVisualPropertyIndex::URL, Dali::String("background-image.png"));
-  backgroundMap.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, 120);
-  backgroundMap.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, 90);
-  view.SetProperty(Ui::View::Property::BACKGROUND, backgroundMap);
+  backgroundMap.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+  backgroundMap.Insert(Ui::Integration::ImageVisual::Property::URL, Dali::String("background-image.png"));
+  backgroundMap.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 120);
+  backgroundMap.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, 90);
+  view.SetProperty(Ui::Integration::View::Property::BACKGROUND, backgroundMap);
 
   MeasuredSize size = view.Measure(1000.0f, 1000.0f);
   DALI_TEST_EQUALS(size.GetWidth(), 140.0f, TEST_LOCATION);  // 120 + pw, buggy: 20
@@ -8546,10 +8615,10 @@ int UtcDaliViewBackgroundChangeInvalidatesMeasureP(void)
   auto backgroundMap = [](int width, int height)
   {
     Property::Map map;
-    map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
-    map.Insert(Ui::ImageVisualPropertyIndex::URL, "background-image.png");
-    map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, width);
-    map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, height);
+    map.Insert(Ui::Integration::Visual::Property::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
+    map.Insert(Ui::Integration::ImageVisual::Property::URL, "background-image.png");
+    map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, width);
+    map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, height);
     return map;
   };
 
@@ -8560,13 +8629,13 @@ int UtcDaliViewBackgroundChangeInvalidatesMeasureP(void)
 
   // Register. Re-measured with the SAME constraints, so a surviving cache entry would
   // still answer 0x0.
-  view.SetProperty(Ui::View::Property::BACKGROUND, backgroundMap(120, 60));
+  view.SetProperty(Ui::Integration::View::Property::BACKGROUND, backgroundMap(120, 60));
   MeasuredSize registered = view.Measure(1000.0f, 1000.0f);
   DALI_TEST_EQUALS(registered.GetWidth(), 120.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(registered.GetHeight(), 60.0f, TEST_LOCATION);
 
   // Replace.
-  view.SetProperty(Ui::View::Property::BACKGROUND, backgroundMap(200, 90));
+  view.SetProperty(Ui::Integration::View::Property::BACKGROUND, backgroundMap(200, 90));
   MeasuredSize replaced = view.Measure(1000.0f, 1000.0f);
   DALI_TEST_EQUALS(replaced.GetWidth(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(replaced.GetHeight(), 90.0f, TEST_LOCATION);
@@ -8602,11 +8671,11 @@ int UtcDaliViewBackgroundChangeAfterSettleUpdatesArrangedSizeP(void)
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 0.0f, TEST_LOCATION);
 
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
-  map.Insert(Ui::ImageVisualPropertyIndex::URL, "background-image.png");
-  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, 140);
-  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, 70);
-  view.SetProperty(Ui::View::Property::BACKGROUND, map);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
+  map.Insert(Ui::Integration::ImageVisual::Property::URL, "background-image.png");
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 140);
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, 70);
+  view.SetProperty(Ui::Integration::View::Property::BACKGROUND, map);
 
   SettleLayout(application);
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 140.0f, TEST_LOCATION);
@@ -9414,23 +9483,23 @@ int UtcDaliViewMeasureDefaultOnlyStandaloneChildrenUsesBackgroundNaturalSizeP(vo
   tet_infoline("A view whose only children are standalone measures its background, like a childless one");
 
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
-  map.Insert(Ui::ImageVisualPropertyIndex::URL, "background-image.png");
-  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, 140);
-  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, 70);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
+  map.Insert(Ui::Integration::ImageVisual::Property::URL, "background-image.png");
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 140);
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, 70);
 
   // The reference: no children at all.
   View childless = View::New();
   childless.SetRequestedWidth(WRAP_CONTENT);
   childless.SetRequestedHeight(WRAP_CONTENT);
-  childless.SetProperty(Ui::View::Property::BACKGROUND, map);
+  childless.SetProperty(Ui::Integration::View::Property::BACKGROUND, map);
   window.Add(childless);
 
   // The case under test: the same background, one STANDALONE child.
   View withStandalone = View::New();
   withStandalone.SetRequestedWidth(WRAP_CONTENT);
   withStandalone.SetRequestedHeight(WRAP_CONTENT);
-  withStandalone.SetProperty(Ui::View::Property::BACKGROUND, map);
+  withStandalone.SetProperty(Ui::Integration::View::Property::BACKGROUND, map);
   window.Add(withStandalone);
 
   View standaloneChild = View::New();
@@ -9464,15 +9533,15 @@ int UtcDaliViewMeasureDefaultContributingChildUsesAccumulationP(void)
   tet_infoline("One contributing child selects the accumulation formula, not the background natural size");
 
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
-  map.Insert(Ui::ImageVisualPropertyIndex::URL, "background-image.png");
-  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, 140);
-  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, 70);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
+  map.Insert(Ui::Integration::ImageVisual::Property::URL, "background-image.png");
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 140);
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, 70);
 
   View view = View::New();
   view.SetRequestedWidth(WRAP_CONTENT);
   view.SetRequestedHeight(WRAP_CONTENT);
-  view.SetProperty(Ui::View::Property::BACKGROUND, map);
+  view.SetProperty(Ui::Integration::View::Property::BACKGROUND, map);
   window.Add(view);
 
   View standaloneChild = View::New();
@@ -10013,5 +10082,145 @@ int UtcDaliViewRequestedHeightPropertyEmitsPropertySetSignalExactlyOnceP(void)
 
   DALI_TEST_EQUALS(recorder.CountOf(Ui::View::Property::REQUESTED_HEIGHT), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(recorder.FirstFloatOf(Ui::View::Property::REQUESTED_HEIGHT), 80.0f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// ─── Remove with no transition alive: the gate skips only dead work ────────
+//
+// The remove-side zero-transition gate in Internal::ViewDataImpl::Remove skips the
+// window lookup, the mChildren find and the ancestor EXIT resolver when no
+// LayoutTransition exists anywhere in the process. Everything the caller can observe
+// must be unchanged: the child is unparented on the spot (never deferred as an EXIT
+// ghost), and the parent re-measures so its WRAP_CONTENT size follows the child set
+// it no longer has.
+int UtcDaliViewRemoveNoTransitionUnparentsAndReMeasuresParentP(void)
+{
+  UiTestApplication application;
+  tet_infoline("Remove with no LayoutTransition alive unparents at once and re-measures the parent");
+
+  gFirstParentMeasureProducerCount = 0;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(WRAP_CONTENT);
+  parent.SetRequestedHeight(WRAP_CONTENT);
+  parent.SetMeasureCallback(MeasureCallback::New(&FirstParentAccumulatingMeasure));
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(200.0f);
+  child.SetRequestedHeight(80.0f);
+  parent.Add(child);
+
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 80.0f, TEST_LOCATION);
+
+  const int baseCount = gFirstParentMeasureProducerCount;
+  DALI_TEST_CHECK(baseCount > 0);
+
+  // ANIMATE_EXIT, but with no transition in existence there is no EXIT to animate, so
+  // the unparent is synchronous -- asserted BEFORE any frame is pumped.
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!child.GetParent());
+
+  SettleLayout(application);
+
+  DALI_TEST_CHECK(gFirstParentMeasureProducerCount > baseCount);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 0.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ─── Lazy VisualData: a view that never asks for a visual has none ────────
+//
+// VisualData is no longer allocated in ViewImpl::Initialize(). A fresh View therefore
+// holds a null context where it used to hold an empty one, and every read path has to
+// answer identically for the two. This pins the answers a fresh View gives, and that
+// the context materialises on the first visual write.
+int UtcDaliViewFreshViewVisualQueriesInertP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A fresh View answers every visual query without owning a visual context");
+
+  View view = View::New();
+
+  DALI_TEST_EQUALS(view.IsResourceReady(), true, TEST_LOCATION);
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(backgroundMap.Empty(), true, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
+
+  // The first visual write creates the context, and the same query now reports it.
+  view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+  application.GetWindow().Add(view);
+
+  backgroundMap = view.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(backgroundMap.Empty(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsResourceReady(), true, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ─── Lazy VisualData: a corner write BEFORE any visual still latches ──────
+//
+// The corner property funnels call NotifyConstraintPropertyChanged, which flips
+// VisualData's first-time corner latch (mCornerRadiusValueAdded) even with zero visuals
+// registered. With lazy creation those funnels have to CREATE the context rather than
+// skip on a null one, or the latch would never be set by a pre-background corner write.
+//
+// The latch is what EnableCornerPropertiesOverridden reads when a visual is registered
+// later: only with it set does the View's corner radius get pushed into that new visual.
+// So the decisive assertion is not the View's own corner radius roundtrip (which is a
+// plain actor property and survives either way) but the radius carried by the BACKGROUND
+// visual registered afterwards -- Vector4::ZERO if the latch was missed.
+int UtcDaliViewCornerRadiusBeforeBackgroundP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A corner radius set before any background survives the background that follows");
+
+  View          view = View::New();
+  const Vector4 testRadius(8.0f, 12.0f, 16.0f, 20.0f);
+
+  // Corner first, on a View that owns no visual context yet.
+  view.SetCornerRadius(testRadius);
+
+  Vector4 radius = view.GetCornerRadius();
+  DALI_TEST_EQUALS(radius.x, testRadius.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.y, testRadius.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.z, testRadius.z, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.w, testRadius.w, TEST_LOCATION);
+
+  // Now the first visual this View ever gets.
+  view.SetBackgroundColor(UiColor(0.0f, 1.0f, 0.0f, 1.0f));
+  application.GetWindow().Add(view);
+  SettleLayout(application);
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(backgroundMap.Empty(), false, TEST_LOCATION);
+
+  // The View's own property is unchanged by the background, as before.
+  radius = view.GetCornerRadius();
+  DALI_TEST_EQUALS(radius.x, testRadius.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.y, testRadius.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.z, testRadius.z, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.w, testRadius.w, TEST_LOCATION);
+
+  // ...and the radius actually reached the background visual, which is what the latch
+  // decides. This is the assertion that fails if the corner funnel skips a null context.
+  Property::Value* visualCornerRadius = backgroundMap.Find(Ui::Integration::Visual::Property::CORNER_RADIUS);
+  DALI_TEST_CHECK(visualCornerRadius);
+
+  Vector4 visualRadius;
+  DALI_TEST_CHECK(visualCornerRadius && visualCornerRadius->Get(visualRadius));
+  DALI_TEST_EQUALS(visualRadius.x, testRadius.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualRadius.y, testRadius.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualRadius.z, testRadius.z, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualRadius.w, testRadius.w, TEST_LOCATION);
+
   END_TEST;
 }

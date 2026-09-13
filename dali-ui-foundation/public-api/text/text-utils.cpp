@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -435,4 +435,4 @@ bool Utf32ToUtf8Range(
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

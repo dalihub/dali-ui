@@ -17,7 +17,7 @@
 #include <dali-ui-foundation/integration-api/layouts/absolute-layout-impl.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -81,4 +81,4 @@ AbsoluteLayout::AbsoluteLayout(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

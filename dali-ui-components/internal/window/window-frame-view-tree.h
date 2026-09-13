@@ -21,7 +21,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 // Owns the WindowFrame visual tree. Native state, input routing and command
@@ -71,4 +71,4 @@ private:
   WindowFrameDecoration    mDecoration;
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

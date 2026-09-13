@@ -16,10 +16,12 @@
 
 ## 문서 범위
 
-이 문서는 DALi UI가 application 생성 시 기본으로 활성화하는 **GEOMETRY touch propagation**을 기준으로 설명합니다.
-`GeometryHittestEnabled`를 `false`로 변경하면 primary hit Actor에서 부모 방향으로 전달하는 PARENT 방식이 사용되며,
-아래의 coordinate candidate 및 late consume 동작과 다릅니다. 이 설정은 application 시작 시 선택하고 input event
-처리가 시작된 뒤에는 변경하지 않습니다.
+이 문서는 DALi UI가 application 생성 시 기본으로 활성화하는 **GEOMETRY input hit testing**을 기준으로 설명합니다.
+TouchEvent와 HoverEvent 모두 front-to-back coordinate candidate를 사용하지만 수명 규칙은 다릅니다.
+TouchEvent는 최초 DOWN에서 candidate를 고정하고 stream owner를 선택할 수 있는 반면, HoverEvent는 매 입력을
+다시 hit-test하여 실제 방문한 candidate prefix를 active 상태로 유지합니다. `GeometryHittestEnabled`를 `false`로
+변경하면 legacy PARENT hit-test 경로가 사용됩니다. 이 설정은 application 시작 시 선택하고 input event 처리가
+시작된 뒤에는 변경하지 않습니다.
 
 이 문서에서 사용하는 용어는 다음과 같습니다.
 
@@ -322,62 +324,71 @@ InterceptTouch를 consume합니다.
 
 ## HoverEvent
 
-HoverEvent는 해당 좌표의 geometry candidate를 front-to-back 순서로 전달합니다.
+GEOMETRY HoverEvent는 매 입력을 hit-test하고 hover 가능한 결과를 front-to-back으로 방문합니다. 한 Actor의
+전체 dispatch 결과는 intrinsic `OnHoverEvent()`와 같은 Actor에 연결된 모든 callback 반환값을 OR한 값입니다.
+이 결과가 `false`이면 다음 geometry candidate로 진행하고, `true`이면 현재 입력의 candidate 순회를 중단합니다.
+다음 입력은 다시 hit-test하고 반환값을 다시 평가하므로 consume은 future hover를 capture하지 않습니다.
+
+순회가 멈출 때까지 실제 방문한 Actor들이 active-target prefix가 됩니다. `false`를 반환한 Actor도 active 상태로
+남고, 영역 안에 있는 동안 후속 `MOTION`을 계속 받으며 unrelated sibling과 동시에 active일 수 있습니다.
 
 ### 이벤트 상태
 
-- 뷰에 진입하게 되면 **Started** 상태가 되고 뷰에서 진출하게 되면 **Leave** 상태가 됩니다.
+- `MOTION`에서 새 candidate가 등장하면 synthetic `STARTED`를 받은 뒤 같은 입력의 `MOTION`도 받습니다.
+- 기존 active candidate는 `MOTION`을 받습니다.
+- 현재 candidate dispatch가 끝난 뒤, 새 visited prefix에서 빠진 이전 active target은 모두 `LEAVE`를 받습니다.
+- hidden, insensitive, disabled, disconnected, remove 또는 reparent된 active target은 `INTERRUPTED`를 한 번 받습니다.
+- `FINISHED`와 명시적 `INTERRUPTED`는 consume 여부와 관계없이 모든 active target에 전달된 뒤 목록을 비웁니다.
+
+GEOMETRY hover는 모든 active target에 `STARTED`와 `LEAVE`를 보장하며 `LEAVE_REQUIRED`를 적용하지 않습니다.
+PARENT hover와 touch에서는 기존의 property 제어 동작을 유지합니다.
 
 ### 이벤트 전파 예시
 
-아래 그림에서 주황색 뷰에서 오른쪽으로 Hover가 이동한다면:
-```
-┌─────────────────────────────────────┐
-│            Blue View                │
-│  ┌───────────────────────────────┐  │
-│  │        Yellow View            │  │
-│  │  ┌─────────────────────────┐  │  │
-│  │  │       Red View          │  │  │
-│  │  │  ┌─────────────────┐    │  │  │
-│  │  │  │   Orange View   │    │  │  │
-│  │  │  └─────────────────┘    │  │  │
-│  │  └─────────────────────────┘  │  │
-│  └───────────────────────────────┘  │
-└─────────────────────────────────────┘
+A와 B가 서로 parent-child 관계가 아닌 sibling이고, B가 앞에 있으며 두 영역이 일부 겹친다고 가정합니다.
+
+```text
+A 전용 영역       A/B 겹침 영역       B 전용 영역
+┌──────── A ──────────┐
+          ┌──────── B ──────────┐
 ```
 
+B가 `false`, A가 `true`를 반환한다고 가정하면 trace는 다음과 같습니다.
+
+```text
+A 전용 -> 겹침   : B STARTED -> B MOTION -> A MOTION
+겹침 안에서 이동 : B MOTION -> A MOTION
+겹침 -> B 전용   : B MOTION -> A LEAVE
+B 전용 -> 겹침   : B MOTION -> A STARTED -> A MOTION
 ```
-주황색 → 빨간색 → 노란색 → 파란색 으로 "Started" 이벤트를 받습니다.
+
+겹침 영역에서는 B의 `false` 결과로 A까지 방문하므로 A와 B가 모두 active입니다. B가 `true`로 바뀌면 B가 현재
+이벤트를 받은 뒤 순회가 중단되고, 이전에 active였던 A는 B dispatch가 끝난 다음 `LEAVE`를 받습니다. B가 다시
+`false`를 반환하면 A는 `STARTED`와 `MOTION`으로 재진입합니다.
+
+GEOMETRY에서 실제 parent는 별도 bubbling 대상이 아닙니다. front-most child와 sibling subtree 뒤의 flat hit-list
+위치에 있을 때만 방문됩니다.
+
+```text
+B callback false : B -> A -> 공통 Parent -> Root (consume될 때까지)
+B callback true  : 현재 입력은 B에서 중단
 ```
 
-- 주황색뷰를 벗어날때 주황색 뷰는 "Leave" 이벤트를 받습니다. 다른 빨간색, 노란색, 파란색 뷰는 그대로 "Motion" 이벤트를 받습니다.
-- 빨간색뷰를 벗어날때 빨간색 뷰는 "Leave" 이벤트를 받습니다. 다른 노란색, 파란색 뷰는 그대로 "Motion" 이벤트를 받습니다.
+geometry 결과에 포함된 hover 가능 Actor만 순회에 참여합니다. callback의 Actor 인자는 현재 receiver를 나타내지만,
+`HoverEvent::GetHitActor()`와 local position은 뒤의 A나 Parent callback에서도 primary front-most hit Actor(겹침의
+B)를 계속 나타냅니다.
 
-### 역방향 이동
-
-역으로 오른쪽에서 다시 왼쪽으로 Hover가 이동한다면:
-- 새로운 뷰에 진입하게 될때 해당뷰는 "Started"를 받게 됩니다.
-- 기존 Motion 이벤트를 받고 있던 뷰들은 그대로 Motion을 받습니다.
-
-### Sample: HoverEvent 동작
-
-Yellow, Red, Orange에 HoverEvent를 등록합니다.
-
-**왼쪽에서 오른쪽 방향으로 마우스를 이동:**
-1. Yellow에 진입할 때 Yellow가 "Started"를 받습니다.
-2. Red에 진입할 때 Red는 "Started"를 받습니다. 기존 Yellow는 그대로 Motion을 받습니다.
-3. Orange에 진입할 때 Orange는 "Started"를 받습니다. 기존 Yellow와 Red는 그대로 Motion을 받습니다.
-
-**오른쪽에서 왼쪽 방향으로 마우스를 이동:**
-1. Orange에서 진출할 때 Orange는 "Leave"를 받습니다. 기존 Yellow와 Red는 그대로 Motion을 받습니다.
-2. Red에서 진출할 때 Red는 "Leave"를 받습니다. 기존 Yellow는 그대로 Motion을 받습니다.
-3. Yellow에서 진출할 때 Yellow는 "Leave"를 받습니다.
+plain `View`는 intrinsic hover consume이 없으므로 raw callback이 `false`를 반환할 때 sibling fall-through를 확인할
+수 있습니다. 반면 `InteractiveView` 또는 `InteractiveTrait`을 가진 `View`는 hover lifecycle을 intrinsic하게
+처리하며 `true`를 반환합니다. 따라서 추가 raw callback이 `false`여도 전체 dispatch는 일반적으로 최상위
+interactive View에서 consume됩니다.
 
 ### Consume 동작
 
-- Consume을 하면 뒤쪽 geometry candidate는 해당 이벤트를 받지 못합니다.
-- 터치와 다르게 Consume했다고 해서 Consume한 뷰가 이후의 Hover이벤트를 받아가는 건 아닙니다.
-- 현재 이벤트가 뒤쪽 candidate로 진행하는 것만 막습니다.
+- `false`를 반환하면 다음 front-to-back geometry candidate로 진행하며 unrelated sibling일 수도 있습니다.
+- `true`를 반환하면 현재 candidate 순회만 중단하며 future hover owner 또는 capture를 만들지 않습니다.
+- 한 Actor에 연결된 callback은 모두 실행됩니다. intrinsic 처리와 callback 반환값을 OR한 뒤 다음 candidate 진행
+  여부를 결정합니다.
 
 ---
 

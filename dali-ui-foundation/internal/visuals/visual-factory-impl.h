@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -290,6 +290,6 @@ inline Internal::VisualFactory& GetImplementation(Ui::Integration::VisualFactory
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif /* DALI_UI_VISUAL_FACTORY_IMPL_H */

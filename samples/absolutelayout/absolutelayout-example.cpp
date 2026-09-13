@@ -22,9 +22,9 @@ using namespace Dali::Ui;
  * AbsoluteLayout sample: absolute pixel positioning.
  *
  * Children are placed at explicit (x, y) coordinates with explicit sizes.
- * - Red box at top-left (20, 20)
- * - Green box at center area (150, 200)
- * - Blue box at bottom-right area (280, 400)
+ * - Red box at top-left (50, 50)
+ * - Green box at center area (100, 100)
+ * - Blue box at lower-right area (200, 200)
  *
  * Press Escape or Back to quit.
  */

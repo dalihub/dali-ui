@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -222,4 +222,4 @@ void SelectableTraitImpl::OnClickedForToggle(View view, InputEvent event)
   SetSelectedInternal(!mSelected, event);
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

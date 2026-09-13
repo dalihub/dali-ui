@@ -19,9 +19,13 @@
 #include <dali-ui-components/public-api/styles/components-style-sheet.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-components/public-api/styles/alert-dialog-style.h>
+#include <dali-ui-components/public-api/styles/dialog-container-style.h>
+#include <dali-ui-components/public-api/styles/dialog-style.h>
 #include <dali-ui-components/public-api/styles/markdown-view-style.h>
+#include <dali-ui-components/public-api/styles/progress-bar-style.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -32,9 +36,29 @@ namespace StyleSheet
 namespace
 {
 
+UiStyle CreateDefaultDialogStyle()
+{
+  return DialogStyle::DefaultPreset();
+}
+
+UiStyle CreateDefaultAlertDialogStyle()
+{
+  return AlertDialogStyle::DefaultPreset();
+}
+
+UiStyle CreateDefaultDialogContainerStyle()
+{
+  return DialogContainerStyle::DefaultPreset();
+}
+
 UiStyle CreateDefaultMarkdownViewStyle()
 {
   return MarkdownViewStyle::DefaultPreset();
+}
+
+UiStyle CreateDefaultProgressBarStyle()
+{
+  return ProgressBarStyle::DefaultPreset();
 }
 
 } // namespace
@@ -42,11 +66,15 @@ UiStyle CreateDefaultMarkdownViewStyle()
 UiStyleSheet New()
 {
   UiStyleSheet styleSheet = UiStyleSheet::New();
+  styleSheet.SetStyle(DialogStyle::DefaultKey(), &CreateDefaultDialogStyle);
+  styleSheet.SetStyle(AlertDialogStyle::DefaultKey(), &CreateDefaultAlertDialogStyle);
+  styleSheet.SetStyle(DialogContainerStyle::DefaultKey(), &CreateDefaultDialogContainerStyle);
   styleSheet.SetStyle(MarkdownViewStyle::DefaultKey(), &CreateDefaultMarkdownViewStyle);
+  styleSheet.SetStyle(ProgressBarStyle::DefaultKey(), &CreateDefaultProgressBarStyle);
   return styleSheet;
 }
 
 } // namespace StyleSheet
 } // namespace Components
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -27,9 +27,10 @@ using namespace Dali::Ui;
  * remaining space on each line.
  *
  * - Row direction with Wrap enabled
- * - 6 boxes with flex-basis 150px each
- * - Boxes with different flex-grow values (items grow to fill the line)
- * - AlignContent: SpaceAround for spacing between wrapped lines
+ * - Two equal-height sections containing three boxes each
+ * - First section bases/grow: 50/1, 50/1, 100/2
+ * - Second section bases/grow: 100/1, 100/1, 200/2
+ * - AlignContent: Center for wrapped lines
  *
  * Press Escape or Back to quit.
  */

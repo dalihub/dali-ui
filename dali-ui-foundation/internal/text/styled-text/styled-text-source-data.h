@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -57,6 +57,6 @@ Dali::Ui::Text::StyledText GetStyledTextSource(const StyledTextSourceDataPtr& da
 } // namespace Text
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_TEXT_STYLED_TEXT_SOURCE_DATA_H

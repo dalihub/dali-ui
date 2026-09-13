@@ -19,7 +19,7 @@
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-settings.h>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -111,4 +111,4 @@ bool WebSettingsImpl::IsExtraFeatureEnabled(const Dali::String& feature) const
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

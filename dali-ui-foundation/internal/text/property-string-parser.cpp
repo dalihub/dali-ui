@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/integration-api/builder/tree-node.h>
 #include <dali-ui-foundation/internal/text/markup-processor/markup-processor-helper-functions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -80,4 +80,4 @@ void ParsePropertyString(const std::string& property, Property::Map& map)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

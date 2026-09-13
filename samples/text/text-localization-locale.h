@@ -20,6 +20,7 @@
 #include <clocale>
 #include <cstdlib>
 #include <string>
+#include <dali/public-api/common/dali-namespace.h>
 
 #if defined(_MSC_VER)
 // Avoid including windows.h in this shared sample header because its global
@@ -27,7 +28,7 @@
 extern "C" __declspec(dllimport) int __stdcall SetEnvironmentVariableA(const char* name, const char* value);
 #endif
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {

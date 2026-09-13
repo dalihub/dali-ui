@@ -20,9 +20,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 
 void ControllerImplDataClearer::ClearFullModelData(Controller::Impl& impl, Controller::OperationsMask operations)
@@ -96,6 +97,10 @@ void ControllerImplDataClearer::ClearFullModelData(Controller::Impl& impl, Contr
   {
     model->mVisualModel->mColors.Clear();
     model->mVisualModel->mColorIndices.Clear();
+    if(model->mLogicalModel->mGradientSpanData)
+    {
+      model->mLogicalModel->mGradientSpanData->glyphPaintIndices.Clear();
+    }
     model->mVisualModel->mBackgroundColors.Clear();
     model->mVisualModel->mBackgroundColorIndices.Clear();
   }
@@ -294,6 +299,16 @@ void ControllerImplDataClearer::ClearGlyphModelData(Controller::Impl& impl, Char
                                                colorIndexBuffer + endGlyphIndexPlusOne);
     }
 
+    if(model->mLogicalModel->mGradientSpanData &&
+       0u != model->mLogicalModel->mGradientSpanData->glyphPaintIndices.Count())
+    {
+      Internal::GradientSpanPaintIndex* paintIndexBuffer =
+        model->mLogicalModel->mGradientSpanData->glyphPaintIndices.Begin();
+      model->mLogicalModel->mGradientSpanData->glyphPaintIndices.Erase(
+        paintIndexBuffer + textUpdateInfo.mStartGlyphIndex,
+        paintIndexBuffer + endGlyphIndexPlusOne);
+    }
+
     if(0u != model->mVisualModel->mBackgroundColorIndices.Count())
     {
       ColorIndex* backgroundColorIndexBuffer = model->mVisualModel->mBackgroundColorIndices.Begin();
@@ -325,9 +340,9 @@ void ControllerImplDataClearer::ClearModelData(Controller::Impl& impl, Character
 
   // The estimated number of lines. Used to avoid reallocations when layouting.
   textUpdateInfo.mEstimatedNumberOfLines =
-      static_cast<Length>(std::max(model->mVisualModel->mLines.Count(), model->mLogicalModel->mParagraphInfo.Count()));
+    static_cast<Length>(std::max(model->mVisualModel->mLines.Count(), model->mLogicalModel->mParagraphInfo.Count()));
 
   model->mVisualModel->ClearCaches();
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

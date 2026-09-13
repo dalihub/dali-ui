@@ -19,6 +19,7 @@
 #include <dali/public-api/adaptor-framework/video-source-descriptor.h>
 #include <dali/public-api/events/key-event.h>
 #include <player.h>
+#include <esplusplayer_capi/esplusplayer_capi.h>
 #include <cstdio>
 #include <string>
 

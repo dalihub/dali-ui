@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@
 #include "wireframe-visual.h"
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -57,7 +58,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
   WireframeVisualPtr wireframeVisual(new WireframeVisual(factoryCache, actualVisual));
 
   // Instead of calling SetProperties, looking for the only valid property 'transform'
-  Property::Value* transformValue = properties.Find(Ui::VisualBasePropertyIndex::TRANSFORM, TRANSFORM);
+  Property::Value* transformValue = properties.Find(Ui::Integration::Visual::Property::TRANSFORM, TRANSFORM);
   Property::Map    transformMap;
   if(transformValue && transformValue->Get(transformMap))
   {
@@ -72,6 +73,8 @@ WireframeVisual::WireframeVisual(VisualFactoryCache& factoryCache, Visual::BaseP
 : Visual::Base(factoryCache, actualVisual ? actualVisual->GetType() : Ui::Integration::InternalVisualType::WIREFRAME),
   mActualVisual(actualVisual)
 {
+  // This visual's shader emits straight (non pre-multiplied) alpha, so opt out of the default.
+  mImpl->mFlags &= ~Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 WireframeVisual::~WireframeVisual()
@@ -111,7 +114,7 @@ void WireframeVisual::DoCreatePropertyMap(Property::Map& map) const
   else
   {
     map.Clear();
-    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::WIREFRAME);
+    map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::WIREFRAME);
   }
 }
 
@@ -122,7 +125,7 @@ void WireframeVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 
 void WireframeVisual::DoSetProperties(const Property::Map& propertyMap)
 {
-  Property::Value* mixValue = propertyMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR, MIX_COLOR);
+  Property::Value* mixValue = propertyMap.Find(Ui::Integration::Visual::Property::MIX_COLOR, MIX_COLOR);
   if(mixValue)
   {
     Vector4 mixColor;
@@ -163,7 +166,7 @@ void WireframeVisual::OnInitialize()
   mImpl->mRenderer = VisualRenderer::New(geometry, shader);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 }
 
 Geometry WireframeVisual::CreateQuadWireframeGeometry()
@@ -201,7 +204,7 @@ void WireframeVisual::OnSetTransform()
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
     // Register transform properties
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer);
   }
 }
 
@@ -219,4 +222,4 @@ Visual::Base& WireframeVisual::GetVisualObject()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -35,7 +35,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -271,7 +271,7 @@ private:
 
   /**
    * @brief Check whether the mask texture is loaded or not.
-   * If MaskingType is MASKING_ON_LOADING and mask texture is failed to load, update shader.
+   * If MaskingPolicy is ON_LOADING and mask texture is failed to load, update shader.
    * @note Should call at SetTexturesToRenderer() only.
    * @return true if we need to update shader. false otherwise.
    */
@@ -370,13 +370,16 @@ private:
   bool mBrokenImageEnabled : 1;     ///< True if broken image is enabled.
   bool mRendererAdded : 1;          ///< True if renderer added into actor.
   bool mUseBrokenImageRenderer : 1; ///< True if renderer changed as broken image.
-  bool mUseSynchronousSizing : 1;   ///< True if we need to synchronize image texture size to visual size, otherwise use
+  bool mImageLoadWithViewSize : 1;  ///< True if we need to synchronize image texture size to visual size, otherwise use
                                     ///< mDesiredSize.
+  bool mPreMultiplyAlphaOnLoad : 1; ///< The requested pre-multiply-on-load value. Kept apart from the
+                                    ///< IS_PRE_MULTIPLIED_ALPHA flag, which tracks what the loaded frames
+                                    ///< actually ended up as, so that a re-load still honours the request.
 };
 
 } // namespace Internal
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 #endif /* DALI_UI_INTERNAL_ANIMATED_IMAGE_VISUAL_H */

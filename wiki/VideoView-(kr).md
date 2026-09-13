@@ -181,7 +181,7 @@ descriptor.SetNativeSession(Dali::Any(static_cast<void*>(player)));
 descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
 ```
 
-2. **브리지** `Dali::Ui::CreateVideoSource()` — `<dali-ui-foundation/public-api/video/video-source.h>`에 선언되어 있으며, descriptor를 `VideoSource`로 변환합니다:
+2. **브리지** `Dali::Ui::CreateVideoSource()` — `<dali-ui-foundation/public-api/views/video/video-source.h>`에 선언되어 있으며, descriptor를 `VideoSource`로 변환합니다:
 
 ```cpp
 VideoSource CreateVideoSource(const SourceDescriptor& descriptor, VideoSourceOwnership ownership = VideoSourceOwnership::EXTERNAL);

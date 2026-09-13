@@ -32,7 +32,7 @@
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/ref-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -197,6 +197,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_IMAGE_LOAD_THREAD_H

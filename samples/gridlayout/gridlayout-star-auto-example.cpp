@@ -24,7 +24,7 @@ using namespace Dali::Ui;
  *
  * Demonstrates GridLength::Star() and GridLength::Auto() sizing modes.
  *
- * - 3 rows: fixed 80px header, Star(1) flexible middle, fixed 60px footer
+ * - 3 rows: fixed 100px header, Star(1) flexible middle, fixed 50px footer
  * - 3 columns: fixed 100px sidebar, Star(2) wide content, Star(1) narrow panel
  *
  * Star columns distribute remaining space proportionally:

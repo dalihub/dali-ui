@@ -2,7 +2,7 @@
 #define DALI_UI_INTERNAL_VISUAL_TRANSFORM_H
 
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali::Ui::Internal::Visual
+namespace DALI_NAMESPACE::Ui::Internal::Visual
 {
 struct Transform
 {
@@ -68,13 +68,13 @@ struct Transform
    */
   static const Property::Map& GetDefaultTransformMap();
 
-  Vector2         mOffset;
-  Vector2         mSize;
-  Vector2         mExtraSize;
-  Vector4         mOffsetSizeMode;
-  Ui::Align::Type mOrigin;
-  Ui::Align::Type mPivot;
+  Vector2          mOffset;
+  Vector2          mSize;
+  Vector2          mExtraSize;
+  Vector4          mOffsetSizeMode;
+  Ui::VisualOrigin mOrigin;
+  Ui::VisualPivot  mPivot;
 };
-} // namespace Dali::Ui::Internal::Visual
+} //namespace DALI_NAMESPACE::Ui::Internal::Visual
 
 #endif // DALI_UI_INTERNAL_VISUAL_TRANSFORM_H

@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -76,4 +76,4 @@ private:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

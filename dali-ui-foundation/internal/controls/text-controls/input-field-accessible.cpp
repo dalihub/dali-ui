@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 std::pair<std::string, bool> InputFieldAccessible::GetNameRaw() const
 {
@@ -101,4 +101,4 @@ std::string InputFieldAccessible::GetTextEventContent(unsigned int length, const
   return substituteText;
 }
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration

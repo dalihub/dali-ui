@@ -29,7 +29,7 @@
 #include <dali-ui/ui-scene-holder-impl.h>
 #include <dali-ui/ui-window.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 using PositionSize = Dali::BoundsInteger;
 
@@ -89,6 +89,7 @@ public:
   std::vector<std::pair<std::unique_ptr<Dali::CallbackBase>, int32_t>> mFramePresentedCallbacks;
   bool                                      mMaximized{false};
   bool                                      mMinimized{false};
+  bool mFocused{false};
 };
 
 } // namespace Adaptor

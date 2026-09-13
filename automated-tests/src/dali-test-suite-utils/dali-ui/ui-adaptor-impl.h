@@ -18,8 +18,9 @@
  */
 
 #include <render-surface-interface.h>
+#include <dali/public-api/common/dali-namespace.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class EglInterface;
 class DisplayConnection;

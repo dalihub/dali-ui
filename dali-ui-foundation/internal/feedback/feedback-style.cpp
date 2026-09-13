@@ -54,7 +54,7 @@ void GetIfString(const Dali::Ui::Integration::TreeNode& node, const std::string&
 
 } // unnamed namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -463,4 +463,4 @@ FeedbackPattern FeedbackStyle::GetFeedbackPattern(const std::string& pattern)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

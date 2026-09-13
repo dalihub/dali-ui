@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -598,4 +598,4 @@ SwitchImpl::~SwitchImpl()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -21,7 +21,7 @@
 
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -29,63 +29,105 @@ namespace Text
 {
 
 /**
- * @brief Describes how the text foreground is revealed over a normalized timeline.
+ * @brief Describes how visible text and inline ImageSpan content are revealed.
  *
- * Reveal divides visible text into sequential units and controls the fade of
- * each unit as TextRevealProgress advances from 0.0 to 1.0. Applications
- * control the playback duration by animating TextRevealProgress.
+ * Reveal controls how content becomes visible as TextRevealProgress advances
+ * from 0.0 to 1.0. Applications control playback duration by animating
+ * TextRevealProgress.
  *
- * By default, text is revealed by character using an automatically selected
- * fade duration. The reveal unit and fade duration ratio can be configured
- * explicitly.
+ * Unit selects the reveal granularity, while Sequence selects whether reveal
+ * units share one timeline across the whole visible content or use an
+ * independent timeline for each final visible line.
  *
- * Reveal affects only the text foreground. Text decorations and other style
- * layers such as shadow, outline, underline, strikethrough, and background are
- * not affected.
+ * Reveal affects the text foreground and inline ImageSpan content. ImageSpan
+ * content reveals as an atomic item in CHARACTER, WORD, and LINE modes, and
+ * reveals spatially across the rendered image in PIXEL mode. Text decorations
+ * and style layers such as shadow, outline, underline, strikethrough, and
+ * background are not affected.
  *
- * Inline replacement content does not participate in the reveal. When text is
- * elided, hidden source text does not consume reveal units and the ellipsis
- * participates in the visible reveal sequence.
+ * When content is elided, hidden source content does not consume reveal units
+ * and the visible ellipsis participates in the reveal progression.
+ *
+ * By default, Reveal uses CHARACTER with WHOLE_TEXT sequencing, no sequence
+ * stagger, and an automatically resolved fade duration.
  */
 class DALI_UI_API Reveal
 {
 public:
   /**
-   * @brief Selects automatic fade duration for the reveal units.
+   * @brief Selects automatic fade duration.
    *
-   * When this value is used as the fade duration ratio, the fade duration is
-   * selected automatically based on the visible reveal units.
-   *
-   * This value represents authored automatic behavior; GetFadeDurationRatio()
-   * returns this value rather than the internally resolved duration ratio.
+   * GetFadeDurationRatio() returns this authored value rather than the
+   * duration resolved for the current layout.
    */
   static constexpr float AUTO_FADE_DURATION_RATIO = -1.0f;
 
   /**
-   * @brief Unit used to divide the visible text into reveal steps.
+   * @brief Selects the granularity of reveal progression.
    */
   enum class Unit : uint8_t
   {
     /**
-     * @brief Reveals visible text by character in logical text order.
+     * @brief Reveals visible text by character while preserving shaping boundaries.
      *
-     * Characters that are rendered as one indivisible text unit may reveal
-     * together.
+     * Progression follows logical text order. Characters that form one
+     * indivisible shaped unit reveal together.
      */
     CHARACTER,
 
     /**
      * @brief Reveals visible text by word in logical text order.
      *
-     * Whitespace does not consume a reveal step. Punctuation is associated with
-     * surrounding text where appropriate.
+     * Whitespace does not create a reveal unit.
      */
-    WORD
+    WORD,
+
+    /**
+     * @brief Reveals one final visible layout line as a unit.
+     *
+     * Lines are determined after shaping, wrapping, maximum-line limiting,
+     * ellipsis, bidirectional layout, and ImageSpan placement. Lines without
+     * revealable visible content do not consume a reveal unit.
+     */
+    LINE,
+
+    /**
+     * @brief Reveals visible content continuously across its rendered foreground.
+     *
+     * PIXEL follows logical text order and shaping boundaries while distributing
+     * reveal timing continuously in pixel space. Inline ImageSpan content
+     * contributes its reserved width to the progression and reveals spatially
+     * across the rendered image.
+     *
+     * The progression is normalized and does not correspond one-to-one with
+     * physical framebuffer pixels.
+     */
+    PIXEL
+  };
+
+  /**
+   * @brief Selects how reveal units share the normalized reveal timeline.
+   */
+  enum class Sequence : uint8_t
+  {
+    /**
+     * @brief Uses one reveal sequence across all final visible content.
+     */
+    WHOLE_TEXT,
+
+    /**
+     * @brief Uses an independent sequence for each final visible layout line.
+     *
+     * Lines created by wrapping are separate sequences, while lines without
+     * revealable content do not create a sequence. With Unit::LINE, each
+     * sequence contains one whole-line reveal unit.
+     */
+    PER_LINE
   };
 
 public:
   /**
-   * @brief Creates a CHARACTER reveal with automatic fade duration.
+   * @brief Creates a CHARACTER reveal using WHOLE_TEXT sequencing and automatic fade duration.
    */
   Reveal();
 
@@ -149,31 +191,38 @@ public:
 
 public:
   /**
-   * @brief Sets the unit used to divide visible text into reveal steps.
+   * @brief Sets the reveal unit.
    *
    * @param[in] unit The reveal unit.
    */
   void SetUnit(Unit unit);
 
   /**
-   * @brief Returns the unit used to divide visible text into reveal steps.
+   * @brief Gets the reveal unit.
    *
    * @return The reveal unit.
    */
   Unit GetUnit() const;
 
   /**
-   * @brief Sets the fade duration of each reveal unit on the normalized timeline.
+   * @brief Sets the reveal sequencing mode.
    *
-   * AUTO_FADE_DURATION_RATIO selects an automatic fade duration based on the
-   * visible reveal units.
+   * @param[in] sequence The reveal sequencing mode.
+   */
+  void SetSequence(Sequence sequence);
+
+  /**
+   * @brief Gets the reveal sequencing mode.
    *
-   * Values from 0.0 to 1.0 specify the duration of each unit fade. Zero produces
-   * a step-wise reveal with no per-unit fade, while one makes all units fade
-   * together over the full timeline.
+   * @return The reveal sequencing mode.
+   */
+  Sequence GetSequence() const;
+
+  /**
+   * @brief Sets the fade duration on the normalized reveal timeline.
    *
-   * When TextRevealProgress is animated linearly from 0.0 to 1.0, the ratio
-   * corresponds to the same fraction of the animation duration.
+   * AUTO_FADE_DURATION_RATIO selects the duration automatically. Values from
+   * 0.0 to 1.0 specify the normalized fade duration; zero disables the fade.
    *
    * Values outside [0.0, 1.0] are clamped, except AUTO_FADE_DURATION_RATIO.
    * NaN is normalized to 0.0.
@@ -183,15 +232,39 @@ public:
   void SetFadeDurationRatio(float ratio);
 
   /**
-   * @brief Returns the authored fade duration ratio.
+   * @brief Gets the authored fade duration ratio.
    *
-   * If automatic duration is selected, this returns
-   * AUTO_FADE_DURATION_RATIO rather than the duration resolved for the current
-   * text layout.
+   * When automatic duration is selected, this returns
+   * AUTO_FADE_DURATION_RATIO rather than the resolved duration.
    *
    * @return AUTO_FADE_DURATION_RATIO or the authored ratio in [0.0, 1.0].
    */
   float GetFadeDurationRatio() const;
+
+  /**
+   * @brief Sets the stagger between consecutive reveal sequences.
+   *
+   * The ratio controls the spacing between consecutive active sequence starts.
+   * A value of 0.0 starts all active sequences together, while 1.0 prevents
+   * consecutive sequences from overlapping.
+   *
+   * Stagger affects PER_LINE sequencing. WHOLE_TEXT uses a single sequence, so
+   * the authored value has no visual effect. With Unit::LINE, stagger controls
+   * the start spacing between whole-line transitions independently of the fade
+   * duration.
+   *
+   * Values outside [0.0, 1.0] are clamped, and NaN is normalized to 0.0.
+   *
+   * @param[in] ratio The sequence stagger ratio in [0.0, 1.0].
+   */
+  void SetSequenceStaggerRatio(float ratio);
+
+  /**
+   * @brief Gets the authored sequence stagger ratio.
+   *
+   * @return The authored ratio in [0.0, 1.0].
+   */
+  float GetSequenceStaggerRatio() const;
 
 private:
   class Impl;
@@ -200,4 +273,4 @@ private:
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

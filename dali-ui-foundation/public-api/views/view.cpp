@@ -34,24 +34,11 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
 {
-namespace
-{
-// TODO: Remove together with the temporary Extents overloads of
-// View::SetMargin() and View::SetPadding().
-Insets ToInsets(const Extents& extents)
-{
-  return Insets(static_cast<float>(extents.start),
-                static_cast<float>(extents.end),
-                static_cast<float>(extents.top),
-                static_cast<float>(extents.bottom));
-}
-} // unnamed namespace
-
 View::View()
 {
 }
@@ -138,6 +125,26 @@ void View::SetLayoutTransition(LayoutTransition transition)
 LayoutTransition View::GetLayoutTransition() const
 {
   return GetImpl(*this).GetLayoutTransition();
+}
+
+void View::SetSelfLayoutTransition(LayoutTransition transition)
+{
+  GetImpl(*this).SetSelfLayoutTransition(transition);
+}
+
+LayoutTransition View::GetSelfLayoutTransition() const
+{
+  return GetImpl(*this).GetSelfLayoutTransition();
+}
+
+void View::SetLayoutTransitionMode(LayoutTransitionMode mode)
+{
+  GetImpl(*this).SetLayoutTransitionMode(mode);
+}
+
+LayoutTransitionMode View::GetLayoutTransitionMode() const
+{
+  return GetImpl(*this).GetLayoutTransitionMode();
 }
 
 void View::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
@@ -244,11 +251,6 @@ void View::SetMargin(const Insets& margin)
   GetImpl(*this).SetMargin(margin);
 }
 
-void View::SetMargin(const Extents& margin)
-{
-  SetMargin(ToInsets(margin));
-}
-
 void View::SetMargin(float start, float end, float top, float bottom)
 {
   SetMargin(Insets(start, end, top, bottom));
@@ -300,11 +302,6 @@ Insets View::GetMargin() const
 void View::SetPadding(const Insets& padding)
 {
   GetImpl(*this).SetPadding(padding);
-}
-
-void View::SetPadding(const Extents& padding)
-{
-  SetPadding(ToInsets(padding));
 }
 
 void View::SetPadding(float start, float end, float top, float bottom)
@@ -443,6 +440,26 @@ void View::SetShadow(const ShadowStack& shadowStack)
 void View::SetInnerShadow(const InnerShadow& innerShadow)
 {
   GetImpl(*this).SetInnerShadow(innerShadow);
+}
+
+void View::SetOffscreenRenderingEnabled(bool enabled)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetOffscreenRenderingEnabled(enabled);
+}
+
+bool View::IsOffscreenRenderingEnabled() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).IsOffscreenRenderingEnabled();
+}
+
+void View::SetOffscreenRenderingRefreshRate(OffscreenRefreshRate refreshRate)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetOffscreenRenderingRefreshRate(refreshRate);
+}
+
+View::OffscreenRefreshRate View::GetOffscreenRenderingRefreshRate() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetOffscreenRenderingRefreshRate();
 }
 
 UiColor View::GetColorMultiplier() const
@@ -725,9 +742,9 @@ void View::LowerBelow(View target, LayoutOrderPolicy policy)
   GetImpl(*this).LowerBelow(target, policy);
 }
 
-bool View::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)
+bool View::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer)
 {
-  return GetImpl(*this).AddVisual(visualBase, containerRangeType);
+  return GetImpl(*this).AddVisual(visualBase, depthLayer);
 }
 
 void View::RemoveVisual(Dali::Ui::VisualBase visualBase)
@@ -735,14 +752,14 @@ void View::RemoveVisual(Dali::Ui::VisualBase visualBase)
   GetImpl(*this).RemoveVisual(visualBase);
 }
 
-uint32_t View::GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const
+uint32_t View::GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const
 {
-  return GetImpl(*this).GetVisualCount(containerRangeType);
+  return GetImpl(*this).GetVisualCount(depthLayer);
 }
 
-Dali::Ui::VisualBase View::GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const
+Dali::Ui::VisualBase View::GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const
 {
-  return GetImpl(*this).GetVisualAt(containerRangeType, siblingOrder);
+  return GetImpl(*this).GetVisualAt(depthLayer, siblingOrder);
 }
 
 void View::ClearBackground()
@@ -1068,10 +1085,15 @@ View::ResourceReadySignalType& View::ResourceReadySignal()
 
 View::OffScreenRenderingFinishedSignalType& View::OffScreenRenderingFinishedSignal()
 {
+  return OffscreenRenderingFinishedSignal();
+}
+
+View::OffscreenRenderingFinishedSignalType& View::OffscreenRenderingFinishedSignal()
+{
   ViewImpl&               viewImpl     = Ui::GetImpl(*this);
   Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
 
-  return viewDataImpl.OffScreenRenderingFinishedSignal();
+  return viewDataImpl.OffscreenRenderingFinishedSignal();
 }
 
 View::KeyEventSignalType& View::KeyEventSignal()
@@ -1121,4 +1143,4 @@ const UniqueAny* View::GetAttachmentInternal(AttachmentId id) const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

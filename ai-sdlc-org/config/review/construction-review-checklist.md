@@ -36,6 +36,11 @@ Verify that required Construction deliverables are complete. This checklist is *
 
 ## Required Deliverables (Customize This Section)
 
+When the change adds or substantially modifies files under `automated-tests/`,
+`manual-tests/`, or `samples/`, load
+`rules/test-and-sample-development.md` before evaluating the applicable checks
+below. Untouched legacy files use the exceptions in that rule.
+
 ### 1. Detailed Design Document
 
 **Evidence Location:** `ai-sdlc-docs/construction/implementation-design/{unit-name}-implementation-design.md`
@@ -81,6 +86,7 @@ Minimum Checks:
   - ✓ Contains section: ## Summary
   - ✓ Contains section: ## Results
   - ✓ Contains field: test_verdict (PASS / FAIL / BLOCKED)
+  - ✓ Applicable test and sample authoring-rule result recorded
 ```
 
 **Example Customization (Level 3):**
@@ -95,6 +101,10 @@ Minimum Checks:
   - ✓ Contains field: passed_tests (number)
   - ✓ Contains field: failed_tests (number)
   - ✓ Contains field: test_verdict (PASS / FAIL / BLOCKED)
+  - ✓ New automated tests registered in their owning harness/module
+  - ✓ New or substantially modified manual-test sources have same-basename scenario documents
+  - ✓ New or substantially modified user-facing samples have a README beside their source
+  - ✓ Runtime PASS, screenshots, logs, and measurements are claimed only when executed or captured
 ```
 
 **Status:** ☐
@@ -138,6 +148,63 @@ Minimum Checks:
 
 ---
 
+### 4. DALi Component Implementation Compliance
+
+**Condition:** Only required when `profile_id == dali_component_feature`
+
+**Evidence Locations:**
+
+- `ai-sdlc-docs/inception/architecture/architecture-design.md`
+- `ai-sdlc-docs/construction/implementation-design/{unit-name}-implementation-design.md`
+- `ai-sdlc-docs/construction/code/{unit-name}-code-verification-summary.md`
+- `ai-sdlc-docs/construction/test/test-report.md`
+- `ai-sdlc-docs/audit/audit.md`
+
+**Recommended Check Level:** Level 3
+
+```yaml
+Minimum Checks:
+  - ✓ Public and implementation base hierarchy matches the approved design
+  - ✓ Public handles remain lightweight and API/ABI constraints are satisfied
+  - ✓ Component style, builder, factory, and UiConfig lifecycle rules verified
+  - ✓ Ubuntu execution environment and exact build/test commands recorded
+  - ✓ OneUIComponents reference behavior covered by tests or documented evidence
+  - ✓ Reference commit and intentional differences recorded
+  - ✓ Applicable wiki, samples, and tests updated in compliance with `rules/test-and-sample-development.md`
+```
+
+**Status:** ☐
+
+---
+
+### 5. DALi API Change Implementation Compliance
+
+**Condition:** Only required when `profile_id == org_standard` and a public,
+extension, or integration API contract is affected
+
+**Evidence Locations:**
+
+- `ai-sdlc-docs/construction/implementation-design/{unit-name}-implementation-design.md`
+- `ai-sdlc-docs/construction/code/{unit-name}-code-verification-summary.md`
+- `ai-sdlc-docs/construction/test/test-report.md`
+
+**Recommended Check Level:** Level 3
+
+```yaml
+Minimum Checks:
+  - ✓ Actual API changes match the approved design and API change inventory
+  - ✓ Public and extension ABI constraints verified against the header diff
+  - ✓ Public handles, implementation state, exports, and dependencies comply with rules
+  - ✓ Applicable validation checks executed with results recorded
+  - ✓ Current dali-ui built and installed before affected tests executed
+  - ✓ Tests, samples, manual-tests, and wiki updated where applicable, including required source/document pairs
+  - ✓ No unapproved API or ABI break remains
+```
+
+**Status:** ☐
+
+---
+
 ## Verdict Determination
 
 ### PASS Conditions
@@ -162,6 +229,8 @@ Minimum Checks:
 | 1 | Detailed Design Document | [Level 1/2/3] | | | |
 | 2 | System Test Results | [Level 1/2/3] | | | |
 | 3 | Code Implementation Summary | [Level 1/2/3] | | | |
+| 4 | DALi Component Implementation Compliance | Level 3 / N/A | | | `dali_component_feature` only |
+| 5 | DALi API Change Implementation Compliance | Level 3 / N/A | | | `org_standard` API changes only |
 
 ---
 
@@ -177,10 +246,10 @@ construction-review.md loads this checklist and evaluates each deliverable:
 
 ## Adding Custom Deliverables
 
-To add a 4th deliverable, follow this template:
+To add another deliverable, follow this template and use the next item number:
 
 ```markdown
-### 4. [Your Deliverable Name]
+### N. [Your Deliverable Name]
 
 **Evidence Location:** `ai-sdlc-docs/construction/[your-file].md`
 

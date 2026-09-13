@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -38,4 +38,4 @@ void ClearUnusedTextures()
 
 } // namespace ImageCacheUtils
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

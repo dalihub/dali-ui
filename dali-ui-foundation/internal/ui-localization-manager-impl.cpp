@@ -29,7 +29,7 @@
 
 #include <dali-ui-foundation/internal/localization/gettext-wrapper.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -708,4 +708,4 @@ void UiLocalizationManagerImpl::OnLocaleChanged(std::string locale)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

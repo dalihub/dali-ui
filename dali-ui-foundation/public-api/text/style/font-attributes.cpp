@@ -25,7 +25,7 @@
 #define DALI_ASSERT_VALID_FONT_ATTRIBUTES(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from FontAttributes object")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -255,6 +255,6 @@ bool FontAttributes::operator!=(const FontAttributes& rhs) const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_FONT_ATTRIBUTES

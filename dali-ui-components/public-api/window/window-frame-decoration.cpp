@@ -22,7 +22,7 @@
 #define DALI_ASSERT_VALID_WINDOW_FRAME_LAYOUT(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from WindowFrameLayout object")
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 struct WindowFrameDecoration::Impl
@@ -137,7 +137,7 @@ DALI_DEFINE_LAYOUT_ACCESSORS(Dali::Vector2, BottomRightResizeHandleSize, bottomR
 
 #undef DALI_DEFINE_LAYOUT_ACCESSORS
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #undef DALI_ASSERT_VALID_WINDOW_FRAME_LAYOUT
 #undef DALI_ASSERT_VALID_WINDOW_FRAME_DECORATION

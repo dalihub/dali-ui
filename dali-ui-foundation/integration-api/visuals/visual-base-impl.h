@@ -2,7 +2,7 @@
 #define DALI_UI_VISUAL_BASE_IMPL_H
 
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,13 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-transform.h>
 #include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -50,7 +51,7 @@ namespace Internal
 class VisualBaseImpl;
 using VisualBaseImplPtr = Dali::IntrusivePtr<VisualBaseImpl>;
 
-class VisualBaseImpl : public Dali::BaseObject, public Dali::ConnectionTracker, public Dali::Integration::Processor
+class DALI_UI_API VisualBaseImpl : public Dali::BaseObject, public Dali::ConnectionTracker, public Dali::Integration::Processor
 {
 public:
   using VisualPropertyId                                       = uint32_t;
@@ -71,9 +72,9 @@ public: ///< Public API
   Dali::Ui::View GetOwner() const;
 
   /**
-   * @copydoc Dali::Ui::VisualBase::GetContainerRangeType()
+   * @copydoc Dali::Ui::VisualBase::GetDepthLayer()
    */
-  Dali::Ui::Integration::Visual::InternalContainerRangeType GetInternalContainerRangeType() const;
+  Dali::Ui::Visual::DepthLayer GetDepthLayer() const;
 
   /**
    * @copydoc Dali::Ui::VisualBase::Detach()
@@ -81,7 +82,14 @@ public: ///< Public API
   void DetachFromContainer();
 
   /**
-   * @copydoc Dali::Ui::VisualBase::DoAction()
+   * @brief Performs an action on the visual.
+   *
+   * @note Not exposed to applications. A concrete visual class wraps each action it supports in a
+   * typed method, e.g. LottieAnimationVisual::Play(), because an action usually needs pending
+   * property changes flushed first and an unknown action id is silently ignored.
+   *
+   * @param[in] actionId The action to perform. See the visual's actions header for supported ids.
+   * @param[in] attributes Optional attributes for the action.
    */
   void DoAction(Dali::Property::Index actionId, const Dali::Property::Value& attributes);
 
@@ -103,6 +111,21 @@ public: // SetProperty / GetProperty
    * @copydoc Dali::Ui::VisualBase::GetProperty()
    */
   Dali::Property::Value GetProperty(Dali::Property::Index index) const;
+
+  /**
+   * @brief Convenience function for obtaining a property of a known type.
+   *
+   * @param[in] index The index of the property
+   * @return The property value
+   * @pre The property types match i.e. PropertyTypes::Get<T>() is equal to GetPropertyType(index).
+   */
+  template<typename T>
+  T GetProperty(Dali::Property::Index index) const
+  {
+    Dali::Property::Value value = GetProperty(index);
+
+    return T(value.Get<T>());
+  }
 
 public:
   /**
@@ -167,14 +190,14 @@ public:
   void SetHeight(float height);
 
   /**
-   * @copydoc Dali::Ui::VisualBase::GetProportionFlags()
+   * @copydoc Dali::Ui::VisualBase::GetTransformProportionFlags()
    */
-  Dali::Ui::Visual::Transform::ProportionFlags GetProportionFlags() const;
+  Dali::Ui::Visual::Transform::ProportionFlags GetTransformProportionFlags() const;
 
   /**
-   * @copydoc Dali::Ui::VisualBase::SetProportionFlags()
+   * @copydoc Dali::Ui::VisualBase::SetTransformProportionFlags()
    */
-  void SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags);
+  void SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags);
 
   /**
    * @copydoc Dali::Ui::VisualBase::GetExtraWidth()
@@ -199,22 +222,22 @@ public:
   /**
    * @copydoc Dali::Ui::VisualBase::GetOrigin()
    */
-  Dali::Ui::Align::Type GetOrigin() const;
+  Dali::Ui::VisualOrigin GetOrigin() const;
 
   /**
    * @copydoc Dali::Ui::VisualBase::SetOrigin()
    */
-  void SetOrigin(Dali::Ui::Align::Type origin);
+  void SetOrigin(Dali::Ui::VisualOrigin origin);
 
   /**
    * @copydoc Dali::Ui::VisualBase::GetPivot()
    */
-  Dali::Ui::Align::Type GetPivot() const;
+  Dali::Ui::VisualPivot GetPivot() const;
 
   /**
    * @copydoc Dali::Ui::VisualBase::SetPivot()
    */
-  void SetPivot(Dali::Ui::Align::Type pivot);
+  void SetPivot(Dali::Ui::VisualPivot pivot);
 
   // Decorated properties (CornerRadius / Borderline)
   /**
@@ -382,8 +405,22 @@ public: ///< Called from other internal class
   Dali::Property GetPropertyObject(Dali::Property::Key visualPropertyKey);
 
   /**
+   * @brief Whether the given property currently holds a value.
+   * @note Unlike GetProperty(), this never queries the visual. A property that was
+   * dropped by RemoveCache() stays absent until it is set again, even while the visual
+   * still holds the previous value because the update has not been applied yet.
+   *
+   * @param[in] index The index of the property.
+   * @return True if the property holds a value.
+   */
+  bool HasCachedProperty(Dali::Property::Index index) const;
+
+  /**
    * @brief Remove cached data of given index.
    * @note We can call this function at const case since cache is mutable.
+   * @note This also drops the value from the pending mutable property updates, so the
+   * property is forgotten even if it was set during the current frame and has not been
+   * applied to the visual yet.
    *
    * @param[in] index The index want to remove cache.
    */
@@ -535,13 +572,13 @@ private:
 
   Dali::String          mName;
   mutable Property::Map mCachedVisualPropertyMap;        ///< Whole collected map of properties.
-  Property::Map         mUpdatedMutableVisualProperties; ///< Temporal properties that was
+  mutable Property::Map mUpdatedMutableVisualProperties; ///< Temporal properties that was
 
   std::unique_ptr<Internal::Visual::Transform> mTransform;
 
   Dali::Ui::Integration::Visual::Base mVisual; ///< Created visual by CreateVisual API
 
-  Dali::Ui::Integration::Visual::InternalContainerRangeType mRangeType{Dali::Ui::Integration::Visual::InternalContainerRangeType::INVALID};
+  Dali::Ui::Visual::DepthLayer mDepthLayer{Dali::Ui::Visual::DepthLayer::NONE};
 
   Dali::Ui::Integration::VisualsContainer::ShadowType mShadowType{Dali::Ui::Integration::VisualsContainer::ShadowType::NONE};
 
@@ -584,6 +621,6 @@ inline static const Internal::VisualBaseImpl& GetImplementation(const Dali::Ui::
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VISUAL_BASE_IMPL_H

@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/integration-api/edge-effect-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -131,4 +131,4 @@ EdgeEffectImpl::FinishedSignalType& EdgeEffectImpl::FinishedSignal()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

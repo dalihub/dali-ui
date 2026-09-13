@@ -18,14 +18,14 @@
  */
 
 // EXTERNAL INCLUDES
-#include <cstdint>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali/devel-api/rendering/texture-devel.h>
 #include <dali/public-api/rendering/texture.h>
+#include <cstdint>
 
 // INTERNAL INCLUDES
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -161,6 +161,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_IMAGE_VISUAL_SHADER_FACTORY_H

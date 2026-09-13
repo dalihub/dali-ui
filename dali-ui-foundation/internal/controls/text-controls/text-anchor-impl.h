@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -170,4 +170,4 @@ inline const Ui::Internal::TextAnchorImpl& GetImpl(const Ui::TextAnchor& textAnc
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

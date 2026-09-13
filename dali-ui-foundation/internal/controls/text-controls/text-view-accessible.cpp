@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 bool TextViewAccessible::ConvertToUtf8Range(const std::string& string, std::size_t begin, std::size_t end,
                                             std::size_t& utf8Begin, std::size_t& utf8End)
@@ -352,4 +352,4 @@ bool TextViewAccessible::SupportsSelection() const
   return false;
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

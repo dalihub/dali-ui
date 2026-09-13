@@ -30,7 +30,7 @@
 #define DALI_ASSERT_VALID_GRADIENT_BASE(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Gradient::Base object")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -353,6 +353,6 @@ Conic Conic::DownCast(const Base& base)
 
 } // namespace Gradient
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_GRADIENT_BASE

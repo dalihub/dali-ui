@@ -50,7 +50,7 @@ const char* PlayStateName(Ui::AnimatedImage::PlayState state)
 /**
  * @brief Verifies AnimatedImageView basic playback control:
  *   Play / Pause / Stop / JumpToFrame
- *   GetPlayState / GetCurrentFrame / GetTotalFrame
+ *   GetPlayState / GetCurrentFrameNumber / GetTotalFrameCount
  *   AnimationFinishedSignal
  *
  * Steps:
@@ -132,8 +132,8 @@ private:
   {
     mStatusLabel.SetText(
       Dali::String("State: ") + Dali::String(PlayStateName(mView.GetPlayState())) +
-      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
-      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()));
+      Dali::String(" | Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrameNumber()).c_str()) +
+      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrameCount()).c_str()));
     return true;
   }
 

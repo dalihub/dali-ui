@@ -18,9 +18,10 @@
  *
  */
 
+#include <dali/public-api/common/dali-namespace.h>
 #include <cstdint> // LCOV_EXCL_LINE
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 /**
  * @brief Contains public accessibility semantic types used by Dali UI views.
@@ -181,6 +182,6 @@ enum class RelationType : uint32_t
 };
 
 } // namespace Accessibility
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #endif // DALI_UI_VIEW_ACCESSIBILITY_TYPES_H

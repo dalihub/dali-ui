@@ -19,7 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/pixel-buffer.h>
-#include <dali/public-api/common/extents.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/object/ref-object.h>
 #include <dali/public-api/rendering/texture-set.h>
 #include <string>
@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -206,14 +206,14 @@ public:
    *
    * @param [in] border border of NPatch
    */
-  void SetBorder(const Dali::Extents& border);
+  void SetBorder(const Dali::Insets& border);
 
   /**
    * @brief Retrieve border of NPatch.
    *
    * @return Return border of NPatch.
    */
-  Dali::Extents GetBorder() const;
+  Dali::Insets GetBorder() const;
 
   /**
    * @brief Set whether the loaded image is premultiplied or not
@@ -296,7 +296,7 @@ private:
   std::size_t                                         mHash;           ///< Hash code for the Url
   uint32_t                                            mCroppedWidth;   ///< Width of the cropped middle part of N-patch
   uint32_t                                            mCroppedHeight;  ///< Height of the cropped middle part of N-patch
-  Dali::Extents                                       mBorder;         ///< The size of the border
+  Dali::Insets                                        mBorder;         ///< The size of the border
   LoadingState                                        mLoadingState;   ///< True if the data loading is completed
   void*                                               mRenderingMap;   ///< NPatch rendering data
 
@@ -308,6 +308,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_NPATCH_DATA_H

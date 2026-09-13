@@ -14,8 +14,9 @@
  */
 
 #include "window-frame-overlay-controller.h"
+#include <dali/public-api/common/dali-namespace.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 OverlayStateUpdate WindowFrameOverlayController::SetAttached(bool attached)
@@ -156,4 +157,4 @@ OverlayStateUpdate WindowFrameOverlayController::UpdateActivation(bool previousA
   return OverlayStateUpdate{becameActive || becameVisible, false};
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

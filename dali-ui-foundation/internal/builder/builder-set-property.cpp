@@ -30,7 +30,7 @@
 
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -522,4 +522,4 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

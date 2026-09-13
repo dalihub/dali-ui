@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/internal/text/styled-text/image-span-impl.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -46,4 +46,4 @@ ImageSpan::ImageSpan(BaseObject* impl)
 }
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

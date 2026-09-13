@@ -21,7 +21,7 @@
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/unique-ptr.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -96,4 +96,4 @@ private:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/integration-api/lottie-animation-view-impl.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -67,6 +67,11 @@ void LottieAnimationView::SetResourceUrl(const Dali::String& url)
 Dali::String LottieAnimationView::GetResourceUrl() const
 {
   return Ui::GetImpl(*this).GetResourceUrl();
+}
+
+void LottieAnimationView::Reload()
+{
+  Ui::GetImpl(*this).Reload();
 }
 
 void LottieAnimationView::Play()
@@ -149,14 +154,14 @@ AnimatedImage::PlayState LottieAnimationView::GetPlayState() const
   return Ui::GetImpl(*this).GetPlayState();
 }
 
-int LottieAnimationView::GetCurrentFrame() const
+int LottieAnimationView::GetCurrentFrameNumber() const
 {
-  return Ui::GetImpl(*this).GetCurrentFrame();
+  return Ui::GetImpl(*this).GetCurrentFrameNumber();
 }
 
-int LottieAnimationView::GetTotalFrame() const
+int LottieAnimationView::GetTotalFrameCount() const
 {
-  return Ui::GetImpl(*this).GetTotalFrame();
+  return Ui::GetImpl(*this).GetTotalFrameCount();
 }
 
 void LottieAnimationView::SetRedrawOnScaleDown(bool redraw)
@@ -179,19 +184,9 @@ bool LottieAnimationView::IsRedrawOnScaleUp() const
   return Ui::GetImpl(*this).IsRedrawOnScaleUp();
 }
 
-void LottieAnimationView::SetFrameCacheEnabled(bool enable)
+void LottieAnimationView::SetNotifyAfterRasterizationEnabled(bool notify)
 {
-  Ui::GetImpl(*this).SetFrameCacheEnabled(enable);
-}
-
-bool LottieAnimationView::IsFrameCacheEnabled() const
-{
-  return Ui::GetImpl(*this).IsFrameCacheEnabled();
-}
-
-void LottieAnimationView::SetNotifyAfterRasterization(bool notify)
-{
-  Ui::GetImpl(*this).SetNotifyAfterRasterization(notify);
+  Ui::GetImpl(*this).SetNotifyAfterRasterizationEnabled(notify);
 }
 
 bool LottieAnimationView::IsNotifyAfterRasterizationEnabled() const
@@ -218,19 +213,19 @@ bool LottieAnimationView::IsAspectFitEnabled() const
   return Ui::GetImpl(*this).IsAspectFitEnabled();
 }
 
-Dali::Property::Map LottieAnimationView::GetContentInfo()
+Dali::Property::Map LottieAnimationView::GetContentInfo() const
 {
   return Ui::GetImpl(*this).GetContentInfo();
 }
 
-Dali::Property::Map LottieAnimationView::GetMarkerInfo()
+Dali::Property::Map LottieAnimationView::GetMarkerInfo() const
 {
   return Ui::GetImpl(*this).GetMarkerInfo();
 }
 
-void LottieAnimationView::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
+void LottieAnimationView::SetDynamicProperty(LottieAnimation::DynamicProperty info)
 {
-  Ui::GetImpl(*this).SetDynamicProperty(info);
+  Ui::GetImpl(*this).SetDynamicProperty(std::move(info));
 }
 
 Vector3 LottieAnimationView::GetNaturalSize() const
@@ -334,5 +329,22 @@ LottieAnimationView::LottieAnimationView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::LottieAnimationViewImpl>(internal);
 }
 
+// TODO: remove these together with the old names they keep alive.
+
+int LottieAnimationView::GetCurrentFrame() const
+{
+  return GetCurrentFrameNumber();
+}
+
+int LottieAnimationView::GetTotalFrame() const
+{
+  return GetTotalFrameCount();
+}
+
+void LottieAnimationView::SetNotifyAfterRasterization(bool notify)
+{
+  SetNotifyAfterRasterizationEnabled(notify);
+}
+
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

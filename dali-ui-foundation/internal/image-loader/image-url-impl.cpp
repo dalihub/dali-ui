@@ -28,7 +28,7 @@
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -84,4 +84,4 @@ const Dali::String& ImageUrl::GetUrl() const
 
 } // End of namespace Ui
 
-} // End of namespace Dali
+} //namespace DALI_NAMESPACE

@@ -21,7 +21,7 @@ using namespace Dali::Ui;
 /**
  * GridLayout sample with a clickable LayoutDirection toggle.
  *
- * Same content as gridlayout-example. A 100x50 yellow standalone child
+ * Same content as gridlayout-example. A 200x50 yellow standalone child
  * at the top-left toggles the root view's LayoutDirection between
  * LEFT_TO_RIGHT and RIGHT_TO_LEFT on click. RTL flips direct children
  * horizontally; the standalone toggle button is excluded from mirroring

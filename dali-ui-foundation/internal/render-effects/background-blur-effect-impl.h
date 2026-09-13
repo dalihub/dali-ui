@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/public-api/render-effects/background-blur-effect.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -126,14 +126,14 @@ public:
   Dali::Ui::BackgroundBlurEffect::FinishedSignalType& FinishedSignal();
 
   /**
-   * @copydoc Ui::BackgroundBlurEffect::SetSourceActor
+   * @copydoc Ui::BackgroundBlurEffect::SetSourceView
    */
-  void SetSourceActor(Dali::Actor sourceActor);
+  void SetSourceView(Ui::View sourceView);
 
   /**
-   * @copydoc Ui::BackgroundBlurEffect::SetStopperActor
+   * @copydoc Ui::BackgroundBlurEffect::SetStopperView
    */
-  void SetStopperActor(Dali::Actor stopperActor);
+  void SetStopperView(Ui::View stopperView);
 
 protected:
   /**
@@ -215,10 +215,22 @@ private:
   void OnRenderFinished(Dali::RenderTask renderTask);
 
   /**
+   * @brief Reconfigures blur resources with an internal downscale factor without changing the user setting.
+   * @param[in] downscaleFactor Internal downscale factor to apply
+   */
+  void ApplyInternalDownscaleFactor(float downscaleFactor);
+
+  /**
+   * @brief Restores the appropriate resolution, or bypasses the effect, after a strength animation.
+   * @param[in] animation Finished animation
+   */
+  void OnBlurStrengthAnimationFinished(Animation animation);
+
+  /**
    * @brief Calculate valid downscale factor and blur radius by given mBlurRadius and mDownscaleFactor.
    * It will change internal values, downscaled blur radius, and skip blur
    */
-  void UpdateDownscaledBlurRadius();
+  void UpdateDownscaledBlurRadius(float downscaleFactor);
 
   BackgroundBlurEffectImpl(const BackgroundBlurEffectImpl&)            = delete;
   BackgroundBlurEffectImpl(BackgroundBlurEffectImpl&&)                 = delete;
@@ -253,8 +265,10 @@ private:
   float    mDownscaleFactor;
   uint32_t mBlurRadius;
 
-  Dali::WeakHandle<Dali::Actor> mUserSourceActor;  ///< Weakhandle of source actor from user.
-  Dali::WeakHandle<Dali::Actor> mUserStopperActor; ///< Weakhandle of stopper actor from user.
+  float mBlurStrength;
+
+  Dali::WeakHandle<Ui::View> mUserSourceView;  ///< Weakhandle of source view from user.
+  Dali::WeakHandle<Ui::View> mUserStopperView; ///< Weakhandle of stopper view from user.
 
   float    mInternalDownscaleFactor;
   uint32_t mInternalBlurRadius;
@@ -263,6 +277,8 @@ private:
 
   bool mSkipBlur : 1;
   bool mBlurOnce : 1;
+  bool mBlurStrengthAnimationActive : 1;
+  bool mZeroStrengthBypass : 1;
 };
 } // namespace Internal
 
@@ -279,6 +295,6 @@ inline const Ui::Internal::BackgroundBlurEffectImpl& GetImplementation(const Ui:
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_BACKGROUND_BLUR_EFFECT_H

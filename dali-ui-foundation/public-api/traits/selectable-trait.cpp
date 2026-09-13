@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -116,4 +116,4 @@ void SelectableTrait::SetToggleByClickEnabled(bool enabled)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

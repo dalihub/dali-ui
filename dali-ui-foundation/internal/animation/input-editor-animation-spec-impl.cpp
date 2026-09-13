@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -120,4 +120,4 @@ void InputEditorAnimationSpecImpl::ApplyPlaceholderTextGradientStartOffsetBy(Ani
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

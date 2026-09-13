@@ -33,7 +33,7 @@ extern "C" {
 #include <third-party/md4c/entity.h>
 }
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1342,4 +1342,4 @@ Dali::String MarkdownSnapshotToPlainText(const MarkdownRenderSnapshot& snapshot)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

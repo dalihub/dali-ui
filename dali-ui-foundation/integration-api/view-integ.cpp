@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -147,4 +147,4 @@ bool HasLayoutCapability(ViewImpl& viewImpl)
 } // namespace View
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

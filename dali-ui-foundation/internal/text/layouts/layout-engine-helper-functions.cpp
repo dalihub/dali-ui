@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -164,4 +164,4 @@ void TraversesCharactersForGlyphPositionsRTL(const VisualModelPtr& visualModel, 
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -27,7 +27,7 @@
 #define DALI_ASSERT_FIT_TYPE(actual, expected, message) \
   DALI_ASSERT_ALWAYS((actual) == (expected) && (message))
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -172,7 +172,7 @@ const Dali::Vector<Fit::Candidate>& Fit::GetCandidates() const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_FIT
 #undef DALI_ASSERT_FIT_TYPE

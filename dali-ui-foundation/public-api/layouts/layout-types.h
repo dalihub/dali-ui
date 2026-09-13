@@ -18,7 +18,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/common/extents.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/signals/callback.h>
 #include <cfloat>
@@ -27,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -649,4 +648,4 @@ inline AbsoluteLayoutFlags operator&(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlag
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

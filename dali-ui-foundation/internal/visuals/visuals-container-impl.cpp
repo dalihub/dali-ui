@@ -30,12 +30,12 @@
 #include <locale>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h> ///< To get viewDataImpl by Internal::ViewDataImpl::Get()
 #include <dali-ui-foundation/internal/views/view/visual-constraint-functions.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
@@ -43,15 +43,17 @@
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
 constexpr std::string_view VISUAL_OBJECT_PROPERTY_NAME_PREFIX("VisualBase");
 
+// Half the gap between two adjacent DepthIndex::Ranges anchors, so that a layer splits evenly into
+// a View half and an application half. See VisualBaseImpl::GetDepthIndex for what each half is for.
 constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::Integration::DepthIndex::Ranges::CONTENT - Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND) / 2;
 
-static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
+static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
 
 Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Internal::VisualBaseImpl& visualObjectImpl)
 {
@@ -84,9 +86,9 @@ Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Int
 
 } // namespace
 
-VisualsContainerPtr VisualsContainer::New(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType)
+VisualsContainerPtr VisualsContainer::New(Dali::Ui::View view, Dali::Ui::Visual::DepthLayer depthLayer)
 {
-  VisualsContainerPtr container(new VisualsContainer(view, rangeType));
+  VisualsContainerPtr container(new VisualsContainer(view, depthLayer));
   return container;
 }
 
@@ -97,9 +99,9 @@ Dali::Ui::View VisualsContainer::GetOwner() const
   return mView.GetHandle();
 }
 
-Dali::Ui::Integration::Visual::InternalContainerRangeType VisualsContainer::GetContainerRangeType() const
+Dali::Ui::Visual::DepthLayer VisualsContainer::GetDepthLayer() const
 {
-  return mRangeType;
+  return mDepthLayer;
 }
 
 uint32_t VisualsContainer::GetVisualBasesCount() const
@@ -237,7 +239,7 @@ void VisualsContainer::ReplaceVisualBase(Dali::Ui::Internal::VisualBaseImpl& vis
         {
           std::ostringstream oss;
           oss.imbue(std::locale::classic());
-          oss << VISUAL_OBJECT_PROPERTY_NAME_PREFIX << "_" << static_cast<int>(mRangeType) << "_" << propertyId;
+          oss << VISUAL_OBJECT_PROPERTY_NAME_PREFIX << "_" << static_cast<int>(mDepthLayer) << "_" << propertyId;
           index = view.RegisterProperty(ToDaliString(oss.str()), ToPropertyValue(oss.str()), Property::AccessMode::READ_WRITE);
         }
 
@@ -304,14 +306,14 @@ void VisualsContainer::UnregisterVisualBase(Dali::Ui::Internal::VisualBaseImpl& 
   }
 }
 
-VisualsContainer::VisualsContainer(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType)
+VisualsContainer::VisualsContainer(Dali::Ui::View view, Dali::Ui::Visual::DepthLayer depthLayer)
 : BaseObject(),
   mVisualBases(),
   mView(view),
-  mRangeType(rangeType),
+  mDepthLayer(depthLayer),
   mVisualIndexConverter()
 {
-  DALI_ASSERT_ALWAYS(0 <= static_cast<int>(mRangeType) && static_cast<int>(mRangeType) < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  DALI_ASSERT_ALWAYS(0 <= static_cast<int>(mDepthLayer) && static_cast<int>(mDepthLayer) < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
 }
 
 VisualsContainer::~VisualsContainer()
@@ -330,4 +332,4 @@ VisualsContainer::~VisualsContainer()
   }
 }
 
-} //namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

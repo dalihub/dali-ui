@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/integration-api/visuals/arc-visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -130,6 +130,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif /* DALI_UI_INTERNAL_ARC_VISUAL_H */

@@ -25,7 +25,7 @@
 #include <sstream>
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -724,4 +724,4 @@ bool ObjLoader::IsSpecularMapPresent()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -27,7 +27,7 @@
 
 using Dali::Integration::ToDaliStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -120,4 +120,4 @@ void SetRendererTexture(Dali::Renderer renderer, Dali::FrameBuffer frameBuffer)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

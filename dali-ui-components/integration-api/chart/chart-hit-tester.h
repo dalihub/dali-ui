@@ -27,7 +27,7 @@
 #include <dali-ui-components/integration-api/chart/chart-model.h>
 #include <dali-ui-components/integration-api/chart/chart-scale-engine.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -97,4 +97,4 @@ public:
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

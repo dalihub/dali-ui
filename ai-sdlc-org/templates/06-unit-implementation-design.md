@@ -90,6 +90,11 @@ artifact_type: IMPLEMENTATION_DESIGN
 |-----------|---------|--------|
 
 ## 7. Verification Strategy
+- `rules/test-and-sample-development.md` applicability:
 - unit-level verification:
+- automated-test source and owning module registration target:
+- manual-test source and same-basename scenario document:
+- sample source and colocated README:
+- expected manual behavior pending runtime evidence:
 - regression-sensitive paths:
 - known risks:

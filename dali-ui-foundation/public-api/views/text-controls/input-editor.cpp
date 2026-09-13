@@ -21,7 +21,7 @@
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -791,4 +791,4 @@ Signal<void(View, Text::TypingStyle::Mask)>& InputEditor::TypingStyleChangedSign
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

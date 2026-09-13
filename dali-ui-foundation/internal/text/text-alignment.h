@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Applies controller or bounded-paragraph alignment to an arbitrary line domain.
@@ -42,6 +42,6 @@ void AlignTextLines(Layout::Engine&             layoutEngine,
                     Dali::LayoutDirection::Type layoutDirection,
                     bool                        matchLayoutDirection);
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_ALIGNMENT_H

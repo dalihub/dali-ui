@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-components/integration-api/chart/scatter-series-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -29,4 +29,4 @@ ScatterSeries::ScatterSeries() = default;
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

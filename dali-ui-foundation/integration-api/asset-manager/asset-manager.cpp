@@ -27,7 +27,7 @@ namespace
 
 } // unnamed namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -93,4 +93,4 @@ const std::string Dali::Ui::Integration::AssetManager::GetDaliDataReadOnlyPath()
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -17,7 +17,7 @@
 #include <dali-ui-foundation/integration-api/layouts/stack-layout-impl.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -101,4 +101,4 @@ float StackLayout::GetSpacing() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

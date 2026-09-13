@@ -29,7 +29,7 @@
 
 using Dali::Integration::ToDaliStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -300,4 +300,4 @@ void ApplyTextureAndUniforms(Renderer& renderer, const Dali::Ui::Internal::NPatc
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

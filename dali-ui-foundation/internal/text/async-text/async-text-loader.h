@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -119,6 +119,7 @@ struct AsyncTextParameters
     textFitStepSize{1.f},
     marqueeLoopDelay{0.0f},
     textRevealFadeDurationRatio{Text::Reveal::AUTO_FADE_DURATION_RATIO},
+    textRevealSequenceStaggerRatio{0.0f},
     renderScale{1.0f},
     renderScaleWidth{0.f},
     renderScaleHeight{0.f},
@@ -147,6 +148,7 @@ struct AsyncTextParameters
     fontWidth{TextAbstraction::FontWidth::NONE},
     fontSlant{TextAbstraction::FontSlant::NONE},
     textRevealUnit{Internal::Reveal::Unit::DISABLED},
+    textRevealSequence{Internal::Reveal::Sequence::WHOLE_TEXT},
     suppressAutoMarquee{false},
     isMultiLine{false},
     ellipsis{true},
@@ -168,6 +170,36 @@ struct AsyncTextParameters
     isTextRevealEnabled{false}
   {
   }
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] rhs The async text parameters to copy.
+   */
+  AsyncTextParameters(const AsyncTextParameters& rhs) = default;
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs The async text parameters to move.
+   */
+  AsyncTextParameters(AsyncTextParameters&& rhs) = default;
+
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] rhs The async text parameters to copy.
+   * @return A reference to this instance.
+   */
+  AsyncTextParameters& operator=(const AsyncTextParameters& rhs) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs The async text parameters to move.
+   * @return A reference to this instance.
+   */
+  AsyncTextParameters& operator=(AsyncTextParameters&& rhs) = default;
 
   ~AsyncTextParameters() = default;
 
@@ -220,10 +252,11 @@ struct AsyncTextParameters
   float textFitMaxSize;
   float textFitStepSize;
   float marqueeLoopDelay;
-  float textRevealFadeDurationRatio; ///< Authored AUTO sentinel or normalized per-unit fade duration.
-  float renderScale;                 ///< The render scale.
-  float renderScaleWidth;            ///< The requested original textWidth when using render scale.
-  float renderScaleHeight;           ///< The requested original textHeight when using render scale.
+  float textRevealFadeDurationRatio;    ///< Authored AUTO sentinel or normalized per-unit fade duration.
+  float textRevealSequenceStaggerRatio; ///< Authored sequence stagger ratio.
+  float renderScale;                    ///< The render scale.
+  float renderScaleWidth;               ///< The requested original textWidth when using render scale.
+  float renderScaleHeight;              ///< The requested original textHeight when using render scale.
 
   int      maxTextureSize;               ///< The maximum size of texture.
   Length   maximumNumberOfLines;         ///< Maximum laid-out lines, or zero for unlimited.
@@ -252,6 +285,7 @@ struct AsyncTextParameters
   FontWidthType                             fontWidth;             ///< The font's width.
   FontSlantType                             fontSlant;             ///< The font's slant.
   Internal::Reveal::Unit                    textRevealUnit;        ///< Shaping/layout reveal unit.
+  Internal::Reveal::Sequence                textRevealSequence;    ///< Final reveal sequence grouping mode.
 
   bool suppressAutoMarquee : 1;            ///< whether automatic marquee evaluation is suppressed.
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.
@@ -291,11 +325,11 @@ struct AsyncTextRenderInfo
     revealMetadataTiles(),
     size(),
     textLogicalBounds(0.0f, 0.0f, 1.0f, 1.0f),
-    textGradientMarqueeViewportBounds(0.0f, 0.0f, 1.0f, 1.0f),
     controlSize(),
     renderedSize(),
     anchorHitRegions(),
     replacementPlacements(),
+    replacementRevealTimings(),
     replacementSourceRevision(0u),
     replacementLayoutGeneration(0u),
     lineCount(0),
@@ -334,14 +368,14 @@ struct AsyncTextRenderInfo
   PixelData                                 overlayStylePixelData;
   PixelData                                 maskPixelData;
   PixelData                                 marqueePixelData;
-  std::vector<PixelData>                    revealMetadataTiles;               ///< One RGBA8888 buffer per height tile.
-  Size                                      size;                              ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
-  Vector4                                   textLogicalBounds;                 ///< Normalized logical text bounds inside @p size.
-  Vector4                                   textGradientMarqueeViewportBounds; ///< Normalized TextGradient bounds inside the visible marquee viewport.
-  Size                                      controlSize;                       ///< View size used to display the rendered text.
-  Size                                      renderedSize;                      ///< Final displayed size reported back to the caller.
-  std::vector<AsyncAnchorHitRegion>         anchorHitRegions;                  ///< Anchor hit regions in text content local coordinates.
-  Vector<ReplacementPlacement>              replacementPlacements;             ///< Final-layout values; no image runtime objects.
+  std::vector<PixelData>                    revealMetadataTiles;      ///< One RGBA8888 buffer per height tile.
+  Size                                      size;                     ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
+  Vector4                                   textLogicalBounds;        ///< Normalized logical text bounds inside @p size.
+  Size                                      controlSize;              ///< View size used to display the rendered text.
+  Size                                      renderedSize;             ///< Final displayed size reported back to the caller.
+  std::vector<AsyncAnchorHitRegion>         anchorHitRegions;         ///< Anchor hit regions in text content local coordinates.
+  Vector<ReplacementPlacement>              replacementPlacements;    ///< Final-layout values; no image runtime objects.
+  Vector<ReplacementRevealTiming>           replacementRevealTimings; ///< Atomic ImageSpan timing from the shared final Reveal plan.
   uint64_t                                  replacementSourceRevision;
   uint64_t                                  replacementLayoutGeneration;
   int                                       lineCount;
@@ -561,6 +595,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_ASYNC_TEXT_LOADER_H

@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -45,4 +45,4 @@ DALI_UI_COMPONENTS_API UiStyleSheet New();
 } // namespace StyleSheet
 } // namespace Components
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

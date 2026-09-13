@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -84,6 +84,6 @@ void CalcualteUnderlineHeight(const FontMetrics& fontMetrics, float& currentUnde
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_RENDERING_STYLES_UNDERLINE_HELPER_FUNCTIONS_H

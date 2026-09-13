@@ -21,7 +21,7 @@ DALi는 앱의 화면 구성과 렌더링을 담당하며, 크게 `dali-core`, `
 | **dali-core** | <ul><li>핵심 렌더링 기능</li><li>Scene graph, animation, shader 등 렌더링 기본 모델 제공</li><li>Property system, signal 등 베이스 기능 제공</li><li>[Github](https://github.com/dalihub/dali-core)</li></ul>
 | **dali-adaptor** | <ul><li>플랫폼 및 그래픽 백엔드 연동 담당</li><li>Window, InputMethod, Widget 등</li><li>[Github](https://github.com/dalihub/dali-adaptor)</li></ul>
 | **dali-ui-foundation** | <ul><li>레이아웃, 접근성, 테마 컬러 등 상위 UI Framework API 제공</li><li>`Label`/`ImageView`/`WebView` 등 기본 컴포넌트 제공</li><li>버튼 베이스 등 컴포넌트 기능 클래스 제공 (UX independent)</li><li>[Github(Sec)](https://github.sec.samsung.net/NUI/dali-ui)</li></ul> |
-| **dali-ui-components** | <ul><li>`Button`, `Switch`, `ProgressBar`, `Slider`, `Dialog` 등 OneUI 기반 컴포넌트 [약 11종](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components#components-tbd) (계획) </li><li>[Github(Sec)](https://github.sec.samsung.net/NUI/dali-ui)</li></ul> |
+| **dali-ui-components** | <ul><li>`TextButton`, `IconButton`, `CheckBox`, `Switch`, `ProgressBar`, `Toast`, `Dialog` 계열 등 OneUI 기반 컴포넌트 제공. [전체 목록 및 사용 안내](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components-%28kr%29)</li><li>[Github(Sec)](https://github.sec.samsung.net/NUI/dali-ui)</li></ul> |
 
 
 <br/>
@@ -87,7 +87,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 세 가지 API 레벨
 * [State Effect](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Effect-(kr))
 * [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI-(kr))
 * [Create New Component](https://github.sec.samsung.net/NUI/dali-ui/wiki/Create-New-Component-(kr))
-* [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
+* [컴포넌트 목록](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components-%28kr%29)
   * [Text](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-(kr))
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView-(kr))
   * [VideoView](https://github.sec.samsung.net/NUI/dali-ui/wiki/VideoView-(kr))

@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/views/view/group-selectable-trait-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -107,4 +107,4 @@ SelectionGroup GroupSelectableTrait::GetGroup() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

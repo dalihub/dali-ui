@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Iterates ordinary and replacement segments in projected text.
@@ -62,6 +62,6 @@ void ForEachProcessingSegment(Length                                 characterCo
   }
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_SEGMENT_ITERATOR_H

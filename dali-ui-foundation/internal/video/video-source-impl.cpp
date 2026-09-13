@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/video/video-source-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -74,4 +74,4 @@ Dali::VideoPlayerPlugin::VideoSourceDescriptor VideoSource::ToAdaptorDescriptor(
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

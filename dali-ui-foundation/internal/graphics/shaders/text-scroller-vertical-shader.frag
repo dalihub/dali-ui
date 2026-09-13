@@ -56,6 +56,15 @@ UNIFORM_BLOCK FragBlock
 };
 
 #ifdef IS_REQUIRED_TEXT_GRADIENT
+highp vec2 GetTextGradientCoordinate()
+{
+#ifdef IS_REQUIRED_TEXT_GRADIENT_CONTENT_BOUND
+  return vec2(vTexCoord.x, fract(vTexCoord.y));
+#else
+  return vTextGradientCoord;
+#endif
+}
+
 highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
 {
   const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
@@ -79,6 +88,15 @@ highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
 #endif
 
 #ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
+highp vec2 GetTextGradientOverlayCoordinate()
+{
+#ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY_CONTENT_BOUND
+  return vec2(vTexCoord.x, fract(vTexCoord.y));
+#else
+  return vTextGradientCoord;
+#endif
+}
+
 highp float EvaluateTextGradientOverlayPosition(highp vec2 textGradientCoord)
 {
   const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
@@ -109,7 +127,7 @@ mediump vec4 ApplyTextGradientOverlay(mediump vec4 baseFill)
   }
 
   highp vec2 textGradientOverlayCoord =
-    (vTextGradientCoord - uTextGradientOverlayBounds.xy) / max(uTextGradientOverlayBounds.zw, vec2(0.000001));
+    (GetTextGradientOverlayCoordinate() - uTextGradientOverlayBounds.xy) / max(uTextGradientOverlayBounds.zw, vec2(0.000001));
   highp float gradientPosition = EvaluateTextGradientOverlayPosition(textGradientOverlayCoord);
   mediump vec4 overlayColor =
     TEXTURE(sGradientOverlayLookup, vec2(gradientPosition + uTextGradientOverlayStartOffset, 0.5));
@@ -141,14 +159,14 @@ void main()
   mediump vec4 preservedColor = textTexture;
   mediump float textGradientMask = TEXTURE(sTextGradientMask, vTexCoord).r;
   highp vec2 textGradientCoord =
-    (vTextGradientCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
+    (GetTextGradientCoordinate() - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
   highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
   mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
   mediump vec4 gradientFill = vec4(gradientColor.rgb * textGradientMask, gradientColor.a * textGradientMask);
   textTexture = gradientFill + preservedColor * (1.0 - gradientFill.a);
 #elif defined(IS_REQUIRED_TEXT_GRADIENT)
   highp vec2 textGradientCoord =
-    (vTextGradientCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
+    (GetTextGradientCoordinate() - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
   highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
   mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
   textTexture = vec4(gradientColor.rgb * textTexture.a, gradientColor.a * textTexture.a);

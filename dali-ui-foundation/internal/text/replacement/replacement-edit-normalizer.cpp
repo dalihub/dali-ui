@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-edit-normalizer.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -196,4 +196,4 @@ void ReplacementEditNormalizer::ApplyEdit(Vector<ReplacementRunSnapshot>& runs,
   runs = std::move(updated);
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

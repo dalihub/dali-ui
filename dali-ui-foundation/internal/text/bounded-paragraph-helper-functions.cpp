@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/script.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -210,4 +210,4 @@ void MergeBoundedParagraphRunsWhenRemoveCharacters(const Vector<Character>& text
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

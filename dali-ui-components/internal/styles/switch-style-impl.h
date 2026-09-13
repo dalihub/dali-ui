@@ -21,7 +21,7 @@
 #include <dali-ui-components/public-api/styles/switch-style.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -93,4 +93,4 @@ inline const Internal::SwitchStyleImpl& GetImpl(const Ui::SwitchStyle& style)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

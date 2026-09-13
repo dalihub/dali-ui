@@ -36,7 +36,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -209,4 +209,4 @@ inline const Internal::UiColorManagerImpl& GetImpl(const UiColorManager& obj)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

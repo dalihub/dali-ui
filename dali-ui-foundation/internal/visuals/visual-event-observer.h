@@ -20,7 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/property-value.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -80,6 +80,6 @@ protected:
 } // namespace Visual
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_INTERNAL_UI_VISUAL_EVENT_OBSERVER_H

@@ -21,8 +21,14 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/internal/text/text-model-interface.h>
 
-namespace Dali
+#include <algorithm>
+#include <cmath>
+#include <vector>
+
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -141,8 +147,103 @@ float GetCalculatedAdvance(unsigned int character, float characterSpacing, float
            : advance + characterSpacing;
 }
 
+float ResolveTextForegroundReferencePixelSize(const ModelInterface&       model,
+                                              bool                        hasInlineReplacement,
+                                              TextAbstraction::FontClient fontClient,
+                                              std::vector<float>*         lineReferencePixelSizes)
+{
+  float          referencePixelSize = 0.0f;
+  const Length   numberOfLines      = model.GetNumberOfLines();
+  const LineRun* lines              = model.GetLines();
+  if(lineReferencePixelSizes)
+  {
+    lineReferencePixelSizes->assign(numberOfLines, 0.0f);
+  }
+  if(!hasInlineReplacement)
+  {
+    for(Length index = 0u; lines && index < numberOfLines; ++index)
+    {
+      const float lineTextHeight = lines[index].ascender - lines[index].descender;
+      if(std::isfinite(lineTextHeight))
+      {
+        referencePixelSize = std::max(referencePixelSize, lineTextHeight);
+        if(lineReferencePixelSizes)
+        {
+          (*lineReferencePixelSizes)[index] = std::max(1.0f, lineTextHeight);
+        }
+      }
+    }
+    return std::max(1.0f, referencePixelSize);
+  }
+
+  struct CachedFontMetrics
+  {
+    FontId      fontId;
+    FontMetrics metrics;
+  };
+
+  const GlyphInfo*               glyphs         = model.GetGlyphs();
+  const Length                   numberOfGlyphs = model.GetNumberOfGlyphs();
+  std::vector<CachedFontMetrics> metricsCache;
+  auto                           getFontMetrics = [&](FontId fontId) -> const FontMetrics&
+  {
+    for(const CachedFontMetrics& cached : metricsCache)
+    {
+      if(cached.fontId == fontId)
+      {
+        return cached.metrics;
+      }
+    }
+    CachedFontMetrics cached{fontId, {}};
+    fontClient.GetFontMetrics(fontId, cached.metrics);
+    metricsCache.push_back(cached);
+    return metricsCache.back().metrics;
+  };
+
+  for(Length index = 0u; lines && index < numberOfLines; ++index)
+  {
+    float lineAscender    = 0.0f;
+    float lineDescender   = 0.0f;
+    bool  hasTextGlyph    = false;
+    auto  includeGlyphRun = [&](const GlyphRun& run)
+    {
+      const GlyphIndex end = std::min<GlyphIndex>(run.glyphIndex + run.numberOfGlyphs, numberOfGlyphs);
+      for(GlyphIndex glyphIndex = run.glyphIndex; glyphs && glyphIndex < end; ++glyphIndex)
+      {
+        const GlyphInfo& glyph = glyphs[glyphIndex];
+        if(glyph.fontId == 0u || IsSyntheticReplacementGlyph(glyph))
+        {
+          continue;
+        }
+        const FontMetrics& metrics = getFontMetrics(glyph.fontId);
+        lineAscender               = hasTextGlyph ? std::max(lineAscender, metrics.ascender) : metrics.ascender;
+        lineDescender              = hasTextGlyph ? std::min(lineDescender, metrics.descender) : metrics.descender;
+        hasTextGlyph               = true;
+      }
+    };
+    includeGlyphRun(lines[index].glyphRun);
+    if(lines[index].isSplitToTwoHalves)
+    {
+      includeGlyphRun(lines[index].glyphRunSecondHalf);
+    }
+    if(hasTextGlyph)
+    {
+      const float lineTextHeight = lineAscender - lineDescender;
+      if(std::isfinite(lineTextHeight))
+      {
+        referencePixelSize = std::max(referencePixelSize, lineTextHeight);
+        if(lineReferencePixelSizes)
+        {
+          (*lineReferencePixelSizes)[index] = lineTextHeight;
+        }
+      }
+    }
+  }
+  return referencePixelSize;
+}
+
 } // namespace Text
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

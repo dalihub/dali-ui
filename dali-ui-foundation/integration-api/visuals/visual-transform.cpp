@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,25 +30,27 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-namespace Dali::Ui::Internal::Visual
+namespace DALI_NAMESPACE::Ui::Internal::Visual
 {
 namespace
 {
+// One table serves VisualOrigin and VisualPivot: it maps strings to integers, and the two
+// enumerations are required to share names, values and order.
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ALIGN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_END)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_END)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_END)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, TOP_LEFT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, TOP_CENTER)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, TOP_RIGHT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, CENTER_LEFT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, CENTER)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, CENTER_RIGHT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, BOTTOM_LEFT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, BOTTOM_CENTER)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::VisualOrigin, BOTTOM_RIGHT)
 DALI_ENUM_TO_STRING_TABLE_END(ALIGN)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(POLICY)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Visual::Transform::Policy, RELATIVE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Visual::Transform::Policy, ABSOLUTE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Integration::Visual::Transform::Policy, RELATIVE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Integration::Visual::Transform::Policy, ABSOLUTE)
 DALI_ENUM_TO_STRING_TABLE_END(POLICY)
 
 bool GetPolicyFromValue(const Property::Value& value, Vector2& policy)
@@ -63,15 +65,15 @@ bool GetPolicyFromValue(const Property::Value& value, Vector2& policy)
     const Property::Array* array = value.GetArray();
     if(array && array->Size() == 2)
     {
-      Ui::Visual::Transform::Policy::Type xPolicy =
-        static_cast<Ui::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
-      Ui::Visual::Transform::Policy::Type yPolicy =
-        static_cast<Ui::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
+      Ui::Integration::Visual::Transform::Policy::Type xPolicy =
+        static_cast<Ui::Integration::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
+      Ui::Integration::Visual::Transform::Policy::Type yPolicy =
+        static_cast<Ui::Integration::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
 
-      if(Scripting::GetEnumerationProperty<Ui::Visual::Transform::Policy::Type>(array->GetElementAt(0), POLICY_TABLE,
-                                                                                POLICY_TABLE_COUNT, xPolicy) &&
-         Scripting::GetEnumerationProperty<Ui::Visual::Transform::Policy::Type>(array->GetElementAt(1), POLICY_TABLE,
-                                                                                POLICY_TABLE_COUNT, yPolicy))
+      if(Scripting::GetEnumerationProperty<Ui::Integration::Visual::Transform::Policy::Type>(array->GetElementAt(0), POLICY_TABLE,
+                                                                                             POLICY_TABLE_COUNT, xPolicy) &&
+         Scripting::GetEnumerationProperty<Ui::Integration::Visual::Transform::Policy::Type>(array->GetElementAt(1), POLICY_TABLE,
+                                                                                             POLICY_TABLE_COUNT, yPolicy))
       {
         policy.x = static_cast<float>(xPolicy);
         policy.y = static_cast<float>(yPolicy);
@@ -88,8 +90,8 @@ Transform::Transform()
   mSize(1.0f, 1.0f),
   mExtraSize(0.0f, 0.0f),
   mOffsetSizeMode(0.0f, 0.0f, 0.0f, 0.0f),
-  mOrigin(Ui::Align::TOP_BEGIN),
-  mPivot(Ui::Align::TOP_BEGIN)
+  mOrigin(Ui::VisualOrigin::TOP_LEFT),
+  mPivot(Ui::VisualPivot::TOP_LEFT)
 {
 }
 
@@ -100,8 +102,8 @@ void Transform::SetPropertyMap(const Property::Map& map)
   mSize           = Vector2(1.0f, 1.0f);
   mExtraSize      = Vector2(0.0f, 0.0f);
   mOffsetSizeMode = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
-  mOrigin         = Ui::Align::TOP_BEGIN;
-  mPivot          = Ui::Align::TOP_BEGIN;
+  mOrigin         = Ui::VisualOrigin::TOP_LEFT;
+  mPivot          = Ui::VisualPivot::TOP_LEFT;
 
   UpdatePropertyMap(map);
 }
@@ -113,27 +115,27 @@ void Transform::UpdatePropertyMap(const Property::Map& map)
     KeyValuePair keyValue = map.GetKeyValue(i);
     switch(Transform::GetIntKey(keyValue.first))
     {
-      case Ui::Visual::Transform::Property::OFFSET:
+      case Ui::Integration::Visual::Transform::Property::OFFSET:
       {
         keyValue.second.Get(mOffset);
         break;
       }
-      case Ui::Visual::Transform::Property::SIZE:
+      case Ui::Integration::Visual::Transform::Property::SIZE:
       {
         keyValue.second.Get(mSize);
         break;
       }
-      case Ui::Visual::Transform::Property::ORIGIN:
+      case Ui::Integration::Visual::Transform::Property::ORIGIN:
       {
-        Scripting::GetEnumerationProperty<Ui::Align::Type>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT, mOrigin);
+        Scripting::GetEnumerationProperty<Ui::VisualOrigin>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT, mOrigin);
         break;
       }
-      case Ui::Visual::Transform::Property::PIVOT:
+      case Ui::Integration::Visual::Transform::Property::PIVOT:
       {
-        Scripting::GetEnumerationProperty<Ui::Align::Type>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT, mPivot);
+        Scripting::GetEnumerationProperty<Ui::VisualPivot>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT, mPivot);
         break;
       }
-      case Ui::Visual::Transform::Property::OFFSET_POLICY:
+      case Ui::Integration::Visual::Transform::Property::OFFSET_POLICY:
       {
         Vector2 policy;
         if(GetPolicyFromValue(keyValue.second, policy))
@@ -143,7 +145,7 @@ void Transform::UpdatePropertyMap(const Property::Map& map)
         }
         break;
       }
-      case Ui::Visual::Transform::Property::SIZE_POLICY:
+      case Ui::Integration::Visual::Transform::Property::SIZE_POLICY:
       {
         Vector2 policy;
         if(GetPolicyFromValue(keyValue.second, policy))
@@ -165,12 +167,12 @@ void Transform::UpdatePropertyMap(const Property::Map& map)
 void Transform::GetPropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Add(Ui::Visual::Transform::Property::OFFSET, mOffset)
-    .Add(Ui::Visual::Transform::Property::SIZE, mSize)
-    .Add(Ui::Visual::Transform::Property::ORIGIN, mOrigin)
-    .Add(Ui::Visual::Transform::Property::PIVOT, mPivot)
-    .Add(Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2(mOffsetSizeMode.x, mOffsetSizeMode.y))
-    .Add(Ui::Visual::Transform::Property::SIZE_POLICY, Vector2(mOffsetSizeMode.z, mOffsetSizeMode.w))
+  map.Add(Ui::Integration::Visual::Transform::Property::OFFSET, mOffset)
+    .Add(Ui::Integration::Visual::Transform::Property::SIZE, mSize)
+    .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, mOrigin)
+    .Add(Ui::Integration::Visual::Transform::Property::PIVOT, mPivot)
+    .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY, Vector2(mOffsetSizeMode.x, mOffsetSizeMode.y))
+    .Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY, Vector2(mOffsetSizeMode.z, mOffsetSizeMode.w))
     .Add(Ui::Integration::Visual::Transform::Property::EXTRA_SIZE, mExtraSize);
 }
 
@@ -190,7 +192,7 @@ Property::Index Transform::GetIntKey(const Property::Key& key)
 
   if(key.stringKey == PIVOT)
   {
-    return Ui::Visual::Transform::Property::PIVOT;
+    return Ui::Integration::Visual::Transform::Property::PIVOT;
   }
   else if(key.stringKey == EXTRA_SIZE)
   {
@@ -198,23 +200,23 @@ Property::Index Transform::GetIntKey(const Property::Key& key)
   }
   else if(key.stringKey == OFFSET)
   {
-    return Ui::Visual::Transform::Property::OFFSET;
+    return Ui::Integration::Visual::Transform::Property::OFFSET;
   }
   else if(key.stringKey == OFFSET_POLICY)
   {
-    return Ui::Visual::Transform::Property::OFFSET_POLICY;
+    return Ui::Integration::Visual::Transform::Property::OFFSET_POLICY;
   }
   else if(key.stringKey == ORIGIN)
   {
-    return Ui::Visual::Transform::Property::ORIGIN;
+    return Ui::Integration::Visual::Transform::Property::ORIGIN;
   }
   else if(key.stringKey == SIZE)
   {
-    return Ui::Visual::Transform::Property::SIZE;
+    return Ui::Integration::Visual::Transform::Property::SIZE;
   }
   else if(key.stringKey == SIZE_POLICY)
   {
-    return Ui::Visual::Transform::Property::SIZE_POLICY;
+    return Ui::Integration::Visual::Transform::Property::SIZE_POLICY;
   }
   return Property::INVALID_INDEX;
 }
@@ -222,15 +224,15 @@ Property::Index Transform::GetIntKey(const Property::Key& key)
 const Property::Map& Transform::GetDefaultTransformMap()
 {
   static const Property::Map sDefaultTransformMap = Dali::CreatePropertyMap({
-    {Ui::Visual::Transform::Property::OFFSET, Vector2::ZERO},
-    {Ui::Visual::Transform::Property::SIZE, Vector2::ONE},
-    {Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN},
-    {Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN},
-    {Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2::ZERO},
-    {Ui::Visual::Transform::Property::SIZE_POLICY, Vector2::ZERO},
+    {Ui::Integration::Visual::Transform::Property::OFFSET, Vector2::ZERO},
+    {Ui::Integration::Visual::Transform::Property::SIZE, Vector2::ONE},
+    {Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT},
+    {Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT},
+    {Ui::Integration::Visual::Transform::Property::OFFSET_POLICY, Vector2::ZERO},
+    {Ui::Integration::Visual::Transform::Property::SIZE_POLICY, Vector2::ZERO},
     {Ui::Integration::Visual::Transform::Property::EXTRA_SIZE, Vector2::ZERO},
   });
 
   return sDefaultTransformMap;
 }
-} // namespace Dali::Ui::Internal::Visual
+} //namespace DALI_NAMESPACE::Ui::Internal::Visual

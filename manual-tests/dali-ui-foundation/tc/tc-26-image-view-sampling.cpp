@@ -130,7 +130,7 @@ private:
 
   void OnLoadWithViewSize(bool enabled)
   {
-    mImage.SetImageLoadWithViewSize(enabled);
+    mImage.SetImageLoadWithViewSizeEnabled(enabled);
     mSizeLabel.SetText(
       Dali::String("DesiredSize: ") + Dali::String(std::to_string(mImage.GetDesiredWidth()).c_str()) +
       Dali::String("x") + Dali::String(std::to_string(mImage.GetDesiredHeight()).c_str()) +

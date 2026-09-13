@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
 
-namespace Dali::Ui::Internal::Text
+namespace DALI_NAMESPACE::Ui::Internal::Text
 {
 namespace
 {
@@ -150,4 +150,4 @@ void RemoveEditableInlineReplacementData(Ui::ViewImpl& owner)
   Internal::ViewDataImpl::Get(owner).RemoveAttachment(EDITABLE_INLINE_REPLACEMENT_DATA_ATTACHMENT_ID);
 }
 
-} // namespace Dali::Ui::Internal::Text
+} //namespace DALI_NAMESPACE::Ui::Internal::Text

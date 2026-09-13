@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-stop-node.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -188,6 +188,6 @@ private:
 
 } // namespace Gradient
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_GRADIENT_BASE_H

@@ -20,7 +20,7 @@
 #include <map>
 #include <utility>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -97,4 +97,4 @@ void WindowFramePresentationController::DispatchFramePresented(int32_t frameId)
   }
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

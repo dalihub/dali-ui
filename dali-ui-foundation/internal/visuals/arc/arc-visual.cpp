@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -67,6 +67,8 @@ ArcVisual::ArcVisual(VisualFactoryCache& factoryCache)
   mSweepAngleIndex(Property::INVALID_INDEX),
   mCapType(Dali::Ui::Integration::ArcVisual::Cap::BUTT)
 {
+  // This visual's shader emits straight (non pre-multiplied) alpha, so opt out of the default.
+  mImpl->mFlags &= ~Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 ArcVisual::~ArcVisual()
@@ -169,7 +171,7 @@ void ArcVisual::DoCreatePropertyMap(Property::Map& map) const
   }
 
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::ARC);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::ARC);
   map.Insert(Ui::Integration::ArcVisual::Property::THICKNESS, thickness);
   map.Insert(Ui::Integration::ArcVisual::Property::START_ANGLE, startAngle);
   map.Insert(Ui::Integration::ArcVisual::Property::SWEEP_ANGLE, sweepAngle);
@@ -192,7 +194,7 @@ void ArcVisual::OnSetTransform()
 
     if(mImpl->mTransformMapChanged)
     {
-      mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+      mImpl->SetTransformUniforms(mImpl->mRenderer);
     }
   }
 }
@@ -246,11 +248,11 @@ void ArcVisual::OnInitialize()
   mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 }
 
 } // namespace Internal
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

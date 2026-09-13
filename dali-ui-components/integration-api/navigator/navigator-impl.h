@@ -28,7 +28,7 @@
 #include <dali-ui-components/public-api/navigator/navigation-transition-spec.h>
 #include <dali-ui-components/public-api/navigator/navigator.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -198,4 +198,4 @@ inline const Integration::NavigatorImpl& GetImpl(const Ui::Navigator& navigator)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

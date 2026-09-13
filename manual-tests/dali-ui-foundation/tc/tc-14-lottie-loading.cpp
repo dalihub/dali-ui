@@ -132,7 +132,7 @@ public:
     content.Add(MakeButtonRow({
       MakeButton("Set\nPlaceholder",   [this] { mView.SetPlaceholderUrl(IMG_PLACEHOLDER); UpdateLabel(); }),
       MakeButton("Clear\nPlaceholder", [this] { mView.SetPlaceholderUrl(""); UpdateLabel(); }),
-      MakeButton("Reload\nURL",        [this] { mView.SetResourceUrl(LOTTIE_WALKER); mView.Play(); UpdateLabel(); }),
+      MakeButton("Reload\nURL",        [this] { mView.SetResourceUrl(LOTTIE_WALKER); mView.Reload(); mView.Play(); UpdateLabel(); }),
       MakeButton("Bad\nURL",           [this] { mView.SetResourceUrl(LOTTIE_MISSING); mView.Play(); UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({

@@ -50,12 +50,12 @@ int UtcDaliSelectableLottieColorBindingRoundTripP(void)
 {
   UiTestApplication application;
   Binding           binding("radio_outline.outline_stroke.color",
-                            LottieAnimation::VectorProperty::STROKE_COLOR,
+                            LottieAnimation::ContentProperty::STROKE_COLOR,
                             ColorPolicy::SELECTED_IN_FRAME_RANGE,
                             FrameRange(7, 26));
 
   DALI_TEST_EQUALS(binding.GetKeyPath(), std::string("radio_outline.outline_stroke.color"), TEST_LOCATION);
-  DALI_TEST_CHECK(binding.GetProperty() == LottieAnimation::VectorProperty::STROKE_COLOR);
+  DALI_TEST_CHECK(binding.GetProperty() == LottieAnimation::ContentProperty::STROKE_COLOR);
   DALI_TEST_CHECK(binding.GetColorPolicy() == ColorPolicy::SELECTED_IN_FRAME_RANGE);
   DALI_TEST_EQUALS(binding.GetSelectedColorRange().startFrame, 7, TEST_LOCATION);
   DALI_TEST_EQUALS(binding.GetSelectedColorRange().endFrame, 26, TEST_LOCATION);
@@ -66,7 +66,7 @@ int UtcDaliSelectableLottieColorBindingReverseRangeNormalizesP(void)
 {
   UiTestApplication application;
   Binding           binding("outline",
-                            LottieAnimation::VectorProperty::STROKE_COLOR,
+                            LottieAnimation::ContentProperty::STROKE_COLOR,
                             ColorPolicy::SELECTED_IN_FRAME_RANGE,
                             FrameRange(26, 7));
 
@@ -78,13 +78,13 @@ int UtcDaliSelectableLottieColorBindingReverseRangeNormalizesP(void)
 int UtcDaliSelectableLottieColorBindingCopyMoveP(void)
 {
   UiTestApplication application;
-  Binding           source("inner", LottieAnimation::VectorProperty::FILL_COLOR, ColorPolicy::ALWAYS_SELECTED);
+  Binding           source("inner", LottieAnimation::ContentProperty::FILL_COLOR, ColorPolicy::ALWAYS_SELECTED);
   Binding           copied(source);
 
   DALI_TEST_EQUALS(copied.GetKeyPath(), std::string("inner"), TEST_LOCATION);
   DALI_TEST_CHECK(copied.GetColorPolicy() == ColorPolicy::ALWAYS_SELECTED);
 
-  Binding assigned("temporary", LottieAnimation::VectorProperty::FILL_COLOR, ColorPolicy::ALWAYS_DESELECTED);
+  Binding assigned("temporary", LottieAnimation::ContentProperty::FILL_COLOR, ColorPolicy::ALWAYS_DESELECTED);
   assigned = source;
   DALI_TEST_EQUALS(assigned.GetKeyPath(), std::string("inner"), TEST_LOCATION);
 
@@ -96,7 +96,7 @@ int UtcDaliSelectableLottieColorBindingCopyMoveP(void)
   copied = source;
   DALI_TEST_EQUALS(copied.GetKeyPath(), std::string("inner"), TEST_LOCATION);
 
-  Binding moveAssigned("other", LottieAnimation::VectorProperty::STROKE_COLOR, ColorPolicy::BY_SELECTION_STATE);
+  Binding moveAssigned("other", LottieAnimation::ContentProperty::STROKE_COLOR, ColorPolicy::BY_SELECTION_STATE);
   moveAssigned = std::move(assigned);
   DALI_TEST_EQUALS(moveAssigned.GetKeyPath(), std::string("inner"), TEST_LOCATION);
   DALI_TEST_ASSERTION(assigned.GetProperty(), MOVED_FROM_ASSERTION);
@@ -107,7 +107,7 @@ int UtcDaliSelectableLottieColorBindingEmptyKeyPathN(void)
 {
   UiTestApplication application;
   DALI_TEST_ASSERTION(
-    Binding("", LottieAnimation::VectorProperty::FILL_COLOR, ColorPolicy::BY_SELECTION_STATE),
+    Binding("", LottieAnimation::ContentProperty::FILL_COLOR, ColorPolicy::BY_SELECTION_STATE),
     "key path must not be empty");
   END_TEST;
 }
@@ -116,7 +116,7 @@ int UtcDaliSelectableLottieColorBindingNonColorPropertyN(void)
 {
   UiTestApplication application;
   DALI_TEST_ASSERTION(
-    Binding("inner", LottieAnimation::VectorProperty::FILL_OPACITY, ColorPolicy::BY_SELECTION_STATE),
+    Binding("inner", LottieAnimation::ContentProperty::FILL_OPACITY, ColorPolicy::BY_SELECTION_STATE),
     "supports only fill and stroke color properties");
   END_TEST;
 }

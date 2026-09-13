@@ -9,3 +9,6 @@ msgstr "موجز الظهيرة"
 
 msgid "IDS_TEXT_GRADIENT_LOCALIZATION_CARD_DESCRIPTION"
 msgstr "<annotation style='muted'>اليوم</annotation> الطقس صافٍ <annotation style='muted'>ومناسب جدًا لممارسة الرياضة.</annotation>"
+
+msgid "IDS_TEXT_GRADIENT_LOCALIZATION_GRADIENT_SPAN_CARD_DESCRIPTION"
+msgstr "اليوم <annotation style='gradient'>الطقس صافٍ</annotation> ومناسب جدًا لممارسة الرياضة."

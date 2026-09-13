@@ -21,7 +21,7 @@
 
 #include <optional>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 // Tracks the window state the window system reports, and resolves the launch
@@ -78,4 +78,4 @@ private:
   bool                       mNativeMinimized{false};
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

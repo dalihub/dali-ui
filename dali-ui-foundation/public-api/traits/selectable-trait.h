@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/traits/interactive-trait.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -179,4 +179,4 @@ protected:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

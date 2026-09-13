@@ -41,6 +41,7 @@
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 #include <dali-ui-foundation/internal/text/text-selection-handle-controller.h>
@@ -65,7 +66,7 @@ const char* MIME_TYPE_HTML       = "application/xhtml+xml";
 
 } // namespace
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
@@ -1783,13 +1784,44 @@ void Controller::Impl::UpdateSelectionHandle(HandleType handleType, const Cursor
   SelectionHandleController::Update(*this, handleType, cursorInfo);
 }
 
+float Controller::Impl::GetHorizontalScrollContentRight(const Vector2& layoutSize)
+{
+  float contentRight = layoutSize.width + mModel->mAlignmentOffset;
+  if(Layout::Engine::SINGLE_LINE_BOX == mLayoutEngine.GetLayout() && mEventData && mEventData->mDecorator)
+  {
+    const bool cursorWillBeRestoredAfterPan =
+      EventData::TEXT_PANNING == mEventData->mState &&
+      (EventData::IsEditingState(mEventData->mPreviousState) || EventData::INACTIVE == mEventData->mPreviousState ||
+       EventData::INTERRUPTED == mEventData->mPreviousState);
+    const bool cursorAffectsBounds = EventData::IsEditingState(mEventData->mState) ||
+                                     EventData::GRAB_HANDLE_PANNING == mEventData->mState ||
+                                     cursorWillBeRestoredAfterPan;
+    if(cursorAffectsBounds)
+    {
+      CursorInfo cursorInfo;
+      GetCursorPosition(mEventData->mPrimaryCursorPosition, cursorInfo);
+      float cursorRight = cursorInfo.primaryPosition.x;
+      if(cursorInfo.isSecondaryCursor)
+      {
+        cursorRight = std::max(cursorRight, cursorInfo.secondaryPosition.x);
+      }
+      cursorRight += mEventData->mDecorator->GetEffectiveCursorWidth();
+      contentRight = std::max(contentRight, cursorRight);
+    }
+  }
+  return contentRight;
+}
+
 void Controller::Impl::ClampHorizontalScroll(const Vector2& layoutSize)
 {
   // Clamp between -space & -alignment offset.
 
-  if(layoutSize.width > mModel->mVisualModel->mControlSize.width)
+  const float controlWidth = mModel->mVisualModel->mControlSize.width;
+  const float contentRight = GetHorizontalScrollContentRight(layoutSize);
+
+  if(layoutSize.width > controlWidth || contentRight > controlWidth)
   {
-    const float space         = (layoutSize.width - mModel->mVisualModel->mControlSize.width) + mModel->mAlignmentOffset;
+    const float space         = contentRight - controlWidth;
     mModel->mScrollPosition.x = (mModel->mScrollPosition.x < -space) ? -space : mModel->mScrollPosition.x;
     mModel->mScrollPosition.x =
       (mModel->mScrollPosition.x > -mModel->mAlignmentOffset) ? -mModel->mAlignmentOffset : mModel->mScrollPosition.x;
@@ -2085,9 +2117,11 @@ bool Controller::Impl::IsScrollable(const Vector2& displacement)
 
       if(isHorizontalScrollEnabled)
       {
-        const float scrollPositionX = std::max(mModel->mScrollPosition.x, -(layoutSize.width - targetSize.width));
-        const float positionX       = scrollPositionX + displacement.x;
-        if(layoutSize.width > targetSize.width && -positionX > 0.f && -positionX < layoutSize.width - targetSize.width)
+        const float scrollableLayoutWidth = GetHorizontalScrollContentRight(layoutSize) - mModel->mAlignmentOffset;
+        const float horizontalScrollRange = scrollableLayoutWidth - targetSize.width;
+        const float scrollPositionX       = std::max(mModel->mScrollPosition.x, -horizontalScrollRange);
+        const float positionX             = scrollPositionX + displacement.x;
+        if(scrollableLayoutWidth > targetSize.width && -positionX > 0.f && -positionX < horizontalScrollRange)
         {
           isScrollable = true;
         }
@@ -2712,6 +2746,7 @@ void Controller::Impl::ClearFontData()
 void Controller::Impl::ClearStyleData()
 {
   mModel->mLogicalModel->mColorRuns.Clear();
+  mModel->mLogicalModel->mGradientSpanData.reset();
   mModel->mLogicalModel->mBackgroundColorRuns.Clear();
   mModel->mLogicalModel->ClearFontDescriptionRuns();
   mModel->mLogicalModel->ClearStrikethroughRuns();
@@ -2729,4 +2764,4 @@ void Controller::Impl::ResetScrollPosition()
   }
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text

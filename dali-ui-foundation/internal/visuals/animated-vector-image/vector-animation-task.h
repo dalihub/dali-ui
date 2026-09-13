@@ -33,7 +33,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -60,7 +60,7 @@ public:
   using ResourceReadySignalType = Signal<void(ResourceStatus)>;
 
   using TimePoint           = std::chrono::time_point<std::chrono::steady_clock>;
-  using DynamicPropertyType = std::vector<Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo>;
+  using DynamicPropertyType = std::vector<Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicProperty>;
 
   /**
    * Flags for re-sending data to the vector animation thread
@@ -201,10 +201,10 @@ public:
   uint32_t GetCurrentFrameNumber() const;
 
   /**
-   * @brief Retrieves the total frame number of the animation.
-   * @return The total frame number
+   * @brief Retrieves how many frames the animation has.
+   * @return The number of frames
    */
-  uint32_t GetTotalFrameNumber() const;
+  uint32_t GetTotalFrameCount() const;
 
   /**
    * @brief Gets the default size of the file,.
@@ -452,6 +452,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VECTOR_ANIMATION_TASK_H

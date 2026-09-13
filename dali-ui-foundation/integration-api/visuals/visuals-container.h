@@ -2,7 +2,7 @@
 #define DALI_UI_VISUAL_OBJECTS_CONTAINER_H
 
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,11 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -43,20 +44,20 @@ namespace Integration
  * @brief VisualsContainer is a container for visual objects for dali-ui specific policy.
  *
  * For each VisualBaseContainer, there is a corresponding view.
- * Each view can has only one VisualsContainer per each ContainerRangeType.
+ * Each view can has only one VisualsContainer per each DepthLayer.
  *
  * It is used to manage visual objects properties to owned view;
  * e.g. SiblingOrder of visual objects to DepthIndex of visual.
  *
  * To avoid the collision between internal visual logic and dali-ui specific policy,
- * there is some limitation of visual object counts per each ContainerRangeType.
+ * there is some limitation of visual object counts per each DepthLayer.
  *
- * For example, if ContainerRangeType is ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
+ * For example, if DepthLayer is DepthLayer::BACKGROUND,
  * it will use visual object's depth index only between
  * Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND and Dali::Ui::Integration::DepthIndex::Ranges::CONTENT.
  * If user try to add over the Dali::Ui::Integration::DepthIndex::Ranges::CONTENT, it will be ignored.
  */
-class VisualsContainer : public Dali::BaseHandle
+class DALI_UI_API VisualsContainer : public Dali::BaseHandle
 {
 public:
   /**
@@ -77,11 +78,11 @@ public:
    * @brief Creates a VisualsContainer object.
    *
    * @param[in] view The view that owns this VisualsContainer.
-   * @param[in] rangeType The range type of this VisualsContainer.
+   * @param[in] depthLayer The depth layer of this VisualsContainer.
    * @return The newly created visual objects container
-   * @post The view should not create another VisualsContainer for each rangeType.
+   * @post The view should not create another VisualsContainer for each depthLayer.
    */
-  static VisualsContainer New(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType);
+  static VisualsContainer New(Dali::Ui::View view, Dali::Ui::Visual::DepthLayer depthLayer);
 
 public: ///< Public API
   /**
@@ -92,11 +93,11 @@ public: ///< Public API
   Dali::Ui::View GetOwner() const;
 
   /**
-   * @brief Gets the range type of VisualsContainer.
+   * @brief Gets the depth layer of VisualsContainer.
    *
-   * @return The range type of VisualsContainer.
+   * @return The depth layer of VisualsContainer.
    */
-  Dali::Ui::Integration::Visual::InternalContainerRangeType GetContainerRangeType() const;
+  Dali::Ui::Visual::DepthLayer GetDepthLayer() const;
 
   /**
    * @brief Gets the number of visual objects in the container.
@@ -177,6 +178,6 @@ public: // Not intended for application developers
 };
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VISUAL_OBJECTS_CONTAINER_H

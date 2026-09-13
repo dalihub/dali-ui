@@ -26,7 +26,7 @@
 #include <dali-ui-components/integration-api/chart/chart-series-impl.h>
 #include <dali-ui-components/public-api/chart/bar-series.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -135,4 +135,4 @@ inline const Integration::BarSeries& GetImplementation(const Ui::BarSeries& hand
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

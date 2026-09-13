@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <memory.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -358,4 +358,4 @@ void GetCharactersDirection(TextAbstraction::BidirectionalSupport&       bidirec
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

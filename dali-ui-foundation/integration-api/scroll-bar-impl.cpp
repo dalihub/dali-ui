@@ -34,7 +34,7 @@
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -649,4 +649,4 @@ void ScrollBarImpl::UpdateHBarSize(float ratio)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

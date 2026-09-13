@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/text-view-interface.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -36,4 +36,4 @@ ViewInterface::~ViewInterface()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

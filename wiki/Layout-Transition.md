@@ -182,6 +182,95 @@ Notes and limits:
 
 ---
 
+## Per-view override (self transition)
+
+`View::SetSelfLayoutTransition(t)` attaches a transition that governs **that
+view itself** as a layout child. It takes precedence over the transition its
+parent attached with `SetLayoutTransition`, and over any `SUBTREE`-scope
+ancestor transition.
+
+Precedence, evaluated per (view, event) at dispatch time:
+
+1. the view's own self transition — terminal;
+2. the direct parent's transition — terminal;
+3. the closest `SUBTREE`-scope ancestor that carries the slot's effect.
+
+Each level terminates on **attachment**, never per slot. A self transition that
+configures only CHANGE does not inherit the parent's ENTER: the unconfigured
+slots simply do not animate (CHANGE snaps, EXIT unparents immediately, ENTER is
+skipped). This is the same wholesale rule levels 2 and 3 already use.
+
+### Three states
+
+| State | Spelling | Meaning |
+|---|---|---|
+| unset (default) | never called, or detached with an uninitialized handle | inherit — the parent / ancestor rules apply |
+| override | `SetSelfLayoutTransition(t)` | `t` alone governs every slot of this view |
+| explicit opt-out | `SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH)` | transitions pass through this view: CHANGE snaps, EXIT unparents immediately, ENTER is skipped and nothing is settled |
+
+An uninitialized handle means "inherit again", **not** "never animate".
+
+```cpp
+LayoutTransition slow = LayoutTransition::New();
+slow.SetChangeTiming(LayoutTransitionTiming{Duration(0.8f), AlphaFunction(AlphaFunction::EASE_IN_OUT), Duration()});
+item.SetSelfLayoutTransition(slow);                                    // override
+other.SetLayoutTransitionMode(LayoutTransitionMode::PASS_THROUGH);     // opt out (policy)
+other.SetLayoutTransitionMode(LayoutTransitionMode::AUTO);             // back to inheriting
+other.SetSelfLayoutTransition(LayoutTransition());                     // detach the handle
+```
+
+### Per-view policy (`LayoutTransitionMode`)
+
+`View::SetLayoutTransitionMode` declares a per-view **policy**. It is read
+*before* any transition handle is resolved, so **policy beats value on the same
+view**: a view whose mode is not `AUTO` is not animated even by the handle
+it attached itself.
+
+| Mode | Effect |
+|---|---|
+| `AUTO` (default) | normal resolution: own self transition > direct parent's > closest `SUBTREE` ancestor's |
+| `PASS_THROUGH` | layout transitions pass through this view: it is never their target, not even of the handle it attached itself. Inheritance keeps flowing to its descendants, and its own **children-role** transition keeps governing its children |
+| `ISOLATE_SUBTREE` | this view and its whole subtree are isolated from every owner **at or above** it — this view's own children-role transition included: nothing from above animates anything inside |
+
+`ISOLATE_SUBTREE` cuts only the chains that come **from above** — those that
+cross the gate or start at it. Declarations made strictly **below** the gate
+still work: a descendant's self transition still animates it, and a descendant's
+children-role transition still governs that descendant's children.
+
+- **Handles are never detached by a mode change.** `GetSelfLayoutTransition()`
+  keeps returning the attached handle whatever the mode, and `AUTO` restores its
+  effect with no re-attach.
+- **A mode change is not a cancellation.** In-flight transitions finish on their
+  own timing, exactly as when a handle is replaced; the new policy applies from
+  the next per-(view, slot) event. Returning to `AUTO` fires no retroactive
+  ENTER for an add that happened under the previous mode.
+- An uninitialized handle still means "inherit again", **not** "never animate" —
+  that is what `PASS_THROUGH` is for.
+
+### Notes and limits
+
+- Works standalone: no ancestor needs a transition.
+- One view can carry both roles; `SetLayoutTransition` governs its children,
+  `SetSelfLayoutTransition` governs itself.
+- `SetReflowScope` is ignored in the self role.
+- Lifecycle callbacks fire from the winner only. A view governed by its own
+  transition never fires its parent's `OnStart` / `OnFinished` — code that counts
+  child completions on the parent must account for that.
+- EXIT geometry is unchanged: the ghost stays under the direct parent, which is
+  also the unparent target; only the effect source changes.
+- CHANGE cause: a self-governed **direct** child of a transition-bearing parent
+  keeps the full cause (`REORDERED` / `SIBLING_*` / `WINDOW_RESIZED`). When no
+  ancestor carries a transition, causes degrade to `OTHER` (or `WINDOW_RESIZED`
+  during a resize), exactly like `SUBTREE`-inherited descendants — so configure a
+  **default** CHANGE timing for a standalone self transition.
+- Initial mount follows the same anchor as the children role (the direct
+  parent's first arrange) and the same opt-in, read from the **self** transition's
+  `SetEnterOnInitialMount`.
+- A self transition is inert while the view has no parent View.
+- Replacing or detaching the handle does not cancel in-flight transitions.
+
+---
+
 ## Lifecycle and removal
 
 `View::Remove(child, RemovePolicy::ANIMATE_EXIT)` performs a **deferred
@@ -449,6 +538,9 @@ while a secondary visual effect follows `rawProgress`.
   `LayoutTransitionTiming`, `LayoutAnimatorContext`.
 - `samples/layout-transition/` — runnable spec-mode and animator-mode
   examples.
+- `samples/layout-transition/layout-transition-self-override-example.cpp` —
+  per-view override, the `LayoutTransitionMode::PASS_THROUGH` opt-out, and the
+  return to inheritance.
 - `automated-tests/src/dali-ui-foundation/utc-Dali-LayoutTransition.cpp` —
   unit tests covering the handle API surface.
 

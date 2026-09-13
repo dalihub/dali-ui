@@ -18,9 +18,10 @@
  *
  */
 
+#include <dali/public-api/common/dali-namespace.h>
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -66,6 +67,6 @@ enum class Direction : uint8_t
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_ENUMERATIONS_INTERNAL_H

@@ -28,7 +28,7 @@
 #define DALI_ASSERT_VALID_SHADOW_STACK(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from ShadowStack object")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -196,6 +196,6 @@ const Shadow& ShadowStack::GetShadowAt(uint32_t index) const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_SHADOW_STACK

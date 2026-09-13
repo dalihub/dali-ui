@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
 #include <dali-ui-foundation/internal/text/async-text/text-loading-task.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -76,7 +76,7 @@ public:
   /**
    * @copydoc Dali::AsyncTextManager::RequestLoad()
    */
-  uint32_t RequestLoad(AsyncTextParameters& parameters, TextLoadObserver* observer);
+  uint32_t RequestLoad(AsyncTextParameters&& parameters, TextLoadObserver* observer);
 
   /**
    * @copydoc Dali::AsyncTextManager::RequestCancel()
@@ -109,22 +109,18 @@ private:
   {
     LoadElement()
     : mTask(),
-      mObserver(nullptr),
-      mParameters()
+      mObserver(nullptr)
     {
     }
 
-    LoadElement(Ui::Internal::TextLoadingTaskPtr task, TextLoadObserver* observer,
-                const AsyncTextParameters& parameters)
+    LoadElement(Ui::Internal::TextLoadingTaskPtr task, TextLoadObserver* observer)
     : mTask(task),
-      mObserver(observer),
-      mParameters(parameters)
+      mObserver(observer)
     {
     }
 
-    Ui::Internal::TextLoadingTaskPtr mTask;       ///< Task.
-    TextLoadObserver*                mObserver;   ///< Observer of text load.
-    AsyncTextParameters              mParameters; ///< Text parameters to load.
+    Ui::Internal::TextLoadingTaskPtr mTask;     ///< Task.
+    TextLoadObserver*                mObserver; ///< Observer of text load.
   };
 
   /**
@@ -188,6 +184,6 @@ inline static const Internal::AsyncTextManager& GetImplementation(const AsyncTex
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_ASYNC_TEXT_MANAGER_IMPL_H

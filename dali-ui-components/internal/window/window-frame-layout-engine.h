@@ -18,7 +18,7 @@
 #include <dali-ui-components/public-api/window/window-frame-decoration.h>
 #include <dali-ui-components/public-api/window/window-frame-geometry.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 class WindowFrameLayoutResult
 {
@@ -136,4 +136,4 @@ public:
 
 bool IsSameWindowFrameGeometry(const WindowFrameGeometry& lhs, const WindowFrameGeometry& rhs);
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

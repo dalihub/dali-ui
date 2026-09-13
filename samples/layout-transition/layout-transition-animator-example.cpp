@@ -164,6 +164,9 @@ public:
     const float y   = ctx.fromBounds.y      + (ctx.toBounds.y - ctx.fromBounds.y) * p;
     const float w   = ctx.fromBounds.width  + (ctx.toBounds.width  - ctx.fromBounds.width)  * p;
     const float h   = ctx.fromBounds.height + (ctx.toBounds.height - ctx.fromBounds.height) * p;
+    // CHANGE can supersede an in-flight ENTER. Animator-owned visual
+    // properties are preserved on cancellation, so settle ENTER's fade here.
+    actor.SetProperty(Actor::Property::OPACITY, 1.0f);
     actor.SetPositionX(x);
     actor.SetPositionY(y);
     actor.SetSizeWidth(w);

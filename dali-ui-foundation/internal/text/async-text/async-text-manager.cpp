@@ -18,10 +18,12 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
 
+#include <utility>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -45,9 +47,9 @@ AsyncTextManager AsyncTextManager::Get()
   return Internal::AsyncTextManager::Get();
 }
 
-uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoadObserver* observer)
+uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters parameters, TextLoadObserver* observer)
 {
-  return GetImplementation(*this).RequestLoad(parameters, observer);
+  return GetImplementation(*this).RequestLoad(std::move(parameters), observer);
 }
 
 void AsyncTextManager::RequestCancel(uint32_t taskId)
@@ -59,4 +61,4 @@ void AsyncTextManager::RequestCancel(uint32_t taskId)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

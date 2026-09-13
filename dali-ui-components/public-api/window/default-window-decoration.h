@@ -25,7 +25,7 @@
 #include <dali-ui-components/public-api/window/window-frame.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -374,4 +374,4 @@ public: // Internal
   explicit DALI_INTERNAL DefaultWindowDecoration(Internal::DefaultWindowDecorationImpl* impl);
 };
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

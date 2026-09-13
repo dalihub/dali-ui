@@ -26,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-thread.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -148,4 +148,4 @@ void VectorAnimationManager::Process(bool postProcessor)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

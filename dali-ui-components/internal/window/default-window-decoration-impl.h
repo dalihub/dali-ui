@@ -21,7 +21,7 @@
 
 #include <vector>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace Internal
 {
@@ -103,4 +103,4 @@ inline const Internal::DefaultWindowDecorationImpl& GetImplementation(const Defa
   return static_cast<const Internal::DefaultWindowDecorationImpl&>(handle.GetBaseObject());
 }
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

@@ -33,17 +33,16 @@
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-signals-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -74,7 +73,7 @@ ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("batchSize",             INTEGER, BATC
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("cacheSize",             INTEGER, CACHE_SIZE)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("frameDelay",            INTEGER, FRAME_DELAY)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("imageColor",            VECTOR4, IMAGE_COLOR)
-ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("preMultipliedAlpha",    BOOLEAN, PRE_MULTIPLIED_ALPHA)
+ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("preMultiplyAlphaOnLoad",    BOOLEAN, PRE_MULTIPLY_ALPHA_ON_LOAD)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("fittingMode",           INTEGER, FITTING_MODE)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("samplingMode",          INTEGER, SAMPLING_MODE)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("desiredWidth",          INTEGER, DESIRED_WIDTH)
@@ -85,7 +84,7 @@ ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("synchronousLoading",    BOOLEAN, SYNC
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("imageLoadWithViewSize", BOOLEAN, IMAGE_LOAD_WITH_VIEW_SIZE)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("alphaMaskUrl",          STRING,  ALPHA_MASK_URL)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("cropToMask",            BOOLEAN, CROP_TO_MASK)
-ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("maskingMode",           INTEGER, MASKING_MODE)
+ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("maskingPolicy",           INTEGER, MASKING_POLICY)
 ANIMATED_IMAGE_VIEW_PROPERTY_REGISTRATION("placeholderImage",      STRING,  PLACEHOLDER_IMAGE)
 
 DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui::Integration, AnimatedImageViewImpl, "pixelArea", VECTOR4, PIXEL_AREA)
@@ -107,7 +106,7 @@ AnimatedImageViewImpl::AnimatedImageViewImpl()
   mStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME),
   mFittingMode(Ui::Image::FittingMode::FILL),
   mSamplingMode(Ui::Image::SamplingMode::LINEAR),
-  mMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING),
+  mMaskingPolicy(Ui::Image::MaskingPolicy::ON_LOADING),
   mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mLoopCount(-1),
@@ -117,7 +116,7 @@ AnimatedImageViewImpl::AnimatedImageViewImpl()
   mDesiredWidth(0),
   mDesiredHeight(0),
   mFrameSpeedFactor(1.0f),
-  mPreMultipliedAlpha(false), ///< Default as false for AnimatedImageView.
+  mPreMultiplyAlphaOnLoad(false), ///< Default as false for AnimatedImageView.
   mImageLoadWithViewSize(false),
   mCropToMask(false),
   mSynchronousLoading(false),
@@ -279,12 +278,12 @@ void AnimatedImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property
         }
         break;
       }
-      case AnimatedImageViewImpl::Property::PRE_MULTIPLIED_ALPHA:
+      case AnimatedImageViewImpl::Property::PRE_MULTIPLY_ALPHA_ON_LOAD:
       {
         bool preMultiplied;
         if(value.Get(preMultiplied))
         {
-          impl.SetPreMultipliedAlpha(preMultiplied);
+          impl.SetPreMultiplyAlphaOnLoadEnabled(preMultiplied);
         }
         break;
       }
@@ -311,7 +310,7 @@ void AnimatedImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property
         bool enabled;
         if(value.Get(enabled))
         {
-          impl.SetImageLoadWithViewSize(enabled);
+          impl.SetImageLoadWithViewSizeEnabled(enabled);
         }
         break;
       }
@@ -333,12 +332,12 @@ void AnimatedImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property
         }
         break;
       }
-      case AnimatedImageViewImpl::Property::MASKING_MODE:
+      case AnimatedImageViewImpl::Property::MASKING_POLICY:
       {
         int mode;
         if(value.Get(mode))
         {
-          impl.SetMaskingMode(static_cast<Ui::Image::MaskingType>(mode));
+          impl.SetMaskingPolicy(static_cast<Ui::Image::MaskingPolicy>(mode));
         }
         break;
       }
@@ -365,7 +364,7 @@ void AnimatedImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property
               urls.PushBack(url);
             }
           }
-          impl.SetResourceUrls(urls);
+          impl.SetResourceUrlList(urls);
         }
         break;
       }
@@ -430,8 +429,8 @@ Dali::Property::Value AnimatedImageViewImpl::GetProperty(Dali::BaseObject* objec
       case AnimatedImageViewImpl::Property::SYNCHRONOUS_LOADING:
         value = impl.IsSynchronousLoading();
         break;
-      case AnimatedImageViewImpl::Property::PRE_MULTIPLIED_ALPHA:
-        value = impl.IsPreMultipliedAlpha();
+      case AnimatedImageViewImpl::Property::PRE_MULTIPLY_ALPHA_ON_LOAD:
+        value = impl.IsPreMultiplyAlphaOnLoadEnabled();
         break;
       case AnimatedImageViewImpl::Property::FITTING_MODE:
         value = static_cast<int>(impl.GetFittingMode());
@@ -448,8 +447,8 @@ Dali::Property::Value AnimatedImageViewImpl::GetProperty(Dali::BaseObject* objec
       case AnimatedImageViewImpl::Property::CROP_TO_MASK:
         value = impl.IsCropToMask();
         break;
-      case AnimatedImageViewImpl::Property::MASKING_MODE:
-        value = static_cast<int>(impl.GetMaskingMode());
+      case AnimatedImageViewImpl::Property::MASKING_POLICY:
+        value = static_cast<int>(impl.GetMaskingPolicy());
         break;
       case AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE:
         value = impl.GetPlaceholderUrl();
@@ -457,7 +456,7 @@ Dali::Property::Value AnimatedImageViewImpl::GetProperty(Dali::BaseObject* objec
       case AnimatedImageViewImpl::Property::IMAGE_URLS:
       {
         Dali::Property::Array array;
-        const auto&           urls = impl.GetResourceUrls();
+        const auto&           urls = impl.GetResourceUrlList();
         for(auto i = 0u; i < urls.Size(); ++i)
         {
           array.PushBack(urls[i]);
@@ -489,13 +488,21 @@ MeasuredSize AnimatedImageViewImpl::OnMeasure(float widthConstraint, float heigh
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
+  float layoutW = GetRequestedWidth();
+  float layoutH = GetRequestedHeight();
+
+  // Both dimensions are already resolved, so measuring the image cannot affect
+  // the view size. Still create the visual so asynchronous loading can start.
+  if(layoutW > 0.0f && layoutH > 0.0f)
+  {
+    EnsureVisualUpdated();
+    return MeasuredSize(layoutW * s, layoutH * s);
+  }
+
   Vector2 naturalSize = GetNaturalSize().GetVectorXY();
 
   float w = naturalSize.width;
   float h = naturalSize.height;
-
-  float layoutW = GetRequestedWidth();
-  float layoutH = GetRequestedHeight();
 
   if(layoutW == MATCH_PARENT)
   {
@@ -541,11 +548,7 @@ LayoutRect AnimatedImageViewImpl::OnArrange(const LayoutRect& bounds)
 Vector3 AnimatedImageViewImpl::GetNaturalSize() const
 {
   AnimatedImageViewImpl& self = *const_cast<AnimatedImageViewImpl*>(this);
-  if(self.mVisualDirty)
-  {
-    self.mVisualDirty = false;
-    self.UpdateVisual();
-  }
+  self.EnsureVisualUpdated();
 
   Vector2 naturalSize;
   if(self.mVisual)
@@ -553,6 +556,15 @@ Vector3 AnimatedImageViewImpl::GetNaturalSize() const
     self.mVisual.GetNaturalSize(naturalSize);
   }
   return Vector3(naturalSize);
+}
+
+void AnimatedImageViewImpl::EnsureVisualUpdated()
+{
+  if(mVisualDirty)
+  {
+    mVisualDirty = false;
+    UpdateVisual();
+  }
 }
 
 void AnimatedImageViewImpl::SetResourceUrl(const Dali::String& url)
@@ -716,7 +728,7 @@ Ui::AnimatedImage::PlayState AnimatedImageViewImpl::GetPlayState() const
   {
     Dali::Property::Map map;
     mVisual.CreatePropertyMap(map);
-    if(auto* value = map.Find(Ui::ImageVisualPropertyIndex::PLAY_STATE))
+    if(auto* value = map.Find(Ui::Integration::ImageVisual::Property::PLAY_STATE))
     {
       return static_cast<Ui::AnimatedImage::PlayState>(value->Get<int>());
     }
@@ -724,13 +736,13 @@ Ui::AnimatedImage::PlayState AnimatedImageViewImpl::GetPlayState() const
   return Ui::AnimatedImage::PlayState::STOPPED;
 }
 
-int AnimatedImageViewImpl::GetCurrentFrame() const
+int AnimatedImageViewImpl::GetCurrentFrameNumber() const
 {
   if(mVisual)
   {
     Dali::Property::Map map;
     mVisual.CreatePropertyMap(map);
-    if(auto* value = map.Find(Ui::ImageVisualPropertyIndex::CURRENT_FRAME_NUMBER))
+    if(auto* value = map.Find(Ui::Integration::ImageVisual::Property::CURRENT_FRAME_NUMBER))
     {
       return value->Get<int>();
     }
@@ -738,13 +750,13 @@ int AnimatedImageViewImpl::GetCurrentFrame() const
   return 0;
 }
 
-int AnimatedImageViewImpl::GetTotalFrame() const
+int AnimatedImageViewImpl::GetTotalFrameCount() const
 {
   if(mVisual)
   {
     Dali::Property::Map map;
     mVisual.CreatePropertyMap(map);
-    if(auto* value = map.Find(Ui::ImageVisualPropertyIndex::TOTAL_FRAME_NUMBER))
+    if(auto* value = map.Find(Ui::Integration::ImageVisual::Property::TOTAL_FRAME_COUNT))
     {
       return value->Get<int>();
     }
@@ -757,7 +769,7 @@ Dali::Signal<void(Dali::Ui::View)>& AnimatedImageViewImpl::AnimationFinishedSign
   return mAnimationFinishedSignal;
 }
 
-void AnimatedImageViewImpl::OnVisualEvent(View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId)
+void AnimatedImageViewImpl::OnVisualEvent(Ui::View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId)
 {
   if(visualIndex == AnimatedImageViewImpl::Property::IMAGE &&
      signalId == Ui::Integration::AnimatedImageVisual::Signal::ANIMATION_FINISHED)
@@ -791,7 +803,7 @@ void AnimatedImageViewImpl::SetImageColor(const UiColor& color)
     {
       // Update MIX_COLOR directly on the existing visual without rebuilding it.
       Dali::Property::Map map;
-      map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
+      map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, mImageColor.GetRgba());
       mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
     }
     else
@@ -815,7 +827,7 @@ void AnimatedImageViewImpl::SetPixelArea(const Vector4& pixelArea)
     if(mVisual)
     {
       Dali::Property::Map map;
-      map.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, mPixelArea);
+      map.Insert(Ui::Integration::ImageVisual::Property::PIXEL_AREA, mPixelArea);
       mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
     }
   }
@@ -909,19 +921,19 @@ bool AnimatedImageViewImpl::IsSynchronousLoading() const
   return mSynchronousLoading;
 }
 
-void AnimatedImageViewImpl::SetPreMultipliedAlpha(bool preMultiplied)
+void AnimatedImageViewImpl::SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied)
 {
-  if(mPreMultipliedAlpha != preMultiplied)
+  if(mPreMultiplyAlphaOnLoad != preMultiplied)
   {
-    mPreMultipliedAlpha = preMultiplied;
-    mVisualDirty        = true;
+    mPreMultiplyAlphaOnLoad = preMultiplied;
+    mVisualDirty            = true;
     InvalidateMeasure();
   }
 }
 
-bool AnimatedImageViewImpl::IsPreMultipliedAlpha() const
+bool AnimatedImageViewImpl::IsPreMultiplyAlphaOnLoadEnabled() const
 {
-  return mPreMultipliedAlpha;
+  return mPreMultiplyAlphaOnLoad;
 }
 
 void AnimatedImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
@@ -975,7 +987,7 @@ Ui::Image::SamplingMode AnimatedImageViewImpl::GetSamplingMode() const
   return mSamplingMode;
 }
 
-void AnimatedImageViewImpl::SetImageLoadWithViewSize(bool enabled)
+void AnimatedImageViewImpl::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
   if(mImageLoadWithViewSize != enabled)
   {
@@ -1020,19 +1032,19 @@ bool AnimatedImageViewImpl::IsCropToMask() const
   return mCropToMask;
 }
 
-void AnimatedImageViewImpl::SetMaskingMode(Ui::Image::MaskingType maskingMode)
+void AnimatedImageViewImpl::SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy)
 {
-  if(mMaskingMode != maskingMode)
+  if(mMaskingPolicy != maskingPolicy)
   {
-    mMaskingMode = maskingMode;
-    mVisualDirty = true;
+    mMaskingPolicy = maskingPolicy;
+    mVisualDirty   = true;
     InvalidateMeasure();
   }
 }
 
-Ui::Image::MaskingType AnimatedImageViewImpl::GetMaskingMode() const
+Ui::Image::MaskingPolicy AnimatedImageViewImpl::GetMaskingPolicy() const
 {
-  return mMaskingMode;
+  return mMaskingPolicy;
 }
 
 void AnimatedImageViewImpl::SetPlaceholderUrl(const Dali::String& url)
@@ -1049,7 +1061,7 @@ Dali::String AnimatedImageViewImpl::GetPlaceholderUrl() const
   return mPlaceholderUrl;
 }
 
-void AnimatedImageViewImpl::SetResourceUrls(const Dali::Vector<Dali::String>& urls)
+void AnimatedImageViewImpl::SetResourceUrlList(const Dali::Vector<Dali::String>& urls)
 {
   mUrls = urls;
   mUrl  = Dali::String();
@@ -1059,7 +1071,7 @@ void AnimatedImageViewImpl::SetResourceUrls(const Dali::Vector<Dali::String>& ur
   InvalidateMeasure();
 }
 
-const Dali::Vector<Dali::String>& AnimatedImageViewImpl::GetResourceUrls() const
+const Dali::Vector<Dali::String>& AnimatedImageViewImpl::GetResourceUrlList() const
 {
   return mUrls;
 }
@@ -1086,7 +1098,7 @@ void AnimatedImageViewImpl::UpdateVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::ANIMATED_IMAGE);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::ANIMATED_IMAGE);
 
   if(hasUrlArray)
   {
@@ -1095,57 +1107,57 @@ void AnimatedImageViewImpl::UpdateVisual()
     {
       urlArray.PushBack(mUrls[i]);
     }
-    map.Insert(Ui::ImageVisualPropertyIndex::URL, urlArray);
+    map.Insert(Ui::Integration::ImageVisual::Property::URL, urlArray);
   }
   else
   {
-    map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
+    map.Insert(Ui::Integration::ImageVisual::Property::URL, mUrl);
   }
 
-  map.Insert(Ui::ImageVisualPropertyIndex::LOOP_COUNT, mLoopCount);
+  map.Insert(Ui::Integration::ImageVisual::Property::LOOP_COUNT, mLoopCount);
 
-  map.Insert(Ui::ImageVisualPropertyIndex::STOP_BEHAVIOR, static_cast<int>(mStopBehavior));
-  map.Insert(Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR, mFrameSpeedFactor);
+  map.Insert(Ui::Integration::ImageVisual::Property::STOP_BEHAVIOR, static_cast<int>(mStopBehavior));
+  map.Insert(Ui::Integration::ImageVisual::Property::FRAME_SPEED_FACTOR, mFrameSpeedFactor);
 
-  map.Insert(Ui::ImageVisualPropertyIndex::BATCH_SIZE, mBatchSize);
-  map.Insert(Ui::ImageVisualPropertyIndex::CACHE_SIZE, mCacheSize);
+  map.Insert(Ui::Integration::ImageVisual::Property::BATCH_SIZE, mBatchSize);
+  map.Insert(Ui::Integration::ImageVisual::Property::CACHE_SIZE, mCacheSize);
 
   if(mFrameDelay >= 0)
   {
-    map.Insert(Ui::ImageVisualPropertyIndex::FRAME_DELAY, mFrameDelay);
+    map.Insert(Ui::Integration::ImageVisual::Property::FRAME_DELAY, mFrameDelay);
   }
 
-  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
-  map.Insert(Ui::ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
+  map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, mImageColor.GetRgba());
+  map.Insert(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultiplyAlphaOnLoad);
 
   if(mDesiredWidth > 0)
   {
-    map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredWidth);
+    map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, mDesiredWidth);
   }
 
   if(mDesiredHeight > 0)
   {
-    map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredHeight);
+    map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, mDesiredHeight);
   }
 
-  map.Insert(Ui::ImageVisualPropertyIndex::LOAD_POLICY, static_cast<int>(mLoadPolicy));
-  map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
-  map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, mSynchronousLoading);
-  map.Insert(Ui::ImageVisualPropertyIndex::SAMPLING_MODE, static_cast<int>(mSamplingMode));
-  map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
-  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, static_cast<int>(mFittingMode));
+  map.Insert(Ui::Integration::ImageVisual::Property::LOAD_POLICY, static_cast<int>(mLoadPolicy));
+  map.Insert(Ui::Integration::ImageVisual::Property::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
+  map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
+  map.Insert(Ui::Integration::ImageVisual::Property::SAMPLING_MODE, static_cast<int>(mSamplingMode));
+  map.Insert(Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, mImageLoadWithViewSize);
+  map.Insert(Ui::Integration::ImageVisual::Property::FITTING_MODE, static_cast<int>(mFittingMode));
 
   if(!mAlphaMaskUrl.Empty())
   {
-    map.Insert(Ui::ImageVisualPropertyIndex::ALPHA_MASK_URL, mAlphaMaskUrl);
-    map.Insert(Ui::ImageVisualPropertyIndex::CROP_TO_MASK, mCropToMask);
-    map.Insert(Ui::ImageVisualPropertyIndex::MASKING_TYPE, static_cast<int>(mMaskingMode));
+    map.Insert(Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL, mAlphaMaskUrl);
+    map.Insert(Ui::Integration::ImageVisual::Property::CROP_TO_MASK, mCropToMask);
+    map.Insert(Ui::Integration::ImageVisual::Property::MASKING_POLICY, static_cast<int>(mMaskingPolicy));
   }
 
   static const Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
   if(mPixelArea != FULL_TEXTURE_RECT)
   {
-    map.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, mPixelArea);
+    map.Insert(Ui::Integration::ImageVisual::Property::PIXEL_AREA, mPixelArea);
   }
 
   auto visualFactory = Ui::Integration::VisualFactory::Get();
@@ -1183,8 +1195,8 @@ void AnimatedImageViewImpl::UpdatePlaceholderVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
-  map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+  map.Insert(Ui::Integration::ImageVisual::Property::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);
   if(visual)
@@ -1213,4 +1225,4 @@ void AnimatedImageViewImpl::OnViewResourceReady(Ui::View view)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

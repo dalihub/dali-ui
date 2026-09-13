@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/chart-series-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -158,4 +158,4 @@ ChartSeries::ChartSeries(Integration::ChartSeries* impl)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -23,7 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/text-view-accessible.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 /**
  * @brief Common accessibility implementation for editable text Views.
@@ -94,6 +94,6 @@ protected:
   virtual void RequestTextRelayout() = 0;
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal
 
 #endif // DALI_UI_INTERNAL_TEXT_CONTROLS_EDITABLE_TEXT_VIEW_ACCESSIBLE_H

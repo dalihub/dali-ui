@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 struct FinalElisionResult;
 class ModelInterface;
@@ -181,6 +181,6 @@ inline MarqueeInitialDelta ResolveMarqueeFittingInitialDelta(const MarqueeFittin
   return std::isfinite(initialDelta) ? MarqueeInitialDelta{initialDelta, true} : MarqueeInitialDelta{};
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_MARQUEE_START_GEOMETRY_H

@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
@@ -37,13 +38,14 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-alignment.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -84,6 +86,14 @@ float ConvertPointToPixel(float point, TextAbstraction::FontClient& fontClient)
 {
   // Pixel size = Point size * DPI / 72.f
   return point * GetDpi(fontClient) / 72.0f;
+}
+
+bool UseLogicalReplacementAutoLineMetrics(const Text::AsyncTextParameters& parameters, bool hasActiveReplacement)
+{
+  return hasActiveReplacement &&
+         parameters.renderScale > 1.0f &&
+         parameters.relativeLineSize < 0.0f &&
+         parameters.minLineSize == 0.0f;
 }
 
 std::string AnchorHrefToString(const Text::Anchor& anchor)
@@ -139,6 +149,7 @@ std::vector<Text::AsyncAnchorHitRegion> BuildAsyncAnchorHitRegions(
   Text::ModelPtr                     semanticModel,
   Text::ModelPtr                     geometryModel,
   const Text::ReplacementProjection* projection,
+  const Text::FinalElisionResult*    finalElision,
   const Text::AsyncTextParameters&   parameters)
 {
   std::vector<Text::AsyncAnchorHitRegion> regions;
@@ -175,7 +186,12 @@ std::vector<Text::AsyncAnchorHitRegion> BuildAsyncAnchorHitRegions(
 
     Vector<Vector2> sizes;
     Vector<Vector2> positions;
-    Text::GetTextGeometry(geometryModel, geometryStart, geometryEnd - 1u, sizes, positions);
+    Text::GetTextGeometry(geometryModel,
+                          geometryStart,
+                          geometryEnd - 1u,
+                          sizes,
+                          positions,
+                          finalElision);
     if(sizes.Empty() || sizes.Count() != positions.Count())
     {
       continue;
@@ -368,6 +384,7 @@ void AsyncTextLoader::ClearTextModelData()
   mTextModel->mLogicalModel->mScriptRuns.Clear();
   mTextModel->mLogicalModel->mFontRuns.Clear();
   mTextModel->mLogicalModel->mColorRuns.Clear();
+  mTextModel->mLogicalModel->mGradientSpanData.reset();
   mTextModel->mLogicalModel->mBackgroundColorRuns.Clear();
   mTextModel->mLogicalModel->mLineBreakInfo.Clear();
   mTextModel->mLogicalModel->mParagraphInfo.Clear();
@@ -672,6 +689,35 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                      numberOfCharacters,
                                      validFonts,
                                      variationsMapPtr);
+
+    // AUTO replacement layout needs the exact scale-1 font choices in order
+    // to make the same line-boundary decision at higher raster resolutions.
+    // Keep this data request-local and use the normal validation path so
+    // fallback, emoji and variable-font selection are not reconstructed from
+    // a scaled FontId.
+    if(UseLogicalReplacementAutoLineMetrics(parameters, true))
+    {
+      const float                            logicalFontScale = effectiveTextScale;
+      const TextAbstraction::PointSize26Dot6 logicalDefaultPointSize =
+        static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * logicalFontScale * numberOfPointsPerOneUnitOfPointSize);
+      ValidateFontsForProcessingSource(mModule.GetMultilanguageSupport(),
+                                       mModule.GetFontClient(),
+                                       processingSource,
+                                       scripts,
+                                       defaultFontDescription,
+                                       logicalDefaultPointSize,
+                                       logicalFontScale,
+                                       0u,
+                                       numberOfCharacters,
+                                       mReplacementData->logicalFontRuns,
+                                       variationsMapPtr);
+      mReplacementData->logicalDefaultFontId =
+        mModule.GetFontClient().GetFontId(defaultFontDescription,
+                                          logicalDefaultPointSize,
+                                          0u,
+                                          variationsMapPtr);
+      mReplacementData->lineMetricRenderScale = parameters.renderScale;
+    }
   }
   else
   {
@@ -768,6 +814,16 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   SetColorSegmentationInfo(mTextModel->mLogicalModel->mColorRuns, mTextModel->mVisualModel->mCharactersToGlyph,
                            mTextModel->mVisualModel->mGlyphsPerCharacter, 0u, 0u, numberOfCharacters,
                            mTextModel->mVisualModel->mColors, mTextModel->mVisualModel->mColorIndices);
+
+  if(mTextModel->mLogicalModel->mGradientSpanData)
+  {
+    Text::Internal::SetGradientSpanSegmentationInfo(*mTextModel->mLogicalModel->mGradientSpanData,
+                                                    mTextModel->mVisualModel->mCharactersToGlyph,
+                                                    mTextModel->mVisualModel->mGlyphsPerCharacter,
+                                                    0u,
+                                                    0u,
+                                                    numberOfCharacters);
+  }
 
   // Set the background color runs in glyphs.
   SetColorSegmentationInfo(mTextModel->mLogicalModel->mBackgroundColorRuns,
@@ -905,23 +961,77 @@ void AsyncTextLoader::UpdateReplacementProcessing(AsyncTextParameters& parameter
   // final fixed-size layouts. Each pass mutates the worker model and therefore
   // receives its own final-elision generation; the request generation remains
   // separately available for UI-thread stale-result rejection.
-  const uint64_t finalGeneration = ++mReplacementData->finalElisionGeneration;
-  finalView.ResolveFinalElision(mModule.GetFontClient(),
-                                replacementState.finalElision,
-                                finalGeneration);
+  const uint64_t finalGeneration             = ++mReplacementData->finalElisionGeneration;
+  bool           useAuthoritativeEndEllipsis = false;
+  if(mTextModel->mElideEnabled && mTextModel->mEllipsisPosition == EllipsisPosition::END)
+  {
+    for(const LineRun& line : mTextModel->mVisualModel->mLines)
+    {
+      useAuthoritativeEndEllipsis |= line.ellipsis;
+    }
+    useAuthoritativeEndEllipsis |= mTextModel->mVisualModel->mLines.Empty() &&
+                                   !mTextModel->mLogicalModel->mText.Empty();
+  }
+  bool authoritativeEndEllipsisResolved = false;
+  if(useAuthoritativeEndEllipsis)
+  {
+    const Size textLayoutArea(parameters.textWidth, parameters.textHeight);
+    authoritativeEndEllipsisResolved = ResolveEndEllipsis(*mTextModel,
+                                                          textLayoutArea,
+                                                          mModule.GetFontClient(),
+                                                          replacementState.finalElision,
+                                                          defaultFontId);
+    DALI_ASSERT_DEBUG(authoritativeEndEllipsisResolved && replacementState.finalElision.resolved &&
+                      "Supported async replacement END layout must publish an authoritative final result");
+    if(authoritativeEndEllipsisResolved)
+    {
+      replacementState.finalElision.layoutGeneration = finalGeneration;
+      FinalizeEndEllipsisGeometry(*mTextModel,
+                                  textLayoutArea,
+                                  parameters.layoutDirection,
+                                  mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS,
+                                  mLayoutEngine,
+                                  replacementState.finalElision);
+    }
+  }
+  if(!authoritativeEndEllipsisResolved)
+  {
+    finalView.ResolveFinalElision(mModule.GetFontClient(),
+                                  replacementState.finalElision,
+                                  finalGeneration);
+  }
 
   ReplacementRenderState& result = replacementState;
   result.processingModel         = mTextModel;
-  result.layoutSize              = mTextModel->mVisualModel->GetLayoutSize();
+  result.layoutSize              = result.finalElision.HasAuthoritativeLayout()
+                                     ? result.finalElision.layoutSize
+                                     : mTextModel->mVisualModel->GetLayoutSize();
   result.sourceRevision          = parameters.replacementSourceSnapshot.sourceRevision;
   result.layoutGeneration        = parameters.replacementLayoutGeneration;
 
-  ExtractReplacementPlacements(*mTextModel,
-                               result.projection,
-                               result.finalElision,
-                               mModule.GetFontClient(),
-                               defaultFontId,
-                               result.placements);
+  if(mReplacementData->lineMetricRenderScale > 1.0f && !mReplacementData->logicalFontRuns.Empty())
+  {
+    ReplacementLineMetricData lineMetricData;
+    lineMetricData.logicalFontRuns      = &mReplacementData->logicalFontRuns;
+    lineMetricData.logicalDefaultFontId = mReplacementData->logicalDefaultFontId;
+    lineMetricData.renderScale          = mReplacementData->lineMetricRenderScale;
+    ExtractReplacementPlacements(*mTextModel,
+                                 result.projection,
+                                 result.finalElision,
+                                 mModule.GetFontClient(),
+                                 defaultFontId,
+                                 lineMetricData,
+                                 result.placements);
+  }
+  else
+  {
+    ExtractReplacementPlacements(*mTextModel,
+                                 result.projection,
+                                 result.finalElision,
+                                 mModule.GetFontClient(),
+                                 defaultFontId,
+                                 result.placements);
+  }
 }
 
 void AsyncTextLoader::CopyReplacementResult(AsyncTextRenderInfo& renderInfo, float renderScale) const
@@ -1038,11 +1148,20 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
   mLayoutEngine.SetDefaultLineSpacing(0.0f);
   mLayoutEngine.SetRelativeLineSize(parameters.relativeLineSize);
 
+  const ReplacementRenderState* replacementState     = mReplacementData ? &mReplacementData->renderState : nullptr;
+  const bool                    hasActiveReplacement = replacementState && replacementState->projection.HasReplacements();
+
   // Text fit and fit candidates are already converted to effective scaled font sizes
   // before CheckForTextFit(). Avoid applying effectiveTextScale again here.
   float fontPointSize = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled)
                           ? parameters.fontSize
                           : parameters.fontSize * parameters.effectiveTextScale;
+  if(hasActiveReplacement && parameters.renderScale > 1.0f && parameters.relativeLineSize >= 0.0f)
+  {
+    // Replacement glyph metrics are in worker coordinates. Scale only the
+    // relative-line-height reference used by that same replacement layout.
+    fontPointSize *= parameters.renderScale;
+  }
   mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize, mModule.GetFontClient()));
 
   // Set vertical line alignment.
@@ -1056,11 +1175,8 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
   mTextModel->mLineWrapMode = parameters.lineWrapMode;
 
   // Set the layout parameters.
-  Layout::Parameters            layoutParameters(textLayoutArea, mTextModel, mModule.GetFontClient(),
-                                                 mModule.GetBidirectionalSupport());
-  const ReplacementRenderState* replacementState     = mReplacementData ? &mReplacementData->renderState : nullptr;
-  const bool                    hasActiveReplacement = replacementState && replacementState->projection.HasReplacements();
-
+  Layout::Parameters layoutParameters(textLayoutArea, mTextModel, mModule.GetFontClient(),
+                                      mModule.GetBidirectionalSupport());
   // Resize the vector of positions to have the same size than the vector of glyphs.
   Vector<Vector2>& glyphPositions = mTextModel->mVisualModel->mGlyphPositions;
   glyphPositions.Resize(totalNumberOfGlyphs);
@@ -1128,6 +1244,14 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
     replacementLayoutData.layoutDirection     = parameters.layoutDirection;
     replacementLayoutData.matchLayoutDirection =
       mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS;
+    if(UseLogicalReplacementAutoLineMetrics(parameters, true) &&
+       mReplacementData->lineMetricRenderScale == parameters.renderScale &&
+       !mReplacementData->logicalFontRuns.Empty())
+    {
+      replacementLayoutData.lineMetricData.logicalFontRuns      = &mReplacementData->logicalFontRuns;
+      replacementLayoutData.lineMetricData.logicalDefaultFontId = mReplacementData->logicalDefaultFontId;
+      replacementLayoutData.lineMetricData.renderScale          = mReplacementData->lineMetricRenderScale;
+    }
     layoutText(&replacementLayoutData);
   }
   else
@@ -1289,7 +1413,9 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const Text::Length           numberOfGlyphs        = renderModel->GetNumberOfGlyphs();
   const bool                   hasColorIndexBuffer   = nullptr != colorsBuffer && nullptr != colorIndicesBuffer;
   TextAbstraction::FontClient& fontClient            = mModule.GetFontClient();
-  bool                         hasMultipleTextColors = false;
+  const auto*                  gradientSpanData      = renderModel->GetGradientSpanModelData();
+  const bool                   hasGradientSpan       = gradientSpanData && !gradientSpanData->glyphPaintIndices.Empty();
+  bool                         hasMultipleTextColors = hasGradientSpan;
   bool                         containsColorGlyph    = false;
   for(Text::Length glyphIndex = 0; glyphIndex < numberOfGlyphs; glyphIndex++)
   {
@@ -1417,12 +1543,21 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                                                                 renderModel->mVisualModel->GetLayoutSize(),
                                                                 renderModel->mVisualModel->mLines.Begin(),
                                                                 static_cast<Dali::Ui::Text::Length>(renderModel->mVisualModel->mLines.Count()),
-                                                                parameters.verticalAlignment);
+                                                                parameters.verticalAlignment,
+                                                                parameters.isMarqueeEnabled &&
+                                                                  parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL);
   const Text::ReplacementProjection* activeProjection =
     (replacementState && replacementState->processingModel && replacementState->projection.HasReplacements())
       ? &replacementState->projection
       : nullptr;
-  renderInfo.anchorHitRegions = BuildAsyncAnchorHitRegions(mTextModel, renderModel, activeProjection, parameters);
+  const Text::FinalElisionResult* activeFinalElision = activeProjection
+                                                         ? &replacementState->finalElision
+                                                         : nullptr;
+  renderInfo.anchorHitRegions                        = BuildAsyncAnchorHitRegions(mTextModel,
+                                                                                  renderModel,
+                                                                                  activeProjection,
+                                                                                  activeFinalElision,
+                                                                                  parameters);
 
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
@@ -1451,19 +1586,66 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   renderInfo.isTextRevealEnabled = parameters.isTextRevealEnabled && !cutoutEnabled && !parameters.isMarqueeEnabled;
   if(renderInfo.isTextRevealEnabled && renderInfo.textPixelData)
   {
-    const auto     sourceRevealPlan = parameters.textRevealUnit == Internal::Reveal::Unit::WORD
-                                        ? Internal::Reveal::BuildPlan(*renderModel,
-                                                                      parameters.textRevealUnit,
-                                                                      parameters.textRevealFadeDurationRatio,
-                                                                      mModule.GetSegmentation())
-                                        : Internal::Reveal::BuildCharacterPlan(*renderModel,
-                                                                               parameters.textRevealFadeDurationRatio);
-    const auto     revealPlan       = mTypesetter->CreateFinalRevealPlan(sourceRevealPlan, parameters.textRevealUnit);
-    const uint32_t metadataWidth    = renderInfo.textPixelData.GetWidth();
-    const uint32_t metadataHeight   = renderInfo.textPixelData.GetHeight();
-    const uint32_t tileLimit        = parameters.maxTextureSize > 0
-                                        ? static_cast<uint32_t>(parameters.maxTextureSize)
-                                        : metadataHeight;
+    const bool hasReplacementProjection = replacementState && replacementState->processingModel &&
+                                          replacementState->projection.HasReplacements() &&
+                                          parameters.replacementSourceSnapshot.hasValidReplacementSource;
+    auto buildSourcePlan = [&](bool includeImageReplacements)
+    {
+      if(includeImageReplacements && hasReplacementProjection)
+      {
+        return Internal::Reveal::BuildPlanWithImageReplacements(*renderModel,
+                                                                parameters.textRevealUnit,
+                                                                parameters.textRevealFadeDurationRatio,
+                                                                mModule.GetSegmentation(),
+                                                                parameters.replacementSourceSnapshot,
+                                                                replacementState->placements);
+      }
+      switch(parameters.textRevealUnit)
+      {
+        case Internal::Reveal::Unit::WORD:
+          return Internal::Reveal::BuildPlan(*renderModel,
+                                             parameters.textRevealUnit,
+                                             parameters.textRevealFadeDurationRatio,
+                                             mModule.GetSegmentation());
+        case Internal::Reveal::Unit::LINE:
+          return Internal::Reveal::BuildLinePlan(*renderModel,
+                                                 parameters.textRevealFadeDurationRatio);
+        case Internal::Reveal::Unit::PIXEL:
+          return Internal::Reveal::BuildPixelPlan(*renderModel,
+                                                  parameters.textRevealFadeDurationRatio);
+        case Internal::Reveal::Unit::CHARACTER:
+        case Internal::Reveal::Unit::DISABLED:
+        default:
+          return Internal::Reveal::BuildCharacterPlan(*renderModel,
+                                                      parameters.textRevealFadeDurationRatio);
+      }
+    };
+    auto sourceRevealPlan = buildSourcePlan(hasReplacementProjection);
+    auto revealPlan       = mTypesetter->CreateFinalRevealPlan(sourceRevealPlan,
+                                                               parameters.textRevealUnit,
+                                                               parameters.textRevealSequence,
+                                                               parameters.textRevealSequenceStaggerRatio);
+    if(hasReplacementProjection &&
+       !mTypesetter->ExtractReplacementRevealTimings(revealPlan,
+                                                     parameters.replacementSourceSnapshot,
+                                                     replacementState->placements,
+                                                     renderInfo.replacementRevealTimings))
+    {
+      // Keep text metadata and ImageSpan publication atomic. If the final
+      // replacement mapping is incomplete, rebuild the established compact
+      // text-only schedule rather than rasterizing an unbound timing gap.
+      renderInfo.replacementRevealTimings.Clear();
+      sourceRevealPlan = buildSourcePlan(false);
+      revealPlan       = mTypesetter->CreateFinalRevealPlan(sourceRevealPlan,
+                                                            parameters.textRevealUnit,
+                                                            parameters.textRevealSequence,
+                                                            parameters.textRevealSequenceStaggerRatio);
+    }
+    const uint32_t metadataWidth  = renderInfo.textPixelData.GetWidth();
+    const uint32_t metadataHeight = renderInfo.textPixelData.GetHeight();
+    const uint32_t tileLimit      = parameters.maxTextureSize > 0
+                                      ? static_cast<uint32_t>(parameters.maxTextureSize)
+                                      : metadataHeight;
     const Vector2  fullMetadataSize(static_cast<float>(metadataWidth), static_cast<float>(metadataHeight));
     const bool     isRendererTiled = parameters.maxTextureSize > 0 &&
                                  renderInfo.size.height > static_cast<float>(parameters.maxTextureSize);
@@ -1915,7 +2097,9 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   if(isHorizontal)
   {
     // As relayout of text may not be done at this point natural size is used to get size. Single line scrolling only.
-    Size textNaturalSize = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
+    Size textNaturalSize   = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
+    textNaturalSize.width  = ConvertToEven(textNaturalSize.width);
+    textNaturalSize.height = ConvertToEven(textNaturalSize.height);
 
     isTextContentOverflow = textNaturalSize.width > controlSize.width;
 
@@ -2041,13 +2225,6 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   parameters.textHeight = verifiedSize.height;
 
   AsyncTextRenderInfo renderInfo = Render(parameters);
-  renderInfo.textGradientMarqueeViewportBounds =
-    CalculateMarqueeGradientViewportBounds(controlSize,
-                                           mTextModel->mVisualModel->GetLayoutSize(),
-                                           mTextModel->mVisualModel->mLines.Begin(),
-                                           static_cast<Dali::Ui::Text::Length>(mTextModel->mVisualModel->mLines.Count()),
-                                           parameters.horizontalAlignment,
-                                           parameters.verticalAlignment);
 
   parameters.textWidth  = static_cast<float>(actualWidth);
   parameters.textHeight = static_cast<float>(actualHeight);
@@ -2320,4 +2497,4 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

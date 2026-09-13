@@ -43,6 +43,7 @@ SET(TC_SOURCES
         utc-Dali-InteractiveView.cpp
         utc-Dali-StateEffect.cpp
         utc-Dali-SelectableTrait.cpp
+        utc-Dali-ProgressView.cpp
         utc-Dali-GroupSelectableTrait.cpp
         utc-Dali-SelectionGroup.cpp
         utc-Dali-ViewState.cpp

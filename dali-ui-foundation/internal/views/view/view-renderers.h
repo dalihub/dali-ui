@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali/dali.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -63,6 +63,6 @@ void SetRendererTexture(Dali::Renderer renderer, Dali::FrameBuffer frameBuffer);
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_VIEW_RENDERERS_H

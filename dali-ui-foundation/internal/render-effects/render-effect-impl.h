@@ -34,7 +34,7 @@
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -247,5 +247,5 @@ inline const Ui::Internal::RenderEffectImpl& GetImplementation(const Ui::RenderE
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 #endif // DALI_UI_INTERNAL_RENDER_EFFECT_H

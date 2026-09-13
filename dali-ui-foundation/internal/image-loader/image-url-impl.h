@@ -26,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -103,6 +103,6 @@ inline const Ui::Internal::ImageUrl& GetImpl(const Dali::Ui::ImageUrl& imageUrl)
   return static_cast<const Ui::Internal::ImageUrl&>(handle);
 }
 
-} // End of namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_IMAGE_URL_H

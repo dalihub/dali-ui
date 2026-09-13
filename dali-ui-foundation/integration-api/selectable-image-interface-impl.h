@@ -26,7 +26,7 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -127,4 +127,4 @@ inline const Integration::SelectableImageInterfaceImpl& GetImpl(const Selectable
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/public-api/text/style/reveal.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -49,11 +49,13 @@ struct TextVisualRevealData
   std::vector<Constraint>       constraints;
   TextAbstraction::Segmentation segmentation;
 
-  Ui::Text::Internal::Reveal::Unit unit{Ui::Text::Internal::Reveal::Unit::DISABLED};
-  float                            fadeDurationRatio{Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO};
-  float                            fadeDuration{0.0f};
-  Property::Index                  progressPropertyIndex{Property::INVALID_INDEX};
-  uint64_t                         revision{0u};
+  Ui::Text::Internal::Reveal::Unit     unit{Ui::Text::Internal::Reveal::Unit::DISABLED};
+  Ui::Text::Internal::Reveal::Sequence sequence{Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT};
+  float                                fadeDurationRatio{Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO};
+  float                                fadeDuration{0.0f};
+  float                                sequenceStaggerRatio{0.0f};
+  Property::Index                      progressPropertyIndex{Property::INVALID_INDEX};
+  uint64_t                             revision{0u};
 };
 
 using TextVisualRevealDataPtr = std::unique_ptr<TextVisualRevealData>;
@@ -80,4 +82,4 @@ inline TextVisualRevealData& GetOrCreateTextVisualRevealData(TextVisualRevealDat
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

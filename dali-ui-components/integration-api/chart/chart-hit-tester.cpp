@@ -30,7 +30,7 @@
 #include <cmath>
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -176,4 +176,4 @@ std::vector<HitResult> ChartHitTester::FindBySameX(const Vector2&     touchPos,
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

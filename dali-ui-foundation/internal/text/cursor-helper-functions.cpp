@@ -128,7 +128,7 @@ void FindEndOfWord(FindWordData& data)
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -907,4 +907,4 @@ bool FindSelectionIndices(VisualModelPtr visualModel, LogicalModelPtr logicalMod
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

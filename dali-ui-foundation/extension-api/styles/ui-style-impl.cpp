@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -46,4 +46,4 @@ UiStyleImpl::~UiStyleImpl()
 
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -30,7 +30,7 @@
 
 using Dali::Integration::ToDaliString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -180,12 +180,12 @@ uint32_t NPatchData::GetCroppedHeight() const
   return mCroppedHeight;
 }
 
-void NPatchData::SetBorder(const Dali::Extents& border)
+void NPatchData::SetBorder(const Dali::Insets& border)
 {
   mBorder = border;
 }
 
-Dali::Extents NPatchData::GetBorder() const
+Dali::Insets NPatchData::GetBorder() const
 {
   return mBorder;
 }
@@ -217,7 +217,7 @@ void* NPatchData::GetRenderingMap() const
 
 void NPatchData::SetLoadedNPatchData(PixelBuffer& pixelBuffer, bool preMultiplied)
 {
-  if(mBorder == Dali::Extents() && Dali::Ui::Integration::NPatchUtility::ParseBorders(pixelBuffer, mStretchPixelsX, mStretchPixelsY))
+  if(mBorder == Dali::Insets() && Dali::Ui::Integration::NPatchUtility::ParseBorders(pixelBuffer, mStretchPixelsX, mStretchPixelsY))
   {
     // Crop the image
     DevelPixelBuffer::Crop(pixelBuffer, 1, 1, pixelBuffer.GetWidth() - 2, pixelBuffer.GetHeight() - 2);
@@ -348,4 +348,4 @@ void NPatchData::ObserverDestroyed(TextureUploadObserver* observer)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

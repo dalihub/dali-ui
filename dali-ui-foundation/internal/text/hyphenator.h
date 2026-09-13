@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/font-run.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -49,6 +49,6 @@ Vector<bool> GetWordHyphens(TextAbstraction::Hyphenation& hyphenation, const Cha
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_HYPHENATOR_H

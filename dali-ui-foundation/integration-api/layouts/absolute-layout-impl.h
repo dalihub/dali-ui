@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -77,4 +77,4 @@ inline const Integration::AbsoluteLayoutImpl& GetImpl(const AbsoluteLayout& layo
   return static_cast<const Integration::AbsoluteLayoutImpl&>(handle);
 }
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

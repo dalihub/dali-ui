@@ -28,6 +28,8 @@
 
 ```cpp
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <dali/integration-api/debug.h>
 
 using namespace Dali::Ui;
 
@@ -44,6 +46,8 @@ webView.SetRequestedHeight(600.0f);
 // Scene에 추가
 window.Add(webView);
 ```
+
+아래 예제는 애플리케이션 초기화 후 실행하며, `window`는 애플리케이션의 `Dali::Window`입니다. 이후 예제에서도 이 헤더와 `webView`를 사용합니다. 통합 헤더에는 WebView가 포함되어 있지 않으므로 전용 헤더가 필요합니다.
 
 ### 웹 엔진 선택
 
@@ -68,7 +72,7 @@ webView.LoadUrl("https://www.example.com");
 ### HTML 문자열 로드
 
 ```cpp
-std::string html = "<html><body><h1>Hello World</h1></body></html>";
+Dali::String html = "<html><body><h1>Hello World</h1></body></html>";
 webView.LoadHtmlString(html);
 ```
 
@@ -87,10 +91,12 @@ webView.LoadHtmlStringOverrideCurrentEntry(
 ### Raw 콘텐츠 로드
 
 ```cpp
-const int8_t* content = reinterpret_cast<const int8_t*>("raw data");
+const char htmlContent[] = "<html><body>Raw content</body></html>";
+const int8_t* content = reinterpret_cast<const int8_t*>(htmlContent);
+const uint32_t contentSize = static_cast<uint32_t>(sizeof(htmlContent) - 1);
 webView.LoadContents(
   content,
-  content_size,
+  contentSize,
   "text/html",
   "UTF-8",
   "https://base.uri.com"
@@ -128,6 +134,8 @@ webView.StopLoading();
 
 ## 4. JavaScript 연동
 
+`WebView::JavaScriptCallback::New(...)` 등 API에 맞는 콜백 타입을 사용합니다. 캡처 없는 람다는 `New(...)`에 전달할 수 있습니다. 인스턴스 상태가 필요하면 아래 대화상자 예제처럼 `New(this, &Controller::Method)`로 멤버 함수를 등록합니다.
+
 ### JavaScript 실행
 
 JavaScript를 실행하고 필요한 경우 callback으로 결과를 받을 수 있습니다.
@@ -139,9 +147,10 @@ webView.EvaluateJavaScript("console.log('Hello from C++');");
 // callback으로 실행 결과 수신
 webView.EvaluateJavaScript(
   "document.title",
-  [](const Dali::String& result) {
-    Dali::DALI_LOG_INFO("Title: %s", result.c_str());
-  }
+  WebView::JavaScriptCallback::New(
+    [](const Dali::String& result) {
+      DALI_LOG_RELEASE_INFO("Title: %s\n", result.CStr());
+    })
 );
 ```
 
@@ -152,10 +161,11 @@ JavaScript가 보내는 메시지를 수신할 handler를 등록합니다.
 ```cpp
 webView.AddJavaScriptMessageHandler(
   "nativeObject",
-  [](const Dali::String& message) {
-    Dali::DALI_LOG_INFO("Message from JS: %s", message.c_str());
-  }
-  );
+  WebView::JavaScriptCallback::New(
+    [](const Dali::String& message) {
+      DALI_LOG_RELEASE_INFO("Message from JS: %s\n", message.CStr());
+    })
+);
 ```
 
 웹 페이지의 JavaScript에서는 다음과 같이 메시지를 보낼 수 있습니다.
@@ -163,44 +173,60 @@ webView.AddJavaScriptMessageHandler(
 ```javascript
 // 웹 페이지에서 실행
 if (window.nativeObject) {
-  window.nativeObject("Hello from JavaScript");
+  window.nativeObject.postMessage("Hello from JavaScript");
 }
+```
+
+```cpp
+// 더 이상 필요하지 않은 handler 삭제
+webView.RemoveJavaScriptMessageHandler("nativeObject");
 ```
 
 ### JavaScript 대화상자
 
 JavaScript의 alert, confirm 및 prompt 대화상자를 처리합니다.
 
+멤버 함수에서 WebView에 응답하도록 컨트롤러를 구성합니다. 페이지를 로드하기 전에 기존 `webView`로 컨트롤러를 생성하고, 콜백이 등록된 WebView가 살아 있는 동안 컨트롤러도 유지해야 합니다. 이 예제는 alert에 즉시 응답하고 confirm을 수락하며 prompt에 고정 문자열을 반환합니다.
+
 ```cpp
-// Alert callback
-webView.RegisterJavaScriptAlertCallback(
-  [webView](const Dali::String& message) {
-    Dali::DALI_LOG_INFO("Alert: %s", message.c_str());
-    webView.JavaScriptAlertReply();
+class WebViewDialogController
+{
+public:
+  explicit WebViewDialogController(WebView webView)
+  : mWebView(webView)
+  {
+    mWebView.RegisterJavaScriptAlertCallback(
+      WebView::JavaScriptAlertCallback::New(this, &WebViewDialogController::OnAlert));
+    mWebView.RegisterJavaScriptConfirmCallback(
+      WebView::JavaScriptConfirmCallback::New(this, &WebViewDialogController::OnConfirm));
+    mWebView.RegisterJavaScriptPromptCallback(
+      WebView::JavaScriptPromptCallback::New(this, &WebViewDialogController::OnPrompt));
+  }
+
+private:
+  bool OnAlert(const Dali::String& message)
+  {
+    DALI_LOG_RELEASE_INFO("Alert: %s\n", message.CStr());
+    mWebView.JavaScriptAlertReply();
     return true;
   }
-);
 
-// Confirm callback
-webView.RegisterJavaScriptConfirmCallback(
-  [webView](const Dali::String& message) {
-    Dali::DALI_LOG_INFO("Confirm: %s", message.c_str());
-    webView.JavaScriptConfirmReply(true); // 또는 false
+  bool OnConfirm(const Dali::String& message)
+  {
+    DALI_LOG_RELEASE_INFO("Confirm: %s\n", message.CStr());
+    mWebView.JavaScriptConfirmReply(true); // 또는 false
     return true;
   }
-);
 
-// Prompt callback
-webView.RegisterJavaScriptPromptCallback(
-  [webView](const Dali::String& message, const Dali::String& defaultText) {
-    Dali::DALI_LOG_INFO("Prompt: %s, Default: %s", message.c_str(), defaultText.c_str());
-    webView.JavaScriptPromptReply("user input");
+  bool OnPrompt(const Dali::String& message, const Dali::String& defaultText)
+  {
+    DALI_LOG_RELEASE_INFO("Prompt: %s, Default: %s\n", message.CStr(), defaultText.CStr());
+    mWebView.JavaScriptPromptReply("user input");
     return true;
   }
-);
 
-// 더 이상 필요하지 않은 handler 삭제
-webView.RemoveJavaScriptMessageHandler("nativeObject");
+  WebView mWebView;
+};
 ```
 
 ---
@@ -212,32 +238,32 @@ webView.RemoveJavaScriptMessageHandler("nativeObject");
 ```cpp
 webView.PageLoadStartedSignal().Connect(
   [](WebView view, const Dali::String& url) {
-    Dali::DALI_LOG_INFO("Page load started: %s", url.c_str());
+    DALI_LOG_RELEASE_INFO("Page load started: %s\n", url.CStr());
   }
 );
 
 webView.PageLoadInProgressSignal().Connect(
   [](WebView view, const Dali::String& url) {
     // 로딩 중 주기적으로 호출됨
-    Dali::DALI_LOG_INFO("Loading in progress...");
+    DALI_LOG_RELEASE_INFO("Loading in progress...\n");
   }
 );
 
 webView.PageLoadFinishedSignal().Connect(
   [](WebView view, const Dali::String& url) {
-    Dali::DALI_LOG_INFO("Page load finished: %s", url.c_str());
+    DALI_LOG_RELEASE_INFO("Page load finished: %s\n", url.CStr());
   }
 );
 
 webView.PageLoadErrorSignal().Connect(
   [](WebView view, const WebViewPageLoadError& error) {
-    Dali::DALI_LOG_ERROR("Load error: %s", error.description.c_str());
+    DALI_LOG_ERROR("Load error: %s\n", error.GetDescription().CStr());
   }
 );
 
 webView.UrlChangedSignal().Connect(
   [](WebView view, const Dali::String& url) {
-    Dali::DALI_LOG_INFO("URL changed: %s", url.c_str());
+    DALI_LOG_RELEASE_INFO("URL changed: %s\n", url.CStr());
   }
 );
 ```
@@ -278,16 +304,14 @@ bool keyEnabled   = webView.IsKeyEventsEnabled();
 
 ### 이벤트 직접 전달
 
-터치 및 키 이벤트를 웹 엔진으로 직접 전달합니다.
+입력 핸들러에서 받은 `Dali::KeyEvent`인 `keyEvent`와 `Dali::TouchEvent`인 `touchEvent`를 웹 엔진으로 직접 전달합니다.
 
 ```cpp
 // 키 이벤트 전달
-const KeyEvent& keyEvent = ...;
-bool consumed = webView.FeedKeyEvent(keyEvent);
+bool keyConsumed = webView.FeedKeyEvent(keyEvent);
 
 // 터치 이벤트 전달
-const TouchEvent& touchEvent = ...;
-bool consumed = webView.FeedTouchEvent(touchEvent);
+bool touchConsumed = webView.FeedTouchEvent(touchEvent);
 
 // 마우스 휠 이벤트 전달
 webView.FeedMouseWheel(true, 3, 100, 200); // yDirection, step, x, y
@@ -406,10 +430,11 @@ Dali::Ui::ImageView screenshot = webView.GetScreenshot(area, 1.0f);
 webView.GetScreenshotAsynchronously(
   area,
   1.0f,
-  [](Dali::Ui::ImageView image) {
-    // 캡처한 이미지 사용
-    Dali::DALI_LOG_INFO("Screenshot captured");
-  }
+  WebView::ScreenshotCapturedCallback::New(
+    [](Dali::Ui::ImageView image) {
+      // 캡처한 이미지 사용
+      DALI_LOG_RELEASE_INFO("Screenshot captured\n");
+    })
 );
 ```
 
@@ -425,9 +450,10 @@ Dali::Ui::ImageView favicon = webView.GetFavicon();
 
 ```cpp
 webView.GetPlainTextAsynchronously(
-  [](const Dali::String& text) {
-    Dali::DALI_LOG_INFO("Plain text: %s", text.c_str());
-  }
+  WebView::PlainTextCallback::New(
+    [](const Dali::String& text) {
+      DALI_LOG_RELEASE_INFO("Plain text: %s\n", text.CStr());
+    })
 );
 ```
 
@@ -437,9 +463,10 @@ webView.GetPlainTextAsynchronously(
 
 ```cpp
 webView.CheckVideoPlayingAsynchronously(
-  [](bool isPlaying) {
-    Dali::DALI_LOG_INFO("Video playing: %s", isPlaying ? "yes" : "no");
-  }
+  WebView::VideoPlayingCallback::New(
+    [](bool isPlaying) {
+      DALI_LOG_RELEASE_INFO("Video playing: %s\n", isPlaying ? "yes" : "no");
+    })
 );
 ```
 
@@ -462,7 +489,7 @@ bool result = webView.FindText(
 // 시그널로 검색 결과 수신
 webView.TextFoundSignal().Connect(
   [](WebView view, uint32_t matchCount) {
-    Dali::DALI_LOG_INFO("Found %u matches", matchCount);
+    DALI_LOG_RELEASE_INFO("Found %u matches\n", matchCount);
   }
 );
 ```

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/builder/style.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/object/handle.h>
 
 using Dali::Integration::ToDaliStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -76,8 +77,8 @@ void Style::ApplyVisual(Handle handle, const std::string& visualName, const Prop
     // merge them into the visual map
     if(instancedProperties)
     {
-      Property::Value* instanceTypeValue = instancedProperties->Find(Ui::VisualBasePropertyIndex::TYPE);
-      Property::Value* newTypeValue      = visualMap.Find(Ui::VisualBasePropertyIndex::TYPE, VISUAL_TYPE);
+      Property::Value* instanceTypeValue = instancedProperties->Find(Ui::Integration::Visual::Property::TYPE);
+      Property::Value* newTypeValue      = visualMap.Find(Ui::Integration::Visual::Property::TYPE, VISUAL_TYPE);
       if(instanceTypeValue && newTypeValue)
       {
         int instanceVisualType = -1;
@@ -123,4 +124,4 @@ Style::~Style()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

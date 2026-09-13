@@ -38,7 +38,7 @@
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -1281,6 +1281,14 @@ public:
   void UpdateSelectionHandle(HandleType handleType, const CursorInfo& cursorInfo);
 
   /**
+   * @brief Gets the right edge used for horizontal scroll bounds.
+   *
+   * @param[in] layoutSize The size of the laid out text.
+   * @return The effective right edge of the scrollable content.
+   */
+  float GetHorizontalScrollContentRight(const Vector2& layoutSize);
+
+  /**
    * @biref Clamps the horizontal scrolling to get the control always filled with text.
    *
    * @param[in] layoutSize The size of the laid out text.
@@ -1683,6 +1691,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_CONTROLLER_IMPL_H

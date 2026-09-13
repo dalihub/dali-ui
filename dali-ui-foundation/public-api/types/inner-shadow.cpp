@@ -30,7 +30,7 @@
 #define DALI_ASSERT_INNER_SHADOW_NOT_NONE(impl, message) \
   DALI_ASSERT_ALWAYS(!(impl)->mIsNone && message)
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -188,7 +188,7 @@ const Insets& InnerShadow::GetInsets() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_INNER_SHADOW_NOT_NONE
 #undef DALI_ASSERT_VALID_INNER_SHADOW

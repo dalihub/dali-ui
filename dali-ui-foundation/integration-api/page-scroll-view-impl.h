@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
 #include <dali-ui-foundation/public-api/views/scroll/page-scrollable-interface.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -229,4 +229,4 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/layouts/grid-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -96,4 +96,4 @@ inline const Integration::GridLayoutImpl& GetImpl(const GridLayout& layout)
   return static_cast<const Integration::GridLayoutImpl&>(handle);
 }
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/abstract-style-character-run.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -75,6 +75,6 @@ struct TypeTraits<Dali::Ui::Text::BoundedParagraphRun> : public Dali::BasicTypes
   };
 };
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_BOUNDED_PARAGRAPH_RUN_H

@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/abstract-style-character-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -57,6 +57,6 @@ struct TypeTraits<Dali::Ui::Text::ColorRun> : public Dali::BasicTypes<Dali::Ui::
   };
 };
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_COLOR_RUN_H

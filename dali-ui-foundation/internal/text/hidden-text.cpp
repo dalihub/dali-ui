@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <algorithm>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -288,4 +288,4 @@ PasswordMode HiddenText::ToPasswordMode(Mode mode) const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

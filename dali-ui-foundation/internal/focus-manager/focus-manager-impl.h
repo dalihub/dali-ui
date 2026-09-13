@@ -33,7 +33,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Integration
 {
@@ -118,6 +118,13 @@ public:
    * @copydoc Ui::FocusManager::ClearFocus
    */
   void ClearFocus();
+
+  // Automatic invalidation removes only records referring to this View,
+  // unlike an explicit ClearFocus() that also cancels a deferred replacement.
+  void InvalidateFocusView(View view);
+
+  // Shared by actual keyboard focus and navigation focus commits.
+  bool IsActiveWindow(Dali::Integration::SceneHolder sceneHolder) const;
 
   /**
    * @copydoc Ui::FocusManager::ClearFocusIndication
@@ -288,8 +295,7 @@ private:
   bool IsValidNavigationCandidate(View candidate, FocusNavigationContext context) const;
 
   /**
-   * Commit the focus change to the specified view. No validation is performed —
-   * the caller must ensure the view is a valid focus target.
+   * Store the focus target, applying it only when its Window is active.
    * @param view The view to receive focus
    * @param context The context that caused the focus change (device, name)
    * @return Whether the focus commit is successful or not
@@ -342,9 +348,13 @@ private:
   void OnSceneHolderFocusChanged(Dali::Integration::SceneHolder sceneHolder, bool focusIn);
 
   /**
-   * Get the focus View from current window
+   * Get the stored focus View from the specified window.
    */
-  View GetFocusViewFromCurrentWindow();
+  View GetFocusViewFromWindow(Layer rootLayer);
+
+  void DisconnectFocusViewIfUnused(View view);
+
+  void OnStoredFocusViewDisconnection(Dali::Actor actor);
 
   /**
    * Convert Device::Class to FocusDevice
@@ -364,8 +374,9 @@ private:
   /**
    * Clear the focus view
    * @param[in] view View to be cleared of focus
+   * @param[in] clearStoredFocus Whether to discard the current Window's stored target
    */
-  void ClearFocus(View view);
+  void ClearFocus(View view, bool clearStoredFocus = true);
 
   /**
    * Detaches the shared focus indicator from a view.
@@ -462,4 +473,4 @@ inline const Internal::FocusManager& GetImpl(const Dali::Ui::FocusManager& obj)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

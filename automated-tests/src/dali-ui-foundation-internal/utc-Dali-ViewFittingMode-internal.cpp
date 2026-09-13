@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
@@ -40,7 +41,7 @@ class FittingModeTestVisual : public Dali::Ui::Internal::Visual::Base
 public:
   using Ptr = IntrusivePtr<FittingModeTestVisual>;
 
-  static Ptr New(Dali::Ui::Internal::VisualFactoryCache&         factoryCache,
+  static Ptr New(Dali::Ui::Internal::VisualFactoryCache&   factoryCache,
                  Dali::Ui::Integration::InternalVisualType type = Dali::Ui::Integration::InternalVisualType::IMAGE)
   {
     Ptr visual(new FittingModeTestVisual(factoryCache, type));
@@ -58,7 +59,7 @@ public:
   int                               reRequestLimit{0};
 
 protected:
-  FittingModeTestVisual(Dali::Ui::Internal::VisualFactoryCache& factoryCache,
+  FittingModeTestVisual(Dali::Ui::Internal::VisualFactoryCache&   factoryCache,
                         Dali::Ui::Integration::InternalVisualType type)
   : Dali::Ui::Internal::Visual::Base(factoryCache, type)
   {
@@ -132,8 +133,8 @@ int UtcDaliViewFittingModeAppliedAfterLayout(void)
   Dali::Ui::Integration::Visual::Base visualB(fittingVisualB.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, visualA);
-  viewData.RegisterVisual(View::Property::SHADOW, visualB);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visualA);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::SHADOW, visualB);
 
   window.Add(view);
 
@@ -174,8 +175,8 @@ int UtcDaliViewFittingModeAfterLayoutSkipsText(void)
   Dali::Ui::Integration::Visual::Base textVisual(fittingTextVisual.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, imageVisual);
-  viewData.RegisterVisual(View::Property::SHADOW, textVisual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, imageVisual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::SHADOW, textVisual);
 
   viewData.EmitLayoutFinishedSignal(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
 
@@ -202,7 +203,7 @@ int UtcDaliViewFittingModeProcessorRunsOncePerRequest(void)
   Dali::Ui::Integration::Visual::Base visual(fittingVisual.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visual);
 
   viewData.SizeOrUiScaleChanged();
 
@@ -388,8 +389,8 @@ int UtcDaliTextVisualStandaloneFittingStillApplies(void)
   visual.SetOffsetY(7.0f);
   visual.SetWidth(0.75f);
   visual.SetHeight(0.5f);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
 
   application.GetScene().Add(view);
   application.SendNotification();
@@ -513,9 +514,9 @@ int UtcDaliTextVisualSameSizePaddingChangeInvalidatesResource(void)
 
   auto& ellipsisViewData =
     Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(ellipsisLabel));
-  auto ellipsisVisual = ellipsisViewData.GetVisual(Ui::Text::LabelPropertyIndex::TEXT);
-  auto ellipsisController = Dali::Ui::Internal::TextVisual::GetController(ellipsisVisual);
-  const auto* ellipsisModel = ellipsisController->GetRenderTextModel();
+  auto        ellipsisVisual     = ellipsisViewData.GetVisual(Ui::Text::LabelPropertyIndex::TEXT);
+  auto        ellipsisController = Dali::Ui::Internal::TextVisual::GetController(ellipsisVisual);
+  const auto* ellipsisModel      = ellipsisController->GetRenderTextModel();
   DALI_TEST_CHECK(ellipsisModel && ellipsisModel->GetNumberOfLines() > 0u);
   DALI_TEST_CHECK(!ellipsisModel->GetLines()[0u].ellipsis);
 
@@ -721,7 +722,7 @@ int UtcDaliViewFittingModeRequestDuringProcessingIsHonoured(void)
   Dali::Ui::Integration::Visual::Base visual(fittingVisual.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visual);
 
   // Kept off-scene deliberately: no layout pass runs, so the LayoutFinished-driven
   // fitting path cannot contribute an apply and every count below comes from the

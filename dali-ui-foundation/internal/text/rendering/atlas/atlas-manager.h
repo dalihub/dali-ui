@@ -22,7 +22,7 @@
 #include <dali/public-api/rendering/texture-set.h>
 #include <stdint.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -277,6 +277,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_ATLAS_MANAGER_H

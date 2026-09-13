@@ -37,7 +37,7 @@
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -59,7 +59,8 @@ struct TextScrollerGradient
   Vector2         conicScale{Vector2::ONE};
   float           conicStartAngle{0.0f};
   float           startOffset{0.0f};
-  Vector4         bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized viewport-local bounds for TextGradient evaluation.
+  Vector4         bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized bounds in the selected TextGradient coordinate space.
+  bool            useTextureCoordinates{false};   ///< True for content-attached marquee coordinates; false for viewport coordinates.
   Property::Index startOffsetPropertyIndex{Property::INVALID_INDEX};
   bool            applyConstraintsAlways{false};
   bool            mixedTextGradient{false};          ///< True when scroller uses preserved color + gradient mask textures.
@@ -76,7 +77,8 @@ struct TextScrollerGradient
   Vector2                   overlayConicScale{Vector2::ONE};
   float                     overlayConicStartAngle{0.0f};
   float                     overlayStartOffset{0.0f};
-  Vector4                   overlayBounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized viewport-local bounds for TextGradientOverlay evaluation.
+  Vector4                   overlayBounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized bounds in the selected TextGradientOverlay coordinate space.
+  bool                      overlayUseTextureCoordinates{false};   ///< True for content-attached marquee coordinates; false for viewport coordinates.
   Text::GradientOverlayMode overlayMode{Text::GradientOverlayMode::SRC_OVER};
   Property::Index           overlayStartOffsetPropertyIndex{Property::INVALID_INDEX};
   bool                      overlayApplyConstraintsAlways{false};
@@ -332,6 +334,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_SCROLLER_H

@@ -19,9 +19,9 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
+#include <dali-ui-foundation/integration-api/ui-property-index-ranges.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -207,6 +207,6 @@ enum Type
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_PRIMITIVE_VISUAL_PROPERTIES_H

@@ -1,0 +1,117 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "manual-test-case.h"
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * FlexLayout sample: margin and padding.
+ *
+ * All margin and padding values use a uniform 50px for easy visual verification.
+ *
+ * 1. Padding: root FlexLayout has 50px padding (content inset from the edges).
+ * 2. Margin: children alternate between no margin and 50px uniform margin.
+ *    - Red box: no margin (flush with padding edge).
+ *    - Green box: 50px margin all sides.
+ *    - Blue box: no margin.
+ * 3. Nested: a horizontal FlexLayout row with 50px padding and 50px margin,
+ *    containing children that alternate no margin / 50px margin.
+ *
+ */
+class TcFlexLayoutMarginPadding : public ManualTest::TestCase, public ConnectionTracker
+{
+public:
+  Dali::String GetName() const override
+  {
+    return "59. FlexLayout: Margin and Padding";
+  }
+
+  Dali::String GetDescription() const override
+  {
+    return "Verify padding, margins, and nested flex layouts";
+  }
+
+  void OnEnter(View contentArea) override
+  {
+
+    // Root: vertical flex layout with padding
+    FlexLayout root = FlexLayout::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetDirection(FlexDirection::COLUMN);
+    root.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f)); // start, end, top, bottom
+
+    // --- Red box: no margin (flush with padding edge) ---
+    View redBox = View::New();
+    redBox.SetBackgroundColor(Color::RED);
+    redBox.SetRequestedHeight(50.0f);
+    root.Add(redBox);
+
+    // --- Green box: 50px margin all sides ---
+    View greenBox = View::New();
+    greenBox.SetBackgroundColor(Color::GREEN);
+    greenBox.SetRequestedHeight(50.0f);
+    greenBox.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
+    root.Add(greenBox);
+
+    // --- Blue box: no margin ---
+    View blueBox = View::New();
+    blueBox.SetBackgroundColor(Color::BLUE);
+    blueBox.SetRequestedHeight(50.0f);
+    root.Add(blueBox);
+
+    // --- Nested: horizontal FlexLayout with padding + children with margins ---
+    FlexLayout nestedRow = FlexLayout::New();
+    nestedRow.SetBackgroundColor(Color::GRAY);
+    nestedRow.SetRequestedHeight(400.0f);
+    nestedRow.SetDirection(FlexDirection::ROW);
+    nestedRow.SetAlignItems(FlexAlign::STRETCH);
+    nestedRow.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
+    nestedRow.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
+
+    View childA = View::New();
+    childA.SetBackgroundColor(Color::MAGENTA);
+    childA.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
+    nestedRow.Add(childA);
+
+    View childB = View::New();
+    childB.SetBackgroundColor(Color::YELLOW);
+    childB.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
+    childB.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
+    nestedRow.Add(childB);
+
+    View childC = View::New();
+    childC.SetBackgroundColor(Color::CYAN);
+    childC.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
+    nestedRow.Add(childC);
+
+    root.Add(nestedRow);
+
+    contentArea.Add(root);
+  }
+
+  void OnExit() override
+  {
+    DisconnectAll();
+  }
+
+};
+
+REGISTER_MANUAL_TEST(TcFlexLayoutMarginPadding)

@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -115,4 +115,4 @@ protected:
 /** @} */
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

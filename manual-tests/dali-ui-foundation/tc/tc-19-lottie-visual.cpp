@@ -141,8 +141,8 @@ private:
   bool OnPollTick()
   {
     const std::string text = std::string("State: ") + PlayStateName(mView.GetPlayState()) +
-                             " | Frame: " + std::to_string(mView.GetCurrentFrame()) +
-                             "/" + std::to_string(mView.GetTotalFrame());
+                             " | Frame: " + std::to_string(mView.GetCurrentFrameNumber()) +
+                             "/" + std::to_string(mView.GetTotalFrameCount());
     if(text != mLastPlayText)
     {
       mLastPlayText = text;

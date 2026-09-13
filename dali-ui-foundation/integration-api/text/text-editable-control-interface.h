@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/text/input-filter.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class Actor;
 struct Vector4;
@@ -155,6 +155,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTEGRATION_TEXT_EDITABLE_CONTROL_INTERFACE_H

@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 class CommonTextUtils
 {
@@ -88,6 +88,6 @@ public:
                                          TextAbstraction::CharacterIndex endIndex);
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal
 
 #endif // DALI_UI_INTERNAL_TEXT_CONTROLS_COMMON_TEXT_UTILS_H

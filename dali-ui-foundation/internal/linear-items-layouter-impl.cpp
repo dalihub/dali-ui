@@ -23,7 +23,7 @@
 #include <cmath>
 #include <limits>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -580,4 +580,4 @@ float LinearItemsLayouterImpl::ScrollBy(float delta, Recycler& recycler)
 } // namespace Internal
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

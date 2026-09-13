@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -174,4 +174,4 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

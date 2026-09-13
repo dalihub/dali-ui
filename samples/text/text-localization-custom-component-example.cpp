@@ -28,6 +28,7 @@
 //   ESC/BACK - Quit
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 
 // Apps can only use public headers in platform builds.
 // #include <dali/integration-api/string-utils.h>
@@ -39,6 +40,7 @@
 // for desktop test
 // Apps can only use public headers in platform builds.
 // #include <dali/devel-api/adaptor-framework/application-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -80,15 +82,15 @@ constexpr uint32_t COLOR_CARD_ACTION      = 0x2563EB;
 Property::Map CreateCardShadowMap()
 {
   Property::Map transform;
-  transform.Add(Ui::Visual::Transform::Property::OFFSET, Vector2(4.0f, 4.0f));
-  transform.Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-                Vector2(static_cast<float>(Ui::Visual::Transform::Policy::ABSOLUTE),
-                        static_cast<float>(Ui::Visual::Transform::Policy::ABSOLUTE)));
+  transform.Add(Ui::Integration::Visual::Transform::Property::OFFSET, Vector2(4.0f, 4.0f));
+  transform.Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+                Vector2(static_cast<float>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE),
+                        static_cast<float>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE)));
 
   Property::Map shadow;
-  shadow.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::VisualType::COLOR);
-  shadow.Add(Ui::VisualBasePropertyIndex::MIX_COLOR, Vector4(0.0f, 0.0f, 0.0f, 0.18f));
-  shadow.Add(Ui::VisualBasePropertyIndex::TRANSFORM, transform);
+  shadow.Add(Ui::Integration::Visual::Property::TYPE, Ui::VisualType::COLOR);
+  shadow.Add(Ui::Integration::Visual::Property::MIX_COLOR, Vector4(0.0f, 0.0f, 0.0f, 0.18f));
+  shadow.Add(Ui::Integration::Visual::Property::TRANSFORM, transform);
 
   return shadow;
 }
@@ -140,7 +142,7 @@ public:
     SetBackgroundColor(UiColor(COLOR_CARD_BACKGROUND));
     SetCornerRadius(16.0f);
 
-    SetProperty(View::Property::SHADOW, CreateCardShadowMap());
+    SetProperty(Dali::Ui::Integration::View::Property::SHADOW, CreateCardShadowMap());
 
     StackLayout titleRow = StackLayout::New(StackOrientation::HORIZONTAL);
     titleRow.SetSpacing(6.0f);

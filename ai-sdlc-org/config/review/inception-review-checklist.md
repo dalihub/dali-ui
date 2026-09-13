@@ -128,6 +128,59 @@ Minimum Checks:
 
 ---
 
+### 4. DALi Component Design Compliance
+
+**Condition:** Only required when `profile_id == dali_component_feature`
+
+**Evidence Locations:**
+
+- `ai-sdlc-docs/inception/requirements/requirements-analysis.md`
+- `ai-sdlc-docs/inception/architecture/architecture-design.md`
+
+**Recommended Check Level:** Level 3
+
+```yaml
+Minimum Checks:
+  - ✓ OneUIComponents reference branch and commit recorded
+  - ✓ Corresponding reference component identified, or approved absence documented
+  - ✓ Component behavior and acceptance criteria mapped from the reference
+  - ✓ Public and implementation base classes selected with rationale
+  - ✓ Component style and configuration approach defined
+  - ✓ Stateful-style TBD areas do not introduce an unapproved shared contract
+  - ✓ Intentional differences from the reference documented
+```
+
+**Status:** ☐
+
+---
+
+### 5. DALi API Change Design Compliance
+
+**Condition:** Only required when `profile_id == org_standard` and a public,
+extension, or integration API contract is affected
+
+**Evidence Locations:**
+
+- `ai-sdlc-docs/inception/reverse-engineering/api-documentation.md`
+- `ai-sdlc-docs/inception/requirements/requirements-analysis.md`
+- `ai-sdlc-docs/inception/architecture/architecture-design.md`
+
+**Recommended Check Level:** Level 3
+
+```yaml
+Minimum Checks:
+  - ✓ Affected API level and consumers identified
+  - ✓ Existing declarations, subclasses, call sites, and ABI-sensitive layout analyzed
+  - ✓ Change classified as ordinary work or explicit pre-release redesign
+  - ✓ Compatibility, ABI, migration, and documentation impact recorded
+  - ✓ Target API and Handle-Body structure comply with applicable rules
+  - ✓ Any intentional API or ABI break has an explicit approved decision
+```
+
+**Status:** ☐
+
+---
+
 ## Verdict Determination
 
 ### PASS Conditions
@@ -152,6 +205,8 @@ Minimum Checks:
 | 1 | Requirements Document | [Level 1/2/3] | | | |
 | 2 | Design Document | [Level 1/2/3] | | | |
 | 3 | Unit Definition | [Level 1/2/3] | | | |
+| 4 | DALi Component Design Compliance | Level 3 / N/A | | | `dali_component_feature` only |
+| 5 | DALi API Change Design Compliance | Level 3 / N/A | | | `org_standard` API changes only |
 
 ---
 
@@ -167,10 +222,10 @@ inception-review.md loads this checklist and evaluates each deliverable:
 
 ## Adding Custom Deliverables
 
-To add a 4th deliverable, follow this template:
+To add another deliverable, follow this template and use the next item number:
 
 ```markdown
-### 4. [Your Deliverable Name]
+### N. [Your Deliverable Name]
 
 **Evidence Location:** `ai-sdlc-docs/inception/[your-file].md`
 

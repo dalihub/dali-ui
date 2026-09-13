@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-manager.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -57,6 +57,6 @@ void AppendMesh(Ui::AtlasManager::Mesh2D& first, const Ui::AtlasManager::Mesh2D&
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_ATLAS_MESH_FACTORY_H

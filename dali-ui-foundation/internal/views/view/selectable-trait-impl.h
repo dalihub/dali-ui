@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -184,4 +184,4 @@ const Internal::SelectableTraitImpl& GetImpl(const SelectableTrait& obj);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -27,18 +27,18 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 
 using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -78,12 +78,12 @@ struct NameIndexMatch
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-  {IMAGE_DESIRED_WIDTH, Ui::ImageVisualPropertyIndex::DESIRED_WIDTH},
-  {IMAGE_DESIRED_HEIGHT, Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT},
-  {SYNCHRONOUS_LOADING, Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING},
-  {LOAD_POLICY_NAME, Ui::ImageVisualPropertyIndex::LOAD_POLICY},
-  {RELEASE_POLICY_NAME, Ui::ImageVisualPropertyIndex::RELEASE_POLICY},
-  {FITTING_MODE, Ui::ImageVisualPropertyIndex::FITTING_MODE},
+  {IMAGE_DESIRED_WIDTH, Ui::Integration::ImageVisual::Property::DESIRED_WIDTH},
+  {IMAGE_DESIRED_HEIGHT, Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT},
+  {SYNCHRONOUS_LOADING, Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING},
+  {LOAD_POLICY_NAME, Ui::Integration::ImageVisual::Property::LOAD_POLICY},
+  {RELEASE_POLICY_NAME, Ui::Integration::ImageVisual::Property::RELEASE_POLICY},
+  {FITTING_MODE, Ui::Integration::ImageVisual::Property::FITTING_MODE},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -126,9 +126,6 @@ SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory&
   mLoadFailed(false),
   mRasterizeForcibly(true)
 {
-  // the rasterized image is with pre-multiplied alpha format
-  mImpl->mFlags |= Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
-
   mImpl->mFittingModeRequired = true;
 
   if(creationOptions & Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
@@ -218,7 +215,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
 {
   switch(index)
   {
-    case Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING:
+    case Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING:
     {
       bool sync = false;
       if(value.Get(sync))
@@ -238,7 +235,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
       }
       break;
     }
-    case Ui::ImageVisualPropertyIndex::DESIRED_WIDTH:
+    case Ui::Integration::ImageVisual::Property::DESIRED_WIDTH:
     {
       int32_t desiredWidth = 0;
       if(value.Get(desiredWidth))
@@ -247,7 +244,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
       }
       break;
     }
-    case Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT:
+    case Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT:
     {
       int32_t desiredHeight = 0;
       if(value.Get(desiredHeight))
@@ -256,7 +253,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
       }
       break;
     }
-    case Ui::ImageVisualPropertyIndex::RELEASE_POLICY:
+    case Ui::Integration::ImageVisual::Property::RELEASE_POLICY:
     {
       int releasePolicy = static_cast<int>(mReleasePolicy);
       if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, RELEASE_POLICY_TABLE, RELEASE_POLICY_TABLE_COUNT,
@@ -266,7 +263,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
       }
       break;
     }
-    case Ui::ImageVisualPropertyIndex::LOAD_POLICY:
+    case Ui::Integration::ImageVisual::Property::LOAD_POLICY:
     {
       int loadPolicy = static_cast<int>(mLoadPolicy);
       if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, LOAD_POLICY_TABLE, LOAD_POLICY_TABLE_COUNT, loadPolicy)))
@@ -276,7 +273,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
       break;
     }
 
-    case Ui::ImageVisualPropertyIndex::FITTING_MODE:
+    case Ui::Integration::ImageVisual::Property::FITTING_MODE:
     {
       int32_t fittingMode = static_cast<int32_t>(mFittingMode);
       if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, FITTING_MODE_TABLE, FITTING_MODE_TABLE_COUNT, fittingMode)))
@@ -291,7 +288,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
 void SvgVisual::DoSetOnScene(Actor& actor)
 {
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 
   // Defer the rasterisation task until we get given a size (by Size Negotiation algorithm)
 
@@ -392,18 +389,18 @@ void SvgVisual::GetNaturalSize(Vector2& naturalSize)
 void SvgVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::SVG);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::SVG);
   if(mImageUrl.IsValid())
   {
-    map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
+    map.Insert(Ui::Integration::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
   }
 
-  map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, IsSynchronousLoadingRequired());
-  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredSize.GetWidth());
-  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredSize.GetHeight());
-  map.Insert(Ui::ImageVisualPropertyIndex::LOAD_POLICY, mLoadPolicy);
-  map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
-  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, mFittingMode);
+  map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, IsSynchronousLoadingRequired());
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, mDesiredSize.GetWidth());
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, mDesiredSize.GetHeight());
+  map.Insert(Ui::Integration::ImageVisual::Property::LOAD_POLICY, mLoadPolicy);
+  map.Insert(Ui::Integration::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::Integration::ImageVisual::Property::FITTING_MODE, mFittingMode);
 }
 
 void SvgVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -557,7 +554,7 @@ void SvgVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer);
   }
 
   if(IsOnScene() && !mLoadFailed)
@@ -627,4 +624,4 @@ Shader SvgVisual::GenerateShader() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

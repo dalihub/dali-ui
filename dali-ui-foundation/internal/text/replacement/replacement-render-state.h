@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Stores replacement state for one sync or async request.
@@ -58,6 +58,6 @@ struct ReplacementRenderState
   bool                         attempted{false};
 };
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_RENDER_STATE_H

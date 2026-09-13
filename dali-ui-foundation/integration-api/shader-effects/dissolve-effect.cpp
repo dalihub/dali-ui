@@ -22,11 +22,12 @@
 #include <dali/public-api/rendering/shader.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -138,19 +139,19 @@ Property::Map CreateDissolveEffect(bool useHighPrecision)
   vertexShaderString.append(vertexShader);
   fragmentShaderString.append(fragmentShader);
 
-  customShader[Visual::Shader::Property::VERTEX_SHADER]   = ToPropertyValue(vertexShaderString);
-  customShader[Visual::Shader::Property::FRAGMENT_SHADER] = ToPropertyValue(fragmentShaderString);
+  customShader[Dali::Ui::Integration::Visual::Shader::Property::VERTEX_SHADER]   = ToPropertyValue(vertexShaderString);
+  customShader[Dali::Ui::Integration::Visual::Shader::Property::FRAGMENT_SHADER] = ToPropertyValue(fragmentShaderString);
 
-  customShader[Visual::Shader::Property::SUBDIVIDE_GRID_X] = 20;
-  customShader[Visual::Shader::Property::SUBDIVIDE_GRID_Y] = 20;
+  customShader[Dali::Ui::Integration::Visual::Shader::Property::SUBDIVIDE_GRID_X] = 20;
+  customShader[Dali::Ui::Integration::Visual::Shader::Property::SUBDIVIDE_GRID_Y] = 20;
 
-  customShader[Visual::Shader::Property::HINTS] = Shader::Hint::OUTPUT_IS_TRANSPARENT;
+  customShader[Dali::Ui::Integration::Visual::Shader::Property::HINTS] = Shader::Hint::OUTPUT_IS_TRANSPARENT;
 
-  map[Ui::VisualBasePropertyIndex::SHADER] = customShader;
+  map[Ui::Integration::Visual::Property::SHADER] = customShader;
   return map;
 }
 
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

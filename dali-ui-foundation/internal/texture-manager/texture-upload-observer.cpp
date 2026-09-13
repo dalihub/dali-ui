@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-type.h> // for INVALUD_TEXTURE_ID
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -93,4 +93,4 @@ TextureUploadObserver::DestructionSignalType& TextureUploadObserver::Destruction
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

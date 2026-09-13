@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/layer-devel.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -74,6 +74,6 @@ static_assert(!(MINIMUM_DEPTH_INDEX <= AUTO_INDEX && AUTO_INDEX <= MAXIMUM_DEPTH
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VIEW_DEPTH_INDEX_RANGES_H

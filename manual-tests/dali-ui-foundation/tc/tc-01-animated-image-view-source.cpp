@@ -72,7 +72,7 @@ constexpr uint32_t C_BG          = 0x1A1A1A;
 /**
  * @brief Verifies AnimatedImageView image source API:
  *   SetResourceUrl / GetResourceUrl
- *   SetResourceUrls / GetResourceUrls
+ *   SetResourceUrlList / GetResourceUrlList
  *
  * Steps:
  *   [SetResourceUrl verification]:
@@ -80,14 +80,14 @@ constexpr uint32_t C_BG          = 0x1A1A1A;
  *   2. [GIF]  -> confirm switch to dali-logo-anim.gif
  *   3. [GIF2] -> confirm switch to animatedLoading.gif
  *
- *   [SetResourceUrls verification]:
- *   1. [URLs: Dog(8)]  -> confirm GetResourceUrls count=8, PNG sequence plays
- *   2. [URLs: Logo(15)] -> confirm GetResourceUrls count=15, more frames play
+ *   [SetResourceUrlList verification]:
+ *   1. [URLs: Dog(8)]  -> confirm GetResourceUrlList count=8, PNG sequence plays
+ *   2. [URLs: Logo(15)] -> confirm GetResourceUrlList count=15, more frames play
  *
  * Expected result:
  *   Single URL: GetResourceUrl returns the full path that was set (printed verbatim).
- *   URL array: GetResourceUrls size matches the count that was set.
- *   Frames: GetTotalFrame() (polled) matches the source: webp 8 / gif 15 / gif2 3,
+ *   URL array: GetResourceUrlList size matches the count that was set.
+ *   Frames: GetTotalFrameCount() (polled) matches the source: webp 8 / gif 15 / gif2 3,
  *   dog array 8 / logo array 15 — the one tree-readable proof the source switched.
  */
 class TcAnimatedImageViewSource : public ManualTest::TestCase, public ConnectionTracker
@@ -95,7 +95,7 @@ class TcAnimatedImageViewSource : public ManualTest::TestCase, public Connection
 public:
   Dali::String GetName() const override
   {
-    return "01. AnimatedImageView: SetResourceUrl / SetResourceUrls";
+    return "01. AnimatedImageView: SetResourceUrl / SetResourceUrlList";
   }
 
   Dali::String GetDescription() const override
@@ -115,7 +115,7 @@ public:
     mCountLabel  = MakeStatusLabel("ResourceUrls count: (single URL mode)");
     mFramesLabel = MakeStatusLabel("Frames: 0");
 
-    // GetTotalFrame() only becomes valid after the (asynchronous) decode, so a
+    // GetTotalFrameCount() only becomes valid after the (asynchronous) decode, so a
     // click handler cannot print it; poll like the buffer/speed screens do.
     mPollTimer = Timer::New(100);
     mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewSource::OnPollTick);
@@ -158,7 +158,7 @@ private:
   bool OnPollTick()
   {
     mFramesLabel.SetText(
-      Dali::String("Frames: ") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()));
+      Dali::String("Frames: ") + Dali::String(std::to_string(mView.GetTotalFrameCount()).c_str()));
     return true;
   }
 
@@ -177,10 +177,10 @@ private:
   {
     Dali::Vector<Dali::String> urlVec;
     for(int i = 0; i < count; ++i) urlVec.PushBack(urls[i]);
-    mView.SetResourceUrls(urlVec);
+    mView.SetResourceUrlList(urlVec);
     mView.Play();
 
-    auto got = mView.GetResourceUrls();
+    auto got = mView.GetResourceUrlList();
     mUrlLabel.SetText("URL: (URL array mode)");
     mCountLabel.SetText(
       Dali::String("ResourceUrls count: ") + Dali::String(std::to_string(got.Size()).c_str()) +

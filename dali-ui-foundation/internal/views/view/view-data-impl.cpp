@@ -59,8 +59,11 @@
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/input-event-impl.h>
@@ -99,9 +102,7 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <algorithm>
 
 using Dali::Integration::GetStdString;
@@ -112,7 +113,7 @@ using Dali::Integration::ToStdString;
 namespace ExtensionView   = Dali::Ui::Extension::View;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -148,15 +149,14 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VIEW_DATA");
 #endif
 
-constexpr unsigned int OFF_SCREEN_RENDERING_TYPE_COUNT        = 3u;
-constexpr char         BACKGROUND_COLOR_BINDING_ID[]          = "BackgroundColor";
-constexpr char         BACKGROUND_GRADIENT_BINDING_ID[]       = "BackgroundGradient";
-constexpr char         COLOR_BINDING_ID[]                     = "Color";
-constexpr char         ACCESSIBILITY_NAME_BINDING_ID[]        = "Ui.View.AccessibilityName";
-constexpr char         ACCESSIBILITY_DESCRIPTION_BINDING_ID[] = "Ui.View.AccessibilityDescription";
-constexpr char         INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-highlight";
-constexpr char         COLLECTION_CONTAINER_ATTRIBUTE[]       = "collection_container";
-constexpr char         COLLECTION_INDEX_ATTRIBUTE[]           = "collection_index";
+constexpr char BACKGROUND_COLOR_BINDING_ID[]          = "BackgroundColor";
+constexpr char BACKGROUND_GRADIENT_BINDING_ID[]       = "BackgroundGradient";
+constexpr char COLOR_BINDING_ID[]                     = "Color";
+constexpr char ACCESSIBILITY_NAME_BINDING_ID[]        = "Ui.View.AccessibilityName";
+constexpr char ACCESSIBILITY_DESCRIPTION_BINDING_ID[] = "Ui.View.AccessibilityDescription";
+constexpr char INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-highlight";
+constexpr char COLLECTION_CONTAINER_ATTRIBUTE[]       = "collection_container";
+constexpr char COLLECTION_INDEX_ATTRIBUTE[]           = "collection_index";
 
 const TraitId ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID                    = TraitId::Alloc();
 const TraitId ACCESSIBILITY_ESCAPE_CALLBACK_TRAIT_ID                      = TraitId::Alloc();
@@ -324,17 +324,7 @@ bool GetInsetsFromPropertyValue(const Property::Value& value, Insets& insets)
     return true;
   }
 
-  Extents extentsValue;
-  if(value.Get(extentsValue))
-  {
-    insets = Insets(static_cast<float>(extentsValue.start),
-                    static_cast<float>(extentsValue.end),
-                    static_cast<float>(extentsValue.top),
-                    static_cast<float>(extentsValue.bottom));
-    return true;
-  }
-
-  return false;
+  return value.Get(insets);
 }
 
 void ResetStateEffect(ViewDataImpl& viewDataImpl, StateEffect effect)
@@ -606,13 +596,13 @@ private:
 };
 
 static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(
-  Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
+  Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
 static constexpr uint32_t BORDERLINE_CORNER_RADIUS_CONSTRAINT_TAG(
-  Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 11);
+  Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 11);
 
-static constexpr uint32_t BORDERLINE_WIDTH_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 12);
-static constexpr uint32_t BORDERLINE_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 13);
-static constexpr uint32_t BORDERLINE_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 14);
+static constexpr uint32_t BORDERLINE_WIDTH_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 12);
+static constexpr uint32_t BORDERLINE_COLOR_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 13);
+static constexpr uint32_t BORDERLINE_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 14);
 
 bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName)
 {
@@ -1140,20 +1130,20 @@ struct ViewDataImpl::ReplayNodeScope
 
 // clang-format off
 // Properties registered without macro to use specific member variables.
-const PropertyRegistration ViewDataImpl::PROPERTY_5(typeRegistration,  "background",                     Ui::View::Property::BACKGROUND,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_5(typeRegistration,  "background",                     Ui::Integration::View::Property::BACKGROUND,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_6(typeRegistration,  "margin",                         Ui::View::Property::MARGIN,                           Property::VECTOR4, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_7(typeRegistration,  "padding",                        Ui::View::Property::PADDING,                          Property::VECTOR4, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_11(typeRegistration, "leftFocusableViewId",           Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_12(typeRegistration, "rightFocusableViewId",          Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID,         Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_13(typeRegistration, "upFocusableViewId",             Ui::View::Property::UP_FOCUSABLE_VIEW_ID,            Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_14(typeRegistration, "downFocusableViewId",           Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_15(typeRegistration, "shadow",                         Ui::View::Property::SHADOW,                           Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_15(typeRegistration, "shadow",                         Ui::Integration::View::Property::SHADOW,                           Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_22(typeRegistration, "dispatchKeyEvents",              Ui::View::Property::DISPATCH_KEY_EVENTS,              Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_24(typeRegistration, "clockwiseFocusableViewId",      Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID,     Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_25(typeRegistration, "counterClockwiseFocusableViewId", Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID, Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_31(typeRegistration, "offScreenRendering",             Ui::View::Property::OFFSCREEN_RENDERING,              Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerShadow",                    Ui::View::Property::INNER_SHADOW,                     Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_33(typeRegistration, "borderline",                     Ui::View::Property::BORDERLINE,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerShadow",                    Ui::Integration::View::Property::INNER_SHADOW,                     Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_33(typeRegistration, "borderline",                     Ui::Integration::View::Property::BORDERLINE,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_34(typeRegistration, "requestedWidth",                 Ui::View::Property::REQUESTED_WIDTH,                  Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_35(typeRegistration, "requestedHeight",                Ui::View::Property::REQUESTED_HEIGHT,                 Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_36(typeRegistration, "minimumWidth",                   Ui::View::Property::MINIMUM_WIDTH,                    Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -1167,7 +1157,7 @@ const PropertyRegistration ViewDataImpl::PROPERTY_44(typeRegistration, "backward
 
 // Animatable without uniform
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_1(typeRegistration, "viewCornerRadius",       Ui::View::Property::CORNER_RADIUS,        Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
-const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
+const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_3(typeRegistration, "viewCornerSquareness",   Ui::View::Property::CORNER_SQUARENESS,    Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_4(typeRegistration, "viewBorderlineWidth",    Ui::View::Property::BORDERLINE_WIDTH,     Property::FLOAT,   &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_5(typeRegistration, "viewBorderlineColor",    Ui::View::Property::BORDERLINE_COLOR,     Property::Value(Color::BLACK), &ViewDataImpl::SetProperty, nullptr);
@@ -1248,6 +1238,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   // Pure cache key; its initial value is never consulted because
   // mArrangeCacheValid starts false.
   mLastArrangeDirection(Dali::LayoutDirection::LEFT_TO_RIGHT),
+  mLayoutTransitionMode(LayoutTransitionMode::AUTO),
   mKeyEventDispatchInProgress(false),
   mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT))
 {
@@ -1302,9 +1293,13 @@ void ViewDataImpl::Destroy()
   ClearRenderEffect();
 }
 
-void ViewDataImpl::InitializeVisualData()
+ViewDataImpl::VisualData& ViewDataImpl::EnsureVisualData()
 {
-  mVisualData = std::make_unique<ViewDataImpl::VisualData>(*this);
+  if(!mVisualData)
+  {
+    mVisualData = std::make_unique<VisualData>(*this);
+  }
+  return *mVisualData;
 }
 
 MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightConstraint)
@@ -1677,9 +1672,9 @@ Ui::View::ResourceReadySignalType& ViewDataImpl::ResourceReadySignal()
   return EnsureResourceReadyData().resourceReadySignal;
 }
 
-Ui::View::OffScreenRenderingFinishedSignalType& ViewDataImpl::OffScreenRenderingFinishedSignal()
+Ui::View::OffscreenRenderingFinishedSignalType& ViewDataImpl::OffscreenRenderingFinishedSignal()
 {
-  return EnsureRenderEffectData().offScreenRenderingFinishedSignal;
+  return EnsureRenderEffectData().offscreenRenderingFinishedSignal;
 }
 
 bool ViewDataImpl::HasLayoutFinishedSignalConnections() const
@@ -2344,9 +2339,10 @@ void ViewDataImpl::InvalidateMeasure()
   // depth-sorted iteration, this lets the parent capture pre-change
   // bounds before the standalone child's own arrange updates them, so
   // a standalone child's RequestedWidth / RequestedHeight change
-  // surfaces as the parent's CHANGE slot. This is the SOLE carrier of the
-  // standalone+transition hook: OnChildAdded no longer repeats it, because the
-  // child's own InvalidateMeasure() on the add always reaches this branch.
+  // surfaces as the parent's CHANGE slot. Both invalidation entries carry this
+  // hook -- this branch for every path that re-derives the parent, and
+  // InvalidateMeasureFromParentAdd's mirror of it for the add -- which is why
+  // OnChildAdded itself never repeats it.
   if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
   {
     Ui::View parentView = GetParentView();
@@ -2372,6 +2368,61 @@ void ViewDataImpl::InvalidateMeasure()
   }
 
   RegisterWithLayoutController();
+}
+
+void ViewDataImpl::InvalidateMeasureFromParentAdd(ViewDataImpl& parentData)
+{
+  // A literal mirror of InvalidateMeasure() above, with one substitution: the parent is
+  // handed in rather than looked up. (The generic entry's parentless fallthrough to
+  // RegisterWithLayoutController() drops out with it -- a caller-supplied parent can
+  // never be absent, so that tail is unreachable here.) OnChildAdded is the single caller that already holds
+  // it, and dali-core parents the child BEFORE OnChildAdd runs (Actor::SetParent precedes
+  // the notification), so the GetParentView() the generic entry would do there provably
+  // resolves to the very view that is calling -- an Actor::GetParent plus two handle
+  // DownCasts per add, spent re-deriving something the caller has in hand.
+  //
+  // Everything else is repeated verbatim rather than delegated. The local half must run
+  // ahead of the generation short-circuit, and the standalone branch carries the
+  // standalone+transition hook for the add -- a standalone child whose parent has a
+  // LayoutTransition invalidates that parent's measure so the dispatcher's
+  // CaptureBeforeLayout / StartTransitionsAfterLayout runs in the same layout batch --
+  // which is why OnChildAdded itself never repeats it.
+  //
+  // The local drops are repeated on purpose too, even though OnChildAdded has just run
+  // ResetSubtreeScaleAndLayoutCaches() over this subtree. The reset deliberately raises
+  // no dirty bits, so the local half is not covered by it in any case; and keeping the
+  // body a verbatim mirror keeps this entry correct on its own terms instead of leaning
+  // on OnChildAdded's exact statement order (the dispatcher's re-entrant window sits
+  // BEFORE the reset today, and nothing here should depend on that).
+  //
+  // UtcDaliViewAddConfiguredOffSceneChildReMeasuresParentP,
+  // UtcDaliViewReparentChildInSameBatchReMeasuresNewParentChainP and
+  // UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP pin it.
+  DropCachedEffectiveScale();
+
+  InvalidateLayoutCaches();
+
+  mMeasureDirty = true;
+  mArrangeDirty = true;
+
+  const uint32_t generation = LayoutInvalidation::CurrentGeneration();
+  if(gActiveLayoutPassDepth == 0u && mMeasureKeyOrPropagation.propagationGeneration == generation)
+  {
+    return;
+  }
+  mMeasureKeyOrPropagation.propagationGeneration = generation;
+
+  if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    if(parentData.GetLayoutTransition())
+    {
+      parentData.InvalidateMeasure();
+    }
+    RegisterWithLayoutController();
+    return;
+  }
+
+  parentData.InvalidateMeasure();
 }
 
 void ViewDataImpl::InvalidateArrange()
@@ -2530,15 +2581,15 @@ UiColor ViewDataImpl::GetBackgroundColor() const
     return outColor;
   }
 
-  Property::Map    backgroundMap = mViewImpl.Self().GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
-  Property::Value* typeValue     = backgroundMap.Find(Ui::VisualBasePropertyIndex::TYPE);
+  Property::Map    backgroundMap = mViewImpl.Self().GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  Property::Value* typeValue     = backgroundMap.Find(Ui::Integration::Visual::Property::TYPE);
   int              type          = static_cast<int>(Ui::Integration::InternalVisualType::COLOR);
   if(typeValue && typeValue->Get(type) && type != static_cast<int>(Ui::Integration::InternalVisualType::COLOR))
   {
     return UiColor();
   }
 
-  Property::Value* colorValue = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
+  Property::Value* colorValue = backgroundMap.Find(Ui::Integration::Visual::Property::MIX_COLOR);
   Vector4          color;
   return colorValue && colorValue->Get(color) ? UiColor(color) : UiColor();
 }
@@ -2677,7 +2728,7 @@ void ViewDataImpl::SetBorderlineOffset(float offset)
 
 void ViewDataImpl::ClearBackground()
 {
-  UnregisterVisual(Ui::View::Property::BACKGROUND);
+  UnregisterVisual(Ui::Integration::View::Property::BACKGROUND);
   ClearBackgroundBinding();
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
@@ -2932,7 +2983,20 @@ void ViewDataImpl::SetLayoutTransition(LayoutTransition transition)
   // unrelated CHANGE as SIBLING_REMOVED.
   if(!transition)
   {
-    mLayoutTransitionData.reset();
+    if(mLayoutTransitionData)
+    {
+      mLayoutTransitionData->transition.Reset();
+      mLayoutTransitionData->pendingEnterChildren.clear();
+      mLayoutTransitionData->pendingReorderedChildren.clear();
+      mLayoutTransitionData->hasPendingChildRemoval = false;
+      // The block is shared with the self role; free it only when both roles are
+      // empty. Every marker above belongs to the children role and has just been
+      // dropped, so an empty children handle leaves nothing else to keep.
+      if(!mLayoutTransitionData->selfTransition)
+      {
+        mLayoutTransitionData.reset();
+      }
+    }
     // Symmetric with the direct markers above: drop any inherited-ENTER
     // candidates this view owns in the dispatcher, so a detach -> reattach
     // cycle does not surface a stale ENTER for a grand-child added under the
@@ -2975,6 +3039,104 @@ void ViewDataImpl::SetLayoutTransition(LayoutTransition transition)
 LayoutTransition ViewDataImpl::GetLayoutTransition() const
 {
   return mLayoutTransitionData ? mLayoutTransitionData->transition : LayoutTransition();
+}
+
+void ViewDataImpl::SetSelfLayoutTransition(LayoutTransition transition)
+{
+  if(!transition)
+  {
+    // Detach: return to the parent / ancestor rules. In-flight transitions are NOT
+    // cancelled (handle replacement is not cancellation), but the self-role records
+    // this view owns in the dispatcher must go: the add-time ENTER candidate,
+    // mirroring the children role dropping its own pending markers on detach, and
+    // the snapshot of the pass in flight. Otherwise a detach -> reattach cycle would
+    // surface a stale self ENTER, or replay a CHANGE from bounds captured before the
+    // detach. An off-window view's records were already dropped by its
+    // scene-disconnect cleanup (OnViewDestroyed), which is why the window guard
+    // below costs nothing.
+    if(mLayoutTransitionData)
+    {
+      mLayoutTransitionData->selfTransition.Reset();
+      if(!mLayoutTransitionData->transition)
+      {
+        mLayoutTransitionData.reset();
+      }
+    }
+    Window window = Window::Get(mViewImpl.Self());
+    if(window)
+    {
+      LayoutController::Get(window).ClearDetachedSelfState(&mViewImpl);
+    }
+    return;
+  }
+
+  EnsureLayoutTransitionData().selfTransition = transition;
+
+  // Seed the ENTER candidate for the natural call order
+  //   parent.Add(child); child.SetSelfLayoutTransition(t);
+  // where OnChildAdded ran before this view carried a self transition and so
+  // recorded nothing. Restricted to !mInitialLayoutDone for the same reason the
+  // children-role seed is: a view that has already been arranged is part of its
+  // parent's visual state and must not fire ENTER now.
+  Actor  self   = mViewImpl.Self();
+  Window window = self ? Window::Get(self) : Window();
+  if(window && !mInitialLayoutDone)
+  {
+    Ui::View parentView = Ui::View::DownCast(self.GetParent());
+    Ui::View selfView   = Ui::View::DownCast(self);
+    if(parentView && selfView)
+    {
+      LayoutController::Get(window).NotifyChildAdded(&GetImpl(parentView), selfView);
+    }
+  }
+}
+
+LayoutTransition ViewDataImpl::GetSelfLayoutTransition() const
+{
+  return mLayoutTransitionData ? mLayoutTransitionData->selfTransition : LayoutTransition();
+}
+
+bool ViewDataImpl::HasSelfLayoutTransition() const
+{
+  return mLayoutTransitionData && mLayoutTransitionData->selfTransition;
+}
+
+void ViewDataImpl::SetLayoutTransitionMode(LayoutTransitionMode mode)
+{
+  if(mLayoutTransitionMode == mode)
+  {
+    return; // Idempotent: a redundant set must not scrub live per-pass state below.
+  }
+  mLayoutTransitionMode = mode;
+
+  if(mode == LayoutTransitionMode::AUTO)
+  {
+    // Returning to AUTO seeds nothing. The next per-(view, slot) event picks this
+    // view up again; an add that happened while the view was gated recorded no
+    // candidate and must not fire ENTER retroactively.
+    return;
+  }
+
+  // Gating applies from the next event (a mode change is not a cancellation), but
+  // the self-role records already standing in the dispatcher must go, exactly as
+  // SetSelfLayoutTransition's detach drops them: the add-time pending ENTER, which
+  // would surface on a later flip back to AUTO, and this pass's self snapshot,
+  // which would then replay ancient bounds as one CHANGE. The attached handles
+  // themselves are deliberately left alone -- policy gates the value, it does not
+  // destroy it. An off-window view's records were already dropped by its
+  // scene-disconnect cleanup (OnViewDestroyed), which is why the window guard
+  // below costs nothing.
+  Actor  self   = mViewImpl.Self();
+  Window window = self ? Window::Get(self) : Window();
+  if(window)
+  {
+    LayoutController::Get(window).ClearDetachedSelfState(&mViewImpl);
+  }
+}
+
+LayoutTransitionMode ViewDataImpl::GetLayoutTransitionMode() const
+{
+  return mLayoutTransitionMode;
 }
 
 LayoutRect ViewDataImpl::GetArrangedBounds() const
@@ -3048,9 +3210,10 @@ void ViewDataImpl::RemoveAll(Ui::RemovePolicy policy)
   // GetChildCount / GetChildAt). Snapshot up front: with ANIMATE_EXIT the
   // EXIT-ing View children stay attached as ghosts, so iterating the live
   // actor list would revisit them and never terminate. Each removal is routed
-  // through the per-child Remove, which already handles this view's own EXIT
-  // slot, an inherited SUBTREE-scope EXIT owner, and the in-flight-ghost
-  // guard; OnChildRemove keeps mChildren in sync for the immediate paths.
+  // through the per-child Remove, which already handles the child's own self
+  // transition, this view's own EXIT slot, an inherited SUBTREE-scope EXIT owner,
+  // and the in-flight-ghost guard; OnChildRemove keeps mChildren in sync for the
+  // immediate paths.
   Actor              self = mViewImpl.Self();
   std::vector<Actor> snapshot;
   const uint32_t     count = self.GetChildCount();
@@ -3084,140 +3247,123 @@ void ViewDataImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
   }
 
   const bool animateExit = (policy == Ui::RemovePolicy::ANIMATE_EXIT);
+  ViewImpl&  childImpl   = GetImpl(child);
+  Actor      selfActor   = mViewImpl.Self();
 
-  // ANIMATE_EXIT only: if a LayoutTransition with an EXIT slot (spec OR
-  // animator) is attached, hand the child off to the layout transition
-  // dispatcher so the EXIT animation can play. IMMEDIATE (and the
-  // no-EXIT-slot case) falls through to the immediate unparent below.
-  Ui::LayoutTransition transition = GetLayoutTransition();
-  bool                 deferred   = false;
-  if(animateExit && transition)
+  // The remove-side mirror of the OnChildAdded gate. With no LayoutTransition alive
+  // anywhere in the process, everything between here and the unparent below is
+  // provably a no-op, and none of it is cheap: Window::Get resolves the actor's
+  // Scene and scans the adaptor's window list, and the child find is a linear walk
+  // of mChildren.
+  //
+  // Provable in both directions, like the add-side gate:
+  //  - Every level of ResolveGoverningTransition reports a transition only through
+  //    some view's non-empty handle, and a non-empty handle IS a live impl (a
+  //    non-AUTO LayoutTransitionMode only makes the resolution reach NONE sooner).
+  //    With none alive the deferred-EXIT branch is unreachable, so an ANIMATE_EXIT
+  //    remove is the immediate unparent either way.
+  //  - The SIBLING_REMOVED marker is written only under this view's own
+  //    children-role handle -- provably empty while the gate is closed.
+  //
+  // The ghost re-remove guard stays inside this fast path (with its own find): it
+  // keys on mChildren bookkeeping -- the actor still parented here while the
+  // logical child is already erased -- not on transition liveness, and that desync
+  // outlives the transition that created it: a ghost whose transition died
+  // mid-flight must still take the early return rather than fall through and
+  // synchronously unparent.
+  if(!Internal::LayoutTransitionImpl::HasAnyInstance())
   {
-    auto&      impl      = Internal::GetImpl(transition);
-    const bool hasExitFx = static_cast<bool>(impl.GetExitVisualSpec()) || impl.HasExitAnimator() || impl.HasActiveExitBoundsEffect();
-    if(hasExitFx)
-    {
-      Actor  self   = mViewImpl.Self();
-      Window window = Window::Get(self);
-      if(window)
-      {
-        // Remove the child from this view's layout-tracking list and
-        // invalidate so siblings flow into the freed slot during the next
-        // layout pass. The child's Actor stays under this Actor so the
-        // dispatcher can animate it before unparenting.
-        ViewImpl& childImpl = GetImpl(child);
-        auto      it        = std::find(mChildren.begin(), mChildren.end(), child);
-        if(it != mChildren.end())
-        {
-          mChildren.Erase(it);
-          LayoutTransitionData& transitionData = *mLayoutTransitionData;
-          transitionData.pendingEnterChildren.erase(&childImpl);
-          // Same rationale as the immediate-remove path's OnChildRemove:
-          // a stale raw ViewImpl* in the reorder set could outlive its
-          // child after deferred-remove EXIT and cause a future heap-
-          // reused address to be misclassified as REORDERED. Erase
-          // per-child here (not full clear) so the cause of any
-          // siblings still pending reorder is preserved.
-          transitionData.pendingReorderedChildren.erase(&childImpl);
-          // Mark sibling removal so the dispatcher tags this pass's CHANGE
-          // dispatches on the remaining siblings as SIBLING_REMOVED. Set
-          // only when a transition is attached to avoid leaving stale
-          // marker state on views without transitions.
-          transitionData.hasPendingChildRemoval = true;
-          InvalidateMeasure();
-
-          // Only schedule the EXIT transition when @p child was actually a
-          // tracked child. Calling Remove on a non-child must not fire
-          // any DALi layout-transition lifecycle / animation; without this
-          // guard a misuse would leave a ghost animation that fires
-          // OnStart / OnFinished and races with
-          // the actor's real parent.
-          LayoutController::Get(window).ScheduleLayoutExit(&mViewImpl, child);
-          deferred = true;
-        }
-      }
-    }
-  }
-
-  if(!deferred)
-  {
-    // Guard against re-removing a child that is currently an EXIT ghost
-    // under this view. Ghost detection: actor parent is still Self() (the
-    // deferred-remove keeps the actor attached) AND the child has already
-    // been removed from the logical children list (mChildren). Without
-    // this guard, the second Remove bypasses the dispatcher
-    // duplicate-EXIT guard and synchronously unparents the ghost, which
-    // triggers OnSceneDisconnection -> CancelPendingExit/CancelActiveAnimator
-    // and silently cancels the in-flight EXIT (no OnFinished, no fade).
-    // The same applies when the parent's LayoutTransition has been replaced
-    // or cleared between the first and second Remove -- the second
-    // call cannot enter the deferred branch but the ghost is still in
-    // flight under its original transition.
-    if(child.GetParent() == mViewImpl.Self() &&
+    if(child.GetParent() == selfActor &&
        std::find(mChildren.begin(), mChildren.end(), child) == mChildren.end())
     {
       return;
     }
+    selfActor.Remove(child);
+    return;
+  }
 
-    Actor      selfActor      = mViewImpl.Self();
-    Window     window         = Window::Get(selfActor);
-    auto       it             = std::find(mChildren.begin(), mChildren.end(), child);
-    const bool isCurrentChild = (it != mChildren.end());
+  Window window = Window::Get(selfActor);
 
-    // Inherited (SUBTREE-scope) EXIT: this view does not handle EXIT through
-    // its own transition (otherwise the deferred branch above would have run).
-    // Walk up to the closest ancestor SUBTREE owner that carries an EXIT
-    // effect; if found, defer the child to that owner. The actor stays under
-    // this view -- the ghost's direct/visual parent -- while the owner's
-    // transition drives the EXIT effect (INV-GHOST-UNDER-DIRECT-PARENT). The
-    // closest-owner / standalone-boundary rules are enforced inside the
-    // resolver, so a child claimed by a closer (non-SUBTREE or non-EXIT)
-    // transition is not stolen by an ancestor.
-    // ANIMATE_EXIT only: inherited (SUBTREE-scope) EXIT defer. IMMEDIATE skips
-    // this and unparents synchronously below.
-    if(animateExit && window && isCurrentChild)
+  auto       it             = std::find(mChildren.begin(), mChildren.end(), child);
+  const bool isCurrentChild = (it != mChildren.end());
+
+  // ONE resolution for this (child, EXIT) event: the child's own transition wins
+  // wholesale, else this view's, else the closest SUBTREE-scope ancestor's. Each
+  // level terminates on attachment, so a child whose own transition carries no
+  // EXIT effect is unparented immediately even when this view or an ancestor has
+  // one -- that is the documented opt-out. A view whose LayoutTransitionMode is not
+  // AUTO resolves to NONE at level 0, so it is likewise unparented immediately.
+  Internal::GoverningTransition governing;
+  if(animateExit)
+  {
+    governing = Internal::ResolveGoverningTransition(&childImpl, &mViewImpl, Internal::ReflowSlot::EXIT);
+  }
+  const bool hasExitFx =
+    governing.transition && Internal::GetImpl(governing.transition).HasExitFx();
+
+  if(animateExit && hasExitFx && window && isCurrentChild)
+  {
+    // Deferred EXIT. The child leaves the layout-tracking list now so siblings
+    // reflow into the freed slot; its Actor stays under THIS view (the ghost host
+    // and unparent target, INV-GHOST-UNDER-DIRECT-PARENT) while the resolved
+    // transition drives the effect.
+    mChildren.Erase(it);
+    if(mLayoutTransitionData)
     {
-      ViewImpl* owner = Internal::FindGoverningSubtreeOwner(&mViewImpl, Internal::ReflowSlot::EXIT);
-      if(owner)
+      mLayoutTransitionData->pendingEnterChildren.erase(&childImpl);
+      // Same rationale as the immediate-remove path's OnChildRemove: a stale raw
+      // ViewImpl* in the reorder set could outlive its child after deferred-remove
+      // EXIT and cause a future heap-reused address to be misclassified as
+      // REORDERED. Erase per-child so siblings still pending reorder keep their
+      // cause.
+      mLayoutTransitionData->pendingReorderedChildren.erase(&childImpl);
+      // Tag the remaining siblings' CHANGE as SIBLING_REMOVED, but only when THIS
+      // view owns a transition to consume the marker: for a self-governed or an
+      // inherited EXIT this view may have none, and an unconsumed marker would
+      // mis-tag a future CHANGE if it later gains one.
+      if(mLayoutTransitionData->transition)
       {
-        ViewImpl& childImpl = GetImpl(child);
-        mChildren.Erase(it);
-        if(mLayoutTransitionData)
-        {
-          mLayoutTransitionData->pendingEnterChildren.erase(&childImpl);
-          mLayoutTransitionData->pendingReorderedChildren.erase(&childImpl);
-        }
-        // Remaining siblings under THIS direct parent reflow into the freed
-        // slot; tag their CHANGE as SIBLING_REMOVED on the next pass -- but only
-        // when THIS view owns a transition to consume the marker. For an
-        // inherited EXIT this view may have no transition, and the marker --
-        // consumed only by a transition-bearing view's layout pass -- would
-        // never be cleared and would mis-tag a future CHANGE if it later gains
-        // one.
-        if(transition)
-        {
-          mLayoutTransitionData->hasPendingChildRemoval = true;
-        }
-        InvalidateMeasure();
-        LayoutController::Get(window).ScheduleLayoutExit(&mViewImpl, child, owner);
-        return;
+        mLayoutTransitionData->hasPendingChildRemoval = true;
       }
     }
-
-    // Mark sibling removal for the next CHANGE pass when a transition is
-    // attached (without an EXIT slot) AND we have a window. The
-    // remaining children may reflow and should be tagged with
-    // SIBLING_REMOVED. Skip the marker when no transition is attached,
-    // or when no window is available -- without a window the marker
-    // cannot be consumed by the dispatcher in this pass (no layout
-    // pass runs), so it would leak across a later add-to-window event
-    // and mis-tag the first layout pass's CHANGE as SIBLING_REMOVED.
-    if(transition && window && isCurrentChild)
-    {
-      mLayoutTransitionData->hasPendingChildRemoval = true;
-    }
-    selfActor.Remove(child);
+    InvalidateMeasure();
+    LayoutController::Get(window).ScheduleLayoutExit(
+      &mViewImpl,
+      child,
+      governing.role == Internal::LayoutTransitionRole::INHERITED_SUBTREE ? governing.owner : nullptr);
+    return;
   }
+
+  // Guard against re-removing a child that is currently an EXIT ghost
+  // under this view. Ghost detection: actor parent is still Self() (the
+  // deferred-remove keeps the actor attached) AND the child has already
+  // been removed from the logical children list (mChildren). Without
+  // this guard, the second Remove bypasses the dispatcher
+  // duplicate-EXIT guard and synchronously unparents the ghost, which
+  // triggers OnSceneDisconnection -> CancelPendingExit/CancelActiveAnimator
+  // and silently cancels the in-flight EXIT (no OnFinished, no fade).
+  // The same applies when the parent's LayoutTransition has been replaced
+  // or cleared between the first and second Remove -- the second
+  // call cannot enter the deferred branch but the ghost is still in
+  // flight under its original transition.
+  if(child.GetParent() == selfActor && !isCurrentChild)
+  {
+    return;
+  }
+
+  // Mark sibling removal for the next CHANGE pass when a transition is
+  // attached (without an EXIT slot) AND we have a window. The
+  // remaining children may reflow and should be tagged with
+  // SIBLING_REMOVED. Skip the marker when no transition is attached,
+  // or when no window is available -- without a window the marker
+  // cannot be consumed by the dispatcher in this pass (no layout
+  // pass runs), so it would leak across a later add-to-window event
+  // and mis-tag the first layout pass's CHANGE as SIBLING_REMOVED.
+  if(mLayoutTransitionData && mLayoutTransitionData->transition && window && isCurrentChild)
+  {
+    mLayoutTransitionData->hasPendingChildRemoval = true;
+  }
+  selfActor.Remove(child);
 }
 
 uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child) const
@@ -3432,9 +3578,16 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     //    so a non-empty map implies a live impl and the gate is open. Detaching a
     //    transition from its view mid-EXIT does not close it -- the ghost's own handle
     //    keeps the impl alive.
-    //  - NotifyChildAdded records nothing unless FindGoverningSubtreeOwner returns an
-    //    owner, and that requires some ancestor's GetLayoutTransition() to be non-empty,
-    //    which again implies a live impl.
+    //  - NotifyChildAdded records nothing unless ResolveGoverningTransition resolves to
+    //    the SELF role (the CHILD carries its own self transition) or to the
+    //    INHERITED_SUBTREE role (an ancestor's SUBTREE transition claims the add). Both
+    //    require a non-empty GetSelfLayoutTransition() / GetLayoutTransition() on some
+    //    view, which again implies a live impl. The DIRECT_PARENT and NONE roles record
+    //    nothing at all.
+    //  - A LayoutTransitionMode other than AUTO only makes that resolution reach NONE
+    //    SOONER (level 0, the level-2 direct-parent cut, or the level-4 walk stop); it
+    //    can never open a recording path this gate closes, so the gate stays valid
+    //    without reading the mode.
     // So "no live impl" implies "both calls do nothing", which is exactly what makes
     // skipping them behaviour-preserving rather than merely usually-harmless.
     //
@@ -3454,17 +3607,14 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
         auto& controller = LayoutController::Get(window);
         controller.NotifyChildReparented(&childImpl);
 
-        // Inherited (SUBTREE-scope) ENTER: when THIS view has no transition of
-        // its own, a child added here is not recorded for direct ENTER (the
-        // gate below requires this view's transition). Notify the dispatcher so
-        // it can walk up to the closest ancestor SUBTREE owner with an ENTER
-        // effect and register an inherited-ENTER candidate. When this view HAS
-        // a transition it is the closest owner and the direct path below claims
-        // the child, so the inherited walk is skipped here.
-        if(!HasLayoutTransition())
-        {
-          controller.NotifyChildAdded(&mViewImpl, view);
-        }
+        // Route the ENTER of this add through the dispatcher's single governing-
+        // transition resolution: a child carrying its own (self-role) transition
+        // records a pending self ENTER whatever this view declares; a child claimed
+        // by THIS view's transition is left to the direct marker below (a no-op
+        // inside the dispatcher); otherwise the closest ancestor SUBTREE owner with
+        // an ENTER effect records an inherited candidate. Called unconditionally so
+        // the self role is not gated on this view's own state.
+        controller.NotifyChildAdded(&mViewImpl, view);
       }
     }
 
@@ -3544,19 +3694,22 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // under a different parent's constraints and is no longer reliable.
     // Through the internal primitive, not ViewImpl::InvalidateMeasure(): this is
     // a framework-internal consistency invalidation, not an application call.
-    ViewDataImpl::Get(childImpl).InvalidateMeasure();
+    // And via the known-parent entry -- one parent lookup fewer, everything else
+    // identical: dali-core has already parented the child, so the lookup the generic
+    // entry would perform can only resolve to this very view.
+    ViewDataImpl::Get(childImpl).InvalidateMeasureFromParentAdd(*this);
 
     // No self-invalidation here for a CONTRIBUTING child, and none is needed: the child's
-    // own InvalidateMeasure() above reaches this view and does the whole job.
+    // own InvalidateMeasureFromParentAdd() above reaches this view and does the whole job.
     //
     // That is a guarantee, not a likelihood. The generation short-circuit
-    // (InvalidateMeasure's propagation-record generation return) is the
-    // only thing that could stop the walk short, and ResetSubtreeScaleAndLayoutCaches()
+    // (the propagation-record generation return, identical in both invalidation entries) is
+    // the only thing that could stop the walk short, and ResetSubtreeScaleAndLayoutCaches()
     // above zeroed the whole added subtree's propagation records -- 0 is the "never
     // propagated" sentinel that no live generation ever equals (the counter starts at 1
-    // and skips 0 on wrap). The child's walk therefore always runs in full, and dali-core
-    // has already parented the child (Actor::SetParent precedes OnChildAdd), so
-    // GetParentView() resolves to THIS view. When the walk arrives here it drops this
+    // and skips 0 on wrap). The child's walk therefore always runs in full, and this view
+    // IS the parent it is handed (dali-core has already parented the child --
+    // Actor::SetParent precedes OnChildAdd). When the walk arrives here it drops this
     // view's cached scale, retracts BOTH layout caches, poisons an in-progress pass and
     // raises both dirty bits before any short-circuit is even consulted -- everything the
     // removed call did.
@@ -3586,15 +3739,16 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
       InvalidateArrange();
 
       // No parent InvalidateMeasure() for the standalone+transition combination either.
-      // The child's InvalidateMeasure() above reaches its own boundary branch, which
-      // carries exactly this hook: a standalone view whose parent has a LayoutTransition
-      // attached invalidates that parent's measure before self-registering, so the
-      // dispatcher's CaptureBeforeLayout / StartTransitionsAfterLayout pass runs in the
-      // same layout batch as the child's. Same predicate (GetLayoutTransition() and
+      // The child's InvalidateMeasureFromParentAdd() above reaches its own boundary branch,
+      // which carries exactly this hook: a standalone view whose parent has a
+      // LayoutTransition attached invalidates that parent's measure before self-registering,
+      // so the dispatcher's CaptureBeforeLayout / StartTransitionsAfterLayout pass runs in
+      // the same layout batch as the child's. Same predicate (GetLayoutTransition() and
       // HasLayoutTransition() read the same member) and same action (the internal
-      // primitive on this very view), and it is reachable for the same reason as the
-      // contributing case above: the propagation record was zeroed a few lines up, so the
-      // walk cannot be short-circuited before it gets there.
+      // primitive on this very view -- the known-parent entry reads it off the parent it
+      // was handed instead of looking it up), and it is reachable for the same reason as
+      // the contributing case above: the propagation record was zeroed a few lines up, so
+      // the walk cannot be short-circuited before it gets there.
       // UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP
       // pins it.
     }
@@ -3814,9 +3968,12 @@ void ViewDataImpl::OnPropertySet(Property::Index index, const Property::Value& p
       const bool enabled = propertyValue.Get<bool>();
       View       self    = View::DownCast(mViewImpl.Self());
 
-      if(!enabled && self == Dali::Ui::FocusManager::Get().GetCurrentFocusView())
+      if(!enabled)
       {
-        Dali::Ui::FocusManager::Get().ClearFocus();
+        // Disabling retained A is not an application's request to cancel a
+        // different deferred B. Invalidate only this View and its own record.
+        auto focusManager = Dali::Ui::FocusManager::Get();
+        GetImpl(focusManager).InvalidateFocusView(self);
       }
 
       ExtensionView::SetState(mViewImpl, ViewState::DISABLED, !enabled);
@@ -3918,29 +4075,30 @@ void ViewDataImpl::GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks
   {
     mRenderEffectData->renderEffect->GetOffScreenRenderTasks(tasks, isForward);
   }
-  if(mRenderEffectData->offScreenRendering)
+  if(mRenderEffectData->offscreenRendering)
   {
-    mRenderEffectData->offScreenRendering->GetOffScreenRenderTasks(tasks, isForward);
+    mRenderEffectData->offscreenRendering->GetOffScreenRenderTasks(tasks, isForward);
   }
 }
 
-Dali::Texture ViewDataImpl::GetOffScreenRenderingOutput() const
+Dali::Texture ViewDataImpl::GetOffscreenRenderingOutput() const
 {
   if(!mRenderEffectData ||
-     mRenderEffectData->offScreenRenderingType != Ui::View::OffScreenRenderingType::REFRESH_ONCE)
+     !mRenderEffectData->offscreenRendering ||
+     mRenderEffectData->offscreenRefreshRate != Ui::View::OffscreenRefreshRate::REFRESH_ONCE)
   {
     DALI_LOG_ERROR(
-      "Precondition unsatisfied: Set property OFFSCREEN_RENDERING to OffScreenRenderingType::REFRESH_ONCE\n");
+      "Precondition unsatisfied: Enable offscreen rendering and set OffscreenRefreshRate::REFRESH_ONCE\n");
     return Dali::Texture();
   }
-  return mRenderEffectData->offScreenRendering->GetTexture();
+  return mRenderEffectData->offscreenRendering->GetTexture();
 }
 
 Vector3 ViewDataImpl::GetBackgroundVisualNaturalSize()
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "ViewDataImpl::GetBackgroundVisualNaturalSize for %s\n",
                 mViewImpl.Self().GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
-  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::View::Property::BACKGROUND);
+  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::Integration::View::Property::BACKGROUND);
   if(visualImplPtr)
   {
     Vector2 naturalSize;
@@ -4608,7 +4766,7 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
     {
       // SetProperty triggers ViewDataImpl::SetProperty(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), which:
       //   - updates the actor animatable so decoration constraints re-evaluate, and
-      //   - calls UpdateCornerRadius() for active RenderEffect / OffScreenRendering.
+      //   - calls UpdateCornerRadius() for active RenderEffect / OffscreenRendering.
       mViewImpl.Self().SetProperty(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, s);
     }
     mEffectiveScaleActorSynced = true;
@@ -5778,7 +5936,7 @@ void ViewDataImpl::SetBackgroundColorInternal(const Vector4& color)
 {
   Property::Map map = Internal::CreateColorVisualPropertyMap(color);
 
-  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::View::Property::BACKGROUND);
+  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::Integration::View::Property::BACKGROUND);
   if(visualImplPtr && visualImplPtr->GetType() == Ui::Integration::InternalVisualType::COLOR)
   {
     // Update background color only
@@ -6356,33 +6514,33 @@ void ViewDataImpl::ResourceReady()
 
 void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->RegisterVisual(index, visual);
+    EnsureVisualData().RegisterVisual(index, visual);
   }
 }
 
 void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, int depthIndex)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->RegisterVisual(index, visual, depthIndex);
+    EnsureVisualData().RegisterVisual(index, visual, depthIndex);
   }
 }
 
 void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->RegisterVisual(index, visual, enabled);
+    EnsureVisualData().RegisterVisual(index, visual, enabled);
   }
 }
 
 void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled, int depthIndex)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->RegisterVisual(index, visual, enabled, depthIndex);
+    EnsureVisualData().RegisterVisual(index, visual, enabled, depthIndex);
   }
 }
 
@@ -6428,9 +6586,9 @@ void ViewDataImpl::OnSceneConnection()
     mVisualData->ConnectScene(self);
   }
 
-  if(mRenderEffectData && mRenderEffectData->offScreenRendering)
+  if(mRenderEffectData && mRenderEffectData->offscreenRendering)
   {
-    mRenderEffectData->offScreenRendering->SetOwnerView(Ui::View(mViewImpl.GetOwner()));
+    mRenderEffectData->offscreenRendering->SetOwnerView(Ui::View(mViewImpl.GetOwner()));
   }
 }
 
@@ -6445,9 +6603,9 @@ void ViewDataImpl::OnSceneDisconnection()
     mVisualData->ClearScene(self);
   }
 
-  if(mRenderEffectData && mRenderEffectData->offScreenRendering)
+  if(mRenderEffectData && mRenderEffectData->offscreenRendering)
   {
-    mRenderEffectData->offScreenRendering->ClearOwnerView();
+    mRenderEffectData->offscreenRendering->ClearOwnerView();
   }
 }
 
@@ -6462,9 +6620,9 @@ void ViewDataImpl::EnableCornerPropertiesOverridden(Ui::Integration::Visual::Bas
 
 void ViewDataImpl::EnableVisual(Property::Index index, bool enable)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    mVisualData->EnableVisual(index, enable);
+    EnsureVisualData().EnableVisual(index, enable);
   }
 }
 
@@ -6483,7 +6641,10 @@ Ui::Visual::ResourceStatus ViewDataImpl::GetVisualResourceStatus(Property::Index
   {
     return mVisualData->GetVisualResourceStatus(index);
   }
-  return Ui::Visual::ResourceStatus::READY;
+  // Null now also means "enabled, but no visual has been touched yet", and for THAT view
+  // the allocated-but-empty context this replaces answered PREPARING -- VisualData's own
+  // FindVisual-miss fallback. Only a DISABLE_VISUALS view keeps the READY answer.
+  return AreVisualsEnabled() ? Ui::Visual::ResourceStatus::PREPARING : Ui::Visual::ResourceStatus::READY;
 }
 
 void ViewDataImpl::DoAction(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
@@ -6504,20 +6665,20 @@ void ViewDataImpl::DoActionExtension(Dali::Property::Index visualIndex, Dali::Pr
   }
 }
 
-bool ViewDataImpl::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    return mVisualData->AddVisualObject(visualBase, internalContainerRangeType);
+    return EnsureVisualData().AddVisualObject(visualBase, internalDepthLayer);
   }
   return false;
 }
 
-bool ViewDataImpl::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
-    return mVisualData->AddShadowVisualObject(visualBase, internalContainerRangeType);
+    return EnsureVisualData().AddShadowVisualObject(visualBase, internalDepthLayer);
   }
   return false;
 }
@@ -6530,20 +6691,20 @@ void ViewDataImpl::RemoveVisualObject(Dali::Ui::VisualBase visualBase)
   }
 }
 
-uint32_t ViewDataImpl::GetVisualObjectCount(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType) const
+uint32_t ViewDataImpl::GetVisualObjectCount(Dali::Ui::Visual::DepthLayer internalDepthLayer) const
 {
   if(DALI_LIKELY(mVisualData))
   {
-    return mVisualData->GetVisualObjectCount(internalContainerRangeType);
+    return mVisualData->GetVisualObjectCount(internalDepthLayer);
   }
   return 0u;
 }
 
-Dali::Ui::VisualBase ViewDataImpl::GetVisualObjectAt(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const
+Dali::Ui::VisualBase ViewDataImpl::GetVisualObjectAt(Dali::Ui::Visual::DepthLayer internalDepthLayer, uint32_t siblingOrder) const
 {
   if(DALI_LIKELY(mVisualData))
   {
-    return mVisualData->GetVisualObjectAt(internalContainerRangeType, siblingOrder);
+    return mVisualData->GetVisualObjectAt(internalDepthLayer, siblingOrder);
   }
   return Dali::Ui::VisualBase();
 }
@@ -6619,7 +6780,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       }
       break;
 
-      case Ui::View::Property::BACKGROUND:
+      case Ui::Integration::View::Property::BACKGROUND:
       {
         std::string          url;
         Vector4              color;
@@ -6640,7 +6801,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         else
         {
           // The background is an empty property map, so unregister the background visual.
-          viewImpl.GetViewDataImpl().UnregisterVisual(Ui::View::Property::BACKGROUND);
+          viewImpl.GetViewDataImpl().UnregisterVisual(Ui::Integration::View::Property::BACKGROUND);
         }
         break;
       }
@@ -6675,7 +6836,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::SHADOW:
+      case Ui::Integration::View::Property::SHADOW:
       {
         const Property::Map* map = value.GetMap();
         if(map && !map->Empty())
@@ -6739,15 +6900,15 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 
       case Ui::View::Property::OFFSCREEN_RENDERING:
       {
-        int32_t offscreenRenderingType;
-        if(value.Get(offscreenRenderingType))
+        int32_t offscreenRenderingValue;
+        if(value.Get(offscreenRenderingValue))
         {
-          viewImpl.GetViewDataImpl().SetOffScreenRendering(offscreenRenderingType);
+          viewImpl.GetViewDataImpl().SetOffscreenRendering(offscreenRenderingValue);
         }
         break;
       }
 
-      case Ui::View::Property::INNER_SHADOW:
+      case Ui::Integration::View::Property::INNER_SHADOW:
       {
         const Property::Map* map = value.GetMap();
         if(map && !map->Empty())
@@ -6762,7 +6923,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::BORDERLINE:
+      case Ui::Integration::View::Property::BORDERLINE:
       {
         const Property::Map* map = value.GetMap();
         if(map && !map->Empty())
@@ -6792,10 +6953,14 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         Vector4 radius;
         if(value.Get(radius))
         {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
+          // Gated on AreVisualsEnabled(), not on the context already existing:
+          // NotifyConstraintPropertyChanged flips the corner first-time latches even with
+          // zero visuals registered, so a corner write made BEFORE any background must keep
+          // today's latch timeline rather than be dropped until the first visual arrives.
+          if(DALI_LIKELY(viewImpl.GetViewDataImpl().AreVisualsEnabled()))
           {
-            viewImpl.GetViewDataImpl().mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_RADIUS,
-                                                                                    false);
+            viewImpl.GetViewDataImpl().EnsureVisualData().NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_RADIUS,
+                                                                                          false);
           }
           viewImpl.GetViewDataImpl().UpdateCornerRadius();
         }
@@ -6807,10 +6972,14 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         int policy;
         if(value.Get(policy))
         {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
+          // Gated on AreVisualsEnabled(), not on the context already existing:
+          // NotifyConstraintPropertyChanged flips the corner first-time latches even with
+          // zero visuals registered, so a corner write made BEFORE any background must keep
+          // today's latch timeline rather than be dropped until the first visual arrives.
+          if(DALI_LIKELY(viewImpl.GetViewDataImpl().AreVisualsEnabled()))
           {
-            viewImpl.GetViewDataImpl().mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_RADIUS_POLICY,
-                                                                                    false);
+            viewImpl.GetViewDataImpl().EnsureVisualData().NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_RADIUS_POLICY,
+                                                                                          false);
           }
           viewImpl.GetViewDataImpl().UpdateCornerRadius();
         }
@@ -6831,10 +7000,14 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         Vector4 squareness;
         if(value.Get(squareness))
         {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
+          // Gated on AreVisualsEnabled(), not on the context already existing:
+          // NotifyConstraintPropertyChanged flips the corner first-time latches even with
+          // zero visuals registered, so a corner write made BEFORE any background must keep
+          // today's latch timeline rather than be dropped until the first visual arrives.
+          if(DALI_LIKELY(viewImpl.GetViewDataImpl().AreVisualsEnabled()))
           {
-            viewImpl.GetViewDataImpl().mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_SQUARENESS,
-                                                                                    false);
+            viewImpl.GetViewDataImpl().EnsureVisualData().NotifyConstraintPropertyChanged(Ui::View::Property::CORNER_SQUARENESS,
+                                                                                          false);
           }
           viewImpl.GetViewDataImpl().UpdateCornerRadius();
         }
@@ -7058,14 +7231,14 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::BACKGROUND:
+      case Ui::Integration::View::Property::BACKGROUND:
       {
         Property::Map map;
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
           const Ui::Internal::Visual::Base* visualImplPtr =
-            viewImpl.GetViewDataImpl().mVisualData->GetVisualImplPtr(Ui::View::Property::BACKGROUND);
+            viewImpl.GetViewDataImpl().mVisualData->GetVisualImplPtr(Ui::Integration::View::Property::BACKGROUND);
           if(visualImplPtr)
           {
             visualImplPtr->CreatePropertyMap(map);
@@ -7088,13 +7261,13 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::SHADOW:
+      case Ui::Integration::View::Property::SHADOW:
       {
         Property::Map map;
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
-          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::SHADOW);
+          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::Integration::View::Property::SHADOW);
           if(visual)
           {
             visual.CreatePropertyMap(map);
@@ -7138,17 +7311,19 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::OFFSCREEN_RENDERING:
       {
         const auto* renderEffectData = viewImpl.GetViewDataImpl().mRenderEffectData.get();
-        value                        = renderEffectData ? renderEffectData->offScreenRenderingType : Ui::View::OffScreenRenderingType::NONE;
+        value                        = renderEffectData && renderEffectData->offscreenRendering
+                                         ? static_cast<int32_t>(renderEffectData->offscreenRefreshRate)
+                                         : 0;
         break;
       }
 
-      case Ui::View::Property::INNER_SHADOW:
+      case Ui::Integration::View::Property::INNER_SHADOW:
       {
         Property::Map map;
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
-          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::INNER_SHADOW);
+          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::Integration::View::Property::INNER_SHADOW);
           if(visual)
           {
             visual.CreatePropertyMap(map);
@@ -7159,13 +7334,13 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::BORDERLINE:
+      case Ui::Integration::View::Property::BORDERLINE:
       {
         Property::Map map;
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
-          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::BORDERLINE);
+          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::Integration::View::Property::BORDERLINE);
           if(visual)
           {
             visual.CreatePropertyMap(map);
@@ -7243,8 +7418,8 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
 Ui::View::VisualEventSignalType& ViewDataImpl::VisualEventSignal()
 {
-  DALI_ASSERT_ALWAYS(mVisualData && "Visual Disabled view cannot use VisualEventSignal!!");
-  return mVisualData->VisualEventSignal();
+  DALI_ASSERT_ALWAYS(AreVisualsEnabled() && "Visual Disabled view cannot use VisualEventSignal!!");
+  return EnsureVisualData().VisualEventSignal();
 }
 
 ViewDataImpl::AccessibilityData& ViewDataImpl::GetOrCreateAccessibilityData()
@@ -8018,7 +8193,7 @@ void ViewDataImpl::OnLayoutFinished(Ui::View view, LayoutRect bounds)
 
 void ViewDataImpl::SetBackground(const Property::Map& map)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
     Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
     visual.SetName("background");
@@ -8027,7 +8202,7 @@ void ViewDataImpl::SetBackground(const Property::Map& map)
     {
       // Ignore corner radius for offscreen case.
       Ui::GetImplementation(visual).CornerRadiusIgnoredAtOffscreenRendering(true);
-      mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
+      EnsureVisualData().RegisterVisual(Ui::Integration::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
       EnableCornerPropertiesOverridden(visual, true);
 
       if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
@@ -8046,14 +8221,14 @@ void ViewDataImpl::SetShadow(const Property::Map& map)
 
 void ViewDataImpl::SetFirstShadow(const Property::Map& map)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
     Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
     visual.SetName("shadow");
 
     if(visual)
     {
-      mVisualData->RegisterVisual(Ui::View::Property::SHADOW, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT);
+      EnsureVisualData().RegisterVisual(Ui::Integration::View::Property::SHADOW, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT);
       EnableCornerPropertiesOverridden(visual, true);
 
       if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
@@ -8066,9 +8241,9 @@ void ViewDataImpl::SetFirstShadow(const Property::Map& map)
 
 void ViewDataImpl::AppendShadow(const Dali::Ui::Shadow& shadow)
 {
-  if(!GetVisualImplPtr(Ui::View::Property::SHADOW))
+  if(!GetVisualImplPtr(Ui::Integration::View::Property::SHADOW))
   {
-    // Keep the first shadow as the View::Property::SHADOW visual. That makes
+    // Keep the first shadow as the Dali::Ui::Integration::View::Property::SHADOW visual. That makes
     // property lookup and shadow blur/opacity animations target the primary
     // shadow directly, while later shadows can live in the visual container.
     SetFirstShadow(Extension::Shadow::CreatePropertyMap(shadow));
@@ -8077,7 +8252,7 @@ void ViewDataImpl::AppendShadow(const Dali::Ui::Shadow& shadow)
 
   ColorVisual visual = Extension::Shadow::CreateVisual(shadow);
   visual.SetName("shadow");
-  if(AddShadowVisualObject(visual, Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND))
+  if(AddShadowVisualObject(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND_EFFECT))
   {
     if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
     {
@@ -8090,7 +8265,7 @@ void ViewDataImpl::ClearShadow()
 {
   if(DALI_LIKELY(mVisualData))
   {
-    mVisualData->UnregisterVisual(Ui::View::Property::SHADOW);
+    mVisualData->UnregisterVisual(Ui::Integration::View::Property::SHADOW);
     mVisualData->RemoveBoxShadowVisualObjects();
   }
 
@@ -8118,13 +8293,13 @@ void ViewDataImpl::SetInnerShadow(const Ui::InnerShadow& innerShadow)
 
 void ViewDataImpl::RegisterInnerShadowVisual(Ui::Integration::Visual::Base visual)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
     visual.SetName("innerShadow");
 
     if(visual)
     {
-      mVisualData->RegisterVisual(Ui::View::Property::INNER_SHADOW, visual, INNER_SHADOW_DEPTH_INDEX);
+      EnsureVisualData().RegisterVisual(Ui::Integration::View::Property::INNER_SHADOW, visual, INNER_SHADOW_DEPTH_INDEX);
 
       Ui::Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
 
@@ -8166,9 +8341,15 @@ void ViewDataImpl::ClearInnerShadow()
 {
   if(DALI_LIKELY(mVisualData))
   {
-    mVisualData->UnregisterVisual(Ui::View::Property::INNER_SHADOW);
+    mVisualData->UnregisterVisual(Ui::Integration::View::Property::INNER_SHADOW);
+  }
 
-    // Trigger a size negotiation request that may be needed when unregistering a visual.
+  // Trigger a size negotiation request that may be needed when unregistering a visual.
+  // Gated on AreVisualsEnabled(), not on the lazy context: before the context became
+  // lazy every enabled view had one, so an enabled view ALWAYS issued this request here
+  // even with nothing registered -- and a visuals-disabled view never did.
+  if(AreVisualsEnabled())
+  {
     if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
     {
       sizeNegotiatedViewImpl->RelayoutRequest();
@@ -8178,20 +8359,22 @@ void ViewDataImpl::ClearInnerShadow()
 
 void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
+    VisualData& visualData = EnsureVisualData();
+
     if(!forciblyCreate)
     {
       Ui::Internal::Visual::Base* previousVisualImplPtr =
-        mVisualData->GetVisualImplPtr(Ui::View::Property::BORDERLINE);
+        visualData.GetVisualImplPtr(Ui::Integration::View::Property::BORDERLINE);
       if(previousVisualImplPtr)
       {
         previousVisualImplPtr->DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
 
         // Trigger borderline relative constraints once
-        mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_WIDTH, false);
-        mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_COLOR, false);
-        mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_OFFSET, false);
+        visualData.NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_WIDTH, false);
+        visualData.NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_COLOR, false);
+        visualData.NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_OFFSET, false);
         return;
       }
     }
@@ -8200,7 +8383,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
 
     if(visual)
     {
-      mVisualData->RegisterVisual(Ui::View::Property::BORDERLINE, visual, BORDERLINE_DEPTH_INDEX);
+      visualData.RegisterVisual(Ui::Integration::View::Property::BORDERLINE, visual, BORDERLINE_DEPTH_INDEX);
 
       // Create constraint only if we set Borderline property as DevelView::BORDERLINE_XXX.
       if(!forciblyCreate)
@@ -8278,9 +8461,15 @@ void ViewDataImpl::ClearBorderline()
 {
   if(DALI_LIKELY(mVisualData))
   {
-    mVisualData->UnregisterVisual(Ui::View::Property::BORDERLINE);
+    mVisualData->UnregisterVisual(Ui::Integration::View::Property::BORDERLINE);
+  }
 
-    // Trigger a size negotiation request that may be needed when unregistering a visual.
+  // Trigger a size negotiation request that may be needed when unregistering a visual.
+  // Gated on AreVisualsEnabled(), not on the lazy context: before the context became
+  // lazy every enabled view had one, so an enabled view ALWAYS issued this request here
+  // even with nothing registered -- and a visuals-disabled view never did.
+  if(AreVisualsEnabled())
+  {
     if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
     {
       sizeNegotiatedViewImpl->RelayoutRequest();
@@ -8425,7 +8614,21 @@ Dali::Vector<Dali::Devel::Accessibility::Relation> ViewDataImpl::GetAccessibilit
 
 void ViewDataImpl::RegisterProcessorOnce()
 {
-  if(DALI_LIKELY(mVisualData))
+  // AreVisualsEnabled(), NOT mVisualData, and deliberately no EnsureVisualData() here:
+  // registering must not allocate. The predicate keeps the pre-lazy registration TIMING
+  // exactly -- enabled implies registered on the first size/scale change, whether or not
+  // a visual exists yet -- because before lazy creation an enabled view always had a
+  // context and so always registered here.
+  //
+  // That timing is load-bearing, not incidental. The registration opens a same-event-cycle
+  // window: a visual registered AFTER the resize but before the processor runs still gets
+  // its fitting applied on that frame. Gating registration on the context existing would
+  // close the window for the first visual a view ever gets, and its fitting would slip to
+  // whatever later size or scale change happened to re-register.
+  //
+  // Process() tolerates the context still being null when it runs (it null-guards
+  // ApplyFittingMode), so registering ahead of any allocation costs a no-op pass at worst.
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
     if(!mProcessorRegistered)
     {
@@ -8450,72 +8653,95 @@ void ViewDataImpl::RefreshRenderEffects()
     mRenderEffectData->renderEffect->Refresh();
   }
 
-  if(mRenderEffectData && mRenderEffectData->offScreenRendering)
+  if(mRenderEffectData && mRenderEffectData->offscreenRendering)
   {
-    mRenderEffectData->offScreenRendering->Refresh();
+    mRenderEffectData->offscreenRendering->Refresh();
   }
 }
 
-void ViewDataImpl::SetOffScreenRendering(int32_t offScreenRenderingType)
+void ViewDataImpl::SetOffscreenRendering(int32_t offscreenRenderingValue)
 {
-  // Validate input
+  if(offscreenRenderingValue == 0)
   {
-    constexpr int32_t count = static_cast<int32_t>(OFF_SCREEN_RENDERING_TYPE_COUNT);
-    if(0 > offScreenRenderingType || offScreenRenderingType >= count)
-    {
-      DALI_LOG_ERROR("Failed to set offscreen rendering. Type index is out of bound.\n");
-      return;
-    }
-  }
-
-  Ui::View::OffScreenRenderingType newType =
-    static_cast<Ui::View::OffScreenRenderingType>(offScreenRenderingType);
-
-  Dali::Ui::View handle(mViewImpl.GetOwner());
-
-  if(newType == Ui::View::OffScreenRenderingType::NONE)
-  {
-    if(mRenderEffectData && mRenderEffectData->offScreenRendering)
-    {
-      auto tempOffscreenRenderingImpl = std::move(mRenderEffectData->offScreenRendering);
-      tempOffscreenRenderingImpl->ClearOwnerView();
-
-      if(DALI_LIKELY(mVisualData))
-      {
-        mVisualData->OffscreenRenderingEnabled(false);
-      }
-    }
-  }
-  else
-  {
-    RenderEffectData& renderEffectData = EnsureRenderEffectData();
-    if(renderEffectData.offScreenRenderingType == Ui::View::OffScreenRenderingType::NONE)
-    {
-      renderEffectData.offScreenRendering = std::make_unique<OffScreenRenderingImpl>(newType);
-      renderEffectData.offScreenRendering->SetOwnerView(handle);
-
-      if(DALI_LIKELY(mVisualData))
-      {
-        mVisualData->OffscreenRenderingEnabled(true);
-      }
-    }
-    else if(renderEffectData.offScreenRenderingType != newType)
-    {
-      renderEffectData.offScreenRendering->SetType(newType);
-    }
-    renderEffectData.offScreenRenderingType = newType;
+    SetOffscreenRenderingEnabled(false);
     return;
   }
 
-  if(mRenderEffectData)
+  if(offscreenRenderingValue != static_cast<int32_t>(Ui::View::OffscreenRefreshRate::REFRESH_ONCE) &&
+     offscreenRenderingValue != static_cast<int32_t>(Ui::View::OffscreenRefreshRate::REFRESH_ALWAYS))
   {
-    mRenderEffectData->offScreenRenderingType = newType;
+    DALI_LOG_ERROR("Failed to set offscreen rendering. Property value is invalid.\n");
+    return;
   }
+
+  SetOffscreenRenderingRefreshRate(static_cast<Ui::View::OffscreenRefreshRate>(offscreenRenderingValue));
+  SetOffscreenRenderingEnabled(true);
+}
+
+void ViewDataImpl::SetOffscreenRenderingEnabled(bool enabled)
+{
+  if(enabled == IsOffscreenRenderingEnabled())
+  {
+    return;
+  }
+
+  if(!enabled)
+  {
+    auto tempOffscreenRenderingImpl = std::move(mRenderEffectData->offscreenRendering);
+    tempOffscreenRenderingImpl->ClearOwnerView();
+
+    if(DALI_LIKELY(mVisualData))
+    {
+      mVisualData->OffscreenRenderingEnabled(false);
+    }
+    return;
+  }
+
+  RenderEffectData& renderEffectData  = EnsureRenderEffectData();
+  renderEffectData.offscreenRendering = std::make_unique<OffscreenRenderingImpl>(renderEffectData.offscreenRefreshRate);
+  renderEffectData.offscreenRendering->SetOwnerView(Dali::Ui::View(mViewImpl.GetOwner()));
+
+  if(DALI_LIKELY(AreVisualsEnabled()))
+  {
+    EnsureVisualData().OffscreenRenderingEnabled(true);
+  }
+}
+
+bool ViewDataImpl::IsOffscreenRenderingEnabled() const
+{
+  return mRenderEffectData && mRenderEffectData->offscreenRendering;
+}
+
+void ViewDataImpl::SetOffscreenRenderingRefreshRate(Ui::View::OffscreenRefreshRate refreshRate)
+{
+  if(refreshRate != Ui::View::OffscreenRefreshRate::REFRESH_ONCE &&
+     refreshRate != Ui::View::OffscreenRefreshRate::REFRESH_ALWAYS)
+  {
+    DALI_LOG_ERROR("Failed to set offscreen refresh rate. Value is invalid.\n");
+    return;
+  }
+
+  RenderEffectData& renderEffectData = EnsureRenderEffectData();
+  if(renderEffectData.offscreenRefreshRate == refreshRate)
+  {
+    return;
+  }
+
+  renderEffectData.offscreenRefreshRate = refreshRate;
+  if(renderEffectData.offscreenRendering)
+  {
+    renderEffectData.offscreenRendering->SetRefreshRate(refreshRate);
+  }
+}
+
+Ui::View::OffscreenRefreshRate ViewDataImpl::GetOffscreenRenderingRefreshRate() const
+{
+  return mRenderEffectData ? mRenderEffectData->offscreenRefreshRate : Ui::View::OffscreenRefreshRate::REFRESH_ALWAYS;
 }
 
 void ViewDataImpl::UpdateCornerRadius()
 {
-  if(mRenderEffectData && (mRenderEffectData->renderEffect || mRenderEffectData->offScreenRendering))
+  if(mRenderEffectData && (mRenderEffectData->renderEffect || mRenderEffectData->offscreenRendering))
   {
     Actor     self   = mViewImpl.Self();
     const int policy = self.GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY);
@@ -8533,9 +8759,9 @@ void ViewDataImpl::UpdateCornerRadius()
       mRenderEffectData->renderEffect->SetCornerConstants(map);
     }
 
-    if(mRenderEffectData->offScreenRendering)
+    if(mRenderEffectData->offscreenRendering)
     {
-      mRenderEffectData->offScreenRendering->SetCornerConstants(map);
+      mRenderEffectData->offscreenRendering->SetCornerConstants(map);
     }
   }
 }
@@ -8545,8 +8771,8 @@ void ViewDataImpl::UpdateBorderline()
   Actor self = mViewImpl.Self();
 
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::COLOR);
-  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, Color::TRANSPARENT);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::COLOR);
+  map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, Color::TRANSPARENT);
   // Scale natural-pixel width to visual pixels for the initial visual creation.
   map.Insert(Ui::Integration::Visual::Property::BORDERLINE_WIDTH,
              self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH));
@@ -8560,20 +8786,26 @@ void ViewDataImpl::UpdateBorderline()
 
 void ViewDataImpl::CreateAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index)
 {
-  if(DALI_LIKELY(mVisualData))
+  if(DALI_LIKELY(AreVisualsEnabled()))
   {
+    // Ensured up front, not inside the borderline branch: the context is needed by the
+    // unconditional call at the bottom either way, and taking the reference before
+    // UpdateBorderline() keeps it valid across that re-entry (EnsureVisualData hands back
+    // the same object once it exists, so the nested SetBorderline cannot replace it).
+    VisualData& visualData = EnsureVisualData();
+
     if(index == Ui::View::Property::BORDERLINE_WIDTH || index == Ui::View::Property::BORDERLINE_COLOR ||
        index == Ui::View::Property::BORDERLINE_OFFSET)
     {
       Ui::Internal::Visual::Base* previousVisualImplPtr =
-        mVisualData->GetVisualImplPtr(Ui::View::Property::BORDERLINE);
+        visualData.GetVisualImplPtr(Ui::Integration::View::Property::BORDERLINE);
       if(!previousVisualImplPtr)
       {
         // Create visual and constraint for borderline first.
         UpdateBorderline();
       }
     }
-    mVisualData->CreateAnimationConstraints(animationObject, index);
+    visualData.CreateAnimationConstraints(animationObject, index);
   }
 }
 
@@ -8613,4 +8845,4 @@ void ViewDataImpl::Process(bool postProcessor)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

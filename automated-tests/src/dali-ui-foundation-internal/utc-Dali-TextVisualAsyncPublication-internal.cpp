@@ -18,18 +18,24 @@
 // EXTERNAL INCLUDES
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
+#include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-event-thread-callback.h>
 
@@ -37,13 +43,13 @@ using namespace Dali;
 
 namespace
 {
-constexpr float VISUAL_WIDTH             = 220.0f;
-constexpr float VISUAL_HEIGHT            = 64.0f;
+constexpr float VISUAL_WIDTH              = 220.0f;
+constexpr float VISUAL_HEIGHT             = 64.0f;
 constexpr int   ASYNC_TEXT_THREAD_TIMEOUT = 5;
 
-namespace UiInternal = Dali::Ui::Internal;
+namespace UiInternal        = Dali::Ui::Internal;
 namespace UiIntegrationText = Dali::Ui::Integration::Text;
-namespace UiText     = Dali::Ui::Text;
+namespace UiText            = Dali::Ui::Text;
 
 struct RenderedTextVisual
 {
@@ -63,6 +69,20 @@ bool HasValidTexture(Actor actor)
 
     Texture texture = textures.GetTexture(0u);
     if(texture && texture.GetWidth() > 0u && texture.GetHeight() > 0u)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool HasMultiColorTextRenderer(Actor actor)
+{
+  for(uint32_t rendererIndex = 0u; rendererIndex < actor.GetRendererCount(); ++rendererIndex)
+  {
+    Renderer              renderer = actor.GetRendererAt(rendererIndex);
+    const Property::Index index    = renderer.GetPropertyIndex("uHasMultipleTextColors");
+    if(index != Property::INVALID_INDEX && renderer.GetProperty<float>(index) > 0.5f)
     {
       return true;
     }
@@ -96,10 +116,10 @@ RenderedTextVisual CreateTextVisual(UiTestApplication& application)
   view.SetProperty(Actor::Property::SIZE, Vector3(VISUAL_WIDTH, VISUAL_HEIGHT, 0.0f));
 
   Property::Map properties;
-  properties.Add(Dali::Ui::VisualBasePropertyIndex::TYPE,
+  properties.Add(Dali::Ui::Integration::Visual::Property::TYPE,
                  Dali::Ui::Integration::InternalVisualType::TEXT);
-  properties.Add(Dali::Ui::TextVisualPropertyIndex::TEXT, "initial");
-  properties.Add(Dali::Ui::TextVisualPropertyIndex::FONT_SIZE, 16.0f);
+  properties.Add(Dali::Ui::Integration::TextVisual::Property::TEXT, "initial");
+  properties.Add(Dali::Ui::Integration::TextVisual::Property::FONT_SIZE, 16.0f);
 
   Dali::Ui::Integration::Visual::Base visual =
     Dali::Ui::Integration::VisualFactory::Get().CreateVisual(properties);
@@ -135,17 +155,42 @@ UiText::AsyncTextParameters MakeParameters(const std::string& text)
   return parameters;
 }
 
-UiText::AsyncTextParameters MakeRevealParameters(const std::string&          text,
-                                                 uint64_t                    revision,
-                                                 UiText::Internal::Reveal::Unit unit,
-                                                 float                       fadeDurationRatio)
+UiText::AsyncTextParameters MakeGradientParameters(const std::string& text)
 {
+  Dali::Ui::Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, Dali::Ui::UiColor(Color::RED)),
+                         Dali::Ui::Gradient::StopNode(0.5f, Dali::Ui::UiColor(Color::GREEN)),
+                         Dali::Ui::Gradient::StopNode(1.0f, Dali::Ui::UiColor(Color::BLUE))});
+
+  UiText::StyledTextBuilder builder = UiText::StyledTextBuilder::New(text.c_str());
+  DALI_TEST_CHECK(builder.SetSpan(UiText::GradientSpan::New(gradient),
+                                  0u,
+                                  static_cast<uint32_t>(text.size())));
+
   UiText::AsyncTextParameters parameters = MakeParameters(text);
   parameters.isMarqueeEnabled            = false;
-  parameters.isTextRevealEnabled         = true;
-  parameters.textRevealUnit              = unit;
-  parameters.textRevealFadeDurationRatio = fadeDurationRatio;
-  parameters.textRevealRevision          = revision;
+  parameters.hasStyledTextStyleSnapshot  = true;
+  parameters.styledTextStyleSnapshot =
+    UiInternal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(), 96.0f);
+  return parameters;
+}
+
+UiText::AsyncTextParameters MakeRevealParameters(
+  const std::string&                 text,
+  uint64_t                           revision,
+  UiText::Internal::Reveal::Unit     unit,
+  float                              fadeDurationRatio,
+  UiText::Internal::Reveal::Sequence sequence             = UiText::Internal::Reveal::Sequence::WHOLE_TEXT,
+  float                              sequenceStaggerRatio = 0.0f)
+{
+  UiText::AsyncTextParameters parameters    = MakeParameters(text);
+  parameters.isMarqueeEnabled               = false;
+  parameters.isTextRevealEnabled            = true;
+  parameters.textRevealUnit                 = unit;
+  parameters.textRevealFadeDurationRatio    = fadeDurationRatio;
+  parameters.textRevealSequence             = sequence;
+  parameters.textRevealSequenceStaggerRatio = sequenceStaggerRatio;
+  parameters.textRevealRevision             = revision;
   return parameters;
 }
 
@@ -161,25 +206,34 @@ UiText::AsyncTextRenderInfo MakeRevealRenderInfo(uint32_t width, uint32_t height
   return renderInfo;
 }
 
-void ConfigureReveal(RenderedTextVisual&            rendered,
-                     UiText::Internal::Reveal::Unit unit,
-                     float                          fadeDurationRatio,
-                     uint64_t                       revision)
+void ConfigureReveal(
+  RenderedTextVisual&                rendered,
+  UiText::Internal::Reveal::Unit     unit,
+  float                              fadeDurationRatio,
+  uint64_t                           revision,
+  UiText::Internal::Reveal::Sequence sequence             = UiText::Internal::Reveal::Sequence::WHOLE_TEXT,
+  float                              sequenceStaggerRatio = 0.0f)
 {
   Property::Index progress = rendered.view.GetPropertyIndex("testRevealProgress");
   if(progress == Property::INVALID_INDEX)
   {
     progress = rendered.view.RegisterProperty("testRevealProgress", 0.5f);
   }
-  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, unit, fadeDurationRatio, progress, revision);
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual,
+                                              unit,
+                                              fadeDurationRatio,
+                                              progress,
+                                              revision,
+                                              sequence,
+                                              sequenceStaggerRatio);
 }
 
-void PublishDirect(RenderedTextVisual&                   rendered,
-                   const UiText::AsyncTextParameters&    parameters,
-                   const UiText::AsyncTextRenderInfo&    renderInfo)
+void PublishDirect(RenderedTextVisual&                rendered,
+                   const UiText::AsyncTextParameters& parameters,
+                   const UiText::AsyncTextRenderInfo& renderInfo)
 {
   Ui::TextLoadObserver::TextInformation completion(renderInfo, parameters);
-  Ui::TextLoadObserver& loadObserver = static_cast<UiInternal::TextVisual&>(
+  Ui::TextLoadObserver&                 loadObserver = static_cast<UiInternal::TextVisual&>(
     Dali::Ui::GetImplementation(rendered.visual).GetVisualObject());
   loadObserver.LoadComplete(true, completion);
 }
@@ -197,8 +251,8 @@ class ReentrantAsyncInterface : public UiIntegrationText::AsyncTextInterface
 {
 public:
   ReentrantAsyncInterface(Dali::Ui::Integration::Visual::Base visual,
-                          Actor                                actor,
-                          CompletionAction                     action = CompletionAction::REQUEST_NEXT)
+                          Actor                               actor,
+                          CompletionAction                    action = CompletionAction::REQUEST_NEXT)
   : mVisual(visual),
     mActor(actor),
     mNextParameters(MakeParameters(
@@ -229,14 +283,14 @@ public:
     {
       case CompletionAction::REQUEST_NEXT:
       {
-        mNextRequestAccepted = UiInternal::TextVisual::UpdateAsyncRenderer(mVisual, mNextParameters);
+        mNextRequestAccepted    = UiInternal::TextVisual::UpdateAsyncRenderer(mVisual, mNextParameters);
         mResultValidAfterAction = HasValidTexture(mActor);
         break;
       }
       case CompletionAction::CLEAR_TEXT:
       {
         mNextParameters.text.clear();
-        mNextRequestAccepted = UiInternal::TextVisual::UpdateAsyncRenderer(mVisual, mNextParameters);
+        mNextRequestAccepted    = UiInternal::TextVisual::UpdateAsyncRenderer(mVisual, mNextParameters);
         mResultValidAfterAction = HasValidTexture(mActor);
         break;
       }
@@ -262,17 +316,19 @@ public:
 
   void AsyncSizeComputed(const UiText::AsyncTextRenderInfo&) override
   {
+    ++mSizeCompletionCount;
   }
 
   Dali::Ui::Integration::Visual::Base mVisual;
-  Actor                                mActor;
-  UiText::AsyncTextParameters          mNextParameters;
-  uint32_t                             mCompletionCount{0u};
-  uint32_t                             mMarqueeInitializationCount{0u};
-  bool                                 mFirstResultValid{false};
-  bool                                 mNextRequestAccepted{false};
-  bool                                 mResultValidAfterAction{false};
-  CompletionAction                     mAction{CompletionAction::REQUEST_NEXT};
+  Actor                               mActor;
+  UiText::AsyncTextParameters         mNextParameters;
+  uint32_t                            mCompletionCount{0u};
+  uint32_t                            mSizeCompletionCount{0u};
+  uint32_t                            mMarqueeInitializationCount{0u};
+  bool                                mFirstResultValid{false};
+  bool                                mNextRequestAccepted{false};
+  bool                                mResultValidAfterAction{false};
+  CompletionAction                    mAction{CompletionAction::REQUEST_NEXT};
 };
 } // unnamed namespace
 
@@ -284,6 +340,34 @@ void utc_dali_text_visual_async_publication_internal_startup(void)
 void utc_dali_text_visual_async_publication_internal_cleanup(void)
 {
   test_return_value = TET_PASS;
+}
+
+int UtcDaliTextVisualInvalidAsyncSizeRequestDoesNotSubmitP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  RenderedTextVisual      rendered = CreateTextVisual(application);
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+
+  UiText::AsyncTextParameters invalid = MakeParameters("render request is invalid for size computation");
+  UiInternal::TextVisual::RequestAsyncSizeComputation(rendered.visual, invalid);
+  DALI_TEST_CHECK(!Test::WaitForEventThreadTrigger(1, 0));
+  DALI_TEST_EQUALS(observer.mSizeCompletionCount, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(invalid.requestType, UiIntegrationText::Async::RENDER_FIXED_SIZE, TEST_LOCATION);
+
+  UiText::AsyncTextParameters valid = MakeParameters("valid natural size after rejected request");
+  valid.requestType                 = UiIntegrationText::Async::COMPUTE_NATURAL_SIZE;
+  UiInternal::TextVisual::RequestAsyncSizeComputationOwned(rendered.visual, std::move(valid));
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_EQUALS(observer.mSizeCompletionCount, 1u, TEST_LOCATION);
+
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
 }
 
 int UtcDaliTextVisualReentrantAsyncPublicationKeepsTextureP(void)
@@ -332,9 +416,9 @@ int UtcDaliTextVisualFailurePreservesPublishedTextureP(void)
   DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
   DALI_TEST_CHECK(HasValidTexture(rendered.view));
 
-  UiText::AsyncTextRenderInfo failedInfo;
+  UiText::AsyncTextRenderInfo           failedInfo;
   Ui::TextLoadObserver::TextInformation failed(failedInfo, parameters);
-  Ui::TextLoadObserver& loadObserver = static_cast<UiInternal::TextVisual&>(
+  Ui::TextLoadObserver&                 loadObserver = static_cast<UiInternal::TextVisual&>(
     Dali::Ui::GetImplementation(rendered.visual).GetVisualObject());
   loadObserver.LoadComplete(false, failed);
   DALI_TEST_CHECK(HasValidTexture(rendered.view));
@@ -441,19 +525,22 @@ int UtcDaliTextVisualRapidRequestsDiscardStaleResultsP(void)
   ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
 
-  UiText::AsyncTextParameters parameters = MakeParameters("initial published result");
+  UiText::AsyncTextParameters parameters = MakeGradientParameters("styled gradient request A");
   DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
   DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
   DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
   DALI_TEST_CHECK(HasValidTexture(rendered.view));
+  DALI_TEST_CHECK(HasMultiColorTextRenderer(rendered.view));
 
-  parameters = MakeParameters("cancelled request B remains invisible");
+  parameters                  = MakeParameters(std::string(30000u, 'B'));
+  parameters.isMarqueeEnabled = false;
   DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
   DALI_TEST_CHECK(HasValidTexture(rendered.view));
-  parameters = MakeParameters("cancelled request C remains invisible");
+  parameters = MakeGradientParameters("styled gradient request C");
   DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
   DALI_TEST_CHECK(HasValidTexture(rendered.view));
-  parameters = MakeParameters("current request D is the only result that may replace the published texture");
+  parameters                  = MakeParameters("plain request D is the only result that may replace request A");
+  parameters.isMarqueeEnabled = false;
   DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
   DALI_TEST_CHECK(HasValidTexture(rendered.view));
 
@@ -463,6 +550,7 @@ int UtcDaliTextVisualRapidRequestsDiscardStaleResultsP(void)
   }
   DALI_TEST_EQUALS(observer.mCompletionCount, 2u, TEST_LOCATION);
   DALI_TEST_CHECK(HasValidTexture(rendered.view));
+  DALI_TEST_CHECK(!HasMultiColorTextRenderer(rendered.view));
 
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
   END_TEST;
@@ -511,13 +599,15 @@ int UtcDaliTextVisualAsyncOffOnDiscardsOlderRequestsP(void)
     if(enableReveal)
     {
       ConfigureReveal(rendered, UiText::Internal::Reveal::Unit::CHARACTER,
-                      UiText::Reveal::AUTO_FADE_DURATION_RATIO, revision);
+                      UiText::Reveal::AUTO_FADE_DURATION_RATIO, revision,
+                      UiText::Internal::Reveal::Sequence::PER_LINE, 0.5f);
     }
 
     UiText::AsyncTextParameters oldParameters =
       enableReveal ? MakeRevealParameters(std::string(30000u, 'A'), revision,
                                           UiText::Internal::Reveal::Unit::CHARACTER,
-                                          UiText::Reveal::AUTO_FADE_DURATION_RATIO)
+                                          UiText::Reveal::AUTO_FADE_DURATION_RATIO,
+                                          UiText::Internal::Reveal::Sequence::PER_LINE, 0.5f)
                    : MakeParameters(std::string(30000u, 'A'));
     oldParameters.isMarqueeEnabled = false;
     DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, oldParameters));
@@ -527,11 +617,13 @@ int UtcDaliTextVisualAsyncOffOnDiscardsOlderRequestsP(void)
     controller->SetAsyncRendering(true);
 
     UiText::AsyncTextParameters currentParameters =
-      enableReveal ? MakeRevealParameters("current reveal request", revision,
+      enableReveal ? MakeRevealParameters("current reveal request\nwith two visual lines", revision,
                                           UiText::Internal::Reveal::Unit::CHARACTER,
-                                          UiText::Reveal::AUTO_FADE_DURATION_RATIO)
+                                          UiText::Reveal::AUTO_FADE_DURATION_RATIO,
+                                          UiText::Internal::Reveal::Sequence::PER_LINE, 0.5f)
                    : MakeParameters("current ordinary request");
     currentParameters.isMarqueeEnabled = false;
+    currentParameters.isMultiLine      = enableReveal;
     DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, currentParameters));
 
     for(uint32_t trigger = 0u; trigger < 3u && observer.mCompletionCount == 0u; ++trigger)
@@ -643,6 +735,83 @@ int UtcDaliTextVisualRevealUnitRejectsOlderCompletionP(void)
   END_TEST;
 }
 
+int UtcDaliTextVisualRevealSequenceRejectsOlderCompletionP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  RenderedTextVisual      rendered = CreateTextVisual(application);
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  1u,
+                  UiText::Internal::Reveal::Sequence::WHOLE_TEXT);
+  const auto staleWholeText = MakeRevealParameters("stale WHOLE_TEXT sequence",
+                                                   1u,
+                                                   UiText::Internal::Reveal::Unit::CHARACTER,
+                                                   0.25f);
+
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  2u,
+                  UiText::Internal::Reveal::Sequence::PER_LINE,
+                  0.25f);
+  PublishDirect(rendered, staleWholeText, MakeRevealRenderInfo(32u, 16u));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
+
+  const auto stalePerLine = MakeRevealParameters("stale PER_LINE sequence",
+                                                 2u,
+                                                 UiText::Internal::Reveal::Unit::CHARACTER,
+                                                 0.25f,
+                                                 UiText::Internal::Reveal::Sequence::PER_LINE,
+                                                 0.25f);
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  3u,
+                  UiText::Internal::Reveal::Sequence::WHOLE_TEXT);
+  PublishDirect(rendered, stalePerLine, MakeRevealRenderInfo(32u, 16u));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
+
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  4u,
+                  UiText::Internal::Reveal::Sequence::PER_LINE,
+                  0.25f);
+  const auto staleStagger = MakeRevealParameters("stale PER_LINE stagger",
+                                                 4u,
+                                                 UiText::Internal::Reveal::Unit::CHARACTER,
+                                                 0.25f,
+                                                 UiText::Internal::Reveal::Sequence::PER_LINE,
+                                                 0.25f);
+  ConfigureReveal(rendered,
+                  UiText::Internal::Reveal::Unit::CHARACTER,
+                  0.25f,
+                  5u,
+                  UiText::Internal::Reveal::Sequence::PER_LINE,
+                  0.5f);
+  PublishDirect(rendered, staleStagger, MakeRevealRenderInfo(32u, 16u));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
+
+  PublishDirect(rendered,
+                MakeRevealParameters("current PER_LINE stagger",
+                                     5u,
+                                     UiText::Internal::Reveal::Unit::CHARACTER,
+                                     0.25f,
+                                     UiText::Internal::Reveal::Sequence::PER_LINE,
+                                     0.5f),
+                MakeRevealRenderInfo(32u, 16u));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
+}
+
 int UtcDaliTextVisualMarqueeRejectsOlderRevealCompletionP(void)
 {
   UiTestApplication application;
@@ -653,8 +822,7 @@ int UtcDaliTextVisualMarqueeRejectsOlderRevealCompletionP(void)
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
   ConfigureReveal(rendered, UiText::Internal::Reveal::Unit::CHARACTER, 0.2f, 1u);
 
-  UiInternal::TextVisual::GetController(rendered.visual)->SetMarqueeEnabled(
-    true, false, UiText::MarqueeOrientation::HORIZONTAL);
+  UiInternal::TextVisual::GetController(rendered.visual)->SetMarqueeEnabled(true, false, UiText::MarqueeOrientation::HORIZONTAL);
   PublishDirect(rendered,
                 MakeRevealParameters("Reveal requested before marquee", 1u,
                                      UiText::Internal::Reveal::Unit::CHARACTER, 0.2f),
@@ -742,8 +910,8 @@ int UtcDaliTextVisualIncompleteRevealMetadataFallsBackAtomicallyP(void)
   absent.revealMetadataTiles.clear();
   VerifyFallback(absent);
 
-  const uint32_t maxTextureSize = static_cast<uint32_t>(Dali::GetMaxTextureSize());
-  UiText::AsyncTextRenderInfo incomplete = MakeRevealRenderInfo(2u, maxTextureSize + 8u);
+  const uint32_t              maxTextureSize = static_cast<uint32_t>(Dali::GetMaxTextureSize());
+  UiText::AsyncTextRenderInfo incomplete     = MakeRevealRenderInfo(2u, maxTextureSize + 8u);
   incomplete.revealMetadataTiles.clear();
   incomplete.revealMetadataTiles.push_back(CreatePixelData(2u, maxTextureSize, Pixel::RGBA8888));
   VerifyFallback(incomplete);

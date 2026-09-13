@@ -22,7 +22,7 @@
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/math/vector4.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -129,6 +129,6 @@ struct StrikethroughStyleProperties
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_STRIKETHROUGH_STYLE_PROPERTIES_H

@@ -19,8 +19,11 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
 
-namespace Dali
+// INTERNAL INCLUDES
+
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -64,6 +67,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_SELECTION_POPUP_CALLBACK_INTERFACE_H

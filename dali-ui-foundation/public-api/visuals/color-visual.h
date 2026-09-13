@@ -22,10 +22,10 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
+#include <dali-ui-foundation/public-api/types/cutout-policy.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -36,27 +36,13 @@ namespace Ui
  */
 
 /**
- * @brief ColorVisual is a owner of Visual::Base with Visual::COLOR, to render simple color.
+ * @brief ColorVisual renders a solid color.
  *
- * It can use CornerRadius / CornerSquareness / Borderline feature.
+ * Its visual type is VisualType::COLOR. On top of the CornerRadius, CornerSquareness and
+ * Borderline features of VisualBase, it adds a blur radius and a cutout policy.
  */
 class DALI_UI_API ColorVisual : public VisualBase
 {
-public:
-  /**
-   * @brief Property indices for ColorVisual.
-   *
-   * These can be used with Dali::Ui::VisualBase::GetProperty() and SetProperty().
-   */
-  struct Property
-  {
-    enum
-    {
-      BLUR_RADIUS   = ColorVisualPropertyIndex::BLUR_RADIUS,
-      CUTOUT_POLICY = ColorVisualPropertyIndex::CUTOUT_POLICY,
-    };
-  };
-
 public:
   /**
    * @brief Creates a ColorVisual object.
@@ -76,18 +62,24 @@ public:
    */
   static ColorVisual DownCast(BaseHandle handle);
 
-public: // Setters
+public: // Properties
   /**
    * @brief Gets the blur radius of the ColorVisual.
    *
-   * @return The blur radius of the ColorVisual
+   * @return The blur radius in pixels
    */
   float GetBlurRadius() const;
 
   /**
    * @brief Sets the blur radius of the ColorVisual.
    *
-   * @param[in] blurRadius The blur radius to set
+   * Zero, the default, leaves the edge sharp; the larger the value, the more the edge is
+   * blurred. The area drawn grows by the blur radius, so a blurred visual reaches beyond
+   * the View it belongs to.
+   *
+   * @param[in] blurRadius The blur radius in pixels
+   * @note If the corner squareness is not zero, the blurred width may differ from this value.
+   * @see SetCutoutPolicy()
    */
   void SetBlurRadius(float blurRadius);
 
@@ -101,7 +93,15 @@ public: // Setters
   /**
    * @brief Sets the cutout policy of the ColorVisual.
    *
+   * The default is CutoutPolicy::NONE, which draws the whole area. Cutting out the view is
+   * how a visual enlarged by a blur radius is kept from drawing underneath its View.
+   *
    * @param[in] cutoutPolicy The cutout policy to set
+   * @note CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS and
+   *       CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS follow the corner radius of the
+   *       View the visual belongs to, so the visual must be added to a View before it is
+   *       put on the scene.
+   * @see CutoutPolicy
    */
   void SetCutoutPolicy(CutoutPolicy cutoutPolicy);
 
@@ -114,20 +114,20 @@ public:
   ColorVisual& operator=(ColorVisual&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL ColorVisual(Dali::Ui::Internal::VisualBaseImpl* object);
-
-public:
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} // namespace Dali
+} // namespace DALI_NAMESPACE
 
-#endif // DALI_UI_VISUAL_OBJECT_H
+#endif // DALI_UI_COLOR_VISUAL_OBJECT_H

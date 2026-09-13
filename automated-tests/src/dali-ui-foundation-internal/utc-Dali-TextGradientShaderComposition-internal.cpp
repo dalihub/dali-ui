@@ -29,6 +29,7 @@
 #include <dali.h>
 #include <mesh-builder.h>
 
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -1573,8 +1574,9 @@ int UtcDaliTextGradientShaderCompositionMarqueeHorizontalFeatureP(void)
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicScale") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicStartAngle") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXT_GRADIENT_TYPE_CONIC") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("(vTextGradientCoord - uTextGradientBounds.xy)") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("fract(") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("return vec2(fract(vTexCoord.x), vTexCoord.y);") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("return vTextGradientCoord;") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("(GetTextGradientCoordinate() - uTextGradientBounds.xy)") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5))") != std::string::npos, true, TEST_LOCATION);
   END_TEST;
 }
@@ -1595,8 +1597,9 @@ int UtcDaliTextGradientShaderCompositionMarqueeVerticalFeatureP(void)
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicScale") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicStartAngle") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXT_GRADIENT_TYPE_CONIC") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("(vTextGradientCoord - uTextGradientBounds.xy)") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("fract(") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("return vec2(vTexCoord.x, fract(vTexCoord.y));") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("return vTextGradientCoord;") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("(GetTextGradientCoordinate() - uTextGradientBounds.xy)") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5))") != std::string::npos, true, TEST_LOCATION);
   END_TEST;
 }
@@ -1772,7 +1775,7 @@ int UtcDaliTextGradientShaderCompositionMarqueeHorizontalOverlayFeatureP(void)
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientOverlayConicCenter") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientOverlayConicScale") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientOverlayConicStartAngle") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("(vTextGradientCoord - uTextGradientOverlayBounds.xy)") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("(GetTextGradientOverlayCoordinate() - uTextGradientOverlayBounds.xy)") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXTURE(sGradientOverlayLookup, vec2(gradientPosition + uTextGradientOverlayStartOffset, 0.5))") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("baseFill.rgb / max(glyphAlpha, 0.000001)") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("vec4(blendedRgb * glyphAlpha, glyphAlpha)") != std::string::npos, true, TEST_LOCATION);
@@ -1795,7 +1798,7 @@ int UtcDaliTextGradientShaderCompositionMarqueeVerticalOverlayFeatureP(void)
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientOverlayConicCenter") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientOverlayConicScale") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientOverlayConicStartAngle") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("(vTextGradientCoord - uTextGradientOverlayBounds.xy)") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("(GetTextGradientOverlayCoordinate() - uTextGradientOverlayBounds.xy)") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXTURE(sGradientOverlayLookup, vec2(gradientPosition + uTextGradientOverlayStartOffset, 0.5))") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("baseFill.rgb / max(glyphAlpha, 0.000001)") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("vec4(blendedRgb * glyphAlpha, glyphAlpha)") != std::string::npos, true, TEST_LOCATION);
@@ -2023,83 +2026,76 @@ int UtcDaliTextGradientShaderCompositionAtlasViewBoundsScrollP(void)
   END_TEST;
 }
 
-int UtcDaliTextGradientCalculateMarqueeGradientViewportBoundsHorizontalOverflowP(void)
+int UtcDaliTextGradientMarqueeContentBoundsIgnoreHorizontalAlignmentAndWrapGapP(void)
 {
   UiText::LineRun line;
   line.width           = 200.0f;
-  line.alignmentOffset = 0.0f;
+  line.alignmentOffset = -30.0f;
   line.ascender        = 15.0f;
   line.descender       = -5.0f;
   line.lineSpacing     = 0.0f;
 
-  const Vector4 bounds = TextInternal::CalculateMarqueeGradientViewportBounds(Vector2(100.0f, 40.0f),
-                                                                              Vector2(200.0f, 20.0f),
-                                                                              &line,
-                                                                              1u,
-                                                                              UiText::Alignment::START,
-                                                                              UiText::Alignment::CENTER);
+  const Vector4 bounds = TextInternal::CalculateGradientContentBounds(Vector2(260.0f, 40.0f),
+                                                                      Vector2(200.0f, 20.0f),
+                                                                      &line,
+                                                                      1u,
+                                                                      UiText::Alignment::CENTER,
+                                                                      true);
 
-  ExpectBounds(bounds, Vector4(0.0f, 0.25f, 1.0f, 0.5f));
+  ExpectBounds(bounds, Vector4(0.0f, 0.25f, 200.0f / 260.0f, 0.5f));
   END_TEST;
 }
 
-int UtcDaliTextGradientCalculateMarqueeGradientViewportBoundsHorizontalShortEndP(void)
-{
-  UiText::LineRun line;
-  line.width           = 40.0f;
-  line.alignmentOffset = 0.0f;
-  line.ascender        = 15.0f;
-  line.descender       = -5.0f;
-  line.lineSpacing     = 0.0f;
-
-  const Vector4 bounds = TextInternal::CalculateMarqueeGradientViewportBounds(Vector2(100.0f, 40.0f),
-                                                                              Vector2(40.0f, 20.0f),
-                                                                              &line,
-                                                                              1u,
-                                                                              UiText::Alignment::END,
-                                                                              UiText::Alignment::END);
-
-  ExpectBounds(bounds, Vector4(0.6f, 0.5f, 0.4f, 0.5f));
-  END_TEST;
-}
-
-int UtcDaliTextGradientCalculateMarqueeGradientViewportBoundsVerticalOverflowP(void)
+int UtcDaliTextGradientMarqueeContentBoundsExcludeVerticalWrapGapP(void)
 {
   UiText::LineRun line;
   line.width           = 50.0f;
-  line.alignmentOffset = 0.0f;
+  line.alignmentOffset = 25.0f;
   line.ascender        = 160.0f;
   line.descender       = 0.0f;
   line.lineSpacing     = 0.0f;
 
-  const Vector4 bounds = TextInternal::CalculateMarqueeGradientViewportBounds(Vector2(100.0f, 80.0f),
-                                                                              Vector2(50.0f, 160.0f),
-                                                                              &line,
-                                                                              1u,
-                                                                              UiText::Alignment::CENTER,
-                                                                              UiText::Alignment::START);
+  const Vector4 bounds = TextInternal::CalculateGradientContentBounds(Vector2(100.0f, 220.0f),
+                                                                      Vector2(100.0f, 160.0f),
+                                                                      &line,
+                                                                      1u,
+                                                                      UiText::Alignment::START);
 
-  ExpectBounds(bounds, Vector4(0.25f, 0.0f, 0.5f, 1.0f));
+  ExpectBounds(bounds, Vector4(0.25f, 0.0f, 0.5f, 160.0f / 220.0f));
   END_TEST;
 }
 
-int UtcDaliTextGradientCalculateMarqueeGradientViewportBoundsVerticalShortEndP(void)
+int UtcDaliTextGradientMarqueeCarriesContentCoordinateModeP(void)
 {
-  UiText::LineRun line;
-  line.width           = 50.0f;
-  line.alignmentOffset = 0.0f;
-  line.ascender        = 15.0f;
-  line.descender       = -5.0f;
-  line.lineSpacing     = 0.0f;
+  const TextInternal::Gradient::Style style = CreateLinearGradientStyle();
+  const Vector4                      bounds(0.0f, 0.0f, 0.8f, 1.0f);
+  const Vector2                      coordinateSize(250.0f, 40.0f);
+  const UiText::TextScrollerGradient contentGradient =
+    TextInternal::GradientMarquee::CreateScrollerGradient(style, bounds, coordinateSize, true);
+  const UiText::TextScrollerGradient viewGradient =
+    TextInternal::GradientMarquee::CreateScrollerGradient(style, Vector4(0.0f, 0.0f, 1.0f, 1.0f), Vector2(100.0f, 40.0f), false);
 
-  const Vector4 bounds = TextInternal::CalculateMarqueeGradientViewportBounds(Vector2(100.0f, 80.0f),
-                                                                              Vector2(50.0f, 20.0f),
-                                                                              &line,
-                                                                              1u,
-                                                                              UiText::Alignment::END,
-                                                                              UiText::Alignment::END);
+  DALI_TEST_EQUALS(contentGradient.useTextureCoordinates, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewGradient.useTextureCoordinates, false, TEST_LOCATION);
+  ExpectBounds(contentGradient.bounds, bounds);
+  ExpectBounds(viewGradient.bounds, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+  END_TEST;
+}
 
-  ExpectBounds(bounds, Vector4(0.5f, 0.75f, 0.5f, 0.25f));
+int UtcDaliTextGradientMarqueeKeepsBaseAndOverlayCoordinateModesIndependentP(void)
+{
+  const TextInternal::Gradient::Style style = CreateLinearGradientStyle();
+  UiText::TextScrollerGradient baseGradient =
+    TextInternal::GradientMarquee::CreateScrollerGradient(style, Vector4(0.0f, 0.0f, 0.8f, 1.0f), Vector2(250.0f, 40.0f), true);
+  const UiText::TextScrollerGradient overlayGradient =
+    TextInternal::GradientMarquee::CreateScrollerGradient(style, Vector4(0.0f, 0.0f, 1.0f, 1.0f), Vector2(100.0f, 40.0f), false);
+
+  TextInternal::GradientMarquee::SetOverlayGradient(baseGradient,
+                                                    overlayGradient,
+                                                    UiText::GradientOverlayMode::SCREEN);
+  DALI_TEST_EQUALS(baseGradient.useTextureCoordinates, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(baseGradient.overlayUseTextureCoordinates, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(baseGradient.overlayMode, UiText::GradientOverlayMode::SCREEN, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2393,28 +2389,54 @@ int UtcDaliTextGradientMarqueeOverlayOnlyMixedTargetCompositionPolicyP(void)
   END_TEST;
 }
 
-int UtcDaliTextGradientMarqueeAsyncUsesViewportBoundsP(void)
+int UtcDaliTextGradientMarqueeSyncAsyncContentBoundsEquivalentP(void)
 {
-  UiText::LineRun line;
-  line.width           = 200.0f;
-  line.alignmentOffset = 0.0f;
-  line.ascender        = 40.0f;
-  line.descender       = 0.0f;
-  line.lineSpacing     = 0.0f;
+  UiText::LineRun syncLine;
+  syncLine.width           = 1419.0f;
+  syncLine.alignmentOffset = -266.0f;
+  syncLine.ascender        = 43.0f;
+  syncLine.descender       = -13.0f;
+  syncLine.lineSpacing     = 0.0f;
 
-  const Vector4 viewportBounds = TextInternal::CalculateMarqueeGradientViewportBounds(Vector2(100.0f, 40.0f),
-                                                                                      Vector2(200.0f, 40.0f),
-                                                                                      &line,
-                                                                                      1u,
-                                                                                      UiText::Alignment::START,
-                                                                                      UiText::Alignment::START);
+  UiText::LineRun asyncLine = syncLine;
+  asyncLine.alignmentOffset = std::numeric_limits<float>::max();
 
-  UiText::AsyncTextRenderInfo renderInfo;
-  renderInfo.textLogicalBounds                 = Vector4(0.0f, 0.0f, 200.0f / 260.0f, 1.0f);
-  renderInfo.textGradientMarqueeViewportBounds = viewportBounds;
+  const Vector4 syncOverflowBounds = TextInternal::CalculateGradientContentBounds(Vector2(1484.0f, 56.0f),
+                                                                                   Vector2(1419.0f, 56.0f),
+                                                                                   &syncLine,
+                                                                                   1u,
+                                                                                   UiText::Alignment::START,
+                                                                                   true);
+  const Vector4 asyncOverflowBounds = TextInternal::CalculateGradientContentBounds(Vector2(1484.0f, 56.0f),
+                                                                                    Vector2(1419.0f, 56.0f),
+                                                                                    &asyncLine,
+                                                                                    1u,
+                                                                                    UiText::Alignment::START,
+                                                                                    true);
 
-  ExpectBounds(renderInfo.textLogicalBounds, Vector4(0.0f, 0.0f, 200.0f / 260.0f, 1.0f));
-  ExpectBounds(renderInfo.textGradientMarqueeViewportBounds, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+  ExpectBounds(syncOverflowBounds, Vector4(0.0f, 0.0f, 1419.0f / 1484.0f, 1.0f));
+  ExpectBounds(asyncOverflowBounds, syncOverflowBounds);
+
+  syncLine.width            = 472.0f;
+  syncLine.alignmentOffset  = 208.0f;
+  asyncLine                 = syncLine;
+  asyncLine.alignmentOffset = std::numeric_limits<float>::max();
+
+  const Vector4 syncFittingBounds = TextInternal::CalculateGradientContentBounds(Vector2(888.0f, 66.0f),
+                                                                                  Vector2(472.0f, 66.0f),
+                                                                                  &syncLine,
+                                                                                  1u,
+                                                                                  UiText::Alignment::START,
+                                                                                  true);
+  const Vector4 asyncFittingBounds = TextInternal::CalculateGradientContentBounds(Vector2(888.0f, 66.0f),
+                                                                                   Vector2(472.0f, 66.0f),
+                                                                                   &asyncLine,
+                                                                                   1u,
+                                                                                   UiText::Alignment::START,
+                                                                                   true);
+
+  ExpectBounds(syncFittingBounds, Vector4(0.0f, 0.0f, 472.0f / 888.0f, 1.0f));
+  ExpectBounds(asyncFittingBounds, syncFittingBounds);
   END_TEST;
 }
 
@@ -3308,6 +3330,30 @@ int UtcDaliAsyncTextMarqueeReportsContentOverflowP(void)
   const UiText::AsyncTextRenderInfo overflowingInfo =
     loader.RenderMarquee(overflowingParameters, true, Size(220.0f, 40.0f));
   DALI_TEST_EQUALS(overflowingInfo.isMarqueeContentOverflow, true, TEST_LOCATION);
+
+  auto verifyEvenNaturalSizeBoundary = [&](float naturalWidth,
+                                           bool  expectedOverflow,
+                                           float expectedTextureWidth)
+  {
+    UiText::AsyncTextParameters parameters = makeParameters();
+    parameters.textWidth                   = 100.0f;
+    parameters.textHeight                  = 40.0f;
+    parameters.renderScale                 = 1.0f;
+    parameters.marqueeGap                  = 80;
+
+    const UiText::AsyncTextRenderInfo renderInfo =
+      loader.RenderMarquee(parameters, true, Size(naturalWidth, 40.0f));
+    DALI_TEST_EQUALS(renderInfo.isMarqueeContentOverflow, expectedOverflow, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderInfo.size.width, expectedTextureWidth, EPSILON, TEST_LOCATION);
+  };
+
+  // Sync marquee obtains an even-normalized natural size before both the
+  // overflow classification and texture-size calculation. Async follows the
+  // same boundary contract, including fractional widths around 100px.
+  verifyEvenNaturalSizeBoundary(99.4f, false, 180.0f);
+  verifyEvenNaturalSizeBoundary(100.0f, false, 180.0f);
+  verifyEvenNaturalSizeBoundary(100.4f, false, 180.0f);
+  verifyEvenNaturalSizeBoundary(101.4f, true, 182.0f);
   END_TEST;
 }
 

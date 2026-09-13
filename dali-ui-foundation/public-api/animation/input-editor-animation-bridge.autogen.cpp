@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/animation/input-editor-animation-spec-impl.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -305,4 +305,4 @@ InputEditorAnimationBridge& InputEditorAnimationBridge::PlaceholderTextGradientS
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

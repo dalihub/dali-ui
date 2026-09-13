@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/dialog/alert-dialog-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -35,7 +35,12 @@ AlertDialog::AlertDialog()
 
 AlertDialog AlertDialog::New()
 {
-  return Integration::AlertDialogImpl::New();
+  return New(AlertDialogStyle::Default());
+}
+
+AlertDialog AlertDialog::New(AlertDialogStyle style)
+{
+  return Integration::AlertDialogImpl::New(style);
 }
 
 AlertDialog::AlertDialog(const AlertDialog& alertDialog)
@@ -125,4 +130,4 @@ AlertDialog::AlertDialog(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

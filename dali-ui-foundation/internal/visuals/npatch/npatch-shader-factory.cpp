@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -167,4 +167,4 @@ bool NpatchShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderType sh
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

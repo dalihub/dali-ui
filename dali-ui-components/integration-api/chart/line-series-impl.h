@@ -26,7 +26,7 @@
 #include <dali-ui-components/integration-api/chart/chart-series-impl.h>
 #include <dali-ui-components/public-api/chart/line-series.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -171,4 +171,4 @@ inline const Integration::LineSeries& GetImplementation(const Ui::LineSeries& ha
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

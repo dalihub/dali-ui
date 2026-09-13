@@ -29,10 +29,15 @@
 #include <string.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
+#include <dali-ui-foundation/internal/text/replacement/inline-replacement-reveal-bridge.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-effects-style.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
@@ -43,15 +48,13 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
-#include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToPropertyValue;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -64,12 +67,12 @@ DALI_INIT_TRACE_FILTER(gTraceFilter2, DALI_TRACE_TEXT_ASYNC, false);
 
 const int CUSTOM_PROPERTY_COUNT(24); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, gradient uniforms
 
-static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
-static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
+static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
+static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                              22);
-static constexpr uint32_t TEXT_VISUAL_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 23);
-static constexpr uint32_t TEXT_VISUAL_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 24);
-static constexpr uint32_t TEXT_VISUAL_REVEAL_PROGRESS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 25);
+static constexpr uint32_t TEXT_VISUAL_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 23);
+static constexpr uint32_t TEXT_VISUAL_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 24);
+static constexpr uint32_t TEXT_VISUAL_REVEAL_PROGRESS_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 25);
 
 const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
   0.0f, // Text::Alignment::START
@@ -194,20 +197,20 @@ struct NameIndexMatch
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-  {TEXT_PROPERTY, Ui::TextVisualPropertyIndex::TEXT},
-  {FONT_FAMILY_PROPERTY, Ui::TextVisualPropertyIndex::FONT_FAMILY},
-  {FONT_SIZE_PROPERTY, Ui::TextVisualPropertyIndex::FONT_SIZE},
-  {FONT_WEIGHT_PROPERTY, Ui::TextVisualPropertyIndex::FONT_WEIGHT},
-  {FONT_WIDTH_PROPERTY, Ui::TextVisualPropertyIndex::FONT_WIDTH},
-  {FONT_SLANT_PROPERTY, Ui::TextVisualPropertyIndex::FONT_SLANT},
-  {MULTI_LINE_PROPERTY, Ui::TextVisualPropertyIndex::MULTI_LINE},
-  {LINE_WRAP_MODE_PROPERTY, Ui::TextVisualPropertyIndex::LINE_WRAP_MODE},
-  {HORIZONTAL_ALIGNMENT_PROPERTY, Ui::TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT},
-  {VERTICAL_ALIGNMENT_PROPERTY, Ui::TextVisualPropertyIndex::VERTICAL_ALIGNMENT},
-  {OVERFLOW_MODE_PROPERTY, Ui::TextVisualPropertyIndex::OVERFLOW_MODE},
-  {LINE_HEIGHT_PROPERTY, Ui::TextVisualPropertyIndex::LINE_HEIGHT},
-  {LINE_HEIGHT_MODE_PROPERTY, Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE},
-  {TEXT_COLOR_PROPERTY, Ui::TextVisualPropertyIndex::TEXT_COLOR},
+  {TEXT_PROPERTY, Ui::Integration::TextVisual::Property::TEXT},
+  {FONT_FAMILY_PROPERTY, Ui::Integration::TextVisual::Property::FONT_FAMILY},
+  {FONT_SIZE_PROPERTY, Ui::Integration::TextVisual::Property::FONT_SIZE},
+  {FONT_WEIGHT_PROPERTY, Ui::Integration::TextVisual::Property::FONT_WEIGHT},
+  {FONT_WIDTH_PROPERTY, Ui::Integration::TextVisual::Property::FONT_WIDTH},
+  {FONT_SLANT_PROPERTY, Ui::Integration::TextVisual::Property::FONT_SLANT},
+  {MULTI_LINE_PROPERTY, Ui::Integration::TextVisual::Property::MULTI_LINE},
+  {LINE_WRAP_MODE_PROPERTY, Ui::Integration::TextVisual::Property::LINE_WRAP_MODE},
+  {HORIZONTAL_ALIGNMENT_PROPERTY, Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT},
+  {VERTICAL_ALIGNMENT_PROPERTY, Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT},
+  {OVERFLOW_MODE_PROPERTY, Ui::Integration::TextVisual::Property::OVERFLOW_MODE},
+  {LINE_HEIGHT_PROPERTY, Ui::Integration::TextVisual::Property::LINE_HEIGHT},
+  {LINE_HEIGHT_MODE_PROPERTY, Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE},
+  {TEXT_COLOR_PROPERTY, Ui::Integration::TextVisual::Property::TEXT_COLOR},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -264,38 +267,38 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   Property::Value value;
 
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::TEXT);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::TEXT);
 
   std::string text;
   mController->GetText(text);
-  map.Insert(Ui::TextVisualPropertyIndex::TEXT, ToPropertyValue(text));
+  map.Insert(Ui::Integration::TextVisual::Property::TEXT, ToPropertyValue(text));
 
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_FAMILY, ToPropertyValue(mController->GetDefaultFontFamily()));
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_SIZE, mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE));
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_WEIGHT, Text::ToFontWeight(mController->GetDefaultFontWeight()));
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_WIDTH, Text::ToFontWidth(mController->GetDefaultFontWidth()));
-  map.Insert(Ui::TextVisualPropertyIndex::FONT_SLANT, Text::ToFontSlant(mController->GetDefaultFontSlant()));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_FAMILY, ToPropertyValue(mController->GetDefaultFontFamily()));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_SIZE, mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_WEIGHT, Text::ToFontWeight(mController->GetDefaultFontWeight()));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_WIDTH, Text::ToFontWidth(mController->GetDefaultFontWidth()));
+  map.Insert(Ui::Integration::TextVisual::Property::FONT_SLANT, Text::ToFontSlant(mController->GetDefaultFontSlant()));
 
-  map.Insert(Ui::TextVisualPropertyIndex::MULTI_LINE, mController->IsMultiLineEnabled());
-  map.Insert(Ui::TextVisualPropertyIndex::LINE_WRAP_MODE, mController->GetLineWrapMode());
+  map.Insert(Ui::Integration::TextVisual::Property::MULTI_LINE, mController->IsMultiLineEnabled());
+  map.Insert(Ui::Integration::TextVisual::Property::LINE_WRAP_MODE, mController->GetLineWrapMode());
 
-  map.Insert(Ui::TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT, mController->GetHorizontalAlignment());
-  map.Insert(Ui::TextVisualPropertyIndex::VERTICAL_ALIGNMENT, mController->GetVerticalAlignment());
+  map.Insert(Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT, mController->GetHorizontalAlignment());
+  map.Insert(Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT, mController->GetVerticalAlignment());
 
-  map.Insert(Ui::TextVisualPropertyIndex::OVERFLOW_MODE, mOverflowMode);
-  map.Insert(Ui::TextVisualPropertyIndex::LINE_HEIGHT, mLineHeight);
-  map.Insert(Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE, mLineHeightMode);
+  map.Insert(Ui::Integration::TextVisual::Property::OVERFLOW_MODE, mOverflowMode);
+  map.Insert(Ui::Integration::TextVisual::Property::LINE_HEIGHT, mLineHeight);
+  map.Insert(Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE, mLineHeightMode);
 
-  map.Insert(Ui::TextVisualPropertyIndex::TEXT_COLOR, mController->GetDefaultColor());
+  map.Insert(Ui::Integration::TextVisual::Property::TEXT_COLOR, mController->GetDefaultColor());
 }
 
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::TEXT);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::TEXT);
   std::string text;
   mController->GetText(text);
-  map.Insert(Ui::TextVisualPropertyIndex::TEXT, ToPropertyValue(text));
+  map.Insert(Ui::Integration::TextVisual::Property::TEXT, ToPropertyValue(text));
 }
 
 TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory& shaderFactory)
@@ -328,9 +331,6 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mIsNaturalSizeTaskRunning(false),
   mIsHeightForWidthTaskRunning(false)
 {
-  // Enable the pre-multiplied alpha to improve the text quality
-  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
-
   // Enable fitting mode, to acquire effectiveScale value.
   mImpl->mFittingModeRequired = true;
 }
@@ -373,7 +373,7 @@ void TextVisual::OnInitialize()
   engine.SetCursorWidth(0u); // Do not layout space for the cursor.
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, static_cast<Ui::Integration::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 }
 
 void TextVisual::DoSetProperties(const Property::Map& propertyMap)
@@ -649,17 +649,17 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
 {
   switch(index)
   {
-    case Ui::TextVisualPropertyIndex::TEXT:
+    case Ui::Integration::TextVisual::Property::TEXT:
     {
       mController->SetText(ToStdString(propertyValue));
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_FAMILY:
+    case Ui::Integration::TextVisual::Property::FONT_FAMILY:
     {
       SetFontFamilyProperty(mController, propertyValue);
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_SIZE:
+    case Ui::Integration::TextVisual::Property::FONT_SIZE:
     {
       const float fontSize = propertyValue.Get<float>();
       if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize))
@@ -668,7 +668,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_WEIGHT:
+    case Ui::Integration::TextVisual::Property::FONT_WEIGHT:
     {
       Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontWeightEnumeration(propertyValue, weight))
@@ -677,7 +677,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_WIDTH:
+    case Ui::Integration::TextVisual::Property::FONT_WIDTH:
     {
       Text::FontWidth width(static_cast<Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontWidthEnumeration(propertyValue, width))
@@ -686,7 +686,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::FONT_SLANT:
+    case Ui::Integration::TextVisual::Property::FONT_SLANT:
     {
       Text::FontSlant slant(static_cast<Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontSlantEnumeration(propertyValue, slant))
@@ -695,12 +695,12 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::MULTI_LINE:
+    case Ui::Integration::TextVisual::Property::MULTI_LINE:
     {
       mController->SetMultiLineEnabled(propertyValue.Get<bool>());
       break;
     }
-    case Ui::TextVisualPropertyIndex::LINE_WRAP_MODE:
+    case Ui::Integration::TextVisual::Property::LINE_WRAP_MODE:
     {
       Text::LineWrapMode mode(static_cast<Text::LineWrapMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetLineWrapModeEnumeration(propertyValue, mode))
@@ -709,7 +709,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT:
+    case Ui::Integration::TextVisual::Property::HORIZONTAL_ALIGNMENT:
     {
       if(mController)
       {
@@ -721,7 +721,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::VERTICAL_ALIGNMENT:
+    case Ui::Integration::TextVisual::Property::VERTICAL_ALIGNMENT:
     {
       if(mController)
       {
@@ -733,7 +733,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::OVERFLOW_MODE:
+    case Ui::Integration::TextVisual::Property::OVERFLOW_MODE:
     {
       Text::OverflowMode mode(static_cast<Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetOverflowModeEnumeration(propertyValue, mode))
@@ -758,7 +758,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::LINE_HEIGHT:
+    case Ui::Integration::TextVisual::Property::LINE_HEIGHT:
     {
       float lineHeight = 0.0f;
       if(propertyValue.Get(lineHeight))
@@ -771,7 +771,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE:
+    case Ui::Integration::TextVisual::Property::LINE_HEIGHT_MODE:
     {
       Text::LineHeightMode mode(static_cast<Text::LineHeightMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetLineHeightModeEnumeration(propertyValue, mode))
@@ -784,7 +784,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::TEXT_COLOR:
+    case Ui::Integration::TextVisual::Property::TEXT_COLOR:
     {
       const Vector4& textColor = propertyValue.Get<Vector4>();
       if(mController->GetDefaultColor() != textColor)
@@ -907,7 +907,9 @@ void TextVisual::UpdateRenderer()
       const Text::GlyphInfo* const glyphsBuffer          = renderModel->GetGlyphs();
       const Text::Length           numberOfGlyphs        = renderModel->GetNumberOfGlyphs();
       const bool                   hasColorIndexBuffer   = nullptr != colorsBuffer && nullptr != colorIndices;
-      bool                         hasMultipleTextColors = false;
+      const auto*                  gradientSpanData      = renderModel->GetGradientSpanModelData();
+      const bool                   hasGradientSpan       = gradientSpanData && !gradientSpanData->glyphPaintIndices.Empty();
+      bool                         hasMultipleTextColors = hasGradientSpan;
       bool                         containsColorGlyph    = false;
       for(Text::Length glyphIndex = 0; glyphIndex < numberOfGlyphs; glyphIndex++)
       {
@@ -1293,14 +1295,14 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     // Transform offset is used for subpixel data upload in text tiling.
     // We should set the transform before creating a tiling texture.
     Property::Map visualTransform;
-    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, layoutSize)
-      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
-      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+    visualTransform.Add(Ui::Integration::Visual::Transform::Property::SIZE, layoutSize)
+      .Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET, visualTransformOffset)
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT);
     SetTransformAndSize(visualTransform, textControlSize, parameters.effectiveTextScale);
 
     // Get the maximum texture size.
@@ -1493,7 +1495,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       if(mImpl->mTransform)
       {
         mImpl->mTransform->GetPropertyMap(retMap);
-        Property::Value* offsetValue = retMap.Find(Dali::Ui::Visual::Transform::Property::OFFSET);
+        Property::Value* offsetValue = retMap.Find(Dali::Ui::Integration::Visual::Transform::Property::OFFSET);
         if(offsetValue)
         {
           offsetValue->Get(info.transformOffset);
@@ -1547,7 +1549,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       if(renderer)
       {
         // Register transform properties
-        mImpl->SetTransformUniforms(renderer, static_cast<Ui::Integration::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+        mImpl->SetTransformUniforms(renderer);
 
         control.AddRenderer(renderer);
 
@@ -1619,6 +1621,25 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         mController->SetCurrentLineSize(parameters.minLineSize);
       }
       mAsyncTextInterface->AsyncTextFitChanged(parameters.fontSize);
+    }
+
+    Ui::View owner = Ui::View::DownCast(control);
+    if(IsCurrentInlineReplacementRender(owner, renderInfo.replacementLayoutGeneration))
+    {
+      const Text::ReplacementSourceSnapshot& currentSource = mController->GetReplacementSourceSnapshot();
+      if(renderInfo.replacementSourceRevision == currentSource.sourceRevision &&
+         renderInfo.replacementLayoutGeneration != 0u)
+      {
+        if(textRevealEnabled)
+        {
+          PublishReplacementRevealTimings(renderInfo.replacementRevealTimings,
+                                          renderInfo.replacementSourceRevision);
+        }
+        else
+        {
+          ClearInlineReplacementReveal(owner);
+        }
+      }
     }
 
     if(mAsyncTextInterface)
@@ -2037,12 +2058,16 @@ void TextVisual::BindGradientOverlayAnimConstraints(VisualRenderer& renderer,
   }
 }
 
-void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit unit,
-                                     float                        fadeDurationRatio,
-                                     Property::Index              progressPropertyIndex,
-                                     uint64_t                     revision)
+void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit     unit,
+                                     float                            fadeDurationRatio,
+                                     Property::Index                  progressPropertyIndex,
+                                     uint64_t                         revision,
+                                     Text::Internal::Reveal::Sequence sequence,
+                                     float                            sequenceStaggerRatio)
 {
-  auto* data = GetTextVisualRevealData(mRevealData);
+  sequence             = unit == Text::Internal::Reveal::Unit::DISABLED ? Text::Internal::Reveal::Sequence::WHOLE_TEXT : sequence;
+  sequenceStaggerRatio = unit == Text::Internal::Reveal::Unit::DISABLED ? 0.0f : sequenceStaggerRatio;
+  auto* data           = GetTextVisualRevealData(mRevealData);
   if(!data)
   {
     if(unit == Text::Internal::Reveal::Unit::DISABLED)
@@ -2051,7 +2076,9 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit unit,
     }
   }
   else if(data->unit == unit &&
+          data->sequence == sequence &&
           Equals(data->fadeDurationRatio, fadeDurationRatio) &&
+          Equals(data->sequenceStaggerRatio, sequenceStaggerRatio) &&
           data->progressPropertyIndex == progressPropertyIndex &&
           data->revision == revision)
   {
@@ -2060,7 +2087,9 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit unit,
 
   data                        = &GetOrCreateTextVisualRevealData(mRevealData);
   data->unit                  = unit;
+  data->sequence              = sequence;
   data->fadeDurationRatio     = fadeDurationRatio;
+  data->sequenceStaggerRatio  = sequenceStaggerRatio;
   data->progressPropertyIndex = progressPropertyIndex;
   data->revision              = revision;
   mRendererUpdateNeeded       = true;
@@ -2125,12 +2154,16 @@ void TextVisual::BindTextRevealConstraint(VisualRenderer& renderer)
   data->constraints.push_back(constraint);
 }
 
-Text::Internal::Reveal::Plan TextVisual::BuildTextRevealSourcePlan()
+Text::Internal::Reveal::Plan TextVisual::BuildTextRevealSourcePlan(bool includeImageReplacements)
 {
   auto* data = GetTextVisualRevealData(mRevealData);
   DALI_ASSERT_ALWAYS(data && data->unit != Text::Internal::Reveal::Unit::DISABLED);
 
-  const Text::ModelInterface& model = *mController->GetRenderTextModel();
+  const Text::ModelInterface&            model             = *mController->GetRenderTextModel();
+  const Text::ReplacementRenderState&    replacementState  = mController->GetReplacementRenderState();
+  const Text::ReplacementSourceSnapshot& replacementSource = mController->GetReplacementSourceSnapshot();
+  const bool                             canIncludeImages  = includeImageReplacements && replacementSource.hasValidReplacementSource &&
+                                replacementState.processingModel && replacementState.projection.HasReplacements();
   if(data->unit == Text::Internal::Reveal::Unit::WORD)
   {
     if(!data->segmentation)
@@ -2139,12 +2172,97 @@ Text::Internal::Reveal::Plan TextVisual::BuildTextRevealSourcePlan()
       // invalid on adaptor worker threads. Own an explicit instance instead.
       data->segmentation = TextAbstraction::Segmentation::New();
     }
+    if(canIncludeImages)
+    {
+      return Text::Internal::Reveal::BuildPlanWithImageReplacements(model,
+                                                                    data->unit,
+                                                                    data->fadeDurationRatio,
+                                                                    data->segmentation,
+                                                                    replacementSource,
+                                                                    replacementState.placements);
+    }
     return Text::Internal::Reveal::BuildPlan(model, data->unit, data->fadeDurationRatio, data->segmentation);
+  }
+  if(canIncludeImages)
+  {
+    return Text::Internal::Reveal::BuildPlanWithImageReplacements(model,
+                                                                  data->unit,
+                                                                  data->fadeDurationRatio,
+                                                                  data->segmentation,
+                                                                  replacementSource,
+                                                                  replacementState.placements);
+  }
+  if(data->unit == Text::Internal::Reveal::Unit::PIXEL)
+  {
+    return Text::Internal::Reveal::BuildPixelPlan(model, data->fadeDurationRatio);
+  }
+  if(data->unit == Text::Internal::Reveal::Unit::LINE)
+  {
+    return Text::Internal::Reveal::BuildLinePlan(model, data->fadeDurationRatio);
   }
   return Text::Internal::Reveal::BuildCharacterPlan(model, data->fadeDurationRatio);
 }
 
-void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& parameters)
+Text::Internal::Reveal::Plan TextVisual::BuildFinalTextRevealPlan(
+  Vector<Text::ReplacementRevealTiming>& replacementTimings,
+  uint64_t&                              replacementSourceRevision)
+{
+  auto* data = GetTextVisualRevealData(mRevealData);
+  DALI_ASSERT_ALWAYS(data && data->unit != Text::Internal::Reveal::Unit::DISABLED);
+
+  replacementTimings.Clear();
+  replacementSourceRevision                                       = 0u;
+  const Text::ReplacementRenderState&    replacementState         = mController->GetReplacementRenderState();
+  const Text::ReplacementSourceSnapshot& replacementSource        = mController->GetReplacementSourceSnapshot();
+  const bool                             hasReplacementProjection = replacementSource.hasValidReplacementSource &&
+                                        replacementState.processingModel &&
+                                        replacementState.projection.HasReplacements();
+  auto sourcePlan = BuildTextRevealSourcePlan(hasReplacementProjection);
+  auto finalPlan  = mTypesetter->CreateFinalRevealPlan(sourcePlan,
+                                                       data->unit,
+                                                       data->sequence,
+                                                       data->sequenceStaggerRatio);
+  if(hasReplacementProjection)
+  {
+    replacementSourceRevision = replacementSource.sourceRevision;
+    if(!mTypesetter->ExtractReplacementRevealTimings(finalPlan,
+                                                     replacementSource,
+                                                     replacementState.placements,
+                                                     replacementTimings))
+    {
+      replacementTimings.Clear();
+      sourcePlan = BuildTextRevealSourcePlan(false);
+      finalPlan  = mTypesetter->CreateFinalRevealPlan(sourcePlan,
+                                                      data->unit,
+                                                      data->sequence,
+                                                      data->sequenceStaggerRatio);
+    }
+  }
+  return finalPlan;
+}
+
+void TextVisual::PublishReplacementRevealTimings(
+  const Vector<Text::ReplacementRevealTiming>& timings,
+  uint64_t                                     sourceRevision)
+{
+  Actor    control = mControl.GetHandle();
+  auto*    data    = GetTextVisualRevealData(mRevealData);
+  Ui::View owner   = Ui::View::DownCast(control);
+
+  const Text::ReplacementSourceSnapshot& currentSource = mController->GetReplacementSourceSnapshot();
+  if(!data || data->unit == Text::Internal::Reveal::Unit::DISABLED ||
+     sourceRevision == 0u || sourceRevision != currentSource.sourceRevision || timings.Empty())
+  {
+    ClearInlineReplacementReveal(owner);
+    return;
+  }
+  PublishInlineReplacementRevealTimings(owner,
+                                        timings,
+                                        sourceRevision,
+                                        data->progressPropertyIndex);
+}
+
+bool TextVisual::PrepareAsyncSizeComputationRequest(Text::AsyncTextParameters& parameters)
 {
 #ifdef TRACE_ENABLED
   if(gTraceFilter2 && gTraceFilter2->IsTraceEnabled())
@@ -2163,10 +2281,7 @@ void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& paramete
       }
       mIsNaturalSizeTaskRunning        = true;
       mNaturalSizeMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
-
-      TextLoadObserver* textLoadObserver = this;
-      mNaturalSizeTaskId                 = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
-      break;
+      return true;
     }
     case Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
     {
@@ -2176,29 +2291,64 @@ void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& paramete
       }
       mIsHeightForWidthTaskRunning        = true;
       mHeightForWidthMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
-
-      TextLoadObserver* textLoadObserver = this;
-      mHeightForWidthTaskId              = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
-      break;
+      return true;
     }
     default:
     {
       DALI_LOG_ERROR("Unexpected request type : %d\n", parameters.requestType);
+      return false;
+    }
+  }
+}
+
+void TextVisual::StoreAsyncSizeTaskId(Ui::Integration::Text::Async::RequestType requestType, uint32_t taskId)
+{
+  switch(requestType)
+  {
+    case Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE:
+    {
+      mNaturalSizeTaskId = taskId;
+      break;
+    }
+    case Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+    {
+      mHeightForWidthTaskId = taskId;
+      break;
+    }
+    default:
+    {
+      // requestType was validated by PrepareAsyncSizeComputationRequest().
       break;
     }
   }
 }
 
-bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
+void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& parameters)
 {
-  Actor control = mControl.GetHandle();
-  if(!control)
+  if(!PrepareAsyncSizeComputationRequest(parameters))
   {
-    // Nothing to do.
-    ResourceReady(Ui::Visual::ResourceStatus::READY);
-    return false;
+    return;
   }
 
+  const auto     requestType = parameters.requestType;
+  const uint32_t taskId      = Text::AsyncTextManager::Get().RequestLoad(parameters, this);
+  StoreAsyncSizeTaskId(requestType, taskId);
+}
+
+void TextVisual::RequestAsyncSizeComputationOwned(Text::AsyncTextParameters&& parameters)
+{
+  if(!PrepareAsyncSizeComputationRequest(parameters))
+  {
+    return;
+  }
+
+  const auto     requestType = parameters.requestType;
+  const uint32_t taskId      = Text::AsyncTextManager::Get().RequestLoad(std::move(parameters), this);
+  StoreAsyncSizeTaskId(requestType, taskId);
+}
+
+bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextParameters& parameters)
+{
   if((fabsf(parameters.textWidth) < Math::MACHINE_EPSILON_1000) ||
      (fabsf(parameters.textHeight) < Math::MACHINE_EPSILON_1000) || parameters.text.empty())
   {
@@ -2237,7 +2387,7 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
       mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
     }
 
-    return true;
+    return false;
   }
 
   // Get the maximum texture size.
@@ -2266,10 +2416,44 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
   }
 #endif
 
-  mIsTextLoadingTaskRunning          = true;
-  mTextLoadingMaximumLinesRevision   = parameters.maximumNumberOfLinesRevision;
-  TextLoadObserver* textLoadObserver = this;
-  mTextLoadingTaskId                 = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
+  mIsTextLoadingTaskRunning        = true;
+  mTextLoadingMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
+
+  return true;
+}
+
+bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
+{
+  Actor control = mControl.GetHandle();
+  if(!control)
+  {
+    // Nothing to do.
+    ResourceReady(Ui::Visual::ResourceStatus::READY);
+    return false;
+  }
+
+  if(PrepareAsyncRendererRequest(control, parameters))
+  {
+    mTextLoadingTaskId = Text::AsyncTextManager::Get().RequestLoad(parameters, this);
+  }
+
+  return true;
+}
+
+bool TextVisual::UpdateAsyncRendererOwned(Text::AsyncTextParameters&& parameters)
+{
+  Actor control = mControl.GetHandle();
+  if(!control)
+  {
+    // Nothing to do.
+    ResourceReady(Ui::Visual::ResourceStatus::READY);
+    return false;
+  }
+
+  if(PrepareAsyncRendererRequest(control, parameters))
+  {
+    mTextLoadingTaskId = Text::AsyncTextManager::Get().RequestLoad(std::move(parameters), this);
+  }
 
   return true;
 }
@@ -2514,6 +2698,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     DALI_LOG_DEBUG_INFO("Text::Reveal foreground rendering is disabled while marquee or cutout is active\n");
   }
   RemoveTextRevealConstraints();
+  if(!textRevealEnabled)
+  {
+    PublishReplacementRevealTimings({}, 0u);
+  }
 
   TextVisualShaderFeature::FeatureBuilder featureBuilder;
   featureBuilder.EnableMultiColor(hasMultipleTextColors)
@@ -2578,12 +2766,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     Pixel::Format textPixelFormat = (containsColorGlyph || hasMultipleTextColors) ? Pixel::RGBA8888 : Pixel::L8;
 
     // Check the text direction
-    Text::Direction              textDirection = mController->GetTextDirection();
-    Text::Internal::Reveal::Plan revealPlan;
-    if(textRevealEnabled)
-    {
-      revealPlan = BuildTextRevealSourcePlan();
-    }
+    Text::Direction                       textDirection = mController->GetTextDirection();
+    Text::Internal::Reveal::Plan          revealPlan;
+    Vector<Text::ReplacementRevealTiming> replacementTimings;
+    uint64_t                              replacementSourceRevision = 0u;
 
     // Create a texture for the text without any styles
     PixelData data =
@@ -2591,7 +2777,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
     if(textRevealEnabled)
     {
-      revealPlan = mTypesetter->CreateFinalRevealPlan(revealPlan, revealData->unit);
+      revealPlan = BuildFinalTextRevealPlan(replacementTimings, replacementSourceRevision);
     }
 
     int verifiedWidth  = data.GetWidth();
@@ -2628,7 +2814,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     if(mImpl->mTransform)
     {
       mImpl->mTransform->GetPropertyMap(retMap);
-      Property::Value* offsetValue = retMap.Find(Dali::Ui::Visual::Transform::Property::OFFSET);
+      Property::Value* offsetValue = retMap.Find(Dali::Ui::Integration::Visual::Transform::Property::OFFSET);
       if(offsetValue)
       {
         offsetValue->Get(info.transformOffset);
@@ -2678,6 +2864,14 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
       verifiedHeight -= maxTextureSize;
     }
+    if(mTextShaderFeatureCache.IsEnabledTextReveal())
+    {
+      PublishReplacementRevealTimings(replacementTimings, replacementSourceRevision);
+    }
+    else
+    {
+      PublishReplacementRevealTimings({}, 0u);
+    }
   }
 
   const Vector4& defaultColor = mController->GetRenderTextModel()->GetDefaultColor();
@@ -2688,7 +2882,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     if(renderer)
     {
       // Register transform properties
-      mImpl->SetTransformUniforms(renderer, static_cast<Ui::Integration::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+      mImpl->SetTransformUniforms(renderer);
 
       // Note, AddRenderer will ignore renderer if it is already added.
       actor.AddRenderer(renderer);
@@ -2868,9 +3062,14 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
   {
     auto* revealData = GetTextVisualRevealData(mRevealData);
     DALI_ASSERT_ALWAYS(revealData);
-    const auto sourcePlan = BuildTextRevealSourcePlan();
-    const auto finalPlan  = mTypesetter->CreateFinalRevealPlan(sourcePlan, revealData->unit);
-    PixelData  metadata   = mTypesetter->RenderTextRevealMetadata(size, textDirection, finalPlan, revealData->fadeDuration);
+    Vector<Text::ReplacementRevealTiming> replacementTimings;
+    uint64_t                              replacementSourceRevision = 0u;
+    const auto                            finalPlan                 = BuildFinalTextRevealPlan(replacementTimings,
+                                                                                               replacementSourceRevision);
+    PixelData                             metadata                  = mTypesetter->RenderTextRevealMetadata(size,
+                                                                                                            textDirection,
+                                                                                                            finalPlan,
+                                                                                                            revealData->fadeDuration);
 
     DALI_ASSERT_ALWAYS(metadata && metadata.GetPixelFormat() == Pixel::RGBA8888 &&
                        metadata.GetWidth() == static_cast<uint32_t>(size.width) &&
@@ -2879,6 +3078,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     Sampler nearestSampler = Sampler::New();
     nearestSampler.SetFilterMode(FilterMode::NEAREST, FilterMode::NEAREST);
     AddTexture(textureSet, metadata, nearestSampler, textureSetIndex);
+    PublishReplacementRevealTimings(replacementTimings, replacementSourceRevision);
   }
 
   return textureSet;
@@ -2924,4 +3124,4 @@ void TextVisual::SetRequireRender(bool requireRender)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

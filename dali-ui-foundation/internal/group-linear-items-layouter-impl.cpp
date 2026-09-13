@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/group-linear-items-layouter-impl.h>
 #include <algorithm>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -105,4 +105,4 @@ LayoutRect GroupLinearItemsLayouterImpl::GetItemBounds(uint32_t position, float 
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

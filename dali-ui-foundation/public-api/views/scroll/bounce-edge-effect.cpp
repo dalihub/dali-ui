@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/bounce-edge-effect-impl.h>
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -90,4 +90,4 @@ float BounceEdgeEffect::GetBounceDuration() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

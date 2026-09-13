@@ -23,6 +23,7 @@
 #include <dali/public-api/math/math-utils.h>
 #include <memory.h>
 #include <cmath>
+#include <unordered_map>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
@@ -36,7 +37,7 @@
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -211,6 +212,11 @@ void Typesetter::SetFinalElisionResult(const FinalElisionResult* result)
 void Typesetter::SetFontClient(TextAbstraction::FontClient& fontClient)
 {
   mImpl->SetFontClient(fontClient);
+}
+
+TextAbstraction::FontClient Typesetter::GetFontClient()
+{
+  return mImpl->GetFontClient();
 }
 
 PixelData Typesetter::Render(const Vector2& size, Direction textDirection,
@@ -674,16 +680,132 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
 }
 
 Internal::Reveal::Plan Typesetter::CreateFinalRevealPlan(const Internal::Reveal::Plan& sourcePlan,
-                                                         Internal::Reveal::Unit        unit)
+                                                         Internal::Reveal::Unit        unit,
+                                                         Internal::Reveal::Sequence    sequence,
+                                                         float                         sequenceStaggerRatio)
 {
   auto& viewModel = *mImpl->GetViewModel();
   viewModel.EnableFinalGlyphMapping();
   viewModel.ElideGlyphs(mImpl->GetFontClient());
-  return Internal::Reveal::ProjectToFinalGlyphs(sourcePlan,
-                                                viewModel.GetNumberOfGlyphs(),
-                                                viewModel.GetFinalToSourceGlyphIndices(),
-                                                viewModel.GetEllipsisFinalGlyphIndex(),
-                                                unit);
+  Internal::Reveal::Plan finalPlan = Internal::Reveal::ProjectToFinalGlyphs(sourcePlan,
+                                                                            viewModel.GetNumberOfGlyphs(),
+                                                                            viewModel.GetFinalToSourceGlyphIndices(),
+                                                                            viewModel.GetEllipsisFinalGlyphIndex(),
+                                                                            unit);
+  if(unit == Internal::Reveal::Unit::LINE)
+  {
+    if(Internal::Reveal::ApplyLineUnitSchedule(finalPlan,
+                                               viewModel.GetLines(),
+                                               viewModel.GetNumberOfLines()) &&
+       sequence == Internal::Reveal::Sequence::PER_LINE)
+    {
+      Internal::Reveal::ApplyPerLineSequenceSchedule(finalPlan,
+                                                     viewModel.GetLines(),
+                                                     viewModel.GetNumberOfLines(),
+                                                     sequenceStaggerRatio);
+    }
+  }
+  else if(unit == Internal::Reveal::Unit::PIXEL)
+  {
+    TextAbstraction::FontClient fontClient;
+    if(finalPlan.fadeDurationRatio == Text::Reveal::AUTO_FADE_DURATION_RATIO)
+    {
+      fontClient = mImpl->GetFontClient();
+    }
+    if(!Internal::Reveal::ApplyPixelSpatialSchedule(finalPlan,
+                                                    viewModel,
+                                                    fontClient,
+                                                    viewModel.GetFinalToSourceGlyphIndices(),
+                                                    viewModel.GetEllipsisFinalGlyphIndex(),
+                                                    sequence,
+                                                    sequenceStaggerRatio))
+    {
+      // The scheduler commits only complete PIXEL timing, so a failure leaves
+      // this projected CHARACTER-compatible plan intact.
+    }
+  }
+  else if(sequence == Internal::Reveal::Sequence::PER_LINE)
+  {
+    Internal::Reveal::ApplyPerLineSequenceSchedule(finalPlan,
+                                                   viewModel.GetLines(),
+                                                   viewModel.GetNumberOfLines(),
+                                                   sequenceStaggerRatio);
+  }
+  return finalPlan;
+}
+
+bool Typesetter::ExtractReplacementRevealTimings(const Internal::Reveal::Plan&       finalPlan,
+                                                 const ReplacementSourceSnapshot&    source,
+                                                 const Vector<ReplacementPlacement>& placements,
+                                                 Vector<ReplacementRevealTiming>&    timings)
+{
+  timings.Clear();
+  auto&             viewModel          = *mImpl->GetViewModel();
+  const Length      finalGlyphCount    = viewModel.GetNumberOfGlyphs();
+  const GlyphInfo*  finalGlyphs        = viewModel.GetGlyphs();
+  const GlyphIndex* finalToSourceGlyph = viewModel.GetFinalToSourceGlyphIndices();
+  if(finalPlan.glyphToUnit.size() != finalGlyphCount || !finalGlyphs)
+  {
+    return false;
+  }
+
+  std::unordered_map<GlyphIndex, GlyphIndex> finalGlyphBySourceSyntheticGlyph;
+  finalGlyphBySourceSyntheticGlyph.reserve(placements.Count());
+  for(GlyphIndex finalGlyph = 0u; finalGlyph < finalGlyphCount; ++finalGlyph)
+  {
+    if(IsSyntheticReplacementGlyph(finalGlyphs[finalGlyph]))
+    {
+      const GlyphIndex sourceGlyph = finalToSourceGlyph ? finalToSourceGlyph[finalGlyph] : finalGlyph;
+      finalGlyphBySourceSyntheticGlyph.emplace(sourceGlyph, finalGlyph);
+    }
+  }
+
+  uint32_t expectedTimingCount = 0u;
+  for(const ReplacementPlacement& placement : placements)
+  {
+    if(!placement.visible || placement.elided || placement.sourceRunIndex >= source.runs.Count())
+    {
+      continue;
+    }
+    const ReplacementRunSnapshot& run = source.runs[placement.sourceRunIndex];
+    if(run.type != ReplacementType::IMAGE || run.image.source.empty() ||
+       run.occurrenceIdentity != placement.occurrenceIdentity)
+    {
+      continue;
+    }
+    ++expectedTimingCount;
+
+    const auto matchingFinalGlyph = finalGlyphBySourceSyntheticGlyph.find(placement.syntheticGlyphIndex);
+    if(matchingFinalGlyph == finalGlyphBySourceSyntheticGlyph.end())
+    {
+      timings.Clear();
+      return false;
+    }
+
+    const uint32_t unit = finalPlan.glyphToUnit[matchingFinalGlyph->second];
+    if(unit == Internal::Reveal::NO_UNIT || unit >= finalPlan.unitStart.size() ||
+       unit >= finalPlan.imageReplacementUnitMask.size() || finalPlan.imageReplacementUnitMask[unit] == 0u)
+    {
+      timings.Clear();
+      return false;
+    }
+
+    float start           = finalPlan.unitStart[unit];
+    float progressionSpan = 0.0f;
+    bool  rightToLeft     = false;
+    if(unit < finalPlan.pixelUnitTiming.size())
+    {
+      progressionSpan = finalPlan.pixelUnitTiming[unit].progressionSpan;
+      rightToLeft     = finalPlan.pixelUnitTiming[unit].rightToLeft;
+      start += 0.5f * progressionSpan;
+    }
+    timings.PushBack({placement.occurrenceIdentity,
+                      start,
+                      finalPlan.fadeDuration,
+                      progressionSpan,
+                      rightToLeft});
+  }
+  return timings.Count() == expectedTimingCount;
 }
 
 PixelData Typesetter::RenderTextRevealMetadata(
@@ -912,4 +1034,4 @@ Typesetter::~Typesetter() = default;
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

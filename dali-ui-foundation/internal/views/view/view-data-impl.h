@@ -33,6 +33,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-accessible.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
@@ -53,7 +54,7 @@
 #include <set>
 #include <unordered_set>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -160,7 +161,7 @@ public:
   View::LayoutFinishedSignalType&             LayoutFinishedSignal();
   View::StateChangedSignalType&               StateChangedSignal();
   View::ResourceReadySignalType&              ResourceReadySignal();
-  View::OffScreenRenderingFinishedSignalType& OffScreenRenderingFinishedSignal();
+  View::OffscreenRenderingFinishedSignalType& OffscreenRenderingFinishedSignal();
   bool                                        HasLayoutFinishedSignalConnections() const;
   void                                        EmitLayoutFinishedSignal(const LayoutRect& bounds);
   PendingLayoutTransitionChanges              TakePendingLayoutTransitionChanges();
@@ -229,6 +230,27 @@ public:
    * while an out-of-processing request arms one coalesced outstanding wake.
    */
   void InvalidateMeasure();
+
+  /**
+   * @brief InvalidateMeasure() for the one caller that already holds the parent.
+   *
+   * Identical in every effect to InvalidateMeasure() -- same local invalidation, same
+   * generation short-circuit, same standalone boundary, same propagation -- but the
+   * parent's data is passed in instead of being re-derived from the actor tree. Valid only
+   * where @p parentData IS this view's parent when the call is made: OnChildAdded, which
+   * dali-core runs after it has already parented the child.
+   *
+   * A re-entrant reparent inside OnChildAdded -- NotifyChildReparented runs application
+   * code, before the subtree cache reset -- is tolerated rather than mis-propagated. The
+   * nested add invalidates the live chain through its own call to this entry; the outer
+   * call then walks the captured @p parentData, which is at worst a conservative extra
+   * invalidation of the OLD chain -- every step an idempotent cache drop plus a coalesced
+   * registration, with the generation stamp collapsing any overlap where the two chains
+   * meet. An invalidation can be repeated harmlessly; it can never be missed.
+   *
+   * @param[in] parentData The layout data of this view's parent
+   */
+  void InvalidateMeasureFromParentAdd(ViewDataImpl& parentData);
 
   /**
    * @brief The arrange-axis counterpart of InvalidateMeasure().
@@ -331,9 +353,21 @@ public:
   LayoutMode       GetLayoutMode() const;
   void             SetLayoutTransition(LayoutTransition transition);
   LayoutTransition GetLayoutTransition() const;
-  LayoutRect       GetArrangedBounds() const;
-  bool             HasArrangeResult() const;
-  bool             IsInitialLayoutDone() const;
+  void             SetSelfLayoutTransition(LayoutTransition transition);
+  LayoutTransition GetSelfLayoutTransition() const;
+  /// Whether this view carries a self-role transition. Cheap predicate (no handle
+  /// copy / refcount) for the dispatcher's per-child dispatch-time check -- level 1
+  /// of Internal::ResolveGoverningTransition.
+  bool HasSelfLayoutTransition() const;
+  void SetLayoutTransitionMode(LayoutTransitionMode mode);
+  /// This view's layout transition policy. Read BEFORE any handle resolution by
+  /// Internal::ResolveGoverningTransition (level 0) and by every dispatch-time
+  /// gate, so it is cheap by construction: a 2-bit member read, available on a
+  /// view that has never allocated LayoutTransitionData.
+  LayoutTransitionMode GetLayoutTransitionMode() const;
+  LayoutRect           GetArrangedBounds() const;
+  bool                 HasArrangeResult() const;
+  bool                 IsInitialLayoutDone() const;
   /// One-shot latch for the layout transition dispatcher's fresh-child ENTER settle.
   /// A child that no producer ever arranges keeps its "fresh" classification forever,
   /// so the settle branch is re-entered on every pass; the settle itself is needed
@@ -386,7 +420,32 @@ public:
   bool          TryGetLayoutParams(GridLayoutParams& params) const;
   bool          TryGetLayoutParams(StackLayoutParams& params) const;
   void          GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward);
-  Dali::Texture GetOffScreenRenderingOutput() const;
+  Dali::Texture GetOffscreenRenderingOutput() const;
+
+  /**
+   * @brief Enables or disables offscreen rendering.
+   * @param[in] enabled True to enable, false to disable
+   */
+  void SetOffscreenRenderingEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether offscreen rendering is enabled.
+   * @return True if offscreen rendering is enabled, false otherwise
+   */
+  bool IsOffscreenRenderingEnabled() const;
+
+  /**
+   * @brief Sets the offscreen rendering refresh rate without changing the enabled state.
+   * @param[in] refreshRate The offscreen rendering refresh rate
+   */
+  void SetOffscreenRenderingRefreshRate(View::OffscreenRefreshRate refreshRate);
+
+  /**
+   * @brief Gets the configured offscreen rendering refresh rate.
+   * @return The configured refresh rate
+   */
+  View::OffscreenRefreshRate GetOffscreenRenderingRefreshRate() const;
+
   /// Natural size of the background visual plus padding, or ZERO when the view has
   /// no background visual. Not an override and never virtually dispatched;
   /// Actor::GetNaturalSize() reaches it only through SizeNegotiatedViewImpl.
@@ -533,9 +592,16 @@ public:
   void SetColorInternal(const Vector4& color);
 
   /**
-   * @brief Initialize private VisualData context for this impl.
+   * @brief Returns this impl's private VisualData context, creating it on first use.
+   *
+   * The context is allocated lazily, so a view that never touches a visual never pays for
+   * one. Every caller must gate on AreVisualsEnabled() first: a DISABLE_VISUALS view must
+   * never reach this function, because reaching it would allocate the very context that
+   * flag exists to suppress.
+   *
+   * @return The VisualData context of this impl
    */
-  void InitializeVisualData();
+  VisualData& EnsureVisualData();
 
   // Trait management (delegated from ViewImpl)
 
@@ -709,21 +775,21 @@ public:
   void DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                          const Dali::Any& attributes);
 
-  bool AddVisualObject(VisualBase visualBase, Integration::Visual::InternalContainerRangeType internalContainerRangeType);
+  bool AddVisualObject(VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer);
 
   /**
    * @brief Adds a shadow visual object.
    * @param[in] visualBase The shadow visual to add
-   * @param[in] internalContainerRangeType The range of visuals to be added
+   * @param[in] internalDepthLayer The layer to add the visual to
    * @return True if the visual was added successfully, false otherwise
    */
-  bool AddShadowVisualObject(VisualBase visualBase, Integration::Visual::InternalContainerRangeType internalContainerRangeType);
+  bool AddShadowVisualObject(VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer);
 
   void RemoveVisualObject(VisualBase visualBase);
 
-  uint32_t GetVisualObjectCount(Integration::Visual::InternalContainerRangeType internalContainerRangeType) const;
+  uint32_t GetVisualObjectCount(Dali::Ui::Visual::DepthLayer internalDepthLayer) const;
 
-  VisualBase GetVisualObjectAt(Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const;
+  VisualBase GetVisualObjectAt(Dali::Ui::Visual::DepthLayer internalDepthLayer, uint32_t siblingOrder) const;
 
   /**
    * @brief Function used to set view properties.
@@ -891,7 +957,7 @@ public:
   /**
    * @brief Replaces all shadows with a single shadow described by a property map.
    *
-   * This is the View::Property::SHADOW setter path. It clears both the first
+   * This is the Dali::Ui::Integration::View::Property::SHADOW setter path. It clears both the first
    * shadow and any additional shadows, then installs @p map as the first shadow.
    *
    * @param[in] map The shadow property map
@@ -901,7 +967,7 @@ public:
   /**
    * @brief Sets only the first shadow visual.
    *
-   * The first shadow is registered as View::Property::SHADOW so property lookup
+   * The first shadow is registered as Dali::Ui::Integration::View::Property::SHADOW so property lookup
    * and typed shadow animations can target it directly.
    *
    * @param[in] map The shadow property map
@@ -912,7 +978,7 @@ public:
    * @brief Appends a shadow value to the shadow stack.
    *
    * The first appended shadow is installed through SetFirstShadow() so it keeps
-   * the View::Property::SHADOW identity used by property lookup and typed
+   * the Dali::Ui::Integration::View::Property::SHADOW identity used by property lookup and typed
    * shadow animations. Later shadows are appended as container visuals.
    *
    * @param[in] shadow The shadow value to append
@@ -1519,12 +1585,12 @@ private:
   bool OnIdleCallback();
 
   /**
-   * Set off-screen rendering.
-   * @param[in] offScreenRenderingType enum OffScreenRenderingType
+   * Sets offscreen rendering from the legacy integer property value.
+   * @param[in] offscreenRenderingValue 0 to disable, or an OffscreenRefreshRate value to enable
    * @note When offscreen rendering is on, changing visual's depth index may not apply instantaneously. Turn it off and
    * on again.
    */
-  void SetOffScreenRendering(int32_t offScreenRenderingType);
+  void SetOffscreenRendering(int32_t offscreenRenderingValue);
 
   /**
    * Notify to this view's corner radius changed.
@@ -1582,10 +1648,10 @@ private:
     // Public effect set through View::SetRenderEffect().
     RenderEffectImplPtr renderEffect;
 
-    // Unlike renderEffect, this handleless effect is created only by the OFFSCREEN_RENDERING property.
-    std::unique_ptr<OffScreenRenderingImpl>    offScreenRendering;
-    View::OffScreenRenderingType               offScreenRenderingType{View::OffScreenRenderingType::NONE};
-    View::OffScreenRenderingFinishedSignalType offScreenRenderingFinishedSignal;
+    // Unlike renderEffect, this handleless effect is created by the offscreen rendering API or property.
+    std::unique_ptr<OffscreenRenderingImpl>    offscreenRendering;
+    View::OffscreenRefreshRate                 offscreenRefreshRate{View::OffscreenRefreshRate::REFRESH_ALWAYS};
+    View::OffscreenRenderingFinishedSignalType offscreenRenderingFinishedSignal;
   };
 
   struct ResourceReadyData
@@ -1598,7 +1664,8 @@ private:
 
   struct LayoutTransitionData
   {
-    LayoutTransition              transition;
+    LayoutTransition              transition;     ///< Children role: governs this view's children
+    LayoutTransition              selfTransition; ///< Self role: governs THIS view inside its parent's frame
     std::unordered_set<ViewImpl*> pendingEnterChildren;
     std::unordered_set<ViewImpl*> pendingReorderedChildren;
     bool                          hasPendingChildRemoval{false};
@@ -1692,7 +1759,7 @@ private:
   float                                mRequestedWidth;       ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f). PACKING: parked here to fill the 4-byte pad in front of mTraits; it belongs logically with mRequestedHeight, which sits in the layout group further down.
   TraitEntries                         mTraits;
   Internal::CoreInteractionObject*     mCoreInteractionObject;
-  std::unique_ptr<VisualData>          mVisualData;
+  std::unique_ptr<VisualData>          mVisualData; ///< Visual context, allocated on first use by EnsureVisualData(). Null means EITHER visuals are disabled (DISABLE_VISUALS) OR no visual has been touched yet -- read paths answer both the same way.
   std::unique_ptr<AttachmentContainer> mAttachments;
   std::unique_ptr<FocusNavigationData> mFocusNavigationData;
   std::unique_ptr<RenderEffectData>    mRenderEffectData;
@@ -1838,6 +1905,20 @@ private:
   /// for the full enumerator range).
   Dali::LayoutDirection::Type mLastArrangeDirection : 2;
 
+  /// Per-view layout transition policy (Ui::LayoutTransitionMode). Deliberately NOT
+  /// inside the lazily allocated mLayoutTransitionData: the policy must be readable
+  /// on a view that carries no transition at all (a plain container declaring
+  /// ISOLATE_SUBTREE is the motivating case), and every gate reads it on the hot
+  /// dispatch path.
+  ///
+  /// PACKING: a 2-bit field parked next to mLastArrangeDirection, the only other
+  /// enum bit-field, so the two share whatever allocation unit the change of field
+  /// type opens at the end of the bool run instead of opening one each. UNSIGNED by
+  /// construction -- LayoutTransitionMode's underlying type is uint8_t -- so the
+  /// signedness caveat noted on mLastArrangeDirection cannot apply: the three
+  /// enumerators are 0..2 and an unsigned 2-bit field holds 0..3.
+  LayoutTransitionMode mLayoutTransitionMode : 2;
+
   /// A whole bool, not a bit-field: ScopedTrueFlag binds a `bool&`, which a bit-field
   /// cannot provide. It sits between the bit-field run above and mFlags below; a
   /// non-bit-field member always starts at the next whole byte, so this placement
@@ -1891,6 +1972,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VIEW_DATA_IMPL_H

@@ -30,7 +30,7 @@ using Dali::Integration::ToDaliString;
 using Dali::Integration::ToPropertyValue;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -684,4 +684,4 @@ bool GetFontSlantEnumeration(const Property::Value& propertyValue, FontSlant& fo
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -20,7 +20,7 @@
 #define DALI_ASSERT_VALID_WINDOW_FRAME_COMMAND(impl, Type) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from " Type " object")
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 
 struct WindowFrameCommandRequest::Impl
@@ -81,6 +81,6 @@ bool WindowFrameCommandRequest::GetResizeDirection(Dali::WindowResizeDirection& 
   return true;
 }
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #undef DALI_ASSERT_VALID_WINDOW_FRAME_COMMAND

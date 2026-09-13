@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/radio-button-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -104,4 +104,4 @@ RadioButton::RadioButton(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

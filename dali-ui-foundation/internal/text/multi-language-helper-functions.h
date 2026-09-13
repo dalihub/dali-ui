@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/font-description-run.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -67,6 +67,6 @@ Script GetScript(Length index, Vector<ScriptRun>::ConstIterator& scriptRunIt,
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_MULTI_LANGUAGE_HELPER_FUNCTIONS_H

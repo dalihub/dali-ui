@@ -72,7 +72,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(10.0f);
-    root.SetPadding(Extents(24, 24, 24, 24));
+    root.SetPadding(Insets(24.0f, 24.0f, 24.0f, 24.0f));
 
     root.Add(MakeLabel("Switch Sample", 24.0f, 0x202124u));
     root.Add(MakeLabel("Tap or drag. With keyboard focus, press Enter to toggle. The circular dim/recoil effect is targeted to the handle.", 14.0f, 0x5F6368u));

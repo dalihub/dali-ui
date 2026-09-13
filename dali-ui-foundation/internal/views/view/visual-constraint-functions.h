@@ -20,7 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/animation/constraint.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 /**
@@ -41,4 +41,4 @@ void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputConta
  */
 void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputContainer& inputs);
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

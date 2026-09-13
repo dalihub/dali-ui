@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -41,6 +41,10 @@ void Renderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4&
 {
 }
 
+void Renderer::UpdateAtlasGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds)
+{
+}
+
 void Renderer::SetAtlasGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex)
 {
 }
@@ -53,4 +57,4 @@ void Renderer::SetAtlasGradientAnimApplyAlways(bool applyAlways, bool notifyToCo
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

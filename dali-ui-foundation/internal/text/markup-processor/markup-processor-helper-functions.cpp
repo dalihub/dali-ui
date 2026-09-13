@@ -26,7 +26,7 @@
 #include <locale>
 #include <sstream>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -360,4 +360,4 @@ bool HorizontalAlignmentTypeStringToTypeValue(const char* const typeStr, Length 
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -55,10 +55,10 @@ const char* SamplingModeName(Ui::Image::SamplingMode m)
 
 /**
  * @brief Verifies AnimatedImageView miscellaneous APIs not covered by other TCs:
- *   SetPreMultipliedAlpha / IsPreMultipliedAlpha
+ *   SetPreMultiplyAlphaOnLoadEnabled / IsPreMultiplyAlphaOnLoadEnabled
  *   SetDesiredWidth / GetDesiredWidth / SetDesiredHeight / GetDesiredHeight
  *   SetPlaceholderUrl / GetPlaceholderUrl
- *   SetImageLoadWithViewSize / IsImageLoadWithViewSizeEnabled
+ *   SetImageLoadWithViewSizeEnabled / IsImageLoadWithViewSizeEnabled
  *   SetSamplingMode / GetSamplingMode
  *
  * Steps:
@@ -127,10 +127,10 @@ public:
       MakeButton("Sampling\nLINEAR",  [this] { mView.SetSamplingMode(Ui::Image::SamplingMode::LINEAR);  UpdateLabels(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("PreMult\nON",  [this] { mView.SetPreMultipliedAlpha(true);  UpdateLabels(); }),
-      MakeButton("PreMult\nOFF", [this] { mView.SetPreMultipliedAlpha(false); UpdateLabels(); }),
-      MakeButton("LoadWith\nViewSize ON",  [this] { mView.SetImageLoadWithViewSize(true);  UpdateLabels(); }),
-      MakeButton("LoadWith\nViewSize OFF", [this] { mView.SetImageLoadWithViewSize(false); UpdateLabels(); }),
+      MakeButton("PreMult\nON",  [this] { mView.SetPreMultiplyAlphaOnLoadEnabled(true);  UpdateLabels(); }),
+      MakeButton("PreMult\nOFF", [this] { mView.SetPreMultiplyAlphaOnLoadEnabled(false); UpdateLabels(); }),
+      MakeButton("LoadWith\nViewSize ON",  [this] { mView.SetImageLoadWithViewSizeEnabled(true);  UpdateLabels(); }),
+      MakeButton("LoadWith\nViewSize OFF", [this] { mView.SetImageLoadWithViewSizeEnabled(false); UpdateLabels(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Set\nPlaceholder",   [this] { mView.SetPlaceholderUrl(IMG_PLACEHOLDER); UpdateLabels(); }),
@@ -163,7 +163,7 @@ private:
     // flag cannot prove the URL round-trips.
     Dali::String phUrl = mView.GetPlaceholderUrl();
     mFlagsLabel.SetText(
-      Dali::String("PreMult: ") + Dali::String(mView.IsPreMultipliedAlpha() ? "ON" : "OFF") +
+      Dali::String("PreMult: ") + Dali::String(mView.IsPreMultiplyAlphaOnLoadEnabled() ? "ON" : "OFF") +
       Dali::String(" | LoadWithViewSize: ") + Dali::String(mView.IsImageLoadWithViewSizeEnabled() ? "ON" : "OFF") +
       Dali::String(" | Placeholder: ") + (phUrl.Empty() ? Dali::String("none") : phUrl));
   }

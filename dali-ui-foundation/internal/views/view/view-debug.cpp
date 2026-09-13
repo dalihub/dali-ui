@@ -33,7 +33,7 @@ using Dali::Integration::ToStdString;
 
 #if defined(DEBUG_ENABLED)
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -372,6 +372,6 @@ void DumpViewHierarchy(std::ostream& o, Actor actor)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif

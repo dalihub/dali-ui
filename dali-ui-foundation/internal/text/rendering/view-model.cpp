@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -341,6 +341,11 @@ const ColorIndex* ViewModel::GetColorIndices() const
   return mFinalElisionResult && mFinalElisionResult->resolved && !mFinalElisionResult->colorIndices.Empty()
            ? mFinalElisionResult->colorIndices.Begin()
            : mModel->GetColorIndices();
+}
+
+const Internal::GradientSpanModelData* ViewModel::GetGradientSpanModelData() const
+{
+  return mModel->GetGradientSpanModelData();
 }
 
 const Vector4* ViewModel::GetBackgroundColors() const
@@ -1104,4 +1109,4 @@ const Vector<CharacterDirection>& ViewModel::GetCharacterDirections() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

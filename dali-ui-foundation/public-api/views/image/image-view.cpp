@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -111,14 +111,14 @@ Vector4 ImageView::GetPixelArea() const
   return Ui::GetImpl(*this).GetPixelArea();
 }
 
-void ImageView::SetPreMultipliedAlpha(bool preMultiplied)
+void ImageView::SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied)
 {
-  Ui::GetImpl(*this).SetPreMultipliedAlpha(preMultiplied);
+  Ui::GetImpl(*this).SetPreMultiplyAlphaOnLoadEnabled(preMultiplied);
 }
 
-bool ImageView::IsPreMultipliedAlpha() const
+bool ImageView::IsPreMultiplyAlphaOnLoadEnabled() const
 {
-  return Ui::GetImpl(*this).IsPreMultipliedAlpha();
+  return Ui::GetImpl(*this).IsPreMultiplyAlphaOnLoadEnabled();
 }
 
 void ImageView::SetSamplingMode(Ui::Image::SamplingMode samplingMode)
@@ -226,9 +226,9 @@ Dali::String ImageView::GetPlaceholderUrl() const
   return Ui::GetImpl(*this).GetPlaceholderUrl();
 }
 
-void ImageView::SetImageLoadWithViewSize(bool enabled)
+void ImageView::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
-  Ui::GetImpl(*this).SetImageLoadWithViewSize(enabled);
+  Ui::GetImpl(*this).SetImageLoadWithViewSizeEnabled(enabled);
 }
 
 bool ImageView::IsImageLoadWithViewSizeEnabled() const
@@ -236,14 +236,14 @@ bool ImageView::IsImageLoadWithViewSizeEnabled() const
   return Ui::GetImpl(*this).IsImageLoadWithViewSizeEnabled();
 }
 
-void ImageView::SetMaskingMode(Ui::Image::MaskingType maskingMode)
+void ImageView::SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy)
 {
-  Ui::GetImpl(*this).SetMaskingMode(maskingMode);
+  Ui::GetImpl(*this).SetMaskingPolicy(maskingPolicy);
 }
 
-Ui::Image::MaskingType ImageView::GetMaskingMode() const
+Ui::Image::MaskingPolicy ImageView::GetMaskingPolicy() const
 {
-  return Ui::GetImpl(*this).GetMaskingMode();
+  return Ui::GetImpl(*this).GetMaskingPolicy();
 }
 
 void ImageView::SetImageColor(const UiColor& color)
@@ -256,9 +256,9 @@ UiColor ImageView::GetImageColor() const
   return Ui::GetImpl(*this).GetImageColor();
 }
 
-void ImageView::SetFastTrackUpload(bool fastTrack)
+void ImageView::SetFastTrackUploadEnabled(bool fastTrack)
 {
-  Ui::GetImpl(*this).SetFastTrackUpload(fastTrack);
+  Ui::GetImpl(*this).SetFastTrackUploadEnabled(fastTrack);
 }
 
 bool ImageView::IsFastTrackUploadEnabled() const
@@ -266,9 +266,9 @@ bool ImageView::IsFastTrackUploadEnabled() const
   return Ui::GetImpl(*this).IsFastTrackUploadEnabled();
 }
 
-void ImageView::SetOrientationCorrection(bool orientationCorrection)
+void ImageView::SetOrientationCorrectionEnabled(bool orientationCorrection)
 {
-  Ui::GetImpl(*this).SetOrientationCorrection(orientationCorrection);
+  Ui::GetImpl(*this).SetOrientationCorrectionEnabled(orientationCorrection);
 }
 
 bool ImageView::IsOrientationCorrectionEnabled() const
@@ -276,12 +276,12 @@ bool ImageView::IsOrientationCorrectionEnabled() const
   return Ui::GetImpl(*this).IsOrientationCorrectionEnabled();
 }
 
-void ImageView::SetNPatchBorder(const Vector4& border)
+void ImageView::SetNPatchBorder(const Dali::Insets& border)
 {
   Ui::GetImpl(*this).SetNPatchBorder(border);
 }
 
-Vector4 ImageView::GetNPatchBorder() const
+Dali::Insets ImageView::GetNPatchBorder() const
 {
   return Ui::GetImpl(*this).GetNPatchBorder();
 }
@@ -317,5 +317,17 @@ ImageView::ImageView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::ImageViewImpl>(internal);
 }
 
+// TODO: remove these together with the old names they keep alive.
+
+void ImageView::SetMaskingMode(Image::MaskingPolicy maskingPolicy)
+{
+  SetMaskingPolicy(maskingPolicy);
+}
+
+Image::MaskingPolicy ImageView::GetMaskingMode() const
+{
+  return GetMaskingPolicy();
+}
+
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

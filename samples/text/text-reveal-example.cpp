@@ -19,6 +19,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -28,34 +29,45 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float       CONTROLS_PANEL_HEIGHT       = 328.0f;
+constexpr float       CONTROLS_PANEL_HEIGHT       = 448.0f;
 constexpr float       CONTROL_HEIGHT              = 34.0f;
 constexpr float       CONTROL_SPACING             = 6.0f;
 constexpr float       MENU_TITLE_WIDTH            = 86.0f;
 constexpr float       STATUS_HEIGHT               = 104.0f;
+constexpr std::size_t ALPHA_CASE_COUNT            = 7u;
 constexpr std::size_t FADE_CASE_COUNT             = 7u;
-constexpr std::size_t DURATION_CASE_COUNT         = 4u;
-constexpr std::size_t TEXT_CASE_COUNT             = 3u;
-constexpr std::size_t DEFAULT_DURATION_CASE_INDEX = 2u;
+constexpr std::size_t DURATION_CASE_COUNT         = 5u;
+constexpr std::size_t TEXT_CASE_COUNT             = 7u;
+constexpr std::size_t SEQUENCE_CASE_COUNT         = 2u;
+constexpr std::size_t STAGGER_CASE_COUNT          = 8u;
+constexpr std::size_t DEFAULT_DURATION_CASE_INDEX = 3u;
 constexpr std::size_t DEFAULT_TEXT_CASE_INDEX     = 1u;
+constexpr std::size_t LOCAL_IMAGE_CASE_INDEX      = 5u;
+constexpr std::size_t REMOTE_IMAGE_CASE_INDEX     = 6u;
 constexpr uint32_t    PANEL_COLOR                 = 0x111827;
 constexpr uint32_t    BUTTON_COLOR                = 0x1E293B;
 constexpr uint32_t    BUTTON_BORDER_COLOR         = 0x475569;
 constexpr uint32_t    SELECTED_BUTTON_COLOR       = 0x1D4ED8;
 constexpr uint32_t    SELECTED_BORDER_COLOR       = 0x93C5FD;
+constexpr const char* REMOTE_IMAGE_URL =
+  "https://raw.githubusercontent.com/dalihub/dali-ui/devel/samples/text/res/flag_us_alt.png";
 
-// FadeDurationRatio is each unit's duration on the normalized Reveal timeline,
-// not a delay between units. For N > 1 and an explicit ratio R:
-//   fadeDuration = R, startInterval = (1 - R) / (N - 1).
-// R = 0 gives a step/typewriter reveal, increasing R creates more overlap, and
-// R = 1 starts every unit at zero for a whole-text fade. With the four-second
-// linear duration option, ratios 0.10, 0.25, 0.50, and 0.75 mean about 0.4 s,
-// 1.0 s, 2.0 s, and 3.0 s per unit respectively.
-//
-// AUTO is the public default. It derives the fade duration from the final
-// visible reveal-unit count, so applications do not need to estimate a ratio
-// for each string; its internal heuristic is deliberately not part of this
-// guide's contract.
+enum class FillMode : uint8_t
+{
+  SOLID,
+  TEXT_GRADIENT,
+  GRADIENT_SPAN
+};
+
+enum class SpanGradientKind : uint8_t
+{
+  LINEAR,
+  RADIAL,
+  CONIC
+};
+
+// FadeDurationRatio controls the unit transition duration;
+// SequenceStaggerRatio controls the spacing between independent sequence starts.
 const float FADE_DURATION_RATIOS[FADE_CASE_COUNT] = {
   Text::Reveal::AUTO_FADE_DURATION_RATIO,
   0.0f,
@@ -76,44 +88,151 @@ const char* const FADE_BUTTON_LABELS[FADE_CASE_COUNT] = {
 
 const char* const FADE_STATUS_LABELS[FADE_CASE_COUNT] = {
   "Auto",
-  "Typewriter (0)",
+  "Step (0)",
   "Short (0.10)",
   "Smooth (0.25)",
   "Overlap (0.50)",
   "Long (0.75)",
-  "Whole Text (1)"};
+  "Full Fade (1.00)"};
 
-// Animation duration is application-owned wall-clock policy. Text::Reveal
-// only consumes normalized progress, so the same Reveal configuration can be
-// played over one, two, four, or eight seconds.
+// Wall-clock duration is application-owned; Reveal consumes normalized progress.
 const float DURATION_SECONDS[DURATION_CASE_COUNT] = {
+  0.5f,
   1.0f,
   2.0f,
   4.0f,
   8.0f};
 
 const char* const DURATION_BUTTON_LABELS[DURATION_CASE_COUNT] = {
+  "0.5 s",
   "1 s",
   "2 s",
   "4 s",
   "8 s"};
 
+const AlphaFunction::BuiltinFunction ALPHA_FUNCTIONS[ALPHA_CASE_COUNT] = {
+  AlphaFunction::LINEAR,
+  AlphaFunction::EASE_IN_SQUARE,
+  AlphaFunction::EASE_OUT_SQUARE,
+  AlphaFunction::EASE_IN,
+  AlphaFunction::EASE_OUT,
+  AlphaFunction::EASE_IN_OUT,
+  AlphaFunction::EASE_IN_OUT_SINE};
+
+const char* const ALPHA_FUNCTION_BUTTON_LABELS[ALPHA_CASE_COUNT] = {
+  "Linear",
+  "In Square",
+  "Out Square",
+  "In Cubic",
+  "Out Cubic",
+  "In-Out",
+  "In-Out Sine"};
+
 const char* const TEXT_BUTTON_LABELS[TEXT_CASE_COUNT] = {
-  "Short",
-  "Middle",
-  "Long"};
+  "English",
+  "Korean",
+  "Bidi",
+  "Emoji",
+  "Long",
+  "Image Local",
+  "Image Remote"};
+
+const Text::Reveal::Sequence SEQUENCES[SEQUENCE_CASE_COUNT] = {
+  Text::Reveal::Sequence::WHOLE_TEXT,
+  Text::Reveal::Sequence::PER_LINE};
+
+const char* const SEQUENCE_BUTTON_LABELS[SEQUENCE_CASE_COUNT] = {
+  "Whole Text",
+  "Per Line"};
+
+const char* const SEQUENCE_STATUS_LABELS[SEQUENCE_CASE_COUNT] = {
+  "WHOLE_TEXT",
+  "PER_LINE"};
+
+const float STAGGER_RATIOS[STAGGER_CASE_COUNT] = {
+  0.0f,
+  0.05f,
+  0.10f,
+  0.20f,
+  0.25f,
+  0.50f,
+  0.75f,
+  1.0f};
+
+const char* const STAGGER_BUTTON_LABELS[STAGGER_CASE_COUNT] = {
+  "0",
+  "0.05",
+  "0.10",
+  "0.20",
+  "0.25",
+  "0.50",
+  "0.75",
+  "1.00"};
 
 const char* const TEXT_CASES[TEXT_CASE_COUNT] = {
-  "Short reveal: office cafe\u0301 — 안녕 😀",
-  "Character reveal keeps office ligatures and cafe\u0301 combining sequences atomic.\n"
-  "한국어 순차 표시와 한글 자모를 확인합니다.\n"
-  "العربية تكشف الكلمات — mixed עברית 123.\n"
-  "Emoji: 👩‍💻 👍🏽 👨‍👩‍👧‍👦",
-  "Long Reveal content makes timing differences easier to compare across multiple lines. "
-  "The office ligature candidate and cafe\u0301 combining sequence stay atomic.\n"
-  "한국어 문장도 길이에 따라 순서대로 표시되며 여러 줄 레이아웃을 확인할 수 있습니다.\n"
-  "العربية تكشف الكلمات بالتتابع — עברית mixed bidi text remains visually ordered.\n"
-  "Punctuation, numbers 12345, and emoji 👩‍💻 👍🏽 👨‍👩‍👧‍👦 complete the long example."};
+  "Good morning. Start the day with cafe\u0301 by the window, "
+  "a design review at 11:00, and a quiet walk by the river before sunset.",
+  "오늘의 일정이 준비되었습니다.\n"
+  "오전에는 천천히 커피를 즐기고, 오후 3시에는 Atlas 룸에서 "
+  "디자인 리뷰를 진행한 뒤 해 질 무렵 산책을 떠나보세요.",
+  "Flight SK204 to دبي departs at 18:30.\n"
+  "Dinner in תל אביב begins at 20:10.",
+  "Build complete 👩‍💻✨ — time to close the laptop.\n"
+  "Dinner 🍜, a high-five 👍🏽, then a family walk 👨‍👩‍👧‍👦 under the city lights 🌙.",
+  "Saturday is yours to explore. Start with brunch at 11:30, wander through "
+  "the museum at 14:00, and reach the riverside just before sunset. Keep the "
+  "evening open for a small jazz bar tucked behind the old market.\n"
+  "토요일은 천천히 즐겨보세요. 오전 11시 30분 브런치로 시작해 오후 2시 "
+  "전시를 보고, 해 질 무렵에는 강변을 걸어보세요.",
+  "Tonight in Seoul: warm lights, late cafés, and a quiet walk along the Han River.",
+  "Next stop, San Francisco: morning coffee, cool fog, and a sunset walk along the waterfront."};
+
+// Each GradientSpan fill keeps the ordinary foreground color outside these
+// words, and applies Linear, Radial and Conic SPAN_BOUND gradients in order.
+const char* const GRADIENT_SPAN_WORDS[TEXT_CASE_COUNT][3u] = {
+  {"morning", "design", "river"},
+  {"오전", "Atlas", "산책"},
+  {"SK204", "دبي", "תל אביב"},
+  {"Build", "Dinner", "city"},
+  {"Saturday", "museum", "강변"},
+  {"Seoul", "cafés", "Han River"},
+  {"San Francisco", "coffee", "waterfront"}};
+
+Gradient::Base CreateGradientSpanGradient(SpanGradientKind kind)
+{
+  Gradient::Base gradient;
+  switch(kind)
+  {
+    case SpanGradientKind::RADIAL:
+    {
+      gradient = Gradient::Radial(Vector2::ZERO, 0.55f);
+      gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(0xFACC15)),
+                             Gradient::StopNode(0.45f, UiColor(0x16A34A)),
+                             Gradient::StopNode(1.0f, UiColor(0x0891B2))});
+      break;
+    }
+    case SpanGradientKind::CONIC:
+    {
+      gradient = Gradient::Conic(Vector2::ZERO, Radian(0.0f));
+      gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(0xDB2777)),
+                             Gradient::StopNode(0.34f, UiColor(0x7C3AED)),
+                             Gradient::StopNode(0.68f, UiColor(0x2563EB)),
+                             Gradient::StopNode(1.0f, UiColor(0xDB2777))});
+      break;
+    }
+    case SpanGradientKind::LINEAR:
+    default:
+    {
+      gradient = Gradient::Linear(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+      gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(0xDC2626)),
+                             Gradient::StopNode(0.5f, UiColor(0xF97316)),
+                             Gradient::StopNode(1.0f, UiColor(0xEAB308))});
+      break;
+    }
+  }
+  gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  return gradient;
+}
 
 Label NewLabel(const char* text, float size, uint32_t color)
 {
@@ -220,10 +339,10 @@ private:
     content.Add(mPreview);
 
     StackLayout configurationControls = NewMenuRow("CONFIG");
-    mUnitButton   = NewButton("");
-    mAsyncButton  = NewButton("");
-    mFillButton   = NewButton("");
-    mRevealButton = NewButton("");
+    mUnitButton                       = NewButton("");
+    mAsyncButton                      = NewButton("");
+    mFillButton                       = NewButton("");
+    mRevealButton                     = NewButton("");
     configurationControls.Add(mUnitButton);
     configurationControls.Add(mAsyncButton);
     configurationControls.Add(mFillButton);
@@ -240,6 +359,18 @@ private:
       });
     }
 
+    StackLayout sequenceControls = NewMenuRow("SEQUENCE");
+    for(std::size_t sequenceIndex = 0u; sequenceIndex < SEQUENCE_CASE_COUNT; ++sequenceIndex)
+    {
+      mSequenceButtons[sequenceIndex] = NewButton(SEQUENCE_BUTTON_LABELS[sequenceIndex]);
+      sequenceControls.Add(mSequenceButtons[sequenceIndex]);
+      mSequenceButtons[sequenceIndex].AsInteractive().ClickedSignal().Connect(this, [this, sequenceIndex](View, InputEvent)
+      {
+        mSequenceIndex = sequenceIndex;
+        ConfigureAndReplay();
+      });
+    }
+
     StackLayout fadeControls = NewMenuRow("FADE");
     for(std::size_t fadeIndex = 0u; fadeIndex < FADE_CASE_COUNT; ++fadeIndex)
     {
@@ -248,6 +379,18 @@ private:
       mFadeButtons[fadeIndex].AsInteractive().ClickedSignal().Connect(this, [this, fadeIndex](View, InputEvent)
       {
         mFadeDurationRatioIndex = fadeIndex;
+        ConfigureAndReplay();
+      });
+    }
+
+    StackLayout staggerControls = NewMenuRow("STAGGER");
+    for(std::size_t staggerIndex = 0u; staggerIndex < STAGGER_CASE_COUNT; ++staggerIndex)
+    {
+      mStaggerButtons[staggerIndex] = NewButton(STAGGER_BUTTON_LABELS[staggerIndex]);
+      staggerControls.Add(mStaggerButtons[staggerIndex]);
+      mStaggerButtons[staggerIndex].AsInteractive().ClickedSignal().Connect(this, [this, staggerIndex](View, InputEvent)
+      {
+        mStaggerIndex = staggerIndex;
         ConfigureAndReplay();
       });
     }
@@ -265,10 +408,23 @@ private:
       });
     }
 
+    StackLayout alphaFunctionControls = NewMenuRow("ALPHA");
+    for(std::size_t alphaFunctionIndex = 0u; alphaFunctionIndex < ALPHA_CASE_COUNT; ++alphaFunctionIndex)
+    {
+      mAlphaButtons[alphaFunctionIndex] = NewButton(ALPHA_FUNCTION_BUTTON_LABELS[alphaFunctionIndex]);
+      alphaFunctionControls.Add(mAlphaButtons[alphaFunctionIndex]);
+      mAlphaButtons[alphaFunctionIndex].AsInteractive().ClickedSignal().Connect(this, [this, alphaFunctionIndex](View, InputEvent)
+      {
+        mAlphaFunctionIndex = alphaFunctionIndex;
+        UpdateAlphaFunctionButtons();
+        Replay();
+      });
+    }
+
     StackLayout playbackControls = NewMenuRow("PLAYBACK");
-    Label replayButton  = NewButton("Replay");
-    mStopPlayButton     = NewButton("Stop");
-    Label reverseButton = NewButton("Reverse");
+    Label       replayButton     = NewButton("Replay");
+    mStopPlayButton              = NewButton("Stop");
+    Label reverseButton          = NewButton("Reverse");
     playbackControls.Add(replayButton);
     playbackControls.Add(mStopPlayButton);
     playbackControls.Add(reverseButton);
@@ -290,8 +446,11 @@ private:
     controlsPanel.SetSpacing(CONTROL_SPACING);
     controlsPanel.Add(configurationControls);
     controlsPanel.Add(textControls);
+    controlsPanel.Add(sequenceControls);
     controlsPanel.Add(fadeControls);
+    controlsPanel.Add(staggerControls);
     controlsPanel.Add(durationControls);
+    controlsPanel.Add(alphaFunctionControls);
     controlsPanel.Add(playbackControls);
     controlsPanel.Add(mStatus);
 
@@ -301,8 +460,22 @@ private:
 
     mUnitButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     {
-      mUnit = mUnit == Text::Reveal::Unit::CHARACTER ? Text::Reveal::Unit::WORD
-                                                     : Text::Reveal::Unit::CHARACTER;
+      if(mUnit == Text::Reveal::Unit::CHARACTER)
+      {
+        mUnit = Text::Reveal::Unit::WORD;
+      }
+      else if(mUnit == Text::Reveal::Unit::WORD)
+      {
+        mUnit = Text::Reveal::Unit::LINE;
+      }
+      else if(mUnit == Text::Reveal::Unit::LINE)
+      {
+        mUnit = Text::Reveal::Unit::PIXEL;
+      }
+      else
+      {
+        mUnit = Text::Reveal::Unit::CHARACTER;
+      }
       ConfigureAndReplay();
     });
     mAsyncButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
@@ -312,7 +485,18 @@ private:
     });
     mFillButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     {
-      mGradientEnabled = !mGradientEnabled;
+      switch(mFillMode)
+      {
+        case FillMode::TEXT_GRADIENT:
+          mFillMode = FillMode::GRADIENT_SPAN;
+          break;
+        case FillMode::GRADIENT_SPAN:
+          mFillMode = FillMode::SOLID;
+          break;
+        case FillMode::SOLID:
+          mFillMode = FillMode::TEXT_GRADIENT;
+          break;
+      }
       ConfigureAndReplay();
     });
     mRevealButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
@@ -345,42 +529,103 @@ private:
     mPreview.SetAsyncRendering(mAsync);
     ApplyFill();
 
-    mUnitButton.SetText(mUnit == Text::Reveal::Unit::CHARACTER ? "Unit: Character" : "Unit: Word");
+    mUnitButton.SetText(GetUnitButtonLabel());
     mAsyncButton.SetText(mAsync ? "Path: Async" : "Path: Sync");
-    mFillButton.SetText(mGradientEnabled ? "Fill: Gradient" : "Fill: Solid");
+    mFillButton.SetText(GetFillButtonLabel());
     mRevealButton.SetText(mRevealEnabled ? "Reveal: On" : "Reveal: Off");
     SetButtonSelected(mAsyncButton, mAsync);
-    SetButtonSelected(mFillButton, mGradientEnabled);
+    SetButtonSelected(mFillButton, mFillMode != FillMode::SOLID);
     SetButtonSelected(mRevealButton, mRevealEnabled);
     UpdateTextButtons();
+    UpdateSequenceButtons();
+    UpdateStaggerButtons();
     UpdateFadeButtons();
     UpdateDurationButtons();
+    UpdateAlphaFunctionButtons();
     Replay();
   }
 
   void SetTextCase(std::size_t textIndex)
   {
     mTextCaseIndex = textIndex % TEXT_CASE_COUNT;
-    mPreview.SetText(TEXT_CASES[mTextCaseIndex]);
+    ApplyFill();
     UpdateTextButtons();
     Replay();
+  }
+
+  const char* GetUnitButtonLabel() const
+  {
+    switch(mUnit)
+    {
+      case Text::Reveal::Unit::WORD:
+        return "Unit: Word";
+      case Text::Reveal::Unit::LINE:
+        return "Unit: Line";
+      case Text::Reveal::Unit::PIXEL:
+        return "Unit: Pixel";
+      case Text::Reveal::Unit::CHARACTER:
+      default:
+        return "Unit: Character";
+    }
+  }
+
+  const char* GetUnitStatusLabel() const
+  {
+    switch(mUnit)
+    {
+      case Text::Reveal::Unit::WORD:
+        return "WORD";
+      case Text::Reveal::Unit::LINE:
+        return "LINE";
+      case Text::Reveal::Unit::PIXEL:
+        return "PIXEL";
+      case Text::Reveal::Unit::CHARACTER:
+      default:
+        return "CHARACTER";
+    }
+  }
+
+  const char* GetFillButtonLabel() const
+  {
+    switch(mFillMode)
+    {
+      case FillMode::SOLID:
+        return "Fill: Solid";
+      case FillMode::GRADIENT_SPAN:
+        return "Fill: Span";
+      case FillMode::TEXT_GRADIENT:
+      default:
+        return "Fill: Gradient";
+    }
+  }
+
+  const char* GetFillStatusLabel() const
+  {
+    switch(mFillMode)
+    {
+      case FillMode::SOLID:
+        return "Solid";
+      case FillMode::GRADIENT_SPAN:
+        return "GradientSpan (Linear/Radial/Conic, SPAN_BOUND)";
+      case FillMode::TEXT_GRADIENT:
+      default:
+        return "TextGradient";
+    }
   }
 
   void ApplyRevealConfiguration()
   {
     if(!mRevealEnabled)
     {
-      // None disables Reveal without resetting the authored progress. Turning
-      // Reveal back on applies the currently selected unit and fade ratio.
+      // Reveal::None() disables the effect while preserving authored progress.
       mPreview.SetTextReveal(Text::Reveal::None());
       return;
     }
 
-    // CHARACTER schedules shaping clusters, keeping ligatures and combining
-    // sequences together. WORD follows DALi word boundaries: whitespace does
-    // not consume a unit, and adjacent punctuation is folded appropriately.
     Text::Reveal reveal;
     reveal.SetUnit(mUnit);
+    reveal.SetSequence(SEQUENCES[mSequenceIndex]);
+    reveal.SetSequenceStaggerRatio(STAGGER_RATIOS[mStaggerIndex]);
     reveal.SetFadeDurationRatio(FADE_DURATION_RATIOS[mFadeDurationRatioIndex]);
     mPreview.SetTextReveal(reveal);
   }
@@ -393,11 +638,35 @@ private:
     }
   }
 
+  void UpdateSequenceButtons()
+  {
+    for(std::size_t sequenceIndex = 0u; sequenceIndex < SEQUENCE_CASE_COUNT; ++sequenceIndex)
+    {
+      SetButtonSelected(mSequenceButtons[sequenceIndex], sequenceIndex == mSequenceIndex);
+    }
+  }
+
+  void UpdateStaggerButtons()
+  {
+    for(std::size_t staggerIndex = 0u; staggerIndex < STAGGER_CASE_COUNT; ++staggerIndex)
+    {
+      SetButtonSelected(mStaggerButtons[staggerIndex], staggerIndex == mStaggerIndex);
+    }
+  }
+
   void UpdateDurationButtons()
   {
     for(std::size_t durationIndex = 0u; durationIndex < DURATION_CASE_COUNT; ++durationIndex)
     {
       SetButtonSelected(mDurationButtons[durationIndex], durationIndex == mDurationCaseIndex);
+    }
+  }
+
+  void UpdateAlphaFunctionButtons()
+  {
+    for(std::size_t alphaFunctionIndex = 0u; alphaFunctionIndex < ALPHA_CASE_COUNT; ++alphaFunctionIndex)
+    {
+      SetButtonSelected(mAlphaButtons[alphaFunctionIndex], alphaFunctionIndex == mAlphaFunctionIndex);
     }
   }
 
@@ -412,9 +681,21 @@ private:
   void ApplyFill()
   {
     mPreview.SetTextColor(UiColor(0x0F172A));
-    if(!mGradientEnabled)
+    mPreview.SetTextGradient(Gradient::Base::None());
+
+    const bool isImageText = mTextCaseIndex == LOCAL_IMAGE_CASE_INDEX ||
+                             mTextCaseIndex == REMOTE_IMAGE_CASE_INDEX;
+    if(mFillMode == FillMode::GRADIENT_SPAN || isImageText)
     {
-      mPreview.SetTextGradient(Gradient::Base::None());
+      mPreview.SetStyledText(BuildCurrentStyledText(mFillMode == FillMode::GRADIENT_SPAN));
+    }
+    else
+    {
+      mPreview.SetText(TEXT_CASES[mTextCaseIndex]);
+    }
+
+    if(mFillMode != FillMode::TEXT_GRADIENT)
+    {
       return;
     }
 
@@ -424,6 +705,55 @@ private:
                            Gradient::StopNode(0.5f, UiColor(0x7C3AED)),
                            Gradient::StopNode(1.0f, UiColor(0xEA580C))});
     mPreview.SetTextGradient(gradient);
+  }
+
+  Text::StyledText BuildCurrentStyledText(bool applyGradientSpans) const
+  {
+    const std::string       source(TEXT_CASES[mTextCaseIndex]);
+    Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(source.c_str());
+
+    if(mTextCaseIndex == LOCAL_IMAGE_CASE_INDEX || mTextCaseIndex == REMOTE_IMAGE_CASE_INDEX)
+    {
+      builder.AppendText(" ");
+      const uint32_t imageIndex = builder.GetUtf32Length();
+      builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
+
+      const bool            remoteImage = mTextCaseIndex == REMOTE_IMAGE_CASE_INDEX;
+      Text::ImageAttributes imageAttributes(remoteImage ? REMOTE_IMAGE_URL : RESOURCES_DIR "flag_kr.png",
+                                            remoteImage ? Vector2(96.0f, 69.0f) : Vector2(48.0f, 32.0f));
+      imageAttributes.SetAlignment(Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
+      DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(imageAttributes),
+                                         imageIndex,
+                                         imageIndex + 1u));
+    }
+
+    if(applyGradientSpans)
+    {
+      const SpanGradientKind kinds[3u] = {
+        SpanGradientKind::LINEAR,
+        SpanGradientKind::RADIAL,
+        SpanGradientKind::CONIC};
+      for(std::size_t index = 0u; index < 3u; ++index)
+      {
+        const char*       word      = GRADIENT_SPAN_WORDS[mTextCaseIndex][index];
+        const std::size_t byteStart = source.find(word);
+        DALI_ASSERT_ALWAYS(byteStart != std::string::npos);
+
+        uint32_t utf32Start = 0u;
+        uint32_t utf32End   = 0u;
+        DALI_ASSERT_ALWAYS(Text::Utf8ToUtf32Range(Dali::StringView(source.data(), static_cast<uint32_t>(source.size())),
+                                                  static_cast<uint32_t>(byteStart),
+                                                  static_cast<uint32_t>(byteStart + std::string(word).size()),
+                                                  utf32Start,
+                                                  utf32End));
+        DALI_ASSERT_ALWAYS(builder.SetSpan(Text::GradientSpan::New(CreateGradientSpanGradient(kinds[index]),
+                                                                   Text::GradientSpan::BoundsMode::SPAN_BOUND),
+                                           utf32Start,
+                                           utf32End));
+      }
+    }
+
+    return builder.Build();
   }
 
   float GetAnimationDuration() const
@@ -467,10 +797,8 @@ private:
       return;
     }
 
-    // Stop/Play reads the current normalized progress and starts a new linear
-    // animation. With linear alpha, the remaining wall-clock duration is the
-    // same fraction of the application's selected duration.
-    const float remainingDuration = GetAnimationDuration() * (1.0f - progress);
+    // Scale the resume duration by the remaining progress.
+    const float        remainingDuration = GetAnimationDuration() * (1.0f - progress);
     std::ostringstream playback;
     playback << "Play: progress " << std::fixed << std::setprecision(2) << progress
              << " -> 1.00 over " << std::setprecision(1) << remainingDuration << " s.";
@@ -492,7 +820,7 @@ private:
       return;
     }
 
-    const float reverseDuration = GetAnimationDuration() * progress;
+    const float        reverseDuration = GetAnimationDuration() * progress;
     std::ostringstream playback;
     playback << "Reverse: progress " << std::fixed << std::setprecision(2) << progress
              << " -> 0.00 over " << std::setprecision(1) << reverseDuration << " s.";
@@ -506,7 +834,7 @@ private:
     mAnimationRunning = true;
     mStopPlayButton.SetText("Stop");
     mAnimation = Animation::New(duration);
-    mPreview.Animate(mAnimation).TextRevealProgress(target, Duration(duration), AlphaFunction::LINEAR);
+    mPreview.Animate(mAnimation).TextRevealProgress(target, Duration(duration), AlphaFunction(ALPHA_FUNCTIONS[mAlphaFunctionIndex]));
     mAnimation.FinishedSignal().Connect(this, [this](Animation animation)
     {
       if(animation != mAnimation)
@@ -540,41 +868,60 @@ private:
     switch(mFadeDurationRatioIndex)
     {
       case 0u:
-        return "AUTO chooses the per-unit fade from the final visible reveal-unit count.";
+        if(mUnit == Text::Reveal::Unit::PIXEL)
+        {
+          return "Auto: fade adapts to the visible spatial range and text scale.";
+        }
+        return mUnit == Text::Reveal::Unit::LINE
+                 ? "Auto: fade adapts to the final visible line count."
+                 : "Auto: fade adapts to the final visible character or word count.";
       case 1u:
-        return mUnit == Text::Reveal::Unit::CHARACTER
-                 ? "Fade 0: each shaping cluster appears immediately at its scheduled progress."
-                 : "Fade 0: each word appears immediately at its scheduled progress.";
+        if(mUnit == Text::Reveal::Unit::PIXEL)
+        {
+          return "Fade 0.00: the foreground advances continuously as a hard reveal front.";
+        }
+        if(mUnit == Text::Reveal::Unit::CHARACTER)
+        {
+          return "Fade 0.00: each shaping cluster appears at its scheduled progress.";
+        }
+        return mUnit == Text::Reveal::Unit::LINE
+                 ? "Fade 0.00: each final layout line appears at its scheduled progress."
+                 : "Fade 0.00: each word appears at its scheduled progress.";
       case 2u:
-        return "Fade 0.10: each unit fades for 10% of the normalized timeline; fades overlap briefly.";
+        return "Fade 0.10: a short transition between reveal states.";
       case 3u:
-        return "Fade 0.25: each unit fades for 25% of the normalized timeline, producing longer overlap.";
+        return "Fade 0.25: a smooth transition with moderate overlap.";
       case 4u:
-        return "Fade 0.50: each unit fades for half of the timeline, producing strong overlap.";
+        return "Fade 0.50: longer fades create stronger overlap.";
       case 5u:
-        return "Fade 0.75: long unit fades overlap across most of the normalized timeline.";
+        return "Fade 0.75: long transitions overlap across most of the reveal.";
       case 6u:
-        return "Fade 1: all units start together and the foreground fades as one.";
+        return "Fade 1.00: units within each sequence share the same fade interval.";
     }
     return "";
   }
 
   void UpdateStatus()
   {
-    const char* revealDescription = mRevealEnabled
-                                      ? GetFadeDescription()
-                                      : "Reveal is unset with Text::Reveal::None(); progress is preserved.";
+    const char*        revealDescription = mRevealEnabled
+                                             ? GetFadeDescription()
+                                             : "Reveal is unset with Text::Reveal::None(); progress is preserved.";
     std::ostringstream status;
     status << "TEXT " << TEXT_BUTTON_LABELS[mTextCaseIndex]
-           << " | UNIT " << (mUnit == Text::Reveal::Unit::CHARACTER ? "CHARACTER" : "WORD")
-           << " | Fade: " << FADE_STATUS_LABELS[mFadeDurationRatioIndex]
+           << " | UNIT " << GetUnitStatusLabel()
+           << " | SEQUENCE " << SEQUENCE_STATUS_LABELS[mSequenceIndex]
+           << " | FADE " << FADE_STATUS_LABELS[mFadeDurationRatioIndex]
+           << " | STAGGER " << STAGGER_BUTTON_LABELS[mStaggerIndex]
            << " | DURATION " << std::fixed << std::setprecision(1) << GetAnimationDuration() << " s"
+           << " | ALPHA " << ALPHA_FUNCTION_BUTTON_LABELS[mAlphaFunctionIndex]
            << "\nPATH " << (mAsync ? "Async" : "Sync")
-           << " | FILL " << (mGradientEnabled ? "Gradient" : "Solid")
+           << " | FILL " << GetFillStatusLabel()
            << " | REVEAL " << (mRevealEnabled ? "On" : "Off")
            << " | UI SCALE " << std::setprecision(1) << mUiScale << 'x'
-           << "\n" << revealDescription
-           << "\n" << mPlaybackStatus
+           << "\n"
+           << revealDescription
+           << "\n"
+           << mPlaybackStatus
            << "\nVIEW  Q/W/E/R/T: scale 0.8/1.0/1.2/1.4/2.0 | ESC: Exit";
     mStatus.SetText(status.str().c_str());
   }
@@ -623,29 +970,35 @@ private:
   }
 
 private:
-  Application&                            mApplication;
-  Label                                   mPreview;
-  Label                                   mUnitButton;
-  std::array<Label, TEXT_CASE_COUNT>      mTextButtons;
-  std::array<Label, FADE_CASE_COUNT>      mFadeButtons;
-  std::array<Label, DURATION_CASE_COUNT>  mDurationButtons;
-  Label                                   mAsyncButton;
-  Label                                   mFillButton;
-  Label                                   mRevealButton;
-  Label                                   mStopPlayButton;
-  Label                                   mStatus;
-  Animation                               mAnimation;
-  std::string                             mPlaybackStatus;
-  Text::Reveal::Unit                      mUnit{Text::Reveal::Unit::CHARACTER};
-  std::size_t                             mTextCaseIndex{DEFAULT_TEXT_CASE_INDEX};
-  std::size_t                             mFadeDurationRatioIndex{0u};
-  std::size_t                             mDurationCaseIndex{DEFAULT_DURATION_CASE_INDEX};
-  bool                                    mAsync{false};
-  bool                                    mGradientEnabled{true};
-  bool                                    mRevealEnabled{true};
-  bool                                    mAnimationRunning{false};
-  float                                   mAnimationTarget{1.0f};
-  float                                   mUiScale{1.0f};
+  Application&                           mApplication;
+  Label                                  mPreview;
+  Label                                  mUnitButton;
+  std::array<Label, TEXT_CASE_COUNT>     mTextButtons;
+  std::array<Label, SEQUENCE_CASE_COUNT> mSequenceButtons;
+  std::array<Label, STAGGER_CASE_COUNT>  mStaggerButtons;
+  std::array<Label, FADE_CASE_COUNT>     mFadeButtons;
+  std::array<Label, DURATION_CASE_COUNT> mDurationButtons;
+  std::array<Label, ALPHA_CASE_COUNT>    mAlphaButtons;
+  Label                                  mAsyncButton;
+  Label                                  mFillButton;
+  Label                                  mRevealButton;
+  Label                                  mStopPlayButton;
+  Label                                  mStatus;
+  Animation                              mAnimation;
+  std::string                            mPlaybackStatus;
+  Text::Reveal::Unit                     mUnit{Text::Reveal::Unit::CHARACTER};
+  std::size_t                            mSequenceIndex{0u};
+  std::size_t                            mStaggerIndex{0u};
+  std::size_t                            mTextCaseIndex{DEFAULT_TEXT_CASE_INDEX};
+  std::size_t                            mFadeDurationRatioIndex{0u};
+  std::size_t                            mDurationCaseIndex{DEFAULT_DURATION_CASE_INDEX};
+  std::size_t                            mAlphaFunctionIndex{0u};
+  bool                                   mAsync{false};
+  FillMode                               mFillMode{FillMode::TEXT_GRADIENT};
+  bool                                   mRevealEnabled{true};
+  bool                                   mAnimationRunning{false};
+  float                                  mAnimationTarget{1.0f};
+  float                                  mUiScale{1.0f};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

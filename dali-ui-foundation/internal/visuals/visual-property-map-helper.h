@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -41,4 +41,4 @@ Property::Map CreateGradientVisualPropertyMap(const Gradient::Base& gradient);
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

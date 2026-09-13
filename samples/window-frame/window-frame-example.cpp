@@ -406,11 +406,11 @@ private:
     titleAccent.SetBackgroundColor(sideColor);
     titleAccent.SetCornerRadius(4.0f);
     titleAccent.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
-    titleAccent.SetMargin(Extents(12u, 0u, 14u, 14u));
+    titleAccent.SetMargin(Insets(12.0f, 0.0f, 14.0f, 14.0f));
     titleAccent.SetLayoutParams(GridLayoutParams::New().SetRow(0u).SetColumn(0u));
     titleArea.Add(titleAccent);
     Label title = MakeLabel(alternate ? "Studio Frame" : "WindowFrame", 19.0f, UiColor(0xFFFFFF));
-    title.SetMargin(Extents(12u, 8u, 0u, 0u));
+    title.SetMargin(Insets(12.0f, 8.0f, 0.0f, 0.0f));
     title.SetLayoutParams(GridLayoutParams::New().SetRow(0u).SetColumn(1u));
     titleArea.Add(title);
     top.Add(titleArea);
@@ -452,7 +452,7 @@ private:
     moveRegion.SetBackgroundColor(bottomColor);
     moveRegion.SetLayoutParams(GridLayoutParams::New().SetRow(0u).SetColumn(1u));
     mFooterStatus = MakeLabel("", 13.0f, secondaryColor);
-    mFooterStatus.SetMargin(Extents(14u, 10u, 0u, 0u));
+    mFooterStatus.SetMargin(Insets(14.0f, 10.0f, 0.0f, 0.0f));
     moveRegion.Add(mFooterStatus);
     bottom.Add(moveRegion);
 
@@ -560,7 +560,7 @@ private:
   void AddTopButton(GridLayout top, uint32_t column, const std::string& text, const UiColor& color, std::function<void()> callback)
   {
     GridLayout button = MakeButton(text, color, std::move(callback));
-    button.SetMargin(Extents(2u, 2u, 8u, 8u));
+    button.SetMargin(Insets(2.0f, 2.0f, 8.0f, 8.0f));
     button.SetLayoutParams(GridLayoutParams::New().SetRow(0u).SetColumn(column));
     top.Add(button);
   }
@@ -595,7 +595,7 @@ private:
     // starts a window move. The label still lets the drag through because it
     // is not interactive.
     Label title = MakeLabel("WindowFrame", 15.0f, UiColor(0x1F1F1F));
-    title.SetMargin(Extents(14u, 0u, 0u, 0u));
+    title.SetMargin(Insets(14.0f, 0.0f, 0.0f, 0.0f));
     mDefaultDecoration.GetMoveRegion().Add(title);
 
     // The custom-frame handles below are not part of this frame.

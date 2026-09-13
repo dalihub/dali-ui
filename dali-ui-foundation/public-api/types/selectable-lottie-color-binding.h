@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -77,12 +77,12 @@ public:
    * @param[in] selectedColorRange The inclusive selected-color range for
    *                               SELECTED_IN_FRAME_RANGE
    * @pre @p keyPath must not be empty.
-   * @pre @p property must be LottieAnimation::VectorProperty::FILL_COLOR or
-   * LottieAnimation::VectorProperty::STROKE_COLOR.
+   * @pre @p property must be LottieAnimation::ContentProperty::FILL_COLOR or
+   * LottieAnimation::ContentProperty::STROKE_COLOR.
    */
   SelectableLottieColorBinding(
     Dali::StringView                         keyPath,
-    LottieAnimation::VectorProperty          property,
+    LottieAnimation::ContentProperty         property,
     ColorPolicy                              colorPolicy,
     const SelectableLottieImage::FrameRange& selectedColorRange = {});
 
@@ -127,7 +127,7 @@ public:
    * @brief Returns the bound Lottie property.
    * @return The fill-color or stroke-color property
    */
-  LottieAnimation::VectorProperty GetProperty() const;
+  LottieAnimation::ContentProperty GetProperty() const;
 
   /**
    * @brief Returns the color selection policy.
@@ -158,4 +158,4 @@ using SelectableLottieColorBindings = Dali::Vector<SelectableLottieColorBinding>
 /** @} */
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

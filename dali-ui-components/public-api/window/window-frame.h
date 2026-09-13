@@ -32,7 +32,7 @@
 #include <dali-ui-components/public-api/window/window-frame-style.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -577,4 +577,4 @@ public: // Internal
   explicit DALI_INTERNAL WindowFrame(Internal::WindowFrameImpl* impl);
 };
 
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

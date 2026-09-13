@@ -24,7 +24,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/property-map.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -59,6 +59,6 @@ DALI_UI_API Dali::Property::Map CreateDistanceFieldEffect();
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_SHADER_EFFECT_DISTANCEFIELD_H

@@ -21,7 +21,7 @@
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -730,4 +730,4 @@ LabelAnimationSpec Label::NewAnimationSpec()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -43,6 +43,8 @@ namespace FocusManager
  * Setting a new target causes the previous target to receive a focus-lost
  * notification. Only one target is retained; previous targets are not stacked
  * or restored automatically.
+ * A new target in an inactive Window is rejected without creating a navigation
+ * reservation. An already-retained key-input target is left unchanged.
  *
  * @pre This function must be called from the UI thread.
  * @pre @p view must be connected to a valid scene.
@@ -83,4 +85,4 @@ DALI_UI_API bool IsKeyInputTarget(Ui::View view);
 } // namespace FocusManager
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

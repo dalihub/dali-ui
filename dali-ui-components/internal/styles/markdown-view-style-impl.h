@@ -26,7 +26,7 @@
 #include <memory>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -231,4 +231,4 @@ inline const Internal::MarkdownViewStyleImpl& GetImpl(const Ui::MarkdownViewStyl
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

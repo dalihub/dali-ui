@@ -29,7 +29,7 @@ using namespace Dali::Ui;
  * - Right panel: CropToMask=true  — image cropped to mask bounding box
  * - IMAGE TYPE button: toggle between static (ImageView) and animated (AnimatedImageView)
  * - MASK buttons: switch between two mask shapes (CIRCLE, BUBBLE)
- * - MODE button: toggle MaskingMode between ON_RENDERING and ON_LOADING
+ * - MODE button: toggle MaskingPolicy between ON_RENDERING and ON_LOADING
  * - Press Escape or Back to quit
  */
 class ImageAlphaMaskController : public ConnectionTracker
@@ -121,7 +121,7 @@ private:
     mStaticImages[panelIdx].SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
     mStaticImages[panelIdx].SetAlphaMaskUrl(MASKS[mMaskIndex].url);
     mStaticImages[panelIdx].SetCropToMask(cropToMask);
-    mStaticImages[panelIdx].SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
+    mStaticImages[panelIdx].SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_RENDERING);
     mStaticImages[panelIdx].SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
 
     mAnimatedImages[panelIdx] = AnimatedImageView::New(ANIMATED_URL);
@@ -129,7 +129,7 @@ private:
     mAnimatedImages[panelIdx].SetRequestedHeight(WRAP_CONTENT);
     mAnimatedImages[panelIdx].SetAlphaMaskUrl(MASKS[mMaskIndex].url);
     mAnimatedImages[panelIdx].SetCropToMask(cropToMask);
-    mAnimatedImages[panelIdx].SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
+    mAnimatedImages[panelIdx].SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_RENDERING);
     mAnimatedImages[panelIdx].SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
     mAnimatedImages[panelIdx].SetVisible(false);
 
@@ -289,13 +289,13 @@ private:
   void OnModeToggleClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mMaskingOnLoading = !mMaskingOnLoading;
-    const auto mode   = mMaskingOnLoading ? Ui::Image::MaskingType::MASKING_ON_LOADING : Ui::Image::MaskingType::MASKING_ON_RENDERING;
+    const auto mode   = mMaskingOnLoading ? Ui::Image::MaskingPolicy::ON_LOADING : Ui::Image::MaskingPolicy::ON_RENDERING;
 
     for(int i = 0; i < PANEL_COUNT; ++i)
     {
-      mStaticImages[i].SetMaskingMode(mode);
+      mStaticImages[i].SetMaskingPolicy(mode);
       mStaticImages[i].Reload();
-      mAnimatedImages[i].SetMaskingMode(mode);
+      mAnimatedImages[i].SetMaskingPolicy(mode);
       if(mImageTypeIndex == 1)
       {
         mAnimatedImages[i].Play();
@@ -304,7 +304,7 @@ private:
 
     mModeLabel.SetText(mMaskingOnLoading ? "MODE: ON_LOADING" : "MODE: ON_RENDERING");
     mInfoLabel.SetText(MakeInfoText());
-    DALI_LOG_RELEASE_INFO("[AlphaMask] MaskingMode=%s\n", mMaskingOnLoading ? "LOADING" : "RENDERING");
+    DALI_LOG_RELEASE_INFO("[AlphaMask] MaskingPolicy=%s\n", mMaskingOnLoading ? "LOADING" : "RENDERING");
   }
 
   void OnKeyEvent(Window window, KeyEvent event)

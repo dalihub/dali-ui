@@ -24,7 +24,7 @@
 #include <string>
 #include <utility> // pair
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -235,6 +235,6 @@ private:
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_SCRIPT_TREE_NODE_H

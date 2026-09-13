@@ -53,7 +53,7 @@ Debug::Filter* gAnimImgLogFilter = Debug::Filter::New(Debug::NoLogging, false, "
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -439,4 +439,4 @@ void RollingAnimatedImageCache::LoadComplete(bool loadSuccess, TextureInformatio
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

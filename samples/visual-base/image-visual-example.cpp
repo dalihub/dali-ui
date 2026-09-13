@@ -27,7 +27,7 @@ constexpr float STACK_SPACING = 10.0f;
 constexpr float STACK_PADDING = 20.0f;
 
 constexpr int16_t VIEW_PADDING = 40;
-constexpr int16_t VIEW_MARGIN = 40;
+constexpr int16_t VIEW_MARGIN  = 40;
 
 int GetRandomInteger(int from, int to)
 {
@@ -39,13 +39,13 @@ int GetRandomInteger(int from, int to)
     return from;
   }
 
-  return rand()%(to-from) + from;
+  return rand() % (to - from) + from;
 }
 
 float GetRandomFloat()
 {
   constexpr int MAX_INTEGER = 10000;
-  int rand = GetRandomInteger(0, MAX_INTEGER);
+  int           rand        = GetRandomInteger(0, MAX_INTEGER);
   return static_cast<float>(rand) / static_cast<float>(MAX_INTEGER);
 }
 
@@ -57,11 +57,11 @@ ColorVisual CreateCustomShadow1()
   visual.SetOffsetY(-10_spx);
   visual.SetWidth(1.01f);
   visual.SetHeight(1.0f);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   visual.SetExtraWidth(50_spx);
   visual.SetExtraHeight(-20_spx);
-  visual.SetOrigin(Align::TOP_CENTER);
-  visual.SetPivot(Align::TOP_CENTER);
+  visual.SetOrigin(VisualOrigin::TOP_CENTER);
+  visual.SetPivot(VisualPivot::TOP_CENTER);
   visual.SetBlurRadius(12_spx);
   visual.SetCornerRadius(12_spx);
   visual.SetColor(UiColor(0x3F0F0F).WithAlpha(0.2f));
@@ -77,11 +77,11 @@ ColorVisual CreateCustomShadow2()
   visual.SetOffsetY(-20_spx);
   visual.SetWidth(1.01f);
   visual.SetHeight(1.01f);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   visual.SetExtraWidth(0_spx);
   visual.SetExtraHeight(0_spx);
-  visual.SetOrigin(Align::TOP_BEGIN);
-  visual.SetPivot(Align::TOP_BEGIN);
+  visual.SetOrigin(VisualOrigin::TOP_LEFT);
+  visual.SetPivot(VisualPivot::TOP_LEFT);
   visual.SetBlurRadius(15_spx);
   visual.SetCornerRadius(15_spx);
   visual.SetColor(UiColor(0x7F7FCF).WithAlpha(0.3f));
@@ -97,11 +97,11 @@ ColorVisual CreateCustomShadow3()
   visual.SetOffsetY(20_spx);
   visual.SetWidth(1.0f);
   visual.SetHeight(1.01f);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   visual.SetExtraWidth(10_spx);
   visual.SetExtraHeight(-10_spx);
-  visual.SetOrigin(Align::TOP_END);
-  visual.SetPivot(Align::TOP_END);
+  visual.SetOrigin(VisualOrigin::TOP_RIGHT);
+  visual.SetPivot(VisualPivot::TOP_RIGHT);
   visual.SetBlurRadius(10_spx);
   visual.SetCornerRadius(10_spx);
   visual.SetColor(UiColor(0x0F040F).WithAlpha(0.3f));
@@ -115,9 +115,9 @@ ColorVisual CreateCustomInnerShadow1()
   visual.SetName("CustomInnerShadow1");
   visual.SetOffsetX(10_spx);
   visual.SetOffsetY(20_spx);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-  visual.SetOrigin(Align::CENTER);
-  visual.SetPivot(Align::CENTER);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetOrigin(VisualOrigin::CENTER);
+  visual.SetPivot(VisualPivot::CENTER);
   visual.SetCornerRadius(0.25f);
   visual.SetCornerSquareness(0.6f);
   visual.SetCornerRadiusPolicyRelative();
@@ -136,9 +136,9 @@ ColorVisual CreateCustomInnerShadow2()
   visual.SetName("CustomInnerShadow2");
   visual.SetOffsetX(-10_spx);
   visual.SetOffsetY(-20_spx);
-  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
-  visual.SetOrigin(Align::CENTER);
-  visual.SetPivot(Align::CENTER);
+  visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetOrigin(VisualOrigin::CENTER);
+  visual.SetPivot(VisualPivot::CENTER);
   visual.SetCornerRadius(0.25f);
   visual.SetCornerSquareness(0.6f);
   visual.SetCornerRadiusPolicyRelative();
@@ -154,14 +154,14 @@ ColorVisual CreateCustomInnerShadow2()
 void AddDecorativeVisuals(View view)
 {
   view.AddVisuals(
-    Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND,
+    Visual::DepthLayer::BACKGROUND_EFFECT,
     {
       CreateCustomShadow1(),
       CreateCustomShadow2(),
       CreateCustomShadow3(),
     });
   view.AddVisuals(
-    Visual::ContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT,
+    Visual::DepthLayer::DECORATION,
     {
       CreateCustomInnerShadow1(),
       CreateCustomInnerShadow2(),
@@ -178,7 +178,7 @@ constexpr std::string_view IMAGE_PATH[] = {
   RESOURCES_DIR "dog-anim.webp",
   RESOURCES_DIR "exif-rotated.jpg",
 };
-constexpr int IMAGE_PATH_COUNT= sizeof(IMAGE_PATH) / sizeof(IMAGE_PATH[0]);
+constexpr int IMAGE_PATH_COUNT = sizeof(IMAGE_PATH) / sizeof(IMAGE_PATH[0]);
 } // namespace
 
 class VisualBaseController : public ConnectionTracker
@@ -287,9 +287,9 @@ private:
 
     root.Add(buttonRow);
     window.Add(root);
-  
+
     // Add initial visuals
-    for(int i=0; i<3; i++)
+    for(int i = 0; i < 3; i++)
     {
       PushVisual();
     }
@@ -300,28 +300,28 @@ private:
 
   void PushVisual()
   {
-    int imageIndex = GetRandomInteger(0, IMAGE_PATH_COUNT);
-    ImageVisual visual = ImageVisual::New();
+    int         imageIndex = GetRandomInteger(0, IMAGE_PATH_COUNT);
+    ImageVisual visual     = ImageVisual::New();
     visual.SetColor(UiColor(1.0f, 1.0f, 1.0f, GetRandomFloat() * 0.5f + 0.5f));
     visual.SetOffsetX(GetRandomFloat() * 0.2f);
     visual.SetOffsetY(GetRandomFloat() * 0.2f);
     visual.SetWidth(GetRandomFloat() * 0.4f + 0.4f);
     visual.SetHeight(GetRandomFloat() * 0.4f + 0.4f);
-    visual.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);
+    visual.SetTransformProportionFlags(Visual::Transform::ProportionFlags::ALL);
     visual.SetCornerRadius(GetRandomFloat() * 0.5f);
     visual.SetCornerRadiusPolicyRelative();
     visual.SetResourceUrl(Dali::StringView(IMAGE_PATH[imageIndex].data(), static_cast<uint32_t>(IMAGE_PATH[imageIndex].size())));
 
-    mView.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    mView.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
 
     UpdateVisualCount();
   }
   void PopVisual()
   {
-    uint32_t visualCount = mView.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    uint32_t visualCount = mView.GetVisualCount(Visual::DepthLayer::BACKGROUND);
     if(visualCount > 0u)
     {
-      auto visual = mView.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, visualCount - 1u);
+      auto visual = mView.GetVisualAt(Visual::DepthLayer::BACKGROUND, visualCount - 1u);
       mView.RemoveVisual(visual);
 
       UpdateVisualCount();
@@ -330,7 +330,7 @@ private:
 
   void UpdateVisualCount()
   {
-    std::string numberOfVisuals = std::to_string(mView.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT));
+    std::string numberOfVisuals = std::to_string(mView.GetVisualCount(Visual::DepthLayer::BACKGROUND));
 
     mVisualCounter.SetText((std::string("Visuals Count : #") + numberOfVisuals).c_str());
   }
@@ -359,14 +359,14 @@ private:
 
 private:
   Application& mApplication;
-  View mView;
-  Label mVisualCounter;
+  View         mView;
+  Label        mVisualCounter;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
 

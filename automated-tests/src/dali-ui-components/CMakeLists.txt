@@ -9,9 +9,12 @@ SET(TC_SOURCES
     utc-Dali-Components.cpp
     utc-Dali-DummyComponent.cpp
     utc-Dali-TextButton.cpp
+    utc-Dali-IconButton.cpp
     utc-Dali-CheckBox.cpp
     utc-Dali-RadioButton.cpp
     utc-Dali-Switch.cpp
+    utc-Dali-ProgressBar.cpp
+    utc-Dali-Toast.cpp
     utc-Dali-ChartView.cpp
     utc-Dali-ChartSeries.cpp
     utc-Dali-PieSeries.cpp
@@ -166,6 +169,28 @@ TARGET_LINK_LIBRARIES(${EXEC_NAME}
     dali-ui-components-test-md4c
     -lpthread -ldl --coverage -rdynamic
 )
+
+# Optional transport-level accessibility regression harness. Normal unit tests
+# do not require GIO or the adaptor's private source headers.
+OPTION(ENABLE_COMPONENTS_ATSPI_CAPTURE "Build Dialog AT-SPI transport capture tests" OFF)
+IF(ENABLE_COMPONENTS_ATSPI_CAPTURE)
+  SET(DALI_ADAPTOR_SOURCE_DIR "" CACHE PATH "Source tree matching the linked DALi adaptor")
+  IF(NOT EXISTS "${DALI_ADAPTOR_SOURCE_DIR}/dali/internal/accessibility/bridge/dbus/dbus-wrapper-gdbus.h")
+    MESSAGE(FATAL_ERROR "AT-SPI capture requires DALI_ADAPTOR_SOURCE_DIR matching the installed adaptor")
+  ENDIF()
+  PKG_CHECK_MODULES(ATSPICAPTURE REQUIRED IMPORTED_TARGET gio-2.0)
+  SET(ATSPI_HARNESS_SOURCES ${TC_SOURCES})
+  LIST(FILTER ATSPI_HARNESS_SOURCES EXCLUDE REGEX "(^|/)utc-")
+  ADD_EXECUTABLE(tct-dali-ui-components-atspi
+    tct-dali-ui-components-atspi.cpp
+    utc-Dali-DialogAccessibilityEvents.cpp
+    dali-ui-components-test-utils/atspi-capture.cpp
+    ${ATSPI_HARNESS_SOURCES})
+  TARGET_INCLUDE_DIRECTORIES(tct-dali-ui-components-atspi SYSTEM PRIVATE "${DALI_ADAPTOR_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(tct-dali-ui-components-atspi
+    ${${CAPI_LIB}_LIBRARIES} dali-ui-components-test-md4c PkgConfig::ATSPICAPTURE
+    -lpthread -ldl --coverage -rdynamic)
+ENDIF()
 
 # Path to installed precompiled addons
 

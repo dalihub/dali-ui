@@ -25,7 +25,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/signals/callback.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -213,6 +213,10 @@ public: // Not intended for application developers
 
 /**
  * @brief Mutable builder used to create RadioButtonStyle handles.
+ *
+ * Minimum sizes and each padding component must be finite and non-negative; a violation triggers an assertion in the setter.
+ * A zero minimum size means no lower bound; zero padding means no padding.
+ * Icon sizes retain a separate compatibility contract: non-positive or non-finite values are normalized to zero (unset), without an assertion.
  */
 class DALI_UI_COMPONENTS_API RadioButtonStyle::Builder
 {
@@ -418,4 +422,4 @@ private:
 /** @} */
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

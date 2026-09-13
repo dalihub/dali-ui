@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,15 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
+#include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
-#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 
 using Dali::Integration::ToDaliStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -49,15 +49,17 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 
 const int MINIMUM_SCROLL_SPEED = 1; // Speed should be set by Property system.
 
-static constexpr const char* TEXT_GRADIENT_SHADER_DEFINE         = "#define IS_REQUIRED_TEXT_GRADIENT\n";
-static constexpr const char* TEXT_GRADIENT_MIXED_SHADER_DEFINE   = "#define IS_REQUIRED_TEXT_GRADIENT_MIXED\n";
-static constexpr const char* TEXT_GRADIENT_OVERLAY_SHADER_DEFINE = "#define IS_REQUIRED_TEXT_GRADIENT_OVERLAY\n";
-static constexpr const char* TEXT_STYLE_SHADER_DEFINE            = "#define IS_REQUIRED_TEXT_STYLE\n";
-static constexpr const char* TEXT_OVERLAY_STYLE_SHADER_DEFINE    = "#define IS_REQUIRED_TEXT_OVERLAY_STYLE\n";
+static constexpr const char* TEXT_GRADIENT_SHADER_DEFINE                       = "#define IS_REQUIRED_TEXT_GRADIENT\n";
+static constexpr const char* TEXT_GRADIENT_MIXED_SHADER_DEFINE                 = "#define IS_REQUIRED_TEXT_GRADIENT_MIXED\n";
+static constexpr const char* TEXT_GRADIENT_OVERLAY_SHADER_DEFINE               = "#define IS_REQUIRED_TEXT_GRADIENT_OVERLAY\n";
+static constexpr const char* TEXT_GRADIENT_CONTENT_BOUND_SHADER_DEFINE         = "#define IS_REQUIRED_TEXT_GRADIENT_CONTENT_BOUND\n";
+static constexpr const char* TEXT_GRADIENT_OVERLAY_CONTENT_BOUND_SHADER_DEFINE = "#define IS_REQUIRED_TEXT_GRADIENT_OVERLAY_CONTENT_BOUND\n";
+static constexpr const char* TEXT_STYLE_SHADER_DEFINE                          = "#define IS_REQUIRED_TEXT_STYLE\n";
+static constexpr const char* TEXT_OVERLAY_STYLE_SHADER_DEFINE                  = "#define IS_REQUIRED_TEXT_OVERLAY_STYLE\n";
 // Keep this tag separate from TextVisual gradient constraint tags because
 // TextScroller reuses the visual renderer while marquee is active.
-static constexpr uint32_t TEXT_SCROLLER_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 26u);
-static constexpr uint32_t TEXT_SCROLLER_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 27u);
+static constexpr uint32_t TEXT_SCROLLER_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 26u);
+static constexpr uint32_t TEXT_SCROLLER_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 27u);
 constexpr const char*     UNIFORM_TEXT_GRADIENT_START_POSITION_NAME("uTextGradientStartPosition");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_END_POSITION_NAME("uTextGradientEndPosition");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME("uTextGradientStartOffset");
@@ -97,7 +99,14 @@ void GradientOffsetConstraint(float& current, const PropertyInputContainer& inpu
   current = inputs[0]->GetFloat();
 }
 
-std::string BuildTextScrollerShaderSource(std::string_view shaderSource, bool textGradientEnabled, bool textGradientMixedEnabled, bool textGradientOverlayEnabled, bool textStyleEnabled, bool textOverlayStyleEnabled)
+std::string BuildTextScrollerShaderSource(std::string_view shaderSource,
+                                          bool             textGradientEnabled,
+                                          bool             textGradientMixedEnabled,
+                                          bool             textGradientOverlayEnabled,
+                                          bool             textGradientUseTextureCoordinates,
+                                          bool             textGradientOverlayUseTextureCoordinates,
+                                          bool             textStyleEnabled,
+                                          bool             textOverlayStyleEnabled)
 {
   std::string shader;
   if(textGradientEnabled)
@@ -111,6 +120,14 @@ std::string BuildTextScrollerShaderSource(std::string_view shaderSource, bool te
   if(textGradientOverlayEnabled)
   {
     shader += TEXT_GRADIENT_OVERLAY_SHADER_DEFINE;
+  }
+  if(textGradientEnabled && textGradientUseTextureCoordinates)
+  {
+    shader += TEXT_GRADIENT_CONTENT_BOUND_SHADER_DEFINE;
+  }
+  if(textGradientOverlayEnabled && textGradientOverlayUseTextureCoordinates)
+  {
+    shader += TEXT_GRADIENT_OVERLAY_CONTENT_BOUND_SHADER_DEFINE;
   }
   if(textStyleEnabled)
   {
@@ -453,8 +470,22 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   const bool             textGradientMixedEnabled = textGradient.enabled && textGradient.mixedTextGradient;
   const bool             textStyleEnabled         = textGradient.styleTextureEnabled;
   const bool             textOverlayStyleEnabled  = textGradient.overlayStyleTextureEnabled;
-  const std::string      vertexShader             = BuildTextScrollerShaderSource(vertexShaderSource, textGradient.enabled, textGradientMixedEnabled, textGradient.overlayEnabled, textStyleEnabled, textOverlayStyleEnabled);
-  const std::string      fragmentShader           = BuildTextScrollerShaderSource(fragmentShaderSource, textGradient.enabled, textGradientMixedEnabled, textGradient.overlayEnabled, textStyleEnabled, textOverlayStyleEnabled);
+  const std::string      vertexShader             = BuildTextScrollerShaderSource(vertexShaderSource,
+                                                                                  textGradient.enabled,
+                                                                                  textGradientMixedEnabled,
+                                                                                  textGradient.overlayEnabled,
+                                                                                  textGradient.useTextureCoordinates,
+                                                                                  textGradient.overlayUseTextureCoordinates,
+                                                                                  textStyleEnabled,
+                                                                                  textOverlayStyleEnabled);
+  const std::string      fragmentShader           = BuildTextScrollerShaderSource(fragmentShaderSource,
+                                                                                  textGradient.enabled,
+                                                                                  textGradientMixedEnabled,
+                                                                                  textGradient.overlayEnabled,
+                                                                                  textGradient.useTextureCoordinates,
+                                                                                  textGradient.overlayUseTextureCoordinates,
+                                                                                  textStyleEnabled,
+                                                                                  textOverlayStyleEnabled);
   std::string            shaderName               = isHorizontal ? "TEXT_SCROLLER" : "TEXT_SCROLLER_VERTICAL";
   if(textGradient.enabled)
   {
@@ -467,6 +498,14 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   if(textGradient.overlayEnabled)
   {
     shaderName += "_TEXT_GRADIENT_OVERLAY";
+  }
+  if(textGradient.enabled && textGradient.useTextureCoordinates)
+  {
+    shaderName += "_CONTENT_BOUND";
+  }
+  if(textGradient.overlayEnabled && textGradient.overlayUseTextureCoordinates)
+  {
+    shaderName += "_OVERLAY_CONTENT_BOUND";
   }
   if(textStyleEnabled)
   {
@@ -553,8 +592,8 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
     BindGradientOverlayConstraint(overlayStartOffsetIndex);
   }
   float initialScrollDelta = 0.0f;
-  // Overflow selects the viewport above; a valid delta independently connects
-  // that viewport to the preceding static render for either fitting or overflow.
+  // A valid delta connects the first marquee frame to the preceding static
+  // render for either fitting or overflow.
   if(isHorizontal && marqueeInitialDelta.valid)
   {
     initialScrollDelta = marqueeInitialDelta.value;
@@ -610,4 +649,4 @@ void TextScroller::StartScrolling(Actor scrollingTextActor, float scrollAmount, 
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

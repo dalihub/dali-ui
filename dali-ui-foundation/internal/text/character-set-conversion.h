@@ -19,10 +19,11 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
 #include <stdint.h>
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -101,6 +102,6 @@ void Utf32ToUtf8(const uint32_t* const utf32, uint32_t numberOfCharacters, std::
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_CHARACTER_SET_CONVERSION_H

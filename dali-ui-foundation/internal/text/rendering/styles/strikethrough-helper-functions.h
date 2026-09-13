@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/strikethrough-glyph-run.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -74,6 +74,6 @@ void CalcualteStrikethroughHeight(float& currentStrikethroughHeight, float& maxS
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_RENDERING_STYLES_STRIKETHROUGH_HELPER_FUNCTIONS_H

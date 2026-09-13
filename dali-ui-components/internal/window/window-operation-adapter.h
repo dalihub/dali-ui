@@ -23,12 +23,12 @@
 #include <memory>
 #include <optional>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 class WindowFrameOptions;
 }
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 struct NativeWindowState
@@ -61,4 +61,4 @@ std::unique_ptr<WindowOperationAdapter> CreateDaliWindowOperationAdapter(Dali::W
                                                                          WindowOperationAdapter::CloseCallback closeCallback,
                                                                          const WindowFrameOptions&             options);
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

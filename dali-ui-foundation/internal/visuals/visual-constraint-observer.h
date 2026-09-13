@@ -22,7 +22,7 @@
 
 #include <unordered_set>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -70,6 +70,6 @@ protected:
 } // namespace Visual
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_INTERNAL_UI_VISUAL_CONSTRAINT_OBSERVER_H

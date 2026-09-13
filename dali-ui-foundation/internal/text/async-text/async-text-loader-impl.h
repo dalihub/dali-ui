@@ -36,7 +36,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -159,6 +159,9 @@ private:
   {
     ReplacementRenderState renderState;
     Vector<Character>      originalLogicalText;
+    Vector<FontRun>        logicalFontRuns;
+    FontId                 logicalDefaultFontId{0u};
+    float                  lineMetricRenderScale{1.0f};
     uint64_t               finalElisionGeneration{0u};
   };
 
@@ -334,6 +337,6 @@ inline static const Internal::AsyncTextLoader& GetImplementation(const AsyncText
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_ASYNC_TEXT_LOADER_IMPL_H

@@ -25,7 +25,7 @@
 
 #include <dali-ui-foundation/internal/builder/builder-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -162,4 +162,4 @@ Builder::BuilderSignalType& Builder::QuitSignal()
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

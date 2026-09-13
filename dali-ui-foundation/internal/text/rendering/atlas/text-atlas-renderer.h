@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -47,6 +47,7 @@ public:
 
   bool SetAtlasGradientState(const Internal::Gradient::AtlasRendererState& state) override;
   void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds) override;
+  void UpdateAtlasGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds) override;
   void SetAtlasGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex) override;
   void SetAtlasGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint = false) override;
 
@@ -77,6 +78,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_ATLAS_RENDERER_H

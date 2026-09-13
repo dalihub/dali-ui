@@ -23,7 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dummy-component.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -104,4 +104,4 @@ inline const Internal::DummyComponentImpl& GetImpl(const Ui::DummyComponent& dum
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

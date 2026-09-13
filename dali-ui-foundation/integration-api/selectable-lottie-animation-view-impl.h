@@ -29,7 +29,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -156,7 +156,7 @@ private:
   struct ColorBindingData
   {
     Dali::String                              keyPath;
-    LottieAnimation::VectorProperty           property;
+    LottieAnimation::ContentProperty          property;
     SelectableLottieColorBinding::ColorPolicy colorPolicy;
     int32_t                                   selectedColorStart;
     int32_t                                   selectedColorEnd;
@@ -181,4 +181,4 @@ private:                           // Data
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -300,14 +300,14 @@ void OverlayEffectImpl::HandleStateChanged(OverlayEffectData& data, View owner, 
     // If overlay ColorVisual creation becomes a measured hot path, consider
     // applying an object pool at this creation point.
     overlay = ColorVisual::New();
-    target.AddVisual(overlay, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    target.AddVisual(overlay, Visual::DepthLayer::BACKGROUND);
     data.SetActiveOverlay(overlay);
     data.SetActiveTarget(target);
   }
   else if(data.GetActiveTarget() != target)
   {
     overlay.Detach();
-    target.AddVisual(overlay, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    target.AddVisual(overlay, Visual::DepthLayer::BACKGROUND);
     data.SetActiveTarget(target);
   }
 
@@ -493,7 +493,7 @@ void OverlayEffectImpl::ApplyOverlayProperties(ColorVisual overlay, View target)
   const float bottom        = mOverlayPadding.bottom;
 
   overlay.SetColor(mOverlayColor);
-  overlay.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  overlay.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
   overlay.SetOffsetX(-left);
   overlay.SetOffsetY(-top);
   overlay.SetWidth(1.0f);
@@ -844,4 +844,4 @@ void OverlayEffectData::ClearRecoilTargets()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

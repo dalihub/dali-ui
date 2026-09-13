@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/animation/label-animation-spec-impl.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -347,4 +347,4 @@ LabelAnimationBridge& LabelAnimationBridge::PixelSnapFactorBy(float relative, Du
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

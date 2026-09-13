@@ -25,7 +25,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -134,4 +134,4 @@ const ViewState ViewState::SELECTED_FOCUSED = ViewState::SELECTED + ViewState::F
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

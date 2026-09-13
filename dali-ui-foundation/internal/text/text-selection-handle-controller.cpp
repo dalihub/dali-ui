@@ -52,7 +52,7 @@ const Dali::Ui::Text::CharacterDirection LTR       = false; ///< Left To Right d
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -641,4 +641,4 @@ void SelectionHandleController::Update(Controller::Impl& impl, HandleType handle
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

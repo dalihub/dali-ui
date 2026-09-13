@@ -22,7 +22,7 @@
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/ref-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -121,6 +121,6 @@ public:
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_BUILDER_STYLE_H

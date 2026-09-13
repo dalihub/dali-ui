@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -41,4 +41,4 @@ void TraitObject::OnViewDestroying(ViewImpl* /*viewImpl*/)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

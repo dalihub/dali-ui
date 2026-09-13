@@ -268,7 +268,7 @@ void SetFocusIndicated(View view)
   ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 }
 
-constexpr auto  OVERLAY_VISUAL_RANGE            = Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT;
+constexpr auto  OVERLAY_VISUAL_RANGE            = Visual::DepthLayer::BACKGROUND;
 constexpr float OVERLAY_RECOIL_SCALE_FACTOR     = 0.96f;
 constexpr float LIST_ITEM_RECOIL_SCALE_FACTOR   = 0.98f;
 constexpr float OVERLAY_DISABLED_OPACITY_FACTOR = 0.4f;

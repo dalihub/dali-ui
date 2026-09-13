@@ -24,7 +24,7 @@
 #define DALI_ASSERT_VALID_LAYOUT_PARAMS(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use moved-from AbsoluteLayoutParams")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -172,6 +172,6 @@ AbsoluteLayoutFlags AbsoluteLayoutParams::GetFlags() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_LAYOUT_PARAMS

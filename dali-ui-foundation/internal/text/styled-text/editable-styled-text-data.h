@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Stores authored span attachments for an editable StyledText source.
@@ -70,6 +70,6 @@ private:
   std::vector<Attachment> mAttachments;
 };
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_EDITABLE_STYLED_TEXT_DATA_H

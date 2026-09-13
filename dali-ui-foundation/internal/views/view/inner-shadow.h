@@ -21,10 +21,11 @@
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/types/inner-shadow.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -42,7 +43,7 @@ namespace InnerShadow
 ColorVisual CreateVisual(const Ui::InnerShadow& innerShadow);
 
 /**
- * @brief Creates a property map for View::Property::INNER_SHADOW.
+ * @brief Creates a property map for Dali::Ui::Integration::View::Property::INNER_SHADOW.
  *
  * @param[in] innerShadow The inner shadow value
  * @return A color visual property map describing the inner shadow
@@ -52,4 +53,4 @@ Property::Map CreatePropertyMap(const Ui::InnerShadow& innerShadow);
 } // namespace InnerShadow
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

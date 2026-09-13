@@ -26,7 +26,7 @@
 #include <memory>
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -114,4 +114,4 @@ inline const Internal::CheckBoxStyleImpl& GetImpl(const Ui::CheckBoxStyle& style
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

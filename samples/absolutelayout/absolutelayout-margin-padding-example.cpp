@@ -22,14 +22,14 @@ using namespace Dali::Ui;
 /**
  * AbsoluteLayout sample: margin and padding.
  *
- * All margin and padding values use a uniform 25px for easy visual verification.
+ * All margin and padding values use a uniform 50px for easy visual verification.
  *
- * 1. Padding: root AbsoluteLayout has 25px padding (children inset from window edges).
+ * 1. Padding: root AbsoluteLayout has 50px padding (children inset from window edges).
  * 2. Margin: children alternate between no margin and 50px uniform margin.
  *    - Red box: no margin (flush with padding edge).
  *    - Green box: 50px margin all sides.
  *    - Blue box: 50px margin all sides.
- * 3. Nested: a child AbsoluteLayout with 25px padding, containing inner boxes
+ * 3. Nested: a child AbsoluteLayout with 50px padding, containing inner boxes
  *    with no margin and 50px margin respectively.
  *
  * Press Escape or Back to quit.

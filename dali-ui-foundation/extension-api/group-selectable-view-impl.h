@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -118,4 +118,4 @@ inline const GroupSelectableViewImpl& GetImpl(const GroupSelectableView& view)
 } // namespace Extension
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -135,4 +135,4 @@ Dali::IntrusivePtr<Gradient> Create(const Dali::Ui::Gradient::Base& gradient)
 } // namespace GradientFactory
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

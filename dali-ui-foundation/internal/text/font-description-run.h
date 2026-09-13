@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/abstract-style-character-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -101,6 +101,6 @@ struct TypeTraits<Dali::Ui::Text::FontDescriptionRun> : public Dali::BasicTypes<
   };
 };
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_FONT_DESCRIPTION_RUN_H

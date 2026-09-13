@@ -19,7 +19,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 /**
  * Class to manage properties for the LabelImpl
@@ -55,4 +55,4 @@ struct LabelImpl::PropertyHandler
   static Property::Value GetProperty(Ui::View view, Property::Index index);
 };
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration

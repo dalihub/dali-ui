@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/visuals/gradient/gradient.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -37,6 +37,6 @@ bool                         IsRenderable(const Dali::Ui::Gradient::Base& gradie
 } // namespace GradientFactory
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_GRADIENT_FACTORY_H

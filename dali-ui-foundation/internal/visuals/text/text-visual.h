@@ -24,6 +24,8 @@
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
 
+#include <utility>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/async-text-interface.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
@@ -36,7 +38,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -133,15 +135,24 @@ public:
    * @param[in] fadeDurationRatio The authored automatic sentinel or normalized fade duration.
    * @param[in] progressPropertyIndex The stable Label scene property used as progress.
    * @param[in] revision The revision used to reject stale asynchronous results.
+   * @param[in] sequence The internal reveal sequence grouping.
+   * @param[in] sequenceStaggerRatio The sequence stagger ratio.
    */
   static void ConfigureTextReveal(
-    Ui::Integration::Visual::Base    visual,
-    Ui::Text::Internal::Reveal::Unit unit,
-    float                            fadeDurationRatio,
-    Property::Index                  progressPropertyIndex,
-    uint64_t                         revision)
+    Ui::Integration::Visual::Base        visual,
+    Ui::Text::Internal::Reveal::Unit     unit,
+    float                                fadeDurationRatio,
+    Property::Index                      progressPropertyIndex,
+    uint64_t                             revision,
+    Ui::Text::Internal::Reveal::Sequence sequence             = Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT,
+    float                                sequenceStaggerRatio = 0.0f)
   {
-    GetVisualObject(visual).ConfigureTextReveal(unit, fadeDurationRatio, progressPropertyIndex, revision);
+    GetVisualObject(visual).ConfigureTextReveal(unit,
+                                                fadeDurationRatio,
+                                                progressPropertyIndex,
+                                                revision,
+                                                sequence,
+                                                sequenceStaggerRatio);
   }
 
   /**
@@ -175,12 +186,24 @@ public:
   /**
    * @brief Instantly updates the async renderer
    * @param[in] visual The text visual.
-   * @param[in] parameters The async text parameters.
+   * @param[in,out] parameters The async text parameters. Existing request adjustments
+   * remain visible to the caller.
    * @return true if the async text render request was successful, false otherwise.
    */
   static bool UpdateAsyncRenderer(Ui::Integration::Visual::Base visual, Ui::Text::AsyncTextParameters& parameters)
   {
     return GetVisualObject(visual).UpdateAsyncRenderer(parameters);
+  };
+
+  /**
+   * @brief Instantly updates the async renderer and consumes the parameters.
+   * @param[in] visual The text visual.
+   * @param[in] parameters The async text parameters. Valid only for destruction or reassignment after this call.
+   * @return true if the async text render request was successful, false otherwise.
+   */
+  static bool UpdateAsyncRendererOwned(Ui::Integration::Visual::Base visual, Ui::Text::AsyncTextParameters&& parameters)
+  {
+    return GetVisualObject(visual).UpdateAsyncRendererOwned(std::move(parameters));
   };
 
   /**
@@ -191,6 +214,16 @@ public:
   static void RequestAsyncSizeComputation(Ui::Integration::Visual::Base visual, Ui::Text::AsyncTextParameters& parameters)
   {
     GetVisualObject(visual).RequestAsyncSizeComputation(parameters);
+  };
+
+  /**
+   * @brief Instantly requests async size computation and consumes the parameters.
+   * @param[in] visual The text visual.
+   * @param[in] parameters The async text parameters. Valid only for destruction or reassignment after this call.
+   */
+  static void RequestAsyncSizeComputationOwned(Ui::Integration::Visual::Base visual, Ui::Text::AsyncTextParameters&& parameters)
+  {
+    GetVisualObject(visual).RequestAsyncSizeComputationOwned(std::move(parameters));
   };
 
   /**
@@ -486,16 +519,56 @@ private:
 
   /**
    * @brief Updates the text's async renderer.
-   * @param[in] parameters The async text parameters.
+   * @param[in,out] parameters The async text parameters.
    * @return true if the async text render request was successful, false otherwise.
    */
   bool UpdateAsyncRenderer(Ui::Text::AsyncTextParameters& parameters);
+
+  /**
+   * @brief Updates the text's async renderer and consumes the parameters.
+   *
+   * @param[in] parameters The async text parameters.
+   * @return true if the async text render request was successful, false otherwise.
+   */
+  bool UpdateAsyncRendererOwned(Ui::Text::AsyncTextParameters&& parameters);
+
+  /**
+   * @brief Prepares an async renderer request.
+   *
+   * @param[in] control The control that owns the renderer.
+   * @param[in,out] parameters The async text parameters to prepare.
+   * @return true if the request should be submitted, false otherwise.
+   */
+  bool PrepareAsyncRendererRequest(Actor& control, Ui::Text::AsyncTextParameters& parameters);
 
   /**
    * @brief Requests the async size computation.
    * @param[in] parameters The async text parameters.
    */
   void RequestAsyncSizeComputation(Ui::Text::AsyncTextParameters& parameters);
+
+  /**
+   * @brief Requests async size computation and consumes the parameters.
+   *
+   * @param[in] parameters The async text parameters.
+   */
+  void RequestAsyncSizeComputationOwned(Ui::Text::AsyncTextParameters&& parameters);
+
+  /**
+   * @brief Prepares an async size computation request.
+   *
+   * @param[in] parameters The async text parameters to prepare.
+   * @return true if the request should be submitted, false otherwise.
+   */
+  bool PrepareAsyncSizeComputationRequest(Ui::Text::AsyncTextParameters& parameters);
+
+  /**
+   * @brief Stores an async size computation task ID.
+   *
+   * @param[in] requestType The request type used to select the task ID member.
+   * @param[in] taskId The task ID to store.
+   */
+  void StoreAsyncSizeTaskId(Ui::Integration::Text::Async::RequestType requestType, uint32_t taskId);
 
   /**
    * @brief Set the control's async text interface.
@@ -591,11 +664,15 @@ private:
    * @param[in] fadeDurationRatio The authored automatic sentinel or normalized fade duration.
    * @param[in] progressPropertyIndex The Label scene progress property index.
    * @param[in] revision The current reveal configuration revision.
+   * @param[in] sequence The internal reveal sequence grouping.
+   * @param[in] sequenceStaggerRatio The sequence stagger ratio.
    */
-  void ConfigureTextReveal(Ui::Text::Internal::Reveal::Unit unit,
-                           float                            fadeDurationRatio,
-                           Property::Index                  progressPropertyIndex,
-                           uint64_t                         revision);
+  void ConfigureTextReveal(Ui::Text::Internal::Reveal::Unit     unit,
+                           float                                fadeDurationRatio,
+                           Property::Index                      progressPropertyIndex,
+                           uint64_t                             revision,
+                           Ui::Text::Internal::Reveal::Sequence sequence             = Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT,
+                           float                                sequenceStaggerRatio = 0.0f);
 
   /**
    * @brief Removes all constraints that bind reveal progress to renderers.
@@ -620,7 +697,23 @@ private:
    *
    * @return The plan indexed by source glyph before final elision projection.
    */
-  Ui::Text::Internal::Reveal::Plan BuildTextRevealSourcePlan();
+  Ui::Text::Internal::Reveal::Plan BuildTextRevealSourcePlan(bool includeImageReplacements = false);
+
+  /**
+   * @brief Builds a final shared plan and extracts atomic ImageSpan timing.
+   *
+   * An incomplete replacement projection falls back to the established
+   * text-only plan so metadata never contains an unpublished timing gap.
+   */
+  Ui::Text::Internal::Reveal::Plan BuildFinalTextRevealPlan(
+    Vector<Ui::Text::ReplacementRevealTiming>& replacementTimings,
+    uint64_t&                                  replacementSourceRevision);
+
+  /**
+   * @brief Publishes or clears ImageSpan Reveal constraints on the owner.
+   */
+  void PublishReplacementRevealTimings(const Vector<Ui::Text::ReplacementRevealTiming>& timings,
+                                       uint64_t                                         sourceRevision);
 
   /**
    * @brief Removes the text's renderer.
@@ -804,6 +897,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif /* DALI_UI_INTERNAL_TEXT_VISUAL_H */

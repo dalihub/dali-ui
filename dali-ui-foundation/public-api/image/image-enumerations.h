@@ -21,7 +21,7 @@
 #include <dali/public-api/adaptor-framework/image-options.h>
 #include <cstdint>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -41,12 +41,12 @@ enum class FittingMode : uint8_t
 };
 
 /**
- * @brief MaskingType configures the alpha clipping structure of the image.
+ * @brief MaskingPolicy controls when the alpha mask is applied to the image.
  */
-enum class MaskingType : uint8_t
+enum class MaskingPolicy : uint8_t
 {
-  MASKING_ON_RENDERING, ///< Masking is applied to rendering phase.
-  MASKING_ON_LOADING    ///< Masking is applied to loading phase.
+  ON_RENDERING, ///< The mask is combined with the image while it is drawn.
+  ON_LOADING    ///< The mask is applied to the image's pixel data while it loads.
 };
 
 /**
@@ -91,4 +91,4 @@ enum class ReleasePolicy : uint8_t
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -31,7 +31,7 @@
 
 using AdaptorImpl = Dali::Internal::Adaptor::Adaptor;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class Window;
 
@@ -267,6 +267,11 @@ Dali::Layer Window::GetRootLayer() const
   return GetImplementation(*this).GetRootLayer();
 }
 
+Dali::Layer Window::GetOverlayLayer()
+{
+  return GetImplementation(*this).GetScene().GetOverlayLayer();
+}
+
 void Window::SetBackgroundColor(const Vector4& color)
 {
   GetImplementation(*this).SetBackgroundColor(color);
@@ -279,12 +284,14 @@ Vector4 Window::GetBackgroundColor() const
 
 void Window::Raise()
 {
+  GetImplementation(*this).mFocused = true;
   GetImplementation(*this).mFocusChangedSignal.Emit(*this, true);
   GetImplementation(*this).FocusChanged(true);
 }
 
 void Window::Lower()
 {
+  GetImplementation(*this).mFocused = false;
   GetImplementation(*this).mFocusChangedSignal.Emit(*this, false);
   GetImplementation(*this).FocusChanged(false);
 }
@@ -306,6 +313,11 @@ void Window::Hide()
 bool Window::IsVisible() const
 {
   return GetImplementation(*this).mVisible;
+}
+
+bool Window::IsFocused() const
+{
+  return GetImplementation(*this).mFocused;
 }
 
 FocusChangedSignalType& Window::FocusChangedSignal()
@@ -398,7 +410,7 @@ void EmitFramePresented(Dali::Window window)
 
 } // namespace Test
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 Dali::RenderTaskList Window::GetRenderTaskList()

@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -66,4 +66,4 @@ bool TextLoadObserver::DisconnectDestructionSignal()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

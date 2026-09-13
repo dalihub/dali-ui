@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -440,4 +440,4 @@ struct DALI_UI_API LayoutAnimatorContext
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

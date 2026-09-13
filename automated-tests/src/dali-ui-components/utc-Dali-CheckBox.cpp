@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-components/dali-ui-components.h>
+#include <limits>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
@@ -160,6 +161,108 @@ float PositionX(Dali::Actor actor)
   return actor.GetProperty<float>(Dali::Actor::Property::POSITION_X);
 }
 } // namespace
+
+int UtcDaliCheckBoxStyleMinimumValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetMinimumWidth(value), "minimum size must be finite and non-negative");
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetMinimumHeight(value), "minimum size must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliCheckBoxStylePaddingValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetPadding(Insets(value, 0.0f, 0.0f, 0.0f)), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetPadding(Insets(0.0f, value, 0.0f, 0.0f)), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetPadding(Insets(0.0f, 0.0f, value, 0.0f)), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetPadding(Insets(0.0f, 0.0f, 0.0f, value)), "padding must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliCheckBoxStyleIconDimensionValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetIconWidth(value), "icon dimension must be finite and non-negative");
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetIconHeight(value), "icon dimension must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliCheckBoxStyleGapValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetLabelGap(value), "label gap must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliCheckBoxStyleFontValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(CheckBoxStyle::Builder().SetFontSize(value), "font size must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliCheckBoxRuntimeNumericValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  CheckBox button = CheckBox::New();
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(button.SetFontSize(value), "font size must be finite and non-negative");
+    DALI_TEST_ASSERTION(button.SetIconWidth(value), "icon dimension must be finite and non-negative");
+    DALI_TEST_ASSERTION(button.SetIconHeight(value), "icon dimension must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliCheckBoxNumericBoundariesP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto style = CheckBoxStyle::Builder().SetMinimumWidth(0.0f).SetMinimumHeight(0.0f)
+                 .SetPadding(Insets(0.0f, 0.0f)).SetIconWidth(0.0f).SetIconHeight(0.0f)
+                 .SetLabelGap(0.0f).SetFontSize(0.0f).Build();
+  CheckBox button = CheckBox::New(style);
+  DALI_TEST_EQUALS(button.GetMinimumWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetMinimumHeight(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetPadding(), Insets(0.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetLabelGap(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetIconWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetIconHeight(), 0.0f, TEST_LOCATION);
+  button.SetIconWidth(0.0f);
+  button.SetIconHeight(0.0f);
+  button.SetFontSize(0.0f);
+  DALI_TEST_EQUALS(button.GetIconWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetIconHeight(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetFontSize(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
 
 int UtcDaliCheckBoxNewP(void)
 {

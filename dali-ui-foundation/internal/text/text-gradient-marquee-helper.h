@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -113,7 +113,8 @@ bool IsCompositionSupported(bool hasMultipleTextColors,
 
 Dali::Ui::Text::TextScrollerGradient CreateScrollerGradient(const Gradient::Style& style,
                                                             const Vector4&         bounds,
-                                                            const Vector2&         coordinateSize);
+                                                            const Vector2&         coordinateSize,
+                                                            bool                   useTextureCoordinates = false);
 
 void SetOverlayGradient(Dali::Ui::Text::TextScrollerGradient&       textGradient,
                         const Dali::Ui::Text::TextScrollerGradient& overlayGradient,
@@ -123,6 +124,6 @@ void SetOverlayGradient(Dali::Ui::Text::TextScrollerGradient&       textGradient
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_INTERNAL_TEXT_GRADIENT_MARQUEE_HELPER_H

@@ -15,6 +15,9 @@ SetPlaceholderUrl / GetPlaceholderUrl, GetLoadingStatus 동작을 확인한다.
 - 버튼 행 3: Set Placeholder / Clear Placeholder / Reload URL / Bad URL
 - 버튼 행 4: Remove View / Re-Add View
 
+[Reload URL]은 정상 URL로 되돌린 뒤 `Reload()`로 강제 리로드한다 — 이미 같은 URL이어도
+항상 리로드가 발생한다 (`SetResourceUrl()`은 같은 URL이면 아무 일도 하지 않는다).
+
 `ResourceReadySignal`은 **실패한 로드에도 발생한다** (실측 — 카운터만으로는 성공/실패를
 구분할 수 없고, `Load:` 필드가 그 구분을 준다).
 

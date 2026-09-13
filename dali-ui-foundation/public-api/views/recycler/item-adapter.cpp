@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -144,4 +144,4 @@ void ItemAdapter::RecycleViewHolder(ItemViewHolder& holder)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

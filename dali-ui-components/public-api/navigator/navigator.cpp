@@ -24,7 +24,7 @@
 // EXTERNAL INCLUDES
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -250,4 +250,4 @@ Navigator::Navigator(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

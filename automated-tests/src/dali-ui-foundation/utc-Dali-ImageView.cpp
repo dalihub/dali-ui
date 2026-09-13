@@ -81,6 +81,33 @@ int UtcDaliImageViewGetNaturalSizeP(void)
   END_TEST;
 }
 
+int UtcDaliImageViewMeasureExplicitSizeP(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New("test.jpg");
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+
+  const MeasuredSize measuredSize = view.Measure(400.0f, 300.0f);
+  DALI_TEST_EQUALS(measuredSize.width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measuredSize.height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewMeasureSingleExplicitDimensionP(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New("test.jpg");
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(32);
+  view.SetRequestedWidth(200.0f);
+
+  const MeasuredSize measuredSize = view.Measure(400.0f, 300.0f);
+  DALI_TEST_EQUALS(measuredSize.width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measuredSize.height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliImageViewNewWithImageUrlP(void)
 {
   UiTestApplication application;
@@ -300,13 +327,13 @@ int UtcDaliImageViewSetGetPreMultipliedAlphaP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
   // Default should be true
-  DALI_TEST_CHECK(view.IsPreMultipliedAlpha());
+  DALI_TEST_CHECK(view.IsPreMultiplyAlphaOnLoadEnabled());
 
-  view.SetPreMultipliedAlpha(false);
-  DALI_TEST_EQUALS(view.IsPreMultipliedAlpha(), false, TEST_LOCATION);
+  view.SetPreMultiplyAlphaOnLoadEnabled(false);
+  DALI_TEST_EQUALS(view.IsPreMultiplyAlphaOnLoadEnabled(), false, TEST_LOCATION);
 
-  view.SetPreMultipliedAlpha(true);
-  DALI_TEST_EQUALS(view.IsPreMultipliedAlpha(), true, TEST_LOCATION);
+  view.SetPreMultiplyAlphaOnLoadEnabled(true);
+  DALI_TEST_EQUALS(view.IsPreMultiplyAlphaOnLoadEnabled(), true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -327,8 +354,8 @@ int UtcDaliImageViewSetGetSynchronousLoadingP(void)
 int UtcDaliImageViewSetGetNPatchBorderP(void)
 {
   UiTestApplication application;
-  ImageView view   = ImageView::New();
-  Vector4   border = Vector4(10.0f, 10.0f, 10.0f, 10.0f);
+  ImageView    view   = ImageView::New();
+  Dali::Insets border = Dali::Insets(10.0f, 10.0f, 10.0f, 10.0f);
   view.SetNPatchBorder(border);
   DALI_TEST_EQUALS(view.GetNPatchBorder(), border, TEST_LOCATION);
   END_TEST;
@@ -446,7 +473,7 @@ int UtcDaliImageViewPropertyReleasePolicyP(void)
   END_TEST;
 }
 
-// AlphaMaskUrl / CropToMask / MaskingMode
+// AlphaMaskUrl / CropToMask / MaskingPolicy
 
 int UtcDaliImageViewSetGetAlphaMaskUrlP(void)
 {
@@ -471,10 +498,10 @@ int UtcDaliImageViewSetGetMaskingModeP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_LOADING, TEST_LOCATION);
-  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
+  view.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_LOADING);
+  DALI_TEST_EQUALS(view.GetMaskingPolicy(), Ui::Image::MaskingPolicy::ON_LOADING, TEST_LOCATION);
+  view.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_RENDERING);
+  DALI_TEST_EQUALS(view.GetMaskingPolicy(), Ui::Image::MaskingPolicy::ON_RENDERING, TEST_LOCATION);
   END_TEST;
 }
 
@@ -485,7 +512,7 @@ int UtcDaliImageViewSetGetImageLoadWithViewSizeP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.IsImageLoadWithViewSizeEnabled(), false, TEST_LOCATION);
-  view.SetImageLoadWithViewSize(true);
+  view.SetImageLoadWithViewSizeEnabled(true);
   DALI_TEST_EQUALS(view.IsImageLoadWithViewSizeEnabled(), true, TEST_LOCATION);
   END_TEST;
 }
@@ -497,7 +524,7 @@ int UtcDaliImageViewSetGetFastTrackUploadingP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.IsFastTrackUploadEnabled(), false, TEST_LOCATION);
-  view.SetFastTrackUpload(true);
+  view.SetFastTrackUploadEnabled(true);
   DALI_TEST_EQUALS(view.IsFastTrackUploadEnabled(), true, TEST_LOCATION);
   END_TEST;
 }
@@ -509,7 +536,7 @@ int UtcDaliImageViewSetGetOrientationCorrectionP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.IsOrientationCorrectionEnabled(), true, TEST_LOCATION);
-  view.SetOrientationCorrection(false);
+  view.SetOrientationCorrectionEnabled(false);
   DALI_TEST_EQUALS(view.IsOrientationCorrectionEnabled(), false, TEST_LOCATION);
   END_TEST;
 }
@@ -524,6 +551,24 @@ int UtcDaliImageViewGetLoadingStatusP(void)
   DALI_TEST_CHECK(status == Ui::Visual::ResourceStatus::PREPARING ||
                   status == Ui::Visual::ResourceStatus::READY ||
                   status == Ui::Visual::ResourceStatus::FAILED);
+  END_TEST;
+}
+
+// Lazy VisualData: with no URL, the ImageView registers no IMAGE visual, so its
+// VisualData context is never allocated. The status query must still answer PREPARING --
+// the same answer the allocated-but-empty context gave before the context became lazy
+// (VisualData's own FindVisual-miss fallback), not the READY that a visuals-DISABLED view
+// gets. ImageViewImpl::UpdatePlaceholderVisual is the consumer that makes the difference
+// load-bearing: it suppresses the placeholder only on READY, so a READY answer here would
+// silently drop placeholders for images that have not loaded.
+int UtcDaliImageViewNoUrlLoadingStatusPreparingP(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New();
+
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLoadingStatus()),
+                   static_cast<int>(Ui::Visual::ResourceStatus::PREPARING),
+                   TEST_LOCATION);
   END_TEST;
 }
 

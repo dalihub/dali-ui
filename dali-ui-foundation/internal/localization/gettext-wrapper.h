@@ -19,10 +19,11 @@
 
 #if !defined(_WIN32) || defined(DALI_UI_HAS_GETTEXT)
 #define DALI_UI_GETTEXT_AVAILABLE
+#include <dali/public-api/common/dali-namespace.h>
 #include <libintl.h>
 #endif
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -77,7 +78,7 @@ inline const char* GetPluralText(const char*   domain,
 } // namespace Localization
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_UI_GETTEXT_AVAILABLE
 

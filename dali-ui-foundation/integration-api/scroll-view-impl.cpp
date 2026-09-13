@@ -42,7 +42,7 @@
 #include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -2413,4 +2413,4 @@ void ScrollViewImpl::OnContentPositionChanged(PropertyNotification source)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

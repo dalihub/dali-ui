@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/public-api/object/base-handle.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -88,4 +88,4 @@ protected:
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/types/unit.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -57,4 +57,4 @@ float operator"" _sdp(long double v)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

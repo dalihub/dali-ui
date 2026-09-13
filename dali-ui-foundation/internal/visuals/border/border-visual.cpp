@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,16 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -59,8 +60,6 @@ BorderVisual::BorderVisual(VisualFactoryCache& factoryCache)
   mBorderSizeIndex(Property::INVALID_INDEX),
   mAntiAliasingEnabled(false)
 {
-  // Enable the pre-multiplied alpha
-  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 BorderVisual::~BorderVisual()
@@ -80,11 +79,11 @@ void BorderVisual::DoSetProperties(const Property::Map& propertyMap)
     {
       if(keyValue.first == BORDER_SIZE_NAME)
       {
-        DoSetProperty(Ui::BorderVisualPropertyIndex::BORDER_SIZE, keyValue.second);
+        DoSetProperty(Ui::Integration::BorderVisual::Property::BORDER_SIZE, keyValue.second);
       }
       else if(keyValue.first == ANTI_ALIASING)
       {
-        DoSetProperty(Ui::BorderVisualPropertyIndex::ANTI_ALIASING, keyValue.second);
+        DoSetProperty(Ui::Integration::BorderVisual::Property::ANTI_ALIASING, keyValue.second);
       }
     }
   }
@@ -94,7 +93,7 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
 {
   switch(index)
   {
-    case Ui::BorderVisualPropertyIndex::BORDER_SIZE:
+    case Ui::Integration::BorderVisual::Property::BORDER_SIZE:
     {
       if(value.Get(mBorderSize))
       {
@@ -109,7 +108,7 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
       }
       break;
     }
-    case Ui::BorderVisualPropertyIndex::ANTI_ALIASING:
+    case Ui::Integration::BorderVisual::Property::ANTI_ALIASING:
     {
       if(value.Get(mAntiAliasingEnabled))
       {
@@ -143,9 +142,9 @@ void BorderVisual::DoSetOnScene(Actor& actor)
 void BorderVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::BORDER);
-  map.Insert(Ui::BorderVisualPropertyIndex::BORDER_SIZE, mBorderSize);
-  map.Insert(Ui::BorderVisualPropertyIndex::ANTI_ALIASING, mAntiAliasingEnabled);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::BORDER);
+  map.Insert(Ui::Integration::BorderVisual::Property::BORDER_SIZE, mBorderSize);
+  map.Insert(Ui::Integration::BorderVisual::Property::ANTI_ALIASING, mAntiAliasingEnabled);
 }
 
 void BorderVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -157,7 +156,7 @@ void BorderVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer);
   }
 }
 
@@ -174,7 +173,7 @@ void BorderVisual::OnInitialize()
   mImpl->mRenderer = VisualRenderer::New(geometry, shader);
   mImpl->mRenderer.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT);
 
-  mBorderSizeIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::BorderVisualPropertyIndex::BORDER_SIZE, BORDER_SIZE_NAME, mBorderSize);
+  mBorderSizeIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::Integration::BorderVisual::Property::BORDER_SIZE, BORDER_SIZE_NAME, mBorderSize);
 
   if(mAntiAliasingEnabled)
   {
@@ -182,7 +181,7 @@ void BorderVisual::OnInitialize()
   }
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 }
 
 void BorderVisual::UpdateShader()
@@ -298,4 +297,4 @@ Geometry BorderVisual::CreateBorderGeometry()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

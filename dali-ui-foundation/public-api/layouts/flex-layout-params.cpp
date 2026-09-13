@@ -25,7 +25,7 @@
 #define DALI_ASSERT_VALID_LAYOUT_PARAMS(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use moved-from FlexLayoutParams")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -151,6 +151,6 @@ FlexAlign FlexLayoutParams::GetAlignSelf() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_LAYOUT_PARAMS

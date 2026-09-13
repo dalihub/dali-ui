@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/property-index-ranges.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -49,6 +49,6 @@ enum ActionRanges
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_ACTION_INDEX_RANGES_H

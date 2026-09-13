@@ -24,7 +24,7 @@
 #define DALI_ASSERT_VALID_FONT_VARIATION_AXIS(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from FontVariation::Axis object")
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -140,6 +140,6 @@ float Axis::GetValue() const
 } // namespace FontVariation
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_VALID_FONT_VARIATION_AXIS

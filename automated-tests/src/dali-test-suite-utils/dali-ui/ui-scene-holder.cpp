@@ -33,7 +33,7 @@
 
 using AdaptorImpl = Dali::Internal::Adaptor::Adaptor;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -317,6 +317,13 @@ void SceneHolder::Remove(Actor actor)
 Dali::Layer SceneHolder::GetRootLayer() const
 {
   return GetImplementation(*this).GetRootLayer();
+}
+
+Dali::Any SceneHolder::GetNativeHandle() const
+{
+  // Desktop UTCs have no X11 window. Text inputs query this on scene connection;
+  // falling through to the real adaptor would access a mock with a different ABI.
+  return Dali::Any(0u);
 }
 
 void SceneHolder::SetBackgroundColor(Vector4 color)

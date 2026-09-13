@@ -17,7 +17,7 @@
 
 #include <dali-ui-foundation/public-api/views/recycler/item-decoration.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -33,4 +33,4 @@ Dali::Signal<void(ItemDecoration&)>& ItemDecoration::DestroyedSignal()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

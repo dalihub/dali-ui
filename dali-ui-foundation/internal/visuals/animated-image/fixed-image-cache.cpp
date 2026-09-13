@@ -23,7 +23,7 @@
 
 #include <locale>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -247,4 +247,4 @@ void FixedImageCache::LoadComplete(bool loadSuccess, TextureInformation textureI
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

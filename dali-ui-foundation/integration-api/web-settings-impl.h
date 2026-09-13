@@ -23,7 +23,7 @@
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -75,4 +75,4 @@ inline const WebSettingsImpl& GetImpl(const WebSettings& settings)
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -23,7 +23,7 @@
 #include <atomic>
 #include <limits>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -48,4 +48,4 @@ uint32_t AllocateUiStyleKeyValue()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

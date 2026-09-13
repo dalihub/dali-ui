@@ -18,9 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -49,6 +50,6 @@ void ApplyImageVisualShaderDebugScriptCode(std::string& vertexShader, std::strin
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_IMAGE_VISUAL_SHADER_DEBUG_H

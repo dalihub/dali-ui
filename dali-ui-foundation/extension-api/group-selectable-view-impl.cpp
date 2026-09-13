@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -99,4 +99,4 @@ GroupSelectableViewImpl::~GroupSelectableViewImpl()
 } // namespace Extension
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

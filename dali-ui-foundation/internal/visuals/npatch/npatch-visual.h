@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/common/extents.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/rendering/geometry.h>
@@ -27,13 +27,13 @@
 #include <dali/public-api/rendering/shader.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-upload-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -226,7 +226,7 @@ private:
   Ui::Visual::ResourceStatus   mAuxiliaryResourceStatus; ///< resource status for auxiliary mask image
   Property::Index              mPreMultipliedAlphaIndex; ///< Index of premultipliedAlpha uniform. Only be used for auxiliary image.
   bool                         mBorderOnly;              ///< if only border is desired
-  Extents                      mBorder;                  ///< The size of the border
+  Insets                       mBorder;                  ///< The size of the border
   float                        mAuxiliaryImageAlpha;     ///< The alpha value for the auxiliary image only
   Ui::Image::ReleasePolicy     mReleasePolicy;           ///< The release policy to determine when an image should no longer be cached.
   Dali::Ui::Image::FittingMode mFittingMode;             ///< How the contents should fit the view
@@ -236,6 +236,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_N_PATCH_VISUAL_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::GetStdString;
 using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace
 {
@@ -115,6 +115,8 @@ MeshVisual::MeshVisual(VisualFactoryCache& factoryCache)
   mUseMipmapping(true),
   mUseSoftNormals(true)
 {
+  // This visual's shader emits straight (non pre-multiplied) alpha, so opt out of the default.
+  mImpl->mFlags &= ~Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 MeshVisual::~MeshVisual()
@@ -234,7 +236,7 @@ void MeshVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer);
   }
 }
 
@@ -257,7 +259,7 @@ void MeshVisual::DoSetOnScene(Actor& actor)
 void MeshVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::MESH);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::MESH);
   map.Insert(Ui::Integration::MeshVisual::Property::OBJECT_URL, ToPropertyValue(mObjectUrl));
   map.Insert(Ui::Integration::MeshVisual::Property::MATERIAL_URL, ToPropertyValue(mMaterialUrl));
   map.Insert(Ui::Integration::MeshVisual::Property::TEXTURES_PATH, ToPropertyValue(mTexturesPath));
@@ -313,7 +315,7 @@ void MeshVisual::OnInitialize()
   mImpl->mRenderer.SetProperty(Renderer::Property::DEPTH_TEST_MODE, DepthTestMode::ON);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 }
 
 void MeshVisual::SupplyEmptyGeometry()
@@ -522,4 +524,4 @@ bool MeshVisual::LoadTextures()
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

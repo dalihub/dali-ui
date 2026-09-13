@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 std::pair<std::string, bool> LabelAccessible::GetNameRaw() const
 {
@@ -44,4 +44,4 @@ Ui::Text::ControllerPtr LabelAccessible::GetTextController() const
   return impl.mController;
 }
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration

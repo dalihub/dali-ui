@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/integration-api/view-accessibility.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
@@ -40,13 +41,13 @@
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 // Verify CornerRadiusPolicy values stay in sync with Ui::Integration::Visual::Policy::Type.
-static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::RELATIVE) == Dali::Ui::Visual::Transform::Policy::RELATIVE);
-static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::ABSOLUTE) == Dali::Ui::Visual::Transform::Policy::ABSOLUTE);
+static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::RELATIVE) == Dali::Ui::Integration::Visual::Transform::Policy::RELATIVE);
+static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::ABSOLUTE) == Dali::Ui::Integration::Visual::Transform::Policy::ABSOLUTE);
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -613,6 +614,26 @@ LayoutTransition ViewImpl::GetLayoutTransition() const
   return mImpl->GetLayoutTransition();
 }
 
+void ViewImpl::SetSelfLayoutTransition(LayoutTransition transition)
+{
+  mImpl->SetSelfLayoutTransition(transition);
+}
+
+LayoutTransition ViewImpl::GetSelfLayoutTransition() const
+{
+  return mImpl->GetSelfLayoutTransition();
+}
+
+void ViewImpl::SetLayoutTransitionMode(LayoutTransitionMode mode)
+{
+  mImpl->SetLayoutTransitionMode(mode);
+}
+
+LayoutTransitionMode ViewImpl::GetLayoutTransitionMode() const
+{
+  return mImpl->GetLayoutTransitionMode();
+}
+
 LayoutRect ViewImpl::GetArrangedBounds() const
 {
   return mImpl->GetArrangedBounds();
@@ -721,9 +742,9 @@ bool ViewImpl::TryGetLayoutParams(StackLayoutParams& params) const
 // VisualBase API
 // =============================================================================
 
-bool ViewImpl::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)
+bool ViewImpl::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer)
 {
-  return mImpl->AddVisualObject(visualBase, static_cast<Dali::Ui::Integration::Visual::InternalContainerRangeType>(containerRangeType));
+  return mImpl->AddVisualObject(visualBase, depthLayer);
 }
 
 void ViewImpl::RemoveVisual(Dali::Ui::VisualBase visualBase)
@@ -731,14 +752,14 @@ void ViewImpl::RemoveVisual(Dali::Ui::VisualBase visualBase)
   mImpl->RemoveVisualObject(visualBase);
 }
 
-uint32_t ViewImpl::GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const
+uint32_t ViewImpl::GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const
 {
-  return mImpl->GetVisualObjectCount(static_cast<Dali::Ui::Integration::Visual::InternalContainerRangeType>(containerRangeType));
+  return mImpl->GetVisualObjectCount(depthLayer);
 }
 
-Dali::Ui::VisualBase ViewImpl::GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const
+Dali::Ui::VisualBase ViewImpl::GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const
 {
-  return mImpl->GetVisualObjectAt(static_cast<Dali::Ui::Integration::Visual::InternalContainerRangeType>(containerRangeType), siblingOrder);
+  return mImpl->GetVisualObjectAt(depthLayer, siblingOrder);
 }
 
 // =============================================================================
@@ -838,10 +859,18 @@ void ViewImpl::Initialize()
   // was not there before. It also still runs before any reorder of a tracked child is
   // possible, including for children a subclass adds from its own OnInitialize().
 
-  if(mImpl->AreVisualsEnabled())
-  {
-    mImpl->InitializeVisualData();
-  }
+  // No VisualData here. The context is allocated lazily, by the first visual mutation
+  // that actually needs it (EnsureVisualData), because every default View was paying a
+  // heap allocation plus the context's own construction for a facility most views never
+  // touch -- no background, no shadow, no borderline, no corner radius -- and in a large
+  // tree those views are the bulk of the tree.
+  //
+  // DISABLE_VISUALS still means never-allocated, exactly as before; what widened is that
+  // an ENABLED view is now null too until it first asks for a visual. Every read path
+  // already answers a null context and an empty one identically (no visual found, count
+  // 0, resources ready), so the widening is invisible to them -- the single place where
+  // the two would have parted, GetVisualResourceStatus's fallback, now branches on
+  // AreVisualsEnabled() to keep each case's original answer.
 
   Integration::ViewAccessibility::Register();
 
@@ -1010,7 +1039,12 @@ Ui::View::FocusChangedSignalType& ViewImpl::FocusChangedSignal()
 
 Dali::Texture ViewImpl::GetOffScreenRenderingOutput() const
 {
-  return mImpl->GetOffScreenRenderingOutput();
+  return GetOffscreenRenderingOutput();
+}
+
+Dali::Texture ViewImpl::GetOffscreenRenderingOutput() const
+{
+  return mImpl->GetOffscreenRenderingOutput();
 }
 
 void ViewImpl::OnSceneDisconnection()
@@ -1107,4 +1141,4 @@ void AllowToAddActorToChildEnd(Ui::View view)
 } // namespace View
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

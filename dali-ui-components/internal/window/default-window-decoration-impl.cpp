@@ -20,7 +20,7 @@
 
 #include <algorithm>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace Internal
 {
@@ -426,4 +426,4 @@ Dali::Ui::View DefaultWindowDecorationImpl::GetMoveRegion() const
 }
 
 } // namespace Internal
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

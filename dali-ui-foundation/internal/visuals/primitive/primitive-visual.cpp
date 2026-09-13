@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,11 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToDaliStringView;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -108,6 +108,9 @@ PrimitiveVisual::PrimitiveVisual(VisualFactoryCache& factoryCache)
   mPrimitiveType(Ui::Integration::PrimitiveVisual::Shape::SPHERE)
 {
   mImpl->mMixColor = DEFAULT_COLOR;
+
+  // This visual's shader emits straight (non pre-multiplied) alpha, so opt out of the default.
+  mImpl->mFlags &= ~Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 PrimitiveVisual::~PrimitiveVisual()
@@ -128,7 +131,7 @@ void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
   }
 
   // By virtue of DoSetProperties being called last, this will override
-  // anything set by Ui::VisualBasePropertyIndex::MIX_COLOR
+  // anything set by Ui::Integration::Visual::Property::MIX_COLOR
   Property::Value* colorValue = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::MIX_COLOR, MIX_COLOR);
   if(colorValue)
   {
@@ -336,7 +339,7 @@ void PrimitiveVisual::DoSetOnScene(Actor& actor)
 void PrimitiveVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::PRIMITIVE);
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::PRIMITIVE);
   map.Insert(Ui::Integration::PrimitiveVisual::Property::MIX_COLOR, mImpl->mMixColor);
   map.Insert(Ui::Integration::PrimitiveVisual::Property::SHAPE, mPrimitiveType);
   map.Insert(Ui::Integration::PrimitiveVisual::Property::SLICES, mSlices);
@@ -360,7 +363,7 @@ void PrimitiveVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer);
   }
 }
 
@@ -378,7 +381,7 @@ void PrimitiveVisual::OnInitialize()
 
   mImpl->mRenderer = VisualRenderer::New(mGeometry, mShader);
   mImpl->mRenderer.SetProperty(Renderer::Property::FACE_CULLING_MODE, FaceCullingMode::BACK);
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer);
 }
 
 void PrimitiveVisual::UpdateShaderUniforms(Vector2 windowSize)
@@ -1448,4 +1451,4 @@ void PrimitiveVisual::FormBevelledCubeTriangles(Vector<unsigned short>& indices)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

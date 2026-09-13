@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -83,4 +83,4 @@ bool ApplyBevelStyle(ControllerPtr controller, const Bevel& bevel);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -17,7 +17,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-mesh-factory.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -151,4 +151,4 @@ void AppendMesh(Ui::AtlasManager::Mesh2D& first, const Ui::AtlasManager::Mesh2D&
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

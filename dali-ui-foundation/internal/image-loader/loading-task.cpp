@@ -35,7 +35,7 @@
 #include <thread>
 #endif
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -307,4 +307,4 @@ void LoadingTask::SetTextureId(TextureManagerType::TextureId id)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include <locale>
 
 // INTERNAL
+#include <dali-ui-foundation/integration-api/ui-property-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
@@ -34,14 +35,17 @@
 #include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visuals-container-impl.h>
+#include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
+// Half the gap between two adjacent DepthIndex::Ranges anchors, so that a layer splits evenly into
+// a View half and an application half. See VisualBaseImpl::GetDepthIndex for what each half is for.
 constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::Integration::DepthIndex::Ranges::CONTENT - Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND) / 2;
 
 Vector4 ToVector4(const Insets& insets)
@@ -53,14 +57,19 @@ Vector4 ToVector4(const Insets& insets)
 Debug::Filter* gVisualBaseLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VISUAL_BASE");
 #endif
 
+// VISUAL_READ_ONLY is the highest range ui-foundation reserves, so bounding it bounds them all.
+static_assert(static_cast<int>(Dali::Ui::Integration::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_END_INDEX) <=
+                static_cast<int>(Dali::Ui::PropertyRanges::UI_FOUNDATION_PROPERTY_MAX),
+              "ui-foundation property indices must stay within UI_FOUNDATION_PROPERTY_MAX");
+
 inline bool IsMutableVisualPropertyIndex(Dali::Property::Index index)
 {
-  return (index >= Dali::Ui::PropertyRanges::VISUAL_MUTABLE_PROPERTY_START_INDEX && index <= Dali::Ui::PropertyRanges::VISUAL_MUTABLE_PROPERTY_END_INDEX);
+  return (index >= Dali::Ui::Integration::PropertyRanges::VISUAL_MUTABLE_PROPERTY_START_INDEX && index <= Dali::Ui::Integration::PropertyRanges::VISUAL_MUTABLE_PROPERTY_END_INDEX);
 }
 
 inline bool IsReadOnlyVisualPropertyIndex(Dali::Property::Index index)
 {
-  return (index >= Dali::Ui::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_START_INDEX && index <= Dali::Ui::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_END_INDEX);
+  return (index >= Dali::Ui::Integration::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_START_INDEX && index <= Dali::Ui::Integration::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_END_INDEX);
 }
 
 inline Vector4 ConvertProportionFlagsToOffsetSizeMode(Dali::Ui::Visual::Transform::ProportionFlags flags)
@@ -145,9 +154,9 @@ Dali::Ui::View VisualBaseImpl::GetOwner() const
   return result;
 }
 
-Dali::Ui::Integration::Visual::InternalContainerRangeType VisualBaseImpl::GetInternalContainerRangeType() const
+Dali::Ui::Visual::DepthLayer VisualBaseImpl::GetDepthLayer() const
 {
-  return mRangeType;
+  return mDepthLayer;
 }
 
 void VisualBaseImpl::DetachFromContainer()
@@ -308,7 +317,7 @@ Dali::Property::Value VisualBaseImpl::GetProperty(Dali::Property::Index index) c
   // Some properties has non-empty default value.
   switch(index)
   {
-    case Ui::VisualBasePropertyIndex::MIX_COLOR:
+    case Ui::Integration::Visual::Property::MIX_COLOR:
     {
       return mCachedVisualPropertyMap[index] = Color::WHITE;
     }
@@ -344,7 +353,7 @@ UiColor VisualBaseImpl::GetColor() const
   {
     return outColor;
   }
-  return GetProperty(Dali::Ui::VisualBasePropertyIndex::MIX_COLOR).Get<Vector4>();
+  return GetProperty(Dali::Ui::Integration::Visual::Property::MIX_COLOR).Get<Vector4>();
 }
 
 void VisualBaseImpl::SetColor(const UiColor& color)
@@ -429,12 +438,12 @@ void VisualBaseImpl::SetHeight(float height)
   }
 }
 
-Dali::Ui::Visual::Transform::ProportionFlags VisualBaseImpl::GetProportionFlags() const
+Dali::Ui::Visual::Transform::ProportionFlags VisualBaseImpl::GetTransformProportionFlags() const
 {
   return ConvertOffsetSizeModeToProportionFlags(mTransform ? mTransform->mOffsetSizeMode : Vector4::ZERO);
 }
 
-void VisualBaseImpl::SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags)
+void VisualBaseImpl::SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags)
 {
   if(mTransform || flags != Dali::Ui::Visual::Transform::ProportionFlags::ALL)
   {
@@ -487,14 +496,14 @@ void VisualBaseImpl::SetExtraHeight(float extraHeight)
   }
 }
 
-Align::Type VisualBaseImpl::GetOrigin() const
+VisualOrigin VisualBaseImpl::GetOrigin() const
 {
-  return mTransform ? mTransform->mOrigin : Align::TOP_BEGIN;
+  return mTransform ? mTransform->mOrigin : VisualOrigin::TOP_LEFT;
 }
 
-void VisualBaseImpl::SetOrigin(Align::Type origin)
+void VisualBaseImpl::SetOrigin(VisualOrigin origin)
 {
-  if(mTransform || origin != Align::TOP_BEGIN)
+  if(mTransform || origin != VisualOrigin::TOP_LEFT)
   {
     if(!mTransform || mTransform->mOrigin != origin)
     {
@@ -506,14 +515,14 @@ void VisualBaseImpl::SetOrigin(Align::Type origin)
   }
 }
 
-Align::Type VisualBaseImpl::GetPivot() const
+VisualPivot VisualBaseImpl::GetPivot() const
 {
-  return mTransform ? mTransform->mPivot : Align::TOP_BEGIN;
+  return mTransform ? mTransform->mPivot : VisualPivot::TOP_LEFT;
 }
 
-void VisualBaseImpl::SetPivot(Align::Type pivot)
+void VisualBaseImpl::SetPivot(VisualPivot pivot)
 {
-  if(mTransform || pivot != Align::TOP_BEGIN)
+  if(mTransform || pivot != VisualPivot::TOP_LEFT)
   {
     if(!mTransform || mTransform->mPivot != pivot)
     {
@@ -655,9 +664,30 @@ Dali::Property VisualBaseImpl::GetPropertyObject(Dali::Property::Key visualPrope
   return Dali::Property(handle, Property::INVALID_INDEX);
 }
 
+bool VisualBaseImpl::HasCachedProperty(Dali::Property::Index index) const
+{
+  if(mPropertyUpdatedStatus == PropertyUpdatedStatus::MUTABLE_PROPERTY_CHANGED)
+  {
+    if(mUpdatedMutableVisualProperties.Find(index))
+    {
+      return true;
+    }
+  }
+
+  // GetProperty() stores an empty value for a property that has no result, so an entry
+  // does not imply a value.
+  const auto* valuePtr = mCachedVisualPropertyMap.Find(index);
+  return valuePtr && valuePtr->GetType() != Property::NONE;
+}
+
 void VisualBaseImpl::RemoveCache(Dali::Property::Index index) const
 {
   mCachedVisualPropertyMap.Remove(index);
+
+  // The property could have been set during the current frame and be waiting in the
+  // pending mutable updates. GetProperty() queries that map first, and UpdateProperty()
+  // sends it to the visual, so it has to be dropped here as well.
+  mUpdatedMutableVisualProperties.Remove(index);
 }
 
 void VisualBaseImpl::UpdateProperty()
@@ -681,8 +711,8 @@ Dali::Ui::Integration::VisualsContainer VisualBaseImpl::GetContainer() const
 
 void VisualBaseImpl::AttachToContainerInternal(Dali::Ui::Integration::VisualsContainer container)
 {
-  mContainer = WeakHandle(container);
-  mRangeType = container.GetContainerRangeType();
+  mContainer  = WeakHandle(container);
+  mDepthLayer = container.GetDepthLayer();
 
   // Request to create visuals if we never create visuals before.
   if(DALI_UNLIKELY(!mVisual))
@@ -698,7 +728,7 @@ void VisualBaseImpl::AttachToContainerInternal(Dali::Ui::Integration::VisualsCon
 void VisualBaseImpl::DetachFromContainerInternal()
 {
   mContainer.Reset();
-  mRangeType        = Dali::Ui::Integration::Visual::InternalContainerRangeType::INVALID;
+  mDepthLayer       = Dali::Ui::Visual::DepthLayer::NONE;
   mSiblingOrder     = 0u;
   mVisualPropertyId = INVALID_VISUAL_PROPERTY_ID;
 }
@@ -713,67 +743,50 @@ void VisualBaseImpl::SetSiblingOrderInternal(uint32_t siblingOrder)
   }
 }
 
+// A layer's depth budget is split in two. The lower half, starting at the anchor itself, belongs to
+// the View's own visuals; the upper half, starting at anchor + MAXIMUM_VISUAL_OBJECTS_COUNT, holds
+// the visuals an application attached. Keeping the halves apart is what makes an application's
+// sibling orders independent of the View's own visuals, which appear and disappear at runtime (a
+// shadow being toggled, a placeholder shown only while an image loads).
+//
+// TODO : The View's own visuals do not use containers yet. They are still registered directly with a
+// fixed depth index; grep for RegisterVisual callers passing DepthIndex::Ranges values. When they
+// move onto containers they belong in the LOWER half. Express which half a visual goes to with an
+// internal-only owner parameter, NOT by adding values to Dali::Ui::Visual::DepthLayer -- that enum
+// names layers only, and a second parallel range enum is what this code carried before. Two known
+// obstacles: VisualBaseImpl builds its own Visual::Base from a VisualType, so an existing
+// Integration::Visual::Base cannot be wrapped; and INNER_SHADOW (DECORATION - 1) and BORDERLINE
+// (FOREGROUND_EFFECT - 1) sit below their anchor where no container reaches, while tying with the
+// top of the application half.
 int32_t VisualBaseImpl::GetDepthIndex() const
 {
   int32_t baseDepthIndex = 0;
-  switch(mRangeType)
+  switch(mDepthLayer)
   {
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::UNDER_BACKGROUND_EFFECT:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::MINIMUM_DEPTH_INDEX;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND:
+    case Dali::Ui::Visual::DepthLayer::BACKGROUND_EFFECT:
     {
       baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT:
+    case Dali::Ui::Visual::DepthLayer::BACKGROUND:
     default:
     {
       baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_CONTENT_AND_DECORATION:
+    case Dali::Ui::Visual::DepthLayer::CONTENT:
     {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::CONTENT + MAXIMUM_VISUAL_OBJECTS_COUNT;
+      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::CONTENT + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT:
+    case Dali::Ui::Visual::DepthLayer::DECORATION:
     {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::DECORATION + MAXIMUM_VISUAL_OBJECTS_COUNT;
+      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::DECORATION + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::OVER_FOREGROUND_EFFECT:
+    case Dali::Ui::Visual::DepthLayer::FOREGROUND_EFFECT:
     {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT + MAXIMUM_VISUAL_OBJECTS_COUNT;
-      break;
-    }
-
-    // Internal container cases
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BACKGROUND_EFFECT:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::BACKGROUND:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::CONTENT:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::CONTENT;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::DECORATION:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::DECORATION;
-      break;
-    }
-    case Dali::Ui::Integration::Visual::InternalContainerRangeType::FOREGROUND_EFFECT:
-    {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT;
+      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
   }
@@ -782,7 +795,7 @@ int32_t VisualBaseImpl::GetDepthIndex() const
 
 void VisualBaseImpl::SetColorInternal(const Vector4& color)
 {
-  SetProperty(Dali::Ui::VisualBasePropertyIndex::MIX_COLOR, color);
+  SetProperty(Dali::Ui::Integration::Visual::Property::MIX_COLOR, color);
 }
 
 void VisualBaseImpl::SetBorderlineColorInternal(const Vector4& borderlineColor)
@@ -799,7 +812,7 @@ void VisualBaseImpl::ApplyTransfromToPropertyMap()
     Property::Map transformProperties;
     mTransform->GetPropertyMap(transformProperties);
 
-    SetProperty(Dali::Ui::VisualBasePropertyIndex::TRANSFORM, transformProperties);
+    SetProperty(Dali::Ui::Integration::Visual::Property::TRANSFORM, transformProperties);
   }
 }
 
@@ -932,7 +945,7 @@ VisualBaseImpl::VisualBaseImpl(Dali::Ui::VisualType type)
 : mContainer(),
   mVisualType(type),
   mName(),
-  mCachedVisualPropertyMap(Dali::CreatePropertyMap({{Dali::Ui::VisualBasePropertyIndex::TYPE, mVisualType}, {Dali::Ui::VisualBasePropertyIndex::MIX_COLOR, Color::WHITE}})),
+  mCachedVisualPropertyMap(Dali::CreatePropertyMap({{Dali::Ui::Integration::Visual::Property::TYPE, mVisualType}, {Dali::Ui::Integration::Visual::Property::MIX_COLOR, Color::WHITE}})),
   mUpdatedMutableVisualProperties(),
   mTransform(nullptr),
   mVisual(),
@@ -974,4 +987,4 @@ VisualBaseImpl::~VisualBaseImpl()
   }
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

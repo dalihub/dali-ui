@@ -26,7 +26,7 @@
 #include <dali/devel-api/text-abstraction/emoji-helper.h>
 #include <dali/devel-api/text-abstraction/script.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -103,6 +103,6 @@ Character GetVariationSelectorByScript(const TextAbstraction::Script& script);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_EMOJI_HELPER_H

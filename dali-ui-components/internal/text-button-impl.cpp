@@ -16,6 +16,7 @@
  */
 
 // CLASS HEADER
+#include <dali-ui-components/internal/styles/style-validation.h>
 #include <dali-ui-components/internal/text-button-impl.h>
 
 // EXTERNAL INCLUDES
@@ -27,7 +28,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -119,6 +120,7 @@ UiColor TextButtonImpl::GetTextColor() const
 
 void TextButtonImpl::SetFontSize(float fontSize)
 {
+  DALI_ASSERT_ALWAYS(StyleValidation::IsNonNegative(fontSize) && "TextButton font size must be finite and non-negative");
   mLabel.SetFontSize(fontSize);
 }
 
@@ -308,4 +310,4 @@ void TextButtonImpl::ApplyAlignment()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

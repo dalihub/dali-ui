@@ -17,7 +17,7 @@
 #include <dali-ui-foundation/extension-api/interactive-view-impl.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -139,4 +139,4 @@ void InteractiveView::SetKeyClickPolicy(KeyClickPolicy policy)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

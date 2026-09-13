@@ -22,9 +22,9 @@ using namespace Dali::Ui;
 /**
  * GridLayout sample: margin and padding.
  *
- * All margin and padding values use a uniform 25px for easy visual verification.
+ * All margin and padding values use a uniform 50px for easy visual verification.
  *
- * 1. Padding: root GridLayout has 25px padding (gray background visible as border).
+ * 1. Padding: root GridLayout has 50px padding (gray background visible as border).
  * 2. Margin: cells alternate between no margin and 50px uniform margin.
  *    - (0,0) Red: no margin (fills cell completely).
  *    - (0,1) Green: 50px margin all sides.

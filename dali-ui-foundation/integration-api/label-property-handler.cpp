@@ -21,11 +21,12 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 namespace
 {
@@ -285,7 +286,7 @@ bool LabelImpl::PropertyHandler::OnPropertySet(LabelImpl& impl, Dali::Property::
       impl.RequestAsyncRender();
       return true;
     }
-    case Ui::View::Property::BACKGROUND:
+    case Ui::Integration::View::Property::BACKGROUND:
     {
       impl.OnBackgroundPropertyChanged();
       return true;
@@ -481,4 +482,4 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
   return value;
 }
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration

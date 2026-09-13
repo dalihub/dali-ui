@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 // Routes Window::AddFramePresentedCallback() back to the owning WindowFrame.
 //
@@ -55,4 +55,4 @@ private:
   int32_t                  mPendingFrameId{0};
 };
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

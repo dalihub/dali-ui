@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToPropertyValue;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -37,13 +38,13 @@ Property::Map CreateImageRegionEffect()
   Property::Map map;
 
   Property::Map customShader;
-  customShader[Visual::Shader::Property::VERTEX_SHADER] = ToPropertyValue(SHADER_IMAGE_REGION_EFFECT_VERT.data());
+  customShader[Dali::Ui::Integration::Visual::Shader::Property::VERTEX_SHADER] = ToPropertyValue(SHADER_IMAGE_REGION_EFFECT_VERT.data());
 
-  map[Ui::VisualBasePropertyIndex::SHADER] = customShader;
+  map[Ui::Integration::Visual::Property::SHADER] = customShader;
   return map;
 }
 
 } // namespace Integration
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

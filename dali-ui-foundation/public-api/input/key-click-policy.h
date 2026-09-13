@@ -17,9 +17,10 @@
  *
  */
 
+#include <dali/public-api/common/dali-namespace.h>
 #include <cstdint>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 /**
  * @brief Defines the policy for when a click event is triggered via key input.
@@ -47,4 +48,4 @@ enum class KeyClickPolicy : uint32_t
    */
   RESERVED = 99
 };
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

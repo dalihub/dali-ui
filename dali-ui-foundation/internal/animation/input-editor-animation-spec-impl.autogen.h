@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h>
 #include <dali-ui-foundation/public-api/animation/input-editor-animation-spec.autogen.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -74,4 +74,4 @@ inline const Internal::InputEditorAnimationSpecImpl& GetImpl(const InputEditorAn
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/page-scroll-view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -144,4 +144,4 @@ void PageScrollView::NotifyPagesRemoved(int atIndex, int removedCount)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

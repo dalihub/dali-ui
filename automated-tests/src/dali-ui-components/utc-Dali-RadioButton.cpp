@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-components/dali-ui-components.h>
+
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
@@ -199,6 +200,60 @@ int UtcDaliRadioButtonStyleDefaultIconP(void)
                                        suffix),
                    0,
                    TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliRadioButtonStyleMinimumValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(RadioButtonStyle::Builder().SetMinimumWidth(value), "minimum size must be finite and non-negative");
+    DALI_TEST_ASSERTION(RadioButtonStyle::Builder().SetMinimumHeight(value), "minimum size must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliRadioButtonStylePaddingValidationN(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float invalid[] = {-3.0f, std::numeric_limits<float>::quiet_NaN(),
+                           std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : invalid)
+  {
+    DALI_TEST_ASSERTION(RadioButtonStyle::Builder().SetPadding(Insets(value, 0.0f, 0.0f, 0.0f)), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(RadioButtonStyle::Builder().SetPadding(Insets(0.0f, value, 0.0f, 0.0f)), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(RadioButtonStyle::Builder().SetPadding(Insets(0.0f, 0.0f, value, 0.0f)), "padding must be finite and non-negative");
+    DALI_TEST_ASSERTION(RadioButtonStyle::Builder().SetPadding(Insets(0.0f, 0.0f, 0.0f, value)), "padding must be finite and non-negative");
+  }
+  END_TEST;
+}
+
+int UtcDaliRadioButtonNumericBoundariesP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  const float normalized[] = {0.0f, -3.0f, WRAP_CONTENT, MATCH_PARENT,
+                              std::numeric_limits<float>::quiet_NaN(),
+                              std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()};
+  for(float value : normalized)
+  {
+    auto style = RadioButtonStyle::Builder().SetMinimumWidth(0.0f).SetMinimumHeight(0.0f)
+                   .SetPadding(Insets(0.0f, 0.0f)).SetIconWidth(value).SetIconHeight(value).Build();
+    DALI_TEST_EQUALS(style.GetIconWidth(), 0.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(style.GetIconHeight(), 0.0f, TEST_LOCATION);
+    RadioButton button = RadioButton::New(style);
+    DALI_TEST_EQUALS(button.GetMinimumWidth(), 0.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(button.GetMinimumHeight(), 0.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(button.GetPadding(), Insets(0.0f, 0.0f), TEST_LOCATION);
+    button.SetIconWidth(20.0f);
+    button.SetIconHeight(30.0f);
+    button.SetIconWidth(value);
+    button.SetIconHeight(value);
+    DALI_TEST_EQUALS(button.GetIconWidth(), 0.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(button.GetIconHeight(), 0.0f, TEST_LOCATION);
+  }
   END_TEST;
 }
 

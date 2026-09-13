@@ -18,7 +18,10 @@
  *
  */
 
-namespace Dali::Ui
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
+
+namespace DALI_NAMESPACE::Ui
 {
 
 /**
@@ -53,6 +56,6 @@ enum FocusDevice
   WHEEL,       ///< A mouse device.
   PROGRAMMATIC ///< Set to API call, not device.
 };
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui
 
 #endif // DALI_UI_VIEW_FOCUS_ENUMS_H

@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/integration-api/default-theme-loader.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -139,4 +139,4 @@ void UiThemeManagerImpl::OnLoaderThemeChanged()
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

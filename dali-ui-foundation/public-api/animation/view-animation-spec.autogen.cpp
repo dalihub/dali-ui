@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -308,4 +308,4 @@ ViewAnimationSpec& ViewAnimationSpec::BorderlineOffsetBy(float relative, Duratio
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

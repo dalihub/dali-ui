@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali/devel-api/scripting/scripting.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -260,6 +260,6 @@ Underline::Type StringToUnderlineType(const char* const underlineTypeStr);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_TEXT_EFFECTS_STYLE_H

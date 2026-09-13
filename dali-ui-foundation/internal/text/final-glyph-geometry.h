@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Stores final source-glyph geometry in one explicit coordinate conversion.
@@ -124,6 +124,6 @@ inline bool GetFinalSourceGlyphGeometry(const Model&              model,
   return true;
 }
 
-} // namespace Dali::Ui::Text
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_FINAL_GLYPH_GEOMETRY_H

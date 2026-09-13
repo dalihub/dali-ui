@@ -24,6 +24,8 @@
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
+
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
@@ -49,28 +51,28 @@ int UtcDaliLottieAnimationVisualCreateAndOwner(void)
 
   // Initially, the visual is not attached to any view.
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::INVALID, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
 
   View view = View::New();
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::BACKGROUND), true, TEST_LOCATION);
 
   DALI_TEST_EQUALS(visual.GetOwner(), view, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u), visual, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::BACKGROUND, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::BACKGROUND, 0u), visual, TEST_LOCATION);
 
   visual.Detach();
 
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetContainerRangeType(), Visual::ContainerRangeType::INVALID, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND), 0u, TEST_LOCATION);
 
   END_TEST;
 }
 
-/* Test that the visual type is ANIMATED_VECTOR_IMAGE */
+/* Test that the visual type is LOTTIE_ANIMATION */
 int UtcDaliLottieAnimationVisualGetVisualType(void)
 {
   UiTestApplication application;
@@ -80,7 +82,7 @@ int UtcDaliLottieAnimationVisualGetVisualType(void)
   // Upcast the handle
   VisualBase visualBase = visual;
 
-  DALI_TEST_EQUALS(visualBase.GetVisualType(), Ui::VisualType::ANIMATED_VECTOR_IMAGE, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualBase.GetVisualType(), Ui::VisualType::LOTTIE_ANIMATION, TEST_LOCATION);
 
   END_TEST;
 }
@@ -168,11 +170,11 @@ int UtcDaliLottieAnimationVisualSetGetProperties01(void)
   visual.SetReleasePolicy(Image::ReleasePolicy::DETACHED);
   DALI_TEST_EQUALS(visual.GetReleasePolicy(), Image::ReleasePolicy::DETACHED, TEST_LOCATION);
 
-  visual.SetOrientationCorrection(false);
-  DALI_TEST_EQUALS(visual.IsOrientationCorrection(), false, TEST_LOCATION);
+  visual.SetOrientationCorrectionEnabled(false);
+  DALI_TEST_EQUALS(visual.IsOrientationCorrectionEnabled(), false, TEST_LOCATION);
 
-  visual.SetSynchronousSizing(true);
-  DALI_TEST_EQUALS(visual.IsSynchronousSizing(), true, TEST_LOCATION);
+  visual.SetImageLoadWithViewSizeEnabled(true);
+  DALI_TEST_EQUALS(visual.IsImageLoadWithViewSizeEnabled(), true, TEST_LOCATION);
 
   application.SendNotification();
   application.Render();
@@ -193,15 +195,12 @@ int UtcDaliLottieAnimationVisualSetGetProperties02(void)
   visual.SetLoopCount(3);
   DALI_TEST_EQUALS(visual.GetLoopCount(), 3, TEST_LOCATION);
 
-  // Play range (two integers)
-  Dali::Property::Array range;
-  range.PushBack(10);
-  range.PushBack(20);
-  visual.SetPlayRange(range);
-  const auto resultRange = visual.GetPlayRange();
-  DALI_TEST_EQUALS(resultRange.Size(), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(resultRange[0].Get<int32_t>(), 10, TEST_LOCATION);
-  DALI_TEST_EQUALS(resultRange[1].Get<int32_t>(), 20, TEST_LOCATION);
+  // Play range (frame numbers)
+  int minFrame = 0, maxFrame = 0;
+  visual.SetMinMaxFrame(10, 20);
+  visual.GetMinMaxFrame(minFrame, maxFrame);
+  DALI_TEST_EQUALS(minFrame, 10, TEST_LOCATION);
+  DALI_TEST_EQUALS(maxFrame, 20, TEST_LOCATION);
 
   // Stop behavior
   visual.SetStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME);
@@ -215,17 +214,14 @@ int UtcDaliLottieAnimationVisualSetGetProperties02(void)
   visual.SetLoopingMode(Ui::LottieAnimation::LoopingMode::AUTO_REVERSE);
   DALI_TEST_EQUALS(visual.GetLoopingMode(), Ui::LottieAnimation::LoopingMode::AUTO_REVERSE, TEST_LOCATION);
 
-  visual.SetRedrawInScalingDown(false);
-  DALI_TEST_EQUALS(visual.IsRedrawInScalingUp(), false, TEST_LOCATION);
+  visual.SetRedrawOnScaleDown(false);
+  DALI_TEST_EQUALS(visual.IsRedrawOnScaleUp(), false, TEST_LOCATION);
 
-  visual.SetRedrawInScalingUp(false);
-  DALI_TEST_EQUALS(visual.IsRedrawInScalingUp(), false, TEST_LOCATION);
+  visual.SetRedrawOnScaleUp(false);
+  DALI_TEST_EQUALS(visual.IsRedrawOnScaleUp(), false, TEST_LOCATION);
 
-  visual.SetFrameCacheEnabled(true);
-  DALI_TEST_EQUALS(visual.IsFrameCacheEnabled(), true, TEST_LOCATION);
-
-  visual.SetNotifyAfterRasterization(true);
-  DALI_TEST_EQUALS(visual.IsNotifyAfterRasterization(), true, TEST_LOCATION);
+  visual.SetNotifyAfterRasterizationEnabled(true);
+  DALI_TEST_EQUALS(visual.IsNotifyAfterRasterizationEnabled(), true, TEST_LOCATION);
 
   visual.SetRenderScale(1.5f);
   DALI_TEST_EQUALS(visual.GetRenderScale(), 1.5f, TEST_LOCATION);
@@ -248,9 +244,9 @@ int UtcDaliLottieAnimationVisualPlayState(void)
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.AddVisuals(
-    Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
+    Visual::DepthLayer::BACKGROUND,
     {visual});
-  
+
   application.GetScene().Add(view);
 
   application.SendNotification();
@@ -268,7 +264,7 @@ int UtcDaliLottieAnimationVisualPlayState(void)
   visual.Play();
   // DALI_TEST_EQUALS(visual.GetPlayState(), AnimatedImage::PlayState::PLAYING, TEST_LOCATION);
 
-  visual.JumpTo(1);
+  visual.JumpToFrame(1);
   // TODO : Need to prepare ui-vector-animation-renderer.cpp for UTC.
 
   END_TEST;
@@ -282,7 +278,8 @@ int UtcDaliLottieAnimationVisualInvalidHandle(void)
   // Empty LottieAnimationVisual handle.
   LottieAnimationVisual empty;
 
-  auto TestAssertFunction = [&](std::function<void(void)> func){
+  auto TestAssertFunction = [&](std::function<void(void)> func)
+  {
     try
     {
       func();
@@ -295,33 +292,55 @@ int UtcDaliLottieAnimationVisualInvalidHandle(void)
   };
 
   // Inherit
-  TestAssertFunction([&](){empty.SetName("ShouldBeCrash");});
-  TestAssertFunction([&](){empty.SetOffsetX(1.0f);});
-  TestAssertFunction([&](){empty.SetOffsetY(1.0f);});
-  TestAssertFunction([&](){empty.SetWidth(100.0f);});
-  TestAssertFunction([&](){empty.SetHeight(100.0f);});
-  TestAssertFunction([&](){empty.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);});
-  TestAssertFunction([&](){empty.SetExtraWidth(10.0f);});
-  TestAssertFunction([&](){empty.SetExtraHeight(10.0f);});
-  TestAssertFunction([&](){empty.SetOrigin(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetPivot(Align::CENTER_BEGIN);});
-  TestAssertFunction([&](){empty.SetSiblingOrder(0u);});
-  TestAssertFunction([&](){empty.SetProperty(Property::INVALID_INDEX, Property::Value());});
+  TestAssertFunction([&]()
+  { empty.SetName("ShouldBeCrash"); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetX(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOffsetY(1.0f); });
+  TestAssertFunction([&]()
+  { empty.SetWidth(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetHeight(100.0f); });
+  TestAssertFunction([&]()
+  { empty.SetTransformProportionFlags(Visual::Transform::ProportionFlags::ALL); });
+  TestAssertFunction([&]()
+  { empty.SetExtraWidth(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetExtraHeight(10.0f); });
+  TestAssertFunction([&]()
+  { empty.SetOrigin(VisualOrigin::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetPivot(VisualPivot::CENTER_LEFT); });
+  TestAssertFunction([&]()
+  { empty.SetSiblingOrder(0u); });
 
-  TestAssertFunction([&](){empty.GetOwner();});
-  TestAssertFunction([&](){empty.GetContainerRangeType();});
-  TestAssertFunction([&](){empty.GetName();});
-  TestAssertFunction([&](){empty.GetOffsetX();});
-  TestAssertFunction([&](){empty.GetOffsetY();});
-  TestAssertFunction([&](){empty.GetWidth();});
-  TestAssertFunction([&](){empty.GetHeight();});
-  TestAssertFunction([&](){empty.GetProportionFlags();});
-  TestAssertFunction([&](){empty.GetExtraWidth();});
-  TestAssertFunction([&](){empty.GetExtraHeight();});
-  TestAssertFunction([&](){empty.GetOrigin();});
-  TestAssertFunction([&](){empty.GetPivot();});
-  TestAssertFunction([&](){empty.GetSiblingOrder();});
-  TestAssertFunction([&](){empty.GetProperty(Property::INVALID_INDEX);});
+  TestAssertFunction([&]()
+  { empty.GetOwner(); });
+  TestAssertFunction([&]()
+  { empty.GetDepthLayer(); });
+  TestAssertFunction([&]()
+  { empty.GetName(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetX(); });
+  TestAssertFunction([&]()
+  { empty.GetOffsetY(); });
+  TestAssertFunction([&]()
+  { empty.GetWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetTransformProportionFlags(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraWidth(); });
+  TestAssertFunction([&]()
+  { empty.GetExtraHeight(); });
+  TestAssertFunction([&]()
+  { empty.GetOrigin(); });
+  TestAssertFunction([&]()
+  { empty.GetPivot(); });
+  TestAssertFunction([&]()
+  { empty.GetSiblingOrder(); });
 
   END_TEST;
 }

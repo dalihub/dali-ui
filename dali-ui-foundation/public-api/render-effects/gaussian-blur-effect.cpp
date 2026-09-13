@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -108,4 +108,4 @@ GaussianBlurEffect::FinishedSignalType& GaussianBlurEffect::FinishedSignal()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

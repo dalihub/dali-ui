@@ -282,6 +282,16 @@ window; `ViewDataImpl` and `LayoutController::RequestLayoutInternal()` are not e
 Defer layout-affecting state changes to event time, or arrange an independent idle/timer
 wake, when prompt follow-up is required.
 
+Framework-internal main-loop wakes follow the same rule. The animated vector image
+visual arms its rasterization by registering a once post-processor and waking the main
+loop; while a Measure/Arrange pass is on the stack it registers but does not wake,
+because a once post-processor registered during the pre phase is drained later in the
+SAME ProcessEvents cycle and the rasterized frame arrives on the vector animation
+thread's own event-thread trigger. That gate covers the pass half only: a
+`LayoutFinished` slot runs during the post phase, after the once post-processor bucket
+has already been swapped and drained, so a wake raised there is the only thing that can
+service the work and is deliberately kept.
+
 Revoking a cache entry prevents it from satisfying a later cache hit; it does not
 immediately replace the last completed result. Until parked work is drained,
 `GetMeasuredSize()` or actor geometry may therefore still expose the previous completed

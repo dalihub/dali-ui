@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -89,4 +89,4 @@ inline const Integration::LayoutImpl& GetImpl(const Layout& layout)
   return static_cast<const Integration::LayoutImpl&>(handle);
 }
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

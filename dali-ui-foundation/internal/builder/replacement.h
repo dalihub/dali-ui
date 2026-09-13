@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/integration-api/builder/tree-node.h>
 #include <dali-ui-foundation/internal/builder/builder-get-is.inl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -267,6 +267,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_BUILDER_REPLACEMENT_H

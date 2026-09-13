@@ -117,7 +117,7 @@ private:
     mImage.SetRequestedWidth(MATCH_PARENT);
     mImage.SetRequestedHeight(MATCH_PARENT);
     mImage.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
-    mImage.SetImageLoadWithViewSize(false);
+    mImage.SetImageLoadWithViewSizeEnabled(false);
     ApplyImageSettings();
     mImage.ResourceReadySignal().Connect(this, &ImageViewSvgController::OnResourceReady);
 

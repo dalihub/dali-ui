@@ -35,15 +35,15 @@ using namespace Dali::Ui;
  *   - FrameSpeedFactor  (0.5x / 1.0x / 2.0x)
  *   - StopBehavior  (CURRENT / FIRST / LAST)
  *   - SetFrameDelay  (200ms / 500ms / 1000ms / 2000ms)
- *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)
+ *   - GetPlayState / GetCurrentFrameNumber / GetTotalFrameCount  (logged on each button press)
  *   - AnimationFinishedSignal
  *
  * Image sources:
  *   0. dog-anim.webp          (animated WebP)
  *   1. dali-logo-anim.gif     (animated GIF)
  *   2. animatedLoading.gif    (animated GIF)
- *   3. URL Array: dog-anim-001~008.png     (8 PNG frames via SetResourceUrls)
- *   4. URL Array: dali-logo-anim-001~015.png  (15 PNG frames via SetResourceUrls)
+ *   3. URL Array: dog-anim-001~008.png     (8 PNG frames via SetResourceUrlList)
+ *   4. URL Array: dali-logo-anim-001~015.png  (15 PNG frames via SetResourceUrlList)
  *
  * Press Escape or Back to quit.
  */
@@ -324,12 +324,12 @@ private:
       mAnimatedImageView.SetBatchSize(4);
       mAnimatedImageView.SetCacheSize(10);
       mAnimatedImageView.SetFrameDelay(FRAME_DELAYS[mFrameDelayIndex]);
-      mAnimatedImageView.SetResourceUrls(urls);
+      mAnimatedImageView.SetResourceUrlList(urls);
     }
     else
     {
       // Single animated file
-      mAnimatedImageView.SetResourceUrls(Dali::Vector<Dali::String>{});
+      mAnimatedImageView.SetResourceUrlList(Dali::Vector<Dali::String>{});
       mAnimatedImageView.SetResourceUrl(IMAGE_URLS[mImageIndex]);
     }
 
@@ -356,8 +356,8 @@ private:
     UpdateStatus("Playing");
     DALI_LOG_RELEASE_INFO("[AnimatedImageView] Play() — state=%d frame=%d/%d\n",
                           static_cast<int>(mAnimatedImageView.GetPlayState()),
-                          mAnimatedImageView.GetCurrentFrame(),
-                          mAnimatedImageView.GetTotalFrame());
+                          mAnimatedImageView.GetCurrentFrameNumber(),
+                          mAnimatedImageView.GetTotalFrameCount());
   }
 
   void OnPause()
@@ -366,8 +366,8 @@ private:
     UpdateStatus("Paused");
     DALI_LOG_RELEASE_INFO("[AnimatedImageView] Pause() — state=%d frame=%d/%d\n",
                           static_cast<int>(mAnimatedImageView.GetPlayState()),
-                          mAnimatedImageView.GetCurrentFrame(),
-                          mAnimatedImageView.GetTotalFrame());
+                          mAnimatedImageView.GetCurrentFrameNumber(),
+                          mAnimatedImageView.GetTotalFrameCount());
   }
 
   void OnStop()
@@ -376,8 +376,8 @@ private:
     UpdateStatus("Stopped");
     DALI_LOG_RELEASE_INFO("[AnimatedImageView] Stop() — state=%d frame=%d/%d\n",
                           static_cast<int>(mAnimatedImageView.GetPlayState()),
-                          mAnimatedImageView.GetCurrentFrame(),
-                          mAnimatedImageView.GetTotalFrame());
+                          mAnimatedImageView.GetCurrentFrameNumber(),
+                          mAnimatedImageView.GetTotalFrameCount());
   }
 
   void OnJumpTo()
@@ -386,7 +386,7 @@ private:
     UpdateStatus("Jumped to frame 5");
     DALI_LOG_RELEASE_INFO("[AnimatedImageView] JumpToFrame(%d) — currentFrame=%d\n",
                           JUMP_FRAME,
-                          mAnimatedImageView.GetCurrentFrame());
+                          mAnimatedImageView.GetCurrentFrameNumber());
   }
 
   void OnReload()
@@ -448,7 +448,7 @@ private:
 
   void OnResourceReady(View view)
   {
-    int total = mAnimatedImageView.GetTotalFrame();
+    int total = mAnimatedImageView.GetTotalFrameCount();
     UpdateStatus("Ready — total frames: " + std::to_string(total));
     DALI_LOG_RELEASE_INFO("[AnimatedImageView] ResourceReady — totalFrame=%d\n", total);
   }
@@ -500,8 +500,8 @@ private:
     if(mAnimatedImageView && mAnimatedImageView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
     {
       DALI_LOG_RELEASE_INFO("[AnimatedImageView] Monitor — frame=%d/%d state=%d\n",
-                            mAnimatedImageView.GetCurrentFrame(),
-                            mAnimatedImageView.GetTotalFrame(),
+                            mAnimatedImageView.GetCurrentFrameNumber(),
+                            mAnimatedImageView.GetTotalFrameCount(),
                             static_cast<int>(mAnimatedImageView.GetPlayState()));
     }
     return true; // continuous

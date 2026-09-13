@@ -22,7 +22,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/input-event-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -191,4 +191,4 @@ const HoverEvent& InputEventImpl::GetHoverEvent() const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

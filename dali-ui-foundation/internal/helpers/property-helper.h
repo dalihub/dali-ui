@@ -22,7 +22,7 @@
 #include <dali/public-api/object/property.h>
 #include <string>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -43,6 +43,6 @@ bool GetStringFromProperty(const Property::Value& value, std::string& output);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_INTERNAL_PROPERTY_HELPER_H

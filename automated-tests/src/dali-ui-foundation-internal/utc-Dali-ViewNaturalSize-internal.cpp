@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
@@ -123,7 +124,7 @@ int UtcDaliViewNaturalSizeResourceReadyOffSceneInvalidatesMeasure(void)
   Dali::Ui::Integration::Visual::Base visual(testVisual.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visual);
 
   // Not ready yet, so natural size is ZERO. This settles the measure cache.
   DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 0.0f, TEST_LOCATION);
@@ -159,7 +160,7 @@ int UtcDaliViewNaturalSizeResourceReadyAfterSettleUpdatesArrangedSize(void)
   Dali::Ui::Integration::Visual::Base visual(testVisual.Get());
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visual);
 
   window.Add(view);
 
@@ -206,7 +207,7 @@ int UtcDaliViewNaturalSizeResourceReadyRespectsRelayoutOptOut(void)
   testVisual->SetResourceReadyRelayoutRequired(false);
 
   auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view));
-  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visual);
 
   DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 0.0f, TEST_LOCATION);
 
@@ -247,17 +248,17 @@ int UtcDaliViewNaturalSizeRegisterUnregisterInvalidatesMeasure(void)
   // No background at all.
   DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 0.0f, TEST_LOCATION);
 
-  viewData.RegisterVisual(View::Property::BACKGROUND, visual);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visual);
   DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 80.0f, TEST_LOCATION);
 
-  viewData.UnregisterVisual(View::Property::BACKGROUND);
+  viewData.UnregisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND);
   DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 0.0f, TEST_LOCATION);
 
   // A visual at any other index is not a natural-size input and invalidates nothing.
   auto                                shadowVisual = NaturalSizeTestVisual::New(factoryCache);
   Dali::Ui::Integration::Visual::Base shadow(shadowVisual.Get());
   shadowVisual->naturalSize = Vector2(500.0f, 500.0f);
-  viewData.RegisterVisual(View::Property::SHADOW, shadow);
+  viewData.RegisterVisual(Dali::Ui::Integration::View::Property::SHADOW, shadow);
   DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 0.0f, TEST_LOCATION);
 
   END_TEST;

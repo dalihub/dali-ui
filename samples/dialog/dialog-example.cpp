@@ -28,6 +28,7 @@
 
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
 #include <dali-ui-components/public-api/dialog/dialog.h>
+#include <dali-ui-components/public-api/components-ui-config.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
@@ -72,11 +73,13 @@ public:
     root.Add(MakeText("AlertDialog Sample", 24.0f, 48.0f));
 
     // The AlertDialog under test (uses the convenience + inherited Dialog API).
-    mAlert = AlertDialog::New();
-    mAlert.SetBackgroundColor(UiColor(0xFFFFFFu));
-    mAlert.SetRequestedHeight(300.0f);
+    auto appearance = DialogStyle::Default().Configure()
+      .SetBackgroundColor(UiColor(0xFFFFFFu)).SetRequestedHeight(300.0f)
+      .SetSpacing(8.0f).Build();
+    auto alertStyle = AlertDialogStyle::Default().Configure()
+      .SetDialogStyle(appearance).Build();
+    mAlert = AlertDialog::New(alertStyle);
     mAlert.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    mAlert.SetSpacing(8.0f);
     mAlert.SetTitle("Delete item?");
     mAlert.SetMessage(MESSAGE_TEXT);
     TextButton cancelButton = mAlert.AddActionButton("Cancel");
@@ -189,7 +192,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  Components::UiConfig config = Components::UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   DialogExample test(application);

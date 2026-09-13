@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -156,4 +156,4 @@ InteractiveViewImpl::~InteractiveViewImpl()
 } // namespace Extension
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

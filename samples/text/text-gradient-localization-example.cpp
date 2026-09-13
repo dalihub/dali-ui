@@ -45,6 +45,10 @@ constexpr uint32_t COLOR_CARD_BACKGROUND  = 0xF8FAFC;
 constexpr uint32_t COLOR_DARK_TEXT        = 0x111827;
 constexpr uint32_t COLOR_MUTED_TEXT       = 0x4B5563;
 
+// -----------------------------------------------------------------------------
+// Legacy global TextGradient localization example
+// -----------------------------------------------------------------------------
+
 void ApplyDescriptionGradient(Label label)
 {
   Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
@@ -188,6 +192,136 @@ private:
   }
 };
 
+// -----------------------------------------------------------------------------
+// GradientSpan localization example
+// -----------------------------------------------------------------------------
+
+Gradient::Base CreateDescriptionGradientSpanGradient()
+{
+  Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  gradient.SetSpreadMethod(Gradient::SpreadMethod::REFLECT);
+  gradient.SetStartOffset(-0.18f);
+  gradient.SetStopNodes({
+    Gradient::StopNode(0.0f, UiColor(0.48f, 0.24f, 0.86f, 1.0f)),
+    Gradient::StopNode(0.25f, UiColor(0.92f, 0.18f, 0.62f, 1.0f)),
+    Gradient::StopNode(0.50f, UiColor(0.34f, 0.46f, 0.95f, 1.0f)),
+    Gradient::StopNode(0.75f, UiColor(0.98f, 0.70f, 0.18f, 1.0f)),
+    Gradient::StopNode(1.0f, UiColor(0.10f, 0.62f, 0.86f, 1.0f)),
+  });
+  return gradient;
+}
+
+Text::StyledText BuildGradientSpanDescriptionStyledText(const Dali::String& markup)
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::FromMarkup(markup);
+  const Gradient::Base   gradient = CreateDescriptionGradientSpanGradient();
+
+  const uint32_t annotationCount = builder.GetAnnotationCount();
+  for(uint32_t annotationIndex = 0u; annotationIndex < annotationCount; ++annotationIndex)
+  {
+    const Text::AnnotationSpan annotation = builder.GetAnnotationAt(annotationIndex);
+    if(annotation.GetKey() == "style" && annotation.GetValue() == "gradient")
+    {
+      builder.SetSpan(Text::GradientSpan::New(gradient, Text::GradientSpan::BoundsMode::SPAN_BOUND),
+                      builder.GetAnnotationStartIndexAt(annotationIndex),
+                      builder.GetAnnotationEndIndexAt(annotationIndex));
+    }
+  }
+
+  return builder.Build();
+}
+
+class LocalizedGradientSpanCard : public StackLayout
+{
+public:
+  struct Data
+  {
+    Data(Label title, Label description)
+    : titleLabel(title),
+      descriptionLabel(description)
+    {
+    }
+
+    Label titleLabel;
+    Label descriptionLabel;
+  };
+
+  LocalizedGradientSpanCard() = default;
+
+  static LocalizedGradientSpanCard New()
+  {
+    LocalizedGradientSpanCard card(StackLayout::New(StackOrientation::VERTICAL));
+    card.Initialize();
+    return card;
+  }
+
+  static LocalizedGradientSpanCard DownCast(BaseHandle handle)
+  {
+    StackLayout layout = StackLayout::DownCast(handle);
+    return layout && layout.GetAttachment<Data>(GetDataId()) ? LocalizedGradientSpanCard(layout) : LocalizedGradientSpanCard();
+  }
+
+  void SetTitle(const Dali::String& text)
+  {
+    if(Data* data = GetAttachment<Data>(GetDataId()))
+    {
+      data->titleLabel.SetText(text);
+    }
+  }
+
+  void SetDescription(const Dali::String& text)
+  {
+    if(Data* data = GetAttachment<Data>(GetDataId()))
+    {
+      data->descriptionLabel.SetStyledText(BuildGradientSpanDescriptionStyledText(text));
+    }
+  }
+
+private:
+  explicit LocalizedGradientSpanCard(StackLayout layout)
+  : StackLayout(layout)
+  {
+  }
+
+  void Initialize()
+  {
+    SetSpacing(8.0f);
+    SetRequestedWidth(MATCH_PARENT);
+    SetRequestedHeight(WRAP_CONTENT);
+    SetPadding(Insets(20.0f, 20.0f, 18.0f, 18.0f));
+    SetBackgroundColor(UiColor(COLOR_CARD_BACKGROUND));
+    SetCornerRadius(16.0f);
+    SetShadow(Shadow(0.0f,
+                     Vector2(4.0f, 4.0f),
+                     UiColor(0.0f, 0.0f, 0.0f, 0.16f),
+                     Vector2::ZERO));
+
+    Label titleLabel = Label::New();
+    titleLabel.SetFontSize(TITLE_FONT_SIZE);
+    titleLabel.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    titleLabel.SetMultiLine(true);
+    titleLabel.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+
+    Label descriptionLabel = Label::New();
+    descriptionLabel.SetFontSize(DESCRIPTION_FONT_SIZE);
+    descriptionLabel.SetTextColor(UiColor(COLOR_MUTED_TEXT));
+    descriptionLabel.SetMultiLine(true);
+    descriptionLabel.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+
+    Add(titleLabel);
+    Add(descriptionLabel);
+
+    SetAttachment(GetDataId(), Dali::MakeUnique<Data>(titleLabel, descriptionLabel));
+  }
+
+  static AttachmentId GetDataId()
+  {
+    static AttachmentId id = AttachmentId::Alloc();
+    return id;
+  }
+};
+
 Label CreatePanelLabel(const char* text, float fontSize)
 {
   Label label = Label::New(text);
@@ -238,12 +372,14 @@ private:
     contents.SetRequestedHeight(MATCH_PARENT);
     contents.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
-    mCard        = CreateCard();
-    mStatusLabel = CreateStatusLabel();
+    mCard             = CreateCard();
+    mGradientSpanCard = CreateGradientSpanCard();
+    mStatusLabel      = CreateStatusLabel();
 
     contents.Add(CreateHeaderLabel());
     contents.Add(CreateHelpLabel());
     contents.Add(mCard);
+    contents.Add(mGradientSpanCard);
     contents.Add(mStatusLabel);
     return contents;
   }
@@ -277,6 +413,20 @@ private:
     return card;
   }
 
+  LocalizedGradientSpanCard CreateGradientSpanCard()
+  {
+    LocalizedGradientSpanCard card = LocalizedGradientSpanCard::New();
+
+    UiLocalizationManager::Get().SetBindingResource(
+      card,
+      "GradientSpanCardTitle",
+      "IDS_TEXT_GRADIENT_LOCALIZATION_CARD_TITLE",
+      TEXT_DOMAIN_GRADIENT_LOCALIZATION,
+      LocalizedStringCallback::New(this, &TextGradientLocalizationController::ApplyGradientSpanCardLocalization));
+
+    return card;
+  }
+
   void ApplyCardLocalization(BaseHandle target, const Dali::String& title)
   {
     LocalizedCard card = LocalizedCard::DownCast(target);
@@ -288,6 +438,19 @@ private:
     UiLocalizationManager manager = UiLocalizationManager::Get();
     card.SetTitle(title);
     card.SetDescription(manager.GetLocalizedString("IDS_TEXT_GRADIENT_LOCALIZATION_CARD_DESCRIPTION", TEXT_DOMAIN_GRADIENT_LOCALIZATION));
+  }
+
+  void ApplyGradientSpanCardLocalization(BaseHandle target, const Dali::String& title)
+  {
+    LocalizedGradientSpanCard card = LocalizedGradientSpanCard::DownCast(target);
+    if(!card)
+    {
+      return;
+    }
+
+    UiLocalizationManager manager = UiLocalizationManager::Get();
+    card.SetTitle(title);
+    card.SetDescription(manager.GetLocalizedString("IDS_TEXT_GRADIENT_LOCALIZATION_GRADIENT_SPAN_CARD_DESCRIPTION", TEXT_DOMAIN_GRADIENT_LOCALIZATION));
   }
 
   void StartGradientAnimation()
@@ -367,6 +530,7 @@ private:
 private:
   Application&  mApplication;
   LocalizedCard mCard;
+  LocalizedGradientSpanCard mGradientSpanCard;
   Label         mStatusLabel;
   Animation     mGradientAnimation;
   std::string   mCurrentLocale;

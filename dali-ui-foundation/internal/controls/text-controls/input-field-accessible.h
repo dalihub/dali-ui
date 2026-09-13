@@ -19,7 +19,7 @@
 
 #include <dali-ui-foundation/internal/controls/text-controls/editable-text-view-accessible.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 /**
  * @brief Connects InputFieldImpl with the common editable-text accessibility implementation.
@@ -89,6 +89,6 @@ private:
   std::string GetTextEventContent(unsigned int length, const std::string& content) const;
 };
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration
 
 #endif // DALI_UI_INTERNAL_INPUT_FIELD_ACCESSIBLE_H

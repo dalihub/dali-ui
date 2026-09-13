@@ -23,10 +23,9 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -37,39 +36,13 @@ namespace Ui
  */
 
 /**
- * @brief TextVisual is a owner of Visual::Base with Visual::TEXT, to render simple text.
+ * @brief TextVisual renders text.
  *
- * It cannot use CornerRadius / CornerSquareness / Borderline feature.
+ * Its visual type is VisualType::TEXT. It cannot use the CornerRadius, CornerSquareness
+ * or Borderline features of VisualBase.
  */
 class DALI_UI_API TextVisual : public VisualBase
 {
-public:
-  /**
-   * @brief Property indices for TextVisual.
-   *
-   * These can be used with Dali::Ui::VisualBase::GetProperty() and SetProperty().
-   */
-  struct Property
-  {
-    enum
-    {
-      TEXT                 = TextVisualPropertyIndex::TEXT,
-      FONT_FAMILY          = TextVisualPropertyIndex::FONT_FAMILY,
-      FONT_SIZE            = TextVisualPropertyIndex::FONT_SIZE,
-      FONT_WEIGHT          = TextVisualPropertyIndex::FONT_WEIGHT,
-      FONT_WIDTH           = TextVisualPropertyIndex::FONT_WIDTH,
-      FONT_SLANT           = TextVisualPropertyIndex::FONT_SLANT,
-      MULTI_LINE           = TextVisualPropertyIndex::MULTI_LINE,
-      LINE_WRAP_MODE       = TextVisualPropertyIndex::LINE_WRAP_MODE,
-      HORIZONTAL_ALIGNMENT = TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT,
-      VERTICAL_ALIGNMENT   = TextVisualPropertyIndex::VERTICAL_ALIGNMENT,
-      OVERFLOW_MODE        = TextVisualPropertyIndex::OVERFLOW_MODE,
-      LINE_HEIGHT          = TextVisualPropertyIndex::LINE_HEIGHT,
-      LINE_HEIGHT_MODE     = TextVisualPropertyIndex::LINE_HEIGHT_MODE,
-      TEXT_COLOR           = TextVisualPropertyIndex::TEXT_COLOR,
-    };
-  };
-
 public:
   /**
    * @brief Creates a TextVisual object.
@@ -89,7 +62,7 @@ public:
    */
   static TextVisual DownCast(BaseHandle handle);
 
-public: // Setters
+public: // Properties
   /**
    * @brief Gets the text.
    *
@@ -295,20 +268,20 @@ public:
   TextVisual& operator=(TextVisual&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL TextVisual(Dali::Ui::Internal::VisualBaseImpl* object);
-
-public:
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} // namespace Dali
+} // namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_VISUAL_OBJECT_H

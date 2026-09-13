@@ -35,7 +35,7 @@
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -91,6 +91,7 @@ struct MarqueeBuilder
   {
     Vector4 bounds{0.0f, 0.0f, 1.0f, 1.0f};
     Vector2 coordinateSize{Vector2::ZERO};
+    bool    useTextureCoordinates{false};
   };
 
   struct MixedGradientContentRequest
@@ -261,6 +262,6 @@ struct MarqueeBuilder
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_FOUNDATION_INTERNAL_TEXT_MARQUEE_BUILDER_H

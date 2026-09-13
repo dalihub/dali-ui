@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -51,7 +51,7 @@ DALI_UI_API ColorVisual CreateVisual(const Ui::Shadow& shadow);
 DALI_UI_API Ui::Shadow CreateShadow(const Property::Map& map);
 
 /**
- * @brief Creates a property map for View::Property::SHADOW.
+ * @brief Creates a property map describing the View's shadow.
  *
  * @param[in] shadow The shadow value
  * @return A color visual property map describing the shadow
@@ -61,4 +61,4 @@ DALI_UI_API Property::Map CreatePropertyMap(const Ui::Shadow& shadow);
 } // namespace Shadow
 } // namespace Extension
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

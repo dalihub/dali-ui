@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <utility>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -101,4 +101,4 @@ WebViewPageLoadError::WebViewPageLoadError(Dali::String             url,
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

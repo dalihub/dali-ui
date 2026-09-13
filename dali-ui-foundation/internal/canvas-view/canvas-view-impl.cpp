@@ -29,16 +29,16 @@
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view-properties.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -339,8 +339,8 @@ void CanvasViewImpl::ApplyRasterizedImage(CanvasViewRasterizingTaskPtr task)
         mImageUrl = Dali::Ui::ImageUrl::New(rasterizedTexture, true);
 
         Dali::Property::Map map;
-        map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
-        map.Insert(Ui::ImageVisualPropertyIndex::URL, mImageUrl.GetUrl());
+        map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+        map.Insert(Ui::Integration::ImageVisual::Property::URL, mImageUrl.GetUrl());
 
         mContentVisual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
         if(mContentVisual)
@@ -562,4 +562,4 @@ void CanvasViewImpl::RequestRasterization()
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

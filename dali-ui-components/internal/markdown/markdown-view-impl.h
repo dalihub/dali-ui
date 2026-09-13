@@ -27,7 +27,7 @@
 #include <dali-ui-components/public-api/markdown/markdown-view.h>
 #include <dali-ui-components/public-api/styles/markdown-view-style.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -227,4 +227,4 @@ inline const MarkdownViewImpl& GetImpl(const Ui::MarkdownView& markdownView)
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

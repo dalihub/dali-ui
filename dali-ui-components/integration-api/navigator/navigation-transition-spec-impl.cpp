@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <dali-ui-components/integration-api/navigator/navigation-transition-spec-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -71,4 +71,4 @@ float NavigationTransitionSpecImpl::GetDuration() const
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

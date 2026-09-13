@@ -17,7 +17,11 @@
  *
  */
 
-namespace Dali
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-namespace.h>
+#include <cstdint>
+
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -25,7 +29,7 @@ namespace Ui
 /**
  * @brief Specifies how corner radius values are interpreted.
  *
- * @note Enum values match Ui::Visual::Transform::Policy::Type internally.
+ * @note The values match the transform policy used internally by the visual system.
  */
 enum class CornerRadiusPolicy
 {
@@ -67,5 +71,25 @@ enum class RemovePolicy
   ANIMATE_EXIT = 1, ///< Run the attached EXIT transition (own or inherited SUBTREE) first, then unparent; immediate when no EXIT slot is configured.
 };
 
+/**
+ * @brief Per-view policy deciding how layout transitions treat this view.
+ *
+ * Read BEFORE any transition handle is resolved, so it is a policy, not a value:
+ * a view whose mode is not @c AUTO is not animated even by the handle it
+ * carries through @c View::SetSelfLayoutTransition(). Handles are never detached
+ * by a mode change — @c View::GetSelfLayoutTransition() keeps returning them, and
+ * returning to @c AUTO restores their effect.
+ *
+ * @note Changing the mode does not interrupt in-flight transitions — the same
+ * contract as replacing a transition handle. It applies from the next
+ * per-(view, slot) event.
+ */
+enum class LayoutTransitionMode : uint8_t
+{
+  AUTO            = 0, ///< (default) Normal resolution: own self transition > direct parent's > closest SUBTREE-scope ancestor's.
+  PASS_THROUGH    = 1, ///< Layout transitions pass through this view: it is never their target, not even of the handle it attached itself with @c View::SetSelfLayoutTransition() — CHANGE snaps to the arranged bounds, EXIT unparents immediately, ENTER is skipped and nothing is settled. Inheritance keeps flowing to its descendants, and its own children-role transition keeps governing its children.
+  ISOLATE_SUBTREE = 2  ///< This view and its whole subtree are isolated from every owner at or above it — this view's own children-role transition included: nothing from above animates anything inside. Declarations made strictly below the gate still work (a descendant's self transition, a descendant's children-role transition).
+};
+
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

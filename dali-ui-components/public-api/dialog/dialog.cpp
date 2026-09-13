@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/dialog/dialog-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -32,7 +32,12 @@ Dialog::Dialog()
 
 Dialog Dialog::New()
 {
-  return Integration::DialogImpl::New();
+  return New(DialogStyle::Default());
+}
+
+Dialog Dialog::New(DialogStyle style)
+{
+  return Integration::DialogImpl::New(style);
 }
 
 Dialog::Dialog(const Dialog& dialog)
@@ -142,4 +147,4 @@ Dialog::Dialog(Dali::Internal::CustomActor* internal)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

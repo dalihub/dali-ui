@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/navigator/navigation-transition-spec-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -103,4 +103,4 @@ NavigationTransitionSpec::NavigationTransitionSpec(Integration::NavigationTransi
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

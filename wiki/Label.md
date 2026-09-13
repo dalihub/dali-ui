@@ -635,7 +635,7 @@ See also: [text-cutout-mask-example.cpp](https://github.sec.samsung.net/NUI/dali
 
 ### Text Reveal
 
-Text Reveal divides the text visible in the final output into `CHARACTER` or `WORD` units and reveals each unit's foreground in sequence according to `TextRevealProgress`. At progress `0.0`, all reveal targets are hidden; at `1.0`, they are fully visible. Animating progress backwards hides the units again in reverse order.
+Text Reveal divides the content visible in the final output into `CHARACTER`, `WORD`, `LINE`, or `PIXEL` units and reveals it in sequence according to `TextRevealProgress`. At progress `0.0`, the reveal targets are hidden; at `1.0`, they are fully visible. Animating progress backwards hides them again in reverse order.
 
 ![Text Reveal](./assets/text/text_reveal.gif)
 
@@ -644,6 +644,7 @@ Label label = Label::New("Sequential text reveal");
 
 Text::Reveal reveal;
 reveal.SetUnit(Text::Reveal::Unit::CHARACTER);
+reveal.SetSequence(Text::Reveal::Sequence::WHOLE_TEXT);
 reveal.SetFadeDurationRatio(Text::Reveal::AUTO_FADE_DURATION_RATIO);
 
 label.SetTextReveal(reveal);
@@ -651,68 +652,14 @@ label.SetTextRevealProgress(0.0f);
 
 Animation animation = Animation::New(2.0f);
 label.Animate(animation)
-  .TextRevealProgress(1.0f, Duration(2.0f), AlphaFunction::LINEAR);
+  .TextRevealProgress(1.0f, Duration(2.0f), AlphaFunction::EASE_IN_OUT);
 animation.Play();
 ~~~
 
-| Unit | Behavior |
-|---|---|
-| `CHARACTER` | The default. Ligatures, combining sequences, emoji clusters, and other elements that shaping treats as indivisible are revealed together as one unit. |
-| `WORD` | Reveals text at word boundaries. Whitespace does not consume a separate unit, and punctuation is associated with an adjacent word where appropriate. |
-
-Set `Text::Reveal::None()` to disable Reveal. When Reveal is disabled, the text is fully visible regardless of the current progress. The progress value is preserved, so setting Reveal again applies the previous progress. Changing configuration such as the unit or fade duration ratio does not reset progress either.
-
-~~~cpp
-label.SetTextReveal(Text::Reveal::None());
-~~~
-
 > [!NOTE]
-> Text Reveal affects only the text foreground. Decorations such as shadow, outline, underline, strikethrough, and background are not affected. Reveal rendering is not applied while marquee or cutout is enabled, but the configuration is retained and takes effect again when the unsupported mode is disabled.
+> Text Reveal affects the text foreground and inline `ImageSpan`. Decorations such as shadow, outline, underline, strikethrough, and background are not affected.
 
-#### Fade Duration Ratio
-
-`FadeDurationRatio` is not a delay between units. It is the length of the interval over which **each unit fades** on the normalized reveal timeline. Let `p` be the overall progress, `N` the final number of visible reveal units, `R` the configured ratio, and `F` the normalized fade duration of each unit.
-
-An explicit ratio `R` is a value from `0.0` to `1.0` and is scheduled as follows. Values outside this range are clamped, and NaN is normalized to `0.0`. `AUTO_FADE_DURATION_RATIO` is preserved as an exception.
-
-~~~text
-F = R
-
-N > 1:
-  startInterval = (1 - F) / (N - 1)
-  start(i)      = i * startInterval,  i = 0, ..., N - 1
-
-N = 1:
-  start(0) = 0
-~~~
-
-For `F > 0`, the opacity of unit `i` is:
-
-~~~text
-opacity(i, p) = clamp((p - start(i)) / F, 0, 1)
-~~~
-
-- `R = 0`: Units appear in sequence without fading, producing a step/typewriter reveal.
-
-  ![FadeDurationRatio 0](./assets/text/fade_ratio_0.gif)
-
-- `R = 1`: Every unit starts at `0`, so the entire text fades together.
-
-  ![FadeDurationRatio 1](./assets/text/fade_ratio_1.gif)
-
-- `0 < R < 1`: The next unit may start before the previous unit finishes fading. For the same number of units, a larger `R` creates a longer overlap.
-
-  The following example uses `R = 0.5`.
-
-  ![FadeDurationRatio 0.5](./assets/text/fade_ratio_0.5.gif)
-
-When progress is animated from `0.0` to `1.0` with `LINEAR` over a total duration `T`, the actual fade time of each unit is `F * T`, and the interval between unit starts is `startInterval * T`. For example, with `N = 5`, `R = 0.25`, and `T = 4 seconds`, each unit fades for `1 second`, and the next unit starts every `0.75 seconds`. With a non-linear alpha function, progress does not increase uniformly over time, so the actual time and speed at which each unit appears may vary depending on its position in the reveal sequence.
-
-`AUTO_FADE_DURATION_RATIO` automatically determines each unit's fade duration from the final number of visible reveal units. It maintains a sequential feel for short text and adjusts the overlap for long text so that each unit's fade does not become excessively short. Visible units are based on the final rendered result, excluding whitespace, source text hidden by elision, and inline replacements. A visible ellipsis glyph participates in the reveal sequence.
-
-When `AUTO` is selected, `GetFadeDurationRatio()` returns `AUTO_FADE_DURATION_RATIO`, not the internally resolved value.
-
-See also: [text-reveal-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-reveal-example.cpp)
+For unit behavior, multi-line sequences and stagger, fade schedules, and animation, see the [Text Reveal guide](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-Reveal).
 
 <br/>
 

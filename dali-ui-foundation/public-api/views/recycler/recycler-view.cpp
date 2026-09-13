@@ -20,7 +20,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/actors/actor.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -288,4 +288,4 @@ RecyclerView::DragFinishedSignalType& RecyclerView::DragFinishedSignal()
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

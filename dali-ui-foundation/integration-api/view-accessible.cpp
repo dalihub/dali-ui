@@ -59,7 +59,7 @@ Dali::Ui::Internal::ViewDataImpl& GetViewImplementation(Dali::Ui::View view)
 
 } // unnamed namespace
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 namespace
 {
@@ -99,7 +99,10 @@ Dali::Actor CreateHighlightIndicatorActor()
   // Create the default if it hasn't been set and one that's shared by all the
   // keyboard focusable actors
   auto imageView = Ui::ImageView::New(ToDaliString(focusBorderImagePath));
-  DevelActor::SetResizePolicy(imageView, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+  imageView.SetFittingMode(Ui::Image::FittingMode::FILL);
+  imageView.SetRequestedWidth(MATCH_PARENT);
+  imageView.SetRequestedHeight(MATCH_PARENT);
+  imageView.SetLayoutMode(LayoutMode::STANDALONE);
 
   imageView.SetAccessibilityHighlightable(false);
 
@@ -586,26 +589,23 @@ bool ViewAccessible::GrabHighlight()
   highlight.SetProperty(Actor::Property::POSITION_Z, 1.0f);
   highlight.SetProperty(Actor::Property::POSITION, Vector2(0.0f, 0.0f));
 
-  // Need to set resize policy again, to update SIZE property which is set by
-  // NUIViewAccessible. The highlight could move from NUIViewAccessible to
-  // ViewAccessible. In this case, highlight has incorrect size.
-  DevelActor::SetResizePolicy(highlight, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
-
   // Remember the highlight actor, so that when the default is changed with
   // SetHighlightActor(), the currently displayed highlight can still be cleared.
   mCurrentHighlightActor = highlight;
   ScrollToSelf();
   self.Add(highlight);
   SetCurrentlyHighlightedActor(self);
-  EmitHighlighted(true);
   RegisterPositionPropertyNotification();
   RegisterPropertySetSignal();
 
+  // Let the application update accessibility metadata before AT-SPI clients
+  // are notified that this object became highlighted.
   auto view = Dali::Ui::View::DownCast(self);
   if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Empty())
   {
     GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(view, true);
   }
+  EmitHighlighted(true);
 
   mHighlightOverlay.UpdateOverlay(highlight);
 
@@ -627,12 +627,13 @@ bool ViewAccessible::ClearHighlight()
     self.Remove(mCurrentHighlightActor.GetHandle());
     mCurrentHighlightActor = {};
     SetCurrentlyHighlightedActor({});
-    EmitHighlighted(false);
+    // Keep the application callback ahead of the matching AT-SPI notification.
     auto view = Dali::Ui::View::DownCast(self);
     if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Empty())
     {
       GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(view, false);
     }
+    EmitHighlighted(false);
     mHighlightOverlay.HideOverlay();
     return true;
   }
@@ -823,4 +824,4 @@ void ViewAccessible::ResetCustomHighlightOverlay()
 {
   mHighlightOverlay.ResetCustomHighlight();
 }
-} // namespace Dali::Ui
+} //namespace DALI_NAMESPACE::Ui

@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/builder/json-parser-state.h>
 #include <dali-ui-foundation/internal/builder/tree-node-manipulator.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -189,4 +189,4 @@ void JsonParser::DeleteRootNode() noexcept
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

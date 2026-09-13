@@ -25,7 +25,7 @@
 #include <dali-ui-components/internal/markdown/markdown-render-model.h>
 #include <dali-ui-components/public-api/styles/markdown-view-style.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -76,4 +76,4 @@ std::unique_ptr<MarkdownTextComponent> CreateMarkdownLabelTextComponent(const Ma
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

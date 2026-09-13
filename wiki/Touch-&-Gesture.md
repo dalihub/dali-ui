@@ -17,11 +17,12 @@
 
 ## Scope
 
-This document describes **GEOMETRY touch propagation**, which DALi UI enables by default when the
-application is created. Setting `GeometryHittestEnabled` to `false` selects PARENT propagation from
-the primary hit Actor toward its parents; that mode does not use the coordinate-candidate and late-consume
-behavior described below. Select this setting during application startup and do not change it after input
-event processing has started.
+This document describes **GEOMETRY input hit testing**, which DALi UI enables by default when the
+application is created. TouchEvent and HoverEvent both use front-to-back coordinate candidates, but their
+lifetimes differ: TouchEvent fixes candidates at the initial DOWN and may select a stream owner, while
+HoverEvent hit-tests every input and keeps the actually visited candidate prefix active. Setting
+`GeometryHittestEnabled` to `false` selects the legacy PARENT hit-test path. Select this setting during
+application startup and do not change it after input event processing has started.
 
 This document uses the following terms:
 
@@ -322,62 +323,73 @@ the InterceptTouch.
 
 ## HoverEvent
 
-HoverEvent follows the geometry candidates at the coordinate from front to back.
+GEOMETRY HoverEvent hit-tests every input and visits the hoverable results from front to back. An Actor's
+full dispatch result combines its intrinsic `OnHoverEvent()` result and every callback connected to the
+same Actor with logical OR. If that result is `false`, delivery continues to the next geometry candidate;
+if it is `true`, the candidate walk stops for the current input. Consumption does not capture future hover
+inputs because the next input is hit-tested and evaluated again.
+
+The Actors actually visited before the walk stops form the active-target prefix. A `false` Actor remains
+active, continues to receive later `MOTION` inputs while hit, and may coexist with unrelated active siblings.
 
 ### Event States
 
-- When entering a view, it enters the **Started** state, and when exiting the view, it enters the **Leave** state.
+- A new candidate encountered during `MOTION` receives synthetic `STARTED` and then the same `MOTION` input.
+- An existing active candidate receives `MOTION`.
+- After current candidates are dispatched, every previous active target not in the new visited prefix receives `LEAVE`.
+- A hidden, insensitive, disabled, disconnected, removed, or reparented active target receives `INTERRUPTED` once.
+- `FINISHED` and explicit `INTERRUPTED` are delivered to every active target regardless of consumption, then
+  the active list is cleared.
+
+GEOMETRY hover guarantees `STARTED` and `LEAVE` for every active target and does not consult
+`LEAVE_REQUIRED`. PARENT hover and touch retain the property-controlled behavior.
 
 ### Event Propagation Example
 
-In the figure below, if the hover moves to the right from the orange view:
-```
-┌─────────────────────────────────────┐
-│            Blue View                │
-│  ┌───────────────────────────────┐  │
-│  │        Yellow View            │  │
-│  │  ┌─────────────────────────┐  │  │
-│  │  │       Red View          │  │  │
-│  │  │  ┌─────────────────┐    │  │  │
-│  │  │  │   Orange View   │    │  │  │
-│  │  │  └─────────────────┘    │  │  │
-│  │  └─────────────────────────┘  │  │
-│  └───────────────────────────────┘  │
-└─────────────────────────────────────┘
+Assume A and B are unrelated siblings, B is in front, and their bounds partially overlap:
+
+```text
+A-only area       A/B overlap       B-only area
+┌──────── A ──────────┐
+          ┌──────── B ──────────┐
 ```
 
+Assume B returns `false` and A returns `true`. The trace is:
+
+```text
+A-only -> overlap : B STARTED -> B MOTION -> A MOTION
+inside overlap    : B MOTION -> A MOTION
+overlap -> B-only : B MOTION -> A LEAVE
+B-only -> overlap : B MOTION -> A STARTED -> A MOTION
 ```
-Orange → Red → Yellow → Blue receive "Started" events.
+
+A and B are both active in the overlap because B's `false` result allows A to be visited. If B changes to
+`true`, B receives the current event, the walk stops, and the previously active A receives `LEAVE` after B's
+dispatch. If B later returns `false`, A re-enters with `STARTED` followed by `MOTION`.
+
+An actual parent is not a separate bubbling destination in GEOMETRY mode. It is visited only at its position
+in the flat hit list, after front-most child and sibling subtrees:
+
+```text
+B callback false : B -> A -> shared Parent -> Root (until consumed)
+B callback true  : B (stop for this input)
 ```
 
-- When exiting the Orange view, the Orange view receives a "Leave" event. Other Red, Yellow, and Blue views continue to receive "Motion" events.
-- When exiting the Red view, the Red view receives a "Leave" event. Other Yellow and Blue views continue to receive "Motion" events.
+Only hoverable Actors present in the geometry results participate. The callback's Actor argument identifies
+the current receiver, while `HoverEvent::GetHitActor()` and local position continue to identify the primary,
+front-most hit Actor (B in the overlap), even in A or Parent callbacks.
 
-### Reverse Movement
-
-If the hover moves back from right to left:
-- When entering a new view, that view receives "Started".
-- Views that were already receiving Motion events continue to receive Motion.
-
-### Sample: HoverEvent Behavior
-
-Register HoverEvent on Yellow, Red, and Orange.
-
-**Moving mouse from left to right:**
-1. When entering Yellow, Yellow receives "Started".
-2. When entering Red, Red receives "Started". Existing Yellow continues to receive Motion.
-3. When entering Orange, Orange receives "Started". Existing Yellow and Red continue to receive Motion.
-
-**Moving mouse from right to left:**
-1. When exiting Orange, Orange receives "Leave". Existing Yellow and Red continue to receive Motion.
-2. When exiting Red, Red receives "Leave". Existing Yellow continues to receive Motion.
-3. When exiting Yellow, Yellow receives "Leave".
+Plain `View` has no intrinsic hover consumption, so a raw callback returning `false` demonstrates sibling
+fall-through. `InteractiveView`, or a `View` with `InteractiveTrait`, intrinsically handles hover and returns
+`true` for its lifecycle states. Its full dispatch therefore normally stops at the front-most interactive
+View even when an additional raw callback returns `false`.
 
 ### Consume Behavior
 
-- When an Actor consumes, geometry candidates behind it do not receive that event.
-- Unlike touch, consuming does not mean the consuming view receives all subsequent Hover events.
-- It only stops the current event from advancing to candidates behind it.
+- Returning `false` continues to the next front-to-back geometry candidate, which can be an unrelated sibling.
+- Returning `true` stops the current candidate walk; it does not create a future hover owner or capture.
+- Every connected callback on one Actor still runs. Their results and intrinsic handling are OR-combined before
+  deciding whether to continue to the next candidate.
 
 ---
 

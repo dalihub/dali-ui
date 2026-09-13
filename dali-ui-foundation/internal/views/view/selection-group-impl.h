@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/public-api/views/selection-group.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -212,4 +212,4 @@ const Internal::SelectionGroupImpl& GetImpl(const SelectionGroup& obj);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <limits>
 
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -71,12 +72,26 @@ int UtcDaliUiConfigGestureOptionsP(void)
   config.SetTapGestureMaximumMultiTapInterval(400u);
   config.SetTapGestureMaximumHoldingTime(250u);
   config.SetTapGestureMaximumMotionDistance(35.0f);
+  config.SetPanGestureMinimumDistance(24);
+  config.SetPanGestureMinimumPanEvents(6u);
+  config.SetPinchGestureMinimumDistance(12.0f);
+  config.SetPinchGestureMinimumTouchEvents(5u);
+  config.SetPinchGestureMinimumTouchEventsAfterStart(6u);
+  config.SetRotationGestureMinimumTouchEvents(7u);
+  config.SetRotationGestureMinimumTouchEventsAfterStart(8u);
 
   // The getters report the requested values before the application is created
   DALI_TEST_EQUALS(config.GetLongPressGestureMinimumHoldingTime(), 700u, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumMultiTapInterval(), 400u, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumHoldingTime(), 250u, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumMotionDistance(), 35.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumDistance(), 24, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumPanEvents(), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumDistance(), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEvents(), 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEventsAfterStart(), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEvents(), 7u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEventsAfterStart(), 8u, TEST_LOCATION);
 
   UiTestApplication application(config);
 
@@ -85,12 +100,26 @@ int UtcDaliUiConfigGestureOptionsP(void)
   DALI_TEST_EQUALS(Dali::Integration::GetTapGestureMaximumMultiTapInterval(), 400u, TEST_LOCATION);
   DALI_TEST_EQUALS(Dali::Integration::GetTapGestureMaximumHoldingTime(), 250u, TEST_LOCATION);
   DALI_TEST_EQUALS(Dali::Integration::GetTapGestureMaximumMotionDistance(), 35.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Integration::GetPanGestureMinimumDistance(), 24, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Integration::GetPanGestureMinimumPanEvents(), 6, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Integration::GetPinchGestureMinimumDistance(), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Integration::GetPinchGestureMinimumTouchEvents(), 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Integration::GetPinchGestureMinimumTouchEventsAfterStart(), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Integration::GetRotationGestureMinimumTouchEvents(), 7u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Integration::GetRotationGestureMinimumTouchEventsAfterStart(), 8u, TEST_LOCATION);
 
   // The getters still report the same values after they have been applied
   DALI_TEST_EQUALS(config.GetLongPressGestureMinimumHoldingTime(), 700u, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumMultiTapInterval(), 400u, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumHoldingTime(), 250u, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumMotionDistance(), 35.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumDistance(), 24, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumPanEvents(), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumDistance(), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEvents(), 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEventsAfterStart(), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEvents(), 7u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEventsAfterStart(), 8u, TEST_LOCATION);
 
   END_TEST;
 }
@@ -104,6 +133,13 @@ int UtcDaliUiConfigGestureOptionsDefault(void)
   DALI_TEST_EQUALS(config.GetTapGestureMaximumMultiTapInterval(), Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MULTI_TAP_INTERVAL, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumHoldingTime(), Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_HOLDING_TIME, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumMotionDistance(), Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MOTION_DISTANCE, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumDistance(), Dali::Integration::DEFAULT_PAN_GESTURE_MINIMUM_DISTANCE, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumPanEvents(), static_cast<uint32_t>(Dali::Integration::DEFAULT_PAN_GESTURE_MINIMUM_PAN_EVENTS), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumDistance(), Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_DISTANCE, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEvents(), Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_TOUCH_EVENTS, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEventsAfterStart(), Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_TOUCH_EVENTS_AFTER_START, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEvents(), Dali::Integration::DEFAULT_ROTATION_GESTURE_MINIMUM_TOUCH_EVENTS, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEventsAfterStart(), Dali::Integration::DEFAULT_ROTATION_GESTURE_MINIMUM_TOUCH_EVENTS_AFTER_START, TEST_LOCATION);
 
   UiTestApplication application(config);
 
@@ -112,6 +148,13 @@ int UtcDaliUiConfigGestureOptionsDefault(void)
   DALI_TEST_EQUALS(config.GetTapGestureMaximumMultiTapInterval(), Dali::Integration::GetTapGestureMaximumMultiTapInterval(), TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumHoldingTime(), Dali::Integration::GetTapGestureMaximumHoldingTime(), TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetTapGestureMaximumMotionDistance(), Dali::Integration::GetTapGestureMaximumMotionDistance(), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumDistance(), Dali::Integration::GetPanGestureMinimumDistance(), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumPanEvents(), static_cast<uint32_t>(Dali::Integration::GetPanGestureMinimumPanEvents()), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumDistance(), Dali::Integration::GetPinchGestureMinimumDistance(), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEvents(), Dali::Integration::GetPinchGestureMinimumTouchEvents(), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEventsAfterStart(), Dali::Integration::GetPinchGestureMinimumTouchEventsAfterStart(), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEvents(), Dali::Integration::GetRotationGestureMinimumTouchEvents(), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEventsAfterStart(), Dali::Integration::GetRotationGestureMinimumTouchEventsAfterStart(), TEST_LOCATION);
 
   END_TEST;
 }
@@ -127,6 +170,57 @@ int UtcDaliUiConfigGestureOptionsFrozenN(void)
   DALI_TEST_ASSERTION(config.SetTapGestureMaximumMultiTapInterval(400u), "UiConfig is frozen");
   DALI_TEST_ASSERTION(config.SetTapGestureMaximumHoldingTime(250u), "UiConfig is frozen");
   DALI_TEST_ASSERTION(config.SetTapGestureMaximumMotionDistance(35.0f), "UiConfig is frozen");
+  DALI_TEST_ASSERTION(config.SetPanGestureMinimumDistance(24), "UiConfig is frozen");
+  DALI_TEST_ASSERTION(config.SetPanGestureMinimumPanEvents(6u), "UiConfig is frozen");
+  DALI_TEST_ASSERTION(config.SetPinchGestureMinimumDistance(12.0f), "UiConfig is frozen");
+  DALI_TEST_ASSERTION(config.SetPinchGestureMinimumTouchEvents(5u), "UiConfig is frozen");
+  DALI_TEST_ASSERTION(config.SetPinchGestureMinimumTouchEventsAfterStart(6u), "UiConfig is frozen");
+  DALI_TEST_ASSERTION(config.SetRotationGestureMinimumTouchEvents(7u), "UiConfig is frozen");
+  DALI_TEST_ASSERTION(config.SetRotationGestureMinimumTouchEventsAfterStart(8u), "UiConfig is frozen");
+
+  END_TEST;
+}
+
+int UtcDaliUiConfigGestureOptionsInvalidValues(void)
+{
+  UiConfig config = UiConfig::New();
+
+  config.SetLongPressGestureMinimumHoldingTime(700u);
+  config.SetTapGestureMaximumMultiTapInterval(400u);
+  config.SetTapGestureMaximumHoldingTime(250u);
+  config.SetTapGestureMaximumMotionDistance(35.0f);
+  config.SetPanGestureMinimumDistance(24);
+  config.SetPanGestureMinimumPanEvents(6u);
+  config.SetPinchGestureMinimumDistance(12.0f);
+  config.SetPinchGestureMinimumTouchEvents(5u);
+  config.SetPinchGestureMinimumTouchEventsAfterStart(6u);
+  config.SetRotationGestureMinimumTouchEvents(7u);
+  config.SetRotationGestureMinimumTouchEventsAfterStart(8u);
+
+  config.SetLongPressGestureMinimumHoldingTime(0u);
+  config.SetTapGestureMaximumMultiTapInterval(0u);
+  config.SetTapGestureMaximumHoldingTime(0u);
+  config.SetTapGestureMaximumMotionDistance(-1.0f);
+  config.SetPanGestureMinimumDistance(-1);
+  config.SetPanGestureMinimumPanEvents(0u);
+  config.SetPanGestureMinimumPanEvents(std::numeric_limits<uint32_t>::max());
+  config.SetPinchGestureMinimumDistance(-1.0f);
+  config.SetPinchGestureMinimumTouchEvents(1u);
+  config.SetPinchGestureMinimumTouchEventsAfterStart(1u);
+  config.SetRotationGestureMinimumTouchEvents(1u);
+  config.SetRotationGestureMinimumTouchEventsAfterStart(1u);
+
+  DALI_TEST_EQUALS(config.GetLongPressGestureMinimumHoldingTime(), 700u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetTapGestureMaximumMultiTapInterval(), 400u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetTapGestureMaximumHoldingTime(), 250u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetTapGestureMaximumMotionDistance(), 35.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumDistance(), 24, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPanGestureMinimumPanEvents(), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumDistance(), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEvents(), 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetPinchGestureMinimumTouchEventsAfterStart(), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEvents(), 7u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetRotationGestureMinimumTouchEventsAfterStart(), 8u, TEST_LOCATION);
 
   END_TEST;
 }

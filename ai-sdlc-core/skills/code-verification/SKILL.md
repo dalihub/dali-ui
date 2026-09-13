@@ -104,6 +104,11 @@ Code Verification (C3) populates the Test column with unit test evidence:
 ### Step 8: Record Results
 
 - Update `ai-sdlc-docs/state/state-log.md` following `logging/state-management.md`
+- Update the verified unit's Unit Status Summary row with `state`,
+  `automated_unit_test_result`, `blocking_items`, and verification-summary
+  evidence. While a technically passing result awaits approval, preserve the
+  prior lifecycle state. Use `state = blocked` when verification is blocked and
+  list the exact blocker.
 - Update `ai-sdlc-docs/audit/audit.md` following `logging/audit-management.md`
 
 ### Step 9: Wait for Explicit Approval
@@ -111,6 +116,9 @@ Code Verification (C3) populates the Test column with unit test evidence:
 - Do not proceed until the user explicitly approves the generated code and unit verification result
 - Approval must be clear and unambiguous
 - If the user requests changes, update the code or tests and repeat unit verification
+- After approval of a PASS result, set the Unit Status Summary row to
+  `state = code_verified`. Do not expose `code_verified` to Integration Ready
+  Check before this approval.
 
 Standard completion prompt — choose one:
 1. Request changes to the generated solution
@@ -150,6 +158,4 @@ Standard completion prompt — choose one:
 - Do not mark a unit `implemented`, `unit-tested-pass`, `code_verified`, or `complete` unless automated unit tests were executed and passed; if not executed, status must be `BLOCKED`
 - User approval cannot override failed or missing unit test evidence; if unit tests are not executed or not passed, the unit remains `BLOCKED`
 - Lack of existing unit tests is not a valid reason to skip unit testing
-
-
 

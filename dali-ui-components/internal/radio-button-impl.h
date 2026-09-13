@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -90,4 +90,4 @@ inline const Internal::RadioButtonImpl& GetImpl(const Ui::RadioButton& radioButt
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

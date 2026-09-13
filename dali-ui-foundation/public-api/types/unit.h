@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -126,4 +126,4 @@ DALI_UI_API float operator"" _sdp(long double v);
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

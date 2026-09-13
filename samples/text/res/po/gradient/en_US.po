@@ -9,3 +9,6 @@ msgstr "Midday brief"
 
 msgid "IDS_TEXT_GRADIENT_LOCALIZATION_CARD_DESCRIPTION"
 msgstr "<annotation style='muted'>Today</annotation> the weather is clear <annotation style='muted'>and it is a great day for exercise.</annotation>"
+
+msgid "IDS_TEXT_GRADIENT_LOCALIZATION_GRADIENT_SPAN_CARD_DESCRIPTION"
+msgstr "Today <annotation style='gradient'>the weather is clear</annotation> and it is a great day for exercise."

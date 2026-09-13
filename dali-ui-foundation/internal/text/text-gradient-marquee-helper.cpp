@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -281,23 +281,25 @@ bool IsCompositionSupported(bool hasMultipleTextColors,
 
 Dali::Ui::Text::TextScrollerGradient CreateScrollerGradient(const Gradient::Style& style,
                                                             const Vector4&         bounds,
-                                                            const Vector2&         coordinateSize)
+                                                            const Vector2&         coordinateSize,
+                                                            bool                   useTextureCoordinates)
 {
   const Gradient::RenderData renderData =
     Gradient::ResolveRenderData(style, bounds, coordinateSize);
 
   Dali::Ui::Text::TextScrollerGradient textGradient;
-  textGradient.enabled         = renderData.enabled;
-  textGradient.type            = renderData.type;
-  textGradient.startPosition   = renderData.startPosition;
-  textGradient.endPosition     = renderData.endPosition;
-  textGradient.radialCenter    = renderData.radialCenter;
-  textGradient.radialScale     = renderData.radialScale;
-  textGradient.conicCenter     = renderData.conicCenter;
-  textGradient.conicScale      = renderData.conicScale;
-  textGradient.conicStartAngle = renderData.conicStartAngle;
-  textGradient.startOffset     = renderData.startOffset;
-  textGradient.bounds          = renderData.bounds;
+  textGradient.enabled               = renderData.enabled;
+  textGradient.type                  = renderData.type;
+  textGradient.startPosition         = renderData.startPosition;
+  textGradient.endPosition           = renderData.endPosition;
+  textGradient.radialCenter          = renderData.radialCenter;
+  textGradient.radialScale           = renderData.radialScale;
+  textGradient.conicCenter           = renderData.conicCenter;
+  textGradient.conicScale            = renderData.conicScale;
+  textGradient.conicStartAngle       = renderData.conicStartAngle;
+  textGradient.startOffset           = renderData.startOffset;
+  textGradient.bounds                = renderData.bounds;
+  textGradient.useTextureCoordinates = useTextureCoordinates;
   return textGradient;
 }
 
@@ -305,22 +307,23 @@ void SetOverlayGradient(Dali::Ui::Text::TextScrollerGradient&       textGradient
                         const Dali::Ui::Text::TextScrollerGradient& overlayGradient,
                         Dali::Ui::Text::GradientOverlayMode         overlayMode)
 {
-  textGradient.overlayEnabled         = overlayGradient.enabled;
-  textGradient.overlayType            = overlayGradient.type;
-  textGradient.overlayStartPosition   = overlayGradient.startPosition;
-  textGradient.overlayEndPosition     = overlayGradient.endPosition;
-  textGradient.overlayRadialCenter    = overlayGradient.radialCenter;
-  textGradient.overlayRadialScale     = overlayGradient.radialScale;
-  textGradient.overlayConicCenter     = overlayGradient.conicCenter;
-  textGradient.overlayConicScale      = overlayGradient.conicScale;
-  textGradient.overlayConicStartAngle = overlayGradient.conicStartAngle;
-  textGradient.overlayStartOffset     = overlayGradient.startOffset;
-  textGradient.overlayBounds          = overlayGradient.bounds;
-  textGradient.overlayMode            = overlayMode;
+  textGradient.overlayEnabled               = overlayGradient.enabled;
+  textGradient.overlayType                  = overlayGradient.type;
+  textGradient.overlayStartPosition         = overlayGradient.startPosition;
+  textGradient.overlayEndPosition           = overlayGradient.endPosition;
+  textGradient.overlayRadialCenter          = overlayGradient.radialCenter;
+  textGradient.overlayRadialScale           = overlayGradient.radialScale;
+  textGradient.overlayConicCenter           = overlayGradient.conicCenter;
+  textGradient.overlayConicScale            = overlayGradient.conicScale;
+  textGradient.overlayConicStartAngle       = overlayGradient.conicStartAngle;
+  textGradient.overlayStartOffset           = overlayGradient.startOffset;
+  textGradient.overlayBounds                = overlayGradient.bounds;
+  textGradient.overlayUseTextureCoordinates = overlayGradient.useTextureCoordinates;
+  textGradient.overlayMode                  = overlayMode;
 }
 
 } // namespace GradientMarquee
 } // namespace Internal
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

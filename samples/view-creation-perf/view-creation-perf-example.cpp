@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -135,6 +136,32 @@ public:
       return;
     }
 
+    // Zero-transition gate control. mDormantTransition is created and NEVER attached to
+    // any view, so it changes no view's behaviour -- it only makes
+    // LayoutTransitionImpl::HasAnyInstance() true, which is the single condition both
+    // gates read: the add-side one in Internal::ViewDataImpl::OnChildAdded and the
+    // remove-side one in Internal::ViewDataImpl::Remove. Pressing this around the same
+    // runs therefore measures gate-off against gate-on for BOTH, with nothing else in the
+    // scene changed.
+    //
+    // Early-return like key 0, before the unconditional ResetScene() below: the toggle
+    // measures nothing itself and must not disturb the scene the next run will build.
+    if(key == "t" || key == "T")
+    {
+      if(mDormantTransition)
+      {
+        mDormantTransition.Reset();
+      }
+      else
+      {
+        mDormantTransition = LayoutTransition::New();
+      }
+      ResetAverages();
+      AppendDormantTransitionNotice();
+      UpdateAverageLabel();
+      return;
+    }
+
     ResetScene();
 
     if(key == "9")
@@ -159,6 +186,18 @@ public:
     else if(key == "7" || key == "8")
     {
       CreatePlainViews(create100, true);
+    }
+    else if(key == "n" || key == "N")
+    {
+      CreateViewsNewOnly();
+    }
+    else if(key == "r" || key == "R")
+    {
+      RemoveViewsOneByOne();
+    }
+    else if(key == "a" || key == "A")
+    {
+      RemoveAllViews();
     }
 
     UpdateAverageLabel();
@@ -261,6 +300,11 @@ private:
   const char* RootModeName() const
   {
     return mRootLayoutModeDefault ? "DEFAULT" : "STANDALONE";
+  }
+
+  const char* TransitionStateName() const
+  {
+    return mDormantTransition ? "dormant" : "none";
   }
 
   void CreateRoot()
@@ -465,6 +509,85 @@ private:
     }
   }
 
+  // View::New() and nothing else: no geometry, no visual, no Add. It isolates the cost of
+  // constructing the impl and its owned state from everything the add path does, which is
+  // what tells a reader whether a change to Add moved the number or a change to the
+  // constructor did. The vector is reserved outside the timed span and destroyed after it,
+  // so neither reallocation nor destruction is charged to the measurement.
+  void CreateViewsNewOnly()
+  {
+    std::vector<View> views;
+    views.reserve(10000u);
+
+    const auto start = std::chrono::high_resolution_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+      views.push_back(View::New());
+    }
+    const auto end = std::chrono::high_resolution_clock::now();
+
+    const uint64_t duration = DurationMicroseconds(start, end);
+    AppendResult("View::New only", false, duration);
+    mTimeNewOnly10000 += duration;
+    ++mCountNewOnly10000;
+  }
+
+  // Builds the same 100x100 flat child set the bulk create keys build, OUTSIDE any timed
+  // span, and hands the handles back so the removal loop can address each child directly.
+  void PrecreateRemovalChildren(std::vector<View>& out)
+  {
+    out.clear();
+    out.reserve(10000u);
+
+    Vector2 position(50.0f, 50.0f);
+    for(int i = 0; i < 100; ++i)
+    {
+      position.x = 50.0f;
+      for(int j = 0; j < 100; ++j)
+      {
+        View view = View::New();
+        SetRequestedGeometry(view, position.x, position.y, 10.0f, 10.0f);
+        mRoot.Add(view);
+        out.push_back(view);
+        position.x += 10.0f;
+      }
+      position.y += 10.0f;
+    }
+  }
+
+  void RemoveViewsOneByOne()
+  {
+    std::vector<View> children;
+    PrecreateRemovalChildren(children);
+
+    const auto start = std::chrono::high_resolution_clock::now();
+    for(View& view : children)
+    {
+      mRoot.Remove(view, RemovePolicy::ANIMATE_EXIT);
+    }
+    const auto end = std::chrono::high_resolution_clock::now();
+
+    const uint64_t duration = DurationMicroseconds(start, end);
+    AppendResult("Remove View", false, duration);
+    mTimeRemove10000 += duration;
+    ++mCountRemove10000;
+  }
+
+  void RemoveAllViews()
+  {
+    std::vector<View> children;
+    PrecreateRemovalChildren(children);
+
+    const auto start = std::chrono::high_resolution_clock::now();
+    mRoot.RemoveAll(RemovePolicy::ANIMATE_EXIT);
+    const auto end = std::chrono::high_resolution_clock::now();
+
+    const uint64_t duration = DurationMicroseconds(start, end);
+    AppendResult("RemoveAll", false, duration);
+    mTimeRemoveAll10000 += duration;
+    ++mCountRemoveAll10000;
+  }
+
   template<typename TimePoint>
   uint64_t DurationMicroseconds(const TimePoint& start, const TimePoint& end) const
   {
@@ -480,21 +603,23 @@ private:
 
   void AppendResult(const char* type, bool create100, uint64_t duration)
   {
-    // The root layout mode is part of what was measured, so it goes on every line --
-    // both modes, not only the toggled one. A log the reader has to correlate with a
-    // remembered key press is a log that gets misread.
+    // The root layout mode and the transition-gate state are both part of what was
+    // measured, so both go on every line -- every value of each, not only the toggled one.
+    // A log the reader has to correlate with a remembered key press is a log that gets
+    // misread.
     std::fprintf(stderr,
-                 "[DALI_UI_VIEW_CREATION_PERF] %s %s : %.3f ms (%llu us) (root=%s)\n",
+                 "[DALI_UI_VIEW_CREATION_PERF] %s %s : %.3f ms (%llu us) (root=%s, transitions=%s)\n",
                  type,
                  create100 ? "100" : "10000",
                  static_cast<double>(duration) / 1000.0,
                  static_cast<unsigned long long>(duration),
-                 RootModeName());
+                 RootModeName(),
+                 TransitionStateName());
 
     if(mLogTimeLabel)
     {
       mLogTimeString += std::string("\n") + type + (create100 ? " 100 : " : " 10000 : ") + FormatMilliseconds(duration) +
-                        " ms (root=" + RootModeName() + ")";
+                        " ms (root=" + RootModeName() + ", transitions=" + TransitionStateName() + ")";
       mLogTimeLabel.SetText(mLogTimeString.c_str());
       TrimLogToWindow();
       PinLabelBottom(mLogTimeLabel);
@@ -519,31 +644,59 @@ private:
     }
   }
 
+  // The transition-gate twin of AppendRootModeNotice, and for the same reason: the toggle
+  // is a measurable change to what the following runs execute, so the log records where it
+  // happened and that the accumulated Averages went with it.
+  void AppendDormantTransitionNotice()
+  {
+    std::fprintf(stderr,
+                 "[DALI_UI_VIEW_CREATION_PERF] dormant LayoutTransition : %s (averages reset)\n",
+                 TransitionStateName());
+
+    if(mLogTimeLabel)
+    {
+      mLogTimeString += std::string("\ndormant LayoutTransition : ") + TransitionStateName() + " (averages reset)";
+      mLogTimeLabel.SetText(mLogTimeString.c_str());
+      TrimLogToWindow();
+      PinLabelBottom(mLogTimeLabel);
+    }
+  }
+
   static uint64_t Average(uint64_t total, uint32_t count)
   {
     return count == 0u ? 0u : total / count;
   }
 
-  /// Drops every accumulated timing sample. The 12 accumulators below carry no mode
-  /// dimension, so after a root-mode toggle the Average panel would average STANDALONE
-  /// and DEFAULT runs together and report a number that describes neither -- which is
-  /// the opposite of what the toggle exists for. Resetting here keeps every displayed
-  /// Average attributable to exactly one root mode.
+  /// Drops every accumulated timing sample. The accumulators below carry neither a root-mode
+  /// nor a transition-gate dimension, so after either toggle the Average panel would average
+  /// runs from both settings together and report a number that describes neither -- which is
+  /// the opposite of what the toggles exist for. Resetting here keeps every displayed
+  /// Average attributable to exactly one root mode and one gate state.
   void ResetAverages()
   {
-    mTimeView100       = 0u;
-    mTimeView10000     = 0u;
-    mTimeRenderer100   = 0u;
-    mTimeRenderer10000 = 0u;
-    mTimeColor100      = 0u;
-    mTimeColor10000    = 0u;
+    mTimeView100             = 0u;
+    mTimeView10000           = 0u;
+    mTimeStandaloneView100   = 0u;
+    mTimeStandaloneView10000 = 0u;
+    mTimeRenderer100         = 0u;
+    mTimeRenderer10000       = 0u;
+    mTimeColor100            = 0u;
+    mTimeColor10000          = 0u;
+    mTimeRemove10000         = 0u;
+    mTimeRemoveAll10000      = 0u;
+    mTimeNewOnly10000        = 0u;
 
-    mCountView100       = 0u;
-    mCountView10000     = 0u;
-    mCountRenderer100   = 0u;
-    mCountRenderer10000 = 0u;
-    mCountColor100      = 0u;
-    mCountColor10000    = 0u;
+    mCountView100             = 0u;
+    mCountView10000           = 0u;
+    mCountStandaloneView100   = 0u;
+    mCountStandaloneView10000 = 0u;
+    mCountRenderer100         = 0u;
+    mCountRenderer10000       = 0u;
+    mCountColor100            = 0u;
+    mCountColor10000          = 0u;
+    mCountRemove10000         = 0u;
+    mCountRemoveAll10000      = 0u;
+    mCountNewOnly10000        = 0u;
   }
 
   void UpdateAverageLabel()
@@ -562,7 +715,10 @@ private:
       "\nCreate View with Renderer 100 : " + FormatMilliseconds(Average(mTimeRenderer100, mCountRenderer100)) + " ms" +
       "\nCreate View with Renderer 10000 : " + FormatMilliseconds(Average(mTimeRenderer10000, mCountRenderer10000)) + " ms" +
       "\nCreate View with Color 100 : " + FormatMilliseconds(Average(mTimeColor100, mCountColor100)) + " ms" +
-      "\nCreate View with Color 10000 : " + FormatMilliseconds(Average(mTimeColor10000, mCountColor10000)) + " ms";
+      "\nCreate View with Color 10000 : " + FormatMilliseconds(Average(mTimeColor10000, mCountColor10000)) + " ms" +
+      "\nRemove View 10000 : " + FormatMilliseconds(Average(mTimeRemove10000, mCountRemove10000)) + " ms" +
+      "\nRemoveAll 10000 : " + FormatMilliseconds(Average(mTimeRemoveAll10000, mCountRemoveAll10000)) + " ms" +
+      "\nView::New only 10000 : " + FormatMilliseconds(Average(mTimeNewOnly10000, mCountNewOnly10000)) + " ms";
     mAverageTimeLabel.SetText(average.c_str());
     PinLabelBottom(mAverageTimeLabel);
   }
@@ -614,6 +770,10 @@ private:
   /// (the historical behaviour); true = LayoutMode::DEFAULT. Toggled by key 0.
   bool mRootLayoutModeDefault{false};
 
+  /// A LayoutTransition held alive and NEVER attached to a view, toggled by key t. It is
+  /// the whole gate control: the handle's emptiness IS the state, so no separate flag.
+  LayoutTransition mDormantTransition;
+
   uint64_t mTimeView100{0u};
   uint64_t mTimeView10000{0u};
   uint64_t mTimeStandaloneView100{0u};
@@ -622,6 +782,9 @@ private:
   uint64_t mTimeRenderer10000{0u};
   uint64_t mTimeColor100{0u};
   uint64_t mTimeColor10000{0u};
+  uint64_t mTimeRemove10000{0u};
+  uint64_t mTimeRemoveAll10000{0u};
+  uint64_t mTimeNewOnly10000{0u};
   uint32_t mCountView100{0u};
   uint32_t mCountView10000{0u};
   uint32_t mCountStandaloneView100{0u};
@@ -630,6 +793,9 @@ private:
   uint32_t mCountRenderer10000{0u};
   uint32_t mCountColor100{0u};
   uint32_t mCountColor10000{0u};
+  uint32_t mCountRemove10000{0u};
+  uint32_t mCountRemoveAll10000{0u};
+  uint32_t mCountNewOnly10000{0u};
 };
 } // unnamed namespace
 

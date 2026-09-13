@@ -27,7 +27,7 @@
 
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -359,4 +359,4 @@ Dali::String ToString(const Dali::Vector<Axis>& axes)
 } // namespace FontVariation
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

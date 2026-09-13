@@ -26,14 +26,14 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/internal/image-loader/fast-track-loading-task.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-upload-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class NativeImage;
 
@@ -260,7 +260,7 @@ private:
   /**
    * @brief Load the texture.
    * @param[out] textures resulting texture set from the image loading.
-   * @param[in] size if mUseSynchronousSizing is true this is the size of visual, else it is mDesiredSize
+   * @param[in] size if mImageLoadWithViewSize is true this is the size of visual, else it is mDesiredSize
    * @param[in] forceReload flag determines if the texture should be reloaded from its source or use the cached texture.
    */
   void LoadTexture(TextureSet& textures, const Dali::ImageDimensions& size, TextureManager::ReloadPolicy forceReload);
@@ -308,7 +308,7 @@ private:
 
   /**
    * @brief Check whether the mask texture is loaded or not.
-   * If MaskingType is MASKING_ON_LOADING and mask texture is failed to load, update shader.
+   * If MaskingPolicy is ON_LOADING and mask texture is failed to load, update shader.
    */
   void CheckMaskTexture();
 
@@ -343,11 +343,23 @@ private:
   void UpdateNativeTextureInfomation(TextureSet textureSet);
 
   /**
-   * @brief Set whether the Pre-multiplied Alpha Blending is required
+   * @brief Records whether the loaded texture has its colour channels pre-multiplied by its alpha,
+   * and applies that to the renderer.
    *
-   * @param[in] preMultiplied whether alpha is pre-multiplied.
+   * Only call this from a load completion point. Before the texture is loaded there is no result
+   * to record; the load-time request is held separately in mPreMultiplyAlphaOnLoad.
+   *
+   * @param[in] preMultiplied whether the loaded texture is pre-multiplied.
    */
-  void EnablePreMultipliedAlpha(bool preMultiplied);
+  void SetTexturePreMultiplied(bool preMultiplied);
+
+  /**
+   * @brief Applies the current pre-multiplied alpha state to the renderer's uniform and blend
+   * equation.
+   *
+   * A newly created renderer does not inherit the state, so call this after creating one.
+   */
+  void ApplyPreMultipliedAlphaToRenderer();
 
 private:
   Vector4         mPixelArea;
@@ -378,6 +390,9 @@ private:
   Dali::Ui::Image::FittingMode   mFittingMode; ///< How the contents should fit the view
   TextureManager::LoadState      mLoadState;   ///< The texture loading state
 
+  bool mPreMultiplyAlphaOnLoad : 1; ///< The requested pre-multiply-on-load value. Kept apart from the
+                                    ///< IS_PRE_MULTIPLIED_ALPHA flag, which tracks what the loaded texture
+                                    ///< actually ended up as, so that a re-load still honours the request.
   bool mOrientationCorrection : 1;  ///< true if the image will have it's orientation corrected.
   bool mNeedYuvToRgb : 1;           ///< true if we need to convert yuv to rgb.
   bool mNeedYuva : 1;               ///< true if the yuv texture has alpha.
@@ -386,7 +401,7 @@ private:
   bool mUseFastTrackUploading : 1;  ///< True if we use fast tack feature.
   bool mRendererAdded : 1;          ///< True if renderer added into actor.
   bool mUseBrokenImageRenderer : 1; ///< True if renderer changed as broken image.
-  bool mUseSynchronousSizing : 1;   ///< True if we need to synchronize image texture size to visual size, otherwise use
+  bool mImageLoadWithViewSize : 1;  ///< True if we need to synchronize image texture size to visual size, otherwise use
                                     ///< mDesiredSize.
 };
 
@@ -394,6 +409,6 @@ private:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif /* DALI_UI_INTERNAL_IMAGE_VISUAL_H */

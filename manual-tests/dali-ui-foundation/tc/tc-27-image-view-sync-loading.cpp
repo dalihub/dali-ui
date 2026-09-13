@@ -42,9 +42,9 @@ constexpr uint32_t C_BG          = 0x1A1A1A;
 /**
  * @brief Verifies ImageView synchronous-loading related flags:
  *   SetSynchronousLoading / IsSynchronousLoading
- *   SetFastTrackUpload / IsFastTrackUploadEnabled
- *   SetOrientationCorrection / IsOrientationCorrectionEnabled
- *   SetPreMultipliedAlpha / IsPreMultipliedAlpha
+ *   SetFastTrackUploadEnabled / IsFastTrackUploadEnabled
+ *   SetOrientationCorrectionEnabled / IsOrientationCorrectionEnabled
+ *   SetPreMultiplyAlphaOnLoadEnabled / IsPreMultiplyAlphaOnLoadEnabled
  *
  * Steps:
  *   [SynchronousLoading verification]:
@@ -113,19 +113,19 @@ public:
       MakeButton("Sync\nOFF", [this] { mImage.SetSynchronousLoading(false); UpdateFlags(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("FastTrack\nON",  [this] { mImage.SetFastTrackUpload(true);  UpdateFlags(); }),
-      MakeButton("FastTrack\nOFF", [this] { mImage.SetFastTrackUpload(false); UpdateFlags(); }),
+      MakeButton("FastTrack\nON",  [this] { mImage.SetFastTrackUploadEnabled(true);  UpdateFlags(); }),
+      MakeButton("FastTrack\nOFF", [this] { mImage.SetFastTrackUploadEnabled(false); UpdateFlags(); }),
     }));
     content.Add(MakeButtonRow({
       // No Reload() here: every one of these setters marks the visual dirty
       // already, and the stray action made the four flag buttons look like
       // they had different behaviours (review 27; same call as sampling).
-      MakeButton("OrientCorr\nON",  [this] { mImage.SetOrientationCorrection(true);  UpdateFlags(); }),
-      MakeButton("OrientCorr\nOFF", [this] { mImage.SetOrientationCorrection(false); UpdateFlags(); }),
+      MakeButton("OrientCorr\nON",  [this] { mImage.SetOrientationCorrectionEnabled(true);  UpdateFlags(); }),
+      MakeButton("OrientCorr\nOFF", [this] { mImage.SetOrientationCorrectionEnabled(false); UpdateFlags(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("PreMult\nON",  [this] { mImage.SetPreMultipliedAlpha(true);  UpdateFlags(); }),
-      MakeButton("PreMult\nOFF", [this] { mImage.SetPreMultipliedAlpha(false); UpdateFlags(); }),
+      MakeButton("PreMult\nON",  [this] { mImage.SetPreMultiplyAlphaOnLoadEnabled(true);  UpdateFlags(); }),
+      MakeButton("PreMult\nOFF", [this] { mImage.SetPreMultiplyAlphaOnLoadEnabled(false); UpdateFlags(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Load\nIMG_A",      [this] { mImage.SetResourceUrl(IMG_A);    UpdateFlags(); }),
@@ -146,7 +146,7 @@ private:
       Dali::String("Sync: ") + Dali::String(mImage.IsSynchronousLoading() ? "ON" : "OFF") +
       Dali::String(" | FastTrack: ") + Dali::String(mImage.IsFastTrackUploadEnabled() ? "ON" : "OFF") +
       Dali::String(" | OrientCorr: ") + Dali::String(mImage.IsOrientationCorrectionEnabled() ? "ON" : "OFF") +
-      Dali::String(" | PreMult: ") + Dali::String(mImage.IsPreMultipliedAlpha() ? "ON" : "OFF"));
+      Dali::String(" | PreMult: ") + Dali::String(mImage.IsPreMultiplyAlphaOnLoadEnabled() ? "ON" : "OFF"));
   }
 
   void UpdateReadyLabel()

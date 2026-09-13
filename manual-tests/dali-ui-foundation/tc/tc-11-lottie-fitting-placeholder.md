@@ -45,7 +45,7 @@ URL을 지운 상태는 로딩이 아니라 **로딩할 대상이 없는 상태*
 
 ## 테스트 4: 정상 로드 복귀
 
-1. [Reload Lottie] 버튼을 탭한다
+1. [Reload Lottie] 버튼을 탭한다 (정상 URL 복구 + Reload()로 강제 리로드)
 2. **기대 결과**: placeholder가 사라지고 Lottie 애니메이션이 재생됨
 3. **기대 결과**: 라벨 2줄이 `ResourceReady: READY`
 

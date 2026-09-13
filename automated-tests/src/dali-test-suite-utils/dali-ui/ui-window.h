@@ -25,7 +25,7 @@
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/signals/dali-signal.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 class Actor;
 class Layer;
@@ -81,6 +81,7 @@ public:
   void                                       Add(Dali::Actor actor);
   void                                       Remove(Dali::Actor actor);
   Dali::Layer                                GetRootLayer() const;
+  Dali::Layer                                 GetOverlayLayer();
   void                                       SetBackgroundColor(const Vector4& color);
   Vector4                                    GetBackgroundColor() const;
   void                                       Raise();
@@ -88,6 +89,7 @@ public:
   void                                       Show();
   void                                       Hide();
   bool                                       IsVisible() const;
+  bool IsFocused() const;
   FocusChangedSignalType&                     FocusChangedSignal();
   ResizedSignalType&                          ResizedSignal();
   MovedSignalType&                            MovedSignal();

@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -62,4 +62,4 @@ GradientGlyphInfo ClassifyGradientGlyph(TextAbstraction::FontClient& fontClient,
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/types/view-state.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -168,4 +168,4 @@ public: // Not intended for application developers
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

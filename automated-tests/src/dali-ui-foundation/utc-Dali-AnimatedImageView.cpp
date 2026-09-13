@@ -80,6 +80,33 @@ int UtcDaliAnimatedImageViewGetNaturalSizeP(void)
   END_TEST;
 }
 
+int UtcDaliAnimatedImageViewMeasureExplicitSizeP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New("test.gif");
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+
+  const MeasuredSize measuredSize = view.Measure(400.0f, 300.0f);
+  DALI_TEST_EQUALS(measuredSize.width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measuredSize.height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewMeasureSingleExplicitDimensionP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New("test.gif");
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(32);
+  view.SetRequestedWidth(200.0f);
+
+  const MeasuredSize measuredSize = view.Measure(400.0f, 300.0f);
+  DALI_TEST_EQUALS(measuredSize.width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measuredSize.height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliAnimatedImageViewCopyConstructorP(void)
 {
   UiTestApplication application;
@@ -171,9 +198,9 @@ int UtcDaliAnimatedImageViewSetGetResourceUrlsP(void)
   urls.PushBack("frame2.png");
   urls.PushBack("frame3.png");
 
-  view.SetResourceUrls(urls);
+  view.SetResourceUrlList(urls);
 
-  const auto result = view.GetResourceUrls();
+  const auto result = view.GetResourceUrlList();
   DALI_TEST_EQUALS(result.Size(), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(result[0], Dali::String("frame1.png"), TEST_LOCATION);
   DALI_TEST_EQUALS(result[1], Dali::String("frame2.png"), TEST_LOCATION);
@@ -555,13 +582,13 @@ int UtcDaliAnimatedImageViewSetGetPreMultipliedAlphaP(void)
   AnimatedImageView view = AnimatedImageView::New();
 
   // Default should be false
-  DALI_TEST_CHECK(!view.IsPreMultipliedAlpha());
+  DALI_TEST_CHECK(!view.IsPreMultiplyAlphaOnLoadEnabled());
 
-  view.SetPreMultipliedAlpha(true);
-  DALI_TEST_CHECK(view.IsPreMultipliedAlpha());
+  view.SetPreMultiplyAlphaOnLoadEnabled(true);
+  DALI_TEST_CHECK(view.IsPreMultiplyAlphaOnLoadEnabled());
 
-  view.SetPreMultipliedAlpha(false);
-  DALI_TEST_CHECK(!view.IsPreMultipliedAlpha());
+  view.SetPreMultiplyAlphaOnLoadEnabled(false);
+  DALI_TEST_CHECK(!view.IsPreMultiplyAlphaOnLoadEnabled());
   END_TEST;
 }
 
@@ -605,7 +632,7 @@ int UtcDaliAnimatedImageViewGetPlayStateP(void)
   END_TEST;
 }
 
-// GetCurrentFrame / GetTotalFrame
+// GetCurrentFrameNumber / GetTotalFrameCount
 
 int UtcDaliAnimatedImageViewGetCurrentFrameP(void)
 {
@@ -613,7 +640,7 @@ int UtcDaliAnimatedImageViewGetCurrentFrameP(void)
   AnimatedImageView view = AnimatedImageView::New();
 
   // Without visual, should return 0
-  DALI_TEST_EQUALS(view.GetCurrentFrame(), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 0, TEST_LOCATION);
   END_TEST;
 }
 
@@ -623,7 +650,7 @@ int UtcDaliAnimatedImageViewGetTotalFrameP(void)
   AnimatedImageView view = AnimatedImageView::New();
 
   // Without visual, should return 0
-  DALI_TEST_EQUALS(view.GetTotalFrame(), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetTotalFrameCount(), 0, TEST_LOCATION);
   END_TEST;
 }
 
@@ -778,7 +805,7 @@ int UtcDaliAnimatedImageViewPropertyPreMultipliedAlphaP(void)
   UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
 
-  const int index = AnimatedImageView::Property::PRE_MULTIPLIED_ALPHA;
+  const int index = AnimatedImageView::Property::PRE_MULTIPLY_ALPHA_ON_LOAD;
 
   view.SetProperty(index, true);
   DALI_TEST_CHECK(view.GetProperty(index).Get<bool>());
@@ -855,11 +882,11 @@ int UtcDaliAnimatedImageViewSetGetMaskingModeP(void)
   UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
 
-  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_LOADING, TEST_LOCATION);
+  view.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_LOADING);
+  DALI_TEST_EQUALS(view.GetMaskingPolicy(), Ui::Image::MaskingPolicy::ON_LOADING, TEST_LOCATION);
 
-  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
+  view.SetMaskingPolicy(Ui::Image::MaskingPolicy::ON_RENDERING);
+  DALI_TEST_EQUALS(view.GetMaskingPolicy(), Ui::Image::MaskingPolicy::ON_RENDERING, TEST_LOCATION);
   END_TEST;
 }
 

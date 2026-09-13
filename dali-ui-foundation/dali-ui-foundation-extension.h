@@ -24,6 +24,7 @@
 #include <dali-ui-foundation/extension-api/focus-manager.h>
 #include <dali-ui-foundation/extension-api/group-selectable-view-impl.h>
 #include <dali-ui-foundation/extension-api/interactive-view-impl.h>
+#include <dali-ui-foundation/extension-api/progress-view-impl.h>
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/extension-api/selectable-view-impl.h>
 #include <dali-ui-foundation/extension-api/shadow.h>

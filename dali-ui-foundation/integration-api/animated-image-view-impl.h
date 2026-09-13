@@ -28,7 +28,7 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/signals/dali-signal.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -58,29 +58,29 @@ public: // Properties
   {
     enum
     {
-      IMAGE                     = Ui::AnimatedImageViewPropertyIndex::IMAGE,
-      IMAGE_URLS                = Ui::AnimatedImageViewPropertyIndex::IMAGE_URLS,
-      LOOP_COUNT                = Ui::AnimatedImageViewPropertyIndex::LOOP_COUNT,
-      STOP_BEHAVIOR             = Ui::AnimatedImageViewPropertyIndex::STOP_BEHAVIOR,
-      FRAME_SPEED_FACTOR        = Ui::AnimatedImageViewPropertyIndex::FRAME_SPEED_FACTOR,
-      BATCH_SIZE                = Ui::AnimatedImageViewPropertyIndex::BATCH_SIZE,
-      CACHE_SIZE                = Ui::AnimatedImageViewPropertyIndex::CACHE_SIZE,
-      FRAME_DELAY               = Ui::AnimatedImageViewPropertyIndex::FRAME_DELAY,
-      IMAGE_COLOR               = Ui::AnimatedImageViewPropertyIndex::IMAGE_COLOR,
-      PRE_MULTIPLIED_ALPHA      = Ui::AnimatedImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
-      FITTING_MODE              = Ui::AnimatedImageViewPropertyIndex::FITTING_MODE,
-      SAMPLING_MODE             = Ui::AnimatedImageViewPropertyIndex::SAMPLING_MODE,
-      DESIRED_WIDTH             = Ui::AnimatedImageViewPropertyIndex::DESIRED_WIDTH,
-      DESIRED_HEIGHT            = Ui::AnimatedImageViewPropertyIndex::DESIRED_HEIGHT,
-      LOAD_POLICY               = Ui::AnimatedImageViewPropertyIndex::LOAD_POLICY,
-      RELEASE_POLICY            = Ui::AnimatedImageViewPropertyIndex::RELEASE_POLICY,
-      SYNCHRONOUS_LOADING       = Ui::AnimatedImageViewPropertyIndex::SYNCHRONOUS_LOADING,
-      IMAGE_LOAD_WITH_VIEW_SIZE = Ui::AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
-      ALPHA_MASK_URL            = Ui::AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
-      CROP_TO_MASK              = Ui::AnimatedImageViewPropertyIndex::CROP_TO_MASK,
-      MASKING_MODE              = Ui::AnimatedImageViewPropertyIndex::MASKING_MODE,
-      PLACEHOLDER_IMAGE         = Ui::AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
-      PIXEL_AREA                = Ui::AnimatedImageViewPropertyIndex::PIXEL_AREA,
+      IMAGE                      = Ui::AnimatedImageViewPropertyIndex::IMAGE,
+      IMAGE_URLS                 = Ui::AnimatedImageViewPropertyIndex::IMAGE_URLS,
+      LOOP_COUNT                 = Ui::AnimatedImageViewPropertyIndex::LOOP_COUNT,
+      STOP_BEHAVIOR              = Ui::AnimatedImageViewPropertyIndex::STOP_BEHAVIOR,
+      FRAME_SPEED_FACTOR         = Ui::AnimatedImageViewPropertyIndex::FRAME_SPEED_FACTOR,
+      BATCH_SIZE                 = Ui::AnimatedImageViewPropertyIndex::BATCH_SIZE,
+      CACHE_SIZE                 = Ui::AnimatedImageViewPropertyIndex::CACHE_SIZE,
+      FRAME_DELAY                = Ui::AnimatedImageViewPropertyIndex::FRAME_DELAY,
+      IMAGE_COLOR                = Ui::AnimatedImageViewPropertyIndex::IMAGE_COLOR,
+      PRE_MULTIPLY_ALPHA_ON_LOAD = Ui::AnimatedImageViewPropertyIndex::PRE_MULTIPLY_ALPHA_ON_LOAD,
+      FITTING_MODE               = Ui::AnimatedImageViewPropertyIndex::FITTING_MODE,
+      SAMPLING_MODE              = Ui::AnimatedImageViewPropertyIndex::SAMPLING_MODE,
+      DESIRED_WIDTH              = Ui::AnimatedImageViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT             = Ui::AnimatedImageViewPropertyIndex::DESIRED_HEIGHT,
+      LOAD_POLICY                = Ui::AnimatedImageViewPropertyIndex::LOAD_POLICY,
+      RELEASE_POLICY             = Ui::AnimatedImageViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING        = Ui::AnimatedImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+      IMAGE_LOAD_WITH_VIEW_SIZE  = Ui::AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+      ALPHA_MASK_URL             = Ui::AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
+      CROP_TO_MASK               = Ui::AnimatedImageViewPropertyIndex::CROP_TO_MASK,
+      MASKING_POLICY             = Ui::AnimatedImageViewPropertyIndex::MASKING_POLICY,
+      PLACEHOLDER_IMAGE          = Ui::AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+      PIXEL_AREA                 = Ui::AnimatedImageViewPropertyIndex::PIXEL_AREA,
     };
   };
 
@@ -126,14 +126,14 @@ public: // API
   void Reload();
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::SetResourceUrls
+   * @copydoc Dali::Ui::AnimatedImageView::SetResourceUrlList
    */
-  void SetResourceUrls(const Dali::Vector<Dali::String>& urls);
+  void SetResourceUrlList(const Dali::Vector<Dali::String>& urls);
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::GetResourceUrls
+   * @copydoc Dali::Ui::AnimatedImageView::GetResourceUrlList
    */
-  const Dali::Vector<Dali::String>& GetResourceUrls() const;
+  const Dali::Vector<Dali::String>& GetResourceUrlList() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::Play
@@ -191,9 +191,9 @@ public: // API
   Ui::Image::SamplingMode GetSamplingMode() const;
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::SetImageLoadWithViewSize
+   * @copydoc Dali::Ui::AnimatedImageView::SetImageLoadWithViewSizeEnabled
    */
-  void SetImageLoadWithViewSize(bool enabled);
+  void SetImageLoadWithViewSizeEnabled(bool enabled);
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::IsImageLoadWithViewSizeEnabled
@@ -221,14 +221,14 @@ public: // API
   bool IsCropToMask() const;
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::SetMaskingMode
+   * @copydoc Dali::Ui::AnimatedImageView::SetMaskingPolicy
    */
-  void SetMaskingMode(Ui::Image::MaskingType maskingMode);
+  void SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy);
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::GetMaskingMode
+   * @copydoc Dali::Ui::AnimatedImageView::GetMaskingPolicy
    */
-  Ui::Image::MaskingType GetMaskingMode() const;
+  Ui::Image::MaskingPolicy GetMaskingPolicy() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetPlaceholderUrl
@@ -311,14 +311,14 @@ public: // API
   Ui::AnimatedImage::PlayState GetPlayState() const;
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::GetCurrentFrame
+   * @copydoc Dali::Ui::AnimatedImageView::GetCurrentFrameNumber
    */
-  int GetCurrentFrame() const;
+  int GetCurrentFrameNumber() const;
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::GetTotalFrame
+   * @copydoc Dali::Ui::AnimatedImageView::GetTotalFrameCount
    */
-  int GetTotalFrame() const;
+  int GetTotalFrameCount() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetNaturalSize
@@ -376,14 +376,14 @@ public: // API
   bool IsSynchronousLoading() const;
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::SetPreMultipliedAlpha
+   * @copydoc Dali::Ui::AnimatedImageView::SetPreMultiplyAlphaOnLoadEnabled
    */
-  void SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultiplyAlphaOnLoadEnabled(bool preMultiplied);
 
   /**
-   * @copydoc Dali::Ui::AnimatedImageView::IsPreMultipliedAlpha
+   * @copydoc Dali::Ui::AnimatedImageView::IsPreMultiplyAlphaOnLoadEnabled
    */
-  bool IsPreMultipliedAlpha() const;
+  bool IsPreMultiplyAlphaOnLoadEnabled() const;
 
 public: // Loading Status & Signals
   /**
@@ -414,6 +414,11 @@ protected: // From ViewImpl
 
 private: // Internal methods
   /**
+   * @brief Creates or refreshes the animated image visual when its properties are dirty.
+   */
+  void EnsureVisualUpdated();
+
+  /**
    * @brief Rebuilds and re-registers the image visual from current property values.
    */
   void UpdateVisual();
@@ -428,7 +433,7 @@ private: // Internal methods
    *
    * Used to intercept ANIMATION_FINISHED and forward it as AnimationFinishedSignal.
    */
-  void OnVisualEvent(View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId);
+  void OnVisualEvent(Ui::View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId);
 
   /**
    * @brief Called when the view's resource becomes ready.
@@ -459,7 +464,7 @@ private:                                 // Data
   Ui::AnimatedImage::StopBehavior mStopBehavior;
   Ui::Image::FittingMode          mFittingMode;
   Ui::Image::SamplingMode         mSamplingMode;
-  Ui::Image::MaskingType          mMaskingMode;
+  Ui::Image::MaskingPolicy        mMaskingPolicy;
   Ui::Image::LoadPolicy           mLoadPolicy;
   Ui::Image::ReleasePolicy        mReleasePolicy;
   int                             mLoopCount;
@@ -470,7 +475,7 @@ private:                                 // Data
   int                             mDesiredHeight;
   float                           mFrameSpeedFactor;
 
-  bool mPreMultipliedAlpha;
+  bool mPreMultiplyAlphaOnLoad;
   bool mImageLoadWithViewSize;
   bool mCropToMask;
   bool mSynchronousLoading;
@@ -481,4 +486,4 @@ private:                                 // Data
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

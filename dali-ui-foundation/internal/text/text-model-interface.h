@@ -35,12 +35,17 @@
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
 namespace Text
 {
+namespace Internal
+{
+struct GradientSpanModelData;
+}
+
 /**
  * @brief Interface class used to retrieve the text's model from the text-controller.
  */
@@ -55,14 +60,14 @@ public:
   }
 
   /**
-   * @brief Retrives the control's size.
+   * @brief Retrieves the control's size.
    *
    * @return The control's size.
    */
   virtual const Size& GetControlSize() const = 0;
 
   /**
-   * @brief Retrives the layout's size.
+   * @brief Retrieves the layout's size.
    *
    * @return The layout's size.
    */
@@ -207,6 +212,17 @@ public:
    * @return Pointer to a vector which stores for each glyph the index to the vector of colors.
    */
   virtual const ColorIndex* GetColorIndices() const = 0;
+
+  /**
+   * @brief Retrieves optional canonical GradientSpan paint data.
+   *
+   * The default keeps existing model implementations source-compatible and
+   * allocation-free when GradientSpan is not present.
+   */
+  virtual const Internal::GradientSpanModelData* GetGradientSpanModelData() const
+  {
+    return nullptr;
+  }
 
   /**
    * @brief Retrieves the vector of background colors.
@@ -565,6 +581,6 @@ public:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_UI_TEXT_MODEL_INTERFACE_H

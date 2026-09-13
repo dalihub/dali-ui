@@ -22,7 +22,7 @@
 #include <dali/devel-api/common/addon-binder.h>
 #include <memory>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -78,6 +78,6 @@ public:
 
 } // namespace Internal
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #endif // DALI_CMAKE_RENDERING_ADDON_H

@@ -23,7 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -96,11 +96,11 @@ struct ImageViewPropertyIndex
     IMAGE_COLOR,
 
     /**
-     * @brief Whether the image uses pre-multiplied alpha.
-     * @details Name "preMultipliedAlpha", type Property::BOOLEAN.
-     * @note See also: ImageView::SetPreMultipliedAlpha(), ImageView::IsPreMultipliedAlpha().
+     * @brief Whether to multiply the colour channels of the image by its alpha channel as it is loaded.
+     * @details Name "preMultiplyAlphaOnLoad", type Property::BOOLEAN.
+     * @note See also: ImageView::SetPreMultiplyAlphaOnLoadEnabled(), ImageView::IsPreMultiplyAlphaOnLoadEnabled().
      */
-    PRE_MULTIPLIED_ALPHA,
+    PRE_MULTIPLY_ALPHA_ON_LOAD,
 
     ///////////////////////////////////////////////////////////////////////////////
     // Placeholder
@@ -133,10 +133,10 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The masking mode.
-     * @details Name "maskingMode", type Ui::Image::MaskingType (Property::INTEGER).
-     * @note See also: ImageView::SetMaskingMode(), ImageView::GetMaskingMode().
+     * @details Name "maskingPolicy", type Ui::Image::MaskingPolicy (Property::INTEGER).
+     * @note See also: ImageView::SetMaskingPolicy(), ImageView::GetMaskingPolicy().
      */
-    MASKING_MODE,
+    MASKING_POLICY,
 
     ///////////////////////////////////////////////////////////////////////////////
     // Loading behavior
@@ -180,21 +180,21 @@ struct ImageViewPropertyIndex
     /**
      * @brief Whether the view size is used as the image load size.
      * @details Name "imageLoadWithViewSize", type Property::BOOLEAN.
-     * @note See also: ImageView::SetImageLoadWithViewSize(), ImageView::IsImageLoadWithViewSizeEnabled().
+     * @note See also: ImageView::SetImageLoadWithViewSizeEnabled(), ImageView::IsImageLoadWithViewSizeEnabled().
      */
     IMAGE_LOAD_WITH_VIEW_SIZE,
 
     /**
      * @brief Whether fast-track GPU uploading is enabled.
      * @details Name "fastTrackUploading", type Property::BOOLEAN.
-     * @note See also: ImageView::SetFastTrackUpload(), ImageView::IsFastTrackUploadEnabled().
+     * @note See also: ImageView::SetFastTrackUploadEnabled(), ImageView::IsFastTrackUploadEnabled().
      */
     FAST_TRACK_UPLOADING,
 
     /**
      * @brief Whether EXIF orientation metadata is applied automatically.
      * @details Name "orientationCorrection", type Property::BOOLEAN.
-     * @note See also: ImageView::SetOrientationCorrection(), ImageView::IsOrientationCorrectionEnabled().
+     * @note See also: ImageView::SetOrientationCorrectionEnabled(), ImageView::IsOrientationCorrectionEnabled().
      */
     ORIENTATION_CORRECTION,
 
@@ -203,7 +203,7 @@ struct ImageViewPropertyIndex
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @brief The N-patch border insets as (left, top, right, bottom).
+     * @brief The widths of the fixed n-patch frame as (left, right, top, bottom).
      * @details Name "nPatchBorder", type Property::VECTOR4.
      * @note See also: ImageView::SetNPatchBorder(), ImageView::GetNPatchBorder().
      */
@@ -230,4 +230,4 @@ struct ImageViewPropertyIndex
 };
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

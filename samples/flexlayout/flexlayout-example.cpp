@@ -24,7 +24,7 @@ using namespace Dali::Ui;
  * A horizontal flex row with three children:
  * - Red box: fixed 100px width
  * - Green box: flex-grow 1 (takes remaining space)
- * - Blue box: fixed 80px width
+ * - Blue box: fixed 100px width
  *
  * Press Escape or Back to quit.
  */

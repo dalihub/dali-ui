@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/public-api/views/recycler/group-linear-items-layouter.h>
 #include <dali/integration-api/debug.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -68,4 +68,4 @@ float GroupLinearItemsLayouter::GetBodyMarginRight() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

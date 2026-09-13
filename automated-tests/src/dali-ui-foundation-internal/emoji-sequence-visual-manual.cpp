@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/shaping.h>
 #include <dali/public-api/adaptor-framework/capture.h>
@@ -40,6 +41,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -1376,20 +1379,20 @@ std::string SourcePathForOptions(const VisualOptions& options)
 Property::Map CreateSoftShadowMap(float alpha, float offsetY, float blurRadius, const Vector2& sizeScale)
 {
   Property::Map transform;
-  transform.Add(Ui::Visual::Transform::Property::OFFSET, Vector2(0.0f, offsetY));
-  transform.Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-                Vector2(static_cast<float>(Ui::Visual::Transform::Policy::ABSOLUTE),
-                        static_cast<float>(Ui::Visual::Transform::Policy::ABSOLUTE)));
-  transform.Add(Ui::Visual::Transform::Property::SIZE, sizeScale);
-  transform.Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-                Vector2(static_cast<float>(Ui::Visual::Transform::Policy::RELATIVE),
-                        static_cast<float>(Ui::Visual::Transform::Policy::RELATIVE)));
+  transform.Add(Ui::Integration::Visual::Transform::Property::OFFSET, Vector2(0.0f, offsetY));
+  transform.Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+                Vector2(static_cast<float>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE),
+                        static_cast<float>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE)));
+  transform.Add(Ui::Integration::Visual::Transform::Property::SIZE, sizeScale);
+  transform.Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY,
+                Vector2(static_cast<float>(Ui::Integration::Visual::Transform::Policy::RELATIVE),
+                        static_cast<float>(Ui::Integration::Visual::Transform::Policy::RELATIVE)));
 
   Property::Map shadow;
-  shadow.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::VisualType::COLOR);
-  shadow.Add(Ui::VisualBasePropertyIndex::MIX_COLOR, Vector4(0.0f, 0.0f, 0.0f, alpha));
-  shadow.Add(Ui::ColorVisualPropertyIndex::BLUR_RADIUS, blurRadius);
-  shadow.Add(Ui::VisualBasePropertyIndex::TRANSFORM, transform);
+  shadow.Add(Ui::Integration::Visual::Property::TYPE, Ui::VisualType::COLOR);
+  shadow.Add(Ui::Integration::Visual::Property::MIX_COLOR, Vector4(0.0f, 0.0f, 0.0f, alpha));
+  shadow.Add(Ui::Integration::ColorVisual::Property::BLUR_RADIUS, blurRadius);
+  shadow.Add(Ui::Integration::Visual::Property::TRANSFORM, transform);
   return shadow;
 }
 
@@ -2568,7 +2571,7 @@ private:
     mSearchInput.SetTextOverflowMode(Text::OverflowMode::CLIP);
     mSearchInput.SetCornerRadiusPolicyRelative();
     mSearchInput.SetCornerRadius(0.5f);
-    mSearchInput.SetProperty(View::Property::SHADOW, CreateSoftShadowMap(0.14f, 3.0f, 5.0f, Vector2(1.02f, 1.08f)));
+    mSearchInput.SetProperty(Dali::Ui::Integration::View::Property::SHADOW, CreateSoftShadowMap(0.14f, 3.0f, 5.0f, Vector2(1.02f, 1.08f)));
     mSearchInput.SetFocusable(true);
     mSearchInput.SetFocusOnTouchEnabled(true);
     mSearchInput.SetProperty(Actor::Property::VISIBLE, false);
@@ -2583,7 +2586,7 @@ private:
     mSearchButton.SetBackgroundColor(Color::WHITE);
     mSearchButton.SetCornerRadiusPolicyRelative();
     mSearchButton.SetCornerRadius(0.5f);
-    mSearchButton.SetProperty(View::Property::SHADOW, CreateSoftShadowMap(0.18f, 3.0f, 4.0f, Vector2(1.08f, 1.08f)));
+    mSearchButton.SetProperty(Dali::Ui::Integration::View::Property::SHADOW, CreateSoftShadowMap(0.18f, 3.0f, 4.0f, Vector2(1.08f, 1.08f)));
     mSearchButton.TouchEventSignal().Connect(this, &EmojiVisualController::OnSearchButtonTouched);
 
     mSearchIcon = Label::New(SEARCH_BUTTON_EMOJI);

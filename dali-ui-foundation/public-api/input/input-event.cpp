@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/input-event-impl.h>
 #include <dali-ui-foundation/public-api/input/input-event.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -136,4 +136,4 @@ const HoverEvent& InputEvent::GetHoverEvent() const
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

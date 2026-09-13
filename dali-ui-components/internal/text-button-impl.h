@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/extension-api/interactive-view-impl.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -91,4 +91,4 @@ inline const Internal::TextButtonImpl& GetImpl(const Ui::TextButton& button)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

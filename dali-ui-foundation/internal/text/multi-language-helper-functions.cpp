@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -168,4 +168,4 @@ Script GetScript(Length index, Vector<ScriptRun>::ConstIterator& scriptRunIt,
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

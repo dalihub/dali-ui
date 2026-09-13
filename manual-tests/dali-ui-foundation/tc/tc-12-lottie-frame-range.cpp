@@ -117,9 +117,9 @@ public:
       MakeButton("Stop",  [this] { mView.Stop(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Full",        [this] { int total = mView.GetTotalFrame(); SetRequestedRange(0, total); }),
-      MakeButton("First Half",  [this] { int total = mView.GetTotalFrame(); SetRequestedRange(0, total / 2); }),
-      MakeButton("Second Half", [this] { int total = mView.GetTotalFrame(); SetRequestedRange(total / 2, total); }),
+      MakeButton("Full",        [this] { int total = mView.GetTotalFrameCount(); SetRequestedRange(0, total); }),
+      MakeButton("First Half",  [this] { int total = mView.GetTotalFrameCount(); SetRequestedRange(0, total / 2); }),
+      MakeButton("Second Half", [this] { int total = mView.GetTotalFrameCount(); SetRequestedRange(total / 2, total); }),
       MakeButton("First 10",    [this] { SetRequestedRange(0, 10); }),
     }));
     content.Add(MakeButtonRow({
@@ -148,12 +148,12 @@ private:
     int maxF = mRequestedMaxFrame;
     if(maxF == 0)
     {
-      maxF = mView.GetTotalFrame();
+      maxF = mView.GetTotalFrameCount();
     }
     const bool getterAvailable = ReadMinMaxFrame(mView, minF, maxF, 0);
     mStatusLabel.SetText(
-      Dali::String("Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrame()).c_str()) +
-      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrame()).c_str()) +
+      Dali::String("Frame: ") + Dali::String(std::to_string(mView.GetCurrentFrameNumber()).c_str()) +
+      Dali::String("/") + Dali::String(std::to_string(mView.GetTotalFrameCount()).c_str()) +
       Dali::String(getterAvailable ? " | Range: " : " | Range(requested): ") + Dali::String(std::to_string(minF).c_str()) +
       Dali::String("-") + Dali::String(std::to_string(maxF).c_str()) +
       Dali::String(" | Speed: ") + Dali::String(std::to_string(mView.GetFrameSpeedFactor()).c_str()));

@@ -15,7 +15,7 @@
 
 #include "window-frame-interaction-controller.h"
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 
 bool WindowFrameInteractionController::CanBegin() const
@@ -146,4 +146,4 @@ const char* WindowFrameInteractionStateName(WindowFrameInteractionState state)
   return "unknown";
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

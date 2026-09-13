@@ -29,7 +29,7 @@
 #define DALI_ASSERT_REVEAL_NOT_NONE(impl, message) \
   DALI_ASSERT_ALWAYS(!(impl)->mIsNone && message)
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -40,14 +40,18 @@ class Reveal::Impl
 public:
   Impl()
   : mUnit(Unit::CHARACTER),
+    mSequence(Sequence::WHOLE_TEXT),
     mFadeDurationRatio(AUTO_FADE_DURATION_RATIO),
+    mSequenceStaggerRatio(0.0f),
     mIsNone(false)
   {
   }
 
-  Unit  mUnit;
-  float mFadeDurationRatio;
-  bool  mIsNone;
+  Unit     mUnit;
+  Sequence mSequence;
+  float    mFadeDurationRatio;
+  float    mSequenceStaggerRatio;
+  bool     mIsNone;
 };
 
 Reveal::Reveal()
@@ -115,7 +119,10 @@ bool Reveal::operator==(const Reveal& rhs) const
   {
     return mImpl->mIsNone == rhs.mImpl->mIsNone;
   }
-  return mImpl->mUnit == rhs.mImpl->mUnit && Dali::Equals(mImpl->mFadeDurationRatio, rhs.mImpl->mFadeDurationRatio);
+  return mImpl->mUnit == rhs.mImpl->mUnit &&
+         mImpl->mSequence == rhs.mImpl->mSequence &&
+         Dali::Equals(mImpl->mFadeDurationRatio, rhs.mImpl->mFadeDurationRatio) &&
+         Dali::Equals(mImpl->mSequenceStaggerRatio, rhs.mImpl->mSequenceStaggerRatio);
 }
 
 bool Reveal::operator!=(const Reveal& rhs) const
@@ -135,6 +142,34 @@ Reveal::Unit Reveal::GetUnit() const
   DALI_ASSERT_VALID_REVEAL(mImpl);
   DALI_ASSERT_REVEAL_NOT_NONE(mImpl, "Cannot access Text::Reveal::None() properties.");
   return mImpl->mUnit;
+}
+
+void Reveal::SetSequence(Sequence sequence)
+{
+  DALI_ASSERT_VALID_REVEAL(mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(mImpl, "Cannot modify Text::Reveal::None().");
+  mImpl->mSequence = sequence;
+}
+
+Reveal::Sequence Reveal::GetSequence() const
+{
+  DALI_ASSERT_VALID_REVEAL(mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(mImpl, "Cannot access Text::Reveal::None() properties.");
+  return mImpl->mSequence;
+}
+
+void Reveal::SetSequenceStaggerRatio(float ratio)
+{
+  DALI_ASSERT_VALID_REVEAL(mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(mImpl, "Cannot modify Text::Reveal::None().");
+  mImpl->mSequenceStaggerRatio = std::isnan(ratio) ? 0.0f : std::max(0.0f, std::min(1.0f, ratio));
+}
+
+float Reveal::GetSequenceStaggerRatio() const
+{
+  DALI_ASSERT_VALID_REVEAL(mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(mImpl, "Cannot access Text::Reveal::None() properties.");
+  return mImpl->mSequenceStaggerRatio;
 }
 
 void Reveal::SetFadeDurationRatio(float ratio)
@@ -164,7 +199,7 @@ float Reveal::GetFadeDurationRatio() const
 
 } // namespace Text
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE
 
 #undef DALI_ASSERT_REVEAL_NOT_NONE
 #undef DALI_ASSERT_VALID_REVEAL

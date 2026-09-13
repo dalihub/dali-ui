@@ -167,7 +167,7 @@ int UtcDaliImageCacheClearUnusedTexturesClearsNPatchCache(void)
   bool  preMultiply    = false;
   auto  npatchId       = npatchLoader.Load(textureManager, nullptr,
                                            Dali::Ui::Internal::VisualUrl("image-cache.9.png"),
-                                           Dali::Extents(), preMultiply, true);
+                                           Dali::Insets(), preMultiply, true);
 
   Dali::Ui::Internal::NPatchDataPtr data;
   DALI_TEST_CHECK(npatchLoader.GetNPatchData(npatchId, data));
@@ -192,8 +192,8 @@ int UtcDaliImageCacheClearUnusedTexturesSkipsSharedNPatch(void)
   auto&      npatchLoader   = factoryCache.GetNPatchLoader();
   const auto url            = Dali::Ui::Internal::VisualUrl("image-cache-shared.9.png");
   bool       preMultiply    = false;
-  auto       firstId        = npatchLoader.Load(textureManager, nullptr, url, Dali::Extents(), preMultiply, true);
-  auto       secondId       = npatchLoader.Load(textureManager, nullptr, url, Dali::Extents(), preMultiply, true);
+  auto       firstId        = npatchLoader.Load(textureManager, nullptr, url, Dali::Insets(), preMultiply, true);
+  auto       secondId       = npatchLoader.Load(textureManager, nullptr, url, Dali::Insets(), preMultiply, true);
 
   DALI_TEST_EQUALS(firstId, secondId, TEST_LOCATION);
 

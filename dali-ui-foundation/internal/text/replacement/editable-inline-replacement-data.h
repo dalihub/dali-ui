@@ -21,17 +21,17 @@
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali::Ui
+namespace DALI_NAMESPACE::Ui
 {
 class ViewImpl;
 }
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 struct ReplacementRenderState;
 }
 
-namespace Dali::Ui::Internal::Text
+namespace DALI_NAMESPACE::Ui::Internal::Text
 {
 /**
  * @brief Enumerates actions for updating editable inline replacement data.
@@ -128,6 +128,6 @@ void RemoveEditableInlineReplacementData(Ui::View owner);
  */
 void RemoveEditableInlineReplacementData(Ui::ViewImpl& owner);
 
-} // namespace Dali::Ui::Internal::Text
+} //namespace DALI_NAMESPACE::Ui::Internal::Text
 
 #endif // DALI_UI_EDITABLE_INLINE_REPLACEMENT_DATA_H

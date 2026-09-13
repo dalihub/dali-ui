@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/views/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -82,9 +82,15 @@ public:
    * The focus is set exactly to the specified view without child delegation.
    * If the view is not focusable or not on the scene, the call fails.
    * Use RequestFocus() if you want automatic child delegation for containers.
+   * If the View's Window does not hold platform input focus, only its stored
+   * focus target is updated. Actual focus, indication and FocusChangedSignal
+   * are unchanged until that Window gains focus. This does not activate a Window;
+   * use Window::Activate() to request an intentional Window switch.
+   * Removing or disabling a stored target cancels its reservation. Reattaching
+   * or re-enabling it does not restore that reservation without a new request.
    *
    * @param view The view to be focused
-   * @return Whether the focus is successful or not
+   * @return true if the target was applied or stored for later activation
    * @pre The FocusManager has been initialized.
    * @pre The View has been initialized.
    */
@@ -97,9 +103,11 @@ public:
    * descendant (child-first). If no descendant accepts focus and
    * the view itself is focusable, it receives focus.
    * If an ancestor has DescendantFocusBlocked set, the request is rejected.
+   * An inactive Window stores the resolved target without changing actual focus,
+   * indication or emitting FocusChangedSignal, as with SetCurrentFocusView().
    *
    * @param view The view to request focus on
-   * @return Whether the focus is successful or not
+   * @return true if the resolved target was applied or stored for later activation
    * @pre The FocusManager has been initialized.
    * @pre The View has been initialized.
    */
@@ -123,9 +131,13 @@ public:
    * If there is no current focus and a navigation Window can be determined,
    * processing starts at the application fallback. A Stay() result consumes
    * the request but returns false because no focus movement occurred.
+   * Navigation stays within its Window. In an inactive Window it starts from
+   * and updates that Window's stored target without changing actual focus.
+   * Key navigation uses the input event's Window; this overload uses the last
+   * Window that received platform focus. This does not activate a Window.
    *
    * @param direction The direction of focus movement
-   * @return true if the movement was successful
+   * @return true if the actual or stored focus target moved
    * @pre The FocusManager has been initialized.
    */
   bool MoveFocus(FocusDirection direction);
@@ -135,6 +147,10 @@ public:
    * that no actor is focused in the focus chain.
    *
    * It will emit focus changed signal without current focused actor.
+   * The stored target of the current View's Window is also removed, including
+   * any deferred replacement. Other Windows' stored targets are preserved.
+   * If no View is focused, the last platform-focused Window's target is removed.
+   * This does not change platform Window activation.
    * @pre The FocusManager has been initialized.
    */
   void ClearFocus();
@@ -203,6 +219,9 @@ public:
 
   /**
    * @brief Move the focus to prev focused actor
+   *
+   * An inactive target Window only updates its stored target. Repeated calls
+   * continue walking the history even while actual focus is unchanged.
    */
   void MoveFocusBackward();
 
@@ -233,7 +252,14 @@ public:
    * @brief Sets whether to clear focus when window loses focus.
    *
    * By default, this is enabled.
-   * When disabled, the focus state is preserved even when the window loses focus,
+   * When enabled, actual focus is cleared on Window focus loss, but the stored
+   * target is preserved for restoration when the Window gains focus again.
+   * When disabled, existing actual focus is retained on Window focus loss.
+   * This does not allow new actual focus changes in an inactive Window:
+   * SetCurrentFocusView(), RequestFocus() and navigation only update its stored
+   * target. When another Window gains focus, the old actual focus is replaced
+   * by its stored target, or cleared if it has no valid target. No default target
+   * is automatically selected on Window focus gain.
    *
    * @param enabled Whether to clear focus when window loses focus
    */
@@ -330,4 +356,4 @@ public: // Signals
  */
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

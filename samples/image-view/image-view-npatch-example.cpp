@@ -27,7 +27,7 @@ using namespace Dali::Ui;
  * - Loads a .9.png image whose border regions are encoded in the file
  * - Shows the image stretched to various sizes to verify borders don't distort
  * - Toggle SetNPatchBorderOnly() to render only the border regions (hollow center)
- * - Manual border override row: shows SetNPatchBorder(Vector4) with explicit insets
+ * - Manual border override row: shows SetNPatchBorder(Insets) with explicit insets
  * - Press Escape or Back to quit
  */
 class ImageViewNPatchController : public ConnectionTracker

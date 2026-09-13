@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/selectable-lottie-animation-view-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -56,4 +56,4 @@ SelectableLottieAnimationView::SelectableLottieAnimationView(Integration::Select
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

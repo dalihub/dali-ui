@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/public-api/types/view-state.h>
 #include <dali-ui-foundation/public-api/views/state-event.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -103,4 +103,4 @@ inline const Internal::StateEventImpl& GetImpl(const StateEvent& obj)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

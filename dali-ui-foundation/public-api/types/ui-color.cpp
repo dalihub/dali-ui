@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/internal/ui-color-cache.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -40,6 +40,7 @@ const UiColor UiColor::ON_PRIMARY("OnPrimary");
 const UiColor UiColor::BACKGROUND("Background");
 const UiColor UiColor::SURFACE("Surface");
 const UiColor UiColor::ON_SURFACE("OnSurface");
+const UiColor UiColor::ON_SURFACE_CONTAINER_HIGHEST("OnSurfaceContainerHighest");
 const UiColor UiColor::OUTLINE("Outline");
 const UiColor UiColor::SHADOW("Shadow");
 const UiColor UiColor::BLUR_SURFACE("BlurSurface");
@@ -431,4 +432,4 @@ void UiColor::SetTokenAlpha(float alpha)
 }
 
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

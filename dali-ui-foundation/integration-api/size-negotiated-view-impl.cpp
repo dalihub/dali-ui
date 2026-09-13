@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 
-namespace Dali::Ui::Integration
+namespace DALI_NAMESPACE::Ui::Integration
 {
 
 SizeNegotiatedViewImpl::~SizeNegotiatedViewImpl() = default;
@@ -83,4 +83,4 @@ void SizeNegotiatedViewImpl::OnInitialize()
 
 SizeNegotiatedViewImpl::SizeNegotiatedViewImpl() = default;
 
-} // namespace Dali::Ui::Integration
+} //namespace DALI_NAMESPACE::Ui::Integration

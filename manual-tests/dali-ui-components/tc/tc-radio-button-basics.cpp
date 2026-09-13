@@ -76,7 +76,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(WRAP_CONTENT);
     root.SetSpacing(8.0f);
-    root.SetPadding(Extents(16, 16, 16, 16));
+    root.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
 
     mStatus = MakeLabel("Select a radio button", 14.0f, COLOR_STATUS);
 

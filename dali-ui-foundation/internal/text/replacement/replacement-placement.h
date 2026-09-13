@@ -22,10 +22,11 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/final-elision-result.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
-namespace Dali::Ui::Text
+namespace DALI_NAMESPACE::Ui::Text
 {
 /**
  * @brief Extracts replacement placements from the final text layout.
@@ -44,6 +45,21 @@ void ExtractReplacementPlacements(const Model&                  model,
                                   FontId                        defaultFontId,
                                   Vector<ReplacementPlacement>& placements);
 
-} // namespace Dali::Ui::Text
+/**
+ * @brief Extracts async RenderScale placements using request-local AUTO line metrics.
+ *
+ * Caret metrics continue to use the rendered font ids. Only the surrounding
+ * ascender and descender used for replacement vertical placement are resolved
+ * from @p lineMetricData.
+ */
+void ExtractReplacementPlacements(const Model&                     model,
+                                  const ReplacementProjection&     projection,
+                                  const FinalElisionResult&        finalElision,
+                                  TextAbstraction::FontClient&     fontClient,
+                                  FontId                           defaultFontId,
+                                  const ReplacementLineMetricData& lineMetricData,
+                                  Vector<ReplacementPlacement>&    placements);
+
+} //namespace DALI_NAMESPACE::Ui::Text
 
 #endif // DALI_UI_TEXT_REPLACEMENT_PLACEMENT_H

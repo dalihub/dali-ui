@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/extension-api/selectable-view-impl.h>
 #include <dali-ui-foundation/public-api/views/selectable-view.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -90,4 +90,4 @@ void SelectableView::SetToggleByClickEnabled(bool enabled)
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

@@ -24,12 +24,11 @@
 #include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
-#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -46,88 +45,86 @@ class VisualBaseImpl;
 class View;
 
 /**
- * @brief VisualBase is a owner of Visual::Base.
+ * @brief The base class of every visual, which can be attached to a Dali::Ui::View.
  *
- * It represents the base visual object that can be attached to a Dali::Ui::View.
  * VisualBase manages attachment/detachment, sibling order, and property updates.
- * A VisualBase can belong to only one View's ContainerRangeType; adding it to
- * another View or ContainerRangeType will automatically remove it from the
- * previous one.
+ * A VisualBase can belong to only one depth layer of one View; adding it to another
+ * View, or to another depth layer, automatically removes it from the previous one.
  *
  * @code
  * Dali::Ui::View view = Dali::Ui::View::New();
- * Dali::Ui::ColorVisual visual = Dali::Ui::ColorVisual::New()
- *                                  .SetColor(UiColor("Primary"))
- *                                  .SetOffsetX(0.5f)
- *                                  .SetWidth(0.5f);
- * view.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+ * Dali::Ui::ColorVisual visual = Dali::Ui::ColorVisual::New();
+ * visual.SetColor(UiColor("Primary"));
+ * visual.SetOffsetX(0.5f);
+ * visual.SetWidth(0.5f);
+ * view.AddVisual(visual, Dali::Ui::Visual::DepthLayer::BACKGROUND);
  *
- * // view.GetVisualCount(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT) == 1u.
+ * // view.GetVisualCount(Dali::Ui::Visual::DepthLayer::BACKGROUND) == 1u.
  * // visual.GetOwner() == view.
  *
- * anotherView.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_CONTENT_AND_DECORATION)
+ * anotherView.AddVisual(visual, Dali::Ui::Visual::DepthLayer::CONTENT)
  *
- * // view.GetVisualCount(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT) == 0u.
+ * // view.GetVisualCount(Dali::Ui::Visual::DepthLayer::BACKGROUND) == 0u.
  * // visual.GetOwner() == anotherView.
  * @endcode
  *
  * VisualBase could change sibling order. It will change the rendering order at view.
- * Sibling order only works at same type of ContainerRangeType. VisualBase could not
- * over the container.
+ * Sibling order only reorders visuals sharing the same DepthLayer. A VisualBase can
+ * never be drawn outside of the layer it is attached to.
  *
- * For example, if ContainerRangeType added at BETWEEN_BACKGROUND_AND_CONTENT,
- * this visual could not be rendered under the background, or over the content.
+ * For example, a visual attached to DepthLayer::BACKGROUND can not be rendered
+ * under the View's background, nor over its content.
  *
  * @code
- * view.AddVisual(visual1, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
- * view.AddVisual(visual2, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+ * view.AddVisual(visual1, Dali::Ui::Visual::DepthLayer::BACKGROUND);
+ * view.AddVisual(visual2, Dali::Ui::Visual::DepthLayer::BACKGROUND);
  *
  * // visual1.GetSiblingOrder() == 0u, visual2.GetSiblingOrder() == 1u.
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u) == visual1;
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 1u) == visual2;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 0u) == visual1;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 1u) == visual2;
  * // Rendering order = view's Background -> visual1 -> visual2 -> Content (e.g. Text for Label, Image for ImageView)
  *
  * visual1.RaiseToTop();
  *
  * // visual1.GetSiblingOrder() == 1u, visual2.GetSiblingOrder() == 0u.
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u) == visual2;
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 1u) == visual1;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 0u) == visual2;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 1u) == visual1;
  * // Rendering order = view's Background -> visual2 -> visual1 -> Content
  *
  * visual2.Detach();
  *
  * // visual1.GetSiblingOrder() == 0u.
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u) == visual1;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 0u) == visual1;
  * // Rendering order = view's Background -> visual1 -> Content
  *
- * view.AddVisual(visual2, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND);
+ * view.AddVisual(visual2, Dali::Ui::Visual::DepthLayer::BACKGROUND_EFFECT);
  *
  * // visual1.GetSiblingOrder() == 0u.
  * // visual2.GetSiblingOrder() == 0u.
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, 0u) == visual2;
- * // view.GetVisualAt(Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, 0u) == visual1;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND_EFFECT, 0u) == visual2;
+ * // view.GetVisualAt(Dali::Ui::Visual::DepthLayer::BACKGROUND, 0u) == visual1;
  * // Rendering order = visual2 -> view's Background -> visual1 -> Content
  * @endcode
  *
  * VisualBase origin and pivot define the reference point of the visual relative to its attached view.
- * Origin define where should the Pivot positions from attached view.
- * (Similar with ParentOrigin and Pivot property of View class.)
+ * The origin selects a point on the attached view; the pivot selects the point on the visual that
+ * is placed there.
  *
  * Offset properties (X/Y) are expressed as a proportion of the pivot from the origin.
- * Width/Height
- * By default, Offset and Size parameters are proportions by attached view size.
- * You can set Dali::Ui::Visual::Transform::ProportionFlags to change each varaibles be absolute or relative.
+ * Width/Height define the size of the visual.
+ * By default, Offset and Size parameters are proportions of the attached view size.
+ * You can set Dali::Ui::Visual::Transform::ProportionFlags to make each value absolute or relative.
  *
- * ExtraWidth/ExtraHeight is additional absolute size of the visual. (Could be negative value)
- * The extra size expand from the Pivot.
+ * ExtraWidth/ExtraHeight add an absolute size to the visual, and may be negative.
+ * The extra size expands from the pivot.
  *
- * VisualBase itself don't have constructor. We should construct class by subclass of
- * VisualBase, e.g. ColorVisual::New().
+ * VisualBase itself has no constructor. Construct one through a subclass,
+ * e.g. ColorVisual::New().
  *
- * @note VisualBase properties applied before LayoutController process.
- * So if you try to create, or change properties during Layout, (e.g. ColorVisual::New() at OnMeasure())
- * that VisualBase properties didn't applied at this phase, so flickering will be occured.
- * DO NOT create or change VisualBase properties during Layout calculation.
+ * @note VisualBase properties are applied before the LayoutController runs. A visual created or
+ * changed during layout (e.g. ColorVisual::New() inside OnMeasure()) therefore has its properties
+ * applied too late for that pass, which flickers.
+ * DO NOT create or change VisualBase properties during layout calculation.
  */
 class DALI_UI_API VisualBase : public Dali::BaseHandle
 {
@@ -143,7 +140,7 @@ public:
    */
   static VisualBase DownCast(BaseHandle handle);
 
-public: ///< Public API
+public: // Attachment and type
   /**
    * @brief Get attached view. Empty handle if this visual is not be attached.
    *
@@ -152,27 +149,16 @@ public: ///< Public API
   Dali::Ui::View GetOwner() const;
 
   /**
-   * @brief Get the attached container range type. INVALID if this visual is not be attached.
+   * @brief Get the attached depth layer. NONE if this visual is not attached.
    *
-   * @return The attached container range type, or INVALID if not be attached.
+   * @return The attached depth layer, or NONE if not attached.
    */
-  Dali::Ui::Visual::ContainerRangeType GetContainerRangeType() const;
+  Dali::Ui::Visual::DepthLayer GetDepthLayer() const;
 
   /**
    * @brief Detach from the attached view.
-   *
    */
   void Detach();
-
-  /**
-   * @brief Perform an action on a visual registered to this view.
-   * Visuals will have actions, this API is used to perform one of these actions with the given attributes.
-   * @note If visual is not been registered to the view, action should be ignored.
-   *
-   * @param[in] actionId The action to perform.  See Visual to find supported actions.
-   * @param[in] attributes Optional attributes for the action.
-   */
-  void DoAction(Dali::Property::Index actionId, const Dali::Property::Value& attributes);
 
   /**
    * @brief Get the type of this VisualBase.
@@ -181,43 +167,7 @@ public: ///< Public API
    */
   Dali::Ui::VisualType GetVisualType() const;
 
-public: // GetProperty / SetProperty
-  /**
-   * @brief Retrieves a property value.
-   * @note BaseHandle is not subclass of Handle. So this API is not use Handle.SetProperty
-   *
-   * @param[in] index The index of the property
-   * @return The property value
-   * @note This returns the value set by SetProperty() or the animation target value if it is being animated.
-   */
-  Dali::Property::Value GetProperty(Dali::Property::Index index) const;
-
-  /**
-   * @brief Convenience function for obtaining a property of a known type.
-   *
-   * @param[in] index The index of the property
-   * @return The property value
-   * @pre The property types match i.e. PropertyTypes::Get<T>() is equal to GetPropertyType(index).
-   * @see GetProperty()
-   */
-  template<typename T>
-  T GetProperty(Dali::Property::Index index) const
-  {
-    Dali::Property::Value value = GetProperty(index);
-
-    return T(value.Get<T>());
-  }
-
-  /**
-   * @brief Sets the value of an existing property.
-   * @note BaseHandle is not subclass of Handle. So this API is not use Handle.SetProperty
-   *
-   * @param[in] index The index of the property
-   * @param[in] propertyValue The new value of the property
-   */
-  void SetProperty(Dali::Property::Index index, Dali::Property::Value propertyValue);
-
-public: // Setters
+public: // Accessors
   /**
    * @brief Gets the name of the VisualBase.
    *
@@ -233,19 +183,26 @@ public: // Setters
   void SetName(const Dali::String& name);
 
   /**
-   * @brief Gets the color of the VisualBase.
+   * @brief Gets the color of this VisualBase.
    *
-   * @return The color of the VisualBase
+   * @return The color of this VisualBase
    */
   UiColor GetColor() const;
 
   /**
    * @brief Sets the color of this VisualBase.
    *
+   * For a VisualBase that draws no content of its own, such as ColorVisual or BorderVisual,
+   * this is the rendered color. For a VisualBase that draws content, such as ImageVisual or
+   * TextVisual, the red, green, blue and alpha components are multiplied with the
+   * corresponding components of that content, tinting it.
+   *
    * @param[in] color The UiColor to apply
+   * @note The default color is white, which leaves drawn content unchanged.
    */
   void SetColor(const UiColor& color);
 
+  // Transform (Offset / Size / Proportion flags / Extra size / Origin / Pivot)
   /**
    * @brief Gets the X offset of the VisualBase.
    *
@@ -253,7 +210,6 @@ public: // Setters
    */
   float GetOffsetX() const;
 
-  // Transform relative properties
   /**
    * @brief Sets the X offset of the VisualBase.
    *
@@ -304,18 +260,24 @@ public: // Setters
   void SetHeight(float height);
 
   /**
-   * @brief Gets the proportion flags of the VisualBase.
+   * @brief Gets the transform proportion flags of the VisualBase.
    *
-   * @return The proportion flags of the VisualBase
+   * @return The transform proportion flags of the VisualBase
    */
-  Dali::Ui::Visual::Transform::ProportionFlags GetProportionFlags() const;
+  Dali::Ui::Visual::Transform::ProportionFlags GetTransformProportionFlags() const;
 
   /**
-   * @brief Sets the proportion flags of the VisualBase.
+   * @brief Sets the transform proportion flags of the VisualBase.
    *
-   * @param[in] flags The proportion flags to set
+   * A flag selects one of the offset and size values. A value whose flag is set is a fraction of
+   * the attached View's size, where 1.0f is the full size; a value whose flag is left unset is an
+   * absolute length in pixels.
+   *
+   * @note ExtraWidth and ExtraHeight are always absolute and are unaffected by these flags.
+   *
+   * @param[in] flags The transform proportion flags to set
    */
-  void SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags);
+  void SetTransformProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags);
 
   /**
    * @brief Gets the extra width of the VisualBase.
@@ -326,7 +288,7 @@ public: // Setters
 
   /**
    * @brief Sets the extra width of the VisualBase.
-   * This width will be added to final width absolutly, independent as proportion flags.
+   * This width is added to the final width absolutely, independent of the transform proportion flags.
    *
    * @param[in] extraWidth The extra width to set
    */
@@ -341,7 +303,7 @@ public: // Setters
 
   /**
    * @brief Sets the extra height of the VisualBase.
-   * This height will be added to final height absolutly, independent as proportion flags.
+   * This height is added to the final height absolutely, independent of the transform proportion flags.
    *
    * @param[in] extraHeight The extra height to set
    */
@@ -352,30 +314,40 @@ public: // Setters
    *
    * @return The origin of the VisualBase
    */
-  Align::Type GetOrigin() const;
+  VisualOrigin GetOrigin() const;
 
   /**
    * @brief Sets the origin of the VisualBase.
    *
-   * @param[in] origin The origin type to set
+   * The origin is the point on the attached View that this visual is positioned from.
+   *
+   * @note The origin is absolute and is never mirrored: a LEFT origin stays on the left whatever
+   * the effective layout direction.
+   *
+   * @param[in] origin The origin to set
    */
-  void SetOrigin(Align::Type origin);
+  void SetOrigin(VisualOrigin origin);
 
   /**
    * @brief Gets the pivot of the VisualBase.
    *
    * @return The pivot of the VisualBase
    */
-  Align::Type GetPivot() const;
+  VisualPivot GetPivot() const;
 
   /**
    * @brief Sets the pivot of the VisualBase.
    *
+   * The pivot is the point on the visual itself that is placed at the origin.
+   *
+   * @note Like the origin, the pivot is absolute and is never mirrored.
+   * @note This takes a Ui::VisualPivot, unlike Actor::SetPivot() which takes a Vector3.
+   *
    * @param[in] pivot The pivot to set
    */
-  void SetPivot(Align::Type pivot);
+  void SetPivot(VisualPivot pivot);
 
-  // Decorated properties (CornerRadius / Borderline)
+  // Decoration (CornerRadius / CornerSquareness / Borderline)
   /**
    * @brief Gets the corner radius of the VisualBase.
    *
@@ -385,7 +357,9 @@ public: // Setters
 
   /**
    * @brief Sets a uniform corner radius for all four corners.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * @param[in] radius The corner radius to apply to all corners
    */
@@ -393,7 +367,9 @@ public: // Setters
 
   /**
    * @brief Sets individual corner radii for all four corners.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * @param[in] topLeft     The radius for the top-left corner
    * @param[in] topRight    The radius for the top-right corner
@@ -404,7 +380,9 @@ public: // Setters
 
   /**
    * @brief Sets corner radii from a Vector4.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * @param[in] radius Corner radii as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
@@ -419,15 +397,21 @@ public: // Setters
 
   /**
    * @brief Sets the corner radius policy.
-   * @note Only supported type of visual has efforts.
    *
-   * @param[in] policy ABSOLUTE for world-unit values (default), RELATIVE for percentage [0.0, 0.5] of the shorter side
+   * @note The default is CornerRadiusPolicy::ABSOLUTE.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
+   *
+   * @param[in] policy ABSOLUTE for world-unit values, RELATIVE for a percentage [0.0, 0.5] of the shorter side
    */
   void SetCornerRadiusPolicy(CornerRadiusPolicy policy);
 
   /**
    * @brief Shortcut to set the corner radius policy to RELATIVE.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * Equivalent to SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE).
    */
@@ -449,7 +433,9 @@ public: // Setters
 
   /**
    * @brief Sets a uniform corner squareness for all four corners.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * @param[in] squareness The squareness value to apply to all corners
    */
@@ -457,7 +443,9 @@ public: // Setters
 
   /**
    * @brief Sets individual corner squareness values for all four corners.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * @param[in] topLeft     The squareness for the top-left corner
    * @param[in] topRight    The squareness for the top-right corner
@@ -468,7 +456,9 @@ public: // Setters
 
   /**
    * @brief Sets corner squareness from a Vector4.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * @param[in] squareness Squareness values as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
@@ -483,7 +473,9 @@ public: // Setters
 
   /**
    * @brief Sets the borderline width of the VisualBase.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * @param[in] width The borderline width to set
    */
@@ -498,7 +490,9 @@ public: // Setters
 
   /**
    * @brief Sets the borderline color of the VisualBase.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * If the UiColor has a color ID, it is resolved from the current
    * theme and a binding is registered so the color is automatically
@@ -517,13 +511,15 @@ public: // Setters
 
   /**
    * @brief Sets the borderline offset of the VisualBase.
-   * @note Only supported type of visual has efforts.
+   * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
+   * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
+   * showing an n-patch image.
    *
    * @param[in] offset The borderline offset to set
    */
   void SetBorderlineOffset(float offset);
 
-public: /// Sibling Order Change API
+public: // Sibling order
   /**
    * @brief Get the sibling order of the visual object inside of the container.
    *
@@ -535,7 +531,7 @@ public: /// Sibling Order Change API
    * @brief Set the sibling order of the visual object inside of the container.
    * @note It will change other VisualBase's sibling order to keep the order.
    * @note It will throw assert if siblingOrder is bigger than the number of visuals
-   * that contianer has.
+   * that the container has.
    *
    * @param[in] siblingOrder The sibling order inside of the container.
    */
@@ -545,7 +541,7 @@ public: /// Sibling Order Change API
    * @brief Raise the visual object above the next sibling visual object.
    *
    * @pre The VisualBase has been initialized.
-   * @pre The VisualBase has been parented.
+   * @pre The VisualBase has been attached to a View.
    */
   void Raise();
 
@@ -553,7 +549,7 @@ public: /// Sibling Order Change API
    * @brief Lower the visual object below the previous sibling visual object.
    *
    * @pre The VisualBase has been initialized.
-   * @pre The VisualBase has been parented.
+   * @pre The VisualBase has been attached to a View.
    */
   void Lower();
 
@@ -561,7 +557,7 @@ public: /// Sibling Order Change API
    * @brief Raise visual object above all other sibling visual objects.
    *
    * @pre The VisualBase has been initialized.
-   * @pre The VisualBase has been parented.
+   * @pre The VisualBase has been attached to a View.
    */
   void RaiseToTop();
 
@@ -569,7 +565,7 @@ public: /// Sibling Order Change API
    * @brief Lower visual object to the bottom of all other sibling visual objects.
    *
    * @pre The VisualBase has been initialized.
-   * @pre The VisualBase has been parented.
+   * @pre The VisualBase has been attached to a View.
    */
   void LowerToBottom();
 
@@ -578,7 +574,7 @@ public: /// Sibling Order Change API
    *
    * @param[in] target The target visual object
    * @pre The VisualBase has been initialized.
-   * @pre The VisualBase has been parented.
+   * @pre The VisualBase has been attached to a View.
    * @pre The target visual object is a sibling.
    */
   void RaiseAbove(VisualBase target);
@@ -588,7 +584,7 @@ public: /// Sibling Order Change API
    *
    * @param[in] target The target visual object
    * @pre The VisualBase has been initialized.
-   * @pre The VisualBase has been parented.
+   * @pre The VisualBase has been attached to a View.
    * @pre The target visual object is a sibling.
    */
   void LowerBelow(VisualBase target);
@@ -602,18 +598,20 @@ public:
   VisualBase& operator=(VisualBase&& rhs) noexcept = default;
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief This constructor is used by Dali New() methods.
    *
    * @param[in] object A pointer to a newly allocated Dali resource
    */
   explicit DALI_INTERNAL VisualBase(Dali::Ui::Internal::VisualBaseImpl* object);
+  /// @endcond
 };
 
 /**
  * @}
  */
 } // namespace Ui
-} // namespace Dali
+} // namespace DALI_NAMESPACE
 
 #endif // DALI_UI_VISUAL_BASE_H

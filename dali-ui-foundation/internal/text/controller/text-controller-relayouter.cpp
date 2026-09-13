@@ -79,7 +79,7 @@ float ConvertPointToPixel(float point)
 
 } // namespace
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -149,7 +149,7 @@ float GetEffectiveEditableLayoutHeight(Controller::Impl& impl, float layoutHeigh
   return (lineHeightSum < layoutHeight) ? lineHeightSum : layoutHeight;
 }
 
-bool IsReplacementElideEnabled(const Controller::Impl& impl)
+bool IsEffectiveElideEnabled(const Controller::Impl& impl)
 {
   bool enabled = impl.mModel->mElideEnabled;
   if(impl.mEventData != nullptr)
@@ -190,7 +190,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   // projected atomic boxes and use CLIP instead of exposing their underlying
   // source text through a non-replacement ellipsis pass.
   const bool useReplacementClipFallback =
-    IsReplacementElideEnabled(impl) && impl.mModel->mEllipsisPosition != EllipsisPosition::END;
+    IsEffectiveElideEnabled(impl) && impl.mModel->mEllipsisPosition != EllipsisPosition::END;
 
   ReplacementRenderState&               result               = impl.GetOrCreateReplacementRenderState();
   TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
@@ -256,7 +256,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   VisualModel& projectedVisual = *result.processingModel->mVisualModel;
   const Length glyphCount      = static_cast<Dali::Ui::Text::Length>(projectedVisual.mGlyphs.Count());
   projectedVisual.mGlyphPositions.Resize(glyphCount);
-  result.processingModel->mElideEnabled = IsReplacementElideEnabled(impl) && !useReplacementClipFallback;
+  result.processingModel->mElideEnabled = IsEffectiveElideEnabled(impl) && !useReplacementClipFallback;
   projectedVisual.SetTextElideEnabled(result.processingModel->mElideEnabled);
   projectedVisual.SetEllipsisPosition(result.processingModel->mEllipsisPosition);
 
@@ -311,7 +311,43 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   result.processingModel->mScrollPosition = impl.mModel->mScrollPosition;
   impl.mView.SetVisualModel(result.processingModel->mVisualModel);
   impl.mView.SetLogicalModel(result.processingModel->mLogicalModel);
-  impl.mView.ResolveFinalElision(impl.GetFontClient(), result.finalElision, result.layoutGeneration);
+  bool useAuthoritativeEndEllipsis = false;
+  if(result.processingModel->mElideEnabled &&
+     result.processingModel->mEllipsisPosition == EllipsisPosition::END)
+  {
+    for(const LineRun& line : projectedVisual.mLines)
+    {
+      useAuthoritativeEndEllipsis |= line.ellipsis;
+    }
+    useAuthoritativeEndEllipsis |= projectedVisual.mLines.Empty() &&
+                                   !result.processingModel->mLogicalModel->mText.Empty();
+  }
+  bool authoritativeEndEllipsisResolved = false;
+  if(useAuthoritativeEndEllipsis)
+  {
+    authoritativeEndEllipsisResolved = ResolveEndEllipsis(*result.processingModel,
+                                                          contentSize,
+                                                          impl.GetFontClient(),
+                                                          result.finalElision,
+                                                          defaultFontId);
+    DALI_ASSERT_DEBUG(authoritativeEndEllipsisResolved && result.finalElision.resolved &&
+                      "Supported replacement END layout must publish an authoritative final result");
+    if(authoritativeEndEllipsisResolved)
+    {
+      result.finalElision.layoutGeneration = result.layoutGeneration;
+      FinalizeEndEllipsisGeometry(*result.processingModel,
+                                  contentSize,
+                                  impl.mLayoutDirection,
+                                  result.processingModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS,
+                                  impl.mLayoutEngine,
+                                  result.finalElision);
+      result.layoutSize = result.finalElision.layoutSize;
+    }
+  }
+  if(!authoritativeEndEllipsisResolved)
+  {
+    impl.mView.ResolveFinalElision(impl.GetFontClient(), result.finalElision, result.layoutGeneration);
+  }
   impl.mView.SetFinalElisionResult(&result.finalElision);
   ExtractReplacementPlacements(*result.processingModel,
                                result.projection,
@@ -1138,6 +1174,15 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     layoutSize = endEllipsis->layoutSize;
   }
 
+  // Reset before replacement layout can return with the editing scroll.
+  if(NO_OPERATION != (LAYOUT & operations) &&
+     impl.mEventData &&
+     EventData::INACTIVE == impl.mEventData->mState &&
+     IsEffectiveElideEnabled(impl))
+  {
+    impl.ResetScrollPosition();
+  }
+
   // A valid replacement projection owns the complete layout/alignment pass.
   // Do not first lay out the underlying glyph stream and then mix its result
   // with replacement placements: natural size, wrapping and ellipsis must all
@@ -1265,12 +1310,6 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
       {
         // Disable ellipsis when editing
         elideTextEnabled = false;
-      }
-
-      // Reset the scroll position in inactive state
-      if(elideTextEnabled && (impl.mEventData->mState == EventData::INACTIVE))
-      {
-        impl.ResetScrollPosition();
       }
     }
 
@@ -1536,4 +1575,4 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

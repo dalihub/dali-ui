@@ -28,7 +28,7 @@
 #include <dali/public-api/object/property.h>
 #include <algorithm>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -871,4 +871,4 @@ bool NavigatorImpl::InAnyStack(Ui::View view) const
 
 } // namespace Integration
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

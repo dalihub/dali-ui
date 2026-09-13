@@ -25,13 +25,14 @@
 #include <dali-ui-foundation/internal/text/bidirectional-support.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-planner.h>
+#include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine-helper-functions.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-parameters.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
@@ -312,18 +313,21 @@ struct Engine::Impl
   /**
    * @brief Updates the ordinary-text metrics used by replacement layout.
    *
-   * @param[in] glyphMetrics The metrics of the new font.
+   * @param[in] metricFontId The font id whose metrics are used.
+   * @param[in] metricScale The scale applied to its ascender and descender.
    * @param[in,out] lineLayout The line layout.
    */
-  void UpdateReplacementTextMetrics(const GlyphMetrics& glyphMetrics, LineLayout& lineLayout)
+  void UpdateReplacementTextMetrics(FontId metricFontId, float metricScale, LineLayout& lineLayout)
   {
-    if(0u == glyphMetrics.fontId)
+    if(0u == metricFontId)
     {
       return;
     }
 
     Text::FontMetrics fontMetrics;
-    mMetrics->GetFontMetrics(glyphMetrics.fontId, fontMetrics);
+    mMetrics->GetFontMetrics(metricFontId, fontMetrics);
+    fontMetrics.ascender *= metricScale;
+    fontMetrics.descender *= metricScale;
     lineLayout.textAscender   = lineLayout.hasTextMetrics
                                   ? std::max(lineLayout.textAscender, fontMetrics.ascender)
                                   : fontMetrics.ascender;
@@ -393,15 +397,23 @@ struct Engine::Impl
    * @param[in] lineLayout The candidate line.
    * @param[out] glyphPositionsBuffer The glyph position buffer.
    * @param[out] lineDirection The candidate line direction.
+   * @param[in] resolveMetricRetention Whether to resolve authoritative multiline source retention.
    * @return The resolved END ellipsis plan.
    */
-  EndEllipsisPlan ResolveEndEllipsisCandidatePlan(const Parameters&     parameters,
-                                                  LayoutBidiParameters& bidiParameters,
-                                                  const LineLayout&     lineLayout,
-                                                  Vector2*              glyphPositionsBuffer,
-                                                  CharacterDirection&   lineDirection)
+  struct EndEllipsisCandidatePlan
   {
-    EndEllipsisPlan plan;
+    EndEllipsisPlan            legacyWidthPlan;
+    EndEllipsisSourceRetention metricRetention;
+  };
+
+  EndEllipsisCandidatePlan ResolveEndEllipsisCandidatePlan(const Parameters&     parameters,
+                                                           LayoutBidiParameters& bidiParameters,
+                                                           const LineLayout&     lineLayout,
+                                                           Vector2*              glyphPositionsBuffer,
+                                                           CharacterDirection&   lineDirection,
+                                                           bool                  resolveMetricRetention)
+  {
+    EndEllipsisCandidatePlan plan;
     if(parameters.replacementLayoutData == nullptr || lineLayout.numberOfGlyphs == 0u)
     {
       return plan;
@@ -440,7 +452,37 @@ struct Engine::Impl
     input.lineWidth             = lineLayout.length;
     input.positionOffset        = alignmentLine.alignmentOffset;
     input.modelCharacterSpacing = visualModel.GetCharacterSpacing();
-    return ResolveEndEllipsisPlan(input, fontClient);
+    if(resolveMetricRetention)
+    {
+      LineRun candidateLine;
+      candidateLine.glyphRun                      = GlyphRun{lineLayout.glyphIndex, lineLayout.numberOfGlyphs};
+      candidateLine.characterRun                  = CharacterRun{lineLayout.characterIndex, lineLayout.numberOfCharacters};
+      candidateLine.width                         = lineLayout.length;
+      candidateLine.extraLength                   = std::ceil(lineLayout.whiteSpaceLengthEndOfLine);
+      candidateLine.direction                     = lineDirection;
+      candidateLine.isSplitToTwoHalves            = lineLayout.isSplitToTwoHalves;
+      candidateLine.glyphRunSecondHalf            = GlyphRun{lineLayout.glyphIndexInSecondHalfLine,
+                                                  lineLayout.numberOfGlyphsInSecondHalfLine};
+      candidateLine.characterRunForSecondHalfLine = CharacterRun{lineLayout.characterIndexInSecondHalfLine,
+                                                                 lineLayout.numberOfCharactersInSecondHalfLine};
+      const EndEllipsisGlyphPositionView positionView{glyphPositionsBuffer,
+                                                      parameters.startGlyphIndex,
+                                                      parameters.numberOfGlyphs};
+      plan.metricRetention = ResolveEndEllipsisRetention(*parameters.textModel,
+                                                         candidateLine,
+                                                         parameters.boundingBox,
+                                                         fontClient,
+                                                         parameters.replacementLayoutData->defaultFontId,
+                                                         positionView);
+    }
+    if(!plan.metricRetention.resolved)
+    {
+      // Single-line END keeps the legacy width-removal contract. Multiline
+      // uses it only as a fallback when authoritative source retention could
+      // not be resolved.
+      plan.legacyWidthPlan = ResolveEndEllipsisPlan(input, fontClient);
+    }
+    return plan;
   }
 
   /**
@@ -451,12 +493,14 @@ struct Engine::Impl
    *
    * @param[in] parameters The current layout parameters.
    * @param[in,out] lineLayout The candidate line metrics to update.
+   * @param[in] metricRetention Optional authoritative END source-retention boundary.
    */
   void ApplyReplacementLineMetrics(
-    const Parameters& parameters,
-    LineLayout&       lineLayout,
-    GlyphIndex        firstExcludedReplacementGlyph = EndEllipsisPlan::INVALID_GLYPH_INDEX,
-    GlyphIndex        lastExcludedReplacementGlyph  = EndEllipsisPlan::INVALID_GLYPH_INDEX)
+    const Parameters&                 parameters,
+    LineLayout&                       lineLayout,
+    const EndEllipsisSourceRetention* metricRetention               = nullptr,
+    GlyphIndex                        firstExcludedReplacementGlyph = EndEllipsisPlan::INVALID_GLYPH_INDEX,
+    GlyphIndex                        lastExcludedReplacementGlyph  = EndEllipsisPlan::INVALID_GLYPH_INDEX)
   {
     if(parameters.replacementLayoutData == nullptr || parameters.replacementLayoutData->runs == nullptr)
     {
@@ -480,8 +524,17 @@ struct Engine::Impl
 
       if(parameters.replacementLayoutData->defaultFontId != 0u)
       {
-        Text::FontMetrics fontMetrics;
-        mMetrics->GetFontMetrics(parameters.replacementLayoutData->defaultFontId, fontMetrics);
+        Text::FontMetrics                fontMetrics;
+        const ReplacementLineMetricData& lineMetricData = parameters.replacementLayoutData->lineMetricData;
+        const FontId                     metricFontId   = lineMetricData.IsEnabled() && lineMetricData.logicalDefaultFontId != 0u
+                                                            ? lineMetricData.logicalDefaultFontId
+                                                            : parameters.replacementLayoutData->defaultFontId;
+        mMetrics->GetFontMetrics(metricFontId, fontMetrics);
+        if(metricFontId != parameters.replacementLayoutData->defaultFontId)
+        {
+          fontMetrics.ascender *= lineMetricData.renderScale;
+          fontMetrics.descender *= lineMetricData.renderScale;
+        }
         ordinaryAscender  = fontMetrics.ascender;
         ordinaryDescender = fontMetrics.descender;
       }
@@ -519,9 +572,13 @@ struct Engine::Impl
         {
           continue;
         }
-        if(firstExcludedReplacementGlyph != EndEllipsisPlan::INVALID_GLYPH_INDEX &&
-           index >= firstExcludedReplacementGlyph &&
-           index <= lastExcludedReplacementGlyph)
+        const bool excludedByFinalRetention = metricRetention && metricRetention->resolved &&
+                                              !metricRetention->IsRetained(visualModel.mGlyphsToCharacters[index]);
+        const bool excludedByWidthPlan = (!metricRetention || !metricRetention->resolved) &&
+                                         firstExcludedReplacementGlyph != EndEllipsisPlan::INVALID_GLYPH_INDEX &&
+                                         index >= firstExcludedReplacementGlyph &&
+                                         index <= lastExcludedReplacementGlyph;
+        if(excludedByFinalRetention || excludedByWidthPlan)
         {
           hasExcludedReplacement = true;
           continue;
@@ -1125,12 +1182,26 @@ struct Engine::Impl
     tmpLineLayout.relativeLineSize = lineLayout.relativeLineSize;
 
     // Calculate the line height if there is no characters.
-    FontId     lastFontId         = glyphMetrics.fontId;
-    const bool collectTextMetrics = parameters.replacementLayoutData != nullptr;
+    FontId     lastFontId                  = glyphMetrics.fontId;
+    FontId     lastReplacementMetricFontId = glyphMetrics.fontId;
+    float      lastReplacementMetricScale  = 1.0f;
+    const bool collectTextMetrics          = parameters.replacementLayoutData != nullptr;
+    const bool collectLogicalTextMetrics   = collectTextMetrics &&
+                                           parameters.replacementLayoutData->lineMetricData.IsEnabled();
     UpdateLineHeight(glyphMetrics, tmpLineLayout);
     if(collectTextMetrics)
     {
-      UpdateReplacementTextMetrics(glyphMetrics, tmpLineLayout);
+      if(collectLogicalTextMetrics &&
+         lineLayout.glyphIndex < parameters.textModel->mVisualModel->mGlyphsToCharacters.Count())
+      {
+        lastReplacementMetricFontId = parameters.replacementLayoutData->lineMetricData.ResolveFontId(
+          parameters.textModel->mVisualModel->mGlyphsToCharacters[lineLayout.glyphIndex],
+          glyphMetrics.fontId,
+          lastReplacementMetricScale);
+      }
+      UpdateReplacementTextMetrics(lastReplacementMetricFontId,
+                                   lastReplacementMetricScale,
+                                   tmpLineLayout);
     }
 
     bool       oneWordLaidOut   = false;
@@ -1160,11 +1231,31 @@ struct Engine::Impl
       if(lastFontId != glyphMetrics.fontId)
       {
         UpdateLineHeight(glyphMetrics, tmpLineLayout);
-        if(collectTextMetrics)
+        if(collectTextMetrics && !collectLogicalTextMetrics)
         {
-          UpdateReplacementTextMetrics(glyphMetrics, tmpLineLayout);
+          UpdateReplacementTextMetrics(glyphMetrics.fontId, 1.0f, tmpLineLayout);
         }
         lastFontId = glyphMetrics.fontId;
+      }
+
+      // Logical and rendered validation normally produce matching run
+      // boundaries, but size-dependent fallback is allowed to segment them
+      // differently. The target RenderScale path must therefore follow the
+      // logical boundary rather than the rendered font-id transition.
+      if(DALI_UNLIKELY(collectLogicalTextMetrics) &&
+         glyphIndex < parameters.textModel->mVisualModel->mGlyphsToCharacters.Count())
+      {
+        float        metricScale  = 1.0f;
+        const FontId metricFontId = parameters.replacementLayoutData->lineMetricData.ResolveFontId(
+          parameters.textModel->mVisualModel->mGlyphsToCharacters[glyphIndex],
+          glyphMetrics.fontId,
+          metricScale);
+        if(metricFontId != lastReplacementMetricFontId || metricScale != lastReplacementMetricScale)
+        {
+          UpdateReplacementTextMetrics(metricFontId, metricScale, tmpLineLayout);
+          lastReplacementMetricFontId = metricFontId;
+          lastReplacementMetricScale  = metricScale;
+        }
       }
 
       // Get the character indices for the current glyph. The last character index is needed
@@ -1632,8 +1723,9 @@ struct Engine::Impl
                     const LineLayout& layout, Size& layoutSize, LineRun* linesBuffer, Vector2* glyphPositionsBuffer,
                     Length& numberOfLines, float penY, bool& isMarqueeEnabled, bool isMarqueeMaxTextureExceeded,
                     bool isHiddenInputEnabled, Text::EllipsisPosition::Type ellipsisPosition,
-                    bool enforceEllipsisInSingleLine)
+                    bool enforceEllipsisInSingleLine, bool& retainedReplacement)
   {
+    retainedReplacement             = false;
     const bool hasReplacementLayout = layoutParameters.replacementLayoutData != nullptr;
     const bool maximumNumberOfLinesExceeded =
       layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
@@ -1714,24 +1806,26 @@ struct Engine::Impl
       const LayoutBidiParameters bidiParametersBeforeEllipsis = layoutBidiParameters;
       GetLineLayoutForBox(layoutParameters, layoutBidiParameters, ellipsisLayout, true, ellipsisPosition,
                           enforceEllipsisInSingleLine, true, isHiddenInputEnabled);
-      CharacterDirection ellipsisLineDirection         = LTR;
-      bool               ellipsisLinePositionsPrepared = false;
-      EndEllipsisPlan    endEllipsisPlan;
+      CharacterDirection       ellipsisLineDirection         = LTR;
+      bool                     ellipsisLinePositionsPrepared = false;
+      EndEllipsisCandidatePlan endEllipsisPlan;
       if(ellipsisPosition == Text::EllipsisPosition::END && hasReplacementLayout)
       {
         endEllipsisPlan               = ResolveEndEllipsisCandidatePlan(layoutParameters,
                                                                         layoutBidiParameters,
                                                                         ellipsisLayout,
                                                                         glyphPositionsBuffer,
-                                                                        ellipsisLineDirection);
+                                                                        ellipsisLineDirection,
+                                                                        isMultiline);
         ellipsisLinePositionsPrepared = ellipsisLayout.numberOfGlyphs > 0u;
       }
       if(hasReplacementLayout)
       {
         ApplyReplacementLineMetrics(layoutParameters,
                                     ellipsisLayout,
-                                    endEllipsisPlan.firstRemovedReplacementGlyphIndex,
-                                    endEllipsisPlan.lastRemovedReplacementGlyphIndex);
+                                    isMultiline ? &endEllipsisPlan.metricRetention : nullptr,
+                                    endEllipsisPlan.legacyWidthPlan.firstRemovedReplacementGlyphIndex,
+                                    endEllipsisPlan.legacyWidthPlan.lastRemovedReplacementGlyphIndex);
       }
 
       // Completely filling the previous line may pull an oversized
@@ -1780,16 +1874,18 @@ struct Engine::Impl
           LayoutBidiParameters boundedBidiParameters = bidiParametersBeforeEllipsis;
           GetLineLayoutForBox(boundedParameters, boundedBidiParameters, boundedEllipsisLayout, true,
                               ellipsisPosition, enforceEllipsisInSingleLine, true, isHiddenInputEnabled);
-          CharacterDirection    boundedLineDirection         = LTR;
-          const EndEllipsisPlan boundedEndEllipsisPlan       = ResolveEndEllipsisCandidatePlan(boundedParameters,
-                                                                                               boundedBidiParameters,
-                                                                                               boundedEllipsisLayout,
-                                                                                               glyphPositionsBuffer,
-                                                                                               boundedLineDirection);
-          const bool            boundedLinePositionsPrepared = boundedEllipsisLayout.numberOfGlyphs > 0u;
+          CharacterDirection             boundedLineDirection         = LTR;
+          const EndEllipsisCandidatePlan boundedEndEllipsisPlan       = ResolveEndEllipsisCandidatePlan(boundedParameters,
+                                                                                                        boundedBidiParameters,
+                                                                                                        boundedEllipsisLayout,
+                                                                                                        glyphPositionsBuffer,
+                                                                                                        boundedLineDirection,
+                                                                                                        true);
+          const bool                     boundedLinePositionsPrepared = boundedEllipsisLayout.numberOfGlyphs > 0u;
           ApplyReplacementLineMetrics(boundedParameters, boundedEllipsisLayout,
-                                      boundedEndEllipsisPlan.firstRemovedReplacementGlyphIndex,
-                                      boundedEndEllipsisPlan.lastRemovedReplacementGlyphIndex);
+                                      &boundedEndEllipsisPlan.metricRetention,
+                                      boundedEndEllipsisPlan.legacyWidthPlan.firstRemovedReplacementGlyphIndex,
+                                      boundedEndEllipsisPlan.legacyWidthPlan.lastRemovedReplacementGlyphIndex);
           if(boundedEllipsisLayout.numberOfGlyphs + boundedEllipsisLayout.numberOfGlyphsInSecondHalfLine > 0u)
           {
             ellipsisLayout                = boundedEllipsisLayout;
@@ -1804,6 +1900,8 @@ struct Engine::Impl
       {
         lineRun->glyphRun.glyphIndex = ellipsisLayout.glyphIndex;
       }
+
+      retainedReplacement = hasReplacementLayout && ellipsisLayout.containsReplacement;
 
       lineRun->glyphRun.numberOfGlyphs         = ellipsisLayout.numberOfGlyphs;
       lineRun->characterRun.characterIndex     = ellipsisLayout.characterIndex;
@@ -2368,7 +2466,8 @@ struct Engine::Impl
 
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  pen y %f\n", penY);
 
-      bool ellipsis = false;
+      bool ellipsis                        = false;
+      bool ellipsisLineContainsReplacement = false;
       if(elideTextEnabled)
       {
         layoutBidiParameters.paragraphDirection = currentParagraphDirection;
@@ -2376,7 +2475,8 @@ struct Engine::Impl
         // Does the ellipsis of the last line.
         ellipsis = EllipsisLine(layoutParameters, layoutBidiParameters, layout, layoutSize, linesBuffer,
                                 glyphPositionsBuffer, numberOfLines, penY, isMarqueeEnabled,
-                                isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, false);
+                                isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, false,
+                                ellipsisLineContainsReplacement);
       }
 
       if(ellipsis && ((ellipsisPosition == Text::EllipsisPosition::END) || (numberOfLines == 1u)))
@@ -2386,7 +2486,8 @@ struct Engine::Impl
         {
           ellipsis = EllipsisLine(layoutParameters, layoutBidiParameters, layout, layoutSize, linesBuffer,
                                   glyphPositionsBuffer, numberOfLines, penY, isMarqueeEnabled,
-                                  isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, true);
+                                  isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, true,
+                                  ellipsisLineContainsReplacement);
         }
 
         // clear hyphen from ellipsis line
@@ -2404,10 +2505,15 @@ struct Engine::Impl
 
         if(!isMultiline)
         {
-          // Recalculate line spacing and line height
+          // Preserve replacement-aware spacing only when the final ellipsis
+          // line actually retained a replacement. A source replacement that
+          // was fully removed must follow the legacy ordinary-text formula.
           LineRun& firstLineRun = *(lines.Begin());
-          firstLineRun.lineSpacing =
-            GetLineSpacing(firstLineRun.ascender + -firstLineRun.descender, layout.relativeLineSize);
+          if(!ellipsisLineContainsReplacement)
+          {
+            firstLineRun.lineSpacing =
+              GetLineSpacing(firstLineRun.ascender + -firstLineRun.descender, layout.relativeLineSize);
+          }
           layoutSize.height = GetLineHeight(firstLineRun, false);
         }
 
@@ -2869,4 +2975,4 @@ float Engine::GetLineSpacing(float textSize, float relativeLineSize) const
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

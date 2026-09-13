@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-namespace Dali::Ui::Internal
+namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
@@ -165,4 +165,4 @@ const char* LaunchStateResolutionName(LaunchStateResolution resolution)
   return "unknown";
 }
 
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal

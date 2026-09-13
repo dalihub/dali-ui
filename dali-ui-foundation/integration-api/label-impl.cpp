@@ -59,6 +59,9 @@
 
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
@@ -69,15 +72,14 @@
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
-#include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 
 namespace Ui
@@ -346,7 +348,7 @@ void LabelImpl::SetText(const Dali::String& text)
   if(hadInlineReplacements)
   {
     ClearInlineReplacementData();
-    // Removing replacements does not implicitly restart a previous marquee.
+    // Removing a marquee blocker does not implicitly restart previous scrolling.
     SuppressAutoMarqueeEvaluation();
     mLastMarqueeEnabled = false;
   }
@@ -475,6 +477,10 @@ void LabelImpl::UpdateInlineReplacementData(const InlineReplacementUpdateData& u
     owner.ResourceReadySignal().Connect(this, &LabelImpl::OnInlineReplacementResourcesReady);
     data->resourceReadyConnected = true;
   }
+  const Internal::Text::TextRevealData* revealData           = Internal::Text::GetTextRevealData(mTextRevealData);
+  const bool                            pixelRevealRequested = revealData && revealData->enabled &&
+                                    revealData->unit == Ui::Text::Reveal::Unit::PIXEL &&
+                                    !mController->IsTextCutout();
   data->manager.Update(data->host,
                        updateData.source,
                        updateData.placements,
@@ -485,7 +491,8 @@ void LabelImpl::UpdateInlineReplacementData(const InlineReplacementUpdateData& u
                                         ownerSize.y - static_cast<float>(padding.top + padding.bottom))),
                        ownerSize,
                        GetEffectiveScale(),
-                       updateData.sourceRevision);
+                       updateData.sourceRevision,
+                       pixelRevealRequested);
 }
 
 void LabelImpl::OnInlineReplacementResourcesReady(Ui::View)
@@ -774,38 +781,66 @@ Dali::Property::Index LabelImpl::EnsureGradientOverlayAnimOffset()
 
 void LabelImpl::SetTextReveal(const Ui::Text::Reveal& reveal)
 {
-  const bool                   enabled                   = reveal != Ui::Text::Reveal::None();
-  const Ui::Text::Reveal::Unit authoredUnit              = enabled ? reveal.GetUnit() : Ui::Text::Reveal::Unit::CHARACTER;
-  const float                  authoredFadeDurationRatio = enabled ? reveal.GetFadeDurationRatio()
-                                                                   : Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO;
-  auto*                        data                      = Internal::Text::GetTextRevealData(mTextRevealData);
+  const bool                       enabled                      = reveal != Ui::Text::Reveal::None();
+  const Ui::Text::Reveal::Unit     authoredUnit                 = enabled ? reveal.GetUnit() : Ui::Text::Reveal::Unit::CHARACTER;
+  const Ui::Text::Reveal::Sequence authoredSequence             = enabled ? reveal.GetSequence() : Ui::Text::Reveal::Sequence::WHOLE_TEXT;
+  const float                      authoredFadeDurationRatio    = enabled ? reveal.GetFadeDurationRatio()
+                                                                          : Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO;
+  const float                      authoredSequenceStaggerRatio = enabled ? reveal.GetSequenceStaggerRatio() : 0.0f;
+  auto*                            data                         = Internal::Text::GetTextRevealData(mTextRevealData);
   if((!data && !enabled) ||
      (data && data->enabled == enabled &&
       (!enabled || (data->unit == authoredUnit &&
-                    Dali::Equals(data->fadeDurationRatio, authoredFadeDurationRatio)))))
+                    data->sequence == authoredSequence &&
+                    Dali::Equals(data->fadeDurationRatio, authoredFadeDurationRatio) &&
+                    Dali::Equals(data->sequenceStaggerRatio, authoredSequenceStaggerRatio)))))
   {
     return;
   }
 
-  data                    = &Internal::Text::GetOrCreateTextRevealData(mTextRevealData);
-  data->enabled           = enabled;
-  data->unit              = authoredUnit;
-  data->fadeDurationRatio = authoredFadeDurationRatio;
+  data                       = &Internal::Text::GetOrCreateTextRevealData(mTextRevealData);
+  data->enabled              = enabled;
+  data->unit                 = authoredUnit;
+  data->sequence             = authoredSequence;
+  data->fadeDurationRatio    = authoredFadeDurationRatio;
+  data->sequenceStaggerRatio = authoredSequenceStaggerRatio;
   ++data->revision;
 
-  Ui::Text::Internal::Reveal::Unit unit              = Ui::Text::Internal::Reveal::Unit::DISABLED;
-  float                            fadeDurationRatio = Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO;
-  Property::Index                  progressIndex     = Property::INVALID_INDEX;
+  if(!enabled)
+  {
+    if(Internal::Text::InlineReplacementData* replacementData =
+         Internal::Text::GetInlineReplacementData(Ui::View::DownCast(Self())))
+    {
+      // Reveal -> None restores ordinary resource-ready visibility immediately.
+      // Enabled reconfiguration keeps the previous valid binding until the
+      // newly built schedule replaces it atomically.
+      replacementData->manager.ClearReveal();
+    }
+  }
+
+  Ui::Text::Internal::Reveal::Unit     unit                 = Ui::Text::Internal::Reveal::Unit::DISABLED;
+  Ui::Text::Internal::Reveal::Sequence sequence             = Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT;
+  float                                fadeDurationRatio    = Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO;
+  float                                sequenceStaggerRatio = 0.0f;
+  Property::Index                      progressIndex        = Property::INVALID_INDEX;
   if(data->enabled)
   {
-    unit              = Ui::Text::Internal::Reveal::ToInternalUnit(data->unit);
-    fadeDurationRatio = data->fadeDurationRatio;
-    progressIndex     = EnsureTextRevealProgress();
+    unit                 = Ui::Text::Internal::Reveal::ToInternalUnit(data->unit);
+    sequence             = Ui::Text::Internal::Reveal::ToInternalSequence(data->sequence);
+    fadeDurationRatio    = data->fadeDurationRatio;
+    sequenceStaggerRatio = data->sequenceStaggerRatio;
+    progressIndex        = EnsureTextRevealProgress();
   }
 
   if(mVisual)
   {
-    Internal::TextVisual::ConfigureTextReveal(mVisual, unit, fadeDurationRatio, progressIndex, data->revision);
+    Internal::TextVisual::ConfigureTextReveal(mVisual,
+                                              unit,
+                                              fadeDurationRatio,
+                                              progressIndex,
+                                              data->revision,
+                                              sequence,
+                                              sequenceStaggerRatio);
   }
 
   if(mController && mController->IsAsyncRendering())
@@ -825,7 +860,9 @@ Ui::Text::Reveal LabelImpl::GetTextReveal() const
 
   Ui::Text::Reveal reveal;
   reveal.SetUnit(data->unit);
+  reveal.SetSequence(data->sequence);
   reveal.SetFadeDurationRatio(data->fadeDurationRatio);
+  reveal.SetSequenceStaggerRatio(data->sequenceStaggerRatio);
   return reveal;
 }
 
@@ -1646,7 +1683,7 @@ float LabelImpl::GetLetterSpacing() const
   return mController->GetCharacterSpacing();
 }
 
-void LabelImpl::SetMaskEffect(View view)
+void LabelImpl::SetMaskEffect(Ui::View view)
 {
   if(!view)
   {
@@ -1656,7 +1693,7 @@ void LabelImpl::SetMaskEffect(View view)
 
   ClearMaskEffect();
 
-  View selfView = Ui::View::DownCast(Self());
+  Ui::View selfView = Ui::View::DownCast(Self());
 
   Self().Add(view);
   GetOrCreateLabelData<WeakHandle<Ui::View>>(selfView, LABEL_MASK_DATA_ATTACHMENT_ID) = view;
@@ -1668,10 +1705,10 @@ void LabelImpl::SetMaskEffect(View view)
 
 void LabelImpl::ClearMaskEffect()
 {
-  View selfView = Ui::View::DownCast(Self());
+  Ui::View selfView = Ui::View::DownCast(Self());
 
   WeakHandle<Ui::View>* sourceView = selfView.GetAttachment<WeakHandle<Ui::View>>(LABEL_MASK_DATA_ATTACHMENT_ID);
-  View                  view       = sourceView ? sourceView->GetHandle() : View();
+  Ui::View              view       = sourceView ? sourceView->GetHandle() : Ui::View();
   if(view)
   {
     Self().Remove(view);
@@ -1698,7 +1735,9 @@ void LabelImpl::SetAsyncRendering(bool asyncRendering)
                                                 Ui::Text::Internal::Reveal::ToInternalUnit(revealData->unit),
                                                 revealData->fadeDurationRatio,
                                                 EnsureTextRevealProgress(),
-                                                revealData->revision);
+                                                revealData->revision,
+                                                Ui::Text::Internal::Reveal::ToInternalSequence(revealData->sequence),
+                                                revealData->sequenceStaggerRatio);
     }
   }
   if(!asyncRendering)
@@ -1816,7 +1855,7 @@ void LabelImpl::StopMarquee()
 
 void LabelImpl::SetPixelSnapFactor(float factor)
 {
-  View                  owner = View::DownCast(Self());
+  Ui::View              owner = Ui::View::DownCast(Self());
   const Property::Index index = Internal::EnsureTextPixelSnapFactorProperty(owner);
   if(index != Property::INVALID_INDEX)
   {
@@ -1826,7 +1865,7 @@ void LabelImpl::SetPixelSnapFactor(float factor)
 
 float LabelImpl::GetPixelSnapFactor() const
 {
-  View                  owner = View::DownCast(Self());
+  Ui::View              owner = Ui::View::DownCast(Self());
   const Property::Index index = Internal::GetTextPixelSnapFactorPropertyIndex(owner);
   return index != Property::INVALID_INDEX ? owner.GetProperty<float>(index) : 0.0f;
 }
@@ -1838,7 +1877,7 @@ void LabelImpl::RequestAsyncNaturalSize()
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
   Ui::Text::AsyncTextParameters     parameters =
     GetAsyncTextParameters(Text::Async::COMPUTE_NATURAL_SIZE, Size::ZERO, GetEffectiveTextPadding(), layoutDirection);
-  Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
+  Internal::TextVisual::RequestAsyncSizeComputationOwned(mVisual, std::move(parameters));
 }
 
 void LabelImpl::RequestAsyncHeightForWidth(float width)
@@ -1850,7 +1889,7 @@ void LabelImpl::RequestAsyncHeightForWidth(float width)
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
   Ui::Text::AsyncTextParameters     parameters =
     GetAsyncTextParameters(Text::Async::COMPUTE_HEIGHT_FOR_WIDTH, Size(contentWidth, 0.0f), padding, layoutDirection);
-  Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
+  Internal::TextVisual::RequestAsyncSizeComputationOwned(mVisual, std::move(parameters));
 }
 
 // =============================================================================
@@ -1874,7 +1913,7 @@ void LabelImpl::RequestAsyncRenderWithFixedSize(float width, float height)
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, Size(contentWidth, contentHeight), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
 }
@@ -1897,7 +1936,7 @@ void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstr
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_FIXED_WIDTH, Size(contentWidth, contentHeightConstraint), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
 }
@@ -1920,7 +1959,7 @@ void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float h
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_FIXED_HEIGHT, Size(contentWidthConstraint, contentHeight), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
 }
@@ -1943,7 +1982,7 @@ void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float h
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_CONSTRAINT, Size(contentWidthConstraint, contentHeightConstraint), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
 }
@@ -1951,22 +1990,22 @@ void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float h
 // =============================================================================
 // Signals
 // =============================================================================
-Signal<void(View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
+Signal<void(Ui::View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
 {
   return mAnchorClickedSignal;
 }
 
-Signal<void(View, float, float)>& LabelImpl::AsyncRenderFinishedSignal()
+Signal<void(Ui::View, float, float)>& LabelImpl::AsyncRenderFinishedSignal()
 {
   return mAsyncRenderFinishedSignal;
 }
 
-Signal<void(View, float, float)>& LabelImpl::AsyncNaturalSizeComputedSignal()
+Signal<void(Ui::View, float, float)>& LabelImpl::AsyncNaturalSizeComputedSignal()
 {
   return mAsyncNaturalSizeComputedSignal;
 }
 
-Signal<void(View, float, float)>& LabelImpl::AsyncHeightForWidthComputedSignal()
+Signal<void(Ui::View, float, float)>& LabelImpl::AsyncHeightForWidthComputedSignal()
 {
   return mAsyncHeightForWidthComputedSignal;
 }
@@ -2054,10 +2093,10 @@ void LabelImpl::OnInitialize()
   Actor self = Self();
 
   Dali::Property::Map propertyMap;
-  propertyMap.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::TEXT);
+  propertyMap.Add(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::TEXT);
 
-  mVisual   = Ui::Integration::VisualFactory::Get().CreateVisual(propertyMap);
-  View view = Ui::View::DownCast(self);
+  mVisual       = Ui::Integration::VisualFactory::Get().CreateVisual(propertyMap);
+  Ui::View view = Ui::View::DownCast(self);
   Internal::ViewDataImpl::Get(GetImpl(view)).RegisterVisual(Ui::Text::LabelPropertyIndex::TEXT, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
 
   Internal::TextVisual::SetAsyncTextInterface(mVisual, this);
@@ -2164,7 +2203,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request async render, size:%f,%f\n", mController.Get(), contentSize.width, contentSize.height);
 
     Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
-    Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+    Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
     mRendererUpdateNeeded   = false;
     mIsAsyncRenderRequested = false;
     return;
@@ -2281,14 +2320,14 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     }
 
     Dali::Property::Map visualTransform;
-    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, visualTransformSize)
-      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
-      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-      .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+    visualTransform.Add(Ui::Integration::Visual::Transform::Property::SIZE, visualTransformSize)
+      .Add(Ui::Integration::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET, visualTransformOffset)
+      .Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT)
+      .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT);
     visualImpl.SetTransformAndSize(visualTransform, size, GetEffectiveScale());
 
     if(mController->IsMarqueeEnabled())
@@ -2723,59 +2762,62 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
       Ui::Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
     if(compositionPlan.HasWork())
     {
-      auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
+      const bool hasContentBoundGradient =
+        (compositionPlan.needsBaseBounds && textGradientBoundsMode == Ui::Text::GradientBoundsMode::CONTENT_BOUND) ||
+        (compositionPlan.needsOverlayBounds && textGradientOverlayBoundsMode == Ui::Text::GradientBoundsMode::CONTENT_BOUND);
+      if(isHorizontal && hasContentBoundGradient)
       {
-        coordinateSize = renderInfo.controlSize;
+        const Vector2 visualCoordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
+        if(visualCoordinateSize.width > Math::MACHINE_EPSILON_1000 &&
+           visualCoordinateSize.height > Math::MACHINE_EPSILON_1000)
+        {
+          // Async controlSize can describe the allocated Label while the text visual is
+          // fitted to the rendered marquee height. Keep scroller geometry on the visual;
+          // gradient evaluation independently uses content texture coordinates.
+          textScrollerControlSize = visualCoordinateSize;
+        }
+      }
+
+      auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode,
+                                              Vector2&                     coordinateSize,
+                                              bool&                        useTextureCoordinates) -> Vector4
+      {
+        useTextureCoordinates = false;
         if(boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
         {
           coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
           return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
         }
 
-        if(isHorizontal)
-        {
-          const Vector2 visualCoordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
-          if(visualCoordinateSize.width > Math::MACHINE_EPSILON_1000 &&
-             visualCoordinateSize.height > Math::MACHINE_EPSILON_1000)
-          {
-            // Remove the horizontal marquee wrap gap to recover the actual text content size.
-            const Vector2 contentSize(std::max(verifiedSize.width - wrapGap, 0.0f),
-                                      verifiedSize.height);
-            const Vector2 xBounds =
-              Ui::Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.width,
-                                                                      contentSize.width,
-                                                                      mController->GetHorizontalAlignment());
-            const Vector2 yBounds =
-              Ui::Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.height,
-                                                                      contentSize.height,
-                                                                      mController->GetVerticalAlignment());
-            coordinateSize          = visualCoordinateSize;
-            textScrollerControlSize = coordinateSize;
-            return Vector4(xBounds.x, yBounds.x, xBounds.y, yBounds.y);
-          }
-        }
-
-        return renderInfo.textGradientMarqueeViewportBounds;
+        coordinateSize        = verifiedSize;
+        useTextureCoordinates = true;
+        return renderInfo.textLogicalBounds;
       };
 
       if(compositionPlan.needsBaseBounds)
       {
         Vector2       textGradientCoordinateSize;
-        const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(textGradientBoundsMode,
-                                                                                    textGradientCoordinateSize);
-        compositionRequest.baseBoundsResolved        = true;
-        compositionRequest.baseBounds.bounds         = textGradientBounds;
-        compositionRequest.baseBounds.coordinateSize = textGradientCoordinateSize;
+        bool          textGradientUseTextureCoordinates     = false;
+        const Vector4 textGradientBounds                    = resolveMarqueeGradientBounds(textGradientBoundsMode,
+                                                                                           textGradientCoordinateSize,
+                                                                                           textGradientUseTextureCoordinates);
+        compositionRequest.baseBoundsResolved               = true;
+        compositionRequest.baseBounds.bounds                = textGradientBounds;
+        compositionRequest.baseBounds.coordinateSize        = textGradientCoordinateSize;
+        compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
       }
 
       if(compositionPlan.needsOverlayBounds)
       {
         Vector2       textGradientOverlayCoordinateSize;
-        const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
-                                                                                       textGradientOverlayCoordinateSize);
-        compositionRequest.overlayBoundsResolved        = true;
-        compositionRequest.overlayBounds.bounds         = textGradientOverlayBounds;
-        compositionRequest.overlayBounds.coordinateSize = textGradientOverlayCoordinateSize;
+        bool          textGradientOverlayUseTextureCoordinates = false;
+        const Vector4 textGradientOverlayBounds                = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
+                                                                                              textGradientOverlayCoordinateSize,
+                                                                                              textGradientOverlayUseTextureCoordinates);
+        compositionRequest.overlayBoundsResolved               = true;
+        compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
+        compositionRequest.overlayBounds.coordinateSize        = textGradientOverlayCoordinateSize;
+        compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
       }
 
       Ui::Text::MarqueeBuilder::PixelDataBundle pixels;
@@ -3521,42 +3563,53 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     {
       if(compositionPlan.needsBaseBounds || compositionPlan.needsOverlayBounds)
       {
-        const Vector4 textGradientViewportBounds =
-          Ui::Text::Internal::CalculateMarqueeGradientViewportBounds(controlSize,
-                                                                     textModel->GetLayoutSize(),
-                                                                     textModel->GetLines(),
-                                                                     textModel->GetNumberOfLines(),
-                                                                     mController->GetHorizontalAlignment(),
-                                                                     mController->GetVerticalAlignment());
-        auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
+        const Vector4 textGradientContentBounds =
+          Ui::Text::Internal::CalculateGradientContentBounds(verifiedSize,
+                                                             textModel->GetLayoutSize(),
+                                                             textModel->GetLines(),
+                                                             textModel->GetNumberOfLines(),
+                                                             mController->GetVerticalAlignment(),
+                                                             isHorizontal);
+        auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode,
+                                                Vector2&                     coordinateSize,
+                                                bool&                        useTextureCoordinates) -> Vector4
         {
-          coordinateSize = controlSize;
+          useTextureCoordinates = false;
           if(boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
           {
             coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
             return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
           }
-          return textGradientViewportBounds;
+
+          coordinateSize        = verifiedSize;
+          useTextureCoordinates = true;
+          return textGradientContentBounds;
         };
 
         if(compositionPlan.needsBaseBounds)
         {
           Vector2       textGradientCoordinateSize;
-          const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(textGradientBoundsMode,
-                                                                                      textGradientCoordinateSize);
-          compositionRequest.baseBoundsResolved        = true;
-          compositionRequest.baseBounds.bounds         = textGradientBounds;
-          compositionRequest.baseBounds.coordinateSize = textGradientCoordinateSize;
+          bool          textGradientUseTextureCoordinates     = false;
+          const Vector4 textGradientBounds                    = resolveMarqueeGradientBounds(textGradientBoundsMode,
+                                                                                             textGradientCoordinateSize,
+                                                                                             textGradientUseTextureCoordinates);
+          compositionRequest.baseBoundsResolved               = true;
+          compositionRequest.baseBounds.bounds                = textGradientBounds;
+          compositionRequest.baseBounds.coordinateSize        = textGradientCoordinateSize;
+          compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
         }
 
         if(compositionPlan.needsOverlayBounds)
         {
           Vector2       textGradientOverlayCoordinateSize;
-          const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
-                                                                                         textGradientOverlayCoordinateSize);
-          compositionRequest.overlayBoundsResolved        = true;
-          compositionRequest.overlayBounds.bounds         = textGradientOverlayBounds;
-          compositionRequest.overlayBounds.coordinateSize = textGradientOverlayCoordinateSize;
+          bool          textGradientOverlayUseTextureCoordinates = false;
+          const Vector4 textGradientOverlayBounds                = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
+                                                                                                textGradientOverlayCoordinateSize,
+                                                                                                textGradientOverlayUseTextureCoordinates);
+          compositionRequest.overlayBoundsResolved               = true;
+          compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
+          compositionRequest.overlayBounds.coordinateSize        = textGradientOverlayCoordinateSize;
+          compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
         }
       }
 
@@ -3764,6 +3817,7 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
     InvalidateMarqueeStartGeometry();
   }
 
+  // FIXME: Baked VIEW_BOUND GradientSpan scrolls with marquee content until viewport-fixed span composition is supported.
   if(enabled && HasInlineReplacementSource())
   {
     InvalidateMarqueeStartGeometry();
@@ -4007,9 +4061,9 @@ void LabelImpl::SetCutoutEnabledInternal(bool enabled)
 
 void LabelImpl::SetViewBackgroundEnabled(bool enabled)
 {
-  View view = Ui::View::DownCast(Self());
+  Ui::View view = Ui::View::DownCast(Self());
   // Avoid unnecessary updates when no background visual exists.
-  if(!Internal::ViewDataImpl::Get(GetImpl(view)).GetVisual(Ui::View::Property::BACKGROUND))
+  if(!Internal::ViewDataImpl::Get(GetImpl(view)).GetVisual(Ui::Integration::View::Property::BACKGROUND))
   {
     return;
   }
@@ -4017,13 +4071,13 @@ void LabelImpl::SetViewBackgroundEnabled(bool enabled)
   if(mIsViewBackgroundEnabled != enabled)
   {
     mIsViewBackgroundEnabled = enabled;
-    Internal::ViewDataImpl::Get(GetImpl(view)).EnableVisual(Ui::View::Property::BACKGROUND, enabled);
+    Internal::ViewDataImpl::Get(GetImpl(view)).EnableVisual(Ui::Integration::View::Property::BACKGROUND, enabled);
   }
 }
 
 bool LabelImpl::GetViewBackgroundColor(Vector4& backgroundColor) const
 {
-  const Property::Value backgroundValue = Self().GetProperty(Ui::View::Property::BACKGROUND);
+  const Property::Value backgroundValue = Self().GetProperty(Ui::Integration::View::Property::BACKGROUND);
 
   if(backgroundValue.GetType() == Property::VECTOR4)
   {
@@ -4034,7 +4088,7 @@ bool LabelImpl::GetViewBackgroundColor(Vector4& backgroundColor) const
   if(backgroundValue.GetType() == Property::MAP)
   {
     const Property::Map& backgroundMap = backgroundValue.Get<Property::Map>();
-    Property::Value*     mixColorValue = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
+    Property::Value*     mixColorValue = backgroundMap.Find(Ui::Integration::Visual::Property::MIX_COLOR);
     if(mixColorValue)
     {
       backgroundColor = mixColorValue->Get<Vector4>();
@@ -4169,12 +4223,13 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
   parameters.isTextFitCandidatesEnabled   = mController->IsTextFitCandidatesEnabled();
   parameters.textFitCandidates            = mController->GetTextFitCandidates();
   parameters.isMarqueeEnabled             = mController->IsMarqueeEnabled();
-  if(HasInlineReplacementSource())
+  const bool hasMarqueeBlocker            = HasInlineReplacementSource();
+  if(hasMarqueeBlocker)
   {
     parameters.isMarqueeEnabled = false;
   }
   parameters.marqueeTriggerPolicy = mMarqueeTriggerPolicy;
-  parameters.suppressAutoMarquee  = mSuppressAutoMarquee;
+  parameters.suppressAutoMarquee  = mSuppressAutoMarquee || hasMarqueeBlocker;
   if(parameters.isMarqueeEnabled || parameters.marqueeTriggerPolicy == Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW)
   {
     parameters.marqueeStopMode    = GetTextScroller()->GetStopMode();
@@ -4198,12 +4253,12 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
                                    !parameters.isCutoutEnabled;
   if(parameters.isTextRevealEnabled)
   {
-    parameters.textRevealUnit              = Ui::Text::Internal::Reveal::ToInternalUnit(revealData->unit);
-    parameters.textRevealFadeDurationRatio = revealData->fadeDurationRatio;
+    parameters.textRevealUnit                 = Ui::Text::Internal::Reveal::ToInternalUnit(revealData->unit);
+    parameters.textRevealSequence             = Ui::Text::Internal::Reveal::ToInternalSequence(revealData->sequence);
+    parameters.textRevealFadeDurationRatio    = revealData->fadeDurationRatio;
+    parameters.textRevealSequenceStaggerRatio = revealData->sequenceStaggerRatio;
   }
-  Property::Map variationsMap;
-  mController->GetVariationsMap(variationsMap);
-  parameters.variationsMap                  = variationsMap;
+  mController->GetVariationsMap(parameters.variationsMap);
   parameters.renderScale                    = mController->GetRenderScale();
   parameters.isEmbossEnabled                = mController->IsEmbossEnabled();
   parameters.embossDirection                = mController->GetEmbossDirection();
@@ -4415,4 +4470,4 @@ Dali::Property::Value LabelImpl::GetProperty(BaseObject* object, Dali::Property:
 
 } // namespace Ui
 
-} // namespace Dali
+} //namespace DALI_NAMESPACE

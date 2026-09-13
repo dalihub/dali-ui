@@ -21,25 +21,27 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/object/property-array.h>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 namespace Ui
 {
 LottieAnimationVisual LottieAnimationVisual::New()
 {
-  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::VisualType::ANIMATED_VECTOR_IMAGE);
+  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::VisualType::LOTTIE_ANIMATION);
   return LottieAnimationVisual(internal.Get());
 }
 
 LottieAnimationVisual LottieAnimationVisual::DownCast(BaseHandle handle)
 {
   Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
-  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::VisualType::ANIMATED_VECTOR_IMAGE)
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::VisualType::LOTTIE_ANIMATION)
   {
     return LottieAnimationVisual(visualBaseImpl);
   }
@@ -52,248 +54,256 @@ LottieAnimationVisual LottieAnimationVisual::DownCast(BaseHandle handle)
 
 Dali::String LottieAnimationVisual::GetResourceUrl() const
 {
-  return VisualBase::GetProperty<Dali::String>(LottieAnimationVisual::Property::URL);
+  return GetImplementation(*this).GetProperty<Dali::String>(Dali::Ui::Integration::ImageVisual::Property::URL);
 }
 
 void LottieAnimationVisual::SetResourceUrl(const Dali::String& resourceUrl)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::URL, resourceUrl);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::URL, resourceUrl);
 }
 
 bool LottieAnimationVisual::IsSynchronousLoading() const
 {
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::SYNCHRONOUS_LOADING);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING);
 }
 
 void LottieAnimationVisual::SetSynchronousLoading(bool synchronous)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::SYNCHRONOUS_LOADING, synchronous);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, synchronous);
 }
 
 int LottieAnimationVisual::GetDesiredWidth() const
 {
-  return VisualBase::GetProperty<int>(LottieAnimationVisual::Property::DESIRED_WIDTH);
+  return GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::DESIRED_WIDTH);
 }
 
 void LottieAnimationVisual::SetDesiredWidth(int desiredWidth)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::DESIRED_WIDTH, desiredWidth);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, desiredWidth);
 }
 
 int LottieAnimationVisual::GetDesiredHeight() const
 {
-  return VisualBase::GetProperty<int>(LottieAnimationVisual::Property::DESIRED_HEIGHT);
+  return GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT);
 }
 
 void LottieAnimationVisual::SetDesiredHeight(int desiredHeight)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::DESIRED_HEIGHT, desiredHeight);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, desiredHeight);
 }
 
 Image::SamplingMode LottieAnimationVisual::GetSamplingMode() const
 {
-  return VisualBase::GetProperty<Image::SamplingMode>(LottieAnimationVisual::Property::SAMPLING_MODE);
+  return GetImplementation(*this).GetProperty<Image::SamplingMode>(Dali::Ui::Integration::ImageVisual::Property::SAMPLING_MODE);
 }
 
 void LottieAnimationVisual::SetSamplingMode(Image::SamplingMode samplingMode)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::SAMPLING_MODE, samplingMode);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::SAMPLING_MODE, samplingMode);
 }
 
 Dali::Vector4 LottieAnimationVisual::GetPixelArea() const
 {
-  return VisualBase::GetProperty<Dali::Vector4>(LottieAnimationVisual::Property::PIXEL_AREA);
+  return GetImplementation(*this).GetProperty<Dali::Vector4>(Dali::Ui::Integration::ImageVisual::Property::PIXEL_AREA);
 }
 
 void LottieAnimationVisual::SetPixelArea(const Dali::Vector4& pixelArea)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::PIXEL_AREA, pixelArea);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PIXEL_AREA, pixelArea);
 }
 
 Dali::WrapMode::Type LottieAnimationVisual::GetWrapModeU() const
 {
-  return VisualBase::GetProperty<Dali::WrapMode::Type>(LottieAnimationVisual::Property::WRAP_MODE_U);
+  return GetImplementation(*this).GetProperty<Dali::WrapMode::Type>(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_U);
 }
 
 void LottieAnimationVisual::SetWrapModeU(Dali::WrapMode::Type wrapModeU)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::WRAP_MODE_U, wrapModeU);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_U, wrapModeU);
 }
 
 Dali::WrapMode::Type LottieAnimationVisual::GetWrapModeV() const
 {
-  return VisualBase::GetProperty<Dali::WrapMode::Type>(LottieAnimationVisual::Property::WRAP_MODE_V);
+  return GetImplementation(*this).GetProperty<Dali::WrapMode::Type>(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_V);
 }
 
 void LottieAnimationVisual::SetWrapModeV(Dali::WrapMode::Type wrapModeV)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::WRAP_MODE_V, wrapModeV);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_V, wrapModeV);
 }
 
 bool LottieAnimationVisual::IsBrokenImageEnabled() const
 {
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_BROKEN_IMAGE);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ENABLE_BROKEN_IMAGE);
 }
 
 void LottieAnimationVisual::SetBrokenImageEnabled(bool brokenImageEnabled)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_BROKEN_IMAGE, brokenImageEnabled);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ENABLE_BROKEN_IMAGE, brokenImageEnabled);
 }
 
 Image::LoadPolicy LottieAnimationVisual::GetLoadPolicy() const
 {
-  return VisualBase::GetProperty<Image::LoadPolicy>(LottieAnimationVisual::Property::LOAD_POLICY);
+  return GetImplementation(*this).GetProperty<Image::LoadPolicy>(Dali::Ui::Integration::ImageVisual::Property::LOAD_POLICY);
 }
 
 void LottieAnimationVisual::SetLoadPolicy(Image::LoadPolicy loadPolicy)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::LOAD_POLICY, loadPolicy);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::LOAD_POLICY, loadPolicy);
 }
 
 Image::ReleasePolicy LottieAnimationVisual::GetReleasePolicy() const
 {
-  return VisualBase::GetProperty<Image::ReleasePolicy>(LottieAnimationVisual::Property::RELEASE_POLICY);
+  return GetImplementation(*this).GetProperty<Image::ReleasePolicy>(Dali::Ui::Integration::ImageVisual::Property::RELEASE_POLICY);
 }
 
 void LottieAnimationVisual::SetReleasePolicy(Image::ReleasePolicy releasePolicy)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::RELEASE_POLICY, releasePolicy);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::RELEASE_POLICY, releasePolicy);
 }
 
-bool LottieAnimationVisual::IsOrientationCorrection() const
+bool LottieAnimationVisual::IsOrientationCorrectionEnabled() const
 {
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ORIENTATION_CORRECTION);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION);
 }
 
-void LottieAnimationVisual::SetOrientationCorrection(bool orientationCorrection)
+void LottieAnimationVisual::SetOrientationCorrectionEnabled(bool orientationCorrection)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
 }
 
-bool LottieAnimationVisual::IsSynchronousSizing() const
+bool LottieAnimationVisual::IsImageLoadWithViewSizeEnabled() const
 {
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::SYNCHRONOUS_SIZING);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE);
 }
 
-void LottieAnimationVisual::SetSynchronousSizing(bool synchronousSizing)
+void LottieAnimationVisual::SetImageLoadWithViewSizeEnabled(bool enabled)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::SYNCHRONOUS_SIZING, synchronousSizing);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, enabled);
 }
 
 int LottieAnimationVisual::GetLoopCount() const
 {
-  return VisualBase::GetProperty<int>(LottieAnimationVisual::Property::LOOP_COUNT);
+  return GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::LOOP_COUNT);
 }
 
 void LottieAnimationVisual::SetLoopCount(int loopCount)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::LOOP_COUNT, loopCount);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::LOOP_COUNT, loopCount);
 }
 
-Dali::Property::Array LottieAnimationVisual::GetPlayRange() const
+void LottieAnimationVisual::SetMinMaxFrame(int minFrame, int maxFrame)
 {
-  Dali::Property::Value  value    = VisualBase::GetProperty(LottieAnimationVisual::Property::PLAY_RANGE);
+  Dali::Property::Array range;
+  range.PushBack(minFrame);
+  range.PushBack(maxFrame);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE, range);
+}
+
+void LottieAnimationVisual::GetMinMaxFrame(int& minFrame, int& maxFrame) const
+{
+  Dali::Property::Value  value    = GetImplementation(*this).GetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE);
   Dali::Property::Array* arrayPtr = value.GetArray();
-  if(arrayPtr)
+  if(arrayPtr && arrayPtr->Count() >= 2u &&
+     arrayPtr->GetElementAt(0).Get(minFrame) && arrayPtr->GetElementAt(1).Get(maxFrame))
   {
-    return *arrayPtr;
+    return;
   }
-  return Dali::Property::Array();
+
+  // No numeric range is set, including when marker names were used.
+  minFrame = 0;
+  maxFrame = GetTotalFrameCount();
 }
 
-void LottieAnimationVisual::SetPlayRange(const Dali::Property::Array& playRange)
+void LottieAnimationVisual::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::PLAY_RANGE, playRange);
+  Dali::Property::Array range;
+  range.PushBack(minMarker);
+  if(!maxMarker.Empty())
+  {
+    range.PushBack(maxMarker);
+  }
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE, range);
 }
 
 AnimatedImage::StopBehavior LottieAnimationVisual::GetStopBehavior() const
 {
-  return VisualBase::GetProperty<AnimatedImage::StopBehavior>(LottieAnimationVisual::Property::STOP_BEHAVIOR);
+  return GetImplementation(*this).GetProperty<AnimatedImage::StopBehavior>(Dali::Ui::Integration::ImageVisual::Property::STOP_BEHAVIOR);
 }
 
 void LottieAnimationVisual::SetStopBehavior(AnimatedImage::StopBehavior stopBehavior)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::STOP_BEHAVIOR, stopBehavior);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::STOP_BEHAVIOR, stopBehavior);
 }
 
 float LottieAnimationVisual::GetFrameSpeedFactor() const
 {
-  return VisualBase::GetProperty<float>(LottieAnimationVisual::Property::FRAME_SPEED_FACTOR);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::ImageVisual::Property::FRAME_SPEED_FACTOR);
 }
 
 void LottieAnimationVisual::SetFrameSpeedFactor(float frameSpeedFactor)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::FRAME_SPEED_FACTOR, frameSpeedFactor);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::FRAME_SPEED_FACTOR, frameSpeedFactor);
 }
 
 LottieAnimation::LoopingMode LottieAnimationVisual::GetLoopingMode() const
 {
-  return VisualBase::GetProperty<LottieAnimation::LoopingMode>(LottieAnimationVisual::Property::LOOPING_MODE);
+  return GetImplementation(*this).GetProperty<LottieAnimation::LoopingMode>(Dali::Ui::Integration::ImageVisual::Property::LOOPING_MODE);
 }
 
 void LottieAnimationVisual::SetLoopingMode(LottieAnimation::LoopingMode loopingMode)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::LOOPING_MODE, loopingMode);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::LOOPING_MODE, loopingMode);
 }
 
-bool LottieAnimationVisual::IsRedrawInScalingDown() const
+bool LottieAnimationVisual::IsRedrawOnScaleDown() const
 {
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::REDRAW_IN_SCALING_DOWN);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::REDRAW_IN_SCALING_DOWN);
 }
 
-void LottieAnimationVisual::SetRedrawInScalingDown(bool redrawInScalingDown)
+void LottieAnimationVisual::SetRedrawOnScaleDown(bool redrawInScalingDown)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::REDRAW_IN_SCALING_DOWN, redrawInScalingDown);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::REDRAW_IN_SCALING_DOWN, redrawInScalingDown);
 }
 
-bool LottieAnimationVisual::IsRedrawInScalingUp() const
+bool LottieAnimationVisual::IsRedrawOnScaleUp() const
 {
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::REDRAW_IN_SCALING_UP);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::REDRAW_IN_SCALING_UP);
 }
 
-void LottieAnimationVisual::SetRedrawInScalingUp(bool redrawInScalingUp)
+void LottieAnimationVisual::SetRedrawOnScaleUp(bool redrawInScalingUp)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::REDRAW_IN_SCALING_UP, redrawInScalingUp);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::REDRAW_IN_SCALING_UP, redrawInScalingUp);
 }
 
-bool LottieAnimationVisual::IsFrameCacheEnabled() const
+bool LottieAnimationVisual::IsNotifyAfterRasterizationEnabled() const
 {
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_FRAME_CACHE);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::NOTIFY_AFTER_RASTERIZATION);
 }
 
-void LottieAnimationVisual::SetFrameCacheEnabled(bool frameCacheEnabled)
+void LottieAnimationVisual::SetNotifyAfterRasterizationEnabled(bool notifyAfterRasterization)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_FRAME_CACHE, frameCacheEnabled);
-}
-
-bool LottieAnimationVisual::IsNotifyAfterRasterization() const
-{
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::NOTIFY_AFTER_RASTERIZATION);
-}
-
-void LottieAnimationVisual::SetNotifyAfterRasterization(bool notifyAfterRasterization)
-{
-  VisualBase::SetProperty(LottieAnimationVisual::Property::NOTIFY_AFTER_RASTERIZATION, notifyAfterRasterization);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::NOTIFY_AFTER_RASTERIZATION, notifyAfterRasterization);
 }
 
 float LottieAnimationVisual::GetRenderScale() const
 {
-  return VisualBase::GetProperty<float>(LottieAnimationVisual::Property::RENDER_SCALE);
+  return GetImplementation(*this).GetProperty<float>(Dali::Ui::Integration::ImageVisual::Property::RENDER_SCALE);
 }
 
 void LottieAnimationVisual::SetRenderScale(float renderScale)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::RENDER_SCALE, renderScale);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::RENDER_SCALE, renderScale);
 }
 
 bool LottieAnimationVisual::IsAspectFitEnabled() const
 {
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_ASPECT_FIT);
+  return GetImplementation(*this).GetProperty<bool>(Dali::Ui::Integration::ImageVisual::Property::ENABLE_ASPECT_FIT);
 }
 
 void LottieAnimationVisual::SetAspectFitEnabled(bool aspectFitEnabled)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_ASPECT_FIT, aspectFitEnabled);
+  GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::ENABLE_ASPECT_FIT, aspectFitEnabled);
 }
 
 // =============================================================================
@@ -304,8 +314,8 @@ AnimatedImage::PlayState LottieAnimationVisual::GetPlayState() const
 {
   // We should not cache this property. Remove cache now.
   // TODO : Maybe need to make API to get proeprty without cache as method.
-  GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::PLAY_STATE);
-  AnimatedImage::PlayState result = VisualBase::GetProperty<AnimatedImage::PlayState>(LottieAnimationVisual::Property::PLAY_STATE);
+  GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::PLAY_STATE);
+  AnimatedImage::PlayState result = GetImplementation(*this).GetProperty<AnimatedImage::PlayState>(Dali::Ui::Integration::ImageVisual::Property::PLAY_STATE);
   return result;
 }
 
@@ -313,40 +323,40 @@ int LottieAnimationVisual::GetCurrentFrameNumber() const
 {
   // We should not cache this property. Remove cache now.
   // TODO : Maybe need to make API to get proeprty without cache as method.
-  GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::CURRENT_FRAME_NUMBER);
-  int result = VisualBase::GetProperty<int>(LottieAnimationVisual::Property::CURRENT_FRAME_NUMBER);
+  GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::CURRENT_FRAME_NUMBER);
+  int result = GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::CURRENT_FRAME_NUMBER);
   return result;
 }
 
-int LottieAnimationVisual::GetTotalFrameNumber() const
+int LottieAnimationVisual::GetTotalFrameCount() const
 {
-  int result = VisualBase::GetProperty<int>(LottieAnimationVisual::Property::TOTAL_FRAME_NUMBER);
+  int result = GetImplementation(*this).GetProperty<int>(Dali::Ui::Integration::ImageVisual::Property::TOTAL_FRAME_COUNT);
   if(result <= 0)
   {
     // We should not cache this property only if result is less or equal than 0. Remove cache now.
-    GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::TOTAL_FRAME_NUMBER);
+    GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::TOTAL_FRAME_COUNT);
   }
   return result;
 }
 
 Dali::Property::Map LottieAnimationVisual::GetContentInfo() const
 {
-  Dali::Property::Map result = VisualBase::GetProperty<Dali::Property::Map>(LottieAnimationVisual::Property::CONTENT_INFO);
+  Dali::Property::Map result = GetImplementation(*this).GetProperty<Dali::Property::Map>(Dali::Ui::Integration::ImageVisual::Property::CONTENT_INFO);
   // TODO : We need to separate whether value not loaded yet, or value is not exist actually.
   if(result.Empty())
   {
-    GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::CONTENT_INFO);
+    GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::CONTENT_INFO);
   }
   return result;
 }
 
 Dali::Property::Map LottieAnimationVisual::GetMarkerInfo() const
 {
-  Dali::Property::Map result = VisualBase::GetProperty<Dali::Property::Map>(LottieAnimationVisual::Property::MARKER_INFO);
+  Dali::Property::Map result = GetImplementation(*this).GetProperty<Dali::Property::Map>(Dali::Ui::Integration::ImageVisual::Property::MARKER_INFO);
   // TODO : We need to separate whether value not loaded yet, or value is not exist actually.
   if(result.Empty())
   {
-    GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::MARKER_INFO);
+    GetImplementation(*this).RemoveCache(Dali::Ui::Integration::ImageVisual::Property::MARKER_INFO);
   }
   return result;
 }
@@ -359,39 +369,39 @@ void LottieAnimationVisual::Play()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::PLAY, Dali::Property::Value());
+  GetImplementation(*this).DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::PLAY, Dali::Property::Value());
 }
 
 void LottieAnimationVisual::Pause()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::PAUSE, Dali::Property::Value());
+  GetImplementation(*this).DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::PAUSE, Dali::Property::Value());
 }
 
 void LottieAnimationVisual::Stop()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::STOP, Dali::Property::Value());
+  GetImplementation(*this).DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::STOP, Dali::Property::Value());
 }
 
-void LottieAnimationVisual::JumpTo(int frame)
+void LottieAnimationVisual::JumpToFrame(int frame)
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::JUMP_TO, static_cast<int32_t>(frame));
+  GetImplementation(*this).DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::JUMP_TO, static_cast<int32_t>(frame));
 }
 
-void LottieAnimationVisual::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
+void LottieAnimationVisual::SetDynamicProperty(LottieAnimation::DynamicProperty info)
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo dynamicInfo;
-  dynamicInfo.id       = info.id;
-  dynamicInfo.keyPath  = info.keyPath.CStr();
-  dynamicInfo.property = static_cast<int32_t>(info.property);
-  dynamicInfo.callback = info.callback;
+  Ui::Integration::AnimatedVectorImageVisual::DynamicProperty dynamicInfo;
+  dynamicInfo.id       = info.GetId();
+  dynamicInfo.keyPath  = info.GetKeyPath().CStr();
+  dynamicInfo.property = static_cast<int32_t>(info.GetProperty());
+  dynamicInfo.callback = Ui::Integration::AnimatedVectorImageVisual::WrapDynamicPropertyCallback(std::move(info.GetCallback()));
   GetImplementation(*this).DoActionExtension(Ui::Integration::AnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY, Dali::Any(dynamicInfo));
 }
 
@@ -403,5 +413,6 @@ LottieAnimationVisual::LottieAnimationVisual(Dali::Ui::Internal::VisualBaseImpl*
 : VisualBase(object)
 {
 }
+
 } // namespace Ui
-} // namespace Dali
+} //namespace DALI_NAMESPACE

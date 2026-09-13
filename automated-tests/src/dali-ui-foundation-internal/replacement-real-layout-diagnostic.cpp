@@ -20,10 +20,13 @@
 #include <cmath>
 #include <initializer_list>
 #include <iostream>
+#include <set>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include "replacement-layout-test-adapter.h"
@@ -507,6 +510,146 @@ void CheckOversizedVerticalSweep(Text::ReplacementLayoutTestServices& services)
             << " visible_and_elided=1" << std::endl;
 }
 
+void CheckAsyncRenderScaleAutoLineHeight()
+{
+  struct Summary
+  {
+    std::vector<float> lineHeights;
+    float              layoutHeight{0.0f};
+    Text::LineIndex    replacementLine{0u};
+    uint32_t           fontCount{0u};
+    bool               replacementVisible{false};
+  };
+
+  const std::pair<const char*, std::string> cases[] = {
+    {"latin",
+     "Latin first line\nLatin second line\nLatin third line\n\uFFFC image line\ntrailing fifth line\ntrailing sixth line"},
+    {"mixed_fallback_emoji",
+     "Latin first line\n한글 둘째 줄\nمرحبا third 😀\n\uFFFC image line\ntrailing fifth line\ntrailing sixth line"},
+    {"same_line_mixed",
+     "Latin 😀 مرحبا before \uFFFC 한국어 after replacement on one mixed line\ntrailing second line\ntrailing third line"},
+  };
+
+  uint32_t horizontalDpi = 0u;
+  uint32_t verticalDpi   = 0u;
+  TextAbstraction::FontClient::Get().GetDpi(horizontalDpi, verticalDpi);
+
+  for(const auto& testCase : cases)
+  {
+    const Vector<Text::Character> text             = Utf32(testCase.second);
+    Text::CharacterIndex          replacementIndex = 0u;
+    while(replacementIndex < text.Count() &&
+          text[replacementIndex] != Text::ReplacementProjection::OBJECT_REPLACEMENT_CHARACTER)
+    {
+      ++replacementIndex;
+    }
+    Require(replacementIndex < text.Count(), "render-scale: U+FFFC marker is missing");
+
+    const auto render = [&](float scale, float textHeight)
+    {
+      Text::AsyncTextParameters parameters;
+      parameters.text             = testCase.second;
+      parameters.fontSize         = 28.337f * 72.0f / static_cast<float>(horizontalDpi);
+      parameters.textWidth        = 492.0f;
+      parameters.textHeight       = textHeight;
+      parameters.originWidth      = parameters.textWidth;
+      parameters.originHeight     = parameters.textHeight;
+      parameters.renderScale      = scale;
+      parameters.isMultiLine      = true;
+      parameters.ellipsis         = true;
+      parameters.ellipsisPosition = Text::EllipsisPosition::END;
+      parameters.relativeLineSize = -1.0f;
+      parameters.lineWrapMode     = Text::LineWrapMode::WORD;
+      parameters.maxTextureSize   = 4096;
+      parameters.replacementSourceSnapshot.runs.PushBack(Candidate(replacementIndex, 1u, 2710u, 210.0f));
+      parameters.replacementSourceSnapshot.runs[0u].metrics.height   = 120.0f;
+      parameters.replacementSourceSnapshot.hasValidReplacementSource = true;
+
+      Text::AsyncTextLoader loader = Text::AsyncTextLoader::New();
+      bool                  cached = false;
+      Size                  naturalSize;
+      if(scale > 1.0f)
+      {
+        naturalSize = loader.SetupRenderScale(parameters, cached);
+      }
+      loader.RenderText(parameters, cached, naturalSize);
+      const Text::ReplacementRenderState* state = Text::GetImplementation(loader).GetReplacementRenderState();
+      Require(state && state->processingModel && state->placements.Count() == 1u,
+              "render-scale: final replacement state is missing");
+      const Vector<Text::LineRun>& lines = state->processingModel->mVisualModel->mLines;
+      Require(!lines.Empty(), "render-scale: no final lines were produced");
+
+      Summary summary;
+      summary.layoutHeight       = state->layoutSize.height / scale;
+      summary.replacementVisible = state->placements[0u].visible;
+      summary.replacementLine    = state->placements[0u].lineIndex;
+      std::set<Text::FontId> fontIds;
+      for(const Text::GlyphInfo& glyph : state->processingModel->mVisualModel->mGlyphs)
+      {
+        if(glyph.fontId != 0u)
+        {
+          fontIds.insert(glyph.fontId);
+        }
+      }
+      summary.fontCount = static_cast<uint32_t>(fontIds.size());
+      for(const Text::LineRun& line : lines)
+      {
+        summary.lineHeights.push_back(Text::GetLineHeight(line, false) / scale);
+      }
+      return summary;
+    };
+
+    const Summary unconstrained = render(1.0f, 2000.0f);
+    Require(unconstrained.replacementVisible, "render-scale: unconstrained replacement is hidden");
+    float boundaryHeight = 0.0f;
+    for(Text::LineIndex index = 0u; index <= unconstrained.replacementLine; ++index)
+    {
+      boundaryHeight += unconstrained.lineHeights[index];
+    }
+    boundaryHeight = std::ceil(boundaryHeight);
+    while(boundaryHeight > 1.0f && render(1.0f, boundaryHeight - 1.0f).replacementVisible)
+    {
+      boundaryHeight -= 1.0f;
+    }
+    while(!render(1.0f, boundaryHeight).replacementVisible)
+    {
+      boundaryHeight += 1.0f;
+    }
+
+    const Summary logical      = render(1.0f, boundaryHeight);
+    const Summary logicalBelow = render(1.0f, boundaryHeight - 1.0f);
+    Require(logical.replacementVisible && !logicalBelow.replacementVisible,
+            "render-scale: scale-1 boundary is not exact");
+    if(std::string(testCase.first) != "latin")
+    {
+      Require(logical.fontCount > 1u, "render-scale: mixed case did not resolve multiple font ids");
+    }
+
+    for(float scale : {1.25f, 1.5f, 2.0f})
+    {
+      const Summary scaled = render(scale, boundaryHeight);
+      Require(scaled.replacementVisible,
+              "render-scale: raster scale changed the oversized replacement boundary");
+      Require(scaled.lineHeights.size() == logical.lineHeights.size(),
+              "render-scale: raster scale changed the retained line count");
+      for(std::size_t index = 0u; index < logical.lineHeights.size(); ++index)
+      {
+        Require(std::fabs(scaled.lineHeights[index] - logical.lineHeights[index]) < 0.01f,
+                "render-scale: AUTO line height changed in logical coordinates");
+      }
+      std::cout << "REAL_REPLACEMENT_RENDER_SCALE case=" << testCase.first
+                << " scale=" << scale
+                << " boundary_height=" << boundaryHeight
+                << " logical_lines=" << logical.lineHeights.size()
+                << " scaled_lines=" << scaled.lineHeights.size()
+                << " logical_fonts=" << logical.fontCount
+                << " scaled_fonts=" << scaled.fontCount
+                << " logical_replacement_visible=" << logical.replacementVisible
+                << " scaled_replacement_visible=" << scaled.replacementVisible << std::endl;
+    }
+  }
+}
+
 } // unnamed namespace
 
 void RunDiagnostics()
@@ -614,13 +757,15 @@ void RunDiagnostics()
   CheckEndEllipsisCase("ltr_rtl", mixedEllipsis, 2u, true, services);
 
   CheckOversizedVerticalSweep(services);
+  CheckAsyncRenderScaleAutoLineHeight();
 }
 
 class DiagnosticRunner : public ConnectionTracker
 {
 public:
-  explicit DiagnosticRunner(Application& application)
-  : mApplication(application)
+  DiagnosticRunner(Application& application, bool renderScaleOnly)
+  : mApplication(application),
+    mRenderScaleOnly(renderScaleOnly)
   {
     mApplication.InitSignal().Connect(this, &DiagnosticRunner::OnInit);
   }
@@ -635,7 +780,14 @@ private:
   {
     try
     {
-      RunDiagnostics();
+      if(mRenderScaleOnly)
+      {
+        CheckAsyncRenderScaleAutoLineHeight();
+      }
+      else
+      {
+        RunDiagnostics();
+      }
     }
     catch(const std::exception& exception)
     {
@@ -659,12 +811,14 @@ private:
   Application& mApplication;
   Timer        mQuitTimer;
   int          mExitStatus{0};
+  bool         mRenderScaleOnly{false};
 };
 
 int main(int argc, char** argv)
 {
-  Application      application = Application::New(&argc, &argv);
-  DiagnosticRunner runner(application);
+  const bool       renderScaleOnly = argc > 1 && std::string(argv[1]) == "--render-scale-only";
+  Application      application     = Application::New(&argc, &argv);
+  DiagnosticRunner runner(application, renderScaleOnly);
   application.MainLoop();
   return runner.GetExitStatus();
 }
