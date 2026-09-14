@@ -41,6 +41,7 @@ SET(TC_SOURCES
     utc-Dali-TextVisualAsyncPublication-internal.cpp
     utc-Dali-WindowsWarningCoverage-internal.cpp
     utc-Dali-ViewAccessibility-internal.cpp
+    utc-Dali-ViewDebug-internal.cpp
     utc-Dali-Accessibility-Text-internal.cpp
     utc-Dali-ImageView-internal.cpp
     utc-Dali-LottieAnimationView-internal.cpp
