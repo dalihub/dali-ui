@@ -44,6 +44,7 @@ SET(TC_SOURCES
     utc-Dali-ImageView-internal.cpp
     utc-Dali-LottieAnimationView-internal.cpp
     utc-Dali-ObjLoader-internal.cpp
+    utc-Dali-MeshVisual-internal.cpp
     utc-Dali-PrimitiveVisual-internal.cpp
     utc-Dali-BuilderReplacement-internal.cpp
     utc-Dali-JsonParser-internal.cpp
