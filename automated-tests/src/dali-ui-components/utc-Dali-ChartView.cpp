@@ -16,15 +16,19 @@
  */
 
 #include <dali-ui-components/public-api/chart/chart-axis.h>
+#include <dali-ui-components/public-api/chart/bar-series.h>
 #include <dali-ui-components/public-api/chart/chart-section.h>
 #include <dali-ui-components/public-api/chart/chart-view.h>
 #include <dali-ui-components/public-api/chart/line-series.h>
+#include <dali-ui-components/public-api/chart/pie-series.h>
+#include <dali-ui-components/public-api/chart/scatter-series.h>
 #include <dali-ui-components/public-api/components-ui-config.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <stdlib.h>
 #include <iostream>
+#include <limits>
 #include <utility>
 
 using namespace Dali;
@@ -47,6 +51,15 @@ static bool gSignalReceived = false;
 void OnDataPointSelected(ChartView, const ChartPointEventArgs&)
 {
   gSignalReceived = true;
+}
+
+void RenderChart(UiTestApplication& application, ChartView chartView)
+{
+  application.GetScene().Add(chartView);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
 }
 } // namespace
 
@@ -338,5 +351,150 @@ int UtcDaliChartViewSettersP(void)
   chartView.SetAnimationDuration(300.0f);
   chartView.SetHitThreshold(15.0f);
   DALI_TEST_EQUALS(chartView.GetTitle(), Dali::String("Test"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliChartViewRenderLineAndScatterP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartAxis         xAxis     = ChartAxis::New();
+  ChartAxis         yAxis     = ChartAxis::New();
+  LineSeries        line      = LineSeries::New();
+  ScatterSeries     scatter   = ScatterSeries::New();
+  ChartSection      band      = ChartSection::New();
+  ChartSection      lineBand  = ChartSection::New();
+
+  xAxis.SetLabels({"Jan", "Feb", "Mar", "Apr", "May"});
+  xAxis.SetTitle("Month");
+  yAxis.SetTitle("Value");
+  yAxis.SetMinimumLimit(-10.0f);
+  yAxis.SetMaximumLimit(50.0f);
+  chartView.SetXAxis(xAxis);
+  chartView.SetYAxis(yAxis);
+
+  line.SetName("Revenue");
+  line.SetValues({10.0f, 24.0f, std::numeric_limits<float>::quiet_NaN(), -5.0f, 42.0f});
+  line.SetSmoothness(0.8f);
+  line.SetFillEnabled(true);
+  line.SetFillColor(Vector4(0.2f, 0.5f, 0.9f, 0.25f));
+  line.SetMarkerShape(LineSeries::MarkerShape::DIAMOND);
+  line.SetMarkerRadius(6.0f);
+  line.SetMarkerBorderWidth(2.0f);
+  line.SetMarkerBorderColor(Color::BLACK);
+  line.SetDataLabelsVisible(true);
+  line.SetDataLabelFormat("%.2f");
+  chartView.AddSeries(line);
+
+  scatter.SetName("Events");
+  scatter.SetValues({Vector2(0.5f, 5.0f), Vector2(2.5f, 30.0f), Vector2(4.0f, 15.0f)});
+  scatter.SetMarkerShape(ScatterSeries::MarkerShape::TRIANGLE);
+  scatter.SetMarkerRadius(5.0f);
+  chartView.AddSeries(scatter);
+
+  band.SetMinimumX(1.0f);
+  band.SetMaximumX(3.0f);
+  band.SetMinimumY(0.0f);
+  band.SetMaximumY(20.0f);
+  band.SetFillColor(Vector4(1.0f, 0.8f, 0.0f, 0.2f));
+  chartView.AddSection(band);
+
+  lineBand.SetMinimumY(25.0f);
+  lineBand.SetMaximumY(25.0f);
+  lineBand.SetStrokeWidth(2.0f);
+  chartView.AddSection(lineBand);
+
+  chartView.SetTitle("Quarterly overview");
+  chartView.SetProperty(ChartView::Property::SHOW_LEGEND, true);
+  RenderChart(application, chartView);
+
+  DALI_TEST_CHECK(chartView.GetChildCount() > 3u);
+  END_TEST;
+}
+
+int UtcDaliChartViewRenderGroupedAndStackedBarsP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView         chartView = ChartView::New(ChartView::Type::BAR, Vector2(480.0f, 360.0f));
+  ChartAxis         xAxis     = ChartAxis::New();
+  ChartAxis         yAxis     = ChartAxis::New();
+  BarSeries         grouped   = BarSeries::New();
+  BarSeries         positive  = BarSeries::New();
+  BarSeries         negative  = BarSeries::New();
+
+  xAxis.SetLabels({"A", "B", "C", "D"});
+  yAxis.SetMinimumLimit(-30.0f);
+  yAxis.SetMaximumLimit(80.0f);
+  chartView.SetXAxis(xAxis);
+  chartView.SetYAxis(yAxis);
+
+  grouped.SetName("Grouped");
+  grouped.SetValues({20.0f, -15.0f, 0.0f, 55.0f});
+  grouped.SetColor(Vector4(0.2f, 0.6f, 0.9f, 1.0f));
+  grouped.SetDataLabelsVisible(true);
+  grouped.SetDataLabelFormat("%.0f");
+  chartView.AddSeries(grouped);
+
+  positive.SetName("Positive stack");
+  positive.SetValues({12.0f, 25.0f, 30.0f, 18.0f});
+  positive.SetStacked(true);
+  positive.SetDataLabelsVisible(true);
+  chartView.AddSeries(positive);
+
+  negative.SetName("Negative stack");
+  negative.SetValues({-8.0f, -12.0f, -20.0f, -5.0f});
+  negative.SetStacked(true);
+  negative.SetDataLabelsVisible(true);
+  chartView.AddSeries(negative);
+
+  chartView.SetProperty(ChartView::Property::SHOW_LEGEND, true);
+  RenderChart(application, chartView);
+
+  grouped.SetValues({30.0f, -20.0f, 15.0f, 60.0f});
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(chartView.GetChildCount() > 3u);
+  END_TEST;
+}
+
+int UtcDaliChartViewRenderPieAndDonutP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView         chartView = ChartView::New(ChartView::Type::PIE, Vector2(420.0f, 360.0f));
+  PieSeries         pie       = PieSeries::New();
+
+  pie.AddSlice("Alpha", 55.0f, Vector4(0.9f, 0.2f, 0.2f, 1.0f));
+  pie.AddSlice("Beta", 30.0f, Vector4(0.2f, 0.7f, 0.3f, 1.0f));
+  pie.AddSlice("Gamma", 15.0f, Vector4(0.2f, 0.4f, 0.9f, 1.0f));
+  pie.SetInnerRadiusRatio(0.45f);
+  pie.SetSliceGap(2.0f);
+  pie.SetCenterLabel("Total");
+  pie.SetDataLabelsVisible(true);
+  pie.SetDataLabelMinAngle(5.0f);
+  chartView.AddSeries(pie);
+  chartView.SetTitle("Distribution");
+  chartView.SetProperty(ChartView::Property::SHOW_LEGEND, true);
+  RenderChart(application, chartView);
+
+  DALI_TEST_CHECK(chartView.GetChildCount() > 3u);
+  END_TEST;
+}
+
+int UtcDaliChartViewRenderGaugeP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView         chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(360.0f, 360.0f));
+
+  chartView.SetGaugeMinimumValue(0.0f);
+  chartView.SetGaugeMaximumValue(100.0f);
+  chartView.SetGaugeValue(72.0f);
+  chartView.SetGaugeArcSpan(270.0f);
+  chartView.SetGaugeCenterLabel("72%");
+  chartView.AddGaugeRange(0.0f, 40.0f, Vector4(0.9f, 0.2f, 0.2f, 1.0f));
+  chartView.AddGaugeRange(40.0f, 80.0f, Vector4(0.9f, 0.7f, 0.1f, 1.0f));
+  chartView.AddGaugeRange(80.0f, 100.0f, Vector4(0.2f, 0.7f, 0.3f, 1.0f));
+  RenderChart(application, chartView);
+
+  DALI_TEST_CHECK(chartView.GetChildCount() > 3u);
   END_TEST;
 }
