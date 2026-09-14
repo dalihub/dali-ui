@@ -17,8 +17,9 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/dali.h>
-#include <dali/public-api/events/key-event.h>
 #include <dali/devel-api/actors/actor-enumerations-devel.h>
+#include <dali/devel-api/adaptor-framework/application.h>
+#include <dali/public-api/events/key-event.h>
 
 #include <algorithm>
 #include <array>
@@ -30,21 +31,21 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr uint32_t BLUR_RADIUS       = 40u;
-constexpr float    BLUR_DOWNSCALE   = 0.25f;
-constexpr float    IMAGE_SIZE       = 200.0f;
-constexpr float    IMAGE_GAP_X      = 120.0f;
-constexpr float    IMAGE_GAP_Y      = 90.0f;
-constexpr float    BOARD_MOVE_X     = 180.0f;
-constexpr float    BOARD_MOVE_Y     = 140.0f;
-constexpr float    BOARD_MOVE_TIME  = 6.0f;
-constexpr float    DITHER_STEP      = 5.0f / 255.0f;
-constexpr float    DITHER_SCALE     = 0.2f;
-constexpr float    INITIAL_DITHER   = 0.1f;
-constexpr float    HELP_MARGIN      = 24.0f;
-constexpr float    HELP_HEIGHT      = 44.0f;
-constexpr int      IMAGE_COLUMNS    = 6;
-constexpr int      IMAGE_ROWS       = 4;
+constexpr uint32_t BLUR_RADIUS     = 40u;
+constexpr float    BLUR_DOWNSCALE  = 0.25f;
+constexpr float    IMAGE_SIZE      = 200.0f;
+constexpr float    IMAGE_GAP_X     = 120.0f;
+constexpr float    IMAGE_GAP_Y     = 90.0f;
+constexpr float    BOARD_MOVE_X    = 180.0f;
+constexpr float    BOARD_MOVE_Y    = 140.0f;
+constexpr float    BOARD_MOVE_TIME = 6.0f;
+constexpr float    DITHER_STEP     = 5.0f / 255.0f;
+constexpr float    DITHER_SCALE    = 0.2f;
+constexpr float    INITIAL_DITHER  = 0.1f;
+constexpr float    HELP_MARGIN     = 24.0f;
+constexpr float    HELP_HEIGHT     = 44.0f;
+constexpr int      IMAGE_COLUMNS   = 6;
+constexpr int      IMAGE_ROWS      = 4;
 
 const std::array<Vector4, 4> BACKGROUND_COLORS =
   {{

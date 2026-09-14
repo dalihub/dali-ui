@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -23,9 +24,8 @@ using Dali::Ui::View;
 class HelloWorldController : public ConnectionTracker
 {
 public:
-
   HelloWorldController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect(this, &HelloWorldController::Create);
@@ -49,7 +49,8 @@ public:
     redChild.SetBackgroundColor(UiColor(0xFF0000));
     redChild.SetRequestedWidth(100_spx);
     redChild.SetRequestedHeight(100_spx);
-    redChild.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+    redChild.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool
+    {
       mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
       return true;
     });
@@ -58,27 +59,27 @@ public:
     mSecondChild.SetBackgroundColor(UiColor(0x0000FF));
     mSecondChild.SetRequestedWidth(100_spx);
     mSecondChild.SetRequestedHeight(100_spx);
-//    mSecondChild.SetRequestedX(100_spx);
-//    mSecondChild.SetRequestedY(100_spx);
+    //    mSecondChild.SetRequestedX(100_spx);
+    //    mSecondChild.SetRequestedY(100_spx);
 
     parent.Add(mSecondChild);
     parent.Add(redChild);
     redChild.Raise();
     mSecondChild.Raise();
-//    parent.Add(redChild);
+    //    parent.Add(redChild);
     parent.Add(mSecondChild);
     window.Add(parent);
   }
 
 private:
   Application& mApplication;
-  View mSecondChild;
+  View         mSecondChild;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   HelloWorldController test(application);

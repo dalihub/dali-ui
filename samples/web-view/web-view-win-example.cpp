@@ -114,11 +114,11 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
-
 
 namespace
 {
@@ -175,11 +175,11 @@ private:
     //   WebEnginePlugin::Create(w,h,argc,argv) internally (see
     //   WebViewImpl::New() in web-view-impl.cpp).
     //   Note: [API #1] Create(w,h,locale,timezone) is NOT used by this sample.
-    static char arg0[] = "web-view-win-example";
-    static char arg1[] = "--prefer-platform-version";
-    char*      webArgs[] = {arg0, arg1};
-    uint32_t   webArgc   = 2;
-    mWebView = WebView::New(webArgc, webArgs);
+    static char arg0[]    = "web-view-win-example";
+    static char arg1[]    = "--prefer-platform-version";
+    char*       webArgs[] = {arg0, arg1};
+    uint32_t    webArgc   = 2;
+    mWebView              = WebView::New(webArgc, webArgs);
     // [API #19] SetSize(w,h) — use a smaller size centered on screen
     //   so the focus indicator is visible around the WebView.
     float viewW = static_cast<float>(windowSize.width) * 0.6f;
@@ -273,9 +273,9 @@ private:
       return;
     }
 
-    const Dali::String& keyName  = event.GetKeyName();
-    const char*         name     = keyName.CStr();
-    int                 keyCode  = event.GetKeyCode();
+    const Dali::String& keyName = event.GetKeyName();
+    const char*         name    = keyName.CStr();
+    int                 keyCode = event.GetKeyCode();
 
     // Log every key for debugging
     DALI_LOG_RELEASE_INFO("[WebViewSample] KeyEvent: name=\"%s\" code=%d\n", name, keyCode);
@@ -291,12 +291,12 @@ private:
     if(IsKey(event, Dali::DALI_KEY_CURSOR_UP))
     {
       // Enlarge WebView by 10%
-      float w = mWebView.GetProperty<float>(Actor::Property::SIZE_WIDTH);
-      float h = mWebView.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
+      float w    = mWebView.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+      float h    = mWebView.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
       float newW = w * 1.1f;
       float newH = h * 1.1f;
-      float dx = (newW - w) * 0.5f;
-      float dy = (newH - h) * 0.5f;
+      float dx   = (newW - w) * 0.5f;
+      float dy   = (newH - h) * 0.5f;
       mWebView.SetRequestedWidth(newW);
       mWebView.SetRequestedHeight(newH);
       mWebView.SetRequestedX(mWebView.GetProperty<float>(Actor::Property::POSITION_X) - dx);
@@ -307,12 +307,12 @@ private:
     if(IsKey(event, Dali::DALI_KEY_CURSOR_DOWN))
     {
       // Shrink WebView by 10%
-      float w = mWebView.GetProperty<float>(Actor::Property::SIZE_WIDTH);
-      float h = mWebView.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
+      float w    = mWebView.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+      float h    = mWebView.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
       float newW = w * 0.9f;
       float newH = h * 0.9f;
-      float dx = (newW - w) * 0.5f;
-      float dy = (newH - h) * 0.5f;
+      float dx   = (newW - w) * 0.5f;
+      float dy   = (newH - h) * 0.5f;
       mWebView.SetRequestedWidth(newW);
       mWebView.SetRequestedHeight(newH);
       mWebView.SetRequestedX(mWebView.GetProperty<float>(Actor::Property::POSITION_X) - dx);
@@ -352,7 +352,7 @@ private:
       return; // Ignore non-number keys
     }
 
-    bool round2    = mKeyRound2[keyIndex];
+    bool round2          = mKeyRound2[keyIndex];
     mKeyRound2[keyIndex] = !round2; // Toggle for next press
 
     DALI_LOG_RELEASE_INFO("[WebViewSample] Key %d, Round %d\n", keyIndex, round2 ? 2 : 1);
@@ -570,12 +570,12 @@ private:
   }
 
 private:
-  Application&       mApplication;
+  Application&      mApplication;
   Dali::Ui::WebView mWebView;
-  bool               mFirstFrameReceived{false};
-  int                mBgColorIndex{0};
-  bool               mVisible{true};
-  bool               mKeyRound2[10]{false}; // Toggle state for each number key 0-9
+  bool              mFirstFrameReceived{false};
+  int               mBgColorIndex{0};
+  bool              mVisible{true};
+  bool              mKeyRound2[10]{false}; // Toggle state for each number key 0-9
 };
 
 // ---------------------------------------------------------------------------
@@ -587,7 +587,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
   DALI_LOG_RELEASE_INFO("[WebViewSample] main() start\n");
   Application application = Application::New(&argc, &argv);
   DALI_LOG_RELEASE_INFO("[WebViewSample] Application created\n");
-  UiConfig    config     = UiConfig::New();
+  UiConfig config = UiConfig::New();
   config.SetWebEngineType(WebEngineType::LWE);
   config.Apply();
   DALI_LOG_RELEASE_INFO("[WebViewSample] UiConfig applied (LWE)\n");

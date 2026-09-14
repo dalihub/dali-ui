@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -159,11 +160,11 @@ public:
     {
       return;
     }
-    const float p   = ctx.progress;
-    const float x   = ctx.fromBounds.x      + (ctx.toBounds.x - ctx.fromBounds.x) * p;
-    const float y   = ctx.fromBounds.y      + (ctx.toBounds.y - ctx.fromBounds.y) * p;
-    const float w   = ctx.fromBounds.width  + (ctx.toBounds.width  - ctx.fromBounds.width)  * p;
-    const float h   = ctx.fromBounds.height + (ctx.toBounds.height - ctx.fromBounds.height) * p;
+    const float p = ctx.progress;
+    const float x = ctx.fromBounds.x + (ctx.toBounds.x - ctx.fromBounds.x) * p;
+    const float y = ctx.fromBounds.y + (ctx.toBounds.y - ctx.fromBounds.y) * p;
+    const float w = ctx.fromBounds.width + (ctx.toBounds.width - ctx.fromBounds.width) * p;
+    const float h = ctx.fromBounds.height + (ctx.toBounds.height - ctx.fromBounds.height) * p;
     // CHANGE can supersede an in-flight ENTER. Animator-owned visual
     // properties are preserved on cancellation, so settle ENTER's fade here.
     actor.SetProperty(Actor::Property::OPACITY, 1.0f);
@@ -233,9 +234,9 @@ public:
     {
       return false;
     }
-    mExpanded             = !mExpanded;
-    const float newHeight = mExpanded ? 160.0f : 80.0f;
-    const uint32_t count  = mStack.GetChildViewCount();
+    mExpanded                = !mExpanded;
+    const float    newHeight = mExpanded ? 160.0f : 80.0f;
+    const uint32_t count     = mStack.GetChildViewCount();
     for(uint32_t i = 0; i < count; ++i)
     {
       mStack.GetChildViewAt(i).SetRequestedHeight(newHeight);

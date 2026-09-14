@@ -30,24 +30,25 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <sstream>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 // ─── layout constants ─────────────────────────────────────────────────────────
-static constexpr float WINDOW_W       = 600.0f;
-static constexpr float WINDOW_H       = 1080.0f;
-static constexpr float INFO_H         = 90.0f;
-static constexpr float SCROLL_Y       = INFO_H;
-static constexpr float SCROLL_H       = WINDOW_H - SCROLL_Y;
+static constexpr float WINDOW_W = 600.0f;
+static constexpr float WINDOW_H = 1080.0f;
+static constexpr float INFO_H   = 90.0f;
+static constexpr float SCROLL_Y = INFO_H;
+static constexpr float SCROLL_H = WINDOW_H - SCROLL_Y;
 
-static constexpr int   PAGE_COUNT     = 5;
-static constexpr float PAGE_W         = WINDOW_W;
-static constexpr float PAGE_H         = SCROLL_H;
+static constexpr int   PAGE_COUNT = 5;
+static constexpr float PAGE_W     = WINDOW_W;
+static constexpr float PAGE_H     = SCROLL_H;
 
 // ─── colours ──────────────────────────────────────────────────────────────────
-static const Vector4 COLOR_INFO_BG      (0.10f, 0.10f, 0.14f, 1.0f);
+static const Vector4 COLOR_INFO_BG(0.10f, 0.10f, 0.14f, 1.0f);
 
 static const Vector4 PAGE_COLORS[PAGE_COUNT] = {
   Vector4(0.20f, 0.45f, 0.80f, 1.0f), // blue
@@ -79,8 +80,8 @@ public:
 private:
   void Create(Application application)
   {
-    Window window = application.GetWindow();
-    auto positionSize = window.GetPositionSize();
+    Window window       = application.GetWindow();
+    auto   positionSize = window.GetPositionSize();
     window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, static_cast<int32_t>(WINDOW_W), static_cast<int32_t>(WINDOW_H)));
     window.SetBackgroundColor(Color::BLACK);
     window.KeyEventSignal().Connect(this, &PageScrollViewController::OnKeyEvent);
@@ -145,7 +146,7 @@ private:
     mPageLabel.SetText(pg.str().c_str());
 
     // Scroll pos
-    Vector2 pos = mPageScrollView.GetScrollPosition();
+    Vector2            pos = mPageScrollView.GetScrollPosition();
     std::ostringstream sp;
     sp << "ScrollPos: " << static_cast<int>(pos.x);
     mScrollPosLabel.SetText(sp.str().c_str());
@@ -219,7 +220,7 @@ private:
 
   void OnScrolling(ScrollView sv)
   {
-    Vector2 pos = sv.GetScrollPosition();
+    Vector2            pos = sv.GetScrollPosition();
     std::ostringstream sp;
     sp << "ScrollPos: " << static_cast<int>(pos.x);
     mScrollPosLabel.SetText(sp.str().c_str());
@@ -227,7 +228,7 @@ private:
 
   void OnDragging(ScrollView sv, float /*deltaX*/, float /*deltaY*/)
   {
-    Vector2 pos = sv.GetScrollPosition();
+    Vector2            pos = sv.GetScrollPosition();
     std::ostringstream sp;
     sp << "ScrollPos: " << static_cast<int>(pos.x);
     mScrollPosLabel.SetText(sp.str().c_str());
@@ -259,11 +260,26 @@ private:
       if(target < mPageScrollView.GetPageCount())
         mPageScrollView.ScrollToPage(target, true);
     }
-    else if(key == "1") { mPageScrollView.ScrollToPage(0, false); }
-    else if(key == "2") { mPageScrollView.ScrollToPage(1, false); }
-    else if(key == "3") { mPageScrollView.ScrollToPage(2, false); }
-    else if(key == "4") { mPageScrollView.ScrollToPage(3, false); }
-    else if(key == "5") { mPageScrollView.ScrollToPage(4, false); }
+    else if(key == "1")
+    {
+      mPageScrollView.ScrollToPage(0, false);
+    }
+    else if(key == "2")
+    {
+      mPageScrollView.ScrollToPage(1, false);
+    }
+    else if(key == "3")
+    {
+      mPageScrollView.ScrollToPage(2, false);
+    }
+    else if(key == "4")
+    {
+      mPageScrollView.ScrollToPage(3, false);
+    }
+    else if(key == "5")
+    {
+      mPageScrollView.ScrollToPage(4, false);
+    }
     RefreshInfoPanel();
   }
 
@@ -281,7 +297,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application              application = Application::New(&argc, &argv);
   PageScrollViewController example(application);
   application.MainLoop();
   return 0;

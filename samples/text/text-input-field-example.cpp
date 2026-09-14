@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <cstdio>
 #include <string>
@@ -23,18 +24,18 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING   = 6.0f;
-constexpr float STACK_PADDING   = 12.0f;
-constexpr float BUTTON_HEIGHT   = 36.0f;
-constexpr float INPUT_HEIGHT    = 60.0f;
-constexpr float BUTTON_SPACING  = 4.0f;
+constexpr float STACK_SPACING  = 6.0f;
+constexpr float STACK_PADDING  = 12.0f;
+constexpr float BUTTON_HEIGHT  = 36.0f;
+constexpr float INPUT_HEIGHT   = 60.0f;
+constexpr float BUTTON_SPACING = 4.0f;
 
-constexpr uint32_t COLOR_DARK_TEXT    = 0x222222;
-constexpr uint32_t COLOR_DARK_GRAY    = 0x404040;
-constexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;
-constexpr uint32_t COLOR_YELLOW       = 0xFFFF00;
-constexpr uint32_t COLOR_CYAN         = 0x00FFFF;
-constexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;
+constexpr uint32_t COLOR_DARK_TEXT  = 0x222222;
+constexpr uint32_t COLOR_DARK_GRAY  = 0x404040;
+constexpr uint32_t COLOR_LIGHT_BLUE = 0xADD8E6;
+constexpr uint32_t COLOR_YELLOW     = 0xFFFF00;
+constexpr uint32_t COLOR_CYAN       = 0x00FFFF;
+constexpr uint32_t COLOR_MAGENTA    = 0xFF00FF;
 
 Label CreateButton(const char* text, uint32_t bgColor)
 {
@@ -142,50 +143,50 @@ private:
     titleLabel.SetRequestedHeight(32);
 
     // Cursor buttons row
-    Label btnCursorBlink = CreateButton("Cursor Blink", 0x3498DB);
+    Label btnCursorBlink    = CreateButton("Cursor Blink", 0x3498DB);
     Label btnCursorInterval = CreateButton("Blink Interval", 0x2ECC71);
-    Label btnCursorPos = CreateButton("Cursor Pos", 0xE74C3C);
-    Label btnCursorWidth = CreateButton("Cursor Width", 0x1ABC9C);
-    View cursorRow1 = CreateButtonRow({btnCursorBlink, btnCursorInterval});
-    View cursorRow2 = CreateButtonRow({btnCursorPos, btnCursorWidth});
+    Label btnCursorPos      = CreateButton("Cursor Pos", 0xE74C3C);
+    Label btnCursorWidth    = CreateButton("Cursor Width", 0x1ABC9C);
+    View  cursorRow1        = CreateButtonRow({btnCursorBlink, btnCursorInterval});
+    View  cursorRow2        = CreateButtonRow({btnCursorPos, btnCursorWidth});
 
     // Placeholder buttons row
     Label btnPlaceholderFocus = CreateButton("Placeholder Focus", 0xE67E22);
     Label btnPlaceholderColor = CreateButton("Placeholder Color", 0x9B59B6);
-    View placeholderRow = CreateButtonRow({btnPlaceholderFocus, btnPlaceholderColor});
+    View  placeholderRow      = CreateButtonRow({btnPlaceholderFocus, btnPlaceholderColor});
 
     // Selection buttons row
-    Label btnSelectionColor = CreateButton("Selection Color", 0x7F8C8D);
+    Label btnSelectionColor   = CreateButton("Selection Color", 0x7F8C8D);
     Label btnSelectionEnabled = CreateButton("Selection Enable", 0x8E44AD);
-    View selectionRow1 = CreateButtonRow({btnSelectionColor, btnSelectionEnabled});
+    View  selectionRow1       = CreateButtonRow({btnSelectionColor, btnSelectionEnabled});
 
     Label btnSelectRange = CreateButton("Select Range", 0x27AE60);
     Label btnSelectWhole = CreateButton("Select Whole", 0xE74C3C);
-    View selectionRow2 = CreateButtonRow({btnSelectRange, btnSelectWhole});
+    View  selectionRow2  = CreateButtonRow({btnSelectRange, btnSelectWhole});
 
     Label btnClearSelection = CreateButton("Clear Selection", 0x95A5A6);
-    View selectionRow3 = CreateButtonRow({btnClearSelection});
+    View  selectionRow3     = CreateButtonRow({btnClearSelection});
 
     // Input filter buttons row
-    Label btnSetInputFilter = CreateButton("Set InputFilter", 0x2980B9);
+    Label btnSetInputFilter   = CreateButton("Set InputFilter", 0x2980B9);
     Label btnResetInputFilter = CreateButton("Reset InputFilter", 0x7F8C8D);
-    View inputFilterRow = CreateButtonRow({btnSetInputFilter, btnResetInputFilter});
+    View  inputFilterRow      = CreateButtonRow({btnSetInputFilter, btnResetInputFilter});
 
     // Other buttons row
-    Label btnMaxLen = CreateButton("Max Length", 0xD35400);
+    Label btnMaxLen   = CreateButton("Max Length", 0xD35400);
     Label btnEditable = CreateButton("Editable", 0x16A085);
-    View otherRow = CreateButtonRow({btnMaxLen, btnEditable});
+    View  otherRow    = CreateButtonRow({btnMaxLen, btnEditable});
 
     // Password buttons row
-    Label btnPasswordMode = CreateButton("Password Mode", 0x8E44AD);
-    Label btnPasswordChar = CreateButton("Password Char", 0x2980B9);
+    Label btnPasswordMode   = CreateButton("Password Mode", 0x8E44AD);
+    Label btnPasswordChar   = CreateButton("Password Char", 0x2980B9);
     Label btnPasswordReveal = CreateButton("Reveal Time", 0xC0392B);
-    View passwordRow1 = CreateButtonRow({btnPasswordMode, btnPasswordChar});
-    View passwordRow2 = CreateButtonRow({btnPasswordReveal});
+    View  passwordRow1      = CreateButtonRow({btnPasswordMode, btnPasswordChar});
+    View  passwordRow2      = CreateButtonRow({btnPasswordReveal});
 
     // Info button
     Label btnInfo = CreateButton("Print Info (log)", 0x34495E);
-    View infoRow = CreateButtonRow({btnInfo});
+    View  infoRow = CreateButtonRow({btnInfo});
 
     // Fixed header area (title, input field, status label)
     StackLayout fixedHeader = StackLayout::New(StackOrientation::VERTICAL);
@@ -302,15 +303,15 @@ private:
 
   void UpdateStatus()
   {
-    bool  cursorBlinkEnabled    = mInputField.IsCursorBlinkEnabled();
-    float cursorBlinkInterval   = mInputField.GetCursorBlinkInterval();
-    uint32_t cursorPosition     = mInputField.GetCursorPosition();
-    int   cursorWidth           = mInputField.GetCursorWidth();
-    int   maximumLength         = mInputField.GetMaximumLength();
-    bool  editable              = mInputField.IsEditable();
-    bool  selectionEnabled      = mInputField.IsSelectionEnabled();
-    uint32_t selStart           = mInputField.GetSelectedTextStart();
-    uint32_t selEnd             = mInputField.GetSelectedTextEnd();
+    bool     cursorBlinkEnabled  = mInputField.IsCursorBlinkEnabled();
+    float    cursorBlinkInterval = mInputField.GetCursorBlinkInterval();
+    uint32_t cursorPosition      = mInputField.GetCursorPosition();
+    int      cursorWidth         = mInputField.GetCursorWidth();
+    int      maximumLength       = mInputField.GetMaximumLength();
+    bool     editable            = mInputField.IsEditable();
+    bool     selectionEnabled    = mInputField.IsSelectionEnabled();
+    uint32_t selStart            = mInputField.GetSelectedTextStart();
+    uint32_t selEnd              = mInputField.GetSelectedTextEnd();
 
     Dali::String status;
     status += "Blink:";
@@ -390,16 +391,16 @@ private:
 
   void UpdateStatusWithSelection()
   {
-    bool  cursorBlinkEnabled    = mInputField.IsCursorBlinkEnabled();
-    float cursorBlinkInterval   = mInputField.GetCursorBlinkInterval();
-    uint32_t cursorPosition     = mInputField.GetCursorPosition();
-    int   cursorWidth           = mInputField.GetCursorWidth();
-    int   maximumLength         = mInputField.GetMaximumLength();
-    bool  editable              = mInputField.IsEditable();
-    bool  selectionEnabled      = mInputField.IsSelectionEnabled();
-    uint32_t selStart           = mInputField.GetSelectedTextStart();
-    uint32_t selEnd             = mInputField.GetSelectedTextEnd();
-    Text::PasswordMode passwordMode = mInputField.GetPasswordMode();
+    bool               cursorBlinkEnabled  = mInputField.IsCursorBlinkEnabled();
+    float              cursorBlinkInterval = mInputField.GetCursorBlinkInterval();
+    uint32_t           cursorPosition      = mInputField.GetCursorPosition();
+    int                cursorWidth         = mInputField.GetCursorWidth();
+    int                maximumLength       = mInputField.GetMaximumLength();
+    bool               editable            = mInputField.IsEditable();
+    bool               selectionEnabled    = mInputField.IsSelectionEnabled();
+    uint32_t           selStart            = mInputField.GetSelectedTextStart();
+    uint32_t           selEnd              = mInputField.GetSelectedTextEnd();
+    Text::PasswordMode passwordMode        = mInputField.GetPasswordMode();
 
     Dali::String status;
     status += "Blink:";
@@ -457,7 +458,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      float interval = mInputField.GetCursorBlinkInterval();
+      float interval    = mInputField.GetCursorBlinkInterval();
       float newInterval = (interval < 0.8f) ? interval + 0.2f : 0.2f;
       mInputField.SetCursorBlinkInterval(newInterval);
       UpdateStatus();
@@ -469,8 +470,8 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      uint32_t position = mInputField.GetCursorPosition();
-      uint32_t textLength = static_cast<uint32_t>(mInputField.GetText().Size());
+      uint32_t position    = mInputField.GetCursorPosition();
+      uint32_t textLength  = static_cast<uint32_t>(mInputField.GetText().Size());
       uint32_t newPosition = (position < textLength) ? position + 1u : 0u;
       mInputField.SetCursorPosition(newPosition);
       UpdateStatus();
@@ -482,7 +483,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      int width = mInputField.GetCursorWidth();
+      int width    = mInputField.GetCursorWidth();
       int newWidth = (width < 6) ? width + 1 : 1;
       mInputField.SetCursorWidth(newWidth);
       UpdateStatus();
@@ -564,7 +565,7 @@ private:
       if(textLength > 0)
       {
         uint32_t start = 0u;
-        uint32_t end = 0u;
+        uint32_t end   = 0u;
 
         // Cycle through different selection patterns:
         // 0: [0, min(3, len)]       - first 3 chars
@@ -579,34 +580,34 @@ private:
         {
           case 0:
             start = 0u;
-            end = std::min(3u, textLength);
+            end   = std::min(3u, textLength);
             break;
           case 1:
             start = 0u;
-            end = std::min(5u, textLength);
+            end   = std::min(5u, textLength);
             break;
           case 2:
             start = std::min(2u, textLength);
-            end = std::min(7u, textLength);
+            end   = std::min(7u, textLength);
             break;
           case 3:
             // REVERSED case: end > start
             start = std::min(3u, textLength);
-            end = 0u;
+            end   = 0u;
             break;
           case 4:
             // REVERSED case: end > start
             start = std::min(5u, textLength);
-            end = std::min(2u, textLength);
+            end   = std::min(2u, textLength);
             break;
           case 5:
             start = 0u;
-            end = textLength;
+            end   = textLength;
             break;
           default:
             mSelectRangeIndex = 0;
-            start = 0u;
-            end = std::min(3u, textLength);
+            start             = 0u;
+            end               = std::min(3u, textLength);
             break;
         }
 
@@ -645,8 +646,9 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      int maxLength = mInputField.GetMaximumLength();
-      int newMaxLength = (maxLength <= 10) ? 20 : (maxLength <= 20) ? 50 : 10;
+      int maxLength    = mInputField.GetMaximumLength();
+      int newMaxLength = (maxLength <= 10) ? 20 : (maxLength <= 20) ? 50
+                                                                    : 10;
       mInputField.SetMaximumLength(newMaxLength);
       UpdateStatus();
     }
@@ -766,7 +768,7 @@ private:
     {
       // Cycle through reveal durations: 0 -> 500 -> 1000 -> 2000 -> 0
       uint32_t currentDuration = mInputField.GetPasswordRevealDuration();
-      uint32_t newDuration = 0u;
+      uint32_t newDuration     = 0u;
 
       if(currentDuration == 0u)
       {
@@ -841,8 +843,8 @@ private:
   Application& mApplication;
   InputField   mInputField;
   Label        mStatusLabel;
-  uint32_t     mSelectRangeIndex = 0;  // For cycling through selection ranges
-  bool         mInputFilterSet = false;
+  uint32_t     mSelectRangeIndex = 0; // For cycling through selection ranges
+  bool         mInputFilterSet   = false;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 #include <cstdio>
 #include <cstring>
@@ -68,7 +69,8 @@ public:
   explicit BrowserController(Application& application)
   : mApplication(application)
   {
-    mApplication.InitSignal().Connect(this, [this](Application application) {
+    mApplication.InitSignal().Connect(this, [this](Application application)
+    {
       OnInit(application);
     });
   }
@@ -76,9 +78,9 @@ public:
 private:
   void OnInit(Application& application)
   {
-    Window window = application.GetWindow();
-    auto posSize = window.GetPositionSize();
-    mWindowSize = Vector2(posSize.width, posSize.height);
+    Window window  = application.GetWindow();
+    auto   posSize = window.GetPositionSize();
+    mWindowSize    = Vector2(posSize.width, posSize.height);
 
     DALI_LOG_RELEASE_INFO("[WVLOG][init] OnInit: window=%.0fx%.0f\n", mWindowSize.width, mWindowSize.height);
 
@@ -126,11 +128,11 @@ private:
     toolbar.SetSpacing(2.0f);
     toolbar.SetBackgroundColor(Color::AQUA_MARINE);
 
-      toolbar.Add(mBtnBack);
-      toolbar.Add(mBtnForward);
-      toolbar.Add(mBtnReload);
-      toolbar.Add(mUrlBar);
-      toolbar.Add(mBtnGo);
+    toolbar.Add(mBtnBack);
+    toolbar.Add(mBtnForward);
+    toolbar.Add(mBtnReload);
+    toolbar.Add(mUrlBar);
+    toolbar.Add(mBtnGo);
 
     mStatusLabel = Label::New("Ready");
     mStatusLabel.SetFontSize(FONT_SIZE_STS);
@@ -143,7 +145,7 @@ private:
     mStatusLabel.SetPadding(Insets(8.0f, 8.0f, 0.0f, 0.0f));
 
     float webViewHeight = static_cast<float>(mWindowSize.height) - TOOLBAR_HEIGHT - STATUS_HEIGHT;
-    mWebView = WebView::New();
+    mWebView            = WebView::New();
     DALI_LOG_RELEASE_INFO("[WVLOG][init] WebView::New() -> handle=%s\n", mWebView ? "valid" : "EMPTY");
     mWebView.SetRequestedWidth(static_cast<float>(mWindowSize.width));
     mWebView.SetRequestedHeight(webViewHeight);
@@ -154,25 +156,29 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
 
-      root.Add(toolbar);
-      root.Add(mStatusLabel);
-      root.Add(mWebView);
+    root.Add(toolbar);
+    root.Add(mStatusLabel);
+    root.Add(mWebView);
 
     window.Add(root);
   }
 
   void ConnectSignals(Window& window)
   {
-    mBtnBack.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
+    mBtnBack.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch)
+    {
       return OnBackTouched(actor, touch);
     });
-    mBtnForward.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
+    mBtnForward.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch)
+    {
       return OnForwardTouched(actor, touch);
     });
-    mBtnReload.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
+    mBtnReload.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch)
+    {
       return OnReloadTouched(actor, touch);
     });
-    mBtnGo.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
+    mBtnGo.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch)
+    {
       return OnGoTouched(actor, touch);
     });
 
@@ -184,7 +190,8 @@ private:
     mWebView.UrlChangedSignal().Connect(this, &BrowserController::OnUrlChanged);
     DALI_LOG_RELEASE_INFO("[WVLOG][init] ConnectSignals: connected (started/inProgress/finished/error/urlChanged). If these never fire on load, signals are dead.\n");
 
-    window.KeyEventSignal().Connect(this, [this](Window /*window*/, const KeyEvent& event) {
+    window.KeyEventSignal().Connect(this, [this](Window /*window*/, const KeyEvent& event)
+    {
       OnKeyEvent(event);
     });
   }
@@ -280,14 +287,14 @@ private:
   {
     float pct = mWebView.GetLoadProgressPercentage();
     DALI_LOG_RELEASE_INFO("[WVLOG][signal] >>>> OnPageLoadInProgress FIRED: %s (%.0f%%)\n", url.CStr(), pct);
-    char  buf[64];
+    char buf[64];
     snprintf(buf, sizeof(buf), "Loading  %.0f%%", pct);
     SetStatus(Dali::String(buf));
   }
 
   void OnPageLoadFinished(WebView /*view*/, const Dali::String& url)
   {
-    mIsLoading = false;
+    mIsLoading         = false;
     Dali::String title = mWebView.GetTitle();
     DALI_LOG_RELEASE_INFO("[WVLOG][signal] >>>> OnPageLoadFinished FIRED: %s title=\"%s\"\n", url.CStr(), title.CStr());
     SetStatus(title.Empty() ? url : title);
@@ -353,7 +360,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   DALI_LOG_RELEASE_INFO("[WVLOG][init] main: starting. Watch [WVLOG][signal] lines: if a page loads but no [signal] line appears, WebView signals are dead.\n");
-  Application    application = Application::New(&argc, &argv);
+  Application application = Application::New(&argc, &argv);
   UiConfig::New().Apply();
   BrowserController browser(application);
   application.MainLoop();

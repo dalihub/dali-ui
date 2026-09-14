@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 #include <dali/dali.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <algorithm>
@@ -48,7 +49,7 @@ const UiColor COLOR_HEADER(0x172033);
 const UiColor COLOR_ROW_A(0xE7EEF8);        // focusable — blue tint
 const UiColor COLOR_ROW_B(0xEAF6EC);        // focusable — green tint
 const UiColor COLOR_ROW_C(0xF7EFE3);        // focusable — orange tint
-const UiColor COLOR_ROW_DISABLED(0xDDE3EC);  // unfocusable — grey
+const UiColor COLOR_ROW_DISABLED(0xDDE3EC); // unfocusable — grey
 const UiColor COLOR_TEXT(0x101828);
 const UiColor COLOR_TEXT_DISABLED(0x94A3B8); // muted grey for unfocusable
 const UiColor COLOR_WHITE(0xFFFFFF);
@@ -76,10 +77,14 @@ UiColor NormalBgForType(uint32_t vtype)
 {
   switch(vtype)
   {
-    case 1u: return COLOR_ROW_B;
-    case 2u: return COLOR_ROW_C;
-    case 3u: return COLOR_ROW_DISABLED;
-    default: return COLOR_ROW_A;
+    case 1u:
+      return COLOR_ROW_B;
+    case 2u:
+      return COLOR_ROW_C;
+    case 3u:
+      return COLOR_ROW_DISABLED;
+    default:
+      return COLOR_ROW_A;
   }
 }
 
@@ -87,11 +92,16 @@ float GetItemHeight(uint32_t position)
 {
   switch(position % 5u)
   {
-    case 1u: return 58.0f;
-    case 2u: return 92.0f;
-    case 3u: return 118.0f;
-    case 4u: return 76.0f;
-    default: return 68.0f;
+    case 1u:
+      return 58.0f;
+    case 2u:
+      return 92.0f;
+    case 3u:
+      return 118.0f;
+    case 4u:
+      return 76.0f;
+    default:
+      return 68.0f;
   }
 }
 
@@ -130,7 +140,10 @@ public:
   {
   }
 
-  void SetStatsLabel(Label label) { mStatsLabel = label; }
+  void SetStatsLabel(Label label)
+  {
+    mStatsLabel = label;
+  }
 
   void Attach(ItemAdapter& adapter)
   {
@@ -170,7 +183,10 @@ public:
     UpdateStatsText();
   }
 
-  uint32_t GetFocusedPosition() const { return mFocusedPosition; }
+  uint32_t GetFocusedPosition() const
+  {
+    return mFocusedPosition;
+  }
 
 private:
   // Per-view tracking: associates each created container+label pair with its data position.
@@ -181,9 +197,15 @@ private:
     uint32_t position{INVALID_POS};
   };
 
-  uint32_t GetItemCount() { return ITEM_COUNT; }
+  uint32_t GetItemCount()
+  {
+    return ITEM_COUNT;
+  }
 
-  uint32_t GetItemViewType(uint32_t position) { return ViewTypeFor(position); }
+  uint32_t GetItemViewType(uint32_t position)
+  {
+    return ViewTypeFor(position);
+  }
 
   void CreateViewHolder(ItemViewHolder& holder)
   {
@@ -223,7 +245,8 @@ private:
     ++mBindCount;
 
     auto it = std::find_if(mViewRecords.begin(), mViewRecords.end(),
-                           [&](const ViewRecord& r) { return r.container == holder.view; });
+                           [&](const ViewRecord& r)
+    { return r.container == holder.view; });
     if(it == mViewRecords.end()) return;
 
     it->position = holder.position;
@@ -242,7 +265,8 @@ private:
   {
     ++mRecycleCount;
     auto it = std::find_if(mViewRecords.begin(), mViewRecords.end(),
-                           [&](const ViewRecord& r) { return r.container == holder.view; });
+                           [&](const ViewRecord& r)
+    { return r.container == holder.view; });
     if(it != mViewRecords.end()) it->position = INVALID_POS;
     UpdateStatsText();
   }
@@ -267,14 +291,16 @@ private:
   {
     if(!view) return Label();
     auto it = std::find_if(mViewRecords.begin(), mViewRecords.end(),
-                           [&](const ViewRecord& r) { return r.container == view; });
+                           [&](const ViewRecord& r)
+    { return r.container == view; });
     return (it != mViewRecords.end()) ? it->label : Label();
   }
 
   uint32_t PositionOf(Label label) const
   {
     auto it = std::find_if(mViewRecords.begin(), mViewRecords.end(),
-                           [&](const ViewRecord& r) { return r.label == label; });
+                           [&](const ViewRecord& r)
+    { return r.label == label; });
     return (it != mViewRecords.end()) ? it->position : INVALID_POS;
   }
 
@@ -317,8 +343,8 @@ public:
     Window window       = application.GetWindow();
     auto   positionSize = window.GetPositionSize();
     window.SetPositionSize(PositionSize(positionSize.x, positionSize.y,
-                                       static_cast<uint32_t>(WINDOW_W),
-                                       static_cast<uint32_t>(WINDOW_H)));
+                                        static_cast<uint32_t>(WINDOW_W),
+                                        static_cast<uint32_t>(WINDOW_H)));
     window.SetBackgroundColor(COLOR_BACKGROUND);
 
     BuildHeader(window);
@@ -466,10 +492,24 @@ private:
     mScrollStateLabel.SetText(Dali::String(oss.str().c_str()));
   }
 
-  void OnScrollStarted(RecyclerView) { UpdateScrollStateLabel(); }
-  void OnScrollFinished(RecyclerView) { UpdateScrollStateLabel(); }
-  void OnDragStarted(RecyclerView) { mIsDragging = true;  UpdateScrollStateLabel(); }
-  void OnDragFinished(RecyclerView) { mIsDragging = false; UpdateScrollStateLabel(); }
+  void OnScrollStarted(RecyclerView)
+  {
+    UpdateScrollStateLabel();
+  }
+  void OnScrollFinished(RecyclerView)
+  {
+    UpdateScrollStateLabel();
+  }
+  void OnDragStarted(RecyclerView)
+  {
+    mIsDragging = true;
+    UpdateScrollStateLabel();
+  }
+  void OnDragFinished(RecyclerView)
+  {
+    mIsDragging = false;
+    UpdateScrollStateLabel();
+  }
 
   // ---- Range timer -----------------------------------------------------------
   bool OnRangeTimerTick()

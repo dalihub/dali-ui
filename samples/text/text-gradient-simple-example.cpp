@@ -14,17 +14,18 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
-constexpr int   WINDOW_WIDTH   = 760;
-constexpr int   WINDOW_HEIGHT  = 300;
-constexpr float STACK_PADDING  = 32.0f;
-constexpr float STACK_SPACING  = 32.0f;
-constexpr float ANIMATION_TIME = 2.2f;
+constexpr int   WINDOW_WIDTH                   = 760;
+constexpr int   WINDOW_HEIGHT                  = 300;
+constexpr float STACK_PADDING                  = 32.0f;
+constexpr float STACK_SPACING                  = 32.0f;
+constexpr float ANIMATION_TIME                 = 2.2f;
 constexpr float ANIMATED_GRADIENT_START_OFFSET = 0.0f;
 constexpr float ANIMATED_GRADIENT_END_OFFSET   = 1.0f;
 
@@ -69,11 +70,11 @@ void InspectAuthoredGradient(Label label)
   if(linear.GetType() == Gradient::Type::LINEAR)
   {
     // DownCast 이후에는 Linear 고유 값과 공통 값을 조회할 수 있다.
-    const Vector2 startPosition = linear.GetStartPosition();
-    const Vector2 endPosition   = linear.GetEndPosition();
-    const Gradient::SpreadMethod spreadMethod = linear.GetSpreadMethod();
-    const float startOffset                   = linear.GetStartOffset();
-    const auto  stopNodes                     = linear.GetStopNodes();
+    const Vector2                startPosition = linear.GetStartPosition();
+    const Vector2                endPosition   = linear.GetEndPosition();
+    const Gradient::SpreadMethod spreadMethod  = linear.GetSpreadMethod();
+    const float                  startOffset   = linear.GetStartOffset();
+    const auto                   stopNodes     = linear.GetStopNodes();
 
     (void)startPosition;
     (void)endPosition;

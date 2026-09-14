@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -28,7 +29,7 @@ class StackLayoutController : public ConnectionTracker
 {
 public:
   StackLayoutController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     mApplication.InitSignal().Connect(this, &StackLayoutController::Create);
   }
@@ -71,9 +72,9 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -86,7 +87,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application           application = Application::New(&argc, &argv);
   StackLayoutController controller(application);
   application.MainLoop();
   return 0;

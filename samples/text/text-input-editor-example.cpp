@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <cstdio>
 #include <string>
@@ -23,11 +24,11 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING   = 6.0f;
-constexpr float STACK_PADDING   = 12.0f;
-constexpr float BUTTON_HEIGHT   = 36.0f;
-constexpr float EDITOR_HEIGHT   = 120.0f;
-constexpr float BUTTON_SPACING  = 4.0f;
+constexpr float STACK_SPACING  = 6.0f;
+constexpr float STACK_PADDING  = 12.0f;
+constexpr float BUTTON_HEIGHT  = 36.0f;
+constexpr float EDITOR_HEIGHT  = 120.0f;
+constexpr float BUTTON_SPACING = 4.0f;
 
 const char* GetLineHeightModeName(Text::LineHeightMode mode)
 {
@@ -116,15 +117,15 @@ LineHeightStep GetLineHeightStep(float lineHeight, float fontSize, Text::LineHei
   float target1, target1_5, target2;
   if(mode == Text::LineHeightMode::RELATIVE)
   {
-    target1 = 1.0f;
+    target1   = 1.0f;
     target1_5 = 1.5f;
-    target2 = 2.0f;
+    target2   = 2.0f;
   }
   else // ABSOLUTE
   {
-    target1 = fontSize * 1.0f;
+    target1   = fontSize * 1.0f;
     target1_5 = fontSize * 1.5f;
-    target2 = fontSize * 2.0f;
+    target2   = fontSize * 2.0f;
   }
 
   if(Dali::Equals(lineHeight, target1, Math::MACHINE_EPSILON_1000))
@@ -144,12 +145,12 @@ LineHeightStep GetLineHeightStep(float lineHeight, float fontSize, Text::LineHei
   return LineHeightStep::AUTO;
 }
 
-constexpr uint32_t COLOR_DARK_TEXT    = 0x222222;
-constexpr uint32_t COLOR_DARK_GRAY    = 0x404040;
-constexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;
-constexpr uint32_t COLOR_YELLOW       = 0xFFFF00;
-constexpr uint32_t COLOR_CYAN         = 0x00FFFF;
-constexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;
+constexpr uint32_t COLOR_DARK_TEXT  = 0x222222;
+constexpr uint32_t COLOR_DARK_GRAY  = 0x404040;
+constexpr uint32_t COLOR_LIGHT_BLUE = 0xADD8E6;
+constexpr uint32_t COLOR_YELLOW     = 0xFFFF00;
+constexpr uint32_t COLOR_CYAN       = 0x00FFFF;
+constexpr uint32_t COLOR_MAGENTA    = 0xFF00FF;
 
 Label CreateButton(const char* text, uint32_t bgColor)
 {
@@ -263,61 +264,61 @@ private:
     titleLabel.SetRequestedHeight(32);
 
     // Cursor buttons row
-    Label btnCursorBlink = CreateButton("Cursor Blink", 0x3498DB);
+    Label btnCursorBlink    = CreateButton("Cursor Blink", 0x3498DB);
     Label btnCursorInterval = CreateButton("Blink Interval", 0x2ECC71);
-    Label btnCursorPos = CreateButton("Cursor Pos", 0xE74C3C);
-    Label btnCursorWidth = CreateButton("Cursor Width", 0x1ABC9C);
-    View cursorRow1 = CreateButtonRow({btnCursorBlink, btnCursorInterval});
-    View cursorRow2 = CreateButtonRow({btnCursorPos, btnCursorWidth});
+    Label btnCursorPos      = CreateButton("Cursor Pos", 0xE74C3C);
+    Label btnCursorWidth    = CreateButton("Cursor Width", 0x1ABC9C);
+    View  cursorRow1        = CreateButtonRow({btnCursorBlink, btnCursorInterval});
+    View  cursorRow2        = CreateButtonRow({btnCursorPos, btnCursorWidth});
 
     // Placeholder buttons row
     Label btnPlaceholderFocus = CreateButton("Placeholder Focus", 0xE67E22);
     Label btnPlaceholderColor = CreateButton("Placeholder Color", 0x9B59B6);
-    View placeholderRow = CreateButtonRow({btnPlaceholderFocus, btnPlaceholderColor});
+    View  placeholderRow      = CreateButtonRow({btnPlaceholderFocus, btnPlaceholderColor});
 
     // Selection buttons row
-    Label btnSelectionColor = CreateButton("Selection Color", 0x7F8C8D);
+    Label btnSelectionColor   = CreateButton("Selection Color", 0x7F8C8D);
     Label btnSelectionEnabled = CreateButton("Selection Enable", 0x8E44AD);
-    View selectionRow1 = CreateButtonRow({btnSelectionColor, btnSelectionEnabled});
+    View  selectionRow1       = CreateButtonRow({btnSelectionColor, btnSelectionEnabled});
 
     Label btnSelectRange = CreateButton("Select Range", 0x27AE60);
     Label btnSelectWhole = CreateButton("Select Whole", 0xE74C3C);
-    View selectionRow2 = CreateButtonRow({btnSelectRange, btnSelectWhole});
+    View  selectionRow2  = CreateButtonRow({btnSelectRange, btnSelectWhole});
 
     Label btnClearSelection = CreateButton("Clear Selection", 0x95A5A6);
-    View selectionRow3 = CreateButtonRow({btnClearSelection});
+    View  selectionRow3     = CreateButtonRow({btnClearSelection});
 
     // Other buttons row
-    Label btnMaxLen = CreateButton("Max Length", 0xD35400);
+    Label btnMaxLen   = CreateButton("Max Length", 0xD35400);
     Label btnEditable = CreateButton("Editable", 0x16A085);
-    View otherRow = CreateButtonRow({btnMaxLen, btnEditable});
+    View  otherRow    = CreateButtonRow({btnMaxLen, btnEditable});
 
     // Text background color button
     Label btnTextBgColor = CreateButton("Text Bg Color", 0x27AE60);
     Label btnClearTextBg = CreateButton("Clear Text Bg", 0x7F8C8D);
-    View textBgRow = CreateButtonRow({btnTextBgColor, btnClearTextBg});
+    View  textBgRow      = CreateButtonRow({btnTextBgColor, btnClearTextBg});
 
     // Line wrap mode button
     Label btnLineWrapMode = CreateButton("Line Wrap Mode", 0x2980B9);
-    View lineWrapRow = CreateButtonRow({btnLineWrapMode});
+    View  lineWrapRow     = CreateButtonRow({btnLineWrapMode});
 
     // Line height buttons
-    Label btnLineHeight = CreateButton("Line Height", 0x8E44AD);
+    Label btnLineHeight     = CreateButton("Line Height", 0x8E44AD);
     Label btnLineHeightMode = CreateButton("LineHeightMode", 0x16A085);
-    View lineHeightRow = CreateButtonRow({btnLineHeight, btnLineHeightMode});
+    View  lineHeightRow     = CreateButtonRow({btnLineHeight, btnLineHeightMode});
 
     // Alignment buttons
     Label btnHorizontalAlignment = CreateButton("H Align", 0xE74C3C);
-    Label btnVerticalAlignment = CreateButton("V Align", 0x3498DB);
-    View alignmentRow = CreateButtonRow({btnHorizontalAlignment, btnVerticalAlignment});
+    Label btnVerticalAlignment   = CreateButton("V Align", 0x3498DB);
+    View  alignmentRow           = CreateButtonRow({btnHorizontalAlignment, btnVerticalAlignment});
 
     // Auto Grow button
     Label btnAutoGrow = CreateButton("Auto Grow", 0x8E44AD);
-    View autoGrowRow = CreateButtonRow({btnAutoGrow});
+    View  autoGrowRow = CreateButtonRow({btnAutoGrow});
 
     // Info button
     Label btnInfo = CreateButton("Print Info (log)", 0x34495E);
-    View infoRow = CreateButtonRow({btnInfo});
+    View  infoRow = CreateButtonRow({btnInfo});
 
     // Fixed header area (title, input editor, status label)
     StackLayout fixedHeader = StackLayout::New(StackOrientation::VERTICAL);
@@ -524,7 +525,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      float interval = mInputEditor.GetCursorBlinkInterval();
+      float interval    = mInputEditor.GetCursorBlinkInterval();
       float newInterval = (interval < 0.8f) ? interval + 0.2f : 0.2f;
       mInputEditor.SetCursorBlinkInterval(newInterval);
       UpdateStatus();
@@ -536,8 +537,8 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      uint32_t position = mInputEditor.GetCursorPosition();
-      uint32_t textLength = static_cast<uint32_t>(mInputEditor.GetText().Size());
+      uint32_t position    = mInputEditor.GetCursorPosition();
+      uint32_t textLength  = static_cast<uint32_t>(mInputEditor.GetText().Size());
       uint32_t newPosition = (position < textLength) ? position + 1u : 0u;
       mInputEditor.SetCursorPosition(newPosition);
       UpdateStatus();
@@ -549,7 +550,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      int width = mInputEditor.GetCursorWidth();
+      int width    = mInputEditor.GetCursorWidth();
       int newWidth = (width < 6) ? width + 1 : 1;
       mInputEditor.SetCursorWidth(newWidth);
       UpdateStatus();
@@ -631,7 +632,7 @@ private:
       if(textLength > 0)
       {
         uint32_t start = 0u;
-        uint32_t end = std::min(10u, textLength);
+        uint32_t end   = std::min(10u, textLength);
         mInputEditor.SelectText(start, end);
       }
       UpdateStatus();
@@ -659,13 +660,13 @@ private:
     return true;
   }
 
-
   bool OnButtonMaxLenTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      int maxLength = mInputEditor.GetMaximumLength();
-      int newMaxLength = (maxLength <= 100) ? 250 : (maxLength <= 250) ? 500 : 100;
+      int maxLength    = mInputEditor.GetMaximumLength();
+      int newMaxLength = (maxLength <= 100) ? 250 : (maxLength <= 250) ? 500
+                                                                       : 100;
       mInputEditor.SetMaximumLength(newMaxLength);
       UpdateStatus();
     }
@@ -752,9 +753,9 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      float lineHeight      = mInputEditor.GetLineHeight();
-      float fontSize        = mInputEditor.GetFontSize();
-      Text::LineHeightMode mode = mInputEditor.GetLineHeightMode();
+      float                lineHeight = mInputEditor.GetLineHeight();
+      float                fontSize   = mInputEditor.GetFontSize();
+      Text::LineHeightMode mode       = mInputEditor.GetLineHeightMode();
 
       LineHeightStep step = GetLineHeightStep(lineHeight, fontSize, mode);
       LineHeightStep newStep;
@@ -828,12 +829,12 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      float lineHeight      = mInputEditor.GetLineHeight();
-      float fontSize        = mInputEditor.GetFontSize();
-      Text::LineHeightMode mode = mInputEditor.GetLineHeightMode();
+      float                lineHeight = mInputEditor.GetLineHeight();
+      float                fontSize   = mInputEditor.GetFontSize();
+      Text::LineHeightMode mode       = mInputEditor.GetLineHeightMode();
 
       Text::LineHeightMode newMode;
-      float newLineHeight;
+      float                newLineHeight;
 
       if(mode == Text::LineHeightMode::RELATIVE)
       {

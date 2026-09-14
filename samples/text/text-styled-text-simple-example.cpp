@@ -14,20 +14,21 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
-#include <cstdio>
 #include <cstdint>
+#include <cstdio>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
-constexpr int   WINDOW_WIDTH   = 760;
-constexpr int   WINDOW_HEIGHT  = 320;
-constexpr float STACK_PADDING  = 32.0f;
-constexpr float STACK_SPACING  = 18.0f;
-constexpr char  SAMPLE_TEXT[]  = "StyledText: red, bold, underline";
+constexpr int      WINDOW_WIDTH    = 760;
+constexpr int      WINDOW_HEIGHT   = 320;
+constexpr float    STACK_PADDING   = 32.0f;
+constexpr float    STACK_SPACING   = 18.0f;
+constexpr char     SAMPLE_TEXT[]   = "StyledText: red, bold, underline";
 constexpr uint32_t RED_START       = 12u;
 constexpr uint32_t RED_END         = 15u;
 constexpr uint32_t BOLD_START      = 17u;
@@ -105,7 +106,7 @@ private:
       {
         const uint32_t startIndex = storedStyledText.GetSpanStartIndexAt(index);
         const uint32_t endIndex   = storedStyledText.GetSpanEndIndexAt(index);
-        Text::Span    span        = storedStyledText.GetSpanAt(index);
+        Text::Span     span       = storedStyledText.GetSpanAt(index);
 
         Text::ForegroundColorSpan foreground = Text::ForegroundColorSpan::DownCast(span);
         if(foreground)
@@ -123,9 +124,9 @@ private:
         Text::FontSpan font = Text::FontSpan::DownCast(span);
         if(font)
         {
-          Text::FontAttributes attributes = font.GetFontAttributes();
-          const bool           hasWeight  = attributes.Has(Text::FontAttributes::Attribute::WEIGHT);
-          const Text::FontWeight weight   = attributes.GetWeight();
+          Text::FontAttributes   attributes = font.GetFontAttributes();
+          const bool             hasWeight  = attributes.Has(Text::FontAttributes::Attribute::WEIGHT);
+          const Text::FontWeight weight     = attributes.GetWeight();
           std::printf("[text-styled-text-simple-example] FontSpan %u-%u hasWeight=%d weight=%d\n",
                       startIndex,
                       endIndex,

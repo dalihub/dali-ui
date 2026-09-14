@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -66,7 +67,7 @@ private:
     underline.SetDashGap(4.0f);
     mUnderlineLabel.SetTextUnderline(underline);
 
-    Label shadowMinLabel = CreateBaseLabel("Shadow Label Minimum");
+    Label        shadowMinLabel = CreateBaseLabel("Shadow Label Minimum");
     Text::Shadow shadowMin;
     shadowMin.SetOffset(Vector2(1.0f, 1.0f));
     shadowMinLabel.SetTextShadow(shadowMin);
@@ -77,7 +78,7 @@ private:
     shadow.SetBlurRadius(2.0f);
     mShadowLabel.SetTextShadow(shadow);
 
-    Label outlineMinLabel = CreateBaseLabel("Outline Label Minimum");
+    Label         outlineMinLabel = CreateBaseLabel("Outline Label Minimum");
     Text::Outline outlineMin;
     outlineMin.SetWidth(2.0f);
     outlineMinLabel.SetTextOutline(outlineMin);
@@ -143,7 +144,6 @@ private:
     root.Add(mInputFieldLineThrough);
     root.Add(mInputFieldTextBackgroundColor);
     window.Add(root);
-
 
     PrintTextBackgroundColorInfo(mTextBackgroundColorLabel, "TextBackgroundColor Label");
     PrintTextBackgroundColorInfo(mInputFieldTextBackgroundColor, "TextBackgroundColor InputField");
@@ -304,14 +304,14 @@ private:
 private:
   Application& mApplication;
 
-  Label      mWeightLabel;
-  Label      mWidthLabel;
-  Label      mSlantLabel;
-  Label      mUnderlineLabel;
-  Label      mShadowLabel;
-  Label      mOutlineLabel;
-  Label      mLineThroughLabel;
-  Label      mTextBackgroundColorLabel;
+  Label mWeightLabel;
+  Label mWidthLabel;
+  Label mSlantLabel;
+  Label mUnderlineLabel;
+  Label mShadowLabel;
+  Label mOutlineLabel;
+  Label mLineThroughLabel;
+  Label mTextBackgroundColorLabel;
 
   InputField mInputFieldUnderline;
   InputField mInputFieldShadow;

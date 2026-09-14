@@ -14,6 +14,7 @@
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -49,10 +50,11 @@ private:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
-    Label title = Label::New("Text Marquee Example\n"
-                             "Test options:\n"
-                             "[1] Start Marquee, [2] Stop Marquee, [d] Toggle Stop Mode, [i] Information\n"
-                             "Text::MarqueeOrientation::HORIZONTAL");
+    Label title = Label::New(
+      "Text Marquee Example\n"
+      "Test options:\n"
+      "[1] Start Marquee, [2] Stop Marquee, [d] Toggle Stop Mode, [i] Information\n"
+      "Text::MarqueeOrientation::HORIZONTAL");
     title.SetFontSize(14.0f);
     title.SetMultiLine(true);
     title.SetLineHeight(1.6f);
@@ -203,7 +205,6 @@ private:
 
   void PrintLabelInfo(Label label, const char* title)
   {
-
   }
 
   void OnKeyEvent(Window window, KeyEvent event)
@@ -364,25 +365,25 @@ private:
   }
 
 private:
-  Application&           mApplication;
-  Text::MarqueeStopMode  mMarqueeStopMode;
-  Label                  mLabelLtr;
-  Label                  mLabelRtl;
-  Label                  mLabelMultiline;
-  Label                  mLabelFocus;
-  Label                  mOverflowLabel;
-  Label                  mOverflowLabelRtl;
-  Label                  mOverflowLabelMultiline;
-  Label                  mOverflowLabelFocus;
-  Label                  mLabelVerticalStart;
-  Label                  mLabelVerticalCenter;
-  Label                  mLabelVerticalEnd;
+  Application&          mApplication;
+  Text::MarqueeStopMode mMarqueeStopMode;
+  Label                 mLabelLtr;
+  Label                 mLabelRtl;
+  Label                 mLabelMultiline;
+  Label                 mLabelFocus;
+  Label                 mOverflowLabel;
+  Label                 mOverflowLabelRtl;
+  Label                 mOverflowLabelMultiline;
+  Label                 mOverflowLabelFocus;
+  Label                 mLabelVerticalStart;
+  Label                 mLabelVerticalCenter;
+  Label                 mLabelVerticalEnd;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetLabelAsyncRendering(true);
   config.SetMarqueeLoopCount(1);
   config.Apply();

@@ -24,6 +24,7 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <algorithm>
 #include <functional>
@@ -215,9 +216,12 @@ private:
     mutations.SetRequestedWidth(MATCH_PARENT);
     mutations.SetRequestedHeight(48.0f);
     mutations.SetSpacing(10.0f);
-    mutations.Add(MakeButton("Toggle annotation", COLOR_PRIMARY, [this]() { ToggleAnnotation(); }));
-    mutations.Add(MakeButton("Toggle enabled", COLOR_WARNING, [this]() { ToggleEnabled(); }));
-    mutations.Add(MakeButton("Reset", COLOR_MUTED, [this]() { ResetEntities(); }));
+    mutations.Add(MakeButton("Toggle annotation", COLOR_PRIMARY, [this]()
+    { ToggleAnnotation(); }));
+    mutations.Add(MakeButton("Toggle enabled", COLOR_WARNING, [this]()
+    { ToggleEnabled(); }));
+    mutations.Add(MakeButton("Reset", COLOR_MUTED, [this]()
+    { ResetEntities(); }));
     panel.Add(mutations);
 
     return panel;
@@ -239,16 +243,20 @@ private:
     firstRow.SetRequestedWidth(MATCH_PARENT);
     firstRow.SetRequestedHeight(50.0f);
     firstRow.SetSpacing(10.0f);
-    firstRow.Add(MakeButton("1  FindById", COLOR_PRIMARY, [this]() { RunFindById(); }));
-    firstRow.Add(MakeButton("2  GetAnnotatedViews", COLOR_SUCCESS, [this]() { RunGetAnnotatedViews(); }));
+    firstRow.Add(MakeButton("1  FindById", COLOR_PRIMARY, [this]()
+    { RunFindById(); }));
+    firstRow.Add(MakeButton("2  GetAnnotatedViews", COLOR_SUCCESS, [this]()
+    { RunGetAnnotatedViews(); }));
     panel.Add(firstRow);
 
     StackLayout secondRow = StackLayout::New(StackOrientation::HORIZONTAL);
     secondRow.SetRequestedWidth(MATCH_PARENT);
     secondRow.SetRequestedHeight(50.0f);
     secondRow.SetSpacing(10.0f);
-    secondRow.Add(MakeButton("3  GetFocusedView", 0x7A5DE8u, [this]() { RunGetFocusedView(); }));
-    secondRow.Add(MakeButton("4  ToPresentation", 0x1885A8u, [this]() { RunToPresentation(); }));
+    secondRow.Add(MakeButton("3  GetFocusedView", 0x7A5DE8u, [this]()
+    { RunGetFocusedView(); }));
+    secondRow.Add(MakeButton("4  ToPresentation", 0x1885A8u, [this]()
+    { RunToPresentation(); }));
     panel.Add(secondRow);
 
     StackLayout response = StackLayout::New(StackOrientation::VERTICAL);
@@ -301,7 +309,8 @@ private:
     Label label = MakeLabel(text, 12.0f, 0xFFFFFFu, MATCH_PARENT);
     label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     button.Add(label);
-    button.ConnectClickedSignal(this, [callback](View, InputEvent) { callback(); });
+    button.ConnectClickedSignal(this, [callback](View, InputEvent)
+    { callback(); });
     return button;
   }
 
@@ -361,7 +370,8 @@ private:
     content.Add(MakeLabel(entityType, 11.0f, 0x8791A6u, 22.0f));
 
     entity.card.Add(content);
-    entity.card.ConnectClickedSignal(this, [this, index](View, InputEvent) { SelectEntity(index); });
+    entity.card.ConnectClickedSignal(this, [this, index](View, InputEvent)
+    { SelectEntity(index); });
     panel.Add(entity.card);
     mEntities.push_back(entity);
   }
@@ -383,13 +393,13 @@ private:
     const View focusedView = FocusManager::Get().GetCurrentFocusView();
     for(size_t index = 0u; index < mEntities.size(); ++index)
     {
-      EntityCard& entity = mEntities[index];
+      EntityCard&  entity = mEntities[index];
       Dali::String annotationId;
       Dali::String annotationType;
       Dali::String annotationInfo;
-      const bool annotated = entity.card.GetAnnotation(annotationId, annotationType, annotationInfo);
-      const bool enabled   = entity.card.GetProperty<bool>(Actor::Property::ENABLED);
-      const bool focused   = focusedView == entity.card;
+      const bool   annotated = entity.card.GetAnnotation(annotationId, annotationType, annotationInfo);
+      const bool   enabled   = entity.card.GetProperty<bool>(Actor::Property::ENABLED);
+      const bool   focused   = focusedView == entity.card;
 
       entity.card.SetBackgroundColor(UiColor(index == mSelectedIndex ? COLOR_SELECTED_CARD : COLOR_UNSELECTED_CARD));
       std::string state = annotated ? "ANNOTATED" : "NO ANNOTATION";
@@ -412,7 +422,7 @@ private:
 
   void ToggleAnnotation()
   {
-    EntityCard& entity = mEntities[mSelectedIndex];
+    EntityCard&  entity = mEntities[mSelectedIndex];
     Dali::String annotationId;
     Dali::String annotationType;
     Dali::String annotationInfo;
@@ -455,7 +465,8 @@ private:
   void RunFindById()
   {
     const uint32_t requestedId = mEntities[mSelectedIndex].card.GetId();
-    auto found = std::find_if(mEntities.begin(), mEntities.end(), [requestedId](const EntityCard& entity) {
+    auto           found       = std::find_if(mEntities.begin(), mEntities.end(), [requestedId](const EntityCard& entity)
+                    {
       return entity.card.GetId() == requestedId;
     });
 
@@ -499,7 +510,8 @@ private:
   void RunGetFocusedView()
   {
     const View focusedView = FocusManager::Get().GetCurrentFocusView();
-    auto found = std::find_if(mEntities.begin(), mEntities.end(), [&focusedView](const EntityCard& entity) {
+    auto       found       = std::find_if(mEntities.begin(), mEntities.end(), [&focusedView](const EntityCard& entity)
+                {
       return entity.card == focusedView;
     });
     if(found == mEntities.end())
@@ -517,13 +529,13 @@ private:
 
   std::string BuildPresentation(const EntityCard& entity) const
   {
-    Dali::String annotationId;
-    Dali::String annotationType;
-    Dali::String annotationInfo;
-    const bool   annotated = entity.card.GetAnnotation(annotationId, annotationType, annotationInfo);
+    Dali::String  annotationId;
+    Dali::String  annotationType;
+    Dali::String  annotationInfo;
+    const bool    annotated      = entity.card.GetAnnotation(annotationId, annotationType, annotationInfo);
     const Vector2 screenPosition = entity.card.GetProperty<Vector2>(Actor::Property::SCREEN_POSITION);
     const Vector3 size           = entity.card.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
-    const bool focused = FocusManager::Get().GetCurrentFocusView() == entity.card;
+    const bool    focused        = FocusManager::Get().GetCurrentFocusView() == entity.card;
 
     std::ostringstream json;
     json.imbue(std::locale::classic());
@@ -560,7 +572,8 @@ private:
 
   void OnFocusChanged(View, View current)
   {
-    auto found = std::find_if(mEntities.begin(), mEntities.end(), [&current](const EntityCard& entity) {
+    auto found = std::find_if(mEntities.begin(), mEntities.end(), [&current](const EntityCard& entity)
+    {
       return entity.card == current;
     });
     if(found != mEntities.end())
@@ -631,7 +644,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application                application = Application::New(&argc, &argv);
   AppEntityAnnotationExample example(application);
   application.MainLoop();
   return 0;

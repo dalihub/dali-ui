@@ -14,10 +14,11 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -25,7 +26,7 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr int     IMAGE_COUNT   = 4;
+constexpr int     IMAGE_COUNT             = 4;
 const char* const IMAGE_URLS[IMAGE_COUNT] = {
   RESOURCES_DIR "gallery-large-3.jpg",
   RESOURCES_DIR "gallery-medium-3.jpg",

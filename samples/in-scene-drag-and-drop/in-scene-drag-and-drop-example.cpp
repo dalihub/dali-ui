@@ -3,6 +3,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -483,7 +484,7 @@ private:
 
   DropProposal AcceptDrop(const DragAndDropEvent& event)
   {
-    int32_t sourceIndex = -1;
+    int32_t         sourceIndex = -1;
     Property::Value cardData;
     if(event.GetPayload().GetRepresentationData(CARD_PAYLOAD_TYPE, cardData))
     {
@@ -592,7 +593,7 @@ private:
 
   void OnDropped(const DragAndDropEvent& event, DragAndDropDetector)
   {
-    int32_t sourceIndex = -1;
+    int32_t         sourceIndex = -1;
     Property::Value cardData;
     if(!event.GetSelectedRepresentationData(cardData) ||
        !cardData.Get(sourceIndex))

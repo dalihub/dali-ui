@@ -20,37 +20,38 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
-constexpr int   WINDOW_WIDTH       = 980;
-constexpr int   WINDOW_HEIGHT      = 820;
-constexpr std::size_t CASE_COUNT    = 14u;
-constexpr float PAGE_PADDING       = 28.0f;
-constexpr float PAGE_SPACING       = 12.0f;
-constexpr float TITLE_FONT_SIZE    = 25.0f;
-constexpr float CASE_FONT_SIZE     = 22.0f;
-constexpr float BODY_FONT_SIZE     = 18.0f;
-constexpr float RESULT_FONT_SIZE   = 30.0f;
-constexpr float FOOTER_FONT_SIZE   = 16.0f;
-constexpr uint32_t PAGE_BACKGROUND = 0xF8FAFC;
-constexpr uint32_t TEXT_PRIMARY    = 0x0F172A;
-constexpr uint32_t TEXT_SECONDARY  = 0x334155;
-constexpr uint32_t TEXT_MUTED      = 0x64748B;
-constexpr uint32_t RED             = 0xDC2626;
-constexpr uint32_t BLUE            = 0x2563EB;
-constexpr uint32_t GREEN           = 0x059669;
-constexpr uint32_t PURPLE          = 0x7C3AED;
-constexpr uint32_t AMBER           = 0xD97706;
-constexpr uint32_t BG_SOFT_RED     = 0xFEE2E2;
-constexpr uint32_t BG_SOFT_BLUE    = 0xDBEAFE;
-constexpr uint32_t BG_SOFT_PURPLE  = 0xF3E8FF;
-constexpr uint32_t BG_SOFT_GREEN   = 0xDCFCE7;
-constexpr uint32_t BG_SOFT_AMBER   = 0xFEF3C7;
-constexpr uint32_t BG_SOFT_CYAN    = 0xCFFAFE;
+constexpr int         WINDOW_WIDTH     = 980;
+constexpr int         WINDOW_HEIGHT    = 820;
+constexpr std::size_t CASE_COUNT       = 14u;
+constexpr float       PAGE_PADDING     = 28.0f;
+constexpr float       PAGE_SPACING     = 12.0f;
+constexpr float       TITLE_FONT_SIZE  = 25.0f;
+constexpr float       CASE_FONT_SIZE   = 22.0f;
+constexpr float       BODY_FONT_SIZE   = 18.0f;
+constexpr float       RESULT_FONT_SIZE = 30.0f;
+constexpr float       FOOTER_FONT_SIZE = 16.0f;
+constexpr uint32_t    PAGE_BACKGROUND  = 0xF8FAFC;
+constexpr uint32_t    TEXT_PRIMARY     = 0x0F172A;
+constexpr uint32_t    TEXT_SECONDARY   = 0x334155;
+constexpr uint32_t    TEXT_MUTED       = 0x64748B;
+constexpr uint32_t    RED              = 0xDC2626;
+constexpr uint32_t    BLUE             = 0x2563EB;
+constexpr uint32_t    GREEN            = 0x059669;
+constexpr uint32_t    PURPLE           = 0x7C3AED;
+constexpr uint32_t    AMBER            = 0xD97706;
+constexpr uint32_t    BG_SOFT_RED      = 0xFEE2E2;
+constexpr uint32_t    BG_SOFT_BLUE     = 0xDBEAFE;
+constexpr uint32_t    BG_SOFT_PURPLE   = 0xF3E8FF;
+constexpr uint32_t    BG_SOFT_GREEN    = 0xDCFCE7;
+constexpr uint32_t    BG_SOFT_AMBER    = 0xFEF3C7;
+constexpr uint32_t    BG_SOFT_CYAN     = 0xCFFAFE;
 
 struct ExampleCase
 {
@@ -121,8 +122,10 @@ ExampleCase BuildFromMarkupOneShotCase()
   data.description = "Start here when a resource or constant string already uses supported DALi markup.";
   data.sourceText  = markup;
   data.result      = BuildFromMarkupOneShotStyledText();
-  data.stats       = "API: Text::StyledText::FromMarkup()\nNo builder is needed for one-shot markup conversion."
-               "\nSpan count: " + std::to_string(data.result.GetSpanCount());
+  data.stats =
+    "API: Text::StyledText::FromMarkup()\nNo builder is needed for one-shot markup conversion."
+    "\nSpan count: " +
+    std::to_string(data.result.GetSpanCount());
   return data;
 }
 
@@ -171,8 +174,10 @@ ExampleCase BuildPushPopSimpleCase()
   data.description = "Recommended builder pattern: append text while a span is open, then close the most recent open span.";
   data.sourceText  = "Normal Red Normal";
   data.result      = result;
-  data.stats       = "Manual range indexes: none\nPopSpan() closes the most recently pushed span."
-               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  data.stats =
+    "Manual range indexes: none\nPopSpan() closes the most recently pushed span."
+    "\nSpan count: " +
+    std::to_string(result.GetSpanCount());
   return data;
 }
 
@@ -206,8 +211,10 @@ ExampleCase BuildNestedPushPopCase()
   data.description = "Nested styles can be expressed naturally with the open span stack and no explicit range math.";
   data.sourceText  = "Normal Red Red Underline Red Normal";
   data.result      = result;
-  data.stats       = "Manual range indexes: none\nInner underline is popped first; outer foreground stays open."
-               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  data.stats =
+    "Manual range indexes: none\nInner underline is popped first; outer foreground stays open."
+    "\nSpan count: " +
+    std::to_string(result.GetSpanCount());
   return data;
 }
 
@@ -238,9 +245,11 @@ ExampleCase BuildPushPopTokenCase()
   data.description = "Keep a token for a block span when nested pushes may happen before the block ends.";
   data.sourceText  = "Normal Highlighted Highlighted Underline Normal";
   data.result      = result;
-  data.stats       = "PopSpan(token) closes the matching span and any spans above it."
-               "\nThis closes underline and background together at the block boundary."
-               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  data.stats =
+    "PopSpan(token) closes the matching span and any spans above it."
+    "\nThis closes underline and background together at the block boundary."
+    "\nSpan count: " +
+    std::to_string(result.GetSpanCount());
   return data;
 }
 
@@ -269,9 +278,11 @@ ExampleCase BuildNonMutatingBuildCase()
   data.description = "Build() creates a snapshot. It does not mutate the builder or pop open spans.";
   data.sourceText  = "First snapshot continues";
   data.result      = result;
-  data.stats       = "The helper calls Build(), appends more text, then calls Build() again."
-               "\nThe open blue span is still active for the second snapshot."
-               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  data.stats =
+    "The helper calls Build(), appends more text, then calls Build() again."
+    "\nThe open blue span is still active for the second snapshot."
+    "\nSpan count: " +
+    std::to_string(result.GetSpanCount());
   return data;
 }
 
@@ -324,11 +335,13 @@ ExampleCase BuildAnnotationResolveCase()
   data.description = "Annotation markup is semantic metadata. App or theme code resolves key/value pairs into concrete visual spans.";
   data.sourceText  = markup;
   data.result      = result;
-  data.stats       = "Each attribute in one annotation tag becomes a separate AnnotationSpan."
-               "\nAnnotation loop caches GetAnnotationCount() before the loop."
-               "\nEach matching visual range receives a new span instance."
-               "\nAnnotation count: " + std::to_string(result.GetAnnotationCount()) +
-               "\nSpan count after resolve: " + std::to_string(result.GetSpanCount());
+  data.stats =
+    "Each attribute in one annotation tag becomes a separate AnnotationSpan."
+    "\nAnnotation loop caches GetAnnotationCount() before the loop."
+    "\nEach matching visual range receives a new span instance."
+    "\nAnnotation count: " +
+    std::to_string(result.GetAnnotationCount()) +
+    "\nSpan count after resolve: " + std::to_string(result.GetSpanCount());
   return data;
 }
 
@@ -403,9 +416,9 @@ ExampleCase BuildUtf8FindCase()
   const std::string text   = "오늘은 가나다 입니다";
   const std::string target = "가나다";
 
-  const std::size_t found       = text.find(target);
-  const bool        targetFound = (found != std::string::npos);
-  bool              converted   = false;
+  const std::size_t found           = text.find(target);
+  const bool        targetFound     = (found != std::string::npos);
+  bool              converted       = false;
   uint32_t          utf8StartIndex  = 0u;
   uint32_t          utf8EndIndex    = 0u;
   uint32_t          utf32StartIndex = 0u;
@@ -448,13 +461,13 @@ ExampleCase BuildUtf32BackToUtf8Case()
   const std::string text   = "Back to UTF-8: A👩‍💻B";
   const std::string target = "👩‍💻";
 
-  const std::size_t found       = text.find(target);
-  const bool        targetFound = (found != std::string::npos);
+  const std::size_t found             = text.find(target);
+  const bool        targetFound       = (found != std::string::npos);
   bool              forwardConverted  = false;
-  uint32_t          utf8StartFromFind  = 0u;
-  uint32_t          utf8EndFromFind    = 0u;
-  uint32_t          utf32StartIndex    = 0u;
-  uint32_t          utf32EndIndex      = 0u;
+  uint32_t          utf8StartFromFind = 0u;
+  uint32_t          utf8EndFromFind   = 0u;
+  uint32_t          utf32StartIndex   = 0u;
+  uint32_t          utf32EndIndex     = 0u;
 
   if(targetFound)
   {
@@ -565,15 +578,15 @@ ExampleCase BuildBoundaryFailureCase()
 {
   const Dali::String text("A가B");
 
-  uint32_t indexOutputBefore = 123u;
-  uint32_t indexOutput       = indexOutputBefore;
-  const bool indexConverted  = Text::Utf8ToUtf32Index(text, 2u, indexOutput);
+  uint32_t   indexOutputBefore = 123u;
+  uint32_t   indexOutput       = indexOutputBefore;
+  const bool indexConverted    = Text::Utf8ToUtf32Index(text, 2u, indexOutput);
 
-  uint32_t rangeStartBefore = 456u;
-  uint32_t rangeEndBefore   = 789u;
-  uint32_t rangeStart       = rangeStartBefore;
-  uint32_t rangeEnd         = rangeEndBefore;
-  const bool rangeConverted = Text::Utf8ToUtf32Range(text, 2u, 4u, rangeStart, rangeEnd);
+  uint32_t   rangeStartBefore = 456u;
+  uint32_t   rangeEndBefore   = 789u;
+  uint32_t   rangeStart       = rangeStartBefore;
+  uint32_t   rangeEnd         = rangeEndBefore;
+  const bool rangeConverted   = Text::Utf8ToUtf32Range(text, 2u, 4u, rangeStart, rangeEnd);
 
   Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(text);
   builder.SetSpan(NewForegroundSpan(GREEN), 1u, 2u);
@@ -611,10 +624,12 @@ ExampleCase BuildImageSpanCase()
   data.title       = "Case 14: Recommended ImageSpan authoring";
   data.description = "Append one U+FFFC, remember its UTF-32 index, then attach one ImageSpan to [index,index+1).";
   data.sourceText  = "Before [U+FFFC] after";
-  data.stats       = "Canonical source unit: U+FFFC OBJECT REPLACEMENT CHARACTER"
-               "\nImageSpan UTF-32 range: " + RangeText(imageIndex, imageIndex + 1u) +
-               "\nReserved size: 64x40 logical pixels"
-               "\nSpan count: 1";
+  data.stats =
+    "Canonical source unit: U+FFFC OBJECT REPLACEMENT CHARACTER"
+    "\nImageSpan UTF-32 range: " +
+    RangeText(imageIndex, imageIndex + 1u) +
+    "\nReserved size: 64x40 logical pixels"
+    "\nSpan count: 1";
   data.result = builder.Build();
   return data;
 }

@@ -17,6 +17,7 @@
 #include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/selection-group.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <cstdio>
 #include <string>
@@ -34,9 +35,9 @@ const UiColor LABEL_COLOR(0x000000);      ///< Black label text
 
 constexpr int   CHILD_COUNT_PER_PARENT = 2;
 constexpr int   PARENT_COUNT           = 2;
-constexpr float CIRCLE_SIZE             = 48.0f;
-constexpr float CIRCLE_GAP              = 24.0f;
-constexpr float PARENT_SPACING          = 40.0f;
+constexpr float CIRCLE_SIZE            = 48.0f;
+constexpr float CIRCLE_GAP             = 24.0f;
+constexpr float PARENT_SPACING         = 40.0f;
 
 const char* const GROUP_NAME = "cross-hierarchy-group"; ///< Named group shared by all children
 

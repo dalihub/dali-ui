@@ -17,12 +17,13 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/devel-api/animation/animation-devel.h>
+#include <unistd.h>
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <string>
-#include <unistd.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -41,11 +42,11 @@ constexpr uint32_t COLOR_SEARCH_TEXT = 0x374151; // Soft black
 constexpr uint32_t COLOR_MATCH_TEXT  = 0x2563EB; // Blue
 
 // Sizes (pixels)
-constexpr float HEADER_HEIGHT       = 60.0f;
+constexpr float HEADER_HEIGHT = 60.0f;
 constexpr float SEARCH_HEIGHT = 48.0f;
-constexpr float SEPARATOR_H         = 1.0f;
-constexpr float PADDING_H           = 20.0f;
-constexpr float PADDING_V           = 14.0f;
+constexpr float SEPARATOR_H   = 1.0f;
+constexpr float PADDING_H     = 20.0f;
+constexpr float PADDING_V     = 14.0f;
 
 // Font sizes (pixels)
 constexpr float FONT_HEADER  = 22.0f;
@@ -489,7 +490,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ManualTestLauncher launcher(application);

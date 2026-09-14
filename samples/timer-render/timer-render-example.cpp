@@ -23,6 +23,7 @@
 // per-second tick log must keep advancing.
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <dali/public-api/adaptor-framework/timer.h>
 
@@ -92,8 +93,8 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application           application = Application::New(&argc, &argv);
-  UiConfig              config      = UiConfig::New();
+  Application application = Application::New(&argc, &argv);
+  UiConfig    config      = UiConfig::New();
   config.Apply();
   TimerRenderController controller(application);
   application.MainLoop();

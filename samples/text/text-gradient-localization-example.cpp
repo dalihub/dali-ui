@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <clocale>
 #include <cstdio>
@@ -214,8 +215,8 @@ Gradient::Base CreateDescriptionGradientSpanGradient()
 
 Text::StyledText BuildGradientSpanDescriptionStyledText(const Dali::String& markup)
 {
-  Text::StyledTextBuilder builder = Text::StyledTextBuilder::FromMarkup(markup);
-  const Gradient::Base   gradient = CreateDescriptionGradientSpanGradient();
+  Text::StyledTextBuilder builder  = Text::StyledTextBuilder::FromMarkup(markup);
+  const Gradient::Base    gradient = CreateDescriptionGradientSpanGradient();
 
   const uint32_t annotationCount = builder.GetAnnotationCount();
   for(uint32_t annotationIndex = 0u; annotationIndex < annotationCount; ++annotationIndex)
@@ -528,12 +529,12 @@ private:
   }
 
 private:
-  Application&  mApplication;
-  LocalizedCard mCard;
+  Application&              mApplication;
+  LocalizedCard             mCard;
   LocalizedGradientSpanCard mGradientSpanCard;
-  Label         mStatusLabel;
-  Animation     mGradientAnimation;
-  std::string   mCurrentLocale;
+  Label                     mStatusLabel;
+  Animation                 mGradientAnimation;
+  std::string               mCurrentLocale;
 
   static constexpr const char* TEXT_DOMAIN_GRADIENT_LOCALIZATION     = "text-gradient-localization-po";
   static constexpr const char* TEXT_LOCALE_DIR_GRADIENT_LOCALIZATION = RESOURCES_DIR "locale/gradient";

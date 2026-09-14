@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <initializer_list>
 #include <string>
@@ -25,11 +26,11 @@ using namespace Dali::Ui;
 namespace
 {
 
-constexpr float STACK_SPACING  = 6.0f;
-constexpr float STACK_PADDING  = 12.0f;
-constexpr float BUTTON_HEIGHT  = 36.0f;
-constexpr float BUTTON_SPACING = 4.0f;
-constexpr size_t MAX_LOG_LINES = 10u;
+constexpr float  STACK_SPACING  = 6.0f;
+constexpr float  STACK_PADDING  = 12.0f;
+constexpr float  BUTTON_HEIGHT  = 36.0f;
+constexpr float  BUTTON_SPACING = 4.0f;
+constexpr size_t MAX_LOG_LINES  = 10u;
 
 const char* GetStateName(InputMethodContext::State state)
 {
@@ -323,7 +324,7 @@ private:
     mInputEditor.SetLayoutParams(CreateFillWeightParams());
 
     // Get InputMethodContext from each control
-    mFieldContext = mInputField.GetInputMethodContext();
+    mFieldContext  = mInputField.GetInputMethodContext();
     mEditorContext = mInputEditor.GetInputMethodContext();
 
     // Connect IME signals for Field context
@@ -338,45 +339,45 @@ private:
     // Panel Visibility
     Label btnShowPanel = CreateButton("Show", 0x3498DB);
     Label btnHidePanel = CreateButton("Hide", 0xE74C3C);
-    Label btnGetState = CreateButton("Get State", 0x9B59B6);
-    Label btnGetArea = CreateButton("Get Area", 0x1ABC9C);
-    View panelRow = CreateButtonRow({btnShowPanel, btnHidePanel, btnGetState, btnGetArea});
+    Label btnGetState  = CreateButton("Get State", 0x9B59B6);
+    Label btnGetArea   = CreateButton("Get Area", 0x1ABC9C);
+    View  panelRow     = CreateButtonRow({btnShowPanel, btnHidePanel, btnGetState, btnGetArea});
 
     // Auto / Restore / Return
     Label btnAutoShow = CreateButton("AutoShow", 0x2980B9);
-    Label btnRestore = CreateButton("Restore", 0x27AE60);
-    Label btnReturn = CreateButton("ReturnKey", 0xE67E22);
-    View autoRow = CreateButtonRow({btnAutoShow, btnRestore, btnReturn});
+    Label btnRestore  = CreateButton("Restore", 0x27AE60);
+    Label btnReturn   = CreateButton("ReturnKey", 0xE67E22);
+    View  autoRow     = CreateButtonRow({btnAutoShow, btnRestore, btnReturn});
 
     // Prediction / Fullscreen / Panel Data
     Label btnPrediction = CreateButton("Prediction", 0x8E44AD);
     Label btnFullscreen = CreateButton("Fullscreen", 0x16A085);
-    Label btnSetData = CreateButton("Set Data", 0xD35400);
-    Label btnGetData = CreateButton("Get Data", 0x7F8C8D);
-    View modeDataRow = CreateButtonRow({btnPrediction, btnFullscreen, btnSetData, btnGetData});
+    Label btnSetData    = CreateButton("Set Data", 0xD35400);
+    Label btnGetData    = CreateButton("Get Data", 0x7F8C8D);
+    View  modeDataRow   = CreateButtonRow({btnPrediction, btnFullscreen, btnSetData, btnGetData});
 
     // Panel Position
-    Label btnPos00 = CreateButton("Pos 0,0", 0x95A5A6);
+    Label btnPos00  = CreateButton("Pos 0,0", 0x95A5A6);
     Label btnPos100 = CreateButton("Pos 100,100", 0x7F8C8D);
-    View posRow = CreateButtonRow({btnPos00, btnPos100});
+    View  posRow    = CreateButtonRow({btnPos00, btnPos100});
 
     Label btnAlignTL = CreateButton("Align TL", 0x3498DB);
     Label btnAlignBC = CreateButton("Align BC", 0x2ECC71);
     Label btnAlignMC = CreateButton("Align MC", 0xE67E22);
-    View alignRow = CreateButtonRow({btnAlignTL, btnAlignBC, btnAlignMC});
+    View  alignRow   = CreateButtonRow({btnAlignTL, btnAlignBC, btnAlignMC});
 
     // Input Panel Options
-    Label btnLayoutNormal   = CreateButton("Normal", 0x3498DB);
-    Label btnLayoutNumber   = CreateButton("Number", 0x2ECC71);
-    Label btnLayoutEmail    = CreateButton("Email", 0xE67E22);
-    Label btnLayoutUrl      = CreateButton("URL", 0x9B59B6);
-    View  layoutRow1        = CreateButtonRow({btnLayoutNormal, btnLayoutNumber, btnLayoutEmail, btnLayoutUrl});
+    Label btnLayoutNormal = CreateButton("Normal", 0x3498DB);
+    Label btnLayoutNumber = CreateButton("Number", 0x2ECC71);
+    Label btnLayoutEmail  = CreateButton("Email", 0xE67E22);
+    Label btnLayoutUrl    = CreateButton("URL", 0x9B59B6);
+    View  layoutRow1      = CreateButtonRow({btnLayoutNormal, btnLayoutNumber, btnLayoutEmail, btnLayoutUrl});
 
-    Label btnLayoutPhone    = CreateButton("Phone", 0x3498DB);
-    Label btnLayoutIp       = CreateButton("IP", 0x2ECC71);
-    Label btnLayoutMonth    = CreateButton("Month", 0xE67E22);
-    Label btnLayoutNumOnly  = CreateButton("NumOnly", 0x9B59B6);
-    View  layoutRow2        = CreateButtonRow({btnLayoutPhone, btnLayoutIp, btnLayoutMonth, btnLayoutNumOnly});
+    Label btnLayoutPhone   = CreateButton("Phone", 0x3498DB);
+    Label btnLayoutIp      = CreateButton("IP", 0x2ECC71);
+    Label btnLayoutMonth   = CreateButton("Month", 0xE67E22);
+    Label btnLayoutNumOnly = CreateButton("NumOnly", 0x9B59B6);
+    View  layoutRow2       = CreateButtonRow({btnLayoutPhone, btnLayoutIp, btnLayoutMonth, btnLayoutNumOnly});
 
     Label btnLayoutPassword = CreateButton("Password", 0xE67E22);
     Label btnLayoutDateTime = CreateButton("DateTime", 0x9B59B6);
@@ -399,11 +400,11 @@ private:
     Label btnReturnSignIn = CreateButton("Ret SignIn", 0x3498DB);
     View  returnKeyRow3   = CreateButtonRow({btnReturnSignIn});
 
-    Label btnAutoCapNone = CreateButton("AC None", 0x3498DB);
+    Label btnAutoCapNone     = CreateButton("AC None", 0x3498DB);
     Label btnAutoCapSentence = CreateButton("AC Sentence", 0x2ECC71);
-    Label btnAutoCapWord = CreateButton("AC Word", 0xE67E22);
-    Label btnAutoCapAll = CreateButton("AC All", 0x9B59B6);
-    View autoCapitalRow = CreateButtonRow({btnAutoCapNone, btnAutoCapSentence, btnAutoCapWord, btnAutoCapAll});
+    Label btnAutoCapWord     = CreateButton("AC Word", 0xE67E22);
+    Label btnAutoCapAll      = CreateButton("AC All", 0x9B59B6);
+    View  autoCapitalRow     = CreateButtonRow({btnAutoCapNone, btnAutoCapSentence, btnAutoCapWord, btnAutoCapAll});
 
     Label btnVarNormal     = CreateButton("Normal", 0x3498DB);
     Label btnVarFilename   = CreateButton("Filename", 0x2ECC71);
@@ -411,20 +412,20 @@ private:
     Label btnVarNumOnly    = CreateButton("NumOnly", 0x9B59B6);
     View  variationRow1    = CreateButtonRow({btnVarNormal, btnVarFilename, btnVarPersonName, btnVarNumOnly});
 
-    Label btnVarSigned     = CreateButton("Signed", 0x3498DB);
-    Label btnVarDecimal    = CreateButton("Decimal", 0x2ECC71);
-    Label btnVarSignDec    = CreateButton("Sign+Dec", 0xE67E22);
-    Label btnVarPassword   = CreateButton("Password", 0x9B59B6);
-    View  variationRow2    = CreateButtonRow({btnVarSigned, btnVarDecimal, btnVarSignDec, btnVarPassword});
+    Label btnVarSigned   = CreateButton("Signed", 0x3498DB);
+    Label btnVarDecimal  = CreateButton("Decimal", 0x2ECC71);
+    Label btnVarSignDec  = CreateButton("Sign+Dec", 0xE67E22);
+    Label btnVarPassword = CreateButton("Password", 0x9B59B6);
+    View  variationRow2  = CreateButtonRow({btnVarSigned, btnVarDecimal, btnVarSignDec, btnVarPassword});
 
-    Label btnVarPwdNum     = CreateButton("PwdNum", 0x3498DB);
-    View  variationRow3    = CreateButtonRow({btnVarPwdNum});
+    Label btnVarPwdNum  = CreateButton("PwdNum", 0x3498DB);
+    View  variationRow3 = CreateButtonRow({btnVarPwdNum});
 
     // Query
     Label btnKeyboardType = CreateButton("KB Type", 0x34495E);
-    Label btnLocale = CreateButton("Locale", 0x2C3E50);
-    Label btnRefresh = CreateButton("Refresh", 0x95A5A6);
-    View queryRow = CreateButtonRow({btnKeyboardType, btnLocale, btnRefresh});
+    Label btnLocale       = CreateButton("Locale", 0x2C3E50);
+    Label btnRefresh      = CreateButton("Refresh", 0x95A5A6);
+    View  queryRow        = CreateButtonRow({btnKeyboardType, btnLocale, btnRefresh});
 
     mLogLabel = Label::New();
     mLogLabel.SetRequestedWidth(MATCH_PARENT);
@@ -1019,7 +1020,7 @@ private:
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
-        auto area = context.GetInputPanelArea();
+        auto         area = context.GetInputPanelArea();
         Dali::String info = "Area=";
         info += FormatArea(area);
         UpdateStatus(info.CStr());
@@ -1035,8 +1036,8 @@ private:
   {
     if(IsTouchUp(touch))
     {
-      bool& enabled = GetCurrentAutoShowEnabled();
-      enabled = !enabled;
+      bool& enabled              = GetCurrentAutoShowEnabled();
+      enabled                    = !enabled;
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
@@ -1090,7 +1091,7 @@ private:
       if(context)
       {
         bool enabled = context.IsTextPredictionEnabled();
-        enabled = !enabled;
+        enabled      = !enabled;
         context.SetTextPredictionEnabled(enabled);
         UpdateStatus();
         AppendLog(enabled ? "Prediction=ON" : "Prediction=OFF");
@@ -1107,7 +1108,7 @@ private:
       if(context)
       {
         bool enabled = context.IsFullScreenModeEnabled();
-        enabled = !enabled;
+        enabled      = !enabled;
         context.SetFullScreenModeEnabled(enabled);
         UpdateStatus();
         AppendLog(enabled ? "Fullscreen=ON" : "Fullscreen=OFF");
@@ -1192,9 +1193,9 @@ private:
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
-        const auto align = InputMethodContext::InputPanelAlign::TOP_LEFT;
-        bool result = context.SetInputPanelPositionAlign(0, 0, align);
-        Dali::String info = "Align ";
+        const auto   align  = InputMethodContext::InputPanelAlign::TOP_LEFT;
+        bool         result = context.SetInputPanelPositionAlign(0, 0, align);
+        Dali::String info   = "Align ";
         info += GetAlignName(align);
         info += result ? "=true" : "=false";
         UpdateStatus(info.CStr());
@@ -1211,9 +1212,9 @@ private:
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
-        const auto align = InputMethodContext::InputPanelAlign::BOTTOM_CENTER;
-        bool result = context.SetInputPanelPositionAlign(0, 0, align);
-        Dali::String info = "Align ";
+        const auto   align  = InputMethodContext::InputPanelAlign::BOTTOM_CENTER;
+        bool         result = context.SetInputPanelPositionAlign(0, 0, align);
+        Dali::String info   = "Align ";
         info += GetAlignName(align);
         info += result ? "=true" : "=false";
         UpdateStatus(info.CStr());
@@ -1230,9 +1231,9 @@ private:
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
-        const auto align = InputMethodContext::InputPanelAlign::MIDDLE_CENTER;
-        bool result = context.SetInputPanelPositionAlign(0, 0, align);
-        Dali::String info = "Align ";
+        const auto   align  = InputMethodContext::InputPanelAlign::MIDDLE_CENTER;
+        bool         result = context.SetInputPanelPositionAlign(0, 0, align);
+        Dali::String info   = "Align ";
         info += GetAlignName(align);
         info += result ? "=true" : "=false";
         UpdateStatus(info.CStr());
@@ -1268,7 +1269,7 @@ private:
       if(context)
       {
         Dali::String locale = context.GetInputPanelLanguageLocale();
-        Dali::String info = "Locale=";
+        Dali::String info   = "Locale=";
         info += locale.CStr();
         UpdateStatus(info.CStr());
         AppendLog(info.CStr());
@@ -1333,15 +1334,15 @@ private:
   }
 
 private:
-  Application&       mApplication;
-  InputField         mInputField;
-  InputEditor        mInputEditor;
-  InputMethodContext mFieldContext;
-  InputMethodContext mEditorContext;
-  Label              mStatusLeftLabel;
-  Label              mStatusRightLabel;
-  Label              mLogLabel;
-  Dali::String       mLastSignal;
+  Application&             mApplication;
+  InputField               mInputField;
+  InputEditor              mInputEditor;
+  InputMethodContext       mFieldContext;
+  InputMethodContext       mEditorContext;
+  Label                    mStatusLeftLabel;
+  Label                    mStatusRightLabel;
+  Label                    mLogLabel;
+  Dali::String             mLastSignal;
   std::vector<std::string> mLogLines;
 
   bool mFieldAutoShowEnabled;

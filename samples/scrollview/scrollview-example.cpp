@@ -45,49 +45,47 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <sstream>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 // ─── layout ──────────────────────────────────────────────────────────────────
-static constexpr float WINDOW_W      = 600.0f;
-static constexpr float WINDOW_H      = 1080.0f;
-static constexpr float OBSERVER_H    = 130.0f;
-static constexpr float SIGNAL_LOG_H  = 116.0f; // +26px for edge-effect status row
+static constexpr float WINDOW_W          = 600.0f;
+static constexpr float WINDOW_H          = 1080.0f;
+static constexpr float OBSERVER_H        = 130.0f;
+static constexpr float SIGNAL_LOG_H      = 116.0f; // +26px for edge-effect status row
 static constexpr float FOCUS_PANEL_H     = 214.0f;
 static constexpr float SCROLL_Y          = OBSERVER_H + SIGNAL_LOG_H + FOCUS_PANEL_H; // 434
 static constexpr float SCROLL_VIEW_H     = WINDOW_H - SCROLL_Y;                       // 646
 static constexpr float FOCUS_SCROLL_PEEK = 40.0f;
 static constexpr float KEY_SCROLL_STEP   = 150.0f; // ~1 item height
-static constexpr int   ITEM_COUNT    = 15;
-static constexpr int   ITEM_GROUP    = 5;    // items per group; gaps inserted between groups
-static constexpr float ITEM_H        = 130.0f;
-static constexpr float ITEM_SPACING  = 10.0f;
-static constexpr float CONTENT_PAD   = 16.0f;
+static constexpr int   ITEM_COUNT        = 15;
+static constexpr int   ITEM_GROUP        = 5; // items per group; gaps inserted between groups
+static constexpr float ITEM_H            = 130.0f;
+static constexpr float ITEM_SPACING      = 10.0f;
+static constexpr float CONTENT_PAD       = 16.0f;
 // Large spacers are inserted between item groups so the distance between the
 // last item of one group and the first item of the next exceeds KEY_SCROLL_STEP.
 // This makes key-scroll-step actually trigger at group boundaries.
-static constexpr float GAP_H         = 320.0f; // >> KEY_SCROLL_STEP
-static constexpr int   GAP_COUNT     = ITEM_COUNT / ITEM_GROUP - 1; // 2
+static constexpr float GAP_H     = 320.0f;                      // >> KEY_SCROLL_STEP
+static constexpr int   GAP_COUNT = ITEM_COUNT / ITEM_GROUP - 1; // 2
 // total content height: 2*pad + N*item + (N-1)*spacing + gaps
-static constexpr float CONTENT_H     = CONTENT_PAD * 2
-                                       + ITEM_COUNT * ITEM_H
-                                       + (ITEM_COUNT - 1) * ITEM_SPACING
-                                       + GAP_COUNT * GAP_H;
+static constexpr float CONTENT_H = CONTENT_PAD * 2 + ITEM_COUNT * ITEM_H + (ITEM_COUNT - 1) * ITEM_SPACING + GAP_COUNT * GAP_H;
 
 // ─── colours ─────────────────────────────────────────────────────────────────
-static const Vector4 COLOR_PANEL_BG    (0.12f, 0.12f, 0.12f, 1.0f);
-static const Vector4 COLOR_LOG_BG      (0.08f, 0.10f, 0.14f, 1.0f);
-static const Vector4 COLOR_FOCUS_BG    (0.10f, 0.12f, 0.18f, 1.0f);
-static const Vector4 COLOR_ACTIVE      (0.20f, 0.85f, 0.40f, 1.0f);
-static const Vector4 COLOR_INACTIVE    (0.35f, 0.35f, 0.35f, 1.0f);
-static const Vector4 COLOR_MODE_ON     (0.20f, 0.55f, 0.90f, 1.0f);
-static const Vector4 COLOR_ITEM_EVEN   (0.82f, 0.87f, 0.95f, 1.0f);
-static const Vector4 COLOR_ITEM_ODD    (0.88f, 0.93f, 0.88f, 1.0f);
-static const Vector4 COLOR_ITEM_FOCUS  (0.20f, 0.50f, 0.88f, 1.0f);
+static const Vector4 COLOR_PANEL_BG(0.12f, 0.12f, 0.12f, 1.0f);
+static const Vector4 COLOR_LOG_BG(0.08f, 0.10f, 0.14f, 1.0f);
+static const Vector4 COLOR_FOCUS_BG(0.10f, 0.12f, 0.18f, 1.0f);
+static const Vector4 COLOR_ACTIVE(0.20f, 0.85f, 0.40f, 1.0f);
+static const Vector4 COLOR_INACTIVE(0.35f, 0.35f, 0.35f, 1.0f);
+static const Vector4 COLOR_MODE_ON(0.20f, 0.55f, 0.90f, 1.0f);
+static const Vector4 COLOR_ITEM_EVEN(0.82f, 0.87f, 0.95f, 1.0f);
+static const Vector4 COLOR_ITEM_ODD(0.88f, 0.93f, 0.88f, 1.0f);
+static const Vector4 COLOR_ITEM_FOCUS(0.20f, 0.50f, 0.88f, 1.0f);
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -104,8 +102,8 @@ public:
 
   void Create(Application application)
   {
-    Window window = application.GetWindow();
-    auto positionSize = window.GetPositionSize();
+    Window window       = application.GetWindow();
+    auto   positionSize = window.GetPositionSize();
     window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, static_cast<uint32_t>(WINDOW_W), static_cast<uint32_t>(WINDOW_H)));
     window.SetBackgroundColor(Color::WHITE);
     window.KeyEventSignal().Connect(this, &ScrollViewController::OnKeyEvent);
@@ -144,11 +142,11 @@ private:
     title.SetTextColor(Color::WHITE);
     panel.Add(title);
 
-    static constexpr float CHIP_W     = 140.0f;
-    static constexpr float CHIP_H     = 48.0f;
-    static constexpr float CHIP_GAP   = 8.0f;
-    static constexpr float ROW_Y      = 44.0f;
-    static constexpr float ROW_X0     = (WINDOW_W - (CHIP_W * 3 + CHIP_GAP * 2)) * 0.5f;
+    static constexpr float CHIP_W   = 140.0f;
+    static constexpr float CHIP_H   = 48.0f;
+    static constexpr float CHIP_GAP = 8.0f;
+    static constexpr float ROW_Y    = 44.0f;
+    static constexpr float ROW_X0   = (WINDOW_W - (CHIP_W * 3 + CHIP_GAP * 2)) * 0.5f;
 
     const char* names[3] = {"Dragging", "Scrolling", "Flinging"};
     for(int i = 0; i < 3; ++i)
@@ -282,10 +280,10 @@ private:
     panel.Add(title);
 
     // Row 1: ScrollOnFocus toggle chip + Focus-Last button + Focused label
-    static constexpr float CHIP_H        = 34.0f;
-    static constexpr float CHIP_W        = 160.0f;
-    static constexpr float FOCUS_LAST_W  = 150.0f;
-    static constexpr float ROW1_Y        = 34.0f;
+    static constexpr float CHIP_H       = 34.0f;
+    static constexpr float CHIP_W       = 160.0f;
+    static constexpr float FOCUS_LAST_W = 150.0f;
+    static constexpr float ROW1_Y       = 34.0f;
 
     mScrollOnFocusChip = View::New();
     mScrollOnFocusChip.SetBackgroundColor(COLOR_ACTIVE);
@@ -326,15 +324,15 @@ private:
     panel.Add(mFocusedLabel);
 
     // Row 2: Mode chips  [MakeVisible] [Start] [Center] [End]
-    static constexpr float MODE_CHIP_W = 128.0f;
-    static constexpr float MODE_GAP    = 8.0f;
-    static constexpr float ROW2_Y      = ROW1_Y + CHIP_H + 8.0f;
-    static constexpr float MODE_ROW_X0 = (WINDOW_W - (MODE_CHIP_W * 4 + MODE_GAP * 3)) * 0.5f;
+    static constexpr float MODE_CHIP_W   = 128.0f;
+    static constexpr float MODE_GAP      = 8.0f;
+    static constexpr float ROW2_Y        = ROW1_Y + CHIP_H + 8.0f;
+    static constexpr float MODE_ROW_X0   = (WINDOW_W - (MODE_CHIP_W * 4 + MODE_GAP * 3)) * 0.5f;
     static const char*     MODE_NAMES[4] = {"MakeVisible", "Start", "Center", "End"};
 
     for(int i = 0; i < 4; ++i)
     {
-      float x = MODE_ROW_X0 + i * (MODE_CHIP_W + MODE_GAP);
+      float x       = MODE_ROW_X0 + i * (MODE_CHIP_W + MODE_GAP);
       mModeChips[i] = View::New();
       mModeChips[i].SetBackgroundColor(i == 0 ? COLOR_MODE_ON : COLOR_INACTIVE);
       mModeChips[i].SetRequestedWidth(MODE_CHIP_W);
@@ -352,7 +350,7 @@ private:
     }
 
     // Row 3: Peek label + -/+ buttons
-    static constexpr float ROW3_Y   = ROW2_Y + CHIP_H + 8.0f;
+    static constexpr float ROW3_Y = ROW2_Y + CHIP_H + 8.0f;
 
     Label peekTitle = Label::New("Peek:");
     peekTitle.SetRequestedWidth(52.0f);
@@ -465,7 +463,7 @@ private:
 
   void UpdateScrollPos(ScrollView sv)
   {
-    Vector2 pos = sv.GetScrollPosition();
+    Vector2            pos = sv.GetScrollPosition();
     std::ostringstream oss;
     oss << "ScrollPos: (" << static_cast<int>(pos.x) << ", " << static_cast<int>(pos.y) << ")";
     mScrollPosLabel.SetText(oss.str().c_str());
@@ -473,13 +471,13 @@ private:
 
   void ConnectScrollViewSignals()
   {
-    mScrollView.ScrollStartedSignal().Connect(this,  &ScrollViewController::OnSVScrollStarted);
-    mScrollView.ScrollingSignal().Connect(this,      &ScrollViewController::OnSVScrolling);
+    mScrollView.ScrollStartedSignal().Connect(this, &ScrollViewController::OnSVScrollStarted);
+    mScrollView.ScrollingSignal().Connect(this, &ScrollViewController::OnSVScrolling);
     mScrollView.ScrollFinishedSignal().Connect(this, &ScrollViewController::OnSVScrollFinished);
-    mScrollView.DragStartedSignal().Connect(this,    &ScrollViewController::OnSVDragStarted);
-    mScrollView.DraggingSignal().Connect(this,       &ScrollViewController::OnSVDragging);
-    mScrollView.DragFinishedSignal().Connect(this,   &ScrollViewController::OnSVDragFinished);
-    mScrollView.TouchEventSignal().Connect(this,        &ScrollViewController::OnSVTouched);
+    mScrollView.DragStartedSignal().Connect(this, &ScrollViewController::OnSVDragStarted);
+    mScrollView.DraggingSignal().Connect(this, &ScrollViewController::OnSVDragging);
+    mScrollView.DragFinishedSignal().Connect(this, &ScrollViewController::OnSVDragFinished);
+    mScrollView.TouchEventSignal().Connect(this, &ScrollViewController::OnSVTouched);
   }
 
   bool OnSVTouched(Actor /*actor*/, TouchEvent touch)
@@ -543,7 +541,7 @@ private:
     UpdateScrollPos(sv);
 
     // Show fling displacement once drag ends
-    Vector2 pos = sv.GetScrollPosition();
+    Vector2            pos = sv.GetScrollPosition();
     std::ostringstream oss;
     oss << "FlingStart: (" << static_cast<int>(pos.x) << ", " << static_cast<int>(pos.y) << ")";
     mFlingVelocityLabel.SetText(oss.str().c_str());
@@ -571,7 +569,7 @@ private:
       if(i > 0 && i % ITEM_GROUP == 0)
       {
         // Determine which gap number this is (1-based) for the label
-        int gapNum = i / ITEM_GROUP;
+        int                gapNum = i / ITEM_GROUP;
         std::ostringstream gapOss;
         gapOss << "── gap " << gapNum << " (" << static_cast<int>(GAP_H) << "px) ──"
                << "  Key-scroll steps across here  ──";
@@ -624,8 +622,8 @@ private:
       hintLabel.SetRequestedY(ITEM_H * 0.65f);
       item.Add(hintLabel);
 
-      mFocusItems[i]      = item;
-      mFocusItemNames[i]  = nameLabel;
+      mFocusItems[i]     = item;
+      mFocusItemNames[i] = nameLabel;
       content.Add(item);
     }
 
@@ -879,14 +877,20 @@ private:
     }
     else
     {
-      auto stateStr = [](EdgeEffect::State s) -> const char* {
+      auto stateStr = [](EdgeEffect::State s) -> const char*
+      {
         switch(s)
         {
-          case EdgeEffect::State::PULL:     return "PULL";
-          case EdgeEffect::State::ABSORB:   return "ABSORB";
-          case EdgeEffect::State::RECEDE:   return "RECEDE";
-          case EdgeEffect::State::PULLDECAY:return "PULLDECAY";
-          default:                          return "IDLE";
+          case EdgeEffect::State::PULL:
+            return "PULL";
+          case EdgeEffect::State::ABSORB:
+            return "ABSORB";
+          case EdgeEffect::State::RECEDE:
+            return "RECEDE";
+          case EdgeEffect::State::PULLDECAY:
+            return "PULLDECAY";
+          default:
+            return "IDLE";
         }
       };
       oss << "EdgeEffect: ON  Top=" << stateStr(mTopEdgeEffect.GetState())
@@ -935,13 +939,13 @@ private:
   // Edge effects
   BounceEdgeEffect mTopEdgeEffect;
   BounceEdgeEffect mBottomEdgeEffect;
-  Label                             mEdgeEffectLabel;
-  bool                              mEdgeEffectEnabled{false};
+  Label            mEdgeEffectLabel;
+  bool             mEdgeEffectEnabled{false};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application          application = Application::New(&argc, &argv);
   ScrollViewController test(application);
   application.MainLoop();
   return 0;

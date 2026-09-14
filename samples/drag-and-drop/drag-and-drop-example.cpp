@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/drag-and-drop.h>
 #include <dali/public-api/adaptor-framework/drag-data.h>
 #include <dali/public-api/adaptor-framework/drag-event.h>
@@ -166,7 +167,7 @@ private:
   void CreateShadowWindow()
   {
     mShadowWindow = Window::New(PositionSize(0, 0, 260, 150), "dali-ui-dnd-shadow", true);
-    mShadowCard = View::New();
+    mShadowCard   = View::New();
     mShadowCard.SetBackgroundColor(SOURCE_COLOR);
     mShadowCard.SetRequestedWidth(MATCH_PARENT);
     mShadowCard.SetRequestedHeight(MATCH_PARENT);
@@ -314,7 +315,7 @@ private:
     else if(event.GetDragType() == DragAndDrop::DragType::DROP && !event.GetData().Empty())
     {
       const Dali::String data = event.GetData();
-      targetColor = SOURCE_COLOR;
+      targetColor             = SOURCE_COLOR;
       target.SetBackgroundColor(targetColor);
       label.SetText(std::string(targetName).append("\nDROPPED\n").append(data.CStr()).c_str());
       stream << " data=" << data.CStr();
@@ -346,7 +347,7 @@ private:
     else if(event.GetDragType() == DragAndDrop::DragType::DROP && !event.GetData().Empty())
     {
       const Dali::String data = event.GetData();
-      mWindowTargetColor = SOURCE_COLOR;
+      mWindowTargetColor      = SOURCE_COLOR;
       mWindowTargetCard.SetBackgroundColor(mWindowTargetColor);
       mWindowTargetLabel.SetText(std::string("TARGET WINDOW\nDROPPED\n").append(data.CStr()).c_str());
       stream << " data=" << data.CStr();

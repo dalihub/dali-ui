@@ -14,8 +14,9 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali/public-api/adaptor-framework/clipboard.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/clipboard-data.h>
+#include <dali/public-api/adaptor-framework/clipboard.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 
 #include <cstdint>
@@ -27,11 +28,11 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING     = 6.0f;
-constexpr float STACK_PADDING     = 12.0f;
-constexpr float BUTTON_HEIGHT     = 36.0f;
-constexpr float BUTTON_SPACING    = 4.0f;
-constexpr float INPUT_HEIGHT      = 54.0f;
+constexpr float    STACK_SPACING        = 6.0f;
+constexpr float    STACK_PADDING        = 12.0f;
+constexpr float    BUTTON_HEIGHT        = 36.0f;
+constexpr float    BUTTON_SPACING       = 4.0f;
+constexpr float    INPUT_HEIGHT         = 54.0f;
 constexpr uint32_t STRESS_INTERVAL_MS   = 50u;
 constexpr uint32_t STRESS_MAX_COUNT     = 100u;
 constexpr uint32_t STRESS_TIMEOUT_TICKS = 20u;
@@ -264,9 +265,9 @@ private:
 
   void SetClipboardResult(const char* result, const Dali::String& mimeType, const Dali::String& content)
   {
-    mLastResult = result;
+    mLastResult   = result;
     mLastMimeType = mimeType;
-    mLastData = content;
+    mLastData     = content;
     UpdateStatus();
   }
 
@@ -304,7 +305,7 @@ private:
     mMultiPlainData.Clear();
     mMultiHtmlData.Clear();
     mMultiPlainCallbackCount = 0u;
-    mMultiHtmlCallbackCount = 0u;
+    mMultiHtmlCallbackCount  = 0u;
     UpdateMultiStatus();
   }
 
@@ -356,9 +357,9 @@ private:
       return;
     }
 
-    Dali::String content = GetInputText();
+    Dali::String        content = GetInputText();
     Dali::ClipboardData data(Dali::String(mimeType), content);
-    bool result = mClipboard.SetData(data);
+    bool                result = mClipboard.SetData(data);
     SetClipboardResult(result ? "SetData success" : "SetData failed", Dali::String(mimeType), content);
   }
 
@@ -382,7 +383,7 @@ private:
       return;
     }
 
-    bool hasType = mClipboard.HasType(Dali::String(mimeType));
+    bool hasType  = mClipboard.HasType(Dali::String(mimeType));
     mLastMimeType = Dali::String(mimeType);
     mLastData.Clear();
     SetLastResult(hasType ? "HasType true" : "HasType false");
@@ -397,18 +398,18 @@ private:
     }
 
     Dali::ClipboardData plainData(MIME_TYPE_PLAIN_TEXT, MULTI_COPY_PLAIN_TEXT);
-    bool plainResult = mClipboard.SetData(plainData);
+    bool                plainResult = mClipboard.SetData(plainData);
 
     Dali::ClipboardData htmlData(MIME_TYPE_HTML, MULTI_COPY_HTML);
-    bool htmlResult = mClipboard.SetData(htmlData);
+    bool                htmlResult = mClipboard.SetData(htmlData);
 
     mMultiPlainCopyResult = plainResult ? "success" : "failed";
-    mMultiHtmlCopyResult = htmlResult ? "success" : "failed";
-    mMultiPlainData = Dali::String(MULTI_COPY_PLAIN_TEXT);
-    mMultiHtmlData = Dali::String(MULTI_COPY_HTML);
+    mMultiHtmlCopyResult  = htmlResult ? "success" : "failed";
+    mMultiPlainData       = Dali::String(MULTI_COPY_PLAIN_TEXT);
+    mMultiHtmlData        = Dali::String(MULTI_COPY_HTML);
 
     mLastMimeType = "plain+html";
-    mLastData = "plain/html multi clipboard data";
+    mLastData     = "plain/html multi clipboard data";
     SetLastResult((plainResult && htmlResult) ? "Multi Copy SetData complete" : "Multi Copy SetData failed");
     UpdateMultiStatus();
   }
@@ -422,11 +423,11 @@ private:
     }
 
     mMultiPlainPasteResult = "requested";
-    mMultiHtmlPasteResult = "requested";
+    mMultiHtmlPasteResult  = "requested";
     mMultiPlainData.Clear();
     mMultiHtmlData.Clear();
     mMultiPlainCallbackCount = 0u;
-    mMultiHtmlCallbackCount = 0u;
+    mMultiHtmlCallbackCount  = 0u;
 
     mClipboard.GetData(Dali::String(MIME_TYPE_PLAIN_TEXT), this, &ClipboardExample::OnMultiPlainDataReceived);
     mClipboard.GetData(Dali::String(MIME_TYPE_HTML), this, &ClipboardExample::OnMultiHtmlDataReceived);
@@ -460,9 +461,9 @@ private:
       return;
     }
 
-    bool mimeMatches = data.GetMimeType() == Dali::String(MIME_TYPE_PLAIN_TEXT);
+    bool mimeMatches       = data.GetMimeType() == Dali::String(MIME_TYPE_PLAIN_TEXT);
     mMultiPlainPasteResult = mimeMatches ? "success" : "mime mismatch";
-    mMultiPlainData = data.GetContent();
+    mMultiPlainData        = data.GetContent();
     UpdateMultiStatus();
   }
 
@@ -477,9 +478,9 @@ private:
       return;
     }
 
-    bool mimeMatches = data.GetMimeType() == Dali::String(MIME_TYPE_HTML);
+    bool mimeMatches      = data.GetMimeType() == Dali::String(MIME_TYPE_HTML);
     mMultiHtmlPasteResult = mimeMatches ? "success" : "mime mismatch";
-    mMultiHtmlData = data.GetContent();
+    mMultiHtmlData        = data.GetContent();
     UpdateMultiStatus();
   }
 
@@ -492,11 +493,11 @@ private:
     }
 
     StopStress();
-    mStressRequestedCount = 0u;
-    mStressCallbackCount = 0u;
-    mStressSuccessCount = 0u;
-    mStressFailCount = 0u;
-    mStressOutstanding = false;
+    mStressRequestedCount   = 0u;
+    mStressCallbackCount    = 0u;
+    mStressSuccessCount     = 0u;
+    mStressFailCount        = 0u;
+    mStressOutstanding      = false;
     mStressOutstandingTicks = 0u;
     mStressExpectedContent.Clear();
     mStressRunning = true;
@@ -514,7 +515,7 @@ private:
       mStressTimer.Stop();
       mStressTimer.Reset();
     }
-    mStressRunning = false;
+    mStressRunning     = false;
     mStressOutstanding = false;
   }
 
@@ -535,24 +536,24 @@ private:
       }
 
       ++mStressFailCount;
-      mStressOutstanding = false;
+      mStressOutstanding      = false;
       mStressOutstandingTicks = 0u;
       SetLastResult("Stress timeout");
     }
 
     if(mStressRequestedCount >= STRESS_MAX_COUNT)
     {
-      mStressRunning = false;
+      mStressRunning     = false;
       mStressOutstanding = false;
       SetLastResult("Stress complete");
       return false;
     }
 
     ++mStressRequestedCount;
-    std::string content = "stress-" + std::to_string(mStressRequestedCount);
+    std::string content    = "stress-" + std::to_string(mStressRequestedCount);
     mStressExpectedContent = Dali::String(content.c_str());
     Dali::ClipboardData data(MIME_TYPE_PLAIN_TEXT, mStressExpectedContent);
-    bool setResult = mClipboard.SetData(data);
+    bool                setResult = mClipboard.SetData(data);
     if(!setResult)
     {
       ++mStressFailCount;
@@ -560,7 +561,7 @@ private:
       return true;
     }
 
-    mStressOutstanding = true;
+    mStressOutstanding      = true;
     mStressOutstandingTicks = 0u;
     mClipboard.GetData(Dali::String(MIME_TYPE_PLAIN_TEXT), this, &ClipboardExample::OnStressClipboardDataReceived);
     UpdateStatus();
@@ -570,7 +571,7 @@ private:
   void OnStressClipboardDataReceived(bool succeeded, const Dali::ClipboardData& data)
   {
     ++mStressCallbackCount;
-    mStressOutstanding = false;
+    mStressOutstanding      = false;
     mStressOutstandingTicks = 0u;
 
     bool matches = succeeded &&
@@ -715,11 +716,11 @@ private:
       mLastMimeType.Clear();
       mLastData.Clear();
       mLastRequestedMimeType.Clear();
-      mCallbackCount = 0u;
+      mCallbackCount        = 0u;
       mStressRequestedCount = 0u;
-      mStressCallbackCount = 0u;
-      mStressSuccessCount = 0u;
-      mStressFailCount = 0u;
+      mStressCallbackCount  = 0u;
+      mStressSuccessCount   = 0u;
+      mStressFailCount      = 0u;
       mStressExpectedContent.Clear();
       ClearMultiState();
       UpdateStatus();

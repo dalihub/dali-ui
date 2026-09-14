@@ -68,6 +68,7 @@
  *   https://github.com/googlefonts/color-fonts/blob/main/glyph_descriptions.md
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -203,7 +204,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetLabelAsyncRendering(true);
   config.Apply();
 

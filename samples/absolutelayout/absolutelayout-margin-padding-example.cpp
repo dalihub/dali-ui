@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -38,7 +39,7 @@ class AbsoluteLayoutMarginPaddingController : public ConnectionTracker
 {
 public:
   AbsoluteLayoutMarginPaddingController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     mApplication.InitSignal().Connect(this, &AbsoluteLayoutMarginPaddingController::Create);
   }
@@ -58,7 +59,8 @@ public:
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetWidth(100.0f).SetHeight(100.0f));
+                             .SetWidth(100.0f)
+                             .SetHeight(100.0f));
     root.Add(redBox);
 
     // --- Green box: 50px margin all sides ---
@@ -66,7 +68,9 @@ public:
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetY(100.0f).SetWidth(100.0f).SetHeight(50.0f));
+                               .SetY(100.0f)
+                               .SetWidth(100.0f)
+                               .SetHeight(50.0f));
     root.Add(greenBox);
 
     // --- Blue box: 50px margin all sides ---
@@ -74,7 +78,10 @@ public:
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX(100.0f).SetY(200.0f).SetWidth(100.0f).SetHeight(50.0f));
+                              .SetX(100.0f)
+                              .SetY(200.0f)
+                              .SetWidth(100.0f)
+                              .SetHeight(50.0f));
     root.Add(blueBox);
 
     // --- Nested AbsoluteLayout with its own padding ---
@@ -83,27 +90,33 @@ public:
     nested.SetPadding(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     nested.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     nested.SetLayoutParams(AbsoluteLayoutParams::New()
-                             .SetY(300.0f).SetWidth(200.0f).SetHeight(200.0f));
+                             .SetY(300.0f)
+                             .SetWidth(200.0f)
+                             .SetHeight(200.0f));
 
     View innerA = View::New();
     innerA.SetBackgroundColor(Color::MAGENTA);
     innerA.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
-      .SetFlags(AbsoluteLayoutFlags::ALL));
+                             .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
+                             .SetFlags(AbsoluteLayoutFlags::ALL));
     nested.Add(innerA);
 
     View innerB = View::New();
     innerB.SetBackgroundColor(Color::YELLOW);
     innerB.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     innerB.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX(50.0f).SetWidth(50.0f).SetHeight(50.0f));
+                             .SetX(50.0f)
+                             .SetWidth(50.0f)
+                             .SetHeight(50.0f));
     nested.Add(innerB);
 
     View innerC = View::New();
     innerC.SetBackgroundColor(Color::CYAN);
     innerC.SetMargin(Insets(50.0f, 50.0f, 50.0f, 50.0f));
     innerC.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetY(50.0f).SetWidth(50.0f).SetHeight(50.0f));
+                             .SetY(50.0f)
+                             .SetWidth(50.0f)
+                             .SetHeight(50.0f));
     nested.Add(innerC);
 
     root.Add(nested);
@@ -114,9 +127,9 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -129,7 +142,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application                           application = Application::New(&argc, &argv);
   AbsoluteLayoutMarginPaddingController controller(application);
   application.MainLoop();
   return 0;

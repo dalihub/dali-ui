@@ -39,6 +39,7 @@
 
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -130,7 +131,7 @@ public:
   // -------------------------------------------------------------------------
   void Create(Application application)
   {
-    Window  window     = application.GetWindow();
+    Window  window       = application.GetWindow();
     auto    positionSize = window.GetPositionSize();
     Vector2 windowSize   = Vector2(static_cast<float>(positionSize.width), static_cast<float>(positionSize.height));
     window.SetBackgroundColor(Color::LIGHT_GRAY);
@@ -2006,8 +2007,8 @@ private:
 // ---------------------------------------------------------------------------
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
-  Components::UiConfig config = Components::UiConfig::New();
+  Application          application = Application::New(&argc, &argv);
+  Components::UiConfig config      = Components::UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ChartViewController controller(application);

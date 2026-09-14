@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <array>
 
@@ -100,7 +101,8 @@ private:
     label.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, 0.0f, CARD_WIDTH, CARD_HEIGHT)));
     card.Add(label);
 
-    card.AsInteractive().ClickedSignal().Connect(this, [this, card, index](View, InputEvent) -> bool {
+    card.AsInteractive().ClickedSignal().Connect(this, [this, card, index](View, InputEvent) -> bool
+    {
       Toggle(card, index);
       return true;
     });

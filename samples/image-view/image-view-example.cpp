@@ -14,8 +14,9 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -43,10 +44,10 @@ public:
 private:
   void OnInit(Application application)
   {
-    Window window     = application.GetWindow();
-    auto   posSize    = window.GetPositionSize();
-    float  halfW      = posSize.width * 0.5f;
-    float  halfH      = posSize.height * 0.5f;
+    Window window  = application.GetWindow();
+    auto   posSize = window.GetPositionSize();
+    float  halfW   = posSize.width * 0.5f;
+    float  halfH   = posSize.height * 0.5f;
     window.SetBackgroundColor(Color::DARK_GRAY);
 
     mLocalImage = ImageView::New(RESOURCES_DIR "gallery-large-3.jpg");

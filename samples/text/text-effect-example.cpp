@@ -15,6 +15,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
 
@@ -92,21 +93,21 @@ namespace
 // Common constants
 // -----------------------------------------------------------------------------
 
-constexpr float STACK_SPACING                    = 14.0f;
-constexpr float STACK_PADDING                    = 28.0f;
-constexpr float EFFECT_WIDTH                     = 640.0f;
-constexpr float EFFECT_HEIGHT                    = 180.0f;
-constexpr float TEXT_FONT_SIZE                   = 62.0f;
-constexpr float SHIMMER_BAND_WIDTH               = 920.0f;
-constexpr float SHIMMER_DURATION_SECONDS         = 1.4f;
-constexpr float OVERLAY_SHIMMER_DURATION_SECONDS = 1.4f;
-constexpr float OVERLAY_SHIMMER_START_OFFSET     = 1.0f;
-constexpr float OVERLAY_SHIMMER_END_OFFSET       = -1.0f;
-constexpr int   WINDOW_WIDTH                     = 800;
-constexpr int   WINDOW_HEIGHT                    = 720;
-constexpr uint32_t BACKGROUND_COLOR              = 0x050505;
-constexpr uint32_t DESCRIPTION_TEXT_COLOR        = 0xE5E7EB;
-constexpr uint32_t SECTION_SEPARATOR_COLOR       = 0x334155;
+constexpr float    STACK_SPACING                    = 14.0f;
+constexpr float    STACK_PADDING                    = 28.0f;
+constexpr float    EFFECT_WIDTH                     = 640.0f;
+constexpr float    EFFECT_HEIGHT                    = 180.0f;
+constexpr float    TEXT_FONT_SIZE                   = 62.0f;
+constexpr float    SHIMMER_BAND_WIDTH               = 920.0f;
+constexpr float    SHIMMER_DURATION_SECONDS         = 1.4f;
+constexpr float    OVERLAY_SHIMMER_DURATION_SECONDS = 1.4f;
+constexpr float    OVERLAY_SHIMMER_START_OFFSET     = 1.0f;
+constexpr float    OVERLAY_SHIMMER_END_OFFSET       = -1.0f;
+constexpr int      WINDOW_WIDTH                     = 800;
+constexpr int      WINDOW_HEIGHT                    = 720;
+constexpr uint32_t BACKGROUND_COLOR                 = 0x050505;
+constexpr uint32_t DESCRIPTION_TEXT_COLOR           = 0xE5E7EB;
+constexpr uint32_t SECTION_SEPARATOR_COLOR          = 0x334155;
 
 constexpr const char* EFFECT_TEXT = "DALI UI FOUNDATION";
 
@@ -309,10 +310,10 @@ private:
   {
   }
 
-  static constexpr uint32_t    SHIMMER_INPUT_EFFECT_WIDTH   = 0u;
-  static constexpr uint32_t    SHIMMER_INPUT_PROGRESS       = 1u;
-  static constexpr uint32_t    SHIMMER_INPUT_COUNT          = 2u;
-  static constexpr const char* SHIMMER_PROGRESS_PROPERTY    = "shimmerProgress";
+  static constexpr uint32_t    SHIMMER_INPUT_EFFECT_WIDTH = 0u;
+  static constexpr uint32_t    SHIMMER_INPUT_PROGRESS     = 1u;
+  static constexpr uint32_t    SHIMMER_INPUT_COUNT        = 2u;
+  static constexpr const char* SHIMMER_PROGRESS_PROPERTY  = "shimmerProgress";
 
   void Initialize()
   {
@@ -580,8 +581,8 @@ public:
 private:
   void OnInit(Application application)
   {
-    Window window = application.GetWindow();
-    auto positionSize = window.GetPositionSize();
+    Window window       = application.GetWindow();
+    auto   positionSize = window.GetPositionSize();
     window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, WINDOW_WIDTH, WINDOW_HEIGHT));
     window.SetBackgroundColor(UiColor(BACKGROUND_COLOR));
 
@@ -594,7 +595,7 @@ private:
 
     root.Add(CreateDescriptionLabel("Gradient text using MaskEffect"));
     mMaskShimmerSource = MaskEffectShimmerSource::New();
-    mMaskEffectLabel = CreateLargeEffectLabel(WRAP_CONTENT, WRAP_CONTENT);
+    mMaskEffectLabel   = CreateLargeEffectLabel(WRAP_CONTENT, WRAP_CONTENT);
     mMaskShimmerSource.ApplyTo(mMaskEffectLabel);
     root.Add(mMaskEffectLabel);
 
@@ -713,11 +714,11 @@ private:
   }
 
 private:
-  Application&             mApplication;
-  Label                    mMaskEffectLabel;
-  MaskEffectShimmerSource  mMaskShimmerSource;
-  Label                    mGradientOverlayLabel;
-  Animation                mGradientOverlayAnimation;
+  Application&            mApplication;
+  Label                   mMaskEffectLabel;
+  MaskEffectShimmerSource mMaskShimmerSource;
+  Label                   mGradientOverlayLabel;
+  Animation               mGradientOverlayAnimation;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

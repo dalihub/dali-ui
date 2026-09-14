@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -32,7 +33,7 @@ class StackLayoutMarginPaddingNestedController : public ConnectionTracker
 {
 public:
   StackLayoutMarginPaddingNestedController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     mApplication.InitSignal().Connect(this, &StackLayoutMarginPaddingNestedController::Create);
   }
@@ -89,32 +90,32 @@ public:
     View box1 = View::New();
     box1.SetBackgroundColor(Color::MAGENTA);
     box1.SetLayoutParams(StackLayoutParams::New()
-      .SetAlignment(LayoutAlignment::FILL)
-      .SetWeight(1.0f));
+                           .SetAlignment(LayoutAlignment::FILL)
+                           .SetWeight(1.0f));
     horizontalRow.Add(box1);
 
     View box2 = View::New();
     box2.SetBackgroundColor(Color::YELLOW);
     box2.SetRequestedHeight(50.0f);
     box2.SetLayoutParams(StackLayoutParams::New()
-      .SetAlignment(LayoutAlignment::START)
-      .SetWeight(1.0f));
+                           .SetAlignment(LayoutAlignment::START)
+                           .SetWeight(1.0f));
     horizontalRow.Add(box2);
 
     View box3 = View::New();
     box3.SetBackgroundColor(Color::RED);
     box3.SetRequestedHeight(50.0f);
     box3.SetLayoutParams(StackLayoutParams::New()
-      .SetAlignment(LayoutAlignment::CENTER)
-      .SetWeight(1.0f));
+                           .SetAlignment(LayoutAlignment::CENTER)
+                           .SetWeight(1.0f));
     horizontalRow.Add(box3);
 
     View box4 = View::New();
     box4.SetBackgroundColor(Color::GREEN);
     box4.SetRequestedHeight(50.0f);
     box4.SetLayoutParams(StackLayoutParams::New()
-      .SetAlignment(LayoutAlignment::END)
-      .SetWeight(1.0f));
+                           .SetAlignment(LayoutAlignment::END)
+                           .SetWeight(1.0f));
     horizontalRow.Add(box4);
 
     root.Add(horizontalRow);
@@ -125,9 +126,9 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -140,7 +141,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application                              application = Application::New(&argc, &argv);
   StackLayoutMarginPaddingNestedController controller(application);
   application.MainLoop();
   return 0;

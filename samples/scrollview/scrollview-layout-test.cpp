@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -22,9 +23,8 @@ using namespace Dali::Ui;
 class ScrollViewLayoutTest : public ConnectionTracker
 {
 public:
-
   ScrollViewLayoutTest(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect(this, &ScrollViewLayoutTest::Create);
@@ -45,16 +45,16 @@ public:
     // Create content view larger than scroll view to test ScrollViewLayoutManager
     View content = View::New();
     content.SetBackgroundColor(Color::BLUE);
-    content.SetLayoutWidth(800.0f);  // Natural width, not constrained by ScrollView
+    content.SetLayoutWidth(800.0f);   // Natural width, not constrained by ScrollView
     content.SetLayoutHeight(1200.0f); // Natural height, not constrained by ScrollView
 
     // Create a ScrollView with vertical scrolling
     ScrollView scrollView = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetLayoutWidth(400.0f)
-      .SetLayoutHeight(600.0f)
-      .BackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f))
-      .SetContent(content);
+                              .SetScrollDirection(ScrollDirection::Vertical)
+                              .SetLayoutWidth(400.0f)
+                              .SetLayoutHeight(600.0f)
+                              .BackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f))
+                              .SetContent(content);
     scrollView.SetRequestedX(100.0f);
     scrollView.SetRequestedY(100.0f);
 
@@ -68,11 +68,11 @@ public:
     matchParentContent.SetLayoutHeight(LayoutDimension::MatchParent); // Should match ScrollView height
 
     ScrollView scrollView2 = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetLayoutWidth(400.0f)
-      .SetLayoutHeight(600.0f)
-      .BackgroundColor(Vector4(0.8f, 0.8f, 0.8f, 1.0f))
-      .SetContent(matchParentContent);
+                               .SetScrollDirection(ScrollDirection::Vertical)
+                               .SetLayoutWidth(400.0f)
+                               .SetLayoutHeight(600.0f)
+                               .BackgroundColor(Vector4(0.8f, 0.8f, 0.8f, 1.0f))
+                               .SetContent(matchParentContent);
     scrollView2.SetRequestedX(600.0f);
     scrollView2.SetRequestedY(100.0f);
 
@@ -81,9 +81,9 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -96,7 +96,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application          application = Application::New(&argc, &argv);
   ScrollViewLayoutTest test(application);
   application.MainLoop();
   return 0;

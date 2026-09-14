@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -64,7 +65,7 @@ public:
     View child1 = View::New();
     child1.SetBackgroundColor(Color::RED);
     child1.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(0.0f, 0.0f, 200.0f, 200.0f)));
+                             .SetBounds(LayoutRect(0.0f, 0.0f, 200.0f, 200.0f)));
     root.Add(child1);
 
     // Child 2: AbsoluteLayout with proportional size (0.5 width, 1.0 height) at x=200.
@@ -79,14 +80,14 @@ public:
     View grandChild1 = View::New();
     grandChild1.SetBackgroundColor(Color::BLUE);
     grandChild1.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(0.0f, 0.0f, 50.0f, 100.0f)));
+                                  .SetBounds(LayoutRect(0.0f, 0.0f, 50.0f, 100.0f)));
     child2.Add(grandChild1);
 
     View grandChild2 = View::New();
     grandChild2.SetBackgroundColor(Color::YELLOW);
     grandChild2.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(50.0f, 0.0f, 0.5f, 1.0f))
-      .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
+                                  .SetBounds(LayoutRect(50.0f, 0.0f, 0.5f, 1.0f))
+                                  .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
     child2.Add(grandChild2);
 
     window.Add(root);
@@ -110,7 +111,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application                                     application = Application::New(&argc, &argv);
   AbsoluteLayoutWrapContentProportionalController controller(application);
   application.MainLoop();
   return 0;

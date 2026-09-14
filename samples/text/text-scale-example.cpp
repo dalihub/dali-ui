@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <cstdlib>
 #include <string>
@@ -31,11 +32,12 @@ constexpr float TARGET_INPUT_HEIGHT = 80.0f;
 
 const char* FONT_SIZE_ENV       = "DALI_SYSTEM_FONT_SIZE";
 const char* FONT_SIZE_WATCH_ENV = "DALI_SYSTEM_FONT_SIZE_WATCH";
-const char* TEST_TEXT = "The quick brown fox jumps over the lazy dog. 1234567890";
+const char* TEST_TEXT           = "The quick brown fox jumps over the lazy dog. 1234567890";
 
 const Dali::Vector<Text::Fit::Candidate>& GetFitCandidates()
 {
-  static Dali::Vector<Text::Fit::Candidate> candidates = [] {
+  static Dali::Vector<Text::Fit::Candidate> candidates = []
+  {
     Dali::Vector<Text::Fit::Candidate> values;
     values.PushBack(Text::Fit::Candidate(10.0f, 20.0f));
     values.PushBack(Text::Fit::Candidate(12.0f, 24.0f));
@@ -467,7 +469,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
   SetEnvironmentVariable(FONT_SIZE_ENV, "NORMAL");
 
   Application application = Application::New(&argc, &argv);
-  auto config = UiConfig::New();
+  auto        config      = UiConfig::New();
   config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::SMALL, 0.8f);
   config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::NORMAL, 1.0f);
   config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::LARGE, 1.2f);

@@ -27,6 +27,7 @@
 //   ESC/BACK - Quit
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 // Apps can only use public headers in platform builds.
 // #include <dali/integration-api/string-utils.h>
@@ -54,21 +55,21 @@ constexpr int MESSAGE_LOCALE_CATEGORY = LC_ALL;
 constexpr int MESSAGE_LOCALE_CATEGORY = LC_MESSAGES;
 #endif
 
-constexpr float STACK_SPACING   = 10.0f;
-constexpr float STACK_PADDING  = 20.0f;
+constexpr float STACK_SPACING = 10.0f;
+constexpr float STACK_PADDING = 20.0f;
 
 constexpr float TITLE_FONT_SIZE  = 20.0f;
 constexpr float LABEL_FONT_SIZE  = 20.0f;
 constexpr float STATUS_FONT_SIZE = 16.0f;
 constexpr float HELP_FONT_SIZE   = 14.0f;
 
-constexpr uint32_t COLOR_WHITE       = 0xFFFFFF;
-constexpr uint32_t COLOR_DARK_TEXT   = 0x222222;
-constexpr uint32_t COLOR_MID_GRAY   = 0x808080;
-constexpr uint32_t COLOR_LIGHT_BLUE = 0xEAF4FF;
-constexpr uint32_t COLOR_LIGHT_RED  = 0xFFE8E8;
-constexpr uint32_t COLOR_LIGHT_GREEN = 0xE8FFE8;
-constexpr uint32_t COLOR_LIGHT_GRAY = 0xF2F2F2;
+constexpr uint32_t COLOR_WHITE        = 0xFFFFFF;
+constexpr uint32_t COLOR_DARK_TEXT    = 0x222222;
+constexpr uint32_t COLOR_MID_GRAY     = 0x808080;
+constexpr uint32_t COLOR_LIGHT_BLUE   = 0xEAF4FF;
+constexpr uint32_t COLOR_LIGHT_RED    = 0xFFE8E8;
+constexpr uint32_t COLOR_LIGHT_GREEN  = 0xE8FFE8;
+constexpr uint32_t COLOR_LIGHT_GRAY   = 0xF2F2F2;
 constexpr uint32_t COLOR_LIGHT_YELLOW = 0xFFF7E6;
 constexpr uint32_t COLOR_LIGHT_CYAN   = 0xE0FFFF;
 
@@ -627,8 +628,8 @@ private:
   std::string  mCurrentLocale;
   bool         mBypassEnabled{false};
 
-  static constexpr const char* TEXT_DOMAIN_DEFAULT  = "text-localization-po";
-  static constexpr const char* TEXT_DOMAIN_ALT       = "text-localization-po-alt";
+  static constexpr const char* TEXT_DOMAIN_DEFAULT     = "text-localization-po";
+  static constexpr const char* TEXT_DOMAIN_ALT         = "text-localization-po-alt";
   static constexpr const char* TEXT_LOCALE_DIR_DEFAULT = RESOURCES_DIR "locale/default";
   static constexpr const char* TEXT_LOCALE_DIR_ALT     = RESOURCES_DIR "locale/alternate";
 };

@@ -41,6 +41,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <sstream>
 #include <vector>
 
@@ -48,26 +49,26 @@ using namespace Dali;
 using namespace Dali::Ui;
 
 // ─── layout ──────────────────────────────────────────────────────────────────
-static constexpr float WINDOW_W    = 600.0f;
-static constexpr float WINDOW_H    = 1080.0f;
-static constexpr float INFO_H      = 80.0f;
-static constexpr float CTRL_H      = 224.0f;
-static constexpr float SCROLL_Y    = INFO_H;
-static constexpr float SCROLL_H    = WINDOW_H - SCROLL_Y - CTRL_H;
-static constexpr float PAGE_W      = WINDOW_W;
-static constexpr float PAGE_H      = SCROLL_H;
+static constexpr float WINDOW_W = 600.0f;
+static constexpr float WINDOW_H = 1080.0f;
+static constexpr float INFO_H   = 80.0f;
+static constexpr float CTRL_H   = 224.0f;
+static constexpr float SCROLL_Y = INFO_H;
+static constexpr float SCROLL_H = WINDOW_H - SCROLL_Y - CTRL_H;
+static constexpr float PAGE_W   = WINDOW_W;
+static constexpr float PAGE_H   = SCROLL_H;
 
 static constexpr float BTN_H    = 50.0f;
 static constexpr float BTN_GAP  = 8.0f;
 static constexpr float CTRL_PAD = 10.0f;
 
 // ─── colour palette ───────────────────────────────────────────────────────────
-static const Vector4 COLOR_INFO_BG    (0.10f, 0.10f, 0.14f, 1.0f);
-static const Vector4 COLOR_CTRL_BG    (0.12f, 0.12f, 0.18f, 1.0f);
-static const Vector4 COLOR_BTN_ADD    (0.18f, 0.55f, 0.25f, 1.0f);
-static const Vector4 COLOR_BTN_REMOVE (0.65f, 0.22f, 0.22f, 1.0f);
-static const Vector4 COLOR_BTN_NAV    (0.20f, 0.40f, 0.72f, 1.0f);
-static const Vector4 COLOR_BTN_MASS   (0.50f, 0.35f, 0.10f, 1.0f);
+static const Vector4 COLOR_INFO_BG(0.10f, 0.10f, 0.14f, 1.0f);
+static const Vector4 COLOR_CTRL_BG(0.12f, 0.12f, 0.18f, 1.0f);
+static const Vector4 COLOR_BTN_ADD(0.18f, 0.55f, 0.25f, 1.0f);
+static const Vector4 COLOR_BTN_REMOVE(0.65f, 0.22f, 0.22f, 1.0f);
+static const Vector4 COLOR_BTN_NAV(0.20f, 0.40f, 0.72f, 1.0f);
+static const Vector4 COLOR_BTN_MASS(0.50f, 0.35f, 0.10f, 1.0f);
 
 // Eight pre-defined page colours; cycle with modulo when more pages are needed.
 static const Vector4 PAGE_PALETTE[] = {
@@ -94,8 +95,8 @@ public:
 private:
   void Create(Application application)
   {
-    Window window = application.GetWindow();
-    auto positionSize = window.GetPositionSize();
+    Window window       = application.GetWindow();
+    auto   positionSize = window.GetPositionSize();
     window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, static_cast<int32_t>(WINDOW_W), static_cast<int32_t>(WINDOW_H)));
     window.SetBackgroundColor(Color::BLACK);
     window.KeyEventSignal().Connect(this, &PageScrollDynamicController::OnKeyEvent);
@@ -214,9 +215,10 @@ private:
     panel.SetRequestedX(0.0f);
     panel.SetRequestedY(ctrlY);
 
-    auto addRow = [&](float y, std::vector<std::pair<const char*, Vector4>> items) {
-      int   n       = static_cast<int>(items.size());
-      float btnW    = (WINDOW_W - CTRL_PAD * 2 - BTN_GAP * (n - 1)) / n;
+    auto addRow = [&](float y, std::vector<std::pair<const char*, Vector4>> items)
+    {
+      int   n    = static_cast<int>(items.size());
+      float btnW = (WINDOW_W - CTRL_PAD * 2 - BTN_GAP * (n - 1)) / n;
       for(int i = 0; i < n; ++i)
       {
         View btn = MakeButton(items[i].first, items[i].second);
@@ -232,23 +234,23 @@ private:
 
     // Row A: Insert
     addRow(6.0f, {
-      {"+End",     COLOR_BTN_ADD},
-      {"+Before",  COLOR_BTN_ADD},
-      {"+After",   COLOR_BTN_ADD},
-    });
+                   {"+End", COLOR_BTN_ADD},
+                   {"+Before", COLOR_BTN_ADD},
+                   {"+After", COLOR_BTN_ADD},
+                 });
     // Row B: Remove
     addRow(6.0f + BTN_H + BTN_GAP, {
-      {"-End",     COLOR_BTN_REMOVE},
-      {"-Current", COLOR_BTN_REMOVE},
-      {"-Before",  COLOR_BTN_REMOVE},
-    });
+                                     {"-End", COLOR_BTN_REMOVE},
+                                     {"-Current", COLOR_BTN_REMOVE},
+                                     {"-Before", COLOR_BTN_REMOVE},
+                                   });
     // Row C: Scenarios + nav
     addRow(6.0f + (BTN_H + BTN_GAP) * 2, {
-      {"++3 at 0", COLOR_BTN_MASS},
-      {"--All",    COLOR_BTN_MASS},
-      {"Nav <",    COLOR_BTN_NAV},
-      {"Nav >",    COLOR_BTN_NAV},
-    });
+                                           {"++3 at 0", COLOR_BTN_MASS},
+                                           {"--All", COLOR_BTN_MASS},
+                                           {"Nav <", COLOR_BTN_NAV},
+                                           {"Nav >", COLOR_BTN_NAV},
+                                         });
 
     window.Add(panel);
   }
@@ -358,7 +360,11 @@ private:
 
   void RemovePageAtEnd()
   {
-    if(mPages.empty()) { LogEvent("nothing to remove"); return; }
+    if(mPages.empty())
+    {
+      LogEvent("nothing to remove");
+      return;
+    }
     int atIndex = static_cast<int>(mPages.size()) - 1;
     RemovePageFromContent(atIndex);
     mPageScrollView.NotifyPagesRemoved(atIndex, 1);
@@ -371,7 +377,11 @@ private:
 
   void RemoveCurrentPage()
   {
-    if(mPages.empty()) { LogEvent("nothing to remove"); return; }
+    if(mPages.empty())
+    {
+      LogEvent("nothing to remove");
+      return;
+    }
     int atIndex = mPageScrollView.GetCurrentPage();
     RemovePageFromContent(atIndex);
     mPageScrollView.NotifyPagesRemoved(atIndex, 1);
@@ -385,7 +395,11 @@ private:
   void RemovePageBefore()
   {
     int cur = mPageScrollView.GetCurrentPage();
-    if(cur == 0) { LogEvent("no page before current"); return; }
+    if(cur == 0)
+    {
+      LogEvent("no page before current");
+      return;
+    }
     int atIndex = cur - 1;
     RemovePageFromContent(atIndex);
     mPageScrollView.NotifyPagesRemoved(atIndex, 1);
@@ -411,7 +425,11 @@ private:
 
   void RemoveAll()
   {
-    if(mPages.empty()) { LogEvent("already empty"); return; }
+    if(mPages.empty())
+    {
+      LogEvent("already empty");
+      return;
+    }
     int oldCount = static_cast<int>(mPages.size());
     for(int i = oldCount - 1; i >= 0; --i)
       RemovePageFromContent(i);
@@ -443,16 +461,26 @@ private:
       if(entry.first == actor)
       {
         const std::string& lbl = entry.second;
-        if(lbl == "+End")         AddPageAtEnd();
-        else if(lbl == "+Before") AddPageBefore();
-        else if(lbl == "+After")  AddPageAfter();
-        else if(lbl == "-End")    RemovePageAtEnd();
-        else if(lbl == "-Current")RemoveCurrentPage();
-        else if(lbl == "-Before") RemovePageBefore();
-        else if(lbl == "++3 at 0")  MassInsertAt0();
-        else if(lbl == "--All")     RemoveAll();
-        else if(lbl == "Nav <")     mPageScrollView.ScrollToPage(mPageScrollView.GetCurrentPage() - 1, true);
-        else if(lbl == "Nav >")     mPageScrollView.ScrollToPage(mPageScrollView.GetCurrentPage() + 1, true);
+        if(lbl == "+End")
+          AddPageAtEnd();
+        else if(lbl == "+Before")
+          AddPageBefore();
+        else if(lbl == "+After")
+          AddPageAfter();
+        else if(lbl == "-End")
+          RemovePageAtEnd();
+        else if(lbl == "-Current")
+          RemoveCurrentPage();
+        else if(lbl == "-Before")
+          RemovePageBefore();
+        else if(lbl == "++3 at 0")
+          MassInsertAt0();
+        else if(lbl == "--All")
+          RemoveAll();
+        else if(lbl == "Nav <")
+          mPageScrollView.ScrollToPage(mPageScrollView.GetCurrentPage() - 1, true);
+        else if(lbl == "Nav >")
+          mPageScrollView.ScrollToPage(mPageScrollView.GetCurrentPage() + 1, true);
         return true;
       }
     }
@@ -477,22 +505,27 @@ private:
       mPageScrollView.ScrollToPage(mPageScrollView.GetCurrentPage() - 1, true);
     else if(key == "Right")
       mPageScrollView.ScrollToPage(mPageScrollView.GetCurrentPage() + 1, true);
-    else if(key == "e" || key == "E") AddPageAtEnd();
-    else if(key == "b" || key == "B") AddPageBefore();
-    else if(key == "a" || key == "A") AddPageAfter();
-    else if(key == "d" || key == "D") RemoveCurrentPage();
-    else if(key == "p" || key == "P") RemovePageBefore();
+    else if(key == "e" || key == "E")
+      AddPageAtEnd();
+    else if(key == "b" || key == "B")
+      AddPageBefore();
+    else if(key == "a" || key == "A")
+      AddPageAfter();
+    else if(key == "d" || key == "D")
+      RemoveCurrentPage();
+    else if(key == "p" || key == "P")
+      RemovePageBefore();
   }
 
   // ── Members ──────────────────────────────────────────────────────────────────
 
-  Application&        mApplication;
-  PageScrollView      mPageScrollView;
-  StackLayout         mContent;
+  Application&   mApplication;
+  PageScrollView mPageScrollView;
+  StackLayout    mContent;
 
   // Page tracking
-  std::vector<View>   mPages;
-  int                 mPageSequence{0}; // monotonic counter for page labels
+  std::vector<View> mPages;
+  int               mPageSequence{0}; // monotonic counter for page labels
 
   // Button registry: (view, label-string)
   std::vector<std::pair<View, std::string>> mButtons;
@@ -506,7 +539,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application                 application = Application::New(&argc, &argv);
   PageScrollDynamicController example(application);
   application.MainLoop();
   return 0;

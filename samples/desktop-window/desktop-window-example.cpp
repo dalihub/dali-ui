@@ -21,6 +21,7 @@
 
 #include "desktop-window.h"
 
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <memory>
 #include <string>
 

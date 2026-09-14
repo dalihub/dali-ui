@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <cstdlib>
 #include <ctime>
@@ -26,7 +27,7 @@ using namespace Dali;
 using namespace Dali::Ui;
 
 constexpr uint32_t NUMBER_OF_IMAGES = 1000u;
-constexpr float    TOP_OFFSET        = 72.0f;
+constexpr float    TOP_OFFSET       = 72.0f;
 
 void SetStandaloneGeometry(View view, float x, float y, float width, float height)
 {
@@ -60,10 +61,10 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     const PositionSize windowPositionSize = window.GetPositionSize();
-    const Vector2 windowSize(static_cast<float>(windowPositionSize.width),
-                             static_cast<float>(windowPositionSize.height));
-    const float   sectionWidth = windowSize.x / 3.0f;
-    const float   contentHeight = windowSize.y - TOP_OFFSET;
+    const Vector2      windowSize(static_cast<float>(windowPositionSize.width),
+                                  static_cast<float>(windowPositionSize.height));
+    const float        sectionWidth  = windowSize.x / 3.0f;
+    const float        contentHeight = windowSize.y - TOP_OFFSET;
 
     uint32_t nRow     = 23u;
     uint32_t nColumn  = 24u;
@@ -100,8 +101,8 @@ public:
 
     // Preserve the original max-dimension square calculation, even though the
     // resulting ImageView can be taller than its parent cell.
-    const float   imageSide = cellSize.x < cellSize.y ? cellSize.y : cellSize.x;
-    const Vector2 imageSize(imageSide, imageSide);
+    const float       imageSide = cellSize.x < cellSize.y ? cellSize.y : cellSize.x;
+    const Vector2     imageSize(imageSide, imageSide);
     const std::string imagePrefix = RESOURCES_DIR "images/gallery-medium-";
     const std::string imageSuffix = ".jpg";
     uint32_t          imageIndex  = 0u;
@@ -127,9 +128,9 @@ public:
     }
     window.Add(imageSection);
 
-    nRow     = 23u;
-    nColumn  = 16u;
-    cellSize = Vector2(sectionWidth / nColumn, contentHeight / nRow);
+    nRow               = 23u;
+    nColumn            = 16u;
+    cellSize           = Vector2(sectionWidth / nColumn, contentHeight / nRow);
     uint32_t textIndex = 0u;
 
     View textSection = View::New();
@@ -139,7 +140,7 @@ public:
     {
       for(uint32_t j = 0u; j < nRow; ++j)
       {
-        const std::string text = std::to_string(textIndex++);
+        const std::string text  = std::to_string(textIndex++);
         Label             label = Label::New(text.c_str());
         SetRequestedGeometry(label, 0.0f, 0.0f, cellSize.x, cellSize.y);
 
@@ -173,7 +174,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
   srand(static_cast<unsigned int>(time(nullptr)));
 
   Dali::Application application = Dali::Application::New(&argc, &argv);
-  PerfLikeCsfs     sample(application);
+  PerfLikeCsfs      sample(application);
   application.MainLoop();
   return 0;
 }

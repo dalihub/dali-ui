@@ -25,6 +25,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -61,10 +62,10 @@ struct StyledTextCase
   float                  fontSize{28.0f};
 };
 
-ImageSpec Image(const char* source,
-                Vector2     size,
-                Text::ImageAttributes::InlineAlignment alignment = Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM,
-                float verticalOffset = 0.0f)
+ImageSpec Image(const char*                            source,
+                Vector2                                size,
+                Text::ImageAttributes::InlineAlignment alignment      = Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM,
+                float                                  verticalOffset = 0.0f)
 {
   return {source, size, alignment, verticalOffset};
 }
@@ -86,96 +87,53 @@ std::vector<StyledTextCase> CreateCases()
   cases.reserve(32u);
 
   cases.push_back({"Short text", "A short StyledText snapshot without replacements.", "Short text", {}, false});
-  cases.push_back({"Medium text", "Ordinary medium-length text exercises the no-ImageSpan path.",
-                   "A medium-length sentence changes repeatedly without any replacement span.", {}, false});
+  cases.push_back({"Medium text", "Ordinary medium-length text exercises the no-ImageSpan path.", "A medium-length sentence changes repeatedly without any replacement span.", {}, false});
   cases.push_back({"Long wrapped text", "Long multiline content without ellipsis.",
                    "This long paragraph wraps over several lines while the same Label is repeatedly updated. "
                    "It keeps ordinary shaping and layout active without creating any image visual. "
                    "Additional words make the workload distinct from the short and medium cases."});
-  cases.push_back({"Very long END ellipsis", "Single-line ordinary text requires END ellipsis.",
-                   "A very long single line of ordinary text deliberately exceeds the preview width and must end with one stable ellipsis.",
-                   {}, false, true});
+  cases.push_back({"Very long END ellipsis", "Single-line ordinary text requires END ellipsis.", "A very long single line of ordinary text deliberately exceeds the preview width and must end with one stable ellipsis.", {}, false, true});
   cases.push_back({"Explicit newlines", "Multiple explicit lines without replacements.",
                    "First explicit line\nSecond explicit line\nThird explicit line"});
-  cases.push_back({"Image only", "One replacement is the complete logical text.", "[image]",
-                   {Image("flag_kr.png", Vector2(72.0f, 44.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
-  cases.push_back({"Text then image", "A trailing replacement follows ordinary text.", "Text before [image]",
-                   {Image("flag_us.png", Vector2(58.0f, 34.0f))}, false});
-  cases.push_back({"Image then text", "A leading replacement precedes ordinary text.", "[image] text after",
-                   {Image("flag_ae.png", Vector2(58.0f, 34.0f))}, false});
-  cases.push_back({"Text image text", "One replacement participates inside a sentence.", "Text before [image] text after",
-                   {Image("flag_kr.png", Vector2(64.0f, 38.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
-  cases.push_back({"Adjacent images", "Two consecutive replacements have different reserved sizes.", "Before [image][image] after",
-                   {Image("flag_kr.png", Vector2(32.0f, 24.0f)), Image("flag_us.png", Vector2(68.0f, 38.0f))}, false});
-  cases.push_back({"One baseline image", "A single baseline-aligned image exercises one-visual publication.", "Baseline [image] image",
-                   {Image("flag_ae.png", Vector2(48.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_BASELINE)}, false});
-  cases.push_back({"Two local sources", "Two images use different bundled resources.", "Korea [image] and USA [image]",
-                   {Image("flag_kr.png", Vector2(52.0f, 32.0f)), Image("flag_us.png", Vector2(52.0f, 32.0f))}, false});
-  cases.push_back({"Five images", "Five replacements alternate bundled local resources.",
-                   "One [image] two [image] three [image] four [image] five [image]",
-                   {Image("flag_kr.png", Vector2(30.0f, 20.0f)), Image("flag_us.png", Vector2(30.0f, 20.0f)),
-                    Image("flag_ae.png", Vector2(30.0f, 20.0f)), Image("flag_kr_alt.png", Vector2(30.0f, 20.0f)),
-                    Image("flag_us_alt.png", Vector2(30.0f, 20.0f))}});
+  cases.push_back({"Image only", "One replacement is the complete logical text.", "[image]", {Image("flag_kr.png", Vector2(72.0f, 44.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
+  cases.push_back({"Text then image", "A trailing replacement follows ordinary text.", "Text before [image]", {Image("flag_us.png", Vector2(58.0f, 34.0f))}, false});
+  cases.push_back({"Image then text", "A leading replacement precedes ordinary text.", "[image] text after", {Image("flag_ae.png", Vector2(58.0f, 34.0f))}, false});
+  cases.push_back({"Text image text", "One replacement participates inside a sentence.", "Text before [image] text after", {Image("flag_kr.png", Vector2(64.0f, 38.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
+  cases.push_back({"Adjacent images", "Two consecutive replacements have different reserved sizes.", "Before [image][image] after", {Image("flag_kr.png", Vector2(32.0f, 24.0f)), Image("flag_us.png", Vector2(68.0f, 38.0f))}, false});
+  cases.push_back({"One baseline image", "A single baseline-aligned image exercises one-visual publication.", "Baseline [image] image", {Image("flag_ae.png", Vector2(48.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_BASELINE)}, false});
+  cases.push_back({"Two local sources", "Two images use different bundled resources.", "Korea [image] and USA [image]", {Image("flag_kr.png", Vector2(52.0f, 32.0f)), Image("flag_us.png", Vector2(52.0f, 32.0f))}, false});
+  cases.push_back({"Five images", "Five replacements alternate bundled local resources.", "One [image] two [image] three [image] four [image] five [image]", {Image("flag_kr.png", Vector2(30.0f, 20.0f)), Image("flag_us.png", Vector2(30.0f, 20.0f)), Image("flag_ae.png", Vector2(30.0f, 20.0f)), Image("flag_kr_alt.png", Vector2(30.0f, 20.0f)), Image("flag_us_alt.png", Vector2(30.0f, 20.0f))}});
   cases.push_back({"Ten images", "Ten small replacements exercise a denser runtime sidecar.",
                    "[image] [image] [image] [image] [image] [image] [image] [image] [image] [image]",
                    RepeatedImages(10u, "flag_kr.png", Vector2(24.0f, 16.0f))});
   cases.push_back({"Same source repeated", "Three occurrences reuse one decoded local source.",
                    "Repeated [image] source [image] reuse [image]",
                    RepeatedImages(3u, "flag_us.png", Vector2(56.0f, 32.0f))});
-  cases.push_back({"Different local sources", "Six bundled sources alternate in one paragraph.",
-                   "[image] [image] [image] [image] [image] [image]",
-                   {Image("flag_kr.png", Vector2(42.0f, 26.0f)), Image("flag_us.png", Vector2(42.0f, 26.0f)),
-                    Image("flag_ae.png", Vector2(42.0f, 26.0f)), Image("flag_kr_alt.png", Vector2(42.0f, 26.0f)),
-                    Image("flag_us_alt.png", Vector2(42.0f, 26.0f)), Image("flag_ae_alt.png", Vector2(42.0f, 26.0f))}});
-  cases.push_back({"Tiny image", "An 8x8 replacement stays visible in ordinary text.", "Tiny [image] image",
-                   {Image("flag_kr.png", Vector2(8.0f, 8.0f))}, false});
-  cases.push_back({"Large image", "A large replacement expands its surrounding line.",
-                   "Text before the large [image] replacement and enough trailing text to wrap below it.",
-                   {Image("flag_us.png", Vector2(180.0f, 100.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
-  cases.push_back({"Mixed image sizes", "Tiny, medium, wide, and tall boxes share one paragraph.",
-                   "Tiny [image], medium [image], wide [image], and tall [image] replacements.",
-                   {Image("flag_kr.png", Vector2(10.0f, 10.0f)), Image("flag_us.png", Vector2(40.0f, 28.0f)),
-                    Image("flag_ae.png", Vector2(100.0f, 34.0f)),
-                    Image("flag_kr_alt.png", Vector2(42.0f, 86.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
-  cases.push_back({"TEXT_BOTTOM", "The image bottom aligns with the surrounding text bottom.", "Bottom [image] alignment",
-                   {Image("flag_us.png", Vector2(54.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM)}, false});
-  cases.push_back({"TEXT_BASELINE", "The image bottom aligns with the text baseline.", "Baseline [image] alignment",
-                   {Image("flag_kr.png", Vector2(54.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_BASELINE)}, false});
-  cases.push_back({"TEXT_CENTER", "The image is vertically centered in the text line.", "Center [image] alignment",
-                   {Image("flag_ae.png", Vector2(54.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
-  cases.push_back({"Positive vertical offset", "A positive offset moves the image down.", "Positive [image] offset",
-                   {Image("flag_kr.png", Vector2(48.0f, 32.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER, 8.0f)}, false});
-  cases.push_back({"Negative vertical offset", "A negative offset moves the image up.", "Negative [image] offset",
-                   {Image("flag_us.png", Vector2(48.0f, 32.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER, -8.0f)}, false});
-  cases.push_back({"LTR paragraph", "A replacement participates in left-to-right layout.",
-                   "English before [image] and ordinary text after the image.",
-                   {Image("flag_kr.png", Vector2(52.0f, 30.0f))}});
-  cases.push_back({"RTL paragraph", "A replacement participates in right-to-left layout.",
-                   "עברית לפני [image] العربية بعد الصورة",
-                   {Image("flag_ae.png", Vector2(52.0f, 30.0f))}, true, false, true});
-  cases.push_back({"Mixed bidi", "LTR, Hebrew, and Arabic runs surround one replacement.",
-                   "LTR עברית [image] العربية trailing text",
-                   {Image("flag_us.png", Vector2(52.0f, 30.0f))}, true, false, true});
-  cases.push_back({"Replacement-only line", "An explicit line contains only one large replacement.",
-                   "Line before\n[image]\nLine after",
-                   {Image("flag_kr.png", Vector2(140.0f, 76.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
+  cases.push_back({"Different local sources", "Six bundled sources alternate in one paragraph.", "[image] [image] [image] [image] [image] [image]", {Image("flag_kr.png", Vector2(42.0f, 26.0f)), Image("flag_us.png", Vector2(42.0f, 26.0f)), Image("flag_ae.png", Vector2(42.0f, 26.0f)), Image("flag_kr_alt.png", Vector2(42.0f, 26.0f)), Image("flag_us_alt.png", Vector2(42.0f, 26.0f)), Image("flag_ae_alt.png", Vector2(42.0f, 26.0f))}});
+  cases.push_back({"Tiny image", "An 8x8 replacement stays visible in ordinary text.", "Tiny [image] image", {Image("flag_kr.png", Vector2(8.0f, 8.0f))}, false});
+  cases.push_back({"Large image", "A large replacement expands its surrounding line.", "Text before the large [image] replacement and enough trailing text to wrap below it.", {Image("flag_us.png", Vector2(180.0f, 100.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
+  cases.push_back({"Mixed image sizes", "Tiny, medium, wide, and tall boxes share one paragraph.", "Tiny [image], medium [image], wide [image], and tall [image] replacements.", {Image("flag_kr.png", Vector2(10.0f, 10.0f)), Image("flag_us.png", Vector2(40.0f, 28.0f)), Image("flag_ae.png", Vector2(100.0f, 34.0f)), Image("flag_kr_alt.png", Vector2(42.0f, 86.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
+  cases.push_back({"TEXT_BOTTOM", "The image bottom aligns with the surrounding text bottom.", "Bottom [image] alignment", {Image("flag_us.png", Vector2(54.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM)}, false});
+  cases.push_back({"TEXT_BASELINE", "The image bottom aligns with the text baseline.", "Baseline [image] alignment", {Image("flag_kr.png", Vector2(54.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_BASELINE)}, false});
+  cases.push_back({"TEXT_CENTER", "The image is vertically centered in the text line.", "Center [image] alignment", {Image("flag_ae.png", Vector2(54.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
+  cases.push_back({"Positive vertical offset", "A positive offset moves the image down.", "Positive [image] offset", {Image("flag_kr.png", Vector2(48.0f, 32.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER, 8.0f)}, false});
+  cases.push_back({"Negative vertical offset", "A negative offset moves the image up.", "Negative [image] offset", {Image("flag_us.png", Vector2(48.0f, 32.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER, -8.0f)}, false});
+  cases.push_back({"LTR paragraph", "A replacement participates in left-to-right layout.", "English before [image] and ordinary text after the image.", {Image("flag_kr.png", Vector2(52.0f, 30.0f))}});
+  cases.push_back({"RTL paragraph", "A replacement participates in right-to-left layout.", "עברית לפני [image] العربية بعد الصورة", {Image("flag_ae.png", Vector2(52.0f, 30.0f))}, true, false, true});
+  cases.push_back({"Mixed bidi", "LTR, Hebrew, and Arabic runs surround one replacement.", "LTR עברית [image] العربية trailing text", {Image("flag_us.png", Vector2(52.0f, 30.0f))}, true, false, true});
+  cases.push_back({"Replacement-only line", "An explicit line contains only one large replacement.", "Line before\n[image]\nLine after", {Image("flag_kr.png", Vector2(140.0f, 76.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
   cases.push_back({"Multiline wrapping", "Three replacements participate in word wrapping.",
                    "A long multiline paragraph places [image] between ordinary words, continues with enough text to wrap, "
                    "then adds [image] and a final [image] before the remaining tail.",
-                   {Image("flag_kr.png", Vector2(44.0f, 28.0f)), Image("flag_us.png", Vector2(72.0f, 36.0f)),
-                    Image("flag_ae.png", Vector2(36.0f, 44.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
-  cases.push_back({"END ellipsis image boundary", "A replacement is fully visible or fully elided at END.",
-                   "A readable prefix approaches [image] and a deliberately long trailing sentence exceeds the preview width.",
-                   {Image("flag_us.png", Vector2(100.0f, 48.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false, true});
-  cases.push_back({"Missing local resource", "A missing local source retains the authored reservation.",
-                   "Missing image [image] keeps layout stable while loading fails.",
-                   {Image("missing-image-span-perf.png", Vector2(80.0f, 48.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
+                   {Image("flag_kr.png", Vector2(44.0f, 28.0f)), Image("flag_us.png", Vector2(72.0f, 36.0f)), Image("flag_ae.png", Vector2(36.0f, 44.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
+  cases.push_back({"END ellipsis image boundary", "A replacement is fully visible or fully elided at END.", "A readable prefix approaches [image] and a deliberately long trailing sentence exceeds the preview width.", {Image("flag_us.png", Vector2(100.0f, 48.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false, true});
+  cases.push_back({"Missing local resource", "A missing local source retains the authored reservation.", "Missing image [image] keeps layout stable while loading fails.", {Image("missing-image-span-perf.png", Vector2(80.0f, 48.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
   cases.push_back({"Multiline END ellipsis", "Explicit lines and later images cross the vertical ellipsis boundary.",
                    "First line [image]\nSecond line contains enough words to wrap around [image]\n"
                    "Third line [image] continues with a long tail that must be elided before the final [image].",
-                   {Image("flag_kr.png", Vector2(44.0f, 28.0f)), Image("flag_us.png", Vector2(90.0f, 48.0f)),
-                    Image("flag_ae.png", Vector2(48.0f, 36.0f)), Image("flag_kr_alt.png", Vector2(72.0f, 40.0f))},
-                   true, true});
+                   {Image("flag_kr.png", Vector2(44.0f, 28.0f)), Image("flag_us.png", Vector2(90.0f, 48.0f)), Image("flag_ae.png", Vector2(48.0f, 36.0f)), Image("flag_kr_alt.png", Vector2(72.0f, 40.0f))},
+                   true,
+                   true});
 
   return cases;
 }
@@ -184,10 +142,13 @@ const char* AlignmentName(Text::Alignment alignment)
 {
   switch(alignment)
   {
-    case Text::Alignment::CENTER: return "CENTER";
-    case Text::Alignment::END: return "END";
+    case Text::Alignment::CENTER:
+      return "CENTER";
+    case Text::Alignment::END:
+      return "END";
     case Text::Alignment::START:
-    default: return "START";
+    default:
+      return "START";
   }
 }
 
@@ -325,7 +286,7 @@ private:
   void UpdateHud(const Text::StyledText& text)
   {
     const StyledTextCase& data = mCases[mCaseIndex];
-    std::ostringstream status;
+    std::ostringstream    status;
     status << "Case " << mCaseIndex + 1u << " / " << mCases.size() << " — " << data.name << "\n"
            << data.description << "\n"
            << "UTF-32 length: " << text.GetUtf32Length() << " | ImageSpan count: " << data.images.size()
@@ -458,11 +419,16 @@ private:
     lifecycleControls.Add(mLabelControl);
     lifecycleControls.Add(mStyledTextControl);
 
-    mPlaybackControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { TogglePlayback(); });
-    mIntervalControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleInterval(); });
-    mRenderingControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleRendering(); });
-    mLabelControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleLabelMode(); });
-    mStyledTextControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleStyledTextMode(); });
+    mPlaybackControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { TogglePlayback(); });
+    mIntervalControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { CycleInterval(); });
+    mRenderingControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { ToggleRendering(); });
+    mLabelControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { ToggleLabelMode(); });
+    mStyledTextControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { ToggleStyledTextMode(); });
 
     mPreviewContainer = StackLayout::New(StackOrientation::VERTICAL);
     mPreviewContainer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));

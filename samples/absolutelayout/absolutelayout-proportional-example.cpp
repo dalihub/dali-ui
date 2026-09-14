@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -38,7 +39,7 @@ class AbsoluteLayoutProportionalController : public ConnectionTracker
 {
 public:
   AbsoluteLayoutProportionalController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     mApplication.InitSignal().Connect(this, &AbsoluteLayoutProportionalController::Create);
   }
@@ -56,24 +57,24 @@ public:
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
-      .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
+                              .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
+                              .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
     root.Add(blueBox);
 
     // Red box: ALL centers a half-size child.
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(0.5f, 0.5f, 0.5f, 0.5f))
-      .SetFlags(AbsoluteLayoutFlags::ALL));
+                             .SetBounds(LayoutRect(0.5f, 0.5f, 0.5f, 0.5f))
+                             .SetFlags(AbsoluteLayoutFlags::ALL));
     root.Add(redBox);
 
     // Green box: POSITION_PROPORTIONAL centers a fixed 100x100 box.
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(0.5f, 0.5f, 100.0f, 100.0f))
-      .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+                               .SetBounds(LayoutRect(0.5f, 0.5f, 100.0f, 100.0f))
+                               .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
     root.Add(greenBox);
 
     window.Add(root);
@@ -82,9 +83,9 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -97,7 +98,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application                          application = Application::New(&argc, &argv);
   AbsoluteLayoutProportionalController controller(application);
   application.MainLoop();
   return 0;

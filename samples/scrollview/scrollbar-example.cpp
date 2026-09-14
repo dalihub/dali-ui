@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -22,9 +23,8 @@ using namespace Dali::Ui;
 class ScrollBarExampleController : public ConnectionTracker
 {
 public:
-
   ScrollBarExampleController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect(this, &ScrollBarExampleController::Create);
@@ -50,7 +50,7 @@ public:
     content.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
 
     // Add multiple colored views to demonstrate scrolling
-    for (int i = 0; i < 12; i++)
+    for(int i = 0; i < 12; i++)
     {
       View view = View::New();
       view.SetBackgroundColor(Color::BLUE);
@@ -93,9 +93,9 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -108,7 +108,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application                application = Application::New(&argc, &argv);
   ScrollBarExampleController test(application);
   application.MainLoop();
   return 0;

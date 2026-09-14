@@ -17,6 +17,7 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 #include <cstdio>
@@ -171,7 +172,7 @@ private:
 
   void OnSvgButtonClicked(View /*clickedView*/, InputEvent /*event*/)
   {
-    mSvgIndex           = (mSvgIndex + 1) % SVG_COUNT;
+    mSvgIndex          = (mSvgIndex + 1) % SVG_COUNT;
     mLastLoadingStatus = -1;
     mImage.SetResourceUrl(SVGS[mSvgIndex].url);
     ApplyImageSettings();
@@ -181,7 +182,7 @@ private:
 
   void OnSizeButtonClicked(View /*clickedView*/, InputEvent /*event*/)
   {
-    mSizeIndex          = (mSizeIndex + 1) % SIZE_COUNT;
+    mSizeIndex         = (mSizeIndex + 1) % SIZE_COUNT;
     mLastLoadingStatus = -1;
     ApplyImageSettings();
     UpdateLabels();
@@ -312,15 +313,15 @@ const ImageViewSvgController::SizeEntry ImageViewSvgController::SIZES[ImageViewS
 
 const ImageViewSvgController::TintEntry ImageViewSvgController::TINTS[ImageViewSvgController::TINT_COUNT] = {
   {"WHITE", UiColor(1.0f, 1.0f, 1.0f, 1.0f)},
-  {"CYAN",  UiColor(0.0f, 0.9f, 1.0f, 1.0f)},
-  {"PINK",  UiColor(1.0f, 0.35f, 0.65f, 1.0f)},
-  {"DIM",   UiColor(0.45f, 0.45f, 0.45f, 1.0f)},
+  {"CYAN", UiColor(0.0f, 0.9f, 1.0f, 1.0f)},
+  {"PINK", UiColor(1.0f, 0.35f, 0.65f, 1.0f)},
+  {"DIM", UiColor(0.45f, 0.45f, 0.45f, 1.0f)},
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ImageViewSvgController controller(application);

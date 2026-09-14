@@ -39,20 +39,21 @@
  *   ./bin/chart-memory-probe 2>&1 | tee result.log
  */
 
+#include <features.h>
+#include <malloc.h>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <functional>
-#include <malloc.h>
-#include <features.h>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/public-api/signals/callback.h>
@@ -90,40 +91,43 @@ static MemSnapshot TakeSnapshot()
     char line[128];
     while(fgets(line, sizeof(line), f))
     {
-      if     (strncmp(line, "VmRSS:",  6) == 0) sscanf(line + 6,  "%ld", &s.vmRss);
-      else if(strncmp(line, "VmHWM:",  6) == 0) sscanf(line + 6,  "%ld", &s.vmHwm);
-      else if(strncmp(line, "VmSize:", 7) == 0) sscanf(line + 7, "%ld", &s.vmSize);
+      if(strncmp(line, "VmRSS:", 6) == 0)
+        sscanf(line + 6, "%ld", &s.vmRss);
+      else if(strncmp(line, "VmHWM:", 6) == 0)
+        sscanf(line + 6, "%ld", &s.vmHwm);
+      else if(strncmp(line, "VmSize:", 7) == 0)
+        sscanf(line + 7, "%ld", &s.vmSize);
     }
     fclose(f);
   }
 
 #if __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 33)
   struct mallinfo2 mi = mallinfo2();
-  s.heapUsed  = static_cast<long>(mi.uordblks / 1024);
-  s.heapArena = static_cast<long>(mi.arena     / 1024);
+  s.heapUsed          = static_cast<long>(mi.uordblks / 1024);
+  s.heapArena         = static_cast<long>(mi.arena / 1024);
 #else
   struct mallinfo mi = mallinfo();
-  s.heapUsed  = static_cast<long>(mi.uordblks / 1024);
-  s.heapArena = static_cast<long>(mi.arena     / 1024);
+  s.heapUsed         = static_cast<long>(mi.uordblks / 1024);
+  s.heapArena        = static_cast<long>(mi.arena / 1024);
 #endif
 
   return s;
 }
 
 static std::string FormatDelta(const char*        tag,
-                                const MemSnapshot& before,
-                                const MemSnapshot& after)
+                               const MemSnapshot& before,
+                               const MemSnapshot& after)
 {
   char buf[320];
   std::snprintf(buf, sizeof(buf),
-    "[%s]\n"
-    "  RSS  : %ld kB (%+ld)\n"
-    "  Heap : %ld kB (%+ld)\n"
-    "  HWM  : %ld kB",
-    tag,
-    after.vmRss,    after.vmRss    - before.vmRss,
-    after.heapUsed, after.heapUsed - before.heapUsed,
-    after.vmHwm);
+                "[%s]\n"
+                "  RSS  : %ld kB (%+ld)\n"
+                "  Heap : %ld kB (%+ld)\n"
+                "  HWM  : %ld kB",
+                tag,
+                after.vmRss, after.vmRss - before.vmRss,
+                after.heapUsed, after.heapUsed - before.heapUsed,
+                after.vmHwm);
   return std::string(buf);
 }
 
@@ -139,12 +143,12 @@ static int CalcGpuTexKb(int w, int h)
 
 namespace
 {
-const int   MAX_LOG_LINES    = 32;
-const float INFO_PANEL_W     = 420.0f;
-const float HEADER_H         = 40.0f;
-const float FOOTER_H         = 54.0f;
-const float BTN_W            = 120.0f;
-const float BTN_H            = 44.0f;
+const int          MAX_LOG_LINES    = 32;
+const float        INFO_PANEL_W     = 420.0f;
+const float        HEADER_H         = 40.0f;
+const float        FOOTER_H         = 54.0f;
+const float        BTN_W            = 120.0f;
+const float        BTN_H            = 44.0f;
 const int          SNAP_FRAME_COUNT = 3;     // rendered frames to wait for buffer settle
 const unsigned int SNAP_FALLBACK_MS = 300u;  // safety net if frame callbacks never arrive
 const unsigned int LEAK_DELAY_MS    = 32u;   // leak cycle interval
@@ -210,13 +214,13 @@ private:
   bool        mLeakRunning{false};
 
   // ── performance timing ────────────────────────────────────────────────────
-  SteadyClock::time_point mBuildStart;          // captured before chart construction
-  double                  mBuildMs{0.0};        // main-thread build time
-  double                  mRenderMs{-1.0};      // -1 until frame-rendered callback fires
-  int32_t                 mFrameIdSeq{0};       // monotonic frame-callback id
-  int32_t                 mPendingFrameId{-1};  // id we are currently waiting on
-  int                     mFramesRemaining{0};  // rendered frames left before snapshot
-  bool                    mSnapPending{false};  // a snapshot is in flight
+  SteadyClock::time_point mBuildStart;         // captured before chart construction
+  double                  mBuildMs{0.0};       // main-thread build time
+  double                  mRenderMs{-1.0};     // -1 until frame-rendered callback fires
+  int32_t                 mFrameIdSeq{0};      // monotonic frame-callback id
+  int32_t                 mPendingFrameId{-1}; // id we are currently waiting on
+  int                     mFramesRemaining{0}; // rendered frames left before snapshot
+  bool                    mSnapPending{false}; // a snapshot is in flight
 
   // ── baseline / log ────────────────────────────────────────────────────────
   MemSnapshot              mBaseline;
@@ -230,9 +234,9 @@ private:
   // InitSignal signature: Signal<void(Application)> — must receive by value
   void OnCreate(Application /*app*/)
   {
-    Window  win = mApp.GetWindow();
+    Window       win          = mApp.GetWindow();
     PositionSize positionSize = win.GetPositionSize();
-    Vector2 wsz(positionSize.width, positionSize.height);
+    Vector2      wsz(positionSize.width, positionSize.height);
     mWinW        = wsz.x;
     mWinH        = wsz.y;
     mChartPanelW = mWinW - INFO_PANEL_W;
@@ -244,7 +248,8 @@ private:
 
     // KeyEventSignal signature: Signal<void(Window, KeyEvent)>
     win.KeyEventSignal().Connect(this,
-      [this](Window /*w*/, KeyEvent e) { OnKeyEvent(e); });
+                                 [this](Window /*w*/, KeyEvent e)
+    { OnKeyEvent(e); });
 
     BuildUI();
     RegisterPhases();
@@ -256,15 +261,15 @@ private:
     {
       char buf[128];
       std::snprintf(buf, sizeof(buf),
-        "Win: %.0fx%.0f  Chart: %.0fx%.0f",
-        mWinW, mWinH, mChartW, mChartH);
+                    "Win: %.0fx%.0f  Chart: %.0fx%.0f",
+                    mWinW, mWinH, mChartW, mChartH);
       AddLog(buf);
     }
     {
       char buf[128];
       std::snprintf(buf, sizeof(buf),
-        "Baseline RSS: %ld kB  Heap: %ld kB",
-        mBaseline.vmRss, mBaseline.heapUsed);
+                    "Baseline RSS: %ld kB  Heap: %ld kB",
+                    mBaseline.vmRss, mBaseline.heapUsed);
       AddLog(buf);
     }
     AddLog("-> / [Next] to advance phase, A / [Auto] for auto-run");
@@ -280,7 +285,10 @@ private:
     // header
     mPhaseLabel = Label::New("Ready");
     mPhaseLabel.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX(0.0f).SetY(0.0f).SetWidth(mWinW).SetHeight(HEADER_H));
+                                  .SetX(0.0f)
+                                  .SetY(0.0f)
+                                  .SetWidth(mWinW)
+                                  .SetHeight(HEADER_H));
     mPhaseLabel.SetFontSize(8.5f);
     mPhaseLabel.SetTextColor(UiColor(0xFFFFFF));
     mPhaseLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
@@ -290,16 +298,19 @@ private:
     // left: chart panel
     mChartPanel = AbsoluteLayout::New();
     mChartPanel.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX(0.0f).SetY(HEADER_H)
-      .SetWidth(mChartPanelW).SetHeight(mContentH));
+                                  .SetX(0.0f)
+                                  .SetY(HEADER_H)
+                                  .SetWidth(mChartPanelW)
+                                  .SetHeight(mContentH));
     mChartPanel.SetBackgroundColor(UiColor(0x1a1a20, 1.0f));
 
     // description label below chart (chart panel coordinate space)
     mChartDescLabel = Label::New("");
     mChartDescLabel.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX(4.0f).SetY(mChartH + 16.0f)
-      .SetWidth(mChartPanelW - 8.0f)
-      .SetHeight(mContentH - mChartH - 22.0f));
+                                      .SetX(4.0f)
+                                      .SetY(mChartH + 16.0f)
+                                      .SetWidth(mChartPanelW - 8.0f)
+                                      .SetHeight(mContentH - mChartH - 22.0f));
     mChartDescLabel.SetFontSize(7.5f);
     mChartDescLabel.SetTextColor(UiColor(0xaaaaaa));
     mChartDescLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
@@ -309,16 +320,19 @@ private:
     // right: info panel
     mInfoPanel = AbsoluteLayout::New();
     mInfoPanel.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX(mChartPanelW).SetY(HEADER_H)
-      .SetWidth(INFO_PANEL_W).SetHeight(mContentH));
+                                 .SetX(mChartPanelW)
+                                 .SetY(HEADER_H)
+                                 .SetWidth(INFO_PANEL_W)
+                                 .SetHeight(mContentH));
     mInfoPanel.SetBackgroundColor(UiColor(0x0d1117, 1.0f));
 
     // log label
     mInfoLabel = Label::New("");
     mInfoLabel.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX(8.0f).SetY(6.0f)
-      .SetWidth(INFO_PANEL_W - 16.0f)
-      .SetHeight(mContentH - 12.0f));
+                                 .SetX(8.0f)
+                                 .SetY(6.0f)
+                                 .SetWidth(INFO_PANEL_W - 16.0f)
+                                 .SetHeight(mContentH - 12.0f));
     mInfoLabel.SetFontSize(6.5f);
     mInfoLabel.SetTextColor(UiColor(0x7ec8a0));
     mInfoLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
@@ -329,9 +343,12 @@ private:
     float btnY = mWinH - FOOTER_H + 5.0f;
     float midX = mWinW * 0.5f - BTN_W * 0.5f;
 
-    mResetButton = MakeButton("Reset",  10.0f,                 btnY, [this]{ OnReset(); });
-    mNextButton  = MakeButton("Next",   midX,                  btnY, [this]{ OnNext(); });
-    mAutoButton  = MakeButton("Auto",   mWinW - BTN_W - 10.0f, btnY, [this]{ OnToggleAuto(); });
+    mResetButton = MakeButton("Reset", 10.0f, btnY, [this]
+    { OnReset(); });
+    mNextButton  = MakeButton("Next", midX, btnY, [this]
+     { OnNext(); });
+    mAutoButton  = MakeButton("Auto", mWinW - BTN_W - 10.0f, btnY, [this]
+     { OnToggleAuto(); });
 
     mRootLayout = AbsoluteLayout::New();
     mRootLayout.SetRequestedWidth(MATCH_PARENT);
@@ -349,15 +366,19 @@ private:
   // ClickedSignal signature: Signal<void(View, InputEvent)>
   // Pass 'this' as ConnectionTrackerInterface* so signal disconnection is handled automatically
   AbsoluteLayout MakeButton(const char* text, float x, float y,
-                              std::function<void()> cb)
+                            std::function<void()> cb)
   {
     auto btn = AbsoluteLayout::New();
     btn.SetRequestedWidth(BTN_W);
     btn.SetRequestedHeight(BTN_H);
     btn.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX(x).SetY(y).SetWidth(BTN_W).SetHeight(BTN_H));
+                          .SetX(x)
+                          .SetY(y)
+                          .SetWidth(BTN_W)
+                          .SetHeight(BTN_H));
     btn.SetBackgroundColor(UiColor(0x2e4a7a, 1.0f));
-    btn.AsInteractive().ClickedSignal().Connect(this, [cb](View, InputEvent) -> bool {
+    btn.AsInteractive().ClickedSignal().Connect(this, [cb](View, InputEvent) -> bool
+    {
       cb();
       return true;
     });
@@ -381,32 +402,51 @@ private:
   void RegisterPhases()
   {
     // P0: empty chart
-    Add("P0:  Empty LINE chart",             [this]{ PhaseCreateEmpty(); });
+    Add("P0:  Empty LINE chart", [this]
+    { PhaseCreateEmpty(); });
     // P1~P4: point count scaling
-    Add("P1:  1 series x    10 points",      [this]{ PhaseDataScale(1,     10); });
-    Add("P2:  1 series x   100 points",      [this]{ PhaseDataScale(1,    100); });
-    Add("P3:  1 series x  1000 points",      [this]{ PhaseDataScale(1,   1000); });
-    Add("P4:  1 series x 10000 points",      [this]{ PhaseDataScale(1,  10000); });
+    Add("P1:  1 series x    10 points", [this]
+    { PhaseDataScale(1, 10); });
+    Add("P2:  1 series x   100 points", [this]
+    { PhaseDataScale(1, 100); });
+    Add("P3:  1 series x  1000 points", [this]
+    { PhaseDataScale(1, 1000); });
+    Add("P4:  1 series x 10000 points", [this]
+    { PhaseDataScale(1, 10000); });
     // P5~P7: series count scaling
-    Add("P5:   3 series x   100 points",     [this]{ PhaseDataScale( 3,   100); });
-    Add("P6:  10 series x   100 points",     [this]{ PhaseDataScale(10,   100); });
-    Add("P7:  20 series x   100 points",     [this]{ PhaseDataScale(20,   100); });
+    Add("P5:   3 series x   100 points", [this]
+    { PhaseDataScale(3, 100); });
+    Add("P6:  10 series x   100 points", [this]
+    { PhaseDataScale(10, 100); });
+    Add("P7:  20 series x   100 points", [this]
+    { PhaseDataScale(20, 100); });
     // P8~P10: chart type
-    Add("P8:  LINE chart  (5 series x 20)",  [this]{ PhaseChartType(false, 5, 20, "LINE"); });
-    Add("P9:  BAR  chart  (5 series x 20)",  [this]{ PhaseChartType(true,  5, 20, "BAR");  });
-    Add("P10: PIE  chart  (4 slices)",       [this]{ PhaseChartTypePie(); });
+    Add("P8:  LINE chart  (5 series x 20)", [this]
+    { PhaseChartType(false, 5, 20, "LINE"); });
+    Add("P9:  BAR  chart  (5 series x 20)", [this]
+    { PhaseChartType(true, 5, 20, "BAR"); });
+    Add("P10: PIE  chart  (4 slices)", [this]
+    { PhaseChartTypePie(); });
     // P11~P13: chart size
-    Add("P11: Size  200 x 150",              [this]{ PhaseSize( 200,  150); });
-    Add("P12: Size  480 x 360",              [this]{ PhaseSize( 480,  360); });
-    Add("P13: Size 1280 x 720",              [this]{ PhaseSize(1280,  720); });
+    Add("P11: Size  200 x 150", [this]
+    { PhaseSize(200, 150); });
+    Add("P12: Size  480 x 360", [this]
+    { PhaseSize(480, 360); });
+    Add("P13: Size 1280 x 720", [this]
+    { PhaseSize(1280, 720); });
     // P14: leak detection
-    Add("P14: Create/Destroy x100 leak test",[this]{ PhaseLeakTest(); });
+    Add("P14: Create/Destroy x100 leak test", [this]
+    { PhaseLeakTest(); });
     // P15~P17: tick label count
-    Add("P15: X-tick  5 labels",             [this]{ PhaseTickLabels( 5); });
-    Add("P16: X-tick 20 labels",             [this]{ PhaseTickLabels(20); });
-    Add("P17: X-tick 50 labels",             [this]{ PhaseTickLabels(50); });
+    Add("P15: X-tick  5 labels", [this]
+    { PhaseTickLabels(5); });
+    Add("P16: X-tick 20 labels", [this]
+    { PhaseTickLabels(20); });
+    Add("P17: X-tick 50 labels", [this]
+    { PhaseTickLabels(50); });
     // done
-    Add("Done",                              [this]{ PhaseDone(); });
+    Add("Done", [this]
+    { PhaseDone(); });
   }
 
   void Add(const char* name, PhaseFunc fn)
@@ -428,10 +468,10 @@ private:
     }
     mChart = chart;
     mChart.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX((mChartPanelW - w) * 0.5f)
-      .SetY(8.0f)
-      .SetWidth(w)
-      .SetHeight(h));
+                             .SetX((mChartPanelW - w) * 0.5f)
+                             .SetY(8.0f)
+                             .SetWidth(w)
+                             .SetHeight(h));
     mChartPanel.Add(mChart);
   }
 
@@ -460,7 +500,11 @@ private:
     RegisterFrameRenderedCallback();
 
     // Safety net: snapshot anyway if frame-rendered callbacks never arrive.
-    if(mSnapTimer) { mSnapTimer.Stop(); mSnapTimer.Reset(); }
+    if(mSnapTimer)
+    {
+      mSnapTimer.Stop();
+      mSnapTimer.Reset();
+    }
     mSnapTimer = Timer::New(SNAP_FALLBACK_MS);
     mSnapTimer.TickSignal().Connect(this, &MemProbeApp::OnSnapTimerTick);
     mSnapTimer.Start();
@@ -507,11 +551,15 @@ private:
     mSnapPending    = false;
     mPendingFrameId = -1; // ignore any further/stale frame callbacks
 
-    if(mSnapTimer) { mSnapTimer.Stop(); mSnapTimer.Reset(); }
+    if(mSnapTimer)
+    {
+      mSnapTimer.Stop();
+      mSnapTimer.Reset();
+    }
 
     MemSnapshot snap = TakeSnapshot();
-    auto cb = std::move(mSnapCallback);
-    mSnapCallback = nullptr;
+    auto        cb   = std::move(mSnapCallback);
+    mSnapCallback    = nullptr;
     if(cb) cb(snap);
 
     if(mAutoRunning && !mLeakRunning)
@@ -524,10 +572,10 @@ private:
     char buf[96];
     if(mRenderMs >= 0.0)
       std::snprintf(buf, sizeof(buf),
-        "\n  Build: %.2f ms\n  Rendered: %.2f ms", mBuildMs, mRenderMs);
+                    "\n  Build: %.2f ms\n  Rendered: %.2f ms", mBuildMs, mRenderMs);
     else
       std::snprintf(buf, sizeof(buf),
-        "\n  Build: %.2f ms\n  Rendered: n/a", mBuildMs);
+                    "\n  Build: %.2f ms\n  Rendered: n/a", mBuildMs);
     return std::string(buf);
   }
 
@@ -543,7 +591,7 @@ private:
     mBuildStart        = SteadyClock::now();
 
     ChartView chart = ChartView::New(ChartView::Type::LINE,
-                                      Vector2(mChartW, mChartH));
+                                     Vector2(mChartW, mChartH));
     chart.SetTitle("Memory Probe");
     auto xAxis0 = ChartAxis::New();
     xAxis0.SetTitle("X");
@@ -558,13 +606,14 @@ private:
 
     SetActiveChart(chart, mChartW, mChartH);
 
-    SnapAfterFrame([this, before](MemSnapshot after) {
+    SnapAfterFrame([this, before](MemSnapshot after)
+    {
       std::string log = FormatDelta("P0: Empty LINE chart", before, after);
-      char gpu[96];
+      char        gpu[96];
       std::snprintf(gpu, sizeof(gpu),
-        "\n  GPU theory: %d kB (3x%.0fx%.0fx4B)",
-        CalcGpuTexKb(static_cast<int>(mChartW), static_cast<int>(mChartH)),
-        mChartW, mChartH);
+                    "\n  GPU theory: %d kB (3x%.0fx%.0fx4B)",
+                    CalcGpuTexKb(static_cast<int>(mChartW), static_cast<int>(mChartH)),
+                    mChartW, mChartH);
       log += gpu;
       log += PerfLine();
       PrintAndLog(log);
@@ -581,9 +630,9 @@ private:
     MemSnapshot before = TakeSnapshot();
     mBuildStart        = SteadyClock::now();
 
-    ChartView chart = ChartView::New(ChartView::Type::LINE,
+    ChartView chart  = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
-    auto xAxisD = ChartAxis::New();
+    auto      xAxisD = ChartAxis::New();
     xAxisD.SetMinimumLimit(0.0f);
     xAxisD.SetMaximumLimit(static_cast<float>(std::max(numPoints - 1, 1)));
     chart.SetXAxis(xAxisD);
@@ -593,18 +642,24 @@ private:
     chart.SetYAxis(yAxisD);
 
     static const Vector4 COLORS[10] = {
-      Vector4(0.20f, 0.60f, 1.00f, 1.0f), Vector4(1.00f, 0.40f, 0.20f, 1.0f),
-      Vector4(0.20f, 0.80f, 0.40f, 1.0f), Vector4(0.90f, 0.70f, 0.10f, 1.0f),
-      Vector4(0.70f, 0.30f, 0.90f, 1.0f), Vector4(0.10f, 0.80f, 0.80f, 1.0f),
-      Vector4(1.00f, 0.50f, 0.70f, 1.0f), Vector4(0.50f, 0.90f, 0.30f, 1.0f),
-      Vector4(0.90f, 0.30f, 0.30f, 1.0f), Vector4(0.30f, 0.50f, 0.90f, 1.0f),
+      Vector4(0.20f, 0.60f, 1.00f, 1.0f),
+      Vector4(1.00f, 0.40f, 0.20f, 1.0f),
+      Vector4(0.20f, 0.80f, 0.40f, 1.0f),
+      Vector4(0.90f, 0.70f, 0.10f, 1.0f),
+      Vector4(0.70f, 0.30f, 0.90f, 1.0f),
+      Vector4(0.10f, 0.80f, 0.80f, 1.0f),
+      Vector4(1.00f, 0.50f, 0.70f, 1.0f),
+      Vector4(0.50f, 0.90f, 0.30f, 1.0f),
+      Vector4(0.90f, 0.30f, 0.30f, 1.0f),
+      Vector4(0.30f, 0.50f, 0.90f, 1.0f),
     };
 
     for(int s = 0; s < numSeries; ++s)
     {
       LineSeries series = LineSeries::New();
       series.SetColor(COLORS[s % 10]);
-      char name[16]; std::snprintf(name, sizeof(name), "S%d", s + 1);
+      char name[16];
+      std::snprintf(name, sizeof(name), "S%d", s + 1);
       series.SetName(name);
 
       Dali::Vector<float> vals;
@@ -617,7 +672,8 @@ private:
 
     SetActiveChart(chart, mChartW, mChartH);
 
-    SnapAfterFrame([this, before, numSeries, numPoints](MemSnapshot after) {
+    SnapAfterFrame([this, before, numSeries, numPoints](MemSnapshot after)
+    {
       char tag[64];
       std::snprintf(tag, sizeof(tag), "%d series x %d points", numSeries, numPoints);
 
@@ -630,7 +686,7 @@ private:
 
       char extra[160];
       std::snprintf(extra, sizeof(extra),
-        "\n  Data theory: %ld B\n  Heap/point: %.1f B", theoryB, perPoint);
+                    "\n  Data theory: %ld B\n  Heap/point: %.1f B", theoryB, perPoint);
       log += extra;
       log += PerfLine();
 
@@ -646,14 +702,14 @@ private:
   // P8~P9: chart type (LINE vs BAR) ─────────────────────────────────────────
 
   void PhaseChartType(bool useBar, int numSeries, int numPoints,
-                       const char* typeName)
+                      const char* typeName)
   {
     MemSnapshot before = TakeSnapshot();
     mBuildStart        = SteadyClock::now();
 
-    ChartView chart = ChartView::New(ChartView::Type::LINE,
+    ChartView chart  = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
-    auto xAxisC = ChartAxis::New();
+    auto      xAxisC = ChartAxis::New();
     xAxisC.SetMinimumLimit(useBar ? -0.5f : 0.0f);
     xAxisC.SetMaximumLimit(static_cast<float>(numPoints) + (useBar ? -0.5f : -1.0f));
     chart.SetXAxis(xAxisC);
@@ -664,14 +720,17 @@ private:
     chart.SetProperty(ChartView::Property::SHOW_LEGEND, true);
 
     static const Vector4 COLORS[5] = {
-      Vector4(0.20f, 0.60f, 1.00f, 1.0f), Vector4(1.00f, 0.40f, 0.20f, 1.0f),
-      Vector4(0.20f, 0.80f, 0.40f, 1.0f), Vector4(0.90f, 0.70f, 0.10f, 1.0f),
+      Vector4(0.20f, 0.60f, 1.00f, 1.0f),
+      Vector4(1.00f, 0.40f, 0.20f, 1.0f),
+      Vector4(0.20f, 0.80f, 0.40f, 1.0f),
+      Vector4(0.90f, 0.70f, 0.10f, 1.0f),
       Vector4(0.70f, 0.30f, 0.90f, 1.0f),
     };
 
     for(int s = 0; s < numSeries; ++s)
     {
-      char name[16]; std::snprintf(name, sizeof(name), "S%d", s + 1);
+      char name[16];
+      std::snprintf(name, sizeof(name), "S%d", s + 1);
       Dali::Vector<float> vals;
       vals.Resize(numPoints);
       for(int i = 0; i < numPoints; ++i)
@@ -697,7 +756,8 @@ private:
 
     SetActiveChart(chart, mChartW, mChartH);
 
-    SnapAfterFrame([this, before, typeName, numSeries, numPoints](MemSnapshot after) {
+    SnapAfterFrame([this, before, typeName, numSeries, numPoints](MemSnapshot after)
+    {
       char tag[64];
       std::snprintf(tag, sizeof(tag), "%s (%d series x %d points)", typeName, numSeries, numPoints);
       std::string log = FormatDelta(tag, before, after);
@@ -719,20 +779,21 @@ private:
     mBuildStart        = SteadyClock::now();
 
     ChartView chart = ChartView::New(ChartView::Type::PIE,
-                                      Vector2(mChartW, mChartH));
+                                     Vector2(mChartW, mChartH));
     chart.SetTitle("Pie Chart");
     chart.SetProperty(ChartView::Property::SHOW_LEGEND, true);
 
     PieSeries pie = PieSeries::New();
-    pie.AddSlice("Alpha",  35.0f, Vector4(0.20f, 0.60f, 1.00f, 1.0f));
-    pie.AddSlice("Beta",   25.0f, Vector4(1.00f, 0.40f, 0.20f, 1.0f));
-    pie.AddSlice("Gamma",  20.0f, Vector4(0.20f, 0.80f, 0.40f, 1.0f));
-    pie.AddSlice("Delta",  20.0f, Vector4(0.90f, 0.70f, 0.10f, 1.0f));
+    pie.AddSlice("Alpha", 35.0f, Vector4(0.20f, 0.60f, 1.00f, 1.0f));
+    pie.AddSlice("Beta", 25.0f, Vector4(1.00f, 0.40f, 0.20f, 1.0f));
+    pie.AddSlice("Gamma", 20.0f, Vector4(0.20f, 0.80f, 0.40f, 1.0f));
+    pie.AddSlice("Delta", 20.0f, Vector4(0.90f, 0.70f, 0.10f, 1.0f));
     chart.AddSeries(pie);
 
     SetActiveChart(chart, mChartW, mChartH);
 
-    SnapAfterFrame([this, before](MemSnapshot after) {
+    SnapAfterFrame([this, before](MemSnapshot after)
+    {
       std::string log = FormatDelta("PIE chart (4 slices)", before, after);
       log += PerfLine();
       PrintAndLog(log);
@@ -749,10 +810,10 @@ private:
     MemSnapshot before = TakeSnapshot();
     mBuildStart        = SteadyClock::now();
 
-    ChartView chart = ChartView::New(ChartView::Type::LINE,
+    ChartView chart  = ChartView::New(ChartView::Type::LINE,
                                       Vector2(static_cast<float>(w),
                                               static_cast<float>(h)));
-    auto xAxisS = ChartAxis::New();
+    auto      xAxisS = ChartAxis::New();
     xAxisS.SetMinimumLimit(0.0f);
     xAxisS.SetMaximumLimit(49.0f);
     chart.SetXAxis(xAxisS);
@@ -764,7 +825,8 @@ private:
     for(int s = 0; s < 3; ++s)
     {
       LineSeries series = LineSeries::New();
-      char name[16]; std::snprintf(name, sizeof(name), "S%d", s + 1);
+      char       name[16];
+      std::snprintf(name, sizeof(name), "S%d", s + 1);
       series.SetName(name);
       Dali::Vector<float> vals;
       vals.Resize(50);
@@ -779,12 +841,13 @@ private:
     float displayH = std::min(static_cast<float>(h), mContentH - 60.0f);
     SetActiveChart(chart, displayW, displayH);
 
-    SnapAfterFrame([this, before, w, h](MemSnapshot after) {
+    SnapAfterFrame([this, before, w, h](MemSnapshot after)
+    {
       char tag[64];
       std::snprintf(tag, sizeof(tag), "Size %dx%d (3 series x 50pt)", w, h);
 
       std::string log = FormatDelta(tag, before, after);
-      char gpu[80];
+      char        gpu[80];
       std::snprintf(gpu, sizeof(gpu), "\n  GPU theory: %d kB", CalcGpuTexKb(w, h));
       log += gpu;
       log += PerfLine();
@@ -795,7 +858,7 @@ private:
 
     char desc[96];
     std::snprintf(desc, sizeof(desc),
-      "Size %dx%d  GPU theory: %d kB", w, h, CalcGpuTexKb(w, h));
+                  "Size %dx%d  GPU theory: %d kB", w, h, CalcGpuTexKb(w, h));
     SetDesc(desc);
   }
 
@@ -807,7 +870,11 @@ private:
     mLeakStartSnap  = TakeSnapshot();
     mLeakRunning    = true;
 
-    if(mChart) { mChartPanel.Remove(mChart); mChart.Reset(); }
+    if(mChart)
+    {
+      mChartPanel.Remove(mChart);
+      mChart.Reset();
+    }
 
     AddLog("=== Leak detection start (x100) ===");
     FlushLog();
@@ -818,9 +885,9 @@ private:
 
   void RunLeakCycle()
   {
-    ChartView chart = ChartView::New(ChartView::Type::LINE,
+    ChartView chart  = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
-    auto xAxisL = ChartAxis::New();
+    auto      xAxisL = ChartAxis::New();
     xAxisL.SetMinimumLimit(0.0f);
     xAxisL.SetMaximumLimit(49.0f);
     chart.SetXAxis(xAxisL);
@@ -838,14 +905,18 @@ private:
     chart.AddSeries(series);
 
     chart.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetX((mChartPanelW - mChartW) * 0.5f)
-      .SetY(8.0f)
-      .SetWidth(mChartW)
-      .SetHeight(mChartH));
+                            .SetX((mChartPanelW - mChartW) * 0.5f)
+                            .SetY(8.0f)
+                            .SetWidth(mChartW)
+                            .SetHeight(mChartH));
     mChartPanel.Add(chart);
     mLeakChart = chart;
 
-    if(mLeakTimer) { mLeakTimer.Stop(); mLeakTimer.Reset(); }
+    if(mLeakTimer)
+    {
+      mLeakTimer.Stop();
+      mLeakTimer.Reset();
+    }
     mLeakTimer = Timer::New(LEAK_DELAY_MS);
     mLeakTimer.TickSignal().Connect(this, &MemProbeApp::OnLeakTimerTick);
     mLeakTimer.Start();
@@ -861,10 +932,10 @@ private:
     if(mLeakCycleCount % 10 == 0)
     {
       MemSnapshot cur = TakeSnapshot();
-      char buf[96];
+      char        buf[96];
       std::snprintf(buf, sizeof(buf),
-        "  %3d/100: RSS=%ld kB (%+ld)",
-        mLeakCycleCount, cur.vmRss, cur.vmRss - mLeakStartSnap.vmRss);
+                    "  %3d/100: RSS=%ld kB (%+ld)",
+                    mLeakCycleCount, cur.vmRss, cur.vmRss - mLeakStartSnap.vmRss);
       AddLog(buf);
       FlushLog();
 
@@ -884,9 +955,9 @@ private:
       bool        pass = std::abs(leak) <= 64;
 
       std::string log = FormatDelta("After 100 cycles", mLeakStartSnap, end);
-      char verdict[96];
+      char        verdict[96];
       std::snprintf(verdict, sizeof(verdict),
-        "\n  Verdict: %+ld kB  %s", leak, pass ? "[PASS]" : "[WARNING: leak suspected]");
+                    "\n  Verdict: %+ld kB  %s", leak, pass ? "[PASS]" : "[WARNING: leak suspected]");
       log += verdict;
 
       printf("\n[Leak verdict] %s (%+ld kB/100cycle)\n",
@@ -916,13 +987,14 @@ private:
     labels.Resize(numTicks);
     for(int i = 0; i < numTicks; ++i)
     {
-      char buf[16]; std::snprintf(buf, sizeof(buf), "L%d", i);
+      char buf[16];
+      std::snprintf(buf, sizeof(buf), "L%d", i);
       labels[i] = buf;
     }
 
-    ChartView chart = ChartView::New(ChartView::Type::LINE,
+    ChartView chart  = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
-    auto xAxisT = ChartAxis::New();
+    auto      xAxisT = ChartAxis::New();
     xAxisT.SetLabels(labels);
     xAxisT.SetMinimumLimit(0.0f);
     xAxisT.SetMaximumLimit(static_cast<float>(std::max(numTicks - 1, 1)));
@@ -943,7 +1015,8 @@ private:
 
     SetActiveChart(chart, mChartW, mChartH);
 
-    SnapAfterFrame([this, before, numTicks](MemSnapshot after) {
+    SnapAfterFrame([this, before, numTicks](MemSnapshot after)
+    {
       char tag[48];
       std::snprintf(tag, sizeof(tag), "X-tick %d labels", numTicks);
 
@@ -951,7 +1024,7 @@ private:
       if(numTicks > 0)
       {
         double heapDelta = static_cast<double>(after.heapUsed - before.heapUsed) * 1024.0;
-        char per[80];
+        char   per[80];
         std::snprintf(per, sizeof(per), "\n  Heap/label: %.0f B", heapDelta / numTicks);
         log += per;
       }
@@ -985,7 +1058,11 @@ private:
     if(mAutoRunning)
     {
       mAutoRunning = false;
-      if(mAutoTimer) { mAutoTimer.Stop(); mAutoTimer.Reset(); }
+      if(mAutoTimer)
+      {
+        mAutoTimer.Stop();
+        mAutoTimer.Reset();
+      }
       mAutoButton.SetBackgroundColor(UiColor(0x2e4a7a, 1.0f));
     }
   }
@@ -996,7 +1073,11 @@ private:
 
   void ScheduleAutoNext()
   {
-    if(mAutoTimer) { mAutoTimer.Stop(); mAutoTimer.Reset(); }
+    if(mAutoTimer)
+    {
+      mAutoTimer.Stop();
+      mAutoTimer.Reset();
+    }
     mAutoTimer = Timer::New(AUTO_NEXT_MS);
     mAutoTimer.TickSignal().Connect(this, &MemProbeApp::OnAutoTimerTick);
     mAutoTimer.Start();
@@ -1062,21 +1143,41 @@ private:
   {
     mLeakRunning = false;
     mAutoRunning = false;
-    if(mAutoTimer) { mAutoTimer.Stop(); mAutoTimer.Reset(); }
-    if(mSnapTimer) { mSnapTimer.Stop(); mSnapTimer.Reset(); }
-    if(mLeakTimer) { mLeakTimer.Stop(); mLeakTimer.Reset(); }
+    if(mAutoTimer)
+    {
+      mAutoTimer.Stop();
+      mAutoTimer.Reset();
+    }
+    if(mSnapTimer)
+    {
+      mSnapTimer.Stop();
+      mSnapTimer.Reset();
+    }
+    if(mLeakTimer)
+    {
+      mLeakTimer.Stop();
+      mLeakTimer.Reset();
+    }
     mSnapCallback = nullptr;
     mSnapPending  = false;
 
-    if(mLeakChart) { mChartPanel.Remove(mLeakChart); mLeakChart.Reset(); }
-    if(mChart)     { mChartPanel.Remove(mChart);     mChart.Reset(); }
+    if(mLeakChart)
+    {
+      mChartPanel.Remove(mLeakChart);
+      mLeakChart.Reset();
+    }
+    if(mChart)
+    {
+      mChartPanel.Remove(mChart);
+      mChart.Reset();
+    }
 
     mCurrentPhase    = -1;
     mLeakCycleCount  = 0;
     mBuildMs         = 0.0;
     mRenderMs        = -1.0;
     mFramesRemaining = 0;
-    mPendingFrameId  = -1;   // ignore any in-flight frame-rendered callback
+    mPendingFrameId  = -1; // ignore any in-flight frame-rendered callback
     mLogLines.clear();
     mBaseline = TakeSnapshot();
     mPrevSnap = mBaseline;
@@ -1088,8 +1189,8 @@ private:
     {
       char buf[96];
       std::snprintf(buf, sizeof(buf),
-        "Baseline RSS: %ld kB  Heap: %ld kB",
-        mBaseline.vmRss, mBaseline.heapUsed);
+                    "Baseline RSS: %ld kB  Heap: %ld kB",
+                    mBaseline.vmRss, mBaseline.heapUsed);
       AddLog(buf);
     }
     FlushLog();
@@ -1101,7 +1202,11 @@ private:
     if(mAutoRunning)
     {
       mAutoRunning = false;
-      if(mAutoTimer) { mAutoTimer.Stop(); mAutoTimer.Reset(); }
+      if(mAutoTimer)
+      {
+        mAutoTimer.Stop();
+        mAutoTimer.Reset();
+      }
       mAutoButton.SetBackgroundColor(UiColor(0x2e4a7a, 1.0f));
     }
     else
@@ -1135,10 +1240,14 @@ private:
     if(event.GetState() != KeyEvent::DOWN) return;
 
     Dali::String key = event.GetKeyName();
-    if     (key == "Right" || key == "Return") OnNext();
-    else if(key == "r"     || key == "R")      OnReset();
-    else if(key == "a"     || key == "A")      OnToggleAuto();
-    else if(key == "Escape")                   mApp.Quit();
+    if(key == "Right" || key == "Return")
+      OnNext();
+    else if(key == "r" || key == "R")
+      OnReset();
+    else if(key == "a" || key == "A")
+      OnToggleAuto();
+    else if(key == "Escape")
+      mApp.Quit();
   }
 };
 
@@ -1148,11 +1257,11 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application         app = Application::New(&argc, &argv);
+  Application          app    = Application::New(&argc, &argv);
   Components::UiConfig config = Components::UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
-  MemProbeApp         probe(app);
+  MemProbeApp probe(app);
   app.MainLoop();
   return 0;
 }

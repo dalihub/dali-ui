@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -32,7 +33,7 @@ class AbsoluteLayoutController : public ConnectionTracker
 {
 public:
   AbsoluteLayoutController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     mApplication.InitSignal().Connect(this, &AbsoluteLayoutController::Create);
   }
@@ -50,21 +51,21 @@ public:
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(50.0f, 50.0f, 50.0f, 50.0f)));
+                             .SetBounds(LayoutRect(50.0f, 50.0f, 50.0f, 50.0f)));
     root.Add(redBox);
 
     // Green box: center area
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(100.0f, 100.0f, 100.0f, 100.0f)));
+                               .SetBounds(LayoutRect(100.0f, 100.0f, 100.0f, 100.0f)));
     root.Add(greenBox);
 
     // Blue box: lower-right area
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(200.0f, 200.0f, 100.0f, 50.0f)));
+                              .SetBounds(LayoutRect(200.0f, 200.0f, 100.0f, 50.0f)));
     root.Add(blueBox);
 
     window.Add(root);
@@ -73,9 +74,9 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -88,7 +89,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application              application = Application::New(&argc, &argv);
   AbsoluteLayoutController controller(application);
   application.MainLoop();
   return 0;

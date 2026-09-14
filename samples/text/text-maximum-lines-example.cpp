@@ -18,6 +18,7 @@
 // one process so MaximumLines behavior can be checked across layout paths.
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <algorithm>
 #include <array>
@@ -35,15 +36,15 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr int      WINDOW_WIDTH          = 1280;
-constexpr int      WINDOW_HEIGHT         = 800;
-constexpr float    INSPECTOR_MIN_WIDTH   = 380.0f;
-constexpr float    INSPECTOR_MAX_WIDTH   = 640.0f;
-constexpr float    INSPECTOR_WIDTH_RATIO = 0.34f;
-constexpr float    DEFAULT_TARGET_WIDTH  = 360.0f;
-constexpr float    DEFAULT_TARGET_HEIGHT = 180.0f;
-constexpr float    SIZE_STEP             = 10.0f;
-constexpr float    MIN_TARGET_SIZE       = 20.0f;
+constexpr int      WINDOW_WIDTH           = 1280;
+constexpr int      WINDOW_HEIGHT          = 800;
+constexpr float    INSPECTOR_MIN_WIDTH    = 380.0f;
+constexpr float    INSPECTOR_MAX_WIDTH    = 640.0f;
+constexpr float    INSPECTOR_WIDTH_RATIO  = 0.34f;
+constexpr float    DEFAULT_TARGET_WIDTH   = 360.0f;
+constexpr float    DEFAULT_TARGET_HEIGHT  = 180.0f;
+constexpr float    SIZE_STEP              = 10.0f;
+constexpr float    MIN_TARGET_SIZE        = 20.0f;
 constexpr uint32_t QUERY_DELAY_MS         = 32u;
 constexpr uint32_t TRANSITION_DELAY_MS    = 400u;
 constexpr uint32_t ABA_DELAY_MS           = 100u;
@@ -167,18 +168,18 @@ enum class FeedbackTone
 
 struct TestState
 {
-  int                   maximumLines  = 3;
-  float                 width     = DEFAULT_TARGET_WIDTH;
-  float                 height    = DEFAULT_TARGET_HEIGHT;
-  bool                  multiLine = true;
-  bool                  async     = false;
-  Text::OverflowMode    overflow  = Text::OverflowMode::ELLIPSIS;
-  Text::LineWrapMode    wrap      = Text::LineWrapMode::WORD;
-  Text::Alignment       alignment = Text::Alignment::START;
-  LayoutDirection::Type direction = LayoutDirection::LEFT_TO_RIGHT;
-  FitMode               fit       = FitMode::OFF;
-  TargetLayoutMode      layout    = TargetLayoutMode::FIXED_FIXED;
-  uint32_t              padding   = 0u;
+  int                   maximumLines = 3;
+  float                 width        = DEFAULT_TARGET_WIDTH;
+  float                 height       = DEFAULT_TARGET_HEIGHT;
+  bool                  multiLine    = true;
+  bool                  async        = false;
+  Text::OverflowMode    overflow     = Text::OverflowMode::ELLIPSIS;
+  Text::LineWrapMode    wrap         = Text::LineWrapMode::WORD;
+  Text::Alignment       alignment    = Text::Alignment::START;
+  LayoutDirection::Type direction    = LayoutDirection::LEFT_TO_RIGHT;
+  FitMode               fit          = FitMode::OFF;
+  TargetLayoutMode      layout       = TargetLayoutMode::FIXED_FIXED;
+  uint32_t              padding      = 0u;
 };
 
 enum class AutoBaselineMode
@@ -190,17 +191,17 @@ enum class AutoBaselineMode
 
 struct AutoCase
 {
-  std::string       id;
-  std::string       name;
-  std::size_t       scenarioIndex = 0u;
-  TestState         state;
-  uint32_t          queryOrder       = 0u;
-  int               expectedLineCount = -1;
-  bool              requireAsync      = false;
-  bool              requireAsyncLineMatch = false;
-  AutoBaselineMode  baselineMode      = AutoBaselineMode::NONE;
-  std::string       baselineKey;
-  std::vector<int>  rapidMaximumLines;
+  std::string      id;
+  std::string      name;
+  std::size_t      scenarioIndex = 0u;
+  TestState        state;
+  uint32_t         queryOrder            = 0u;
+  int              expectedLineCount     = -1;
+  bool             requireAsync          = false;
+  bool             requireAsyncLineMatch = false;
+  AutoBaselineMode baselineMode          = AutoBaselineMode::NONE;
+  std::string      baselineKey;
+  std::vector<int> rapidMaximumLines;
 };
 
 struct AutoMeasurement
@@ -213,7 +214,8 @@ struct AutoMeasurement
 
 const Dali::Vector<Text::Fit::Candidate>& FitCandidates()
 {
-  static Dali::Vector<Text::Fit::Candidate> candidates = [] {
+  static Dali::Vector<Text::Fit::Candidate> candidates = []
+  {
     Dali::Vector<Text::Fit::Candidate> values;
     values.PushBack(Text::Fit::Candidate(10.0f, 14.0f));
     values.PushBack(Text::Fit::Candidate(14.0f, 19.0f));
@@ -234,10 +236,14 @@ const char* WrapName(Text::LineWrapMode mode)
 {
   switch(mode)
   {
-    case Text::LineWrapMode::WORD:        return "WORD";
-    case Text::LineWrapMode::CHARACTER:   return "CHARACTER";
-    case Text::LineWrapMode::HYPHENATION: return "HYPHENATION";
-    case Text::LineWrapMode::MIXED:       return "MIXED";
+    case Text::LineWrapMode::WORD:
+      return "WORD";
+    case Text::LineWrapMode::CHARACTER:
+      return "CHARACTER";
+    case Text::LineWrapMode::HYPHENATION:
+      return "HYPHENATION";
+    case Text::LineWrapMode::MIXED:
+      return "MIXED";
   }
   return "UNKNOWN";
 }
@@ -246,9 +252,12 @@ const char* AlignmentName(Text::Alignment alignment)
 {
   switch(alignment)
   {
-    case Text::Alignment::START:  return "START";
-    case Text::Alignment::CENTER: return "CENTER";
-    case Text::Alignment::END:    return "END";
+    case Text::Alignment::START:
+      return "START";
+    case Text::Alignment::CENTER:
+      return "CENTER";
+    case Text::Alignment::END:
+      return "END";
   }
   return "UNKNOWN";
 }
@@ -262,9 +271,12 @@ const char* FitName(FitMode mode)
 {
   switch(mode)
   {
-    case FitMode::OFF:        return "OFF";
-    case FitMode::RANGE:      return "RANGE(8..32/2)";
-    case FitMode::CANDIDATES: return "CANDIDATES(5)";
+    case FitMode::OFF:
+      return "OFF";
+    case FitMode::RANGE:
+      return "RANGE(8..32/2)";
+    case FitMode::CANDIDATES:
+      return "CANDIDATES(5)";
   }
   return "UNKNOWN";
 }
@@ -273,11 +285,16 @@ const char* LayoutName(TargetLayoutMode mode)
 {
   switch(mode)
   {
-    case TargetLayoutMode::FIXED_FIXED: return "FIXED/FIXED";
-    case TargetLayoutMode::FIXED_WRAP:  return "FIXED/WRAP";
-    case TargetLayoutMode::WRAP_WRAP:   return "WRAP/WRAP";
-    case TargetLayoutMode::MATCH_WRAP:  return "MATCH/WRAP";
-    case TargetLayoutMode::WRAP_FIXED:  return "WRAP/FIXED";
+    case TargetLayoutMode::FIXED_FIXED:
+      return "FIXED/FIXED";
+    case TargetLayoutMode::FIXED_WRAP:
+      return "FIXED/WRAP";
+    case TargetLayoutMode::WRAP_WRAP:
+      return "WRAP/WRAP";
+    case TargetLayoutMode::MATCH_WRAP:
+      return "MATCH/WRAP";
+    case TargetLayoutMode::WRAP_FIXED:
+      return "WRAP/FIXED";
   }
   return "UNKNOWN";
 }
@@ -286,9 +303,12 @@ const char* PaddingName(uint32_t padding)
 {
   switch(padding % 3u)
   {
-    case 0u: return "ZERO(0/0/0/0)";
-    case 1u: return "COMPACT(4/4/2/2)";
-    case 2u: return "WIDE(20/20/12/12)";
+    case 0u:
+      return "ZERO(0/0/0/0)";
+    case 1u:
+      return "COMPACT(4/4/2/2)";
+    case 2u:
+      return "WIDE(20/20/12/12)";
   }
   return "UNKNOWN";
 }
@@ -301,7 +321,8 @@ std::string MaximumLinesName(int maximumLines)
 std::string UpperKey(const KeyEvent& event)
 {
   std::string key(event.GetKeyName().CStr());
-  std::transform(key.begin(), key.end(), key.begin(), [](unsigned char value) {
+  std::transform(key.begin(), key.end(), key.begin(), [](unsigned char value)
+  {
     return static_cast<char>(std::toupper(value));
   });
   return key;
@@ -516,10 +537,10 @@ private:
     mWindowWidth  = std::max(1.0f, windowWidth);
     mWindowHeight = std::max(1.0f, windowHeight);
 
-    const float scale = std::clamp(std::min(mWindowWidth / static_cast<float>(WINDOW_WIDTH),
-                                            mWindowHeight / static_cast<float>(WINDOW_HEIGHT)),
-                                   0.9f,
-                                   1.35f);
+    const float scale          = std::clamp(std::min(mWindowWidth / static_cast<float>(WINDOW_WIDTH),
+                                                     mWindowHeight / static_cast<float>(WINDOW_HEIGHT)),
+                                            0.9f,
+                                            1.35f);
     const float inspectorWidth = std::clamp(mWindowWidth * INSPECTOR_WIDTH_RATIO,
                                             INSPECTOR_MIN_WIDTH,
                                             INSPECTOR_MAX_WIDTH);
@@ -582,9 +603,9 @@ private:
 
   void ApplyLayoutMode()
   {
-    float requestedWidth  = mState.width;
-    float requestedHeight = mState.height;
-    LayoutAlignment crossAlignment = LayoutAlignment::CENTER;
+    float           requestedWidth  = mState.width;
+    float           requestedHeight = mState.height;
+    LayoutAlignment crossAlignment  = LayoutAlignment::CENTER;
 
     switch(mState.layout)
     {
@@ -616,9 +637,15 @@ private:
   {
     switch(mState.padding % 3u)
     {
-      case 0u: mTestLabel.SetPadding(Insets(0.0f, 0.0f, 0.0f, 0.0f)); break;
-      case 1u: mTestLabel.SetPadding(Insets(4.0f, 4.0f, 2.0f, 2.0f)); break;
-      case 2u: mTestLabel.SetPadding(Insets(20.0f, 20.0f, 12.0f, 12.0f)); break;
+      case 0u:
+        mTestLabel.SetPadding(Insets(0.0f, 0.0f, 0.0f, 0.0f));
+        break;
+      case 1u:
+        mTestLabel.SetPadding(Insets(4.0f, 4.0f, 2.0f, 2.0f));
+        break;
+      case 2u:
+        mTestLabel.SetPadding(Insets(20.0f, 20.0f, 12.0f, 12.0f));
+        break;
     }
   }
 
@@ -626,9 +653,15 @@ private:
   {
     switch(mState.fit)
     {
-      case FitMode::OFF:        mTestLabel.SetTextFit(Text::Fit::None()); break;
-      case FitMode::RANGE:      mTestLabel.SetTextFit(Text::Fit::Range(8.0f, 32.0f, 2.0f)); break;
-      case FitMode::CANDIDATES: mTestLabel.SetTextFit(FitCandidates()); break;
+      case FitMode::OFF:
+        mTestLabel.SetTextFit(Text::Fit::None());
+        break;
+      case FitMode::RANGE:
+        mTestLabel.SetTextFit(Text::Fit::Range(8.0f, 32.0f, 2.0f));
+        break;
+      case FitMode::CANDIDATES:
+        mTestLabel.SetTextFit(FitCandidates());
+        break;
     }
   }
 
@@ -678,22 +711,26 @@ private:
     {
       mAutoQueryReady = false;
     }
-    mNaturalValid   = false;
-    mHfwValid       = false;
-    mLineBefore     = -1;
+    mNaturalValid    = false;
+    mHfwValid        = false;
+    mLineBefore      = -1;
     mLineWidthBefore = -1;
-    mLineAfter      = -1;
-    mLineWidthAfter = -1;
-    mQueryPhase     = "before Render(next frame)";
+    mLineAfter       = -1;
+    mLineWidthAfter  = -1;
+    mQueryPhase      = "before Render(next frame)";
 
     switch(mQueryOrder)
     {
       case 0u:
-        QueryNatural(); QueryHfw(); QueryLinesBefore();
+        QueryNatural();
+        QueryHfw();
+        QueryLinesBefore();
         mQueryOrderName = "Natural > HFW > Lines > Render";
         break;
       case 1u:
-        QueryLinesBefore(); QueryNatural(); QueryHfw();
+        QueryLinesBefore();
+        QueryNatural();
+        QueryHfw();
         mQueryOrderName = "Lines > Natural > HFW > Render";
         break;
       case 2u:
@@ -705,13 +742,13 @@ private:
         mQueryOrderName = "HFW > Render > Natural > Lines";
         break;
       case 4u:
-        mLineBefore = mTestLabel.GetLineCount();
+        mLineBefore     = mTestLabel.GetLineCount();
         mQueryOrderName = "Line(current) > Render > Line(current/width)";
         break;
       case 5u:
         QueryHfw();
         mLineWidthBefore = mTestLabel.GetLineCount(mState.width);
-        mQueryOrderName = "HFW > Line(width) > Render > remaining";
+        mQueryOrderName  = "HFW > Line(width) > Render > remaining";
         break;
       case 6u:
         mQueryOrderName = "Render > Natural > HFW > Lines";
@@ -769,7 +806,8 @@ private:
       case 4u:
         mLineAfter      = mTestLabel.GetLineCount();
         mLineWidthAfter = mTestLabel.GetLineCount(mState.width);
-        QueryNatural(); QueryHfw();
+        QueryNatural();
+        QueryHfw();
         break;
       case 5u:
         QueryNatural();
@@ -777,7 +815,8 @@ private:
         mLineWidthAfter = mTestLabel.GetLineCount(mState.width);
         break;
       case 6u:
-        QueryNatural(); QueryHfw();
+        QueryNatural();
+        QueryHfw();
         mLineAfter      = mTestLabel.GetLineCount();
         mLineWidthAfter = mTestLabel.GetLineCount(mState.width);
         break;
@@ -896,13 +935,13 @@ private:
       return;
     }
 
-    const AutoCase& testCase      = mAutoCases[mAutoCaseIndex];
-    const std::size_t completed   = mAutoCaseIndex;
-    const std::size_t total       = mAutoCases.size();
-    const std::size_t percent     = total == 0u ? 0u : (completed * 100u) / total;
-    constexpr std::size_t BAR_SIZE = 24u;
-    const std::size_t filled      = (percent * BAR_SIZE) / 100u;
-    const std::string progressBar = std::string(filled, '#') + std::string(BAR_SIZE - filled, '.');
+    const AutoCase&       testCase    = mAutoCases[mAutoCaseIndex];
+    const std::size_t     completed   = mAutoCaseIndex;
+    const std::size_t     total       = mAutoCases.size();
+    const std::size_t     percent     = total == 0u ? 0u : (completed * 100u) / total;
+    constexpr std::size_t BAR_SIZE    = 24u;
+    const std::size_t     filled      = (percent * BAR_SIZE) / 100u;
+    const std::string     progressBar = std::string(filled, '#') + std::string(BAR_SIZE - filled, '.');
 
     std::ostringstream header;
     header << "<font weight='bold'><color value='#F8FAFC'>LABEL MAXIMUM LINES · AUTO VERIFY</color></font>"
@@ -1012,13 +1051,13 @@ private:
       return;
     }
 
-    const Text::Fit::Type actualFit = mTestLabel.GetTextFit().GetType();
-    const char* actualFitName = actualFit == Text::Fit::Type::RANGE ? "RANGE" :
-                                actualFit == Text::Fit::Type::CANDIDATES ? "CANDIDATES" : "OFF";
+    const Text::Fit::Type actualFit     = mTestLabel.GetTextFit().GetType();
+    const char*           actualFitName = actualFit == Text::Fit::Type::RANGE ? "RANGE" : actualFit == Text::Fit::Type::CANDIDATES ? "CANDIDATES"
+                                                                                                                                   : "OFF";
 
-    uint32_t bannerBackground = 0x0F766E;
-    uint32_t bannerBorder     = 0x5EEAD4;
-    const char* bannerAccent  = "#99F6E4";
+    uint32_t    bannerBackground = 0x0F766E;
+    uint32_t    bannerBorder     = 0x5EEAD4;
+    const char* bannerAccent     = "#99F6E4";
     if(mFeedbackTone == FeedbackTone::ACTION)
     {
       bannerBackground = 0x6D28D9;
@@ -1095,7 +1134,7 @@ private:
     }
 
     StopAutomation();
-    mAutoInteractive = interactive;
+    mAutoInteractive   = interactive;
     mAutoResultVisible = false;
     if(interactive)
     {
@@ -1157,22 +1196,22 @@ private:
                           const std::string& cappedBaselineKey = std::string())
   {
     AutoCase capture;
-    capture.name          = name + "-capture";
-    capture.scenarioIndex = scenarioIndex;
-    capture.state         = state;
+    capture.name               = name + "-capture";
+    capture.scenarioIndex      = scenarioIndex;
+    capture.state              = state;
     capture.state.maximumLines = Text::MAXIMUM_LINES_UNLIMITED;
-    capture.baselineMode  = AutoBaselineMode::CAPTURE;
-    capture.baselineKey   = baselineKey;
+    capture.baselineMode       = AutoBaselineMode::CAPTURE;
+    capture.baselineKey        = baselineKey;
     AddAutoCase(capture);
 
-    AutoCase capped = capture;
-    capped.name          = name + "-capped";
+    AutoCase capped           = capture;
+    capped.name               = name + "-capped";
     capped.state.maximumLines = 2;
-    capped.baselineMode  = cappedBaselineKey.empty() ? AutoBaselineMode::NONE : AutoBaselineMode::CAPTURE;
-    capped.baselineKey   = cappedBaselineKey;
+    capped.baselineMode       = cappedBaselineKey.empty() ? AutoBaselineMode::NONE : AutoBaselineMode::CAPTURE;
+    capped.baselineKey        = cappedBaselineKey;
     AddAutoCase(capped);
 
-    AutoCase restore = capture;
+    AutoCase restore     = capture;
     restore.name         = name + "-restore";
     restore.baselineMode = AutoBaselineMode::COMPARE;
     AddAutoCase(restore);
@@ -1182,8 +1221,8 @@ private:
   {
     mAutoCases.clear();
 
-    constexpr std::array<std::size_t, 12u> CORE_SCENARIOS{{0u, 1u, 3u, 4u, 15u, 16u, 5u, 6u, 8u, 9u, 10u, 11u}};
-    constexpr std::array<int, 5u>           MAXIMUM_LINES_VALUES{{0, 1, 2, 3, 5}};
+    constexpr std::array<std::size_t, 12u>       CORE_SCENARIOS{{0u, 1u, 3u, 4u, 15u, 16u, 5u, 6u, 8u, 9u, 10u, 11u}};
+    constexpr std::array<int, 5u>                MAXIMUM_LINES_VALUES{{0, 1, 2, 3, 5}};
     constexpr std::array<Text::OverflowMode, 2u> OVERFLOW_VALUES{{Text::OverflowMode::CLIP, Text::OverflowMode::ELLIPSIS}};
 
     for(std::size_t scenarioIndex : CORE_SCENARIOS)
@@ -1193,11 +1232,11 @@ private:
         for(Text::OverflowMode overflow : OVERFLOW_VALUES)
         {
           AutoCase testCase;
-          testCase.name          = "core-matrix";
-          testCase.scenarioIndex = scenarioIndex;
-          testCase.state         = MakeAutoState(scenarioIndex);
+          testCase.name               = "core-matrix";
+          testCase.scenarioIndex      = scenarioIndex;
+          testCase.state              = MakeAutoState(scenarioIndex);
           testCase.state.maximumLines = maximumLines;
-          testCase.state.overflow = overflow;
+          testCase.state.overflow     = overflow;
           AddAutoCase(testCase);
         }
       }
@@ -1206,9 +1245,9 @@ private:
     for(std::size_t scenarioIndex = 0u; scenarioIndex < SCENARIOS.size(); ++scenarioIndex)
     {
       AutoCase smoke;
-      smoke.name          = "all-scenarios-smoke";
-      smoke.scenarioIndex = scenarioIndex;
-      smoke.state         = MakeAutoState(scenarioIndex);
+      smoke.name               = "all-scenarios-smoke";
+      smoke.scenarioIndex      = scenarioIndex;
+      smoke.state              = MakeAutoState(scenarioIndex);
       smoke.state.maximumLines = 3;
       AddAutoCase(smoke);
     }
@@ -1219,24 +1258,24 @@ private:
                                                                       Text::LineWrapMode::MIXED}})
     {
       AutoCase option;
-      option.name           = "wrap-mode-smoke";
-      option.scenarioIndex  = 0u;
-      option.state          = MakeAutoState(0u);
+      option.name               = "wrap-mode-smoke";
+      option.scenarioIndex      = 0u;
+      option.state              = MakeAutoState(0u);
       option.state.maximumLines = 3;
-      option.state.wrap     = wrap;
+      option.state.wrap         = wrap;
       AddAutoCase(option);
     }
 
     for(Text::Alignment alignment : std::array<Text::Alignment, 3u>{{Text::Alignment::START,
-                                                                      Text::Alignment::CENTER,
-                                                                      Text::Alignment::END}})
+                                                                     Text::Alignment::CENTER,
+                                                                     Text::Alignment::END}})
     {
       AutoCase option;
-      option.name            = "alignment-smoke";
-      option.scenarioIndex   = 0u;
-      option.state           = MakeAutoState(0u);
-      option.state.maximumLines  = 3;
-      option.state.alignment = alignment;
+      option.name               = "alignment-smoke";
+      option.scenarioIndex      = 0u;
+      option.state              = MakeAutoState(0u);
+      option.state.maximumLines = 3;
+      option.state.alignment    = alignment;
       AddAutoCase(option);
     }
 
@@ -1244,64 +1283,64 @@ private:
                                                                                  LayoutDirection::RIGHT_TO_LEFT}})
     {
       AutoCase option;
-      option.name            = "direction-smoke";
-      option.scenarioIndex   = 5u;
-      option.state           = MakeAutoState(5u);
-      option.state.maximumLines  = 3;
-      option.state.direction = direction;
+      option.name               = "direction-smoke";
+      option.scenarioIndex      = 5u;
+      option.state              = MakeAutoState(5u);
+      option.state.maximumLines = 3;
+      option.state.direction    = direction;
       AddAutoCase(option);
     }
 
     for(TargetLayoutMode layout : std::array<TargetLayoutMode, 5u>{{TargetLayoutMode::FIXED_FIXED,
-                                                                     TargetLayoutMode::FIXED_WRAP,
-                                                                     TargetLayoutMode::WRAP_WRAP,
-                                                                     TargetLayoutMode::MATCH_WRAP,
-                                                                     TargetLayoutMode::WRAP_FIXED}})
+                                                                    TargetLayoutMode::FIXED_WRAP,
+                                                                    TargetLayoutMode::WRAP_WRAP,
+                                                                    TargetLayoutMode::MATCH_WRAP,
+                                                                    TargetLayoutMode::WRAP_FIXED}})
     {
       AutoCase option;
-      option.name           = "layout-mode-smoke";
-      option.scenarioIndex  = 0u;
-      option.state          = MakeAutoState(0u);
+      option.name               = "layout-mode-smoke";
+      option.scenarioIndex      = 0u;
+      option.state              = MakeAutoState(0u);
       option.state.maximumLines = 3;
-      option.state.layout   = layout;
+      option.state.layout       = layout;
       AddAutoCase(option);
     }
 
     for(uint32_t padding : std::array<uint32_t, 3u>{{0u, 1u, 2u}})
     {
       AutoCase option;
-      option.name           = "padding-smoke";
-      option.scenarioIndex  = 0u;
-      option.state          = MakeAutoState(0u);
+      option.name               = "padding-smoke";
+      option.scenarioIndex      = 0u;
+      option.state              = MakeAutoState(0u);
       option.state.maximumLines = 3;
-      option.state.padding  = padding;
+      option.state.padding      = padding;
       AddAutoCase(option);
     }
 
     for(int maximumLines : MAXIMUM_LINES_VALUES)
     {
       AutoCase canonical;
-      canonical.name          = "explicit-five-lines";
-      canonical.scenarioIndex = 1u;
-      canonical.state         = MakeAutoState(1u);
-      canonical.state.width   = 900.0f;
-      canonical.state.height  = 400.0f;
+      canonical.name               = "explicit-five-lines";
+      canonical.scenarioIndex      = 1u;
+      canonical.state              = MakeAutoState(1u);
+      canonical.state.width        = 900.0f;
+      canonical.state.height       = 400.0f;
       canonical.state.maximumLines = maximumLines;
-      canonical.expectedLineCount = maximumLines == Text::MAXIMUM_LINES_UNLIMITED ? 5 : maximumLines;
+      canonical.expectedLineCount  = maximumLines == Text::MAXIMUM_LINES_UNLIMITED ? 5 : maximumLines;
       AddAutoCase(canonical);
     }
 
     for(int maximumLines : std::array<int, 2u>{{1, 3}})
     {
       AutoCase singleLine;
-      singleLine.name          = "single-line-semantics";
-      singleLine.scenarioIndex = 1u;
-      singleLine.state         = MakeAutoState(1u);
-      singleLine.state.width   = 900.0f;
-      singleLine.state.height  = 160.0f;
-      singleLine.state.multiLine = false;
-      singleLine.state.maximumLines  = maximumLines;
-      singleLine.expectedLineCount = 1;
+      singleLine.name               = "single-line-semantics";
+      singleLine.scenarioIndex      = 1u;
+      singleLine.state              = MakeAutoState(1u);
+      singleLine.state.width        = 900.0f;
+      singleLine.state.height       = 160.0f;
+      singleLine.state.multiLine    = false;
+      singleLine.state.maximumLines = maximumLines;
+      singleLine.expectedLineCount  = 1;
       AddAutoCase(singleLine);
     }
 
@@ -1310,12 +1349,12 @@ private:
       for(int maximumLines : std::array<int, 2u>{{0, 3}})
       {
         AutoCase query;
-        query.name          = "query-order";
-        query.scenarioIndex = 0u;
-        query.state         = MakeAutoState(0u);
-        query.state.width   = 260.0f;
+        query.name               = "query-order";
+        query.scenarioIndex      = 0u;
+        query.state              = MakeAutoState(0u);
+        query.state.width        = 260.0f;
         query.state.maximumLines = maximumLines;
-        query.queryOrder    = queryOrder;
+        query.queryOrder         = queryOrder;
         AddAutoCase(query);
       }
     }
@@ -1333,19 +1372,19 @@ private:
 
     for(FitMode fit : std::array<FitMode, 2u>{{FitMode::RANGE, FitMode::CANDIDATES}})
     {
-      TestState state = MakeAutoState(0u);
-      state.width  = 240.0f;
-      state.height = 160.0f;
-      state.fit    = fit;
+      TestState state                = MakeAutoState(0u);
+      state.width                    = 240.0f;
+      state.height                   = 160.0f;
+      state.fit                      = fit;
       const std::string fitName      = fit == FitMode::RANGE ? "fit-range" : "fit-candidates";
       const std::string fitCappedKey = fitName + "-capped";
       AddRestoreSequence("text-fit-restore", fitName, 0u, state, fitCappedKey);
 
-      TestState impossible = MakeAutoState(16u);
-      impossible.width    = 180.0f;
-      impossible.height   = 42.0f;
+      TestState impossible    = MakeAutoState(16u);
+      impossible.width        = 180.0f;
+      impossible.height       = 42.0f;
       impossible.maximumLines = 2;
-      impossible.fit      = fit;
+      impossible.fit          = fit;
 
       AutoCase stableCapture;
       stableCapture.name          = "text-fit-impossible-capture";
@@ -1355,33 +1394,33 @@ private:
       stableCapture.baselineKey   = fit == FitMode::RANGE ? "impossible-range" : "impossible-candidates";
       AddAutoCase(stableCapture);
 
-      AutoCase stableCompare = stableCapture;
+      AutoCase stableCompare     = stableCapture;
       stableCompare.name         = "text-fit-impossible-repeat";
       stableCompare.baselineMode = AutoBaselineMode::COMPARE;
       AddAutoCase(stableCompare);
 
       AutoCase asyncFit;
-      asyncFit.name           = "text-fit-async";
-      asyncFit.scenarioIndex  = 0u;
-      asyncFit.state          = state;
+      asyncFit.name               = "text-fit-async";
+      asyncFit.scenarioIndex      = 0u;
+      asyncFit.state              = state;
       asyncFit.state.maximumLines = 2;
-      asyncFit.state.async    = true;
-      asyncFit.requireAsync   = true;
-      asyncFit.baselineMode   = AutoBaselineMode::COMPARE;
-      asyncFit.baselineKey    = fitCappedKey;
+      asyncFit.state.async        = true;
+      asyncFit.requireAsync       = true;
+      asyncFit.baselineMode       = AutoBaselineMode::COMPARE;
+      asyncFit.baselineKey        = fitCappedKey;
       AddAutoCase(asyncFit);
     }
 
     for(Text::OverflowMode overflow : OVERFLOW_VALUES)
     {
       AutoCase conflict;
-      conflict.name          = "height-conflict";
-      conflict.scenarioIndex = 15u;
-      conflict.state         = MakeAutoState(15u);
-      conflict.state.width   = 320.0f;
-      conflict.state.height  = 54.0f;
+      conflict.name               = "height-conflict";
+      conflict.scenarioIndex      = 15u;
+      conflict.state              = MakeAutoState(15u);
+      conflict.state.width        = 320.0f;
+      conflict.state.height       = 54.0f;
       conflict.state.maximumLines = 3;
-      conflict.state.overflow = overflow;
+      conflict.state.overflow     = overflow;
       AddAutoCase(conflict);
     }
 
@@ -1390,10 +1429,10 @@ private:
       for(int maximumLines : std::array<int, 4u>{{0, 1, 2, 3}})
       {
         AutoCase image;
-        image.name          = "image-span-width";
-        image.scenarioIndex = 11u;
-        image.state         = MakeAutoState(11u);
-        image.state.width   = width;
+        image.name               = "image-span-width";
+        image.scenarioIndex      = 11u;
+        image.state              = MakeAutoState(11u);
+        image.state.width        = width;
         image.state.maximumLines = maximumLines;
         if(width == 180.0f && maximumLines == 2)
         {
@@ -1405,13 +1444,13 @@ private:
     }
 
     AutoCase syncBefore;
-    syncBefore.name          = "sync-to-async-sync";
-    syncBefore.scenarioIndex = 0u;
-    syncBefore.state         = MakeAutoState(0u);
+    syncBefore.name               = "sync-to-async-sync";
+    syncBefore.scenarioIndex      = 0u;
+    syncBefore.state              = MakeAutoState(0u);
     syncBefore.state.maximumLines = 3;
     AddAutoCase(syncBefore);
 
-    AutoCase asyncState = syncBefore;
+    AutoCase asyncState     = syncBefore;
     asyncState.state.async  = true;
     asyncState.requireAsync = true;
     AddAutoCase(asyncState);
@@ -1419,45 +1458,45 @@ private:
     AddAutoCase(syncBefore);
 
     AutoCase asyncImage;
-    asyncImage.name          = "image-span-async";
-    asyncImage.scenarioIndex = 11u;
-    asyncImage.state         = MakeAutoState(11u);
-    asyncImage.state.width   = 180.0f;
+    asyncImage.name               = "image-span-async";
+    asyncImage.scenarioIndex      = 11u;
+    asyncImage.state              = MakeAutoState(11u);
+    asyncImage.state.width        = 180.0f;
     asyncImage.state.maximumLines = 2;
-    asyncImage.state.async    = true;
-    asyncImage.requireAsync   = true;
-    asyncImage.baselineMode   = AutoBaselineMode::COMPARE;
-    asyncImage.baselineKey    = "image-span-sync-capped";
+    asyncImage.state.async        = true;
+    asyncImage.requireAsync       = true;
+    asyncImage.baselineMode       = AutoBaselineMode::COMPARE;
+    asyncImage.baselineKey        = "image-span-sync-capped";
     AddAutoCase(asyncImage);
 
     AutoCase abaReference;
-    abaReference.name          = "async-rapid-aba-sync-reference";
-    abaReference.scenarioIndex = 0u;
-    abaReference.state         = MakeAutoState(0u);
+    abaReference.name               = "async-rapid-aba-sync-reference";
+    abaReference.scenarioIndex      = 0u;
+    abaReference.state              = MakeAutoState(0u);
     abaReference.state.maximumLines = 5;
-    abaReference.baselineMode  = AutoBaselineMode::CAPTURE;
-    abaReference.baselineKey   = "async-aba-final";
+    abaReference.baselineMode       = AutoBaselineMode::CAPTURE;
+    abaReference.baselineKey        = "async-aba-final";
     AddAutoCase(abaReference);
 
     AutoCase aba;
-    aba.name          = "async-rapid-aba";
-    aba.scenarioIndex = 0u;
-    aba.state         = MakeAutoState(0u);
-    aba.state.async   = true;
-    aba.state.maximumLines = 5;
-    aba.requireAsync   = true;
+    aba.name                  = "async-rapid-aba";
+    aba.scenarioIndex         = 0u;
+    aba.state                 = MakeAutoState(0u);
+    aba.state.async           = true;
+    aba.state.maximumLines    = 5;
+    aba.requireAsync          = true;
     aba.requireAsyncLineMatch = true;
-    aba.baselineMode   = AutoBaselineMode::COMPARE;
-    aba.baselineKey    = "async-aba-final";
-    aba.rapidMaximumLines  = {5, 2, 5};
+    aba.baselineMode          = AutoBaselineMode::COMPARE;
+    aba.baselineKey           = "async-aba-final";
+    aba.rapidMaximumLines     = {5, 2, 5};
     AddAutoCase(aba);
 
-    AutoCase rapid = aba;
-    rapid.name          = "async-rapid-transition";
-    rapid.state.height  = 420.0f;
+    AutoCase rapid           = aba;
+    rapid.name               = "async-rapid-transition";
+    rapid.state.height       = 420.0f;
     rapid.state.maximumLines = Text::MAXIMUM_LINES_UNLIMITED;
-    rapid.baselineMode  = AutoBaselineMode::COMPARE;
-    rapid.baselineKey   = "restore-s1";
+    rapid.baselineMode       = AutoBaselineMode::COMPARE;
+    rapid.baselineKey        = "restore-s1";
     rapid.rapidMaximumLines  = {5, 2, 5, 1, Text::MAXIMUM_LINES_UNLIMITED};
     AddAutoCase(rapid);
   }
@@ -1471,15 +1510,15 @@ private:
     }
 
     const AutoCase& testCase = mAutoCases[mAutoCaseIndex];
-    mAutoCaseTicks            = 0u;
-    mAutoQueryReady           = false;
-    mAutoPreviousValid        = false;
-    mAutoStableObservations   = 0u;
-    mAutoCasePassStart        = mAutoPassCount;
-    mAutoCaseFailStart        = mAutoFailCount;
-    mAutoNaturalStart         = mAsyncNaturalCompletions;
-    mAutoHfwStart             = mAsyncHfwCompletions;
-    mAutoRenderStart          = mAsyncRenderCompletions;
+    mAutoCaseTicks           = 0u;
+    mAutoQueryReady          = false;
+    mAutoPreviousValid       = false;
+    mAutoStableObservations  = 0u;
+    mAutoCasePassStart       = mAutoPassCount;
+    mAutoCaseFailStart       = mAutoFailCount;
+    mAutoNaturalStart        = mAsyncNaturalCompletions;
+    mAutoHfwStart            = mAsyncHfwCompletions;
+    mAutoRenderStart         = mAsyncRenderCompletions;
 
     mScenarioIndex = testCase.scenarioIndex;
     mState         = testCase.state;
@@ -1577,7 +1616,7 @@ private:
       ++mAutoFailCount;
     }
 
-    const AutoCase& testCase = mAutoCases[mAutoCaseIndex];
+    const AutoCase&    testCase = mAutoCases[mAutoCaseIndex];
     std::ostringstream line;
     line << "[MAXIMUM_LINES][CHECK][" << (passed ? "PASS" : "FAIL") << "]"
          << " case=" << testCase.id
@@ -1605,9 +1644,9 @@ private:
 
   void LogAutoObservation(const AutoCase& testCase) const
   {
-    const Text::Fit::Type actualFit = mTestLabel.GetTextFit().GetType();
-    const char* actualFitName = actualFit == Text::Fit::Type::RANGE ? "RANGE" :
-                                actualFit == Text::Fit::Type::CANDIDATES ? "CANDIDATES" : "OFF";
+    const Text::Fit::Type actualFit     = mTestLabel.GetTextFit().GetType();
+    const char*           actualFitName = actualFit == Text::Fit::Type::RANGE ? "RANGE" : actualFit == Text::Fit::Type::CANDIDATES ? "CANDIDATES"
+                                                                                                                                   : "OFF";
 
     std::ostringstream state;
     state << "[MAXIMUM_LINES][STATE] case=" << testCase.id
@@ -1719,8 +1758,8 @@ private:
     AutoCheck(mTestLabel.GetLineWrapMode() == mState.wrap, "STATE", "wrap-roundtrip", WrapName(mState.wrap), WrapName(mTestLabel.GetLineWrapMode()));
     AutoCheck(mTestLabel.GetHorizontalTextAlignment() == mState.alignment, "STATE", "alignment-roundtrip", AlignmentName(mState.alignment), AlignmentName(mTestLabel.GetHorizontalTextAlignment()));
 
-    const Text::Fit::Type expectedFit = mState.fit == FitMode::RANGE ? Text::Fit::Type::RANGE :
-                                         mState.fit == FitMode::CANDIDATES ? Text::Fit::Type::CANDIDATES : Text::Fit::Type::NONE;
+    const Text::Fit::Type expectedFit = mState.fit == FitMode::RANGE ? Text::Fit::Type::RANGE : mState.fit == FitMode::CANDIDATES ? Text::Fit::Type::CANDIDATES
+                                                                                                                                  : Text::Fit::Type::NONE;
     AutoCheck(mTestLabel.GetTextFit().GetType() == expectedFit, "TEXT_FIT", "fit-roundtrip", FitName(mState.fit), FitName(mState.fit));
 
     if(mState.multiLine && mState.maximumLines > Text::MAXIMUM_LINES_UNLIMITED)
@@ -1816,7 +1855,7 @@ private:
     std::fflush(stdout);
     RestoreInteractiveAutoState();
     mAutoInteractive = false;
-    mAutoExitCode     = 0;
+    mAutoExitCode    = 0;
     RecordFeedback("V", "AUTO VERIFY CANCELLED", "Manual scenario and settings restored", "automation", FeedbackTone::ACTION);
     ApplyState(true, false);
   }
@@ -1916,12 +1955,12 @@ private:
   void SelectScenario(int delta, bool applyRecommended)
   {
     const int count = static_cast<int>(SCENARIOS.size());
-    mScenarioIndex = static_cast<std::size_t>((static_cast<int>(mScenarioIndex) + delta + count) % count);
+    mScenarioIndex  = static_cast<std::size_t>((static_cast<int>(mScenarioIndex) + delta + count) % count);
     if(applyRecommended)
     {
       const Scenario& scenario = SCENARIOS[mScenarioIndex];
-      mState.wrap      = scenario.recommendedWrap;
-      mState.direction = scenario.recommendedDirection;
+      mState.wrap              = scenario.recommendedWrap;
+      mState.direction         = scenario.recommendedDirection;
 
       if(mScenarioIndex == 12u || mScenarioIndex == 13u || mScenarioIndex == 14u)
       {
@@ -1930,17 +1969,17 @@ private:
       else if(mScenarioIndex == 15u)
       {
         mState.maximumLines = 3;
-        mState.width    = 260.0f;
-        mState.height   = 54.0f;
-        mState.layout   = TargetLayoutMode::FIXED_FIXED;
+        mState.width        = 260.0f;
+        mState.height       = 54.0f;
+        mState.layout       = TargetLayoutMode::FIXED_FIXED;
       }
       else if(mScenarioIndex == 16u)
       {
         mState.maximumLines = 2;
-        mState.width    = 180.0f;
-        mState.height   = 42.0f;
-        mState.fit      = FitMode::RANGE;
-        mState.layout   = TargetLayoutMode::FIXED_FIXED;
+        mState.width        = 180.0f;
+        mState.height       = 42.0f;
+        mState.fit          = FitMode::RANGE;
+        mState.layout       = TargetLayoutMode::FIXED_FIXED;
       }
       else if(mScenarioIndex == 17u)
       {
@@ -2003,7 +2042,7 @@ private:
         return false;
       }
       const std::string before = MaximumLinesName(mState.maximumLines);
-      mState.maximumLines = transition[mAutomationIndex++];
+      mState.maximumLines      = transition[mAutomationIndex++];
       RecordFeedback("T", "MAXIMUM LINES · TRANSITION", before + "  ->  " + MaximumLinesName(mState.maximumLines), "max", FeedbackTone::ACTION);
       ApplyState();
       return true;
@@ -2020,7 +2059,7 @@ private:
         return false;
       }
       const std::string before = MaximumLinesName(mState.maximumLines);
-      mState.maximumLines = aba[mAutomationIndex % aba.size()];
+      mState.maximumLines      = aba[mAutomationIndex % aba.size()];
       ++mAutomationIndex;
       RecordFeedback("R", "MAXIMUM LINES · ASYNC ABA", before + "  ->  " + MaximumLinesName(mState.maximumLines), "max", FeedbackTone::ACTION);
       ApplyState();
@@ -2112,70 +2151,70 @@ private:
         case 0u:
         {
           const std::string before = ScalarName(mState.width);
-          mState.width = 80.0f + static_cast<float>((mStressIteration * 37u) % 421u);
+          mState.width             = 80.0f + static_cast<float>((mStressIteration * 37u) % 421u);
           RecordFeedback("X", "WIDTH · FULL STRESS", before + "  ->  " + ScalarName(mState.width), "size", FeedbackTone::ACTION);
           break;
         }
         case 1u:
         {
           const std::string before = ScalarName(mState.height);
-          mState.height = 30.0f + static_cast<float>((mStressIteration * 29u) % 231u);
+          mState.height            = 30.0f + static_cast<float>((mStressIteration * 29u) % 231u);
           RecordFeedback("X", "HEIGHT · FULL STRESS", before + "  ->  " + ScalarName(mState.height), "size", FeedbackTone::ACTION);
           break;
         }
         case 2u:
         {
           const std::string before = MaximumLinesName(mState.maximumLines);
-          mState.maximumLines = static_cast<int>((mStressIteration / 2u) % 6u);
+          mState.maximumLines      = static_cast<int>((mStressIteration / 2u) % 6u);
           RecordFeedback("X", "MAXIMUM LINES · FULL STRESS", before + "  ->  " + MaximumLinesName(mState.maximumLines), "max", FeedbackTone::ACTION);
           break;
         }
         case 3u:
         {
           const std::string before = OverflowName(mState.overflow);
-          mState.overflow = mState.overflow == Text::OverflowMode::ELLIPSIS ? Text::OverflowMode::CLIP : Text::OverflowMode::ELLIPSIS;
+          mState.overflow          = mState.overflow == Text::OverflowMode::ELLIPSIS ? Text::OverflowMode::CLIP : Text::OverflowMode::ELLIPSIS;
           RecordFeedback("X", "OVERFLOW · FULL STRESS", before + "  ->  " + OverflowName(mState.overflow), "overflow", FeedbackTone::ACTION);
           break;
         }
         case 4u:
         {
           const std::string before = WrapName(mState.wrap);
-          mState.wrap = static_cast<Text::LineWrapMode>((static_cast<uint32_t>(mState.wrap) + 1u) % 4u);
+          mState.wrap              = static_cast<Text::LineWrapMode>((static_cast<uint32_t>(mState.wrap) + 1u) % 4u);
           RecordFeedback("X", "WRAP · FULL STRESS", before + "  ->  " + WrapName(mState.wrap), "wrap", FeedbackTone::ACTION);
           break;
         }
         case 5u:
         {
           const std::string before = AlignmentName(mState.alignment);
-          mState.alignment = static_cast<Text::Alignment>((static_cast<uint32_t>(mState.alignment) + 1u) % 3u);
+          mState.alignment         = static_cast<Text::Alignment>((static_cast<uint32_t>(mState.alignment) + 1u) % 3u);
           RecordFeedback("X", "ALIGN · FULL STRESS", before + "  ->  " + AlignmentName(mState.alignment), "align", FeedbackTone::ACTION);
           break;
         }
         case 6u:
         {
           const std::string before = DirectionName(mState.direction);
-          mState.direction = mState.direction == LayoutDirection::LEFT_TO_RIGHT ? LayoutDirection::RIGHT_TO_LEFT : LayoutDirection::LEFT_TO_RIGHT;
+          mState.direction         = mState.direction == LayoutDirection::LEFT_TO_RIGHT ? LayoutDirection::RIGHT_TO_LEFT : LayoutDirection::LEFT_TO_RIGHT;
           RecordFeedback("X", "DIRECTION · FULL STRESS", before + "  ->  " + DirectionName(mState.direction), "direction", FeedbackTone::ACTION);
           break;
         }
         case 7u:
         {
           const std::string before = FitName(mState.fit);
-          mState.fit = static_cast<FitMode>((static_cast<uint32_t>(mState.fit) + 1u) % 3u);
+          mState.fit               = static_cast<FitMode>((static_cast<uint32_t>(mState.fit) + 1u) % 3u);
           RecordFeedback("X", "TEXT FIT · FULL STRESS", before + "  ->  " + FitName(mState.fit), "fit", FeedbackTone::ACTION);
           break;
         }
         case 8u:
         {
           const std::string before = mState.async ? "ON" : "OFF";
-          mState.async = !mState.async;
+          mState.async             = !mState.async;
           RecordFeedback("X", "ASYNC · FULL STRESS", before + "  ->  " + (mState.async ? "ON" : "OFF"), "async", FeedbackTone::ACTION);
           break;
         }
         case 9u:
         {
           const std::string before = LayoutName(mState.layout);
-          mState.layout = static_cast<TargetLayoutMode>((static_cast<uint32_t>(mState.layout) + 1u) % 5u);
+          mState.layout            = static_cast<TargetLayoutMode>((static_cast<uint32_t>(mState.layout) + 1u) % 5u);
           RecordFeedback("X", "LAYOUT · FULL STRESS", before + "  ->  " + LayoutName(mState.layout), "size", FeedbackTone::ACTION);
           break;
         }
@@ -2190,8 +2229,8 @@ private:
         {
           const std::string beforePadding = PaddingName(mState.padding);
           const std::string beforeMulti   = mState.multiLine ? "true" : "false";
-          mState.padding = (mState.padding + 1u) % 3u;
-          mState.multiLine = !mState.multiLine;
+          mState.padding                  = (mState.padding + 1u) % 3u;
+          mState.multiLine                = !mState.multiLine;
           RecordFeedback("X", "PADDING + MULTILINE · FULL STRESS",
                          beforePadding + " -> " + PaddingName(mState.padding) + " · " + beforeMulti + " -> " + (mState.multiLine ? "true" : "false"),
                          "multiline", FeedbackTone::ACTION);
@@ -2208,16 +2247,16 @@ private:
   void Reset()
   {
     StopAutomation();
-    mState                = TestState{};
-    mScenarioIndex        = 0u;
-    mAppliedScenarioIndex = SCENARIOS.size();
-    mQueryOrder           = 0u;
-    mUpdateCount          = 0u;
-    mAsyncRenderCompletions = 0u;
-    mAsyncNaturalRequests   = 0u;
+    mState                   = TestState{};
+    mScenarioIndex           = 0u;
+    mAppliedScenarioIndex    = SCENARIOS.size();
+    mQueryOrder              = 0u;
+    mUpdateCount             = 0u;
+    mAsyncRenderCompletions  = 0u;
+    mAsyncNaturalRequests    = 0u;
     mAsyncNaturalCompletions = 0u;
-    mAsyncHfwRequests       = 0u;
-    mAsyncHfwCompletions    = 0u;
+    mAsyncHfwRequests        = 0u;
+    mAsyncHfwCompletions     = 0u;
     mAsyncRenderWidth = mAsyncRenderHeight = 0.0f;
     mAsyncNaturalWidth = mAsyncNaturalHeight = 0.0f;
     mAsyncHfwWidth = mAsyncHfwHeight = 0.0f;
@@ -2249,11 +2288,11 @@ private:
     }
 
     mAutoResultVisible = false;
-    bool handled = true;
+    bool handled       = true;
     if(IsKey(event, DALI_KEY_CURSOR_LEFT))
     {
       const std::string before = ScalarName(mState.width);
-      mState.width = std::max(MIN_TARGET_SIZE, mState.width - SIZE_STEP);
+      mState.width             = std::max(MIN_TARGET_SIZE, mState.width - SIZE_STEP);
       RecordChange("LEFT", "WIDTH", before, ScalarName(mState.width), "size");
     }
     else if(IsKey(event, DALI_KEY_CURSOR_RIGHT))
@@ -2265,7 +2304,7 @@ private:
     else if(IsKey(event, DALI_KEY_CURSOR_DOWN))
     {
       const std::string before = ScalarName(mState.height);
-      mState.height = std::max(MIN_TARGET_SIZE, mState.height - SIZE_STEP);
+      mState.height            = std::max(MIN_TARGET_SIZE, mState.height - SIZE_STEP);
       RecordChange("DOWN", "HEIGHT", before, ScalarName(mState.height), "size");
     }
     else if(IsKey(event, DALI_KEY_CURSOR_UP))
@@ -2280,61 +2319,61 @@ private:
       if(key.size() == 1u && key[0] >= '0' && key[0] <= '5')
       {
         const std::string before = MaximumLinesName(mState.maximumLines);
-        mState.maximumLines = key[0] - '0';
+        mState.maximumLines      = key[0] - '0';
         RecordChange(key, "MAXIMUM LINES", before, MaximumLinesName(mState.maximumLines), "max");
       }
       else if(key == "E")
       {
         const std::string before = OverflowName(mState.overflow);
-        mState.overflow = mState.overflow == Text::OverflowMode::ELLIPSIS ? Text::OverflowMode::CLIP : Text::OverflowMode::ELLIPSIS;
+        mState.overflow          = mState.overflow == Text::OverflowMode::ELLIPSIS ? Text::OverflowMode::CLIP : Text::OverflowMode::ELLIPSIS;
         RecordChange("E", "OVERFLOW", before, OverflowName(mState.overflow), "overflow");
       }
       else if(key == "W")
       {
         const std::string before = WrapName(mState.wrap);
-        mState.wrap = static_cast<Text::LineWrapMode>((static_cast<uint32_t>(mState.wrap) + 1u) % 4u);
+        mState.wrap              = static_cast<Text::LineWrapMode>((static_cast<uint32_t>(mState.wrap) + 1u) % 4u);
         RecordChange("W", "WRAP", before, WrapName(mState.wrap), "wrap");
       }
       else if(key == "H")
       {
         const std::string before = AlignmentName(mState.alignment);
-        mState.alignment = static_cast<Text::Alignment>((static_cast<uint32_t>(mState.alignment) + 1u) % 3u);
+        mState.alignment         = static_cast<Text::Alignment>((static_cast<uint32_t>(mState.alignment) + 1u) % 3u);
         RecordChange("H", "ALIGN", before, AlignmentName(mState.alignment), "align");
       }
       else if(key == "D")
       {
         const std::string before = DirectionName(mState.direction);
-        mState.direction = mState.direction == LayoutDirection::LEFT_TO_RIGHT ? LayoutDirection::RIGHT_TO_LEFT : LayoutDirection::LEFT_TO_RIGHT;
+        mState.direction         = mState.direction == LayoutDirection::LEFT_TO_RIGHT ? LayoutDirection::RIGHT_TO_LEFT : LayoutDirection::LEFT_TO_RIGHT;
         RecordChange("D", "DIRECTION", before, DirectionName(mState.direction), "direction");
       }
       else if(key == "A")
       {
         const std::string before = mState.async ? "ON" : "OFF";
-        mState.async = !mState.async;
+        mState.async             = !mState.async;
         RecordChange("A", "ASYNC", before, mState.async ? "ON" : "OFF", "async");
       }
       else if(key == "F")
       {
         const std::string before = FitName(mState.fit);
-        mState.fit = static_cast<FitMode>((static_cast<uint32_t>(mState.fit) + 1u) % 3u);
+        mState.fit               = static_cast<FitMode>((static_cast<uint32_t>(mState.fit) + 1u) % 3u);
         RecordChange("F", "TEXT FIT", before, FitName(mState.fit), "fit");
       }
       else if(key == "L")
       {
         const std::string before = LayoutName(mState.layout);
-        mState.layout = static_cast<TargetLayoutMode>((static_cast<uint32_t>(mState.layout) + 1u) % 5u);
+        mState.layout            = static_cast<TargetLayoutMode>((static_cast<uint32_t>(mState.layout) + 1u) % 5u);
         RecordChange("L", "LAYOUT", before, LayoutName(mState.layout), "size");
       }
       else if(key == "G")
       {
         const std::string before = PaddingName(mState.padding);
-        mState.padding = (mState.padding + 1u) % 3u;
+        mState.padding           = (mState.padding + 1u) % 3u;
         RecordChange("G", "PADDING", before, PaddingName(mState.padding), "padding");
       }
       else if(key == "M")
       {
         const std::string before = mState.multiLine ? "true" : "false";
-        mState.multiLine = !mState.multiLine;
+        mState.multiLine         = !mState.multiLine;
         RecordChange("M", "MULTILINE", before, mState.multiLine ? "true" : "false", "multiline");
       }
       else if(key == "N")
@@ -2352,7 +2391,7 @@ private:
       else if(key == "Q")
       {
         const uint32_t before = mQueryOrder;
-        mQueryOrder = (mQueryOrder + 1u) % 7u;
+        mQueryOrder           = (mQueryOrder + 1u) % 7u;
         RecordChange("Q", "QUERY ORDER", std::to_string(before), std::to_string(mQueryOrder), "query");
       }
       else if(key == "V")
@@ -2414,15 +2453,15 @@ private:
   Label        mRuntime;
   Label        mFooter;
 
-  TestState  mState;
-  std::size_t mScenarioIndex        = 0u;
-  std::size_t mAppliedScenarioIndex = SCENARIOS.size();
-  std::string mVeryLongText;
-  std::string mLastAction;
-  std::string mFeedbackKey    = "READY";
-  std::string mFeedbackTitle  = "SAMPLE READY";
-  std::string mFeedbackDetail = "Press a key; the changed value will appear here as before -> after";
-  std::string mChangedField;
+  TestState    mState;
+  std::size_t  mScenarioIndex        = 0u;
+  std::size_t  mAppliedScenarioIndex = SCENARIOS.size();
+  std::string  mVeryLongText;
+  std::string  mLastAction;
+  std::string  mFeedbackKey    = "READY";
+  std::string  mFeedbackTitle  = "SAMPLE READY";
+  std::string  mFeedbackDetail = "Press a key; the changed value will appear here as before -> after";
+  std::string  mChangedField;
   FeedbackTone mFeedbackTone  = FeedbackTone::READY;
   uint32_t     mFeedbackCount = 0u;
   float        mWindowWidth   = static_cast<float>(WINDOW_WIDTH);
@@ -2433,18 +2472,18 @@ private:
   Timer mStressTimer;
   Timer mAutoTimer;
 
-  std::vector<AutoCase>                 mAutoCases;
+  std::vector<AutoCase>                  mAutoCases;
   std::map<std::string, AutoMeasurement> mAutoBaselines;
-  std::size_t                            mAutoCaseIndex     = 0u;
-  uint32_t                               mAutoCaseTicks     = 0u;
-  uint32_t                               mAutoCheckCount    = 0u;
-  uint32_t                               mAutoPassCount     = 0u;
-  uint32_t                               mAutoFailCount     = 0u;
-  uint32_t                               mAutoCasePassStart = 0u;
-  uint32_t                               mAutoCaseFailStart = 0u;
-  uint32_t                               mAutoNaturalStart  = 0u;
-  uint32_t                               mAutoHfwStart      = 0u;
-  uint32_t                               mAutoRenderStart   = 0u;
+  std::size_t                            mAutoCaseIndex          = 0u;
+  uint32_t                               mAutoCaseTicks          = 0u;
+  uint32_t                               mAutoCheckCount         = 0u;
+  uint32_t                               mAutoPassCount          = 0u;
+  uint32_t                               mAutoFailCount          = 0u;
+  uint32_t                               mAutoCasePassStart      = 0u;
+  uint32_t                               mAutoCaseFailStart      = 0u;
+  uint32_t                               mAutoNaturalStart       = 0u;
+  uint32_t                               mAutoHfwStart           = 0u;
+  uint32_t                               mAutoRenderStart        = 0u;
   uint32_t                               mAutoStableObservations = 0u;
   AutoMeasurement                        mAutoPreviousMeasurement;
   bool                                   mAutoPreviousValid = false;
@@ -2469,13 +2508,13 @@ private:
   std::string mQueryPhase;
   Vector3     mNatural{0.0f, 0.0f, 0.0f};
   Vector3     mActualSize{0.0f, 0.0f, 0.0f};
-  float       mHeightForWidth = 0.0f;
-  bool        mNaturalValid   = false;
-  bool        mHfwValid       = false;
-  int         mLineBefore     = -1;
+  float       mHeightForWidth  = 0.0f;
+  bool        mNaturalValid    = false;
+  bool        mHfwValid        = false;
+  int         mLineBefore      = -1;
   int         mLineWidthBefore = -1;
-  int         mLineAfter      = -1;
-  int         mLineWidthAfter = -1;
+  int         mLineAfter       = -1;
+  int         mLineWidthAfter  = -1;
 
   uint32_t mUpdateCount             = 0u;
   uint32_t mAsyncRenderCompletions  = 0u;

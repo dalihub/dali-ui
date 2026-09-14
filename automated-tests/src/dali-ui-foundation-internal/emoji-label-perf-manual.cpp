@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 
 #include <algorithm>
@@ -177,10 +178,10 @@ std::string FindFixturePath()
 PerfOptions LoadOptions()
 {
   PerfOptions options;
-  options.fixturePath    = FindFixturePath();
-  options.maxItems       = GetEnvSize("DALI_EMOJI_PERF_MAX_ITEMS", 0u);
-  options.runs           = std::max<size_t>(1u, GetEnvSize("DALI_EMOJI_PERF_RUNS", DEFAULT_RUNS));
-  options.phaseTimeoutMs = static_cast<uint32_t>(GetEnvSize("DALI_EMOJI_PERF_TIMEOUT_MS", DEFAULT_PHASE_TIMEOUT_MS));
+  options.fixturePath     = FindFixturePath();
+  options.maxItems        = GetEnvSize("DALI_EMOJI_PERF_MAX_ITEMS", 0u);
+  options.runs            = std::max<size_t>(1u, GetEnvSize("DALI_EMOJI_PERF_RUNS", DEFAULT_RUNS));
+  options.phaseTimeoutMs  = static_cast<uint32_t>(GetEnvSize("DALI_EMOJI_PERF_TIMEOUT_MS", DEFAULT_PHASE_TIMEOUT_MS));
   options.initialFontSize = GetEnvFloat("DALI_EMOJI_PERF_FONT_SIZE", DEFAULT_INITIAL_FONT_SIZE);
 
   const char* fontFamily = GetEnv("DALI_EMOJI_PERF_FONT_FAMILY");
@@ -379,9 +380,9 @@ private:
 
     const PerfPhase& phase = mPhases[mCurrentPhase];
     mCompleted.assign(mLabels.size(), false);
-    mCompletedCount  = 0u;
-    mPhaseActive     = true;
-    mPhaseStart      = std::chrono::steady_clock::now();
+    mCompletedCount = 0u;
+    mPhaseActive    = true;
+    mPhaseStart     = std::chrono::steady_clock::now();
 
     const std::chrono::steady_clock::time_point updateStart = std::chrono::steady_clock::now();
     for(size_t index = 0u; index < mLabels.size(); ++index)
@@ -421,7 +422,7 @@ private:
               << " asyncAllMs=" << ElapsedMilliseconds(mPhaseStart)
               << " status=TIMEOUT\n";
     mPhaseActive = false;
-    mExitStatus = 2;
+    mExitStatus  = 2;
     mApplication.Quit();
     return false;
   }
@@ -459,7 +460,7 @@ private:
     }
 
     const PerfPhase& phase = mPhases[mCurrentPhase];
-    mPhaseActive = false;
+    mPhaseActive           = false;
     std::cout << "LABEL_PERF_PHASE"
               << " run=" << (mCurrentRun + 1u)
               << " phase=" << phase.name
@@ -475,24 +476,24 @@ private:
   }
 
 private:
-  Application&                                     mApplication;
-  PerfOptions                                     mOptions;
-  std::vector<PerfCase>                           mItems;
-  std::vector<std::string>                        mTexts;
-  Window                                          mWindow;
-  AbsoluteLayout                                  mRoot;
-  std::vector<Label>                              mLabels;
-  std::vector<PerfPhase>                          mPhases;
-  std::vector<bool>                               mCompleted;
-  Timer                                           mNextPhaseTimer;
-  Timer                                           mTimeoutTimer;
-  std::chrono::steady_clock::time_point           mPhaseStart;
-  size_t                                          mCurrentRun{0u};
-  size_t                                          mCurrentPhase{0u};
-  size_t                                          mCompletedCount{0u};
-  uint64_t                                        mUpdateCallMs{0u};
-  int                                             mExitStatus{0};
-  bool                                            mPhaseActive{false};
+  Application&                          mApplication;
+  PerfOptions                           mOptions;
+  std::vector<PerfCase>                 mItems;
+  std::vector<std::string>              mTexts;
+  Window                                mWindow;
+  AbsoluteLayout                        mRoot;
+  std::vector<Label>                    mLabels;
+  std::vector<PerfPhase>                mPhases;
+  std::vector<bool>                     mCompleted;
+  Timer                                 mNextPhaseTimer;
+  Timer                                 mTimeoutTimer;
+  std::chrono::steady_clock::time_point mPhaseStart;
+  size_t                                mCurrentRun{0u};
+  size_t                                mCurrentPhase{0u};
+  size_t                                mCompletedCount{0u};
+  uint64_t                              mUpdateCallMs{0u};
+  int                                   mExitStatus{0};
+  bool                                  mPhaseActive{false};
 };
 
 } // namespace
@@ -501,11 +502,11 @@ int DALI_EXPORT_API main(int argc, char** argv)
 {
   try
   {
-    PerfOptions options = LoadOptions();
-    std::vector<PerfCase> items = LoadCases(options);
+    PerfOptions           options = LoadOptions();
+    std::vector<PerfCase> items   = LoadCases(options);
 
     Application application = Application::New(&argc, &argv);
-    UiConfig config = UiConfig::New();
+    UiConfig    config      = UiConfig::New();
     config.SetLabelAsyncRendering(true);
     config.Apply();
     EmojiLabelPerfController controller(application, options, std::move(items));

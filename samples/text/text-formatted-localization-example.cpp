@@ -24,6 +24,7 @@
 //   ESC/BACK - Quit
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include "text-localization-locale.h"
 
 #include <clocale>
@@ -40,8 +41,8 @@ constexpr float STACK_SPACING   = 10.0f;
 constexpr float STACK_PADDING   = 20.0f;
 constexpr float TITLE_FONT_SIZE = 20.0f;
 constexpr float LABEL_FONT_SIZE = 18.0f;
-constexpr float CASE_FONT_SIZE   = 15.0f;
-constexpr float HELP_FONT_SIZE   = 14.0f;
+constexpr float CASE_FONT_SIZE  = 15.0f;
+constexpr float HELP_FONT_SIZE  = 14.0f;
 
 constexpr uint32_t COLOR_WHITE      = 0xFFFFFF;
 constexpr uint32_t COLOR_DARK_TEXT  = 0x222222;
@@ -384,22 +385,22 @@ private:
   }
 
   /**
-  * @brief Switches locale explicitly for manual testing on Linux and Windows hosts.
-  *
-  * The 1/2/3 key path and the direct setlocale()/LANGUAGE updates below are
-  * specific to this standalone host sample. They are not a locale-management
-  * pattern for Tizen device applications.
-  *
-  * In the Tizen product path, system locale changes are handled by the
-  * platform locale infrastructure. UiLocalizationManager listens to
-  * Adaptor::LocaleChangedSignal() and refreshes registered bindings when that
-  * signal is received. The callbacks can then call
-  * GetLocalizedString()/GetLocalizedPluralString(), which use the active
-  * gettext locale and catalog.
-  *
-  * This host test calls RefreshBindings() directly only to apply the locale
-  * changed by the sample's 1/2/3 keys immediately.
-  */
+   * @brief Switches locale explicitly for manual testing on Linux and Windows hosts.
+   *
+   * The 1/2/3 key path and the direct setlocale()/LANGUAGE updates below are
+   * specific to this standalone host sample. They are not a locale-management
+   * pattern for Tizen device applications.
+   *
+   * In the Tizen product path, system locale changes are handled by the
+   * platform locale infrastructure. UiLocalizationManager listens to
+   * Adaptor::LocaleChangedSignal() and refreshes registered bindings when that
+   * signal is received. The callbacks can then call
+   * GetLocalizedString()/GetLocalizedPluralString(), which use the active
+   * gettext locale and catalog.
+   *
+   * This host test calls RefreshBindings() directly only to apply the locale
+   * changed by the sample's 1/2/3 keys immediately.
+   */
   void SetLocale(const char* catalogLocale, const char* posixLocale, const char* windowsLocale)
   {
 #if defined(_WIN32)

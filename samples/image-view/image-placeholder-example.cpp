@@ -14,11 +14,12 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
-#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
-#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -38,13 +39,20 @@ using namespace Dali::Ui;
  */
 class ImagePlaceholderController : public ConnectionTracker
 {
-  enum class ViewType { IMAGE = 0, ANIMATED, LOTTIE, COUNT };
+  enum class ViewType
+  {
+    IMAGE = 0,
+    ANIMATED,
+    LOTTIE,
+    COUNT
+  };
   static const char* TYPE_NAMES[(int)ViewType::COUNT];
   static const char* TYPE_URLS[(int)ViewType::COUNT];
 
 public:
   explicit ImagePlaceholderController(Application& application)
-  : mApplication(application), mViewType(ViewType::IMAGE)
+  : mApplication(application),
+    mViewType(ViewType::IMAGE)
   {
     mApplication.InitSignal().Connect(this, &ImagePlaceholderController::OnInit);
   }
@@ -130,9 +138,16 @@ private:
   void ResetImage()
   {
     // Stop any pending load timer from a previous cycle.
-    if(mLoadTimer && mLoadTimer.IsRunning()) { mLoadTimer.Stop(); }
+    if(mLoadTimer && mLoadTimer.IsRunning())
+    {
+      mLoadTimer.Stop();
+    }
 
-    if(mImage) { mContainer.Remove(mImage); mImage.Reset(); }
+    if(mImage)
+    {
+      mContainer.Remove(mImage);
+      mImage.Reset();
+    }
 
     // Step 1: create view with placeholder only — no main URL yet.
     // MATCH_PARENT height ensures the view fills the weighted container so the placeholder is visible.
@@ -214,19 +229,28 @@ private:
     mTypeButton.SetText(TYPE_NAMES[(int)mViewType]);
     ResetImage();
   }
-  void OnReloadClicked(View, InputEvent) { ResetImage(); }
+  void OnReloadClicked(View, InputEvent)
+  {
+    ResetImage();
+  }
   void OnResourceReady(View view)
   {
     mStatusLabel.SetText("ResourceReady — placeholder removed");
 
     Ui::Visual::ResourceStatus status = Ui::Visual::ResourceStatus::FAILED;
-    if(auto v = ImageView::DownCast(view)) status = v.GetLoadingStatus();
-    else if(auto v = AnimatedImageView::DownCast(view)) status = v.GetLoadingStatus();
-    else if(auto v = LottieAnimationView::DownCast(view)) status = v.GetLoadingStatus();
+    if(auto v = ImageView::DownCast(view))
+      status = v.GetLoadingStatus();
+    else if(auto v = AnimatedImageView::DownCast(view))
+      status = v.GetLoadingStatus();
+    else if(auto v = LottieAnimationView::DownCast(view))
+      status = v.GetLoadingStatus();
 
     DALI_LOG_ERROR("[Placeholder] ResourceReady fired! GetLoadingStatus=%d\n", (int)status);
   }
-  void OnKeyEvent(Window window, KeyEvent event) { if(event.GetState() == KeyEvent::DOWN && (IsKey(event, DALI_KEY_ESCAPE) || IsKey(event, DALI_KEY_BACK))) mApplication.Quit(); }
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if(event.GetState() == KeyEvent::DOWN && (IsKey(event, DALI_KEY_ESCAPE) || IsKey(event, DALI_KEY_BACK))) mApplication.Quit();
+  }
 
   Application& mApplication;
   View         mImage;
@@ -237,13 +261,13 @@ private:
   ViewType     mViewType;
 };
 
-const char* ImagePlaceholderController::TYPE_NAMES[(int)ImagePlaceholderController::ViewType::COUNT] = { "TYPE: IMAGE", "TYPE: ANIMATED", "TYPE: LOTTIE" };
-const char* ImagePlaceholderController::TYPE_URLS[(int)ImagePlaceholderController::ViewType::COUNT] = { RESOURCES_DIR "gallery-large-3.jpg", RESOURCES_DIR "dog-anim.webp", RESOURCES_DIR "jolly_walker.json" };
+const char* ImagePlaceholderController::TYPE_NAMES[(int)ImagePlaceholderController::ViewType::COUNT] = {"TYPE: IMAGE", "TYPE: ANIMATED", "TYPE: LOTTIE"};
+const char* ImagePlaceholderController::TYPE_URLS[(int)ImagePlaceholderController::ViewType::COUNT]  = {RESOURCES_DIR "gallery-large-3.jpg", RESOURCES_DIR "dog-anim.webp", RESOURCES_DIR "jolly_walker.json"};
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ImagePlaceholderController controller(application);

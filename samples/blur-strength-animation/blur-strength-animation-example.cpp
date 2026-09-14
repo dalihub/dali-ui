@@ -15,16 +15,17 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
-constexpr uint32_t BLUR_RADIUS               = 40u;
-constexpr float    CONFIGURED_DOWNSCALE      = 0.25f;
+constexpr uint32_t BLUR_RADIUS                = 40u;
+constexpr float    CONFIGURED_DOWNSCALE       = 0.25f;
 constexpr float    ANIMATION_DURATION_SECONDS = 2.5f;
-const char* const  IMAGE_URL                 = RESOURCES_DIR "gallery-medium-49.jpg";
+const char* const  IMAGE_URL                  = RESOURCES_DIR "gallery-medium-49.jpg";
 
 constexpr float WINDOW_WIDTH  = 1280.0f;
 constexpr float WINDOW_HEIGHT = 720.0f;
@@ -98,7 +99,7 @@ private:
     mRoot = NewView(0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT, UiColor(0x08111F));
     mWindow.Add(mRoot);
 
-    Label title = NewLabel("Blur Strength Animation", 40.0f, 24.0f, 1200.0f, 48.0f, 32.0f, UiColor(0xF8FAFC));
+    Label title    = NewLabel("Blur Strength Animation", 40.0f, 24.0f, 1200.0f, 48.0f, 32.0f, UiColor(0xF8FAFC));
     Label subtitle = NewLabel("Strength 0 ↔ 1  |  requested downscale 0.25  |  animation buffers 1.0", 40.0f, 72.0f, 1200.0f, 34.0f, 17.0f, UiColor(0x94A3B8));
     mRoot.Add(title);
     mRoot.Add(subtitle);
@@ -106,7 +107,7 @@ private:
     AddCardBackground(LEFT_X);
     AddCardBackground(RIGHT_X);
 
-    mGaussianImage = NewImage(LEFT_X + 12.0f, CARD_TOP + 12.0f, CARD_WIDTH - 24.0f, CARD_HEIGHT - 24.0f);
+    mGaussianImage   = NewImage(LEFT_X + 12.0f, CARD_TOP + 12.0f, CARD_WIDTH - 24.0f, CARD_HEIGHT - 24.0f);
     mBackgroundImage = NewImage(RIGHT_X + 12.0f, CARD_TOP + 12.0f, CARD_WIDTH - 24.0f, CARD_HEIGHT - 24.0f);
     mGaussianImage.ResourceReadySignal().Connect(this, &BlurStrengthAnimationController::OnGaussianImageReady);
     mBackgroundImage.ResourceReadySignal().Connect(this, &BlurStrengthAnimationController::OnBackgroundImageReady);
@@ -128,8 +129,8 @@ private:
     mRoot.Add(status);
 
     mDirectionLabel = NewLabel("Preparing effects...", 68.0f, 601.0f, 1144.0f, 36.0f, 18.0f, UiColor(0xE2E8F0));
-    Label detail = NewLabel("At Strength 0, blur rendering is bypassed. A new animation automatically reactivates it at full resolution.",
-                            68.0f, 637.0f, 1144.0f, 30.0f, 14.0f, UiColor(0x7DD3FC));
+    Label detail    = NewLabel("At Strength 0, blur rendering is bypassed. A new animation automatically reactivates it at full resolution.",
+                               68.0f, 637.0f, 1144.0f, 30.0f, 14.0f, UiColor(0x7DD3FC));
     mRoot.Add(mDirectionLabel);
     mRoot.Add(detail);
 

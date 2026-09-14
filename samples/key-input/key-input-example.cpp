@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <dali/public-api/adaptor-framework/key.h>
 #include <dali/public-api/adaptor-framework/keyboard.h>

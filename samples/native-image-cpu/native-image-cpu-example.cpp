@@ -20,6 +20,7 @@
 //     the four-quadrant image is shown on screen for visual confirmation.
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
 #include <dali/devel-api/adaptor-framework/native-image-devel.h>
@@ -92,8 +93,8 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application              application = Application::New(&argc, &argv);
-  UiConfig                 config      = UiConfig::New();
+  Application application = Application::New(&argc, &argv);
+  UiConfig    config      = UiConfig::New();
   config.Apply();
   NativeImageCpuController controller(application);
   application.MainLoop();

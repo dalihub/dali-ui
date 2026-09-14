@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING = 10.0f;
-constexpr float STACK_PADDING = 20.0f;
-constexpr float INPUT_FIELD_HEIGHT = 64.0f;
+constexpr float STACK_SPACING       = 10.0f;
+constexpr float STACK_PADDING       = 20.0f;
+constexpr float INPUT_FIELD_HEIGHT  = 64.0f;
 constexpr float INPUT_EDITOR_HEIGHT = 170.0f;
 
 constexpr const char* INPUT_FIELD_MARKUP =

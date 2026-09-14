@@ -15,10 +15,11 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <chrono>
-#include <cstdio>
 #include <cstdint>
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -64,8 +65,8 @@ public:
     mWindow.SetBackgroundColor(Color::WHITE);
 
     const PositionSize windowPositionSize = mWindow.GetPositionSize();
-    mWindowSize = Vector2(static_cast<float>(windowPositionSize.width),
-                          static_cast<float>(windowPositionSize.height));
+    mWindowSize                           = Vector2(static_cast<float>(windowPositionSize.width),
+                                                    static_cast<float>(windowPositionSize.height));
 
     mDefaultView = View::New();
     SetStandaloneGeometry(mDefaultView, 0.0f, 0.0f, 10.0f, 10.0f);
@@ -802,7 +803,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Dali::Application application = Dali::Application::New(&argc, &argv);
-  ViewCreationPerf sample(application);
+  ViewCreationPerf  sample(application);
   application.MainLoop();
   return 0;
 }

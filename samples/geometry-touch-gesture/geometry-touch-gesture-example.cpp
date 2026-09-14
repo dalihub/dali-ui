@@ -21,6 +21,7 @@
 #include <sstream>
 
 // INTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/application.h>
 #include "sample-common.h"
 
 namespace GeometryTouchGestureSample
