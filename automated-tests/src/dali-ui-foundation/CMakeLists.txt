@@ -14,6 +14,7 @@ SET(TC_SOURCES
         utc-Dali-ScrollBar.cpp
         utc-Dali-GroupAdapter.cpp
         utc-Dali-AnimatedImageVisual.cpp
+        utc-Dali-Builder.cpp
         utc-Dali-BorderVisual.cpp
         utc-Dali-Unit.cpp
         utc-Dali-FocusManager.cpp
