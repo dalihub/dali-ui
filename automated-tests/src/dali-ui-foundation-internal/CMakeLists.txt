@@ -47,6 +47,7 @@ SET(TC_SOURCES
     utc-Dali-MeshVisual-internal.cpp
     utc-Dali-TransitionData-internal.cpp
     utc-Dali-NPatchUtilities-internal.cpp
+    utc-Dali-FeedbackStyle-internal.cpp
     utc-Dali-PrimitiveVisual-internal.cpp
     utc-Dali-BuilderReplacement-internal.cpp
     utc-Dali-JsonParser-internal.cpp
