@@ -16,6 +16,8 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/object/property-devel.h>
+#include <dali/devel-api/object/property-value-devel.h>
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
@@ -447,9 +449,10 @@ OptionalExtents Replacement::IsExtents(const TreeNode& node) const
   if(OptionalString replace = HasFullReplacement(node))
   {
     Property::Value value = GetFullReplacement(*replace);
-    if(Property::EXTENTS == value.GetType())
+    Extents         extentsValue;
+    if(DevelProperty::EXTENTS == value.GetType() && GetExtents(value, extentsValue))
     {
-      extents = value.Get<Extents>();
+      extents = extentsValue;
     }
   }
   else
