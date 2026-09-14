@@ -47,6 +47,7 @@ SET(TC_SOURCES
     utc-Dali-ViewAccessibility-internal.cpp
     utc-Dali-ViewDebug-internal.cpp
     utc-Dali-PageScrollView-internal.cpp
+    utc-Dali-PropertyBridge-internal.cpp
     utc-Dali-Accessibility-Text-internal.cpp
     utc-Dali-AnchorInteractionData-internal.cpp
     utc-Dali-ImageView-internal.cpp

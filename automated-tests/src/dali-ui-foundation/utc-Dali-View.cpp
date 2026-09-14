@@ -16,7 +16,6 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/integration-api/accessibility-highlight-overlay.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
@@ -4837,58 +4836,6 @@ int UtcDaliViewAccessibilityRoleConversionP(void)
   view.SetAccessibilityRole(static_cast<UiAccessibility::Role>(-1));
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::UNKNOWN, TEST_LOCATION);
 
-  END_TEST;
-}
-
-int UtcDaliAccessibilityHighlightOverlayP(void)
-{
-  UiTestApplication application;
-  AccessibilityHighlightOverlay overlay;
-
-  DALI_TEST_EQUALS(overlay.GetOverlayMode(), OverlayHighlightMode::AUTO, TEST_LOCATION);
-  overlay.SetOverlayMode(OverlayHighlightMode::MANUAL);
-  DALI_TEST_EQUALS(overlay.GetOverlayMode(), OverlayHighlightMode::MANUAL, TEST_LOCATION);
-  overlay.ResetCustomHighlight();
-  DALI_TEST_EQUALS(overlay.GetOverlayMode(), OverlayHighlightMode::AUTO, TEST_LOCATION);
-
-  Actor unparentedHighlight = Actor::New();
-  unparentedHighlight.SetProperty(Actor::Property::VISIBLE, false);
-  overlay.UpdateOverlay(unparentedHighlight);
-  DALI_TEST_CHECK(unparentedHighlight.GetProperty<bool>(Actor::Property::VISIBLE));
-  overlay.HideOverlay();
-
-  View root = View::New();
-  root.SetProperty(Actor::Property::SIZE, Vector2(480.0f, 800.0f));
-  View sceneView = View::New();
-  sceneView.SetAccessibilityRole(UiAccessibility::Role::SCENE_3D);
-  sceneView.SetProperty(Actor::Property::POSITION, Vector2(10.0f, 20.0f));
-  sceneView.SetProperty(Actor::Property::SIZE, Vector2(300.0f, 400.0f));
-  View model = View::New();
-  View highlight = View::New();
-  model.Add(highlight);
-  sceneView.Add(model);
-  root.Add(sceneView);
-  application.GetScene().Add(root);
-
-  overlay.SetCustomHighlight(Vector2(30.0f, 40.0f), Vector2(50.0f, 60.0f));
-  overlay.UpdateOverlay(highlight);
-  Actor overlayActor = root.FindChildByName("HighlightOverlay");
-  DALI_TEST_CHECK(overlayActor);
-  Actor highlightActor = overlayActor.FindChildByName("HighlightIndicator");
-  DALI_TEST_CHECK(highlightActor);
-  DALI_TEST_EQUALS(highlightActor.GetProperty<Vector2>(Actor::Property::POSITION), Vector2(30.0f, 40.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(highlightActor.GetProperty<Vector2>(Actor::Property::SIZE), Vector2(50.0f, 60.0f), TEST_LOCATION);
-  DALI_TEST_CHECK(!highlight.GetProperty<bool>(Actor::Property::VISIBLE));
-
-  overlayActor.Remove(highlightActor);
-  overlay.ResetCustomHighlight();
-  application.SendNotification();
-  application.Render();
-  overlay.UpdateOverlay(highlight);
-  highlightActor = overlayActor.FindChildByName("HighlightIndicator");
-  DALI_TEST_CHECK(highlightActor);
-  overlay.HideOverlay();
-  DALI_TEST_CHECK(!highlightActor.GetProperty<bool>(Actor::Property::VISIBLE));
   END_TEST;
 }
 

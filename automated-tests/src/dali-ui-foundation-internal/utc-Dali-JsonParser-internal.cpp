@@ -37,7 +37,7 @@ void utc_dali_json_parser_internal_cleanup(void)
 int UtcDaliJsonParserParsesAllJsonValueTypesP(void)
 {
   JsonParser parser = JsonParser::New();
-  DALI_TEST_CHECK(parser.Parse(
+  const bool parsed = parser.Parse(
     R"({
       "string":"line\nquote:\" unicode:\u0041 {TOKEN}",
       "integer":-42,
@@ -47,7 +47,8 @@ int UtcDaliJsonParserParsesAllJsonValueTypesP(void)
       "null":null,
       "array":[1,2.5,"three",false,null],
       "object":{"nested":"value"}
-    })"));
+    })");
+  DALI_TEST_CHECK(parsed);
 
   const TreeNode* root = parser.GetRoot();
   DALI_TEST_CHECK(root);
