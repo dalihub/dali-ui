@@ -20,6 +20,12 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
 
+#define private public
+#define protected public
+#include <dali-ui-foundation/integration-api/web-view-impl.h>
+#undef protected
+#undef private
+
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -43,6 +49,11 @@ bool OnJavaScriptPromptCallback(const Dali::String& message, const Dali::String&
 void OnScreenshotCallback(Dali::Ui::ImageView screenshot) {}
 void OnVideoPlayingCallback(bool isPlaying) {}
 void OnPlainTextCallback(const Dali::String& text) {}
+
+Dali::Ui::Integration::WebViewImpl& GetWebViewImpl(WebView view)
+{
+  return static_cast<Dali::Ui::Integration::WebViewImpl&>(view.GetImplementation());
+}
 
 } // namespace
 
@@ -1128,5 +1139,113 @@ int UtcDaliWebViewPageLoadErrorTypeEnumP(void)
   DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorType::NONE), 0, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorType::NETWORK), 2, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorType::PRINT), 6, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewInternalConversionsAndPropertiesP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  auto& impl = GetWebViewImpl(view);
+
+  DALI_TEST_EQUALS(impl.ToStdString(Dali::String("text")), std::string("text"), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.ToDaliString(std::string("value")), Dali::String("value"), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiScrollEdge(Dali::WebEnginePlugin::ScrollEdge::LEFT)), static_cast<int>(WebViewScrollEdge::LEFT), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiScrollEdge(Dali::WebEnginePlugin::ScrollEdge::RIGHT)), static_cast<int>(WebViewScrollEdge::RIGHT), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiScrollEdge(Dali::WebEnginePlugin::ScrollEdge::TOP)), static_cast<int>(WebViewScrollEdge::TOP), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiScrollEdge(Dali::WebEnginePlugin::ScrollEdge::BOTTOM)), static_cast<int>(WebViewScrollEdge::BOTTOM), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiScrollEdge(static_cast<Dali::WebEnginePlugin::ScrollEdge>(99))), static_cast<int>(WebViewScrollEdge::BOTTOM), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiOverScrolled(Dali::WebEnginePlugin::OverScrolled::LEFT)), static_cast<int>(WebViewOverScrolled::LEFT), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiOverScrolled(Dali::WebEnginePlugin::OverScrolled::RIGHT)), static_cast<int>(WebViewOverScrolled::RIGHT), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiOverScrolled(Dali::WebEnginePlugin::OverScrolled::TOP)), static_cast<int>(WebViewOverScrolled::TOP), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiOverScrolled(Dali::WebEnginePlugin::OverScrolled::BOTTOM)), static_cast<int>(WebViewOverScrolled::BOTTOM), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(impl.ToUiOverScrolled(static_cast<Dali::WebEnginePlugin::OverScrolled>(99))), static_cast<int>(WebViewOverScrolled::BOTTOM), TEST_LOCATION);
+  impl.ToEngineFindOption(WebViewFindOption::CASE_INSENSITIVE | WebViewFindOption::WRAP_AROUND);
+  impl.ToUiPageLoadErrorCode(Dali::WebEngineLoadError::ErrorCode::UNKNOWN);
+  impl.ToUiPageLoadErrorType(Dali::WebEngineLoadError::ErrorType::NONE);
+
+  BaseObject* object = &view.GetBaseObject();
+  const Dali::Property::Index writable[] = {
+    Dali::Ui::Integration::WebViewImpl::Property::URL, Dali::Ui::Integration::WebViewImpl::Property::USER_AGENT, Dali::Ui::Integration::WebViewImpl::Property::SCROLL_POSITION,
+    Dali::Ui::Integration::WebViewImpl::Property::VIDEO_HOLE_ENABLED, Dali::Ui::Integration::WebViewImpl::Property::MOUSE_EVENTS_ENABLED,
+    Dali::Ui::Integration::WebViewImpl::Property::KEY_EVENTS_ENABLED, Dali::Ui::Integration::WebViewImpl::Property::DOCUMENT_BACKGROUND_COLOR,
+    Dali::Ui::Integration::WebViewImpl::Property::TILES_CLEARED_WHEN_HIDDEN, Dali::Ui::Integration::WebViewImpl::Property::TILE_COVER_AREA_MULTIPLIER,
+    Dali::Ui::Integration::WebViewImpl::Property::CURSOR_ENABLED_BY_CLIENT, Dali::Ui::Integration::WebViewImpl::Property::PAGE_ZOOM_FACTOR,
+    Dali::Ui::Integration::WebViewImpl::Property::TEXT_ZOOM_FACTOR};
+  const Dali::Property::Value values[] = {
+    Dali::String("https://example.com"), Dali::String("agent"), Vector2(1.0f, 2.0f),
+    true, false, false, Color::WHITE, true, 2.0f, true, 1.5f, 1.25f};
+  for(size_t i = 0u; i < sizeof(writable) / sizeof(writable[0]); ++i)
+  {
+    Dali::Ui::Integration::WebViewImpl::SetProperty(object, writable[i], values[i]);
+  }
+  Dali::Ui::Integration::WebViewImpl::SetProperty(object, 999999, Dali::Property::Value());
+
+  const Dali::Property::Index readable[] = {
+    Dali::Ui::Integration::WebViewImpl::Property::URL, Dali::Ui::Integration::WebViewImpl::Property::USER_AGENT, Dali::Ui::Integration::WebViewImpl::Property::SCROLL_POSITION,
+    Dali::Ui::Integration::WebViewImpl::Property::SCROLL_SIZE, Dali::Ui::Integration::WebViewImpl::Property::CONTENT_SIZE, Dali::Ui::Integration::WebViewImpl::Property::TITLE,
+    Dali::Ui::Integration::WebViewImpl::Property::VIDEO_HOLE_ENABLED, Dali::Ui::Integration::WebViewImpl::Property::MOUSE_EVENTS_ENABLED,
+    Dali::Ui::Integration::WebViewImpl::Property::KEY_EVENTS_ENABLED, Dali::Ui::Integration::WebViewImpl::Property::SELECTED_TEXT,
+    Dali::Ui::Integration::WebViewImpl::Property::PAGE_ZOOM_FACTOR, Dali::Ui::Integration::WebViewImpl::Property::TEXT_ZOOM_FACTOR,
+    Dali::Ui::Integration::WebViewImpl::Property::LOAD_PROGRESS_PERCENTAGE};
+  for(auto index : readable)
+  {
+    DALI_TEST_CHECK(Dali::Ui::Integration::WebViewImpl::GetProperty(object, index).GetType() != Dali::Property::NONE);
+  }
+  DALI_TEST_EQUALS(Dali::Ui::Integration::WebViewImpl::GetProperty(object, 999999).GetType(), Dali::Property::NONE, TEST_LOCATION);
+  DALI_TEST_CHECK(!impl.CreateImageViewFromPixelData(PixelData()));
+  END_TEST;
+}
+
+int UtcDaliWebViewInternalSignalEmissionP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  auto& impl = GetWebViewImpl(view);
+  WebViewPageLoadError error;
+
+  impl.EmitPageLoadStarted("url");
+  impl.EmitPageLoadInProgress("url");
+  impl.EmitPageLoadFinished("url");
+  impl.EmitPageLoadError(error);
+  impl.EmitScrollEdgeReached(WebViewScrollEdge::LEFT);
+  impl.EmitOverScrolled(WebViewOverScrolled::RIGHT);
+  impl.EmitUrlChanged("url");
+  impl.EmitFrameRendered();
+  impl.EmitFullscreenEntered();
+  impl.EmitFullscreenExited();
+  impl.EmitTextFound(3u);
+  DALI_TEST_CHECK(!impl.EmitGeolocationPermission("host", "https"));
+  impl.EmitWebProcessCrashed();
+
+  int calls = 0;
+  view.PageLoadStartedSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.PageLoadInProgressSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.PageLoadFinishedSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.PageLoadErrorSignal().Connect(&application, [&calls](WebView, const WebViewPageLoadError&) { ++calls; });
+  view.ScrollEdgeReachedSignal().Connect(&application, [&calls](WebView, WebViewScrollEdge) { ++calls; });
+  view.OverScrolledSignal().Connect(&application, [&calls](WebView, WebViewOverScrolled) { ++calls; });
+  view.UrlChangedSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.FrameRenderedSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  view.FullscreenEnteredSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  view.FullscreenExitedSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  view.TextFoundSignal().Connect(&application, [&calls](WebView, uint32_t) { ++calls; });
+  view.GeolocationPermissionSignal().Connect(&application, [&calls](WebView, const Dali::String&, const Dali::String&) { ++calls; return true; });
+  view.WebProcessCrashedSignal().Connect(&application, [&calls](WebView) { ++calls; });
+
+  impl.EmitPageLoadStarted("url");
+  impl.EmitPageLoadInProgress("url");
+  impl.EmitPageLoadFinished("url");
+  impl.EmitPageLoadError(error);
+  impl.EmitScrollEdgeReached(WebViewScrollEdge::LEFT);
+  impl.EmitOverScrolled(WebViewOverScrolled::RIGHT);
+  impl.EmitUrlChanged("url");
+  impl.EmitFrameRendered();
+  impl.EmitFullscreenEntered();
+  impl.EmitFullscreenExited();
+  impl.EmitTextFound(3u);
+  DALI_TEST_CHECK(impl.EmitGeolocationPermission("host", "https"));
+  impl.EmitWebProcessCrashed();
+  DALI_TEST_EQUALS(calls, 13, TEST_LOCATION);
   END_TEST;
 }
