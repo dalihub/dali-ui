@@ -113,6 +113,64 @@ const char* BUILDER_JSON = R"JSON(
     },
     "wrong": { "type": "Actor" },
     "untyped": {}
+  },
+  "animations": {
+    "mixed": {
+      "duration": 1.5,
+      "loop": false,
+      "endAction": "BAKE",
+      "disconnectAction": "DISCARD",
+      "properties": [
+        {
+          "actor": "animationTarget",
+          "property": "position",
+          "value": [40.0, 50.0, 0.0],
+          "alphaFunction": "EASE_IN_OUT",
+          "timePeriod": { "delay": 0.1, "duration": 0.5 }
+        },
+        {
+          "actor": "animationTarget",
+          "property": "size",
+          "value": [10.0, 20.0, 0.0],
+          "relative": true,
+          "alphaFunction": "BOUNCE"
+        },
+        {
+          "actor": "animationTarget",
+          "property": "visible",
+          "value": false,
+          "alphaFunction": "LINEAR"
+        },
+        {
+          "actor": "animationTarget",
+          "property": "colorMultiplier",
+          "keyFrames": [
+            { "progress": 0.0, "value": [1.0, 0.0, 0.0, 1.0] },
+            { "progress": 1.0, "value": [0.0, 0.0, 1.0, 1.0] }
+          ],
+          "timePeriod": { "duration": 1.0 }
+        },
+        {
+          "actor": "animationTarget",
+          "property": "orientation",
+          "value": [0.0, 0.0, 90.0],
+          "alphaFunction": "EASE_OUT"
+        }
+      ]
+    },
+    "pathMove": {
+      "endAction": "BAKE_FINAL",
+      "disconnectAction": "BAKE_FINAL",
+      "properties": [
+        {
+          "actor": "animationTarget",
+          "path": "generated",
+          "forward": [1.0, 0.0, 0.0],
+          "timePeriod": { "delay": 0.2, "duration": 0.8 },
+          "alphaFunction": "REVERSE"
+        }
+      ]
+    }
   }
 }
 )JSON";
@@ -217,5 +275,40 @@ int UtcDaliBuilderPathsAndConstrainersP(void)
   DALI_TEST_CHECK(!builder.GetLinearConstrainer("wrong"));
   DALI_TEST_CHECK(!builder.GetLinearConstrainer("untyped"));
   DALI_TEST_CHECK(!builder.GetLinearConstrainer("unknown"));
+  END_TEST;
+}
+
+int UtcDaliBuilderAnimationsP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Dali::Ui::Integration::Builder builder = Dali::Ui::Integration::Builder::New();
+  Actor root = Actor::New();
+  Actor target = Actor::New();
+  target.SetProperty(Actor::Property::NAME, "animationTarget");
+  root.Add(target);
+  application.GetScene().Add(root);
+  application.SendNotification();
+
+  builder.LoadFromString(BUILDER_JSON);
+  Animation mixed = builder.CreateAnimation("mixed", root);
+  DALI_TEST_CHECK(mixed);
+  DALI_TEST_EQUALS(mixed.GetDuration(), 1.5f, TEST_LOCATION);
+  mixed.Play();
+  application.SendNotification();
+  application.Render(1600u);
+
+  Property::Map overrides;
+  overrides["UNUSED"] = 1;
+  Animation mixedWithOverrides = builder.CreateAnimation("mixed", overrides, root);
+  DALI_TEST_CHECK(mixedWithOverrides);
+
+  Animation pathMove = builder.CreateAnimation("pathMove", root);
+  DALI_TEST_CHECK(pathMove);
+  DALI_TEST_EQUALS(pathMove.GetDuration(), 1.0f, TEST_LOCATION);
+  pathMove.Play();
+  application.SendNotification();
+  application.Render(1100u);
+
+  DALI_TEST_CHECK(!builder.CreateAnimation("unknown", root));
   END_TEST;
 }
