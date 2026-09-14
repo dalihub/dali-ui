@@ -11,6 +11,7 @@ SET(TC_SOURCES
     utc-Dali-AnimatedImageView-internal.cpp
     utc-Dali-FocusManager-internal.cpp
     utc-Dali-ImageCache-internal.cpp
+    utc-Dali-FastTrackLoadingTask-internal.cpp
     utc-Dali-ImageUrl-internal.cpp
     utc-Dali-InteractiveTrait-internal.cpp
     utc-Dali-InteractiveView-internal.cpp
