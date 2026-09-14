@@ -29,7 +29,6 @@
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-adaptor-impl.h>
-#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <test-gesture-generator.h>
 
 using namespace Dali;
@@ -621,7 +620,6 @@ void CheckBackgroundTextInputFocus(bool longPress)
 {
   UiTestApplication application;
   FocusManager manager = FocusManager::Get();
-  auto keyManager = Dali::Ui::Internal::KeyInputFocusManager::Get();
   Window background = application.GetWindow();
   TextInput input = TextInput::New();
   input.SetFocusable(true);
@@ -668,7 +666,7 @@ void CheckBackgroundTextInputFocus(bool longPress)
         TestGenerateTap(application, 20.0f, 20.0f, 100u);
       }
       DALI_TEST_CHECK(manager.GetCurrentFocusView() == current);
-      DALI_TEST_CHECK(keyManager.GetCurrentFocusView() == current);
+      DALI_TEST_CHECK(UiExtension::FocusManager::IsKeyInputTarget(current));
       DALI_TEST_CHECK(current.GetState().Contains(ViewState::FOCUSED));
       DALI_TEST_CHECK(!input.GetState().Contains(ViewState::FOCUSED));
       DALI_TEST_CHECK(recorder.changes.empty());
@@ -680,7 +678,7 @@ void CheckBackgroundTextInputFocus(bool longPress)
       // separately requests navigation. Disable it to isolate the key-only path.
       View expected = longPress && !focusOnTouch ? savedNavigation : View(input);
       DALI_TEST_CHECK(manager.GetCurrentFocusView() == expected);
-      DALI_TEST_CHECK(keyManager.GetCurrentFocusView() == expected);
+      DALI_TEST_CHECK(UiExtension::FocusManager::IsKeyInputTarget(expected));
       DALI_TEST_CHECK(expected.GetState().Contains(ViewState::FOCUSED));
     }
   }
@@ -719,9 +717,8 @@ int UtcDaliFocusManagerActiveDirectKeyFocusKeepsIndependentNavigationFocusP(void
   InputField input = InputField::New();
   application.GetWindow().Add(input);
   DALI_TEST_CHECK(manager.SetCurrentFocusView(current));
-  auto keyManager = Dali::Ui::Internal::KeyInputFocusManager::Get();
-  keyManager.SetFocus(input);
-  DALI_TEST_CHECK(keyManager.GetCurrentFocusView() == input);
+  DALI_TEST_CHECK(UiExtension::FocusManager::SetKeyInputTarget(input));
+  DALI_TEST_CHECK(UiExtension::FocusManager::IsKeyInputTarget(input));
   DALI_TEST_CHECK(manager.GetCurrentFocusView() == current);
   END_TEST;
 }
