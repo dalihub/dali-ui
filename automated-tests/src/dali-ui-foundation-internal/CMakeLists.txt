@@ -43,6 +43,7 @@ SET(TC_SOURCES
     utc-Dali-LottieAnimationView-internal.cpp
     utc-Dali-ObjLoader-internal.cpp
     utc-Dali-PrimitiveVisual-internal.cpp
+    utc-Dali-BuilderReplacement-internal.cpp
     utc-Dali-ViewFittingMode-internal.cpp
     utc-Dali-ViewNaturalSize-internal.cpp
     utc-Dali-View-order-internal.cpp
