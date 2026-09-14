@@ -20,6 +20,7 @@
 #include <dali/devel-api/text-abstraction/script.h>
 #include <dali-ui-foundation/internal/text/bounded-paragraph-helper-functions.h>
 #include <dali-ui-foundation/internal/text/font-run.h>
+#include <dali-ui-foundation/internal/text/font-variation/font-variation-property-data.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 #include <dali-ui-foundation/internal/text/text-io.h>
@@ -190,5 +191,44 @@ int UtcDaliTextIoP(void)
   std::ostringstream lineStream;
   Text::operator<<(lineStream, lines);
   DALI_TEST_CHECK(lineStream.str().find("Line 1") != std::string::npos);
+  END_TEST;
+}
+
+int UtcDaliFontVariationPropertyDataP(void)
+{
+  UiTestApplication application;
+  namespace UiTextInternal = Dali::Ui::Internal::Text;
+
+  View emptyOwner;
+  DALI_TEST_CHECK(UiTextInternal::GetFontVariationPropertyData(emptyOwner) == nullptr);
+
+  View owner = View::New();
+  DALI_TEST_CHECK(UiTextInternal::GetFontVariationPropertyData(owner) == nullptr);
+  auto& data = UiTextInternal::GetOrCreateFontVariationPropertyData(owner);
+  DALI_TEST_CHECK(&data == UiTextInternal::GetFontVariationPropertyData(owner));
+  DALI_TEST_CHECK(&data == &UiTextInternal::GetOrCreateFontVariationPropertyData(owner));
+
+  Property::Index weightIndex = owner.RegisterProperty("variation-weight", 400.0f);
+  Property::Index widthIndex  = owner.RegisterProperty("variation-width", 100.0f);
+  DALI_TEST_CHECK(data.Insert(weightIndex, "wght"));
+  DALI_TEST_CHECK(data.Insert(widthIndex, "wdth"));
+  DALI_TEST_CHECK(!data.Insert(weightIndex, "duplicate"));
+
+  Dali::String tag;
+  DALI_TEST_CHECK(data.Find(weightIndex, tag));
+  DALI_TEST_EQUALS(tag, Dali::String("wght"), TEST_LOCATION);
+  DALI_TEST_CHECK(!data.Find(Property::INVALID_INDEX, tag));
+
+  Property::Map map;
+  data.ApplyCurrentPropertyValues(Actor(), map);
+  DALI_TEST_EQUALS(map.Count(), 0u, TEST_LOCATION);
+  owner.SetProperty(weightIndex, 650.0f);
+  owner.SetProperty(widthIndex, 120.0f);
+  application.GetScene().Add(owner);
+  application.SendNotification();
+  application.Render();
+  data.ApplyCurrentPropertyValues(owner, map);
+  DALI_TEST_EQUALS(map["wght"].Get<float>(), 650.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(map["wdth"].Get<float>(), 120.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
