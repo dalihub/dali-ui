@@ -17,8 +17,11 @@
 
 #include <dali-ui-foundation/integration-api/builder/builder.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/integration-api/events/key-event-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -68,6 +71,86 @@ const char* BUILDER_JSON = R"JSON(
       ]
     },
     "missingType": { "name": "invalid" }
+    ,
+    "signalActor": {
+      "type": "View",
+      "name": "signalRoot",
+      "actors": [
+        { "type": "View", "name": "signalChild" },
+        { "type": "View", "name": "signalTarget" }
+      ],
+      "signals": [
+        {
+          "name": "keyEvent",
+          "actor": "signalTarget",
+          "property": "visible",
+          "value": false,
+          "action": "set"
+        },
+        {
+          "name": "keyEvent",
+          "actor": "signalRoot",
+          "childActor": "signalChild",
+          "action": "show",
+          "parameters": {
+            "scalar": 1.0,
+            "rotation": { "quaternion": [0.0, 0.0, 0.0, 1.0] },
+            "two": [1.0, 2.0],
+            "three": [1.0, 2.0, 3.0],
+            "four": [1.0, 2.0, 3.0, 4.0]
+          }
+        },
+        { "name": "keyEvent", "actor": "signalChild", "action": "hide" },
+        { "name": "keyEvent", "action": "quit" },
+        { "name": "keyEvent", "action": "play", "animation": "signalAnimation" },
+        {
+          "name": "keyEvent",
+          "action": "applyConstraint",
+          "constrainer": "path",
+          "properties": [
+            {
+              "source": "signalRoot",
+              "sourceProperty": "positionX",
+              "target": "signalTarget",
+              "targetProperty": "position",
+              "range": [0.0, 1.0],
+              "wrap": [-1.0, 1.0]
+            }
+          ]
+        },
+        {
+          "name": "keyEvent",
+          "action": "applyConstraint",
+          "constrainer": "linear",
+          "properties": [
+            {
+              "source": "signalRoot",
+              "sourceProperty": "positionX",
+              "target": "signalTarget",
+              "targetProperty": "positionX",
+              "range": [0.0, 1.0]
+            }
+          ]
+        },
+        {
+          "name": "keyEvent",
+          "action": "removeConstraints",
+          "constrainer": "linear",
+          "properties": [{ "target": "signalTarget" }]
+        },
+        { "name": "keyEvent", "action": "show" },
+        { "name": "keyEvent", "action": "play", "animation": "missing" },
+        { "name": "keyEvent", "action": "applyConstraint" },
+        { "name": "keyEvent", "action": "removeConstraints" }
+      ],
+      "notifications": [
+        { "property": "opacity", "condition": "False", "action": "show" },
+        { "property": "opacity", "condition": "LessThan", "value": 0.8, "action": "show" },
+        { "property": "opacity", "condition": "GreaterThan", "min": 0.2, "action": "show" },
+        { "property": "opacity", "condition": "Inside", "arg0": 0.2, "arg1": 0.8, "action": "show" },
+        { "property": "opacity", "condition": "Outside", "min": 0.1, "max": 0.9, "action": "show" }
+      ]
+    }
   },
   "styles": {
     "baseStyle": {
@@ -115,6 +198,11 @@ const char* BUILDER_JSON = R"JSON(
     "untyped": {}
   },
   "animations": {
+    "signalAnimation": {
+      "properties": [
+        { "actor": "signalRoot", "property": "opacity", "value": 0.5 }
+      ]
+    },
     "mixed": {
       "duration": 1.5,
       "loop": false,
@@ -174,6 +262,13 @@ const char* BUILDER_JSON = R"JSON(
   }
 }
 )JSON";
+
+bool gBuilderQuitRequested = false;
+
+void OnBuilderQuit()
+{
+  gBuilderQuitRequested = true;
+}
 } // namespace
 
 int UtcDaliBuilderConstantsTemplatesAndStylesP(void)
@@ -310,5 +405,39 @@ int UtcDaliBuilderAnimationsP(void)
   application.Render(1100u);
 
   DALI_TEST_CHECK(!builder.CreateAnimation("unknown", root));
+  END_TEST;
+}
+
+int UtcDaliBuilderSignalsAndNotificationsP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Dali::Ui::Integration::Builder builder = Dali::Ui::Integration::Builder::New();
+  gBuilderQuitRequested = false;
+  builder.QuitSignal().Connect(&OnBuilderQuit);
+  builder.LoadFromString(BUILDER_JSON);
+
+  View root = View::DownCast(builder.Create("signalActor"));
+  DALI_TEST_CHECK(root);
+  application.GetScene().Add(root);
+  root.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusView(root);
+  application.SendNotification();
+  application.Render(20u);
+
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100u, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::KEYBOARD, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_CHECK(gBuilderQuitRequested);
+  Actor target = root.FindChildByName("signalTarget");
+  DALI_TEST_CHECK(target);
+  DALI_TEST_CHECK(!target.GetProperty<bool>(Actor::Property::VISIBLE));
+  DALI_TEST_CHECK(!root.FindChildByName("signalChild").GetProperty<bool>(Actor::Property::VISIBLE));
+
+  root.SetProperty(Actor::Property::OPACITY, 0.0f);
+  application.SendNotification();
+  application.Render(20u);
+  application.GetScene().Remove(root);
+  application.SendNotification();
   END_TEST;
 }
