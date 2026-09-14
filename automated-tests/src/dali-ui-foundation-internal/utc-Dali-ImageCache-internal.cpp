@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-loader.h>
+#include <dali-ui-foundation/internal/visuals/animated-image/rolling-image-cache.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
@@ -72,6 +73,23 @@ Dali::Ui::Internal::TextureManager::TextureId ReuseTexture(Dali::Ui::Internal::T
                                     Dali::Ui::Internal::TextureManager::ReloadPolicy::CACHED,
                                     preMultiplyOnLoad, true);
 }
+
+class TestFrameReadyObserver : public Dali::Ui::Internal::ImageCache::FrameReadyObserver
+{
+public:
+  void FrameReady(Dali::TextureSet textureSet, uint32_t interval, bool preMultiplied) override
+  {
+    ++callCount;
+    lastTextureSet   = textureSet;
+    lastInterval     = interval;
+    lastPremultiplied = preMultiplied;
+  }
+
+  uint32_t         callCount{0u};
+  Dali::TextureSet lastTextureSet;
+  uint32_t         lastInterval{0u};
+  bool             lastPremultiplied{false};
+};
 } // unnamed namespace
 
 void utc_dali_image_cache_internal_startup(void)
@@ -253,5 +271,71 @@ int UtcDaliImageCacheClearUnusedTexturesClearsSvgCache(void)
   svgLoader.RequestLoadRemove(reloadedLoadId, nullptr);
   application.SendNotification();
 
+  END_TEST;
+}
+
+int UtcDaliRollingImageCacheStateP(void)
+{
+  UiTestApplication application;
+  auto& textureManager = GetFactoryCache().GetTextureManager();
+  auto firstTextureId  = AddUploadedTexture(textureManager, "rolling-first.png", 1);
+  auto secondTextureId = AddUploadedTexture(textureManager, "rolling-second.png", 1);
+
+  Dali::Ui::Internal::ImageCache::UrlList urls(2u);
+  urls[0].mUrl       = Dali::Ui::Internal::VisualUrl("rolling-first.png");
+  urls[0].mTextureId = firstTextureId;
+  urls[1].mUrl       = Dali::Ui::Internal::VisualUrl("rolling-second.png");
+  urls[1].mTextureId = secondTextureId;
+  Dali::Ui::Internal::TextureManager::MaskingDataPointer maskingData;
+  TestFrameReadyObserver observer;
+  Dali::Ui::Internal::RollingImageCache cache(textureManager,
+                                               Dali::ImageDimensions(),
+                                               Dali::SamplingMode::BOX_THEN_LINEAR,
+                                               urls,
+                                               maskingData,
+                                               observer,
+                                               2u,
+                                               1u,
+                                               42u,
+                                               true);
+
+  DALI_TEST_EQUALS(cache.GetCurrentFrameIndex(), -1, TEST_LOCATION);
+  DALI_TEST_EQUALS(cache.GetTotalFrameCount(), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(cache.GetFrameInterval(1u), 42u, TEST_LOCATION);
+  DALI_TEST_CHECK(!cache.IsFrontReady());
+
+  cache.mQueue.PushBack({0u, false});
+  cache.mRequestingLoad = true;
+  Dali::TextureSet readyTextureSet = Dali::TextureSet::New();
+  Dali::Ui::TextureUploadObserver::TextureInformation readyInformation(
+    Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE,
+    firstTextureId,
+    readyTextureSet,
+    true);
+  cache.LoadComplete(true, readyInformation);
+  DALI_TEST_CHECK(cache.IsFrontReady());
+  DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(observer.lastInterval, 42u, TEST_LOCATION);
+  DALI_TEST_CHECK(observer.lastPremultiplied);
+  DALI_TEST_EQUALS(cache.GetCurrentFrameIndex(), 0, TEST_LOCATION);
+  cache.FirstFrame();
+  cache.GetFrontTextureSet();
+  DALI_TEST_EQUALS(cache.GetCachedTextureId(0u), firstTextureId, TEST_LOCATION);
+
+  cache.mQueue.PushBack({1u, false});
+  cache.mRequestingLoad = false;
+  Dali::Ui::TextureUploadObserver::TextureInformation secondInformation(
+    Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE,
+    secondTextureId,
+    Dali::TextureSet::New(),
+    false);
+  cache.LoadComplete(true, secondInformation);
+  DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
+
+  cache.LoadComplete(false, secondInformation);
+  DALI_TEST_EQUALS(observer.callCount, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(observer.lastInterval, 0u, TEST_LOCATION);
+  cache.ClearCache(true);
+  DALI_TEST_EQUALS(cache.GetCurrentFrameIndex(), -1, TEST_LOCATION);
   END_TEST;
 }
