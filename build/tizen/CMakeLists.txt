@@ -326,11 +326,12 @@ IF( ENABLE_COVERAGE )
 
     ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}rename_cov_data ./rename-cov-data )
 
-    # fastcov.py combines capture and exclude into a single operation
+    # Measure product-authored sources. Generated invoke wrappers and animation
+    # bridges are validated through their generators rather than per-line UTCs.
     ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}cov_data
       COMMAND ${FASTCOV_BIN} ${FASTCOV_OPTS}
         -d .
-        --exclude dali-env /usr/include /usr/local/include third-party
+        --exclude dali-env /usr/include /usr/local/include third-party generated/ .autogen.cpp
         -o dali.info )
 
     # genhtml works with fastcov.py output (lcov-compatible format)
