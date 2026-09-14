@@ -18,6 +18,7 @@ SET(TC_SOURCES
     utc-Dali-SelectableTrait-internal.cpp
     utc-Dali-LayoutDependencyScope-internal.cpp
     utc-Dali-GradientFactory-internal.cpp
+    utc-Dali-ShaderFactory-internal.cpp
     utc-Dali-GradientVisualSemantics-internal.cpp
     utc-Dali-TextGradientBaseline-internal.cpp
     utc-Dali-TextGradientGlyphClassification-internal.cpp
