@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/integration-api/shader-effects/motion-blur-effect.h>
 #include <dali-ui-foundation/integration-api/shader-effects/motion-stretch-effect.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visual-factory/precompile-shader-option.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
@@ -66,5 +67,45 @@ int UtcDaliShaderEffectsUniformsP(void)
   DALI_TEST_EQUALS(actor.GetProperty<float>(actor.GetPropertyIndex("uRecipNumSamples")), 0.25f, 0.001f, TEST_LOCATION);
   Ui::Integration::SetMotionStretchProperties(second);
   DALI_TEST_EQUALS(second.GetProperty<float>(second.GetPropertyIndex("uAlphaScale")), 0.75f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliPrecompileShaderOptionP(void)
+{
+  UiTestApplication application;
+  Property::Map flags;
+  flags.Insert("ROUNDED_CORNER", true);
+  flags.Insert("BORDERLINE", false);
+  flags.Insert("EMOJI", true);
+  flags.Insert("UNKNOWN_FLAG", true);
+  flags.Insert(3, true);
+  Property::Map map;
+  map.Insert("shaderType", "custom");
+  map.Insert("shaderOption", flags);
+  map.Insert("vertexShader", "vertex");
+  map.Insert("fragmentShader", "fragment");
+  map.Insert("shaderName", "named");
+  map.Insert("xStretchCount", 3);
+  map.Insert("yStretchCount", 4);
+  map.Insert(5, "ignored");
+
+  Ui::Integration::PrecompileShaderOption option(map);
+  DALI_TEST_EQUALS(static_cast<int>(option.GetShaderType()), static_cast<int>(Ui::Integration::PrecompileShaderOption::ShaderType::CUSTOM), TEST_LOCATION);
+  DALI_TEST_EQUALS(option.GetShaderOptions().size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(option.GetVertexShader(), std::string("vertex"), TEST_LOCATION);
+  DALI_TEST_EQUALS(option.GetFragmentShader(), std::string("fragment"), TEST_LOCATION);
+  DALI_TEST_EQUALS(option.GetShaderName(), std::string("named"), TEST_LOCATION);
+  DALI_TEST_EQUALS(option.GetNpatchXStretchCount(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(option.GetNpatchYStretchCount(), 4u, TEST_LOCATION);
+
+  Property::Map invalid;
+  invalid.Insert("shaderType", "invalid");
+  invalid.Insert("vertexShader", 1);
+  invalid.Insert("fragmentShader", 2);
+  invalid.Insert("shaderName", 3);
+  invalid.Insert("xStretchCount", "bad");
+  invalid.Insert("yStretchCount", "bad");
+  option.ConvertShaderMap(invalid);
+  DALI_TEST_EQUALS(option.GetShaderName(), std::string("named"), TEST_LOCATION);
   END_TEST;
 }
