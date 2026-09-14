@@ -17,7 +17,9 @@
 
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
+#include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
+#include <dali-ui-foundation/internal/text/text-selection-handle-controller.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-test-suite-utils.h>
 
@@ -180,5 +182,65 @@ int UtcDaliTextCursorGeometryEmptyModelP(void)
   parameters.isMultiline = true;
   Text::GetCursorPosition(parameters, 20.0f, cursorInfo);
   DALI_TEST_EQUALS(cursorInfo.primaryPosition, Vector2::ZERO, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextSelectionHandleRepositionP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Text::ControllerPtr controller = Text::Controller::New();
+  Text::DecoratorPtr decorator = Text::Decorator::New(*controller, *controller);
+  InputMethodContext inputMethodContext;
+  controller->EnableTextInput(decorator, inputMethodContext);
+  controller->SetDefaultFontSize(20.0f, Text::Controller::PIXEL_SIZE);
+  controller->SetMultiLineEnabled(true);
+  controller->SetText("one two three four five six seven eight nine");
+  controller->KeyboardFocusGainEvent(false);
+  controller->Relayout(Size(100.0f, 240.0f));
+
+  Text::Controller::Impl& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+  DALI_TEST_CHECK(impl.mModel->mVisualModel->mLines.Count() > 2u);
+  impl.mEventData->mLeftSelectionPosition = 1u;
+  impl.mEventData->mRightSelectionPosition = 35u;
+  Text::SelectionHandleController::Reposition(impl);
+  DALI_TEST_CHECK(impl.mEventData->mDecoratorUpdated);
+
+  impl.mEventData->mLeftSelectionPosition = 35u;
+  impl.mEventData->mRightSelectionPosition = 1u;
+  Text::SelectionHandleController::Reposition(impl);
+
+  impl.mEventData->mLeftSelectionPosition = 4u;
+  impl.mEventData->mRightSelectionPosition = 4u;
+  Text::SelectionHandleController::Reposition(impl);
+  END_TEST;
+}
+
+int UtcDaliTextSelectionHandleHitAndUpdateP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Text::ControllerPtr controller = Text::Controller::New();
+  Text::DecoratorPtr decorator = Text::Decorator::New(*controller, *controller);
+  InputMethodContext inputMethodContext;
+  controller->EnableTextInput(decorator, inputMethodContext);
+  controller->SetDefaultFontSize(20.0f, Text::Controller::PIXEL_SIZE);
+  controller->SetMultiLineEnabled(true);
+  controller->SetText("select words here");
+  controller->Relayout(Size(180.0f, 80.0f));
+  Text::Controller::Impl& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+
+  Text::SelectionHandleController::Reposition(impl, 15.0f, 8.0f, Text::Controller::NoTextTap::HIGHLIGHT);
+  Text::SelectionHandleController::Reposition(impl, 1000.0f, 8.0f, Text::Controller::NoTextTap::SHOW_SELECTION_POPUP);
+  Text::SelectionHandleController::Reposition(impl, -100.0f, 8.0f, Text::Controller::NoTextTap::NO_ACTION);
+
+  Text::CursorInfo cursorInfo;
+  impl.GetCursorPosition(0u, cursorInfo);
+  Text::SelectionHandleController::Update(impl, Text::LEFT_SELECTION_HANDLE, cursorInfo);
+  Text::SelectionHandleController::Update(impl, Text::RIGHT_SELECTION_HANDLE, cursorInfo);
+  Text::SelectionHandleController::Update(impl, Text::GRAB_HANDLE, cursorInfo);
+
+  Text::ControllerPtr emptyController = Text::Controller::New();
+  Text::Controller::Impl& emptyImpl = Text::Controller::Impl::GetImplementation(*emptyController.Get());
+  Text::SelectionHandleController::Reposition(emptyImpl, 0.0f, 0.0f, Text::Controller::NoTextTap::NO_ACTION);
+  DALI_TEST_CHECK(impl.mEventData);
   END_TEST;
 }
