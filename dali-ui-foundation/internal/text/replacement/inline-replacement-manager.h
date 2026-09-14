@@ -21,6 +21,7 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -110,6 +111,32 @@ private:
  */
 class InlineReplacementManager
 {
+  // A callback may remove the attachment itself. Guards retain only this
+  // cancellation state, never the manager, its owner, or graphics resources.
+  struct UpdateState
+  {
+    uint64_t generation{0u};
+    uint32_t depth{0u};
+    bool     alive{true};
+  };
+
+  struct UpdateGuard
+  {
+    explicit UpdateGuard(const std::shared_ptr<UpdateState>& current)
+    : state(current),
+      generation(current->generation)
+    {
+    }
+
+    explicit operator bool() const
+    {
+      return state->alive && state->generation == generation;
+    }
+
+    std::shared_ptr<UpdateState> state;
+    uint64_t                     generation;
+  };
+
 public:
   /**
    * @brief Creates an inline replacement manager.
@@ -163,6 +190,16 @@ public:
                           Property::Index                                  progressPropertyIndex);
 
   /**
+   * @brief Requires a usable Reveal binding before displaying existing images.
+   *
+   * Async Reveal activation can precede timing publication. Keep valid prior
+   * bindings. A simultaneous full fade can bind ordinary images immediately
+   * without per-unit metadata; other schedules keep unbound images hidden.
+   * ClearReveal() restores ordinary visibility when Reveal is disabled.
+   */
+  void RequireRevealBinding(Property::Index progressPropertyIndex, bool fullFade);
+
+  /**
    * @brief Removes replacement Reveal constraints and restores resource-ready visibility.
    */
   void ClearReveal();
@@ -210,6 +247,55 @@ public:
    */
   void PrepareOwnerDestruction();
 
+  /**
+   * @brief Describes a fully bound image without transferring visual ownership.
+   *
+   * Renderer geometry includes aspect fit and clipping. Readiness is independent
+   * of whether its draw is captured.
+   */
+  struct BlurCaptureSource
+  {
+    uint64_t occurrenceIdentity{0u};
+    uint32_t lineIndex{0u};
+    Renderer renderer;
+  };
+
+  /**
+   * @brief Reads current resource, geometry and Reveal-ready image renderers.
+   */
+  std::vector<BlurCaptureSource> GetReadyBlurCaptureSources(uint64_t sourceRevision) const;
+
+  /**
+   * @brief Suppresses the owner's direct draw while a text blur proxy uses it.
+   *
+   * The manager keeps the registered visual and its loading/fitting lifecycle.
+   * A weak actor identity cannot match a later client reusing its address.
+   */
+  bool CaptureBlurRenderer(Actor client, uint64_t sourceRevision, const BlurCaptureSource& source, Actor retention);
+
+  /**
+   * @brief Restores only still-current renderers borrowed by this client.
+   */
+  void ReleaseBlurCapture(Actor client);
+
+  /**
+   * @brief Returns renderers before ImageVisual may reattach or replace them.
+   *
+   * Resource-ready can reenter during a visual update. Capture resumes only
+   * after the outer placement/timing operation completes on the event thread.
+   */
+  class CaptureUpdateScope
+  {
+  public:
+    explicit CaptureUpdateScope(InlineReplacementManager& manager);
+    ~CaptureUpdateScope();
+    CaptureUpdateScope(const CaptureUpdateScope&)            = delete;
+    CaptureUpdateScope& operator=(const CaptureUpdateScope&) = delete;
+
+  private:
+    std::shared_ptr<UpdateState> mState;
+  };
+
 private:
   friend class InlineReplacementManagerTestAccessor;
 
@@ -230,6 +316,7 @@ private:
   struct Entry
   {
     uint64_t                      occurrenceIdentity{0u};
+    uint32_t                      lineIndex{0u};
     RuntimeImageDescriptor        descriptor;
     Property::Index               propertyIndex{Property::INVALID_INDEX};
     Ui::Integration::Visual::Base visual;
@@ -278,6 +365,15 @@ private:
                                                              const RuntimeImageDescriptor& rhs);
 
 private:
+  struct BlurCaptureState
+  {
+    WeakHandle<Actor>              client;
+    WeakHandle<Actor>              retention;
+    std::vector<BlurCaptureSource> sources;
+  };
+
+  std::unique_ptr<BlurCaptureState>                               mBlurCapture;
+  std::shared_ptr<UpdateState>                                    mUpdateState{std::make_shared<UpdateState>()};
   InlineReplacementViewHost*                                      mHost{nullptr};
   std::vector<Entry>                                              mEntries;
   std::unordered_map<uint64_t, std::size_t>                       mEntryIndex;

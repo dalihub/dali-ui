@@ -1642,6 +1642,7 @@ public:
   Length                mMaximumNumberOfCharacters; ///< Maximum number of characters that can be inserted.
   Length                mMaximumNumberOfLines;      ///< Maximum number of laid-out lines, or zero for unlimited.
   uint64_t              mMaximumLinesRevision;      ///< Revision used to reject stale async MaximumLines results.
+  uint64_t              mRenderRevision{0u};        ///< Invalidates detached render work when another layout/render is requested.
   LayoutDirection::Type mLayoutDirection;           ///< Current system language direction
 
   // Floating-point values

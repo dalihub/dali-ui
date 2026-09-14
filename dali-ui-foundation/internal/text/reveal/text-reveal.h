@@ -23,6 +23,7 @@
 #include <dali-ui-foundation/public-api/text/style/reveal.h>
 
 #include <cstdint>
+#include <limits>
 #include <vector>
 
 namespace DALI_NAMESPACE::TextAbstraction
@@ -45,6 +46,21 @@ namespace Internal
 namespace Reveal
 {
 constexpr uint32_t NO_UNIT = 0xffffffffu;
+
+/**
+ * @brief Resolves the progress consumed by Reveal rendering.
+ *
+ * Float constraints can retain a value one epsilon below one after the
+ * animation reaches its exact endpoint. Match that equality range when
+ * drawing the completed state; do not change the authored progress or the
+ * interior schedule. Keep the text and inline-image shader thresholds equal.
+ */
+inline float ResolveRenderProgress(float progress)
+{
+  return !(progress > 0.0f)                                         ? 0.0f
+         : progress >= 1.0f - std::numeric_limits<float>::epsilon() ? 1.0f
+                                                                    : progress;
+}
 
 enum class Unit : uint8_t
 {
@@ -91,6 +107,11 @@ struct Plan
   std::vector<uint8_t>         imageReplacementUnitMask;
   float                        fadeDurationRatio{Text::Reveal::AUTO_FADE_DURATION_RATIO};
   float                        fadeDuration{0.0f};
+
+  /**
+   * @brief Common stagger reference after normalization, including STEP/LINE envelopes.
+   */
+  float sequenceDuration{1.0f};
 
   /**
    * @brief Returns the number of scheduled reveal units.

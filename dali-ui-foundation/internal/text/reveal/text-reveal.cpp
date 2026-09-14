@@ -1340,6 +1340,7 @@ bool ApplyPixelSpatialSchedule(Plan&                       plan,
   plan.pixelUnitTiming          = std::move(pixelUnitTiming);
   plan.imageReplacementUnitMask = std::move(imageReplacementUnitMask);
   plan.fadeDuration             = resolvedFadeDuration;
+  plan.sequenceDuration         = 1.0f / totalDuration;
   return true;
 }
 
@@ -1583,7 +1584,8 @@ bool ApplyPerLineSequenceSchedule(Plan&          plan,
     const float offset      = static_cast<float>(perLineSequenceIndex[pair.lineIndex]) * sequenceStaggerRatio;
     plan.unitStart[newUnit] = (offset + static_cast<float>(localRank++) * startInterval) / totalDuration;
   }
-  plan.fadeDuration = fadeDuration / totalDuration;
+  plan.fadeDuration     = fadeDuration / totalDuration;
+  plan.sequenceDuration = 1.0f / totalDuration;
 
   for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
   {

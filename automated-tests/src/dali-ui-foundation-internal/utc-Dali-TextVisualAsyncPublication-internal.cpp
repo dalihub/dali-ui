@@ -18,6 +18,9 @@
 // EXTERNAL INCLUDES
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
+#include <dali/integration-api/pixel-data-integ.h>
+#include <dali/public-api/object/weak-handle.h>
+#include <cstring>
 #include <utility>
 
 // INTERNAL INCLUDES
@@ -26,20 +29,36 @@
 #include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/internal/text/replacement/inline-replacement-data.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-event-thread-callback.h>
+#include "inline-replacement-manager-test-accessor.h"
 
 using namespace Dali;
+
+namespace Dali::Ui::Internal
+{
+struct TextVisualTestAccessor
+{
+  static bool PublishBlur(Ui::Integration::Visual::Base visual, Actor owner, const PreparedRevealBlur& prepared, uint64_t revision,
+                          const Vector<Ui::Text::ReplacementRevealTiming>& ordinaryTimings)
+  {
+    return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject()).PublishPreparedRevealBlur(owner, prepared, revision, ordinaryTimings);
+  }
+};
+} // namespace Dali::Ui::Internal
 
 namespace
 {
@@ -113,6 +132,11 @@ PixelData CreatePixelData(uint32_t width, uint32_t height, Pixel::Format pixelFo
 RenderedTextVisual CreateTextVisual(UiTestApplication& application)
 {
   Dali::Ui::View view = Dali::Ui::View::New();
+  // Keep a real owner extent after layout, as production Label does. Setting
+  // Actor::SIZE alone is overwritten by View layout before direct publication.
+  view.SetLayoutMode(Dali::Ui::LayoutMode::STANDALONE);
+  view.SetRequestedWidth(VISUAL_WIDTH);
+  view.SetRequestedHeight(VISUAL_HEIGHT);
   view.SetProperty(Actor::Property::SIZE, Vector3(VISUAL_WIDTH, VISUAL_HEIGHT, 0.0f));
 
   Property::Map properties;
@@ -998,5 +1022,800 @@ int UtcDaliTextVisualRevealMetadataFallbackRecoversP(void)
   DALI_TEST_CHECK(rendered.view.GetRendererAt(0u).GetShader() != ordinaryShader);
 
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
+}
+
+namespace
+{
+int CheckAsyncRevealPendingOrdinary(UiTestApplication& application, bool blur, bool hidden)
+{
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  auto       rendered = CreateTextVisual(application);
+  // Complete an ordinary async publication explicitly; this fixture is a View
+  // with a TextVisual, not a Label that submits its controller layout itself.
+  auto ordinaryParameters = MakeParameters("initial ordinary publication");
+  ordinaryParameters.isMarqueeEnabled = false;
+  auto initialLoader = UiText::AsyncTextLoader::New();
+  PublishDirect(rendered, ordinaryParameters, initialLoader.RenderText(ordinaryParameters, false, Size::ZERO));
+  application.SendNotification();
+  application.Render();
+  const auto original = rendered.view.GetRendererAt(0u);
+  DALI_TEST_CHECK(HasValidTexture(rendered.view));
+  const auto progress = rendered.view.RegisterProperty("testRevealProgress", 0.0f);
+
+  // A completed None result can remain on a hidden Label between presets.
+  // Show it and start Reveal, but deliberately withhold the worker completion.
+  rendered.view.SetProperty(Actor::Property::VISIBLE, !hidden);
+  application.SendNotification();
+  application.Render();
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::PIXEL,
+                                              0.0f, progress, 1u, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f, blur ? 24.0f : 0.0f, 0.5f);
+  rendered.view.SetProperty(Actor::Property::VISIBLE, true);
+  for(int frame = 0; frame < 4; ++frame)
+  {
+    application.SendNotification();
+    application.Render();
+    for(uint32_t index = 0; index < rendered.view.GetRendererCount(); ++index)
+    {
+      const auto renderer = rendered.view.GetRendererAt(index);
+      // The old ordinary renderer cannot represent progress zero without
+      // metadata. It must not remain drawable while the request is pending.
+      DALI_TEST_CHECK(renderer != original || !renderer.GetTextures() ||
+                      renderer.GetTextures().GetTextureCount() == 0u ||
+                      renderer.GetCurrentProperty<float>(DevelRenderer::Property::OPACITY) == 0.0f);
+    }
+  }
+  auto parameters                        = MakeRevealParameters("First line\nAnother line", 1u, UiText::Internal::Reveal::Unit::PIXEL,
+                                                                0.0f, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f);
+  parameters.isMultiLine                 = true;
+  parameters.textRevealBlurRadius        = blur ? 24.0f : 0.0f;
+  parameters.textRevealBlurDurationRatio = 0.5f;
+  parameters.isTextRevealBlurRequested   = blur;
+  auto       loader                      = UiText::AsyncTextLoader::New();
+  const auto result                      = loader.RenderText(parameters, false, Size::ZERO);
+  PublishDirect(rendered, parameters, result);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(blur ? static_cast<bool>(rendered.view.FindChildByName("RevealGaussianForeground"))
+                       : HasTextRevealRenderer(rendered.view));
+  DALI_TEST_EQUALS(rendered.view.GetCurrentProperty<float>(progress), 0.0f, TEST_LOCATION);
+  rendered.view.Unparent();
+  application.SendNotification();
+  application.Render();
+  END_TEST;
+}
+} // unnamed namespace
+
+int UtcDaliTextVisualAsyncRevealPendingOrdinaryP(void)
+{
+  UiTestApplication application;
+  const int visible = CheckAsyncRevealPendingOrdinary(application, false, false);
+  return visible == 0 ? CheckAsyncRevealPendingOrdinary(application, false, true) : visible;
+}
+
+int UtcDaliTextVisualAsyncBlurPendingOrdinaryP(void)
+{
+  UiTestApplication application;
+  const int visible = CheckAsyncRevealPendingOrdinary(application, true, false);
+  return visible == 0 ? CheckAsyncRevealPendingOrdinary(application, true, true) : visible;
+}
+
+int UtcDaliTextVisualAsyncRevealRetainsCompatiblePendingP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  for(const bool blur : {false, true})
+  {
+    auto       rendered  = CreateTextVisual(application);
+    const auto tasks     = application.GetScene().GetRenderTaskList();
+    const auto baseline  = tasks.GetTaskCount();
+    const auto progress  = rendered.view.RegisterProperty("testRevealProgress", 1.0f);
+    auto       configure = [&](uint64_t revision, UiText::Internal::Reveal::Unit unit)
+    {
+      UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, unit, 0.0f, progress, revision,
+                                                  UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f, blur ? 24.0f : 0.0f, 0.5f);
+    };
+    configure(1u, UiText::Internal::Reveal::Unit::PIXEL);
+    auto parameters                        = MakeRevealParameters("First line\nSecond line", 1u, UiText::Internal::Reveal::Unit::PIXEL,
+                                                                  0.0f, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f);
+    parameters.isMultiLine                 = true;
+    parameters.isTextRevealBlurRequested   = blur;
+    parameters.textRevealBlurRadius        = blur ? 24.0f : 0.0f;
+    parameters.textRevealBlurDurationRatio = 0.5f;
+    auto       loader                      = UiText::AsyncTextLoader::New();
+    const auto result                      = loader.RenderText(parameters, false, Size::ZERO);
+    PublishDirect(rendered, parameters, result);
+    application.SendNotification();
+    application.Render();
+    Actor foreground = blur ? rendered.view.FindChildByName("RevealGaussianForeground") : rendered.view;
+    DALI_TEST_CHECK(foreground && foreground.GetRendererCount() > 0u);
+    const auto original    = foreground.GetRendererAt(0u);
+    const auto texture     = original.GetTextures().GetTexture(0u);
+    const auto activeTasks = tasks.GetTaskCount();
+    configure(2u, UiText::Internal::Reveal::Unit::CHARACTER);
+    rendered.view.SetProperty(progress, 0.0f);
+    PublishDirect(rendered, parameters, result); // stale completion must not replace the retained result
+    for(int frame = 0; frame < 4; ++frame)
+    {
+      application.SendNotification();
+      application.Render();
+      DALI_TEST_EQUALS(tasks.GetTaskCount(), activeTasks, TEST_LOCATION);
+      DALI_TEST_CHECK(!blur || rendered.view.FindChildByName("RevealGaussianForeground") == foreground);
+      DALI_TEST_CHECK(foreground.GetRendererCount() > 0u && foreground.GetRendererAt(0u) == original);
+      DALI_TEST_CHECK(original.GetTextures().GetTexture(0u) == texture);
+      DALI_TEST_EQUALS(original.GetCurrentProperty<float>(original.GetPropertyIndex("uTextRevealProgress")),
+                       0.0f, TEST_LOCATION);
+    }
+
+    // None removes the progress binding immediately. Re-enable before any
+    // disable result arrives: old metadata alone is no longer a usable result.
+    configure(3u, UiText::Internal::Reveal::Unit::DISABLED);
+    configure(4u, UiText::Internal::Reveal::Unit::PIXEL);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(!HasValidTexture(rendered.view));
+    DALI_TEST_CHECK(!rendered.view.FindChildByName("RevealGaussianForeground"));
+    DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline, TEST_LOCATION);
+    parameters.textRevealRevision = 4u;
+    PublishDirect(rendered, parameters, result);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(tasks.GetTaskCount(), activeTasks, TEST_LOCATION);
+    DALI_TEST_CHECK(blur ? static_cast<bool>(rendered.view.FindChildByName("RevealGaussianForeground"))
+                         : HasTextRevealRenderer(rendered.view));
+    rendered.view.Unparent();
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextVisualAsyncRevealPendingFullFadeP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  for(const bool blur : {false, true})
+  {
+    auto rendered = CreateTextVisual(application);
+    auto ordinary = MakeParameters("A completed ordinary publication");
+    ordinary.isMarqueeEnabled = false;
+    auto loader = UiText::AsyncTextLoader::New();
+    PublishDirect(rendered, ordinary, loader.RenderText(ordinary, false, Size::ZERO));
+    application.SendNotification();
+    application.Render();
+    const auto original = rendered.view.GetRendererAt(0u);
+    const auto textures = original.GetTextures();
+    const auto progress = rendered.view.RegisterProperty("testRevealProgress", 1.0f);
+    auto configure = [&](uint64_t revision, UiText::Internal::Reveal::Unit unit)
+    {
+      UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, unit, 1.0f, progress, revision,
+                                                  UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, blur ? 24.0f : 0.0f, 1.0f);
+    };
+    configure(1u, UiText::Internal::Reveal::Unit::PIXEL);
+    // No worker completion or animation is needed to expose the old exit gap.
+    // Full fade has identical opacity for all units and can be evaluated on
+    // the previous ordinary foreground without waiting for glyph metadata.
+    for(const float value : {1.0f, 0.0f, 0.5f, 1.0f})
+    {
+      rendered.view.SetProperty(progress, value);
+      for(int frame = 0; frame < 3; ++frame)
+      {
+        application.SendNotification();
+        application.Render();
+        DALI_TEST_CHECK(rendered.view.GetRendererAt(0u) == original);
+        DALI_TEST_CHECK(original.GetTextures() == textures);
+        DALI_TEST_EQUALS(original.GetCurrentProperty<float>(DevelRenderer::Property::OPACITY),
+                         value, TEST_LOCATION);
+      }
+    }
+    // Cancelling at zero must discard the temporary opacity guard, including
+    // when the same renderer survives until the ordinary result arrives.
+    rendered.view.SetProperty(progress, 0.0f);
+    application.SendNotification();
+    application.Render();
+    configure(2u, UiText::Internal::Reveal::Unit::DISABLED);
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(original.GetCurrentProperty<float>(DevelRenderer::Property::OPACITY), 1.0f, TEST_LOCATION);
+
+    configure(3u, UiText::Internal::Reveal::Unit::PIXEL);
+    rendered.view.SetProperty(progress, 1.0f);
+    application.SendNotification();
+    application.Render();
+    Animation animation = Animation::New(0.25f);
+    animation.AnimateTo(Property(rendered.view, progress), 0.0f, AlphaFunction::LINEAR);
+    animation.Play();
+    for(int frame = 0; frame < 20; ++frame)
+    {
+      application.SendNotification();
+      application.Render(16);
+      DALI_TEST_CHECK(rendered.view.GetRendererAt(0u) == original);
+      DALI_TEST_CHECK(original.GetTextures() == textures);
+      DALI_TEST_EQUALS(original.GetCurrentProperty<float>(DevelRenderer::Property::OPACITY),
+                       rendered.view.GetCurrentProperty<float>(progress), 0.0001f, TEST_LOCATION);
+    }
+    DALI_TEST_EQUALS(rendered.view.GetCurrentProperty<float>(progress), 0.0f, TEST_LOCATION);
+    auto parameters = MakeRevealParameters("A completed ordinary publication", 3u, UiText::Internal::Reveal::Unit::PIXEL, 1.0f);
+    parameters.textRevealBlurRadius = blur ? 24.0f : 0.0f;
+    parameters.textRevealBlurDurationRatio = 1.0f;
+    parameters.isTextRevealBlurRequested = blur;
+    PublishDirect(rendered, parameters, loader.RenderText(parameters, false, Size::ZERO));
+    application.SendNotification();
+    application.Render();
+    Actor foreground = blur ? rendered.view.FindChildByName("RevealGaussianForeground") : rendered.view;
+    DALI_TEST_CHECK(foreground && foreground.GetRendererCount() > 0u);
+    auto foregroundRenderer = foreground.GetRendererAt(0u);
+    DALI_TEST_EQUALS(foregroundRenderer.GetCurrentProperty<float>(foregroundRenderer.GetPropertyIndex("uTextRevealProgress")),
+                     0.0f, TEST_LOCATION);
+    rendered.view.SetProperty(progress, 0.5f);
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+    // A valid publication no longer has the pending ordinary opacity binding.
+    DALI_TEST_EQUALS(foreground.GetRendererAt(0u).GetCurrentProperty<float>(DevelRenderer::Property::OPACITY), 1.0f, TEST_LOCATION);
+    rendered.view.Unparent();
+    application.SendNotification();
+    application.Render();
+  }
+  END_TEST;
+}
+
+int UtcDaliTextVisualAsyncRevealPendingNoneFullFadeP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  for(bool blur : {false, true})
+  {
+    auto rendered = CreateTextVisual(application);
+    const auto progress = rendered.view.RegisterProperty("testRevealProgress", 1.0f);
+    UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::CHARACTER,
+                                                0.25f, progress, 1u, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f, blur ? 24.0f : 0.0f, 0.5f);
+    auto parameters = MakeRevealParameters("First line\nSecond line", 1u, UiText::Internal::Reveal::Unit::CHARACTER,
+                                           0.25f, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f);
+    parameters.isMultiLine = true;
+    parameters.isTextRevealBlurRequested = blur;
+    parameters.textRevealBlurRadius = blur ? 24.0f : 0.0f;
+    parameters.textRevealBlurDurationRatio = 0.5f;
+    auto loader = UiText::AsyncTextLoader::New();
+    const auto result = loader.RenderText(parameters, false, Size::ZERO);
+    PublishDirect(rendered, parameters, result);
+    application.SendNotification();
+    application.Render();
+    UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::DISABLED,
+                                                1.0f, progress, 2u);
+    // The application can start an exit before the preceding None request
+    // publishes. Neither the old enabled result nor None may win this race.
+    UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::PIXEL,
+                                                1.0f, progress, 3u, UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, blur ? 48.0f : 0.0f, 1.0f);
+    DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 1u, TEST_LOCATION);
+    const auto fallback = rendered.view.GetRendererAt(0u);
+    const auto texture = fallback.GetTextures().GetTexture(0u);
+    PublishDirect(rendered, parameters, result); // stale enabled completion
+    auto none = MakeParameters("First line\nSecond line");
+    none.isMarqueeEnabled = false;
+    none.textRevealRevision = 2u;
+    PublishDirect(rendered, none, loader.RenderText(none, false, Size::ZERO));
+    for(float value : {1.0f, 0.75f, 0.25f, 0.0f})
+    {
+      rendered.view.SetProperty(progress, value);
+      application.SendNotification();
+      application.Render();
+      application.SendNotification();
+      application.Render();
+      DALI_TEST_CHECK(rendered.view.GetRendererAt(0u) == fallback);
+      DALI_TEST_CHECK(fallback.GetTextures().GetTexture(0u) == texture);
+      DALI_TEST_EQUALS(fallback.GetCurrentProperty<float>(DevelRenderer::Property::OPACITY), value, TEST_LOCATION);
+      DALI_TEST_CHECK(!rendered.view.FindChildByName("TextRevealRuntimeGaussian"));
+      DALI_TEST_EQUALS(application.GetScene().GetRenderTaskList().GetTaskCount(), 1u, TEST_LOCATION);
+    }
+    rendered.view.Unparent();
+    application.SendNotification();
+    application.Render();
+  }
+  END_TEST;
+}
+
+int UtcDaliTextVisualAsyncRevealPendingOpacityCompositionP(void)
+{
+  UiTestApplication application;
+  auto              rendered   = CreateTextVisual(application);
+  auto              parameters = MakeParameters("Pending opacity composition");
+  parameters.isMarqueeEnabled  = false;
+  auto loader                  = UiText::AsyncTextLoader::New();
+  PublishDirect(rendered, parameters, loader.RenderText(parameters, false, Size::ZERO));
+  auto renderer = rendered.view.GetRendererAt(0u);
+  renderer.SetProperty(DevelRenderer::Property::OPACITY, 0.5f);
+  rendered.view.SetProperty(Actor::Property::COLOR_ALPHA, 0.5f);
+  const auto progress  = rendered.view.RegisterProperty("testRevealProgress", 0.5f);
+  const auto reference = rendered.view.RegisterProperty("referenceOpacity", 0.5f);
+  Animation  animation = Animation::New(1.0f);
+  animation.AnimateTo(Property(renderer, DevelRenderer::Property::OPACITY), 0.9f);
+  animation.AnimateTo(Property(rendered.view, reference), 0.9f);
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::PIXEL,
+                                              1.0f, progress, 1u, UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, 24.0f, 1.0f);
+  for(int frame = 0; frame < 3; ++frame)
+  {
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(DevelRenderer::Property::OPACITY), 0.25f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(rendered.view.GetCurrentProperty<Vector4>(Actor::Property::COLOR).a, 0.5f, TEST_LOCATION);
+  }
+  animation.Play();
+  for(int frame = 0; frame < 6; ++frame)
+  {
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(DevelRenderer::Property::OPACITY),
+                     rendered.view.GetCurrentProperty<float>(reference) * 0.5f, 0.0001f, TEST_LOCATION);
+  }
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::DISABLED,
+                                              1.0f, progress, 2u);
+  for(int frame = 0; frame < 6; ++frame)
+  {
+    application.SendNotification();
+    application.Render(16);
+    // Removing the temporary constraint restores the existing animation's
+    // authority; it must not bake the half-opacity result into that animation.
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(DevelRenderer::Property::OPACITY),
+                     rendered.view.GetCurrentProperty<float>(reference), 0.0001f, TEST_LOCATION);
+  }
+  animation.Stop();
+  rendered.view.Unparent();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(application.GetScene().GetRenderTaskList().GetTaskCount(), 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextVisualAsyncShutdownCompletionP(void)
+{
+  UiTestApplication application;
+  auto rendered = CreateTextVisual(application);
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+  const auto progress = rendered.view.RegisterProperty("testRevealProgress", 1.0f);
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::PIXEL,
+                                              1.0f, progress, 1u, UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, 24.0f, 1.0f);
+  auto parameters = MakeRevealParameters("Completion after shutdown", 1u, UiText::Internal::Reveal::Unit::PIXEL, 1.0f);
+  parameters.isTextRevealBlurRequested = true;
+  parameters.textRevealBlurRadius = 24.0f;
+  auto loader = UiText::AsyncTextLoader::New();
+  const auto result = loader.RenderText(parameters, false, Size::ZERO);
+  const auto tasks = application.GetScene().GetRenderTaskList();
+  application.GetAdaptor().Stop();
+  PublishDirect(rendered, parameters, result);
+  DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!rendered.view.FindChildByName("TextRevealRuntimeGaussian"));
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), 1u, TEST_LOCATION);
+  parameters.requestType = UiIntegrationText::Async::COMPUTE_NATURAL_SIZE;
+  PublishDirect(rendered, parameters, result);
+  DALI_TEST_EQUALS(observer.mSizeCompletionCount, 0u, TEST_LOCATION);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  rendered.view.Unparent();
+  END_TEST;
+}
+
+int UtcDaliTextVisualAsyncBlurConstructionReentryP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  for(uint32_t mutation = 0u; mutation < 6u; ++mutation)
+  {
+    auto rendered = CreateTextVisual(application);
+    const auto progress = rendered.view.RegisterProperty("testRevealProgress", 0.5f);
+    auto configure = [&](uint64_t revision, bool enabled, float radius)
+    {
+      UiInternal::TextVisual::ConfigureTextReveal(rendered.visual,
+        enabled ? UiText::Internal::Reveal::Unit::PIXEL : UiText::Internal::Reveal::Unit::DISABLED,
+        1.0f, progress, revision, UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, radius, 1.0f);
+    };
+    configure(1u, true, 24.0f);
+    auto parameters = MakeRevealParameters("Old source", 1u, UiText::Internal::Reveal::Unit::PIXEL, 1.0f);
+    parameters.isTextRevealBlurRequested = true;
+    parameters.textRevealBlurRadius = 24.0f;
+    auto loader = UiText::AsyncTextLoader::New();
+    auto oldResult = loader.RenderText(parameters, false, Size::ZERO);
+    auto next = parameters;
+    next.textRevealRevision = 2u;
+    next.textRevealBlurRadius = 48.0f;
+    if(mutation == 2u)
+    {
+      next.text = "Latest replacement source";
+    }
+    auto nextResult = loader.RenderText(next, false, Size::ZERO);
+    Renderer latestForeground;
+    bool fired = false;
+    bool propertyCancelled = false;
+    bool inMutation = false;
+    std::vector<WeakHandleBase> candidateActors;
+    ConnectionTracker tracker;
+    application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle object)
+    {
+      if(!inMutation && Actor::DownCast(object))
+      {
+        candidateActors.emplace_back(object);
+      }
+      if(!fired && Actor::DownCast(object))
+      {
+        fired = true;
+        inMutation = true;
+        if(mutation == 0u)
+        {
+          configure(2u, false, 0.0f);
+        }
+        else if(mutation < 3u)
+        {
+          configure(2u, true, 48.0f);
+          PublishDirect(rendered, next, nextResult);
+          latestForeground = rendered.view.FindChildByName("RevealGaussianForeground").GetRendererAt(0u);
+        }
+        else if(mutation == 3u)
+        {
+          UiInternal::TextVisual::GetController(rendered.visual)->SetAsyncRendering(false);
+        }
+        else if(mutation == 4u)
+        {
+          rendered.view.Unparent();
+        }
+        else
+        {
+          auto foreground = rendered.view.GetRendererAt(0u);
+          const auto fade = foreground.GetPropertyIndex("uTextRevealFadeDuration");
+          foreground.PropertySetSignal().Connect(&tracker, [&, fade](Handle, Property::Index index, const Property::Value&)
+          {
+            if(!propertyCancelled && index == fade)
+            {
+              propertyCancelled = true;
+              configure(2u, false, 0.0f);
+            }
+          });
+        }
+        inMutation = false;
+      }
+    });
+    PublishDirect(rendered, parameters, oldResult);
+    tracker.DisconnectAll();
+    DALI_TEST_CHECK(fired);
+    DALI_TEST_CHECK(mutation != 5u || propertyCancelled);
+    for(const auto& object : candidateActors)
+    {
+      DALI_TEST_CHECK(!object.GetBaseHandle());
+    }
+    application.SendNotification();
+    application.Render();
+    auto runtime = rendered.view.FindChildByName("TextRevealRuntimeGaussian");
+    if(mutation == 1u || mutation == 2u)
+    {
+      DALI_TEST_CHECK(runtime);
+      DALI_TEST_CHECK(runtime.FindChildByName("RevealGaussianForeground").GetRendererAt(0u) == latestForeground);
+      DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 0u, TEST_LOCATION);
+      DALI_TEST_EQUALS(application.GetScene().GetRenderTaskList().GetTaskCount(), 4u, TEST_LOCATION);
+    }
+    else
+    {
+      DALI_TEST_CHECK(!runtime);
+      DALI_TEST_EQUALS(application.GetScene().GetRenderTaskList().GetTaskCount(), 1u, TEST_LOCATION);
+    }
+    rendered.view.Unparent();
+    DALI_TEST_EQUALS(application.GetScene().GetRenderTaskList().GetTaskCount(), 1u, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextVisualAsyncBlurWorkerPayloadP(void)
+{
+  UiTestApplication application;
+  TextAbstraction::FontClient::Get();
+  const auto samePixels = [](PixelData first, PixelData second)
+  {
+    if(!first || !second || first.GetWidth() != second.GetWidth() ||
+       first.GetHeight() != second.GetHeight() || first.GetPixelFormat() != second.GetPixelFormat())
+    {
+      return false;
+    }
+    const auto a = Integration::GetPixelDataBuffer(first);
+    const auto b = Integration::GetPixelDataBuffer(second);
+    return a.bufferSize == b.bufferSize && std::memcmp(a.buffer, b.buffer, a.bufferSize) == 0;
+  };
+  for(const auto unit : {UiText::Internal::Reveal::Unit::CHARACTER, UiText::Internal::Reveal::Unit::WORD,
+                         UiText::Internal::Reveal::Unit::LINE, UiText::Internal::Reveal::Unit::PIXEL})
+  {
+    for(const auto sequence : {UiText::Internal::Reveal::Sequence::WHOLE_TEXT, UiText::Internal::Reveal::Sequence::PER_LINE})
+    {
+      auto parameters                        = MakeRevealParameters("First visual line\nShort end", 1u, unit, 0.0f, sequence, 0.25f);
+      parameters.isMultiLine                 = true;
+      parameters.ellipsis                    = false;
+      parameters.textRevealBlurRadius        = 24.0f;
+      parameters.textRevealBlurDurationRatio = 0.5f;
+      auto loader                            = UiText::AsyncTextLoader::New();
+      auto ordinary                          = loader.RenderText(parameters, false, Size::ZERO);
+      DALI_TEST_CHECK(!ordinary.revealBlur);
+      parameters.isTextRevealBlurRequested = true;
+      auto blurred                         = loader.RenderText(parameters, false, Size::ZERO);
+      DALI_TEST_CHECK(blurred.revealBlur);
+      const auto& prepared = *blurred.revealBlur;
+      DALI_TEST_EQUALS(prepared.options.radius, 24u, TEST_LOCATION);
+      DALI_TEST_EQUALS(prepared.options.perLine, sequence == UiText::Internal::Reveal::Sequence::PER_LINE, TEST_LOCATION);
+      DALI_TEST_CHECK(prepared.metadata && prepared.blurDuration > 0.0f);
+      DALI_TEST_EQUALS(!prepared.lines.empty(), prepared.options.perLine, TEST_LOCATION);
+      for(const auto& line : prepared.lines)
+      {
+        DALI_TEST_CHECK(line.foreground && line.metadata);
+        DALI_TEST_CHECK(line.sequence.start >= 0.0f && line.sequence.start < 1.0f);
+      }
+      // Preparing blur must not mutate the independent ordinary fallback.
+      DALI_TEST_CHECK(samePixels(ordinary.textPixelData, blurred.textPixelData));
+      DALI_TEST_EQUALS(ordinary.revealMetadataTiles.size(), blurred.revealMetadataTiles.size(), TEST_LOCATION);
+      DALI_TEST_CHECK(samePixels(ordinary.revealMetadataTiles.front(), blurred.revealMetadataTiles.front()));
+      DALI_TEST_EQUALS(ordinary.textRevealFadeDuration, blurred.textRevealFadeDuration, TEST_LOCATION);
+      const auto copied = blurred;
+      DALI_TEST_CHECK(copied.revealBlur.get() == blurred.revealBlur.get());
+    }
+  }
+  // Supersampled input keeps display-sized blur targets and an independent
+  // ordinary Reveal fallback. Supersampling must not multiply the FBO size.
+  for(const float scale : {1.25f, 1.5f})
+  {
+    auto parameters                      = MakeRevealParameters("Scaled ordinary Reveal", 1u, UiText::Internal::Reveal::Unit::CHARACTER, 0.2f);
+    parameters.isTextRevealBlurRequested = true;
+    parameters.textRevealBlurRadius      = 24.0f;
+    parameters.renderScale               = scale;
+    auto       loader                    = UiText::AsyncTextLoader::New();
+    bool cachedNaturalSize = false;
+    const auto naturalSize = loader.SetupRenderScale(parameters, cachedNaturalSize);
+    const auto result = loader.RenderText(parameters, cachedNaturalSize, naturalSize);
+    DALI_TEST_CHECK(result.revealBlur);
+    DALI_TEST_EQUALS(result.revealBlur->options.controlSize, result.renderedSize, TEST_LOCATION);
+    DALI_TEST_CHECK(result.textPixelData && !result.revealMetadataTiles.empty());
+  }
+  END_TEST;
+}
+
+int UtcDaliTextVisualAsyncBlurValidInvalidValidP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  TextAbstraction::FontClient::Get();
+  auto       rendered = CreateTextVisual(application);
+  const auto tasks    = application.GetScene().GetRenderTaskList();
+  const auto baseline = tasks.GetTaskCount();
+  const auto progress = rendered.view.RegisterProperty("testRevealProgress", 0.4f);
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::CHARACTER,
+                                              0.0f, progress, 1u, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f, 24.0f, 0.5f);
+  auto parameters                        = MakeRevealParameters("First line\nSecond line", 1u, UiText::Internal::Reveal::Unit::CHARACTER,
+                                                                0.0f, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f);
+  parameters.isMultiLine                 = true;
+  parameters.isTextRevealBlurRequested   = true;
+  parameters.textRevealBlurRadius        = 24.0f;
+  parameters.textRevealBlurDurationRatio = 0.5f;
+  auto       loader                      = UiText::AsyncTextLoader::New();
+  const auto valid                       = loader.RenderText(parameters, false, Size::ZERO);
+  DALI_TEST_CHECK(valid.revealBlur && !valid.revealBlur->lines.empty());
+  for(int invalidKind = 0; invalidKind < 4; ++invalidKind)
+  {
+    PublishDirect(rendered, parameters, valid);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline + 3u, TEST_LOCATION);
+    const auto foreground = rendered.view.FindChildByName("RevealGaussianForeground");
+    DALI_TEST_CHECK(foreground && HasTextRevealRenderer(foreground));
+
+    auto invalid = valid;
+    auto partial = std::make_shared<UiInternal::PreparedRevealBlur>(*valid.revealBlur);
+    if(invalidKind == 0)
+    {
+      partial->metadata.Reset();
+    }
+    if(invalidKind == 1)
+    {
+      partial->lines.front().foreground.Reset();
+    }
+    if(invalidKind == 2)
+    {
+      partial->options.radius = 48u;
+    }
+    if(invalidKind == 3)
+    {
+      partial->lines.front().metadata = CreatePixelData(1u, 1u, Pixel::RGBA8888);
+    }
+    invalid.revealBlur = partial;
+    PublishDirect(rendered, parameters, invalid);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline, TEST_LOCATION);
+    DALI_TEST_CHECK(HasTextRevealRenderer(rendered.view));
+    DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(rendered.view.GetRendererAt(0u).GetProperty<float>("uTextRevealFadeDuration"),
+                     valid.textRevealFadeDuration, 0.0001f, TEST_LOCATION);
+  }
+  PublishDirect(rendered, parameters, valid);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline + 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(rendered.view.GetProperty<float>(progress), 0.4f, TEST_LOCATION);
+  rendered.view.Unparent();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline, TEST_LOCATION);
+  END_TEST;
+}
+
+namespace
+{
+int CheckBlurUploadFailureRestoresImages(bool direct)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  TextAbstraction::FontClient::Get();
+  auto        rendered   = CreateTextVisual(application);
+  auto        controller = UiInternal::TextVisual::GetController(rendered.visual);
+  Texture     image      = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
+  auto        url        = Ui::ImageUrl::New(image, true);
+  const char* text       = "First long line\n\xef\xbf\xbc\nLast";
+  auto        builder    = UiText::StyledTextBuilder::New(text);
+  DALI_TEST_CHECK(builder.SetSpan(UiText::ImageSpan::New(UiText::ImageAttributes(url.GetUrl(), Vector2(24.0f, 18.0f))), 16u, 17u));
+  controller->SetStyledText(builder.Build());
+  const auto progress = rendered.view.RegisterProperty("testRevealProgress", 0.4f);
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::CHARACTER,
+                                              0.25f, progress, 1u, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f, 24.0f, 1.0f);
+  auto parameters                        = MakeRevealParameters(text, 1u, UiText::Internal::Reveal::Unit::CHARACTER,
+                                                                0.25f, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f);
+  parameters.isMultiLine                 = true;
+  parameters.isTextRevealBlurRequested   = true;
+  parameters.textRevealBlurRadius        = 24.0f;
+  parameters.textRevealBlurDurationRatio = 1.0f;
+  parameters.replacementSourceSnapshot   = controller->GetReplacementSourceSnapshot();
+  parameters.replacementLayoutGeneration = 1u;
+  auto       loader                      = UiText::AsyncTextLoader::New();
+  const auto result                      = loader.RenderText(parameters, false, Size::ZERO);
+  DALI_TEST_CHECK(result.revealBlur && !result.revealBlur->images.empty());
+  DALI_TEST_CHECK(!result.replacementRevealTimings.Empty() && !result.revealBlur->timings.Empty());
+  DALI_TEST_CHECK(std::abs(result.revealBlur->timings[0u].fadeDuration - result.replacementRevealTimings[0u].fadeDuration) > 0.0001f ||
+                  std::abs(result.revealBlur->timings[0u].start - result.replacementRevealTimings[0u].start) > 0.0001f);
+  auto& data                = UiInternal::Text::GetOrCreateInlineReplacementData(rendered.view);
+  data.lastRenderGeneration = 1u;
+  DALI_TEST_CHECK(data.manager.Update(data.host, parameters.replacementSourceSnapshot, result.replacementPlacements,
+                                      Vector2::ZERO, Vector2::ZERO, Vector2(VISUAL_WIDTH, VISUAL_HEIGHT),
+                                      Vector2(VISUAL_WIDTH, VISUAL_HEIGHT), 1.0f, result.replacementSourceRevision, false));
+  DALI_TEST_CHECK(data.manager.ApplyRevealTimings(result.replacementRevealTimings, result.replacementSourceRevision, progress));
+  application.SendNotification();
+  application.Render();
+  data.manager.Refresh();
+  using Accessor = UiInternal::Text::InlineReplacementManagerTestAccessor;
+  DALI_TEST_EQUALS(Accessor::GetEntryCount(data.manager), 1u, TEST_LOCATION);
+  const auto imageRenderer = Accessor::GetEntryVisual(data.manager, 1u).GetRenderer();
+  DALI_TEST_CHECK(imageRenderer);
+  UiText::ReplacementRevealTiming ordinary;
+  DALI_TEST_CHECK(Accessor::GetRevealTiming(data.manager, 1u, ordinary));
+  if(direct)
+  {
+    auto ordinaryResult = result;
+    ordinaryResult.revealBlur.reset();
+    PublishDirect(rendered, parameters, ordinaryResult);
+    controller->SetAsyncRendering(false);
+  }
+  Renderer          ordinaryForeground;
+  TextureSet        ordinaryTextures;
+  Shader            ordinaryShader;
+  float             ordinaryFade = 0.0f;
+  bool              failed       = false;
+  ConnectionTracker tracker;
+  application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle object)
+  {
+    if(!failed && Actor::DownCast(object))
+    {
+      failed = true;
+      for(uint32_t index = 0u; index < rendered.view.GetRendererCount(); ++index)
+      {
+        auto       renderer = rendered.view.GetRendererAt(index);
+        const auto fade     = renderer.GetPropertyIndex("uTextRevealFadeDuration");
+        if(fade != Property::INVALID_INDEX)
+        {
+          ordinaryForeground = renderer;
+          ordinaryTextures   = renderer.GetTextures();
+          ordinaryShader     = renderer.GetShader();
+          ordinaryFade       = renderer.GetProperty<float>(fade);
+        }
+      }
+      // Invalidate only the optional payload after validation. Core Upload
+      // returns false for an empty buffer without enqueuing a texture update.
+      Dali::Integration::ReleasePixelDataBuffer(result.revealBlur->metadata);
+    }
+  });
+  if(direct)
+  {
+    DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::PublishBlur(rendered.visual, rendered.view, *result.revealBlur,
+                                                                     result.replacementSourceRevision, result.replacementRevealTimings));
+  }
+  else
+  {
+    PublishDirect(rendered, parameters, result);
+  }
+  tracker.DisconnectAll();
+  DALI_TEST_CHECK(failed);
+  DALI_TEST_CHECK(ordinaryForeground);
+  DALI_TEST_CHECK(ordinaryForeground.GetTextures() == ordinaryTextures);
+  DALI_TEST_CHECK(ordinaryForeground.GetShader() == ordinaryShader);
+  DALI_TEST_EQUALS(ordinaryForeground.GetProperty<float>(ordinaryForeground.GetPropertyIndex("uTextRevealFadeDuration")),
+                   ordinaryFade, 0.0001f, TEST_LOCATION);
+  DALI_TEST_CHECK(!rendered.view.FindChildByName("RevealGaussianForeground"));
+  DALI_TEST_EQUALS(application.GetScene().GetRenderTaskList().GetTaskCount(), 1u, TEST_LOCATION);
+  UiText::ReplacementRevealTiming restored;
+  DALI_TEST_CHECK(Accessor::GetRevealTiming(data.manager, 1u, restored));
+  DALI_TEST_EQUALS(restored.start, ordinary.start, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(restored.fadeDuration, ordinary.fadeDuration, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(restored.progressionSpan, ordinary.progressionSpan, 0.0001f, TEST_LOCATION);
+  DALI_TEST_CHECK(Accessor::GetRevealConstraint(data.manager, 1u).GetTargetObject() == imageRenderer);
+  bool restoredRenderer = false;
+  for(uint32_t index = 0u; index < rendered.view.GetRendererCount(); ++index)
+  {
+    restoredRenderer |= rendered.view.GetRendererAt(index) == imageRenderer;
+  }
+  DALI_TEST_CHECK(restoredRenderer);
+  rendered.view.Unparent();
+  END_TEST;
+}
+} // unnamed namespace
+
+int UtcDaliTextVisualAsyncBlurUploadFailureRestoresImagesP(void)
+{
+  return CheckBlurUploadFailureRestoresImages(false);
+}
+
+int UtcDaliTextVisualBlurUploadFailureRestoresImagesP(void)
+{
+  // Exercise the shared publication transaction without the async completion's
+  // later ordinary timing delivery masking an incomplete rollback.
+  return CheckBlurUploadFailureRestoresImages(true);
+}
+
+int UtcDaliTextVisualAsyncBlurStaleRevisionP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  TextAbstraction::FontClient::Get();
+  auto       rendered                  = CreateTextVisual(application);
+  const auto tasks                     = application.GetScene().GetRenderTaskList();
+  const auto baseline                  = tasks.GetTaskCount();
+  const auto progress                  = rendered.view.RegisterProperty("testRevealProgress", 0.4f);
+  auto       parameters                = MakeRevealParameters("Blur revision", 1u, UiText::Internal::Reveal::Unit::CHARACTER, 0.0f);
+  parameters.isTextRevealBlurRequested = true;
+  parameters.textRevealBlurRadius      = 24.0f;
+  auto       loader                    = UiText::AsyncTextLoader::New();
+  const auto result                    = loader.RenderText(parameters, false, Size::ZERO);
+  DALI_TEST_CHECK(result.revealBlur);
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, parameters.textRevealUnit, 0.0f,
+                                              progress, 1u, parameters.textRevealSequence, 0.0f, 24.0f, 1.0f);
+  PublishDirect(rendered, parameters, result);
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline + 3u, TEST_LOCATION);
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::DISABLED,
+                                              0.0f, progress, 2u);
+  // Keep the displayed publication until the current disable request arrives.
+  // A stale completion must neither replace it nor resurrect it afterwards.
+  PublishDirect(rendered, parameters, result);
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline + 3u, TEST_LOCATION);
+  auto disabledParameters                      = parameters;
+  disabledParameters.textRevealRevision        = 2u;
+  disabledParameters.isTextRevealEnabled       = false;
+  disabledParameters.isTextRevealBlurRequested = false;
+  auto disabledResult                          = loader.RenderText(disabledParameters, false, Size::ZERO);
+  PublishDirect(rendered, disabledParameters, disabledResult);
+  PublishDirect(rendered, parameters, result);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline, TEST_LOCATION);
+  UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, parameters.textRevealUnit, 0.0f,
+                                              progress, 3u, parameters.textRevealSequence, 0.0f, 48.0f, 1.0f);
+  PublishDirect(rendered, parameters, result);
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline, TEST_LOCATION);
+  parameters.textRevealRevision   = 3u;
+  parameters.textRevealBlurRadius = 48.0f;
+  const auto current              = loader.RenderText(parameters, false, Size::ZERO);
+  PublishDirect(rendered, parameters, current);
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline + 3u, TEST_LOCATION);
   END_TEST;
 }

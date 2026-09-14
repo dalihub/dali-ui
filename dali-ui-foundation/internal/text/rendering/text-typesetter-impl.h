@@ -157,6 +157,8 @@ public: // Image buffer creation
    * @param[in] verticalOffset The vertical offset to be added to the glyph's position.
    * @param[in] fromGlyphIndex The index of the first glyph within the text to be drawn
    * @param[in] toGlyphIndex The index of the last glyph within the text to be drawn
+   * @param[in] revealOffsetY Metadata storage origin in the original target, otherwise zero.
+   * @param[in] revealFullHeight Original target height for metadata line traversal, or zero to use bufferHeight.
    *
    * @return An image buffer with the text.
    */
@@ -164,7 +166,8 @@ public: // Image buffer creation
                                 const Typesetter::Style style, const bool ignoreHorizontalAlignment,
                                 const Pixel::Format pixelFormat, const int32_t horizontalOffset,
                                 const int32_t verticalOffset, const TextAbstraction::GlyphIndex fromGlyphIndex,
-                                const TextAbstraction::GlyphIndex toGlyphIndex);
+                                const TextAbstraction::GlyphIndex toGlyphIndex,
+                                uint32_t revealOffsetY = 0u, uint32_t revealFullHeight = 0u);
 
   /**
    * @brief Create & draw a L8 mask containing TextGradient target glyph coverage only.

@@ -27,6 +27,13 @@ namespace Ui
 {
 namespace Text
 {
+namespace Internal
+{
+namespace Reveal
+{
+struct Extension;
+} // namespace Reveal
+} // namespace Internal
 
 /**
  * @brief Describes how visible text and inline ImageSpan content are revealed.
@@ -267,6 +274,8 @@ public:
   float GetSequenceStaggerRatio() const;
 
 private:
+  friend struct Internal::Reveal::Extension;
+
   class Impl;
   Impl* mImpl{nullptr};
 };

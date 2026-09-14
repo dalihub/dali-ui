@@ -1880,6 +1880,68 @@ int UtcDaliTextRevealTileBoundaryMetadataP(void)
   END_TEST;
 }
 
+int UtcDaliTextRevealMetadataGlyphStateP(void)
+{
+  UiTestApplication application;
+  auto              controller = UiText::Controller::New();
+  controller->SetText("A M W");
+  controller->SetDefaultFontSize(24.0f, UiText::Controller::PIXEL_SIZE);
+  const Vector2 size(320.0f, 64.0f);
+  controller->Relayout(size);
+  auto typesetter = UiText::Typesetter::New(controller->GetRenderTextModel());
+  typesetter->SetFinalElisionResult(controller->GetFinalElisionResult());
+  auto ordinary = typesetter->Render(size, UiText::Direction::LEFT_TO_RIGHT,
+                                     UiText::Typesetter::RENDER_NO_STYLES, false, Pixel::L8);
+  DALI_TEST_CHECK(ordinary);
+  auto       source     = Reveal::BuildCharacterPlan(*controller->GetRenderTextModel(), 0.25f);
+  auto       plan       = typesetter->CreateFinalRevealPlan(source, Reveal::Unit::CHARACTER);
+  const auto glyphCount = plan.glyphToUnit.size();
+  DALI_TEST_CHECK(glyphCount > 1u);
+  auto raster = [&]()
+  {
+    float      fade   = 0.0f;
+    auto       pixels = typesetter->RenderTextRevealMetadata(size, UiText::Direction::LEFT_TO_RIGHT, plan, fade);
+    const auto buffer = Dali::Integration::GetPixelDataBuffer(pixels);
+    return std::vector<uint8_t>(buffer.buffer, buffer.buffer + buffer.bufferSize);
+  };
+  auto ownedCount = [](const std::vector<uint8_t>& pixels)
+  {
+    size_t count = 0u;
+    for(size_t offset = 2u; offset < pixels.size(); offset += 4u)
+    {
+      count += pixels[offset] != 0u ? 1u : 0u;
+    }
+    return count;
+  };
+  for(float start : {0.125f, 0.75f, 0.0f})
+  {
+    plan.unitStart = {start};
+    plan.glyphToUnit.assign(glyphCount, 0u);
+    const auto all = raster();
+    DALI_TEST_CHECK(ownedCount(all) > 0u);
+    const uint32_t encoded = static_cast<uint32_t>(std::round(start * 65535.0f));
+    for(size_t offset = 0u; offset + 3u < all.size(); offset += 4u)
+    {
+      if(all[offset + 2u] != 0u)
+      {
+        DALI_TEST_EQUALS((static_cast<uint32_t>(all[offset]) << 8u) | all[offset + 1u], encoded, TEST_LOCATION);
+      }
+    }
+    // Invalid glyphs after a valid glyph must not reuse its prepared timing.
+    plan.glyphToUnit.assign(glyphCount, Reveal::NO_UNIT);
+    plan.glyphToUnit[0u] = 0u;
+    const auto first     = raster();
+    DALI_TEST_CHECK(ownedCount(first) > 0u && ownedCount(first) < ownedCount(all));
+    plan.glyphToUnit.resize(1u);
+    DALI_TEST_CHECK(raster() == first);
+    plan.glyphToUnit.assign(glyphCount, static_cast<uint32_t>(plan.unitStart.size()));
+    DALI_TEST_EQUALS(ownedCount(raster()), static_cast<size_t>(0u), TEST_LOCATION);
+    plan.glyphToUnit.assign(glyphCount, 0u);
+    DALI_TEST_CHECK(raster() == all);
+  }
+  END_TEST;
+}
+
 int UtcDaliTextRevealMetadataOwnershipHaloP(void)
 {
   constexpr uint32_t WIDTH      = 5u;
@@ -1961,6 +2023,98 @@ int UtcDaliTextRevealMetadataOwnershipHaloP(void)
   Reveal::ExpandMetadataOwnership(empty.data(), 3u, 3u);
   DALI_TEST_CHECK(std::all_of(empty.begin(), empty.end(), [](uint8_t value)
   { return value == 0u; }));
+  END_TEST;
+}
+
+int UtcDaliTextRevealMetadataOwnershipNeighborhoodP(void)
+{
+  // Use an immutable source and a direct neighborhood lookup as an independent
+  // reference. This also checks that halo writes never become new sources.
+  auto check = [](const std::vector<uint8_t>& input, uint32_t width, uint32_t height)
+  {
+    auto expected = input;
+    for(uint32_t y = 0u; y < height; ++y)
+    {
+      for(uint32_t x = 0u; x < width; ++x)
+      {
+        const size_t offset = (static_cast<size_t>(y) * width + x) * 4u;
+        if(input[offset + 2u] != 0u)
+        {
+          continue;
+        }
+        uint32_t latest = 0u;
+        for(uint32_t sy = y == 0u ? 0u : y - 1u; sy <= std::min(height - 1u, y + 1u); ++sy)
+        {
+          for(uint32_t sx = x == 0u ? 0u : x - 1u; sx <= std::min(width - 1u, x + 1u); ++sx)
+          {
+            const size_t source = (static_cast<size_t>(sy) * width + sx) * 4u;
+            if(input[source + 2u] != 0u)
+            {
+              latest = std::max(latest, (static_cast<uint32_t>(input[source]) << 8u) + input[source + 1u] + 1u);
+            }
+          }
+        }
+        if(latest != 0u)
+        {
+          --latest;
+          expected[offset]      = static_cast<uint8_t>(latest >> 8u);
+          expected[offset + 1u] = static_cast<uint8_t>(latest & 0xffu);
+          expected[offset + 2u] = 255u;
+          expected[offset + 3u] = 0u;
+        }
+      }
+    }
+    // Deliberately unaligned metadata and guard bytes catch boundary writes.
+    std::vector<uint8_t> actual(input.size() + 2u, 0xa5u);
+    std::copy(input.begin(), input.end(), actual.begin() + 1u);
+    Reveal::ExpandMetadataOwnership(actual.data() + 1u, width, height);
+    return actual.front() == 0xa5u && actual.back() == 0xa5u &&
+           std::equal(expected.begin(), expected.end(), actual.begin() + 1u);
+  };
+
+  // Exhaust every 3x3 occupancy pattern with zero, maximum, increasing and
+  // decreasing starts. Coverage ties cannot change a halo's final zero alpha.
+  for(uint32_t mask = 0u; mask < 512u; ++mask)
+  {
+    for(uint32_t timing = 0u; timing < 4u; ++timing)
+    {
+      std::vector<uint8_t> input(3u * 3u * 4u, 0u);
+      for(uint32_t pixel = 0u; pixel < 9u; ++pixel)
+      {
+        const uint32_t start   = timing == 0u ? 0u : timing == 1u ? 65535u
+                                                   : timing == 2u ? pixel * 7000u
+                                                                  : (8u - pixel) * 7000u;
+        input[pixel * 4u]      = static_cast<uint8_t>(start >> 8u);
+        input[pixel * 4u + 1u] = static_cast<uint8_t>(start & 0xffu);
+        input[pixel * 4u + 2u] = (mask & (1u << pixel)) != 0u ? 1u : 0u;
+        input[pixel * 4u + 3u] = static_cast<uint8_t>(pixel * 31u);
+      }
+      DALI_TEST_CHECK(check(input, 3u, 3u));
+    }
+  }
+  // Thin/empty images, odd widths and alternating empty rows exercise rolling
+  // row reuse. Invalid texels may contain nonzero RG/A and must remain intact
+  // unless an original owner actually reaches them.
+  for(uint32_t width : {0u, 1u, 2u, 17u})
+  {
+    for(uint32_t height : {0u, 1u, 2u, 9u})
+    {
+      std::vector<uint8_t> input(static_cast<size_t>(width) * height * 4u, 0u);
+      for(uint32_t y = 0u; y < height; ++y)
+      {
+        for(uint32_t x = 0u; x < width; ++x)
+        {
+          const size_t offset = (static_cast<size_t>(y) * width + x) * 4u;
+          input[offset]       = static_cast<uint8_t>(x * 13u);
+          input[offset + 1u]  = static_cast<uint8_t>(y * 29u);
+          input[offset + 2u]  = y % 3u == 0u && x % 2u == 0u ? 255u : 0u;
+          input[offset + 3u]  = 123u;
+        }
+      }
+      DALI_TEST_CHECK(check(input, width, height));
+    }
+  }
+  Reveal::ExpandMetadataOwnership(nullptr, 1u, 1u);
   END_TEST;
 }
 
@@ -4682,6 +4836,146 @@ int UtcDaliTextRevealGradientSpanMetadataP(void)
     }
   }
   DALI_TEST_CHECK(hasRevealCoverage);
+  END_TEST;
+}
+
+int UtcDaliTextRevealMetadataForegroundIsolationP(void)
+{
+  UiTestApplication application;
+  const Vector2     size(280.0f, 96.0f);
+  const char*       text = "AVATAR ffi office\nArabic العربية";
+  auto              segmentation = TextAbstraction::Segmentation::Get();
+
+  Ui::Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetStopNodes({Ui::Gradient::StopNode(0.0f, Ui::UiColor(Vector4(1.0f, 0.0f, 0.0f, 0.1f))),
+                         Ui::Gradient::StopNode(1.0f, Ui::UiColor(Vector4(0.0f, 0.0f, 1.0f, 0.8f)))});
+  auto builder = UiText::StyledTextBuilder::New(text);
+  DALI_TEST_CHECK(builder.SetSpan(UiText::GradientSpan::New(gradient), 0u, 17u));
+
+  auto copyPixels = [](PixelData pixels)
+  {
+    const auto buffer = Integration::GetPixelDataBuffer(pixels);
+    return std::vector<uint8_t>(buffer.buffer, buffer.buffer + buffer.bufferSize);
+  };
+
+  for(const auto unit : {Reveal::Unit::CHARACTER, Reveal::Unit::WORD, Reveal::Unit::LINE, Reveal::Unit::PIXEL})
+  {
+    std::vector<uint8_t> reference;
+    for(bool styled : {false, true})
+    {
+      auto controller = UiText::Controller::New();
+      controller->SetMultiLineEnabled(true);
+      controller->SetDefaultFontSize(24.0f, UiText::Controller::PIXEL_SIZE);
+      controller->SetCharacterSpacing(-1.0f);
+      if(styled)
+      {
+        controller->SetStyledText(builder.Build());
+        controller->SetDefaultColor(Vector4(0.2f, 0.7f, 0.4f, 0.35f));
+      }
+      else
+      {
+        controller->SetText(text);
+      }
+      controller->Relayout(size);
+
+      auto       typesetter = UiText::Typesetter::New(controller->GetRenderTextModel());
+      const auto foreground = typesetter->Render(size, UiText::Direction::LEFT_TO_RIGHT,
+                                                  UiText::Typesetter::RENDER_NO_STYLES, false, Pixel::RGBA8888);
+      DALI_TEST_CHECK(foreground);
+      const auto foregroundPixels = copyPixels(foreground);
+      const auto source = Reveal::BuildPlan(*controller->GetRenderTextModel(), unit, 0.25f, segmentation);
+      const auto plan   = typesetter->CreateFinalRevealPlan(source, unit);
+      float      fade   = 0.0f;
+      const auto metadata = typesetter->RenderTextRevealMetadata(size, UiText::Direction::LEFT_TO_RIGHT, plan, fade);
+      DALI_TEST_CHECK(metadata);
+      const auto pixels = copyPixels(metadata);
+      DALI_TEST_CHECK(std::any_of(pixels.begin(), pixels.end(), [](uint8_t value)
+      {
+        return value != 0u;
+      }));
+      if(styled)
+      {
+        // Monochrome metadata depends on glyph coverage, not foreground RGB,
+        // text alpha or GradientSpan paint alpha, even where glyphs overlap.
+        DALI_TEST_CHECK(pixels == reference);
+      }
+      else
+      {
+        reference = pixels;
+      }
+
+      // Metadata-only traversal must release its context before an ordinary
+      // raster, and must not alter the already returned foreground pixels.
+      const auto after = typesetter->Render(size, UiText::Direction::LEFT_TO_RIGHT,
+                                             UiText::Typesetter::RENDER_NO_STYLES, false, Pixel::RGBA8888);
+      DALI_TEST_CHECK(after);
+      DALI_TEST_CHECK(copyPixels(after) == foregroundPixels);
+      const auto repeated = typesetter->RenderTextRevealMetadata(size, UiText::Direction::LEFT_TO_RIGHT, plan, fade);
+      DALI_TEST_CHECK(repeated);
+      DALI_TEST_CHECK(copyPixels(repeated) == pixels);
+      DALI_TEST_CHECK(copyPixels(foreground) == foregroundPixels);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextRevealPixelColumnTimingP(void)
+{
+  UiTestApplication application;
+  const Vector2     size(120.0f, 70.0f);
+  for(auto alignment : {UiText::Alignment::START, UiText::Alignment::CENTER, UiText::Alignment::END})
+  {
+    auto controller = UiText::Controller::New();
+    controller->SetMultiLineEnabled(false);
+    controller->SetDefaultFontSize(37.5f, UiText::Controller::PIXEL_SIZE);
+    controller->SetHorizontalAlignment(alignment);
+    controller->SetText("WIffi WWW iii");
+    controller->Relayout(size);
+    auto typesetter = UiText::Typesetter::New(controller->GetRenderTextModel());
+    DALI_TEST_CHECK(typesetter->Render(size, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES));
+    auto plan = typesetter->CreateFinalRevealPlan(Reveal::BuildPixelPlan(*controller->GetRenderTextModel(), 0.25f), Reveal::Unit::PIXEL);
+    DALI_TEST_CHECK(plan.HasPixelTiming() && !plan.unitStart.empty());
+    DALI_TEST_EQUALS(typesetter->GetViewModel()->GetNumberOfLines(), 1u, TEST_LOCATION);
+    const int32_t offset = static_cast<int32_t>(typesetter->GetViewModel()->GetLines()[0u].alignmentOffset);
+    // Use one timing owner for this oracle: even overlapping glyphs then
+    // have the same expected start at a given X. Glyph widths and clipping
+    // remain real; no fixed font dimensions or coverage counts are assumed.
+    std::fill(plan.glyphToUnit.begin(), plan.glyphToUnit.end(), 0u);
+    for(bool rtl : {false, true})
+    {
+      for(float extent : {0.0f, 17.25f, 173.5f})
+      {
+        plan.unitStart[0u]                       = rtl ? 0.18751f : 0.81249f;
+        plan.pixelUnitTiming[0u].visualMinimum   = 2.25f;
+        plan.pixelUnitTiming[0u].visualMaximum   = 2.25f + extent;
+        plan.pixelUnitTiming[0u].progressionSpan = 0.55f;
+        plan.pixelUnitTiming[0u].rightToLeft     = rtl;
+        float fade                               = 0.0f;
+        auto  metadata                           = typesetter->RenderTextRevealMetadata(size, UiText::Direction::LEFT_TO_RIGHT, plan, fade);
+        DALI_TEST_CHECK(metadata);
+        const auto pixels  = Integration::GetPixelDataBuffer(metadata);
+        bool       covered = false;
+        for(uint32_t y = 0u; y < metadata.GetHeight(); ++y)
+        {
+          for(uint32_t x = 0u; x < metadata.GetWidth(); ++x)
+          {
+            const auto* pixel = pixels.buffer + static_cast<size_t>(y) * metadata.GetStrideBytes() + static_cast<size_t>(x) * 4u;
+            if(pixel[3u] == 0u)
+            {
+              continue; // Ownership-only halo has its own neighborhood rule.
+            }
+            covered                 = true;
+            const float    visualX  = static_cast<float>(static_cast<int32_t>(x) - offset) + 0.5f;
+            const float    start    = Reveal::ResolvePixelStart(plan, 0u, visualX);
+            const uint32_t expected = static_cast<uint32_t>(std::round(std::max(0.0f, std::min(1.0f, start)) * 65535.0f));
+            const uint32_t actual   = (static_cast<uint32_t>(pixel[0u]) << 8u) | pixel[1u];
+            DALI_TEST_EQUALS(actual, expected, TEST_LOCATION);
+          }
+        }
+        DALI_TEST_CHECK(covered);
+      }
+    }
+  }
   END_TEST;
 }
 

@@ -170,6 +170,10 @@ highp float ResolveTextRevealOpacity(highp vec2 texCoord)
     floor(revealMetadata.r * 255.0 + 0.5) * 256.0 + floor(revealMetadata.g * 255.0 + 0.5);
   highp float normalizedStart = encodedStart / 65535.0;
   highp float revealProgress = clamp(uTextRevealProgress, 0.0, 1.0);
+  // Match Reveal::ResolveRenderProgress: float constraints may retain one
+  // epsilon below one when an animation completes. Leave interior timing intact.
+  const highp float completeProgress = 0.99999988079071044921875;
+  revealProgress = mix(revealProgress, 1.0, step(completeProgress, revealProgress));
   highp float localOpacity;
   if(uTextRevealFadeDuration <= 0.000001)
   {
@@ -315,4 +319,9 @@ void main()
                    ) * (1.0 - overlayStyleTexture.a) + overlayStyleTexture
 #endif
                  );
+#ifdef TEXT_REVEAL_BLUR_ALPHA_SOURCE
+  // Private single-color capture: A8 is stored as R8 by the graphics backend.
+  // Keep final foreground alpha (including Reveal) and restore RGB at output.
+  gl_FragColor = vec4(gl_FragColor.a);
+#endif
 }

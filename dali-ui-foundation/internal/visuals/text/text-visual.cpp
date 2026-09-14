@@ -20,6 +20,8 @@
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/devel-api/rendering/texture-devel.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/pixel-data-integ.h>
@@ -27,6 +29,10 @@
 #include <dali/integration-api/texture-integ.h>
 #include <dali/integration-api/trace.h>
 #include <string.h>
+#include <cmath>
+#include <limits>
+#include <utility>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
@@ -45,10 +51,12 @@
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
+#include <dali-ui-foundation/internal/visuals/text/text-reveal-runtime-blur.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToDaliString;
@@ -470,6 +478,10 @@ void TextVisual::DoSetOnScene(Actor& actor)
 
 void TextVisual::RemoveRenderer(Actor& actor, bool removeDefaultRenderer)
 {
+  if(auto* data = GetTextVisualRevealData(mRevealData))
+  {
+    RemoveRuntimeRevealBlur(data->runtimeBlur, actor);
+  }
   for(RendererContainer::iterator iter = mRendererList.begin(); iter != mRendererList.end(); ++iter)
   {
     Renderer renderer = (*iter);
@@ -819,6 +831,17 @@ void TextVisual::UpdateLineHeight()
 
 void TextVisual::UpdateRenderer()
 {
+  // Handles may outlive Application::MainLoop. Property setters must not
+  // rebuild render resources after the adaptor has retired their scene.
+  if(!Dali::Adaptor::IsAvailable())
+  {
+    Actor control = mControl.GetHandle();
+    if(control)
+    {
+      RemoveRenderer(control, true);
+    }
+    return;
+  }
   if(mController->IsAsyncRendering())
   {
     return;
@@ -1102,7 +1125,12 @@ void TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
 // From async text manager
 void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textInformation)
 {
-  Text::AsyncTextParameters parameters = textInformation.parameters;
+  if(!Dali::Adaptor::IsAvailable())
+  {
+    return;
+  }
+  Text::AsyncTextParameters parameters          = textInformation.parameters;
+  const auto                publicationRevision = mController->GetRenderRevision();
 
 #ifdef TRACE_ENABLED
   if(gTraceFilter2 && gTraceFilter2->IsTraceEnabled())
@@ -1620,6 +1648,44 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       }
     }
 
+    // Publish blur before client callbacks and replacement placement delivery.
+    // The ordinary textures/timing above remain a complete fallback if any
+    // optional plane or capability check fails.
+    if(renderInfo.revealBlur && textRevealEnabled && !renderInfo.isEmbossEnabled && !isHeightTiling)
+    {
+      const auto& prepared           = *renderInfo.revealBlur;
+      const auto& options            = prepared.options;
+      Ui::View    owner              = Ui::View::DownCast(control);
+      const auto* currentReveal      = GetTextVisualRevealData(mRevealData);
+      const bool  currentReplacement = !parameters.replacementSourceSnapshot.hasValidReplacementSource ||
+                                      (IsCurrentInlineReplacementRender(owner, renderInfo.replacementLayoutGeneration) &&
+                                       renderInfo.replacementSourceRevision == mController->GetReplacementSourceSnapshot().sourceRevision);
+      if(owner && currentReveal && currentReveal->revision == parameters.textRevealRevision &&
+         mController->IsAsyncRendering() && currentReplacement &&
+         currentReveal->blurRadius > 0.0f && currentReveal->blurDurationRatio > 0.0f &&
+         options.controlSize == textControlSize &&
+         options.radius == ResolveRevealBlurRadius(currentReveal->blurRadius * GetImpl(owner).GetEffectiveScale()) &&
+         options.durationRatio == currentReveal->blurDurationRatio &&
+         options.stagger == currentReveal->sequenceStaggerRatio &&
+         options.perLine == (currentReveal->sequence == Text::Internal::Reveal::Sequence::PER_LINE) &&
+         PublishPreparedRevealBlur(control, prepared, renderInfo.replacementSourceRevision, renderInfo.replacementRevealTimings))
+      {
+        renderInfo.replacementRevealTimings = prepared.timings;
+        renderInfo.textRevealFadeDuration   = prepared.fadeDuration;
+      }
+    }
+    renderInfo.revealBlur.reset();
+
+    // Allocation/attachment above can invoke application code. Do not deliver
+    // the old result's image timings or completion after a newer publication.
+    const auto* publishedReveal = GetTextVisualRevealData(mRevealData);
+    if(!Dali::Adaptor::IsAvailable() || mController->GetRenderRevision() != publicationRevision ||
+       parameters.textRevealRevision != (publishedReveal ? publishedReveal->revision : 0u) ||
+       !mController->IsAsyncRendering() || mControl.GetHandle() != control)
+    {
+      return;
+    }
+
     if(mAsyncTextInterface && parameters.isMarqueeEnabled)
     {
       mAsyncTextInterface->AsyncInitializeMarquee(renderInfo);
@@ -2070,12 +2136,15 @@ void TextVisual::BindGradientOverlayAnimConstraints(VisualRenderer& renderer,
   }
 }
 
-void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit     unit,
-                                     float                            fadeDurationRatio,
-                                     Property::Index                  progressPropertyIndex,
-                                     uint64_t                         revision,
-                                     Text::Internal::Reveal::Sequence sequence,
-                                     float                            sequenceStaggerRatio)
+void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit            unit,
+                                     float                                   fadeDurationRatio,
+                                     Property::Index                         progressPropertyIndex,
+                                     uint64_t                                revision,
+                                     Text::Internal::Reveal::Sequence        sequence,
+                                     float                                   sequenceStaggerRatio,
+                                     float                                   blurRadius,
+                                     float                                   blurDurationRatio,
+                                     Ui::Integration::Text::Reveal::BlurMode blurMode)
 {
   sequence             = unit == Text::Internal::Reveal::Unit::DISABLED ? Text::Internal::Reveal::Sequence::WHOLE_TEXT : sequence;
   sequenceStaggerRatio = unit == Text::Internal::Reveal::Unit::DISABLED ? 0.0f : sequenceStaggerRatio;
@@ -2091,6 +2160,9 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit     unit,
           data->sequence == sequence &&
           Equals(data->fadeDurationRatio, fadeDurationRatio) &&
           Equals(data->sequenceStaggerRatio, sequenceStaggerRatio) &&
+          Equals(data->blurRadius, blurRadius) &&
+          Equals(data->blurDurationRatio, blurDurationRatio) &&
+          data->blurMode == blurMode &&
           data->progressPropertyIndex == progressPropertyIndex &&
           data->revision == revision)
   {
@@ -2102,6 +2174,9 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit     unit,
   data->sequence              = sequence;
   data->fadeDurationRatio     = fadeDurationRatio;
   data->sequenceStaggerRatio  = sequenceStaggerRatio;
+  data->blurRadius            = blurRadius;
+  data->blurDurationRatio     = blurDurationRatio;
+  data->blurMode              = blurMode;
   data->progressPropertyIndex = progressPropertyIndex;
   data->revision              = revision;
   mRendererUpdateNeeded       = true;
@@ -2113,6 +2188,64 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit     unit,
 
   if(IsOnScene())
   {
+    if(mController->IsAsyncRendering() && unit != Text::Internal::Reveal::Unit::DISABLED &&
+       !mController->IsMarqueeEnabled() && !mController->IsTextCutout() &&
+       (!mTextShaderFeatureCache.IsEnabledTextReveal() || data->constraints.empty()))
+    {
+      // Keep the previous publication until the async replacement is ready.
+      // A full fade with simultaneous sequence starts has opacity == progress
+      // for every text unit, so it needs no glyph metadata. Bind that exact
+      // foreground fade immediately, including when an animation starts in
+      // this event. Blur itself still needs the prepared worker payload.
+      // Other schedules can only reuse ordinary text at the visible endpoint.
+      Actor owner = mControl.GetHandle();
+      if(owner)
+      {
+        // Renderer opacity must not fade decoration planes with the foreground.
+        const bool fullFade = fadeDurationRatio == 1.0f &&
+                              (sequence == Text::Internal::Reveal::Sequence::WHOLE_TEXT || sequenceStaggerRatio == 0.0f) &&
+                              !mTextShaderFeatureCache.IsEnabledStyle() && !mTextShaderFeatureCache.IsEnabledOverlay();
+        if((fullFade || !mTextShaderFeatureCache.IsEnabledTextReveal()) && progressPropertyIndex != Property::INVALID_INDEX)
+        {
+          if(mTextShaderFeatureCache.IsEnabledTextReveal())
+          {
+            // None may itself still be pending. Its old metadata has lost its
+            // progress binding; recover the ordinary foreground from those
+            // same textures instead of discarding the only visible result.
+            RemoveRuntimeRevealBlur(data->runtimeBlur, owner);
+            auto featureBuilder = mTextShaderFeatureCache;
+            featureBuilder.EnableTextReveal(false);
+            auto shader = GetTextShader(mFactoryCache, featureBuilder);
+            for(auto& renderer : mRendererList)
+            {
+              renderer.SetShader(shader);
+            }
+          }
+          RemoveTextRevealConstraints();
+          for(auto& renderer : mRendererList)
+          {
+            Constraint constraint = Constraint::New<float>(renderer, Dali::DevelRenderer::Property::OPACITY,
+                                                           [fullFade](float& opacity, const PropertyInputContainer& inputs)
+            {
+              const float progress = Text::Internal::Reveal::ResolveRenderProgress(inputs[0]->GetFloat());
+              opacity *= fullFade ? progress : (progress == 1.0f ? 1.0f : 0.0f);
+            });
+            constraint.AddSource(Source(owner, progressPropertyIndex));
+            constraint.SetRemoveAction(Constraint::DISCARD);
+            constraint.SetApplyRate(Constraint::APPLY_ALWAYS);
+            Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_VISUAL_REVEAL_PROGRESS_CONSTRAINT_TAG);
+            constraint.Apply();
+            data->pendingConstraints.push_back(constraint);
+          }
+        }
+        else
+        {
+          // None -> Reveal before the None publication has completed has no
+          // usable progress binding, even if the old shader has metadata.
+          RemoveRenderer(owner, true);
+        }
+      }
+    }
     UpdateRenderer();
   }
 }
@@ -2134,6 +2267,11 @@ void TextVisual::RemoveTextRevealConstraints()
     }
   }
   data->constraints.clear();
+  for(auto& constraint : data->pendingConstraints)
+  {
+    constraint.Remove();
+  }
+  data->pendingConstraints.clear();
 }
 
 void TextVisual::BindTextRevealConstraint(VisualRenderer& renderer)
@@ -2371,6 +2509,11 @@ void TextVisual::CancelAsyncRender(Ui::Integration::Visual::Base visual)
 
 bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextParameters& parameters)
 {
+  if(!Dali::Adaptor::IsAvailable())
+  {
+    RemoveRenderer(control, true);
+    return false;
+  }
   if((fabsf(parameters.textWidth) < Math::MACHINE_EPSILON_1000) ||
      (fabsf(parameters.textHeight) < Math::MACHINE_EPSILON_1000) || parameters.text.empty())
   {
@@ -2961,6 +3104,377 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
           mOpacityConstraintList.push_back(opacityConstraint);
         }
       }
+    }
+  }
+  // Unsupported configurations keep the complete ordinary Reveal publication.
+  // Keep at least two Gaussian samples, as ordinary BlurEffect does. Resolve
+  // this before sizing the halo so every target and shader uses the same radius.
+  const bool     blurEnabled = revealData && revealData->blurRadius > 0.0f && revealData->blurDurationRatio > 0.0f;
+  const uint32_t blurRadius  = blurEnabled
+                                 ? ResolveRevealBlurRadius(revealData->blurRadius * mController->GetUiScale())
+                                 : 0u;
+  if(revealData && blurRadius != 0u && textRevealEnabled &&
+     !mController->IsAsyncRendering() &&
+     !embossEnabled && !isHeightTiling && mRendererList.size() == 1u)
+  {
+    Ui::View      ownerView   = Ui::View::DownCast(actor);
+    const Vector3 controlSize = actor.GetProperty<Vector3>(Actor::Property::SIZE);
+    const float   halo        = 2.0f * static_cast<float>(blurRadius + 2u);
+    if(ownerView && Dali::Integration::SceneHolder::Get(actor) &&
+       controlSize.x > 0.0f && controlSize.y > 0.0f &&
+       std::ceil(controlSize.x) + halo < static_cast<float>(maxTextureSize) &&
+       std::ceil(controlSize.y) + halo < static_cast<float>(maxTextureSize))
+    {
+      Vector<Text::ReplacementRevealTiming> timings;
+      uint64_t                              sourceRevision = 0u;
+      auto                                  plan           = BuildFinalTextRevealPlan(timings, sourceRevision);
+      RevealBlurPreparationOptions          options;
+      options.rasterSize       = size;
+      options.controlSize      = Vector2(controlSize.x, controlSize.y);
+      options.radius           = blurRadius;
+      options.maxTextureSize   = static_cast<uint32_t>(maxTextureSize);
+      options.durationRatio    = revealData->blurDurationRatio;
+      options.stagger          = revealData->sequenceStaggerRatio;
+      options.textDirection    = mController->GetTextDirection();
+      options.foregroundFormat = mRendererList.front().GetTextures().GetTexture(0u).GetPixelFormat();
+      options.perLine          = revealData->sequence == Text::Internal::Reveal::Sequence::PER_LINE;
+      options.decorations      = mTextShaderFeatureCache.IsEnabledStyle() || mTextShaderFeatureCache.IsEnabledOverlay();
+      options.gradientMixed    = mTextShaderFeatureCache.IsEnabledTextGradientMixed();
+      options.colorMask        = !mTextShaderFeatureCache.IsEnabledAnyTextGradient() &&
+                          mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor();
+      const auto prepared = PrepareRevealBlur(*mTypesetter, std::move(plan), timings, options,
+                                              &mController->GetReplacementRenderState().placements);
+      if(prepared)
+      {
+        PublishPreparedRevealBlur(actor, *prepared, sourceRevision, timings);
+      }
+    }
+  }
+}
+
+bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur& prepared, uint64_t sourceRevision,
+                                           const Vector<Text::ReplacementRevealTiming>& ordinaryTimings)
+{
+  auto* data = GetTextVisualRevealData(mRevealData);
+  if(!Dali::Adaptor::IsAvailable() || !data || data->runtimeBlur || !actor || mRendererList.size() != 1u || !Dali::Integration::SceneHolder::Get(actor))
+  {
+    return false;
+  }
+  const auto revision         = data->revision;
+  const bool asynchronous     = mController->IsAsyncRendering();
+  auto       foreground       = mRendererList.front();
+  const auto original         = foreground.GetTextures();
+  const auto originalShader   = foreground.GetShader();
+  const auto renderRevision   = mController->GetRenderRevision();
+  const auto sourceIdentity   = mController->GetReplacementSourceSnapshot().sourceRevision;
+  const auto layoutGeneration = mController->GetReplacementRenderState().layoutGeneration;
+  const auto features         = mTextShaderFeatureCache.GetShaderType();
+  const auto uiScale          = mController->GetUiScale();
+  const auto renderScale      = mController->GetRenderScale();
+  const auto scene            = Dali::Integration::SceneHolder::Get(actor);
+  const auto ownerView        = Ui::View::DownCast(actor);
+  if(!ownerView)
+  {
+    return false;
+  }
+  const auto padding        = ownerView.GetPadding();
+  const auto effectiveScale = GetImpl(ownerView).GetEffectiveScale();
+  // Capture quality and display radius from this revision, not a later Label
+  // getter during runtime allocation (which can reenter or publish asynchronously).
+  const auto  blurSettings = ResolveRuntimeRevealBlurSettings(data->blurMode, data->blurRadius * effectiveScale);
+  const auto& options      = prepared.options;
+  const auto  maximum      = Dali::GetMaxTextureSize();
+  const float halo         = 2.0f * static_cast<float>(options.radius + 2u);
+  // Async text constraints may be ceil-rounded before fractional UI padding
+  // is restored. Capture uses the actual owner's uSize, as the text vertex
+  // shader does, rather than that rounded layout constraint.
+  const auto    ownerSize = actor.GetProperty<Vector3>(Actor::Property::SIZE);
+  const Vector2 captureSize(ownerSize.x, ownerSize.y);
+  // A source/style request can be queued without changing the renderer yet.
+  // Compare both that invalidation and the resolved resources/owner geometry.
+  auto unchanged = [&]()
+  {
+    return Dali::Adaptor::IsAvailable() && GetTextVisualRevealData(mRevealData) == data && data->revision == revision &&
+           mController->GetRenderRevision() == renderRevision && mController->IsAsyncRendering() == asynchronous &&
+           mController->GetReplacementSourceSnapshot().sourceRevision == sourceIdentity &&
+           mController->GetReplacementRenderState().layoutGeneration == layoutGeneration &&
+           mTextShaderFeatureCache.GetShaderType() == features && mController->GetUiScale() == uiScale &&
+           mController->GetRenderScale() == renderScale && mControl.GetHandle() == actor &&
+           Dali::Integration::SceneHolder::Get(actor) == scene && actor.GetProperty<Vector3>(Actor::Property::SIZE) == ownerSize &&
+           ownerView.GetPadding() == padding && GetImpl(ownerView).GetEffectiveScale() == effectiveScale &&
+           mRendererList.size() == 1u && mRendererList.front() == foreground;
+  };
+  if(options.radius == 0u || options.radius != ResolveRevealBlurRadius(static_cast<float>(options.radius)) || maximum <= 0 ||
+     !(options.controlSize.x > 0.0f && options.controlSize.y > 0.0f &&
+       options.rasterSize.x > 0.0f && options.rasterSize.y > 0.0f) ||
+     !std::isfinite(options.controlSize.x + options.controlSize.y + options.rasterSize.x + options.rasterSize.y) ||
+     options.rasterSize.x > static_cast<float>(maximum) || options.rasterSize.y > static_cast<float>(maximum) ||
+     !(captureSize.x > 0.0f && captureSize.y > 0.0f) || !std::isfinite(captureSize.x + captureSize.y) ||
+     std::ceil(captureSize.x) + halo >= static_cast<float>(maximum) ||
+     std::ceil(captureSize.y) + halo >= static_cast<float>(maximum))
+  {
+    return false;
+  }
+  const bool gradientMixed = mTextShaderFeatureCache.IsEnabledTextGradientMixed();
+  const bool colorMask     = !mTextShaderFeatureCache.IsEnabledAnyTextGradient() &&
+                         mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor();
+  if(!original || original.GetTextureCount() < 2u || gradientMixed != options.gradientMixed || colorMask != options.colorMask ||
+     options.decorations != (mTextShaderFeatureCache.IsEnabledStyle() || mTextShaderFeatureCache.IsEnabledOverlay()) ||
+     options.perLine != !prepared.lines.empty() || !(prepared.blurDuration > 0.0f) || !std::isfinite(prepared.blurDuration))
+  {
+    return false;
+  }
+  const auto source          = original.GetTexture(0u);
+  const auto metadataIndex   = original.GetTextureCount() - 1u;
+  auto       metadataTexture = original.GetTexture(metadataIndex);
+  if(!source || source.GetPixelFormat() != options.foregroundFormat ||
+     source.GetWidth() != static_cast<uint32_t>(options.rasterSize.x) || source.GetHeight() != static_cast<uint32_t>(options.rasterSize.y))
+  {
+    return false;
+  }
+  auto matching = [](PixelData pixels, uint32_t width, uint32_t height, Pixel::Format format)
+  {
+    if(!pixels || pixels.GetWidth() != width || pixels.GetHeight() != height || pixels.GetPixelFormat() != format)
+    {
+      return false;
+    }
+    const auto   buffer   = Dali::Integration::GetPixelDataBuffer(pixels);
+    const size_t rowBytes = static_cast<size_t>(width) * Pixel::GetBytesPerPixel(format);
+    const size_t stride   = pixels.GetStrideBytes() ? pixels.GetStrideBytes() : rowBytes;
+    return height > 0u && buffer.buffer && stride >= rowBytes &&
+           (static_cast<size_t>(height) - 1u) * stride + rowBytes <= buffer.bufferSize;
+  };
+  if(!metadataTexture || !matching(prepared.metadata, metadataTexture.GetWidth(), metadataTexture.GetHeight(), Pixel::RGBA8888) ||
+     !std::isfinite(prepared.fadeDuration) || prepared.fadeDuration < 0.0f ||
+     !std::isfinite(prepared.planTiming.x + prepared.planTiming.y) ||
+     prepared.planTiming.x < 0.0f || prepared.planTiming.y < 0.0f || prepared.planTiming.y > 1.0f)
+  {
+    return false;
+  }
+  for(const auto& line : prepared.lines)
+  {
+    if(!line.sequence.hasTextForeground)
+    {
+      if(line.foreground || line.mask || line.metadata ||
+         std::none_of(prepared.images.begin(), prepared.images.end(), [&](const auto& image)
+      {
+        return image.lineIndex == line.sequence.lineIndex;
+      }))
+      {
+        return false;
+      }
+      continue;
+    }
+    const auto& rectangle = line.sequence.textureRect;
+    const float width     = rectangle.z * static_cast<float>(source.GetWidth());
+    const float height    = rectangle.w * static_cast<float>(source.GetHeight());
+    if(!(rectangle.x >= 0.0f && rectangle.y >= 0.0f && rectangle.z > 0.0f && rectangle.w > 0.0f) ||
+       rectangle.x + rectangle.z > 1.000001f || rectangle.y + rectangle.w > 1.000001f ||
+       !std::isfinite(width + height + line.sequence.start) ||
+       line.sequence.start < 0.0f || line.sequence.start > 1.0f)
+    {
+      return false;
+    }
+    const auto w = static_cast<uint32_t>(std::round(width));
+    const auto h = static_cast<uint32_t>(std::round(height));
+    if(!matching(line.foreground, w, h, options.foregroundFormat) || !matching(line.metadata, w, h, Pixel::RGBA8888) ||
+       ((gradientMixed || colorMask) && !matching(line.mask, w, h, Pixel::L8)))
+    {
+      return false;
+    }
+  }
+  std::vector<RuntimeRevealBlurSequence> sequences;
+  sequences.reserve(prepared.lines.size());
+  for(const auto& line : prepared.lines)
+  {
+    RuntimeRevealBlurSequence sequence;
+    static_cast<RevealBlurSequence&>(sequence) = line.sequence;
+    if(!sequence.hasTextForeground)
+    {
+      sequences.push_back(std::move(sequence));
+      continue;
+    }
+    sequence.textures = TextureSet::New();
+    for(uint32_t index = 0u; index < original.GetTextureCount(); ++index)
+    {
+      sequence.textures.SetTexture(index, original.GetTexture(index));
+      sequence.textures.SetSampler(index, original.GetSampler(index));
+    }
+    Sampler   sampler = original.GetSampler(0u);
+    PixelData pixels  = line.foreground;
+    AddTexture(sequence.textures, pixels, sampler, 0u);
+    if(gradientMixed || colorMask)
+    {
+      const auto maskIndex = gradientMixed ? 1u : metadataIndex - 1u;
+      sampler              = original.GetSampler(maskIndex);
+      pixels               = line.mask;
+      AddTexture(sequence.textures, pixels, sampler, maskIndex);
+    }
+    sampler = original.GetSampler(metadataIndex);
+    pixels  = line.metadata;
+    AddTexture(sequence.textures, pixels, sampler, metadataIndex);
+    sequences.push_back(std::move(sequence));
+  }
+  std::unique_ptr<RuntimeRevealBlurDecorations> decorations;
+  std::unique_ptr<RuntimeRevealBlurImages>      images;
+  if(!prepared.images.empty())
+  {
+    images                 = std::make_unique<RuntimeRevealBlurImages>();
+    images->sourceRevision = sourceRevision;
+    images->placements     = prepared.images;
+  }
+  if(mTextShaderFeatureCache.IsEnabledStyle() || mTextShaderFeatureCache.IsEnabledOverlay())
+  {
+    // Reuse the existing style planes. Capture must omit their samplers as
+    // well as shader features, so gradient/color-mask indices remain correct.
+    uint32_t styleIndex = gradientMixed ? 3u : (mTextShaderFeatureCache.IsEnabledTextGradient() ? 2u : 1u);
+    if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
+    {
+      ++styleIndex;
+    }
+    const uint32_t planeCount = static_cast<uint32_t>(mTextShaderFeatureCache.IsEnabledStyle()) +
+                                static_cast<uint32_t>(mTextShaderFeatureCache.IsEnabledOverlay());
+    if(styleIndex + planeCount >= metadataIndex + 1u)
+    {
+      return false;
+    }
+    auto compact = [styleIndex, planeCount](TextureSet textures)
+    {
+      auto     result = TextureSet::New();
+      uint32_t slot   = 0u;
+      for(uint32_t index = 0u; index < textures.GetTextureCount(); ++index)
+      {
+        if(index < styleIndex || index >= styleIndex + planeCount)
+        {
+          result.SetTexture(slot, textures.GetTexture(index));
+          result.SetSampler(slot++, textures.GetSampler(index));
+        }
+      }
+      return result;
+    };
+    decorations                     = std::make_unique<RuntimeRevealBlurDecorations>();
+    decorations->foregroundTextures = compact(original);
+    auto feature                    = mTextShaderFeatureCache;
+    feature.EnableStyle(false).EnableOverlay(false);
+    decorations->foregroundShader = mTextVisualShaderFactory.GetShader(mFactoryCache, feature);
+    for(auto& sequence : sequences)
+    {
+      if(sequence.hasTextForeground)
+      {
+        sequence.textures = compact(sequence.textures);
+      }
+    }
+    for(bool overlay : {false, true})
+    {
+      if(overlay ? mTextShaderFeatureCache.IsEnabledOverlay() : mTextShaderFeatureCache.IsEnabledStyle())
+      {
+        const auto plane = original.GetTexture(styleIndex);
+        if(!plane || plane.GetWidth() != source.GetWidth() || plane.GetHeight() != source.GetHeight() ||
+           plane.GetPixelFormat() != Pixel::RGBA8888)
+        {
+          return false;
+        }
+        auto& textureSet = overlay ? decorations->overlay : decorations->background;
+        textureSet       = TextureSet::New();
+        textureSet.SetTexture(0u, original.GetTexture(styleIndex));
+        textureSet.SetSampler(0u, original.GetSampler(styleIndex++));
+      }
+    }
+  }
+  // Object-created callbacks during allocation may have requested a new result.
+  if(!unchanged() || data->runtimeBlur || foreground.GetTextures() != original || foreground.GetShader() != originalShader)
+  {
+    return false;
+  }
+  auto runtimeBlur = PrepareRuntimeRevealBlur(actor, foreground, captureSize, data->progressPropertyIndex,
+                                              options.radius, prepared.blurDuration, std::move(sequences),
+                                              !mTextShaderFeatureCache.IsEnabledMultiColor() && !mTextShaderFeatureCache.IsEnabledEmoji() &&
+                                                !mTextShaderFeatureCache.IsEnabledAnyTextGradient() && !mTextShaderFeatureCache.IsEnabledTextGradientOverlay() &&
+                                                !mController->IsTextCutout(),
+                                              std::move(decorations), std::move(images), blurSettings);
+  if(!runtimeBlur)
+  {
+    return false;
+  }
+  if(!unchanged() || data->runtimeBlur || foreground.GetTextures() != original || foreground.GetShader() != originalShader)
+  {
+    // Detached construction has not borrowed or restored any owner resource.
+    return false;
+  }
+  // Own the candidate before attach: scene/task creation can reenter. Cleanup
+  // cancels this actor before restoring its borrowed foreground, and the
+  // returning activation must never overwrite a newer publication.
+  data->runtimeBlur            = runtimeBlur;
+  const auto  fadeIndex        = foreground.GetPropertyIndex(UNIFORM_TEXT_REVEAL_FADE_DURATION_NAME);
+  const float previousFade     = foreground.GetProperty<float>(fadeIndex);
+  bool        timingsPublished = false;
+  auto        current          = [&]()
+  {
+    return unchanged() && data->runtimeBlur == runtimeBlur && HasCurrentRuntimeRevealBlurForeground(runtimeBlur);
+  };
+  auto cancel = [&]()
+  {
+    // A newer publication may already have retired us. In that case even
+    // restoring the old scalar would overwrite the new renderer's schedule.
+    if(GetTextVisualRevealData(mRevealData) == data && data->runtimeBlur == runtimeBlur)
+    {
+      const auto cancellationRevision = data->revision;
+      RemoveRuntimeRevealBlur(data->runtimeBlur, actor);
+      if(GetTextVisualRevealData(mRevealData) == data && data->revision == cancellationRevision &&
+         !data->runtimeBlur && foreground.GetTextures() == original &&
+         foreground.GetProperty<float>(fadeIndex) == prepared.fadeDuration)
+      {
+        foreground.SetProperty(fadeIndex, previousFade);
+      }
+      // The caller's ordinary schedule remains authoritative if optional
+      // upload fails. A source/revision mutation instead owns its next result;
+      // do not restore this snapshot over that newer request.
+      if(timingsPublished && unchanged() && !data->runtimeBlur &&
+         foreground.GetTextures() == original && foreground.GetShader() == originalShader)
+      {
+        PublishReplacementRevealTimings(ordinaryTimings, sourceRevision);
+      }
+    }
+    return false;
+  };
+  if(!ActivateRuntimeRevealBlur(runtimeBlur, actor) || !current())
+  {
+    return cancel();
+  }
+  foreground.SetProperty(fadeIndex, prepared.fadeDuration);
+  if(!current())
+  {
+    return cancel();
+  }
+  timingsPublished = true;
+  PublishReplacementRevealTimings(prepared.timings, sourceRevision);
+  if(!current())
+  {
+    return cancel();
+  }
+  RefreshRuntimeRevealBlurImages(runtimeBlur);
+  if(!current())
+  {
+    return cancel();
+  }
+  // No observable allocations or property writes follow the final metadata
+  // upload. Cancelled construction therefore leaves the ordinary plane intact.
+  if(!metadataTexture.Upload(prepared.metadata))
+  {
+    return cancel();
+  }
+  data->fadeDuration = prepared.fadeDuration;
+  return true;
+}
+
+void TextVisual::RefreshRevealBlurImages(Ui::Integration::Visual::Base visual)
+{
+  if(visual)
+  {
+    auto& impl = GetVisualObject(visual);
+    if(auto* data = GetTextVisualRevealData(impl.mRevealData))
+    {
+      RefreshRuntimeRevealBlurImages(data->runtimeBlur);
     }
   }
 }

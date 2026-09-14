@@ -70,6 +70,8 @@ extern const std::string_view SHADER_TEXT_CONTROLLER_BACKGROUND_SHADER_FRAG;
 extern const std::string_view SHADER_TEXT_CONTROLLER_BACKGROUND_SHADER_VERT;
 extern const std::string_view SHADER_TEXT_DECORATOR_SHADER_FRAG;
 extern const std::string_view SHADER_TEXT_DECORATOR_SHADER_VERT;
+extern const std::string_view SHADER_TEXT_REVEAL_BLUR_FRAG;
+extern const std::string_view SHADER_TEXT_REVEAL_BLUR_VERT;
 extern const std::string_view SHADER_TEXT_SCROLLER_SHADER_FRAG;
 extern const std::string_view SHADER_TEXT_SCROLLER_SHADER_VERT;
 extern const std::string_view SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG;

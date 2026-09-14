@@ -2861,6 +2861,30 @@ int UtcDaliInlineReplacementManagerPixelBindingOrderingP(void)
                    0.01f,
                    TEST_LOCATION);
 
+  // Async publication applies timing before placement. Authored PIXEL with
+  // fade ratio 1 resolves to scalar opacity; the later placement update must
+  // preserve the shader paired with that binding, not reinstall a spatial one.
+  timings[0u].progressionSpan = 0.0f;
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  Constraint scalarConstraint = Accessor::GetRevealConstraint(manager, run.occurrenceIdentity);
+  DALI_TEST_CHECK(!Ui::GetImplementation(visual).IsUsingCustomShader());
+  DALI_TEST_CHECK(manager.Update(host,
+                                 source,
+                                 placements,
+                                 Vector2::ZERO,
+                                 Vector2(120.0f, 60.0f),
+                                 Vector2(120.0f, 60.0f),
+                                 1.0f,
+                                 source.sourceRevision,
+                                 true));
+  manager.Refresh();
+  DALI_TEST_CHECK(visual.GetRenderer() == renderer);
+  DALI_TEST_CHECK(Accessor::GetRevealConstraint(manager, run.occurrenceIdentity) == scalarConstraint);
+  DALI_TEST_CHECK(!Ui::GetImplementation(visual).IsUsingCustomShader());
+  timings[0u].progressionSpan = 0.3f;
+  DALI_TEST_CHECK(manager.ApplyRevealTimings(timings, source.sourceRevision, progressIndex));
+  DALI_TEST_CHECK(Ui::GetImplementation(visual).IsUsingCustomShader());
+
   // Atomic and spatial modes own mutually exclusive targets. None removes
   // both the binding and replacement-owned shader without hiding a READY image.
   for(uint32_t cycle = 0u; cycle < 100u; ++cycle)
@@ -3212,6 +3236,636 @@ int UtcDaliInlineReplacementManagerPixelBindingOrderingP(void)
   DALI_TEST_CHECK(Accessor::IsEntryVisible(timingFirstReadyManager,
                                            timingFirstReadySource.runs[0u].occurrenceIdentity));
 
+  END_TEST;
+}
+
+namespace
+{
+using ReplacementManager  = Ui::Internal::Text::InlineReplacementManager;
+using ReplacementAccessor = Ui::Internal::Text::InlineReplacementManagerTestAccessor;
+
+struct BlurCaptureFixture
+{
+  explicit BlurCaptureFixture(UiTestApplication& application)
+  : owner(View::New()),
+    host(owner, Ui::Integration::DepthIndex::CONTENT + 1),
+    manager(std::make_unique<ReplacementManager>()),
+    image(Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u)),
+    url(Ui::ImageUrl::New(image, true))
+  {
+    application.GetScene().Add(owner);
+    source.sourceRevision = 17u;
+    for(uint32_t index = 0u; index < 2u; ++index)
+    {
+      auto run         = ImageCandidate(index, 1u, index + 1u);
+      run.image.source = url.GetUrl().CStr();
+      source.runs.PushBack(run);
+      Text::ReplacementPlacement placement;
+      placement.logicalCharacterRange = run.logicalCharacterRange;
+      placement.sourceRunIndex        = index;
+      placement.occurrenceIdentity    = run.occurrenceIdentity;
+      placement.position              = Vector2(24.0f * static_cast<float>(index), 0.0f);
+      placement.size                  = Vector2(20.0f, 18.0f);
+      placement.visible               = true;
+      placements.PushBack(placement);
+      timings.PushBack({run.occurrenceIdentity, 0.0f, 0.5f});
+    }
+  }
+
+  bool Update()
+  {
+    return manager->Update(host, source, placements, Vector2::ZERO,
+                           Vector2(100.0f, 40.0f), Vector2(100.0f, 40.0f),
+                           1.0f, source.sourceRevision);
+  }
+
+  bool Publish()
+  {
+    return Update() && manager->ApplyRevealTimings(timings, source.sourceRevision,
+                                                   owner.RegisterProperty("uCaptureProgress", 0.5f));
+  }
+
+  View                                          owner;
+  Ui::Internal::Text::InlineReplacementViewHost host;
+  std::unique_ptr<ReplacementManager>           manager;
+  Texture                                       image;
+  Ui::ImageUrl                                  url;
+  Text::ReplacementSourceSnapshot               source;
+  Vector<Text::ReplacementPlacement>            placements;
+  Vector<Text::ReplacementRevealTiming>         timings;
+};
+} // namespace
+
+int UtcDaliInlineReplacementManagerBlurCaptureEntryRemovalP(void)
+{
+  UiTestApplication application;
+  // Both a live and an expired retention actor must allow selective teardown.
+  for(bool expireRetention : {false, true})
+  {
+    BlurCaptureFixture fixture(application);
+    DALI_TEST_CHECK(fixture.Publish());
+    auto& manager = *fixture.manager;
+    auto  sources = manager.GetReadyBlurCaptureSources(fixture.source.sourceRevision);
+    DALI_TEST_EQUALS(sources.size(), static_cast<size_t>(2u), TEST_LOCATION);
+    Actor client    = Actor::New();
+    Actor retention = Actor::New();
+    for(const auto& source : sources)
+    {
+      DALI_TEST_CHECK(manager.CaptureBlurRenderer(client, fixture.source.sourceRevision, source, retention));
+    }
+    DALI_TEST_EQUALS(retention.GetRendererCount(), 2u, TEST_LOCATION);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    if(expireRetention)
+    {
+      WeakHandle<Actor> retired(retention);
+      retention.Reset();
+      DALI_TEST_CHECK(!retired.GetHandle());
+    }
+    DALI_TEST_CHECK(ReplacementAccessor::RemoveEntry(manager, sources[0u].occurrenceIdentity));
+    DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(manager), static_cast<size_t>(1u), TEST_LOCATION);
+    DALI_TEST_EQUALS(ReplacementAccessor::GetBlurCaptureSourceCount(manager), static_cast<size_t>(1u), TEST_LOCATION);
+    if(retention)
+    {
+      DALI_TEST_EQUALS(retention.GetRendererCount(), 1u, TEST_LOCATION);
+      DALI_TEST_CHECK(retention.GetRendererAt(0u) == sources[1u].renderer);
+    }
+    manager.ReleaseBlurCapture(client);
+    DALI_TEST_EQUALS(ReplacementAccessor::GetBlurCaptureSourceCount(manager), static_cast<size_t>(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(fixture.owner.GetRendererAt(0u) == sources[1u].renderer);
+    if(retention)
+    {
+      DALI_TEST_EQUALS(retention.GetRendererCount(), 0u, TEST_LOCATION);
+    }
+    manager.Clear();
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    fixture.owner.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerBlurCaptureClientP(void)
+{
+  UiTestApplication  application;
+  BlurCaptureFixture fixture(application);
+  DALI_TEST_CHECK(fixture.Publish());
+  auto&      manager  = *fixture.manager;
+  const auto revision = fixture.source.sourceRevision;
+  const auto sources  = manager.GetReadyBlurCaptureSources(revision);
+  DALI_TEST_EQUALS(sources.size(), static_cast<size_t>(2u), TEST_LOCATION);
+  DALI_TEST_CHECK(manager.GetReadyBlurCaptureSources(0u).empty());
+  DALI_TEST_CHECK(manager.GetReadyBlurCaptureSources(revision + 1u).empty());
+  Actor client      = Actor::New();
+  Actor otherClient = Actor::New();
+  Actor retention   = Actor::New();
+  DALI_TEST_CHECK(!manager.CaptureBlurRenderer({}, revision, sources[0u], retention));
+  DALI_TEST_CHECK(!manager.CaptureBlurRenderer(client, revision, sources[0u], {}));
+  DALI_TEST_CHECK(!manager.CaptureBlurRenderer(client, revision + 1u, sources[0u], retention));
+  auto staleSource               = sources[0u];
+  staleSource.occurrenceIdentity = 999u;
+  DALI_TEST_CHECK(!manager.CaptureBlurRenderer(client, revision, staleSource, retention));
+  staleSource          = sources[0u];
+  staleSource.renderer = sources[1u].renderer;
+  DALI_TEST_CHECK(!manager.CaptureBlurRenderer(client, revision, staleSource, retention));
+  DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 2u, TEST_LOCATION);
+  for(uint32_t repeat = 0u; repeat < 2u; ++repeat)
+  {
+    DALI_TEST_CHECK(manager.CaptureBlurRenderer(client, revision, sources[0u], retention));
+    DALI_TEST_EQUALS(retention.GetRendererCount(), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(ReplacementAccessor::GetBlurCaptureSourceCount(manager), static_cast<size_t>(1u), TEST_LOCATION);
+  }
+  DALI_TEST_CHECK(!manager.CaptureBlurRenderer(otherClient, revision, sources[1u], retention));
+  manager.ReleaseBlurCapture(otherClient);
+  DALI_TEST_EQUALS(retention.GetRendererCount(), 1u, TEST_LOCATION);
+  // An expired client cannot keep ownership or prevent a new capture.
+  client.Reset();
+  DALI_TEST_CHECK(manager.CaptureBlurRenderer(otherClient, revision, sources[1u], retention));
+  DALI_TEST_EQUALS(retention.GetRendererCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(retention.GetRendererAt(0u) == sources[1u].renderer);
+  DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(fixture.owner.GetRendererAt(0u) == sources[0u].renderer);
+  // Update must restore the captured renderer before mutating its visual.
+  DALI_TEST_CHECK(fixture.Update());
+  DALI_TEST_EQUALS(retention.GetRendererCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(ReplacementAccessor::GetBlurCaptureSourceCount(manager), static_cast<size_t>(0u), TEST_LOCATION);
+  manager.ReleaseBlurCapture(otherClient);
+  DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerBlurCaptureDuringUpdateP(void)
+{
+  UiTestApplication  application;
+  BlurCaptureFixture fixture(application);
+  DALI_TEST_CHECK(fixture.Publish());
+  auto&      manager  = *fixture.manager;
+  const auto revision = fixture.source.sourceRevision;
+  const auto sources  = manager.GetReadyBlurCaptureSources(revision);
+  DALI_TEST_EQUALS(sources.size(), static_cast<size_t>(2u), TEST_LOCATION);
+  Actor client    = Actor::New();
+  Actor retention = Actor::New();
+  DALI_TEST_CHECK(manager.CaptureBlurRenderer(client, revision, sources[0u], retention));
+  bool              attempted = false;
+  bool              captured  = false;
+  ConnectionTracker tracker;
+  auto              renderer = sources[0u].renderer;
+  renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index, const Property::Value&)
+  {
+    attempted = true;
+    captured |= manager.CaptureBlurRenderer(client, revision, sources[0u], retention);
+  });
+  manager.ClearReveal();
+  tracker.DisconnectAll();
+  DALI_TEST_CHECK(attempted && !captured);
+  DALI_TEST_EQUALS(retention.GetRendererCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(manager.GetReadyBlurCaptureSources(revision).empty());
+  // Leaving the update scope must permit capture again after republishing.
+  DALI_TEST_CHECK(fixture.Publish());
+  DALI_TEST_CHECK(manager.CaptureBlurRenderer(client, revision, sources[0u], retention));
+  manager.Clear();
+  DALI_TEST_EQUALS(retention.GetRendererCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerRemoveEntryCancelledP(void)
+{
+  UiTestApplication application;
+  for(bool destroy : {false, true})
+  {
+    BlurCaptureFixture fixture(application);
+    DALI_TEST_CHECK(fixture.Publish());
+    auto renderer = ReplacementAccessor::GetEntryVisual(*fixture.manager, 1u).GetRenderer();
+    DALI_TEST_CHECK(renderer);
+    bool              cancelled = false;
+    ConnectionTracker tracker;
+    renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index, const Property::Value&)
+    {
+      if(!cancelled)
+      {
+        cancelled = true;
+        if(destroy)
+        {
+          fixture.manager.reset();
+        }
+        else
+        {
+          fixture.manager->Clear();
+        }
+      }
+    });
+    fixture.placements.Clear();
+    DALI_TEST_CHECK(!fixture.Update());
+    tracker.DisconnectAll();
+    DALI_TEST_CHECK(cancelled);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    if(!destroy)
+    {
+      DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+      DALI_TEST_CHECK(!ReplacementAccessor::HasHost(*fixture.manager));
+    }
+    else
+    {
+      DALI_TEST_CHECK(!fixture.manager);
+    }
+    fixture.owner.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerCreateEntryCancelledP(void)
+{
+  UiTestApplication application;
+  for(bool destroy : {false, true})
+  {
+    BlurCaptureFixture fixture(application);
+    // A new host reuses the owner's named slot. RegisterProperty then emits
+    // PropertySetSignal, just as it does when reattaching to an existing View.
+    Ui::Internal::Text::InlineReplacementViewHost previousHost(fixture.owner, Ui::Integration::DepthIndex::CONTENT + 1);
+    const auto                                    slot      = previousHost.AllocateVisualSlot();
+    bool                                          cancelled = false;
+    ConnectionTracker                             tracker;
+    fixture.owner.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index index, const Property::Value&)
+    {
+      if(!cancelled && index == slot)
+      {
+        cancelled = true;
+        if(destroy)
+        {
+          fixture.manager.reset();
+        }
+        else
+        {
+          fixture.manager->Clear();
+        }
+      }
+    });
+    DALI_TEST_CHECK(!fixture.Update());
+    tracker.DisconnectAll();
+    DALI_TEST_CHECK(cancelled);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    if(!destroy)
+    {
+      DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+      DALI_TEST_CHECK(!ReplacementAccessor::HasHost(*fixture.manager));
+      DALI_TEST_CHECK(fixture.Publish());
+      DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 2u, TEST_LOCATION);
+    }
+    else
+    {
+      DALI_TEST_CHECK(!fixture.manager);
+    }
+    fixture.owner.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerCapturedOwnerDestructionP(void)
+{
+  UiTestApplication application;
+  for(bool expireRetention : {false, true})
+  {
+    BlurCaptureFixture fixture(application);
+    DALI_TEST_CHECK(fixture.Publish());
+    Actor                             client    = Actor::New();
+    Actor                             retention = Actor::New();
+    std::vector<WeakHandle<Renderer>> renderers;
+    {
+      const auto sources = fixture.manager->GetReadyBlurCaptureSources(fixture.source.sourceRevision);
+      DALI_TEST_EQUALS(sources.size(), static_cast<size_t>(2u), TEST_LOCATION);
+      for(const auto& source : sources)
+      {
+        DALI_TEST_CHECK(fixture.manager->CaptureBlurRenderer(client, fixture.source.sourceRevision, source, retention));
+        auto renderer = source.renderer;
+        renderers.emplace_back(renderer);
+      }
+    }
+    if(expireRetention)
+    {
+      retention.Reset();
+    }
+    fixture.manager->PrepareOwnerDestruction();
+    fixture.manager->PrepareOwnerDestruction();
+    DALI_TEST_CHECK(!ReplacementAccessor::HasHost(*fixture.manager));
+    DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(ReplacementAccessor::GetBlurCaptureSourceCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+    if(retention)
+    {
+      DALI_TEST_EQUALS(retention.GetRendererCount(), 0u, TEST_LOCATION);
+    }
+    // Late release must not restore a renderer after owner teardown begins.
+    fixture.manager->ReleaseBlurCapture(client);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    fixture.owner.Unparent();
+    fixture.owner.Reset();
+    fixture.manager->Clear();
+    application.RunIdles();
+    for(const auto& renderer : renderers)
+    {
+      DALI_TEST_CHECK(!renderer.GetHandle());
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerHostSwitchP(void)
+{
+  UiTestApplication  application;
+  BlurCaptureFixture fixture(application);
+  DALI_TEST_CHECK(fixture.Publish());
+  auto previousVisual = ReplacementAccessor::GetEntryVisual(*fixture.manager, 1u);
+  View nextOwner      = View::New();
+  application.GetScene().Add(nextOwner);
+  Ui::Internal::Text::InlineReplacementViewHost nextHost(nextOwner, Ui::Integration::DepthIndex::CONTENT + 1);
+  DALI_TEST_CHECK(fixture.manager->Update(nextHost, fixture.source, fixture.placements, Vector2::ZERO,
+                                          Vector2(100.0f, 40.0f), Vector2(100.0f, 40.0f), 1.0f, fixture.source.sourceRevision));
+  DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(nextOwner.GetRendererCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(ReplacementAccessor::GetEntryVisual(*fixture.manager, 1u) != previousVisual);
+  DALI_TEST_EQUALS(ReplacementAccessor::GetRevealConstraintCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+  DALI_TEST_CHECK(fixture.manager->ApplyRevealTimings(fixture.timings, fixture.source.sourceRevision,
+                                                      nextOwner.RegisterProperty("uCaptureProgress", 0.5f)));
+  DALI_TEST_EQUALS(fixture.manager->GetReadyBlurCaptureSources(fixture.source.sourceRevision).size(), static_cast<size_t>(2u), TEST_LOCATION);
+  fixture.manager->Clear();
+  DALI_TEST_EQUALS(nextOwner.GetRendererCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerUpdateCancelledP(void)
+{
+  enum class Change
+  {
+    SOURCE_REVISION,
+    HOST,
+    IMAGE_SIZE,
+    FAILED_IMAGE
+  };
+  UiTestApplication application;
+  for(auto change : {Change::SOURCE_REVISION, Change::HOST, Change::IMAGE_SIZE, Change::FAILED_IMAGE})
+  {
+    BlurCaptureFixture fixture(application);
+    DALI_TEST_CHECK(fixture.Publish());
+    auto                                          visual   = ReplacementAccessor::GetEntryVisual(*fixture.manager, 1u);
+    auto                                          renderer = visual.GetRenderer();
+    Ui::Internal::Text::InlineReplacementViewHost nextHost(fixture.owner, Ui::Integration::DepthIndex::CONTENT + 1);
+    if(change == Change::SOURCE_REVISION)
+    {
+      ++fixture.source.sourceRevision;
+    }
+    else if(change == Change::IMAGE_SIZE)
+    {
+      fixture.source.runs[0u].metrics.width += 1.0f;
+    }
+    else if(change == Change::FAILED_IMAGE)
+    {
+      Ui::GetImplementation(visual).ResourceReady(Ui::Visual::ResourceStatus::FAILED);
+    }
+    bool              cancelled = false;
+    ConnectionTracker tracker;
+    renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index, const Property::Value&)
+    {
+      if(!cancelled)
+      {
+        cancelled = true;
+        fixture.manager->Clear();
+      }
+    });
+    DALI_TEST_CHECK(!fixture.manager->Update(change == Change::HOST ? nextHost : fixture.host,
+                                             fixture.source, fixture.placements, Vector2::ZERO,
+                                             Vector2(100.0f, 40.0f), Vector2(100.0f, 40.0f), 1.0f, fixture.source.sourceRevision));
+    tracker.DisconnectAll();
+    DALI_TEST_CHECK(cancelled);
+    DALI_TEST_CHECK(!ReplacementAccessor::HasHost(*fixture.manager));
+    DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    DALI_TEST_CHECK(fixture.Publish());
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 2u, TEST_LOCATION);
+    fixture.manager->Clear();
+    fixture.owner.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerGeometryCancelledP(void)
+{
+  enum class Change
+  {
+    CROP,
+    POSITION,
+    PIXEL_TIMING
+  };
+  UiTestApplication application;
+  for(auto change : {Change::CROP, Change::POSITION, Change::PIXEL_TIMING})
+  {
+    BlurCaptureFixture fixture(application);
+    if(change == Change::CROP)
+    {
+      fixture.placements[0u].position.x = -8.0f;
+    }
+    if(change == Change::PIXEL_TIMING)
+    {
+      fixture.timings[0u].progressionSpan = 0.5f;
+    }
+    DALI_TEST_CHECK(fixture.Publish());
+    auto visual   = ReplacementAccessor::GetEntryVisual(*fixture.manager, 1u);
+    auto renderer = visual.GetRenderer();
+    auto property = static_cast<Property::Index>(VisualRenderer::Property::TRANSFORM_OFFSET);
+    if(change == Change::CROP)
+    {
+      property = renderer.GetPropertyIndex("pixelArea");
+    }
+    else if(change == Change::PIXEL_TIMING)
+    {
+      property = renderer.GetPropertyIndex("uInlineReplacementRevealTiming");
+    }
+    DALI_TEST_CHECK(property != Property::INVALID_INDEX);
+    fixture.placements[0u].position.x += 2.0f;
+    bool              cancelled = false;
+    ConnectionTracker tracker;
+    renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index index, const Property::Value&)
+    {
+      if(!cancelled && index == property)
+      {
+        cancelled = true;
+        fixture.manager->Clear();
+      }
+    });
+    DALI_TEST_CHECK(!fixture.manager->Update(fixture.host, fixture.source, fixture.placements, Vector2::ZERO,
+                                             Vector2(100.0f, 40.0f), Vector2(100.0f, 40.0f), 1.0f,
+                                             fixture.source.sourceRevision, change == Change::PIXEL_TIMING));
+    tracker.DisconnectAll();
+    DALI_TEST_CHECK(cancelled);
+    DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    fixture.owner.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerRefreshCancelledP(void)
+{
+  UiTestApplication application;
+  for(bool failedImage : {false, true})
+  {
+    BlurCaptureFixture fixture(application);
+    fixture.timings[0u].progressionSpan = failedImage ? 0.0f : 0.5f;
+    DALI_TEST_CHECK(fixture.Publish());
+    auto visual   = ReplacementAccessor::GetEntryVisual(*fixture.manager, 1u);
+    auto renderer = visual.GetRenderer();
+    if(failedImage)
+    {
+      Ui::GetImplementation(visual).ResourceReady(Ui::Visual::ResourceStatus::FAILED);
+    }
+    bool              cancelled = false;
+    ConnectionTracker tracker;
+    renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index, const Property::Value&)
+    {
+      if(!cancelled)
+      {
+        cancelled = true;
+        fixture.manager->Clear();
+      }
+    });
+    fixture.manager->Refresh();
+    tracker.DisconnectAll();
+    DALI_TEST_CHECK(cancelled);
+    DALI_TEST_CHECK(!ReplacementAccessor::HasHost(*fixture.manager));
+    DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    fixture.owner.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerBindingCancelledP(void)
+{
+  enum class Change
+  {
+    SOURCE_REVISION,
+    OPACITY,
+    PIXEL_TIMING
+  };
+  UiTestApplication application;
+  for(auto change : {Change::SOURCE_REVISION, Change::OPACITY, Change::PIXEL_TIMING})
+  {
+    BlurCaptureFixture fixture(application);
+    fixture.timings[0u].progressionSpan = change == Change::PIXEL_TIMING ? 0.5f : 0.0f;
+    DALI_TEST_CHECK(fixture.Publish());
+    auto visual   = ReplacementAccessor::GetEntryVisual(*fixture.manager, 1u);
+    auto renderer = visual.GetRenderer();
+    auto property = static_cast<Property::Index>(Renderer::Property::MIX_COLOR);
+    if(change == Change::OPACITY)
+    {
+      property = renderer.GetPropertyIndex("__dali_ui_inline_replacement_reveal_base_opacity");
+    }
+    else if(change == Change::PIXEL_TIMING)
+    {
+      property = renderer.GetPropertyIndex("uInlineReplacementRevealTiming");
+    }
+    DALI_TEST_CHECK(property != Property::INVALID_INDEX);
+    fixture.timings[0u].fadeDuration = 0.75f;
+    bool              cancelled      = false;
+    ConnectionTracker tracker;
+    renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index index, const Property::Value&)
+    {
+      if(!cancelled && index == property)
+      {
+        cancelled = true;
+        fixture.manager->Clear();
+      }
+    });
+    DALI_TEST_CHECK(!fixture.manager->ApplyRevealTimings(fixture.timings,
+                                                         fixture.source.sourceRevision + (change == Change::SOURCE_REVISION ? 1u : 0u),
+                                                         fixture.owner.GetPropertyIndex("uCaptureProgress")));
+    tracker.DisconnectAll();
+    DALI_TEST_CHECK(cancelled);
+    DALI_TEST_EQUALS(ReplacementAccessor::GetRevealTimingCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    fixture.owner.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerRequiredBindingCancelledP(void)
+{
+  UiTestApplication application;
+  for(bool fullFade : {false, true})
+  {
+    BlurCaptureFixture fixture(application);
+    // Ordinary visible images have no Reveal timing yet.
+    DALI_TEST_CHECK(fixture.Update());
+    const auto        progress  = fixture.owner.RegisterProperty("uCaptureProgress", 0.5f);
+    auto              visual    = ReplacementAccessor::GetEntryVisual(*fixture.manager, 1u);
+    auto              renderer  = visual.GetRenderer();
+    bool              cancelled = false;
+    ConnectionTracker tracker;
+    renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index, const Property::Value&)
+    {
+      if(!cancelled)
+      {
+        cancelled = true;
+        fixture.manager->Clear();
+      }
+    });
+    fixture.manager->RequireRevealBinding(progress, fullFade);
+    tracker.DisconnectAll();
+    DALI_TEST_CHECK(cancelled);
+    DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    fixture.owner.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliInlineReplacementManagerClearCancelledP(void)
+{
+  UiTestApplication application;
+  for(bool restoreVisibility : {false, true})
+  {
+    BlurCaptureFixture fixture(application);
+    if(restoreVisibility)
+    {
+      // PIXEL placement awaiting timing stays hidden until ClearReveal.
+      DALI_TEST_CHECK(fixture.manager->Update(fixture.host, fixture.source, fixture.placements, Vector2::ZERO,
+                                              Vector2(100.0f, 40.0f), Vector2(100.0f, 40.0f), 1.0f,
+                                              fixture.source.sourceRevision, true));
+      DALI_TEST_CHECK(!ReplacementAccessor::IsEntryVisible(*fixture.manager, 1u));
+    }
+    else
+    {
+      DALI_TEST_CHECK(fixture.Publish());
+    }
+    auto              visual    = ReplacementAccessor::GetEntryVisual(*fixture.manager, 1u);
+    auto              renderer  = visual.GetRenderer();
+    bool              cancelled = false;
+    ConnectionTracker tracker;
+    renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index index, const Property::Value& value)
+    {
+      // Visual opacity is published as the alpha component of MIX_COLOR.
+      if(!cancelled && index == Renderer::Property::MIX_COLOR &&
+         (restoreVisibility ? value.Get<Vector4>().a == 1.0f : ReplacementAccessor::GetRevealTimingCount(*fixture.manager) == 0u))
+      {
+        cancelled = true;
+        fixture.manager->Clear();
+      }
+    });
+    if(restoreVisibility)
+    {
+      fixture.manager->ClearReveal();
+    }
+    else
+    {
+      fixture.manager->Clear();
+    }
+    tracker.DisconnectAll();
+    DALI_TEST_CHECK(cancelled);
+    DALI_TEST_EQUALS(ReplacementAccessor::GetEntryCount(*fixture.manager), static_cast<size_t>(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(fixture.owner.GetRendererCount(), 0u, TEST_LOCATION);
+    fixture.owner.Unparent();
+  }
   END_TEST;
 }
 

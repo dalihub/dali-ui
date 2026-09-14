@@ -25,6 +25,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/images/pixel-data.h>
 #include <dali/public-api/images/pixel.h>
+#include <dali/public-api/math/rect.h>
 #include <dali/public-api/object/ref-object.h>
 #include <memory> ///< for std::unique_ptr
 
@@ -314,6 +315,52 @@ public:
     const Vector2&                fullSize                  = Size::ZERO,
     bool                          ignoreHorizontalAlignment = false,
     const Vector2&                originSize                = Size::ZERO);
+
+  /**
+   * @brief Selects a foreground or metadata plane for Reveal blur preparation.
+   */
+  enum class RuntimeBlurPlane
+  {
+    TEXT,
+    COLOR_MASK,
+    GRADIENT_PRESERVED,
+    GRADIENT_MASK,
+    REVEAL_METADATA
+  };
+
+  /**
+   * @brief Finds a conservative source band for one runtime-blur line.
+   *
+   * Uses actual font bitmaps and the rasterizer's integer baseline accumulation,
+   * not nominal line boxes. Keeps the full width and two transparent guard rows.
+   * GradientSpan, hyphenation and non-END elision retain the full target to
+   * preserve raster coordinates and coverage. No selection state or bitmap
+   * ownership survives the call.
+   * A supplied baseline must use the rasterizer's per-line integer truncation.
+   */
+  Rect<uint32_t> GetRuntimeBlurLineRasterBounds(const Vector2& size, LineIndex lineIndex, const int32_t* lineBaseline = nullptr);
+
+  /**
+   * @brief Rasterizes one final layout line without changing its coordinates.
+   *
+   * This opt-in setup path uses the ordinary glyph-range rasterizer. All line
+   * metrics and gradient bounds remain intact, including glyph overhangs;
+   * no screen-space line clipping or persistent raster-selection state is used.
+   * The caller must resolve the final model and plan before requesting planes.
+   * Planes may use a vertical tile (zero height selects the full target).
+   * Its origin is subtracted after computing alignment in the original size;
+   * metadata may also use a horizontal tile (zero width selects the full width).
+   * PIXEL timing keeps the original visual X, independently of tile storage.
+   * Include one extra source texel outside each cropped metadata edge for
+   * ownership expansion. Non-metadata planes retain the full width.
+   * Non-metadata GradientSpan planes require the full target so their paint
+   * coordinates and overlap coverage retain the ordinary raster semantics.
+   */
+  PixelData RenderRuntimeBlurLine(const Vector2& size, LineIndex lineIndex,
+                                  RuntimeBlurPlane plane, Pixel::Format format,
+                                  const Internal::Reveal::Plan& plan,
+                                  uint32_t rasterOffsetY = 0u, uint32_t rasterHeight = 0u,
+                                  uint32_t rasterOffsetX = 0u, uint32_t rasterWidth = 0u);
 
   /**
    * @brief Create & draw the image buffer of single background color.

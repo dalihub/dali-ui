@@ -16,6 +16,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/unique-ptr.h>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
@@ -69,13 +70,20 @@ void RemoveInlineReplacementData(Ui::View owner)
 {
   if(owner)
   {
-    owner.RemoveAttachment(INLINE_REPLACEMENT_DATA_ATTACHMENT_ID);
+    RemoveInlineReplacementData(GetImpl(owner));
   }
 }
 
 void RemoveInlineReplacementData(Ui::ViewImpl& owner)
 {
-  Internal::ViewDataImpl::Get(owner).RemoveAttachment(INLINE_REPLACEMENT_DATA_ATTACHMENT_ID);
+  auto& data = Internal::ViewDataImpl::Get(owner);
+  if(auto* attachment = data.GetAttachment(INLINE_REPLACEMENT_DATA_ATTACHMENT_ID))
+  {
+    // Retire the identity before destroying visuals. Their callbacks may install
+    // a new attachment, which the returning removal must not erase.
+    UniqueAny retiring = std::move(*attachment);
+    data.RemoveAttachment(INLINE_REPLACEMENT_DATA_ATTACHMENT_ID);
+  }
 }
 
 } //namespace DALI_NAMESPACE::Ui::Internal::Text

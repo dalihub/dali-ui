@@ -16,6 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
@@ -26,6 +27,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -35,7 +37,6 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
-using namespace Dali::Ui::Integration;
 
 using Dali::Integration::ToStdString;
 
@@ -208,10 +209,9 @@ bool WaitForAsyncHeightForWidth(UiTestApplication& application)
   return gAsyncHeightForWidthComputed;
 }
 
-bool WaitForAsyncRender(UiTestApplication& application)
+bool WaitForAsyncRender(UiTestApplication& application, uint32_t maxTriggerCount = 4u)
 {
-  constexpr uint32_t MAX_TRIGGER_COUNT = 4u;
-  for(uint32_t trigger = 0u; trigger < MAX_TRIGGER_COUNT && !gAsyncRenderFinished; ++trigger)
+  for(uint32_t trigger = 0u; trigger < maxTriggerCount && !gAsyncRenderFinished; ++trigger)
   {
     if(!Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT))
     {
@@ -1212,6 +1212,139 @@ int UtcDaliLabelInvokeMethod(void)
   END_TEST;
 }
 
+int UtcDaliLabelTextRevealBlurValueP(void)
+{
+  static_assert(sizeof(Text::Reveal) == sizeof(void*));
+  UiTestApplication application;
+  Text::Reveal      reveal;
+  DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurRadius(reveal), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurDurationRatio(reveal), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Integration::Text::Reveal::GetBlurMode(reveal)), static_cast<int>(Ui::Integration::Text::Reveal::BlurMode::PERFORMANCE), TEST_LOCATION);
+  Text::Reveal quality(reveal);
+  Ui::Integration::Text::Reveal::SetBlurMode(quality, Ui::Integration::Text::Reveal::BlurMode::QUALITY);
+  DALI_TEST_CHECK(quality != reveal);
+  reveal = quality;
+  Ui::Integration::Text::Reveal::SetBlurRadius(reveal, 16.5f);
+  Ui::Integration::Text::Reveal::SetBlurDurationRatio(reveal, 0.5f);
+  Text::Reveal copy(reveal);
+  DALI_TEST_CHECK(copy == reveal);
+  Ui::Integration::Text::Reveal::SetBlurRadius(copy, 24.0f);
+  DALI_TEST_CHECK(copy != reveal);
+  copy = reveal;
+  Ui::Integration::Text::Reveal::SetBlurDurationRatio(copy, 0.25f);
+  DALI_TEST_CHECK(copy != reveal);
+  Text::Reveal moved(std::move(copy));
+  DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurRadius(moved), 16.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurDurationRatio(moved), 0.25f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Integration::Text::Reveal::GetBlurMode(moved)), static_cast<int>(Ui::Integration::Text::Reveal::BlurMode::QUALITY), TEST_LOCATION);
+  copy = std::move(moved);
+  DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurDurationRatio(copy), 0.25f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Integration::Text::Reveal::GetBlurMode(copy)), static_cast<int>(Ui::Integration::Text::Reveal::BlurMode::QUALITY), TEST_LOCATION);
+
+  for(float value : {-1.0f, -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::quiet_NaN()})
+  {
+    Ui::Integration::Text::Reveal::SetBlurRadius(copy, value);
+    Ui::Integration::Text::Reveal::SetBlurDurationRatio(copy, value);
+    DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurRadius(copy), 0.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurDurationRatio(copy), 0.0f, TEST_LOCATION);
+  }
+  for(float value : {100.0f, std::numeric_limits<float>::infinity()})
+  {
+    Ui::Integration::Text::Reveal::SetBlurRadius(copy, value);
+    Ui::Integration::Text::Reveal::SetBlurDurationRatio(copy, value);
+    DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurRadius(copy), 64.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurDurationRatio(copy), 1.0f, TEST_LOCATION);
+  }
+
+  // Unknown authored modes survive value copies and Label round trips.
+  // Their rendering fallback is checked by the internal publication UTC.
+  const auto unknownMode = static_cast<Ui::Integration::Text::Reveal::BlurMode>(255u);
+  Ui::Integration::Text::Reveal::SetBlurMode(copy, unknownMode);
+  Text::Reveal unknown(copy);
+  DALI_TEST_CHECK(unknown == copy);
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Integration::Text::Reveal::GetBlurMode(unknown)), 255, TEST_LOCATION);
+
+  Label label = Label::New("Blur value ownership");
+  label.SetTextReveal(unknown);
+  DALI_TEST_CHECK(label.GetTextReveal() == unknown);
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Integration::Text::Reveal::GetBlurMode(label.GetTextReveal())), 255, TEST_LOCATION);
+  label.SetTextReveal(reveal);
+  const auto progressIndex = label.GetPropertyIndex("uTextRevealProgress");
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  Ui::Integration::Text::Reveal::SetBlurMode(reveal, Ui::Integration::Text::Reveal::BlurMode::PERFORMANCE);
+  DALI_TEST_CHECK(label.GetTextReveal() != reveal);
+  label.SetTextReveal(reveal);
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+  Ui::Integration::Text::Reveal::SetBlurRadius(reveal, 32.0f);
+  DALI_TEST_EQUALS(Ui::Integration::Text::Reveal::GetBlurRadius(label.GetTextReveal()), 16.5f, TEST_LOCATION);
+  label.SetTextReveal(reveal);
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  label.SetTextReveal(Text::Reveal::None());
+  DALI_TEST_CHECK(label.GetTextReveal() == Text::Reveal::None());
+  label.SetTextReveal(reveal);
+  DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+  DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+  for(bool none : {true, false})
+  {
+    Text::Reveal invalid;
+    Text::Reveal valid(std::move(invalid));
+    if(none)
+    {
+      invalid = Text::Reveal::None();
+    }
+    const char* setterMessage = none ? "Cannot modify Text::Reveal::None()." : "Cannot use a moved-from Reveal object";
+    const char* getterMessage = none ? "Cannot access Text::Reveal::None() properties." : "Cannot use a moved-from Reveal object";
+    DALI_TEST_ASSERTION(Ui::Integration::Text::Reveal::SetBlurRadius(invalid, 24.0f), setterMessage);
+    DALI_TEST_ASSERTION(Ui::Integration::Text::Reveal::GetBlurRadius(invalid), getterMessage);
+    DALI_TEST_ASSERTION(Ui::Integration::Text::Reveal::SetBlurDurationRatio(invalid, 0.5f), setterMessage);
+    DALI_TEST_ASSERTION(Ui::Integration::Text::Reveal::GetBlurDurationRatio(invalid), getterMessage);
+    DALI_TEST_ASSERTION(Ui::Integration::Text::Reveal::SetBlurMode(invalid, unknownMode), setterMessage);
+    DALI_TEST_ASSERTION(Ui::Integration::Text::Reveal::GetBlurMode(invalid), getterMessage);
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelTextRevealBlurAnimationP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New("A complete line\nZ");
+  label.SetLayoutMode(LayoutMode::STANDALONE);
+  label.SetRequestedWidth(480.0f);
+  label.SetRequestedHeight(160.0f);
+  label.SetMultiLine(true);
+  Text::Reveal reveal;
+  reveal.SetSequence(Text::Reveal::Sequence::PER_LINE);
+  reveal.SetSequenceStaggerRatio(0.25f);
+  Ui::Integration::Text::Reveal::SetBlurRadius(reveal, 16.0f);
+  Ui::Integration::Text::Reveal::SetBlurDurationRatio(reveal, 0.5f);
+  label.SetTextReveal(reveal);
+  application.GetScene().Add(label);
+  const auto progressIndex = label.GetPropertyIndex("uTextRevealProgress");
+  for(float target : {1.0f, 0.0f})
+  {
+    Animation animation = Animation::New(1.0f);
+    label.Animate(animation).TextRevealProgress(target, Duration(1.0f), AlphaFunction(AlphaFunction::EASE_IN_SQUARE));
+    animation.Play();
+    for(int frame = 0; frame < 55; ++frame)
+    {
+      application.SendNotification();
+      application.Render(20);
+    }
+    DALI_TEST_EQUALS(animation.GetDuration(), 1.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetTextRevealProgress(), target, 0.0001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
+    DALI_TEST_CHECK(label.GetTextReveal() == reveal);
+    animation.Stop();
+  }
+  // Direct progress control uses the same public property after playback.
+  label.SetTextRevealProgress(0.4f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.4f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliLabelTextRevealPublicApiP(void)
 {
   UiTestApplication application;
@@ -2180,6 +2313,7 @@ int UtcDaliLabelTextRevealLifecycleStressP(void)
     Text::Reveal::Unit::LINE};
 
   Label label = Label::New(texts[1]);
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
   label.SetRequestedWidth(360.0f);
   label.SetRequestedHeight(88.0f);
   label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
@@ -2206,7 +2340,9 @@ int UtcDaliLabelTextRevealLifecycleStressP(void)
     DALI_TEST_CHECK(std::isfinite(progress));
     DALI_TEST_CHECK(progress >= 0.0f && progress <= 1.0f);
     const bool connected = label.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE);
-    DALI_TEST_CHECK(!connected || label.GetRendererCount() > 0u);
+    // Async Reveal may withdraw an incompatible ordinary result while its
+    // metadata is pending. Checkpoint C verifies the completed publication.
+    DALI_TEST_CHECK(!connected || label.IsAsyncRendering() || label.GetRendererCount() > 0u);
   };
 
   auto HasRevealRenderer = [&]()
@@ -2368,15 +2504,18 @@ int UtcDaliLabelTextRevealLifecycleStressP(void)
 
   // A pending asynchronous update must not restore an authored Reveal that
   // was disabled before the result was published.
+  // The stress loop can leave more cancelled completions than a single update.
+  constexpr uint32_t MAX_PENDING_TRIGGER_COUNT = 12u;
   label.SetAsyncRendering(true);
   label.SetTextReveal(reveal);
   label.SetText(texts[2]);
   application.SendNotification();
   application.Render(16);
+  gAsyncRenderFinished = false;
   label.SetTextReveal(Text::Reveal::None());
   application.SendNotification();
   application.Render(16);
-  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_CHECK(WaitForAsyncRender(application, MAX_PENDING_TRIGGER_COUNT));
   application.SendNotification();
   application.Render(32);
   CheckCommonState();
@@ -2384,7 +2523,9 @@ int UtcDaliLabelTextRevealLifecycleStressP(void)
   DALI_TEST_EQUALS(label.GetPropertyIndex("uTextRevealProgress"), progressIndex, TEST_LOCATION);
 
   // Checkpoint C: async publication can still converge to a supported Reveal
-  // renderer after the high-churn phase.
+  // renderer after the high-churn phase. Wait for the accepted render signal,
+  // since a worker trigger alone can belong to a cancelled request.
+  gAsyncRenderFinished = false;
   label.SetTextCutoutEnabled(false);
   label.SetTextOutline(Text::Outline::None());
   label.SetAsyncRendering(true);
@@ -2396,7 +2537,7 @@ int UtcDaliLabelTextRevealLifecycleStressP(void)
   label.SetRequestedHeight(88.0f);
   application.SendNotification();
   application.Render(16);
-  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_CHECK(WaitForAsyncRender(application, MAX_PENDING_TRIGGER_COUNT));
   application.SendNotification();
   application.Render(32);
   CheckCommonState();

@@ -16,6 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/actors/actor-enumerations-devel.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
@@ -507,6 +508,7 @@ void LabelImpl::UpdateInlineReplacementData(const InlineReplacementUpdateData& u
                        GetEffectiveScale(),
                        updateData.sourceRevision,
                        pixelRevealRequested);
+  Internal::TextVisual::RefreshRevealBlurImages(mVisual);
 }
 
 void LabelImpl::OnInlineReplacementResourcesReady(Ui::View)
@@ -515,6 +517,7 @@ void LabelImpl::OnInlineReplacementResourcesReady(Ui::View)
        Internal::Text::GetInlineReplacementData(Ui::View::DownCast(Self())))
   {
     data->manager.Refresh();
+    Internal::TextVisual::RefreshRevealBlurImages(mVisual);
   }
 }
 
@@ -801,13 +804,19 @@ void LabelImpl::SetTextReveal(const Ui::Text::Reveal& reveal)
   const float                      authoredFadeDurationRatio    = enabled ? reveal.GetFadeDurationRatio()
                                                                           : Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO;
   const float                      authoredSequenceStaggerRatio = enabled ? reveal.GetSequenceStaggerRatio() : 0.0f;
+  const float                      authoredBlurRadius           = enabled ? Ui::Integration::Text::Reveal::GetBlurRadius(reveal) : 0.0f;
+  const float                      authoredBlurDurationRatio    = enabled ? Ui::Integration::Text::Reveal::GetBlurDurationRatio(reveal) : 1.0f;
+  const auto                       authoredBlurMode             = enabled ? Ui::Integration::Text::Reveal::GetBlurMode(reveal) : Ui::Integration::Text::Reveal::BlurMode::PERFORMANCE;
   auto*                            data                         = Internal::Text::GetTextRevealData(mTextRevealData);
   if((!data && !enabled) ||
      (data && data->enabled == enabled &&
       (!enabled || (data->unit == authoredUnit &&
                     data->sequence == authoredSequence &&
+                    data->blurMode == authoredBlurMode &&
                     Dali::Equals(data->fadeDurationRatio, authoredFadeDurationRatio) &&
-                    Dali::Equals(data->sequenceStaggerRatio, authoredSequenceStaggerRatio)))))
+                    Dali::Equals(data->sequenceStaggerRatio, authoredSequenceStaggerRatio) &&
+                    Dali::Equals(data->blurRadius, authoredBlurRadius) &&
+                    Dali::Equals(data->blurDurationRatio, authoredBlurDurationRatio)))))
   {
     return;
   }
@@ -818,17 +827,27 @@ void LabelImpl::SetTextReveal(const Ui::Text::Reveal& reveal)
   data->sequence             = authoredSequence;
   data->fadeDurationRatio    = authoredFadeDurationRatio;
   data->sequenceStaggerRatio = authoredSequenceStaggerRatio;
+  data->blurRadius           = authoredBlurRadius;
+  data->blurDurationRatio    = authoredBlurDurationRatio;
+  data->blurMode             = authoredBlurMode;
   ++data->revision;
 
-  if(!enabled)
+  if(Internal::Text::InlineReplacementData* replacementData =
+       Internal::Text::GetInlineReplacementData(Ui::View::DownCast(Self())))
   {
-    if(Internal::Text::InlineReplacementData* replacementData =
-         Internal::Text::GetInlineReplacementData(Ui::View::DownCast(Self())))
+    if(!enabled)
     {
       // Reveal -> None restores ordinary resource-ready visibility immediately.
-      // Enabled reconfiguration keeps the previous valid binding until the
-      // newly built schedule replaces it atomically.
       replacementData->manager.ClearReveal();
+    }
+    else if(mController && mController->IsAsyncRendering() &&
+            !mController->IsMarqueeEnabled() && !mController->IsTextCutout())
+    {
+      // Full fade needs no per-unit metadata. Bind the current image result
+      // immediately so starting an async exit does not remove it first.
+      const bool fullFade = authoredFadeDurationRatio == 1.0f &&
+                            (authoredSequence == Ui::Text::Reveal::Sequence::WHOLE_TEXT || authoredSequenceStaggerRatio == 0.0f);
+      replacementData->manager.RequireRevealBinding(EnsureTextRevealProgress(), fullFade);
     }
   }
 
@@ -854,7 +873,10 @@ void LabelImpl::SetTextReveal(const Ui::Text::Reveal& reveal)
                                               progressIndex,
                                               data->revision,
                                               sequence,
-                                              sequenceStaggerRatio);
+                                              sequenceStaggerRatio,
+                                              data->blurRadius,
+                                              data->blurDurationRatio,
+                                              data->blurMode);
   }
 
   if(mController && mController->IsAsyncRendering())
@@ -877,6 +899,9 @@ Ui::Text::Reveal LabelImpl::GetTextReveal() const
   reveal.SetSequence(data->sequence);
   reveal.SetFadeDurationRatio(data->fadeDurationRatio);
   reveal.SetSequenceStaggerRatio(data->sequenceStaggerRatio);
+  Ui::Integration::Text::Reveal::SetBlurRadius(reveal, data->blurRadius);
+  Ui::Integration::Text::Reveal::SetBlurDurationRatio(reveal, data->blurDurationRatio);
+  Ui::Integration::Text::Reveal::SetBlurMode(reveal, data->blurMode);
   return reveal;
 }
 
@@ -1751,7 +1776,10 @@ void LabelImpl::SetAsyncRendering(bool asyncRendering)
                                                 EnsureTextRevealProgress(),
                                                 revealData->revision,
                                                 Ui::Text::Internal::Reveal::ToInternalSequence(revealData->sequence),
-                                                revealData->sequenceStaggerRatio);
+                                                revealData->sequenceStaggerRatio,
+                                                revealData->blurRadius,
+                                                revealData->blurDurationRatio,
+                                                revealData->blurMode);
     }
   }
   if(!asyncRendering)
@@ -3954,7 +3982,20 @@ bool LabelImpl::IsVisible()
 
 void LabelImpl::OnSceneConnection(int depth)
 {
-  ViewImpl::OnSceneConnection(depth);
+  if(auto* data = Internal::Text::GetInlineReplacementData(Ui::View::DownCast(Self())))
+  {
+    {
+      // All registered visuals must reconnect before text borrows an image
+      // renderer; ImageVisual may run after TextVisual in this traversal.
+      Internal::Text::InlineReplacementManager::CaptureUpdateScope captureUpdate(data->manager);
+      ViewImpl::OnSceneConnection(depth);
+    }
+    Internal::TextVisual::RefreshRevealBlurImages(mVisual);
+  }
+  else
+  {
+    ViewImpl::OnSceneConnection(depth);
+  }
 
   Dali::Window window = Window::Get(Self());
   if(window)
@@ -4312,6 +4353,10 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
     parameters.textRevealSequence             = Ui::Text::Internal::Reveal::ToInternalSequence(revealData->sequence);
     parameters.textRevealFadeDurationRatio    = revealData->fadeDurationRatio;
     parameters.textRevealSequenceStaggerRatio = revealData->sequenceStaggerRatio;
+    parameters.textRevealBlurRadius           = revealData->blurRadius * GetEffectiveScale();
+    parameters.textRevealBlurDurationRatio    = revealData->blurDurationRatio;
+    parameters.isTextRevealBlurRequested      = revealData->blurRadius > 0.0f &&
+                                           revealData->blurDurationRatio > 0.0f;
   }
   mController->GetVariationsMap(parameters.variationsMap);
   parameters.renderScale                    = mController->GetRenderScale();

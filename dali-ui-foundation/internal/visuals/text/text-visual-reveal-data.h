@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali/devel-api/text-abstraction/segmentation.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/property.h>
@@ -28,6 +29,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/public-api/text/style/reveal.h>
+#include <dali/public-api/actors/actor.h>
 
 namespace DALI_NAMESPACE
 {
@@ -46,16 +48,24 @@ namespace Internal
  */
 struct TextVisualRevealData
 {
-  std::vector<Constraint>       constraints;
+  std::vector<Constraint> constraints;
+  // Ordinary fallback bindings are not evidence of published glyph metadata.
+  std::vector<Constraint>       pendingConstraints;
   TextAbstraction::Segmentation segmentation;
 
-  Ui::Text::Internal::Reveal::Unit     unit{Ui::Text::Internal::Reveal::Unit::DISABLED};
-  Ui::Text::Internal::Reveal::Sequence sequence{Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT};
-  float                                fadeDurationRatio{Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO};
-  float                                fadeDuration{0.0f};
-  float                                sequenceStaggerRatio{0.0f};
-  Property::Index                      progressPropertyIndex{Property::INVALID_INDEX};
-  uint64_t                             revision{0u};
+  Ui::Text::Internal::Reveal::Unit        unit{Ui::Text::Internal::Reveal::Unit::DISABLED};
+  Ui::Text::Internal::Reveal::Sequence    sequence{Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT};
+  float                                   fadeDurationRatio{Ui::Text::Reveal::AUTO_FADE_DURATION_RATIO};
+  float                                   fadeDuration{0.0f};
+  float                                   sequenceStaggerRatio{0.0f};
+  float                                   blurRadius{0.0f};
+  float                                   blurDurationRatio{1.0f};
+  Ui::Integration::Text::Reveal::BlurMode blurMode{Ui::Integration::Text::Reveal::BlurMode::PERFORMANCE};
+  Property::Index                         progressPropertyIndex{Property::INVALID_INDEX};
+  uint64_t                                revision{0u};
+
+  // Owns offscreen resources only while Reveal blur is active.
+  Actor runtimeBlur;
 };
 
 using TextVisualRevealDataPtr = std::unique_ptr<TextVisualRevealData>;

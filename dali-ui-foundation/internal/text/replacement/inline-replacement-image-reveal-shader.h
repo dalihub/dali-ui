@@ -54,6 +54,9 @@ void main()
   lowp vec4 textureColor = TEXTURE(sTexture, vTexCoord) * uColor;
 
   highp float progress = clamp(uInlineReplacementRevealProgress, 0.0, 1.0);
+  // Keep the completion threshold equal to Reveal::ResolveRenderProgress.
+  const highp float completeProgress = 0.99999988079071044921875;
+  progress = mix(progress, 1.0, step(completeProgress, progress));
   highp float reveal = 0.0;
   if(progress >= 1.0)
   {
