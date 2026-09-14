@@ -1388,6 +1388,89 @@ int UtcDaliScrollViewSettersP(void)
   END_TEST;
 }
 
+int UtcDaliScrollViewFocusAndKeyScrollPropertiesP(void)
+{
+  UiTestApplication application;
+  ScrollView        scrollView = ScrollView::New();
+
+  scrollView.SetScrollOnFocus(false);
+  DALI_TEST_CHECK(!scrollView.GetScrollOnFocus());
+  scrollView.SetScrollOnFocus(true);
+  DALI_TEST_CHECK(scrollView.GetScrollOnFocus());
+
+  scrollView.SetFocusScrollToPosition(ScrollToPosition::Center);
+  DALI_TEST_EQUALS(scrollView.GetFocusScrollToPosition(), ScrollToPosition::Center, TEST_LOCATION);
+  scrollView.SetFocusScrollPeek(-5.0f);
+  DALI_TEST_EQUALS(scrollView.GetFocusScrollPeek(), 0.0f, TEST_LOCATION);
+  scrollView.SetFocusScrollPeek(24.0f);
+  DALI_TEST_EQUALS(scrollView.GetFocusScrollPeek(), 24.0f, TEST_LOCATION);
+
+  scrollView.SetKeyScrollEnabled(true);
+  DALI_TEST_CHECK(scrollView.IsKeyScrollEnabled());
+  scrollView.SetKeyScrollStep(0.0f);
+  DALI_TEST_EQUALS(scrollView.GetKeyScrollStep(), 1.0f, TEST_LOCATION);
+  scrollView.SetKeyScrollStep(75.0f);
+  DALI_TEST_EQUALS(scrollView.GetKeyScrollStep(), 75.0f, TEST_LOCATION);
+  scrollView.SetKeyScrollEnabled(false);
+  DALI_TEST_CHECK(!scrollView.IsKeyScrollEnabled());
+  END_TEST;
+}
+
+int UtcDaliScrollViewScrollToChildVariantsP(void)
+{
+  UiTestApplication application;
+  ScrollView        scrollView = ScrollView::New();
+  View              content    = View::New();
+  View              child      = View::New();
+
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(160.0f);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  content.SetRequestedWidth(600.0f);
+  content.SetRequestedHeight(500.0f);
+  child.SetRequestedWidth(60.0f);
+  child.SetRequestedHeight(40.0f);
+  child.SetRequestedX(420.0f);
+  child.SetRequestedY(360.0f);
+  content.Add(child);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.ScrollTo(child, false, ScrollToPosition::Start);
+  scrollView.ScrollTo(child, false, ScrollToPosition::Center);
+  scrollView.ScrollTo(child, false, ScrollToPosition::End);
+  scrollView.SetFocusScrollPeek(12.0f);
+  scrollView.ScrollTo(child, false, ScrollToPosition::MakeVisible);
+
+  scrollView.SetScrollDirection(ScrollDirection::Horizontal);
+  scrollView.ScrollTo(child, false, ScrollToPosition::MakeVisible);
+
+  scrollView.SetScrollDirection(ScrollDirection::Both);
+  scrollView.ScrollTo(Vector2::ZERO, false);
+  scrollView.ScrollTo(child, false, ScrollToPosition::MakeVisible);
+  DALI_TEST_CHECK(scrollView.GetScrollPosition().x > 0.0f);
+  DALI_TEST_CHECK(scrollView.GetScrollPosition().y > 0.0f);
+
+  scrollView.SetMinimumFlingDuration(10);
+  scrollView.SetMaximumFlingDuration(20);
+  scrollView.ScrollTo(Vector2(100.0f, 100.0f), true);
+  DALI_TEST_CHECK(scrollView.IsScrolling());
+  application.SendNotification();
+  application.Render(30u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(!scrollView.IsScrolling());
+
+  scrollView.SetProperty(Actor::Property::VISIBLE, false);
+  scrollView.ScrollTo(Vector2(30.0f, 40.0f), true);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition(), Vector2(30.0f, 40.0f), TEST_LOCATION);
+  END_TEST;
+}
+
 // View Inheritance Test
 
 int UtcDaliScrollViewIsViewP(void)
