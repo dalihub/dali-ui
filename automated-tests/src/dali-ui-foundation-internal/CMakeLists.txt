@@ -30,6 +30,7 @@ SET(TC_SOURCES
     utc-Dali-TextGradientStyle-internal.cpp
     utc-Dali-TextEffectsStyle-internal.cpp
     utc-Dali-TextFontStyle-internal.cpp
+    utc-Dali-TextLogicalModel-internal.cpp
     utc-Dali-TextCursorGeometry-internal.cpp
     utc-Dali-TextDecorator-internal.cpp
     utc-Dali-TextAtlasGradientState-internal.cpp
