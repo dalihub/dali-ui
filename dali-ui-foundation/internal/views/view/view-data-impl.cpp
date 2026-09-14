@@ -8071,6 +8071,13 @@ bool ViewDataImpl::IsAccessibleCreated() const
 
 void ViewDataImpl::SetAccessibilityStates(uint32_t states)
 {
+  const bool oldExpanded = HasAccessibilityState(Accessibility::State::EXPANDED);
+  const bool newExpanded = (states & ViewAccessibilityStateToMask(Accessibility::State::EXPANDED)) != 0u;
+  if(oldExpanded != newExpanded)
+  {
+    EmitAccessibilityStateChanged(Dali::Integration::Accessibility::State::EXPANDED, newExpanded);
+  }
+
   const auto defaultStates = AccessibilityData::GetDefaultViewAccessibilityStates();
   if(DALI_LIKELY(GetAccessibilityData()) || states != defaultStates)
   {
