@@ -29,6 +29,7 @@ SET(TC_SOURCES
     utc-Dali-ReplacementEditNormalizer-internal.cpp
     utc-Dali-TextGradientStyle-internal.cpp
     utc-Dali-TextEffectsStyle-internal.cpp
+    utc-Dali-TextCursorGeometry-internal.cpp
     utc-Dali-TextDecorator-internal.cpp
     utc-Dali-TextAtlasGradientState-internal.cpp
     utc-Dali-TextGradientShaderComposition-internal.cpp
