@@ -41,6 +41,7 @@ SET(TC_SOURCES
     utc-Dali-Accessibility-Text-internal.cpp
     utc-Dali-ImageView-internal.cpp
     utc-Dali-LottieAnimationView-internal.cpp
+    utc-Dali-ObjLoader-internal.cpp
     utc-Dali-ViewFittingMode-internal.cpp
     utc-Dali-ViewNaturalSize-internal.cpp
     utc-Dali-View-order-internal.cpp
