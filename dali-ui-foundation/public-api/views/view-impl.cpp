@@ -870,7 +870,11 @@ void ViewImpl::Initialize()
   // already answers a null context and an empty one identically (no visual found, count
   // 0, resources ready), so the widening is invisible to them -- the single place where
   // the two would have parted, GetVisualResourceStatus's fallback, now branches on
-  // AreVisualsEnabled() to keep each case's original answer.
+  // Internal::ViewDataImpl::CanUseVisuals() to keep each case's original answer. That
+  // predicate also requires the owner handle: a visual mutation issued from a subclass
+  // constructor, before View handle(*impl) has run, is ignored exactly as it was when the
+  // context did not exist until this function -- Self() is empty there, so allocating
+  // and mutating would have to read an empty handle.
 
   Integration::ViewAccessibility::Register();
 

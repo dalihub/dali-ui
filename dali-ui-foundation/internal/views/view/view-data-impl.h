@@ -140,6 +140,21 @@ public:
 
   bool AreVisualsEnabled() const;
 
+  /**
+   * @brief Whether a visual MUTATION may proceed on this view right now.
+   *
+   * True only when visuals are enabled (no DISABLE_VISUALS) AND the owning
+   * Dali::Internal::CustomActor already exists, i.e. "View handle(*impl)" has run.
+   * Before that point -- inside a ViewImpl subclass constructor -- Self() is an empty
+   * handle and VisualData's mutators read properties from it, so a mutation requested
+   * then is ignored, exactly as it was when the context was only created in
+   * ViewImpl::Initialize(). Every path that calls EnsureVisualData() must gate on this,
+   * never on AreVisualsEnabled() alone.
+   *
+   * @return True if a visual mutation may allocate and use the VisualData context
+   */
+  bool CanUseVisuals() const;
+
   MeasuredSize Measure(float visualWidth, float visualHeight);
   LayoutRect   Arrange(const LayoutRect& bounds);
 
@@ -595,9 +610,12 @@ public:
    * @brief Returns this impl's private VisualData context, creating it on first use.
    *
    * The context is allocated lazily, so a view that never touches a visual never pays for
-   * one. Every caller must gate on AreVisualsEnabled() first: a DISABLE_VISUALS view must
+   * one. Every caller must gate on CanUseVisuals() first. A DISABLE_VISUALS view must
    * never reach this function, because reaching it would allocate the very context that
-   * flag exists to suppress.
+   * flag exists to suppress; and a call made before the owner handle exists (from a
+   * ViewImpl subclass constructor) must never reach it either, because VisualData's
+   * mutators read mViewImpl.Self(), which is an empty handle until View handle(*impl)
+   * has run.
    *
    * @return The VisualData context of this impl
    */
@@ -1759,7 +1777,7 @@ private:
   float                                mRequestedWidth;       ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f). PACKING: parked here to fill the 4-byte pad in front of mTraits; it belongs logically with mRequestedHeight, which sits in the layout group further down.
   TraitEntries                         mTraits;
   Internal::CoreInteractionObject*     mCoreInteractionObject;
-  std::unique_ptr<VisualData>          mVisualData; ///< Visual context, allocated on first use by EnsureVisualData(). Null means EITHER visuals are disabled (DISABLE_VISUALS) OR no visual has been touched yet -- read paths answer both the same way.
+  std::unique_ptr<VisualData>          mVisualData; ///< Visual context, allocated on first use by EnsureVisualData(). Null means EITHER visuals are disabled (DISABLE_VISUALS) OR no visual has been touched yet (a mutation requested before the owner handle existed does not count: CanUseVisuals() drops it, as the pre-lazy code did) -- read paths answer both the same way.
   std::unique_ptr<AttachmentContainer> mAttachments;
   std::unique_ptr<FocusNavigationData> mFocusNavigationData;
   std::unique_ptr<RenderEffectData>    mRenderEffectData;
