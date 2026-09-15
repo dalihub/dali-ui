@@ -252,7 +252,8 @@ public: // Properties
    * @brief Sets when the animation starts loading.
    *
    * The default is Image::LoadPolicy::ATTACHED, which waits until the visual is on the
-   * scene. Image::LoadPolicy::IMMEDIATE starts as soon as the url is set, trading memory
+   * scene and its owner and ancestor chain are visible. Hiding after loading starts
+   * does not cancel the load. Image::LoadPolicy::IMMEDIATE starts as soon as the url is set, trading memory
    * held earlier for a shorter wait when the visual does appear.
    *
    * @param[in] loadPolicy The load policy to set

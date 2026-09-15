@@ -73,6 +73,11 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(LOOPING_MODE)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::LottieAnimation::LoopingMode, AUTO_REVERSE)
 DALI_ENUM_TO_STRING_TABLE_END(LOOPING_MODE)
 
+DALI_ENUM_TO_STRING_TABLE_BEGIN(LOAD_POLICY)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::LoadPolicy, ATTACHED)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::LoadPolicy, IMMEDIATE)
+DALI_ENUM_TO_STRING_TABLE_END(LOAD_POLICY)
+
 // release policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, DETACHED)
@@ -93,6 +98,7 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {SYNCHRONOUS_LOADING, Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING},
   {IMAGE_DESIRED_WIDTH, Ui::Integration::ImageVisual::Property::DESIRED_WIDTH},
   {IMAGE_DESIRED_HEIGHT, Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT},
+  {LOAD_POLICY_NAME, Ui::Integration::ImageVisual::Property::LOAD_POLICY},
   {RELEASE_POLICY_NAME, Ui::Integration::ImageVisual::Property::RELEASE_POLICY},
   {FITTING_MODE, Ui::Integration::ImageVisual::Property::FITTING_MODE},
   {LOOP_COUNT_NAME, Ui::Integration::ImageVisual::Property::LOOP_COUNT},
@@ -167,9 +173,10 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&        
   mRenderScale(1.0f),
   mPlayState(Ui::AnimatedImage::PlayState::STOPPED),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
+  mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
   mLastSentPlayStateId(0u),
+  mLoadState(LoadState::NOT_STARTED),
   mRasterizeCompleted(false),
-  mLoadFailed(false),
   mRendererAdded(false),
   mRedrawInScalingDown(true),
   mRedrawInScalingUp(true),
@@ -228,7 +235,7 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
   }
   else
   {
-    if(mLoadFailed && mImpl->mRenderer)
+    if(mLoadState == LoadState::FAILED && mImpl->mRenderer)
     {
       // Load failed, use broken image size
       auto textureSet = mImpl->mRenderer.GetTextures();
@@ -295,16 +302,23 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::Integration::ImageVisual::Property::REDRAW_IN_SCALING_UP, mRedrawInScalingUp);
 
   Property::Map layerInfo;
-  mVectorAnimationTask->GetLayerInfo(layerInfo);
+  if(mLoadState == LoadState::LOADED)
+  {
+    mVectorAnimationTask->GetLayerInfo(layerInfo);
+  }
   map.Insert(Ui::Integration::ImageVisual::Property::CONTENT_INFO, layerInfo);
 
   Property::Map markerInfo;
-  mVectorAnimationTask->GetMarkerInfo(markerInfo);
+  if(mLoadState == LoadState::LOADED)
+  {
+    mVectorAnimationTask->GetMarkerInfo(markerInfo);
+  }
   map.Insert(Ui::Integration::ImageVisual::Property::MARKER_INFO, markerInfo);
 
   map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, IsSynchronousLoadingRequired());
   map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, mDesiredSize.GetWidth());
   map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, mDesiredSize.GetHeight());
+  map.Insert(Ui::Integration::ImageVisual::Property::LOAD_POLICY, mLoadPolicy);
   map.Insert(Ui::Integration::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
 
   map.Insert(Ui::Integration::ImageVisual::Property::ENABLE_FRAME_CACHE, mFrameCacheEnabled);
@@ -342,6 +356,7 @@ void AnimatedVectorImageVisual::DoSetProperties(const Property::Map& propertyMap
     }
   }
 
+  EnsureLoading();
   TriggerVectorRasterization();
 }
 
@@ -456,6 +471,15 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       break;
     }
 
+    case Ui::Integration::ImageVisual::Property::LOAD_POLICY:
+    {
+      int32_t policy = static_cast<int32_t>(mLoadPolicy);
+      if(Scripting::GetEnumerationProperty(value, LOAD_POLICY_TABLE, LOAD_POLICY_TABLE_COUNT, policy))
+      {
+        mLoadPolicy = static_cast<Ui::Image::LoadPolicy>(policy);
+      }
+      break;
+    }
     case Ui::Integration::ImageVisual::Property::RELEASE_POLICY:
     {
       int32_t releasePolicy = static_cast<int32_t>(mReleasePolicy);
@@ -584,8 +608,6 @@ void AnimatedVectorImageVisual::OnInitialize(void)
   mVectorAnimationTask->SetAnimationFinishedCallback(
     MakeCallback(this, &AnimatedVectorImageVisual::OnAnimationFinished));
 
-  EncodedImageBuffer encodedImageBuffer;
-
   if(mImageUrl.IsBufferResource())
   {
     // Increase reference count of External Resources :
@@ -593,12 +615,9 @@ void AnimatedVectorImageVisual::OnInitialize(void)
     // Reference count will be decreased at destructor of the visual.
     TextureManager& textureManager = mFactoryCache.GetTextureManager();
     textureManager.UseExternalResource(mImageUrl);
-
-    encodedImageBuffer = textureManager.GetEncodedImageBuffer(mImageUrl);
   }
 
   mVectorAnimationTask->KeepRasterizedBuffer(mFrameCacheEnabled);
-  mVectorAnimationTask->RequestLoad(mImageUrl, encodedImageBuffer, IsSynchronousLoadingRequired());
 
   Shader shader = GenerateShader();
 
@@ -619,6 +638,7 @@ void AnimatedVectorImageVisual::OnInitialize(void)
   }
 
   mVectorAnimationTask->SetRenderer(mImpl->mRenderer);
+  EnsureLoading();
 }
 
 void AnimatedVectorImageVisual::DoSetOnScene(Actor& actor)
@@ -627,8 +647,10 @@ void AnimatedVectorImageVisual::DoSetOnScene(Actor& actor)
 
   // Hold the weak handle of the placement actor and delay the adding of renderer until the rasterization is finished.
   mPlacementActor = actor;
+  Dali::DevelActor::OnSceneVisibilityChangedSignal(actor).Connect(this, &AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged);
+  EnsureLoading();
 
-  if(mLoadFailed)
+  if(mLoadState == LoadState::FAILED)
   {
     Vector2 imageSize = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
     mFactoryCache.UpdateBrokenImageRenderer(mImpl->mRenderer, imageSize, false);
@@ -644,8 +666,6 @@ void AnimatedVectorImageVisual::DoSetOnScene(Actor& actor)
 
     mSizeNotification = actor.AddPropertyNotification(Actor::Property::SIZE, StepCondition(3.0f));
     mSizeNotification.NotifySignal().Connect(this, &AnimatedVectorImageVisual::OnSizeNotification);
-
-    Dali::DevelActor::OnSceneVisibilityChangedSignal(actor).Connect(this, &AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged);
 
     if(mImpl->mEventObserver)
     {
@@ -847,16 +867,21 @@ void AnimatedVectorImageVisual::OnResourceReady(VectorAnimationTask::ResourceSta
 
   if(status == VectorAnimationTask::ResourceStatus::LOADED)
   {
+    mLoadState = LoadState::LOADED;
     if(mImpl->mEventObserver)
     {
       mImpl->mEventObserver->RelayoutRequest(*this);
     }
+    TriggerVectorRasterization();
   }
   else
   {
     mRasterizeCompleted = true;
 
-    mLoadFailed = status == VectorAnimationTask::ResourceStatus::FAILED ? true : false;
+    if(status == VectorAnimationTask::ResourceStatus::FAILED)
+    {
+      mLoadState = LoadState::FAILED;
+    }
     if(status == VectorAnimationTask::ResourceStatus::READY)
     {
       // Texture was ready. Change the shader if we need.
@@ -893,7 +918,7 @@ void AnimatedVectorImageVisual::OnResourceReady(VectorAnimationTask::ResourceSta
     Actor actor = mPlacementActor.GetHandle();
     if(actor && !mRendererAdded)
     {
-      if(!mLoadFailed)
+      if(mLoadState != LoadState::FAILED)
       {
         actor.AddRenderer(mImpl->mRenderer);
         ResourceReady(Ui::Visual::ResourceStatus::READY);
@@ -950,8 +975,32 @@ void AnimatedVectorImageVisual::OnAnimationFinished(uint32_t playStateId)
   }
 }
 
+void AnimatedVectorImageVisual::EnsureLoading()
+{
+  if(mLoadState != LoadState::NOT_STARTED || !mImpl->mRenderer)
+  {
+    return;
+  }
+  Actor actor = mPlacementActor.GetHandle();
+  if(mLoadPolicy != Ui::Image::LoadPolicy::IMMEDIATE && (!actor || !DevelActor::IsOnSceneVisible(actor)))
+  {
+    return;
+  }
+  mLoadState = LoadState::LOADING; // RequestLoad can complete synchronously.
+  EncodedImageBuffer buffer;
+  if(mImageUrl.IsBufferResource())
+  {
+    buffer = mFactoryCache.GetTextureManager().GetEncodedImageBuffer(mImageUrl);
+  }
+  mVectorAnimationTask->RequestLoad(mImageUrl, buffer, IsSynchronousLoadingRequired());
+}
+
 void AnimatedVectorImageVisual::SendAnimationData()
 {
+  if(mLoadState != LoadState::LOADED)
+  {
+    return; // Retain settings and callbacks until frame metadata is available.
+  }
   if(mAnimationData.resendFlag)
   {
     if(mAnimationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE)
@@ -1028,7 +1077,7 @@ void AnimatedVectorImageVisual::StopAnimation()
 
 void AnimatedVectorImageVisual::TriggerVectorRasterization()
 {
-  if(!mEventCallback && Dali::Adaptor::IsAvailable())
+  if(mLoadState == LoadState::LOADED && !mEventCallback && Dali::Adaptor::IsAvailable())
   {
     mEventCallback               = MakeCallback(this, &AnimatedVectorImageVisual::OnProcessEvents);
     auto& vectorAnimationManager = mFactoryCache.GetVectorAnimationManager();
@@ -1123,7 +1172,11 @@ void AnimatedVectorImageVisual::OnSizeNotification(PropertyNotification source)
 
 void AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged(Actor actor, bool visible)
 {
-  if(!visible)
+  if(visible)
+  {
+    EnsureLoading();
+  }
+  else
   {
     StopAnimation();
     TriggerVectorRasterization();

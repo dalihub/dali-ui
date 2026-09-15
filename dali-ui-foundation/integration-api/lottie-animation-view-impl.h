@@ -29,6 +29,8 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/signals/dali-signal.h>
+#include <optional>
+#include <vector>
 
 namespace DALI_NAMESPACE
 {
@@ -63,6 +65,7 @@ public: // Properties
       IMAGE_COLOR            = Ui::LottieAnimationViewPropertyIndex::IMAGE_COLOR,
       DESIRED_WIDTH          = Ui::LottieAnimationViewPropertyIndex::DESIRED_WIDTH,
       DESIRED_HEIGHT         = Ui::LottieAnimationViewPropertyIndex::DESIRED_HEIGHT,
+      LOAD_POLICY            = Ui::LottieAnimationViewPropertyIndex::LOAD_POLICY,
       RELEASE_POLICY         = Ui::LottieAnimationViewPropertyIndex::RELEASE_POLICY,
       SYNCHRONOUS_LOADING    = Ui::LottieAnimationViewPropertyIndex::SYNCHRONOUS_LOADING,
       REDRAW_IN_SCALING_DOWN = Ui::LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_DOWN,
@@ -320,6 +323,18 @@ public: // API
   int GetDesiredHeight() const;
 
   /**
+   * @brief Sets when the animation may start loading. Default is ATTACHED.
+   *
+   * ATTACHED waits until connected to a visible scene with a visible ancestor chain.
+   * Hiding after loading starts does not cancel the load. IMMEDIATE permits loading
+   * while detached or hidden. SynchronousLoading only controls how an allowed load runs.
+   */
+  void SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
+
+  /** @brief Returns the loading policy. */
+  Ui::Image::LoadPolicy GetLoadPolicy() const;
+
+  /**
    * @copydoc Dali::Ui::LottieAnimationView::SetReleasePolicy
    */
   void SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
@@ -380,6 +395,7 @@ public: // API
   Ui::Visual::ResourceStatus GetLoadingStatus() const;
 
 protected: // From ViewImpl
+  void OnSceneConnection(int depth) override;
   /**
    * @copydoc ViewImpl::OnInitialize
    */
@@ -397,15 +413,18 @@ protected: // From ViewImpl
 
 private: // Internal methods
   /**
-   * @brief Rebuilds and re-registers the Lottie visual from current property values.
+   * @brief Creates the visual only when the loading policy permits it.
    */
-  void UpdateVisual();
+  void CreateVisualIfRequired();
+  bool IsReadyToLoad() const;
+  void ResetVisual();
+  void ApplyPendingActions();
+  void OnSceneVisibilityChanged(Actor actor, bool visible);
 
   /**
    * @brief Updates a property on the existing Lottie visual.
    *
-   * If visual creation is pending, the current member values are applied when
-   * UpdateVisual() creates it instead.
+   * Before creation, current member values are retained for the initial visual map.
    */
   void UpdateVisualProperty(Dali::Property::Index index, const Dali::Property::Value& value);
 
@@ -453,6 +472,7 @@ private:                                 // Data
   Ui::LottieAnimation::LoopingMode mLoopingMode;
   PlayRangeType                    mPlayRangeType;
   Ui::Image::ReleasePolicy         mReleasePolicy;
+  Ui::Image::LoadPolicy            mLoadPolicy;
   int                              mLoopCount;
   int                              mMinFrame;
   int                              mMaxFrame;
@@ -467,7 +487,10 @@ private:                                 // Data
   bool mNotifyAfterRasterization;
   bool mSynchronousLoading;
   bool mAspectFitEnabled;
-  bool mVisualDirty; ///< True when the visual needs creation or rebuilding; runtime properties normally update in place
+  // Resource-specific requests retained while visual creation is deferred.
+  std::optional<int>                                mPendingFrame;
+  std::optional<Ui::AnimatedImage::PlayState>       mPendingPlayState;
+  std::vector<Ui::LottieAnimation::DynamicProperty> mPendingDynamicProperties;
 
   Dali::Signal<void(Dali::Ui::View)> mAnimationFinishedSignal;
 };

@@ -24,6 +24,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/property-notification.h>
 #include <dali/public-api/object/weak-handle.h>
+#include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
@@ -198,6 +199,9 @@ private:
    */
   void SendAnimationData();
 
+  /** Starts loading once the configured policy permits it. */
+  void EnsureLoading();
+
   /**
    * @brief Set the vector image size.
    */
@@ -240,6 +244,15 @@ private:
   AnimatedVectorImageVisual& operator=(const AnimatedVectorImageVisual& visual) = delete;
 
 private:
+  // File and frame metadata loading; rasterization and renderer attachment are separate.
+  enum class LoadState : uint8_t
+  {
+    NOT_STARTED,
+    LOADING,
+    LOADED,
+    FAILED
+  };
+
   VisualUrl                          mImageUrl;
   VectorAnimationTask::AnimationData mAnimationData;
   VectorAnimationTaskPtr             mVectorAnimationTask;
@@ -258,10 +271,11 @@ private:
 
   Dali::Ui::AnimatedImage::PlayState mPlayState;
   Dali::Ui::Image::ReleasePolicy     mReleasePolicy;
+  Dali::Ui::Image::LoadPolicy        mLoadPolicy;
   uint32_t                           mLastSentPlayStateId;
+  LoadState                          mLoadState;
 
   bool mRasterizeCompleted : 1;
-  bool mLoadFailed : 1;
   bool mRendererAdded : 1;
   bool mRedrawInScalingDown : 1;
   bool mRedrawInScalingUp : 1;

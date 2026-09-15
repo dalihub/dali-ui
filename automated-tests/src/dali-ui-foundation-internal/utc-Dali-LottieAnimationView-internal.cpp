@@ -16,7 +16,12 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
@@ -31,6 +36,9 @@ namespace Test
 {
 namespace UiVectorAnimationRenderer
 {
+void     ResetLoadCount();
+uint32_t GetLoadCount();
+uint32_t GetDynamicPropertyCount();
 void     ResetLastSize();
 uint32_t GetLastWidth();
 uint32_t GetLastHeight();
@@ -67,6 +75,15 @@ void SendIndependentProcessEvents(UiTestApplication& application)
   application.GetRenderController().Initialize();
   application.SendNotification();
 }
+
+struct ResourceReadyCounter
+{
+  int& count;
+  void operator()(Ui::View)
+  {
+    ++count;
+  }
+};
 
 struct WindowLayoutFinishedCounter
 {
@@ -211,6 +228,7 @@ int UtcDaliLottieAnimationViewSameResourceUrlKeepsVisual(void)
 {
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New("animation.json");
+  application.GetScene().Add(view);
   view.Measure(100.0f, 100.0f);
 
   auto& viewData       = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
@@ -228,6 +246,7 @@ int UtcDaliLottieAnimationViewReloadRecreatesVisual(void)
 {
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New("animation.json");
+  application.GetScene().Add(view);
   view.Measure(100.0f, 100.0f);
 
   auto& viewData       = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
@@ -252,6 +271,54 @@ int UtcDaliLottieAnimationViewReloadWithoutUrlIsNoOp(void)
 
   auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
   DALI_TEST_CHECK(!viewData.GetVisual(LottieAnimationView::Property::IMAGE));
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewReplacementKeepsRendererUntilReady(void)
+{
+  UiTestApplication application;
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.SetSynchronousLoading(true);
+  view.SetDesiredWidth(100);
+  view.SetDesiredHeight(100);
+  application.GetScene().Add(view);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(2));
+  DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+
+  // Both URL replacement and Reload must retain the displayed frame until the
+  // replacement has a rasterized resource, not merely loaded metadata.
+  for(int replacement = 0; replacement < 2; ++replacement)
+  {
+    Renderer previousRenderer = view.GetRendererAt(0u);
+    if(replacement == 0)
+    {
+      view.SetResourceUrl("replacement.json");
+    }
+    else
+    {
+      view.Reload();
+    }
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+    DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(view.GetRendererAt(0u) == previousRenderer);
+
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(2));
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+    DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(view.GetRendererAt(0u) != previousRenderer);
+  }
+
+  // An empty URL has no replacement to wait for and must remove the old frame.
+  view.SetResourceUrl("");
+  DALI_TEST_EQUALS(view.GetRendererCount(), 0u, TEST_LOCATION);
+  auto& data = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  DALI_TEST_CHECK(!data.GetVisual(LottieAnimationView::Property::IMAGE));
   END_TEST;
 }
 
@@ -290,6 +357,7 @@ int UtcDaliLottieAnimationViewRuntimePropertiesDoNotRecreateVisual(void)
 {
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New("animation.json");
+  application.GetScene().Add(view);
   view.Measure(100.0f, 100.0f);
 
   auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
@@ -327,6 +395,7 @@ int UtcDaliLottieAnimationViewSetSameUrlInMeasureDoesNotWakeIdle(void)
   LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
 
   LottieAnimationView lottie = LottieAnimationView::New(LOTTIE_TEST_URL);
+  lottie.SetSynchronousLoading(true);
   gInPassLottie              = lottie;
 
   View host = View::New();
@@ -341,18 +410,14 @@ int UtcDaliLottieAnimationViewSetSameUrlInMeasureDoesNotWakeIdle(void)
   DALI_TEST_EQUALS(gInPassProducerCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
-  // The first pass CREATES the visual, and putting it on scene raises an in-pass
-  // RelayoutRequest -> InvalidateMeasure, so this pass parks a follow-up instead of
-  // settling. What matters is that it parks WITHOUT arming a wake (asserted above).
-  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+  // Attachment already created the visual, so the first measure pass settles.
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
 
   auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(lottie));
   auto  visual   = viewData.GetVisual(LottieAnimationView::Property::IMAGE);
   DALI_TEST_CHECK(visual);
 
-  // An independently triggered cycle drains the parked follow-up. The same-URL setter
-  // is now a no-op, so nothing is rebuilt, nothing re-parks, no wake is armed, and the
-  // layout settles.
+  // An independently triggered cycle keeps the settled layout and the same visual.
   SendIndependentProcessEvents(application);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
   DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
@@ -367,22 +432,19 @@ int UtcDaliLottieAnimationViewSetSameUrlInMeasureDoesNotWakeIdle(void)
   END_TEST;
 }
 
-int UtcDaliLottieAnimationViewVisualCreatedInMeasureDoesNotWakeIdle(void)
+int UtcDaliLottieAnimationViewVisualCreatedOnAttachDoesNotWakeDuringMeasure(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();
-  tet_infoline("A vector visual created inside a measure pass registers its rasterization without waking the main loop");
+  tet_infoline("A vector visual created on attachment settles in the first measure pass without another wake");
 
   int                         emitCount = 0;
   WindowLayoutFinishedCounter counter(emitCount);
   LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, counter);
 
   LottieAnimationView lottie = LottieAnimationView::New(LOTTIE_TEST_URL);
-  // A fixed desired size makes the natural size deterministic: the animation loads on the
-  // vector thread, and without this the fitting transform applied at LayoutFinished could
-  // observe a size that changed between the arrange and the emit and re-trigger a wake at
-  // pass depth 0. Neither call creates the visual at event time: the visual is still built
-  // by the first measure pass, which is what this test exercises.
+  lottie.SetSynchronousLoading(true);
+  // Explicit dimensions are available even before attachment.
   lottie.SetDesiredWidth(100);
   lottie.SetDesiredHeight(100);
 
@@ -396,18 +458,14 @@ int UtcDaliLottieAnimationViewVisualCreatedInMeasureDoesNotWakeIdle(void)
   SendRequestedProcessEvents(application);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
-  // The first pass CREATES the visual, and putting it on scene raises an in-pass
-  // RelayoutRequest -> InvalidateMeasure, so this pass parks a follow-up instead of
-  // settling. What matters is that it parks WITHOUT a wake even though DoSetProperties,
-  // DoSetOnScene and OnSetTransform all reach TriggerVectorRasterization.
-  DALI_TEST_EQUALS(emitCount, 0, TEST_LOCATION);
+  // Visual creation and its invalidation happened at attachment, before this pass.
+  DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
 
   auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(lottie));
   auto  visual   = viewData.GetVisual(LottieAnimationView::Property::IMAGE);
   DALI_TEST_CHECK(visual);
 
-  // An independently triggered cycle drains the parked follow-up: nothing is rebuilt,
-  // nothing re-parks, no wake is armed, and the layout settles.
+  // A further cycle leaves the settled layout and visual unchanged.
   SendIndependentProcessEvents(application);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
   DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
@@ -432,6 +490,7 @@ int UtcDaliLottieAnimationViewVisualActionInMeasureDoesNotWakeIdle(void)
   gInPassProducerCount = 0;
 
   LottieAnimationView lottie = LottieAnimationView::New(LOTTIE_TEST_URL);
+  lottie.SetSynchronousLoading(true);
   gInPassLottie              = lottie;
 
   View host = View::New();
@@ -441,7 +500,7 @@ int UtcDaliLottieAnimationViewVisualActionInMeasureDoesNotWakeIdle(void)
   host.Add(lottie);
   window.Add(host);
 
-  // First pass creates the visual (SetPixelArea is a no-op until then).
+  // The visual already exists when the first measure callback sets PixelArea.
   SendRequestedProcessEvents(application);
   DALI_TEST_EQUALS(gInPassProducerCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
@@ -466,6 +525,7 @@ int UtcDaliLottieAnimationViewPlayFromLayoutFinishedRequestsIdleWake(void)
   gLayoutFinishedSlotCount = 0;
 
   LottieAnimationView lottie = LottieAnimationView::New(LOTTIE_TEST_URL);
+  lottie.SetSynchronousLoading(true);
   gLayoutFinishedLottie      = lottie;
   lottie.SetRequestedWidth(100.0f);
   lottie.SetRequestedHeight(100.0f);
@@ -484,5 +544,222 @@ int UtcDaliLottieAnimationViewPlayFromLayoutFinishedRequestsIdleWake(void)
   DALI_TEST_EQUALS(gLayoutFinishedSlotCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(WasProcessEventsOnIdleRequested(application));
 
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewDeferredCommandsDoNotLoad(void)
+{
+  UiTestApplication application;
+  Test::UiVectorAnimationRenderer::ResetLoadCount();
+  Test::UiVectorAnimationRenderer::ResetLastSize();
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.SetSynchronousLoading(true);
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(32);
+  view.SetMinMaxFrame(1, 4);
+  view.Play();
+  view.Pause();
+  view.JumpToFrame(3);
+  view.SetDynamicProperty(Ui::LottieAnimation::DynamicProperty(1, "**",
+    Ui::LottieAnimation::ContentProperty::FILL_COLOR,
+    Ui::LottieAnimation::DynamicPropertyCallback::New(&TestFillColor)));
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
+  application.SendNotification();
+  application.Render();
+
+  auto& data = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  DALI_TEST_EQUALS(view.GetLoadPolicy(), Ui::Image::LoadPolicy::ATTACHED, TEST_LOCATION);
+  DALI_TEST_CHECK(!data.GetVisual(LottieAnimationView::Property::IMAGE));
+  // Readiness considers registered visuals only, as in ImageView and AnimatedImageView.
+  DALI_TEST_CHECK(view.IsResourceReady());
+  DALI_TEST_EQUALS(view.GetNaturalSize(), Vector3(64.0f, 32.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLastWidth(), 0u, TEST_LOCATION);
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(2));
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLastWidth(), 64u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLastHeight(), 32u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::PAUSED, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetDynamicPropertyCount(), 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewHiddenAncestorDefersCreation(void)
+{
+  UiTestApplication application;
+  Test::UiVectorAnimationRenderer::ResetLoadCount();
+  Actor parent = Actor::New();
+  parent.SetProperty(Actor::Property::VISIBLE, false);
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.SetSynchronousLoading(true);
+  view.SetRequestedWidth(WRAP_CONTENT);
+  view.SetRequestedHeight(WRAP_CONTENT);
+  parent.Add(view);
+  application.GetScene().Add(parent);
+  view.JumpToFrame(2);
+  view.Play();
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
+  application.SendNotification();
+  application.Render();
+  auto& data = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  DALI_TEST_CHECK(!data.GetVisual(LottieAnimationView::Property::IMAGE));
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNaturalSize(), Vector3::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.Measure(100.0f, 100.0f).GetWidth(), 0.0f, TEST_LOCATION);
+
+  parent.SetProperty(Actor::Property::VISIBLE, true);
+  DALI_TEST_CHECK(data.GetVisual(LottieAnimationView::Property::IMAGE));
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNaturalSize(), Vector3(100.0f, 100.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.Measure(100.0f, 100.0f).GetWidth(), 100.0f, TEST_LOCATION);
+  application.GetScene().Remove(parent);
+  application.GetScene().Add(parent);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewHiddenReloadDefersNewResource(void)
+{
+  UiTestApplication application;
+  Test::UiVectorAnimationRenderer::ResetLoadCount();
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.SetSynchronousLoading(true);
+  view.SetProperty(Actor::Property::VISIBLE, false);
+  application.GetScene().Add(view);
+  view.Reload();
+  view.JumpToFrame(3);
+  view.SetResourceUrl("replacement.json");
+  view.Play();
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 0u, TEST_LOCATION);
+  view.SetProperty(Actor::Property::VISIBLE, true);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  view.SetProperty(Actor::Property::VISIBLE, false);
+  auto& data = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  auto previousVisual = data.GetVisual(LottieAnimationView::Property::IMAGE);
+  view.Reload();
+  DALI_TEST_CHECK(data.GetVisual(LottieAnimationView::Property::IMAGE) == previousVisual);
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  view.SetProperty(Actor::Property::VISIBLE, true);
+  DALI_TEST_CHECK(data.GetVisual(LottieAnimationView::Property::IMAGE) != previousVisual);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewImmediateLoadsOffScene(void)
+{
+  UiTestApplication application;
+  Test::UiVectorAnimationRenderer::ResetLoadCount();
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.SetSynchronousLoading(true);
+  view.SetProperty(Actor::Property::VISIBLE, false);
+  view.SetProperty(LottieAnimationView::Property::LOAD_POLICY, static_cast<int>(Ui::Image::LoadPolicy::IMMEDIATE));
+  DALI_TEST_EQUALS(view.GetLoadPolicy(), Ui::Image::LoadPolicy::IMMEDIATE, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetTotalFrameCount(), 5, TEST_LOCATION);
+  view.SetLoadPolicy(Ui::Image::LoadPolicy::ATTACHED);
+  view.Reload();
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  view.SetLoadPolicy(Ui::Image::LoadPolicy::IMMEDIATE);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationVisualLoadPolicyGuardsActions(void)
+{
+  UiTestApplication application;
+  Test::UiVectorAnimationRenderer::ResetLoadCount();
+  Test::UiVectorAnimationRenderer::ResetLastSize();
+  Dali::Property::Map map;
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::LOTTIE_ANIMATION);
+  map.Insert(Ui::Integration::ImageVisual::Property::URL, "animation.json");
+  map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, true);
+  map.Insert("loadPolicy", "ATTACHED");
+  auto visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
+  visual.DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::JUMP_TO, 3);
+  visual.DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::PLAY, Dali::Property::Map());
+  visual.CreatePropertyMap(map);
+  DALI_TEST_EQUALS(map.Find(Ui::Integration::ImageVisual::Property::CONTENT_INFO)->Get<Dali::Property::Map>().Count(), 0u, TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLastWidth(), 0u, TEST_LOCATION);
+
+  View owner = View::New();
+  owner.SetProperty(Actor::Property::VISIBLE, false);
+  auto& data = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(owner));
+  data.RegisterVisual(LottieAnimationView::Property::IMAGE, visual);
+  application.GetScene().Add(owner);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 0u, TEST_LOCATION);
+  owner.SetProperty(Actor::Property::VISIBLE, true);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  visual.CreatePropertyMap(map);
+  DALI_TEST_EQUALS(map.Find(Ui::Integration::ImageVisual::Property::TOTAL_FRAME_COUNT)->Get<int>(), 5, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewAsyncDeferredLoadCompletes(void)
+{
+  UiTestApplication application;
+  Test::UiVectorAnimationRenderer::ResetLoadCount();
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(32);
+  view.JumpToFrame(3);
+  view.Pause();
+  DALI_TEST_CHECK(!view.IsSynchronousLoading());
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 0u, TEST_LOCATION);
+  application.GetScene().Add(view);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1)); // load metadata, then schedule pending commands
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(2)); // rasterization and upload
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::PAUSED, TEST_LOCATION);
+  DALI_TEST_CHECK(view.IsResourceReady());
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewDeferredResourceUsesRegisteredVisualReadiness(void)
+{
+  UiTestApplication application;
+  Test::UiVectorAnimationRenderer::ResetLoadCount();
+  LottieAnimationView view = LottieAnimationView::New("invalid.json");
+  view.SetSynchronousLoading(true);
+  int readyCount = 0;
+  view.ResourceReadySignal().Connect(&application, ResourceReadyCounter{readyCount});
+
+  Dali::Property::Map map;
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::COLOR);
+  auto background = Ui::Integration::VisualFactory::Get().CreateVisual(map);
+  auto& data = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+  data.RegisterVisual(Ui::Integration::View::Property::BACKGROUND, background);
+  // Deliver background completion while the Lottie view is still off scene.
+  Ui::GetImplementation(background).ResourceReady(Ui::Visual::ResourceStatus::READY);
+  // Background readiness may emit while the main visual is still deferred.
+  DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(view.IsResourceReady());
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 0u, TEST_LOCATION);
+
+  application.GetScene().Add(view);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+  DALI_TEST_CHECK(view.IsResourceReady());
+  DALI_TEST_CHECK(readyCount > 1);
   END_TEST;
 }
