@@ -10,8 +10,9 @@
 4. [HoverEvent](#hoverevent)
 5. [Gesture Detection by HandleEvent](#gesture-detection-by-handleevent)
 6. [Gesture Propagation](#gesture-propagation)
-7. [Example 1: Basic Gesture Recognition](#example-1-basic-gesture-recognition)
-8. [Example 2: Gesture Handling Using InterceptTouchEvent](#example-2-gesture-handling-using-intercepttouchevent)
+7. [Per-Device Gesture Recognition Options](#per-device-gesture-recognition-options)
+8. [Example 1: Basic Gesture Recognition](#example-1-basic-gesture-recognition)
+9. [Example 2: Gesture Handling Using InterceptTouchEvent](#example-2-gesture-handling-using-intercepttouchevent)
 
 ---
 
@@ -455,6 +456,81 @@ is **gesture arbitration between touch candidates**, not gesture-signal propagat
 - After ownership is selected, normal TouchEvents no longer continue to other coordinate candidates.
 - An actual ancestor of the owner may intercept a later Motion, restrict the delivery path, and let a new
   Touch consumer on that path become the owner.
+
+---
+
+## Per-Device Gesture Recognition Options
+
+The same gesture detector can recognize gestures differently depending on which input device
+started them — a mouse, a touchscreen finger, a TV pointing remote, or one specific named device.
+This is independent of the propagation mode above: it is resolved once per gesture sequence, from
+the device that pressed down, whether that touch reached the detector through `Attach()` or through
+`HandleEvent()`.
+
+### GestureDeviceSelector
+
+`Dali::GestureDeviceSelector` picks which devices a set of options or thresholds applies to:
+
+```cpp
+GestureDeviceSelector::ByDeviceClass(Device::Class::MOUSE);
+GestureDeviceSelector::ByDeviceClassAndSubclass(Device::Class::POINTER, Device::Subclass::REMOCON);
+GestureDeviceSelector::ByDeviceName("Pointing Device"); // exact match, case-sensitive
+```
+
+When several selectors registered on the same detector match a gesture, the most specific one
+wins: device name, then class and subclass, then class alone.
+
+### Two layers
+
+- **Detector-local options** — `PanGestureDetector`, `TapGestureDetector` and
+  `LongPressGestureDetector` accept a complete `Options` snapshot per selector. `PinchGestureDetector`
+  and `RotationGestureDetector` have no detector-local settings at all, even for a single global
+  profile, so there is nothing to register here for them.
+
+  ```cpp
+  PanGestureDetector pan = PanGestureDetector::New();
+
+  // Mouse: only start the pan for a roughly horizontal drag.
+  PanGestureDetector::Options mouseOptions = pan.GetDefaultOptions();
+  mouseOptions.AddDirection(PanGestureDetector::DIRECTION_HORIZONTAL);
+  pan.SetDeviceOptions(GestureDeviceSelector::ByDeviceClass(Device::Class::MOUSE), mouseOptions);
+
+  pan.Attach(view);
+  ```
+
+  `GetDeviceOptions(selector, options)` and `ClearDeviceOptions(selector)` complete the surface.
+
+- **Application-wide `Dali::GestureThresholds`** — covers all five gesture types (pan, tap, long
+  press, pinch, rotation). These are the recognition thresholds that used to be a single value for
+  the whole application. Registering a per-device threshold reaches every detector in the process,
+  including ones a dali-ui component creates internally (`ScrollView`, `InteractiveTrait`,
+  `InputEditor`), not only detectors the application attaches itself.
+
+  ```cpp
+  // Mouse: needs a longer drag before a pan starts than the touch default.
+  GestureThresholds::PanThresholds mouseThresholds = GestureThresholds::GetDefaultPanThresholds();
+  mouseThresholds.SetMinimumDistance(40);
+  GestureThresholds::SetPanThresholds(GestureDeviceSelector::ByDeviceClass(Device::Class::MOUSE), mouseThresholds);
+  ```
+
+| Gesture | Detector-local `Options` | `GestureThresholds` |
+|---|---|---|
+| Pan | touches range, motion age, angles | minimum distance, minimum pan events |
+| Tap | taps range, receive-all-tap-events | multi-tap interval, holding time, motion distance |
+| Long Press | touches range | minimum holding time |
+| Pinch | — (no detector-local settings exist) | minimum distance, minimum touch events (before/after start) |
+| Rotation | — (no detector-local settings exist) | minimum touch events (before/after start) |
+
+### Relationship to UiConfig
+
+[UiConfig](Configuration.md)'s gesture setters (`SetLongPressGestureMinimumHoldingTime()` and similar)
+set the single global value that `GestureThresholds` falls back to when no device selector matches;
+they must be called before `Apply()`. `GestureThresholds` is a separate API and can be set or
+cleared at any time, including after `Apply()` — a matching selector always wins over the
+`UiConfig`/default value, regardless of call order.
+
+For a complete, runnable example, see the
+[device-gesture-options sample](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/device-gesture-options).
 
 ---
 
