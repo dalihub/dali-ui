@@ -22,6 +22,8 @@ SET(TC_SOURCES
     utc-Dali-ChartSection.cpp
     utc-Dali-Navigator.cpp
     utc-Dali-Dialog.cpp
+    utc-Dali-DialogPresentation.cpp
+    utc-Dali-DialogTransitionSample.cpp
     utc-Dali-DialogContainer.cpp
     utc-Dali-AlertDialog.cpp
     utc-Dali-MarkdownView.cpp

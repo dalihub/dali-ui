@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include <dali-ui-components/integration-api/navigator/navigator-impl.h>
+#include <dali-ui-components/internal/dialog/dialog-presentation-session.h>
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-manager.h>
@@ -34,6 +35,8 @@ namespace Ui
 {
 namespace Integration
 {
+using Internal::DialogPresentationSession;
+using Internal::NavigatorModalBridge;
 namespace
 {
 constexpr float TRANSITION_DURATION = 0.25f; // seconds
@@ -94,7 +97,8 @@ Ui::Navigator NavigatorImpl::New()
 }
 
 NavigatorImpl::NavigatorImpl()
-: ViewImpl()
+: ViewImpl(),
+  mModalData(new Internal::NavigatorModalData())
 {
 }
 
@@ -120,34 +124,41 @@ void NavigatorImpl::OnInitialize()
 
 void NavigatorImpl::Push(Ui::View page, bool animated)
 {
-  if(mInvokingTransitionCallback || !page || InAnyStack(page))
+  if(mInvokingTransitionCallback || mModalData->destroying || !page || InAnyStack(page))
   {
     return;
   }
   SettlePendingTransition();
 
+  if(InAnyStack(page)) return;
+
   Ui::Navigator handle = GetHandle();
   Ui::View      prev   = NavTop();
 
   mNavStack.push_back(page);
+  ++mModalData->revision;
+  const auto transitionId = ++mModalData->transitionId;
+  mTxIncoming             = page;
+  mTxOutgoing             = prev;
+  mTxByPop                = false;
+  mTxRemoveOutgoing       = false;
+  mTxByModal              = false;
   AddChildFill(page);
+  if(transitionId != mModalData->transitionId) return;
   RestackModals();
   UpdateVisibility();
+  if(transitionId != mModalData->transitionId) return;
 
   if(prev && handle)
   {
     mPageWillDisappearSignal.Emit(handle, prev, false);
   }
+  if(transitionId != mModalData->transitionId) return;
   if(handle)
   {
     mPageWillAppearSignal.Emit(handle, page, false);
   }
-
-  mTxIncoming       = page;
-  mTxOutgoing       = prev;
-  mTxByPop          = false;
-  mTxRemoveOutgoing = false;
-  mTxByModal        = false;
+  if(transitionId != mModalData->transitionId) return;
   RunTransition(animated && mPageTransitionAnimationEnabled, true);
 }
 
@@ -155,34 +166,43 @@ Ui::View NavigatorImpl::Pop(bool animated)
 {
   // The last page may be popped, leaving the stack empty; only an already-empty
   // stack returns an empty handle.
-  if(mInvokingTransitionCallback || mNavStack.empty())
+  if(mInvokingTransitionCallback || mModalData->destroying || mNavStack.empty())
   {
     return Ui::View();
   }
-  SettlePendingTransition();
-
   Ui::Navigator handle = GetHandle();
   Ui::View      top    = mNavStack.back();
+  SettlePendingTransition();
+  if(!InStack(mNavStack, top)) return top;
+  if(NavTop() != top)
+  {
+    Remove(top);
+    return top;
+  }
   mNavStack.pop_back();
-  Ui::View newTop = NavTop();
+  ++mModalData->revision;
+  Ui::View   newTop       = NavTop();
+  const auto transitionId = ++mModalData->transitionId;
+  mTxIncoming             = newTop;
+  mTxOutgoing             = top;
+  mTxByPop                = true;
+  mTxRemoveOutgoing       = true;
+  mTxByModal              = false;
 
   UpdateVisibility();
   RestackModals();
+  if(transitionId != mModalData->transitionId) return top;
 
   if(handle)
   {
     mPageWillDisappearSignal.Emit(handle, top, true);
   }
+  if(transitionId != mModalData->transitionId) return top;
   if(newTop && handle)
   {
     mPageWillAppearSignal.Emit(handle, newTop, true);
   }
-
-  mTxIncoming       = newTop;
-  mTxOutgoing       = top;
-  mTxByPop          = true;
-  mTxRemoveOutgoing = true;
-  mTxByModal        = false;
+  if(transitionId != mModalData->transitionId) return top;
   RunTransition(animated && mPageTransitionAnimationEnabled, false);
   return top;
 }
@@ -220,10 +240,7 @@ void NavigatorImpl::Remove(Ui::View page)
       return;
     }
     mNavStack.erase(it);
-    if(page.GetParent() == Self())
-    {
-      Self().Remove(page);
-    }
+    DetachChild(page);
     RemovePageSpec(page);
     UpdateVisibility();
     return;
@@ -237,42 +254,73 @@ void NavigatorImpl::Remove(Ui::View page)
       PopModal(false);
       return;
     }
-    mModalStack.erase(mit);
-    if(page.GetParent() == Self())
+    // Lifecycle callbacks below may release the caller's last Navigator handle.
+    auto handle  = GetHandle();
+    auto session = NavigatorModalBridge::Find(*this, page);
+    if(session) session->BeginClose(DialogDismissReason::PROGRAMMATIC);
+    if(mTxByModal && mTxOutgoing == page)
     {
-      Self().Remove(page);
+      // An Exit callback may be animating this covered content. Stop it before
+      // Hidden can detach/repost the same Dialog. Settling emits callbacks, so
+      // neither an iterator nor stack membership can be kept across this call.
+      const auto visual = mTxOutgoingVisual;
+      do
+      {
+        SettlePendingTransition();
+        mit = std::find(mModalStack.begin(), mModalStack.end(), page);
+        if(mit == mModalStack.end()) return;
+        // Completion callbacks may start another transition on this content.
+      } while(mTxByModal && mTxOutgoing == page);
+      RestoreModalContent(visual);
+      if(page == ModalTop())
+      {
+        PopModal(false);
+        return;
+      }
     }
+    mModalStack.erase(mit);
+    ++mModalData->revision;
+    DetachChild(page);
     RemovePageSpec(page);
     UpdateVisibility();
+    if(session) session->Complete(DialogDismissReason::PROGRAMMATIC);
   }
 }
 
 void NavigatorImpl::Clear()
 {
-  if(mInvokingTransitionCallback)
+  if(mInvokingTransitionCallback || mModalData->destroying)
   {
     return;
   }
 
+  auto handle   = GetHandle();
+  auto modals   = mModalStack;
+  auto pages    = mNavStack;
+  auto sessions = mModalData->sessions;
+  for(auto& session : sessions) session->BeginClose(DialogDismissReason::PROGRAMMATIC);
   SettlePendingTransition();
-  for(auto& v : mModalStack)
+  for(auto& v : modals)
   {
-    if(v.GetParent() == Self())
-    {
-      Self().Remove(v);
-    }
+    mModalStack.erase(std::remove(mModalStack.begin(), mModalStack.end(), v), mModalStack.end());
   }
-  for(auto& v : mNavStack)
+  for(auto& v : pages)
   {
-    if(v.GetParent() == Self())
-    {
-      Self().Remove(v);
-    }
+    mNavStack.erase(std::remove(mNavStack.begin(), mNavStack.end(), v), mNavStack.end());
   }
-  mModalStack.clear();
-  mNavStack.clear();
-  mPageSpecs.clear();
-  mModalPageSpecs.clear();
+  ++mModalData->revision;
+  for(auto& v : modals)
+  {
+    DetachChild(v);
+    RemovePageSpec(v);
+  }
+  for(auto& v : pages)
+  {
+    DetachChild(v);
+    RemovePageSpec(v);
+  }
+  UpdateVisibility();
+  for(auto& session : sessions) session->Complete(DialogDismissReason::PROGRAMMATIC);
 }
 
 // =============================================================================
@@ -281,18 +329,39 @@ void NavigatorImpl::Clear()
 
 void NavigatorImpl::PushModal(Ui::View modal, bool animated)
 {
-  if(mInvokingTransitionCallback || !modal || InAnyStack(modal))
-  {
-    return;
-  }
-  SettlePendingTransition();
+  PushModalInternal(modal, animated, {});
+}
 
-  Ui::Navigator handle    = GetHandle();
-  Ui::View      prevModal = ModalTop();
+bool NavigatorImpl::PushModalInternal(Ui::View modal, bool animated, std::shared_ptr<DialogPresentationSession> session)
+{
+  if(mInvokingTransitionCallback || mModalData->destroying || !modal || InAnyStack(modal))
+  {
+    return false;
+  }
+  Ui::Navigator handle = GetHandle();
+  SettlePendingTransition();
+  if(InAnyStack(modal) || (session && session->state != DialogPresentationSession::State::PREPARING)) return false;
+
+  Ui::View prevModal = ModalTop();
 
   mModalStack.push_back(modal);
+  ++mModalData->revision;
+  if(session)
+  {
+    mModalData->sessions.push_back(session);
+    session->state          = DialogPresentationSession::State::REGISTERED;
+    session->registeredOnce = true;
+  }
+  const auto transitionId = ++mModalData->transitionId;
+  Ui::View   disappearing = prevModal ? prevModal : NavTop();
+  mTxIncoming             = modal;
+  mTxOutgoing             = disappearing;
+  mTxByPop                = false;
+  mTxRemoveOutgoing       = false;
+  mTxByModal              = true;
   AddChildFill(modal);
   RestackModals();
+  if(transitionId != mModalData->transitionId) return true;
 
   // Wire tap-to-dismiss when the modal is a DialogContainer.
   Ui::DialogContainer dialogContainer = Ui::DialogContainer::DownCast(modal);
@@ -302,61 +371,68 @@ void NavigatorImpl::PushModal(Ui::View modal, bool animated)
   }
 
   UpdateVisibility();
+  if(transitionId != mModalData->transitionId) return true;
 
   // The view being covered is the previous modal, or (for the first modal) the
   // current navigation-stack top.
-  Ui::View disappearing = prevModal ? prevModal : NavTop();
   if(disappearing && handle)
   {
     mPageWillDisappearSignal.Emit(handle, disappearing, false);
   }
+  if(transitionId != mModalData->transitionId) return true;
   if(handle)
   {
     mPageWillAppearSignal.Emit(handle, modal, false);
   }
-
-  mTxIncoming       = modal;
-  mTxOutgoing       = disappearing;
-  mTxByPop          = false;
-  mTxRemoveOutgoing = false;
-  mTxByModal        = true;
+  if(transitionId != mModalData->transitionId) return true;
   RunTransition(animated && mModalTransitionAnimationEnabled, true);
+  return true;
 }
 
 Ui::View NavigatorImpl::PopModal(bool animated)
 {
-  if(mInvokingTransitionCallback || mModalStack.empty())
+  if(mInvokingTransitionCallback || mModalData->destroying || mModalStack.empty())
   {
     return Ui::View();
   }
+  Ui::Navigator handle  = GetHandle();
+  Ui::View      top     = mModalStack.back();
+  auto          session = NavigatorModalBridge::Find(*this, top);
+  if(session) session->BeginClose(DialogDismissReason::PROGRAMMATIC);
   SettlePendingTransition();
-
-  Ui::Navigator handle = GetHandle();
-  Ui::View      top    = mModalStack.back();
+  if(!InStack(mModalStack, top)) return top;
+  if(ModalTop() != top)
+  {
+    Remove(top);
+    return top;
+  }
   mModalStack.pop_back();
-  Ui::View newModalTop = ModalTop();
+  ++mModalData->revision;
+  Ui::View   newModalTop  = ModalTop();
+  Ui::View   appearing    = newModalTop ? newModalTop : NavTop();
+  const auto transitionId = ++mModalData->transitionId;
+  mTxIncoming             = appearing;
+  mTxOutgoing             = top;
+  mTxByPop                = true;
+  mTxRemoveOutgoing       = true;
+  mTxByModal              = true;
 
   UpdateVisibility();
   RestackModals();
+  if(transitionId != mModalData->transitionId) return top;
 
   // The view revealed is the new modal top, or (when the modal stack is now
   // empty) the navigation-stack top.
-  Ui::View appearing = newModalTop ? newModalTop : NavTop();
-
   if(handle)
   {
     mPageWillDisappearSignal.Emit(handle, top, true);
   }
+  if(transitionId != mModalData->transitionId) return top;
   if(appearing && handle)
   {
     mPageWillAppearSignal.Emit(handle, appearing, true);
   }
-
-  mTxIncoming       = appearing;
-  mTxOutgoing       = top;
-  mTxByPop          = true;
-  mTxRemoveOutgoing = true;
-  mTxByModal        = true;
+  if(transitionId != mModalData->transitionId) return top;
   RunTransition(animated && mModalTransitionAnimationEnabled, false);
   return top;
 }
@@ -419,19 +495,25 @@ bool NavigatorImpl::NavigateBack()
 
   if(!mModalStack.empty())
   {
-    if(EmitBackRequested(navigator, mModalStack.back()))
+    auto top     = ModalTop();
+    auto session = NavigatorModalBridge::Find(*this, top);
+    if(EmitBackRequested(navigator, top))
     {
       return true;
     }
+    if(ModalTop() != top || NavigatorModalBridge::Find(*this, top) != session) return true;
+    if(session) return session->RequestDismiss(DialogDismissReason::BACK);
     PopModal(true);
     return true;
   }
   if(mNavStack.size() > 1)
   {
-    if(EmitBackRequested(navigator, mNavStack.back()))
+    auto top = NavTop();
+    if(EmitBackRequested(navigator, top))
     {
       return true;
     }
+    if(NavTop() != top || ModalTop()) return true;
     Pop(true);
     return true;
   }
@@ -526,28 +608,71 @@ void NavigatorImpl::AddChildFill(Ui::View view)
 
 void NavigatorImpl::UpdateVisibility()
 {
-  for(std::size_t i = 0; i < mNavStack.size(); ++i)
+  auto       pages    = mNavStack;
+  auto       modals   = mModalStack;
+  const auto revision = mModalData->revision;
+  for(auto& page : pages)
   {
-    mNavStack[i].SetProperty(Dali::Actor::Property::VISIBLE, (i + 1 == mNavStack.size()));
+    if(revision != mModalData->revision) return;
+    page.SetProperty(Dali::Actor::Property::VISIBLE, page == NavTop());
   }
-  for(std::size_t i = 0; i < mModalStack.size(); ++i)
+  for(auto& modal : modals)
   {
-    mModalStack[i].SetProperty(Dali::Actor::Property::VISIBLE, (i + 1 == mModalStack.size()));
+    if(revision != mModalData->revision) return;
+    modal.SetProperty(Dali::Actor::Property::VISIBLE, modal == ModalTop());
   }
 }
 
 void NavigatorImpl::RestackModals()
 {
   // Keep modal content above the navigation stack (later children are higher).
-  for(auto& modal : mModalStack)
+  auto modals = mModalStack;
+  for(auto& modal : modals)
   {
-    modal.RaiseToTop();
+    if(InStack(mModalStack, modal)) modal.RaiseToTop();
+  }
+}
+
+NavigatorImpl::TransitionView NavigatorImpl::CaptureTransitionView(Ui::View view) const
+{
+  TransitionView state;
+  auto           container = mTxByModal ? Ui::DialogContainer::DownCast(view) : Ui::DialogContainer();
+  state.modalContent       = static_cast<bool>(container);
+  state.view               = container ? container.GetModalContent() : view;
+  if(state.view)
+  {
+    state.position = state.view.GetProperty<Vector3>(Dali::Actor::Property::POSITION);
+    state.scale    = state.view.GetProperty<Vector3>(Dali::Actor::Property::SCALE);
+    state.opacity  = state.view.GetProperty<float>(Dali::Actor::Property::OPACITY);
+  }
+  return state;
+}
+
+void NavigatorImpl::RestoreModalContent(const TransitionView& state)
+{
+  if(state.modalContent && state.view)
+  {
+    auto view = state.view;
+    view.SetProperty(Dali::Actor::Property::POSITION, state.position);
+    view.SetProperty(Dali::Actor::Property::SCALE, state.scale);
+    view.SetProperty(Dali::Actor::Property::OPACITY, state.opacity);
+  }
+}
+
+void NavigatorImpl::RestoreScrim()
+{
+  if(mTxScrim)
+  {
+    mTxScrim.SetProperty(Dali::Actor::Property::OPACITY, mTxScrimOpacity);
+    mTxScrim.Reset();
   }
 }
 
 void NavigatorImpl::RunTransition(bool animated, bool fadeIncoming)
 {
   AbortTransition();
+  mTxIncomingVisual = CaptureTransitionView(mTxIncoming);
+  mTxOutgoingVisual = CaptureTransitionView(mTxOutgoing);
   mTxIncomingSpec.Reset();
   mTxOutgoingSpec.Reset();
   mTxIncomingSnapSpec.Reset();
@@ -559,89 +684,112 @@ void NavigatorImpl::RunTransition(bool animated, bool fadeIncoming)
 
   if(animated && (mTxIncoming || mTxOutgoing))
   {
+    auto container = mTxByModal ? Ui::DialogContainer::DownCast(fadeIncoming ? mTxIncoming : mTxOutgoing)
+                                : Ui::DialogContainer();
+    mTxScrim       = container ? container.GetScrim() : Ui::View();
+    if(mTxScrim)
+    {
+      mTxScrimOpacity = mTxScrim.GetProperty<float>(Dali::Actor::Property::OPACITY);
+    }
     // Keep both selected specifications alive across callback emission. A callback
     // may clear or replace Navigator's stored specifications re-entrantly.
     mTxIncomingSpec =
       mTxIncoming ? LookupAnimatorSpec(mTxIncoming, mTxByPop, true, mTxByModal) : NavigationTransitionSpec();
     mTxOutgoingSpec =
       mTxOutgoing ? LookupAnimatorSpec(mTxOutgoing, mTxByPop, false, mTxByModal) : NavigationTransitionSpec();
-    if(mTxIncomingSpec || mTxOutgoingSpec)
+    const bool custom = mTxIncomingSpec || mTxOutgoingSpec;
+    Ui::View   target = fadeIncoming ? mTxIncomingVisual.view : mTxOutgoingVisual.view;
+    if(custom || target || mTxScrim)
     {
-      if(mTxIncoming)
+      if(custom && mTxIncoming)
       {
         mTxIncoming.SetProperty(Dali::Actor::Property::VISIBLE, true);
       }
-      if(mTxOutgoing)
+      if(custom && mTxOutgoing)
       {
         mTxOutgoing.SetProperty(Dali::Actor::Property::VISIBLE, true);
       }
 
-      mTransition = Dali::Animation::New(ResolveTransitionDuration(mTxIncoming, mTxOutgoing));
+      const float duration = (custom || container) ? ResolveTransitionDuration(mTxIncoming, mTxOutgoing)
+                                                   : TRANSITION_DURATION;
+      mTransition          = Dali::Animation::New(duration);
+      if(mTxScrim)
+      {
+        // Only the newly pushed or removed scrim fades. Covered/revealed scrims
+        // keep their resting opacity, and the full container remains stationary.
+        mTxScrim.SetProperty(Dali::Actor::Property::OPACITY, fadeIncoming ? 0.0f : mTxScrimOpacity);
+        mTransition.AnimateTo(Dali::Property(mTxScrim, Dali::Actor::Property::OPACITY),
+                              fadeIncoming ? mTxScrimOpacity : 0.0f,
+                              Dali::AlphaFunction::LINEAR, Dali::TimePeriod(duration));
+      }
+      if(custom)
       {
         ScopedTransitionCallback callbackScope(mInvokingTransitionCallback);
-        if(mTxIncomingSpec && mTxIncoming)
+        if(mTxIncomingSpec && mTxIncomingVisual.view)
         {
-          SelectAnimatorSignal(mTxIncomingSpec, mTxByPop, true).Emit(mTransition, mTxIncoming);
+          SelectAnimatorSignal(mTxIncomingSpec, mTxByPop, true).Emit(mTransition, mTxIncomingVisual.view);
         }
-        if(mTxOutgoingSpec && mTxOutgoing)
+        if(mTxOutgoingSpec && mTxOutgoingVisual.view)
         {
-          SelectAnimatorSignal(mTxOutgoingSpec, mTxByPop, false).Emit(mTransition, mTxOutgoing);
+          SelectAnimatorSignal(mTxOutgoingSpec, mTxByPop, false).Emit(mTransition, mTxOutgoingVisual.view);
         }
+      }
+      else if(target)
+      {
+        const float opacity = 1.0f;
+        target.SetProperty(Dali::Actor::Property::OPACITY, fadeIncoming ? 0.0f : opacity);
+        mTransition.AnimateTo(Dali::Property(target, Dali::Actor::Property::OPACITY), fadeIncoming ? opacity : 0.0f);
       }
       mTransition.FinishedSignal().Connect(this, &NavigatorImpl::OnTransitionFinished);
       mTransition.Play();
       return;
     }
-
-    Ui::View target = fadeIncoming ? mTxIncoming : mTxOutgoing;
-    if(target)
-    {
-      const float from = fadeIncoming ? 0.0f : 1.0f;
-      const float to   = fadeIncoming ? 1.0f : 0.0f;
-      target.SetProperty(Dali::Actor::Property::OPACITY, from);
-
-      mTransition = Dali::Animation::New(TRANSITION_DURATION);
-      mTransition.AnimateTo(Dali::Property(target, Dali::Actor::Property::OPACITY), to);
-      mTransition.FinishedSignal().Connect(this, &NavigatorImpl::OnTransitionFinished);
-      mTransition.Play();
-      return;
-    }
   }
   FinishTransition();
 }
 
-void NavigatorImpl::OnTransitionFinished(Dali::Animation /*animation*/)
+void NavigatorImpl::OnTransitionFinished(Dali::Animation animation)
 {
-  FinishTransition();
+  if(animation == mTransition) FinishTransition();
 }
 
 void NavigatorImpl::FinishTransition()
 {
-  Ui::Navigator handle = GetHandle();
+  Ui::Navigator handle          = GetHandle();
+  const auto    transitionId    = mModalData->transitionId;
+  Ui::View      incoming        = mTxIncoming;
+  Ui::View      outgoing        = mTxOutgoing;
+  const bool    byPop           = mTxByPop;
+  const bool    removeOutgoing  = mTxRemoveOutgoing;
+  auto          incomingSession = NavigatorModalBridge::Find(*this, incoming);
+  auto          outgoingSession = NavigatorModalBridge::Find(*this, outgoing);
 
-  if(mTxIncoming)
+  if(incoming)
   {
-    SnapView(mTxIncoming, true);
+    SnapView(incoming, true);
   }
-  if(mTxOutgoing && !mTxRemoveOutgoing)
+  if(transitionId != mModalData->transitionId) return;
+  if(outgoing && !removeOutgoing)
   {
-    SnapView(mTxOutgoing, false);
+    SnapView(outgoing, false);
   }
-  if(mTxRemoveOutgoing && mTxOutgoing)
+  if(transitionId != mModalData->transitionId) return;
+  RestoreScrim();
+  if(removeOutgoing || (outgoingSession && outgoingSession->state == DialogPresentationSession::State::CLOSING))
   {
-    if(mTxOutgoing.GetParent() == Self())
-    {
-      Self().Remove(mTxOutgoing);
-    }
-    RemovePageSpec(mTxOutgoing);
+    // A covered managed Dialog can also be closing while its Exit settles.
+    RestoreModalContent(mTxOutgoingVisual);
   }
-  UpdateVisibility();
-
-  Ui::View   incoming = mTxIncoming;
-  Ui::View   outgoing = mTxOutgoing;
-  const bool byPop    = mTxByPop;
+  if(removeOutgoing && outgoing)
+  {
+    DetachChild(outgoing);
+    RemovePageSpec(outgoing);
+  }
+  if(transitionId != mModalData->transitionId) return;
   mTxIncoming.Reset();
   mTxOutgoing.Reset();
+  mTxIncomingVisual = {};
+  mTxOutgoingVisual = {};
   mTxByPop          = false;
   mTxRemoveOutgoing = false;
   mTxByModal        = false;
@@ -653,6 +801,9 @@ void NavigatorImpl::FinishTransition()
   // does not treat this (already completed) transition as still pending and emit
   // TransitionFinishedSignal a second time.
   mTransition.Reset();
+  ++mModalData->transitionId;
+  const auto completedId = mModalData->transitionId;
+  UpdateVisibility();
 
   if(handle)
   {
@@ -660,11 +811,17 @@ void NavigatorImpl::FinishTransition()
     {
       mPageDidDisappearSignal.Emit(handle, outgoing, byPop);
     }
-    if(incoming)
+    if(incoming && completedId == mModalData->transitionId)
     {
       mPageDidAppearSignal.Emit(handle, incoming, byPop);
     }
-    mTransitionFinishedSignal.Emit(handle);
+    if(completedId == mModalData->transitionId) mTransitionFinishedSignal.Emit(handle);
+  }
+  if(removeOutgoing && outgoingSession) outgoingSession->Complete(DialogDismissReason::PROGRAMMATIC);
+  if(incomingSession)
+  {
+    incomingSession->enterCompleted = true;
+    incomingSession->TryNotifyShown();
   }
 }
 
@@ -687,9 +844,64 @@ void NavigatorImpl::SettlePendingTransition()
   }
 }
 
-void NavigatorImpl::OnScrimClicked(Ui::DialogContainer /*container*/)
+void NavigatorImpl::OnScrimClicked(Ui::DialogContainer container)
 {
+  if(ModalTop() != container) return;
+  if(auto session = NavigatorModalBridge::Find(*this, container))
+  {
+    session->RequestDismiss(DialogDismissReason::SCRIM);
+    return;
+  }
   PopModal(true);
+}
+
+void NavigatorImpl::DetachChild(Ui::View view)
+{
+  if(view && view.GetParent() == Self())
+  {
+    auto session = NavigatorModalBridge::Find(*this, view);
+    mModalData->removing.push_back({view.GetObjectPtr(), session.get()});
+    struct ResetRemovalPermission
+    {
+      std::vector<Internal::NavigatorModalData::Removal>& removals;
+      ~ResetRemovalPermission()
+      {
+        removals.pop_back();
+      }
+    } resetRemovalPermission{mModalData->removing};
+    Self().Remove(view);
+  }
+}
+
+void NavigatorImpl::OnChildRemove(Actor& child)
+{
+  if(!mModalData->destroying)
+  {
+    auto view     = Ui::View::DownCast(child);
+    auto session  = NavigatorModalBridge::Find(*this, view);
+    auto expected = std::find_if(mModalData->removing.rbegin(), mModalData->removing.rend(), [&](const auto& removal)
+    {
+      return removal.target == child.GetObjectPtr() && removal.session == session.get();
+    });
+    DALI_ASSERT_ALWAYS((!session || expected != mModalData->removing.rend()) &&
+                       "Managed DialogContainer must be removed through Navigator or Dialog::Dismiss");
+    if(expected != mModalData->removing.rend()) expected->target = nullptr;
+  }
+  ViewImpl::OnChildRemove(child);
+}
+
+void NavigatorImpl::OnDestroy()
+{
+  mModalData->destroying = true;
+  AbortTransition();
+  RestoreScrim();
+  RestoreModalContent(mTxIncomingVisual);
+  RestoreModalContent(mTxOutgoingVisual);
+  mTxIncomingVisual = {};
+  mTxOutgoingVisual = {};
+  auto sessions     = std::move(mModalData->sessions);
+  for(auto& session : sessions) session->Complete(DialogDismissReason::HOST_REMOVED, true);
+  ViewImpl::OnDestroy();
 }
 
 bool NavigatorImpl::EmitBackRequested(Ui::Navigator navigator, Ui::View page)
@@ -795,6 +1007,11 @@ float NavigatorImpl::ResolveTransitionDuration(Ui::View incoming, Ui::View outgo
 
 void NavigatorImpl::SnapView(Ui::View view, bool isIncoming)
 {
+  const auto& captured = isIncoming ? mTxIncomingVisual : mTxOutgoingVisual;
+  // PageWill callbacks can settle a transition before RunTransition captures
+  // its visual targets. An empty modal content is still a valid snapshot.
+  const auto state = (captured.view || captured.modalContent) ? captured : CaptureTransitionView(view);
+  view             = state.view;
   if(!view)
   {
     return;

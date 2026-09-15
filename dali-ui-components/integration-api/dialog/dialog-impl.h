@@ -23,11 +23,18 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog.h>
+#include <dali-ui-components/public-api/navigator/navigator.h>
+#include <memory>
 
 namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+namespace Internal
+{
+struct DialogPresentationData;
+class DialogPresentationSession;
+}
 namespace Integration
 {
 
@@ -46,6 +53,15 @@ public:
    */
   static Ui::Dialog New();
   static Ui::Dialog New(Ui::DialogStyle style);
+
+  bool Post(Ui::Navigator navigator, const DialogPostOptions& options);
+  void Dismiss(bool animated);
+  bool IsPosted() const;
+  void SetDismissPolicy(DialogDismissPolicy policy);
+  DialogDismissPolicy GetDismissPolicy() const;
+  Ui::Dialog::DismissRequestedSignalType& DismissRequestedSignal();
+  Ui::Dialog::ShownSignalType& ShownSignal();
+  Ui::Dialog::HiddenSignalType& HiddenSignal();
 
   // Section accessors
   void     SetHeaderView(Ui::View headerView);
@@ -99,6 +115,8 @@ private:
   Ui::View        mBodyView;
   Ui::View        mFooterView;
   LayoutAlignment mAlignment{LayoutAlignment::FILL};
+  friend class Internal::DialogPresentationSession;
+  std::unique_ptr<Internal::DialogPresentationData> mPresentation;
 };
 
 } // namespace Integration

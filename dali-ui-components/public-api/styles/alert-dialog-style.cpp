@@ -49,8 +49,14 @@ TextButtonStyle ResolveAlertActionButtonStyle(AlertDialogStyle style)
   {
     return action;
   }
-  // Preserve configured button geometry/effects and the legacy Alert palette.
-  return TextButtonStyle::Default().Configure().SetBackgroundColor(UiColor(0x3367D6u)).SetTextColor(UiColor(0xFFFFFFu)).SetFontSize(16.0f).Build();
+  auto defaultButton = TextButtonStyle::Default();
+  auto builder = defaultButton.Configure();
+  // Apply OneUI fallback geometry without overriding an application's provider.
+  if(defaultButton == TextButtonStyle::DefaultPreset())
+  {
+    builder.SetMinimumSize(Vector2(144.0f, 64.0f)).SetPadding(24.0f, 4.0f);
+  }
+  return std::move(builder).SetBackgroundColor(UiColor(0x3367D6u)).SetTextColor(UiColor(0xFFFFFFu)).SetFontSize(16.0f).Build();
 }
 } // namespace Internal
 
@@ -123,6 +129,10 @@ TextButtonStyle AlertDialogStyle::GetActionButtonStyle() const
 float AlertDialogStyle::GetActionRowHeight() const
 {
   return GetStyleImpl(*this).values.mActionRowHeight;
+}
+Insets AlertDialogStyle::GetActionRowPadding() const
+{
+  return GetStyleImpl(*this).values.mActionRowPadding;
 }
 float AlertDialogStyle::GetActionButtonSpacing() const
 {
@@ -225,13 +235,24 @@ AlertDialogStyle::Builder&& AlertDialogStyle::Builder::SetActionButtonStyle(Text
 }
 AlertDialogStyle::Builder& AlertDialogStyle::Builder::SetActionRowHeight(float value) &
 {
-  DALI_ASSERT_ALWAYS(Internal::StyleValidation::IsNonNegative(value) && "AlertDialogStyle ActionRowHeight is invalid");
+  DALI_ASSERT_ALWAYS((value == WRAP_CONTENT || Internal::StyleValidation::IsNonNegative(value)) && "AlertDialogStyle ActionRowHeight is invalid");
   GetStyleImpl(mStyle).values.mActionRowHeight = value;
   return *this;
 }
 AlertDialogStyle::Builder&& AlertDialogStyle::Builder::SetActionRowHeight(float value) &&
 {
   SetActionRowHeight(value);
+  return std::move(*this);
+}
+AlertDialogStyle::Builder& AlertDialogStyle::Builder::SetActionRowPadding(const Insets& value) &
+{
+  DALI_ASSERT_ALWAYS(Internal::StyleValidation::IsNonNegative(value) && "AlertDialogStyle ActionRowPadding is invalid");
+  GetStyleImpl(mStyle).values.mActionRowPadding = value;
+  return *this;
+}
+AlertDialogStyle::Builder&& AlertDialogStyle::Builder::SetActionRowPadding(const Insets& value) &&
+{
+  SetActionRowPadding(value);
   return std::move(*this);
 }
 AlertDialogStyle::Builder& AlertDialogStyle::Builder::SetActionButtonSpacing(float value) &

@@ -41,7 +41,11 @@ public:
   DialogStyle() = default;
   /// @brief Gets the default key for registration with Components UiConfig.
   static UiStyleKey<DialogStyle> DefaultKey();
-  /// @brief Gets the built-in defaults, independent of the configured provider.
+  /// @brief Gets the OneUI fallback surface, independent of the configured provider.
+  /// Uses absolute radius 44, translucent white (alpha 0.6), two cutout shadows,
+  /// and an inner border. Content defaults are width 908, WRAP_CONTENT height,
+  /// own padding (44, 44, 36, 32), and section spacing 12. Child padding is preserved.
+  /// Register a DefaultKey provider for theme-specific surface values.
   static DialogStyle DefaultPreset();
   /// @brief Gets the style from the current configuration, falling back to the built-in defaults.
   static DialogStyle Default();

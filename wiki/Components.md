@@ -2,6 +2,8 @@
 
 ## Components
 
+Dialog and AlertDialog support [managed Post/Dismiss presentation](Dialog.md#managed-presentation-recommended), dismissal policy, and `DialogContainerStyle::NoScrimPreset()`.
+
 #### Layouts
 `dali-ui-foundation`
 name | desc. | sample

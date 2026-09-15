@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
 #include <dali-ui-components/public-api/dialog/dialog.h>
+#include <dali-ui-components/public-api/navigator/navigator.h>
 #include <dali-ui-components/public-api/styles/alert-dialog-style.h>
 #include <dali-ui-components/public-api/components-ui-config.h>
 #include <dali-ui-components/integration-api/dialog/alert-dialog-impl.h>
@@ -30,6 +31,166 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+int UtcDaliAlertDialogOneUiLayoutDefaultsP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto dialog = AlertDialog::New();
+  dialog.SetTitle("Title");
+  dialog.SetMessage("Message");
+  auto action = dialog.AddActionButton("OK");
+  DALI_TEST_EQUALS(dialog.GetPadding(), Insets(44.0f, 44.0f, 36.0f, 32.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.GetRequestedWidth(), 908.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.GetRequestedHeight(), WRAP_CONTENT, TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.GetSpacing(), 12.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(Label::DownCast(dialog.GetHeaderView()).IsMultiLine());
+  DALI_TEST_CHECK(Label::DownCast(dialog.GetBodyView()).IsMultiLine());
+  DALI_TEST_EQUALS(dialog.GetHeaderView().GetPadding(), Insets(), TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.GetBodyView().GetPadding(), Insets(), TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.GetFooterView().GetRequestedHeight(), WRAP_CONTENT, TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.GetFooterView().GetPadding(), Insets(0.0f, 0.0f, 12.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(action.GetMinimumWidth(), 144.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(action.GetMinimumHeight(), 64.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAlertDialogActionRowStyleOverridesP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto original = AlertDialogStyle::Default().Configure()
+    .SetActionRowPadding(Insets(3.0f, 5.0f, 7.0f, 9.0f)).SetActionRowHeight(WRAP_CONTENT).Build();
+  auto changed = original.Configure().SetActionRowPadding(Insets()).SetActionRowHeight(90.0f).Build();
+  auto dialog = AlertDialog::New(original);
+  dialog.AddActionButton("OK");
+  DALI_TEST_EQUALS(dialog.GetFooterView().GetPadding(), original.GetActionRowPadding(), TEST_LOCATION);
+  auto customFooter = View::New();
+  customFooter.SetPadding(Insets(17.0f, 19.0f));
+  dialog.SetFooterView(customFooter);
+  DALI_TEST_EQUALS(customFooter.GetPadding(), Insets(17.0f, 19.0f), TEST_LOCATION);
+  dialog.AddActionButton("New group");
+  DALI_TEST_EQUALS(dialog.GetFooterView().GetPadding(), Insets(3.0f, 5.0f, 7.0f, 9.0f), TEST_LOCATION);
+  auto other = AlertDialog::New(changed);
+  other.AddActionButton("OK");
+  DALI_TEST_EQUALS(other.GetFooterView().GetPadding(), Insets(), TEST_LOCATION);
+  DALI_TEST_EQUALS(other.GetFooterView().GetRequestedHeight(), 90.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetActionRowHeight(), WRAP_CONTENT, TEST_LOCATION);
+  for(float value : {-1.0f, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::quiet_NaN()})
+  {
+    DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetActionRowPadding(Insets(value, 0, 0, 0)), "");
+    DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetActionRowPadding(Insets(0, value, 0, 0)), "");
+    DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetActionRowPadding(Insets(0, 0, value, 0)), "");
+    DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetActionRowPadding(Insets(0, 0, 0, value)), "");
+  }
+  END_TEST;
+}
+
+int UtcDaliAlertDialogOneUiLayoutGeometryP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto host = Navigator::New();
+  host.SetRequestedWidth(480.0f);
+  host.SetRequestedHeight(800.0f);
+  application.GetScene().Add(host);
+  auto dialog = AlertDialog::New();
+  dialog.SetRequestedWidth(440.0f);
+  dialog.SetLayoutParams(AbsoluteLayoutParams::New()
+    .SetBounds(LayoutRect(0.5f, 0.5f, WRAP_CONTENT, WRAP_CONTENT))
+    .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+  dialog.SetTitle("Delete item?");
+  dialog.SetMessage("This action cannot be undone.");
+  auto first = dialog.AddActionButton("Cancel");
+  auto second = dialog.AddActionButton("OK");
+  DialogPostOptions options;
+  options.animated = false;
+  float shortHeight = 0.0f;
+  float shortTitleHeight = 0.0f;
+  for(bool longText : {false, true})
+  {
+    if(longText)
+    {
+      dialog.SetTitle("A long title that must wrap inside the dialog instead of crossing its rounded boundary");
+      dialog.SetMessage("A long message that must grow vertically and move the action row down without overlapping the title or the buttons. The dialog height follows its content.");
+    }
+    DALI_TEST_CHECK(dialog.Post(host, options));
+    host.Measure(480.0f, 800.0f);
+    host.Arrange(LayoutRect(0, 0, 480, 800));
+    application.SendNotification();
+    application.Render(500);
+    application.SendNotification();
+    application.Render(500);
+    auto title = dialog.GetHeaderView();
+    auto body = dialog.GetBodyView();
+    auto footer = dialog.GetFooterView();
+    DALI_TEST_EQUALS(title.GetCurrentPosition().x, 44.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(title.GetCurrentPosition().y, 36.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(title.GetCurrentSize().x, 352.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(body.GetCurrentPosition().y, 36.0f + title.GetCurrentSize().y + 12.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(footer.GetCurrentPosition().y, body.GetCurrentPosition().y + body.GetCurrentSize().y + 12.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetCurrentSize().y, footer.GetCurrentPosition().y + footer.GetCurrentSize().y + 32.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(first.GetCurrentSize().x, 144.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(second.GetCurrentSize().x, 144.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(first.GetCurrentSize().y, 64.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(first.GetCurrentPosition().y, 12.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(second.GetCurrentPosition().x - first.GetCurrentPosition().x - first.GetCurrentSize().x, 32.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(first.GetCurrentPosition().x, footer.GetCurrentSize().x - second.GetCurrentPosition().x - second.GetCurrentSize().x, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetCurrentPosition().y, (800.0f - dialog.GetCurrentSize().y) * 0.5f, 0.01f, TEST_LOCATION);
+    if(longText)
+    {
+      DALI_TEST_CHECK(title.GetCurrentSize().y > shortTitleHeight);
+      DALI_TEST_CHECK(dialog.GetCurrentSize().y > shortHeight);
+    }
+    else
+    {
+      shortHeight = dialog.GetCurrentSize().y;
+      shortTitleHeight = title.GetCurrentSize().y;
+    }
+    dialog.Dismiss(false);
+  }
+  END_TEST;
+}
+
+int UtcDaliAlertDialogOneUiLayoutRtlAndRebuildP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto dialog = AlertDialog::New();
+  dialog.SetProperty(Actor::Property::LAYOUT_DIRECTION, LayoutDirection::RIGHT_TO_LEFT);
+  dialog.SetRequestedWidth(440.0f);
+  dialog.SetRequestedHeight(WRAP_CONTENT);
+  application.GetScene().Add(dialog);
+  dialog.SetTitle("Title");
+  auto first = dialog.AddActionButton("OK");
+  auto second = dialog.AddActionButton("Cancel");
+  auto third = dialog.AddActionButton("Third");
+  // A wider dialog accommodates three natural-size actions without wrapping.
+  dialog.SetRequestedWidth(700.0f);
+  auto arrange = [&]() {
+    auto measured = dialog.Measure(700.0f, 800.0f);
+    dialog.Arrange(LayoutRect(0, 0, measured.width, measured.height));
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+  };
+  arrange();
+  DALI_TEST_CHECK(first.GetCurrentPosition().x > second.GetCurrentPosition().x);
+  DALI_TEST_CHECK(second.GetCurrentPosition().x > third.GetCurrentPosition().x);
+  DALI_TEST_EQUALS(first.GetCurrentPosition().x - second.GetCurrentPosition().x - second.GetCurrentSize().x, 32.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(second.GetCurrentPosition().x - third.GetCurrentPosition().x - third.GetCurrentSize().x, 32.0f, 0.01f, TEST_LOCATION);
+  auto footer = dialog.GetFooterView();
+  DALI_TEST_EQUALS(third.GetCurrentPosition().x, footer.GetCurrentSize().x - first.GetCurrentPosition().x - first.GetCurrentSize().x, 0.01f, TEST_LOCATION);
+  auto title = dialog.GetHeaderView();
+  DALI_TEST_EQUALS(footer.GetCurrentPosition().y, title.GetCurrentPosition().y + title.GetCurrentSize().y + 12.0f, 0.01f, TEST_LOCATION);
+  dialog.SetTitle("");
+  dialog.ClearActionButtons();
+  auto only = dialog.AddActionButton("Only");
+  arrange();
+  footer = dialog.GetFooterView();
+  DALI_TEST_EQUALS(footer.GetChildCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(only.GetMargin(), Insets(), TEST_LOCATION);
+  DALI_TEST_EQUALS(footer.GetCurrentPosition().y, 36.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(only.GetCurrentPosition().x, (footer.GetCurrentSize().x - only.GetCurrentSize().x) * 0.5f, 0.01f, TEST_LOCATION);
+  END_TEST;
+}
 
 void utc_dali_alert_dialog_startup(void)
 {
@@ -77,9 +238,9 @@ int UtcDaliAlertDialogStyleContentAndActionsP(void)
   DALI_TEST_EQUALS(action.GetFontSize(), 25.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(action.GetTextColor().GetRgba(), Color::RED, TEST_LOCATION);
   DALI_TEST_EQUALS(action.GetBackgroundColor().GetRgba(), Color::GREEN, TEST_LOCATION);
-  auto row = StackLayout::DownCast(dialog.GetFooterView());
+  auto row = dialog.GetFooterView();
   DALI_TEST_EQUALS(row.GetRequestedHeight(), 80.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(row.GetSpacing(), 14.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.AddActionButton("Second").GetMargin().start, 14.0f, TEST_LOCATION);
   dialog.ClearActionButtons();
   DALI_TEST_EQUALS(dialog.AddActionButton("Again").GetFontSize(), 25.0f, TEST_LOCATION);
   auto copy = style.Configure().SetTitleFontSize(41.0f).Build();
@@ -205,7 +366,7 @@ int UtcDaliAlertDialogStyleMoveConsumptionAndCastP(void)
   DALI_TEST_EQUALS(Label::DownCast(alert.GetBodyView()).GetFontSize(), 23.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(Label::DownCast(alert.GetBodyView()).GetTextColor(), UiColor(UiColor::ON_SURFACE), TEST_LOCATION);
   DALI_TEST_EQUALS(alert.GetFooterView().GetRequestedHeight(), 77.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(StackLayout::DownCast(alert.GetFooterView()).GetSpacing(), 11.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(alert.AddActionButton("Second").GetMargin().start, 11.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -218,7 +379,10 @@ int UtcDaliAlertDialogStyleNumericValidationN(void)
   {
     DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetTitleFontSize(value), "");
     DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetMessageFontSize(value), "");
-    DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetActionRowHeight(value), "");
+    if(value != WRAP_CONTENT)
+    {
+      DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetActionRowHeight(value), "");
+    }
     DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetActionButtonSpacing(value), "");
   }
   auto alert = AlertDialog::New(AlertDialogStyle::Builder().SetTitleFontSize(0.0f)
@@ -229,7 +393,7 @@ int UtcDaliAlertDialogStyleNumericValidationN(void)
   DALI_TEST_EQUALS(Label::DownCast(alert.GetHeaderView()).GetFontSize(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(Label::DownCast(alert.GetBodyView()).GetFontSize(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(alert.GetFooterView().GetRequestedHeight(), 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(StackLayout::DownCast(alert.GetFooterView()).GetSpacing(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(alert.AddActionButton("Second").GetMargin().start, 0.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -260,7 +424,7 @@ int UtcDaliAlertDialogStyleProviderAndLegacyActionP(void)
   preset.SetTitle("Preset");
   DALI_TEST_EQUALS(Label::DownCast(preset.GetHeaderView()).GetFontSize(), 22.0f, TEST_LOCATION);
   DALI_TEST_ASSERTION(AlertDialog::New(AlertDialogStyle()), "");
-  DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetActionRowHeight(-1.0f), "");
+  DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetActionRowHeight(MATCH_PARENT), "");
   DALI_TEST_ASSERTION(AlertDialogStyle::Builder().SetMessageFontSize(-1.0f), "");
   END_TEST;
 }

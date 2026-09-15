@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include <dali-ui-components/integration-api/dialog/dialog-container-impl.h>
+#include <dali-ui-components/internal/dialog/dialog-presentation-session.h>
 
 // EXTERNAL INCLUDES
 #include <unordered_map>
@@ -133,6 +134,22 @@ void DialogContainerImpl::SetModalContent(Ui::View modalContent)
   {
     return;
   }
+  auto session = mPresentationSession.lock();
+  DALI_ASSERT_ALWAYS(!session ||
+                    (mContentClearOwner == session.get() && !modalContent) ||
+                    (session->state == Internal::DialogPresentationSession::State::PREPARING && !mModalContent && modalContent == session->dialog.GetHandle()));
+  // Consume the setter permission before invoking application callbacks.
+  mContentClearOwner = nullptr;
+  if(session && !modalContent)
+  {
+    mExpectedContentRemoval = mModalContent.GetObjectPtr();
+    mExpectedRemovalSessionId = session->id;
+  }
+  struct ResetRemovalPermission
+  {
+    const RefObject*& target;
+    ~ResetRemovalPermission() { target = nullptr; }
+  } resetRemovalPermission{mExpectedContentRemoval};
   // Scene/visibility callbacks can synchronously clear or replace the content.
   // Keep this actor alive and let the newest nested setter supersede this one.
   Actor          self       = Self();
@@ -291,8 +308,29 @@ void DialogContainerImpl::ReleaseModalContent()
   }
 }
 
+void DialogContainerImpl::ClearPresentationContent(const Internal::DialogPresentationSession& session)
+{
+  DALI_ASSERT_ALWAYS(mPresentationSession.lock().get() == &session);
+  mContentClearOwner = &session;
+  struct ResetClearPermission
+  {
+    const Internal::DialogPresentationSession*& owner;
+    ~ResetClearPermission() { owner = nullptr; }
+  } resetClearPermission{mContentClearOwner};
+  SetModalContent({});
+}
+
 void DialogContainerImpl::OnChildRemove(Actor& child)
 {
+  auto session = mPresentationSession.lock();
+  if(session && child == session->dialog.GetHandle())
+  {
+    DALI_ASSERT_ALWAYS(mExpectedContentRemoval == child.GetObjectPtr() &&
+                      mExpectedRemovalSessionId == session->id &&
+                      "Posted Dialog must be dismissed before direct Add/Remove/Unparent");
+    // One expected removal cannot authorize a nested external operation.
+    mExpectedContentRemoval = nullptr;
+  }
   ViewImpl::OnChildRemove(child);
   if(child == mModalContent)
   {
@@ -304,7 +342,10 @@ void DialogContainerImpl::OnChildRemove(Actor& child)
 
 void DialogContainerImpl::OnDestroy()
 {
+  auto session = mPresentationSession.lock();
+  mPresentationSession.reset();
   ReleaseModalContent();
+  if(session) session->Complete(DialogDismissReason::HOST_REMOVED, false, true);
   ViewImpl::OnDestroy();
 }
 

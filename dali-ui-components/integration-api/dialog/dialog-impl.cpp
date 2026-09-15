@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include <dali-ui-components/integration-api/dialog/dialog-impl.h>
+#include <dali-ui-components/internal/dialog/dialog-presentation-session.h>
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/stack-layout-manager.h>
@@ -26,6 +27,7 @@
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <cmath>
+#include <limits>
 
 namespace DALI_NAMESPACE
 {
@@ -66,12 +68,84 @@ Ui::Dialog DialogImpl::New(Ui::DialogStyle style)
 }
 
 DialogImpl::DialogImpl()
-: ViewImpl()
+: ViewImpl(), mPresentation(new Internal::DialogPresentationData())
 {
 }
 
 DialogImpl::~DialogImpl()
 {
+}
+
+bool DialogImpl::Post(Ui::Navigator navigator, const DialogPostOptions& options)
+{
+  DALI_ASSERT_ALWAYS(navigator && "Dialog Post requires an initialized Navigator");
+  auto current = mPresentation->current;
+  if(current)
+  {
+    return current->state == Internal::DialogPresentationSession::State::REGISTERED &&
+           current->navigator.GetHandle() == navigator;
+  }
+  Ui::Dialog dialog = Ui::Dialog::DownCast(Self());
+  DALI_ASSERT_ALWAYS(!dialog.GetParent() && "Dialog::Post cannot be mixed with direct Add/Remove");
+  DALI_ASSERT_ALWAYS(mPresentation->nextId != std::numeric_limits<uint64_t>::max());
+  // Reserve the preparing session before style resolution can invoke app code.
+  // A nested Post must not register another container for this same Dialog.
+  auto session = std::make_shared<Internal::DialogPresentationSession>(++mPresentation->nextId, dialog, Ui::DialogContainer(), navigator);
+  mPresentation->current = session;
+  auto container = Ui::DialogContainer::New(options.containerStyle ? options.containerStyle : Ui::DialogContainerStyle::Default());
+  session->container = WeakHandle<Ui::DialogContainer>(container);
+  if(!session->Register(options))
+  {
+    session->Complete(DialogDismissReason::PROGRAMMATIC);
+    return false;
+  }
+  return true;
+}
+
+void DialogImpl::Dismiss(bool animated)
+{
+  auto session = mPresentation->current;
+  if(session)
+  {
+    session->Dismiss(animated, DialogDismissReason::PROGRAMMATIC);
+  }
+  else
+  {
+    DALI_ASSERT_ALWAYS(!Self().GetParent() && "Dialog::Dismiss cannot be mixed with direct Add/Remove");
+  }
+}
+
+bool DialogImpl::IsPosted() const
+{
+  auto session = mPresentation->current;
+  return session && (session->state == Internal::DialogPresentationSession::State::REGISTERED ||
+                     session->state == Internal::DialogPresentationSession::State::CLOSING);
+}
+
+void DialogImpl::SetDismissPolicy(DialogDismissPolicy policy)
+{
+  DALI_ASSERT_ALWAYS(static_cast<uint32_t>(policy) <= 3u && "Invalid dialog dismiss policy");
+  mPresentation->policy = policy;
+}
+
+DialogDismissPolicy DialogImpl::GetDismissPolicy() const
+{
+  return mPresentation->policy;
+}
+
+Ui::Dialog::DismissRequestedSignalType& DialogImpl::DismissRequestedSignal()
+{
+  return mPresentation->requested;
+}
+
+Ui::Dialog::ShownSignalType& DialogImpl::ShownSignal()
+{
+  return mPresentation->shown;
+}
+
+Ui::Dialog::HiddenSignalType& DialogImpl::HiddenSignal()
+{
+  return mPresentation->hidden;
 }
 
 void DialogImpl::ApplyInitialStyle(Ui::DialogStyle style)
@@ -81,7 +155,7 @@ void DialogImpl::ApplyInitialStyle(Ui::DialogStyle style)
   self.SetRequestedWidth(style.GetRequestedWidth());
   self.SetRequestedHeight(style.GetRequestedHeight());
   self.SetPadding(style.GetPadding());
-  // Keep an empty background on the legacy transparent default path.
+  // Preserve an explicitly requested empty background.
   if(style.GetBackgroundColor() != UiColor(0x000000u, 0.0f))
   {
     self.SetBackgroundColor(style.GetBackgroundColor());

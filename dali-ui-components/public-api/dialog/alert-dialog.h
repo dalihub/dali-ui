@@ -39,6 +39,15 @@ class AlertDialogImpl;
  *
  * It derives from Dialog and auto-builds the header (title), body (message) and
  * footer (action buttons) sections from SetTitle / SetMessage / AddActionButton.
+ * Generated title/message labels wrap to the content width. Sections stack from
+ * the top with a content-driven height; the footer is not pinned to the bottom.
+ * Actions retain their natural/minimum size and form a centered horizontal group.
+ * Choose a width appropriate for the host and action content through the existing
+ * style/layout APIs. Post does not clamp oversized content or add scrolling.
+ * Use the inherited Dialog::Post() and Dialog::Dismiss() APIs for ordinary modal presentation.
+ * Action buttons do not dismiss automatically; call Dismiss after handling an
+ * action. For custom scrim composition, use a manually owned DialogContainer
+ * instead and follow Dialog's prohibition on mixing the two ownership paths.
  */
 class DALI_UI_COMPONENTS_API AlertDialog : public Dialog
 {
@@ -119,8 +128,9 @@ public: // Convenience API
   /**
    * @brief Adds an action button to the footer.
    *
-   * Action buttons are distributed evenly across the footer. Connect a handler
-   * to the returned button's ClickedSignal() to handle the action.
+   * Action buttons form a centered group at their natural/minimum sizes.
+   * Connect a handler to the returned button's ClickedSignal() to handle the
+   * action; clicking a button does not dismiss the dialog automatically.
    *
    * @param[in] text The button text
    * @return The newly added action button

@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <cstdint>
+#include <memory>
 
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -31,6 +32,10 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+namespace Internal
+{
+class DialogPresentationSession;
+}
 namespace Integration
 {
 
@@ -62,6 +67,12 @@ protected:
   void OnChildRemove(Actor& child) override;
 
 private:
+  friend class Internal::DialogPresentationSession;
+  std::weak_ptr<Internal::DialogPresentationSession> mPresentationSession;
+  const Internal::DialogPresentationSession* mContentClearOwner{nullptr};
+  const RefObject* mExpectedContentRemoval{nullptr};
+  uint64_t mExpectedRemovalSessionId{0u};
+  void ClearPresentationContent(const Internal::DialogPresentationSession& session);
   void CreateDefaultScrim();
   void OnScrimClicked(Ui::View view, Ui::InputEvent event);
   void ObserveModalContent();

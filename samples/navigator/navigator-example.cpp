@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-// Interactive sample for Ui::Navigator (+ DialogContainer + AlertDialog).
+// Interactive sample for Ui::Navigator and managed AlertDialog::Post/Dismiss.
 //
 //   - Page Anim On/Off     : toggles page transition animations
 //   - Modal Anim On/Off    : toggles modal transition animations
 //   - Push Page / Pop Page : Navigator::Push / Navigator::Pop
 //   - Fade Page            : Navigator::SetPageTransitionSpec for one page
-//   - Show Dialog          : Navigator::PushModal with modal default animation
-//   - Per-modal Custom Ani : Navigator::SetPageModalTransitionSpec for one modal
-//                            view. Tap an action button OR tap the scrim to
+//   - Show Dialog          : Dialog::Post with modal default animation
+//   - Per-modal Custom Ani : DialogPostOptions::transitionSpec for one session.
+//                            Tap an action button OR tap the scrim to
 //                            dismiss it.
 //   - Back / Escape        : Navigator::NavigateBack (dismisses modal, else pops;
 //                            quits when nothing is left to go back to)
 
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
-#include <dali-ui-components/public-api/dialog/dialog-container.h>
+#include <dali-ui-components/public-api/dialog/dialog-post-options.h>
 #include <dali-ui-components/public-api/navigator/navigator.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/view.h>
@@ -53,10 +53,6 @@ constexpr int   PAGE_COLOR_COUNT            = 5;
 constexpr float PAGE_SLIDE_TRAVEL           = 96.0f;
 constexpr float PAGE_WOBBLE_TRAVEL          = 72.0f;
 constexpr float PAGE_WOBBLE_VERTICAL_TRAVEL = 28.0f;
-constexpr float MODAL_DROP_TRAVEL           = 80.0f;
-constexpr float MODAL_BOUNCE_TRAVEL         = 120.0f;
-constexpr float MODAL_SHAKE_X_TRAVEL        = 110.0f;
-constexpr float MODAL_SHAKE_Y_TRAVEL        = 84.0f;
 } // namespace
 
 class NavigatorExample : public ConnectionTracker
@@ -91,7 +87,7 @@ public:
 #endif
     mNavigator.SetTransitionSpec(CreateSlideTransitionSpec());
 #ifdef DALI_UI_NAVIGATOR_HAS_MODAL_TRANSITION_SPEC
-    mNavigator.SetModalTransitionSpec(CreateModalDropTransitionSpec());
+    mNavigator.SetModalTransitionSpec(CreateModalScaleTransitionSpec());
 #endif
 #ifdef DALI_UI_NAVIGATOR_HAS_MODAL_ANIMATION_SWITCH
     mNavigator.SetModalTransitionAnimationEnabled(mModalAnimationEnabled);
@@ -263,39 +259,34 @@ private:
     return spec;
   }
 
-  NavigationTransitionSpec CreateModalDropTransitionSpec()
+  NavigationTransitionSpec CreateModalScaleTransitionSpec()
   {
     NavigationTransitionSpec spec = NavigationTransitionSpec::New();
     spec.SetDuration(0.32f);
 
-    // Incoming modal drives POSITION_Y with a key-frame animation for the same reason as
-    // the slide spec (the just-arranged modal would otherwise have its POSITION_Y clobbered
-    // to 0 by ViewImpl::OnArrange). popExit animates the already-arranged modal from its
-    // current position, so AnimateTo is correct there.
+    // The target is the dialog content, not its full-screen container. Preserve
+    // its layout position; Navigator independently fades the stationary scrim.
     spec.EnterSignal().Connect(this, [](Animation& anim, View view)
     {
-      Dali::Ui::Extension::View::SetPositionY(view, MODAL_DROP_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
-      KeyFrames dropY = KeyFrames::New();
-      dropY.Add(0.0f, MODAL_DROP_TRAVEL);
-      dropY.Add(1.0f, 0.0f);
-      anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), dropY, AlphaFunction::EASE_OUT);
+      KeyFrames scale = KeyFrames::New();
+      scale.Add(0.0f, Vector3(0.85f, 0.85f, 1.0f));
+      scale.Add(1.0f, Vector3::ONE);
+      anim.AnimateBetween(Property(view, Actor::Property::SCALE), scale, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
     });
     spec.PopExitSignal().Connect(this, [](Animation& anim, View view)
     {
-      anim.AnimateTo(Property(view, Actor::Property::POSITION_Y), MODAL_DROP_TRAVEL, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::SCALE), Vector3(0.85f, 0.85f, 1.0f), AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT);
     });
     spec.SnapIncomingSignal().Connect(this, [](View view)
     {
-      Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     });
     spec.SnapOutgoingSignal().Connect(this, [](View view)
     {
-      Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     });
@@ -310,24 +301,6 @@ private:
 
     spec.EnterSignal().Connect(this, [](Animation& anim, View view)
     {
-      KeyFrames shakeX = KeyFrames::New();
-      shakeX.Add(0.0f, -MODAL_SHAKE_X_TRAVEL);
-      shakeX.Add(0.18f, MODAL_SHAKE_X_TRAVEL * 0.92f);
-      shakeX.Add(0.34f, -MODAL_SHAKE_X_TRAVEL * 0.74f);
-      shakeX.Add(0.52f, MODAL_SHAKE_X_TRAVEL * 0.48f);
-      shakeX.Add(0.70f, -MODAL_SHAKE_X_TRAVEL * 0.24f);
-      shakeX.Add(0.86f, MODAL_SHAKE_X_TRAVEL * 0.10f);
-      shakeX.Add(1.0f, 0.0f);
-
-      KeyFrames shakeY = KeyFrames::New();
-      shakeY.Add(0.0f, -MODAL_BOUNCE_TRAVEL);
-      shakeY.Add(0.18f, MODAL_SHAKE_Y_TRAVEL * 0.68f);
-      shakeY.Add(0.34f, -MODAL_SHAKE_Y_TRAVEL * 0.54f);
-      shakeY.Add(0.52f, MODAL_SHAKE_Y_TRAVEL * 0.36f);
-      shakeY.Add(0.70f, -MODAL_SHAKE_Y_TRAVEL * 0.22f);
-      shakeY.Add(0.86f, MODAL_SHAKE_Y_TRAVEL * 0.10f);
-      shakeY.Add(1.0f, 0.0f);
-
       KeyFrames scale = KeyFrames::New();
       scale.Add(0.0f, Vector3(0.62f, 0.62f, 1.0f));
       scale.Add(0.18f, Vector3(1.18f, 1.18f, 1.0f));
@@ -336,47 +309,23 @@ private:
       scale.Add(0.70f, Vector3(0.96f, 0.96f, 1.0f));
       scale.Add(1.0f, Vector3(1.0f, 1.0f, 1.0f));
 
-      Dali::Ui::Extension::View::SetPositionX(view, -MODAL_SHAKE_X_TRAVEL);
-      Dali::Ui::Extension::View::SetPositionY(view, -MODAL_BOUNCE_TRAVEL);
       view.SetProperty(Actor::Property::SCALE, Vector3(0.62f, 0.62f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
-      anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), shakeX, AlphaFunction::EASE_OUT);
-      anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), shakeY, AlphaFunction::EASE_OUT);
       anim.AnimateBetween(Property(view, Actor::Property::SCALE), scale, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT, TimePeriod(0.0f, 0.18f));
     });
     spec.PopExitSignal().Connect(this, [](Animation& anim, View view)
     {
-      KeyFrames shakeX = KeyFrames::New();
-      shakeX.Add(0.0f, 0.0f);
-      shakeX.Add(0.18f, MODAL_SHAKE_X_TRAVEL * 0.58f);
-      shakeX.Add(0.36f, -MODAL_SHAKE_X_TRAVEL * 0.76f);
-      shakeX.Add(0.56f, MODAL_SHAKE_X_TRAVEL * 0.92f);
-      shakeX.Add(1.0f, MODAL_SHAKE_X_TRAVEL * 1.15f);
-
-      KeyFrames shakeY = KeyFrames::New();
-      shakeY.Add(0.0f, 0.0f);
-      shakeY.Add(0.18f, -MODAL_SHAKE_Y_TRAVEL * 0.38f);
-      shakeY.Add(0.36f, MODAL_SHAKE_Y_TRAVEL * 0.34f);
-      shakeY.Add(0.56f, -MODAL_SHAKE_Y_TRAVEL * 0.28f);
-      shakeY.Add(1.0f, MODAL_BOUNCE_TRAVEL);
-
-      anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), shakeX, AlphaFunction::EASE_OUT);
-      anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), shakeY, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::SCALE), Vector3(0.66f, 0.66f, 1.0f), AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT, TimePeriod(0.08f, 0.30f));
     });
     spec.SnapIncomingSignal().Connect(this, [](View view)
     {
-      Dali::Ui::Extension::View::SetPositionX(view, 0.0f);
-      Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     });
     spec.SnapOutgoingSignal().Connect(this, [](View view)
     {
-      Dali::Ui::Extension::View::SetPositionX(view, 0.0f);
-      Dali::Ui::Extension::View::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     });
@@ -410,14 +359,15 @@ private:
     alert.SetTitle("Delete item?");
     alert.SetMessage("This action cannot be undone.");
     TextButton cancelButton = alert.AddActionButton("Cancel");
-    cancelButton.ConnectClickedSignal(this, [this](View, InputEvent)
+    WeakHandle<AlertDialog> weakAlert(alert);
+    cancelButton.ConnectClickedSignal(this, [this, weakAlert](View, InputEvent)
     {
-      mNavigator.PopModal(mModalAnimationEnabled);
+      if(auto dialog = weakAlert.GetHandle()) dialog.Dismiss(mModalAnimationEnabled);
     });
     TextButton deleteButton = alert.AddActionButton("Delete");
-    deleteButton.ConnectClickedSignal(this, [this](View, InputEvent)
+    deleteButton.ConnectClickedSignal(this, [this, weakAlert](View, InputEvent)
     {
-      mNavigator.PopModal(mModalAnimationEnabled);
+      if(auto dialog = weakAlert.GetHandle()) dialog.Dismiss(mModalAnimationEnabled);
     });
 
     // Center the card over the scrim.
@@ -427,15 +377,14 @@ private:
                             .SetBounds(LayoutRect(0.5f, 0.5f, dialogWidth, dialogHeight))
                             .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
 
-    DialogContainer container = DialogContainer::New();
-    container.SetModalContent(alert);
-
+    DialogPostOptions options;
+    options.animated = mModalAnimationEnabled;
     if(usePerModalAnimation)
     {
-      mNavigator.SetPageModalTransitionSpec(container, CreatePerModalBounceTransitionSpec());
+      options.transitionSpec = CreatePerModalBounceTransitionSpec();
     }
 
-    mNavigator.PushModal(container, mModalAnimationEnabled);
+    alert.Post(mNavigator, options);
     UpdateStatus();
   }
 
@@ -501,7 +450,7 @@ private:
       {
         if(mNavigator.GetModalStackCount() > 0u)
         {
-          mNavigator.PopModal(mModalAnimationEnabled);
+          mNavigator.NavigateBack();
         }
         else if(mNavigator.GetNavigationStackCount() > 1u)
         {

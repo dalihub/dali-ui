@@ -135,6 +135,51 @@ LayoutAlignment Dialog::GetLayoutAlignment() const
   return GetImpl(*this).GetLayoutAlignment();
 }
 
+bool Dialog::Post(Navigator navigator)
+{
+  return GetImpl(*this).Post(navigator, DialogPostOptions{});
+}
+
+bool Dialog::Post(Navigator navigator, const DialogPostOptions& options)
+{
+  return GetImpl(*this).Post(navigator, options);
+}
+
+void Dialog::Dismiss(bool animated)
+{
+  GetImpl(*this).Dismiss(animated);
+}
+
+bool Dialog::IsPosted() const
+{
+  return GetImpl(*this).IsPosted();
+}
+
+void Dialog::SetDismissPolicy(DialogDismissPolicy policy)
+{
+  GetImpl(*this).SetDismissPolicy(policy);
+}
+
+DialogDismissPolicy Dialog::GetDismissPolicy() const
+{
+  return GetImpl(*this).GetDismissPolicy();
+}
+
+Dialog::DismissRequestedSignalType& Dialog::DismissRequestedSignal()
+{
+  return GetImpl(*this).DismissRequestedSignal();
+}
+
+Dialog::ShownSignalType& Dialog::ShownSignal()
+{
+  return GetImpl(*this).ShownSignal();
+}
+
+Dialog::HiddenSignalType& Dialog::HiddenSignal()
+{
+  return GetImpl(*this).HiddenSignal();
+}
+
 Dialog::Dialog(Integration::DialogImpl& implementation)
 : View(implementation)
 {

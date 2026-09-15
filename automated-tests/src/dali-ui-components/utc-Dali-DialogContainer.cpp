@@ -52,6 +52,35 @@ BackgroundBlurEffect GetContainerBlur(View scrim)
 }
 }
 
+int UtcDaliDialogContainerOneUiScrimDefaultsP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto container = DialogContainer::New();
+  auto scrim = container.GetScrim();
+  DALI_TEST_EQUALS(scrim.GetBackgroundColor().GetRgba(), Vector4(0.0f, 0.0f, 0.0f, 0.4f), TEST_LOCATION);
+  auto blur = GetContainerBlur(scrim);
+  DALI_TEST_CHECK(blur);
+  DALI_TEST_EQUALS(blur.GetBlurRadius(), 100u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliDialogContainerNoScrimPreset(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto style = DialogContainerStyle::NoScrimPreset();
+  auto container = DialogContainer::New(style);
+  auto scrim = InteractiveView::DownCast(container.GetScrim());
+  DALI_TEST_CHECK(scrim);
+  DALI_TEST_EQUALS(scrim.GetBackgroundColor().GetRgba().a, 0.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(!scrim.GetRenderEffect());
+  DALI_TEST_CHECK(style == DialogContainerStyle::NoScrimPreset());
+  auto changed = style.Configure().SetScrimColor(UiColor(Color::BLUE)).Build();
+  DALI_TEST_EQUALS(changed.GetScrimColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetScrimColor().GetRgba().a, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(DialogContainerStyle::DefaultPreset().GetScrimColor().GetRgba().a, 0.4f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliDialogContainerStyleContractP(void)
 {
   auto config = Components::UiConfig::New();
@@ -63,8 +92,8 @@ int UtcDaliDialogContainerStyleContractP(void)
   auto blur = GetContainerBlur(container.GetScrim());
   DALI_TEST_CHECK(blur);
   DALI_TEST_EQUALS(blur.GetBlurRadius(), 6u, TEST_LOCATION);
-  DALI_TEST_EQUALS(DialogContainerStyle::DefaultPreset().GetScrimBlurRadius(), 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(DialogContainerStyle::DefaultPreset().GetScrimColor().GetRgba(), Vector4(0.0f, 0.0f, 0.0f, 0.5f), TEST_LOCATION);
+  DALI_TEST_EQUALS(DialogContainerStyle::DefaultPreset().GetScrimBlurRadius(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(DialogContainerStyle::DefaultPreset().GetScrimColor().GetRgba(), Vector4(0.0f, 0.0f, 0.0f, 0.4f), TEST_LOCATION);
   DALI_TEST_CHECK(DialogContainerStyle::DownCast(style) == style);
   DALI_TEST_CHECK(DialogContainerStyle::StaticDownCast(style) == style);
   DALI_TEST_CHECK(!DialogContainerStyle::DownCast(BaseHandle()));
