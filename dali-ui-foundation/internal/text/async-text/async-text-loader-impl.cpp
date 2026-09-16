@@ -1387,6 +1387,13 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 {
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_RENDER");
 
+  // Horizontal marquee textures use local glyph coordinates. Natural-size
+  // measurement leaves line alignment relative to MAX_FLOAT in the model;
+  // final screen alignment belongs to TextScroller. Apply the same policy to
+  // every payload, including the common text/style passes before marquee.
+  const bool ignoreHorizontalAlignment = parameters.isMarqueeEnabled &&
+                                         parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
+
   ReplacementRenderState* replacementState = mReplacementData ? &mReplacementData->renderState : nullptr;
   ModelPtr                renderModel      = (replacementState && replacementState->processingModel &&
                           replacementState->projection.HasReplacements())
@@ -1566,7 +1573,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   if(cutoutEnabled)
   {
     cutoutData = mTypesetter->RenderWithPixelBuffer(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
-                                                    false, textPixelFormat);
+                                                    ignoreHorizontalAlignment, textPixelFormat);
 
     // Make transparent buffer.
     // If the cutout is enabled, a separate texture is not used for the text.
@@ -1580,7 +1587,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   {
     // Create a pixel data for the text without any styles
     renderInfo.textPixelData =
-      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat);
   }
 
   renderInfo.isTextRevealEnabled = parameters.isTextRevealEnabled && !cutoutEnabled && !parameters.isMarqueeEnabled;
@@ -1674,26 +1681,26 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     {
       float cutoutAlpha         = renderModel->GetDefaultColor().a;
       renderInfo.stylePixelData = mTypesetter->RenderWithCutout(
-        layoutSize, textDirection, cutoutData, Text::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888, cutoutAlpha);
+        layoutSize, textDirection, cutoutData, Text::Typesetter::RENDER_NO_TEXT, ignoreHorizontalAlignment, Pixel::RGBA8888, cutoutAlpha);
     }
     else
     {
       // Create RGBA pixel data for all the text styles (without the text itself)
       renderInfo.stylePixelData =
-        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888);
+        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT, ignoreHorizontalAlignment, Pixel::RGBA8888);
     }
   }
   if(isOverlayStyle)
   {
     // Create RGBA pixel data for all the overlay styles
     renderInfo.overlayStylePixelData =
-      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE, false, Pixel::RGBA8888);
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE, ignoreHorizontalAlignment, Pixel::RGBA8888);
   }
   if(containsColorGlyph && !hasMultipleTextColors)
   {
     // Create a L8 pixel data as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
     renderInfo.maskPixelData =
-      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_MASK, ignoreHorizontalAlignment, Pixel::L8);
   }
   const bool textGradientMixedPayloadBaseAllowed =
     parameters.isTextGradientRequested &&
@@ -1713,8 +1720,6 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   // mixed targets keep the simple overlay path instead of allocating mixed payloads.
   if(nonMarqueeTextGradientMixedPayload || marqueeTextGradientMixedPayload)
   {
-    const bool ignoreHorizontalAlignment = parameters.isMarqueeEnabled &&
-                                           parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
     const Vector2 originSize = parameters.isMarqueeEnabled ? Size(parameters.originWidth, parameters.originHeight)
                                                            : Size::ZERO;
     renderInfo.textGradientPreservedPixelData =
@@ -1734,7 +1739,6 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                          : (parameters.isTextGradientRequested || parameters.isTextGradientOverlayRequested));
   if(marqueeStylePayload)
   {
-    const bool    ignoreHorizontalAlignment = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
     const Vector2 originSize(parameters.originWidth, parameters.originHeight);
     if(!hasMixedColorTarget)
     {
@@ -1749,7 +1753,6 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   if(parameters.isMarqueeEnabled && isOverlayStyle)
   {
-    const bool    ignoreHorizontalAlignment = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
     const Vector2 originSize(parameters.originWidth, parameters.originHeight);
     renderInfo.marqueeOverlayStylePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE,
@@ -1763,7 +1766,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     // render passes must not replace the texture geometry used by the delta.
     renderInfo.marqueePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
-                          parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL, Pixel::RGBA8888,
+                          ignoreHorizontalAlignment, Pixel::RGBA8888,
                           Size(parameters.originWidth, parameters.originHeight));
     if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
     {

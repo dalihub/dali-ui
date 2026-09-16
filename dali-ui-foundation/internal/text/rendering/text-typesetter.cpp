@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/strikethrough-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
+#include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
@@ -46,6 +47,21 @@ namespace Text
 namespace
 {
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
+
+// Validate once per render operation, before allocating or converting dimensions.
+// Style/metadata passes use RGBA; plain text and masks may use L8.
+bool ResolveRasterSize(const Vector2& size, uint32_t& width, uint32_t& height, uint32_t bytesPerPixel = 4u)
+{
+  int32_t x, y;
+  if(!Raster::Convert(size.width, x) || !Raster::Convert(size.height, y) || x < 0 || y < 0 ||
+     !Raster::BufferFits(static_cast<uint32_t>(x), static_cast<uint32_t>(y), bytesPerPixel))
+  {
+    return false;
+  }
+  width  = static_cast<uint32_t>(x);
+  height = static_cast<uint32_t>(y);
+  return true;
+}
 
 /**
  * @brief Fast multiply & divide by 255. It wiil be useful when we applying alpha value in color
@@ -225,7 +241,7 @@ PixelData Typesetter::Render(const Vector2& size, Direction textDirection,
 {
   PixelBuffer result =
     RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
-  PixelData pixelData = PixelBuffer::Convert(result);
+  PixelData pixelData = result ? PixelBuffer::Convert(result) : PixelData{};
 
   return pixelData;
 }
@@ -280,6 +296,12 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
                                              bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
                                              const Vector2& originSize)
 {
+  uint32_t bufferWidth, bufferHeight;
+  if(!ResolveRasterSize(size, bufferWidth, bufferHeight, Pixel::GetBytesPerPixel(pixelFormat)))
+  {
+    return {};
+  }
+
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER_TEXT_GRADIENT_MASK");
 
   auto& viewModel = *(mImpl->GetViewModel());
@@ -321,12 +343,18 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
     }
     case Alignment::CENTER:
     {
-      penY = static_cast<int32_t>(std::round(0.5f * (controlHeight - layoutHeight)));
+      if(!Raster::Convert(std::round(0.5f * (controlHeight - layoutHeight)), penY))
+      {
+        return {};
+      }
       break;
     }
     case Alignment::END:
     {
-      penY = static_cast<int32_t>(controlHeight - layoutHeight);
+      if(!Raster::Convert(controlHeight - layoutHeight, penY))
+      {
+        return {};
+      }
       break;
     }
   }
@@ -334,12 +362,11 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
   if(viewModel.IsCutoutEnabled())
   {
     Vector2 offset = viewModel.GetOffsetWithCutout();
-    penX           = static_cast<int32_t>(offset.x);
-    penY           = static_cast<int32_t>(offset.y);
+    if(!Raster::Convert(offset.x, penX) || !Raster::Convert(offset.y, penY))
+    {
+      return {};
+    }
   }
-
-  const uint32_t bufferWidth  = static_cast<uint32_t>(size.width);
-  const uint32_t bufferHeight = static_cast<uint32_t>(size.height);
 
   auto startIndexOfGlyphs = viewModel.GetStartIndexOfElidedGlyphs();
   auto endIndexOfGlyphs   = viewModel.GetEndIndexOfElidedGlyphs();
@@ -348,13 +375,19 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
     mImpl->CreateTextGradientMaskImageBuffer(bufferWidth, bufferHeight, ignoreHorizontalAlignment, pixelFormat, penX,
                                              penY, startIndexOfGlyphs, endIndexOfGlyphs);
 
-  return PixelBuffer::Convert(result);
+  return result ? PixelBuffer::Convert(result) : PixelData{};
 }
 
 PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction textDirection,
                                                   bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
                                                   const Vector2& originSize)
 {
+  uint32_t bufferWidth, bufferHeight;
+  if(!ResolveRasterSize(size, bufferWidth, bufferHeight, Pixel::GetBytesPerPixel(pixelFormat)))
+  {
+    return {};
+  }
+
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER_TEXT_GRADIENT_PRESERVED");
 
   auto& viewModel = *(mImpl->GetViewModel());
@@ -396,12 +429,18 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
     }
     case Alignment::CENTER:
     {
-      penY = static_cast<int32_t>(std::round(0.5f * (controlHeight - layoutHeight)));
+      if(!Raster::Convert(std::round(0.5f * (controlHeight - layoutHeight)), penY))
+      {
+        return {};
+      }
       break;
     }
     case Alignment::END:
     {
-      penY = static_cast<int32_t>(controlHeight - layoutHeight);
+      if(!Raster::Convert(controlHeight - layoutHeight, penY))
+      {
+        return {};
+      }
       break;
     }
   }
@@ -409,12 +448,11 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
   if(viewModel.IsCutoutEnabled())
   {
     Vector2 offset = viewModel.GetOffsetWithCutout();
-    penX           = static_cast<int32_t>(offset.x);
-    penY           = static_cast<int32_t>(offset.y);
+    if(!Raster::Convert(offset.x, penX) || !Raster::Convert(offset.y, penY))
+    {
+      return {};
+    }
   }
-
-  const uint32_t bufferWidth  = static_cast<uint32_t>(size.width);
-  const uint32_t bufferHeight = static_cast<uint32_t>(size.height);
 
   auto startIndexOfGlyphs = viewModel.GetStartIndexOfElidedGlyphs();
   auto endIndexOfGlyphs   = viewModel.GetEndIndexOfElidedGlyphs();
@@ -423,7 +461,7 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
     mImpl->CreateTextGradientPreservedImageBuffer(bufferWidth, bufferHeight, ignoreHorizontalAlignment, pixelFormat,
                                                   penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
 
-  return PixelBuffer::Convert(result);
+  return result ? PixelBuffer::Convert(result) : PixelData{};
 }
 
 PixelData Typesetter::RenderWithCutout(const Vector2& size, Direction textDirection,
@@ -433,9 +471,13 @@ PixelData Typesetter::RenderWithCutout(const Vector2& size, Direction textDirect
 {
   PixelBuffer result =
     RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
-  SetMaskForImageBuffer(mask, result, static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), originAlpha);
+  if(!result || !mask)
+  {
+    return {};
+  }
+  SetMaskForImageBuffer(mask, result, result.GetWidth(), result.GetHeight(), originAlpha);
 
-  PixelData pixelData = PixelBuffer::Convert(result);
+  PixelData pixelData = result ? PixelBuffer::Convert(result) : PixelData{};
 
   return pixelData;
 }
@@ -445,6 +487,15 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
                                               RenderBehaviour behaviour, bool ignoreHorizontalAlignment,
                                               Pixel::Format pixelFormat, const Vector2& originSize)
 {
+  uint32_t       bufferWidth, bufferHeight;
+  const uint32_t bytesPerPixel = (behaviour == RENDER_NO_STYLES || behaviour == RENDER_MASK)
+                                   ? Pixel::GetBytesPerPixel(pixelFormat)
+                                   : 4u;
+  if(!ResolveRasterSize(size, bufferWidth, bufferHeight, bytesPerPixel))
+  {
+    return {};
+  }
+
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER");
   // @todo. This initial implementation for a TextLabel has only one visible page.
 
@@ -495,12 +546,18 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
     }
     case Alignment::CENTER:
     {
-      penY = static_cast<int32_t>(std::round(0.5f * (controlHeight - layoutHeight)));
+      if(!Raster::Convert(std::round(0.5f * (controlHeight - layoutHeight)), penY))
+      {
+        return {};
+      }
       break;
     }
     case Alignment::END:
     {
-      penY = static_cast<int32_t>(controlHeight - layoutHeight);
+      if(!Raster::Convert(controlHeight - layoutHeight, penY))
+      {
+        return {};
+      }
       break;
     }
   }
@@ -509,8 +566,10 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   if(isCutoutEnabled)
   {
     Vector2 offset = viewModel.GetOffsetWithCutout();
-    penX           = static_cast<int32_t>(offset.x);
-    penY           = static_cast<int32_t>(offset.y);
+    if(!Raster::Convert(offset.x, penX) || !Raster::Convert(offset.y, penY))
+    {
+      return {};
+    }
   }
 
   // Generate the image buffers of the text for each different style first,
@@ -518,11 +577,16 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   // do all of these in CPU only, so that once the final texture is generated,
   // no calculation is needed in GPU during each frame.
 
-  const uint32_t bufferWidth  = static_cast<uint32_t>(size.width);
-  const uint32_t bufferHeight = static_cast<uint32_t>(size.height);
-
   const uint32_t bufferSizeInt  = bufferWidth * bufferHeight;
   const size_t   bufferSizeChar = sizeof(uint32_t) * static_cast<std::size_t>(bufferSizeInt);
+
+  // PixelBuffer keeps the requested empty geometry, but has no backing bytes.
+  // Avoid passing its null buffer to memset/memcpy in the style passes.
+  if(bufferSizeInt == 0u)
+  {
+    return PixelBuffer::New(bufferWidth, bufferHeight,
+                            (behaviour == RENDER_NO_TEXT || behaviour == RENDER_OVERLAY_STYLE) ? Pixel::RGBA8888 : pixelFormat);
+  }
 
   // Elided text in ellipsis at START could start on index greater than 0
   auto startIndexOfGlyphs = viewModel.GetStartIndexOfElidedGlyphs();
@@ -818,6 +882,12 @@ PixelData Typesetter::RenderTextRevealMetadata(
   bool                          ignoreHorizontalAlignment,
   const Vector2&                originSize)
 {
+  uint32_t width, height;
+  if(!ResolveRasterSize(tileSize, width, height))
+  {
+    return {};
+  }
+
   // Reuse the normal glyph traversal, but offset it into a tile-local target.
   // The caller projects one canonical final plan before visiting any tile.
   auto& viewModel = *mImpl->GetViewModel();
@@ -847,20 +917,27 @@ PixelData Typesetter::RenderTextRevealMetadata(
     case Alignment::START:
       break;
     case Alignment::CENTER:
-      penY = static_cast<int32_t>(std::round(0.5f * (controlHeight - layoutHeight)));
+      if(!Raster::Convert(std::round(0.5f * (controlHeight - layoutHeight)), penY))
+      {
+        return {};
+      }
       break;
     case Alignment::END:
-      penY = static_cast<int32_t>(controlHeight - layoutHeight);
+      if(!Raster::Convert(controlHeight - layoutHeight, penY))
+      {
+        return {};
+      }
       break;
   }
-  penY -= static_cast<int32_t>(tileOffsetY);
+  if(!Raster::Add(penY, -static_cast<int64_t>(tileOffsetY), penY))
+  {
+    return {};
+  }
 
   const auto startGlyph = viewModel.GetStartIndexOfElidedGlyphs();
   const auto endGlyph   = viewModel.GetEndIndexOfElidedGlyphs();
   fadeDuration          = plan.fadeDuration;
 
-  const uint32_t width  = static_cast<uint32_t>(tileSize.width);
-  const uint32_t height = static_cast<uint32_t>(tileSize.height);
   mImpl->BeginRevealMetadata(width, height, plan);
   PixelBuffer traversal = mImpl->CreateImageBuffer(width, height, Typesetter::STYLE_NONE,
                                                    ignoreHorizontalAlignment, Pixel::RGBA8888,
@@ -872,10 +949,19 @@ PixelData Typesetter::RenderTextRevealMetadata(
 PixelBuffer Typesetter::CreateFullBackgroundBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
                                                    const Vector4& backgroundColor)
 {
+  if(!Raster::BufferFits(bufferWidth, bufferHeight, 4u))
+  {
+    return {};
+  }
+
   const uint32_t bufferSizeInt        = bufferWidth * bufferHeight;
   uint8_t        backgroundColorAlpha = static_cast<uint8_t>(backgroundColor.a * 255.f);
 
   PixelBuffer buffer = PixelBuffer::New(bufferWidth, bufferHeight, Pixel::RGBA8888);
+  if(bufferSizeInt == 0u)
+  {
+    return buffer;
+  }
 
   uint32_t* bitmapBuffer = reinterpret_cast<uint32_t*>(buffer.GetBuffer());
 
