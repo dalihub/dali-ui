@@ -15,6 +15,7 @@
 
 #include "text-test-case.h"
 
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <unistd.h>
 #include <cstdio>
 #include <string>

@@ -28,27 +28,14 @@
 //   ESC/BACK - Quit
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali/devel-api/adaptor-framework/application.h>
-
-// Apps can only use public headers in platform builds.
-// #include <dali/integration-api/string-utils.h>
 
 #include <clocale>
 #include <cstdio>
 #include <string>
 
-// for desktop test
-// Apps can only use public headers in platform builds.
-// #include <dali/devel-api/adaptor-framework/application-devel.h>
-#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
-
 using namespace Dali;
 using namespace Dali::Ui;
-
-// Apps can only use public headers in platform builds.
-// using Dali::Integration::ToDaliStringView;
-// using Dali::Integration::ToStdString;
 
 namespace
 {
@@ -75,26 +62,6 @@ constexpr uint32_t COLOR_CARD_BACKGROUND  = 0xF7F9FC;
 constexpr uint32_t COLOR_CARD_TITLE       = 0x1F2937;
 constexpr uint32_t COLOR_CARD_DESCRIPTION = 0x4B5563;
 constexpr uint32_t COLOR_CARD_ACTION      = 0x2563EB;
-
-// ---------------------------------------------------------------------------
-// Card shadow helper
-// ---------------------------------------------------------------------------
-
-Property::Map CreateCardShadowMap()
-{
-  Property::Map transform;
-  transform.Add(Ui::Integration::Visual::Transform::Property::OFFSET, Vector2(4.0f, 4.0f));
-  transform.Add(Ui::Integration::Visual::Transform::Property::OFFSET_POLICY,
-                Vector2(static_cast<float>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE),
-                        static_cast<float>(Ui::Integration::Visual::Transform::Policy::ABSOLUTE)));
-
-  Property::Map shadow;
-  shadow.Add(Ui::Integration::Visual::Property::TYPE, Ui::VisualType::COLOR);
-  shadow.Add(Ui::Integration::Visual::Property::MIX_COLOR, Vector4(0.0f, 0.0f, 0.0f, 0.18f));
-  shadow.Add(Ui::Integration::Visual::Property::TRANSFORM, transform);
-
-  return shadow;
-}
 
 // ---------------------------------------------------------------------------
 // LocalizedCard - lightweight handle derived from StackLayout with attachment
@@ -143,7 +110,10 @@ public:
     SetBackgroundColor(UiColor(COLOR_CARD_BACKGROUND));
     SetCornerRadius(16.0f);
 
-    SetProperty(Dali::Ui::Integration::View::Property::SHADOW, CreateCardShadowMap());
+    SetShadow(Shadow(0.0f,
+                     Vector2(4.0f, 4.0f),
+                     UiColor(0.0f, 0.0f, 0.0f, 0.18f),
+                     Vector2::ZERO));
 
     StackLayout titleRow = StackLayout::New(StackOrientation::HORIZONTAL);
     titleRow.SetSpacing(6.0f);

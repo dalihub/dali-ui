@@ -18,6 +18,7 @@ BuildRequires:  pkgconfig(capi-appfw-app-control)
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(dali2-core)
 BuildRequires:  pkgconfig(dali2-adaptor)
+BuildRequires:  dali2-adaptor-integration-devel
 BuildRequires:  pkgconfig(dali2-ui-foundation)
 BuildRequires:  pkgconfig(dali2-ui-components)
 

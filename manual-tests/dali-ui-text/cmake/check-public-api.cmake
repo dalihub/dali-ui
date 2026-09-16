@@ -12,6 +12,13 @@ IF(EXISTS "${TEXT_APP_SOURCE_DIR}/../dali-ui-foundation/manual-test-case.h")
 ENDIF()
 FOREACH(SRC ${TEXT_APP_SOURCES})
   FILE(READ "${SRC}" CONTENT)
+  IF(SRC STREQUAL "${TEXT_APP_SOURCE_DIR}/main.cpp")
+    # Application moved to adaptor devel headers. Allow only this exact include
+    # in the launcher; TC and shared validation code remain Public API only.
+    STRING(REGEX REPLACE
+      "(^|\n)[ \t]*#[ \t]*include[ \t]*<dali/devel-api/adaptor-framework/application[.]h>[ \t]*(\r?\n|$)"
+      "\\1" CONTENT "${CONTENT}")
+  ENDIF()
   IF(CONTENT MATCHES "#[ \t]*include[^\n]*(devel-api|integration-api|/internal/|extension-api)" OR
      CONTENT MATCHES "(^|[^A-Za-z0-9_])(Internal|Integration|Devel[A-Za-z0-9_]*)::|using[ \t]+namespace[^;\n]*(Internal|Integration|Devel[A-Za-z0-9_]*)")
     MESSAGE(FATAL_ERROR "Text manual tests must use Public API only: ${SRC}")

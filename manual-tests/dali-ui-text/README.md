@@ -4,8 +4,10 @@
 현재 `Text Layout`, `Ellipsis`, `Marquee` 순서로 제공하며, `manual-tests/dali-ui-foundation`과 같은
 registry / `OnEnter()` / `OnExit()` 구조를 사용한다.
 
-DALi **Public API만** 사용한다. Internal / integration / extension / devel API나
-UTC mock은 사용하지 않는다. Emoji Sequence internal 검증은 이 앱에 포함하지 않는다.
+테스트와 공용 검사 모듈은 DALi **Public API만** 사용한다. Internal / integration / extension /
+devel API나 UTC mock으로 제품 내부 상태를 검사하지 않는다. Emoji Sequence internal 검증은
+이 앱에 포함하지 않는다. 앱 실행에 필요한 `Application`이 adaptor devel API로 이동하여,
+launcher의 `main.cpp`에서 해당 헤더를 직접 include하는 경우만 예외로 허용한다.
 매 빌드에서 앱 소스의 비공개 API include/namespace 사용을 검사한다. 이는 실수를 막는
 소스 검사이며, 제품 내부 상태 검증은 앱이 아닌 별도의 UTC에만 둔다.
 
@@ -13,6 +15,8 @@ UTC mock은 사용하지 않는다. Emoji Sequence internal 검증은 이 앱에
 
 저장소 루트 `dali-ui/`에서 실행한다. 현재 소스와 호환되는 DALi core, adaptor,
 ui-foundation library와 public development headers, libpng 1.6 development package가 필요하다.
+Tizen에서는 `Application` 헤더를 제공하는 `dali2-adaptor-integration-devel`도 필요하며,
+spec의 BuildRequires에 명시되어 있다. 별도의 integration library를 링크하는 것은 아니다.
 
 libpng는 PNG 기반 자동 픽셀 검사용이다. libpng 직접 의존성이 없는 수동 조작 빌드는
 `-DTEXT_PIXEL_CHECKS=OFF`로 설정한다. 이때 Text Layout 자동 검증과 모든 수동 버튼은
