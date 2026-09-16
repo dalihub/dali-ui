@@ -9,8 +9,9 @@
 4. [HoverEvent](#hoverevent)
 5. [Gesture Detection by HandleEvent](#gesture-detection-by-handleevent)
 6. [Gesture Propagation](#gesture-propagation)
-7. [Example 1: 기본 제스처 인식](#example-1-기본-제스처-인식)
-8. [Example 2: InterceptTouchEvent를 활용한 제스처 처리](#example-2-intercepttouchevent를-활용한-제스처-처리)
+7. [입력 장치별 제스처 인식 옵션](#입력-장치별-제스처-인식-옵션)
+8. [Example 1: 기본 제스처 인식](#example-1-기본-제스처-인식)
+9. [Example 2: InterceptTouchEvent를 활용한 제스처 처리](#example-2-intercepttouchevent를-활용한-제스처-처리)
 
 ---
 
@@ -455,6 +456,79 @@ Touch candidate가 같은 stream을 받고 각자의 GestureDetector를 진행�
 - owner가 정해진 뒤에는 다른 coordinate candidate로 일반 TouchEvent를 계속 전파하지 않습니다.
 - owner의 실제 조상은 후속 Motion에서 intercept하여 전달 범위를 제한하고, 그 경로의 새 Touch consumer를
   owner로 선택할 수 있습니다.
+
+---
+
+## 입력 장치별 제스처 인식 옵션
+
+같은 제스처 detector라도 어떤 입력 장치에서 시작됐는지에 따라 다르게 인식되도록 만들 수 있습니다 —
+마우스, 터치스크린 손가락, TV 포인팅 리모컨, 또는 특정 이름의 장치 하나까지도 구분할 수 있습니다.
+이건 위에서 다룬 전파 방식(PARENT/GEOMETRY)과는 별개입니다 — `Attach()`로 붙였든 `HandleEvent()`로
+직접 먹였든 상관없이, 시퀀스를 시작한(눌린 순간의) 장치를 기준으로 제스처 시퀀스당 한 번만 해소됩니다.
+
+### GestureDeviceSelector
+
+`Dali::GestureDeviceSelector`가 옵션·임계값을 적용할 장치를 지정합니다:
+
+```cpp
+GestureDeviceSelector::ByDeviceClass(Device::Class::MOUSE);
+GestureDeviceSelector::ByDeviceClassAndSubclass(Device::Class::POINTER, Device::Subclass::REMOCON);
+GestureDeviceSelector::ByDeviceName("Pointing Device"); // 정확히 일치(exact), 대소문자 구분
+```
+
+같은 detector에 등록된 여러 selector가 동시에 매칭되면 가장 구체적인 것이 이깁니다 — device name >
+class+subclass > class 순.
+
+### 두 계층
+
+- **Detector-local 옵션** — `PanGestureDetector`, `TapGestureDetector`, `LongPressGestureDetector`는
+  selector별로 완전한 `Options` 스냅샷을 등록할 수 있습니다. `PinchGestureDetector`와
+  `RotationGestureDetector`는 전역 하나짜리 설정조차 detector 레벨엔 없어서, 여기에 등록할 대상 자체가
+  없습니다.
+
+  ```cpp
+  PanGestureDetector pan = PanGestureDetector::New();
+
+  // 마우스: 수평에 가까운 드래그일 때만 팬을 시작한다.
+  PanGestureDetector::Options mouseOptions = pan.GetDefaultOptions();
+  mouseOptions.AddDirection(PanGestureDetector::DIRECTION_HORIZONTAL);
+  pan.SetDeviceOptions(GestureDeviceSelector::ByDeviceClass(Device::Class::MOUSE), mouseOptions);
+
+  pan.Attach(view);
+  ```
+
+  `GetDeviceOptions(selector, options)`, `ClearDeviceOptions(selector)`가 나머지 API입니다.
+
+- **앱 전역 `Dali::GestureThresholds`** — 5종 제스처(pan/tap/long press/pinch/rotation) 전부를
+  다룹니다. 원래는 앱 전체에 하나뿐이던 인식 임계값입니다. device별로 등록하면 앱이 직접 붙인
+  detector뿐 아니라 dali-ui 컴포넌트가 내부적으로 만드는 detector(`ScrollView`, `InteractiveTrait`,
+  `InputEditor`)에도 그대로 적용됩니다.
+
+  ```cpp
+  // 마우스: 팬이 시작되려면 터치 기본값보다 더 길게 드래그해야 한다.
+  GestureThresholds::PanThresholds mouseThresholds = GestureThresholds::GetDefaultPanThresholds();
+  mouseThresholds.SetMinimumDistance(40);
+  GestureThresholds::SetPanThresholds(GestureDeviceSelector::ByDeviceClass(Device::Class::MOUSE), mouseThresholds);
+  ```
+
+| 제스처 | Detector-local `Options` | `GestureThresholds` |
+|---|---|---|
+| Pan | touches 범위, motion age, 각도 | 최소 거리, 최소 pan 이벤트 수 |
+| Tap | taps 범위, receive-all-tap-events | multi-tap 간격, holding time, motion distance |
+| Long Press | touches 범위 | 최소 holding time |
+| Pinch | — (detector-local 설정 자체가 없음) | 최소 거리, 최소 touch 이벤트 수(시작 전/후) |
+| Rotation | — (detector-local 설정 자체가 없음) | 최소 touch 이벤트 수(시작 전/후) |
+
+### UiConfig와의 관계
+
+[UiConfig](Configuration-(kr).md)의 제스처 setter(`SetLongPressGestureMinimumHoldingTime()` 등)는
+`GestureThresholds`가 device selector 매칭 실패 시 쓰는 단일 전역값을 설정하며, 반드시 `Apply()` 이전에
+호출해야 합니다. `GestureThresholds`는 별개의 API라 `Apply()` 이후를 포함해 언제든 설정·해제할 수
+있습니다 — 호출 순서와 무관하게, 매칭되는 selector가 있으면 항상 `UiConfig`/기본값보다 우선합니다.
+
+완전히 동작하는 예제는
+[device-gesture-options 샘플](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/device-gesture-options)을
+참고하세요.
 
 ---
 
