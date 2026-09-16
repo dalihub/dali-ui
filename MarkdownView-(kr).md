@@ -11,7 +11,7 @@ components 및 foundation 헤더를 포함하고 애플리케이션을 `dali-ui-
 ```cpp
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali/public-api/adaptor-framework/application.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
