@@ -42,6 +42,7 @@ int main(int, char**)
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 #include <cstdlib>
@@ -179,28 +180,32 @@ private:
 
   void ConnectSignals(Window& window)
   {
-    mBtnGoogle.TouchEventSignal().Connect(this, [this](Actor, const TouchEvent& touch) {
+    mBtnGoogle.TouchEventSignal().Connect(this, [this](Actor, const TouchEvent& touch)
+    {
       if(touch.GetState(0) == PointState::DOWN)
       {
         Navigate(Dali::String(GOOGLE_URL));
       }
       return true;
     });
-    mBtnStress.TouchEventSignal().Connect(this, [this](Actor, const TouchEvent& touch) {
+    mBtnStress.TouchEventSignal().Connect(this, [this](Actor, const TouchEvent& touch)
+    {
       if(touch.GetState(0) == PointState::DOWN)
       {
         Navigate(mStressPageUrl);
       }
       return true;
     });
-    mBtnTestPage.TouchEventSignal().Connect(this, [this](Actor, const TouchEvent& touch) {
+    mBtnTestPage.TouchEventSignal().Connect(this, [this](Actor, const TouchEvent& touch)
+    {
       if(touch.GetState(0) == PointState::DOWN)
       {
         Navigate(mTestPageUrl);
       }
       return true;
     });
-    mBtnReload.TouchEventSignal().Connect(this, [this](Actor, const TouchEvent& touch) {
+    mBtnReload.TouchEventSignal().Connect(this, [this](Actor, const TouchEvent& touch)
+    {
       if(touch.GetState(0) == PointState::DOWN)
       {
         DALI_LOG_RELEASE_INFO("[WebViewWinTest] Reload\n");

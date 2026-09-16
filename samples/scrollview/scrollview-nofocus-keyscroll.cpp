@@ -42,24 +42,25 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <sstream>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
-static constexpr float WINDOW_W   = 600.0f;
-static constexpr float WINDOW_H   = 1080.0f;
-static constexpr float INFO_H     = 180.0f;
-static constexpr float SCROLL_Y   = INFO_H;
-static constexpr float SCROLL_H   = WINDOW_H - SCROLL_Y;
+static constexpr float WINDOW_W = 600.0f;
+static constexpr float WINDOW_H = 1080.0f;
+static constexpr float INFO_H   = 180.0f;
+static constexpr float SCROLL_Y = INFO_H;
+static constexpr float SCROLL_H = WINDOW_H - SCROLL_Y;
 
 static constexpr int   ITEM_COUNT = 20;
 static constexpr float ITEM_H     = 140.0f;
 static constexpr float ITEM_GAP   = 8.0f;
 
-static const Vector4 COLOR_BG    (0.10f, 0.10f, 0.14f, 1.0f);
+static const Vector4 COLOR_BG(0.10f, 0.10f, 0.14f, 1.0f);
 static const Vector4 COLOR_ACTIVE(0.20f, 0.75f, 0.40f, 1.0f);
-static const Vector4 COLOR_INACT (0.40f, 0.40f, 0.40f, 1.0f);
+static const Vector4 COLOR_INACT(0.40f, 0.40f, 0.40f, 1.0f);
 static const Vector4 ITEM_COLORS[2] = {
   Vector4(0.82f, 0.87f, 0.95f, 1.0f),
   Vector4(0.88f, 0.93f, 0.88f, 1.0f),
@@ -79,7 +80,7 @@ private:
   {
     Window window = application.GetWindow();
     window.SetPositionSize(PositionSize(0, 0,
-      static_cast<uint32_t>(WINDOW_W), static_cast<uint32_t>(WINDOW_H)));
+                                        static_cast<uint32_t>(WINDOW_W), static_cast<uint32_t>(WINDOW_H)));
     window.SetBackgroundColor(Color::BLACK);
     window.KeyEventSignal().Connect(this, &NoFocusKeyScrollTest::OnKeyEvent);
 
@@ -209,7 +210,7 @@ private:
     mKeyScrollChip.SetBackgroundColor(ks ? COLOR_ACTIVE : COLOR_INACT);
     Label::DownCast(mKeyScrollChip.GetChildViewAt(0)).SetText(ks ? "KeyScroll: ON" : "KeyScroll: OFF");
 
-    int scrollY = static_cast<int>(mScrollView.GetScrollPosition().y);
+    int                scrollY = static_cast<int>(mScrollView.GetScrollPosition().y);
     std::ostringstream sp;
     sp << "ScrollPos: " << scrollY;
     mScrollPosLabel.SetText(sp.str().c_str());
@@ -224,7 +225,7 @@ private:
   void OnScrolling(ScrollView sv)
   {
     // Fired by touch scroll — show that touch still works
-    int scrollY = static_cast<int>(sv.GetScrollPosition().y);
+    int                scrollY = static_cast<int>(sv.GetScrollPosition().y);
     std::ostringstream sp;
     sp << "ScrollPos: " << scrollY << "  (touch scroll)";
     mScrollPosLabel.SetText(sp.str().c_str());
@@ -285,7 +286,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application          application = Application::New(&argc, &argv);
   NoFocusKeyScrollTest test(application);
   application.MainLoop();
   return 0;

@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -112,7 +113,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application                         application = Application::New(&argc, &argv);
   GridLayoutWrapContentStarController controller(application);
   application.MainLoop();
   return 0;

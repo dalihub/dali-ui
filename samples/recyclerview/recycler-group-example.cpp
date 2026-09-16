@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 #include <dali/dali.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <algorithm>
@@ -36,24 +37,24 @@ namespace
 constexpr float WINDOW_W    = 600.0f;
 constexpr float WINDOW_H    = 900.0f;
 constexpr float HEADER_H    = 100.0f;
-constexpr float ITEM_H      = 56.0f;   // body item height
-constexpr float SECTION_H   = 40.0f;   // group header height
-constexpr float BODY_MARGIN = 14.0f;   // horizontal card inset (each side)
-constexpr float CARD_RADIUS = 10.0f;   // group body card corner radius
-constexpr float ITEM_RADIUS = 10.0f;   // body item corner radius (same as card)
-constexpr float GAP_H       = 20.0f;   // spacing between groups
+constexpr float ITEM_H      = 56.0f; // body item height
+constexpr float SECTION_H   = 40.0f; // group header height
+constexpr float BODY_MARGIN = 14.0f; // horizontal card inset (each side)
+constexpr float CARD_RADIUS = 10.0f; // group body card corner radius
+constexpr float ITEM_RADIUS = 10.0f; // body item corner radius (same as card)
+constexpr float GAP_H       = 20.0f; // spacing between groups
 
 // Body item view types (inner adapter):
 constexpr uint32_t BODY_TYPE_A = 0u;
 constexpr uint32_t BODY_TYPE_B = 1u;
 
 // Colour palette
-const UiColor COLOR_BG(0xEEF0F5);        // window background
-const UiColor COLOR_HEADER_BG(0x1C2A42); // app header bar
-const UiColor COLOR_TEXT_DARK(0x1A2332); // primary text
-const UiColor COLOR_TEXT_MUTED(0x8899AA);// secondary / subtext
-const UiColor COLOR_CARD(0xFFFFFF);      // group card background
-const UiColor COLOR_STAT(0x7EC8E3);      // stats label in header
+const UiColor COLOR_BG(0xEEF0F5);         // window background
+const UiColor COLOR_HEADER_BG(0x1C2A42);  // app header bar
+const UiColor COLOR_TEXT_DARK(0x1A2332);  // primary text
+const UiColor COLOR_TEXT_MUTED(0x8899AA); // secondary / subtext
+const UiColor COLOR_CARD(0xFFFFFF);       // group card background
+const UiColor COLOR_STAT(0x7EC8E3);       // stats label in header
 
 // ---- Group data ------------------------------------------------------------
 
@@ -65,14 +66,14 @@ struct GroupInfo
 };
 
 static const GroupInfo GROUPS[] = {
-  {"Accounts",          4u, true},
-  {"Notifications",     3u, true},
-  {"Display",           5u, true},
+  {"Accounts", 4u, true},
+  {"Notifications", 3u, true},
+  {"Display", 5u, true},
   {"Sound & Vibration", 2u, true},
-  {"Privacy",           4u, false}, // no header — just card
-  {"Storage",           3u, true},
-  {"Advanced",          2u, true},
-  {"About",             1u, false},
+  {"Privacy", 4u, false}, // no header — just card
+  {"Storage", 3u, true},
+  {"Advanced", 2u, true},
+  {"About", 1u, false},
 };
 constexpr uint32_t GROUP_COUNT = static_cast<uint32_t>(std::size(GROUPS));
 
@@ -156,9 +157,18 @@ public:
     adapter.RecycleViewHolderSignal().Connect(this, &BodyItemAdapter::OnRecycleViewHolder);
   }
 
-  uint32_t CreateCount() const { return mCreateCount; }
-  uint32_t BindCount() const { return mBindCount; }
-  uint32_t RecycleCount() const { return mRecycleCount; }
+  uint32_t CreateCount() const
+  {
+    return mCreateCount;
+  }
+  uint32_t BindCount() const
+  {
+    return mBindCount;
+  }
+  uint32_t RecycleCount() const
+  {
+    return mRecycleCount;
+  }
 
 private:
   // Count of all body items across all groups.
@@ -301,8 +311,8 @@ public:
     Window window = application.GetWindow();
     auto   ps     = window.GetPositionSize();
     window.SetPositionSize(PositionSize(ps.x, ps.y,
-                                       static_cast<uint32_t>(WINDOW_W),
-                                       static_cast<uint32_t>(WINDOW_H)));
+                                        static_cast<uint32_t>(WINDOW_W),
+                                        static_cast<uint32_t>(WINDOW_H)));
     window.SetBackgroundColor(COLOR_BG);
 
     BuildHeader(window);
@@ -459,8 +469,8 @@ private:
 // ---------------------------------------------------------------------------
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application             app    = Application::New(&argc, &argv);
-  UiConfig                config = UiConfig::New();
+  Application app    = Application::New(&argc, &argv);
+  UiConfig    config = UiConfig::New();
   config.Apply();
 
   RecyclerGroupController controller(app);

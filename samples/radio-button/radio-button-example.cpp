@@ -24,6 +24,7 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 

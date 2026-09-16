@@ -29,6 +29,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <array>
 #include <map>
@@ -44,17 +45,17 @@ namespace
 constexpr const char* TAG = "EMOJI";
 
 // Configuration constants
-constexpr float    DEFAULT_SCALE             = 1.2f;
-constexpr float    SCALE_STEP                = 0.2f;
-constexpr int      DEFAULT_ROW               = 18;
-constexpr int      DEFAULT_COL               = 19;
-constexpr float    DEFAULT_PIXEL_SIZE        = 29.0f;
-constexpr int      DEFAULT_CELL              = 1;
-constexpr int      DEFAULT_WIDTH             = 30;
-constexpr int      DEFAULT_HEIGHT            = 29;
-constexpr int      DEFAULT_LOG_WIDTH         = 300;
-constexpr int      NUM_OF_BUTTON             = 4;
-constexpr uint32_t SCALE_TEST_INTERVAL_MS    = 500;
+constexpr float    DEFAULT_SCALE          = 1.2f;
+constexpr float    SCALE_STEP             = 0.2f;
+constexpr int      DEFAULT_ROW            = 18;
+constexpr int      DEFAULT_COL            = 19;
+constexpr float    DEFAULT_PIXEL_SIZE     = 29.0f;
+constexpr int      DEFAULT_CELL           = 1;
+constexpr int      DEFAULT_WIDTH          = 30;
+constexpr int      DEFAULT_HEIGHT         = 29;
+constexpr int      DEFAULT_LOG_WIDTH      = 300;
+constexpr int      NUM_OF_BUTTON          = 4;
+constexpr uint32_t SCALE_TEST_INTERVAL_MS = 500;
 
 // Colors
 constexpr uint32_t COLOR_WHITE      = 0xFFFFFF;
@@ -67,10 +68,10 @@ constexpr const char* FONT_FAMILY = "SamsungOneUI_400";
 // constexpr const char* FONT_FAMILY = "Noto Color Emoji";
 
 // Unicode constants for emoji sequences
-constexpr const char* ZWJ  = "\u200d";   // Zero Width Joiner
-constexpr const char* ZWNJ = "\u200c";   // Zero Width Non Joiner
-constexpr const char* VS15 = "\ufe0e";   // Variation Selector 15 (text)
-constexpr const char* VS16 = "\ufe0f";   // Variation Selector 16 (emoji)
+constexpr const char* ZWJ  = "\u200d"; // Zero Width Joiner
+constexpr const char* ZWNJ = "\u200c"; // Zero Width Non Joiner
+constexpr const char* VS15 = "\ufe0e"; // Variation Selector 15 (text)
+constexpr const char* VS16 = "\ufe0f"; // Variation Selector 16 (emoji)
 
 } // namespace
 
@@ -83,7 +84,7 @@ struct TrackedLabel
   bool  updateWidth;
   bool  updateHeight;
   bool  updateFontSize;
-  float fontSizeRatio;  // Multiplier for mPixelSize
+  float fontSizeRatio; // Multiplier for mPixelSize
 
   TrackedLabel()
   : label(),
@@ -91,7 +92,8 @@ struct TrackedLabel
     updateHeight(true),
     updateFontSize(true),
     fontSizeRatio(1.0f)
-  {}
+  {
+  }
 };
 
 /**
@@ -111,7 +113,8 @@ struct TrackedContainer
     updateHeight(false),
     widthMultiplier(0),
     heightMultiplier(0)
-  {}
+  {
+  }
 };
 
 /**
@@ -127,7 +130,8 @@ struct TrackedLogRow
   : row(),
     emojiLabel(),
     descLabel()
-  {}
+  {
+  }
 };
 
 /**
@@ -320,18 +324,18 @@ private:
 
   void TrackMainContainer(View container)
   {
-    mTrackedMainContainer.container       = container;
-    mTrackedMainContainer.updateWidth     = true;
-    mTrackedMainContainer.updateHeight    = true;
+    mTrackedMainContainer.container        = container;
+    mTrackedMainContainer.updateWidth      = true;
+    mTrackedMainContainer.updateHeight     = true;
     mTrackedMainContainer.widthMultiplier  = DEFAULT_ROW;
     mTrackedMainContainer.heightMultiplier = DEFAULT_COL;
   }
 
   void TrackLogMainContainer(View container)
   {
-    mTrackedLogMainContainer.container       = container;
-    mTrackedLogMainContainer.updateWidth     = false;
-    mTrackedLogMainContainer.updateHeight    = true;
+    mTrackedLogMainContainer.container        = container;
+    mTrackedLogMainContainer.updateWidth      = false;
+    mTrackedLogMainContainer.updateHeight     = true;
     mTrackedLogMainContainer.heightMultiplier = DEFAULT_COL;
   }
 
@@ -661,14 +665,12 @@ private:
   void GenerateEmoji()
   {
     // * 1 * Face emojis
-    View emojiView1 = AddRow(mMainView);
-    const std::array<const char*, 18> faceAry{{
-      "\U0001F600", "\U0001F970", "\U0001F60B", "\U0001F917",
-      "\U0001F910", "\U0001F60C", "\U0001F637", "\U0001F631",
-      "\U0001F97A", "\U0001F615", "\U0001F923", "\U0001FAE0",
-      "\U0001F607", "\U0001F970", "\U0001F911", "\U0001F914",
-      "\U0001F976", "\U0001F92F"
-    }};
+    View                              emojiView1 = AddRow(mMainView);
+    const std::array<const char*, 18> faceAry{{"\U0001F600", "\U0001F970", "\U0001F60B", "\U0001F917",
+                                               "\U0001F910", "\U0001F60C", "\U0001F637", "\U0001F631",
+                                               "\U0001F97A", "\U0001F615", "\U0001F923", "\U0001FAE0",
+                                               "\U0001F607", "\U0001F970", "\U0001F911", "\U0001F914",
+                                               "\U0001F976", "\U0001F92F"}};
     AddEmoji(emojiView1, faceAry);
 
     // * 2 * Face combinations
@@ -686,33 +688,25 @@ private:
 
     View emojiView2 = AddRow(mMainView);
 
-    const std::array<const char*, 9> faceCombAry{{
-      faceWithoutMouth.c_str(), cloud.c_str(), faceInCloud.c_str(),
-      faceSmile.c_str(), dash.c_str(), faceExhaling.c_str(),
-      faceXEye.c_str(), dizzy.c_str(), faceSpiral.c_str()
-    }};
-    const std::array<const char*, 9> faceCombDescAry{{
-      "FACE_WITHOUT_MOUTH", "CLOUD", "FACE_IN_CLOUD = FACE_WITHOUT_MOUTH + ZWJ + CLOUD + VS16",
-      "FACE_SMILE", "DASH", "FACE_EXHALING = FACE_SMILE + ZWJ + DASH",
-      "FACE_X_EYE", "DIZZY", "FACE_SPIRAL = FACE_X_EYE + ZWJ + DIZZY"
-    }};
+    const std::array<const char*, 9> faceCombAry{{faceWithoutMouth.c_str(), cloud.c_str(), faceInCloud.c_str(),
+                                                  faceSmile.c_str(), dash.c_str(), faceExhaling.c_str(),
+                                                  faceXEye.c_str(), dizzy.c_str(), faceSpiral.c_str()}};
+    const std::array<const char*, 9> faceCombDescAry{{"FACE_WITHOUT_MOUTH", "CLOUD", "FACE_IN_CLOUD = FACE_WITHOUT_MOUTH + ZWJ + CLOUD + VS16",
+                                                      "FACE_SMILE", "DASH", "FACE_EXHALING = FACE_SMILE + ZWJ + DASH",
+                                                      "FACE_X_EYE", "DIZZY", "FACE_SPIRAL = FACE_X_EYE + ZWJ + DIZZY"}};
     AddEmoji(emojiView2, faceCombAry, faceCombDescAry);
 
-    const std::array<const char*, 9> faceMoreAry{{
-      "\U0001F920", "\U0001F973", "\U0001F978",
-      "\U0001F60E", "\U0001F913", "\U0001F9D0",
-      "\U0001F92C", "\U0001F608", "\U0001F480"
-    }};
-    const std::array<const char*, 9> faceMoreDescAry{{
-      "COWBOY", "PARTY", "DISGUISED", "SUNGLASS", "NERD", "MONOCLE",
-      "MOUTH", "DEVIL", "SKULL"
-    }};
+    const std::array<const char*, 9> faceMoreAry{{"\U0001F920", "\U0001F973", "\U0001F978",
+                                                  "\U0001F60E", "\U0001F913", "\U0001F9D0",
+                                                  "\U0001F92C", "\U0001F608", "\U0001F480"}};
+    const std::array<const char*, 9> faceMoreDescAry{{"COWBOY", "PARTY", "DISGUISED", "SUNGLASS", "NERD", "MONOCLE",
+                                                      "MOUTH", "DEVIL", "SKULL"}};
     AddEmoji(emojiView2, faceMoreAry, faceMoreDescAry);
 
     // * 3 * Emotion emojis
-    std::string redHeart          = "\u2764";
-    std::string fire              = "\U0001F525";
-    std::string heartOnFire       = redHeart + VS16 + ZWJ + fire;
+    std::string redHeart    = "\u2764";
+    std::string fire        = "\U0001F525";
+    std::string heartOnFire = redHeart + VS16 + ZWJ + fire;
 
     std::string eye               = "\U0001F441";
     std::string speechBubble      = "\U0001F5E8";
@@ -720,22 +714,16 @@ private:
 
     View emojiView3 = AddRow(mMainView);
 
-    const std::array<const char*, 9> emotionAry{{
-      "\U0001F48B", "\U0001F4AF", "\U0001F4A2", "\U0001F4A5",
-      "\U0001F4A6", "\U0001F573", "\U0001F4AC", "\U0001F4A4", "\U0001F4AD"
-    }};
+    const std::array<const char*, 9> emotionAry{{"\U0001F48B", "\U0001F4AF", "\U0001F4A2", "\U0001F4A5",
+                                                 "\U0001F4A6", "\U0001F573", "\U0001F4AC", "\U0001F4A4", "\U0001F4AD"}};
     AddEmoji(emojiView3, emotionAry);
 
-    const std::array<const char*, 9> emotionCombAry{{
-      redHeart.c_str(), fire.c_str(), heartOnFire.c_str(),
-      eye.c_str(), speechBubble.c_str(), eyeInSpeechBubble.c_str(),
-      "\U0001F977", "\U0001F934", "\U0001F47C"
-    }};
-    const std::array<const char*, 9> emotionCombDescAry{{
-      "RED_HEART", "FIRE", "HEART_ON_FIRE = RED_HEART + VS16 + ZWJ + FIRE",
-      "EYE", "SPEECH_BUBBLE", "EYE_IN_SPEECH_BUBBLE = EYE + VS16 + ZWJ + SPEECH_BUBBLE + VS16",
-      "NINJA", "PRINCE", "BABY"
-    }};
+    const std::array<const char*, 9> emotionCombAry{{redHeart.c_str(), fire.c_str(), heartOnFire.c_str(),
+                                                     eye.c_str(), speechBubble.c_str(), eyeInSpeechBubble.c_str(),
+                                                     "\U0001F977", "\U0001F934", "\U0001F47C"}};
+    const std::array<const char*, 9> emotionCombDescAry{{"RED_HEART", "FIRE", "HEART_ON_FIRE = RED_HEART + VS16 + ZWJ + FIRE",
+                                                         "EYE", "SPEECH_BUBBLE", "EYE_IN_SPEECH_BUBBLE = EYE + VS16 + ZWJ + SPEECH_BUBBLE + VS16",
+                                                         "NINJA", "PRINCE", "BABY"}};
     AddEmoji(emojiView3, emotionCombAry, emotionCombDescAry);
 
     // * 4 * Person emojis
@@ -765,22 +753,18 @@ private:
 
     View emojiView4 = AddRow(mMainView);
 
-    const std::array<const char*, 18> personAry{{
-      maleSign.c_str(), femaleSign.c_str(), transgenderSign.c_str(),
-      beard.c_str(), beardMan.c_str(), beardWoman.c_str(),
-      blond.c_str(), blondMan.c_str(), blondWoman.c_str(),
-      deaf.c_str(), deafMan.c_str(), deafWoman.c_str(),
-      olderPerson.c_str(), olderMan.c_str(), olderWoman.c_str(),
-      person.c_str(), man.c_str(), woman.c_str()
-    }};
-    const std::array<const char*, 18> personDescAry{{
-      "MALE_SIGN", "FEMALE_SIGN", "TRANSGENDER_SIGN",
-      "BEARD", "BEARD_MAN = BEARD + ZWJ + MALE_SIGN + VS16", "BEARD_WOMAN = BEARD + ZWJ + FEMALE_SIGN + VS16",
-      "BLOND", "BLOND_MAN = BLOND + ZWJ + MALE_SIGN + VS16", "BLOND_WOMAN = BLOND + ZWJ + FEMALE_SIGN + VS16",
-      "DEAF", "DEAF_MAN = DEAF + ZWJ + MALE_SIGN + VS16", "DEAF_WOMAN = DEAF + ZWJ + FEMALE_SIGN + VS16",
-      "OLDER_PERSON", "OLDER_MAN", "OLDER_WOMAN",
-      "PERSON", "MAN", "WOMAN"
-    }};
+    const std::array<const char*, 18> personAry{{maleSign.c_str(), femaleSign.c_str(), transgenderSign.c_str(),
+                                                 beard.c_str(), beardMan.c_str(), beardWoman.c_str(),
+                                                 blond.c_str(), blondMan.c_str(), blondWoman.c_str(),
+                                                 deaf.c_str(), deafMan.c_str(), deafWoman.c_str(),
+                                                 olderPerson.c_str(), olderMan.c_str(), olderWoman.c_str(),
+                                                 person.c_str(), man.c_str(), woman.c_str()}};
+    const std::array<const char*, 18> personDescAry{{"MALE_SIGN", "FEMALE_SIGN", "TRANSGENDER_SIGN",
+                                                     "BEARD", "BEARD_MAN = BEARD + ZWJ + MALE_SIGN + VS16", "BEARD_WOMAN = BEARD + ZWJ + FEMALE_SIGN + VS16",
+                                                     "BLOND", "BLOND_MAN = BLOND + ZWJ + MALE_SIGN + VS16", "BLOND_WOMAN = BLOND + ZWJ + FEMALE_SIGN + VS16",
+                                                     "DEAF", "DEAF_MAN = DEAF + ZWJ + MALE_SIGN + VS16", "DEAF_WOMAN = DEAF + ZWJ + FEMALE_SIGN + VS16",
+                                                     "OLDER_PERSON", "OLDER_MAN", "OLDER_WOMAN",
+                                                     "PERSON", "MAN", "WOMAN"}};
     AddEmoji(emojiView4, personAry, personDescAry);
 
     // * 5 * Hair variations
@@ -809,29 +793,25 @@ private:
 
     View emojiView5 = AddRow(mMainView);
 
-    const std::array<const char*, 18> hairAry{{
-      redHair.c_str(), curlyHair.c_str(), whiteHair.c_str(), baldHair.c_str(),
-      personHair1.c_str(), personHair2.c_str(), personHair3.c_str(), personHair4.c_str(),
-      manHair1.c_str(), manHair2.c_str(), manHair3.c_str(), manHair4.c_str(),
-      womanHair1.c_str(), womanHair2.c_str(), womanHair3.c_str(), womanHair4.c_str(),
-      boy.c_str(), girl.c_str()
-    }};
-    const std::array<const char*, 18> hairDescAry{{
-      "RED_HAIR", "CURLY_HAIR", "WHITE_HAIR", "BALD_HAIR",
-      "PERSON_HAIR1 = PERSON + ZWJ + RED_HAIR",
-      "PERSON_HAIR2 = PERSON + ZWJ + CURLY_HAIR",
-      "PERSON_HAIR3 = PERSON + ZWJ + WHITE_HAIR",
-      "PERSON_HAIR4 = PERSON + ZWJ + BALD_HAIR",
-      "MAN_HAIR1 = MAN + ZWJ + RED_HAIR",
-      "MAN_HAIR2 = MAN + ZWJ + CURLY_HAIR",
-      "MAN_HAIR3 = MAN + ZWJ + WHITE_HAIR",
-      "MAN_HAIR4 = MAN + ZWJ + BALD_HAIR",
-      "WOMAN_HAIR1 = WOMAN + ZWJ + RED_HAIR",
-      "WOMAN_HAIR2 = WOMAN + ZWJ + CURLY_HAIR",
-      "WOMAN_HAIR3 = WOMAN + ZWJ + WHITE_HAIR",
-      "WOMAN_HAIR4 = WOMAN + ZWJ + BALD_HAIR",
-      "BOY", "GIRL"
-    }};
+    const std::array<const char*, 18> hairAry{{redHair.c_str(), curlyHair.c_str(), whiteHair.c_str(), baldHair.c_str(),
+                                               personHair1.c_str(), personHair2.c_str(), personHair3.c_str(), personHair4.c_str(),
+                                               manHair1.c_str(), manHair2.c_str(), manHair3.c_str(), manHair4.c_str(),
+                                               womanHair1.c_str(), womanHair2.c_str(), womanHair3.c_str(), womanHair4.c_str(),
+                                               boy.c_str(), girl.c_str()}};
+    const std::array<const char*, 18> hairDescAry{{"RED_HAIR", "CURLY_HAIR", "WHITE_HAIR", "BALD_HAIR",
+                                                   "PERSON_HAIR1 = PERSON + ZWJ + RED_HAIR",
+                                                   "PERSON_HAIR2 = PERSON + ZWJ + CURLY_HAIR",
+                                                   "PERSON_HAIR3 = PERSON + ZWJ + WHITE_HAIR",
+                                                   "PERSON_HAIR4 = PERSON + ZWJ + BALD_HAIR",
+                                                   "MAN_HAIR1 = MAN + ZWJ + RED_HAIR",
+                                                   "MAN_HAIR2 = MAN + ZWJ + CURLY_HAIR",
+                                                   "MAN_HAIR3 = MAN + ZWJ + WHITE_HAIR",
+                                                   "MAN_HAIR4 = MAN + ZWJ + BALD_HAIR",
+                                                   "WOMAN_HAIR1 = WOMAN + ZWJ + RED_HAIR",
+                                                   "WOMAN_HAIR2 = WOMAN + ZWJ + CURLY_HAIR",
+                                                   "WOMAN_HAIR3 = WOMAN + ZWJ + WHITE_HAIR",
+                                                   "WOMAN_HAIR4 = WOMAN + ZWJ + BALD_HAIR",
+                                                   "BOY", "GIRL"}};
     AddEmoji(emojiView5, hairAry, hairDescAry);
 
     // * 6 * Work/Profession emojis
@@ -850,16 +830,12 @@ private:
 
     View emojiView6 = AddRow(mMainView);
 
-    const std::array<const char*, 12> workAry{{
-      medicalSymbol.c_str(), balanceScale.c_str(), airPlane.c_str(), graduationCap.c_str(),
-      school.c_str(), rice.c_str(), cooking.c_str(), wrench.c_str(),
-      microScope.c_str(), laptop.c_str(), rocket.c_str(), palette.c_str()
-    }};
-    const std::array<const char*, 12> workDescAry{{
-      "MEDICAL_SYMBOL", "BALANCE_SCALE", "AIR_PLANE", "GRADUATION_CAP",
-      "SCHOOL", "RICE", "COOKING", "WRENCH",
-      "MICRO_SCOPE", "LAPTOP", "ROCKET", "PALETTE"
-    }};
+    const std::array<const char*, 12> workAry{{medicalSymbol.c_str(), balanceScale.c_str(), airPlane.c_str(), graduationCap.c_str(),
+                                               school.c_str(), rice.c_str(), cooking.c_str(), wrench.c_str(),
+                                               microScope.c_str(), laptop.c_str(), rocket.c_str(), palette.c_str()}};
+    const std::array<const char*, 12> workDescAry{{"MEDICAL_SYMBOL", "BALANCE_SCALE", "AIR_PLANE", "GRADUATION_CAP",
+                                                   "SCHOOL", "RICE", "COOKING", "WRENCH",
+                                                   "MICRO_SCOPE", "LAPTOP", "ROCKET", "PALETTE"}};
     AddEmoji(emojiView6, workAry, workDescAry);
 
     std::string detective      = "\U0001F575";
@@ -870,18 +846,14 @@ private:
     std::string guardMan   = guard + ZWJ + maleSign + VS16;
     std::string guardWoman = guard + ZWJ + femaleSign + VS16;
 
-    const std::array<const char*, 6> workCombAry{{
-      detective.c_str(), detectiveMan.c_str(), detectiveWoman.c_str(),
-      guard.c_str(), guardMan.c_str(), guardWoman.c_str()
-    }};
-    const std::array<const char*, 6> workCombDescAry{{
-      "DETECTIVE",
-      "DETECTIVE_MAN = DETECTIVE + VS16 + ZWJ + MALE_SIGN + VS16",
-      "DETECTIVE_WOMAN = DETECTIVE + VS16 + ZWJ + FEMALE_SIGN + VS16",
-      "GUARD",
-      "GUARD_MAN = GUARD + ZWJ + MALE_SIGN + VS16",
-      "GUARD_WOMAN = GUARD + ZWJ + FEMALE_SIGN + VS16"
-    }};
+    const std::array<const char*, 6> workCombAry{{detective.c_str(), detectiveMan.c_str(), detectiveWoman.c_str(),
+                                                  guard.c_str(), guardMan.c_str(), guardWoman.c_str()}};
+    const std::array<const char*, 6> workCombDescAry{{"DETECTIVE",
+                                                      "DETECTIVE_MAN = DETECTIVE + VS16 + ZWJ + MALE_SIGN + VS16",
+                                                      "DETECTIVE_WOMAN = DETECTIVE + VS16 + ZWJ + FEMALE_SIGN + VS16",
+                                                      "GUARD",
+                                                      "GUARD_MAN = GUARD + ZWJ + MALE_SIGN + VS16",
+                                                      "GUARD_WOMAN = GUARD + ZWJ + FEMALE_SIGN + VS16"}};
     AddEmoji(emojiView6, workCombAry, workCombDescAry);
 
     // * 7 * Work combinations 2
@@ -911,34 +883,30 @@ private:
 
     View emojiView7 = AddRow(mMainView);
 
-    const std::array<const char*, 18> workComb2Ary{{
-      personDoctor.c_str(), manDoctor.c_str(), womanDoctor.c_str(),
-      personJudge.c_str(), manJudge.c_str(), womanJudge.c_str(),
-      personPilot.c_str(), manPilot.c_str(), womanPilot.c_str(),
-      personStudent.c_str(), manStudent.c_str(), womanStudent.c_str(),
-      personTeacher.c_str(), manTeacher.c_str(), womanTeacher.c_str(),
-      personFarmer.c_str(), manFarmer.c_str(), womanFarmer.c_str()
-    }};
-    const std::array<const char*, 18> workComb2DescAry{{
-      "PERSON_DOCTOR = PERSON + ZWJ + MEDICAL_SYMBOL + VS16",
-      "MAN_DOCTOR = MAN + ZWJ + MEDICAL_SYMBOL + VS16",
-      "WOMAN_DOCTOR = WOMAN + ZWJ + MEDICAL_SYMBOL + VS16",
-      "PERSON_JUDGE = PERSON + ZWJ + BALANCE_SCALE + VS16",
-      "MAN_JUDGE = MAN + ZWJ + BALANCE_SCALE + VS16",
-      "WOMAN_JUDGE = WOMAN + ZWJ + BALANCE_SCALE + VS16",
-      "PERSON_PILOT = PERSON + ZWJ + AIR_PLANE + VS16",
-      "MAN_PILOT = MAN + ZWJ + AIR_PLANE + VS16",
-      "WOMAN_PILOT = WOMAN + ZWJ + AIR_PLANE + VS16",
-      "PERSON_STUDENT = PERSON + ZWJ + GRADUATION_CAP",
-      "MAN_STUDENT = MAN + ZWJ + GRADUATION_CAP",
-      "WOMAN_STUDENT = WOMAN + ZWJ + GRADUATION_CAP",
-      "PERSON_TEACHER = PERSON + ZWJ + SCHOOL",
-      "MAN_TEACHER = MAN + ZWJ + SCHOOL",
-      "WOMAN_TEACHER = WOMAN + ZWJ + SCHOOL",
-      "PERSON_FARMER = PERSON + ZWJ + RICE",
-      "MAN_FARMER = MAN + ZWJ + RICE",
-      "WOMAN_FARMER = WOMAN + ZWJ + RICE"
-    }};
+    const std::array<const char*, 18> workComb2Ary{{personDoctor.c_str(), manDoctor.c_str(), womanDoctor.c_str(),
+                                                    personJudge.c_str(), manJudge.c_str(), womanJudge.c_str(),
+                                                    personPilot.c_str(), manPilot.c_str(), womanPilot.c_str(),
+                                                    personStudent.c_str(), manStudent.c_str(), womanStudent.c_str(),
+                                                    personTeacher.c_str(), manTeacher.c_str(), womanTeacher.c_str(),
+                                                    personFarmer.c_str(), manFarmer.c_str(), womanFarmer.c_str()}};
+    const std::array<const char*, 18> workComb2DescAry{{"PERSON_DOCTOR = PERSON + ZWJ + MEDICAL_SYMBOL + VS16",
+                                                        "MAN_DOCTOR = MAN + ZWJ + MEDICAL_SYMBOL + VS16",
+                                                        "WOMAN_DOCTOR = WOMAN + ZWJ + MEDICAL_SYMBOL + VS16",
+                                                        "PERSON_JUDGE = PERSON + ZWJ + BALANCE_SCALE + VS16",
+                                                        "MAN_JUDGE = MAN + ZWJ + BALANCE_SCALE + VS16",
+                                                        "WOMAN_JUDGE = WOMAN + ZWJ + BALANCE_SCALE + VS16",
+                                                        "PERSON_PILOT = PERSON + ZWJ + AIR_PLANE + VS16",
+                                                        "MAN_PILOT = MAN + ZWJ + AIR_PLANE + VS16",
+                                                        "WOMAN_PILOT = WOMAN + ZWJ + AIR_PLANE + VS16",
+                                                        "PERSON_STUDENT = PERSON + ZWJ + GRADUATION_CAP",
+                                                        "MAN_STUDENT = MAN + ZWJ + GRADUATION_CAP",
+                                                        "WOMAN_STUDENT = WOMAN + ZWJ + GRADUATION_CAP",
+                                                        "PERSON_TEACHER = PERSON + ZWJ + SCHOOL",
+                                                        "MAN_TEACHER = MAN + ZWJ + SCHOOL",
+                                                        "WOMAN_TEACHER = WOMAN + ZWJ + SCHOOL",
+                                                        "PERSON_FARMER = PERSON + ZWJ + RICE",
+                                                        "MAN_FARMER = MAN + ZWJ + RICE",
+                                                        "WOMAN_FARMER = WOMAN + ZWJ + RICE"}};
     AddEmoji(emojiView7, workComb2Ary, workComb2DescAry);
 
     // * 8 * Work combinations 3
@@ -968,34 +936,30 @@ private:
 
     View emojiView8 = AddRow(mMainView);
 
-    const std::array<const char*, 18> workComb3Ary{{
-      personCook.c_str(), manCook.c_str(), womanCook.c_str(),
-      personMechanic.c_str(), manMechanic.c_str(), womanMechanic.c_str(),
-      personScientist.c_str(), manScientist.c_str(), womanScientist.c_str(),
-      personTechnologist.c_str(), manTechnologist.c_str(), womanTechnologist.c_str(),
-      personAstronaut.c_str(), manAstronaut.c_str(), womanAstronaut.c_str(),
-      personArtist.c_str(), manArtist.c_str(), womanArtist.c_str()
-    }};
-    const std::array<const char*, 18> workComb3DescAry{{
-      "PERSON_COOK = PERSON + ZWJ + COOKING",
-      "MAN_COOK = MAN + ZWJ + COOKING",
-      "WOMAN_COOK = WOMAN + ZWJ + COOKING",
-      "PERSON_MECHANIC = PERSON + ZWJ + WRENCH",
-      "MAN_MECHANIC = MAN + ZWJ + WRENCH",
-      "WOMAN_MECHANIC = WOMAN + ZWJ + WRENCH",
-      "PERSON_SCIENTIST = PERSON + ZWJ + MICRO_SCOPE",
-      "MAN_SCIENTIST = MAN + ZWJ + MICRO_SCOPE",
-      "WOMAN_SCIENTIST = WOMAN + ZWJ + MICRO_SCOPE",
-      "PERSON_TECHNOLOGIST = PERSON + ZWJ + LAPTOP",
-      "MAN_TECHNOLOGIST = MAN + ZWJ + LAPTOP",
-      "WOMAN_TECHNOLOGIST = WOMAN + ZWJ + LAPTOP",
-      "PERSON_ASTRONAUT = PERSON + ZWJ + ROCKET",
-      "MAN_ASTRONAUT = MAN + ZWJ + ROCKET",
-      "WOMAN_ASTRONAUT = WOMAN + ZWJ + ROCKET",
-      "PERSON_ARTIST = PERSON + ZWJ + PALETTE",
-      "MAN_ARTIST = MAN + ZWJ + PALETTE",
-      "WOMAN_ARTIST = WOMAN + ZWJ + PALETTE"
-    }};
+    const std::array<const char*, 18> workComb3Ary{{personCook.c_str(), manCook.c_str(), womanCook.c_str(),
+                                                    personMechanic.c_str(), manMechanic.c_str(), womanMechanic.c_str(),
+                                                    personScientist.c_str(), manScientist.c_str(), womanScientist.c_str(),
+                                                    personTechnologist.c_str(), manTechnologist.c_str(), womanTechnologist.c_str(),
+                                                    personAstronaut.c_str(), manAstronaut.c_str(), womanAstronaut.c_str(),
+                                                    personArtist.c_str(), manArtist.c_str(), womanArtist.c_str()}};
+    const std::array<const char*, 18> workComb3DescAry{{"PERSON_COOK = PERSON + ZWJ + COOKING",
+                                                        "MAN_COOK = MAN + ZWJ + COOKING",
+                                                        "WOMAN_COOK = WOMAN + ZWJ + COOKING",
+                                                        "PERSON_MECHANIC = PERSON + ZWJ + WRENCH",
+                                                        "MAN_MECHANIC = MAN + ZWJ + WRENCH",
+                                                        "WOMAN_MECHANIC = WOMAN + ZWJ + WRENCH",
+                                                        "PERSON_SCIENTIST = PERSON + ZWJ + MICRO_SCOPE",
+                                                        "MAN_SCIENTIST = MAN + ZWJ + MICRO_SCOPE",
+                                                        "WOMAN_SCIENTIST = WOMAN + ZWJ + MICRO_SCOPE",
+                                                        "PERSON_TECHNOLOGIST = PERSON + ZWJ + LAPTOP",
+                                                        "MAN_TECHNOLOGIST = MAN + ZWJ + LAPTOP",
+                                                        "WOMAN_TECHNOLOGIST = WOMAN + ZWJ + LAPTOP",
+                                                        "PERSON_ASTRONAUT = PERSON + ZWJ + ROCKET",
+                                                        "MAN_ASTRONAUT = MAN + ZWJ + ROCKET",
+                                                        "WOMAN_ASTRONAUT = WOMAN + ZWJ + ROCKET",
+                                                        "PERSON_ARTIST = PERSON + ZWJ + PALETTE",
+                                                        "MAN_ARTIST = MAN + ZWJ + PALETTE",
+                                                        "WOMAN_ARTIST = WOMAN + ZWJ + PALETTE"}};
     AddEmoji(emojiView8, workComb3Ary, workComb3DescAry);
 
     // * 9 * Fantasy characters
@@ -1028,31 +992,27 @@ private:
 
     View emojiView9 = AddRow(mMainView);
 
-    const std::array<const char*, 18> fantasyAry{{
-      christmasTree.c_str(), santa.c_str(), santaWoman.c_str(), santaPerson.c_str(),
-      mage.c_str(), mageMan.c_str(), mageWoman.c_str(),
-      vampire.c_str(), vampireMan.c_str(), vampireWoman.c_str(),
-      elf.c_str(), elfMan.c_str(), elfWoman.c_str(),
-      zombie.c_str(), zombieMan.c_str(), zombieWoman.c_str(),
-      merpersonWoman.c_str(), genieMan.c_str()
-    }};
-    const std::array<const char*, 18> fantasyDescAry{{
-      "CHRISTMAS_TREE", "SANTA", "SANTA_WOMAN", "SANTA_PERSON = PERSON + ZWJ + CHRISTMAS_TREE",
-      "MAGE",
-      "MAGE_MAN = MAGE + ZWJ + MALE_SIGN + VS16",
-      "MAGE_WOMAN = MAGE + ZWJ + FEMALE_SIGN + VS16",
-      "VAMPIRE",
-      "VAMPIRE_MAN = VAMPIRE + ZWJ + MALE_SIGN + VS16",
-      "VAMPIRE_WOMAN = VAMPIRE + ZWJ + FEMALE_SIGN + VS16",
-      "ELF",
-      "ELF_MAN = ELF + ZWJ + MALE_SIGN + VS16",
-      "ELF_WOMAN = ELF + ZWJ + FEMALE_SIGN + VS16",
-      "ZOMBIE",
-      "ZOMBIE_MAN = ZOMBIE + ZWJ + MALE_SIGN + VS16",
-      "ZOMBIE_WOMAN = ZOMBIE + ZWJ + FEMALE_SIGN + VS16",
-      "MERPERSON_WOMAN = MERPERSON + ZWJ + FEMALE_SIGN + VS16",
-      "GENIE_MAN = GENIE + ZWJ + MALE_SIGN + VS16"
-    }};
+    const std::array<const char*, 18> fantasyAry{{christmasTree.c_str(), santa.c_str(), santaWoman.c_str(), santaPerson.c_str(),
+                                                  mage.c_str(), mageMan.c_str(), mageWoman.c_str(),
+                                                  vampire.c_str(), vampireMan.c_str(), vampireWoman.c_str(),
+                                                  elf.c_str(), elfMan.c_str(), elfWoman.c_str(),
+                                                  zombie.c_str(), zombieMan.c_str(), zombieWoman.c_str(),
+                                                  merpersonWoman.c_str(), genieMan.c_str()}};
+    const std::array<const char*, 18> fantasyDescAry{{"CHRISTMAS_TREE", "SANTA", "SANTA_WOMAN", "SANTA_PERSON = PERSON + ZWJ + CHRISTMAS_TREE",
+                                                      "MAGE",
+                                                      "MAGE_MAN = MAGE + ZWJ + MALE_SIGN + VS16",
+                                                      "MAGE_WOMAN = MAGE + ZWJ + FEMALE_SIGN + VS16",
+                                                      "VAMPIRE",
+                                                      "VAMPIRE_MAN = VAMPIRE + ZWJ + MALE_SIGN + VS16",
+                                                      "VAMPIRE_WOMAN = VAMPIRE + ZWJ + FEMALE_SIGN + VS16",
+                                                      "ELF",
+                                                      "ELF_MAN = ELF + ZWJ + MALE_SIGN + VS16",
+                                                      "ELF_WOMAN = ELF + ZWJ + FEMALE_SIGN + VS16",
+                                                      "ZOMBIE",
+                                                      "ZOMBIE_MAN = ZOMBIE + ZWJ + MALE_SIGN + VS16",
+                                                      "ZOMBIE_WOMAN = ZOMBIE + ZWJ + FEMALE_SIGN + VS16",
+                                                      "MERPERSON_WOMAN = MERPERSON + ZWJ + FEMALE_SIGN + VS16",
+                                                      "GENIE_MAN = GENIE + ZWJ + MALE_SIGN + VS16"}};
     AddEmoji(emojiView9, fantasyAry, fantasyDescAry);
 
     // * 10 ~ 11 * Family sequences
@@ -1084,33 +1044,29 @@ private:
 
     View emojiView12 = AddRow(mMainView);
 
-    const std::array<const char*, 18> activityAry{{
-      juggling.c_str(), jugglingMan.c_str(), jugglingWoman.c_str(),
-      surfer.c_str(), surferMan.c_str(), surferWoman.c_str(),
-      whiteCane.c_str(), whiteCanePerson.c_str(), whiteCaneMan.c_str(), whiteCaneWoman.c_str(),
-      manualWheelchair.c_str(), manualWheelchairPerson.c_str(), manualWheelchairMan.c_str(), manualWheelchairWoman.c_str(),
-      motorizedWheelchair.c_str(), motorizedWheelchairPerson.c_str(), motorizedWheelchairMan.c_str(), motorizedWheelchairWoman.c_str()
-    }};
-    const std::array<const char*, 18> activityDescAry{{
-      "JUGGLING",
-      "JUGGLING_MAN = JUGGLING + ZWJ + MALE_SIGN + VS16",
-      "JUGGLING_WOMAN = JUGGLING + ZWJ + FEMALE_SIGN + VS16",
-      "SURFER",
-      "SURFER_MAN = SURFER + ZWJ + MALE_SIGN + VS16",
-      "SURFER_WOMAN = SURFER + ZWJ + FEMALE_SIGN + VS16",
-      "WHITE_CANE",
-      "WHITE_CANE_PERSON = PERSON + ZWJ + WHITE_CANE",
-      "WHITE_CANE_MAN = MAN + ZWJ + WHITE_CANE",
-      "WHITE_CANE_WOMAN = WOMAN + ZWJ + WHITE_CANE",
-      "MANUAL_WHEELCHAIR",
-      "MANUAL_WHEELCHAIR_PERSON = PERSON + ZWJ + MANUAL_WHEELCHAIR",
-      "MANUAL_WHEELCHAIR_MAN = MAN + ZWJ + MANUAL_WHEELCHAIR",
-      "MANUAL_WHEELCHAIR_WOMAN = WOMAN + ZWJ + MANUAL_WHEELCHAIR",
-      "MOTORIZED_WHEELCHAIR",
-      "MOTORIZED_WHEELCHAIR_PERSON = PERSON + ZWJ + MOTORIZED_WHEELCHAIR",
-      "MOTORIZED_WHEELCHAIR_MAN = MAN + ZWJ + MOTORIZED_WHEELCHAIR",
-      "MOTORIZED_WHEELCHAIR_WOMAN = WOMAN + ZWJ + MOTORIZED_WHEELCHAIR"
-    }};
+    const std::array<const char*, 18> activityAry{{juggling.c_str(), jugglingMan.c_str(), jugglingWoman.c_str(),
+                                                   surfer.c_str(), surferMan.c_str(), surferWoman.c_str(),
+                                                   whiteCane.c_str(), whiteCanePerson.c_str(), whiteCaneMan.c_str(), whiteCaneWoman.c_str(),
+                                                   manualWheelchair.c_str(), manualWheelchairPerson.c_str(), manualWheelchairMan.c_str(), manualWheelchairWoman.c_str(),
+                                                   motorizedWheelchair.c_str(), motorizedWheelchairPerson.c_str(), motorizedWheelchairMan.c_str(), motorizedWheelchairWoman.c_str()}};
+    const std::array<const char*, 18> activityDescAry{{"JUGGLING",
+                                                       "JUGGLING_MAN = JUGGLING + ZWJ + MALE_SIGN + VS16",
+                                                       "JUGGLING_WOMAN = JUGGLING + ZWJ + FEMALE_SIGN + VS16",
+                                                       "SURFER",
+                                                       "SURFER_MAN = SURFER + ZWJ + MALE_SIGN + VS16",
+                                                       "SURFER_WOMAN = SURFER + ZWJ + FEMALE_SIGN + VS16",
+                                                       "WHITE_CANE",
+                                                       "WHITE_CANE_PERSON = PERSON + ZWJ + WHITE_CANE",
+                                                       "WHITE_CANE_MAN = MAN + ZWJ + WHITE_CANE",
+                                                       "WHITE_CANE_WOMAN = WOMAN + ZWJ + WHITE_CANE",
+                                                       "MANUAL_WHEELCHAIR",
+                                                       "MANUAL_WHEELCHAIR_PERSON = PERSON + ZWJ + MANUAL_WHEELCHAIR",
+                                                       "MANUAL_WHEELCHAIR_MAN = MAN + ZWJ + MANUAL_WHEELCHAIR",
+                                                       "MANUAL_WHEELCHAIR_WOMAN = WOMAN + ZWJ + MANUAL_WHEELCHAIR",
+                                                       "MOTORIZED_WHEELCHAIR",
+                                                       "MOTORIZED_WHEELCHAIR_PERSON = PERSON + ZWJ + MOTORIZED_WHEELCHAIR",
+                                                       "MOTORIZED_WHEELCHAIR_MAN = MAN + ZWJ + MOTORIZED_WHEELCHAIR",
+                                                       "MOTORIZED_WHEELCHAIR_WOMAN = WOMAN + ZWJ + MOTORIZED_WHEELCHAIR"}};
     AddEmoji(emojiView12, activityAry, activityDescAry);
 
     // * 13 * Animal emojis
@@ -1125,38 +1081,30 @@ private:
 
     View emojiView13 = AddRow(mMainView);
 
-    const std::array<const char*, 8> animalAry{{
-      dragon.c_str(), trex.c_str(), mammoth.c_str(), beaver.c_str(),
-      unicorn.c_str(), tiger.c_str(), buffalo.c_str(), whale.c_str()
-    }};
-    const std::array<const char*, 8> animalDescAry{{
-      "DRAGON", "TREX", "MAMMOTH", "BEAVER", "UNICORN", "TIGER", "BUFFALO", "WHALE"
-    }};
+    const std::array<const char*, 8> animalAry{{dragon.c_str(), trex.c_str(), mammoth.c_str(), beaver.c_str(),
+                                                unicorn.c_str(), tiger.c_str(), buffalo.c_str(), whale.c_str()}};
+    const std::array<const char*, 8> animalDescAry{{"DRAGON", "TREX", "MAMMOTH", "BEAVER", "UNICORN", "TIGER", "BUFFALO", "WHALE"}};
     AddEmoji(emojiView13, animalAry, animalDescAry);
 
-    std::string guideDog          = "\U0001F9AE";
-    std::string dog               = "\U0001F415";
-    std::string safetyVest        = "\U0001F9BA";
-    std::string serviceDog        = dog + ZWJ + safetyVest;
+    std::string guideDog   = "\U0001F9AE";
+    std::string dog        = "\U0001F415";
+    std::string safetyVest = "\U0001F9BA";
+    std::string serviceDog = dog + ZWJ + safetyVest;
 
-    std::string cat               = "\U0001F408";
-    std::string blackLargeSquare  = "\u2B1B";
-    std::string blackCat          = cat + ZWJ + blackLargeSquare;
+    std::string cat              = "\U0001F408";
+    std::string blackLargeSquare = "\u2B1B";
+    std::string blackCat         = cat + ZWJ + blackLargeSquare;
 
-    std::string bear              = "\U0001F43B";
-    std::string snowFlake         = "\u2744";
-    std::string polarBear         = bear + ZWJ + snowFlake + VS16;
+    std::string bear      = "\U0001F43B";
+    std::string snowFlake = "\u2744";
+    std::string polarBear = bear + ZWJ + snowFlake + VS16;
 
-    const std::array<const char*, 10> animalCombAry{{
-      guideDog.c_str(), dog.c_str(), safetyVest.c_str(), serviceDog.c_str(),
-      cat.c_str(), blackLargeSquare.c_str(), blackCat.c_str(),
-      bear.c_str(), snowFlake.c_str(), polarBear.c_str()
-    }};
-    const std::array<const char*, 10> animalCombDescAry{{
-      "GUIDE_DOG", "DOG", "SAFETY_VEST", "SERVICE_DOG = DOG + ZWJ + SAFETY_VEST",
-      "CAT", "BLACK_LARGE_SQUARE", "BLACK_CAT = CAT + ZWJ + BLACK_LARGE_SQUARE",
-      "BEAR", "SNOW_FLAKE", "POLAR_BEAR = BEAR + ZWJ + SNOW_FLAKE + VS16"
-    }};
+    const std::array<const char*, 10> animalCombAry{{guideDog.c_str(), dog.c_str(), safetyVest.c_str(), serviceDog.c_str(),
+                                                     cat.c_str(), blackLargeSquare.c_str(), blackCat.c_str(),
+                                                     bear.c_str(), snowFlake.c_str(), polarBear.c_str()}};
+    const std::array<const char*, 10> animalCombDescAry{{"GUIDE_DOG", "DOG", "SAFETY_VEST", "SERVICE_DOG = DOG + ZWJ + SAFETY_VEST",
+                                                         "CAT", "BLACK_LARGE_SQUARE", "BLACK_CAT = CAT + ZWJ + BLACK_LARGE_SQUARE",
+                                                         "BEAR", "SNOW_FLAKE", "POLAR_BEAR = BEAR + ZWJ + SNOW_FLAKE + VS16"}};
     AddEmoji(emojiView13, animalCombAry, animalCombDescAry);
 
     // * 14 * Keycap emojis
@@ -1184,20 +1132,16 @@ private:
     std::string upButton       = "\U0001F199";
     std::string reservedButton = "\U0001F22F";
 
-    const std::array<const char*, 4> keycapMoreAry{{
-      abButton.c_str(), vsButton.c_str(), upButton.c_str(), reservedButton.c_str()
-    }};
-    const std::array<const char*, 4> keycapMoreDescAry{{
-      "AB_BUTTON_BLOOD_TYPE", "VS_BUTTON", "UP_BUTTON", "JAPANESE_RESERVED_BUTTON"
-    }};
+    const std::array<const char*, 4> keycapMoreAry{{abButton.c_str(), vsButton.c_str(), upButton.c_str(), reservedButton.c_str()}};
+    const std::array<const char*, 4> keycapMoreDescAry{{"AB_BUTTON_BLOOD_TYPE", "VS_BUTTON", "UP_BUTTON", "JAPANESE_RESERVED_BUTTON"}};
     AddEmoji(emojiView14, keycapMoreAry, keycapMoreDescAry);
 
     // * 15 * Flag emojis
     std::string whiteFlag = "\U0001F3F3";
     std::string rainbow   = "\U0001F308";
 
-    std::string rainbowFlag      = whiteFlag + VS16 + ZWJ + rainbow;
-    std::string transgenderFlag  = whiteFlag + VS16 + ZWJ + transgenderSign + VS16;
+    std::string rainbowFlag     = whiteFlag + VS16 + ZWJ + rainbow;
+    std::string transgenderFlag = whiteFlag + VS16 + ZWJ + transgenderSign + VS16;
 
     std::string blackFlag          = "\U0001F3F4";
     std::string skullAndCrossbones = "\u2620";
@@ -1205,16 +1149,12 @@ private:
 
     View emojiView15 = AddRow(mMainView);
 
-    const std::array<const char*, 9> flagAry{{
-      whiteFlag.c_str(), rainbow.c_str(), rainbowFlag.c_str(),
-      whiteFlag.c_str(), transgenderSign.c_str(), transgenderFlag.c_str(),
-      blackFlag.c_str(), skullAndCrossbones.c_str(), pirateFlag.c_str()
-    }};
-    const std::array<const char*, 9> flagDescAry{{
-      "WHITE_FLAG", "RAINBOW", "RAINBOW_FLAG = WHITE_FLAG + VS16 + ZWJ + RAINBOW",
-      "WHITE_FLAG", "TRANSGENDER_SIGN", "TRANSGENDER_FLAG = WHITE_FLAG + VS16 + ZWJ + TRANSGENDER_SIGN + VS16",
-      "BLACK_FLAG", "SKULL_AND_CROSSBONES", "PIRATE_FLAG = BLACK_FLAG + ZWJ + SKULL_AND_CROSSBONES + VS16"
-    }};
+    const std::array<const char*, 9> flagAry{{whiteFlag.c_str(), rainbow.c_str(), rainbowFlag.c_str(),
+                                              whiteFlag.c_str(), transgenderSign.c_str(), transgenderFlag.c_str(),
+                                              blackFlag.c_str(), skullAndCrossbones.c_str(), pirateFlag.c_str()}};
+    const std::array<const char*, 9> flagDescAry{{"WHITE_FLAG", "RAINBOW", "RAINBOW_FLAG = WHITE_FLAG + VS16 + ZWJ + RAINBOW",
+                                                  "WHITE_FLAG", "TRANSGENDER_SIGN", "TRANSGENDER_FLAG = WHITE_FLAG + VS16 + ZWJ + TRANSGENDER_SIGN + VS16",
+                                                  "BLACK_FLAG", "SKULL_AND_CROSSBONES", "PIRATE_FLAG = BLACK_FLAG + ZWJ + SKULL_AND_CROSSBONES + VS16"}};
     AddEmoji(emojiView15, flagAry, flagDescAry);
 
     // Flag tag letters
@@ -1250,46 +1190,34 @@ private:
     std::string US = uniU + uniS;
     std::string KR = uniK + uniR;
 
-    const std::array<const char*, 9> flagNationAry{{
-      england.c_str(), scotland.c_str(), wales.c_str(),
-      GB.c_str(), DE.c_str(), EU.c_str(), UN.c_str(), US.c_str(), KR.c_str()
-    }};
-    const std::array<const char*, 9> flagNationDescAry{{
-      "ENGLAND = BLACK_FLAG + g + b + e + n + g + CANCEL_TAG",
-      "SCOTLAND = BLACK_FLAG + g + b + s + c + t + CANCEL_TAG",
-      "WALES = BLACK_FLAG + g + b + w + l + s + CANCEL_TAG",
-      "GB = G + B", "DE = D + E", "EU = E + U", "UN = U + N", "US = U + S", "KR = K + R"
-    }};
+    const std::array<const char*, 9> flagNationAry{{england.c_str(), scotland.c_str(), wales.c_str(),
+                                                    GB.c_str(), DE.c_str(), EU.c_str(), UN.c_str(), US.c_str(), KR.c_str()}};
+    const std::array<const char*, 9> flagNationDescAry{{"ENGLAND = BLACK_FLAG + g + b + e + n + g + CANCEL_TAG",
+                                                        "SCOTLAND = BLACK_FLAG + g + b + s + c + t + CANCEL_TAG",
+                                                        "WALES = BLACK_FLAG + g + b + w + l + s + CANCEL_TAG",
+                                                        "GB = G + B", "DE = D + E", "EU = E + U", "UN = U + N", "US = U + S", "KR = K + R"}};
     AddEmoji(emojiView15, flagNationAry, flagNationDescAry);
 
     // * 16 * Flag letters A-R
-    View emojiView16 = AddRow(mMainView);
-    const std::array<const char*, 18> flagLetterAry{{
-      "\U0001F1E6", "\U0001F1E7", "\U0001F1E8", "\U0001F1E9", "\U0001F1EA", "\U0001F1EB",
-      "\U0001F1EC", "\U0001F1ED", "\U0001F1EE", "\U0001F1EF", "\U0001F1F0", "\U0001F1F1",
-      "\U0001F1F2", "\U0001F1F3", "\U0001F1F4", "\U0001F1F5", "\U0001F1F6", "\U0001F1F7"
-    }};
-    const std::array<const char*, 18> flagLetterDescAry{{
-      "Unicode Character A", "Unicode Character B", "Unicode Character C",
-      "Unicode Character D", "Unicode Character E", "Unicode Character F",
-      "Unicode Character G", "Unicode Character H", "Unicode Character I",
-      "Unicode Character J", "Unicode Character K", "Unicode Character L",
-      "Unicode Character M", "Unicode Character N", "Unicode Character O",
-      "Unicode Character P", "Unicode Character Q", "Unicode Character R"
-    }};
+    View                              emojiView16 = AddRow(mMainView);
+    const std::array<const char*, 18> flagLetterAry{{"\U0001F1E6", "\U0001F1E7", "\U0001F1E8", "\U0001F1E9", "\U0001F1EA", "\U0001F1EB",
+                                                     "\U0001F1EC", "\U0001F1ED", "\U0001F1EE", "\U0001F1EF", "\U0001F1F0", "\U0001F1F1",
+                                                     "\U0001F1F2", "\U0001F1F3", "\U0001F1F4", "\U0001F1F5", "\U0001F1F6", "\U0001F1F7"}};
+    const std::array<const char*, 18> flagLetterDescAry{{"Unicode Character A", "Unicode Character B", "Unicode Character C",
+                                                         "Unicode Character D", "Unicode Character E", "Unicode Character F",
+                                                         "Unicode Character G", "Unicode Character H", "Unicode Character I",
+                                                         "Unicode Character J", "Unicode Character K", "Unicode Character L",
+                                                         "Unicode Character M", "Unicode Character N", "Unicode Character O",
+                                                         "Unicode Character P", "Unicode Character Q", "Unicode Character R"}};
     AddEmoji(emojiView16, flagLetterAry, flagLetterDescAry);
 
     // * 17 * Flag letters S-Z and tag letters
-    View emojiView17 = AddRow(mMainView);
-    const std::array<const char*, 8> flagLetter2Ary{{
-      "\U0001F1F8", "\U0001F1F9", "\U0001F1FA", "\U0001F1FB",
-      "\U0001F1FC", "\U0001F1FD", "\U0001F1FE", "\U0001F1FF"
-    }};
-    const std::array<const char*, 8> flagLetter2DescAry{{
-      "Unicode Character S", "Unicode Character T", "Unicode Character U",
-      "Unicode Character V", "Unicode Character W", "Unicode Character X",
-      "Unicode Character Y", "Unicode Character Z"
-    }};
+    View                             emojiView17 = AddRow(mMainView);
+    const std::array<const char*, 8> flagLetter2Ary{{"\U0001F1F8", "\U0001F1F9", "\U0001F1FA", "\U0001F1FB",
+                                                     "\U0001F1FC", "\U0001F1FD", "\U0001F1FE", "\U0001F1FF"}};
+    const std::array<const char*, 8> flagLetter2DescAry{{"Unicode Character S", "Unicode Character T", "Unicode Character U",
+                                                         "Unicode Character V", "Unicode Character W", "Unicode Character X",
+                                                         "Unicode Character Y", "Unicode Character Z"}};
     AddEmoji(emojiView17, flagLetter2Ary, flagLetter2DescAry);
 
     AddEmojiButton(emojiView17, letter_b.c_str(), "b", "Latin Small Letter B");
@@ -1306,13 +1234,9 @@ private:
     // * 18 * Digits and skin tones
     View emojiView18 = AddRow(mMainView);
 
-    const std::array<const char*, 12> flagDigitAry{{
-      "#", "*", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
-    }};
-    const std::array<const char*, 12> flagDigitDescAry{{
-      "HASH", "ASTERISK", "DIGIT 0", "DIGIT 1", "DIGIT 2", "DIGIT 3",
-      "DIGIT 4", "DIGIT 5", "DIGIT 6", "DIGIT 7", "DIGIT 8", "DIGIT 9"
-    }};
+    const std::array<const char*, 12> flagDigitAry{{"#", "*", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}};
+    const std::array<const char*, 12> flagDigitDescAry{{"HASH", "ASTERISK", "DIGIT 0", "DIGIT 1", "DIGIT 2", "DIGIT 3",
+                                                        "DIGIT 4", "DIGIT 5", "DIGIT 6", "DIGIT 7", "DIGIT 8", "DIGIT 9"}};
     AddEmoji(emojiView18, flagDigitAry, flagDigitDescAry);
 
     std::string lightSkinTone       = "\U0001F3FB";
@@ -1321,14 +1245,10 @@ private:
     std::string mediumDarkSkinTone  = "\U0001F3FE";
     std::string darkSkinTone        = "\U0001F3FF";
 
-    const std::array<const char*, 5> skinToneAry{{
-      lightSkinTone.c_str(), mediumLightSkinTone.c_str(), mediumSkinTone.c_str(),
-      mediumDarkSkinTone.c_str(), darkSkinTone.c_str()
-    }};
-    const std::array<const char*, 5> skinToneDescAry{{
-      "LIGHT_SKIN_TONE", "MEDIUM_LIGHT_SKIN_TONE", "MEDIUM_SKIN_TONE",
-      "MEDIUM_DARK_SKIN_TONE", "DARK_SKIN_TONE"
-    }};
+    const std::array<const char*, 5> skinToneAry{{lightSkinTone.c_str(), mediumLightSkinTone.c_str(), mediumSkinTone.c_str(),
+                                                  mediumDarkSkinTone.c_str(), darkSkinTone.c_str()}};
+    const std::array<const char*, 5> skinToneDescAry{{"LIGHT_SKIN_TONE", "MEDIUM_LIGHT_SKIN_TONE", "MEDIUM_SKIN_TONE",
+                                                      "MEDIUM_DARK_SKIN_TONE", "DARK_SKIN_TONE"}};
     AddEmoji(emojiView18, skinToneAry, skinToneDescAry);
 
     AddEmojiButton(emojiView18, ZWNJ, "ZWNJ", "Zero Width Non Joiner");
@@ -1391,42 +1311,38 @@ private:
       }
     }
 
-    std::string family               = "\U0001F46A";
-    std::string couple               = "\U0001F491";
-    std::string redHeart             = "\u2764";
-    std::string coupleWomanMan       = woman + ZWJ + redHeart + ZWJ + man;
-    std::string coupleManMan         = man + ZWJ + redHeart + ZWJ + man;
-    std::string coupleWomanWoman     = woman + ZWJ + redHeart + ZWJ + woman;
+    std::string family           = "\U0001F46A";
+    std::string couple           = "\U0001F491";
+    std::string redHeart         = "\u2764";
+    std::string coupleWomanMan   = woman + ZWJ + redHeart + ZWJ + man;
+    std::string coupleManMan     = man + ZWJ + redHeart + ZWJ + man;
+    std::string coupleWomanWoman = woman + ZWJ + redHeart + ZWJ + woman;
 
-    std::string kissMark             = "\U0001F48B";
-    std::string kiss                 = "\U0001F48F";
-    std::string kissWomanMan         = woman + ZWJ + redHeart + VS16 + ZWJ + kissMark + ZWJ + man;
-    std::string kissManMan           = man + ZWJ + redHeart + VS16 + ZWJ + kissMark + ZWJ + man;
-    std::string kissWomanWoman       = woman + ZWJ + redHeart + VS16 + ZWJ + kissMark + ZWJ + woman;
+    std::string kissMark       = "\U0001F48B";
+    std::string kiss           = "\U0001F48F";
+    std::string kissWomanMan   = woman + ZWJ + redHeart + VS16 + ZWJ + kissMark + ZWJ + man;
+    std::string kissManMan     = man + ZWJ + redHeart + VS16 + ZWJ + kissMark + ZWJ + man;
+    std::string kissWomanWoman = woman + ZWJ + redHeart + VS16 + ZWJ + kissMark + ZWJ + woman;
 
     std::string handshake            = "\U0001F91D";
     std::string peopleHoldingHands   = person + ZWJ + handshake + ZWJ + person;
     std::string womanManHoldingHands = "\U0001F46B";
 
-    const std::array<const char*, 11> familyAry{{
-      family.c_str(),
-      couple.c_str(), coupleWomanMan.c_str(), coupleManMan.c_str(), coupleWomanWoman.c_str(),
-      kiss.c_str(), kissWomanMan.c_str(), kissManMan.c_str(), kissWomanWoman.c_str(),
-      peopleHoldingHands.c_str(), womanManHoldingHands.c_str()
-    }};
-    const std::array<const char*, 11> familyDescAry{{
-      "FAMILY",
-      "COUPLE",
-      "COUPLE_WOMAN_MAN = WOMAN + ZWJ + RED_HEART + ZWJ + MAN",
-      "COUPLE_MAN_MAN = MAN + ZWJ + RED_HEART + ZWJ + MAN",
-      "COUPLE_WOMAN_WOMAN = WOMAN + ZWJ + RED_HEART + ZWJ + WOMAN",
-      "KISS",
-      "KISS_WOMAN_MAN = WOMAN + ZWJ + RED_HEART + VS16 + ZWJ + KISS_MARK + ZWJ + MAN",
-      "KISS_MAN_MAN = MAN + ZWJ + RED_HEART + VS16 + ZWJ + KISS_MARK + ZWJ + MAN",
-      "KISS_WOMAN_WOMAN = WOMAN + ZWJ + RED_HEART + VS16 + ZWJ + KISS_MARK + ZWJ + WOMAN",
-      "PEOPLE_HOLDING_HANDS = PERSON + ZWJ + HANDSHAKE + ZWJ + PERSON",
-      "WOMAN_MAN_HOLDING_HANDS"
-    }};
+    const std::array<const char*, 11> familyAry{{family.c_str(),
+                                                 couple.c_str(), coupleWomanMan.c_str(), coupleManMan.c_str(), coupleWomanWoman.c_str(),
+                                                 kiss.c_str(), kissWomanMan.c_str(), kissManMan.c_str(), kissWomanWoman.c_str(),
+                                                 peopleHoldingHands.c_str(), womanManHoldingHands.c_str()}};
+    const std::array<const char*, 11> familyDescAry{{"FAMILY",
+                                                     "COUPLE",
+                                                     "COUPLE_WOMAN_MAN = WOMAN + ZWJ + RED_HEART + ZWJ + MAN",
+                                                     "COUPLE_MAN_MAN = MAN + ZWJ + RED_HEART + ZWJ + MAN",
+                                                     "COUPLE_WOMAN_WOMAN = WOMAN + ZWJ + RED_HEART + ZWJ + WOMAN",
+                                                     "KISS",
+                                                     "KISS_WOMAN_MAN = WOMAN + ZWJ + RED_HEART + VS16 + ZWJ + KISS_MARK + ZWJ + MAN",
+                                                     "KISS_MAN_MAN = MAN + ZWJ + RED_HEART + VS16 + ZWJ + KISS_MARK + ZWJ + MAN",
+                                                     "KISS_WOMAN_WOMAN = WOMAN + ZWJ + RED_HEART + VS16 + ZWJ + KISS_MARK + ZWJ + WOMAN",
+                                                     "PEOPLE_HOLDING_HANDS = PERSON + ZWJ + HANDSHAKE + ZWJ + PERSON",
+                                                     "WOMAN_MAN_HOLDING_HANDS"}};
     AddEmoji(emojiView, familyAry, familyDescAry);
   }
 
@@ -1447,7 +1363,7 @@ private:
       return false;
     }
 
-    const std::string emoji = label.GetText().CStr();
+    const std::string emoji       = label.GetText().CStr();
     std::string       description = "[" + emoji + "] : No description";
 
     const auto it = mEmojiDictionary.find(emoji);
@@ -1713,14 +1629,14 @@ private:
   std::map<std::string, std::string> mEmojiDictionary;
   std::vector<std::string>           mHistory;
 
-  float    mScale;
-  bool     mAsyncRendering;
-  float    mPixelSize;
-  int      mCell;
-  int      mWidth;
-  int      mHeight;
-  int      mLogWidth;
-  int      mLogHeight;
+  float mScale;
+  bool  mAsyncRendering;
+  float mPixelSize;
+  int   mCell;
+  int   mWidth;
+  int   mHeight;
+  int   mLogWidth;
+  int   mLogHeight;
 
   Timer    mScaleTestTimer;
   bool     mScaleTestRunning;
@@ -1730,20 +1646,20 @@ private:
   // UI Tracking for In-Place Scale Updates
   //////////////////////////////////////////////////////////////////////////////
 
-  std::vector<TrackedLabel>     mTrackedEmojiLabels;
-  std::vector<TrackedLabel>     mTrackedOverlayLabels;
-  std::vector<TrackedLogRow>    mTrackedLogRows;
-  TrackedLabel                  mTrackedWorkbench;
-  TrackedLabel                  mTrackedTitleLabel;
-  TrackedContainer              mTrackedMainContainer;
-  TrackedContainer              mTrackedLogMainContainer;
-  TrackedContainer              mTrackedLogView;
+  std::vector<TrackedLabel>  mTrackedEmojiLabels;
+  std::vector<TrackedLabel>  mTrackedOverlayLabels;
+  std::vector<TrackedLogRow> mTrackedLogRows;
+  TrackedLabel               mTrackedWorkbench;
+  TrackedLabel               mTrackedTitleLabel;
+  TrackedContainer           mTrackedMainContainer;
+  TrackedContainer           mTrackedLogMainContainer;
+  TrackedContainer           mTrackedLogView;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetLabelAsyncRendering(true);
   config.Apply();
 

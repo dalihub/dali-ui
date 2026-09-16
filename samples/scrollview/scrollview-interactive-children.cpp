@@ -31,6 +31,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <sstream>
@@ -55,15 +56,15 @@ static const Vector4 COLOR_STATUS_BG(0.15f, 0.15f, 0.15f, 1.0f);
 // Helper: log a view's size and visibility
 static void LogViewInfo(const char* tag, View view)
 {
-  float w      = view.GetProperty<float>(Actor::Property::SIZE_WIDTH);
-  float h      = view.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
-  float lx     = view.GetProperty<float>(Actor::Property::POSITION_X);
-  float ly     = view.GetProperty<float>(Actor::Property::POSITION_Y);
-  float wx     = view.GetProperty<float>(Actor::Property::WORLD_POSITION_X);
-  float wy     = view.GetProperty<float>(Actor::Property::WORLD_POSITION_Y);
-  bool  vis    = view.GetProperty<bool>(Actor::Property::VISIBLE);
+  float   w    = view.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+  float   h    = view.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
+  float   lx   = view.GetProperty<float>(Actor::Property::POSITION_X);
+  float   ly   = view.GetProperty<float>(Actor::Property::POSITION_Y);
+  float   wx   = view.GetProperty<float>(Actor::Property::WORLD_POSITION_X);
+  float   wy   = view.GetProperty<float>(Actor::Property::WORLD_POSITION_Y);
+  bool    vis  = view.GetProperty<bool>(Actor::Property::VISIBLE);
   Vector2 scr  = view.GetProperty<Vector2>(Actor::Property::SCREEN_POSITION);
-  int clip     = view.GetProperty<int>(Actor::Property::CLIPPING_MODE);
+  int     clip = view.GetProperty<int>(Actor::Property::CLIPPING_MODE);
   DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample][Layout] %-24s  size=%5.0fx%-5.0f  local=(%5.0f,%5.0f)  world=(%6.0f,%6.0f)  screen=(%5.0f,%5.0f)  vis=%s  clip=%d\n",
                         tag, w, h, lx, ly, wx, wy, scr.x, scr.y, vis ? "Y" : "N", clip);
 }
@@ -172,15 +173,17 @@ private:
     InteractiveTrait interactive = item.AsInteractive();
     interactive.PressedChangedSignal().Connect(
       this,
-      [item, normalColor](View, bool isPressed, InputEvent) mutable {
-        item.SetBackgroundColor(isPressed ? COLOR_PRESSED : normalColor);
-      });
+      [item, normalColor](View, bool isPressed, InputEvent) mutable
+    {
+      item.SetBackgroundColor(isPressed ? COLOR_PRESSED : normalColor);
+    });
 
     interactive.ClickedSignal().Connect(
       this,
-      [this, index](View, InputEvent) {
-        OnItemClicked(index);
-      });
+      [this, index](View, InputEvent)
+    {
+      OnItemClicked(index);
+    });
 
     return item;
   }
@@ -189,10 +192,10 @@ private:
   bool OnDebugTimer()
   {
     DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample][Layout] ── post-layout size dump ──\n");
-    LogViewInfo("StatusBar",   mStatusBar);
+    LogViewInfo("StatusBar", mStatusBar);
     LogViewInfo("StatusLabel", mStatusLabel);
-    LogViewInfo("ScrollView",  mScrollView);
-    LogViewInfo("Content",     mContent);
+    LogViewInfo("ScrollView", mScrollView);
+    LogViewInfo("Content", mContent);
     for(int i = 0; i < 3; ++i)
     {
       if(mFirstItems[i])
@@ -264,7 +267,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ScrollInteractiveChildrenController controller(application);

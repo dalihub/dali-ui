@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -43,7 +44,7 @@ public:
 
     // Build a reusable fade-in spec
     mFadeInSpec = View::NewAnimationSpec()
-      .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
+                    .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
 
     InteractiveView redBox = InteractiveView::New();
     redBox.SetBackgroundColor(UiColor(0xFF0000));
@@ -87,16 +88,16 @@ public:
   }
 
 private:
-  Application&       mApplication;
-  View               mRedBox;
-  View               mBlueBox;
-  ViewAnimationSpec  mFadeInSpec;
+  Application&      mApplication;
+  View              mRedBox;
+  View              mBlueBox;
+  ViewAnimationSpec mFadeInSpec;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   AnimationExample example(application);

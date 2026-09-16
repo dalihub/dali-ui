@@ -11,7 +11,7 @@ Include the components and foundation headers and link your application against 
 ```cpp
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali/public-api/adaptor-framework/application.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

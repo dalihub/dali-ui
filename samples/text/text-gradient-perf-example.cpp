@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #if defined(__GLIBC__)
 #include <malloc.h>
@@ -36,20 +37,20 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr int      WINDOW_WIDTH         = 1920;
-constexpr int      WINDOW_HEIGHT        = 1080;
-constexpr uint32_t DEFAULT_LABEL_COUNT  = 300u;
-constexpr uint32_t GRID_COLUMNS         = 20u;
-constexpr float    HUD_HEIGHT           = 112.0f;
-constexpr float    GRID_SPACING         = 3.0f;
-constexpr float    SMALL_SIZE_SCALE     = 0.85f;
-constexpr float    LARGE_SIZE_SCALE     = 1.15f;
-constexpr float    FONT_SIZE_RATIO      = 0.36f;
-constexpr float    MIN_LABEL_FONT_SIZE  = 12.0f;
-constexpr float    MASK_RATIO_STEP      = 0.05f;
-constexpr float    GRADIENT_OFFSET_STEP = 0.12f;
-constexpr uint32_t HEARTBEAT_INTERVAL_MS = 100u;
-constexpr uint32_t DEFER_OPERATION_MS    = 60u;
+constexpr int      WINDOW_WIDTH                   = 1920;
+constexpr int      WINDOW_HEIGHT                  = 1080;
+constexpr uint32_t DEFAULT_LABEL_COUNT            = 300u;
+constexpr uint32_t GRID_COLUMNS                   = 20u;
+constexpr float    HUD_HEIGHT                     = 112.0f;
+constexpr float    GRID_SPACING                   = 3.0f;
+constexpr float    SMALL_SIZE_SCALE               = 0.85f;
+constexpr float    LARGE_SIZE_SCALE               = 1.15f;
+constexpr float    FONT_SIZE_RATIO                = 0.36f;
+constexpr float    MIN_LABEL_FONT_SIZE            = 12.0f;
+constexpr float    MASK_RATIO_STEP                = 0.05f;
+constexpr float    GRADIENT_OFFSET_STEP           = 0.12f;
+constexpr uint32_t HEARTBEAT_INTERVAL_MS          = 100u;
+constexpr uint32_t DEFER_OPERATION_MS             = 60u;
 constexpr uint32_t POST_OPERATION_MEMORY_DELAY_MS = 1500u;
 
 enum class PerfRenderMode
@@ -377,7 +378,7 @@ private:
   {
     mMode = GetInitialRenderMode();
 
-    Window window = application.GetWindow();
+    Window window       = application.GetWindow();
     auto   positionSize = window.GetPositionSize();
     window.SetPositionSize(PositionSize(positionSize.x, positionSize.y, WINDOW_WIDTH, WINDOW_HEIGHT));
     window.SetBackgroundColor(UiColor(0x10131A));
@@ -471,8 +472,8 @@ private:
     }
     else if(keyName == "h" || keyName == "H")
     {
-      mHelpVisible = !mHelpVisible;
-      mLastOperation = mHelpVisible ? "help_show" : "help_hide";
+      mHelpVisible      = !mHelpVisible;
+      mLastOperation    = mHelpVisible ? "help_show" : "help_hide";
       mRunningOperation = false;
       UpdateHud();
     }
@@ -547,8 +548,8 @@ private:
       }
     }
 
-    mLastOperationMs = LogElapsed("set_text", start);
-    mLastOperation = "set_text";
+    mLastOperationMs  = LogElapsed("set_text", start);
+    mLastOperation    = "set_text";
     mRunningOperation = false;
     UpdateMemoryAfterOperation();
     UpdateHud();
@@ -632,8 +633,8 @@ private:
     const auto start = Clock::now();
     ClearGrid(nullptr);
     CreateGrid();
-    mLastOperationMs = LogElapsed(operation, start);
-    mLastOperation = operation;
+    mLastOperationMs  = LogElapsed(operation, start);
+    mLastOperation    = operation;
     mRunningOperation = false;
     UpdateMemoryAfterOperation();
     UpdateHud();
@@ -653,8 +654,8 @@ private:
 
     if(operation)
     {
-      mLastOperationMs = LogElapsed(operation, start);
-      mLastOperation = operation;
+      mLastOperationMs  = LogElapsed(operation, start);
+      mLastOperation    = operation;
       mRunningOperation = false;
       UpdateMemoryAfterOperation();
       UpdateHud();
@@ -714,7 +715,7 @@ private:
   {
     const auto start = Clock::now();
 
-    mLabelSize = CalculateLabelSize();
+    mLabelSize                = CalculateLabelSize();
     const uint32_t labelCount = static_cast<uint32_t>(mLabels.size());
     for(uint32_t index = 0u; index < labelCount; ++index)
     {
@@ -733,8 +734,8 @@ private:
       }
     }
 
-    mLastOperationMs = LogElapsed(operation, start);
-    mLastOperation = operation;
+    mLastOperationMs  = LogElapsed(operation, start);
+    mLastOperation    = operation;
     mRunningOperation = false;
     UpdateMemoryAfterOperation();
     UpdateHud();
@@ -989,16 +990,16 @@ private:
   void StartHeartbeat()
   {
     mLastHeartbeatAt = Clock::now();
-    mHeartbeatTimer = Timer::New(HEARTBEAT_INTERVAL_MS);
+    mHeartbeatTimer  = Timer::New(HEARTBEAT_INTERVAL_MS);
     mHeartbeatTimer.TickSignal().Connect(this, &TextGradientPerfExample::OnHeartbeatTick);
     mHeartbeatTimer.Start();
   }
 
   bool OnHeartbeatTick()
   {
-    const auto now = Clock::now();
-    const double gapMs = std::chrono::duration_cast<std::chrono::microseconds>(now - mLastHeartbeatAt).count() / 1000.0;
-    const bool ignoreStall = mIgnoreNextHeartbeatStall;
+    const auto   now          = Clock::now();
+    const double gapMs        = std::chrono::duration_cast<std::chrono::microseconds>(now - mLastHeartbeatAt).count() / 1000.0;
+    const bool   ignoreStall  = mIgnoreNextHeartbeatStall;
     mIgnoreNextHeartbeatStall = false;
 
     if(!ignoreStall && gapMs > static_cast<double>(HEARTBEAT_INTERVAL_MS) + 45.0)
@@ -1007,7 +1008,7 @@ private:
     }
 
     mLastHeartbeatAt = now;
-    mHeartbeatIndex = (mHeartbeatIndex + 1u) % 8u;
+    mHeartbeatIndex  = (mHeartbeatIndex + 1u) % 8u;
     UpdateTimingBadge();
     UpdateHeartbeatBadge();
     return true;
@@ -1015,10 +1016,10 @@ private:
 
   MemorySnapshot CaptureMemorySnapshot() const
   {
-    MemorySnapshot snapshot = ReadProcessMemorySnapshot();
-    snapshot.labelCount           = static_cast<uint32_t>(mLabels.size());
-    snapshot.labelVectorSize      = mLabels.size();
-    snapshot.labelVectorCapacity  = mLabels.capacity();
+    MemorySnapshot snapshot      = ReadProcessMemorySnapshot();
+    snapshot.labelCount          = static_cast<uint32_t>(mLabels.size());
+    snapshot.labelVectorSize     = mLabels.size();
+    snapshot.labelVectorCapacity = mLabels.capacity();
     return snapshot;
   }
 
@@ -1033,9 +1034,9 @@ private:
     mIgnoreNextHeartbeatStall = true;
 
     const MemorySnapshot snapshot = CaptureMemorySnapshot();
-    mMemoryBaseline              = snapshot;
-    mHasMemoryBaseline           = true;
-    mPeakMemoryKb                = snapshot.pssKb;
+    mMemoryBaseline               = snapshot;
+    mHasMemoryBaseline            = true;
+    mPeakMemoryKb                 = snapshot.pssKb;
     UpdateObservedMemory(snapshot);
     PrintMemorySnapshot(tag, snapshot);
   }
@@ -1089,7 +1090,7 @@ private:
       mMemoryUpdateTimer.Reset();
     }
 
-    mMemoryRefreshPending = false;
+    mMemoryRefreshPending     = false;
     mIgnoreNextHeartbeatStall = true;
 
     AppendMemorySnapshot((mPendingMemoryUpdateTag + "-before-trim").c_str());
@@ -1126,7 +1127,7 @@ private:
 
   void UpdateTimingBadge()
   {
-    const UiColor timingColor = GetTimingColor(mLastOperationMs, mLastStallMs);
+    const UiColor      timingColor = GetTimingColor(mLastOperationMs, mLastStallMs);
     std::ostringstream timingText;
     timingText << std::fixed << std::setprecision(1)
                << "WORK " << mLastOperationMs << "ms"
@@ -1243,7 +1244,7 @@ private:
 
   double LogElapsed(const char* operation, Clock::time_point start) const
   {
-    const auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - start).count();
+    const auto   elapsed   = std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - start).count();
     const double elapsedMs = static_cast<double>(elapsed) / 1000.0;
     std::printf(
       "TEXT_GRADIENT_PERF_EXAMPLE operation=%s mode=%s scenario=%s count=%zu async=%s elapsedMs=%.3f\n",
@@ -1257,52 +1258,52 @@ private:
   }
 
 private:
-  Application&       mApplication;
+  Application&               mApplication;
   const uint32_t             mLabelCount{GetConfiguredLabelCount()};
   const GradientSpanScenario mGradientSpanScenario{GetGradientSpanScenario()};
-  AbsoluteLayout     mRoot;
-  AbsoluteLayout     mGridRoot;
-  AbsoluteLayout     mHudRoot;
-  Label              mModeBadge;
-  Label              mCountBadge;
-  Label              mAsyncBadge;
-  Label              mOperationBadge;
-  Label              mTimingBadge;
-  Label              mHeartbeatBadge;
-  Label              mHeapBadge;
-  Label              mMemoryBadge;
-  Label              mDetailLabel;
-  Label              mHelpLabel;
-  std::vector<Label> mLabels;
-  std::vector<View>  mMaskViews;
-  Timer              mDeferredOperationTimer;
-  Timer              mHeartbeatTimer;
-  Timer              mMemoryUpdateTimer;
-  PerfRenderMode     mMode{PerfRenderMode::TEXT_GRADIENT};
-  PendingOperation   mPendingOperation{PendingOperation::NONE};
-  GradientSpec       mGradientSpec;
-  MaskGradientBounds mMaskBounds;
-  Vector2            mLabelSize{0.0f, 0.0f};
-  float              mWindowWidth{static_cast<float>(WINDOW_WIDTH)};
-  float              mWindowHeight{static_cast<float>(WINDOW_HEIGHT)};
-  std::size_t        mTextIndex{0u};
-  std::string        mLastOperation{"init"};
-  std::string        mPendingOperationName;
-  std::string        mPendingMemoryUpdateTag;
-  Clock::time_point  mLastHeartbeatAt;
-  MemorySnapshot     mMemoryBaseline;
-  MemorySnapshot     mLastMemorySnapshot;
-  double             mLastOperationMs{0.0};
-  double             mLastStallMs{0.0};
-  long               mPeakMemoryKb{0};
-  uint32_t           mHeartbeatIndex{0u};
+  AbsoluteLayout             mRoot;
+  AbsoluteLayout             mGridRoot;
+  AbsoluteLayout             mHudRoot;
+  Label                      mModeBadge;
+  Label                      mCountBadge;
+  Label                      mAsyncBadge;
+  Label                      mOperationBadge;
+  Label                      mTimingBadge;
+  Label                      mHeartbeatBadge;
+  Label                      mHeapBadge;
+  Label                      mMemoryBadge;
+  Label                      mDetailLabel;
+  Label                      mHelpLabel;
+  std::vector<Label>         mLabels;
+  std::vector<View>          mMaskViews;
+  Timer                      mDeferredOperationTimer;
+  Timer                      mHeartbeatTimer;
+  Timer                      mMemoryUpdateTimer;
+  PerfRenderMode             mMode{PerfRenderMode::TEXT_GRADIENT};
+  PendingOperation           mPendingOperation{PendingOperation::NONE};
+  GradientSpec               mGradientSpec;
+  MaskGradientBounds         mMaskBounds;
+  Vector2                    mLabelSize{0.0f, 0.0f};
+  float                      mWindowWidth{static_cast<float>(WINDOW_WIDTH)};
+  float                      mWindowHeight{static_cast<float>(WINDOW_HEIGHT)};
+  std::size_t                mTextIndex{0u};
+  std::string                mLastOperation{"init"};
+  std::string                mPendingOperationName;
+  std::string                mPendingMemoryUpdateTag;
+  Clock::time_point          mLastHeartbeatAt;
+  MemorySnapshot             mMemoryBaseline;
+  MemorySnapshot             mLastMemorySnapshot;
+  double                     mLastOperationMs{0.0};
+  double                     mLastStallMs{0.0};
+  long                       mPeakMemoryKb{0};
+  uint32_t                   mHeartbeatIndex{0u};
   bool                       mAsyncRendering{GetInitialAsyncRendering()};
-  bool               mLargeSize{false};
-  bool               mHelpVisible{false};
-  bool               mRunningOperation{false};
-  bool               mHasMemoryBaseline{false};
-  bool               mMemoryRefreshPending{false};
-  bool               mIgnoreNextHeartbeatStall{false};
+  bool                       mLargeSize{false};
+  bool                       mHelpVisible{false};
+  bool                       mRunningOperation{false};
+  bool                       mHasMemoryBaseline{false};
+  bool                       mMemoryRefreshPending{false};
+  bool                       mIgnoreNextHeartbeatStall{false};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -29,16 +30,14 @@ const char* CARD_TEXTS[] = {
   "The Metropolitan Museum of Art",
   "National Gallery in Prague",
   "Tokyo National Museum",
-  "Victoria and Albert Museum"
-};
+  "Victoria and Albert Museum"};
 
 const char* CARD_DESCS[] = {
   "322 Pieces",
   "14 Pieces",
   "2 Pieces",
   "15 Pieces",
-  "22 Pieces"
-};
+  "22 Pieces"};
 
 const Vector4 CARD_COLORS[] = {
   Vector4(0.0f, 0.5f, 1.0f, 1.0f),  // Blue
@@ -283,11 +282,11 @@ private:
 
     // Store card info for animation
     CardInfo info;
-    info.card = card;
-    info.titleLabel = titleLabel;
-    info.descLabel = descLabel;
+    info.card           = card;
+    info.titleLabel     = titleLabel;
+    info.descLabel      = descLabel;
     info.useRenderScale = useRenderScale;
-    info.colorBlock = colorBlock;
+    info.colorBlock     = colorBlock;
 
     if(useRenderScale)
     {
@@ -467,7 +466,7 @@ private:
     if(touch.GetState(0) == PointState::MOTION)
     {
       Vector2 position = touch.GetLocalPosition(0);
-      mCurrentScale = std::clamp(1.0f + (position.x / mScaleBar.GetSize().width) * 1.5f, 1.0f, 2.5f);
+      mCurrentScale    = std::clamp(1.0f + (position.x / mScaleBar.GetSize().width) * 1.5f, 1.0f, 2.5f);
       UpdateScaleDisplay();
     }
     return true;
@@ -479,12 +478,12 @@ private:
   // -------------------------------------------------------------------------
   struct CardInfo
   {
-    View        card;
-    Label       titleLabel;
-    Label       descLabel;
-    View        colorBlock;
-    bool        useRenderScale;
-    Animation   currentAnimation;
+    View      card;
+    Label     titleLabel;
+    Label     descLabel;
+    View      colorBlock;
+    bool      useRenderScale;
+    Animation currentAnimation;
   };
 
   // -------------------------------------------------------------------------
@@ -492,10 +491,10 @@ private:
   // -------------------------------------------------------------------------
   Application& mApplication;
 
-  float        mCurrentScale;
-  View         mScaleBar;
-  View         mScaleIndicator;
-  Label        mScaleValueLabel;
+  float mCurrentScale;
+  View  mScaleBar;
+  View  mScaleIndicator;
+  Label mScaleValueLabel;
 
   std::vector<CardInfo> mRenderScaleCards;
   std::vector<CardInfo> mOriginalCards;

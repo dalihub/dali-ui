@@ -17,6 +17,7 @@
 #include <dali-ui-components/public-api/window/window-frame.h>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <algorithm>
 #include <functional>

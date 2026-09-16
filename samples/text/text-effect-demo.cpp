@@ -15,7 +15,7 @@
 
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali/public-api/adaptor-framework/application.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 
 #include <algorithm>
@@ -39,35 +39,35 @@ constexpr float CARD_MINIMUM_HEIGHT      = 379.0f;
 constexpr float CARD_HORIZONTAL_MARGIN   = 8.0f;
 constexpr float CARD_VERTICAL_MARGIN     = 4.0f;
 
-constexpr uint32_t BACKGROUND_COLOR       = 0x0A0F1C;
-constexpr uint32_t BACKGROUND_DEEP_COLOR  = 0x0E1628;
-constexpr uint32_t CARD_COLOR             = 0x141D30;
-constexpr uint32_t CARD_SELECTED_COLOR    = 0x18243A;
-constexpr uint32_t CARD_LINE_COLOR        = 0x273753;
-constexpr uint32_t PRIMARY_TEXT_COLOR     = 0xF5F7FB;
-constexpr uint32_t SECONDARY_TEXT_COLOR   = 0x9DA9BC;
-constexpr uint32_t MUTED_TEXT_COLOR       = 0x6F7E94;
-constexpr uint32_t BLUE_COLOR             = 0x3D7BFF;
-constexpr uint32_t CYAN_COLOR             = 0x52E5FF;
-constexpr uint32_t PURPLE_COLOR           = 0x8E6CFF;
-constexpr uint32_t SUCCESS_COLOR          = 0x65E6A5;
+constexpr uint32_t BACKGROUND_COLOR      = 0x0A0F1C;
+constexpr uint32_t BACKGROUND_DEEP_COLOR = 0x0E1628;
+constexpr uint32_t CARD_COLOR            = 0x141D30;
+constexpr uint32_t CARD_SELECTED_COLOR   = 0x18243A;
+constexpr uint32_t CARD_LINE_COLOR       = 0x273753;
+constexpr uint32_t PRIMARY_TEXT_COLOR    = 0xF5F7FB;
+constexpr uint32_t SECONDARY_TEXT_COLOR  = 0x9DA9BC;
+constexpr uint32_t MUTED_TEXT_COLOR      = 0x6F7E94;
+constexpr uint32_t BLUE_COLOR            = 0x3D7BFF;
+constexpr uint32_t CYAN_COLOR            = 0x52E5FF;
+constexpr uint32_t PURPLE_COLOR          = 0x8E6CFF;
+constexpr uint32_t SUCCESS_COLOR         = 0x65E6A5;
 
-constexpr float SCENE_FADE_OUT_SECONDS       = 0.22f;
-constexpr float SCENE_FADE_IN_SECONDS        = 0.30f;
-constexpr float CARD_ENTRANCE_SECONDS        = 0.36f;
-constexpr float AFFORDANCE_ENTRANCE_SECONDS  = 0.32f;
-constexpr float MARKDOWN_ENTRANCE_SECONDS    = 0.36f;
-constexpr float INTRO_GRADIENT_SECONDS       = 2.80f;
-constexpr float SHIMMER_DURATION_SECONDS     = 1.40f;
-constexpr float SKELETON_SHIMMER_SECONDS     = 1.85f;
-constexpr float HERO_GRADIENT_SECONDS       = 6.00f;
-constexpr float HIGHLIGHT_SWEEP_SECONDS     = 0.85f;
-constexpr float REVEAL_SEQUENCE_SECONDS     = 2.65f;
-constexpr float COMPLETE_REVEAL_SECONDS     = 0.60f;
-constexpr float STATUS_FADE_OUT_SECONDS      = 0.28f;
-constexpr float STATUS_FADE_IN_SECONDS       = 0.52f;
-constexpr float DETAIL_STATUS_REVEAL_SECONDS = 1.00f;
-constexpr uint32_t GENERATING_INTERVAL_MS = 1300u;
+constexpr float    SCENE_FADE_OUT_SECONDS       = 0.22f;
+constexpr float    SCENE_FADE_IN_SECONDS        = 0.30f;
+constexpr float    CARD_ENTRANCE_SECONDS        = 0.36f;
+constexpr float    AFFORDANCE_ENTRANCE_SECONDS  = 0.32f;
+constexpr float    MARKDOWN_ENTRANCE_SECONDS    = 0.36f;
+constexpr float    INTRO_GRADIENT_SECONDS       = 2.80f;
+constexpr float    SHIMMER_DURATION_SECONDS     = 1.40f;
+constexpr float    SKELETON_SHIMMER_SECONDS     = 1.85f;
+constexpr float    HERO_GRADIENT_SECONDS        = 6.00f;
+constexpr float    HIGHLIGHT_SWEEP_SECONDS      = 0.85f;
+constexpr float    REVEAL_SEQUENCE_SECONDS      = 2.65f;
+constexpr float    COMPLETE_REVEAL_SECONDS      = 0.60f;
+constexpr float    STATUS_FADE_OUT_SECONDS      = 0.28f;
+constexpr float    STATUS_FADE_IN_SECONDS       = 0.52f;
+constexpr float    DETAIL_STATUS_REVEAL_SECONDS = 1.00f;
+constexpr uint32_t GENERATING_INTERVAL_MS       = 1300u;
 
 constexpr std::array<const char*, 4u> GENERATING_STATUS{{
   "Understanding your travel style...",
@@ -1067,14 +1067,10 @@ private:
     for(std::size_t index = 0u; index < mCards.size(); ++index)
     {
       const float delay = CARD_DELAY[index];
-      mCards[index].day.Animate(mRevealSequenceAnimation)
-        .TextRevealProgress(1.0f, Duration(0.42f), AlphaFunction::LINEAR, Duration(delay));
-      mCards[index].title.Animate(mRevealSequenceAnimation)
-        .TextRevealProgress(1.0f, Duration(0.88f), AlphaFunction::LINEAR, Duration(delay + 0.10f));
-      mCards[index].places.Animate(mRevealSequenceAnimation)
-        .TextRevealProgress(1.0f, Duration(1.18f), AlphaFunction::LINEAR, Duration(delay + 0.30f));
-      mCards[index].subtitle.Animate(mRevealSequenceAnimation)
-        .TextRevealProgress(1.0f, Duration(1.05f), AlphaFunction::LINEAR, Duration(delay + 0.42f));
+      mCards[index].day.Animate(mRevealSequenceAnimation).TextRevealProgress(1.0f, Duration(0.42f), AlphaFunction::LINEAR, Duration(delay));
+      mCards[index].title.Animate(mRevealSequenceAnimation).TextRevealProgress(1.0f, Duration(0.88f), AlphaFunction::LINEAR, Duration(delay + 0.10f));
+      mCards[index].places.Animate(mRevealSequenceAnimation).TextRevealProgress(1.0f, Duration(1.18f), AlphaFunction::LINEAR, Duration(delay + 0.30f));
+      mCards[index].subtitle.Animate(mRevealSequenceAnimation).TextRevealProgress(1.0f, Duration(1.05f), AlphaFunction::LINEAR, Duration(delay + 0.42f));
     }
     mRevealSequenceAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
     {
@@ -1098,8 +1094,7 @@ private:
 
     mCards[1].title.SetTextGradient(NewSeaSunsetGradient(-0.12f));
     mHeroGradientAnimation = Animation::New(HERO_GRADIENT_SECONDS);
-    mCards[1].title.Animate(mHeroGradientAnimation)
-      .TextGradientStartOffset(0.34f, Duration(HERO_GRADIENT_SECONDS), AlphaFunction::LINEAR);
+    mCards[1].title.Animate(mHeroGradientAnimation).TextGradientStartOffset(0.34f, Duration(HERO_GRADIENT_SECONDS), AlphaFunction::LINEAR);
     mHeroGradientAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mHeroGradientAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
     mHeroGradientAnimation.SetEndAction(Animation::DISCARD);
@@ -1121,8 +1116,7 @@ private:
 
     ConfigureShimmer(mCards[1].title, true);
     mOverlaySweepAnimation = Animation::New(HIGHLIGHT_SWEEP_SECONDS);
-    mCards[1].title.Animate(mOverlaySweepAnimation)
-      .TextGradientOverlayStartOffset(-1.15f, Duration(HIGHLIGHT_SWEEP_SECONDS), AlphaFunction::LINEAR);
+    mCards[1].title.Animate(mOverlaySweepAnimation).TextGradientOverlayStartOffset(-1.15f, Duration(HIGHLIGHT_SWEEP_SECONDS), AlphaFunction::LINEAR);
     mOverlaySweepAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
     {
       if(token != mLifecycleToken || animation != mOverlaySweepAnimation)
@@ -1513,11 +1507,11 @@ int DALI_EXPORT_API main(int argc, char** argv)
 // Markdown streaming simulator
 namespace
 {
-constexpr uint32_t DETAIL_MARKDOWN_DELAY_MS        = 3000u;
-constexpr uint32_t MARKDOWN_STREAM_START_DELAY_MS  = 180u;
-constexpr uint32_t MARKDOWN_STREAM_INTERVAL        = 6u;
-constexpr uint32_t MARKDOWN_SCROLL_INTERVAL        = 10u;
-constexpr uint32_t FINAL_SCROLL_DELAY_MS           = 32u;
+constexpr uint32_t DETAIL_MARKDOWN_DELAY_MS       = 3000u;
+constexpr uint32_t MARKDOWN_STREAM_START_DELAY_MS = 180u;
+constexpr uint32_t MARKDOWN_STREAM_INTERVAL       = 6u;
+constexpr uint32_t MARKDOWN_SCROLL_INTERVAL       = 10u;
+constexpr uint32_t FINAL_SCROLL_DELAY_MS          = 32u;
 
 constexpr std::array<const char*, 10u> MARKDOWN_CHUNKS{{
   R"MD(# Day 2 · Sea & Sunset 🌊

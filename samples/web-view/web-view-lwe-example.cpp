@@ -37,6 +37,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -83,7 +84,7 @@ private:
   void OnInit(Application application)
   {
     Window window     = application.GetWindow();
-    auto   windowSize    = window.GetPositionSize();
+    auto   windowSize = window.GetPositionSize();
     window.SetBackgroundColor(Color::BLACK);
 
     // ---- Create WebView ------------------------------------------------
@@ -301,7 +302,7 @@ private:
   }
 
 private:
-  Application&     mApplication;
+  Application&      mApplication;
   Dali::Ui::WebView mWebView;
   bool              mFirstFrameReceived{false};
 };
@@ -312,8 +313,8 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application           application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  Application application = Application::New(&argc, &argv);
+  UiConfig    config      = UiConfig::New();
   config.SetWebEngineType(WebEngineType::LWE);
   config.Apply();
   WebViewSampleController sample(application);

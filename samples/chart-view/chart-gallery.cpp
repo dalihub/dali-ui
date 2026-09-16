@@ -33,6 +33,7 @@
 
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture.h>
 
@@ -128,7 +129,7 @@ public:
 
   void OnCreate(Application application)
   {
-    Window  window = application.GetWindow();
+    Window  window       = application.GetWindow();
     auto    positionSize = window.GetPositionSize();
     Vector2 windowSize   = Vector2(static_cast<float>(positionSize.width), static_cast<float>(positionSize.height));
     window.SetBackgroundColor(Vector4(0.93f, 0.93f, 0.95f, 1.0f));

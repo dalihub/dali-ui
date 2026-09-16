@@ -71,11 +71,8 @@ FastTrack은 성능 속성이라 화면·카운터 어디에도 관측점이 없
 ## 통과 기준
 
 - Sync OFF의 Reload는 카운터 +1, Sync ON의 Reload는 카운터 불변이어야 한다
+- Sync ON이어도 `SetResourceUrl(다른 URL)`로 새 이미지가 준비되면 `ResourceReadySignal`이
+  정확히 한 번 발생해야 한다 (로드 완료 알림에는 동기 로드 예외가 없다)
 - OrientationCorrection: ON/OFF 렌더가 다르고(TOP 띠 방향), ON→OFF→ON이 비트 동일 복원
 - PreMult: 알파 PNG에서 ON/OFF 차이가 반투명 경계에 한정되고(임계 64에서 0px), 왕복 복원
 - 네 플래그의 Is* 반환값이 설정한 값과 일치해야 한다 (PreMult 초기값 ON 포함)
-
-> **알려진 컴포넌트 결함 F22 (이슈 리포트 대상, 3.12 막힘 유지)**: Sync ON에서도
-> `SetResourceUrl(다른 URL)`은 ResourceReadySignal을 쏜다(`image-visual.cpp`의 인라인
-> emit에 SYNCHRONOUS_LOADING 억제가 없다). Reload 경로는 플래그를 지키고 재생성 경로는
-> 어긴다 — 고치는 쪽이 어느 의미가 옳은지 함께 정해야 한다.

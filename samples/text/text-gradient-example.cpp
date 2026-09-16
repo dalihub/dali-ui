@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <algorithm>
 #include <array>
@@ -27,43 +28,43 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING    = 12.0f;
-constexpr float HEADER_PADDING   = 12.0f;
-constexpr float HEADER_ROW_GAP   = 8.0f;
-constexpr float HEADER_BADGE_HEIGHT = 30.0f;
-constexpr float HEADER_INFO_HEIGHT  = 34.0f;
-constexpr float CONTENT_PADDING  = 16.0f;
-constexpr float FOOTER_PADDING   = 12.0f;
-constexpr float FOOTER_ROW_GAP   = 8.0f;
-constexpr float FOOTER_TITLE_WIDTH = 120.0f;
-constexpr float FOOTER_BADGE_HEIGHT = 28.0f;
-constexpr float FOOTER_LINE_HEIGHT  = 24.0f;
-constexpr float HEADER_HEIGHT     = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_INFO_HEIGHT + HEADER_PADDING;
-constexpr float FOOTER_HEIGHT     = FOOTER_PADDING + FOOTER_BADGE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_PADDING;
-constexpr float MATRIX_TITLE_HEIGHT = 18.0f;
-constexpr float MATRIX_HEADER_HEIGHT = 20.0f;
-constexpr float MATRIX_HORIZONTAL_ROW_HEIGHT = 30.0f;
-constexpr float MATRIX_VERTICAL_ROW_HEIGHT   = 72.0f;
-constexpr float MATRIX_CAPTION_WIDTH = 76.0f;
-constexpr float MATRIX_CELL_WIDTH    = 188.0f;
-constexpr int   WINDOW_WIDTH     = 920;
-constexpr int   WINDOW_HEIGHT    = 880;
-constexpr std::size_t CASE_COUNT                         = 16u;
-constexpr std::size_t INITIAL_CASE_INDEX                 = 0u;
-constexpr std::size_t INITIAL_ALIGNMENT_INDEX            = 1u;
-constexpr std::size_t INITIAL_SPREAD_METHOD_INDEX        = 0u;
-constexpr std::size_t INITIAL_GRADIENT_BOUNDS_MODE_INDEX = 0u;
-constexpr uint32_t BADGE_DISABLED_BACKGROUND             = 0x1E293B;
-constexpr uint32_t BADGE_DISABLED_BORDER                 = 0x475569;
-constexpr uint32_t BADGE_DISABLED_TEXT                   = 0xCBD5E1;
-constexpr uint32_t BADGE_READY_BACKGROUND                = 0x075985;
-constexpr uint32_t BADGE_READY_BORDER                    = 0x38BDF8;
-constexpr uint32_t BADGE_APPLY_BACKGROUND                = 0x047857;
-constexpr uint32_t BADGE_APPLY_BORDER                    = 0x6EE7B7;
-constexpr uint32_t BADGE_ON_TEXT                         = 0xF8FAFC;
-constexpr float OVERLAY_EFFECT_SHIMMER_START_OFFSET      = 1.0f;
-constexpr float OVERLAY_EFFECT_SHIMMER_END_OFFSET        = -1.0f;
-constexpr float OVERLAY_EFFECT_SHIMMER_DURATION          = 1.4f;
+constexpr float       STACK_SPACING                       = 12.0f;
+constexpr float       HEADER_PADDING                      = 12.0f;
+constexpr float       HEADER_ROW_GAP                      = 8.0f;
+constexpr float       HEADER_BADGE_HEIGHT                 = 30.0f;
+constexpr float       HEADER_INFO_HEIGHT                  = 34.0f;
+constexpr float       CONTENT_PADDING                     = 16.0f;
+constexpr float       FOOTER_PADDING                      = 12.0f;
+constexpr float       FOOTER_ROW_GAP                      = 8.0f;
+constexpr float       FOOTER_TITLE_WIDTH                  = 120.0f;
+constexpr float       FOOTER_BADGE_HEIGHT                 = 28.0f;
+constexpr float       FOOTER_LINE_HEIGHT                  = 24.0f;
+constexpr float       HEADER_HEIGHT                       = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_INFO_HEIGHT + HEADER_PADDING;
+constexpr float       FOOTER_HEIGHT                       = FOOTER_PADDING + FOOTER_BADGE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_PADDING;
+constexpr float       MATRIX_TITLE_HEIGHT                 = 18.0f;
+constexpr float       MATRIX_HEADER_HEIGHT                = 20.0f;
+constexpr float       MATRIX_HORIZONTAL_ROW_HEIGHT        = 30.0f;
+constexpr float       MATRIX_VERTICAL_ROW_HEIGHT          = 72.0f;
+constexpr float       MATRIX_CAPTION_WIDTH                = 76.0f;
+constexpr float       MATRIX_CELL_WIDTH                   = 188.0f;
+constexpr int         WINDOW_WIDTH                        = 920;
+constexpr int         WINDOW_HEIGHT                       = 880;
+constexpr std::size_t CASE_COUNT                          = 16u;
+constexpr std::size_t INITIAL_CASE_INDEX                  = 0u;
+constexpr std::size_t INITIAL_ALIGNMENT_INDEX             = 1u;
+constexpr std::size_t INITIAL_SPREAD_METHOD_INDEX         = 0u;
+constexpr std::size_t INITIAL_GRADIENT_BOUNDS_MODE_INDEX  = 0u;
+constexpr uint32_t    BADGE_DISABLED_BACKGROUND           = 0x1E293B;
+constexpr uint32_t    BADGE_DISABLED_BORDER               = 0x475569;
+constexpr uint32_t    BADGE_DISABLED_TEXT                 = 0xCBD5E1;
+constexpr uint32_t    BADGE_READY_BACKGROUND              = 0x075985;
+constexpr uint32_t    BADGE_READY_BORDER                  = 0x38BDF8;
+constexpr uint32_t    BADGE_APPLY_BACKGROUND              = 0x047857;
+constexpr uint32_t    BADGE_APPLY_BORDER                  = 0x6EE7B7;
+constexpr uint32_t    BADGE_ON_TEXT                       = 0xF8FAFC;
+constexpr float       OVERLAY_EFFECT_SHIMMER_START_OFFSET = 1.0f;
+constexpr float       OVERLAY_EFFECT_SHIMMER_END_OFFSET   = -1.0f;
+constexpr float       OVERLAY_EFFECT_SHIMMER_DURATION     = 1.4f;
 
 enum class GradientKind
 {
@@ -98,19 +99,19 @@ enum class GradientSpanCase
 
 struct CaseDefinition
 {
-  const char*  title;
-  const char*  text;
-  const char*  expected;
-  const char*  notes;
-  GradientKind gradient;
-  float        fontSize;
-  bool         multiline;
-  bool         markup;
-  bool         style;
-  bool         marquee{false};
+  const char*              title;
+  const char*              text;
+  const char*              expected;
+  const char*              notes;
+  GradientKind             gradient;
+  float                    fontSize;
+  bool                     multiline;
+  bool                     markup;
+  bool                     style;
+  bool                     marquee{false};
   Text::MarqueeOrientation marqueeOrientation{Text::MarqueeOrientation::HORIZONTAL};
-  bool         marqueeDefaultRunning{true};
-  bool         compactGradientSpan{false};
+  bool                     marqueeDefaultRunning{true};
+  bool                     compactGradientSpan{false};
   GradientSpanCase         gradientSpanCase{GradientSpanCase::NONE};
 };
 
@@ -987,10 +988,10 @@ private:
   {
     StopGradientAnimation();
     StopGradientOverlayAnimation();
-    mMarqueeMatrixMode = false;
-    mCaseIndex         = index % CASES.size();
-    mGradientApplied   = true;
-    mMarqueeRunning    = CASES[mCaseIndex].marqueeDefaultRunning;
+    mMarqueeMatrixMode       = false;
+    mCaseIndex               = index % CASES.size();
+    mGradientApplied         = true;
+    mMarqueeRunning          = CASES[mCaseIndex].marqueeDefaultRunning;
     mGradientSpanSourceStage = 0u;
     StopMarqueeMatrixLabels();
     SetMarqueeMatrixVisible(false);
@@ -1090,9 +1091,9 @@ private:
     const float marqueeWidth = row1Width * 0.15f;
     const float matrixWidth  = std::max(row1Width - caseWidth - sizeWidth - hAlignWidth - vAlignWidth - marqueeWidth, 0.0f);
 
-    const float gradientWidth = row2Width * 0.15f;
-    const float spreadWidth   = row2Width * 0.15f;
-    const float boundsWidth   = row2Width * 0.16f;
+    const float gradientWidth  = row2Width * 0.15f;
+    const float spreadWidth    = row2Width * 0.15f;
+    const float boundsWidth    = row2Width * 0.16f;
     const float animationWidth = row2Width * 0.16f;
     const float clearWidth     = row2Width * 0.16f;
     const float resetWidth     = std::max(row2Width - gradientWidth - spreadWidth - boundsWidth - animationWidth - clearWidth, 0.0f);
@@ -1276,13 +1277,13 @@ private:
     return label;
   }
 
-  Label CreateMarqueeMatrixLabel(const char* text,
-                                 bool asyncRendering,
+  Label CreateMarqueeMatrixLabel(const char*              text,
+                                 bool                     asyncRendering,
                                  Text::MarqueeOrientation orientation,
-                                 Text::Alignment horizontalAlignment,
-                                 Text::Alignment verticalAlignment,
-                                 bool multiline,
-                                 float rowHeight)
+                                 Text::Alignment          horizontalAlignment,
+                                 Text::Alignment          verticalAlignment,
+                                 bool                     multiline,
+                                 float                    rowHeight)
   {
     Label label = CreateLabel(text, orientation == Text::MarqueeOrientation::HORIZONTAL ? 18.0f : 16.0f, UiColor(0x111827));
     label.SetAsyncRendering(asyncRendering);
@@ -1326,21 +1327,21 @@ private:
     mMarqueeMatrixContainer.Add(row);
   }
 
-  void AddMarqueeMatrixRow(const char* caption,
+  void AddMarqueeMatrixRow(const char*              caption,
                            Text::MarqueeOrientation orientation,
-                           Text::Alignment alignment)
+                           Text::Alignment          alignment)
   {
-    const bool isHorizontal = orientation == Text::MarqueeOrientation::HORIZONTAL;
-    const float rowHeight   = isHorizontal ? MATRIX_HORIZONTAL_ROW_HEIGHT : MATRIX_VERTICAL_ROW_HEIGHT;
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    const bool  isHorizontal = orientation == Text::MarqueeOrientation::HORIZONTAL;
+    const float rowHeight    = isHorizontal ? MATRIX_HORIZONTAL_ROW_HEIGHT : MATRIX_VERTICAL_ROW_HEIGHT;
+    StackLayout row          = StackLayout::New(StackOrientation::HORIZONTAL);
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(rowHeight);
 
-    const char* const shortText = isHorizontal ? "Short" : "V\nShort";
-    const char* const longText  = isHorizontal
-                                    ? "Horizontal marquee gradient matrix sample keeps moving with content bounds"
-                                    : "Vertical\nmarquee\ngradient\nmatrix\ncontent\nbounds";
+    const char* const     shortText           = isHorizontal ? "Short" : "V\nShort";
+    const char* const     longText            = isHorizontal
+                                                  ? "Horizontal marquee gradient matrix sample keeps moving with content bounds"
+                                                  : "Vertical\nmarquee\ngradient\nmatrix\ncontent\nbounds";
     const Text::Alignment horizontalAlignment = isHorizontal ? alignment : Text::Alignment::CENTER;
     const Text::Alignment verticalAlignment   = isHorizontal ? Text::Alignment::CENTER : alignment;
 
@@ -1714,7 +1715,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopAnimationForOptionChange();
-    mGradientApplied = true;
+    mGradientApplied               = true;
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2003,7 +2004,7 @@ private:
 
     StopGradientAnimation();
 
-    const float duration = GetAnimationDuration(CurrentSpreadMethod());
+    const float duration   = GetAnimationDuration(CurrentSpreadMethod());
     mTextGradientAnimation = Animation::New(duration);
     mTextGradientAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mTextGradientAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
@@ -2032,8 +2033,8 @@ private:
         mPreviewLabel.StopMarquee();
         mAsyncPreviewLabel.StopMarquee();
       }
-      const GradientKind animationGradient = GetEffectiveCaseGradientKind(CASES[mCaseIndex]);
-      const bool compactGradientSpan = CASES[mCaseIndex].compactGradientSpan;
+      const GradientKind animationGradient   = GetEffectiveCaseGradientKind(CASES[mCaseIndex]);
+      const bool         compactGradientSpan = CASES[mCaseIndex].compactGradientSpan;
       ApplyAnimationBaseGradientToLabel(mPreviewLabel, animationGradient, compactGradientSpan);
       ApplyAnimationBaseGradientToLabel(mAsyncPreviewLabel, animationGradient, compactGradientSpan);
       ApplyGradientAnimation(mPreviewLabel);
@@ -2082,7 +2083,7 @@ private:
 
     StopGradientOverlayAnimation();
 
-    const float duration = GetOverlayAnimationDuration(CurrentOverlayFillMode(), CurrentOverlaySpreadMethod());
+    const float duration          = GetOverlayAnimationDuration(CurrentOverlayFillMode(), CurrentOverlaySpreadMethod());
     mTextGradientOverlayAnimation = Animation::New(duration);
     mTextGradientOverlayAnimation.SetLoopCount(Animation::INFINITE_LOOP);
     mTextGradientOverlayAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
@@ -2206,11 +2207,11 @@ private:
 
   void ApplyOverlayGradientToLabelByKind(Label label, GradientKind gradient, bool useEffectAnimationStartOffset = false)
   {
-    const Gradient::SpreadMethod      spreadMethod = CurrentOverlaySpreadMethod();
-    const Text::GradientBoundsMode    boundsMode   = CurrentOverlayBoundsMode();
-    const Text::GradientOverlayMode   overlayMode  = CurrentOverlayMode();
-    const OverlayFillMode             fillMode     = CurrentOverlayFillMode();
-    const float                       startOffset  = (useEffectAnimationStartOffset && fillMode == OverlayFillMode::EFFECT) ? OVERLAY_EFFECT_SHIMMER_START_OFFSET : 0.0f;
+    const Gradient::SpreadMethod    spreadMethod = CurrentOverlaySpreadMethod();
+    const Text::GradientBoundsMode  boundsMode   = CurrentOverlayBoundsMode();
+    const Text::GradientOverlayMode overlayMode  = CurrentOverlayMode();
+    const OverlayFillMode           fillMode     = CurrentOverlayFillMode();
+    const float                     startOffset  = (useEffectAnimationStartOffset && fillMode == OverlayFillMode::EFFECT) ? OVERLAY_EFFECT_SHIMMER_START_OFFSET : 0.0f;
 
     switch(gradient)
     {
@@ -2261,8 +2262,8 @@ private:
       return;
     }
 
-    const bool wasAnimationRunning = StopAnimationForOptionChange();
-    const GradientKind currentGradient = CurrentDisplayedGradientKind();
+    const bool         wasAnimationRunning = StopAnimationForOptionChange();
+    const GradientKind currentGradient     = CurrentDisplayedGradientKind();
     if(currentGradient == GradientKind::LINEAR)
     {
       mGradientTypeOverride = GradientKind::RADIAL;
@@ -2360,7 +2361,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopAnimationForOptionChange();
-    mSpreadMethodIndex = (mSpreadMethodIndex + 1u) % SPREAD_METHODS.size();
+    mSpreadMethodIndex             = (mSpreadMethodIndex + 1u) % SPREAD_METHODS.size();
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2372,7 +2373,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopAnimationForOptionChange();
-    mGradientBoundsModeIndex = (mGradientBoundsModeIndex + 1u) % GRADIENT_BOUNDS_MODES.size();
+    mGradientBoundsModeIndex       = (mGradientBoundsModeIndex + 1u) % GRADIENT_BOUNDS_MODES.size();
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2384,7 +2385,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
-    mOverlayGradientTypeIndex = (mOverlayGradientTypeIndex + 1u) % OVERLAY_GRADIENT_KINDS.size();
+    mOverlayGradientTypeIndex      = (mOverlayGradientTypeIndex + 1u) % OVERLAY_GRADIENT_KINDS.size();
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2396,7 +2397,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
-    mOverlayFillMode = mOverlayFillMode == OverlayFillMode::EFFECT ? OverlayFillMode::FULL : OverlayFillMode::EFFECT;
+    mOverlayFillMode               = mOverlayFillMode == OverlayFillMode::EFFECT ? OverlayFillMode::FULL : OverlayFillMode::EFFECT;
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2408,7 +2409,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
-    mOverlaySpreadMethodIndex = (mOverlaySpreadMethodIndex + 1u) % SPREAD_METHODS.size();
+    mOverlaySpreadMethodIndex      = (mOverlaySpreadMethodIndex + 1u) % SPREAD_METHODS.size();
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2420,7 +2421,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
-    mOverlayBoundsModeIndex = (mOverlayBoundsModeIndex + 1u) % GRADIENT_BOUNDS_MODES.size();
+    mOverlayBoundsModeIndex        = (mOverlayBoundsModeIndex + 1u) % GRADIENT_BOUNDS_MODES.size();
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2432,7 +2433,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
-    mOverlayModeIndex = (mOverlayModeIndex + 1u) % OVERLAY_MODES.size();
+    mOverlayModeIndex              = (mOverlayModeIndex + 1u) % OVERLAY_MODES.size();
     RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2457,7 +2458,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopAnimationForOptionChange();
-    mHorizontalAlignmentIndex = (mHorizontalAlignmentIndex + 1u) % ALIGNMENTS.size();
+    mHorizontalAlignmentIndex      = (mHorizontalAlignmentIndex + 1u) % ALIGNMENTS.size();
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2469,7 +2470,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopAnimationForOptionChange();
-    mVerticalAlignmentIndex = (mVerticalAlignmentIndex + 1u) % ALIGNMENTS.size();
+    mVerticalAlignmentIndex        = (mVerticalAlignmentIndex + 1u) % ALIGNMENTS.size();
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2481,7 +2482,7 @@ private:
     }
 
     const bool wasAnimationRunning = StopAnimationForOptionChange();
-    mPreviewSizeMode = (mPreviewSizeMode == PreviewSizeMode::FIXED) ? PreviewSizeMode::WRAP : PreviewSizeMode::FIXED;
+    mPreviewSizeMode               = (mPreviewSizeMode == PreviewSizeMode::FIXED) ? PreviewSizeMode::WRAP : PreviewSizeMode::FIXED;
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
   }
 
@@ -2637,7 +2638,7 @@ private:
       return;
     }
 
-    const CaseDefinition& item = CASES[mCaseIndex];
+    const CaseDefinition& item             = CASES[mCaseIndex];
     const bool            overlaySupported = IsOverlaySupportedForCase(item);
     UpdateOverlayBadges(overlaySupported);
 
@@ -2931,42 +2932,42 @@ private:
   }
 
 private:
-  Application& mApplication;
-  StackLayout    mRoot;
-  AbsoluteLayout mHeaderRoot;
-  StackLayout    mContentRoot;
-  AbsoluteLayout mFooterRoot;
-  Label          mCaseBadge;
-  Label          mGradientTypeBadge;
-  Label          mSpreadBadge;
-  Label          mBoundsBadge;
-  Label          mSizeBadge;
-  Label          mHAlignBadge;
-  Label          mVAlignBadge;
-  Label          mMarqueeBadge;
-  Label          mMatrixBadge;
-  Label          mAnimationBadge;
-  Label          mResetBadge;
-  Label          mClearBadge;
-  Label          mOverlayTypeBadge;
-  Label          mOverlayFillBadge;
-  Label          mOverlaySpreadBadge;
-  Label          mOverlayBoundsBadge;
-  Label          mOverlayAnimationBadge;
-  Label          mOverlayModeBadge;
-  Label          mOverlayToggleBadge;
-  Label          mOverlayResetBadge;
-  Label          mExpectedBadge;
-  StackLayout    mNormalPreviewContainer;
-  StackLayout    mMarqueeMatrixContainer;
-  Label          mPreviewLabel;
-  Label          mAsyncPreviewLabel;
-  Label          mMenuTitleLabel;
-  Label          mCaseListLabel;
-  Label          mHelpLabel;
-  Label          mViewHelpLabel;
-  Animation      mTextGradientAnimation;
-  Animation      mTextGradientOverlayAnimation;
+  Application&       mApplication;
+  StackLayout        mRoot;
+  AbsoluteLayout     mHeaderRoot;
+  StackLayout        mContentRoot;
+  AbsoluteLayout     mFooterRoot;
+  Label              mCaseBadge;
+  Label              mGradientTypeBadge;
+  Label              mSpreadBadge;
+  Label              mBoundsBadge;
+  Label              mSizeBadge;
+  Label              mHAlignBadge;
+  Label              mVAlignBadge;
+  Label              mMarqueeBadge;
+  Label              mMatrixBadge;
+  Label              mAnimationBadge;
+  Label              mResetBadge;
+  Label              mClearBadge;
+  Label              mOverlayTypeBadge;
+  Label              mOverlayFillBadge;
+  Label              mOverlaySpreadBadge;
+  Label              mOverlayBoundsBadge;
+  Label              mOverlayAnimationBadge;
+  Label              mOverlayModeBadge;
+  Label              mOverlayToggleBadge;
+  Label              mOverlayResetBadge;
+  Label              mExpectedBadge;
+  StackLayout        mNormalPreviewContainer;
+  StackLayout        mMarqueeMatrixContainer;
+  Label              mPreviewLabel;
+  Label              mAsyncPreviewLabel;
+  Label              mMenuTitleLabel;
+  Label              mCaseListLabel;
+  Label              mHelpLabel;
+  Label              mViewHelpLabel;
+  Animation          mTextGradientAnimation;
+  Animation          mTextGradientOverlayAnimation;
   std::vector<Label> mMarqueeMatrixLabels;
   float              mWindowWidth{static_cast<float>(WINDOW_WIDTH)};
   std::size_t        mCaseIndex{INITIAL_CASE_INDEX};
@@ -2979,21 +2980,21 @@ private:
   std::size_t        mOverlayBoundsModeIndex{INITIAL_GRADIENT_BOUNDS_MODE_INDEX};
   std::size_t        mOverlayModeIndex{0u};
   std::size_t        mGradientSpanSourceStage{0u};
-  PreviewSizeMode mPreviewSizeMode{PreviewSizeMode::FIXED};
-  OverlayFillMode mOverlayFillMode{OverlayFillMode::EFFECT};
-  GradientKind    mGradientTypeOverride{GradientKind::NONE};
-  bool            mGradientApplied{true};
-  bool            mOverlayApplied{false};
-  bool            mAnimationInfo{false};
-  bool            mOverlayAnimationInfo{false};
-  bool            mMarqueeMatrixMode{false};
-  bool            mMarqueeRunning{true};
+  PreviewSizeMode    mPreviewSizeMode{PreviewSizeMode::FIXED};
+  OverlayFillMode    mOverlayFillMode{OverlayFillMode::EFFECT};
+  GradientKind       mGradientTypeOverride{GradientKind::NONE};
+  bool               mGradientApplied{true};
+  bool               mOverlayApplied{false};
+  bool               mAnimationInfo{false};
+  bool               mOverlayAnimationInfo{false};
+  bool               mMarqueeMatrixMode{false};
+  bool               mMarqueeRunning{true};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
 

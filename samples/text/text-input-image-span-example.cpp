@@ -18,14 +18,15 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
-constexpr int         WINDOW_WIDTH  = 900;
-constexpr int         WINDOW_HEIGHT = 720;
+constexpr int         WINDOW_WIDTH         = 900;
+constexpr int         WINDOW_HEIGHT        = 720;
 constexpr float       RELATIVE_LINE_HEIGHT = 1.6f;
 constexpr const char* REMOTE_IMAGE =
   "https://www.w3.org/assets/logos/w3c-2025-transitional/w3c-72x48.png";
@@ -55,10 +56,10 @@ Label NewButton(const char* text)
   return button;
 }
 
-void AppendImage(Text::StyledTextBuilder& builder,
-                 const char*              source,
-                 const Vector2&           size,
-                 float                    verticalOffset = 0.0f,
+void AppendImage(Text::StyledTextBuilder&               builder,
+                 const char*                            source,
+                 const Vector2&                         size,
+                 float                                  verticalOffset = 0.0f,
                  Text::ImageAttributes::InlineAlignment alignment =
                    Text::ImageAttributes::InlineAlignment::TEXT_CENTER)
 {
@@ -183,12 +184,18 @@ private:
     {
       settingToolbar.Add(button);
     }
-    resetButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { SetStyledContent("StyledText restored"); });
-    plainButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { SetPlainContent("Plain text set"); });
-    mAlignmentButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleAlignment(); });
-    mOffsetButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleVerticalOffset(); });
-    mLineHeightButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleLineHeight(); });
-    mLifecycleButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleLifecycle(); });
+    resetButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { SetStyledContent("StyledText restored"); });
+    plainButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { SetPlainContent("Plain text set"); });
+    mAlignmentButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { CycleAlignment(); });
+    mOffsetButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { ToggleVerticalOffset(); });
+    mLineHeightButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { ToggleLineHeight(); });
+    mLifecycleButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { ToggleLifecycle(); });
 
     mStatus = NewTextLabel("", 13.0f, 0xE2E8F0);
     mStatus.SetBackgroundColor(UiColor(0x1E293B));

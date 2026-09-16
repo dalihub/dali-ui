@@ -53,20 +53,21 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <sstream>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
-static constexpr float WINDOW_W        = 600.0f;
-static constexpr float WINDOW_H        = 1080.0f;
+static constexpr float WINDOW_W = 600.0f;
+static constexpr float WINDOW_H = 1080.0f;
 
-static constexpr float INFO_H          = 160.0f;
-static constexpr float EXT_BTN_H       = 50.0f;
-static constexpr float EXT_TOP_Y       = INFO_H;                   // 160
-static constexpr float SCROLL_Y        = EXT_TOP_Y + EXT_BTN_H;   // 210
-static constexpr float SCROLL_H        = 700.0f;
-static constexpr float EXT_BOT_Y       = SCROLL_Y + SCROLL_H;     // 910
+static constexpr float INFO_H    = 160.0f;
+static constexpr float EXT_BTN_H = 50.0f;
+static constexpr float EXT_TOP_Y = INFO_H;                // 160
+static constexpr float SCROLL_Y  = EXT_TOP_Y + EXT_BTN_H; // 210
+static constexpr float SCROLL_H  = 700.0f;
+static constexpr float EXT_BOT_Y = SCROLL_Y + SCROLL_H; // 910
 
 static constexpr float ITEM_H          = 130.0f;
 static constexpr float ITEM_SPACING    = 10.0f;
@@ -75,23 +76,19 @@ static constexpr float GAP_H           = 1500.0f;
 static constexpr int   BOTTOM_COUNT    = 5;
 static constexpr float KEY_SCROLL_STEP = 150.0f;
 
-static constexpr float CONTENT_H = CONTENT_PAD * 2
-                                  + ITEM_H + ITEM_SPACING
-                                  + GAP_H  + ITEM_SPACING
-                                  + BOTTOM_COUNT * ITEM_H
-                                  + (BOTTOM_COUNT - 1) * ITEM_SPACING;
+static constexpr float CONTENT_H = CONTENT_PAD * 2 + ITEM_H + ITEM_SPACING + GAP_H + ITEM_SPACING + BOTTOM_COUNT * ITEM_H + (BOTTOM_COUNT - 1) * ITEM_SPACING;
 
-static const Vector4 COLOR_BG             (0.10f, 0.10f, 0.14f, 1.0f);
-static const Vector4 COLOR_EXT_TOP        (0.80f, 0.55f, 0.15f, 1.0f);
-static const Vector4 COLOR_EXT_TOP_FOCUS  (0.60f, 0.35f, 0.05f, 1.0f);
-static const Vector4 COLOR_EXT_BOT        (0.55f, 0.15f, 0.80f, 1.0f);
-static const Vector4 COLOR_EXT_BOT_FOCUS  (0.35f, 0.05f, 0.60f, 1.0f);
-static const Vector4 COLOR_SCROLL_FOCUS   (0.20f, 0.50f, 0.80f, 1.0f);
-static const Vector4 COLOR_SCROLL_IDLE    (0.90f, 0.90f, 0.90f, 1.0f);
-static const Vector4 COLOR_TOP_ITEM       (0.75f, 0.78f, 0.82f, 1.0f);
-static const Vector4 COLOR_BOTTOM_ITEM    (0.30f, 0.70f, 0.45f, 1.0f);
-static const Vector4 COLOR_BOTTOM_FOCUS   (0.15f, 0.45f, 0.25f, 1.0f);
-static const Vector4 COLOR_GAP            (0.85f, 0.87f, 0.90f, 1.0f);
+static const Vector4 COLOR_BG(0.10f, 0.10f, 0.14f, 1.0f);
+static const Vector4 COLOR_EXT_TOP(0.80f, 0.55f, 0.15f, 1.0f);
+static const Vector4 COLOR_EXT_TOP_FOCUS(0.60f, 0.35f, 0.05f, 1.0f);
+static const Vector4 COLOR_EXT_BOT(0.55f, 0.15f, 0.80f, 1.0f);
+static const Vector4 COLOR_EXT_BOT_FOCUS(0.35f, 0.05f, 0.60f, 1.0f);
+static const Vector4 COLOR_SCROLL_FOCUS(0.20f, 0.50f, 0.80f, 1.0f);
+static const Vector4 COLOR_SCROLL_IDLE(0.90f, 0.90f, 0.90f, 1.0f);
+static const Vector4 COLOR_TOP_ITEM(0.75f, 0.78f, 0.82f, 1.0f);
+static const Vector4 COLOR_BOTTOM_ITEM(0.30f, 0.70f, 0.45f, 1.0f);
+static const Vector4 COLOR_BOTTOM_FOCUS(0.15f, 0.45f, 0.25f, 1.0f);
+static const Vector4 COLOR_GAP(0.85f, 0.87f, 0.90f, 1.0f);
 
 class FarFocusKeyScrollTest : public ConnectionTracker
 {
@@ -107,7 +104,7 @@ private:
   {
     Window window = application.GetWindow();
     window.SetPositionSize(PositionSize(0, 0,
-      static_cast<uint32_t>(WINDOW_W), static_cast<uint32_t>(WINDOW_H)));
+                                        static_cast<uint32_t>(WINDOW_W), static_cast<uint32_t>(WINDOW_H)));
     window.SetBackgroundColor(Color::BLACK);
     window.KeyEventSignal().Connect(this, &FarFocusKeyScrollTest::OnKeyEvent);
 
@@ -297,7 +294,7 @@ private:
   // ── Callbacks ───────────────────────────────────────────────────────────────
   void RefreshInfo()
   {
-    int scrollY = static_cast<int>(mScrollView.GetScrollPosition().y);
+    int                scrollY = static_cast<int>(mScrollView.GetScrollPosition().y);
     std::ostringstream sp;
     sp << "ScrollPos: " << scrollY;
     mScrollPosLabel.SetText(sp.str().c_str());
@@ -322,16 +319,16 @@ private:
     ++mFocusChangeCount;
 
     // Restore previous colors
-    if(from == mExtTopBtn)    mExtTopBtn.SetBackgroundColor(COLOR_EXT_TOP);
-    if(from == mExtBotBtn)    mExtBotBtn.SetBackgroundColor(COLOR_EXT_BOT);
-    if(from == mScrollView)   mScrollView.SetBackgroundColor(COLOR_SCROLL_IDLE);
+    if(from == mExtTopBtn) mExtTopBtn.SetBackgroundColor(COLOR_EXT_TOP);
+    if(from == mExtBotBtn) mExtBotBtn.SetBackgroundColor(COLOR_EXT_BOT);
+    if(from == mScrollView) mScrollView.SetBackgroundColor(COLOR_SCROLL_IDLE);
     for(int i = 0; i < BOTTOM_COUNT; ++i)
       if(from == mBottomItems[i]) mBottomItems[i].SetBackgroundColor(COLOR_BOTTOM_ITEM);
 
     // Apply new focus color
-    if(to == mExtTopBtn)    mExtTopBtn.SetBackgroundColor(COLOR_EXT_TOP_FOCUS);
-    if(to == mExtBotBtn)    mExtBotBtn.SetBackgroundColor(COLOR_EXT_BOT_FOCUS);
-    if(to == mScrollView)   mScrollView.SetBackgroundColor(COLOR_SCROLL_FOCUS);
+    if(to == mExtTopBtn) mExtTopBtn.SetBackgroundColor(COLOR_EXT_TOP_FOCUS);
+    if(to == mExtBotBtn) mExtBotBtn.SetBackgroundColor(COLOR_EXT_BOT_FOCUS);
+    if(to == mScrollView) mScrollView.SetBackgroundColor(COLOR_SCROLL_FOCUS);
     for(int i = 0; i < BOTTOM_COUNT; ++i)
       if(to == mBottomItems[i]) mBottomItems[i].SetBackgroundColor(COLOR_BOTTOM_FOCUS);
 
@@ -406,7 +403,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application           application = Application::New(&argc, &argv);
   FarFocusKeyScrollTest test(application);
   application.MainLoop();
   return 0;

@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/devel-api/adaptor-framework/bitmap-saver.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/pixel-data-integ.h>
@@ -30,11 +31,11 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr uint32_t BLUR_RADIUS             = 100u;
-constexpr float    BLUR_DOWNSCALE          = 0.15f;
-constexpr float    DISPLAY_OPACITY         = 0.55f;
-constexpr float    EPSILON_OPACITY         = 0.02f;
-constexpr float    FADE_DURATION_SECONDS   = 3.0f;
+constexpr uint32_t BLUR_RADIUS              = 100u;
+constexpr float    BLUR_DOWNSCALE           = 0.15f;
+constexpr float    DISPLAY_OPACITY          = 0.55f;
+constexpr float    EPSILON_OPACITY          = 0.02f;
+constexpr float    FADE_DURATION_SECONDS    = 3.0f;
 constexpr uint32_t START_DELAY_MILLISECONDS = 600u;
 constexpr uint32_t STATUS_TICK_MILLISECONDS = 100u;
 
@@ -193,8 +194,8 @@ private:
 
     mImageLayer = AbsoluteLayout::New();
     mImageLayer.SetLayoutParams(AbsoluteLayoutParams::New()
-                                 .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
-                                 .SetFlags(AbsoluteLayoutFlags::ALL));
+                                  .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
+                                  .SetFlags(AbsoluteLayoutFlags::ALL));
     mImageLayer.SetBackgroundColor(Color::BLACK);
     mPreview.Add(mImageLayer);
 
@@ -219,8 +220,7 @@ private:
     mPreviewBadge.SetCornerRadius(8.0f);
     mPreviewBadge.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     mPreviewBadge.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mPreviewBadge.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.02f, 0.91f, 0.54f, 0.065f))
-                                   .SetFlags(AbsoluteLayoutFlags::ALL));
+    mPreviewBadge.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.02f, 0.91f, 0.54f, 0.065f)).SetFlags(AbsoluteLayoutFlags::ALL));
     mPreview.Add(mPreviewBadge);
   }
 
@@ -258,9 +258,12 @@ private:
     mControlPanel.Add(animationTitle);
 
     StackLayout fadeRow = NewActionRow();
-    fadeRow.Add(NewActionButton("Fade in\n0 -> .55", [this] { StartManualFadeIn(); }, 0x0E7490));
-    fadeRow.Add(NewActionButton("Fade out\n.55 -> 0", [this] { StartManualFadeOut(); }, 0x0E7490));
-    fadeRow.Add(NewActionButton("Slow cycle\n0 -> .55 -> 0", [this] { StartFadeCycle(); }, 0x0E7490));
+    fadeRow.Add(NewActionButton("Fade in\n0 -> .55", [this]
+    { StartManualFadeIn(); }, 0x0E7490));
+    fadeRow.Add(NewActionButton("Fade out\n.55 -> 0", [this]
+    { StartManualFadeOut(); }, 0x0E7490));
+    fadeRow.Add(NewActionButton("Slow cycle\n0 -> .55 -> 0", [this]
+    { StartFadeCycle(); }, 0x0E7490));
     mControlPanel.Add(fadeRow);
 
     Label diagnosticTitle = NewLabel("RESOURCE / DIAGNOSTICS", 14.0f, 0xFBBF24);
@@ -269,8 +272,10 @@ private:
     mControlPanel.Add(diagnosticTitle);
 
     StackLayout resourceRow = NewActionRow();
-    resourceRow.Add(NewActionButton("Next image\n+ Refresh", [this] { ChangeImageAndRefresh(); }, 0x92400E));
-    resourceRow.Add(NewActionButton("Refresh blur\n+ dump FBO", [this] { RefreshAndDump(); }, 0x92400E));
+    resourceRow.Add(NewActionButton("Next image\n+ Refresh", [this]
+    { ChangeImageAndRefresh(); }, 0x92400E));
+    resourceRow.Add(NewActionButton("Refresh blur\n+ dump FBO", [this]
+    { RefreshAndDump(); }, 0x92400E));
     mControlPanel.Add(resourceRow);
 
     Label help = NewLabel("Keyboard: 1-7 scenario  |  I fade-in  O fade-out  C cycle\nSpace next image  |  R refresh + FBO dump  |  Esc quit", 12.0f, 0x94A3B8);
@@ -399,8 +404,8 @@ private:
     mBlurredImage.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
     mBlurredImage.SetOpacity(1.0f); // Matches ImageBox construction before the later fade reset.
     mBlurredImage.SetLayoutParams(AbsoluteLayoutParams::New()
-                                   .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
-                                   .SetFlags(AbsoluteLayoutFlags::ALL));
+                                    .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
+                                    .SetFlags(AbsoluteLayoutFlags::ALL));
     mBlurredImage.ResourceReadySignal().Connect(this, &GaussianBlurImageController::OnResourceReady);
 
     if(!mConfig.attachOnReady)
@@ -487,7 +492,7 @@ private:
       return;
     }
 
-    mResourceReady = true;
+    mResourceReady     = true;
     const Vector3 size = mBlurredImage.GetCurrentSize();
     DALI_LOG_RELEASE_INFO("[GAUSSIAN-BLUR-SAMPLE] run=%u ResourceReady opacity=%.3f size=%.1fx%.1f attachOnReady=%d\n",
                           mRunId,
@@ -642,9 +647,9 @@ private:
     {
       return;
     }
-    mImageIndex = (mImageIndex + 1u) % IMAGE_COUNT;
-    mResourceReady = false;
-    mAttachPending = false;
+    mImageIndex      = (mImageIndex + 1u) % IMAGE_COUNT;
+    mResourceReady   = false;
+    mAttachPending   = false;
     mFadeOnNextReady = false;
     mBlurredImage.SetResourceUrl(IMAGE_URLS[mImageIndex]);
     mSharpReference.SetResourceUrl(IMAGE_URLS[mImageIndex]);
@@ -672,7 +677,7 @@ private:
       return;
     }
 
-    const float opacity = mBlurredImage.GetCurrentProperty<float>(Actor::Property::OPACITY);
+    const float        opacity = mBlurredImage.GetCurrentProperty<float>(Actor::Property::OPACITY);
     std::ostringstream status;
     status << "Run " << mRunId << "  |  " << mConfig.name << "  |  opacity "
            << std::fixed << std::setprecision(3) << opacity
@@ -699,18 +704,30 @@ private:
     {
       mApplication.Quit();
     }
-    else if(key == "1") RunScenario(Scenario::ORIGINAL_EARLY_ZERO, true);
-    else if(key == "2") RunScenario(Scenario::READY_ATTACH_ZERO, true);
-    else if(key == "3") RunScenario(Scenario::READY_ATTACH_OPAQUE, true);
-    else if(key == "4") RunScenario(Scenario::READY_ATTACH_EPSILON, true);
-    else if(key == "5") RunScenario(Scenario::EARLY_ATTACH_EPSILON, true);
-    else if(key == "6") RunScenario(Scenario::EARLY_ZERO_STATIC, true);
-    else if(key == "7") RunScenario(Scenario::CONTINUOUS_BLUR, true);
-    else if(key == "i" || key == "I") StartManualFadeIn();
-    else if(key == "o" || key == "O") StartManualFadeOut();
-    else if(key == "c" || key == "C") StartFadeCycle();
-    else if(key == "space" || key == "Space") ChangeImageAndRefresh();
-    else if(key == "r" || key == "R") RefreshAndDump();
+    else if(key == "1")
+      RunScenario(Scenario::ORIGINAL_EARLY_ZERO, true);
+    else if(key == "2")
+      RunScenario(Scenario::READY_ATTACH_ZERO, true);
+    else if(key == "3")
+      RunScenario(Scenario::READY_ATTACH_OPAQUE, true);
+    else if(key == "4")
+      RunScenario(Scenario::READY_ATTACH_EPSILON, true);
+    else if(key == "5")
+      RunScenario(Scenario::EARLY_ATTACH_EPSILON, true);
+    else if(key == "6")
+      RunScenario(Scenario::EARLY_ZERO_STATIC, true);
+    else if(key == "7")
+      RunScenario(Scenario::CONTINUOUS_BLUR, true);
+    else if(key == "i" || key == "I")
+      StartManualFadeIn();
+    else if(key == "o" || key == "O")
+      StartManualFadeOut();
+    else if(key == "c" || key == "C")
+      StartFadeCycle();
+    else if(key == "space" || key == "Space")
+      ChangeImageAndRefresh();
+    else if(key == "r" || key == "R")
+      RefreshAndDump();
   }
 
 private:
@@ -747,12 +764,18 @@ int DALI_EXPORT_API main(int argc, char** argv)
   for(int index = 1; index < argc; ++index)
   {
     const std::string argument = argv[index];
-    if(argument == "--resource-ready-attach") initialScenario = Scenario::READY_ATTACH_ZERO;
-    else if(argument == "--resource-ready-opaque") initialScenario = Scenario::READY_ATTACH_OPAQUE;
-    else if(argument == "--resource-ready-epsilon") initialScenario = Scenario::READY_ATTACH_EPSILON;
-    else if(argument == "--early-epsilon") initialScenario = Scenario::EARLY_ATTACH_EPSILON;
-    else if(argument == "--early-zero-static") initialScenario = Scenario::EARLY_ZERO_STATIC;
-    else if(argument == "--continuous") initialScenario = Scenario::CONTINUOUS_BLUR;
+    if(argument == "--resource-ready-attach")
+      initialScenario = Scenario::READY_ATTACH_ZERO;
+    else if(argument == "--resource-ready-opaque")
+      initialScenario = Scenario::READY_ATTACH_OPAQUE;
+    else if(argument == "--resource-ready-epsilon")
+      initialScenario = Scenario::READY_ATTACH_EPSILON;
+    else if(argument == "--early-epsilon")
+      initialScenario = Scenario::EARLY_ATTACH_EPSILON;
+    else if(argument == "--early-zero-static")
+      initialScenario = Scenario::EARLY_ZERO_STATIC;
+    else if(argument == "--continuous")
+      initialScenario = Scenario::CONTINUOUS_BLUR;
   }
 
   Application application = Application::New(&argc, &argv);

@@ -14,11 +14,12 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
-#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
-#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -35,7 +36,7 @@ using namespace Dali::Ui;
  */
 class ImageColorController : public ConnectionTracker
 {
-  static constexpr int COLOR_COUNT = 6;
+  static constexpr int COLOR_COUNT      = 6;
   static constexpr int IMAGE_TYPE_COUNT = 3;
 
   struct ColorEntry
@@ -294,10 +295,10 @@ private:
 
 const ImageColorController::ColorEntry ImageColorController::COLORS[ImageColorController::COLOR_COUNT] = {
   {"ORIGINAL", UiColor(1.0f, 1.0f, 1.0f, 1.0f)},
-  {"RED",      UiColor(1.0f, 0.0f, 0.0f, 1.0f)},
-  {"GREEN",    UiColor(0.0f, 1.0f, 0.0f, 1.0f)},
-  {"BLUE",     UiColor(0.0f, 0.0f, 1.0f, 1.0f)},
-  {"GRAY",     UiColor(0.5f, 0.5f, 0.5f, 1.0f)},
+  {"RED", UiColor(1.0f, 0.0f, 0.0f, 1.0f)},
+  {"GREEN", UiColor(0.0f, 1.0f, 0.0f, 1.0f)},
+  {"BLUE", UiColor(0.0f, 0.0f, 1.0f, 1.0f)},
+  {"GRAY", UiColor(0.5f, 0.5f, 0.5f, 1.0f)},
   {"50%\nALPHA", UiColor(1.0f, 1.0f, 1.0f, 0.5f)},
 };
 
@@ -316,7 +317,7 @@ const char* ImageColorController::IMAGE_URLS[ImageColorController::IMAGE_TYPE_CO
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ImageColorController controller(application);

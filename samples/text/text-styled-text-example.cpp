@@ -17,14 +17,15 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
-#include <cstdio>
 #include <cstdint>
+#include <cstdio>
 #include <sstream>
 #include <string>
 #include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -32,23 +33,23 @@ using namespace Dali::Ui;
 namespace
 {
 
-constexpr float STACK_SPACING       = 8.0f;
-constexpr float HEADER_PADDING      = 12.0f;
-constexpr float HEADER_ROW_GAP      = 8.0f;
-constexpr float HEADER_BADGE_HEIGHT = 30.0f;
-constexpr float HEADER_INFO_HEIGHT  = 52.0f;
-constexpr float CONTENT_PADDING     = 16.0f;
-constexpr float FOOTER_PADDING      = 12.0f;
-constexpr float FOOTER_ROW_GAP      = 8.0f;
-constexpr float FOOTER_TITLE_WIDTH  = 120.0f;
-constexpr float FOOTER_BADGE_HEIGHT = 28.0f;
-constexpr float FOOTER_LINE_HEIGHT  = 24.0f;
-constexpr float PREVIEW_TITLE_HEIGHT = 28.0f;
-constexpr float HEADER_HEIGHT       = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_INFO_HEIGHT + HEADER_PADDING;
-constexpr float FOOTER_HEIGHT       = FOOTER_PADDING + FOOTER_BADGE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_PADDING;
-constexpr int   WINDOW_WIDTH        = 920;
-constexpr int   WINDOW_HEIGHT       = 820;
-constexpr std::size_t CASE_COUNT     = 29u;
+constexpr float       STACK_SPACING        = 8.0f;
+constexpr float       HEADER_PADDING       = 12.0f;
+constexpr float       HEADER_ROW_GAP       = 8.0f;
+constexpr float       HEADER_BADGE_HEIGHT  = 30.0f;
+constexpr float       HEADER_INFO_HEIGHT   = 52.0f;
+constexpr float       CONTENT_PADDING      = 16.0f;
+constexpr float       FOOTER_PADDING       = 12.0f;
+constexpr float       FOOTER_ROW_GAP       = 8.0f;
+constexpr float       FOOTER_TITLE_WIDTH   = 120.0f;
+constexpr float       FOOTER_BADGE_HEIGHT  = 28.0f;
+constexpr float       FOOTER_LINE_HEIGHT   = 24.0f;
+constexpr float       PREVIEW_TITLE_HEIGHT = 28.0f;
+constexpr float       HEADER_HEIGHT        = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_INFO_HEIGHT + HEADER_PADDING;
+constexpr float       FOOTER_HEIGHT        = FOOTER_PADDING + FOOTER_BADGE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_PADDING;
+constexpr int         WINDOW_WIDTH         = 920;
+constexpr int         WINDOW_HEIGHT        = 820;
+constexpr std::size_t CASE_COUNT           = 29u;
 
 constexpr uint32_t BADGE_DISABLED_BACKGROUND = 0x1E293B;
 constexpr uint32_t BADGE_DISABLED_BORDER     = 0x475569;
@@ -168,9 +169,12 @@ constexpr const char* FROM_MARKUP_ANCHOR_ENTITY_TEXT =
   "<a href=https://example.com?a=1&amp;b=2 color=blue clicked-color='red'>entity link</a> | A &lt; B &amp;&amp; C &gt; D | raw 1 < 2 && 3 > 2";
 
 constexpr const char* FROM_MARKUP_IMAGE_TEXT =
-  "Self-closing <img src='" RESOURCES_DIR "flag_kr.png' width='64' height='40'/> | "
-  "open-only <img src='" RESOURCES_DIR "flag_us.png' width='72' height='40'> text |\n"
-  "empty pair <img src='" RESOURCES_DIR "flag_ae.png' width='58' height='40'></img> | "
+  "Self-closing <img src='" RESOURCES_DIR
+  "flag_kr.png' width='64' height='40'/> | "
+  "open-only <img src='" RESOURCES_DIR
+  "flag_us.png' width='72' height='40'> text |\n"
+  "empty pair <img src='" RESOURCES_DIR
+  "flag_ae.png' width='58' height='40'></img> | "
   "content pair <img src='" RESOURCES_DIR "flag&#95;kr.png' width='64' height='40'>Hello</img> preserved";
 
 constexpr std::array<uint32_t, 4u> COLOR_VALUES{{
@@ -520,7 +524,7 @@ private:
     SetBadgeBounds(mResetBadge, x, row1Y, resetWidth, HEADER_BADGE_HEIGHT);
 
     const float actionWidth = (contentWidth - (HEADER_ROW_GAP * 2.0f)) / 3.0f;
-    x = HEADER_PADDING;
+    x                       = HEADER_PADDING;
     SetBadgeBounds(mValueBadge, x, row2Y, actionWidth, HEADER_BADGE_HEIGHT);
     x += actionWidth + HEADER_ROW_GAP;
     SetBadgeBounds(mRangeBadge, x, row2Y, actionWidth, HEADER_BADGE_HEIGHT);
@@ -800,8 +804,8 @@ private:
       }
       case StyledTextCase::FOREGROUND_COLOR_SPAN_SINGLE:
       {
-        state.text = "Hello StyledText ForegroundColorSpan";
-        auto range = CurrentRange(6u, 16u, 0u, 5u);
+        state.text                      = "Hello StyledText ForegroundColorSpan";
+        auto                    range   = CurrentRange(6u, 16u, 0u, 5u);
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewForegroundColorSpan(mColorIndex), range.first, range.second);
         state.spanMode  = "ForegroundColorSpan single";
@@ -811,11 +815,11 @@ private:
       }
       case StyledTextCase::FOREGROUND_COLOR_SPAN_MULTIPLE:
       {
-        state.text = "Multiple ForegroundColorSpan ranges";
-        auto secondRange = CurrentRange(9u, 18u, 16u, 24u);
-        const std::size_t firstIndex  = mColorIndex;
-        const std::size_t secondIndex = (mColorIndex + 2u) % COLOR_VALUES.size();
-        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+        state.text                          = "Multiple ForegroundColorSpan ranges";
+        auto                    secondRange = CurrentRange(9u, 18u, 16u, 24u);
+        const std::size_t       firstIndex  = mColorIndex;
+        const std::size_t       secondIndex = (mColorIndex + 2u) % COLOR_VALUES.size();
+        Text::StyledTextBuilder builder     = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewForegroundColorSpan(firstIndex), 0u, 8u);
         builder.SetSpan(NewForegroundColorSpan(secondIndex), secondRange.first, secondRange.second);
         state.spanMode  = "ForegroundColorSpan multiple objects";
@@ -825,10 +829,10 @@ private:
       }
       case StyledTextCase::FOREGROUND_COLOR_SPAN_SAME_OBJECT_UPDATE:
       {
-        state.text = "Same object updates range";
-        auto finalRange = CurrentRange(5u, 11u, 12u, 17u);
-        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
-        Text::ForegroundColorSpan         span    = NewForegroundColorSpan(mColorIndex);
+        state.text                           = "Same object updates range";
+        auto                      finalRange = CurrentRange(5u, 11u, 12u, 17u);
+        Text::StyledTextBuilder   builder    = Text::StyledTextBuilder::New(state.text.c_str());
+        Text::ForegroundColorSpan span       = NewForegroundColorSpan(mColorIndex);
         builder.SetSpan(span, 0u, 4u);
         builder.SetSpan(span, finalRange.first, finalRange.second);
         state.spanMode  = "same ForegroundColorSpan object update";
@@ -838,9 +842,9 @@ private:
       }
       case StyledTextCase::FOREGROUND_COLOR_SPAN_OVERLAP:
       {
-        state.text = "Overlap later wins sample";
-        auto laterRange = CurrentRange(8u, 20u, 3u, 18u);
-        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+        state.text                         = "Overlap later wins sample";
+        auto                    laterRange = CurrentRange(8u, 20u, 3u, 18u);
+        Text::StyledTextBuilder builder    = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(0xEF4444)), 0u, 14u);
         builder.SetSpan(NewForegroundColorSpan(LaterColorIndex()), laterRange.first, laterRange.second);
         state.spanMode  = "overlap ForegroundColorSpan";
@@ -850,8 +854,8 @@ private:
       }
       case StyledTextCase::FOREGROUND_COLOR_SPAN_CLEAR:
       {
-        state.text = "Clear spans returns plain StyledText";
-        auto range = CurrentRange(0u, 11u, 12u, 23u);
+        state.text                      = "Clear spans returns plain StyledText";
+        auto                    range   = CurrentRange(0u, 11u, 12u, 23u);
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewForegroundColorSpan(mColorIndex), range.first, range.second);
         state.spanMode  = "ForegroundColorSpan before clear";
@@ -861,8 +865,8 @@ private:
       }
       case StyledTextCase::FOREGROUND_COLOR_SPAN_CHANGE_VALUE:
       {
-        state.text = "Change ForegroundColorSpan value";
-        auto range = CurrentRange(7u, 16u, 0u, 6u);
+        state.text                      = "Change ForegroundColorSpan value";
+        auto                    range   = CurrentRange(7u, 16u, 0u, 6u);
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewForegroundColorSpan(mColorIndex), range.first, range.second);
         state.spanMode  = "ForegroundColorSpan value update";
@@ -872,8 +876,8 @@ private:
       }
       case StyledTextCase::FOREGROUND_COLOR_SPAN_CHANGE_RANGE:
       {
-        state.text = "Change span range sample";
-        auto range = CurrentRange(7u, 17u, 0u, 6u);
+        state.text                      = "Change span range sample";
+        auto                    range   = CurrentRange(7u, 17u, 0u, 6u);
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewForegroundColorSpan(mColorIndex), range.first, range.second);
         state.spanMode  = "ForegroundColorSpan range update";
@@ -883,8 +887,8 @@ private:
       }
       case StyledTextCase::BACKGROUND_COLOR_SPAN_SINGLE:
       {
-        state.text = "BackgroundColorSpan sample";
-        auto range = CurrentRange(0u, 20u, 9u, 26u);
+        state.text                      = "BackgroundColorSpan sample";
+        auto                    range   = CurrentRange(0u, 20u, 9u, 26u);
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewBackgroundColorSpan(mBackgroundIndex), range.first, range.second);
         state.spanMode  = "BackgroundColorSpan single";
@@ -894,9 +898,9 @@ private:
       }
       case StyledTextCase::BACKGROUND_COLOR_SPAN_OVERLAP:
       {
-        state.text = "Background overlap sample";
-        auto laterRange = CurrentRange(10u, 24u, 3u, 21u);
-        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+        state.text                         = "Background overlap sample";
+        auto                    laterRange = CurrentRange(10u, 24u, 3u, 21u);
+        Text::StyledTextBuilder builder    = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(Text::BackgroundColorSpan::New(UiColor(0xFEF08A)), 0u, 16u);
         builder.SetSpan(NewBackgroundColorSpan(LaterBackgroundIndex()), laterRange.first, laterRange.second);
         state.spanMode  = "overlap BackgroundColorSpan";
@@ -906,8 +910,8 @@ private:
       }
       case StyledTextCase::FOREGROUND_AND_BACKGROUND_COLOR_SPAN:
       {
-        state.text = "Foreground background";
-        auto range = CurrentRange(0u, 10u, 11u, 21u);
+        state.text                      = "Foreground background";
+        auto                    range   = CurrentRange(0u, 10u, 11u, 21u);
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewForegroundColorSpan(mColorIndex), range.first, range.second);
         builder.SetSpan(NewBackgroundColorSpan(mBackgroundIndex), range.first, range.second);
@@ -918,10 +922,10 @@ private:
       }
       case StyledTextCase::UNDERLINE_SPAN_SINGLE:
       {
-        state.text = "UnderlineSpan sample";
-        auto range = CurrentRange(0u, 13u, 14u, 20u);
-        const std::size_t valueIndex = CurrentUnderlineValueIndex();
-        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+        state.text                         = "UnderlineSpan sample";
+        auto                    range      = CurrentRange(0u, 13u, 14u, 20u);
+        const std::size_t       valueIndex = CurrentUnderlineValueIndex();
+        Text::StyledTextBuilder builder    = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewUnderlineSpan(valueIndex, UnderlineTypeForValue(valueIndex)), range.first, range.second);
         state.spanMode  = "UnderlineSpan single";
         state.rangeInfo = "range: " + RangeText(range.first, range.second);
@@ -930,10 +934,10 @@ private:
       }
       case StyledTextCase::LINE_THROUGH_SPAN_SINGLE:
       {
-        state.text = "LineThroughSpan sample";
-        auto range = CurrentRange(0u, 15u, 16u, 22u);
-        const std::size_t valueIndex = CurrentLineThroughValueIndex();
-        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+        state.text                         = "LineThroughSpan sample";
+        auto                    range      = CurrentRange(0u, 15u, 16u, 22u);
+        const std::size_t       valueIndex = CurrentLineThroughValueIndex();
+        Text::StyledTextBuilder builder    = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewLineThroughSpan(valueIndex, LineThroughThicknessForValue(valueIndex)), range.first, range.second);
         state.spanMode  = "LineThroughSpan single";
         state.rangeInfo = "range: " + RangeText(range.first, range.second);
@@ -942,8 +946,8 @@ private:
       }
       case StyledTextCase::FOREGROUND_BACKGROUND_DECORATION_SPAN:
       {
-        state.text = "Decorated StyledText";
-        auto range = CurrentRange(0u, 9u, 10u, 20u);
+        state.text                      = "Decorated StyledText";
+        auto                    range   = CurrentRange(0u, 9u, 10u, 20u);
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewForegroundColorSpan(mColorIndex), range.first, range.second);
         builder.SetSpan(NewBackgroundColorSpan(mBackgroundIndex), range.first, range.second);
@@ -964,9 +968,9 @@ private:
       }
       case StyledTextCase::FONT_SPAN_WEIGHT:
       {
-        state.text = "Weight span sample";
-        auto range = CurrentRange(0u, 6u, 7u, 11u);
-        const std::size_t valueIndex = CurrentFontValueIndex();
+        state.text                      = "Weight span sample";
+        auto                 range      = CurrentRange(0u, 6u, 7u, 11u);
+        const std::size_t    valueIndex = CurrentFontValueIndex();
         Text::FontAttributes attributes;
         attributes.SetWeight(FontWeightForValue(valueIndex));
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
@@ -978,9 +982,9 @@ private:
       }
       case StyledTextCase::FONT_SPAN_SLANT:
       {
-        state.text = "Slant italic sample";
-        auto range = CurrentRange(0u, 6u, 7u, 13u);
-        const std::size_t valueIndex = CurrentFontValueIndex();
+        state.text                      = "Slant italic sample";
+        auto                 range      = CurrentRange(0u, 6u, 7u, 13u);
+        const std::size_t    valueIndex = CurrentFontValueIndex();
         Text::FontAttributes attributes;
         attributes.SetSlant(FontSlantForValue(valueIndex));
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
@@ -992,9 +996,9 @@ private:
       }
       case StyledTextCase::FONT_SPAN_SIZE:
       {
-        state.text = "Font size pixel span";
-        auto range = CurrentRange(0u, 9u, 10u, 15u);
-        const std::size_t valueIndex = CurrentFontValueIndex();
+        state.text                      = "Font size pixel span";
+        auto                 range      = CurrentRange(0u, 9u, 10u, 15u);
+        const std::size_t    valueIndex = CurrentFontValueIndex();
         Text::FontAttributes attributes;
         attributes.SetSize(FontSizeForValue(valueIndex));
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
@@ -1006,9 +1010,9 @@ private:
       }
       case StyledTextCase::FONT_SPAN_COMBINED:
       {
-        state.text = "Combined FontSpan sample";
-        auto range = CurrentRange(0u, 8u, 9u, 17u);
-        const std::size_t valueIndex = CurrentFontValueIndex();
+        state.text                      = "Combined FontSpan sample";
+        auto                 range      = CurrentRange(0u, 8u, 9u, 17u);
+        const std::size_t    valueIndex = CurrentFontValueIndex();
         Text::FontAttributes attributes;
         attributes.SetFamily("Ubuntu Mono");
         attributes.SetSize(FontSizeForValue(valueIndex));
@@ -1023,9 +1027,9 @@ private:
       }
       case StyledTextCase::FONT_SPAN_FIELD_MERGE:
       {
-        state.text = "Family and weight merge";
-        auto weightRange = CurrentRange(11u, 17u, 7u, 17u);
-        const std::size_t valueIndex = CurrentFontValueIndex();
+        state.text                       = "Family and weight merge";
+        auto                 weightRange = CurrentRange(11u, 17u, 7u, 17u);
+        const std::size_t    valueIndex  = CurrentFontValueIndex();
         Text::FontAttributes familyAttributes;
         familyAttributes.SetFamily("Ubuntu Mono");
         Text::FontAttributes weightAttributes;
@@ -1040,8 +1044,8 @@ private:
       }
       case StyledTextCase::FONT_SPAN_LATER_WEIGHT_WINS:
       {
-        state.text = "Bold normal wins";
-        auto normalRange = CurrentRange(5u, 11u, 0u, 4u);
+        state.text                       = "Bold normal wins";
+        auto                 normalRange = CurrentRange(5u, 11u, 0u, 4u);
         Text::FontAttributes boldAttributes;
         boldAttributes.SetWeight(Text::FontWeight::BOLD);
         Text::FontAttributes normalAttributes;
@@ -1056,9 +1060,9 @@ private:
       }
       case StyledTextCase::ANCHOR_SPAN:
       {
-        state.text = "Fallback explicit links";
-        auto explicitRange = CurrentRange(9u, 17u, 18u, 23u);
-        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+        state.text                            = "Fallback explicit links";
+        auto                    explicitRange = CurrentRange(9u, 17u, 18u, 23u);
+        Text::StyledTextBuilder builder       = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(NewAnchorSpan("anchor://fallback", false), 0u, 8u);
         builder.SetSpan(NewAnchorSpan("anchor://explicit", true), explicitRange.first, explicitRange.second);
         state.spanMode  = "AnchorSpan fallback + explicit";
@@ -1112,8 +1116,8 @@ private:
       }
       case StyledTextCase::GRADIENT_SPAN_VALUE_RANGE:
       {
-        state.text = "VALUE GradientSpan RANGE";
-        const auto range = CurrentRange(6u, 18u, 0u, 24u);
+        state.text                      = "VALUE GradientSpan RANGE";
+        const auto              range   = CurrentRange(6u, 18u, 0u, 24u);
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
         builder.SetSpan(Text::GradientSpan::New(NewGradient(mGradientIndex)), range.first, range.second);
 
@@ -1124,9 +1128,9 @@ private:
       }
       case StyledTextCase::GRADIENT_SPAN_BOUNDS:
       {
-        state.text = "SPAN_BOUND----------------\n------CONTENT_BOUND-------\n----------------VIEW_BOUND";
-        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
-        const Gradient::Base   gradient = NewGradient(mGradientIndex);
+        state.text                       = "SPAN_BOUND----------------\n------CONTENT_BOUND-------\n----------------VIEW_BOUND";
+        Text::StyledTextBuilder builder  = Text::StyledTextBuilder::New(state.text.c_str());
+        const Gradient::Base    gradient = NewGradient(mGradientIndex);
 
         const auto spanRange    = CurrentRange(0u, 10u, 0u, 26u);
         const auto contentRange = CurrentRange(33u, 46u, 27u, 53u);
@@ -1151,11 +1155,11 @@ private:
       }
       case StyledTextCase::GRADIENT_SPAN_OVERLAP:
       {
-        state.text = "RAINBOW SOLID RAINBOW";
+        state.text                      = "RAINBOW SOLID RAINBOW";
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
 
-        const auto solidRange          = CurrentRange(8u, 13u, 5u, 16u);
-        const auto laterGradientRange  = CurrentRange(14u, 21u, 11u, 21u);
+        const auto solidRange         = CurrentRange(8u, 13u, 5u, 16u);
+        const auto laterGradientRange = CurrentRange(14u, 21u, 11u, 21u);
 
         builder.SetSpan(Text::GradientSpan::New(NewGradient(mGradientIndex)), 0u, 21u);
         builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(0x111827)), solidRange.first, solidRange.second);
@@ -1183,7 +1187,7 @@ private:
 
   void ApplyCurrentCase()
   {
-    PreviewState state;
+    PreviewState              state;
     const StyledTextCaseInfo& info = CurrentCase();
 
     if(!info.enabled)
@@ -1800,7 +1804,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
 

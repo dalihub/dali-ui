@@ -14,10 +14,11 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -36,10 +37,10 @@ class ImageAlphaMaskController : public ConnectionTracker
 {
   // ── Constants ─────────────────────────────────────────────────────────────
 
-  static constexpr int PANEL_CROP_OFF = 0;
-  static constexpr int PANEL_CROP_ON  = 1;
-  static constexpr int PANEL_COUNT    = 2;
-  static constexpr int MASK_COUNT     = 2;
+  static constexpr int PANEL_CROP_OFF   = 0;
+  static constexpr int PANEL_CROP_ON    = 1;
+  static constexpr int PANEL_COUNT      = 2;
+  static constexpr int MASK_COUNT       = 2;
   static constexpr int IMAGE_TYPE_COUNT = 2;
 
   struct MaskEntry
@@ -264,7 +265,7 @@ private:
 
   void OnImageTypeToggleClicked(View /*clickedView*/, InputEvent /*event*/)
   {
-    mImageTypeIndex = (mImageTypeIndex + 1) % IMAGE_TYPE_COUNT;
+    mImageTypeIndex         = (mImageTypeIndex + 1) % IMAGE_TYPE_COUNT;
     const bool showAnimated = (mImageTypeIndex == 1);
 
     for(int i = 0; i < PANEL_COUNT; ++i)
@@ -354,16 +355,16 @@ private:
 
   // ── Members ─────────────────────────────────────────────────────────────────
 
-  Application&     mApplication;
-  Ui::ImageView    mStaticImages[PANEL_COUNT];
+  Application&      mApplication;
+  Ui::ImageView     mStaticImages[PANEL_COUNT];
   AnimatedImageView mAnimatedImages[PANEL_COUNT];
-  Label            mInfoLabel;
-  Label            mModeLabel;
-  Label            mImageTypeLabel;
-  View             mMaskButtons[MASK_COUNT];
-  int              mMaskIndex;
-  int              mImageTypeIndex;
-  bool             mMaskingOnLoading;
+  Label             mInfoLabel;
+  Label             mModeLabel;
+  Label             mImageTypeLabel;
+  View              mMaskButtons[MASK_COUNT];
+  int               mMaskIndex;
+  int               mImageTypeIndex;
+  bool              mMaskingOnLoading;
 };
 
 // ── Static data ───────────────────────────────────────────────────────────────
@@ -386,7 +387,7 @@ const ImageAlphaMaskController::ImageTypeEntry ImageAlphaMaskController::IMAGE_T
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ImageAlphaMaskController controller(application);

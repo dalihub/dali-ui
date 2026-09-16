@@ -14,11 +14,12 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
-#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
-#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -42,29 +43,29 @@ using namespace Dali::Ui;
  */
 class ImageSamplingController : public ConnectionTracker
 {
-  static constexpr int SAMPLING_COUNT = 4;
-  static constexpr int SIZE_COUNT     = 3;
+  static constexpr int SAMPLING_COUNT            = 4;
+  static constexpr int SIZE_COUNT                = 3;
   static constexpr int IMAGE_TYPE_COUNT_SAMPLING = 2; // ImageView, AnimatedImageView
-  static constexpr int IMAGE_TYPE_COUNT_DESIRED   = 3; // ImageView, AnimatedImageView, LottieAnimationView
+  static constexpr int IMAGE_TYPE_COUNT_DESIRED  = 3; // ImageView, AnimatedImageView, LottieAnimationView
 
   struct SamplingEntry
   {
-    const char*            name;
+    const char*             name;
     Ui::Image::SamplingMode mode;
   };
 
   struct DesiredSizeEntry
   {
-    const char*    name;
+    const char*     name;
     ImageDimensions size;
   };
 
-  static const SamplingEntry  SAMPLINGS[SAMPLING_COUNT];
+  static const SamplingEntry    SAMPLINGS[SAMPLING_COUNT];
   static const DesiredSizeEntry SIZES[SIZE_COUNT];
-  static const char* IMAGE_TYPE_NAMES_SAMPLING[IMAGE_TYPE_COUNT_SAMPLING];
-  static const char* IMAGE_TYPE_URLS_SAMPLING[IMAGE_TYPE_COUNT_SAMPLING];
-  static const char* IMAGE_TYPE_NAMES_DESIRED[IMAGE_TYPE_COUNT_DESIRED];
-  static const char* IMAGE_TYPE_URLS_DESIRED[IMAGE_TYPE_COUNT_DESIRED];
+  static const char*            IMAGE_TYPE_NAMES_SAMPLING[IMAGE_TYPE_COUNT_SAMPLING];
+  static const char*            IMAGE_TYPE_URLS_SAMPLING[IMAGE_TYPE_COUNT_SAMPLING];
+  static const char*            IMAGE_TYPE_NAMES_DESIRED[IMAGE_TYPE_COUNT_DESIRED];
+  static const char*            IMAGE_TYPE_URLS_DESIRED[IMAGE_TYPE_COUNT_DESIRED];
 
 public:
   explicit ImageSamplingController(Application& application)
@@ -493,7 +494,7 @@ private:
 
   Dali::String MakeDesiredSizeInfoText() const
   {
-    char buf[128];
+    char        buf[128];
     const auto& s = SIZES[mSizeIndex].size;
     if(s.GetWidth() == 0 && s.GetHeight() == 0)
     {
@@ -520,18 +521,18 @@ private:
   }
 
 private:
-  Application&  mApplication;
+  Application& mApplication;
 
   // SamplingMode section
-  StackLayout         mSamplingImageContainer;
-  Ui::ImageView       mSamplingImage;
-  AnimatedImageView   mSamplingAnimatedImage;
-  Label               mSamplingInfoLabel;
-  View                mSamplingImageTypeButton;
-  View                mSamplingImageTypeLabel;
-  View                mSamplingButtons[SAMPLING_COUNT];
-  int                 mSamplingIndex;
-  int                 mImageTypeIndexSampling;
+  StackLayout       mSamplingImageContainer;
+  Ui::ImageView     mSamplingImage;
+  AnimatedImageView mSamplingAnimatedImage;
+  Label             mSamplingInfoLabel;
+  View              mSamplingImageTypeButton;
+  View              mSamplingImageTypeLabel;
+  View              mSamplingButtons[SAMPLING_COUNT];
+  int               mSamplingIndex;
+  int               mImageTypeIndexSampling;
 
   // DesiredSize section
   StackLayout         mDesiredSizeImageContainer;
@@ -547,15 +548,15 @@ private:
 };
 
 const ImageSamplingController::SamplingEntry ImageSamplingController::SAMPLINGS[ImageSamplingController::SAMPLING_COUNT] = {
-  {"NEAREST",         Ui::Image::SamplingMode::NEAREST},
+  {"NEAREST", Ui::Image::SamplingMode::NEAREST},
   {"BOX_THEN\nNEAREST", Ui::Image::SamplingMode::BOX_THEN_NEAREST},
-  {"BOX_THEN\nLINEAR",  Ui::Image::SamplingMode::BOX_THEN_LINEAR},
-  {"LINEAR",          Ui::Image::SamplingMode::LINEAR},
+  {"BOX_THEN\nLINEAR", Ui::Image::SamplingMode::BOX_THEN_LINEAR},
+  {"LINEAR", Ui::Image::SamplingMode::LINEAR},
 };
 
 const ImageSamplingController::DesiredSizeEntry ImageSamplingController::SIZES[ImageSamplingController::SIZE_COUNT] = {
-  {"FULL",    ImageDimensions(0, 0)},
-  {"128x128",    ImageDimensions(128, 128)},
+  {"FULL", ImageDimensions(0, 0)},
+  {"128x128", ImageDimensions(128, 128)},
   {"32x32", ImageDimensions(32, 32)},
 };
 
@@ -584,7 +585,7 @@ const char* ImageSamplingController::IMAGE_TYPE_URLS_DESIRED[ImageSamplingContro
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ImageSamplingController controller(application);

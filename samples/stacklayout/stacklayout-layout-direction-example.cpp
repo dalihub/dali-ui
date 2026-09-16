@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -34,7 +35,7 @@ class StackLayoutDirectionController : public ConnectionTracker
 {
 public:
   StackLayoutDirectionController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     mApplication.InitSignal().Connect(this, &StackLayoutDirectionController::Create);
   }
@@ -88,7 +89,8 @@ public:
     toggleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     toggleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     toggleBtn.Add(toggleLabel);
-    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool
+    {
       mIsRtl = !mIsRtl;
       mRoot.SetLayoutDirection(mIsRtl ? Dali::LayoutDirection::RIGHT_TO_LEFT : Dali::LayoutDirection::LEFT_TO_RIGHT);
       return true;
@@ -101,9 +103,9 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -119,7 +121,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   StackLayoutDirectionController controller(application);

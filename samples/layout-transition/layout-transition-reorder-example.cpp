@@ -15,6 +15,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/devel-api/actors/actor-devel.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <algorithm>
 #include <cstdint>
@@ -580,12 +581,12 @@ private:
 
     StopAutoScrollTimer();
 
-    View       droppedChild  = mDraggedChild;
-    View       proxyToRemove = mDragProxy;
-    const uint32_t   targetIndex  = mDraggedIndex;
-    const float      originalReqW = mDraggedOriginalReqW;
-    const float      originalReqH = mDraggedOriginalReqH;
-    const LayoutRect dragBounds   = mDragBounds;
+    View             droppedChild  = mDraggedChild;
+    View             proxyToRemove = mDragProxy;
+    const uint32_t   targetIndex   = mDraggedIndex;
+    const float      originalReqW  = mDraggedOriginalReqW;
+    const float      originalReqH  = mDraggedOriginalReqH;
+    const LayoutRect dragBounds    = mDragBounds;
 
     // Reset state first so any layout work triggered by the swap below
     // sees a clean controller (no pending drag). mLastDragRootPosition
@@ -696,9 +697,9 @@ private:
   // the unchanged finger position so the proxy reorder keeps tracking the
   // finger as the content slides underneath the floating dragged child.
 
-  static constexpr float AUTO_SCROLL_EDGE_ZONE = 60.0f; ///< px from viewport edge that triggers auto-scroll
-  static constexpr float AUTO_SCROLL_MAX_STEP  = 12.0f; ///< px scrolled per tick at the very edge
-  static constexpr uint32_t AUTO_SCROLL_TICK_MS = 16u;  ///< ~60 Hz
+  static constexpr float    AUTO_SCROLL_EDGE_ZONE = 60.0f; ///< px from viewport edge that triggers auto-scroll
+  static constexpr float    AUTO_SCROLL_MAX_STEP  = 12.0f; ///< px scrolled per tick at the very edge
+  static constexpr uint32_t AUTO_SCROLL_TICK_MS   = 16u;   ///< ~60 Hz
 
   void StartAutoScrollTimer()
   {
@@ -771,7 +772,7 @@ private:
   Application& mApplication;
   Window       mWindow;
   StackLayout  mRoot;
-  ScrollView   mScrollView;          ///< Vertical scroll wrapper around mStack
+  ScrollView   mScrollView; ///< Vertical scroll wrapper around mStack
   StackLayout  mStack;
   Label        mEnterButton;
   Label        mExitButton;
@@ -779,15 +780,15 @@ private:
   uint32_t     mNextColorIndex;
   bool         mEditMode;
   bool         mDragging;
-  View         mDraggedChild;        ///< The actual child, floating under the window during drag
-  View         mDragProxy;           ///< Empty (OPACITY 0) slot reserving the dragged child's place in mStack
-  uint32_t     mDraggedIndex;        ///< Current index of mDragProxy in mStack
-  LayoutRect   mDragBounds;          ///< Dragged child's world bounds (driven by finger)
+  View         mDraggedChild; ///< The actual child, floating under the window during drag
+  View         mDragProxy;    ///< Empty (OPACITY 0) slot reserving the dragged child's place in mStack
+  uint32_t     mDraggedIndex; ///< Current index of mDragProxy in mStack
+  LayoutRect   mDragBounds;   ///< Dragged child's world bounds (driven by finger)
   float        mDragGrabOffsetY;
-  float        mDraggedOriginalReqW; ///< Restored to mDraggedChild on FinishDrag
-  float        mDraggedOriginalReqH; ///< Restored to mDraggedChild on FinishDrag
-  Vector2      mLastDragRootPosition;///< Latest finger position in mRoot-local space; drives auto-scroll
-  Timer        mAutoScrollTimer;     ///< Fires while a drag is in flight to apply edge-zone auto-scroll
+  float        mDraggedOriginalReqW;  ///< Restored to mDraggedChild on FinishDrag
+  float        mDraggedOriginalReqH;  ///< Restored to mDraggedChild on FinishDrag
+  Vector2      mLastDragRootPosition; ///< Latest finger position in mRoot-local space; drives auto-scroll
+  Timer        mAutoScrollTimer;      ///< Fires while a drag is in flight to apply edge-zone auto-scroll
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

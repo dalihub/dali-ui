@@ -24,6 +24,7 @@
 //   ESC/BACK - Quit
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 // Apps can only use public headers in platform builds.
 // #include <dali/integration-api/string-utils.h>
@@ -52,10 +53,10 @@ constexpr int MESSAGE_LOCALE_CATEGORY = LC_MESSAGES;
 constexpr float STACK_SPACING = 10.0f;
 constexpr float STACK_PADDING = 20.0f;
 
-constexpr float TITLE_FONT_SIZE    = 32.0f;
-constexpr float LABEL_FONT_SIZE    = 24.0f;
-constexpr float STATUS_FONT_SIZE   = 18.0f;
-constexpr float HELP_FONT_SIZE     = 16.0f;
+constexpr float TITLE_FONT_SIZE  = 32.0f;
+constexpr float LABEL_FONT_SIZE  = 24.0f;
+constexpr float STATUS_FONT_SIZE = 18.0f;
+constexpr float HELP_FONT_SIZE   = 16.0f;
 
 constexpr uint32_t COLOR_WHITE      = 0xFFFFFF;
 constexpr uint32_t COLOR_DARK_TEXT  = 0x222222;

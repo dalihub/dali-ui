@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -417,7 +418,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetLabelAsyncRendering(true);
   config.SetDefaultPlaceholderTextColor(Color::DARK_GRAY);
   config.SetShowPlaceholderTextOnFocus(false);

@@ -10224,3 +10224,101 @@ int UtcDaliViewCornerRadiusBeforeBackgroundP(void)
 
   END_TEST;
 }
+
+namespace
+{
+// ─── Owner gate: a visual write from the impl CONSTRUCTOR is ignored, not fatal ───
+//
+// ViewImpl::SetBackgroundColor is public, so a subclass may call it from its own
+// constructor. No owner exists yet (View handle(*impl) has not run), so Self() is an
+// empty handle and VisualData::RegisterVisual would read a property from it. Before
+// lazy allocation the call was a silent no-op because the context did not exist until
+// Initialize(); ViewDataImpl::CanUseVisuals() keeps exactly that.
+class ConstructorBackgroundViewImpl : public ViewImpl
+{
+public:
+  static IntrusivePtr<ConstructorBackgroundViewImpl> New()
+  {
+    return IntrusivePtr<ConstructorBackgroundViewImpl>(new ConstructorBackgroundViewImpl());
+  }
+
+protected:
+  ConstructorBackgroundViewImpl()
+  : ViewImpl()
+  {
+    SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f)); // must be ignored, must not throw
+  }
+};
+
+Dali::TypeRegistration constructorBackgroundViewTypeReg(
+  typeid(ConstructorBackgroundViewImpl), typeid(ViewImpl), nullptr);
+
+// ─── Owner gate: a visual write from OnInitialize() goes through ──────────
+//
+// OnInitialize() runs from ViewImpl::Initialize(), which View::New (and the tests
+// below) call only after the handle exists, so the owner is in place and the same
+// SetBackgroundColor that a constructor must drop is applied here -- the earliest
+// point a subclass can legitimately touch its visuals.
+class OnInitializeBackgroundViewImpl : public ViewImpl
+{
+public:
+  static IntrusivePtr<OnInitializeBackgroundViewImpl> New()
+  {
+    return IntrusivePtr<OnInitializeBackgroundViewImpl>(new OnInitializeBackgroundViewImpl());
+  }
+
+protected:
+  OnInitializeBackgroundViewImpl()
+  : ViewImpl()
+  {
+  }
+
+  void OnInitialize() override
+  {
+    ViewImpl::OnInitialize();
+    SetBackgroundColor(UiColor(0.0f, 0.0f, 1.0f, 1.0f));
+  }
+};
+
+Dali::TypeRegistration onInitializeBackgroundViewTypeReg(
+  typeid(OnInitializeBackgroundViewImpl), typeid(ViewImpl), nullptr);
+} // namespace
+
+int UtcDaliViewImplConstructorSetBackgroundColorIgnoredP(void)
+{
+  UiTestApplication application;
+  tet_infoline("SetBackgroundColor from a ViewImpl constructor is ignored; it works once the handle exists");
+
+  IntrusivePtr<ConstructorBackgroundViewImpl> impl = ConstructorBackgroundViewImpl::New();
+  View                                        handle(*impl);
+  impl->Initialize();
+  DALI_TEST_CHECK(handle);
+
+  // Parity with the pre-lazy behaviour: the constructor-time write left no background.
+  Property::Map backgroundMap = handle.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(backgroundMap.Empty(), true, TEST_LOCATION);
+
+  // With the owner in place the same call goes through.
+  handle.SetBackgroundColor(UiColor(0.0f, 1.0f, 0.0f, 1.0f));
+  application.GetWindow().Add(handle);
+  backgroundMap = handle.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(backgroundMap.Empty(), false, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewImplOnInitializeSetBackgroundColorAppliedP(void)
+{
+  UiTestApplication application;
+  tet_infoline("SetBackgroundColor from OnInitialize() is applied because the owner already exists");
+
+  IntrusivePtr<OnInitializeBackgroundViewImpl> impl = OnInitializeBackgroundViewImpl::New();
+  View                                         handle(*impl);
+  impl->Initialize();
+  DALI_TEST_CHECK(handle);
+
+  Property::Map backgroundMap = handle.GetProperty<Property::Map>(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(backgroundMap.Empty(), false, TEST_LOCATION);
+
+  END_TEST;
+}

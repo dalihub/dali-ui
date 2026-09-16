@@ -14,12 +14,12 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
-#include <dali/public-api/adaptor-framework/application.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/animation/key-frames.h>
 #include <dali/public-api/events/key-event.h>
@@ -154,7 +154,8 @@ private:
     gifLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     gifButton.Add(gifLabel);
     gifButton.AsInteractive().ClickedSignal().Connect(
-      this, [this](View, InputEvent) { OnGifButtonClicked(); });
+      this, [this](View, InputEvent)
+    { OnGifButtonClicked(); });
     mGifButton = gifButton;
 
     // Animate PixelArea button
@@ -173,7 +174,8 @@ private:
     animLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     animButton.Add(animLabel);
     animButton.AsInteractive().ClickedSignal().Connect(
-      this, [this](View, InputEvent) { OnAnimateButtonClicked(); });
+      this, [this](View, InputEvent)
+    { OnAnimateButtonClicked(); });
     mAnimateButton = animButton;
 
     row.Add(gifButton);
@@ -273,19 +275,19 @@ private:
     //   t=0.75 : zoom into bottom-right quadrant
     //   t=1.0  : back to full (loops)
     KeyFrames keyFrames = KeyFrames::New();
-    keyFrames.Add(0.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
-    keyFrames.Add(0.25f, Property::Value(Vector4(0.0f,  0.0f,  0.5f,  0.5f)));
-    keyFrames.Add(0.50f, Property::Value(Vector4(0.25f, 0.25f, 0.5f,  0.5f)));
-    keyFrames.Add(0.75f, Property::Value(Vector4(0.5f,  0.5f,  0.5f,  0.5f)));
-    keyFrames.Add(1.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
+    keyFrames.Add(0.00f, Property::Value(Vector4(0.0f, 0.0f, 1.0f, 1.0f)));
+    keyFrames.Add(0.25f, Property::Value(Vector4(0.0f, 0.0f, 0.5f, 0.5f)));
+    keyFrames.Add(0.50f, Property::Value(Vector4(0.25f, 0.25f, 0.5f, 0.5f)));
+    keyFrames.Add(0.75f, Property::Value(Vector4(0.5f, 0.5f, 0.5f, 0.5f)));
+    keyFrames.Add(1.00f, Property::Value(Vector4(0.0f, 0.0f, 1.0f, 1.0f)));
 
     mPixelAreaAnimation = Animation::New(3.0f);
     mPixelAreaAnimation.SetLoopCount(Animation::INFINITE_LOOP);
 
     // PIXEL_AREA is an animatable property on both ImageView and AnimatedImageView
     int pixelAreaIndex = mUsingGif
-      ? static_cast<int>(AnimatedImageView::Property::PIXEL_AREA)
-      : static_cast<int>(ImageView::Property::PIXEL_AREA);
+                           ? static_cast<int>(AnimatedImageView::Property::PIXEL_AREA)
+                           : static_cast<int>(ImageView::Property::PIXEL_AREA);
 
     mPixelAreaAnimation.AnimateBetween(
       Property(mImage, pixelAreaIndex),
@@ -367,7 +369,7 @@ private:
       return Dali::String(buf);
     }
     const Vector4& a = AREAS[mActiveIndex].area;
-    char buf[128];
+    char           buf[128];
     snprintf(buf, sizeof(buf),
              "[%s] PixelArea: x=%.2f  y=%.2f  w=%.2f  h=%.2f",
              source, a.x, a.y, a.z, a.w);
@@ -386,35 +388,35 @@ private:
   }
 
 private:
-  Application&  mApplication;
-  View          mImage;
-  View          mImageContainer;
-  Label         mInfoLabel;
-  View          mButtons[AREA_COUNT];
-  View          mGifButton;
-  View          mAnimateButton;
-  Animation     mPixelAreaAnimation;
-  int           mActiveIndex;
-  bool          mUsingGif;
-  bool          mAnimating;
+  Application& mApplication;
+  View         mImage;
+  View         mImageContainer;
+  Label        mInfoLabel;
+  View         mButtons[AREA_COUNT];
+  View         mGifButton;
+  View         mAnimateButton;
+  Animation    mPixelAreaAnimation;
+  int          mActiveIndex;
+  bool         mUsingGif;
+  bool         mAnimating;
 };
 
 const char* const ImagePixelAreaController::JPG_URL = RESOURCES_DIR "gallery-large-3.jpg";
 const char* const ImagePixelAreaController::GIF_URL = RESOURCES_DIR "dali-logo-anim.gif";
 
 const ImagePixelAreaController::AreaEntry ImagePixelAreaController::AREAS[ImagePixelAreaController::AREA_COUNT] = {
-  {"FULL",         Vector4(0.0f,  0.0f,  1.0f, 1.0f)},
-  {"TOP-L",        Vector4(0.0f,  0.0f,  0.5f, 0.5f)},
-  {"TOP-R",        Vector4(0.5f,  0.0f,  0.5f, 0.5f)},
-  {"BOT-L",        Vector4(0.0f,  0.5f,  0.5f, 0.5f)},
-  {"BOT-R",        Vector4(0.5f,  0.5f,  0.5f, 0.5f)},
+  {"FULL", Vector4(0.0f, 0.0f, 1.0f, 1.0f)},
+  {"TOP-L", Vector4(0.0f, 0.0f, 0.5f, 0.5f)},
+  {"TOP-R", Vector4(0.5f, 0.0f, 0.5f, 0.5f)},
+  {"BOT-L", Vector4(0.0f, 0.5f, 0.5f, 0.5f)},
+  {"BOT-R", Vector4(0.5f, 0.5f, 0.5f, 0.5f)},
   {"CENTER\nZOOM", Vector4(0.25f, 0.25f, 0.5f, 0.5f)},
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ImagePixelAreaController controller(application);

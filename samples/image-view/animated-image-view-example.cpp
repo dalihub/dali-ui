@@ -14,9 +14,10 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 #include <cstdio>
@@ -49,8 +50,8 @@ using namespace Dali::Ui;
  */
 class AnimatedImageViewSampleController : public ConnectionTracker
 {
-  static constexpr int JUMP_FRAME    = 5;
-  static constexpr int IMAGE_COUNT   = 5;
+  static constexpr int JUMP_FRAME  = 5;
+  static constexpr int IMAGE_COUNT = 5;
 
 public:
   explicit AnimatedImageViewSampleController(Application& application)
@@ -160,19 +161,26 @@ private:
   View CreatePlaybackRow()
   {
     return CreateButtonRow({
-      CreateButton("PLAY",   [this](View, InputEvent) { OnPlay(); }),
-      CreateButton("PAUSE",  [this](View, InputEvent) { OnPause(); }),
-      CreateButton("STOP",   [this](View, InputEvent) { OnStop(); }),
-      CreateButton("JUMP→5", [this](View, InputEvent) { OnJumpTo(); }),
+      CreateButton("PLAY", [this](View, InputEvent)
+    { OnPlay(); }),
+      CreateButton("PAUSE", [this](View, InputEvent)
+    { OnPause(); }),
+      CreateButton("STOP", [this](View, InputEvent)
+    { OnStop(); }),
+      CreateButton("JUMP→5", [this](View, InputEvent)
+    { OnJumpTo(); }),
     });
   }
 
   View CreateChangeImageRow()
   {
     return CreateButtonRow({
-      CreateButton("◀ PREV", [this](View, InputEvent) { OnPrevImage(); }),
-      CreateButton("NEXT ▶", [this](View, InputEvent) { OnNextImage(); }),
-      CreateButton("RELOAD", [this](View, InputEvent) { OnReload(); }),
+      CreateButton("◀ PREV", [this](View, InputEvent)
+    { OnPrevImage(); }),
+      CreateButton("NEXT ▶", [this](View, InputEvent)
+    { OnNextImage(); }),
+      CreateButton("RELOAD", [this](View, InputEvent)
+    { OnReload(); }),
     });
   }
 
@@ -189,7 +197,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton));
+    row.Add(CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent)
+    { OnLoopToggle(); }, mLoopButton));
     return row;
   }
 
@@ -206,7 +215,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton));
+    row.Add(CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent)
+    { OnSpeedToggle(); }, mSpeedButton));
     return row;
   }
 
@@ -223,7 +233,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton));
+    row.Add(CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent)
+    { OnStopBehaviorToggle(); }, mStopBehaviorButton));
     return row;
   }
 
@@ -240,7 +251,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(FRAME_DELAY_LABELS[mFrameDelayIndex], [this](View, InputEvent) { OnFrameDelayToggle(); }, mFrameDelayButton));
+    row.Add(CreateToggleButton(FRAME_DELAY_LABELS[mFrameDelayIndex], [this](View, InputEvent)
+    { OnFrameDelayToggle(); }, mFrameDelayButton));
     return row;
   }
 
@@ -523,17 +535,17 @@ private:
   static constexpr float SPEED_FACTORS[3] = {0.5f, 1.0f, 2.0f};
   static constexpr int   FRAME_DELAYS[4]  = {200, 500, 1000, 2000};
 
-  static const char* IMAGE_NAMES[IMAGE_COUNT];
-  static const char* IMAGE_URLS[3]; // indices 0-2: single animated file
-  static const char* URL_ARRAY_FORMATS[2];
-  static const int   URL_ARRAY_FRAME_COUNTS[2];
-  static const char* WEBP_RELOAD_SOURCE_URL;
-  static const char* WEBP_RELOAD_ROTATED_URL;
-  static const char* WEBP_RELOAD_TEMP_URL;
-  static const char* LOOP_LABELS[3];
-  static const char* SPEED_LABELS[3];
-  static const char* STOP_BEHAVIOR_LABELS[3];
-  static const char* FRAME_DELAY_LABELS[4];
+  static const char*                           IMAGE_NAMES[IMAGE_COUNT];
+  static const char*                           IMAGE_URLS[3]; // indices 0-2: single animated file
+  static const char*                           URL_ARRAY_FORMATS[2];
+  static const int                             URL_ARRAY_FRAME_COUNTS[2];
+  static const char*                           WEBP_RELOAD_SOURCE_URL;
+  static const char*                           WEBP_RELOAD_ROTATED_URL;
+  static const char*                           WEBP_RELOAD_TEMP_URL;
+  static const char*                           LOOP_LABELS[3];
+  static const char*                           SPEED_LABELS[3];
+  static const char*                           STOP_BEHAVIOR_LABELS[3];
+  static const char*                           FRAME_DELAY_LABELS[4];
   static const Ui::AnimatedImage::StopBehavior STOP_BEHAVIORS[3];
 
   Application&      mApplication;
@@ -547,11 +559,11 @@ private:
   View              mFrameDelayButton;
   Timer             mMonitorTimer;
 
-  int mImageIndex;
-  int mLoopIndex;
-  int mSpeedIndex;
-  int mStopBehaviorIndex;
-  int mFrameDelayIndex;
+  int  mImageIndex;
+  int  mLoopIndex;
+  int  mSpeedIndex;
+  int  mStopBehaviorIndex;
+  int  mFrameDelayIndex;
   bool mReloadRotated;
 };
 
@@ -595,7 +607,7 @@ const Ui::AnimatedImage::StopBehavior AnimatedImageViewSampleController::STOP_BE
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   AnimatedImageViewSampleController controller(application);

@@ -17,16 +17,19 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/view.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
-#include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/shaping.h>
 #include <dali/public-api/adaptor-framework/capture.h>
-#include <dali/public-api/adaptor-framework/clipboard.h>
 #include <dali/public-api/adaptor-framework/clipboard-data.h>
+#include <dali/public-api/adaptor-framework/clipboard.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 
+#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
@@ -41,8 +44,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
-#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -54,51 +55,51 @@ namespace
 #define DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "automated-tests/src/dali-ui-foundation-internal/resources"
 #endif
 
-constexpr float HEADER_MIN_HEIGHT                = 50.0f;
-constexpr float HEADER_LINE_HEIGHT               = 17.0f;
-constexpr float ROW_HEIGHT                       = 230.0f;
-constexpr float ROW_SPACING                      = 8.0f;
-constexpr float PAGE_PADDING_X                   = 12.0f;
-constexpr float PAGE_PADDING_Y                   = 12.0f;
-constexpr float ROW_PADDING_X                    = 10.0f;
-constexpr float ROW_PADDING_Y                    = 8.0f;
-constexpr float PREVIEW_WIDTH                    = 160.0f;
-constexpr float PREVIEW_SIZE                     = 52.0f;
-constexpr float SAMPLE_PREVIEW_GAP               = 8.0f;
-constexpr float SAMPLE_IMAGE_SCALE               = 1.12f;
-constexpr float SAMPLE_SET_LABEL_HEIGHT          = 22.0f;
-constexpr float SAMPLE_SET_LABEL_SIZE            = 11.0f;
-constexpr float SAMPLE_PLACEHOLDER_SIZE           = 13.0f;
-constexpr float DETAIL_SIZE                      = 15.0f;
-constexpr float MIN_DETAIL_WIDTH                 = 220.0f;
-constexpr float HEADER_SIZE                      = 12.0f;
-constexpr float NAV_BUTTON_WIDTH                 = 150.0f;
-constexpr float NAV_PAGE_BUTTON_WIDTH            = 96.0f;
-constexpr float NAV_BUTTON_HEIGHT                = 26.0f;
-constexpr float NAV_SIZE                         = 12.0f;
-constexpr float NAV_PADDING_X                    = 8.0f;
-constexpr float NAV_PADDING_Y                    = 6.0f;
-constexpr float NAV_BUTTON_GAP_X                 = 4.0f;
-constexpr float NAV_BUTTON_GAP_Y                 = 4.0f;
-constexpr float FLOATING_SEARCH_MARGIN           = 18.0f;
-constexpr float FLOATING_SEARCH_BUTTON_SIZE      = 48.0f;
-constexpr float FLOATING_SEARCH_INPUT_HEIGHT     = 42.0f;
-constexpr float FLOATING_SEARCH_INPUT_MAX_WIDTH  = 420.0f;
-constexpr float FLOATING_SEARCH_INPUT_MIN_WIDTH  = 220.0f;
-constexpr float FLOATING_SEARCH_FONT_SIZE        = 14.0f;
-constexpr float FLOATING_SEARCH_ICON_SIZE        = 23.0f;
-constexpr float FLOATING_SEARCH_ANIMATION_TIME   = 0.18f;
-constexpr float PREVIEW_POPUP_MARGIN             = 64.0f;
-constexpr float PREVIEW_POPUP_MAX_WIDTH          = 800.0f;
-constexpr float PREVIEW_POPUP_MAX_HEIGHT         = 800.0f;
-constexpr float PREVIEW_POPUP_TEXT_FIT_MIN_SIZE  = 20.0f;
-constexpr float PREVIEW_POPUP_TEXT_FIT_MAX_SIZE  = 600.0f;
-constexpr float PREVIEW_POPUP_TEXT_FIT_STEP_SIZE = 10.0f;
-constexpr size_t DEFAULT_PAGE_SIZE               = 100u;
-constexpr uint32_t DETAIL_DIAGNOSTIC_TIMER_MS    = 16u;
-constexpr size_t DETAIL_DIAGNOSTIC_BATCH_SIZE    = 2u;
-constexpr const char* MIME_TYPE_TEXT_PLAIN        = "text/plain;charset=utf-8";
-constexpr const char* SEARCH_BUTTON_EMOJI         = "\xF0\x9F\x94\x8D\xEF\xB8\x8F"; // U+1F50D U+FE0F
+constexpr float       HEADER_MIN_HEIGHT                = 50.0f;
+constexpr float       HEADER_LINE_HEIGHT               = 17.0f;
+constexpr float       ROW_HEIGHT                       = 230.0f;
+constexpr float       ROW_SPACING                      = 8.0f;
+constexpr float       PAGE_PADDING_X                   = 12.0f;
+constexpr float       PAGE_PADDING_Y                   = 12.0f;
+constexpr float       ROW_PADDING_X                    = 10.0f;
+constexpr float       ROW_PADDING_Y                    = 8.0f;
+constexpr float       PREVIEW_WIDTH                    = 160.0f;
+constexpr float       PREVIEW_SIZE                     = 52.0f;
+constexpr float       SAMPLE_PREVIEW_GAP               = 8.0f;
+constexpr float       SAMPLE_IMAGE_SCALE               = 1.12f;
+constexpr float       SAMPLE_SET_LABEL_HEIGHT          = 22.0f;
+constexpr float       SAMPLE_SET_LABEL_SIZE            = 11.0f;
+constexpr float       SAMPLE_PLACEHOLDER_SIZE          = 13.0f;
+constexpr float       DETAIL_SIZE                      = 15.0f;
+constexpr float       MIN_DETAIL_WIDTH                 = 220.0f;
+constexpr float       HEADER_SIZE                      = 12.0f;
+constexpr float       NAV_BUTTON_WIDTH                 = 150.0f;
+constexpr float       NAV_PAGE_BUTTON_WIDTH            = 96.0f;
+constexpr float       NAV_BUTTON_HEIGHT                = 26.0f;
+constexpr float       NAV_SIZE                         = 12.0f;
+constexpr float       NAV_PADDING_X                    = 8.0f;
+constexpr float       NAV_PADDING_Y                    = 6.0f;
+constexpr float       NAV_BUTTON_GAP_X                 = 4.0f;
+constexpr float       NAV_BUTTON_GAP_Y                 = 4.0f;
+constexpr float       FLOATING_SEARCH_MARGIN           = 18.0f;
+constexpr float       FLOATING_SEARCH_BUTTON_SIZE      = 48.0f;
+constexpr float       FLOATING_SEARCH_INPUT_HEIGHT     = 42.0f;
+constexpr float       FLOATING_SEARCH_INPUT_MAX_WIDTH  = 420.0f;
+constexpr float       FLOATING_SEARCH_INPUT_MIN_WIDTH  = 220.0f;
+constexpr float       FLOATING_SEARCH_FONT_SIZE        = 14.0f;
+constexpr float       FLOATING_SEARCH_ICON_SIZE        = 23.0f;
+constexpr float       FLOATING_SEARCH_ANIMATION_TIME   = 0.18f;
+constexpr float       PREVIEW_POPUP_MARGIN             = 64.0f;
+constexpr float       PREVIEW_POPUP_MAX_WIDTH          = 800.0f;
+constexpr float       PREVIEW_POPUP_MAX_HEIGHT         = 800.0f;
+constexpr float       PREVIEW_POPUP_TEXT_FIT_MIN_SIZE  = 20.0f;
+constexpr float       PREVIEW_POPUP_TEXT_FIT_MAX_SIZE  = 600.0f;
+constexpr float       PREVIEW_POPUP_TEXT_FIT_STEP_SIZE = 10.0f;
+constexpr size_t      DEFAULT_PAGE_SIZE                = 100u;
+constexpr uint32_t    DETAIL_DIAGNOSTIC_TIMER_MS       = 16u;
+constexpr size_t      DETAIL_DIAGNOSTIC_BATCH_SIZE     = 2u;
+constexpr const char* MIME_TYPE_TEXT_PLAIN             = "text/plain;charset=utf-8";
+constexpr const char* SEARCH_BUTTON_EMOJI              = "\xF0\x9F\x94\x8D\xEF\xB8\x8F"; // U+1F50D U+FE0F
 
 struct VisualCase
 {
@@ -489,7 +490,7 @@ std::string ScriptRunsToString(const Dali::Vector<Dali::Ui::Text::ScriptRun>& sc
   return stream.str();
 }
 
-std::string FontRunsToString(Dali::TextAbstraction::FontClient& fontClient,
+std::string FontRunsToString(Dali::TextAbstraction::FontClient&           fontClient,
                              const Dali::Vector<Dali::Ui::Text::FontRun>& fonts)
 {
   std::stringstream stream;
@@ -617,10 +618,10 @@ std::string ItemCodepointsForCharacterRange(const VisualCase& item, uint32_t gly
   return codepoints.empty() ? "none" : CodepointsToString(codepoints);
 }
 
-std::string CompositionGlyphsToString(const VisualCase&                                      item,
-                                      const Dali::Vector<Dali::Ui::Text::GlyphInfo>&         glyphs,
-                                      const Dali::Vector<Dali::Ui::Text::CharacterIndex>&    glyphToCharacterMap,
-                                      const Dali::Vector<Dali::Ui::Text::Length>&            charactersPerGlyph)
+std::string CompositionGlyphsToString(const VisualCase&                                   item,
+                                      const Dali::Vector<Dali::Ui::Text::GlyphInfo>&      glyphs,
+                                      const Dali::Vector<Dali::Ui::Text::CharacterIndex>& glyphToCharacterMap,
+                                      const Dali::Vector<Dali::Ui::Text::Length>&         charactersPerGlyph)
 {
   const uint32_t itemCharacterBegin = 1u;
   const uint32_t itemCharacterEnd   = 1u + static_cast<uint32_t>(item.codepoints.size());
@@ -727,10 +728,10 @@ std::string HtmlEscape(const std::string& text)
 }
 
 bool ConvertUtf8ByteRangeToUtf32Range(const std::string& text,
-                                       size_t             utf8StartIndex,
-                                       size_t             utf8EndIndex,
-                                       uint32_t&          utf32StartIndex,
-                                       uint32_t&          utf32EndIndex)
+                                      size_t             utf8StartIndex,
+                                      size_t             utf8EndIndex,
+                                      uint32_t&          utf32StartIndex,
+                                      uint32_t&          utf32EndIndex)
 {
   if(utf8StartIndex > utf8EndIndex ||
      utf8EndIndex > text.size() ||
@@ -831,14 +832,13 @@ std::string FindFixturePath()
   }
 
   const std::vector<std::string> candidates =
-  {
-    MakeFixturePathFromTestResourceDir(),
-    "automated-tests/emoji/res/emoji-test-latest.tsv",
-    "../emoji/res/emoji-test-latest.tsv",
-    std::string(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR) + "/emoji/emoji-test-latest.tsv",
-    "automated-tests/src/dali-ui-foundation-internal/resources/emoji/emoji-test-latest.tsv",
-    "../src/dali-ui-foundation-internal/resources/emoji/emoji-test-latest.tsv"
-  };
+    {
+      MakeFixturePathFromTestResourceDir(),
+      "automated-tests/emoji/res/emoji-test-latest.tsv",
+      "../emoji/res/emoji-test-latest.tsv",
+      std::string(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR) + "/emoji/emoji-test-latest.tsv",
+      "automated-tests/src/dali-ui-foundation-internal/resources/emoji/emoji-test-latest.tsv",
+      "../src/dali-ui-foundation-internal/resources/emoji/emoji-test-latest.tsv"};
 
   for(const std::string& candidate : candidates)
   {
@@ -899,13 +899,13 @@ VisualOptions LoadOptions()
     options.mode = visualMode;
   }
 
-  const char* maxItems = GetEnv("DALI_EMOJI_VISUAL_MAX_ITEMS");
-  options.fixturePath  = FindFixturePath();
-  options.maxItems     = maxItems ? GetEnvSize("DALI_EMOJI_VISUAL_MAX_ITEMS", 0u) : 0u;
-  options.pageSize     = GetEnvSize("DALI_EMOJI_VISUAL_PAGE_SIZE", DEFAULT_PAGE_SIZE);
-  options.fontSize    = GetEnvFloat("DALI_EMOJI_VISUAL_FONT_SIZE", PREVIEW_SIZE);
-  options.captureDelayMs = static_cast<uint32_t>(GetEnvSize("DALI_EMOJI_VISUAL_CAPTURE_DELAY_MS", options.captureDelayMs));
-  options.sample         = LoadSampleOptions();
+  const char* maxItems     = GetEnv("DALI_EMOJI_VISUAL_MAX_ITEMS");
+  options.fixturePath      = FindFixturePath();
+  options.maxItems         = maxItems ? GetEnvSize("DALI_EMOJI_VISUAL_MAX_ITEMS", 0u) : 0u;
+  options.pageSize         = GetEnvSize("DALI_EMOJI_VISUAL_PAGE_SIZE", DEFAULT_PAGE_SIZE);
+  options.fontSize         = GetEnvFloat("DALI_EMOJI_VISUAL_FONT_SIZE", PREVIEW_SIZE);
+  options.captureDelayMs   = static_cast<uint32_t>(GetEnvSize("DALI_EMOJI_VISUAL_CAPTURE_DELAY_MS", options.captureDelayMs));
+  options.sample           = LoadSampleOptions();
   options.exportOnly       = GetEnvBool("DALI_EMOJI_VISUAL_EXPORT_ONLY");
   options.exitAfterExport  = GetEnvBool("DALI_EMOJI_VISUAL_EXIT_AFTER_EXPORT");
   options.exitAfterCapture = GetEnvBool("DALI_EMOJI_VISUAL_EXIT_AFTER_CAPTURE");
@@ -1024,8 +1024,8 @@ std::vector<VisualCase> LoadFixture(const VisualOptions& options)
 
 std::vector<VisualCase> BuildRepresentativeCases(const std::vector<VisualCase>& fixtureItems)
 {
-  std::set<std::string>    seenSignatures;
-  std::vector<VisualCase>  items;
+  std::set<std::string>   seenSignatures;
+  std::vector<VisualCase> items;
 
   for(const VisualCase& fixtureItem : fixtureItems)
   {
@@ -1070,11 +1070,10 @@ std::vector<VisualCase> GroupCasesBySignature(const std::vector<VisualCase>& fix
 std::vector<VisualCase> BuildCompatibilityCases()
 {
   const std::vector<std::pair<std::string, uint32_t>> bases =
-  {
-    {"grinning face", 0x1F600u},
-    {"robot", 0x1F916u},
-    {"heart", 0x2764u}
-  };
+    {
+      {"grinning face", 0x1F600u},
+      {"robot", 0x1F916u},
+      {"heart", 0x2764u}};
 
   std::vector<VisualCase> items;
   for(const auto& base : bases)
@@ -1091,11 +1090,10 @@ std::vector<VisualCase> BuildCompatibilityCases()
   }
 
   const std::vector<std::pair<std::string, uint32_t>> keycapBases =
-  {
-    {"digit one", 0x0031u},
-    {"number sign", 0x0023u},
-    {"asterisk", 0x002Au}
-  };
+    {
+      {"digit one", 0x0031u},
+      {"number sign", 0x0023u},
+      {"asterisk", 0x002Au}};
 
   for(const auto& base : keycapBases)
   {
@@ -1110,20 +1108,19 @@ std::vector<VisualCase> BuildCompatibilityCases()
 std::vector<VisualCase> BuildKeycapEvidenceCases()
 {
   const std::vector<std::pair<std::string, uint32_t>> bases =
-  {
-    {"number sign", 0x0023u},
-    {"asterisk", 0x002Au},
-    {"digit zero", 0x0030u},
-    {"digit one", 0x0031u},
-    {"digit two", 0x0032u},
-    {"digit three", 0x0033u},
-    {"digit four", 0x0034u},
-    {"digit five", 0x0035u},
-    {"digit six", 0x0036u},
-    {"digit seven", 0x0037u},
-    {"digit eight", 0x0038u},
-    {"digit nine", 0x0039u}
-  };
+    {
+      {"number sign", 0x0023u},
+      {"asterisk", 0x002Au},
+      {"digit zero", 0x0030u},
+      {"digit one", 0x0031u},
+      {"digit two", 0x0032u},
+      {"digit three", 0x0033u},
+      {"digit four", 0x0034u},
+      {"digit five", 0x0035u},
+      {"digit six", 0x0036u},
+      {"digit seven", 0x0037u},
+      {"digit eight", 0x0038u},
+      {"digit nine", 0x0039u}};
 
   std::vector<VisualCase> items;
   for(const auto& base : bases)
@@ -1256,7 +1253,7 @@ Label MakeLabel(const std::string& text, float fontSize, const Vector4& color)
   return label;
 }
 
-std::string BuildRunDiagnosticText(Text::MultilanguageSupport& multilanguageSupport,
+std::string BuildRunDiagnosticText(Text::MultilanguageSupport&  multilanguageSupport,
                                    TextAbstraction::FontClient& fontClient,
                                    const VisualCase&            item)
 {
@@ -1330,10 +1327,12 @@ std::string BuildRunDiagnosticText(Text::MultilanguageSupport& multilanguageSupp
     }
     else
     {
-      stream << '\n' << "missingGlyphs: unavailable, inconsistent glyph maps";
+      stream << '\n'
+             << "missingGlyphs: unavailable, inconsistent glyph maps";
       if(needsCompositionDiagnostics)
       {
-        stream << '\n' << "compositionGlyphs: unavailable, inconsistent glyph maps";
+        stream << '\n'
+               << "compositionGlyphs: unavailable, inconsistent glyph maps";
       }
     }
     return stream.str();
@@ -1353,13 +1352,15 @@ std::string MakeDetailText(const VisualCase& item, const std::string& diagnostic
          << item.name;
   if(!item.reason.empty())
   {
-    stream << '\n' << item.reason;
+    stream << '\n'
+           << item.reason;
   }
-  stream << '\n' << diagnostics;
+  stream << '\n'
+         << diagnostics;
   return stream.str();
 }
 
-std::string MakeDetailText(Text::MultilanguageSupport& multilanguageSupport,
+std::string MakeDetailText(Text::MultilanguageSupport&  multilanguageSupport,
                            TextAbstraction::FontClient& fontClient,
                            const VisualCase&            item)
 {
@@ -1406,8 +1407,8 @@ std::string CompactPath(const std::string& path, size_t maxLength = 88u)
     if(compact.compare(0u, homePath.size(), homePath) == 0)
     {
       compact = "~" + compact.substr(homePath.size());
+    }
   }
-}
 
   if(compact.size() <= maxLength)
   {
@@ -1461,7 +1462,7 @@ std::string AnchorIdForSection(const std::string& section)
 
 std::vector<std::string> SectionsForShownItems(const std::vector<VisualCase>& items, size_t shownCount)
 {
-  std::set<std::string>   seenSections;
+  std::set<std::string>    seenSections;
   std::vector<std::string> sections;
 
   for(size_t index = 0u; index < shownCount; ++index)
@@ -1476,10 +1477,10 @@ std::vector<std::string> SectionsForShownItems(const std::vector<VisualCase>& it
   return sections;
 }
 
-void WriteHtmlExport(const VisualOptions&             options,
-                     const std::vector<VisualCase>&  items,
-                     Text::MultilanguageSupport&     multilanguageSupport,
-                     TextAbstraction::FontClient&    fontClient)
+void WriteHtmlExport(const VisualOptions&           options,
+                     const std::vector<VisualCase>& items,
+                     Text::MultilanguageSupport&    multilanguageSupport,
+                     TextAbstraction::FontClient&   fontClient)
 {
   std::ofstream output(options.exportHtmlPath.c_str());
   if(!output.good())
@@ -1487,9 +1488,9 @@ void WriteHtmlExport(const VisualOptions&             options,
     throw std::runtime_error("failed to open visual export path: " + options.exportHtmlPath);
   }
 
-  const size_t              shownCount = ShownCountForOptions(items, options);
-  const std::vector<std::string> sections = SectionsForShownItems(items, shownCount);
-  const std::string         maxItemsText = options.maxItems == 0u ? "all" : std::to_string(options.maxItems);
+  const size_t                   shownCount   = ShownCountForOptions(items, options);
+  const std::vector<std::string> sections     = SectionsForShownItems(items, shownCount);
+  const std::string              maxItemsText = options.maxItems == 0u ? "all" : std::to_string(options.maxItems);
   output << "<!doctype html>\n"
          << "<html lang=\"ko\">\n"
          << "<head>\n"
@@ -1540,7 +1541,7 @@ void WriteHtmlExport(const VisualOptions&             options,
   std::string previousSection;
   for(size_t index = 0u; index < shownCount; ++index)
   {
-    const VisualCase& item = items[index];
+    const VisualCase& item    = items[index];
     const std::string section = SectionForCase(item);
     if(section != previousSection)
     {
@@ -1559,7 +1560,8 @@ void WriteHtmlExport(const VisualOptions&             options,
     {
       output << "\n<span class=\"reason\">" << HtmlEscape(item.reason) << "</span>";
     }
-    output << "\n" << HtmlEscape(BuildRunDiagnosticText(multilanguageSupport, fontClient, item))
+    output << "\n"
+           << HtmlEscape(BuildRunDiagnosticText(multilanguageSupport, fontClient, item))
            << "</pre>\n"
            << "</div>\n"
            << "</section>\n";
@@ -1577,9 +1579,9 @@ void WriteHtmlExport(const VisualOptions&             options,
 
 int RunExportOnly(const VisualOptions& options)
 {
-  Text::MultilanguageSupport multilanguageSupport = Text::MultilanguageSupport::New(false);
-  TextAbstraction::FontClient fontClient          = TextAbstraction::FontClient::New();
-  const std::vector<VisualCase> items              = LoadVisualCases(options);
+  Text::MultilanguageSupport    multilanguageSupport = Text::MultilanguageSupport::New(false);
+  TextAbstraction::FontClient   fontClient           = TextAbstraction::FontClient::New();
+  const std::vector<VisualCase> items                = LoadVisualCases(options);
   WriteHtmlExport(options, items, multilanguageSupport, fontClient);
   std::cout << "Emoji visual export written: " << options.exportHtmlPath
             << " selected=" << items.size()
@@ -1829,12 +1831,13 @@ private:
 
   float HeaderHeightForText(const std::string& text) const
   {
-    const float availableWidth      = std::max(120.0f, CurrentWindowWidth() - 24.0f);
+    const float  availableWidth        = std::max(120.0f, CurrentWindowWidth() - 24.0f);
     const size_t estimatedCharsPerLine = std::max<size_t>(24u, static_cast<size_t>(availableWidth / (HEADER_SIZE * 0.62f)));
-    size_t      lineCount           = 0u;
-    size_t      lineLength          = 0u;
+    size_t       lineCount             = 0u;
+    size_t       lineLength            = 0u;
 
-    auto addEstimatedLine = [&]() {
+    auto addEstimatedLine = [&]()
+    {
       lineCount += std::max<size_t>(1u, (lineLength + estimatedCharsPerLine - 1u) / estimatedCharsPerLine);
       lineLength = 0u;
     };
@@ -1890,14 +1893,17 @@ private:
     }
 
     mNavigation.RemoveAll();
-    mNavigation.Add(MakeNavButton("Prev page", [this]() { PreviousPage(); }, NAV_PAGE_BUTTON_WIDTH, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
-    mNavigation.Add(MakeNavButton("Next page", [this]() { NextPage(); }, NAV_PAGE_BUTTON_WIDTH, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
+    mNavigation.Add(MakeNavButton("Prev page", [this]()
+    { PreviousPage(); }, NAV_PAGE_BUTTON_WIDTH, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
+    mNavigation.Add(MakeNavButton("Next page", [this]()
+    { NextPage(); }, NAV_PAGE_BUTTON_WIDTH, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
 
     for(size_t sectionIndex = 0u; sectionIndex < mSectionAnchors.size(); ++sectionIndex)
     {
       std::stringstream label;
       label << (sectionIndex + 1u) << ". " << mSectionAnchors[sectionIndex].first;
-      mNavigation.Add(MakeNavButton(label.str(), [this, sectionIndex]() { JumpToSection(sectionIndex); }, NAV_BUTTON_WIDTH, Vector4(0.90f, 0.93f, 0.98f, 1.0f)));
+      mNavigation.Add(MakeNavButton(label.str(), [this, sectionIndex]()
+      { JumpToSection(sectionIndex); }, NAV_BUTTON_WIDTH, Vector4(0.90f, 0.93f, 0.98f, 1.0f)));
     }
   }
 
@@ -1930,7 +1936,8 @@ private:
     size_t      rowCount     = 1u;
     float       currentWidth = 0.0f;
 
-    auto addButtonWidth = [&](float width) {
+    auto addButtonWidth = [&](float width)
+    {
       const float buttonWidth = width + NAV_BUTTON_GAP_X;
       if(currentWidth > 0.0f && currentWidth + buttonWidth > usableWidth)
       {
@@ -1956,10 +1963,10 @@ private:
     mNavigation.SetRequestedHeight(height);
   }
 
-  Label MakeNavButton(const std::string& text,
+  Label MakeNavButton(const std::string&           text,
                       const std::function<void()>& action,
-                      float width,
-                      const Vector4& backgroundColor)
+                      float                        width,
+                      const Vector4&               backgroundColor)
   {
     Label button = Label::New();
     button.SetRequestedWidth(width);
@@ -1977,7 +1984,8 @@ private:
     button.SetBackgroundColor(backgroundColor);
     button.SetMargin(Insets(0.0f, static_cast<uint16_t>(NAV_BUTTON_GAP_X), 0.0f, static_cast<uint16_t>(NAV_BUTTON_GAP_Y)));
     button.SetPadding(Insets(4.0f, 4.0f, 0.0f, 0.0f));
-    button.TouchEventSignal().Connect(this, [action, backgroundColor](Actor actor, const TouchEvent& touch) {
+    button.TouchEventSignal().Connect(this, [action, backgroundColor](Actor actor, const TouchEvent& touch)
+    {
       Label button = Label::DownCast(actor);
       if(button)
       {
@@ -2038,8 +2046,8 @@ private:
 
   std::vector<std::pair<std::string, size_t>> BuildCurrentSectionAnchors() const
   {
-    std::set<std::string>                         seenSections;
-    std::vector<std::pair<std::string, size_t>>   sections;
+    std::set<std::string>                       seenSections;
+    std::vector<std::pair<std::string, size_t>> sections;
 
     for(size_t visibleIndex = 0u; visibleIndex < mShownCount; ++visibleIndex)
     {
@@ -2277,7 +2285,7 @@ private:
     }
 
     const size_t clampedItemIndex = mShownCount == 0u ? 0u : std::min(itemIndex, mShownCount - 1u);
-    size_t current = 0u;
+    size_t       current          = 0u;
     for(size_t index = 0u; index < mSectionAnchors.size(); ++index)
     {
       if(mSectionAnchors[index].second <= clampedItemIndex)
@@ -2408,10 +2416,10 @@ private:
       return;
     }
 
-    const size_t visibleRows = mShownCount == 0u ? 1u : CurrentVisibleRowCount();
-    const float  pageWidth   = PageContentWidth();
-    const float  rowWidth    = std::max(MinimumRowWidth(), pageWidth - PAGE_PADDING_X * 2.0f);
-    const bool   widthChanged = pageWidth != mLastPageContentWidth;
+    const size_t visibleRows     = mShownCount == 0u ? 1u : CurrentVisibleRowCount();
+    const float  pageWidth       = PageContentWidth();
+    const float  rowWidth        = std::max(MinimumRowWidth(), pageWidth - PAGE_PADDING_X * 2.0f);
+    const bool   widthChanged    = pageWidth != mLastPageContentWidth;
     const bool   rowCountChanged = visibleRows != mLastVisibleRowCount;
 
     if(widthChanged)
@@ -2626,10 +2634,10 @@ private:
     const float bottom = std::max(FLOATING_SEARCH_MARGIN + FLOATING_SEARCH_BUTTON_SIZE, height - FLOATING_SEARCH_MARGIN);
 
     FloatingSearchBounds bounds;
-    bounds.buttonX    = right - FLOATING_SEARCH_BUTTON_SIZE;
-    bounds.buttonY    = bottom - FLOATING_SEARCH_BUTTON_SIZE;
-    bounds.buttonSize = FLOATING_SEARCH_BUTTON_SIZE;
-    bounds.inputWidth = std::max(FLOATING_SEARCH_BUTTON_SIZE, std::min(FloatingSearchInputWidth(), right - FLOATING_SEARCH_MARGIN));
+    bounds.buttonX     = right - FLOATING_SEARCH_BUTTON_SIZE;
+    bounds.buttonY     = bottom - FLOATING_SEARCH_BUTTON_SIZE;
+    bounds.buttonSize  = FLOATING_SEARCH_BUTTON_SIZE;
+    bounds.inputWidth  = std::max(FLOATING_SEARCH_BUTTON_SIZE, std::min(FloatingSearchInputWidth(), right - FLOATING_SEARCH_MARGIN));
     bounds.inputHeight = FLOATING_SEARCH_INPUT_HEIGHT;
     bounds.inputX      = right - bounds.inputWidth;
     bounds.inputY      = bottom - bounds.inputHeight;
@@ -2660,9 +2668,9 @@ private:
       return;
     }
 
-    const auto  size   = mWindow.GetPositionSize();
-    const float width  = std::max(1.0f, static_cast<float>(size.width));
-    const float height = std::max(1.0f, static_cast<float>(size.height));
+    const auto                 size   = mWindow.GetPositionSize();
+    const float                width  = std::max(1.0f, static_cast<float>(size.width));
+    const float                height = std::max(1.0f, static_cast<float>(size.height));
     const FloatingSearchBounds bounds = CurrentFloatingSearchBounds();
 
     mSearchOverlay.SetRequestedWidth(width);
@@ -2719,7 +2727,7 @@ private:
     StopSearchAnimation();
 
     const FloatingSearchBounds bounds = CurrentFloatingSearchBounds();
-    mIsSearchOpen                    = true;
+    mIsSearchOpen                     = true;
     mSearchDismissLayer.SetProperty(Actor::Property::VISIBLE, true);
     mSearchButton.SetProperty(Actor::Property::VISIBLE, true);
     mSearchButton.SetProperty(Actor::Property::SENSITIVE, false);
@@ -2754,7 +2762,7 @@ private:
     StopSearchAnimation();
 
     const FloatingSearchBounds bounds = CurrentFloatingSearchBounds();
-    mIsSearchOpen = false;
+    mIsSearchOpen                     = false;
     FocusManager::Get().ClearFocus();
     mSearchButton.SetProperty(Actor::Property::VISIBLE, true);
     mSearchButton.SetProperty(Actor::Property::SENSITIVE, true);
@@ -2836,8 +2844,8 @@ private:
     mLargePreview = MakeLabel(std::string(), PREVIEW_POPUP_TEXT_FIT_MAX_SIZE, Color::BLACK);
     mLargePreview.SetMultiLine(false);
     mLargePreview.SetTextFit(Text::Fit::Range(PREVIEW_POPUP_TEXT_FIT_MIN_SIZE,
-                                            PREVIEW_POPUP_TEXT_FIT_MAX_SIZE,
-                                            PREVIEW_POPUP_TEXT_FIT_STEP_SIZE));
+                                              PREVIEW_POPUP_TEXT_FIT_MAX_SIZE,
+                                              PREVIEW_POPUP_TEXT_FIT_STEP_SIZE));
     mLargePreview.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     mLargePreview.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mLargePreview.SetBackgroundColor(Color::WHITE);
@@ -2898,7 +2906,7 @@ private:
     for(size_t slot = 0u; slot < mRowPool.size(); ++slot)
     {
       const size_t visibleIndex = mPageStartIndex + slot;
-      RowActors& row = mRowPool[slot];
+      RowActors&   row          = mRowPool[slot];
       if(visibleIndex < pageEnd)
       {
         const size_t itemIndex = ItemIndexForVisibleIndex(visibleIndex);
@@ -2998,7 +3006,7 @@ private:
     }
 
     const auto size = mWindow.GetPositionSize();
-    mCapture = Capture::New();
+    mCapture        = Capture::New();
     mCapture.FinishedSignal().Connect(this, &EmojiVisualController::OnCaptureFinished);
     mCapture.Start(mRoot,
                    Vector2(static_cast<float>(size.width), static_cast<float>(size.height)),
@@ -3303,50 +3311,50 @@ private:
   }
 
 private:
-  Application&               mApplication;
-  VisualOptions              mOptions;
-  Window                     mWindow;
-  StackLayout                mRoot;
-  Label                      mHeader;
-  AbsoluteLayout             mPageContent;
-  AbsoluteLayout             mPreviewOverlay;
-  AbsoluteLayout             mSearchOverlay;
-  FlexLayout                 mNavigation;
-  ScrollView                 mScrollView;
-  View                       mSearchDismissLayer;
-  View                       mSearchButton;
-  Label                      mSearchIcon;
-  Label                      mEmptyLabel;
-  Label                      mLargePreview;
-  InputField                 mSearchInput;
-  AbsoluteLayoutParams       mEmptyLabelParams;
-  AbsoluteLayoutParams       mLargePreviewParams;
-  Animation                  mSearchAnimation;
-  Timer                      mCaptureTimer;
-  Timer                      mDetailDiagnosticTimer;
-  Capture                    mCapture;
-  Text::MultilanguageSupport mMultilanguageSupport;
-  TextAbstraction::FontClient mFontClient;
-  std::vector<VisualCase>    mItems;
-  std::vector<RowActors>     mRowPool;
-  std::vector<std::string>   mSearchIndex;
-  std::vector<size_t>        mSearchMatches;
-  std::vector<std::string>   mDetailTextCache;
-  std::vector<std::string>   mBasicDetailTextCache;
-  std::vector<bool>          mDetailTextQueued;
-  std::vector<size_t>        mPendingDetailTextIndices;
+  Application&                                mApplication;
+  VisualOptions                               mOptions;
+  Window                                      mWindow;
+  StackLayout                                 mRoot;
+  Label                                       mHeader;
+  AbsoluteLayout                              mPageContent;
+  AbsoluteLayout                              mPreviewOverlay;
+  AbsoluteLayout                              mSearchOverlay;
+  FlexLayout                                  mNavigation;
+  ScrollView                                  mScrollView;
+  View                                        mSearchDismissLayer;
+  View                                        mSearchButton;
+  Label                                       mSearchIcon;
+  Label                                       mEmptyLabel;
+  Label                                       mLargePreview;
+  InputField                                  mSearchInput;
+  AbsoluteLayoutParams                        mEmptyLabelParams;
+  AbsoluteLayoutParams                        mLargePreviewParams;
+  Animation                                   mSearchAnimation;
+  Timer                                       mCaptureTimer;
+  Timer                                       mDetailDiagnosticTimer;
+  Capture                                     mCapture;
+  Text::MultilanguageSupport                  mMultilanguageSupport;
+  TextAbstraction::FontClient                 mFontClient;
+  std::vector<VisualCase>                     mItems;
+  std::vector<RowActors>                      mRowPool;
+  std::vector<std::string>                    mSearchIndex;
+  std::vector<size_t>                         mSearchMatches;
+  std::vector<std::string>                    mDetailTextCache;
+  std::vector<std::string>                    mBasicDetailTextCache;
+  std::vector<bool>                           mDetailTextQueued;
+  std::vector<size_t>                         mPendingDetailTextIndices;
   std::vector<std::pair<std::string, size_t>> mSectionAnchors;
-  std::string                mLoadError;
-  std::string                mSearchText;
-  std::string                mSearchQuery;
-  size_t                     mBaseShownCount{0u};
-  size_t                     mShownCount{0u};
-  size_t                     mPageStartIndex{0u};
-  size_t                     mPendingDetailTextIndex{0u};
-  float                      mLastPageContentWidth{-1.0f};
-  size_t                     mLastVisibleRowCount{static_cast<size_t>(-1)};
-  bool                       mIsPreviewOverlayVisible{false};
-  bool                       mIsSearchOpen{false};
+  std::string                                 mLoadError;
+  std::string                                 mSearchText;
+  std::string                                 mSearchQuery;
+  size_t                                      mBaseShownCount{0u};
+  size_t                                      mShownCount{0u};
+  size_t                                      mPageStartIndex{0u};
+  size_t                                      mPendingDetailTextIndex{0u};
+  float                                       mLastPageContentWidth{-1.0f};
+  size_t                                      mLastVisibleRowCount{static_cast<size_t>(-1)};
+  bool                                        mIsPreviewOverlayVisible{false};
+  bool                                        mIsSearchOpen{false};
 };
 
 } // namespace
@@ -3366,7 +3374,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
     }
 
     Application application = Application::New(&argc, &argv);
-    UiConfig config = UiConfig::New();
+    UiConfig    config      = UiConfig::New();
     config.SetLabelAsyncRendering(true);
     config.SetDefaultFocusIndicatorEnabled(false);
     config.Apply();

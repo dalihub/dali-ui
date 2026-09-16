@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <cstdio>
 
@@ -42,9 +43,9 @@ public:
     {
     }
 
-    Label   label;
-    UiColor normalColor;
-    UiColor pressedColor;
+    Label    label;
+    UiColor  normalColor;
+    UiColor  pressedColor;
     uint32_t clickCount{0u};
   };
 
@@ -144,7 +145,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   MyButtonExampleController controller(application);

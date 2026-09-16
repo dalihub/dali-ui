@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -122,7 +123,8 @@ private:
 
     PositionSize positionSize = window.GetPositionSize();
     PositionToggleButton(Window::WindowSize(positionSize.width, positionSize.height));
-    mToggleButton.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+    mToggleButton.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool
+    {
       mFixedSize = !mFixedSize;
 
       if(mFixedSize)
@@ -148,17 +150,17 @@ private:
     mToggleButton.SetRequestedX((static_cast<float>(windowSize.GetWidth()) - TOGGLE_BUTTON_WIDTH) * 0.5f);
   }
 
-  Application& mApplication;
-  AbsoluteLayout mParent;
+  Application&    mApplication;
+  AbsoluteLayout  mParent;
   InteractiveView mToggleButton;
-  Label          mToggleLabel;
-  bool           mFixedSize{false};
+  Label           mToggleLabel;
+  bool            mFixedSize{false};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   AbsoluteLayoutWrapContentPositionProportionalLabelController controller(application);

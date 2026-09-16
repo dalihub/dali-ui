@@ -51,18 +51,19 @@
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/gl/gl-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <GLES2/gl2.h>
 
 #include <atomic>
-#include <string>
 #include <cmath>
 #include <cstdio>
 #include <memory>
+#include <string>
 #include <vector>
 
 using namespace Dali;
@@ -284,7 +285,7 @@ public:
   {
     mFrameCount.fetch_add(1u);
 
-    const BoundsInteger& box = info.GetClippingBox();
+    const BoundsInteger& box  = info.GetClippingBox();
     const Size&          size = info.GetSize();
 
     mReportedWidth.store(box.width);
@@ -447,23 +448,56 @@ public:
   {
     mTerminateCompleted = true;
   }
-  bool IsTerminateCompleted() const { return mTerminateCompleted; }
+  bool IsTerminateCompleted() const
+  {
+    return mTerminateCompleted;
+  }
 
   // Read from the event thread.
   void SetRestoreState(bool restore)
   {
     mRestoreState.store(restore);
   }
-  bool     GetRestoreState() const { return mRestoreState.load(); }
-  uint32_t GetInitCount() const { return mInitCount.load(); }
-  uint32_t GetFrameCount() const { return mFrameCount.load(); }
-  uint32_t GetTerminateCount() const { return mTerminateCount.load(); }
-  int32_t  GetReportedX() const { return mReportedX.load(); }
-  int32_t  GetReportedY() const { return mReportedY.load(); }
-  int32_t  GetReportedWidth() const { return mReportedWidth.load(); }
-  int32_t  GetReportedHeight() const { return mReportedHeight.load(); }
-  uint32_t GetBoundTextureCount() const { return mBoundTextureCount.load(); }
-  uint32_t GetBoundTextureHandle() const { return mBoundTextureHandle.load(); }
+  bool GetRestoreState() const
+  {
+    return mRestoreState.load();
+  }
+  uint32_t GetInitCount() const
+  {
+    return mInitCount.load();
+  }
+  uint32_t GetFrameCount() const
+  {
+    return mFrameCount.load();
+  }
+  uint32_t GetTerminateCount() const
+  {
+    return mTerminateCount.load();
+  }
+  int32_t GetReportedX() const
+  {
+    return mReportedX.load();
+  }
+  int32_t GetReportedY() const
+  {
+    return mReportedY.load();
+  }
+  int32_t GetReportedWidth() const
+  {
+    return mReportedWidth.load();
+  }
+  int32_t GetReportedHeight() const
+  {
+    return mReportedHeight.load();
+  }
+  uint32_t GetBoundTextureCount() const
+  {
+    return mBoundTextureCount.load();
+  }
+  uint32_t GetBoundTextureHandle() const
+  {
+    return mBoundTextureHandle.load();
+  }
 
 private:
   // Render thread only.
@@ -487,7 +521,7 @@ private:
   std::atomic_uint32_t mTerminateCount{0u};
 
   /// Event thread only.
-  bool mTerminateCompleted{false};
+  bool                 mTerminateCompleted{false};
   std::atomic_int32_t  mReportedX{0};
   std::atomic_int32_t  mReportedY{0};
   std::atomic_int32_t  mReportedWidth{0};

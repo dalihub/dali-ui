@@ -33,8 +33,8 @@
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
-#include <dali/public-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/key.h>
 
 #include "../text/text-localization-locale.h"
@@ -100,7 +100,7 @@ private:
     // configuration. It includes the foundation configuration as well.
     Dali::Ui::Components::UiConfig::New().Apply();
 
-    auto localization = Dali::Ui::UiLocalizationManager::Get();
+    auto       localization     = Dali::Ui::UiLocalizationManager::Get();
     const bool domainRegistered = localization.RegisterDomain(LOCALIZATION_DOMAIN, LOCALE_DIRECTORY);
     DALI_LOG_RELEASE_INFO("[LOCALIZATION DOMAIN] domain=%s localePath=\"%s\" registered=%s\n",
                           LOCALIZATION_DOMAIN,
@@ -290,17 +290,18 @@ private:
     const char* language = std::getenv("LANGUAGE");
 #endif
 
-    DALI_LOG_RELEASE_INFO("[LOCALIZATION LOOKUP] event=%s selected=%s activeLocale=\"%s\" "
-                          "LANGUAGE=\"%s\" IDS_WIFI=\"%s\" IDS_CONNECT=\"%s\" "
-                          "IDS_COMPLETE=\"%s\" IDS_WIFI_CONNECT_COMPLETE=\"%s\"\n",
-                          event,
-                          mSelectedLocale.c_str(),
-                          activeLocale ? activeLocale : "(unknown)",
-                          language ? language : "(unset)",
-                          wifi.CStr(),
-                          connect.CStr(),
-                          complete.CStr(),
-                          sentence.CStr());
+    DALI_LOG_RELEASE_INFO(
+      "[LOCALIZATION LOOKUP] event=%s selected=%s activeLocale=\"%s\" "
+      "LANGUAGE=\"%s\" IDS_WIFI=\"%s\" IDS_CONNECT=\"%s\" "
+      "IDS_COMPLETE=\"%s\" IDS_WIFI_CONNECT_COMPLETE=\"%s\"\n",
+      event,
+      mSelectedLocale.c_str(),
+      activeLocale ? activeLocale : "(unknown)",
+      language ? language : "(unset)",
+      wifi.CStr(),
+      connect.CStr(),
+      complete.CStr(),
+      sentence.CStr());
   }
 
   const char* GetButtonId(Dali::Ui::View view) const
@@ -347,8 +348,8 @@ private:
     }
 #endif
 
-    mSelectedLocale             = catalogLocale;
-    mPosixLocaleSetSucceeded    = requestedLocaleSet;
+    mSelectedLocale          = catalogLocale;
+    mPosixLocaleSetSucceeded = requestedLocaleSet;
 
     Dali::Ui::UiLocalizationManager::Get().RefreshBindings();
     const auto localizedWifi = Dali::Ui::UiLocalizationManager::Get().GetLocalizedString(
@@ -372,7 +373,7 @@ private:
       return;
     }
 
-    mCurrentView = view;
+    mCurrentView        = view;
     const bool focusSet = Dali::Ui::FocusManager::Get().SetCurrentFocusView(view);
     UpdateStatus();
 

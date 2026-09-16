@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include "my-view.h"
 
 using namespace Dali;
@@ -25,9 +26,8 @@ using Dali::Ui::View;
 class MyViewController : public ConnectionTracker
 {
 public:
-
   MyViewController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect(this, &MyViewController::Create);
@@ -51,13 +51,13 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
       if(event.GetKeyName() == "1")
       {
         mMyView.ChangeBackground();
       }
-      else if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      else if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -66,7 +66,7 @@ public:
 
 private:
   Application& mApplication;
-  MyView mMyView;
+  MyView       mMyView;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

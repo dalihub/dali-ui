@@ -5,6 +5,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <array>
 #include <cstddef>
@@ -15,19 +16,19 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr int      WINDOW_WIDTH                                  = 920;
-constexpr int      WINDOW_HEIGHT                                 = 880;
-constexpr float    ROOT_PADDING                                  = 18.0f;
-constexpr float    STACK_SPACING                                 = 10.0f;
-constexpr float    HEADER_HEIGHT                                 = 132.0f;
-constexpr float    FOOTER_HEIGHT                                 = 112.0f;
-constexpr float    INPUT_FIELD_HEIGHT                            = 92.0f;
-constexpr float    NORMAL_ANIMATION_DURATION_SECONDS             = 2.6f;
-constexpr float    PLACEHOLDER_ANIMATION_DURATION_SECONDS        = 2.2f;
-constexpr float    NORMAL_GRADIENT_START_OFFSET                  = -0.75f;
-constexpr float    NORMAL_GRADIENT_END_OFFSET                    = 1.25f;
-constexpr float    PLACEHOLDER_GRADIENT_START_OFFSET             = 0.85f;
-constexpr float    PLACEHOLDER_GRADIENT_END_OFFSET               = -1.15f;
+constexpr int   WINDOW_WIDTH                           = 920;
+constexpr int   WINDOW_HEIGHT                          = 880;
+constexpr float ROOT_PADDING                           = 18.0f;
+constexpr float STACK_SPACING                          = 10.0f;
+constexpr float HEADER_HEIGHT                          = 132.0f;
+constexpr float FOOTER_HEIGHT                          = 112.0f;
+constexpr float INPUT_FIELD_HEIGHT                     = 92.0f;
+constexpr float NORMAL_ANIMATION_DURATION_SECONDS      = 2.6f;
+constexpr float PLACEHOLDER_ANIMATION_DURATION_SECONDS = 2.2f;
+constexpr float NORMAL_GRADIENT_START_OFFSET           = -0.75f;
+constexpr float NORMAL_GRADIENT_END_OFFSET             = 1.25f;
+constexpr float PLACEHOLDER_GRADIENT_START_OFFSET      = 0.85f;
+constexpr float PLACEHOLDER_GRADIENT_END_OFFSET        = -1.15f;
 
 enum class GradientKind
 {
@@ -828,16 +829,16 @@ private:
 
   void ResetCurrentOptions()
   {
-    mTextSwapEnabled              = false;
-    mGradientApplied              = true;
-    mPlaceholderGradientApplied   = true;
-    mNormalAnimationEnabled       = true;
-    mPlaceholderAnimationEnabled  = true;
-    mSpreadMethodIndex            = 0u;
-    mViewBounds                   = false;
-    mCleared                      = false;
-    mCompactWidth                 = false;
-    mCompactHeight                = false;
+    mTextSwapEnabled             = false;
+    mGradientApplied             = true;
+    mPlaceholderGradientApplied  = true;
+    mNormalAnimationEnabled      = true;
+    mPlaceholderAnimationEnabled = true;
+    mSpreadMethodIndex           = 0u;
+    mViewBounds                  = false;
+    mCleared                     = false;
+    mCompactWidth                = false;
+    mCompactHeight               = false;
     mWindow.SetPositionSize(PositionSize(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
     ApplyCurrentCase();
   }
@@ -975,8 +976,8 @@ private:
   Animation   mNormalAnimation;
   Animation   mPlaceholderAnimation;
 
-  std::size_t mCaseIndex{0u};
-  std::size_t mSpreadMethodIndex{0u};
+  std::size_t  mCaseIndex{0u};
+  std::size_t  mSpreadMethodIndex{0u};
   GradientKind mGradientKind{GradientKind::LINEAR};
   bool         mViewBounds{false};
   bool         mGradientApplied{true};

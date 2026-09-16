@@ -29,6 +29,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 // Apps can only use public headers in platform builds.
 // #include <dali/integration-api/string-utils.h>
@@ -372,7 +373,7 @@ private:
     UiLocalizationManager manager = UiLocalizationManager::Get();
 
     const Dali::String flagImageUrl = manager.GetLocalizedString("IDS_FLAG_IMAGE_URL", TEXT_DOMAIN_DEFAULT);
-    const Dali::String path = RESOURCES_DIR + flagImageUrl;
+    const Dali::String path         = RESOURCES_DIR + flagImageUrl;
     card.SetFlagImageUrl(path);
     card.SetTitle(title);
     card.SetDescription(manager.GetLocalizedString("IDS_CARD_DESCRIPTION"));
@@ -406,7 +407,7 @@ private:
     UiLocalizationManager manager = UiLocalizationManager::Get();
 
     const Dali::String flagImageUrl = manager.GetLocalizedString("IDS_ALT_FLAG_IMAGE_URL", TEXT_DOMAIN_ALT);
-    const Dali::String path = RESOURCES_DIR + flagImageUrl;
+    const Dali::String path         = RESOURCES_DIR + flagImageUrl;
     card.SetFlagImageUrl(path);
     card.SetTitle(title);
     card.SetDescription(manager.GetLocalizedString("IDS_ALT_CARD_DESCRIPTION", TEXT_DOMAIN_ALT));
@@ -562,15 +563,15 @@ private:
   }
 
 private:
-  Application& mApplication;
+  Application&  mApplication;
   LocalizedCard mDefaultCard;
   LocalizedCard mAltCard;
-  Label        mStatusLabel;
-  std::string  mCurrentDomain;
-  std::string  mCurrentLocale;
-  bool         mBypassEnabled{false};
+  Label         mStatusLabel;
+  std::string   mCurrentDomain;
+  std::string   mCurrentLocale;
+  bool          mBypassEnabled{false};
 
-  static constexpr const char* TEXT_DOMAIN_DEFAULT    = "text-localization-po";
+  static constexpr const char* TEXT_DOMAIN_DEFAULT     = "text-localization-po";
   static constexpr const char* TEXT_DOMAIN_ALT         = "text-localization-po-alt";
   static constexpr const char* TEXT_LOCALE_DIR_DEFAULT = RESOURCES_DIR "locale/default";
   static constexpr const char* TEXT_LOCALE_DIR_ALT     = RESOURCES_DIR "locale/alternate";

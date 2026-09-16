@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -87,12 +88,12 @@ public:
     // is the mirror for EXIT (full → 0 collapsed at TOP).
     LayoutTransition transition = LayoutTransition::New();
     transition.SetEnterVisualSpec(enterSpec)
-              .SetExitVisualSpec(exitSpec)
-              .SetEnterBoundsEffect(LayoutBoundsEffects::ExpandFrom(
-                LayoutBoundsEdge::TOP, timing))
-              .SetExitBoundsEffect(LayoutBoundsEffects::ShrinkTo(
-                LayoutBoundsEdge::TOP, timing))
-              .SetChangeTiming(timing);
+      .SetExitVisualSpec(exitSpec)
+      .SetEnterBoundsEffect(LayoutBoundsEffects::ExpandFrom(
+        LayoutBoundsEdge::TOP, timing))
+      .SetExitBoundsEffect(LayoutBoundsEffects::ShrinkTo(
+        LayoutBoundsEdge::TOP, timing))
+      .SetChangeTiming(timing);
 
     mStack.SetLayoutTransition(transition);
 
@@ -204,9 +205,9 @@ public:
     {
       return false;
     }
-    mExpanded             = !mExpanded;
-    const float newHeight = mExpanded ? 160.0f : 80.0f;
-    const uint32_t count  = mStack.GetChildViewCount();
+    mExpanded                = !mExpanded;
+    const float    newHeight = mExpanded ? 160.0f : 80.0f;
+    const uint32_t count     = mStack.GetChildViewCount();
     for(uint32_t i = 0; i < count; ++i)
     {
       mStack.GetChildViewAt(i).SetRequestedHeight(newHeight);
@@ -236,8 +237,8 @@ public:
   }
 
 private:
-  Application&      mApplication;
-  StackLayout       mStack;
+  Application& mApplication;
+  StackLayout  mStack;
   Label        mEnterButton;
   Label        mExitButton;
   Label        mChangeButton;

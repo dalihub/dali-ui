@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include "text-localization-locale.h"
 
 #include <clocale>
@@ -27,9 +28,9 @@ using namespace Dali::Ui;
 namespace
 {
 
-constexpr float LABEL_FONT_SIZE  = 25.0f;
-constexpr float STACK_SPACING    = 10.0f;
-constexpr float STACK_PADDING    = 24.0f;
+constexpr float LABEL_FONT_SIZE = 25.0f;
+constexpr float STACK_SPACING   = 10.0f;
+constexpr float STACK_PADDING   = 24.0f;
 
 constexpr uint32_t COLOR_BACKGROUND = 0xF1F5F9;
 constexpr uint32_t COLOR_TEXT       = 0x172033;
@@ -210,16 +211,16 @@ private:
      * numeric, monetary, and date formatting.
      */
     (void)posixLocale;
-    const bool messageLocaleSet = Samples::SetMessageLocale(catalogLocale);
-    const char* localeResult    = setlocale(LC_ALL, windowsLocale);
+    const bool  messageLocaleSet = Samples::SetMessageLocale(catalogLocale);
+    const char* localeResult     = setlocale(LC_ALL, windowsLocale);
     if(!messageLocaleSet)
     {
       std::printf("Failed to set the Windows gettext locale environment\n");
     }
 #else
     (void)windowsLocale;
-    const bool messageLocaleSet = setenv("LANGUAGE", catalogLocale, 1) == 0;
-    const char* localeResult    = setlocale(LC_MESSAGES, posixLocale);
+    const bool  messageLocaleSet = setenv("LANGUAGE", catalogLocale, 1) == 0;
+    const char* localeResult     = setlocale(LC_MESSAGES, posixLocale);
     (void)messageLocaleSet;
 #endif
 

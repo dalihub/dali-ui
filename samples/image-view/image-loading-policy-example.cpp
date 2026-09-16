@@ -16,11 +16,12 @@
 #include <string>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -60,7 +61,13 @@ constexpr int LOTTIE_COUNT = 3;
  */
 class ImageLoadingPolicyController : public ConnectionTracker
 {
-  enum class ViewType { IMAGE = 0, ANIMATED, LOTTIE, COUNT };
+  enum class ViewType
+  {
+    IMAGE = 0,
+    ANIMATED,
+    LOTTIE,
+    COUNT
+  };
   static constexpr int TYPE_COUNT = static_cast<int>(ViewType::COUNT);
 
   struct ReleasePolicyEntry
@@ -114,7 +121,7 @@ private:
   View CreateTypeRow()
   {
     static const char* NAMES[TYPE_COUNT] = {"IMAGE", "ANIMATED", "LOTTIE"};
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    StackLayout        row               = StackLayout::New(StackOrientation::HORIZONTAL);
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(44.0f);
@@ -323,9 +330,12 @@ private:
   {
     switch(mViewType)
     {
-      case ViewType::ANIMATED: return GIF_URLS[mImageIndex % GIF_COUNT];
-      case ViewType::LOTTIE:   return LOTTIE_URLS[mImageIndex % LOTTIE_COUNT];
-      default:                  return IMAGE_URLS[mImageIndex % IMAGE_COUNT];
+      case ViewType::ANIMATED:
+        return GIF_URLS[mImageIndex % GIF_COUNT];
+      case ViewType::LOTTIE:
+        return LOTTIE_URLS[mImageIndex % LOTTIE_COUNT];
+      default:
+        return IMAGE_URLS[mImageIndex % IMAGE_COUNT];
     }
   }
 
@@ -333,16 +343,19 @@ private:
   {
     switch(mViewType)
     {
-      case ViewType::ANIMATED: return GIF_COUNT;
-      case ViewType::LOTTIE:   return LOTTIE_COUNT;
-      default:                  return IMAGE_COUNT;
+      case ViewType::ANIMATED:
+        return GIF_COUNT;
+      case ViewType::LOTTIE:
+        return LOTTIE_COUNT;
+      default:
+        return IMAGE_COUNT;
     }
   }
 
   View CreateView()
   {
     const char* url = GetCurrentUrl();
-    View view;
+    View        view;
     if(mViewType == ViewType::ANIMATED)
       view = AnimatedImageView::New(url);
     else if(mViewType == ViewType::LOTTIE)
@@ -370,37 +383,59 @@ private:
 
   void SetViewUrl(View view, const char* url)
   {
-    if(auto v = AnimatedImageView::DownCast(view))    v.SetResourceUrl(url);
-    else if(auto v = LottieAnimationView::DownCast(view)) v.SetResourceUrl(url);
-    else view.SetProperty(ImageView::Property::IMAGE, url);
+    if(auto v = AnimatedImageView::DownCast(view))
+      v.SetResourceUrl(url);
+    else if(auto v = LottieAnimationView::DownCast(view))
+      v.SetResourceUrl(url);
+    else
+      view.SetProperty(ImageView::Property::IMAGE, url);
   }
 
   void ConnectResourceReady(View view, void (ImageLoadingPolicyController::*callback)(View))
   {
-    if(auto v = ImageView::DownCast(view))              v.ResourceReadySignal().Connect(this, callback);
-    else if(auto v = AnimatedImageView::DownCast(view)) v.ResourceReadySignal().Connect(this, callback);
-    else if(auto v = LottieAnimationView::DownCast(view)) v.ResourceReadySignal().Connect(this, callback);
+    if(auto v = ImageView::DownCast(view))
+      v.ResourceReadySignal().Connect(this, callback);
+    else if(auto v = AnimatedImageView::DownCast(view))
+      v.ResourceReadySignal().Connect(this, callback);
+    else if(auto v = LottieAnimationView::DownCast(view))
+      v.ResourceReadySignal().Connect(this, callback);
   }
 
   void PlayView(View view)
   {
-    if(auto v = AnimatedImageView::DownCast(view))    v.Play();
-    else if(auto v = LottieAnimationView::DownCast(view)) v.Play();
+    if(auto v = AnimatedImageView::DownCast(view))
+      v.Play();
+    else if(auto v = LottieAnimationView::DownCast(view))
+      v.Play();
   }
 
   void StopAnimView(View view)
   {
-    if(auto v = AnimatedImageView::DownCast(view))    v.Stop();
-    else if(auto v = LottieAnimationView::DownCast(view)) v.Stop();
+    if(auto v = AnimatedImageView::DownCast(view))
+      v.Stop();
+    else if(auto v = LottieAnimationView::DownCast(view))
+      v.Stop();
   }
 
   // ── Timers ────────────────────────────────────────────────────────────────
 
   void StopAllTimers()
   {
-    if(mHideTimer)    { mHideTimer.Stop();    mHideTimer.Reset(); }
-    if(mCheckTimer)   { mCheckTimer.Stop();   mCheckTimer.Reset(); }
-    if(mLoadAddTimer) { mLoadAddTimer.Stop(); mLoadAddTimer.Reset(); }
+    if(mHideTimer)
+    {
+      mHideTimer.Stop();
+      mHideTimer.Reset();
+    }
+    if(mCheckTimer)
+    {
+      mCheckTimer.Stop();
+      mCheckTimer.Reset();
+    }
+    if(mLoadAddTimer)
+    {
+      mLoadAddTimer.Stop();
+      mLoadAddTimer.Reset();
+    }
   }
 
   // ── Callbacks ─────────────────────────────────────────────────────────────
@@ -429,13 +464,22 @@ private:
     SetViewUrl(mCurrentView, GetCurrentUrl());
   }
 
-  void OnPlayClicked(View, InputEvent)  { PlayView(mCurrentView); }
-  void OnStopClicked(View, InputEvent)  { StopAnimView(mCurrentView); }
+  void OnPlayClicked(View, InputEvent)
+  {
+    PlayView(mCurrentView);
+  }
+  void OnStopClicked(View, InputEvent)
+  {
+    StopAnimView(mCurrentView);
+  }
   void OnReloadClicked(View, InputEvent)
   {
-    if(auto v = ImageView::DownCast(mCurrentView))                v.Reload();
-    else if(auto v = AnimatedImageView::DownCast(mCurrentView))   v.Reload();
-    else if(auto v = LottieAnimationView::DownCast(mCurrentView)) v.Reload();
+    if(auto v = ImageView::DownCast(mCurrentView))
+      v.Reload();
+    else if(auto v = AnimatedImageView::DownCast(mCurrentView))
+      v.Reload();
+    else if(auto v = LottieAnimationView::DownCast(mCurrentView))
+      v.Reload();
   }
 
   void OnSyncClicked(View, InputEvent)
@@ -459,9 +503,18 @@ private:
     RefreshStatus();
   }
 
-  void OnRelDetachedClicked(View, InputEvent)  { SetReleasePolicy(0); }
-  void OnRelDestroyedClicked(View, InputEvent) { SetReleasePolicy(1); }
-  void OnRelNeverClicked(View, InputEvent)     { SetReleasePolicy(2); }
+  void OnRelDetachedClicked(View, InputEvent)
+  {
+    SetReleasePolicy(0);
+  }
+  void OnRelDestroyedClicked(View, InputEvent)
+  {
+    SetReleasePolicy(1);
+  }
+  void OnRelNeverClicked(View, InputEvent)
+  {
+    SetReleasePolicy(2);
+  }
 
   void SetReleasePolicy(int index)
   {
@@ -474,8 +527,16 @@ private:
 
   void OnHideClicked(View, InputEvent)
   {
-    if(mHideTimer)  { mHideTimer.Stop();  mHideTimer.Reset(); }
-    if(mCheckTimer) { mCheckTimer.Stop(); mCheckTimer.Reset(); }
+    if(mHideTimer)
+    {
+      mHideTimer.Stop();
+      mHideTimer.Reset();
+    }
+    if(mCheckTimer)
+    {
+      mCheckTimer.Stop();
+      mCheckTimer.Reset();
+    }
     mReleasePolicyReadyAfterReAdd = false;
     if(mCurrentView) mImageContainer.Remove(mCurrentView);
     mHideTimer = Timer::New(1000);
@@ -512,8 +573,14 @@ private:
     }
   }
 
-  void OnLoadAttachedClicked(View, InputEvent)  { SetLoadPolicy(0); }
-  void OnLoadImmediateClicked(View, InputEvent) { SetLoadPolicy(1); }
+  void OnLoadAttachedClicked(View, InputEvent)
+  {
+    SetLoadPolicy(0);
+  }
+  void OnLoadImmediateClicked(View, InputEvent)
+  {
+    SetLoadPolicy(1);
+  }
 
   void SetLoadPolicy(int index)
   {
@@ -526,7 +593,7 @@ private:
   void OnLoadTestClicked(View, InputEvent)
   {
     StopAllTimers();
-    mPendingLoadView = CreateView();
+    mPendingLoadView         = CreateView();
     Ui::Image::LoadPolicy lp = (mLoadPolicyIndex == 0) ? Ui::Image::LoadPolicy::ATTACHED : Ui::Image::LoadPolicy::IMMEDIATE;
     mPendingLoadView.SetProperty(ImageView::Property::LOAD_POLICY, lp);
     ConnectResourceReady(mPendingLoadView, &ImageLoadingPolicyController::OnLoadTestReady);
@@ -560,9 +627,12 @@ private:
   void OnMainResourceReady(View view)
   {
     int status = 0;
-    if(auto v = ImageView::DownCast(view))              status = static_cast<int>(v.GetLoadingStatus());
-    else if(auto v = AnimatedImageView::DownCast(view)) status = static_cast<int>(v.GetLoadingStatus());
-    else if(auto v = LottieAnimationView::DownCast(view)) status = static_cast<int>(v.GetLoadingStatus());
+    if(auto v = ImageView::DownCast(view))
+      status = static_cast<int>(v.GetLoadingStatus());
+    else if(auto v = AnimatedImageView::DownCast(view))
+      status = static_cast<int>(v.GetLoadingStatus());
+    else if(auto v = LottieAnimationView::DownCast(view))
+      status = static_cast<int>(v.GetLoadingStatus());
     DALI_LOG_RELEASE_INFO("[Main] ResourceReady. Status=%d\n", status);
   }
 
@@ -609,7 +679,7 @@ const ImageLoadingPolicyController::ReleasePolicyEntry ImageLoadingPolicyControl
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ImageLoadingPolicyController controller(application);

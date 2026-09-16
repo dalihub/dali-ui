@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING = 10.0f;
-constexpr float STACK_PADDING = 20.0f;
-const char* DEFAULT_FONT_FAMILY = "Ubuntu Mono";
-const char* VARIABLE_FONT_FAMILY = "Noto Sans Mono";
-const char* SAMPLE_TEXT = "The quick brown fox jumps over the lazy dog";
+constexpr float STACK_SPACING        = 10.0f;
+constexpr float STACK_PADDING        = 20.0f;
+const char*     DEFAULT_FONT_FAMILY  = "Ubuntu Mono";
+const char*     VARIABLE_FONT_FAMILY = "Noto Sans Mono";
+const char*     SAMPLE_TEXT          = "The quick brown fox jumps over the lazy dog";
 
 Label CreateSectionLabel(const char* text)
 {

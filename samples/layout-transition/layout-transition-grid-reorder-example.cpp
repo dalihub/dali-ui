@@ -15,6 +15,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/devel-api/actors/actor-devel.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <algorithm>
 #include <cmath>
@@ -492,10 +493,10 @@ private:
     // grid's column band (X) so it stays on screen.
     const Bounds rootExtents     = mRoot.CalculateScreenExtents();
     const Bounds viewportExtents = mScrollView.CalculateScreenExtents();
-    const float viewportTop      = viewportExtents.y - rootExtents.y;
-    const float viewportHeight   = viewportExtents.height;
-    const float minY           = viewportTop;
-    const float maxY           = std::max(minY, viewportTop + viewportHeight - mDragBounds.height);
+    const float  viewportTop     = viewportExtents.y - rootExtents.y;
+    const float  viewportHeight  = viewportExtents.height;
+    const float  minY            = viewportTop;
+    const float  maxY            = std::max(minY, viewportTop + viewportHeight - mDragBounds.height);
 
     const float gridLeft  = GetGridWorldX();
     const float gridRight = gridLeft + static_cast<float>(COLUMNS) * CELL_W;
@@ -591,8 +592,8 @@ private:
   {
     if(mLongPressArmed && mPressedItem && !mDragging)
     {
-      View     cell  = mPressedItem;
-      uint32_t index = mPressIndex;
+      View     cell   = mPressedItem;
+      uint32_t index  = mPressIndex;
       mLongPressArmed = false;
       mPressedItem    = View();
       BeginDrag(cell, index, mLastTouchRootPosition);
@@ -630,8 +631,8 @@ private:
       return false;
     }
 
-    const float viewportTop    = mOuterStack.GetCurrentProperty<float>(Actor::Property::POSITION_Y) +
-                                 mScrollView.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+    const float viewportTop = mOuterStack.GetCurrentProperty<float>(Actor::Property::POSITION_Y) +
+                              mScrollView.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
     const float viewportHeight = mScrollView.GetCurrentProperty<float>(Actor::Property::SIZE_HEIGHT);
     const float viewportBottom = viewportTop + viewportHeight;
     const float touchY         = mLastTouchRootPosition.y;
@@ -675,18 +676,18 @@ private:
   static constexpr uint32_t AUTO_SCROLL_TICK_MS   = 16u;   ///< ~60 Hz
 
   Application&      mApplication;
-  Window           mWindow;
-  AbsoluteLayout   mRoot;
-  StackLayout      mOuterStack;
-  ScrollView       mScrollView;
-  GridLayout       mGrid;
+  Window            mWindow;
+  AbsoluteLayout    mRoot;
+  StackLayout       mOuterStack;
+  ScrollView        mScrollView;
+  GridLayout        mGrid;
   std::vector<View> mGridItems; ///< Logical order of grid cells
 
   bool       mDragging;
-  View       mDraggedChild;   ///< Hidden original that stays in the grid as the touch target
-  View       mDragPreview;    ///< Insensitive visual copy floating under the window
-  uint32_t   mDraggedIndex;   ///< Current index of mDraggedChild in mGridItems
-  LayoutRect mDragBounds;     ///< Preview world bounds (driven by the finger)
+  View       mDraggedChild; ///< Hidden original that stays in the grid as the touch target
+  View       mDragPreview;  ///< Insensitive visual copy floating under the window
+  uint32_t   mDraggedIndex; ///< Current index of mDraggedChild in mGridItems
+  LayoutRect mDragBounds;   ///< Preview world bounds (driven by the finger)
   Vector2    mDragGrabOffset;
   Vector2    mLastTouchRootPosition;
 
@@ -701,7 +702,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application                           application = Application::New(&argc, &argv);
+  Application application = Application::New(&argc, &argv);
   UiConfig::New().Apply();
   LayoutTransitionGridReorderController controller(application);
   application.MainLoop();

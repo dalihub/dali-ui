@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <string>
 
@@ -22,8 +23,8 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr char BLACK_TEXT[]       = "BLACK TEXT";
-constexpr char TEST_IMAGE_NAME[]  = "transparent-window-black-controls.png";
+constexpr char BLACK_TEXT[]      = "BLACK TEXT";
+constexpr char TEST_IMAGE_NAME[] = "transparent-window-black-controls.png";
 
 View CreatePanel(const Vector3& position, const Vector2& size, const UiColor& color)
 {
@@ -119,7 +120,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
   windowData.SetPositionSize(positionSize);
   windowData.SetTransparency(true);
 
-  Application application = Application::New(&argc, &argv, "", false, windowData);
+  Application                 application = Application::New(&argc, &argv, "", false, windowData);
   TransparentWindowController controller(application);
   application.MainLoop();
   return 0;

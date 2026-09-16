@@ -14,9 +14,10 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;
@@ -128,11 +129,16 @@ private:
   View CreatePlaybackRow()
   {
     return CreateButtonRow({
-      CreateButton("PLAY",    [this](View, InputEvent) { OnPlay(); }),
-      CreateButton("PAUSE",   [this](View, InputEvent) { OnPause(); }),
-      CreateButton("STOP",    [this](View, InputEvent) { OnStop(); }),
-      CreateButton("JUMP > 10", [this](View, InputEvent) { OnJumpTo(); }),
-      CreateButton("JUMP+SIZE", [this](View, InputEvent) { OnJumpAndResize(); }),
+      CreateButton("PLAY", [this](View, InputEvent)
+    { OnPlay(); }),
+      CreateButton("PAUSE", [this](View, InputEvent)
+    { OnPause(); }),
+      CreateButton("STOP", [this](View, InputEvent)
+    { OnStop(); }),
+      CreateButton("JUMP > 10", [this](View, InputEvent)
+    { OnJumpTo(); }),
+      CreateButton("JUMP+SIZE", [this](View, InputEvent)
+    { OnJumpAndResize(); }),
     });
   }
 
@@ -149,7 +155,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton));
+    row.Add(CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent)
+    { OnLoopToggle(); }, mLoopButton));
     return row;
   }
 
@@ -166,7 +173,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(LOOPING_MODE_LABELS[mLoopingModeIndex], [this](View, InputEvent) { OnLoopingModeToggle(); }, mLoopingModeButton));
+    row.Add(CreateToggleButton(LOOPING_MODE_LABELS[mLoopingModeIndex], [this](View, InputEvent)
+    { OnLoopingModeToggle(); }, mLoopingModeButton));
     return row;
   }
 
@@ -183,7 +191,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton));
+    row.Add(CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent)
+    { OnSpeedToggle(); }, mSpeedButton));
     return row;
   }
 
@@ -200,7 +209,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton));
+    row.Add(CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent)
+    { OnStopBehaviorToggle(); }, mStopBehaviorButton));
     return row;
   }
 
@@ -217,7 +227,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(FRAME_RANGE_LABELS[mFrameRangeIndex], [this](View, InputEvent) { OnFrameRangeToggle(); }, mFrameRangeButton));
+    row.Add(CreateToggleButton(FRAME_RANGE_LABELS[mFrameRangeIndex], [this](View, InputEvent)
+    { OnFrameRangeToggle(); }, mFrameRangeButton));
     return row;
   }
 
@@ -234,7 +245,8 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateToggleButton(RENDER_SCALE_LABELS[mRenderScaleIndex], [this](View, InputEvent) { OnRenderScaleToggle(); }, mRenderScaleButton));
+    row.Add(CreateToggleButton(RENDER_SCALE_LABELS[mRenderScaleIndex], [this](View, InputEvent)
+    { OnRenderScaleToggle(); }, mRenderScaleButton));
     return row;
   }
 
@@ -251,8 +263,10 @@ private:
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     row.Add(label);
-    row.Add(CreateButton("Set Placeholder", [this](View, const InputEvent&) { OnSetPlaceholder(); }));
-    row.Add(CreateButton("Clear URL", [this](View, const InputEvent&) { OnClearUrl(); }));
+    row.Add(CreateButton("Set Placeholder", [this](View, const InputEvent&)
+    { OnSetPlaceholder(); }));
+    row.Add(CreateButton("Clear URL", [this](View, const InputEvent&)
+    { OnClearUrl(); }));
     return row;
   }
 
@@ -405,7 +419,7 @@ private:
   void OnFrameRangeToggle()
   {
     mFrameRangeIndex = (mFrameRangeIndex + 1) % 3;
-    int total = mLottieView.GetTotalFrameCount();
+    int total        = mLottieView.GetTotalFrameCount();
     switch(mFrameRangeIndex)
     {
       case 0: // full range
@@ -508,17 +522,17 @@ private:
   }
 
 private:
-  static constexpr int   LOOP_COUNTS[3]   = {-1, 3, 1};
-  static constexpr float SPEED_FACTORS[3] = {0.5f, 1.0f, 2.0f};
-  static constexpr float RENDER_SCALES[3] = {0.5f, 1.0f, 2.0f};
-  static const char*     LOOP_LABELS[3];
-  static const char*     LOOPING_MODE_LABELS[2];
-  static const char*     SPEED_LABELS[3];
-  static const char*     STOP_BEHAVIOR_LABELS[3];
-  static const char*     FRAME_RANGE_LABELS[3];
-  static const char*     RENDER_SCALE_LABELS[3];
-  static const Ui::LottieAnimation::LoopingMode  LOOPING_MODES[2];
-  static const Ui::AnimatedImage::StopBehavior   STOP_BEHAVIORS[3];
+  static constexpr int                          LOOP_COUNTS[3]   = {-1, 3, 1};
+  static constexpr float                        SPEED_FACTORS[3] = {0.5f, 1.0f, 2.0f};
+  static constexpr float                        RENDER_SCALES[3] = {0.5f, 1.0f, 2.0f};
+  static const char*                            LOOP_LABELS[3];
+  static const char*                            LOOPING_MODE_LABELS[2];
+  static const char*                            SPEED_LABELS[3];
+  static const char*                            STOP_BEHAVIOR_LABELS[3];
+  static const char*                            FRAME_RANGE_LABELS[3];
+  static const char*                            RENDER_SCALE_LABELS[3];
+  static const Ui::LottieAnimation::LoopingMode LOOPING_MODES[2];
+  static const Ui::AnimatedImage::StopBehavior  STOP_BEHAVIORS[3];
 
   Application&        mApplication;
   LottieAnimationView mLottieView;
@@ -531,13 +545,13 @@ private:
   View                mRenderScaleButton;
   Timer               mMonitorTimer;
 
-  int mLoopIndex;
-  int mLoopingModeIndex;
-  int mSpeedIndex;
-  int mStopBehaviorIndex;
-  int mFrameRangeIndex;
-  int mRenderScaleIndex;
-  int mDesiredSize{256};
+  int  mLoopIndex;
+  int  mLoopingModeIndex;
+  int  mSpeedIndex;
+  int  mStopBehaviorIndex;
+  int  mFrameRangeIndex;
+  int  mRenderScaleIndex;
+  int  mDesiredSize{256};
   bool mDesiredSizeCheckPending{false};
 };
 
@@ -545,9 +559,9 @@ constexpr int   LottieAnimationViewSampleController::LOOP_COUNTS[];
 constexpr float LottieAnimationViewSampleController::SPEED_FACTORS[];
 constexpr float LottieAnimationViewSampleController::RENDER_SCALES[];
 
-const char* LottieAnimationViewSampleController::LOOP_LABELS[]         = {"Loop: Infinite", "Loop: 3", "Loop: 1"};
-const char* LottieAnimationViewSampleController::LOOPING_MODE_LABELS[] = {"Mode: RESTART", "Mode: REVERSE"};
-const char* LottieAnimationViewSampleController::SPEED_LABELS[]        = {"Speed: 0.5x", "Speed: 1.0x", "Speed: 2.0x"};
+const char* LottieAnimationViewSampleController::LOOP_LABELS[]          = {"Loop: Infinite", "Loop: 3", "Loop: 1"};
+const char* LottieAnimationViewSampleController::LOOPING_MODE_LABELS[]  = {"Mode: RESTART", "Mode: REVERSE"};
+const char* LottieAnimationViewSampleController::SPEED_LABELS[]         = {"Speed: 0.5x", "Speed: 1.0x", "Speed: 2.0x"};
 const char* LottieAnimationViewSampleController::STOP_BEHAVIOR_LABELS[] = {"StopAt: CURRENT", "StopAt: FIRST", "StopAt: LAST"};
 const char* LottieAnimationViewSampleController::FRAME_RANGE_LABELS[]   = {"Range: FULL", "Range: 1st HALF", "Range: 2nd HALF"};
 const char* LottieAnimationViewSampleController::RENDER_SCALE_LABELS[]  = {"Scale: 0.5x", "Scale: 1.0x", "Scale: 2.0x"};
@@ -566,7 +580,7 @@ const Ui::AnimatedImage::StopBehavior LottieAnimationViewSampleController::STOP_
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   LottieAnimationViewSampleController controller(application);

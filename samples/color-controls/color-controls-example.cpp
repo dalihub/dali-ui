@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include "test-config.h"
 #include "test-theme-loader.h"
@@ -25,9 +26,8 @@ using Dali::Ui::View;
 class ColorControlsExample : public ConnectionTracker
 {
 public:
-
   ColorControlsExample(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect(this, &ColorControlsExample::Create);
@@ -52,7 +52,8 @@ public:
     redChild.SetBackgroundColor(UiColor::PRIMARY);
     redChild.SetRequestedWidth(100_spx);
     redChild.SetRequestedHeight(100_spx);
-    redChild.AsInteractive().ClickedSignal().Connect(this, [this](View view, InputEvent event) -> bool {
+    redChild.AsInteractive().ClickedSignal().Connect(this, [this](View view, InputEvent event) -> bool
+    {
       mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
       return true;
     });
@@ -71,7 +72,7 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
       if(event.GetKeyName() == "1")
       {
@@ -82,7 +83,7 @@ public:
         return;
       }
 
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -91,13 +92,13 @@ public:
 
 private:
   Application& mApplication;
-  View mSecondChild;
+  View         mSecondChild;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  TestConfig config = TestConfig::New();
+  TestConfig  config      = TestConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ColorControlsExample test(application);

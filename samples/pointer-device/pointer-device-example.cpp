@@ -20,6 +20,7 @@
 // without any GUI automation.
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/public-api/events/device.h>
@@ -37,15 +38,23 @@ const char* DeviceClassName(Device::Class::Type deviceClass)
 {
   switch(deviceClass)
   {
-    case Device::Class::USER:     return "USER";
-    case Device::Class::KEYBOARD: return "KEYBOARD";
-    case Device::Class::MOUSE:    return "MOUSE";
-    case Device::Class::TOUCH:    return "TOUCH";
-    case Device::Class::PEN:      return "PEN";
-    case Device::Class::POINTER:  return "POINTER";
-    case Device::Class::GAMEPAD:  return "GAMEPAD";
-    case Device::Class::NONE:     // fall through
-    default:                      return "NONE";
+    case Device::Class::USER:
+      return "USER";
+    case Device::Class::KEYBOARD:
+      return "KEYBOARD";
+    case Device::Class::MOUSE:
+      return "MOUSE";
+    case Device::Class::TOUCH:
+      return "TOUCH";
+    case Device::Class::PEN:
+      return "PEN";
+    case Device::Class::POINTER:
+      return "POINTER";
+    case Device::Class::GAMEPAD:
+      return "GAMEPAD";
+    case Device::Class::NONE: // fall through
+    default:
+      return "NONE";
   }
 }
 } // unnamed namespace
@@ -111,8 +120,8 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application             application = Application::New(&argc, &argv);
-  UiConfig                config      = UiConfig::New();
+  Application application = Application::New(&argc, &argv);
+  UiConfig    config      = UiConfig::New();
   config.Apply();
   PointerDeviceController controller(application);
   application.MainLoop();

@@ -16,6 +16,7 @@
 #include "manual-test-case.h"
 
 #include <dali-ui-components/dali-ui-components.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -252,8 +253,8 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
-  Components::UiConfig config = Components::UiConfig::New();
+  Application          application = Application::New(&argc, &argv);
+  Components::UiConfig config      = Components::UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   ManualTestLauncher launcher(application);

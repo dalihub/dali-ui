@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <cstdio>
 
 using namespace Dali;
@@ -30,7 +31,8 @@ const char* MULTI_LINE_TEXT  = "This is a multi line TextFit candidate example. 
 
 const Dali::Vector<Text::Fit::Candidate>& GetFitCandidates()
 {
-  static Dali::Vector<Text::Fit::Candidate> candidates = [] {
+  static Dali::Vector<Text::Fit::Candidate> candidates = []
+  {
     Dali::Vector<Text::Fit::Candidate> values;
     values.PushBack(Text::Fit::Candidate(16.0f, 32.0f));
     values.PushBack(Text::Fit::Candidate(20.0f, 40.0f));
@@ -44,7 +46,8 @@ const Dali::Vector<Text::Fit::Candidate>& GetFitCandidates()
 
 const Dali::Vector<Text::Fit::Candidate>& GetAlternativeCandidates()
 {
-  static Dali::Vector<Text::Fit::Candidate> candidates = [] {
+  static Dali::Vector<Text::Fit::Candidate> candidates = []
+  {
     Dali::Vector<Text::Fit::Candidate> values;
     values.PushBack(Text::Fit::Candidate(16.0f, 30.0f));
     values.PushBack(Text::Fit::Candidate(20.0f, 30.0f));
@@ -58,9 +61,11 @@ const Dali::Vector<Text::Fit::Candidate>& GetAlternativeCandidates()
 
 const Dali::Vector<Text::Fit::Candidate>& GetFontSizeCandidates()
 {
-  static Dali::Vector<Text::Fit::Candidate> candidates = [] {
+  static Dali::Vector<Text::Fit::Candidate> candidates = []
+  {
     Dali::Vector<Text::Fit::Candidate> values;
-    auto addCandidate = [&values](float fontSize) {
+    auto                               addCandidate = [&values](float fontSize)
+    {
       Text::Fit::Candidate candidate;
       candidate.SetFontSize(fontSize);
       values.PushBack(candidate);

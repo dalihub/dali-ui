@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -140,14 +141,14 @@ public:
 
     LayoutTransition transition = LayoutTransition::New();
     transition.SetChangeTiming(timing)
-              .SetEnterVisualSpec(enterSpec)
-              .SetExitVisualSpec(exitSpec)
-              .SetEnterBoundsEffect(LayoutBoundsEffects::ExpandFrom(
-                LayoutBoundsEdge::TOP, timing))
-              .SetExitBoundsEffect(LayoutBoundsEffects::ShrinkTo(
-                LayoutBoundsEdge::TOP, timing))
-              .SetReflowScope(subtree ? LayoutReflowScope::SUBTREE
-                                      : LayoutReflowScope::DIRECT_CHILDREN);
+      .SetEnterVisualSpec(enterSpec)
+      .SetExitVisualSpec(exitSpec)
+      .SetEnterBoundsEffect(LayoutBoundsEffects::ExpandFrom(
+        LayoutBoundsEdge::TOP, timing))
+      .SetExitBoundsEffect(LayoutBoundsEffects::ShrinkTo(
+        LayoutBoundsEdge::TOP, timing))
+      .SetReflowScope(subtree ? LayoutReflowScope::SUBTREE
+                              : LayoutReflowScope::DIRECT_CHILDREN);
     return transition;
   }
 

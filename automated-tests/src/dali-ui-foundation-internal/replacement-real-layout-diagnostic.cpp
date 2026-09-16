@@ -15,7 +15,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/adaptor-framework/application.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <cmath>
 #include <initializer_list>
@@ -56,7 +56,7 @@ Vector<Text::Character> Characters(std::initializer_list<Text::Character> values
 
 Vector<Text::Character> Utf32(const std::string& utf8)
 {
-  const auto* bytes = reinterpret_cast<const uint8_t*>(utf8.data());
+  const auto*             bytes = reinterpret_cast<const uint8_t*>(utf8.data());
   Vector<Text::Character> text;
   text.Resize(Text::GetNumberOfUtf8Characters(bytes, utf8.size()));
   const uint32_t converted = Text::Utf8ToUtf32(bytes, utf8.size(), text.Begin());
@@ -116,9 +116,9 @@ bool IsGeneratedEllipsisDrawable(const Text::ReplacementRenderState& state)
     return false;
   }
 
-  const TextAbstraction::GlyphInfo& glyph = result.glyphs[result.ellipsisFinalGlyphIndex];
-  const Vector2& position = result.viewGlyphPositions[result.ellipsisFinalGlyphIndex];
-  const Size& control = state.processingModel->mVisualModel->mControlSize;
+  const TextAbstraction::GlyphInfo& glyph    = result.glyphs[result.ellipsisFinalGlyphIndex];
+  const Vector2&                    position = result.viewGlyphPositions[result.ellipsisFinalGlyphIndex];
+  const Size&                       control  = state.processingModel->mVisualModel->mControlSize;
   return position.x + glyph.width > 0.0f && position.x < control.width &&
          position.y + glyph.height > 0.0f && position.y < control.height;
 }
@@ -152,8 +152,8 @@ void CheckOrdinaryLineDirectionCase(const char*                          name,
                                     float                                width,
                                     Text::ReplacementLayoutTestServices& services)
 {
-  Text::ModelPtr source              = Text::Model::New();
-  source->mLogicalModel->mText       = Utf32(utf8);
+  Text::ModelPtr source        = Text::Model::New();
+  source->mLogicalModel->mText = Utf32(utf8);
   Text::ReplacementLayoutTestOptions options;
   options.contentSize = Size(width, 80.0f);
   options.elideText   = elideText;
@@ -189,23 +189,23 @@ void CheckOrdinaryLineDirectionCase(const char*                          name,
   ReleaseBidi(services, result);
 }
 
-void CheckMarqueeTransitionCase(const char*                   name,
-                                const std::string&            utf8,
-                                Text::Alignment               alignment,
-                                LayoutDirection::Type         layoutDirection,
-                                float                         controlWidth,
-                                bool                          expectedRightToLeft,
-                                bool                          expectedEligible)
+void CheckMarqueeTransitionCase(const char*           name,
+                                const std::string&    utf8,
+                                Text::Alignment       alignment,
+                                LayoutDirection::Type layoutDirection,
+                                float                 controlWidth,
+                                bool                  expectedRightToLeft,
+                                bool                  expectedEligible)
 {
-  Text::ModelPtr source = Text::Model::New();
+  Text::ModelPtr source        = Text::Model::New();
   source->mLogicalModel->mText = Utf32(utf8);
 
   Text::ReplacementLayoutTestOptions options;
   options.contentSize          = Size(controlWidth, 40.0f);
   options.elideText            = true;
   options.ellipsisPosition     = Text::EllipsisPosition::END;
-  options.horizontalAlignment = alignment;
-  options.layoutDirection     = layoutDirection;
+  options.horizontalAlignment  = alignment;
+  options.layoutDirection      = layoutDirection;
   options.matchLayoutDirection = true;
 
   const Text::OrdinaryMarqueeTransitionTrace trace =
@@ -225,7 +225,7 @@ void CheckMarqueeTransitionCase(const char*                   name,
 
   constexpr float wrapGap      = 20.0f;
   const float     textureWidth = trace.naturalContentWidth + wrapGap;
-  const float horizontalAlignment =
+  const float     horizontalAlignment =
     Text::ResolveHorizontalMarqueeAlignment(true,
                                             trace.directionRightToLeft,
                                             options.horizontalAlignment);
@@ -340,7 +340,7 @@ void CheckEndEllipsisCase(const char* name, Vector<Text::Character>& text, Text:
                           bool expectBidi, Text::ReplacementLayoutTestServices& services)
 {
   Vector<Text::ReplacementRunSnapshot> candidates;
-  constexpr float widths[] = {8.0f, 24.0f, 48.0f, 80.0f, 32.0f};
+  constexpr float                      widths[] = {8.0f, 24.0f, 48.0f, 80.0f, 32.0f};
   for(uint32_t index = 0u; index < 5u; ++index)
   {
     candidates.PushBack(Candidate(firstReplacement + index * 2u, 1u, 100u + index, widths[index]));
@@ -397,8 +397,8 @@ void CheckOversizedVerticalSweep(Text::ReplacementLayoutTestServices& services)
     "The large reserved box must be fully visible only when its whole line participates in the visible layout. "
     "Otherwise the renderer must choose a text ellipsis boundary without flashing, cropping or retaining the large image. "
     "Repeated trailing words add stable overflow for wide and narrow resize verification.";
-  Vector<Text::Character> text = Utf32(utf8);
-  Text::CharacterIndex replacementIndex = 0u;
+  Vector<Text::Character> text             = Utf32(utf8);
+  Text::CharacterIndex    replacementIndex = 0u;
   while(replacementIndex < text.Count() && text[replacementIndex] != Text::ReplacementProjection::OBJECT_REPLACEMENT_CHARACTER)
   {
     ++replacementIndex;
@@ -407,16 +407,16 @@ void CheckOversizedVerticalSweep(Text::ReplacementLayoutTestServices& services)
 
   Vector<Text::ReplacementRunSnapshot> candidates;
   candidates.PushBack(Candidate(replacementIndex, 1u, 2700u, 210.0f));
-  candidates[0u].metrics.height = 120.0f;
+  candidates[0u].metrics.height                = 120.0f;
   const Text::ReplacementProjection projection = Text::ReplacementProjection::Build(text, candidates);
 
-  bool     sawVisible              = false;
-  bool     sawElided               = false;
-  bool     previousVisible         = false;
-  uint32_t heightEllipsisLayouts   = 0u;
-  uint32_t widthEllipsisLayouts    = 0u;
-  float    firstVisibleHeight      = 0.0f;
-  float    firstVisibleWidth       = 0.0f;
+  bool     sawVisible            = false;
+  bool     sawElided             = false;
+  bool     previousVisible       = false;
+  uint32_t heightEllipsisLayouts = 0u;
+  uint32_t widthEllipsisLayouts  = 0u;
+  float    firstVisibleHeight    = 0.0f;
+  float    firstVisibleWidth     = 0.0f;
   for(float height = 40.0f; height <= 400.0f; height += 2.0f)
   {
     Text::ReplacementLayoutTestOptions options;
@@ -437,7 +437,7 @@ void CheckOversizedVerticalSweep(Text::ReplacementLayoutTestServices& services)
             "oversized: more height hid a previously visible replacement");
     previousVisible = result.placements[0u].visible;
     sawVisible |= result.placements[0u].visible;
-    sawElided  |= result.placements[0u].elided;
+    sawElided |= result.placements[0u].elided;
     if(firstVisibleHeight == 0.0f && result.placements[0u].visible)
     {
       firstVisibleHeight = height;
@@ -481,7 +481,7 @@ void CheckOversizedVerticalSweep(Text::ReplacementLayoutTestServices& services)
             "oversized width: more width hid a previously visible replacement");
     previousVisible = result.placements[0u].visible;
     sawVisible |= result.placements[0u].visible;
-    sawElided  |= result.placements[0u].elided;
+    sawElided |= result.placements[0u].elided;
     if(firstVisibleWidth == 0.0f && result.placements[0u].visible)
     {
       firstVisibleWidth = width;

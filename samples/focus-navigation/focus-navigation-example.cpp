@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <algorithm>
 #include <vector>
@@ -49,8 +50,9 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
 
-    Label guide = Label::New("No initial focus is requested. Press an arrow key or Tab.\n"
-                             "The application fallback uses the custom order 1 → 4 → 2 → 3.");
+    Label guide = Label::New(
+      "No initial focus is requested. Press an arrow key or Tab.\n"
+      "The application fallback uses the custom order 1 → 4 → 2 → 3.");
     guide.SetRequestedX(30.0f);
     guide.SetRequestedY(20.0f);
     guide.SetRequestedWidth(560.0f);
@@ -59,9 +61,9 @@ private:
     guide.SetMultiLine(true);
     root.Add(guide);
 
-    View first = MakeFocusableView("1", 50.0f, 130.0f, 0xC84B31);
+    View first  = MakeFocusableView("1", 50.0f, 130.0f, 0xC84B31);
     View second = MakeFocusableView("2", 270.0f, 130.0f, 0x2D6A9F);
-    View third = MakeFocusableView("3", 50.0f, 300.0f, 0x4C956C);
+    View third  = MakeFocusableView("3", 50.0f, 300.0f, 0x4C956C);
     View fourth = MakeFocusableView("4", 270.0f, 300.0f, 0x8F5DA2);
 
     root.Add(first);
@@ -119,7 +121,7 @@ private:
     }
 
     const FocusDirection direction = context.GetDirection();
-    const bool forward = direction == FocusDirection::RIGHT ||
+    const bool           forward   = direction == FocusDirection::RIGHT ||
                          direction == FocusDirection::DOWN ||
                          direction == FocusDirection::FORWARD;
     const bool backward = direction == FocusDirection::LEFT ||
@@ -159,13 +161,13 @@ private:
   }
 
 private:
-  Application& mApplication;
+  Application&      mApplication;
   std::vector<View> mTraversalOrder;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
+  Application               application = Application::New(&argc, &argv);
   FocusNavigationController controller(application);
   application.MainLoop();
   return 0;

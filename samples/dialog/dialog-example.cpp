@@ -26,13 +26,14 @@
 //
 // Press Escape or Back to quit.
 
+#include <dali-ui-components/public-api/components-ui-config.h>
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
 #include <dali-ui-components/public-api/dialog/dialog.h>
-#include <dali-ui-components/public-api/components-ui-config.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
-#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <functional>
 #include <string>
@@ -73,12 +74,9 @@ public:
     root.Add(MakeText("AlertDialog Sample", 24.0f, 48.0f));
 
     // The AlertDialog under test (uses the convenience + inherited Dialog API).
-    auto appearance = DialogStyle::Default().Configure()
-      .SetBackgroundColor(UiColor(0xFFFFFFu)).SetRequestedHeight(300.0f)
-      .SetSpacing(8.0f).Build();
-    auto alertStyle = AlertDialogStyle::Default().Configure()
-      .SetDialogStyle(appearance).Build();
-    mAlert = AlertDialog::New(alertStyle);
+    auto appearance = DialogStyle::Default().Configure().SetBackgroundColor(UiColor(0xFFFFFFu)).SetRequestedHeight(300.0f).SetSpacing(8.0f).Build();
+    auto alertStyle = AlertDialogStyle::Default().Configure().SetDialogStyle(appearance).Build();
+    mAlert          = AlertDialog::New(alertStyle);
     mAlert.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     mAlert.SetTitle("Delete item?");
     mAlert.SetMessage(MESSAGE_TEXT);
@@ -98,10 +96,14 @@ public:
     buttons.SetRequestedHeight(80.0f);
     buttons.SetSpacing(8.0f);
     buttons.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    buttons.Add(MakeButton("Spacing +", UiColor(0x3367D6u), [this]() { ChangeSpacing(+8.0f); }));
-    buttons.Add(MakeButton("Spacing -", UiColor(0x3367D6u), [this]() { ChangeSpacing(-8.0f); }));
-    buttons.Add(MakeButton("Align", UiColor(0x00897Bu), [this]() { CycleAlignment(); }));
-    buttons.Add(MakeButton("Toggle Msg", UiColor(0xD81B60u), [this]() { ToggleMessage(); }));
+    buttons.Add(MakeButton("Spacing +", UiColor(0x3367D6u), [this]()
+    { ChangeSpacing(+8.0f); }));
+    buttons.Add(MakeButton("Spacing -", UiColor(0x3367D6u), [this]()
+    { ChangeSpacing(-8.0f); }));
+    buttons.Add(MakeButton("Align", UiColor(0x00897Bu), [this]()
+    { CycleAlignment(); }));
+    buttons.Add(MakeButton("Toggle Msg", UiColor(0xD81B60u), [this]()
+    { ToggleMessage(); }));
     root.Add(buttons);
 
     window.Add(root);
@@ -167,7 +169,8 @@ private:
     label.SetRequestedY(28.0f);
     button.Add(label);
 
-    button.ConnectClickedSignal(this, [onClicked](View, InputEvent) { onClicked(); });
+    button.ConnectClickedSignal(this, [onClicked](View, InputEvent)
+    { onClicked(); });
     return button;
   }
 
@@ -191,8 +194,8 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
-  Components::UiConfig config = Components::UiConfig::New();
+  Application          application = Application::New(&argc, &argv);
+  Components::UiConfig config      = Components::UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   DialogExample test(application);

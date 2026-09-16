@@ -15,8 +15,8 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
-#include <dali/public-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <algorithm>
 #include <array>
@@ -108,7 +108,7 @@ Timing RunSync(const Case& item)
   }
   const double total = Microseconds(start);
 
-  const Text::Length glyphCount = controller->GetView().GetNumberOfGlyphs();
+  const Text::Length           glyphCount = controller->GetView().GetNumberOfGlyphs();
   std::vector<Text::GlyphInfo> glyphs(glyphCount);
   std::vector<Vector2>         positions(glyphCount);
   float                        minimumLineOffset = 0.0f;
@@ -121,27 +121,27 @@ Timing RunSync(const Case& item)
 Timing RunAsync(const Case& item)
 {
   Text::AsyncTextParameters parameters;
-  parameters.text               = item.text;
-  parameters.fontSize           = 18.0f;
-  parameters.textWidth          = item.size.width;
-  parameters.textHeight         = item.size.height;
-  parameters.originWidth        = item.size.width;
-  parameters.originHeight       = item.size.height;
-  parameters.isMultiLine        = item.multiline;
-  parameters.lineWrapMode       = Text::LineWrapMode::WORD;
-  parameters.ellipsis           = item.ellipsis;
-  parameters.ellipsisPosition   = Text::EllipsisPosition::END;
-  parameters.characterSpacing   = item.characterSpacing;
-  parameters.renderScale        = item.renderScale;
-  parameters.layoutDirection    = item.direction;
-  parameters.maxTextureSize     = 4096;
-  parameters.requestType        = Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
+  parameters.text             = item.text;
+  parameters.fontSize         = 18.0f;
+  parameters.textWidth        = item.size.width;
+  parameters.textHeight       = item.size.height;
+  parameters.originWidth      = item.size.width;
+  parameters.originHeight     = item.size.height;
+  parameters.isMultiLine      = item.multiline;
+  parameters.lineWrapMode     = Text::LineWrapMode::WORD;
+  parameters.ellipsis         = item.ellipsis;
+  parameters.ellipsisPosition = Text::EllipsisPosition::END;
+  parameters.characterSpacing = item.characterSpacing;
+  parameters.renderScale      = item.renderScale;
+  parameters.layoutDirection  = item.direction;
+  parameters.maxTextureSize   = 4096;
+  parameters.requestType      = Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
 
-  Text::AsyncTextLoader loader = Text::AsyncTextLoader::New();
-  const auto            start  = Clock::now();
+  Text::AsyncTextLoader                  loader = Text::AsyncTextLoader::New();
+  const auto                             start  = Clock::now();
   static constexpr std::array<float, 6u> WIDTHS{{80.0f, 104.0f, 128.0f, 160.0f, 200.0f, 240.0f}};
   static constexpr std::array<float, 6u> HEIGHTS{{8.0f, 16.0f, 24.0f, 36.0f, 52.0f, 72.0f}};
-  auto render = [&]()
+  auto                                   render = [&]()
   {
     bool cachedNaturalSize = false;
     Size naturalSize       = Size::ZERO;
@@ -212,7 +212,7 @@ void RunBenchmarks()
     asyncTotal.reserve(SAMPLE_COUNT);
     for(uint32_t sample = 0u; sample < SAMPLE_COUNT; ++sample)
     {
-      const Timing sync = RunSync(item);
+      const Timing sync  = RunSync(item);
       const Timing async = RunAsync(item);
       syncTotal.push_back(sync.totalMicroseconds);
       syncGlyph.push_back(sync.glyphMicroseconds);

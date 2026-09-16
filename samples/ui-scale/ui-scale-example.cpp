@@ -57,6 +57,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>

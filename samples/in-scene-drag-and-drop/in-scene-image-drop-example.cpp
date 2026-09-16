@@ -4,6 +4,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <algorithm>
 #include <fstream>
 #include <utility>
@@ -17,11 +18,11 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr uint32_t BACKGROUND_COLOR      = 0x101820u;
-constexpr uint32_t PANEL_COLOR           = 0x263238u;
-constexpr uint32_t TARGET_ACCEPTED_COLOR = 0x2E7D32u;
-constexpr uint32_t TARGET_REJECTED_COLOR = 0xB71C1Cu;
-constexpr uint32_t TARGET_DROPPED_COLOR  = 0x0D47A1u;
+constexpr uint32_t BACKGROUND_COLOR        = 0x101820u;
+constexpr uint32_t PANEL_COLOR             = 0x263238u;
+constexpr uint32_t TARGET_ACCEPTED_COLOR   = 0x2E7D32u;
+constexpr uint32_t TARGET_REJECTED_COLOR   = 0xB71C1Cu;
+constexpr uint32_t TARGET_DROPPED_COLOR    = 0x0D47A1u;
 constexpr auto     IMAGE_RESOURCE_URL_TYPE = "application/x-dali-image-resource-url";
 constexpr auto     IMAGE_METADATA_TYPE     = "application/x-dali-image-metadata";
 
@@ -227,9 +228,9 @@ private:
 
   DropProposal AcceptImage(const DragAndDropEvent& event)
   {
-    Dali::String imageUrl;
+    Dali::String    imageUrl;
     Property::Value imageData;
-    const bool canCopyImage =
+    const bool      canCopyImage =
       event.GetPayload().GetRepresentationData(IMAGE_RESOURCE_URL_TYPE, imageData) &&
       imageData.Get(imageUrl) &&
       imageUrl.Size() > 0u &&
@@ -241,7 +242,7 @@ private:
 
   View CreatePreview(const DragAndDropEvent& event)
   {
-    Dali::String imageUrl;
+    Dali::String    imageUrl;
     Property::Value imageData;
     if(!event.GetPayload().GetRepresentationData(IMAGE_RESOURCE_URL_TYPE, imageData) ||
        !imageData.Get(imageUrl))
@@ -297,8 +298,8 @@ private:
       return;
     }
 
-    Dali::String imageUrl;
-    Property::Value imageData;
+    Dali::String        imageUrl;
+    Property::Value     imageData;
     const DropProposal& proposal = event.GetDropProposal();
     if(proposal.GetOperation() == DragAndDropOperation::COPY &&
        event.GetSelectedRepresentationData(imageData) &&

@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -33,7 +34,7 @@ class AbsoluteLayoutDirectionController : public ConnectionTracker
 {
 public:
   AbsoluteLayoutDirectionController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     mApplication.InitSignal().Connect(this, &AbsoluteLayoutDirectionController::Create);
   }
@@ -51,21 +52,21 @@ public:
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(50.0f, 50.0f, 50.0f, 50.0f)));
+                             .SetBounds(LayoutRect(50.0f, 50.0f, 50.0f, 50.0f)));
     mRoot.Add(redBox);
 
     // Green box: center area
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(100.0f, 100.0f, 100.0f, 100.0f)));
+                               .SetBounds(LayoutRect(100.0f, 100.0f, 100.0f, 100.0f)));
     mRoot.Add(greenBox);
 
     // Blue box: lower-right area
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(200.0f, 200.0f, 100.0f, 50.0f)));
+                              .SetBounds(LayoutRect(200.0f, 200.0f, 100.0f, 50.0f)));
     mRoot.Add(blueBox);
 
     // Toggle button: 200x50 translucent-black standalone child at top-left
@@ -85,7 +86,8 @@ public:
     toggleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     toggleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     toggleBtn.Add(toggleLabel);
-    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool
+    {
       mIsRtl = !mIsRtl;
       mRoot.SetLayoutDirection(mIsRtl ? Dali::LayoutDirection::RIGHT_TO_LEFT : Dali::LayoutDirection::LEFT_TO_RIGHT);
       return true;
@@ -98,9 +100,9 @@ public:
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    if (event.GetState() == KeyEvent::DOWN)
+    if(event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -116,7 +118,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   AbsoluteLayoutDirectionController controller(application);

@@ -37,13 +37,14 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
-#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable-group.h>
 #include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-gradient.h>
 #include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-linear-gradient.h>
@@ -537,7 +538,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   CanvasViewSample sample(application);

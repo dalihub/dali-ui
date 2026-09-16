@@ -6,10 +6,11 @@
 
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <string>
 
@@ -63,16 +64,19 @@ public:
     buttonRow.SetRequestedHeight(96.0f);
     buttonRow.SetSpacing(16.0f);
 
-    IconButton defaultButton = IconButton::New(IconButtonStyle::AddPreset());
-    IconButton backButton    = IconButton::New(IconButtonStyle::BackPreset());
-    IconButton moreButton    = IconButton::New(IconButtonStyle::MorePreset());
+    IconButton defaultButton         = IconButton::New(IconButtonStyle::AddPreset());
+    IconButton backButton            = IconButton::New(IconButtonStyle::BackPreset());
+    IconButton moreButton            = IconButton::New(IconButtonStyle::MorePreset());
     IconButton disabledDefaultButton = IconButton::New(IconButtonStyle::AddPreset());
     IconButton disabledBackButton    = IconButton::New(IconButtonStyle::BackPreset());
     IconButton disabledMoreButton    = IconButton::New(IconButtonStyle::MorePreset());
 
-    defaultButton.ClickedSignal().Connect(this, [this](View, InputEvent) { UpdateClickCount(mDefaultClickCount, "Add", ++mDefaultClicks); });
-    backButton.ClickedSignal().Connect(this, [this](View, InputEvent) { UpdateClickCount(mBackClickCount, "Back", ++mBackClicks); });
-    moreButton.ClickedSignal().Connect(this, [this](View, InputEvent) { UpdateClickCount(mMoreClickCount, "More", ++mMoreClicks); });
+    defaultButton.ClickedSignal().Connect(this, [this](View, InputEvent)
+    { UpdateClickCount(mDefaultClickCount, "Add", ++mDefaultClicks); });
+    backButton.ClickedSignal().Connect(this, [this](View, InputEvent)
+    { UpdateClickCount(mBackClickCount, "Back", ++mBackClicks); });
+    moreButton.ClickedSignal().Connect(this, [this](View, InputEvent)
+    { UpdateClickCount(mMoreClickCount, "More", ++mMoreClicks); });
 
     AddButtonPair(buttonRow, defaultButton, disabledDefaultButton, mDefaultClickCount, "Add", 56.0f);
     AddButtonPair(buttonRow, backButton, disabledBackButton, mBackClickCount, "Back", 52.0f);

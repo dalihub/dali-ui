@@ -38,7 +38,9 @@
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -107,11 +109,6 @@ Dali::Actor CreateHighlightIndicatorActor()
   imageView.SetAccessibilityHighlightable(false);
 
   return imageView;
-}
-
-std::string FetchImageSrc(const Ui::ImageView& imageView)
-{
-  return ToStdString(imageView.GetResourceUrl());
 }
 
 bool IsRoleV2(int32_t rawRole)
@@ -452,13 +449,23 @@ Dali::Devel::Accessibility::Attributes ViewAccessible::GetAttributes() const
     result.emplace(automationIdKey, std::move(automationId));
   }
 
+  std::string imageSrc;
   if(auto imageView = Ui::ImageView::DownCast(Self()))
   {
-    auto imageSrc = FetchImageSrc(imageView);
-    if(!imageSrc.empty())
-    {
-      result.emplace(ATTR_IMG_SRC_KEY, std::move(imageSrc));
-    }
+    imageSrc = ToStdString(imageView.GetResourceUrl());
+  }
+  else if(auto animatedImageView = Ui::AnimatedImageView::DownCast(Self()))
+  {
+    imageSrc = ToStdString(animatedImageView.GetResourceUrl());
+  }
+  else if(auto lottieView = Ui::LottieAnimationView::DownCast(Self()))
+  {
+    imageSrc = ToStdString(lottieView.GetResourceUrl());
+  }
+
+  if(!imageSrc.empty())
+  {
+    result.emplace(ATTR_IMG_SRC_KEY, std::move(imageSrc));
   }
 
   // Add "class" if not present already

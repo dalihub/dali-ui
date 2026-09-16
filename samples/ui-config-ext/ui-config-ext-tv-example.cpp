@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <dali/devel-api/adaptor-framework/application.h>
 #include "tv-config.h"
 
 using namespace Dali;

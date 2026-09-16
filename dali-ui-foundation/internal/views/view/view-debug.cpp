@@ -19,6 +19,8 @@
 #include <dali-ui-foundation/internal/views/view/view-visual-data.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali/devel-api/object/property-devel.h>
+#include <dali/devel-api/object/property-value-devel.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/stream-operators.h>
 #include <dali/integration-api/string-utils.h>
@@ -57,6 +59,15 @@ public:
 
   void ToStream(std::ostream& stream)
   {
+    // DevelProperty::EXTENTS cannot be a case label of a Property::Type switch.
+    if(mValue.GetType() == DevelProperty::EXTENTS)
+    {
+      Extents extents;
+      GetExtents(mValue, extents);
+      stream << extents;
+      return;
+    }
+
     switch(mValue.GetType())
     {
       case Dali::Property::BOOLEAN:
@@ -179,11 +190,6 @@ public:
           }
         }
         stream << "}";
-        break;
-      }
-      case Dali::Property::EXTENTS:
-      {
-        stream << mValue.Get<Extents>();
         break;
       }
       case Dali::Property::INSETS:

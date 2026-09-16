@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <cstdio>
 #include <string>
@@ -23,22 +24,22 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING   = 6.0f;
-constexpr float STACK_PADDING   = 12.0f;
-constexpr float BUTTON_HEIGHT   = 36.0f;
+constexpr float STACK_SPACING       = 6.0f;
+constexpr float STACK_PADDING       = 12.0f;
+constexpr float BUTTON_HEIGHT       = 36.0f;
 constexpr float INPUT_EDITOR_HEIGHT = 200.0f;
-constexpr float BUTTON_SPACING  = 4.0f;
-constexpr float COLOR_PREVIEW_SIZE = 24.0f;
+constexpr float BUTTON_SPACING      = 4.0f;
+constexpr float COLOR_PREVIEW_SIZE  = 24.0f;
 
-constexpr uint32_t COLOR_DARK_TEXT    = 0x222222;
-constexpr uint32_t COLOR_DARK_GRAY    = 0x404040;
-constexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;
-constexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;
-constexpr uint32_t COLOR_BLUE         = 0x00AAFF;
-constexpr uint32_t COLOR_GREEN        = 0x00CC66;
-constexpr uint32_t COLOR_BLACK        = 0x000000;
-constexpr uint32_t COLOR_WHITE        = 0xFFFFFF;
-constexpr uint32_t COLOR_BUTTON_BG    = 0xE0E0E0;
+constexpr uint32_t COLOR_DARK_TEXT  = 0x222222;
+constexpr uint32_t COLOR_DARK_GRAY  = 0x404040;
+constexpr uint32_t COLOR_LIGHT_BLUE = 0xADD8E6;
+constexpr uint32_t COLOR_MAGENTA    = 0xFF00FF;
+constexpr uint32_t COLOR_BLUE       = 0x00AAFF;
+constexpr uint32_t COLOR_GREEN      = 0x00CC66;
+constexpr uint32_t COLOR_BLACK      = 0x000000;
+constexpr uint32_t COLOR_WHITE      = 0xFFFFFF;
+constexpr uint32_t COLOR_BUTTON_BG  = 0xE0E0E0;
 
 Label CreateButton(const char* text, uint32_t bgColor)
 {
@@ -312,9 +313,9 @@ private:
     // Color buttons section
     buttonContainer.Add(CreateSectionLabel("Typing Text Color:"));
     Label magentaBtn = CreateButton("Magenta", COLOR_BUTTON_BG);
-    Label blueBtn = CreateButton("Blue", COLOR_BUTTON_BG);
-    Label greenBtn = CreateButton("Green", COLOR_BUTTON_BG);
-    Label blackBtn = CreateButton("Black", COLOR_BUTTON_BG);
+    Label blueBtn    = CreateButton("Blue", COLOR_BUTTON_BG);
+    Label greenBtn   = CreateButton("Green", COLOR_BUTTON_BG);
+    Label blackBtn   = CreateButton("Black", COLOR_BUTTON_BG);
 
     magentaBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnMagentaButtonTouched);
     blueBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnBlueButtonTouched);
@@ -325,9 +326,9 @@ private:
 
     // Font family buttons section
     buttonContainer.Add(CreateSectionLabel("Typing Font Family:"));
-    Label sansBtn = CreateButton("Sans", COLOR_BUTTON_BG);
+    Label sansBtn  = CreateButton("Sans", COLOR_BUTTON_BG);
     Label serifBtn = CreateButton("Serif", COLOR_BUTTON_BG);
-    Label monoBtn = CreateButton("Mono", COLOR_BUTTON_BG);
+    Label monoBtn  = CreateButton("Mono", COLOR_BUTTON_BG);
 
     sansBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnSansButtonTouched);
     serifBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnSerifButtonTouched);
@@ -337,9 +338,9 @@ private:
 
     // Font size buttons section
     buttonContainer.Add(CreateSectionLabel("Typing Font Size:"));
-    Label smallBtn = CreateButton("Small", COLOR_BUTTON_BG);
+    Label smallBtn  = CreateButton("Small", COLOR_BUTTON_BG);
     Label mediumBtn = CreateButton("Medium", COLOR_BUTTON_BG);
-    Label largeBtn = CreateButton("Large", COLOR_BUTTON_BG);
+    Label largeBtn  = CreateButton("Large", COLOR_BUTTON_BG);
 
     smallBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnSmallFontSizeButtonTouched);
     mediumBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnMediumFontSizeButtonTouched);
@@ -350,7 +351,7 @@ private:
     // Font weight buttons section
     buttonContainer.Add(CreateSectionLabel("Typing Font Weight:"));
     Label normalWeightBtn = CreateButton("Normal", COLOR_BUTTON_BG);
-    Label boldBtn = CreateButton("Bold", COLOR_BUTTON_BG);
+    Label boldBtn         = CreateButton("Bold", COLOR_BUTTON_BG);
 
     normalWeightBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnNormalWeightButtonTouched);
     boldBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnBoldButtonTouched);
@@ -360,7 +361,7 @@ private:
     // Font width buttons section
     buttonContainer.Add(CreateSectionLabel("Typing Font Width:"));
     Label normalWidthBtn = CreateButton("Normal", COLOR_BUTTON_BG);
-    Label condensedBtn = CreateButton("Condensed", COLOR_BUTTON_BG);
+    Label condensedBtn   = CreateButton("Condensed", COLOR_BUTTON_BG);
 
     normalWidthBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnNormalWidthButtonTouched);
     condensedBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnCondensedButtonTouched);
@@ -370,7 +371,7 @@ private:
     // Font slant buttons section
     buttonContainer.Add(CreateSectionLabel("Typing Font Slant:"));
     Label normalSlantBtn = CreateButton("Normal", COLOR_BUTTON_BG);
-    Label italicBtn = CreateButton("Italic", COLOR_BUTTON_BG);
+    Label italicBtn      = CreateButton("Italic", COLOR_BUTTON_BG);
 
     normalSlantBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnNormalSlantButtonTouched);
     italicBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnItalicButtonTouched);
@@ -634,13 +635,13 @@ private:
 
 private:
   Application& mApplication;
-  InputEditor mInputEditor;
-  View mTypingColorView;
-  Label mTypingFontFamilyLabel;
-  Label mTypingFontSizeLabel;
-  Label mTypingFontWeightLabel;
-  Label mTypingFontWidthLabel;
-  Label mTypingFontSlantLabel;
+  InputEditor  mInputEditor;
+  View         mTypingColorView;
+  Label        mTypingFontFamilyLabel;
+  Label        mTypingFontSizeLabel;
+  Label        mTypingFontWeightLabel;
+  Label        mTypingFontWidthLabel;
+  Label        mTypingFontSlantLabel;
 };
 
 int main(int argc, char** argv)

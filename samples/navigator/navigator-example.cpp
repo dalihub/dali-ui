@@ -32,11 +32,12 @@
 #include <dali-ui-components/public-api/navigator/navigator.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/view.h>
-#include <dali-ui-foundation/public-api/views/interactive-view.h>
-#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/interactive-view.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 
 #include <functional>
 #include <string>
@@ -47,15 +48,15 @@ using Dali::Ui::View;
 
 namespace
 {
-const UiColor PAGE_COLORS[] = {UiColor(0x1565C0u), UiColor(0x2E7D32u), UiColor(0x6A1B9Au), UiColor(0xEF6C00u), UiColor(0xC62828u)};
-constexpr int PAGE_COLOR_COUNT = 5;
-constexpr float PAGE_SLIDE_TRAVEL = 96.0f;
-constexpr float PAGE_WOBBLE_TRAVEL = 72.0f;
+const UiColor   PAGE_COLORS[]               = {UiColor(0x1565C0u), UiColor(0x2E7D32u), UiColor(0x6A1B9Au), UiColor(0xEF6C00u), UiColor(0xC62828u)};
+constexpr int   PAGE_COLOR_COUNT            = 5;
+constexpr float PAGE_SLIDE_TRAVEL           = 96.0f;
+constexpr float PAGE_WOBBLE_TRAVEL          = 72.0f;
 constexpr float PAGE_WOBBLE_VERTICAL_TRAVEL = 28.0f;
-constexpr float MODAL_DROP_TRAVEL = 80.0f;
-constexpr float MODAL_BOUNCE_TRAVEL = 120.0f;
-constexpr float MODAL_SHAKE_X_TRAVEL = 110.0f;
-constexpr float MODAL_SHAKE_Y_TRAVEL = 84.0f;
+constexpr float MODAL_DROP_TRAVEL           = 80.0f;
+constexpr float MODAL_BOUNCE_TRAVEL         = 120.0f;
+constexpr float MODAL_SHAKE_X_TRAVEL        = 110.0f;
+constexpr float MODAL_SHAKE_Y_TRAVEL        = 84.0f;
 } // namespace
 
 class NavigatorExample : public ConnectionTracker
@@ -101,16 +102,23 @@ public:
     root.Add(mStatus);
 
     StackLayout navButtons = MakeButtonRow();
-    navButtons.Add(MakeButton("Page Anim On/Off", UiColor(0x455A64u), [this]() { TogglePageAnimation(); }));
-    navButtons.Add(MakeButton("Push Page", UiColor(0x3367D6u), [this]() { PushPage(); }));
-    navButtons.Add(MakeButton("Per-page Custom Ani", UiColor(0x7B1FA2u), [this]() { PushPage(true); }));
-    navButtons.Add(MakeButton("Pop Page", UiColor(0x5F6368u), [this]() { mNavigator.Pop(mPageAnimationEnabled); UpdateStatus(); }));
+    navButtons.Add(MakeButton("Page Anim On/Off", UiColor(0x455A64u), [this]()
+    { TogglePageAnimation(); }));
+    navButtons.Add(MakeButton("Push Page", UiColor(0x3367D6u), [this]()
+    { PushPage(); }));
+    navButtons.Add(MakeButton("Per-page Custom Ani", UiColor(0x7B1FA2u), [this]()
+    { PushPage(true); }));
+    navButtons.Add(MakeButton("Pop Page", UiColor(0x5F6368u), [this]()
+    { mNavigator.Pop(mPageAnimationEnabled); UpdateStatus(); }));
     root.Add(navButtons);
 
     StackLayout modalButtons = MakeButtonRow();
-    modalButtons.Add(MakeButton("Modal Anim On/Off", UiColor(0x37474Fu), [this]() { ToggleModalAnimation(); }));
-    modalButtons.Add(MakeButton("Show Dialog", UiColor(0x00897Bu), [this]() { ShowDialog(false); }));
-    modalButtons.Add(MakeButton("Per-modal Custom Ani", UiColor(0xC2185Bu), [this]() { ShowDialog(true); }));
+    modalButtons.Add(MakeButton("Modal Anim On/Off", UiColor(0x37474Fu), [this]()
+    { ToggleModalAnimation(); }));
+    modalButtons.Add(MakeButton("Show Dialog", UiColor(0x00897Bu), [this]()
+    { ShowDialog(false); }));
+    modalButtons.Add(MakeButton("Per-modal Custom Ani", UiColor(0xC2185Bu), [this]()
+    { ShowDialog(true); }));
     root.Add(modalButtons);
 
     window.Add(root);
@@ -480,7 +488,8 @@ private:
     label.SetRequestedY(28.0f);
     button.Add(label);
 
-    button.ConnectClickedSignal(this, [onClicked](View, InputEvent) { onClicked(); });
+    button.ConnectClickedSignal(this, [onClicked](View, InputEvent)
+    { onClicked(); });
     return button;
   }
 
@@ -517,7 +526,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig config = UiConfig::New();
+  UiConfig    config      = UiConfig::New();
   config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
   NavigatorExample test(application);
