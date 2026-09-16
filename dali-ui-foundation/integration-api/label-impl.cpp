@@ -85,6 +85,20 @@ namespace DALI_NAMESPACE
 namespace Ui
 {
 
+namespace Text
+{
+bool IsMarqueeStopRequested(Actor control)
+{
+  Ui::Label label = Ui::Label::DownCast(control);
+  if(!label)
+  {
+    return false;
+  }
+  auto& impl = static_cast<Ui::Integration::LabelImpl&>(Ui::GetImpl(label));
+  return impl.mTextScroller && impl.mTextScroller->IsStopRequested();
+}
+} // namespace Text
+
 namespace Integration
 {
 
@@ -949,12 +963,12 @@ void LabelImpl::SetTextOverflowMode(Ui::Text::OverflowMode mode)
     {
       case Ui::Text::OverflowMode::CLIP:
       {
-        mController->SetTextElideEnabled(false);
+        mController->SetTextElideEnabledForControl(false);
         break;
       }
       case Ui::Text::OverflowMode::ELLIPSIS:
       {
-        mController->SetTextElideEnabled(true);
+        mController->SetTextElideEnabledForControl(true);
         break;
       }
     }
@@ -2144,8 +2158,6 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   mSize                           = size;
   const bool contentLayoutDirty   = mIsContentLayoutDirty;
   const bool manualRenderFinished = mIsManualRenderFinished;
-  mIsContentLayoutDirty           = false;
-  mIsManualRenderFinished         = false;
 
   if(contentLayoutDirty)
   {
@@ -2157,6 +2169,9 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     // When marquee stop is requested in FINISH_LOOP mode, defer relayout until scrolling finishes.
     return;
   }
+  // A FINISH_LOOP request defers, rather than consumes, pending size updates.
+  mIsContentLayoutDirty   = false;
+  mIsManualRenderFinished = false;
 
   Actor self = Self();
 
@@ -2179,7 +2194,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   {
     UpdateA11yAnchors(contentLayoutDirty);
 
-    if(mTextScroller && mTextScroller->IsScrolling() && !(mRendererUpdateNeeded || contentLayoutDirty))
+    if(mTextScroller && mTextScroller->IsScrolling() && !(mRendererUpdateNeeded || contentLayoutDirty || mIsAsyncRenderRequested))
     {
       // When marquee is playing, a text load request is made only if a text update is absolutely necessary.
       return;
@@ -2203,9 +2218,12 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request async render, size:%f,%f\n", mController.Get(), contentSize.width, contentSize.height);
 
     Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
-    Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
+    // Empty/zero-size content completes synchronously. Consume this request
+    // before dispatch so completion sees current state and any new request
+    // made by a completion callback remains pending.
     mRendererUpdateNeeded   = false;
     mIsAsyncRenderRequested = false;
+    Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
     return;
   }
 
@@ -2679,6 +2697,18 @@ void LabelImpl::EmitAnchorClicked(const std::string& href)
 // =============================================================================
 void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& renderInfo)
 {
+  if(!IsVisible())
+  {
+    return; // Visibility restoration requests fresh content; never start hidden.
+  }
+  if(mMarqueeTriggerPolicy == Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW && mSuppressAutoMarquee)
+  {
+    // Stop/finite completion can happen after this worker captured its policy.
+    // The old completion must not undo the user's stop or start another loop.
+    RequestTextRelayout();
+    RequestAsyncRender();
+    return;
+  }
   if(HasInlineReplacementSource())
   {
     StopMarqueeImmediately();
@@ -2894,6 +2924,19 @@ void LabelImpl::AsyncTextFitChanged(float pointSize)
 void LabelImpl::AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async render finished, size:%f,%f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
+
+  // A committed static result replaces the marquee renderer. Retire the old
+  // animation without a user/loop-finished callback (which suppresses ON_OVERFLOW).
+  // Marquee results carry marqueePixelData, including MANUAL fitting text.
+  if(!renderInfo.marqueePixelData && mTextScroller && mTextScroller->IsScrolling() && !mIsAsyncRenderRequested)
+  {
+    mTextScroller->StopScrollingForUpdate();
+    if(mController->IsMarqueeEnabled())
+    {
+      mController->SetMarqueeEnabled(false, false, mTextScroller->GetOrientation());
+    }
+    InvalidateMarqueeStartGeometry();
+  }
 
   // To avoid flickering issues, enable/disable the background visual when async load is completed.
   SetViewBackgroundEnabled(!mController->IsTextCutout());
@@ -3868,6 +3911,14 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
       RequestAsyncRender();
     }
   }
+  if(!enabled && mTextScroller && mTextScroller->IsStopRequested() && mController->IsAsyncRendering())
+  {
+    // FINISH_LOOP also defers results requested before Stop. Otherwise their
+    // completion can replace the moving shader or restart its animation.
+    // ScrollingFinished() will request fresh content after the current loop.
+    Internal::TextVisual::CancelAsyncRender(mVisual);
+    mIsManualRenderInProgress = false;
+  }
 }
 
 void LabelImpl::OnViewEffectiveVisibilityChanged(Actor actor, bool visible)
@@ -3968,6 +4019,10 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Ui::Text::Marqu
     }
     else
     {
+      if(mTextScroller)
+      {
+        mTextScroller->StopScrollingForUpdate();
+      }
       InvalidateMarqueeStartGeometry();
     }
     mController->SetMarqueeEnabled(marqueeEnabled, true, orientation);

@@ -184,7 +184,9 @@ class TestScrollerInterface : public UiIntegrationText::ScrollerInterface
 public:
   void ScrollingFinished() override
   {
+    ++finished;
   }
+  int finished{0};
 };
 
 void ExpectMarqueeCompositionResult(bool hasMultipleTextColors,
@@ -2992,6 +2994,50 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesRendererBoundsP(void)
   ExpectPosition(actualConicCenter, Vector2(0.25f, 0.75f));
   ExpectPosition(actualConicScale, Vector2(100.0f, 40.0f));
   DALI_TEST_EQUALS(renderer.GetProperty<float>(conicStartAngleIndex), 0.75f, EPSILON, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextMarqueeContentRetirementP(void)
+{
+  TestApplication application;
+  for(auto mode : {UiText::MarqueeStopMode::IMMEDIATE, UiText::MarqueeStopMode::FINISH_LOOP})
+  {
+    for(auto orientation : {UiText::MarqueeOrientation::HORIZONTAL, UiText::MarqueeOrientation::VERTICAL})
+    {
+      TestScrollerInterface observer;
+      auto                  scroller = UiText::TextScroller::New(observer);
+      scroller->SetStopMode(mode);
+      scroller->SetOrientation(orientation);
+      scroller->SetLoopDelay(0.0f);
+      scroller->SetLoopCount(1);
+      scroller->SetSpeed(100);
+      auto actor    = Actor::New();
+      auto geometry = CreateQuadGeometry();
+      auto shader   = CreateShader();
+      auto renderer = Renderer::New(geometry, shader);
+      actor.AddRenderer(renderer);
+      application.GetScene().Add(actor);
+      auto start = [&]()
+      {
+        scroller->SetParameters(actor, renderer, TextureSet::New(), Size(100, 40), Size(200, 100),
+                                20.0f, true, false, UiText::Alignment::START, UiText::Alignment::START, true);
+        application.SendNotification();
+        application.Render(16);
+      };
+      start();
+      DALI_TEST_CHECK(scroller->IsScrolling());
+      scroller->StopScrollingForUpdate();
+      DALI_TEST_CHECK(!scroller->IsScrolling() && !scroller->IsStopRequested());
+      DALI_TEST_EQUALS(observer.finished, 0, TEST_LOCATION);
+      DALI_TEST_EQUALS(scroller->GetStopMode(), mode, TEST_LOCATION);
+      start();
+      application.Render(5000);
+      application.SendNotification();
+      DALI_TEST_EQUALS(observer.finished, 1, TEST_LOCATION);
+      DALI_TEST_CHECK(!scroller->IsScrolling());
+      actor.Unparent();
+    }
+  }
   END_TEST;
 }
 

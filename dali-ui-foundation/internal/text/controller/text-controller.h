@@ -419,6 +419,16 @@ public: // Configure the text controller.
   void SetTextElideEnabled(bool enabled);
 
   /**
+   * @brief Sets the control's text elide mode and schedules text layout when the mode changes.
+   *
+   * Does not invalidate UI measurement or font and shaping data.
+   * Temporary internal elision overrides must use SetTextElideEnabled() instead.
+   *
+   * @param[in] enabled Whether to enable the text elide.
+   */
+  void SetTextElideEnabledForControl(bool enabled);
+
+  /**
    * @copydoc ModelInterface::IsTextElideEnabled()
    */
   bool IsTextElideEnabled() const;

@@ -516,6 +516,20 @@ bool Controller::IsTextElideEnabled() const
   return mImpl->mModel->mElideEnabled;
 }
 
+void Controller::SetTextElideEnabledForControl(bool enabled)
+{
+  if(mImpl->mModel->mElideEnabled == enabled)
+  {
+    return;
+  }
+  SetTextElideEnabled(enabled);
+  // Schedule glyph/line placement at the already allocated control size. Do not
+  // invalidate UI measure, font/shaping caches, or editable selection state.
+  mImpl->mOperationsPending                  = static_cast<OperationsMask>(mImpl->mOperationsPending | LAYOUT | ALIGN | REORDER | UPDATE_LAYOUT_SIZE);
+  mImpl->mTextUpdateInfo.mFullRelayoutNeeded = true;
+  mImpl->mTextUpdateInfo.mCharacterIndex     = 0u;
+}
+
 void Controller::SetTextFitEnabled(bool enabled)
 {
   if(enabled)

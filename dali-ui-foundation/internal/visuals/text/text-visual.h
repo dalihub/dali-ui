@@ -207,6 +207,16 @@ public:
   };
 
   /**
+   * @brief Cancels pending async render publication without changing the current renderer.
+   *
+   * Does not cancel natural-size or height-for-width requests.
+   * The owner is responsible for requesting a replacement render when needed.
+   *
+   * @param[in] visual The text visual.
+   */
+  static void CancelAsyncRender(Ui::Integration::Visual::Base visual);
+
+  /**
    * @brief Instantly requests the async size computation.
    * @param[in] visual The text visual.
    * @param[in] parameters The async text parameters.

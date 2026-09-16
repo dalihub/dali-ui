@@ -371,6 +371,46 @@ int UtcDaliEndEllipsisInactiveP(void)
   END_TEST;
 }
 
+int UtcDaliEndEllipsisAuthoredOverflowInvalidationP(void)
+{
+  UiTestApplication application;
+  const std::string source = "First line alpha bravo charlie delta\nSecond line echo foxtrot golf\nThird line hotel india juliet";
+  for(bool multiline : {false, true})
+  {
+    auto controller = MakeEndController(source, 130.0f, 44.0f, multiline);
+    auto reference  = Text::Controller::New();
+    reference->SetText(source);
+    reference->SetDefaultFontSize(18.0f, Text::Controller::PIXEL_SIZE);
+    reference->SetMultiLineEnabled(multiline);
+    reference->SetLineWrapMode(Text::LineWrapMode::WORD);
+    // Independent CLIP layout, not a render of the subject being tested.
+    reference->SetTextElideEnabled(false);
+    reference->Relayout(Size(130.0f, 44.0f));
+    auto&       impl         = Text::Controller::Impl::GetImplementation(*controller);
+    const auto* glyphStorage = impl.mModel->mVisualModel->mGlyphs.Begin();
+    for(int iteration = 0; iteration < 3; ++iteration)
+    {
+      controller->SetTextElideEnabledForControl(false);
+      DALI_TEST_CHECK((impl.mOperationsPending & Text::Controller::LAYOUT) != 0);
+      DALI_TEST_CHECK((impl.mOperationsPending & Text::Controller::SHAPE_TEXT) == 0);
+      DALI_TEST_CHECK((controller->Relayout(Size(130.0f, 44.0f)) & Text::Controller::MODEL_UPDATED) != 0);
+      auto render = [](const Text::ControllerPtr& model)
+      {
+        return Text::Typesetter::New(model->GetRenderTextModel())->Render(Size(130.0f, 44.0f), Text::Direction::LEFT_TO_RIGHT, Text::Typesetter::RENDER_NO_STYLES, false, Pixel::L8);
+      };
+      // Hidden glyph placements need not match; the rendered CLIP result must.
+      DALI_TEST_CHECK(HaveSamePixels(render(reference), render(controller)));
+      DALI_TEST_CHECK(glyphStorage == impl.mModel->mVisualModel->mGlyphs.Begin());
+      controller->SetTextElideEnabledForControl(false);
+      DALI_TEST_EQUALS(impl.mOperationsPending, Text::Controller::NO_OPERATION, TEST_LOCATION);
+      controller->SetTextElideEnabledForControl(true);
+      controller->Relayout(Size(130.0f, 44.0f));
+      DALI_TEST_CHECK(controller->GetFinalElisionResult());
+    }
+  }
+  END_TEST;
+}
+
 int UtcDaliAsyncTextLoaderCutoutReuseP(void)
 {
   UiTestApplication application;

@@ -45,6 +45,45 @@ void utc_dali_layout_invalidation_generation_internal_cleanup(void)
   test_return_value = TET_PASS;
 }
 
+int UtcDaliLabelOverflowDoesNotInvalidateUiLayout(void)
+{
+  UiTestApplication application;
+  for(float requested : {240.0f, WRAP_CONTENT})
+  {
+    auto root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(240.0f);
+    root.SetRequestedHeight(160.0f);
+    auto label = Label::New("First line alpha bravo charlie delta\nSecond line echo foxtrot\nThird line golf hotel");
+    label.SetRequestedWidth(requested);
+    label.SetRequestedHeight(60.0f);
+    label.SetMultiLine(true);
+    root.Add(label);
+    application.GetScene().Add(root);
+    for(int i = 0; i < 4; ++i)
+    {
+      application.SendNotification();
+      application.Render();
+    }
+    auto& rootData  = ViewDataImpl::Get(GetImpl(root));
+    auto& labelData = ViewDataImpl::Get(GetImpl(label));
+    DALI_TEST_CHECK(!rootData.IsMeasureDirty() && !rootData.IsArrangeDirty());
+    DALI_TEST_CHECK(!labelData.IsMeasureDirty() && !labelData.IsArrangeDirty());
+    const auto size = label.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+    for(auto mode : {Text::OverflowMode::CLIP, Text::OverflowMode::ELLIPSIS, Text::OverflowMode::ELLIPSIS})
+    {
+      label.SetTextOverflowMode(mode);
+      DALI_TEST_CHECK(!rootData.IsMeasureDirty() && !rootData.IsArrangeDirty());
+      DALI_TEST_CHECK(!labelData.IsMeasureDirty() && !labelData.IsArrangeDirty());
+      application.SendNotification();
+      application.Render();
+      DALI_TEST_CHECK(!rootData.IsMeasureDirty() && !rootData.IsArrangeDirty());
+      DALI_TEST_EQUALS(label.GetCurrentProperty<Vector3>(Actor::Property::SIZE), size, TEST_LOCATION);
+    }
+    root.Unparent();
+  }
+  END_TEST;
+}
+
 // White-box coverage for the invalidation PROPAGATION generation.
 //
 // InvalidateMeasure()/InvalidateArrange() do two separable things: local bookkeeping
