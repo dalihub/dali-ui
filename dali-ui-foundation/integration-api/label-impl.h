@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/integration-api/text/text-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-renderer-state.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
@@ -823,6 +824,11 @@ protected:
   LabelImpl();
 
 private: // Config
+  /**
+   * @copydoc Ui::Text::IsMarqueeStopRequested()
+   */
+  friend bool Ui::Text::IsMarqueeStopRequested(Actor control);
+
   /**
    * @brief Applies default values from UiConfig if applied.
    */

@@ -1708,6 +1708,223 @@ int UtcDaliLabelTextRevealCutoutUnsupportedP(void)
   END_TEST;
 }
 
+int UtcDaliLabelMarqueeEmptySourceRetirementP(void)
+{
+  UiTestApplication application;
+  for(bool async : {false, true})
+  {
+    Label label = Label::New("Long marquee source that must disappear completely when replaced by empty text.");
+    label.SetRequestedWidth(120.0f);
+    label.SetRequestedHeight(48.0f);
+    label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+    label.SetMarqueeLoopCount(0);
+    label.SetAsyncRendering(async);
+    label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+    gAsyncRenderFinished = false;
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render(16);
+    if(async)
+    {
+      DALI_TEST_CHECK(WaitForAsyncRender(application));
+    }
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+    for(int cycle = 0; cycle < 3; ++cycle)
+    {
+      gAsyncRenderFinished = false;
+      label.SetText("");
+      application.SendNotification();
+      application.Render(16);
+      if(async)
+      {
+        DALI_TEST_CHECK(WaitForAsyncRender(application));
+      }
+      DALI_TEST_CHECK(!label.IsMarqueeRunning());
+      gAsyncRenderFinished = false;
+      label.SetText("Long marquee source that must resume automatically after the empty source.");
+      application.SendNotification();
+      application.Render(16);
+      if(async)
+      {
+        DALI_TEST_CHECK(WaitForAsyncRender(application));
+      }
+      DALI_TEST_CHECK(label.IsMarqueeRunning());
+    }
+    label.StopMarquee();
+    label.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelAsyncEmptyCompletionPreservesNewRequestP(void)
+{
+  UiTestApplication application;
+  ConnectionTracker tracker;
+  Label             label = Label::New("Initial text");
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(48.0f);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+  label.SetMarqueeLoopCount(0);
+  label.SetAsyncRendering(true);
+  bool refill = false;
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  label.AsyncRenderFinishedSignal().Connect(&tracker, [&](View, float, float)
+  {
+    if(refill)
+    {
+      refill = false;
+      label.SetText("A long source requested inside the empty-render completion must reach the renderer.");
+    }
+  });
+  gAsyncRenderFinished = false;
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+
+  refill               = true;
+  gAsyncRenderFinished = false;
+  label.SetText("");
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(!refill);
+  DALI_TEST_CHECK(gAsyncRenderFinished);
+  // This completion was synchronous. A distinct render must now publish the
+  // nonempty source requested by the callback, without another API mutation.
+  gAsyncRenderFinished = false;
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.IsMarqueeRunning());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+  label.StopMarquee();
+  END_TEST;
+}
+
+int UtcDaliLabelMarqueeFinishLoopResizeKeepsRendererP(void)
+{
+  UiTestApplication application;
+  for(bool async : {false, true})
+    for(bool automatic : {false, true})
+      for(bool vertical : {false, true})
+      {
+        Label label = Label::New("First long line for marquee\nSecond long line for marquee\nThird line\nFourth line\nFifth line");
+        label.SetRequestedWidth(120.0f);
+        label.SetRequestedHeight(48.0f);
+        label.SetMultiLine(vertical);
+        label.SetMarqueeOrientation(vertical ? Text::MarqueeOrientation::VERTICAL : Text::MarqueeOrientation::HORIZONTAL);
+        label.SetMarqueeTriggerPolicy(automatic ? Text::MarqueeTriggerPolicy::ON_OVERFLOW : Text::MarqueeTriggerPolicy::MANUAL);
+        label.SetMarqueeLoopCount(0);
+        label.SetMarqueeLoopDelay(0.0f);
+        label.SetMarqueeSpeed(20);
+        label.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
+        label.SetAsyncRendering(async);
+        label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+        if(!automatic) label.StartMarquee();
+        gAsyncRenderFinished = false;
+        application.GetScene().Add(label);
+        application.SendNotification();
+        application.Render(16);
+        if(async)
+        {
+          DALI_TEST_CHECK(WaitForAsyncRender(application));
+        }
+        DALI_TEST_CHECK(label.IsMarqueeRunning());
+        const Shader movingShader = label.GetRendererAt(0u).GetShader();
+        label.StopMarquee();
+        label.SetRequestedWidth(100.0f);
+        application.SendNotification();
+        application.Render(16);
+        application.SendNotification();
+        application.Render(100);
+        // Resize must not replace the shader being animated while FINISH_LOOP
+        // explicitly defers the text renderer update.
+        DALI_TEST_CHECK(label.GetRendererAt(0u).GetShader() == movingShader);
+        DALI_TEST_CHECK(label.IsMarqueeRunning());
+        gAsyncRenderFinished = false;
+        application.Render(60000);
+        application.SendNotification();
+        application.Render(16);
+        if(async)
+        {
+          DALI_TEST_CHECK(WaitForAsyncRender(application));
+        }
+        DALI_TEST_CHECK(!label.IsMarqueeRunning());
+        DALI_TEST_CHECK(label.GetRendererAt(0u).GetShader() != movingShader);
+        DALI_TEST_EQUALS(label.GetCurrentProperty<Vector3>(Actor::Property::SIZE).x, 100.0f, TEST_LOCATION);
+        label.Unparent();
+      }
+  END_TEST;
+}
+
+int UtcDaliLabelAsyncMarqueeFinishLoopInFlightP(void)
+{
+  UiTestApplication application;
+  for(bool automatic : {false, true})
+    for(bool vertical : {false, true})
+      for(bool fittingResult : {false, true})
+      {
+        // MANUAL intentionally scrolls fitting text too; the automatic variant
+        // additionally exercises an in-flight static result replacing marquee.
+        Label label = Label::New("First long marquee line\nSecond long marquee line\nThird line\nFourth line\nFifth line");
+        label.SetRequestedWidth(120.0f);
+        label.SetRequestedHeight(48.0f);
+        label.SetMultiLine(vertical);
+        label.SetMarqueeOrientation(vertical ? Text::MarqueeOrientation::VERTICAL : Text::MarqueeOrientation::HORIZONTAL);
+        label.SetMarqueeTriggerPolicy(automatic ? Text::MarqueeTriggerPolicy::ON_OVERFLOW : Text::MarqueeTriggerPolicy::MANUAL);
+        label.SetMarqueeLoopCount(0);
+        label.SetMarqueeLoopDelay(0.0f);
+        label.SetMarqueeSpeed(20);
+        label.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
+        label.SetAsyncRendering(true);
+        label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+        if(!automatic) label.StartMarquee();
+        gAsyncRenderFinished = false;
+        application.GetScene().Add(label);
+        application.SendNotification();
+        application.Render(16);
+        DALI_TEST_CHECK(WaitForAsyncRender(application));
+        DALI_TEST_CHECK(label.IsMarqueeRunning());
+        const Shader movingShader = label.GetRendererAt(0u).GetShader();
+
+        gAsyncRenderFinished = false;
+        label.SetText(fittingResult ? "Ab" : "Updated long marquee line\nSecond updated long line\nThird line\nFourth line\nFifth line");
+        application.SendNotification();
+        application.Render(16); // Dispatch, but do not deliver worker completion.
+        DALI_TEST_CHECK(!gAsyncRenderFinished);
+        label.StopMarquee();
+        DALI_TEST_CHECK(label.IsMarqueeRunning());
+        DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+        application.SendNotification();
+        application.Render(100);
+        // The result was requested before Stop. It must neither replace the
+        // moving shader nor restart the animation while its last loop runs.
+        DALI_TEST_CHECK(label.GetRendererAt(0u).GetShader() == movingShader);
+        DALI_TEST_CHECK(label.IsMarqueeRunning());
+        DALI_TEST_CHECK(!gAsyncRenderFinished);
+
+        application.Render(60000);
+        application.SendNotification();
+        application.Render(16);
+        DALI_TEST_CHECK(WaitForAsyncRender(application));
+        DALI_TEST_CHECK(!label.IsMarqueeRunning());
+        DALI_TEST_CHECK(label.GetRendererAt(0u).GetShader() != movingShader);
+        DALI_TEST_CHECK(HasValidTextTexture(label));
+        gAsyncRenderFinished = false;
+        for(int idleFrame = 0; idleFrame < 3; ++idleFrame)
+        {
+          application.SendNotification();
+          application.Render(16);
+          // Deliver any unexpected worker completion as well as frame work.
+          // No new source or size request is made after the static result.
+          Test::WaitForEventThreadTrigger(1, 0);
+        }
+        DALI_TEST_CHECK(!gAsyncRenderFinished);
+        label.Unparent();
+      }
+  END_TEST;
+}
+
 int UtcDaliLabelTextRevealMarqueeUnsupportedP(void)
 {
   UiTestApplication application;

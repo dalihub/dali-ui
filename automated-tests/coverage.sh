@@ -58,7 +58,8 @@ if [ ! -s "$TOP_LEVEL_INFO" ] ; then
     exit 1
 fi
 
-# fastcov.py doesn't require version detection or complex rc options
+# Measure product-authored sources. Generated invoke wrappers and animation
+# bridges are validated through their generators rather than per-line UTCs.
 FASTCOV_OPTS=(--branch-coverage --lcov --gcov "$GCOV_BIN")
 echo "Using fastcov.py for coverage data collection"
 
@@ -73,7 +74,7 @@ for i in `find . -name "*.dir"` ; do
         then
             "$FASTCOV_BIN" "${FASTCOV_OPTS[@]}" \
                 -d . \
-                --exclude /usr/include automated-tests dali-env \
+                --exclude /usr/include automated-tests dali-env generated/ .autogen.cpp \
                 -o dali.info
             if [ ! -s dali.info ]
             then

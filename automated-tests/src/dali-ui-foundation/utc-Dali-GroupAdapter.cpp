@@ -16,6 +16,8 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/views/recycler/group-body-decoration.h>
+#include <dali-ui-foundation/public-api/views/recycler/group-linear-items-layouter.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
@@ -154,5 +156,82 @@ int UtcDaliGroupAdapterRetainsBridgeForFlatAdapterP(void)
   }
 
   DALI_TEST_EQUALS(flatAdapter.GetItemCount(), 5u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliGroupBodyDecorationLifecycleP(void)
+{
+  UiTestApplication application;
+  View scroller = View::New();
+  GroupBodyDecoration decoration;
+  int invalidated = 0;
+  decoration.LayoutInvalidatedSignal().Connect(&application, [&invalidated]() { ++invalidated; });
+  decoration.SetBodyHorizontalMargin(-5.0f, 12.0f);
+  decoration.SetBodyColor(UiColor(0xFF0000));
+  decoration.SetBodyCornerRadius(8.0f);
+  DALI_TEST_EQUALS(invalidated, 1, TEST_LOCATION);
+
+  ItemViewHolder header;
+  header.rowType = GroupRowType::HEADER;
+  decoration.OnItemActivated(header, scroller);
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoration.GetItemOffsets(header).left, 0.0f, 0.001f, TEST_LOCATION);
+
+  ItemViewHolder top;
+  top.rowType = GroupRowType::BODY_TOP;
+  top.groupIndex = 3u;
+  top.view = View::New();
+  ItemViewHolder bottom = top;
+  bottom.rowType = GroupRowType::BODY_BOTTOM;
+  decoration.OnItemActivated(top, scroller);
+  decoration.OnItemActivated(bottom, scroller);
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoration.GetItemOffsets(top).right, 12.0f, 0.001f, TEST_LOCATION);
+
+  decoration.OnLayoutStart();
+  decoration.OnItemBoundsUpdated(header, LayoutRect(0.0f, 0.0f, 100.0f, 20.0f));
+  decoration.OnItemBoundsUpdated(top, LayoutRect(0.0f, 20.0f, 100.0f, 30.0f));
+  decoration.OnItemBoundsUpdated(bottom, LayoutRect(0.0f, 50.0f, 100.0f, 40.0f));
+  View background = View::DownCast(scroller.GetChildAt(0u));
+  DALI_TEST_EQUALS(background.GetProperty<Vector3>(Actor::Property::SIZE), Vector3(88.0f, 70.0f, 1.0f), TEST_LOCATION);
+
+  decoration.SetBodyColor(UiColor(0x00FF00));
+  decoration.SetBodyCornerRadius(4.0f);
+  decoration.OnItemRecycled(header);
+  ItemViewHolder unknown = top;
+  unknown.groupIndex = 99u;
+  decoration.OnItemRecycled(unknown);
+  decoration.OnItemRecycled(top);
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 1u, TEST_LOCATION);
+  decoration.OnItemRecycled(bottom);
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliGroupLinearItemsLayouterP(void)
+{
+  UiTestApplication application;
+  GroupLinearItemsLayouter horizontal = GroupLinearItemsLayouter::New(LinearItemsLayouter::Orientation::HORIZONTAL);
+  DALI_TEST_CHECK(horizontal.CanScrollVertically());
+
+  GroupAdapter adapter = GroupAdapter::New();
+  adapter.SetDataSource(std::make_shared<TestGroupDataSource>());
+  GroupLinearItemsLayouter layouter = GroupLinearItemsLayouter::New();
+  layouter.SetGroupAdapter(adapter);
+  layouter.SetBodyHorizontalMargin(-4.0f, 15.0f);
+  DALI_TEST_EQUALS(layouter.GetBodyMarginLeft(), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(layouter.GetBodyMarginRight(), 15.0f, 0.001f, TEST_LOCATION);
+
+  LayoutRect header = layouter.GetItemBounds(0u, 100.0f);
+  LayoutRect body = layouter.GetItemBounds(1u, 100.0f);
+  DALI_TEST_EQUALS(header.x, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(header.width, 100.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(body.x, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(body.width, 85.0f, 0.001f, TEST_LOCATION);
+
+  layouter.SetBodyHorizontalMargin(80.0f, 80.0f);
+  body = layouter.GetItemBounds(1u, 100.0f);
+  DALI_TEST_EQUALS(body.x, 80.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(body.width, 0.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }

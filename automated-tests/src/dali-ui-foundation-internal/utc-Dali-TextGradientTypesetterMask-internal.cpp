@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
+#include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-test-suite-utils.h>
@@ -26,7 +27,11 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <initializer_list>
+#include <cmath>
+#include <limits>
+#include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 
 using namespace Dali;
 
@@ -98,7 +103,7 @@ public:
   const Size& GetLayoutSize() const override { return mLayoutSize; }
   const Vector2& GetScrollPosition() const override { return mScrollPosition; }
   UiText::Alignment GetHorizontalAlignment() const override { return UiText::Alignment::START; }
-  UiText::Alignment GetVerticalAlignment() const override { return UiText::Alignment::START; }
+  UiText::Alignment GetVerticalAlignment() const override { return mVerticalAlignment; }
   UiText::Alignment GetVerticalLineAlignment() const override { return UiText::Alignment::START; }
   UiText::EllipsisPosition::Type GetEllipsisPosition() const override { return UiText::EllipsisPosition::END; }
   bool IsTextElideEnabled() const override { return false; }
@@ -120,9 +125,9 @@ public:
   {
     return mHasGradientSpan ? &mGradientSpanData : nullptr;
   }
-  const Vector4* GetBackgroundColors() const override { return nullptr; }
-  const UiText::ColorIndex* GetBackgroundColorIndices() const override { return nullptr; }
-  bool IsMarkupBackgroundColorSet() const override { return false; }
+  const Vector4* GetBackgroundColors() const override { return mBackgroundIndices.Empty() ? nullptr : &mShadowColor; }
+  const UiText::ColorIndex* GetBackgroundColorIndices() const override { return mBackgroundIndices.Empty() ? nullptr : mBackgroundIndices.Begin(); }
+  bool IsMarkupBackgroundColorSet() const override { return !mBackgroundIndices.Empty(); }
   const Vector4& GetDefaultColor() const override { return mDefaultColor; }
   const Vector2& GetShadowOffset() const override { return mStyleEnabled ? mShadowOffset : mZeroVector; }
   bool IsShadowEnabled() const override { return mStyleEnabled; }
@@ -130,33 +135,39 @@ public:
   const float& GetShadowBlurRadius() const override { return mZeroFloat; }
   const Vector4& GetUnderlineColor() const override { return mStyleEnabled ? mUnderlineColor : mTransparentColor; }
   bool IsUnderlineEnabled() const override { return mStyleEnabled; }
-  bool IsMarkupUnderlineSet() const override { return false; }
-  float GetUnderlineHeight() const override { return 0.0f; }
-  UiText::Underline::Type GetUnderlineType() const override { return UiText::Underline::Type::SOLID; }
-  float GetDashedUnderlineWidth() const override { return 0.0f; }
-  float GetDashedUnderlineGap() const override { return 0.0f; }
-  UiText::Length GetNumberOfUnderlineRuns() const override { return 0u; }
-  void GetUnderlineRuns(UiText::UnderlinedGlyphRun*, UiText::UnderlineRunIndex, UiText::Length) const override {}
+  bool IsMarkupUnderlineSet() const override { return !mUnderlineRuns.Empty(); }
+  float GetUnderlineHeight() const override { return mUnderlineHeight; }
+  UiText::Underline::Type GetUnderlineType() const override { return mUnderlineType; }
+  float GetDashedUnderlineWidth() const override { return 2.0f; }
+  float GetDashedUnderlineGap() const override { return 2.0f; }
+  UiText::Length GetNumberOfUnderlineRuns() const override { return static_cast<UiText::Length>(mUnderlineRuns.Count()); }
+  void GetUnderlineRuns(UiText::UnderlinedGlyphRun* runs, UiText::UnderlineRunIndex index, UiText::Length count) const override
+  {
+    for(UiText::Length i = 0u; i < count; ++i) { runs[i] = mUnderlineRuns[index + i]; }
+  }
   const Vector2& GetOutlineOffset() const override { return mZeroVector; }
-  const Vector4& GetOutlineColor() const override { return mTransparentColor; }
-  uint16_t GetOutlineWidth() const override { return 0u; }
-  bool IsOutlineEnabled() const override { return false; }
+  const Vector4& GetOutlineColor() const override { return mShadowColor; }
+  uint16_t GetOutlineWidth() const override { return mOutlineWidth; }
+  bool IsOutlineEnabled() const override { return mOutlineWidth != 0u; }
   const float& GetOutlineBlurRadius() const override { return mZeroFloat; }
   const Vector4& GetBackgroundColor() const override { return mTransparentColor; }
   bool IsBackgroundEnabled() const override { return false; }
   const UiText::GlyphInfo* GetHyphens() const override { return nullptr; }
   const UiText::Length* GetHyphenIndices() const override { return nullptr; }
   UiText::Length GetHyphensCount() const override { return 0u; }
-  const Vector4& GetStrikethroughColor() const override { return mTransparentColor; }
-  bool IsStrikethroughEnabled() const override { return false; }
-  bool IsMarkupStrikethroughSet() const override { return false; }
-  float GetStrikethroughHeight() const override { return 0.0f; }
-  UiText::Length GetNumberOfStrikethroughRuns() const override { return 0u; }
+  const Vector4& GetStrikethroughColor() const override { return mUnderlineColor; }
+  bool IsStrikethroughEnabled() const override { return mStrikethroughHeight > 0.0f; }
+  bool IsMarkupStrikethroughSet() const override { return !mStrikethroughRuns.Empty(); }
+  float GetStrikethroughHeight() const override { return mStrikethroughHeight; }
+  UiText::Length GetNumberOfStrikethroughRuns() const override { return static_cast<UiText::Length>(mStrikethroughRuns.Count()); }
   UiText::Length GetNumberOfBoundedParagraphRuns() const override { return 0u; }
   const Vector<UiText::BoundedParagraphRun>& GetBoundedParagraphRuns() const override { return mBoundedParagraphRuns; }
   UiText::Length GetNumberOfCharacterSpacingGlyphRuns() const override { return 0u; }
   const Vector<UiText::CharacterSpacingGlyphRun>& GetCharacterSpacingGlyphRuns() const override { return mCharacterSpacingGlyphRuns; }
-  void GetStrikethroughRuns(UiText::StrikethroughGlyphRun*, UiText::StrikethroughRunIndex, UiText::Length) const override {}
+  void GetStrikethroughRuns(UiText::StrikethroughGlyphRun* runs, UiText::StrikethroughRunIndex index, UiText::Length count) const override
+  {
+    for(UiText::Length i = 0u; i < count; ++i) { runs[i] = mStrikethroughRuns[index + i]; }
+  }
   float GetCharacterSpacing() const override { return 0.0f; }
   const UiText::Character* GetTextBuffer() const override { return mCharacters.Begin(); }
   const Vector<UiText::CharacterIndex>& GetGlyphsToCharacters() const override { return mGlyphToCharacters; }
@@ -298,6 +309,49 @@ public:
     mColors[0u] = color;
   }
 
+  void SetAlignmentOffset(float value) { mLines[0u].alignmentOffset = value; }
+  void SetLineAscender(float value) { mLines[0u].ascender = value; }
+  void SetGlyphSize(float width, float height) { mGlyphs[0u].width = width; mGlyphs[0u].height = height; }
+  void SetShadowOffset(const Vector2& offset) { mShadowOffset = offset; }
+  void SetVerticalAlignment(UiText::Alignment alignment) { mVerticalAlignment = alignment; }
+  void SetDecoration(UiText::Underline::Type type, float height, float strikeHeight = 0.0f, uint16_t outline = 0u)
+  {
+    mUnderlineType = type;
+    mUnderlineHeight = height;
+    mStrikethroughHeight = strikeHeight;
+    mOutlineWidth = outline;
+  }
+  void SetBackgroundSpan()
+  {
+    mBackgroundIndices.Resize(mGlyphs.Count());
+    std::fill(mBackgroundIndices.Begin(), mBackgroundIndices.End(), 1u);
+  }
+  void SetDecorationSpan()
+  {
+    UiText::UnderlinedGlyphRun underline;
+    underline.glyphRun.numberOfGlyphs = 1u;
+    underline.properties.height = 9.0f;
+    underline.properties.heightDefined = true;
+    mUnderlineRuns.PushBack(underline);
+    UiText::StrikethroughGlyphRun strike;
+    strike.glyphRun.numberOfGlyphs = 1u;
+    strike.properties.height = 9.0f;
+    strike.properties.heightDefined = true;
+    mStrikethroughRuns.PushBack(strike);
+  }
+  void SetTwoLines()
+  {
+    DALI_ASSERT_ALWAYS(mGlyphs.Count() == 2u);
+    mLines[0u].glyphRun.numberOfGlyphs = 1u;
+    mLines[0u].characterRun.numberOfCharacters = 1u;
+    mLines[0u].ascender = 6.75f;
+    mLines[0u].descender = -3.5f;
+    auto second = mLines[0u];
+    second.glyphRun.glyphIndex = 1u;
+    second.characterRun.characterIndex = 1u;
+    mLines.PushBack(second);
+  }
+
 private:
   Size    mControlSize{MASK_SIZE};
   Size    mLayoutSize{MASK_SIZE};
@@ -310,6 +364,14 @@ private:
   Vector4 mUnderlineColor{Color::RED};
   float   mZeroFloat{0.0f};
   bool    mStyleEnabled{false};
+  UiText::Underline::Type mUnderlineType{UiText::Underline::Type::SOLID};
+  UiText::Alignment mVerticalAlignment{UiText::Alignment::START};
+  float mUnderlineHeight{0.0f};
+  float mStrikethroughHeight{0.0f};
+  uint16_t mOutlineWidth{0u};
+  Vector<UiText::ColorIndex> mBackgroundIndices;
+  Vector<UiText::UnderlinedGlyphRun> mUnderlineRuns;
+  Vector<UiText::StrikethroughGlyphRun> mStrikethroughRuns;
 
   Vector<UiText::LineRun>                  mLines;
   Vector<UiText::GlyphInfo>                mGlyphs;
@@ -694,5 +756,401 @@ int UtcDaliTextGradientTypesetterMixedPreservedMaskSizeContractP(void)
   DALI_TEST_EQUALS(mask.GetHeight(), preserved.GetHeight(), TEST_LOCATION);
   DALI_TEST_CHECK(SumRgbaAlphaPixels(preserved) > 0u);
   DALI_TEST_CHECK(SumMaskPixels(mask) > 0u);
+  END_TEST;
+}
+
+// The second glyph is healthy: rejecting malformed geometry must not hide it.
+int UtcDaliTypesetterMalformedCoordinatesP(void)
+{
+  TestApplication application;
+  const float values[] = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(),
+                          std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity(),
+                          -std::numeric_limits<float>::infinity(), 2147483648.0f, -2147483648.0f,
+                          std::nextafter(2147483648.0f, 0.0f), std::nextafter(-2147483648.0f, 0.0f)};
+  for(bool gradient : {false, true})
+  {
+    for(float value : values)
+    {
+      for(bool vertical : {false, true})
+      {
+        MaskModel model(2u);
+        if(gradient)
+        {
+          model.SetGradientSpanGlyphRange(0u, 2u);
+        }
+        model.SetGlyphPosition(0u, vertical ? Vector2(0.0f, value) : Vector2(value, 0.0f));
+        auto typesetter = UiText::Typesetter::New(&model);
+        auto pixels = typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT,
+                                         UiText::Typesetter::RENDER_NO_STYLES, false, Pixel::RGBA8888);
+        DALI_TEST_EQUALS(SumRgbaAlphaPixels(pixels), uint64_t(8u * 255u), TEST_LOCATION);
+        DALI_TEST_EQUALS(SumMaskPixels(RenderTextGradientMask(model)), gradient ? uint64_t(0u) : uint64_t(8u * 255u), TEST_LOCATION);
+        DALI_TEST_EQUALS(SumRgbaAlphaPixels(RenderTextGradientPreserved(model)), gradient ? uint64_t(8u * 255u) : uint64_t(0u), TEST_LOCATION);
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTypesetterMalformedLineAndStyleCoordinatesP(void)
+{
+  TestApplication application;
+  for(float value : {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(),
+                     std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity(),
+                     -std::numeric_limits<float>::infinity(), 2147483648.0f, -2147483648.0f})
+  {
+    MaskModel model(1u, {}, true);
+    model.SetAlignmentOffset(value);
+    auto typesetter = UiText::Typesetter::New(&model);
+    for(auto behaviour : {UiText::Typesetter::RENDER_TEXT_AND_STYLES, UiText::Typesetter::RENDER_NO_TEXT,
+                           UiText::Typesetter::RENDER_OVERLAY_STYLE, UiText::Typesetter::RENDER_MASK})
+    {
+      const auto pixels = typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, behaviour, false, Pixel::RGBA8888);
+      DALI_TEST_EQUALS(SumRgbaAlphaPixels(pixels), uint64_t(0u), TEST_LOCATION);
+    }
+    DALI_TEST_EQUALS(SumMaskPixels(RenderTextGradientMask(model)), uint64_t(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(SumRgbaAlphaPixels(RenderTextGradientPreserved(model)), uint64_t(0u), TEST_LOCATION);
+    // Ignoring measurement alignment is a render policy; the model stays intact.
+    DALI_TEST_EQUALS(SumRgbaAlphaPixels(typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT,
+                       UiText::Typesetter::RENDER_NO_STYLES, true, Pixel::RGBA8888)), uint64_t(8u * 255u), TEST_LOCATION);
+    DALI_TEST_CHECK(std::isnan(value) ? std::isnan(model.GetLines()[0u].alignmentOffset)
+                                     : model.GetLines()[0u].alignmentOffset == value);
+    model.SetAlignmentOffset(0.0f);
+    model.SetShadowOffset(Vector2(value, value));
+    DALI_TEST_EQUALS(SumRgbaAlphaPixels(typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT,
+                       UiText::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888)), uint64_t(0u), TEST_LOCATION);
+    model.SetLineAscender(value);
+    DALI_TEST_EQUALS(SumRgbaAlphaPixels(typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT,
+                       UiText::Typesetter::RENDER_NO_STYLES, false, Pixel::RGBA8888)), uint64_t(0u), TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliTypesetterMalformedDimensionsP(void)
+{
+  TestApplication application;
+  for(float value : {std::numeric_limits<float>::max(), -1.0f, std::numeric_limits<float>::quiet_NaN(),
+                     std::numeric_limits<float>::infinity(), 2147483648.0f, 1073741824.0f})
+  {
+    for(bool height : {false, true})
+    {
+      MaskModel model(2u);
+      model.SetGlyphSize(height ? 2.0f : value, height ? value : 4.0f);
+      auto typesetter = UiText::Typesetter::New(&model);
+      DALI_TEST_EQUALS(SumRgbaAlphaPixels(typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT,
+                         UiText::Typesetter::RENDER_NO_STYLES, false, Pixel::RGBA8888)), uint64_t(8u * 255u), TEST_LOCATION);
+      const Vector2 size = height ? Vector2(240.0f, value) : Vector2(value, 96.0f);
+      DALI_TEST_CHECK(!typesetter->Render(size, UiText::Direction::LEFT_TO_RIGHT));
+      DALI_TEST_CHECK(!typesetter->RenderTextGradientMask(size, UiText::Direction::LEFT_TO_RIGHT));
+      DALI_TEST_CHECK(!typesetter->RenderTextGradientPreserved(size, UiText::Direction::LEFT_TO_RIGHT));
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTypesetterNegativeFractionalCoordinatesP(void)
+{
+  TestApplication application;
+  for(bool gradient : {false, true})
+  {
+    MaskModel model(1u);
+    if(gradient)
+    {
+      model.SetGradientSpanGlyphRange(0u, 1u);
+    }
+    model.SetGlyphPosition(0u, Vector2(1.9f, -1.9f));
+    auto typesetter = UiText::Typesetter::New(&model);
+    const auto pixels = typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT,
+                                           UiText::Typesetter::RENDER_NO_STYLES, false, Pixel::RGBA8888);
+    DALI_TEST_EQUALS(SumRgbaAlphaPixels(pixels), uint64_t(6u * 255u), TEST_LOCATION);
+    const auto buffer = Integration::GetPixelDataBuffer(pixels);
+    for(uint32_t y = 0; y < pixels.GetHeight(); ++y)
+    {
+      for(uint32_t x = 0; x < pixels.GetWidth(); ++x)
+      {
+        DALI_TEST_EQUALS(buffer.buffer[y * pixels.GetStrideBytes() + x * 4u + 3u],
+                          uint8_t(y < 3u && x >= 1u && x < 3u ? 255u : 0u), TEST_LOCATION);
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTypesetterRasterArithmeticBoundariesP(void)
+{
+  namespace Raster = UiText::Raster;
+  int32_t result;
+  Raster::GlyphClip clip;
+  DALI_TEST_CHECK(!Raster::Convert(2147483648.0f, result));
+  DALI_TEST_CHECK(Raster::Convert(-2147483648.0f, result));
+  DALI_TEST_CHECK(!Raster::Add(std::numeric_limits<int32_t>::max(), 1, result));
+  DALI_TEST_CHECK(!Raster::Add(std::numeric_limits<int32_t>::min(), -1, result));
+  DALI_TEST_CHECK(!Raster::BufferFits(0xffffffffu, 0xffffffffu, 4u));
+  DALI_TEST_CHECK(!Raster::BufferFits(65536u, 65536u, 1u));
+  DALI_TEST_CHECK(Raster::BufferFits(16384u, 16384u, 4u)); // 1 GiB, within each index domain.
+  DALI_TEST_CHECK(Raster::BufferFits(4096u, 131072u, 1u)); // Tall L8 text, 512 MiB.
+  DALI_TEST_EQUALS(Raster::BufferFits(16384u, 32768u, 4u),
+                    std::numeric_limits<ptrdiff_t>::max() > std::numeric_limits<int32_t>::max(), TEST_LOCATION);
+  // Widening the destination byte limit must not widen signed source scanlines.
+  DALI_TEST_CHECK(!Raster::ClipGlyph(0.0f, 0.0f, 0, 0, 16384u, 32768u, 4u, 240u, 96u, clip));
+  // Coordinate converts, but adding the bitmap width would overflow.
+  DALI_TEST_CHECK(!Raster::ClipGlyph(2147483520.0f, 0.0f, -2147483520, 0, 256u, 4u, 1u, 240u, 96u, clip));
+  DALI_TEST_CHECK(!Raster::ClipGlyph(0.0f, 0.0f, std::numeric_limits<int32_t>::min(), 0, 2u, 4u, 1u, 240u, 96u, clip));
+  DALI_TEST_CHECK(!Raster::ClipGlyph(0.0f, 0.0f, 0, 0, 0xffffffffu, 4u, 1u, 240u, 96u, clip));
+  DALI_TEST_CHECK(!Raster::ClipGlyph(0.0f, 0.0f, 0, 0, 2u, 0xffffffffu, 1u, 240u, 96u, clip));
+  DALI_TEST_CHECK(Raster::ClipGlyph(-1.9f, -1.9f, 0, 0, 2u, 4u, 1u, 240u, 96u, clip));
+  DALI_TEST_EQUALS(clip.left, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(clip.top, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(clip.right, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(clip.bottom, 4, TEST_LOCATION);
+
+  // Validate the unsigned extent before narrowing it to a signed coordinate.
+  const uint32_t maxExtent = static_cast<uint32_t>(std::numeric_limits<int32_t>::max());
+  int32_t begin, end;
+  DALI_TEST_CHECK(Raster::ClipRange(-1.9f, 3.9f, maxExtent, begin, end));
+  DALI_TEST_EQUALS(begin, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(end, 3, TEST_LOCATION);
+  DALI_TEST_CHECK(!Raster::ClipRange(-1.9f, 3.9f, maxExtent + 1u, begin, end));
+  DALI_TEST_CHECK(!Raster::ClipRange(-1.9f, 3.9f, std::numeric_limits<uint32_t>::max(), begin, end));
+  DALI_TEST_CHECK(!Raster::ClipRange(-1.9f, 3.9f, 0u, begin, end));
+  END_TEST;
+}
+
+int UtcDaliTypesetterMalformedFirstLineIsolationP(void)
+{
+  TestApplication application;
+  auto samePixels = [](PixelData actual, PixelData expected)
+  {
+    DALI_TEST_CHECK(actual && expected);
+    const auto a = Integration::GetPixelDataBuffer(actual);
+    const auto b = Integration::GetPixelDataBuffer(expected);
+    DALI_TEST_CHECK(std::memcmp(a.buffer, b.buffer, expected.GetStrideBytes() * expected.GetHeight()) == 0);
+  };
+  for(bool gradient : {false, true})
+  {
+    for(float value : {std::numeric_limits<float>::max(), std::numeric_limits<float>::quiet_NaN(),
+                       std::numeric_limits<float>::infinity(), -2147483648.0f})
+    {
+      MaskModel reference(2u, {}, true);
+      MaskModel malformed(2u, {}, true);
+      for(auto* model : {&reference, &malformed})
+      {
+        model->SetTwoLines();
+        model->SetBackgroundSpan();
+        model->SetDecoration(UiText::Underline::Type::DOUBLE, 2.0f, 2.0f, 1u);
+        if(gradient)
+        {
+          model->SetGradientSpanGlyphRange(0u, 2u);
+        }
+      }
+      // A safely offscreen first line still advances the second line's baseline.
+      reference.SetAlignmentOffset(-1024.0f);
+      malformed.SetAlignmentOffset(value);
+      for(auto behaviour : {UiText::Typesetter::RENDER_NO_STYLES, UiText::Typesetter::RENDER_NO_TEXT,
+                             UiText::Typesetter::RENDER_OVERLAY_STYLE, UiText::Typesetter::RENDER_TEXT_AND_STYLES})
+      {
+        auto expected = UiText::Typesetter::New(&reference)->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, behaviour);
+        DALI_TEST_CHECK(SumRgbaAlphaPixels(expected) > 0u);
+        samePixels(UiText::Typesetter::New(&malformed)->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, behaviour), expected);
+      }
+      samePixels(RenderTextGradientMask(malformed), RenderTextGradientMask(reference));
+      samePixels(RenderTextGradientPreserved(malformed), RenderTextGradientPreserved(reference));
+      // Horizontal failure must not conceal malformed vertical metrics.
+      malformed.SetLineAscender(std::numeric_limits<float>::quiet_NaN());
+      DALI_TEST_EQUALS(SumRgbaAlphaPixels(UiText::Typesetter::New(&malformed)->Render(
+                         MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_TEXT_AND_STYLES)), uint64_t(0u), TEST_LOCATION);
+      DALI_TEST_EQUALS(SumMaskPixels(RenderTextGradientMask(malformed)), uint64_t(0u), TEST_LOCATION);
+      DALI_TEST_EQUALS(SumRgbaAlphaPixels(RenderTextGradientPreserved(malformed)), uint64_t(0u), TEST_LOCATION);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTypesetterMalformedGlyphStyleIsolationP(void)
+{
+  TestApplication application;
+  for(bool gradient : {false, true})
+  {
+    for(bool dimension : {false, true})
+    {
+      for(float value : {std::numeric_limits<float>::max(), std::numeric_limits<float>::quiet_NaN(),
+                         std::numeric_limits<float>::infinity()})
+      {
+        MaskModel reference(2u, {}, true);
+        MaskModel malformed(2u, {}, true);
+        for(auto* model : {&reference, &malformed})
+        {
+          model->SetLineAscender(8.0f);
+          model->SetBackgroundSpan();
+          model->SetDecorationSpan();
+          if(gradient)
+          {
+            model->SetGradientSpanGlyphRange(0u, 2u);
+          }
+        }
+        reference.SetGlyphSize(0.0f, 0.0f);
+        if(dimension)
+        {
+          malformed.SetGlyphSize(value, 4.0f);
+        }
+        else
+        {
+          malformed.SetGlyphPosition(0u, Vector2(0.0f, value));
+        }
+        for(auto behaviour : {UiText::Typesetter::RENDER_NO_TEXT, UiText::Typesetter::RENDER_OVERLAY_STYLE,
+                               UiText::Typesetter::RENDER_TEXT_AND_STYLES})
+        {
+          auto expected = UiText::Typesetter::New(&reference)->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, behaviour);
+          auto actual = UiText::Typesetter::New(&malformed)->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, behaviour);
+          DALI_TEST_CHECK(SumRgbaAlphaPixels(expected) > 0u);
+          DALI_TEST_CHECK(std::memcmp(Integration::GetPixelDataBuffer(actual).buffer,
+                                      Integration::GetPixelDataBuffer(expected).buffer,
+                                      expected.GetStrideBytes() * expected.GetHeight()) == 0);
+        }
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTypesetterDecorationClippingP(void)
+{
+  TestApplication application;
+  // Right/bottom clipping must be the exact crop of an otherwise identical
+  // render, including fractional baseline/thickness and both DOUBLE strokes.
+  for(auto type : {UiText::Underline::Type::SOLID, UiText::Underline::Type::DOUBLE, UiText::Underline::Type::DASHED})
+  {
+    for(float height : {1.0f, 2.5f, 6.0f})
+    {
+      for(bool multiline : {false, true})
+      {
+        MaskModel model(2u, {}, true);
+        model.SetDecoration(type, height, height, 1u);
+        model.SetBackgroundSpan();
+        if(multiline)
+        {
+          model.SetTwoLines();
+        }
+        model.SetGlyphPosition(0u, Vector2(1.9f, -1.9f));
+        model.SetGlyphPosition(1u, Vector2(8.9f, 1.9f));
+        for(auto behaviour : {UiText::Typesetter::RENDER_NO_TEXT, UiText::Typesetter::RENDER_OVERLAY_STYLE,
+                               UiText::Typesetter::RENDER_TEXT_AND_STYLES})
+        {
+          auto full = UiText::Typesetter::New(&model)->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, behaviour);
+          for(float cropHeight : {4.0f, 7.0f, 12.0f, 18.0f})
+          {
+            auto clipped = UiText::Typesetter::New(&model)->Render(Vector2(12.0f, cropHeight), UiText::Direction::LEFT_TO_RIGHT, behaviour);
+            for(uint32_t y = 0u; y < clipped.GetHeight(); ++y)
+            {
+              DALI_TEST_CHECK(std::memcmp(Integration::GetPixelDataBuffer(clipped).buffer + y * clipped.GetStrideBytes(),
+                                          Integration::GetPixelDataBuffer(full).buffer + y * full.GetStrideBytes(),
+                                          clipped.GetWidth() * 4u) == 0);
+            }
+          }
+        }
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTypesetterMalformedLineMetadataTilesP(void)
+{
+  TestApplication application;
+  MaskModel model(2u);
+  model.SetTwoLines();
+  model.SetAlignmentOffset(std::numeric_limits<float>::quiet_NaN());
+  auto typesetter = UiText::Typesetter::New(&model);
+  auto plan = UiText::Internal::Reveal::BuildCharacterPlan(model, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+  float fadeDuration = 0.0f;
+  auto full = typesetter->RenderTextRevealMetadata(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, plan, fadeDuration);
+  // The first line is skipped by the tile culling path; its fractional metrics
+  // must accumulate exactly as in the full traversal (two truncations).
+  constexpr uint32_t offset = 12u;
+  auto tile = typesetter->RenderTextRevealMetadata(Vector2(MASK_SIZE.width, MASK_SIZE.height - offset),
+                 UiText::Direction::LEFT_TO_RIGHT, plan, fadeDuration, offset, MASK_SIZE);
+  DALI_TEST_CHECK(full && tile);
+  DALI_TEST_CHECK(std::memcmp(Integration::GetPixelDataBuffer(tile).buffer,
+                              Integration::GetPixelDataBuffer(full).buffer + offset * full.GetStrideBytes(),
+                              tile.GetHeight() * tile.GetStrideBytes()) == 0);
+  const auto bytes = Integration::GetPixelDataBuffer(full);
+  // Two 2x4 glyphs: only the healthy second one contributes metadata.
+  uint32_t covered = 0u;
+  for(uint32_t y = 0u; y < full.GetHeight(); ++y)
+  {
+    for(uint32_t x = 0u; x < full.GetWidth(); ++x)
+    {
+      if(bytes.buffer[y * full.GetStrideBytes() + x * 4u + 3u] != 0u)
+      {
+        DALI_TEST_CHECK(y >= 15u && y < 19u);
+        ++covered;
+      }
+    }
+  }
+  DALI_TEST_EQUALS(covered, 8u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTypesetterEmptyBufferP(void)
+{
+  TestApplication application;
+  MaskModel model(2u, {}, true);
+  model.SetBackgroundSpan();
+  model.SetDecoration(UiText::Underline::Type::DOUBLE, 2.0f, 2.0f, 1u);
+  auto typesetter = UiText::Typesetter::New(&model);
+  for(const auto& size : {Vector2(0.0f, 96.0f), Vector2(240.0f, 0.0f), Vector2::ZERO})
+  {
+    for(auto behaviour : {UiText::Typesetter::RENDER_NO_STYLES, UiText::Typesetter::RENDER_NO_TEXT,
+                           UiText::Typesetter::RENDER_OVERLAY_STYLE, UiText::Typesetter::RENDER_TEXT_AND_STYLES})
+    {
+      auto pixels = typesetter->Render(size, UiText::Direction::LEFT_TO_RIGHT, behaviour);
+      DALI_TEST_CHECK(pixels);
+      DALI_TEST_EQUALS(pixels.GetWidth(), uint32_t(size.width), TEST_LOCATION);
+      DALI_TEST_EQUALS(pixels.GetHeight(), uint32_t(size.height), TEST_LOCATION);
+    }
+    DALI_TEST_CHECK(typesetter->RenderTextGradientMask(size, UiText::Direction::LEFT_TO_RIGHT));
+    DALI_TEST_CHECK(typesetter->RenderTextGradientPreserved(size, UiText::Direction::LEFT_TO_RIGHT));
+    DALI_TEST_CHECK(typesetter->CreateFullBackgroundBuffer(uint32_t(size.width), uint32_t(size.height), Color::BLUE));
+    const auto plan = UiText::Internal::Reveal::BuildCharacterPlan(model, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
+    float fadeDuration = 0.0f;
+    DALI_TEST_CHECK(typesetter->RenderTextRevealMetadata(size, UiText::Direction::LEFT_TO_RIGHT, plan, fadeDuration));
+  }
+  END_TEST;
+}
+
+int UtcDaliTypesetterDecorationNegativeEdgesP(void)
+{
+  TestApplication application;
+  for(auto type : {UiText::Underline::Type::SOLID, UiText::Underline::Type::DOUBLE, UiText::Underline::Type::DASHED})
+  {
+    for(float height : {1.0f, 3.0f, 6.0f})
+    {
+      for(float baseline : {14.0f, 16.0f, 18.0f})
+      {
+        MaskModel reference(1u, {}, true);
+        MaskModel clippedModel(1u, {}, true);
+        for(auto* model : {&reference, &clippedModel})
+        {
+          model->SetVerticalAlignment(UiText::Alignment::END);
+          model->SetDecoration(type, height, height, 1u);
+          model->SetBackgroundSpan();
+          model->SetLineAscender(4.0f);
+        }
+        reference.SetGlyphPosition(0u, Vector2(18.0f, baseline - 4.0f));
+        clippedModel.SetGlyphPosition(0u, Vector2(-2.0f, baseline - 4.0f));
+        for(auto behaviour : {UiText::Typesetter::RENDER_NO_TEXT, UiText::Typesetter::RENDER_OVERLAY_STYLE,
+                               UiText::Typesetter::RENDER_TEXT_AND_STYLES})
+        {
+          auto full = UiText::Typesetter::New(&reference)->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, behaviour);
+          auto clipped = UiText::Typesetter::New(&clippedModel)->Render(Vector2(220.0f, 76.0f), UiText::Direction::LEFT_TO_RIGHT, behaviour);
+          for(uint32_t y = 0u; y < clipped.GetHeight(); ++y)
+          {
+            DALI_TEST_CHECK(std::memcmp(Integration::GetPixelDataBuffer(clipped).buffer + y * clipped.GetStrideBytes(),
+                                        Integration::GetPixelDataBuffer(full).buffer + (y + 20u) * full.GetStrideBytes() + 20u * 4u,
+                                        clipped.GetWidth() * 4u) == 0);
+          }
+        }
+      }
+    }
+  }
   END_TEST;
 }

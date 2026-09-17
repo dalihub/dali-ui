@@ -16,11 +16,18 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <stdlib.h>
 #include <iostream>
+
+#define private public
+#define protected public
+#include <dali-ui-foundation/integration-api/scroll-view-impl.h>
+#undef protected
+#undef private
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -79,6 +86,11 @@ Dali::Integration::TouchEvent GenerateDoubleTouch(PointState::Type stateA, const
 
   touchEvent.time = time;
   return touchEvent;
+}
+
+Dali::Ui::Integration::ScrollViewImpl& GetScrollImpl(ScrollView scrollView)
+{
+  return static_cast<Dali::Ui::Integration::ScrollViewImpl&>(scrollView.GetImplementation());
 }
 
 struct PressedChangedSignalData
@@ -1388,6 +1400,89 @@ int UtcDaliScrollViewSettersP(void)
   END_TEST;
 }
 
+int UtcDaliScrollViewFocusAndKeyScrollPropertiesP(void)
+{
+  UiTestApplication application;
+  ScrollView        scrollView = ScrollView::New();
+
+  scrollView.SetScrollOnFocus(false);
+  DALI_TEST_CHECK(!scrollView.GetScrollOnFocus());
+  scrollView.SetScrollOnFocus(true);
+  DALI_TEST_CHECK(scrollView.GetScrollOnFocus());
+
+  scrollView.SetFocusScrollToPosition(ScrollToPosition::Center);
+  DALI_TEST_EQUALS(scrollView.GetFocusScrollToPosition(), ScrollToPosition::Center, TEST_LOCATION);
+  scrollView.SetFocusScrollPeek(-5.0f);
+  DALI_TEST_EQUALS(scrollView.GetFocusScrollPeek(), 0.0f, TEST_LOCATION);
+  scrollView.SetFocusScrollPeek(24.0f);
+  DALI_TEST_EQUALS(scrollView.GetFocusScrollPeek(), 24.0f, TEST_LOCATION);
+
+  scrollView.SetKeyScrollEnabled(true);
+  DALI_TEST_CHECK(scrollView.IsKeyScrollEnabled());
+  scrollView.SetKeyScrollStep(0.0f);
+  DALI_TEST_EQUALS(scrollView.GetKeyScrollStep(), 1.0f, TEST_LOCATION);
+  scrollView.SetKeyScrollStep(75.0f);
+  DALI_TEST_EQUALS(scrollView.GetKeyScrollStep(), 75.0f, TEST_LOCATION);
+  scrollView.SetKeyScrollEnabled(false);
+  DALI_TEST_CHECK(!scrollView.IsKeyScrollEnabled());
+  END_TEST;
+}
+
+int UtcDaliScrollViewScrollToChildVariantsP(void)
+{
+  UiTestApplication application;
+  ScrollView        scrollView = ScrollView::New();
+  View              content    = View::New();
+  View              child      = View::New();
+
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(160.0f);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  content.SetRequestedWidth(600.0f);
+  content.SetRequestedHeight(500.0f);
+  child.SetRequestedWidth(60.0f);
+  child.SetRequestedHeight(40.0f);
+  child.SetRequestedX(420.0f);
+  child.SetRequestedY(360.0f);
+  content.Add(child);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.ScrollTo(child, false, ScrollToPosition::Start);
+  scrollView.ScrollTo(child, false, ScrollToPosition::Center);
+  scrollView.ScrollTo(child, false, ScrollToPosition::End);
+  scrollView.SetFocusScrollPeek(12.0f);
+  scrollView.ScrollTo(child, false, ScrollToPosition::MakeVisible);
+
+  scrollView.SetScrollDirection(ScrollDirection::Horizontal);
+  scrollView.ScrollTo(child, false, ScrollToPosition::MakeVisible);
+
+  scrollView.SetScrollDirection(ScrollDirection::Both);
+  scrollView.ScrollTo(Vector2::ZERO, false);
+  scrollView.ScrollTo(child, false, ScrollToPosition::MakeVisible);
+  DALI_TEST_CHECK(scrollView.GetScrollPosition().x > 0.0f);
+  DALI_TEST_CHECK(scrollView.GetScrollPosition().y > 0.0f);
+
+  scrollView.SetMinimumFlingDuration(10);
+  scrollView.SetMaximumFlingDuration(20);
+  scrollView.ScrollTo(Vector2(100.0f, 100.0f), true);
+  DALI_TEST_CHECK(scrollView.IsScrolling());
+  application.SendNotification();
+  application.Render(30u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(!scrollView.IsScrolling());
+
+  scrollView.SetProperty(Actor::Property::VISIBLE, false);
+  scrollView.ScrollTo(Vector2(30.0f, 40.0f), true);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition(), Vector2(30.0f, 40.0f), TEST_LOCATION);
+  END_TEST;
+}
+
 // View Inheritance Test
 
 int UtcDaliScrollViewIsViewP(void)
@@ -1507,5 +1602,141 @@ int UtcDaliScrollViewScrolledContentSurvivesSettledLayoutPassP(void)
   DALI_TEST_EQUALS(sibling.GetProperty<float>(Actor::Property::POSITION_X), 12.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), scrolledAgainY, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliScrollViewInternalMathP(void)
+{
+  UiTestApplication application;
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(300.0f);
+  View content = View::New();
+  content.SetRequestedWidth(600.0f);
+  content.SetRequestedHeight(900.0f);
+  View child = View::New();
+  child.SetProperty(Actor::Property::POSITION, Vector3(50.0f, 100.0f, 0.0f));
+  View grandchild = View::New();
+  grandchild.SetProperty(Actor::Property::POSITION, Vector3(10.0f, 20.0f, 0.0f));
+  child.Add(grandchild);
+  content.Add(child);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+  auto& impl = GetScrollImpl(scrollView);
+  Dali::Ui::Extension::View::SetPositionX(child, 50.0f);
+  Dali::Ui::Extension::View::SetPositionY(child, 100.0f);
+  Dali::Ui::Extension::View::SetPositionX(grandchild, 10.0f);
+  Dali::Ui::Extension::View::SetPositionY(grandchild, 20.0f);
+  impl.mViewportWidth = 200.0f;
+  impl.mViewportHeight = 300.0f;
+  impl.mScrollableWidth = 600.0f;
+  impl.mScrollableHeight = 900.0f;
+  impl.mMinimumStartX = -400.0f;
+  impl.mMinimumStartY = -600.0f;
+
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  DALI_TEST_EQUALS(impl.AdjustMovement(Vector2(20.0f, 10.0f)), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.AdjustMovement(Vector2(10.0f, 20.0f)), Vector2(0.0f, 20.0f), TEST_LOCATION);
+  scrollView.SetScrollDirection(ScrollDirection::Horizontal);
+  DALI_TEST_EQUALS(impl.AdjustMovement(Vector2(20.0f, 10.0f)), Vector2(20.0f, 0.0f), TEST_LOCATION);
+  scrollView.SetScrollDirection(ScrollDirection::Both);
+  DALI_TEST_EQUALS(impl.AdjustMovement(Vector2(20.0f, 10.0f)), Vector2(20.0f, 10.0f), TEST_LOCATION);
+
+  DALI_TEST_EQUALS(impl.AdjustDelta(Vector2(500.0f, 700.0f), Vector2(-100.0f, -100.0f)), Vector2(100.0f, 100.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.AdjustDelta(Vector2(-500.0f, -700.0f), Vector2(-100.0f, -100.0f)), Vector2(-300.0f, -500.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.AdjustScrollPosition(Vector2(-10.0f, 1000.0f)), Vector2(0.0f, 600.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.GetScrollPositionForChild(content, Vector2(1.0f, 2.0f)), Vector2(1.0f, 2.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.GetScrollPositionForChild(child, Vector2::ZERO), Vector2(50.0f, 100.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.GetScrollPositionForChild(grandchild, Vector2::ZERO), Vector2(60.0f, 120.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.GetScrollPositionForChild(View::New(), Vector2(3.0f, 4.0f)), Vector2(3.0f, 4.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.ContentPositionToScrollPosition(Vector2(-20.0f, -30.0f)), Vector2(20.0f, 30.0f), TEST_LOCATION);
+  impl.mScrollPosition = Vector2(100.0f, 200.0f);
+  DALI_TEST_EQUALS(impl.DeltaFromScrollPosition(Vector2(30.0f, 50.0f)), Vector2(70.0f, 150.0f), TEST_LOCATION);
+
+  impl.mVelocityTracker.Clear();
+  DALI_TEST_EQUALS(impl.mVelocityTracker.Compute(), Vector2::ZERO, TEST_LOCATION);
+  impl.mVelocityTracker.Add(0u, Vector2::ZERO);
+  impl.mVelocityTracker.Add(20u, Vector2(20.0f, 40.0f));
+  impl.mVelocityTracker.Add(40u, Vector2(40.0f, 80.0f));
+  DALI_TEST_EQUALS(impl.mVelocityTracker.Compute(), Vector2(1.0f, 2.0f), 0.01f, TEST_LOCATION);
+  impl.mVelocityTracker.Add(500u, Vector2(40.0f, 80.0f));
+  DALI_TEST_EQUALS(impl.mVelocityTracker.Compute(), Vector2::ZERO, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliScrollViewInternalStateAndSignalsP(void)
+{
+  UiTestApplication application;
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(300.0f);
+  View content = View::New();
+  content.SetRequestedWidth(600.0f);
+  content.SetRequestedHeight(900.0f);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+  auto& impl = GetScrollImpl(scrollView);
+
+  int scrollStarted = 0;
+  int scrollFinished = 0;
+  int scrolling = 0;
+  int dragStarted = 0;
+  int dragging = 0;
+  int dragFinished = 0;
+  impl.ScrollStartedSignal().Connect(&application, [&scrollStarted](ScrollView) { ++scrollStarted; });
+  impl.ScrollFinishedSignal().Connect(&application, [&scrollFinished](ScrollView) { ++scrollFinished; });
+  impl.ScrollingSignal().Connect(&application, [&scrolling](ScrollView) { ++scrolling; });
+  impl.DragStartedSignal().Connect(&application, [&dragStarted](ScrollView) { ++dragStarted; });
+  impl.DraggingSignal().Connect(&application, [&dragging](ScrollView, float, float) { ++dragging; });
+  impl.DragFinishedSignal().Connect(&application, [&dragFinished](ScrollView) { ++dragFinished; });
+  impl.SendScrollStarted();
+  impl.SendScrollStarted();
+  impl.SendScrolling();
+  impl.SendDragStarted();
+  impl.SendDragging(1.0f, 2.0f);
+  impl.SendDragFinished();
+  impl.SendScrollFinished();
+  DALI_TEST_EQUALS(scrollStarted, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollFinished, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrolling, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragStarted, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragging, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragFinished, 1, TEST_LOCATION);
+
+  scrollView.SetMaxFlingDistance(10.0f);
+  scrollView.SetFlingSensitivity(2.0f);
+  scrollView.SetDecelerationRate(0.9f);
+  scrollView.SetMaximumFlingDuration(1000);
+  DALI_TEST_EQUALS(impl.VelocityToMovement(Vector2(10000.0f, -10000.0f)), Vector2(10.0f, -10.0f), 0.01f, TEST_LOCATION);
+
+  scrollView.SetPanScrollEnabled(false);
+  scrollView.SetPanScrollEnabled(false);
+  DALI_TEST_CHECK(!scrollView.IsPanScrollEnabled());
+  scrollView.SetPanScrollEnabled(true);
+  DALI_TEST_CHECK(scrollView.IsPanScrollEnabled());
+  scrollView.SetKeyScrollEnabled(true);
+  scrollView.SetKeyScrollStep(-5.0f);
+  scrollView.SetFocusScrollPeek(-5.0f);
+  scrollView.SetScrollOnFocus(false);
+  DALI_TEST_CHECK(scrollView.IsKeyScrollEnabled());
+  DALI_TEST_EQUALS(scrollView.GetKeyScrollStep(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetFocusScrollPeek(), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(!scrollView.GetScrollOnFocus());
+
+  impl.UpdateScrollingProperties();
+  impl.ApplyScrollPosition(Vector2(20.0f, 30.0f));
+  impl.ScrollToWithDuration(Vector2(20.0f, 30.0f), 0.1f);
+  impl.ScrollToWithDuration(Vector2(100.0f, 200.0f), 0.1f);
+  DALI_TEST_CHECK(impl.mScrollAnimation);
+  impl.CancelScrollAnimation();
+  impl.OnScrollAnimationFinished(Animation());
+  impl.SetContent(View());
+  impl.UpdateScrollingProperties();
+  impl.ApplyScrollPosition(Vector2::ZERO);
+  impl.ScrollToWithDuration(Vector2::ZERO, 0.1f);
   END_TEST;
 }

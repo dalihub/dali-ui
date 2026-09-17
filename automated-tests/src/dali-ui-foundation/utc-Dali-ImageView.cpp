@@ -17,9 +17,12 @@
 
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/devel-api/rendering/frame-buffer-devel.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <test-native-image.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -122,6 +125,37 @@ int UtcDaliImageViewNewWithImageUrlP(void)
 
   DALI_TEST_CHECK(view);
   DALI_TEST_EQUALS(view.GetResourceUrl(), resourceUrl, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageUrlUtilsGenerateUrlP(void)
+{
+  UiTestApplication application;
+
+  FrameBuffer frameBuffer = FrameBuffer::New(8u, 8u, FrameBuffer::Attachment::NONE);
+  ImageUrl colorUrl        = ImageUrlUtils::GenerateUrl(frameBuffer, Pixel::RGBA8888, 8u, 8u);
+  DALI_TEST_CHECK(colorUrl);
+  ImageUrl attachedColorUrl = ImageUrlUtils::GenerateUrl(frameBuffer, 0u);
+  DALI_TEST_CHECK(attachedColorUrl);
+
+  Texture depthTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::DEPTH_FLOAT, 8u, 8u);
+  DevelFrameBuffer::AttachDepthTexture(frameBuffer, depthTexture);
+  ImageUrl depthUrl = ImageUrlUtils::GenerateDepthUrl(frameBuffer);
+  DALI_TEST_CHECK(depthUrl);
+
+  auto* pixelBytes = new uint8_t[4u]{0xffu, 0x80u, 0x40u, 0xffu};
+  PixelData pixelData = PixelData::New(pixelBytes, 4u, 1u, 1u, Pixel::RGBA8888, PixelData::DELETE_ARRAY);
+  ImageUrl pixelUrl   = ImageUrlUtils::GenerateUrl(pixelData, true);
+  DALI_TEST_CHECK(pixelUrl);
+
+  NativeImageInterfacePtr nativeImage = TestNativeImage::New(4u, 4u);
+  ImageUrl nativeUrl = ImageUrlUtils::GenerateUrl(nativeImage, false);
+  DALI_TEST_CHECK(nativeUrl);
+
+  EncodedImageBuffer::RawBufferType rawBuffer;
+  rawBuffer.PushBack(0x11u);
+  ImageUrl encodedUrl = ImageUrlUtils::GenerateUrl(EncodedImageBuffer::New(std::move(rawBuffer)));
+  DALI_TEST_CHECK(encodedUrl);
   END_TEST;
 }
 

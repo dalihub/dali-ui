@@ -35,6 +35,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-renderer-state.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-reveal-bridge.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
@@ -828,6 +829,17 @@ void TextVisual::UpdateRenderer()
   {
     // Nothing to do.
     return;
+  }
+
+  if(mController->IsMarqueeEnabled())
+  {
+    // A visual transform can change independently of Label::OnRelayout().
+    // Respect the same FINISH_LOOP deferral here; replacing its shader would
+    // disconnect the animation and finish the requested loop prematurely.
+    if(Text::IsMarqueeStopRequested(control))
+    {
+      return;
+    }
   }
 
   // Calculates the size to be used to relayout.
@@ -2345,6 +2357,16 @@ void TextVisual::RequestAsyncSizeComputationOwned(Text::AsyncTextParameters&& pa
   const auto     requestType = parameters.requestType;
   const uint32_t taskId      = Text::AsyncTextManager::Get().RequestLoad(std::move(parameters), this);
   StoreAsyncSizeTaskId(requestType, taskId);
+}
+
+void TextVisual::CancelAsyncRender(Ui::Integration::Visual::Base visual)
+{
+  TextVisual& visualObject = GetVisualObject(visual);
+  if(visualObject.mIsTextLoadingTaskRunning)
+  {
+    Text::AsyncTextManager::Get().RequestCancel(visualObject.mTextLoadingTaskId);
+    visualObject.mIsTextLoadingTaskRunning = false;
+  }
 }
 
 bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextParameters& parameters)

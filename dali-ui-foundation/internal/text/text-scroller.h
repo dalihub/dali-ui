@@ -202,6 +202,14 @@ public:
   void StopScrolling();
 
   /**
+   * @brief Stops scrolling and releases scroller resources when the rendered content is replaced.
+   *
+   * Does not notify ScrollingFinished() or change the configured stop mode.
+   * This internal transition is separate from a user stop or loop completion.
+   */
+  void StopScrollingForUpdate();
+
+  /**
    * @brief Whether the stop scrolling has been triggered or not.
    */
   bool IsStopRequested() const;

@@ -28,6 +28,12 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
+#define private public
+#define protected public
+#include <dali-ui-foundation/integration-api/recycler-view-impl.h>
+#undef protected
+#undef private
+
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -117,6 +123,11 @@ RecyclerView BuildRecycler(UiTestApplication& application, Window window, ItemAd
   application.SendNotification();
 
   return recycler;
+}
+
+Dali::Ui::Integration::RecyclerViewImpl& GetRecyclerImpl(RecyclerView recycler)
+{
+  return static_cast<Dali::Ui::Integration::RecyclerViewImpl&>(recycler.GetImplementation());
 }
 
 } // namespace
@@ -502,5 +513,168 @@ int UtcDaliRecyclerViewNoAdapterN(void)
 
   DALI_TEST_EQUALS(recycler.GetScrollOffset(), 0.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_CHECK(!recycler.IsScrolling());
+  END_TEST;
+}
+
+int UtcDaliRecyclerViewInternalGeometryAndStateP(void)
+{
+  UiTestApplication application;
+  Window window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter adapter = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter);
+  auto& impl = GetRecyclerImpl(recycler);
+
+  DALI_TEST_EQUALS(impl.OnMeasure(-10.0f, -20.0f).ToVector2(), Vector2::ZERO, TEST_LOCATION);
+  impl.OnArrange(LayoutRect(0.0f, 0.0f, RECYCLER_WIDTH, RECYCLER_HEIGHT));
+  impl.EnsureScroller();
+  impl.UpdateScrollerSize();
+  impl.UpdateScrollBar();
+  DALI_TEST_EQUALS(impl.GetViewportExtent(), RECYCLER_HEIGHT, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.GetCrossExtent(), RECYCLER_WIDTH, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.GetMaxScrollOffset() > 0.0f);
+  DALI_TEST_EQUALS(impl.ClampScrollOffset(-50.0f), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.ClampScrollOffset(100000.0f), impl.GetMaxScrollOffset(), 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.CalculateScrollDuration(100.0f) > 0.0f);
+  DALI_TEST_CHECK(impl.SyncScrollOffsetFromScroller() >= 0.0f);
+
+  recycler.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
+  recycler.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  DALI_TEST_EQUALS(static_cast<int>(recycler.GetVerticalScrollBarVisibility()), static_cast<int>(ScrollBarVisibility::Always), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recycler.GetHorizontalScrollBarVisibility()), static_cast<int>(ScrollBarVisibility::Never), TEST_LOCATION);
+  recycler.SetOverScrollMode(OverScrollMode::Never);
+  DALI_TEST_CHECK(!impl.CanOverScroll());
+  recycler.SetOverScrollMode(OverScrollMode::Always);
+  DALI_TEST_CHECK(impl.CanOverScroll());
+  recycler.SetOverScrollMode(OverScrollMode::ContentScrolls);
+  DALI_TEST_CHECK(impl.CanOverScroll());
+
+  int scrollStarted = 0;
+  int scrollFinished = 0;
+  int dragStarted = 0;
+  int dragFinished = 0;
+  impl.ScrollStartedSignal().Connect(&application, [&scrollStarted](RecyclerView) { ++scrollStarted; });
+  impl.ScrollFinishedSignal().Connect(&application, [&scrollFinished](RecyclerView) { ++scrollFinished; });
+  impl.DragStartedSignal().Connect(&application, [&dragStarted](RecyclerView) { ++dragStarted; });
+  impl.DragFinishedSignal().Connect(&application, [&dragFinished](RecyclerView) { ++dragFinished; });
+  impl.SendScrollStarted();
+  impl.SendScrollStarted();
+  impl.SendDragStarted();
+  impl.SendScrollFinished();
+  impl.SendDragFinished();
+  impl.SendScrollFinished();
+  DALI_TEST_EQUALS(scrollStarted, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollFinished, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragStarted, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragFinished, 1, TEST_LOCATION);
+
+  recycler.SetKeyScrollEnabled(true);
+  recycler.SetKeyScrollStep(-10.0f);
+  recycler.SetScrollOnFocus(false);
+  recycler.SetFocusScrollPeek(-10.0f);
+  DALI_TEST_CHECK(recycler.IsKeyScrollEnabled());
+  DALI_TEST_EQUALS(recycler.GetKeyScrollStep(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(!recycler.GetScrollOnFocus());
+  DALI_TEST_EQUALS(recycler.GetFocusScrollPeek(), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.IsLayoutAxisDirection(FocusDirection::UP));
+  DALI_TEST_CHECK(!impl.IsLayoutAxisDirection(FocusDirection::LEFT));
+  DALI_TEST_CHECK(impl.IsForwardDirection(FocusDirection::DOWN));
+  DALI_TEST_CHECK(!impl.IsForwardDirection(FocusDirection::UP));
+  DALI_TEST_CHECK(impl.IsAtScrollBoundary(FocusDirection::UP));
+  DALI_TEST_EQUALS(impl.NextItemPosition(0u, FocusDirection::DOWN), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.NextItemPosition(0u, FocusDirection::UP), impl.INVALID_ITEM_POSITION, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.NextItemPosition(gItemCount - 1u, FocusDirection::DOWN), impl.INVALID_ITEM_POSITION, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.FindActiveView(0u));
+  DALI_TEST_EQUALS(impl.FindActiveItemPosition(impl.FindActiveView(0u)), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.FindActiveItemPosition(View::New()), impl.INVALID_ITEM_POSITION, TEST_LOCATION);
+
+  impl.ScrollToItemMakeVisible(gItemCount, false);
+  impl.ScrollToItemMakeVisible(0u, false);
+  impl.ScrollToItemMakeVisible(20u, false);
+  impl.mKeyRepeatTargetPos = impl.INVALID_ITEM_POSITION;
+  DALI_TEST_CHECK(!impl.OnKeyRepeatTimerTick());
+  impl.StartKeyRepeatTimer();
+  impl.StartKeyRepeatTimer();
+  impl.StopKeyRepeatTimer();
+  impl.AbortScroll();
+  recycler.SetKeyScrollEnabled(false);
+  END_TEST;
+}
+
+int UtcDaliRecyclerViewInternalAnimationAndRecyclingP(void)
+{
+  UiTestApplication application;
+  Window window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter adapter = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter, true);
+  auto& impl = GetRecyclerImpl(recycler);
+
+  impl.StartScrollAnimation(0.0f, 0.0f);
+  impl.StartScrollAnimation(300.0f, 0.1f);
+  DALI_TEST_CHECK(impl.mScrollAnimation);
+  application.Render(200u);
+  impl.OnScrollAnimationFinished(impl.mScrollAnimation);
+  impl.CancelScrollAnimation();
+
+  ItemViewHolder recycled;
+  recycled.view = View::New();
+  recycled.viewType = 77u;
+  for(size_t i = 0u; i < 10u; ++i)
+  {
+    impl.CacheRecycledItem(recycled);
+  }
+  DALI_TEST_CHECK(impl.mRecycledItems.size() <= 8u);
+  DALI_TEST_CHECK(impl.ObtainItemView(30u, 77u));
+  DALI_TEST_CHECK(impl.ObtainItemView(31u, 88u));
+  impl.RecycleRecord(impl.mActiveItems.size());
+  if(!impl.mActiveItems.empty())
+  {
+    impl.RecycleRecord(0u);
+  }
+  impl.RecycleAll();
+  DALI_TEST_CHECK(impl.mActiveItems.empty());
+
+  impl.EnsureDefaultEdgeEffects();
+  impl.UpdateEdgeEffectSources();
+  impl.PullEdgeEffect(-10.0f, 0.0f);
+  impl.PullEdgeEffect(10.0f, 0.0f);
+  impl.PullEdgeEffect(10.0f, 10.0f);
+  impl.ReleaseEdgeEffects(1.0f);
+  impl.mStartEdgeActive = true;
+  impl.mEndEdgeActive = true;
+  impl.ReleaseEdgeEffects(10000.0f);
+  impl.FinishEdgeEffects();
+  END_TEST;
+}
+
+int UtcDaliRecyclerViewInternalHorizontalP(void)
+{
+  UiTestApplication application;
+  Window window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter adapter = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::HORIZONTAL);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter);
+  auto& impl = GetRecyclerImpl(recycler);
+  impl.OnArrange(LayoutRect(0.0f, 0.0f, RECYCLER_WIDTH, RECYCLER_HEIGHT));
+
+  DALI_TEST_EQUALS(impl.GetViewportExtent(), RECYCLER_WIDTH, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.GetCrossExtent(), RECYCLER_HEIGHT, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.IsLayoutAxisDirection(FocusDirection::LEFT));
+  DALI_TEST_CHECK(!impl.IsLayoutAxisDirection(FocusDirection::UP));
+  recycler.SetScrollOffset(100.0f);
+  impl.ApplyScrollerPosition();
+  impl.UpdateScrollerSize();
+  impl.UpdateScrollBar();
+  DALI_TEST_CHECK(impl.SyncScrollOffsetFromScroller() >= 0.0f);
+  impl.StartScrollAnimation(200.0f, 0.1f);
+  application.Render(200u);
+  impl.CancelScrollAnimation();
   END_TEST;
 }

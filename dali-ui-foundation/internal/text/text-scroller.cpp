@@ -258,6 +258,23 @@ bool TextScroller::IsStopRequested() const
   return mIsStopRequested;
 }
 
+void TextScroller::StopScrollingForUpdate()
+{
+  mIsStoppedImmediately.store(true);
+  mIsStopRequested = false;
+  if(mScrollAnimation)
+  {
+    mScrollAnimation.Clear();
+    mScrollAnimation.Reset();
+  }
+  RemoveGradientConstraints();
+  RemoveGradientOverlayConstraints();
+  mGradientEnabled        = false;
+  mGradientOverlayEnabled = false;
+  mRenderer.Reset();
+  mScrollingTextActor.Reset();
+}
+
 bool TextScroller::IsScrolling() const
 {
   return (mScrollAnimation && mScrollAnimation.GetState() == Animation::PLAYING);
@@ -619,6 +636,10 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
 
 void TextScroller::MarqueeAnimationFinished(Dali::Animation animation)
 {
+  if(animation != mScrollAnimation)
+  {
+    return; // A queued completion from replaced content cannot finish the new run.
+  }
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::MarqueeAnimationFinished\n");
   mIsStopRequested = false;
   if(!mIsStoppedImmediately.load())

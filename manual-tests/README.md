@@ -21,6 +21,13 @@ manual-tests/
 모듈이 추가될 경우 동일한 구조로 `manual-tests/<module-name>/` 디렉터리를 추가하면
 최상위 CMakeLists.txt가 자동으로 인식합니다.
 
+Text 전용 앱은 [dali-ui-text](dali-ui-text/README.md)에 있다. 현재 **Text Layout, Ellipsis, Marquee**를
+제공하며, 화면 버튼/V와 CLI에서 같은 Sync + Async 자동 검증을 실행할 수 있다.
+Public API만 사용하며 타깃 실행 및 결과 수집 절차는
+[Text Layout](dali-ui-text/tc/tc-text-layout.md),
+[Ellipsis](dali-ui-text/tc/tc-text-ellipsis.md),
+[Marquee](dali-ui-text/tc/tc-text-marquee.md)에 설명한다.
+
 ---
 
 ## 빌드 방법

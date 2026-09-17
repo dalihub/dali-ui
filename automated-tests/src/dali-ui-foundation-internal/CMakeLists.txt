@@ -6,16 +6,19 @@ SET(RPM_NAME "core-${PKG_NAME}-tests")
 # Keep the test source declarations at the top so the Windows runner can
 # include this file in source-list-only mode without configuring Unix targets.
 SET(TC_SOURCES
+    utc-Dali-AsyncMarqueeCoordinates-internal.cpp
     utc-Dali-AnimatedImageReleasePolicy-internal.cpp
     utc-Dali-AnimatedImageView-internal.cpp
     utc-Dali-FocusManager-internal.cpp
     utc-Dali-ImageCache-internal.cpp
+    utc-Dali-FastTrackLoadingTask-internal.cpp
     utc-Dali-ImageUrl-internal.cpp
     utc-Dali-InteractiveTrait-internal.cpp
     utc-Dali-InteractiveView-internal.cpp
     utc-Dali-SelectableTrait-internal.cpp
     utc-Dali-LayoutDependencyScope-internal.cpp
     utc-Dali-GradientFactory-internal.cpp
+    utc-Dali-ShaderFactory-internal.cpp
     utc-Dali-GradientVisualSemantics-internal.cpp
     utc-Dali-TextGradientBaseline-internal.cpp
     utc-Dali-TextGradientGlyphClassification-internal.cpp
@@ -27,6 +30,11 @@ SET(TC_SOURCES
     utc-Dali-ReplacementProjection-internal.cpp
     utc-Dali-ReplacementEditNormalizer-internal.cpp
     utc-Dali-TextGradientStyle-internal.cpp
+    utc-Dali-TextEffectsStyle-internal.cpp
+    utc-Dali-TextFontStyle-internal.cpp
+    utc-Dali-TextLogicalModel-internal.cpp
+    utc-Dali-TextUtilities-internal.cpp
+    utc-Dali-TextCursorGeometry-internal.cpp
     utc-Dali-TextDecorator-internal.cpp
     utc-Dali-TextAtlasGradientState-internal.cpp
     utc-Dali-TextGradientShaderComposition-internal.cpp
@@ -37,9 +45,22 @@ SET(TC_SOURCES
     utc-Dali-TextVisualAsyncPublication-internal.cpp
     utc-Dali-WindowsWarningCoverage-internal.cpp
     utc-Dali-ViewAccessibility-internal.cpp
+    utc-Dali-ViewDebug-internal.cpp
+    utc-Dali-PageScrollView-internal.cpp
+    utc-Dali-PropertyBridge-internal.cpp
     utc-Dali-Accessibility-Text-internal.cpp
+    utc-Dali-AnchorInteractionData-internal.cpp
     utc-Dali-ImageView-internal.cpp
     utc-Dali-LottieAnimationView-internal.cpp
+    utc-Dali-ObjLoader-internal.cpp
+    utc-Dali-MeshVisual-internal.cpp
+    utc-Dali-TransitionData-internal.cpp
+    utc-Dali-NPatchUtilities-internal.cpp
+    utc-Dali-FeedbackStyle-internal.cpp
+    utc-Dali-ArcWireframeVisual-internal.cpp
+    utc-Dali-PrimitiveVisual-internal.cpp
+    utc-Dali-BuilderReplacement-internal.cpp
+    utc-Dali-JsonParser-internal.cpp
     utc-Dali-ViewFittingMode-internal.cpp
     utc-Dali-ViewNaturalSize-internal.cpp
     utc-Dali-View-order-internal.cpp

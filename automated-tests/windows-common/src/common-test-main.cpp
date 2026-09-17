@@ -15,6 +15,7 @@
  */
 
 #include DALI_TEST_HEADER
+#include "windows-private-access-unsupported-tests.h"
 
 #include <cstring>
 #include <exception>
@@ -99,10 +100,6 @@ constexpr const char* WINDOWS_OVERLAY_EFFECT_INTERNAL_REASON =
   "This TC requires a non-exported OverlayEffect internal method.";
 
 constexpr UnsupportedTest WINDOWS_UNSUPPORTED_TESTS[] = {
-  {"UtcDaliWindowsWarningCoverageNPatchP", WINDOWS_PRIVATE_ACCESS_REASON},
-  {"UtcDaliWindowsWarningCoverageImageVisualsP", WINDOWS_PRIVATE_ACCESS_REASON},
-  {"UtcDaliWindowsWarningCoverageAsyncTextP", WINDOWS_PRIVATE_ACCESS_REASON},
-  {"UtcDaliWindowsWarningCoverageTextVisualMaxTextureP", WINDOWS_PRIVATE_ACCESS_REASON},
   {"UtcDaliInteractiveViewOverlayEffectRecoilRestoreReleaseWaitsForFinishP", WINDOWS_OVERLAY_EFFECT_INTERNAL_REASON},
   {"UtcDaliViewAccessibilityActiveDescendantNotificationP", WINDOWS_ACCESSIBILITY_REASON},
   {"UtcDaliViewAccessibilityReadingInfoInternalP", WINDOWS_ACCESSIBILITY_REASON},
@@ -132,6 +129,13 @@ const char* GetUnsupportedReason(const char* name)
     if(std::strcmp(name, unsupported.name) == 0)
     {
       return unsupported.reason;
+    }
+  }
+  for(const char* unsupported : WINDOWS_PRIVATE_ACCESS_UNSUPPORTED_TESTS)
+  {
+    if(unsupported && std::strcmp(name, unsupported) == 0)
+    {
+      return WINDOWS_PRIVATE_ACCESS_REASON;
     }
   }
   return nullptr;

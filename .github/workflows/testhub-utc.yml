@@ -23,7 +23,12 @@ concurrency:
 jobs:
 
   build:
+    name: Build (${{ matrix.configuration }})
     runs-on: [ code-linux ]
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [ debug, release ]
     container:
       image: tizen-nui-docker-local.bart.sec.samsung.net/dali-ci-env:ubuntu22.04-v1
       credentials:
@@ -184,7 +189,8 @@ jobs:
         gcc --version | head -1
         cmake --version | head -1
 
-    - name: Build DALi
+    - name: Build DALi (Debug)
+      if: matrix.configuration == 'debug'
       shell: bash
       run: |
         set -euo pipefail
@@ -218,6 +224,7 @@ jobs:
         ./build.sh
 
     - name: Run automated test
+      if: matrix.configuration == 'debug'
       shell: bash
       run: |
         set -euo pipefail
@@ -229,12 +236,22 @@ jobs:
         )
 
     - name: Generate LCOV coverage data
+      if: matrix.configuration == 'debug'
       shell: bash
       run: |
         set -euo pipefail
 
         cmake --build build/tizen --target cov_data
         test -s build/tizen/dali.info
+        workspace_prefix="SF:${GITHUB_WORKSPACE%/}/"
+        awk -v prefix="$workspace_prefix" '
+          index($0, prefix) == 1 {
+            print "SF:" substr($0, length(prefix) + 1)
+            next
+          }
+          { print }
+        ' build/tizen/dali.info > build/tizen/dali.info.normalized
+        mv build/tizen/dali.info.normalized build/tizen/dali.info
         genhtml \
           --branch-coverage \
           --no-sort \
@@ -242,7 +259,22 @@ jobs:
           build/tizen/dali.info
         test -s build/tizen/doc/coverage/index.html
 
+    - name: Calculate changed-code coverage
+      if: matrix.configuration == 'debug' && github.event_name == 'pull_request_target'
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        python3 .github/scripts/check-patch-coverage.py \
+          --coverage build/tizen/dali.info \
+          --base HEAD^1 \
+          --head HEAD \
+          --threshold 80 \
+          --output-directory patch_coverage
+        cat patch_coverage/summary.md >> "$GITHUB_STEP_SUMMARY"
+
     - name: Collect artifacts
+      if: matrix.configuration == 'debug'
       shell: bash
       run: |
         set -euo pipefail
@@ -262,6 +294,7 @@ jobs:
         test "$(find coverage -name '*.func.html' | wc -l)" -gt 0
 
     - name: Upload artifacts (test_results)
+      if: matrix.configuration == 'debug'
       uses: CODE-Actions/upload-artifact@v2
       with:
         name: test_results     # name of stored artifact
@@ -269,16 +302,41 @@ jobs:
         retention-days: 1
 
     - name: Upload artifacts (coverage)
+      if: matrix.configuration == 'debug'
       uses: CODE-Actions/upload-artifact@v2
       with:
         name: coverage
         path: coverage
         retention-days: 1
 
+    - name: Upload artifacts (patch coverage)
+      if: matrix.configuration == 'debug' && github.event_name == 'pull_request_target'
+      uses: CODE-Actions/upload-artifact@v2
+      with:
+        name: patch_coverage
+        path: patch_coverage
+        retention-days: 1
+
     - name: Release build check
+      if: matrix.configuration == 'release'
       shell: bash
       run: |
         set -euo pipefail
+
+        cd tizenvg
+        meson setup builddir -Dtools=svg2png --prefix "$DESKTOP_PREFIX" --libdir "$DESKTOP_PREFIX/lib"
+        ninja -C builddir install
+        cd -
+
+        cd dali-core/build/tizen
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
+
+        cd dali-adaptor/build/tizen
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug -DENABLE_GRAPHICS_BACKEND=GLES
+        make install -j8
+        cd -
 
         cd build/tizen
         cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release -DENABLE_GRAPHICS_BACKEND=GLES
@@ -309,3 +367,26 @@ jobs:
         test-artifact-name: test_results
         coverage-tool: lcov
         coverage-artifact-name: coverage
+
+  patch-coverage:
+    name: Patch coverage (80%)
+    runs-on: [ code-linux ]
+    needs: [ build, testhub ]
+    if: github.event_name == 'pull_request_target' && needs.build.result == 'success' && needs.testhub.result == 'success'
+    steps:
+    - name: Download patch coverage result
+      uses: CODE-Actions/download-artifact@v2
+      with:
+        name: patch_coverage
+        path: patch_coverage
+
+    - name: Report and enforce patch coverage
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        cat patch_coverage/summary.md >> "$GITHUB_STEP_SUMMARY"
+        if ! grep -qx 'PASS' patch_coverage/status; then
+          echo '::error::Changed-code coverage is below the required 80%.'
+          exit 1
+        fi
