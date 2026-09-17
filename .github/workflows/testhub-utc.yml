@@ -23,7 +23,12 @@ concurrency:
 jobs:
 
   build:
+    name: Build (${{ matrix.configuration }})
     runs-on: [ code-linux ]
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [ debug, release ]
     container:
       image: tizen-nui-docker-local.bart.sec.samsung.net/dali-ci-env:ubuntu22.04-v1
       credentials:
@@ -184,7 +189,8 @@ jobs:
         gcc --version | head -1
         cmake --version | head -1
 
-    - name: Build DALi
+    - name: Build DALi (Debug)
+      if: matrix.configuration == 'debug'
       shell: bash
       run: |
         set -euo pipefail
@@ -218,6 +224,7 @@ jobs:
         ./build.sh
 
     - name: Run automated test
+      if: matrix.configuration == 'debug'
       shell: bash
       run: |
         set -euo pipefail
@@ -229,6 +236,7 @@ jobs:
         )
 
     - name: Generate LCOV coverage data
+      if: matrix.configuration == 'debug'
       shell: bash
       run: |
         set -euo pipefail
@@ -243,6 +251,7 @@ jobs:
         test -s build/tizen/doc/coverage/index.html
 
     - name: Collect artifacts
+      if: matrix.configuration == 'debug'
       shell: bash
       run: |
         set -euo pipefail
@@ -262,6 +271,7 @@ jobs:
         test "$(find coverage -name '*.func.html' | wc -l)" -gt 0
 
     - name: Upload artifacts (test_results)
+      if: matrix.configuration == 'debug'
       uses: CODE-Actions/upload-artifact@v2
       with:
         name: test_results     # name of stored artifact
@@ -269,6 +279,7 @@ jobs:
         retention-days: 1
 
     - name: Upload artifacts (coverage)
+      if: matrix.configuration == 'debug'
       uses: CODE-Actions/upload-artifact@v2
       with:
         name: coverage
@@ -276,9 +287,25 @@ jobs:
         retention-days: 1
 
     - name: Release build check
+      if: matrix.configuration == 'release'
       shell: bash
       run: |
         set -euo pipefail
+
+        cd tizenvg
+        meson setup builddir -Dtools=svg2png --prefix "$DESKTOP_PREFIX" --libdir "$DESKTOP_PREFIX/lib"
+        ninja -C builddir install
+        cd -
+
+        cd dali-core/build/tizen
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
+
+        cd dali-adaptor/build/tizen
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug -DENABLE_GRAPHICS_BACKEND=GLES
+        make install -j8
+        cd -
 
         cd build/tizen
         cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release -DENABLE_GRAPHICS_BACKEND=GLES
