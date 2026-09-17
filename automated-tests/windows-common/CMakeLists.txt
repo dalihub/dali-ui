@@ -77,13 +77,70 @@ SET(INTERNAL_TC_NAMES ${TC_SOURCE_LIST})
 LIST(TRANSFORM INTERNAL_TC_NAMES PREPEND "${INTERNAL_TEST_DIR}/")
 SET(INTERNAL_RUN_SOURCES ${TC_SOURCES})
 LIST(TRANSFORM INTERNAL_RUN_SOURCES PREPEND "${INTERNAL_TEST_DIR}/")
-LIST(REMOVE_ITEM INTERNAL_RUN_SOURCES "${INTERNAL_TEST_DIR}/utc-Dali-WindowsWarningCoverage-internal.cpp")
-LIST(REMOVE_ITEM INTERNAL_RUN_SOURCES "${INTERNAL_TEST_DIR}/utc-Dali-InteractiveView-internal.cpp")
-LIST(REMOVE_ITEM INTERNAL_RUN_SOURCES "${INTERNAL_TEST_DIR}/utc-Dali-ObjLoader-internal.cpp")
-LIST(REMOVE_ITEM INTERNAL_RUN_SOURCES "${INTERNAL_TEST_DIR}/utc-Dali-MeshVisual-internal.cpp")
-LIST(REMOVE_ITEM INTERNAL_RUN_SOURCES "${INTERNAL_TEST_DIR}/utc-Dali-FeedbackStyle-internal.cpp")
-LIST(REMOVE_ITEM INTERNAL_RUN_SOURCES "${INTERNAL_TEST_DIR}/utc-Dali-ArcWireframeVisual-internal.cpp")
-LIST(REMOVE_ITEM INTERNAL_RUN_SOURCES "${INTERNAL_TEST_DIR}/utc-Dali-PrimitiveVisual-internal.cpp")
+
+# MSVC includes member access levels in decorated names. Tests that rewrite
+# private/protected as public therefore cannot link to separately compiled
+# foundation implementation objects and are reported as unsupported on Windows.
+SET(WINDOWS_UNSUPPORTED_INTERNAL_TESTS
+  utc-Dali-AnimatedImageReleasePolicy-internal.cpp
+  utc-Dali-ArcWireframeVisual-internal.cpp
+  utc-Dali-FeedbackStyle-internal.cpp
+  utc-Dali-ImageCache-internal.cpp
+  utc-Dali-InteractiveView-internal.cpp
+  utc-Dali-MeshVisual-internal.cpp
+  utc-Dali-ObjLoader-internal.cpp
+  utc-Dali-PageScrollView-internal.cpp
+  utc-Dali-PrimitiveVisual-internal.cpp
+  utc-Dali-WindowsWarningCoverage-internal.cpp
+)
+
+SET(WINDOWS_UNSUPPORTED_TEST_NAMES "")
+SET(WINDOWS_UNSUPPORTED_TEST_STUBS "")
+FOREACH(TEST_SOURCE IN LISTS WINDOWS_UNSUPPORTED_INTERNAL_TESTS)
+  SET(TEST_PATH "${INTERNAL_TEST_DIR}/${TEST_SOURCE}")
+  LIST(REMOVE_ITEM INTERNAL_RUN_SOURCES "${TEST_PATH}")
+  FILE(READ "${TEST_PATH}" TEST_CONTENT)
+
+  STRING(REGEX MATCH "void[ \t]+[A-Za-z0-9_]+_startup\\(void\\)" STARTUP_MATCH "${TEST_CONTENT}")
+  IF(STARTUP_MATCH)
+    STRING(REGEX REPLACE "^void[ \t]+|\\(void\\)$" "" STARTUP_NAME "${STARTUP_MATCH}")
+    STRING(APPEND WINDOWS_UNSUPPORTED_TEST_STUBS "void ${STARTUP_NAME}(void) {}\n")
+  ENDIF()
+
+  STRING(REGEX MATCH "void[ \t]+[A-Za-z0-9_]+_cleanup\\(void\\)" CLEANUP_MATCH "${TEST_CONTENT}")
+  IF(CLEANUP_MATCH)
+    STRING(REGEX REPLACE "^void[ \t]+|\\(void\\)$" "" CLEANUP_NAME "${CLEANUP_MATCH}")
+    STRING(APPEND WINDOWS_UNSUPPORTED_TEST_STUBS "void ${CLEANUP_NAME}(void) {}\n")
+  ENDIF()
+
+  STRING(REGEX MATCHALL "int[ \t]+Utc[A-Za-z0-9_]+\\(void\\)" TEST_MATCHES "${TEST_CONTENT}")
+  FOREACH(TEST_MATCH IN LISTS TEST_MATCHES)
+    STRING(REGEX REPLACE "^int[ \t]+|\\(void\\)$" "" TEST_NAME "${TEST_MATCH}")
+    STRING(APPEND WINDOWS_UNSUPPORTED_TEST_NAMES "  \"${TEST_NAME}\",\n")
+    STRING(APPEND WINDOWS_UNSUPPORTED_TEST_STUBS "int ${TEST_NAME}(void) { return 77; }\n")
+  ENDFOREACH()
+  STRING(APPEND WINDOWS_UNSUPPORTED_TEST_STUBS "\n")
+ENDFOREACH()
+
+FOREACH(TEST_SOURCE IN LISTS INTERNAL_TC_NAMES)
+  FILE(READ "${TEST_SOURCE}" TEST_CONTENT)
+  STRING(REGEX MATCH "#[ \t]*define[ \t]+(private|protected)[ \t]+public" ACCESS_OVERRIDE "${TEST_CONTENT}")
+  IF(ACCESS_OVERRIDE)
+    GET_FILENAME_COMPONENT(TEST_FILENAME "${TEST_SOURCE}" NAME)
+    LIST(FIND WINDOWS_UNSUPPORTED_INTERNAL_TESTS "${TEST_FILENAME}" UNSUPPORTED_INDEX)
+    IF(UNSUPPORTED_INDEX EQUAL -1)
+      MESSAGE(FATAL_ERROR "${TEST_FILENAME} rewrites C++ access levels and must be listed in WINDOWS_UNSUPPORTED_INTERNAL_TESTS for MSVC.")
+    ENDIF()
+  ENDIF()
+ENDFOREACH()
+
+SET(WINDOWS_UNSUPPORTED_TEST_NAMES_HEADER "${CMAKE_CURRENT_BINARY_DIR}/windows-private-access-unsupported-tests.h")
+FILE(WRITE "${WINDOWS_UNSUPPORTED_TEST_NAMES_HEADER}"
+  "#pragma once\n\ninline constexpr const char* WINDOWS_PRIVATE_ACCESS_UNSUPPORTED_TESTS[] = {\n${WINDOWS_UNSUPPORTED_TEST_NAMES}  nullptr,\n};\n")
+
+SET(WINDOWS_UNSUPPORTED_TEST_STUB_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/windows-private-access-unsupported-tests.cpp")
+FILE(WRITE "${WINDOWS_UNSUPPORTED_TEST_STUB_SOURCE}" "${WINDOWS_UNSUPPORTED_TEST_STUBS}")
+
 LIST(REMOVE_ITEM INTERNAL_RUN_SOURCES "${INTERNAL_TEST_DIR}/../dali-test-suite-utils/test-harness.cpp")
 
 
@@ -126,7 +183,7 @@ GENERATE_TEST_HEADER("${INTERNAL_HEADER}" gDaliUiFoundationInternalTests ${INTER
 ADD_EXECUTABLE(tct-dali-ui-foundation-internal-core
   src/common-test-main.cpp
   src/adaptor-static-constants.cpp
-  src/windows-unsupported-tests.cpp
+  ${WINDOWS_UNSUPPORTED_TEST_STUB_SOURCE}
   ${INTERNAL_RUN_SOURCES}
   $<TARGET_OBJECTS:dali-ui-foundation-test-objects>
 )
