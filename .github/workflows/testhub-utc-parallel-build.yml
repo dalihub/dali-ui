@@ -1,0 +1,169 @@
+name: "Unittest parallel build experiment (testhub)"
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  debug-utc:
+    runs-on: [ code-linux ]
+    container:
+      image: tizen-nui-docker-local.bart.sec.samsung.net/dali-ci-env:ubuntu22.04-v1
+      credentials:
+        username: ${{ secrets.BART_USERNAME }}
+        password: ${{ secrets.BART_IDENTITY_TOKEN }}
+    env:
+      CC: gcc
+      CXX: g++
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - uses: code-actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup SSH
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Clone DALi dependencies
+      env:
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      run: |
+        set -euo pipefail
+
+        knownHostsFile="$RUNNER_TEMP/review-tizen-known-hosts"
+        printf '%s\n' "$SSH_KNOWN_HOSTS" > "$knownHostsFile"
+        chmod 0600 "$knownHostsFile"
+        export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=$knownHostsFile -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=yes"
+
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+        git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
+
+    - name: Build and test Debug
+      run: |
+        set -euo pipefail
+
+        install -m 0755 dali-core/build/scripts/fastcov.py "$DESKTOP_PREFIX/bin/fastcov.py"
+
+        cd tizenvg
+        meson setup builddir -Dtools=svg2png --prefix "$DESKTOP_PREFIX" --libdir "$DESKTOP_PREFIX/lib"
+        ninja -C builddir install
+        cd -
+
+        cd dali-core/build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
+
+        cd dali-adaptor/build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug -DENABLE_GRAPHICS_BACKEND=GLES
+        make install -j8
+        cd -
+
+        cd build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
+
+        cd manual-tests
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
+
+        cd samples
+        ./build.sh
+        cd -
+
+        cd automated-tests
+        ./build.sh
+        xvfb-run ./execute.sh
+
+    - name: Generate Debug coverage data
+      run: |
+        set -euo pipefail
+
+        cmake --build build/tizen --target cov_data
+        test -s build/tizen/dali.info
+
+  release-build-check:
+    runs-on: [ code-linux ]
+    container:
+      image: tizen-nui-docker-local.bart.sec.samsung.net/dali-ci-env:ubuntu22.04-v1
+      credentials:
+        username: ${{ secrets.BART_USERNAME }}
+        password: ${{ secrets.BART_IDENTITY_TOKEN }}
+    env:
+      CC: gcc
+      CXX: g++
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - uses: code-actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup SSH
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Clone DALi dependencies
+      env:
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      run: |
+        set -euo pipefail
+
+        knownHostsFile="$RUNNER_TEMP/review-tizen-known-hosts"
+        printf '%s\n' "$SSH_KNOWN_HOSTS" > "$knownHostsFile"
+        chmod 0600 "$knownHostsFile"
+        export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=$knownHostsFile -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=yes"
+
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+        git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
+
+    - name: Build Release
+      run: |
+        set -euo pipefail
+
+        cd tizenvg
+        meson setup builddir -Dtools=svg2png --prefix "$DESKTOP_PREFIX" --libdir "$DESKTOP_PREFIX/lib"
+        ninja -C builddir install
+        cd -
+
+        cd dali-core/build/tizen
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release
+        make install -j8
+        cd -
+
+        cd dali-adaptor/build/tizen
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release -DENABLE_GRAPHICS_BACKEND=GLES
+        make install -j8
+        cd -
+
+        cd build/tizen
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release -DENABLE_GRAPHICS_BACKEND=GLES
+        make install -j8
+        cd -
+
+        cd automated-tests
+        ./build.sh
+        cd -
+
+        cd manual-tests
+        cmake -DCMAKE_INSTALL_PREFIX="$DESKTOP_PREFIX" -DCMAKE_BUILD_TYPE=Release
+        make install -j8
+        cd -
+
+        cd samples
+        ./build.sh Release
