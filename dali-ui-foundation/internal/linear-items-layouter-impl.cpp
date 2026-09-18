@@ -494,10 +494,18 @@ float LinearItemsLayouterImpl::ScrollBy(float delta, Recycler& recycler)
   const uint32_t newFirst = FindFirstVisiblePosition(mScrollOffset, mCacheBefore, itemCount);
   const uint32_t newLast  = FindLastVisiblePosition(mScrollOffset, mViewportExtent, mCacheAfter, itemCount);
 
-  if(!mHasActiveItems)
+  if(!mHasActiveItems || newLast < mFirstActive || newFirst > mLastActive)
   {
-    // Cold start: compute starting offset from scratch.
-    const float firstOffset = GetItemOffset(newFirst);
+    // A disjoint jump has no surviving window boundary. Filling from oldLast + 1
+    // would materialize the skipped gap and associate the new first item with the
+    // old window's end offset. Preserve measured extents, but rebuild the exact range.
+    const float firstOffset = mHasActiveItems ? GetItemOffsetFrom(mFirstActive, mFirstActiveOffset, newFirst)
+                                              : GetItemOffset(newFirst);
+    if(mHasActiveItems)
+    {
+      recycler.RecycleAllViews();
+    }
+    mHasActiveItems = false;
     LayoutState state;
     state.nextPosition  = newFirst;
     state.endPosition   = newLast + 1u;
@@ -507,7 +515,7 @@ float LinearItemsLayouterImpl::ScrollBy(float delta, Recycler& recycler)
     mFirstActiveOffset   = firstOffset;
     mLastActive          = newLast;
     mLastActiveEndOffset = state.currentOffset;
-    mHasActiveItems      = true;
+    mHasActiveItems      = (newFirst <= newLast);
     return consumed;
   }
 

@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <vector>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -66,6 +67,10 @@ int      gRecycledViews = 0;
 
 std::vector<uint32_t> gBoundPositions;
 
+// The live view bound to each position, so a test can read back the geometry the
+// layouter arranged it at.
+std::map<uint32_t, View> gViewsByPosition;
+
 uint32_t TestItemCount()
 {
   return gItemCount;
@@ -84,6 +89,7 @@ void TestBindViewHolder(ItemViewHolder& holder)
 {
   ++gBoundViews;
   gBoundPositions.push_back(holder.position);
+  gViewsByPosition[holder.position] = holder.view;
 }
 
 void TestRecycleViewHolder(ItemViewHolder&)
@@ -98,6 +104,7 @@ void ResetCounters()
   gBoundViews    = 0;
   gRecycledViews = 0;
   gBoundPositions.clear();
+  gViewsByPosition.clear();
 }
 
 // A ready-to-drive recycler: adapter and layouter are owned by the caller so each
@@ -1035,5 +1042,150 @@ int UtcDaliRecyclerViewLayouterReconfigurationP(void)
   application.SendNotification();
   application.Render();
   DALI_TEST_CHECK(layouter.CanScrollVertically());
+  END_TEST;
+}
+
+// A scroll that lands entirely past the realised window has no surviving boundary to
+// extend from. Filling forward from the old window's end would bind every skipped item
+// and anchor the new first item at the old window's end offset, leaving the gap items
+// parented and on screen. The exact new range must be rebuilt instead, and the anchor
+// offset must be the new first item's own offset.
+int UtcDaliRecyclerViewScrollByDisjointJumpP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter         adapter  = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  // Estimate unmeasured items at their real extent, so the derived offsets below are
+  // not a function of the layouter's default estimate.
+  layouter.SetItemExtent(RECYCLER_ITEM_HEIGHT);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter, true);
+
+  // The item views live on the recycler's scroller child; the other child is the bar.
+  View scroller;
+  for(uint32_t i = 0u; i < recycler.GetChildCount(); ++i)
+  {
+    View child = View::DownCast(recycler.GetChildAt(i));
+    if(child && !ScrollBar::DownCast(child))
+    {
+      scroller = child;
+    }
+  }
+  DALI_TEST_CHECK(scroller);
+
+  // 40 items of 50 over a 400 viewport with 300 of cache either side: the initial
+  // window is 0..13, so the content is 2000 and the maximum offset 1600.
+  DALI_TEST_EQUALS(recycler.GetFirstVisiblePosition(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetLastVisiblePosition(), 13u, TEST_LOCATION);
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 14u, TEST_LOCATION);
+
+  gBoundPositions.clear();
+  gRecycledViews = 0;
+
+  // Jump to offset 1500: the new window is 24..39, disjoint from 0..13.
+  recycler.ScrollBy(1500.0f, false);
+  application.SendNotification();
+
+  DALI_TEST_EQUALS(recycler.GetScrollOffset(), 1500.0f, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetFirstVisiblePosition(), 24u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetLastVisiblePosition(), 39u, TEST_LOCATION);
+
+  // Only the new range was bound, and the whole old window was recycled.
+  std::vector<uint32_t> expected;
+  for(uint32_t pos = 24u; pos <= 39u; ++pos)
+  {
+    expected.push_back(pos);
+  }
+  DALI_TEST_EQUALS(gBoundPositions.size(), expected.size(), TEST_LOCATION);
+  DALI_TEST_CHECK(gBoundPositions == expected);
+  DALI_TEST_EQUALS(gRecycledViews, 14, TEST_LOCATION);
+  // 16 realised views, not 26: the skipped gap was never materialised.
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 16u, TEST_LOCATION);
+
+  gBoundPositions.clear();
+
+  // A small scroll back brings item 23 into the window. Its offset is derived from the
+  // rebuilt anchor (24 at 1200), so it lands at 1150.
+  recycler.ScrollBy(-50.0f, false);
+  application.SendNotification();
+
+  DALI_TEST_EQUALS(recycler.GetScrollOffset(), 1450.0f, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetFirstVisiblePosition(), 23u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gBoundPositions.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gBoundPositions[0], 23u, TEST_LOCATION);
+  DALI_TEST_CHECK(gViewsByPosition[23u]);
+  DALI_TEST_EQUALS(gViewsByPosition[23u].GetProperty<float>(Actor::Property::POSITION_Y), 1150.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// A programmatic scroll can arrive before the layouter has realised any window: the
+// last layout pass saw no items, so there is no boundary to extend and nothing to
+// recycle. The scroll must build the exact range from scratch, anchored at the new first
+// item's own offset, and that window must then serve as a normal anchor.
+int UtcDaliRecyclerViewScrollByWithoutRealisedWindowP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  ResetCounters();
+  gItemCount = 0u; // the first layout pass sees no items and realises no window
+
+  ItemAdapter         adapter  = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  layouter.SetItemExtent(RECYCLER_ITEM_HEIGHT);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter, true);
+
+  View scroller;
+  for(uint32_t i = 0u; i < recycler.GetChildCount(); ++i)
+  {
+    View child = View::DownCast(recycler.GetChildAt(i));
+    if(child && !ScrollBar::DownCast(child))
+    {
+      scroller = child;
+    }
+  }
+  DALI_TEST_CHECK(scroller);
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gBoundViews, 0, TEST_LOCATION);
+
+  // The adapter now reports 40 items of 50, but nothing has been notified, so the
+  // layouter still has no window when the scroll arrives.
+  gItemCount = 40u;
+  recycler.ScrollBy(120.0f, false);
+  application.SendNotification();
+
+  // Offset 120 over a 400 viewport with 300 of cache either side: items 0..16 are
+  // realised from offset 0 and nothing was recycled.
+  DALI_TEST_EQUALS(recycler.GetScrollOffset(), 120.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetFirstVisiblePosition(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetLastVisiblePosition(), 16u, TEST_LOCATION);
+  std::vector<uint32_t> expected;
+  for(uint32_t pos = 0u; pos <= 16u; ++pos)
+  {
+    expected.push_back(pos);
+  }
+  DALI_TEST_EQUALS(gBoundPositions.size(), expected.size(), TEST_LOCATION);
+  DALI_TEST_CHECK(gBoundPositions == expected);
+  DALI_TEST_EQUALS(gRecycledViews, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 17u, TEST_LOCATION);
+  DALI_TEST_CHECK(gViewsByPosition[0u]);
+  DALI_TEST_EQUALS(gViewsByPosition[0u].GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(gViewsByPosition[16u]);
+  DALI_TEST_EQUALS(gViewsByPosition[16u].GetProperty<float>(Actor::Property::POSITION_Y), 800.0f, 0.001f, TEST_LOCATION);
+
+  // The rebuilt window is a normal anchor: a small scroll extends it from its end.
+  gBoundPositions.clear();
+  recycler.ScrollBy(50.0f, false);
+  application.SendNotification();
+  DALI_TEST_EQUALS(recycler.GetScrollOffset(), 170.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetFirstVisiblePosition(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetLastVisiblePosition(), 17u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gBoundPositions.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gBoundPositions[0], 17u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gRecycledViews, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 18u, TEST_LOCATION);
+  DALI_TEST_CHECK(gViewsByPosition[17u]);
+  DALI_TEST_EQUALS(gViewsByPosition[17u].GetProperty<float>(Actor::Property::POSITION_Y), 850.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
