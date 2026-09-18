@@ -126,6 +126,19 @@ public: // API
   void SetScrollableHeight(float height);
 
   /**
+   * @brief Re-reads this view's own arranged size as the scroll viewport and, if it
+   * changed, recomputes the scroll bounds and clamp and notifies
+   * OnScrollableAreaChanged().
+   *
+   * @note The viewport is this view's OWN size, which the layout pass applies from
+   * the PARENT's arrange -- it never passes through SetScrollableWidth/Height (those
+   * carry the CONTENT extent). Without this entry a resize of the scroll view alone
+   * left mViewportWidth/Height, the clamp limits and any page count derived from the
+   * viewport at their previous values. Called by ScrollViewLayoutManager::Arrange.
+   */
+  void RefreshViewport();
+
+  /**
    * @brief Gets the scroll direction.
    */
   ScrollDirection GetScrollDirection() const;
@@ -451,9 +464,10 @@ protected:
   /**
    * @brief Called whenever the scrollable area dimensions change.
    *
-   * Fired by SetScrollableWidth() and SetScrollableHeight() after
-   * UpdateScrollingProperties() has been applied — i.e. the new bounds
-   * are already in effect when this is invoked.
+   * Fired by SetScrollableWidth(), SetScrollableHeight() and RefreshViewport()
+   * after UpdateScrollingProperties() has been applied — i.e. the new bounds
+   * are already in effect when this is invoked. The first two report a changed
+   * CONTENT extent, the third a changed VIEWPORT.
    *
    * Subclasses may override to react to layout-driven dimension changes
    * (e.g. PageScrollViewImpl uses this to re-emit PageChangedSignal when

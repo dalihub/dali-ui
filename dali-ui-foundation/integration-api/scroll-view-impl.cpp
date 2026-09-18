@@ -279,6 +279,39 @@ void ScrollViewImpl::SetScrollableHeight(float height)
   OnScrollableAreaChanged();
 }
 
+void ScrollViewImpl::RefreshViewport()
+{
+  if(!mContent)
+  {
+    // UpdateScrollingProperties() is a no-op without content, and the viewport it
+    // caches is re-read the moment content is set.
+    return;
+  }
+
+  // The viewport IS this view's own arranged size. Compare against the cached value
+  // with the same tolerance SetScrollable* uses, so a pass that did not resize the
+  // scroll view costs one property read and nothing else.
+  const float width  = Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
+  const float height = Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);
+  if(std::abs(mViewportWidth - width) < 0.01f && std::abs(mViewportHeight - height) < 0.01f)
+  {
+    return;
+  }
+
+  // Recompute the bounds and clamp from the new viewport, then notify exactly as
+  // SetScrollableWidth()/SetScrollableHeight() do: a subclass re-derives its
+  // viewport-dependent state from OnScrollableAreaChanged(), and a viewport-only resize
+  // reaches it through no other entry.
+  //
+  // Safe across PageScrollView's first layout pass, whose handler carries pre-layout
+  // state (an expected page count and a current page selected by NotifyPages* before any
+  // real dimensions existed): that handler returns while the primary extent or the page
+  // length is still 0, and once real extents exist it APPLIES the page selected
+  // pre-layout before re-deriving from the scroll position.
+  UpdateScrollingProperties();
+  OnScrollableAreaChanged();
+}
+
 ScrollDirection ScrollViewImpl::GetScrollDirection() const
 {
   return mScrollDirection;
@@ -2342,16 +2375,43 @@ void ScrollViewImpl::CancelScrollAnimation()
 
 void ScrollViewImpl::OnScrollAnimationFinished(Animation animation)
 {
+  // A Finished emitted for an animation CancelScrollAnimation already stopped and released
+  // must not reset a newer handle nor write the content actor the new animation now owns.
+  // CancelScrollAnimation has already captured the live position and sent ScrollFinished.
+  if(animation != mScrollAnimation)
+  {
+    return;
+  }
+
   mScrollAnimation.Reset();
 
   if(mContent)
   {
-    mCurrentPosition = Vector2(std::round(mContent.GetCurrentProperty<float>(Actor::Property::POSITION_X)),
-                               std::round(mContent.GetCurrentProperty<float>(Actor::Property::POSITION_Y)));
-    mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
+    mCurrentPosition                = Vector2(std::round(mContent.GetCurrentProperty<float>(Actor::Property::POSITION_X)),
+                                              std::round(mContent.GetCurrentProperty<float>(Actor::Property::POSITION_Y)));
+    const Vector2 completedPosition = ContentPositionToScrollPosition(mCurrentPosition);
+    const Vector2 clampedPosition   = AdjustScrollPosition(completedPosition);
+    if(clampedPosition != completedPosition)
+    {
+      // Layout may shrink the range while an animation retains its original endpoint.
+      // Repair the settled position before notifying observers by applying the clamped
+      // FLOAT, exactly as the non-animated ScrollTo applies its clamped target: on a
+      // fractional range the actor must rest on the maximum, not one unit past it.
+      // (ScrollTo(false) then rounds only its cached copies, so its public offset can
+      // differ from the actor by less than one unit; that pre-existing behaviour is not
+      // changed here.) The animation has already finished, so nothing is retargeted;
+      // ApplyScrollPosition also updates the scroll bar.
+      mScrollPosition = clampedPosition;
+      ApplyScrollPosition(mScrollPosition);
+      mCurrentPosition = Vector2(mMaximumStartX - mScrollPosition.x, mMaximumStartY - mScrollPosition.y);
+    }
+    else
+    {
+      mScrollPosition = completedPosition;
 
-    // Update scroll bar position
-    mScrollBar.UpdateScrollPosition(mScrollPosition);
+      // Update scroll bar position
+      mScrollBar.UpdateScrollPosition(mScrollPosition);
+    }
   }
 
   SendScrollFinished();

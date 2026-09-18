@@ -163,9 +163,31 @@ protected:
    * @brief Overrides ScrollViewImpl hook to detect when the layout pass first sets
    *        accurate viewport / scrollable-area dimensions.
    *
-   * Emits PageChangedSignal when the layout-derived page count differs from the
-   * last emitted count — most importantly on the very first layout pass when
-   * PageIndicator::Bind() was called before layout ran.
+   * Emits PageChangedSignal whenever the layout-derived count changes, and whenever the
+   * reported page changes. The reported page is the page the view will settle on: while a
+   * snap is in flight it is the snap target clamped to the new count, which is exactly what
+   * OnScrollFinished commits, so the transient and the settled notification agree even when
+   * the last page is partial. A free scroll (no snap target) or a settled view re-derives
+   * from the scroll position, which during an animated scroll is the LIVE current position,
+   * not the target. A page selected by NotifyPagesInserted / NotifyPagesRemoved that has
+   * just been applied is the newer intent and is kept. A changed viewport that leaves the
+   * count alone re-derives only on a settled view, so a snap target that is still valid is
+   * never replaced by the nearest page. ScrollToPage clears a target whose animated scroll
+   * never started, so an explicit page request that had nothing to scroll does not leave a
+   * stale target behind. Repeated callbacks for the same geometry emit nothing.
+   *
+   * This is also where a page SELECTED before the first layout is applied: with a zero
+   * page length ScrollToPage could only record the page, so the first call that has real
+   * dimensions scrolls to it while preserving the selected page. A
+   * pre-layout user ScrollTo after that selection releases the pre-layout state through
+   * OnScrollFinished and is therefore not covered.
+   *
+   * @note That apply calls ScrollToPage, which emits ScrollStarted / Scrolling /
+   * ScrollFinished SYNCHRONOUSLY from inside the layout pass. Two mechanisms bound the
+   * re-entrancy: mExpectedPageCount is reset BEFORE ScrollToPage runs, so a handler that
+   * triggers another pass finds no override and this block does not run again; and the
+   * apply holds the notify-in-progress flag for its duration (restored by a scope guard,
+   * including on an exception), so the nested ScrollFinished cannot demote the selection.
    *
    * @note ABI note: do NOT reorder or remove after first publication.
    */

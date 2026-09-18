@@ -163,6 +163,20 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
       scrollImpl->SetScrollableHeight(childBounds.height);
     }
   }
+
+  // This view's own arranged size is the scroll viewport, and it never reaches the
+  // scroll view through SetScrollableWidth/Height (those carry the CONTENT extent),
+  // so a pass that resized only the scroll view would otherwise leave the viewport,
+  // the clamp limits and any viewport-derived page count at their previous values.
+  //
+  // Deliberately AFTER the loop: the scrollable extents for this pass are set above,
+  // and the observers RefreshViewport notifies read them. Before the loop they would
+  // instead read the PREVIOUS pass's extent -- 0 on the first pass, where no extent has
+  // been set yet.
+  if(scrollImpl != nullptr)
+  {
+    scrollImpl->RefreshViewport();
+  }
 }
 
 } // namespace Ui

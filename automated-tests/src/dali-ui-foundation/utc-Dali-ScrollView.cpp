@@ -2233,3 +2233,51 @@ int UtcDaliEdgeEffectStateTransitionsAndSignalsP(void)
   DALI_TEST_CHECK(&effect.FinishedSignal());
   END_TEST;
 }
+
+// An animated scroll keeps its original endpoint while layout shrinks the scrollable
+// range underneath it. When the animation finishes, the settled position must be the
+// clamped one, and the content actor must agree with it: nothing may be left parked
+// past the new maximum.
+int UtcDaliScrollViewAnimationFinishClampsAfterRangeShrinkP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+  scrollView.SetContent(content);
+  window.Add(scrollView);
+
+  application.SendNotification();
+  application.Render();
+
+  // Scrollable 600 over a 200 viewport: the maximum scroll position is 400.
+  // Fixed fling duration so the animation length does not depend on the range.
+  scrollView.SetMinimumFlingDuration(100);
+  scrollView.SetMaximumFlingDuration(100);
+
+  scrollView.ScrollTo(Vector2(0.0f, 400.0f), true);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(scrollView.IsScrolling());
+
+  // The content shrinks mid-animation: the maximum scroll position becomes 100.
+  content.SetRequestedHeight(300.0f);
+  application.SendNotification();
+
+  application.Render(100);
+  application.Render(100);
+  application.Render(100);
+  application.SendNotification();
+
+  DALI_TEST_CHECK(!scrollView.IsScrolling());
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 100.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -100.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
