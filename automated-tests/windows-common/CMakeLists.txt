@@ -214,6 +214,16 @@ TARGET_COMPILE_DEFINITIONS(tct-dali-ui-foundation-internal-core PRIVATE
   _USE_MATH_DEFINES
   __restrict__=__restrict
 )
+# view-debug.h guards its Dump*() declarations (and the view-impl.h include
+# that provides GetImpl) behind DEBUG_ENABLED, and view-debug.cpp compiles the
+# matching definitions out without it. The prebuilt Release dali2-core does not
+# export Debug::Filter::New (dali-core defines it only under DEBUG_ENABLED), so
+# DEBUG_ENABLED cannot be switched on target-wide: scope it to exactly the two
+# translation units that need it, in every config.
+SET_SOURCE_FILES_PROPERTIES("${FOUNDATION_DIR}/internal/views/view/view-debug.cpp"
+  PROPERTIES COMPILE_DEFINITIONS DEBUG_ENABLED)
+SET_SOURCE_FILES_PROPERTIES("${INTERNAL_TEST_DIR}/utc-Dali-ViewDebug-internal.cpp"
+  PROPERTIES COMPILE_DEFINITIONS DEBUG_ENABLED)
 TARGET_COMPILE_OPTIONS(tct-dali-ui-foundation-internal-core PRIVATE
   /FI "${DALI_WINDOWS_DEPENDENCIES_INCLUDE_DIR}/dali-windows-dependencies.h"
   /vmg /utf-8 /W3 /wd4251 /wd4275
