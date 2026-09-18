@@ -83,6 +83,25 @@ void AbortIfSpecHasLayoutBoundsProperty(const Dali::Ui::ViewAnimationSpec& spec)
 void AbortIfInvalidBoundsEffect(const Dali::Ui::LayoutBoundsEffect& effect);
 
 /**
+ * @brief Aborts if @p timing has a non-finite duration or delay.
+ *
+ * A NaN or infinite duration reaches @c Animation::New / @c TimePeriod unchecked and
+ * makes the animation's own progress undefined, so every geometry it drives becomes
+ * non-finite. Registration is the last point at which the value can still be reported
+ * to the caller. The alpha is validated separately.
+ */
+void AbortIfNonFiniteTiming(const Dali::Ui::LayoutTransitionTiming& timing);
+
+/**
+ * @brief Aborts if @p timing has a non-finite duration or delay.
+ *
+ * The animator channel drives application callbacks from a progress the dispatcher
+ * computes as elapsed / duration and then feeds to @c Lerp1D, so a NaN or infinite
+ * duration or delay turns every interpolated bound non-finite instead.
+ */
+void AbortIfNonFiniteAnimatorTiming(const Dali::Ui::LayoutAnimatorTiming& timing);
+
+/**
  * @brief Returns true if @p effect leaves the bounds unchanged.
  *
  * A no-op effect either has no offset / size factor flags set, or has all

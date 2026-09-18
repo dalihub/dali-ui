@@ -164,6 +164,7 @@ const LayoutBoundsEffect& LayoutTransitionImpl::GetExitBoundsEffect() const
 
 void LayoutTransitionImpl::SetChangeTiming(const LayoutTransitionTiming& timing)
 {
+  AbortIfNonFiniteTiming(timing);
   AbortIfNonTerminalLayoutAlpha(timing.alpha);
   mChangeTiming        = timing;
   mChangeTimingEnabled = true;
@@ -172,6 +173,7 @@ void LayoutTransitionImpl::SetChangeTiming(const LayoutTransitionTiming& timing)
 void LayoutTransitionImpl::SetChangeTiming(LayoutChangeCause             cause,
                                            const LayoutTransitionTiming& timing)
 {
+  AbortIfNonFiniteTiming(timing);
   AbortIfNonTerminalLayoutAlpha(timing.alpha);
   const size_t index             = LayoutChangeCauseIndex(cause);
   mChangeTimingsByCause[index]   = timing;
@@ -218,6 +220,7 @@ bool LayoutTransitionImpl::TryGetChangeTiming(LayoutChangeCause       cause,
 
 void LayoutTransitionImpl::SetEnterAnimator(LayoutAnimatorCallback callback, const LayoutAnimatorTiming& timing)
 {
+  AbortIfNonFiniteAnimatorTiming(timing);
   AbortIfReverseAlpha(timing.alpha);
   mEnterAnimator       = std::move(callback);
   mEnterAnimatorTiming = timing;
@@ -226,6 +229,7 @@ void LayoutTransitionImpl::SetEnterAnimator(LayoutAnimatorCallback callback, con
 
 void LayoutTransitionImpl::SetExitAnimator(LayoutAnimatorCallback callback, const LayoutAnimatorTiming& timing)
 {
+  AbortIfNonFiniteAnimatorTiming(timing);
   AbortIfReverseAlpha(timing.alpha);
   mExitAnimator       = std::move(callback);
   mExitAnimatorTiming = timing;
@@ -234,6 +238,7 @@ void LayoutTransitionImpl::SetExitAnimator(LayoutAnimatorCallback callback, cons
 
 void LayoutTransitionImpl::SetChangeAnimator(LayoutAnimatorCallback callback, const LayoutAnimatorTiming& timing)
 {
+  AbortIfNonFiniteAnimatorTiming(timing);
   AbortIfReverseAlpha(timing.alpha);
   mChangeAnimator       = std::move(callback);
   mChangeAnimatorTiming = timing;

@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <limits>
 #include <vector>
 
 using namespace Dali;
@@ -1725,5 +1726,28 @@ int UtcDaliLayoutControllerFailedBatchKeepsCompletedRootSnapshotsP(void)
   application.SendNotification();
   DALI_TEST_EQUALS(widths.size(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(finishes, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+// The documented contract is a positive, finite, NORMAL scale. A subnormal scale is not
+// a usable display scale and would make the layout's reciprocal overflow, so it is
+// rejected together with the non-finite values rather than clamped.
+int UtcDaliUiScaleManagerSetScaleSubnormalRejectedN(void)
+{
+  UiTestApplication application;
+  tet_infoline("A subnormal or non-finite UI scale is rejected, leaving the previous scale in place");
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+
+  UiScaleManager::Get().SetScale(1.0f);
+  DALI_TEST_EQUALS(UiScaleManager::Get().GetScale(), 1.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(std::numeric_limits<float>::denorm_min());
+  DALI_TEST_EQUALS(UiScaleManager::Get().GetScale(), 1.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(std::numeric_limits<float>::quiet_NaN());
+  DALI_TEST_EQUALS(UiScaleManager::Get().GetScale(), 1.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
   END_TEST;
 }

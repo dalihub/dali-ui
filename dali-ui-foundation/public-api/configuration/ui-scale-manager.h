@@ -119,7 +119,9 @@ public:
    * Called by system/vconf handlers when the display scale changes.
    * Invalidates all registered layout roots and triggers re-layout.
    *
-   * @param[in] scale The new scale factor
+   * @param[in] scale The new scale factor. It must be positive, finite and normal
+   *            (>= FLT_MIN), because the layout also divides by it; other values are
+   *            ignored and logged, leaving the current scale in place.
    */
   void SetScale(float scale);
 
