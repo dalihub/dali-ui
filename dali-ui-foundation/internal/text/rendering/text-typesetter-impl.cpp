@@ -2003,7 +2003,7 @@ void Internal::Reveal::ExpandMetadataOwnership(uint8_t* metadata, uint32_t width
     uint8_t  coverage;
   };
 
-  auto collectSources = [metadata, width, rowBytes, PIXEL_SIZE](uint32_t y, std::vector<OwnershipSource>& sources)
+  auto collectSources = [metadata, width, rowBytes](uint32_t y, std::vector<OwnershipSource>& sources)
   {
     sources.clear();
     const uint8_t* row = metadata + static_cast<size_t>(y) * rowBytes;
