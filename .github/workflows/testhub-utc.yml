@@ -241,7 +241,10 @@ jobs:
       run: |
         set -euo pipefail
 
-        cmake --build build/tizen --target cov_data
+        (
+          cd automated-tests
+          ./coverage.sh -n
+        )
         test -s build/tizen/dali.info
         workspace_prefix="SF:${GITHUB_WORKSPACE%/}/"
         awk -v prefix="$workspace_prefix" '
@@ -258,6 +261,25 @@ jobs:
           --output-directory build/tizen/doc/coverage \
           build/tizen/dali.info
         test -s build/tizen/doc/coverage/index.html
+        {
+          echo '## Total coverage'
+          echo
+          echo '| Metric | Covered | Total | Coverage |'
+          echo '| --- | ---: | ---: | ---: |'
+          awk -F: '
+            /^LF:/  { linesFound += $2 }
+            /^LH:/  { linesHit += $2 }
+            /^FNF:/ { functionsFound += $2 }
+            /^FNH:/ { functionsHit += $2 }
+            /^BRF:/ { branchesFound += $2 }
+            /^BRH:/ { branchesHit += $2 }
+            END {
+              printf "| Lines | %d | %d | %.2f%% |\n", linesHit, linesFound, linesFound ? 100 * linesHit / linesFound : 0
+              printf "| Functions | %d | %d | %.2f%% |\n", functionsHit, functionsFound, functionsFound ? 100 * functionsHit / functionsFound : 0
+              printf "| Branches | %d | %d | %.2f%% |\n", branchesHit, branchesFound, branchesFound ? 100 * branchesHit / branchesFound : 0
+            }
+          ' build/tizen/dali.info
+        } >> "$GITHUB_STEP_SUMMARY"
 
     - name: Calculate changed-code coverage
       if: matrix.configuration == 'debug' && github.event_name == 'pull_request_target'
