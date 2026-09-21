@@ -15,6 +15,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <string>
 
 using namespace Dali;
@@ -118,9 +119,8 @@ private:
     View maskView = View::New();
     place(maskView, 30, 90, WIDTH, HEIGHT);
 
-    GradientVisual gradient = GradientVisual::New();
-    gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
-    gradient.SetLinearGradient(Vector2(0, -0.5f), Vector2(0, 0.5f));
+    Gradient::Linear gradientValue(Vector2(0, -0.5f), Vector2(0, 0.5f));
+    gradientValue.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
     const float edge = FADE_WIDTH / HEIGHT;
     // Sample smoothstep so the fade joins transparent and opaque regions gently.
     constexpr int STEPS = 16;
@@ -137,7 +137,10 @@ private:
       const float alpha = 1.0f - t * t * (3.0f - 2.0f * t);
       stops.PushBack(Gradient::StopNode(1.0f - edge + edge * t, Vector4(1, 1, 1, alpha)));
     }
-    gradient.SetStopNodes(stops);
+    gradientValue.SetStopNodes(stops);
+
+    GradientVisual gradient = GradientVisual::New();
+    gradient.SetGradient(gradientValue);
     maskView.AddVisual(gradient, Visual::DepthLayer::BACKGROUND);
     return maskView;
   }
