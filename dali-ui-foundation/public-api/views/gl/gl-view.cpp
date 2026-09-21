@@ -50,9 +50,9 @@ GlView::GlView(GlView&& rhs) noexcept            = default;
 GlView& GlView::operator=(const GlView& glView)  = default;
 GlView& GlView::operator=(GlView&& rhs) noexcept = default;
 
-GlView GlView::New(GlView::BackendMode backendMode)
+GlView GlView::New(GlView::BackendMode backendMode, const GlViewOffscreenConfig& offscreenConfig)
 {
-  Internal::GlViewImplPtr impl = Internal::GlViewImpl::New(backendMode);
+  Internal::GlViewImplPtr impl = Internal::GlViewImpl::New(backendMode, offscreenConfig);
   GlView                  view(*impl);
   impl->Initialize();
   return view;

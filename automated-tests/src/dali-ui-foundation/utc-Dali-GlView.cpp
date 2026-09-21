@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/public-api/views/gl/gl-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-event-thread-callback.h>
+#include <dali-ui/ui-lifecycle-controller.h>
 #include <dali.h>
 
 using namespace Dali;
@@ -499,6 +500,51 @@ int UtcDaliGlViewDestroyedWithoutTerminateP(void)
   application.Render();
 
   // Nothing the application registered is invoked against a view it has let go of.
+  DALI_TEST_EQUALS(recorder.terminateCount, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.terminatedCount, 0u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliGlViewTerminateAtApplicationShutdownP(void)
+{
+  UiTestApplication  application;
+  GlCallbackRecorder recorder;
+
+  GlView view = CreateDrawnGlView(application, recorder);
+
+  view.Terminate(recorder.CompletionCallback());
+  DALI_TEST_EQUALS(recorder.terminatedCount, 0u, TEST_LOCATION);
+
+  // The application shuts down before the rendering side has reported back. Nothing
+  // reaches the event thread from that point on, so the sequence completes here rather
+  // than leaving the application waiting for a notification that cannot arrive.
+  LifecycleController::Get().TerminateSignal().Emit();
+
+  DALI_TEST_EQUALS(recorder.terminatedCount, 1u, TEST_LOCATION);
+
+  // Nothing registered on the view is invoked afterwards - the terminate invocation the
+  // rendering side still delivers included.
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(recorder.terminateCount, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.terminatedCount, 1u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliGlViewApplicationShutdownWithoutTerminateP(void)
+{
+  UiTestApplication  application;
+  GlCallbackRecorder recorder;
+
+  GlView view = CreateDrawnGlView(application, recorder);
+
+  // No terminate was requested, so there is no sequence to complete and the shutdown
+  // leaves the view alone.
+  LifecycleController::Get().TerminateSignal().Emit();
+
   DALI_TEST_EQUALS(recorder.terminateCount, 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(recorder.terminatedCount, 0u, TEST_LOCATION);
 

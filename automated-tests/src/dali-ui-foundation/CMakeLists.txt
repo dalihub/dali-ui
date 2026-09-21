@@ -7,6 +7,7 @@ SET(CAPI_LIB "dali-ui-foundation")
 
 SET(TC_SOURCES
         utc-Dali-GlView.cpp
+        utc-Dali-GlViewOffscreen.cpp
         utc-Dali-UniqueAny.cpp
         utc-Dali-UiStyle.cpp
         utc-Dali-ScrollView.cpp
@@ -116,6 +117,8 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-environment-variable.cpp
     ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
     ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp
+    ../dali-test-suite-utils/dali-ui/ui-native-image-queue.cpp
+    ../dali-test-suite-utils/dali-ui/ui-native-image-surface.cpp
     ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
     ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
     ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp

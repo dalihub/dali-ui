@@ -51,6 +51,10 @@ struct GlViewRenderInfoImpl;
  *   glScissor(box.x, box.y, box.width, box.height);
  *   glEnable(GL_SCISSOR_TEST);
  *
+ *   // GlView::BackendMode::OFFSCREEN_RENDERING is the exception: the surface and the
+ *   // context are the application's own, so it has to set their viewport itself.
+ *   glViewport(0, 0, info.GetSize().width, info.GetSize().height);
+ *
  *   // Vertices are in the view's own pixel space, origin at its centre.
  *   glUniformMatrix4fv(mMvpLocation, 1, GL_FALSE, info.GetMvpMatrix().AsFloat());
  *   ...
@@ -108,6 +112,11 @@ public:
    * it. Vertices expressed in this space are placed on screen by GetMvpMatrix().
    *
    * @return The size of the view
+   *
+   * @note For GlView::BackendMode::OFFSCREEN_RENDERING this is also the size of the
+   *       buffer being drawn into, and therefore the viewport the application has to
+   *       set - nothing else sets it, and GL leaves it at the size of whichever surface
+   *       the context was first made current with.
    */
   const Size& GetSize() const;
 

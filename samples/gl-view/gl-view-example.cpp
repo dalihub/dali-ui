@@ -32,8 +32,18 @@
  *     per-face colours, which is also what happens on the first frames while the
  *     texture upload is still in flight.
  *
+ * The OFFSCREEN backend draws on a thread and a context of its own, into a buffer DALi
+ * composites, so neither the state hazard (C) nor the texture binding (X) applies there.
+ * Owning the context also means nothing is set up for us, so that is the one backend
+ * where the callback sets its own viewport.
+ * What it does share is the placement the callbacks are given, and that is what makes it
+ * worth cycling through: the cube should land in the same place, at the same size, as it
+ * does on the direct backends. If it does not, the synthesised MVP or clipping box is
+ * wrong. Expect the GL content to lag the DALi frame around it by a frame, most visible
+ * while the view is animating.
+ *
  * Keys:
- *   B   - rebuild the view with the other backend (DIRECT / UNSAFE_DIRECT)
+ *   B   - rebuild the view with the next backend (DIRECT / UNSAFE_DIRECT / OFFSCREEN)
  *   M   - toggle CONTINUOUS / ON_DEMAND rendering mode
  *   R   - RenderOnce() (only has a visible effect in ON_DEMAND)
  *   A   - animate the view's position, scale and rotation
@@ -42,9 +52,10 @@
  *   T   - Terminate() the view
  *   ESC - quit
  *
- * Threading: the GL callbacks run on the DALi render thread, so they must not touch
- * DALi APIs. Everything they want to report goes through atomics and is picked up by a
- * Timer on the event thread.
+ * Threading: the GL callbacks run on the DALi render thread - or, on the OFFSCREEN
+ * backend, on the view's own rendering thread - so they must not touch DALi APIs.
+ * Everything they want to report goes through atomics and is picked up by a Timer on the
+ * event thread.
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -53,6 +64,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/views/gl/gl-view-offscreen-config.h>
 #include <dali-ui-foundation/public-api/views/gl/gl-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali/devel-api/adaptor-framework/application.h>
@@ -154,8 +166,42 @@ const GLushort CUBE_INDICES[] = {
 
 const char* ToString(GlView::BackendMode mode)
 {
-  return (mode == GlView::BackendMode::UNSAFE_DIRECT_RENDERING) ? "UNSAFE_DIRECT_RENDERING"
-                                                                : "DIRECT_RENDERING";
+  switch(mode)
+  {
+    case GlView::BackendMode::UNSAFE_DIRECT_RENDERING:
+    {
+      return "UNSAFE_DIRECT_RENDERING";
+    }
+    case GlView::BackendMode::OFFSCREEN_RENDERING:
+    {
+      return "OFFSCREEN_RENDERING";
+    }
+    case GlView::BackendMode::DIRECT_RENDERING:
+    default:
+    {
+      return "DIRECT_RENDERING";
+    }
+  }
+}
+
+GlView::BackendMode NextBackendMode(GlView::BackendMode mode)
+{
+  switch(mode)
+  {
+    case GlView::BackendMode::DIRECT_RENDERING:
+    {
+      return GlView::BackendMode::UNSAFE_DIRECT_RENDERING;
+    }
+    case GlView::BackendMode::UNSAFE_DIRECT_RENDERING:
+    {
+      return GlView::BackendMode::OFFSCREEN_RENDERING;
+    }
+    case GlView::BackendMode::OFFSCREEN_RENDERING:
+    default:
+    {
+      return GlView::BackendMode::DIRECT_RENDERING;
+    }
+  }
 }
 
 const char* ToString(GlView::RenderingMode mode)
@@ -303,11 +349,13 @@ public:
     GLint     savedScissorBox[4]  = {0, 0, 0, 0};
     GLboolean savedScissorEnabled = GL_FALSE;
     GLboolean savedDepthEnabled   = GL_FALSE;
+    GLboolean savedDepthMask      = GL_TRUE;
     if(mRestoreState)
     {
       glGetIntegerv(GL_SCISSOR_BOX, savedScissorBox);
       savedScissorEnabled = glIsEnabled(GL_SCISSOR_TEST);
       savedDepthEnabled   = glIsEnabled(GL_DEPTH_TEST);
+      glGetBooleanv(GL_DEPTH_WRITEMASK, &savedDepthMask);
     }
 
     // Confine drawing to the region GlView told us about. GetClippingBox() is already in
@@ -318,11 +366,26 @@ public:
     // the clipping box would apply the view's placement a second time.
     glScissor(box.x, box.y, box.width, box.height);
     glEnable(GL_SCISSOR_TEST);
+
+    // The OFFSCREEN backend draws into a surface and a context of its own, and nothing
+    // sets their viewport for us: GL leaves it at the size of whichever surface the
+    // context was first made current with, which is not the size we draw at. The direct
+    // backends are the opposite case handled just above - their viewport is DALi's and
+    // must be left alone.
+    if(mOwnsViewport.load())
+    {
+      glViewport(0, 0, static_cast<GLsizei>(size.width), static_cast<GLsizei>(size.height));
+    }
     // DALi requests a depth buffer by default (DALI_DISABLE_DEPTH_BUFFER turns it off, in
     // which case the cube's faces will draw in the wrong order). Note that on the UNSAFE
     // backend this shares DALi's depth buffer, so the clear below is visible to DALi for
     // the rest of the frame - inside the scissor box only.
     glEnable(GL_DEPTH_TEST);
+
+    // Depth writes as well, not just the test: the UNSAFE backend inherits DALi's state,
+    // and DALi leaves them off for its own 2D content. Without this the clear below is
+    // masked out and nothing writes depth, so the faces draw in submission order.
+    glDepthMask(GL_TRUE);
     glClearColor(0.06f, 0.07f, 0.10f, 1.0f);
     glClear(static_cast<GLbitfield>(GL_COLOR_BUFFER_BIT) | static_cast<GLbitfield>(GL_DEPTH_BUFFER_BIT));
 
@@ -413,6 +476,7 @@ public:
       {
         glDisable(GL_DEPTH_TEST);
       }
+      glDepthMask(savedDepthMask);
     }
 
     return true;
@@ -457,6 +521,10 @@ public:
   void SetRestoreState(bool restore)
   {
     mRestoreState.store(restore);
+  }
+  void SetOwnsViewport(bool owns)
+  {
+    mOwnsViewport.store(owns);
   }
   bool GetRestoreState() const
   {
@@ -516,6 +584,7 @@ private:
 
   // Shared with the event thread.
   std::atomic_bool     mRestoreState{true};
+  std::atomic_bool     mOwnsViewport{false};
   std::atomic_uint32_t mInitCount{0u};
   std::atomic_uint32_t mFrameCount{0u};
   std::atomic_uint32_t mTerminateCount{0u};
@@ -680,8 +749,14 @@ private:
     mRenderers.push_back(std::make_unique<CubeRenderer>());
     CubeRenderer* renderer = mRenderers.back().get();
     renderer->SetRestoreState(restoreState);
+    renderer->SetOwnsViewport(mBackendMode == GlView::BackendMode::OFFSCREEN_RENDERING);
 
-    mGlView = GlView::New(mBackendMode);
+    // Ignored by the direct backends, which draw into the window surface. The cube needs
+    // a depth buffer, and the offscreen backend has to be told so before its buffers exist.
+    GlViewOffscreenConfig offscreenConfig;
+    offscreenConfig.SetDepthEnabled(true);
+
+    mGlView = GlView::New(mBackendMode, offscreenConfig);
     mGlView.SetLayoutParams(AbsoluteLayoutParams::New()
                               .SetBounds(LayoutRect(pad, pad, slot.width - pad * 2.0f, slot.height - pad * 2.0f)));
     mGlView.RegisterGlCallbacks(
@@ -702,6 +777,13 @@ private:
    */
   void ApplyTextureBinding()
   {
+    if(mBackendMode == GlView::BackendMode::OFFSCREEN_RENDERING)
+    {
+      // Nothing to hand over: that backend renders on a context that shares none of
+      // DALi's resources, so the cube always falls back to its per-face colours.
+      return;
+    }
+
     Dali::Vector<Texture> textures;
     if(mTextureBound)
     {
@@ -727,9 +809,7 @@ private:
 
     if(key == "b" || key == "B")
     {
-      mBackendMode = (mBackendMode == GlView::BackendMode::DIRECT_RENDERING)
-                       ? GlView::BackendMode::UNSAFE_DIRECT_RENDERING
-                       : GlView::BackendMode::DIRECT_RENDERING;
+      mBackendMode = NextBackendMode(mBackendMode);
       BuildGlView();
     }
     else if(key == "m" || key == "M")

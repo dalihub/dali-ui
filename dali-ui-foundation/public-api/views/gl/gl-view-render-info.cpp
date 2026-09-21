@@ -27,9 +27,7 @@ namespace Ui
 {
 namespace
 {
-/// Returned while there is no input to read through.
-const Size                   EMPTY_SIZE{};
-const BoundsInteger          EMPTY_CLIPPING_BOX{};
+/// An offscreen backend has no bound textures to report.
 const Dali::Vector<uint32_t> EMPTY_TEXTURE_BINDINGS{};
 } // namespace
 
@@ -47,31 +45,34 @@ Internal::GlViewRenderInfoImpl& GlViewRenderInfo::GetImplementation()
 
 const Matrix& GlViewRenderInfo::GetMvpMatrix() const
 {
-  return mImpl->input ? mImpl->input->mvp : Matrix::IDENTITY;
+  return mImpl->input ? mImpl->input->mvp : mImpl->mvp;
 }
 
 const Matrix& GlViewRenderInfo::GetViewMatrix() const
 {
+  // An offscreen backend has no render task, so there is no view transform to report.
   return mImpl->input ? mImpl->input->view : Matrix::IDENTITY;
 }
 
 const Matrix& GlViewRenderInfo::GetProjectionMatrix() const
 {
-  return mImpl->input ? mImpl->input->projection : Matrix::IDENTITY;
+  return mImpl->input ? mImpl->input->projection : mImpl->projection;
 }
 
 const Size& GlViewRenderInfo::GetSize() const
 {
-  return mImpl->input ? mImpl->input->size : EMPTY_SIZE;
+  return mImpl->input ? mImpl->input->size : mImpl->size;
 }
 
 const BoundsInteger& GlViewRenderInfo::GetClippingBox() const
 {
-  return mImpl->input ? mImpl->input->clippingBox : EMPTY_CLIPPING_BOX;
+  return mImpl->input ? mImpl->input->clippingBox : mImpl->clippingBox;
 }
 
 const Vector4& GlViewRenderInfo::GetWorldColorMultiplier() const
 {
+  // An offscreen backend's output is composited by DALi, whose shader applies the
+  // inherited colour - so the application must not apply it a second time.
   return mImpl->input ? mImpl->input->worldColorMultiplier : Vector4::ONE;
 }
 
