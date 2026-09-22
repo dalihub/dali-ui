@@ -665,7 +665,7 @@ void CheckBackgroundTextInputFocus(bool longPress)
       {
         TestGenerateTap(application, 20.0f, 20.0f, 100u);
       }
-      DALI_TEST_CHECK(manager.GetCurrentFocusView() == current);
+      DALI_TEST_CHECK(manager.GetCurrentFocusView().GetObjectPtr() == current.GetObjectPtr());
       DALI_TEST_CHECK(UiExtension::FocusManager::IsKeyInputTarget(current));
       DALI_TEST_CHECK(current.GetState().Contains(ViewState::FOCUSED));
       DALI_TEST_CHECK(!input.GetState().Contains(ViewState::FOCUSED));
@@ -677,7 +677,7 @@ void CheckBackgroundTextInputFocus(bool longPress)
       // Long press itself is key-only; with FocusOnTouch enabled, touch release
       // separately requests navigation. Disable it to isolate the key-only path.
       View expected = longPress && !focusOnTouch ? savedNavigation : View(input);
-      DALI_TEST_CHECK(manager.GetCurrentFocusView() == expected);
+      DALI_TEST_CHECK(manager.GetCurrentFocusView().GetObjectPtr() == expected.GetObjectPtr());
       DALI_TEST_CHECK(UiExtension::FocusManager::IsKeyInputTarget(expected));
       DALI_TEST_CHECK(expected.GetState().Contains(ViewState::FOCUSED));
     }
