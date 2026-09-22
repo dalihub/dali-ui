@@ -240,6 +240,14 @@ public:
    */
   Shader GetShader(VisualFactoryCache& factoryCache, const TextVisualShaderFeature::FeatureBuilder& featureBuilder);
 
+  /**
+   * @brief Gets the foreground-only Reveal shader for prepared source atlases.
+   *
+   * Reuses the resolved text/gradient features without decoration samplers.
+   * Atlas addressing is independent of local gradient and timing coordinates.
+   */
+  Shader GetRevealSourceShader(VisualFactoryCache& factoryCache, TextVisualShaderFeature::FeatureBuilder featureBuilder);
+
 public: // Implementation of VisualShaderFactoryInterface
   /**
    * @copydoc Dali::Ui::VisualShaderFactoryInterface::AddPrecompiledShader
@@ -253,6 +261,7 @@ public: // Implementation of VisualShaderFactoryInterface
 
 private:
   std::unordered_map<uint32_t, VisualFactoryCache::ExternalShaderId> mRevealShaderIds;
+  std::unordered_map<uint32_t, VisualFactoryCache::ExternalShaderId> mRevealSourceShaderIds;
 
   /**
    * @brief Create pre-compiled shader for image with builder and option.

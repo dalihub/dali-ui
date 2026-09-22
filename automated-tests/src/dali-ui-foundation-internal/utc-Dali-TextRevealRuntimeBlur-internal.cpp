@@ -246,6 +246,27 @@ std::vector<float> UploadedCaptureVertices(UiTestApplication& application, uint3
   return {};
 }
 
+std::vector<float> UploadedSourceVertices(UiTestApplication& application, uint32_t lines)
+{
+  const size_t count   = static_cast<size_t>(lines) * 4u * 12u;
+  const auto&  buffers = application.GetGraphicsController().mAllocatedBuffers;
+  for(auto iter = buffers.rbegin(); iter != buffers.rend(); ++iter)
+  {
+    const auto* buffer = *iter;
+    if((buffer->mUsage & static_cast<uint32_t>(Graphics::BufferUsage::VERTEX_BUFFER)) &&
+       buffer->memory.size() == count * sizeof(float))
+    {
+      std::vector<float> values(count);
+      std::memcpy(values.data(), buffer->memory.data(), buffer->memory.size());
+      if(count && values[0u] == -0.5f && values[1u] == -0.5f && values[10u] > 0.0f && values[11u] > 0.0f)
+      {
+        return values;
+      }
+    }
+  }
+  return {};
+}
+
 uint64_t BatchStoragePixels(const std::vector<Ui::Internal::RuntimeRevealBlurBatch>& batches)
 {
   uint64_t pixels = 0u;
@@ -1017,7 +1038,7 @@ int UtcDaliTextRevealRuntimeGaussianSharedForegroundP(void)
         DALI_TEST_EQUALS(tasks.GetTaskCount(), 4u, TEST_LOCATION);
         auto foreground = Find(host, "RevealGaussianLineForeground");
         DALI_TEST_CHECK(foreground);
-        DALI_TEST_EQUALS(foreground.GetRendererCount(), count, TEST_LOCATION);
+        DALI_TEST_EQUALS(foreground.GetRendererCount(), 1u, TEST_LOCATION);
         DALI_TEST_EQUALS(foreground.GetParent(), Find(host, "RevealGaussianBatchSource"), TEST_LOCATION);
         DALI_TEST_EQUALS(Passes(host, "RevealGaussianBatchH").size(), static_cast<size_t>(1u), TEST_LOCATION);
         DALI_TEST_EQUALS(Passes(host, "RevealGaussianBatchV").size(), static_cast<size_t>(1u), TEST_LOCATION);
@@ -1038,7 +1059,7 @@ int UtcDaliTextRevealRuntimeGaussianSharedForegroundP(void)
         // Both qualities batch output without adding one actor per line.
         DALI_TEST_EQUALS(actors - cameras, 7u, TEST_LOCATION);
         DALI_TEST_EQUALS(cameras, 3u, TEST_LOCATION);
-        DALI_TEST_EQUALS(renderers, count + 4u, TEST_LOCATION);
+        DALI_TEST_EQUALS(renderers, 5u, TEST_LOCATION);
         DALI_TEST_EQUALS(BlurLines(host).size(), static_cast<size_t>(count), TEST_LOCATION);
         application.GetScene().Remove(label);
         Settle(application);
@@ -1046,7 +1067,7 @@ int UtcDaliTextRevealRuntimeGaussianSharedForegroundP(void)
         application.GetScene().Add(label);
         Settle(application);
         DALI_TEST_EQUALS(tasks.GetTaskCount(), 4u, TEST_LOCATION);
-        DALI_TEST_EQUALS(Passes(label, "RevealGaussianLineForeground").size(), static_cast<size_t>(count), TEST_LOCATION);
+        DALI_TEST_EQUALS(Passes(label, "RevealGaussianLineForeground").size(), static_cast<size_t>(1u), TEST_LOCATION);
         label.SetTextReveal(Text::Reveal::None());
         Settle(application);
         DALI_TEST_EQUALS(tasks.GetTaskCount(), 1u, TEST_LOCATION);
@@ -1087,6 +1108,7 @@ int UtcDaliTextRevealRuntimeGaussianDrawBatchBoundaryP(void)
   const auto vertical   = Passes(label, "RevealGaussianBatchV");
   DALI_TEST_EQUALS(horizontal.size(), static_cast<size_t>(2u), TEST_LOCATION);
   DALI_TEST_EQUALS(vertical.size(), horizontal.size(), TEST_LOCATION);
+  DALI_TEST_EQUALS(Passes(label, "RevealGaussianLineForeground").size(), static_cast<size_t>(2u), TEST_LOCATION);
   DALI_TEST_EQUALS(Passes(label, "RevealGaussianOutput").size(), horizontal.size(), TEST_LOCATION);
   DALI_TEST_CHECK(horizontal[0].GetGeometry() != vertical[0].GetGeometry());
   DALI_TEST_CHECK(horizontal[1].GetGeometry() != vertical[1].GetGeometry());
@@ -1114,6 +1136,235 @@ int UtcDaliTextRevealRuntimeGaussianDrawBatchBoundaryP(void)
     }
     DALI_TEST_EQUALS(tasks.GetTaskCount(), 4u, TEST_LOCATION);
   }
+  END_TEST;
+}
+
+namespace
+{
+PixelData SourceAtlasTestPlane(uint32_t width, uint32_t height, Pixel::Format format, uint32_t seed)
+{
+  const uint32_t bytes  = Pixel::GetBytesPerPixel(format);
+  const uint32_t stride = (width + 3u) * bytes;
+  auto*          buffer = new uint8_t[static_cast<size_t>(stride) * height];
+  for(uint32_t y = 0u; y < height; ++y)
+  {
+    for(uint32_t x = 0u; x < stride; ++x)
+    {
+      buffer[static_cast<size_t>(y) * stride + x] = static_cast<uint8_t>((seed + y * 13u + x) % 256u);
+    }
+  }
+  return PixelData::New(buffer, stride * height, width, height, stride, format, PixelData::DELETE_ARRAY);
+}
+} //namespace
+
+int UtcDaliTextRevealSourceAtlasPackingP(void)
+{
+  UiTestApplication application;
+  for(auto format : {Pixel::L8, Pixel::RGBA8888})
+  {
+    for(bool masked : {false, true})
+    {
+      Ui::Internal::PreparedRevealBlur prepared;
+      prepared.options.perLine        = true;
+      prepared.options.maxTextureSize = 16u;
+      for(uint32_t i = 0u; i < 6u; ++i)
+      {
+        Ui::Internal::RevealBlurLineRaster line;
+        line.sequence.lineIndex = i;
+        line.foreground         = SourceAtlasTestPlane(5u + i % 3u, 4u, format, i * 19u);
+        line.metadata           = SourceAtlasTestPlane(line.foreground.GetWidth(), 4u, Pixel::RGBA8888, i * 23u);
+        if(masked)
+        {
+          line.mask = SourceAtlasTestPlane(line.foreground.GetWidth(), 4u, Pixel::L8, i * 29u);
+        }
+        prepared.lines.push_back(std::move(line));
+      }
+      const auto originals = prepared.lines;
+      DALI_TEST_CHECK(Ui::Internal::PrepareRevealBlurSourceAtlases(prepared));
+      // Two guarded entries fit per chunk. Atlas boundaries do not reorder lines.
+      DALI_TEST_EQUALS(prepared.sourceAtlases.size(), static_cast<size_t>(3u), TEST_LOCATION);
+      for(uint32_t i = 0u; i < prepared.lines.size(); ++i)
+      {
+        const auto& line = prepared.lines[i];
+        DALI_TEST_EQUALS(line.sequence.lineIndex, i, TEST_LOCATION);
+        DALI_TEST_EQUALS(line.atlasIndex, i / 2u, TEST_LOCATION);
+        DALI_TEST_CHECK(!line.foreground && !line.metadata && !line.mask);
+        const auto& atlas = prepared.sourceAtlases[line.atlasIndex];
+        DALI_TEST_CHECK(atlas.foreground.GetWidth() <= 16u && atlas.foreground.GetHeight() <= 16u);
+        for(uint32_t plane = 0u; plane < (masked ? 3u : 2u); ++plane)
+        {
+          const auto input  = plane == 0u ? originals[i].foreground : (plane == 1u ? originals[i].metadata : originals[i].mask);
+          const auto output = plane == 0u ? atlas.foreground : (plane == 1u ? atlas.metadata : atlas.mask);
+          const auto source = Dali::Integration::GetPixelDataBuffer(input);
+          const auto target = Dali::Integration::GetPixelDataBuffer(output);
+          const auto bytes  = Pixel::GetBytesPerPixel(input.GetPixelFormat());
+          DALI_TEST_EQUALS(output.GetWidth(), atlas.foreground.GetWidth(), TEST_LOCATION);
+          DALI_TEST_EQUALS(output.GetHeight(), atlas.foreground.GetHeight(), TEST_LOCATION);
+          for(uint32_t y = 0u; y < input.GetHeight() + 2u; ++y)
+          {
+            for(uint32_t x = 0u; x < input.GetWidth() + 2u; ++x)
+            {
+              const auto  sx = std::clamp(x, 1u, input.GetWidth()) - 1u;
+              const auto  sy = std::clamp(y, 1u, input.GetHeight()) - 1u;
+              const auto* a  = source.buffer + static_cast<size_t>(sy) * input.GetStrideBytes() + sx * bytes;
+              const auto* b  = target.buffer + static_cast<size_t>(line.atlasRectangle.y + y - 1u) * output.GetStrideBytes() + (line.atlasRectangle.x + x - 1u) * bytes;
+              // Includes padded input stride and all four replicated corners.
+              DALI_TEST_CHECK(std::memcmp(a, b, bytes) == 0);
+            }
+          }
+        }
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextRevealSourceAtlasGroupingP(void)
+{
+  UiTestApplication                application;
+  Ui::Internal::PreparedRevealBlur prepared;
+  prepared.options.perLine        = true;
+  prepared.options.maxTextureSize = 64u;
+  for(uint32_t i = 0u; i < 9u; ++i)
+  {
+    Ui::Internal::RevealBlurLineRaster line;
+    line.sequence.lineIndex         = i;
+    line.sequence.hasTextForeground = i != 4u;
+    if(line.sequence.hasTextForeground)
+    {
+      const auto format = i < 2u ? Pixel::L8 : Pixel::RGBA8888;
+      line.foreground   = SourceAtlasTestPlane(i == 7u ? 64u : 5u, 4u, format, i);
+      line.metadata     = SourceAtlasTestPlane(line.foreground.GetWidth(), 4u, Pixel::RGBA8888, i);
+      if(i == 5u || i == 6u)
+      {
+        line.mask = SourceAtlasTestPlane(5u, 4u, Pixel::L8, i);
+      }
+    }
+    prepared.lines.push_back(std::move(line));
+  }
+  DALI_TEST_CHECK(Ui::Internal::PrepareRevealBlurSourceAtlases(prepared));
+  DALI_TEST_EQUALS(prepared.sourceAtlases.size(), static_cast<size_t>(3u), TEST_LOCATION);
+  for(uint32_t i : {0u, 1u, 2u, 3u, 5u, 6u})
+  {
+    DALI_TEST_CHECK(prepared.lines[i].atlasIndex != Ui::Internal::RevealBlurLineRaster::NO_ATLAS);
+    DALI_TEST_CHECK(!prepared.lines[i].foreground);
+  }
+  // Image-only, no room for the guard, and a singleton keep their old path.
+  for(uint32_t i : {4u, 7u, 8u})
+  {
+    DALI_TEST_EQUALS(prepared.lines[i].atlasIndex, Ui::Internal::RevealBlurLineRaster::NO_ATLAS, TEST_LOCATION);
+  }
+  DALI_TEST_CHECK(!prepared.lines[4u].foreground);
+  DALI_TEST_CHECK(prepared.lines[7u].foreground && prepared.lines[8u].foreground);
+  DALI_TEST_CHECK(prepared.sourceAtlases[0u].foreground.GetPixelFormat() == Pixel::L8);
+  DALI_TEST_CHECK(prepared.sourceAtlases[1u].foreground.GetPixelFormat() == Pixel::RGBA8888);
+  DALI_TEST_CHECK(!prepared.sourceAtlases[1u].mask && prepared.sourceAtlases[2u].mask);
+  Ui::Internal::PreparedRevealBlur invalid;
+  invalid.options = prepared.options;
+  invalid.lines.resize(2u);
+  for(auto& line : invalid.lines)
+  {
+    line.foreground = SourceAtlasTestPlane(5u, 4u, Pixel::L8, 0u);
+    line.metadata   = SourceAtlasTestPlane(4u, 4u, Pixel::RGBA8888, 0u);
+  }
+  DALI_TEST_CHECK(!Ui::Internal::PrepareRevealBlurSourceAtlases(invalid));
+  END_TEST;
+}
+
+int UtcDaliTextRevealSourceAtlasLifetimeP(void)
+{
+  UiTestApplication application;
+  Label             label = MakeLabel(application);
+  label.SetMultiLine(true);
+  label.SetRequestedHeight(350.0f);
+  label.SetFontSize(24.0f);
+  label.SetText("One ordinary line\nA second line\nAnd a final line");
+  const auto tasks = application.GetScene().GetRenderTaskList();
+  for(auto mode : {Ui::Integration::Text::Reveal::BlurMode::PERFORMANCE, Ui::Integration::Text::Reveal::BlurMode::QUALITY})
+  {
+    Text::Reveal reveal;
+    reveal.SetSequence(Text::Reveal::Sequence::PER_LINE);
+    Ui::Integration::Text::Reveal::SetBlurRadius(reveal, 24.0f);
+    Ui::Integration::Text::Reveal::SetBlurMode(reveal, mode);
+    label.SetTextReveal(reveal);
+    Settle(application);
+    auto source = Passes(label, "RevealGaussianLineForeground");
+    DALI_TEST_EQUALS(source.size(), static_cast<size_t>(1u), TEST_LOCATION);
+    const auto program = source[0u].GetShader().GetProperty(Shader::Property::PROGRAM);
+    DALI_TEST_CHECK(program.GetMap() && program.GetMap()->Find("hints"));
+    DALI_TEST_EQUALS(program.GetMap()->Find("hints")->Get<Dali::String>(), Dali::String("MODIFIES_GEOMETRY"), TEST_LOCATION);
+    std::vector<WeakHandleBase> retired;
+    retired.emplace_back(source[0u]);
+    auto geometry = source[0u].GetGeometry();
+    retired.emplace_back(geometry);
+    geometry.Reset();
+    auto textures = source[0u].GetTextures();
+    for(uint32_t slot = 0u; slot < textures.GetTextureCount(); ++slot)
+    {
+      auto texture = textures.GetTexture(slot);
+      retired.emplace_back(texture);
+    }
+    textures.Reset();
+    source.clear();
+    label.SetTextReveal(Text::Reveal::None());
+    Settle(application);
+    DALI_TEST_EQUALS(tasks.GetTaskCount(), 1u, TEST_LOCATION);
+    for(auto& weak : retired)
+    {
+      DALI_TEST_CHECK(!weak.GetBaseHandle());
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextRevealSourceAtlasImageBoundaryP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  Texture    image   = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
+  ImageUrl   url     = ImageUrl::New(image, true);
+  auto       builder = Text::StyledTextBuilder::New("First\nMiddle ");
+  const auto start   = builder.GetUtf32Length();
+  builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
+  DALI_TEST_CHECK(builder.SetSpan(Text::ImageSpan::New(Text::ImageAttributes(url.GetUrl(), Vector2(24.0f, 24.0f))), start, start + 1u));
+  builder.AppendText("\nLast");
+  Label label = Label::New();
+  label.SetLayoutMode(LayoutMode::STANDALONE);
+  label.SetRequestedWidth(360.0f);
+  label.SetRequestedHeight(240.0f);
+  label.SetFontSize(16.0f);
+  label.SetMultiLine(true);
+  label.SetStyledText(builder.Build());
+  Text::Reveal reveal;
+  reveal.SetSequence(Text::Reveal::Sequence::PER_LINE);
+  Ui::Integration::Text::Reveal::SetBlurRadius(reveal, 24.0f);
+  label.SetTextReveal(reveal);
+  application.GetScene().Add(label);
+  Settle(application);
+  const auto            sources = Passes(label, "RevealGaussianLineForeground");
+  std::vector<Renderer> textSources;
+  uint32_t              imageDraws = 0u;
+  for(auto renderer : sources)
+  {
+    DALI_TEST_CHECK(renderer.GetTextures().GetTextureCount() <= 8u);
+    if(renderer.GetTextures().GetTexture(0u) == image)
+    {
+      ++imageDraws;
+    }
+    else
+    {
+      textSources.push_back(renderer);
+    }
+  }
+  DALI_TEST_EQUALS(imageDraws, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(textSources.size(), static_cast<size_t>(3u), TEST_LOCATION);
+  // First and Last share prepared storage, but must not be merged across the
+  // middle image-bearing line merely because their A8 page is shared.
+  DALI_TEST_CHECK(textSources[0u].GetTextures() == textSources[1u].GetTextures());
+  DALI_TEST_CHECK(textSources[0u].GetGeometry() != textSources[1u].GetGeometry());
+  label.SetTextReveal(Text::Reveal::None());
+  Settle(application);
+  DALI_TEST_EQUALS(application.GetScene().GetRenderTaskList().GetTaskCount(), 1u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2019,27 +2270,34 @@ int UtcDaliTextRevealRuntimeGaussianCroppedGeometryP(void)
       DALI_TEST_CHECK(!View::DownCast(host));
       const Renderer original    = Find(label, "RevealGaussianForeground").GetRendererAt(0u);
       const auto     foregrounds = Passes(label, "RevealGaussianLineForeground");
-      DALI_TEST_CHECK(!foregrounds.empty());
+      DALI_TEST_EQUALS(foregrounds.size(), static_cast<size_t>(1u), TEST_LOCATION);
+      const auto lineCount      = static_cast<uint32_t>(BlurLines(label).size());
+      const auto sourceVertices = UploadedSourceVertices(application, lineCount);
+      DALI_TEST_EQUALS(sourceVertices.size(), static_cast<size_t>(lineCount) * 48u, TEST_LOCATION);
       for(Renderer foreground : foregrounds)
       {
-        DALI_TEST_CHECK(foreground.GetShader() == original.GetShader());
-        DALI_TEST_CHECK(foreground.GetGeometry() == original.GetGeometry());
+        DALI_TEST_CHECK(foreground.GetShader() != original.GetShader());
+        DALI_TEST_CHECK(foreground.GetGeometry() != original.GetGeometry());
         const auto index = original.GetPropertyIndex("uTextGradientBounds");
         DALI_TEST_CHECK(index != Property::INVALID_INDEX);
-        const auto rectangle     = foreground.GetProperty<Vector4>(foreground.GetPropertyIndex("runtimeBlurTextureRect"));
         const auto bounds        = original.GetCurrentProperty<Vector4>(index);
-        const auto croppedBounds = foreground.GetCurrentProperty<Vector4>(foreground.GetPropertyIndex("uTextGradientBounds"));
-        // A cropped UV must address the same original gradient position.
-        DALI_TEST_EQUALS(Vector4(croppedBounds.x * rectangle.z + rectangle.x, croppedBounds.y * rectangle.w + rectangle.y,
-                                 croppedBounds.z * rectangle.z, croppedBounds.w * rectangle.w),
-                         bounds, 0.0001f, TEST_LOCATION);
-        const auto originalTexture = original.GetTextures().GetTexture(0u);
-        const auto croppedTexture  = foreground.GetTextures().GetTexture(0u);
-        DALI_TEST_CHECK(croppedTexture.GetHeight() < originalTexture.GetHeight());
+        // Shared bounds stay in original coordinates. Each quad supplies its
+        // own crop for the shader's existing local gradient calculation.
+        DALI_TEST_EQUALS(foreground.GetCurrentProperty<Vector4>(foreground.GetPropertyIndex("uTextGradientBounds")), bounds, TEST_LOCATION);
+        for(uint32_t line = 0u; line < lineCount; ++line)
+        {
+          const auto*   vertex = sourceVertices.data() + static_cast<size_t>(line) * 48u;
+          const Vector4 rectangle(vertex[2u], vertex[3u], vertex[4u], vertex[5u]);
+          DALI_TEST_CHECK(rectangle.z > 0.0f && rectangle.w > 0.0f);
+          const Vector4 croppedBounds((bounds.x - rectangle.x) / rectangle.z, (bounds.y - rectangle.y) / rectangle.w,
+                                      bounds.z / rectangle.z, bounds.w / rectangle.w);
+          DALI_TEST_EQUALS(Vector4(croppedBounds.x * rectangle.z + rectangle.x, croppedBounds.y * rectangle.w + rectangle.y,
+                                   croppedBounds.z * rectangle.z, croppedBounds.w * rectangle.w),
+                           bounds, 0.0001f, TEST_LOCATION);
+        }
         using P                 = VisualRenderer::Property;
         const auto originalSize = original.GetCurrentProperty<Vector2>(P::TRANSFORM_SIZE);
-        DALI_TEST_EQUALS(foreground.GetCurrentProperty<Vector2>(P::TRANSFORM_SIZE),
-                         Vector2(originalSize.x * rectangle.z, originalSize.y * rectangle.w), 0.001f, TEST_LOCATION);
+        DALI_TEST_EQUALS(foreground.GetCurrentProperty<Vector2>(P::TRANSFORM_SIZE), originalSize, TEST_LOCATION);
       }
       auto               tasks      = application.GetScene().GetRenderTaskList();
       uint64_t           actualArea = 0u;
@@ -2076,10 +2334,10 @@ int UtcDaliTextRevealRuntimeGaussianCroppedGeometryP(void)
           DALI_TEST_EQUALS(foreground.GetCurrentProperty<Vector3>(Actor::Property::SIZE),
                            Find(label, "RevealGaussianForeground").GetCurrentProperty<Vector3>(Actor::Property::SIZE), TEST_LOCATION);
           DALI_TEST_EQUALS(foreground.GetCurrentProperty<Vector3>(Actor::Property::POSITION), Vector3::ZERO, TEST_LOCATION);
-          const auto capture = UploadedCaptureVertices(application, foreground.GetRendererCount());
-          DALI_TEST_EQUALS(capture.size(), static_cast<size_t>(foreground.GetRendererCount()) * 44u, TEST_LOCATION);
+          const auto capture = UploadedCaptureVertices(application, lineCount);
+          DALI_TEST_EQUALS(capture.size(), static_cast<size_t>(lineCount) * 44u, TEST_LOCATION);
           std::vector<float> expectedVertices;
-          for(uint32_t line = 0u; line < foreground.GetRendererCount(); ++line)
+          for(uint32_t line = 0u; line < lineCount; ++line)
           {
             DALI_TEST_CHECK(outputIndex < outputs.size());
             const auto*   vertex = capture.data() + static_cast<size_t>(line) * 44u;
@@ -2089,13 +2347,8 @@ int UtcDaliTextRevealRuntimeGaussianCroppedGeometryP(void)
             DALI_TEST_CHECK(lineSize.x > 0.0f && lineSize.y > 0.0f);
             DALI_TEST_CHECK(std::abs(center.x) + lineSize.x * 0.5f <= static_cast<float>(texture.GetWidth()) * 0.5f + 0.001f);
             DALI_TEST_CHECK(std::abs(center.y) + lineSize.y * 0.5f <= static_cast<float>(texture.GetHeight()) * 0.5f + 0.001f);
-            using P                   = VisualRenderer::Property;
-            const auto renderer       = foreground.GetRendererAt(line);
-            const auto crop           = renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("runtimeBlurTextureRect"));
-            const auto originalSize   = original.GetCurrentProperty<Vector2>(P::TRANSFORM_SIZE);
-            const auto originalOffset = original.GetCurrentProperty<Vector2>(P::TRANSFORM_OFFSET);
-            const auto captureOffset  = renderer.GetCurrentProperty<Vector2>(P::TRANSFORM_OFFSET) -
-                                       (originalOffset + Vector2(originalSize.x * crop.x, originalSize.y * crop.y));
+            const auto*   source = sourceVertices.data() + static_cast<size_t>(line) * 48u;
+            const Vector2 captureOffset(source[6u], source[7u]);
             const Vector2 offset = center - captureOffset;
             for(Vector2 uv : {Vector2(0.0f, 0.0f), Vector2(1.0f, 0.0f), Vector2(0.0f, 1.0f), Vector2(1.0f, 1.0f)})
             {
@@ -2113,7 +2366,7 @@ int UtcDaliTextRevealRuntimeGaussianCroppedGeometryP(void)
         }
       }
       DALI_TEST_EQUALS(outputIndex, outputs.size(), TEST_LOCATION);
-      DALI_TEST_CHECK(actualArea < static_cast<uint64_t>(foregrounds.size()) * 3u * 668u * 308u);
+      DALI_TEST_CHECK(actualArea < static_cast<uint64_t>(lineCount) * 3u * 668u * 308u);
     }
   }
   END_TEST;
@@ -2738,7 +2991,7 @@ int CheckRuntimeGaussianPublicTiming(Text::Reveal::Unit unit, Text::Reveal::Sequ
         auto       foreground = Passes(label, perLine ? "RevealGaussianLineForeground" : "RevealGaussianForeground");
         DALI_TEST_EQUALS(horizontal.size(), perLine ? static_cast<size_t>(3u) : static_cast<size_t>(1u), TEST_LOCATION);
         DALI_TEST_EQUALS(vertical.size(), horizontal.size(), TEST_LOCATION);
-        DALI_TEST_EQUALS(foreground.size(), horizontal.size(), TEST_LOCATION);
+        DALI_TEST_EQUALS(foreground.size(), static_cast<size_t>(1u), TEST_LOCATION);
         // Identical explicit lines share a canonical reference interval.
         // LINE/STEP has zero visible transition time, but its blur/stagger
         // reference remains meaningful and must not become zero.
@@ -2763,7 +3016,7 @@ int CheckRuntimeGaussianPublicTiming(Text::Reveal::Unit unit, Text::Reveal::Sequ
               DALI_TEST_EQUALS(pass.Strength(),
                                1.0f - q * q * (3.0f - 2.0f * q), 0.0002f, TEST_LOCATION);
             }
-            DALI_TEST_EQUALS(foreground[line].GetCurrentProperty<float>(foreground[line].GetPropertyIndex("uTextRevealProgress")),
+            DALI_TEST_EQUALS(foreground[0u].GetCurrentProperty<float>(foreground[0u].GetPropertyIndex("uTextRevealProgress")),
                              progress, 0.0001f, TEST_LOCATION);
           }
         }
@@ -5044,20 +5297,23 @@ int UtcDaliTextRevealRuntimeGaussianSourceRegionP(void)
       for(const auto& line : prepared->lines)
       {
         auto full = typesetter->RenderRuntimeBlurLine(size, line.sequence.lineIndex, Plane::TEXT, Pixel::RGBA8888, plan);
-        DALI_TEST_CHECK(full && line.foreground);
+        const auto isolated = line.atlasIndex == Ui::Internal::RevealBlurLineRaster::NO_ATLAS
+                                ? line.foreground
+                                : Ui::Internal::CropRuntimeRevealBlurPixels(prepared->sourceAtlases[line.atlasIndex].foreground, line.atlasRectangle);
+        DALI_TEST_CHECK(full && isolated);
         const auto fullPixels = Dali::Integration::GetPixelDataBuffer(full);
-        const auto cropped    = Dali::Integration::GetPixelDataBuffer(line.foreground);
+        const auto   cropped    = Dali::Integration::GetPixelDataBuffer(isolated);
         const auto x          = static_cast<uint32_t>(std::round(line.sequence.textureRect.x * size.width));
         const auto y          = static_cast<uint32_t>(std::round(line.sequence.textureRect.y * size.height));
         const size_t rowBytes = static_cast<size_t>(full.GetWidth()) * 4u;
-        DALI_TEST_CHECK(x + line.foreground.GetWidth() <= full.GetWidth());
-        DALI_TEST_CHECK(y + line.foreground.GetHeight() <= full.GetHeight());
+        DALI_TEST_CHECK(x + isolated.GetWidth() <= full.GetWidth());
+        DALI_TEST_CHECK(y + isolated.GetHeight() <= full.GetHeight());
         std::vector<uint8_t> reconstructed(rowBytes * full.GetHeight(), 0u);
-        for(uint32_t row = 0u; row < line.foreground.GetHeight(); ++row)
+        for(uint32_t row = 0u; row < isolated.GetHeight(); ++row)
         {
           std::memcpy(reconstructed.data() + static_cast<size_t>(y + row) * rowBytes + x * 4u,
-                      cropped.buffer + static_cast<size_t>(row) * line.foreground.GetStrideBytes(),
-                      static_cast<size_t>(line.foreground.GetWidth()) * 4u);
+                      cropped.buffer + static_cast<size_t>(row) * isolated.GetStrideBytes(),
+                      static_cast<size_t>(isolated.GetWidth()) * 4u);
         }
         for(uint32_t row = 0u; row < full.GetHeight(); ++row)
         {
@@ -5130,11 +5386,21 @@ int UtcDaliTextRevealRuntimeGaussianSourceRegionFallbackP(void)
   DALI_TEST_CHECK(BlurLines(label).size() > 1u);
   const auto foreground = Passes(label, "RevealGaussianLineForeground");
   DALI_TEST_CHECK(!foreground.empty());
+  const auto lineCount      = static_cast<uint32_t>(BlurLines(label).size());
+  const auto sourceVertices = UploadedSourceVertices(application, lineCount);
+  DALI_TEST_EQUALS(sourceVertices.size(), static_cast<size_t>(lineCount) * 48u, TEST_LOCATION);
   for(auto renderer : foreground)
   {
     auto texture = renderer.GetTextures().GetTexture(0u);
-    DALI_TEST_EQUALS(texture.GetWidth(), originalTexture.GetWidth(), TEST_LOCATION);
-    DALI_TEST_EQUALS(texture.GetHeight(), originalTexture.GetHeight(), TEST_LOCATION);
+    for(uint32_t line = 0u; line < lineCount; ++line)
+    {
+      const auto* vertex = sourceVertices.data() + static_cast<size_t>(line) * 48u;
+      // Transparent source fallback still retains the entire original plane
+      // per entry; batching changes storage, not its crop/coverage contract.
+      DALI_TEST_EQUALS(Vector4(vertex[2u], vertex[3u], vertex[4u], vertex[5u]), Vector4(0.0f, 0.0f, 1.0f, 1.0f), TEST_LOCATION);
+      DALI_TEST_EQUALS(vertex[10u] * static_cast<float>(texture.GetWidth()), static_cast<float>(originalTexture.GetWidth()), 0.001f, TEST_LOCATION);
+      DALI_TEST_EQUALS(vertex[11u] * static_cast<float>(texture.GetHeight()), static_cast<float>(originalTexture.GetHeight()), 0.001f, TEST_LOCATION);
+    }
   }
   label.SetTextReveal(Text::Reveal::None());
   Settle(application);

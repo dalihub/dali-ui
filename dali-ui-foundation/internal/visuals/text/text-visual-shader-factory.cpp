@@ -20,6 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 
@@ -406,6 +407,41 @@ Shader TextVisualShaderFactory::GetShader(VisualFactoryCache&                   
     shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
     shader.RegisterProperty(PIXEL_SNAP_FACTOR_UNIFORM_NAME.data(), PIXEL_SNAP_DISABLED_VALUE);
   }
+  return shader;
+}
+
+Shader TextVisualShaderFactory::GetRevealSourceShader(VisualFactoryCache& factoryCache, TextVisualShaderFeature::FeatureBuilder featureBuilder)
+{
+  featureBuilder.EnableStyle(false).EnableOverlay(false).EnableTextReveal(true);
+  const auto key   = static_cast<uint32_t>(featureBuilder.GetShaderType());
+  const auto found = mRevealSourceShaderIds.find(key);
+  if(found != mRevealSourceShaderIds.end())
+  {
+    if(auto shader = factoryCache.GetExternalShader(found->second))
+    {
+      return shader;
+    }
+  }
+  std::string vertexPrefix;
+  std::string fragmentPrefix;
+  featureBuilder.GetVertexShaderPrefixList(vertexPrefix);
+  featureBuilder.GetFragmentShaderPrefixList(fragmentPrefix);
+  vertexPrefix += "#define TEXT_REVEAL_SOURCE_ATLAS\n";
+  fragmentPrefix += "#define TEXT_REVEAL_SOURCE_ATLAS\n";
+  const std::string vertex   = vertexPrefix + SHADER_TEXT_VISUAL_SHADER_VERT.data();
+  const std::string fragment = fragmentPrefix + SHADER_TEXT_VISUAL_SHADER_FRAG.data();
+  // Each quad moves to its capture cell through vertex attributes. The
+  // original visual bounds are not a culling bound for the combined geometry.
+  auto shader = Shader::New(ToDaliStringView(vertex), ToDaliStringView(fragment), Shader::Hint::MODIFIES_GEOMETRY, "TEXT_REVEAL_SOURCE_ATLAS");
+  if(!Dali::Adaptor::IsAvailable())
+  {
+    return {};
+  }
+  shader.ReserveCustomProperties(3);
+  shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+  shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
+  shader.RegisterProperty(PIXEL_SNAP_FACTOR_UNIFORM_NAME.data(), PIXEL_SNAP_DISABLED_VALUE);
+  mRevealSourceShaderIds[key] = factoryCache.RegisterExternalShader(shader);
   return shader;
 }
 

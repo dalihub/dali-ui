@@ -143,6 +143,116 @@ PixelData CropRuntimeRevealBlurPixels(PixelData pixels, const Rect<uint32_t>& re
   return PixelBuffer::Convert(cropped);
 }
 
+bool PrepareRevealBlurSourceAtlases(PreparedRevealBlur& prepared)
+{
+  const uint32_t maximum = prepared.options.maxTextureSize;
+  if(!prepared.options.perLine || maximum < 3u)
+  {
+    return true;
+  }
+  auto eligible = [maximum](const RevealBlurLineRaster& line)
+  {
+    return line.sequence.hasTextForeground && line.foreground && line.metadata &&
+           line.atlasIndex == RevealBlurLineRaster::NO_ATLAS &&
+           line.foreground.GetWidth() > 0u && line.foreground.GetHeight() > 0u &&
+           line.foreground.GetWidth() <= maximum - 2u && line.foreground.GetHeight() <= maximum - 2u &&
+           (line.foreground.GetPixelFormat() == Pixel::L8 || line.foreground.GetPixelFormat() == Pixel::RGBA8888);
+  };
+  for(size_t first = 0u; first < prepared.lines.size();)
+  {
+    const auto& initial = prepared.lines[first];
+    if(!eligible(initial))
+    {
+      ++first;
+      continue;
+    }
+    const auto format = initial.foreground.GetPixelFormat();
+    const bool masked = bool(initial.mask);
+    uint32_t   width  = 0u;
+    uint32_t   height = 0u;
+    size_t     end    = first;
+    for(; end < prepared.lines.size(); ++end)
+    {
+      const auto& line = prepared.lines[end];
+      if(!eligible(line) || line.foreground.GetPixelFormat() != format || bool(line.mask) != masked ||
+         line.foreground.GetHeight() + 2u > maximum - height)
+      {
+        break;
+      }
+      width = std::max(width, line.foreground.GetWidth() + 2u);
+      height += line.foreground.GetHeight() + 2u;
+    }
+    if(end - first < 2u)
+    {
+      first = end;
+      continue;
+    }
+    RevealBlurSourceAtlas atlas;
+    for(uint32_t plane = 0u; plane < (masked ? 3u : 2u); ++plane)
+    {
+      const auto   planeFormat = plane == 0u ? format : (plane == 1u ? Pixel::RGBA8888 : Pixel::L8);
+      const size_t bytes       = Pixel::GetBytesPerPixel(planeFormat);
+      if(static_cast<uint64_t>(width) * height > std::numeric_limits<size_t>::max() / bytes)
+      {
+        return false;
+      }
+      auto pixels = PixelBuffer::New(width, height, planeFormat);
+      if(!pixels.GetBuffer())
+      {
+        return false;
+      }
+      std::memset(pixels.GetBuffer(), 0, static_cast<size_t>(width) * height * bytes);
+      uint32_t y = 0u;
+      for(size_t index = first; index < end; ++index)
+      {
+        const auto& line  = prepared.lines[index];
+        const auto  input = plane == 0u ? line.foreground : (plane == 1u ? line.metadata : line.mask);
+        const auto  w     = line.foreground.GetWidth();
+        const auto  h     = line.foreground.GetHeight();
+        if(!input || input.GetWidth() != w || input.GetHeight() != h || input.GetPixelFormat() != planeFormat)
+        {
+          return false;
+        }
+        const auto   buffer   = Dali::Integration::GetPixelDataBuffer(input);
+        const size_t rowBytes = static_cast<size_t>(w) * bytes;
+        const size_t stride   = input.GetStrideBytes() ? input.GetStrideBytes() : rowBytes;
+        if(!buffer.buffer || stride < rowBytes || (static_cast<size_t>(h) - 1u) * stride + rowBytes > buffer.bufferSize)
+        {
+          return false;
+        }
+        for(uint32_t row = 0u; row < h + 2u; ++row)
+        {
+          const auto* source = buffer.buffer + static_cast<size_t>(std::clamp(row, 1u, h) - 1u) * stride;
+          auto*       target = pixels.GetBuffer() + (static_cast<size_t>(y + row) * width) * bytes;
+          // One replicated texel, including corners, preserves standalone
+          // CLAMP_TO_EDGE for local [0,1] UV and non-mipmapped linear filtering.
+          std::memcpy(target + bytes, source, rowBytes);
+          std::memcpy(target, source, bytes);
+          std::memcpy(target + (static_cast<size_t>(w) + 1u) * bytes, source + (static_cast<size_t>(w) - 1u) * bytes, bytes);
+        }
+        y += h + 2u;
+      }
+      auto& output = plane == 0u ? atlas.foreground : (plane == 1u ? atlas.metadata : atlas.mask);
+      output       = PixelBuffer::Convert(pixels);
+    }
+    const auto atlasIndex = static_cast<uint32_t>(prepared.sourceAtlases.size());
+    prepared.sourceAtlases.push_back(std::move(atlas));
+    uint32_t y = 0u;
+    for(size_t index = first; index < end; ++index)
+    {
+      auto& line          = prepared.lines[index];
+      line.atlasIndex     = atlasIndex;
+      line.atlasRectangle = Rect<uint32_t>(1u, y + 1u, line.foreground.GetWidth(), line.foreground.GetHeight());
+      y += line.foreground.GetHeight() + 2u;
+      line.foreground.Reset();
+      line.metadata.Reset();
+      line.mask.Reset();
+    }
+    first = end;
+  }
+  return true;
+}
+
 std::vector<RevealBlurSequence> BuildRevealBlurSequences(
   Ui::Text::Typesetter& typesetter, const Ui::Text::Internal::Reveal::Plan& plan)
 {
@@ -547,7 +657,7 @@ std::shared_ptr<const PreparedRevealBlur> PrepareRevealBlur(
     result->lines.push_back(std::move(line));
   }
   result->metadata = typesetter.RenderTextRevealMetadata(size, options.textDirection, plan, result->fadeDuration);
-  if(!result->metadata)
+  if(!result->metadata || !PrepareRevealBlurSourceAtlases(*result))
   {
     return {};
   }

@@ -5,6 +5,17 @@
 precision highp float;
 
 INPUT highp vec2 vTexCoord;
+#ifdef TEXT_REVEAL_SOURCE_ATLAS
+INPUT highp vec4 vSourceAtlas;
+INPUT highp vec4 vSourceCrop;
+// Timing and gradient calculations still use local text coordinates. Only
+// isolated input planes are atlased; shared gradient lookups remain unchanged.
+#define TEXT_SOURCE_UV(coord) (vSourceAtlas.xy + clamp(coord, 0.0, 1.0) * vSourceAtlas.zw)
+#define TEXT_SOURCE_BOUNDS(bounds) vec4((bounds.xy - vSourceCrop.xy) / vSourceCrop.zw, bounds.zw / vSourceCrop.zw)
+#else
+#define TEXT_SOURCE_UV(coord) coord
+#define TEXT_SOURCE_BOUNDS(bounds) bounds
+#endif
 UNIFORM sampler2D sTexture;
 #ifdef IS_REQUIRED_TEXT_GRADIENT_MIXED
 UNIFORM sampler2D sTextGradientMask;
@@ -140,8 +151,9 @@ mediump vec4 ApplyTextGradientOverlay(mediump vec4 baseFill, highp vec2 texCoord
     return baseFill;
   }
 
+  highp vec4 overlayBounds = TEXT_SOURCE_BOUNDS(uTextGradientOverlayBounds);
   highp vec2 textGradientOverlayCoord =
-    (texCoord - uTextGradientOverlayBounds.xy) / max(uTextGradientOverlayBounds.zw, vec2(0.000001));
+    (texCoord - overlayBounds.xy) / max(overlayBounds.zw, vec2(0.000001));
   highp float gradientPosition = EvaluateTextGradientOverlayPosition(textGradientOverlayCoord);
   mediump vec4 overlayColor =
     TEXTURE(sGradientOverlayLookup, vec2(gradientPosition + uTextGradientOverlayStartOffset, 0.5));
@@ -165,7 +177,7 @@ mediump vec4 ApplyTextGradientOverlay(mediump vec4 baseFill, highp vec2 texCoord
 #ifdef IS_REQUIRED_TEXT_REVEAL
 highp float ResolveTextRevealOpacity(highp vec2 texCoord)
 {
-  mediump vec4 revealMetadata = TEXTURE(sTextRevealMetadata, texCoord);
+  mediump vec4 revealMetadata = TEXTURE(sTextRevealMetadata, TEXT_SOURCE_UV(texCoord));
   highp float encodedStart =
     floor(revealMetadata.r * 255.0 + 0.5) * 256.0 + floor(revealMetadata.g * 255.0 + 0.5);
   highp float normalizedStart = encodedStart / 65535.0;
@@ -209,25 +221,27 @@ void main()
 
   mediump vec4 textColor;
 #ifdef IS_REQUIRED_TEXT_GRADIENT_MIXED
-  mediump vec4 preservedColor = TEXTURE(sTexture, vTexCoord);
-  mediump float textTexture = TEXTURE(sTextGradientMask, vTexCoord).r;
+  mediump vec4 preservedColor = TEXTURE(sTexture, TEXT_SOURCE_UV(vTexCoord));
+  mediump float textTexture = TEXTURE(sTextGradientMask, TEXT_SOURCE_UV(vTexCoord)).r;
+  highp vec4 gradientBounds = TEXT_SOURCE_BOUNDS(uTextGradientBounds);
   highp vec2 textGradientCoord =
-    (vTexCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
+    (vTexCoord - gradientBounds.xy) / max(gradientBounds.zw, vec2(0.000001));
   highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
   mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
   mediump vec4 gradientFill = vec4(gradientColor.rgb * textTexture,
                                    gradientColor.a * textTexture * uTextColorAnimatable.a);
   textColor = gradientFill + preservedColor * (1.0 - gradientFill.a);
 #elif defined(IS_REQUIRED_TEXT_GRADIENT)
-  mediump float textTexture = TEXTURE(sTexture, vTexCoord).r;
+  mediump float textTexture = TEXTURE(sTexture, TEXT_SOURCE_UV(vTexCoord)).r;
+  highp vec4 gradientBounds = TEXT_SOURCE_BOUNDS(uTextGradientBounds);
   highp vec2 textGradientCoord =
-    (vTexCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
+    (vTexCoord - gradientBounds.xy) / max(gradientBounds.zw, vec2(0.000001));
   highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
   mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
   textColor = vec4(gradientColor.rgb * textTexture, gradientColor.a * textTexture * uTextColorAnimatable.a);
 #elif defined(IS_REQUIRED_MULTI_COLOR) || defined(IS_REQUIRED_EMOJI)
   // Multiple color or use emoji.
-  textColor = TEXTURE(sTexture, vTexCoord);
+  textColor = TEXTURE(sTexture, TEXT_SOURCE_UV(vTexCoord));
 #ifdef IS_REQUIRED_EMBOSS
   // Multiple color or use emoji, with emboss
   mediump float textAlpha = textColor.a;
@@ -258,7 +272,7 @@ void main()
 #elif defined(IS_REQUIRED_MULTI_COLOR)
 #elif defined(IS_REQUIRED_EMOJI)
   // Single color with emoji.
-  mediump float maskTexture = TEXTURE(sMask, vTexCoord).r;
+  mediump float maskTexture = TEXTURE(sMask, TEXT_SOURCE_UV(vTexCoord)).r;
 
   // Set the color of non-transparent pixel in text to what it is animated to.
   // Markup text with multiple text colors are not animated (but can be supported later on if required).
@@ -291,7 +305,7 @@ void main()
 
 #else
   // Single color without emoji.
-  mediump float textTexture = TEXTURE(sTexture, vTexCoord).r;
+  mediump float textTexture = TEXTURE(sTexture, TEXT_SOURCE_UV(vTexCoord)).r;
   textColor = uTextColorAnimatable * textTexture;
 #endif
 

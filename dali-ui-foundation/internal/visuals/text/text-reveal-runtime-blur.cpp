@@ -29,13 +29,11 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
-#include <dali/integration-api/pixel-data-integ.h>
 #include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/camera-actor.h>
 #include <dali/public-api/actors/custom-actor-impl.h>
 #include <dali/public-api/actors/custom-actor.h>
-#include <dali/public-api/adaptor-framework/pixel-buffer.h>
 #include <dali/public-api/animation/constraint-source.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/common/constants.h>
@@ -311,21 +309,74 @@ Actor NewPassActor(const char* name, const Vector2& size)
   return actor;
 }
 
-Shader& GetAlphaSourceShader()
+Shader& GetAlphaSourceShader(bool atlased = false)
 {
-  thread_local Shader shader;
+  thread_local std::array<Shader, 2u> shaders;
+  auto&                               shader = shaders[atlased ? 1u : 0u];
   if(!shader)
   {
     // This variant is selected only from the resolved single-color feature
     // state. Do not inspect or rewrite the original shader's source at runtime.
-    const std::string fragment = std::string("#define IS_REQUIRED_TEXT_REVEAL\n#define TEXT_REVEAL_BLUR_ALPHA_SOURCE\n") + SHADER_TEXT_VISUAL_SHADER_FRAG.data();
-    shader                     = Shader::New(Dali::Integration::ToDaliStringView(SHADER_TEXT_VISUAL_SHADER_VERT),
-                                             Dali::Integration::ToDaliStringView(fragment), Shader::Hint::NONE, "TEXT_REVEAL_BLUR_ALPHA_SOURCE");
+    const std::string prefix   = atlased ? "#define TEXT_REVEAL_SOURCE_ATLAS\n" : "";
+    const std::string vertex   = prefix + SHADER_TEXT_VISUAL_SHADER_VERT.data();
+    const std::string fragment = prefix + "#define IS_REQUIRED_TEXT_REVEAL\n#define TEXT_REVEAL_BLUR_ALPHA_SOURCE\n" + SHADER_TEXT_VISUAL_SHADER_FRAG.data();
+    shader                     = Shader::New(Dali::Integration::ToDaliStringView(vertex),
+                                             Dali::Integration::ToDaliStringView(fragment), atlased ? Shader::Hint::MODIFIES_GEOMETRY : Shader::Hint::NONE,
+                         atlased ? "TEXT_REVEAL_BLUR_ALPHA_ATLAS" : "TEXT_REVEAL_BLUR_ALPHA_SOURCE");
+    if(!Dali::Adaptor::IsAvailable())
+    {
+      return shader;
+    }
     shader.RegisterProperty("viewEffectiveScale", 1.0f);
     shader.RegisterProperty("visualTransformUseEffectiveScale", 1.0f);
     shader.RegisterProperty("pixelSnapFactor", 0.0f);
   }
   return shader;
+}
+
+// Source geometry carries no per-line uniforms. Bound indices independently
+// of atlas chunking and blur page packing.
+constexpr uint32_t MAX_SOURCE_LINES_PER_DRAW = TextRevealBlurRenderer::MAX_LINES_PER_DRAW;
+static_assert(MAX_SOURCE_LINES_PER_DRAW <= std::numeric_limits<uint16_t>::max() / 4u);
+
+struct SourceBatchVertex
+{
+  Vector2 position;
+  Vector4 crop;
+  Vector2 captureOffset;
+  Vector4 atlas;
+};
+
+Geometry CreateSourceBatchGeometry(const std::vector<SourceBatchVertex>& vertices)
+{
+  Property::Map format;
+  format["aPosition"]     = Property::VECTOR2;
+  format["aSourceCrop"]   = Property::VECTOR4;
+  format["aSourceOffset"] = Property::VECTOR2;
+  format["aSourceAtlas"]  = Property::VECTOR4;
+  auto buffer             = VertexBuffer::New(format);
+  if(!Dali::Adaptor::IsAvailable())
+  {
+    return {};
+  }
+  buffer.SetData(vertices.data(), static_cast<uint32_t>(vertices.size()));
+  std::vector<uint16_t> indices;
+  indices.reserve(vertices.size() / 4u * 6u);
+  for(size_t first = 0u; first < vertices.size(); first += 4u)
+  {
+    for(uint32_t corner : {0u, 3u, 1u, 0u, 2u, 3u})
+    {
+      indices.push_back(static_cast<uint16_t>(first + corner));
+    }
+  }
+  auto geometry = Geometry::New();
+  if(!Dali::Adaptor::IsAvailable())
+  {
+    return {};
+  }
+  geometry.AddVertexBuffer(buffer);
+  geometry.SetIndexBuffer(indices.data(), static_cast<uint32_t>(indices.size()));
+  return geometry;
 }
 
 Shader& GetDecorationShader()
@@ -605,9 +656,10 @@ Geometry CreateBlurBatchGeometry(const Vertex* vertices, uint32_t lineCount)
 /**
  * @brief Owns the offscreen resources for Text::Reveal blur.
  *
- * WHOLE_TEXT reuses the TextVisual foreground renderer. PER_LINE clones its
- * bindings with line-local textures and capture coordinates. Both paths retain
- * resolved gradient/color-glyph composition and update-side Reveal progress.
+ * WHOLE_TEXT reuses the TextVisual foreground renderer. PER_LINE batches
+ * compatible atlas entries and retains isolated sub-draws where required.
+ * Both paths preserve local capture coordinates, resolved gradient/color-glyph
+ * composition and update-side Reveal progress.
  */
 class RuntimeBlurActor : public CustomActorImpl
 {
@@ -1193,6 +1245,9 @@ public:
       std::vector<BlurBatchVertex>        horizontalVertices;
       std::vector<BlurBatchOutputVertex>  outputVertices;
       std::vector<BlurBatchHandoffVertex> handoffVertices;
+      std::vector<SourceBatchVertex>      sourceVertices;
+      TextureSet                          sourceTextures;
+      Shader                              sourceShader;
       Actor                               sharedForeground;
       if(batched)
       {
@@ -1216,6 +1271,36 @@ public:
           return;
         }
         pass.source.Add(sharedForeground);
+      }
+      // A TextureSet identifies the atlas format, masks, shared lookups and
+      // sampler state of this publication. All scalar bindings still mirror
+      // mForeground. Never combine across an image slot or a legacy sub-draw.
+      auto flushSource = [&]()
+      {
+        if(sourceVertices.empty())
+        {
+          return true;
+        }
+        auto renderer = CloneForeground(mForeground, foregroundProperties, sourceTextures,
+                                        Vector4(0.0f, 0.0f, 1.0f, 1.0f), mContentSize);
+        if(!Dali::Adaptor::IsAvailable() || !renderer)
+        {
+          return false;
+        }
+        auto geometry = CreateSourceBatchGeometry(sourceVertices);
+        if(!Dali::Adaptor::IsAvailable() || !geometry)
+        {
+          return false;
+        }
+        renderer.SetGeometry(geometry);
+        renderer.SetShader(sourceShader);
+        sharedForeground.AddRenderer(renderer);
+        sourceVertices.clear();
+        return true;
+      };
+      if(perLine)
+      {
+        sourceVertices.reserve(std::min(batch.count, static_cast<size_t>(MAX_SOURCE_LINES_PER_DRAW)) * 4u);
       }
       float y = 0.0f;
       for(size_t sequence = batch.first; sequence < batch.first + batch.count; ++sequence)
@@ -1256,8 +1341,45 @@ public:
         Actor foreground = batched ? sharedForeground : mForegroundActor;
         if(perLine)
         {
-          if(timing.hasTextForeground)
+          const bool imageSlot = mImages && std::any_of(mImages->bindings.begin(), mImages->bindings.end(), [&](const auto& image)
           {
+            return image.placement.lineIndex == timing.lineIndex;
+          });
+          // Existing A8/RGBA page packing may place non-neighboring logical
+          // lines beside one another. Keep source groups contiguous in the
+          // original sequence as well as in the packed page.
+          const bool sequenceBoundary = !sequenceOrder.empty() && sequence > batch.first &&
+                                        sequenceOrder[sequence] != sequenceOrder[sequence - 1u] + 1u;
+          if((imageSlot || sequenceBoundary) && !flushSource())
+          {
+            return;
+          }
+          if(timing.hasTextForeground && timing.atlasShader)
+          {
+            const auto shader = alphaOnly ? GetAlphaSourceShader(true) : timing.atlasShader;
+            if(!Dali::Adaptor::IsAvailable())
+            {
+              return;
+            }
+            if((sourceTextures != timing.textures || sourceShader != shader ||
+                sourceVertices.size() == MAX_SOURCE_LINES_PER_DRAW * 4u) &&
+               !flushSource())
+            {
+              return;
+            }
+            sourceTextures = timing.textures;
+            sourceShader   = shader;
+            for(const Vector2 uv : {Vector2(0.0f, 0.0f), Vector2(1.0f, 0.0f), Vector2(0.0f, 1.0f), Vector2(1.0f, 1.0f)})
+            {
+              sourceVertices.push_back({uv - Vector2(0.5f, 0.5f), timing.textureRect, center - offset, timing.atlasRectangle});
+            }
+          }
+          else if(timing.hasTextForeground)
+          {
+            if(!flushSource())
+            {
+              return;
+            }
             Renderer renderer = CloneForeground(mForeground, foregroundProperties, timing.textures, timing.textureRect, mContentSize,
                                                 batched ? center - offset : Vector2::ZERO);
             if(!Dali::Adaptor::IsAvailable() || !renderer)
@@ -1273,6 +1395,10 @@ public:
               renderer.SetShader(GetAlphaSourceShader());
             }
             foreground.AddRenderer(renderer);
+          }
+          if(imageSlot && !flushSource())
+          {
+            return;
           }
         }
         if(!batched)
@@ -1377,6 +1503,10 @@ public:
           outputParent.Add(outputActor);
         }
         y += size.y;
+      }
+      if(!flushSource())
+      {
+        return;
       }
       if(batched)
       {

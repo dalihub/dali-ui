@@ -1544,7 +1544,17 @@ int UtcDaliTextVisualAsyncBlurWorkerPayloadP(void)
       DALI_TEST_EQUALS(!prepared.lines.empty(), prepared.options.perLine, TEST_LOCATION);
       for(const auto& line : prepared.lines)
       {
-        DALI_TEST_CHECK(line.foreground && line.metadata);
+        if(line.atlasIndex == UiInternal::RevealBlurLineRaster::NO_ATLAS)
+        {
+          DALI_TEST_CHECK(line.foreground && line.metadata);
+        }
+        else
+        {
+          DALI_TEST_CHECK(line.atlasIndex < prepared.sourceAtlases.size());
+          DALI_TEST_CHECK(!line.foreground && !line.metadata && !line.mask);
+          const auto& atlas = prepared.sourceAtlases[line.atlasIndex];
+          DALI_TEST_CHECK(atlas.foreground && atlas.metadata);
+        }
         DALI_TEST_CHECK(line.sequence.start >= 0.0f && line.sequence.start < 1.0f);
       }
       // Preparing blur must not mutate the independent ordinary fallback.
@@ -1595,7 +1605,8 @@ int UtcDaliTextVisualAsyncBlurValidInvalidValidP(void)
   auto       loader                      = UiText::AsyncTextLoader::New();
   const auto valid                       = loader.RenderText(parameters, false, Size::ZERO);
   DALI_TEST_CHECK(valid.revealBlur && !valid.revealBlur->lines.empty());
-  for(int invalidKind = 0; invalidKind < 4; ++invalidKind)
+  DALI_TEST_CHECK(!valid.revealBlur->sourceAtlases.empty());
+  for(int invalidKind = 0; invalidKind < 7; ++invalidKind)
   {
     PublishDirect(rendered, parameters, valid);
     application.SendNotification();
@@ -1612,7 +1623,15 @@ int UtcDaliTextVisualAsyncBlurValidInvalidValidP(void)
     }
     if(invalidKind == 1)
     {
-      partial->lines.front().foreground.Reset();
+      const auto atlasIndex = partial->lines.front().atlasIndex;
+      if(atlasIndex == UiInternal::RevealBlurLineRaster::NO_ATLAS)
+      {
+        partial->lines.front().foreground.Reset();
+      }
+      else
+      {
+        partial->sourceAtlases[atlasIndex].foreground.Reset();
+      }
     }
     if(invalidKind == 2)
     {
@@ -1621,6 +1640,18 @@ int UtcDaliTextVisualAsyncBlurValidInvalidValidP(void)
     if(invalidKind == 3)
     {
       partial->lines.front().metadata = CreatePixelData(1u, 1u, Pixel::RGBA8888);
+    }
+    if(invalidKind == 4)
+    {
+      partial->lines.front().atlasIndex = static_cast<uint32_t>(partial->sourceAtlases.size());
+    }
+    if(invalidKind == 5)
+    {
+      partial->lines.front().atlasRectangle.x = 0u; // Missing replicated edge.
+    }
+    if(invalidKind == 6)
+    {
+      partial->sourceAtlases.front().metadata = CreatePixelData(1u, 1u, Pixel::RGBA8888);
     }
     invalid.revealBlur = partial;
     PublishDirect(rendered, parameters, invalid);

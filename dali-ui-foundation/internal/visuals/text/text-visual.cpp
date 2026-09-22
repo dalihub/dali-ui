@@ -3251,11 +3251,26 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
   {
     return false;
   }
+  for(const auto& atlas : prepared.sourceAtlases)
+  {
+    if(!atlas.foreground)
+    {
+      return false;
+    }
+    const auto width  = atlas.foreground.GetWidth();
+    const auto height = atlas.foreground.GetHeight();
+    if(width < 3u || height < 3u || width > static_cast<uint32_t>(maximum) || height > static_cast<uint32_t>(maximum) ||
+       !matching(atlas.foreground, width, height, options.foregroundFormat) || !matching(atlas.metadata, width, height, Pixel::RGBA8888) ||
+       ((gradientMixed || colorMask) ? !matching(atlas.mask, width, height, Pixel::L8) : bool(atlas.mask)))
+    {
+      return false;
+    }
+  }
   for(const auto& line : prepared.lines)
   {
     if(!line.sequence.hasTextForeground)
     {
-      if(line.foreground || line.mask || line.metadata ||
+      if(line.foreground || line.mask || line.metadata || line.atlasIndex != RevealBlurLineRaster::NO_ATLAS ||
          std::none_of(prepared.images.begin(), prepared.images.end(), [&](const auto& image)
       {
         return image.lineIndex == line.sequence.lineIndex;
@@ -3277,14 +3292,40 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
     }
     const auto w = static_cast<uint32_t>(std::round(width));
     const auto h = static_cast<uint32_t>(std::round(height));
-    if(!matching(line.foreground, w, h, options.foregroundFormat) || !matching(line.metadata, w, h, Pixel::RGBA8888) ||
-       ((gradientMixed || colorMask) && !matching(line.mask, w, h, Pixel::L8)))
+    if(line.atlasIndex != RevealBlurLineRaster::NO_ATLAS)
+    {
+      if(line.atlasIndex >= prepared.sourceAtlases.size() || line.foreground || line.mask || line.metadata)
+      {
+        return false;
+      }
+      const auto& atlas  = prepared.sourceAtlases[line.atlasIndex];
+      const auto& entry  = line.atlasRectangle;
+      const auto  width  = atlas.foreground.GetWidth();
+      const auto  height = atlas.foreground.GetHeight();
+      if(w == 0u || h == 0u || entry.width != w || entry.height != h || entry.x == 0u || entry.y == 0u ||
+         entry.x >= width || entry.y >= height || w >= width - entry.x || h >= height - entry.y)
+      {
+        return false;
+      }
+    }
+    else if(!matching(line.foreground, w, h, options.foregroundFormat) || !matching(line.metadata, w, h, Pixel::RGBA8888) ||
+            ((gradientMixed || colorMask) && !matching(line.mask, w, h, Pixel::L8)))
     {
       return false;
     }
   }
   std::vector<RuntimeRevealBlurSequence> sequences;
   sequences.reserve(prepared.lines.size());
+  std::vector<TextureSet> atlasTextures(prepared.sourceAtlases.size());
+  Shader                  atlasShader;
+  if(!prepared.sourceAtlases.empty())
+  {
+    atlasShader = mTextVisualShaderFactory.GetRevealSourceShader(mFactoryCache, mTextShaderFeatureCache);
+    if(!unchanged() || !atlasShader)
+    {
+      return false;
+    }
+  }
   for(const auto& line : prepared.lines)
   {
     RuntimeRevealBlurSequence sequence;
@@ -3294,25 +3335,69 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
       sequences.push_back(std::move(sequence));
       continue;
     }
-    sequence.textures = TextureSet::New();
-    for(uint32_t index = 0u; index < original.GetTextureCount(); ++index)
+    const bool atlased = line.atlasIndex != RevealBlurLineRaster::NO_ATLAS;
+    if(atlased)
     {
-      sequence.textures.SetTexture(index, original.GetTexture(index));
-      sequence.textures.SetSampler(index, original.GetSampler(index));
+      sequence.atlasShader    = atlasShader;
+      const auto& atlas       = prepared.sourceAtlases[line.atlasIndex];
+      const auto& entry       = line.atlasRectangle;
+      const float width       = static_cast<float>(atlas.foreground.GetWidth());
+      const float height      = static_cast<float>(atlas.foreground.GetHeight());
+      sequence.atlasRectangle = Vector4(static_cast<float>(entry.x) / width, static_cast<float>(entry.y) / height,
+                                        static_cast<float>(entry.width) / width, static_cast<float>(entry.height) / height);
+      sequence.textures       = atlasTextures[line.atlasIndex];
     }
-    Sampler   sampler = original.GetSampler(0u);
-    PixelData pixels  = line.foreground;
-    AddTexture(sequence.textures, pixels, sampler, 0u);
-    if(gradientMixed || colorMask)
+    if(!sequence.textures)
     {
-      const auto maskIndex = gradientMixed ? 1u : metadataIndex - 1u;
-      sampler              = original.GetSampler(maskIndex);
-      pixels               = line.mask;
-      AddTexture(sequence.textures, pixels, sampler, maskIndex);
+      sequence.textures = TextureSet::New();
+      if(!unchanged())
+      {
+        return false;
+      }
+      for(uint32_t index = 0u; index < original.GetTextureCount(); ++index)
+      {
+        sequence.textures.SetTexture(index, original.GetTexture(index));
+        sequence.textures.SetSampler(index, original.GetSampler(index));
+      }
+      const auto* atlas  = atlased ? &prepared.sourceAtlases[line.atlasIndex] : nullptr;
+      auto        upload = [&](PixelData pixels, uint32_t index)
+      {
+        auto texture = Texture::New(TextureType::TEXTURE_2D, pixels.GetPixelFormat(), pixels.GetWidth(), pixels.GetHeight());
+        if(!unchanged())
+        {
+          return false;
+        }
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
+        std::string text;
+        mController->GetText(text);
+        const bool uploaded = Dali::Integration::TextureUploadWithContent(texture, pixels, ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SIMPLE_LABEL);
+#else
+        const bool uploaded = texture.Upload(pixels);
+#endif
+        if(!uploaded)
+        {
+          return false;
+        }
+        // Upload retains PixelData in its queued message. The prepared result
+        // and this local handle can expire without manually freeing its buffer.
+        sequence.textures.SetTexture(index, texture);
+        return true;
+      };
+      if(!upload(atlased ? atlas->foreground : line.foreground, 0u) ||
+         !upload(atlased ? atlas->metadata : line.metadata, metadataIndex))
+      {
+        return false;
+      }
+      if((gradientMixed || colorMask) &&
+         !upload(atlased ? atlas->mask : line.mask, gradientMixed ? 1u : metadataIndex - 1u))
+      {
+        return false;
+      }
+      if(atlased)
+      {
+        atlasTextures[line.atlasIndex] = sequence.textures;
+      }
     }
-    sampler = original.GetSampler(metadataIndex);
-    pixels  = line.metadata;
-    AddTexture(sequence.textures, pixels, sampler, metadataIndex);
     sequences.push_back(std::move(sequence));
   }
   std::unique_ptr<RuntimeRevealBlurDecorations> decorations;
@@ -3357,11 +3442,22 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
     auto feature                    = mTextShaderFeatureCache;
     feature.EnableStyle(false).EnableOverlay(false);
     decorations->foregroundShader = mTextVisualShaderFactory.GetShader(mFactoryCache, feature);
-    for(auto& sequence : sequences)
+    // Compact shared atlas sets once; preserving TextureSet identity also
+    // preserves the compatible source group after decoration slots are removed.
+    for(auto& textures : atlasTextures)
     {
+      if(textures)
+      {
+        textures = compact(textures);
+      }
+    }
+    for(size_t index = 0u; index < sequences.size(); ++index)
+    {
+      auto& sequence = sequences[index];
       if(sequence.hasTextForeground)
       {
-        sequence.textures = compact(sequence.textures);
+        const auto atlasIndex = prepared.lines[index].atlasIndex;
+        sequence.textures     = atlasIndex == RevealBlurLineRaster::NO_ATLAS ? compact(sequence.textures) : atlasTextures[atlasIndex];
       }
     }
     for(bool overlay : {false, true})

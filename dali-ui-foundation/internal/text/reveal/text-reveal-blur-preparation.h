@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali/public-api/images/pixel-data.h>
 #include <dali/public-api/math/rect.h>
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -73,14 +74,34 @@ struct RevealBlurPreparationOptions
 };
 
 /**
- * @brief Keeps the cropped planes of one sequence until event-thread upload.
+ * @brief Keeps either isolated CPU planes or an entry in a prepared source atlas.
+ *
+ * textureRect remains relative to the original text, independently of the atlas.
+ * Atlas-backed entries do not retain the isolated planes after preparation.
  */
 struct RevealBlurLineRaster
 {
+  static constexpr uint32_t NO_ATLAS = std::numeric_limits<uint32_t>::max();
+
   RevealBlurSequence sequence;
   PixelData          foreground;
   PixelData          mask;
   PixelData          metadata;
+  uint32_t           atlasIndex{NO_ATLAS};
+  Rect<uint32_t>     atlasRectangle;
+};
+
+/**
+ * @brief Owns immutable source planes sharing one guarded entry layout.
+ *
+ * Only CPU data crosses the preparation/publication boundary. Foreground and
+ * optional mask use linear sampling; metadata keeps its nearest sampling.
+ */
+struct RevealBlurSourceAtlas
+{
+  PixelData foreground;
+  PixelData mask;
+  PixelData metadata;
 };
 
 /**
@@ -107,6 +128,7 @@ struct PreparedRevealBlur
 {
   RevealBlurPreparationOptions              options;
   std::vector<RevealBlurLineRaster>         lines;
+  std::vector<RevealBlurSourceAtlas>        sourceAtlases;
   PixelData                                 metadata;
   Vector<Ui::Text::ReplacementRevealTiming> timings;
   std::vector<RevealBlurImage>              images;
@@ -114,6 +136,15 @@ struct PreparedRevealBlur
   float                                     blurDuration{0.0f};
   float                                     fadeDuration{0.0f};
 };
+
+/**
+ * @brief Packs compatible consecutive line planes before publishing the result.
+ *
+ * A single pass splits vertical stacks at format and maximum-texture boundaries.
+ * Single-entry and oversized groups retain their isolated planes. Failure leaves
+ * the private preparation disposable; no partially prepared result is published.
+ */
+bool PrepareRevealBlurSourceAtlases(PreparedRevealBlur& prepared);
 
 /**
  * @brief Reads final lines and their existing schedule before blur normalization.
@@ -159,4 +190,4 @@ std::shared_ptr<const PreparedRevealBlur> PrepareRevealBlur(
   const Vector<Ui::Text::ReplacementRevealTiming>& timings,
   const RevealBlurPreparationOptions&              options,
   const Vector<Ui::Text::ReplacementPlacement>*    placements = nullptr);
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal
