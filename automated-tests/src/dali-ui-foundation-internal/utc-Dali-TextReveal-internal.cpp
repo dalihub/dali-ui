@@ -103,6 +103,18 @@ namespace
 namespace Reveal = Dali::Ui::Text::Internal::Reveal;
 namespace UiText = Dali::Ui::Text;
 
+#if defined(__cpp_char8_t) && (__cpp_char8_t >= 201811L)
+inline const char* u8s(const char8_t* s)
+{
+  return reinterpret_cast<const char*>(s);
+}
+#else
+inline const char* u8s(const char* s)
+{
+  return s;
+}
+#endif
+
 constexpr float EPSILON = 0.0001f;
 
 std::string GetRepositoryResourcePath(const char* relativePath)
@@ -2867,13 +2879,13 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
                    TEST_LOCATION);
 
   UiText::ControllerPtr bidi = BuildReplacementController(
-    u8"אבג X ABC", {{4u, 1u}}, Size(420.0f, 120.0f));
+    u8s(u8"אבג X ABC"), {{4u, 1u}}, Size(420.0f, 120.0f));
   const auto bidiResult = build(bidi, Reveal::Unit::WORD);
   DALI_TEST_EQUALS(bidiResult.first.GetUnitCount(), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(bidiResult.second.Count(), 1u, TEST_LOCATION);
   DALI_TEST_CHECK(bidiResult.second[0u].start > 0.0f && bidiResult.second[0u].start < 1.0f);
   UiText::ControllerPtr inverseBidi = BuildReplacementController(
-    u8"ABC X אבג", {{4u, 1u}}, Size(420.0f, 120.0f));
+    u8s(u8"ABC X אבג"), {{4u, 1u}}, Size(420.0f, 120.0f));
   for(Reveal::Unit unit : {Reveal::Unit::CHARACTER,
                            Reveal::Unit::WORD,
                            Reveal::Unit::LINE,
@@ -2891,7 +2903,7 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
     }
   }
   UiText::ControllerPtr rtlReplacement = BuildReplacementController(
-    u8"א ב ג", {{2u, 1u}}, Size(420.0f, 120.0f));
+    u8s(u8"א ב ג"), {{2u, 1u}}, Size(420.0f, 120.0f));
   UiText::ModelPtr rtlProcessingModel = rtlReplacement->GetReplacementRenderState().processingModel;
   DALI_TEST_CHECK(rtlProcessingModel);
   auto& rtlDirections = rtlProcessingModel->mLogicalModel->mCharacterDirections;
@@ -3660,7 +3672,7 @@ int UtcDaliTextRevealImageReplacementEndEllipsisPerLineSequenceP(void)
 
   // Mixed-direction content keeps both the RTL replacement line and the final
   // ellipsis line authoritative for every unit, including PIXEL direction.
-  UiText::ControllerPtr bidi = buildCase(u8"עברית X العربية\nEnglish text\nmore hidden words",
+  UiText::ControllerPtr bidi = buildCase(u8s(u8"עברית X العربية\nEnglish text\nmore hidden words"),
                                          6u,
                                          2u,
                                          Size(320.0f, 240.0f));
