@@ -45,6 +45,7 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/font-variation/font-variation-property-data.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-renderer-state.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-data.h>
 #include <dali-ui-foundation/internal/text/reveal/text-reveal-data.h>

@@ -21,6 +21,7 @@
 #include <cmath>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/marquee-start-geometry-types.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
@@ -29,24 +30,6 @@ namespace DALI_NAMESPACE::Ui::Text
 struct FinalElisionResult;
 class ModelInterface;
 class VisualModel;
-
-/**
- * @brief Stable source identity and static control geometry retained across
- * the ellipsis-to-marquee transition.
- *
- * The character index plus the glyph's occurrence within that character is
- * stable across the separate static and natural-layout requests used by the
- * async path because both requests shape the same authored source. Font,
- * locale, direction, content, and render changes invalidate the descriptor;
- * request cancellation prevents an older async result from republishing it.
- */
-struct MarqueeStartAnchor
-{
-  CharacterIndex characterIndex{0u};
-  Length         glyphOccurrence{0u};
-  float          staticControlX{0.0f}; ///< Logical pixels in the Label content box.
-  bool           valid{false};
-};
 
 /** @brief Position of the retained source anchor in the generated marquee texture. */
 struct MarqueeTextureAnchor
@@ -59,20 +42,6 @@ struct MarqueeTextureAnchor
 struct MarqueeInitialDelta
 {
   float value{0.0f}; ///< Logical pixels in the scroller control/texture domain.
-  bool  valid{false};
-};
-
-/**
- * @brief Effective horizontal translation used by a fitting static render.
- *
- * Fitting single-line marquee keeps the full source topology, so preserving
- * the static renderer's effective line translation is sufficient. This is
- * intentionally separate from MarqueeStartAnchor, which identifies retained
- * source geometry across an END-ellipsis transition.
- */
-struct MarqueeFittingStartGeometry
-{
-  float staticTranslation{0.0f}; ///< Logical pixels in the Label content box.
   bool  valid{false};
 };
 
