@@ -165,9 +165,8 @@ TARGET_INCLUDE_DIRECTORIES(${PROJECT_LIB_NAME}
 
 
 # ---------------------------------------------------------
-# 5. Link dependencies (remove toolkit, add GLES)
+# 5. Link dependencies
 # ---------------------------------------------------------
-# Note: PKG_CHECK_MODULES(OPENGLES glesv2 egl) must be declared in the top-level CMakeLists.txt
 TARGET_LINK_LIBRARIES(${PROJECT_LIB_NAME}
   PUBLIC ${DALI_UI_PLATFORM_LIBRARIES}
   PRIVATE ${DALI_UI_GETTEXT_LIBRARIES} ${COVERAGE}
@@ -199,13 +198,8 @@ IF(INSTALL_CMAKE_MODULES)
     DESTINATION share/${PROJECT_LIB_NAME}
   )
 
-  IF(WIN32)
-    SET(PACKAGE_DEPENDENCIES
-"    find_dependency(dali2-core CONFIG REQUIRED)\n    find_dependency(dali2-adaptor CONFIG REQUIRED)\n    find_dependency(unofficial-angle CONFIG REQUIRED)\n")
-  ELSE()
-    SET(PACKAGE_DEPENDENCIES
+  SET(PACKAGE_DEPENDENCIES
 "    find_dependency(dali2-core CONFIG REQUIRED)\n    find_dependency(dali2-adaptor CONFIG REQUIRED)\n")
-  ENDIF()
 
   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_LIB_NAME}-config.cmake
 "include(CMakeFindDependencyMacro)\n${PACKAGE_DEPENDENCIES}include(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_LIB_NAME}-targets.cmake)\n")
