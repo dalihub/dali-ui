@@ -75,13 +75,7 @@ SET(TC_SOURCES
         utc-Dali-ViewTypeRegistry.cpp
 )
 
-ADD_CUSTOM_COMMAND(
-    COMMAND ../../scripts/tcheadgen.sh ${EXEC_NAME}.h
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT ${EXEC_NAME}.h
-    DEPENDS ${TC_SOURCES} CMakeLists.txt ../../scripts/tcheadgen.sh ../../scripts/retriever.sh
-    COMMENT "Generating test tables for ${EXEC_NAME}"
-)
+SET(TC_SOURCE_LIST ${TC_SOURCES})
 
 LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/mesh-builder.cpp
@@ -126,6 +120,18 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-vector-animation-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-image-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-window.cpp
+)
+
+IF(DALI_TEST_SOURCE_LIST_ONLY)
+    RETURN()
+ENDIF()
+
+ADD_CUSTOM_COMMAND(
+    COMMAND ../../scripts/tcheadgen.sh ${EXEC_NAME}.h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT ${EXEC_NAME}.h
+    DEPENDS ${TC_SOURCE_LIST} CMakeLists.txt ../../scripts/tcheadgen.sh ../../scripts/retriever.sh
+    COMMENT "Generating test tables for ${EXEC_NAME}"
 )
 
 PKG_CHECK_MODULES(${CAPI_LIB} REQUIRED
