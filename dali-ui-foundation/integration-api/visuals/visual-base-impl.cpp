@@ -48,12 +48,12 @@ namespace
 // a View half and an application half. See VisualBaseImpl::GetDepthIndex for what each half is for.
 constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::Integration::DepthIndex::Ranges::CONTENT - Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND) / 2;
 
+#if defined(DEBUG_ENABLED)
 Vector4 ToVector4(const Insets& insets)
 {
   return Vector4(insets.start, insets.end, insets.top, insets.bottom);
 }
 
-#if defined(DEBUG_ENABLED)
 Debug::Filter* gVisualBaseLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VISUAL_BASE");
 #endif
 

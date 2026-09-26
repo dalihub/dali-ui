@@ -46,7 +46,7 @@ BackgroundBlurEffect GetContainerBlur(View scrim)
   // RenderEffect has no public typed downcast. Check the implementation type
   // against a public factory result before sharing the existing effect handle.
   auto blur = BackgroundBlurEffect::New();
-  DALI_ASSERT_ALWAYS(typeid(effect.GetBaseObject()) == typeid(blur.GetBaseObject()));
+  DALI_ASSERT_ALWAYS(effect.GetBaseObject().GetTypeName() == blur.GetBaseObject().GetTypeName());
   static_cast<BaseHandle&>(blur) = effect;
   return blur;
 }
