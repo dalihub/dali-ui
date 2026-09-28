@@ -17,7 +17,7 @@ thumb.
 ## 1. Basic Setup
 
 Include the components umbrella header and apply `Components::UiConfig` before
-creating component styles or entering the main loop.
+creating component styles or running the application.
 
 ```cpp
 #include <dali-ui-components/dali-ui-components.h>
@@ -27,14 +27,11 @@ using namespace Dali::Ui;
 
 int main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
-
   // Includes both the foundation configuration and component styles.
   Components::UiConfig::New().Apply();
 
-  MyController controller(application);
-  application.MainLoop();
-  return 0;
+  MyApp app(argc, argv); // MyApp inherits tizen_appfw::UiApplication
+  return app.Run();
 }
 ```
 

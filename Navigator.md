@@ -28,7 +28,7 @@ back handling, stack queries, and page transition customization in one place.
 using namespace Dali;
 using namespace Dali::Ui;
 
-Application application = Application::New(&argc, &argv);
+// In main(), before running the application:
 Components::UiConfig::New().Apply();
 ```
 
@@ -127,7 +127,7 @@ including closing animations. Finish teardown before switching ownership paths.
 ```cpp
 if(!navigator.NavigateBack())
 {
-  application.Quit();
+  Exit(); // tizen_appfw::UiApplication::Exit()
 }
 ```
 

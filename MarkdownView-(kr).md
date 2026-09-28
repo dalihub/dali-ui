@@ -6,25 +6,22 @@
 
 ## 설정과 완전한 예제
 
-components 및 foundation 헤더를 포함하고 애플리케이션을 `dali-ui-components`와 필요한 foundation 라이브러리에 연결합니다. `MainLoop()` 전에 `Components::UiConfig`를 한 번 적용합니다. foundation 설정도 포함하므로 foundation `UiConfig`를 별도로 적용하지 않습니다.
+components 및 foundation 헤더를 포함하고 애플리케이션을 `dali-ui-components`와 필요한 foundation 라이브러리에 연결합니다. 애플리케이션 실행 전에 `Components::UiConfig`를 한 번 적용합니다. foundation 설정도 포함하므로 foundation `UiConfig`를 별도로 적용하지 않습니다.
 
 ```cpp
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
-class MarkdownExample : public ConnectionTracker
+class MarkdownExample : public tizen_appfw::UiApplication, public ConnectionTracker
 {
 public:
-  explicit MarkdownExample(Application& application)
-  {
-    application.InitSignal().Connect(this, &MarkdownExample::Create);
-  }
+  MarkdownExample(int argc, char** argv) : UiApplication(argc, argv) {}
 
-  void Create(Application application)
+protected:
+  bool OnCreate() override
   {
     ScrollView scroll = ScrollView::New();
     scroll.SetRequestedWidth(MATCH_PARENT);
@@ -40,17 +37,17 @@ public:
                          "> Keep the document width bounded.\n\n"
                          "[Documentation](https://example.com)");
     scroll.SetContent(document);
-    application.GetWindow().Add(scroll);
+    GetDefaultWindow().Add(scroll);
+    return true;
   }
 };
 
 int main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
   Components::UiConfig::New().Apply();
-  MarkdownExample controller(application);
-  application.MainLoop();
-  return 0;
+
+  MarkdownExample app(argc, argv);
+  return app.Run();
 }
 ```
 
