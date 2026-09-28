@@ -31,17 +31,14 @@ in the same application.
 ```cpp
 int main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
-
-  // Apply() must be called before application.MainLoop().
+  // Apply() must be called before the application runs.
   UiConfig config = UiConfig::New();
   config.SetDpi(320);
   config.SetScalingFactor(1.5f);
   config.Apply();
 
-  MyAppController controller(application);
-  application.MainLoop();
-  return 0;
+  MyApp app(argc, argv); // MyApp inherits tizen_appfw::UiApplication
+  return app.Run();
 }
 ```
 

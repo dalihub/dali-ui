@@ -36,7 +36,7 @@
 
 ## 초기화와 기본 사용법
 
-`dali-ui-components`를 사용하는 애플리케이션은 `MainLoop()` 전에
+`dali-ui-components`를 사용하는 애플리케이션은 애플리케이션 실행 전에
 `Components::UiConfig`를 한 번 적용해야 합니다. foundation `UiConfig`를 별도로 적용하지
 마세요.
 
@@ -52,12 +52,10 @@ using namespace Dali::Ui;
 
 int main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
   Components::UiConfig::New().Apply();
 
-  MyController controller(application);
-  application.MainLoop();
-  return 0;
+  MyApp app(argc, argv); // MyApp은 tizen_appfw::UiApplication을 상속합니다.
+  return app.Run();
 }
 ```
 

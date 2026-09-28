@@ -214,7 +214,7 @@ can make text measurement and final arrangement use different widths.
 using namespace Dali;
 using namespace Dali::Ui;
 
-Application application = Application::New(&argc, &argv);
+// In main(), before running the application:
 Components::UiConfig::New().Apply();
 ```
 

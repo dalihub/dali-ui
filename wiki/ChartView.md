@@ -33,7 +33,7 @@
 
 ## 1. Basic Setup
 
-> ⚠️ **Note**: `ChartView` is part of `dali-ui-components`. You must call `Components::UiConfig::New().Apply()` before `MainLoop()`. See [Configuration](Configuration.md) for details.
+> ⚠️ **Note**: `ChartView` is part of `dali-ui-components`. You must call `Components::UiConfig::New().Apply()` before running the application. See [Configuration](Configuration.md) for details.
 
 ### main.cpp
 
@@ -44,14 +44,11 @@ using namespace Dali::Ui;
 
 int main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
-
-  // Apply Components::UiConfig before MainLoop().
+  // Apply Components::UiConfig before running the application.
   Components::UiConfig::New().Apply();
 
-  MyController controller(application);
-  application.MainLoop();
-  return 0;
+  MyApp app(argc, argv); // MyApp inherits tizen_appfw::UiApplication
+  return app.Run();
 }
 ```
 
@@ -1185,7 +1182,7 @@ target_compile_options(my-chart-app PRIVATE
 
 ## 18. Important Notes
 
-- **`Components::UiConfig` is required.** Call `Components::UiConfig::New().Apply()` before `Application::MainLoop()` when using `dali-ui-components`. See [Configuration](Configuration.md).
+- **`Components::UiConfig` is required.** Call `Components::UiConfig::New().Apply()` before running the application when using `dali-ui-components`. See [Configuration](Configuration.md).
 
 - **Chart type is fixed at creation.** `ChartView::New(type, size)` determines the chart type for the lifetime of the object. There is no `SetType()` method — create a new `ChartView` if you need a different type.
 

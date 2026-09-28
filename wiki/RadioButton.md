@@ -37,7 +37,7 @@ part of the application flow.
 ## Setup and basic use
 
 Applications using `dali-ui-components` must apply `Components::UiConfig` once before
-`MainLoop()`. Do not apply foundation `UiConfig` separately.
+running the application. Do not apply foundation `UiConfig` separately.
 
 ```cpp
 #include <dali-ui-components/dali-ui-components.h>
@@ -51,12 +51,10 @@ using namespace Dali::Ui;
 
 int main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
   Components::UiConfig::New().Apply();
 
-  MyController controller(application);
-  application.MainLoop();
-  return 0;
+  MyApp app(argc, argv); // MyApp inherits tizen_appfw::UiApplication
+  return app.Run();
 }
 ```
 

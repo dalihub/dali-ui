@@ -68,20 +68,11 @@ class UiConfigImpl;
  * After that point, any setter call will trigger an assertion failure.
  *
  * @code
- *  int main(int argc, char** argv)
- *  {
- *    Application application = Application::New(&argc, &argv);
- *
- *    UiConfig config = UiConfig::New();
- *    config.SetScalingFactor(1.5f);
- *    config.SetDpi(320);
- *    config.Apply();
- *
- *    HelloWorldController test(application);
- *    application.MainLoop();
- *
- *    return 0;
- *  }
+ *  // In main(), before running the application:
+ *  UiConfig config = UiConfig::New();
+ *  config.SetScalingFactor(1.5f);
+ *  config.SetDpi(320);
+ *  config.Apply();
  * @endcode
  */
 class DALI_UI_API UiConfig : public BaseHandle

@@ -39,13 +39,15 @@ The following skeleton shows the minimum flow from creation to content insertion
 using namespace Dali;
 using namespace Dali::Ui;
 
-class MyWindowController : public ConnectionTracker
+class MyWindowApp : public tizen_appfw::UiApplication, public ConnectionTracker
 {
 public:
-  void Initialize(Application application)
+  MyWindowApp(int argc, char** argv) : UiApplication(argc, argv) {}
+
+protected:
+  bool OnCreate() override
   {
-    mApplication = application;
-    mWindow      = application.GetWindow();
+    mWindow = GetDefaultWindow();
     mWindow.SetBackgroundColor(Color::TRANSPARENT);
     mWindow.SetTransparency(true);
 
@@ -55,7 +57,7 @@ public:
 
     mWindowFrame = WindowFrame::New(
       mWindow,
-      WindowFrame::CloseCallback::New(this, &MyWindowController::OnClose),
+      WindowFrame::CloseCallback::New(this, &MyWindowApp::OnClose),
       options);
     mWindowFrame.SetOverlayEnabled(true);
     mWindowFrame.SetOverlayAutoHideDelay(2500u);
@@ -69,12 +71,13 @@ public:
 
     View appContent = CreateAppContent();
     mWindowFrame.GetContentRoot().Add(appContent);
+    return true;
   }
 
 private:
   void OnClose()
   {
-    mApplication.Quit();
+    Exit();
   }
 
   // Application-specific helpers implemented by the product.
@@ -82,13 +85,12 @@ private:
   void ConnectSignals();
   View CreateAppContent();
 
-  Application  mApplication;
   Window       mWindow;
   WindowFrame mWindowFrame;
 };
 ```
 
-Store `Application` and `Window` handles by value. Retaining a pointer or reference to a caller's local handle can outlive that handle. A transparent native background and surface are required when client shadows or rounded outer corners must remain visible.
+Store the `Window` handle by value. Retaining a pointer or reference to a caller's local handle can outlive that handle. A transparent native background and surface are required when client shadows or rounded outer corners must remain visible.
 
 Recommended initialization order:
 
