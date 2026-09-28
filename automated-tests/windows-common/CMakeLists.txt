@@ -39,6 +39,7 @@ LIST(GET DALI_WINDOWS_DEPENDENCIES_INCLUDE_DIRS 0 DALI_WINDOWS_DEPENDENCIES_INCL
 
 SET(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 SET(FOUNDATION_DIR "${ROOT_DIR}/dali-ui-foundation")
+SET(COMPONENTS_DIR "${ROOT_DIR}/dali-ui-components")
 SET(TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../src")
 SET(FOUNDATION_TEST_DIR "${TEST_DIR}/dali-ui-foundation")
 SET(INTERNAL_TEST_DIR "${TEST_DIR}/dali-ui-foundation-internal")
@@ -86,6 +87,42 @@ TARGET_LINK_LIBRARIES(dali-ui-foundation-test-objects PRIVATE
   dali2-core::dali2-core
 )
 
+FILE(GLOB_RECURSE COMPONENTS_SOURCES CONFIGURE_DEPENDS "${COMPONENTS_DIR}/*.cpp")
+
+ADD_LIBRARY(dali-ui-components-test-objects OBJECT ${COMPONENTS_SOURCES})
+TARGET_INCLUDE_DIRECTORIES(dali-ui-components-test-objects PRIVATE
+  "${ROOT_DIR}"
+  "${FOUNDATION_DIR}/third-party"
+  "${FOUNDATION_DIR}/internal"
+  "${FOUNDATION_DIR}/integration-api"
+)
+TARGET_COMPILE_DEFINITIONS(dali-ui-components-test-objects PRIVATE
+  BUILDING_DALI_ADAPTOR
+  BUILDING_DALI_UI_FOUNDATION
+  BUILDING_DALI_UI_COMPONENTS
+  $<$<CONFIG:Debug>:DEBUG_ENABLED>
+  DALI_UI_HAS_GETTEXT
+  DALI_UI_COMPONENTS_IMAGE_DIR="${CMAKE_INSTALL_PREFIX}/share/dali/ui/images/components/"
+  EGLAPI=
+  GL_API=
+  GL_APICALL=
+  GL_GLEXT_PROTOTYPES
+  NO_THORVG
+  NOMINMAX
+  WIN32_LEAN_AND_MEAN
+  __restrict__=__restrict
+)
+TARGET_COMPILE_OPTIONS(dali-ui-components-test-objects PRIVATE
+  /FI "${DALI_WINDOWS_DEPENDENCIES_INCLUDE_DIR}/dali-windows-dependencies.h"
+  /vmg /utf-8 /W3 /wd4251 /wd4275
+)
+TARGET_LINK_LIBRARIES(dali-ui-components-test-objects PRIVATE
+  dali-windows-dependencies::dali-windows-dependencies
+  dali2-adaptor::dali2-adaptor
+  dali2-core::dali2-core
+  Intl::Intl
+)
+
 SET(DALI_TEST_SOURCE_LIST_ONLY ON)
 INCLUDE("${FOUNDATION_TEST_DIR}/CMakeLists.txt")
 SET(FOUNDATION_TC_NAMES ${TC_SOURCE_LIST})
@@ -98,10 +135,11 @@ SET(INTERNAL_RUN_SOURCES ${TC_SOURCES})
 INCLUDE("${COMPONENTS_TEST_DIR}/CMakeLists.txt")
 SET(COMPONENTS_TC_NAMES ${TC_SOURCE_LIST})
 SET(COMPONENTS_RUN_SOURCES ${TC_SOURCES})
-# DALI_INTERNAL does not hide class members on Windows. These implementations
-# are already exported by dali2-ui-components and compiling them here again
-# produces duplicate public symbols in the test executable.
-LIST(REMOVE_ITEM COMPONENTS_RUN_SOURCES ${COMPONENT_HIDDEN_VALUE_TEST_SOURCES})
+# The complete components implementation is linked through the test object
+# target below, so do not compile selected implementation units twice.
+LIST(REMOVE_ITEM COMPONENTS_RUN_SOURCES
+  ${COMPONENT_INTERNAL_TEST_SOURCES}
+  ${COMPONENT_HIDDEN_VALUE_TEST_SOURCES})
 UNSET(DALI_TEST_SOURCE_LIST_ONLY)
 
 LIST(REMOVE_ITEM FOUNDATION_RUN_SOURCES "../dali-test-suite-utils/test-harness.cpp")
@@ -295,6 +333,8 @@ FUNCTION(CONFIGURE_UI_TEST_RUNNER TARGET ARRAY_NAME HEADER_NAME SUITE_LABEL)
   )
   TARGET_COMPILE_DEFINITIONS(${TARGET} PRIVATE
     BUILDING_DALI_ADAPTOR
+    BUILDING_DALI_UI_FOUNDATION
+    BUILDING_DALI_UI_COMPONENTS
     DALI_TEST_ARRAY=${ARRAY_NAME}
     DALI_TEST_HEADER="${HEADER_NAME}"
     DALI_TEST_SUITE="${SUITE_LABEL}"
@@ -314,8 +354,6 @@ FUNCTION(CONFIGURE_UI_TEST_RUNNER TARGET ARRAY_NAME HEADER_NAME SUITE_LABEL)
   )
   TARGET_LINK_LIBRARIES(${TARGET} PRIVATE
     dali-windows-dependencies::dali-windows-dependencies
-    dali2-ui-components::dali2-ui-components
-    dali2-ui-foundation::dali2-ui-foundation
     dali2-adaptor::dali2-adaptor
     dali2-core::dali2-core
     Intl::Intl
@@ -328,6 +366,7 @@ ADD_EXECUTABLE(tct-dali-ui-foundation-core
   src/common-test-main.cpp
   src/adaptor-static-constants.cpp
   ${FOUNDATION_RUN_SOURCES}
+  $<TARGET_OBJECTS:dali-ui-foundation-test-objects>
 )
 CONFIGURE_UI_TEST_RUNNER(tct-dali-ui-foundation-core
   gDaliUiFoundationTests dali-ui-foundation-testcases.h foundation)
@@ -345,6 +384,8 @@ ADD_EXECUTABLE(tct-dali-ui-components-core
   src/common-test-main.cpp
   src/adaptor-static-constants.cpp
   ${COMPONENTS_RUN_SOURCES}
+  $<TARGET_OBJECTS:dali-ui-foundation-test-objects>
+  $<TARGET_OBJECTS:dali-ui-components-test-objects>
 )
 CONFIGURE_UI_TEST_RUNNER(tct-dali-ui-components-core
   gDaliUiComponentsTests dali-ui-components-testcases.h components)
@@ -413,6 +454,7 @@ IF("dali-ui-components" IN_LIST DALI_UI_WINDOWS_TEST_MODULES)
 ELSE()
   SET_TARGET_PROPERTIES(
     dali-ui-components-test-md4c
+    dali-ui-components-test-objects
     tct-dali-ui-components-core
     ComponentsSampleAddOn
     PROPERTIES EXCLUDE_FROM_ALL TRUE)
