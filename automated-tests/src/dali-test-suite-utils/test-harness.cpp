@@ -442,7 +442,7 @@ int32_t GetAvailableCores()
   double load[1];
   if(getloadavg(load, 1) != -1)
   {
-    int32_t available = std::max(0, static_cast<int>(cores - load[0])); // rough estimate
+    int32_t available = std::max(1, static_cast<int>(cores - load[0])); // rough estimate
     cores             = available;
   }
 
