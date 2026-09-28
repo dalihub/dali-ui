@@ -196,6 +196,13 @@ struct LottieAnimationViewPropertyIndex
      */
     PLACEHOLDER_IMAGE,
 
+    /**
+     * @brief When loading may start. Default: Image::LoadPolicy::ATTACHED.
+     * @details Name "loadPolicy", type Property::INTEGER.
+     * ATTACHED waits for scene connection and on-scene visibility; IMMEDIATE allows off-scene loading.
+     */
+    LOAD_POLICY,
+
     ///////////////////////////////////////////////////////////////////////////////
     // Animatable
     ///////////////////////////////////////////////////////////////////////////////

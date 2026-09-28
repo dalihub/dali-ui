@@ -14,3 +14,4 @@ DALI_ADD_SAMPLE(scrollview-interactive-children scrollview-interactive-children.
 DALI_ADD_SAMPLE(scrollview-scrollbar-example scrollbar-example.cpp)
 DALI_ADD_SAMPLE(scrollview-nofocus-keyscroll scrollview-nofocus-keyscroll.cpp)
 DALI_ADD_SAMPLE(scrollview-farfocus-keyscroll scrollview-farfocus-keyscroll.cpp)
+DALI_ADD_SAMPLE(scrollview-gradient-mask-example scrollview-gradient-mask-example.cpp)

@@ -39,7 +39,9 @@ public:
     info.name    = "SampleAddOn";
     info.version = Dali::DALI_ADDON_VERSION(1, 0, 0);
     info.next    = nullptr;
+#if !defined(_WIN32)
     tet_printf("SampleAddOn: GetAddOnInfo() : name = %s\n", info.name.c_str());
+#endif
   }
 
   /**

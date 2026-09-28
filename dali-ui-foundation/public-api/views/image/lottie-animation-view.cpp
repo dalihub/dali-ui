@@ -253,6 +253,16 @@ int LottieAnimationView::GetDesiredHeight() const
   return Ui::GetImpl(*this).GetDesiredHeight();
 }
 
+void LottieAnimationView::SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy)
+{
+  Ui::GetImpl(*this).SetLoadPolicy(loadPolicy);
+}
+
+Ui::Image::LoadPolicy LottieAnimationView::GetLoadPolicy() const
+{
+  return Ui::GetImpl(*this).GetLoadPolicy();
+}
+
 void LottieAnimationView::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
 {
   Ui::GetImpl(*this).SetReleasePolicy(releasePolicy);

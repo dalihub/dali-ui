@@ -30,17 +30,20 @@ class DialogStyleImpl : public Extension::UiStyleImpl
 public:
   struct Values
   {
-    float              mRequestedWidth{WRAP_CONTENT};
+    float              mRequestedWidth{908.0f};
     float              mRequestedHeight{WRAP_CONTENT};
-    UiColor            mBackgroundColor{UiColor(0x000000u, 0.0f)};
-    Insets             mPadding{Insets()};
-    float              mSpacing{0.0f};
-    Vector4            mCornerRadius{Vector4::ZERO};
+    // Fold the common OneUI section insets into our own content padding.
+    UiColor            mBackgroundColor{UiColor(0xFFFFFFu, 0.6f)};
+    Insets             mPadding{44.0f, 44.0f, 36.0f, 32.0f};
+    float              mSpacing{12.0f};
+    Vector4            mCornerRadius{44.0f, 44.0f, 44.0f, 44.0f};
     CornerRadiusPolicy mCornerRadiusPolicy{CornerRadiusPolicy::ABSOLUTE};
-    ShadowStack        mShadow{ShadowStack()};
-    float              mBorderlineWidth{0.0f};
-    float              mBorderlineOffset{0.0f};
-    UiColor            mBorderlineColor{UiColor(0x000000u, 1.0f)};
+    ShadowStack        mShadow{
+      Shadow(8.0f, Vector2::ZERO, UiColor(0x000000u, 0.05f), Vector2::ZERO, CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
+      Shadow(32.0f, Vector2(0.0f, 16.0f), UiColor(0x000000u, 0.1f), Vector2::ZERO, CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS)};
+    float              mBorderlineWidth{2.0f};
+    float              mBorderlineOffset{-1.0f};
+    UiColor            mBorderlineColor{UiColor(0xFCFCFFu, 0.05f)};
     float              mBackgroundBlurRadius{0.0f};
   } values;
 

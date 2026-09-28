@@ -30,8 +30,9 @@ class DialogContainerStyleImpl : public Extension::UiStyleImpl
 public:
   struct Values
   {
-    UiColor mScrimColor{UiColor(0x000000u, 0.5f)};
-    float   mScrimBlurRadius{0.0f};
+    // OneUI fallback scrim; NoScrimPreset explicitly disables tint and blur.
+    UiColor mScrimColor{UiColor(0x000000u, 0.4f)};
+    float   mScrimBlurRadius{100.0f};
   } values;
 
   DialogContainerStyleImpl() = default;

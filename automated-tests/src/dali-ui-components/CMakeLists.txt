@@ -22,6 +22,8 @@ SET(TC_SOURCES
     utc-Dali-ChartSection.cpp
     utc-Dali-Navigator.cpp
     utc-Dali-Dialog.cpp
+    utc-Dali-DialogPresentation.cpp
+    utc-Dali-DialogTransitionSample.cpp
     utc-Dali-DialogContainer.cpp
     utc-Dali-AlertDialog.cpp
     utc-Dali-MarkdownView.cpp
@@ -36,26 +38,15 @@ SET(TC_SOURCES
     window/utc-Dali-WindowFrameStateController.cpp
 )
 
+SET(TC_SOURCE_LIST ${TC_SOURCES})
+
 SET(TC_GENERATED_HEADER
     ${CMAKE_CURRENT_SOURCE_DIR}/${EXEC_NAME}.h
 )
 
-ADD_CUSTOM_COMMAND(
-    COMMAND ../../scripts/tcheadgen.sh ${EXEC_NAME}.h
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT ${TC_GENERATED_HEADER}
-    DEPENDS
-        ${TC_SOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/tcheadgen.sh
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/retriever.sh
-    COMMENT "Generating test tables for ${EXEC_NAME}"
-    VERBATIM
-)
-
 # WindowFrame policy cases exercise internal units directly, so those units are
 # compiled into the test executable. They are hidden in the shared library.
-LIST(APPEND TC_SOURCES
+SET(COMPONENT_INTERNAL_TEST_SOURCES
     ../../../dali-ui-components/internal/window/window-frame-layout-engine.cpp
     ../../../dali-ui-components/internal/window/window-frame-decoration-validator.cpp
     ../../../dali-ui-components/internal/window/window-frame-style-resolver.cpp
@@ -74,6 +65,10 @@ LIST(APPEND TC_SOURCES
     ../../../dali-ui-components/public-api/window/window-frame-interaction.cpp
     ../../../dali-ui-components/internal/markdown/markdown-parser.cpp
     ../../../dali-ui-components/internal/markdown/markdown-render-model.cpp
+)
+
+LIST(APPEND TC_SOURCES
+    ${COMPONENT_INTERNAL_TEST_SOURCES}
     ../dali-test-suite-utils/mesh-builder.cpp
     ../dali-test-suite-utils/dali-test-suite-utils.cpp
     ../dali-test-suite-utils/test-actor-utils.cpp
@@ -107,6 +102,8 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-environment-variable.cpp
     ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
     ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp
+    ../dali-test-suite-utils/dali-ui/ui-native-image-queue.cpp
+    ../dali-test-suite-utils/dali-ui/ui-native-image-surface.cpp
     ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
     ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
     ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
@@ -114,6 +111,23 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-vector-animation-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-image-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-window.cpp
+)
+
+IF(DALI_TEST_SOURCE_LIST_ONLY)
+    RETURN()
+ENDIF()
+
+ADD_CUSTOM_COMMAND(
+    COMMAND ../../scripts/tcheadgen.sh ${EXEC_NAME}.h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT ${TC_GENERATED_HEADER}
+    DEPENDS
+        ${TC_SOURCE_LIST}
+        ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/tcheadgen.sh
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/retriever.sh
+    COMMENT "Generating test tables for ${EXEC_NAME}"
+    VERBATIM
 )
 
 ADD_LIBRARY(dali-ui-components-test-md4c STATIC

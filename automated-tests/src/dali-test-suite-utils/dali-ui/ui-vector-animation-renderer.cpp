@@ -37,6 +37,7 @@
 
 namespace
 {
+std::atomic<uint32_t>                             gVectorAnimationLoadCount{0u};
 std::atomic<uint32_t>                             gLastVectorAnimationWidth{0u};
 std::atomic<uint32_t>                             gLastVectorAnimationHeight{0u};
 std::mutex                                        gDynamicPropertyProbeMutex;
@@ -78,6 +79,7 @@ public:
 
   bool Load(const std::string& url)
   {
+    ++gVectorAnimationLoadCount;
     Dali::Mutex::ScopedLock lock(mMutex);
     mLoadFailed = (url == "invalid.json");
     if(!mLoadFailed)
@@ -90,6 +92,7 @@ public:
 
   bool Load(const Dali::Vector<uint8_t>& data)
   {
+    ++gVectorAnimationLoadCount;
     Dali::Mutex::ScopedLock lock(mMutex);
     mDefaultWidth  = 100;
     mDefaultHeight = 100;
@@ -465,6 +468,16 @@ namespace Test
 {
 namespace UiVectorAnimationRenderer
 {
+void ResetLoadCount()
+{
+  gVectorAnimationLoadCount.store(0u);
+}
+
+uint32_t GetLoadCount()
+{
+  return gVectorAnimationLoadCount.load();
+}
+
 void ResetLastSize()
 {
   gLastVectorAnimationWidth.store(0u);

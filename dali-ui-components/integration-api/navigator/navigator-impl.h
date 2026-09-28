@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/animation/animation.h>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -32,6 +33,12 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+namespace Internal
+{
+struct NavigatorModalData;
+struct NavigatorModalBridge;
+class DialogPresentationSession;
+} //namespace Internal
 namespace Integration
 {
 
@@ -109,8 +116,13 @@ protected:
   virtual ~NavigatorImpl();
 
   void OnInitialize() override;
+  void OnDestroy() override;
+  void OnChildRemove(Actor& child) override;
 
 private:
+  friend struct Internal::NavigatorModalBridge;
+  bool          PushModalInternal(Ui::View modal, bool animated, std::shared_ptr<Internal::DialogPresentationSession> session);
+  void          DetachChild(Ui::View view);
   Ui::Navigator GetHandle();
   Ui::View      NavTop() const;
   Ui::View      ModalTop() const;
@@ -118,7 +130,20 @@ private:
   void          UpdateVisibility();
   void          RestackModals();
 
-  // Fade transition: animate one view's opacity, then finalize.
+  // Stack identity and visual transition targets are intentionally separate.
+  struct TransitionView
+  {
+    Ui::View view;
+    Vector3  position{Vector3::ZERO};
+    Vector3  scale{Vector3::ONE};
+    float    opacity{1.0f};
+    bool     modalContent{false};
+  };
+  TransitionView CaptureTransitionView(Ui::View view) const;
+  void           RestoreModalContent(const TransitionView& state);
+  void           RestoreScrim();
+
+  // Animate content and the active scrim on one timeline, then finalize.
   void RunTransition(bool animated, bool fadeIncoming);
   void OnTransitionFinished(Dali::Animation animation);
   void FinishTransition();
@@ -147,8 +172,9 @@ private:
   NavigatorImpl& operator=(NavigatorImpl&&)      = delete;
 
 private:
-  std::vector<Ui::View> mNavStack;
-  std::vector<Ui::View> mModalStack;
+  std::vector<Ui::View>                         mNavStack;
+  std::unique_ptr<Internal::NavigatorModalData> mModalData;
+  std::vector<Ui::View>                         mModalStack;
 
   Ui::Navigator::BackRequestedSignalType      mBackRequestedSignal;
   Ui::Navigator::PageEventSignalType          mPageWillAppearSignal;
@@ -161,6 +187,10 @@ private:
   Dali::Animation mTransition;
   Ui::View        mTxIncoming;
   Ui::View        mTxOutgoing;
+  TransitionView  mTxIncomingVisual;
+  TransitionView  mTxOutgoingVisual;
+  Ui::View        mTxScrim;
+  float           mTxScrimOpacity{1.0f};
   bool            mTxByPop{false};
   bool            mTxRemoveOutgoing{false};
   bool            mTxByModal{false};

@@ -19,6 +19,9 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/signals/render-callback.h>
+#include <dali/public-api/math/matrix.h>
+#include <dali/public-api/math/rect.h>
+#include <dali/public-api/math/vector2.h>
 
 namespace DALI_NAMESPACE
 {
@@ -29,12 +32,24 @@ namespace Internal
 /**
  * @brief Implementation of GlViewRenderInfo.
  *
- * Owned by GlViewImpl and pointed at whatever RenderCallbackInput the current callback was
- * given, so a frame costs one pointer store and the render thread copies nothing.
+ * Owned by GlViewImpl. A direct backend points it at whatever RenderCallbackInput the
+ * current callback was given, so a frame costs one pointer store and nothing is copied.
+ *
+ * An offscreen backend has no such input - there is no render task drawing the view, only
+ * a buffer it fills - so it fills these in instead. They are written to describe the same
+ * thing the direct backends report, which is what lets one set of application callbacks
+ * work on either: vertices in the view's own pixel space with the origin at its centre,
+ * placed by the MVP matrix.
  */
 struct GlViewRenderInfoImpl
 {
-  const Dali::RenderCallbackInput* input{nullptr};
+  const Dali::RenderCallbackInput* input{nullptr}; ///< Direct backends
+
+  /// Offscreen backend, read only while input is null.
+  Matrix        mvp{Matrix::IDENTITY};
+  Matrix        projection{Matrix::IDENTITY};
+  Size          size;
+  BoundsInteger clippingBox;
 };
 
 } // namespace Internal

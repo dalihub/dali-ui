@@ -1,5 +1,14 @@
 # Navigator
 
+[한국어](Navigator-(kr).md)
+
+For Dialog content, prefer `dialog.Post(navigator)` and `dialog.Dismiss()`;
+see [managed Dialog presentation](Dialog.md#managed-presentation-recommended).
+Navigator remains the modal-stack owner. Use `NavigateBack()` for user Back
+requests so Dialog policy/vetoes are respected; explicit PopModal/Remove/Clear
+bypass those vetoes. Manual PushModal assembly remains available, but do not mix
+it with Post/Dismiss on the same active content.
+
 `Navigator` is a page-stack navigation container in `dali-ui-components`.
 It manages two stacks:
 
@@ -69,28 +78,27 @@ Other stack APIs:
 
 ## Modal Stack
 
-Push modal content above the navigation stack:
+For Dialog content, prefer Post/Dismiss. The internal container is managed for
+you, and an action dismisses its own Dialog even if another modal covers it:
 
 ```cpp
 AlertDialog alert = AlertDialog::New();
 alert.SetTitle("Delete item?");
 alert.SetMessage("This action cannot be undone.");
 TextButton cancelButton = alert.AddActionButton("Cancel");
-cancelButton.ConnectClickedSignal(this, [navigator](View, InputEvent) mutable {
-  navigator.PopModal();
+WeakHandle<AlertDialog> weakAlert(alert);
+cancelButton.ConnectClickedSignal(this, [weakAlert](View, InputEvent) {
+  if(auto dialog = weakAlert.GetHandle()) dialog.Dismiss();
 });
 TextButton deleteButton = alert.AddActionButton("Delete");
-deleteButton.ConnectClickedSignal(this, [navigator](View, InputEvent) mutable {
-  navigator.PopModal();
+deleteButton.ConnectClickedSignal(this, [weakAlert](View, InputEvent) {
+  if(auto dialog = weakAlert.GetHandle()) dialog.Dismiss();
 });
 
-DialogContainer container = DialogContainer::New();
-container.SetModalContent(alert);
-
-navigator.PushModal(container);
+alert.Post(navigator);
 ```
 
-Dismiss the top modal item:
+Explicitly dismiss the top modal item (bypassing user-request vetoes):
 
 ```cpp
 navigator.PopModal();
@@ -98,6 +106,13 @@ navigator.PopModal();
 
 When a `DialogContainer` is pushed as modal content, tapping the scrim can
 dismiss it through `Navigator`.
+
+For a custom scrim View or complex scrim composition, use the existing manual
+`SetScrim` / `SetModalContent` / `PushModal` path instead; see
+[manual Dialog presentation](Dialog.md#manual-presentation-with-navigator-advanced).
+Simple tint/blur changes and NoScrimPreset remain available through Post options.
+Never mix direct parenting with Post/Dismiss in the same active presentation,
+including closing animations. Finish teardown before switching ownership paths.
 
 ---
 
@@ -223,6 +238,18 @@ navigator.ClearPageModalTransitionSpec(dialogContainer);
 This lets normal page navigation and modal dialog presentation use different
 motion.
 
+For a DialogContainer, the animator and snap target is its modal content. The
+per-modal spec is still registered against the container, and Navigator's page
+signals still identify that stack item. A separate linear scrim fade is added
+to the same Animation, preserving a stationary input boundary. This also applies
+to Dialog.Post and its transitionSpec option. Ordinary pages and non-container
+modals continue receiving their original View. Existing callbacks must not
+assume every modal target can be downcast to DialogContainer.
+
+Scrim fading uses the resolved transition duration (0.25 seconds by default).
+Longer property animations added by a callback extend the shared timeline;
+completion waits for all of them. No separate ViewAnimationSpec is needed.
+
 ---
 
 ## Signals
@@ -251,7 +278,7 @@ navigator.PageDidAppearSignal().Connect(
 - A view cannot be pushed into both the navigation stack and modal stack at the
   same time.
 - Page transition settings and modal transition settings are independent.
-- `DialogContainer` is the recommended wrapper for modal dialog content.
+- Prefer Dialog Post/Dismiss; manually own a DialogContainer for complex scrim composition.
 
 <br/>
 

@@ -33,6 +33,7 @@
 #include <dali-ui-components/public-api/dialog/dialog-container.h>
 #include <dali-ui-components/public-api/dialog/dialog-properties.h>
 #include <dali-ui-components/public-api/dialog/dialog.h>
+#include <dali-ui-components/public-api/dialog/dialog-post-options.h>
 #include <dali-ui-components/public-api/icon-button.h>
 #include <dali-ui-components/public-api/markdown/markdown-view.h>
 #include <dali-ui-components/public-api/navigator/navigation-transition-spec.h>

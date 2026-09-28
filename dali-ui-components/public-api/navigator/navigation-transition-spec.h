@@ -47,6 +47,15 @@ class NavigationTransitionSpecImpl;
  *
  * The handle is reference counted. Copies share the same callbacks and
  * duration.
+ *
+ * For DialogContainer modals, animator and snap callbacks receive the modal
+ * content, not the container. Navigator fades the scrim independently on the
+ * same animation; the container remains the stack item and input boundary.
+ * A callback that downcasts its target to DialogContainer must be updated.
+ * Preserve the content's layout position rather than assuming an origin of zero.
+ * Before removing modal content, Navigator restores its pre-exit position,
+ * scale and opacity so it can be presented again. Other animated properties
+ * remain the responsibility of the application.
  */
 class DALI_UI_COMPONENTS_API NavigationTransitionSpec : public BaseHandle
 {

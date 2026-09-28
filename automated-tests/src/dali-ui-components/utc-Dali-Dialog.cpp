@@ -19,7 +19,10 @@
 #include <iostream>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/shadow.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-components/public-api/dialog/dialog.h>
+#include <dali-ui-components/public-api/dialog/alert-dialog.h>
 #include <dali-ui-components/public-api/styles/dialog-style.h>
 #include <dali-ui-components/public-api/components-ui-config.h>
 #include <limits>
@@ -36,6 +39,59 @@ void utc_dali_dialog_startup(void)
 void utc_dali_dialog_cleanup(void)
 {
   test_return_value = TET_PASS;
+}
+
+int UtcDaliDialogOneUiSurfaceDefaultsP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  // Both factories must apply the OneUI fallback surface, not just expose it.
+  for(Dialog dialog : {Dialog::New(), Dialog(AlertDialog::New())})
+  {
+    DALI_TEST_EQUALS(dialog.GetCornerRadius(), Vector4(44.0f, 44.0f, 44.0f, 44.0f), TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetCornerRadiusPolicy(), CornerRadiusPolicy::ABSOLUTE, TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetBackgroundColor().GetRgba(), Vector4(1.0f, 1.0f, 1.0f, 0.6f), TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetBorderlineWidth(), 2.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetBorderlineOffset(), -1.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetBorderlineColor(), UiColor(0xFCFCFFu, 0.05f), TEST_LOCATION);
+    // View stores the first shadow in SHADOW and the rest as background effects.
+    Property::Value firstValue = dialog.GetProperty(Ui::Integration::View::Property::SHADOW);
+    const auto* firstMap = firstValue.GetMap();
+    DALI_TEST_CHECK(firstMap);
+    auto first = Ui::Extension::Shadow::CreateShadow(*firstMap);
+    DALI_TEST_EQUALS(first.GetBlurRadius(), 8.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(first.GetColor(), UiColor(0x000000u, 0.05f), TEST_LOCATION);
+    DALI_TEST_EQUALS(first.GetOffset(), Vector2::ZERO, TEST_LOCATION);
+    DALI_TEST_EQUALS(first.GetCutoutPolicy(), CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS, TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 1u, TEST_LOCATION);
+    auto second = ColorVisual::DownCast(dialog.GetVisualAt(Visual::DepthLayer::BACKGROUND_EFFECT, 0u));
+    DALI_TEST_CHECK(second);
+    DALI_TEST_EQUALS(second.GetBlurRadius(), 32.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(second.GetColor(), UiColor(0x000000u, 0.1f), TEST_LOCATION);
+    DALI_TEST_EQUALS(second.GetOffsetX(), 0.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(second.GetOffsetY(), 16.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(second.GetCutoutPolicy(), CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS, TEST_LOCATION);
+    // Content insets belong to the Dialog, not to application-owned sections.
+    DALI_TEST_EQUALS(dialog.GetRequestedWidth(), 908.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetPadding(), Insets(44.0f, 44.0f, 36.0f, 32.0f), TEST_LOCATION);
+    DALI_TEST_EQUALS(dialog.GetSpacing(), 12.0f, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliDialogSurfaceOverridesP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto style = DialogStyle::Default().Configure()
+    .SetBackgroundColor(UiColor(0x000000u, 0.0f)).SetCornerRadius(Vector4::ZERO)
+    .SetBorderlineWidth(0.0f).SetShadow(ShadowStack()).Build();
+  auto dialog = Dialog::New(style);
+  DALI_TEST_EQUALS(dialog.GetCornerRadius(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.GetBackgroundColor().GetRgba().a, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.GetBorderlineWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(dialog.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 0u, TEST_LOCATION);
+  Property::Value shadow = dialog.GetProperty(Ui::Integration::View::Property::SHADOW);
+  DALI_TEST_CHECK(shadow.GetMap() && shadow.GetMap()->Empty());
+  END_TEST;
 }
 
 int UtcDaliDialogStyleAppliedP(void)
@@ -117,7 +173,7 @@ int UtcDaliDialogDefaultStyleProviderP(void)
   auto dialog = Dialog::New();
   DALI_TEST_EQUALS(dialog.GetSpacing(), 19.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(dialog.GetBackgroundColor(), UiColor(UiColor::PRIMARY), TEST_LOCATION);
-  DALI_TEST_EQUALS(Dialog::New(DialogStyle::DefaultPreset()).GetSpacing(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dialog::New(DialogStyle::DefaultPreset()).GetSpacing(), 12.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -464,7 +520,7 @@ int UtcDaliDialogSetGetSpacingP(void)
 {
   UiTestApplication application;
   Dialog            dialog = Dialog::New();
-  DALI_TEST_EQUALS(0.0f, dialog.GetSpacing(), TEST_LOCATION);
+  DALI_TEST_EQUALS(12.0f, dialog.GetSpacing(), TEST_LOCATION);
 
   dialog.SetSpacing(24.0f);
   DALI_TEST_EQUALS(24.0f, dialog.GetSpacing(), TEST_LOCATION);

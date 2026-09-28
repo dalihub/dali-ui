@@ -19,6 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog-properties.h>
+#include <dali-ui-components/public-api/dialog/dialog-post-options.h>
 #include <dali-ui-components/public-api/styles/dialog-style.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -28,6 +29,7 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+class Navigator;
 namespace Integration DALI_INTERNAL
 {
 class DialogImpl;
@@ -37,8 +39,18 @@ class DialogImpl;
  * @brief Dialog is a three-section (header / body / footer) container control.
  *
  * It arranges its header, body and footer sections vertically (via an internal
- * stack layout) and is typically presented modally inside a DialogContainer.
- * This is the base class for AlertDialog.
+ * stack layout). This is the base class for AlertDialog.
+ *
+ * Prefer Post(navigator) and Dismiss() for modal presentation. Post creates and
+ * registers the DialogContainer internally, preserving the Dialog's layout
+ * parameters. Use DialogPostOptions::containerStyle for scrim color, blur, or
+ * DialogContainerStyle::NoScrimPreset() without manually creating a container.
+ *
+ * For a custom scrim view or complex scrim composition, assemble a separate
+ * DialogContainer with SetScrim/SetModalContent and Navigator::PushModal, and
+ * manage its removal through Navigator. Do not mix manual parent management
+ * with Post/Dismiss during a presentation, including its closing animation.
+ * Switch paths only after the previous presentation and parent links are cleared.
  */
 class DALI_UI_COMPONENTS_API Dialog : public View
 {
@@ -96,6 +108,56 @@ public:
    * @return A handle to a Dialog or an uninitialized handle
    */
   static Dialog DownCast(BaseHandle handle);
+
+public: // Presentation
+  using DismissRequestedSignalType = Signal<bool(Dialog, DialogDismissReason)>;
+  using ShownSignalType = Signal<void(Dialog)>;
+  using HiddenSignalType = Signal<void(Dialog, DialogDismissReason)>;
+
+  /**
+   * @brief Presents this Dialog using a container owned by the given Navigator.
+   * @param[in] navigator The Navigator that owns the modal presentation
+   * @return True if accepted or already posted to the same Navigator. Returns
+   * false for a different active host, a closing session, or rejected registration.
+   * @pre Both handles must be initialized.
+   * @pre An unposted Dialog must have no parent. Violations always assert.
+   * @note Do not mix Post/Dismiss with direct Add/Remove/Unparent of this Dialog
+   * or its managed container until HiddenSignal reports completion. This also
+   * applies during closing animations. Use Dismiss or Navigator's modal removal
+   * APIs instead. Detected violations always assert; hierarchy rollback and
+   * continued use after catching the assertion exception are not supported.
+   */
+  bool Post(Navigator navigator);
+  /**
+   * @copydoc Post(Navigator)
+   * @param[in] options Scrim style and transition settings for a new presentation
+   * @note Posting again to the same Navigator preserves the active session;
+   * it does not replace its options or move the Dialog to the top.
+   */
+  bool Post(Navigator navigator, const DialogPostOptions& options);
+  /**
+   * @brief Dismisses only this managed presentation. Repeated calls do nothing.
+   * @param[in] animated Whether to use the Navigator's modal exit transition
+   * @pre A Dialog without a managed presentation must have no parent.
+   * Calling Dismiss on manually parented content always asserts.
+   * @note Direct Add/Remove is allowed again only after presentation cleanup,
+   * reported by HiddenSignal, not merely after this call returns when an
+   * animation is running. For manual containers, use Navigator removal APIs
+   * instead and detach the content before switching to Post.
+   */
+  void Dismiss(bool animated = true);
+  /// @brief Whether a managed session exists, including covered and closing sessions.
+  bool IsPosted() const;
+  /// @brief Sets the allowed user requests. Defaults to BACK_AND_SCRIM.
+  void SetDismissPolicy(DialogDismissPolicy policy);
+  /// @brief Gets the allowed user requests.
+  DialogDismissPolicy GetDismissPolicy() const;
+  /// @brief Emitted after policy checks. Returning true vetoes a user request.
+  DismissRequestedSignalType& DismissRequestedSignal();
+  /// @brief Emitted once after first appearance in a presentation session.
+  ShownSignalType& ShownSignal();
+  /// @brief Emitted once after cleanup. The callback may post the Dialog again.
+  HiddenSignalType& HiddenSignal();
 
 public: // Sections
   /**

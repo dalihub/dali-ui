@@ -44,8 +44,19 @@ class DialogContainerImpl;
  * AbsoluteLayout); when none are set, the content is placed at the top-left at its
  * natural size. To center the content, give it AbsoluteLayoutParams with
  * POSITION_PROPORTIONAL bounds. Tapping the scrim emits ScrimClickedSignal;
- * Navigator connects this to PopModal so the dialog is dismissed when the
- * background is tapped.
+ * Navigator handles this for the top modal, using PopModal for manual containers
+ * or the Dialog's dismiss policy and request signal for managed presentations.
+ *
+ * Prefer Dialog::Post/Dismiss for ordinary dialogs. Use a manually assembled
+ * DialogContainer when a custom scrim view or complex scrim composition is
+ * required. Scrim color, blur, and visibility alone can be selected through
+ * DialogPostOptions::containerStyle without manual assembly.
+ *
+ * Keep manual SetModalContent/PushModal and managed Post/Dismiss separate for
+ * the entire presentation, including closing animations. Do not manually
+ * reparent or remove a posted Dialog or its internal container. After a manual
+ * container is removed from Navigator, clear its content before posting that
+ * Dialog; after a managed presentation, wait for Dialog::HiddenSignal.
  */
 class DALI_UI_COMPONENTS_API DialogContainer : public View
 {
@@ -75,6 +86,8 @@ public: // Content
    * The role is unchanged. Setting the same handle again has no effect.
    * If called again from a synchronous scene callback on the content, the latest request takes precedence.
    * The caller is responsible for focus movement and restoration, key handling, and dismissal policy.
+   * @pre Do not replace or clear content owned by Dialog::Post. Use Dialog::Dismiss
+   * or Navigator's modal removal APIs. Mixing the two ownership paths always asserts.
    * @param[in] modalContent The content view, or an empty handle to clear it
    */
   void SetModalContent(View modalContent);
@@ -87,6 +100,10 @@ public: // Content
 
   /**
    * @brief Replaces the built-in scrim with a custom view.
+   * @note Use this on an application-owned container, not the internal container
+   * of a posted Dialog. The supplied view's color and effects are preserved;
+   * its requested size is set to fill the container. Clicks are forwarded to
+   * ScrimClickedSignal only when the view is an InteractiveView.
    * @param[in] scrim The scrim view (kept below the modal content)
    */
   void SetScrim(View scrim);

@@ -40,7 +40,7 @@ public:
   AlertDialogStyle() = default;
   /// @brief Gets the default key for registration with Components UiConfig.
   static UiStyleKey<AlertDialogStyle> DefaultKey();
-  /// @brief Gets the built-in defaults, independent of the configured provider.
+  /// @brief Gets the built-in defaults: content-height action row, top padding 12 and action spacing 32.
   static AlertDialogStyle DefaultPreset();
   /// @brief Gets the style from the current configuration, falling back to the built-in defaults.
   static AlertDialogStyle Default();
@@ -65,10 +65,12 @@ public:
   float GetMessageFontSize() const;
   /// @brief Message font family. An empty string preserves the default Label font.
   Dali::String GetMessageFontFamily() const;
-  /// @brief Explicit action appearance. An empty handle uses the legacy Alert action defaults.
+  /// @brief Explicit action appearance. An empty handle uses the Alert fallback and configured TextButton geometry.
   TextButtonStyle GetActionButtonStyle() const;
-  /// @brief Fixed action row height. Must be finite and non-negative.
+  /// @brief Generated action row height: WRAP_CONTENT (default), or a finite non-negative fixed height.
   float GetActionRowHeight() const;
+  /// @brief Padding for the internally generated action row, not a user-supplied Footer.
+  Insets GetActionRowPadding() const;
   /// @brief Spacing between actions. Must be finite and non-negative.
   float GetActionButtonSpacing() const;
 
@@ -117,14 +119,18 @@ public:
   Builder& SetMessageFontFamily(const Dali::String& value) &;
   /// @copydoc SetMessageFontFamily
   Builder&& SetMessageFontFamily(const Dali::String& value) &&;
-  /// @brief Explicit action appearance. An empty handle uses the legacy Alert action defaults.
+  /// @brief Explicit action appearance. An empty handle uses the Alert fallback and configured TextButton geometry.
   Builder& SetActionButtonStyle(TextButtonStyle value) &;
   /// @copydoc SetActionButtonStyle
   Builder&& SetActionButtonStyle(TextButtonStyle value) &&;
-  /// @brief Fixed action row height. Must be finite and non-negative. Invalid values trigger an assertion.
+  /// @brief Generated action row height: WRAP_CONTENT, or a finite non-negative fixed height. Invalid values assert.
   Builder& SetActionRowHeight(float value) &;
   /// @copydoc SetActionRowHeight
   Builder&& SetActionRowHeight(float value) &&;
+  /// @brief Padding for the generated action row only. All sides must be finite and non-negative; invalid values assert.
+  Builder& SetActionRowPadding(const Insets& value) &;
+  /// @copydoc SetActionRowPadding
+  Builder&& SetActionRowPadding(const Insets& value) &&;
   /// @brief Spacing between actions. Must be finite and non-negative. Invalid values trigger an assertion.
   Builder& SetActionButtonSpacing(float value) &;
   /// @copydoc SetActionButtonSpacing

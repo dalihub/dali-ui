@@ -57,6 +57,12 @@ DialogContainerStyle DialogContainerStyle::Default()
   auto style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }
+DialogContainerStyle DialogContainerStyle::NoScrimPreset()
+{
+  DebugAssertStyleConfigApplied();
+  static auto style = Builder().SetScrimColor(UiColor(0x000000u, 0.0f)).SetScrimBlurRadius(0.0f).Build();
+  return style;
+}
 DialogContainerStyle DialogContainerStyle::DownCast(BaseHandle handle)
 {
   return DialogContainerStyle(dynamic_cast<Internal::DialogContainerStyleImpl*>(handle.GetObjectPtr()));

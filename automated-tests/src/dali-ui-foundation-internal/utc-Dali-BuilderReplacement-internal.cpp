@@ -24,7 +24,7 @@ using namespace Dali::Ui::Internal;
 namespace
 {
 
-const TreeNode& ParseRoot(Dali::Ui::Integration::JsonParser& parser, const std::string& source)
+const TreeNode& ParseRoot(Dali::Ui::Integration::JsonParser& parser, const char* source)
 {
   DALI_TEST_CHECK(parser.Parse(source));
   DALI_TEST_CHECK(parser.GetRoot());

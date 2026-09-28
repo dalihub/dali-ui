@@ -76,6 +76,8 @@ public:
     AddControl("제목 갱신", &TcDialogBasics::OnUpdateTitle);
     AddControl("scrim 교체 / 복원", &TcDialogBasics::OnReplaceScrim);
     AddControl("modal 제거 / 재설치", &TcDialogBasics::OnToggleModalContent);
+    AddControl("Post 기본 / 종료", &TcDialogBasics::OnPost);
+    AddControl("Post 투명 scrim / 종료", &TcDialogBasics::OnPostNoScrim);
     mStatus = MakeDialogLabel("");
     mStatus.SetMultiLine(true);
     mRoot.Add(mStatus);
@@ -168,13 +170,20 @@ public:
     scroll.SetRequestedWidth(MATCH_PARENT);
     scroll.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     scroll.SetContent(mRoot);
-    contentArea.Add(scroll);
+    mNavigator = Navigator::New();
+    mNavigator.SetRequestedWidth(MATCH_PARENT);
+    mNavigator.SetRequestedHeight(MATCH_PARENT);
+    mNavigator.Push(scroll, false);
+    contentArea.Add(mNavigator);
     UpdateStatus();
   }
 
   void OnExit() override
   {
     DisconnectAll();
+    if(mNavigator) mNavigator.Clear();
+    mPosted.Reset();
+    mNavigator.Reset();
     // Exercise the container's removal path instead of restoring flags in test code.
     if(mContainer)
     {
@@ -195,12 +204,47 @@ public:
     mStatus.Reset();
     mRoot.Reset();
     mTitleRevision = 0u;
+    mShownCount = 0u;
+    mHiddenCount = 0u;
     mActionCount = 0u;
     mScrimClickCount = 0u;
     mLastAction = "없음";
   }
 
 private:
+  void OnPost(View, InputEvent) { Post(false); }
+  void OnPostNoScrim(View, InputEvent) { Post(true); }
+
+  void Post(bool noScrim)
+  {
+    mPosted = AlertDialog::New();
+    mPosted.SetTitle("관리형 Dialog");
+    mPosted.SetMessage("배경 클릭 / Back 요청 / 차단 / 중첩 / 아래 창 종료를 확인하세요.");
+    mPosted.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(0.5f, 0.5f, 360.0f, 300.0f))
+      .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+    WeakHandle<AlertDialog> weak(mPosted);
+    mPosted.AddActionButton("닫기").ClickedSignal().Connect(this, [weak](View, InputEvent) {
+      if(auto dialog = weak.GetHandle()) dialog.Dismiss();
+    });
+    mPosted.AddActionButton("차단 전환").ClickedSignal().Connect(this, [weak](View, InputEvent) {
+      if(auto dialog = weak.GetHandle()) dialog.SetDismissPolicy(
+        dialog.GetDismissPolicy() == DialogDismissPolicy::NONE ? DialogDismissPolicy::BACK_AND_SCRIM : DialogDismissPolicy::NONE);
+    });
+    mPosted.AddActionButton("Back 요청").ClickedSignal().Connect(this, [this](View, InputEvent) { mNavigator.NavigateBack(); });
+    mPosted.AddActionButton("중첩").ClickedSignal().Connect(this, [this, weak](View, InputEvent) {
+      Post(false);
+      mPosted.AddActionButton("아래 창 종료").ClickedSignal().Connect(this, [weak](View, InputEvent) {
+        if(auto below = weak.GetHandle()) below.Dismiss(false);
+      });
+    });
+    mPosted.ShownSignal().Connect(this, [this](Dialog) { ++mShownCount; UpdateStatus(); });
+    mPosted.HiddenSignal().Connect(this, [this](Dialog, DialogDismissReason) { ++mHiddenCount; UpdateStatus(); });
+    DialogPostOptions options;
+    if(noScrim) options.containerStyle = DialogContainerStyle::NoScrimPreset();
+    mPosted.Post(mNavigator, options);
+  }
+
   using ControlHandler = void (TcDialogBasics::*)(View, InputEvent);
 
   void AddControl(const Dali::String& text, ControlHandler handler)
@@ -274,11 +318,16 @@ private:
       " / scrim 클릭: " + std::to_string(mScrimClickCount) + "\n" +
       "제목 갱신: " + std::to_string(mTitleRevision) +
       " / 제목 객체 유지: " + FlagText(mAlert.GetHeaderView() == mOriginalTitleHeader) + "\n" +
-      "action 클릭: " + std::to_string(mActionCount) + " / 마지막: " + mLastAction;
+      "action 클릭: " + std::to_string(mActionCount) + " / 마지막: " + mLastAction +
+      "\n관리형 Shown/Hidden: " + std::to_string(mShownCount) + "/" + std::to_string(mHiddenCount);
     mStatus.SetText(Dali::String(status.c_str()));
   }
 
   StackLayout     mRoot;
+  Navigator       mNavigator;
+  AlertDialog     mPosted;
+  uint32_t        mShownCount{0u};
+  uint32_t        mHiddenCount{0u};
   Label           mStatus;
   Dialog          mDefaultDialog;
   AlertDialog     mDefaultAlert;

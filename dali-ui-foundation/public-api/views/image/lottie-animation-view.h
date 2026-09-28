@@ -70,6 +70,7 @@ public:
       IMAGE_COLOR                = LottieAnimationViewPropertyIndex::IMAGE_COLOR,
       DESIRED_WIDTH              = LottieAnimationViewPropertyIndex::DESIRED_WIDTH,
       DESIRED_HEIGHT             = LottieAnimationViewPropertyIndex::DESIRED_HEIGHT,
+      LOAD_POLICY                = LottieAnimationViewPropertyIndex::LOAD_POLICY,
       RELEASE_POLICY             = LottieAnimationViewPropertyIndex::RELEASE_POLICY,
       SYNCHRONOUS_LOADING        = LottieAnimationViewPropertyIndex::SYNCHRONOUS_LOADING,
       REDRAW_IN_SCALING_DOWN     = LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_DOWN,
@@ -148,6 +149,8 @@ public: // Image
    *
    * Setting the URL that is already configured has no effect. Use Reload() to load
    * the current URL again.
+   * The previous visual remains displayed until its replacement is ready.
+   * An empty URL removes the current content immediately.
    *
    * @param[in] url The URL of the Lottie JSON file
    */
@@ -168,6 +171,8 @@ public: // Image
    * this if the animation should keep running. A placeholder image, when one is set and
    * the animation is not currently loaded, is shown again while the reload is in flight.
    *
+   * Reload follows the current LoadPolicy, including when the view is hidden.
+   * The previous visual is retained until the replacement resource is ready.
    * Has no effect if no resource URL has been set.
    */
   void Reload();
@@ -175,6 +180,9 @@ public: // Image
 public: // Playback Control
   /**
    * @brief Starts the animation, or resumes it if it was paused.
+   *
+   * Before visual creation, playback commands are retained without starting a load.
+   * The most recent Play(), Pause(), or Stop() request is applied when creation is allowed.
    */
   void Play();
 
@@ -217,6 +225,8 @@ public: // Playback Control
    * @brief Jumps to the specified frame number.
    *
    * A frame outside the current playback range is clamped to the nearest endpoint.
+   * Before visual creation, the latest requested frame is retained without loading.
+   * Clamping takes place after the animation metadata has loaded.
    *
    * @param[in] frame The frame index to jump to
    */
@@ -302,18 +312,18 @@ public: // Playback Options
    */
   float GetFrameSpeedFactor() const;
 
-public: // State Queries (read-only, requires live visual)
+public: // State Queries
   /**
    * @brief Gets the current playback state of the animation.
    *
-   * @return The current PlayState
+   * @return The pending playback request before visual creation, or the current PlayState
    */
   AnimatedImage::PlayState GetPlayState() const;
 
   /**
    * @brief Gets the current frame number being displayed.
    *
-   * @return The current frame index
+   * @return The pending frame request before visual creation, or the current frame index
    */
   int GetCurrentFrameNumber() const;
 
@@ -479,7 +489,9 @@ public: // Advanced
   /**
    * @brief Sets a per-frame dynamic property callback on a specific layer/element.
    *
-   * The info is consumed: its callback is handed to the visual, so pass it with std::move().
+   * The info is consumed, so pass it with std::move(). Set the resource URL first.
+   * Before visual creation, the view owns the callback and transfers it when creation
+   * is allowed. Changing the URL or calling Reload() clears these resource-specific callbacks.
    *
    * @param[in] info The dynamic property info
    */
@@ -506,8 +518,12 @@ public: // Size & Loading Behavior
   /**
    * @brief Returns the natural size of the Lottie animation content.
    *
-   * The returned size reflects the animation Visual, including the desired size
-   * or composition size when applicable. It may differ from the laid-out View size.
+   * If both desired dimensions are positive, they are returned without creating a visual.
+   * Otherwise, this returns the existing visual's natural size, or zero before creation.
+   * This query never starts loading. Loading completion invalidates layout measurement.
+   * To load before scene connection, use LoadPolicy::IMMEDIATE via SetLoadPolicy();
+   * the resource's natural size becomes available after loading completes.
+   * The returned size may differ from the laid-out View size.
    *
    * @return The natural size of the Lottie animation content
    */
@@ -540,6 +556,26 @@ public: // Size & Loading Behavior
    * @return The desired height in pixels, or 0 if not set
    */
   int GetDesiredHeight() const;
+
+  /**
+   * @brief Sets when the animation may start loading. Default is ATTACHED.
+   *
+   * ATTACHED waits until connected to a visible scene with a visible ancestor chain.
+   * Hiding after loading starts does not cancel the load. IMMEDIATE permits loading
+   * while detached or hidden. SynchronousLoading only controls how an allowed load runs.
+   * Visibility does not test opacity, clipping, or whether the view is within the viewport.
+   * This policy gates initial loading; it does not suspend an already loaded animation.
+   *
+   * @param[in] loadPolicy The loading policy to use
+   */
+  void SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
+
+  /**
+   * @brief Returns the loading policy.
+   *
+   * @return The current loading policy
+   */
+  Ui::Image::LoadPolicy GetLoadPolicy() const;
 
   /**
    * @brief Sets the release policy for the animation resource.

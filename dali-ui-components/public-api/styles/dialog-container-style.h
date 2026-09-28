@@ -27,7 +27,7 @@ namespace Ui
 {
 /**
  * @brief An immutable presentation policy applied at creation. Does not store content or modal state.
- * @note UiConfig::Apply must be called before using Default or DefaultPreset.
+ * @note UiConfig::Apply must be called before using Default, DefaultPreset or NoScrimPreset.
  */
 class DALI_UI_COMPONENTS_API DialogContainerStyle : public UiStyle
 {
@@ -37,8 +37,14 @@ public:
   DialogContainerStyle() = default;
   /// @brief Gets the default key for registration with Components UiConfig.
   static UiStyleKey<DialogContainerStyle> DefaultKey();
-  /// @brief Gets the built-in defaults, independent of the configured provider.
+  /// @brief Gets the OneUI fallback scrim: black with alpha 0.4 and blur radius 100.
+  /// Independent of the configured provider; use NoScrimPreset to disable both.
   static DialogContainerStyle DefaultPreset();
+  /**
+   * @brief Gets a cached preset with transparent tint and no background blur.
+   * The built-in scrim still receives input; this does not make the dialog non-modal.
+   */
+  static DialogContainerStyle NoScrimPreset();
   /// @brief Gets the style from the current configuration, falling back to the built-in defaults.
   static DialogContainerStyle Default();
   /// @brief Returns an empty handle if the type does not match.

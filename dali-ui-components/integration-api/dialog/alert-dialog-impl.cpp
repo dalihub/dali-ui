@@ -21,8 +21,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
-#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali/devel-api/object/type-registry-helper.h>
@@ -104,6 +104,7 @@ void AlertDialogImpl::SetTitle(const Dali::String& title)
   }
   Ui::Label label = Ui::Label::New(title);
   label.SetRequestedWidth(MATCH_PARENT);
+  label.SetMultiLine(true);
   label.SetFontSize(mStyle.GetTitleFontSize());
   label.SetTextColor(mStyle.GetTitleTextColor());
   if(!mStyle.GetTitleFontFamily().Empty())
@@ -135,6 +136,7 @@ void AlertDialogImpl::SetMessage(const Dali::String& message)
   }
   Ui::Label label = Ui::Label::New(message);
   label.SetRequestedWidth(MATCH_PARENT);
+  label.SetMultiLine(true);
   label.SetFontSize(mStyle.GetMessageFontSize());
   label.SetTextColor(mStyle.GetMessageTextColor());
   if(!mStyle.GetMessageFontFamily().Empty())
@@ -152,19 +154,27 @@ Dali::String AlertDialogImpl::GetMessage() const
 
 Ui::TextButton AlertDialogImpl::AddActionButton(const Dali::String& text)
 {
-  StackLayout row = StackLayout::DownCast(mActionButtonRow);
+  FlexLayout row = FlexLayout::DownCast(mActionButtonRow);
   if(!row || GetFooterView() != row)
   {
-    row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row = FlexLayout::New();
+    row.SetDirection(FlexDirection::ROW);
+    row.SetJustifyContent(FlexJustify::CENTER);
+    row.SetAlignItems(FlexAlign::CENTER);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(mStyle.GetActionRowHeight());
-    row.SetSpacing(mStyle.GetActionButtonSpacing());
+    row.SetPadding(mStyle.GetActionRowPadding());
     mActionButtonRow = row;
     SetFooterView(row);
   }
 
   Ui::TextButton button = Ui::TextButton::New(text, mActionStyle);
-  button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+  button.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(0.0f).SetFlexShrink(0.0f));
+  // Logical start margin supplies the gap without modifying existing buttons.
+  if(row.GetChildCount() > 0u)
+  {
+    button.SetMargin(Insets(mStyle.GetActionButtonSpacing(), 0.0f, 0.0f, 0.0f));
+  }
   row.Add(button);
 
   return button;

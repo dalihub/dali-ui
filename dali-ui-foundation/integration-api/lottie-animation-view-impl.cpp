@@ -19,6 +19,7 @@
 #include "lottie-animation-view-impl.h"
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
@@ -79,6 +80,7 @@ LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("notifyAfterRasterization", BOOLEAN,
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("renderScale",              FLOAT,   RENDER_SCALE)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("enableAspectFit",          BOOLEAN, ENABLE_ASPECT_FIT)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("placeholderImage",         STRING,  PLACEHOLDER_IMAGE)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("loadPolicy",               INTEGER, LOAD_POLICY)
 
 DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui::Integration, LottieAnimationViewImpl, "pixelArea", VECTOR4, PIXEL_AREA)
 
@@ -110,6 +112,7 @@ LottieAnimationViewImpl::LottieAnimationViewImpl()
   mLoopingMode(Ui::LottieAnimation::LoopingMode::RESTART),
   mPlayRangeType(PlayRangeType::NONE),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
+  mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
   mLoopCount(-1),
   mMinFrame(0),
   mMaxFrame(0),
@@ -123,7 +126,6 @@ LottieAnimationViewImpl::LottieAnimationViewImpl()
   mNotifyAfterRasterization(false),
   mSynchronousLoading(false),
   mAspectFitEnabled(true),
-  mVisualDirty(false),
   mAnimationFinishedSignal()
 {
 }
@@ -214,6 +216,15 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
         if(value.Get(height))
         {
           impl.SetDesiredHeight(height);
+        }
+        break;
+      }
+      case LottieAnimationViewImpl::Property::LOAD_POLICY:
+      {
+        int policy;
+        if(value.Get(policy))
+        {
+          impl.SetLoadPolicy(static_cast<Ui::Image::LoadPolicy>(policy));
         }
         break;
       }
@@ -344,6 +355,9 @@ Dali::Property::Value LottieAnimationViewImpl::GetProperty(Dali::BaseObject* obj
       case LottieAnimationViewImpl::Property::DESIRED_HEIGHT:
         value = impl.GetDesiredHeight();
         break;
+      case LottieAnimationViewImpl::Property::LOAD_POLICY:
+        value = static_cast<int>(impl.GetLoadPolicy());
+        break;
       case LottieAnimationViewImpl::Property::RELEASE_POLICY:
         value = static_cast<int>(impl.GetReleasePolicy());
         break;
@@ -382,6 +396,7 @@ Dali::Property::Value LottieAnimationViewImpl::GetProperty(Dali::BaseObject* obj
 void LottieAnimationViewImpl::OnInitialize()
 {
   ViewImpl::OnInitialize();
+  DevelActor::OnSceneVisibilityChangedSignal(Self()).Connect(this, &LottieAnimationViewImpl::OnSceneVisibilityChanged);
   Internal::ViewDataImpl::Get(*this).VisualEventSignal().Connect(this, &LottieAnimationViewImpl::OnVisualEvent);
 
   // Connect to View::ResourceReadySignal to handle placeholder removal
@@ -449,17 +464,15 @@ LayoutRect LottieAnimationViewImpl::OnArrange(const LayoutRect& bounds)
 
 Vector3 LottieAnimationViewImpl::GetNaturalSize() const
 {
-  LottieAnimationViewImpl& self = *const_cast<LottieAnimationViewImpl*>(this);
-  if(self.mVisualDirty)
-  {
-    self.mVisualDirty = false;
-    self.UpdateVisual();
-  }
-
   Vector2 naturalSize;
-  if(self.mVisual)
+  if(mDesiredWidth > 0 && mDesiredHeight > 0)
   {
-    self.mVisual.GetNaturalSize(naturalSize);
+    naturalSize = Vector2(static_cast<float>(mDesiredWidth), static_cast<float>(mDesiredHeight));
+  }
+  else if(mVisual)
+  {
+    auto visual = mVisual;
+    visual.GetNaturalSize(naturalSize);
   }
   return Vector3(naturalSize);
 }
@@ -479,9 +492,8 @@ void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)
   if(mUrl != url)
   {
     mUrl = url;
-    // Re-show placeholder while new animation loads
-    UpdatePlaceholderVisual();
-    mVisualDirty = true;
+    ResetVisual();
+    CreateVisualIfRequired();
     InvalidateMeasure();
   }
 }
@@ -498,56 +510,45 @@ void LottieAnimationViewImpl::Reload()
     return;
   }
 
-  // The animated vector image visual has no RELOAD action, so reloading is a visual
-  // rebuild: the next measure recreates the visual from mUrl. Dynamic property
-  // callbacks belong to the old visual and are therefore dropped with it.
-  UpdatePlaceholderVisual();
-  mVisualDirty = true;
+  // Rebuild from the current URL. Callbacks and playback requests belong to the old resource.
+  ResetVisual();
+  CreateVisualIfRequired();
   InvalidateMeasure();
 }
 
 void LottieAnimationViewImpl::Play()
 {
-  // Flush any pending configuration before issuing the playback action.
-  // This guarantees that SetResourceUrl / SetMinMaxFrame / etc. called before
-  // Play() are reflected in the visual that actually starts playing.
-  if(mVisualDirty)
-  {
-    mVisualDirty = false;
-    UpdateVisual();
-  }
   if(mVisual)
   {
-    auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::Integration::AnimatedVectorImageVisual::Action::PLAY, Dali::Property::Map());
+    mVisual.DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::PLAY, Dali::Property::Map());
+  }
+  else
+  {
+    mPendingPlayState = Ui::AnimatedImage::PlayState::PLAYING;
   }
 }
 
 void LottieAnimationViewImpl::Pause()
 {
-  if(mVisualDirty)
-  {
-    mVisualDirty = false;
-    UpdateVisual();
-  }
   if(mVisual)
   {
-    auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::Integration::AnimatedVectorImageVisual::Action::PAUSE, Dali::Property::Map());
+    mVisual.DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::PAUSE, Dali::Property::Map());
+  }
+  else
+  {
+    mPendingPlayState = Ui::AnimatedImage::PlayState::PAUSED;
   }
 }
 
 void LottieAnimationViewImpl::Stop()
 {
-  if(mVisualDirty)
-  {
-    mVisualDirty = false;
-    UpdateVisual();
-  }
   if(mVisual)
   {
-    auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::Integration::AnimatedVectorImageVisual::Action::STOP, Dali::Property::Map());
+    mVisual.DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::STOP, Dali::Property::Map());
+  }
+  else
+  {
+    mPendingPlayState = Ui::AnimatedImage::PlayState::STOPPED;
   }
 }
 
@@ -567,15 +568,13 @@ int LottieAnimationViewImpl::GetLoopCount() const
 
 void LottieAnimationViewImpl::JumpToFrame(int frame)
 {
-  if(mVisualDirty)
-  {
-    mVisualDirty = false;
-    UpdateVisual();
-  }
   if(mVisual)
   {
-    auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::Integration::AnimatedVectorImageVisual::Action::JUMP_TO, frame);
+    mVisual.DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::JUMP_TO, frame);
+  }
+  else
+  {
+    mPendingFrame = frame;
   }
 }
 
@@ -671,6 +670,10 @@ float LottieAnimationViewImpl::GetFrameSpeedFactor() const
 
 Dali::Ui::AnimatedImage::PlayState LottieAnimationViewImpl::GetPlayState() const
 {
+  if(mPendingPlayState)
+  {
+    return *mPendingPlayState;
+  }
   if(mVisual)
   {
     Dali::Property::Map map;
@@ -685,6 +688,10 @@ Dali::Ui::AnimatedImage::PlayState LottieAnimationViewImpl::GetPlayState() const
 
 int LottieAnimationViewImpl::GetCurrentFrameNumber() const
 {
+  if(mPendingFrame)
+  {
+    return *mPendingFrame;
+  }
   if(mVisual)
   {
     Dali::Property::Map map;
@@ -827,12 +834,6 @@ Dali::Property::Map LottieAnimationViewImpl::GetMarkerInfo() const
 
 void LottieAnimationViewImpl::SetDynamicProperty(Ui::LottieAnimation::DynamicProperty info)
 {
-  if(mVisualDirty)
-  {
-    mVisualDirty = false;
-    UpdateVisual();
-  }
-
   if(mVisual)
   {
     Ui::Integration::AnimatedVectorImageVisual::DynamicProperty dynamicInfo;
@@ -840,14 +841,21 @@ void LottieAnimationViewImpl::SetDynamicProperty(Ui::LottieAnimation::DynamicPro
     dynamicInfo.keyPath  = info.GetKeyPath().CStr();
     dynamicInfo.property = static_cast<int32_t>(info.GetProperty());
     dynamicInfo.callback = Ui::Integration::AnimatedVectorImageVisual::WrapDynamicPropertyCallback(std::move(info.GetCallback()));
-    auto& viewData       = Internal::ViewDataImpl::Get(*this);
-    viewData.DoActionExtension(LottieAnimationViewImpl::Property::IMAGE,
-                               Ui::Integration::AnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY,
-                               Dali::Any(dynamicInfo));
+    mVisual.DoActionExtension(Ui::Integration::AnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY,
+                              Dali::Any(dynamicInfo));
   }
-  else
+  else if(!mUrl.Empty())
   {
-    DALI_LOG_WARNING("LottieAnimationView: SetDynamicProperty ignored — no visual (set ResourceUrl first)\n");
+    // Replace callbacks for the same binding while creation is deferred.
+    for(auto& pending : mPendingDynamicProperties)
+    {
+      if(pending.GetId() == info.GetId() && pending.GetKeyPath() == info.GetKeyPath() && pending.GetProperty() == info.GetProperty())
+      {
+        pending = std::move(info);
+        return;
+      }
+    }
+    mPendingDynamicProperties.emplace_back(std::move(info));
   }
 }
 
@@ -858,12 +866,16 @@ Dali::Signal<void(Dali::Ui::View)>& LottieAnimationViewImpl::AnimationFinishedSi
 
 Ui::Visual::ResourceStatus LottieAnimationViewImpl::GetLoadingStatus() const
 {
+  if(!mVisual)
+  {
+    return Ui::Visual::ResourceStatus::PREPARING;
+  }
   return Internal::ViewDataImpl::Get(*this).GetVisualResourceStatus(LottieAnimationViewImpl::Property::IMAGE);
 }
 
 void LottieAnimationViewImpl::OnVisualEvent(Ui::View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId)
 {
-  if(visualIndex == LottieAnimationViewImpl::Property::IMAGE &&
+  if(mVisual && visualIndex == LottieAnimationViewImpl::Property::IMAGE &&
      signalId == static_cast<Dali::Property::Index>(Ui::Integration::AnimatedVectorImageVisual::Signal::ANIMATION_FINISHED))
   {
     Ui::View handle(GetOwner());
@@ -871,21 +883,14 @@ void LottieAnimationViewImpl::OnVisualEvent(Ui::View view, Dali::Property::Index
   }
 }
 
-void LottieAnimationViewImpl::UpdateVisual()
+void LottieAnimationViewImpl::CreateVisualIfRequired()
 {
-  auto& viewData = Internal::ViewDataImpl::Get(*this);
-
-  if(mVisual)
+  if(mVisual || mUrl.Empty() || !IsReadyToLoad())
   {
-    viewData.UnregisterVisual(LottieAnimationViewImpl::Property::IMAGE);
-    mVisual.Reset();
-  }
-
-  if(mUrl.Empty())
-  {
-    DALI_LOG_ERROR("LottieAnimationView must be supplied with a valid URL.\n");
     return;
   }
+  auto& viewData = Internal::ViewDataImpl::Get(*this);
+  UpdatePlaceholderVisual();
 
   Dali::Property::Map map;
   map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::LOTTIE_ANIMATION);
@@ -930,6 +935,7 @@ void LottieAnimationViewImpl::UpdateVisual()
     map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, mDesiredHeight);
   }
 
+  map.Insert(Ui::Integration::ImageVisual::Property::LOAD_POLICY, static_cast<int>(mLoadPolicy));
   map.Insert(Ui::Integration::ImageVisual::Property::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
   map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
   map.Insert(Ui::Integration::ImageVisual::Property::PIXEL_AREA, mPixelArea);
@@ -941,17 +947,24 @@ void LottieAnimationViewImpl::UpdateVisual()
     mVisual = visualFactory.CreateVisual(map);
     if(mVisual)
     {
-      viewData.RegisterVisual(LottieAnimationViewImpl::Property::IMAGE, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
-      viewData.EnableCornerPropertiesOverridden(mVisual, true);
+      auto visual = mVisual;
+      ApplyPendingActions();
+      viewData.EnableCornerPropertiesOverridden(visual, true);
+      viewData.RegisterVisual(LottieAnimationViewImpl::Property::IMAGE, visual, Dali::Ui::Integration::DepthIndex::CONTENT);
+      // Creation may happen after a hidden view was already measured/arranged.
+      viewData.InvalidateMeasure();
+      if(mVisual == visual)
+      {
+        ApplyLayout(Self().GetProperty<Vector2>(Actor::Property::SIZE));
+      }
     }
   }
 }
 
 void LottieAnimationViewImpl::UpdateVisualProperty(Dali::Property::Index index, const Dali::Property::Value& value)
 {
-  // A dirty visual is either not created yet or belongs to the previous URL.
-  // UpdateVisual() will apply all current member values to the new visual.
-  if(!mVisual || mVisualDirty)
+  // Creation uses the latest member values; setters never materialize a visual.
+  if(!mVisual)
   {
     return;
   }
@@ -959,6 +972,89 @@ void LottieAnimationViewImpl::UpdateVisualProperty(Dali::Property::Index index, 
   Dali::Property::Map map;
   map.Insert(index, value);
   mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
+}
+
+bool LottieAnimationViewImpl::IsReadyToLoad() const
+{
+  return mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE || DevelActor::IsOnSceneVisible(Self());
+}
+
+void LottieAnimationViewImpl::OnSceneConnection(int depth)
+{
+  ViewImpl::OnSceneConnection(depth);
+  CreateVisualIfRequired();
+}
+
+void LottieAnimationViewImpl::OnSceneVisibilityChanged(Actor, bool visible)
+{
+  if(visible)
+  {
+    CreateVisualIfRequired();
+  }
+}
+
+void LottieAnimationViewImpl::ResetVisual()
+{
+  mPendingFrame.reset();
+  mPendingPlayState.reset();
+  mPendingDynamicProperties.clear();
+  auto& viewData = Internal::ViewDataImpl::Get(*this);
+  // Keep the registered visual until RegisterVisual replaces it and the new
+  // resource is ready. Clearing the URL explicitly removes the current content.
+  if(mUrl.Empty())
+  {
+    viewData.UnregisterVisual(LottieAnimationViewImpl::Property::IMAGE);
+  }
+  mVisual.Reset();
+  viewData.UnregisterVisual(LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE);
+}
+
+void LottieAnimationViewImpl::ApplyPendingActions()
+{
+  auto properties = std::move(mPendingDynamicProperties);
+  mPendingDynamicProperties.clear();
+  for(auto& property : properties)
+  {
+    SetDynamicProperty(std::move(property));
+  }
+  if(mPendingFrame)
+  {
+    const int frame = *mPendingFrame;
+    mPendingFrame.reset();
+    JumpToFrame(frame);
+  }
+  if(mPendingPlayState)
+  {
+    const auto state = *mPendingPlayState;
+    mPendingPlayState.reset();
+    if(state == Ui::AnimatedImage::PlayState::PLAYING)
+    {
+      Play();
+    }
+    else if(state == Ui::AnimatedImage::PlayState::PAUSED)
+    {
+      Pause();
+    }
+    else
+    {
+      Stop();
+    }
+  }
+}
+
+void LottieAnimationViewImpl::SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy)
+{
+  if(mLoadPolicy != loadPolicy)
+  {
+    mLoadPolicy = loadPolicy;
+    UpdateVisualProperty(Ui::Integration::ImageVisual::Property::LOAD_POLICY, static_cast<int>(loadPolicy));
+    CreateVisualIfRequired();
+  }
+}
+
+Ui::Image::LoadPolicy LottieAnimationViewImpl::GetLoadPolicy() const
+{
+  return mLoadPolicy;
 }
 
 void LottieAnimationViewImpl::SetDesiredWidth(int width)
@@ -1031,12 +1127,6 @@ void LottieAnimationViewImpl::SetImageColor(const UiColor& color)
       map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, mImageColor.GetRgba());
       mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
     }
-    else
-    {
-      // Visual not yet created: defer to next OnMeasure pass
-      mVisualDirty = true;
-      InvalidateMeasure();
-    }
   }
 }
 
@@ -1080,7 +1170,7 @@ void LottieAnimationViewImpl::UpdatePlaceholderVisual()
   auto& viewData = Internal::ViewDataImpl::Get(*this);
   viewData.UnregisterVisual(LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE);
 
-  if(mPlaceholderUrl.Empty())
+  if(mPlaceholderUrl.Empty() || mUrl.Empty() || !IsReadyToLoad())
   {
     return;
   }
@@ -1111,6 +1201,10 @@ void LottieAnimationViewImpl::UpdatePlaceholderVisual()
 
 void LottieAnimationViewImpl::OnViewResourceReady(Ui::View view)
 {
+  if(!mVisual)
+  {
+    return;
+  }
   auto& viewData = Internal::ViewDataImpl::Get(*this);
   if(viewData.GetVisualResourceStatus(LottieAnimationViewImpl::Property::IMAGE) != Ui::Visual::ResourceStatus::READY)
   {

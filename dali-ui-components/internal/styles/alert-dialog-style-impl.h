@@ -40,8 +40,9 @@ public:
     float           mMessageFontSize{16.0f};
     Dali::String    mMessageFontFamily{Dali::String()};
     TextButtonStyle mActionButtonStyle{TextButtonStyle()};
-    float           mActionRowHeight{64.0f};
-    float           mActionButtonSpacing{8.0f};
+    float           mActionRowHeight{WRAP_CONTENT};
+    Insets          mActionRowPadding{0.0f, 0.0f, 12.0f, 0.0f};
+    float           mActionButtonSpacing{32.0f};
   } values;
 
   AlertDialogStyleImpl() = default;
