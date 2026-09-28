@@ -1,6 +1,10 @@
 name: "Unittest (Windows)"
 
 on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+    - devel
   workflow_dispatch:
     inputs:
       dali_core_change:
