@@ -53,13 +53,13 @@ void utc_dali_builder_replacement_internal_cleanup(void)
 int UtcDaliBuilderReplacementScalarTypesAndOverrideP(void)
 {
   Dali::Ui::Integration::JsonParser parser = Dali::Ui::Integration::JsonParser::New();
-  const std::string json = R"({
-    "boolean":"{BOOLEAN}",
-    "float":"{FLOAT}",
-    "integer":"{INTEGER}",
-    "text":"{TEXT}"
-  })";
-  const TreeNode& root = ParseRoot(parser, json);
+  const TreeNode& root = ParseRoot(parser,
+                                   R"({
+                                     "boolean":"{BOOLEAN}",
+                                     "float":"{FLOAT}",
+                                     "integer":"{INTEGER}",
+                                     "text":"{TEXT}"
+                                   })");
 
   Property::Map defaults;
   defaults.Insert("BOOLEAN", true);
@@ -91,17 +91,17 @@ int UtcDaliBuilderReplacementScalarTypesAndOverrideP(void)
 int UtcDaliBuilderReplacementCompositeTypesP(void)
 {
   Dali::Ui::Integration::JsonParser parser = Dali::Ui::Integration::JsonParser::New();
-  const std::string json = R"({
-    "vector2":"{VECTOR2}",
-    "vector3":"{VECTOR3}",
-    "vector4":"{VECTOR4}",
-    "matrix":"{MATRIX}",
-    "matrix3":"{MATRIX3}",
-    "rect":"{RECT}",
-    "extents":"{EXTENTS}",
-    "insets":"{INSETS}"
-  })";
-  const TreeNode& root = ParseRoot(parser, json);
+  const TreeNode& root = ParseRoot(parser,
+                                   R"({
+                                     "vector2":"{VECTOR2}",
+                                     "vector3":"{VECTOR3}",
+                                     "vector4":"{VECTOR4}",
+                                     "matrix":"{MATRIX}",
+                                     "matrix3":"{MATRIX3}",
+                                     "rect":"{RECT}",
+                                     "extents":"{EXTENTS}",
+                                     "insets":"{INSETS}"
+                                   })");
 
   Matrix matrix;
   matrix.SetIdentity();
@@ -146,14 +146,14 @@ int UtcDaliBuilderReplacementCompositeTypesP(void)
 int UtcDaliBuilderReplacementMapArrayAndPartialStringsP(void)
 {
   Dali::Ui::Integration::JsonParser parser = Dali::Ui::Integration::JsonParser::New();
-  const std::string json = R"({
-    "map":"{MAP}",
-    "array":"{ARRAY}",
-    "partial":"assets/{DIRECTORY}/{FILE}",
-    "unknown":"{UNKNOWN}",
-    "wrong":"{INTEGER}"
-  })";
-  const TreeNode& root = ParseRoot(parser, json);
+  const TreeNode& root = ParseRoot(parser,
+                                   R"({
+                                     "map":"{MAP}",
+                                     "array":"{ARRAY}",
+                                     "partial":"assets/{DIRECTORY}/{FILE}",
+                                     "unknown":"{UNKNOWN}",
+                                     "wrong":"{INTEGER}"
+                                   })");
 
   Property::Map nestedMap;
   nestedMap.Insert("key", "value");
@@ -196,21 +196,21 @@ int UtcDaliBuilderReplacementMapArrayAndPartialStringsP(void)
 int UtcDaliBuilderReplacementDirectNodesAndMissingChildrenP(void)
 {
   Dali::Ui::Integration::JsonParser parser = Dali::Ui::Integration::JsonParser::New();
-  const std::string json = R"({
-    "boolean":true,
-    "float":1.5,
-    "integer":7,
-    "text":"plain",
-    "vector2":[1,2],
-    "vector3":[1,2,3],
-    "vector4":[1,2,3,4],
-    "matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
-    "matrix3":[1,0,0,0,1,0,0,0,0,1],
-    "rect":[1,2,3,4],
-    "extents":[1,2,3,4],
-    "insets":[1,2,3,4]
-  })";
-  const TreeNode& root = ParseRoot(parser, json);
+  const TreeNode& root = ParseRoot(parser,
+                                   R"({
+                                     "boolean":true,
+                                     "float":1.5,
+                                     "integer":7,
+                                     "text":"plain",
+                                     "vector2":[1,2],
+                                     "vector3":[1,2,3],
+                                     "vector4":[1,2,3,4],
+                                     "matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+                                     "matrix3":[1,0,0,0,1,0,0,0,1],
+                                     "rect":[1,2,3,4],
+                                     "extents":[1,2,3,4],
+                                     "insets":[1,2,3,4]
+                                   })");
 
   Replacement replacement;
   DALI_TEST_CHECK(replacement.IsBoolean(Child(root, "boolean")));
