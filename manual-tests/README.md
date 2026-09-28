@@ -164,3 +164,5 @@ TC가 소유한 overlay container에 추가합니다. 이렇게 하면 launcher 
 | TC 파일명 | `tc-<기능명>.cpp` (소문자, 하이픈) | `tc-scroll-view.cpp` |
 | TC 시나리오 | `tc-<기능명>.md` (TC 파일과 동일 이름) | `tc-scroll-view.md` |
 | TC 클래스명 | `Tc<기능명>` (PascalCase) | `TcScrollView` |
+
+Layout 신규 회귀 검증은 [Layout suite 실행·판정 기준](dali-ui-foundation/layout-validation-coverage.md)과 TC95–TC157의 대응 MD를 사용하십시오.
