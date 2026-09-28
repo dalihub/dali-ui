@@ -137,6 +137,11 @@ public: // Creation
    */
   static WebViewImplPtr New(uint32_t argc, char** argv);
 
+  /**
+   * @copydoc Dali::Ui::WebView::SetWebEngineType
+   */
+  static void SetWebEngineType(WebEngineType type);
+
 public: // API — URL & User Agent
   /**
    * @copydoc Dali::Ui::WebView::GetUrl

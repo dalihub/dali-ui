@@ -84,6 +84,32 @@ int UtcDaliWebViewNewWithoutAppliedUiConfigN(void)
   END_TEST;
 }
 
+int UtcDaliWebViewSetWebEngineTypeBeforeCreationP(void)
+{
+  UiConfig config = UiConfig::New();
+  config.SetWebEngineType(WebEngineType::LWE);
+  WebView::SetWebEngineType(WebEngineType::CHROMIUM);
+
+  UiTestApplication application(config);
+  WebView view = WebView::New();
+  DALI_TEST_CHECK(view);
+  DALI_TEST_EQUALS(UiConfig::GetCurrent().GetWebEngineType(), WebEngineType::LWE, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewSetWebEngineTypeAfterCreationN(void)
+{
+  UiTestApplication application;
+  {
+    WebView view = WebView::New();
+    DALI_TEST_CHECK(view);
+  }
+
+  WebView::SetWebEngineType(WebEngineType::CHROMIUM);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Web engine cannot be changed after a WebView has been created");
+  END_TEST;
+}
+
 int UtcDaliWebViewConstructorP(void)
 {
   UiTestApplication application;
