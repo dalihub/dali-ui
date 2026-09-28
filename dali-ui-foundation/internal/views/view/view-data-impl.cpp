@@ -45,7 +45,6 @@
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
-#include <dali/public-api/object/object-registry.h>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
