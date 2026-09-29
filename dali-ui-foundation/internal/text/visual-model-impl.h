@@ -773,6 +773,9 @@ private:
   // Undefined
   VisualModel& operator=(const VisualModel& handle);
 
+  struct ShadowData;
+  ShadowData& GetOrCreateShadowData();
+
   struct OutlineData;
   OutlineData& GetOrCreateOutlineData();
 
@@ -790,24 +793,22 @@ public:
   Vector<Vector4>                  mBackgroundColors;       ///< Background colors of the glyphs.
   Vector<ColorIndex>               mBackgroundColorIndices; ///< Indices to the vector of background colors for each glyphs.
   Vector4                          mTextColor;              ///< The text color
-  Vector4                          mShadowColor;            ///< Color of drop shadow
   Vector4                          mUnderlineColor;         ///< Color of underline
   Vector4                          mBackgroundColor;        ///< Color of text background
   Vector4                          mStrikethroughColor;     ///< Color of text background
   Size                             mControlSize;            ///< The size of the UI control.
-  Vector2                          mShadowOffset;           ///< Offset for drop shadow.
   float                            mUnderlineHeight;        ///< Fixed height for underline to override font metrics.
   float                            mStrikethroughHeight;    ///< Fixed height for strikethrough to override font metrics.
   Underline::Type                  mUnderlineType;          ///< The type of the underline.
   float                            mDashedUnderlineWidth;   ///< The width of the dashes of the dashed underline.
   float                            mDashedUnderlineGap;     ///< The gap between the dashes of the dashed underline.
-  float                            mShadowBlurRadius;       ///< Blur radius of shadow, 0 indicates no blur.
   Vector<StrikethroughGlyphRun>    mStrikethroughRuns;      ///< Runs of glyphs that have strikethrough.
   Vector<CharacterSpacingGlyphRun> mCharacterSpacingRuns;   ///< Runs of glyphs that have character-spacing.
   CutoutData*                      mCutoutData;             ///< Cutout values allocated on demand.
   HyphenInfo                       mHyphen;                 ///< Contains hyphen glyph info & the character index to draw hyphen after.
 
 private:
+  std::unique_ptr<ShadowData>  mShadowData;  ///< Shadow values allocated on first non-default write, retained on disable.
   std::unique_ptr<OutlineData> mOutlineData; ///< Outline values allocated on first non-default write, retained on disable.
 
   Size mNaturalSize;      ///< Size of the text with no line wrapping.

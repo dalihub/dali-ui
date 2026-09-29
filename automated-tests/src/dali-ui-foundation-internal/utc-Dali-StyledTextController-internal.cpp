@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
@@ -48,6 +49,7 @@
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui/ui-event-thread-callback.h>
 
 using namespace Dali;
 
@@ -724,6 +726,154 @@ int UtcDaliVisualModelOutlineReplacementCopyP(void)
   END_TEST;
 }
 
+int UtcDaliVisualModelShadowDataLifecycleP(void)
+{
+  UiTestApplication application;
+  auto              model       = PublicText::Model::New();
+  auto&             visualModel = *model->mVisualModel;
+
+  DALI_TEST_CHECK(!visualModel.IsShadowEnabled());
+  DALI_TEST_EQUALS(visualModel.GetShadowColor(), Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel.GetShadowOffset(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(model->GetShadowBlurRadius(), 0.0f, TEST_LOCATION);
+
+  const Vector4* defaultColor  = &visualModel.GetShadowColor();
+  const Vector2* defaultOffset = &visualModel.GetShadowOffset();
+  const float*   defaultBlur   = &model->GetShadowBlurRadius();
+  visualModel.SetShadowColor(Color::BLACK);
+  visualModel.SetShadowOffset(Vector2::ZERO);
+  visualModel.SetShadowBlurRadius(0.0f);
+  visualModel.SetShadowEnabled(true);
+  DALI_TEST_CHECK(&visualModel.GetShadowColor() == defaultColor);
+  DALI_TEST_CHECK(&visualModel.GetShadowOffset() == defaultOffset);
+  DALI_TEST_CHECK(&model->GetShadowBlurRadius() == defaultBlur);
+
+  DALI_TEST_CHECK(!PublicText::MarqueeBuilder::CollectGradientFeatureInfo(*model, false).styleTextureEnabled);
+
+  auto        controller     = PublicText::Controller::New();
+  auto&       coloredVisual  = GetVisualModel(controller);
+  const auto* coloredDefault = &coloredVisual.GetShadowColor();
+  controller->SetText("Hello");
+  controller->SetDefaultColor(Color::RED);
+  RelayoutController(controller);
+  DALI_TEST_CHECK(&coloredVisual.GetShadowColor() == coloredDefault);
+  DALI_TEST_EQUALS(coloredVisual.GetShadowColor(), Color::BLACK, TEST_LOCATION);
+
+  visualModel.SetShadowColor(Color::RED);
+  visualModel.SetShadowOffset(Vector2(2.0f, 4.0f));
+  visualModel.SetShadowBlurRadius(5.0f);
+  const Vector4* color  = &visualModel.GetShadowColor();
+  const Vector2* offset = &visualModel.GetShadowOffset();
+  const float*   blur   = &model->GetShadowBlurRadius();
+  // Previously returned references remain readable. Their values after a setter
+  // are not a contract; callers must obtain the current values from the getters.
+  DALI_TEST_CHECK(std::isfinite(defaultColor->r));
+  DALI_TEST_CHECK(std::isfinite(defaultOffset->x));
+  DALI_TEST_CHECK(std::isfinite(*defaultBlur));
+
+  // Disabling rendering does not discard authored values or their storage.
+  visualModel.SetShadowEnabled(false);
+  DALI_TEST_CHECK(PublicText::MarqueeBuilder::CollectGradientFeatureInfo(*model, false).styleTextureEnabled);
+  DALI_TEST_EQUALS(*color, Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offset, Vector2(2.0f, 4.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(*blur, 5.0f, TEST_LOCATION);
+  visualModel.SetShadowColor(Color::BLACK);
+  visualModel.SetShadowOffset(Vector2::ZERO);
+  visualModel.SetShadowBlurRadius(0.0f);
+  visualModel.SetShadowEnabled(true);
+  DALI_TEST_CHECK(&visualModel.GetShadowColor() == color);
+  DALI_TEST_CHECK(&visualModel.GetShadowOffset() == offset);
+  DALI_TEST_CHECK(&model->GetShadowBlurRadius() == blur);
+  DALI_TEST_EQUALS(*color, Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offset, Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(*blur, 0.0f, TEST_LOCATION);
+
+  DALI_TEST_CHECK(!PublicText::MarqueeBuilder::CollectGradientFeatureInfo(*model, false).styleTextureEnabled);
+
+  END_TEST;
+}
+
+int UtcDaliVisualModelShadowExactValuesP(void)
+{
+  UiTestApplication application;
+  constexpr float   small = 1.0e-8f;
+
+  auto offsetModel = PublicText::VisualModel::New();
+  offsetModel->SetShadowOffset(Vector2(small, -0.0f));
+  DALI_TEST_CHECK(offsetModel->GetShadowOffset().x == small);
+  DALI_TEST_CHECK(std::signbit(offsetModel->GetShadowOffset().y));
+
+  auto        colorModel = PublicText::VisualModel::New();
+  const float nearBlack  = 1.0e-8f;
+  colorModel->SetShadowColor(Vector4(nearBlack, 0.0f, -0.0f, 1.0f));
+  DALI_TEST_CHECK(colorModel->GetShadowColor().r == nearBlack);
+
+  DALI_TEST_CHECK(std::signbit(colorModel->GetShadowColor().b));
+
+  auto blurModel = PublicText::VisualModel::New();
+  blurModel->SetShadowBlurRadius(-0.0f);
+  DALI_TEST_CHECK(std::signbit(blurModel->GetShadowBlurRadius()));
+  blurModel->SetShadowBlurRadius(small);
+  DALI_TEST_CHECK(blurModel->GetShadowBlurRadius() == small);
+  blurModel->SetShadowBlurRadius(std::numeric_limits<float>::quiet_NaN());
+  DALI_TEST_CHECK(std::isnan(blurModel->GetShadowBlurRadius()));
+  DALI_TEST_CHECK(!blurModel->IsShadowEnabled());
+
+  END_TEST;
+}
+
+int UtcDaliVisualModelShadowReplacementCopyP(void)
+{
+  UiTestApplication application;
+  auto              source       = PublicText::Model::New();
+  auto              target       = PublicText::Model::New();
+  auto&             targetVisual = *target->mVisualModel;
+
+  const Vector4* defaultColor  = &targetVisual.GetShadowColor();
+  const Vector2* defaultOffset = &targetVisual.GetShadowOffset();
+  const float*   defaultBlur   = &target->GetShadowBlurRadius();
+  PublicText::CopyTextProcessingProperties(*source, *target);
+  DALI_TEST_CHECK(&targetVisual.GetShadowColor() == defaultColor);
+  DALI_TEST_CHECK(&targetVisual.GetShadowOffset() == defaultOffset);
+  DALI_TEST_CHECK(&target->GetShadowBlurRadius() == defaultBlur);
+  DALI_TEST_CHECK(!targetVisual.IsShadowEnabled());
+
+  source->mVisualModel->SetShadowColor(Color::RED);
+  source->mVisualModel->SetShadowOffset(Vector2(1.0e-8f, -0.0f));
+  source->mVisualModel->SetShadowBlurRadius(-0.0f);
+  PublicText::CopyTextProcessingProperties(*source, *target);
+  DALI_TEST_EQUALS(targetVisual.GetShadowColor(), Color::RED, TEST_LOCATION);
+  DALI_TEST_CHECK(targetVisual.GetShadowOffset().x == 1.0e-8f);
+  DALI_TEST_CHECK(std::signbit(targetVisual.GetShadowOffset().y));
+  DALI_TEST_CHECK(std::signbit(target->GetShadowBlurRadius()));
+  DALI_TEST_CHECK(!targetVisual.IsShadowEnabled());
+  const Vector4* color  = &targetVisual.GetShadowColor();
+  const Vector2* offset = &targetVisual.GetShadowOffset();
+  const float*   blur   = &target->GetShadowBlurRadius();
+  DALI_TEST_CHECK(color != &source->GetShadowColor());
+
+  source->mVisualModel->SetShadowColor(Color::GREEN);
+  DALI_TEST_EQUALS(*color, Color::RED, TEST_LOCATION);
+
+  auto defaults = PublicText::Model::New();
+  PublicText::CopyTextProcessingProperties(*defaults, *target);
+  DALI_TEST_CHECK(&targetVisual.GetShadowColor() == color);
+  DALI_TEST_CHECK(&targetVisual.GetShadowOffset() == offset);
+  DALI_TEST_CHECK(&target->GetShadowBlurRadius() == blur);
+  DALI_TEST_EQUALS(*color, Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offset, Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_CHECK(!std::signbit(offset->y));
+  DALI_TEST_EQUALS(*blur, 0.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(!std::signbit(*blur));
+
+  source->mVisualModel->SetShadowEnabled(true);
+  PublicText::CopyTextProcessingProperties(*source, *target);
+  DALI_TEST_CHECK(targetVisual.IsShadowEnabled());
+  DALI_TEST_CHECK(&targetVisual.GetShadowColor() == color);
+  DALI_TEST_EQUALS(*color, Color::GREEN, TEST_LOCATION);
+
+  END_TEST;
+}
 int UtcDaliVisualModelCutoutDataLifecycleP(void)
 {
   UiTestApplication application;
@@ -1862,5 +2012,68 @@ int UtcDaliStyledTextControllerSetStyledTextClearsOldFromMarkupColorRunsP(void)
   DALI_TEST_EQUALS(logicalModel.mColorRuns.Count(), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(logicalModel.mBackgroundColorRuns.Count(), 0u, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliTextShadowAsyncPendingP(void)
+{
+  UiTestApplication application;
+  TextAbstraction::FontClient::Get();
+  auto label = Ui::Label::New();
+  label.SetRequestedWidth(200.0f);
+  label.SetRequestedHeight(60.0f);
+  label.SetStyledText(PublicText::StyledText::FromMarkup("<b>Hello</b>"));
+  label.SetTextColor(Ui::UiColor(Color::RED));
+  application.GetScene().Add(label);
+  PublicText::Shadow shadow;
+  shadow.SetColor(Ui::UiColor(Color::BLUE));
+  shadow.SetOffset(Vector2(2.0f, 3.0f));
+  shadow.SetBlurRadius(4.0f);
+  label.SetTextShadow(shadow);
+  const auto drain = [&]()
+  {
+    application.SendNotification();
+    application.Render();
+  };
+  drain(); // Exercise sync shadow before switching to async.
+  DALI_TEST_EQUALS(label.GetTextShadow().GetOffset(), Vector2(2.0f, 3.0f), TEST_LOCATION);
+  ConnectionTracker tracker;
+  unsigned int      completed = 0u;
+  label.AsyncRenderFinishedSignal().Connect(&tracker, [&](Ui::View, float, float)
+  {
+    ++completed;
+  });
+  label.SetAsyncRendering(true);
+  drain();
+  label.SetTextShadow(PublicText::Shadow::None());
+  shadow.SetColor(Ui::UiColor(Color::GREEN));
+  shadow.SetOffset(Vector2(4.0f, 5.0f));
+  label.SetTextShadow(shadow);
+  drain();
+  for(int attempt = 0; attempt < 4 && !completed; ++attempt)
+  {
+    Test::WaitForEventThreadTrigger(1, 5);
+    drain();
+  }
+  DALI_TEST_CHECK(completed > 0u);
+  DALI_TEST_EQUALS(label.GetTextShadow().GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextShadow().GetOffset(), Vector2(4.0f, 5.0f), TEST_LOCATION);
+  completed = 0u;
+  label.SetTextShadow(PublicText::Shadow::None());
+  drain();
+  for(int attempt = 0; attempt < 4 && !completed; ++attempt)
+  {
+    Test::WaitForEventThreadTrigger(1, 5);
+    drain();
+  }
+  DALI_TEST_CHECK(completed > 0u);
+  DALI_TEST_CHECK(label.GetTextShadow() == PublicText::Shadow::None());
+  label.Unparent();
+  application.GetScene().Add(label);
+  label.SetTextShadow(shadow);
+  drain();
+  label.Unparent();
+  label.Reset(); // Pending request must own values independently of this Label.
+  drain();
   END_TEST;
 }
