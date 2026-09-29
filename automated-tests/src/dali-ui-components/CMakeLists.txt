@@ -55,21 +55,20 @@ SET(COMPONENT_INTERNAL_TEST_SOURCES
     ../../../dali-ui-components/internal/window/window-frame-state-controller.cpp
     ../../../dali-ui-components/internal/window/initial-window-state-resolver.cpp
     ../../../dali-ui-components/internal/window/window-operation-adapter.cpp
+    # WindowFrameGeometry's laying-out constructor is DALI_INTERNAL, so the
+    # library does not export it to the geometry cases.
+    ../../../dali-ui-components/public-api/window/window-frame-geometry.cpp
+    # The command and interaction snapshots are created by internal units.
+    # Compile their value implementations with those unit cases because the
+    # construction entry points are intentionally not exported.
+    ../../../dali-ui-components/public-api/window/window-frame-command.cpp
+    ../../../dali-ui-components/public-api/window/window-frame-interaction.cpp
     ../../../dali-ui-components/internal/markdown/markdown-parser.cpp
     ../../../dali-ui-components/internal/markdown/markdown-render-model.cpp
 )
 
-# Unix shared libraries hide these DALI_INTERNAL construction entry points, so
-# compile their value implementations with the internal policy cases there.
-SET(COMPONENT_HIDDEN_VALUE_TEST_SOURCES
-    ../../../dali-ui-components/public-api/window/window-frame-geometry.cpp
-    ../../../dali-ui-components/public-api/window/window-frame-command.cpp
-    ../../../dali-ui-components/public-api/window/window-frame-interaction.cpp
-)
-
 LIST(APPEND TC_SOURCES
     ${COMPONENT_INTERNAL_TEST_SOURCES}
-    ${COMPONENT_HIDDEN_VALUE_TEST_SOURCES}
     ../dali-test-suite-utils/mesh-builder.cpp
     ../dali-test-suite-utils/dali-test-suite-utils.cpp
     ../dali-test-suite-utils/test-actor-utils.cpp
