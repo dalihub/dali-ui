@@ -48,6 +48,8 @@ SET(TEST_UTIL_DIR "${TEST_DIR}/dali-test-suite-utils")
 
 FILE(GLOB_RECURSE FOUNDATION_SOURCES CONFIGURE_DEPENDS "${FOUNDATION_DIR}/*.cpp")
 LIST(FILTER FOUNDATION_SOURCES EXCLUDE REGEX "[/\\]shader-generator[/\\]shader-generator\\.cpp$")
+LIST(FILTER FOUNDATION_SOURCES EXCLUDE REGEX "[/\\]drag-drop-detector[/\\]drag-and-drop-detector-impl\\.cpp$")
+LIST(FILTER FOUNDATION_SOURCES EXCLUDE REGEX "[/\\]drag-and-drop[/\\]drag-and-drop-detector\\.cpp$")
 
 ADD_LIBRARY(dali-ui-foundation-test-objects OBJECT ${FOUNDATION_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(dali-ui-foundation-test-objects PRIVATE
