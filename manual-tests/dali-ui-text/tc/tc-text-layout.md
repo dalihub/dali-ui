@@ -28,7 +28,21 @@ Label의 줄바꿈, MaximumLines, 크기 측정, TextFit, ImageSpan 및 Sync/Asy
 [TEXT_LAYOUT][AUTO][PASS]
 ```
 
-실패하면 case ID, category/name, expected/observed와 전체 로그를 저장한다.
+실패하면 case key, case ID, category/name, expected/observed와 전체 로그를 저장한다.
+
+## Case 식별
+
+`[TEXT_LAYOUT][CASE][BEGIN] id=C0003 index=3 key=core-matrix/s01/max-1/clip/sync name=core-matrix ...`
+
+- `id`(`C0001`…)는 실행 순서다. case가 추가되면 뒤 번호가 모두 밀린다.
+- `name`은 case 묶음 이름이다. `core-matrix`처럼 여러 case가 같은 이름을 쓴다.
+- `key`는 **case마다 고유하고 순서와 무관한 식별자**다. 묶음 이름, scenario 번호(`sNN`),
+  scenario 기본값과 다른 설정(`max-`, `clip`/`ellipsis`, `wrap-`, `align-`, `rtl`/`ltr`, `fit-`,
+  `layout-`, `pad-`, `w`/`h`, `q`, `rapid`), 반복 sequence의 단계(`step-N`), 렌더러(`sync`/`async`)
+  순서로 만든다. 설정이 같은 case가 둘이면 두 결과가 한 식별자로 섞이므로, 중복 key는
+  `[TEXT_LAYOUT][ERROR] duplicate case key ...`와 exit 2로 실행 전에 막는다.
+- 이전 실행과 결과를 비교하거나 한 case만 재현할 때는 `key`를 쓴다
+  (`DALI_TEXT_CASE_FILTER=core-matrix/s01/max-1/clip/sync`).
 화면에는 처음 20개 실패 check만 표시된다. 진행이 멈추거나 오류/종료로 완료하지 못하면
 마지막 case ID와 화면·로그를 남기고 미완료로 기록한다.
 

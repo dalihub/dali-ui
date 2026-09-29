@@ -119,7 +119,9 @@ PNG를 남긴다. 작은 화면에서도 실행할 수 있지만 검증 중 resi
 자동 CLI 실행은 다른 앱의 키 입력을 가져오지 않도록 window focus를 요청하지 않는다.
 
 재현 범위를 줄이려면 `DALI_TEXT_CASE_FILTER=lifecycle`처럼 case 이름의 부분 문자열을
-지정한다. 선택된 case도 Sync/Async 양쪽을 실행하며, 일치하는 case가 없으면 ERROR다.
+지정한다. Ellipsis/Marquee는 선택된 case도 Sync/Async 양쪽을 실행한다. Text Layout은
+case key(아래)와 정확히 같은 값이면 그 case 하나만, 아니면 key·이름의 부분 문자열로 고르며,
+고른 case가 비교하는 baseline을 만드는 case도 함께 실행한다. 일치하는 case가 없으면 ERROR다.
 필터 실행의 PASS는 전체 검증 PASS를 대신하지 않는다. 실제 창 최소화 검증은
 [Marquee 타깃 iconify 절차](tc/tc-text-marquee.md#타깃-window-iconify복원)를 따른다.
 

@@ -26,8 +26,10 @@
 #include <cctype>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <iomanip>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -187,8 +189,10 @@ enum class AutoBaselineMode
 
 struct AutoCase
 {
-  std::string      id;
-  std::string      name;
+  std::string      id;   ///< Run order (C0001...). Shifts when cases are added.
+  std::string      key;  ///< Stable unique identity derived from name + settings.
+  std::string      name; ///< Case family; several cases share one name.
+  std::string      step; ///< Position inside a sequence that repeats one setting.
   std::size_t      scenarioIndex = 0u;
   TestState        state;
   uint32_t         queryOrder            = 0u;
@@ -313,6 +317,18 @@ const char* PaddingName(uint32_t padding)
 std::string MaximumLinesName(int maximumLines)
 {
   return maximumLines == Text::MAXIMUM_LINES_UNLIMITED ? "UNLIMITED(0)" : std::to_string(maximumLines);
+}
+
+std::string KeyToken(const char* value)
+{
+  std::string token(value);
+  std::transform(token.begin(), token.end(), token.begin(), [](unsigned char c)
+  {
+    return c == '/' ? '-' : static_cast<char>(std::tolower(c));
+  });
+  const auto paren = token.find('(');
+  if(paren != std::string::npos) token.erase(paren);
+  return token;
 }
 
 std::string UpperKey(const KeyEvent& event)
@@ -1257,7 +1273,20 @@ private:
       mAutoSavedManualState   = true;
     }
 
+    mAutoCaseKeyError.clear();
     BuildAutoCases();
+    if(!mAutoCaseKeyError.empty() || !ApplyAutoCaseFilter())
+    {
+      const std::string error = !mAutoCaseKeyError.empty() ? mAutoCaseKeyError : "DALI_TEXT_CASE_FILTER matched no cases";
+      mAutoExitCode = 2;
+      mAutoFinished = true;
+      mChangeBanner.SetText(("ERROR: " + error).c_str());
+      mFailureDetails.SetText(("ERROR: " + error).c_str());
+      mFailureDetails.SetAccessibilityValue("ERROR");
+      PrintAutoLine("[TEXT_LAYOUT][ERROR] " + error);
+      std::fprintf(stderr, "[TEXT_LAYOUT][ERROR] %s\n", error.c_str());
+      return;
+    }
     mAutoBaselines.clear();
     mAutoCaseIndex          = 0u;
     mAutoCaseTicks          = 0u;
@@ -1294,12 +1323,104 @@ private:
     return state;
   }
 
+  /// A case's identity must not depend on its position: C0001 is only the run
+  /// order, so inserting a case renumbers every later one. The key is the family
+  /// name, the scenario, each setting that differs from the scenario default and
+  /// the renderer, e.g. `core-matrix/s01/max-unlimited/clip/async`.
+  std::string MakeCaseKey(const AutoCase& testCase) const
+  {
+    const TestState   base  = MakeAutoState(testCase.scenarioIndex);
+    const TestState&  state = testCase.state;
+    const std::string asyncSuffix("-async");
+    std::string       family = testCase.name;
+    if(family.size() > asyncSuffix.size() && family.compare(family.size() - asyncSuffix.size(), asyncSuffix.size(), asyncSuffix) == 0)
+    {
+      family.erase(family.size() - asyncSuffix.size());
+    }
+    std::ostringstream key;
+    key << family << "/s" << std::setw(2) << std::setfill('0') << (testCase.scenarioIndex + 1u);
+    if(state.maximumLines != base.maximumLines)
+    {
+      key << "/max-" << (state.maximumLines == Text::MAXIMUM_LINES_UNLIMITED ? std::string("unlimited") : std::to_string(state.maximumLines));
+    }
+    if(state.overflow != base.overflow) key << '/' << KeyToken(OverflowName(state.overflow));
+    if(state.multiLine != base.multiLine) key << (state.multiLine ? "/multi-line" : "/single-line");
+    if(state.wrap != base.wrap) key << "/wrap-" << KeyToken(WrapName(state.wrap));
+    if(state.alignment != base.alignment) key << "/align-" << KeyToken(AlignmentName(state.alignment));
+    if(state.direction != base.direction) key << '/' << KeyToken(DirectionName(state.direction));
+    if(state.fit != base.fit) key << "/fit-" << KeyToken(FitName(state.fit));
+    if(state.layout != base.layout) key << "/layout-" << KeyToken(LayoutName(state.layout));
+    if(state.padding != base.padding) key << "/pad-" << KeyToken(PaddingName(state.padding));
+    if(state.width != base.width) key << "/w" << static_cast<int>(std::lround(state.width));
+    if(state.height != base.height) key << "/h" << static_cast<int>(std::lround(state.height));
+    if(testCase.queryOrder != 0u) key << "/q" << testCase.queryOrder;
+    if(!testCase.rapidMaximumLines.empty()) key << "/rapid";
+    if(!testCase.step.empty()) key << "/step-" << testCase.step;
+    key << (state.async ? "/async" : "/sync");
+    return key.str();
+  }
+
   void AddAutoCase(AutoCase testCase)
   {
     std::ostringstream id;
     id << 'C' << std::setw(4) << std::setfill('0') << (mAutoCases.size() + 1u);
-    testCase.id = id.str();
+    testCase.id  = id.str();
+    testCase.key = MakeCaseKey(testCase);
+    for(const auto& existing : mAutoCases)
+    {
+      if(existing.key == testCase.key)
+      {
+        // Two cases with one key would merge their results in every consumer.
+        mAutoCaseKeyError = "duplicate case key " + testCase.key + " (" + existing.id + ", " + testCase.id + ")";
+      }
+    }
     mAutoCases.push_back(testCase);
+  }
+
+  /// DALI_TEXT_CASE_FILTER: an exact key selects that one case; otherwise the
+  /// value is a substring of the key or name. A COMPARE case also keeps the case
+  /// that captures its baseline, so a subset still judges the same thing.
+  bool ApplyAutoCaseFilter()
+  {
+    const char* filter = std::getenv("DALI_TEXT_CASE_FILTER");
+    if(!filter || !*filter) return true;
+    const std::string value(filter);
+    std::vector<AutoCase> selected;
+    for(const auto& testCase : mAutoCases)
+    {
+      if(testCase.key == value) selected.push_back(testCase);
+    }
+    if(selected.empty())
+    {
+      for(const auto& testCase : mAutoCases)
+      {
+        if(testCase.key.find(value) != std::string::npos || testCase.name.find(value) != std::string::npos)
+        {
+          selected.push_back(testCase);
+        }
+      }
+    }
+    if(selected.empty()) return false;
+    std::set<std::string> keep;
+    for(const auto& testCase : selected)
+    {
+      keep.insert(testCase.id);
+      if(testCase.baselineMode != AutoBaselineMode::COMPARE) continue;
+      for(const auto& producer : mAutoCases)
+      {
+        if(producer.baselineMode == AutoBaselineMode::CAPTURE && producer.baselineKey == testCase.baselineKey)
+        {
+          keep.insert(producer.id);
+        }
+      }
+    }
+    std::vector<AutoCase> kept;
+    for(const auto& testCase : mAutoCases)
+    {
+      if(keep.count(testCase.id)) kept.push_back(testCase);
+    }
+    mAutoCases.swap(kept);
+    return true;
   }
 
   void AddRestoreSequence(const std::string& name,
@@ -1561,14 +1682,18 @@ private:
     syncBefore.scenarioIndex      = 0u;
     syncBefore.state              = MakeAutoState(0u);
     syncBefore.state.maximumLines = 3;
+    syncBefore.step               = "1";
     AddAutoCase(syncBefore);
 
     AutoCase asyncState     = syncBefore;
     asyncState.state.async  = true;
     asyncState.requireAsync = true;
+    asyncState.step         = "2";
     AddAutoCase(asyncState);
 
-    AddAutoCase(syncBefore);
+    AutoCase syncAfter = syncBefore;
+    syncAfter.step     = "3";
+    AddAutoCase(syncAfter);
 
     AutoCase asyncImage;
     asyncImage.name               = "image-span-async";
@@ -1656,6 +1781,7 @@ private:
     std::ostringstream begin;
     begin << "[TEXT_LAYOUT][CASE][BEGIN] id=" << testCase.id
           << " index=" << (mAutoCaseIndex + 1u)
+          << " key=" << testCase.key
           << " name=" << testCase.name
           << " renderer=" << (mState.async ? "async" : "sync")
           << " scenario=" << (testCase.scenarioIndex + 1u);
@@ -1950,6 +2076,7 @@ private:
 
     std::ostringstream end;
     end << "[TEXT_LAYOUT][CASE][END] id=" << testCase.id
+        << " key=" << testCase.key
         << " pass=" << (mAutoPassCount - mAutoCasePassStart)
         << " fail=" << (mAutoFailCount - mAutoCaseFailStart);
     PrintAutoLine(end.str());
@@ -2657,6 +2784,7 @@ private:
   Timer mAutoTimer;
 
   std::vector<AutoCase>                  mAutoCases;
+  std::string                            mAutoCaseKeyError;
   std::map<std::string, AutoMeasurement> mAutoBaselines;
   std::size_t                            mAutoCaseIndex          = 0u;
   uint32_t                               mAutoCaseTicks          = 0u;
