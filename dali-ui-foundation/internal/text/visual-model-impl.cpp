@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <memory.h>
+#include <cstring>
 
 namespace DALI_NAMESPACE
 {
@@ -27,6 +28,28 @@ namespace Ui
 {
 namespace Text
 {
+namespace
+{
+const float DEFAULT_OUTLINE_BLUR_RADIUS = 0.0f;
+}
+
+struct VisualModel::OutlineData
+{
+  Vector4  color{Color::WHITE};
+  Vector2  offset{Vector2::ZERO};
+  float    blurRadius{DEFAULT_OUTLINE_BLUR_RADIUS};
+  uint16_t width{0u};
+};
+
+VisualModel::OutlineData& VisualModel::GetOrCreateOutlineData()
+{
+  if(!mOutlineData)
+  {
+    mOutlineData = std::make_unique<OutlineData>();
+  }
+  return *mOutlineData;
+}
+
 VisualModelPtr VisualModel::New()
 {
   return VisualModelPtr(new VisualModel());
@@ -388,17 +411,28 @@ void VisualModel::SetUnderlineColor(const Vector4& color)
 
 void VisualModel::SetOutlineOffset(const Vector2& outlineOffset)
 {
-  mOutlineOffset = outlineOffset;
+  // Preserve exact values, including signed zero and sub-epsilon offsets.
+  // Default writes from async reset and replacement copying need no storage.
+  if(mOutlineData || std::memcmp(outlineOffset.AsFloat(), Vector2::ZERO.AsFloat(), 2u * sizeof(float)) != 0)
+  {
+    GetOrCreateOutlineData().offset = outlineOffset;
+  }
 }
 
 void VisualModel::SetOutlineColor(const Vector4& color)
 {
-  mOutlineColor = color;
+  if(mOutlineData || std::memcmp(color.AsFloat(), Color::WHITE.AsFloat(), 4u * sizeof(float)) != 0)
+  {
+    GetOrCreateOutlineData().color = color;
+  }
 }
 
 void VisualModel::SetOutlineBlurRadius(const float& outlineBlurRadius)
 {
-  mOutlineBlurRadius = outlineBlurRadius;
+  if(mOutlineData || std::memcmp(&outlineBlurRadius, &DEFAULT_OUTLINE_BLUR_RADIUS, sizeof(float)) != 0)
+  {
+    GetOrCreateOutlineData().blurRadius = outlineBlurRadius;
+  }
 }
 
 void VisualModel::SetUnderlineEnabled(bool enabled)
@@ -428,7 +462,10 @@ void VisualModel::SetDashedUnderlineGap(float gap)
 
 void VisualModel::SetOutlineWidth(uint16_t width)
 {
-  mOutlineWidth = width;
+  if(mOutlineData || width != 0u)
+  {
+    GetOrCreateOutlineData().width = width;
+  }
 }
 
 void VisualModel::SetOutlineEnabled(bool enabled)
@@ -539,17 +576,17 @@ const Vector4& VisualModel::GetUnderlineColor() const
 
 const Vector2& VisualModel::GetOutlineOffset() const
 {
-  return mOutlineOffset;
+  return mOutlineData ? mOutlineData->offset : Vector2::ZERO;
 }
 
 const Vector4& VisualModel::GetOutlineColor() const
 {
-  return mOutlineColor;
+  return mOutlineData ? mOutlineData->color : Color::WHITE;
 }
 
 const float& VisualModel::GetOutlineBlurRadius() const
 {
-  return mOutlineBlurRadius;
+  return mOutlineData ? mOutlineData->blurRadius : DEFAULT_OUTLINE_BLUR_RADIUS;
 }
 
 bool VisualModel::IsUnderlineEnabled() const
@@ -579,7 +616,7 @@ float VisualModel::GetDashedUnderlineGap() const
 
 uint16_t VisualModel::GetOutlineWidth() const
 {
-  return mOutlineWidth;
+  return mOutlineData ? mOutlineData->width : 0u;
 }
 
 bool VisualModel::IsOutlineEnabled() const
@@ -758,20 +795,16 @@ VisualModel::VisualModel()
   mTextColor(Color::BLACK),
   mShadowColor(Color::BLACK),
   mUnderlineColor(Color::BLACK),
-  mOutlineColor(Color::WHITE),
   mBackgroundColor(Color::TRANSPARENT),
   mStrikethroughColor(Color::BLACK),
   mControlSize(),
   mShadowOffset(),
-  mOutlineOffset(),
   mUnderlineHeight(0.0f),
   mStrikethroughHeight(0.0f),
   mUnderlineType(Underline::Type::SOLID),
   mDashedUnderlineWidth(2.0f),
   mDashedUnderlineGap(1.0f),
   mShadowBlurRadius(0.0f),
-  mOutlineBlurRadius(0.0f),
-  mOutlineWidth(0u),
   mCutoutData(nullptr),
   mNaturalSize(),
   mLayoutSize(),

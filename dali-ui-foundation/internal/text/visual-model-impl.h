@@ -24,6 +24,7 @@
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/ref-object.h>
+#include <memory>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/character-spacing-glyph-run.h>
@@ -772,6 +773,9 @@ private:
   // Undefined
   VisualModel& operator=(const VisualModel& handle);
 
+  struct OutlineData;
+  OutlineData& GetOrCreateOutlineData();
+
 public:
   Vector<GlyphInfo>                mGlyphs;                 ///< For each glyph, the font's id, glyph's index within the font and glyph's metrics.
   Vector<CharacterIndex>           mGlyphsToCharacters;     ///< For each glyph, the index of the first character.
@@ -788,26 +792,24 @@ public:
   Vector4                          mTextColor;              ///< The text color
   Vector4                          mShadowColor;            ///< Color of drop shadow
   Vector4                          mUnderlineColor;         ///< Color of underline
-  Vector4                          mOutlineColor;           ///< Color of outline
   Vector4                          mBackgroundColor;        ///< Color of text background
   Vector4                          mStrikethroughColor;     ///< Color of text background
   Size                             mControlSize;            ///< The size of the UI control.
   Vector2                          mShadowOffset;           ///< Offset for drop shadow.
-  Vector2                          mOutlineOffset;          ///< Offset for outline
   float                            mUnderlineHeight;        ///< Fixed height for underline to override font metrics.
   float                            mStrikethroughHeight;    ///< Fixed height for strikethrough to override font metrics.
   Underline::Type                  mUnderlineType;          ///< The type of the underline.
   float                            mDashedUnderlineWidth;   ///< The width of the dashes of the dashed underline.
   float                            mDashedUnderlineGap;     ///< The gap between the dashes of the dashed underline.
   float                            mShadowBlurRadius;       ///< Blur radius of shadow, 0 indicates no blur.
-  float                            mOutlineBlurRadius;      ///< Blur radius of outline, 0 indicates no blur.
-  uint16_t                         mOutlineWidth;           ///< Width of outline.
   Vector<StrikethroughGlyphRun>    mStrikethroughRuns;      ///< Runs of glyphs that have strikethrough.
   Vector<CharacterSpacingGlyphRun> mCharacterSpacingRuns;   ///< Runs of glyphs that have character-spacing.
   CutoutData*                      mCutoutData;             ///< Cutout values allocated on demand.
   HyphenInfo                       mHyphen;                 ///< Contains hyphen glyph info & the character index to draw hyphen after.
 
 private:
+  std::unique_ptr<OutlineData> mOutlineData; ///< Outline values allocated on first non-default write, retained on disable.
+
   Size mNaturalSize;      ///< Size of the text with no line wrapping.
   Size mLayoutSize;       ///< Size of the laid-out text considering the layout properties set.
   Size mCachedLayoutSize; ///< Size of the cached laid-out text for controller's get layout size.

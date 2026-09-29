@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
@@ -587,6 +588,138 @@ int UtcDaliTextControllerFocusGainDuringPanRestoresEditingP(void)
   controller->Relayout(controlSize);
   DALI_TEST_EQUALS(impl.mEventData->mState, PublicText::EventData::INACTIVE, TEST_LOCATION);
   DALI_TEST_EQUALS(controller->GetHorizontalScrollPosition(), 0.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliVisualModelOutlineDataLifecycleP(void)
+{
+  UiTestApplication application;
+  auto              model       = PublicText::Model::New();
+  auto&             visualModel = *model->mVisualModel;
+
+  DALI_TEST_CHECK(!visualModel.IsOutlineEnabled());
+  DALI_TEST_EQUALS(visualModel.GetOutlineColor(), Color::WHITE, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel.GetOutlineOffset(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel.GetOutlineWidth(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(model->GetOutlineBlurRadius(), 0.0f, TEST_LOCATION);
+
+  const Vector4* defaultColor  = &visualModel.GetOutlineColor();
+  const Vector2* defaultOffset = &visualModel.GetOutlineOffset();
+  const float*  defaultBlur   = &model->GetOutlineBlurRadius();
+  visualModel.SetOutlineColor(Color::WHITE);
+  visualModel.SetOutlineOffset(Vector2::ZERO);
+  visualModel.SetOutlineBlurRadius(0.0f);
+  visualModel.SetOutlineWidth(0u);
+  visualModel.SetOutlineEnabled(true);
+  DALI_TEST_CHECK(&visualModel.GetOutlineColor() == defaultColor);
+  DALI_TEST_CHECK(&visualModel.GetOutlineOffset() == defaultOffset);
+  DALI_TEST_CHECK(&model->GetOutlineBlurRadius() == defaultBlur);
+
+  visualModel.SetOutlineWidth(3u);
+  visualModel.SetOutlineColor(Color::RED);
+  visualModel.SetOutlineOffset(Vector2(2.0f, 4.0f));
+  visualModel.SetOutlineBlurRadius(5.0f);
+  const Vector4* color  = &visualModel.GetOutlineColor();
+  const Vector2* offset = &visualModel.GetOutlineOffset();
+  const float*  blur   = &model->GetOutlineBlurRadius();
+  // Previously returned references remain readable. Their values after a setter
+  // are not a contract; callers must obtain the current values from the getters.
+  DALI_TEST_CHECK(std::isfinite(defaultColor->r));
+  DALI_TEST_CHECK(std::isfinite(defaultOffset->x));
+  DALI_TEST_CHECK(std::isfinite(*defaultBlur));
+
+  // Disabling rendering does not discard authored values or their storage.
+  visualModel.SetOutlineEnabled(false);
+  DALI_TEST_EQUALS(*color, Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offset, Vector2(2.0f, 4.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(*blur, 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualModel.GetOutlineWidth(), 3u, TEST_LOCATION);
+  visualModel.SetOutlineColor(Color::WHITE);
+  visualModel.SetOutlineOffset(Vector2::ZERO);
+  visualModel.SetOutlineBlurRadius(0.0f);
+  visualModel.SetOutlineWidth(0u);
+  visualModel.SetOutlineEnabled(true);
+  DALI_TEST_CHECK(&visualModel.GetOutlineColor() == color);
+  DALI_TEST_CHECK(&visualModel.GetOutlineOffset() == offset);
+  DALI_TEST_CHECK(&model->GetOutlineBlurRadius() == blur);
+  DALI_TEST_EQUALS(*color, Color::WHITE, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offset, Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(*blur, 0.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliVisualModelOutlineExactValuesP(void)
+{
+  UiTestApplication application;
+  constexpr float   small = 1.0e-8f;
+
+  auto offsetModel = PublicText::VisualModel::New();
+  offsetModel->SetOutlineOffset(Vector2(small, -0.0f));
+  DALI_TEST_CHECK(offsetModel->GetOutlineOffset().x == small);
+  DALI_TEST_CHECK(std::signbit(offsetModel->GetOutlineOffset().y));
+
+  auto colorModel = PublicText::VisualModel::New();
+  const float nearWhite = std::nextafter(1.0f, 0.0f);
+  colorModel->SetOutlineColor(Vector4(nearWhite, 1.0f, 1.0f, 1.0f));
+  DALI_TEST_CHECK(colorModel->GetOutlineColor().r == nearWhite);
+
+  auto blurModel = PublicText::VisualModel::New();
+  blurModel->SetOutlineBlurRadius(-0.0f);
+  DALI_TEST_CHECK(std::signbit(blurModel->GetOutlineBlurRadius()));
+  blurModel->SetOutlineBlurRadius(small);
+  DALI_TEST_CHECK(blurModel->GetOutlineBlurRadius() == small);
+  blurModel->SetOutlineBlurRadius(std::numeric_limits<float>::quiet_NaN());
+  DALI_TEST_CHECK(std::isnan(blurModel->GetOutlineBlurRadius()));
+  DALI_TEST_CHECK(!blurModel->IsOutlineEnabled());
+
+  END_TEST;
+}
+
+int UtcDaliVisualModelOutlineReplacementCopyP(void)
+{
+  UiTestApplication application;
+  auto              source = PublicText::Model::New();
+  auto              target = PublicText::Model::New();
+  auto&             targetVisual = *target->mVisualModel;
+
+  const Vector4* defaultColor = &targetVisual.GetOutlineColor();
+  const Vector2* defaultOffset = &targetVisual.GetOutlineOffset();
+  const float* defaultBlur = &target->GetOutlineBlurRadius();
+  PublicText::CopyTextProcessingProperties(*source, *target);
+  DALI_TEST_CHECK(&targetVisual.GetOutlineColor() == defaultColor);
+  DALI_TEST_CHECK(&targetVisual.GetOutlineOffset() == defaultOffset);
+  DALI_TEST_CHECK(&target->GetOutlineBlurRadius() == defaultBlur);
+  DALI_TEST_CHECK(!targetVisual.IsOutlineEnabled());
+
+  source->mVisualModel->SetOutlineColor(Color::RED);
+  source->mVisualModel->SetOutlineOffset(Vector2(1.0e-8f, -0.0f));
+  source->mVisualModel->SetOutlineBlurRadius(-0.0f);
+  source->mVisualModel->SetOutlineWidth(2u);
+  PublicText::CopyTextProcessingProperties(*source, *target);
+  DALI_TEST_EQUALS(targetVisual.GetOutlineColor(), Color::RED, TEST_LOCATION);
+  DALI_TEST_CHECK(targetVisual.GetOutlineOffset().x == 1.0e-8f);
+  DALI_TEST_CHECK(std::signbit(targetVisual.GetOutlineOffset().y));
+  DALI_TEST_CHECK(std::signbit(target->GetOutlineBlurRadius()));
+  DALI_TEST_EQUALS(targetVisual.GetOutlineWidth(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(!targetVisual.IsOutlineEnabled());
+  const Vector4* color = &targetVisual.GetOutlineColor();
+  const Vector2* offset = &targetVisual.GetOutlineOffset();
+  const float* blur = &target->GetOutlineBlurRadius();
+  DALI_TEST_CHECK(color != &source->GetOutlineColor());
+
+  auto defaults = PublicText::Model::New();
+  PublicText::CopyTextProcessingProperties(*defaults, *target);
+  DALI_TEST_CHECK(&targetVisual.GetOutlineColor() == color);
+  DALI_TEST_CHECK(&targetVisual.GetOutlineOffset() == offset);
+  DALI_TEST_CHECK(&target->GetOutlineBlurRadius() == blur);
+  DALI_TEST_EQUALS(*color, Color::WHITE, TEST_LOCATION);
+  DALI_TEST_EQUALS(*offset, Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_CHECK(!std::signbit(offset->y));
+  DALI_TEST_EQUALS(*blur, 0.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(!std::signbit(*blur));
+  DALI_TEST_EQUALS(targetVisual.GetOutlineWidth(), 0u, TEST_LOCATION);
 
   END_TEST;
 }

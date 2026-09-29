@@ -261,7 +261,7 @@ bool Model::IsOutlineEnabled() const
 
 const float& Model::GetOutlineBlurRadius() const
 {
-  return mVisualModel->mOutlineBlurRadius;
+  return mVisualModel->GetOutlineBlurRadius();
 }
 
 const Vector4& Model::GetBackgroundColor() const
