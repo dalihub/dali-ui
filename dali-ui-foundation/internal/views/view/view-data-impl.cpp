@@ -86,6 +86,7 @@
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/views/view/inner-shadow.h>
 #include <dali-ui-foundation/internal/views/view/view-gradient-color-binding.h>
+#include <dali-ui-foundation/internal/views/view/view-internal-depth-slots.h>
 #include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
@@ -469,9 +470,6 @@ constexpr const char* ACTION_ACCESSIBILITY_READING_PAUSED    = "ReadingPaused";
 constexpr const char* ACTION_ACCESSIBILITY_READING_RESUMED   = "ReadingResumed";
 constexpr const char* ACTION_ACCESSIBILITY_READING_SKIPPED   = "ReadingSkipped";
 constexpr const char* ACTION_ACCESSIBILITY_READING_STOPPED   = "ReadingStopped";
-
-constexpr int INNER_SHADOW_DEPTH_INDEX = Dali::Ui::Integration::DepthIndex::DECORATION - 1;
-constexpr int BORDERLINE_DEPTH_INDEX   = Dali::Ui::Integration::DepthIndex::FOREGROUND_EFFECT - 1;
 
 inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 {
@@ -8312,7 +8310,7 @@ void ViewDataImpl::RegisterInnerShadowVisual(Ui::Integration::Visual::Base visua
 
     if(visual)
     {
-      EnsureVisualData().RegisterVisual(Ui::Integration::View::Property::INNER_SHADOW, visual, INNER_SHADOW_DEPTH_INDEX);
+      EnsureVisualData().RegisterVisual(Ui::Integration::View::Property::INNER_SHADOW, visual, Ui::Internal::ViewInternalDepthIndex::INNER_SHADOW);
 
       Ui::Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
 
@@ -8397,7 +8395,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
 
     if(visual)
     {
-      visualData.RegisterVisual(Ui::Integration::View::Property::BORDERLINE, visual, BORDERLINE_DEPTH_INDEX);
+      visualData.RegisterVisual(Ui::Integration::View::Property::BORDERLINE, visual, Ui::Internal::ViewInternalDepthIndex::BORDERLINE);
 
       // Create constraint only if we set Borderline property as DevelView::BORDERLINE_XXX.
       if(!forciblyCreate)

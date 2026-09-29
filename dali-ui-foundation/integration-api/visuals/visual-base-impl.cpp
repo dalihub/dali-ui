@@ -33,6 +33,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
+#include <dali-ui-foundation/internal/views/view/view-internal-depth-slots.h> ///< For MAXIMUM_VISUAL_OBJECTS_COUNT
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visuals-container-impl.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
@@ -44,10 +45,6 @@ namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
-// Half the gap between two adjacent DepthIndex::Ranges anchors, so that a layer splits evenly into
-// a View half and an application half. See VisualBaseImpl::GetDepthIndex for what each half is for.
-constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::Integration::DepthIndex::Ranges::CONTENT - Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND) / 2;
-
 Vector4 ToVector4(const Insets& insets)
 {
   return Vector4(insets.start, insets.end, insets.top, insets.bottom);
@@ -753,11 +750,11 @@ void VisualBaseImpl::SetSiblingOrderInternal(uint32_t siblingOrder)
 // fixed depth index; grep for RegisterVisual callers passing DepthIndex::Ranges values. When they
 // move onto containers they belong in the LOWER half. Express which half a visual goes to with an
 // internal-only owner parameter, NOT by adding values to Dali::Ui::Visual::DepthLayer -- that enum
-// names layers only, and a second parallel range enum is what this code carried before. Two known
-// obstacles: VisualBaseImpl builds its own Visual::Base from a VisualType, so an existing
-// Integration::Visual::Base cannot be wrapped; and INNER_SHADOW (DECORATION - 1) and BORDERLINE
-// (FOREGROUND_EFFECT - 1) sit below their anchor where no container reaches, while tying with the
-// top of the application half.
+// names layers only, and a second parallel range enum is what this code carried before. One known
+// obstacle: VisualBaseImpl builds its own Visual::Base from a VisualType, so an existing
+// Integration::Visual::Base cannot be wrapped. The band-edge visuals (INNER_SHADOW, BORDERLINE)
+// sit at the BOTTOM of the lower half of the band above their content, so they migrate like any
+// other View-internal visual.
 int32_t VisualBaseImpl::GetDepthIndex() const
 {
   int32_t baseDepthIndex = 0;

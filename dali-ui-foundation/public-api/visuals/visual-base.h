@@ -530,8 +530,8 @@ public: // Sibling order
   /**
    * @brief Set the sibling order of the visual object inside of the container.
    * @note It will change other VisualBase's sibling order to keep the order.
-   * @note It will throw assert if siblingOrder is bigger than the number of visuals
-   * that the container has.
+   * @note If siblingOrder is not less than the number of visuals that the container
+   * has, it is clamped to the topmost order.
    *
    * @param[in] siblingOrder The sibling order inside of the container.
    */

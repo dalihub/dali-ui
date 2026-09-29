@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/views/view/view-internal-depth-slots.h>
+
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/integration-api/debug.h>
@@ -475,7 +478,7 @@ void GaussianBlurEffectImpl::OnActivate()
 
   // Inject blurred output to view
   Renderer targetRenderer = GetTargetRenderer();
-  targetRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::FOREGROUND_EFFECT);
+  targetRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::Internal::ViewInternalDepthIndex::FOREGROUND_BLUR);
   ownerView.AddCacheRenderer(targetRenderer);
   ownerView.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
   SetRendererTexture(targetRenderer, mBlurredOutputFrameBuffer);

@@ -1704,8 +1704,9 @@ public: // VisualBase (non-chaining)
    * @brief Add a Dali::Ui::VisualBase to the view.
    *
    * The visual is added to the top of the visuals.
-   * If the container cannot add more than maximum count of visuals
-   * or the visual is already added, return false and it will be ignored.
+   * If the container cannot add more than maximum count of visuals,
+   * the visual is already added, or the depth layer is invalid,
+   * return false and it will be ignored.
    *
    * If input visual already added to another view,
    * visual will be detached from old view and added to this view.
