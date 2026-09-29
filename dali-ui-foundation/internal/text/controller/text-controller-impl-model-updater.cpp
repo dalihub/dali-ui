@@ -327,11 +327,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
         }
       }
 
-      Property::Map* variationsMapPtr = nullptr;
-      if(!targetModel.mLogicalModel->mVariationsMap.Empty())
-      {
-        variationsMapPtr = &targetModel.mLogicalModel->mVariationsMap;
-      }
+      Property::Map* variationsMapPtr = targetModel.mLogicalModel->GetVariationsMap();
 
       // Validates the fonts. If there is a character with no assigned font it sets a default one.
       // After this call, fonts are validated.

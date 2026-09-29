@@ -59,7 +59,7 @@ void CopyAuthoredRuns(const Model& source, Model& target)
   targetLogical.mUnderlinedCharacterRuns       = sourceLogical.mUnderlinedCharacterRuns;
   targetLogical.mStrikethroughCharacterRuns    = sourceLogical.mStrikethroughCharacterRuns;
   targetLogical.mCharacterSpacingCharacterRuns = sourceLogical.mCharacterSpacingCharacterRuns;
-  targetLogical.mVariationsMap                 = sourceLogical.mVariationsMap;
+  targetLogical.SetVariationsMap(sourceLogical.GetVariationsMap());
 }
 
 ControllerPtr CreateController(const Model&                        originalModel,

@@ -344,13 +344,20 @@ void Controller::SetTextCutout(bool cutout)
 
 void Controller::GetVariationsMap(Property::Map& map)
 {
-  map = mImpl->mModel->mLogicalModel->mVariationsMap;
+  if(const auto* variationsMap = mImpl->mModel->mLogicalModel->GetVariationsMap())
+  {
+    map = *variationsMap;
+  }
+  else
+  {
+    map.Clear();
+  }
 }
 
 void Controller::SetVariationsMap(const Property::Map& map)
 {
-  auto& variationsMap = mImpl->mModel->mLogicalModel->mVariationsMap;
-  variationsMap.Clear();
+  auto& logicalModel = *mImpl->mModel->mLogicalModel;
+  logicalModel.SetVariationsMap(nullptr);
 
   Property::Map::SizeType numberOfItems = map.Count();
 
@@ -363,7 +370,7 @@ void Controller::SetVariationsMap(const Property::Map& map)
       float value = 0.f;
       if(keyvalue.first.stringKey.Size() == 4 && keyvalue.second.Get(value)) // Variable tag must be 4-length string.
       {
-        variationsMap[keyvalue.first.stringKey] = value;
+        logicalModel.GetOrCreateVariationsMap()[keyvalue.first.stringKey] = value;
       }
     }
   }
@@ -377,11 +384,11 @@ void Controller::SetVariationsMap(const Property::Map& map)
 Dali::Vector<Text::FontVariation::Axis> Controller::GetVariations() const
 {
   Dali::Vector<Text::FontVariation::Axis> axes;
-  const Property::Map&                    map   = mImpl->mModel->mLogicalModel->mVariationsMap;
-  const Property::Map::SizeType           count = map.Count();
+  const Property::Map*                    map   = mImpl->mModel->mLogicalModel->GetVariationsMap();
+  const Property::Map::SizeType           count = map ? map->Count() : 0u;
   for(Property::Map::SizeType i = 0u; i < count; ++i)
   {
-    const auto& keyValue = map.GetKeyValue(i);
+    const auto& keyValue = map->GetKeyValue(i);
     if(keyValue.first.type == Property::Key::STRING)
     {
       float value = 0.0f;
@@ -397,8 +404,8 @@ Dali::Vector<Text::FontVariation::Axis> Controller::GetVariations() const
 
 void Controller::SetVariations(const Dali::Vector<Text::FontVariation::Axis>& axes)
 {
-  auto& variationsMap = mImpl->mModel->mLogicalModel->mVariationsMap;
-  variationsMap.Clear();
+  auto& logicalModel = *mImpl->mModel->mLogicalModel;
+  logicalModel.SetVariationsMap(nullptr);
 
   const std::size_t count = axes.Count();
   for(std::size_t i = 0u; i < count; i++)
@@ -407,7 +414,7 @@ void Controller::SetVariations(const Dali::Vector<Text::FontVariation::Axis>& ax
     const float value = axes[i].GetValue();
     if(tag.Size() == 4u && std::isfinite(value))
     {
-      variationsMap[tag] = value;
+      logicalModel.GetOrCreateVariationsMap()[tag] = value;
     }
   }
 
@@ -419,10 +426,10 @@ void Controller::SetVariations(const Dali::Vector<Text::FontVariation::Axis>& ax
 
 void Controller::ClearVariationsMap()
 {
-  auto& variationsMap = mImpl->mModel->mLogicalModel->mVariationsMap;
-  if(!variationsMap.Empty())
+  auto& logicalModel = *mImpl->mModel->mLogicalModel;
+  if(logicalModel.GetVariationsMap())
   {
-    variationsMap.Clear();
+    logicalModel.SetVariationsMap(nullptr);
     mImpl->ClearFontData();
     RequestRelayout();
     RequestAsyncRender();

@@ -57,6 +57,37 @@ LogicalModelPtr LogicalModel::New()
   return LogicalModelPtr(new LogicalModel());
 }
 
+Property::Map* LogicalModel::GetVariationsMap()
+{
+  return mVariationsMap && !mVariationsMap->Empty() ? &*mVariationsMap : nullptr;
+}
+
+const Property::Map* LogicalModel::GetVariationsMap() const
+{
+  return mVariationsMap && !mVariationsMap->Empty() ? &*mVariationsMap : nullptr;
+}
+
+Property::Map& LogicalModel::GetOrCreateVariationsMap()
+{
+  if(!mVariationsMap)
+  {
+    mVariationsMap.emplace();
+  }
+  return *mVariationsMap;
+}
+
+void LogicalModel::SetVariationsMap(const Property::Map* map)
+{
+  if(map && !map->Empty())
+  {
+    GetOrCreateVariationsMap() = *map;
+  }
+  else if(mVariationsMap)
+  {
+    mVariationsMap->Clear();
+  }
+}
+
 Script LogicalModel::GetScript(CharacterIndex characterIndex) const
 {
   // If this operation is too slow, consider a binary search.

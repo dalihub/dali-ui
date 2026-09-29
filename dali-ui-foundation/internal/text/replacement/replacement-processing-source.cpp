@@ -182,7 +182,7 @@ void CopyTextProcessingProperties(const Model& source, Model& target)
   target.mRemoveBackInset       = source.mRemoveBackInset;
   target.mScrollPosition        = source.mScrollPosition;
 
-  target.mLogicalModel->mVariationsMap = source.mLogicalModel->mVariationsMap;
+  target.mLogicalModel->SetVariationsMap(source.mLogicalModel->GetVariationsMap());
 
   targetVisual.mControlSize = sourceVisual.mControlSize;
   targetVisual.SetTextColor(source.GetDefaultColor());

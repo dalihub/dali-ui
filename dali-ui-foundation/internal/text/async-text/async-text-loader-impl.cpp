@@ -398,7 +398,7 @@ void AsyncTextLoader::ClearTextModelData()
   mTextModel->mLogicalModel->ClearStrikethroughRuns();
   mTextModel->mLogicalModel->ClearUnderlineRuns();
   mTextModel->mLogicalModel->ClearAnchors();
-  mTextModel->mLogicalModel->mVariationsMap.Clear();
+  mTextModel->mLogicalModel->SetVariationsMap(nullptr);
 
   // Free the allocated memory used to store the conversion table in the bidirectional line info run.
   for(Vector<BidirectionalLineInfoRun>::Iterator it    = mTextModel->mLogicalModel->mBidirectionalLineInfo.Begin(),
@@ -470,7 +470,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   mTextModel->mVerticalLineAlignment = parameters.verticalLineAlignment;
   mTextModel->mVisualModel->SetVerticalLineAlignment(parameters.verticalLineAlignment);
 
-  mTextModel->mLogicalModel->mVariationsMap = parameters.variationsMap;
+  mTextModel->mLogicalModel->SetVariationsMap(&parameters.variationsMap);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Update visual model.
@@ -669,11 +669,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 
   defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * scale * numberOfPointsPerOneUnitOfPointSize);
 
-  Property::Map* variationsMapPtr = nullptr;
-  if(!mTextModel->mLogicalModel->mVariationsMap.Empty())
-  {
-    variationsMapPtr = &mTextModel->mLogicalModel->mVariationsMap;
-  }
+  Property::Map* variationsMapPtr = mTextModel->mLogicalModel->GetVariationsMap();
 
   // Validates the fonts. If there is a character with no assigned font it sets a default one.
   // After this call, fonts are validated.
