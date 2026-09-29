@@ -97,7 +97,10 @@ public:
    */
   void InvalidateAll()
   {
-    std::memset(mValid, 0, mSize);
+    if(mSize > 0u)
+    {
+      std::memset(mValid, 0, mSize);
+    }
   }
 
   /**

@@ -482,12 +482,15 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 
   // Update style properties.
   mTextModel->mVisualModel->SetTextColor(parameters.textColor);
+  // Requests carry resolved colors, also used by runs when global style is off.
+  // Always replace the previous worker request's fallback colors.
+  mTextModel->mVisualModel->SetUnderlineColor(parameters.underlineColor);
+  mTextModel->mVisualModel->SetStrikethroughColor(parameters.strikethroughColor);
 
   if(parameters.isUnderlineEnabled)
   {
     mTextModel->mVisualModel->SetUnderlineEnabled(parameters.isUnderlineEnabled);
     mTextModel->mVisualModel->SetUnderlineType(parameters.underlineType);
-    mTextModel->mVisualModel->SetUnderlineColor(parameters.underlineColor);
     mTextModel->mVisualModel->SetUnderlineHeight(parameters.underlineHeight);
     mTextModel->mVisualModel->SetDashedUnderlineWidth(parameters.dashedUnderlineWidth);
     mTextModel->mVisualModel->SetDashedUnderlineGap(parameters.dashedUnderlineGap);
@@ -496,7 +499,6 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   if(parameters.isStrikethroughEnabled)
   {
     mTextModel->mVisualModel->SetStrikethroughEnabled(parameters.isStrikethroughEnabled);
-    mTextModel->mVisualModel->SetStrikethroughColor(parameters.strikethroughColor);
     mTextModel->mVisualModel->SetStrikethroughHeight(parameters.strikethroughHeight);
   }
 

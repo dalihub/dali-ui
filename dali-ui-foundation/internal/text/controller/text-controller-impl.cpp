@@ -2540,9 +2540,31 @@ void Controller::Impl::SetDefaultColor(const Vector4& color)
 
   if(!IsShowingPlaceholderText())
   {
+    const auto& visualModel   = *mModel->mVisualModel;
+    const auto& logicalModel  = *mModel->mLogicalModel;
+    const auto  inheritsColor = [](const auto& run)
+    {
+      return !run.properties.colorDefined;
+    };
+    // Inherited decoration colors are baked into the async overlay texture.
+    // Explicit run colors and ordinary text can keep using the renderer tint.
+    const bool underlineChanged = !visualModel.mUnderlineColorSet && visualModel.GetUnderlineColor() != color &&
+                                  (visualModel.IsUnderlineEnabled() ||
+                                   (!logicalModel.mUnderlinedCharacterRuns.Empty() &&
+                                    std::any_of(logicalModel.mUnderlinedCharacterRuns.Begin(), logicalModel.mUnderlinedCharacterRuns.End(),
+                                                inheritsColor)));
+    const bool strikeChanged = !visualModel.mStrikethroughColorSet && visualModel.GetStrikethroughColor() != color &&
+                               (visualModel.IsStrikethroughEnabled() ||
+                                (!logicalModel.mStrikethroughCharacterRuns.Empty() &&
+                                 std::any_of(logicalModel.mStrikethroughCharacterRuns.Begin(), logicalModel.mStrikethroughCharacterRuns.End(),
+                                             inheritsColor)));
     mModel->mVisualModel->SetTextColor(color);
     mOperationsPending = static_cast<OperationsMask>(mOperationsPending | COLOR);
     RequestRelayout();
+    if(underlineChanged || strikeChanged)
+    {
+      RequestAsyncRender();
+    }
   }
 }
 

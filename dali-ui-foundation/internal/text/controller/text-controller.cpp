@@ -1340,9 +1340,15 @@ const float& Controller::GetShadowBlurRadius() const
 
 void Controller::SetUnderlineColor(const Vector4& color)
 {
-  mImpl->mModel->mVisualModel->SetUnderlineColor(color);
-  RequestRelayout();
-  RequestAsyncRender();
+  auto&      visualModel  = *mImpl->mModel->mVisualModel;
+  const bool colorChanged = visualModel.GetUnderlineColor() != color;
+  // Equal effective colors must still record the explicitly authored color.
+  visualModel.SetUnderlineColor(color);
+  if(colorChanged)
+  {
+    RequestRelayout();
+    RequestAsyncRender();
+  }
 }
 
 const Vector4& Controller::GetUnderlineColor() const
@@ -1758,9 +1764,15 @@ float Controller::GetStrikethroughHeight() const
 
 void Controller::SetStrikethroughColor(const Vector4& color)
 {
-  mImpl->mModel->mVisualModel->SetStrikethroughColor(color);
-  RequestRelayout();
-  RequestAsyncRender();
+  auto&      visualModel  = *mImpl->mModel->mVisualModel;
+  const bool colorChanged = visualModel.GetStrikethroughColor() != color;
+  // Equal effective colors must still record the explicitly authored color.
+  visualModel.SetStrikethroughColor(color);
+  if(colorChanged)
+  {
+    RequestRelayout();
+    RequestAsyncRender();
+  }
 }
 
 const Vector4& Controller::GetStrikethroughColor() const

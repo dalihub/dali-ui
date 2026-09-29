@@ -24,6 +24,13 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
+#include <dali-ui-foundation/internal/text/text-effects-style.h>
+#include <dali-ui-foundation/integration-api/text/text-control-interface.h>
 #include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
@@ -2075,5 +2082,353 @@ int UtcDaliTextShadowAsyncPendingP(void)
   label.Unparent();
   label.Reset(); // Pending request must own values independently of this Label.
   drain();
+  END_TEST;
+}
+
+namespace
+{
+PublicText::ControllerPtr DecorationController(Ui::Label label)
+{
+  auto visual = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(label)).GetVisual(PublicText::LabelPropertyIndex::TEXT);
+  return Ui::Internal::TextVisual::GetController(visual);
+}
+
+template<typename Control>
+void CheckExplicitDecorationColor(Control control)
+{
+  control.SetText("Hello");
+  control.SetTextColor(Ui::UiColor(Color::GREEN));
+  auto underline = CreateUnderline(Color::GREEN, 1.0f);
+  auto strike    = CreateLineThrough(Color::GREEN, 1.0f);
+  control.SetTextUnderline(underline);
+  control.SetTextLineThrough(strike);
+  control.SetTextColor(Ui::UiColor(Color::BLUE));
+  DALI_TEST_EQUALS(control.GetTextUnderline().GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(control.GetTextLineThrough().GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+  control.SetTextUnderline(PublicText::Underline::None());
+  control.SetTextLineThrough(PublicText::LineThrough::None());
+  control.SetTextColor(Ui::UiColor(Color::RED));
+  control.SetTextUnderline(underline);
+  control.SetTextLineThrough(strike);
+  DALI_TEST_EQUALS(control.GetTextUnderline().GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(control.GetTextLineThrough().GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+}
+
+Vector4 decorationTestTextColor;
+Vector4 decorationTestStyleColor;
+bool    DecorationColorOverride(StringView id, Vector4& out)
+{
+  if(id == "DecorationAuditText")
+  {
+    out = decorationTestTextColor;
+    return true;
+  }
+  if(id == "DecorationAuditStyle")
+  {
+    out = decorationTestStyleColor;
+    return true;
+  }
+  return false;
+}
+} //namespace
+
+int UtcDaliTextDecorationExplicitEqualColorP(void)
+{
+  UiTestApplication application;
+  CheckExplicitDecorationColor(Ui::Label::New());
+  CheckExplicitDecorationColor(Ui::InputField::New());
+  CheckExplicitDecorationColor(Ui::InputEditor::New());
+  // Default value objects also specify BLACK, including when the text starts BLACK.
+  auto label = Ui::Label::New();
+  label.SetTextUnderline(PublicText::Underline());
+  label.SetTextLineThrough(PublicText::LineThrough());
+  label.SetTextColor(Ui::UiColor(Color::RED));
+  DALI_TEST_EQUALS(label.GetTextUnderline().GetColor().GetRgba(), Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextLineThrough().GetColor().GetRgba(), Color::BLACK, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextDecorationPropertyMapExplicitColorP(void)
+{
+  UiTestApplication application;
+  auto              controller = PublicText::Controller::New();
+  controller->SetDefaultColor(Color::GREEN);
+  Property::Map map;
+  map["enable"] = true;
+  PublicText::SetUnderlineProperties(controller, map, PublicText::EffectStyle::DEFAULT);
+  PublicText::SetStrikethroughProperties(controller, map, PublicText::EffectStyle::DEFAULT);
+  controller->SetDefaultColor(Color::RED);
+  DALI_TEST_EQUALS(controller->GetUnderlineColor(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetStrikethroughColor(), Color::RED, TEST_LOCATION);
+  map["color"] = Color::RED;
+  PublicText::SetUnderlineProperties(controller, map, PublicText::EffectStyle::DEFAULT);
+  PublicText::SetStrikethroughProperties(controller, map, PublicText::EffectStyle::DEFAULT);
+  controller->SetDefaultColor(Color::BLUE);
+  DALI_TEST_EQUALS(controller->GetUnderlineColor(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetStrikethroughColor(), Color::RED, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextDecorationBindingP(void)
+{
+  UiTestApplication application;
+  auto              manager = Ui::UiColorManager::Get();
+  decorationTestTextColor   = Color::RED;
+  decorationTestStyleColor  = Color::GREEN;
+  manager.SetColorOverride(DecorationColorOverride);
+  auto label      = Ui::Label::New();
+  auto controller = DecorationController(label);
+  controller->SetUnderlineEnabled(true);
+  controller->SetStrikethroughEnabled(true);
+  label.SetTextColor(Ui::UiColor("DecorationAuditText"));
+  DALI_TEST_EQUALS(controller->GetUnderlineColor(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetStrikethroughColor(), Color::RED, TEST_LOCATION);
+  decorationTestTextColor = Color::GREEN;
+  manager.SetColorOverride(DecorationColorOverride);
+  DALI_TEST_EQUALS(controller->GetUnderlineColor(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetStrikethroughColor(), Color::GREEN, TEST_LOCATION);
+  PublicText::Underline   underline;
+  PublicText::LineThrough strike;
+  underline.SetColor(Ui::UiColor("DecorationAuditStyle"));
+  strike.SetColor(Ui::UiColor("DecorationAuditStyle"));
+  label.SetTextUnderline(underline);
+  label.SetTextLineThrough(strike);
+  // Change only text: no decoration callback can conceal a lost explicit flag.
+  label.SetTextColor(Ui::UiColor(Color::BLUE));
+  DALI_TEST_EQUALS(controller->GetUnderlineColor(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetStrikethroughColor(), Color::GREEN, TEST_LOCATION);
+  decorationTestStyleColor = Color::YELLOW;
+  manager.SetColorOverride(DecorationColorOverride);
+  DALI_TEST_EQUALS(controller->GetUnderlineColor(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetStrikethroughColor(), Color::YELLOW, TEST_LOCATION);
+  manager.ClearColorOverride();
+  END_TEST;
+}
+
+int UtcDaliTextDecorationInheritedLifecycleP(void)
+{
+  UiTestApplication application;
+  auto              source = PublicText::Model::New();
+  auto&             visual = *source->mVisualModel;
+  DALI_TEST_EQUALS(visual.GetUnderlineColor(), Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetStrikethroughColor(), Color::BLACK, TEST_LOCATION);
+  visual.SetUnderlineEnabled(true);
+  visual.SetStrikethroughEnabled(true);
+  visual.SetTextColor(Color::RED);
+  visual.SetUnderlineEnabled(false);
+  visual.SetStrikethroughEnabled(false);
+  visual.SetTextColor(Color::BLUE);
+  visual.SetUnderlineEnabled(true);
+  visual.SetStrikethroughEnabled(true);
+  DALI_TEST_EQUALS(visual.GetUnderlineColor(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetStrikethroughColor(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_CHECK(!visual.mUnderlineColorSet && !visual.mStrikethroughColorSet);
+  auto target = PublicText::Model::New();
+  target->mVisualModel->SetTextColor(Color::RED);
+  PublicText::CopyTextProcessingProperties(*source, *target);
+  DALI_TEST_EQUALS(target->GetUnderlineColor(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(target->GetStrikethroughColor(), Color::BLUE, TEST_LOCATION);
+  // Processing copies are resolved snapshots, not independent authored models.
+  target->mVisualModel->SetTextColor(Color::RED);
+  DALI_TEST_EQUALS(target->GetUnderlineColor(), Color::BLUE, TEST_LOCATION);
+  visual.SetUnderlineColor(Color::GREEN);
+  visual.SetStrikethroughColor(Color::GREEN);
+  visual.SetTextColor(Color::RED);
+  PublicText::CopyTextProcessingProperties(*source, *target);
+  DALI_TEST_EQUALS(target->GetUnderlineColor(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(target->GetStrikethroughColor(), Color::GREEN, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextDecorationAsyncInheritedPendingP(void)
+{
+  UiTestApplication application;
+  TextAbstraction::FontClient::Get();
+  auto label = Ui::Label::New();
+  label.SetText("Hello");
+  label.SetRequestedWidth(200.0f);
+  label.SetRequestedHeight(60.0f);
+  auto controller = DecorationController(label);
+  controller->SetUnderlineEnabled(true);
+  controller->SetStrikethroughEnabled(true);
+  label.SetTextColor(Ui::UiColor(Color::RED));
+  label.SetAsyncRendering(true);
+  application.GetScene().Add(label);
+  ConnectionTracker tracker;
+  unsigned int      completed = 0u;
+  label.AsyncRenderFinishedSignal().Connect(&tracker, [&](Ui::View, float, float)
+  { ++completed; });
+  const auto drain = [&]()
+  { application.SendNotification(); application.Render(); };
+  const auto wait = [&]()
+  {
+    for(int attempt = 0; attempt < 4 && !completed; ++attempt)
+    {
+      Test::WaitForEventThreadTrigger(1, 1);
+      drain();
+    }
+  };
+  drain();
+  wait();
+  DALI_TEST_CHECK(completed > 0u);
+  completed = 0u;
+  label.SetTextColor(Ui::UiColor(Color::BLUE));
+  drain();
+  wait();
+  DALI_TEST_CHECK(completed > 0u);
+  DALI_TEST_EQUALS(controller->GetUnderlineColor(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetStrikethroughColor(), Color::BLUE, TEST_LOCATION);
+  completed = 0u;
+  label.SetTextColor(Ui::UiColor(Color::RED));
+  drain(); // Submit RED, then supersede it before the event-thread completion.
+  label.SetTextColor(Ui::UiColor(Color::GREEN));
+  drain();
+  wait();
+  DALI_TEST_CHECK(completed > 0u);
+  DALI_TEST_EQUALS(controller->GetUnderlineColor(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetStrikethroughColor(), Color::GREEN, TEST_LOCATION);
+  label.Unparent();
+  application.GetScene().Add(label);
+  label.SetTextColor(Ui::UiColor(Color::BLUE));
+  drain();
+  label.Unparent();
+  controller.Reset();
+  label.Reset();
+  drain();
+  END_TEST;
+}
+
+int UtcDaliTextDecorationAsyncWorkerReuseP(void)
+{
+  UiTestApplication application;
+  TextAbstraction::FontClient::Get();
+  // Exercise each run type separately with global style disabled.
+  for(bool underline : {true, false})
+  {
+    PublicText::AsyncTextParameters parameters;
+    parameters.text                   = "Hello";
+    parameters.fontFamily             = "DejaVu Sans";
+    parameters.fontSize               = 20.0f;
+    parameters.textWidth              = 200.0f;
+    parameters.textHeight             = 60.0f;
+    parameters.maxTextureSize         = 2048u;
+    parameters.textColor              = Color::RED;
+    parameters.isUnderlineEnabled     = true;
+    parameters.isStrikethroughEnabled = true;
+    parameters.underlineColor         = Color::GREEN;
+    parameters.strikethroughColor     = Color::GREEN;
+    auto loader                       = PublicText::AsyncTextLoader::New();
+    loader.RenderText(parameters, false, Size::ZERO);
+    parameters.textColor                  = Color::BLUE;
+    parameters.underlineColor             = Color::BLUE;
+    parameters.strikethroughColor         = Color::BLUE;
+    parameters.isUnderlineEnabled         = false;
+    parameters.isStrikethroughEnabled     = false;
+    parameters.hasStyledTextStyleSnapshot = true;
+    if(underline)
+    {
+      PublicText::Internal::StyledTextUnderlineRunSnapshot run;
+      run.numberOfCharacters = 5u;
+      parameters.styledTextStyleSnapshot.underlineRuns.push_back(run);
+    }
+    else
+    {
+      PublicText::Internal::StyledTextLineThroughRunSnapshot run;
+      run.numberOfCharacters = 5u;
+      parameters.styledTextStyleSnapshot.lineThroughRuns.push_back(run);
+    }
+    const auto reused      = loader.RenderText(parameters, false, Size::ZERO);
+    auto       freshLoader = PublicText::AsyncTextLoader::New();
+    const auto fresh       = freshLoader.RenderText(parameters, false, Size::ZERO);
+    DALI_TEST_CHECK(reused.overlayStylePixelData && fresh.overlayStylePixelData);
+    auto a = Dali::Integration::GetPixelDataBuffer(reused.overlayStylePixelData);
+    auto b = Dali::Integration::GetPixelDataBuffer(fresh.overlayStylePixelData);
+    DALI_TEST_EQUALS(a.bufferSize, b.bufferSize, TEST_LOCATION);
+    DALI_TEST_CHECK(std::equal(a.buffer, a.buffer + a.bufferSize, b.buffer));
+    bool blue = false;
+    for(unsigned int i = 0u; i + 3u < a.bufferSize; i += 4u)
+    {
+      DALI_TEST_EQUALS(a.buffer[i + 1u], 0u, TEST_LOCATION);
+      blue = blue || a.buffer[i + 2u] > 0u;
+    }
+    DALI_TEST_CHECK(blue);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextDecorationAsyncInvalidationP(void)
+{
+  UiTestApplication application;
+  struct Control : Ui::Integration::Text::ControlInterface
+  {
+    unsigned int requests = 0u;
+    void         RequestTextRelayout() override
+    {
+    }
+    void InvalidateTextMeasure() override
+    {
+    }
+    void RequestAsyncRender() override
+    {
+      ++requests;
+    }
+  } control;
+  auto controller = PublicText::Controller::New(&control);
+  controller->SetText("Hello");
+  control.requests = 0u;
+  controller->SetDefaultColor(Color::RED);
+  DALI_TEST_EQUALS(control.requests, 0u, TEST_LOCATION);
+  auto&                              logical = GetLogicalModel(controller);
+  PublicText::UnderlinedCharacterRun underline;
+  underline.characterRun.numberOfCharacters = 5u;
+  underline.properties.colorDefined         = true;
+  underline.properties.color                = Color::GREEN;
+  logical.mUnderlinedCharacterRuns.PushBack(underline);
+  controller->SetDefaultColor(Color::BLUE);
+  DALI_TEST_EQUALS(control.requests, 0u, TEST_LOCATION);
+  logical.mUnderlinedCharacterRuns[0u].properties.colorDefined = false;
+  controller->SetDefaultColor(Color::RED);
+  DALI_TEST_EQUALS(control.requests, 1u, TEST_LOCATION);
+  controller->SetUnderlineColor(Color::RED);
+  DALI_TEST_EQUALS(control.requests, 1u, TEST_LOCATION); // Only authored intent changed.
+  controller->SetDefaultColor(Color::BLUE);
+  DALI_TEST_EQUALS(control.requests, 1u, TEST_LOCATION); // Explicit global fallback.
+  logical.mUnderlinedCharacterRuns.Clear();
+  PublicText::StrikethroughCharacterRun strike;
+  strike.characterRun.numberOfCharacters = 5u;
+  strike.properties.colorDefined         = true;
+  strike.properties.color                = Color::GREEN;
+  logical.mStrikethroughCharacterRuns.PushBack(strike);
+  controller->SetDefaultColor(Color::RED);
+  DALI_TEST_EQUALS(control.requests, 1u, TEST_LOCATION);
+  logical.mStrikethroughCharacterRuns[0u].properties.colorDefined = false;
+  controller->SetDefaultColor(Color::BLUE);
+  DALI_TEST_EQUALS(control.requests, 2u, TEST_LOCATION);
+  controller->SetStrikethroughColor(Color::BLUE);
+  controller->SetDefaultColor(Color::RED);
+  DALI_TEST_EQUALS(control.requests, 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextDecorationSpanDefaultsP(void)
+{
+  UiTestApplication application;
+  auto              controller = PublicText::Controller::New();
+  controller->SetDefaultColor(Color::RED);
+  auto builder = PublicText::StyledTextBuilder::New("Hello");
+  builder.SetSpan(PublicText::UnderlineSpan::New(PublicText::Underline()), 0u, 5u);
+  builder.SetSpan(PublicText::LineThroughSpan::New(CreateLineThrough(Color::GREEN, 2.0f)), 0u, 5u);
+  controller->SetStyledText(builder.Build());
+  auto& logical = GetLogicalModel(controller);
+  DALI_TEST_CHECK(!controller->IsUnderlineEnabled() && !controller->IsStrikethroughEnabled());
+  DALI_TEST_CHECK(logical.mUnderlinedCharacterRuns[0u].properties.colorDefined);
+  DALI_TEST_EQUALS(logical.mUnderlinedCharacterRuns[0u].properties.color, Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(logical.mStrikethroughCharacterRuns[0u].properties.color, Color::GREEN, TEST_LOCATION);
+  controller->SetDefaultColor(Color::BLUE);
+  DALI_TEST_EQUALS(logical.mUnderlinedCharacterRuns[0u].properties.color, Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(logical.mStrikethroughCharacterRuns[0u].properties.color, Color::GREEN, TEST_LOCATION);
+  controller->SetStyledText(PublicText::StyledText::FromMarkup("<u>Hello</u>"));
+  DALI_TEST_CHECK(logical.mUnderlinedCharacterRuns[0u].properties.colorDefined);
+  DALI_TEST_EQUALS(logical.mUnderlinedCharacterRuns[0u].properties.color, Color::BLACK, TEST_LOCATION);
   END_TEST;
 }
