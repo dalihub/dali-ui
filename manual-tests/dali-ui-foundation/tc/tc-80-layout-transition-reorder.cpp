@@ -512,6 +512,11 @@ private:
     mDraggedChild.SetRequestedHeight(bounds.height);
     mDraggedChild.SetRequestedX(bounds.x);
     mDraggedChild.SetRequestedY(bounds.y);
+    // mTestArea is an AbsoluteLayout, which places a regular child from its
+    // AbsoluteLayoutParams and ignores RequestedX/Y. STANDALONE makes the
+    // floating card honour RequestedX/Y so it follows the finger (as the
+    // grid reorder sample's preview does); FinishDrag restores DEFAULT.
+    mDraggedChild.SetLayoutMode(LayoutMode::STANDALONE);
     mTestArea.Add(mDraggedChild);
     mDraggedChild.RaiseToTop(LayoutOrderPolicy::PRESERVE);
 
@@ -662,6 +667,7 @@ private:
     droppedChild.SetRequestedHeight(originalReqH);
     droppedChild.SetRequestedX(0.0f);
     droppedChild.SetRequestedY(0.0f);
+    droppedChild.SetLayoutMode(LayoutMode::DEFAULT);
 
     // Re-insert at logical index targetIndex. InsertBelow places a fresh child
     // at the logical (layout) position matching its actor position; an empty
