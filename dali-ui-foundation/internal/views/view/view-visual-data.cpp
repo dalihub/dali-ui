@@ -1549,7 +1549,7 @@ Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::Visua
   return Dali::Ui::VisualBase();
 }
 
-void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, bool isLayoutFinishedUpdate)
+void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, FittingModeUpdate update)
 {
   Actor  self;
   Insets padding;
@@ -1566,7 +1566,8 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, bool isLayo
     Internal::Visual::Base& visualImpl = Ui::GetImplementation((*iter)->visual);
 
     if(!visualImpl.IsFittingModeRequired() ||
-       (isLayoutFinishedUpdate && visualImpl.GetType() == Ui::Integration::InternalVisualType::TEXT))
+       (update == FittingModeUpdate::ARRANGE && visualImpl.GetType() != Ui::Integration::InternalVisualType::SVG) ||
+       (update == FittingModeUpdate::LAYOUT_FINISHED && visualImpl.GetType() == Ui::Integration::InternalVisualType::TEXT))
     {
       continue;
     }

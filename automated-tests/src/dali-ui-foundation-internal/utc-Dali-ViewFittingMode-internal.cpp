@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <vector>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -747,5 +748,78 @@ int UtcDaliViewFittingModeRequestDuringProcessingIsHonoured(void)
   application.SendNotification();
   DALI_TEST_EQUALS(fittingVisual->applyCount, 2, TEST_LOCATION);
 
+  END_TEST;
+}
+
+namespace
+{
+struct FinalFittingBounds
+{
+  int        calls{0};
+  LayoutRect Arrange(View, const LayoutRect&)
+  {
+    ++calls;
+    return LayoutRect(4.0f, 4.0f, 40.0f, 20.0f);
+  }
+};
+} //namespace
+
+int UtcDaliViewArrangeFittingUsesFinalBoundsAndCacheSvgOnly(void)
+{
+  UiTestApplication application;
+  using VisualType                            = Dali::Ui::Integration::InternalVisualType;
+  View                                view    = View::New();
+  auto                                factory = Dali::Ui::Integration::VisualFactory::Get();
+  auto&                               cache   = Dali::Ui::GetImplementation(factory).GetFactoryCache();
+  auto                                svg     = FittingModeTestVisual::New(cache, VisualType::SVG);
+  auto&                               data    = Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(view));
+  Dali::Ui::Integration::Visual::Base svgVisual(svg.Get());
+  data.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, svgVisual);
+
+  std::vector<FittingModeTestVisual::Ptr> otherVisuals;
+  Property::Index                         index = 10000;
+  for(auto type : {VisualType::COLOR, VisualType::IMAGE, VisualType::ANIMATED_IMAGE,
+                   VisualType::N_PATCH, VisualType::LOTTIE_ANIMATION, VisualType::TEXT})
+  {
+    auto                                visual = FittingModeTestVisual::New(cache, type);
+    Dali::Ui::Integration::Visual::Base handle(visual.Get());
+    data.RegisterVisual(index++, handle);
+    otherVisuals.push_back(visual);
+  }
+
+  FinalFittingBounds producer;
+  view.SetArrangeCallback(ArrangeCallback::New(&producer, &FinalFittingBounds::Arrange));
+  view.Measure(100.0f, 50.0f);
+  const LayoutRect input(0.0f, 0.0f, 100.0f, 50.0f);
+  view.Arrange(input);
+  DALI_TEST_EQUALS(svg->applyCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(svg->lastControlSize, Vector2(40.0f, 20.0f), 0.01f, TEST_LOCATION);
+  for(const auto& visual : otherVisuals)
+  {
+    DALI_TEST_EQUALS(visual->applyCount, 0, TEST_LOCATION);
+  }
+  // A cache hit must deliver the final size without running the producer again.
+  svg->lastControlSize = Vector2::ZERO;
+  view.Arrange(input);
+  DALI_TEST_EQUALS(producer.calls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(svg->applyCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(svg->lastControlSize, Vector2(40.0f, 20.0f), 0.01f, TEST_LOCATION);
+  for(const auto& visual : otherVisuals)
+  {
+    DALI_TEST_EQUALS(visual->applyCount, 0, TEST_LOCATION);
+  }
+
+  // LayoutFinished still fits every eligible non-text visual, including SVG.
+  data.EmitLayoutFinishedSignal(LayoutRect(4.0f, 4.0f, 40.0f, 20.0f));
+  DALI_TEST_EQUALS(svg->applyCount, 3, TEST_LOCATION);
+  for(const auto& visual : otherVisuals)
+  {
+    const int expectedCount = visual->GetType() == VisualType::TEXT ? 0 : 1;
+    DALI_TEST_EQUALS(visual->applyCount, expectedCount, TEST_LOCATION);
+    if(expectedCount)
+    {
+      DALI_TEST_EQUALS(visual->lastControlSize, Vector2(40.0f, 20.0f), 0.01f, TEST_LOCATION);
+    }
+  }
   END_TEST;
 }

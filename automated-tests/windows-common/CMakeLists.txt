@@ -245,6 +245,7 @@ TARGET_COMPILE_DEFINITIONS(tct-dali-ui-foundation-internal-core PRIVATE
   DALI_TEST_ARRAY=gDaliUiFoundationInternalTests
   DALI_TEST_HEADER="dali-ui-foundation-internal-testcases.h"
   DALI_TEST_SUITE="foundation-internal"
+  DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR="${INTERNAL_TEST_DIR}/resources"
   $<$<CONFIG:Debug>:DEBUG_ENABLED>
   EGLAPI=
   GL_API=

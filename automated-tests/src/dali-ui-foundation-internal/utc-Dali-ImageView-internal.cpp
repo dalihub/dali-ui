@@ -24,6 +24,7 @@
 #include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <ui-event-thread-callback.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -265,5 +266,90 @@ int UtcDaliImageViewAutoNPatchBorderOnlyReachesVisual(void)
   DALI_TEST_CHECK(borderOnlyValue->Get(borderOnly));
   DALI_TEST_EQUALS(borderOnly, true, TEST_LOCATION);
 
+  END_TEST;
+}
+
+namespace
+{
+struct ArrangeSvgPanel : ConnectionTracker
+{
+  ImageView    arrow;
+  bool         delaySettlement{true};
+  int          measures{0};
+  int          finishes{0};
+  MeasuredSize Measure(View view, float, float)
+  {
+    ++measures;
+    if(!arrow)
+    {
+      arrow = ImageView::New(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/initial-layout.svg");
+      arrow.SetRequestedWidth(40.0f);
+      arrow.SetRequestedHeight(40.0f);
+      arrow.SetBackgroundColor(UiColor(0x303030));
+      view.Add(arrow);
+      arrow.LayoutFinishedSignal().Connect(this, &ArrangeSvgPanel::Finished);
+    }
+    arrow.Measure(40.0f, 40.0f);
+    // Bound the unsettled interval without changing any image property.
+    if(delaySettlement && measures < 12)
+    {
+      Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(view)).InvalidateMeasure();
+    }
+    return MeasuredSize(100.0f, 100.0f);
+  }
+  LayoutRect Arrange(View, const LayoutRect& bounds)
+  {
+    arrow.Arrange(LayoutRect(4.0f, 4.0f, 40.0f, 40.0f));
+    return bounds;
+  }
+  void Finished(View, LayoutRect)
+  {
+    ++finishes;
+  }
+};
+} // namespace
+
+// Drive event processing explicitly: this tests SVG size delivery while layout
+// remains pending, independently of whether a follow-up idle wake is requested.
+int UtcDaliImageViewSvgReadyBeforeLayoutSettles(void)
+{
+  UiTestApplication application;
+  ArrangeSvgPanel   panel;
+  View              root = View::New();
+  root.SetRequestedWidth(100.0f);
+  root.SetRequestedHeight(100.0f);
+  root.SetMeasureCallback(MeasureCallback::New(&panel, &ArrangeSvgPanel::Measure));
+  root.SetArrangeCallback(ArrangeCallback::New(&panel, &ArrangeSvgPanel::Arrange));
+  application.GetWindow().Add(root);
+
+  for(int i = 0; i < 8 && (!panel.arrow || !panel.arrow.IsResourceReady()); ++i)
+  {
+    application.SendNotification();
+    application.Render();
+    if(!panel.arrow.IsResourceReady())
+    {
+      Test::WaitForEventThreadTrigger(1, 1);
+    }
+  }
+
+  DALI_TEST_CHECK(panel.arrow.IsResourceReady());
+  DALI_TEST_EQUALS(panel.finishes, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(panel.arrow.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(panel.arrow.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(panel.arrow.GetRendererCount(), 2u, TEST_LOCATION);
+  Texture texture = panel.arrow.GetRendererAt(1u).GetTextures().GetTexture(0u);
+
+  panel.delaySettlement = false;
+  Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(root)).InvalidateMeasure();
+  for(int i = 0; i < 5 && panel.finishes == 0; ++i)
+  {
+    application.SendNotification();
+    application.Render();
+  }
+
+  DALI_TEST_CHECK(panel.finishes > 0);
+  DALI_TEST_CHECK(panel.arrow.IsResourceReady());
+  DALI_TEST_EQUALS(panel.arrow.GetRendererCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(panel.arrow.GetRendererAt(1u).GetTextures().GetTexture(0u) == texture);
   END_TEST;
 }
