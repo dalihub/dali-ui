@@ -594,7 +594,11 @@ const Vector4& VisualModel::GetShadowColor() const
 
 const float& VisualModel::GetShadowBlurRadius() const
 {
-  return mShadowData ? mShadowData->blurRadius : DEFAULT_SHADOW_BLUR_RADIUS;
+  if(mShadowData)
+  {
+    return mShadowData->blurRadius;
+  }
+  return DEFAULT_SHADOW_BLUR_RADIUS;
 }
 
 const Vector4& VisualModel::GetUnderlineColor() const
@@ -614,7 +618,11 @@ const Vector4& VisualModel::GetOutlineColor() const
 
 const float& VisualModel::GetOutlineBlurRadius() const
 {
-  return mOutlineData ? mOutlineData->blurRadius : DEFAULT_OUTLINE_BLUR_RADIUS;
+  if(mOutlineData)
+  {
+    return mOutlineData->blurRadius;
+  }
+  return DEFAULT_OUTLINE_BLUR_RADIUS;
 }
 
 bool VisualModel::IsUnderlineEnabled() const

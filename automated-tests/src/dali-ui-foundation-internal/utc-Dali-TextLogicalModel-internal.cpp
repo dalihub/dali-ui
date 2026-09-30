@@ -146,10 +146,14 @@ int UtcDaliTextVariationsFontCacheP(void)
 {
   UiTestApplication application;
   auto              logical = LogicalModel::New();
-  for(char c : std::string("Hello")) logical->mText.PushBack(c);
-  auto support = MultilanguageSupport::New(false);
-  auto client  = TextAbstraction::FontClient::Get();
-  support.SetScripts(logical->mText, 0u, logical->mText.Count(), logical->mScriptRuns);
+  for(char c : std::string("Hello"))
+  {
+    logical->mText.PushBack(static_cast<Character>(c));
+  }
+  const auto characterCount = static_cast<Length>(logical->mText.Count());
+  auto       support        = MultilanguageSupport::New(false);
+  auto       client         = TextAbstraction::FontClient::Get();
+  support.SetScripts(logical->mText, 0u, characterCount, logical->mScriptRuns);
   TextAbstraction::FontDescription description;
   description.family  = "DejaVu Sans";
   const auto size     = 12u * client.GetNumberOfPointsPerOneUnitOfPointSize();
@@ -157,7 +161,7 @@ int UtcDaliTextVariationsFontCacheP(void)
   {
     Vector<FontRun> fonts;
     support.ValidateFonts(client, logical->mText, logical->mScriptRuns, logical->mFontDescriptionRuns,
-                          description, size, 1.0f, 0u, logical->mText.Count(), fonts, variations);
+                          description, size, 1.0f, 0u, characterCount, fonts, variations);
     return fonts.Empty() ? 0u : fonts[0].fontId;
   };
   const auto defaultFont = validate(logical->GetVariationsMap());

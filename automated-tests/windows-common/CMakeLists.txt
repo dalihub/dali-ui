@@ -121,6 +121,7 @@ SET(WINDOWS_UNSUPPORTED_TEST_SOURCES
   "${FOUNDATION_TEST_DIR}/utc-Dali-RecyclerView.cpp"
   "${FOUNDATION_TEST_DIR}/utc-Dali-WebView.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-AnimatedImageReleasePolicy-internal.cpp"
+  "${INTERNAL_TEST_DIR}/utc-Dali-AsyncTextLoaderOwnership-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-ArcWireframeVisual-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-FeedbackStyle-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-ImageCache-internal.cpp"

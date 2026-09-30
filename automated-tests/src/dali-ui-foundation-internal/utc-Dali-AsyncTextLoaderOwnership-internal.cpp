@@ -76,7 +76,10 @@ int UtcDaliAsyncTextLocalePendingCustomFontP(void)
   UiTestApplication application;
   auto              manager = UiText::AsyncTextManager::Get();
   auto&             impl    = UiText::GetImplementation(manager);
-  auto              loader  = impl.GetAvailableLoader();
+  // Fix the initial manager locale so the first transition is independent of
+  // the host locale. This changes loader state, not the process or OS locale.
+  impl.OnLocaleChanged("en_US.UTF-8");
+  auto loader = impl.GetAvailableLoader();
   DALI_TEST_CHECK(loader);
 
   // A running loader becomes locale-pending when its worker returns it.
