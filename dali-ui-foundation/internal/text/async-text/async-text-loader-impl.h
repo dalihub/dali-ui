@@ -306,8 +306,10 @@ private:
                                  // sections.
   bool mIsTextDirectionRTL : 1;  // The direction of the first line after layout completion.
   bool mIsTextMirrored : 1;
-  bool mModuleClearNeeded : 1;
-  bool mLocaleUpdateNeeded : 1;
+  // Accessed under the manager's pool mutex or while the UI owns the loader
+  // exclusively. Keep separate storage from the worker-owned bitfields above.
+  bool mModuleClearNeeded;
+  bool mLocaleUpdateNeeded;
 
   Mutex mMutex;
 }; // class AsyncTextLoader
