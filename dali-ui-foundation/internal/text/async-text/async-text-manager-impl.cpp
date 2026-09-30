@@ -139,11 +139,17 @@ Text::AsyncTextManager AsyncTextManager::Get()
 
 void AsyncTextManager::OnCustomFontAdded(const std::string& path)
 {
-  for(auto& loader : mAvailableLoaders)
+  std::vector<Text::AsyncTextLoader> loaders;
+  loaders.reserve(MAXIMUM_NUMBER_OF_LOADER);
   {
-    loader.RequestAddCustomFont(path);
+    Mutex::ScopedLock lock(mLoaderMutex);
+    loaders.insert(loaders.end(), mAvailableLoaders.begin(), mAvailableLoaders.end());
+    loaders.insert(loaders.end(), mRunningLoaders.begin(), mRunningLoaders.end());
   }
-  for(auto& loader : mRunningLoaders)
+
+  // Keep handles alive across pool moves without holding the pool lock while
+  // waiting for a loader's custom-font queue mutex.
+  for(auto& loader : loaders)
   {
     loader.RequestAddCustomFont(path);
   }

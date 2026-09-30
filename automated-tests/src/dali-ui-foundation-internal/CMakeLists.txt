@@ -6,6 +6,7 @@ SET(RPM_NAME "core-${PKG_NAME}-tests")
 # Keep the test source declarations at the top so the Windows runner can
 # include this file in source-list-only mode without configuring Unix targets.
 SET(TC_SOURCES
+    utc-Dali-AsyncTextLoaderOwnership-internal.cpp
     utc-Dali-AsyncMarqueeCoordinates-internal.cpp
     utc-Dali-AnimatedImageReleasePolicy-internal.cpp
     utc-Dali-AnimatedImageView-internal.cpp
