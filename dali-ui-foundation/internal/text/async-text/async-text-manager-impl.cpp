@@ -145,6 +145,7 @@ void AsyncTextManager::OnCustomFontAdded(const std::string& path)
     Mutex::ScopedLock lock(mLoaderMutex);
     loaders.insert(loaders.end(), mAvailableLoaders.begin(), mAvailableLoaders.end());
     loaders.insert(loaders.end(), mRunningLoaders.begin(), mRunningLoaders.end());
+    loaders.insert(loaders.end(), mLocaleChangedLoaders.begin(), mLocaleChangedLoaders.end());
   }
 
   // Keep handles alive across pool moves without holding the pool lock while

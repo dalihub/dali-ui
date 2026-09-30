@@ -70,3 +70,36 @@ int UtcDaliAsyncTextCustomFontRequestOrderP(void)
   impl.ReleaseLoader(nullptr, reused);
   END_TEST;
 }
+
+int UtcDaliAsyncTextLocalePendingCustomFontP(void)
+{
+  UiTestApplication application;
+  auto              manager = UiText::AsyncTextManager::Get();
+  auto&             impl    = UiText::GetImplementation(manager);
+  auto              loader  = impl.GetAvailableLoader();
+  DALI_TEST_CHECK(loader);
+
+  // A running loader becomes locale-pending when its worker returns it.
+  impl.OnLocaleChanged("ar_SA.UTF-8");
+  impl.ReleaseLoader(nullptr, loader);
+  DALI_TEST_EQUALS(impl.mLocaleChangedLoaders.size(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.mLocaleChangedLoaders.front() == loader);
+
+  impl.OnCustomFontAdded("first/font/path");
+  impl.OnCustomFontAdded("second/font/path");
+  auto& state = UiText::GetImplementation(loader);
+  DALI_TEST_EQUALS(state.mCustomFonts.size(), 2u, TEST_LOCATION);
+
+  // ClearModule and SetLocale must retain the queue for the next Initialize.
+  impl.OnLocaleChanged("he_IL.UTF-8");
+  impl.OnLocaleChanged("en_US.UTF-8");
+  DALI_TEST_CHECK(impl.mLocaleChangedLoaders.empty());
+  DALI_TEST_CHECK(impl.mRunningLoaders.empty());
+  DALI_TEST_EQUALS(state.mLocale, std::string("en_US.UTF-8"), TEST_LOCATION);
+  DALI_TEST_CHECK(!loader.IsModuleClearNeeded());
+  DALI_TEST_CHECK(!loader.IsLocaleUpdateNeeded());
+  DALI_TEST_EQUALS(state.mCustomFonts.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.mCustomFonts[0], std::string("first/font/path"), TEST_LOCATION);
+  DALI_TEST_EQUALS(state.mCustomFonts[1], std::string("second/font/path"), TEST_LOCATION);
+  END_TEST;
+}
