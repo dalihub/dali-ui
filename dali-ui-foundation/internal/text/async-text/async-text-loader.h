@@ -37,6 +37,7 @@
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -44,6 +45,11 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+namespace Internal
+{
+struct PreparedRevealBlur;
+} // namespace Internal
+
 namespace Text
 {
 namespace Internal DALI_INTERNAL
@@ -120,6 +126,8 @@ struct AsyncTextParameters
     marqueeLoopDelay{0.0f},
     textRevealFadeDurationRatio{Text::Reveal::AUTO_FADE_DURATION_RATIO},
     textRevealSequenceStaggerRatio{0.0f},
+    textRevealBlurRadius{0.0f},
+    textRevealBlurDurationRatio{1.0f},
     renderScale{1.0f},
     renderScaleWidth{0.f},
     renderScaleHeight{0.f},
@@ -167,7 +175,8 @@ struct AsyncTextParameters
     isEmbossEnabled{false},
     isTextGradientRequested{false},
     isTextGradientOverlayRequested{false},
-    isTextRevealEnabled{false}
+    isTextRevealEnabled{false},
+    isTextRevealBlurRequested{false}
   {
   }
 
@@ -254,6 +263,8 @@ struct AsyncTextParameters
   float marqueeLoopDelay;
   float textRevealFadeDurationRatio;    ///< Authored AUTO sentinel or normalized per-unit fade duration.
   float textRevealSequenceStaggerRatio; ///< Authored sequence stagger ratio.
+  float textRevealBlurRadius;           ///< UI-scaled blur radius; raster supersampling does not multiply it.
+  float textRevealBlurDurationRatio;    ///< Authored sequence blur duration ratio.
   float renderScale;                    ///< The render scale.
   float renderScaleWidth;               ///< The requested original textWidth when using render scale.
   float renderScaleHeight;              ///< The requested original textHeight when using render scale.
@@ -306,6 +317,7 @@ struct AsyncTextParameters
   bool isTextGradientRequested : 1;        ///< Whether async render may generate TextGradient-only payloads.
   bool isTextGradientOverlayRequested : 1; ///< Whether async render may generate TextGradientOverlay-only payloads.
   bool isTextRevealEnabled : 1;            ///< Whether the worker should produce reveal metadata.
+  bool isTextRevealBlurRequested : 1;      ///< Blur requested; worker checks kernel and raster capabilities.
 };
 
 struct AsyncTextRenderInfo
@@ -323,6 +335,7 @@ struct AsyncTextRenderInfo
     maskPixelData(),
     marqueePixelData(),
     revealMetadataTiles(),
+    revealBlur(),
     size(),
     textLogicalBounds(0.0f, 0.0f, 1.0f, 1.0f),
     controlSize(),
@@ -368,35 +381,38 @@ struct AsyncTextRenderInfo
   PixelData                                 overlayStylePixelData;
   PixelData                                 maskPixelData;
   PixelData                                 marqueePixelData;
-  std::vector<PixelData>                    revealMetadataTiles;      ///< One RGBA8888 buffer per height tile.
-  Size                                      size;                     ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
-  Vector4                                   textLogicalBounds;        ///< Normalized logical text bounds inside @p size.
-  Size                                      controlSize;              ///< View size used to display the rendered text.
-  Size                                      renderedSize;             ///< Final displayed size reported back to the caller.
-  std::vector<AsyncAnchorHitRegion>         anchorHitRegions;         ///< Anchor hit regions in text content local coordinates.
-  Vector<ReplacementPlacement>              replacementPlacements;    ///< Final-layout values; no image runtime objects.
-  Vector<ReplacementRevealTiming>           replacementRevealTimings; ///< Atomic ImageSpan timing from the shared final Reveal plan.
-  uint64_t                                  replacementSourceRevision;
-  uint64_t                                  replacementLayoutGeneration;
-  int                                       lineCount;
-  float                                     marqueeWrapGap;
-  MarqueeStartAnchor                        marqueeStartAnchor;          ///< Static result in logical Label coordinates.
-  MarqueeTextureAnchor                      marqueeTextureAnchor;        ///< Marquee result in logical texture coordinates.
-  MarqueeFittingStartGeometry               marqueeFittingStartGeometry; ///< Effective fitting static translation.
-  float                                     textRevealFadeDuration;
-  bool                                      hasMultipleTextColors : 1;
-  bool                                      containsColorGlyph : 1;
-  bool                                      styleEnabled : 1;
-  bool                                      styleTextureEnabled : 1;
-  bool                                      styleBlocksTextGradient : 1;
-  bool                                      isOverlayStyle : 1;
-  bool                                      isMarqueeContentOverflow : 1;
-  bool                                      isMarqueeStartAnchorResolved : 1;          ///< Whether this static render evaluated the anchor gate.
-  bool                                      isMarqueeFittingStartGeometryResolved : 1; ///< Whether this static render evaluated fitting geometry.
-  bool                                      isTextDirectionRTL : 1;
-  bool                                      isCutoutEnabled : 1;
-  bool                                      isEmbossEnabled : 1;
-  bool                                      isTextRevealEnabled : 1;
+  std::vector<PixelData>                    revealMetadataTiles; ///< One RGBA8888 buffer per height tile.
+
+  std::shared_ptr<const Ui::Internal::PreparedRevealBlur> revealBlur; ///< Optional CPU-only result; absent for ordinary Reveal.
+
+  Size                              size;                     ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
+  Vector4                           textLogicalBounds;        ///< Normalized logical text bounds inside @p size.
+  Size                              controlSize;              ///< View size used to display the rendered text.
+  Size                              renderedSize;             ///< Final displayed size reported back to the caller.
+  std::vector<AsyncAnchorHitRegion> anchorHitRegions;         ///< Anchor hit regions in text content local coordinates.
+  Vector<ReplacementPlacement>      replacementPlacements;    ///< Final-layout values; no image runtime objects.
+  Vector<ReplacementRevealTiming>   replacementRevealTimings; ///< Atomic ImageSpan timing from the shared final Reveal plan.
+  uint64_t                          replacementSourceRevision;
+  uint64_t                          replacementLayoutGeneration;
+  int                               lineCount;
+  float                             marqueeWrapGap;
+  MarqueeStartAnchor                marqueeStartAnchor;          ///< Static result in logical Label coordinates.
+  MarqueeTextureAnchor              marqueeTextureAnchor;        ///< Marquee result in logical texture coordinates.
+  MarqueeFittingStartGeometry       marqueeFittingStartGeometry; ///< Effective fitting static translation.
+  float                             textRevealFadeDuration;
+  bool                              hasMultipleTextColors : 1;
+  bool                              containsColorGlyph : 1;
+  bool                              styleEnabled : 1;
+  bool                              styleTextureEnabled : 1;
+  bool                              styleBlocksTextGradient : 1;
+  bool                              isOverlayStyle : 1;
+  bool                              isMarqueeContentOverflow : 1;
+  bool                              isMarqueeStartAnchorResolved : 1;          ///< Whether this static render evaluated the anchor gate.
+  bool                              isMarqueeFittingStartGeometryResolved : 1; ///< Whether this static render evaluated fitting geometry.
+  bool                              isTextDirectionRTL : 1;
+  bool                              isCutoutEnabled : 1;
+  bool                              isEmbossEnabled : 1;
+  bool                              isTextRevealEnabled : 1;
 };
 
 /**

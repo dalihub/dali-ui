@@ -126,3 +126,36 @@ int UtcDaliImageViewReplacesStoredImageUrlHandle(void)
 
   END_TEST;
 }
+
+int UtcDaliImageUrlEncodedImageBufferExtension(void)
+{
+  UiTestApplication application;
+
+  // The generated buffer url carries the extension matching the buffer's ImageType,
+  // so that the loader picks the decoder from the url.
+  auto makeBuffer = [](uint8_t seed)
+  {
+    Dali::EncodedImageBuffer::RawBufferType rawBuffer;
+    rawBuffer.PushBack(seed);
+    rawBuffer.PushBack(0x22u);
+    rawBuffer.PushBack(0x33u);
+    return rawBuffer;
+  };
+
+  Dali::Ui::ImageUrl regularUrl = Dali::Ui::ImageUrl::New(Dali::EncodedImageBuffer::New(makeBuffer(0x11u)));
+  Dali::Ui::ImageUrl svgUrl     = Dali::Ui::ImageUrl::New(Dali::EncodedImageBuffer::New(makeBuffer(0x44u), Dali::EncodedImageBuffer::ImageType::SVG));
+  Dali::Ui::ImageUrl lottieUrl  = Dali::Ui::ImageUrl::New(Dali::EncodedImageBuffer::New(makeBuffer(0x55u), Dali::EncodedImageBuffer::ImageType::LOTTIE));
+
+  auto endsWith = [](const std::string& url, const std::string& extension)
+  {
+    return url.size() >= extension.size() && url.compare(url.size() - extension.size(), extension.size(), extension) == 0;
+  };
+
+  DALI_TEST_CHECK(endsWith(svgUrl.GetUrl().CStr(), ".svg"));
+  DALI_TEST_CHECK(endsWith(lottieUrl.GetUrl().CStr(), ".json"));
+
+  // REGULAR_IMAGE, the default, appends no extension.
+  DALI_TEST_CHECK(std::string(regularUrl.GetUrl().CStr()).find('.') == std::string::npos);
+
+  END_TEST;
+}

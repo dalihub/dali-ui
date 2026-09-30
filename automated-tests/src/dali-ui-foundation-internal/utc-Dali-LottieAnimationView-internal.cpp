@@ -28,6 +28,7 @@
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/vector-animation-renderer.h>
 #include <dali-ui/ui-event-thread-callback.h>
+#include <chrono>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -39,6 +40,7 @@ namespace UiVectorAnimationRenderer
 void     ResetLoadCount();
 uint32_t GetLoadCount();
 uint32_t GetDynamicPropertyCount();
+uint32_t GetLastRenderedFrame();
 void     ResetLastSize();
 uint32_t GetLastWidth();
 uint32_t GetLastHeight();
@@ -712,6 +714,8 @@ int UtcDaliLottieAnimationViewAsyncDeferredLoadCompletes(void)
   UiTestApplication application;
   Test::UiVectorAnimationRenderer::ResetLoadCount();
   LottieAnimationView view = LottieAnimationView::New("animation.json");
+  int                 readyCount = 0;
+  view.ResourceReadySignal().Connect(&application, ResourceReadyCounter{readyCount});
   view.SetDesiredWidth(64);
   view.SetDesiredHeight(32);
   view.JumpToFrame(3);
@@ -719,15 +723,24 @@ int UtcDaliLottieAnimationViewAsyncDeferredLoadCompletes(void)
   DALI_TEST_CHECK(!view.IsSynchronousLoading());
   DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 0u, TEST_LOCATION);
   application.GetScene().Add(view);
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
   view.Measure(100.0f, 100.0f);
   view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
   application.SendNotification();
   application.Render();
-  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1)); // load metadata, then schedule pending commands
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(2)); // rasterization and upload
+
+  const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+  while(readyCount == 0 && std::chrono::steady_clock::now() < deadline)
+  {
+    Test::WaitForEventThreadTrigger(1, 1);
+    application.SendNotification();
+    application.Render();
+  }
+
+  DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
   DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLoadCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLastRenderedFrame(), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 3, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::PAUSED, TEST_LOCATION);
   DALI_TEST_CHECK(view.IsResourceReady());

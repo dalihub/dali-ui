@@ -63,7 +63,7 @@ int UtcDaliTextCursorClosestLineAndIndexP(void)
   bool matched = true;
   DALI_TEST_EQUALS(Text::GetClosestLine(visual, -20.0f, matched), 0u, TEST_LOCATION);
   DALI_TEST_CHECK(!matched);
-  const Text::LineIndex lastLine = visual->mLines.Count() - 1u;
+  const Text::LineIndex lastLine = static_cast<Text::LineIndex>(visual->mLines.Count() - 1u);
   DALI_TEST_EQUALS(Text::GetClosestLine(visual, 1000.0f, matched), lastLine, TEST_LOCATION);
   DALI_TEST_CHECK(!matched);
   DALI_TEST_EQUALS(Text::GetClosestLine(visual, 1.0f, matched), 0u, TEST_LOCATION);

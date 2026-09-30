@@ -86,6 +86,11 @@ namespace Integration
 namespace
 {
 
+std::mutex    gWebEngineTypeMutex;
+WebEngineType gWebEngineType           = WebEngineType::CHROMIUM;
+bool          gWebEngineTypeOverridden = false;
+bool          gWebViewCreated          = false;
+
 // ---------------------------------------------------------------------------
 // Type registration factory function
 // ---------------------------------------------------------------------------
@@ -229,17 +234,34 @@ WebViewImplPtr WebViewImpl::New(uint32_t argc, char** argv)
   return impl;
 }
 
+void WebViewImpl::SetWebEngineType(WebEngineType type)
+{
+  std::lock_guard<std::mutex> lock(gWebEngineTypeMutex);
+  DALI_ASSERT_ALWAYS((!gWebViewCreated || type == gWebEngineType) && "Web engine cannot be changed after a WebView has been created");
+  gWebEngineType           = type;
+  gWebEngineTypeOverridden = true;
+}
+
 WebViewImplPtr WebViewImpl::CreateWithEngine()
 {
   DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "UiConfig::Apply() must be called before WebView::New()");
 
-  const WebEngineType webEngineType = UiConfig::GetCurrent().GetWebEngineType();
-  const char* const   webEngineName = webEngineType == WebEngineType::LWE ? "LWE" : "Chromium";
+  WebEngineType webEngineType;
+  {
+    std::lock_guard<std::mutex> lock(gWebEngineTypeMutex);
+    if(!gWebViewCreated)
+    {
+      gWebEngineType = gWebEngineTypeOverridden ? gWebEngineType : UiConfig::GetCurrent().GetWebEngineType();
+    }
+    webEngineType   = gWebEngineType;
+    gWebViewCreated = true;
+  }
+  const char* const webEngineName = webEngineType == WebEngineType::LWE ? "LWE" : "Chromium";
 
   static std::once_flag webEngineLogFlag;
   std::call_once(webEngineLogFlag, [webEngineName]()
   {
-    DALI_LOG_RELEASE_INFO("[WebView] Using %s web engine as configured in the applied UiConfig.\n", webEngineName);
+    DALI_LOG_RELEASE_INFO("[WebView] Using %s web engine.\n", webEngineName);
   });
 
   auto* impl       = new WebViewImpl();

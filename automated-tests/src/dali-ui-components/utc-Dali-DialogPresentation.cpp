@@ -22,11 +22,9 @@
 #include <dali-ui-components/public-api/navigator/navigator.h>
 #include <dali-ui-test-suite-utils.h>
 #include <test-gesture-generator.h>
-#include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
-#include <sys/wait.h>
-#include <unistd.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -50,22 +48,8 @@ void Advance(UiTestApplication& application)
   application.Render(500);
 }
 
-int CheckPresentationMixing(unsigned operation)
+int CheckFatalPresentationMixing(unsigned operation)
 {
-  // Actor callbacks may assert after hierarchy mutation. Test the fatal contract
-  // in a child process without unwinding a partially modified scene afterwards.
-  const pid_t child = fork();
-  DALI_TEST_CHECK(child >= 0);
-  if(child > 0)
-  {
-    int status = 0;
-    pid_t result;
-    do { result = waitpid(child, &status, 0); } while(result < 0 && errno == EINTR);
-    DALI_TEST_CHECK(result == child);
-    DALI_TEST_CHECK(WIFEXITED(status));
-    DALI_TEST_EQUALS(WEXITSTATUS(status), 0, TEST_LOCATION);
-    END_TEST;
-  }
   UiTestApplication application(Components::UiConfig::New());
   ConnectionTracker tracker;
   auto navigator = Navigator::New();
@@ -91,18 +75,50 @@ int CheckPresentationMixing(unsigned operation)
       case 0u: newParent.Add(dialog); break;
       case 1u: dialog.Unparent(); break;
       case 2u: dialog.GetParent().Remove(dialog); break;
-      case 3u: DialogContainer::DownCast(dialog.GetParent()).SetModalContent({}); break;
-      case 4u: DialogContainer::DownCast(dialog.GetParent()).SetModalContent(View::New()); break;
       case 5u: static_cast<Actor&>(navigator).Remove(navigator.GetModalStackItem(0u)); break;
       case 6u: newParent.Add(navigator.GetModalStackItem(0u)); break;
       case 7u: dialog.Unparent(); break;
     }
   }
-  catch(const DaliException&)
+  catch(const DaliException& exception)
   {
-    asserted = true;
+    const char* expected = operation <= 2u || operation == 7u
+                             ? "Posted Dialog must be dismissed before direct Add/Remove/Unparent"
+                             : "Managed DialogContainer must be removed through Navigator or Dialog::Dismiss";
+    asserted = exception.condition && std::strstr(exception.condition, expected);
   }
+  // The hierarchy has already changed when OnChildRemove reports these fatal
+  // contract violations. The test runner gives every UTC its own process, so
+  // terminate it without unwinding the deliberately inconsistent object graph.
   std::_Exit(asserted && hidden == 0u ? EXIT_SUCCESS : EXIT_FAILURE);
+}
+
+int CheckPresentationContentSetterMixing(bool clear)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ConnectionTracker tracker;
+  auto navigator = Navigator::New();
+  auto dialog = Dialog::New();
+  DialogPostOptions options;
+  options.animated = false;
+  unsigned hidden = 0u;
+  dialog.HiddenSignal().Connect(&tracker, [&](Dialog, DialogDismissReason) { ++hidden; });
+  DALI_TEST_CHECK(dialog.Post(navigator, options));
+  auto container = DialogContainer::DownCast(dialog.GetParent());
+  if(clear)
+  {
+    DALI_TEST_ASSERTION(container.SetModalContent({}), "mContentClearOwner == session.get()");
+  }
+  else
+  {
+    DALI_TEST_ASSERTION(container.SetModalContent(View::New()), "mContentClearOwner == session.get()");
+  }
+  DALI_TEST_CHECK(dialog.IsPosted());
+  DALI_TEST_CHECK(container.GetModalContent() == dialog);
+  DALI_TEST_EQUALS(hidden, 0u, TEST_LOCATION);
+  dialog.Dismiss(false);
+  DALI_TEST_EQUALS(hidden, 1u, TEST_LOCATION);
+  END_TEST;
 }
 }
 
@@ -243,42 +259,42 @@ int UtcDaliDialogPresentationHostDestroyed(void)
 
 int UtcDaliDialogPresentationContentReparentAsserts(void)
 {
-  return CheckPresentationMixing(0u);
+  return CheckFatalPresentationMixing(0u);
 }
 
 int UtcDaliDialogPresentationContentUnparentAsserts(void)
 {
-  return CheckPresentationMixing(1u);
+  return CheckFatalPresentationMixing(1u);
 }
 
 int UtcDaliDialogPresentationContentRemoveAsserts(void)
 {
-  return CheckPresentationMixing(2u);
+  return CheckFatalPresentationMixing(2u);
 }
 
 int UtcDaliDialogPresentationContentClearAsserts(void)
 {
-  return CheckPresentationMixing(3u);
+  return CheckPresentationContentSetterMixing(true);
 }
 
 int UtcDaliDialogPresentationContentReplaceAsserts(void)
 {
-  return CheckPresentationMixing(4u);
+  return CheckPresentationContentSetterMixing(false);
 }
 
 int UtcDaliDialogPresentationContainerRemoveAsserts(void)
 {
-  return CheckPresentationMixing(5u);
+  return CheckFatalPresentationMixing(5u);
 }
 
 int UtcDaliDialogPresentationContainerReparentAsserts(void)
 {
-  return CheckPresentationMixing(6u);
+  return CheckFatalPresentationMixing(6u);
 }
 
 int UtcDaliDialogPresentationClosingUnparentAsserts(void)
 {
-  return CheckPresentationMixing(7u);
+  return CheckFatalPresentationMixing(7u);
 }
 
 int UtcDaliDialogPresentationPolicyAndExplicitBypass(void)

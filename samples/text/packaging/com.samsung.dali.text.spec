@@ -20,6 +20,7 @@ BuildRequires:  pkgconfig(dali2-core)
 BuildRequires:  pkgconfig(dali2-adaptor)
 BuildRequires:  dali2-adaptor-integration-devel
 BuildRequires:  pkgconfig(dali2-ui-foundation)
+BuildRequires:  dali2-ui-foundation-integration-devel
 BuildRequires:  pkgconfig(dali2-ui-components)
 
 %description

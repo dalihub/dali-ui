@@ -903,7 +903,7 @@ int UtcDaliTextGradientShaderCompositionMixedMultiColorFeatureP(void)
   std::string fragmentShader = fragmentPrefix + std::string(SHADER_TEXT_VISUAL_SHADER_FRAG);
   const auto  maskSampler    = fragmentShader.find("UNIFORM sampler2D sTextGradientMask;");
   const auto  lookupSampler  = fragmentShader.find("UNIFORM sampler2D sGradientLookup;");
-  const auto  maskLookup     = fragmentShader.find("TEXTURE(sTextGradientMask, vTexCoord).r");
+  const auto  maskLookup     = fragmentShader.find("TEXTURE(sTextGradientMask, TEXT_SOURCE_UV(vTexCoord)).r");
   const auto  gradientLookup = fragmentShader.find("TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5))");
   const auto  alphaOver      = fragmentShader.find("gradientFill + preservedColor * (1.0 - gradientFill.a)");
 
@@ -1295,7 +1295,7 @@ int UtcDaliTextGradientShaderCompositionSkipsSingleColorFallbackP(void)
   std::string fragmentShader = fragmentPrefix + std::string(SHADER_TEXT_VISUAL_SHADER_FRAG);
 
   ExpectTextGradientDefine(fragmentPrefix);
-  DALI_TEST_EQUALS(fragmentShader.find("#elif defined(IS_REQUIRED_TEXT_GRADIENT)\n  mediump float textTexture = TEXTURE(sTexture, vTexCoord).r;") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("#elif defined(IS_REQUIRED_TEXT_GRADIENT)\n  mediump float textTexture = TEXTURE(sTexture, TEXT_SOURCE_UV(vTexCoord)).r;") != std::string::npos, true, TEST_LOCATION);
   END_TEST;
 }
 

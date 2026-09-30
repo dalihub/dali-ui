@@ -39,13 +39,15 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
-class MyWindowController : public ConnectionTracker
+class MyWindowApp : public tizen_appfw::UiApplication, public ConnectionTracker
 {
 public:
-  void Initialize(Application application)
+  MyWindowApp(int argc, char** argv) : UiApplication(argc, argv) {}
+
+protected:
+  bool OnCreate() override
   {
-    mApplication = application;
-    mWindow      = application.GetWindow();
+    mWindow = GetDefaultWindow();
     mWindow.SetBackgroundColor(Color::TRANSPARENT);
     mWindow.SetTransparency(true);
 
@@ -55,7 +57,7 @@ public:
 
     mWindowFrame = WindowFrame::New(
       mWindow,
-      WindowFrame::CloseCallback::New(this, &MyWindowController::OnClose),
+      WindowFrame::CloseCallback::New(this, &MyWindowApp::OnClose),
       options);
     mWindowFrame.SetOverlayEnabled(true);
     mWindowFrame.SetOverlayAutoHideDelay(2500u);
@@ -69,12 +71,13 @@ public:
 
     View appContent = CreateAppContent();
     mWindowFrame.GetContentRoot().Add(appContent);
+    return true;
   }
 
 private:
   void OnClose()
   {
-    mApplication.Quit();
+    Exit();
   }
 
   // Application-specific helpers implemented by the product.
@@ -82,13 +85,12 @@ private:
   void ConnectSignals();
   View CreateAppContent();
 
-  Application  mApplication;
   Window       mWindow;
   WindowFrame mWindowFrame;
 };
 ```
 
-`Application`과 `Window`는 handle을 값으로 보관합니다. 호출자가 넘긴 지역 handle의 주소를 저장하면 controller보다 먼저 소멸할 수 있으므로 pointer/reference를 장기 보관하지 않는 편이 안전합니다. Client shadow와 둥근 외곽을 사용하려면 native window background와 surface도 transparent로 준비해야 합니다.
+`Window`는 handle을 값으로 보관합니다. 호출자가 넘긴 지역 handle의 주소를 저장하면 먼저 소멸할 수 있으므로 pointer/reference를 장기 보관하지 않는 편이 안전합니다. Client shadow와 둥근 외곽을 사용하려면 native window background와 surface도 transparent로 준비해야 합니다.
 
 권장 초기화 순서는 다음과 같습니다.
 

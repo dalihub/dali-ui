@@ -2494,6 +2494,14 @@ public: // Relayout.
   void RequestRelayout();
 
   /**
+   * @brief Gets the event-side layout/render invalidation revision.
+   *
+   * A queued request can invalidate detached resources before Relayout changes
+   * the model or the published renderer. This is not an async task identifier.
+   */
+  uint64_t GetRenderRevision() const;
+
+  /**
    * @brief Invalidate the measured size using the Ui::Integration::Text::ControlInterface.
    */
   void InvalidateMeasure();

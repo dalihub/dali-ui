@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <utility>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -60,7 +61,11 @@ struct RevealRasterContext
 {
   PixelBuffer                   metadata;
   const Internal::Reveal::Plan* plan{nullptr};
-  GlyphIndex                    currentGlyph{0u};
+  uint8_t*                      pixels{nullptr};
+  uint64_t                      pixelCount{0u};
+  uint32_t                      currentUnit{Internal::Reveal::NO_UNIT};
+  uint32_t                      encodedStart{0u};
+  std::vector<uint16_t>         pixelColumnStarts;
 };
 
 namespace
@@ -70,26 +75,41 @@ DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
 const float HALF(0.5f);
 const float ONE_AND_A_HALF(1.5f);
 
+template<bool PIXEL_REVEAL>
+void PrepareRevealGlyph(RevealRasterContext& context, GlyphIndex glyph)
+{
+  context.currentUnit = Internal::Reveal::NO_UNIT;
+  if(!context.plan || glyph >= context.plan->glyphToUnit.size())
+  {
+    return;
+  }
+  const uint32_t unit = context.plan->glyphToUnit[glyph];
+  if(unit == Internal::Reveal::NO_UNIT || unit >= context.plan->unitStart.size())
+  {
+    return;
+  }
+  context.currentUnit = unit;
+  if constexpr(!PIXEL_REVEAL)
+  {
+    // The plan and unit are fixed for this glyph traversal. Encode once, not
+    // for every covered pixel; PIXEL still resolves its start from visual X.
+    const float start    = context.plan->unitStart[unit];
+    context.encodedStart = static_cast<uint32_t>(std::round(std::max(0.0f, std::min(1.0f, start)) * 65535.0f));
+  }
+}
+
 void RecordRevealPixel(RevealRasterContext* context,
                        uint32_t             pixelIndex,
                        uint8_t              coverage,
                        bool                 overwrite)
 {
-  if(!context || coverage == 0u || !context->plan || context->currentGlyph >= context->plan->glyphToUnit.size() ||
-     pixelIndex >= static_cast<uint64_t>(context->metadata.GetWidth()) * context->metadata.GetHeight())
+  if(!context || coverage == 0u || context->currentUnit == Internal::Reveal::NO_UNIT || pixelIndex >= context->pixelCount)
   {
     return;
   }
 
-  const uint32_t unit = context->plan->glyphToUnit[context->currentGlyph];
-  if(unit == Internal::Reveal::NO_UNIT || unit >= context->plan->unitStart.size())
-  {
-    return;
-  }
-
-  const float    normalizedStart = context->plan->unitStart[unit];
-  const uint32_t encoded         = static_cast<uint32_t>(std::round(std::max(0.0f, std::min(1.0f, normalizedStart)) * 65535.0f));
-  uint8_t*       pixel           = context->metadata.GetBuffer() + pixelIndex * 4u;
+  const uint32_t encoded = context->encodedStart;
+  uint8_t*       pixel   = context->pixels + pixelIndex * 4u;
   if(overwrite || pixel[2] == 0u || coverage >= pixel[3])
   {
     pixel[0] = static_cast<uint8_t>((encoded >> 8u) & 0xffu);
@@ -101,26 +121,17 @@ void RecordRevealPixel(RevealRasterContext* context,
 
 void RecordPixelRevealPixel(RevealRasterContext* context,
                             uint32_t             pixelIndex,
-                            float                visualX,
+                            uint32_t             encoded,
                             uint8_t              coverage,
                             bool                 overwrite)
 {
-  if(!context || coverage == 0u || !context->plan || context->currentGlyph >= context->plan->glyphToUnit.size() ||
-     pixelIndex >= static_cast<uint64_t>(context->metadata.GetWidth()) * context->metadata.GetHeight())
+  if(!context || coverage == 0u || context->currentUnit == Internal::Reveal::NO_UNIT || pixelIndex >= context->pixelCount)
   {
     return;
   }
 
-  const uint32_t unit = context->plan->glyphToUnit[context->currentGlyph];
-  if(unit == Internal::Reveal::NO_UNIT || unit >= context->plan->unitStart.size())
-  {
-    return;
-  }
-
-  const float    normalizedStart = Internal::Reveal::ResolvePixelStart(*context->plan, unit, visualX);
-  const uint32_t encoded         = static_cast<uint32_t>(std::round(std::max(0.0f, std::min(1.0f, normalizedStart)) * 65535.0f));
-  uint8_t*       pixel           = context->metadata.GetBuffer() + pixelIndex * 4u;
-  bool           writePixel      = overwrite || pixel[2] == 0u || coverage >= pixel[3];
+  uint8_t* pixel      = context->pixels + pixelIndex * 4u;
+  bool     writePixel = overwrite || pixel[2] == 0u || coverage >= pixel[3];
   if(pixel[2] != 0u)
   {
     const uint32_t existing = (static_cast<uint32_t>(pixel[0]) << 8u) | pixel[1];
@@ -379,6 +390,70 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
   const bool     isColorGlyph      = Internal::IsColorGlyphBuffer(data.glyphBitmap);
   const uint32_t glyphAlphaIndex   = glyphPixelSize - 1u;
 
+  if constexpr(RECORD_REVEAL)
+  {
+    if constexpr(PIXEL_REVEAL)
+    {
+      auto& context = *data.revealContext;
+      if(context.currentUnit == Internal::Reveal::NO_UNIT)
+      {
+        return;
+      }
+      // A glyph column has the same visual X in every decoded scanline.
+      // Keep the original expression and quantization; incremental floating
+      // point steps could change ownership at a 16-bit timing boundary.
+      // Scratch is reused across glyphs and released with this raster context.
+      context.pixelColumnStarts.resize(static_cast<size_t>(indexRangeMax - indexRangeMin));
+      for(int32_t index = indexRangeMin; index < indexRangeMax; ++index)
+      {
+        const float visualX = static_cast<float>(static_cast<int32_t>(position->x) + index) + 0.5f;
+        const float start   = Internal::Reveal::ResolvePixelStart(*context.plan, context.currentUnit, visualX);
+        context.pixelColumnStarts[static_cast<size_t>(index - indexRangeMin)] =
+          static_cast<uint16_t>(std::round(std::max(0.0f, std::min(1.0f, start)) * 65535.0f));
+      }
+    }
+    // Metadata uses the same clipped glyph coverage without compositing an
+    // unused foreground image. Color glyphs retain their effective alpha and
+    // overwrite policy; monochrome glyphs retain raw coverage, including when
+    // their foreground is painted by a GradientSpan.
+    const uint8_t inputAlpha = static_cast<uint8_t>(color->a * 255);
+    BEGIN_GLYPH_BITMAP(data);
+    SKIP_GLYPH_SCANLINE(lineIndexRangeMin);
+
+    for(int32_t lineIndex = lineIndexRangeMin; lineIndex < lineIndexRangeMax; ++lineIndex)
+    {
+      BEGIN_GLYPH_SCANLINE_DECODE(data);
+      for(int32_t index = indexRangeMin; index < indexRangeMax; ++index)
+      {
+        const uint8_t alpha    = glyphScanline[static_cast<uint32_t>(index) * glyphPixelSize + glyphAlphaIndex];
+        const uint8_t coverage = isColorGlyph ? MultiplyAndNormalizeColor(inputAlpha, alpha) : alpha;
+        if(coverage == 0u)
+        {
+          continue;
+        }
+
+        const uint32_t pixelIndex = static_cast<uint32_t>(lineIndex + yOffset) * data.width +
+                                    static_cast<uint32_t>(xOffset + index);
+        if constexpr(PIXEL_REVEAL)
+        {
+          RecordPixelRevealPixel(data.revealContext,
+                                 pixelIndex,
+                                 data.revealContext->pixelColumnStarts[static_cast<size_t>(index - indexRangeMin)],
+                                 coverage,
+                                 isColorGlyph);
+        }
+        else
+        {
+          RecordRevealPixel(data.revealContext, pixelIndex, coverage, isColorGlyph);
+        }
+      }
+      END_GLYPH_SCANLINE_DECODE(data);
+    }
+
+    END_GLYPH_BITMAP();
+    return;
+  }
+
   if(Pixel::RGBA8888 == pixelFormat)
   {
     uint32_t* __restrict__ bitmapBuffer = reinterpret_cast<uint32_t*>(data.bitmapBuffer.GetBuffer());
@@ -442,24 +517,6 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
             MultiplyAndNormalizeColor(*(packedInputColorBuffer + 3u), *(packedColorGlyphBuffer + 3u));
           *(packedColorGlyphBuffer + 3u) = colorAlpha;
 
-          if constexpr(RECORD_REVEAL)
-          {
-            const uint32_t pixelIndex = static_cast<uint32_t>(lineIndex + yOffset) * data.width +
-                                        static_cast<uint32_t>(xOffsetIndex);
-            if constexpr(PIXEL_REVEAL)
-            {
-              RecordPixelRevealPixel(data.revealContext,
-                                     pixelIndex,
-                                     static_cast<float>(static_cast<int32_t>(position->x) + index) + 0.5f,
-                                     colorAlpha,
-                                     true);
-            }
-            else
-            {
-              RecordRevealPixel(data.revealContext, pixelIndex, colorAlpha, true);
-            }
-          }
-
           if(Typesetter::STYLE_SHADOW == style)
           {
             // The shadow of color glyph needs to have the shadow color.
@@ -512,24 +569,6 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
           if(alpha > 0u)
           {
             const int32_t xOffsetIndex = xOffset + index;
-
-            if constexpr(RECORD_REVEAL)
-            {
-              const uint32_t pixelIndex = static_cast<uint32_t>(lineIndex + yOffset) * data.width +
-                                          static_cast<uint32_t>(xOffsetIndex);
-              if constexpr(PIXEL_REVEAL)
-              {
-                RecordPixelRevealPixel(data.revealContext,
-                                       pixelIndex,
-                                       static_cast<float>(static_cast<int32_t>(position->x) + index) + 0.5f,
-                                       alpha,
-                                       false);
-              }
-              else
-              {
-                RecordRevealPixel(data.revealContext, pixelIndex, alpha, false);
-              }
-            }
 
             // Check alpha of overlapped pixels
             uint32_t& currentColor             = *(bitmapBuffer + xOffsetIndex);
@@ -645,7 +684,7 @@ void TypesetGradientGlyph(GlyphData& __restrict__ data,
     return;
   }
 
-  if(Internal::IsColorGlyphBuffer(data.glyphBitmap))
+  if(RECORD_REVEAL || Internal::IsColorGlyphBuffer(data.glyphBitmap))
   {
     TypesetGlyph<RECORD_REVEAL, PIXEL_REVEAL>(data, position, fallbackColor, Typesetter::STYLE_NONE, Pixel::RGBA8888);
     return;
@@ -687,26 +726,10 @@ void TypesetGradientGlyph(GlyphData& __restrict__ data,
         continue;
       }
 
-      const int32_t  textureX   = xOffset + index;
-      const int32_t  textureY   = yOffset + lineIndex;
-      const uint32_t pixelIndex = static_cast<uint32_t>(textureY) * data.width + static_cast<uint32_t>(textureX);
-      if constexpr(RECORD_REVEAL)
-      {
-        if constexpr(PIXEL_REVEAL)
-        {
-          RecordPixelRevealPixel(data.revealContext,
-                                 pixelIndex,
-                                 static_cast<float>(static_cast<int32_t>(position->x) + index) + 0.5f,
-                                 coverage,
-                                 false);
-        }
-        else
-        {
-          RecordRevealPixel(data.revealContext, pixelIndex, coverage, false);
-        }
-      }
-
-      uint32_t& currentColor = *(bitmapBuffer + textureX);
+      const int32_t  textureX     = xOffset + index;
+      const int32_t  textureY     = yOffset + lineIndex;
+      const uint32_t pixelIndex   = static_cast<uint32_t>(textureY) * data.width + static_cast<uint32_t>(textureX);
+      uint32_t&      currentColor = *(bitmapBuffer + textureX);
 
       // Output alpha already includes foreground and GradientSpan paint alpha.
       // Keep raw glyph coverage/source alpha separate while the later glyph owns the paint.
@@ -1341,7 +1364,7 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
     // Reveal plans are indexed by the canonical final glyph sequence. The
     // source-domain glyphIndex is retained for colors/styles, while the
     // compacted elidedGlyphIndex selects reveal timing.
-    glyphData.revealContext->currentGlyph = elidedGlyphIndex;
+    PrepareRevealGlyph<PIXEL_REVEAL>(*glyphData.revealContext, elidedGlyphIndex);
   }
 
   // Replacement glyphs reserve layout space only. They never participate in
@@ -1996,111 +2019,85 @@ void Internal::Reveal::ExpandMetadataOwnership(uint8_t* metadata, uint32_t width
   constexpr uint32_t PIXEL_SIZE = 4u;
   const size_t       rowBytes   = static_cast<size_t>(width) * PIXEL_SIZE;
 
-  struct OwnershipSource
+  struct RowBounds
   {
-    uint32_t x;
-    uint16_t start;
-    uint8_t  coverage;
+    uint32_t begin;
+    uint32_t end;
   };
 
-  auto collectSources = [metadata, width, rowBytes, PIXEL_SIZE](uint32_t y, std::vector<OwnershipSource>& sources)
+  // A zero key means no original owner; start + 1 preserves valid zero starts.
+  // Horizontal maxima followed by vertical maxima select the latest start in
+  // the original 3x3 neighborhood. Coverage ties cannot affect the final halo:
+  // its coverage is always zero, and raster-owned texels are never overwritten.
+  std::vector<uint32_t> rows(static_cast<size_t>(width) * 3u, 0u);
+  uint32_t*             previous   = rows.data();
+  uint32_t*             current    = previous + width;
+  uint32_t*             next       = current + width;
+  const auto            collectRow = [metadata, width, rowBytes, PIXEL_SIZE](uint32_t y, uint32_t* output)
   {
-    sources.clear();
+    memset(output, 0u, static_cast<size_t>(width) * sizeof(uint32_t));
+    RowBounds      bounds{width, 0u};
     const uint8_t* row = metadata + static_cast<size_t>(y) * rowBytes;
     for(uint32_t x = 0u; x < width; ++x)
     {
       const uint8_t* pixel = row + static_cast<size_t>(x) * PIXEL_SIZE;
-      if(pixel[2u] != 0u)
+      if(pixel[2u] == 0u)
       {
-        sources.push_back({x,
-                           static_cast<uint16_t>(static_cast<uint16_t>(pixel[0u]) * 256u + pixel[1u]),
-                           pixel[3u]});
+        continue;
+      }
+      const uint32_t key   = (static_cast<uint32_t>(pixel[0u]) << 8u) + pixel[1u] + 1u;
+      const uint32_t begin = x == 0u ? 0u : x - 1u;
+      const uint32_t end   = x == width - 1u ? width : x + 2u;
+      bounds.begin         = std::min(bounds.begin, begin);
+      bounds.end           = end;
+      for(uint32_t destination = begin; destination < end; ++destination)
+      {
+        output[destination] = std::max(output[destination], key);
       }
     }
+    return bounds;
   };
 
-  // Source lists are captured before their rows can receive halo writes. The
-  // three rolling lists therefore prevent recursive expansion while avoiding
-  // a second full RGBA buffer. Temporary storage remains proportional to width.
-  std::vector<OwnershipSource> previousSources;
-  std::vector<OwnershipSource> currentSources;
-  std::vector<OwnershipSource> nextSources;
-  std::vector<uint32_t>        haloDestinations;
-  std::vector<uint8_t>         originalOwnership(width, 0u);
-  previousSources.reserve(width);
-  currentSources.reserve(width);
-  nextSources.reserve(width);
-  haloDestinations.reserve(width);
-
-  collectSources(0u, currentSources);
-  if(height > 1u)
-  {
-    collectSources(1u, nextSources);
-  }
-
+  // Capture each row before any halo writes reach it. Rolling storage remains
+  // proportional to width; occupied bounds avoid visiting empty rows/margins.
+  RowBounds previousBounds{width, 0u};
+  RowBounds currentBounds = collectRow(0u, current);
+  RowBounds nextBounds    = height > 1u ? collectRow(1u, next) : RowBounds{width, 0u};
   for(uint32_t y = 0u; y < height; ++y)
   {
-    const std::vector<OwnershipSource>* sourceRows[] = {&previousSources, &currentSources, &nextSources};
-    uint8_t*                            destination  = metadata + static_cast<size_t>(y) * rowBytes;
-    haloDestinations.clear();
-    for(const OwnershipSource& source : currentSources)
+    uint8_t*       destination = metadata + static_cast<size_t>(y) * rowBytes;
+    const uint32_t begin       = std::min(previousBounds.begin, std::min(currentBounds.begin, nextBounds.begin));
+    const uint32_t end         = std::max(previousBounds.end, std::max(currentBounds.end, nextBounds.end));
+    for(uint32_t x = begin; x < end; ++x)
     {
-      originalOwnership[source.x] = 1u;
-    }
-
-    for(const std::vector<OwnershipSource>* sourceRow : sourceRows)
-    {
-      for(const OwnershipSource& source : *sourceRow)
+      uint8_t* pixel = destination + static_cast<size_t>(x) * PIXEL_SIZE;
+      if(pixel[2u] != 0u)
       {
-        const uint32_t destinationBegin = source.x == 0u ? 0u : source.x - 1u;
-        const uint32_t destinationEnd   = std::min(width - 1u, source.x + 1u);
-        for(uint32_t destinationX = destinationBegin; destinationX <= destinationEnd; ++destinationX)
-        {
-          if(originalOwnership[destinationX] != 0u)
-          {
-            continue;
-          }
-
-          uint8_t*       destinationPixel = destination + static_cast<size_t>(destinationX) * PIXEL_SIZE;
-          const uint16_t selectedStart =
-            static_cast<uint16_t>(static_cast<uint16_t>(destinationPixel[0u]) * 256u + destinationPixel[1u]);
-          if(destinationPixel[2u] == 0u || source.start > selectedStart ||
-             (source.start == selectedStart && source.coverage > destinationPixel[3u]))
-          {
-            if(destinationPixel[2u] == 0u)
-            {
-              haloDestinations.push_back(destinationX);
-            }
-            const uint32_t encodedStart = static_cast<uint32_t>(source.start);
-            destinationPixel[0u]        = static_cast<uint8_t>((encodedStart >> 8u) & 0xffu);
-            destinationPixel[1u]        = static_cast<uint8_t>(encodedStart & 0xffu);
-            destinationPixel[2u]        = 255u;
-            // Source coverage is retained only while resolving conflicts in
-            // this destination row and cleared once all candidates are known.
-            destinationPixel[3u] = source.coverage;
-          }
-        }
+        continue;
+      }
+      const uint32_t selected = std::max(previous[x], std::max(current[x], next[x]));
+      if(selected != 0u)
+      {
+        const uint32_t start = selected - 1u;
+        pixel[0u]            = static_cast<uint8_t>(start >> 8u);
+        pixel[1u]            = static_cast<uint8_t>(start & 0xffu);
+        pixel[2u]            = 255u;
+        pixel[3u]            = 0u;
       }
     }
 
-    for(uint32_t destinationX : haloDestinations)
-    {
-      destination[static_cast<size_t>(destinationX) * PIXEL_SIZE + 3u] = 0u;
-    }
-    for(const OwnershipSource& source : currentSources)
-    {
-      originalOwnership[source.x] = 0u;
-    }
-
-    previousSources.swap(currentSources);
-    currentSources.swap(nextSources);
+    std::swap(previous, current);
+    std::swap(current, next);
+    previousBounds = currentBounds;
+    currentBounds  = nextBounds;
     if(y + 2u < height)
     {
-      collectSources(y + 2u, nextSources);
+      nextBounds = collectRow(y + 2u, next);
     }
     else
     {
-      nextSources.clear();
+      memset(next, 0u, static_cast<size_t>(width) * sizeof(uint32_t));
+      nextBounds = {width, 0u};
     }
   }
 }
@@ -2111,9 +2108,13 @@ void Typesetter::Impl::BeginRevealMetadata(uint32_t width, uint32_t height, cons
   mRevealRasterContext           = std::make_unique<RevealRasterContext>();
   mRevealRasterContext->metadata = PixelBuffer::New(width, height, Pixel::RGBA8888);
   mRevealRasterContext->plan     = &plan;
+  // Borrow only for this raster. EndRevealMetadata releases the context after
+  // ownership expansion; no plan or buffer address survives publication.
+  mRevealRasterContext->pixels     = mRevealRasterContext->metadata.GetBuffer();
+  mRevealRasterContext->pixelCount = static_cast<uint64_t>(width) * height;
   if(width != 0u && height != 0u)
   {
-    memset(mRevealRasterContext->metadata.GetBuffer(), 0u, static_cast<size_t>(width) * height * 4u);
+    memset(mRevealRasterContext->pixels, 0u, static_cast<size_t>(width) * height * 4u);
   }
 }
 
@@ -2292,7 +2293,8 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
                                                 const bool              ignoreHorizontalAlignment,
                                                 const Pixel::Format pixelFormat, const int32_t horizontalOffset,
                                                 const int32_t verticalOffset, const GlyphIndex fromGlyphIndex,
-                                                const GlyphIndex toGlyphIndex)
+                                                const GlyphIndex toGlyphIndex,
+                                                uint32_t revealOffsetY, uint32_t revealFullHeight)
 {
   if(!Raster::BufferFits(bufferWidth, bufferHeight, Pixel::GetBytesPerPixel(pixelFormat)))
   {
@@ -2313,14 +2315,22 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
   const Length* __restrict__ hyphenIndices              = viewModel.GetHyphenIndices();
   const Length hyphensCount                             = viewModel.GetHyphensCount();
 
-  // Create and initialize the pixel buffer.
+  // Metadata callers consume EndRevealMetadata(), not the foreground return
+  // value. Keep the ordinary raster allocation out of that traversal.
   GlyphData glyphData;
   glyphData.verticalOffset   = verticalOffset;
   glyphData.width            = bufferWidth;
   glyphData.height           = bufferHeight;
-  glyphData.bitmapBuffer     = CreateTransparentImageBuffer(bufferWidth, bufferHeight, pixelFormat);
   glyphData.horizontalOffset = 0;
   glyphData.revealContext    = mRevealRasterContext.get();
+  if(glyphData.revealContext)
+  {
+    DALI_ASSERT_DEBUG(style == Typesetter::STYLE_NONE && pixelFormat == Pixel::RGBA8888);
+  }
+  else
+  {
+    glyphData.bitmapBuffer = CreateTransparentImageBuffer(bufferWidth, bufferHeight, pixelFormat);
+  }
 
   Length hyphenIndex = 0;
 
@@ -2345,7 +2355,7 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
     viewModel.GetCharacterSpacingGlyphRuns();
 
   const Internal::GradientSpanModelData* gradientSpanData =
-    (style == Typesetter::STYLE_NONE && pixelFormat == Pixel::RGBA8888)
+    (!glyphData.revealContext && style == Typesetter::STYLE_NONE && pixelFormat == Pixel::RGBA8888)
       ? viewModel.GetGradientSpanModelData()
       : nullptr;
   std::vector<GradientRasterPaint> gradientRasterPaints;
@@ -2480,23 +2490,18 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
       {
         break;
       }
-      if(lineBottom <= 0 || lineTop >= static_cast<int32_t>(bufferHeight))
+      // A runtime-blur metadata band changes storage, not the reference line
+      // traversal. Keep its original clipping decisions: skipping extra lines
+      // can change fractional-metric rounding and discard bitmap overhangs.
+      const int64_t clipTop    = -static_cast<int64_t>(revealOffsetY);
+      const int64_t clipBottom = static_cast<int64_t>(revealFullHeight ? revealFullHeight : bufferHeight) + clipTop;
+      if(lineBottom <= clipTop || lineTop >= clipBottom)
       {
         LineVerticalAdvance advance(glyphData, line, inputParamsForLine.verticalLineAlignType);
         continue;
       }
       const bool pixelReveal = glyphData.revealContext->plan && glyphData.revealContext->plan->HasPixelTiming();
-      if(applyGradientSpan && pixelReveal)
-      {
-        CreateImageBufferForEachLine<true, true, true>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
-                                                       inputParamsForLine, inputParamsForGlyph);
-      }
-      else if(applyGradientSpan)
-      {
-        CreateImageBufferForEachLine<true, true, false>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
-                                                        inputParamsForLine, inputParamsForGlyph);
-      }
-      else if(pixelReveal)
+      if(pixelReveal)
       {
         CreateImageBufferForEachLine<true, false, true>(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u),
                                                         inputParamsForLine, inputParamsForGlyph);

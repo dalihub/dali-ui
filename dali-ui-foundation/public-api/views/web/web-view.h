@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/views/web/web-back-forward-list.h>
+#include <dali-ui-foundation/public-api/views/web/web-engine-type.h>
 #include <dali-ui-foundation/public-api/views/web/web-profile.h>
 #include <dali-ui-foundation/public-api/views/web/web-settings.h>
 #include <dali-ui-foundation/public-api/views/web/web-view-page-load-error.h>
@@ -804,6 +805,17 @@ public: // Additional APIs
    * @return The back-forward list
    */
   WebBackForwardList GetBackForwardList() const;
+
+  /**
+   * @brief Selects the process-wide web engine for WebView instances.
+   *
+   * Call this before creating the first WebView. Once a WebView has been
+   * created, selecting a different engine triggers an assertion, even if
+   * that WebView has been destroyed.
+   *
+   * @param[in] type The web engine type
+   */
+  static void SetWebEngineType(WebEngineType type);
 
 public: // Not intended for application developers
   /// @cond internal

@@ -317,7 +317,7 @@ void ClearGlyphRuns(GlyphIndex startIndex, GlyphIndex endIndex, Vector<T>& runs,
 template<typename T>
 void ClearGlyphRuns(GlyphIndex startIndex, GlyphIndex endIndex, Vector<T>& runs)
 {
-  uint32_t startRemoveIndex = runs.Count();
+  uint32_t startRemoveIndex = static_cast<uint32_t>(runs.Count());
   uint32_t endRemoveIndex   = startRemoveIndex;
   ClearGlyphRuns(startIndex, endIndex, runs, startRemoveIndex, endRemoveIndex);
 

@@ -1,4 +1,4 @@
-name: "Unittest (testhub)"
+name: "Unittest (Ubuntu)"
 
 on:
   pull_request_target:
@@ -23,12 +23,16 @@ concurrency:
 jobs:
 
   build:
-    name: Build (${{ matrix.configuration }})
+    name: "${{ matrix.job_name }}"
     runs-on: [ code-linux ]
     strategy:
       fail-fast: false
       matrix:
-        configuration: [ debug, release ]
+        include:
+        - configuration: debug
+          job_name: "Build & Test (debug)"
+        - configuration: release
+          job_name: "Build (release)"
     container:
       image: tizen-nui-docker-local.bart.sec.samsung.net/dali-ci-env:ubuntu22.04-v1
       credentials:

@@ -68,20 +68,11 @@ class UiConfigImpl;
  * After that point, any setter call will trigger an assertion failure.
  *
  * @code
- *  int main(int argc, char** argv)
- *  {
- *    Application application = Application::New(&argc, &argv);
- *
- *    UiConfig config = UiConfig::New();
- *    config.SetScalingFactor(1.5f);
- *    config.SetDpi(320);
- *    config.Apply();
- *
- *    HelloWorldController test(application);
- *    application.MainLoop();
- *
- *    return 0;
- *  }
+ *  // In main(), before running the application:
+ *  UiConfig config = UiConfig::New();
+ *  config.SetScalingFactor(1.5f);
+ *  config.SetDpi(320);
+ *  config.Apply();
  * @endcode
  */
 class DALI_UI_API UiConfig : public BaseHandle
@@ -1098,8 +1089,8 @@ public: // Properties
   /**
    * @brief Sets the web engine used by WebView instances.
    *
-   * The engine is selected when the first WebView is created and is shared by
-   * all WebView instances in the process.
+   * @deprecated Use WebView::SetWebEngineType() instead. This setting is used
+   * only if WebView::SetWebEngineType() has not been called.
    *
    * @pre The config must not be frozen.
    * @param[in] type The web engine type
@@ -1108,6 +1099,9 @@ public: // Properties
 
   /**
    * @brief Gets the web engine used by WebView instances.
+   *
+   * @deprecated This returns the UiConfig setting, which may differ from the
+   * engine selected through WebView::SetWebEngineType().
    *
    * @return The configured web engine type
    */

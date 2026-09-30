@@ -26,6 +26,7 @@
 #include <dali/devel-api/text-abstraction/shaping.h>
 #include <dali/public-api/object/base-object.h>
 #include <algorithm>
+#include <cstdlib>
 #include <cstring>
 
 using namespace Dali;
@@ -339,12 +340,15 @@ public:
       data.compressionType = TextAbstraction::GlyphBufferData::CompressionType::NO_COMPRESSION;
     }
 
-    return PixelData::New(data.buffer,
-                          data.width * data.height * Pixel::GetBytesPerPixel(data.format),
-                          data.width,
-                          data.height,
-                          data.format,
-                          PixelData::FREE);
+    PixelData pixelData = PixelData::New(data.buffer,
+                                       data.width * data.height * Pixel::GetBytesPerPixel(data.format),
+                                       data.width,
+                                       data.height,
+                                       data.format,
+                                       PixelData::FREE);
+    // PixelData now owns the allocation; GlyphBufferData must not free it.
+    data.isBufferOwned = false;
+    return pixelData;
   }
   void CreateVectorBlob(FontId fontId, GlyphIndex glyphIndex, VectorBlob*& blob, unsigned int& blobLength, unsigned int& nominalWidth, unsigned int& nominalHeight)
   {
@@ -676,6 +680,11 @@ GlyphBufferData::GlyphBufferData()
 
 GlyphBufferData::~GlyphBufferData()
 {
+  // Match the adaptor: cached/borrowed bitmaps are not released here.
+  if(isBufferOwned)
+  {
+    free(buffer);
+  }
 }
 
 FontClient& FontClient::operator=(const FontClient& handle)

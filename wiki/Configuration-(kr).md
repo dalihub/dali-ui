@@ -28,17 +28,14 @@ Config는 하나만 적용합니다. 같은 앱에서 `UiConfig`와 `Components:
 ```cpp
 int main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
-
-  // Apply()는 application.MainLoop() 호출 전에 호출합니다.
+  // Apply()는 애플리케이션이 실행되기 전에 호출합니다.
   UiConfig config = UiConfig::New();
   config.SetDpi(320);
   config.SetScalingFactor(1.5f);
   config.Apply();
 
-  MyAppController controller(application);
-  application.MainLoop();
-  return 0;
+  MyApp app(argc, argv); // MyApp은 tizen_appfw::UiApplication을 상속합니다.
+  return app.Run();
 }
 ```
 

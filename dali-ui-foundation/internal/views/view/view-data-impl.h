@@ -1131,13 +1131,20 @@ public:
 
   void EmitAccessibilityStateChanged(Dali::Integration::Accessibility::State state, int newValue); // LCOV_EXCL_LINE
 
+  enum class FittingModeUpdate
+  {
+    SIZE_OR_SCALE,   ///< Apply fitting to all eligible visuals.
+    ARRANGE,         ///< Deliver final bounds early to SVG visuals only.
+    LAYOUT_FINISHED, ///< Apply fitting to non-text visuals after layout settles.
+  };
+
   /**
    * @brief Apply fittingMode
    *
    * @param[in] size The size of the view
-   * @param[in] isLayoutFinishedUpdate Whether fitting mode is updated after layout has finished
+   * @param[in] update The fitting update phase, which determines the target visuals
    */
-  void ApplyFittingMode(const Vector2& size, bool isLayoutFinishedUpdate = false);
+  void ApplyFittingMode(const Vector2& size, FittingModeUpdate update = FittingModeUpdate::SIZE_OR_SCALE);
 
   /**
    * @brief Ensures this view listens to its layout-finished signal for fitting mode update.

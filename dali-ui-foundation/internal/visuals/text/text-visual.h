@@ -19,6 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/base-object.h>
@@ -31,6 +32,7 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
+#include <dali-ui-foundation/internal/text/reveal/text-reveal-blur-preparation.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual-gradient-data.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual-reveal-data.h>
@@ -71,7 +73,16 @@ typedef IntrusivePtr<TextVisual> TextVisualPtr;
  */
 class TextVisual : public Visual::Base, public TextLoadObserver
 {
+  friend struct TextVisualTestAccessor;
+
 public:
+  /**
+   * @brief Refreshes image capture after placement or resource-ready publication.
+   *
+   * No text relayout, rasterization or blur target allocation is requested.
+   */
+  static void RefreshRevealBlurImages(Ui::Integration::Visual::Base visual);
+
   /**
    * @brief Create a new text visual.
    *
@@ -137,22 +148,31 @@ public:
    * @param[in] revision The revision used to reject stale asynchronous results.
    * @param[in] sequence The internal reveal sequence grouping.
    * @param[in] sequenceStaggerRatio The sequence stagger ratio.
+   * @param[in] blurRadius The authored blur radius; zero disables blur.
+   * @param[in] blurDurationRatio The common sequence-relative blur duration.
+   * @param[in] blurMode The runtime blur sampling quality.
    */
   static void ConfigureTextReveal(
-    Ui::Integration::Visual::Base        visual,
-    Ui::Text::Internal::Reveal::Unit     unit,
-    float                                fadeDurationRatio,
-    Property::Index                      progressPropertyIndex,
-    uint64_t                             revision,
-    Ui::Text::Internal::Reveal::Sequence sequence             = Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT,
-    float                                sequenceStaggerRatio = 0.0f)
+    Ui::Integration::Visual::Base           visual,
+    Ui::Text::Internal::Reveal::Unit        unit,
+    float                                   fadeDurationRatio,
+    Property::Index                         progressPropertyIndex,
+    uint64_t                                revision,
+    Ui::Text::Internal::Reveal::Sequence    sequence             = Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT,
+    float                                   sequenceStaggerRatio = 0.0f,
+    float                                   blurRadius           = 0.0f,
+    float                                   blurDurationRatio    = 1.0f,
+    Ui::Integration::Text::Reveal::BlurMode blurMode             = Ui::Integration::Text::Reveal::BlurMode::PERFORMANCE)
   {
     GetVisualObject(visual).ConfigureTextReveal(unit,
                                                 fadeDurationRatio,
                                                 progressPropertyIndex,
                                                 revision,
                                                 sequence,
-                                                sequenceStaggerRatio);
+                                                sequenceStaggerRatio,
+                                                blurRadius,
+                                                blurDurationRatio,
+                                                blurMode);
   }
 
   /**
@@ -676,13 +696,19 @@ private:
    * @param[in] revision The current reveal configuration revision.
    * @param[in] sequence The internal reveal sequence grouping.
    * @param[in] sequenceStaggerRatio The sequence stagger ratio.
+   * @param[in] blurRadius The authored blur radius; zero disables blur.
+   * @param[in] blurDurationRatio The common sequence-relative blur duration.
+   * @param[in] blurMode The runtime blur sampling quality.
    */
-  void ConfigureTextReveal(Ui::Text::Internal::Reveal::Unit     unit,
-                           float                                fadeDurationRatio,
-                           Property::Index                      progressPropertyIndex,
-                           uint64_t                             revision,
-                           Ui::Text::Internal::Reveal::Sequence sequence             = Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT,
-                           float                                sequenceStaggerRatio = 0.0f);
+  void ConfigureTextReveal(Ui::Text::Internal::Reveal::Unit        unit,
+                           float                                   fadeDurationRatio,
+                           Property::Index                         progressPropertyIndex,
+                           uint64_t                                revision,
+                           Ui::Text::Internal::Reveal::Sequence    sequence             = Ui::Text::Internal::Reveal::Sequence::WHOLE_TEXT,
+                           float                                   sequenceStaggerRatio = 0.0f,
+                           float                                   blurRadius           = 0.0f,
+                           float                                   blurDurationRatio    = 1.0f,
+                           Ui::Integration::Text::Reveal::BlurMode blurMode             = Ui::Integration::Text::Reveal::BlurMode::PERFORMANCE);
 
   /**
    * @brief Removes all constraints that bind reveal progress to renderers.
@@ -724,6 +750,15 @@ private:
    */
   void PublishReplacementRevealTimings(const Vector<Ui::Text::ReplacementRevealTiming>& timings,
                                        uint64_t                                         sourceRevision);
+
+  /**
+   * @brief Uploads an accepted CPU result without consulting a layout model.
+   *
+   * All required planes are checked before ordinary metadata is replaced.
+   * This boundary is shared by synchronous and asynchronous publication.
+   */
+  bool PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur& prepared, uint64_t sourceRevision,
+                                 const Vector<Ui::Text::ReplacementRevealTiming>& ordinaryTimings);
 
   /**
    * @brief Removes the text's renderer.

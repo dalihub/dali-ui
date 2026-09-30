@@ -26,14 +26,11 @@ using namespace Dali::Ui;
 
 int main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
-
   // Foundation 설정과 component style을 모두 포함합니다.
   Components::UiConfig::New().Apply();
 
-  MyController controller(application);
-  application.MainLoop();
-  return 0;
+  MyApp app(argc, argv); // MyApp은 tizen_appfw::UiApplication을 상속합니다.
+  return app.Run();
 }
 ```
 

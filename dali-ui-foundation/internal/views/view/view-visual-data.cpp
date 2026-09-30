@@ -1446,7 +1446,11 @@ void ViewDataImpl::VisualData::OffscreenRenderingEnabled(bool enabled)
 bool ViewDataImpl::VisualData::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer)
 {
   int rangeIndex = static_cast<int>(internalDepthLayer);
-  DALI_ASSERT_ALWAYS(0 <= rangeIndex && rangeIndex < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
+  if(DALI_UNLIKELY(rangeIndex < 0 || rangeIndex >= static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT)))
+  {
+    DALI_LOG_ERROR("Invalid depth layer : %d. Add VisualBase failed.\n", rangeIndex);
+    return false;
+  }
 
   if(!mVisualObjectsContainer[rangeIndex])
   {
@@ -1460,7 +1464,11 @@ bool ViewDataImpl::VisualData::AddVisualObject(Dali::Ui::VisualBase visualBase, 
 bool ViewDataImpl::VisualData::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer internalDepthLayer)
 {
   int rangeIndex = static_cast<int>(internalDepthLayer);
-  DALI_ASSERT_ALWAYS(0 <= rangeIndex && rangeIndex < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
+  if(DALI_UNLIKELY(rangeIndex < 0 || rangeIndex >= static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT)))
+  {
+    DALI_LOG_ERROR("Invalid depth layer : %d. Add shadow VisualBase failed.\n", rangeIndex);
+    return false;
+  }
 
   if(!mVisualObjectsContainer[rangeIndex])
   {
@@ -1512,7 +1520,11 @@ void ViewDataImpl::VisualData::RemoveVisualObject(Dali::Ui::VisualBase visualBas
 uint32_t ViewDataImpl::VisualData::GetVisualObjectCount(Dali::Ui::Visual::DepthLayer internalDepthLayer) const
 {
   int rangeIndex = static_cast<int>(internalDepthLayer);
-  DALI_ASSERT_ALWAYS(0 <= rangeIndex && rangeIndex < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
+  if(DALI_UNLIKELY(rangeIndex < 0 || rangeIndex >= static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT)))
+  {
+    DALI_LOG_ERROR("Invalid depth layer : %d\n", rangeIndex);
+    return 0u;
+  }
 
   if(mVisualObjectsContainer[rangeIndex])
   {
@@ -1524,7 +1536,11 @@ uint32_t ViewDataImpl::VisualData::GetVisualObjectCount(Dali::Ui::Visual::DepthL
 Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::Visual::DepthLayer internalDepthLayer, uint32_t siblingOrder) const
 {
   int rangeIndex = static_cast<int>(internalDepthLayer);
-  DALI_ASSERT_ALWAYS(0 <= rangeIndex && rangeIndex < static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT) && "Invalid depth layer inputed!");
+  if(DALI_UNLIKELY(rangeIndex < 0 || rangeIndex >= static_cast<int>(Dali::Ui::Visual::DepthLayer::MAX_COUNT)))
+  {
+    DALI_LOG_ERROR("Invalid depth layer : %d\n", rangeIndex);
+    return Dali::Ui::VisualBase();
+  }
 
   if(mVisualObjectsContainer[rangeIndex])
   {
@@ -1533,7 +1549,7 @@ Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::Visua
   return Dali::Ui::VisualBase();
 }
 
-void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, bool isLayoutFinishedUpdate)
+void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, FittingModeUpdate update)
 {
   Actor  self;
   Insets padding;
@@ -1550,7 +1566,8 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, bool isLayo
     Internal::Visual::Base& visualImpl = Ui::GetImplementation((*iter)->visual);
 
     if(!visualImpl.IsFittingModeRequired() ||
-       (isLayoutFinishedUpdate && visualImpl.GetType() == Ui::Integration::InternalVisualType::TEXT))
+       (update == FittingModeUpdate::ARRANGE && visualImpl.GetType() != Ui::Integration::InternalVisualType::SVG) ||
+       (update == FittingModeUpdate::LAYOUT_FINISHED && visualImpl.GetType() == Ui::Integration::InternalVisualType::TEXT))
     {
       continue;
     }

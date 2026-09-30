@@ -2004,6 +2004,7 @@ void Controller::Impl::ScrollTextToMatchCursor()
 
 void Controller::Impl::RequestRelayout()
 {
+  ++mRenderRevision;
   if(nullptr != mControlInterface)
   {
     mControlInterface->RequestTextRelayout();
@@ -2020,6 +2021,7 @@ void Controller::Impl::InvalidateMeasure()
 
 void Controller::Impl::RequestAsyncRender()
 {
+  ++mRenderRevision;
   if(nullptr != mControlInterface)
   {
     mControlInterface->RequestAsyncRender();

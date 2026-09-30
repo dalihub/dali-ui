@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/views/view/view-internal-depth-slots.h>
+
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/integration-api/debug.h>
@@ -465,7 +468,7 @@ void BackgroundBlurEffectImpl::OnActivate()
   CreateRenderTasks(GetSceneHolder(), ownerView, sourceDownscaleFactor);
 
   // Reset shader constants
-  auto&    blurShader         = GaussianBlurAlgorithm::GetGaussianBlurShader(mDownscaledBlurRadius);
+  auto&    blurShader         = GaussianBlurAlgorithm::GetShader(mDownscaledBlurRadius);
   Renderer horizontalRenderer = mHorizontalBlurActor.GetRendererAt(0u);
   horizontalRenderer.SetShader(blurShader);
   SetRendererTexture(horizontalRenderer, useIntermediateDownsample ? mDownsampledBackgroundFrameBuffer : mInputBackgroundFrameBuffer);
@@ -478,7 +481,7 @@ void BackgroundBlurEffectImpl::OnActivate()
 
   // Inject blurred output to view
   Renderer renderer = GetTargetRenderer();
-  renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT);
+  renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::Internal::ViewInternalDepthIndex::BACKGROUND_BLUR);
   ownerView.AddRenderer(renderer);
   ownerView.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
   SetRendererTexture(renderer, mBlurredOutputFrameBuffer);

@@ -33,6 +33,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-image-reveal-shader.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
+#include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
@@ -71,7 +72,7 @@ struct ReplacementRevealOpacityConstraint
   void operator()(float& current, const PropertyInputContainer& inputs)
   {
     const float baseOpacity = std::max(0.0f, std::min(1.0f, inputs[0]->GetFloat()));
-    const float progress    = std::max(0.0f, std::min(1.0f, inputs[1]->GetFloat()));
+    const float progress    = Ui::Text::Internal::Reveal::ResolveRenderProgress(inputs[1]->GetFloat());
     float       reveal      = 0.0f;
     if(progress >= 1.0f)
     {
@@ -212,34 +213,93 @@ Ui::View InlineReplacementViewHost::GetOwner() const
 
 InlineReplacementManager::InlineReplacementManager() = default;
 
+InlineReplacementManager::CaptureUpdateScope::CaptureUpdateScope(InlineReplacementManager& manager)
+: mState(manager.mUpdateState)
+{
+  ++mState->depth;
+  if(manager.mBlurCapture)
+  {
+    manager.ReleaseBlurCapture(manager.mBlurCapture->client.GetHandle());
+  }
+}
+
+InlineReplacementManager::CaptureUpdateScope::~CaptureUpdateScope()
+{
+  --mState->depth;
+}
+
 InlineReplacementManager::~InlineReplacementManager()
 {
   Clear();
+  mUpdateState->alive = false;
 }
 
 std::vector<InlineReplacementManager::Entry>::iterator InlineReplacementManager::RemoveEntry(
   std::vector<Entry>::iterator iterator)
 {
+  UpdateGuard current(mUpdateState);
   ReleaseEntryVisual(*iterator);
+  if(!current)
+  {
+    return {};
+  }
   return mEntries.erase(iterator);
 }
 
 void InlineReplacementManager::ReleaseEntryVisual(Entry& entry)
 {
+  UpdateGuard current(mUpdateState);
+  if(mBlurCapture)
+  {
+    if(auto retention = mBlurCapture->retention.GetHandle())
+    {
+      for(auto& source : mBlurCapture->sources)
+      {
+        if(source.occurrenceIdentity == entry.occurrenceIdentity)
+        {
+          retention.RemoveRenderer(source.renderer);
+        }
+      }
+    }
+    auto& sources = mBlurCapture->sources;
+    sources.erase(std::remove_if(sources.begin(), sources.end(), [&](const auto& source)
+    {
+      return source.occurrenceIdentity == entry.occurrenceIdentity;
+    }),
+                  sources.end());
+  }
   RemoveEntryRevealConstraint(entry);
+  if(!current)
+  {
+    return;
+  }
   if(mHost && entry.propertyIndex != Property::INVALID_INDEX)
   {
     mHost->UnregisterVisual(entry.propertyIndex);
+    if(!current)
+    {
+      return;
+    }
     mHost->ReleaseVisualSlot(entry.propertyIndex);
   }
   DiscardVisual(entry.visual);
+  if(!current)
+  {
+    return;
+  }
   entry.propertyIndex = Property::INVALID_INDEX;
   ResetEntryResourceState(entry);
 }
 
 bool InlineReplacementManager::CreateEntryVisual(InlineReplacementViewHost& host, Entry& entry)
 {
-  entry.propertyIndex = host.AllocateVisualSlot();
+  UpdateGuard current(mUpdateState);
+  const auto  propertyIndex = host.AllocateVisualSlot();
+  if(!current)
+  {
+    return false;
+  }
+  entry.propertyIndex = propertyIndex;
   if(entry.propertyIndex == Property::INVALID_INDEX)
   {
     return false;
@@ -259,9 +319,15 @@ bool InlineReplacementManager::CreateEntryVisual(InlineReplacementViewHost& host
   {
     visualMap.Insert(Ui::Integration::Visual::Property::SHADER, CreatePixelRevealCustomShaderMap());
   }
-  entry.visual = Ui::Integration::VisualFactory::Get().CreateVisual(
+  auto visual = Ui::Integration::VisualFactory::Get().CreateVisual(
     visualMap,
     Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY);
+  if(!current)
+  {
+    DiscardVisual(visual);
+    return false;
+  }
+  entry.visual = std::move(visual);
   if(!entry.visual)
   {
     host.ReleaseVisualSlot(entry.propertyIndex);
@@ -278,6 +344,10 @@ bool InlineReplacementManager::CreateEntryVisual(InlineReplacementViewHost& host
   Property::Map opacityMap;
   opacityMap.Insert(Ui::Integration::Visual::Property::OPACITY, 0.0f);
   entry.visual.SetProperties(opacityMap);
+  if(!current)
+  {
+    return false;
+  }
   ResetEntryResourceState(entry);
   host.RegisterVisual(entry.propertyIndex, entry.visual);
   return true;
@@ -355,6 +425,7 @@ void InlineReplacementManager::UpdateEntryVisibility(Entry& entry)
 
 void InlineReplacementManager::RemoveEntryRevealConstraint(Entry& entry, bool removePixelShader)
 {
+  UpdateGuard current(mUpdateState);
   if(entry.revealConstraint)
   {
     entry.revealConstraint.Remove();
@@ -363,6 +434,10 @@ void InlineReplacementManager::RemoveEntryRevealConstraint(Entry& entry, bool re
   if(removePixelShader && entry.visual && Ui::GetImplementation(entry.visual).IsUsingCustomShader())
   {
     SetEntryPixelRevealShader(entry, false);
+    if(!current)
+    {
+      return;
+    }
   }
   entry.revealPixelSpatial          = false;
   entry.revealPixelProgressIndex    = Property::INVALID_INDEX;
@@ -377,6 +452,7 @@ void InlineReplacementManager::RemoveEntryRevealConstraint(Entry& entry, bool re
 
 bool InlineReplacementManager::SetEntryPixelRevealShader(Entry& entry, bool enabled)
 {
+  UpdateGuard current(mUpdateState);
   if(!entry.visual)
   {
     return !enabled;
@@ -405,6 +481,10 @@ bool InlineReplacementManager::SetEntryPixelRevealShader(Entry& entry, bool enab
       Property::Map visualMap;
       visualMap.Insert(Ui::Integration::Visual::Property::SHADER, CreatePixelRevealCustomShaderMap());
       entry.visual.SetProperties(visualMap);
+      if(!current)
+      {
+        return false;
+      }
     }
     return visualImpl.IsUsingCustomShader();
   }
@@ -415,6 +495,10 @@ bool InlineReplacementManager::SetEntryPixelRevealShader(Entry& entry, bool enab
     Property::Map   visualMap;
     visualMap.Insert(Ui::Integration::Visual::Property::SHADER, emptyShaderArray);
     entry.visual.SetProperties(visualMap);
+    if(!current)
+    {
+      return false;
+    }
   }
   return !visualImpl.IsUsingCustomShader();
 }
@@ -473,6 +557,7 @@ bool InlineReplacementManager::UpdateEntryPixelRevealTiming(Entry& entry)
 
 InlineReplacementManager::RevealBindingResult InlineReplacementManager::ApplyEntryRevealConstraint(Entry& entry)
 {
+  UpdateGuard current(mUpdateState);
   if(!mHost || !entry.visual || mRevealProgressPropertyIndex == Property::INVALID_INDEX)
   {
     RemoveEntryRevealConstraint(entry);
@@ -521,26 +606,54 @@ InlineReplacementManager::RevealBindingResult InlineReplacementManager::ApplyEnt
   // READY-state shader remove/reinstall cycle.
   const bool preservePixelShader = pixelSpatial && visualImpl.IsUsingCustomShader();
   RemoveEntryRevealConstraint(entry, !preservePixelShader);
+  if(!current)
+  {
+    return RevealBindingResult::INVALID;
+  }
   entry.revealStart           = start;
   entry.revealFadeDuration    = fadeDuration;
   entry.revealProgressionSpan = progressionSpan;
   entry.revealRightToLeft     = rightToLeft;
 
-  if(pixelSpatial && SetEntryPixelRevealShader(entry, true))
+  const bool pixelShader = pixelSpatial && SetEntryPixelRevealShader(entry, true);
+  if(!current)
+  {
+    return RevealBindingResult::INVALID;
+  }
+  if(pixelShader)
   {
     entry.revealPixelSpatial       = true;
     entry.revealPixelProgressIndex = renderer.GetPropertyIndex(INLINE_REPLACEMENT_REVEAL_PROGRESS);
     if(entry.revealPixelProgressIndex == Property::INVALID_INDEX)
     {
-      entry.revealPixelProgressIndex = renderer.RegisterProperty(
+      const auto progressIndex = renderer.RegisterProperty(
         INLINE_REPLACEMENT_REVEAL_PROGRESS,
         std::max(0.0f, std::min(1.0f, owner.GetCurrentProperty<float>(mRevealProgressPropertyIndex))));
+      if(!current)
+      {
+        return RevealBindingResult::INVALID;
+      }
+      entry.revealPixelProgressIndex = progressIndex;
     }
-    if(entry.revealPixelProgressIndex != Property::INVALID_INDEX && UpdateEntryPixelRevealTiming(entry))
+    if(!current)
     {
-      entry.revealConstraint = Constraint::New<float>(renderer,
-                                                      entry.revealPixelProgressIndex,
-                                                      ReplacementRevealProgressConstraint());
+      return RevealBindingResult::INVALID;
+    }
+    const bool validTiming = entry.revealPixelProgressIndex != Property::INVALID_INDEX && UpdateEntryPixelRevealTiming(entry);
+    if(!current)
+    {
+      return RevealBindingResult::INVALID;
+    }
+    if(validTiming)
+    {
+      auto constraint = Constraint::New<float>(renderer,
+                                               entry.revealPixelProgressIndex,
+                                               ReplacementRevealProgressConstraint());
+      if(!current)
+      {
+        return RevealBindingResult::INVALID;
+      }
+      entry.revealConstraint = std::move(constraint);
       entry.revealConstraint.AddSource(Source(owner, mRevealProgressPropertyIndex));
       entry.revealConstraint.SetRemoveAction(Constraint::DISCARD);
       entry.revealConstraint.SetApplyRate(Dali::Constraint::APPLY_ALWAYS);
@@ -559,12 +672,21 @@ InlineReplacementManager::RevealBindingResult InlineReplacementManager::ApplyEnt
   entry.revealBaseOpacityIndex = renderer.GetPropertyIndex(INLINE_REPLACEMENT_REVEAL_BASE_OPACITY);
   if(entry.revealBaseOpacityIndex == Property::INVALID_INDEX)
   {
-    entry.revealBaseOpacityIndex = renderer.RegisterProperty(INLINE_REPLACEMENT_REVEAL_BASE_OPACITY,
-                                                             entry.currentlyVisible ? 1.0f : 0.0f);
+    const auto baseIndex = renderer.RegisterProperty(INLINE_REPLACEMENT_REVEAL_BASE_OPACITY,
+                                                     entry.currentlyVisible ? 1.0f : 0.0f);
+    if(!current)
+    {
+      return RevealBindingResult::INVALID;
+    }
+    entry.revealBaseOpacityIndex = baseIndex;
   }
   else
   {
     renderer.SetProperty(entry.revealBaseOpacityIndex, entry.currentlyVisible ? 1.0f : 0.0f);
+  }
+  if(!current)
+  {
+    return RevealBindingResult::INVALID;
   }
   if(entry.revealBaseOpacityIndex == Property::INVALID_INDEX)
   {
@@ -572,9 +694,14 @@ InlineReplacementManager::RevealBindingResult InlineReplacementManager::ApplyEnt
     return RevealBindingResult::DEFERRED;
   }
 
-  entry.revealConstraint = Constraint::New<float>(renderer,
-                                                  Dali::DevelRenderer::Property::OPACITY,
-                                                  ReplacementRevealOpacityConstraint(start, fadeDuration));
+  auto constraint = Constraint::New<float>(renderer,
+                                           Dali::DevelRenderer::Property::OPACITY,
+                                           ReplacementRevealOpacityConstraint(start, fadeDuration));
+  if(!current)
+  {
+    return RevealBindingResult::INVALID;
+  }
+  entry.revealConstraint = std::move(constraint);
   entry.revealConstraint.AddSource(Source(renderer, entry.revealBaseOpacityIndex));
   entry.revealConstraint.AddSource(Source(owner, mRevealProgressPropertyIndex));
   entry.revealConstraint.SetRemoveAction(Constraint::DISCARD);
@@ -587,6 +714,7 @@ InlineReplacementManager::RevealBindingResult InlineReplacementManager::ApplyEnt
 
 bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
 {
+  UpdateGuard current(mUpdateState);
   if(!entry.visual)
   {
     return true;
@@ -601,12 +729,24 @@ bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
   if(readyToReveal && entry.revealPixelSpatial && UsesMultiPlaneYuvTexture(entry.visual.GetRenderer()))
   {
     SetEntryPixelRevealShader(entry, false);
+    if(!current)
+    {
+      return false;
+    }
     entry.revealPixelSpatial = false;
     ApplyEntryRevealConstraint(entry);
+    if(!current)
+    {
+      return false;
+    }
   }
   if(!readyToReveal)
   {
     SetEntryVisible(entry, false);
+    if(!current)
+    {
+      return false;
+    }
   }
   else if(!entry.aspectResolved)
   {
@@ -665,6 +805,10 @@ bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
     Property::Map pixelAreaMap;
     pixelAreaMap.Insert(Ui::Integration::ImageVisual::Property::PIXEL_AREA, pixelArea);
     entry.visual.SetProperties(pixelAreaMap);
+    if(!current)
+    {
+      return false;
+    }
     entry.lastPixelArea    = pixelArea;
     entry.pixelAreaApplied = true;
   }
@@ -682,6 +826,10 @@ bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
       .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT)
       .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT);
     visualImpl.SetTransformAndSize(transform, entry.ownerSize, entry.effectiveScale);
+    if(!current)
+    {
+      return false;
+    }
     entry.lastTransformOffset = visualOffset;
     entry.lastTransformSize   = visualSize;
     entry.lastOwnerSize       = entry.ownerSize;
@@ -692,6 +840,10 @@ bool InlineReplacementManager::ApplyEntryTransform(Entry& entry)
   if(entry.revealPixelSpatial)
   {
     UpdateEntryPixelRevealTiming(entry);
+    if(!current)
+    {
+      return false;
+    }
   }
 
   // Geometry, sampling and an authored PIXEL binding are committed before
@@ -738,14 +890,28 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
   {
     return false;
   }
+  const auto state = mUpdateState;
+  ++state->generation;
+  CaptureUpdateScope captureUpdate(*this);
   if(!mRevealTimings.empty() && mRevealSourceRevision != expectedSourceRevision)
   {
+    const auto expected = state->generation + 1u;
     ClearReveal();
+    if(!state->alive || state->generation != expected)
+    {
+      return false;
+    }
   }
   if(mHost && mHost != &host)
   {
+    const auto expected = state->generation + 1u;
     Clear();
+    if(!state->alive || state->generation != expected)
+    {
+      return false;
+    }
   }
+  UpdateGuard current(state);
   mHost                              = &host;
   mEntrySourceRevision               = expectedSourceRevision;
   mPixelRevealRequested              = pixelRevealRequested;
@@ -821,6 +987,10 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
     if(entry && !IsSameRuntimeImageDescriptor(entry->descriptor, descriptor))
     {
       ReleaseEntryVisual(*entry);
+      if(!current)
+      {
+        return false;
+      }
       entry->descriptor = descriptor;
     }
 
@@ -842,13 +1012,19 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
     // RegisterVisual(). Publish authoritative placement first so its reentrant
     // Refresh() never observes an entry with zero/default geometry.
     entry->lastSeenGeneration = updateGeneration;
+    entry->lineIndex          = placement.lineIndex;
     entry->reservedOffset     = reservedOffset;
     entry->reservedSize       = placement.size;
     entry->clipOffset         = clipOffset;
     entry->clipSize           = contentSize;
     entry->ownerSize          = ownerSize;
     entry->effectiveScale     = effectiveScale;
-    if(!entry->visual && !CreateEntryVisual(host, *entry))
+    const bool created        = entry->visual || CreateEntryVisual(host, *entry);
+    if(!current)
+    {
+      return false;
+    }
+    if(!created)
     {
       if(entryCreated)
       {
@@ -865,20 +1041,42 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
       continue;
     }
 
-    if(mPixelRevealRequested)
+    // Timing can precede placement in async publication. Keep the shader
+    // paired with an existing binding: authored PIXEL may resolve to scalar
+    // opacity when its progression span is zero.
+    if(mPixelRevealRequested && !entry->revealConstraint)
     {
       SetEntryPixelRevealShader(*entry, true);
+      if(!current)
+      {
+        return false;
+      }
     }
 
-    if(!ApplyEntryTransform(*entry))
+    const bool transformed = ApplyEntryTransform(*entry);
+    if(!current)
+    {
+      return false;
+    }
+    if(!transformed)
     {
       ReleaseEntryVisual(*entry);
+      if(!current)
+      {
+        return false;
+      }
     }
     else if(mRevealSourceRevision == expectedSourceRevision && !mRevealTimings.empty())
     {
-      if(ApplyEntryRevealConstraint(*entry) == RevealBindingResult::INVALID)
+      const auto bound = ApplyEntryRevealConstraint(*entry);
+      if(!current)
+      {
+        return false;
+      }
+      if(bound == RevealBindingResult::INVALID)
       {
         ClearReveal();
+        return false;
       }
     }
   }
@@ -888,6 +1086,10 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
     if(iterator->lastSeenGeneration != updateGeneration)
     {
       iterator = RemoveEntry(iterator);
+      if(!current)
+      {
+        return false;
+      }
     }
     else
     {
@@ -902,6 +1104,9 @@ bool InlineReplacementManager::ApplyRevealTimings(
   uint64_t                                         sourceRevision,
   Property::Index                                  progressPropertyIndex)
 {
+  ++mUpdateState->generation;
+  UpdateGuard        current(mUpdateState);
+  CaptureUpdateScope captureUpdate(*this);
   if(sourceRevision == 0u || progressPropertyIndex == Property::INVALID_INDEX || timings.Empty())
   {
     ClearReveal();
@@ -937,6 +1142,10 @@ bool InlineReplacementManager::ApplyRevealTimings(
     for(Entry& entry : mEntries)
     {
       RemoveEntryRevealConstraint(entry);
+      if(!current)
+      {
+        return false;
+      }
     }
     return true;
   }
@@ -944,6 +1153,10 @@ bool InlineReplacementManager::ApplyRevealTimings(
   for(Entry& entry : mEntries)
   {
     valid = ApplyEntryRevealConstraint(entry) != RevealBindingResult::INVALID && valid;
+    if(!current)
+    {
+      return false;
+    }
   }
   if(!valid)
   {
@@ -952,13 +1165,59 @@ bool InlineReplacementManager::ApplyRevealTimings(
   return valid;
 }
 
+void InlineReplacementManager::RequireRevealBinding(Property::Index progressPropertyIndex, bool fullFade)
+{
+  const auto state = mUpdateState;
+  ++state->generation;
+  if(fullFade && mRevealTimings.empty() && mEntrySourceRevision != 0u && !mEntries.empty())
+  {
+    // All units start together and fade for the whole timeline. These timings
+    // are exact for the already published occurrences, not guessed glyph data.
+    // Use the existing binding/teardown path, including renderer-ready refresh.
+    Vector<Ui::Text::ReplacementRevealTiming> timings;
+    timings.Reserve(static_cast<uint32_t>(mEntries.size()));
+    for(const auto& entry : mEntries)
+    {
+      Ui::Text::ReplacementRevealTiming timing;
+      timing.occurrenceIdentity = entry.occurrenceIdentity;
+      timing.fadeDuration       = 1.0f;
+      timings.PushBack(timing);
+    }
+    if(!ApplyRevealTimings(timings, mEntrySourceRevision, progressPropertyIndex) || !state->alive)
+    {
+      return;
+    }
+  }
+  UpdateGuard current(state);
+  mRevealBindingRequired = true;
+  for(Entry& entry : mEntries)
+  {
+    UpdateEntryVisibility(entry);
+    if(!current)
+    {
+      return;
+    }
+  }
+}
+
 void InlineReplacementManager::ClearReveal()
 {
+  ++mUpdateState->generation;
+  UpdateGuard        current(mUpdateState);
+  CaptureUpdateScope captureUpdate(*this);
   mRevealBindingRequired = false;
   for(Entry& entry : mEntries)
   {
     RemoveEntryRevealConstraint(entry);
+    if(!current)
+    {
+      return;
+    }
     UpdateEntryVisibility(entry);
+    if(!current)
+    {
+      return;
+    }
   }
   mRevealTimings.clear();
   mRevealSourceRevision        = 0u;
@@ -967,6 +1226,8 @@ void InlineReplacementManager::ClearReveal()
 
 void InlineReplacementManager::Refresh()
 {
+  UpdateGuard        current(mUpdateState);
+  CaptureUpdateScope captureUpdate(*this);
   if(!mHost || !mHost->GetOwner())
   {
     return;
@@ -974,13 +1235,27 @@ void InlineReplacementManager::Refresh()
 
   for(Entry& entry : mEntries)
   {
-    if(!ApplyEntryTransform(entry))
+    const bool transformed = ApplyEntryTransform(entry);
+    if(!current)
+    {
+      return;
+    }
+    if(!transformed)
     {
       ReleaseEntryVisual(entry);
+      if(!current)
+      {
+        return;
+      }
     }
     else if(!mRevealTimings.empty())
     {
-      if(ApplyEntryRevealConstraint(entry) == RevealBindingResult::INVALID)
+      const auto bound = ApplyEntryRevealConstraint(entry);
+      if(!current)
+      {
+        return;
+      }
+      if(bound == RevealBindingResult::INVALID)
       {
         ClearReveal();
         break;
@@ -991,10 +1266,22 @@ void InlineReplacementManager::Refresh()
 
 void InlineReplacementManager::PrepareOwnerDestruction()
 {
+  ++mUpdateState->generation;
   // ViewDataImpl owns another handle to every registered visual and clears it
   // after the CustomActor implementation has finished destruction. Avoid the
   // normal unregister path here because it requires CustomActorImpl::Self(),
   // and leave each visual to be discarded once by ViewDataImpl.
+  if(mBlurCapture)
+  {
+    if(auto retention = mBlurCapture->retention.GetHandle())
+    {
+      for(auto& source : mBlurCapture->sources)
+      {
+        retention.RemoveRenderer(source.renderer);
+      }
+    }
+    mBlurCapture.reset();
+  }
   mHost = nullptr;
   for(Entry& entry : mEntries)
   {
@@ -1019,17 +1306,130 @@ void InlineReplacementManager::PrepareOwnerDestruction()
 
 void InlineReplacementManager::Clear()
 {
+  const auto state    = mUpdateState;
+  const auto expected = state->generation + 1u;
   ClearReveal();
+  if(!state->alive || state->generation != expected)
+  {
+    return;
+  }
+  UpdateGuard current(state);
   while(!mEntries.empty())
   {
     RemoveEntry(mEntries.begin());
+    if(!current)
+    {
+      return;
+    }
   }
+  mBlurCapture.reset();
   mHost = nullptr;
   mEntryIndex.clear();
   mUpdateGeneration      = 0u;
   mEntrySourceRevision   = 0u;
   mPixelRevealRequested  = false;
   mRevealBindingRequired = false;
+}
+
+std::vector<InlineReplacementManager::BlurCaptureSource> InlineReplacementManager::GetReadyBlurCaptureSources(uint64_t sourceRevision) const
+{
+  std::vector<BlurCaptureSource> sources;
+  if(sourceRevision == 0u || sourceRevision != mEntrySourceRevision || sourceRevision != mRevealSourceRevision)
+  {
+    return sources;
+  }
+  for(const auto& entry : mEntries)
+  {
+    if(entry.visual && entry.currentlyVisible && entry.transformApplied && entry.pixelAreaApplied && entry.revealConstraint &&
+       Ui::GetImplementation(entry.visual).GetResourceStatus() == Ui::Visual::ResourceStatus::READY)
+    {
+      auto renderer = entry.visual.GetRenderer();
+      if(renderer && renderer.GetTextures() && renderer.GetTextures().GetTextureCount() > 0u)
+      {
+        sources.push_back({entry.occurrenceIdentity, entry.lineIndex, renderer});
+      }
+    }
+  }
+  return sources;
+}
+
+bool InlineReplacementManager::CaptureBlurRenderer(Actor client, uint64_t sourceRevision, const BlurCaptureSource& source, Actor retention)
+{
+  if(mBlurCapture && !mBlurCapture->client.GetHandle())
+  {
+    ReleaseBlurCapture({});
+  }
+  auto owner = mHost ? mHost->GetOwner() : Ui::View();
+  if(!client || !owner || !retention || mUpdateState->depth != 0u || sourceRevision != mEntrySourceRevision || sourceRevision != mRevealSourceRevision ||
+     (mBlurCapture && mBlurCapture->client.GetHandle() != client))
+  {
+    return false;
+  }
+  const auto entry = std::find_if(mEntries.begin(), mEntries.end(), [&](const auto& candidate)
+  {
+    return candidate.occurrenceIdentity == source.occurrenceIdentity && candidate.visual &&
+           candidate.visual.GetRenderer() == source.renderer;
+  });
+  if(entry == mEntries.end())
+  {
+    return false;
+  }
+  if(!mBlurCapture)
+  {
+    mBlurCapture            = std::make_unique<BlurCaptureState>();
+    mBlurCapture->client    = client;
+    mBlurCapture->retention = retention;
+  }
+  auto& sources = mBlurCapture->sources;
+  auto  found   = std::find_if(sources.begin(), sources.end(), [&](const auto& candidate)
+     {
+    return candidate.occurrenceIdentity == source.occurrenceIdentity;
+  });
+  if(found == sources.end())
+  {
+    sources.push_back(source);
+  }
+  else
+  {
+    if(found->renderer != source.renderer)
+    {
+      retention.RemoveRenderer(found->renderer);
+    }
+    *found = source;
+  }
+  // Visual mutations release capture first; repeated capture remains idempotent.
+  auto renderer = source.renderer;
+  owner.RemoveRenderer(renderer);
+  retention.AddRenderer(renderer);
+  return true;
+}
+
+void InlineReplacementManager::ReleaseBlurCapture(Actor client)
+{
+  if(!mBlurCapture || mBlurCapture->client.GetHandle() != client)
+  {
+    return;
+  }
+  auto capture   = std::move(mBlurCapture);
+  auto owner     = mHost ? mHost->GetOwner() : Ui::View();
+  auto retention = capture->retention.GetHandle();
+  for(auto& source : capture->sources)
+  {
+    if(retention)
+    {
+      retention.RemoveRenderer(source.renderer);
+    }
+    const auto entry = std::find_if(mEntries.begin(), mEntries.end(), [&](const auto& candidate)
+    {
+      return candidate.occurrenceIdentity == source.occurrenceIdentity && candidate.visual &&
+             candidate.visual.GetRenderer() == source.renderer;
+    });
+    if(owner && entry != mEntries.end())
+    {
+      auto renderer = source.renderer;
+      owner.AddRenderer(renderer);
+    }
+  }
 }
 
 } // namespace Text

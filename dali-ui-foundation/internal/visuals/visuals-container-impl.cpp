@@ -34,7 +34,8 @@
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
-#include <dali-ui-foundation/internal/views/view/view-data-impl.h> ///< To get viewDataImpl by Internal::ViewDataImpl::Get()
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>            ///< To get viewDataImpl by Internal::ViewDataImpl::Get()
+#include <dali-ui-foundation/internal/views/view/view-internal-depth-slots.h> ///< For MAXIMUM_VISUAL_OBJECTS_COUNT
 #include <dali-ui-foundation/internal/views/view/visual-constraint-functions.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -48,10 +49,6 @@ namespace DALI_NAMESPACE::Ui::Internal
 namespace
 {
 constexpr std::string_view VISUAL_OBJECT_PROPERTY_NAME_PREFIX("VisualBase");
-
-// Half the gap between two adjacent DepthIndex::Ranges anchors, so that a layer splits evenly into
-// a View half and an application half. See VisualBaseImpl::GetDepthIndex for what each half is for.
-constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::Integration::DepthIndex::Ranges::CONTENT - Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND) / 2;
 
 static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
 
@@ -111,7 +108,11 @@ uint32_t VisualsContainer::GetVisualBasesCount() const
 
 Dali::Ui::VisualBase VisualsContainer::GetVisualBaseAt(uint32_t index) const
 {
-  DALI_ASSERT_ALWAYS(index < mVisualBases.size() && "Visual object index out of bounds");
+  if(DALI_UNLIKELY(index >= mVisualBases.size()))
+  {
+    DALI_LOG_ERROR("Visual object index %u is out of bounds (%zu)\n", index, mVisualBases.size());
+    return Dali::Ui::VisualBase();
+  }
   return mVisualBases[index];
 }
 
@@ -189,8 +190,13 @@ void VisualsContainer::RemoveVisualBase(Dali::Ui::VisualBase visualObject)
 
 void VisualsContainer::ChangeSiblingOrder(uint32_t fromIndex, uint32_t toIndex)
 {
-  DALI_ASSERT_ALWAYS(fromIndex < mVisualBases.size() && "fromIndex is out of bounds");
-  DALI_ASSERT_ALWAYS(toIndex < mVisualBases.size() && "toIndex is out of bounds");
+  if(DALI_UNLIKELY(fromIndex >= mVisualBases.size()))
+  {
+    DALI_LOG_ERROR("fromIndex %u is out of bounds (%zu). Change sibling order failed.\n", fromIndex, mVisualBases.size());
+    return;
+  }
+  // An out-of-range target from VisualBase::SetSiblingOrder means topmost.
+  toIndex = std::min(toIndex, static_cast<uint32_t>(mVisualBases.size()) - 1u);
   if(fromIndex != toIndex)
   {
     // Keep reference of visual object.

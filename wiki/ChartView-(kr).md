@@ -34,7 +34,7 @@
 
 ## 1. 기본 설정
 
-> ⚠️ **주의**: `ChartView`는 `dali-ui-components`의 일부입니다. `MainLoop()` 호출 전에 반드시 `Components::UiConfig::New().Apply()`를 호출해야 합니다. 자세한 내용은 [Configuration](Configuration.md)을 참조하세요.
+> ⚠️ **주의**: `ChartView`는 `dali-ui-components`의 일부입니다. 애플리케이션 실행 전에 반드시 `Components::UiConfig::New().Apply()`를 호출해야 합니다. 자세한 내용은 [Configuration](Configuration.md)을 참조하세요.
 
 ### main.cpp
 
@@ -45,14 +45,11 @@ using namespace Dali::Ui;
 
 int main(int argc, char** argv)
 {
-  Application application = Application::New(&argc, &argv);
-
-  // Components::UiConfig는 MainLoop() 전에 적용
+  // Components::UiConfig는 애플리케이션 실행 전에 적용
   Components::UiConfig::New().Apply();
 
-  MyController controller(application);
-  application.MainLoop();
-  return 0;
+  MyApp app(argc, argv); // MyApp은 tizen_appfw::UiApplication을 상속합니다.
+  return app.Run();
 }
 ```
 
@@ -1186,7 +1183,7 @@ target_compile_options(my-chart-app PRIVATE
 
 ## 18. 주요 참고사항
 
-- **`Components::UiConfig`는 필수입니다.** `dali-ui-components`를 사용할 때는 `Application::MainLoop()` 전에 `Components::UiConfig::New().Apply()`를 호출해야 합니다. [Configuration](Configuration.md)을 참조하세요.
+- **`Components::UiConfig`는 필수입니다.** `dali-ui-components`를 사용할 때는 애플리케이션 실행 전에 `Components::UiConfig::New().Apply()`를 호출해야 합니다. [Configuration](Configuration.md)을 참조하세요.
 
 - **차트 타입은 생성 시 고정됩니다.** `ChartView::New(type, size)`는 객체의 생명주기 동안 차트 타입을 결정합니다. `SetType()` 메서드는 없으므로 다른 타입이 필요하면 새 `ChartView`를 생성해야 합니다.
 

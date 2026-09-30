@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
+#include <dali-ui-foundation/internal/text/reveal/text-reveal-blur-preparation.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
@@ -1590,6 +1591,10 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat);
   }
 
+  std::unique_ptr<Internal::Reveal::Plan> blurPlan;
+  const bool                              prepareBlur = parameters.isTextRevealBlurRequested &&
+                           parameters.textRevealBlurRadius > 0.0f && parameters.textRevealBlurDurationRatio > 0.0f &&
+                           !embossEnabled;
   renderInfo.isTextRevealEnabled = parameters.isTextRevealEnabled && !cutoutEnabled && !parameters.isMarqueeEnabled;
   if(renderInfo.isTextRevealEnabled && renderInfo.textPixelData)
   {
@@ -1672,6 +1677,10 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
         mTypesetter->RenderTextRevealMetadata(
           Vector2(static_cast<float>(metadataTileWidth), static_cast<float>(tileHeight)), textDirection,
           revealPlan, renderInfo.textRevealFadeDuration, offsetY, fullMetadataSize));
+    }
+    if(prepareBlur && !isRendererTiled)
+    {
+      blurPlan = std::make_unique<Internal::Reveal::Plan>(std::move(revealPlan));
     }
   }
 
@@ -1799,6 +1808,32 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     float renderedWidth     = isRenderScale ? parameters.renderScaleWidth : parameters.textWidth;
     float renderedHeight    = isRenderScale ? parameters.renderScaleHeight : parameters.textHeight;
     renderInfo.renderedSize = Size(renderedWidth, renderedHeight);
+  }
+
+  if(blurPlan)
+  {
+    // Use only this request's Typesetter and worker FontClient. Ordinary planes
+    // and timing stay intact until the event thread accepts the whole blur result.
+    Ui::Internal::RevealBlurPreparationOptions options;
+    options.rasterSize = Vector2(static_cast<float>(renderInfo.textPixelData.GetWidth()),
+                                 static_cast<float>(renderInfo.textPixelData.GetHeight()));
+    // Raster dimensions include renderScale; the capture target uses the same
+    // displayed coordinates as TextVisual, including already-scaled UI padding.
+    options.controlSize      = Vector2((isRenderScale ? parameters.renderScaleWidth : parameters.textWidth) + parameters.padding.start + parameters.padding.end,
+                                       (isRenderScale ? parameters.renderScaleHeight : parameters.textHeight) + parameters.padding.top + parameters.padding.bottom);
+    options.radius           = Ui::Internal::ResolveRevealBlurRadius(parameters.textRevealBlurRadius);
+    options.maxTextureSize   = parameters.maxTextureSize > 0 ? static_cast<uint32_t>(parameters.maxTextureSize) : 0u;
+    options.durationRatio    = parameters.textRevealBlurDurationRatio;
+    options.stagger          = parameters.textRevealSequenceStaggerRatio;
+    options.foregroundFormat = textPixelFormat;
+    options.textDirection    = textDirection;
+    options.perLine          = parameters.textRevealSequence == Internal::Reveal::Sequence::PER_LINE;
+    options.gradientMixed    = nonMarqueeTextGradientMixedPayload;
+    options.colorMask        = !parameters.isTextGradientRequested && containsColorGlyph && !hasMultipleTextColors;
+    options.decorations      = styleEnabled || isOverlayStyle;
+    renderInfo.revealBlur    = Ui::Internal::PrepareRevealBlur(*mTypesetter, std::move(*blurPlan),
+                                                               renderInfo.replacementRevealTimings, options,
+                                                            mReplacementData ? &mReplacementData->renderState.placements : nullptr);
   }
 
   CopyReplacementResult(renderInfo, parameters.renderScale);

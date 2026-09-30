@@ -276,7 +276,7 @@ public:
   /**
    * @copydoc Dali::Ui::Internal::ViewDataImpl::ApplyFittingMode()
    */
-  void ApplyFittingMode(const Vector2& size, bool isLayoutFinishedUpdate);
+  void ApplyFittingMode(const Vector2& size, FittingModeUpdate update);
 
   /**
    * @brief Stops observing the given visual.

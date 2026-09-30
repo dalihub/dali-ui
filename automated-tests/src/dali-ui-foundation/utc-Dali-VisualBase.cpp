@@ -413,16 +413,11 @@ int UtcDaliVisualBaseSiblingOrder(void)
   visual2.SetSiblingOrder(2);
   TestSiblingOder(3, 2, 0, 1);
 
-  // Throw exception if sibling order set over the container size.
-  try
-  {
-    visual1.SetSiblingOrder(4);
-    tet_result(TET_FAIL);
-  }
-  catch(DaliException& e)
-  {
-    tet_result(TET_PASS);
-  }
+  // Sibling order over the container size is clamped to the topmost.
+  visual3.SetSiblingOrder(100);
+  TestSiblingOder(2, 1, 3, 0);
+  visual3.SetSiblingOrder(0);
+  TestSiblingOder(3, 2, 0, 1);
 
   // LowerToBottom
   visual4.LowerToBottom();
@@ -458,6 +453,57 @@ int UtcDaliVisualBaseSiblingOrder(void)
   TestSiblingOder(1, 3, 2, 0);
   visual1.LowerBelow(visual2);
   TestSiblingOder(1, 3, 2, 0);
+
+  END_TEST;
+}
+int UtcDaliVisualBaseInvalidDepthLayer(void)
+{
+  UiTestApplication application;
+
+  VisualBase visual = ColorVisual::New();
+  View       view   = View::New();
+
+  // Invalid depth layers are rejected without aborting.
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::NONE), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::MAX_COUNT), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
+
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::NONE), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::MAX_COUNT), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!view.GetVisualAt(Visual::DepthLayer::NONE, 0u));
+  DALI_TEST_CHECK(!view.GetVisualAt(Visual::DepthLayer::MAX_COUNT, 0u));
+
+  // An out-of-range sibling order returns an empty handle.
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::DepthLayer::CONTENT), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::CONTENT, 0u), visual, TEST_LOCATION);
+  DALI_TEST_CHECK(!view.GetVisualAt(Visual::DepthLayer::CONTENT, 1u));
+  DALI_TEST_CHECK(!view.GetVisualAt(Visual::DepthLayer::CONTENT, 100u));
+
+  END_TEST;
+}
+int UtcDaliVisualBaseContainerFull(void)
+{
+  UiTestApplication application;
+
+  View view = View::New();
+
+  // Fill the CONTENT layer to its capacity, half the depth budget of a layer.
+  constexpr uint32_t maximumVisualCount = 50u;
+  for(uint32_t i = 0u; i < maximumVisualCount; ++i)
+  {
+    DALI_TEST_EQUALS(view.AddVisual(ColorVisual::New(), Visual::DepthLayer::CONTENT), true, TEST_LOCATION);
+  }
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::CONTENT), maximumVisualCount, TEST_LOCATION);
+
+  // The container is full; one more add fails and leaves the visual unattached.
+  VisualBase extra = ColorVisual::New();
+  DALI_TEST_EQUALS(view.AddVisual(extra, Visual::DepthLayer::CONTENT), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(extra.GetOwner(), View(), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::CONTENT), maximumVisualCount, TEST_LOCATION);
+
+  // Other layers are unaffected.
+  DALI_TEST_EQUALS(view.AddVisual(extra, Visual::DepthLayer::DECORATION), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(extra.GetOwner(), view, TEST_LOCATION);
 
   END_TEST;
 }

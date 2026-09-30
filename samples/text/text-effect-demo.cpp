@@ -15,6 +15,7 @@
 
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 
@@ -22,10 +23,19 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <string>
+#include <vector>
 
 using namespace Dali;
 using namespace Dali::Ui;
+namespace RevealBlur = Dali::Ui::Integration::Text::Reveal;
+
+// Local travel-demo content illustrates Reveal, gradients and layout transitions.
+// Keys: Enter/Space advances, Esc/Back returns, 0 restarts, 1 selects Sync, 2 selects Async.
+// Markdown owns its internal Labels and is excluded from the rendering-mode controls.
+// Blur Effect compares ordinary Reveal + one GaussianBlurEffect per animated Label.
+// Select the mode, then press 0 for a repeatable comparison from the loading screen.
 
 namespace
 {
@@ -52,22 +62,50 @@ constexpr uint32_t CYAN_COLOR            = 0x52E5FF;
 constexpr uint32_t PURPLE_COLOR          = 0x8E6CFF;
 constexpr uint32_t SUCCESS_COLOR         = 0x65E6A5;
 
-constexpr float    SCENE_FADE_OUT_SECONDS       = 0.22f;
-constexpr float    SCENE_FADE_IN_SECONDS        = 0.30f;
-constexpr float    CARD_ENTRANCE_SECONDS        = 0.36f;
-constexpr float    AFFORDANCE_ENTRANCE_SECONDS  = 0.32f;
-constexpr float    MARKDOWN_ENTRANCE_SECONDS    = 0.36f;
-constexpr float    INTRO_GRADIENT_SECONDS       = 2.80f;
-constexpr float    SHIMMER_DURATION_SECONDS     = 1.40f;
-constexpr float    SKELETON_SHIMMER_SECONDS     = 1.85f;
-constexpr float    HERO_GRADIENT_SECONDS        = 6.00f;
-constexpr float    HIGHLIGHT_SWEEP_SECONDS      = 0.85f;
-constexpr float    REVEAL_SEQUENCE_SECONDS      = 2.65f;
-constexpr float    COMPLETE_REVEAL_SECONDS      = 0.60f;
-constexpr float    STATUS_FADE_OUT_SECONDS      = 0.28f;
-constexpr float    STATUS_FADE_IN_SECONDS       = 0.52f;
-constexpr float    DETAIL_STATUS_REVEAL_SECONDS = 1.00f;
-constexpr uint32_t GENERATING_INTERVAL_MS       = 1300u;
+struct BlurPreset
+{
+  const char* name;
+  float       entranceRadius;
+  float       exitRadius;
+};
+
+constexpr std::array<BlurPreset, 3u> BLUR_PRESETS{{
+  {"Strong", 24.0f, 48.0f},
+  {"Medium", 20.0f, 40.0f},
+  {"Soft", 16.0f, 32.0f},
+}};
+
+constexpr float BLUR_TOGGLE_WIDTH    = 84.0f;
+constexpr float BLUR_EFFECT_WIDTH    = 100.0f;
+constexpr float BLUR_QUALITY_WIDTH   = 112.0f;
+constexpr float BLUR_TOGGLE_HEIGHT   = 28.0f;
+constexpr float BLUR_TOGGLE_MARGIN   = 12.0f;
+constexpr float BLUR_CONTROL_SPACING = 8.0f;
+
+constexpr float LOADING_SECONDS      = 2.0f;
+constexpr float LOADING_FADE_SECONDS = 0.18f;
+
+constexpr float SCENE_FADE_OUT_SECONDS       = 0.22f;
+constexpr float SCENE_FADE_IN_SECONDS        = 0.30f;
+constexpr float SCENE_TEXT_EXIT_SECONDS      = 0.40f;
+constexpr float TEXT_SLIDE_SECONDS           = 0.32f;
+constexpr float TEXT_REVEAL_LEAD_SECONDS     = 0.06f;
+constexpr float CARD_ENTRANCE_SECONDS        = 0.36f;
+constexpr float CARD_TEXT_SLIDE_SECONDS      = 0.60f;
+constexpr float CARD_DESCRIPTION_SECONDS     = 2.00f;
+constexpr float AFFORDANCE_ENTRANCE_SECONDS  = 0.32f;
+constexpr float MARKDOWN_ENTRANCE_SECONDS    = 0.36f;
+constexpr float INTRO_GRADIENT_SECONDS       = 2.80f;
+constexpr float SHIMMER_DURATION_SECONDS     = 1.40f;
+constexpr float SKELETON_SHIMMER_SECONDS     = 1.85f;
+constexpr float HERO_GRADIENT_SECONDS        = 6.00f;
+constexpr float HIGHLIGHT_SWEEP_SECONDS      = 0.85f;
+constexpr float COMPLETE_REVEAL_SECONDS      = 0.60f;
+constexpr float STATUS_FADE_OUT_SECONDS      = 0.28f;
+constexpr float STATUS_FADE_IN_SECONDS       = 0.52f;
+constexpr float DETAIL_STATUS_REVEAL_SECONDS = 1.00f;
+
+constexpr uint32_t GENERATING_INTERVAL_MS = 1300u;
 
 constexpr std::array<const char*, 4u> GENERATING_STATUS{{
   "Understanding your travel style...",
@@ -167,7 +205,7 @@ View NewDivider()
   return divider;
 }
 
-Gradient::Linear NewJejuGradient(float startOffset = 0.0f)
+Gradient::Linear NewJejuGradient(float startOffset)
 {
   Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
   gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
@@ -257,13 +295,97 @@ Gradient::Linear NewSkeletonShimmerGradient(float startOffset)
   return gradient;
 }
 
-void ConfigureReveal(Label label, Text::Reveal::Unit unit, float fadeDurationRatio, float progress)
+bool IsLongText(Label label)
 {
+  // Classify this demo's copy, not UTF-8 bytes or font-dependent line counts.
+  const std::string text(label.GetText().CStr());
+  return std::count_if(text.begin(), text.end(), [](unsigned char character)
+  {
+    return (character & 0xC0u) != 0x80u;
+  }) >= 64;
+}
+
+void ConfigureEntranceReveal(Label label, Text::Reveal::Unit unit, float blurRadius, RevealBlur::BlurMode blurMode)
+{
+  const bool   longText = IsLongText(label);
   Text::Reveal reveal;
   reveal.SetUnit(unit);
-  reveal.SetFadeDurationRatio(fadeDurationRatio);
+  // Stagger the lines of longer copy; short headings and status rows enter together.
+  reveal.SetSequence(Text::Reveal::Sequence::PER_LINE);
+  reveal.SetFadeDurationRatio(0.0f);
+  reveal.SetSequenceStaggerRatio(longText ? 0.25f : 0.0f);
+  RevealBlur::SetBlurRadius(reveal, blurRadius);
+  RevealBlur::SetBlurDurationRatio(reveal, longText ? 0.5f : 1.0f);
+  RevealBlur::SetBlurMode(reveal, blurMode);
   label.SetTextReveal(reveal);
-  label.SetTextRevealProgress(progress);
+  label.SetTextRevealProgress(0.0f);
+}
+
+void ConfigureExitReveal(Label label, float blurRadius, RevealBlur::BlurMode blurMode)
+{
+  const auto current = label.GetTextReveal();
+  // An interrupted entrance reverses from its current state. Switching a
+  // partially revealed sentence to a whole-text fade would expose hidden units.
+  if(current != Text::Reveal::None() && label.GetTextRevealProgress() < 1.0f)
+  {
+    return;
+  }
+  Text::Reveal reveal;
+  reveal.SetUnit(current == Text::Reveal::None() ? Text::Reveal::Unit::PIXEL : current.GetUnit());
+  reveal.SetSequence(Text::Reveal::Sequence::WHOLE_TEXT);
+  reveal.SetFadeDurationRatio(1.0f);
+  reveal.SetSequenceStaggerRatio(0.0f);
+  RevealBlur::SetBlurRadius(reveal, blurRadius);
+  RevealBlur::SetBlurDurationRatio(reveal, 1.0f);
+  RevealBlur::SetBlurMode(reveal, blurMode);
+  label.SetTextReveal(reveal);
+  label.SetTextRevealProgress(1.0f);
+}
+
+LayoutTransition NewTextEntranceTransition(float delay, float slideDuration)
+{
+  const LayoutTransitionTiming timing{Duration(slideDuration),
+                                      AlphaFunction(AlphaFunction::EASE_OUT_SQUARE),
+                                      Duration(delay)};
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, timing.duration, timing.alpha, timing.delay);
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetEnterVisualSpec(enterSpec)
+    .SetEnterBoundsEffect(LayoutBoundsEffects::SlideFrom(LayoutBoundsEdge::BOTTOM,
+                                                         LayoutBoundsLength::Pixel(12.0f),
+                                                         timing))
+    .ClearChangeTiming()
+    .SetEnterOnInitialMount(true);
+  return transition;
+}
+
+void RemountText(Label label)
+{
+  // Replacing a string alone is not a layout ENTER. Reinsert in the same slot
+  // before the next layout pass, preserving the status row's size and order.
+  Actor parent = label.GetParent();
+  if(!parent)
+  {
+    return;
+  }
+  Actor next;
+  for(uint32_t index = 0u; index + 1u < parent.GetChildCount(); ++index)
+  {
+    if(parent.GetChildAt(index) == label)
+    {
+      next = parent.GetChildAt(index + 1u);
+      break;
+    }
+  }
+  label.Unparent();
+  if(next)
+  {
+    parent.InsertBelow(label, next);
+  }
+  else
+  {
+    parent.Add(label);
+  }
 }
 
 MarkdownViewStyle NewTravelMarkdownStyle()
@@ -304,10 +426,7 @@ LayoutTransition NewCardEntranceTransition()
                                       Duration(0.06f)};
 
   ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
-  enterSpec.Opacity(1.0f,
-                    Duration(CARD_ENTRANCE_SECONDS),
-                    AlphaFunction(AlphaFunction::EASE_OUT),
-                    Duration(0.06f));
+  enterSpec.Opacity(1.0f, timing.duration, timing.alpha, timing.delay);
 
   LayoutTransition transition = LayoutTransition::New();
   transition.SetEnterVisualSpec(enterSpec)
@@ -326,9 +445,7 @@ LayoutTransition NewAffordanceTransition(LayoutBoundsEdge edge)
                                       Duration()};
 
   ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
-  enterSpec.Opacity(1.0f,
-                    Duration(AFFORDANCE_ENTRANCE_SECONDS),
-                    AlphaFunction(AlphaFunction::EASE_OUT));
+  enterSpec.Opacity(1.0f, timing.duration, timing.alpha, timing.delay);
 
   LayoutTransition transition = LayoutTransition::New();
   transition.SetEnterVisualSpec(enterSpec)
@@ -347,9 +464,7 @@ LayoutTransition NewMarkdownEntranceTransition()
                                       Duration()};
 
   ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
-  enterSpec.Opacity(1.0f,
-                    Duration(MARKDOWN_ENTRANCE_SECONDS),
-                    AlphaFunction(AlphaFunction::EASE_OUT));
+  enterSpec.Opacity(1.0f, timing.duration, timing.alpha, timing.delay);
 
   LayoutTransition transition = LayoutTransition::New();
   transition.SetEnterVisualSpec(enterSpec)
@@ -369,18 +484,53 @@ public:
   : mApplication(application)
   {
     mApplication.InitSignal().Connect(this, &TextEffectDemo::OnInit);
+    mApplication.TerminateSignal().Connect(this, &TextEffectDemo::OnTerminate);
   }
 
   ~TextEffectDemo()
   {
+    Shutdown();
+  }
+
+  void OnTerminate(Application)
+  {
+    Shutdown();
+  }
+
+  void Shutdown()
+  {
+    if(mShuttingDown)
+    {
+      return;
+    }
+    mShuttingDown = true;
     ++mLifecycleToken;
+    DisconnectAll();
+    StopLoading();
     StopSceneActivity();
     RemoveCurrentSceneImmediately();
+    if(mBlurEffectToggle)
+    {
+      mBlurEffectToggle.Unparent();
+    }
+    if(mBlurToggle)
+    {
+      mBlurToggle.Unparent();
+    }
+    if(mBlurRadiusButton)
+    {
+      mBlurRadiusButton.Unparent();
+    }
+    if(mBlurModeButton)
+    {
+      mBlurModeButton.Unparent();
+    }
     if(mSceneRoot)
     {
       mSceneRoot.SetLayoutTransition(LayoutTransition());
       mSceneRoot.Unparent();
     }
+    ResetSceneHandles();
   }
 
 private:
@@ -406,6 +556,12 @@ private:
     Label       action;
   };
 
+  struct LabelBlurEffect
+  {
+    Label              label;
+    GaussianBlurEffect effect;
+  };
+
   void OnInit(Application application)
   {
     mWindow = application.GetWindow();
@@ -416,12 +572,280 @@ private:
     mSceneRoot = NewSceneViewport();
     ConfigureSceneTransition();
     mWindow.Add(mSceneRoot);
-    ResetToState(DemoState::INTRO);
+
+    // Keep the demo controls outside scene transitions and text Reveal traversal.
+    mBlurEffectToggle  = NewCenteredLabel("Blur Effect", 12.0f, CYAN_COLOR, "SamsungOneUI_700");
+    mBlurToggle        = NewCenteredLabel("", 12.0f, CYAN_COLOR, "SamsungOneUI_700");
+    mBlurRadiusButton  = NewCenteredLabel("", 12.0f, CYAN_COLOR, "SamsungOneUI_700");
+    mBlurModeButton    = NewCenteredLabel("", 12.0f, CYAN_COLOR, "SamsungOneUI_700");
+    for(auto button : {mBlurEffectToggle, mBlurToggle, mBlurRadiusButton, mBlurModeButton})
+    {
+      button.SetLayoutMode(LayoutMode::STANDALONE);
+      button.SetRequestedWidth(BLUR_TOGGLE_WIDTH);
+      button.SetRequestedHeight(BLUR_TOGGLE_HEIGHT);
+      button.SetMultiLine(false);
+      button.SetBackgroundColor(UiColor(CARD_COLOR));
+      button.SetCornerRadius(BLUR_TOGGLE_HEIGHT * 0.5f);
+      button.SetBorderlineWidth(1.0f);
+      button.SetBorderlineOffset(-1.0f);
+      button.SetStateEffect(OverlayEffect::Plain());
+    }
+    mBlurEffectToggle.SetRequestedWidth(BLUR_EFFECT_WIDTH);
+    mBlurModeButton.SetRequestedWidth(BLUR_QUALITY_WIDTH);
+    mBlurEffectToggle.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      ToggleBlurEffect();
+    });
+    mBlurToggle.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      ToggleBlur();
+    });
+    mBlurRadiusButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      CycleBlurRadius();
+    });
+    mBlurModeButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      ToggleBlurMode();
+    });
+    UpdateBlurControls();
+    const auto bounds = mWindow.GetPositionSize();
+    PositionBlurControls(bounds.width, bounds.height);
+    mWindow.Add(mBlurEffectToggle);
+    mWindow.Add(mBlurToggle);
+    mWindow.Add(mBlurRadiusButton);
+    mWindow.Add(mBlurModeButton);
+    ShowLoading();
   }
 
-  StackLayout NewSceneRoot(float spacing = 0.0f) const
+  void ShowLoading()
   {
-    StackLayout root = NewVertical(spacing);
+    const uint64_t token = ++mLifecycleToken;
+    mTransitioning       = false;
+    StopLoading();
+    StopSceneActivity();
+    RemoveCurrentSceneImmediately();
+    ResetSceneHandles();
+    mState = DemoState::INTRO;
+
+    // This is a presentation delay, not a background preparation task. Build
+    // and start the main scene only after it ends so its entrance remains visible.
+    mLoadingView = NewSceneViewport();
+    mLoadingView.SetSensitive(false);
+    mLoadingView.SetOpacity(0.0f);
+    StackLayout content = NewVertical(14.0f);
+    content.SetRequestedWidth(260.0f);
+    content.SetRequestedHeight(WRAP_CONTENT);
+    mLoadingLabel = NewCenteredLabel("Preparing your escape", 16.0f, SECONDARY_TEXT_COLOR, "SamsungOneUI_500");
+    mLoadingLabel.SetRequestedHeight(26.0f);
+    mLoadingLabel.SetMultiLine(false);
+    mLoadingLabel.SetAsyncRendering(mAsyncRendering);
+    content.Add(mLoadingLabel);
+
+    StackLayout dots = NewHorizontal(8.0f);
+    dots.SetRequestedWidth(WRAP_CONTENT);
+    dots.SetRequestedHeight(6.0f);
+    dots.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
+    mLoadingPulseAnimation = Animation::New(0.96f);
+    const std::array<uint32_t, 3u> colors{{BLUE_COLOR, CYAN_COLOR, PURPLE_COLOR}};
+    for(std::size_t index = 0u; index < colors.size(); ++index)
+    {
+      View dot = View::New();
+      dot.SetRequestedWidth(6.0f);
+      dot.SetRequestedHeight(6.0f);
+      dot.SetBackgroundColor(UiColor(colors[index]));
+      dot.SetCornerRadius(3.0f);
+      dot.SetOpacity(0.22f);
+      dots.Add(dot);
+
+      const float phase = static_cast<float>(index) * 0.18f;
+      KeyFrames   pulse = KeyFrames::New();
+      pulse.Add(0.0f, 0.22f);
+      if(index > 0u)
+      {
+        pulse.Add(phase, 0.22f);
+      }
+      pulse.Add(phase + 0.18f, 1.0f);
+      pulse.Add(phase + 0.42f, 0.22f);
+      pulse.Add(1.0f, 0.22f);
+      mLoadingPulseAnimation.AnimateBetween(Property(dot, Actor::Property::OPACITY), pulse);
+    }
+    content.Add(dots);
+    mLoadingView.Add(content);
+    mWindow.Add(mLoadingView);
+
+    KeyFrames opacity = KeyFrames::New();
+    opacity.Add(0.0f, 0.0f);
+    opacity.Add(LOADING_FADE_SECONDS / LOADING_SECONDS, 1.0f);
+    opacity.Add(1.0f - LOADING_FADE_SECONDS / LOADING_SECONDS, 1.0f);
+    opacity.Add(1.0f, 0.0f);
+    mLoadingAnimation = Animation::New(LOADING_SECONDS);
+    mLoadingAnimation.AnimateBetween(Property(mLoadingView, Actor::Property::OPACITY), opacity);
+    mLoadingAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
+    {
+      if(token == mLifecycleToken && animation == mLoadingAnimation)
+      {
+        ResetToState(DemoState::INTRO);
+      }
+    });
+    mLoadingPulseAnimation.SetLoopCount(Animation::INFINITE_LOOP);
+    mLoadingPulseAnimation.Play();
+    mLoadingAnimation.Play();
+  }
+
+  void StopLoading()
+  {
+    StopAnimation(mLoadingAnimation);
+    StopAnimation(mLoadingPulseAnimation);
+    if(mLoadingView)
+    {
+      mLoadingView.Unparent();
+      mLoadingView.Reset();
+    }
+    mLoadingLabel.Reset();
+  }
+
+  void UpdateBlurControls()
+  {
+    const bool revealBlurEnabled = mBlurEnabled && !mBlurEffectEnabled;
+    mBlurEffectToggle.SetTextColor(UiColor(mBlurEffectEnabled ? CYAN_COLOR : SECONDARY_TEXT_COLOR));
+    mBlurEffectToggle.SetBorderlineColor(UiColor(mBlurEffectEnabled ? BLUE_COLOR : CARD_LINE_COLOR));
+    mBlurToggle.SetEnabled(!mBlurEffectEnabled);
+    mBlurToggle.SetText(revealBlurEnabled ? "Blur ON" : "Blur OFF");
+    mBlurToggle.SetTextColor(UiColor(revealBlurEnabled ? CYAN_COLOR : SECONDARY_TEXT_COLOR));
+    mBlurToggle.SetBorderlineColor(UiColor(revealBlurEnabled ? BLUE_COLOR : CARD_LINE_COLOR));
+
+    mBlurRadiusButton.SetText(BLUR_PRESETS[mBlurPresetIndex].name);
+    mBlurRadiusButton.SetEnabled(revealBlurEnabled);
+    mBlurRadiusButton.SetTextColor(UiColor(revealBlurEnabled ? CYAN_COLOR : MUTED_TEXT_COLOR));
+    mBlurRadiusButton.SetBorderlineColor(UiColor(revealBlurEnabled ? BLUE_COLOR : CARD_LINE_COLOR));
+    mBlurModeButton.SetText(mBlurMode == RevealBlur::BlurMode::QUALITY ? "Quality" : "Performance");
+    mBlurModeButton.SetEnabled(revealBlurEnabled);
+    mBlurModeButton.SetTextColor(UiColor(revealBlurEnabled ? CYAN_COLOR : MUTED_TEXT_COLOR));
+    mBlurModeButton.SetBorderlineColor(UiColor(revealBlurEnabled ? BLUE_COLOR : CARD_LINE_COLOR));
+  }
+
+  void PositionBlurControls(int32_t windowWidth, int32_t windowHeight)
+  {
+    if(mBlurEffectToggle && mBlurToggle && mBlurRadiusButton && mBlurModeButton)
+    {
+      const float x = std::max(0.0f, static_cast<float>(windowWidth) - BLUR_EFFECT_WIDTH - 2.0f * BLUR_TOGGLE_WIDTH - BLUR_QUALITY_WIDTH - 3.0f * BLUR_CONTROL_SPACING - BLUR_TOGGLE_MARGIN);
+      const float y = std::max(0.0f, static_cast<float>(windowHeight) - BLUR_TOGGLE_HEIGHT - BLUR_TOGGLE_MARGIN);
+      mBlurEffectToggle.SetRequestedX(x);
+      mBlurEffectToggle.SetRequestedY(y);
+      const float revealX = x + BLUR_EFFECT_WIDTH + BLUR_CONTROL_SPACING;
+      mBlurToggle.SetRequestedX(revealX);
+      mBlurToggle.SetRequestedY(y);
+      mBlurRadiusButton.SetRequestedX(revealX + BLUR_TOGGLE_WIDTH + BLUR_CONTROL_SPACING);
+      mBlurRadiusButton.SetRequestedY(y);
+      mBlurModeButton.SetRequestedX(revealX + 2.0f * (BLUR_TOGGLE_WIDTH + BLUR_CONTROL_SPACING));
+      mBlurModeButton.SetRequestedY(y);
+    }
+  }
+
+  float GetEntranceBlurRadius() const
+  {
+    return mBlurEnabled && !mBlurEffectEnabled ? BLUR_PRESETS[mBlurPresetIndex].entranceRadius : 0.0f;
+  }
+
+  float GetExitBlurRadius() const
+  {
+    return mBlurEnabled && !mBlurEffectEnabled ? BLUR_PRESETS[mBlurPresetIndex].exitRadius : 0.0f;
+  }
+
+  void ToggleBlurEffect()
+  {
+    // Keep running animations intact. Their next entrance/exit selects the mode;
+    // restart with 0 to compare the complete demo using one mode throughout.
+    mBlurEffectEnabled = !mBlurEffectEnabled;
+    UpdateBlurControls();
+    std::printf("Blur Effect: %s (next text animation; 0 restarts)\n", mBlurEffectEnabled ? "ON" : "OFF");
+  }
+
+  void ToggleBlur()
+  {
+    if(mBlurEffectEnabled)
+    {
+      return;
+    }
+    mBlurEnabled = !mBlurEnabled;
+    UpdateBlurControls();
+    UpdateSceneBlur();
+  }
+
+  void CycleBlurRadius()
+  {
+    if(!mBlurEnabled || mBlurEffectEnabled)
+    {
+      return;
+    }
+    mBlurPresetIndex = (mBlurPresetIndex + 1u) % BLUR_PRESETS.size();
+    UpdateBlurControls();
+    UpdateSceneBlur();
+  }
+
+  void ToggleBlurMode()
+  {
+    if(!mBlurEnabled || mBlurEffectEnabled)
+    {
+      return;
+    }
+    mBlurMode = mBlurMode == RevealBlur::BlurMode::QUALITY ? RevealBlur::BlurMode::PERFORMANCE : RevealBlur::BlurMode::QUALITY;
+    UpdateBlurControls();
+    UpdateSceneBlur();
+  }
+
+  void UpdateSceneBlur()
+  {
+    RefreshSceneLabels();
+    for(auto label : mSceneLabels)
+    {
+      auto reveal = label.GetTextReveal();
+      if(reveal == Text::Reveal::None() || label.GetRenderEffect())
+      {
+        // Completed text stays ordinary; a running Effect keeps its chosen backend.
+        continue;
+      }
+      // Update blur settings without changing the progress animator, unit or timing.
+      RevealBlur::SetBlurRadius(reveal, reveal.GetSequence() == Text::Reveal::Sequence::WHOLE_TEXT ? GetExitBlurRadius() : GetEntranceBlurRadius());
+      RevealBlur::SetBlurMode(reveal, mBlurMode);
+      label.SetTextReveal(reveal);
+    }
+  }
+
+  void ApplyTextRenderingMode()
+  {
+    for(auto label : mSceneLabels)
+    {
+      if(label.IsAsyncRendering() != mAsyncRendering)
+      {
+        label.SetAsyncRendering(mAsyncRendering);
+      }
+    }
+    // The badge/action can be waiting to mount; loading and controls live outside the scene.
+    for(auto label : {mCards[1].badge, mCards[1].action, mBlurEffectToggle, mBlurToggle, mBlurRadiusButton, mBlurModeButton, mLoadingLabel})
+    {
+      if(label && label.IsAsyncRendering() != mAsyncRendering)
+      {
+        label.SetAsyncRendering(mAsyncRendering);
+      }
+    }
+  }
+
+  void SetTextRenderingMode(bool asyncRendering)
+  {
+    if(mAsyncRendering != asyncRendering)
+    {
+      mAsyncRendering = asyncRendering;
+      RefreshSceneLabels();
+      ApplyTextRenderingMode();
+    }
+    std::printf("Text rendering: %s (1: Sync, 2: Async)\n", mAsyncRendering ? "Async" : "Sync");
+  }
+
+  StackLayout NewSceneRoot() const
+  {
+    StackLayout root = NewVertical();
     root.SetBackgroundColor(UiColor(BACKGROUND_COLOR));
     return root;
   }
@@ -443,7 +867,8 @@ private:
     enterSpec.Opacity(1.0f, Duration(SCENE_FADE_IN_SECONDS), AlphaFunction(AlphaFunction::EASE_OUT));
 
     ViewAnimationSpec exitSpec = ViewAnimationSpec::New();
-    exitSpec.Opacity(0.0f, Duration(SCENE_FADE_OUT_SECONDS), AlphaFunction(AlphaFunction::EASE_IN));
+    exitSpec.Opacity(0.0f, Duration(SCENE_FADE_OUT_SECONDS), AlphaFunction(AlphaFunction::EASE_IN),
+                      Duration(SCENE_TEXT_EXIT_SECONDS - SCENE_FADE_OUT_SECONDS));
 
     LayoutTransition transition = LayoutTransition::New();
     // Scene changes only animate visual lifetime. Bounds continue to follow the
@@ -564,7 +989,7 @@ private:
 
   View BuildGeneratingScene()
   {
-    StackLayout root = NewSceneRoot(0.0f);
+    StackLayout root = NewSceneRoot();
     root.SetPadding(Insets(SCENE_HORIZONTAL_PADDING, SCENE_HORIZONTAL_PADDING, SCENE_VERTICAL_PADDING, SCENE_VERTICAL_PADDING));
 
     StackLayout header = NewHorizontal();
@@ -592,7 +1017,7 @@ private:
     return root;
   }
 
-  ItineraryCard NewItineraryCard(std::size_t index, bool revealImmediately)
+  ItineraryCard NewItineraryCard(std::size_t index)
   {
     static constexpr std::array<const char*, 3u> DAY{{"DAY 1", "DAY 2", "DAY 3"}};
     static constexpr std::array<const char*, 3u> TITLE{{"Forest & Oreum", "Sea & Sunset", "Market & Old Town"}};
@@ -678,21 +1103,16 @@ private:
       card.root.SetLayoutTransition(NewAffordanceTransition(LayoutBoundsEdge::BOTTOM));
     }
 
-    const float progress = revealImmediately ? 1.0f : 0.0f;
-    ConfigureReveal(card.day, Text::Reveal::Unit::WORD, Text::Reveal::AUTO_FADE_DURATION_RATIO, progress);
-    ConfigureReveal(card.title, Text::Reveal::Unit::CHARACTER, Text::Reveal::AUTO_FADE_DURATION_RATIO, progress);
-    ConfigureReveal(card.places, Text::Reveal::Unit::CHARACTER, Text::Reveal::AUTO_FADE_DURATION_RATIO, progress);
-    ConfigureReveal(card.subtitle, Text::Reveal::Unit::WORD, Text::Reveal::AUTO_FADE_DURATION_RATIO, progress);
     return card;
   }
 
-  View BuildResultCards(bool revealImmediately)
+  View BuildResultCards()
   {
     FlexLayout cards = NewWrappingRow();
     cards.SetLayoutTransition(NewCardEntranceTransition());
     for(std::size_t index = 0u; index < mCards.size(); ++index)
     {
-      mCards[index] = NewItineraryCard(index, revealImmediately);
+      mCards[index] = NewItineraryCard(index);
       mCards[index].root.SetOpacity(0.0f);
       cards.Add(mCards[index].root);
     }
@@ -705,7 +1125,7 @@ private:
     return scroll;
   }
 
-  View BuildResultsScene(bool revealImmediately)
+  View BuildResultsScene()
   {
     StackLayout root = NewSceneRoot();
     root.SetPadding(Insets(SCENE_HORIZONTAL_PADDING, SCENE_HORIZONTAL_PADDING, SCENE_VERTICAL_PADDING, SCENE_VERTICAL_PADDING));
@@ -729,7 +1149,7 @@ private:
     subheading.SetRequestedHeight(38.0f);
     root.Add(subheading);
     root.Add(NewVerticalSpacer(8.0f));
-    root.Add(BuildResultCards(revealImmediately));
+    root.Add(BuildResultCards());
 
     Label hint = NewCenteredLabel("Select the best match to open your detailed AI itinerary", 14.0f, MUTED_TEXT_COLOR);
     hint.SetRequestedHeight(36.0f);
@@ -826,9 +1246,8 @@ private:
       case DemoState::GENERATING:
         return BuildGeneratingScene();
       case DemoState::REVEAL_RESULTS:
-        return BuildResultsScene(false);
       case DemoState::RESULTS_READY:
-        return BuildResultsScene(true);
+        return BuildResultsScene();
       case DemoState::DETAIL_STREAMING:
       case DemoState::DETAIL_READY:
         return BuildDetailScene();
@@ -875,9 +1294,175 @@ private:
     const PositionSize windowBounds = mWindow.GetPositionSize();
     SizeSceneContent(windowBounds.width, windowBounds.height);
 
+    StartSceneTextEntrance(token);
     mSceneContent.SetOpacity(0.0f);
     mSceneRoot.Add(mSceneContent);
     StartSceneActivity(state, token);
+  }
+
+  void RefreshSceneLabels()
+  {
+    mSceneLabels.clear();
+    if(mSceneContent)
+    {
+      CollectSceneLabels(mSceneContent);
+    }
+  }
+
+  void CollectSceneLabels(Actor actor)
+  {
+    // Streaming Markdown owns and reuses its internal Labels. Keep that path
+    // incremental; do not rebuild blur for every appended character.
+    if(MarkdownView::DownCast(actor))
+    {
+      return;
+    }
+    if(auto label = Label::DownCast(actor))
+    {
+      mSceneLabels.push_back(label);
+      return;
+    }
+    for(uint32_t index = 0u; index < actor.GetChildCount(); ++index)
+    {
+      CollectSceneLabels(actor.GetChildAt(index));
+    }
+  }
+
+  void ClearBlurEffect(Label label)
+  {
+    auto entry = std::find_if(mLabelBlurEffects.begin(), mLabelBlurEffects.end(), [label](const LabelBlurEffect& item)
+    {
+      return item.label == label;
+    });
+    if(entry != mLabelBlurEffects.end())
+    {
+      if(label.GetRenderEffect() == entry->effect)
+      {
+        label.ClearRenderEffect();
+      }
+      mLabelBlurEffects.erase(entry);
+    }
+  }
+
+  void ClearTextReveal(Label label)
+  {
+    ClearBlurEffect(label);
+    if(label.GetTextReveal() != Text::Reveal::None())
+    {
+      label.SetTextReveal(Text::Reveal::None());
+    }
+  }
+
+  void AnimateBlurEffect(Label label, Animation animation, float radius, float duration,
+                         float delay, AlphaFunction alpha, float from, float to)
+  {
+    ClearBlurEffect(label);
+    GaussianBlurEffect effect = GaussianBlurEffect::New(static_cast<uint32_t>(radius));
+    // Use the public strength-animation policy unchanged (full-resolution H/V).
+    // Attach first: activation initializes the properties animated by the effect.
+    label.SetRenderEffect(effect);
+    effect.AddBlurStrengthAnimation(animation, alpha, TimePeriod(delay, duration), from, to);
+    mLabelBlurEffects.push_back({label, effect});
+  }
+
+  void AnimateTextEntrance(Label label, Animation animation, float duration, float delay = 0.0f,
+                           float slideDuration = TEXT_SLIDE_SECONDS)
+  {
+    label.SetSelfLayoutTransition(NewTextEntranceTransition(delay, slideDuration));
+    label.Animate(animation)
+      .TextRevealProgress(1.0f, Duration(duration), AlphaFunction::EASE_OUT_SQUARE,
+                          Duration(delay + TEXT_REVEAL_LEAD_SECONDS));
+    if(mBlurEffectEnabled)
+    {
+      // Reveal keeps its units and line staggering; the effect blurs the whole Label.
+      AnimateBlurEffect(label, animation, BLUR_PRESETS[mBlurPresetIndex].entranceRadius,
+                        duration, delay + TEXT_REVEAL_LEAD_SECONDS, AlphaFunction::EASE_OUT_SQUARE, 1.0f, 0.0f);
+    }
+    else
+    {
+      ClearBlurEffect(label);
+    }
+  }
+
+  void AnimateTextExit(Label label, Animation animation, float duration)
+  {
+    const float progress    = label.GetTextRevealProgress();
+    const bool  interrupted = label.GetTextReveal() != Text::Reveal::None() && progress < 1.0f;
+    auto entry = std::find_if(mLabelBlurEffects.begin(), mLabelBlurEffects.end(), [label](const LabelBlurEffect& item)
+    {
+      return item.label == label;
+    });
+    // An interrupted entrance retains its original blur backend and radius,
+    // just as ConfigureExitReveal retains the partially revealed unit schedule.
+    const bool useEffect = interrupted ? entry != mLabelBlurEffects.end() : mBlurEffectEnabled;
+    ConfigureExitReveal(label, GetExitBlurRadius(), mBlurMode);
+    label.Animate(animation)
+      .TextRevealProgress(0.0f, Duration(duration), AlphaFunction::LINEAR);
+    if(useEffect)
+    {
+      // Both animations use the same delay/alpha: strength is always 1-progress.
+      // This also continues a stopped entrance without snapping strength to zero.
+      const float from = interrupted ? std::clamp(1.0f - progress, 0.0f, 1.0f) : 0.0f;
+      if(interrupted)
+      {
+        // The previous animator has been stopped. Keep its mounted capture and
+        // radius when reversing; replacing the effect would reinitialize it.
+        entry->effect.AddBlurStrengthAnimation(animation, AlphaFunction::LINEAR, TimePeriod(0.0f, duration), from, 1.0f);
+      }
+      else
+      {
+        AnimateBlurEffect(label, animation, BLUR_PRESETS[mBlurPresetIndex].exitRadius,
+                          duration, 0.0f, AlphaFunction::LINEAR, from, 1.0f);
+      }
+    }
+    else
+    {
+      ClearBlurEffect(label);
+    }
+  }
+
+  void StartSceneTextEntrance(uint64_t token)
+  {
+    RefreshSceneLabels();
+    // Apply the selection before the newly built scene's first on-scene layout.
+    ApplyTextRenderingMode();
+    mSceneTextAnimation = Animation::New(0.0f);
+    std::vector<Label> enteringLabels;
+    for(auto label : mSceneLabels)
+    {
+      const auto current = label.GetTextReveal();
+      ConfigureEntranceReveal(label, current == Text::Reveal::None() ? Text::Reveal::Unit::PIXEL : current.GetUnit(), GetEntranceBlurRadius(), mBlurMode);
+      if(label == mGeneratingStatus || label == mDetailStatus)
+      {
+        continue; // These status rows have their own replacement/completion flow.
+      }
+      bool cardText = false;
+      for(const auto& card : mCards)
+      {
+        cardText |= label == card.day || label == card.title || label == card.places || label == card.subtitle;
+      }
+      if(cardText && mState == DemoState::REVEAL_RESULTS)
+      {
+        continue;
+      }
+      AnimateTextEntrance(label, mSceneTextAnimation, IsLongText(label) ? 2.0f : 1.0f, 0.0f,
+                          cardText ? CARD_TEXT_SLIDE_SECONDS : TEXT_SLIDE_SECONDS);
+      enteringLabels.push_back(label);
+    }
+    mSceneTextAnimation.FinishedSignal().Connect(this, [this, token, enteringLabels](Animation animation)
+    {
+      if(token != mLifecycleToken || animation != mSceneTextAnimation)
+      {
+        return;
+      }
+      mSceneTextAnimation.Reset();
+      for(auto label : enteringLabels)
+      {
+        // Release offscreen tasks while the finished scene's gradients remain.
+        ClearTextReveal(label);
+      }
+    });
+    mSceneTextAnimation.Play();
   }
 
   void SizeSceneContent(int32_t windowWidth, int32_t windowHeight)
@@ -896,6 +1481,7 @@ private:
   void OnWindowResized(Window, Window::WindowSize windowSize)
   {
     SizeSceneContent(windowSize.GetWidth(), windowSize.GetHeight());
+    PositionBlurControls(windowSize.GetWidth(), windowSize.GetHeight());
   }
 
   void OnSceneTransitionFinished(View view, LayoutTransitionSlot slot)
@@ -938,6 +1524,13 @@ private:
     mPendingState    = state;
     mTransitioning   = true;
     StopSceneActivity(true);
+    RefreshSceneLabels();
+    mSceneExitTextAnimation = Animation::New(SCENE_TEXT_EXIT_SECONDS);
+    for(auto label : mSceneLabels)
+    {
+      AnimateTextExit(label, mSceneExitTextAnimation, SCENE_TEXT_EXIT_SECONDS);
+    }
+    mSceneExitTextAnimation.Play();
     mSceneContent.SetOpacity(1.0f);
     mSceneRoot.Remove(mSceneContent, RemovePolicy::ANIMATE_EXIT);
   }
@@ -946,6 +1539,7 @@ private:
   {
     const uint64_t token = ++mLifecycleToken;
     mTransitioning       = false;
+    StopLoading();
     StopSceneActivity();
     RemoveCurrentSceneImmediately();
     InstallState(state, token);
@@ -997,10 +1591,21 @@ private:
 
     StopAnimation(mGeneratingStatusRevealAnimation);
     mGeneratingStatus.SetText(GENERATING_STATUS[index]);
-    ConfigureReveal(mGeneratingStatus, Text::Reveal::Unit::CHARACTER, 1.0f, 0.0f);
-    mGeneratingStatusRevealAnimation = Animation::New(STATUS_FADE_IN_SECONDS);
-    mGeneratingStatus.Animate(mGeneratingStatusRevealAnimation)
-      .TextRevealProgress(1.0f, Duration(STATUS_FADE_IN_SECONDS), AlphaFunction::EASE_OUT);
+    ConfigureEntranceReveal(mGeneratingStatus, Text::Reveal::Unit::CHARACTER, GetEntranceBlurRadius(), mBlurMode);
+    if(index > 0u)
+    {
+      RemountText(mGeneratingStatus);
+    }
+    mGeneratingStatusRevealAnimation = Animation::New(0.0f);
+    AnimateTextEntrance(mGeneratingStatus, mGeneratingStatusRevealAnimation, STATUS_FADE_IN_SECONDS);
+    mGeneratingStatusRevealAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
+    {
+      if(token == mLifecycleToken && animation == mGeneratingStatusRevealAnimation)
+      {
+        mGeneratingStatusRevealAnimation.Reset();
+        ClearTextReveal(mGeneratingStatus);
+      }
+    });
     mGeneratingStatusRevealAnimation.Play();
   }
 
@@ -1013,10 +1618,8 @@ private:
     }
 
     StopAnimation(mGeneratingStatusRevealAnimation);
-    ConfigureReveal(mGeneratingStatus, Text::Reveal::Unit::CHARACTER, 1.0f, 1.0f);
     mGeneratingStatusRevealAnimation = Animation::New(STATUS_FADE_OUT_SECONDS);
-    mGeneratingStatus.Animate(mGeneratingStatusRevealAnimation)
-      .TextRevealProgress(0.0f, Duration(STATUS_FADE_OUT_SECONDS), AlphaFunction::EASE_IN);
+    AnimateTextExit(mGeneratingStatus, mGeneratingStatusRevealAnimation, STATUS_FADE_OUT_SECONDS);
     mGeneratingStatusRevealAnimation.FinishedSignal().Connect(this, [this, index, token](Animation animation)
     {
       if(token != mLifecycleToken || mState != DemoState::GENERATING ||
@@ -1062,15 +1665,18 @@ private:
 
   void StartResultReveal(uint64_t token)
   {
-    mRevealSequenceAnimation = Animation::New(REVEAL_SEQUENCE_SECONDS);
+    // Let the last Label's delay + duration determine completion before adding
+    // the badge/action. Longer descriptions must not be cut short by cleanup.
+    mRevealSequenceAnimation = Animation::New(0.0f);
     static constexpr std::array<float, 3u> CARD_DELAY{{0.00f, 0.48f, 0.96f}};
     for(std::size_t index = 0u; index < mCards.size(); ++index)
     {
       const float delay = CARD_DELAY[index];
-      mCards[index].day.Animate(mRevealSequenceAnimation).TextRevealProgress(1.0f, Duration(0.42f), AlphaFunction::LINEAR, Duration(delay));
-      mCards[index].title.Animate(mRevealSequenceAnimation).TextRevealProgress(1.0f, Duration(0.88f), AlphaFunction::LINEAR, Duration(delay + 0.10f));
-      mCards[index].places.Animate(mRevealSequenceAnimation).TextRevealProgress(1.0f, Duration(1.18f), AlphaFunction::LINEAR, Duration(delay + 0.30f));
-      mCards[index].subtitle.Animate(mRevealSequenceAnimation).TextRevealProgress(1.0f, Duration(1.05f), AlphaFunction::LINEAR, Duration(delay + 0.42f));
+      // Keep the slide visible while the foreground emerges from blur.
+      AnimateTextEntrance(mCards[index].day, mRevealSequenceAnimation, 0.42f, delay, CARD_TEXT_SLIDE_SECONDS);
+      AnimateTextEntrance(mCards[index].title, mRevealSequenceAnimation, 0.88f, delay + 0.10f, CARD_TEXT_SLIDE_SECONDS);
+      AnimateTextEntrance(mCards[index].places, mRevealSequenceAnimation, 1.18f, delay + 0.30f, CARD_TEXT_SLIDE_SECONDS);
+      AnimateTextEntrance(mCards[index].subtitle, mRevealSequenceAnimation, CARD_DESCRIPTION_SECONDS, delay + 0.42f, CARD_TEXT_SLIDE_SECONDS);
     }
     mRevealSequenceAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
     {
@@ -1079,6 +1685,13 @@ private:
         return;
       }
       mRevealSequenceAnimation.Reset();
+      for(const auto& card : mCards)
+      {
+        for(auto label : {card.day, card.title, card.places, card.subtitle})
+        {
+          ClearTextReveal(label);
+        }
+      }
       mState = DemoState::RESULTS_READY;
       StartDay2Highlight(token, true);
     });
@@ -1100,6 +1713,24 @@ private:
     mHeroGradientAnimation.SetEndAction(Animation::DISCARD);
     mHeroGradientAnimation.Play();
 
+    mAffordanceRevealAnimation = Animation::New(0.0f);
+    for(auto label : {mCards[1].badge, mCards[1].action})
+    {
+      if(label && !label.GetParent())
+      {
+        ConfigureEntranceReveal(label, Text::Reveal::Unit::PIXEL, GetEntranceBlurRadius(), mBlurMode);
+        AnimateTextEntrance(label, mAffordanceRevealAnimation, 0.60f, 0.0f, CARD_TEXT_SLIDE_SECONDS);
+      }
+    }
+    mAffordanceRevealAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
+    {
+      if(token == mLifecycleToken && animation == mAffordanceRevealAnimation)
+      {
+        mAffordanceRevealAnimation.Reset();
+        ClearTextReveal(mCards[1].badge);
+        ClearTextReveal(mCards[1].action);
+      }
+    });
     if(mCards[1].eyebrowRow && mCards[1].badge && !mCards[1].badge.GetParent())
     {
       mCards[1].eyebrowRow.Add(mCards[1].badge);
@@ -1108,6 +1739,7 @@ private:
     {
       mCards[1].root.Add(mCards[1].action);
     }
+    mAffordanceRevealAnimation.Play();
 
     if(!runEntranceSweep)
     {
@@ -1158,10 +1790,9 @@ private:
 
     PrepareMarkdownSimulation();
 
-    ConfigureReveal(mDetailStatus, Text::Reveal::Unit::CHARACTER, 0.0f, 0.0f);
-    mDetailStatusRevealAnimation = Animation::New(DETAIL_STATUS_REVEAL_SECONDS);
-    mDetailStatus.Animate(mDetailStatusRevealAnimation)
-      .TextRevealProgress(1.0f, Duration(DETAIL_STATUS_REVEAL_SECONDS), AlphaFunction::LINEAR);
+    ConfigureEntranceReveal(mDetailStatus, Text::Reveal::Unit::CHARACTER, GetEntranceBlurRadius(), mBlurMode);
+    mDetailStatusRevealAnimation = Animation::New(0.0f);
+    AnimateTextEntrance(mDetailStatus, mDetailStatusRevealAnimation, DETAIL_STATUS_REVEAL_SECONDS);
     mDetailStatusRevealAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
     {
       if(token != mLifecycleToken || mState != DemoState::DETAIL_STREAMING ||
@@ -1171,6 +1802,7 @@ private:
       }
 
       mDetailStatusRevealAnimation.Reset();
+      ClearTextReveal(mDetailStatus);
       ConfigureShimmer(mDetailStatus, false);
       StartShimmer(mDetailStatus);
       StartMarkdownDelay(token);
@@ -1184,15 +1816,36 @@ private:
     {
       return;
     }
+    StopShimmer();
+    StopAnimation(mDetailStatusRevealAnimation);
+    mDetailStatusRevealAnimation = Animation::New(STATUS_FADE_OUT_SECONDS);
+    AnimateTextExit(mDetailStatus, mDetailStatusRevealAnimation, STATUS_FADE_OUT_SECONDS);
+    mDetailStatusRevealAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
+    {
+      if(token == mLifecycleToken && animation == mDetailStatusRevealAnimation)
+      {
+        mDetailStatusRevealAnimation.Reset();
+        RevealWritingStatus(token);
+      }
+    });
+    mDetailStatusRevealAnimation.Play();
+  }
+
+  void RevealWritingStatus(uint64_t token)
+  {
+    if(token != mLifecycleToken || mState != DemoState::DETAIL_STREAMING || !mDetailStatus)
+    {
+      return;
+    }
 
     StopShimmer();
     StopAnimation(mDetailStatusRevealAnimation);
     mDetailStatus.SetText("Writing your plan...✦");
-    ConfigureReveal(mDetailStatus, Text::Reveal::Unit::CHARACTER, 0.0f, 0.0f);
+    ConfigureEntranceReveal(mDetailStatus, Text::Reveal::Unit::CHARACTER, GetEntranceBlurRadius(), mBlurMode);
+    RemountText(mDetailStatus);
 
-    mDetailStatusRevealAnimation = Animation::New(DETAIL_STATUS_REVEAL_SECONDS);
-    mDetailStatus.Animate(mDetailStatusRevealAnimation)
-      .TextRevealProgress(1.0f, Duration(DETAIL_STATUS_REVEAL_SECONDS), AlphaFunction::LINEAR);
+    mDetailStatusRevealAnimation = Animation::New(0.0f);
+    AnimateTextEntrance(mDetailStatus, mDetailStatusRevealAnimation, DETAIL_STATUS_REVEAL_SECONDS);
     mDetailStatusRevealAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
     {
       if(token != mLifecycleToken || mState != DemoState::DETAIL_STREAMING ||
@@ -1202,6 +1855,7 @@ private:
       }
 
       mDetailStatusRevealAnimation.Reset();
+      ClearTextReveal(mDetailStatus);
       ConfigureShimmer(mDetailStatus, false);
       StartShimmer(mDetailStatus);
     });
@@ -1238,7 +1892,7 @@ private:
   void StopShimmer()
   {
     StopAnimation(mShimmerAnimation);
-    if(mShimmerLabel)
+    if(mShimmerLabel && !mShuttingDown)
     {
       mShimmerLabel.SetTextGradientOverlay(Gradient::Base::None());
     }
@@ -1276,7 +1930,7 @@ private:
     StopAnimation(mSkeletonShimmerAnimation);
     for(std::size_t index = 0u; index < mSkeletonLineCount; ++index)
     {
-      if(mSkeletonLines[index])
+      if(mSkeletonLines[index] && !mShuttingDown)
       {
         mSkeletonLines[index].SetBackgroundColor(UiColor(CARD_LINE_COLOR));
       }
@@ -1293,11 +1947,15 @@ private:
 
   void RestartDemo()
   {
-    ResetToState(DemoState::INTRO);
+    ShowLoading();
   }
 
   void OnPrimaryAction()
   {
+    if(mLoadingView)
+    {
+      return;
+    }
     switch(mState)
     {
       case DemoState::INTRO:
@@ -1318,6 +1976,11 @@ private:
 
   void OnBackAction()
   {
+    if(mLoadingView)
+    {
+      mApplication.Quit();
+      return;
+    }
     switch(mState)
     {
       case DemoState::DETAIL_STREAMING:
@@ -1346,6 +2009,14 @@ private:
     if(key == "0" || key == "KP_0")
     {
       RestartDemo();
+    }
+    else if(key == "1" || key == "KP_1")
+    {
+      SetTextRenderingMode(false);
+    }
+    else if(key == "2" || key == "KP_2")
+    {
+      SetTextRenderingMode(true);
     }
     else if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
@@ -1385,26 +2056,41 @@ private:
     StopTimer(mMarkdownTimer);
     StopTimer(mFinalScrollTimer);
 
+    // A scene exit takes ownership of progress. Freeze every earlier writer,
+    // including delayed entrances, before configuring the exit Reveal.
+    StopAnimation(mSceneTextAnimation);
+    StopAnimation(mSceneExitTextAnimation);
+    StopAnimation(mAffordanceRevealAnimation);
+    StopAnimation(mGeneratingStatusRevealAnimation);
+    StopAnimation(mRevealSequenceAnimation);
+    StopAnimation(mDetailStatusRevealAnimation);
+    StopAnimation(mCompletionAnimation);
+
     if(preserveSceneVisuals)
     {
       return;
     }
 
+    for(auto& entry : mLabelBlurEffects)
+    {
+      if(entry.label.GetRenderEffect() == entry.effect)
+      {
+        entry.label.ClearRenderEffect();
+      }
+    }
+    mLabelBlurEffects.clear();
+
     StopShimmer();
     StopSkeletonShimmer();
     StopAnimation(mIntroGradientAnimation);
-    StopAnimation(mGeneratingStatusRevealAnimation);
-    StopAnimation(mRevealSequenceAnimation);
     StopAnimation(mHeroGradientAnimation);
     StopAnimation(mOverlaySweepAnimation);
-    StopAnimation(mDetailStatusRevealAnimation);
-    StopAnimation(mCompletionAnimation);
 
-    if(mCards[1].title)
+    if(mCards[1].title && !mShuttingDown)
     {
       mCards[1].title.SetTextGradientOverlay(Gradient::Base::None());
     }
-    if(mDetailStatus)
+    if(mDetailStatus && !mShuttingDown)
     {
       mDetailStatus.SetTextGradientOverlay(Gradient::Base::None());
     }
@@ -1412,6 +2098,7 @@ private:
 
   void ResetSceneHandles()
   {
+    mSceneLabels.clear();
     mIntroJeju.Reset();
     mGeneratingTitle.Reset();
     mGeneratingStatus.Reset();
@@ -1432,7 +2119,7 @@ private:
     }
   }
 
-  // Markdown streaming simulation is implemented after main().
+  // Local Markdown streaming simulation; source text and implementation follow below.
   void PrepareMarkdownSimulation();
   void StartMarkdownDelay(uint64_t token);
   void ShowMarkdownPanel(uint64_t token);
@@ -1440,6 +2127,7 @@ private:
   void TrackMarkdownBottom();
   void AppendNextMarkdownCharacters(uint64_t token);
   void FinishMarkdownStreaming(uint64_t token);
+  void RevealCompletedStatus(uint64_t token);
   void SetDetailReadyImmediately();
 
 private:
@@ -1449,6 +2137,12 @@ private:
   DemoState    mPendingState{DemoState::INTRO};
   View         mSceneRoot;
   View         mSceneContent;
+  View         mLoadingView;
+
+  std::vector<Label>           mSceneLabels;
+  std::vector<LabelBlurEffect> mLabelBlurEffects;
+
+  bool mShuttingDown{false};
 
   Label mIntroJeju;
   Label mGeneratingTitle;
@@ -1456,14 +2150,19 @@ private:
   Label mDetailHero;
   Label mDetailStatus;
   Label mShimmerLabel;
+  Label mBlurEffectToggle;
+  Label mBlurToggle;
+  Label mBlurRadiusButton;
+  Label mBlurModeButton;
+  Label mLoadingLabel;
 
   std::array<View, 9u>          mSkeletonLines;
-  std::size_t                   mSkeletonLineCount{0u};
+  std::size_t                  mSkeletonLineCount{0u};
   std::array<ItineraryCard, 3u> mCards;
-  ScrollView                    mMarkdownScroll;
-  StackLayout                   mMarkdownHost;
-  StackLayout                   mMarkdownPanel;
-  MarkdownView                  mMarkdownView;
+  ScrollView                  mMarkdownScroll;
+  StackLayout                 mMarkdownHost;
+  StackLayout                 mMarkdownPanel;
+  MarkdownView                mMarkdownView;
 
   Timer mGeneratingTimer;
 
@@ -1476,11 +2175,24 @@ private:
   Animation mOverlaySweepAnimation;
   Animation mDetailStatusRevealAnimation;
   Animation mCompletionAnimation;
+  Animation mSceneTextAnimation;
+  Animation mSceneExitTextAnimation;
+  Animation mAffordanceRevealAnimation;
+  Animation mLoadingAnimation;
+  Animation mLoadingPulseAnimation;
 
-  std::size_t mGeneratingStatusIndex{0u};
-  uint64_t    mLifecycleToken{0u};
-  uint64_t    mTransitionToken{0u};
-  bool        mTransitioning{false};
+  std::size_t               mGeneratingStatusIndex{0u};
+  std::size_t               mBlurPresetIndex{0u};
+  RevealBlur::BlurMode      mBlurMode{RevealBlur::BlurMode::PERFORMANCE};
+
+  // Scene changes invalidate old callbacks; animation handles distinguish
+  // successive animations within the same scene.
+  uint64_t mLifecycleToken{0u};
+  uint64_t mTransitionToken{0u};
+  bool     mTransitioning{false};
+  bool     mBlurEnabled{true};
+  bool     mBlurEffectEnabled{false};
+  bool     mAsyncRendering{false};
 
   // Markdown streaming simulation state.
   Timer       mMarkdownStartTimer;
@@ -1493,25 +2205,14 @@ private:
   std::string mMarkdownSource;
 };
 
-int DALI_EXPORT_API main(int argc, char** argv)
-{
-  Application application = Application::New(&argc, &argv);
-  UiConfig    config      = UiConfig::New();
-  config.Apply();
-
-  TextEffectDemo controller(application);
-  application.MainLoop();
-  return 0;
-}
-
 // Markdown streaming simulator
 namespace
 {
-constexpr uint32_t DETAIL_MARKDOWN_DELAY_MS       = 3000u;
-constexpr uint32_t MARKDOWN_STREAM_START_DELAY_MS = 180u;
-constexpr uint32_t MARKDOWN_STREAM_INTERVAL       = 6u;
-constexpr uint32_t MARKDOWN_SCROLL_INTERVAL       = 10u;
-constexpr uint32_t FINAL_SCROLL_DELAY_MS          = 32u;
+constexpr uint32_t DETAIL_MARKDOWN_DELAY_MS        = 3000u;
+constexpr uint32_t MARKDOWN_STREAM_START_DELAY_MS  = 180u;
+constexpr uint32_t MARKDOWN_STREAM_INTERVAL_MS     = 6u;
+constexpr uint32_t MARKDOWN_SCROLL_EVERY_N_UPDATES = 10u;
+constexpr uint32_t FINAL_SCROLL_DELAY_MS           = 32u;
 
 constexpr std::array<const char*, 10u> MARKDOWN_CHUNKS{{
   R"MD(# Day 2 · Sea & Sunset 🌊
@@ -1684,7 +2385,7 @@ void TextEffectDemo::StartMarkdownStreaming(uint64_t token)
   StartWritingStatus(token);
   AppendNextMarkdownCharacters(token);
 
-  mMarkdownTimer = Timer::New(MARKDOWN_STREAM_INTERVAL);
+  mMarkdownTimer = Timer::New(MARKDOWN_STREAM_INTERVAL_MS);
   mMarkdownTimer.TickSignal().Connect(this, [this, token]()
   {
     if(token != mLifecycleToken || mState != DemoState::DETAIL_STREAMING)
@@ -1729,7 +2430,7 @@ void TextEffectDemo::AppendNextMarkdownCharacters(uint64_t token)
   mMarkdownSource.assign(mMarkdownFullSource, 0u, mMarkdownByteOffset);
   mMarkdownView.SetMarkdown(Dali::String(mMarkdownSource.c_str()));
   ++mMarkdownStreamStep;
-  if(mMarkdownStreamStep % MARKDOWN_SCROLL_INTERVAL == 0u)
+  if(mMarkdownStreamStep % MARKDOWN_SCROLL_EVERY_N_UPDATES == 0u)
   {
     TrackMarkdownBottom();
   }
@@ -1754,22 +2455,14 @@ void TextEffectDemo::FinishMarkdownStreaming(uint64_t token)
   mDetailStatus.SetTextGradientOverlay(Gradient::Base::None());
   StopAnimation(mCompletionAnimation);
   mState = DemoState::DETAIL_READY;
-  mDetailStatus.SetText("Your day is ready  ✓");
-  ConfigureReveal(mDetailStatus, Text::Reveal::Unit::WORD, Text::Reveal::AUTO_FADE_DURATION_RATIO, 0.0f);
-
-  mCompletionAnimation = Animation::New(COMPLETE_REVEAL_SECONDS);
-  mDetailStatus.Animate(mCompletionAnimation)
-    .TextRevealProgress(1.0f, Duration(COMPLETE_REVEAL_SECONDS), AlphaFunction::LINEAR);
+  mCompletionAnimation = Animation::New(STATUS_FADE_OUT_SECONDS);
+  AnimateTextExit(mDetailStatus, mCompletionAnimation, STATUS_FADE_OUT_SECONDS);
   mCompletionAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
   {
-    if(token != mLifecycleToken || animation != mCompletionAnimation)
+    if(token == mLifecycleToken && animation == mCompletionAnimation)
     {
-      return;
-    }
-    mCompletionAnimation.Reset();
-    if(mDetailStatus)
-    {
-      mDetailStatus.SetTextColor(UiColor(SUCCESS_COLOR));
+      mCompletionAnimation.Reset();
+      RevealCompletedStatus(token);
     }
   });
   mCompletionAnimation.Play();
@@ -1786,6 +2479,34 @@ void TextEffectDemo::FinishMarkdownStreaming(uint64_t token)
   mFinalScrollTimer.Start();
 }
 
+void TextEffectDemo::RevealCompletedStatus(uint64_t token)
+{
+  if(token != mLifecycleToken || mState != DemoState::DETAIL_READY || !mDetailStatus)
+  {
+    return;
+  }
+  mDetailStatus.SetText("Your day is ready  ✓");
+  ConfigureEntranceReveal(mDetailStatus, Text::Reveal::Unit::WORD, GetEntranceBlurRadius(), mBlurMode);
+  RemountText(mDetailStatus);
+
+  mCompletionAnimation = Animation::New(0.0f);
+  AnimateTextEntrance(mDetailStatus, mCompletionAnimation, COMPLETE_REVEAL_SECONDS);
+  mCompletionAnimation.FinishedSignal().Connect(this, [this, token](Animation animation)
+  {
+    if(token != mLifecycleToken || animation != mCompletionAnimation)
+    {
+      return;
+    }
+    mCompletionAnimation.Reset();
+    if(mDetailStatus)
+    {
+      ClearTextReveal(mDetailStatus);
+      mDetailStatus.SetTextColor(UiColor(SUCCESS_COLOR));
+    }
+  });
+  mCompletionAnimation.Play();
+}
+
 void TextEffectDemo::SetDetailReadyImmediately()
 {
   mMarkdownFullSource = BuildMarkdownSource();
@@ -1794,4 +2515,16 @@ void TextEffectDemo::SetDetailReadyImmediately()
   mMarkdownHost.Add(mMarkdownPanel);
   mDetailStatus.SetText("Your day is ready  ✓");
   mDetailStatus.SetTextColor(UiColor(SUCCESS_COLOR));
+  ClearTextReveal(mDetailStatus);
+}
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig    config      = UiConfig::New();
+  config.Apply();
+
+  TextEffectDemo controller(application);
+  application.MainLoop();
+  return 0;
 }

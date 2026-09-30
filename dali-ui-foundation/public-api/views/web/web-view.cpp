@@ -86,6 +86,11 @@ WebView WebView::DownCast(BaseHandle handle)
   return Ui::View::DownCast<WebView, Ui::Integration::WebViewImpl>(handle);
 }
 
+void WebView::SetWebEngineType(WebEngineType type)
+{
+  Integration::WebViewImpl::SetWebEngineType(type);
+}
+
 WebView::WebView(Integration::WebViewImpl& implementation)
 : View(implementation)
 {

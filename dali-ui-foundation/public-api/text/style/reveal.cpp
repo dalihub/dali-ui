@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/public-api/text/style/reveal.h>
 
+#include <dali-ui-foundation/internal/text/reveal/reveal-extension.h>
 #include <dali/public-api/common/dali-common.h>
 #include <dali/public-api/math/math-utils.h>
 
@@ -43,6 +44,9 @@ public:
     mSequence(Sequence::WHOLE_TEXT),
     mFadeDurationRatio(AUTO_FADE_DURATION_RATIO),
     mSequenceStaggerRatio(0.0f),
+    mBlurRadius(0.0f),
+    mBlurDurationRatio(1.0f),
+    mBlurMode(0u),
     mIsNone(false)
   {
   }
@@ -51,6 +55,9 @@ public:
   Sequence mSequence;
   float    mFadeDurationRatio;
   float    mSequenceStaggerRatio;
+  float    mBlurRadius;
+  float    mBlurDurationRatio;
+  uint8_t  mBlurMode;
   bool     mIsNone;
 };
 
@@ -122,7 +129,10 @@ bool Reveal::operator==(const Reveal& rhs) const
   return mImpl->mUnit == rhs.mImpl->mUnit &&
          mImpl->mSequence == rhs.mImpl->mSequence &&
          Dali::Equals(mImpl->mFadeDurationRatio, rhs.mImpl->mFadeDurationRatio) &&
-         Dali::Equals(mImpl->mSequenceStaggerRatio, rhs.mImpl->mSequenceStaggerRatio);
+         Dali::Equals(mImpl->mSequenceStaggerRatio, rhs.mImpl->mSequenceStaggerRatio) &&
+         Dali::Equals(mImpl->mBlurRadius, rhs.mImpl->mBlurRadius) &&
+         Dali::Equals(mImpl->mBlurDurationRatio, rhs.mImpl->mBlurDurationRatio) &&
+         mImpl->mBlurMode == rhs.mImpl->mBlurMode;
 }
 
 bool Reveal::operator!=(const Reveal& rhs) const
@@ -195,6 +205,48 @@ float Reveal::GetFadeDurationRatio() const
   DALI_ASSERT_VALID_REVEAL(mImpl);
   DALI_ASSERT_REVEAL_NOT_NONE(mImpl, "Cannot access Text::Reveal::None() properties.");
   return mImpl->mFadeDurationRatio;
+}
+
+void Internal::Reveal::Extension::SetBlurRadius(Ui::Text::Reveal& reveal, float radius)
+{
+  DALI_ASSERT_VALID_REVEAL(reveal.mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(reveal.mImpl, "Cannot modify Text::Reveal::None().");
+  reveal.mImpl->mBlurRadius = radius;
+}
+
+float Internal::Reveal::Extension::GetBlurRadius(const Ui::Text::Reveal& reveal)
+{
+  DALI_ASSERT_VALID_REVEAL(reveal.mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(reveal.mImpl, "Cannot access Text::Reveal::None() properties.");
+  return reveal.mImpl->mBlurRadius;
+}
+
+void Internal::Reveal::Extension::SetBlurDurationRatio(Ui::Text::Reveal& reveal, float ratio)
+{
+  DALI_ASSERT_VALID_REVEAL(reveal.mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(reveal.mImpl, "Cannot modify Text::Reveal::None().");
+  reveal.mImpl->mBlurDurationRatio = ratio;
+}
+
+float Internal::Reveal::Extension::GetBlurDurationRatio(const Ui::Text::Reveal& reveal)
+{
+  DALI_ASSERT_VALID_REVEAL(reveal.mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(reveal.mImpl, "Cannot access Text::Reveal::None() properties.");
+  return reveal.mImpl->mBlurDurationRatio;
+}
+
+void Internal::Reveal::Extension::SetBlurMode(Ui::Text::Reveal& reveal, uint8_t mode)
+{
+  DALI_ASSERT_VALID_REVEAL(reveal.mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(reveal.mImpl, "Cannot modify Text::Reveal::None().");
+  reveal.mImpl->mBlurMode = mode;
+}
+
+uint8_t Internal::Reveal::Extension::GetBlurMode(const Ui::Text::Reveal& reveal)
+{
+  DALI_ASSERT_VALID_REVEAL(reveal.mImpl);
+  DALI_ASSERT_REVEAL_NOT_NONE(reveal.mImpl, "Cannot access Text::Reveal::None() properties.");
+  return reveal.mImpl->mBlurMode;
 }
 
 } // namespace Text

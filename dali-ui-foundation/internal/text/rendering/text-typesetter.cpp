@@ -939,11 +939,153 @@ PixelData Typesetter::RenderTextRevealMetadata(
   fadeDuration          = plan.fadeDuration;
 
   mImpl->BeginRevealMetadata(width, height, plan);
-  PixelBuffer traversal = mImpl->CreateImageBuffer(width, height, Typesetter::STYLE_NONE,
-                                                   ignoreHorizontalAlignment, Pixel::RGBA8888,
-                                                   penX, penY, startGlyph, endGlyph);
-  (void)traversal;
+  mImpl->CreateImageBuffer(width, height, Typesetter::STYLE_NONE,
+                           ignoreHorizontalAlignment, Pixel::RGBA8888,
+                           penX, penY, startGlyph, endGlyph);
   return mImpl->EndRevealMetadata();
+}
+
+Rect<uint32_t> Typesetter::GetRuntimeBlurLineRasterBounds(const Vector2& size, LineIndex lineIndex, const int32_t* lineBaseline)
+{
+  const auto&          model  = *mImpl->GetViewModel();
+  const auto           width  = static_cast<uint32_t>(size.width);
+  const auto           height = static_cast<uint32_t>(size.height);
+  const Rect<uint32_t> full(0u, 0u, width, height);
+  if(lineIndex >= model.GetNumberOfLines() || model.GetGradientSpanModelData() ||
+     model.GetHyphensCount() != 0u || model.GetEllipsisPosition() != Text::EllipsisPosition::END)
+  {
+    return full;
+  }
+  const auto& line = model.GetLines()[lineIndex];
+  if(line.isSplitToTwoHalves || line.glyphRun.numberOfGlyphs == 0u)
+  {
+    return full;
+  }
+
+  int32_t baseline = lineBaseline ? *lineBaseline : 0;
+  if(!lineBaseline)
+  {
+    if(model.GetVerticalAlignment() == Alignment::CENTER)
+    {
+      baseline = static_cast<int32_t>(std::round(0.5f * (size.height - model.GetLayoutSize().height)));
+    }
+    else if(model.GetVerticalAlignment() == Alignment::END)
+    {
+      baseline = static_cast<int32_t>(size.height - model.GetLayoutSize().height);
+    }
+    // Keep the separate per-line truncations used by CreateImageBufferForEachLine.
+    // Summing fractional metrics first would move later lines by whole pixels.
+    for(LineIndex index = 0u; index <= lineIndex; ++index)
+    {
+      const auto& current = model.GetLines()[index];
+      baseline += static_cast<int32_t>(current.ascender + GetPreOffsetVerticalLineAlignment(current, model.GetVerticalLineAlignment()));
+      if(index != lineIndex)
+      {
+        baseline += static_cast<int32_t>(-current.descender + GetPostOffsetVerticalLineAlignment(current, model.GetVerticalLineAlignment()));
+      }
+    }
+  }
+
+  const auto start  = model.GetStartIndexOfElidedGlyphs();
+  const auto first  = std::max(line.glyphRun.glyphIndex, start);
+  const auto last   = std::min(line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs - 1u, model.GetEndIndexOfElidedGlyphs());
+  int64_t    top    = height;
+  int64_t    bottom = 0;
+  for(GlyphIndex index = first; index <= last; ++index)
+  {
+    const auto& glyph = model.GetGlyphs()[index - start];
+    if(IsSyntheticReplacementGlyph(glyph) || glyph.width < Math::MACHINE_EPSILON_1000 || glyph.height < Math::MACHINE_EPSILON_1000)
+    {
+      continue;
+    }
+    TextAbstraction::GlyphBufferData bitmap;
+    bitmap.width  = static_cast<uint32_t>(glyph.width);
+    bitmap.height = static_cast<uint32_t>(glyph.height);
+    mImpl->GetFontClient().CreateBitmap(glyph.fontId, glyph.index, glyph.isItalicRequired, glyph.isBoldRequired, bitmap, 0);
+    if(bitmap.buffer && bitmap.width > 0u && bitmap.height > 0u)
+    {
+      const int64_t y = static_cast<int64_t>(baseline) + static_cast<int32_t>(model.GetLayout()[index - start].y);
+      top             = std::min(top, y);
+      bottom          = std::max(bottom, y + bitmap.height);
+    }
+    // GlyphBufferData releases owned buffers; cached font bitmaps stay borrowed.
+  }
+  // Match the final source crop's filtering guard; Gaussian support is added
+  // later to the GPU target and does not require a full-height CPU plane.
+  top    = std::max<int64_t>(0, top - 2);
+  bottom = std::min<int64_t>(height, bottom + 2);
+  return bottom > top ? Rect<uint32_t>(0u, static_cast<uint32_t>(top), width, static_cast<uint32_t>(bottom - top)) : full;
+}
+
+PixelData Typesetter::RenderRuntimeBlurLine(const Vector2& size, LineIndex lineIndex,
+                                            RuntimeBlurPlane plane, Pixel::Format format,
+                                            const Internal::Reveal::Plan& plan,
+                                            uint32_t rasterOffsetY, uint32_t rasterHeight,
+                                            uint32_t rasterOffsetX, uint32_t rasterWidth)
+{
+  const auto& model = *mImpl->GetViewModel();
+  if(lineIndex >= model.GetNumberOfLines())
+  {
+    return {};
+  }
+  const auto& line    = model.GetLines()[lineIndex];
+  const auto& lastRun = line.isSplitToTwoHalves ? line.glyphRunSecondHalf : line.glyphRun;
+  if(lastRun.numberOfGlyphs == 0u)
+  {
+    return {};
+  }
+  const GlyphIndex first = line.glyphRun.glyphIndex;
+  const GlyphIndex last  = lastRun.glyphIndex + lastRun.numberOfGlyphs - 1u;
+  int32_t          penY  = 0;
+  if(model.GetVerticalAlignment() == Alignment::CENTER)
+  {
+    penY = static_cast<int32_t>(std::round(0.5f * (size.height - model.GetLayoutSize().height)));
+  }
+  else if(model.GetVerticalAlignment() == Alignment::END)
+  {
+    penY = static_cast<int32_t>(size.height - model.GetLayoutSize().height);
+  }
+  const auto width  = static_cast<uint32_t>(size.width);
+  const auto height = static_cast<uint32_t>(size.height);
+  if(rasterHeight == 0u)
+  {
+    rasterHeight = height;
+  }
+  if(rasterWidth == 0u)
+  {
+    rasterWidth = width;
+  }
+  if(rasterOffsetY > height || rasterHeight > height - rasterOffsetY ||
+     rasterOffsetX > width || rasterWidth > width - rasterOffsetX ||
+     (plane != RuntimeBlurPlane::REVEAL_METADATA && (rasterOffsetX != 0u || rasterWidth != width)) ||
+     (plane != RuntimeBlurPlane::REVEAL_METADATA && model.GetGradientSpanModelData() &&
+      (rasterOffsetY != 0u || rasterHeight != height)))
+  {
+    return {};
+  }
+  penY -= static_cast<int32_t>(rasterOffsetY);
+  PixelBuffer buffer;
+  switch(plane)
+  {
+    case RuntimeBlurPlane::GRADIENT_PRESERVED:
+      buffer = mImpl->CreateTextGradientPreservedImageBuffer(width, rasterHeight, false, format, 0, penY, first, last);
+      break;
+    case RuntimeBlurPlane::GRADIENT_MASK:
+      buffer = mImpl->CreateTextGradientMaskImageBuffer(width, rasterHeight, false, format, 0, penY, first, last);
+      break;
+    case RuntimeBlurPlane::REVEAL_METADATA:
+      mImpl->BeginRevealMetadata(rasterWidth, rasterHeight, plan);
+      mImpl->CreateImageBuffer(rasterWidth, rasterHeight, STYLE_NONE, false, Pixel::RGBA8888,
+                               -static_cast<int32_t>(rasterOffsetX), penY, first, last,
+                               rasterOffsetY, height);
+      return mImpl->EndRevealMetadata();
+    default:
+      buffer = mImpl->CreateImageBuffer(width, rasterHeight,
+                                        plane == RuntimeBlurPlane::COLOR_MASK ? STYLE_MASK : STYLE_NONE,
+                                        false, format, 0, penY, first, last);
+      break;
+  }
+  return PixelBuffer::Convert(buffer);
 }
 
 PixelBuffer Typesetter::CreateFullBackgroundBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
