@@ -20,6 +20,7 @@
 #include <dali/integration-api/pixel-data-integ.h>
 #include <dali/integration-api/trace.h>
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <utility>
 
@@ -68,14 +69,28 @@ float ConvertToEven(float value)
 
 float GetDpi(TextAbstraction::FontClient& fontClient)
 {
-  static uint32_t horizontalDpi = 0u;
-  static uint32_t verticalDpi   = 0u;
+  static std::atomic<uint32_t> cachedDpi{0u};
+  uint32_t                     dpi = cachedDpi.load(std::memory_order_relaxed);
 
-  if(DALI_UNLIKELY(horizontalDpi == 0u))
+  if(DALI_UNLIKELY(dpi == 0u))
   {
+    uint32_t horizontalDpi = 0u;
+    uint32_t verticalDpi   = 0u;
     fontClient.GetDpi(horizontalDpi, verticalDpi);
+    if(horizontalDpi != 0u)
+    {
+      // Keep the first nonzero value. A zero result must allow a later retry.
+      if(cachedDpi.compare_exchange_strong(dpi, horizontalDpi, std::memory_order_relaxed))
+      {
+        dpi = horizontalDpi;
+      }
+    }
+    else
+    {
+      dpi = cachedDpi.load(std::memory_order_relaxed);
+    }
   }
-  return static_cast<float>(horizontalDpi);
+  return static_cast<float>(dpi);
 }
 
 float ConvertPixelToPoint(float pixel, TextAbstraction::FontClient& fontClient)
