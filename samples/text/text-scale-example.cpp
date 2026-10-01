@@ -15,8 +15,12 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/devel-api/adaptor-framework/application.h>
+#include <dali/integration-api/system/system-settings.h>
 
-#include <cstdlib>
+#include <array>
+#include <iomanip>
+#include <iterator>
+#include <sstream>
 #include <string>
 
 using namespace Dali;
@@ -24,84 +28,96 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING       = 8.0f;
-constexpr float STACK_PADDING       = 16.0f;
-constexpr float BUTTON_HEIGHT       = 44.0f;
-constexpr float TARGET_LABEL_HEIGHT = 80.0f;
-constexpr float TARGET_INPUT_HEIGHT = 80.0f;
+using SystemFont                          = Dali::Integration::SystemSettings::FontSize;
+constexpr float       STACK_SPACING       = 8.f;
+constexpr float       STACK_PADDING       = 16.f;
+constexpr float       BUTTON_HEIGHT       = 34.f;
+constexpr float       TARGET_INPUT_HEIGHT = 80.f;
+const Vector2         IMAGE_SIZE(36.f, 24.f); // Match the 24px font height and flag_kr.png's 3:2 aspect ratio.
+constexpr const char* TEST_TEXT = "The quick brown fox jumps over the lazy dog. 1234567890";
 
-const char* FONT_SIZE_ENV       = "DALI_SYSTEM_FONT_SIZE";
-const char* FONT_SIZE_WATCH_ENV = "DALI_SYSTEM_FONT_SIZE_WATCH";
-const char* TEST_TEXT           = "The quick brown fox jumps over the lazy dog. 1234567890";
+struct FontOption
+{
+  const char* key;
+  const char* name;
+  SystemFont  value;
+};
+constexpr FontOption FONT_OPTIONS[] = {
+  {"1", "SMALL", SystemFont::SMALL},
+  {"2", "NORMAL", SystemFont::NORMAL},
+  {"3", "LARGE", SystemFont::LARGE},
+  {"4", "EXTRA_LARGE", SystemFont::EXTRA_LARGE},
+  {"5", "GIANT", SystemFont::GIANT}};
+
+struct UiOption
+{
+  const char* key;
+  float       scale;
+};
+constexpr UiOption UI_OPTIONS[] = {{"Q", 0.8f}, {"W", 1.f}, {"E", 1.2f}, {"R", 1.5f}, {"T", 2.f}};
+
+struct ClampOption
+{
+  const char* key;
+  const char* label;
+  float       minimum;
+  float       maximum;
+};
+constexpr ClampOption CLAMP_OPTIONS[] = {
+  {"0", "Default 0.5..2.0", 0.5f, 2.f},
+  {"F1", "Min 1.2", 1.2f, 2.f},
+  {"F2", "Max 1.3", 0.5f, 1.3f},
+  {"F3", "Min 1.4 > max 1.0", 1.4f, 1.f},
+  {"F4", "Fixed 2.0", 2.f, 2.f}};
 
 const Dali::Vector<Text::Fit::Candidate>& GetFitCandidates()
 {
-  static Dali::Vector<Text::Fit::Candidate> candidates = []
+  static const Dali::Vector<Text::Fit::Candidate> candidates = []
   {
     Dali::Vector<Text::Fit::Candidate> values;
-    values.PushBack(Text::Fit::Candidate(10.0f, 20.0f));
-    values.PushBack(Text::Fit::Candidate(12.0f, 24.0f));
-    values.PushBack(Text::Fit::Candidate(14.0f, 28.0f));
-    values.PushBack(Text::Fit::Candidate(16.0f, 32.0f));
-    values.PushBack(Text::Fit::Candidate(18.0f, 36.0f));
-    values.PushBack(Text::Fit::Candidate(20.0f, 40.0f));
+    values.PushBack(Text::Fit::Candidate(10.f, 20.f));
+    values.PushBack(Text::Fit::Candidate(12.f, 24.f));
+    values.PushBack(Text::Fit::Candidate(14.f, 28.f));
+    values.PushBack(Text::Fit::Candidate(16.f, 32.f));
+    values.PushBack(Text::Fit::Candidate(18.f, 36.f));
+    values.PushBack(Text::Fit::Candidate(20.f, 40.f));
     return values;
   }();
   return candidates;
 }
 
-Label CreateButton(const char* text, float fontSize = 14.0f)
-{
-  Label button = Label::New(text);
-  button.SetFontSize(fontSize);
-  button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
-  button.SetVerticalTextAlignment(Text::Alignment::CENTER);
-  button.SetBackgroundColor(UiColor(0x4A90D9));
-  button.SetRequestedWidth(MATCH_PARENT);
-  button.SetRequestedHeight(BUTTON_HEIGHT);
-  button.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
-  return button;
-}
-
 Label CreateHeaderLabel(const char* text)
 {
-  Label label = Label::New(text);
-  label.SetFontSize(14.0f);
+  auto label = Label::New(text);
+  label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  label.SetSystemFontSizeScaleEnabled(false);
+  label.SetFontSize(14.f);
+  label.SetTextColor(UiColor(0x243447));
+  label.SetMultiLine(true);
+  label.SetRequestedWidth(MATCH_PARENT);
+  label.SetRequestedHeight(WRAP_CONTENT);
   return label;
 }
 
-const char* GetEnvironmentVariableValue(const char* variableName)
+Label CreateButton(const char* text)
 {
-#if defined(_MSC_VER)
-  thread_local std::string value;
-  char*                    environmentVariableValue = nullptr;
-  std::size_t              valueLength              = 0u;
-  if(_dupenv_s(&environmentVariableValue, &valueLength, variableName) != 0 || environmentVariableValue == nullptr)
-  {
-    value.clear();
-    return nullptr;
-  }
-
-  value.assign(environmentVariableValue);
-  std::free(environmentVariableValue);
-  return value.c_str();
-#else
-  return std::getenv(variableName);
-#endif
+  auto button = CreateHeaderLabel(text);
+  button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+  button.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  button.SetTextColor(UiColor(0xFFFFFF));
+  button.SetBackgroundColor(UiColor(0x365D7C));
+  button.SetRequestedHeight(BUTTON_HEIGHT);
+  button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.f).SetAlignment(LayoutAlignment::FILL));
+  return button;
 }
 
-void SetEnvironmentVariable(const char* variableName, const char* value)
+StackLayout CreateRow()
 {
-#if defined(_MSC_VER)
-  _putenv_s(variableName, value);
-#else
-  setenv(variableName, value, 1);
-#endif
-}
-
-void SetSystemFontSizeEnv(const char* fontSize)
-{
-  SetEnvironmentVariable(FONT_SIZE_ENV, fontSize);
+  auto row = StackLayout::New(StackOrientation::HORIZONTAL);
+  row.SetRequestedWidth(MATCH_PARENT);
+  row.SetRequestedHeight(WRAP_CONTENT);
+  row.SetSpacing(STACK_SPACING);
+  return row;
 }
 } // namespace
 
@@ -115,370 +131,297 @@ public:
   }
 
 private:
+  std::array<Label, 4> Labels() const
+  {
+    return {mTargetLabel, mImageLabel, mFitLabel, mFitCandidateLabel};
+  }
+
+  template<typename Action>
+  void AddButton(StackLayout row, const char* text, Action action)
+  {
+    auto button = CreateButton(text);
+    button.TouchEventSignal().Connect(this, [action](Actor, TouchEvent event)
+    {
+      if(event.GetPointCount() > 0u && event.GetState(0u) == PointState::UP) action();
+      return true;
+    });
+    row.Add(button);
+  }
+
   void OnInit(Application application)
   {
-    Window window = application.GetWindow();
-    window.SetBackgroundColor(UiColor(0xF5F5F5));
+    auto window = application.GetWindow();
+    window.SetPositionSize(PositionSize(0, 0, 1120, 920));
+    window.SetBackgroundColor(UiColor(0xF5F7FA));
     window.KeyEventSignal().Connect(this, &TextScaleController::OnKeyEvent);
 
-    // Target Label for visual testing
-    mTargetLabel = Label::New(TEST_TEXT);
-    mTargetLabel.SetRequestedWidth(MATCH_PARENT);
-    mTargetLabel.SetRequestedHeight(TARGET_LABEL_HEIGHT);
-    mTargetLabel.SetMultiLine(true);
-    mTargetLabel.SetFontSize(24.0f);
-    mTargetLabel.SetBackgroundColor(UiColor(0xFFFFFF));
-    mTargetLabel.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
-
-    // Target InputField for visual testing
-    mTargetInputField = InputField::New();
-    mTargetInputField.SetRequestedWidth(MATCH_PARENT);
-    mTargetInputField.SetRequestedHeight(TARGET_INPUT_HEIGHT);
-    mTargetInputField.SetFontSize(24.0f);
-    mTargetInputField.SetText("InputField test text");
-    mTargetInputField.SetBackgroundColor(UiColor(0xFFFFFF));
-    mTargetInputField.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
-
-    mFitLabel = Label::New(TEST_TEXT);
-    mFitLabel.SetRequestedWidth(MATCH_PARENT);
-    mFitLabel.SetRequestedHeight(WRAP_CONTENT);
-    mFitLabel.SetMaximumHeight(120);
-    mFitLabel.SetMultiLine(true);
-    mFitLabel.SetBackgroundColor(UiColor(0xFFFFFF));
-    mFitLabel.SetTextFit(Text::Fit::Range(10, 20, 2));
-    mFitLabel.SetLineHeight(40.0f);
-    mFitLabel.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
-    mFitLabel.SetPadding(Insets(16.0f, 16.0f, 0.0f, 0.0f));
-
-    mFitCandidateLabel = Label::New(TEST_TEXT);
-    mFitCandidateLabel.SetRequestedWidth(MATCH_PARENT);
-    mFitCandidateLabel.SetRequestedHeight(WRAP_CONTENT);
-    mFitCandidateLabel.SetMaximumHeight(120);
-    mFitCandidateLabel.SetMultiLine(true);
-    mFitCandidateLabel.SetBackgroundColor(UiColor(0xFFFFFF));
-    mFitCandidateLabel.SetTextFit(GetFitCandidates());
-    mFitCandidateLabel.SetPadding(Insets(16.0f, 16.0f, 0.0f, 0.0f));
-
-    mStatusLabel = Label::New();
-    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
-    mStatusLabel.SetRequestedHeight(WRAP_CONTENT);
-    mStatusLabel.SetFontSize(12.0f);
-    mStatusLabel.SetMultiLine(true);
-    mStatusLabel.SetBackgroundColor(UiColor(0xE8E8E8));
-    mStatusLabel.SetPadding(Insets(16.0f, 16.0f, 16.0f, 16.0f));
-
-    UpdateStatus();
-
-    Label titleButton = CreateButton("System Font Size Scale Test", 16.0f);
-    titleButton.SetBackgroundColor(UiColor(0x2C3E50));
-
-    Label btn1 = CreateButton("1. System Font SMALL");
-    btn1.SetBackgroundColor(UiColor(0x3498DB));
-
-    Label btn2 = CreateButton("2. System Font NORMAL");
-    btn2.SetBackgroundColor(UiColor(0x2ECC71));
-
-    Label btn3 = CreateButton("3. System Font LARGE");
-    btn3.SetBackgroundColor(UiColor(0xE74C3C));
-
-    Label btn4 = CreateButton("4. System Font EXTRA_LARGE");
-    btn4.SetBackgroundColor(UiColor(0xE67E22));
-
-    Label btn5 = CreateButton("5. System Font GIANT");
-    btn5.SetBackgroundColor(UiColor(0x9B59B6));
-
-    Label btn6 = CreateButton("6. Enable System Scale");
-    btn6.SetBackgroundColor(UiColor(0x1ABC9C));
-
-    Label btn7 = CreateButton("7. Disable System Scale");
-    btn7.SetBackgroundColor(UiColor(0x7F8C8D));
-
-    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    auto root = StackLayout::New(StackOrientation::VERTICAL);
+    // Keep the test controls/HUD readable while the targets follow global UI scale.
+    root.SetUiScalePolicy(UiScalePolicy::DISABLED);
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    auto title = CreateHeaderLabel("Text scale: font, UI, ImageSpan and TextFit");
+    title.SetFontSize(22.f);
+    root.Add(title);
 
-    root.Add(titleButton);
-    root.Add(CreateHeaderLabel("Target Label:"));
-    root.Add(mTargetLabel);
-    root.Add(CreateHeaderLabel("Target InputField:"));
-    root.Add(mTargetInputField);
-    root.Add(CreateHeaderLabel("Fit Range & Candidates:"));
-    root.Add(mFitLabel);
-    root.Add(mFitCandidateLabel);
-    root.Add(CreateHeaderLabel("Current Status:"));
+    auto fonts = CreateRow();
+    for(const auto& option : FONT_OPTIONS)
+    {
+      const std::string caption = std::string(option.key) + ": " + option.name;
+      AddButton(fonts, caption.c_str(), [this, value = option.value]()
+      { SetSystemFontSize(value); });
+    }
+    root.Add(fonts);
+    auto uiScales = CreateRow();
+    for(const auto& option : UI_OPTIONS)
+    {
+      std::ostringstream caption;
+      caption << option.key << ": UI " << option.scale;
+      AddButton(uiScales, caption.str().c_str(), [this, scale = option.scale]()
+      { SetUiScale(scale); });
+    }
+    root.Add(uiScales);
+    auto modes = CreateRow();
+    AddButton(modes, "6: System scale ON", [this]()
+    { SetSystemFontSizeScaleEnabled(true); });
+    AddButton(modes, "7: System scale OFF", [this]()
+    { SetSystemFontSizeScaleEnabled(false); });
+    AddButton(modes, "S: Sync Labels", [this]()
+    { SetRendering(false); });
+    AddButton(modes, "A: Async Labels", [this]()
+    { SetRendering(true); });
+    root.Add(modes);
+    auto clamps = CreateRow();
+    for(unsigned i = 0; i < std::size(CLAMP_OPTIONS); ++i)
+    {
+      const std::string caption = std::string(CLAMP_OPTIONS[i].key) + ": " + CLAMP_OPTIONS[i].label;
+      AddButton(clamps, caption.c_str(), [this, i]()
+      { ApplyMinMaxScale(i); });
+    }
+    root.Add(clamps);
+
+    mStatusLabel = CreateHeaderLabel("");
+    mStatusLabel.SetBackgroundColor(UiColor(0xE5EDF4));
+    mStatusLabel.SetPadding(Insets(12.f, 12.f, 8.f, 8.f));
     root.Add(mStatusLabel);
-    root.Add(CreateHeaderLabel("Test Scenarios:"));
-    root.Add(btn1);
-    root.Add(btn2);
-    root.Add(btn3);
-    root.Add(btn4);
-    root.Add(btn5);
-    root.Add(btn6);
-    root.Add(btn7);
+
+    mTargetLabel       = Label::New(TEST_TEXT);
+    mImageLabel        = Label::New();
+    mFitLabel          = Label::New(TEST_TEXT);
+    mFitCandidateLabel = Label::New(TEST_TEXT);
+    for(auto label : Labels())
+    {
+      label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+      label.SetRequestedWidth(MATCH_PARENT);
+      label.SetRequestedHeight(WRAP_CONTENT);
+      label.SetMultiLine(true);
+      label.SetFontSize(24.f);
+      label.SetTextColor(UiColor(0x172B4D));
+      label.SetBackgroundColor(UiColor(0xFFFFFF));
+      label.SetPadding(Insets(16.f, 16.f, 16.f, 16.f));
+    }
+    mTargetLabel.SetMinimumHeight(80.f);
+    mImageLabel.SetMinimumHeight(80.f);
+    auto       builder    = Text::StyledTextBuilder::New("Text ABC ");
+    const auto imageIndex = builder.GetUtf32Length();
+    builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
+    Text::ImageAttributes image(RESOURCES_DIR "flag_kr.png", IMAGE_SIZE);
+    image.SetAlignment(Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
+    builder.SetSpan(Text::ImageSpan::New(image), imageIndex, imageIndex + 1u);
+    builder.AppendText(" DEF");
+    mImageLabel.SetStyledText(builder.Build());
+
+    mTargetInputField = InputField::New();
+    mTargetInputField.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    mTargetInputField.SetRequestedWidth(MATCH_PARENT);
+    mTargetInputField.SetRequestedHeight(TARGET_INPUT_HEIGHT);
+    mTargetInputField.SetFontSize(24.f);
+    mTargetInputField.SetText("InputField test text");
+    mTargetInputField.SetBackgroundColor(UiColor(0xFFFFFF));
+    mTargetInputField.SetPadding(Insets(16.f, 16.f, 16.f, 16.f));
+
+    mFitLabel.SetMaximumHeight(120.f);
+    mFitLabel.SetTextFit(Text::Fit::Range(10.f, 20.f, 2.f));
+    mFitLabel.SetLineHeight(40.f);
+    mFitLabel.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
+    mFitLabel.SetPadding(Insets(16.f, 16.f, 0.f, 0.f));
+    mFitCandidateLabel.SetMaximumHeight(120.f);
+    mFitCandidateLabel.SetTextFit(GetFitCandidates());
+    mFitCandidateLabel.SetPadding(Insets(16.f, 16.f, 0.f, 0.f));
+
+    auto targets = StackLayout::New(StackOrientation::VERTICAL);
+    targets.SetRequestedWidth(MATCH_PARENT);
+    targets.SetRequestedHeight(WRAP_CONTENT);
+    targets.SetSpacing(STACK_SPACING);
+    targets.Add(CreateHeaderLabel("A. Normal Label | authored font 24px"));
+    targets.Add(mTargetLabel);
+    targets.Add(CreateHeaderLabel("B. ImageSpan Label | flag_kr.png, authored image 36x24 | Text ABC [image] DEF"));
+    targets.Add(mImageLabel);
+    targets.Add(CreateHeaderLabel("C. InputField | system font scale, synchronous control"));
+    targets.Add(mTargetInputField);
+    targets.Add(CreateHeaderLabel("D. TextFit Range | 10..20 step 2, absolute line height 40, max height 120"));
+    targets.Add(mFitLabel);
+    targets.Add(CreateHeaderLabel("E. TextFit Candidates | (font, line height): (10,20)..(20,40), step (2,4)"));
+    targets.Add(mFitCandidateLabel);
+    auto scroll = ScrollView::New();
+    scroll.SetScrollDirection(ScrollDirection::Vertical);
+    scroll.SetRequestedWidth(MATCH_PARENT);
+    scroll.SetRequestedHeight(MATCH_PARENT);
+    scroll.SetLayoutParams(StackLayoutParams::New().SetWeight(1.f).SetAlignment(LayoutAlignment::FILL));
+    scroll.SetContent(targets);
+    root.Add(scroll);
     window.Add(root);
 
-    btn1.TouchEventSignal().Connect(this, &TextScaleController::OnButton1Touched);
-    btn2.TouchEventSignal().Connect(this, &TextScaleController::OnButton2Touched);
-    btn3.TouchEventSignal().Connect(this, &TextScaleController::OnButton3Touched);
-    btn4.TouchEventSignal().Connect(this, &TextScaleController::OnButton4Touched);
-    btn5.TouchEventSignal().Connect(this, &TextScaleController::OnButton5Touched);
-    btn6.TouchEventSignal().Connect(this, &TextScaleController::OnButton6Touched);
-    btn7.TouchEventSignal().Connect(this, &TextScaleController::OnButton7Touched);
+    auto settings = Dali::Integration::SystemSettings::Get();
+    settings.FontSizeChangedSignal().Connect(this, &TextScaleController::OnSystemFontSizeChanged);
+    SetRendering(false);
+    ApplyMinMaxScale(0u);
+    SetSystemFontSizeScaleEnabled(true);
+    SetSystemFontSize(SystemFont::NORMAL);
+    SetUiScale(1.f);
   }
 
-  void UpdateStatus()
+  void SetSystemFontSize(SystemFont size)
   {
-    // Get Label values
-    float labelMinFontSizeScale = mTargetLabel.GetMinimumFontSizeScale();
-    float labelMaxFontSizeScale = mTargetLabel.GetMaximumFontSizeScale();
-    bool  labelSystemEnabled    = mTargetLabel.IsSystemFontSizeScaleEnabled();
-    float labelAdjustedScale    = mTargetLabel.GetAdjustedFontSizeScale();
-
-    // Get InputField values
-    float inputMinFontSizeScale = mTargetInputField.GetMinimumFontSizeScale();
-    float inputMaxFontSizeScale = mTargetInputField.GetMaximumFontSizeScale();
-    bool  inputSystemEnabled    = mTargetInputField.IsSystemFontSizeScaleEnabled();
-    float inputAdjustedScale    = mTargetInputField.GetAdjustedFontSizeScale();
-
-    Dali::String status;
-
-    const char* environmentFontSize = GetEnvironmentVariableValue(FONT_SIZE_ENV);
-
-    status += "[System Font Env]\n";
-    status += environmentFontSize ? environmentFontSize : "(null)";
-    status += "\nScale updates after X backend watch tick.";
-    status += "\n\n";
-
-    status += "[Label]\n";
-    status += "Min: ";
-    status += std::to_string(labelMinFontSizeScale).substr(0, 5).c_str();
-    status += ", Max: ";
-    status += std::to_string(labelMaxFontSizeScale).substr(0, 5).c_str();
-    status += "\nSystem: ";
-    status += (labelSystemEnabled ? "ON" : "OFF");
-    status += ", Adjusted: ";
-    status += std::to_string(labelAdjustedScale).substr(0, 5).c_str();
-
-    status += "\n\n[InputField]\n";
-    status += "Min: ";
-    status += std::to_string(inputMinFontSizeScale).substr(0, 5).c_str();
-    status += ", Max: ";
-    status += std::to_string(inputMaxFontSizeScale).substr(0, 5).c_str();
-    status += "\nSystem: ";
-    status += (inputSystemEnabled ? "ON" : "OFF");
-    status += ", Adjusted: ";
-    status += std::to_string(inputAdjustedScale).substr(0, 5).c_str();
-
-    mStatusLabel.SetText(status);
+    // Sample/test-only injection through DALi Integration API. This simulates
+    // notifications emitted by the platform SystemSettings provider, exercising
+    // the real control update path on desktop. Applications must not emit this
+    // signal to change the user's system font-size setting.
+    Dali::Integration::SystemSettings::Get().FontSizeChangedSignal().Emit(size);
   }
 
-  void SetSystemFontSize(const char* fontSize)
+  void OnSystemFontSizeChanged(SystemFont size)
   {
-    SetSystemFontSizeEnv(fontSize);
+    mSystemFont = size;
+    UpdateStatus();
+  }
 
+  void SetUiScale(float scale)
+  {
+    UiScaleManager::Get().SetScale(scale);
     UpdateStatus();
   }
 
   void SetSystemFontSizeScaleEnabled(bool enabled)
   {
-    mTargetLabel.SetSystemFontSizeScaleEnabled(enabled);
+    for(auto label : Labels()) label.SetSystemFontSizeScaleEnabled(enabled);
     mTargetInputField.SetSystemFontSizeScaleEnabled(enabled);
-    mFitLabel.SetSystemFontSizeScaleEnabled(enabled);
-    mFitCandidateLabel.SetSystemFontSizeScaleEnabled(enabled);
-
     UpdateStatus();
   }
 
-  void ApplyMinMaxScale(float minScale, float maxScale)
+  void ApplyMinMaxScale(unsigned preset)
   {
-    mTargetLabel.SetMinimumFontSizeScale(minScale);
-    mTargetLabel.SetMaximumFontSizeScale(maxScale);
-
-    mTargetInputField.SetMinimumFontSizeScale(minScale);
-    mTargetInputField.SetMaximumFontSizeScale(maxScale);
-
-    mFitLabel.SetMinimumFontSizeScale(minScale);
-    mFitLabel.SetMaximumFontSizeScale(maxScale);
-
-    mFitCandidateLabel.SetMinimumFontSizeScale(minScale);
-    mFitCandidateLabel.SetMaximumFontSizeScale(maxScale);
-
+    mClampPreset       = preset;
+    const auto& option = CLAMP_OPTIONS[preset];
+    for(auto label : Labels())
+    {
+      label.SetMinimumFontSizeScale(option.minimum);
+      label.SetMaximumFontSizeScale(option.maximum);
+    }
+    mTargetInputField.SetMinimumFontSizeScale(option.minimum);
+    mTargetInputField.SetMaximumFontSizeScale(option.maximum);
     UpdateStatus();
   }
 
-  bool OnButton1Touched(Actor, TouchEvent touch)
+  void SetRendering(bool async)
   {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      SetSystemFontSize("SMALL");
-    }
-    return true;
+    mAsync = async;
+    for(auto label : Labels()) label.SetAsyncRendering(async);
+    UpdateStatus();
   }
 
-  bool OnButton2Touched(Actor, TouchEvent touch)
+  void UpdateStatus()
   {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      SetSystemFontSize("NORMAL");
-    }
-    return true;
+    const char* fontName = "UNKNOWN";
+    for(const auto& option : FONT_OPTIONS)
+      if(option.value == mSystemFont) fontName = option.name;
+    const float        font = mTargetLabel.GetAdjustedFontSizeScale();
+    const float        ui   = UiScaleManager::Get().GetScale();
+    const auto         size = IMAGE_SIZE * (font * ui);
+    std::ostringstream status;
+    status << std::fixed << std::setprecision(2)
+           << "System Font: " << fontName << " | Adjusted Font Scale: " << font
+           << " | UI Scale: " << ui << " | Effective Text Scale: " << font * ui
+           << "\nSystem Scale Enabled: " << (mTargetLabel.IsSystemFontSizeScaleEnabled() ? "ON" : "OFF")
+           << " | Rendering: " << (mAsync ? "ASYNC" : "SYNC")
+           << " | InputField: SYNC, adjusted=" << mTargetInputField.GetAdjustedFontSizeScale()
+           << "\nClamp: " << CLAMP_OPTIONS[mClampPreset].label
+           << " | configured min/max=" << mTargetLabel.GetMinimumFontSizeScale() << "/" << mTargetLabel.GetMaximumFontSizeScale();
+    if(mClampPreset == 3u) status << " | min > max: effective range is 1.40..1.40";
+    status << "\nImageSpan authored: 36x24 | Expected display: " << size.x << "x" << size.y;
+    mStatusLabel.SetText(status.str().c_str());
   }
 
-  bool OnButton3Touched(Actor, TouchEvent touch)
+  void OnKeyEvent(Window, KeyEvent event)
   {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      SetSystemFontSize("LARGE");
-    }
-    return true;
-  }
-
-  bool OnButton4Touched(Actor, TouchEvent touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      SetSystemFontSize("EXTRA_LARGE");
-    }
-    return true;
-  }
-
-  bool OnButton5Touched(Actor, TouchEvent touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      SetSystemFontSize("GIANT");
-    }
-    return true;
-  }
-
-  bool OnButton6Touched(Actor, TouchEvent touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      SetSystemFontSizeScaleEnabled(true);
-    }
-    return true;
-  }
-
-  bool OnButton7Touched(Actor, TouchEvent touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      SetSystemFontSizeScaleEnabled(false);
-    }
-    return true;
-  }
-
-  void OnKeyEvent(Window window, KeyEvent event)
-  {
-    if(event.GetState() != KeyEvent::UP)
-    {
-      return;
-    }
-
-    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+    if(event.GetState() != KeyEvent::UP) return;
+    if(IsKey(event, DALI_KEY_ESCAPE) || IsKey(event, DALI_KEY_BACK))
     {
       mApplication.Quit();
       return;
     }
-
-    // system font size scale
-    if(event.GetKeyName() == "1")
+    const auto key = event.GetKeyName();
+    for(const auto& option : FONT_OPTIONS)
     {
-      SetSystemFontSize("SMALL");
-      ApplyMinMaxScale(0.5f, 2.0f);
+      if(key == option.key)
+      {
+        SetSystemFontSize(option.value);
+        return;
+      }
     }
-    else if(event.GetKeyName() == "2")
+    for(const auto& option : UI_OPTIONS)
     {
-      SetSystemFontSize("NORMAL");
-      ApplyMinMaxScale(0.5f, 2.0f);
+      std::string lower(option.key);
+      lower[0] = static_cast<char>(lower[0] + ('a' - 'A'));
+      if(key == option.key || key == lower.c_str())
+      {
+        SetUiScale(option.scale);
+        return;
+      }
     }
-    else if(event.GetKeyName() == "3")
+    for(unsigned i = 0u; i < std::size(CLAMP_OPTIONS); ++i)
     {
-      SetSystemFontSize("LARGE");
-      ApplyMinMaxScale(1.2f, 2.0f);
+      if(key == CLAMP_OPTIONS[i].key)
+      {
+        ApplyMinMaxScale(i);
+        return;
+      }
     }
-    else if(event.GetKeyName() == "4")
-    {
-      SetSystemFontSize("EXTRA_LARGE");
-      ApplyMinMaxScale(0.5f, 1.3f);
-    }
-    else if(event.GetKeyName() == "5")
-    {
-      SetSystemFontSize("GIANT");
-      ApplyMinMaxScale(1.4f, 1.0f);
-    }
-    else if(event.GetKeyName() == "6")
-    {
+    if(key == "6")
       SetSystemFontSizeScaleEnabled(true);
-    }
-    else if(event.GetKeyName() == "7")
-    {
+    else if(key == "7")
       SetSystemFontSizeScaleEnabled(false);
-    }
-    // ui scale
-    else if(event.GetKeyName() == "q")
-    {
-      UiScaleManager::Get().SetScale(0.8f);
-    }
-    else if(event.GetKeyName() == "w")
-    {
-      UiScaleManager::Get().SetScale(1.0f);
-    }
-    else if(event.GetKeyName() == "e")
-    {
-      UiScaleManager::Get().SetScale(1.2f);
-    }
-    else if(event.GetKeyName() == "r")
-    {
-      UiScaleManager::Get().SetScale(1.5f);
-    }
-    else if(event.GetKeyName() == "t")
-    {
-      UiScaleManager::Get().SetScale(2.0f);
-    }
-    else if(event.GetKeyName() == "s")
-    {
-      mTargetLabel.SetAsyncRendering(false);
-      mFitLabel.SetAsyncRendering(false);
-      mFitCandidateLabel.SetAsyncRendering(false);
-    }
-    else if(event.GetKeyName() == "a")
-    {
-      mTargetLabel.SetAsyncRendering(true);
-      mFitLabel.SetAsyncRendering(true);
-      mFitCandidateLabel.SetAsyncRendering(true);
-    }
+    else if(key == "s" || key == "S")
+      SetRendering(false);
+    else if(key == "a" || key == "A")
+      SetRendering(true);
   }
 
-private:
   Application& mApplication;
   Label        mTargetLabel;
+  Label        mImageLabel;
   InputField   mTargetInputField;
   Label        mFitLabel;
   Label        mFitCandidateLabel;
   Label        mStatusLabel;
+  SystemFont   mSystemFont{SystemFont::NORMAL};
+  unsigned     mClampPreset{0u};
+  bool         mAsync{false};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  // Ubuntu/X backend-only test hook for runtime system font size changes.
-  SetEnvironmentVariable(FONT_SIZE_WATCH_ENV, "1");
-  SetEnvironmentVariable(FONT_SIZE_ENV, "NORMAL");
-
-  Application application = Application::New(&argc, &argv);
-  auto        config      = UiConfig::New();
+  auto application = Application::New(&argc, &argv);
+  auto config      = UiConfig::New();
   config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::SMALL, 0.8f);
-  config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::NORMAL, 1.0f);
+  config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::NORMAL, 1.f);
   config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::LARGE, 1.2f);
   config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::EXTRA_LARGE, 1.4f);
   config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::GIANT, 1.5f);
   config.Apply();
-
   TextScaleController controller(application);
   application.MainLoop();
-
   return 0;
 }

@@ -30,6 +30,7 @@ SET(TC_SOURCES
     utc-Dali-TextAlignment-internal.cpp
     utc-Dali-TextEllipsis-internal.cpp
     utc-Dali-ReplacementProjection-internal.cpp
+    utc-Dali-ImageSpanFontScale-internal.cpp
     utc-Dali-ReplacementEditNormalizer-internal.cpp
     utc-Dali-TextGradientStyle-internal.cpp
     utc-Dali-TextEffectsStyle-internal.cpp

@@ -355,17 +355,21 @@ bool InlineReplacementManager::CreateEntryVisual(InlineReplacementViewHost& host
 
 InlineReplacementManager::RuntimeImageDescriptor InlineReplacementManager::BuildRuntimeImageDescriptor(
   const Ui::Text::ReplacementRunSnapshot& run,
-  float                                   effectiveScale)
+  const Vector2&                          displaySize)
 {
   RuntimeImageDescriptor descriptor;
   descriptor.source = run.image.source;
-
-  const float safeScale    = std::isfinite(effectiveScale) && effectiveScale > 0.0f ? effectiveScale : 1.0f;
-  const float maxDimension = static_cast<float>(std::numeric_limits<int32_t>::max());
-  descriptor.desiredWidth  = static_cast<int32_t>(std::min(maxDimension,
-                                                           std::max(1.0f, std::ceil(run.metrics.width * safeScale))));
-  descriptor.desiredHeight = static_cast<int32_t>(std::min(maxDimension,
-                                                           std::max(1.0f, std::ceil(run.metrics.height * safeScale))));
+  // Final, unclipped placements already include UI and adjusted font scales.
+  // Async publication has removed the text-only renderScale at this point.
+  // Match ImageDimensions' uint16_t range instead of overflowing on conversion.
+  const auto dimension = [](float value)
+  {
+    return std::isfinite(value) ? static_cast<int32_t>(std::min(
+                                    static_cast<float>(std::numeric_limits<uint16_t>::max()), std::max(1.0f, std::ceil(value))))
+                                : 1;
+  };
+  descriptor.desiredWidth  = dimension(displaySize.x);
+  descriptor.desiredHeight = dimension(displaySize.y);
   return descriptor;
 }
 
@@ -981,7 +985,7 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
     {
       continue;
     }
-    const RuntimeImageDescriptor descriptor = BuildRuntimeImageDescriptor(run, effectiveScale);
+    const RuntimeImageDescriptor descriptor = BuildRuntimeImageDescriptor(run, placement.size);
     Entry*                       entry      = findEntry(run.occurrenceIdentity);
     bool                         entryCreated{false};
     if(entry && !IsSameRuntimeImageDescriptor(entry->descriptor, descriptor))
