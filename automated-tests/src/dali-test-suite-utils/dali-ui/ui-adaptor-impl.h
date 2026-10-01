@@ -56,6 +56,26 @@ namespace Internal
 {
 namespace Adaptor
 {
+// Match the observer interface used by adaptor plugins. Its internal header is
+// not installed with the SDK used to build UI tests.
+class LifeCycleObserver
+{
+public:
+  virtual void OnStart() = 0;
+  virtual void OnPause() = 0;
+  virtual void OnResume() = 0;
+  virtual void OnStop() = 0;
+  virtual void OnDestroy() = 0;
+
+protected:
+  LifeCycleObserver() {}
+  virtual ~LifeCycleObserver() {}
+
+private:
+  LifeCycleObserver(const LifeCycleObserver&);
+  LifeCycleObserver& operator=(const LifeCycleObserver&);
+};
+
 class Adaptor
 {
 public:
@@ -66,6 +86,8 @@ public:
 
   void Start(Dali::Window window);
   void Stop();
+  void AddObserver(LifeCycleObserver& observer);
+  void RemoveObserver(LifeCycleObserver& observer);
 
   bool AddIdle(CallbackBase* callback, bool hasReturnValue);
   void RemoveIdle(CallbackBase* callback);
@@ -112,6 +134,7 @@ public:
   }
 
 private:
+  std::vector<LifeCycleObserver*>              mObservers;
   Vector<CallbackBase*>                        mCallbacks;
   Vector<CallbackBase*>                        mReturnCallbacks;
   std::vector<Internal::Adaptor::SceneHolder*> mWindows;

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://tizen.org/ns/packages"
+          package="com.samsung.dali.ui.widget-viewer"
+          version="1.0.0"
+          api-version="10.0">
+    <profile name="tizen" />
+    <label>DALI UI Widget Viewer</label>
+    <description>DALI UI widget viewer sample</description>
+    <ui-application appid="com.samsung.dali.ui.widget-viewer"
+                    exec="/usr/apps/com.samsung.dali.ui.widget-viewer/bin/widget-viewer.example"
+                    type="dali-c++app"
+                    multiple="false"
+                    taskmanage="true"
+                    nodisplay="false">
+        <label>DALI UI Widget Viewer</label>
+    </ui-application>
+    <privileges>
+        <privilege>http://tizen.org/privilege/widget.viewer</privilege>
+        <privilege>http://tizen.org/privilege/datasharing</privilege>
+    </privileges>
+</manifest>

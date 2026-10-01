@@ -174,3 +174,5 @@
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
 #include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
+
+#include <dali-ui-foundation/public-api/views/widget/widget-view.h>

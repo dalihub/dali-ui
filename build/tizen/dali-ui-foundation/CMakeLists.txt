@@ -2,6 +2,10 @@ PROJECT(dali-ui-foundation)
 SET(PROJECT_LIB_NAME dali${DALI_API_MAJOR}-ui-foundation)
 SET(FOUNDATION_ROOT_SRC_DIR ${ROOT_SRC_DIR}/dali-ui-foundation)
 
+SET_PROPERTY(SOURCE ${FOUNDATION_ROOT_SRC_DIR}/internal/views/widget/widget-view-impl.cpp
+             APPEND PROPERTY COMPILE_DEFINITIONS
+             DALI_WIDGET_VIEWER_LOCALE_DIR="${WIDGET_VIEWER_LOCALE_DIR_NORMALIZED}")
+
 # ---------------------------------------------------------
 # 1. Shader Generator Configuration
 # ---------------------------------------------------------
