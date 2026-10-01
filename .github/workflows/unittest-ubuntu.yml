@@ -284,6 +284,14 @@ jobs:
             }
           ' build/tizen/dali.info
         } >> "$GITHUB_STEP_SUMMARY"
+        if ! awk -F: '
+          /^LF:/ { linesFound += $2 }
+          /^LH:/ { linesHit += $2 }
+          END { exit linesFound > 0 && 100 * linesHit >= 90 * linesFound ? 0 : 1 }
+        ' build/tizen/dali.info; then
+          echo '::error::Total line coverage is below the required 90%.'
+          exit 1
+        fi
 
     - name: Calculate changed-code coverage
       if: matrix.configuration == 'debug' && github.event_name == 'pull_request_target'
@@ -295,7 +303,7 @@ jobs:
           --coverage build/tizen/dali.info \
           --base HEAD^1 \
           --head HEAD \
-          --threshold 80 \
+          --threshold 90 \
           --output-directory patch_coverage
         cat patch_coverage/summary.md >> "$GITHUB_STEP_SUMMARY"
 
@@ -395,7 +403,7 @@ jobs:
         coverage-artifact-name: coverage
 
   patch-coverage:
-    name: Patch coverage (80%)
+    name: Patch coverage (90%)
     runs-on: [ code-linux ]
     needs: [ build, testhub ]
     if: github.event_name == 'pull_request_target' && needs.build.result == 'success' && needs.testhub.result == 'success'
@@ -413,6 +421,6 @@ jobs:
 
         cat patch_coverage/summary.md >> "$GITHUB_STEP_SUMMARY"
         if ! grep -qx 'PASS' patch_coverage/status; then
-          echo '::error::Changed-code coverage is below the required 80%.'
+          echo '::error::Changed-code coverage is below the required 90%.'
           exit 1
         fi
