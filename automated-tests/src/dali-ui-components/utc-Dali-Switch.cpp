@@ -370,3 +370,32 @@ int UtcDaliSwitchOverlayTargetP(void)
   DALI_TEST_CHECK(target.IsAccessibilityHidden());
   END_TEST;
 }
+
+int UtcDaliSwitchAnimatedSelectionInterruptionP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  Switch control = Switch::New();
+  ArrangeOnScene(application, control);
+  control.SetSelectionAnimationMode(SelectionAnimationMode::ENABLED);
+  View thumbTarget = control.GetStateEffectTarget();
+  DALI_TEST_EQUALS(PositionX(thumbTarget), TRACK_X, TEST_LOCATION);
+
+  control.SetSelected(true);
+  application.SendNotification();
+  application.Render(40);
+  DALI_TEST_CHECK(control.IsSelected());
+  control.SetSelected(false);
+  application.SendNotification();
+  application.Render(500);
+  DALI_TEST_CHECK(!control.IsSelected());
+  DALI_TEST_EQUALS(PositionX(thumbTarget), TRACK_X, 0.01f, TEST_LOCATION);
+
+  control.SetSelected(true);
+  application.SendNotification();
+  application.Render(500);
+  DALI_TEST_CHECK(control.IsSelected());
+  DALI_TEST_EQUALS(PositionX(thumbTarget), TRACK_X + TRAVEL, 0.01f, TEST_LOCATION);
+  control.SetSelectionAnimationMode(SelectionAnimationMode::DISABLED);
+  control.SetSelected(false);
+  END_TEST;
+}

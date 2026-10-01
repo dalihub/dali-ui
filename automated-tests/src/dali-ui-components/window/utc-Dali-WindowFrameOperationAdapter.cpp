@@ -59,3 +59,52 @@ int UtcDaliWindowFrameAdapterObservesStateWhenRequestsDisabledP(void)
   DALI_TEST_CHECK(adapter->GetWindowState().minimized);
   END_TEST;
 }
+
+int UtcDaliWindowFrameAdapterMoveResizeAndBoundsP(void)
+{
+  UiTestApplication application;
+  Dali::Window window = application.GetWindow();
+  WindowFrameOptions options;
+  auto adapter = CreateDaliWindowOperationAdapter(window, WindowOperationAdapter::CloseCallback(), options);
+  DALI_TEST_CHECK(adapter->RequestMove());
+  DALI_TEST_CHECK(adapter->RequestResize(Dali::WindowResizeDirection::BOTTOM_RIGHT));
+  const auto bounds = adapter->GetTargetMaximizedBounds();
+  DALI_TEST_CHECK(bounds);
+  DALI_TEST_EQUALS(bounds->width, 480, TEST_LOCATION);
+  DALI_TEST_EQUALS(bounds->height, 800, TEST_LOCATION);
+
+  WindowFrameOptions disabled;
+  disabled.SetFeatureEnabled(WindowFrameFeature::MOVE, false);
+  disabled.SetFeatureEnabled(WindowFrameFeature::RESIZE, false);
+  auto gated = CreateDaliWindowOperationAdapter(window, WindowOperationAdapter::CloseCallback(), disabled);
+  DALI_TEST_CHECK(!gated->RequestMove());
+  DALI_TEST_CHECK(!gated->RequestResize(Dali::WindowResizeDirection::BOTTOM_RIGHT));
+  END_TEST;
+}
+
+int UtcDaliWindowFrameAdapterAspectRatioHintLifecycleP(void)
+{
+  UiTestApplication application;
+  Dali::Window window = application.GetWindow();
+  WindowFrameOptions options;
+  const Dali::String hint("wm.policy.win.resize_aspect_ratio");
+
+  auto created = CreateDaliWindowOperationAdapter(window, WindowOperationAdapter::CloseCallback(), options);
+  DALI_TEST_CHECK(created->ApplyResizeAspectRatioHint(true));
+  const unsigned int hintId = window.GetAuxiliaryHintId(hint);
+  DALI_TEST_CHECK(hintId != 0u);
+  DALI_TEST_EQUALS(window.GetAuxiliaryHintValue(hintId), Dali::String("1"), TEST_LOCATION);
+  DALI_TEST_CHECK(!created->RequestClose());
+
+  auto reused = CreateDaliWindowOperationAdapter(window, WindowOperationAdapter::CloseCallback(), options);
+  DALI_TEST_CHECK(reused->ApplyResizeAspectRatioHint(false));
+  DALI_TEST_EQUALS(window.GetAuxiliaryHintValue(hintId), Dali::String("0"), TEST_LOCATION);
+  reused->RestoreResizeAspectRatioHint();
+  DALI_TEST_EQUALS(window.GetAuxiliaryHintValue(hintId), Dali::String("1"), TEST_LOCATION);
+  created->RestoreResizeAspectRatioHint();
+  DALI_TEST_EQUALS(window.GetAuxiliaryHintValue(hintId), Dali::String("0"), TEST_LOCATION);
+  reused.reset();
+  created.reset();
+  DALI_TEST_EQUALS(window.GetAuxiliaryHintId(hint), 0u, TEST_LOCATION);
+  END_TEST;
+}
