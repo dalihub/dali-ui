@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/internal/views/view/inner-shadow.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
@@ -200,5 +201,56 @@ int UtcDaliViewSetInnerShadowP(void)
   const Property::Value clearedValue = view.GetProperty(Dali::Ui::Integration::View::Property::INNER_SHADOW);
   DALI_TEST_CHECK(clearedValue.GetMap() && clearedValue.GetMap()->Empty());
 
+  END_TEST;
+}
+
+int UtcDaliViewDecorationCornerRadiusConstraintsP(void)
+{
+  UiTestApplication application;
+
+  auto makeView = [&](CornerRadiusPolicy policy, const Vector4& radius)
+  {
+    View view = View::New();
+    view.SetRequestedWidth(200.0f);
+    view.SetRequestedHeight(120.0f);
+    view.SetCornerRadius(radius);
+    view.SetCornerRadiusPolicy(policy);
+    view.SetBorderlineWidth(8.0f);
+    view.SetBorderlineOffset(0.5f);
+    view.SetBorderlineColor(UiColor(0.2f, 0.4f, 0.6f, 1.0f));
+    view.SetInnerShadow(InnerShadow(Insets(4.0f, 8.0f, 12.0f, 16.0f), 6.0f,
+                                    UiColor(0.0f, 0.0f, 0.0f, 0.5f)));
+    application.GetScene().Add(view);
+    return view;
+  };
+
+  View relativeView = makeView(CornerRadiusPolicy::RELATIVE, Vector4(0.0f, 0.1f, 0.2f, 0.3f));
+  View absoluteView = makeView(CornerRadiusPolicy::ABSOLUTE, Vector4(0.0f, 8.0f, 12.0f, 16.0f));
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(relativeView.GetRendererCount() >= 2u);
+  DALI_TEST_CHECK(absoluteView.GetRendererCount() >= 2u);
+  END_TEST;
+}
+
+int UtcDaliInnerShadowDirectVisualFactoryP(void)
+{
+  UiTestApplication application;
+  DALI_TEST_CHECK(!Dali::Ui::Internal::InnerShadow::CreateVisual(InnerShadow::None()));
+  const UiColor color(0.1f, 0.2f, 0.3f, 0.5f);
+  InnerShadow shadow(Insets(20.0f, -10.0f, 30.0f, 5.0f), 8.0f, color);
+  ColorVisual visual = Dali::Ui::Internal::InnerShadow::CreateVisual(shadow);
+  DALI_TEST_CHECK(visual);
+  DALI_TEST_EQUALS(visual.GetBlurRadius(), 8.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetOffsetX(), 15.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetOffsetY(), 12.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetExtraWidth(), 146.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetExtraHeight(), 121.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetBorderlineWidth(), 78.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetBorderlineColor(), color, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetCutoutPolicy(), CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS, TEST_LOCATION);
   END_TEST;
 }

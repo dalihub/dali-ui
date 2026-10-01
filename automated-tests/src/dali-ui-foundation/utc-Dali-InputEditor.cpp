@@ -17,16 +17,21 @@
 
 // EXTERNAL INCLUDES
 #include <dali.h>
+#include <dali/integration-api/adaptor-framework/input-method-context-integ.h>
+#include <dali/integration-api/events/key-event-integ.h>
 #include <stdlib.h>
 #include <iostream>
 #include <limits>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/text/input-style.h>
+#include <dali-ui-foundation/integration-api/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-test-suite-utils.h>
+#include <test-gesture-generator.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -1842,7 +1847,7 @@ int UtcDaliInputEditorTextGradientControlLifecycleP(void)
 
 int UtcDaliInputEditorTextGradientStartOffsetAnimationP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputEditor     editor = InputEditor::New();
 
   Animation noGradientAnimation = Animation::New(0.1f);
@@ -1865,6 +1870,9 @@ int UtcDaliInputEditorTextGradientStartOffsetAnimationP(void)
   editor.SetPlaceholderTextGradient(MakeInputEditorConicGradient());
 
   Animation animation = Animation::New(0.1f);
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
   editor.Animate(animation)
     .TextGradientStartOffset(0.75f, Duration(0.1f))
     .PlaceholderTextGradientStartOffset(0.5f, Duration(0.1f));
@@ -1876,6 +1884,15 @@ int UtcDaliInputEditorTextGradientStartOffsetAnimationP(void)
   DALI_TEST_CHECK(normalIndex != placeholderIndex);
   DALI_TEST_EQUALS(editor.GetProperty<float>(normalIndex), 0.125f, EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(editor.GetProperty<float>(placeholderIndex), -0.25f, EPSILON, TEST_LOCATION);
+  animation.Play();
+  application.SendNotification();
+  application.Render(50);
+  application.SendNotification();
+  application.Render(50);
+  DALI_TEST_CHECK(editor.GetProperty<float>(placeholderIndex) > -0.25f);
+  animation.Stop();
+  application.SendNotification();
+  application.Render();
 
   InputEditorAnimationSpec spec = InputEditor::NewAnimationSpec();
   spec.TextGradientStartOffsetBy(0.05f, Duration(0.1f))
@@ -1895,5 +1912,372 @@ int UtcDaliInputEditorTextGradientStartOffsetAnimationP(void)
   DALI_TEST_EQUALS(editor.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), normalIndex, TEST_LOCATION);
   DALI_TEST_EQUALS(editor.GetPropertyIndex(PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), placeholderIndex, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliInputEditorKeyboardEditingAcrossLinesP(void)
+{
+  UiTestApplication application;
+  InputEditor editor = InputEditor::New();
+  editor.SetRequestedWidth(300.0f);
+  editor.SetRequestedHeight(140.0f);
+  editor.SetFocusable(true);
+  editor.SetText("one\ntwo");
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(editor));
+  editor.SetCursorPosition(4u);
+  DALI_TEST_EQUALS(editor.GetCursorPosition(), 4u, TEST_LOCATION);
+
+  Dali::Integration::KeyEvent backspace(
+    "BackSpace", "BackSpace", "", DALI_KEY_BACKSPACE, 0, 100u,
+    Dali::Integration::KeyEvent::DOWN, "", "",
+    Device::Class::KEYBOARD, Device::Subclass::NONE);
+  application.ProcessEvent(backspace);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetText(), Dali::String("onetwo"), TEST_LOCATION);
+  DALI_TEST_EQUALS(editor.GetCursorPosition(), 3u, TEST_LOCATION);
+
+  Dali::Integration::KeyEvent typed(
+    "z", "z", "Z", 90, 0, 200u,
+    Dali::Integration::KeyEvent::DOWN, "", "",
+    Device::Class::KEYBOARD, Device::Subclass::NONE);
+  application.ProcessEvent(typed);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetText(), Dali::String("oneZtwo"), TEST_LOCATION);
+
+  Dali::Integration::KeyEvent selectAll(
+    "a", "a", "", 38, Dali::KeyEvent::CTRL, 300u,
+    Dali::Integration::KeyEvent::DOWN, "", "",
+    Device::Class::KEYBOARD, Device::Subclass::NONE);
+  application.ProcessEvent(selectAll);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetSelectedText(), Dali::String("oneZtwo"), TEST_LOCATION);
+
+  Dali::Integration::KeyEvent replace(
+    "q", "q", "Q", 24, 0, 400u,
+    Dali::Integration::KeyEvent::DOWN, "", "",
+    Device::Class::KEYBOARD, Device::Subclass::NONE);
+  application.ProcessEvent(replace);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetText(), Dali::String("Q"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputEditorSelectAndClearMultilineTextP(void)
+{
+  UiTestApplication application;
+  InputEditor editor = InputEditor::New();
+  editor.SetFocusable(true);
+  editor.SetRequestedWidth(300.0f);
+  editor.SetRequestedHeight(140.0f);
+  editor.SetText("one\ntwo");
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(editor));
+  editor.SelectText(2u, 5u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetSelectedText(), Dali::String("e\nt"), TEST_LOCATION);
+  editor.SelectWholeText();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetSelectedText(), Dali::String("one\ntwo"), TEST_LOCATION);
+  editor.ClearSelection();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetSelectedText(), Dali::String(""), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorInputMethodPreeditAndSelectionP(void)
+{
+  UiTestApplication application;
+  InputEditor editor = InputEditor::New();
+  editor.SetFocusable(true);
+  editor.SetRequestedWidth(300.0f);
+  editor.SetRequestedHeight(140.0f);
+  editor.SetText("one\ntwo");
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(editor));
+  editor.SetCursorPosition(7u);
+
+  namespace InputMethod = Dali::Integration::InputMethodContext;
+  InputMethodContext context = editor.GetInputMethodContext();
+  DALI_TEST_CHECK(context);
+  auto preedit = InputMethod::EventData(InputMethod::PRE_EDIT, Dali::String("x"), 0, 1);
+  auto result = InputMethod::KeyboardEventReceivedSignal(context).Emit(context, preedit);
+  DALI_TEST_CHECK(result.update);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetText(), Dali::String("one\ntwox"), TEST_LOCATION);
+
+  preedit = InputMethod::EventData(InputMethod::PRE_EDIT, Dali::String("xy"), 0, 2);
+  InputMethod::KeyboardEventReceivedSignal(context).Emit(context, preedit);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetText(), Dali::String("one\ntwoxy"), TEST_LOCATION);
+
+  auto commit = InputMethod::EventData(InputMethod::COMMIT, Dali::String("Z"), 0, 1);
+  InputMethod::KeyboardEventReceivedSignal(context).Emit(context, commit);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetText(), Dali::String("one\ntwoZ"), TEST_LOCATION);
+
+  auto surrounding = InputMethod::EventData(InputMethod::GET_SURROUNDING, Dali::String(), 0, 0);
+  result = InputMethod::KeyboardEventReceivedSignal(context).Emit(context, surrounding);
+  DALI_TEST_CHECK(result.update);
+  DALI_TEST_EQUALS(result.currentText, Dali::String("one\ntwoZ"), TEST_LOCATION);
+
+  auto selection = InputMethod::EventData(InputMethod::SELECTION_SET, 2, 5);
+  InputMethod::KeyboardEventReceivedSignal(context).Emit(context, selection);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetSelectedText(), Dali::String("e\nt"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorTouchSelectionGesturesP(void)
+{
+  UiTestApplication application;
+  InputEditor editor = InputEditor::New();
+  editor.SetText("alpha beta gamma\nsecond line of editable text\nthird line");
+  editor.SetRequestedWidth(300.0f);
+  editor.SetRequestedHeight(160.0f);
+  editor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+  editor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
+
+  TestGenerateTap(application, 40.0f, 30.0f, 100u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == editor);
+
+  TestGenerateTap(application, 40.0f, 30.0f, 300u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(editor.GetCursorPosition() <= editor.GetText().Size());
+  DALI_TEST_CHECK(editor.GetSelectedText().Size() > 0u);
+
+  TestGenerateLongPress(application, 40.0f, 30.0f, 700u);
+  application.SendNotification();
+  application.Render();
+  TestEndLongPress(application, 40.0f, 30.0f, 700u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(editor.GetText().Size() > 0u);
+
+  editor.SetText("first line\nsecond line\nthird line\nfourth line\nfifth line\nsixth line\nseventh line");
+  editor.SetRequestedHeight(60.0f);
+  application.SendNotification();
+  application.Render();
+  uint32_t panTime = 900u;
+  TestStartPan(application, Vector2(40.0f, 45.0f), Vector2(40.0f, 25.0f), panTime);
+  TestMovePan(application, Vector2(40.0f, 10.0f), panTime + 16u);
+  TestEndPan(application, Vector2(40.0f, 10.0f), panTime + 32u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(editor.GetText().Size() > 0u);
+  END_TEST;
+}
+
+int UtcDaliInputEditorSelectionAndInputSignalsP(void)
+{
+  UiTestApplication application;
+  InputEditor control = InputEditor::New();
+  control.SetFocusable(true);
+  control.SetRequestedWidth(300.0f);
+  control.SetRequestedHeight(100.0f);
+  application.GetScene().Add(control);
+  application.SendNotification();
+  application.Render();
+
+  unsigned int textChanged = 0u;
+  unsigned int maximumReached = 0u;
+  unsigned int inputRejected = 0u;
+  unsigned int selectionStarted = 0u;
+  unsigned int selectionChanged = 0u;
+  unsigned int selectionCleared = 0u;
+  control.TextChangedSignal().Connect(&application, [&](View) { ++textChanged; });
+  control.MaximumLengthReachedSignal().Connect(&application, [&](View) { ++maximumReached; });
+  control.InputRejectedSignal().Connect(&application, [&](View, Text::InputFilter::RejectReason) { ++inputRejected; });
+  control.SelectionStartedSignal().Connect(&application, [&](View) { ++selectionStarted; });
+  control.SelectionChangedSignal().Connect(&application, [&](View, uint32_t, uint32_t) { ++selectionChanged; });
+  control.SelectionClearedSignal().Connect(&application, [&](View) { ++selectionCleared; });
+
+  control.SetText("abc");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(textChanged > 0u);
+
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(control));
+  control.SelectText(0u, 2u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(control.GetSelectedText(), Dali::String("ab"), TEST_LOCATION);
+  control.ClearSelection();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(control.GetSelectedText(), Dali::String(""), TEST_LOCATION);
+  DALI_TEST_CHECK(selectionStarted + selectionChanged + selectionCleared > 0u);
+
+  Text::InputFilter filter;
+  filter.SetAllowPattern("[a-z]");
+  control.SetInputFilter(filter);
+  control.SetMaximumLength(3);
+  control.SetCursorPosition(3u);
+  InputMethodContext context = control.GetInputMethodContext();
+  DALI_TEST_CHECK(context);
+  namespace InputMethod = Dali::Integration::InputMethodContext;
+  auto rejected = InputMethod::EventData(InputMethod::COMMIT, Dali::String("4"), 0, 1);
+  InputMethod::KeyboardEventReceivedSignal(context).Emit(context, rejected);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(control.GetText(), Dali::String("abc"), TEST_LOCATION);
+  DALI_TEST_CHECK(inputRejected > 0u);
+
+  auto overflow = InputMethod::EventData(InputMethod::COMMIT, Dali::String("d"), 0, 1);
+  InputMethod::KeyboardEventReceivedSignal(context).Emit(context, overflow);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(control.GetText(), Dali::String("abc"), TEST_LOCATION);
+  DALI_TEST_CHECK(maximumReached > 0u);
+  FocusManager::Get().ClearFocus();
+  END_TEST;
+}
+
+int UtcDaliInputEditorLayoutAndTypingStyleAccessorsP(void)
+{
+  UiTestApplication application;
+  InputEditor editor = InputEditor::New();
+  editor.SetText("first line\nsecond line");
+  editor.SetRequestedWidth(240.0f);
+  editor.SetRequestedHeight(120.0f);
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(editor.GetLineCount() >= 2);
+  DALI_TEST_CHECK(editor.GetLineCount(240.0f) >= 2);
+  DALI_TEST_CHECK(editor.CursorPositionChangedSignal().Empty());
+  DALI_TEST_CHECK(editor.TypingStyleChangedSignal().Empty());
+
+  auto& impl = static_cast<Dali::Ui::Integration::InputEditorImpl&>(editor.GetImplementation());
+  impl.SetFontSizeScale(1.25f);
+  DALI_TEST_EQUALS(impl.GetFontSizeScale(), 1.25f, TEST_LOCATION);
+  impl.SetLetterSpacing(2.0f);
+  DALI_TEST_EQUALS(impl.GetLetterSpacing(), 2.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.GetFontSize() > 0.0f);
+  END_TEST;
+}
+
+int UtcDaliInputEditorClipboardCopyCutPasteP(void)
+{
+  UiTestApplication application;
+  InputEditor editor = InputEditor::New();
+  editor.SetFocusable(true);
+  editor.SetText("alpha beta");
+  editor.SetRequestedWidth(240.0f);
+  editor.SetRequestedHeight(80.0f);
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(editor));
+  auto& impl = static_cast<Dali::Ui::Integration::InputEditorImpl&>(editor.GetImplementation());
+
+  editor.SelectText(0u, 5u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetSelectedText(), Dali::String("alpha"), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.CopyText(), std::string("alpha"), TEST_LOCATION);
+  editor.SelectText(6u, 10u);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetSelectedText(), Dali::String("beta"), TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.CutText(), std::string("beta"), TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetText(), Dali::String("alpha "), TEST_LOCATION);
+
+  impl.PasteText();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(editor.GetText(), Dali::String("alpha beta"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorTypingStyleSelectionAndBackgroundP(void)
+{
+  UiTestApplication application;
+  InputEditor editor = InputEditor::New();
+  editor.SetText("sample text");
+  editor.SetRequestedWidth(240.0f);
+  editor.SetRequestedHeight(100.0f);
+  editor.SetBackgroundColor(UiColor(Color::CYAN));
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = static_cast<Dali::Ui::Integration::InputEditorImpl&>(editor.GetImplementation());
+  Vector4 background = Color::TRANSPARENT;
+  impl.GetControlBackgroundColor(background);
+  DALI_TEST_EQUALS(background, Color::CYAN, TEST_LOCATION);
+
+  int signalCount = 0;
+  Text::TypingStyle::Mask observedMask = Text::TypingStyle::NONE;
+  editor.TypingStyleChangedSignal().Connect(&application, [&](View, Text::TypingStyle::Mask mask)
+  {
+    ++signalCount;
+    observedMask = mask;
+  });
+  impl.InputStyleChanged(Dali::Ui::Integration::Text::InputStyle::NONE);
+  impl.InputStyleChanged(Dali::Ui::Integration::Text::InputStyle::INPUT_LINE_SPACING);
+  DALI_TEST_EQUALS(signalCount, 0, TEST_LOCATION);
+  impl.InputStyleChanged(static_cast<Dali::Ui::Integration::Text::InputStyle::Mask>(
+    Dali::Ui::Integration::Text::InputStyle::INPUT_COLOR | Dali::Ui::Integration::Text::InputStyle::INPUT_POINT_SIZE | Dali::Ui::Integration::Text::InputStyle::INPUT_FONT_WEIGHT));
+  DALI_TEST_EQUALS(signalCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(observedMask),
+                   static_cast<int>(Text::TypingStyle::TEXT_COLOR | Text::TypingStyle::FONT_SIZE | Text::TypingStyle::FONT_WEIGHT),
+                   TEST_LOCATION);
+
+  editor.SelectText(0u, 6u);
+  application.SendNotification();
+  application.Render();
+  const Dali::Ui::Integration::Text::Uint32Pair selection = impl.GetTextSelectionRange();
+  DALI_TEST_EQUALS(selection.first, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(selection.second, 6u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorStyledAnchorLookupP(void)
+{
+  UiTestApplication application;
+  InputEditor editor = InputEditor::New();
+  editor.SetRequestedWidth(240.0f);
+  editor.SetRequestedHeight(80.0f);
+  editor.SetStyledText(Text::StyledText::FromMarkup("<a href='help'>Help</a> text"));
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = static_cast<Dali::Ui::Integration::InputEditorImpl&>(editor.GetImplementation());
+  auto& anchorControl = static_cast<Dali::Ui::Integration::Text::AnchorControlInterface&>(impl);
+  std::string href;
+  DALI_TEST_CHECK(anchorControl.AnchorClicked(1u, href));
+  DALI_TEST_EQUALS(href, std::string("help"), TEST_LOCATION);
+  DALI_TEST_CHECK(!anchorControl.AnchorClicked(100u, href));
   END_TEST;
 }

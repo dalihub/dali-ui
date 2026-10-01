@@ -15,7 +15,12 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/internal/builder/style.h>
 #include <dali-ui-foundation/integration-api/builder/builder.h>
+#include <dali-ui-foundation/internal/builder/dictionary.h>
+#include <dali-ui-foundation/internal/builder/builder-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -439,5 +444,157 @@ int UtcDaliBuilderSignalsAndNotificationsP(void)
   application.Render(20u);
   application.GetScene().Remove(root);
   application.SendNotification();
+  END_TEST;
+}
+
+int UtcDaliBuilderNoRootAnimationP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Dali::Ui::Integration::Builder builder = Dali::Ui::Integration::Builder::New();
+  builder.LoadFromString(BUILDER_JSON);
+
+  Actor target = Actor::New();
+  target.SetProperty(Actor::Property::NAME, "animationTarget");
+  application.GetScene().Add(target);
+  application.SendNotification();
+  application.Render();
+
+  Animation animation = builder.CreateAnimation("mixed");
+  DALI_TEST_CHECK(animation);
+  DALI_TEST_EQUALS(animation.GetDuration(), 1.5f, 0.001f, TEST_LOCATION);
+  Property::Map overrides;
+  overrides["UNUSED"] = 1;
+  DALI_TEST_CHECK(builder.CreateAnimation("mixed", overrides));
+  DALI_TEST_CHECK(!builder.CreateAnimation("unknown"));
+  END_TEST;
+}
+
+int UtcDaliBuilderRenderTaskCreationP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Dali::Ui::Integration::Builder builder = Dali::Ui::Integration::Builder::New();
+  builder.LoadFromString(R"JSON({
+    "renderTasks": {
+      "main": {
+        "sourceActor": "source",
+        "cameraActor": "camera"
+      }
+    }
+  })JSON");
+
+  Actor source = Actor::New();
+  source.SetProperty(Actor::Property::NAME, "source");
+  CameraActor camera = CameraActor::New();
+  camera.SetProperty(Actor::Property::NAME, "camera");
+  application.GetScene().Add(source);
+  application.GetScene().Add(camera);
+  application.SendNotification();
+  application.Render();
+
+  RenderTaskList tasks = application.GetScene().GetRenderTaskList();
+  const uint32_t before = tasks.GetTaskCount();
+  builder.CreateRenderTask("main");
+  DALI_TEST_CHECK(tasks.GetTaskCount() > before);
+  builder.CreateRenderTask("unknown");
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), before + 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliBuilderStylePropertyExtractionP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Dali::Ui::Integration::Builder builder = Dali::Ui::Integration::Builder::New();
+  auto& impl = Dali::Ui::GetImpl(builder);
+  Property::Map properties;
+  Actor actor = Actor::New();
+
+  DALI_TEST_CHECK(!impl.GetStyleProperties("baseStyle", actor, properties));
+  DALI_TEST_CHECK(properties.Empty());
+  builder.LoadFromString(BUILDER_JSON);
+  DALI_TEST_CHECK(impl.LookupStyleName("BASESTYLE"));
+  DALI_TEST_CHECK(!impl.LookupStyleName("missing"));
+  DALI_TEST_CHECK(!impl.GetStyleProperties("missing", actor, properties));
+  DALI_TEST_CHECK(properties.Empty());
+
+  DALI_TEST_CHECK(impl.GetStyleProperties("derivedStyle", actor, properties));
+  const Property::Value* size = properties.Find(Actor::Property::SIZE);
+  DALI_TEST_CHECK(size);
+  DALI_TEST_EQUALS(size->Get<Vector3>(), Vector3(320.0f, 180.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_CHECK(!properties.Find(Dali::String("actors")));
+
+  DALI_TEST_CHECK(impl.GetStyleProperties("baseStyle", Handle(), properties));
+  const Property::Value* visible = properties.Find(Dali::String("visible"));
+  DALI_TEST_CHECK(visible);
+  DALI_TEST_EQUALS(visible->Get<bool>(), false, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliBuilderStyleAppliesVisualInstanceAndActorPropertiesP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  view.SetRequestedWidth(WRAP_CONTENT);
+  view.SetRequestedHeight(WRAP_CONTENT);
+
+  Dali::Ui::Internal::StylePtr style = Dali::Ui::Internal::Style::New();
+  style->properties.Insert(Actor::Property::NAME, "styled-view");
+  Property::Map image;
+  image.Insert(Ui::Integration::Visual::Property::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
+  image.Insert(Ui::Integration::ImageVisual::Property::URL, "style-image.png");
+  image.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 80);
+  image.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, 40);
+  DALI_TEST_CHECK(style->visuals.Add("background", image));
+
+  Property::Map instance = image;
+  instance.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 120);
+  Dali::Ui::Internal::Dictionary<Property::Map> instances;
+  DALI_TEST_CHECK(instances.Add("background", instance));
+  style->ApplyVisualsAndPropertiesRecursively(view, instances);
+  DALI_TEST_EQUALS(view.GetProperty<String>(Actor::Property::NAME), String("styled-view"), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 120.0f, TEST_LOCATION);
+
+  Property::Map differentType;
+  differentType.Insert(Ui::Integration::Visual::Property::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::COLOR));
+  differentType.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 200);
+  Dali::Ui::Internal::Style::ApplyVisual(view, "background", image, &differentType);
+  DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 80.0f, TEST_LOCATION);
+
+  Dali::Ui::Internal::Style::ApplyVisual(view, "notAProperty", image, &instance);
+  DALI_TEST_EQUALS(view.GetProperty<String>(Actor::Property::NAME), String("styled-view"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliBuilderDictionaryMutationAndLookupP(void)
+{
+  UiTestApplication application;
+  Dali::Ui::Internal::Dictionary<Property::Map> values;
+  Property::Map first;
+  first.Insert("value", 1);
+  Property::Map second;
+  second.Insert("value", 2);
+  DALI_TEST_CHECK(values.Add("First", first));
+  DALI_TEST_CHECK(!values.Add("First", second));
+  DALI_TEST_CHECK(!values.Add(nullptr, first));
+  DALI_TEST_CHECK(values.FindConst("first"));
+  DALI_TEST_CHECK(!values.FindConst("missing"));
+  DALI_TEST_CHECK(!values.FindConst(""));
+
+  Dali::Ui::Internal::Dictionary<Property::Map> replacement;
+  DALI_TEST_CHECK(replacement.Add("First", second));
+  DALI_TEST_CHECK(replacement.Add("Second", first));
+  values.Merge(replacement);
+  DALI_TEST_EQUALS(values.FindConst("First")->Find("value")->Get<int>(), 2, TEST_LOCATION);
+  Dali::Ui::Internal::DictionaryKeys keys;
+  values.GetKeys(keys);
+  DALI_TEST_EQUALS(keys.size(), 2u, TEST_LOCATION);
+  values.Remove("First");
+  values.Remove("absent");
+  values.Remove("");
+  DALI_TEST_CHECK(!values.FindConst("First"));
+  DALI_TEST_CHECK(values.FindConst("Second"));
+
+  Dali::Ui::Internal::DictionaryKeys merged{"alpha", "beta"};
+  Dali::Ui::Internal::Merge(merged, Dali::Ui::Internal::DictionaryKeys{"beta", "gamma"});
+  DALI_TEST_EQUALS(merged.size(), 3u, TEST_LOCATION);
   END_TEST;
 }

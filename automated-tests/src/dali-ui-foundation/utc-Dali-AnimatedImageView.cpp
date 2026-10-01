@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui/ui-event-thread-callback.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
@@ -898,5 +899,227 @@ int UtcDaliAnimatedImageViewAlphaMaskNoChangeP(void)
   view.SetAlphaMaskUrl("mask.png");
   view.SetAlphaMaskUrl("mask.png"); // same value
   DALI_TEST_EQUALS(view.GetAlphaMaskUrl(), Dali::String("mask.png"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewRealGifPlaybackP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New("../samples/visual-base/res/animatedLoading.gif");
+  view.SetSynchronousLoading(true);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(view.GetCurrentFrameNumber() >= 0);
+
+  view.Play();
+  DALI_TEST_EQUALS(view.GetPlayState(), AnimatedImage::PlayState::PLAYING, TEST_LOCATION);
+  view.JumpToFrame(1);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 1, TEST_LOCATION);
+
+  view.Pause();
+  DALI_TEST_EQUALS(view.GetPlayState(), AnimatedImage::PlayState::PAUSED, TEST_LOCATION);
+  view.Stop();
+  DALI_TEST_EQUALS(view.GetPlayState(), AnimatedImage::PlayState::STOPPED, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewImageSequenceCacheP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New();
+  view.SetResourceUrlList({
+    "../samples/image-view/res/dog-anim-001.png",
+    "../samples/image-view/res/dog-anim-002.png",
+    "../samples/image-view/res/dog-anim-003.png",
+    "../samples/image-view/res/dog-anim-004.png"});
+  view.SetSynchronousLoading(true);
+  view.SetBatchSize(2);
+  view.SetCacheSize(2);
+  view.SetFrameDelay(100);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  for(int attempt = 0; attempt < 4 && view.GetRendererCount() == 0u; ++attempt)
+  {
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 0, TEST_LOCATION);
+
+  view.Play();
+  DALI_TEST_EQUALS(view.GetPlayState(), AnimatedImage::PlayState::PLAYING, TEST_LOCATION);
+  for(int frame = 1; frame < 4; ++frame)
+  {
+    view.JumpToFrame(frame);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), frame, TEST_LOCATION);
+  }
+
+  view.Stop();
+  DALI_TEST_EQUALS(view.GetPlayState(), AnimatedImage::PlayState::STOPPED, TEST_LOCATION);
+
+  view.SetStopBehavior(AnimatedImage::StopBehavior::FIRST_FRAME);
+  view.Stop();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 0, TEST_LOCATION);
+
+  view.SetStopBehavior(AnimatedImage::StopBehavior::LAST_FRAME);
+  view.Stop();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 3, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewRealGifAlphaMaskPoliciesP(void)
+{
+  UiTestApplication application;
+  const Dali::String gifUrl("../samples/visual-base/res/animatedLoading.gif");
+  const Dali::String maskUrl("../samples/visual-base/res/mask.png");
+
+  AnimatedImageView renderMasked = AnimatedImageView::New(gifUrl);
+  renderMasked.SetAlphaMaskUrl(maskUrl);
+  renderMasked.SetMaskingPolicy(Image::MaskingPolicy::ON_RENDERING);
+  renderMasked.SetSynchronousLoading(true);
+  renderMasked.SetRequestedWidth(160.0f);
+  renderMasked.SetRequestedHeight(160.0f);
+  application.GetScene().Add(renderMasked);
+
+  AnimatedImageView loadMasked = AnimatedImageView::New(gifUrl);
+  loadMasked.SetAlphaMaskUrl(maskUrl);
+  loadMasked.SetMaskingPolicy(Image::MaskingPolicy::ON_LOADING);
+  loadMasked.SetCropToMask(true);
+  loadMasked.SetSynchronousLoading(true);
+  loadMasked.SetRequestedWidth(160.0f);
+  loadMasked.SetRequestedHeight(160.0f);
+  application.GetScene().Add(loadMasked);
+
+  application.SendNotification();
+  application.Render();
+  for(int attempt = 0; attempt < 4 &&
+      (renderMasked.GetRendererCount() == 0u || loadMasked.GetRendererCount() == 0u); ++attempt)
+  {
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+    application.SendNotification();
+    application.Render();
+  }
+
+  DALI_TEST_CHECK(renderMasked.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(loadMasked.GetRendererCount() > 0u);
+  DALI_TEST_EQUALS(renderMasked.GetRendererAt(0u).GetTextures().GetTextureCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(loadMasked.GetRendererAt(0u).GetTextures().GetTextureCount(), 1u, TEST_LOCATION);
+
+  renderMasked.JumpToFrame(1);
+  loadMasked.JumpToFrame(1);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(renderMasked.GetCurrentFrameNumber(), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(loadMasked.GetCurrentFrameNumber(), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewLoadingAndFittingOptionsP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New();
+  view.SetLoadPolicy(Image::LoadPolicy::ATTACHED);
+  DALI_TEST_EQUALS(view.GetLoadPolicy(), Image::LoadPolicy::ATTACHED, TEST_LOCATION);
+  view.SetSamplingMode(Image::SamplingMode::NEAREST);
+  DALI_TEST_EQUALS(view.GetSamplingMode(), Image::SamplingMode::NEAREST, TEST_LOCATION);
+  view.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+  DALI_TEST_EQUALS(view.GetFittingMode(), Image::FittingMode::FIT_KEEP_ASPECT_RATIO, TEST_LOCATION);
+  view.SetImageLoadWithViewSizeEnabled(true);
+  DALI_TEST_CHECK(view.IsImageLoadWithViewSizeEnabled());
+  view.SetPlaceholderUrl("../samples/image-view/res/sample.jpg");
+  DALI_TEST_EQUALS(view.GetPlaceholderUrl(), Dali::String("../samples/image-view/res/sample.jpg"), TEST_LOCATION);
+
+  view.SetResourceUrl("../samples/visual-base/res/animatedLoading.gif");
+  view.SetSynchronousLoading(true);
+  view.SetRequestedWidth(180.0f);
+  view.SetRequestedHeight(120.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  view.SetFittingMode(Image::FittingMode::CENTER);
+  DALI_TEST_EQUALS(view.GetFittingMode(), Image::FittingMode::CENTER, TEST_LOCATION);
+  view.SetSamplingMode(Image::SamplingMode::LINEAR);
+  DALI_TEST_EQUALS(view.GetSamplingMode(), Image::SamplingMode::LINEAR, TEST_LOCATION);
+  view.SetLoadPolicy(Image::LoadPolicy::IMMEDIATE);
+  DALI_TEST_EQUALS(view.GetLoadPolicy(), Image::LoadPolicy::IMMEDIATE, TEST_LOCATION);
+  view.SetImageLoadWithViewSizeEnabled(false);
+  DALI_TEST_CHECK(!view.IsImageLoadWithViewSizeEnabled());
+  view.SetPlaceholderUrl("");
+  DALI_TEST_EQUALS(view.GetPlaceholderUrl(), Dali::String(""), TEST_LOCATION);
+  view.Reload();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewRegisteredPropertyMatrixP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New();
+  struct PropertyCase
+  {
+    Property::Index index;
+    Property::Value value;
+  };
+  const PropertyCase cases[] = {
+    {AnimatedImageView::Property::IMAGE, Dali::String("missing-frame.gif")},
+    {AnimatedImageView::Property::LOOP_COUNT, 2},
+    {AnimatedImageView::Property::IMAGE_COLOR, Vector4(0.5f, 0.6f, 0.7f, 1.0f)},
+    {AnimatedImageView::Property::STOP_BEHAVIOR, static_cast<int>(AnimatedImage::StopBehavior::FIRST_FRAME)},
+    {AnimatedImageView::Property::FRAME_SPEED_FACTOR, 1.5f},
+    {AnimatedImageView::Property::BATCH_SIZE, 3},
+    {AnimatedImageView::Property::CACHE_SIZE, 5},
+    {AnimatedImageView::Property::FRAME_DELAY, 80},
+    {AnimatedImageView::Property::DESIRED_WIDTH, 48},
+    {AnimatedImageView::Property::DESIRED_HEIGHT, 32},
+    {AnimatedImageView::Property::LOAD_POLICY, static_cast<int>(Image::LoadPolicy::ATTACHED)},
+    {AnimatedImageView::Property::RELEASE_POLICY, static_cast<int>(Image::ReleasePolicy::DETACHED)},
+    {AnimatedImageView::Property::SYNCHRONOUS_LOADING, false},
+    {AnimatedImageView::Property::PRE_MULTIPLY_ALPHA_ON_LOAD, true},
+    {AnimatedImageView::Property::FITTING_MODE, static_cast<int>(Image::FittingMode::FILL)},
+    {AnimatedImageView::Property::SAMPLING_MODE, static_cast<int>(Image::SamplingMode::BOX_THEN_LINEAR)},
+    {AnimatedImageView::Property::IMAGE_LOAD_WITH_VIEW_SIZE, true},
+    {AnimatedImageView::Property::ALPHA_MASK_URL, Dali::String("missing-mask.png")},
+    {AnimatedImageView::Property::CROP_TO_MASK, true},
+    {AnimatedImageView::Property::MASKING_POLICY, static_cast<int>(Image::MaskingPolicy::ON_LOADING)},
+    {AnimatedImageView::Property::PLACEHOLDER_IMAGE, Dali::String("missing-placeholder.png")},
+    {AnimatedImageView::Property::PIXEL_AREA, Vector4(0.0f, 0.0f, 1.0f, 1.0f)},
+  };
+  for(const auto& property : cases)
+  {
+    view.SetProperty(property.index, property.value);
+    DALI_TEST_CHECK(view.GetProperty(property.index).GetType() != Property::NONE);
+  }
+
+  Property::Array urls;
+  urls.PushBack(Dali::String("first.png"));
+  urls.PushBack(5);
+  urls.PushBack(Dali::String("second.png"));
+  view.SetProperty(AnimatedImageView::Property::IMAGE_URLS, urls);
+  Property::Array result;
+  DALI_TEST_CHECK(view.GetProperty(AnimatedImageView::Property::IMAGE_URLS).Get(result));
+  DALI_TEST_EQUALS(result.Count(), 2u, TEST_LOCATION);
   END_TEST;
 }

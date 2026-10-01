@@ -285,3 +285,57 @@ int UtcDaliUiConfigLongPressKeyEventMinimumCountFrozenN(void)
 
   END_TEST;
 }
+
+int UtcDaliUiConfigPublicPolicyMatrixP(void)
+{
+  UiConfig config = UiConfig::New();
+  config.SetBrokenImageUrl(UiConfig::BrokenImageType::SMALL, "small.png");
+  config.SetBrokenImageUrl(UiConfig::BrokenImageType::LARGE, "large.png");
+  DALI_TEST_EQUALS(config.GetBrokenImageUrl(UiConfig::BrokenImageType::SMALL), Dali::String("small.png"), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetBrokenImageUrl(UiConfig::BrokenImageType::LARGE), Dali::String("large.png"), TEST_LOCATION);
+
+  config.SetClearFocusOnEscapeEnabled(false);
+  config.SetClearFocusIndicationOnTouch(false);
+  config.SetClearFocusIndicationOnHover(false);
+  config.SetDefaultFocusIndicatorEnabled(false);
+  DALI_TEST_CHECK(!config.IsClearFocusOnEscapeEnabled());
+  DALI_TEST_CHECK(!config.IsClearFocusIndicationOnTouchEnabled());
+  DALI_TEST_CHECK(!config.IsClearFocusIndicationOnHoverEnabled());
+  DALI_TEST_CHECK(!config.IsDefaultFocusIndicatorEnabled());
+
+  config.SetDefaultFontSize(18.0f);
+  config.SetDefaultSystemFontSizeScaleEnabled(false);
+  config.SetDefaultMinimumFontSizeScale(0.8f);
+  config.SetDefaultMaximumFontSizeScale(1.6f);
+  config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::LARGE, 1.25f);
+  DALI_TEST_EQUALS(config.GetDefaultFontSize(), 18.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(!config.IsDefaultSystemFontSizeScaleEnabled());
+  DALI_TEST_EQUALS(config.GetDefaultMinimumFontSizeScale(), 0.8f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetDefaultMaximumFontSizeScale(), 1.6f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetScaleForSystemFontSize(UiConfig::SystemFontSize::LARGE), 1.25f, TEST_LOCATION);
+
+  config.SetDefaultTextColor(Vector4(0.1f, 0.2f, 0.3f, 1.0f));
+  config.SetDefaultPlaceholderTextColor(Vector4(0.4f, 0.5f, 0.6f, 1.0f));
+  config.SetShowPlaceholderTextOnFocus(false);
+  DALI_TEST_EQUALS(config.GetDefaultTextColor(), Vector4(0.1f, 0.2f, 0.3f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetDefaultPlaceholderTextColor(), Vector4(0.4f, 0.5f, 0.6f, 1.0f), TEST_LOCATION);
+  DALI_TEST_CHECK(!config.IsPlaceholderTextShownOnFocus());
+
+  config.SetMarqueeSpeed(50);
+  config.SetMarqueeLoopCount(3);
+  config.SetMarqueeLoopDelay(0.4f);
+  config.SetMarqueeGap(20.0f);
+  config.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
+  config.SetMarqueeOrientation(Text::MarqueeOrientation::VERTICAL);
+  config.SetTextLayoutDirectionMode(Text::LayoutDirectionMode::LOCALE);
+  config.SetLabelAsyncRendering(true);
+  DALI_TEST_EQUALS(config.GetMarqueeSpeed(), 50, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetMarqueeLoopCount(), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetMarqueeLoopDelay(), 0.4f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetMarqueeGap(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetMarqueeStopMode(), Text::MarqueeStopMode::FINISH_LOOP, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetMarqueeOrientation(), Text::MarqueeOrientation::VERTICAL, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetTextLayoutDirectionMode(), Text::LayoutDirectionMode::LOCALE, TEST_LOCATION);
+  DALI_TEST_CHECK(config.IsLabelAsyncRendering());
+  END_TEST;
+}

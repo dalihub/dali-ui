@@ -26,6 +26,7 @@
 #include <dali-ui-foundation/extension-api/focus-manager.h>
 #include <dali-ui-foundation/extension-api/focus-indication-policy.h>
 #include <dali-ui-foundation/extension-api/ui-config-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-adaptor-impl.h>
@@ -3092,5 +3093,49 @@ int UtcDaliFocusManagerForwardSingleViewN(void)
   FocusManager::Get().RequestFocus(v1);
   DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
   DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == v1);
+  END_TEST;
+}
+
+int UtcDaliFocusFinderDirectionalBeamSelectionP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  parent.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  parent.SetPivot(Pivot::TOP_LEFT);
+  parent.SetRequestedWidth(400.0f);
+  parent.SetRequestedHeight(400.0f);
+  application.GetScene().Add(parent);
+
+  auto makeView = [&](float x, float y)
+  {
+    View view = View::New();
+    view.SetFocusable(true);
+    view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+    view.SetPivot(Pivot::TOP_LEFT);
+    view.SetRequestedX(x);
+    view.SetRequestedY(y);
+    view.SetRequestedWidth(40.0f);
+    view.SetRequestedHeight(40.0f);
+    parent.Add(view);
+    return view;
+  };
+
+  View center = makeView(150.0f, 150.0f);
+  makeView(210.0f, 220.0f);
+  makeView(90.0f, 220.0f);
+  makeView(220.0f, 90.0f);
+  makeView(80.0f, 90.0f);
+  View left = makeView(60.0f, 150.0f);
+  View right = makeView(240.0f, 150.0f);
+  View up = makeView(150.0f, 60.0f);
+  View down = makeView(150.0f, 240.0f);
+  application.SendNotification();
+  application.Render();
+
+  Actor root = application.GetScene().GetRootLayer();
+  DALI_TEST_EQUALS(Dali::Ui::Internal::FocusFinder::GetNearestFocusableView(root, center, FocusDirection::LEFT), left, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::Internal::FocusFinder::GetNearestFocusableView(root, center, FocusDirection::RIGHT), right, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::Internal::FocusFinder::GetNearestFocusableView(root, center, FocusDirection::UP), up, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::Internal::FocusFinder::GetNearestFocusableView(root, center, FocusDirection::DOWN), down, TEST_LOCATION);
   END_TEST;
 }

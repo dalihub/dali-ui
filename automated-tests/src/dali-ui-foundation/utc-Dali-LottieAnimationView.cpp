@@ -20,6 +20,7 @@
 
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-dynamic-property.h>
 #include <dali-ui/ui-event-thread-callback.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
@@ -850,5 +851,38 @@ int UtcDaliLottieAnimationViewPropertyRenderScaleP(void)
 
   view.SetProperty(index, 0.2f);
   DALI_TEST_EQUALS(view.GetProperty(index).Get<float>(), 0.2f, TEST_LOCATION);
+  END_TEST;
+}
+
+namespace
+{
+Property::Value DynamicFillColor(int32_t, LottieAnimation::ContentProperty, uint32_t)
+{
+  return Property::Value(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+}
+}
+
+int UtcDaliLottieDynamicPropertyValueSemanticsP(void)
+{
+  UiTestApplication application;
+  LottieAnimation::DynamicProperty property;
+  DALI_TEST_EQUALS(property.GetId(), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(property.GetProperty(), LottieAnimation::ContentProperty::FILL_COLOR, TEST_LOCATION);
+  property.SetId(7)
+    .SetKeyPath("Layer.Fill")
+    .SetProperty(LottieAnimation::ContentProperty::FILL_COLOR)
+    .SetCallback(LottieAnimation::DynamicPropertyCallback::New(&DynamicFillColor));
+  DALI_TEST_EQUALS(property.GetId(), 7, TEST_LOCATION);
+  DALI_TEST_EQUALS(property.GetKeyPath(), String("Layer.Fill"), TEST_LOCATION);
+  DALI_TEST_CHECK(property.GetCallback());
+  const LottieAnimation::DynamicProperty& constProperty = property;
+  DALI_TEST_CHECK(constProperty.GetCallback());
+
+  LottieAnimation::DynamicProperty moved(std::move(property));
+  DALI_TEST_EQUALS(moved.GetId(), 7, TEST_LOCATION);
+  LottieAnimation::DynamicProperty assigned;
+  assigned = std::move(moved);
+  DALI_TEST_EQUALS(assigned.GetKeyPath(), String("Layer.Fill"), TEST_LOCATION);
+  DALI_TEST_CHECK(assigned.GetCallback());
   END_TEST;
 }

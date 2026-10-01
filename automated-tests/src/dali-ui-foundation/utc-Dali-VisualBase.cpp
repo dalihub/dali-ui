@@ -34,6 +34,9 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
@@ -1087,5 +1090,59 @@ int UtcDaliVisualBaseInvalidHandle(void)
   TestAssertFunction([&]()
   { empty.GetSiblingOrder(); });
 
+  END_TEST;
+}
+
+int UtcDaliVisualBaseInstancePropertyMapsP(void)
+{
+  UiTestApplication application;
+
+  auto getInstanceMap = [&](VisualBase visual)
+  {
+    View view = View::New();
+    view.SetRequestedWidth(200.0f);
+    view.SetRequestedHeight(120.0f);
+    DALI_TEST_CHECK(view.AddVisual(visual, Visual::DepthLayer::BACKGROUND));
+    application.GetScene().Add(view);
+    application.SendNotification();
+    application.Render();
+
+    auto internalVisual = GetImplementation(visual).GetVisual();
+    DALI_TEST_CHECK(internalVisual);
+    Property::Map map;
+    Dali::Ui::GetImplementation(internalVisual).CreateInstancePropertyMap(map);
+    return map;
+  };
+
+  ColorVisual color = ColorVisual::New();
+  DALI_TEST_CHECK(getInstanceMap(color).Empty());
+
+  TextVisual text = TextVisual::New();
+  text.SetText("instance text");
+  Property::Map textMap = getInstanceMap(text);
+  const Property::Value* textType = textMap.Find(Dali::Ui::Integration::Visual::Property::TYPE);
+  const Property::Value* textValue = textMap.Find(Dali::Ui::Integration::TextVisual::Property::TEXT);
+  DALI_TEST_CHECK(textType && textValue);
+  DALI_TEST_EQUALS(textType->Get<int>(), static_cast<int>(Dali::Ui::Integration::InternalVisualType::TEXT), TEST_LOCATION);
+  DALI_TEST_EQUALS(textValue->Get<Dali::String>(), Dali::String("instance text"), TEST_LOCATION);
+
+  ImageVisual image = ImageVisual::New();
+  image.SetResourceUrl("../samples/image-view/res/sample.jpg");
+  image.SetDesiredWidth(64);
+  image.SetDesiredHeight(48);
+  Property::Map imageMap = getInstanceMap(image);
+  const Property::Value* imageType = imageMap.Find(Dali::Ui::Integration::Visual::Property::TYPE);
+  const Property::Value* imageWidth = imageMap.Find(Dali::Ui::Integration::ImageVisual::Property::DESIRED_WIDTH);
+  DALI_TEST_CHECK(imageType && imageWidth);
+  DALI_TEST_EQUALS(imageType->Get<int>(), static_cast<int>(Dali::Ui::Integration::InternalVisualType::IMAGE), TEST_LOCATION);
+  DALI_TEST_EQUALS(imageWidth->Get<int>(), 64, TEST_LOCATION);
+
+  AnimatedImageVisual animated = AnimatedImageVisual::New();
+  animated.SetResourceUrl("../samples/visual-base/res/animatedLoading.gif");
+  animated.SetDesiredWidth(80);
+  Property::Map animatedMap = getInstanceMap(animated);
+  const Property::Value* animatedType = animatedMap.Find(Dali::Ui::Integration::Visual::Property::TYPE);
+  DALI_TEST_CHECK(animatedType);
+  DALI_TEST_EQUALS(animatedType->Get<int>(), static_cast<int>(Dali::Ui::Integration::InternalVisualType::ANIMATED_IMAGE), TEST_LOCATION);
   END_TEST;
 }
