@@ -237,6 +237,11 @@ void Window::SetPositionSize(PositionSize positionSize)
   GetImplementation(*this).SetPositionSize(positionSize);
 }
 
+void Window::RequestMoveToServer()
+{
+  GetImplementation(*this);
+}
+
 PositionSize Window::GetPositionSize() const
 {
   return GetImplementation(*this).GetPositionSize();
@@ -388,6 +393,51 @@ void Window::Minimize(bool minimize)
 {
   GetImplementation(*this).Minimize(minimize);
 }
+unsigned int Window::AddAuxiliaryHint(const Dali::String& hint, const Dali::String& value)
+{
+  auto& implementation = GetImplementation(*this);
+  implementation.mAuxiliaryHintId = 1u;
+  implementation.mAuxiliaryHintName = hint;
+  implementation.mAuxiliaryHintValue = value;
+  return implementation.mAuxiliaryHintId;
+}
+
+bool Window::RemoveAuxiliaryHint(unsigned int id)
+{
+  auto& implementation = GetImplementation(*this);
+  if(id != implementation.mAuxiliaryHintId || id == 0u)
+  {
+    return false;
+  }
+  implementation.mAuxiliaryHintId = 0u;
+  implementation.mAuxiliaryHintName = Dali::String();
+  implementation.mAuxiliaryHintValue = Dali::String();
+  return true;
+}
+
+bool Window::SetAuxiliaryHintValue(unsigned int id, const Dali::String& value)
+{
+  auto& implementation = GetImplementation(*this);
+  if(id != implementation.mAuxiliaryHintId || id == 0u)
+  {
+    return false;
+  }
+  implementation.mAuxiliaryHintValue = value;
+  return true;
+}
+
+Dali::String Window::GetAuxiliaryHintValue(unsigned int id) const
+{
+  const auto& implementation = GetImplementation(*this);
+  return id == implementation.mAuxiliaryHintId ? implementation.mAuxiliaryHintValue : Dali::String();
+}
+
+unsigned int Window::GetAuxiliaryHintId(const Dali::String& hint) const
+{
+  const auto& implementation = GetImplementation(*this);
+  return hint == implementation.mAuxiliaryHintName ? implementation.mAuxiliaryHintId : 0u;
+}
+
 
 void Window::SetMinimumSize(WindowSize size)
 {
@@ -440,4 +490,19 @@ Window Window::Get(Actor actor)
   return Dali::Window(windowImpl);
 }
 
+namespace DevelWindow
+{
+void RequestResizeToServer(Window window, WindowResizeDirection)
+{
+  GetImplementation(window);
+}
+} // namespace DevelWindow
+
+namespace WindowSystem
+{
+Int32Pair GetMainScreenSize()
+{
+  return Int32Pair(480, 800);
+}
+} // namespace WindowSystem
 } // namespace Dali

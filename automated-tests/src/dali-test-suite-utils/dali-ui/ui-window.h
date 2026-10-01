@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/scene.h>
+#include <dali/public-api/adaptor-framework/window-definitions.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/int-pair.h>
 #include <dali/public-api/math/rect.h>
@@ -75,6 +76,7 @@ public:
 
   void SetPositionSize(PositionSize positionSize);
   PositionSize GetPositionSize() const;
+  void RequestMoveToServer();
 
   Dali::Integration::Scene                   GetScene();
   Dali::Integration::RenderSurfaceInterface& GetRenderSurface();
@@ -106,6 +108,11 @@ public:
   bool IsMinimized() const;
   void Minimize(bool minimize);
   void SetMinimumSize(WindowSize size);
+  unsigned int AddAuxiliaryHint(const Dali::String& hint, const Dali::String& value);
+  bool RemoveAuxiliaryHint(unsigned int id);
+  bool SetAuxiliaryHintValue(unsigned int id, const Dali::String& value);
+  Dali::String GetAuxiliaryHintValue(unsigned int id) const;
+  unsigned int GetAuxiliaryHintId(const Dali::String& hint) const;
   void SetMaximumSize(WindowSize size);
   void AddFramePresentedCallback(CallbackBase* callback, int32_t frameId);
 
