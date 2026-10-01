@@ -1,7 +1,7 @@
 # Auto-generated from dali-ui.spec.in by makespec.sh
 Name:       dali2-ui-foundation
 Summary:    DALi UI Library
-Version:    2.5.41.11505
+Version:    2.5.41.11517
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0 and BSD-3-Clause and MIT
@@ -96,16 +96,16 @@ Development components for dali-ui-components.
 # TODO: temporary fix => will remove after included in gcc_warning_sr_pkgs list in build.conf
 %{?gcc_unforce_options:%gcc_unforce_options}
 PREFIX="/usr"
-CXXFLAGS+=" -Wall -g -Os -DNDEBUG -fPIC -fvisibility-inlines-hidden -fdata-sections -ffunction-sections "
-LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -Wl,--gc-sections -lgcc_s -lgcc -Wl,-Bsymbolic-functions "
+CXXFLAGS="$CXXFLAGS -Wall -g -Os -DNDEBUG -fPIC -fvisibility-inlines-hidden -fdata-sections -ffunction-sections "
+LDFLAGS="$LDFLAGS -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -Wl,--gc-sections -lgcc_s -lgcc -Wl,-Bsymbolic-functions "
 
 %ifarch %{arm}
-CXXFLAGS+=" -D_ARCH_ARM_ -mfpu=neon"
+CXXFLAGS="$CXXFLAGS -D_ARCH_ARM_ -mfpu=neon"
 %endif
 
 %if 0%{?enable_coverage}
-CXXFLAGS+=" --coverage "
-LDFLAGS+=" --coverage "
+CXXFLAGS="$CXXFLAGS --coverage "
+LDFLAGS="$LDFLAGS --coverage "
 %endif
 
 libtoolize --force
@@ -116,9 +116,9 @@ CXXFLAGS="${CXXFLAGS:-%optflags}" ;
 LDFLAGS="${LDFLAGS:-%optflags}" ;
 
 %if "%{vd_asan}" == "1" || "%{asan}" == "1"
-CFLAGS+=" -fsanitize=address"
-CXXFLAGS+=" -fsanitize=address -Wno-maybe-uninitialized"
-LDFLAGS+=" -fsanitize=address"
+CFLAGS="$CFLAGS -fsanitize=address"
+CXXFLAGS="$CXXFLAGS -fsanitize=address -Wno-maybe-uninitialized"
+LDFLAGS="$LDFLAGS -fsanitize=address"
 %endif
 export CFLAGS;
 export CXXFLAGS;
@@ -132,7 +132,7 @@ do
   language=${language%.po}
   msgfmt -o ${language}.mo ${language}.po
 done
-) &> /dev/null
+) > /dev/null 2>&1
 
 cmake \
 %if 0%{?enable_debug}
@@ -160,7 +160,7 @@ make %{?jobs:-j%jobs}
 rm -rf %{buildroot}
 cd build/tizen
 
-pushd %{_builddir}/%{name}-%{version}/build/tizen
+cd %{_builddir}/%{name}-%{version}/build/tizen
 %make_install
 
 # PO install
@@ -172,7 +172,7 @@ do
   mkdir -p %{buildroot}/%{_datadir}/locale/${language}/LC_MESSAGES/
   cp ${language}.mo %{buildroot}/%{_datadir}/locale/${language}/LC_MESSAGES/dali-ui-foundation.mo
 done
-) &> /dev/null
+) > /dev/null 2>&1
 
 # Create directory and copy (style, images, sounds etc)
 %define dali_data_ro_dir %TZ_SYS_RO_SHARE/dali/

@@ -2928,9 +2928,9 @@ void InputFieldImpl::SetUnderlineColorInternal(const Vector4& color)
 {
   if(mController->GetUnderlineColor() != color)
   {
-    mController->SetUnderlineColor(color);
     mRenderer.Reset();
   }
+  mController->SetUnderlineColor(color);
 }
 
 void InputFieldImpl::SetShadowColorInternal(const Vector4& color)
@@ -2955,9 +2955,9 @@ void InputFieldImpl::SetLineThroughColorInternal(const Vector4& color)
 {
   if(mController->GetStrikethroughColor() != color)
   {
-    mController->SetStrikethroughColor(color);
     mRenderer.Reset();
   }
+  mController->SetStrikethroughColor(color);
 }
 
 void InputFieldImpl::SetTypingTextColorInternal(const Vector4& color)

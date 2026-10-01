@@ -176,7 +176,7 @@ const Vector4& Model::GetDefaultColor() const
 
 const Vector2& Model::GetShadowOffset() const
 {
-  return mVisualModel->mShadowOffset;
+  return mVisualModel->GetShadowOffset();
 }
 
 bool Model::IsShadowEnabled() const
@@ -186,12 +186,12 @@ bool Model::IsShadowEnabled() const
 
 const Vector4& Model::GetShadowColor() const
 {
-  return mVisualModel->mShadowColor;
+  return mVisualModel->GetShadowColor();
 }
 
 const float& Model::GetShadowBlurRadius() const
 {
-  return mVisualModel->mShadowBlurRadius;
+  return mVisualModel->GetShadowBlurRadius();
 }
 
 const Vector4& Model::GetUnderlineColor() const
@@ -261,7 +261,7 @@ bool Model::IsOutlineEnabled() const
 
 const float& Model::GetOutlineBlurRadius() const
 {
-  return mVisualModel->mOutlineBlurRadius;
+  return mVisualModel->GetOutlineBlurRadius();
 }
 
 const Vector4& Model::GetBackgroundColor() const

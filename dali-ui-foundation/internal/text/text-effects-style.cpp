@@ -529,10 +529,10 @@ bool SetUnderlineProperties(ControllerPtr controller, const Property::Value& val
           }
 
           // Sets the default underline values.
-          if(colorDefined && (controller->GetUnderlineColor() != color))
+          if(colorDefined)
           {
+            update = update || (controller->GetUnderlineColor() != color);
             controller->SetUnderlineColor(color);
-            update = true;
           }
 
           if(heightDefined && (fabsf(controller->GetUnderlineHeight() - height) > Math::MACHINE_EPSILON_1000))
@@ -1226,10 +1226,10 @@ bool SetStrikethroughProperties(ControllerPtr controller, const Property::Value&
           }
 
           // Sets the default strikethrough values.
-          if(colorDefined && (controller->GetStrikethroughColor() != color))
+          if(colorDefined)
           {
+            update = update || (controller->GetStrikethroughColor() != color);
             controller->SetStrikethroughColor(color);
-            update = true;
           }
           if(heightDefined && (fabsf(controller->GetStrikethroughHeight() - height) > Math::MACHINE_EPSILON_1000))
           {

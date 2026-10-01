@@ -24,6 +24,7 @@
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/ref-object.h>
 #include <memory>
+#include <optional>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/anchor.h>
@@ -240,6 +241,24 @@ public:
    */
   void ClearBidirectionalParagraphInfo(TextAbstraction::BidirectionalSupport& bidirectionalSupport);
 
+  /**
+   * @brief Returns the variation map only when it contains variations.
+   * Reads never allocate; retained empty storage also returns nullptr.
+   */
+  Property::Map*       GetVariationsMap();
+  const Property::Map* GetVariationsMap() const;
+
+  /**
+   * @brief Creates variation storage on the first write, then reuses it.
+   */
+  Property::Map& GetOrCreateVariationsMap();
+
+  /**
+   * @brief Copies variations, or clears them for a null/empty source.
+   * Existing storage is retained when clearing.
+   */
+  void SetVariationsMap(const Property::Map* map);
+
 protected:
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
@@ -282,7 +301,7 @@ public:
   Vector<CharacterSpacingCharacterRun>
     mCharacterSpacingCharacterRuns; ///< The character-spacing character run from markup-processor.
 
-  Property::Map mVariationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
+  std::optional<Property::Map> mVariationsMap; ///< Materialized on first variation write, retained when cleared.
 
   BidirectionalLineRunIndex mBidirectionalLineIndex; ///< The last fetched bidirectional line info.
 };

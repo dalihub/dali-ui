@@ -20,6 +20,7 @@
 #include <dali/integration-api/pixel-data-integ.h>
 #include <dali/integration-api/trace.h>
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <utility>
 
@@ -68,14 +69,28 @@ float ConvertToEven(float value)
 
 float GetDpi(TextAbstraction::FontClient& fontClient)
 {
-  static uint32_t horizontalDpi = 0u;
-  static uint32_t verticalDpi   = 0u;
+  static std::atomic<uint32_t> cachedDpi{0u};
+  uint32_t                     dpi = cachedDpi.load(std::memory_order_relaxed);
 
-  if(DALI_UNLIKELY(horizontalDpi == 0u))
+  if(DALI_UNLIKELY(dpi == 0u))
   {
+    uint32_t horizontalDpi = 0u;
+    uint32_t verticalDpi   = 0u;
     fontClient.GetDpi(horizontalDpi, verticalDpi);
+    if(horizontalDpi != 0u)
+    {
+      // Keep the first nonzero value. A zero result must allow a later retry.
+      if(cachedDpi.compare_exchange_strong(dpi, horizontalDpi, std::memory_order_relaxed))
+      {
+        dpi = horizontalDpi;
+      }
+    }
+    else
+    {
+      dpi = cachedDpi.load(std::memory_order_relaxed);
+    }
   }
-  return static_cast<float>(horizontalDpi);
+  return static_cast<float>(dpi);
 }
 
 float ConvertPixelToPoint(float pixel, TextAbstraction::FontClient& fontClient)
@@ -398,7 +413,7 @@ void AsyncTextLoader::ClearTextModelData()
   mTextModel->mLogicalModel->ClearStrikethroughRuns();
   mTextModel->mLogicalModel->ClearUnderlineRuns();
   mTextModel->mLogicalModel->ClearAnchors();
-  mTextModel->mLogicalModel->mVariationsMap.Clear();
+  mTextModel->mLogicalModel->SetVariationsMap(nullptr);
 
   // Free the allocated memory used to store the conversion table in the bidirectional line info run.
   for(Vector<BidirectionalLineInfoRun>::Iterator it    = mTextModel->mLogicalModel->mBidirectionalLineInfo.Begin(),
@@ -470,7 +485,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   mTextModel->mVerticalLineAlignment = parameters.verticalLineAlignment;
   mTextModel->mVisualModel->SetVerticalLineAlignment(parameters.verticalLineAlignment);
 
-  mTextModel->mLogicalModel->mVariationsMap = parameters.variationsMap;
+  mTextModel->mLogicalModel->SetVariationsMap(&parameters.variationsMap);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Update visual model.
@@ -482,12 +497,15 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 
   // Update style properties.
   mTextModel->mVisualModel->SetTextColor(parameters.textColor);
+  // Requests carry resolved colors, also used by runs when global style is off.
+  // Always replace the previous worker request's fallback colors.
+  mTextModel->mVisualModel->SetUnderlineColor(parameters.underlineColor);
+  mTextModel->mVisualModel->SetStrikethroughColor(parameters.strikethroughColor);
 
   if(parameters.isUnderlineEnabled)
   {
     mTextModel->mVisualModel->SetUnderlineEnabled(parameters.isUnderlineEnabled);
     mTextModel->mVisualModel->SetUnderlineType(parameters.underlineType);
-    mTextModel->mVisualModel->SetUnderlineColor(parameters.underlineColor);
     mTextModel->mVisualModel->SetUnderlineHeight(parameters.underlineHeight);
     mTextModel->mVisualModel->SetDashedUnderlineWidth(parameters.dashedUnderlineWidth);
     mTextModel->mVisualModel->SetDashedUnderlineGap(parameters.dashedUnderlineGap);
@@ -496,7 +514,6 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   if(parameters.isStrikethroughEnabled)
   {
     mTextModel->mVisualModel->SetStrikethroughEnabled(parameters.isStrikethroughEnabled);
-    mTextModel->mVisualModel->SetStrikethroughColor(parameters.strikethroughColor);
     mTextModel->mVisualModel->SetStrikethroughHeight(parameters.strikethroughHeight);
   }
 
@@ -669,11 +686,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 
   defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * scale * numberOfPointsPerOneUnitOfPointSize);
 
-  Property::Map* variationsMapPtr = nullptr;
-  if(!mTextModel->mLogicalModel->mVariationsMap.Empty())
-  {
-    variationsMapPtr = &mTextModel->mLogicalModel->mVariationsMap;
-  }
+  Property::Map* variationsMapPtr = mTextModel->mLogicalModel->GetVariationsMap();
 
   // Validates the fonts. If there is a character with no assigned font it sets a default one.
   // After this call, fonts are validated.

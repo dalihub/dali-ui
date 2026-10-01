@@ -4485,10 +4485,7 @@ void LabelImpl::SetTextBackgroundColorInternal(const Vector4& color)
 
 void LabelImpl::SetUnderlineColorInternal(const Vector4& color)
 {
-  if(mController->GetUnderlineColor() != color)
-  {
-    mController->SetUnderlineColor(color);
-  }
+  mController->SetUnderlineColor(color);
 }
 
 void LabelImpl::SetShadowColorInternal(const Vector4& color)
@@ -4509,10 +4506,7 @@ void LabelImpl::SetOutlineColorInternal(const Vector4& color)
 
 void LabelImpl::SetLineThroughColorInternal(const Vector4& color)
 {
-  if(mController->GetStrikethroughColor() != color)
-  {
-    mController->SetStrikethroughColor(color);
-  }
+  mController->SetStrikethroughColor(color);
 }
 
 void LabelImpl::SetBevelLightColorInternal(const Vector4& color)
