@@ -4030,3 +4030,40 @@ int UtcDaliTextGradientShaderCompositionAsyncTextVisualDisabledFallbackP(void)
   ExpectNoTextGradientDefine(fragmentPrefix);
   END_TEST;
 }
+
+int UtcDaliTextScrollerPreparedCompositionMatrixP(void)
+{
+  TestApplication application;
+  for(int scenario = 0; scenario < 4; ++scenario)
+  {
+    Sampler sampler = Sampler::New();
+    auto content = UiText::MarqueeBuilder::CreateTextContent(CreatePixelData(2u, 2u, Pixel::RGBA8888), sampler);
+    const auto gradient = CreateSimpleGradientContentRequest(true, true);
+    UiText::MarqueeBuilder::CompositionRequest request;
+    request.sampler = sampler;
+    request.verifiedSize = Size(2.0f, 2.0f);
+    request.gradientState = gradient.gradientState;
+    request.baseBoundsResolved = gradient.baseBoundsResolved;
+    request.baseBounds = gradient.baseBounds;
+    request.overlayBoundsResolved = gradient.overlayBoundsResolved;
+    request.overlayBounds = gradient.overlayBounds;
+    request.overlayMode = gradient.overlayMode;
+    request.featureInfo.styleTextureEnabled = scenario == 1 || scenario == 3;
+    request.featureInfo.hasMultipleTextColors = scenario == 2 || scenario == 3;
+    request.featureInfo.isOverlayStyle = true;
+
+    UiText::MarqueeBuilder::PixelDataBundle pixels;
+    pixels.fillPixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+    pixels.stylePixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+    pixels.preservedPixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+    pixels.maskPixelData = CreatePixelData(2u, 2u, Pixel::L8);
+    pixels.overlayStylePixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+    const auto plan = UiText::MarqueeBuilder::GetCompositionPlan(request);
+    DALI_TEST_CHECK(plan.HasWork());
+    UiText::MarqueeBuilder::ApplyPreparedComposition(content, request, pixels);
+    DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+    DALI_TEST_CHECK(content.textGradient.enabled);
+    DALI_TEST_CHECK(content.textGradient.overlayStyleTextureEnabled);
+  }
+  END_TEST;
+}

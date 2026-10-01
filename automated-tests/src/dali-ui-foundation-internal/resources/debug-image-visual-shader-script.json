@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "minimumColorRate": 0.1,
+  "maximumColorRate": 0.5,
+  "extraAttributes": "mediump vec3 aDebug;",
+  "extraVaryings": ["mediump vec3 vDebug;"],
+  "extraUniforms": "mediump float uDebug;",
+  "applyVaryingsCode": "vDebug = gl_Position.xyz / gl_Position.w;",
+  "redChannelCodes": {
+    "triggerCode": ["return", " false;"],
+    "ratioCode": "return 0.0;"
+  },
+  "greenChannelCodes": {
+    "triggerCode": "return true;",
+    "ratioCode": "return 0.5;"
+  },
+  "blueChannelCodes": {
+    "triggerCode": "return false;",
+    "ratioCode": "return 1.0;"
+  }
+}

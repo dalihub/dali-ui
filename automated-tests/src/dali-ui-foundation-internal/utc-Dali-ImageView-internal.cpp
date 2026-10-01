@@ -268,7 +268,44 @@ int UtcDaliImageViewAutoNPatchBorderOnlyReachesVisual(void)
   DALI_TEST_CHECK(borderOnlyValue);
   DALI_TEST_CHECK(borderOnlyValue->Get(borderOnly));
   DALI_TEST_EQUALS(borderOnly, true, TEST_LOCATION);
+  END_TEST;
+}
 
+int UtcDaliImageViewRealNPatchRenderingModesP(void)
+{
+  UiTestApplication application;
+  const char* url = "../samples/image-view/res/button-up-1.9.png";
+
+  for(bool borderOnly : {false, true})
+  {
+    ImageView view = ImageView::New();
+    view.SetSynchronousLoading(true);
+    view.SetRequestedWidth(160.0f);
+    view.SetRequestedHeight(100.0f);
+    view.SetNPatchBorderOnly(borderOnly);
+    if(borderOnly)
+    {
+      view.SetNPatchBorder(Insets(2.0f, 2.0f, 2.0f, 2.0f));
+    }
+    view.SetResourceUrl(url);
+    application.GetScene().Add(view);
+    application.SendNotification();
+    application.Render();
+
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+    DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+    DALI_TEST_CHECK(view.GetRendererAt(0u).GetTextures().GetTexture(0u));
+
+    const Vector3 naturalSize = view.GetNaturalSize();
+    DALI_TEST_CHECK(naturalSize.width > 0.0f);
+    DALI_TEST_CHECK(naturalSize.height > 0.0f);
+
+    view.Reload();
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+    application.GetScene().Remove(view);
+  }
   END_TEST;
 }
 

@@ -22,6 +22,7 @@
 #define protected public
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/visuals/mesh/mesh-visual.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #undef protected
@@ -209,6 +210,55 @@ int UtcDaliMeshVisualMaterialAndTextureFailuresP(void)
   visual->CreateShader();
   visual->mShadingMode = Ui::Integration::MeshVisual::ShadingMode::TEXTURELESS_WITH_DIFFUSE_LIGHTING;
   visual->CreateShader();
+  visual->mShadingMode = Ui::Integration::MeshVisual::ShadingMode::TEXTURED_WITH_DETAILED_SPECULAR_LIGHTING;
+  visual->mTexturesPath = std::string(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR) + "/../../../../samples/window-frame/res/";
+  visual->mDiffuseTextureUrl = "theme.png";
+  visual->mNormalTextureUrl = "theme.png";
+  visual->mGlossTextureUrl = "theme.png";
+  DALI_TEST_CHECK(visual->LoadTextures());
+  DALI_TEST_CHECK(visual->mTextureSet.GetTexture(0u));
+  DALI_TEST_CHECK(visual->mTextureSet.GetTexture(1u));
+  DALI_TEST_CHECK(visual->mTextureSet.GetTexture(2u));
   std::remove(MATERIAL_PATH);
+  END_TEST;
+}
+
+int UtcDaliMeshVisualInitializeAndShaderFallbacksP(void)
+{
+  UiTestApplication application;
+  WriteFile(OBJECT_PATH,
+            "\n"
+            "v 0 0 0\n"
+            "v 1 0 0\n"
+            "v 0 1 0\n"
+            "f 1 2 3\n");
+
+  auto visual = CreateMeshVisual();
+  visual->mObjectUrl = OBJECT_PATH;
+  visual->mUseTexture = false;
+  visual->mUseSoftNormals = false;
+  visual->OnInitialize();
+  DALI_TEST_CHECK(visual->mImpl->mRenderer);
+  DALI_TEST_CHECK(visual->mTextureSet);
+  DALI_TEST_EQUALS(visual->mShadingMode,
+                   Ui::Integration::MeshVisual::ShadingMode::TEXTURELESS_WITH_DIFFUSE_LIGHTING,
+                   TEST_LOCATION);
+
+  Actor actor = Actor::New();
+  application.GetScene().Add(actor);
+  visual->DoSetOnScene(actor);
+  DALI_TEST_EQUALS(actor.GetRendererCount(), 1u, TEST_LOCATION);
+  visual->OnSetTransform();
+  visual->UpdateShaderUniforms(Vector2(100.0f, 100.0f));
+
+  auto missingMaterial = CreateMeshVisual();
+  missingMaterial->mObjectUrl = OBJECT_PATH;
+  missingMaterial->mMaterialUrl = "/tmp/dali-ui-missing-material.mtl";
+  missingMaterial->mUseTexture = true;
+  missingMaterial->mUseSoftNormals = false;
+  missingMaterial->OnInitialize();
+  DALI_TEST_CHECK(missingMaterial->mImpl->mRenderer);
+
+  std::remove(OBJECT_PATH);
   END_TEST;
 }

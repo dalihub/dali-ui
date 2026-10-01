@@ -2432,3 +2432,114 @@ int UtcDaliTextDecorationSpanDefaultsP(void)
   DALI_TEST_EQUALS(logical.mUnderlinedCharacterRuns[0u].properties.color, Color::BLACK, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliTextControllerTapAndLongPressEditingP(void)
+{
+  UiTestApplication application;
+  const Size size(180.0f, 60.0f);
+  PublicText::ControllerPtr controller = PublicText::Controller::New();
+  PublicText::DecoratorPtr decorator = PublicText::Decorator::New(*controller, *controller);
+  InputMethodContext inputMethodContext;
+  controller->EnableTextInput(decorator, inputMethodContext);
+  controller->SetText("Tap and long press this editable sentence");
+  controller->KeyboardFocusGainEvent(false);
+  controller->Relayout(size);
+
+  PublicText::Controller::Impl& impl = PublicText::Controller::Impl::GetImplementation(*controller.Get());
+  DALI_TEST_CHECK(impl.mEventData != nullptr);
+  const uint32_t textLength = impl.mModel->mLogicalModel->mText.Count();
+
+  controller->TapEvent(1u, 20.0f, 15.0f);
+  controller->Relayout(size);
+  DALI_TEST_CHECK(controller->GetPrimaryCursorPosition() <= textLength);
+  DALI_TEST_EQUALS(impl.mEventData->mLeftSelectionPosition,
+                   impl.mEventData->mRightSelectionPosition,
+                   TEST_LOCATION);
+
+  controller->TapEvent(2u, 30.0f, 15.0f);
+  controller->Relayout(size);
+  DALI_TEST_CHECK(impl.mEventData->mLeftSelectionPosition <= textLength);
+  DALI_TEST_CHECK(impl.mEventData->mRightSelectionPosition <= textLength);
+
+  controller->LongPressEvent(GestureState::STARTED, 40.0f, 15.0f);
+  controller->Relayout(size);
+  DALI_TEST_CHECK(impl.mEventData->mLeftSelectionPosition <= textLength);
+  DALI_TEST_CHECK(impl.mEventData->mRightSelectionPosition <= textLength);
+
+  controller->SelectWholeText();
+  controller->Relayout(size);
+  DALI_TEST_EQUALS(impl.mEventData->mLeftSelectionPosition, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.mEventData->mRightSelectionPosition, textLength, TEST_LOCATION);
+  controller->SelectNone();
+  controller->Relayout(size);
+  DALI_TEST_EQUALS(impl.mEventData->mLeftSelectionPosition,
+                   impl.mEventData->mRightSelectionPosition,
+                   TEST_LOCATION);
+
+  controller->SetText("");
+  controller->Relayout(size);
+  controller->LongPressEvent(GestureState::STARTED, 20.0f, 15.0f);
+  controller->Relayout(size);
+  DALI_TEST_CHECK(impl.mEventData->mState == PublicText::EventData::EDITING_WITH_POPUP ||
+                  impl.mEventData->mState == PublicText::EventData::EDITING);
+  END_TEST;
+}
+
+int UtcDaliStyledTextControllerAtlasDecorationMeshesP(void)
+{
+  UiTestApplication application;
+  for(PublicText::Underline::Type type : {PublicText::Underline::Type::SOLID,
+                                          PublicText::Underline::Type::DASHED,
+                                          PublicText::Underline::Type::DOUBLE})
+  {
+    PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New("Decorated and struck words");
+    const PublicText::Underline underline = CreateUnderline(Color::GREEN, 2.0f, type, 4.0f, 2.0f);
+    const PublicText::LineThrough lineThrough = CreateLineThrough(Color::RED, 2.5f);
+    DALI_TEST_CHECK(builder.SetSpan(PublicText::UnderlineSpan::New(underline), 0u, 9u));
+    DALI_TEST_CHECK(builder.SetSpan(PublicText::LineThroughSpan::New(lineThrough), 14u, 20u));
+
+    PublicText::ControllerPtr controller = PublicText::Controller::New();
+    controller->SetDefaultFontSize(20.0f, PublicText::Controller::PIXEL_SIZE);
+    controller->SetStyledText(builder.Build());
+    RelayoutController(controller);
+    PublicText::VisualModel& visual = GetVisualModel(controller);
+    DALI_TEST_CHECK(visual.GetNumberOfUnderlineRuns() > 0u);
+    DALI_TEST_CHECK(visual.GetNumberOfStrikethroughRuns() > 0u);
+
+    PublicText::RendererPtr renderer = PublicText::AtlasRenderer::New();
+    Actor textControl = Actor::New();
+    float alignmentOffset = 0.0f;
+    Actor textActor = renderer->Render(controller->GetView(),
+                                       textControl,
+                                       Property::INVALID_INDEX,
+                                       alignmentOffset,
+                                       0);
+    DALI_TEST_CHECK(textActor);
+    DALI_TEST_CHECK(textActor.GetChildCount() > 0u);
+  }
+  END_TEST;
+}
+
+int UtcDaliStyledTextControllerAnchorActorsFromStyledTextP(void)
+{
+  UiTestApplication application;
+  PublicText::ControllerPtr controller = PublicText::Controller::New();
+  controller->SetStyledText(PublicText::StyledText::FromMarkup(
+    "Read <a href='https://example.com/docs'>docs</a> and <a href='help'>help</a>"));
+  RelayoutController(controller);
+
+  std::vector<Dali::Ui::TextAnchor> anchors;
+  controller->GetAnchorActors(anchors);
+  DALI_TEST_EQUALS(anchors.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(anchors[0].GetProperty<String>(Actor::Property::NAME), String("docs"), TEST_LOCATION);
+  DALI_TEST_EQUALS(anchors[0].GetProperty<String>(Dali::Ui::TextAnchor::Property::URI), String("https://example.com/docs"), TEST_LOCATION);
+  DALI_TEST_EQUALS(anchors[0].GetProperty<int>(Dali::Ui::TextAnchor::Property::START_CHARACTER_INDEX), 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(anchors[0].GetProperty<int>(Dali::Ui::TextAnchor::Property::END_CHARACTER_INDEX), 9, TEST_LOCATION);
+  DALI_TEST_EQUALS(anchors[1].GetProperty<String>(Actor::Property::NAME), String("help"), TEST_LOCATION);
+
+  controller->SetStyledText(PublicText::StyledText::New("No links"));
+  RelayoutController(controller);
+  controller->GetAnchorActors(anchors);
+  DALI_TEST_CHECK(anchors.empty());
+  END_TEST;
+}

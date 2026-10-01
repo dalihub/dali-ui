@@ -20,6 +20,12 @@
 #include <dali/devel-api/text-abstraction/script.h>
 #include <dali-ui-foundation/internal/text/bounded-paragraph-helper-functions.h>
 #include <dali-ui-foundation/internal/text/font-run.h>
+#include <dali-ui-foundation/internal/text/character-set-conversion.h>
+#include <dali-ui-foundation/internal/text/emoji-helper.h>
+#include <dali-ui-foundation/internal/text/characters-helper-functions.h>
+#include <dali-ui-foundation/internal/text/logical-model-impl.h>
+#include <dali-ui-foundation/internal/text/markup-processor/markup-processor-helper-functions.h>
+#include <dali-ui-foundation/internal/text/visual-model-impl.h>
 #include <dali-ui-foundation/internal/text/font-variation/font-variation-property-data.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
@@ -230,5 +236,198 @@ int UtcDaliFontVariationPropertyDataP(void)
   data.ApplyCurrentPropertyValues(owner, map);
   DALI_TEST_EQUALS(map["wght"].Get<float>(), 650.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(map["wdth"].Get<float>(), 120.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextClusteredCharacterRunP(void)
+{
+  Text::VisualModelPtr visual = Text::VisualModel::New();
+  Text::LogicalModelPtr logical = Text::LogicalModel::New();
+  visual->mCharactersToGlyph.PushBack(0u);
+  visual->mCharactersToGlyph.PushBack(0u);
+  visual->mCharactersPerGlyph.PushBack(2u);
+  visual->mGlyphsToCharacters.PushBack(0u);
+
+  Text::ScriptRun script{};
+  script.characterRun = Text::CharacterRun(0u, 2u);
+  script.script = TextAbstraction::UNKNOWN;
+  logical->mScriptRuns.PushBack(script);
+  Text::CharacterRun cluster = Text::RetrieveClusteredCharactersOfCharacterIndex(visual, logical, 1u);
+  DALI_TEST_EQUALS(cluster.characterIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(cluster.numberOfCharacters, 2u, TEST_LOCATION);
+
+  logical->mScriptRuns[0].script = TextAbstraction::ARABIC;
+  cluster = Text::RetrieveClusteredCharactersOfCharacterIndex(visual, logical, 1u);
+  DALI_TEST_EQUALS(cluster.characterIndex, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(cluster.numberOfCharacters, 1u, TEST_LOCATION);
+
+  visual->mCharactersPerGlyph[0] = 0u;
+  visual->mCharactersPerGlyph.PushBack(2u);
+  visual->mGlyphsToCharacters.PushBack(0u);
+  cluster = Text::RetrieveClusteredCharactersOfCharacterIndex(visual, logical, 1u);
+  DALI_TEST_EQUALS(cluster.characterIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(cluster.numberOfCharacters, 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextUtf8ConversionBoundariesP(void)
+{
+  const uint32_t characters[] = {'A', 0x00E9u, 0x4E2Du, 0x1F642u};
+  uint8_t encoded[32] = {};
+  const uint32_t byteCount = Text::Utf32ToUtf8(characters, 4u, encoded);
+  DALI_TEST_EQUALS(byteCount, 10u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetNumberOfUtf8Bytes(characters, 4u), byteCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetNumberOfUtf8Characters(encoded, byteCount), 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetUtf8Length(encoded[0]), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetUtf8Length(encoded[1]), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetUtf8Length(encoded[3]), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetUtf8Length(encoded[6]), 4u, TEST_LOCATION);
+
+  uint32_t decoded[8] = {};
+  DALI_TEST_EQUALS(Text::Utf8ToUtf32(encoded, byteCount, decoded), 4u, TEST_LOCATION);
+  for(uint32_t index = 0u; index < 4u; ++index)
+  {
+    DALI_TEST_EQUALS(decoded[index], characters[index], TEST_LOCATION);
+  }
+
+  const uint8_t lineEndings[] = {'A', '\r', '\n', 'B', '\r', 'C', 0xFEu};
+  DALI_TEST_EQUALS(Text::Utf8ToUtf32(lineEndings, 7u, decoded), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoded[1], static_cast<uint32_t>('\n'), TEST_LOCATION);
+  DALI_TEST_EQUALS(decoded[3], static_cast<uint32_t>('\n'), TEST_LOCATION);
+  DALI_TEST_EQUALS(decoded[5], 0x20u, TEST_LOCATION);
+
+  std::string roundTrip;
+  Text::Utf32ToUtf8(characters, 4u, roundTrip);
+  DALI_TEST_EQUALS(roundTrip.size(), static_cast<size_t>(byteCount), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextLegacyExtendedUtf8WidthsP(void)
+{
+  const uint32_t codePoints[] = {0x200000u, 0x4000000u};
+  uint8_t encoded[12] = {};
+  DALI_TEST_EQUALS(Text::GetNumberOfUtf8Bytes(codePoints, 2u), 11u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::Utf32ToUtf8(codePoints, 2u, encoded), 11u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetUtf8Length(encoded[0]), 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetUtf8Length(encoded[5]), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetNumberOfUtf8Characters(encoded, 11u), 2u, TEST_LOCATION);
+  uint32_t decoded[2] = {};
+  DALI_TEST_EQUALS(Text::Utf8ToUtf32(encoded, 11u, decoded), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoded[0], codePoints[0], TEST_LOCATION);
+  DALI_TEST_EQUALS(decoded[1], codePoints[1], TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkupHelperColorAndAlignmentRoundTripsP(void)
+{
+  const struct { const char* name; Vector4 value; } colors[] = {
+    {"black", Color::BLACK}, {"white", Color::WHITE}, {"red", Color::RED},
+    {"green", Color::GREEN}, {"blue", Color::BLUE}, {"yellow", Color::YELLOW},
+    {"magenta", Color::MAGENTA}, {"cyan", Color::CYAN}, {"transparent", Color::TRANSPARENT}
+  };
+  for(const auto& color : colors)
+  {
+    Vector4 parsed;
+    Text::ColorStringToVector4(color.name, static_cast<Text::Length>(strlen(color.name)), parsed);
+    DALI_TEST_EQUALS(parsed, color.value, TEST_LOCATION);
+    std::string serialized;
+    Text::Vector4ToColorString(color.value, serialized);
+    DALI_TEST_EQUALS(serialized, std::string(color.name), TEST_LOCATION);
+  }
+
+  Vector4 webColor;
+  Text::ColorStringToVector4("#f00", 4u, webColor);
+  DALI_TEST_EQUALS(webColor, Color::RED, TEST_LOCATION);
+  Text::ColorStringToVector4("#FF0000", 7u, webColor);
+  DALI_TEST_EQUALS(webColor, Color::RED, TEST_LOCATION);
+  Text::ColorStringToVector4("0xFF0000FF", 10u, webColor);
+  DALI_TEST_EQUALS(webColor, Color::BLUE, TEST_LOCATION);
+  std::string serialized;
+  Text::Vector4ToColorString(Vector4(0.2f, 0.4f, 0.6f, 0.8f), serialized);
+  DALI_TEST_CHECK(serialized.find("0x") == 0u);
+
+  Text::Alignment alignment = Text::Alignment::START;
+  DALI_TEST_CHECK(Text::HorizontalAlignmentTypeStringToTypeValue("center", 6u, alignment));
+  DALI_TEST_EQUALS(alignment, Text::Alignment::CENTER, TEST_LOCATION);
+  DALI_TEST_CHECK(Text::HorizontalAlignmentTypeStringToTypeValue("end", 3u, alignment));
+  DALI_TEST_EQUALS(alignment, Text::Alignment::END, TEST_LOCATION);
+  DALI_TEST_CHECK(Text::HorizontalAlignmentTypeStringToTypeValue("start", 5u, alignment));
+  DALI_TEST_EQUALS(alignment, Text::Alignment::START, TEST_LOCATION);
+  DALI_TEST_CHECK(!Text::HorizontalAlignmentTypeStringToTypeValue("unknown", 7u, alignment));
+  DALI_TEST_EQUALS(Text::StringToUint("42"), 42u, TEST_LOCATION);
+  std::string number;
+  Text::UintToString(42u, number);
+  DALI_TEST_EQUALS(number, std::string("42"), TEST_LOCATION);
+  Text::Underline::Type underline = Text::Underline::Type::DOUBLE;
+  Text::UnderlineTypeStringToTypeValue("solid", 5u, underline);
+  DALI_TEST_EQUALS(underline, Text::Underline::Type::SOLID, TEST_LOCATION);
+  Text::UnderlineTypeStringToTypeValue("dashed", 6u, underline);
+  DALI_TEST_EQUALS(underline, Text::Underline::Type::DASHED, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliEmojiHelperSequenceFallbackMatrixP(void)
+{
+  using Script = TextAbstraction::Script;
+  auto checkSequence = [](std::initializer_list<Text::Character> characters, bool expected,
+                          Text::Length expectedLength, Script expectedScript)
+  {
+    Text::Length length = 0u;
+    Script script = TextAbstraction::UNKNOWN;
+    const bool found = Text::GetEmojiSequence(characters.begin(), 0u,
+                                               static_cast<Text::Length>(characters.size() - 1u),
+                                               TextAbstraction::UNKNOWN, length, script);
+    DALI_TEST_EQUALS(found, expected, TEST_LOCATION);
+    if(expected)
+    {
+      DALI_TEST_EQUALS(length, expectedLength, TEST_LOCATION);
+      DALI_TEST_EQUALS(script, expectedScript, TEST_LOCATION);
+    }
+  };
+
+  checkSequence({'1', 0xFE0Fu, 0x20E3u}, true, 3u, TextAbstraction::EMOJI_COLOR);
+  checkSequence({'1', 0xFE0Eu, 0x20E3u}, true, 3u, TextAbstraction::EMOJI_TEXT);
+  checkSequence({'1', 0x20E3u}, true, 2u, TextAbstraction::EMOJI);
+  checkSequence({0x1F1FAu, 0x1F1F8u}, true, 2u, TextAbstraction::EMOJI_COLOR);
+  checkSequence({0x1F1FAu}, true, 1u, TextAbstraction::EMOJI);
+  checkSequence({0x1F469u, 0x200Du, 0x1F4BBu}, true, 3u, TextAbstraction::EMOJI_COLOR);
+  checkSequence({0x1F469u, 0x200Du}, true, 2u, TextAbstraction::EMOJI_COLOR);
+  checkSequence({0x1F44Du, 0x1F3FDu}, true, 2u, TextAbstraction::EMOJI_COLOR);
+  checkSequence({0x1F3F4u, 0xE0067u, 0xE0062u, 0xE007Fu}, true, 4u, TextAbstraction::EMOJI_COLOR);
+  checkSequence({0x2764u, 0xFE0Fu}, true, 2u, TextAbstraction::EMOJI_COLOR);
+  checkSequence({0x2764u, 0xFE0Eu}, true, 2u, TextAbstraction::EMOJI_TEXT);
+  checkSequence({'A'}, false, 0u, TextAbstraction::UNKNOWN);
+  checkSequence({0x1F3FBu}, false, 0u, TextAbstraction::UNKNOWN);
+
+  const Text::Character keycap[] = {'1', 0xFE0Fu, 0x20E3u};
+  Script script = TextAbstraction::COMMON;
+  DALI_TEST_CHECK(Text::IsNewSequence(keycap, TextAbstraction::COMMON, 0u, 2u, script));
+  DALI_TEST_EQUALS(script, TextAbstraction::EMOJI_COLOR, TEST_LOCATION);
+  DALI_TEST_CHECK(!Text::IsNewSequence(keycap, TextAbstraction::EMOJI_COLOR, 2u, 2u, script));
+  const Text::Character heartText[] = {0x2764u, 0xFE0Eu, 'A'};
+  DALI_TEST_CHECK(Text::IsNewSequence(heartText, TextAbstraction::EMOJI_COLOR, 0u, 2u, script));
+  DALI_TEST_EQUALS(script, TextAbstraction::EMOJI_TEXT, TEST_LOCATION);
+  DALI_TEST_CHECK(!Text::IsNewSequence(heartText, TextAbstraction::EMOJI_TEXT, 2u, 2u, script));
+  const Text::Character heartPlain[] = {0x2764u, 'A'};
+  DALI_TEST_CHECK(Text::IsNewSequence(heartPlain, TextAbstraction::EMOJI, 0u, 1u, script));
+
+  script = TextAbstraction::COMMON;
+  DALI_TEST_CHECK(Text::IsScriptChangedToFollowSequence(TextAbstraction::EMOJI,
+                                                          0x20E3u, script));
+  DALI_TEST_EQUALS(script, TextAbstraction::EMOJI, TEST_LOCATION);
+  script = TextAbstraction::COMMON;
+  DALI_TEST_CHECK(Text::IsScriptChangedToFollowSequence(TextAbstraction::EMOJI_COLOR,
+                                                          0xFE0Eu, script));
+  DALI_TEST_EQUALS(script, TextAbstraction::EMOJI_TEXT, TEST_LOCATION);
+  script = TextAbstraction::COMMON;
+  DALI_TEST_CHECK(Text::IsScriptChangedToFollowSequence(TextAbstraction::EMOJI,
+                                                          0xFE0Fu, script));
+  DALI_TEST_EQUALS(script, TextAbstraction::EMOJI_COLOR, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetVariationSelectorByScript(TextAbstraction::EMOJI_COLOR),
+                   0xFE0Fu, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetVariationSelectorByScript(TextAbstraction::EMOJI_TEXT),
+                   0xFE0Eu, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetVariationSelectorByScript(TextAbstraction::COMMON),
+                   0u, TEST_LOCATION);
   END_TEST;
 }

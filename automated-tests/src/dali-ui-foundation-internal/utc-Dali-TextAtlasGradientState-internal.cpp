@@ -13,9 +13,11 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
+#include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
 #include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
+#include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
@@ -496,5 +498,41 @@ int UtcDaliTextAtlasGradientCommonTextUtilsBackgroundScrollP(void)
   DALI_TEST_CHECK(backgroundActor.GetParent() == renderableActor);
   DALI_TEST_EQUALS(backgroundActor.GetProperty<Vector3>(Actor::Property::POSITION), Vector3::ZERO, TEST_LOCATION);
   DALI_TEST_EQUALS(recordingRenderer->updateAtlasGradientCount, 3u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextAtlasGradientAnimationConstraintP(void)
+{
+  UiTestApplication application;
+  AtlasGradient::AtlasResource prepared;
+  DALI_TEST_CHECK(prepared.Set(MakeGradient(Color::RED, Color::BLUE)));
+
+  Dali::Ui::Text::ControllerPtr controller = Dali::Ui::Text::Controller::New();
+  controller->SetText("Animated gradient text");
+  controller->SetDefaultFontSize(22.0f, Dali::Ui::Text::Controller::PIXEL_SIZE);
+  controller->Relayout(Size(300.0f, 60.0f));
+
+  Dali::Ui::Text::RendererPtr renderer = Dali::Ui::Text::AtlasRenderer::New();
+  DALI_TEST_CHECK(renderer->SetAtlasGradientState(prepared.GetRendererState()));
+  renderer->UpdateAtlasGradient(Vector2(300.0f, 60.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+
+  Actor source = Actor::New();
+  const Property::Index offset = source.RegisterProperty("gradientOffset", 0.25f);
+  renderer->SetAtlasGradientAnimProperties(source, offset);
+  renderer->SetAtlasGradientAnimApplyAlways(true);
+  Actor textControl = Actor::New();
+  float alignmentOffset = 0.0f;
+  Actor textActor = renderer->Render(controller->GetView(),
+                                     textControl,
+                                     Property::INVALID_INDEX,
+                                     alignmentOffset,
+                                     0);
+  DALI_TEST_CHECK(textActor);
+  DALI_TEST_CHECK(textActor.GetChildCount() > 0u);
+
+  renderer->UpdateAtlasGradient(Vector2(280.0f, 60.0f), Vector4(0.1f, 0.0f, 0.8f, 1.0f));
+  source.SetProperty(offset, 0.75f);
+  renderer->SetAtlasGradientAnimApplyAlways(false, true);
+  renderer->SetAtlasGradientAnimProperties(Actor(), Property::INVALID_INDEX);
   END_TEST;
 }

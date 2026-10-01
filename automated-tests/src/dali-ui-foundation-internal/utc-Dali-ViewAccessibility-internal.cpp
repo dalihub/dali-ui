@@ -1201,3 +1201,91 @@ int UtcDaliViewAccessibilityExtensionNotificationsP(void)
 
   END_TEST;
 }
+
+int UtcDaliViewAccessibilityRoleConversionMatrixP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  TestAccessibilityViewAccessible accessible(view);
+  using LegacyRole = Dali::Integration::Accessibility::Role;
+
+  for(uint32_t value = UiAccessibility::ROLE_START_INDEX;
+      value < static_cast<uint32_t>(UiAccessibility::Role::MAX_COUNT);
+      ++value)
+  {
+    const auto role = static_cast<UiAccessibility::Role>(value);
+    view.SetAccessibilityRole(role);
+    const LegacyRole converted = accessible.GetRole();
+    if(role == UiAccessibility::Role::NONE)
+    {
+      DALI_TEST_EQUALS(converted, LegacyRole::UNKNOWN, TEST_LOCATION);
+    }
+    else
+    {
+      DALI_TEST_CHECK(converted != LegacyRole::UNKNOWN);
+    }
+  }
+
+  view.SetAccessibilityRole(UiAccessibility::Role::ADJUSTABLE);
+  DALI_TEST_EQUALS(accessible.GetRole(), LegacyRole::SLIDER, TEST_LOCATION);
+  view.SetAccessibilityRole(UiAccessibility::Role::BUTTON);
+  DALI_TEST_EQUALS(accessible.GetRole(), LegacyRole::PUSH_BUTTON, TEST_LOCATION);
+  view.SetAccessibilityRole(UiAccessibility::Role::TAB);
+  DALI_TEST_EQUALS(accessible.GetRole(), LegacyRole::PAGE_TAB, TEST_LOCATION);
+  view.SetAccessibilityRole(UiAccessibility::Role::SCENE_3D);
+  DALI_TEST_EQUALS(accessible.GetRole(), LegacyRole::FILLER, TEST_LOCATION);
+  view.SetAccessibilityRole(UiAccessibility::Role::MODEL);
+  DALI_TEST_EQUALS(accessible.GetRole(), LegacyRole::IMAGE, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityNotificationLifecycleAndGeometryP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(200.0f);
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  parent.Add(child);
+  application.GetScene().Add(parent);
+  parent.Measure(200.0f, 200.0f);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 200.0f));
+  application.SendNotification();
+  application.Render();
+
+  auto* accessible = dynamic_cast<Dali::Ui::ViewAccessible*>(Dali::Accessibility::Accessible::Get(child));
+  DALI_TEST_CHECK(accessible);
+  auto& data = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(child)).GetOrCreateAccessibilityData();
+
+  DALI_TEST_EQUALS(data.GetConnectionCount(), 0u, TEST_LOCATION);
+  data.RegisterAccessibilityPropertySetSignal();
+  DALI_TEST_EQUALS(data.GetConnectionCount(), 1u, TEST_LOCATION);
+  data.RegisterAccessibilityPropertySetSignal();
+  DALI_TEST_EQUALS(data.GetConnectionCount(), 1u, TEST_LOCATION);
+  child.SetProperty(Actor::Property::NAME, "updated-name");
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("updated-name"), TEST_LOCATION);
+  data.UnregisterAccessibilityPropertySetSignal();
+  DALI_TEST_EQUALS(data.GetConnectionCount(), 0u, TEST_LOCATION);
+  data.UnregisterAccessibilityPropertySetSignal();
+
+  data.CheckHighlightedObjectGeometry();
+  auto extents = accessible->GetExtents(Dali::Devel::Accessibility::CoordinateType::WINDOW);
+  DALI_TEST_EQUALS(accessible->GetLastPosition(), Vector2(extents.x, extents.y), TEST_LOCATION);
+  data.RegisterAccessibilityPositionPropertyNotification();
+  data.RegisterAccessibilityPositionPropertyNotification();
+  child.SetProperty(Actor::Property::POSITION, Vector3(20.0f, 15.0f, 0.0f));
+  application.SendNotification();
+  application.Render();
+  child.SetProperty(Actor::Property::POSITION, Vector3(300.0f, 300.0f, 0.0f));
+  application.SendNotification();
+  application.Render();
+  data.CheckHighlightedObjectGeometry();
+  child.SetProperty(Actor::Property::POSITION, Vector3(-300.0f, -300.0f, 0.0f));
+  application.SendNotification();
+  application.Render();
+  data.CheckHighlightedObjectGeometry();
+  data.UnregisterAccessibilityPositionPropertyNotification();
+  END_TEST;
+}

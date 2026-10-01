@@ -16,6 +16,7 @@
 
 // EXTERNAL INCLUDES
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -2613,5 +2614,351 @@ int UtcDaliMaximumLinesAsyncLoaderP(void)
                    TEST_LOCATION);
   DALI_TEST_EQUALS(trailingNewlineFitInfo.lineCount, 2, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliTextViewModelFallbackAndFinalResultP(void)
+{
+  UiTestApplication application;
+  Text::View view;
+
+  DALI_TEST_EQUALS(view.GetControlSize(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLayoutSize(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNumberOfLines(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetLines() == nullptr);
+  DALI_TEST_EQUALS(view.GetNumberOfGlyphs(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetColors() == nullptr);
+  DALI_TEST_CHECK(view.GetColorIndices() == nullptr);
+  DALI_TEST_CHECK(view.GetBackgroundColors() == nullptr);
+  DALI_TEST_CHECK(view.GetBackgroundColorIndices() == nullptr);
+  DALI_TEST_CHECK(!view.IsMarkupBackgroundColorSet());
+  DALI_TEST_CHECK(!view.IsShadowEnabled());
+  DALI_TEST_CHECK(!view.IsUnderlineEnabled());
+  DALI_TEST_CHECK(!view.IsOutlineEnabled());
+  DALI_TEST_CHECK(!view.IsStrikethroughEnabled());
+  DALI_TEST_CHECK(!view.IsCutoutEnabled());
+  DALI_TEST_EQUALS(view.GetNumberOfUnderlineRuns(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNumberOfStrikethroughRuns(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNumberOfBoundedParagraphRuns(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVerticalLineAlignment(), Text::Alignment::CENTER, TEST_LOCATION);
+
+  Text::VisualModelPtr visual = Text::VisualModel::New();
+  Text::LogicalModelPtr logical = Text::LogicalModel::New();
+  visual->mControlSize = Size(120.0f, 40.0f);
+  visual->SetLayoutSize(Size(100.0f, 20.0f));
+  visual->SetTextColor(Color::RED);
+  visual->SetCharacterSpacing(2.5f);
+  visual->SetCutoutEnabled(true);
+  visual->SetVerticalLineAlignment(Text::Alignment::END);
+  visual->mColors.PushBack(Color::BLUE);
+  visual->mColorIndices.PushBack(0u);
+  visual->mBackgroundColors.PushBack(Color::GREEN);
+  visual->mBackgroundColorIndices.PushBack(0u);
+  visual->mGlyphs.PushBack(Text::GlyphInfo{});
+  visual->mGlyphPositions.PushBack(Vector2(3.0f, 4.0f));
+  visual->mLines.PushBack(Text::LineRun{});
+  logical->mText.PushBack('A');
+
+  view.SetVisualModel(visual);
+  view.SetLogicalModel(logical);
+  DALI_TEST_EQUALS(view.GetControlSize(), Size(120.0f, 40.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLayoutSize(), Size(100.0f, 20.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNumberOfLines(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetLines() == visual->mLines.Begin());
+  DALI_TEST_EQUALS(view.GetNumberOfGlyphs(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetColors() == visual->mColors.Begin());
+  DALI_TEST_CHECK(view.GetColorIndices() == visual->mColorIndices.Begin());
+  DALI_TEST_CHECK(view.GetBackgroundColors() == visual->mBackgroundColors.Begin());
+  DALI_TEST_CHECK(view.GetBackgroundColorIndices() == visual->mBackgroundColorIndices.Begin());
+  DALI_TEST_CHECK(view.IsMarkupBackgroundColorSet());
+  DALI_TEST_EQUALS(view.GetTextColor(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCharacterSpacing(), 2.5f, TEST_LOCATION);
+  DALI_TEST_CHECK(view.IsCutoutEnabled());
+  DALI_TEST_EQUALS(view.GetVerticalLineAlignment(), Text::Alignment::END, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetTextBuffer() == logical->mText.Begin());
+
+  Text::FinalElisionResult result;
+  result.resolved = true;
+  result.textElided = true;
+  result.authoritativeLines = true;
+  result.layoutSize = Size(60.0f, 20.0f);
+  result.minimumLineOffset = -2.0f;
+  result.glyphs.PushBack(Text::GlyphInfo{});
+  result.viewGlyphPositions.PushBack(Vector2(5.0f, 6.0f));
+  result.lines.PushBack(Text::LineRun{});
+  result.finalToStyleGlyphIndices.PushBack(0u);
+  result.colorIndices.PushBack(0u);
+  result.backgroundColorIndices.PushBack(0u);
+  view.SetFinalElisionResult(&result);
+
+  DALI_TEST_EQUALS(view.GetLayoutSize(), Size(60.0f, 20.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNumberOfLines(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetLines() == result.lines.Begin());
+  DALI_TEST_EQUALS(view.GetNumberOfGlyphs(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetFinalGlyphStyleSourceIndices() == result.finalToStyleGlyphIndices.Begin());
+  DALI_TEST_CHECK(view.GetColorIndices() == result.colorIndices.Begin());
+  DALI_TEST_CHECK(view.GetBackgroundColorIndices() == result.backgroundColorIndices.Begin());
+
+  Text::GlyphInfo glyph;
+  Vector2 position;
+  float minLineOffset = 0.0f;
+  DALI_TEST_EQUALS(view.GetGlyphs(&glyph, &position, minLineOffset, 0u, 1u), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(position, Vector2(5.0f, 6.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(minLineOffset, -2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetGlyphs(&glyph, &position, minLineOffset, 1u, 1u), 0u, TEST_LOCATION);
+
+  view.SetFinalElisionResult(nullptr);
+  DALI_TEST_EQUALS(view.GetLayoutSize(), Size(100.0f, 20.0f), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextViewUncachedEllipsisPositionsP(void)
+{
+  UiTestApplication application;
+  for(Text::EllipsisPosition::Type position :
+      {Text::EllipsisPosition::START, Text::EllipsisPosition::MIDDLE, Text::EllipsisPosition::END})
+  {
+    Text::ControllerPtr controller = Text::Controller::New();
+    controller->SetText("Physical ellipsis path with several words and a narrow viewport");
+    controller->SetDefaultFontSize(20.0f, Text::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(false);
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(position);
+    controller->Relayout(Size(95.0f, 35.0f));
+
+    auto& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+    DALI_TEST_CHECK(impl.mModel->mVisualModel->mGlyphs.Count() > 1u);
+    DALI_TEST_CHECK(impl.mModel->mVisualModel->mLines.Count() > 0u);
+    DALI_TEST_CHECK(impl.mModel->mVisualModel->mLines[0u].ellipsis);
+
+    Text::View legacyView;
+    legacyView.SetVisualModel(impl.mModel->mVisualModel);
+    legacyView.SetLogicalModel(impl.mModel->mLogicalModel);
+    const Text::Length glyphCount = legacyView.GetNumberOfGlyphs();
+    Vector<Text::GlyphInfo> glyphs;
+    Vector<Vector2> positions;
+    glyphs.Resize(glyphCount);
+    positions.Resize(glyphCount);
+    float minimumLineOffset = 0.0f;
+    const Text::Length visibleGlyphCount =
+      legacyView.GetGlyphs(glyphs.Begin(), positions.Begin(), minimumLineOffset, 0u, glyphCount);
+    DALI_TEST_CHECK(visibleGlyphCount > 0u);
+    DALI_TEST_CHECK(visibleGlyphCount <= glyphCount);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextRendererOwnedElisionPositionsP(void)
+{
+  UiTestApplication application;
+  for(Text::EllipsisPosition::Type position :
+      {Text::EllipsisPosition::START, Text::EllipsisPosition::MIDDLE, Text::EllipsisPosition::END})
+  {
+    for(bool multiLine : {false, true})
+    {
+      Text::ControllerPtr controller = Text::Controller::New();
+      controller->SetText(multiLine
+                            ? "First line of text with enough words to wrap\nSecond line of text with more words\nThird line"
+                            : "A long single line of text with enough words to require ellipsis");
+      controller->SetDefaultFontSize(20.0f, Text::Controller::PIXEL_SIZE);
+      controller->SetMultiLineEnabled(multiLine);
+      controller->SetTextElideEnabled(true);
+      if(multiLine)
+      {
+        controller->SetMaximumNumberOfLines(1);
+      }
+      controller->SetEllipsisPosition(position);
+      controller->Relayout(Size(90.0f, multiLine ? 38.0f : 30.0f));
+
+      auto& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+      DALI_TEST_CHECK(impl.mModel->mVisualModel->mLines.Count() > 0u);
+      DALI_TEST_CHECK(impl.mModel->mVisualModel->mLines[0u].ellipsis);
+
+      Text::TypesetterPtr typesetter = Text::Typesetter::New(controller->GetRenderTextModel());
+      Text::ViewModel* view = typesetter->GetViewModel();
+      TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
+      view->EnableFinalGlyphMapping();
+      view->ElideGlyphs(fontClient);
+      DALI_TEST_CHECK(view->GetNumberOfGlyphs() > 0u);
+      DALI_TEST_CHECK(view->GetNumberOfGlyphs() <= impl.mModel->mVisualModel->mGlyphs.Count());
+      DALI_TEST_CHECK(view->GetGlyphs() != nullptr);
+      DALI_TEST_CHECK(view->GetLayout() != nullptr);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextViewUncachedMultilineAndDirectionP(void)
+{
+  UiTestApplication application;
+  const std::array<std::string, 3u> texts{{
+    "First paragraph with many words that must wrap before its end. Second sentence continues.",
+    "Left to right text and العربية العربية العربية text at the end.",
+    "First line\nSecond line contains enough words to wrap\nThird line remains invisible",
+  }};
+
+  for(const std::string& source : texts)
+  {
+    for(Text::EllipsisPosition::Type position :
+        {Text::EllipsisPosition::START, Text::EllipsisPosition::MIDDLE, Text::EllipsisPosition::END})
+    {
+      Text::ControllerPtr controller = Text::Controller::New();
+      controller->SetText(source);
+      controller->SetDefaultFontSize(18.0f, Text::Controller::PIXEL_SIZE);
+      controller->SetMultiLineEnabled(true);
+      controller->SetTextElideEnabled(true);
+      controller->SetEllipsisPosition(position);
+      controller->SetMaximumNumberOfLines(2);
+      controller->Relayout(Size(100.0f, 42.0f));
+
+      auto& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+      const auto& visual = *impl.mModel->mVisualModel;
+      DALI_TEST_CHECK(visual.mLines.Count() > 0u);
+      DALI_TEST_CHECK(std::any_of(visual.mLines.Begin(),
+                                  visual.mLines.End(),
+                                  [](const Text::LineRun& line)
+                                  {
+                                    return line.ellipsis;
+                                  }));
+
+      Text::View view;
+      view.SetVisualModel(impl.mModel->mVisualModel);
+      view.SetLogicalModel(impl.mModel->mLogicalModel);
+      const Text::Length sourceCount = view.GetNumberOfGlyphs();
+      Vector<Text::GlyphInfo> glyphs;
+      Vector<Vector2> positions;
+      glyphs.Resize(sourceCount);
+      positions.Resize(sourceCount);
+      float minimumLineOffset = 0.0f;
+      const Text::Length visibleCount =
+        view.GetGlyphs(glyphs.Begin(), positions.Begin(), minimumLineOffset, 0u, sourceCount);
+      DALI_TEST_CHECK(visibleCount > 0u);
+      DALI_TEST_CHECK(visibleCount <= sourceCount);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextViewResolveFinalElisionP(void)
+{
+  UiTestApplication application;
+  TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
+
+  for(Text::EllipsisPosition::Type position :
+      {Text::EllipsisPosition::START, Text::EllipsisPosition::MIDDLE, Text::EllipsisPosition::END})
+  {
+    Text::ControllerPtr controller = Text::Controller::New();
+    controller->SetText("A long single line with enough words to require ellipsis");
+    controller->SetDefaultFontSize(20.0f, Text::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(false);
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(position);
+    controller->Relayout(Size(90.0f, 35.0f));
+
+    auto& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+    Text::View view;
+    view.SetVisualModel(impl.mModel->mVisualModel);
+    view.SetLogicalModel(impl.mModel->mLogicalModel);
+    Text::FinalElisionResult result;
+    view.ResolveFinalElision(fontClient, result, 1u);
+    DALI_TEST_CHECK(result.resolved);
+    DALI_TEST_CHECK(result.textElided);
+    DALI_TEST_CHECK(result.glyphs.Count() > 0u);
+    DALI_TEST_EQUALS(result.layoutGeneration, 1u, TEST_LOCATION);
+
+    const Text::Length glyphCount = result.glyphs.Count();
+    view.ResolveFinalElision(fontClient, result, 1u);
+    DALI_TEST_EQUALS(result.glyphs.Count(), glyphCount, TEST_LOCATION);
+    view.ResolveFinalElision(fontClient, result, 2u);
+    DALI_TEST_EQUALS(result.layoutGeneration, 2u, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextViewOptionalModelGettersP(void)
+{
+  UiTestApplication application;
+  Text::View empty;
+  DALI_TEST_CHECK(!empty.IsTextElideEnabled());
+  DALI_TEST_CHECK(!empty.IsCutoutEnabled());
+  DALI_TEST_CHECK(!empty.IsMarkupUnderlineSet());
+  DALI_TEST_CHECK(!empty.IsMarkupStrikethroughSet());
+  DALI_TEST_EQUALS(empty.GetUnderlineHeight(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetHyphensCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetNumberOfBoundedParagraphRuns(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetNumberOfStrikethroughRuns(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetOutlineWidth(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetDashedUnderlineWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetDashedUnderlineGap(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetStartIndexOfElidedGlyphs(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetEndIndexOfElidedGlyphs(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetFirstMiddleIndexOfElidedGlyphs(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetSecondMiddleIndexOfElidedGlyphs(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!empty.GetHyphens());
+  DALI_TEST_CHECK(!empty.GetHyphenIndices());
+  DALI_TEST_CHECK(!empty.IsOutlineEnabled());
+  DALI_TEST_EQUALS(empty.GetTextColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetShadowOffset(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetShadowColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetUnderlineColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetOutlineColor(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_CHECK(!empty.IsShadowEnabled());
+  DALI_TEST_CHECK(!empty.IsUnderlineEnabled());
+  DALI_TEST_EQUALS(empty.GetVerticalLineAlignment(), Text::Alignment::CENTER, TEST_LOCATION);
+
+  Text::ControllerPtr controller = Text::Controller::New();
+  controller->SetText("Styled view getters");
+  controller->Relayout(Size(200.0f, 50.0f));
+  auto& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+  Text::View view;
+  view.SetVisualModel(impl.mModel->mVisualModel);
+  view.SetLogicalModel(impl.mModel->mLogicalModel);
+  DALI_TEST_CHECK(view.GetTextBuffer());
+  DALI_TEST_CHECK(view.GetHyphensCount() == 0u);
+  DALI_TEST_CHECK(view.GetNumberOfBoundedParagraphRuns() == 0u);
+  DALI_TEST_CHECK(view.GetBoundedParagraphRuns().Count() == 0u);
+  DALI_TEST_CHECK(view.GetNumberOfStrikethroughRuns() == 0u);
+  DALI_TEST_CHECK(!view.IsMarkupStrikethroughSet());
+  DALI_TEST_CHECK(!view.IsMarkupUnderlineSet());
+  DALI_TEST_CHECK(view.GetCharacterSpacing() == 0.0f);
+  DALI_TEST_CHECK(view.GetGlyphsToCharacters().Count() > 0u);
+  DALI_TEST_CHECK(!view.IsCutoutEnabled());
+  DALI_TEST_CHECK(view.GetVerticalLineAlignment() == Text::Alignment::CENTER);
+  END_TEST;
+}
+
+int UtcDaliTextViewEllipsisTallerThanControlP(void)
+{
+  UiTestApplication application;
+  for(Text::EllipsisPosition::Type position :
+      {Text::EllipsisPosition::START, Text::EllipsisPosition::MIDDLE, Text::EllipsisPosition::END})
+  {
+    Text::ControllerPtr controller = Text::Controller::New();
+    controller->SetText("Tall ellipsis line with sufficient glyphs to truncate");
+    controller->SetDefaultFontSize(20.0f, Text::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(false);
+    controller->SetTextElideEnabled(true);
+    controller->SetEllipsisPosition(position);
+    controller->Relayout(Size(90.0f, 35.0f));
+    auto& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+    auto& visual = *impl.mModel->mVisualModel;
+    DALI_TEST_CHECK(visual.mLines.Count() > 0u);
+    DALI_TEST_CHECK(visual.mLines[0u].ellipsis);
+    const Text::Length glyphCount = visual.mGlyphs.Count();
+    DALI_TEST_CHECK(glyphCount > 1u);
+    visual.mControlSize.height = 1.0f;
+
+    Text::View view;
+    view.SetVisualModel(impl.mModel->mVisualModel);
+    view.SetLogicalModel(impl.mModel->mLogicalModel);
+    Vector<Text::GlyphInfo> glyphs;
+    Vector<Vector2> positions;
+    glyphs.Resize(glyphCount);
+    positions.Resize(glyphCount);
+    float minimumLineOffset = 0.0f;
+    const Text::Length visibleCount =
+      view.GetGlyphs(glyphs.Begin(), positions.Begin(), minimumLineOffset, 0u, glyphCount);
+    DALI_TEST_CHECK(visibleCount <= glyphCount);
+  }
   END_TEST;
 }
