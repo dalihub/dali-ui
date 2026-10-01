@@ -30,7 +30,10 @@
 #include <dali/integration-api/rendering/decorated-visual-renderer.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
+#include <algorithm>
+#include <cmath>
 #include <cstring> // for strlen()
+#include <limits>
 
 // INTERNAL HEADERS
 #include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
@@ -161,8 +164,15 @@ Geometry CreateGeometry(VisualFactoryCache& factoryCache, ImageDimensions gridSi
 ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                 const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions size)
 {
+  return New(factoryCache, shaderFactory, creationOptions, imageUrl, properties, size, Vector2::ZERO);
+}
+
+ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
+                                const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions desiredSize, const Vector2& arrangedViewSize)
+{
   ImageVisualPtr imageVisualPtr(
-    new ImageVisual(factoryCache, shaderFactory, creationOptions, imageUrl, size));
+    new ImageVisual(factoryCache, shaderFactory, creationOptions, imageUrl, desiredSize));
+  imageVisualPtr->mImpl->mControlSize = arrangedViewSize;
   imageVisualPtr->SetProperties(properties);
   imageVisualPtr->Initialize();
   return imageVisualPtr;
@@ -263,10 +273,29 @@ void ImageVisual::DoSetProperties(const Property::Map& propertyMap)
       }
     }
   }
+  // Read the arranged view size after all properties, before either load policy
+  // can start loading. Later property updates must not reset the current load size.
+  Dali::ImageDimensions loadSize = mDesiredSize;
+  if(!mImpl->mRenderer && mImageLoadWithViewSize)
+  {
+    const float width  = std::round(mImpl->mControlSize.width);
+    const float height = std::round(mImpl->mControlSize.height);
+    if(std::isfinite(width) && std::isfinite(height) && width > 0.0f && height > 0.0f)
+    {
+      const float maximumSize = std::numeric_limits<uint16_t>::max();
+      loadSize                = Dali::ImageDimensions(static_cast<uint16_t>(std::min(width, maximumSize)),
+                                                      static_cast<uint16_t>(std::min(height, maximumSize)));
+    }
+    if(loadSize.GetWidth() > 0 && loadSize.GetHeight() > 0)
+    {
+      mLastRequiredSize = loadSize;
+    }
+  }
+
   // Load image immediately if LOAD_POLICY requires it
   if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE)
   {
-    LoadTexture(mTextures, mDesiredSize, TextureManager::ReloadPolicy::CACHED);
+    LoadTexture(mTextures, loadSize, TextureManager::ReloadPolicy::CACHED);
   }
 }
 

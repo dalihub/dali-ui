@@ -30,9 +30,10 @@ using namespace Dali::Ui;
  * - Direction: view size → image load size.
  * - Fixed-height container (200px).
  * - OFF: image decoded at full resolution once → ResourceReady fires 1 time.
- * - ON : image decoded at full resolution first, then OnSetTransform detects the view
- *        size and reloads at display dimensions → ResourceReady fires 2 times.
- *        The second load is memory-efficient: texture size == view size.
+ * - ON : rebuilding an already arranged view uses its current bounds for the first
+ *        load. Before the first arrangement, loading can precede the size update.
+ *        Later layout or fitting changes can request another load, so ResourceReady
+ *        is not guaranteed to fire a fixed number of times.
  * - After the view is fully laid out, explicit Reload() fires ResourceReady 1 time only
  *   because mLastRequiredSize already holds the correct view size.
  * - The info label shows the ResourceReady call count to make this difference observable.
@@ -93,8 +94,8 @@ private:
   {
     // Fixed-height container so the view size is stable and OnSetTransform gets a real size.
     // SYNC OFF: image decoded at original resolution once → ResourceReady fires 1 time.
-    // SYNC ON : initial load fires ResourceReady, then OnSetTransform reloads at view
-    //           dimensions → ResourceReady fires a 2nd time (texture size == view size).
+    // SYNC ON : a rebuild uses existing arranged bounds for its initial load.
+    //           Initial layout or later fitting changes may request another load.
     //           For explicit Reload() after view is laid out, mLastRequiredSize already
     //           holds the view size → ResourceReady fires 1 time only.
     mSyncImage = ImageView::New(RESOURCES_DIR "gallery-medium-49.jpg");

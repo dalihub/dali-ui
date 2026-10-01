@@ -15,13 +15,16 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-transform.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-types.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <ui-event-thread-callback.h>
@@ -351,5 +354,300 @@ int UtcDaliImageViewSvgReadyBeforeLayoutSettles(void)
   DALI_TEST_CHECK(panel.arrow.IsResourceReady());
   DALI_TEST_EQUALS(panel.arrow.GetRendererCount(), 2u, TEST_LOCATION);
   DALI_TEST_CHECK(panel.arrow.GetRendererAt(1u).GetTextures().GetTexture(0u) == texture);
+  END_TEST;
+}
+
+namespace
+{
+Dali::Ui::Internal::Visual::Base& VisualOf(ImageView view)
+{
+  auto visual = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+  return Ui::GetImplementation(visual);
+}
+
+ImageDimensions ReportedLoadSize(Ui::Integration::Visual::Base visual)
+{
+  Property::Map map;
+  visual.CreatePropertyMap(map);
+  return ImageDimensions(static_cast<uint32_t>(map.Find(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH)->Get<int>()),
+                         static_cast<uint32_t>(map.Find(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT)->Get<int>()));
+}
+
+ImageDimensions ReportedLoadSize(ImageView view)
+{
+  return ReportedLoadSize(DataOf(view).GetVisual(ImageView::Property::IMAGE));
+}
+} // namespace
+
+int UtcDaliImageViewRebuildViewSizeAttachedFirstLoad(void)
+{
+  UiTestApplication application;
+  ImageView view = ImageView::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetDesiredWidth(30);
+  view.SetDesiredHeight(20);
+  view.SetSynchronousLoading(true);
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  view.Arrange(LayoutRect(0, 0, 180, 90));
+
+  view.SetImageLoadWithViewSizeEnabled(true);
+  view.Measure(200, 100);
+  auto& visual = VisualOf(view);
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(180, 90), TEST_LOCATION);
+  // Supplying the hint must not start an ATTACHED load while off scene.
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+  DALI_TEST_CHECK(!visual.GetRenderer().GetTextures());
+  DALI_TEST_EQUALS(view.GetDesiredWidth(), 30, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetDesiredHeight(), 20, TEST_LOCATION);
+
+  application.GetWindow().Add(view);
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  const auto firstTexture = visual.GetRenderer().GetTextures().GetTexture(0);
+  DALI_TEST_EQUALS(firstTexture.GetWidth(), 180u, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstTexture.GetHeight(), 90u, TEST_LOCATION);
+  DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 180, 90));
+  DALI_TEST_CHECK(visual.GetRenderer().GetTextures().GetTexture(0) == firstTexture);
+
+  view.SetImageLoadWithViewSizeEnabled(false);
+  view.Measure(200, 100);
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(30, 20), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewRebuildViewSizeOnScenePolicies(void)
+{
+  UiTestApplication application;
+  for(auto policy : {Image::LoadPolicy::ATTACHED, Image::LoadPolicy::IMMEDIATE})
+  {
+    for(bool synchronous : {false, true})
+    {
+      ImageView view = ImageView::New();
+      view.SetRequestedWidth(200);
+      view.SetRequestedHeight(100);
+      view.SetLoadPolicy(policy);
+      view.SetSynchronousLoading(synchronous);
+      view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+      application.GetWindow().Add(view);
+      view.Arrange(LayoutRect(0, 0, 160, 80));
+      view.SetImageLoadWithViewSizeEnabled(true);
+      view.Measure(200, 100);
+      // Inspect immediately, before LayoutFinished can conceal a wrong first load.
+      DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(160, 80), TEST_LOCATION);
+      if(synchronous)
+      {
+        const auto texture = VisualOf(view).GetRenderer().GetTextures().GetTexture(0);
+        DALI_TEST_EQUALS(texture.GetWidth(), 160u, TEST_LOCATION);
+        DALI_TEST_EQUALS(texture.GetHeight(), 80u, TEST_LOCATION);
+      }
+      application.GetWindow().Remove(view);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewRebuildViewSizeUrlAndResize(void)
+{
+  UiTestApplication application;
+  ImageView view = ImageView::New();
+  view.SetRequestedWidth(200);
+  view.SetRequestedHeight(100);
+  view.SetImageLoadWithViewSizeEnabled(true);
+  view.SetResourceUrl("rebuild-first.png");
+  application.GetWindow().Add(view);
+  view.Arrange(LayoutRect(0, 0, 150, 75));
+  view.SetResourceUrl("rebuild-second.png");
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(150, 75), TEST_LOCATION);
+
+  view.Arrange(LayoutRect(0, 0, 120, 60));
+  view.SetSamplingMode(Image::SamplingMode::NEAREST);
+  view.Measure(200, 100);
+  auto& visual = VisualOf(view);
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(120, 60), TEST_LOCATION);
+  DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 100, 50));
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(100, 50), TEST_LOCATION);
+
+  // A later desired-size property update must not reinstate the creation hint.
+  Property::Map properties;
+  properties.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 20);
+  properties.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, 10);
+  visual.SetProperties(properties);
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(100, 50), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewRebuildViewSizeFallbackAndOtherVisuals(void)
+{
+  UiTestApplication application;
+  ImageView view = ImageView::New();
+  view.SetRequestedWidth(200);
+  view.SetRequestedHeight(100);
+  view.SetDesiredWidth(30);
+  view.SetDesiredHeight(20);
+  view.SetImageLoadWithViewSizeEnabled(true);
+  view.SetResourceUrl("not-arranged.png");
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(30, 20), TEST_LOCATION);
+
+  view.Arrange(LayoutRect(0, 0, 200, 100));
+  view.SetImageLoadWithViewSizeEnabled(false);
+  view.Measure(200, 100);
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(30, 20), TEST_LOCATION);
+
+  view.SetImageLoadWithViewSizeEnabled(true);
+  view.SetResourceUrl("preserve.svg");
+  {
+    Property::Map map;
+    DataOf(view).GetVisual(ImageView::Property::IMAGE).CreatePropertyMap(map);
+    DALI_TEST_CHECK(map.Find(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH));
+    DALI_TEST_CHECK(map.Find(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT));
+    DALI_TEST_EQUALS(map.Find(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH)->Get<int>(), 30, TEST_LOCATION);
+    DALI_TEST_EQUALS(map.Find(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT)->Get<int>(), 20, TEST_LOCATION);
+  }
+  view.SetResourceUrl("preserve.9.png");
+  DALI_TEST_EQUALS(Ui::GetImplementation(DataOf(view).GetVisual(ImageView::Property::IMAGE)).GetType(),
+                   Ui::Integration::InternalVisualType::N_PATCH, TEST_LOCATION);
+
+  // Desired size also seeds direct visual creation, without a factory option.
+  // Put the flag before the size entries to verify property order independence.
+  Property::Map map;
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+  map.Insert(Ui::Integration::ImageVisual::Property::URL, "ordinary-visual.png");
+  map.Insert(Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, true);
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 30);
+  map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, 20);
+  auto visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
+  DALI_TEST_EQUALS(ReportedLoadSize(visual), ImageDimensions(30, 20), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewRebuildViewSizePreservesFitting(void)
+{
+  UiTestApplication application;
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(1.5f);
+  for(auto fitting : {Image::FittingMode::FILL, Image::FittingMode::FIT_KEEP_ASPECT_RATIO,
+                      Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO, Image::FittingMode::CENTER})
+  {
+    ImageView view = ImageView::New();
+    view.SetRequestedWidth(200);
+    view.SetRequestedHeight(120);
+    view.SetPadding(10, 10, 10, 10);
+    view.SetFittingMode(fitting);
+    view.SetSynchronousLoading(true);
+    view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+    application.GetWindow().Add(view);
+    view.Arrange(LayoutRect(0, 0, 300, 180));
+    view.SetImageLoadWithViewSizeEnabled(true);
+    view.Measure(300, 180);
+    auto& visual = VisualOf(view);
+    DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(300, 180), TEST_LOCATION);
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+    const auto texture = visual.GetRenderer().GetTextures().GetTexture(0);
+    // The loader preserves the source aspect ratio while covering the requested
+    // 300x180 area: its decoded texture is 360x180, not a stretched 300x180.
+    DALI_TEST_EQUALS(texture.GetWidth(), 360u, TEST_LOCATION);
+    DALI_TEST_EQUALS(texture.GetHeight(), 180u, TEST_LOCATION);
+
+    DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 300, 180));
+    Property::Map map;
+    DataOf(view).GetVisual(ImageView::Property::IMAGE).CreatePropertyMap(map);
+    Property::Map transform;
+    DALI_TEST_CHECK(map.Find(Ui::Integration::Visual::Property::TRANSFORM)->Get(transform));
+    const bool fitInside = fitting == Image::FittingMode::FIT_KEEP_ASPECT_RATIO || fitting == Image::FittingMode::CENTER;
+    // The decoded fixture has a 2:1 aspect ratio; padding is scaled exactly once.
+    DALI_TEST_EQUALS(transform.Find(Ui::Integration::Visual::Transform::Property::SIZE)->Get<Vector2>(),
+                     fitInside ? Vector2(270, 135) : Vector2(270, 150), 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(transform.Find(Ui::Integration::Visual::Transform::Property::OFFSET)->Get<Vector2>(),
+                     fitInside ? Vector2(15, 22.5f) : Vector2(15, 15), 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(ReportedLoadSize(view), fitInside ? ImageDimensions(270, 135) : ImageDimensions(270, 150), TEST_LOCATION);
+    application.GetWindow().Remove(view);
+  }
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+int UtcDaliImageViewRebuildViewSizeCreationHint(void)
+{
+  UiTestApplication application;
+  auto factory = Ui::Integration::VisualFactory::Get();
+  auto& factoryImpl = Ui::GetImplementation(factory);
+  for(auto policy : {Image::LoadPolicy::ATTACHED, Image::LoadPolicy::IMMEDIATE})
+  {
+    Property::Map map;
+    map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+    map.Insert(Ui::Integration::ImageVisual::Property::URL, DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+    map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_WIDTH, 30);
+    map.Insert(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT, 20);
+    map.Insert(Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, true);
+    map.Insert(Ui::Integration::ImageVisual::Property::LOAD_POLICY, static_cast<int>(policy));
+    map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, true);
+
+    auto visual = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2(160.4f, 79.6f));
+    DALI_TEST_EQUALS(ReportedLoadSize(visual), ImageDimensions(160, 80), TEST_LOCATION);
+    Actor actor = Actor::New();
+    application.GetWindow().Add(actor);
+    auto& impl = Ui::GetImplementation(visual);
+    impl.SetOnScene(actor);
+    const auto texture = impl.GetRenderer().GetTextures().GetTexture(0);
+    DALI_TEST_EQUALS(texture.GetWidth(), 160u, TEST_LOCATION);
+    DALI_TEST_EQUALS(texture.GetHeight(), 80u, TEST_LOCATION);
+
+    // Initial view size never replaces the stored desired-size properties.
+    Property::Map disable;
+    disable.Insert(Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, false);
+    impl.SetProperties(disable);
+    DALI_TEST_EQUALS(ReportedLoadSize(visual), ImageDimensions(30, 20), TEST_LOCATION);
+    impl.SetOffScene(actor);
+    application.GetWindow().Remove(actor);
+
+    map[Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE] = false;
+    visual = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2(160.4f, 79.6f));
+    DALI_TEST_EQUALS(ReportedLoadSize(visual), ImageDimensions(30, 20), TEST_LOCATION);
+
+    map[Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE] = true;
+    visual = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2::ZERO);
+    DALI_TEST_EQUALS(ReportedLoadSize(visual), ImageDimensions(30, 20), TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewRebuildViewSizeDesiredDefaults(void)
+{
+  UiTestApplication application;
+  auto factory = Ui::Integration::VisualFactory::Get();
+  auto& factoryImpl = Ui::GetImplementation(factory);
+  for(auto policy : {Image::LoadPolicy::ATTACHED, Image::LoadPolicy::IMMEDIATE})
+  {
+    for(bool loadWithViewSize : {false, true})
+    {
+      for(bool hasDesiredWidth : {false, true})
+      {
+        Property::Map map;
+        map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+        map.Insert(Ui::Integration::ImageVisual::Property::URL, DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+        map.Insert(Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, loadWithViewSize);
+        map.Insert(Ui::Integration::ImageVisual::Property::LOAD_POLICY, static_cast<int>(policy));
+        map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, true);
+        if(hasDesiredWidth)
+        {
+          // String keys must be preserved as well as numeric property keys.
+          map.Insert("desiredWidth", 30);
+        }
+        const ImageDimensions desiredSize(hasDesiredWidth ? 30 : 0, 0);
+        auto visual = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2(160, 80));
+        DALI_TEST_EQUALS(ReportedLoadSize(visual), loadWithViewSize ? ImageDimensions(160, 80) : desiredSize, TEST_LOCATION);
+
+        Property::Map disable;
+        disable.Insert(Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, false);
+        Ui::GetImplementation(visual).SetProperties(disable);
+        DALI_TEST_EQUALS(ReportedLoadSize(visual), desiredSize, TEST_LOCATION);
+        DALI_TEST_CHECK(!map.Find(Ui::Integration::ImageVisual::Property::DESIRED_HEIGHT));
+      }
+    }
+  }
+
+  // The existing URL-and-size creation path still uses size as Desired Size.
+  auto visual = factory.CreateVisual(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png", ImageDimensions(30, 20));
+  DALI_TEST_EQUALS(ReportedLoadSize(visual), ImageDimensions(30, 20), TEST_LOCATION);
   END_TEST;
 }

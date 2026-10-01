@@ -168,8 +168,9 @@ enum
   /**
    * @brief Whether the image is loaded at the size of the View it is drawn in.
    * @details Name "imageLoadWithViewSize", type Property::BOOLEAN.
-   * If this property is true, the desired width and height are ignored and the image is
-   * loaded at the View's size, so it is resampled whenever that size changes.
+   * If this property is true, the image is loaded at the View's size and resampled
+   * whenever that size changes. A desired width and height supplied at creation
+   * provide the initial load size until the first View size is delivered.
    * @note The default is false.
    */
   IMAGE_LOAD_WITH_VIEW_SIZE,

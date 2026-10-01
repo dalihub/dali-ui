@@ -129,6 +129,13 @@ Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map& p
 Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&                            propertyMap,
                                                           Ui::Integration::VisualFactory::CreationOptions creationOptions)
 {
+  return CreateVisual(propertyMap, creationOptions, Vector2::ZERO);
+}
+
+Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&                            propertyMap,
+                                                          Ui::Integration::VisualFactory::CreationOptions creationOptions,
+                                                          const Vector2&                                  initialViewSize)
+{
   Visual::BasePtr visualPtr;
 
   Property::Value*                    typeValue  = propertyMap.Find(Ui::Integration::Visual::Property::TYPE, VISUAL_TYPE);
@@ -209,7 +216,7 @@ Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&  
                 }
                 else
                 {
-                  visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap);
+                  visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap, ImageDimensions(), initialViewSize);
                 }
                 break;
               }

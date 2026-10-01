@@ -67,6 +67,13 @@ public:
   Ui::Integration::Visual::Base CreateVisual(const Property::Map& propertyMap, Ui::Integration::VisualFactory::CreationOptions creationOptions);
 
   /**
+   * @brief Creates a visual with an already arranged view size, in pixels.
+   * The size is consumed by ImageVisual before its first view-size load.
+   */
+  Ui::Integration::Visual::Base CreateVisual(const Property::Map& propertyMap, Ui::Integration::VisualFactory::CreationOptions creationOptions,
+                                             const Vector2& initialViewSize);
+
+  /**
    * @copydoc Ui::Integration::VisualFactory::CreateVisual( const std::string&, ImageDimensions )
    */
   Ui::Integration::Visual::Base CreateVisual(const std::string& image, ImageDimensions size);
