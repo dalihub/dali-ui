@@ -70,7 +70,7 @@ class Clipboard;
 } //namespace Internal DALI_INTERNAL
 
 /**
- * The Clipboard can operate using various funtion.
+ * The Clipboard can operate using various functions.
  * Clipboard can manage it's item and set show / hide status.
  */
 class Clipboard : public BaseHandle

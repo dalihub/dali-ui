@@ -886,7 +886,7 @@ class MockWebEngineSecurityOrigin : public Dali::WebEngineSecurityOrigin
 public:
   MockWebEngineSecurityOrigin()
   : mockUrl("https://test.html"),
-    mockPotocol("https")
+    mockProtocol("https")
   {
   }
 
@@ -897,12 +897,12 @@ public:
 
   std::string GetProtocol() const
   {
-    return mockPotocol;
+    return mockProtocol;
   }
 
 private:
   std::string mockUrl;
-  std::string mockPotocol;
+  std::string mockProtocol;
 };
 
 class MockWebEngineSettings : public WebEngineSettings
