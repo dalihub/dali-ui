@@ -1178,7 +1178,7 @@ const Vector2& View::GetShadowOffset() const
 {
   if(mImpl->mVisualModel)
   {
-    return mImpl->mVisualModel->GetShadowOffset();
+    return mImpl->mVisualModel->GetEffectiveShadowOffset();
   }
   return Vector2::ZERO;
 }
@@ -1257,7 +1257,7 @@ float View::GetUnderlineHeight() const
 {
   if(mImpl->mVisualModel)
   {
-    return mImpl->mVisualModel->GetUnderlineHeight();
+    return mImpl->mVisualModel->GetEffectiveUnderlineHeight();
   }
   return 0.0f;
 }
@@ -1277,7 +1277,7 @@ float View::GetDashedUnderlineWidth() const
   float width = 0.0f;
   if(mImpl->mVisualModel)
   {
-    width = mImpl->mVisualModel->GetDashedUnderlineWidth();
+    width = mImpl->mVisualModel->GetEffectiveDashedUnderlineWidth();
   }
   return width;
 }
@@ -1287,7 +1287,7 @@ float View::GetDashedUnderlineGap() const
   float gap = 0.0f;
   if(mImpl->mVisualModel)
   {
-    gap = mImpl->mVisualModel->GetDashedUnderlineGap();
+    gap = mImpl->mVisualModel->GetEffectiveDashedUnderlineGap();
   }
   return gap;
 }
@@ -1335,7 +1335,7 @@ uint16_t View::GetOutlineWidth() const
 {
   if(mImpl->mVisualModel)
   {
-    return mImpl->mVisualModel->GetOutlineWidth();
+    return mImpl->mVisualModel->GetEffectiveOutlineWidth();
   }
   return 0u;
 }
@@ -1443,7 +1443,7 @@ bool View::IsMarkupStrikethroughSet() const
 
 float View::GetStrikethroughHeight() const
 {
-  return (mImpl->mVisualModel) ? mImpl->mVisualModel->GetStrikethroughHeight() : 0.0f;
+  return (mImpl->mVisualModel) ? mImpl->mVisualModel->GetEffectiveStrikethroughHeight() : 0.0f;
 }
 
 Length View::GetNumberOfStrikethroughRuns() const

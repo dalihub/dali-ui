@@ -52,41 +52,6 @@ This sample demonstrates DALi UI text features.
 | `text-gradient-localization.example` | Localized markup ranges with TextGradient |
 | `text-image-span.example` | Sync/async inline image layout playground |
 
-## Text scale and ImageSpan
-
-`text-scale.example` compares UI scale and system font scale in sync/async
-Labels, InputField (sync), and TextFit Range/Candidates. Its ImageSpan uses the
-existing `flag_kr.png` in an authored 36x24 box. Scroll to see all targets at
-larger scales; the HUD shows the current settings and expected image size.
-
-| Keys | Action |
-| --- | --- |
-| `1` / `2` / `3` / `4` / `5` | SMALL / NORMAL / LARGE / EXTRA_LARGE / GIANT: 0.8 / 1.0 / 1.2 / 1.4 / 1.5 |
-| `Q` / `W` / `E` / `R` / `T` | UI scale 0.8 / 1.0 / 1.2 / 1.5 / 2.0 |
-| `S` / `A` | Sync / async for all four Labels |
-| `6` / `7` | System font scale ON / OFF |
-| `0` | Default font clamp 0.5..2.0 |
-| `F1` / `F2` | Minimum 1.2 / maximum 1.3 |
-| `F3` | Minimum 1.4, maximum 1.0: effective range 1.4..1.4 |
-| `F4` | Fixed font scale 2.0 |
-
-Buttons use the same actions. Clamps remain active with system scale OFF;
-use `0` + `7` to return to font scale 1.0.
-
-Font changes use sample/test-only DALi Integration `SystemSettings` signal
-injection to simulate platform-provider notifications. Applications must not
-emit this signal to change the user's system font-size setting.
-
-```bash
-# From dali-ui root, after configuring the DALi desktop environment:
-cmake -S samples/text -B <sample-build-directory>
-cmake --build <sample-build-directory> --target text-scale.example
-./samples/text/bin/text-scale.example
-
-# After building the foundation-internal UTCs:
-automated-tests/build/src/dali-ui-foundation-internal/tct-dali-ui-foundation-internal-core -f -m UtcDaliImageSpan
-```
-
 ## Localization resources
 
 The PO source files are stored by locale under `res/po`.

@@ -176,7 +176,7 @@ const Vector4& Model::GetDefaultColor() const
 
 const Vector2& Model::GetShadowOffset() const
 {
-  return mVisualModel->GetShadowOffset();
+  return mVisualModel->GetEffectiveShadowOffset();
 }
 
 bool Model::IsShadowEnabled() const
@@ -211,7 +211,7 @@ bool Model::IsMarkupUnderlineSet() const
 
 float Model::GetUnderlineHeight() const
 {
-  return mVisualModel->GetUnderlineHeight();
+  return mVisualModel->GetEffectiveUnderlineHeight();
 }
 
 Text::Underline::Type Model::GetUnderlineType() const
@@ -221,12 +221,12 @@ Text::Underline::Type Model::GetUnderlineType() const
 
 float Model::GetDashedUnderlineWidth() const
 {
-  return mVisualModel->GetDashedUnderlineWidth();
+  return mVisualModel->GetEffectiveDashedUnderlineWidth();
 }
 
 float Model::GetDashedUnderlineGap() const
 {
-  return mVisualModel->GetDashedUnderlineGap();
+  return mVisualModel->GetEffectiveDashedUnderlineGap();
 }
 
 Length Model::GetNumberOfUnderlineRuns() const
@@ -241,7 +241,7 @@ void Model::GetUnderlineRuns(UnderlinedGlyphRun* underlineRuns, UnderlineRunInde
 
 const Vector2& Model::GetOutlineOffset() const
 {
-  return mVisualModel->GetOutlineOffset();
+  return mVisualModel->GetEffectiveOutlineOffset();
 }
 
 const Vector4& Model::GetOutlineColor() const
@@ -251,7 +251,7 @@ const Vector4& Model::GetOutlineColor() const
 
 uint16_t Model::GetOutlineWidth() const
 {
-  return mVisualModel->GetOutlineWidth();
+  return mVisualModel->GetEffectiveOutlineWidth();
 }
 
 bool Model::IsOutlineEnabled() const
@@ -305,7 +305,7 @@ bool Model::IsMarkupStrikethroughSet() const
 
 float Model::GetStrikethroughHeight() const
 {
-  return mVisualModel->GetStrikethroughHeight();
+  return mVisualModel->GetEffectiveStrikethroughHeight();
 }
 
 Length Model::GetNumberOfStrikethroughRuns() const

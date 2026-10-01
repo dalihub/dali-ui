@@ -22,6 +22,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -54,7 +55,7 @@ struct UiOption
   const char* key;
   float       scale;
 };
-constexpr UiOption UI_OPTIONS[] = {{"Q", 0.8f}, {"W", 1.f}, {"E", 1.2f}, {"R", 1.5f}, {"T", 2.f}};
+constexpr UiOption UI_OPTIONS[] = {{"Q", 0.8f}, {"W", 1.f}, {"E", 1.2f}, {"R", 1.25f}, {"T", 1.5f}, {"Y", 2.f}};
 
 struct ClampOption
 {
@@ -119,6 +120,95 @@ StackLayout CreateRow()
   row.SetSpacing(STACK_SPACING);
   return row;
 }
+
+StackLayout CreateControlRow(const char* category)
+{
+  auto row   = CreateRow();
+  auto label = CreateHeaderLabel(category);
+  label.SetRequestedWidth(180.f);
+  label.SetRequestedHeight(BUTTON_HEIGHT);
+  label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  row.Add(label);
+  return row;
+}
+
+Label CreateSectionHeader(const char* text)
+{
+  auto label = CreateHeaderLabel(text);
+  label.SetFontSize(18.f);
+  label.SetFontWeight(Text::FontWeight::BOLD);
+  label.SetBackgroundColor(UiColor(0xE5EDF4));
+  label.SetPadding(Insets(8.f, 8.f, 6.f, 6.f));
+  return label;
+}
+
+void AddCaseColumn(StackLayout row, const char* caption, Label label)
+{
+  auto column = StackLayout::New(StackOrientation::VERTICAL);
+  column.SetRequestedHeight(WRAP_CONTENT);
+  column.SetSpacing(4.f);
+  column.SetLayoutParams(StackLayoutParams::New().SetWeight(1.f).SetAlignment(LayoutAlignment::FILL));
+  column.Add(CreateHeaderLabel(caption));
+  column.Add(label);
+  row.Add(column);
+}
+
+Text::Underline MakeUnderline(Text::Underline::Type type = Text::Underline::Type::DASHED, float thickness = 2.f)
+{
+  Text::Underline style;
+  style.SetType(type);
+  style.SetThickness(thickness);
+  style.SetDashLength(4.f);
+  style.SetDashGap(2.f);
+  style.SetColor(UiColor(0x0066CC));
+  return style;
+}
+
+Text::LineThrough MakeLineThrough(float thickness = 2.f)
+{
+  Text::LineThrough style;
+  style.SetThickness(thickness);
+  style.SetColor(UiColor(0xC62828));
+  return style;
+}
+
+Text::StyledText CreateStyledTextCase(Text::Underline::Type type, bool underline, bool lineThrough)
+{
+  auto builder = Text::StyledTextBuilder::New("ABCD");
+  if(underline) builder.SetSpan(Text::UnderlineSpan::New(MakeUnderline(type)), 0u, 4u);
+  if(lineThrough) builder.SetSpan(Text::LineThroughSpan::New(MakeLineThrough()), 0u, 4u);
+  return builder.Build();
+}
+
+Text::StyledText CreateMarkupCase(const char* type, bool underline, bool lineThrough)
+{
+  std::ostringstream markup;
+  if(underline) markup << "<u color='#0066CC' height='2' type='" << type << "' dash-width='4' dash-gap='2'>";
+  if(lineThrough) markup << "<s color='#C62828' height='2'>";
+  markup << "ABCD";
+  if(lineThrough) markup << "</s>";
+  if(underline) markup << "</u>";
+  return Text::StyledText::FromMarkup(markup.str().c_str());
+}
+
+Text::StyledText CreateMixedCase()
+{
+  auto       builder = Text::StyledTextBuilder::New("plain ");
+  const auto start   = builder.GetUtf32Length();
+  builder.AppendText("ABCD ");
+  const auto imageIndex = builder.GetUtf32Length();
+  builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
+  Text::ImageAttributes image(RESOURCES_DIR "flag_kr.png", IMAGE_SIZE);
+  image.SetAlignment(Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
+  builder.SetSpan(Text::ImageSpan::New(image), imageIndex, imageIndex + 1u);
+  builder.SetSpan(Text::UnderlineSpan::New(MakeUnderline()), start, imageIndex + 1u);
+  auto inner = MakeUnderline(Text::Underline::Type::SOLID, 4.f);
+  inner.SetColor(UiColor(0xEF6C00));
+  builder.SetSpan(Text::UnderlineSpan::New(inner), start + 1u, start + 3u);
+  builder.SetSpan(Text::LineThroughSpan::New(MakeLineThrough()), start + 2u, imageIndex + 1u);
+  builder.AppendText(" tail");
+  return builder.Build();
+}
 } // namespace
 
 class TextScaleController : public ConnectionTracker
@@ -131,9 +221,9 @@ public:
   }
 
 private:
-  std::array<Label, 4> Labels() const
+  const std::vector<Label>& Labels() const
   {
-    return {mTargetLabel, mImageLabel, mFitLabel, mFitCandidateLabel};
+    return mLabels;
   }
 
   template<typename Action>
@@ -154,6 +244,7 @@ private:
     window.SetPositionSize(PositionSize(0, 0, 1120, 920));
     window.SetBackgroundColor(UiColor(0xF5F7FA));
     window.KeyEventSignal().Connect(this, &TextScaleController::OnKeyEvent);
+    window.InterceptKeyEventSignal().Connect(this, &TextScaleController::OnNavigationKeyEvent);
 
     auto root = StackLayout::New(StackOrientation::VERTICAL);
     // Keep the test controls/HUD readable while the targets follow global UI scale.
@@ -162,11 +253,18 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
-    auto title = CreateHeaderLabel("Text scale: font, UI, ImageSpan and TextFit");
+    auto title = CreateHeaderLabel("Text Scale Test");
     title.SetFontSize(22.f);
     root.Add(title);
 
-    auto fonts = CreateRow();
+    auto pages = CreateControlRow("Page");
+    AddButton(pages, "General Scale", [this]()
+    { SetPage(0u); });
+    AddButton(pages, "Text Style / StyledText", [this]()
+    { SetPage(1u); });
+    root.Add(pages);
+
+    auto fonts = CreateControlRow("System Font Size Scale");
     for(const auto& option : FONT_OPTIONS)
     {
       const std::string caption = std::string(option.key) + ": " + option.name;
@@ -174,26 +272,28 @@ private:
       { SetSystemFontSize(value); });
     }
     root.Add(fonts);
-    auto uiScales = CreateRow();
+    auto uiScales = CreateControlRow("UI Scale");
     for(const auto& option : UI_OPTIONS)
     {
       std::ostringstream caption;
-      caption << option.key << ": UI " << option.scale;
+      caption << option.key << ": " << option.scale;
       AddButton(uiScales, caption.str().c_str(), [this, scale = option.scale]()
       { SetUiScale(scale); });
     }
     root.Add(uiScales);
-    auto modes = CreateRow();
-    AddButton(modes, "6: System scale ON", [this]()
+    auto systemScale = CreateControlRow("System Scale");
+    AddButton(systemScale, "6: ON", [this]()
     { SetSystemFontSizeScaleEnabled(true); });
-    AddButton(modes, "7: System scale OFF", [this]()
+    AddButton(systemScale, "7: OFF", [this]()
     { SetSystemFontSizeScaleEnabled(false); });
+    root.Add(systemScale);
+    auto modes = CreateControlRow("Rendering");
     AddButton(modes, "S: Sync Labels", [this]()
     { SetRendering(false); });
     AddButton(modes, "A: Async Labels", [this]()
     { SetRendering(true); });
     root.Add(modes);
-    auto clamps = CreateRow();
+    auto clamps = CreateControlRow("Clamp");
     for(unsigned i = 0; i < std::size(CLAMP_OPTIONS); ++i)
     {
       const std::string caption = std::string(CLAMP_OPTIONS[i].key) + ": " + CLAMP_OPTIONS[i].label;
@@ -211,6 +311,7 @@ private:
     mImageLabel        = Label::New();
     mFitLabel          = Label::New(TEST_TEXT);
     mFitCandidateLabel = Label::New(TEST_TEXT);
+    mLabels            = {mTargetLabel, mImageLabel, mFitLabel, mFitCandidateLabel};
     for(auto label : Labels())
     {
       label.SetUiScalePolicy(UiScalePolicy::ENABLED);
@@ -239,6 +340,7 @@ private:
     mTargetInputField.SetRequestedHeight(TARGET_INPUT_HEIGHT);
     mTargetInputField.SetFontSize(24.f);
     mTargetInputField.SetText("InputField test text");
+    mTargetInputField.SetTextColor(UiColor(0x172B4D));
     mTargetInputField.SetBackgroundColor(UiColor(0xFFFFFF));
     mTargetInputField.SetPadding(Insets(16.f, 16.f, 16.f, 16.f));
 
@@ -255,7 +357,7 @@ private:
     targets.SetRequestedWidth(MATCH_PARENT);
     targets.SetRequestedHeight(WRAP_CONTENT);
     targets.SetSpacing(STACK_SPACING);
-    targets.Add(CreateHeaderLabel("A. Normal Label | authored font 24px"));
+    targets.Add(CreateHeaderLabel("A. Normal Label | authored font 24px | plain text"));
     targets.Add(mTargetLabel);
     targets.Add(CreateHeaderLabel("B. ImageSpan Label | flag_kr.png, authored image 36x24 | Text ABC [image] DEF"));
     targets.Add(mImageLabel);
@@ -265,13 +367,15 @@ private:
     targets.Add(mFitLabel);
     targets.Add(CreateHeaderLabel("E. TextFit Candidates | (font, line height): (10,20)..(20,40), step (2,4)"));
     targets.Add(mFitCandidateLabel);
-    auto scroll = ScrollView::New();
-    scroll.SetScrollDirection(ScrollDirection::Vertical);
-    scroll.SetRequestedWidth(MATCH_PARENT);
-    scroll.SetRequestedHeight(MATCH_PARENT);
-    scroll.SetLayoutParams(StackLayoutParams::New().SetWeight(1.f).SetAlignment(LayoutAlignment::FILL));
-    scroll.SetContent(targets);
-    root.Add(scroll);
+    mPages[0] = targets;
+    mPages[1] = CreateStylePage();
+    mScroll   = ScrollView::New();
+    mScroll.SetScrollDirection(ScrollDirection::Vertical);
+    mScroll.SetRequestedWidth(MATCH_PARENT);
+    mScroll.SetRequestedHeight(MATCH_PARENT);
+    mScroll.SetLayoutParams(StackLayoutParams::New().SetWeight(1.f).SetAlignment(LayoutAlignment::FILL));
+    mScroll.SetContent(mPages[0]);
+    root.Add(mScroll);
     window.Add(root);
 
     auto settings = Dali::Integration::SystemSettings::Get();
@@ -281,6 +385,148 @@ private:
     SetSystemFontSizeScaleEnabled(true);
     SetSystemFontSize(SystemFont::NORMAL);
     SetUiScale(1.f);
+  }
+
+  Label CreateStyleLabel()
+  {
+    auto label = Label::New("ABCD");
+    label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetMultiLine(true);
+    label.SetFontSize(24.f);
+    label.SetTextColor(UiColor(0x172B4D));
+    label.SetBackgroundColor(UiColor(0xFFFFFF));
+    label.SetPadding(Insets(12.f, 12.f, 8.f, 8.f));
+    mLabels.push_back(label);
+    return label;
+  }
+
+  void CreateStyleRow(StackLayout page, const char* caption, Text::Underline::Type type,
+                      const char* markupType, bool underline, bool lineThrough)
+  {
+    page.Add(CreateHeaderLabel(caption));
+    auto row     = CreateRow();
+    auto control = CreateStyleLabel();
+    if(underline) control.SetTextUnderline(MakeUnderline(type));
+    if(lineThrough) control.SetTextLineThrough(MakeLineThrough());
+    auto styled = CreateStyleLabel();
+    styled.SetStyledText(CreateStyledTextCase(type, underline, lineThrough));
+    auto markup = CreateStyleLabel();
+    markup.SetStyledText(CreateMarkupCase(markupType, underline, lineThrough));
+    AddCaseColumn(row, "Control Text Style", control);
+    AddCaseColumn(row, "StyledText Span", styled);
+    AddCaseColumn(row, "Markup", markup);
+    page.Add(row);
+  }
+
+  StackLayout CreateStylePage()
+  {
+    // Build controls and immutable StyledText snapshots once. Scale and page
+    // changes reuse these objects; they never call SetStyledText again.
+    auto page = StackLayout::New(StackOrientation::VERTICAL);
+    page.SetRequestedWidth(MATCH_PARENT);
+    page.SetRequestedHeight(WRAP_CONTENT);
+    page.SetSpacing(STACK_SPACING);
+    page.Add(CreateHeaderLabel("Tab: switch page | PgUp/PgDn: scroll | All samples: font 24px. Row values are authored."));
+    page.Add(CreateHeaderLabel("F5 vs F6: same 48px font, decoration 2x vs 1x. UI round trip: W > R > T > Y > W."));
+    auto comparison = CreateControlRow("Style Comparison");
+    AddButton(comparison, "F5: UI=2 / F=1", [this]()
+    { SetContractPreset(false); });
+    AddButton(comparison, "F6: UI=1 / F=2", [this]()
+    { SetContractPreset(true); });
+    page.Add(comparison);
+    using Type = Text::Underline::Type;
+    page.Add(CreateSectionHeader("Underline"));
+    CreateStyleRow(page, "1. Underline solid | thickness 2", Type::SOLID, "solid", true, false);
+    CreateStyleRow(page, "2. Underline dashed | thickness 2, dash length 4 / gap 2", Type::DASHED, "dashed", true, false);
+    CreateStyleRow(page, "3. Underline double | thickness 2", Type::DOUBLE, "double", true, false);
+    page.Add(CreateSectionHeader("LineThrough"));
+    CreateStyleRow(page, "4. LineThrough | thickness 2", Type::SOLID, "solid", false, true);
+    CreateStyleRow(page, "5. Underline + LineThrough | both thickness 2, dash 4/2 | Markup: nested <u><s>", Type::DASHED, "dashed", true, true);
+
+    page.Add(CreateSectionHeader("Shadow / Outline"));
+    page.Add(CreateHeaderLabel("6. Control-only effects | compare signed offsets against plain text"));
+    auto effects = CreateRow();
+    AddCaseColumn(effects, "Plain reference", CreateStyleLabel());
+    auto         shadowLabel = CreateStyleLabel();
+    Text::Shadow shadow;
+    shadow.SetOffset(Vector2(-2.f, 3.f));
+    shadow.SetColor(UiColor(0x607D8B));
+    shadowLabel.SetTextShadow(shadow);
+    AddCaseColumn(effects, "Shadow offset (-2,+3)", shadowLabel);
+    auto          outlineLabel = CreateStyleLabel();
+    Text::Outline outline;
+    outline.SetWidth(2.f);
+    outline.SetOffset(Vector2(2.f, -3.f));
+    outline.SetColor(UiColor(0xEF6C00));
+    outlineLabel.SetTextOutline(outline);
+    AddCaseColumn(effects, "Outline width 2, offset (+2,-3)", outlineLabel);
+    page.Add(effects);
+
+    page.Add(CreateSectionHeader("Overlapping StyledText"));
+    page.Add(CreateHeaderLabel("7. ABCD, UTF-32 ranges [start,end); later orange span wins"));
+    auto overlaps = CreateRow();
+    auto under    = Text::StyledTextBuilder::New("ABCD");
+    under.SetSpan(Text::UnderlineSpan::New(MakeUnderline()), 0u, 4u);
+    auto innerUnderline = MakeUnderline(Type::SOLID, 4.f);
+    innerUnderline.SetColor(UiColor(0xEF6C00));
+    under.SetSpan(Text::UnderlineSpan::New(innerUnderline), 1u, 3u);
+    auto underLabel = CreateStyleLabel();
+    underLabel.SetStyledText(under.Build());
+    AddCaseColumn(overlaps, "Underline: [0,4) 2, dash 4/2\nthen [1,3) solid 4", underLabel);
+    auto strike = Text::StyledTextBuilder::New("ABCD");
+    strike.SetSpan(Text::LineThroughSpan::New(MakeLineThrough()), 0u, 4u);
+    auto innerStrike = MakeLineThrough(4.f);
+    innerStrike.SetColor(UiColor(0xEF6C00));
+    strike.SetSpan(Text::LineThroughSpan::New(innerStrike), 1u, 3u);
+    auto strikeLabel = CreateStyleLabel();
+    strikeLabel.SetStyledText(strike.Build());
+    AddCaseColumn(overlaps, "LineThrough: [0,4) 2\nthen [1,3) 4", strikeLabel);
+    auto crossed = Text::StyledTextBuilder::New("ABCD");
+    crossed.SetSpan(Text::UnderlineSpan::New(MakeUnderline()), 0u, 3u);
+    crossed.SetSpan(Text::LineThroughSpan::New(MakeLineThrough()), 1u, 4u);
+    auto crossedLabel = CreateStyleLabel();
+    crossedLabel.SetStyledText(crossed.Build());
+    AddCaseColumn(overlaps, "Underline [0,3) 2, dash 4/2\nLineThrough [1,4) 2", crossedLabel);
+    page.Add(overlaps);
+
+    page.Add(CreateSectionHeader("Mixed StyledText + ImageSpan"));
+    page.Add(CreateHeaderLabel("8. Underline 2, dash 4/2; BC underline 4; CD + image LineThrough 2; flag 36x24"));
+    mMixedText = CreateMixedCase();
+    auto mixed = CreateStyleLabel();
+    mixed.SetStyledText(mMixedText);
+    page.Add(mixed);
+    page.Add(CreateSectionHeader("Editable"));
+    page.Add(CreateHeaderLabel("9. InputField (SYNC) | same mixed StyledText and authored values as row 8"));
+    mStyleInputField = InputField::New();
+    mStyleInputField.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    mStyleInputField.SetRequestedWidth(MATCH_PARENT);
+    mStyleInputField.SetRequestedHeight(WRAP_CONTENT);
+    mStyleInputField.SetFontSize(24.f);
+    mStyleInputField.SetTextColor(UiColor(0x172B4D));
+    mStyleInputField.SetBackgroundColor(UiColor(0xFFFFFF));
+    mStyleInputField.SetPadding(Insets(12.f, 12.f, 8.f, 8.f));
+    mStyleInputField.SetStyledText(mMixedText);
+    page.Add(mStyleInputField);
+    return page;
+  }
+
+  void SetPage(unsigned page)
+  {
+    if(page == mPage) return;
+    mPage = page;
+    mScroll.SetContent(mPages[page]);
+    mScroll.ScrollTo(Vector2::ZERO, false);
+    UpdateStatus();
+  }
+
+  void SetContractPreset(bool fontOnly)
+  {
+    SetSystemFontSizeScaleEnabled(true);
+    ApplyMinMaxScale(fontOnly ? 4u : 0u);
+    SetSystemFontSize(SystemFont::NORMAL);
+    SetUiScale(fontOnly ? 1.f : 2.f);
   }
 
   void SetSystemFontSize(SystemFont size)
@@ -308,6 +554,7 @@ private:
   {
     for(auto label : Labels()) label.SetSystemFontSizeScaleEnabled(enabled);
     mTargetInputField.SetSystemFontSizeScaleEnabled(enabled);
+    mStyleInputField.SetSystemFontSizeScaleEnabled(enabled);
     UpdateStatus();
   }
 
@@ -322,6 +569,8 @@ private:
     }
     mTargetInputField.SetMinimumFontSizeScale(option.minimum);
     mTargetInputField.SetMaximumFontSizeScale(option.maximum);
+    mStyleInputField.SetMinimumFontSizeScale(option.minimum);
+    mStyleInputField.SetMaximumFontSizeScale(option.maximum);
     UpdateStatus();
   }
 
@@ -342,7 +591,8 @@ private:
     const auto         size = IMAGE_SIZE * (font * ui);
     std::ostringstream status;
     status << std::fixed << std::setprecision(2)
-           << "System Font: " << fontName << " | Adjusted Font Scale: " << font
+           << "Page: " << (mPage == 0u ? "General Scale" : "Text Style / StyledText")
+           << "\nSystem Font: " << fontName << " | Adjusted Font Scale: " << font
            << " | UI Scale: " << ui << " | Effective Text Scale: " << font * ui
            << "\nSystem Scale Enabled: " << (mTargetLabel.IsSystemFontSizeScaleEnabled() ? "ON" : "OFF")
            << " | Rendering: " << (mAsync ? "ASYNC" : "SYNC")
@@ -352,6 +602,28 @@ private:
     if(mClampPreset == 3u) status << " | min > max: effective range is 1.40..1.40";
     status << "\nImageSpan authored: 36x24 | Expected display: " << size.x << "x" << size.y;
     mStatusLabel.SetText(status.str().c_str());
+  }
+
+  bool OnNavigationKeyEvent(Window, KeyEvent event)
+  {
+    const auto key = event.GetKeyName();
+    // Reserve page navigation before an editable control or FocusManager can
+    // consume it. Other keys retain the sample's existing input behavior.
+    if(key != "Tab" && key != "F5" && key != "F6" && key != "Prior" && key != "Next") return false;
+    if(event.GetState() != KeyEvent::UP) return true;
+    if(key == "Tab")
+    {
+      SetPage(1u - mPage);
+    }
+    else if(key == "F5" || key == "F6")
+    {
+      SetContractPreset(key == "F6");
+    }
+    else
+    {
+      mScroll.ScrollToY(mScroll.GetScrollPosition().y + (key == "Next" ? 1.f : -1.f) * mScroll.GetCurrentSize().y * 0.8f, false);
+    }
+    return true;
   }
 
   void OnKeyEvent(Window, KeyEvent event)
@@ -406,6 +678,12 @@ private:
   Label        mFitLabel;
   Label        mFitCandidateLabel;
   Label        mStatusLabel;
+  std::vector<Label>         mLabels;
+  std::array<StackLayout, 2> mPages;
+  ScrollView                 mScroll;
+  InputField                 mStyleInputField;
+  Text::StyledText           mMixedText;
+  unsigned                   mPage{0u};
   SystemFont   mSystemFont{SystemFont::NORMAL};
   unsigned     mClampPreset{0u};
   bool         mAsync{false};
