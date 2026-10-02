@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://tizen.org/ns/packages" api-version="10.0" package="com.samsung.dali.focus-key-grab" version="2.1.0">
+    <profile name="tizen" />
+    <ui-application appid="com.samsung.dali.focus-key-grab" exec="/usr/apps/com.samsung.dali.focus-key-grab/bin/focus-key-grab.example" type="dali-c++app" multiple="false" taskmanage="true" nodisplay="false">
+        <label>DALi Focus Key Grab Probe</label>
+    </ui-application>
+    <privileges>
+        <privilege>http://tizen.org/privilege/keygrab</privilege>
+    </privileges>
+</manifest>

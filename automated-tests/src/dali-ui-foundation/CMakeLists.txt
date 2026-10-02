@@ -20,6 +20,7 @@ SET(TC_SOURCES
         utc-Dali-BorderVisual.cpp
         utc-Dali-Unit.cpp
         utc-Dali-FocusManager.cpp
+        utc-Dali-IndependentFocus.cpp
         utc-Dali-View.cpp
         utc-Dali-ViewLayoutBoundary.cpp
         utc-Dali-Label.cpp

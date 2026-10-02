@@ -62,7 +62,7 @@ focusMgr.RequestFocus(containerOrButton);
 // 현재 포커스된 View 조회
 View focused = focusMgr.GetCurrentFocusView();
 
-// 포커스 해제
+// 전역 포커스 해제 (다른 윈도우의 독립 포커스는 유지)
 focusMgr.ClearFocus();
 ```
 
@@ -85,6 +85,61 @@ focusMgr.RequestFocus(layout);
 // layout 자신에게 직접 focus를 시도합니다. child로 위임하지 않습니다.
 focusMgr.SetCurrentFocusView(layout);
 ```
+
+<br/>
+
+### 비활성 윈도우의 독립 포커스
+
+기본 정책에서는 비활성 윈도우의 요청을 다음 활성화용 대상으로 저장합니다.
+독립 옵션을 명시적으로 켜면 활성 메인윈도우의 포커스를 유지하면서 비활성
+서브윈도우에도 실제 포커스를 적용할 수 있습니다:
+
+```cpp
+subWindow.SetAcceptFocus(false); // 서브윈도우를 표시하기 전에 설정
+focusMgr.SetIndependentFocusEnabled(subWindow, true);
+focusMgr.SetCurrentFocusView(subView);
+
+View primary = focusMgr.GetCurrentFocusView();           // mainView
+View mainActual = focusMgr.GetCurrentFocusView(mainWindow); // mainView
+View subActual = focusMgr.GetCurrentFocusView(subWindow); // subView
+```
+
+윈도우가 visible이고 View가 일반 포커스 조건을 만족해야 합니다. 옵션만 켜서는
+저장된 대상을 실제 포커스하지 않습니다. 기본값은 false이며
+`IsIndependentFocusEnabled(window)`로 조회합니다. 두 View의 `FOCUSED` 상태가
+유지되고, subView를 추가하면서 mainView에 포커스 상실을 통지하지 않습니다.
+논리적 포커스만 바꾸므로 네이티브 활성화나 키그랩은 별도로 설정해야 합니다.
+
+키 대상은 이벤트를 전달한 SceneHolder의 윈도우로 선택합니다. 이벤트의 nonzero
+윈도우 ID가 native ID와 다르면 전달하지 않고, ID 0은 전달 SceneHolder를 사용합니다.
+소비되지 않은 키는 같은 윈도우의 부모로 전파하고 방향키는 그 윈도우 내부에서 탐색합니다.
+View가 키를 소비하면 부모 전달과 탐색이 모두 중단됩니다.
+
+윈도우 범위의 `MoveFocus(window, direction)`, `MoveFocusBackward(window)`,
+`ClearFocusIndication(window)`, `ClearFocus(window)`도 제공합니다.
+`MoveFocusBackward(window)`는 현재 탐색 대상과 다른 가장 최근의 유효한 이력을
+찾습니다. 일반 비활성 창에서는 예약 대상만 변경하며, 반복 호출은 이력을 한 단계씩
+거슬러 올라갑니다. 현재 탐색 대상이 없으면 이력이 하나뿐이어도 가장 최근의 유효한
+대상으로 복귀합니다. `ClearFocus(window)`는 실제 포커스와 예약 대상을 지우지만
+이력은 유지하므로, 이후 명시적으로 `MoveFocusBackward(window)`를 호출하여
+복귀할 수 있습니다. 유효한 대상이 없으면 포커스와 예약 대상은 바뀌지 않습니다.
+서브 숨김·옵션 해제·대상 무효화는 서브만 해제합니다. 재표시나 옵션 재설정 후에는
+명시적으로 다시 요청해야 합니다. 실제 활성화된 독립 View의 전역 역할을 바꿀 때
+불필요한 포커스 상실·획득을 반복하지 않습니다.
+InputField·InputEditor와 custom IME 세션은 이번 지원 범위에 포함하지 않습니다.
+
+기존 `FocusChangedSignal()`은 전역 대상의 변경만 알립니다. 각 윈도우의 실제
+대상 변경은 새로운 신호로 관찰합니다:
+
+```cpp
+focusMgr.WindowFocusChangedSignal().Connect(&tracker,
+  [](Window window, View previous, View current) {
+    // window 내부의 실제 포커스 변경
+  });
+```
+
+기기 조작·기대 로그·라이브러리와 샘플의 빌드 버전은
+[focus-key-grab 샘플](../samples/focus-key-grab/README.md)을 참고하세요.
 
 <br/>
 
@@ -136,7 +191,9 @@ focus를 복원하기 위한 별도 escape API는 필요하지 않습니다.
 
 ## 키 이벤트 처리
 
-포커스를 가진 View는 모든 키 입력/해제에 대해 `KeyEventSignal`을 발생시킵니다. `true`를 반환하면 이벤트를 소비하여 추가 전파를 막습니다.
+포커스된 키 대상 View는 자신의 윈도우로 전달된 키 입력/해제에 대해
+`KeyEventSignal`을 발생시킵니다. `true`를 반환하면 이벤트를 소비하여
+부모 전달과 방향키 탐색을 중단합니다.
 
 멤버 함수를 사용하는 방식:
 

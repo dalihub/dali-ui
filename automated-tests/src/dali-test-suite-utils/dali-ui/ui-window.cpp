@@ -267,6 +267,11 @@ Dali::Layer Window::GetRootLayer() const
   return GetImplementation(*this).GetRootLayer();
 }
 
+int32_t Window::GetNativeId() const
+{
+  return GetImplementation(*this).GetNativeId();
+}
+
 Dali::Layer Window::GetOverlayLayer()
 {
   return GetImplementation(*this).GetScene().GetOverlayLayer();

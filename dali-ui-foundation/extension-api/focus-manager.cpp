@@ -46,7 +46,7 @@ bool SetKeyInputTarget(Ui::View view)
   }
 
   manager.SetFocus(view);
-  return manager.GetCurrentFocusView() == view;
+  return manager.GetCurrentFocusView(Window::DownCast(Dali::Integration::SceneHolder::Get(view))) == view;
 }
 
 bool ClearKeyInputTarget(Ui::View view)
@@ -57,7 +57,7 @@ bool ClearKeyInputTarget(Ui::View view)
   }
 
   Internal::KeyInputFocusManager manager = Internal::KeyInputFocusManager::Get();
-  if(!manager || manager.GetCurrentFocusView() != view)
+  if(!manager || manager.GetCurrentFocusView(Window::DownCast(Dali::Integration::SceneHolder::Get(view))) != view)
   {
     return false;
   }
@@ -74,7 +74,7 @@ bool IsKeyInputTarget(Ui::View view)
   }
 
   Internal::KeyInputFocusManager manager = Internal::KeyInputFocusManager::Get();
-  return manager && manager.GetCurrentFocusView() == view;
+  return manager && manager.GetCurrentFocusView(Window::DownCast(Dali::Integration::SceneHolder::Get(view))) == view;
 }
 
 } // namespace FocusManager

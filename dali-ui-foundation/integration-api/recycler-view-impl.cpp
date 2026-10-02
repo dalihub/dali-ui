@@ -1241,7 +1241,7 @@ void RecyclerViewImpl::SendScrollFinished()
 void RecyclerViewImpl::SendDragStarted()
 {
   mIsDragging = true;
-  Internal::ScrollStateObserver::Get().NotifyDragStarted();
+  Internal::ScrollStateObserver::Get().NotifyDragStarted(Window::Get(Self()));
   RecyclerView rv = RecyclerView::DownCast(Self());
   mDragStartedSignal.Emit(rv);
 }
@@ -1640,7 +1640,7 @@ bool RecyclerViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
 {
   if(!mKeyScrollEnabled || !mAdapter || !mLayouter) return false;
   if(event.GetState() != Dali::KeyEvent::DOWN) return false;
-  if(FocusManager::Get().GetCurrentFocusView() != View::DownCast(Self())) return false;
+  if(FocusManager::Get().GetCurrentFocusView(Window::Get(Self())) != View::DownCast(Self())) return false;
 
   const Dali::String keyName = event.GetKeyName();
 

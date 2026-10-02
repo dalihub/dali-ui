@@ -755,7 +755,7 @@ View ScrollViewImpl::OnFocusRequested()
   // items can have their world-position center outside the visible viewport when
   // they are only partially on-screen, which would otherwise falsely trigger the
   // "approaching from below/above" branch and re-focus the same item.
-  View prevFocus = FocusManager::Get().GetCurrentFocusView();
+  View prevFocus = FocusManager::Get().GetCurrentFocusView(Window::Get(Self()));
 
   if(prevFocus && !IsDescendantOfContent(prevFocus))
   {
@@ -852,7 +852,7 @@ bool ScrollViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
   // All other navigation keys: only act when ScrollView itself is the focused view.
   // When a content descendant is focused, OnFocusNavigationRequested handles key-scroll;
   // acting here too would fire scroll twice per key press.
-  if(FocusManager::Get().GetCurrentFocusView() != View::DownCast(Self())) return false;
+  if(FocusManager::Get().GetCurrentFocusView(Window::Get(Self())) != View::DownCast(Self())) return false;
 
   FocusDirection direction;
   if(keyName == "Up")
@@ -2234,7 +2234,7 @@ void ScrollViewImpl::SendScrollFinished()
 void ScrollViewImpl::SendDragStarted()
 {
   mIsDragging = true;
-  Ui::Internal::ScrollStateObserver::Get().NotifyDragStarted();
+  Ui::Internal::ScrollStateObserver::Get().NotifyDragStarted(Window::Get(Self()));
   Ui::ScrollView scrollView = Ui::ScrollView::DownCast(Self());
   mDragStartedSignal.Emit(scrollView);
 }

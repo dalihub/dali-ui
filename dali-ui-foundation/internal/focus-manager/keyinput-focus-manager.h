@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/views/view.h>
+#include <dali/public-api/adaptor-framework/window.h>
 
 namespace DALI_NAMESPACE
 {
@@ -32,10 +33,9 @@ class KeyInputFocusManagerImpl;
 /**
  * KeyInputFocusManager
  * This class provides the functionality of registering for keyboard events for views.
- * The keyinput focus manager maintains a stack of views, With the last added view receiving
- * all the keyboard events first. And if the conrol doesn't consume the event it is passed to
- * the next view in the stack. If none of the views in the stack consume the key event then
- * UnhandledKeyEventSignal() is emitted.
+ * One key-input target is retained for the primary Window and for each explicitly
+ * independent Window. Events select a target by the delivering SceneHolder and
+ * bubble through its ancestors in that Window. Previous targets are not stacked.
  *
  * Signals
  * | %Signal Name         | Method                            |
@@ -70,24 +70,41 @@ public:
 
   /**
    * Sets keyboard focus for a view.
-   * Note: A view can be set to be in focus and still not receive all the key events if another view has over
-   * ridden it. As the key input focus mechanism works like a stack, the top most view receives all the key events,
-   * and passes on the unhandled events to the views below in the stack. A view in the stack will regain key input
-   * focus when there are no more views above it in the focus stack.
-   *
-   * @pre The View is not in the focus stack. If it is allready present in the top of the stack it results in a
-   * no-op, If it is present in the stack but not on the top of the stack, then the view is moved to the top of the
-   * focus stack.
+   * Replaces the target in the View's focus scope and notifies actual focus
+   * loss/gain. A request for the existing target is a no-op.
    * @param[in] view The View to receive keyboard input
    */
   void SetFocus(View view);
 
   /**
-   * Query for the view that is currently set to be on top of the fcous stack and receives all
-   * keyboard input events first.
+   * Queries the primary Window's current key-input target.
    * @return Pointer to the view set to receive keyboard inputs.
    */
   View GetCurrentFocusView() const;
+
+  /**
+   * @brief Gets the actual key input target in the specified Window.
+   * @param[in] window The Window to query
+   * @return Its independent or primary target, or an empty View if none exists
+   */
+  View GetCurrentFocusView(Dali::Window window) const;
+
+  /**
+   * @brief Registers or removes independent key input target storage.
+   * Enabling adopts an existing primary target in the Window without notifying
+   * focus gain. The caller clears inactive targets before disabling storage.
+   * @param[in] window The Window whose storage is changed
+   * @param[in] enabled Whether independent storage is enabled
+   */
+  void SetIndependentWindow(Window window, bool enabled);
+
+  /**
+   * @brief Promotes the Window's existing key target to the primary role.
+   * Retains targets owned by other independent Windows and releases an ordinary
+   * displaced target. A loss callback's newer target is preserved.
+   * @param[in] window The new primary Window; empty clears the primary role
+   */
+  void SetPrimaryWindow(Window window);
 
   /**
    * Removes focus for the given view, The view will no longer receive events from keyboard.

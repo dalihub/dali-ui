@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
@@ -46,28 +47,46 @@ namespace Internal
 class DALI_UI_API ScrollStateObserver
 {
 public:
-  using StateSignalType = Signal<void()>;
+  using StateSignalType       = Signal<void()>;       ///< Process-wide state notification.
+  using WindowStateSignalType = Signal<void(Window)>; ///< Notification carrying the source Window.
 
   /**
    * @brief Returns the process-level singleton instance.
+   * @return The shared observer
    */
   static ScrollStateObserver& Get();
 
   // -----------------------------------------------------------------------
   // State queries — all O(1)
 
+  /**
+   * @brief Queries whether any container is resolving a recognized pan gesture.
+   * @return True while at least one disambiguation is pending
+   */
   bool IsGestureDisambiguating() const
   {
     return mDisambiguatingDepth > 0;
   }
+  /**
+   * @brief Queries whether any container is being dragged.
+   * @return True while at least one drag is active
+   */
   bool IsDragging() const
   {
     return mDraggingDepth > 0;
   }
+  /**
+   * @brief Queries whether any container is scrolling, by drag or fling.
+   * @return True while at least one scroll is active
+   */
   bool IsScrolling() const
   {
     return mScrollingDepth > 0;
   }
+  /**
+   * @brief Queries whether scrolling continues without an active drag.
+   * @return True if scrolling is active and no container is being dragged
+   */
   bool IsFlinging() const
   {
     return IsScrolling() && !IsDragging();
@@ -76,39 +95,105 @@ public:
   // -----------------------------------------------------------------------
   // Signals
 
+  /**
+   * @brief Gets the signal emitted for each disambiguation start.
+   * @return The process-wide notification signal
+   */
   StateSignalType& DisambiguationBeganSignal()
   {
     return mDisambiguationBeganSignal;
   }
+  /**
+   * @brief Gets the signal emitted for each disambiguation end.
+   * @return The process-wide notification signal
+   */
   StateSignalType& DisambiguationEndedSignal()
   {
     return mDisambiguationEndedSignal;
   }
+  /**
+   * @brief Gets the signal emitted for each scroll start.
+   * @return The process-wide notification signal
+   */
   StateSignalType& ScrollStartedSignal()
   {
     return mScrollStartedSignal;
   }
+  /**
+   * @brief Gets the signal emitted for each scroll end.
+   * @return The process-wide notification signal
+   */
   StateSignalType& ScrollFinishedSignal()
   {
     return mScrollFinishedSignal;
   }
+  /**
+   * @brief Gets the existing process-wide signal emitted for every drag start.
+   * @return The notification signal, emitted after WindowDragStartedSignal()
+   */
   StateSignalType& DragStartedSignal()
   {
     return mDragStartedSignal;
   }
+  /**
+   * @brief Gets the signal emitted for each drag end.
+   * @return The process-wide notification signal
+   */
   StateSignalType& DragFinishedSignal()
   {
     return mDragFinishedSignal;
   }
 
+  /**
+   * @brief Gets the drag-start signal carrying the source Window.
+   * The callback receives an empty Window for legacy notifications without a
+   * source. Scope-aware clients must not infer another Window from that value.
+   * @return The signal, emitted before the process-wide DragStartedSignal()
+   */
+  WindowStateSignalType& WindowDragStartedSignal()
+  {
+    return mWindowDragStartedSignal;
+  }
+
   // -----------------------------------------------------------------------
   // Notifications — called by scrollable containers
 
+  /**
+   * @brief Increments the disambiguation count and emits its start signal.
+   */
   void NotifyGestureDisambiguationBegan();
+
+  /**
+   * @brief Decrements the disambiguation count without underflow and emits its end signal.
+   */
   void NotifyGestureDisambiguationEnded();
+
+  /**
+   * @brief Starts a drag without source information for legacy callers.
+   * Delegates to NotifyDragStarted(Window) with an empty Window. This cannot
+   * identify which independent Window's pending touch focus should be cancelled.
+   */
   void NotifyDragStarted();
+
+  /**
+   * @brief Increments the drag count once and emits scoped then process-wide signals.
+   * @param[in] window The source Window; empty means the source is unknown
+   */
+  void NotifyDragStarted(Window window);
+
+  /**
+   * @brief Decrements the drag count without underflow and emits its end signal.
+   */
   void NotifyDragFinished();
+
+  /**
+   * @brief Increments the scroll count and emits its start signal.
+   */
   void NotifyScrollStarted();
+
+  /**
+   * @brief Decrements the scroll count without underflow and emits its end signal.
+   */
   void NotifyScrollFinished();
 
 private:
@@ -121,12 +206,13 @@ private:
   int mDraggingDepth{0};       ///< user finger actively dragging
   int mScrollingDepth{0};      ///< any scroll in progress (drag or fling)
 
-  StateSignalType mDisambiguationBeganSignal;
-  StateSignalType mDisambiguationEndedSignal;
-  StateSignalType mScrollStartedSignal;
-  StateSignalType mScrollFinishedSignal;
-  StateSignalType mDragStartedSignal;
-  StateSignalType mDragFinishedSignal;
+  StateSignalType       mDisambiguationBeganSignal;
+  StateSignalType       mDisambiguationEndedSignal;
+  StateSignalType       mScrollStartedSignal;
+  StateSignalType       mScrollFinishedSignal;
+  StateSignalType       mDragStartedSignal;
+  StateSignalType       mDragFinishedSignal;
+  WindowStateSignalType mWindowDragStartedSignal;
 };
 
 } // namespace Internal

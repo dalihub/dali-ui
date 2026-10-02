@@ -1,0 +1,18 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.8.2)
+
+PROJECT(focus-key-grab.example)
+
+SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+OPTION(TIZEN "Build the Tizen key-grab probe" OFF)
+
+IF(NOT COMMAND DALI_ADD_SAMPLE)
+  INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../common.cmake")
+ENDIF()
+
+DALI_ADD_SAMPLE(focus-key-grab.example focus-key-grab-example.cpp)
+
+IF(TIZEN)
+  TARGET_COMPILE_DEFINITIONS(focus-key-grab.example PRIVATE FOCUS_KEY_GRAB_TIZEN)
+ENDIF()

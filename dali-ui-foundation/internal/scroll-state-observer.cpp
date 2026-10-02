@@ -51,7 +51,13 @@ void ScrollStateObserver::NotifyGestureDisambiguationEnded()
 
 void ScrollStateObserver::NotifyDragStarted()
 {
+  NotifyDragStarted(Window());
+}
+
+void ScrollStateObserver::NotifyDragStarted(Window window)
+{
   ++mDraggingDepth;
+  mWindowDragStartedSignal.Emit(window);
   mDragStartedSignal.Emit();
 }
 
