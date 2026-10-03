@@ -45,12 +45,12 @@ namespace DALI_NAMESPACE::Ui::Internal
 {
 namespace
 {
+#if defined(DEBUG_ENABLED)
 Vector4 ToVector4(const Insets& insets)
 {
   return Vector4(insets.start, insets.end, insets.top, insets.bottom);
 }
 
-#if defined(DEBUG_ENABLED)
 Debug::Filter* gVisualBaseLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VISUAL_BASE");
 #endif
 
