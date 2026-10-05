@@ -19,6 +19,8 @@
 #include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
+#include <dali/devel-api/animation/animation-devel.h>
+#include <dali/devel-api/common/singleton-service.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h>
 #include <dali/integration-api/string-utils.h>
@@ -33,6 +35,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui/ui-async-task-manager.h>
 #include <dali-ui/ui-event-thread-callback.h>
 
 using namespace Dali;
@@ -1886,6 +1889,165 @@ int UtcDaliLabelMarqueeEmptySourceRetirementP(void)
     label.StopMarquee();
     label.Unparent();
   }
+  END_TEST;
+}
+
+int UtcDaliLabelMarqueeDestroyLifecycleP(void)
+{
+  UiTestApplication application;
+  const auto initialAnimations = DevelAnimation::GetAnimationCount();
+  for(int loopCount : {0, 3})
+    for(auto stopMode : {Text::MarqueeStopMode::IMMEDIATE, Text::MarqueeStopMode::FINISH_LOOP})
+      for(bool requestStop : {false, true})
+        for(bool resize : {false, true})
+        {
+          Label label = Label::New("A running marquee must release its label and animation when the last owner goes away.");
+          label.SetRequestedWidth(120.0f);
+          label.SetRequestedHeight(48.0f);
+          label.SetMarqueeLoopCount(loopCount);
+          label.SetMarqueeLoopDelay(0.0f);
+          label.SetMarqueeSpeed(20);
+          label.SetMarqueeStopMode(stopMode);
+          application.GetScene().Add(label);
+          label.StartMarquee();
+          application.SendNotification();
+          application.Render(100);
+          DALI_TEST_CHECK(label.IsMarqueeRunning());
+          WeakHandle<Label> weakLabel(label);
+          if(requestStop)
+          {
+            label.StopMarquee();
+            DALI_TEST_EQUALS(label.IsMarqueeRunning(), stopMode == Text::MarqueeStopMode::FINISH_LOOP, TEST_LOCATION);
+          }
+          if(resize)
+          {
+            label.SetRequestedWidth(100.0f);
+            label.SetText("Updated marquee content with pending layout at destruction.");
+          }
+          label.Unparent();
+          label.Reset();
+          application.SendNotification();
+          application.Render(16);
+          application.SendNotification();
+          DALI_TEST_CHECK(!weakLabel.GetHandle());
+          DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), initialAnimations, TEST_LOCATION);
+        }
+  END_TEST;
+}
+
+int UtcDaliLabelAsyncMarqueeDestroyInFlightP(void)
+{
+  UiTestApplication application;
+  const auto initialAnimations = DevelAnimation::GetAnimationCount();
+  for(int cycle = 0; cycle < 8; ++cycle)
+  {
+    Label label = Label::New("Async infinite marquee before a pending source and renderer replacement.");
+    label.SetRequestedWidth(120.0f);
+    label.SetRequestedHeight(48.0f);
+    label.SetMarqueeLoopCount(0);
+    label.SetAsyncRendering(true);
+    label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+    application.GetScene().Add(label);
+    label.StartMarquee();
+    gAsyncRenderFinished = false;
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(WaitForAsyncRender(application));
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+
+    gAsyncRenderFinished = false;
+    label.SetText("A new async result must not call a label that was destroyed while rendering.");
+    label.SetRequestedWidth(100.0f);
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(!gAsyncRenderFinished);
+    const bool completionQueued = (cycle % 4) >= 2;
+    if(completionQueued)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT, false));
+    }
+    if(cycle % 2)
+    {
+      label.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
+      label.StopMarquee();
+      DALI_TEST_CHECK(label.IsMarqueeRunning());
+    }
+    WeakHandle<Label> weakLabel(label);
+    label.Unparent();
+    label.Reset();
+    if(completionQueued)
+    {
+      Test::AsyncTaskManager::ProcessAllCompletedTasks();
+    }
+    else
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+    }
+    application.SendNotification();
+    application.Render(16);
+    application.SendNotification();
+    DALI_TEST_CHECK(!weakLabel.GetHandle());
+    DALI_TEST_CHECK(!gAsyncRenderFinished);
+    DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), initialAnimations, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelMarqueeDestroyAfterCoreP(void)
+{
+  Label label;
+  WeakHandle<Label> weakLabel;
+  {
+    UiTestApplication application;
+    label = Label::New("An infinite marquee label can outlive the DALi Core.");
+    weakLabel = label;
+    label.SetRequestedWidth(120.0f);
+    label.SetRequestedHeight(48.0f);
+    label.SetMarqueeLoopCount(0);
+    application.GetScene().Add(label);
+    label.StartMarquee();
+    application.SendNotification();
+    application.Render(100);
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+  }
+  DALI_TEST_CHECK(!SingletonService::Get());
+  label.Reset();
+  DALI_TEST_CHECK(!weakLabel.GetHandle());
+  END_TEST;
+}
+
+int UtcDaliLabelMarqueeSceneReconnectP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New("An infinite marquee reconnects while an application still owns the label.");
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(48.0f);
+  label.SetMarqueeLoopCount(0);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+  WeakHandle<Label> weakLabel(label);
+  for(int cycle = 0; cycle < 8; ++cycle)
+  {
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render(100);
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+    DALI_TEST_CHECK(HasValidTextTexture(label));
+    label.Unparent();
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(weakLabel.GetHandle());
+  }
+  application.GetScene().Add(label);
+  label.Reset(); // The scene still owns the actor after the application releases it.
+  application.SendNotification();
+  application.Render(100);
+  label = weakLabel.GetHandle();
+  DALI_TEST_CHECK(label && label.IsMarqueeRunning());
+  label.Unparent();
+  label.Reset();
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(!weakLabel.GetHandle());
   END_TEST;
 }
 
