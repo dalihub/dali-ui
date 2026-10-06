@@ -2866,7 +2866,7 @@ int UtcDaliTextViewResolveFinalElisionP(void)
     DALI_TEST_CHECK(result.glyphs.Count() > 0u);
     DALI_TEST_EQUALS(result.layoutGeneration, 1u, TEST_LOCATION);
 
-    const Text::Length glyphCount = result.glyphs.Count();
+    const Text::Length glyphCount = static_cast<Text::Length>(result.glyphs.Count());
     view.ResolveFinalElision(fontClient, result, 1u);
     DALI_TEST_EQUALS(result.glyphs.Count(), glyphCount, TEST_LOCATION);
     view.ResolveFinalElision(fontClient, result, 2u);
@@ -2944,7 +2944,7 @@ int UtcDaliTextViewEllipsisTallerThanControlP(void)
     auto& visual = *impl.mModel->mVisualModel;
     DALI_TEST_CHECK(visual.mLines.Count() > 0u);
     DALI_TEST_CHECK(visual.mLines[0u].ellipsis);
-    const Text::Length glyphCount = visual.mGlyphs.Count();
+    const Text::Length glyphCount = static_cast<Text::Length>(visual.mGlyphs.Count());
     DALI_TEST_CHECK(glyphCount > 1u);
     visual.mControlSize.height = 1.0f;
 

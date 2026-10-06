@@ -690,21 +690,22 @@ int UtcDaliTextControllerAnchorClickAndHitTestP(void)
 
   auto& impl = Text::Controller::Impl::GetImplementation(*controller);
   auto& logicalModel = *impl.mModel->mLogicalModel;
+  const Text::Length textLength = static_cast<Text::Length>(logicalModel.mText.Count());
   Text::ColorRun colorRun;
   colorRun.characterRun.characterIndex = 0u;
-  colorRun.characterRun.numberOfCharacters = logicalModel.mText.Count();
+  colorRun.characterRun.numberOfCharacters = textLength;
   colorRun.color = Color::BLUE;
-  const uint32_t colorRunIndex = logicalModel.mColorRuns.Count();
+  const uint32_t colorRunIndex = static_cast<uint32_t>(logicalModel.mColorRuns.Count());
   logicalModel.mColorRuns.PushBack(colorRun);
   Text::UnderlinedCharacterRun underlineRun;
   underlineRun.characterRun.characterIndex = 0u;
-  underlineRun.characterRun.numberOfCharacters = logicalModel.mText.Count();
-  const uint32_t underlineRunIndex = logicalModel.mUnderlinedCharacterRuns.Count();
+  underlineRun.characterRun.numberOfCharacters = textLength;
+  const uint32_t underlineRunIndex = static_cast<uint32_t>(logicalModel.mUnderlinedCharacterRuns.Count());
   logicalModel.mUnderlinedCharacterRuns.PushBack(underlineRun);
 
   Text::Anchor anchor{};
   anchor.startIndex = 0u;
-  anchor.endIndex = logicalModel.mText.Count();
+  anchor.endIndex = textLength;
   anchor.href = new char[8]{'t', 'e', 's', 't', ':', '/', '/', '\0'};
   anchor.colorRunIndex = colorRunIndex;
   anchor.underlinedCharacterRunIndex = underlineRunIndex;
@@ -713,7 +714,7 @@ int UtcDaliTextControllerAnchorClickAndHitTestP(void)
   logicalModel.mAnchors.PushBack(anchor);
 
   std::string href;
-  DALI_TEST_CHECK(!controller->AnchorClickEvent(logicalModel.mText.Count(), href));
+  DALI_TEST_CHECK(!controller->AnchorClickEvent(textLength, href));
   DALI_TEST_CHECK(controller->AnchorClickEvent(1u, href));
   DALI_TEST_EQUALS(href, std::string("test://"), TEST_LOCATION);
   DALI_TEST_CHECK(logicalModel.mAnchors[0u].isClicked);

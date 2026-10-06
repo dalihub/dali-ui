@@ -2447,7 +2447,7 @@ int UtcDaliTextControllerTapAndLongPressEditingP(void)
 
   PublicText::Controller::Impl& impl = PublicText::Controller::Impl::GetImplementation(*controller.Get());
   DALI_TEST_CHECK(impl.mEventData != nullptr);
-  const uint32_t textLength = impl.mModel->mLogicalModel->mText.Count();
+  const uint32_t textLength = static_cast<uint32_t>(impl.mModel->mLogicalModel->mText.Count());
 
   controller->TapEvent(1u, 20.0f, 15.0f);
   controller->Relayout(size);
