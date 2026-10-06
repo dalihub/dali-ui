@@ -194,6 +194,8 @@ field.SetFontVariation(Text::FontVariation::None());
 
 font variation 설정을 clear하려면 `SetFontVariation(Text::FontVariation::None())`을 사용합니다. 빈 settings 문자열은 invalid로 처리되며 현재 font variation은 변경되지 않습니다.
 
+텍스트 일부의 style이나 inline image는 `SetStyledText()`로 적용할 수 있습니다. Markup 문자열은 `Text::StyledText::FromMarkup()`으로 변환해서 적용하며, `SetText()`에 직접 전달하면 plain text로 처리됩니다. 지원 tag와 문법은 [Markup](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup-(kr)), 코드로 span을 구성하는 방법은 [StyledText](https://github.sec.samsung.net/NUI/dali-ui/wiki/StyledText-(kr))를 참고하세요.
+
 <br/>
 
 ## Cursor and Selection

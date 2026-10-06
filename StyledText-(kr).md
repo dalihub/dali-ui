@@ -31,6 +31,8 @@ label.SetStyledText(builder.Build());
 
 ## StyledText And Markup
 
+지원 tag, attribute, color 값 형식과 inline image 문법은 [Markup](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup-(kr))을 참고하세요. Markup은 `Label`, `InputField`, `InputEditor`에서 공통으로 사용할 수 있습니다.
+
 단순한 static markup은 바로 `StyledText`로 변환할 수 있습니다.
 
 ~~~cpp
@@ -174,6 +176,8 @@ if(Text::Utf8ToUtf32Range(Dali::StringView(text.data(), static_cast<uint32_t>(te
 
 `ImageSpan`은 지정한 text range를 하나의 atomic inline image box로 치환합니다. Image source, layout에서 확보할 크기, text baseline에 대한 정렬 등은 `ImageAttributes`로 설정합니다.
 
+Markup으로 inline image를 삽입하려면 [Markup의 Inline image](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup-(kr)#inline-image)를 참고하세요.
+
 가장 안전한 작성 방식은 image가 들어갈 위치에 U+FFFC OBJECT REPLACEMENT CHARACTER 하나를 넣고, 그 한 글자에 `ImageSpan`을 적용하는 것입니다.
 
 ~~~cpp
@@ -264,6 +268,8 @@ label.SetStyledText(builder.Build());
 ## Annotation
 
 `AnnotationSpan`은 semantic key/value metadata를 저장합니다. 자체적으로 rendering을 바꾸지는 않으며, 앱이나 theme code가 annotation을 읽고 visual span으로 변환하는 방식으로 사용합니다.
+
+Markup의 `<annotation>` 문법은 [Markup의 Annotation](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup-(kr)#annotation)을 참고하세요.
 
 `AnnotationSpan`도 `Span`이므로 `GetSpanCount()`와 `GetSpanAt()`으로 전체 span을 순회하면 함께 나타납니다. Annotation만 처리할 때는 `GetAnnotationCount()`, `GetAnnotationAt()`, `GetAnnotationStartIndexAt()`, `GetAnnotationEndIndexAt()` API를 사용하면 annotation span만 순회할 수 있어 markup이나 localized text를 visual styling으로 변환하는 코드가 단순해집니다. 즉, annotation 전용 API는 convenience filter이고, annotation span은 일반 span 순회에도 포함됩니다.
 

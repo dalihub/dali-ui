@@ -104,6 +104,7 @@ For simple partial styling, DALi markup can be converted to `StyledText`. For pr
 
 | Feature | Use When | Details |
 |---|---|---|
+| Markup | Writing partial styles or annotations with tags in a string | [Markup](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup) |
 | `StyledText` | Styling specific text ranges or resolving semantic annotations | [StyledText](https://github.sec.samsung.net/NUI/dali-ui/wiki/StyledText) |
 | `TextGradient` / `TextGradientOverlay` | Applying gradient, highlight, or shimmer effects to `Label` text rendering | [Text Gradient](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-Gradient) |
 
