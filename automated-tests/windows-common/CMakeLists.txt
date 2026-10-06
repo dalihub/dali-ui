@@ -128,6 +128,7 @@ SET(WINDOWS_UNSUPPORTED_TEST_SOURCES
   "${INTERNAL_TEST_DIR}/utc-Dali-InternalCoverage-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-InteractiveView-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-TextLogicalModel-internal.cpp"
+  "${INTERNAL_TEST_DIR}/utc-Dali-LottieAnimationView-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-MeshVisual-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-ObjLoader-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-PageScrollView-internal.cpp"
