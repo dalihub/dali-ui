@@ -93,6 +93,7 @@ For details about the class structure and extensibility of `View`, see [here](ht
   * [Text](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text)
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView)
   * [VideoView](https://github.sec.samsung.net/NUI/dali-ui/wiki/VideoView)
+  * [MediaView](https://github.sec.samsung.net/NUI/dali-ui/wiki/MediaView)
   * [CanvasView](https://github.sec.samsung.net/NUI/dali-ui/wiki/CanvasView)
   * [ChartView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ChartView)
   * [WindowFrame](https://github.sec.samsung.net/NUI/dali-ui/wiki/WindowFrame)

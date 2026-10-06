@@ -308,6 +308,12 @@ Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&  
       break;
     }
 
+    case Ui::Integration::InternalVisualType::STREAMED_IMAGE:
+    {
+      // The owner supplies frames directly; a property map cannot describe them.
+      break;
+    }
+
     default:
     {
       break;

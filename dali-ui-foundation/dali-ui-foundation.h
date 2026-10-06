@@ -149,6 +149,7 @@
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
+#include <dali-ui-foundation/public-api/views/media/media-view.h>
 #include <dali-ui-foundation/public-api/views/video/video-source.h>
 #include <dali-ui-foundation/public-api/views/video/video-view.h>
 

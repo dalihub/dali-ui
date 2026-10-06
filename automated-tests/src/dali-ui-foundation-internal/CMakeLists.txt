@@ -25,6 +25,7 @@ SET(TC_SOURCES
     utc-Dali-GradientFactory-internal.cpp
     utc-Dali-ShaderFactory-internal.cpp
     utc-Dali-VisualFactory-internal.cpp
+    utc-Dali-StreamedImageVisual-internal.cpp
     utc-Dali-GradientVisualSemantics-internal.cpp
     utc-Dali-TextAbstractionOwnership-internal.cpp
     utc-Dali-TextGradientBaseline-internal.cpp

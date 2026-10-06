@@ -64,6 +64,7 @@ const TypeExpectation EXPECTATIONS[] = {
   {"AnimatedImageView", "AnimatedImageViewImpl", "View"},
   {"LottieAnimationView", "LottieAnimationViewImpl", "View"},
   {"VideoView", "VideoViewImpl", "View"},
+  {"MediaView", "MediaViewImpl", "View"},
   {"WebView", "WebViewImpl", "View"},
   {"Label", "LabelImpl", "View"},
   {"InputField", "InputFieldImpl", "View"},
