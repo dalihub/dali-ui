@@ -219,8 +219,7 @@ int UtcDaliImageShaderDebugScriptFallbackP(void)
 int UtcDaliImageShaderDebugScriptFromJsonP(void)
 {
   UiTestApplication application;
-  std::string scriptPath(__FILE__);
-  scriptPath = scriptPath.substr(0u, scriptPath.find_last_of('/')) + "/resources/debug-image-visual-shader-script.json";
+  const std::string scriptPath = DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/debug-image-visual-shader-script.json";
   Dali::EnvironmentVariable::SetTestEnvironmentVariable("DALI_DEBUG_IMAGE_VISUAL_SHADER_SCRIPT_FILE_NAME", scriptPath.c_str());
 
   Dali::Ui::Internal::ImageVisualShaderFactory factory;
