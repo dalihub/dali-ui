@@ -9,6 +9,7 @@ SET(TC_SOURCES
     utc-Dali-AsyncTextLoaderOwnership-internal.cpp
     utc-Dali-BidirectionalSupport-internal.cpp
     utc-Dali-AsyncMarqueeCoordinates-internal.cpp
+    utc-Dali-InternalCoverage-internal.cpp
     utc-Dali-AnimatedImageReleasePolicy-internal.cpp
     utc-Dali-AnimatedImageView-internal.cpp
     utc-Dali-FocusManager-internal.cpp
