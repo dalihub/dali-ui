@@ -62,15 +62,16 @@ int UtcDaliBidirectionalMixedParagraphAndSplitLineP(void)
   lineBreaks[7u] = TextAbstraction::LINE_MUST_BREAK;
   lineBreaks[8u] = TextAbstraction::LINE_MUST_BREAK;
 
+  const Length characterCount = static_cast<Length>(text.Count());
   Vector<BidirectionalParagraphInfoRun> paragraphs;
   Vector<BidirectionalLineInfoRun> lines;
-  SetBidirectionalInfo(bidi, text, scripts, lineBreaks, 0u, text.Count(), paragraphs, lines);
+  SetBidirectionalInfo(bidi, text, scripts, lineBreaks, 0u, characterCount, paragraphs, lines);
   DALI_TEST_EQUALS(paragraphs.Count(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(paragraphs[0u].characterRun.characterIndex, 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(paragraphs[0u].characterRun.numberOfCharacters, 8u, TEST_LOCATION);
 
   Vector<CharacterDirection> directions;
-  GetCharactersDirection(bidi, paragraphs, text.Count(), 0u, text.Count(), directions);
+  GetCharactersDirection(bidi, paragraphs, characterCount, 0u, characterCount, directions);
   DALI_TEST_CHECK(!directions[0u]);
   DALI_TEST_EQUALS(paragraphs[0u].direction, true, TEST_LOCATION);
   DALI_TEST_EQUALS(directions.Count(), text.Count(), TEST_LOCATION);
@@ -86,7 +87,7 @@ int UtcDaliBidirectionalMixedParagraphAndSplitLineP(void)
   DALI_TEST_CHECK(lines[1u].visualToLogicalMapSecondHalf != nullptr);
 
   Vector<Character> mirrored;
-  DALI_TEST_CHECK(GetMirroredText(bidi, text, directions, paragraphs, 0u, text.Count(), mirrored));
+  DALI_TEST_CHECK(GetMirroredText(bidi, text, directions, paragraphs, 0u, characterCount, mirrored));
   DALI_TEST_EQUALS(mirrored.Count(), text.Count(), TEST_LOCATION);
 
   for(auto& line : lines)
