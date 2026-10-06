@@ -44,10 +44,12 @@ SET(TC_GENERATED_HEADER
     ${CMAKE_CURRENT_SOURCE_DIR}/${EXEC_NAME}.h
 )
 
-# WindowFrame policy cases exercise internal units directly, so those units are
-# compiled into the test executable. They are hidden in the shared library.
+# Chart and WindowFrame cases exercise internal units directly, so those units
+# are compiled into the test executable. They are hidden in the shared library.
 SET(COMPONENT_INTERNAL_TEST_SOURCES
-    # ChartHitTester is internal and is not exported by the release library.
+    ../../../dali-ui-components/integration-api/chart/chart-axis-impl.cpp
+    ../../../dali-ui-components/integration-api/chart/chart-series-impl.cpp
+    ../../../dali-ui-components/integration-api/chart/chart-color-palette.cpp
     ../../../dali-ui-components/integration-api/chart/chart-hit-tester.cpp
     ../../../dali-ui-components/internal/window/window-frame-layout-engine.cpp
     ../../../dali-ui-components/internal/window/window-frame-decoration-validator.cpp
