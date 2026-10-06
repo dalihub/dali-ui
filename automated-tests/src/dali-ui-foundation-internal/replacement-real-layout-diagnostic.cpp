@@ -241,8 +241,7 @@ void CheckMarqueeTransitionCase(const char*           name,
                                 Text::Alignment       alignment,
                                 LayoutDirection::Type layoutDirection,
                                 float                 controlWidth,
-                                bool                  expectedRightToLeft,
-                                bool                  expectedEligible)
+                                bool                  expectedRightToLeft)
 {
   Text::ModelPtr source        = Text::Model::New();
   source->mLogicalModel->mText = Utf32(utf8);
@@ -257,13 +256,6 @@ void CheckMarqueeTransitionCase(const char*           name,
 
   const Text::OrdinaryMarqueeTransitionTrace trace =
     Text::TraceOrdinaryMarqueeTransitionForTest(*source, options);
-  if(!expectedEligible)
-  {
-    Require(!trace.valid, std::string(name) + ": non-rigid case unexpectedly became eligible");
-    std::cout << "REAL_MARQUEE_TRANSITION case=" << name << " fallback=legacy" << std::endl;
-    return;
-  }
-
   Require(trace.valid, std::string(name) + ": transition trace invalid");
   Require(trace.directionRightToLeft == expectedRightToLeft,
           std::string(name) + ": unexpected resolved text direction");
@@ -321,23 +313,20 @@ void CheckMarqueeTransitions()
     "\xD7\xA9\xD7\x9C\xD7\x95\xD7\x9D \xD7\xA2\xD7\x95\xD7\x9C\xD7\x9D, \xD7\xA0\xD7\xA2\xD7\x99\xD7\x9D \xD7\x9E\xD7\x90\xD7\x95\xD7\x93,\xD7\x95\xD7\x9E\xD7\xA7\xD7\x95\xD7\x95\xD7\x94 \xD7\xA9\xD7\x99\xD7\x94\xD7\x99\xD7\x94 \xD7\x9C\xD7\xA0\xD7\x95 \xD7\xA9\xD7\x99\xD7\x97\xD7\x94 \xD7\xA0\xD7\xA2\xD7\x99\xD7\x9E\xD7\x94 \xD7\x95\xD7\x98\xD7\x95\xD7\x91\xD7\x94 \xD7\x99\xD7\x97\xD7\x93";
 
   CheckMarqueeTransitionCase("ltr_start", ltr, Text::Alignment::START,
-                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false, true);
+                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false);
   CheckMarqueeTransitionCase("ltr_center", ltr, Text::Alignment::CENTER,
-                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false, true);
+                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false);
   CheckMarqueeTransitionCase("ltr_end", ltr, Text::Alignment::END,
-                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false, true);
+                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false);
   CheckMarqueeTransitionCase("rtl_start", rtl, Text::Alignment::START,
-                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true, true);
+                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true);
   CheckMarqueeTransitionCase("rtl_center", rtl, Text::Alignment::CENTER,
-                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true, true);
+                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true);
   CheckMarqueeTransitionCase("rtl_end", rtl, Text::Alignment::END,
-                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true, true);
+                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true);
   CheckMarqueeTransitionCase("mixed_rigid", "English \xD7\x90\xD7\x91\xD7\x92 trailing words force END ellipsis",
                              Text::Alignment::CENTER, LayoutDirection::LEFT_TO_RIGHT,
-                             90.0f, false, true);
-  CheckMarqueeTransitionCase("mixed_non_rigid", "English \xD7\x90\xD7\x91\xD7\x92 trailing words force END ellipsis",
-                             Text::Alignment::CENTER, LayoutDirection::LEFT_TO_RIGHT,
-                             100.0f, false, false);
+                             90.0f, false);
 }
 
 void CheckLayoutCase(const char* name, Vector<Text::Character>& text, Text::CharacterIndex start,

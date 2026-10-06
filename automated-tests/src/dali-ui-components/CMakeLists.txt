@@ -47,6 +47,8 @@ SET(TC_GENERATED_HEADER
 # WindowFrame policy cases exercise internal units directly, so those units are
 # compiled into the test executable. They are hidden in the shared library.
 SET(COMPONENT_INTERNAL_TEST_SOURCES
+    # ChartHitTester is internal and is not exported by the release library.
+    ../../../dali-ui-components/integration-api/chart/chart-hit-tester.cpp
     ../../../dali-ui-components/internal/window/window-frame-layout-engine.cpp
     ../../../dali-ui-components/internal/window/window-frame-decoration-validator.cpp
     ../../../dali-ui-components/internal/window/window-frame-style-resolver.cpp
