@@ -857,7 +857,11 @@ int UtcDaliAbsoluteLayoutParamsIndividualBoundsAndMoveP(void)
   assigned = std::move(moved);
   DALI_TEST_EQUALS(assigned.GetBounds().GetWidth(), 120.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(assigned.GetBounds().GetHeight(), 60.0f, TEST_LOCATION);
-  assigned = std::move(assigned);
+  // Self-move through a reference alias so the this != &other guard in
+  // AbsoluteLayoutParams::operator=(AbsoluteLayoutParams&&) is exercised
+  // without tripping GCC 13 -Wself-move, which only flags a literal self-move.
+  AbsoluteLayoutParams& self = assigned;
+  assigned                   = std::move(self);
   DALI_TEST_EQUALS(assigned.GetX(), 4.0f, TEST_LOCATION);
   END_TEST;
 }
