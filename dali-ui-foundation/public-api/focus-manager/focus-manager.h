@@ -377,9 +377,9 @@ public: // Signals
    * request focus afterward. An inactive enabled Window does not replace the
    * global focus. Disabling an inactive Window clears its actual and stored
    * targets. Disabling the active Window preserves its global focus.
-   * Hidden Windows release independent actual focus and require a new request
-   * after showing, including an explicit MoveFocus() to choose an initial target.
-   * Targets must be effectively visible through their ancestor chain.
+   * Hiding a Window releases independent actual focus and requires a new request.
+   * SetCurrentFocusView() may apply focus before the Window or its View hierarchy
+   * is shown. Showing them preserves focus requested while hidden.
    * InputField, InputEditor and custom IME sessions are not
    * supported in an independent Window.
    * @param[in] window The Window whose policy is changed

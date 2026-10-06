@@ -535,7 +535,7 @@ bool FocusManager::CanSetKeyInputFocus(View view) const
   Window window = Window::DownCast(Dali::Integration::SceneHolder::Get(view));
   if(IsIndependentFocusEnabled(window))
   {
-    return window.IsVisible() && view.IsEffectivelyVisible() && view.IsFocusable() && view.IsEnabled() &&
+    return view.IsFocusable() && view.IsEnabled() &&
            !view.HasAncestorBlockingFocus() && !InputField::DownCast(view) && !InputEditor::DownCast(view);
   }
   return window && IsActiveWindow(Dali::Integration::SceneHolder::Get(window.GetRootLayer()));
@@ -544,7 +544,7 @@ bool FocusManager::CanSetKeyInputFocus(View view) const
 bool FocusManager::IsLogicalFocusWindow(Dali::Integration::SceneHolder sceneHolder) const
 {
   Window window = Window::DownCast(sceneHolder);
-  return IsActiveWindow(sceneHolder) || (IsIndependentFocusEnabled(window) && window.IsVisible());
+  return IsActiveWindow(sceneHolder) || IsIndependentFocusEnabled(window);
 }
 
 bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
@@ -1800,7 +1800,7 @@ void FocusManager::OnWindowFocusChanged(Window window, bool focusIn)
     // invalid target here would clear valid actual focus and its saved record.
     // Validate and restore directly for this platform event, while keeping the
     // public setters' restriction on application requests during navigation.
-    if(currentFocusedView && currentFocusedView.IsVisible() && !currentFocusedView.HasAncestorBlockingFocus() &&
+    if(currentFocusedView && (IsIndependentFocusEnabled(window) || currentFocusedView.IsVisible()) && !currentFocusedView.HasAncestorBlockingFocus() &&
        DoSetCurrentFocusView(currentFocusedView, {Ui::FocusDevice::PROGRAMMATIC, "", Ui::InputEvent::Programmatic()}))
     {
       RefreshFocusIndicator(currentFocusedView);

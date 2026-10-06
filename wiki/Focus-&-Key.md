@@ -128,8 +128,10 @@ actual focus and the stored target but retains history for a later explicit
 `MoveFocusBackward(window)`. If no valid destination exists, actual focus and
 the stored target remain unchanged.
 Hiding the independent Window, disabling its option, or invalidating its target
-clears its actual focus without clearing mainView. Showing or enabling it again
-requires a new explicit request. Native activation promotes an already focused
+clears its actual focus without clearing mainView. A new explicit request is
+required after hiding or enabling it. `SetCurrentFocusView()` can apply focus
+while the Window, target View, or an ancestor is hidden, and showing them preserves
+that focus. Native activation promotes an already focused
 independent View to the global role without repeating its focus loss/gain.
 InputField, InputEditor and custom IME sessions are outside this feature's scope.
 
