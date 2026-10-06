@@ -1850,3 +1850,67 @@ int UtcDaliTextVisualAsyncBlurStaleRevisionP(void)
   DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline + 3u, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliTextDecorationScaleAsyncSupersedeP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  RenderedTextVisual rendered = CreateTextVisual(application);
+  struct DecorationObserver : ReentrantAsyncInterface
+  {
+    DecorationObserver(RenderedTextVisual& rendered)
+    : ReentrantAsyncInterface(rendered.visual, rendered.view, CompletionAction::NONE)
+    {
+    }
+    void AsyncRenderFinished(UiText::AsyncTextRenderInfo&& info) override
+    {
+      overlay = info.overlayStylePixelData;
+      ReentrantAsyncInterface::AsyncRenderFinished(std::move(info));
+    }
+    PixelData overlay;
+  } observer(rendered);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+  auto parameters               = MakeParameters("Decoration scale");
+  parameters.isMarqueeEnabled   = false;
+  parameters.isUnderlineEnabled = true;
+  parameters.underlineHeight    = 2.f;
+  parameters.underlineColor     = Color::RED;
+  const auto original           = parameters;
+  DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+  PixelData baseline = observer.overlay;
+  DALI_TEST_CHECK(baseline);
+  parameters.decorationUiScale  = 2.f;
+  parameters.effectiveTextScale = 2.f;
+  DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(observer.overlay);
+  for(float scale : {1.25f, 1.5f})
+  {
+    parameters.text               = std::string(30000u, 'B');
+    parameters.decorationUiScale  = scale;
+    parameters.effectiveTextScale = scale;
+    DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
+  }
+  parameters = original;
+  DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
+  for(uint32_t trigger = 0u; trigger < 3u && observer.mCompletionCount < 3u; ++trigger)
+  {
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  }
+  DALI_TEST_EQUALS(observer.mCompletionCount, 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(observer.overlay);
+  DALI_TEST_EQUALS(observer.overlay.GetWidth(), baseline.GetWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(observer.overlay.GetHeight(), baseline.GetHeight(), TEST_LOCATION);
+  DALI_TEST_EQUALS(observer.overlay.GetPixelFormat(), baseline.GetPixelFormat(), TEST_LOCATION);
+  DALI_TEST_EQUALS(observer.overlay.GetStrideBytes(), baseline.GetStrideBytes(), TEST_LOCATION);
+  const auto expected = Dali::Integration::GetPixelDataBuffer(baseline);
+  const auto actual   = Dali::Integration::GetPixelDataBuffer(observer.overlay);
+  DALI_TEST_EQUALS(actual.bufferSize, expected.bufferSize, TEST_LOCATION);
+  DALI_TEST_CHECK(actual.bufferSize == expected.bufferSize &&
+                  std::memcmp(actual.buffer, expected.buffer, actual.bufferSize) == 0);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
+}

@@ -18,6 +18,10 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/internal/builder/style.h>
+#include <dali-ui-foundation/internal/views/view/view-visual-data.h>
+#include <dali-ui-foundation/public-api/visuals/visual-types.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
@@ -25,6 +29,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <unordered_set>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -261,5 +266,122 @@ int UtcDaliViewNaturalSizeRegisterUnregisterInvalidatesMeasure(void)
   viewData.RegisterVisual(Dali::Ui::Integration::View::Property::SHADOW, shadow);
   DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 0.0f, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliViewVisualDataStateStyleReplacementP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  DALI_TEST_CHECK(view.GetPropertyIndex("background") != Property::INVALID_INDEX);
+  auto& data = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view)).EnsureVisualData();
+
+  auto makeColorMap = [](const Vector4& color)
+  {
+    Property::Map map;
+    map.Add(Dali::Ui::Integration::Visual::Property::TYPE, VisualType::COLOR);
+    map.Add(Dali::Ui::Integration::Visual::Property::MIX_COLOR, color);
+    return map;
+  };
+  auto normal = Dali::Ui::Internal::Style::New();
+  normal->visuals.Add("background", makeColorMap(Color::RED));
+  auto focused = Dali::Ui::Internal::Style::New();
+  focused->visuals.Add("background", makeColorMap(Color::BLUE));
+  normal->subStates.Add("focus", focused);
+  data.ReplaceStateVisualsAndProperties({}, normal, "focus");
+  DALI_TEST_CHECK(view.GetProperty<Property::Map>(Dali::Ui::Integration::View::Property::BACKGROUND).Count() > 0u);
+
+  auto changed = Dali::Ui::Internal::Style::New();
+  changed->visuals.Add("background", makeColorMap(Color::GREEN));
+  data.ReplaceStateVisualsAndProperties(normal, changed, "focus");
+  DALI_TEST_CHECK(view.GetProperty<Property::Map>(Dali::Ui::Integration::View::Property::BACKGROUND).Count() > 0u);
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  data.ReplaceStateVisualsAndProperties(changed, normal, "focus");
+  DALI_TEST_CHECK(view.IsResourceReady());
+  data.ReplaceStateVisualsAndProperties(normal, {}, "focus");
+  END_TEST;
+}
+
+int UtcDaliViewVisualDataRegistrationAndOverridesP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  auto factory = Dali::Ui::Integration::VisualFactory::Get();
+  auto& factoryCache = Dali::Ui::GetImplementation(factory).GetFactoryCache();
+  auto& data = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view)).EnsureVisualData();
+  auto firstImpl = NaturalSizeTestVisual::New(factoryCache);
+  Dali::Ui::Integration::Visual::Base first(firstImpl.Get());
+  data.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, first, false);
+  DALI_TEST_CHECK(!data.IsVisualEnabled(Dali::Ui::Integration::View::Property::BACKGROUND));
+  DALI_TEST_CHECK(data.GetVisual("background") == first);
+  data.EnableVisual(Dali::Ui::Integration::View::Property::BACKGROUND, true);
+  DALI_TEST_CHECK(data.IsVisualEnabled(Dali::Ui::Integration::View::Property::BACKGROUND));
+  data.EnableReadyTransitionOverridden(first, true);
+  data.EnableReadyTransitionOverridden(first, true);
+  data.EnableReadyTransitionOverridden(first, false);
+
+  auto replacementImpl = NaturalSizeTestVisual::New(factoryCache);
+  Dali::Ui::Integration::Visual::Base replacement(replacementImpl.Get());
+  data.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, replacement, 7);
+  DALI_TEST_EQUALS(replacement.GetDepthIndex(), 7, TEST_LOCATION);
+  DALI_TEST_CHECK(data.GetVisual(Dali::Ui::Integration::View::Property::BACKGROUND) == replacement);
+
+  auto shadowImpl = NaturalSizeTestVisual::New(factoryCache);
+  Dali::Ui::Integration::Visual::Base shadow(shadowImpl.Get());
+  data.RegisterVisual(Dali::Ui::Integration::View::Property::SHADOW, shadow, true, 8);
+  DALI_TEST_CHECK(data.IsVisualEnabled(Dali::Ui::Integration::View::Property::SHADOW));
+  data.UnregisterVisual(Dali::Ui::Integration::View::Property::SHADOW);
+  DALI_TEST_CHECK(!data.GetVisual(Dali::Ui::Integration::View::Property::SHADOW));
+  END_TEST;
+}
+
+int UtcDaliViewVisualDataAnimationConstraintReferenceCountsP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  auto& data = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view)).EnsureVisualData();
+  Animation animation = Animation::New(1.0f);
+  const auto property = View::Property::BORDERLINE_WIDTH;
+  const std::unordered_set<Property::Index> properties{property};
+  DALI_TEST_CHECK(!data.IsAnyPropertyAnimate(properties));
+  data.CreateAnimationConstraints(animation.GetBaseObject(), property);
+  DALI_TEST_CHECK(data.IsAnyPropertyAnimate(properties));
+  data.CreateAnimationConstraints(animation.GetBaseObject(), property);
+  data.ClearAnimationConstraints(animation.GetBaseObject(), property);
+  DALI_TEST_CHECK(data.IsAnyPropertyAnimate(properties));
+  data.ClearAnimationConstraints(animation.GetBaseObject(), property);
+  DALI_TEST_CHECK(!data.IsAnyPropertyAnimate(properties));
+  data.ClearAnimationConstraints(animation.GetBaseObject(), property);
+  END_TEST;
+}
+
+int UtcDaliViewVisualDataCornerConstraintTransitionsP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  auto& data = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view)).EnsureVisualData();
+  auto factory = Dali::Ui::Integration::VisualFactory::Get();
+  Property::Map map;
+  map.Add(Dali::Ui::Integration::Visual::Property::TYPE, VisualType::COLOR);
+  map.Add(Dali::Ui::Integration::Visual::Property::MIX_COLOR, Color::RED);
+  auto visual = factory.CreateVisual(map);
+  DALI_TEST_CHECK(visual);
+  data.RegisterVisual(Dali::Ui::Integration::View::Property::BACKGROUND, visual, true);
+  data.EnableVisual(Property::INVALID_INDEX, true);
+  data.DoActionExtension(Dali::Ui::Integration::View::Property::BACKGROUND, 999, Dali::Any());
+  data.EnableCornerPropertiesOverridden(visual, true, {});
+  view.SetProperty(View::Property::CORNER_RADIUS, Vector4(3.0f, 4.0f, 5.0f, 6.0f));
+  view.SetProperty(View::Property::CORNER_SQUARENESS, Vector4(0.2f, 0.3f, 0.4f, 0.5f));
+  data.NotifyConstraintPropertyChanged(View::Property::CORNER_RADIUS, false);
+  data.NotifyConstraintPropertyChanged(View::Property::CORNER_RADIUS, true);
+  data.NotifyConstraintPropertyChanged(View::Property::CORNER_SQUARENESS, false);
+  data.NotifyConstraintPropertyChanged(View::Property::CORNER_SQUARENESS, true);
+  data.OffscreenRenderingEnabled(true);
+  data.OffscreenRenderingEnabled(false);
+  data.EnableCornerPropertiesOverridden(visual, false, {});
+  DALI_TEST_CHECK(data.GetVisual(Dali::Ui::Integration::View::Property::BACKGROUND) == visual);
   END_TEST;
 }

@@ -235,3 +235,80 @@ int UtcDaliGroupLinearItemsLayouterP(void)
   DALI_TEST_EQUALS(body.width, 0.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliGroupAdapterHeaderAndGapHolderLifecycleP(void)
+{
+  UiTestApplication application;
+  GroupAdapter group = GroupAdapter::New();
+  group.SetDataSource(std::make_shared<TestGroupDataSource>());
+  group.SetGapHeight(14.0f);
+  DALI_TEST_EQUALS(group.GetGapHeight(), 14.0f, TEST_LOCATION);
+  ItemAdapter flat = group.GetAdapter();
+
+  ItemViewHolder fallbackHeader;
+  fallbackHeader.position = 0u;
+  flat.CreateViewHolder(fallbackHeader);
+  DALI_TEST_CHECK(fallbackHeader.view);
+  DALI_TEST_EQUALS(fallbackHeader.rowType, GroupRowType::HEADER, TEST_LOCATION);
+  DALI_TEST_EQUALS(fallbackHeader.view.GetRequestedHeight(), 0.0f, TEST_LOCATION);
+
+  int createCount = 0;
+  int bindCount = 0;
+  int recycleCount = 0;
+  group.CreateHeaderViewHolderSignal().Connect(&application, [&](ItemViewHolder& holder)
+  {
+    ++createCount;
+    holder.view = View::New();
+  });
+  group.BindHeaderViewHolderSignal().Connect(&application, [&](ItemViewHolder&)
+  {
+    ++bindCount;
+  });
+  group.RecycleHeaderViewHolderSignal().Connect(&application, [&](ItemViewHolder&)
+  {
+    ++recycleCount;
+  });
+
+  ItemViewHolder header;
+  header.position = 0u;
+  flat.CreateViewHolder(header);
+  flat.BindViewHolder(header);
+  flat.RecycleViewHolder(header);
+  DALI_TEST_EQUALS(createCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(bindCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycleCount, 1, TEST_LOCATION);
+
+  ItemViewHolder gap;
+  gap.position = 3u;
+  flat.CreateViewHolder(gap);
+  DALI_TEST_EQUALS(gap.rowType, GroupRowType::GAP, TEST_LOCATION);
+  DALI_TEST_EQUALS(gap.view.GetRequestedHeight(), 14.0f, TEST_LOCATION);
+  group.SetGapHeight(22.0f);
+  flat.BindViewHolder(gap);
+  DALI_TEST_EQUALS(gap.view.GetRequestedHeight(), 22.0f, TEST_LOCATION);
+  flat.RecycleViewHolder(gap);
+
+  group.NotifyDataSetChanged();
+  DALI_TEST_EQUALS(flat.GetItemCount(), 5u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliGroupAdapterPreventsReservedInnerViewTypesP(void)
+{
+  UiTestApplication application;
+  GroupAdapter group = GroupAdapter::New();
+  group.SetDataSource(std::make_shared<TestGroupDataSource>());
+  ItemAdapter inner = ItemAdapter::New();
+  inner.GetItemViewTypeSignal().Connect(&application, [](uint32_t)
+  {
+    return GroupAdapter::RESERVED_VIEW_TYPE_HEADER;
+  });
+  group.SetInnerAdapter(inner);
+
+  ItemAdapter flat = group.GetAdapter();
+  DALI_TEST_EQUALS(flat.GetItemViewType(0u), GroupAdapter::RESERVED_VIEW_TYPE_HEADER, TEST_LOCATION);
+  DALI_TEST_EQUALS(flat.GetItemViewType(3u), GroupAdapter::RESERVED_VIEW_TYPE_GAP, TEST_LOCATION);
+  DALI_TEST_EQUALS(flat.GetItemViewType(1u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(flat.GetItemViewType(4u), 0u, TEST_LOCATION);
+  END_TEST;
+}

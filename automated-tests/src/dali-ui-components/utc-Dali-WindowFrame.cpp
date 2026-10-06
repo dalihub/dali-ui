@@ -1219,3 +1219,92 @@ int UtcDaliDefaultWindowDecorationBarActionReleasesOwnerP(void)
   DALI_TEST_CHECK(!observer.owner);
   END_TEST;
 }
+
+int UtcDaliWindowFrameWindowSignalLifecycleP(void)
+{
+  UiTestApplication application;
+  Window window = application.GetWindow();
+  WindowFrame frame = WindowFrame::New(window, WindowFrame::CloseCallback::New(&NoOpClose));
+  DALI_TEST_CHECK(frame.Attach());
+
+  window.MovedSignal().Emit(window, Window::WindowPosition(12, 24));
+  window.MoveCompletedSignal().Emit(window, Window::WindowPosition(12, 24));
+  window.ResizedSignal().Emit(window, Window::WindowSize(480, 800));
+  window.ResizeCompletedSignal().Emit(window, Window::WindowSize(480, 800));
+  window.FocusChangedSignal().Emit(window, false);
+  window.FocusChangedSignal().Emit(window, true);
+  window.VisibilityChangedSignal().Emit(window, false);
+  window.VisibilityChangedSignal().Emit(window, true);
+
+  DALI_TEST_CHECK(frame.IsAttached());
+  DALI_TEST_CHECK(frame.GetContentRoot());
+  frame.Detach();
+  DALI_TEST_CHECK(!frame.IsAttached());
+  END_TEST;
+}
+
+int UtcDaliWindowFrameDecorationInputCallbacksP(void)
+{
+  struct Observer : public ConnectionTracker
+  {
+    void OnGeometry(WindowFrame, const WindowFrameGeometry&) { ++geometryCount; }
+    void OnGeometryCompleted(WindowFrame, const WindowFrameGeometry&) { ++completedCount; }
+    void OnVisibility(WindowFrame, bool) { ++visibilityCount; }
+    int geometryCount{0};
+    int completedCount{0};
+    int visibilityCount{0};
+  };
+  UiTestApplication application;
+  WindowFrameOptions options;
+  options.SetInitialStatePolicy(WindowFrameInitialStatePolicy::USE_CURRENT);
+  WindowFrame frame = WindowFrame::New(application.GetWindow(), WindowFrame::CloseCallback::New(&NoOpClose), options);
+  DefaultWindowDecoration defaults = DefaultWindowDecoration::New(frame);
+  WindowFrameDecoration decoration = defaults.GetDecoration();
+  DALI_TEST_CHECK(frame.Attach());
+
+  TouchEvent empty = TouchEvent::New(1u);
+  TouchEvent down = TouchEvent::New(2u);
+  down.AddPoint(1, PointState::STARTED, Vector2(10.0f, 10.0f));
+  TouchEvent up = TouchEvent::New(3u);
+  up.AddPoint(1, PointState::FINISHED, Vector2(10.0f, 10.0f));
+  TouchEvent interrupted = TouchEvent::New(4u);
+  interrupted.AddPoint(1, PointState::INTERRUPTED, Vector2(10.0f, 10.0f));
+
+  Dali::Ui::View move = decoration.GetMoveRegion();
+  Dali::Ui::View left = decoration.GetBottomLeftResizeHandle();
+  Dali::Ui::View right = decoration.GetBottomRightResizeHandle();
+  for(const TouchEvent& event : {empty, down, up, interrupted})
+  {
+    move.TouchEventSignal().Emit(move, event);
+    left.TouchEventSignal().Emit(left, event);
+    right.TouchEventSignal().Emit(right, event);
+  }
+
+  Dali::Ui::View minimize = decoration.GetMinimizeControl();
+  Dali::Ui::View maximize = decoration.GetMaximizeRestoreControl();
+  Dali::Ui::View close = decoration.GetCloseControl();
+  minimize.AsInteractive().ClickedSignal().Emit(minimize, InputEvent::Programmatic());
+  maximize.AsInteractive().ClickedSignal().Emit(maximize, InputEvent::Programmatic());
+  close.AsInteractive().ClickedSignal().Emit(close, InputEvent::Programmatic());
+
+  Observer observer;
+  frame.GeometryChangedSignal().Connect(&observer, &Observer::OnGeometry);
+  frame.GeometryChangeCompletedSignal().Connect(&observer, &Observer::OnGeometryCompleted);
+  frame.DecorationVisibilityChangedSignal().Connect(&observer, &Observer::OnVisibility);
+  application.GetWindow().MovedSignal().Emit(application.GetWindow(), Window::WindowPosition(24, 32));
+  application.GetWindow().MoveCompletedSignal().Emit(application.GetWindow(), Window::WindowPosition(24, 32));
+  frame.SetDecorationVisible(false);
+  frame.SetDecorationVisible(true);
+  frame.SetOverlayEnabled(true);
+  frame.SetOverlayAutoHideDelay(1u);
+  frame.ShowOverlayTemporarily();
+  frame.RequestFrameResize(Vector2(320.0f, 240.0f));
+  Actor surface = frame.GetContentRoot().GetParent().GetParent();
+  DALI_TEST_CHECK(surface);
+  surface.InterceptTouchEventSignal().Emit(surface, down);
+  DALI_TEST_CHECK(observer.completedCount > 0);
+  DALI_TEST_CHECK(observer.visibilityCount > 0);
+
+  frame.Detach();
+  END_TEST;
+}

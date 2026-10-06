@@ -3617,6 +3617,7 @@ int UtcDaliInlineReplacementManagerUpdateCancelledP(void)
     else if(change == Change::IMAGE_SIZE)
     {
       fixture.source.runs[0u].metrics.width += 1.0f;
+      fixture.placements[0u].size.x += 1.0f;
     }
     else if(change == Change::FAILED_IMAGE)
     {

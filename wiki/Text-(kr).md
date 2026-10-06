@@ -104,6 +104,7 @@ label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
 
 | 기능 | 사용 시점 | 자세한 내용 |
 |---|---|---|
+| Markup | 문자열의 tag로 부분 스타일이나 annotation을 작성할 때 | [Markup](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup-(kr)) |
 | `StyledText` | 특정 text range를 스타일링하거나 semantic annotation을 해석해야 할 때 | [StyledText](https://github.sec.samsung.net/NUI/dali-ui/wiki/StyledText-(kr)) |
 | `TextGradient` / `TextGradientOverlay` | `Label` text rendering에 gradient, highlight, shimmer 효과를 적용할 때 | [Text Gradient](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-Gradient-(kr)) |
 

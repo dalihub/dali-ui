@@ -20,6 +20,7 @@ SET(TC_SOURCES
         utc-Dali-BorderVisual.cpp
         utc-Dali-Unit.cpp
         utc-Dali-FocusManager.cpp
+        utc-Dali-IndependentFocus.cpp
         utc-Dali-View.cpp
         utc-Dali-ViewLayoutBoundary.cpp
         utc-Dali-Label.cpp
@@ -107,7 +108,10 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/test-render-surface-if.cpp
     ../dali-test-suite-utils/dali-ui/ui-adaptor.cpp
     ../dali-test-suite-utils/dali-ui/ui-async-task-manager.cpp
+    ../dali-test-suite-utils/dali-ui/ui-texture-upload-manager.cpp
+    ../dali-test-suite-utils/dali-ui/ui-web-engine.cpp
     ../dali-test-suite-utils/dali-ui/ui-canvas-renderer.cpp
+    ../dali-test-suite-utils/dali-ui/ui-clipboard.cpp
     ../dali-test-suite-utils/dali-ui/ui-environment-variable.cpp
     ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
     ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp

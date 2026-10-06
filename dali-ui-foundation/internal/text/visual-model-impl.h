@@ -261,6 +261,72 @@ public:
   void SetShadowOffset(const Vector2& shadowOffset);
 
   /**
+   * @brief Sets the effective UI scale used to resolve authored decoration geometry.
+   *
+   * FontSizeScale and renderScale are not included. Authored values are preserved.
+   * Non-positive and non-finite scales are ignored.
+   *
+   * @param[in] scale The control's effective UI scale after its UI scale policy.
+   */
+  void SetDecorationUiScale(float scale);
+
+  /**
+   * @brief Retrieves the UI scale used for decoration geometry.
+   *
+   * @return The UI scale, excluding FontSizeScale and renderScale.
+   */
+  float GetDecorationUiScale() const;
+
+  /**
+   * @brief Retrieves the authored shadow offset multiplied by the UI scale.
+   *
+   * @return The effective signed offset used by layout and rendering.
+   */
+  const Vector2& GetEffectiveShadowOffset() const;
+
+  /**
+   * @brief Retrieves the authored outline offset multiplied by the UI scale.
+   *
+   * @return The effective signed offset used by layout and rendering.
+   */
+  const Vector2& GetEffectiveOutlineOffset() const;
+
+  /**
+   * @brief Retrieves the UI-scaled outline width in the existing integer representation.
+   *
+   * @return The nearest integer width, saturated to uint16_t. Zero remains zero.
+   */
+  uint16_t GetEffectiveOutlineWidth() const;
+
+  /**
+   * @brief Retrieves the authored underline thickness multiplied by the UI scale.
+   *
+   * @return The effective thickness, or zero to retain automatic font metrics.
+   */
+  float GetEffectiveUnderlineHeight() const;
+
+  /**
+   * @brief Retrieves the authored underline dash length multiplied by the UI scale.
+   *
+   * @return The effective dash length. An authored zero remains zero.
+   */
+  float GetEffectiveDashedUnderlineWidth() const;
+
+  /**
+   * @brief Retrieves the authored underline dash gap multiplied by the UI scale.
+   *
+   * @return The effective dash gap. An authored zero remains zero.
+   */
+  float GetEffectiveDashedUnderlineGap() const;
+
+  /**
+   * @brief Retrieves the authored line-through thickness multiplied by the UI scale.
+   *
+   * @return The effective thickness, preserving zero for the renderer's default behavior.
+   */
+  float GetEffectiveStrikethroughHeight() const;
+
+  /**
    * @brief Retrieves the text's shadow offset.
    *
    * @return The text's shadow offset.
@@ -810,6 +876,8 @@ public:
 private:
   std::unique_ptr<ShadowData>  mShadowData;  ///< Shadow values allocated on first non-default write, retained on disable.
   std::unique_ptr<OutlineData> mOutlineData; ///< Outline values allocated on first non-default write, retained on disable.
+
+  float mDecorationUiScale; ///< UI scale for text decorations.
 
   Size mNaturalSize;      ///< Size of the text with no line wrapping.
   Size mLayoutSize;       ///< Size of the laid-out text considering the layout properties set.

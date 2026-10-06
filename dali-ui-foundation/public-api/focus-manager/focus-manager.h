@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/public-api/focus-manager/focus-navigation-callback.h>
 #include <dali-ui-foundation/public-api/views/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/views/view.h>
+#include <dali/public-api/adaptor-framework/window.h>
 
 namespace DALI_NAMESPACE
 {
@@ -77,22 +78,40 @@ public:
   static FocusManager Get();
 
   /**
-   * @brief Sets the focus directly to the given view.
+   * @brief Sets the focus target directly in the given View's Window.
    *
-   * The focus is set exactly to the specified view without child delegation.
+   * The target Window is determined from the View's scene connection. The focus
+   * is set exactly to the specified View without child delegation.
    * If the view is not focusable or not on the scene, the call fails.
    * Use RequestFocus() if you want automatic child delegation for containers.
    * If the View's Window does not hold platform input focus, only its stored
    * focus target is updated. Actual focus, indication and FocusChangedSignal
-   * are unchanged until that Window gains focus. This does not activate a Window;
+   * are unchanged until that Window gains focus. A visible Window explicitly
+   * enabled with SetIndependentFocusEnabled() instead applies its own actual
+   * focus while preserving focus in other Windows. Independent targets must also
+   * be visible through their ancestor chain. This does not activate a Window;
    * use Window::Activate() to request an intentional Window switch.
+   * Setting focus in an inactive independent Window does not change the global
+   * target returned by GetCurrentFocusView(). Use GetCurrentFocusView(Window)
+   * with the View's Window to query the actual result in that scope.
    * Removing or disabling a stored target cancels its reservation. Reattaching
    * or re-enabling it does not restore that reservation without a new request.
    *
-   * @param view The view to be focused
-   * @return true if the target was applied or stored for later activation
+   * For example, if mainView is the global target and the visible subWindow
+   * allows independent focus, a successful request for subView has these results:
+   * @code
+   * focusManager.SetCurrentFocusView(subView);
+   * View primary = focusManager.GetCurrentFocusView();          // mainView
+   * View subActual = focusManager.GetCurrentFocusView(subWindow); // subView
+   * @endcode
+   *
+   * @param[in] view The target View, which also determines the Window to update
+   * @return true if the target was applied or stored for later activation, false
+   *         if the request was rejected. Success alone does not guarantee actual focus.
    * @pre The FocusManager has been initialized.
    * @pre The View has been initialized.
+   * @see GetCurrentFocusView(Window)
+   * @see SetIndependentFocusEnabled(Window,bool)
    */
   bool SetCurrentFocusView(View view);
 
@@ -103,8 +122,9 @@ public:
    * descendant (child-first). If no descendant accepts focus and
    * the view itself is focusable, it receives focus.
    * If an ancestor has DescendantFocusBlocked set, the request is rejected.
-   * An inactive Window stores the resolved target without changing actual focus,
-   * indication or emitting FocusChangedSignal, as with SetCurrentFocusView().
+   * An inactive Window normally stores the resolved target without changing
+   * actual focus. The independent option applies the resolved target within its
+   * Window, as with SetCurrentFocusView().
    *
    * @param view The view to request focus on
    * @return true if the resolved target was applied or stored for later activation
@@ -114,10 +134,20 @@ public:
   bool RequestFocus(View view);
 
   /**
-   * @brief Gets the current focused view.
+   * @brief Gets the global current navigation focus View.
    *
-   * @return A handle to the current focused view or an empty handle if no view is focused
+   * This overload retains its global scope. Setting or moving independent focus
+   * in an inactive Window does not change this result, even if that Window was
+   * the target of the most recent SetCurrentFocusView() call. The global target
+   * follows the existing platform focus and retention policies and is not
+   * permanently associated with the main Window.
+   * Use GetCurrentFocusView(Window) to query actual navigation focus within a
+   * particular Window. Stored targets awaiting activation are not returned.
+   *
+   * @return The global current navigation focus View, or an empty handle if no
+   *         global target exists. Other Windows may still have independent focus.
    * @pre The FocusManager has been initialized.
+   * @see GetCurrentFocusView(Window)
    */
   View GetCurrentFocusView();
 
@@ -256,8 +286,10 @@ public:
    * target is preserved for restoration when the Window gains focus again.
    * When disabled, existing actual focus is retained on Window focus loss.
    * This does not allow new actual focus changes in an inactive Window:
-   * SetCurrentFocusView(), RequestFocus() and navigation only update its stored
-   * target. When another Window gains focus, the old actual focus is replaced
+   * SetCurrentFocusView(), RequestFocus() and navigation normally only update its
+   * stored target. SetIndependentFocusEnabled() supplies a separate exception:
+   * its actual focus survives native focus loss until cleared, hidden or
+   * invalidated. When another Window gains focus, ordinary actual focus is replaced
    * by its stored target, or cleared if it has no valid target. No default target
    * is automatically selected on Window focus gain.
    *
@@ -337,6 +369,117 @@ public: // Signals
    * @pre The Object has been initialized.
    */
   FocusChangedSignalType& FocusChangedSignal();
+
+  /**
+   * @brief Allows a Window to retain actual View focus independently of platform activation.
+   *
+   * Disabled by default. Enabling does not apply a stored target; explicitly
+   * request focus afterward. An inactive enabled Window does not replace the
+   * global focus. Disabling an inactive Window clears its actual and stored
+   * targets. Disabling the active Window preserves its global focus.
+   * Hidden Windows release independent actual focus and require a new request
+   * after showing, including an explicit MoveFocus() to choose an initial target.
+   * Targets must be effectively visible through their ancestor chain.
+   * InputField, InputEditor and custom IME sessions are not
+   * supported in an independent Window.
+   * @param[in] window The Window whose policy is changed
+   * @param[in] enabled Whether independent focus is enabled
+   * @return True if applied, false for an invalid Window, unsupported target,
+   *         or a request made during a navigation callback
+   * @pre Called on the UI thread.
+   */
+  bool SetIndependentFocusEnabled(Window window, bool enabled);
+
+  /**
+   * @brief Queries whether the Window allows independent actual focus.
+   * @param[in] window The Window to query
+   * @return True if enabled, false otherwise, including an empty Window
+   * @pre Called on the UI thread.
+   */
+  bool IsIndependentFocusEnabled(Window window) const;
+
+  /**
+   * @brief Returns actual navigation focus in the Window, excluding stored targets.
+   *
+   * This overload queries the specified Window's scope. For an independent
+   * Window, it returns that Window's actual navigation target even while the
+   * Window is inactive. For an ordinary Window, it returns the global target
+   * only when that target belongs to the specified Window.
+   * An inactive independent Window may therefore return a different View from
+   * GetCurrentFocusView(). A separately configured key input target may also
+   * differ from the navigation target returned here. Querying does not activate
+   * the Window or apply a stored target.
+   * @param[in] window The Window to query
+   * @return Its actual navigation focus View, or an empty handle if no actual
+   *         target exists or the Window is empty
+   * @pre Called on the UI thread.
+   * @see GetCurrentFocusView()
+   * @see SetCurrentFocusView(View)
+   */
+  View GetCurrentFocusView(Window window);
+
+  /**
+   * @brief Clears actual focus, key input and the stored target in the Window only.
+   *
+   * Focus history is retained for a later explicit MoveFocusBackward(window).
+   * @param[in] window The Window to clear; an empty Window is ignored
+   * @pre Called on the UI thread, outside a navigation callback.
+   */
+  void ClearFocus(Window window);
+
+  /**
+   * @brief Navigates within the Window without activating it.
+   *
+   * Independent Windows navigate from actual focus. If actual focus is empty
+   * after enabling or showing, navigation policies receive an empty current View
+   * and can select an initial target. An ordinary inactive Window continues to
+   * navigate from its stored target and stores the destination for activation.
+   * @param[in] window The Window in which navigation is performed
+   * @param[in] direction The navigation direction
+   * @return True if the destination was applied or stored, false otherwise
+   * @pre Called on the UI thread, outside a navigation callback.
+   */
+  bool MoveFocus(Window window, FocusDirection direction);
+
+  /**
+   * @brief Navigates backward through the Window's focus history only.
+   *
+   * Searches from the most recent entry, skipping the current navigation target
+   * and candidates that cannot receive focus. Independent Windows use actual
+   * focus as their current target; ordinary Windows use their stored target.
+   * Active and visible independent Windows apply actual focus. An ordinary
+   * inactive Window only stores the destination, and repeated calls continue
+   * through its history without activating the Window.
+   * If no current target exists, the most recent valid entry is restored, even
+   * when the history contains only one entry. If no valid destination exists,
+   * actual focus and the stored target remain unchanged.
+   * @param[in] window The Window in which navigation is performed
+   * @pre Called on the UI thread, outside a navigation callback.
+   * @see MoveFocus(Window, FocusDirection)
+   * @see ClearFocus(Window)
+   */
+  void MoveFocusBackward(Window window);
+
+  /**
+   * @brief Clears focus indication in the Window without releasing actual focus.
+   * @param[in] window The Window whose focus indication is cleared
+   * @pre Called on the UI thread.
+   */
+  void ClearFocusIndication(Window window);
+
+  /**
+   * @brief Actual navigation focus changes within a Window: Window, previous, current.
+   */
+  using WindowFocusChangedSignalType = Signal<void(Window, View, View)>;
+
+  /**
+   * @brief Returns the signal for actual navigation focus changes in a Window.
+   * Stored requests and changes of a Window's global role alone do not emit it.
+   * The callback receives the Window, previous View and current View.
+   * @return The signal to connect to
+   * @pre The FocusManager has been initialized.
+   */
+  WindowFocusChangedSignalType& WindowFocusChangedSignal();
 
   // Not intended for application developers
 

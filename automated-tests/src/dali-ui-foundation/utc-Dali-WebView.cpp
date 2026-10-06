@@ -29,6 +29,11 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
+namespace Test
+{
+void EmitGlobalTimerSignal();
+}
+
 void utc_dali_webview_startup(void)
 {
   test_return_value = TET_UNDEF;
@@ -41,14 +46,39 @@ void utc_dali_webview_cleanup(void)
 
 namespace
 {
-void OnJavaScriptCallback(const Dali::String& result) {}
+unsigned int gJavaScriptCallbackCount = 0u;
+unsigned int gScreenshotCallbackCount = 0u;
+unsigned int gVideoCallbackCount = 0u;
+unsigned int gPlainTextCallbackCount = 0u;
+Dali::String gJavaScriptResult;
+Dali::String gPlainTextResult;
+bool gVideoPlaying = false;
+void OnJavaScriptCallback(const Dali::String& result)
+{
+  ++gJavaScriptCallbackCount;
+  gJavaScriptResult = result;
+}
 void OnJavaScriptMessageWithNameCallback(const Dali::String& exposedObjectName, const Dali::String& message) {}
 bool OnJavaScriptAlertCallback(const Dali::String& message) { return true; }
 bool OnJavaScriptConfirmCallback(const Dali::String& message) { return true; }
 bool OnJavaScriptPromptCallback(const Dali::String& message, const Dali::String& defaultValue) { return true; }
-void OnScreenshotCallback(Dali::Ui::ImageView screenshot) {}
-void OnVideoPlayingCallback(bool isPlaying) {}
-void OnPlainTextCallback(const Dali::String& text) {}
+void OnScreenshotCallback(Dali::Ui::ImageView screenshot)
+{
+  if(screenshot)
+  {
+    ++gScreenshotCallbackCount;
+  }
+}
+void OnVideoPlayingCallback(bool isPlaying)
+{
+  ++gVideoCallbackCount;
+  gVideoPlaying = isPlaying;
+}
+void OnPlainTextCallback(const Dali::String& text)
+{
+  ++gPlainTextCallbackCount;
+  gPlainTextResult = text;
+}
 
 Dali::Ui::Integration::WebViewImpl& GetWebViewImpl(WebView view)
 {
@@ -1273,5 +1303,135 @@ int UtcDaliWebViewInternalSignalEmissionP(void)
   DALI_TEST_CHECK(impl.EmitGeolocationPermission("host", "https"));
   impl.EmitWebProcessCrashed();
   DALI_TEST_EQUALS(calls, 13, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewLayoutAndInputFallbackP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.SetRequestedWidth(180.0f);
+  view.SetRequestedHeight(90.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = GetWebViewImpl(view);
+  MeasuredSize constrained = impl.OnMeasure(180.0f, 90.0f);
+  DALI_TEST_EQUALS(constrained.GetWidth(), 180.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(constrained.GetHeight(), 90.0f, 0.001f, TEST_LOCATION);
+  MeasuredSize unconstrained = impl.OnMeasure(INFINITY, INFINITY);
+  DALI_TEST_EQUALS(unconstrained.GetWidth(), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(unconstrained.GetHeight(), 0.0f, 0.001f, TEST_LOCATION);
+  LayoutRect arranged = impl.OnArrange(LayoutRect(0.0f, 0.0f, 180.0f, 90.0f));
+  DALI_TEST_EQUALS(arranged.width, 180.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(arranged.height, 90.0f, 0.001f, TEST_LOCATION);
+
+  unsigned int frameCount = 0u;
+  view.FrameRenderedSignal().Connect(&application, [&](WebView) { ++frameCount; });
+  impl.OnFrameRendered();
+  DALI_TEST_EQUALS(frameCount, 1u, TEST_LOCATION);
+
+  view.SetKeyEventsEnabled(false);
+  view.SetMouseEventsEnabled(false);
+  DALI_TEST_CHECK(!impl.OnKeyEvent(KeyEvent::New()));
+  DALI_TEST_CHECK(!impl.OnTouchEvent(TouchEvent::New(0u)));
+  DALI_TEST_CHECK(impl.HasIntrinsicTouchHandling());
+  view.SetKeyEventsEnabled(true);
+  view.SetMouseEventsEnabled(true);
+  DALI_TEST_CHECK(view.FeedKeyEvent(KeyEvent::New()));
+  DALI_TEST_CHECK(view.FeedTouchEvent(TouchEvent::New(0u)));
+  DALI_TEST_CHECK(impl.OnKeyEvent(KeyEvent::New()));
+  DALI_TEST_CHECK(impl.OnTouchEvent(TouchEvent::New(0u)));
+
+  END_TEST;
+}
+
+int UtcDaliWebViewAsyncEngineCallbacksP(void)
+{
+  UiTestApplication application;
+  gJavaScriptCallbackCount = 0u;
+  gScreenshotCallbackCount = 0u;
+  gVideoCallbackCount = 0u;
+  gPlainTextCallbackCount = 0u;
+  gVideoPlaying = false;
+  gJavaScriptResult.Clear();
+  gPlainTextResult.Clear();
+
+  WebView view = WebView::New();
+  view.EvaluateJavaScript(Dali::String("1 + 1"), WebView::JavaScriptCallback::New(OnJavaScriptCallback));
+  DALI_TEST_CHECK(view.GetScreenshotAsynchronously(Dali::BoundsInteger(0, 0, 40, 40), 1.0f,
+      WebView::ScreenshotCapturedCallback::New(OnScreenshotCallback)));
+  DALI_TEST_CHECK(view.CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback::New(OnVideoPlayingCallback)));
+  view.GetPlainTextAsynchronously(WebView::PlainTextCallback::New(OnPlainTextCallback));
+  Test::EmitGlobalTimerSignal();
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(gJavaScriptCallbackCount, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gJavaScriptResult, Dali::String("undefined"), TEST_LOCATION);
+  DALI_TEST_EQUALS(gScreenshotCallbackCount, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gVideoCallbackCount, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(gVideoPlaying);
+  DALI_TEST_EQUALS(gPlainTextCallbackCount, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(gPlainTextResult.Empty());
+  END_TEST;
+}
+
+int UtcDaliWebViewEngineLoadSignalsP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  unsigned int started = 0u;
+  unsigned int progress = 0u;
+  unsigned int finished = 0u;
+  unsigned int errors = 0u;
+  unsigned int urlChanges = 0u;
+  unsigned int frames = 0u;
+  view.PageLoadStartedSignal().Connect(&application, [&](WebView source, const Dali::String& url)
+  {
+    DALI_TEST_EQUALS(source, view, TEST_LOCATION);
+    DALI_TEST_EQUALS(url, Dali::String("https://example.com"), TEST_LOCATION);
+    ++started;
+  });
+  view.PageLoadInProgressSignal().Connect(&application, [&](WebView, const Dali::String&)
+  { ++progress; });
+  view.PageLoadFinishedSignal().Connect(&application, [&](WebView, const Dali::String&)
+  { ++finished; });
+  view.PageLoadErrorSignal().Connect(&application, [&](WebView, const WebViewPageLoadError&)
+  { ++errors; });
+  view.UrlChangedSignal().Connect(&application, [&](WebView, const Dali::String&)
+  { ++urlChanges; });
+  view.FrameRenderedSignal().Connect(&application, [&](WebView)
+  { ++frames; });
+
+  view.LoadUrl("https://example.com");
+  Test::EmitGlobalTimerSignal();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(started, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(progress, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(finished, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(errors, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(urlChanges, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewEngineScrollEdgeSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  unsigned int edges = 0u;
+  view.ScrollEdgeReachedSignal().Connect(&application, [&](WebView source, WebViewScrollEdge edge)
+  {
+    DALI_TEST_EQUALS(source, view, TEST_LOCATION);
+    DALI_TEST_EQUALS(edge, WebViewScrollEdge::BOTTOM, TEST_LOCATION);
+    ++edges;
+  });
+
+  DALI_TEST_CHECK(view.ScrollEdgeBy(0, 10));
+  Test::EmitGlobalTimerSignal();
+  DALI_TEST_EQUALS(edges, 1u, TEST_LOCATION);
   END_TEST;
 }

@@ -19,6 +19,9 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
+#define private public
+#include <dali-ui-foundation/internal/text/multi-language-support-impl.h>
+#undef private
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
@@ -28,8 +31,17 @@
 #include <cstdlib>
 #include <cstring>
 #include <limits>
+#include <vector>
 
 using namespace Dali;
+
+namespace Dali
+{
+namespace EnvironmentVariable
+{
+void SetTestEnvironmentVariable(const char* variable, const char* value);
+}
+}
 using namespace Dali::Ui;
 using namespace Dali::Ui::Text;
 
@@ -398,5 +410,156 @@ int UtcDaliTextLogicalModelParagraphAndBidiP(void)
   DALI_TEST_EQUALS(model->GetNumberOfCharacterSpacingCharacterRuns(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(model->GetCharacterSpacingCharacterRuns().Count(), 1u, TEST_LOCATION);
   model->ClearAnchors();
+  END_TEST;
+}
+
+int UtcDaliMultilanguageScriptAndFontTransitionsP(void)
+{
+  UiTestApplication application;
+  auto support = MultilanguageSupport::New(false);
+  auto client = TextAbstraction::FontClient::Get();
+  support.SetLocale("th_TH");
+  DALI_TEST_EQUALS(support.GetLocale(), std::string("th_TH"), TEST_LOCATION);
+  support.IsICULineBreakNeeded();
+  support.SetLocale("en_US");
+  DALI_TEST_CHECK(!support.IsICULineBreakNeeded());
+  support.ClearCache();
+
+  const std::vector<std::vector<Character>> samples =
+  {
+    {' ', 'A', ' ', 0x05D0u, 0x05D1u, ' ', 'B', '\n', 0x0627u, ' ', '1', ':'},
+    {'1', 0xFE0Fu, 0x20E3u, ' ', '2', 0xFE0Eu, 0x20E3u, ' ', 0x1F600u, 'A'},
+    {0x0915u, ' ', 0x0E01u, '\n', 0x0410u, ' ', 0x05D0u, ' ', 0x0628u},
+    {' ', '\t', '\n', ' ', 'A', ' ', 'B', ' '},
+    {'#', 0xFE0Fu, 0x20E3u, ' ', '*', 0x20E3u, ' ', '0', 0xFE0Eu, 0x20E3u},
+    {0x2764u, 0xFE0Eu, ' ', 0x2764u, 0xFE0Fu, ' ', 0x1F468u, 0x200Du, 0x1F469u},
+    {0x05D0u, ' ', 'A', ' ', 0x0628u, '\n', '1', ':', '2'}
+  };
+  TextAbstraction::FontDescription defaultFont;
+  defaultFont.family = "DejaVu Sans";
+  const auto pointSize = 12u * client.GetNumberOfPointsPerOneUnitOfPointSize();
+
+  for(const auto& sample : samples)
+  {
+    Vector<Character> text;
+    for(Character character : sample)
+    {
+      text.PushBack(character);
+    }
+
+    Vector<ScriptRun> scripts;
+    support.SetScripts(text, 0u, static_cast<Length>(text.Count()), scripts);
+    DALI_TEST_CHECK(!scripts.Empty());
+    CharacterIndex next = 0u;
+    for(const ScriptRun& run : scripts)
+    {
+      DALI_TEST_EQUALS(run.characterRun.characterIndex, next, TEST_LOCATION);
+      next += run.characterRun.numberOfCharacters;
+    }
+    DALI_TEST_EQUALS(next, static_cast<CharacterIndex>(text.Count()), TEST_LOCATION);
+
+    Vector<FontDescriptionRun> descriptions;
+    Vector<FontRun> fonts;
+    support.ValidateFonts(client, text, scripts, descriptions, defaultFont, pointSize, 1.0f,
+                          0u, static_cast<Length>(text.Count()), fonts);
+    DALI_TEST_CHECK(!fonts.Empty());
+    support.ValidateFonts(client, text, scripts, descriptions, defaultFont, pointSize, 1.0f,
+                          0u, static_cast<Length>(text.Count()), fonts);
+
+    Vector<ScriptRun> incremental;
+    const Length firstHalf = static_cast<Length>(text.Count() / 2u);
+    support.SetScripts(text, 0u, firstHalf, incremental);
+    support.SetScripts(text, firstHalf, static_cast<Length>(text.Count()) - firstHalf, incremental);
+    DALI_TEST_CHECK(!incremental.Empty());
+
+    Vector<ScriptRun> revised = scripts;
+    support.SetScripts(text, 1u, 1u, revised);
+    DALI_TEST_CHECK(!revised.Empty());
+
+    FontDescriptionRun styled;
+    styled.characterRun = {1u, 3u};
+    styled.weight = TextAbstraction::FontWeight::BOLD;
+    styled.weightDefined = true;
+    styled.slant = TextAbstraction::FontSlant::ITALIC;
+    styled.slantDefined = true;
+    descriptions.PushBack(styled);
+    fonts.Clear();
+    support.ValidateFonts(client, text, scripts, descriptions, defaultFont, pointSize, 1.25f,
+                          0u, static_cast<Length>(text.Count()), fonts);
+    DALI_TEST_CHECK(!fonts.Empty());
+
+    Vector<FontRun> incrementalFonts;
+    support.ValidateFonts(client, text, scripts, descriptions, defaultFont, pointSize, 1.0f,
+                          0u, firstHalf, incrementalFonts);
+    support.ValidateFonts(client, text, scripts, descriptions, defaultFont, pointSize, 1.0f,
+                          firstHalf, static_cast<Length>(text.Count()) - firstHalf, incrementalFonts);
+    DALI_TEST_CHECK(!incrementalFonts.Empty());
+  }
+  END_TEST;
+}
+
+int UtcDaliMultilanguageFontLookupCacheAndLocaleP(void)
+{
+  UiTestApplication application;
+  auto support = MultilanguageSupport::New(false);
+  auto& impl = Text::GetImplementation(support);
+  TextAbstraction::FontDescription description;
+  description.family = "DejaVu Sans";
+
+  impl.CacheFontId(description, 100u, 0u, 0u, 0u);
+  DALI_TEST_EQUALS(impl.FindCachedFontId(description, 100u, 0u, 0u), 0u, TEST_LOCATION);
+  for(uint32_t index = 0u; index < 33u; ++index)
+  {
+    impl.CacheFontId(description, 100u + index, 0u, 0u, index + 1u);
+  }
+  DALI_TEST_EQUALS(impl.mFontIdLookupCache.size(), 32u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.FindCachedFontId(description, 100u, 0u, 0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.FindCachedFontId(description, 101u, 0u, 0u), 2u, TEST_LOCATION);
+  impl.CacheFontId(description, 101u, 0u, 0u, 99u);
+  DALI_TEST_EQUALS(impl.FindCachedFontId(description, 101u, 0u, 0u), 99u, TEST_LOCATION);
+  impl.OnLocaleChanged("ko_KR");
+  DALI_TEST_EQUALS(support.GetLocale(), std::string("ko_KR"), TEST_LOCATION);
+  DALI_TEST_CHECK(impl.mFontIdLookupCache.empty());
+  END_TEST;
+}
+
+int UtcDaliMultilanguageICULineBreakP(void)
+{
+  UiTestApplication application;
+  EnvironmentVariable::SetTestEnvironmentVariable("DALI_TEXT_ENABLE_ICU", "1");
+  auto support = MultilanguageSupport::New(false);
+  EnvironmentVariable::SetTestEnvironmentVariable("DALI_TEXT_ENABLE_ICU", "");
+  support.SetLocale("th_TH");
+  DALI_TEST_CHECK(support.IsICULineBreakNeeded());
+  TextAbstraction::LineBreakInfo breaks[11]{};
+  support.UpdateICULineBreak("hello world", 11u, breaks);
+  support.SetLocale("en_US");
+  DALI_TEST_CHECK(!support.IsICULineBreakNeeded());
+  END_TEST;
+}
+
+int UtcDaliMultilanguageKeycapTextFallbackP(void)
+{
+  UiTestApplication application;
+  auto support = MultilanguageSupport::New(false);
+  auto client = TextAbstraction::FontClient::Get();
+  Vector<Character> text;
+  text.PushBack('1');
+  text.PushBack(0xFE0Eu);
+  text.PushBack(0x20E3u);
+
+  ScriptRun script;
+  script.characterRun = {0u, 3u};
+  script.script = TextAbstraction::EMOJI_TEXT;
+  script.isRightToLeft = false;
+  Vector<ScriptRun> scripts;
+  scripts.PushBack(script);
+  Vector<FontDescriptionRun> descriptions;
+  TextAbstraction::FontDescription fontDescription;
+  fontDescription.family = "DejaVu Sans";
+  Vector<FontRun> fonts;
+  const auto pointSize = 12u * client.GetNumberOfPointsPerOneUnitOfPointSize();
+  support.ValidateFonts(client, text, scripts, descriptions, fontDescription, pointSize, 1.0f, 0u, 3u, fonts);
+  DALI_TEST_CHECK(!fonts.Empty());
   END_TEST;
 }

@@ -35,6 +35,7 @@
 #include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/events/wheel-event.h>
 #include <dali/public-api/object/property-map.h>
+#include <algorithm>
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
@@ -50,6 +51,8 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
+#include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -137,6 +140,7 @@ BaseHandle Create()
 DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::FocusManager, Dali::BaseHandle, Create, true)
 
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusChanged", SIGNAL_FOCUS_CHANGED)
+DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "windowFocusChanged", SIGNAL_WINDOW_FOCUS_CHANGED)
 
 DALI_TYPE_REGISTRATION_END()
 
@@ -205,7 +209,7 @@ FocusManager::FocusManager()
 {
   Dali::Integration::RegisterFocusedActorProvider(mFocusedActorProvider.get());
   LifecycleController::Get().PreInitSignal().Connect(mSlotDelegate, &FocusManager::OnAdaptorInit);
-  ScrollStateObserver::Get().DragStartedSignal().Connect(mSlotDelegate, &FocusManager::ClearTouchFocusCandidate);
+  ScrollStateObserver::Get().WindowDragStartedSignal().Connect(mSlotDelegate, &FocusManager::OnDragStarted);
 }
 
 void FocusManager::OnAdaptorInit()
@@ -305,125 +309,148 @@ bool FocusManager::RequestFocus(View view)
 
 bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& context)
 {
-  bool                           success = false;
-  Dali::Integration::SceneHolder currentWindow;
-
   if(!mConfigurationLoaded)
   {
     GetConfiguration();
   }
-
-  // Check whether the view is in the stage and is keyboard focusable.
-  if(view && view.IsFocusable() && view.IsEnabled() && view.IsConnectedToScene() &&
-     (currentWindow = Dali::Integration::SceneHolder::Get(view))) ///< Note : SceneHolder might not be valid even if view is connected to scene.
-                                                                  ///         (e.g. Adaptor Stopped, SceneHolder removed but Scene is still alive)
+  auto sceneHolder = view && view.IsConnectedToScene() ? Dali::Integration::SceneHolder::Get(view) : Dali::Integration::SceneHolder();
+  if(!view || !view.IsFocusable() || !view.IsEnabled() || !sceneHolder)
   {
-    View               currentFocusedView = GetCurrentFocusView();
-    FocusChangeContext effectiveContext   = context;
-    if(IsActiveWindow(currentWindow) && view != currentFocusedView)
+    return false;
+  }
+  Window     window      = Window::DownCast(sceneHolder);
+  const bool independent = IsIndependentFocusEnabled(window);
+  if(independent && !CanSetKeyInputFocus(view))
+  {
+    return false;
+  }
+  View               previous         = independent ? GetCurrentFocusView(window) : GetCurrentFocusView();
+  FocusChangeContext effectiveContext = context;
+  if(IsLogicalFocusWindow(sceneHolder) && view != previous)
+  {
+    const bool previousIndicated    = previous && GetImpl(previous).GetState().Contains(ViewState::FOCUS_INDICATED);
+    effectiveContext.focusIndicated = mFocusIndicationPolicy({previous, view, context.device, context.inputEvent,
+                                                              previousIndicated, ShouldIndicateFocus(context, previousIndicated)});
+  }
+  // Policy callbacks can disconnect the target or change its independent policy.
+  if(!view.IsConnectedToScene() || Dali::Integration::SceneHolder::Get(view) != sceneHolder ||
+     independent != IsIndependentFocusEnabled(window) || (independent && !CanSetKeyInputFocus(view)))
+  {
+    return false;
+  }
+
+  Layer root = sceneHolder.GetRootLayer();
+  View  previousStored;
+  bool  found = false;
+  for(auto& entry : mCurrentFocusViews)
+  {
+    if(entry.first.GetHandle() == root)
     {
-      const bool previousFocusIndicated = currentFocusedView && GetImpl(currentFocusedView).GetState().Contains(ViewState::FOCUS_INDICATED);
-      const bool proposedIndicated      = ShouldIndicateFocus(context, previousFocusIndicated);
-      effectiveContext.focusIndicated   = mFocusIndicationPolicy({currentFocusedView, view, context.device, context.inputEvent, previousFocusIndicated, proposedIndicated});
+      previousStored = entry.second.GetHandle();
+      entry.second   = view;
+      found          = true;
+      break;
     }
+  }
+  if(!found)
+  {
+    mCurrentFocusViews.emplace_back(root, view);
+  }
+  view.SceneDisconnectedSignal().Connect(mSlotDelegate, &FocusManager::OnStoredFocusViewDisconnection);
+  DisconnectFocusViewIfUnused(previousStored);
+  if(!IsLogicalFocusWindow(sceneHolder))
+  {
+    return true;
+  }
 
-    // The indication policy can request focus on another View reentrantly.
-    // Storing before that callback would leave its nested target as the saved
-    // cursor even though this outer request applies actual focus afterward.
-    // Store after the callback so navigation starts from the actual focus View.
-    Layer targetRootLayer    = currentWindow.GetRootLayer();
-    bool  focusedWindowFound = false;
-    View  previousStoredView;
-    for(unsigned int i = 0; i < mCurrentFocusViews.size(); i++)
-    {
-      if(mCurrentFocusViews[i].first.GetHandle() == targetRootLayer)
-      {
-        previousStoredView           = mCurrentFocusViews[i].second.GetHandle();
-        mCurrentFocusViews[i].second = view;
-        focusedWindowFound           = true;
-        break;
-      }
-    }
-    if(!focusedWindowFound)
-    {
-      // Store the first requested focus target for this Window.
-      mCurrentFocusViews.push_back(std::pair<WeakHandle<Layer>, WeakHandle<View>>(targetRootLayer, view));
-    }
+  const bool global               = IsActiveWindow(sceneHolder);
+  View       previousGlobal       = GetCurrentFocusView();
+  View       previousLocal        = GetCurrentFocusView(window);
+  Window     previousWindow       = previousGlobal ? Window::DownCast(Dali::Integration::SceneHolder::Get(previousGlobal)) : Window();
+  const bool retainPreviousGlobal = previousWindow && previousWindow != window && IsIndependentFocusEnabled(previousWindow);
+  const bool changed              = previousLocal != view;
+  if(!changed && (!global || previousGlobal == view))
+  {
+    return true;
+  }
 
-    // Deferred targets must also be observed. Otherwise removing and reattaching
-    // one before activation makes a cancelled request look valid again.
-    view.SceneDisconnectedSignal().Connect(mSlotDelegate, &FocusManager::OnStoredFocusViewDisconnection);
-    DisconnectFocusViewIfUnused(previousStoredView);
-
-    // Recheck activation after the callback. A background request only stores.
-    if(!IsActiveWindow(currentWindow))
-    {
-      return true;
-    }
-
-    // If developer set focus on same view, doing nothing
-    DALI_LOG_DEBUG_INFO("current focused view : [%p] new focused view : [%p]\n", currentFocusedView.GetObjectPtr(), view.GetObjectPtr());
-    if(view == currentFocusedView)
-    {
-      return true;
-    }
-
-    if(currentWindow.GetRootLayer() != mCurrentFocusedWindow.GetHandle())
-    {
-      Layer rootLayer       = currentWindow.GetRootLayer();
-      mCurrentFocusedWindow = rootLayer;
-      mCurrentWindowId      = static_cast<uint32_t>(currentWindow.GetNativeId());
-    }
-
-    // Save the current focused view
-    view.SceneDisconnectedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
-    mCurrentFocusView = view;
-    DisconnectFocusViewIfUnused(currentFocusedView);
-
-    // Save the last focus change context before KeyInputFocusManager notifies Views.
+  if(auto* state = FindIndependentState(window))
+  {
+    state->focus   = view;
+    state->context = effectiveContext;
+    state->context.window.Reset();
+  }
+  if(global)
+  {
+    mCurrentFocusedWindow   = root;
+    mCurrentWindowId        = static_cast<uint32_t>(sceneHolder.GetNativeId());
+    mCurrentFocusView       = view;
+    mCurrentFocusWindow     = window;
     mLastFocusChangeContext = effectiveContext;
-
-    if(currentFocusedView && currentFocusedView.IsConnectedToScene())
-    {
-      DetachFocusIndicator(currentFocusedView);
-      Internal::KeyInputFocusManager::Get().RemoveFocus(currentFocusedView);
-    }
-
-    if(view.IsConnectedToScene())
-    {
-      Internal::KeyInputFocusManager::Get().SetFocus(view);
-      RefreshFocusIndicator(view);
-    }
-
-    // Send notification for the change of focus view
-    if(!mFocusChangedSignal.Empty())
-    {
-      mFocusChangedSignal.Emit(currentFocusedView, view);
-    }
-
-    // Backward keeps its selected entry even for a deferred request. Restoring
-    // that target must not duplicate the entry and consume the next backward.
-    if(mFocusHistory.empty() || mFocusHistory.back().GetHandle() != view)
-    {
-      mFocusHistory.push_back(view);
-    }
-
-    // Delete first element before add new element when Stack is full.
-    if(mFocusHistory.size() > MAX_HISTORY_AMOUNT)
-    {
-      FocusStackIterator beginPos = mFocusHistory.begin();
-      mFocusHistory.erase(beginPos);
-    }
-
-    DALI_LOG_INFO(gLogFilter, Debug::General, "[%s:%d] SUCCEED\n", __FUNCTION__, __LINE__);
-    success = true;
   }
-  else
+  view.SceneDisconnectedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
+  if(independent)
   {
-    DALI_LOG_WARNING("[%s:%d] FAILED\n", __FUNCTION__, __LINE__);
+    view.EffectiveVisibilityChangedSignal().Connect(mSlotDelegate, &FocusManager::OnIndependentViewVisibilityChanged);
   }
 
-  return success;
+  auto keyManager = KeyInputFocusManager::Get();
+  if(global && previousGlobal && previousGlobal != view && !retainPreviousGlobal)
+  {
+    DetachFocusIndicator(previousGlobal);
+    keyManager.RemoveFocus(previousGlobal);
+    DisconnectFocusViewIfUnused(previousGlobal);
+  }
+  if(independent && previousLocal && previousLocal != view && previousLocal != previousGlobal)
+  {
+    DetachFocusIndicator(previousLocal);
+    keyManager.RemoveFocus(previousLocal);
+    DisconnectFocusViewIfUnused(previousLocal);
+  }
+  if(GetCurrentFocusView(window) != view || (independent && !CanSetKeyInputFocus(view)))
+  {
+    return false;
+  }
+
+  FocusStack* history = &mFocusHistory;
+  if(auto* state = FindIndependentState(window))
+  {
+    history = &state->history;
+  }
+  if(history->empty() || history->back().GetHandle() != view)
+  {
+    history->push_back(view);
+    if(history->size() > MAX_HISTORY_AMOUNT)
+    {
+      history->erase(history->begin());
+    }
+  }
+  if(changed)
+  {
+    keyManager.SetFocus(view);
+  }
+  else if(global)
+  {
+    keyManager.SetPrimaryWindow(window);
+  }
+  if(GetCurrentFocusView(window) != view)
+  {
+    return false;
+  }
+  RefreshFocusIndicator(view);
+  if(global && previousWindow && previousWindow != window && previousGlobal && !retainPreviousGlobal)
+  {
+    mWindowFocusChangedSignal.Emit(previousWindow, previousGlobal, View());
+  }
+  if(changed && GetCurrentFocusView(window) == view)
+  {
+    mWindowFocusChangedSignal.Emit(window, previousLocal, view);
+  }
+  if(global && previousGlobal != view && GetCurrentFocusView() == view)
+  {
+    mFocusChangedSignal.Emit(previousGlobal, view);
+  }
+  return true;
 }
 
 View FocusManager::GetCurrentFocusView()
@@ -451,6 +478,378 @@ bool FocusManager::IsActiveWindow(Dali::Integration::SceneHolder sceneHolder) co
   Layer  rootLayer     = mCurrentFocusedWindow.GetHandle();
   Window currentWindow = rootLayer ? Window::DownCast(Dali::Integration::SceneHolder::Get(rootLayer)) : Window();
   return !currentWindow || currentWindow == window || !currentWindow.IsFocused();
+}
+
+FocusManager::IndependentFocusState* FocusManager::FindIndependentState(Window window)
+{
+  for(auto& state : mIndependentFocusStates)
+  {
+    if(window && state.window.GetHandle() == window)
+    {
+      return &state;
+    }
+  }
+  return nullptr;
+}
+
+const FocusManager::IndependentFocusState* FocusManager::FindIndependentState(Window window) const
+{
+  for(const auto& state : mIndependentFocusStates)
+  {
+    if(window && state.window.GetHandle() == window)
+    {
+      return &state;
+    }
+  }
+  return nullptr;
+}
+
+FocusManager::IndependentFocusState* FocusManager::FindIndependentState(View view)
+{
+  if(view && view.IsConnectedToScene())
+  {
+    return FindIndependentState(Window::DownCast(Dali::Integration::SceneHolder::Get(view)));
+  }
+  for(auto& state : mIndependentFocusStates)
+  {
+    if(view && state.focus.GetHandle() == view)
+    {
+      return &state;
+    }
+  }
+  return nullptr;
+}
+
+bool FocusManager::IsIndependentFocusEnabled(Window window) const
+{
+  const auto* state = FindIndependentState(window);
+  return state && state->enabled;
+}
+
+bool FocusManager::CanSetKeyInputFocus(View view) const
+{
+  if(!view || !view.IsConnectedToScene())
+  {
+    return false;
+  }
+  Window window = Window::DownCast(Dali::Integration::SceneHolder::Get(view));
+  if(IsIndependentFocusEnabled(window))
+  {
+    return window.IsVisible() && view.IsEffectivelyVisible() && view.IsFocusable() && view.IsEnabled() &&
+           !view.HasAncestorBlockingFocus() && !InputField::DownCast(view) && !InputEditor::DownCast(view);
+  }
+  return window && IsActiveWindow(Dali::Integration::SceneHolder::Get(window.GetRootLayer()));
+}
+
+bool FocusManager::IsLogicalFocusWindow(Dali::Integration::SceneHolder sceneHolder) const
+{
+  Window window = Window::DownCast(sceneHolder);
+  return IsActiveWindow(sceneHolder) || (IsIndependentFocusEnabled(window) && window.IsVisible());
+}
+
+bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
+{
+  if(!window || !window.GetRootLayer() || mNavigationInProgress)
+  {
+    return false;
+  }
+  if(IsIndependentFocusEnabled(window) == enabled)
+  {
+    return true;
+  }
+  auto keyManager = KeyInputFocusManager::Get();
+  if(enabled)
+  {
+    // Weak Window identity prevents native-ID reuse from inheriting a policy.
+    // Release expired records when another independent Window is configured.
+    mIndependentFocusStates.erase(std::remove_if(mIndependentFocusStates.begin(), mIndependentFocusStates.end(),
+                                                 [](const IndependentFocusState& entry)
+    { return !entry.window.GetHandle(); }),
+                                  mIndependentFocusStates.end());
+    View actual    = GetCurrentFocusView(window);
+    View stored    = GetFocusViewFromWindow(window.GetRootLayer());
+    View keyTarget = keyManager.GetCurrentFocusView(window);
+    for(View candidate : {actual, stored, keyTarget})
+    {
+      if(InputField::DownCast(candidate) || InputEditor::DownCast(candidate))
+      {
+        return false;
+      }
+    }
+    IndependentFocusState* state = FindIndependentState(window);
+    if(!state)
+    {
+      mIndependentFocusStates.emplace_back();
+      state = &mIndependentFocusStates.back();
+    }
+    state->window  = window;
+    state->enabled = true;
+    state->focus   = actual;
+    state->context = mLastFocusChangeContext;
+    state->context.window.Reset();
+    state->history.clear();
+    if(actual)
+    {
+      state->history.push_back(actual);
+      actual.EffectiveVisibilityChangedSignal().Connect(mSlotDelegate, &FocusManager::OnIndependentViewVisibilityChanged);
+      if(mFocusIndicatorView && mFocusIndicatorView.GetParent() == actual)
+      {
+        state->indicator = mFocusIndicatorView;
+        mFocusIndicatorView.Reset();
+      }
+    }
+    keyManager.SetIndependentWindow(window, true);
+    window.VisibilityChangedSignal().Connect(mSlotDelegate, &FocusManager::OnWindowVisibilityChanged);
+  }
+  else
+  {
+    auto* state    = FindIndependentState(window);
+    state->enabled = false;
+    if(!IsActiveWindow(Dali::Integration::SceneHolder::Get(window.GetRootLayer())))
+    {
+      ClearWindowFocus(window, true);
+    }
+    else
+    {
+      if(state->indicator)
+      {
+        if(mFocusIndicatorView)
+        {
+          mFocusIndicatorView.Unparent();
+        }
+        mFocusIndicatorView = state->indicator;
+      }
+      View current = state->focus.GetHandle();
+      if(current && (mFocusHistory.empty() || mFocusHistory.back().GetHandle() != current))
+      {
+        mFocusHistory.push_back(current);
+      }
+    }
+    // A focus-loss callback can explicitly enable the Window again.
+    if(IsIndependentFocusEnabled(window))
+    {
+      return true;
+    }
+    keyManager.SetIndependentWindow(window, false);
+    window.VisibilityChangedSignal().Disconnect(mSlotDelegate, &FocusManager::OnWindowVisibilityChanged);
+    mIndependentFocusStates.erase(std::remove_if(mIndependentFocusStates.begin(), mIndependentFocusStates.end(),
+                                                 [window](const IndependentFocusState& entry)
+    { return entry.window.GetHandle() == window; }),
+                                  mIndependentFocusStates.end());
+  }
+  return true;
+}
+
+View FocusManager::GetCurrentFocusView(Window window)
+{
+  if(!window)
+  {
+    return View();
+  }
+  View view;
+  if(auto* state = FindIndependentState(window))
+  {
+    view = state->focus.GetHandle();
+  }
+  else
+  {
+    view = GetCurrentFocusView();
+  }
+  return view && view.IsConnectedToScene() && Dali::Integration::SceneHolder::Get(view) == window ? view : View();
+}
+
+const FocusManager::FocusChangeContext& FocusManager::FocusChangedContext(View view) const
+{
+  for(auto iter = mFocusNotificationContexts.rbegin(); iter != mFocusNotificationContexts.rend(); ++iter)
+  {
+    if(iter->first.GetHandle() == view)
+    {
+      return iter->second;
+    }
+  }
+  if(view)
+  {
+    Window window = Window::DownCast(Dali::Integration::SceneHolder::Get(view));
+    if(const auto* state = FindIndependentState(window))
+    {
+      return state->context;
+    }
+  }
+  return mLastFocusChangeContext;
+}
+
+void FocusManager::NotifyKeyInputFocus(View view, bool focused, Window window)
+{
+  FocusChangeContext context = mLastFocusChangeContext;
+  if(const auto* state = FindIndependentState(window))
+  {
+    context = state->context;
+  }
+  mFocusNotificationContexts.emplace_back(view, context);
+  GetImpl(view).NotifyFocusChanged(focused);
+  mFocusNotificationContexts.pop_back();
+}
+
+void FocusManager::ClearWindowFocus(Window window, bool clearStoredFocus)
+{
+  if(!window)
+  {
+    return;
+  }
+  View view = GetCurrentFocusView(window);
+  if(auto* state = FindIndependentState(window))
+  {
+    view = state->focus.GetHandle();
+  }
+  auto keyManager = KeyInputFocusManager::Get();
+  View keyTarget  = keyManager.GetCurrentFocusView(window);
+  DetachFocusIndicator(view);
+  if(auto* state = FindIndependentState(window))
+  {
+    state->focus.Reset();
+    state->touchCandidate.Reset();
+    state->touchDeviceId = -1;
+    state->context       = {};
+  }
+  const bool global = view && mCurrentFocusView.GetHandle() == view;
+  if(global)
+  {
+    mCurrentFocusView.Reset();
+    mCurrentFocusWindow.Reset();
+    mLastFocusChangeContext = {};
+  }
+  if(clearStoredFocus)
+  {
+    for(auto iter = mCurrentFocusViews.begin(); iter != mCurrentFocusViews.end();)
+    {
+      if(iter->first.GetHandle() == window.GetRootLayer())
+      {
+        View stored = iter->second.GetHandle();
+        iter        = mCurrentFocusViews.erase(iter);
+        DisconnectFocusViewIfUnused(stored);
+      }
+      else
+      {
+        ++iter;
+      }
+    }
+  }
+  if(view)
+  {
+    view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
+  }
+  keyManager.RemoveFocus(keyTarget);
+  DisconnectFocusViewIfUnused(view);
+  if(view && !GetCurrentFocusView(window))
+  {
+    mWindowFocusChangedSignal.Emit(window, view, View());
+    if(global && !GetCurrentFocusView())
+    {
+      mFocusChangedSignal.Emit(view, View());
+    }
+  }
+}
+
+void FocusManager::ClearFocus(Window window)
+{
+  if(!mNavigationInProgress)
+  {
+    ClearWindowFocus(window, true);
+  }
+}
+
+void FocusManager::OnWindowVisibilityChanged(Window window, bool visible)
+{
+  if(!visible)
+  {
+    ClearWindowFocus(window, false);
+  }
+}
+
+void FocusManager::OnIndependentViewVisibilityChanged(Actor actor, bool visible)
+{
+  if(!visible && IsIndependentFocusEnabled(Window::DownCast(Dali::Integration::SceneHolder::Get(actor))))
+  {
+    InvalidateFocusView(View::DownCast(actor));
+  }
+}
+
+bool FocusManager::MoveFocus(Window window, Ui::FocusDirection direction)
+{
+  return window && MoveFocus(direction, {Ui::FocusDevice::PROGRAMMATIC, "", Ui::InputEvent::Programmatic(), window});
+}
+
+void FocusManager::MoveFocusBackward(Window window)
+{
+  if(!window || mNavigationInProgress)
+  {
+    return;
+  }
+  auto getHistory = [this, window]() -> FocusStack&
+  {
+    if(auto* state = FindIndependentState(window); state && state->enabled)
+    {
+      return state->history;
+    }
+    return mFocusHistory;
+  };
+
+  const bool independent = IsIndependentFocusEnabled(window);
+  View       current     = GetNavigationCursor(window);
+  FocusStack candidates  = getHistory();
+  for(size_t index = candidates.size(); index > 0u; --index)
+  {
+    View target = candidates[index - 1u].GetHandle();
+    if(!target || target == current || !target.IsConnectedToScene() || Dali::Integration::SceneHolder::Get(target) != window)
+    {
+      continue;
+    }
+
+    // Consume this Window's newer entries before callbacks can append a new
+    // request. Keep the selected entry for repeated deferred backward moves.
+    FocusStack previousHistory;
+    FocusStack pendingHistory;
+    {
+      auto& history   = getHistory();
+      previousHistory = history;
+      history.erase(std::remove_if(history.begin() + index, history.end(), [window, independent](const WeakHandle<View>& entry)
+      {
+        View view = entry.GetHandle();
+        return independent || !view || (view.IsConnectedToScene() && Dali::Integration::SceneHolder::Get(view) == window);
+      }),
+                    history.end());
+      pendingHistory = history;
+    }
+    if(SetCurrentFocusView(target))
+    {
+      return;
+    }
+
+    // A rejected candidate can be skipped, but a reentrant focus or policy
+    // change owns the result. Reacquire the history after all callbacks.
+    if(IsIndependentFocusEnabled(window) != independent || GetNavigationCursor(window) != current)
+    {
+      return;
+    }
+    auto& history = getHistory();
+    if(history.size() != pendingHistory.size() ||
+       !std::equal(history.begin(), history.end(), pendingHistory.begin(), [](const WeakHandle<View>& left, const WeakHandle<View>& right)
+    { return left.GetHandle() == right.GetHandle(); }))
+    {
+      return;
+    }
+    history = std::move(previousHistory);
+  }
+}
+
+void FocusManager::ClearFocusIndication(Window window)
+{
+  SetFocusIndicated(GetCurrentFocusView(window), false, InputEvent::Programmatic());
+}
+
+Ui::FocusManager::WindowFocusChangedSignalType& FocusManager::WindowFocusChangedSignal()
+{
+  return mWindowFocusChangedSignal;
 }
 
 View FocusManager::GetFocusViewFromWindow(Layer rootLayer)
@@ -483,6 +882,12 @@ void FocusManager::MoveFocusBackward()
   if(mNavigationInProgress)
   {
     DALI_LOG_WARNING("Backward navigation is not allowed from a focus navigation callback\n");
+    return;
+  }
+
+  if(auto* state = FindIndependentState(GetCurrentFocusView()))
+  {
+    MoveFocusBackward(state->window.GetHandle());
     return;
   }
 
@@ -578,7 +983,8 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
   } guard(mNavigationInProgress);
 
   Layer                  rootLayer         = context.window ? context.window.GetRootLayer() : mCurrentFocusedWindow.GetHandle();
-  View                   currentFocusView  = rootLayer ? GetFocusViewFromWindow(rootLayer) : GetCurrentFocusView();
+  Window                 navigationWindow  = rootLayer ? Window::DownCast(Dali::Integration::SceneHolder::Get(rootLayer)) : Window();
+  View                   currentFocusView  = GetNavigationCursor(navigationWindow);
   FocusNavigationContext navigationContext = CreateFocusNavigationContext(currentFocusView, direction, context);
   if(!navigationContext)
   {
@@ -738,6 +1144,15 @@ FocusNavigationContext FocusManager::CreateFocusNavigationContext(View currentFo
   return FocusNavigationContext(impl.Get());
 }
 
+View FocusManager::GetNavigationCursor(Window window)
+{
+  if(!window)
+  {
+    return GetCurrentFocusView();
+  }
+  return IsIndependentFocusEnabled(window) ? GetCurrentFocusView(window) : GetFocusViewFromWindow(window.GetRootLayer());
+}
+
 bool FocusManager::ApplyFocusNavigationResult(const FocusNavigationResult& result, View originalFocusView, FocusNavigationContext context, const FocusChangeContext& changeContext)
 {
   if(result.GetType() == FocusNavigationResultType::NOT_HANDLED ||
@@ -746,7 +1161,7 @@ bool FocusManager::ApplyFocusNavigationResult(const FocusNavigationResult& resul
     return false;
   }
 
-  if(GetFocusViewFromWindow(context.GetWindow().GetRootLayer()) != originalFocusView)
+  if(GetNavigationCursor(context.GetWindow()) != originalFocusView)
   {
     DALI_LOG_WARNING("Focus changed while a focus navigation policy was running\n");
     return false;
@@ -864,25 +1279,33 @@ void FocusManager::ClearFocus(View view, bool clearStoredFocus)
     }
   }
 
+  Window previousWindow = mCurrentFocusWindow.GetHandle();
+  mCurrentFocusView.Reset();
+  mCurrentFocusWindow.Reset();
   if(view)
   {
+    Window window = Window::DownCast(Dali::Integration::SceneHolder::Get(view));
     DALI_LOG_RELEASE_INFO("ClearFocus id:(%d)\n", view.GetProperty<int32_t>(Dali::Actor::Property::ID));
+    if(!window)
+    {
+      window = previousWindow;
+    }
     // A focus-lost callback can remove this View. Stop actual-focus observation
     // before notifying it to avoid recursive ClearFocus, but keep the separate
     // stored-target observer so that removal still cancels its reservation.
     view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
-    if(view.IsConnectedToScene())
-    {
-      Internal::KeyInputFocusManager::Get().RemoveFocus(view);
-    }
+    Internal::KeyInputFocusManager::Get().RemoveFocus(view);
 
-    // Send notification for the change of focus view
-    if(!mFocusChangedSignal.Empty())
+    if(window)
+    {
+      mWindowFocusChangedSignal.Emit(window, view, View());
+    }
+    // A loss callback may already have established a new global target.
+    if(!GetCurrentFocusView() && !mFocusChangedSignal.Empty())
     {
       mFocusChangedSignal.Emit(view, Ui::View());
     }
   }
-  mCurrentFocusView.Reset();
   // Focus-out clears actual focus but retains its reservation. Keep observing
   // that saved View so removal while the Window is inactive cancels the record.
   DisconnectFocusViewIfUnused(view);
@@ -893,6 +1316,13 @@ void FocusManager::DisconnectFocusViewIfUnused(View view)
 {
   if(view && view != mCurrentFocusView.GetHandle())
   {
+    for(const auto& state : mIndependentFocusStates)
+    {
+      if(state.focus.GetHandle() == view)
+      {
+        return;
+      }
+    }
     for(const auto& entry : mCurrentFocusViews)
     {
       if(entry.second.GetHandle() == view)
@@ -902,14 +1332,20 @@ void FocusManager::DisconnectFocusViewIfUnused(View view)
     }
     view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
     view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnStoredFocusViewDisconnection);
+    view.EffectiveVisibilityChangedSignal().Disconnect(mSlotDelegate, &FocusManager::OnIndependentViewVisibilityChanged);
   }
 }
 
 void FocusManager::DetachFocusIndicator(View view)
 {
-  if(view && mFocusIndicatorView)
+  if(view)
   {
-    view.Remove(mFocusIndicatorView);
+    auto* state     = FindIndependentState(view);
+    View  indicator = state ? state->indicator : mFocusIndicatorView;
+    if(indicator && indicator.GetParent() == view)
+    {
+      indicator.Unparent();
+    }
   }
 }
 
@@ -939,6 +1375,20 @@ void FocusManager::ClearTouchFocusCandidate()
   mTouchFocusDeviceId = -1;
 }
 
+void FocusManager::OnDragStarted(Window window)
+{
+  if(auto* state = FindIndependentState(window))
+  {
+    state->touchCandidate.Reset();
+    state->touchDeviceId = -1;
+  }
+  View candidate = mTouchFocusCandidate.GetHandle();
+  if(!window || !candidate || !candidate.IsConnectedToScene() || Dali::Integration::SceneHolder::Get(candidate) == window)
+  {
+    ClearTouchFocusCandidate();
+  }
+}
+
 bool FocusManager::ShouldIndicateFocus(const FocusChangeContext& context, bool previousFocusIndicated) const
 {
   switch(context.device)
@@ -957,6 +1407,11 @@ bool FocusManager::ShouldIndicateFocus(const FocusChangeContext& context, bool p
 void FocusManager::ClearFocus()
 {
   View view = GetCurrentFocusView();
+  if(auto* state = FindIndependentState(view))
+  {
+    ClearWindowFocus(state->window.GetHandle(), true);
+    return;
+  }
   DetachFocusIndicator(view);
   ClearFocus(view);
 }
@@ -1001,20 +1456,25 @@ View FocusManager::GetFocusGroup(View view)
 
 View FocusManager::GetFocusIndicatorView()
 {
-  if(!mFocusIndicatorView)
-  {
-    // Create the default if it hasn't been set and one that's shared by all the keyboard focusable views
-    const std::string imageDirPath        = Dali::Ui::Integration::AssetManager::GetDaliImagePath();
-    Ui::ImageView     focusIndicatorImage = Ui::ImageView::New();
-    focusIndicatorImage.SetResourceUrl(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME));
-    focusIndicatorImage.SetFittingMode(Ui::Image::FittingMode::FILL);
-    mFocusIndicatorView = focusIndicatorImage;
-    mFocusIndicatorView.SetRequestedWidth(MATCH_PARENT);
-    mFocusIndicatorView.SetRequestedHeight(MATCH_PARENT);
-    mFocusIndicatorView.SetLayoutMode(LayoutMode::STANDALONE);
-  }
+  return GetFocusIndicatorView(GetCurrentFocusView());
+}
 
-  return mFocusIndicatorView;
+View FocusManager::GetFocusIndicatorView(View view)
+{
+  auto* state     = FindIndependentState(view);
+  View& indicator = state ? state->indicator : mFocusIndicatorView;
+  if(!indicator)
+  {
+    const std::string imageDirPath = Dali::Ui::Integration::AssetManager::GetDaliImagePath();
+    Ui::ImageView     image        = Ui::ImageView::New();
+    image.SetResourceUrl(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME));
+    image.SetFittingMode(Ui::Image::FittingMode::FILL);
+    indicator = image;
+    indicator.SetRequestedWidth(MATCH_PARENT);
+    indicator.SetRequestedHeight(MATCH_PARENT);
+    indicator.SetLayoutMode(LayoutMode::STANDALONE);
+  }
+  return indicator;
 }
 
 uint32_t FocusManager::GetCurrentWindowId() const
@@ -1044,7 +1504,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
 
   bool isFocusStartableKey = false;
   bool navigationRequested = false;
-  View focusViewBeforeKey  = GetCurrentFocusView();
+  View focusViewBeforeKey  = GetCurrentFocusView(Window::DownCast(sceneHolder));
 
   if(event.GetState() == KeyEvent::DOWN)
   {
@@ -1132,9 +1592,9 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
     }
   }
 
-  if(isFocusStartableKey && IsActiveWindow(sceneHolder))
+  if(isFocusStartableKey && IsLogicalFocusWindow(sceneHolder))
   {
-    View focusedView = GetCurrentFocusView();
+    View focusedView = GetCurrentFocusView(Window::DownCast(sceneHolder));
     if(focusedView)
     {
       if(focusedView == focusViewBeforeKey)
@@ -1157,65 +1617,81 @@ void FocusManager::OnTouch(Dali::Integration::SceneHolder sceneHolder, TouchEven
   {
     GetConfiguration();
   }
-
+  Window     window         = Window::DownCast(sceneHolder);
+  const bool independent    = IsIndependentFocusEnabled(window);
+  auto       clearCandidate = [this, window, independent]()
+  {
+    if(independent)
+    {
+      if(auto* state = FindIndependentState(window))
+      {
+        state->touchCandidate.Reset();
+        state->touchDeviceId = -1;
+      }
+    }
+    else
+    {
+      ClearTouchFocusCandidate();
+    }
+  };
   if(touch.GetPointCount() < 1)
   {
-    ClearTouchFocusCandidate();
+    clearCandidate();
     return;
   }
-
   switch(touch.GetState(0))
   {
     case PointState::DOWN:
     {
-      ClearTouchFocusCandidate();
-
-      // If you touch the currently focused view again, you don't need to do SetCurrentFocusView again.
-      View hitView = View::DownCast(touch.GetHitActor(0));
+      clearCandidate();
+      View hitView     = View::DownCast(touch.GetHitActor(0));
+      View focusedView = GetCurrentFocusView(window);
       if(mClearFocusIndicationOnTouch)
       {
-        View focusedView = GetCurrentFocusView();
         SetFocusIndicationWithPolicy(focusedView, false, ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0)), Ui::InputEvent::New(touch));
       }
-
-      if(hitView && hitView == GetCurrentFocusView())
+      if(hitView && hitView != GetCurrentFocusView(window) && hitView.IsFocusable() && hitView.IsFocusOnTouchEnabled() && !hitView.HasAncestorBlockingFocus())
       {
-        return;
-      }
-
-      // If FOCUSABLE and FOCUS_ON_TOUCH is true, set focus view on touch release.
-      if(hitView && hitView.IsFocusable() && hitView.IsFocusOnTouchEnabled() && !hitView.HasAncestorBlockingFocus())
-      {
-        mTouchFocusCandidate = hitView;
-        mTouchFocusDeviceId  = touch.GetDeviceId(0);
+        if(independent)
+        {
+          if(auto* state = FindIndependentState(window))
+          {
+            state->touchCandidate = hitView;
+            state->touchDeviceId  = touch.GetDeviceId(0);
+          }
+        }
+        else
+        {
+          mTouchFocusCandidate = hitView;
+          mTouchFocusDeviceId  = touch.GetDeviceId(0);
+        }
       }
       break;
     }
     case PointState::UP:
     {
-      View candidate = mTouchFocusCandidate.GetHandle();
-      if(candidate && touch.GetDeviceId(0) == mTouchFocusDeviceId)
+      View    candidate = mTouchFocusCandidate.GetHandle();
+      int32_t deviceId  = mTouchFocusDeviceId;
+      if(independent)
       {
-        View hitView = View::DownCast(touch.GetHitActor(0));
-        if(hitView == candidate && candidate.IsFocusable() && candidate.IsFocusOnTouchEnabled() && !candidate.HasAncestorBlockingFocus())
-        {
-          Ui::FocusDevice device = ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0));
-          DoSetCurrentFocusView(candidate, {device, touch.GetDeviceName(0), Ui::InputEvent::New(touch)});
-        }
+        auto* state = FindIndependentState(window);
+        candidate   = state ? state->touchCandidate.GetHandle() : View();
+        deviceId    = state ? state->touchDeviceId : -1;
       }
-      ClearTouchFocusCandidate();
+      if(candidate && touch.GetDeviceId(0) == deviceId && View::DownCast(touch.GetHitActor(0)) == candidate &&
+         candidate.IsFocusable() && candidate.IsFocusOnTouchEnabled() && !candidate.HasAncestorBlockingFocus())
+      {
+        DoSetCurrentFocusView(candidate, {ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0)), touch.GetDeviceName(0), Ui::InputEvent::New(touch), window});
+      }
+      clearCandidate();
       break;
     }
     case PointState::INTERRUPTED:
     case PointState::LEAVE:
-    {
-      ClearTouchFocusCandidate();
+      clearCandidate();
       break;
-    }
     default:
-    {
       break;
-    }
   }
 }
 
@@ -1233,7 +1709,7 @@ bool FocusManager::OnHover(Actor actor, HoverEvent hover)
 
   if(hover.GetPointCount() > 0u)
   {
-    View focusedView     = GetCurrentFocusView();
+    View focusedView     = GetCurrentFocusView(Window::DownCast(Dali::Integration::SceneHolder::Get(actor)));
     View hitView         = View::DownCast(hover.GetHitActor(0u));
     bool leftFocusedView = focusedView && ((hitView && !hitView.IsEffectivelyFocused()) || (!hitView && !IsScreenPointInsideView(focusedView, hover.GetScreenPosition(0u))));
     if(leftFocusedView)
@@ -1257,7 +1733,7 @@ void FocusManager::OnWheelEvent(Dali::Integration::SceneHolder sceneHolder, Whee
 bool FocusManager::OnCustomWheelEvent(Dali::Integration::SceneHolder sceneHolder, WheelEvent event)
 {
   bool consumed = false;
-  View view     = GetCurrentFocusView();
+  View view     = GetCurrentFocusView(Window::DownCast(sceneHolder));
   if(view)
   {
     // Notify the view about the wheel event
@@ -1314,7 +1790,11 @@ void FocusManager::OnWindowFocusChanged(Window window, bool focusIn)
     mCurrentWindowId      = static_cast<uint32_t>(Dali::Integration::SceneHolder::Get(rootLayer).GetNativeId());
 
     // Get Current Focused View from window
-    View currentFocusedView = GetFocusViewFromWindow(rootLayer);
+    View currentFocusedView = IsIndependentFocusEnabled(window) ? GetCurrentFocusView(window) : View();
+    if(!currentFocusedView)
+    {
+      currentFocusedView = GetFocusViewFromWindow(rootLayer);
+    }
     // Focus-in can arrive while a navigation callback is running. The public
     // setter rejects requests during navigation; treating that rejection as an
     // invalid target here would clear valid actual focus and its saved record.
@@ -1329,9 +1809,25 @@ void FocusManager::OnWindowFocusChanged(Window window, bool focusIn)
     {
       // No valid stored target: discard this Window's record and release
       // any actual focus retained by the clear-on-loss=false policy.
-      View previousView = GetCurrentFocusView();
-      DetachFocusIndicator(previousView);
-      ClearFocus(previousView);
+      View  previousView  = GetCurrentFocusView();
+      auto* previousState = FindIndependentState(previousView);
+      if(previousState && previousState->enabled)
+      {
+        mCurrentFocusView.Reset();
+        mCurrentFocusWindow.Reset();
+        mLastFocusChangeContext = {};
+        KeyInputFocusManager::Get().SetPrimaryWindow(window);
+        if(previousView)
+        {
+          mFocusChangedSignal.Emit(previousView, View());
+        }
+      }
+      else
+      {
+        DetachFocusIndicator(previousView);
+        ClearFocus(previousView);
+        KeyInputFocusManager::Get().SetPrimaryWindow(window);
+      }
     }
   }
 }
@@ -1341,7 +1837,7 @@ void FocusManager::OnSceneHolderFocusChanged(Dali::Integration::SceneHolder scen
   Window window = Window::DownCast(sceneHolder);
   if(window)
   {
-    if(!focusIn && mCurrentFocusedWindow.GetHandle() == window.GetRootLayer() && mClearFocusOnWindowFocusLost)
+    if(!focusIn && !IsIndependentFocusEnabled(window) && mCurrentFocusedWindow.GetHandle() == window.GetRootLayer() && mClearFocusOnWindowFocusLost)
     {
       // Keep the Window as the navigation scope, and preserve its record.
       View currentView = GetCurrentFocusView();
@@ -1372,6 +1868,10 @@ bool FocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterfac
   {
     manager->FocusChangedSignal().Connect(tracker, functor);
   }
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_WINDOW_FOCUS_CHANGED))
+  {
+    manager->WindowFocusChangedSignal().Connect(tracker, functor);
+  }
   else
   {
     // signalName does not match any signal
@@ -1395,7 +1895,20 @@ void FocusManager::SetDefaultFocusIndicatorEnabled(bool enabled)
 
   mDefaultFocusIndicatorEnabled = enabled;
   mConfigurationLoaded          = true;
+  std::vector<View> targets;
+  for(auto& state : mIndependentFocusStates)
+  {
+    if(!enabled && state.indicator)
+    {
+      state.indicator.Unparent();
+    }
+    targets.push_back(state.focus.GetHandle());
+  }
   RefreshFocusIndicator(GetCurrentFocusView());
+  for(View target : targets)
+  {
+    RefreshFocusIndicator(target);
+  }
 }
 
 bool FocusManager::IsDefaultFocusIndicatorEnabled() const
@@ -1455,7 +1968,8 @@ bool FocusManager::IsClearFocusIndicationOnHoverEnabled() const
 
 void FocusManager::RefreshFocusIndicator(View view)
 {
-  if(!view || view != GetCurrentFocusView())
+  Window window = view ? Window::DownCast(Dali::Integration::SceneHolder::Get(view)) : Window();
+  if(!view || view != GetCurrentFocusView(window))
   {
     return;
   }
@@ -1463,7 +1977,7 @@ void FocusManager::RefreshFocusIndicator(View view)
   const bool focusIndicated = GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED);
   if(mDefaultFocusIndicatorEnabled && focusIndicated && !IsDefaultFocusIndicatorSuppressedByStateEffect(view))
   {
-    view.Add(GetFocusIndicatorView());
+    view.Add(GetFocusIndicatorView(view));
   }
   else
   {
@@ -1479,11 +1993,20 @@ void FocusManager::OnSceneDisconnection(Dali::Actor actor)
 void FocusManager::InvalidateFocusView(View view)
 {
   OnStoredFocusViewDisconnection(view);
-  if(view && view == mCurrentFocusView.GetHandle())
+  if(auto* state = FindIndependentState(view))
+  {
+    Window window = state->window.GetHandle();
+    if(state->focus.GetHandle() == view)
+    {
+      ClearWindowFocus(window, false);
+    }
+  }
+  else if(view && view == mCurrentFocusView.GetHandle())
   {
     DetachFocusIndicator(view);
     ClearFocus(view, false);
   }
+  KeyInputFocusManager::Get().RemoveFocus(view);
   DisconnectFocusViewIfUnused(view);
 }
 

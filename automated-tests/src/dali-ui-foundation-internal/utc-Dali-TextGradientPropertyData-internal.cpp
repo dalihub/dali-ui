@@ -18,6 +18,11 @@
 #include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-property-data.h>
+#include <dali-ui-foundation/public-api/animation/input-editor-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/input-field-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/duration.h>
+#include <dali/public-api/animation/constraints.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual-gradient-data.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
@@ -203,5 +208,66 @@ int UtcDaliTextGradientPropertyDataVisualLazyLifecycleP(void)
   DALI_TEST_CHECK(!storageData.mHasGradientContext);
   DALI_TEST_CHECK(!storageData.mHasGradientOverlayContext);
 
+  END_TEST;
+}
+
+int UtcDaliTextGradientAnimatableConstraintsAcrossControlsP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New("Constrained label gradient");
+  InputField field = InputField::New();
+  InputEditor editor = InputEditor::New();
+  field.SetPlaceholder("Field placeholder");
+  editor.SetPlaceholder("Editor placeholder");
+  label.SetTextGradient(MakeRenderableLinear());
+  field.SetTextGradient(MakeRenderableLinear());
+  label.SetTextGradientOverlay(MakeRenderableLinear());
+  field.SetPlaceholderTextGradient(MakeRenderableLinear());
+  editor.SetTextGradient(MakeRenderableLinear());
+  editor.SetPlaceholderTextGradient(MakeRenderableLinear());
+
+  Animation registration = Animation::New(0.1f);
+  label.Animate(registration)
+    .TextGradientStartOffset(0.7f, Duration(0.1f))
+    .TextGradientOverlayStartOffset(0.7f, Duration(0.1f));
+  field.Animate(registration)
+    .TextGradientStartOffset(0.7f, Duration(0.1f))
+    .PlaceholderTextGradientStartOffset(0.7f, Duration(0.1f));
+  editor.Animate(registration)
+    .TextGradientStartOffset(0.7f, Duration(0.1f))
+    .PlaceholderTextGradientStartOffset(0.7f, Duration(0.1f));
+
+  application.GetScene().Add(label);
+  application.GetScene().Add(field);
+  application.GetScene().Add(editor);
+  application.SendNotification();
+  application.Render();
+
+  View controls[] = {label, label, field, field, editor, editor};
+  const char* propertyNames[] = {
+    "uTextGradientStartOffset",
+    "uTextGradientOverlayStartOffset",
+    "uTextGradientStartOffset",
+    "uPlaceholderTextGradientStartOffset",
+    "uTextGradientStartOffset",
+    "uPlaceholderTextGradientStartOffset"};
+  Dali::Vector<Constraint> constraints;
+  for(uint32_t index = 0u; index < 6u; ++index)
+  {
+    const Property::Index propertyIndex = controls[index].GetPropertyIndex(propertyNames[index]);
+    DALI_TEST_CHECK(propertyIndex != Property::INVALID_INDEX);
+    Constraint constraint = Constraint::New<float>(controls[index], propertyIndex, Dali::EqualToConstraint());
+    constraint.AddSource(Source(controls[index], Actor::Property::OPACITY));
+    constraint.Apply();
+    constraints.PushBack(constraint);
+  }
+  application.SendNotification();
+  application.Render();
+  for(uint32_t index = 0u; index < 6u; ++index)
+  {
+    const Property::Index propertyIndex = controls[index].GetPropertyIndex(propertyNames[index]);
+    DALI_TEST_EQUALS(controls[index].GetCurrentProperty<float>(propertyIndex), 1.0f, 0.001f, TEST_LOCATION);
+    constraints[index].Remove();
+  }
   END_TEST;
 }

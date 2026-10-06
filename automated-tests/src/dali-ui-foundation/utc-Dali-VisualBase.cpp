@@ -34,6 +34,9 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>

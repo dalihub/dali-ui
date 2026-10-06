@@ -15,7 +15,12 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/internal/builder/style.h>
 #include <dali-ui-foundation/integration-api/builder/builder.h>
+#include <dali-ui-foundation/internal/builder/dictionary.h>
+#include <dali-ui-foundation/internal/builder/builder-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -439,5 +444,58 @@ int UtcDaliBuilderSignalsAndNotificationsP(void)
   application.Render(20u);
   application.GetScene().Remove(root);
   application.SendNotification();
+  END_TEST;
+}
+
+int UtcDaliBuilderNoRootAnimationP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Dali::Ui::Integration::Builder builder = Dali::Ui::Integration::Builder::New();
+  builder.LoadFromString(BUILDER_JSON);
+
+  Actor target = Actor::New();
+  target.SetProperty(Actor::Property::NAME, "animationTarget");
+  application.GetScene().Add(target);
+  application.SendNotification();
+  application.Render();
+
+  Animation animation = builder.CreateAnimation("mixed");
+  DALI_TEST_CHECK(animation);
+  DALI_TEST_EQUALS(animation.GetDuration(), 1.5f, 0.001f, TEST_LOCATION);
+  Property::Map overrides;
+  overrides["UNUSED"] = 1;
+  DALI_TEST_CHECK(builder.CreateAnimation("mixed", overrides));
+  DALI_TEST_CHECK(!builder.CreateAnimation("unknown"));
+  END_TEST;
+}
+
+int UtcDaliBuilderRenderTaskCreationP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Dali::Ui::Integration::Builder builder = Dali::Ui::Integration::Builder::New();
+  builder.LoadFromString(R"JSON({
+    "renderTasks": {
+      "main": {
+        "sourceActor": "source",
+        "cameraActor": "camera"
+      }
+    }
+  })JSON");
+
+  Actor source = Actor::New();
+  source.SetProperty(Actor::Property::NAME, "source");
+  CameraActor camera = CameraActor::New();
+  camera.SetProperty(Actor::Property::NAME, "camera");
+  application.GetScene().Add(source);
+  application.GetScene().Add(camera);
+  application.SendNotification();
+  application.Render();
+
+  RenderTaskList tasks = application.GetScene().GetRenderTaskList();
+  const uint32_t before = tasks.GetTaskCount();
+  builder.CreateRenderTask("main");
+  DALI_TEST_CHECK(tasks.GetTaskCount() > before);
+  builder.CreateRenderTask("unknown");
+  DALI_TEST_EQUALS(tasks.GetTaskCount(), before + 1u, TEST_LOCATION);
   END_TEST;
 }

@@ -20,7 +20,9 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/base-object.h>
+#include <dali/public-api/object/weak-handle.h>
 #include <string>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
@@ -52,19 +54,34 @@ public:
   KeyInputFocusManagerImpl();
 
   /**
-   * @copydoc Ui::SetFocus
+   * @copydoc KeyInputFocusManager::SetFocus(View)
    */
   void SetFocus(Ui::View view);
 
   /**
-   * @copydoc Ui::RemoveFocus
+   * @copydoc KeyInputFocusManager::RemoveFocus(View)
    */
   void RemoveFocus(Ui::View view);
 
   /**
-   * @copydoc Ui::GetCurrentFocusView
+   * @copydoc KeyInputFocusManager::GetCurrentFocusView()const
    */
   Ui::View GetCurrentFocusView() const;
+
+  /**
+   * @copydoc KeyInputFocusManager::GetCurrentFocusView(Window)const
+   */
+  Ui::View GetCurrentFocusView(Window window) const;
+
+  /**
+   * @copydoc KeyInputFocusManager::SetIndependentWindow(Window,bool)
+   */
+  void SetIndependentWindow(Window window, bool enabled);
+
+  /**
+   * @copydoc KeyInputFocusManager::SetPrimaryWindow(Window)
+   */
+  void SetPrimaryWindow(Window window);
 
 public:
   /**
@@ -93,6 +110,20 @@ protected:
 
 private:
   /**
+   * @brief Checks whether any primary or independent scope still owns the target.
+   * @param[in] view The target to query
+   * @return True if a live focus scope owns it
+   */
+  bool HasFocusTarget(Ui::View view) const;
+
+  /**
+   * @brief Disconnects target observers and notifies one actual focus loss.
+   * @param[in] view The non-empty target whose ownership was already removed
+   * @param[in] window Its owning Window, including during scene disconnection
+   */
+  void NotifyFocusLost(Ui::View view, Window window);
+
+  /**
    * This will be called when a new scene holder is created
    * @param sceneHolder The new scene holder
    */
@@ -110,6 +141,13 @@ private:
    * @param[in]  view  The view removed from the scene.
    */
   void OnFocusViewSceneDisconnection(Dali::Actor view);
+
+  /**
+   * @brief Removes an independent key target when its effective visibility is lost.
+   * @param[in] actor The View whose effective visibility changed
+   * @param[in] visible Whether the View is effectively visible
+   */
+  void OnFocusViewVisibilityChanged(Dali::Actor actor, bool visible);
 
   /**
    *  Recursively deliver events to the view and its parents, until the event is consumed or the stage is reached.
@@ -138,6 +176,13 @@ private:
 
   Ui::View mCurrentFocusView; ///< The current focused view
   uint32_t mCurrentWindowId;  ///< The native window id of current focused view
+
+  struct WindowKeyTarget
+  {
+    WeakHandle<Window> window;
+    WeakHandle<View>   view;
+  };
+  std::vector<WindowKeyTarget> mWindowTargets;
 };
 
 inline KeyInputFocusManagerImpl& GetImpl(KeyInputFocusManager& obj)

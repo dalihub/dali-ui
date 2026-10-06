@@ -16,6 +16,8 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
+#include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
+#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali/devel-api/atspi-interfaces/editable-text.h>
@@ -115,6 +117,15 @@ int UtcDaliAccessibilityTextControlsInterfacesInternalP(void)
   DALI_TEST_EQUALS(hyperlink->GetStartIndex(), 2, TEST_LOCATION);
   DALI_TEST_EQUALS(hyperlink->GetEndIndex(), 6, TEST_LOCATION);
   DALI_TEST_EQUALS(hyperlink->GetAnchorUri(0), "https://example.com", TEST_LOCATION);
+  DALI_TEST_EQUALS(hyperlink->GetAnchorCount(), 1, TEST_LOCATION);
+  DALI_TEST_CHECK(hyperlink->GetAnchorAccessible(0) == anchorAccessible);
+  DALI_TEST_CHECK(hyperlink->IsValid());
+  anchor.SetProperty(TextAnchor::Property::URI, "");
+  DALI_TEST_CHECK(!hyperlink->IsValid());
+  anchor.SetProperty(TextAnchor::Property::URI, "https://example.com");
+  label.Add(anchor);
+  application.GetScene().Add(label);
+  DALI_TEST_CHECK(anchor.DoAction("activate", Property::Map()));
 
   END_TEST;
 }
@@ -419,5 +430,101 @@ int UtcDaliAccessibilityEditableTextReadOnlyInternalP(void)
   DALI_TEST_EQUALS(editorEditable->SetTextContents("changed"), false, TEST_LOCATION);
   DALI_TEST_EQUALS(editor.GetText(), "editor", TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliViewAccessibleFocusAndActionsP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  view.SetProperty(Actor::Property::NAME, "accessibleView");
+  view.SetFocusable(true);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  auto* accessible = dynamic_cast<ViewAccessible*>(Dali::Accessibility::Accessible::Get(view));
+  DALI_TEST_CHECK(accessible != nullptr);
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("accessibleView"), TEST_LOCATION);
+  DALI_TEST_CHECK(!accessible->GetLocalizedRoleName().empty());
+  DALI_TEST_EQUALS(accessible->GetLastPosition(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_CHECK(!accessible->IsHidden());
+  DALI_TEST_CHECK(accessible->GrabFocus());
+  DALI_TEST_EQUALS(FocusManager::Get().GetCurrentFocusView(), view, TEST_LOCATION);
+
+  const size_t actionCount = accessible->GetActionCount();
+  DALI_TEST_EQUALS(accessible->GetActionName(actionCount), std::string(), TEST_LOCATION);
+  DALI_TEST_CHECK(!accessible->DoAction("missing-action"));
+  DALI_TEST_CHECK(!accessible->DoAction(actionCount));
+  DALI_TEST_CHECK(!accessible->IsScrollable());
+  DALI_TEST_CHECK(!accessible->ScrollToChild(View()));
+  FocusManager::Get().ClearFocus();
+  END_TEST;
+}
+
+int UtcDaliAccessibilityLabelTextBoundariesAndLinksInternalP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  label.SetMultiLine(true);
+  label.SetRequestedWidth(250.0f);
+  label.SetRequestedHeight(100.0f);
+  label.SetStyledText(Text::StyledText::FromMarkup("Read <a href='docs'>docs</a> now\\nNext line"));
+  application.GetScene().Add(label);
+  label.Measure(250.0f, 100.0f);
+  label.Arrange(LayoutRect(0.0f, 0.0f, 250.0f, 100.0f));
+  application.SendNotification();
+  application.Render();
+
+  auto* accessible = Dali::Accessibility::Accessible::Get(label);
+  auto* text = dynamic_cast<Dali::Accessibility::Text*>(accessible);
+  auto* hypertext = dynamic_cast<Dali::Accessibility::Hypertext*>(accessible);
+  DALI_TEST_CHECK(text);
+  DALI_TEST_CHECK(hypertext);
+  DALI_TEST_EQUALS(text->GetCursorOffset(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!text->SetCursorOffset(1u));
+  DALI_TEST_CHECK(!text->RemoveSelection(0u));
+  DALI_TEST_CHECK(!text->SetRangeOfSelection(0u, 0u, 2u));
+  DALI_TEST_EQUALS(text->GetRangeOfSelection(0u).content, std::string(), TEST_LOCATION);
+  auto word = text->GetTextAtOffset(0u, Dali::Devel::Accessibility::TextBoundary::WORD);
+  auto line = text->GetTextAtOffset(0u, Dali::Devel::Accessibility::TextBoundary::LINE);
+  DALI_TEST_CHECK(word.endOffset <= static_cast<int32_t>(text->GetCharacterCount()));
+  DALI_TEST_CHECK(line.endOffset <= static_cast<int32_t>(text->GetCharacterCount()));
+  TextAnchor anchor = TextAnchor::New();
+  anchor.SetProperty(TextAnchor::Property::START_CHARACTER_INDEX, 5);
+  anchor.SetProperty(TextAnchor::Property::END_CHARACTER_INDEX, 9);
+  anchor.SetProperty(TextAnchor::Property::URI, "docs");
+  std::vector<TextAnchor> anchors;
+  anchors.push_back(anchor);
+  DALI_TEST_CHECK(Dali::Ui::Internal::Text::SetA11yAnchors(label, std::move(anchors)));
+
+  DALI_TEST_EQUALS(hypertext->GetLinkCount(), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(hypertext->GetLinkIndex(-1), -1, TEST_LOCATION);
+  DALI_TEST_EQUALS(hypertext->GetLinkIndex(6), 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!hypertext->GetLink(-1));
+  DALI_TEST_CHECK(!hypertext->GetLink(1));
+  DALI_TEST_CHECK(hypertext->GetLink(0));
+  END_TEST;
+}
+
+int UtcDaliAccessibilityInputFieldSelectionAndPlaceholderInternalP(void)
+{
+  UiTestApplication application;
+  InputField field = InputField::New();
+  field.SetPlaceholder("enter text");
+  auto* accessible = Dali::Accessibility::Accessible::Get(field);
+  auto* text = dynamic_cast<Dali::Accessibility::Text*>(accessible);
+  DALI_TEST_CHECK(text);
+  DALI_TEST_EQUALS(accessible->GetName(), "enter text", TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetTextAtOffset(0u, Dali::Devel::Accessibility::TextBoundary::WORD).content, std::string(), TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetTextAtOffset(0u, Dali::Devel::Accessibility::TextBoundary::LINE).content, std::string(), TEST_LOCATION);
+
+  field.SetText("selection");
+  DALI_TEST_CHECK(text->SetRangeOfSelection(0u, 1u, 4u));
+  DALI_TEST_EQUALS(text->GetRangeOfSelection(0u).content, std::string("ele"), TEST_LOCATION);
+  DALI_TEST_CHECK(text->RemoveSelection(0u));
+  DALI_TEST_EQUALS(text->GetRangeOfSelection(0u).content, std::string(), TEST_LOCATION);
+  DALI_TEST_CHECK(!text->SetRangeOfSelection(0u, 5u, 2u));
+  DALI_TEST_CHECK(!text->SetRangeOfSelection(1u, 0u, 2u));
   END_TEST;
 }

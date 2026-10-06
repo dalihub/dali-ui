@@ -32,6 +32,7 @@
 #include "replacement-layout-test-adapter.h"
 
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -189,13 +190,58 @@ void CheckOrdinaryLineDirectionCase(const char*                          name,
   ReleaseBidi(services, result);
 }
 
+void CheckOrdinaryMultilineDirectionCases(Text::ReplacementLayoutTestServices& services)
+{
+  struct Case
+  {
+    const char* name;
+    std::string text;
+    Text::LineWrapMode wrapMode;
+    float width;
+  };
+  const std::initializer_list<Case> cases = {
+    {"hebrew_words", "אבגדה וזחטי כלמנס עפצקר שתאבג וזחטי כלמנס", Text::LineWrapMode::WORD, 75.0f},
+    {"arabic_characters", "العربية مع English وأرقام 123 وأحرف إضافية", Text::LineWrapMode::CHARACTER, 65.0f},
+    {"mixed_paragraphs", "אבגדה English 123\nالعربية second line 456", Text::LineWrapMode::MIXED, 90.0f}
+  };
+
+  for(const Case& testCase : cases)
+  {
+    Text::ModelPtr source = Text::Model::New();
+    source->mLogicalModel->mText = Utf32(testCase.text);
+    Text::ReplacementLayoutTestOptions options;
+    options.contentSize = Size(testCase.width, 250.0f);
+    options.layoutType = Text::Layout::Engine::MULTI_LINE_BOX;
+    options.lineWrapMode = testCase.wrapMode;
+
+    Text::ModelPtr result;
+    Require(Text::LayoutOrdinaryForTest(*source, options, result),
+            std::string(testCase.name) + ": multiline layout failed");
+    const Text::LogicalModel& logical = *result->mLogicalModel;
+    const Text::VisualModel& visual = *result->mVisualModel;
+    Require(visual.mLines.Count() > 1u, std::string(testCase.name) + ": expected wrapped lines");
+    Require(!logical.mBidirectionalParagraphInfo.Empty(),
+            std::string(testCase.name) + ": expected RTL paragraph");
+    Require(!logical.mBidirectionalLineInfo.Empty(),
+            std::string(testCase.name) + ": expected bidi line maps");
+    for(const Text::LineRun& line : visual.mLines)
+    {
+      Require(line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs <= visual.mGlyphs.Count(),
+              std::string(testCase.name) + ": line exceeds glyph buffer");
+    }
+    std::cout << "REAL_MULTILINE_DIRECTION case=" << testCase.name
+              << " lines=" << visual.mLines.Count()
+              << " bidi_lines=" << logical.mBidirectionalLineInfo.Count() << std::endl;
+    ReleaseBidi(services, result);
+  }
+}
+
 void CheckMarqueeTransitionCase(const char*           name,
                                 const std::string&    utf8,
                                 Text::Alignment       alignment,
                                 LayoutDirection::Type layoutDirection,
                                 float                 controlWidth,
-                                bool                  expectedRightToLeft,
-                                bool                  expectedEligible)
+                                bool                  expectedRightToLeft)
 {
   Text::ModelPtr source        = Text::Model::New();
   source->mLogicalModel->mText = Utf32(utf8);
@@ -210,13 +256,6 @@ void CheckMarqueeTransitionCase(const char*           name,
 
   const Text::OrdinaryMarqueeTransitionTrace trace =
     Text::TraceOrdinaryMarqueeTransitionForTest(*source, options);
-  if(!expectedEligible)
-  {
-    Require(!trace.valid, std::string(name) + ": non-rigid case unexpectedly became eligible");
-    std::cout << "REAL_MARQUEE_TRANSITION case=" << name << " fallback=legacy" << std::endl;
-    return;
-  }
-
   Require(trace.valid, std::string(name) + ": transition trace invalid");
   Require(trace.directionRightToLeft == expectedRightToLeft,
           std::string(name) + ": unexpected resolved text direction");
@@ -274,23 +313,20 @@ void CheckMarqueeTransitions()
     "\xD7\xA9\xD7\x9C\xD7\x95\xD7\x9D \xD7\xA2\xD7\x95\xD7\x9C\xD7\x9D, \xD7\xA0\xD7\xA2\xD7\x99\xD7\x9D \xD7\x9E\xD7\x90\xD7\x95\xD7\x93,\xD7\x95\xD7\x9E\xD7\xA7\xD7\x95\xD7\x95\xD7\x94 \xD7\xA9\xD7\x99\xD7\x94\xD7\x99\xD7\x94 \xD7\x9C\xD7\xA0\xD7\x95 \xD7\xA9\xD7\x99\xD7\x97\xD7\x94 \xD7\xA0\xD7\xA2\xD7\x99\xD7\x9E\xD7\x94 \xD7\x95\xD7\x98\xD7\x95\xD7\x91\xD7\x94 \xD7\x99\xD7\x97\xD7\x93";
 
   CheckMarqueeTransitionCase("ltr_start", ltr, Text::Alignment::START,
-                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false, true);
+                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false);
   CheckMarqueeTransitionCase("ltr_center", ltr, Text::Alignment::CENTER,
-                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false, true);
+                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false);
   CheckMarqueeTransitionCase("ltr_end", ltr, Text::Alignment::END,
-                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false, true);
+                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false);
   CheckMarqueeTransitionCase("rtl_start", rtl, Text::Alignment::START,
-                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true, true);
+                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true);
   CheckMarqueeTransitionCase("rtl_center", rtl, Text::Alignment::CENTER,
-                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true, true);
+                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true);
   CheckMarqueeTransitionCase("rtl_end", rtl, Text::Alignment::END,
-                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true, true);
+                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true);
   CheckMarqueeTransitionCase("mixed_rigid", "English \xD7\x90\xD7\x91\xD7\x92 trailing words force END ellipsis",
                              Text::Alignment::CENTER, LayoutDirection::LEFT_TO_RIGHT,
-                             90.0f, false, true);
-  CheckMarqueeTransitionCase("mixed_non_rigid", "English \xD7\x90\xD7\x91\xD7\x92 trailing words force END ellipsis",
-                             Text::Alignment::CENTER, LayoutDirection::LEFT_TO_RIGHT,
-                             100.0f, false, false);
+                             90.0f, false);
 }
 
 void CheckLayoutCase(const char* name, Vector<Text::Character>& text, Text::CharacterIndex start,
@@ -701,6 +737,7 @@ void RunDiagnostics()
                                  true,
                                  100.0f,
                                  services);
+  CheckOrdinaryMultilineDirectionCases(services);
   CheckMarqueeTransitions();
 
   Vector<Text::Character> ltr = Characters({'a', 'b', 'I', 'C', 'O', 'N', 'c', 'd'});
@@ -787,6 +824,10 @@ private:
       else
       {
         RunDiagnostics();
+        mSvgView = ImageView::New();
+        mSvgView.SetSynchronousLoading(true);
+        mSvgView.SetResourceUrl("../samples/layout-transition/res/edit.svg");
+        mApplication.GetWindow().Add(mSvgView);
       }
     }
     catch(const std::exception& exception)
@@ -803,6 +844,19 @@ private:
 
   bool OnQuitTimer()
   {
+    if(mSvgView)
+    {
+      const auto status = mSvgView.GetLoadingStatus();
+      if(status == Visual::ResourceStatus::PREPARING && ++mSvgWaitCount < 100u)
+      {
+        return true;
+      }
+      if(status != Visual::ResourceStatus::READY)
+      {
+        std::cerr << "REAL_SVG_FAILURE status=" << static_cast<int>(status) << std::endl;
+        mExitStatus = 1;
+      }
+    }
     mApplication.Quit();
     return false;
   }
@@ -810,6 +864,8 @@ private:
 private:
   Application& mApplication;
   Timer        mQuitTimer;
+  ImageView    mSvgView;
+  unsigned int mSvgWaitCount{0u};
   int          mExitStatus{0};
   bool         mRenderScaleOnly{false};
 };

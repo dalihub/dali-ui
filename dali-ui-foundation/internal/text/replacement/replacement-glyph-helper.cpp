@@ -18,6 +18,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/decoration-scale.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-segment-iterator.h>
 namespace DALI_NAMESPACE::Ui::Text
@@ -256,16 +257,16 @@ void CopyProcessingCharacterStylesToVisual(const LogicalModel& logicalModel, Vis
   ConvertCharacterStyleRuns(logicalModel.mUnderlinedCharacterRuns,
                             visualModel,
                             visualModel.mUnderlineRuns,
-                            [](const UnderlinedCharacterRun& source, UnderlinedGlyphRun& destination)
+                            [&visualModel](const UnderlinedCharacterRun& source, UnderlinedGlyphRun& destination)
   {
-    destination.properties = source.properties;
+    destination.properties = ResolveDecorationProperties(source.properties, visualModel.GetDecorationUiScale());
   });
   ConvertCharacterStyleRuns(logicalModel.mStrikethroughCharacterRuns,
                             visualModel,
                             visualModel.mStrikethroughRuns,
-                            [](const StrikethroughCharacterRun& source, StrikethroughGlyphRun& destination)
+                            [&visualModel](const StrikethroughCharacterRun& source, StrikethroughGlyphRun& destination)
   {
-    destination.properties = source.properties;
+    destination.properties = ResolveDecorationProperties(source.properties, visualModel.GetDecorationUiScale());
   });
   ConvertCharacterStyleRuns(logicalModel.mCharacterSpacingCharacterRuns,
                             visualModel,

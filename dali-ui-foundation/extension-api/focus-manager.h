@@ -40,11 +40,14 @@ namespace FocusManager
  * focus history, or accessibility focus. Consequently, the key-input target
  * may differ from Dali::Ui::FocusManager::GetCurrentFocusView().
  *
- * Setting a new target causes the previous target to receive a focus-lost
- * notification. Only one target is retained; previous targets are not stacked
- * or restored automatically.
- * A new target in an inactive Window is rejected without creating a navigation
- * reservation. An already-retained key-input target is left unchanged.
+ * Setting a new target causes the previous target in its focus scope to receive
+ * a focus-lost notification. Normally there is one global target. A Window
+ * explicitly enabled with SetIndependentFocusEnabled() has its own target and
+ * does not release the target in another Window. Previous targets are not
+ * stacked or restored automatically.
+ * An inactive Window without this option rejects a new target without creating
+ * a navigation reservation. Independent Windows support visible, enabled,
+ * focusable general Views; InputField and InputEditor are rejected.
  *
  * @pre This function must be called from the UI thread.
  * @pre @p view must be connected to a valid scene.

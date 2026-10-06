@@ -185,28 +185,31 @@ void CopyTextProcessingProperties(const Model& source, Model& target)
   target.mLogicalModel->SetVariationsMap(source.mLogicalModel->GetVariationsMap());
 
   targetVisual.mControlSize = sourceVisual.mControlSize;
+  // Copy authored decoration values with their UI context, not Model's already
+  // resolved values, so the processing model applies the scale only once.
+  targetVisual.SetDecorationUiScale(sourceVisual.GetDecorationUiScale());
   targetVisual.SetTextColor(source.GetDefaultColor());
   targetVisual.SetCharacterSpacing(source.GetCharacterSpacing());
   targetVisual.SetShadowEnabled(source.IsShadowEnabled());
-  targetVisual.SetShadowOffset(source.GetShadowOffset());
+  targetVisual.SetShadowOffset(sourceVisual.GetShadowOffset());
   targetVisual.SetShadowColor(source.GetShadowColor());
   targetVisual.SetShadowBlurRadius(source.GetShadowBlurRadius());
   targetVisual.SetUnderlineEnabled(source.IsUnderlineEnabled());
   targetVisual.SetUnderlineType(source.GetUnderlineType());
   targetVisual.SetUnderlineColor(source.GetUnderlineColor());
-  targetVisual.SetUnderlineHeight(source.GetUnderlineHeight());
-  targetVisual.SetDashedUnderlineWidth(source.GetDashedUnderlineWidth());
-  targetVisual.SetDashedUnderlineGap(source.GetDashedUnderlineGap());
+  targetVisual.SetUnderlineHeight(sourceVisual.GetUnderlineHeight());
+  targetVisual.SetDashedUnderlineWidth(sourceVisual.GetDashedUnderlineWidth());
+  targetVisual.SetDashedUnderlineGap(sourceVisual.GetDashedUnderlineGap());
   targetVisual.SetOutlineEnabled(source.IsOutlineEnabled());
-  targetVisual.SetOutlineOffset(source.GetOutlineOffset());
+  targetVisual.SetOutlineOffset(sourceVisual.GetOutlineOffset());
   targetVisual.SetOutlineColor(source.GetOutlineColor());
-  targetVisual.SetOutlineWidth(source.GetOutlineWidth());
+  targetVisual.SetOutlineWidth(sourceVisual.GetOutlineWidth());
   targetVisual.SetOutlineBlurRadius(source.GetOutlineBlurRadius());
   targetVisual.SetBackgroundEnabled(source.IsBackgroundEnabled());
   targetVisual.SetBackgroundColor(source.GetBackgroundColor());
   targetVisual.SetStrikethroughEnabled(source.IsStrikethroughEnabled());
   targetVisual.SetStrikethroughColor(source.GetStrikethroughColor());
-  targetVisual.SetStrikethroughHeight(source.GetStrikethroughHeight());
+  targetVisual.SetStrikethroughHeight(sourceVisual.GetStrikethroughHeight());
 
   // Separately registered image visuals cannot contribute to the text cutout mask.
   targetVisual.SetCutoutEnabled(false);

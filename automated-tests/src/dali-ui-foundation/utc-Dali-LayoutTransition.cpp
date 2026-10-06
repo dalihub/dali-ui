@@ -6624,3 +6624,94 @@ int UtcDaliLayoutTransitionSelfStandaloneWindowResizeFallbackP(void)
   DALI_TEST_EQUALS(b.GetCurrentProperty<float>(Actor::Property::POSITION_Y), bFinal, 0.5f, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliViewAnimationSpecVisualAndActorPropertyMatrixP(void)
+{
+  UiTestApplication application;
+  View plain = View::New();
+  View decorated = View::New();
+  decorated.SetBackgroundColor(UiColor(0.2f, 0.3f, 0.4f, 1.0f));
+  decorated.SetShadow(Shadow(8.0f, Vector2(2.0f, 3.0f), UiColor(0.0f, 0.0f, 0.0f, 0.5f)));
+  decorated.SetRequestedWidth(100.0f);
+  decorated.SetRequestedHeight(80.0f);
+  application.GetScene().Add(plain);
+  application.GetScene().Add(decorated);
+  application.SendNotification();
+  application.Render();
+
+  ViewAnimationSpec withoutVisuals = ViewAnimationSpec::New();
+  withoutVisuals.BackgroundColor(UiColor(Color::RED), Duration(0.2f));
+  withoutVisuals.BackgroundColorBy(UiColor(0.1f, 0.0f, 0.0f, 0.0f), Duration(0.2f));
+  withoutVisuals.ShadowBlurRadius(12.0f, Duration(0.2f));
+  withoutVisuals.ShadowBlurRadiusBy(2.0f, Duration(0.2f));
+  withoutVisuals.ShadowOpacity(0.7f, Duration(0.2f));
+  withoutVisuals.ShadowOpacityBy(-0.1f, Duration(0.2f));
+  Animation missingVisualAnimation = Animation::New(0.1f);
+  withoutVisuals.ApplyTo(missingVisualAnimation, plain);
+  DALI_TEST_CHECK(missingVisualAnimation.GetDuration() >= 0.2f);
+
+  ViewAnimationSpec to = ViewAnimationSpec::New();
+  to.BackgroundColor(UiColor(Color::BLUE), Duration(0.3f), AlphaFunction(), Duration(0.1f));
+  to.ShadowBlurRadius(14.0f, Duration(0.3f));
+  to.ShadowOpacity(0.6f, Duration(0.3f));
+  to.Size(Vector3(120.0f, 90.0f, 0.0f), Duration(0.3f));
+  to.SizeWidth(120.0f, Duration(0.3f));
+  to.SizeHeight(90.0f, Duration(0.3f));
+  to.Position(Vector3(10.0f, 20.0f, 0.0f), Duration(0.3f));
+  to.PositionX(10.0f, Duration(0.3f));
+  to.PositionY(20.0f, Duration(0.3f));
+  to.Scale(Vector3(1.2f, 1.1f, 1.0f), Duration(0.3f));
+  to.ScaleX(1.2f, Duration(0.3f));
+  to.ScaleY(1.1f, Duration(0.3f));
+  to.Color(Vector4(0.8f, 0.7f, 0.6f, 1.0f), Duration(0.3f));
+  to.Opacity(0.8f, Duration(0.3f));
+  to.CornerRadius(Vector4(4.0f, 4.0f, 4.0f, 4.0f), Duration(0.3f));
+  to.CornerSquareness(Vector4(0.2f, 0.2f, 0.2f, 0.2f), Duration(0.3f));
+  Animation toAnimation = Animation::New(0.1f);
+  to.ApplyTo(toAnimation, decorated);
+  DALI_TEST_CHECK(toAnimation.GetDuration() >= 0.4f);
+
+  ViewAnimationSpec by = ViewAnimationSpec::New();
+  by.BackgroundColorBy(UiColor(0.1f, 0.0f, 0.0f, 0.0f), Duration(0.2f));
+  by.ShadowBlurRadiusBy(2.0f, Duration(0.2f));
+  by.ShadowOpacityBy(0.1f, Duration(0.2f));
+  by.SizeBy(Vector3(10.0f, 5.0f, 0.0f), Duration(0.2f));
+  by.SizeWidthBy(10.0f, Duration(0.2f));
+  by.SizeHeightBy(5.0f, Duration(0.2f));
+  by.PositionBy(Vector3(3.0f, 4.0f, 0.0f), Duration(0.2f));
+  by.PositionXBy(3.0f, Duration(0.2f));
+  by.PositionYBy(4.0f, Duration(0.2f));
+  by.ScaleBy(Vector3(0.1f, 0.1f, 0.0f), Duration(0.2f));
+  by.ScaleXBy(0.1f, Duration(0.2f));
+  by.ScaleYBy(0.1f, Duration(0.2f));
+  by.ColorBy(Vector4(0.1f, 0.0f, 0.0f, 0.0f), Duration(0.2f));
+  by.OpacityBy(-0.1f, Duration(0.2f));
+  by.CornerRadiusBy(Vector4(1.0f, 1.0f, 1.0f, 1.0f), Duration(0.2f));
+  by.CornerSquarenessBy(Vector4(0.1f, 0.1f, 0.1f, 0.1f), Duration(0.2f));
+  Animation byAnimation = Animation::New(0.1f);
+  by.ApplyTo(byAnimation, decorated);
+  DALI_TEST_CHECK(byAnimation.GetDuration() >= 0.2f);
+  END_TEST;
+}
+
+int UtcDaliViewAnimationSpecGradientVisualOffsetP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetStopNodes({{0.0f, UiColor(Color::RED)}, {1.0f, UiColor(Color::BLUE)}});
+  view.SetBackgroundGradient(gradient);
+  view.SetRequestedWidth(140.0f);
+  view.SetRequestedHeight(80.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  ViewAnimationSpec spec = ViewAnimationSpec::New();
+  spec.BackgroundGradientStartOffset(0.2f, Duration(0.25f));
+  spec.BackgroundGradientStartOffsetBy(0.1f, Duration(0.25f));
+  Animation animation = Animation::New(0.1f);
+  spec.ApplyTo(animation, view);
+  DALI_TEST_CHECK(animation.GetDuration() >= 0.25f);
+  END_TEST;
+}

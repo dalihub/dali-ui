@@ -22,10 +22,12 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
+#include <dali-ui-foundation/public-api/views/recycler/item-decoration.h>
 #include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
 #include <dali-ui-foundation/public-api/views/recycler/linear-items-layouter.h>
 #include <dali-ui-foundation/public-api/views/recycler/recycler-view.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali/devel-api/events/pan-gesture-devel.h>
 #include <dali.h>
 
 #define private public
@@ -129,6 +131,48 @@ Dali::Ui::Integration::RecyclerViewImpl& GetRecyclerImpl(RecyclerView recycler)
 {
   return static_cast<Dali::Ui::Integration::RecyclerViewImpl&>(recycler.GetImplementation());
 }
+
+class CountingDecoration : public ItemDecoration, public ItemDecorationInvalidationSupport
+{
+public:
+  mutable int offsets = 0;
+  int activated = 0;
+  int recycled = 0;
+  int layoutStarts = 0;
+  int boundsUpdates = 0;
+  Dali::Signal<void()> invalidated;
+
+  ItemOffsets GetItemOffsets(const ItemViewHolder&) const override
+  {
+    ++offsets;
+    return {1.0f, 2.0f, 1.0f, 3.0f};
+  }
+
+  void OnLayoutStart() override
+  {
+    ++layoutStarts;
+  }
+
+  void OnItemActivated(ItemViewHolder&, View) override
+  {
+    ++activated;
+  }
+
+  void OnItemRecycled(const ItemViewHolder&) override
+  {
+    ++recycled;
+  }
+
+  void OnItemBoundsUpdated(const ItemViewHolder&, const LayoutRect&) override
+  {
+    ++boundsUpdates;
+  }
+
+  Dali::Signal<void()>& LayoutInvalidatedSignal() override
+  {
+    return invalidated;
+  }
+};
 
 } // namespace
 
@@ -676,5 +720,264 @@ int UtcDaliRecyclerViewInternalHorizontalP(void)
   impl.StartScrollAnimation(200.0f, 0.1f);
   application.Render(200u);
   impl.CancelScrollAnimation();
+  END_TEST;
+}
+
+int UtcDaliRecyclerViewKeyboardAndWheelNavigationP(void)
+{
+  UiTestApplication application;
+  Window window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter adapter = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter);
+  auto& impl = GetRecyclerImpl(recycler);
+  impl.OnArrange(LayoutRect(0.0f, 0.0f, RECYCLER_WIDTH, RECYCLER_HEIGHT));
+  recycler.SetProperty(Actor::Property::FOCUSABLE, true);
+  recycler.SetKeyScrollEnabled(true);
+  recycler.SetKeyScrollStep(80.0f);
+
+  DALI_TEST_CHECK(impl.HasIntrinsicWheelHandling());
+  WheelEvent wheel = WheelEvent::New(WheelEvent::MOUSE_WHEEL, 0, 0u, Vector2::ZERO, -1, 100u);
+  DALI_TEST_CHECK(impl.OnWheelEvent(wheel));
+
+  KeyEvent key = KeyEvent::New();
+  key.SetState(KeyEvent::UP);
+  key.SetKeyName("Down");
+  DALI_TEST_CHECK(!impl.OnKeyEvent(key));
+
+  key.SetState(KeyEvent::DOWN);
+  DALI_TEST_CHECK(!impl.OnKeyEvent(key));
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(recycler));
+
+  key.SetKeyName("InvalidKey");
+  DALI_TEST_CHECK(!impl.OnKeyEvent(key));
+  key.SetKeyName("Left");
+  DALI_TEST_CHECK(!impl.OnKeyEvent(key));
+  key.SetKeyName("Down");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  key.SetKeyName("Next");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+
+  key.SetKeyName("End");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  DALI_TEST_EQUALS(impl.mKeyRepeatTargetPos, gItemCount - 1u, TEST_LOCATION);
+  impl.StopKeyRepeatTimer();
+
+  key.SetKeyName("Home");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  DALI_TEST_EQUALS(impl.mKeyRepeatTargetPos, 0u, TEST_LOCATION);
+  impl.StopKeyRepeatTimer();
+  FocusManager::Get().ClearFocus();
+  impl.CancelScrollAnimation();
+  impl.FinishEdgeEffects();
+  END_TEST;
+}
+
+int UtcDaliRecyclerViewPublicEffectsAndSignalsP(void)
+{
+  UiTestApplication application;
+  RecyclerView recycler = RecyclerView::New();
+  recycler.SetOverScrollMode(OverScrollMode::Always);
+  DALI_TEST_EQUALS(recycler.GetOverScrollMode(), OverScrollMode::Always, TEST_LOCATION);
+
+  EdgeEffect start = EdgeEffect::New();
+  EdgeEffect end = EdgeEffect::New();
+  recycler.SetStartEdgeEffect(start);
+  recycler.SetEndEdgeEffect(end);
+  DALI_TEST_CHECK(recycler.GetStartEdgeEffect() == start);
+  DALI_TEST_CHECK(recycler.GetEndEdgeEffect() == end);
+  DALI_TEST_CHECK(!recycler.IsScrolling());
+
+  int started = 0;
+  int finished = 0;
+  int dragStarted = 0;
+  int dragFinished = 0;
+  recycler.ScrollStartedSignal().Connect(&application, [&started](RecyclerView) { ++started; });
+  recycler.ScrollFinishedSignal().Connect(&application, [&finished](RecyclerView) { ++finished; });
+  recycler.DragStartedSignal().Connect(&application, [&dragStarted](RecyclerView) { ++dragStarted; });
+  recycler.DragFinishedSignal().Connect(&application, [&dragFinished](RecyclerView) { ++dragFinished; });
+  auto& impl = GetRecyclerImpl(recycler);
+  impl.SendScrollStarted();
+  impl.SendDragStarted();
+  impl.SendDragFinished();
+  impl.SendScrollFinished();
+  DALI_TEST_EQUALS(started, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(finished, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragStarted, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragFinished, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliRecyclerViewDecorationLifecycleP(void)
+{
+  UiTestApplication application;
+  Window window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter adapter = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter, true);
+  DALI_TEST_CHECK(recycler.GetAdapter() == adapter);
+  auto& impl = GetRecyclerImpl(recycler);
+
+  CountingDecoration decoration;
+  recycler.AddItemDecoration(decoration);
+  DALI_TEST_EQUALS(impl.mDecorations.size(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(decoration.activated > 0);
+  DALI_TEST_CHECK(decoration.offsets > 0);
+  DALI_TEST_CHECK(decoration.layoutStarts > 0);
+  DALI_TEST_CHECK(decoration.boundsUpdates > 0);
+
+  recycler.AddItemDecoration(decoration);
+  DALI_TEST_EQUALS(impl.mDecorations.size(), 1u, TEST_LOCATION);
+
+  const int previousBounds = decoration.boundsUpdates;
+  decoration.invalidated.Emit();
+  application.SendNotification();
+  recycler.ScrollBy(80.0f, false);
+  application.SendNotification();
+  DALI_TEST_CHECK(decoration.boundsUpdates > previousBounds);
+
+  recycler.RemoveItemDecoration(decoration);
+  DALI_TEST_CHECK(decoration.recycled > 0);
+  DALI_TEST_CHECK(impl.mDecorations.empty());
+  recycler.RemoveItemDecoration(decoration);
+
+  {
+    CountingDecoration temporary;
+    recycler.AddItemDecoration(temporary);
+    DALI_TEST_EQUALS(impl.mDecorations.size(), 1u, TEST_LOCATION);
+  }
+  DALI_TEST_CHECK(impl.mDecorations.empty());
+
+  RecyclerView withoutLayouter = RecyclerView::New();
+  CountingDecoration early;
+  withoutLayouter.AddItemDecoration(early);
+  DALI_TEST_CHECK(GetRecyclerImpl(withoutLayouter).mDecorations.size() == 1u);
+  withoutLayouter.RemoveItemDecoration(early);
+  END_TEST;
+}
+
+int UtcDaliRecyclerViewPanGestureLifecycleP(void)
+{
+  UiTestApplication application;
+  Window window = application.GetWindow();
+  ResetCounters();
+  ItemAdapter adapter = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter);
+  auto& impl = GetRecyclerImpl(recycler);
+
+  unsigned int dragStarted = 0u;
+  unsigned int dragFinished = 0u;
+  recycler.DragStartedSignal().Connect(&application, [&](RecyclerView) { ++dragStarted; });
+  recycler.DragFinishedSignal().Connect(&application, [&](RecyclerView) { ++dragFinished; });
+
+  PanGesture started = DevelPanGesture::New(GestureState::STARTED);
+  DevelPanGesture::SetPosition(started, Vector2(60.0f, 160.0f));
+  impl.OnPanGesture(recycler, started);
+  DALI_TEST_CHECK(impl.mIsDragging);
+
+  PanGesture continuing = DevelPanGesture::New(GestureState::CONTINUING);
+  DevelPanGesture::SetPosition(continuing, Vector2(60.0f, 100.0f));
+  impl.OnPanGesture(recycler, continuing);
+  DALI_TEST_CHECK(recycler.GetScrollOffset() > 0.0f);
+
+  PanGesture finished = DevelPanGesture::New(GestureState::FINISHED);
+  DevelPanGesture::SetVelocity(finished, Vector2::ZERO);
+  impl.OnPanGesture(recycler, finished);
+  DALI_TEST_CHECK(!impl.mIsDragging);
+  DALI_TEST_EQUALS(dragStarted, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragFinished, 1u, TEST_LOCATION);
+
+  impl.OnPanGesture(recycler, started);
+  PanGesture cancelled = DevelPanGesture::New(GestureState::CANCELLED);
+  impl.OnPanGesture(recycler, cancelled);
+  DALI_TEST_CHECK(!impl.mIsDragging);
+  DALI_TEST_EQUALS(dragStarted, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragFinished, 2u, TEST_LOCATION);
+
+  impl.OnPanGesture(recycler, started);
+  DevelPanGesture::SetVelocity(finished, Vector2(0.0f, -1000.0f));
+  impl.OnPanGesture(recycler, finished);
+  impl.CancelScrollAnimation();
+  application.SendNotification();
+  application.Render();
+  END_TEST;
+}
+
+int UtcDaliRecyclerViewFocusEntryAndMoveP(void)
+{
+  UiTestApplication application;
+  Window window = application.GetWindow();
+  ResetCounters();
+  ItemAdapter adapter = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter);
+  recycler.SetKeyScrollEnabled(true);
+  recycler.SetKeyScrollStep(80.0f);
+  auto& impl = GetRecyclerImpl(recycler);
+  DALI_TEST_CHECK(!impl.mActiveItems.empty());
+  for(auto& record : impl.mActiveItems)
+  {
+    if(record.view)
+    {
+      record.view.SetFocusable(true);
+    }
+  }
+
+  View first = impl.OnFocusRequested();
+  DALI_TEST_CHECK(first);
+  DALI_TEST_CHECK(first != recycler);
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(first));
+  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() != first);
+  FocusManager::Get().ClearFocus();
+
+  recycler.SetKeyScrollEnabled(false);
+  DALI_TEST_CHECK(!impl.OnFocusRequested());
+  END_TEST;
+}
+
+int UtcDaliRecyclerViewLayouterReconfigurationP(void)
+{
+  UiTestApplication application;
+  Window window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter adapter = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New();
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter);
+  DALI_TEST_EQUALS(layouter.GetOrientation(), ItemsLayouter::Orientation::VERTICAL, TEST_LOCATION);
+  layouter.SetItemExtent(0.0f);
+  DALI_TEST_EQUALS(layouter.GetItemExtent(), 1.0f, TEST_LOCATION);
+  layouter.SetItemSpacing(-4.0f);
+  DALI_TEST_EQUALS(layouter.GetItemSpacing(), 0.0f, TEST_LOCATION);
+  layouter.SetItemExtent(64.0f);
+  layouter.SetItemSpacing(8.0f);
+  DALI_TEST_EQUALS(layouter.GetItemExtent(), 64.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(layouter.GetItemSpacing(), 8.0f, TEST_LOCATION);
+
+  layouter.SetOrientation(ItemsLayouter::Orientation::HORIZONTAL);
+  DALI_TEST_EQUALS(layouter.GetOrientation(), ItemsLayouter::Orientation::HORIZONTAL, TEST_LOCATION);
+  const LayoutRect horizontal = layouter.GetItemBounds(2u, 100.0f);
+  DALI_TEST_CHECK(horizontal.width > 0.0f);
+  DALI_TEST_EQUALS(horizontal.height, 100.0f, 0.001f, TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  recycler.ScrollBy(96.0f, false);
+  application.SendNotification();
+  DALI_TEST_CHECK(recycler.GetScrollOffset() >= 0.0f);
+
+  layouter.SetOrientation(ItemsLayouter::Orientation::HORIZONTAL);
+  layouter.SetOrientation(ItemsLayouter::Orientation::VERTICAL);
+  const LayoutRect vertical = layouter.GetItemBounds(2u, 100.0f);
+  DALI_TEST_EQUALS(vertical.width, 100.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(vertical.height > 0.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(layouter.CanScrollVertically());
   END_TEST;
 }

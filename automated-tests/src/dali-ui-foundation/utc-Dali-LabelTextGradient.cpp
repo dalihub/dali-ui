@@ -1272,3 +1272,60 @@ int UtcDaliLabelTextRevealConcurrentAnimationsAndRebuildP(void)
   ExpectRendererBindings();
   END_TEST;
 }
+
+int UtcDaliLabelAsyncGradientMarqueeComposesAfterPublicationP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  for(bool viewBound : {false, true})
+  {
+    Label label = Label::New("Long gradient marquee text that must scroll after asynchronous publication.");
+    label.SetRequestedWidth(130.0f);
+    label.SetRequestedHeight(42.0f);
+    label.SetAsyncRendering(true);
+    label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+    label.SetMarqueeLoopCount(0);
+    label.SetTextGradient(MakeRenderableLinear());
+    label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ONE, Vector2::ZERO));
+    label.SetTextGradientBoundsMode(viewBound ? Text::GradientBoundsMode::VIEW_BOUND
+                                              : Text::GradientBoundsMode::CONTENT_BOUND);
+    label.SetTextGradientOverlayBoundsMode(viewBound ? Text::GradientBoundsMode::CONTENT_BOUND
+                                                     : Text::GradientBoundsMode::VIEW_BOUND);
+    label.SetTextGradientOverlayMode(Text::GradientOverlayMode::SCREEN);
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render();
+
+    for(int trigger = 0; trigger < 4; ++trigger)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+      application.SendNotification();
+      application.Render(16);
+      if(label.GetRendererCount() > 0u && label.GetRendererAt(0u).GetTextures())
+      {
+        break;
+      }
+    }
+    DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+    DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures());
+
+    label.StartMarquee();
+    application.SendNotification();
+    application.Render(16);
+    for(int trigger = 0; trigger < 6 && !label.IsMarqueeRunning(); ++trigger)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+      application.SendNotification();
+      application.Render(16);
+    }
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+    DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+    DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures());
+    label.StopMarquee();
+    application.GetScene().Remove(label);
+  }
+  END_TEST;
+}

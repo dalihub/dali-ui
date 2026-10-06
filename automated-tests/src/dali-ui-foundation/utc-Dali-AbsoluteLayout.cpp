@@ -840,3 +840,24 @@ int UtcDaliAbsoluteLayoutReentrantChildRemoveDuringArrangeP(void)
   gSiblingToRemove.Reset();
   END_TEST;
 }
+
+int UtcDaliAbsoluteLayoutParamsIndividualBoundsAndMoveP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayoutParams params = AbsoluteLayoutParams::New();
+  params.SetX(4.0f).SetY(8.0f).SetWidth(120.0f).SetHeight(60.0f);
+  DALI_TEST_EQUALS(params.GetX(), 4.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(params.GetY(), 8.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(params.GetWidth(), 120.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(params.GetHeight(), 60.0f, TEST_LOCATION);
+
+  AbsoluteLayoutParams moved(std::move(params));
+  DALI_TEST_EQUALS(moved.GetBounds().GetY(), 8.0f, TEST_LOCATION);
+  AbsoluteLayoutParams assigned = AbsoluteLayoutParams::New();
+  assigned = std::move(moved);
+  DALI_TEST_EQUALS(assigned.GetBounds().GetWidth(), 120.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(assigned.GetBounds().GetHeight(), 60.0f, TEST_LOCATION);
+  assigned = std::move(assigned);
+  DALI_TEST_EQUALS(assigned.GetX(), 4.0f, TEST_LOCATION);
+  END_TEST;
+}

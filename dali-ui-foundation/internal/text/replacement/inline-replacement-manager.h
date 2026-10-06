@@ -360,7 +360,7 @@ private:
   bool                          UpdateEntryPixelRevealTiming(Entry& entry);
   static void                   ResetEntryResourceState(Entry& entry);
   static RuntimeImageDescriptor BuildRuntimeImageDescriptor(const Ui::Text::ReplacementRunSnapshot& run,
-                                                            float                                   effectiveScale);
+                                                            const Vector2&                          displaySize);
   static bool                   IsSameRuntimeImageDescriptor(const RuntimeImageDescriptor& lhs,
                                                              const RuntimeImageDescriptor& rhs);
 

@@ -34,7 +34,7 @@ This sample demonstrates DALi UI text features.
 | `text-style-bevel.example` | Text bevel style sample |
 | `text-fit.example` | Text fit sample |
 | `text-fit-candidate.example` | Text fit candidate sample |
-| `text-scale.example` | Text scale sample |
+| `text-scale.example` | System font/UI scale, ImageSpan resources, InputField and sync/async TextFit |
 | `text-font-variation.example` | Font variation sample |
 | `text-cutout-mask.example` | Text cutout mask sample |
 | `text-gradient.example` | Label TextGradient visual playground |
@@ -50,6 +50,7 @@ This sample demonstrates DALi UI text features.
 | `text-formatted-localization.example` | Positional printf formatting and gettext plural lookup using localized PO/MO strings |
 | `text-localization-custom-component.example` | Custom component localization sample |
 | `text-gradient-localization.example` | Localized markup ranges with TextGradient |
+| `text-image-span.example` | Sync/async inline image layout playground |
 
 ## Localization resources
 

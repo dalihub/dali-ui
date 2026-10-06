@@ -254,6 +254,42 @@ int UtcDaliLineSeriesSettersP(void)
   END_TEST;
 }
 
+int UtcDaliLineSeriesExtendedPropertiesAndAssignmentP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  LineSeries series = LineSeries::New();
+  const Vector4 markerColor(0.2f, 0.4f, 0.6f, 1.0f);
+  const Vector4 borderColor(0.9f, 0.7f, 0.5f, 1.0f);
+  const Vector4 labelColor(0.3f, 0.5f, 0.7f, 1.0f);
+
+  series.SetMarkerColor(markerColor);
+  series.SetMarkerBorderColor(borderColor);
+  series.SetMarkerBorderWidth(2.5f);
+  series.SetDataLabelColor(labelColor);
+  series.SetDataLabelSize(18.0f);
+  DALI_TEST_EQUALS(series.GetMarkerColor(), markerColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(series.GetMarkerBorderColor(), borderColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(series.GetMarkerBorderWidth(), 2.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(series.GetDataLabelColor(), labelColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(series.GetDataLabelSize(), 18.0f, 0.001f, TEST_LOCATION);
+
+  LineSeries::DataLabelFormatterType formatter = [](float, int) -> Dali::String { return "formatted"; };
+  series.SetDataLabelFormatter(formatter);
+  DALI_TEST_CHECK(series.GetDataLabelFormatter() == formatter);
+  series.SetDataLabelFormatter(nullptr);
+  DALI_TEST_CHECK(series.GetDataLabelFormatter() == nullptr);
+
+  LineSeries copy;
+  copy = series;
+  DALI_TEST_CHECK(copy == series);
+  copy = copy;
+  DALI_TEST_CHECK(copy == series);
+  LineSeries moved;
+  moved = std::move(copy);
+  DALI_TEST_CHECK(moved == series);
+  END_TEST;
+}
+
 // ===========================================================================
 // BarSeries
 // ===========================================================================

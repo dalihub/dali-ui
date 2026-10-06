@@ -26,6 +26,7 @@
 #include <dali-ui-foundation/extension-api/focus-manager.h>
 #include <dali-ui-foundation/extension-api/focus-indication-policy.h>
 #include <dali-ui-foundation/extension-api/ui-config-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-adaptor-impl.h>

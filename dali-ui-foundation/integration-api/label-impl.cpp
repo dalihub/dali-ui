@@ -4287,6 +4287,7 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
   parameters.relativeLineSize             = mController->GetRelativeLineSize();
   parameters.characterSpacing             = mController->GetCharacterSpacing();
   parameters.effectiveTextScale           = mController->GetEffectiveTextScale();
+  parameters.decorationUiScale            = mController->GetUiScale();
   parameters.horizontalAlignment          = mController->GetHorizontalAlignment();
   parameters.verticalAlignment            = mController->GetVerticalAlignment();
   parameters.verticalLineAlignment        = mController->GetVerticalLineAlignment();

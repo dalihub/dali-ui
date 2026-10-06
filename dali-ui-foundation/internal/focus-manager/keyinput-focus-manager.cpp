@@ -79,6 +79,21 @@ View KeyInputFocusManager::GetCurrentFocusView() const
   return GetImpl(*this).GetCurrentFocusView();
 }
 
+View KeyInputFocusManager::GetCurrentFocusView(Window window) const
+{
+  return GetImpl(*this).GetCurrentFocusView(window);
+}
+
+void KeyInputFocusManager::SetIndependentWindow(Window window, bool enabled)
+{
+  GetImpl(*this).SetIndependentWindow(window, enabled);
+}
+
+void KeyInputFocusManager::SetPrimaryWindow(Window window)
+{
+  GetImpl(*this).SetPrimaryWindow(window);
+}
+
 void KeyInputFocusManager::RemoveFocus(View view)
 {
   GetImpl(*this).RemoveFocus(view);

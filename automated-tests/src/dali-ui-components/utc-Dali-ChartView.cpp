@@ -18,11 +18,14 @@
 #include <dali-ui-components/public-api/chart/chart-axis.h>
 #include <dali-ui-components/public-api/chart/bar-series.h>
 #include <dali-ui-components/public-api/chart/chart-section.h>
+#include <dali-ui-components/integration-api/chart/chart-hit-tester.h>
 #include <dali-ui-components/public-api/chart/chart-view.h>
 #include <dali-ui-components/public-api/chart/line-series.h>
 #include <dali-ui-components/public-api/chart/pie-series.h>
 #include <dali-ui-components/public-api/chart/scatter-series.h>
 #include <dali-ui-components/public-api/components-ui-config.h>
+#include <dali/devel-api/events/pan-gesture-devel.h>
+#include <dali/devel-api/events/pinch-gesture-devel.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -73,6 +76,74 @@ Dali::Ui::Integration::ChartViewImpl& GetChartImpl(ChartView view)
   return static_cast<Dali::Ui::Integration::ChartViewImpl&>(view.GetImplementation());
 }
 } // namespace
+
+int UtcDaliChartPointEventArgsValueSemanticsP(void)
+{
+  ChartPointEventArgs empty;
+  DALI_TEST_EQUALS(empty.GetSeriesIndex(), -1, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetPointIndex(), -1, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetDataX(), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetDataY(), 0.0f, 0.001f, TEST_LOCATION);
+
+  ChartPointEventArgs original(2, 4, 3.5f, -7.0f, "revenue", "April");
+  DALI_TEST_EQUALS(original.GetSeriesIndex(), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetPointIndex(), 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetDataX(), 3.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetDataY(), -7.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetSeriesName(), Dali::String("revenue"), TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetXLabel(), Dali::String("April"), TEST_LOCATION);
+
+  ChartPointEventArgs copy(original);
+  DALI_TEST_EQUALS(copy.GetSeriesName(), Dali::String("revenue"), TEST_LOCATION);
+  ChartPointEventArgs assigned;
+  assigned = original;
+  DALI_TEST_EQUALS(assigned.GetPointIndex(), 4, TEST_LOCATION);
+  assigned = assigned;
+  DALI_TEST_EQUALS(assigned.GetSeriesIndex(), 2, TEST_LOCATION);
+
+  ChartPointEventArgs moved(std::move(copy));
+  DALI_TEST_EQUALS(moved.GetDataY(), -7.0f, 0.001f, TEST_LOCATION);
+  ChartPointEventArgs moveAssigned;
+  moveAssigned = std::move(assigned);
+  DALI_TEST_EQUALS(moveAssigned.GetXLabel(), Dali::String("April"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliChartViewGaugeStyleAndSignalsP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(360.0f, 360.0f));
+  chartView.SetGaugeStartAngle(-90.0f);
+  chartView.SetGaugeArcWidth(0.25f);
+  chartView.SetGaugeTrackColor(Color::BLUE);
+  chartView.SetGaugeProgressColor(Color::GREEN);
+  DALI_TEST_EQUALS(chartView.GetGaugeStartAngle(), -90.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(chartView.GetGaugeArcWidth(), 0.25f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(chartView.GetGaugeTrackColor(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(chartView.GetGaugeProgressColor(), Color::GREEN, TEST_LOCATION);
+
+  DALI_TEST_CHECK(chartView.LegendItemTappedSignal().Empty());
+  DALI_TEST_CHECK(chartView.MultiPointSelectedSignal().Empty());
+  DALI_TEST_CHECK(chartView.ZoomedSignal().Empty());
+  END_TEST;
+}
+
+int UtcDaliChartViewPublicTooltipFormatterP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  chartView.SetTooltipFormatter([](const Dali::String& series, const Dali::String& label, float)
+  {
+    return series + label;
+  });
+  Dali::Ui::Integration::HitResult hit;
+  hit.seriesName = "revenue";
+  hit.xLabel = "April";
+  hit.isValid = true;
+  DALI_TEST_EQUALS(GetChartImpl(chartView).BuildMultiTooltipText({hit}), std::string("revenueApril"), TEST_LOCATION);
+
+  END_TEST;
+}
 
 int UtcDaliChartViewConstructorP(void)
 {
@@ -692,5 +763,299 @@ int UtcDaliChartViewInternalPieHitTestP(void)
 
   pie.SetVisible(false);
   DALI_TEST_EQUALS(impl.HitTestPie(outerPoint, seriesIndex), -1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliChartViewWheelZoomAtPlotCenterP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries line = LineSeries::New();
+  line.SetValues({0.0f, 10.0f, 20.0f, 30.0f});
+  chartView.AddSeries(line);
+  chartView.SetZoomMode(static_cast<int>(ChartView::ZoomMode::ZOOM_X) |
+                        static_cast<int>(ChartView::ZoomMode::ZOOM_Y));
+  RenderChart(application, chartView);
+
+  auto& impl = GetChartImpl(chartView);
+  impl.InitViewportFromData();
+  const float originalXRange = impl.mViewportXMax - impl.mViewportXMin;
+  const float originalYRange = impl.mViewportYMax - impl.mViewportYMin;
+  const auto& plot = impl.mLastLayout.plotArea;
+  const Vector2 center(plot.x + plot.width * 0.5f, plot.y + plot.height * 0.5f);
+
+  WheelEvent zoomIn = WheelEvent::New(WheelEvent::MOUSE_WHEEL, 0, 0u, center, 1, 100u);
+  DALI_TEST_CHECK(impl.OnWheel(chartView, zoomIn));
+  DALI_TEST_CHECK(impl.mViewportXMax - impl.mViewportXMin < originalXRange);
+  DALI_TEST_CHECK(impl.mViewportYMax - impl.mViewportYMin < originalYRange);
+
+  WheelEvent outside = WheelEvent::New(WheelEvent::MOUSE_WHEEL, 0, 0u, Vector2(-100.0f, -100.0f), 1, 200u);
+  DALI_TEST_CHECK(!impl.OnWheel(chartView, outside));
+
+  chartView.ResetZoom();
+  DALI_TEST_CHECK(!impl.mViewportActive);
+
+  END_TEST;
+}
+int UtcDaliChartViewPanGestureMovesViewportP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries line = LineSeries::New();
+  line.SetValues({5.0f, 10.0f, 20.0f, 35.0f});
+  chartView.AddSeries(line);
+  chartView.SetZoomMode(static_cast<int>(ChartView::ZoomMode::PAN_X) |
+                        static_cast<int>(ChartView::ZoomMode::PAN_Y));
+  chartView.SetZoomClampEnabled(false);
+  RenderChart(application, chartView);
+
+  auto& impl = GetChartImpl(chartView);
+  PanGesture started = DevelPanGesture::New(GestureState::STARTED);
+  DevelPanGesture::SetPosition(started, Vector2(100.0f, 100.0f));
+  impl.OnPanGesture(chartView, started);
+  DALI_TEST_CHECK(impl.mPanActive);
+  const float startX = impl.mViewportXMin;
+  const float startY = impl.mViewportYMin;
+
+  PanGesture continuing = DevelPanGesture::New(GestureState::CONTINUING);
+  DevelPanGesture::SetPosition(continuing, Vector2(140.0f, 120.0f));
+  impl.OnPanGesture(chartView, continuing);
+  DALI_TEST_CHECK(impl.mViewportXMin < startX);
+  DALI_TEST_CHECK(impl.mViewportYMin < startY);
+
+  PanGesture finished = DevelPanGesture::New(GestureState::FINISHED);
+  impl.OnPanGesture(chartView, finished);
+  DALI_TEST_CHECK(!impl.mPanActive);
+  END_TEST;
+}
+
+int UtcDaliChartViewTouchHoverAndLegendInteractionP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries series = LineSeries::New();
+  series.SetName("traffic");
+  series.SetValues({2.0f, 5.0f, 9.0f, 4.0f});
+  chartView.AddSeries(series);
+  RenderChart(application, chartView);
+
+  auto& impl = GetChartImpl(chartView);
+  TouchEvent started = TouchEvent::New(1u);
+  started.AddPoint(1, PointState::STARTED, Vector2(100.0f, 100.0f));
+  DALI_TEST_CHECK(impl.OnTouch(chartView, started));
+  TouchEvent motion = TouchEvent::New(2u);
+  motion.AddPoint(1, PointState::MOTION, Vector2(140.0f, 120.0f));
+  DALI_TEST_CHECK(impl.OnTouch(chartView, motion));
+  TouchEvent finished = TouchEvent::New(3u);
+  finished.AddPoint(1, PointState::FINISHED, Vector2(140.0f, 120.0f));
+  DALI_TEST_CHECK(impl.OnTouch(chartView, finished));
+  DALI_TEST_CHECK(!impl.mTouchActive);
+
+  HoverEvent entered = HoverEvent::New(4u);
+  entered.AddPoint(1, PointState::STARTED, Vector2(110.0f, 100.0f));
+  DALI_TEST_CHECK(impl.OnHover(chartView, entered));
+  HoverEvent exited = HoverEvent::New(5u);
+  exited.AddPoint(1, PointState::FINISHED, Vector2(110.0f, 100.0f));
+  DALI_TEST_CHECK(impl.OnHover(chartView, exited));
+
+  impl.mLastLayout.hasLegend = true;
+  impl.mModel.mStyle.visibility.showLegend = true;
+  impl.mLastLayout.legendItems.push_back({Vector2(100.0f, 200.0f), Vector2(120.0f, 195.0f), "traffic"});
+  impl.mLegendLabels.push_back(Label::New());
+  const Vector2 legendPosition(100.0f, 195.0f);
+  DALI_TEST_EQUALS(impl.FindLegendItemAt(legendPosition), 0, TEST_LOCATION);
+  impl.HighlightLegendItem(0);
+  DALI_TEST_EQUALS(impl.mHoveredLegendIndex, 0, TEST_LOCATION);
+  impl.ClearLegendHighlight();
+  DALI_TEST_EQUALS(impl.mHoveredLegendIndex, -1, TEST_LOCATION);
+  DALI_TEST_CHECK(series.IsVisible());
+  DALI_TEST_CHECK(impl.HandleLegendTap(legendPosition));
+  DALI_TEST_CHECK(!series.IsVisible());
+
+  impl.mModel.mStyle.interaction.touchEnabled = false;
+  DALI_TEST_CHECK(!impl.OnTouch(chartView, started));
+  impl.mModel.mStyle.interaction.hoverEnabled = false;
+  DALI_TEST_CHECK(!impl.OnHover(chartView, entered));
+  END_TEST;
+}
+
+int UtcDaliChartViewDenseLineAndNumericBarsP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView dense = ChartView::New(ChartView::Type::LINE, Vector2(280.0f, 220.0f));
+  LineSeries line = LineSeries::New();
+  line.SetName("Dense samples");
+  line.SetMarkersVisible(true);
+  line.SetMarkerShape(LineSeries::MarkerShape::CIRCLE);
+  Dali::Vector<Vector2> points;
+  for(uint32_t index = 0u; index < 1400u; ++index)
+  {
+    const float value = static_cast<float>(static_cast<int>(index % 37u) - 18);
+    points.PushBack(Vector2(static_cast<float>(index), index == 301u
+                                                         ? std::numeric_limits<float>::quiet_NaN()
+                                                         : value));
+  }
+  line.SetValues(points);
+  dense.AddSeries(line);
+  RenderChart(application, dense);
+  DALI_TEST_CHECK(dense.GetChildCount() > 0u);
+
+  ChartView bars = ChartView::New(ChartView::Type::BAR, Vector2(280.0f, 220.0f));
+  BarSeries bar = BarSeries::New();
+  bar.SetName("Irregular intervals");
+  bar.SetValues({Vector2(0.0f, -4.0f), Vector2(0.5f, 8.0f),
+                 Vector2(2.5f, 3.0f), Vector2(8.0f, 12.0f)});
+  bars.AddSeries(bar);
+  RenderChart(application, bars);
+  DALI_TEST_CHECK(bars.GetChildCount() > 0u);
+  END_TEST;
+}
+
+int UtcDaliChartViewPinchZoomUpdatesBothViewportAxesP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries line = LineSeries::New();
+  line.SetValues({0.0f, 10.0f, 20.0f, 30.0f});
+  chartView.AddSeries(line);
+  chartView.SetZoomMode(static_cast<int>(ChartView::ZoomMode::ZOOM_X) |
+                        static_cast<int>(ChartView::ZoomMode::ZOOM_Y));
+  chartView.SetZoomClampEnabled(false);
+  chartView.SetAutoFitYOnPanEnabled(false);
+  RenderChart(application, chartView);
+
+  auto& impl = GetChartImpl(chartView);
+  impl.InitViewportFromData();
+  const float originalXRange = impl.mViewportXMax - impl.mViewportXMin;
+  const float originalYRange = impl.mViewportYMax - impl.mViewportYMin;
+
+  PinchGesture started = DevelPinchGesture::New(GestureState::STARTED);
+  impl.OnPinchGesture(chartView, started);
+  DALI_TEST_CHECK(impl.mPinchStartXMax > impl.mPinchStartXMin);
+  DALI_TEST_CHECK(impl.mPinchStartYMax > impl.mPinchStartYMin);
+
+  PinchGesture continuing = DevelPinchGesture::New(GestureState::CONTINUING);
+  impl.OnPinchGesture(chartView, continuing);
+  DALI_TEST_CHECK(impl.mViewportActive);
+  DALI_TEST_CHECK(impl.mViewportXMax - impl.mViewportXMin > originalXRange);
+  DALI_TEST_CHECK(impl.mViewportYMax - impl.mViewportYMin > originalYRange);
+
+  chartView.SetZoomMode(static_cast<int>(ChartView::ZoomMode::NONE));
+  const float unchangedXMin = impl.mViewportXMin;
+  impl.OnPinchGesture(chartView, continuing);
+  DALI_TEST_EQUALS(impl.mViewportXMin, unchangedXMin, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliChartViewTitlePlacementAndLabelPoolLifecycleP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  chartView.SetTitle("Revenue");
+  ChartAxis xAxis = ChartAxis::New();
+  ChartAxis yAxis = ChartAxis::New();
+  xAxis.SetTitle("Month");
+  yAxis.SetTitle("Amount");
+  xAxis.SetLabels({"Jan", "Feb", "Mar"});
+  chartView.SetXAxis(xAxis);
+  chartView.SetYAxis(yAxis);
+  LineSeries line = LineSeries::New();
+  line.SetValues({1.0f, 3.0f, 2.0f});
+  line.SetName("Revenue");
+  chartView.AddSeries(line);
+  chartView.SetProperty(ChartView::Property::SHOW_LEGEND, true);
+  RenderChart(application, chartView);
+
+  auto& impl = GetChartImpl(chartView);
+  DALI_TEST_CHECK(impl.mTitleLabel);
+  DALI_TEST_CHECK(impl.mXAxisTitleLabel);
+  DALI_TEST_CHECK(impl.mYAxisTitleLabel);
+  DALI_TEST_CHECK(!impl.mXTickLabels.empty());
+  DALI_TEST_CHECK(!impl.mYTickLabels.empty());
+
+  struct TitleCase
+  {
+    ChartView::TitlePosition position;
+    Vector3 pivot;
+  };
+  const TitleCase titleCases[] = {
+    {ChartView::TitlePosition::TOP_LEFT, Pivot::TOP_LEFT},
+    {ChartView::TitlePosition::TOP_RIGHT, Pivot::TOP_RIGHT},
+    {ChartView::TitlePosition::BOTTOM_CENTER, Pivot::BOTTOM_CENTER},
+    {ChartView::TitlePosition::TOP_CENTER, Pivot::TOP_CENTER},
+  };
+  for(const TitleCase& titleCase : titleCases)
+  {
+    chartView.SetTitlePosition(titleCase.position);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(impl.mTitleLabel.GetProperty<Vector3>(Actor::Property::PIVOT), titleCase.pivot, TEST_LOCATION);
+  }
+  auto layout = impl.mLastLayout;
+  layout.hasLegend = true;
+  layout.legendItems.push_back({Vector2(20.0f, 20.0f), Vector2(40.0f, 20.0f), "Revenue"});
+  impl.PlaceTextLabels(layout);
+  DALI_TEST_CHECK(!impl.mLegendLabels.empty());
+
+  layout.hasLegend = false;
+  layout.hasTitle = false;
+  layout.hasXAxisTitle = false;
+  layout.hasYAxisTitle = false;
+  impl.PlaceTextLabels(layout);
+  DALI_TEST_CHECK(impl.mLegendLabels.empty());
+  DALI_TEST_CHECK(!impl.mTitleLabel.GetProperty<bool>(Actor::Property::VISIBLE));
+  DALI_TEST_CHECK(!impl.mXAxisTitleLabel.GetProperty<bool>(Actor::Property::VISIBLE));
+  DALI_TEST_CHECK(!impl.mYAxisTitleLabel.GetProperty<bool>(Actor::Property::VISIBLE));
+
+  const size_t childrenBeforeClear = chartView.GetChildCount();
+  impl.ClearLabelPool(impl.mYTickLabels);
+  DALI_TEST_CHECK(impl.mYTickLabels.empty());
+  DALI_TEST_CHECK(chartView.GetChildCount() < childrenBeforeClear);
+  END_TEST;
+}
+
+int UtcDaliChartHitTesterSameXAndNearestYP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  Dali::Ui::Integration::ChartModel model;
+  model.mXAxis = ChartAxis::New();
+  model.mYAxis = ChartAxis::New();
+  model.mXAxis.SetLabels({"zero", "one"});
+
+  LineSeries low = LineSeries::New();
+  low.SetName("low");
+  low.SetValues({Vector2(1.0f, 2.0f), Vector2(3.0f, 4.0f)});
+  LineSeries high = LineSeries::New();
+  high.SetName("high");
+  high.SetValues({Vector2(1.0f, 8.0f)});
+  model.AddSeries(low);
+  model.AddSeries(high);
+
+  Dali::Ui::Integration::ScaleEngine scale;
+  scale.SetPlotArea(Rect<float>(0.0f, 0.0f, 100.0f, 100.0f));
+  scale.SetDataRange(0.0f, 10.0f, 0.0f, 10.0f);
+  Dali::Ui::Integration::ChartHitTester tester;
+  DALI_TEST_CHECK(tester.IsInsidePlotArea(Vector2(10.0f, 20.0f), scale));
+  DALI_TEST_CHECK(!tester.IsInsidePlotArea(Vector2(-1.0f, 20.0f), scale));
+
+  auto matches = tester.FindBySameX(Vector2(10.0f, 20.0f), model, scale, 15.0f, false);
+  DALI_TEST_EQUALS(matches.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(matches[0].xLabel, String("one"), TEST_LOCATION);
+  auto nearest = tester.FindBySameX(Vector2(10.0f, 20.0f), model, scale, 15.0f, true);
+  DALI_TEST_EQUALS(nearest.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(nearest[0].seriesName, String("high"), TEST_LOCATION);
+  DALI_TEST_EQUALS(nearest[0].dataY, 8.0f, TEST_LOCATION);
+  auto closest = tester.FindNearest(Vector2(10.0f, 20.0f), model, scale, 15.0f);
+  DALI_TEST_CHECK(closest.isValid);
+  DALI_TEST_EQUALS(closest.seriesName, String("high"), TEST_LOCATION);
+  DALI_TEST_EQUALS(closest.xLabel, String("one"), TEST_LOCATION);
+  DALI_TEST_EQUALS(closest.pointIndex, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!tester.FindNearest(Vector2(90.0f, 20.0f), model, scale, 1.0f).isValid);
+
+  high.SetVisible(false);
+  nearest = tester.FindBySameX(Vector2(10.0f, 20.0f), model, scale, 15.0f, true);
+  DALI_TEST_EQUALS(nearest.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(nearest[0].seriesName, String("low"), TEST_LOCATION);
+  DALI_TEST_CHECK(tester.FindBySameX(Vector2(90.0f, 20.0f), model, scale, 1.0f, true).empty());
   END_TEST;
 }

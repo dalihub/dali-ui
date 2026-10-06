@@ -1576,10 +1576,10 @@ void ViewDataImpl::HandleFocusChangedDefault(bool focused)
   auto       focusManager = Ui::FocusManager::Get();
   if(focusManager)
   {
-    cause = GetImpl(focusManager).FocusChangedContext().inputEvent;
+    cause = GetImpl(focusManager).FocusChangedContext(View::DownCast(mViewImpl.Self())).inputEvent;
   }
 
-  const bool focusIndicated = focusManager && GetImpl(focusManager).FocusChangedContext().focusIndicated;
+  const bool focusIndicated = focusManager && GetImpl(focusManager).FocusChangedContext(View::DownCast(mViewImpl.Self())).focusIndicated;
   SetState(ViewState::FOCUSED + (focusIndicated ? ViewState::FOCUS_INDICATED : ViewState::NORMAL), focused, cause);
 
   if(auto* traitObject = GetCoreInteractionObject())

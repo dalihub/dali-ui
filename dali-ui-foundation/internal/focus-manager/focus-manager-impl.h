@@ -95,12 +95,78 @@ public:
   bool RequestFocus(View view);
 
   /**
-   * @copydoc Ui::FocusManager::GetCurrentFocusView
+   * @copydoc Ui::FocusManager::GetCurrentFocusView()
    */
   View GetCurrentFocusView();
 
   /**
-   * @copydoc Ui::FocusManager::MoveFocus
+   * @copydoc Ui::FocusManager::SetIndependentFocusEnabled(Window,bool)
+   */
+  bool SetIndependentFocusEnabled(Window window, bool enabled);
+
+  /**
+   * @copydoc Ui::FocusManager::IsIndependentFocusEnabled(Window)const
+   */
+  bool IsIndependentFocusEnabled(Window window) const;
+
+  /**
+   * @copydoc Ui::FocusManager::GetCurrentFocusView(Window)
+   */
+  View GetCurrentFocusView(Window window);
+
+  /**
+   * @copydoc Ui::FocusManager::ClearFocus(Window)
+   */
+  void ClearFocus(Window window);
+
+  /**
+   * @copydoc Ui::FocusManager::MoveFocus(Window,FocusDirection)
+   */
+  bool MoveFocus(Window window, Ui::FocusDirection direction);
+
+  /**
+   * @copydoc Ui::FocusManager::MoveFocusBackward(Window)
+   */
+  void MoveFocusBackward(Window window);
+
+  /**
+   * @copydoc Ui::FocusManager::ClearFocusIndication(Window)
+   */
+  void ClearFocusIndication(Window window);
+
+  /**
+   * @copydoc Ui::FocusManager::WindowFocusChangedSignal()
+   */
+  Ui::FocusManager::WindowFocusChangedSignalType& WindowFocusChangedSignal();
+
+  /**
+   * @brief Checks whether actual key input and navigation focus may be applied.
+   * Independent targets must be effectively visible, enabled, focusable and
+   * outside blocked or editable scopes. Ordinary targets require an active Window.
+   * @param[in] view The proposed target
+   * @return True if eligible; false for an empty or disconnected View
+   */
+  bool CanSetKeyInputFocus(View view) const;
+
+  /**
+   * @brief Gets the cause associated with a View's focus notification.
+   * Nested notifications use their saved context before the Window or global
+   * fallback. Callers must copy the context before invoking application callbacks.
+   * @param[in] view The View whose notification context is needed
+   * @return The innermost notification context, Window context or global context
+   */
+  const FocusChangeContext& FocusChangedContext(View view) const;
+
+  /**
+   * @brief Notifies key input focus while preserving the cause across callbacks.
+   * @param[in] view The View gaining or losing focus
+   * @param[in] focused Whether focus is gained
+   * @param[in] window The owning Window, including during View disconnection
+   */
+  void NotifyKeyInputFocus(View view, bool focused, Window window);
+
+  /**
+   * @copydoc Ui::FocusManager::MoveFocus(FocusDirection,const Dali::String&)
    */
   bool MoveFocus(Ui::FocusDirection direction, const Dali::String& deviceName = "");
 
@@ -115,7 +181,7 @@ public:
   void SetFocusNavigationFallback(FocusNavigationCallback callback);
 
   /**
-   * @copydoc Ui::FocusManager::ClearFocus
+   * @copydoc Ui::FocusManager::ClearFocus()
    */
   void ClearFocus();
 
@@ -123,7 +189,11 @@ public:
   // unlike an explicit ClearFocus() that also cancels a deferred replacement.
   void InvalidateFocusView(View view);
 
-  // Shared by actual keyboard focus and navigation focus commits.
+  /**
+   * @brief Checks native focus while accounting for overlapping focus-in/out events.
+   * @param[in] sceneHolder The scene holder to query
+   * @return True if this is the active Window; independent policy is not considered
+   */
   bool IsActiveWindow(Dali::Integration::SceneHolder sceneHolder) const;
 
   /**
@@ -241,6 +311,73 @@ private:
   typedef std::vector<WeakHandle<View>> FocusStack;         ///< Focus history stack
   typedef FocusStack::iterator          FocusStackIterator; ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
 
+  struct IndependentFocusState
+  {
+    WeakHandle<Window> window;        ///< Object identity without extending Window lifetime.
+    bool               enabled{true}; ///< Remains false while disable callbacks are running.
+    WeakHandle<View>   focus;
+    WeakHandle<View>   touchCandidate;
+    int32_t            touchDeviceId{-1};
+    View               indicator;
+    FocusStack         history;
+    FocusChangeContext context;
+  };
+
+  /**
+   * @brief Finds the record by Window object identity, including during disable.
+   * @param[in] window The Window to find
+   * @return Its record, or nullptr for an empty or unregistered Window
+   */
+  IndependentFocusState* FindIndependentState(Window window);
+
+  /**
+   * @copydoc FocusManager::FindIndependentState(Window)
+   */
+  const IndependentFocusState* FindIndependentState(Window window) const;
+
+  /**
+   * @brief Finds a View's owning record, falling back to actual focus after disconnection.
+   * @param[in] view The View to find
+   * @return Its record, or nullptr if no record refers to the View
+   */
+  IndependentFocusState* FindIndependentState(View view);
+
+  /**
+   * @brief Clears independent actual focus when the Window is hidden.
+   * @param[in] window The Window whose visibility changed
+   * @param[in] visible Whether the Window is visible
+   */
+  void OnWindowVisibilityChanged(Window window, bool visible);
+
+  /**
+   * @brief Invalidates independent focus when a View or its ancestor becomes hidden.
+   * @param[in] actor The View whose effective visibility changed
+   * @param[in] visible Whether the View is effectively visible
+   */
+  void OnIndependentViewVisibilityChanged(Actor actor, bool visible);
+
+  /**
+   * @brief Clears only the Window's actual focus, key target, indication and touch candidate.
+   * State is cleared before loss callbacks, and subsequent operations recheck it.
+   * @param[in] window The owning Window; an empty Window is ignored
+   * @param[in] clearStoredFocus Whether to discard its restoration reservation
+   */
+  void ClearWindowFocus(Window window, bool clearStoredFocus);
+
+  /**
+   * @brief Gets or creates the focus indicator owned by the View's focus scope.
+   * @param[in] view The focused View
+   * @return Its independent indicator or the shared ordinary indicator
+   */
+  View GetFocusIndicatorView(View view);
+
+  /**
+   * @brief Checks whether a Window can receive actual logical focus.
+   * @param[in] sceneHolder The scene holder to query
+   * @return True for an active Window or a visible independent Window
+   */
+  bool IsLogicalFocusWindow(Dali::Integration::SceneHolder sceneHolder) const;
+
   struct ParentNavigationResult
   {
     FocusNavigationResult result = FocusNavigationResult::NotHandled();
@@ -285,6 +422,13 @@ private:
   FocusNavigationContext CreateFocusNavigationContext(View currentFocusView, Ui::FocusDirection direction, const FocusChangeContext& context);
 
   /**
+   * @brief Gets the cursor used both before navigation and after policy callbacks.
+   * @param[in] window The navigation Window, or empty for the global actual target
+   * @return Actual focus for an independent Window, otherwise its stored target
+   */
+  View GetNavigationCursor(Window window);
+
+  /**
    * Resolves and validates a handled navigation result, then commits a move.
    */
   bool ApplyFocusNavigationResult(const FocusNavigationResult& result, View originalFocusView, FocusNavigationContext context, const FocusChangeContext& changeContext);
@@ -295,7 +439,7 @@ private:
   bool IsValidNavigationCandidate(View candidate, FocusNavigationContext context) const;
 
   /**
-   * Store the focus target, applying it only when its Window is active.
+   * Store the focus target, applying it when its Window allows actual focus.
    * @param view The view to receive focus
    * @param context The context that caused the focus change (device, name)
    * @return Whether the focus commit is successful or not
@@ -402,6 +546,12 @@ private:
   void ClearTouchFocusCandidate();
 
   /**
+   * @brief Cancels the pending touch focus candidate in the drag's Window only.
+   * @param[in] window The source Window; empty cancels only the ordinary candidate
+   */
+  void OnDragStarted(Window window);
+
+  /**
    * Gets the current native window id
    */
   uint32_t GetCurrentWindowId() const;
@@ -421,9 +571,13 @@ private:
 private:
   std::unique_ptr<FocusedActorProviderImpl> mFocusedActorProvider; ///< Bridge that exposes the focused View to dali-adaptor
 
-  Ui::FocusManager::FocusChangedSignalType mFocusChangedSignal;  ///< The signal to notify the focus change
-  WeakHandle<View>                         mCurrentFocusView;    ///< A weak handle to the current focused view
-  WeakHandle<View>                         mTouchFocusCandidate; ///< A weak handle to the view that may receive focus when touch is released
+  Ui::FocusManager::FocusChangedSignalType                     mFocusChangedSignal; ///< The signal to notify the focus change
+  Ui::FocusManager::WindowFocusChangedSignalType               mWindowFocusChangedSignal;
+  std::vector<IndependentFocusState>                           mIndependentFocusStates;
+  std::vector<std::pair<WeakHandle<View>, FocusChangeContext>> mFocusNotificationContexts;
+  WeakHandle<View>                                             mCurrentFocusView;    ///< A weak handle to the current focused view
+  WeakHandle<Window>                                           mCurrentFocusWindow;  ///< Weak owner used during View disconnection cleanup
+  WeakHandle<View>                                             mTouchFocusCandidate; ///< A weak handle to the view that may receive focus when touch is released
 
   View mFocusIndicatorView; ///< The focus indicator view shared by all the keyboard focusable views for highlight
 

@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -26,6 +27,7 @@
 #define private public
 #define protected public
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
+#include <dali-ui-foundation/integration-api/page-scroll-view-impl.h>
 #undef protected
 #undef private
 
@@ -1428,6 +1430,129 @@ int UtcDaliScrollViewFocusAndKeyScrollPropertiesP(void)
   END_TEST;
 }
 
+int UtcDaliScrollViewKeyNavigationSelectsVisibleContentP(void)
+{
+  UiTestApplication application;
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetKeyScrollEnabled(true);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(800.0f);
+
+  View first = View::New();
+  first.SetRequestedWidth(40.0f);
+  first.SetRequestedHeight(40.0f);
+  first.SetRequestedY(20.0f);
+  first.SetProperty(Actor::Property::FOCUSABLE, true);
+
+  View middle = View::New();
+  middle.SetRequestedWidth(40.0f);
+  middle.SetRequestedHeight(40.0f);
+  middle.SetRequestedY(240.0f);
+  middle.SetProperty(Actor::Property::FOCUSABLE, true);
+
+  View last = View::New();
+  last.SetRequestedWidth(40.0f);
+  last.SetRequestedHeight(40.0f);
+  last.SetRequestedY(700.0f);
+  last.SetProperty(Actor::Property::FOCUSABLE, true);
+
+  content.Add(first);
+  content.Add(middle);
+  content.Add(last);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = GetScrollImpl(scrollView);
+  DALI_TEST_CHECK(impl.IsDirectionCompatible(FocusDirection::DOWN));
+  DALI_TEST_CHECK(!impl.IsDirectionCompatible(FocusDirection::RIGHT));
+  DALI_TEST_EQUALS(impl.FindNextFocusableInContent(View(), Vector2::ZERO, FocusDirection::DOWN), first, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.IsChildInViewport(first));
+  DALI_TEST_CHECK(!impl.IsChildInViewport(middle));
+  DALI_TEST_EQUALS(impl.PageScrollAndFocus(FocusDirection::PAGE_DOWN), middle, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.FullScrollAndFocus(true), last, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.FullScrollAndFocus(false), first, TEST_LOCATION);
+
+  middle.SetProperty(Actor::Property::ENABLED, false);
+  DALI_TEST_EQUALS(impl.FindNextFocusableInContent(first, Vector2(0.0f, 20.0f), FocusDirection::DOWN), last, TEST_LOCATION);
+  scrollView.ScrollToY(600.0f, false);
+  DALI_TEST_CHECK(impl.IsAtScrollBoundary(FocusDirection::DOWN));
+  DALI_TEST_CHECK(!impl.IsAtScrollBoundary(FocusDirection::UP));
+  scrollView.ScrollToY(0.0f, false);
+  DALI_TEST_CHECK(impl.IsAtScrollBoundary(FocusDirection::UP));
+
+  END_TEST;
+}
+
+int UtcDaliScrollViewKeyboardScrollingWithoutFocusableContentP(void)
+{
+  UiTestApplication application;
+  ScrollView scrollView = ScrollView::New();
+  View content = View::New();
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetScrollDirection(ScrollDirection::Both);
+  scrollView.SetKeyScrollEnabled(true);
+  scrollView.SetKeyScrollStep(60.0f);
+  scrollView.SetProperty(Actor::Property::FOCUSABLE, true);
+  content.SetRequestedWidth(600.0f);
+  content.SetRequestedHeight(600.0f);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = GetScrollImpl(scrollView);
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(scrollView));
+  DALI_TEST_EQUALS(FocusManager::Get().GetCurrentFocusView(), scrollView, TEST_LOCATION);
+
+  KeyEvent key = KeyEvent::New();
+  key.SetKeyName("Down");
+  key.SetState(KeyEvent::UP);
+  DALI_TEST_CHECK(!impl.OnKeyEvent(key));
+  key.SetState(KeyEvent::DOWN);
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  DALI_TEST_CHECK(scrollView.IsScrolling());
+  impl.CancelScrollAnimation();
+
+  key.SetKeyName("Right");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  impl.CancelScrollAnimation();
+  key.SetKeyName("Next");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  impl.CancelScrollAnimation();
+  key.SetKeyName("Prior");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  impl.CancelScrollAnimation();
+  key.SetKeyName("End");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  impl.CancelScrollAnimation();
+  key.SetKeyName("Home");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  impl.CancelScrollAnimation();
+  key.SetKeyName("Unmapped");
+  DALI_TEST_CHECK(!impl.OnKeyEvent(key));
+
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  key.SetKeyName("Left");
+  DALI_TEST_CHECK(!impl.OnKeyEvent(key));
+  scrollView.SetKeyScrollEnabled(false);
+  key.SetKeyName("Down");
+  DALI_TEST_CHECK(!impl.OnKeyEvent(key));
+  FocusManager::Get().ClearFocus();
+  END_TEST;
+}
+
 int UtcDaliScrollViewScrollToChildVariantsP(void)
 {
   UiTestApplication application;
@@ -1738,5 +1863,373 @@ int UtcDaliScrollViewInternalStateAndSignalsP(void)
   impl.UpdateScrollingProperties();
   impl.ApplyScrollPosition(Vector2::ZERO);
   impl.ScrollToWithDuration(Vector2::ZERO, 0.1f);
+  END_TEST;
+}
+
+int UtcDaliPageScrollViewPublicPagingAndHandlesP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  PageScrollView pager = PageScrollView::New();
+  DALI_TEST_CHECK(pager);
+  DALI_TEST_CHECK(PageScrollView::DownCast(pager));
+  DALI_TEST_CHECK(!PageScrollView::DownCast(View::New()));
+
+  PageScrollView copied(pager);
+  PageScrollView moved(std::move(copied));
+  PageScrollView assigned;
+  assigned = moved;
+  DALI_TEST_CHECK(assigned == pager);
+  PageScrollView moveAssigned;
+  moveAssigned = std::move(assigned);
+  DALI_TEST_CHECK(moveAssigned == pager);
+
+  pager.SetContent(View::New());
+  pager.SetScrollDirection(ScrollDirection::Horizontal);
+  pager.SetPageSize(Vector2(100.0f, 80.0f));
+  auto& impl = static_cast<Dali::Ui::Integration::PageScrollViewImpl&>(pager.GetImplementation());
+  impl.SetScrollableWidth(500.0f);
+  DALI_TEST_EQUALS(pager.GetPageSize(), Vector2(100.0f, 80.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetPageCount(), 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 0, TEST_LOCATION);
+
+  int pageChanges = 0;
+  pager.PageChangedSignal().Connect(&application, [&pageChanges](int, int) { ++pageChanges; });
+  DALI_TEST_CHECK(pager.DestroyingSignal().Empty());
+  pager.ScrollToPage(2, false);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 2, TEST_LOCATION);
+  DALI_TEST_CHECK(pageChanges > 0);
+
+  pager.NotifyPagesInserted(1, 2);
+  DALI_TEST_EQUALS(pager.GetPageCount(), 7, TEST_LOCATION);
+  pager.NotifyPagesRemoved(1, 2);
+  DALI_TEST_EQUALS(pager.GetPageCount(), 5, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliScrollViewEdgeEffectsAndWheelP(void)
+{
+  UiTestApplication application;
+  ScrollView scrollView = ScrollView::New();
+  auto& impl = GetScrollImpl(scrollView);
+  DALI_TEST_CHECK(impl.HasIntrinsicWheelHandling());
+
+  WheelEvent vertical = WheelEvent::New(WheelEvent::MOUSE_WHEEL, 0, 0u, Vector2(50.0f, 50.0f), 1, 100u);
+  DALI_TEST_CHECK(!impl.OnWheelEvent(vertical));
+
+  EdgeEffect start = EdgeEffect::New();
+  EdgeEffect end = EdgeEffect::New();
+  scrollView.SetStartEdgeEffect(start);
+  scrollView.SetEndEdgeEffect(end);
+  DALI_TEST_CHECK(scrollView.GetStartEdgeEffect() == start);
+  DALI_TEST_CHECK(scrollView.GetEndEdgeEffect() == end);
+
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetScrollDirection(ScrollDirection::Both);
+  View content = View::New();
+  content.SetRequestedWidth(600.0f);
+  content.SetRequestedHeight(600.0f);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(impl.OnWheelEvent(vertical));
+  impl.CancelScrollAnimation();
+
+  WheelEvent horizontal = WheelEvent::New(WheelEvent::MOUSE_WHEEL, 1, 0u, Vector2(50.0f, 50.0f), 1, 200u);
+  DALI_TEST_CHECK(impl.OnWheelEvent(horizontal));
+  impl.CancelScrollAnimation();
+
+  scrollView.SetScrollDirection(ScrollDirection::Horizontal);
+  DALI_TEST_CHECK(impl.OnWheelEvent(vertical));
+  impl.CancelScrollAnimation();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  DALI_TEST_CHECK(!impl.OnWheelEvent(horizontal));
+
+  scrollView.SetStartEdgeEffect(EdgeEffect());
+  scrollView.SetEndEdgeEffect(EdgeEffect());
+  DALI_TEST_CHECK(!scrollView.GetStartEdgeEffect());
+  DALI_TEST_CHECK(!scrollView.GetEndEdgeEffect());
+  END_TEST;
+}
+
+int UtcDaliScrollViewFocusNavigationThroughContentP(void)
+{
+  UiTestApplication application;
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetKeyScrollEnabled(true);
+  scrollView.SetKeyScrollStep(70.0f);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetProperty(Actor::Property::FOCUSABLE, true);
+
+  View content = View::New();
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(700.0f);
+  View first = View::New();
+  first.SetRequestedWidth(40.0f);
+  first.SetRequestedHeight(40.0f);
+  first.SetRequestedY(20.0f);
+  first.SetProperty(Actor::Property::FOCUSABLE, true);
+  View second = View::New();
+  second.SetRequestedWidth(40.0f);
+  second.SetRequestedHeight(40.0f);
+  second.SetRequestedY(140.0f);
+  second.SetProperty(Actor::Property::FOCUSABLE, true);
+  View third = View::New();
+  third.SetRequestedWidth(40.0f);
+  third.SetRequestedHeight(40.0f);
+  third.SetRequestedY(520.0f);
+  third.SetProperty(Actor::Property::FOCUSABLE, true);
+  content.Add(first);
+  content.Add(second);
+  content.Add(third);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = GetScrollImpl(scrollView);
+  DALI_TEST_EQUALS(impl.OnFocusRequested(), scrollView, TEST_LOCATION);
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(first));
+  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_EQUALS(FocusManager::Get().GetCurrentFocusView(), second, TEST_LOCATION);
+  FocusManager::Get().MoveFocus(FocusDirection::DOWN);
+  DALI_TEST_CHECK(scrollView.IsScrolling() || FocusManager::Get().GetCurrentFocusView() == third);
+  impl.CancelScrollAnimation();
+
+  scrollView.SetKeyScrollEnabled(false);
+  DALI_TEST_CHECK(impl.OnFocusRequested());
+  FocusManager::Get().ClearFocus();
+  END_TEST;
+}
+
+int UtcDaliScrollViewHorizontalFocusNavigationP(void)
+{
+  UiTestApplication application;
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Horizontal);
+  scrollView.SetKeyScrollEnabled(true);
+  scrollView.SetKeyScrollStep(70.0f);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(120.0f);
+  scrollView.SetFocusable(true);
+
+  View content = View::New();
+  content.SetRequestedWidth(650.0f);
+  content.SetRequestedHeight(120.0f);
+  View first = View::New();
+  first.SetRequestedWidth(40.0f);
+  first.SetRequestedHeight(40.0f);
+  first.SetRequestedX(20.0f);
+  first.SetFocusable(true);
+  View second = View::New();
+  second.SetRequestedWidth(40.0f);
+  second.SetRequestedHeight(40.0f);
+  second.SetRequestedX(140.0f);
+  second.SetFocusable(true);
+  View last = View::New();
+  last.SetRequestedWidth(40.0f);
+  last.SetRequestedHeight(40.0f);
+  last.SetRequestedX(520.0f);
+  last.SetFocusable(true);
+  content.Add(first);
+  content.Add(second);
+  content.Add(last);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = GetScrollImpl(scrollView);
+  DALI_TEST_CHECK(impl.IsDirectionCompatible(FocusDirection::RIGHT));
+  DALI_TEST_CHECK(!impl.IsDirectionCompatible(FocusDirection::DOWN));
+  DALI_TEST_EQUALS(impl.FindNextFocusableInContent(View(), Vector2::ZERO, FocusDirection::RIGHT), first, TEST_LOCATION);
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(first));
+  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::RIGHT));
+  DALI_TEST_EQUALS(FocusManager::Get().GetCurrentFocusView(), second, TEST_LOCATION);
+  scrollView.ScrollToX(450.0f, false);
+  DALI_TEST_CHECK(impl.IsChildInViewport(last));
+  DALI_TEST_CHECK(impl.IsAtScrollBoundary(FocusDirection::RIGHT));
+  FocusManager::Get().ClearFocus();
+  END_TEST;
+}
+
+int UtcDaliScrollViewEdgePullReverseAndReleaseP(void)
+{
+  UiTestApplication application;
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetPivot(Pivot::TOP_LEFT);
+  scrollView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+
+  View content = View::New();
+  content.SetPivot(Pivot::TOP_LEFT);
+  content.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+  scrollView.SetContent(content);
+  BounceEdgeEffect start = BounceEdgeEffect::New(ScrollDirection::Vertical);
+  BounceEdgeEffect end = BounceEdgeEffect::New(ScrollDirection::Vertical);
+  scrollView.SetStartEdgeEffect(start);
+  scrollView.SetEndEdgeEffect(end);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = GetScrollImpl(scrollView);
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(100.0f, 40.0f), 100u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(100.0f, 80.0f), 116u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(100.0f, 120.0f), 132u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(100.0f, 160.0f), 148u));
+  DALI_TEST_CHECK(impl.mStartEdgeActive);
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(100.0f, 80.0f), 164u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(100.0f, 40.0f), 180u));
+  DALI_TEST_CHECK(!impl.mStartEdgeActive);
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(100.0f, 40.0f), 196u));
+  impl.CancelScrollAnimation();
+  start.Finish();
+  end.Finish();
+
+  scrollView.ScrollToY(400.0f, false);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 400.0f, TEST_LOCATION);
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(100.0f, 160.0f), 300u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(100.0f, 120.0f), 316u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(100.0f, 80.0f), 332u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(100.0f, 40.0f), 348u));
+  DALI_TEST_CHECK(impl.mEndEdgeActive);
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(100.0f, 40.0f), 364u));
+  DALI_TEST_CHECK(!impl.mEndEdgeActive);
+  impl.CancelScrollAnimation();
+  start.Finish();
+  end.Finish();
+  END_TEST;
+}
+
+int UtcDaliScrollViewFocusEntryUsesVisibleEdgeItemsP(void)
+{
+  UiTestApplication application;
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetKeyScrollEnabled(true);
+  scrollView.SetRequestedX(100.0f);
+  scrollView.SetRequestedY(300.0f);
+  scrollView.SetRequestedWidth(180.0f);
+  scrollView.SetRequestedHeight(180.0f);
+  scrollView.SetFocusable(true);
+
+  View content = View::New();
+  content.SetRequestedWidth(180.0f);
+  content.SetRequestedHeight(500.0f);
+  View first = View::New();
+  first.SetRequestedWidth(50.0f);
+  first.SetRequestedHeight(40.0f);
+  first.SetRequestedY(20.0f);
+  first.SetFocusable(true);
+  View last = View::New();
+  last.SetRequestedWidth(50.0f);
+  last.SetRequestedHeight(40.0f);
+  last.SetRequestedY(390.0f);
+  last.SetFocusable(true);
+  content.Add(first);
+  content.Add(last);
+  scrollView.SetContent(content);
+
+  View above = View::New();
+  above.SetRequestedX(100.0f);
+  above.SetRequestedY(20.0f);
+  above.SetRequestedWidth(40.0f);
+  above.SetRequestedHeight(40.0f);
+  above.SetFocusable(true);
+  View below = View::New();
+  below.SetRequestedX(100.0f);
+  below.SetRequestedY(700.0f);
+  below.SetRequestedWidth(40.0f);
+  below.SetRequestedHeight(40.0f);
+  below.SetFocusable(true);
+
+  application.GetScene().Add(scrollView);
+  application.GetScene().Add(above);
+  application.GetScene().Add(below);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = GetScrollImpl(scrollView);
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(above));
+  DALI_TEST_EQUALS(impl.OnFocusRequested(), first, TEST_LOCATION);
+
+  scrollView.ScrollToY(320.0f, false);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(below));
+  DALI_TEST_EQUALS(impl.OnFocusRequested(), last, TEST_LOCATION);
+
+  first.SetFocusable(false);
+  last.SetFocusable(false);
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(above));
+  DALI_TEST_EQUALS(impl.OnFocusRequested(), scrollView, TEST_LOCATION);
+  FocusManager::Get().ClearFocus();
+  END_TEST;
+}
+
+int UtcDaliBounceEdgeEffectPropertiesAndDownCastP(void)
+{
+  UiTestApplication application;
+  BounceEdgeEffect effect = BounceEdgeEffect::New(ScrollDirection::Horizontal);
+  DALI_TEST_EQUALS(effect.GetAxis(), ScrollDirection::Horizontal, TEST_LOCATION);
+
+  EdgeEffect base = effect;
+  BounceEdgeEffect downcast = BounceEdgeEffect::DownCast(base);
+  DALI_TEST_CHECK(downcast);
+  DALI_TEST_EQUALS(downcast.GetAxis(), ScrollDirection::Horizontal, TEST_LOCATION);
+  DALI_TEST_EQUALS(BounceEdgeEffect::DownCast(EdgeEffect()), BounceEdgeEffect(), TEST_LOCATION);
+
+  effect.SetPullResistance(0.75f).SetBounceDuration(0.4f);
+  DALI_TEST_EQUALS(effect.GetPullResistance(), 0.75f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetBounceDuration(), 0.4f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliEdgeEffectStateTransitionsAndSignalsP(void)
+{
+  UiTestApplication application;
+  EdgeEffect effect = EdgeEffect::New();
+  View source = View::New();
+  effect.SetSource(source);
+  DALI_TEST_CHECK(effect.GetSource() == source);
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::IDLE);
+
+  effect.OnRelease();
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::IDLE);
+  effect.OnPull(2.0f, 6.0f);
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::PULL);
+  effect.OnPull(3.0f, 9.0f);
+  effect.OnRelease();
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::RECEDE);
+  effect.OnAbsorb(5.0f);
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::ABSORB);
+  effect.OnAbsorb(6.0f);
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::ABSORB);
+  effect.Finish();
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::IDLE);
+  effect.OnAbsorb(7.0f);
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::ABSORB);
+  effect.OnPull(1.0f, 1.0f);
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::PULL);
+  effect.Finish();
+
+  DALI_TEST_CHECK(&effect.PullSignal());
+  DALI_TEST_CHECK(&effect.ReleaseSignal());
+  DALI_TEST_CHECK(&effect.AbsorbSignal());
+  DALI_TEST_CHECK(&effect.FinishedSignal());
   END_TEST;
 }

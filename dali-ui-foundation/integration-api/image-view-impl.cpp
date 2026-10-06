@@ -33,6 +33,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
@@ -943,7 +944,8 @@ void ImageViewImpl::UpdateVisual()
 {
   DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: url=%s\n", mUrl.CStr());
 
-  auto& viewData = Internal::ViewDataImpl::Get(*this);
+  auto&            viewData       = Internal::ViewDataImpl::Get(*this);
+  const LayoutRect arrangedBounds = GetArrangedBounds();
 
   if(mVisual)
   {
@@ -999,7 +1001,7 @@ void ImageViewImpl::UpdateVisual()
     // IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY tells the factory not to upgrade
     // a GIF/WebP URL to AnimatedImageVisual. Only the first frame is decoded.
     // (NPatch detection via BORDER property is unaffected by this flag.)
-    mVisual = visualFactory.CreateVisual(map, Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY);
+    mVisual = Ui::GetImplementation(visualFactory).CreateVisual(map, Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY, Vector2(arrangedBounds.width, arrangedBounds.height));
     if(mVisual)
     {
       DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: RegisterVisual result=ok\n");

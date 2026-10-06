@@ -196,6 +196,8 @@ field.SetFontVariation(Text::FontVariation::None());
 
 Use `SetFontVariation(Text::FontVariation::None())` to clear font variation settings. An empty settings string is invalid and leaves the current font variation unchanged.
 
+Use `SetStyledText()` to apply styles to parts of the text or insert inline images. Convert a markup string with `Text::StyledText::FromMarkup()` before applying it; passing it directly to `SetText()` treats it as plain text. See [Markup](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup) for supported tags and syntax, and [StyledText](https://github.sec.samsung.net/NUI/dali-ui/wiki/StyledText) for building spans in code.
+
 <br/>
 
 ## Cursor and Selection

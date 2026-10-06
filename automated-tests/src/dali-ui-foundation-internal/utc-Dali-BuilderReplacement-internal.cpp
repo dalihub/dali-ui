@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/integration-api/builder/json-parser.h>
 #include <dali-ui-foundation/internal/builder/replacement.h>
+#include <dali-ui-foundation/internal/builder/builder-set-property.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
@@ -239,5 +240,86 @@ int UtcDaliBuilderReplacementDirectNodesAndMissingChildrenP(void)
   DALI_TEST_CHECK(!replacement.IsExtents(missing));
   DALI_TEST_CHECK(!replacement.IsInsets(missing));
 
+  END_TEST;
+}
+
+int UtcDaliBuilderPropertyDisambiguatedTypesP(void)
+{
+  Dali::Ui::Integration::JsonParser parser = Dali::Ui::Integration::JsonParser::New();
+  const TreeNode& root = ParseRoot(parser,
+                                   R"({
+                                     "boolean":{"typeCast":"boolean","value":true},
+                                     "float":{"typeCast":"float","value":1.5},
+                                     "vector2":{"typeCast":"vector2","value":[1,2]},
+                                     "vector3":{"typeCast":"vector3","value":[1,2,3]},
+                                     "vector4":{"typeCast":"vector4","value":[1,2,3,4]},
+                                     "rotation":{"typeCast":"rotation","value":[0,0,1,90]},
+                                     "rect":{"typeCast":"rect","value":[1,2,3,4]},
+                                     "string":{"typeCast":"string","value":"123"},
+                                     "map":{"typeCast":"map","value":{"key":1}},
+                                     "array":{"typeCast":"array","value":[1,2,3,4]},
+                                     "insets":{"typeCast":"insets","value":[1,2,3,4]}
+                                   })");
+
+  struct TypeCase
+  {
+    const char* name;
+    Property::Type type;
+  };
+  const TypeCase cases[] = {
+    {"boolean", Property::BOOLEAN},
+    {"float", Property::FLOAT},
+    {"vector2", Property::VECTOR2},
+    {"vector3", Property::VECTOR3},
+    {"vector4", Property::VECTOR4},
+    {"rotation", Property::ROTATION},
+    {"rect", Property::RECTANGLE},
+    {"string", Property::STRING},
+    {"map", Property::MAP},
+    {"array", Property::ARRAY},
+    {"insets", Property::INSETS}
+  };
+  for(const TypeCase& testCase : cases)
+  {
+    const TreeNode* node = root.GetChild(testCase.name);
+    DALI_TEST_CHECK(node);
+    Property::Value value;
+    DeterminePropertyFromNode(*node, value);
+    DALI_TEST_EQUALS(value.GetType(), testCase.type, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliBuilderPropertyExplicitTypesP(void)
+{
+  Dali::Ui::Integration::JsonParser parser = Dali::Ui::Integration::JsonParser::New();
+  const TreeNode& root = ParseRoot(parser,
+                                   R"({
+                                     "color":{"r":128,"g":64,"b":32,"a":255},
+                                     "rgb":{"r":255,"g":0,"b":0},
+                                     "euler":[0,0,90],
+                                     "axis":[0,0,1,90],
+                                     "matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+                                     "matrix3":[1,0,0,0,1,0,0,0,1],
+                                     "mixed":[1,"two",true],
+                                     "object":{"child":3},
+                                     "invalid":"not a vector"
+                                   })");
+  Property::Value value;
+  DALI_TEST_CHECK(DeterminePropertyFromNode(*root.GetChild("color"), Property::VECTOR4, value));
+  DALI_TEST_EQUALS(value.GetType(), Property::VECTOR4, TEST_LOCATION);
+  DALI_TEST_CHECK(DeterminePropertyFromNode(*root.GetChild("rgb"), Property::VECTOR4, value));
+  DALI_TEST_EQUALS(value.Get<Vector4>().a, 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(DeterminePropertyFromNode(*root.GetChild("euler"), Property::ROTATION, value));
+  DALI_TEST_EQUALS(value.GetType(), Property::ROTATION, TEST_LOCATION);
+  DALI_TEST_CHECK(DeterminePropertyFromNode(*root.GetChild("axis"), Property::ROTATION, value));
+  DALI_TEST_CHECK(DeterminePropertyFromNode(*root.GetChild("matrix"), Property::MATRIX, value));
+  DALI_TEST_CHECK(DeterminePropertyFromNode(*root.GetChild("matrix3"), Property::MATRIX3, value));
+  DALI_TEST_CHECK(DeterminePropertyFromNode(*root.GetChild("mixed"), Property::ARRAY, value));
+  DALI_TEST_EQUALS(value.GetArray()->Count(), 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(DeterminePropertyFromNode(*root.GetChild("object"), Property::MAP, value));
+  DALI_TEST_EQUALS(value.GetMap()->Count(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!DeterminePropertyFromNode(*root.GetChild("invalid"), Property::VECTOR3, value));
+  DALI_TEST_CHECK(!DeterminePropertyFromNode(*root.GetChild("invalid"), Property::NONE, value));
   END_TEST;
 }

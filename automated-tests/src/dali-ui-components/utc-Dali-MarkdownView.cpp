@@ -18,6 +18,7 @@
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-components/internal/markdown/markdown-parser.h>
 #include <dali-ui-components/internal/markdown/markdown-view-impl.h>
+#include <dali-ui-components/internal/markdown/markdown-render-model.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
@@ -2688,5 +2689,51 @@ int UtcDaliMarkdownViewToPlainTextUtf8BoundariesP(void)
   CheckPlainText("한글 😀 [링크](url) ![그림](img.png)", "한글 😀 링크 [url] 그림 [img.png]");
   CheckPlainText("😀  \n다음", "😀\n다음");
   CheckPlainText("한글\n😀", "한글\n😀");
+  END_TEST;
+}
+
+int UtcDaliMarkdownRenderRoleClassificationP(void)
+{
+  struct RoleExpectation
+  {
+    MarkdownRenderRole role;
+    const char* name;
+    bool text;
+    bool container;
+    bool materializable;
+  };
+  const RoleExpectation cases[] = {
+    {MarkdownRenderRole::DOCUMENT, "DOCUMENT", false, true, false},
+    {MarkdownRenderRole::PARAGRAPH, "PARAGRAPH", true, false, true},
+    {MarkdownRenderRole::LIST_ITEM_PARAGRAPH, "LIST_ITEM_PARAGRAPH", true, false, true},
+    {MarkdownRenderRole::QUOTE_PARAGRAPH, "QUOTE_PARAGRAPH", true, false, true},
+    {MarkdownRenderRole::TABLE_CELL_PARAGRAPH, "TABLE_CELL_PARAGRAPH", true, false, true},
+    {MarkdownRenderRole::HEADING, "HEADING", true, false, true},
+    {MarkdownRenderRole::CODE_BLOCK, "CODE_BLOCK", true, false, true},
+    {MarkdownRenderRole::BLOCK_IMAGE, "BLOCK_IMAGE", false, false, true},
+    {MarkdownRenderRole::LIST, "LIST", false, true, true},
+    {MarkdownRenderRole::LIST_ITEM, "LIST_ITEM", true, true, true},
+    {MarkdownRenderRole::QUOTE, "QUOTE", false, true, true},
+    {MarkdownRenderRole::TABLE, "TABLE", false, true, true},
+    {MarkdownRenderRole::TABLE_HEAD, "TABLE_HEAD", false, true, true},
+    {MarkdownRenderRole::TABLE_BODY, "TABLE_BODY", false, true, true},
+    {MarkdownRenderRole::TABLE_ROW, "TABLE_ROW", false, true, true},
+    {MarkdownRenderRole::TABLE_CELL, "TABLE_CELL", true, true, true},
+    {MarkdownRenderRole::THEMATIC_BREAK, "THEMATIC_BREAK", false, false, true},
+    {MarkdownRenderRole::RAW_HTML, "RAW_HTML", true, false, false},
+  };
+
+  for(const RoleExpectation& item : cases)
+  {
+    DALI_TEST_EQUALS(std::string(MarkdownRenderRoleName(item.role)), std::string(item.name), TEST_LOCATION);
+    DALI_TEST_EQUALS(MarkdownIsTextRole(item.role), item.text, TEST_LOCATION);
+    DALI_TEST_EQUALS(MarkdownIsContainerRole(item.role), item.container, TEST_LOCATION);
+    DALI_TEST_EQUALS(MarkdownCanMaterializeRole(item.role), item.materializable, TEST_LOCATION);
+  }
+
+  DALI_TEST_EQUALS(std::string(MarkdownRenderRoleName(static_cast<MarkdownRenderRole>(255))), std::string("UNKNOWN"), TEST_LOCATION);
+  DALI_TEST_EQUALS(MarkdownUtf8Length("A\xC3\xA9\xE4\xB8\xAD"), 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(MarkdownHashString("same") == MarkdownHashString("same"));
+  DALI_TEST_CHECK(MarkdownHashString("same") != MarkdownHashString("different"));
   END_TEST;
 }

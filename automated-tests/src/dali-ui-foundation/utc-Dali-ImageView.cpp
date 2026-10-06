@@ -630,3 +630,171 @@ int UtcDaliImageViewSettersP(void)
   DALI_TEST_EQUALS(view.GetFittingMode(), Ui::Image::FittingMode::FILL, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliImageViewRealNPatchLoadP(void)
+{
+  UiTestApplication application;
+  ImageView view = ImageView::New("../samples/image-view/res/button-up-1.9.png");
+  view.SetSynchronousLoading(true);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(80.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  const Vector3 naturalSize = view.GetNaturalSize();
+  DALI_TEST_CHECK(naturalSize.width > 0.0f);
+  DALI_TEST_CHECK(naturalSize.height > 0.0f);
+
+  view.SetNPatchBorderOnly(true);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  view.Reload();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  END_TEST;
+}
+
+int UtcDaliImageViewRealAlphaMaskPoliciesP(void)
+{
+  UiTestApplication application;
+  const Dali::String imageUrl("../samples/image-view/res/sample.jpg");
+  const Dali::String maskUrl("../samples/image-view/res/mask.png");
+
+  ImageView renderMasked = ImageView::New(imageUrl);
+  renderMasked.SetAlphaMaskUrl(maskUrl);
+  renderMasked.SetMaskingPolicy(Image::MaskingPolicy::ON_RENDERING);
+  renderMasked.SetSynchronousLoading(true);
+  renderMasked.SetRequestedWidth(160.0f);
+  renderMasked.SetRequestedHeight(160.0f);
+  application.GetScene().Add(renderMasked);
+
+  ImageView loadMasked = ImageView::New(imageUrl);
+  loadMasked.SetAlphaMaskUrl(maskUrl);
+  loadMasked.SetMaskingPolicy(Image::MaskingPolicy::ON_LOADING);
+  loadMasked.SetCropToMask(true);
+  loadMasked.SetSynchronousLoading(true);
+  loadMasked.SetRequestedWidth(160.0f);
+  loadMasked.SetRequestedHeight(160.0f);
+  application.GetScene().Add(loadMasked);
+
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(renderMasked.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(loadMasked.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(renderMasked.GetRendererAt(0u).GetTextures());
+  DALI_TEST_CHECK(loadMasked.GetRendererAt(0u).GetTextures());
+  DALI_TEST_EQUALS(renderMasked.GetRendererAt(0u).GetTextures().GetTextureCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(loadMasked.GetRendererAt(0u).GetTextures().GetTextureCount(), 1u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliImageViewResourceFailureRecoveryP(void)
+{
+  UiTestApplication application;
+  const Dali::String validUrl("../samples/image-view/res/sample.jpg");
+  const Dali::String missingUrl("../samples/image-view/res/does-not-exist.jpg");
+
+  ImageView view = ImageView::New(missingUrl);
+  view.SetSynchronousLoading(true);
+  view.SetPlaceholderUrl(validUrl);
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  view.Reload();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+
+  view.SetResourceUrl(validUrl);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetRendererAt(0u).GetTextures());
+
+  view.SetResourceUrl(missingUrl);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewViewSizeReloadAndFittingP(void)
+{
+  UiTestApplication application;
+  ImageView view = ImageView::New("../samples/image-view/res/sample.jpg");
+  view.SetSynchronousLoading(true);
+  view.SetImageLoadWithViewSizeEnabled(true);
+  view.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+  view.SetRequestedWidth(150.0f);
+  view.SetRequestedHeight(90.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(120.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetRendererAt(0u).GetTextures());
+
+  view.SetFittingMode(Ui::Image::FittingMode::CENTER);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  view.SetImageLoadWithViewSizeEnabled(false);
+  view.Reload();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewRenderedPropertyChangesP(void)
+{
+  UiTestApplication application;
+  ImageView view = ImageView::New("../samples/image-view/res/mask.png");
+  view.SetSynchronousLoading(true);
+  view.SetRequestedWidth(120.0f);
+  view.SetRequestedHeight(120.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  view.SetPreMultiplyAlphaOnLoadEnabled(false);
+  view.SetPixelArea(Vector4(0.1f, 0.2f, 0.6f, 0.5f));
+  view.SetImageColor(UiColor(0.8f, 0.6f, 0.4f, 0.5f));
+  view.SetFittingMode(Ui::Image::FittingMode::CENTER);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(!view.IsPreMultiplyAlphaOnLoadEnabled());
+  DALI_TEST_EQUALS(view.GetPixelArea(), Vector4(0.1f, 0.2f, 0.6f, 0.5f), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetRendererAt(0u).GetTextures());
+
+  view.SetPreMultiplyAlphaOnLoadEnabled(true);
+  view.SetPixelArea(Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+  view.SetFittingMode(Ui::Image::FittingMode::FILL);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.IsPreMultiplyAlphaOnLoadEnabled());
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  END_TEST;
+}

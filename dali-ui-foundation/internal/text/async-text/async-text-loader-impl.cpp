@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
+#include <dali-ui-foundation/internal/text/decoration-scale.h>
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
@@ -496,6 +497,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   mTextModel->mVisualModel->mControlSize = Size(parameters.textWidth, parameters.textHeight);
 
   // Update style properties.
+  mTextModel->mVisualModel->SetDecorationUiScale(parameters.decorationUiScale);
   mTextModel->mVisualModel->SetTextColor(parameters.textColor);
   // Requests carry resolved colors, also used by runs when global style is off.
   // Always replace the previous worker request's fallback colors.
@@ -881,7 +883,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       // Create one run for all glyphs of all run's characters that has same properties
       // This enhance performance and reduce the needed memory to store glyphs-runs
       UnderlinedGlyphRun underlineGlyphRun;
-      underlineGlyphRun.properties              = it->properties;
+      underlineGlyphRun.properties              = ResolveDecorationProperties(it->properties, parameters.decorationUiScale);
       underlineGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       underlineGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
@@ -913,7 +915,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       }
 
       StrikethroughGlyphRun strikethroughGlyphRun;
-      strikethroughGlyphRun.properties              = it->properties;
+      strikethroughGlyphRun.properties              = ResolveDecorationProperties(it->properties, parameters.decorationUiScale);
       strikethroughGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       strikethroughGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 

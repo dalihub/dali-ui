@@ -158,6 +158,46 @@ bool FocusManager::IsClearFocusIndicationOnHoverEnabled() const
   return GetImpl(*this).IsClearFocusIndicationOnHoverEnabled();
 }
 
+bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
+{
+  return GetImpl(*this).SetIndependentFocusEnabled(window, enabled);
+}
+
+bool FocusManager::IsIndependentFocusEnabled(Window window) const
+{
+  return GetImpl(*this).IsIndependentFocusEnabled(window);
+}
+
+View FocusManager::GetCurrentFocusView(Window window)
+{
+  return GetImpl(*this).GetCurrentFocusView(window);
+}
+
+void FocusManager::ClearFocus(Window window)
+{
+  GetImpl(*this).ClearFocus(window);
+}
+
+bool FocusManager::MoveFocus(Window window, FocusDirection direction)
+{
+  return GetImpl(*this).MoveFocus(window, direction);
+}
+
+void FocusManager::MoveFocusBackward(Window window)
+{
+  GetImpl(*this).MoveFocusBackward(window);
+}
+
+void FocusManager::ClearFocusIndication(Window window)
+{
+  GetImpl(*this).ClearFocusIndication(window);
+}
+
+FocusManager::WindowFocusChangedSignalType& FocusManager::WindowFocusChangedSignal()
+{
+  return GetImpl(*this).WindowFocusChangedSignal();
+}
+
 } // namespace Ui
 
 } //namespace DALI_NAMESPACE

@@ -7,10 +7,13 @@ SET(RPM_NAME "core-${PKG_NAME}-tests")
 # include this file in source-list-only mode without configuring Unix targets.
 SET(TC_SOURCES
     utc-Dali-AsyncTextLoaderOwnership-internal.cpp
+    utc-Dali-BidirectionalSupport-internal.cpp
     utc-Dali-AsyncMarqueeCoordinates-internal.cpp
+    utc-Dali-InternalCoverage-internal.cpp
     utc-Dali-AnimatedImageReleasePolicy-internal.cpp
     utc-Dali-AnimatedImageView-internal.cpp
     utc-Dali-FocusManager-internal.cpp
+    utc-Dali-AsyncImageLoader-internal.cpp
     utc-Dali-ImageCache-internal.cpp
     utc-Dali-FastTrackLoadingTask-internal.cpp
     utc-Dali-ImageUrl-internal.cpp
@@ -20,6 +23,7 @@ SET(TC_SOURCES
     utc-Dali-LayoutDependencyScope-internal.cpp
     utc-Dali-GradientFactory-internal.cpp
     utc-Dali-ShaderFactory-internal.cpp
+    utc-Dali-VisualFactory-internal.cpp
     utc-Dali-GradientVisualSemantics-internal.cpp
     utc-Dali-TextAbstractionOwnership-internal.cpp
     utc-Dali-TextGradientBaseline-internal.cpp
@@ -29,10 +33,14 @@ SET(TC_SOURCES
     utc-Dali-StyledTextController-internal.cpp
     utc-Dali-TextAlignment-internal.cpp
     utc-Dali-TextEllipsis-internal.cpp
+    utc-Dali-TextPlaceholder-internal.cpp
+    utc-Dali-TextInputInternals-internal.cpp
     utc-Dali-ReplacementProjection-internal.cpp
+    utc-Dali-ImageSpanFontScale-internal.cpp
     utc-Dali-ReplacementEditNormalizer-internal.cpp
     utc-Dali-TextGradientStyle-internal.cpp
     utc-Dali-TextEffectsStyle-internal.cpp
+    utc-Dali-TextDecorationScale-internal.cpp
     utc-Dali-TextFontStyle-internal.cpp
     utc-Dali-TextLogicalModel-internal.cpp
     utc-Dali-TextUtilities-internal.cpp
@@ -392,12 +400,12 @@ TARGET_LINK_LIBRARIES(${EMOJI_LABEL_PERF_NAME}
 #     The normal UTC executable intentionally interposes lightweight text
 #     abstraction fakes. This separate target omits that harness so Hebrew,
 #     bidi reorder and END ellipsis exercise the production Adaptor services.
-#     Build explicitly with:
-#       cmake --build <build-dir> --target dali-replacement-real-layout-diagnostic
+#     Build with the regular UTC targets so these production paths are measured
+#     by both CI and local combined coverage.
 # ---------------------------------------------------------
 SET(REPLACEMENT_REAL_LAYOUT_NAME dali-replacement-real-layout-diagnostic)
 
-ADD_EXECUTABLE(${REPLACEMENT_REAL_LAYOUT_NAME} EXCLUDE_FROM_ALL
+ADD_EXECUTABLE(${REPLACEMENT_REAL_LAYOUT_NAME}
     ${LIBRARY_SOURCES}
     replacement-layout-test-adapter.cpp
     replacement-real-layout-diagnostic.cpp

@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/common/singleton-service.h>
 #include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
@@ -363,8 +364,9 @@ void TextScroller::RemoveGradientConstraints()
 
 void TextScroller::BindGradientConstraint(Property::Index rendererStartOffsetIndex)
 {
+  Actor textActor = mScrollingTextActor.GetHandle();
   if(!mGradientEnabled ||
-     !mScrollingTextActor ||
+     !textActor ||
      rendererStartOffsetIndex == Property::INVALID_INDEX ||
      mGradientAnimOffsetIndex == Property::INVALID_INDEX)
   {
@@ -372,7 +374,7 @@ void TextScroller::BindGradientConstraint(Property::Index rendererStartOffsetInd
   }
 
   Constraint constraint = Constraint::New<float>(mRenderer, rendererStartOffsetIndex, GradientOffsetConstraint);
-  constraint.AddSource(Source(mScrollingTextActor, mGradientAnimOffsetIndex));
+  constraint.AddSource(Source(textActor, mGradientAnimOffsetIndex));
   constraint.SetApplyRate(mGradientApplyAlways ? Dali::Constraint::APPLY_ALWAYS
                                                : Dali::Constraint::APPLY_ONCE);
   Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_SCROLLER_GRADIENT_START_OFFSET_CONSTRAINT_TAG);
@@ -394,8 +396,9 @@ void TextScroller::RemoveGradientOverlayConstraints()
 
 void TextScroller::BindGradientOverlayConstraint(Property::Index rendererStartOffsetIndex)
 {
+  Actor textActor = mScrollingTextActor.GetHandle();
   if(!mGradientOverlayEnabled ||
-     !mScrollingTextActor ||
+     !textActor ||
      rendererStartOffsetIndex == Property::INVALID_INDEX ||
      mGradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
   {
@@ -403,7 +406,7 @@ void TextScroller::BindGradientOverlayConstraint(Property::Index rendererStartOf
   }
 
   Constraint constraint = Constraint::New<float>(mRenderer, rendererStartOffsetIndex, GradientOffsetConstraint);
-  constraint.AddSource(Source(mScrollingTextActor, mGradientOverlayAnimOffsetIndex));
+  constraint.AddSource(Source(textActor, mGradientOverlayAnimOffsetIndex));
   constraint.SetApplyRate(mGradientOverlayApplyAlways ? Dali::Constraint::APPLY_ALWAYS
                                                       : Dali::Constraint::APPLY_ONCE);
   Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_SCROLLER_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG);
@@ -444,6 +447,12 @@ TextScroller::TextScroller(Ui::Integration::Text::ScrollerInterface& scrollerInt
 
 TextScroller::~TextScroller()
 {
+  // Core removes its thread-local service before tearing down the playlist.
+  // While it is alive, retire even infinite animations without a finish callback.
+  if(mScrollAnimation && Dali::SingletonService::Get())
+  {
+    mScrollAnimation.Clear();
+  }
 }
 
 void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, TextureSet textureSet,

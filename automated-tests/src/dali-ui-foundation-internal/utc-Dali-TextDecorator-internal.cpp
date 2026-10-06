@@ -24,6 +24,8 @@
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-test-suite-utils.h>
+#include <cmath>
+#include <dali-ui/ui-timer.h>
 #include <dali.h>
 
 using namespace Dali;
@@ -211,9 +213,191 @@ int UtcDaliTextDecoratorHandlesReceivePanWithHitTestModesP(void)
       DALI_TEST_EQUALS(controller.mEvents.back().state, Text::HANDLE_RELEASED, TEST_LOCATION);
       DALI_TEST_CHECK(handle.GetResourceUrl() != pressedImage);
     }
-
     application.GetScene().Remove(root);
   }
 
+  END_TEST;
+}
+
+int UtcDaliTextDecoratorCursorHighlightAndPopupStateP(void)
+{
+  UiTestApplication application;
+  Actor root = Actor::New();
+  root.SetProperty(Actor::Property::SIZE, Vector2(240.0f, 160.0f));
+  application.GetScene().Add(root);
+
+  TestDecoratorController controller(root);
+  Text::DecoratorPtr decorator = Text::Decorator::New(controller, controller);
+  NoopRelayoutContainer container;
+
+  decorator->SetBoundingBox(BoundsInteger(0, 0, 240, 160));
+  BoundsInteger bounds;
+  decorator->GetBoundingBox(bounds);
+  DALI_TEST_EQUALS(bounds.width, 240, TEST_LOCATION);
+  DALI_TEST_EQUALS(bounds.height, 160, TEST_LOCATION);
+
+  decorator->SetUiScale(1.5f);
+  DALI_TEST_EQUALS(decorator->GetUiScale(), 1.5f, TEST_LOCATION);
+  decorator->SetCursorWidth(2);
+  DALI_TEST_EQUALS(decorator->GetCursorWidth(), 2, TEST_LOCATION);
+  DALI_TEST_CHECK(decorator->GetEffectiveCursorWidth() > 0.0f);
+  decorator->SetCursorBlinkInterval(0.4f);
+  DALI_TEST_EQUALS(decorator->GetCursorBlinkInterval(), 0.4f, TEST_LOCATION);
+
+  for(Text::Cursor cursor : {Text::PRIMARY_CURSOR, Text::SECONDARY_CURSOR})
+  {
+    decorator->SetPosition(cursor, 30.0f, 40.0f, 18.0f, 20.0f);
+    decorator->SetVisualCursorGeometry(cursor, 32.0f, 40.0f, 18.0f);
+    decorator->SetGlyphOffset(cursor, 3.0f);
+    DALI_TEST_EQUALS(decorator->GetGlyphOffset(cursor), 3.0f, TEST_LOCATION);
+    decorator->SetCursorColor(cursor, Vector4(0.3f, 0.4f, 0.5f, 1.0f));
+    DALI_TEST_EQUALS(decorator->GetColor(cursor), Vector4(0.3f, 0.4f, 0.5f, 1.0f), TEST_LOCATION);
+    float x;
+    float y;
+    float height;
+    float lineHeight;
+    decorator->GetPosition(cursor, x, y, height, lineHeight);
+    DALI_TEST_EQUALS(x, 30.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(lineHeight, 20.0f, TEST_LOCATION);
+  }
+
+  decorator->SetActiveCursor(Text::ACTIVE_CURSOR_BOTH);
+  decorator->StartCursorBlink();
+  decorator->DelayCursorBlink();
+  decorator->StopCursorBlink();
+
+  decorator->SetHandleColor(Vector4(1.0f, 0.5f, 0.0f, 1.0f));
+  DALI_TEST_EQUALS(decorator->GetHandleColor(), Vector4(1.0f, 0.5f, 0.0f, 1.0f), TEST_LOCATION);
+  for(Text::HandleType handle : {Text::GRAB_HANDLE, Text::LEFT_SELECTION_HANDLE, Text::RIGHT_SELECTION_HANDLE})
+  {
+    decorator->SetPosition(handle, 40.0f, 50.0f, 18.0f);
+    decorator->SetHandleActive(handle, true);
+    DALI_TEST_CHECK(decorator->IsHandleActive(handle));
+    decorator->FlipHandleVertically(handle, true);
+    DALI_TEST_CHECK(decorator->IsHandleVerticallyFlipped(handle));
+    decorator->FlipHandleVertically(handle, false);
+    float x;
+    float y;
+    float lineHeight;
+    decorator->GetPosition(handle, x, y, lineHeight);
+    DALI_TEST_EQUALS(x, 40.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(y, 50.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(lineHeight, 18.0f, TEST_LOCATION);
+  }
+  decorator->FlipSelectionHandlesOnCrossEnabled(true);
+  decorator->SetSelectionHandleFlipState(true, true, false);
+
+  decorator->ResizeHighlightQuads(2u);
+  decorator->AddHighlight(0u, Vector4(10.0f, 10.0f, 35.0f, 25.0f));
+  decorator->AddHighlight(1u, Vector4(40.0f, 10.0f, 65.0f, 25.0f));
+  decorator->SetHighLightBox(Vector2(10.0f, 10.0f), Size(55.0f, 15.0f), 0.0f);
+  decorator->SetHighlightColor(Vector4(0.0f, 0.0f, 1.0f, 0.5f));
+  DALI_TEST_EQUALS(decorator->GetHighlightColor(), Vector4(0.0f, 0.0f, 1.0f, 0.5f), TEST_LOCATION);
+  decorator->SetHighlightActive(true);
+  DALI_TEST_CHECK(decorator->IsHighlightActive());
+  decorator->SetPopupActive(true);
+  DALI_TEST_CHECK(decorator->IsPopupActive());
+
+  decorator->SetScrollThreshold(12.0f);
+  DALI_TEST_EQUALS(decorator->GetScrollThreshold(), 12.0f, TEST_LOCATION);
+  decorator->SetScrollSpeed(45.0f);
+  DALI_TEST_EQUALS(decorator->GetScrollSpeed(), 45.0f, TEST_LOCATION);
+  decorator->SetHorizontalScrollEnabled(true);
+  decorator->SetVerticalScrollEnabled(true);
+  decorator->SetSmoothHandlePanEnabled(true);
+  DALI_TEST_CHECK(decorator->IsHorizontalScrollEnabled());
+  DALI_TEST_CHECK(decorator->IsVerticalScrollEnabled());
+  DALI_TEST_CHECK(decorator->IsSmoothHandlePanEnabled());
+
+  decorator->Relayout(Vector2(240.0f, 160.0f), container);
+  decorator->UpdatePositions(Vector2(4.0f, 5.0f));
+  application.SendNotification();
+  application.Render();
+
+  decorator->ClearHighlights();
+  decorator->SetHighlightActive(false);
+  decorator->SetPopupActive(false);
+  decorator->SetActiveCursor(Text::ACTIVE_CURSOR_NONE);
+  decorator->NotifyEndOfScroll();
+  decorator->Relayout(Vector2(240.0f, 160.0f), container);
+  DALI_TEST_CHECK(!decorator->IsHighlightActive());
+  DALI_TEST_CHECK(!decorator->IsPopupActive());
+  END_TEST;
+}
+
+int UtcDaliTextDecoratorHandleEdgeAutoScrollP(void)
+{
+  UiTestApplication application;
+  struct EdgeCase
+  {
+    Vector2 delta;
+    bool horizontal;
+    bool vertical;
+  };
+  const std::array<EdgeCase, 4u> cases{{
+    {Vector2(-110.0f, 0.0f), true, false},
+    {Vector2(110.0f, 0.0f), true, false},
+    {Vector2(0.0f, -70.0f), false, true},
+    {Vector2(0.0f, 70.0f), false, true},
+  }};
+
+  for(const EdgeCase& edge : cases)
+  {
+    Actor root = Actor::New();
+    root.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+    root.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+    root.SetProperty(Actor::Property::SIZE, Vector2(240.0f, 160.0f));
+    application.GetScene().Add(root);
+
+    TestDecoratorController controller(root);
+    Text::DecoratorPtr decorator = Text::Decorator::New(controller, controller);
+    decorator->SetBoundingBox(BoundsInteger(0, 0, 240, 160));
+    decorator->SetHandleImage(Text::GRAB_HANDLE,
+                              Text::HANDLE_IMAGE_RELEASED,
+                              GetRepositoryResourcePath("samples/text/res/cursor_handle.png"));
+    decorator->SetHandleImage(Text::GRAB_HANDLE,
+                              Text::HANDLE_IMAGE_PRESSED,
+                              GetRepositoryResourcePath("samples/text/res/cursor_handle_pressed.png"));
+    decorator->SetPosition(Text::GRAB_HANDLE, 120.0f, 65.0f, 20.0f);
+    decorator->SetHandleActive(Text::GRAB_HANDLE, true);
+    decorator->SetScrollThreshold(25.0f);
+    decorator->SetScrollSpeed(60.0f);
+    decorator->SetHorizontalScrollEnabled(edge.horizontal);
+    decorator->SetVerticalScrollEnabled(edge.vertical);
+
+    NoopRelayoutContainer container;
+    decorator->Relayout(Vector2(240.0f, 160.0f), container);
+    application.SendNotification();
+    application.Render();
+
+    std::vector<ImageView> views;
+    CollectImageViews(root, views);
+    DALI_TEST_EQUALS(views.size(), 1u, TEST_LOCATION);
+    const Bounds extents = views.front().CalculateScreenExtents();
+    const Vector2 start(extents.x + 0.5f * extents.width, extents.y + 0.5f * extents.height);
+    const Vector2 end = start + edge.delta;
+    uint32_t time = 100u;
+    TestStartPan(application, start, end, time);
+    Test::EmitGlobalTimerSignal();
+    float anchorX = 0.0f;
+    float anchorY = 0.0f;
+    decorator->GetScrollingAnchor(anchorX, anchorY);
+    DALI_TEST_CHECK(std::isfinite(anchorX));
+    DALI_TEST_CHECK(std::isfinite(anchorY));
+    TestEndPan(application, end, time);
+    DALI_TEST_CHECK(std::any_of(controller.mEvents.begin(),
+                                controller.mEvents.end(),
+                                [](const DecorationEventRecord& event)
+                                {
+                                  return event.state == Text::HANDLE_SCROLLING;
+                                }));
+    DALI_TEST_CHECK(std::any_of(controller.mEvents.begin(),
+                                controller.mEvents.end(),
+                                [](const DecorationEventRecord& event)
+                                {
+                                  return event.state == Text::HANDLE_STOP_SCROLLING;
+                                }));
+    application.GetScene().Remove(root);
+  }
   END_TEST;
 }

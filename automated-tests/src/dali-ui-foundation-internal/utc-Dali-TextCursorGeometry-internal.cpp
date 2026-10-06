@@ -244,3 +244,207 @@ int UtcDaliTextSelectionHandleHitAndUpdateP(void)
   DALI_TEST_CHECK(impl.mEventData);
   END_TEST;
 }
+
+int UtcDaliTextGeometryEllipsisAndBidiMatrixP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  for(const char* content : {"office affinity fish", "abc אבגדה def مرحبا xyz", "one two three four five six"})
+  {
+    for(auto position : {Text::EllipsisPosition::START, Text::EllipsisPosition::MIDDLE, Text::EllipsisPosition::END})
+    {
+      Text::ControllerPtr controller = CreateController(content, Size(72.0f, 32.0f));
+      controller->SetTextElideEnabled(true);
+      controller->SetMaximumNumberOfLines(1);
+      controller->SetEllipsisPosition(position);
+      controller->Relayout(Size(72.0f, 32.0f));
+      Text::Controller::Impl& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+      Text::ModelPtr model = impl.mModel;
+      Text::VisualModelPtr visual = model->mVisualModel;
+      Text::LogicalModelPtr logical = model->mLogicalModel;
+      const auto* finalElision = controller->GetFinalElisionResult();
+      Vector<Vector2> sizes;
+      Vector<Vector2> positions;
+      const Text::CharacterIndex last = static_cast<Text::CharacterIndex>(logical->mText.Count() - 1u);
+      Text::GetTextGeometry(model, 0u, last, sizes, positions);
+      Text::GetTextGeometry(model, 1u, last - 1u, sizes, positions, finalElision);
+      Text::GetTextGeometry(model, last, 0u, sizes, positions);
+      DALI_TEST_EQUALS(sizes.Count(), positions.Count(), TEST_LOCATION);
+      for(Text::CharacterIndex index = 0u; index <= last; ++index)
+      {
+        if(visual->GetLineOfCharacter(index) < visual->mLines.Count())
+        {
+          Text::GetCharacterBoundingRect(model, index, finalElision);
+        }
+      }
+      for(float y : {-10.0f, 0.0f, 15.0f, 100.0f})
+      {
+        bool matched = false;
+        Text::GetClosestCursorIndex(visual, logical, impl.mMetrics, 12.0f, y, Text::CharacterHitTest::TAP, matched);
+        Text::GetClosestCursorIndex(visual, logical, impl.mMetrics, 12.0f, y, Text::CharacterHitTest::SCROLL, matched);
+        Text::CharacterIndex start = 0u;
+        Text::CharacterIndex end = 0u;
+        Text::CharacterIndex noHit = 0u;
+        Text::FindSelectionIndices(visual, logical, impl.mMetrics, 12.0f, y, start, end, noHit);
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextCursorWhitespaceBidiAndLigatureMatrixP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  for(const char* content : {"  one   two\n\nthree  ", "abc אבג def\nمرحبا xyz", "office affinity fi ffi\n", "A 👨‍👩‍👧‍👦 B"})
+  {
+    Text::ControllerPtr controller = CreateController(content, Size(110.0f, 280.0f));
+    Text::Controller::Impl& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+    Text::VisualModelPtr visual = impl.mModel->mVisualModel;
+    Text::LogicalModelPtr logical = impl.mModel->mLogicalModel;
+    DALI_TEST_CHECK(!visual->mLines.Empty());
+
+    Text::GetCursorPositionParameters parameters;
+    parameters.visualModel = visual;
+    parameters.logicalModel = logical;
+    parameters.metrics = impl.mMetrics;
+    parameters.verticalLineAlignment = Text::Alignment::END;
+    parameters.isMultiline = true;
+    for(Text::CharacterIndex index = 0u; index <= logical->mText.Count(); ++index)
+    {
+      parameters.logical = index;
+      Text::CursorInfo cursor;
+      Text::GetCursorPosition(parameters, 20.0f, cursor);
+    }
+
+    for(float y : {-4.0f, 1.0f, 15.0f, 28.0f, 40.0f, 60.0f, 120.0f, 300.0f})
+    {
+      for(float x : {-20.0f, 0.0f, 12.0f, 30.0f, 60.0f, 90.0f, 150.0f})
+      {
+        bool matched = false;
+        Text::GetClosestCursorIndex(visual, logical, impl.mMetrics, x, y, Text::CharacterHitTest::TAP, matched);
+        Text::GetClosestCursorIndex(visual, logical, impl.mMetrics, x, y, Text::CharacterHitTest::SCROLL, matched);
+        Text::CharacterIndex start = 0u;
+        Text::CharacterIndex end = 0u;
+        Text::CharacterIndex noHit = 0u;
+        Text::FindSelectionIndices(visual, logical, impl.mMetrics, x, y, start, end, noHit);
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextGeometryMappedLigatureSlicesP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Text::ControllerPtr controller = CreateController("afib", Size(200.0f, 80.0f));
+  Text::Controller::Impl& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+  Text::ModelPtr model = impl.mModel;
+  Text::VisualModelPtr visual = model->mVisualModel;
+  DALI_TEST_CHECK(visual->mGlyphs.Count() >= 4u);
+
+  // Model the character-to-glyph tables emitted by a font that shapes "fi" as one ligature.
+  // The local mock font does not combine those glyphs by itself.
+  visual->mCharactersToGlyph[2u] = visual->mCharactersToGlyph[1u];
+  visual->mGlyphsPerCharacter[2u] = 0u;
+  visual->mCharactersPerGlyph[visual->mCharactersToGlyph[1u]] = 2u;
+  Vector<Vector2> sizes;
+  Vector<Vector2> positions;
+  Text::GetTextGeometry(model, 1u, 2u, sizes, positions);
+  DALI_TEST_CHECK(!sizes.Empty());
+  DALI_TEST_EQUALS(sizes.Count(), positions.Count(), TEST_LOCATION);
+  Text::GetTextGeometry(model, 0u, 2u, sizes, positions);
+  DALI_TEST_CHECK(!sizes.Empty());
+  Text::GetTextGeometry(model, 2u, 2u, sizes, positions);
+  DALI_TEST_CHECK(!sizes.Empty());
+  Text::GetCursorPositionParameters parameters;
+  parameters.visualModel = visual;
+  parameters.logicalModel = model->mLogicalModel;
+  parameters.metrics = impl.mMetrics;
+  parameters.isMultiline = true;
+  parameters.verticalLineAlignment = Text::Alignment::START;
+  parameters.logical = 2u;
+  Text::CursorInfo cursor;
+  Text::GetCursorPosition(parameters, 20.0f, cursor);
+  DALI_TEST_CHECK(cursor.lineHeight > 0.0f);
+  bool matched = false;
+  for(float x : {0.0f, 10.0f, 20.0f, 30.0f, 40.0f})
+  {
+    Text::GetClosestCursorIndex(visual, model->mLogicalModel, impl.mMetrics, x, 10.0f,
+                                Text::CharacterHitTest::TAP, matched);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextGeometryOutOfRangeAndEmptyModelP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Vector<Vector2> sizes;
+  Vector<Vector2> positions;
+  Text::ControllerPtr empty = CreateController("", Size(100.0f, 40.0f));
+  Text::ModelPtr emptyModel = Text::Controller::Impl::GetImplementation(*empty.Get()).mModel;
+  Text::GetTextGeometry(emptyModel, 0u, 0u, sizes, positions);
+  DALI_TEST_CHECK(sizes.Empty());
+  DALI_TEST_EQUALS(Text::GetCharIndexAtPosition(Text::ModelPtr(), 0.0f, 0.0f), -1, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetCharIndexAtPosition(emptyModel, 0.0f, 0.0f), -1, TEST_LOCATION);
+
+  Text::ControllerPtr controller = CreateController("alpha beta", Size(200.0f, 40.0f));
+  Text::ModelPtr model = Text::Controller::Impl::GetImplementation(*controller.Get()).mModel;
+  Text::GetTextGeometry(model, 999u, 999u, sizes, positions);
+  DALI_TEST_CHECK(sizes.Empty());
+  Text::GetTextGeometry(model, 999u, 0u, sizes, positions);
+  Text::GetTextGeometry(model, 0u, 999u, sizes, positions);
+  DALI_TEST_CHECK(!sizes.Empty());
+
+  Text::VisualModelPtr visual = model->mVisualModel;
+  model->mVisualModel = nullptr;
+  DALI_TEST_EQUALS(Text::GetLineBoundingRect(model, 0u), Bounds(), TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::GetCharacterBoundingRect(model, 0u), Bounds(), TEST_LOCATION);
+  model->mVisualModel = visual;
+  END_TEST;
+}
+
+int UtcDaliTextCursorBidirectionalBoundaryP(void)
+{
+  UiTestApplication application(UiConfig::New());
+  Text::ControllerPtr controller = CreateController("abcd", Size(200.0f, 40.0f));
+  Text::Controller::Impl& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+  Text::VisualModelPtr visual = impl.mModel->mVisualModel;
+  Text::LogicalModelPtr logical = impl.mModel->mLogicalModel;
+  DALI_TEST_EQUALS(visual->mLines.Count(), 1u, TEST_LOCATION);
+
+  logical->mCharacterDirections.Clear();
+  for(bool rightToLeft : {false, false, true, true})
+  {
+    logical->mCharacterDirections.PushBack(rightToLeft);
+  }
+
+  Text::BidirectionalLineInfoRun bidiLine{};
+  bidiLine.characterRun = visual->mLines[0u].characterRun;
+  bidiLine.visualToLogicalMap = static_cast<Text::CharacterIndex*>(malloc(4u * sizeof(Text::CharacterIndex)));
+  DALI_TEST_CHECK(bidiLine.visualToLogicalMap);
+  for(Text::CharacterIndex index = 0u; index < 4u; ++index)
+  {
+    bidiLine.visualToLogicalMap[index] = index;
+  }
+  bidiLine.direction = false;
+  bidiLine.isIdentity = true;
+  logical->mBidirectionalLineInfo.PushBack(bidiLine);
+
+  Text::GetCursorPositionParameters parameters;
+  parameters.visualModel = visual;
+  parameters.logicalModel = logical;
+  parameters.metrics = impl.mMetrics;
+  parameters.isMultiline = true;
+  parameters.verticalLineAlignment = Text::Alignment::START;
+  for(Text::CharacterIndex index = 0u; index <= 4u; ++index)
+  {
+    parameters.logical = index;
+    Text::CursorInfo cursor;
+    Text::GetCursorPosition(parameters, 20.0f, cursor);
+    DALI_TEST_CHECK(cursor.lineHeight > 0.0f);
+    if(index == 2u || index == 4u)
+    {
+      DALI_TEST_CHECK(cursor.isSecondaryCursor);
+    }
+  }
+  END_TEST;
+}

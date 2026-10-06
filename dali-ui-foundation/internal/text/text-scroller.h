@@ -24,6 +24,7 @@
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
+#include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/render-tasks/render-task.h>
 #include <dali/public-api/rendering/renderer.h>
 #include <atomic>
@@ -317,7 +318,7 @@ private:
   Property::Index                           mScrollDeltaIndex;               // Property used by shader to represent distance to scroll
   Animation                                 mScrollAnimation;                // Animation used to update the mScrollDeltaIndex
   Dali::Renderer                            mRenderer;                       // Renderer used to render the text
-  Actor                                     mScrollingTextActor;             // Actor used as source for TextGradient animation properties
+  WeakHandle<Actor>                         mScrollingTextActor;             // Non-owning gradient source: Label owns this scroller.
   std::vector<Constraint>                   mGradientConstraints;            // Constraints for animated TextGradient uniforms.
   std::vector<Constraint>                   mGradientOverlayConstraints;     // Constraints for animated TextGradientOverlay uniforms.
   Property::Index                           mGradientAnimOffsetIndex;        // Source property for uTextGradientStartOffset.

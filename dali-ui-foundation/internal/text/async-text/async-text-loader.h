@@ -109,6 +109,7 @@ struct AsyncTextParameters
     relativeLineSize{1.f},
     characterSpacing{0.f},
     effectiveTextScale{1.f},
+    decorationUiScale{1.f},
     textWidth{0.f},
     textHeight{0.f},
     originWidth{0.f},
@@ -246,6 +247,7 @@ struct AsyncTextParameters
   float relativeLineSize;   ///< The relative height of the line (a factor that will be multiplied by text height).
   float characterSpacing;   ///< The space between characters.
   float effectiveTextScale; ///< The effective text scale including font size scale and UI scale.
+  float decorationUiScale;  ///< Authored decoration geometry uses UI scale only.
   float textWidth;          ///< The width in pixels of the boundaries where the text is going to be laid-out.
   float textHeight;         ///< The height in pixels of the boundaries where the text is going to be laid-out.
   float originWidth;

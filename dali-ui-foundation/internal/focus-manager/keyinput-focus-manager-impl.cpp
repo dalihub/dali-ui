@@ -25,6 +25,7 @@
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/actors/layer.h>
+#include <algorithm>
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
@@ -69,70 +70,176 @@ void KeyInputFocusManagerImpl::OnSceneHolderCreated(Dali::Integration::SceneHold
   sceneHolder.KeyEventGeneratedSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnKeyEvent);
 }
 
+void KeyInputFocusManagerImpl::SetIndependentWindow(Window window, bool enabled)
+{
+  mWindowTargets.erase(std::remove_if(mWindowTargets.begin(), mWindowTargets.end(),
+                                      [](const WindowKeyTarget& target)
+  { return !target.window.GetHandle(); }),
+                       mWindowTargets.end());
+  for(auto iter = mWindowTargets.begin(); iter != mWindowTargets.end(); ++iter)
+  {
+    if(iter->window.GetHandle() == window)
+    {
+      if(!enabled)
+      {
+        mWindowTargets.erase(iter);
+      }
+      return;
+    }
+  }
+  if(enabled)
+  {
+    WindowKeyTarget target;
+    target.window = window;
+    if(mCurrentFocusView && Dali::Integration::SceneHolder::Get(mCurrentFocusView) == window)
+    {
+      target.view = mCurrentFocusView;
+      mCurrentFocusView.EffectiveVisibilityChangedSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewVisibilityChanged);
+    }
+    mWindowTargets.push_back(target);
+  }
+}
+
+Ui::View KeyInputFocusManagerImpl::GetCurrentFocusView(Window window) const
+{
+  if(!window)
+  {
+    return Ui::View();
+  }
+  for(const auto& target : mWindowTargets)
+  {
+    if(target.window.GetHandle() == window)
+    {
+      Ui::View view = target.view.GetHandle();
+      return view;
+    }
+  }
+  return mCurrentFocusView && mCurrentFocusView.IsConnectedToScene() &&
+             Dali::Integration::SceneHolder::Get(mCurrentFocusView) == window
+           ? mCurrentFocusView
+           : Ui::View();
+}
+
+void KeyInputFocusManagerImpl::SetPrimaryWindow(Window window)
+{
+  Ui::View previous = mCurrentFocusView;
+  Ui::View target   = GetCurrentFocusView(window);
+  // Commit before notifying loss so a callback's newer target is never overwritten.
+  mCurrentFocusView = target;
+  mCurrentWindowId  = target ? static_cast<uint32_t>(window.GetNativeId()) : 0;
+  if(previous && previous != target && !HasFocusTarget(previous))
+  {
+    NotifyFocusLost(previous, Window::DownCast(Dali::Integration::SceneHolder::Get(previous)));
+  }
+}
+
+bool KeyInputFocusManagerImpl::HasFocusTarget(Ui::View view) const
+{
+  if(!view)
+  {
+    return false;
+  }
+  return mCurrentFocusView == view || std::any_of(mWindowTargets.begin(), mWindowTargets.end(),
+                                                  [view](const WindowKeyTarget& target)
+  { return target.window.GetHandle() && target.view.GetHandle() == view; });
+}
+
+void KeyInputFocusManagerImpl::NotifyFocusLost(Ui::View view, Window window)
+{
+  view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection);
+  view.EffectiveVisibilityChangedSignal().Disconnect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewVisibilityChanged);
+  auto focusManager = Ui::FocusManager::Get();
+  GetImpl(focusManager).NotifyKeyInputFocus(view, false, window);
+}
+
 void KeyInputFocusManagerImpl::SetFocus(Ui::View view)
 {
   if(!view || !view.IsConnectedToScene())
   {
-    // No-op
     return;
   }
-
-  // Text-input taps, long presses and cursor APIs can bypass FocusManager and
-  // arrive after it accepted a deferred request. Do not let that direct call
-  // steal actual key focus or clear the foreground View's FOCUSED state.
-  // Key-only requests must not create navigation reservations: converting a
-  // rejected SetKeyInputTarget(Y) to SetCurrentFocusView(Y) would overwrite a
-  // saved X even though the extension call returns false. Reassigning a retained
-  // key target must likewise leave a different deferred navigation target intact.
-  // Callers that intend navigation focus must request it explicitly.
-  auto focusManager = Ui::FocusManager::Get();
-  if(focusManager && !GetImpl(focusManager).IsActiveWindow(Dali::Integration::SceneHolder::Get(view)))
+  Window window       = Window::DownCast(Dali::Integration::SceneHolder::Get(view));
+  auto   focusManager = Ui::FocusManager::Get();
+  if(!window || (focusManager && !GetImpl(focusManager).CanSetKeyInputFocus(view)))
   {
     return;
   }
 
-  if(view == mCurrentFocusView)
+  const bool independent     = focusManager && GetImpl(focusManager).IsIndependentFocusEnabled(window);
+  const bool active          = !focusManager || GetImpl(focusManager).IsActiveWindow(Dali::Integration::SceneHolder::Get(window.GetRootLayer()));
+  Ui::View   previous        = independent ? GetCurrentFocusView(window) : mCurrentFocusView;
+  Ui::View   previousPrimary = active && mCurrentFocusView != previous ? mCurrentFocusView : Ui::View();
+  if(independent)
   {
-    // View already has focus
+    for(auto& target : mWindowTargets)
+    {
+      if(target.window.GetHandle() == window)
+      {
+        target.view = view;
+        break;
+      }
+    }
+  }
+  if(active)
+  {
+    mCurrentFocusView = view;
+    mCurrentWindowId  = static_cast<uint32_t>(window.GetNativeId());
+  }
+  if(previous != view)
+  {
+    view.SceneDisconnectedSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection);
+    if(independent)
+    {
+      view.EffectiveVisibilityChangedSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewVisibilityChanged);
+    }
+  }
+  // Local and primary ownership have both been updated. Release each displaced
+  // target once, unless a callback has already made it a current target again.
+  for(Ui::View displaced : {previous, previousPrimary})
+  {
+    if(displaced && displaced != view && !HasFocusTarget(displaced))
+    {
+      NotifyFocusLost(displaced, Window::DownCast(Dali::Integration::SceneHolder::Get(displaced)));
+    }
+  }
+  // A loss callback may replace or disconnect the newly committed target.
+  if(previous == view || GetCurrentFocusView(window) != view)
+  {
     return;
   }
-
-  view.SceneDisconnectedSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection);
-
-  Dali::Ui::View previousFocusView = GetCurrentFocusView();
-
-  // Set view to currentFocusView
-  mCurrentFocusView = view;
-  mCurrentWindowId  = static_cast<uint32_t>(Dali::Integration::SceneHolder::Get(view).GetNativeId());
-
-  if(previousFocusView)
+  GetImpl(focusManager).NotifyKeyInputFocus(view, true, window);
+  if(GetCurrentFocusView(window) == view && !mKeyInputFocusChangedSignal.Empty())
   {
-    // Notify the view that it has lost key input focus
-    GetImpl(previousFocusView).NotifyFocusChanged(false);
-  }
-
-  // Tell the new actor that it has gained focus.
-  GetImpl(view).NotifyFocusChanged(true);
-
-  // Emit the signal to inform focus change to the application.
-  if(!mKeyInputFocusChangedSignal.Empty())
-  {
-    mKeyInputFocusChangedSignal.Emit(view, previousFocusView);
+    mKeyInputFocusChangedSignal.Emit(view, previous);
   }
 }
 
 void KeyInputFocusManagerImpl::RemoveFocus(Ui::View view)
 {
-  if(view && view == mCurrentFocusView)
+  if(!view)
   {
-    DALI_LOG_RELEASE_INFO("RemoveFocus id:(%d)\n", view.GetProperty<int32_t>(Dali::Actor::Property::ID));
-    view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection);
-
+    return;
+  }
+  bool   removed = false;
+  Window window  = Window::DownCast(Dali::Integration::SceneHolder::Get(view));
+  for(auto& target : mWindowTargets)
+  {
+    if(target.view.GetHandle() == view)
+    {
+      window = target.window.GetHandle();
+      target.view.Reset();
+      removed = true;
+    }
+  }
+  if(view == mCurrentFocusView)
+  {
     mCurrentFocusView.Reset();
     mCurrentWindowId = 0;
-
-    // Notify the view that it has lost key input focus
-    GetImpl(view).NotifyFocusChanged(false);
+    removed          = true;
+  }
+  if(removed)
+  {
+    NotifyFocusLost(view, window);
   }
 }
 
@@ -155,18 +262,14 @@ bool KeyInputFocusManagerImpl::OnKeyEvent(Dali::Integration::SceneHolder sceneHo
 {
   bool consumed = false;
 
-  Ui::View view = GetCurrentFocusView();
-  if(view)
+  Window window = Window::DownCast(sceneHolder);
+  if(!window || (event.GetWindowId() > 0 && event.GetWindowId() != static_cast<uint32_t>(window.GetNativeId())))
   {
-    // Key events that occur in windows other than the currently focused view are skipped.
-    uint32_t eventWindowId = event.GetWindowId();
-    if(eventWindowId > 0 && GetCurrentWindowId() != eventWindowId)
-    {
-      DALI_LOG_RELEASE_INFO("Current view window id %d, window ID where key event occurred %d : key event skip\n",
-                            GetCurrentWindowId(), eventWindowId);
-      return consumed;
-    }
-
+    return false;
+  }
+  Ui::View view = GetCurrentFocusView(window);
+  if(view && view.IsConnectedToScene() && Dali::Integration::SceneHolder::Get(view) == sceneHolder)
+  {
     Dali::Actor dispatch = view;
     while(dispatch)
     {
@@ -192,10 +295,11 @@ bool KeyInputFocusManagerImpl::NotifyKeyEvent(Ui::View view, const KeyEvent& eve
 
   if(view)
   {
-    consumed = ViewDataImpl::Get(GetImpl(view)).NotifyKeyEvent(event);
+    Dali::Actor oldParent   = view.GetParent();
+    auto        sceneHolder = Dali::Integration::SceneHolder::Get(view);
+    consumed                = ViewDataImpl::Get(GetImpl(view)).NotifyKeyEvent(event);
 
-    // if view doesn't consume KeyEvent, give KeyEvent to its parent.
-    if(!consumed)
+    if(!consumed && view.GetParent() == oldParent && Dali::Integration::SceneHolder::Get(view) == sceneHolder)
     {
       Ui::View parent = Ui::View::DownCast(view.GetParent());
 
@@ -212,6 +316,15 @@ bool KeyInputFocusManagerImpl::NotifyKeyEvent(Ui::View view, const KeyEvent& eve
 void KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection(Dali::Actor actor)
 {
   RemoveFocus(Dali::Ui::View::DownCast(actor));
+}
+
+void KeyInputFocusManagerImpl::OnFocusViewVisibilityChanged(Dali::Actor actor, bool visible)
+{
+  auto manager = Ui::FocusManager::Get();
+  if(!visible && manager && GetImpl(manager).IsIndependentFocusEnabled(Window::DownCast(Dali::Integration::SceneHolder::Get(actor))))
+  {
+    RemoveFocus(Ui::View::DownCast(actor));
+  }
 }
 
 bool KeyInputFocusManagerImpl::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker,

@@ -39,6 +39,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-placeholder-handler.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-relayouter.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
+#include <dali-ui-foundation/internal/text/decoration-scale.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
@@ -2276,7 +2277,7 @@ void Controller::Impl::CopyUnderlinedFromLogicalToVisualModels(bool shouldClearP
     underlineGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
     underlineGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
     // Copy properties (attributes)
-    underlineGlyphRun.properties = it->properties;
+    underlineGlyphRun.properties = ResolveDecorationProperties(it->properties, mUiScale);
 
     for(Length index = 1u; index < numberOfCharacters; index++)
     {
@@ -2310,7 +2311,7 @@ void Controller::Impl::CopyStrikethroughFromLogicalToVisualModels()
     }
 
     StrikethroughGlyphRun strikethroughGlyphRun;
-    strikethroughGlyphRun.properties              = it->properties;
+    strikethroughGlyphRun.properties              = ResolveDecorationProperties(it->properties, mUiScale);
     strikethroughGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
     strikethroughGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
@@ -2599,6 +2600,7 @@ bool Controller::Impl::SetUiScale(float scale)
   }
 
   mUiScale = scale;
+  mModel->mVisualModel->SetDecorationUiScale(scale);
   mLayoutEngine.SetFontSizeScale(GetEffectiveTextScale());
   return true;
 }

@@ -22,12 +22,17 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
+#include <dali-ui/ui-event-thread-callback.h>
+#define private public
+#include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-task.h>
+#undef private
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/vector-animation-renderer.h>
-#include <dali-ui/ui-event-thread-callback.h>
 #include <chrono>
 
 using namespace Dali;
@@ -774,5 +779,104 @@ int UtcDaliLottieAnimationViewDeferredResourceUsesRegisteredVisualReadiness(void
   DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
   DALI_TEST_CHECK(view.IsResourceReady());
   DALI_TEST_CHECK(readyCount > 1);
+  END_TEST;
+}
+
+int UtcDaliVectorAnimationTaskPlaybackAndRangeP(void)
+{
+  UiTestApplication application;
+  auto factory = Dali::Ui::Integration::VisualFactory::Get();
+  auto& cache = Dali::Ui::GetImplementation(factory).GetFactoryCache();
+  using Task = Dali::Ui::Internal::VectorAnimationTask;
+
+  Dali::Ui::Internal::VectorAnimationTaskPtr failed(new Task(cache));
+  failed->RequestLoad(Dali::Ui::Internal::VisualUrl("invalid.json"), Dali::EncodedImageBuffer(), true);
+  DALI_TEST_CHECK(failed->mLoadFailed);
+  DALI_TEST_CHECK(!failed->Rasterize());
+  Property::Map unavailable;
+  failed->GetLayerInfo(unavailable);
+  failed->GetMarkerInfo(unavailable);
+  DALI_TEST_CHECK(unavailable.Empty());
+
+  Dali::Ui::Internal::VectorAnimationTaskPtr task(new Task(cache));
+  task->RequestLoad(Dali::Ui::Internal::VisualUrl("animation.json"), Dali::EncodedImageBuffer(), true);
+  DALI_TEST_EQUALS(task->GetTotalFrameCount(), 5u, TEST_LOCATION);
+  task->SetSize(32u, 24u);
+  uint32_t width = 0u;
+  uint32_t height = 0u;
+  task->GetDefaultSize(width, height);
+  DALI_TEST_CHECK(width > 0u && height > 0u);
+
+  Property::Map layerInfo;
+  Property::Map markerInfo;
+  task->GetLayerInfo(layerInfo);
+  task->GetLayerInfo(layerInfo);
+  task->GetMarkerInfo(markerInfo);
+  task->GetMarkerInfo(markerInfo);
+
+  Property::Array invalidRange;
+  task->SetPlayRange(invalidRange);
+  invalidRange.PushBack("unknown-marker");
+  task->SetPlayRange(invalidRange);
+  Property::Array markerRange;
+  markerRange.PushBack("start");
+  markerRange.PushBack("end");
+  task->SetPlayRange(markerRange);
+  Property::Array range;
+  range.PushBack(3);
+  range.PushBack(1);
+  task->SetPlayRange(range);
+  uint32_t start = 0u;
+  uint32_t end = 0u;
+  task->GetPlayRange(start, end);
+  DALI_TEST_EQUALS(start, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(end, 3u, TEST_LOCATION);
+  task->SetCurrentFrameNumber(100u);
+  DALI_TEST_EQUALS(task->GetCurrentFrameNumber(), 3u, TEST_LOCATION);
+
+  task->SetStopBehavior(Ui::AnimatedImage::StopBehavior::FIRST_FRAME);
+  DALI_TEST_EQUALS(task->GetStoppedFrame(start, end, 2u), start, TEST_LOCATION);
+  task->SetStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME);
+  task->SetLoopingMode(Ui::LottieAnimation::LoopingMode::RESTART);
+  DALI_TEST_EQUALS(task->GetStoppedFrame(start, end, 2u), end, TEST_LOCATION);
+  task->SetLoopingMode(Ui::LottieAnimation::LoopingMode::AUTO_REVERSE);
+  DALI_TEST_EQUALS(task->GetStoppedFrame(start, end, 2u), start, TEST_LOCATION);
+  task->SetStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME);
+  DALI_TEST_EQUALS(task->GetStoppedFrame(start, end, 2u), 2u, TEST_LOCATION);
+
+  task->KeepRasterizedBuffer(true);
+  DALI_TEST_CHECK(task->IsKeptRasterizedBuffer());
+  task->SetAspectFitEnabled(false);
+  DALI_TEST_CHECK(!task->IsAspectFitEnabled());
+  task->SetSize(48u, 36u);
+  DALI_TEST_CHECK(task->Rasterize());
+
+  Task::AnimationData data;
+  data.resendFlag = Task::RESEND_LOOP_COUNT | Task::RESEND_PLAY_RANGE |
+                    Task::RESEND_STOP_BEHAVIOR | Task::RESEND_LOOPING_MODE |
+                    Task::RESEND_CURRENT_FRAME | Task::RESEND_NOTIFY_AFTER_RASTERIZATION |
+                    Task::RESEND_FRAME_SPEED_FACTOR | Task::RESEND_NEED_RESOURCE_READY |
+                    Task::RESEND_PLAY_STATE;
+  data.loopCount = 1;
+  data.playRange = range;
+  data.stopBehavior = Ui::AnimatedImage::StopBehavior::LAST_FRAME;
+  data.loopingMode = Ui::LottieAnimation::LoopingMode::RESTART;
+  data.currentFrame = 3u;
+  data.frameSpeedFactor = 2.0f;
+  data.notifyAfterRasterization = true;
+  data.playState = Ui::AnimatedImage::PlayState::PLAYING;
+  data.playStateId = 7u;
+  task->mAnimationData[1].push_back(data);
+  task->mAnimationDataUpdated = true;
+  task->ApplyAnimationData();
+  DALI_TEST_EQUALS(task->mAppliedPlayStateId, 7u, TEST_LOCATION);
+  DALI_TEST_EQUALS(task->GetCurrentFrameNumber(), 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(task->Rasterize());
+  DALI_TEST_CHECK(task->Rasterize());
+
+  task->CalculateNextFrameTime(true);
+  task->mNextFrameStartTime -= std::chrono::seconds(1);
+  task->CalculateNextFrameTime(false);
+  DALI_TEST_CHECK(task->mDroppedFrames > 0u);
   END_TEST;
 }

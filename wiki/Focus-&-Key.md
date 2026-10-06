@@ -64,7 +64,7 @@ focusMgr.RequestFocus(containerOrButton);
 // Query the currently focused View
 View focused = focusMgr.GetCurrentFocusView();
 
-// Clear focus entirely
+// Clear the global focus (independent focus in other Windows is preserved)
 focusMgr.ClearFocus();
 ```
 
@@ -87,6 +87,64 @@ focusMgr.RequestFocus(layout);
 // Tries to focus layout itself. Does not delegate to children.
 focusMgr.SetCurrentFocusView(layout);
 ```
+
+<br/>
+
+### Independent Focus in an Inactive Window
+
+By default, a request in an inactive Window only stores a target for later
+activation. Explicitly enable independent focus to apply actual focus in that
+Window while keeping the active Window's View focused:
+
+```cpp
+subWindow.SetAcceptFocus(false); // Apply before showing the subwindow.
+focusMgr.SetIndependentFocusEnabled(subWindow, true);
+focusMgr.SetCurrentFocusView(subView);
+
+View primary = focusMgr.GetCurrentFocusView();           // mainView
+View mainActual = focusMgr.GetCurrentFocusView(mainWindow); // mainView
+View subActual = focusMgr.GetCurrentFocusView(subWindow); // subView
+```
+
+The Window must be visible and the View must meet normal eligibility rules.
+Enabling alone does not apply a stored target. The option defaults to false;
+query it with `IsIndependentFocusEnabled(window)`. Both Views keep their
+`FOCUSED` state, and adding subView does not send mainView a focus-loss signal.
+This changes logical focus; it does not activate the Window or grab native keys.
+
+Keys are routed by the delivering SceneHolder to that Window's key target.
+A nonzero event Window ID must match its native ID; ID 0 uses the delivering
+SceneHolder. Unconsumed keys bubble within that Window only, and unconsumed
+directional keys navigate there. A View that consumes a key also stops navigation.
+
+Use `MoveFocus(window, direction)`, `MoveFocusBackward(window)`,
+`ClearFocusIndication(window)`, and `ClearFocus(window)` for scoped operations.
+`MoveFocusBackward(window)` selects the most recent valid history entry that
+differs from the current navigation target. An ordinary inactive Window only
+updates its stored target; repeated calls walk backward one step at a time.
+When no current navigation target exists, it restores the most recent valid
+entry even if the history contains only one entry. `ClearFocus(window)` removes
+actual focus and the stored target but retains history for a later explicit
+`MoveFocusBackward(window)`. If no valid destination exists, actual focus and
+the stored target remain unchanged.
+Hiding the independent Window, disabling its option, or invalidating its target
+clears its actual focus without clearing mainView. Showing or enabling it again
+requires a new explicit request. Native activation promotes an already focused
+independent View to the global role without repeating its focus loss/gain.
+InputField, InputEditor and custom IME sessions are outside this feature's scope.
+
+Global `FocusChangedSignal()` reports changes to the global target. To observe
+actual focus changes within each Window, connect the new scoped signal:
+
+```cpp
+focusMgr.WindowFocusChangedSignal().Connect(&tracker,
+  [](Window window, View previous, View current) {
+    // Actual focus changed within window.
+  });
+```
+
+See the [focus-key-grab sample](../samples/focus-key-grab/README.md) for
+controls, expected device logs and matching library/sample builds.
 
 <br/>
 
@@ -138,7 +196,9 @@ popup and restore focus elsewhere without a separate escape API.
 
 ## Handling Key Events
 
-A focused View emits `KeyEventSignal` for every key press/release. Return `true` to consume the event (preventing further propagation).
+A focused key target emits `KeyEventSignal` for key presses/releases delivered
+to its Window. Return `true` to consume the event, stopping parent propagation
+and directional navigation.
 
 Using a member function:
 

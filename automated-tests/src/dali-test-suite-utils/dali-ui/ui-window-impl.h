@@ -90,6 +90,9 @@ public:
   bool                                      mMaximized{false};
   bool                                      mMinimized{false};
   bool mFocused{false};
+  unsigned int mAuxiliaryHintId{0u};
+  Dali::String mAuxiliaryHintName;
+  Dali::String mAuxiliaryHintValue;
 };
 
 } // namespace Adaptor

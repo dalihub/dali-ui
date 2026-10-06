@@ -97,3 +97,22 @@ int UtcDaliWindowFrameInteractionExternalCancellation(void)
   DALI_TEST_CHECK(!controller.Cancel());
   END_TEST;
 }
+
+int UtcDaliWindowFrameInteractionNamesAndInvalidTransitionsP(void)
+{
+  WindowFrameInteractionController controller;
+  DALI_TEST_CHECK(!controller.PointerEnded(WindowFrameInteractionType::MOVE, false));
+  DALI_TEST_CHECK(!controller.CompleteMove());
+  DALI_TEST_CHECK(!controller.CompleteResize());
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionTypeName(WindowFrameInteractionType::NONE)), "none", TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionTypeName(WindowFrameInteractionType::MOVE)), "move", TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionTypeName(WindowFrameInteractionType::RESIZE_BOTTOM_LEFT)), "resize-bottom-left", TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionTypeName(WindowFrameInteractionType::RESIZE_BOTTOM_RIGHT)), "resize-bottom-right", TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionTypeName(static_cast<WindowFrameInteractionType>(99))), "unknown", TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionStateName(WindowFrameInteractionState::STARTED)), "started", TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionStateName(WindowFrameInteractionState::POINTER_RELEASED)), "pointer-released", TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionStateName(WindowFrameInteractionState::COMPLETED)), "completed", TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionStateName(WindowFrameInteractionState::CANCELLED)), "cancelled", TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(WindowFrameInteractionStateName(static_cast<WindowFrameInteractionState>(99))), "unknown", TEST_LOCATION);
+  END_TEST;
+}

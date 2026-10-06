@@ -20,7 +20,11 @@
 
 // EXTERNAL INCLUDES
 #include <memory.h>
+#include <cmath>
 #include <cstring>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/decoration-scale.h>
 
 namespace DALI_NAMESPACE
 {
@@ -38,6 +42,7 @@ struct VisualModel::ShadowData
 {
   Vector4 color{Color::BLACK};
   Vector2 offset{Vector2::ZERO};
+  Vector2 effectiveOffset{Vector2::ZERO};
   float   blurRadius{DEFAULT_SHADOW_BLUR_RADIUS};
 };
 
@@ -54,6 +59,7 @@ struct VisualModel::OutlineData
 {
   Vector4  color{Color::WHITE};
   Vector2  offset{Vector2::ZERO};
+  Vector2  effectiveOffset{Vector2::ZERO};
   float    blurRadius{DEFAULT_OUTLINE_BLUR_RADIUS};
   uint16_t width{0u};
 };
@@ -406,7 +412,9 @@ void VisualModel::SetShadowOffset(const Vector2& shadowOffset)
   // Default writes from async reset and replacement copying need no storage.
   if(mShadowData || std::memcmp(shadowOffset.AsFloat(), Vector2::ZERO.AsFloat(), 2u * sizeof(float)) != 0)
   {
-    GetOrCreateShadowData().offset = shadowOffset;
+    auto& data           = GetOrCreateShadowData();
+    data.offset          = shadowOffset;
+    data.effectiveOffset = ResolveDecorationOffset(shadowOffset, mDecorationUiScale);
   }
 }
 
@@ -443,7 +451,9 @@ void VisualModel::SetOutlineOffset(const Vector2& outlineOffset)
   // Default writes from async reset and replacement copying need no storage.
   if(mOutlineData || std::memcmp(outlineOffset.AsFloat(), Vector2::ZERO.AsFloat(), 2u * sizeof(float)) != 0)
   {
-    GetOrCreateOutlineData().offset = outlineOffset;
+    auto& data           = GetOrCreateOutlineData();
+    data.offset          = outlineOffset;
+    data.effectiveOffset = ResolveDecorationOffset(outlineOffset, mDecorationUiScale);
   }
 }
 
@@ -575,6 +585,63 @@ Alignment VisualModel::GetVerticalLineAlignment() const
 const Vector4& VisualModel::GetTextColor() const
 {
   return mTextColor;
+}
+
+void VisualModel::SetDecorationUiScale(float scale)
+{
+  if(!std::isfinite(scale) || scale <= 0.0f || scale == mDecorationUiScale)
+  {
+    return;
+  }
+  mDecorationUiScale = scale;
+  if(mShadowData)
+  {
+    mShadowData->effectiveOffset = ResolveDecorationOffset(mShadowData->offset, scale);
+  }
+  if(mOutlineData)
+  {
+    mOutlineData->effectiveOffset = ResolveDecorationOffset(mOutlineData->offset, scale);
+  }
+}
+
+float VisualModel::GetDecorationUiScale() const
+{
+  return mDecorationUiScale;
+}
+
+const Vector2& VisualModel::GetEffectiveShadowOffset() const
+{
+  return mShadowData ? mShadowData->effectiveOffset : Vector2::ZERO;
+}
+
+const Vector2& VisualModel::GetEffectiveOutlineOffset() const
+{
+  return mOutlineData ? mOutlineData->effectiveOffset : Vector2::ZERO;
+}
+
+uint16_t VisualModel::GetEffectiveOutlineWidth() const
+{
+  return ResolveDecorationOutlineWidth(GetOutlineWidth(), mDecorationUiScale);
+}
+
+float VisualModel::GetEffectiveUnderlineHeight() const
+{
+  return ResolveDecorationDistance(mUnderlineHeight, mDecorationUiScale);
+}
+
+float VisualModel::GetEffectiveDashedUnderlineWidth() const
+{
+  return ResolveDecorationDistance(mDashedUnderlineWidth, mDecorationUiScale);
+}
+
+float VisualModel::GetEffectiveDashedUnderlineGap() const
+{
+  return ResolveDecorationDistance(mDashedUnderlineGap, mDecorationUiScale);
+}
+
+float VisualModel::GetEffectiveStrikethroughHeight() const
+{
+  return ResolveDecorationDistance(mStrikethroughHeight, mDecorationUiScale);
 }
 
 const Vector2& VisualModel::GetShadowOffset() const
@@ -839,6 +906,7 @@ VisualModel::VisualModel()
   mDashedUnderlineWidth(2.0f),
   mDashedUnderlineGap(1.0f),
   mCutoutData(nullptr),
+  mDecorationUiScale(1.0f),
   mNaturalSize(),
   mLayoutSize(),
   mCachedLayoutSize(),

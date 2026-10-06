@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/integration-api/builder/json-parser.h>
+#include <dali-ui-foundation/internal/builder/tree-node-manipulator.h>
 #include <dali-ui-test-suite-utils.h>
 
 #include <sstream>
@@ -147,5 +148,77 @@ int UtcDaliJsonParserReportsRepresentativeSyntaxErrorsP(void)
     DALI_TEST_CHECK(parser.GetErrorColumn() >= 0);
   }
 
+  END_TEST;
+}
+
+int UtcDaliTreeNodeManipulatorValueAndWriteMatrixP(void)
+{
+  using Manipulator = Dali::Ui::Internal::TreeNodeManipulator;
+  using Node = Dali::Ui::Integration::TreeNode;
+
+  Node* root = Manipulator::NewTreeNode();
+  Manipulator tree(root);
+  tree.SetType(Node::OBJECT);
+  auto addChild = [&](Node* parent, const char* name)
+  {
+    Node* child = Manipulator::NewTreeNode();
+    Manipulator(child).SetName(name);
+    Manipulator(parent).AddChild(child);
+    return child;
+  };
+
+  Manipulator(addChild(root, "quoted")).SetString("a\"b");
+  Node* numbers = addChild(root, "numbers");
+  Manipulator(numbers).SetType(Node::ARRAY);
+  Manipulator(addChild(numbers, nullptr)).SetInteger(7);
+  Manipulator(addChild(numbers, nullptr)).SetFloat(2.5f);
+  Manipulator(addChild(root, "yes")).SetBoolean(true);
+  Manipulator(addChild(root, "no")).SetBoolean(false);
+  Node* empty = addChild(root, "empty");
+  Node* nested = addChild(root, "nested");
+  Manipulator(nested).SetType(Node::OBJECT);
+  Manipulator(addChild(nested, "leaf")).SetString("value");
+
+  DALI_TEST_EQUALS(tree.Size(), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(tree.GetType(), Node::OBJECT, TEST_LOCATION);
+  DALI_TEST_CHECK(tree.GetChild("numbers") == numbers);
+  auto numberIter = numbers->CBegin();
+  ++numberIter;
+  DALI_TEST_EQUALS((*numberIter).second.GetFloat(), 2.5f, TEST_LOCATION);
+  DALI_TEST_CHECK(Manipulator(numbers).GetParent() == root);
+  DALI_TEST_CHECK(Dali::Ui::Internal::FindIt("leaf", root) == nested->GetChild("leaf"));
+  DALI_TEST_CHECK(!Dali::Ui::Internal::FindIt("absent", root));
+
+  std::ostringstream output;
+  tree.Write(output, 2);
+  DALI_TEST_CHECK(output.str().find("a\\\"b") != std::string::npos);
+  DALI_TEST_CHECK(output.str().find("numbers") != std::string::npos);
+  DALI_TEST_CHECK(output.str().find("true") != std::string::npos);
+  DALI_TEST_CHECK(output.str().find("false") != std::string::npos);
+  DALI_TEST_CHECK(output.str().find("null") != std::string::npos);
+
+  int nodeCount = 0;
+  int characterCount = 0;
+  Node* copy = Manipulator::Copy(*root, nodeCount, characterCount);
+  DALI_TEST_EQUALS(nodeCount, 10, TEST_LOCATION);
+  DALI_TEST_CHECK(characterCount > 0);
+  Dali::Ui::Internal::VectorChar storage(static_cast<size_t>(characterCount));
+  auto current = storage.begin();
+  Manipulator(copy).MoveStrings(current, storage.end());
+  DALI_TEST_EQUALS(copy->GetChild("quoted")->GetString(), "a\"b", TEST_LOCATION);
+  DALI_TEST_EQUALS(copy->GetChild("nested")->GetChild("leaf")->GetString(), "value", TEST_LOCATION);
+
+  Manipulator(numbers).SetType(Node::ARRAY);
+  DALI_TEST_EQUALS(numbers->Size(), 0u, TEST_LOCATION);
+  Manipulator(nested).SetType(Node::STRING);
+  DALI_TEST_EQUALS(nested->Size(), 0u, TEST_LOCATION);
+  Manipulator(nested).SetString("replacement");
+  DALI_TEST_EQUALS(nested->GetString(), "replacement", TEST_LOCATION);
+  Manipulator(empty).SetSubstitution(true);
+
+  Manipulator(copy).RemoveChildren();
+  delete copy;
+  tree.RemoveChildren();
+  delete root;
   END_TEST;
 }

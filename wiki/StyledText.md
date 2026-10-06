@@ -31,6 +31,8 @@ label.SetStyledText(builder.Build());
 
 ## StyledText And Markup
 
+For supported tags, attributes, color value formats, and inline image syntax, see [Markup](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup). Markup is shared by `Label`, `InputField`, and `InputEditor`.
+
 For simple static markup, convert directly to `StyledText`:
 
 ~~~cpp
@@ -174,6 +176,8 @@ When building text incrementally, use `GetUtf32Length()` before and after `Appen
 
 `ImageSpan` replaces a specified text range with a single atomic inline image box. Use `ImageAttributes` to set the image source, the size reserved in the layout, and its alignment relative to the text baseline.
 
+To insert an inline image with markup, see [Inline Image in Markup](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup#inline-image).
+
 The safest pattern is to insert one U+FFFC OBJECT REPLACEMENT CHARACTER where the image should appear and apply `ImageSpan` to that character.
 
 ~~~cpp
@@ -264,6 +268,8 @@ label.SetStyledText(builder.Build());
 ## Annotation
 
 `AnnotationSpan` stores semantic key/value metadata. It does not directly change rendering. Application or theme code can read annotations and resolve them into visual spans.
+
+For the `<annotation>` markup syntax, see [Annotation in Markup](https://github.sec.samsung.net/NUI/dali-ui/wiki/Markup#annotation).
 
 `AnnotationSpan` is also a `Span`, so it appears when iterating all spans with `GetSpanCount()` and `GetSpanAt()`. `GetAnnotationCount()`, `GetAnnotationAt()`, `GetAnnotationStartIndexAt()`, and `GetAnnotationEndIndexAt()` provide a filtered view for annotation spans, which is convenient when resolving markup or localized text into visual styling. In other words, the annotation APIs are convenience filters; annotation spans are still part of normal span iteration.
 

@@ -27,6 +27,8 @@
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/devel-api/animation/animation-devel.h>
+#include <dali/devel-api/common/singleton-service.h>
 #include <mesh-builder.h>
 
 #include <limits>
@@ -3071,6 +3073,206 @@ int UtcDaliTextGradientMarqueeScrollerInitializesPixelSnapFactorP(void)
   END_TEST;
 }
 
+int UtcDaliTextScrollerDestroyRetiresAnimationP(void)
+{
+  TestApplication application;
+  const auto initialAnimations = DevelAnimation::GetAnimationCount();
+  for(int cycle = 0; cycle < 32; ++cycle)
+  {
+    TestScrollerInterface observer;
+    auto scroller = UiText::TextScroller::New(observer);
+    scroller->SetLoopCount(cycle % 2 ? 3 : 0);
+    scroller->SetLoopDelay(0.0f);
+    scroller->SetSpeed(100);
+    Actor actor = Actor::New();
+    Geometry geometry = CreateQuadGeometry();
+    Shader initialShader = CreateShader();
+    Renderer renderer = Renderer::New(geometry, initialShader);
+    actor.AddRenderer(renderer);
+    application.GetScene().Add(actor);
+    scroller->SetParameters(actor, renderer, TextureSet::New(), Size(100, 40), Size(200, 40),
+                            20.0f, true, false, UiText::Alignment::START, UiText::Alignment::START, true);
+    application.SendNotification();
+    application.Render(100);
+    DALI_TEST_CHECK(scroller->IsScrolling());
+    Animation animation = DevelAnimation::GetAnimationAt(initialAnimations);
+    WeakHandle<Animation> weakAnimation(animation);
+    Shader shader = renderer.GetShader();
+    const auto deltaIndex = shader.GetPropertyIndex("uDelta");
+    DALI_TEST_CHECK(shader.GetCurrentProperty<float>(deltaIndex) > 0.0f);
+    WeakHandle<Shader> weakShader(shader);
+    shader.Reset();
+    animation.Reset();
+
+    // Keep the actor/renderer alive: their destruction must not be what stops
+    // the infinite animation, and destruction must not call the interface.
+    scroller.Reset();
+    DALI_TEST_CHECK(!weakAnimation.GetHandle());
+    DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), initialAnimations, TEST_LOCATION);
+    application.SendNotification();
+    application.Render(5000);
+    application.SendNotification();
+    DALI_TEST_EQUALS(observer.finished, 0, TEST_LOCATION);
+    actor.Unparent();
+    actor.Reset();
+    renderer.Reset();
+    DALI_TEST_CHECK(!weakShader.GetHandle());
+  }
+  END_TEST;
+}
+
+int UtcDaliTextScrollerDestroyPendingFinishP(void)
+{
+  TestApplication application;
+  const auto initialAnimations = DevelAnimation::GetAnimationCount();
+  for(int scenario = 0; scenario < 3; ++scenario)
+  {
+    TestScrollerInterface observer;
+    auto scroller = UiText::TextScroller::New(observer);
+    scroller->SetLoopCount(scenario == 2 ? 1 : 0);
+    scroller->SetLoopDelay(0.0f);
+    scroller->SetSpeed(100);
+    Actor actor = Actor::New();
+    Geometry geometry = CreateQuadGeometry();
+    Shader initialShader = CreateShader();
+    Renderer renderer = Renderer::New(geometry, initialShader);
+    actor.AddRenderer(renderer);
+    application.GetScene().Add(actor);
+    scroller->SetParameters(actor, renderer, TextureSet::New(), Size(100, 40), Size(200, 40),
+                            20.0f, true, false, UiText::Alignment::START, UiText::Alignment::START, true);
+    application.SendNotification();
+    application.Render(100);
+    if(scenario < 2)
+    {
+      scroller->SetStopMode(scenario == 0 ? UiText::MarqueeStopMode::FINISH_LOOP : UiText::MarqueeStopMode::IMMEDIATE);
+      scroller->StopScrolling();
+      DALI_TEST_EQUALS(scroller->IsStopRequested(), scenario == 0, TEST_LOCATION);
+      DALI_TEST_EQUALS(scroller->IsScrolling(), scenario == 0, TEST_LOCATION);
+      application.SendNotification();
+    }
+    if(scenario != 0)
+    {
+      application.Render(5000); // Queue completion, without delivering it.
+    }
+    DALI_TEST_EQUALS(observer.finished, scenario == 1 ? 1 : 0, TEST_LOCATION);
+    scroller.Reset();
+    application.SendNotification();
+    application.Render(5000);
+    application.SendNotification();
+    DALI_TEST_EQUALS(observer.finished, scenario == 1 ? 1 : 0, TEST_LOCATION);
+    DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), initialAnimations, TEST_LOCATION);
+    actor.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliTextScrollerGradientSourceDestroyedP(void)
+{
+  TestApplication application;
+  TestScrollerInterface observer;
+  auto scroller = UiText::TextScroller::New(observer);
+  scroller->SetLoopCount(0);
+  Actor actor = Actor::New();
+  WeakHandle<Actor> weakActor(actor);
+  Geometry geometry = CreateQuadGeometry();
+  Shader initialShader = CreateShader();
+  Renderer renderer = Renderer::New(geometry, initialShader);
+  actor.AddRenderer(renderer);
+  application.GetScene().Add(actor);
+  UiText::TextScrollerGradient gradient;
+  gradient.enabled = true;
+  gradient.overlayEnabled = true;
+  gradient.startOffsetPropertyIndex = actor.RegisterProperty("gradientOffset", 0.25f);
+  gradient.overlayStartOffsetPropertyIndex = actor.RegisterProperty("overlayOffset", 0.75f);
+  gradient.applyConstraintsAlways = true;
+  gradient.overlayApplyConstraintsAlways = true;
+  scroller->SetParameters(actor, renderer, TextureSet::New(), Size(100, 40), Size(200, 40),
+                          20.0f, true, false, UiText::Alignment::START, UiText::Alignment::START, true, gradient);
+  application.SendNotification();
+  application.Render(16);
+  application.Render(16);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(renderer.GetPropertyIndex("uTextGradientStartOffset")), 0.25f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(renderer.GetPropertyIndex("uTextGradientOverlayStartOffset")), 0.75f, EPSILON, TEST_LOCATION);
+  actor.Unparent();
+  actor.Reset();
+  DALI_TEST_CHECK(!weakActor.GetHandle());
+  // Exercise both rebind paths with an expired weak source.
+  scroller->SetGradientAnimProperties(gradient.overlayStartOffsetPropertyIndex);
+  scroller->SetGradientOverlayAnimProperties(gradient.startOffsetPropertyIndex);
+  application.SendNotification();
+  application.Render(16);
+  scroller.Reset();
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_EQUALS(observer.finished, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerDestroyDisconnectsRetainedAnimationP(void)
+{
+  TestApplication application;
+  const auto initialAnimations = DevelAnimation::GetAnimationCount();
+  TestScrollerInterface observer;
+  auto scroller = UiText::TextScroller::New(observer);
+  scroller->SetLoopCount(0);
+  Actor actor = Actor::New();
+  Geometry geometry = CreateQuadGeometry();
+  Shader initialShader = CreateShader();
+  Renderer renderer = Renderer::New(geometry, initialShader);
+  actor.AddRenderer(renderer);
+  application.GetScene().Add(actor);
+  scroller->SetParameters(actor, renderer, TextureSet::New(), Size(100, 40), Size(200, 40),
+                          20.0f, true, false, UiText::Alignment::START, UiText::Alignment::START, true);
+  application.SendNotification();
+  application.Render(100);
+  DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), initialAnimations + 1u, TEST_LOCATION);
+  Animation animation = DevelAnimation::GetAnimationAt(initialAnimations);
+  DALI_TEST_CHECK(!animation.FinishedSignal().Empty());
+  scroller.Reset();
+  DALI_TEST_EQUALS(animation.GetState(), Animation::STOPPED, TEST_LOCATION);
+  DALI_TEST_CHECK(animation.FinishedSignal().Empty());
+  animation.FinishedSignal().Emit(animation);
+  DALI_TEST_EQUALS(observer.finished, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerDestroyAfterCoreP(void)
+{
+  TestScrollerInterface observer;
+  UiText::TextScrollerPtr scroller;
+  WeakHandle<Animation> weakAnimation;
+  {
+    TestApplication application;
+    const auto initialAnimations = DevelAnimation::GetAnimationCount();
+    scroller = UiText::TextScroller::New(observer);
+    scroller->SetLoopCount(0);
+    Actor actor = Actor::New();
+    Geometry geometry = CreateQuadGeometry();
+    Shader initialShader = CreateShader();
+    Renderer renderer = Renderer::New(geometry, initialShader);
+    actor.AddRenderer(renderer);
+    application.GetScene().Add(actor);
+    UiText::TextScrollerGradient gradient;
+    gradient.enabled = true;
+    gradient.overlayEnabled = true;
+    gradient.startOffsetPropertyIndex = actor.RegisterProperty("gradientOffset", 0.25f);
+    gradient.overlayStartOffsetPropertyIndex = actor.RegisterProperty("overlayOffset", 0.75f);
+    scroller->SetParameters(actor, renderer, TextureSet::New(), Size(100, 40), Size(200, 40),
+                            20.0f, true, false, UiText::Alignment::START, UiText::Alignment::START, true, gradient);
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(scroller->IsScrolling());
+    DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), initialAnimations + 1u, TEST_LOCATION);
+    Animation animation = DevelAnimation::GetAnimationAt(initialAnimations);
+    weakAnimation = animation;
+  }
+  DALI_TEST_CHECK(!SingletonService::Get());
+  scroller.Reset();
+  DALI_TEST_CHECK(!weakAnimation.GetHandle());
+  DALI_TEST_EQUALS(observer.finished, 0, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliTextScrollerHorizontalAlignmentIgnoresWrapGapP(void)
 {
   TestApplication application;
@@ -3826,5 +4028,42 @@ int UtcDaliTextGradientShaderCompositionAsyncTextVisualDisabledFallbackP(void)
   DALI_TEST_EQUALS(builder.IsEnabledTextGradient(), false, TEST_LOCATION);
   DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_SINGLE_COLOR_TEXT, TEST_LOCATION);
   ExpectNoTextGradientDefine(fragmentPrefix);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerPreparedCompositionMatrixP(void)
+{
+  TestApplication application;
+  for(int scenario = 0; scenario < 4; ++scenario)
+  {
+    Sampler sampler = Sampler::New();
+    auto content = UiText::MarqueeBuilder::CreateTextContent(CreatePixelData(2u, 2u, Pixel::RGBA8888), sampler);
+    const auto gradient = CreateSimpleGradientContentRequest(true, true);
+    UiText::MarqueeBuilder::CompositionRequest request;
+    request.sampler = sampler;
+    request.verifiedSize = Size(2.0f, 2.0f);
+    request.gradientState = gradient.gradientState;
+    request.baseBoundsResolved = gradient.baseBoundsResolved;
+    request.baseBounds = gradient.baseBounds;
+    request.overlayBoundsResolved = gradient.overlayBoundsResolved;
+    request.overlayBounds = gradient.overlayBounds;
+    request.overlayMode = gradient.overlayMode;
+    request.featureInfo.styleTextureEnabled = scenario == 1 || scenario == 3;
+    request.featureInfo.hasMultipleTextColors = scenario == 2 || scenario == 3;
+    request.featureInfo.isOverlayStyle = true;
+
+    UiText::MarqueeBuilder::PixelDataBundle pixels;
+    pixels.fillPixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+    pixels.stylePixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+    pixels.preservedPixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+    pixels.maskPixelData = CreatePixelData(2u, 2u, Pixel::L8);
+    pixels.overlayStylePixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+    const auto plan = UiText::MarqueeBuilder::GetCompositionPlan(request);
+    DALI_TEST_CHECK(plan.HasWork());
+    UiText::MarqueeBuilder::ApplyPreparedComposition(content, request, pixels);
+    DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+    DALI_TEST_CHECK(content.textGradient.enabled);
+    DALI_TEST_CHECK(content.textGradient.overlayStyleTextureEnabled);
+  }
   END_TEST;
 }

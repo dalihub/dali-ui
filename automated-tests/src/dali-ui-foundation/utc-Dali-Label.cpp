@@ -19,6 +19,8 @@
 #include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
+#include <dali/devel-api/animation/animation-devel.h>
+#include <dali/devel-api/common/singleton-service.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h>
 #include <dali/integration-api/string-utils.h>
@@ -32,7 +34,9 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui/ui-async-task-manager.h>
 #include <dali-ui/ui-event-thread-callback.h>
 
 using namespace Dali;
@@ -1886,6 +1890,165 @@ int UtcDaliLabelMarqueeEmptySourceRetirementP(void)
     label.StopMarquee();
     label.Unparent();
   }
+  END_TEST;
+}
+
+int UtcDaliLabelMarqueeDestroyLifecycleP(void)
+{
+  UiTestApplication application;
+  const auto initialAnimations = DevelAnimation::GetAnimationCount();
+  for(int loopCount : {0, 3})
+    for(auto stopMode : {Text::MarqueeStopMode::IMMEDIATE, Text::MarqueeStopMode::FINISH_LOOP})
+      for(bool requestStop : {false, true})
+        for(bool resize : {false, true})
+        {
+          Label label = Label::New("A running marquee must release its label and animation when the last owner goes away.");
+          label.SetRequestedWidth(120.0f);
+          label.SetRequestedHeight(48.0f);
+          label.SetMarqueeLoopCount(loopCount);
+          label.SetMarqueeLoopDelay(0.0f);
+          label.SetMarqueeSpeed(20);
+          label.SetMarqueeStopMode(stopMode);
+          application.GetScene().Add(label);
+          label.StartMarquee();
+          application.SendNotification();
+          application.Render(100);
+          DALI_TEST_CHECK(label.IsMarqueeRunning());
+          WeakHandle<Label> weakLabel(label);
+          if(requestStop)
+          {
+            label.StopMarquee();
+            DALI_TEST_EQUALS(label.IsMarqueeRunning(), stopMode == Text::MarqueeStopMode::FINISH_LOOP, TEST_LOCATION);
+          }
+          if(resize)
+          {
+            label.SetRequestedWidth(100.0f);
+            label.SetText("Updated marquee content with pending layout at destruction.");
+          }
+          label.Unparent();
+          label.Reset();
+          application.SendNotification();
+          application.Render(16);
+          application.SendNotification();
+          DALI_TEST_CHECK(!weakLabel.GetHandle());
+          DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), initialAnimations, TEST_LOCATION);
+        }
+  END_TEST;
+}
+
+int UtcDaliLabelAsyncMarqueeDestroyInFlightP(void)
+{
+  UiTestApplication application;
+  const auto initialAnimations = DevelAnimation::GetAnimationCount();
+  for(int cycle = 0; cycle < 8; ++cycle)
+  {
+    Label label = Label::New("Async infinite marquee before a pending source and renderer replacement.");
+    label.SetRequestedWidth(120.0f);
+    label.SetRequestedHeight(48.0f);
+    label.SetMarqueeLoopCount(0);
+    label.SetAsyncRendering(true);
+    label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+    application.GetScene().Add(label);
+    label.StartMarquee();
+    gAsyncRenderFinished = false;
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(WaitForAsyncRender(application));
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+
+    gAsyncRenderFinished = false;
+    label.SetText("A new async result must not call a label that was destroyed while rendering.");
+    label.SetRequestedWidth(100.0f);
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(!gAsyncRenderFinished);
+    const bool completionQueued = (cycle % 4) >= 2;
+    if(completionQueued)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT, false));
+    }
+    if(cycle % 2)
+    {
+      label.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
+      label.StopMarquee();
+      DALI_TEST_CHECK(label.IsMarqueeRunning());
+    }
+    WeakHandle<Label> weakLabel(label);
+    label.Unparent();
+    label.Reset();
+    if(completionQueued)
+    {
+      Test::AsyncTaskManager::ProcessAllCompletedTasks();
+    }
+    else
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+    }
+    application.SendNotification();
+    application.Render(16);
+    application.SendNotification();
+    DALI_TEST_CHECK(!weakLabel.GetHandle());
+    DALI_TEST_CHECK(!gAsyncRenderFinished);
+    DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), initialAnimations, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelMarqueeDestroyAfterCoreP(void)
+{
+  Label label;
+  WeakHandle<Label> weakLabel;
+  {
+    UiTestApplication application;
+    label = Label::New("An infinite marquee label can outlive the DALi Core.");
+    weakLabel = label;
+    label.SetRequestedWidth(120.0f);
+    label.SetRequestedHeight(48.0f);
+    label.SetMarqueeLoopCount(0);
+    application.GetScene().Add(label);
+    label.StartMarquee();
+    application.SendNotification();
+    application.Render(100);
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+  }
+  DALI_TEST_CHECK(!SingletonService::Get());
+  label.Reset();
+  DALI_TEST_CHECK(!weakLabel.GetHandle());
+  END_TEST;
+}
+
+int UtcDaliLabelMarqueeSceneReconnectP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New("An infinite marquee reconnects while an application still owns the label.");
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(48.0f);
+  label.SetMarqueeLoopCount(0);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+  WeakHandle<Label> weakLabel(label);
+  for(int cycle = 0; cycle < 8; ++cycle)
+  {
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render(100);
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+    DALI_TEST_CHECK(HasValidTextTexture(label));
+    label.Unparent();
+    application.SendNotification();
+    application.Render(16);
+    DALI_TEST_CHECK(weakLabel.GetHandle());
+  }
+  application.GetScene().Add(label);
+  label.Reset(); // The scene still owns the actor after the application releases it.
+  application.SendNotification();
+  application.Render(100);
+  label = weakLabel.GetHandle();
+  DALI_TEST_CHECK(label && label.IsMarqueeRunning());
+  label.Unparent();
+  label.Reset();
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(!weakLabel.GetHandle());
   END_TEST;
 }
 
@@ -4966,5 +5129,208 @@ int UtcDaliLabelTextRevealPixelP(void)
   DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexImage2D"), 0, TEST_LOCATION);
   DALI_TEST_EQUALS(gl.GetTextureTrace().CountMethod("TexSubImage2D"), 0, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliLabelManualAsyncRenderModesP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  Label label = Label::New("Manual asynchronous rendering across layout constraints");
+  label.SetRequestedWidth(300.0f);
+  label.SetRequestedHeight(80.0f);
+  label.SetAsyncRendering(true);
+  label.AsyncRenderFinishedSignal().Connect(&OnAsyncRenderFinished);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  gAsyncRenderFinished = false;
+
+  auto& impl = static_cast<Dali::Ui::Integration::LabelImpl&>(label.GetImplementation());
+
+  impl.RequestAsyncRenderWithFixedSize(250.0f, 60.0f);
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+
+  gAsyncRenderFinished = false;
+  impl.RequestAsyncRenderWithFixedWidth(220.0f, 120.0f);
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(gAsyncRenderWidth > 0.0f);
+
+  gAsyncRenderFinished = false;
+  impl.RequestAsyncRenderWithFixedHeight(300.0f, 70.0f);
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(gAsyncRenderHeight > 0.0f);
+
+  gAsyncRenderFinished = false;
+  impl.RequestAsyncRenderWithConstraints(200.0f, 50.0f);
+  DALI_TEST_CHECK(WaitForAsyncRender(application));
+  DALI_TEST_CHECK(gAsyncRenderWidth <= 200.0f);
+  DALI_TEST_CHECK(gAsyncRenderHeight <= 50.0f);
+
+  END_TEST;
+}
+
+int UtcDaliLabelMaskEffectReplacementP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  label.SetText("masked content");
+  View firstMask = View::New();
+  View secondMask = View::New();
+
+  label.SetMaskEffect(View());
+  DALI_TEST_CHECK(!label.GetRenderEffect());
+  label.SetMaskEffect(firstMask);
+  DALI_TEST_CHECK(label.GetRenderEffect());
+  DALI_TEST_EQUALS(firstMask.GetParent(), label, TEST_LOCATION);
+  label.SetMaskEffect(secondMask);
+  DALI_TEST_CHECK(label.GetRenderEffect());
+  DALI_TEST_CHECK(!firstMask.GetParent());
+  DALI_TEST_EQUALS(secondMask.GetParent(), label, TEST_LOCATION);
+  label.ClearMaskEffect();
+  DALI_TEST_CHECK(!label.GetRenderEffect());
+  DALI_TEST_CHECK(!secondMask.GetParent());
+  label.ClearMaskEffect();
+  END_TEST;
+}
+
+int UtcDaliLabelAnchorResolutionAndSignalP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  label.SetRequestedWidth(200.0f);
+  label.SetRequestedHeight(60.0f);
+  label.SetStyledText(Text::StyledText::FromMarkup("<a href='docs'>link</a> plain"));
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+
+  unsigned int clickedCount = 0u;
+  Dali::String clickedHref;
+  label.AnchorClickedSignal().Connect(&application, [&](View view, const Dali::String& href)
+  {
+    DALI_TEST_EQUALS(view, label, TEST_LOCATION);
+    clickedHref = href;
+    ++clickedCount;
+  });
+
+  auto& impl = static_cast<Dali::Ui::Integration::LabelImpl&>(label.GetImplementation());
+  auto& anchorControl = static_cast<Dali::Ui::Integration::Text::AnchorControlInterface&>(impl);
+  std::string href;
+  DALI_TEST_CHECK(anchorControl.AnchorClicked(1u, href));
+  DALI_TEST_EQUALS(href, std::string("docs"), TEST_LOCATION);
+  anchorControl.EmitAnchorClicked(href);
+  DALI_TEST_EQUALS(clickedCount, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickedHref, Dali::String("docs"), TEST_LOCATION);
+  DALI_TEST_CHECK(!anchorControl.AnchorClicked(100u, href));
+  END_TEST;
+}
+
+int UtcDaliLabelFontVariationPropertyNotificationP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  label.SetText("Variable font property");
+  label.SetFontVariation("wght=500");
+  application.GetScene().Add(label);
+
+  auto& impl = static_cast<Dali::Ui::Integration::LabelImpl&>(label.GetImplementation());
+  DALI_TEST_EQUALS(impl.RegisterFontVariationProperty("bad"), Property::INVALID_INDEX, TEST_LOCATION);
+
+  const Property::Index weight = impl.RegisterFontVariationProperty("wght");
+  DALI_TEST_CHECK(weight != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(label.GetProperty<float>(weight), 500.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.RegisterFontVariationProperty("wght"), weight, TEST_LOCATION);
+
+  label.SetProperty(weight, 650.0f);
+  application.SendNotification();
+  application.Render();
+  auto axes = label.GetFontVariation();
+  DALI_TEST_CHECK(axes.Count() > 0u);
+  DALI_TEST_EQUALS(axes[0u].GetTag(), Dali::String("wght"), TEST_LOCATION);
+  DALI_TEST_EQUALS(axes[0u].GetValue(), 650.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  const Property::Index width = impl.RegisterFontVariationProperty("wdth");
+  DALI_TEST_CHECK(width != Property::INVALID_INDEX);
+  application.SendNotification();
+  application.Render();
+  label.SetProperty(width, 85.0f);
+  application.SendNotification();
+  application.Render();
+  axes = label.GetFontVariation();
+  DALI_TEST_EQUALS(axes.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(axes[1u].GetTag(), Dali::String("wdth"), TEST_LOCATION);
+  DALI_TEST_EQUALS(axes[1u].GetValue(), 85.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLabelFontScaleAndSpacingAccessorsP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New("scaled label");
+  label.SetRequestedWidth(220.0f);
+  label.SetRequestedHeight(80.0f);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = static_cast<Dali::Ui::Integration::LabelImpl&>(label.GetImplementation());
+  impl.SetFontSizeScale(1.25f);
+  DALI_TEST_EQUALS(impl.GetFontSizeScale(), 1.25f, TEST_LOCATION);
+  impl.SetLetterSpacing(2.0f);
+  DALI_TEST_EQUALS(impl.GetLetterSpacing(), 2.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.GetFontSize() > 0.0f);
+  END_TEST;
+}
+
+int UtcDaliLabelHyphenationAndMixedWrapRenderingP(void)
+{
+  UiTestApplication application;
+  const char* text = "Extraordinarilylongwordwithmanysyllablesthatmustwrap";
+  for(Text::LineWrapMode mode : {Text::LineWrapMode::HYPHENATION, Text::LineWrapMode::MIXED})
+  {
+    Label label = Label::New(text);
+    label.SetMultiLine(true);
+    label.SetLineWrapMode(mode);
+    label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+    label.SetRequestedWidth(80.0f);
+    label.SetRequestedHeight(70.0f);
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render();
+
+    const int unlimitedLines = label.GetLineCount(80.0f);
+    DALI_TEST_CHECK(unlimitedLines > 2);
+    label.SetMaximumLines(2);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(label.GetLineCount(80.0f), 2, TEST_LOCATION);
+    DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+    application.GetScene().Remove(label);
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelRelativeAndAbsoluteLineHeightLayoutP(void)
+{
+  UiTestApplication application;
+  Label label = Label::New("first line\nsecond line\nthird line");
+  label.SetMultiLine(true);
+  label.SetFontSize(18.0f);
+  label.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+  label.SetLineHeight(1.0f);
+  const float normalHeight = label.GetNaturalSize().height;
+  label.SetLineHeight(1.8f);
+  const float expandedHeight = label.GetNaturalSize().height;
+  DALI_TEST_CHECK(expandedHeight > normalHeight);
+
+  label.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
+  label.SetLineHeight(12.0f);
+  const float shortHeight = label.GetNaturalSize().height;
+  label.SetLineHeight(28.0f);
+  const float tallHeight = label.GetNaturalSize().height;
+  DALI_TEST_CHECK(tallHeight > shortHeight);
   END_TEST;
 }
