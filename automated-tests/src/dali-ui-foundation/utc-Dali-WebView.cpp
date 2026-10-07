@@ -16,6 +16,8 @@
  */
 
 #include <dali-ui-test-suite-utils.h>
+#include <test-native-image.h>
+#include <ui-web-engine.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
@@ -1470,5 +1472,65 @@ int UtcDaliWebViewEngineScrollEdgeSignalP(void)
   DALI_TEST_CHECK(view.ScrollEdgeBy(0, 10));
   Test::EmitGlobalTimerSignal();
   DALI_TEST_EQUALS(edges, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewFrameRenderedWithoutNativeImageN(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  auto& impl = GetWebViewImpl(view);
+  unsigned int frames = 0u;
+  view.FrameRenderedSignal().Connect(&application, [&](WebView source)
+  {
+    DALI_TEST_EQUALS(source, view, TEST_LOCATION);
+    ++frames;
+  });
+
+  DALI_TEST_CHECK(impl.mWebEngine);
+  Test::WebEngine::SetNativeImageInterface(impl.mWebEngine, nullptr);
+  impl.OnFrameRendered();
+
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!impl.mVisual);
+  DALI_TEST_EQUALS(impl.mLastRenderedNativeImageWidth, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.mLastRenderedNativeImageHeight, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewFrameRenderedNativeImageInterfaceP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  auto& impl = GetWebViewImpl(view);
+  unsigned int frames = 0u;
+  view.FrameRenderedSignal().Connect(&application, [&](WebView) { ++frames; });
+
+  // A NativeImageInterface that is not a NativeImage exercises the queue-compatible path.
+  auto nativeImage = TestNativeImage::New(160u, 90u);
+  Test::WebEngine::SetNativeImageInterface(impl.mWebEngine, nativeImage);
+  DALI_TEST_CHECK(!impl.mWebEngine.GetNativeImage());
+  impl.OnFrameRendered();
+
+  DALI_TEST_CHECK(impl.mVisual);
+  DALI_TEST_EQUALS(impl.mLastRenderedNativeImageWidth, 160u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.mLastRenderedNativeImageHeight, 90u, TEST_LOCATION);
+  DALI_TEST_CHECK(!impl.mVisualChangeRequired);
+  auto firstVisual = impl.mVisual;
+
+  impl.OnFrameRendered();
+  DALI_TEST_CHECK(impl.mVisual == firstVisual);
+
+  auto resizedImage = TestNativeImage::New(320u, 180u);
+  Test::WebEngine::SetNativeImageInterface(impl.mWebEngine, resizedImage);
+  impl.mVisualChangeRequired = true;
+  impl.OnFrameRendered();
+
+  DALI_TEST_CHECK(impl.mVisual);
+  DALI_TEST_CHECK(impl.mVisual != firstVisual);
+  DALI_TEST_EQUALS(impl.mLastRenderedNativeImageWidth, 320u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.mLastRenderedNativeImageHeight, 180u, TEST_LOCATION);
+  DALI_TEST_CHECK(!impl.mVisualChangeRequired);
+  DALI_TEST_EQUALS(frames, 3u, TEST_LOCATION);
   END_TEST;
 }

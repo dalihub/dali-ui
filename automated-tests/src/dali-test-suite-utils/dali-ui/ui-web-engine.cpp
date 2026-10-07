@@ -2260,6 +2260,7 @@ public:
   {
   }
 
+  Dali::NativeImageInterfacePtr mNativeImageInterface;
   std::string              mUrl;
   std::vector<std::string> mHistory;
   size_t                   mCurrentPlusOnePos;
@@ -2832,6 +2833,11 @@ NativeImagePtr WebEngine::GetNativeImage()
   return nullptr;
 }
 
+NativeImageInterfacePtr WebEngine::GetNativeImageInterface()
+{
+  return Internal::Adaptor::GetImplementation(*this).mNativeImageInterface;
+}
+
 bool WebEngine::IsIncognito() const
 {
   return false;
@@ -3381,6 +3387,11 @@ void WebEngine::RegisterPlaybackVideoPausedCallback(Dali::WebEnginePlugin::WebEn
 
 namespace Test::WebEngine
 {
+void SetNativeImageInterface(Dali::WebEngine engine, Dali::NativeImageInterfacePtr nativeImage)
+{
+  Dali::Internal::Adaptor::GetImplementation(engine).mNativeImageInterface = nativeImage;
+}
+
 void SetWebViewAccessible(Dali::Accessibility::Accessible* webAccessible)
 {
   Dali::Internal::Adaptor::SetTestWebViewAccessible(dynamic_cast<Dali::Accessibility::ActorAccessible*>(webAccessible));
