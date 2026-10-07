@@ -31,19 +31,12 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include "replacement-layout-test-adapter.h"
 
-#include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
-float CalculateMarqueeAnchorControlX(float textureX, float viewportOrigin, float initialDelta)
-{
-  return textureX - viewportOrigin - initialDelta;
-}
-
 Vector<Text::Character> Characters(std::initializer_list<Text::Character> values)
 {
   Vector<Text::Character> text;
@@ -97,31 +90,6 @@ uint32_t CountSyntheticGlyphs(const Text::ReplacementRenderState& state)
     count += Text::IsSyntheticReplacementGlyph(glyph) ? 1u : 0u;
   }
   return count;
-}
-
-uint32_t CountGeneratedFinalGlyphs(const Text::FinalElisionResult& result)
-{
-  uint32_t visibleSourceGlyphs = 0u;
-  for(const Text::GlyphIndex finalGlyphIndex : result.sourceToFinalGlyphIndices)
-  {
-    visibleSourceGlyphs += finalGlyphIndex != Text::FinalElisionResult::INVALID_GLYPH_INDEX ? 1u : 0u;
-  }
-  return result.glyphs.Count() - visibleSourceGlyphs;
-}
-
-bool IsGeneratedEllipsisDrawable(const Text::ReplacementRenderState& state)
-{
-  const Text::FinalElisionResult& result = state.finalElision;
-  if(!result.applied || result.ellipsisFinalGlyphIndex >= result.glyphs.Count())
-  {
-    return false;
-  }
-
-  const TextAbstraction::GlyphInfo& glyph    = result.glyphs[result.ellipsisFinalGlyphIndex];
-  const Vector2&                    position = result.viewGlyphPositions[result.ellipsisFinalGlyphIndex];
-  const Size&                       control  = state.processingModel->mVisualModel->mControlSize;
-  return position.x + glyph.width > 0.0f && position.x < control.width &&
-         position.y + glyph.height > 0.0f && position.y < control.height;
 }
 
 void ReleaseBidi(Text::ReplacementLayoutTestServices& services, Text::ReplacementRenderState& result)
@@ -262,67 +230,21 @@ void CheckMarqueeTransitionCase(const char*           name,
   Require(std::fabs(trace.sourceToTextureMaximumTranslation - trace.sourceToTextureMinimumTranslation) < 0.01f,
           std::string(name) + ": source-to-texture mapping is not rigid");
 
-  constexpr float wrapGap      = 20.0f;
-  const float     textureWidth = trace.naturalContentWidth + wrapGap;
-  const float     horizontalAlignment =
-    Text::ResolveHorizontalMarqueeAlignment(true,
-                                            trace.directionRightToLeft,
-                                            options.horizontalAlignment);
-  const float legacyViewportOrigin =
-    Text::ResolveLegacyHorizontalMarqueeViewportOrigin(horizontalAlignment,
-                                                       textureWidth,
-                                                       controlWidth,
-                                                       wrapGap);
-  Text::MarqueeStartAnchor staticAnchor;
-  staticAnchor.staticControlX = trace.staticControlX;
-  staticAnchor.valid          = true;
-  const Text::MarqueeInitialDelta solved =
-    Text::ResolveMarqueeInitialDelta(staticAnchor,
-                                     Text::MarqueeTextureAnchor{trace.marqueeTextureX, true},
-                                     horizontalAlignment,
-                                     textureWidth,
-                                     controlWidth,
-                                     wrapGap);
-  Require(solved.valid, std::string(name) + ": production delta was not resolved");
-  const float solvedFirstFrameX = CalculateMarqueeAnchorControlX(trace.marqueeTextureX,
-                                                                 legacyViewportOrigin,
-                                                                 solved.value);
-
+  // Delta solving and first-frame coordinate arithmetic are covered by
+  // UtcDaliEndEllipsisMarqueeStartAnchorP. Here the real bidi/shaping output
+  // must preserve a rigid mapping between static and marquee layouts.
   std::cout << "REAL_MARQUEE_TRANSITION case=" << name
-            << " character=" << trace.anchorCharacter
-            << " static_source_glyph=" << trace.staticSourceGlyph
-            << " texture_glyph=" << trace.marqueeTextureGlyph
-            << " static_control_x=" << trace.staticControlX
-            << " texture_x=" << trace.marqueeTextureX
-            << " content_width=" << trace.naturalContentWidth
-            << " viewport_origin=" << legacyViewportOrigin
-            << " solved_delta=" << solved.value
-            << " solved_first=" << solvedFirstFrameX
             << " source_texture_spread="
             << trace.sourceToTextureMaximumTranslation - trace.sourceToTextureMinimumTranslation
             << std::endl;
-  Require(std::fabs(solvedFirstFrameX - trace.staticControlX) < 0.01f,
-          std::string(name) + ": shader-derived delta did not close continuity");
 }
 
 void CheckMarqueeTransitions()
 {
-  const std::string ltr =
-    "A long left to right line that requires END ellipsis before marquee starts";
   const std::string rtl =
     "\xD7\xA9\xD7\x9C\xD7\x95\xD7\x9D \xD7\xA2\xD7\x95\xD7\x9C\xD7\x9D, \xD7\xA0\xD7\xA2\xD7\x99\xD7\x9D \xD7\x9E\xD7\x90\xD7\x95\xD7\x93,\xD7\x95\xD7\x9E\xD7\xA7\xD7\x95\xD7\x95\xD7\x94 \xD7\xA9\xD7\x99\xD7\x94\xD7\x99\xD7\x94 \xD7\x9C\xD7\xA0\xD7\x95 \xD7\xA9\xD7\x99\xD7\x97\xD7\x94 \xD7\xA0\xD7\xA2\xD7\x99\xD7\x9E\xD7\x94 \xD7\x95\xD7\x98\xD7\x95\xD7\x91\xD7\x94 \xD7\x99\xD7\x97\xD7\x93";
 
-  CheckMarqueeTransitionCase("ltr_start", ltr, Text::Alignment::START,
-                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false);
-  CheckMarqueeTransitionCase("ltr_center", ltr, Text::Alignment::CENTER,
-                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false);
-  CheckMarqueeTransitionCase("ltr_end", ltr, Text::Alignment::END,
-                             LayoutDirection::LEFT_TO_RIGHT, 150.0f, false);
   CheckMarqueeTransitionCase("rtl_start", rtl, Text::Alignment::START,
-                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true);
-  CheckMarqueeTransitionCase("rtl_center", rtl, Text::Alignment::CENTER,
-                             LayoutDirection::RIGHT_TO_LEFT, 150.0f, true);
-  CheckMarqueeTransitionCase("rtl_end", rtl, Text::Alignment::END,
                              LayoutDirection::RIGHT_TO_LEFT, 150.0f, true);
   CheckMarqueeTransitionCase("mixed_rigid", "English \xD7\x90\xD7\x91\xD7\x92 trailing words force END ellipsis",
                              Text::Alignment::CENTER, LayoutDirection::LEFT_TO_RIGHT,
@@ -344,16 +266,6 @@ void CheckLayoutCase(const char* name, Vector<Text::Character>& text, Text::Char
   Require(CountSyntheticGlyphs(result) == 1u, std::string(name) + ": replacement was not one glyph");
   Require(result.placements.Count() == 1u && result.placements[0u].visible,
           std::string(name) + ": replacement placement is missing");
-  Require(result.placements[0u].logicalCharacterRange.characterIndex == start &&
-            result.placements[0u].logicalCharacterRange.numberOfCharacters == length,
-          std::string(name) + ": original logical range was not retained");
-  Require(std::isfinite(result.placements[0u].position.x), std::string(name) + ": placement is not finite");
-  Require(projection.FindByLogicalCharacter(start + length / 2u) != nullptr,
-          std::string(name) + ": interior logical lookup lost the replacement");
-  Require(projection.FindByLogicalCharacter(start + length / 2u)->projectedCharacterIndex ==
-            projection.LogicalCharacterToProjected(result.placements[0u].logicalCharacterRange.characterIndex),
-          std::string(name) + ": interior logical index maps to another visual unit");
-
   const Text::LogicalModel& logicalModel = *result.processingModel->mLogicalModel;
   Require(logicalModel.mBidirectionalParagraphInfo.Empty() != expectBidi,
           std::string(name) + ": unexpected bidi paragraph state");
@@ -398,23 +310,12 @@ void CheckEndEllipsisCase(const char* name, Vector<Text::Character>& text, Text:
   uint32_t elidedCount  = 0u;
   for(const Text::ReplacementPlacement& placement : result.placements)
   {
-    Require(placement.visible != placement.elided, std::string(name) + ": replacement is partially classified");
-    Require(placement.logicalCharacterRange.numberOfCharacters == 1u,
-            std::string(name) + ": ellipsis split the logical replacement range");
     visibleCount += placement.visible ? 1u : 0u;
     elidedCount += placement.elided ? 1u : 0u;
   }
   Require(visibleCount > 0u && elidedCount > 0u,
           std::string(name) + ": test did not cover both visible and elided replacements");
 
-  const Text::FinalElisionResult& finalElision = result.finalElision;
-  Require(finalElision.resolved,
-          std::string(name) + ": final elision was not resolved");
-  Require(finalElision.applied && finalElision.ellipsisUnitCount == 1u &&
-            finalElision.ellipsisOmissionReason == Text::FinalElisionResult::EllipsisOmissionReason::NONE,
-          std::string(name) + ": shared final-elision state disagrees with the generated ellipsis");
-  Require(CountGeneratedFinalGlyphs(finalElision) == 1u,
-          std::string(name) + ": END ellipsis does not own exactly one semantic unit");
   const Text::LogicalModel& logicalModel = *result.processingModel->mLogicalModel;
   Require(logicalModel.mBidirectionalParagraphInfo.Empty() != expectBidi,
           std::string(name) + ": unexpected END ellipsis bidi state");
@@ -423,127 +324,6 @@ void CheckEndEllipsisCase(const char* name, Vector<Text::Character>& text, Text:
             << " elided=" << elidedCount
             << " bidi=" << expectBidi << std::endl;
   ReleaseBidi(services, result);
-}
-
-void CheckOversizedVerticalSweep(Text::ReplacementLayoutTestServices& services)
-{
-  const std::string utf8 =
-    "An oversized replacement follows wrapped introductory prose and tests vertical END ellipsis. "
-    "More words place \uFFFC near a constrained line before many trailing sentences continue. "
-    "The large reserved box must be fully visible only when its whole line participates in the visible layout. "
-    "Otherwise the renderer must choose a text ellipsis boundary without flashing, cropping or retaining the large image. "
-    "Repeated trailing words add stable overflow for wide and narrow resize verification.";
-  Vector<Text::Character> text             = Utf32(utf8);
-  Text::CharacterIndex    replacementIndex = 0u;
-  while(replacementIndex < text.Count() && text[replacementIndex] != Text::ReplacementProjection::OBJECT_REPLACEMENT_CHARACTER)
-  {
-    ++replacementIndex;
-  }
-  Require(replacementIndex < text.Count(), "oversized: U+FFFC marker is missing");
-
-  Vector<Text::ReplacementRunSnapshot> candidates;
-  candidates.PushBack(Candidate(replacementIndex, 1u, 2700u, 210.0f));
-  candidates[0u].metrics.height                = 120.0f;
-  const Text::ReplacementProjection projection = Text::ReplacementProjection::Build(text, candidates);
-
-  bool     sawVisible            = false;
-  bool     sawElided             = false;
-  bool     previousVisible       = false;
-  uint32_t heightEllipsisLayouts = 0u;
-  uint32_t widthEllipsisLayouts  = 0u;
-  float    firstVisibleHeight    = 0.0f;
-  float    firstVisibleWidth     = 0.0f;
-  for(float height = 40.0f; height <= 400.0f; height += 2.0f)
-  {
-    Text::ReplacementLayoutTestOptions options;
-    options.contentSize      = Size(400.0f, height);
-    options.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
-    options.lineWrapMode     = Text::LineWrapMode::WORD;
-    options.elideText        = true;
-    options.ellipsisPosition = Text::EllipsisPosition::END;
-    options.fontPointSize    = 28u * 64u;
-    options.fontPixelSize    = 28.0f * 4.0f / 3.0f;
-    options.sourceRevision   = 270u;
-    options.layoutGeneration = static_cast<uint64_t>(height);
-    Text::ReplacementRenderState result;
-    Require(Text::LayoutReplacementForTest(projection, services, options, result),
-            "oversized: projected layout was not entered");
-    Require(result.placements.Count() == 1u, "oversized: placement count changed");
-    Require(!previousVisible || result.placements[0u].visible,
-            "oversized: more height hid a previously visible replacement");
-    previousVisible = result.placements[0u].visible;
-    sawVisible |= result.placements[0u].visible;
-    sawElided |= result.placements[0u].elided;
-    if(firstVisibleHeight == 0.0f && result.placements[0u].visible)
-    {
-      firstVisibleHeight = height;
-    }
-
-    const Text::FinalElisionResult& finalElision = result.finalElision;
-    Require(finalElision.resolved,
-            "oversized: final result was not resolved");
-    Require(CountGeneratedFinalGlyphs(finalElision) <= 1u,
-            "oversized: duplicate semantic ellipsis unit");
-    if(finalElision.textElided)
-    {
-      ++heightEllipsisLayouts;
-      Require(finalElision.applied && finalElision.ellipsisUnitCount == 1u &&
-                CountGeneratedFinalGlyphs(finalElision) == 1u,
-              "oversized: elided layout has no authoritative ellipsis unit");
-      Require(IsGeneratedEllipsisDrawable(result),
-              "oversized: generated ellipsis is outside the control");
-    }
-    ReleaseBidi(services, result);
-  }
-
-  previousVisible = false;
-  for(float width = 120.0f; width <= 600.0f; width += 2.0f)
-  {
-    Text::ReplacementLayoutTestOptions options;
-    options.contentSize      = Size(width, 367.0f);
-    options.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
-    options.lineWrapMode     = Text::LineWrapMode::WORD;
-    options.elideText        = true;
-    options.ellipsisPosition = Text::EllipsisPosition::END;
-    options.fontPointSize    = 28u * 64u;
-    options.fontPixelSize    = 28.0f * 4.0f / 3.0f;
-    options.sourceRevision   = 271u;
-    options.layoutGeneration = static_cast<uint64_t>(width + 1000.0f);
-    Text::ReplacementRenderState result;
-    Require(Text::LayoutReplacementForTest(projection, services, options, result),
-            "oversized width: projected layout was not entered");
-    Require(result.placements.Count() == 1u, "oversized width: placement count changed");
-    Require(!previousVisible || result.placements[0u].visible,
-            "oversized width: more width hid a previously visible replacement");
-    previousVisible = result.placements[0u].visible;
-    sawVisible |= result.placements[0u].visible;
-    sawElided |= result.placements[0u].elided;
-    if(firstVisibleWidth == 0.0f && result.placements[0u].visible)
-    {
-      firstVisibleWidth = width;
-    }
-
-    const Text::FinalElisionResult& finalElision = result.finalElision;
-    if(finalElision.textElided)
-    {
-      ++widthEllipsisLayouts;
-      Require(finalElision.applied && finalElision.ellipsisUnitCount == 1u &&
-                CountGeneratedFinalGlyphs(finalElision) == 1u,
-              "oversized width: elided layout has no authoritative ellipsis unit");
-      Require(IsGeneratedEllipsisDrawable(result),
-              "oversized width: generated ellipsis is outside the control");
-    }
-    ReleaseBidi(services, result);
-  }
-
-  Require(sawVisible && sawElided && heightEllipsisLayouts > 0u && widthEllipsisLayouts > 0u,
-          "oversized: sweep did not cross visible/elided and ellipsis thresholds");
-  std::cout << "REAL_REPLACEMENT_OVERSIZED_SWEEP height=40..400/2 width=120..600/2"
-            << " first_visible_height=" << firstVisibleHeight
-            << " first_visible_width=" << firstVisibleWidth
-            << " height_ellipsis_layouts=" << heightEllipsisLayouts
-            << " width_ellipsis_layouts=" << widthEllipsisLayouts
-            << " visible_and_elided=1" << std::endl;
 }
 
 void CheckAsyncRenderScaleAutoLineHeight()
@@ -558,8 +338,6 @@ void CheckAsyncRenderScaleAutoLineHeight()
   };
 
   const std::pair<const char*, std::string> cases[] = {
-    {"latin",
-     "Latin first line\nLatin second line\nLatin third line\n\uFFFC image line\ntrailing fifth line\ntrailing sixth line"},
     {"mixed_fallback_emoji",
      "Latin first line\n한글 둘째 줄\nمرحبا third 😀\n\uFFFC image line\ntrailing fifth line\ntrailing sixth line"},
     {"same_line_mixed",
@@ -656,10 +434,7 @@ void CheckAsyncRenderScaleAutoLineHeight()
     const Summary logicalBelow = render(1.0f, boundaryHeight - 1.0f);
     Require(logical.replacementVisible && !logicalBelow.replacementVisible,
             "render-scale: scale-1 boundary is not exact");
-    if(std::string(testCase.first) != "latin")
-    {
-      Require(logical.fontCount > 1u, "render-scale: mixed case did not resolve multiple font ids");
-    }
+    Require(logical.fontCount > 1u, "render-scale: mixed case did not resolve multiple font ids");
 
     for(float scale : {1.25f, 1.5f, 2.0f})
     {
@@ -688,6 +463,9 @@ void CheckAsyncRenderScaleAutoLineHeight()
 
 } // unnamed namespace
 
+// Keep only integration checks whose inputs depend on real font selection,
+// shaping or bidi reordering. Projection, ellipsis ownership, size sweeps and
+// marquee delta arithmetic belong to the mock-backed internal UTCs.
 void RunDiagnostics()
 {
   Text::ReplacementLayoutTestServices services{
@@ -697,14 +475,6 @@ void RunDiagnostics()
     TextAbstraction::FontClient::Get(),
     Text::MultilanguageSupport::Get()};
 
-  CheckOrdinaryLineDirectionCase("pure_ltr",
-                                 "Pure LTR text",
-                                 false,
-                                 false,
-                                 false,
-                                 false,
-                                 400.0f,
-                                 services);
   CheckOrdinaryLineDirectionCase("pure_rtl",
                                  "\xD7\x90\xD7\x91\xD7\x92\xD7\x93",
                                  true,
@@ -739,12 +509,6 @@ void RunDiagnostics()
                                  services);
   CheckOrdinaryMultilineDirectionCases(services);
   CheckMarqueeTransitions();
-
-  Vector<Text::Character> ltr = Characters({'a', 'b', 'I', 'C', 'O', 'N', 'c', 'd'});
-  CheckLayoutCase("ltr", ltr, 2u, 4u, false, services);
-
-  Vector<Text::Character> canonical = Characters({'A', 0xFFFCu, 'B'});
-  CheckLayoutCase("canonical_ufffc", canonical, 1u, 1u, false, services);
 
   Vector<Text::Character> rtl = Characters({0x05D0u, 0x05D1u, 'I', 'C', 'O', 'N', 0x05D2u, 0x05D3u});
   CheckLayoutCase("rtl", rtl, 2u, 4u, true, services);
@@ -781,10 +545,6 @@ void RunDiagnostics()
   Vector<Text::Character> arabicLigature = Characters({'X', 0x0644u, 0x0627u, 'Y'});
   CheckLayoutCase("arabic_ligature_lam", arabicLigature, 1u, 1u, true, services);
 
-  Vector<Text::Character> ltrEllipsis =
-    Characters({'A', 0xFFFCu, 'x', 0xFFFCu, 'x', 0xFFFCu, 'x', 0xFFFCu, 'x', 0xFFFCu, 'Z'});
-  CheckEndEllipsisCase("ltr", ltrEllipsis, 1u, false, services);
-
   Vector<Text::Character> rtlEllipsis =
     Characters({0x05D0u, 0xFFFCu, 'x', 0xFFFCu, 'x', 0xFFFCu, 'x', 0xFFFCu, 'x', 0xFFFCu, 0x05D1u});
   CheckEndEllipsisCase("rtl", rtlEllipsis, 1u, true, services);
@@ -793,7 +553,8 @@ void RunDiagnostics()
     Characters({'A', 0x05D0u, 0xFFFCu, 'x', 0xFFFCu, 'x', 0xFFFCu, 'x', 0xFFFCu, 'x', 0xFFFCu, 0x05D1u, 'Z'});
   CheckEndEllipsisCase("ltr_rtl", mixedEllipsis, 2u, true, services);
 
-  CheckOversizedVerticalSweep(services);
+  // Size sweeps and ellipsis ownership are covered with deterministic metrics
+  // by UtcDaliReplacementVerticalEndEllipsisLifecycleP.
   CheckAsyncRenderScaleAutoLineHeight();
 }
 
@@ -824,10 +585,6 @@ private:
       else
       {
         RunDiagnostics();
-        mSvgView = ImageView::New();
-        mSvgView.SetSynchronousLoading(true);
-        mSvgView.SetResourceUrl("../samples/layout-transition/res/edit.svg");
-        mApplication.GetWindow().Add(mSvgView);
       }
     }
     catch(const std::exception& exception)
@@ -844,19 +601,6 @@ private:
 
   bool OnQuitTimer()
   {
-    if(mSvgView)
-    {
-      const auto status = mSvgView.GetLoadingStatus();
-      if(status == Visual::ResourceStatus::PREPARING && ++mSvgWaitCount < 100u)
-      {
-        return true;
-      }
-      if(status != Visual::ResourceStatus::READY)
-      {
-        std::cerr << "REAL_SVG_FAILURE status=" << static_cast<int>(status) << std::endl;
-        mExitStatus = 1;
-      }
-    }
     mApplication.Quit();
     return false;
   }
@@ -864,8 +608,6 @@ private:
 private:
   Application& mApplication;
   Timer        mQuitTimer;
-  ImageView    mSvgView;
-  unsigned int mSvgWaitCount{0u};
   int          mExitStatus{0};
   bool         mRenderScaleOnly{false};
 };

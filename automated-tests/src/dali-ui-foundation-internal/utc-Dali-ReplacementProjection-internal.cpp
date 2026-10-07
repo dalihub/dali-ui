@@ -4204,6 +4204,8 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
         projection, placement.logicalCharacterRange.characterIndex + placement.logicalCharacterRange.numberOfCharacters));
     }
     DALI_TEST_CHECK(elidedCount > 0u);
+    DALI_TEST_CHECK(elidedCount < result.placements.Count());
+    CheckFinalElisionContract(result);
     CheckLaidOutBoundariesAreAtomic(projection, result);
   }
 
@@ -4489,6 +4491,8 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
     return result;
   };
 
+  // Moved from the real-layout diagnostic: these visibility and ellipsis
+  // contracts use deterministic glyph metrics and do not need system fonts.
   // The sample's vertical threshold is deterministic: more height can reveal
   // additional END-prefix glyphs and the image, but cannot hide either again.
   bool     sawImageVisible           = false;
@@ -4496,7 +4500,8 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
   uint32_t previousVisibleGlyphCount = 0u;
   bool     previousImageVisible      = false;
   uint64_t generation                = 1u;
-  for(float height = 80.0f; height <= 320.0f; height += 2.0f)
+  uint32_t heightEllipsisLayouts = 0u;
+  for(float height = 40.0f; height <= 400.0f; height += 2.0f)
   {
     Text::ReplacementRenderState    result            = layout(400.0f, height, generation++);
     const Text::FinalElisionResult& finalElision      = result.finalElision;
@@ -4509,10 +4514,12 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
     previousImageVisible      = result.placements[0u].visible;
     sawImageVisible |= result.placements[0u].visible;
     sawImageElided |= result.placements[0u].elided;
+    heightEllipsisLayouts += finalElision.textElided ? 1u : 0u;
     result.Clear(services.bidirectionalSupport);
   }
   DALI_TEST_CHECK(sawImageVisible);
   DALI_TEST_CHECK(sawImageElided);
+  DALI_TEST_CHECK(heightEllipsisLayouts > 0u);
 
   // Width changes exercise line-count thresholds and must retain a single
   // drawable ellipsis unit even when horizontal and vertical pressure meet.
@@ -4521,6 +4528,9 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
   uint32_t previousLineCount         = 0u;
   bool     previousWidthImageVisible = false;
   bool     sawLineCountChange        = false;
+  bool sawWidthImageVisible = false;
+  bool sawWidthImageElided = false;
+  uint32_t widthEllipsisLayouts = 0u;
   for(float width = 120.0f; width <= 600.0f; width += 2.0f)
   {
     Text::ReplacementRenderState result    = layout(width, 367.0f, generation++);
@@ -4529,9 +4539,15 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
     sawLineCountChange |= previousLineCount != 0u && previousLineCount != lineCount;
     previousWidthImageVisible = result.placements[0u].visible;
     previousLineCount         = lineCount;
+    sawWidthImageVisible |= result.placements[0u].visible;
+    sawWidthImageElided |= result.placements[0u].elided;
+    widthEllipsisLayouts += result.finalElision.textElided ? 1u : 0u;
     result.Clear(services.bidirectionalSupport);
   }
   DALI_TEST_CHECK(sawLineCountChange);
+  DALI_TEST_CHECK(sawWidthImageVisible);
+  DALI_TEST_CHECK(sawWidthImageElided);
+  DALI_TEST_CHECK(widthEllipsisLayouts > 0u);
 
   // Reuse one controller across narrow/wide/narrow generations. The second
   // resolve of an unchanged generation is an idempotent cache hit, and the
