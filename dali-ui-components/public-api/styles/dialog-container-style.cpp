@@ -17,7 +17,7 @@
 #include <dali-ui-components/internal/styles/dialog-container-style-impl.h>
 #include <dali-ui-components/internal/styles/style-validation.h>
 #include <dali-ui-components/public-api/styles/dialog-container-style.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <cmath>
 #include <utility>
@@ -47,19 +47,19 @@ UiStyleKey<DialogContainerStyle> DialogContainerStyle::DefaultKey()
 }
 DialogContainerStyle DialogContainerStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static auto style = Builder().Build();
   return style;
 }
 DialogContainerStyle DialogContainerStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   auto style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }
 DialogContainerStyle DialogContainerStyle::NoScrimPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static auto style = Builder().SetScrimColor(UiColor(0x000000u, 0.0f)).SetScrimBlurRadius(0.0f).Build();
   return style;
 }

@@ -22,7 +22,7 @@
 #include <dali-ui-components/internal/component-image-path.h>
 #include <dali-ui-components/internal/styles/check-box-style-impl.h>
 #include <dali-ui-components/internal/styles/style-validation.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
@@ -70,14 +70,14 @@ UiStyleKey<CheckBoxStyle> CheckBoxStyle::DefaultKey()
 
 CheckBoxStyle CheckBoxStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static CheckBoxStyle style = CheckBoxStyle::Builder().Build();
   return style;
 }
 
 CheckBoxStyle CheckBoxStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   CheckBoxStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   if(style)
   {

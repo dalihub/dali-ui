@@ -18,7 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/object/property-helper-devel.h>
+#include <dali/devel-api/object/type-registry-helper.h>
 
 /**
  * @brief Helper macros for property registration using an external property index type.

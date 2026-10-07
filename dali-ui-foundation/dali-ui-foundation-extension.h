@@ -28,7 +28,6 @@
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/extension-api/selectable-view-impl.h>
 #include <dali-ui-foundation/extension-api/shadow.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 #include <dali-ui-foundation/extension-api/theme-loader-interface.h>
 #include <dali-ui-foundation/extension-api/ui-config-impl.h>

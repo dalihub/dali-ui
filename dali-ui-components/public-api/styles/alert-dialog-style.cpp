@@ -17,7 +17,7 @@
 #include <dali-ui-components/internal/styles/alert-dialog-style-impl.h>
 #include <dali-ui-components/internal/styles/style-validation.h>
 #include <dali-ui-components/public-api/styles/alert-dialog-style.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <cmath>
 #include <utility>
@@ -50,7 +50,7 @@ TextButtonStyle ResolveAlertActionButtonStyle(AlertDialogStyle style)
     return action;
   }
   auto defaultButton = TextButtonStyle::Default();
-  auto builder = defaultButton.Configure();
+  auto builder       = defaultButton.Configure();
   // Apply OneUI fallback geometry without overriding an application's provider.
   if(defaultButton == TextButtonStyle::DefaultPreset())
   {
@@ -67,13 +67,13 @@ UiStyleKey<AlertDialogStyle> AlertDialogStyle::DefaultKey()
 }
 AlertDialogStyle AlertDialogStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static auto style = Builder().Build();
   return style;
 }
 AlertDialogStyle AlertDialogStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   auto style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }
