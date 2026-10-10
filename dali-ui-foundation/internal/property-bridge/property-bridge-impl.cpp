@@ -23,6 +23,7 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
+
 namespace DALI_NAMESPACE
 {
 namespace Ui
@@ -33,6 +34,7 @@ StringGetterDelegate gStringGetter = nullptr;
 
 namespace
 {
+static constexpr Dali::TypeInfoId gSingletonTypeInfoId = DALI_TYPE_ID(Dali::Ui::Integration::PropertyBridge);
 
 } // namespace
 
@@ -53,7 +55,7 @@ Dali::Ui::Integration::PropertyBridge PropertyBridge::Get()
   if(service)
   {
     // Check whether the singleton is already created
-    Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::Ui::Integration::PropertyBridge));
+    Dali::BaseHandle handle = service.GetSingleton(gSingletonTypeInfoId);
     if(handle)
     {
       // If so, downcast the handle
@@ -63,7 +65,7 @@ Dali::Ui::Integration::PropertyBridge PropertyBridge::Get()
     else // create and register the object
     {
       bridgeHandle = Dali::Ui::Integration::PropertyBridge(new PropertyBridge);
-      service.Register(typeid(bridgeHandle), bridgeHandle);
+      service.Register(gSingletonTypeInfoId, bridgeHandle);
     }
   }
 
