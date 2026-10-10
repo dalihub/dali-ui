@@ -34,8 +34,10 @@ namespace Integration
 {
 namespace
 {
+static constexpr Dali::TypeInfoId gSingletonTypeInfoId = DALI_TYPE_ID(VisualFactory);
+
 const char* const DALI_DEBUG_RENDERING("DALI_DEBUG_RENDERING");
-}
+} //namespace
 
 VisualFactory VisualFactory::Get()
 {
@@ -45,7 +47,7 @@ VisualFactory VisualFactory::Get()
   SingletonService singletonService(SingletonService::Get());
   if(singletonService)
   {
-    BaseHandle handle = singletonService.GetSingleton(typeid(VisualFactory));
+    BaseHandle handle = singletonService.GetSingleton(gSingletonTypeInfoId);
     if(handle)
     {
       // If so, downcast the handle of singleton to VisualFactory
@@ -63,7 +65,7 @@ VisualFactory VisualFactory::Get()
       {
         factory = VisualFactory(new Dali::Ui::Internal::VisualFactory(false));
       }
-      singletonService.Register(typeid(VisualFactory), factory);
+      singletonService.Register(gSingletonTypeInfoId, factory);
     }
   }
 

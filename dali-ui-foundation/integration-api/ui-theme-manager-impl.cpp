@@ -36,6 +36,8 @@ namespace Integration
 
 namespace
 {
+static constexpr Dali::TypeInfoId gSingletonTypeInfoId = DALI_TYPE_ID(UiThemeManager);
+
 const char* const UICONFIG_NOT_INITIALIZED_MESSAGE =
   "UiConfig has not been initialized. "
   "Call UiConfig::New().Apply() in main() before the application main loop starts. "
@@ -60,7 +62,7 @@ UiThemeManager UiThemeManagerImpl::Get()
   if(service)
   {
     // Check whether the singleton is already created
-    BaseHandle handle = service.GetSingleton(typeid(UiThemeManager));
+    BaseHandle handle = service.GetSingleton(gSingletonTypeInfoId);
     if(handle)
     {
       // If so, downcast the handle
@@ -79,7 +81,7 @@ UiThemeManager UiThemeManagerImpl::Get()
       {
         manager = UiThemeManager(new UiThemeManagerImpl());
       }
-      service.Register(typeid(manager), manager);
+      service.Register(gSingletonTypeInfoId, manager);
     }
   }
   else
