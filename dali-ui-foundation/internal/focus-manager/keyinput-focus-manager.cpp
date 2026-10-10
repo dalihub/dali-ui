@@ -24,6 +24,11 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.h>
 
+namespace
+{
+static constexpr Dali::TypeInfoId gSingletonTypeInfoId = DALI_TYPE_ID(KeyInputFocusManager);
+} // unnamed namespace
+
 namespace DALI_NAMESPACE
 {
 namespace Ui
@@ -46,7 +51,7 @@ KeyInputFocusManager KeyInputFocusManager::Get()
   SingletonService singletonService(SingletonService::Get());
   if(singletonService)
   {
-    Dali::BaseHandle handle = singletonService.GetSingleton(typeid(KeyInputFocusManager));
+    Dali::BaseHandle handle = singletonService.GetSingleton(gSingletonTypeInfoId);
     if(handle)
     {
       // If so, downcast the handle of singleton to focus manager
@@ -57,7 +62,7 @@ KeyInputFocusManager KeyInputFocusManager::Get()
     {
       // If not, create the focus manager and register it as a singleton
       manager = KeyInputFocusManager(new KeyInputFocusManagerImpl());
-      singletonService.Register(typeid(manager), manager);
+      singletonService.Register(gSingletonTypeInfoId, manager);
     }
   }
 

@@ -25,6 +25,11 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
 
+namespace
+{
+static constexpr Dali::TypeInfoId gSingletonTypeInfoId = DALI_TYPE_ID(Dali::Ui::Text::Backend);
+} // unnamed namespace
+
 namespace DALI_NAMESPACE
 {
 namespace Ui
@@ -57,7 +62,7 @@ Dali::Ui::Text::Backend Backend::Get()
   if(service)
   {
     // Check whether the singleton is already created
-    Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::Ui::Text::Backend));
+    Dali::BaseHandle handle = service.GetSingleton(gSingletonTypeInfoId);
     if(handle)
     {
       // If so, downcast the handle
@@ -67,7 +72,7 @@ Dali::Ui::Text::Backend Backend::Get()
     else // create and register the object
     {
       backendHandle = Dali::Ui::Text::Backend(new Backend);
-      service.Register(typeid(backendHandle), backendHandle);
+      service.Register(gSingletonTypeInfoId, backendHandle);
     }
   }
 
