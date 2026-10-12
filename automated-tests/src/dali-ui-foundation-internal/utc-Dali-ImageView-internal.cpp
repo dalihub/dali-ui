@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-transform.h>
@@ -35,6 +36,13 @@
 #include <dali.h>
 #include <ui-event-thread-callback.h>
 #include <string>
+
+#include <chrono>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+
+#include "resources/image-span-resolution-png.h"
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -1641,4 +1649,588 @@ int UtcDaliImageViewPlaceholderMultiVisualSceneCallbacks(void)
   }
   DALI_TEST_EQUALS(caseNumber, 64, TEST_LOCATION);
   END_TEST;
+}
+
+namespace
+{
+struct SizingPngFixture
+{
+  SizingPngFixture()
+  : path(std::filesystem::temp_directory_path() /
+         ("dali-ui-sizing-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".png"))
+  {
+    std::ofstream stream(path, std::ios::binary);
+    stream.write(reinterpret_cast<const char*>(IMAGE_SPAN_RESOLUTION_PNG), sizeof(IMAGE_SPAN_RESOLUTION_PNG));
+  }
+  ~SizingPngFixture()
+  {
+    std::error_code error;
+    std::filesystem::remove(path, error);
+  }
+  std::filesystem::path path;
+};
+
+Texture ImageTexture(ImageView view)
+{
+  auto visual = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+  return Ui::GetImplementation(visual).GetRenderer().GetTextures().GetTexture(0);
+}
+} // namespace
+
+int UtcDaliImageViewExplicitSizeFirstUpload(void)
+{
+  UiTestApplication        application;
+  SizingPngFixture         fixture;
+  std::vector<std::string> urls{fixture.path.string()};
+#if defined(_MSC_VER)
+  char* remote = nullptr;
+  _dupenv_s(&remote, nullptr, "DALI_TEST_SIZING_REMOTE_URL");
+#else
+  const char* remote = std::getenv("DALI_TEST_SIZING_REMOTE_URL");
+#endif
+  if(remote)
+  {
+    urls.emplace_back(remote); // Optional loopback HTTP fixture for integration runs.
+  }
+#if defined(_MSC_VER)
+  std::free(remote);
+#endif
+  struct ScaleRestorer
+  {
+    float original = UiScaleManager::Get().GetScale();
+    ~ScaleRestorer()
+    {
+      UiScaleManager::Get().SetScale(original);
+    }
+  } restoreScale;
+  for(float scale : {1.0f, 1.5f})
+  {
+    UiScaleManager::Get().SetScale(scale);
+    for(const auto& url : urls)
+    {
+      for(bool synchronous : {false, true})
+      {
+        auto view = ImageView::New();
+        view.SetImageLoadWithViewSizeEnabled(true);
+        view.SetSynchronousLoading(synchronous);
+        view.SetDesiredWidth(16);
+        view.SetDesiredHeight(16);
+        view.SetResourceUrl(url.c_str());
+        // Read the current explicit size at scene attachment, including constraints.
+        view.SetRequestedWidth(synchronous ? 100.0f : 40.0f);
+        view.SetRequestedHeight(synchronous ? 100.0f : 40.0f);
+        view.SetMinimumWidth(80);
+        view.SetMinimumHeight(80);
+        view.SetMaximumWidth(80);
+        view.SetMaximumHeight(80);
+        view.SetPadding(8, 8, 8, 8);
+        // With URL assigned first, ImageView creates its deferred visual during measure.
+        view.Measure(80 * scale, 80 * scale);
+        DALI_TEST_CHECK(!DataOf(view).HasArrangeResult());
+        DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+        application.GetWindow().Add(view);
+        if(!synchronous || url.find("http") == 0)
+        {
+          DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+        }
+        // No Arrange/Render has run: the first texture must already be reduced.
+        DALI_TEST_CHECK(!DataOf(view).HasArrangeResult());
+        auto texture = ImageTexture(view);
+        DALI_TEST_EQUALS(texture.GetWidth(), static_cast<uint32_t>(64 * scale), TEST_LOCATION);
+        DALI_TEST_EQUALS(texture.GetHeight(), static_cast<uint32_t>(64 * scale), TEST_LOCATION);
+        DALI_TEST_EQUALS(view.GetDesiredWidth(), 16, TEST_LOCATION);
+        DALI_TEST_EQUALS(view.GetDesiredHeight(), 16, TEST_LOCATION);
+        view.Arrange(LayoutRect(0, 0, 80 * scale, 80 * scale));
+        DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 80 * scale, 80 * scale));
+        application.SendNotification();
+        application.Render();
+        DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1, 1), false, TEST_LOCATION);
+        DALI_TEST_CHECK(ImageTexture(view) == texture);
+        // Both loading modes must apply later size changes.
+        view.SetMinimumWidth(0);
+        view.SetMinimumHeight(0);
+        view.SetRequestedWidth(64);
+        view.SetRequestedHeight(64);
+        view.Arrange(LayoutRect(0, 0, 64 * scale, 64 * scale));
+        DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 64 * scale, 64 * scale));
+        if(!synchronous || url.find("http") == 0)
+        {
+          DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+        }
+        application.SendNotification();
+        application.Render();
+        texture = ImageTexture(view);
+        DALI_TEST_EQUALS(texture.GetWidth(), static_cast<uint32_t>(48 * scale), TEST_LOCATION);
+        DALI_TEST_EQUALS(texture.GetHeight(), static_cast<uint32_t>(48 * scale), TEST_LOCATION);
+        application.GetWindow().Remove(view);
+        application.SendNotification();
+        application.Render();
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewExplicitSizeFallbacks(void)
+{
+  UiTestApplication application;
+  SizingPngFixture  fixture;
+  for(int scenario = 0; scenario < 6; ++scenario)
+  {
+    auto view = ImageView::New();
+    view.SetRequestedWidth(scenario == 3 ? MATCH_PARENT : scenario == 4 ? 0
+                                                                        : 64);
+    view.SetRequestedHeight(64);
+    view.SetSynchronousLoading(true);
+    view.SetImageLoadWithViewSizeEnabled(scenario != 0);
+    if(scenario == 0)
+    {
+      view.SetDesiredWidth(32);
+      view.SetDesiredHeight(32);
+    }
+    if(scenario == 1)
+    {
+      view.SetLoadPolicy(Image::LoadPolicy::IMMEDIATE);
+    }
+    if(scenario == 2)
+    {
+      view.SetFittingMode(Image::FittingMode::CENTER);
+    }
+    view.SetResourceUrl(fixture.path.string().c_str());
+    view.Measure(64, 64);
+    if(scenario == 5)
+    {
+      Property::Map transform;
+      transform.Add(Ui::Integration::Visual::Transform::Property::SIZE, Vector2(0.5f, 0.5f));
+      Property::Map properties;
+      properties.Add(Ui::Integration::Visual::Property::TRANSFORM, transform);
+      auto visual = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+      Ui::GetImplementation(visual).SetProperties(properties);
+    }
+    application.GetWindow().Add(view);
+    auto texture = ImageTexture(view);
+    DALI_TEST_EQUALS(texture.GetWidth(), scenario == 0 ? 32u : 192u, TEST_LOCATION);
+    DALI_TEST_EQUALS(texture.GetHeight(), scenario == 0 ? 32u : 192u, TEST_LOCATION);
+    application.GetWindow().Remove(view);
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewExplicitSizeShaderAndMask(void)
+{
+  UiTestApplication application;
+  SizingPngFixture  fixture;
+  for(int scenario = 0; scenario < 3; ++scenario)
+  {
+    for(bool synchronous : {false, true})
+    {
+      auto view = ImageView::New();
+      view.SetRequestedWidth(64);
+      view.SetRequestedHeight(64);
+      view.SetImageLoadWithViewSizeEnabled(true);
+      view.SetSynchronousLoading(synchronous);
+      if(scenario != 0)
+      {
+        view.SetAlphaMaskUrl(fixture.path.string().c_str());
+        view.SetCropToMask(true);
+        view.SetMaskingPolicy(scenario == 1 ? Image::MaskingPolicy::ON_LOADING : Image::MaskingPolicy::ON_RENDERING);
+      }
+      view.SetResourceUrl(fixture.path.string().c_str());
+      if(scenario == 0)
+      {
+        Property::Map shader;
+        shader.Add(Ui::Integration::Visual::Shader::Property::FRAGMENT_SHADER, "Foobar");
+        Property::Map properties;
+        properties.Add(Ui::Integration::Visual::Property::SHADER, shader);
+        auto visual = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+        Ui::GetImplementation(visual).SetProperties(properties);
+      }
+      application.GetWindow().Add(view);
+      if(!synchronous)
+      {
+        DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(scenario == 0 ? 1 : scenario == 1 ? 3
+                                                                                          : 2));
+      }
+      auto texture = ImageTexture(view);
+      DALI_TEST_EQUALS(texture.GetWidth(), 64u, TEST_LOCATION);
+      DALI_TEST_EQUALS(texture.GetHeight(), 64u, TEST_LOCATION);
+      auto textures = Ui::GetImplementation(DataOf(view).GetVisual(ImageView::Property::IMAGE)).GetRenderer().GetTextures();
+      DALI_TEST_EQUALS(textures.GetTextureCount(), scenario == 2 ? 2u : 1u, TEST_LOCATION);
+      view.Arrange(LayoutRect(0, 0, 64, 64));
+      DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 64, 64));
+      application.SendNotification();
+      application.Render();
+      DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1, 1), false, TEST_LOCATION);
+      DALI_TEST_CHECK(ImageTexture(view) == texture);
+      if(synchronous)
+      {
+        for(uint32_t size : {32u, 96u, 48u})
+        {
+          const float viewSize = static_cast<float>(size);
+          view.SetRequestedWidth(viewSize);
+          view.SetRequestedHeight(viewSize);
+          view.Arrange(LayoutRect(0, 0, viewSize, viewSize));
+          DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, viewSize, viewSize));
+          texture = ImageTexture(view);
+          DALI_TEST_EQUALS(texture.GetWidth(), size, TEST_LOCATION);
+          DALI_TEST_EQUALS(texture.GetHeight(), size, TEST_LOCATION);
+          textures = Ui::GetImplementation(DataOf(view).GetVisual(ImageView::Property::IMAGE)).GetRenderer().GetTextures();
+          DALI_TEST_EQUALS(textures.GetTextureCount(), scenario == 2 ? 2u : 1u, TEST_LOCATION);
+          application.SendNotification();
+          application.Render();
+        }
+      }
+      application.GetWindow().Remove(view);
+      application.SendNotification();
+      application.Render();
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewSynchronousSizingResizeReleasesTextures(void)
+{
+  UiTestApplication application;
+  SizingPngFixture  fixture;
+  auto&             gl   = application.GetGlAbstraction();
+  auto              view = ImageView::New();
+  view.SetRequestedWidth(64);
+  view.SetRequestedHeight(64);
+  view.SetImageLoadWithViewSizeEnabled(true);
+  view.SetSynchronousLoading(true);
+  view.SetResourceUrl(fixture.path.string().c_str());
+  application.GetWindow().Add(view);
+  view.Arrange(LayoutRect(0, 0, 64, 64));
+  DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 64, 64));
+  application.SendNotification();
+  application.Render();
+  const auto liveTextures = gl.GetNumGeneratedTextures();
+
+  for(uint32_t size : {48u, 32u, 80u, 48u})
+  {
+    auto           texture = ImageTexture(view);
+    WeakHandleBase previous(texture);
+    texture.Reset(); // The test must not keep the old texture alive.
+    const auto previousId = gl.GetLastGenTextureId();
+    gl.ClearDeletedTextures();
+
+    const float viewSize = static_cast<float>(size);
+    view.SetRequestedWidth(viewSize);
+    view.SetRequestedHeight(viewSize);
+    view.Arrange(LayoutRect(0, 0, viewSize, viewSize));
+    DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, viewSize, viewSize));
+    texture = ImageTexture(view);
+    DALI_TEST_EQUALS(texture.GetWidth(), size, TEST_LOCATION);
+    DALI_TEST_EQUALS(texture.GetHeight(), size, TEST_LOCATION);
+    DALI_TEST_CHECK(texture != previous.GetBaseHandle());
+    texture.Reset();
+
+    // Flush queued cache removal and render-side resource destruction.
+    for(int frame = 0; frame < 3; ++frame)
+    {
+      application.SendNotification();
+      application.Render();
+    }
+    DALI_TEST_CHECK(!previous.GetBaseHandle());
+    DALI_TEST_CHECK(gl.CheckTextureDeleted(previousId));
+    DALI_TEST_EQUALS(gl.GetNumGeneratedTextures(), liveTextures, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewExplicitSizeFittingAndBuffer(void)
+{
+  UiTestApplication                       application;
+  SizingPngFixture                        fixture;
+  Dali::EncodedImageBuffer::RawBufferType bytes;
+  bytes.Resize(sizeof(IMAGE_SPAN_RESOLUTION_PNG));
+  std::copy(std::begin(IMAGE_SPAN_RESOLUTION_PNG), std::end(IMAGE_SPAN_RESOLUTION_PNG), bytes.Begin());
+  auto              bufferUrl = Dali::Ui::ImageUrl::New(Dali::EncodedImageBuffer::New(std::move(bytes)));
+  const std::string localUrl  = fixture.path.string();
+  for(const auto& url : {localUrl, std::string(bufferUrl.GetUrl().CStr())})
+  {
+    for(auto mode : {Image::FittingMode::FILL, Image::FittingMode::FIT_KEEP_ASPECT_RATIO, Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO})
+    {
+      for(bool synchronous : {false, true})
+      {
+        auto view = ImageView::New();
+        view.SetRequestedWidth(80);
+        view.SetRequestedHeight(40);
+        view.SetSynchronousLoading(synchronous);
+        view.SetImageLoadWithViewSizeEnabled(true);
+        view.SetFittingMode(mode);
+        view.SetResourceUrl(url.c_str());
+        application.GetWindow().Add(view);
+        if(!synchronous)
+        {
+          DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+        }
+        // The square source covers the rectangular request without losing its aspect ratio.
+        auto texture = ImageTexture(view);
+        DALI_TEST_EQUALS(texture.GetWidth(), 80u, TEST_LOCATION);
+        DALI_TEST_EQUALS(texture.GetHeight(), 80u, TEST_LOCATION);
+        view.Arrange(LayoutRect(0, 0, 80, 40));
+        DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 80, 40));
+        if(!synchronous && mode == Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
+        {
+          DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+        }
+        application.SendNotification();
+        application.Render();
+        texture                 = ImageTexture(view);
+        const uint32_t expected = mode == Image::FittingMode::FIT_KEEP_ASPECT_RATIO ? 40u : 80u;
+        DALI_TEST_EQUALS(texture.GetWidth(), expected, TEST_LOCATION);
+        DALI_TEST_EQUALS(texture.GetHeight(), expected, TEST_LOCATION);
+        application.GetWindow().Remove(view);
+        application.SendNotification();
+        application.Render();
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewInitialSizeOnEnableAndReplacement(void)
+{
+  UiTestApplication application;
+  SizingPngFixture  fixture;
+  for(bool synchronous : {false, true})
+  {
+    // The first scene attachment is delayed until after the size changes.
+    auto view = ImageView::New();
+    view.SetRequestedWidth(64);
+    view.SetRequestedHeight(64);
+    view.SetImageLoadWithViewSizeEnabled(true);
+    view.SetSynchronousLoading(synchronous);
+    view.SetResourceUrl(fixture.path.string().c_str());
+    DataOf(view).EnableVisual(ImageView::Property::IMAGE, false);
+    application.GetWindow().Add(view);
+    view.SetRequestedWidth(40);
+    view.SetRequestedHeight(40);
+    DataOf(view).EnableVisual(ImageView::Property::IMAGE, true);
+    if(!synchronous)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+    }
+    auto texture = ImageTexture(view);
+    DALI_TEST_EQUALS(texture.GetWidth(), 40u, TEST_LOCATION);
+    DALI_TEST_EQUALS(texture.GetHeight(), 40u, TEST_LOCATION);
+
+    // Replacing a visual on scene must also use the latest size before relayout.
+    view.SetRequestedWidth(80);
+    view.SetRequestedHeight(80);
+    view.SetDesiredWidth(16);
+    view.SetDesiredHeight(16);
+    view.Measure(80, 80);
+    if(!synchronous)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+    }
+    texture = ImageTexture(view);
+    DALI_TEST_EQUALS(texture.GetWidth(), 80u, TEST_LOCATION);
+    DALI_TEST_EQUALS(texture.GetHeight(), 80u, TEST_LOCATION);
+    application.GetWindow().Remove(view);
+    application.SendNotification();
+    application.Render();
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewImmediateAsyncSizing(void)
+{
+  UiTestApplication application;
+  SizingPngFixture  fixture;
+  auto              view = ImageView::New();
+  view.SetRequestedWidth(64);
+  view.SetRequestedHeight(64);
+  view.SetImageLoadWithViewSizeEnabled(true);
+  view.SetSynchronousLoading(false);
+  view.SetLoadPolicy(Image::LoadPolicy::IMMEDIATE);
+  view.SetResourceUrl(fixture.path.string().c_str());
+  application.GetWindow().Add(view);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+  // IMMEDIATE starts before scene attachment; retain its original request size.
+  DALI_TEST_EQUALS(ImageTexture(view).GetWidth(), 192u, TEST_LOCATION);
+  view.Arrange(LayoutRect(0, 0, 64, 64));
+  DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 64, 64));
+  // Layout must request a new texture using the actual view size.
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(ImageTexture(view).GetWidth(), 64u, TEST_LOCATION);
+  DALI_TEST_EQUALS(ImageTexture(view).GetHeight(), 64u, TEST_LOCATION);
+  END_TEST;
+}
+
+namespace
+{
+int TestSynchronousImageRecovery(bool reload, bool brokenImage = true, bool viewSized = true)
+{
+  UiTestApplication application(CreatePlaceholderFailureConfig());
+  SizingPngFixture  fixture;
+  {
+    std::ofstream clear(fixture.path, std::ios::binary | std::ios::trunc);
+  }
+  auto view = ImageView::New();
+  view.SetRequestedWidth(64);
+  view.SetRequestedHeight(64);
+  view.SetSynchronousLoading(true);
+  view.SetImageLoadWithViewSizeEnabled(viewSized);
+  view.SetResourceUrl(fixture.path.string().c_str());
+  Property::Map options;
+  options.Insert(Ui::Integration::ImageVisual::Property::ENABLE_BROKEN_IMAGE, brokenImage);
+  VisualOf(view).SetProperties(options);
+  int readyCount = 0;
+  view.ResourceReadySignal().Connect(&application, [&](View)
+  { ++readyCount; });
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+
+  for(uint32_t size : {48u, 32u, 16u})
+  {
+    const bool success = size != 32u;
+    {
+      std::ofstream stream(fixture.path, std::ios::binary | std::ios::trunc);
+      if(success)
+      {
+        stream.write(reinterpret_cast<const char*>(IMAGE_SPAN_RESOLUTION_PNG), sizeof(IMAGE_SPAN_RESOLUTION_PNG));
+      }
+      DALI_TEST_CHECK(stream.good());
+    }
+    readyCount = 0;
+    if(reload)
+    {
+      view.Reload();
+    }
+    else
+    {
+      const float viewSize = static_cast<float>(size);
+      view.SetRequestedWidth(viewSize);
+      view.SetRequestedHeight(viewSize);
+      view.Arrange(LayoutRect(0, 0, viewSize, viewSize));
+      DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, viewSize, viewSize));
+    }
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), success ? Ui::Visual::ResourceStatus::READY : Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+    DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+    if(success)
+    {
+      const auto     texture  = ImageTexture(view);
+      const uint32_t expected = viewSized ? (reload ? 64u : size) : 192u;
+      DALI_TEST_EQUALS(texture.GetWidth(), expected, TEST_LOCATION);
+      DALI_TEST_EQUALS(texture.GetHeight(), expected, TEST_LOCATION);
+    }
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int TestReloadBeforeImageSize(bool zeroSizeLayout)
+{
+  UiTestApplication application;
+  SizingPngFixture  fixture;
+  auto              factory     = Ui::Integration::VisualFactory::Get();
+  auto&             factoryImpl = Ui::GetImplementation(factory);
+  for(bool synchronous : {false, true})
+  {
+    Property::Map map;
+    map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+    map.Insert(Ui::Integration::ImageVisual::Property::URL, fixture.path.string().c_str());
+    map.Insert(Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE, true);
+    map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, synchronous);
+    map.Insert(Ui::Integration::ImageVisual::Property::RELEASE_POLICY, static_cast<int>(Image::ReleasePolicy::NEVER));
+    Actor actor = Actor::New();
+    application.GetScene().Add(actor);
+    auto  other     = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2(100, 100));
+    auto& otherImpl = Ui::GetImplementation(other);
+    otherImpl.SetOnScene(actor);
+    if(!synchronous)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+    }
+    const auto otherTexture = otherImpl.GetRenderer().GetTextures().GetTexture(0);
+    auto       previous     = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2(64, 84));
+    auto&      previousImpl = Ui::GetImplementation(previous);
+    previousImpl.SetOnScene(actor);
+    if(!synchronous)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+    }
+    const auto oldTexture = previousImpl.GetRenderer().GetTextures().GetTexture(0);
+    previousImpl.SetOffScene(actor);
+
+    // No creation-size hint or provider: Reload must reach the later display-size request.
+    auto  visual = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2::ZERO);
+    auto& impl   = Ui::GetImplementation(visual);
+    impl.SetOnScene(actor);
+    impl.DoAction(Ui::Integration::ImageVisual::Action::RELOAD, Property::Map());
+    if(!synchronous)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+    }
+    if(zeroSizeLayout)
+    {
+      impl.SetTransformAndSize(Property::Map(), Vector2::ZERO, 1.0f);
+    }
+    impl.SetTransformAndSize(Property::Map(), Vector2(64, 84), 1.0f);
+    if(!synchronous)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+    }
+    auto texture = impl.GetRenderer().GetTextures().GetTexture(0);
+    DALI_TEST_CHECK(texture != oldTexture);
+    DALI_TEST_EQUALS(texture.GetWidth(), oldTexture.GetWidth(), TEST_LOCATION);
+    DALI_TEST_EQUALS(texture.GetHeight(), oldTexture.GetHeight(), TEST_LOCATION);
+    DALI_TEST_EQUALS(impl.GetResourceStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+    DALI_TEST_CHECK(otherImpl.GetRenderer().GetTextures().GetTexture(0) == otherTexture);
+
+    // The forced policy is one-shot; ordinary resizing must reuse the other size's cache.
+    impl.SetTransformAndSize(Property::Map(), Vector2(100, 100), 1.0f);
+    DALI_TEST_CHECK(impl.GetRenderer().GetTextures().GetTexture(0) == otherTexture);
+    impl.SetOffScene(actor);
+    otherImpl.SetOffScene(actor);
+    application.GetScene().Remove(actor);
+  }
+  END_TEST;
+}
+} // namespace
+
+int UtcDaliImageViewSynchronousResizeRecovery(void)
+{
+  return TestSynchronousImageRecovery(false);
+}
+
+int UtcDaliImageViewSynchronousReloadRecovery(void)
+{
+  return TestSynchronousImageRecovery(true);
+}
+
+int UtcDaliImageViewSynchronousResizeRecoveryWithoutBrokenImage(void)
+{
+  return TestSynchronousImageRecovery(false, false);
+}
+
+int UtcDaliImageViewSynchronousReloadRecoveryWithoutBrokenImage(void)
+{
+  return TestSynchronousImageRecovery(true, false);
+}
+
+int UtcDaliImageViewSynchronousReloadRecoveryWithoutViewSize(void)
+{
+  return TestSynchronousImageRecovery(true, true, false);
+}
+
+int UtcDaliImageViewReloadBeforeLayout(void)
+{
+  return TestReloadBeforeImageSize(false);
+}
+
+int UtcDaliImageViewReloadBeforeZeroSizeLayout(void)
+{
+  return TestReloadBeforeImageSize(true);
 }

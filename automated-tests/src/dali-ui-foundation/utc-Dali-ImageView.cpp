@@ -715,7 +715,8 @@ int UtcDaliImageViewResourceFailureRecoveryP(void)
   view.Reload();
   application.SendNotification();
   application.Render();
-  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+  // Synchronous Reload has completed; the missing file must report failure.
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
 
   view.SetResourceUrl(validUrl);
   application.SendNotification();

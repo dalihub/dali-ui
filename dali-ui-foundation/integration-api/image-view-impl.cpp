@@ -23,6 +23,9 @@
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
 
+#include <algorithm>
+#include <cmath>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
@@ -49,6 +52,27 @@ namespace Integration
 namespace
 {
 const AttachmentId IMAGE_URL_ATTACHMENT_ID = AttachmentId::Alloc();
+
+Vector2 GetInitialImageSize(Actor& actor)
+{
+  auto view = Ui::View::DownCast(actor);
+  if(!view)
+  {
+    return Vector2::ZERO;
+  }
+  auto&       viewImpl        = Ui::GetImpl(view);
+  const float requestedWidth  = viewImpl.GetRequestedWidth();
+  const float requestedHeight = viewImpl.GetRequestedHeight();
+  if(!std::isfinite(requestedWidth) || !std::isfinite(requestedHeight) || requestedWidth <= 0.0f || requestedHeight <= 0.0f)
+  {
+    return Vector2::ZERO;
+  }
+  // Requested dimensions and padding are in natural units; the loader uses pixels.
+  const float  width   = std::min(std::max(requestedWidth, viewImpl.GetMinimumWidth()), viewImpl.GetMaximumWidth());
+  const float  height  = std::min(std::max(requestedHeight, viewImpl.GetMinimumHeight()), viewImpl.GetMaximumHeight());
+  const Insets padding = viewImpl.GetPadding();
+  return Vector2(width - padding.start - padding.end, height - padding.top - padding.bottom) * viewImpl.GetEffectiveScale();
+}
 
 BaseHandle CreateImageView()
 {
@@ -1035,6 +1059,7 @@ void ImageViewImpl::UpdateVisual()
     if(mVisual)
     {
       DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: RegisterVisual result=ok\n");
+      Ui::GetImplementation(mVisual).SetInitialLoadingSizeProvider(GetInitialImageSize);
       // ResourceReadySignal can clear or replace mVisual during registration.
       // Keep the registered handle alive and stop if the callback changed it.
       auto visual = mVisual;
