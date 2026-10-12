@@ -255,6 +255,8 @@ void FocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder sceneHold
 
 FocusManager::~FocusManager()
 {
+  // Releasing members can disconnect Views before the slot delegate is destroyed.
+  mSlotDelegate.DisconnectAll();
   Dali::Integration::UnregisterFocusedActorProvider(mFocusedActorProvider.get());
 }
 
@@ -387,6 +389,8 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
     mCurrentFocusView       = view;
     mCurrentFocusWindow     = window;
     mLastFocusChangeContext = effectiveContext;
+    // The Window is only a navigation scope; stored context must not retain it.
+    mLastFocusChangeContext.window.Reset();
   }
   view.SceneDisconnectedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
   if(independent)
