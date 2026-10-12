@@ -247,7 +247,7 @@ int UtcDaliDialogShowingBridgeWorldAlphaTransitionsP(void)
   fixture.Render();
   fixture.capture.Tick(22u);
   DALI_TEST_EQUALS(content.GetProperty<Vector4>(Actor::Property::WORLD_COLOR_MULTIPLIER).a, 0.0f, TEST_LOCATION);
-  DALI_TEST_CHECK(DevelActor::IsOnSceneVisible(content));
+  DALI_TEST_CHECK(content.IsOnSceneVisible());
   DALI_TEST_EQUALS(fixture.capture.Events().size(), 1u, TEST_LOCATION);
   DALI_TEST_CHECK(IsShowingMessage(fixture.capture.Events()[0], content, 0));
 
@@ -298,7 +298,7 @@ int UtcDaliDialogShowingBridgeCullingTransitionsP(void)
   fixture.Render();
   fixture.capture.Tick(22u);
   DALI_TEST_CHECK(content.GetProperty<bool>(DevelActor::Property::CULLED));
-  DALI_TEST_CHECK(DevelActor::IsOnSceneVisible(content));
+  DALI_TEST_CHECK(content.IsOnSceneVisible());
   DALI_TEST_EQUALS(fixture.capture.Events().size(), 1u, TEST_LOCATION);
   DALI_TEST_CHECK(IsShowingMessage(fixture.capture.Events()[0], content, 0));
 

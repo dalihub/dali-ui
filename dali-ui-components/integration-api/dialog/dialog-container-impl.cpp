@@ -136,19 +136,22 @@ void DialogContainerImpl::SetModalContent(Ui::View modalContent)
   }
   auto session = mPresentationSession.lock();
   DALI_ASSERT_ALWAYS(!session ||
-                    (mContentClearOwner == session.get() && !modalContent) ||
-                    (session->state == Internal::DialogPresentationSession::State::PREPARING && !mModalContent && modalContent == session->dialog.GetHandle()));
+                     (mContentClearOwner == session.get() && !modalContent) ||
+                     (session->state == Internal::DialogPresentationSession::State::PREPARING && !mModalContent && modalContent == session->dialog.GetHandle()));
   // Consume the setter permission before invoking application callbacks.
   mContentClearOwner = nullptr;
   if(session && !modalContent)
   {
-    mExpectedContentRemoval = mModalContent.GetObjectPtr();
+    mExpectedContentRemoval   = mModalContent.GetObjectPtr();
     mExpectedRemovalSessionId = session->id;
   }
   struct ResetRemovalPermission
   {
     const RefObject*& target;
-    ~ResetRemovalPermission() { target = nullptr; }
+    ~ResetRemovalPermission()
+    {
+      target = nullptr;
+    }
   } resetRemovalPermission{mExpectedContentRemoval};
   // Scene/visibility callbacks can synchronously clear or replace the content.
   // Keep this actor alive and let the newest nested setter supersede this one.
@@ -222,7 +225,7 @@ void DialogContainerImpl::SetModalContent(Ui::View modalContent)
 
 void DialogContainerImpl::ObserveModalContent()
 {
-  DevelActor::OnSceneVisibilityChangedSignal(mModalContent).Connect(this, &DialogContainerImpl::OnModalVisibilityChanged);
+  mModalContent.OnSceneVisibilityChangedSignal().Connect(this, &DialogContainerImpl::OnModalVisibilityChanged);
 
   // Scene visibility excludes transparency and culling. Observe these rendered
   // properties too, then query Foundation's actual accessible SHOWING state.
@@ -292,7 +295,7 @@ void DialogContainerImpl::ReleaseModalContent()
     {
       gModalOwners.erase(owner);
     }
-    DevelActor::OnSceneVisibilityChangedSignal(content).Disconnect(this, &DialogContainerImpl::OnModalVisibilityChanged);
+    content.OnSceneVisibilityChangedSignal().Disconnect(this, &DialogContainerImpl::OnModalVisibilityChanged);
     content.RemovePropertyNotification(mModalAlphaNotification);
     content.RemovePropertyNotification(mModalCulledNotification);
   }
@@ -315,7 +318,10 @@ void DialogContainerImpl::ClearPresentationContent(const Internal::DialogPresent
   struct ResetClearPermission
   {
     const Internal::DialogPresentationSession*& owner;
-    ~ResetClearPermission() { owner = nullptr; }
+    ~ResetClearPermission()
+    {
+      owner = nullptr;
+    }
   } resetClearPermission{mContentClearOwner};
   SetModalContent({});
 }
@@ -326,8 +332,8 @@ void DialogContainerImpl::OnChildRemove(Actor& child)
   if(session && child == session->dialog.GetHandle())
   {
     DALI_ASSERT_ALWAYS(mExpectedContentRemoval == child.GetObjectPtr() &&
-                      mExpectedRemovalSessionId == session->id &&
-                      "Posted Dialog must be dismissed before direct Add/Remove/Unparent");
+                       mExpectedRemovalSessionId == session->id &&
+                       "Posted Dialog must be dismissed before direct Add/Remove/Unparent");
     // One expected removal cannot authorize a nested external operation.
     mExpectedContentRemoval = nullptr;
   }

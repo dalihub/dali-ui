@@ -344,7 +344,7 @@ bool ViewAccessible::IsShowing()
   Dali::Actor self = Self();
   if(Dali::EqualsZero(self.GetProperty<Vector4>(Actor::Property::WORLD_COLOR_MULTIPLIER).a) ||
      self.GetProperty<bool>(Dali::DevelActor::Property::CULLED) ||
-     !Dali::DevelActor::IsOnSceneVisible(self))
+     !self.IsOnSceneVisible())
   {
     return false;
   }

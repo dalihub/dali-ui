@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/internal/visuals/animated-image/animated-image-visual.h>
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
@@ -1134,7 +1133,7 @@ void AnimatedImageVisual::DoSetOnScene(Actor& actor)
 {
   mStartFirstFrame = true;
   mPlacementActor  = actor;
-  Dali::DevelActor::OnSceneVisibilityChangedSignal(actor).Connect(this, &AnimatedImageVisual::OnControlEffectiveVisibilityChanged);
+  actor.OnSceneVisibilityChangedSignal().Connect(this, &AnimatedImageVisual::OnControlEffectiveVisibilityChanged);
 
   // We should clear cached informations before mImageCache->FirstFrame();
   // TODO : Could we remove this cache clearing code?
@@ -1182,7 +1181,7 @@ void AnimatedImageVisual::DoSetOffScene(Actor& actor)
   mCurrentFrameIndex = FIRST_FRAME_INDEX;
   mCurrentLoopIndex  = FIRST_LOOP;
 
-  Dali::DevelActor::OnSceneVisibilityChangedSignal(actor).Disconnect(this, &AnimatedImageVisual::OnControlEffectiveVisibilityChanged);
+  actor.OnSceneVisibilityChangedSignal().Disconnect(this, &AnimatedImageVisual::OnControlEffectiveVisibilityChanged);
 }
 
 void AnimatedImageVisual::OnSetTransform()
