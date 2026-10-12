@@ -157,7 +157,7 @@ void OffscreenRenderingImpl::CreateFrameBuffer()
   {
     std::ostringstream oss;
     oss.imbue(std::locale::classic());
-    oss << "OffscreenRendering refresh rate:" << mRefreshRate;
+    oss << "OffscreenRendering refresh rate:" << static_cast<int>(mRefreshRate);
 
     Dali::Integration::TextureUploadWithContent(texture, Dali::PixelData(), ToDaliString(oss.str()), Dali::Integration::TextureContextTypeHint::FBO_ATTACHED_COLOR_TEXTURE, true);
   }
