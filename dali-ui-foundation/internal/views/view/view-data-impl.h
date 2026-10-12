@@ -1134,8 +1134,7 @@ public:
   enum class FittingModeUpdate
   {
     SIZE_OR_SCALE,   ///< Apply fitting to all eligible visuals.
-    ARRANGE,         ///< Deliver final bounds early to SVG visuals only.
-    LAYOUT_FINISHED, ///< Apply fitting to non-text visuals after layout settles.
+    LAYOUT_FINISHED, ///< Apply fitting to non-text visuals when a completed layout pass is delivered.
   };
 
   /**
@@ -1155,7 +1154,7 @@ public:
    * @brief Called when this view's layout is finished.
    *
    * @param[in] view The view whose layout is finished
-   * @param[in] bounds The arranged bounds of the view
+   * @param[in] bounds The delivered snapshot; fitting uses the latest arranged target when one exists.
    */
   void OnLayoutFinished(Ui::View view, LayoutRect bounds);
 

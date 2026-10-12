@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <vector>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -124,7 +125,7 @@ struct ViewLayoutFinishedSignalFunctor
   ViewLayoutFinishedSignalData& d;
 };
 
-// Changes a layout PROPERTY on `target` once, on the first emit (window-suppress
+// Changes a layout PROPERTY on `target` once, on the first emit (keeps-window
 // test). Both this framework-internal route and the public invalidation functor
 // below fully retain another pass from inside the emit; neither may request an
 // idle ProcessEvents wake from that processing episode.
@@ -190,7 +191,8 @@ MeasuredSize RequestLayoutDuringMeasure(View, float, float)
 
 // On first emit, changes a layout property on `target` (a framework-internal
 // invalidation subject to the same PARK policy) and RE-ENTERS ProcessLayouts
-// explicitly (b1 stale-skip regression guard).
+// explicitly. Its pass is delivered by the next cycle; the item being delivered is
+// not skipped.
 struct ReenterProcessLayoutsFunctor
 {
   ReenterProcessLayoutsFunctor(LayoutController& c, View target, int& count, bool& done)
@@ -271,6 +273,20 @@ struct RemoveThenGetInSlotFunctor
   int&               count;
   int&               newControllerCount;
 };
+
+// Re-invalidates its own view on every measure, so every pass leaves the root PARKED.
+View gParkEveryPassView;
+int  gParkEveryPassCount = 0;
+
+MeasuredSize ParkEveryPassMeasure(View, float, float)
+{
+  ++gParkEveryPassCount;
+  if(gParkEveryPassView)
+  {
+    gParkEveryPassView.InvalidateMeasure();
+  }
+  return MeasuredSize(80.0f, 60.0f);
+}
 } // namespace
 
 void utc_dali_layoutcontroller_startup(void)
@@ -394,8 +410,7 @@ int UtcDaliLayoutControllerLayoutFinishedSignalNoSpuriousEmitP(void)
   application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
 
-  // Subsequent cycles with nothing pending must NOT re-fire (latch cleared;
-  // the post phase sees no scheduled emit).
+  // Subsequent cycles with no completed pass must NOT re-fire.
   application.SendNotification();
   application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
@@ -421,7 +436,7 @@ int UtcDaliLayoutControllerLayoutFinishedSignalRefiresP(void)
   application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
 
-  // Invalidate again: a new dirty->quiescent transition fires the signal again.
+  // Invalidate again: the next completed pass fires the signal again.
   root.SetRequestedWidth(200.0f);
   application.SendNotification();
   DALI_TEST_EQUALS(data.count, 2, TEST_LOCATION);
@@ -586,11 +601,11 @@ int UtcDaliViewLayoutFinishedSignalRtlTargetBoundsP(void)
   END_TEST;
 }
 
-// A View slot that re-schedules layout through a layout property setter starts a
-// new episode from inside the emit, so the window signal is deferred. The new
-// episode remains pending but does not arm RequestProcessEventsOnIdle; a later
-// independent ProcessEvents trigger drains it.
-int UtcDaliViewLayoutFinishedSignalSuppressWindowSignalWhenSlotChangesPropertyP(void)
+// A View slot that re-schedules layout through a layout property setter parks that
+// work without a wake, but it does not cancel the completed pass's Window signal. A
+// later independent ProcessEvents trigger drains the parked pass, which is reported in
+// turn.
+int UtcDaliViewLayoutFinishedSignalKeepsWindowSignalWhenSlotChangesPropertyP(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();
@@ -609,24 +624,24 @@ int UtcDaliViewLayoutFinishedSignalSuppressWindowSignalWhenSlotChangesPropertyP(
   ChangeWidthOnceFunctor viewFunctor(root, viewEmitCount, didChange);
   root.LayoutFinishedSignal().Connect(&application, viewFunctor);
 
-  // Post phase emits the View signal; its slot changes a layout property, so the
-  // window signal is suppressed and the resulting pass is parked without a wake.
+  // Post phase delivers the View signal, then the Window signal; the slot's property
+  // change is parked without a wake.
   SendRequestedProcessEvents(application);
-  DALI_TEST_EQUALS(winData.count, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(winData.count, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(viewEmitCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
   SendIndependentProcessEvents(application);
-  DALI_TEST_EQUALS(winData.count, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(winData.count, 2, TEST_LOCATION);
   DALI_TEST_EQUALS(viewEmitCount, 2, TEST_LOCATION);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
   END_TEST;
 }
 
 // A slot that unconditionally calls View::InvalidateMeasure() on every emit. The
-// call is PARKED, never ignored: it is fully propagated and retained, so the window
-// signal stays suppressed, but it cannot wake another idle ProcessEvents cycle by
-// itself. The second half also pins
+// call is PARKED, never ignored: it is fully propagated and retained, it does not
+// cancel the completed pass's Window signal, and it cannot wake another idle
+// ProcessEvents cycle by itself. The second half also pins
 // deferred->wakeable upgrade: a later event-time invalidation must reach the root
 // and arm a wake even though an equivalent parked registration already exists.
 int UtcDaliViewLayoutFinishedSlotInvalidationParkedN(void)
@@ -649,7 +664,7 @@ int UtcDaliViewLayoutFinishedSlotInvalidationParkedN(void)
 
   SendRequestedProcessEvents(application);
   DALI_TEST_EQUALS(viewEmitCount, 1, TEST_LOCATION);
-  DALI_TEST_EQUALS(winData.count, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(winData.count, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
   // The slot left the root parked. An equivalent invalidation at event time must
@@ -660,7 +675,7 @@ int UtcDaliViewLayoutFinishedSlotInvalidationParkedN(void)
 
   SendRequestedProcessEvents(application);
   DALI_TEST_EQUALS(viewEmitCount, 2, TEST_LOCATION);
-  DALI_TEST_EQUALS(winData.count, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(winData.count, 2, TEST_LOCATION);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
   END_TEST;
 }
@@ -693,15 +708,15 @@ int UtcDaliLayoutControllerRequestLayoutDuringPassParkedN(void)
 
   SendRequestedProcessEvents(application);
   DALI_TEST_EQUALS(gRequestLayoutProducerCount, 1, TEST_LOCATION);
-  DALI_TEST_EQUALS(data.count, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
   // The explicit trigger consumes the retained registration. Because RequestLayout
   // alone did not dirty the view, its measure cache hits and the producer does not
-  // re-request; the episode settles without arming another wake.
+  // re-request; the pass still completes and is reported, without arming another wake.
   SendIndependentProcessEvents(application);
   DALI_TEST_EQUALS(gRequestLayoutProducerCount, 1, TEST_LOCATION);
-  DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(data.count, 2, TEST_LOCATION);
   DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
   gRequestLayoutTarget.Reset();
@@ -726,34 +741,55 @@ int UtcDaliViewLayoutFinishedSignalSlotReentersProcessLayoutsP(void)
   root.Add(b);
   window.Add(root);
 
-  LayoutController& controller = LayoutController::Get(window);
-
-  ViewLayoutFinishedSignalData    bData;
-  ViewLayoutFinishedSignalFunctor bFunctor(bData);
-  b.LayoutFinishedSignal().Connect(&application, bFunctor);
-
+  LayoutController&            controller = LayoutController::Get(window);
+  std::vector<float>           widths;
+  std::vector<int>             order;
   int                          aCount = 0;
   bool                         done   = false;
-  ReenterProcessLayoutsFunctor aFunctor(controller, b, aCount, done);
-  a.LayoutFinishedSignal().Connect(&application, aFunctor);
+  ReenterProcessLayoutsFunctor reenter(controller, b, aCount, done);
+  a.LayoutFinishedSignal().Connect(&application, [&](View view, LayoutRect bounds)
+  {
+    order.push_back(1);
+    reenter(view, bounds);
+  });
+  b.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect bounds)
+  {
+    order.push_back(2);
+    widths.push_back(bounds.width);
+  });
+  controller.LayoutFinishedSignal().Connect(&application, [&](Window)
+  { order.push_back(3); });
 
-  // The slot re-enters ProcessLayouts() during the post-phase emit; drive
-  // several full cycles so the re-scheduled + re-entered episode settles and
-  // b's final (width 120) bounds are delivered.
-  application.SendNotification();
-  application.SendNotification();
-  application.SendNotification();
-  application.SendNotification();
+  // Cycle 1: A's slot changes B and completes a second pass synchronously. That pass waits
+  // for the next cycle; B's item from the first pass is still delivered now (no skipping
+  // because a newer snapshot exists), followed by the Window notification. The slot's pass
+  // requests no ProcessEvents cycle of its own; only an independent trigger delivers it.
+  SendRequestedProcessEvents(application);
+  DALI_TEST_EQUALS(aCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(order == std::vector<int>({1, 2, 3}));
+  DALI_TEST_EQUALS(widths.size(), 1u, TEST_LOCATION);
+  if(widths.size() == 1u)
+  {
+    DALI_TEST_EQUALS(widths[0], 60.0f, 0.01f, TEST_LOCATION);
+  }
+  DALI_TEST_EQUALS(b.GetProperty<float>(Actor::Property::SIZE_WIDTH), 120.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
 
-  // The slot's framework-internal property invalidation is retained and parked
-  // under the same policy as a public invalidation. Its explicit re-entrant
-  // ProcessLayouts call drains that work and starts a new dirty->settled episode,
-  // so exact emit counts are implementation-defined (a view may legitimately
-  // recur per episode). The guaranteed invariants are: no crash / no permanent
-  // stranding, and b's LAST delivered bounds reflect its final width-120 layout.
-  DALI_TEST_CHECK(aCount >= 1);
-  DALI_TEST_CHECK(bData.count >= 1);
-  DALI_TEST_EQUALS(bData.bounds.width, b.GetProperty<float>(Actor::Property::SIZE_WIDTH), 0.01f, TEST_LOCATION);
+  // Cycle 2, independently triggered: the slot's pass is delivered once: A, B (now 120), then
+  // the Window.
+  SendIndependentProcessEvents(application);
+  DALI_TEST_EQUALS(aCount, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(order == std::vector<int>({1, 2, 3, 1, 2, 3}));
+  DALI_TEST_EQUALS(widths.size(), 2u, TEST_LOCATION);
+  if(widths.size() == 2u)
+  {
+    DALI_TEST_EQUALS(widths[1], 120.0f, 0.01f, TEST_LOCATION);
+  }
+
+  // Nothing further was recorded.
+  application.SendNotification();
+  DALI_TEST_EQUALS(aCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(order.size(), 6u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -907,6 +943,419 @@ int UtcDaliLayoutControllerRemoveInSlotIdleReapP(void)
   root.SetRequestedWidth(120.0f);
   application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+// Two manual passes before any automatic cycle: neither delivers inside its call, and the
+// next post-process phase merges them into ONE notification per View carrying the latest
+// bounds, followed by ONE Window notification.
+int UtcDaliLayoutControllerManualPassesMergeIntoOneDeliveryP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("Manual passes are delivered by the next automatic cycle, merged per View with the latest bounds");
+
+  View root = View::New();
+  root.SetRequestedWidth(100.0f);
+  root.SetRequestedHeight(60.0f);
+  window.Add(root);
+
+  LayoutController&  controller = LayoutController::Get(window);
+  std::vector<float> widths;
+  std::vector<int>   order;
+  root.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect bounds)
+  {
+    widths.push_back(bounds.width);
+    order.push_back(1);
+  });
+  controller.LayoutFinishedSignal().Connect(&application, [&](Window)
+  { order.push_back(2); });
+
+  controller.ProcessLayouts(); // pass 1: root at 100
+  root.SetRequestedWidth(180.0f);
+  controller.ProcessLayouts(); // pass 2: root at 180 replaces the same item
+
+  DALI_TEST_CHECK(widths.empty());
+  DALI_TEST_CHECK(order.empty());
+  DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 180.0f, 0.01f, TEST_LOCATION);
+
+  // Nothing is pending, but the automatic pre-process promotes both recorded passes and
+  // the post-process phase delivers them once.
+  application.SendNotification();
+  DALI_TEST_CHECK(order == std::vector<int>({1, 2}));
+  DALI_TEST_EQUALS(widths.size(), 1u, TEST_LOCATION);
+  if(widths.size() == 1u)
+  {
+    DALI_TEST_EQUALS(widths[0], 180.0f, 0.01f, TEST_LOCATION);
+  }
+
+  // Nothing further was recorded.
+  application.SendNotification();
+  DALI_TEST_EQUALS(widths.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(order.size(), 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+// Views collected by different passes before one delivery are each notified once, with
+// their own latest snapshot, in the order they were first collected -- including Views
+// the last pass did not arrange.
+int UtcDaliLayoutControllerViewsFromSeveralPassesDeliveredOnceP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("Views from several passes are delivered once each, in first-collected order");
+
+  View r = View::New();
+  r.SetRequestedWidth(200.0f);
+  r.SetRequestedHeight(100.0f);
+  View a = View::New();
+  a.SetRequestedWidth(50.0f);
+  a.SetRequestedHeight(40.0f);
+  View b = View::New();
+  b.SetRequestedWidth(60.0f);
+  b.SetRequestedHeight(30.0f);
+  r.Add(a);
+  r.Add(b);
+  window.Add(r);
+
+  LayoutController&  controller = LayoutController::Get(window);
+  std::vector<int>   order;
+  std::vector<float> widths;
+  a.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect bounds)
+  {
+    order.push_back(1);
+    widths.push_back(bounds.width);
+  });
+  b.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect bounds)
+  {
+    order.push_back(2);
+    widths.push_back(bounds.width);
+  });
+  controller.LayoutFinishedSignal().Connect(&application, [&](Window)
+  { order.push_back(4); });
+
+  controller.ProcessLayouts(); // pass 1: r arranges a and b
+
+  View s = View::New();
+  s.SetRequestedWidth(200.0f);
+  s.SetRequestedHeight(100.0f);
+  View c = View::New();
+  c.SetRequestedWidth(30.0f);
+  c.SetRequestedHeight(30.0f);
+  s.Add(c);
+  c.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect bounds)
+  {
+    order.push_back(3);
+    widths.push_back(bounds.width);
+  });
+  window.Add(s);
+
+  controller.ProcessLayouts(); // pass 2: only s is pending, so only c is arranged
+  DALI_TEST_CHECK(order.empty());
+
+  application.SendNotification();
+  DALI_TEST_CHECK(order == std::vector<int>({1, 2, 3, 4}));
+  DALI_TEST_EQUALS(widths.size(), 3u, TEST_LOCATION);
+  if(widths.size() == 3u)
+  {
+    DALI_TEST_EQUALS(widths[0], 50.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(widths[1], 60.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(widths[2], 30.0f, 0.01f, TEST_LOCATION);
+  }
+
+  application.SendNotification();
+  DALI_TEST_EQUALS(order.size(), 4u, TEST_LOCATION);
+  END_TEST;
+}
+
+// A producer that re-invalidates its own view on EVERY measure leaves the root parked
+// after every pass. Every pass is nevertheless reported to the View and to the Window at
+// its delivery point, and no pass arms an idle wake: pending work never suppresses or
+// defers the notification of a completed pass.
+int UtcDaliLayoutControllerParkedWorkDoesNotSuppressCompletionP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("Parked work never suppresses or defers the notification of a completed pass");
+
+  LayoutController&           controller = LayoutController::Get(window);
+  LayoutFinishedSignalData    winData;
+  LayoutFinishedSignalFunctor winFunctor(winData);
+  controller.LayoutFinishedSignal().Connect(&application, winFunctor);
+
+  gParkEveryPassCount = 0;
+
+  View view = View::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetMeasureCallback(MeasureCallback::New(&ParkEveryPassMeasure));
+  gParkEveryPassView = view;
+
+  ViewLayoutFinishedSignalData    viewData;
+  ViewLayoutFinishedSignalFunctor viewFunctor(viewData);
+  view.LayoutFinishedSignal().Connect(&application, viewFunctor);
+
+  window.Add(view);
+
+  for(int cycle = 1; cycle <= 3; ++cycle)
+  {
+    if(cycle == 1)
+    {
+      SendRequestedProcessEvents(application);
+    }
+    else
+    {
+      SendIndependentProcessEvents(application);
+    }
+    DALI_TEST_EQUALS(gParkEveryPassCount, cycle, TEST_LOCATION);
+    DALI_TEST_EQUALS(viewData.count, cycle, TEST_LOCATION);
+    DALI_TEST_EQUALS(winData.count, cycle, TEST_LOCATION);
+    DALI_TEST_EQUALS(viewData.bounds.width, view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 0.01f, TEST_LOCATION);
+    DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+  }
+
+  gParkEveryPassView.Reset();
+  END_TEST;
+}
+
+// Connections are judged at emit time: a Window slot connected after a pass completed but
+// before its delivery is called, while View and Window slots disconnected before the
+// delivery are not -- although the pass was recorded while they were connected.
+int UtcDaliLayoutControllerConnectionsJudgedAtDeliveryP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("LayoutFinished connections are evaluated at delivery, not when the pass completed");
+
+  View root = View::New();
+  root.SetRequestedWidth(100.0f);
+  root.SetRequestedHeight(60.0f);
+  window.Add(root);
+
+  LayoutController& controller  = LayoutController::Get(window);
+  int               views       = 0;
+  int               windows     = 0;
+  int               lateWindows = 0;
+  int               lateViews   = 0;
+  root.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect)
+  { ++views; });
+
+  controller.ProcessLayouts(); // recorded while no Window slot is connected
+  controller.LayoutFinishedSignal().Connect(&application, CountLayoutFinishedFunctor(windows));
+
+  application.SendNotification();
+  DALI_TEST_EQUALS(views, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(windows, 1, TEST_LOCATION);
+
+  {
+    ConnectionTracker tracker;
+    controller.LayoutFinishedSignal().Connect(&tracker, CountLayoutFinishedFunctor(lateWindows));
+    root.LayoutFinishedSignal().Connect(&tracker, [&](View, LayoutRect)
+    { ++lateViews; });
+
+    root.SetRequestedWidth(120.0f);
+    controller.ProcessLayouts(); // recorded while both extra slots are connected
+    tracker.DisconnectAll();     // ...and disconnected before the delivery
+
+    application.SendNotification();
+    DALI_TEST_EQUALS(views, 2, TEST_LOCATION);
+    DALI_TEST_EQUALS(windows, 2, TEST_LOCATION);
+    DALI_TEST_EQUALS(lateWindows, 0, TEST_LOCATION);
+    DALI_TEST_EQUALS(lateViews, 0, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+// LayoutController::Remove() from a View slot stops the rest of the delivery at once: the
+// detached controller notifies neither the remaining View nor the Window.
+int UtcDaliLayoutControllerRemoveInViewSlotStopsDeliveryP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("Removing the controller from a View slot stops the rest of the delivery");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  View first = View::New();
+  first.SetRequestedWidth(40.0f);
+  first.SetRequestedHeight(30.0f);
+  View second = View::New();
+  second.SetRequestedWidth(50.0f);
+  second.SetRequestedHeight(30.0f);
+  root.Add(first);
+  root.Add(second);
+  window.Add(root);
+
+  int                             firstCount  = 0;
+  int                             windowCount = 0;
+  ViewSlotRemoveControllerFunctor firstFunctor(window, firstCount);
+  first.LayoutFinishedSignal().Connect(&application, firstFunctor);
+  ViewLayoutFinishedSignalData    secondData;
+  ViewLayoutFinishedSignalFunctor secondFunctor(secondData);
+  second.LayoutFinishedSignal().Connect(&application, secondFunctor);
+  LayoutController::Get(window).LayoutFinishedSignal().Connect(&application, CountLayoutFinishedFunctor(windowCount));
+
+  application.SendNotification();
+  DALI_TEST_EQUALS(firstCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondData.count, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(windowCount, 0, TEST_LOCATION);
+
+  // The detached controller is freed at idle without delivering what it had left.
+  application.RunIdles();
+  DALI_TEST_EQUALS(secondData.count, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(windowCount, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+// A View that leaves the scene after a pass recorded it is not notified for that pass: its
+// item is tombstoned in place, so the Views recorded after it keep their order and are
+// delivered, followed by the Window. Destroying it afterwards changes nothing; a tombstoned
+// item is never dereferenced.
+int UtcDaliLayoutControllerViewLeavingSceneBeforeDeliveryNotNotifiedP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A View that leaves the scene before the delivery is not notified for the passes recorded earlier");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  View leaving = View::New();
+  leaving.SetRequestedWidth(50.0f);
+  leaving.SetRequestedHeight(40.0f);
+  View staying = View::New();
+  staying.SetRequestedWidth(60.0f);
+  staying.SetRequestedHeight(30.0f);
+  root.Add(leaving);
+  root.Add(staying);
+  window.Add(root);
+
+  LayoutController& controller = LayoutController::Get(window);
+  std::vector<int>  order;
+  leaving.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect)
+  { order.push_back(1); });
+  staying.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect)
+  { order.push_back(2); });
+  controller.LayoutFinishedSignal().Connect(&application, [&](Window)
+  { order.push_back(3); });
+
+  controller.ProcessLayouts(); // records leaving, then staying; never delivers inside the call
+  root.Remove(leaving);        // tombstones leaving's item; staying keeps its position
+  leaving.Reset();             // destroyed: its tombstoned item is never dereferenced
+  DALI_TEST_CHECK(order.empty());
+
+  application.SendNotification();
+  DALI_TEST_CHECK(order == std::vector<int>({2, 3}));
+
+  // Nothing further was recorded.
+  application.SendNotification();
+  DALI_TEST_EQUALS(order.size(), 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+// A View slot that removes a later View from the scene during the delivery tombstones that
+// View's undelivered item in place: the cursor is not disturbed, the removed View is not
+// notified, and the View after it and the Window still are. The removal re-schedules the
+// parent's layout without a wake; an independent trigger then reports that pass in turn.
+int UtcDaliLayoutControllerViewRemovedBySlotSkippedInDeliveryP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A View removed from the scene by an earlier slot of the same delivery is skipped; the rest is delivered");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  View first = View::New();
+  first.SetRequestedWidth(40.0f);
+  first.SetRequestedHeight(30.0f);
+  View middle = View::New();
+  middle.SetRequestedWidth(50.0f);
+  middle.SetRequestedHeight(30.0f);
+  View last = View::New();
+  last.SetRequestedWidth(60.0f);
+  last.SetRequestedHeight(30.0f);
+  root.Add(first);
+  root.Add(middle);
+  root.Add(last);
+  window.Add(root);
+
+  LayoutController& controller = LayoutController::Get(window);
+  std::vector<int>  order;
+  bool              removed = false;
+  first.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect)
+  {
+    order.push_back(1);
+    if(!removed)
+    {
+      removed = true;
+      root.Remove(middle);
+    }
+  });
+  middle.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect)
+  { order.push_back(2); });
+  last.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect)
+  { order.push_back(3); });
+  controller.LayoutFinishedSignal().Connect(&application, [&](Window)
+  { order.push_back(4); });
+
+  SendRequestedProcessEvents(application);
+  DALI_TEST_CHECK(removed);
+  DALI_TEST_CHECK(!middle.GetParent());
+  DALI_TEST_CHECK(order == std::vector<int>({1, 3, 4}));
+  DALI_TEST_CHECK(!WasProcessEventsOnIdleRequested(application));
+
+  // The removal left root pending without a wake; an independent trigger drains it, and that
+  // pass arranges first and last only.
+  SendIndependentProcessEvents(application);
+  DALI_TEST_CHECK(order == std::vector<int>({1, 3, 4, 1, 3, 4}));
+  END_TEST;
+}
+
+// A View recorded while subscribed but left with no connection before the delivery is
+// skipped at the delivery; the View after it and the Window are still notified.
+int UtcDaliLayoutControllerViewUnsubscribedBeforeDeliveryNotNotifiedP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A View with no connection left at the delivery is skipped, although it was recorded");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  View dropped = View::New();
+  dropped.SetRequestedWidth(50.0f);
+  dropped.SetRequestedHeight(40.0f);
+  View kept = View::New();
+  kept.SetRequestedWidth(60.0f);
+  kept.SetRequestedHeight(30.0f);
+  root.Add(dropped);
+  root.Add(kept);
+  window.Add(root);
+
+  LayoutController& controller = LayoutController::Get(window);
+  std::vector<int>  order;
+  kept.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect)
+  { order.push_back(2); });
+  controller.LayoutFinishedSignal().Connect(&application, [&](Window)
+  { order.push_back(3); });
+
+  {
+    ConnectionTracker tracker;
+    dropped.LayoutFinishedSignal().Connect(&tracker, [&](View, LayoutRect)
+    { order.push_back(1); });
+
+    controller.ProcessLayouts(); // records dropped, then kept, while both are subscribed
+    tracker.DisconnectAll();     // dropped is left with no connection before the delivery
+
+    application.SendNotification();
+    DALI_TEST_CHECK(order == std::vector<int>({2, 3}));
+  }
+
+  // Nothing further was recorded.
+  application.SendNotification();
+  DALI_TEST_EQUALS(order.size(), 2u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1146,7 +1595,7 @@ int UtcDaliLayoutControllerBatchSurvivesProducerExceptionP(void)
   window.Add(targetHost);
   targetHost.Add(target);
 
-  // A normal batch first. It settles, emits once, and the slot then arms the throw and
+  // A normal batch first. It completes, emits once, and the slot then arms the throw and
   // parks a fresh dirty state on both roots without requesting a wake.
   SendRequestedProcessEvents(application);
   DALI_TEST_EQUALS(emitCount, 1, TEST_LOCATION);
@@ -1180,7 +1629,7 @@ int UtcDaliLayoutControllerBatchSurvivesProducerExceptionP(void)
   DALI_TEST_EQUALS(gExceptionTargetCount, 2, TEST_LOCATION);
   DALI_TEST_EQUALS(gThrowingMeasureCount, 3, TEST_LOCATION);
 
-  // 4. ...and that pass settled, so LayoutFinished emitted again.
+  // 4. ...and that pass completed, so LayoutFinished emitted again.
   DALI_TEST_EQUALS(emitCount, 2, TEST_LOCATION);
 
   // Steady state: nothing re-schedules itself.
@@ -1189,5 +1638,92 @@ int UtcDaliLayoutControllerBatchSurvivesProducerExceptionP(void)
   DALI_TEST_EQUALS(gThrowingMeasureCount, 3, TEST_LOCATION);
   DALI_TEST_EQUALS(emitCount, 2, TEST_LOCATION);
 
+  END_TEST;
+}
+
+// A batch that throws keeps the View snapshots of the layout roots it had already
+// completed -- the next automatic cycle delivers them -- but earns no Window notification
+// of its own. Driven through the manual entry point for the same reason as the test
+// above: Core::ProcessEvents' re-entrancy latch is not RAII.
+int UtcDaliLayoutControllerFailedBatchKeepsCompletedRootSnapshotsP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("A failed batch keeps the snapshots of its completed roots but earns no Window notification");
+
+  gThrowingMeasureCount = 0;
+  gThrowingMeasureArmed = false;
+
+  // Directly under the Window (depth 1), so the depth sort runs it FIRST.
+  View first = View::New();
+  first.SetRequestedWidth(100.0f);
+  first.SetRequestedHeight(60.0f);
+
+  // Under a non-View actor (depth 2): an independent layout root that runs after `first`.
+  Actor host     = Actor::New();
+  View  throwing = View::New();
+  throwing.SetRequestedWidth(80.0f);
+  throwing.SetRequestedHeight(50.0f);
+  throwing.SetMeasureCallback(MeasureCallback::New(&ThrowWhenArmedMeasure));
+
+  LayoutController&  controller = LayoutController::Get(window);
+  std::vector<float> widths;
+  int                finishes = 0;
+  first.LayoutFinishedSignal().Connect(&application, [&](View, LayoutRect bounds)
+  { widths.push_back(bounds.width); });
+  controller.LayoutFinishedSignal().Connect(&application, CountLayoutFinishedFunctor(finishes));
+
+  window.Add(first);
+  window.Add(host);
+  host.Add(throwing);
+
+  SendRequestedProcessEvents(application);
+  DALI_TEST_EQUALS(widths.size(), 1u, TEST_LOCATION);
+  if(widths.size() == 1u)
+  {
+    DALI_TEST_EQUALS(widths[0], 100.0f, 0.01f, TEST_LOCATION);
+  }
+  DALI_TEST_EQUALS(finishes, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gThrowingMeasureCount, 1, TEST_LOCATION);
+
+  // `first` completes its pass at 140, then `throwing` throws out of the same batch.
+  first.SetRequestedWidth(140.0f);
+  throwing.InvalidateMeasure();
+  gThrowingMeasureArmed = true;
+  bool caught           = false;
+  try
+  {
+    controller.ProcessLayouts();
+  }
+  catch(const Dali::DaliException&)
+  {
+    caught = true;
+  }
+  DALI_TEST_CHECK(caught);
+  DALI_TEST_EQUALS(gThrowingMeasureCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(first.GetProperty<float>(Actor::Property::SIZE_WIDTH), 140.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(widths.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(finishes, 1, TEST_LOCATION);
+
+  // Drop the throwing root: leaving the scene unregisters the root the rollback restored.
+  host.Remove(throwing);
+  throwing.Reset();
+  window.Remove(host);
+  host.Reset();
+
+  // Nothing is pending, but the automatic pre-process promotes the snapshot the failed
+  // batch recorded for `first`; that batch never set the Window flag.
+  application.SendNotification();
+  DALI_TEST_EQUALS(widths.size(), 2u, TEST_LOCATION);
+  if(widths.size() == 2u)
+  {
+    DALI_TEST_EQUALS(widths[0], 100.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(widths[1], 140.0f, 0.01f, TEST_LOCATION);
+  }
+  DALI_TEST_EQUALS(finishes, 1, TEST_LOCATION);
+
+  application.SendNotification();
+  DALI_TEST_EQUALS(widths.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(finishes, 1, TEST_LOCATION);
   END_TEST;
 }

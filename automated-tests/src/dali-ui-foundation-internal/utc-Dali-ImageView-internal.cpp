@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-transform.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
+#include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-types.h>
@@ -314,9 +315,11 @@ namespace
 struct ArrangeSvgPanel : ConnectionTracker
 {
   ImageView    arrow;
+  View         root;
   bool         delaySettlement{true};
   int          measures{0};
   int          finishes{0};
+  int          finishesWhilePending{0};
   MeasuredSize Measure(View view, float, float)
   {
     ++measures;
@@ -345,13 +348,19 @@ struct ArrangeSvgPanel : ConnectionTracker
   void Finished(View, LayoutRect)
   {
     ++finishes;
+    if(Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(root)).IsMeasureDirty())
+    {
+      ++finishesWhilePending;
+    }
   }
 };
 } // namespace
 
-// Drive event processing explicitly: this tests SVG size delivery while layout
-// remains pending, independently of whether a follow-up idle wake is requested.
-int UtcDaliImageViewSvgReadyBeforeLayoutSettles(void)
+// Every pass is reported while the producer keeps another pass pending; the
+// LayoutFinished-driven fitting gives the SVG its size, so the resource becomes ready
+// without layout ever settling. Event processing is driven explicitly, independently of
+// whether a follow-up idle wake is requested.
+int UtcDaliImageViewSvgReadyWhileLayoutPending(void)
 {
   UiTestApplication application;
   ArrangeSvgPanel   panel;
@@ -360,6 +369,10 @@ int UtcDaliImageViewSvgReadyBeforeLayoutSettles(void)
   root.SetRequestedHeight(100.0f);
   root.SetMeasureCallback(MeasureCallback::New(&panel, &ArrangeSvgPanel::Measure));
   root.SetArrangeCallback(ArrangeCallback::New(&panel, &ArrangeSvgPanel::Arrange));
+  panel.root         = root;
+  int windowFinishes = 0;
+  LayoutController::Get(application.GetWindow()).LayoutFinishedSignal().Connect(&application, [&](Window)
+  { ++windowFinishes; });
   application.GetWindow().Add(root);
 
   for(int i = 0; i < 8 && (!panel.arrow || !panel.arrow.IsResourceReady()); ++i)
@@ -373,21 +386,30 @@ int UtcDaliImageViewSvgReadyBeforeLayoutSettles(void)
   }
 
   DALI_TEST_CHECK(panel.arrow.IsResourceReady());
-  DALI_TEST_EQUALS(panel.finishes, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(panel.finishes > 0);
+  DALI_TEST_EQUALS(panel.finishes, windowFinishes, TEST_LOCATION);
+  DALI_TEST_EQUALS(panel.finishesWhilePending, panel.finishes, TEST_LOCATION);
+  DALI_TEST_CHECK(panel.measures < 12);
+  DALI_TEST_CHECK(Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(root)).IsMeasureDirty());
   DALI_TEST_EQUALS(panel.arrow.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(panel.arrow.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 40.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(panel.arrow.GetRendererCount(), 2u, TEST_LOCATION);
   Texture texture = panel.arrow.GetRendererAt(1u).GetTextures().GetTexture(0u);
 
-  panel.delaySettlement = false;
+  const int finishesBefore = panel.finishes;
+  const int measuresBefore = panel.measures;
+  panel.delaySettlement    = false;
   Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(root)).InvalidateMeasure();
-  for(int i = 0; i < 5 && panel.finishes == 0; ++i)
+  for(int i = 0; i < 5 && panel.finishes == finishesBefore; ++i)
   {
     application.SendNotification();
     application.Render();
   }
 
-  DALI_TEST_CHECK(panel.finishes > 0);
+  DALI_TEST_CHECK(panel.finishes > finishesBefore);
+  DALI_TEST_CHECK(panel.measures > measuresBefore);
+  DALI_TEST_EQUALS(panel.finishes, windowFinishes, TEST_LOCATION);
+  DALI_TEST_CHECK(!Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(root)).IsMeasureDirty());
   DALI_TEST_CHECK(panel.arrow.IsResourceReady());
   DALI_TEST_EQUALS(panel.arrow.GetRendererCount(), 2u, TEST_LOCATION);
   DALI_TEST_CHECK(panel.arrow.GetRendererAt(1u).GetTextures().GetTexture(0u) == texture);
@@ -500,6 +522,16 @@ int UtcDaliImageViewRebuildViewSizeUrlAndResize(void)
   view.SetSamplingMode(Image::SamplingMode::NEAREST);
   view.Measure(200, 100);
   auto& visual = VisualOf(view);
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(120, 60), TEST_LOCATION);
+  // LayoutFinished fits the visual to the View's latest arranged target, not to the
+  // delivered payload, so an older payload cannot rewind the view-size load: the view
+  // is still arranged at 120x60 here.
+  DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 100, 50));
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(120, 60), TEST_LOCATION);
+
+  // A manual Arrange() publishes the new target but fits nothing by itself; the reload
+  // to the finished size happens when LayoutFinished is delivered for that target.
+  view.Arrange(LayoutRect(0, 0, 100, 50));
   DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(120, 60), TEST_LOCATION);
   DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0, 0, 100, 50));
   DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(100, 50), TEST_LOCATION);

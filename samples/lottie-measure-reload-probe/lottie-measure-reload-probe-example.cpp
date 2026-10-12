@@ -25,9 +25,10 @@
 //
 // What to observe on a device:
 //  1. In the DEFAULT mode the callback issues SetResourceUrl() with the current url,
-//     which is a NO-OP: the child is not dirtied, the layout settles, "LayoutFinished"
-//     prints once, and the application goes idle. CPU for this process in `top` should
-//     fall back to the idle baseline and the per-pass lines should stop.
+//     which is a NO-OP: the child is not dirtied, the first pass leaves nothing pending,
+//     "LayoutFinished" prints once for that pass, and the application goes idle. CPU for
+//     this process in `top` should fall back to the idle baseline and the per-pass lines
+//     should stop.
 //  2. Press 5 to switch the callback to Reload(). That is the explicit reload, and it
 //     rebuilds the child's visual on every pass. The passes, the CPU reading and the
 //     framework diagnostics below are what this probe exists to show.
@@ -38,10 +39,11 @@
 //     they show the pass rate directly. With per-pass logging on they are a LOWER bound.
 //  5. Whether passes keep arriving with NO input at all. That is the actual question:
 //     an idle application prints nothing.
-//  6. "LayoutFinished" is printed only when layout really settles. In Reload() mode the
-//     producer keeps re-invalidating and it stays starved; press 1 to stop the producer,
-//     or 5 to go back to the no-op call, and the next event should drain the pending work
-//     and settle.
+//  6. "LayoutFinished" is printed for every completed pass. In Reload() mode it keeps
+//     printing once per serviced pass even though the producer re-invalidates every time:
+//     pending work never suppresses or defers the notification of a completed pass. Press 1
+//     to stop the producer, or 5 to go back to the no-op call; the next event drains the
+//     pending work, that last pass is reported, and the layout settles.
 //  7. In Reload() mode two framework diagnostics are expected and are not defects: one
 //     'View::InvalidateMeasure() called ... while a Measure/Arrange pass is running'
 //     error line per view (the Lottie child's in-pass invalidation), and one
@@ -148,8 +150,8 @@ public:
 
   void OnLayoutFinished(Window /*window*/)
   {
-    // Starved while the producer keeps re-invalidating; fires once layout finally settles.
-    std::cout << "LayoutFinished: settled after " << mProbe.GetMeasureCount()
+    // Reported for every completed pass, including one whose Reload() parked another pass.
+    std::cout << "LayoutFinished: pass completed after " << mProbe.GetMeasureCount()
               << " measure passes, " << mProbe.GetReloadCount() << " in-pass calls" << std::endl;
   }
 

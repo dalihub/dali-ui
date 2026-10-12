@@ -1631,35 +1631,59 @@ public: // State API (non-chaining)
   StateChangedSignalType& StateChangedSignal();
 
   /**
-   * @brief Emitted when this View's layout has fully settled.
+   * @brief Emitted after a layout pass that arranged this View completes.
    *
-   * Fires once per dirty-to-settled layout episode of this View's window, after
-   * all Measure/Arrange work for the window has drained (same settle point as
-   * LayoutController::LayoutFinishedSignal). Emitted during the post-process
-   * phase, i.e. AFTER DALi core size negotiation (Relayout); Measure/Arrange
-   * still run in the pre-process phase and only the emit is deferred. The
-   * callback receives this View and its arranged target as a LayoutRect in
+   * A layout pass is one LayoutController batch of Measure and Arrange for this View's
+   * window. Every pass that arranged this View -- including one that served its arrange
+   * cache -- notifies it at the pass's delivery point: the post-process phase that follows
+   * DALi core size negotiation (Relayout), before the window's
+   * LayoutController::LayoutFinishedSignal. This holds even when another layout root of the
+   * same pass throws afterwards. Further layout work may still be pending at that point;
+   * pending work never suppresses or defers this notification, so it does not mean that
+   * the window's layout has settled. Passes completed up to the end of an automatic
+   * pre-process phase are delivered by the post-process phase of the same ProcessEvents
+   * cycle. A pass run by a manual LayoutController::ProcessLayouts() is delivered after the
+   * next automatic pre-process phase, never inside that call. A call made after the
+   * automatic pre-process phase of the current cycle -- from a LayoutFinishedSignal slot or
+   * from another window's post-process callback -- requests no ProcessEvents cycle of its
+   * own: its pass is delivered by the next independently triggered cycle (input, a timer,
+   * an animation or any other wake), which on a quiescent application may be indefinitely
+   * later. When prompt delivery is required, invalidate layout at event time, which
+   * requests a cycle, or call LayoutController::ProcessLayouts() from an input event
+   * handler, whose cycle then delivers the pass.
+   *
+   * The callback receives this View and its arranged target as a LayoutRect in
    * PARENT-relative, visual (scale-applied) units. Under RIGHT_TO_LEFT the x is
    * the mirrored (final) position. The bounds are the PRE-transition target,
-   * snapshotted during arrange, not intermediate animated values.
+   * snapshotted after the arrange, not intermediate animated values.
    *
-   * Recurs: the signal fires again on a later settled pass whenever this View is
-   * re-arranged. Connecting after a layout pass does not replay the previous result.
+   * One delivery notifies this View at most ONCE, however many passes it covers, with the
+   * bounds of the most recent of them. The payload is the result of the delivered pass:
+   * when layout ran again in the meantime -- for example a slot called
+   * LayoutController::ProcessLayouts() during this delivery -- the payload can differ from
+   * the live Actor properties, and the newer result is delivered by the next delivery.
+   *
+   * Recurs: the signal fires again for every later pass that re-arranges this View. A View
+   * is recorded only while it has a connection when it is arranged, and a slot is called
+   * only if it is still connected at delivery, so connecting after a pass does not replay
+   * that pass. A View that is destroyed or leaves the scene before the delivery is not
+   * notified for the earlier passes.
    *
    * A slot may NOT invalidate layout. The emit runs inside the layout processing
    * window, so a direct InvalidateMeasure() / InvalidateArrange() call is a contract
    * violation and is logged once for that View. The invalidation is nevertheless
    * retained in full: affected caches and ancestors are invalidated and the layout root
    * remains pending. It is PARKED rather than allowed to request an idle ProcessEvents
-   * wake, which prevents a dirty->settled->emit loop from keeping the main loop awake.
-   * Parked work counts as pending, so no later completion notification is emitted until
-   * an independently triggered ProcessEvents, an explicit LayoutController::ProcessLayouts(),
-   * or an out-of-processing request drains it. The callback already being delivered
-   * cannot be withdrawn. Property changes and tree mutations from a slot (Add / Remove)
-   * follow the same scheduling rule; framework-internal routing is not an exemption.
-   * Defer layout-affecting work to event time when a prompt follow-up is required.
+   * wake, which prevents a pass->emit->invalidate loop from keeping the main loop awake.
+   * Parked work does not withdraw the notification being delivered or the rest of the
+   * delivery; it is processed by a later pass when an independently triggered
+   * ProcessEvents, an explicit LayoutController::ProcessLayouts(), or an out-of-processing
+   * request drains it, and that pass notifies again. Property changes and tree mutations
+   * from a slot (Add / Remove) follow the same scheduling rule; framework-internal routing
+   * is not an exemption. Defer layout-affecting work to event time when a prompt follow-up
+   * is required.
    *
-   * @warning This signal fires whenever the View is (re-)arranged in a settled pass,
+   * @warning This signal fires whenever the View is (re-)arranged in a completed pass,
    * INCLUDING when its bounds did NOT change (e.g. it was re-arranged only because a
    * sibling or ancestor changed) -- do NOT assume "signal fired" means "this View's
    * geometry changed". Guard any layout-affecting work in the slot behind a real
@@ -1670,8 +1694,13 @@ public: // State API (non-chaining)
    * built-in LayoutManagers and the default arrange route through child.Arrange().
    * A custom parent ArrangeCallback that positions a non-standalone child by
    * writing Actor properties directly, without calling that child's Arrange(),
-   * will NOT fire the child's signal. This is not a completion callback for a
-   * manual View::Arrange().
+   * will NOT fire the child's signal. A direct manual View::Arrange() creates no
+   * controller pass and does not emit this signal. The framework fits a View's registered
+   * fitting-mode visuals (an SVG image, for example) to the arranged size when this signal
+   * is delivered, so such a manual Arrange() does not trigger that framework-driven
+   * fitting. A View type that fits its own content in OnArrange() (LottieAnimationView,
+   * for example) still does so when a manual Arrange() runs its OnArrange(); an
+   * arrange-cache hit replays the cached result without calling OnArrange().
    *
    * @return The layout-finished signal
    */

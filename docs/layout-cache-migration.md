@@ -148,8 +148,10 @@ actor bounds에는 마지막으로 완료된 pass의 geometry가 계속 보일 �
 dali-core의 relayout 정책(처리 중 `RequestRelayout()`은 보존되지만 wake를 만들지
 않음)과 동일하게 **best-effort로만 지원**된다. PARK된 작업은 다음에 외부 요인으로
 발생하는 `ProcessEvents`에서 처리되는데, 입력·애니메이션·타이머가 전혀 없는 정지
-상태 앱에서는 그 시점이 **무기한 뒤**일 수 있고 `LayoutFinished`도 그때까지 함께
-보류된다. 따라서 컴포넌트와 앱은 **현재 프레임의 정확성을 in-pass 무효화에 의존해서는
+상태 앱에서는 그 시점이 **무기한 뒤**일 수 있다. 단 `LayoutFinished`는 함께
+보류되지 않는다. 작업을 park한 pass도 자신의 전달 시점(core Relayout 뒤
+post-process)에 통지되고, park된 작업은 그것을 처리한 pass가 다시 통지한다.
+따라서 컴포넌트와 앱은 **현재 프레임의 정확성을 in-pass 무효화에 의존해서는
 안 된다**. 처리 프레임이 wake 없이 parked work를 남기고 끝나면 controller가 에피소드당
 한 번 `DALI_LOG_ERROR`를 남긴다(공개 API 위반 경고가 볼 수 없는 framework 내부 경로
 기인 파킹까지 포함; pending set이 비워지면 latch가 풀려 다음 에피소드에 다시 1회

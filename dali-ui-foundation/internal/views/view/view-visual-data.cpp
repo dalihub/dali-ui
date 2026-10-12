@@ -1566,7 +1566,6 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, FittingMode
     Internal::Visual::Base& visualImpl = Ui::GetImplementation((*iter)->visual);
 
     if(!visualImpl.IsFittingModeRequired() ||
-       (update == FittingModeUpdate::ARRANGE && visualImpl.GetType() != Ui::Integration::InternalVisualType::SVG) ||
        (update == FittingModeUpdate::LAYOUT_FINISHED && visualImpl.GetType() == Ui::Integration::InternalVisualType::TEXT))
     {
       continue;
