@@ -1444,6 +1444,16 @@ bool WebViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
   return false;
 }
 
+void WebViewImpl::OnFocusChanged(bool focused)
+{
+  if(mWebEngine)
+  {
+    mWebEngine.SetFocus(focused);
+  }
+
+  ViewImpl::OnFocusChanged(focused);
+}
+
 bool WebViewImpl::HasIntrinsicTouchHandling() const
 {
   return true;

@@ -20,3 +20,6 @@ ELSE()
   DALI_ADD_SAMPLE(web-view-lwe.example web-view-lwe-example.cpp)
   DALI_ADD_SAMPLE(web-browser.example web-browser-example.cpp)
 ENDIF()
+
+# Offline TV remote/focus test; Windows uses the LWE web engine.
+DALI_ADD_SAMPLE(web-view-key-test.example web-view-key-test-example.cpp)

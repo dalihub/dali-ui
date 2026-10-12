@@ -573,6 +573,11 @@ private: // From ViewImpl
    */
   bool OnKeyEvent(const Dali::KeyEvent& event) override;
 
+  /**
+   * @copydoc ViewImpl::OnFocusChanged
+   */
+  void OnFocusChanged(bool focused) override;
+
 private: // From CustomActorImpl
   /**
    * @copydoc Dali::CustomActorImpl::HasIntrinsicTouchHandling()

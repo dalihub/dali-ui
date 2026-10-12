@@ -19,6 +19,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <ui-web-engine.h>
 
 #define private public
 #define protected public
@@ -1343,6 +1344,42 @@ int UtcDaliWebViewLayoutAndInputFallbackP(void)
   DALI_TEST_CHECK(view.FeedTouchEvent(TouchEvent::New(0u)));
   DALI_TEST_CHECK(impl.OnKeyEvent(KeyEvent::New()));
   DALI_TEST_CHECK(impl.OnTouchEvent(TouchEvent::New(0u)));
+
+  END_TEST;
+}
+
+int UtcDaliWebViewFocusChangedP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.SetFocusable(true);
+  application.GetScene().Add(view);
+  View other = View::New();
+  other.SetFocusable(true);
+  application.GetScene().Add(other);
+
+  auto& impl = GetWebViewImpl(view);
+  DALI_TEST_CHECK(impl.mWebEngine);
+  DALI_TEST_EQUALS(Test::WebEngine::GetFocusSetCallCount(impl.mWebEngine), 0, TEST_LOCATION);
+
+  FocusManager manager = FocusManager::Get();
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(view));
+  DALI_TEST_CHECK(view.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_EQUALS(Test::WebEngine::GetFocusSetCallCount(impl.mWebEngine), 1, TEST_LOCATION);
+  DALI_TEST_CHECK(Test::WebEngine::GetLastFocus(impl.mWebEngine));
+
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(other));
+  DALI_TEST_CHECK(!view.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_EQUALS(Test::WebEngine::GetFocusSetCallCount(impl.mWebEngine), 2, TEST_LOCATION);
+  DALI_TEST_CHECK(!Test::WebEngine::GetLastFocus(impl.mWebEngine));
+
+  Dali::WebEngine engine = impl.mWebEngine;
+  impl.mWebEngine.Reset();
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(view));
+  DALI_TEST_CHECK(view.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(other));
+  DALI_TEST_CHECK(!view.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_EQUALS(Test::WebEngine::GetFocusSetCallCount(engine), 2, TEST_LOCATION);
 
   END_TEST;
 }

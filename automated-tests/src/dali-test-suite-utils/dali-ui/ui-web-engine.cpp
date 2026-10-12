@@ -2270,6 +2270,8 @@ public:
   float mTextZoomFactor;
   float mScaleFactor;
   bool  mVisible;
+  int   mFocusSetCallCount{0};
+  bool  mFocused{false};
 
   Dali::Vector2                       mScrollPosition;
   Dali::Vector2                       mScrollSize;
@@ -3129,6 +3131,9 @@ void WebEngine::ExitFullscreen()
 
 void WebEngine::SetFocus(bool focused)
 {
+  auto& impl = Internal::Adaptor::GetImplementation(*this);
+  ++impl.mFocusSetCallCount;
+  impl.mFocused = focused;
 }
 
 void WebEngine::SetPageZoomFactor(float zoomFactor)
@@ -3383,5 +3388,13 @@ void SetWebViewAccessible(Dali::Accessibility::Accessible* webAccessible)
 void SetWebAccessibleActivatedAddress(Dali::Devel::Accessibility::Address address)
 {
   Dali::Internal::Adaptor::SetTestWebAccessibleActivatedAddress(address);
+}
+int GetFocusSetCallCount(const Dali::WebEngine& webEngine)
+{
+  return Dali::Internal::Adaptor::GetImplementation(webEngine).mFocusSetCallCount;
+}
+bool GetLastFocus(const Dali::WebEngine& webEngine)
+{
+  return Dali::Internal::Adaptor::GetImplementation(webEngine).mFocused;
 }
 } // namespace Test::WebEngine
