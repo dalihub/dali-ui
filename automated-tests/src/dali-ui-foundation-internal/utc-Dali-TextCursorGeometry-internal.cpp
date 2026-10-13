@@ -448,3 +448,45 @@ int UtcDaliTextCursorBidirectionalBoundaryP(void)
   }
   END_TEST;
 }
+
+int UtcDaliTextGeometryMaximumLinesHiddenCharactersP(void)
+{
+  UiTestApplication application;
+  for(int maximumLines : {1, 2})
+  {
+    Text::ControllerPtr controller = Text::Controller::New();
+    controller->SetText("First line\nSecond line\nHidden final line");
+    controller->SetDefaultFontSize(20.0f, Text::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetTextElideEnabled(false);
+    controller->SetMaximumNumberOfLines(maximumLines);
+    controller->Relayout(Size(300.0f, 200.0f));
+    auto model = Text::Controller::Impl::GetImplementation(*controller.Get()).mModel;
+    const auto& last = model->mVisualModel->mLines.Back();
+    const Text::CharacterIndex firstHidden = last.characterRun.characterIndex + last.characterRun.numberOfCharacters;
+    const Text::CharacterIndex end = model->GetNumberOfCharacters() - 1u;
+    DALI_TEST_CHECK(firstHidden <= end);
+    // A capped layout only needs positions for its visible prefix. Hidden
+    // character queries must reject the missing line before indexing positions.
+    model->mVisualModel->mGlyphPositions.Resize(last.glyphRun.glyphIndex + last.glyphRun.numberOfGlyphs);
+    DALI_TEST_CHECK(Text::GetCharacterBoundingRect(model, 0u).width > 0.0f);
+    for(Text::CharacterIndex character = firstHidden; character <= end; ++character)
+    {
+      DALI_TEST_EQUALS(Text::GetCharacterBoundingRect(model, character), Bounds(), TEST_LOCATION);
+    }
+    Vector<Vector2> sizes, positions, visibleSizes, visiblePositions;
+    Text::GetTextGeometry(model, firstHidden, end, sizes, positions);
+    DALI_TEST_CHECK(sizes.Empty() && positions.Empty());
+    Text::GetTextGeometry(model, 0u, firstHidden - 1u, visibleSizes, visiblePositions);
+    DALI_TEST_CHECK(!visibleSizes.Empty());
+    Text::GetTextGeometry(model, 0u, end, sizes, positions);
+    DALI_TEST_EQUALS(sizes.Count(), visibleSizes.Count(), TEST_LOCATION);
+    DALI_TEST_EQUALS(positions.Count(), visiblePositions.Count(), TEST_LOCATION);
+    for(uint32_t block = 0u; block < sizes.Count(); ++block)
+    {
+      DALI_TEST_EQUALS(sizes[block], visibleSizes[block], TEST_LOCATION);
+      DALI_TEST_EQUALS(positions[block], visiblePositions[block], TEST_LOCATION);
+    }
+  }
+  END_TEST;
+}

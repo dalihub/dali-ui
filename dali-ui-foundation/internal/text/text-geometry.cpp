@@ -127,6 +127,11 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
 
   if(lineIndex >= numberOfLines && numberOfLines > 0)
   {
+    if(!textModel->mElideEnabled)
+    {
+      // MaximumLines can stop layout while the source text remains intact.
+      return;
+    }
     lineIndex = numberOfLines - 1;
   }
 
@@ -169,6 +174,11 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
 
   for(GlyphIndex index = glyphStart; index <= glyphEnd; ++index)
   {
+    if(!isEllipsisEnabled && isLastLine && index > lastGlyphOfLine)
+    {
+      // The remaining source glyphs have no positions in the capped layout.
+      break;
+    }
     FinalGlyphGeometry finalGlyphGeometry;
     if(useFinalElision)
     {
@@ -409,19 +419,19 @@ Bounds GetCharacterBoundingRect(ModelPtr textModel, const uint32_t charIndex,
     return {0, 0, 0, 0};
   }
 
-  const Vector<Vector2>&   glyphPositions = visualModel->mGlyphPositions;
-  const Vector<GlyphInfo>& glyphs         = visualModel->mGlyphs;
-  const Vector<LineRun>&   lines          = visualModel->mLines;
+  const Vector<LineRun>& lines     = visualModel->mLines;
+  const LineIndex        lineIndex = visualModel->GetLineOfCharacter(charIndex);
+  if(lineIndex >= lines.Count())
+  {
+    // MaximumLines-hidden characters have no laid-out line or glyph position.
+    return {0, 0, 0, 0};
+  }
+  const LineRun& lineRun = lines[lineIndex];
 
-  // For each character, the index of the first glyph.
-  const GlyphIndex glyphIndex = visualModel->mCharactersToGlyph[charIndex]; // took its glyphs
-
-  const Vector2&   characterPosition = glyphPositions[glyphIndex];
-  const GlyphInfo& glyphInfo         = glyphs[glyphIndex];
-
-  // GetLineOfCharacter function returns 0 if the lines are empty
-  const int      lineIndex = visualModel->GetLineOfCharacter(charIndex);
-  const LineRun& lineRun   = lines[lineIndex];
+  // Validate the laid-out line before accessing this character's glyph position.
+  const GlyphIndex glyphIndex        = visualModel->mCharactersToGlyph[charIndex];
+  const Vector2&   characterPosition = visualModel->mGlyphPositions[glyphIndex];
+  const GlyphInfo& glyphInfo         = visualModel->mGlyphs[glyphIndex];
 
   float characterX = 0.0f;
   if(finalElision && finalElision->resolved && finalElision->textElided)

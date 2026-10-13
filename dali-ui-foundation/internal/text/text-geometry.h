@@ -36,11 +36,14 @@ struct FinalElisionResult;
  * line. if a line contains characters with different directions, multiple sizes will be returned for each block of
  * contiguous characters with the same direction.
  *
+ * Characters omitted from a CLIP layout by MaximumLines contribute no geometry.
+ *
  * @param[in] textModel text model containing text info.
  * @param[in] startIndex start index of the text requested to get position/size for.
  * @param[in] endIndex end index(included) of the text requested to get position/size for.
- * @param[in] sizesList list of sizes for the reuested text.
- * @param[in] positionsList list of positions for the requested text
+ * @param[out] sizesList list of sizes for the requested text.
+ * @param[out] positionsList list of positions for the requested text.
+ * @param[in] finalElision Optional resolved elision geometry owned by the caller.
  */
 void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterIndex endIndex, Vector<Vector2>& sizesList,
                      Vector<Vector2>& positionsList, const FinalElisionResult* finalElision = nullptr);
@@ -75,13 +78,15 @@ float GetLineTop(const Vector<LineRun>& lines, const LineRun& lineRun);
 
 /**
  * @brief Get the rendered size and position of a specific character in a rectangle.
- * If the text is not yet rendered or the index > text.Count(); a rect of {0, 0, 0, 0} is returned.
+ * If the text is not yet rendered, the index is out of range, or MaximumLines
+ * leaves the character without a laid-out line, a rect of {0, 0, 0, 0} is returned.
  * The Width  of the character = glyph.advance
  * The Height of the character = glyph.height
  * The Left (X) of the character = characterPosition.x - glyph.xBearing; Regardless of the language direction RTL or
  * LTR, the x point is the left x-point of the glyph. The Top  (Y) of the character = characterPosition.y.
  * @param[in] textModel text model containing text info.
  * @param[in] charIndex character index to which we want to calculate the geometry for.
+ * @param[in] finalElision Optional resolved elision geometry owned by the caller.
  * @return Rect {x, y, width, height}.
  */
 Bounds GetCharacterBoundingRect(ModelPtr textModel, const uint32_t charIndex,
