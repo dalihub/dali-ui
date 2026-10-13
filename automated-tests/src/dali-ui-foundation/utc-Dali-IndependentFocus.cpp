@@ -575,6 +575,78 @@ int UtcDaliIndependentFocusHideAndDisableClearOnlySubP(void)
   END_TEST;
 }
 
+int UtcDaliIndependentFocusRepeatedPolicyRequestsPreserveFocusP(void)
+{
+  FocusScenario s;
+  FocusRecorder mainRecorder;
+  FocusRecorder subRecorder;
+  s.mainView.FocusChangedSignal().Connect(&mainRecorder, &FocusRecorder::OnView);
+  s.manager.FocusChangedSignal().Connect(&mainRecorder, &FocusRecorder::OnGlobal);
+  s.subA.FocusChangedSignal().Connect(&subRecorder, &FocusRecorder::OnView);
+  s.manager.WindowFocusChangedSignal().Connect(&subRecorder, &FocusRecorder::OnWindow);
+
+  DALI_TEST_CHECK(s.manager.SetIndependentFocusEnabled(s.sub, false));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.mainView));
+  DALI_TEST_CHECK(subRecorder.windows.empty());
+
+  DALI_TEST_CHECK(s.Enable());
+  DALI_TEST_CHECK(s.manager.SetIndependentFocusEnabled(s.sub, true));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subA));
+  DALI_TEST_EQUALS(subRecorder.gained, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(subRecorder.lost, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(subRecorder.windows.size(), 1u, TEST_LOCATION);
+
+  DALI_TEST_CHECK(s.manager.SetIndependentFocusEnabled(s.sub, false));
+  DALI_TEST_CHECK(s.manager.SetIndependentFocusEnabled(s.sub, false));
+  DALI_TEST_CHECK(!s.manager.IsIndependentFocusEnabled(s.sub));
+  DALI_TEST_CHECK(!s.manager.GetCurrentFocusView(s.sub));
+  DALI_TEST_CHECK(!KeyFocus::IsKeyInputTarget(s.subA));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.mainView));
+  DALI_TEST_EQUALS(subRecorder.lost, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(subRecorder.windows.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(mainRecorder.lost, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(mainRecorder.globalChanges, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliIndependentFocusDisableKeepsReentrantEnableP(void)
+{
+  FocusScenario s;
+  DALI_TEST_CHECK(s.Enable());
+  bool              lossNotified           = false;
+  bool              nestedDisableSucceeded = false;
+  bool              nestedEnableSucceeded  = false;
+  bool              nestedFocusSucceeded   = false;
+  ConnectionTracker tracker;
+  s.subA.FocusChangedSignal().Connect(&tracker, [&](View, bool focused)
+  {
+    if(!focused)
+    {
+      lossNotified           = true;
+      nestedDisableSucceeded = s.manager.SetIndependentFocusEnabled(s.sub, false);
+      nestedEnableSucceeded  = s.manager.SetIndependentFocusEnabled(s.sub, true);
+      nestedFocusSucceeded   = s.manager.SetCurrentFocusView(s.subB);
+    }
+  });
+
+  DALI_TEST_CHECK(s.manager.SetIndependentFocusEnabled(s.sub, false));
+  DALI_TEST_CHECK(lossNotified);
+  DALI_TEST_CHECK(nestedDisableSucceeded);
+  DALI_TEST_CHECK(nestedEnableSucceeded);
+  DALI_TEST_CHECK(nestedFocusSucceeded);
+  DALI_TEST_CHECK(s.manager.IsIndependentFocusEnabled(s.sub));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subB);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subB));
+  DALI_TEST_CHECK(s.subB.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!s.subA.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.mainView));
+  END_TEST;
+}
+
 int UtcDaliIndependentFocusSetBeforeWindowShowP(void)
 {
   FocusScenario s;

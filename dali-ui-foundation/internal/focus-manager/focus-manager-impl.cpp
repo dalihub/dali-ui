@@ -559,7 +559,12 @@ bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
   {
     return false;
   }
-  if(IsIndependentFocusEnabled(window) == enabled)
+  auto* state = FindIndependentState(window);
+  if(!state && !enabled)
+  {
+    return true;
+  }
+  if(state && state->enabled == enabled)
   {
     return true;
   }
@@ -582,7 +587,8 @@ bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
         return false;
       }
     }
-    IndependentFocusState* state = FindIndependentState(window);
+    // Pruning expired entries may invalidate the previously found state.
+    state = FindIndependentState(window);
     if(!state)
     {
       mIndependentFocusStates.emplace_back();
@@ -609,7 +615,6 @@ bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
   }
   else
   {
-    auto* state    = FindIndependentState(window);
     state->enabled = false;
     if(!IsActiveWindow(Dali::Integration::SceneHolder::Get(window.GetRootLayer())))
     {
