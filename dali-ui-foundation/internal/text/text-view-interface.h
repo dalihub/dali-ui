@@ -113,7 +113,12 @@ public:
   virtual Length GetNumberOfGlyphs() const = 0;
 
   /**
-   * @brief Retrieves glyphs and positions in the given buffers.
+   * @brief Copies a range of the rendered glyph sequence and its positions.
+   *
+   * Indices address the final sequence when a resolved elision result is bound;
+   * otherwise they address the sequence produced by the complete uncached layout.
+   * A partial request is a slice of that sequence, with the same positions as a
+   * full request. It does not independently lay out or elide the requested range.
    *
    * @note The size of the @p glyphs and @p glyphPositions buffers need to be big enough to copy the @p numberOfGlyphs
    * glyphs and positions.
@@ -121,11 +126,14 @@ public:
    *
    * @param[out] glyphs Pointer to a buffer where the glyphs are copied.
    * @param[out] glyphPositions Pointer to a buffer where the glyph's positions are copied.
-   * @param[out] minLineOffset The minimum line offset.
-   * @param[in] glyphIndex Index to the first glyph.
-   * @param[in] numberOfGlyphs Number of glyphs to be copied.
+   * @param[out] minLineOffset The minimum alignment offset of the complete layout.
+   * An empty or out-of-range uncached request sets this to zero; a resolved
+   * elision result retains its stored offset even when no glyphs are copied.
+   * @param[in] glyphIndex Index of the first glyph in the rendered sequence.
+   * @param[in] numberOfGlyphs Maximum number of glyphs to copy; each output buffer
+   * must hold at least this many elements. Zero allows null output buffers.
    *
-   * @return The number of glyphs.
+   * @return The number copied, clamped to the remaining rendered sequence.
    */
   virtual Length GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLineOffset, GlyphIndex glyphIndex,
                            Length numberOfGlyphs) const = 0;

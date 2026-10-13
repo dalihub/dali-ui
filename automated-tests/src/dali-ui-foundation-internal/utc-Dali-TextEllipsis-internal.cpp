@@ -2962,3 +2962,168 @@ int UtcDaliTextViewEllipsisTallerThanControlP(void)
   }
   END_TEST;
 }
+
+namespace
+{
+/**
+ * @brief Checks that subranges equal full-output slices without writing outside
+ * caller buffers, and preserve the cached/uncached minimum-offset contract.
+ * @param[in] view View to query; source and resolved-result owners remain alive.
+ * @param[in] final Bound result, or nullptr for uncached requests.
+ * @return Zero on success; a test failure code otherwise.
+ */
+int CheckViewGlyphSubranges(Text::View& view, const Text::FinalElisionResult* final)
+{
+  const Text::Length available = view.GetNumberOfGlyphs();
+  Vector<Text::GlyphInfo> reference;
+  Vector<Vector2> referencePositions;
+  reference.Resize(available + 1u);
+  referencePositions.Resize(available + 1u);
+  float minimum = -123.5f;
+  const Text::Length visible = view.GetGlyphs(reference.Begin(), referencePositions.Begin(), minimum, 0u, available);
+  DALI_TEST_CHECK(visible <= available);
+  const bool authoritative = final && final->resolved && final->textElided;
+  for(Text::GlyphIndex start : {0u, 1u, available / 2u, available ? available - 1u : 0u, visible ? visible - 1u : 0u, available, available + 1u})
+  {
+    for(Text::Length requested : {0u, 1u, 2u, 10u, available, available + 3u})
+    {
+      Vector<Text::GlyphInfo> glyphs;
+      Vector<Vector2> positions;
+      glyphs.Resize(requested + 2u);
+      positions.Resize(requested + 2u);
+      glyphs[0u].index = glyphs[requested + 1u].index = 0x12345678u;
+      positions[0u] = positions[requested + 1u] = Vector2(123.0f, 456.0f);
+      float offset = -123.5f;
+      const Text::Length count = view.GetGlyphs(glyphs.Begin() + 1u, positions.Begin() + 1u, offset, start, requested);
+      DALI_TEST_EQUALS(count, start < visible ? std::min(requested, visible - start) : 0u, TEST_LOCATION);
+      DALI_TEST_EQUALS(offset, !authoritative && (requested == 0u || start >= available) ? 0.0f : minimum, TEST_LOCATION);
+      for(Text::Length boundary : {0u, requested + 1u})
+      {
+        DALI_TEST_EQUALS(glyphs[boundary].index, 0x12345678u, TEST_LOCATION);
+        DALI_TEST_EQUALS(positions[boundary], Vector2(123.0f, 456.0f), TEST_LOCATION);
+      }
+      for(Text::Length index = 0u; index < count; ++index)
+      {
+        const auto& actual = glyphs[index + 1u];
+        const auto& expected = reference[start + index];
+        DALI_TEST_EQUALS(actual.index, expected.index, TEST_LOCATION);
+        DALI_TEST_EQUALS(actual.fontId, expected.fontId, TEST_LOCATION);
+        DALI_TEST_EQUALS(actual.width, expected.width, TEST_LOCATION);
+        DALI_TEST_EQUALS(actual.height, expected.height, TEST_LOCATION);
+        DALI_TEST_EQUALS(actual.xBearing, expected.xBearing, TEST_LOCATION);
+        DALI_TEST_EQUALS(actual.yBearing, expected.yBearing, TEST_LOCATION);
+        DALI_TEST_EQUALS(actual.advance, expected.advance, TEST_LOCATION);
+        DALI_TEST_EQUALS(actual.scaleFactor, expected.scaleFactor, TEST_LOCATION);
+        DALI_TEST_CHECK(actual.isItalicRequired == expected.isItalicRequired);
+        DALI_TEST_CHECK(actual.isBoldRequired == expected.isBoldRequired);
+        DALI_TEST_CHECK(actual.isShaped == expected.isShaped);
+        DALI_TEST_CHECK(positions[index + 1u].x == referencePositions[start + index].x);
+        DALI_TEST_CHECK(positions[index + 1u].y == referencePositions[start + index].y);
+      }
+    }
+  }
+  return 0;
+}
+} // unnamed namespace
+
+int UtcDaliTextViewGlyphSubrangeBoundsP(void)
+{
+  UiTestApplication application;
+  for(const char* text : {"First line with a long suffix\nSecond line with more words", "ABC אבג العربية 123 text with a long suffix\nNext paragraph"})
+  {
+    for(bool elide : {false, true})
+    {
+      for(bool multiline : {false, true})
+      {
+        Text::ControllerPtr controller = Text::Controller::New();
+        controller->SetText(text);
+        controller->SetDefaultFontSize(20.0f, Text::Controller::PIXEL_SIZE);
+        controller->SetMultiLineEnabled(multiline);
+        controller->SetTextElideEnabled(elide);
+        controller->SetMaximumNumberOfLines(2);
+        controller->Relayout(Size(95.0f, 65.0f));
+        auto& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+        for(bool authoritative : {false, true})
+        {
+          Text::View view;
+          view.SetVisualModel(impl.mModel->mVisualModel);
+          view.SetLogicalModel(impl.mModel->mLogicalModel);
+          if(authoritative)
+          {
+            view.SetFinalElisionResult(controller->GetFinalElisionResult());
+          }
+          const Text::Length available = view.GetNumberOfGlyphs();
+          DALI_TEST_CHECK(available > 1u);
+          DALI_TEST_EQUALS(CheckViewGlyphSubranges(view, authoritative ? controller->GetFinalElisionResult() : nullptr), 0, TEST_LOCATION);
+        }
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextViewGlyphSubrangeContractsP(void)
+{
+  UiTestApplication application;
+  const std::array<const char*, 6u> texts{{"", "\n\n", "a\n", "First line\n\nExtraordinary internationalization suffix\n", "אבג דהו العربية 123", "ABC אבג العربية á office suffix\nNext paragraph"}};
+  unsigned fixture = 0u;
+  for(const char* text : texts)
+  {
+    for(bool elide : {false, true})
+    {
+      for(bool multiline : {false, true})
+      {
+        for(Text::Alignment alignment : {Text::Alignment::START, Text::Alignment::CENTER, Text::Alignment::END})
+        {
+          ++fixture;
+          auto controller = Text::Controller::New();
+          controller->SetDefaultFontSize(20.0f, Text::Controller::PIXEL_SIZE);
+          controller->SetMultiLineEnabled(multiline);
+          controller->SetTextElideEnabled(elide);
+          controller->SetHorizontalAlignment(alignment);
+          controller->SetVerticalAlignment(alignment);
+          controller->SetVerticalLineAlignment(alignment);
+          controller->SetDefaultLineSpacing(2.25f);
+          controller->SetCharacterSpacing(-1.25f);
+          controller->SetLineWrapMode(static_cast<Text::LineWrapMode>(fixture % 4u));
+          controller->SetMaximumNumberOfLines(fixture % 3u);
+          for(unsigned cycle = 0u; cycle < 3u; ++cycle)
+          {
+            const std::string source = cycle == 1u ? std::string(text) + "\nAppended text" : text;
+            if(fixture % 7u == 0u)
+            {
+              auto builder = Text::StyledTextBuilder::New(("[x] " + source).c_str());
+              builder.SetSpan(Text::ImageSpan::New(Text::ImageAttributes("unused-subrange-image.png", Vector2(24.0f, 28.0f))), 0u, 3u);
+              controller->SetStyledText(builder.Build());
+            }
+            else
+            {
+              controller->SetText(source);
+            }
+            controller->Relayout(cycle == 0u ? Size(40.0f, 40.0f) : cycle == 1u ? Size(86.25f, 42.5f) : Size(240.0f, 180.0f));
+            auto& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+            Text::View view;
+            view.SetVisualModel(impl.mModel->mVisualModel);
+            view.SetLogicalModel(impl.mModel->mLogicalModel);
+            DALI_TEST_EQUALS(CheckViewGlyphSubranges(view, nullptr), 0, TEST_LOCATION);
+            const auto* final = controller->GetFinalElisionResult();
+            view.SetFinalElisionResult(final);
+            DALI_TEST_EQUALS(CheckViewGlyphSubranges(view, final), 0, TEST_LOCATION);
+          }
+        }
+      }
+    }
+  }
+  Text::View empty;
+  DALI_TEST_EQUALS(CheckViewGlyphSubranges(empty, nullptr), 0, TEST_LOCATION);
+  auto controller = Text::Controller::New();
+  controller->SetText("Shaped text with no laid-out line");
+  controller->Relayout(Size(300.0f, 100.0f));
+  auto& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
+  impl.mModel->mVisualModel->mLines.Clear();
+  Text::View view;
+  view.SetVisualModel(impl.mModel->mVisualModel);
+  view.SetLogicalModel(impl.mModel->mLogicalModel);
+  DALI_TEST_EQUALS(CheckViewGlyphSubranges(view, nullptr), 0, TEST_LOCATION);
+  END_TEST;
+}

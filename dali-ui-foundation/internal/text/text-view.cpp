@@ -780,7 +780,40 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
     return copyCount;
   }
 
-  return GetGlyphsUncached(glyphs, glyphPositions, nullptr, minLineOffset, glyphIndex, numberOfGlyphs);
+  if(!mImpl->mVisualModel || !mImpl->mLogicalModel)
+  {
+    minLineOffset = 0.0f;
+    return 0u;
+  }
+
+  const Length availableGlyphs = GetNumberOfGlyphs();
+  if(numberOfGlyphs == 0u || glyphIndex >= availableGlyphs)
+  {
+    minLineOffset = 0.0f;
+    return 0u;
+  }
+
+  if(glyphIndex != 0u || numberOfGlyphs < availableGlyphs)
+  {
+    // The legacy resolver traverses whole-line indices. Resolve into full
+    // buffers before slicing so a subrange cannot become its working buffer.
+    Vector<GlyphInfo> resolvedGlyphs;
+    Vector<Vector2>   resolvedPositions;
+    resolvedGlyphs.Resize(availableGlyphs);
+    resolvedPositions.Resize(availableGlyphs);
+    const Length visibleGlyphs = GetGlyphsUncached(resolvedGlyphs.Begin(), resolvedPositions.Begin(), nullptr,
+                                                   minLineOffset, 0u, availableGlyphs);
+    if(glyphIndex >= visibleGlyphs)
+    {
+      return 0u;
+    }
+    const Length copyCount = std::min(numberOfGlyphs, visibleGlyphs - glyphIndex);
+    memcpy(glyphs, resolvedGlyphs.Begin() + glyphIndex, copyCount * sizeof(GlyphInfo));
+    memcpy(glyphPositions, resolvedPositions.Begin() + glyphIndex, copyCount * sizeof(Vector2));
+    return copyCount;
+  }
+
+  return GetGlyphsUncached(glyphs, glyphPositions, nullptr, minLineOffset, 0u, availableGlyphs);
 }
 
 const GlyphIndex* View::GetFinalGlyphStyleSourceIndices() const
