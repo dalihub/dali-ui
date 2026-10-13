@@ -116,7 +116,8 @@ private:
   class VisualData;
 
 public:
-  using AccessibleObjectCreator = ViewAccessible* (*)(Dali::Ui::View);
+  using AccessibleObjectCreator       = ViewAccessible* (*)(Dali::Ui::View);
+  using VisualResourceReadySignalType = Signal<void(Property::Index)>;
 
   /**
    * @brief Retrieves the implementation of the internal view class.
@@ -744,6 +745,10 @@ public:
    */
   void ResourceReady();
 
+  /// Notify internal listeners before evaluating view-wide resource readiness.
+  void                           VisualResourceReady(Property::Index index);
+  VisualResourceReadySignalType& VisualResourceReadySignal();
+
   void RegisterVisual(Property::Index index, Integration::Visual::Base& visual);
 
   void RegisterVisual(Property::Index index, Integration::Visual::Base& visual, int depthIndex);
@@ -755,6 +760,9 @@ public:
   void UnregisterVisual(Property::Index index);
 
   Integration::Visual::Base GetVisual(Property::Index index) const;
+
+  /// Returns the visual retained until the current replacement finishes loading.
+  Integration::Visual::Base GetPreviousVisual(Property::Index index) const;
 
   /**
    * @brief Get the raw pointer of visual impl.
@@ -1681,6 +1689,7 @@ private:
   struct ResourceReadyData
   {
     View::ResourceReadySignalType resourceReadySignal;
+    VisualResourceReadySignalType visualResourceReadySignal;
     CallbackBase*                 idleCallback{nullptr};
     bool                          isEmittingResourceReadySignal{false};
     bool                          idleCallbackRegistered{false};

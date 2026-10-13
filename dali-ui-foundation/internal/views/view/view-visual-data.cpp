@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <unordered_set>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
@@ -240,7 +241,7 @@ void SetVisualOnScene(Internal::Visual::Base& visualImpl, ViewImpl& viewImpl)
   visualImpl.SetOnScene(self);
 
   Ui::View handle = Ui::View(viewImpl.GetOwner());
-  if(handle.IsOffscreenRenderingEnabled())
+  if(visualImpl.IsOnScene() && handle.IsOffscreenRenderingEnabled())
   {
     if(!visualImpl.IsOffscreenRenderingCaptureEnabled())
     {
@@ -308,15 +309,40 @@ ViewDataImpl::VisualData::~VisualData()
 
 void ViewDataImpl::VisualData::ConnectScene(Actor parent)
 {
-  for(RegisteredVisualContainer::Iterator iter = mVisuals.Begin(); iter != mVisuals.End(); iter++)
+  // Setting a visual on scene can synchronously complete an image and remove
+  // its placeholder. Keep handles rather than iterators across those callbacks.
+  struct SceneVisual
   {
-    // Check whether the visual is empty and enabled
+    Property::Index               index;
+    Ui::Integration::Visual::Base visual;
+  };
+  std::vector<SceneVisual> visuals;
+  visuals.reserve(mVisuals.Count());
+  for(auto iter = mVisuals.Begin(); iter != mVisuals.End(); ++iter)
+  {
     if((*iter)->visual && (*iter)->enabled)
     {
-      DALI_LOG_INFO(gLogFilter, Debug::Verbose, "View::OnSceneConnection Setting visual(%d) on scene\n",
-                    (*iter)->index);
-      SetVisualOnScene(Ui::GetImplementation((*iter)->visual), mOuter.mViewImpl);
+      visuals.push_back({(*iter)->index, (*iter)->visual});
     }
+  }
+  for(auto& visual : visuals)
+  {
+    // A ready callback can detach the owner without unregistering its visuals.
+    if(!parent.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+    {
+      break;
+    }
+    RegisteredVisualContainer::Iterator iter;
+    if(FindVisual(visual.index, mVisuals, iter) && (*iter)->visual == visual.visual && (*iter)->enabled)
+    {
+      SetVisualOnScene(Ui::GetImplementation(visual.visual), mOuter.mViewImpl);
+    }
+  }
+  if(!parent.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  {
+    // Core skips disconnection notification when removal interrupts the first
+    // connection callback, so clean up visuals that were already attached here.
+    ClearScene(parent);
   }
 }
 
@@ -358,6 +384,11 @@ void ViewDataImpl::VisualData::ResourceReady(Visual::Base& object)
     return;
   }
 
+  // Internal callbacks may unregister other visuals, invalidating iterators.
+  const auto index   = (*registeredIter)->index;
+  const bool enabled = (*registeredIter)->enabled;
+
+  (*registeredIter)->resourceReadyNotified = object.IsResourceReady();
   RegisteredVisualContainer::Iterator visualToRemoveIter;
   // Find visual with the same index in the removal container
   // Set if off stage as it's replacement is now ready.
@@ -378,8 +409,12 @@ void ViewDataImpl::VisualData::ResourceReady(Visual::Base& object)
   // A visual is ready so view may need relayouting if staged
   RelayoutRequest(object);
 
-  // Called by a Visual when it's resource is ready
-  if(((*registeredIter)->enabled))
+  // Let the owning control react to this visual before testing all resources.
+  // Removing a loading placeholder here can make the whole view ready.
+  mOuter.VisualResourceReady(index);
+
+  // Called by a Visual when its resource is ready.
+  if(enabled)
   {
     mOuter.ResourceReady();
   }
@@ -520,7 +555,8 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integra
   DALI_LOG_INFO(gLogFilter, Debug::Concise, "RegisterVisual:%d \n", index);
 
   bool  visualReplaced(false);
-  Actor self = mOuter.mViewImpl.Self();
+  Actor self             = mOuter.mViewImpl.Self();
+  auto  registeredVisual = visual; // Ready callbacks may reset the caller's handle.
 
   // Set the depth index, if not set by caller this will be either the current visual depth, max depth of all visuals
   // or zero.
@@ -656,7 +692,7 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integra
       index, visual, (enabled == VisualState::ENABLED ? true : false), (visualReplaced && enabled));
     mVisuals.PushBack(newRegisteredVisual);
 
-    Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
+    Internal::Visual::Base& visualImpl = Ui::GetImplementation(registeredVisual);
     if(visualImpl.IsFittingModeRequired() && visualImpl.GetType() != Ui::Integration::InternalVisualType::TEXT)
     {
       mOuter.EnsureFittingModeLayoutFinishedSignalConnected();
@@ -667,11 +703,15 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integra
     {
       SetVisualOnScene(visualImpl, mOuter.mViewImpl);
     }
-    else if(enabled &&
-            visualImpl.IsResourceReady()) // When not being staged, check if visual already 'ResourceReady' before it
-                                          // was Registered. ( Resource may have been loaded already )
+    // Cached or IMMEDIATE loads can be ready before observation starts, even
+    // on scene. Finish their registration unless a callback already did so.
+    if(enabled && visualImpl.IsResourceReady())
     {
-      ResourceReady(visualImpl);
+      RegisteredVisualContainer::Iterator iter;
+      if(FindVisual(index, mVisuals, iter) && (*iter)->visual == registeredVisual && !(*iter)->resourceReadyNotified)
+      {
+        ResourceReady(visualImpl);
+      }
     }
   }
 
@@ -691,7 +731,7 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integra
   }
 
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "View::RegisterVisual() Registered %s(%d), enabled:%s\n",
-                visual.GetName().c_str(), index, enabled ? "true" : "false");
+                registeredVisual.GetName().c_str(), index, enabled ? "true" : "false");
 }
 
 void ViewDataImpl::VisualData::UnregisterVisual(Property::Index index)
@@ -734,6 +774,16 @@ void ViewDataImpl::VisualData::UnregisterVisual(Property::Index index)
 Ui::Integration::Visual::Base ViewDataImpl::VisualData::GetVisual(Property::Index index) const
 {
   return Ui::Integration::Visual::Base(GetVisualImplPtr(index));
+}
+
+Ui::Integration::Visual::Base ViewDataImpl::VisualData::GetPreviousVisual(Property::Index index) const
+{
+  RegisteredVisualContainer::Iterator iter;
+  if(FindVisual(index, mRemoveVisuals, iter))
+  {
+    return (*iter)->visual;
+  }
+  return Ui::Integration::Visual::Base();
 }
 
 Ui::Internal::Visual::Base* ViewDataImpl::VisualData::GetVisualImplPtr(Property::Index index) const

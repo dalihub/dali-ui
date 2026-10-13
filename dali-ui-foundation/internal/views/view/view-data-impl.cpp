@@ -3848,6 +3848,12 @@ void ViewDataImpl::OnViewSceneConnection()
 {
   OnSceneConnection();
 
+  Actor self(mViewImpl.Self());
+  if(!self.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  {
+    return;
+  }
+
   if(auto* traitObject = GetCoreInteractionObject())
   {
     if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
@@ -3856,8 +3862,7 @@ void ViewDataImpl::OnViewSceneConnection()
     }
   }
 
-  Actor self(mViewImpl.Self());
-  int   clippingMode = ClippingMode::DISABLED;
+  int clippingMode = ClippingMode::DISABLED;
   if(self.GetProperty(Actor::Property::CLIPPING_MODE).Get(clippingMode) &&
      clippingMode == ClippingMode::CLIP_CHILDREN &&
      (DALI_UNLIKELY(!mVisualData) || mVisualData->mVisuals.Empty()) &&
@@ -6504,6 +6509,19 @@ const ViewDataImpl& ViewDataImpl::Get(const ViewImpl& viewImpl)
   return viewImpl.GetViewDataImpl();
 }
 
+ViewDataImpl::VisualResourceReadySignalType& ViewDataImpl::VisualResourceReadySignal()
+{
+  return EnsureResourceReadyData().visualResourceReadySignal;
+}
+
+void ViewDataImpl::VisualResourceReady(Property::Index index)
+{
+  if(mResourceReadyData)
+  {
+    mResourceReadyData->visualResourceReadySignal.Emit(index);
+  }
+}
+
 void ViewDataImpl::ResourceReady()
 {
   DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
@@ -6560,6 +6578,11 @@ Ui::Integration::Visual::Base ViewDataImpl::GetVisual(Property::Index index) con
   return Ui::Integration::Visual::Base(GetVisualImplPtr(index));
 }
 
+Ui::Integration::Visual::Base ViewDataImpl::GetPreviousVisual(Property::Index index) const
+{
+  return mVisualData ? mVisualData->GetPreviousVisual(index) : Ui::Integration::Visual::Base();
+}
+
 Ui::Internal::Visual::Base* ViewDataImpl::GetVisualImplPtr(Property::Index index) const
 {
   if(DALI_LIKELY(mVisualData))
@@ -6580,16 +6603,16 @@ bool ViewDataImpl::IsResourceReady() const
 
 void ViewDataImpl::OnSceneConnection()
 {
+  Actor self = mViewImpl.Self();
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "View::OnSceneConnection number of registered visuals(%d)\n",
                 mVisualData ? mVisualData->mVisuals.Size() : 0u);
 
   if(DALI_LIKELY(mVisualData))
   {
-    Actor self = mViewImpl.Self();
     mVisualData->ConnectScene(self);
   }
 
-  if(mRenderEffectData && mRenderEffectData->offscreenRendering)
+  if(self.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) && mRenderEffectData && mRenderEffectData->offscreenRendering)
   {
     mRenderEffectData->offscreenRendering->SetOwnerView(Ui::View(mViewImpl.GetOwner()));
   }

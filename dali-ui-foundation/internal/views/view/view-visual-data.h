@@ -57,6 +57,7 @@ struct RegisteredVisual
   bool pending : 1;
   bool overrideReadyTransition : 1;
   bool overrideCornerProperties : 1;
+  bool resourceReadyNotified : 1;
 
   RegisteredVisual(Property::Index aIndex, Ui::Integration::Visual::Base& aVisual, bool aEnabled, bool aPendingReplacement)
   : index(aIndex),
@@ -64,7 +65,8 @@ struct RegisteredVisual
     enabled(aEnabled),
     pending(aPendingReplacement),
     overrideReadyTransition(false),
-    overrideCornerProperties(false)
+    overrideCornerProperties(false),
+    resourceReadyNotified(false)
   {
   }
 };
@@ -169,6 +171,9 @@ public:
    * @copydoc Dali::Ui::Internal::ViewDataImpl::GetVisual()
    */
   Ui::Integration::Visual::Base GetVisual(Property::Index index) const;
+
+  /// @copydoc Dali::Ui::Internal::ViewDataImpl::GetPreviousVisual()
+  Ui::Integration::Visual::Base GetPreviousVisual(Property::Index index) const;
 
   /**
    * @copydoc Dali::Ui::Internal::ViewDataImpl::GetVisualImplPtr()

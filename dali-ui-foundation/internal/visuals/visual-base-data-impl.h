@@ -63,6 +63,8 @@ struct Base::Impl
     IS_FITTING_MODE_IGNORE_VIEW_PADDING = 1 << 1,
     IS_PRE_MULTIPLIED_ALPHA             = 1 << 2,
     IS_SYNCHRONOUS_RESOURCE_LOADING     = 1 << 3,
+    IS_SETTING_ON_SCENE                 = 1 << 4,
+    IS_OFF_SCENE_REQUESTED              = 1 << 5,
   };
 
   struct CustomShader

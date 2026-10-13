@@ -107,7 +107,7 @@ struct ImageViewPropertyIndex
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @brief The URL of the placeholder image shown while loading.
+     * @brief The URL of the placeholder image shown when the resource URL is empty or while loading.
      * @details Name "placeholderImage", type Property::STRING.
      * @note See also: ImageView::SetPlaceholderUrl(), ImageView::GetPlaceholderUrl().
      */

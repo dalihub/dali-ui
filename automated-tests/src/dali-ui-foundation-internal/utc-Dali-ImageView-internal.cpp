@@ -15,20 +15,26 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-transform.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-types.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <ui-event-thread-callback.h>
+#include <string>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -39,6 +45,67 @@ Dali::Ui::Internal::ViewDataImpl& DataOf(ImageView view)
 {
   return Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(view));
 }
+
+// Distinct cache keys for the same fixture without growing paths linearly.
+// Keep paths short enough for the Windows file loader as the matrix grows.
+Dali::String MakeImageViewTestUrl(int id)
+{
+  std::string path(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/");
+  while(id > 0)
+  {
+    path += (id & 1) ? "./" : "../resources/";
+    id >>= 1;
+  }
+  path += "view-size.png";
+  return Dali::String(path.c_str());
+}
+
+UiConfig CreatePlaceholderFailureConfig()
+{
+  UiConfig config = UiConfig::New();
+  // Failure tests must not depend on installed theme images in DALI_IMAGE_DIR.
+  for(auto type : {UiConfig::BrokenImageType::SMALL, UiConfig::BrokenImageType::NORMAL, UiConfig::BrokenImageType::LARGE})
+  {
+    config.SetBrokenImageUrl(type, DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  }
+  return config;
+}
+
+// Keeps an unrelated visual pending until the test explicitly completes it.
+class PendingImageViewTestVisual : public Ui::Internal::Visual::Base
+{
+public:
+  static IntrusivePtr<PendingImageViewTestVisual> New(Ui::Internal::VisualFactoryCache& cache)
+  {
+    IntrusivePtr<PendingImageViewTestVisual> visual(new PendingImageViewTestVisual(cache));
+    visual->Initialize();
+    return visual;
+  }
+
+private:
+  explicit PendingImageViewTestVisual(Ui::Internal::VisualFactoryCache& cache)
+  : Ui::Internal::Visual::Base(cache, Ui::Integration::InternalVisualType::IMAGE)
+  {
+  }
+  void OnInitialize() override
+  {
+  }
+  void DoCreatePropertyMap(Property::Map&) const override
+  {
+  }
+  void DoCreateInstancePropertyMap(Property::Map&) const override
+  {
+  }
+  void DoSetProperties(const Property::Map&) override
+  {
+  }
+  void OnSetTransform() override
+  {
+  }
+  void DoSetOnScene(Actor&) override
+  {
+  }
+};
 
 /**
  * @brief Counts how often the layout system asks this view to measure.
@@ -264,7 +331,7 @@ int UtcDaliImageViewAutoNPatchBorderOnlyReachesVisual(void)
   Property::Map visualMap;
   visual.CreatePropertyMap(visualMap);
 
-  bool borderOnly = false;
+  bool borderOnly      = false;
   auto borderOnlyValue = visualMap.Find(Ui::Integration::ImageVisual::Property::BORDER_ONLY);
   DALI_TEST_CHECK(borderOnlyValue);
   DALI_TEST_CHECK(borderOnlyValue->Get(borderOnly));
@@ -275,7 +342,7 @@ int UtcDaliImageViewAutoNPatchBorderOnlyReachesVisual(void)
 int UtcDaliImageViewRealNPatchRenderingModesP(void)
 {
   UiTestApplication application;
-  const char* url = "../samples/image-view/res/button-up-1.9.png";
+  const char*       url = "../samples/image-view/res/button-up-1.9.png";
 
   for(bool borderOnly : {false, true})
   {
@@ -441,7 +508,7 @@ ImageDimensions ReportedLoadSize(ImageView view)
 int UtcDaliImageViewRebuildViewSizeAttachedFirstLoad(void)
 {
   UiTestApplication application;
-  ImageView view = ImageView::New();
+  ImageView         view = ImageView::New();
   view.SetRequestedWidth(200.0f);
   view.SetRequestedHeight(100.0f);
   view.SetDesiredWidth(30);
@@ -508,7 +575,7 @@ int UtcDaliImageViewRebuildViewSizeOnScenePolicies(void)
 int UtcDaliImageViewRebuildViewSizeUrlAndResize(void)
 {
   UiTestApplication application;
-  ImageView view = ImageView::New();
+  ImageView         view = ImageView::New();
   view.SetRequestedWidth(200);
   view.SetRequestedHeight(100);
   view.SetImageLoadWithViewSizeEnabled(true);
@@ -548,7 +615,7 @@ int UtcDaliImageViewRebuildViewSizeUrlAndResize(void)
 int UtcDaliImageViewRebuildViewSizeFallbackAndOtherVisuals(void)
 {
   UiTestApplication application;
-  ImageView view = ImageView::New();
+  ImageView         view = ImageView::New();
   view.SetRequestedWidth(200);
   view.SetRequestedHeight(100);
   view.SetDesiredWidth(30);
@@ -592,7 +659,7 @@ int UtcDaliImageViewRebuildViewSizeFallbackAndOtherVisuals(void)
 int UtcDaliImageViewRebuildViewSizePreservesFitting(void)
 {
   UiTestApplication application;
-  const float originalScale = UiScaleManager::Get().GetScale();
+  const float       originalScale = UiScaleManager::Get().GetScale();
   UiScaleManager::Get().SetScale(1.5f);
   for(auto fitting : {Image::FittingMode::FILL, Image::FittingMode::FIT_KEEP_ASPECT_RATIO,
                       Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO, Image::FittingMode::CENTER})
@@ -638,8 +705,8 @@ int UtcDaliImageViewRebuildViewSizePreservesFitting(void)
 int UtcDaliImageViewRebuildViewSizeCreationHint(void)
 {
   UiTestApplication application;
-  auto factory = Ui::Integration::VisualFactory::Get();
-  auto& factoryImpl = Ui::GetImplementation(factory);
+  auto              factory     = Ui::Integration::VisualFactory::Get();
+  auto&             factoryImpl = Ui::GetImplementation(factory);
   for(auto policy : {Image::LoadPolicy::ATTACHED, Image::LoadPolicy::IMMEDIATE})
   {
     Property::Map map;
@@ -670,11 +737,11 @@ int UtcDaliImageViewRebuildViewSizeCreationHint(void)
     application.GetWindow().Remove(actor);
 
     map[Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE] = false;
-    visual = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2(160.4f, 79.6f));
+    visual                                                                 = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2(160.4f, 79.6f));
     DALI_TEST_EQUALS(ReportedLoadSize(visual), ImageDimensions(30, 20), TEST_LOCATION);
 
     map[Ui::Integration::ImageVisual::Property::IMAGE_LOAD_WITH_VIEW_SIZE] = true;
-    visual = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2::ZERO);
+    visual                                                                 = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2::ZERO);
     DALI_TEST_EQUALS(ReportedLoadSize(visual), ImageDimensions(30, 20), TEST_LOCATION);
   }
   END_TEST;
@@ -683,8 +750,8 @@ int UtcDaliImageViewRebuildViewSizeCreationHint(void)
 int UtcDaliImageViewRebuildViewSizeDesiredDefaults(void)
 {
   UiTestApplication application;
-  auto factory = Ui::Integration::VisualFactory::Get();
-  auto& factoryImpl = Ui::GetImplementation(factory);
+  auto              factory     = Ui::Integration::VisualFactory::Get();
+  auto&             factoryImpl = Ui::GetImplementation(factory);
   for(auto policy : {Image::LoadPolicy::ATTACHED, Image::LoadPolicy::IMMEDIATE})
   {
     for(bool loadWithViewSize : {false, true})
@@ -703,7 +770,7 @@ int UtcDaliImageViewRebuildViewSizeDesiredDefaults(void)
           map.Insert("desiredWidth", 30);
         }
         const ImageDimensions desiredSize(hasDesiredWidth ? 30 : 0, 0);
-        auto visual = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2(160, 80));
+        auto                  visual = factoryImpl.CreateVisual(map, Ui::Integration::VisualFactory::NONE, Vector2(160, 80));
         DALI_TEST_EQUALS(ReportedLoadSize(visual), loadWithViewSize ? ImageDimensions(160, 80) : desiredSize, TEST_LOCATION);
 
         Property::Map disable;
@@ -718,5 +785,860 @@ int UtcDaliImageViewRebuildViewSizeDesiredDefaults(void)
   // The existing URL-and-size creation path still uses size as Desired Size.
   auto visual = factory.CreateVisual(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png", ImageDimensions(30, 20));
   DALI_TEST_EQUALS(ReportedLoadSize(visual), ImageDimensions(30, 20), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderEmptyUrlLifecycle(void)
+{
+  UiTestApplication  application;
+  const Dali::String url(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  for(bool fixedSize : {false, true})
+  {
+    ImageView view = ImageView::New();
+    view.SetSynchronousLoading(true);
+    if(fixedSize)
+    {
+      view.SetRequestedWidth(160.0f);
+      view.SetRequestedHeight(100.0f);
+    }
+    view.SetPlaceholderUrl(url);
+    application.GetScene().Add(view);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+    DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::IMAGE));
+    DALI_TEST_CHECK(view.GetNaturalSize().width > 0.0f);
+    view.SetResourceUrl(url);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+    DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+    view.SetResourceUrl(ImageUrl());
+    DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String(), TEST_LOCATION);
+    DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::IMAGE));
+    DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+    view.SetResourceUrl(Dali::String());
+    DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+    view.SetPlaceholderUrl(Dali::String());
+    DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+    DALI_TEST_EQUALS(view.GetNaturalSize(), Vector3::ZERO, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderDoesNotCoverFailure(void)
+{
+  UiTestApplication application(CreatePlaceholderFailureConfig());
+  ImageView         view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetSynchronousLoading(true);
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  application.GetScene().Add(view);
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/missing-placeholder-test.png");
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  view.SetPlaceholderUrl("another-placeholder.png");
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  view.SetResourceUrl(Dali::String());
+  DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::IMAGE));
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderReplacementKeepsPreviousImage(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetSynchronousLoading(true);
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  for(int i = 0; i < 8 && DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE); ++i)
+  {
+    Test::WaitForEventThreadTrigger(1, 1);
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  view.SetSynchronousLoading(false);
+  view.Measure(160.0f, 100.0f);
+  application.SendNotification();
+  application.Render();
+  const auto previousRenderer = view.GetRendererAt(0u);
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/missing-replacement-test.png");
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  bool previousStillVisible = false;
+  for(uint32_t i = 0; i < view.GetRendererCount(); ++i)
+  {
+    previousStillVisible |= view.GetRendererAt(i) == previousRenderer;
+  }
+  DALI_TEST_CHECK(previousStillVisible);
+  view.SetResourceUrl(Dali::String());
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::IMAGE));
+  DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderAsyncFailureRecovery(void)
+{
+  UiTestApplication application(CreatePlaceholderFailureConfig());
+  ImageView         view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/missing-async-placeholder-test.png");
+  for(int i = 0; i < 8 && (view.GetLoadingStatus() != Ui::Visual::ResourceStatus::FAILED ||
+                           DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+      ++i)
+  {
+    Test::WaitForEventThreadTrigger(1, 1);
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  view.SetResourceUrl(Dali::String());
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::IMAGE));
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderCompletionEmitsResourceReady(void)
+{
+  UiTestApplication application;
+  for(bool attachBeforeUrl : {true, false})
+  {
+    for(bool synchronous : {true, false})
+    {
+      const Dali::String mainUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+      ImageView          cachedImage;
+      if(!synchronous)
+      {
+        cachedImage = ImageView::New();
+        cachedImage.SetRequestedWidth(80.0f);
+        cachedImage.SetRequestedHeight(40.0f);
+        cachedImage.SetSynchronousLoading(true);
+        cachedImage.SetResourceUrl(mainUrl);
+        application.GetScene().Add(cachedImage);
+        DALI_TEST_EQUALS(cachedImage.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+      }
+
+      ImageView view = ImageView::New();
+      view.SetRequestedWidth(160.0f);
+      view.SetRequestedHeight(100.0f);
+      view.SetSynchronousLoading(synchronous);
+      view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/initial-layout.svg");
+      int readyCount = 0;
+      view.ResourceReadySignal().Connect(&application, [&](View)
+      { ++readyCount; });
+      if(attachBeforeUrl)
+      {
+        application.GetScene().Add(view);
+      }
+      DALI_TEST_EQUALS(DataOf(view).GetVisualResourceStatus(ImageView::Property::PLACEHOLDER_IMAGE),
+                       Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+      view.SetResourceUrl(mainUrl);
+      if(!attachBeforeUrl)
+      {
+        application.GetScene().Add(view);
+      }
+      DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+      DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+      DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+      Test::WaitForEventThreadTrigger(1, 1);
+      application.SendNotification();
+      application.Render();
+      DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+      application.GetScene().Remove(view);
+      if(cachedImage)
+      {
+        application.GetScene().Remove(cachedImage);
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderChainedReplacementKeepsPreviousImage(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetSynchronousLoading(true);
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/initial-layout.svg");
+  view.SetSynchronousLoading(false);
+  view.Measure(160.0f, 100.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  const auto previousRenderer = view.GetRendererAt(0u);
+
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/missing-chain-b.png");
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/missing-chain-c.png");
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  bool previousStillVisible = false;
+  for(uint32_t i = 0; i < view.GetRendererCount(); ++i)
+  {
+    previousStillVisible |= view.GetRendererAt(i) == previousRenderer;
+  }
+  DALI_TEST_CHECK(previousStillVisible);
+  view.SetResourceUrl(Dali::String());
+  DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderFailureWithPendingBackground(void)
+{
+  UiTestApplication application(CreatePlaceholderFailureConfig());
+  ImageView         view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  application.GetScene().Add(view);
+  for(int i = 0; i < 8 && DataOf(view).GetVisualResourceStatus(ImageView::Property::PLACEHOLDER_IMAGE) != Ui::Visual::ResourceStatus::READY; ++i)
+  {
+    Test::WaitForEventThreadTrigger(1, 1);
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_EQUALS(DataOf(view).GetVisualResourceStatus(ImageView::Property::PLACEHOLDER_IMAGE),
+                   Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  auto                          factory    = Ui::Integration::VisualFactory::Get();
+  auto                          background = PendingImageViewTestVisual::New(Ui::GetImplementation(factory).GetFactoryCache());
+  Ui::Integration::Visual::Base backgroundHandle(background.Get());
+  DataOf(view).RegisterVisual(Ui::Integration::View::Property::BACKGROUND, backgroundHandle);
+  int readyCount = 0;
+  view.ResourceReadySignal().Connect(&application, [&](View)
+  { ++readyCount; });
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/missing-pending-background.png");
+  for(int i = 0; i < 8 && view.GetLoadingStatus() != Ui::Visual::ResourceStatus::FAILED; ++i)
+  {
+    Test::WaitForEventThreadTrigger(1, 1);
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+  DALI_TEST_EQUALS(background->GetResourceStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  DALI_TEST_EQUALS(readyCount, 0, TEST_LOCATION);
+  background->ResourceReady(Ui::Visual::ResourceStatus::READY);
+  DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderChainedInitialLoadsKeepPlaceholder(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  application.GetScene().Add(view);
+  for(const char* url : {"/missing-initial-a.png", "/missing-initial-b.png", "/missing-initial-c.png"})
+  {
+    view.SetResourceUrl(Dali::String(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR) + Dali::String(url));
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+    DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  }
+  END_TEST;
+}
+
+// Preserve enabled registrations when a visual is also registered at another,
+// disabled property index before the view connects to the scene.
+int UtcDaliImageViewSharedVisualSceneConnection(void)
+{
+  UiTestApplication             application;
+  ImageView                     view       = ImageView::New();
+  auto                          factory    = Ui::Integration::VisualFactory::Get();
+  auto                          testVisual = PendingImageViewTestVisual::New(Ui::GetImplementation(factory).GetFactoryCache());
+  Ui::Integration::Visual::Base visual(testVisual.Get());
+  constexpr Property::Index     disabledIndex = 10001;
+  constexpr Property::Index     enabledIndex  = 10002;
+  DataOf(view).RegisterVisual(disabledIndex, visual, false);
+  DataOf(view).RegisterVisual(enabledIndex, visual, true);
+  DALI_TEST_CHECK(!testVisual->IsOnScene());
+  application.GetScene().Add(view);
+  DALI_TEST_CHECK(testVisual->IsOnScene());
+  END_TEST;
+}
+
+namespace
+{
+int CheckPlaceholderReadyCallbackChangesUrl(bool replaceUrl, bool onScene = false)
+{
+  UiTestApplication  application(CreatePlaceholderFailureConfig());
+  const Dali::String mainUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  const Dali::String nextUrl(replaceUrl ? (onScene ? DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/./view-size.png" : DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/missing-ready-callback.png") : "");
+  ImageView          cachedImage = ImageView::New();
+  cachedImage.SetRequestedWidth(80.0f);
+  cachedImage.SetRequestedHeight(40.0f);
+  cachedImage.SetSynchronousLoading(true);
+  cachedImage.SetResourceUrl(mainUrl);
+  application.GetScene().Add(cachedImage);
+  DALI_TEST_EQUALS(cachedImage.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+
+  ImageView view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetLoadPolicy(onScene ? Image::LoadPolicy::ATTACHED : Image::LoadPolicy::IMMEDIATE);
+  view.SetSynchronousLoading(onScene);
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/initial-layout.svg");
+  if(onScene)
+  {
+    application.GetScene().Add(view);
+    DALI_TEST_EQUALS(DataOf(view).GetVisualResourceStatus(ImageView::Property::PLACEHOLDER_IMAGE),
+                     Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+  }
+  Renderer                      completedRenderer;
+  int                           readyCount           = 0;
+  bool                          requestReturned      = false;
+  bool                          callbackBeforeReturn = false;
+  Ui::Integration::Visual::Base completedVisual;
+  Ui::Integration::Visual::Base replacementVisual;
+  view.ResourceReadySignal().Connect(&application, [&](View)
+  {
+    ++readyCount;
+    if(readyCount == 1)
+    {
+      callbackBeforeReturn = !requestReturned;
+      completedVisual      = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+      if(onScene)
+      {
+        completedRenderer = Ui::GetImplementation(completedVisual).GetRenderer();
+      }
+      view.SetResourceUrl(nextUrl);
+      replacementVisual = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+    }
+  });
+  view.SetResourceUrl(mainUrl);
+  requestReturned = true;
+  DALI_TEST_CHECK(callbackBeforeReturn);
+  DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetResourceUrl(), nextUrl, TEST_LOCATION);
+  DALI_TEST_CHECK(completedVisual);
+  DALI_TEST_CHECK(completedVisual != replacementVisual);
+  DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::IMAGE) == replacementVisual);
+  DALI_TEST_EQUALS(view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE), onScene, TEST_LOCATION);
+  if(onScene)
+  {
+    DALI_TEST_CHECK(completedRenderer);
+    for(uint32_t i = 0; i < view.GetRendererCount(); ++i)
+    {
+      DALI_TEST_CHECK(view.GetRendererAt(i) != completedRenderer);
+    }
+    view.SetPlaceholderUrl(Dali::String());
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(view.GetRendererCount(), replaceUrl ? 1u : 0u, TEST_LOCATION);
+    for(uint32_t i = 0; i < view.GetRendererCount(); ++i)
+    {
+      DALI_TEST_CHECK(view.GetRendererAt(i) != completedRenderer);
+    }
+    END_TEST;
+  }
+  if(replaceUrl)
+  {
+    DALI_TEST_CHECK(replacementVisual);
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+    application.GetScene().Add(view);
+    for(int i = 0; i < 8 && view.GetLoadingStatus() != Ui::Visual::ResourceStatus::FAILED; ++i)
+    {
+      Test::WaitForEventThreadTrigger(1, 1);
+      application.SendNotification();
+      application.Render();
+    }
+    DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+    DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+    DALI_TEST_EQUALS(readyCount, 2, TEST_LOCATION);
+  }
+  else
+  {
+    DALI_TEST_CHECK(!replacementVisual);
+    DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+    application.GetScene().Add(view);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::IMAGE));
+    DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  }
+  END_TEST;
+}
+} // namespace
+
+int UtcDaliImageViewPlaceholderReadyCallbackClearsUrl(void)
+{
+  return CheckPlaceholderReadyCallbackChangesUrl(false);
+}
+
+int UtcDaliImageViewPlaceholderReadyCallbackReplacesUrl(void)
+{
+  return CheckPlaceholderReadyCallbackChangesUrl(true);
+}
+
+int UtcDaliImageViewPlaceholderOnSceneReadyCallbackClearsUrl(void)
+{
+  return CheckPlaceholderReadyCallbackChangesUrl(false, true);
+}
+
+int UtcDaliImageViewPlaceholderOnSceneReadyCallbackReplacesUrl(void)
+{
+  return CheckPlaceholderReadyCallbackChangesUrl(true, true);
+}
+
+// Exercise completion callbacks while both loading state and scene ownership
+// change. Renderer identity and final ownership matter as well as URL state.
+int UtcDaliImageViewPlaceholderCompletionLifecycleMatrix(void)
+{
+  UiTestApplication application;
+  enum Action
+  {
+    CLEAR,
+    REPLACE_READY,
+    REPLACE_PENDING,
+    DETACH,
+    RECONNECT
+  };
+  int caseNumber = 0;
+  for(int loading = 0; loading < 3; ++loading) // synchronous, cached, asynchronous
+  {
+    for(auto policy : {Image::LoadPolicy::ATTACHED, Image::LoadPolicy::IMMEDIATE})
+    {
+      for(bool offscreen : {false, true})
+      {
+        for(bool placeholderReady : {false, true})
+        {
+          for(auto action : {CLEAR, REPLACE_READY, REPLACE_PENDING, DETACH, RECONNECT})
+          {
+            ++caseNumber;
+            const std::string label = "Completion lifecycle case " + std::to_string(caseNumber) +
+                                      ": loading=" + std::to_string(loading) + ", policy=" + std::to_string(static_cast<int>(policy)) + ", offscreen=" + std::to_string(offscreen) +
+                                      ", placeholderReady=" + std::to_string(placeholderReady) + ", action=" + std::to_string(action);
+            tet_infoline(label.c_str());
+            const auto mainUrl = MakeImageViewTestUrl(caseNumber * 3);
+            const auto nextUrl = MakeImageViewTestUrl(caseNumber * 3 + 1);
+            ImageView  cachedImage;
+            if(loading == 1)
+            {
+              cachedImage = ImageView::New();
+              cachedImage.SetRequestedWidth(160.0f);
+              cachedImage.SetRequestedHeight(100.0f);
+              cachedImage.SetSynchronousLoading(true);
+              cachedImage.SetResourceUrl(mainUrl);
+              application.GetScene().Add(cachedImage);
+              DALI_TEST_EQUALS(cachedImage.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+            }
+            ImageView view = ImageView::New();
+            view.SetRequestedWidth(160.0f);
+            view.SetRequestedHeight(100.0f);
+            view.SetLoadPolicy(policy);
+            view.SetSynchronousLoading(loading == 0);
+            view.SetOffscreenRenderingEnabled(offscreen);
+            view.SetPlaceholderUrl(MakeImageViewTestUrl(caseNumber * 3 + 2));
+            application.GetScene().Add(view);
+            if(placeholderReady)
+            {
+              for(int i = 0; i < 8 && DataOf(view).GetVisualResourceStatus(ImageView::Property::PLACEHOLDER_IMAGE) != Ui::Visual::ResourceStatus::READY; ++i)
+              {
+                Test::WaitForEventThreadTrigger(1, 1);
+                application.SendNotification();
+                application.Render();
+              }
+            }
+            DALI_TEST_EQUALS(DataOf(view).GetVisualResourceStatus(ImageView::Property::PLACEHOLDER_IMAGE),
+                             placeholderReady ? Ui::Visual::ResourceStatus::READY : Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+            bool                          callbackRan = false;
+            Ui::Integration::Visual::Base completedVisual;
+            Renderer                      completedRenderer;
+            ConnectionTracker             callbackTracker;
+            view.ResourceReadySignal().Connect(&callbackTracker, [&](View)
+            {
+              auto image = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+              if(callbackRan || !image || !Ui::GetImplementation(image).IsResourceReady())
+              {
+                return;
+              }
+              callbackRan       = true;
+              completedVisual   = image;
+              completedRenderer = Ui::GetImplementation(completedVisual).GetRenderer();
+              switch(action)
+              {
+                case CLEAR:
+                  view.SetResourceUrl(Dali::String());
+                  break;
+                case REPLACE_READY:
+                case REPLACE_PENDING:
+                  view.SetSynchronousLoading(action == REPLACE_READY);
+                  view.SetResourceUrl(nextUrl);
+                  break;
+                case DETACH:
+                  view.Unparent();
+                  break;
+                case RECONNECT:
+                  view.Unparent();
+                  application.GetScene().Add(view);
+                  break;
+              }
+            });
+            view.SetResourceUrl(mainUrl);
+            if(loading == 2)
+            {
+              DALI_TEST_CHECK(!callbackRan);
+            }
+            for(int i = 0; i < 8 && !callbackRan; ++i)
+            {
+              Test::WaitForEventThreadTrigger(1, 1);
+              application.SendNotification();
+              application.Render();
+            }
+            DALI_TEST_CHECK(callbackRan);
+            DALI_TEST_CHECK(completedVisual);
+            DALI_TEST_CHECK(completedRenderer);
+            if(action == REPLACE_PENDING || action == RECONNECT)
+            {
+              for(int i = 0; i < 8 && view.GetLoadingStatus() != Ui::Visual::ResourceStatus::READY; ++i)
+              {
+                Test::WaitForEventThreadTrigger(1, 1);
+                application.SendNotification();
+                application.Render();
+              }
+              DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+            }
+            if(action == CLEAR)
+            {
+              DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String(), TEST_LOCATION);
+              DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::IMAGE));
+              DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+            }
+            if(action == REPLACE_READY || action == REPLACE_PENDING)
+            {
+              DALI_TEST_EQUALS(view.GetResourceUrl(), nextUrl, TEST_LOCATION);
+              DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::IMAGE) != completedVisual);
+              DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+            }
+            DALI_TEST_EQUALS(view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE), action != DETACH, TEST_LOCATION);
+            DALI_TEST_EQUALS(Ui::GetImplementation(completedVisual).IsOnScene(), action == RECONNECT, TEST_LOCATION);
+            view.SetPlaceholderUrl(Dali::String());
+            view.SetOffscreenRenderingEnabled(false);
+            application.SendNotification();
+            application.Render();
+            DALI_TEST_EQUALS(view.GetRendererCount(), action == CLEAR || action == DETACH ? 0u : 1u, TEST_LOCATION);
+            DALI_TEST_EQUALS(view.GetCacheRendererCount(), 0u, TEST_LOCATION);
+            if(action != RECONNECT)
+            {
+              for(uint32_t i = 0; i < view.GetRendererCount(); ++i)
+              {
+                DALI_TEST_CHECK(view.GetRendererAt(i) != completedRenderer);
+              }
+            }
+            view.SetResourceUrl(Dali::String());
+            view.Unparent();
+            DALI_TEST_EQUALS(view.GetRendererCount(), 0u, TEST_LOCATION);
+            DALI_TEST_EQUALS(view.GetCacheRendererCount(), 0u, TEST_LOCATION);
+            if(cachedImage)
+            {
+              application.GetScene().Remove(cachedImage);
+            }
+          }
+        }
+      }
+    }
+  }
+  DALI_TEST_EQUALS(caseNumber, 120, TEST_LOCATION);
+  END_TEST;
+}
+
+// A visual removed by its synchronous ready callback must not subsequently be
+// inserted into an offscreen renderer cache by the returning connection call.
+int UtcDaliImageViewPlaceholderReadyCallbackRemovesOffscreenVisual(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetOffscreenRenderingEnabled(true);
+  application.GetScene().Add(view);
+  const auto    initialCacheRendererCount = view.GetCacheRendererCount();
+  Property::Map map;
+  map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+  map.Insert(Ui::Integration::ImageVisual::Property::URL, DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, true);
+  map.Insert(Ui::Integration::ImageVisual::Property::RELEASE_POLICY, static_cast<int>(Image::ReleasePolicy::NEVER));
+  auto                      visual      = Ui::Integration::VisualFactory::Get().CreateVisual(map);
+  constexpr Property::Index visualIndex = 10003;
+  bool                      removed     = false;
+  view.ResourceReadySignal().Connect(&application, [&](View)
+  {
+    if(!removed)
+    {
+      removed = true;
+      DataOf(view).UnregisterVisual(visualIndex);
+    }
+  });
+  DataOf(view).RegisterVisual(visualIndex, visual, Ui::Integration::DepthIndex::FOREGROUND_EFFECT);
+  DALI_TEST_CHECK(removed);
+  DALI_TEST_CHECK(!Ui::GetImplementation(visual).IsOnScene());
+  DALI_TEST_EQUALS(view.GetRendererCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCacheRendererCount(), initialCacheRendererCount, TEST_LOCATION);
+  DataOf(view).RegisterVisual(visualIndex, visual, Ui::Integration::DepthIndex::FOREGROUND_EFFECT);
+  DALI_TEST_CHECK(Ui::GetImplementation(visual).IsOnScene());
+  DALI_TEST_EQUALS(view.GetCacheRendererCount(), initialCacheRendererCount + 1u, TEST_LOCATION);
+  DataOf(view).UnregisterVisual(visualIndex);
+  DALI_TEST_CHECK(!Ui::GetImplementation(visual).IsOnScene());
+  DALI_TEST_EQUALS(view.GetRendererCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCacheRendererCount(), initialCacheRendererCount, TEST_LOCATION);
+  END_TEST;
+}
+
+// SVG resolves during scene connection through a separate loading path. Keep
+// its natural-size/rasterization contract while honouring reentrant removal.
+int UtcDaliImageViewPlaceholderSvgReadyCallbackClearsUrl(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New();
+  view.SetRequestedWidth(64.0f);
+  view.SetRequestedHeight(64.0f);
+  view.SetDesiredWidth(64);
+  view.SetDesiredHeight(64);
+  view.SetSynchronousLoading(true);
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  application.GetScene().Add(view);
+  bool                          cleared = false;
+  Ui::Integration::Visual::Base completedVisual;
+  view.ResourceReadySignal().Connect(&application, [&](View)
+  {
+    auto image = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+    if(!cleared && image && Ui::GetImplementation(image).IsResourceReady())
+    {
+      cleared         = true;
+      completedVisual = image;
+      view.SetResourceUrl(Dali::String());
+    }
+  });
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/initial-layout.svg");
+  for(int i = 0; i < 8 && !cleared; ++i)
+  {
+    Test::WaitForEventThreadTrigger(1, 1);
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_CHECK(cleared);
+  DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String(), TEST_LOCATION);
+  DALI_TEST_CHECK(!Ui::GetImplementation(completedVisual).IsOnScene());
+  DALI_TEST_CHECK(!DataOf(view).GetVisual(ImageView::Property::IMAGE));
+  DALI_TEST_CHECK(DataOf(view).GetVisual(ImageView::Property::PLACEHOLDER_IMAGE));
+  view.SetPlaceholderUrl(Dali::String());
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetRendererCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderCachedImmediateReplacement(void)
+{
+  UiTestApplication  application;
+  const Dali::String firstUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  const Dali::String secondUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/./view-size.png");
+  ImageView          cached = ImageView::New();
+  cached.SetRequestedWidth(160.0f);
+  cached.SetRequestedHeight(100.0f);
+  cached.SetSynchronousLoading(true);
+  cached.SetResourceUrl(secondUrl);
+  application.GetScene().Add(cached);
+  DALI_TEST_EQUALS(cached.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  ImageView view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetLoadPolicy(Image::LoadPolicy::IMMEDIATE);
+  view.SetSynchronousLoading(true);
+  view.SetResourceUrl(firstUrl);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+  const auto oldRenderer = view.GetRendererAt(0u);
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/initial-layout.svg");
+  view.SetSynchronousLoading(false);
+  int readyCount = 0;
+  view.ResourceReadySignal().Connect(&application, [&](View)
+  { ++readyCount; });
+  view.SetResourceUrl(secondUrl);
+  DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetRendererAt(0u) != oldRenderer);
+  DALI_TEST_CHECK(!DataOf(view).GetPreviousVisual(ImageView::Property::IMAGE));
+  DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliImageViewPlaceholderDetachWithFollowingBackground(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetSynchronousLoading(true);
+  view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/./view-size.png");
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  view.SetBackgroundColor(UiColor(0xFF0000));
+  auto background = DataOf(view).GetVisual(Ui::Integration::View::Property::BACKGROUND);
+  bool detached   = false;
+  view.ResourceReadySignal().Connect(&application, [&](View)
+  {
+    if(!detached)
+    {
+      detached = true;
+      view.Unparent();
+    }
+  });
+  application.GetScene().Add(view);
+  for(int i = 0; i < 8 && !detached; ++i)
+  {
+    Test::WaitForEventThreadTrigger(1, 1);
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_CHECK(detached);
+  DALI_TEST_EQUALS(view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetRendererCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!Ui::GetImplementation(background).IsOnScene());
+  END_TEST;
+}
+
+// Multiple ready visuals can publish completion at different points in the
+// connection snapshot. Cover both registration orders and reentrant ownership.
+int UtcDaliImageViewPlaceholderMultiVisualSceneCallbacks(void)
+{
+  UiTestApplication application;
+  int               caseNumber = 0;
+  for(auto policy : {Image::LoadPolicy::ATTACHED, Image::LoadPolicy::IMMEDIATE})
+  {
+    for(bool cached : {false, true})
+    {
+      for(bool backgroundFirst : {false, true})
+      {
+        for(bool offscreen : {false, true})
+        {
+          for(bool reconnect : {false, true})
+          {
+            for(bool usePlaceholder : {false, true})
+            {
+              ++caseNumber;
+              tet_infoline(("Multi-visual scene case " + std::to_string(caseNumber)).c_str());
+              const auto url = MakeImageViewTestUrl(caseNumber + 400);
+              ImageView  cacheOwner;
+              if(cached)
+              {
+                cacheOwner = ImageView::New();
+                cacheOwner.SetRequestedWidth(160.0f);
+                cacheOwner.SetRequestedHeight(100.0f);
+                cacheOwner.SetSynchronousLoading(true);
+                cacheOwner.SetResourceUrl(url);
+                application.GetScene().Add(cacheOwner);
+                DALI_TEST_EQUALS(cacheOwner.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+              }
+              ImageView view = ImageView::New();
+              view.SetRequestedWidth(160.0f);
+              view.SetRequestedHeight(100.0f);
+              view.SetLoadPolicy(policy);
+              view.SetSynchronousLoading(!cached);
+              view.SetOffscreenRenderingEnabled(offscreen);
+              if(usePlaceholder)
+              {
+                view.SetPlaceholderUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/initial-layout.svg");
+              }
+              if(backgroundFirst)
+              {
+                view.SetBackgroundColor(UiColor(0xFF0000));
+              }
+              bool              callbackRan = false;
+              ConnectionTracker tracker;
+              view.ResourceReadySignal().Connect(&tracker, [&](View)
+              {
+                auto image = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+                if(!callbackRan && image && Ui::GetImplementation(image).IsResourceReady())
+                {
+                  callbackRan = true;
+                  view.Unparent();
+                  if(reconnect)
+                  {
+                    application.GetScene().Add(view);
+                  }
+                }
+              });
+              view.SetResourceUrl(url);
+              if(!backgroundFirst)
+              {
+                view.SetBackgroundColor(UiColor(0xFF0000));
+              }
+              auto background = DataOf(view).GetVisual(Ui::Integration::View::Property::BACKGROUND);
+              if(!callbackRan)
+              {
+                application.GetScene().Add(view);
+              }
+              for(int i = 0; i < 8 && !callbackRan; ++i)
+              {
+                Test::WaitForEventThreadTrigger(1, 1);
+                application.SendNotification();
+                application.Render();
+              }
+              DALI_TEST_CHECK(callbackRan);
+              DALI_TEST_EQUALS(view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE), reconnect, TEST_LOCATION);
+              DALI_TEST_EQUALS(Ui::GetImplementation(background).IsOnScene(), reconnect, TEST_LOCATION);
+              auto image = DataOf(view).GetVisual(ImageView::Property::IMAGE);
+              DALI_TEST_CHECK(image);
+              DALI_TEST_EQUALS(Ui::GetImplementation(image).IsOnScene(), reconnect, TEST_LOCATION);
+              view.SetOffscreenRenderingEnabled(false);
+              application.SendNotification();
+              application.Render();
+              DALI_TEST_EQUALS(view.GetRendererCount(), reconnect ? 2u : 0u, TEST_LOCATION);
+              DALI_TEST_EQUALS(view.GetCacheRendererCount(), 0u, TEST_LOCATION);
+              view.SetPlaceholderUrl(Dali::String());
+              view.SetResourceUrl(Dali::String());
+              view.Unparent();
+              DALI_TEST_EQUALS(view.GetRendererCount(), 0u, TEST_LOCATION);
+              DALI_TEST_EQUALS(view.GetCacheRendererCount(), 0u, TEST_LOCATION);
+              if(cacheOwner)
+              {
+                application.GetScene().Remove(cacheOwner);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  DALI_TEST_EQUALS(caseNumber, 64, TEST_LOCATION);
   END_TEST;
 }
