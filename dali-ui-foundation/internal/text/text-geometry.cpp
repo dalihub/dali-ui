@@ -163,14 +163,10 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
 
   CharacterDirection isPrevoiusRightToLeft =
     (nullptr != modelCharacterDirectionsBuffer ? *(modelCharacterDirectionsBuffer + startIndex) : false);
-  const bool                   isEllipsisEnabled               = textModel->mElideEnabled;
-  const bool                   useFinalElision                 = finalElision && finalElision->resolved && finalElision->textElided;
-  const GlyphIndex             startIndexOfGlyphs              = textModel->GetStartIndexOfElidedGlyphs();
-  const GlyphIndex             endIndexOfGlyphs                = textModel->GetEndIndexOfElidedGlyphs();
-  const GlyphIndex             firstMiddleIndexOfElidedGlyphs  = textModel->GetFirstMiddleIndexOfElidedGlyphs();
-  const GlyphIndex             secondMiddleIndexOfElidedGlyphs = textModel->GetSecondMiddleIndexOfElidedGlyphs();
-  const EllipsisPosition::Type ellipsisPosition                = textModel->GetEllipsisPosition();
-  bool                         hasBlock                        = false;
+  const bool       isEllipsisEnabled = textModel->mElideEnabled;
+  const bool       useFinalElision   = finalElision && finalElision->resolved && finalElision->textElided;
+  const GlyphIndex endIndexOfGlyphs  = textModel->GetEndIndexOfElidedGlyphs();
+  bool             hasBlock          = false;
 
   for(GlyphIndex index = glyphStart; index <= glyphEnd; ++index)
   {
@@ -193,40 +189,10 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
     }
     else if(isEllipsisEnabled)
     {
-      if(ellipsisPosition == EllipsisPosition::MIDDLE)
+      if(index > endIndexOfGlyphs)
       {
-        if(index >= firstMiddleIndexOfElidedGlyphs && index < secondMiddleIndexOfElidedGlyphs)
-        {
-          if((index - 1 == firstMiddleIndexOfElidedGlyphs) && (firstMiddleIndexOfElidedGlyphs != 0))
-          {
-            sizesList.PushBack(blockSize);
-            positionsList.PushBack(blockPos);
-          }
-
-          if(GetNextLine(index, lineIndex, lineRun, lastGlyphOfLine, numberOfLines, isLastLine))
-          {
-            UpdateLineInfo(lineRun, currentLineOffset, currentLineHeight, lastGlyphOfLine, isLastLine);
-          }
-          // Ignore any glyph that was removed
-          continue;
-        }
-      }
-      else
-      {
-        if((ellipsisPosition == EllipsisPosition::END) && (index > endIndexOfGlyphs))
-        {
-          // skip remaining elided glyphs
-          break;
-        }
-        else if((ellipsisPosition == EllipsisPosition::START) && (index <= startIndexOfGlyphs))
-        {
-          if(GetNextLine(index, lineIndex, lineRun, lastGlyphOfLine, numberOfLines, isLastLine))
-          {
-            UpdateLineInfo(lineRun, currentLineOffset, currentLineHeight, lastGlyphOfLine, isLastLine);
-          }
-
-          continue;
-        }
+        // skip remaining elided glyphs
+        break;
       }
     }
 
@@ -285,10 +251,7 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
       }
     }
 
-    if(!hasBlock || (index == glyphStart) ||
-       (isEllipsisEnabled &&
-        (((ellipsisPosition == EllipsisPosition::MIDDLE) && (index == secondMiddleIndexOfElidedGlyphs)) ||
-         ((ellipsisPosition == EllipsisPosition::START) && (index - 1 == startIndexOfGlyphs)))))
+    if(!hasBlock || (index == glyphStart))
     {
       blockPos  = currentPosition;
       blockSize = currentSize;

@@ -91,15 +91,6 @@ const char* GetHorizontalAlignmentString(const Alignment& alignment);
 const char* GetVerticalAlignmentString(const Alignment& alignment);
 
 /**
- * @brief Get the ellipsis-location-type from the provided property value.
- * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
- * @param[out] ellipsisPositionType The resulting ellipsisPositionType from the given source
- * @return true if the resulting ellipsisPositionType has been updated
- */
-bool GetEllipsisPositionTypeEnumeration(const Property::Value&  propertyValue,
-                                        EllipsisPosition::Type& ellipsisPositionType);
-
-/**
  * @brief Get the line height mode from the provided property value.
  * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
  * @param[out] lineHeightMode The resulting LineHeightMode from the given source

@@ -1195,7 +1195,6 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
   imageAnchorParameters.requestType                 = Dali::Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
   imageAnchorParameters.horizontalAlignment         = Dali::Ui::Text::Alignment::CENTER;
   imageAnchorParameters.lineWrapMode                = Dali::Ui::Text::LineWrapMode::CHARACTER;
-  imageAnchorParameters.ellipsisPosition             = Dali::Ui::Text::EllipsisPosition::END;
   imageAnchorParameters.hasStyledTextStyleSnapshot   = true;
   imageAnchorParameters.styledTextStyleSnapshot      =
     StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(imageAnchorStyledText,

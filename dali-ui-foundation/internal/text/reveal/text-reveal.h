@@ -270,9 +270,8 @@ Plan ProjectToFinalGlyphs(const Plan&       sourcePlan,
  *
  * Each final LineRun containing at least one revealable glyph becomes one
  * unit in line order. Empty or whitespace-only lines do not consume a unit.
- * Both halves of split bidi lines are mapped to the same unit. The operation
- * commits atomically; invalid or incomplete line mappings leave the input
- * plan unchanged.
+ * The operation commits atomically; invalid or incomplete line mappings leave
+ * the input plan unchanged.
  *
  * @param[in,out] plan The projected final-glyph plan to collapse.
  * @param[in] lines The authoritative final visual lines.

@@ -65,16 +65,9 @@ void SetBidirectionalInfo(TextAbstraction::BidirectionalSupport& bidirectionalSu
  * @param[in] bidiLineIndex Index to the line's bidirectional info.
  * @param[in] startIndex The character from where the bidirectional info is set.
  * @param[in] numberOfCharacters The number of characters.
- * @param[in] startIndexInSecondHalfLine The character from where the bidirectional info is set for the second half of
- * line..
- * @param[in] numberOfCharactersInSecondHalfLine The number of characters for the second half of line..
  * @param[in] direction The direction of the line.
  */
-void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport,
-                 const BidirectionalParagraphInfoRun&   bidirectionalParagraphInfo,
-                 Vector<BidirectionalLineInfoRun>& lineInfoRuns, BidirectionalLineRunIndex bidiLineIndex,
-                 CharacterIndex startIndex, Length numberOfCharacters, CharacterIndex startIndexInSecondHalfLine,
-                 Length numberOfCharactersInSecondHalfLine, CharacterDirection direction);
+void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport, const BidirectionalParagraphInfoRun& bidirectionalParagraphInfo, Vector<BidirectionalLineInfoRun>& lineInfoRuns, BidirectionalLineRunIndex bidiLineIndex, CharacterIndex startIndex, Length numberOfCharacters, CharacterDirection direction);
 
 /**
  * @brief Replaces any character in the right to left paragraphs which could be mirrored.

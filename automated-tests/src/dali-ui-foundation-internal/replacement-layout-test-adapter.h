@@ -50,7 +50,6 @@ struct ReplacementLayoutTestOptions
   Size                             contentSize{320.0f, 80.0f};
   Layout::Engine::Type             layoutType{Layout::Engine::SINGLE_LINE_BOX};
   LineWrapMode                     lineWrapMode{LineWrapMode::WORD};
-  EllipsisPosition::Type           ellipsisPosition{EllipsisPosition::END};
   TextAbstraction::PointSize26Dot6 fontPointSize{TextAbstraction::FontClient::DEFAULT_POINT_SIZE};
   float                            fontPixelSize{10.0f};
   float                            characterSpacing{0.0f};

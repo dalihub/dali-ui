@@ -163,11 +163,7 @@ void SetBidirectionalInfo(TextAbstraction::BidirectionalSupport& bidirectionalSu
   }
 }
 
-void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport,
-                 const BidirectionalParagraphInfoRun&   bidirectionalParagraphInfo,
-                 Vector<BidirectionalLineInfoRun>& lineInfoRuns, BidirectionalLineRunIndex bidiLineIndex,
-                 CharacterIndex startIndex, Length numberOfCharacters, CharacterIndex startIndexInSecondHalfLine,
-                 Length numberOfCharactersInSecondHalfLine, CharacterDirection direction)
+void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport, const BidirectionalParagraphInfoRun& bidirectionalParagraphInfo, Vector<BidirectionalLineInfoRun>& lineInfoRuns, BidirectionalLineRunIndex bidiLineIndex, CharacterIndex startIndex, Length numberOfCharacters, CharacterDirection direction)
 {
   // Creates a bidirectional info for the line run.
   BidirectionalLineInfoRun lineInfoRun;
@@ -176,19 +172,11 @@ void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport,
   lineInfoRun.direction                       = direction;
   lineInfoRun.isIdentity                      = true;
 
-  lineInfoRun.characterRunForSecondHalfLine.characterIndex     = startIndexInSecondHalfLine;
-  lineInfoRun.characterRunForSecondHalfLine.numberOfCharacters = numberOfCharactersInSecondHalfLine;
-
   // Allocate space for the conversion maps.
   // The memory is freed after the visual to logical to visual conversion tables are built in the logical model.
   lineInfoRun.visualToLogicalMap =
     numberOfCharacters ? reinterpret_cast<CharacterIndex*>(malloc(numberOfCharacters * sizeof(CharacterIndex)))
                        : nullptr;
-
-  lineInfoRun.visualToLogicalMapSecondHalf =
-    numberOfCharactersInSecondHalfLine
-      ? reinterpret_cast<CharacterIndex*>(malloc(numberOfCharactersInSecondHalfLine * sizeof(CharacterIndex)))
-      : nullptr;
 
   if(nullptr != lineInfoRun.visualToLogicalMap)
   {
@@ -203,25 +191,6 @@ void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport,
     for(unsigned int i = 0; i < numberOfCharacters; ++i)
     {
       if(i != *(lineInfoRun.visualToLogicalMap + i))
-      {
-        lineInfoRun.isIdentity = false;
-        break;
-      }
-    }
-  }
-
-  if(nullptr != lineInfoRun.visualToLogicalMapSecondHalf)
-  {
-    // Reorders the second half of the line.
-    bidirectionalSupport.Reorder(bidirectionalParagraphInfo.bidirectionalInfoIndex,
-                                 lineInfoRun.characterRunForSecondHalfLine.characterIndex -
-                                   bidirectionalParagraphInfo.characterRun.characterIndex,
-                                 lineInfoRun.characterRunForSecondHalfLine.numberOfCharacters,
-                                 lineInfoRun.visualToLogicalMapSecondHalf);
-
-    for(unsigned int i = 0; i < numberOfCharactersInSecondHalfLine; ++i)
-    {
-      if(i != *(lineInfoRun.visualToLogicalMapSecondHalf + i))
       {
         lineInfoRun.isIdentity = false;
         break;

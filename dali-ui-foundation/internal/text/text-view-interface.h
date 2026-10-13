@@ -333,13 +333,6 @@ public:
   virtual bool IsOutlineEnabled() const = 0;
 
   /**
-   * @brief Retrieves ellipsis position for text.
-   *
-   * @return The ellipsis position.
-   */
-  virtual Text::EllipsisPosition::Type GetEllipsisPosition() const = 0;
-
-  /**
    * @brief Whether the text elide property is enabled.
    *
    * @return @e true if the text elide property is enabled, @e false otherwise.
@@ -347,32 +340,11 @@ public:
   virtual bool IsTextElideEnabled() const = 0;
 
   /**
-   * @brief Retrieves the start index of laid-out glyphs.
-   *
-   * @return The start index of laid-out glyphs.
-   */
-  virtual GlyphIndex GetStartIndexOfElidedGlyphs() const = 0;
-
-  /**
    * @brief Retrieves the end index of laid-out glyphs.
    *
    * @return The end index of laid-out glyphs.
    */
   virtual GlyphIndex GetEndIndexOfElidedGlyphs() const = 0;
-
-  /**
-   * @brief Retrieves the first middle index of elided glyphs, index before ellipsis of middle.
-   *
-   * @return The first middle index of elided glyphs, index before ellipsis of middle.
-   */
-  virtual GlyphIndex GetFirstMiddleIndexOfElidedGlyphs() const = 0;
-
-  /**
-   * @brief Retrieves the second middle index of elided glyphs, index of ellipsis of middle.
-   *
-   * @return The second middle index of elided glyphs, index of ellipsis of middle.
-   */
-  virtual GlyphIndex GetSecondMiddleIndexOfElidedGlyphs() const = 0;
 
   /**
    * @brief Retrieves the strikethrough color.

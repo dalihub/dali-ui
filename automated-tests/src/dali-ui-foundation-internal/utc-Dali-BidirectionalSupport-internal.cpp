@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/bidirectional-support.h>
 #include <dali-ui-foundation/internal/text/bidirectional-line-info-run.h>
 #include <dali-ui-foundation/internal/text/bidirectional-paragraph-info-run.h>
+#include <dali-ui-foundation/internal/text/bidirectional-support.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 #include <dali-ui-test-suite-utils.h>
 #include <cstdlib>
@@ -35,7 +35,7 @@ void utc_dali_bidirectional_support_internal_cleanup(void)
   test_return_value = TET_PASS;
 }
 
-int UtcDaliBidirectionalMixedParagraphAndSplitLineP(void)
+int UtcDaliBidirectionalMixedParagraphAndLineRangesP(void)
 {
   UiTestApplication application;
   TextAbstraction::BidirectionalSupport bidi = TextAbstraction::BidirectionalSupport::Get();
@@ -76,15 +76,21 @@ int UtcDaliBidirectionalMixedParagraphAndSplitLineP(void)
   DALI_TEST_EQUALS(paragraphs[0u].direction, true, TEST_LOCATION);
   DALI_TEST_EQUALS(directions.Count(), text.Count(), TEST_LOCATION);
 
-  ReorderLine(bidi, paragraphs[0u], lines, 0u, 0u, 8u, 0u, 0u, paragraphs[0u].direction);
+  ReorderLine(bidi, paragraphs[0u], lines, 0u, 0u, 8u, paragraphs[0u].direction);
   DALI_TEST_EQUALS(lines.Count(), 1u, TEST_LOCATION);
   DALI_TEST_CHECK(lines[0u].visualToLogicalMap != nullptr);
   DALI_TEST_CHECK(!lines[0u].isIdentity);
 
-  ReorderLine(bidi, paragraphs[0u], lines, 1u, 0u, 4u, 4u, 4u, paragraphs[0u].direction);
+  ReorderLine(bidi, paragraphs[0u], lines, 1u, 4u, 4u, paragraphs[0u].direction);
   DALI_TEST_EQUALS(lines.Count(), 2u, TEST_LOCATION);
   DALI_TEST_CHECK(lines[1u].visualToLogicalMap != nullptr);
-  DALI_TEST_CHECK(lines[1u].visualToLogicalMapSecondHalf != nullptr);
+
+  // The UTC adaptor's Reorder is a no-op. Check the UI-owned line ranges here;
+  // real-font regression probes validate the resulting bidi maps and pixels.
+  DALI_TEST_EQUALS(lines[0u].characterRun.characterIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(lines[0u].characterRun.numberOfCharacters, 8u, TEST_LOCATION);
+  DALI_TEST_EQUALS(lines[1u].characterRun.characterIndex, 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(lines[1u].characterRun.numberOfCharacters, 4u, TEST_LOCATION);
 
   Vector<Character> mirrored;
   DALI_TEST_CHECK(GetMirroredText(bidi, text, directions, paragraphs, 0u, characterCount, mirrored));
@@ -93,7 +99,6 @@ int UtcDaliBidirectionalMixedParagraphAndSplitLineP(void)
   for(auto& line : lines)
   {
     free(line.visualToLogicalMap);
-    free(line.visualToLogicalMapSecondHalf);
   }
   bidi.DestroyInfo(paragraphs[0u].bidirectionalInfoIndex);
 

@@ -67,8 +67,8 @@ public:
   /**
    * @brief Binds the final result owned by the active render model.
    *
-   * A null pointer preserves the START/MIDDLE fallback and standalone
-   * callers that do not publish an authoritative final result.
+   * A null pointer uses uncached resolution for standalone callers that do not
+   * publish an authoritative final result. The owner must outlive this binding.
    *
    * @param[in] result The resolved final sequence, or nullptr to disable it.
    */
@@ -254,34 +254,14 @@ public:
   bool IsOutlineEnabled() const override;
 
   /**
-   * @copydoc Dali::Ui::Text::ViewInterface::GetEllipsisPosition()
-   */
-  Text::EllipsisPosition::Type GetEllipsisPosition() const override;
-
-  /**
    * @copydoc Dali::Ui::Text::ViewInterface::IsTextElideEnabled()
    */
   bool IsTextElideEnabled() const override;
 
   /**
-   * @copydoc Dali::Ui::Text::ViewInterface::GetStartIndexOfElidedGlyphs()
-   */
-  GlyphIndex GetStartIndexOfElidedGlyphs() const override;
-
-  /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetEndIndexOfElidedGlyphs()
    */
   GlyphIndex GetEndIndexOfElidedGlyphs() const override;
-
-  /**
-   * @copydoc Dali::Ui::Text::ViewInterface::GetFirstMiddleIndexOfElidedGlyphs()
-   */
-  GlyphIndex GetFirstMiddleIndexOfElidedGlyphs() const override;
-
-  /**
-   * @copydoc Dali::Ui::Text::ViewInterface::GetSecondMiddleIndexOfElidedGlyphs()
-   */
-  GlyphIndex GetSecondMiddleIndexOfElidedGlyphs() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetStrikethroughColor()

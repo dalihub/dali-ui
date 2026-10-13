@@ -250,12 +250,10 @@ int UtcDaliTextGeometryEllipsisAndBidiMatrixP(void)
   UiTestApplication application(UiConfig::New());
   for(const char* content : {"office affinity fish", "abc אבגדה def مرحبا xyz", "one two three four five six"})
   {
-    for(auto position : {Text::EllipsisPosition::START, Text::EllipsisPosition::MIDDLE, Text::EllipsisPosition::END})
     {
       Text::ControllerPtr controller = CreateController(content, Size(72.0f, 32.0f));
       controller->SetTextElideEnabled(true);
       controller->SetMaximumNumberOfLines(1);
-      controller->SetEllipsisPosition(position);
       controller->Relayout(Size(72.0f, 32.0f));
       Text::Controller::Impl& impl = Text::Controller::Impl::GetImplementation(*controller.Get());
       Text::ModelPtr model = impl.mModel;

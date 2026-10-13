@@ -425,9 +425,6 @@ void AsyncTextLoader::ClearTextModelData()
 
     free(bidiLineInfo.visualToLogicalMap);
     bidiLineInfo.visualToLogicalMap = NULL;
-
-    free(bidiLineInfo.visualToLogicalMapSecondHalf);
-    bidiLineInfo.visualToLogicalMapSecondHalf = NULL;
   }
   mTextModel->mLogicalModel->mBidirectionalLineInfo.Clear();
 
@@ -979,7 +976,7 @@ void AsyncTextLoader::UpdateReplacementProcessing(AsyncTextParameters& parameter
   // separately available for UI-thread stale-result rejection.
   const uint64_t finalGeneration             = ++mReplacementData->finalElisionGeneration;
   bool           useAuthoritativeEndEllipsis = false;
-  if(mTextModel->mElideEnabled && mTextModel->mEllipsisPosition == EllipsisPosition::END)
+  if(mTextModel->mElideEnabled)
   {
     for(const LineRun& line : mTextModel->mVisualModel->mLines)
     {
@@ -1211,19 +1208,9 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
     TextAbstraction::IsNewParagraph(*(textBuffer + (mTextModel->mLogicalModel->mText.Count() - 1u)));
 
   // Update the ellipsis
-  // START/MIDDLE are not released for replacement content. Keep the
-  // replacement projection active and fall back to CLIP so the underlying
-  // authored range is never exposed as ordinary text.
-  const bool useReplacementClipFallback =
-    hasActiveReplacement &&
-    parameters.ellipsis && parameters.ellipsisPosition != EllipsisPosition::END;
-  bool ellipsisEnabled      = parameters.ellipsis && !useReplacementClipFallback;
+  bool ellipsisEnabled      = parameters.ellipsis;
   mTextModel->mElideEnabled = ellipsisEnabled;
   mTextModel->mVisualModel->SetTextElideEnabled(ellipsisEnabled);
-
-  auto ellipsisPosition         = parameters.ellipsisPosition;
-  mTextModel->mEllipsisPosition = ellipsisPosition;
-  mTextModel->mVisualModel->SetEllipsisPosition(ellipsisPosition);
 
   // Update the visual model.
   Size       newLayoutSize; // The size of the text after it has been laid-out.
@@ -1233,8 +1220,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
   const auto layoutText                  = [&](ReplacementLayoutData* replacementLayoutData)
   {
     layoutParameters.replacementLayoutData = replacementLayoutData;
-    updated                                = mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, ellipsisEnabled, isMarqueeEnabled,
-                                                                      isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
+    updated                                = mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, ellipsisEnabled, isMarqueeEnabled, isMarqueeMaxTextureExceeded, isHiddenInputEnabled);
   };
 
   FontId replacementDefaultFontId = 0u;
@@ -1289,7 +1275,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
   }
   const bool hasNoVisibleEndLine = !updated && mTextModel->mVisualModel->mLines.Empty() &&
                                    !mTextModel->mLogicalModel->mText.Empty();
-  if(!hasActiveReplacement && ellipsisEnabled && ellipsisPosition == EllipsisPosition::END &&
+  if(!hasActiveReplacement && ellipsisEnabled &&
      (hasEndEllipsisCandidate || hasNoVisibleEndLine))
   {
     mEndEllipsisResult  = std::make_unique<FinalElisionResult>();

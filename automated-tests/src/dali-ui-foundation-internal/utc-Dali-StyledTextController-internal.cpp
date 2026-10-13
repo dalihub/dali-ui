@@ -1043,7 +1043,6 @@ int UtcDaliStyledTextControllerMaximumLinesTextFitP(void)
       controller->SetMaximumNumberOfLines(maximumNumberOfLines);
     }
     controller->SetTextElideEnabled(true);
-    controller->SetEllipsisPosition(PublicText::EllipsisPosition::END);
     controller->SetTextFitEnabled(true);
     controller->SetTextFitMinSize(MIN_POINT_SIZE, PublicText::Controller::POINT_SIZE);
     controller->SetTextFitMaxSize(MAX_POINT_SIZE, PublicText::Controller::POINT_SIZE);
@@ -1186,7 +1185,6 @@ int UtcDaliStyledTextControllerMaximumLinesTextFitP(void)
     controller->SetMultiLineEnabled(true);
     controller->SetLineWrapMode(PublicText::LineWrapMode::CHARACTER);
     controller->SetTextElideEnabled(true);
-    controller->SetEllipsisPosition(PublicText::EllipsisPosition::END);
     controller->SetMaximumNumberOfLines(maximumNumberOfLines);
     if(useCandidates)
     {

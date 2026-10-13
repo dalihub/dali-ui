@@ -64,10 +64,7 @@ struct FinalElisionResult
     layoutSize              = Size::ZERO;
     minimumLineOffset       = 0.0f;
     elidedOffset            = 0.0f;
-    startIndex              = 0u;
     endIndex                = 0u;
-    firstMiddleIndex        = 0u;
-    secondMiddleIndex       = 0u;
     ellipsisFinalGlyphIndex = INVALID_GLYPH_INDEX;
     ellipsisLineIndex       = INVALID_LINE_INDEX;
     ellipsisUnitCount       = 0u;
@@ -153,10 +150,7 @@ struct FinalElisionResult
   Size                   layoutSize{Size::ZERO};    ///< Layout size derived only from final-domain lines.
   float                  minimumLineOffset{0.0f};
   float                  elidedOffset{0.0f};
-  GlyphIndex             startIndex{0u};
   GlyphIndex             endIndex{0u};
-  GlyphIndex             firstMiddleIndex{0u};
-  GlyphIndex             secondMiddleIndex{0u};
   GlyphIndex             ellipsisFinalGlyphIndex{INVALID_GLYPH_INDEX};
   LineIndex              ellipsisLineIndex{INVALID_LINE_INDEX};
   Length                 ellipsisUnitCount{0u};

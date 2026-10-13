@@ -166,6 +166,13 @@ bool IsEffectiveElideEnabled(const Controller::Impl& impl)
   return enabled;
 }
 
+/**
+ * @brief Rebuilds the projected render model and its authoritative END result.
+ * @param[in,out] impl Controller owning the projection, View binding and final result.
+ * @param[in] contentSize Available content size.
+ * @param[in] maximumNumberOfLines Maximum laid-out lines, or zero for unlimited.
+ * @param[in,out] maximumNumberOfLinesExceeded Accumulates whether the line cap was exceeded.
+ */
 void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSize, Length maximumNumberOfLines,
                                   bool& maximumNumberOfLinesExceeded)
 {
@@ -185,12 +192,6 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   }
 
   const ReplacementSourceSnapshot& source = impl.GetReplacementSourceSnapshot();
-
-  // START/MIDDLE are not released for replacement content. Preserve the
-  // projected atomic boxes and use CLIP instead of exposing their underlying
-  // source text through a non-replacement ellipsis pass.
-  const bool useReplacementClipFallback =
-    IsEffectiveElideEnabled(impl) && impl.mModel->mEllipsisPosition != EllipsisPosition::END;
 
   ReplacementRenderState&               result               = impl.GetOrCreateReplacementRenderState();
   TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
@@ -256,9 +257,8 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   VisualModel& projectedVisual = *result.processingModel->mVisualModel;
   const Length glyphCount      = static_cast<Dali::Ui::Text::Length>(projectedVisual.mGlyphs.Count());
   projectedVisual.mGlyphPositions.Resize(glyphCount);
-  result.processingModel->mElideEnabled = IsEffectiveElideEnabled(impl) && !useReplacementClipFallback;
+  result.processingModel->mElideEnabled = IsEffectiveElideEnabled(impl);
   projectedVisual.SetTextElideEnabled(result.processingModel->mElideEnabled);
-  projectedVisual.SetEllipsisPosition(result.processingModel->mEllipsisPosition);
 
   ReplacementLayoutData replacementLayoutData;
   replacementLayoutData.runs                = &result.projection.GetReplacementRuns();
@@ -282,13 +282,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   const float fontPixelSize = ConvertPointToPixel(pointSize);
   impl.mLayoutEngine.SetFontPixelSize(fontPixelSize);
   bool marqueeEnabled = impl.mIsMarqueeEnabled;
-  impl.mLayoutEngine.LayoutText(layoutParameters,
-                                result.layoutSize,
-                                result.processingModel->mElideEnabled,
-                                marqueeEnabled,
-                                impl.mIsMarqueeMaxTextureExceeded,
-                                false,
-                                result.processingModel->mEllipsisPosition);
+  impl.mLayoutEngine.LayoutText(layoutParameters, result.layoutSize, result.processingModel->mElideEnabled, marqueeEnabled, impl.mIsMarqueeMaxTextureExceeded, false);
   maximumNumberOfLinesExceeded |= layoutParameters.maximumNumberOfLinesExceeded;
   impl.mIsMarqueeEnabled = marqueeEnabled;
   projectedVisual.SetLayoutSize(result.layoutSize);
@@ -312,8 +306,7 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
   impl.mView.SetVisualModel(result.processingModel->mVisualModel);
   impl.mView.SetLogicalModel(result.processingModel->mLogicalModel);
   bool useAuthoritativeEndEllipsis = false;
-  if(result.processingModel->mElideEnabled &&
-     result.processingModel->mEllipsisPosition == EllipsisPosition::END)
+  if(result.processingModel->mElideEnabled)
   {
     for(const LineRun& line : projectedVisual.mLines)
     {
@@ -1298,7 +1291,6 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
 
     // Update the ellipsis
     bool elideTextEnabled = impl.mModel->mElideEnabled;
-    auto ellipsisPosition = impl.mModel->mEllipsisPosition;
 
     if(NULL != impl.mEventData)
     {
@@ -1328,8 +1320,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     {
       impl.ClearEndEllipsisResult();
     }
-    viewUpdated = impl.mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, elideTextEnabled, isMarqueeEnabled,
-                                                isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
+    viewUpdated = impl.mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, elideTextEnabled, isMarqueeEnabled, isMarqueeMaxTextureExceeded, isHiddenInputEnabled);
     maximumNumberOfLinesExceeded |= layoutParameters.maximumNumberOfLinesExceeded;
 
     const auto hasEndEllipsisCandidate = [visualModel]()
@@ -1346,7 +1337,6 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     const bool hasNoVisibleEndLine = !viewUpdated && visualModel->mLines.Empty() &&
                                      !impl.mModel->mLogicalModel->mText.Empty();
     if(!impl.HasValidReplacementSource() && elideTextEnabled &&
-       ellipsisPosition == EllipsisPosition::END &&
        (hasEndEllipsisCandidate() || hasNoVisibleEndLine))
     {
       visualModel->SetLayoutSize(newLayoutSize);

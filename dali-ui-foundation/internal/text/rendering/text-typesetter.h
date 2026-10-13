@@ -218,7 +218,6 @@ public:
    *
    * @param[in] size The renderer size.
    * @param[in] textDirection The direction of the text.
-   * @param[in] cutoutBuffer The buffer to use pixel information to cutout.
    * @param[in] behaviour The behaviour of how to render the text (i.e. whether to render the text only or the styles
    * only or both).
    * @param[in] ignoreHorizontalAlignment Whether to ignore the horizontal alignment (i.e. always render as if
@@ -243,7 +242,6 @@ public:
    *
    * @param[in] size The renderer size.
    * @param[in] textDirection The direction of the text.
-   * @param[in] cutoutBuffer The buffer to use pixel information to cutout.
    * @param[in] behaviour The behaviour of how to render the text (i.e. whether to render the text only or the styles
    * only or both).
    * @param[in] ignoreHorizontalAlignment Whether to ignore the horizontal alignment (i.e. always render as if

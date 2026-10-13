@@ -1041,14 +1041,10 @@ struct InputParameterForEachLine
   const GlyphIndex toGlyphIndex;
 
   // Elide text info
-  const GlyphIndex startIndexOfGlyphs;
   const GlyphIndex endIndexOfGlyphs;
-  const GlyphIndex firstMiddleIndexOfElidedGlyphs;
-  const GlyphIndex secondMiddleIndexOfElidedGlyphs;
   const float      elidedOffset;
 
-  const Alignment                    verticalLineAlignType;
-  const Text::EllipsisPosition::Type ellipsisPosition;
+  const Alignment verticalLineAlignType;
 
   const GlyphInfo* __restrict__ hyphens;
   const Length* __restrict__ hyphenIndices;
@@ -1146,6 +1142,17 @@ std::vector<Internal::Gradient::Stop> PrepareGradientStops(const Internal::Gradi
   return stops;
 }
 
+/**
+ * @brief Resolves gradient paints using final glyph bounds and source style mappings.
+ * @param[in] viewModel Rendered glyph sequence and optional final-to-style-source map.
+ * @param[in] data Authored gradient paints and source glyph assignments.
+ * @param[in] bufferWidth Raster buffer width in pixels.
+ * @param[in] bufferHeight Raster buffer height in pixels.
+ * @param[in] ignoreHorizontalAlignment Whether to ignore line alignment.
+ * @param[in] horizontalOffset Raster origin x offset.
+ * @param[in] verticalOffset Raster origin y offset.
+ * @return Resolved paint entries in the same order as data.paints.
+ */
 std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&                             viewModel,
                                                              const Internal::GradientSpanModelData& data,
                                                              uint32_t                               bufferWidth,
@@ -1196,28 +1203,13 @@ std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&         
     }
     accumulatedVertical += line.ascender + GetPreOffsetVerticalLineAlignment(line, viewModel.GetVerticalLineAlignment());
 
-    if(horizontalOffsetValid && (line.glyphRun.numberOfGlyphs > 0u || line.glyphRunSecondHalf.numberOfGlyphs > 0u))
+    if(horizontalOffsetValid && (line.glyphRun.numberOfGlyphs > 0u))
     {
       const GlyphIndex firstGlyph       = line.glyphRun.glyphIndex;
-      const GlyphIndex lastGlyphPlusOne = line.isSplitToTwoHalves
-                                            ? line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs
-                                            : line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs;
+      const GlyphIndex lastGlyphPlusOne = line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs;
       for(GlyphIndex glyphIndex = firstGlyph; glyphIndex < lastGlyphPlusOne; ++glyphIndex)
       {
-        GlyphIndex finalGlyphIndex = glyphIndex - viewModel.GetStartIndexOfElidedGlyphs();
-        if(viewModel.GetEllipsisPosition() == Text::EllipsisPosition::MIDDLE)
-        {
-          if(glyphIndex > viewModel.GetFirstMiddleIndexOfElidedGlyphs() &&
-             glyphIndex < viewModel.GetSecondMiddleIndexOfElidedGlyphs())
-          {
-            continue;
-          }
-          if(glyphIndex >= viewModel.GetSecondMiddleIndexOfElidedGlyphs())
-          {
-            finalGlyphIndex -= viewModel.GetSecondMiddleIndexOfElidedGlyphs() -
-                               viewModel.GetFirstMiddleIndexOfElidedGlyphs() - 1u;
-          }
-        }
+        GlyphIndex finalGlyphIndex = glyphIndex;
 
         const GlyphIndex styleGlyph = finalStyleSource
                                         ? ResolveFinalStyleSourceGlyph(finalStyleSource, finalGlyphIndex)
@@ -1594,6 +1586,16 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
   }
 }
 
+/**
+ * @brief Rasterizes a final-domain line, including its styles and optional reveal data.
+ * @param[in] fontClient Font client providing glyph bitmaps.
+ * @param[in,out] glyphData Raster buffers and current line/glyph state.
+ * @param[in,out] hyphenIndex Next entry in the hyphen sequence.
+ * @param[in] line Line whose glyph run indexes the rendered sequence.
+ * @param[in] isFirstLine Whether this is the first rendered line.
+ * @param[in] inputParamsForLine Shared line buffers, range limits and elision state.
+ * @param[in] inputParamsForGlyph Style, gradient and reveal rasterization inputs.
+ */
 template<bool RECORD_REVEAL, bool APPLY_GRADIENT_SPAN, bool PIXEL_REVEAL = false>
 void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphData& glyphData, Length& hyphenIndex,
                                   const LineRun& line, const bool isFirstLine,
@@ -1665,37 +1667,16 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
   bool  addHyphen       = false;
 
   // Traverses the glyphs of the line.
-  const GlyphIndex startGlyphIndex = std::max(std::max(line.glyphRun.glyphIndex, inputParamsForLine.startIndexOfGlyphs),
-                                              inputParamsForLine.fromGlyphIndex);
+  const GlyphIndex startGlyphIndex = std::max(line.glyphRun.glyphIndex, inputParamsForLine.fromGlyphIndex);
   GlyphIndex       endGlyphIndex =
-    (line.isSplitToTwoHalves ? line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs
-                             : line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs) -
+    (line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs) -
     1u;
   endGlyphIndex =
     std::min(std::min(endGlyphIndex, inputParamsForLine.endIndexOfGlyphs), inputParamsForLine.toGlyphIndex);
 
   for(GlyphIndex glyphIndex = startGlyphIndex; glyphIndex <= endGlyphIndex; ++glyphIndex)
   {
-    // To handle START case of ellipsis, the first glyph has been shifted
-    // glyphIndex represent indices in whole glyphs but elidedGlyphIndex represents indices in elided Glyphs
-    GlyphIndex elidedGlyphIndex = glyphIndex - inputParamsForLine.startIndexOfGlyphs;
-
-    // To handle MIDDLE case of ellipsis, the first glyph in the second half of line has been shifted and skip the
-    // removed glyph from middle.
-    if(inputParamsForLine.ellipsisPosition == Text::EllipsisPosition::MIDDLE)
-    {
-      if(glyphIndex > inputParamsForLine.firstMiddleIndexOfElidedGlyphs &&
-         glyphIndex < inputParamsForLine.secondMiddleIndexOfElidedGlyphs)
-      {
-        // Ignore any glyph that removed for MIDDLE ellipsis
-        continue;
-      }
-      if(glyphIndex >= inputParamsForLine.secondMiddleIndexOfElidedGlyphs)
-      {
-        elidedGlyphIndex -= (inputParamsForLine.secondMiddleIndexOfElidedGlyphs -
-                             inputParamsForLine.firstMiddleIndexOfElidedGlyphs - 1u);
-      }
-    }
+    GlyphIndex elidedGlyphIndex = glyphIndex;
 
     // Retrieve the glyph's info.
     const GlyphInfo* glyphInfo;
@@ -1789,6 +1770,17 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
   }
 }
 
+/**
+ * @brief Rasterizes gradient coverage for a final-domain line.
+ * @param[in] fontClient Font client providing glyph bitmaps.
+ * @param[in,out] glyphData Raster buffers and current line/glyph state.
+ * @param[in,out] hyphenIndex Next entry in the hyphen sequence.
+ * @param[in] line Line whose glyph run indexes the rendered sequence.
+ * @param[in] inputParamsForLine Shared line buffers, range limits and elision state.
+ * @param[in] inputParamsForGlyph Glyph rasterization properties.
+ * @param[in] gradientColorIndexBuffer Color indices used to select gradient coverage.
+ * @param[in] renderGradientTargets True for gradient-fill targets; false for preserved glyphs.
+ */
 template<bool APPLY_GRADIENT_SPAN>
 void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient       fontClient,
                                                   GlyphData&                        glyphData,
@@ -1828,32 +1820,16 @@ void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient   
   FontId lastFontId               = 0;
   bool   addHyphen                = false;
 
-  const GlyphIndex startGlyphIndex = std::max(std::max(line.glyphRun.glyphIndex, inputParamsForLine.startIndexOfGlyphs),
-                                              inputParamsForLine.fromGlyphIndex);
+  const GlyphIndex startGlyphIndex = std::max(line.glyphRun.glyphIndex, inputParamsForLine.fromGlyphIndex);
   GlyphIndex       endGlyphIndex =
-    (line.isSplitToTwoHalves ? line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs
-                             : line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs) -
+    (line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs) -
     1u;
   endGlyphIndex =
     std::min(std::min(endGlyphIndex, inputParamsForLine.endIndexOfGlyphs), inputParamsForLine.toGlyphIndex);
 
   for(GlyphIndex glyphIndex = startGlyphIndex; glyphIndex <= endGlyphIndex; ++glyphIndex)
   {
-    GlyphIndex elidedGlyphIndex = glyphIndex - inputParamsForLine.startIndexOfGlyphs;
-
-    if(inputParamsForLine.ellipsisPosition == Text::EllipsisPosition::MIDDLE)
-    {
-      if(glyphIndex > inputParamsForLine.firstMiddleIndexOfElidedGlyphs &&
-         glyphIndex < inputParamsForLine.secondMiddleIndexOfElidedGlyphs)
-      {
-        continue;
-      }
-      if(glyphIndex >= inputParamsForLine.secondMiddleIndexOfElidedGlyphs)
-      {
-        elidedGlyphIndex -= (inputParamsForLine.secondMiddleIndexOfElidedGlyphs -
-                             inputParamsForLine.firstMiddleIndexOfElidedGlyphs - 1u);
-      }
-    }
+    GlyphIndex elidedGlyphIndex = glyphIndex;
 
     const GlyphInfo* glyphInfo = nullptr;
     if(addHyphen && inputParamsForLine.hyphens)
@@ -2383,14 +2359,10 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
                                                      fromGlyphIndex,
                                                      toGlyphIndex,
 
-                                                     // Elided text info. Indices according to elided text and Ellipsis position.
-                                                     viewModel.GetStartIndexOfElidedGlyphs(),
+                                                     // Elided text info. Indices according to elided text.
                                                      viewModel.GetEndIndexOfElidedGlyphs(),
-                                                     viewModel.GetFirstMiddleIndexOfElidedGlyphs(),
-                                                     viewModel.GetSecondMiddleIndexOfElidedGlyphs(),
                                                      viewModel.GetElidedOffset(),
                                                      viewModel.GetVerticalLineAlignment(),
-                                                     viewModel.GetEllipsisPosition(),
 
                                                      hyphens,
                                                      hyphenIndices,
@@ -2415,7 +2387,6 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
                                                                   viewModel.GetStrikethroughHeight(),
                                                                   true,
                                                                   true};
-
 
   // Aggregate input parameter for each glyph from mModel
   const InputParameterForEachGlyph inputParamsForGlyph{style,
@@ -2586,13 +2557,9 @@ PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uint32_t  
                                                      fromGlyphIndex,
                                                      toGlyphIndex,
 
-                                                     viewModel.GetStartIndexOfElidedGlyphs(),
                                                      viewModel.GetEndIndexOfElidedGlyphs(),
-                                                     viewModel.GetFirstMiddleIndexOfElidedGlyphs(),
-                                                     viewModel.GetSecondMiddleIndexOfElidedGlyphs(),
                                                      viewModel.GetElidedOffset(),
                                                      viewModel.GetVerticalLineAlignment(),
-                                                     viewModel.GetEllipsisPosition(),
 
                                                      hyphens,
                                                      hyphenIndices,
@@ -2731,13 +2698,9 @@ PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint3
                                                      fromGlyphIndex,
                                                      toGlyphIndex,
 
-                                                     viewModel.GetStartIndexOfElidedGlyphs(),
                                                      viewModel.GetEndIndexOfElidedGlyphs(),
-                                                     viewModel.GetFirstMiddleIndexOfElidedGlyphs(),
-                                                     viewModel.GetSecondMiddleIndexOfElidedGlyphs(),
                                                      viewModel.GetElidedOffset(),
                                                      viewModel.GetVerticalLineAlignment(),
-                                                     viewModel.GetEllipsisPosition(),
 
                                                      hyphens,
                                                      hyphenIndices,

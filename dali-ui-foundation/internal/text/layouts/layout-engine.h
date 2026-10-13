@@ -116,14 +116,11 @@ public:
    * @param[in] isMarqueeMaxTextureExceeded If isMarqueeMaxTextureExceeded is true, enable ellipsis during auro
    * scroll.
    * @param[in] isHiddenInputEnabled if isHiddenInputEnabled is true, hidden input feature is enabled.
-   * @param[in] ellipsisPosition The location of the text ellipsis
    *
    * @return \e true if the text has been re-laid-out. \e false means the given width is too small to layout even a
    * single character.
    */
-  bool LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled, bool& isMarqueeEnabled,
-                  bool isMarqueeMaxTextureExceeded, bool isHiddenInputEnabled,
-                  Text::EllipsisPosition::Type ellipsisPosition);
+  bool LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled, bool& isMarqueeEnabled, bool isMarqueeMaxTextureExceeded, bool isHiddenInputEnabled);
 
   /**
    * @brief Aligns the laid out lines.

@@ -96,7 +96,7 @@ bool GetInlineReplacementRevealTiming(Ui::View owner, Ui::Text::ReplacementRevea
   const Text::InlineReplacementData* data = Text::GetInlineReplacementData(owner);
   return data && Text::InlineReplacementManagerTestAccessor::GetRevealTiming(data->manager, 1u, timing);
 }
-} // namespace Dali::Ui::Internal
+} //namespace DALI_NAMESPACE::Ui::Internal
 
 namespace
 {
@@ -562,21 +562,19 @@ int UtcDaliTextRevealLineUnitScheduleP(void)
   DALI_TEST_EQUALS(imageLine.imageReplacementUnitMask[1u], 0u, TEST_LOCATION);
   DALI_TEST_CHECK(!imageLine.HasPixelTiming());
 
-  Reveal::Plan splitLine;
-  splitLine.glyphToUnit       = {0u, 1u, Reveal::NO_UNIT, 2u};
-  splitLine.unitStart         = {0.0f, 0.5f, 1.0f};
-  splitLine.fadeDurationRatio = 0.25f;
-  std::vector<UiText::LineRun> splitRuns(2u);
-  splitRuns[0u].glyphRun           = {0u, 1u};
-  splitRuns[0u].isSplitToTwoHalves = true;
-  splitRuns[0u].glyphRunSecondHalf = {1u, 1u};
-  splitRuns[1u].glyphRun           = {2u, 2u};
-  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(splitLine,
-                                                splitRuns.data(),
-                                                static_cast<UiText::Length>(splitRuns.size())));
-  DALI_TEST_EQUALS(splitLine.GetUnitCount(), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(splitLine.glyphToUnit[0u], splitLine.glyphToUnit[1u], TEST_LOCATION);
-  DALI_TEST_EQUALS(splitLine.glyphToUnit[3u], 1u, TEST_LOCATION);
+  Reveal::Plan unmappedGlyphLine;
+  unmappedGlyphLine.glyphToUnit       = {0u, 1u, Reveal::NO_UNIT, 2u};
+  unmappedGlyphLine.unitStart         = {0.0f, 0.5f, 1.0f};
+  unmappedGlyphLine.fadeDurationRatio = 0.25f;
+  std::vector<UiText::LineRun> unmappedGlyphRuns(2u);
+  unmappedGlyphRuns[0u].glyphRun = {0u, 2u};
+  unmappedGlyphRuns[1u].glyphRun = {2u, 2u};
+  DALI_TEST_CHECK(Reveal::ApplyLineUnitSchedule(unmappedGlyphLine,
+                                                unmappedGlyphRuns.data(),
+                                                static_cast<UiText::Length>(unmappedGlyphRuns.size())));
+  DALI_TEST_EQUALS(unmappedGlyphLine.GetUnitCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(unmappedGlyphLine.glyphToUnit[0u], unmappedGlyphLine.glyphToUnit[1u], TEST_LOCATION);
+  DALI_TEST_EQUALS(unmappedGlyphLine.glyphToUnit[3u], 1u, TEST_LOCATION);
 
   Reveal::Plan       invalid  = Reveal::BuildPlan(text, 6u, glyphMap, 6u, Reveal::Unit::LINE, 0.25f);
   const Reveal::Plan original = invalid;
@@ -615,7 +613,6 @@ int UtcDaliTextRevealLineFinalLayoutP(void)
     result.controller->SetDefaultFontSize(20.0f, UiText::Controller::PIXEL_SIZE);
     result.controller->SetMultiLineEnabled(true);
     result.controller->SetTextElideEnabled(elide);
-    result.controller->SetEllipsisPosition(UiText::EllipsisPosition::END);
     if(maxLines > 0)
     {
       result.controller->SetMaximumNumberOfLines(maxLines);
@@ -657,10 +654,7 @@ int UtcDaliTextRevealLineFinalLayoutP(void)
         }
       };
       InspectRun(lines[lineIndex].glyphRun);
-      if(lines[lineIndex].isSplitToTwoHalves)
-      {
-        InspectRun(lines[lineIndex].glyphRunSecondHalf);
-      }
+
       if(lineUnit != Reveal::NO_UNIT)
       {
         ++result.activeLineCount;
@@ -930,21 +924,19 @@ int UtcDaliTextRevealPerLineSequenceScheduleP(void)
   DALI_TEST_EQUALS(bidi.glyphToUnit[1u], 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(bidi.glyphToUnit[2u], 0u, TEST_LOCATION);
 
-  Reveal::Plan splitLine;
-  splitLine.glyphToUnit       = {1u, Reveal::NO_UNIT, 0u, 2u};
-  splitLine.unitStart         = {0.0f, 0.5f, 1.0f};
-  splitLine.fadeDurationRatio = 0.25f;
-  std::vector<UiText::LineRun> splitRuns(2u);
-  splitRuns[0u].glyphRun           = {0u, 1u};
-  splitRuns[0u].isSplitToTwoHalves = true;
-  splitRuns[0u].glyphRunSecondHalf = {2u, 1u};
-  splitRuns[1u].glyphRun           = {3u, 1u};
-  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(splitLine,
-                                                       splitRuns.data(),
-                                                       static_cast<UiText::Length>(splitRuns.size()),
+  Reveal::Plan unmappedGlyphLine;
+  unmappedGlyphLine.glyphToUnit       = {1u, Reveal::NO_UNIT, 0u, 2u};
+  unmappedGlyphLine.unitStart         = {0.0f, 0.5f, 1.0f};
+  unmappedGlyphLine.fadeDurationRatio = 0.25f;
+  std::vector<UiText::LineRun> unmappedGlyphRuns(2u);
+  unmappedGlyphRuns[0u].glyphRun = {0u, 3u};
+  unmappedGlyphRuns[1u].glyphRun = {3u, 1u};
+  DALI_TEST_CHECK(Reveal::ApplyPerLineSequenceSchedule(unmappedGlyphLine,
+                                                       unmappedGlyphRuns.data(),
+                                                       static_cast<UiText::Length>(unmappedGlyphRuns.size()),
                                                        0.5f));
-  DALI_TEST_EQUALS(splitLine.glyphToUnit[0u], 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(splitLine.glyphToUnit[2u], 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(unmappedGlyphLine.glyphToUnit[0u], 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(unmappedGlyphLine.glyphToUnit[2u], 0u, TEST_LOCATION);
 
   auto       incompleteMapping = MakePlan({2u}, 0.25f);
   const auto originalMapping   = incompleteMapping;
@@ -1033,10 +1025,7 @@ int UtcDaliTextRevealPerLineSequenceFinalLayoutP(void)
     float start  = 0.0f;
     bool  active = false;
     CollectRunStart(lines[lineIndex].glyphRun, start, active);
-    if(lines[lineIndex].isSplitToTwoHalves)
-    {
-      CollectRunStart(lines[lineIndex].glyphRunSecondHalf, start, active);
-    }
+
     if(active)
     {
       activeLineStarts.push_back(start);
@@ -1167,7 +1156,6 @@ int UtcDaliTextRevealPerLineSequenceMaximumLinesEndEllipsisP(void)
     controller->SetDefaultFontSize(20.0f, UiText::Controller::PIXEL_SIZE);
     controller->SetMultiLineEnabled(true);
     controller->SetTextElideEnabled(true);
-    controller->SetEllipsisPosition(UiText::EllipsisPosition::END);
     controller->SetMaximumNumberOfLines(2);
     controller->Relayout(Size(500.0f, 500.0f));
 
@@ -1235,10 +1223,7 @@ int UtcDaliTextRevealPerLineSequenceMaximumLinesEndEllipsisP(void)
         }
       };
       CollectRun(lines[lineIndex].glyphRun);
-      if(lines[lineIndex].isSplitToTwoHalves)
-      {
-        CollectRun(lines[lineIndex].glyphRunSecondHalf);
-      }
+
       DALI_TEST_CHECK(count > 0u);
       result.lineUnitCounts.push_back(count);
       result.lineStarts.push_back(lineStart);
@@ -2372,7 +2357,6 @@ int UtcDaliTextRevealPixelP(void)
     controller->SetDefaultFontSize(24.0f, UiText::Controller::PIXEL_SIZE);
     controller->SetMultiLineEnabled(true);
     controller->SetTextElideEnabled(true);
-    controller->SetEllipsisPosition(UiText::EllipsisPosition::END);
     controller->SetMaximumNumberOfLines(2u);
     controller->Relayout(Size(500.0f, 500.0f));
     const UiText::ModelInterface* model = controller->GetRenderTextModel();
@@ -3404,7 +3388,6 @@ int UtcDaliTextRevealImageReplacementVisibilityP(void)
     UiText::ControllerPtr controller = BuildReplacementController(text, ranges, Size(500.0f, 500.0f), true);
     controller->SetMultiLineEnabled(true);
     controller->SetMaximumNumberOfLines(2);
-    controller->SetEllipsisPosition(UiText::EllipsisPosition::END);
     controller->Relayout(Size(500.0f, 500.0f));
     const UiText::ReplacementRenderState& state = controller->GetReplacementRenderState();
     DALI_TEST_CHECK(state.finalElision.textElided);
@@ -3598,10 +3581,6 @@ int UtcDaliTextRevealImageReplacementEndEllipsisPerLineSequenceP(void)
     for(uint32_t line = 0u; line < lineCount; ++line)
     {
       mapRun(line, lines[line].glyphRun);
-      if(lines[line].isSplitToTwoHalves)
-      {
-        mapRun(line, lines[line].glyphRunSecondHalf);
-      }
     }
     for(uint32_t glyph = 0u; glyph < glyphCount; ++glyph)
     {
@@ -3735,7 +3714,6 @@ int UtcDaliTextRevealImageReplacementEndEllipsisPerLineSequenceP(void)
     if(elideText)
     {
       controller->SetMaximumNumberOfLines(maximumLines);
-      controller->SetEllipsisPosition(UiText::EllipsisPosition::END);
     }
     controller->Relayout(size);
     return controller;
@@ -3881,7 +3859,6 @@ int UtcDaliTextRevealImageReplacementEndEllipsisPerLineSequenceP(void)
     parameters.maxTextureSize                 = 4096;
     parameters.maximumNumberOfLines           = 2u;
     parameters.ellipsis                       = true;
-    parameters.ellipsisPosition               = UiText::EllipsisPosition::END;
     parameters.isMultiLine                    = true;
     parameters.isTextRevealEnabled            = true;
     parameters.textRevealUnit                 = unit;
@@ -5047,10 +5024,7 @@ int UtcDaliTextRevealPixelMixedLineAutoP(void)
       }
     };
     includeRun(lines[line].glyphRun);
-    if(lines[line].isSplitToTwoHalves)
-    {
-      includeRun(lines[line].glyphRunSecondHalf);
-    }
+
     return completion;
   };
 

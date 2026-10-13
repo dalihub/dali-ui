@@ -217,7 +217,6 @@ void CheckMarqueeTransitionCase(const char*           name,
   Text::ReplacementLayoutTestOptions options;
   options.contentSize          = Size(controlWidth, 40.0f);
   options.elideText            = true;
-  options.ellipsisPosition     = Text::EllipsisPosition::END;
   options.horizontalAlignment  = alignment;
   options.layoutDirection      = layoutDirection;
   options.matchLayoutDirection = true;
@@ -298,7 +297,6 @@ void CheckEndEllipsisCase(const char* name, Vector<Text::Character>& text, Text:
   Text::ReplacementLayoutTestOptions options;
   options.contentSize      = Vector2(90.0f, 40.0f);
   options.elideText        = true;
-  options.ellipsisPosition = Text::EllipsisPosition::END;
   Text::ReplacementRenderState result;
   Require(Text::LayoutReplacementForTest(projection, services, options, result),
           std::string(name) + ": END ellipsis layout was not entered");
@@ -371,7 +369,6 @@ void CheckAsyncRenderScaleAutoLineHeight()
       parameters.renderScale      = scale;
       parameters.isMultiLine      = true;
       parameters.ellipsis         = true;
-      parameters.ellipsisPosition = Text::EllipsisPosition::END;
       parameters.relativeLineSize = -1.0f;
       parameters.lineWrapMode     = Text::LineWrapMode::WORD;
       parameters.maxTextureSize   = 4096;

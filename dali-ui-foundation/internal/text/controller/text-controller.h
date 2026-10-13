@@ -2253,18 +2253,6 @@ public: // Queries & retrieves.
   void SetVerticalLineAlignment(Alignment alignment);
 
   /**
-   * @brief Retrieves ellipsis position
-   * @return The ellipsis position
-   */
-  Text::EllipsisPosition::Type GetEllipsisPosition() const;
-
-  /**
-   * @brief Sets ellipsis position
-   * @param[in] ellipsisPosition The ellipsis position for the text
-   */
-  void SetEllipsisPosition(Text::EllipsisPosition::Type ellipsisPosition);
-
-  /**
    * @brief Sets the render scale
    * @param[in] renderScale The render scale
    */

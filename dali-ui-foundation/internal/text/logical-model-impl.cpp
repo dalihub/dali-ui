@@ -683,7 +683,6 @@ LogicalModel::~LogicalModel()
   for(auto&& info : mBidirectionalLineInfo)
   {
     free(info.visualToLogicalMap);
-    free(info.visualToLogicalMapSecondHalf);
   }
 
   ClearFontDescriptionRuns();

@@ -80,6 +80,7 @@ struct AsyncAnchorHitRegion
 
 struct AsyncTextParameters
 {
+  /** @brief Initializes the asynchronous request with default text properties. */
   AsyncTextParameters()
   : text{},
     fontFamily{},
@@ -149,7 +150,6 @@ struct AsyncTextParameters
     layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
     verticalLineAlignment{Alignment::START},
     layoutDirectionPolicy{LayoutDirectionMode::CONTENTS},
-    ellipsisPosition{Text::EllipsisPosition::END},
     marqueeTriggerPolicy{Text::MarqueeTriggerPolicy::MANUAL},
     marqueeOrientation{Text::MarqueeOrientation::HORIZONTAL},
     marqueeStopMode{Text::MarqueeStopMode::FINISH_LOOP},
@@ -290,7 +290,6 @@ struct AsyncTextParameters
   Dali::LayoutDirection::Type               layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
   Alignment                                 verticalLineAlignment; ///< The vertical line alignment: one of {START, CENTER, END}.
   LayoutDirectionMode                       layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
-  Text::EllipsisPosition::Type              ellipsisPosition;      ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
   Text::MarqueeTriggerPolicy                marqueeTriggerPolicy;  ///< policy that determines when marquee is triggered : one of {MANUAL, ON_OVERFLOW}.
   Text::MarqueeOrientation                  marqueeOrientation;    ///< The orientation of the marquee {HORIZONTAL, VERTICAL}.
   Text::MarqueeStopMode                     marqueeStopMode;       ///< The marquee stop mode: one of {FINISH_LOOP, IMMEDIATE}.

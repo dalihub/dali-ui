@@ -728,8 +728,7 @@ bool ApplyLineUnitSchedule(Plan&          plan,
 
   for(uint32_t lineIndex = 0u; lineIndex < lineCount; ++lineIndex)
   {
-    if(!mapRun(lineIndex, lines[lineIndex].glyphRun) ||
-       (lines[lineIndex].isSplitToTwoHalves && !mapRun(lineIndex, lines[lineIndex].glyphRunSecondHalf)))
+    if(!mapRun(lineIndex, lines[lineIndex].glyphRun))
     {
       return false;
     }
@@ -840,8 +839,7 @@ bool ApplyPixelSpatialSchedule(Plan&                       plan,
 
   for(uint32_t line = 0u; line < lineCount; ++line)
   {
-    if(!mapLineRun(line, lines[line].glyphRun) ||
-       (lines[line].isSplitToTwoHalves && !mapLineRun(line, lines[line].glyphRunSecondHalf)))
+    if(!mapLineRun(line, lines[line].glyphRun))
     {
       return false;
     }
@@ -896,8 +894,7 @@ bool ApplyPixelSpatialSchedule(Plan&                       plan,
         }
         return true;
       };
-      if(!collectRun(lines[line].glyphRun) ||
-         (lines[line].isSplitToTwoHalves && !collectRun(lines[line].glyphRunSecondHalf)))
+      if(!collectRun(lines[line].glyphRun))
       {
         return false;
       }
@@ -1443,8 +1440,7 @@ bool ApplyPerLineSequenceSchedule(Plan&          plan,
 
   for(uint32_t lineIndex = 0u; lineIndex < lineCount; ++lineIndex)
   {
-    if(!mapRun(lineIndex, lines[lineIndex].glyphRun) ||
-       (lines[lineIndex].isSplitToTwoHalves && !mapRun(lineIndex, lines[lineIndex].glyphRunSecondHalf)))
+    if(!mapRun(lineIndex, lines[lineIndex].glyphRun))
     {
       return false;
     }
