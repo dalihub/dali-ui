@@ -118,6 +118,31 @@ Rect ColorBounds(const Image& image, Rect r, Color color, uint8_t tolerance)
   return right < 0 ? Rect{} : Rect{left, top, right - left + 1, bottom - top + 1};
 }
 
+Rect RetainedTextRegion(const Image& reference, Rect viewport, float markerWidth, bool rightToLeft)
+{
+  if(!Contains(reference, viewport) || !std::isfinite(markerWidth) || markerWidth <= 0 || markerWidth >= viewport.width)
+  {
+    return {};
+  }
+  const auto ink = ColorBounds(reference, viewport, {0, 0, 0, 255});
+  if(ink.width == 0)
+  {
+    return {};
+  }
+  const int extent = static_cast<int>(std::ceil(markerWidth));
+  if(rightToLeft)
+  {
+    const int end = viewport.x + viewport.width;
+    viewport.x = ink.x + extent;
+    viewport.width = end - viewport.x;
+  }
+  else
+  {
+    viewport.width = ink.x + ink.width - extent - viewport.x;
+  }
+  return Contains(reference, viewport) && CountInk(reference, viewport) >= 12 ? viewport : Rect{};
+}
+
 std::size_t CountInk(const Image& image, Rect r, Color background, uint8_t threshold)
 {
   if(!Contains(image, r)) return 0;

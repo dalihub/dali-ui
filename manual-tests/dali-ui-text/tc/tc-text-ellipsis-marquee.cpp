@@ -1077,6 +1077,14 @@ private:
     measure.SetLineWrapMode(c.wrap);
     mTargetWidth             = std::floor(mWidth * c.widthRatio);
     const float naturalWidth = measure.GetNaturalSize().x;
+    // Measure the same U+2026 font footprint independently of the subject.
+    // Its occupied end edge comes from the static reference capture; a fixed
+    // fraction of the viewport can include the replacement glyph at small widths.
+    auto marker = Label::New("\u2026");
+    marker.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    marker.SetSystemFontSizeScaleEnabled(false);
+    marker.SetFontSize(c.fontSize);
+    mMarkerWidth = marker.GetNaturalSize().x;
     mFitWidth                = std::ceil(naturalWidth) + 4;
     if(c.boundary == -1 || c.boundary == 1) mTargetWidth = std::ceil(naturalWidth) + 4 * c.boundary;
     if(c.boundary == 2) mTargetWidth = std::floor(naturalWidth * 0.7f);
@@ -1103,7 +1111,7 @@ private:
     mMinimumCycle            = (motionLength + c.gap) / mSpeed;
     Log("[CASE][BEGIN] " + CaseId() + " direction=" + (c.rtl ? "RTL" : "LTR") + " speed=" + std::to_string(mSpeed) +
         " viewport=" + std::to_string(mTargetWidth) + "x" + std::to_string(c.height) +
-        " font=" + std::to_string(c.fontSize) + " renderScale=" + std::to_string(c.renderScale));
+        " font=" + std::to_string(c.fontSize) + " renderScale=" + std::to_string(c.renderScale) + " markerWidth=" + std::to_string(mMarkerWidth));
     CreateTarget(Text::OverflowMode::CLIP, mTargetWidth);
     SetStep(Step::CLIP_REFERENCE, true);
   }
@@ -1437,11 +1445,18 @@ private:
         {
           auto retained = Roi();
           if(Current().multiline)
+          {
             retained.height = 32; // first complete line
+          }
           else
           {
-            retained.width = int(mTargetWidth) * 2 / 3;
-            if(Current().rtl) retained.x += int(mTargetWidth) - retained.width;
+            retained.width = int(mTargetWidth);
+            retained = IC::RetainedTextRegion(mBaseline, retained, mMarkerWidth, Current().rtl);
+            if(!IC::Contains(mBaseline, retained))
+            {
+              Error("no retained foreground outside measured ellipsis footprint");
+              return;
+            }
           }
           Compare(mBaseline, mLast, "marquee-retained-origin", retained);
         }
@@ -1719,7 +1734,7 @@ private:
   int                              mStableCount{0}, mAsyncCompletions{0}, mRequiredAsync{0}, mChecks{0}, mFailedChecks{0}, mFailedCases{0}, mCompleted{0};
   int                              mDepartures{0}, mAtOriginFrames{0}, mMotionSamples{0}, mAfterStopMotion{0}, mExitCode{3};
   double                           mMinimumCycle{0};
-  float                            mTargetWidth{288}, mFitWidth{288};
+  float                            mTargetWidth{288}, mFitWidth{288}, mMarkerWidth{0};
   bool                             mRestarted{false};
   int                              mLifecycle{0};
   int                              mAutoCycles{0};

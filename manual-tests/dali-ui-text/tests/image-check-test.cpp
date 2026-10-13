@@ -108,6 +108,38 @@ int main()
   Check(!IC::Compare(a, b, full).equal, "comparison never aligns away offset bugs");
   Check(!IC::EstimateTranslation(white, white, full, 10, 6).valid, "blank motion rejected");
   Check(!IC::EstimateTranslation(a, b, full, 80, 6).valid, "invalid search range rejected");
+  // A narrow viewport's last third is not the ellipsis boundary. Derive a
+  // fixed region from the static reference and independent marker dimensions.
+  auto retained = white;
+  Paint(retained, {8, 10, 7, 20}, {0, 0, 0, 255});
+  Paint(retained, {20, 15, 18, 6}, {0, 0, 0, 255});
+  Paint(retained, {44, 28, 14, 3}, {0, 0, 0, 255}); // marker footprint
+  const IC::Rect viewport{4, 4, 60, 40};
+  const auto region = IC::RetainedTextRegion(retained, viewport, 16, false);
+  Check(region.x == 4 && region.width == 38, "retained ROI excludes measured marker, not viewport fraction");
+  auto moving = retained;
+  Paint(moving, {44, 10, 16, 22}, {0, 0, 0, 255}); // newly revealed source glyphs
+  Check(IC::Compare(retained, moving, region).equal, "new source glyphs beyond boundary do not corrupt origin oracle");
+  auto shifted = White(120, 60);
+  for(uint32_t y = 0; y < moving.height; ++y)
+    for(uint32_t x = 0; x + 1 < moving.width; ++x)
+      for(int channel = 0; channel < 4; ++channel)
+        shifted.rgba[(std::size_t(y) * shifted.width + x + 1) * 4 + channel] = moving.rgba[(std::size_t(y) * moving.width + x) * 4 + channel];
+  Check(!IC::Compare(retained, shifted, region).equal, "negative control: one-pixel origin error fails fixed reference ROI");
+  auto stale = moving;
+  Paint(stale, {20, 15, 18, 6}, {255, 255, 255, 255});
+  Check(!IC::Compare(retained, stale, region).equal, "negative control: stale/missing retained glyph fails");
+  const auto rtlRegion = IC::RetainedTextRegion(retained, viewport, 16, true);
+  Check(rtlRegion.x == 24 && rtlRegion.width == 40, "RTL excludes measured marker from left edge");
+  Check(!IC::Contains(white, IC::RetainedTextRegion(white, viewport, 16, false)), "blank reference is not a retained region");
+  Check(!IC::Contains(retained, IC::RetainedTextRegion(retained, viewport, 60, false)), "no space outside marker is not PASS");
+  Check(!IC::Contains(retained, IC::RetainedTextRegion(retained, viewport, std::numeric_limits<float>::quiet_NaN(), false)), "invalid marker measurement rejected");
+  for(float invalidWidth : {-1.0f, 0.0f, std::numeric_limits<float>::infinity()})
+  {
+    const auto invalidRegion = IC::RetainedTextRegion(retained, viewport, invalidWidth, false);
+    Check(!IC::Compare(retained, moving, invalidRegion).valid, "invalid marker cannot produce a passing comparison");
+  }
+  Check(!IC::Compare(retained, moving, IC::RetainedTextRegion(retained, {-1, 0, 60, 40}, 16, false)).valid, "invalid viewport cannot pass");
   auto diff = IC::Difference(a, b);
   Check(diff.IsValid() && IC::CountColor(diff, full, {255, 0, 255, 255}) > 0, "difference highlights changes");
   Check(!IC::Difference(a, White(1, 1)).IsValid(), "invalid diff dimensions rejected");
