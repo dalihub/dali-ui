@@ -19,7 +19,6 @@
 #include "lottie-animation-view-impl.h"
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
@@ -396,7 +395,7 @@ Dali::Property::Value LottieAnimationViewImpl::GetProperty(Dali::BaseObject* obj
 void LottieAnimationViewImpl::OnInitialize()
 {
   ViewImpl::OnInitialize();
-  DevelActor::OnSceneVisibilityChangedSignal(Self()).Connect(this, &LottieAnimationViewImpl::OnSceneVisibilityChanged);
+  Self().OnSceneVisibilityChangedSignal().Connect(this, &LottieAnimationViewImpl::OnSceneVisibilityChanged);
   Internal::ViewDataImpl::Get(*this).VisualEventSignal().Connect(this, &LottieAnimationViewImpl::OnVisualEvent);
 
   // Connect to View::ResourceReadySignal to handle placeholder removal
@@ -976,7 +975,7 @@ void LottieAnimationViewImpl::UpdateVisualProperty(Dali::Property::Index index, 
 
 bool LottieAnimationViewImpl::IsReadyToLoad() const
 {
-  return mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE || DevelActor::IsOnSceneVisible(Self());
+  return mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE || Self().IsOnSceneVisible();
 }
 
 void LottieAnimationViewImpl::OnSceneConnection(int depth)

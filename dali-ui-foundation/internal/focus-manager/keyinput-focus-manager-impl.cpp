@@ -63,6 +63,7 @@ KeyInputFocusManagerImpl::KeyInputFocusManagerImpl()
 
 KeyInputFocusManagerImpl::~KeyInputFocusManagerImpl()
 {
+  mSlotDelegate.DisconnectAll();
 }
 
 void KeyInputFocusManagerImpl::OnSceneHolderCreated(Dali::Integration::SceneHolder sceneHolder)
@@ -149,7 +150,11 @@ void KeyInputFocusManagerImpl::NotifyFocusLost(Ui::View view, Window window)
   view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection);
   view.EffectiveVisibilityChangedSignal().Disconnect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewVisibilityChanged);
   auto focusManager = Ui::FocusManager::Get();
-  GetImpl(focusManager).NotifyKeyInputFocus(view, false, window);
+  // Singleton lookup is unavailable while the application is tearing it down.
+  if(focusManager)
+  {
+    GetImpl(focusManager).NotifyKeyInputFocus(view, false, window);
+  }
 }
 
 void KeyInputFocusManagerImpl::SetFocus(Ui::View view)

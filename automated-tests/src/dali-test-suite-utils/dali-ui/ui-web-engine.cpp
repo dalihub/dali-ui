@@ -2260,6 +2260,7 @@ public:
   {
   }
 
+  Dali::NativeImageInterfacePtr mNativeImageInterface;
   std::string              mUrl;
   std::vector<std::string> mHistory;
   size_t                   mCurrentPlusOnePos;
@@ -2270,6 +2271,8 @@ public:
   float mTextZoomFactor;
   float mScaleFactor;
   bool  mVisible;
+  int   mFocusSetCallCount{0};
+  bool  mFocused{false};
 
   Dali::Vector2                       mScrollPosition;
   Dali::Vector2                       mScrollSize;
@@ -2830,6 +2833,11 @@ NativeImagePtr WebEngine::GetNativeImage()
   return nullptr;
 }
 
+NativeImageInterfacePtr WebEngine::GetNativeImageInterface()
+{
+  return Internal::Adaptor::GetImplementation(*this).mNativeImageInterface;
+}
+
 bool WebEngine::IsIncognito() const
 {
   return false;
@@ -3129,6 +3137,9 @@ void WebEngine::ExitFullscreen()
 
 void WebEngine::SetFocus(bool focused)
 {
+  auto& impl = Internal::Adaptor::GetImplementation(*this);
+  ++impl.mFocusSetCallCount;
+  impl.mFocused = focused;
 }
 
 void WebEngine::SetPageZoomFactor(float zoomFactor)
@@ -3376,6 +3387,11 @@ void WebEngine::RegisterPlaybackVideoPausedCallback(Dali::WebEnginePlugin::WebEn
 
 namespace Test::WebEngine
 {
+void SetNativeImageInterface(Dali::WebEngine engine, Dali::NativeImageInterfacePtr nativeImage)
+{
+  Dali::Internal::Adaptor::GetImplementation(engine).mNativeImageInterface = nativeImage;
+}
+
 void SetWebViewAccessible(Dali::Accessibility::Accessible* webAccessible)
 {
   Dali::Internal::Adaptor::SetTestWebViewAccessible(dynamic_cast<Dali::Accessibility::ActorAccessible*>(webAccessible));
@@ -3383,5 +3399,13 @@ void SetWebViewAccessible(Dali::Accessibility::Accessible* webAccessible)
 void SetWebAccessibleActivatedAddress(Dali::Devel::Accessibility::Address address)
 {
   Dali::Internal::Adaptor::SetTestWebAccessibleActivatedAddress(address);
+}
+int GetFocusSetCallCount(const Dali::WebEngine& webEngine)
+{
+  return Dali::Internal::Adaptor::GetImplementation(webEngine).mFocusSetCallCount;
+}
+bool GetLastFocus(const Dali::WebEngine& webEngine)
+{
+  return Dali::Internal::Adaptor::GetImplementation(webEngine).mFocused;
 }
 } // namespace Test::WebEngine

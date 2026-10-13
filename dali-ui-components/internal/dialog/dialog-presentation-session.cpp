@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#include <dali-ui-components/internal/dialog/dialog-presentation-session.h>
-#include <dali-ui-components/integration-api/dialog/dialog-impl.h>
 #include <dali-ui-components/integration-api/dialog/dialog-container-impl.h>
+#include <dali-ui-components/integration-api/dialog/dialog-impl.h>
 #include <dali-ui-components/integration-api/navigator/navigator-impl.h>
-#include <dali/devel-api/actors/actor-devel.h>
+#include <dali-ui-components/internal/dialog/dialog-presentation-session.h>
 #include <algorithm>
 
 namespace DALI_NAMESPACE
@@ -28,19 +27,22 @@ namespace Ui
 namespace Internal
 {
 DialogPresentationSession::DialogPresentationSession(uint64_t sessionId, Dialog content, DialogContainer hostContainer, Navigator host)
-: id(sessionId), dialog(content), container(hostContainer), navigator(host)
+: id(sessionId),
+  dialog(content),
+  container(hostContainer),
+  navigator(host)
 {
 }
 
 bool DialogPresentationSession::Register(const DialogPostOptions& options)
 {
   auto keepAlive = shared_from_this();
-  auto content = dialog.GetHandle();
-  auto modal = container.GetHandle();
-  auto host = navigator.GetHandle();
+  auto content   = dialog.GetHandle();
+  auto modal     = container.GetHandle();
+  auto host      = navigator.GetHandle();
   if(!content || !modal || !host || state != State::PREPARING || content.GetParent()) return false;
   GetImpl(modal).mPresentationSession = keepAlive;
-  DevelActor::OnSceneVisibilityChangedSignal(content).Connect(this, &DialogPresentationSession::OnSceneVisibilityChanged);
+  content.OnSceneVisibilityChangedSignal().Connect(this, &DialogPresentationSession::OnSceneVisibilityChanged);
   modal.SetModalContent(content);
   if(state != State::PREPARING || content.GetParent() != modal || modal.GetModalContent() != content) return false;
   return NavigatorModalBridge::Register(GetImpl(host), keepAlive, options);
@@ -49,7 +51,7 @@ bool DialogPresentationSession::Register(const DialogPostOptions& options)
 bool DialogPresentationSession::BeginClose(DialogDismissReason value)
 {
   if(state != State::REGISTERED) return false;
-  state = State::CLOSING;
+  state  = State::CLOSING;
   reason = value;
   return true;
 }
@@ -65,9 +67,9 @@ void DialogPresentationSession::Dismiss(bool animated, DialogDismissReason value
 bool DialogPresentationSession::RequestDismiss(DialogDismissReason value)
 {
   auto keepAlive = shared_from_this();
-  auto host = navigator.GetHandle();
-  auto modal = container.GetHandle();
-  auto content = dialog.GetHandle();
+  auto host      = navigator.GetHandle();
+  auto modal     = container.GetHandle();
+  auto content   = dialog.GetHandle();
   if(!host || !modal || !content || state != State::REGISTERED || host.GetCurrentView() != modal) return true;
   const uint32_t bit = value == DialogDismissReason::BACK ? 1u : 2u;
   if((static_cast<uint32_t>(content.GetDismissPolicy()) & bit) == 0u) return true;
@@ -85,11 +87,11 @@ void DialogPresentationSession::TryNotifyShown()
   auto keepAlive = shared_from_this();
   if(state != State::REGISTERED || !enterCompleted || shownSent) return;
   auto content = dialog.GetHandle();
-  auto host = navigator.GetHandle();
-  auto modal = container.GetHandle();
+  auto host    = navigator.GetHandle();
+  auto modal   = container.GetHandle();
   if(!content || !host || !modal || host.GetCurrentView() != modal ||
      !content.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) ||
-     !DevelActor::IsOnSceneVisible(content)) return;
+     !content.IsOnSceneVisible()) return;
   shownSent = true;
   content.ShownSignal().Emit(content);
 }
@@ -109,8 +111,8 @@ void DialogPresentationSession::Complete(DialogDismissReason value, bool hostDes
   if(hostDestroyed) navigator.Reset();
   if(containerDestroyed) container.Reset();
   auto content = dialog.GetHandle();
-  auto modal = container.GetHandle();
-  auto host = navigator.GetHandle();
+  auto modal   = container.GetHandle();
+  auto host    = navigator.GetHandle();
   DisconnectAll();
   if(host) NavigatorModalBridge::Detach(GetImpl(host), id, modal);
   if(modal)
@@ -152,8 +154,10 @@ bool NavigatorModalBridge::Dismiss(Integration::NavigatorImpl& host, std::shared
   if(!session->BeginClose(reason)) return false;
   host.SettlePendingTransition();
   if(session->state == DialogPresentationSession::State::ENDED) return true;
-  if(host.ModalTop() == modal) host.PopModal(animated);
-  else host.Remove(modal);
+  if(host.ModalTop() == modal)
+    host.PopModal(animated);
+  else
+    host.Remove(modal);
   return true;
 }
 
@@ -169,9 +173,11 @@ std::shared_ptr<DialogPresentationSession> NavigatorModalBridge::Find(Integratio
 void NavigatorModalBridge::Detach(Integration::NavigatorImpl& host, uint64_t id, View modal)
 {
   auto& sessions = host.mModalData->sessions;
-  sessions.erase(std::remove_if(sessions.begin(), sessions.end(), [&](const auto& session) {
+  sessions.erase(std::remove_if(sessions.begin(), sessions.end(), [&](const auto& session)
+  {
     return session->id == id && session->container.GetHandle() == modal;
-  }), sessions.end());
+  }),
+                 sessions.end());
   // Only unregister here. The owning navigation operation performs removal.
 }
 } // namespace Internal

@@ -24,7 +24,10 @@ namespace Test
 {
 namespace WebEngine
 {
+void SetNativeImageInterface(Dali::WebEngine engine, Dali::NativeImageInterfacePtr nativeImage);
 void SetWebViewAccessible(Dali::Accessibility::Accessible* webAccessible);
 void SetWebAccessibleActivatedAddress(Dali::Devel::Accessibility::Address address);
+int GetFocusSetCallCount(const Dali::WebEngine& webEngine);
+bool GetLastFocus(const Dali::WebEngine& webEngine);
 } // namespace WebEngine
 } // namespace Test

@@ -236,7 +236,7 @@ jobs:
         (
           cd automated-tests
           ./build.sh
-          xvfb-run ./execute.sh
+          ./execute.sh
         )
 
     - name: Generate LCOV coverage data

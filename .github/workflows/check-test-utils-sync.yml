@@ -1,0 +1,233 @@
+name: "Shared test utilities"
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+    - devel
+  workflow_dispatch:
+    inputs:
+      dali_core_change:
+        description: 'dali-core Gerrit change number, or default'
+        required: false
+        default: 'default'
+      dali_adaptor_change:
+        description: 'dali-adaptor Gerrit change number, or default'
+        required: false
+        default: 'default'
+      dali_toolkit_change:
+        description: 'dali-toolkit Gerrit change number, or default'
+        required: false
+        default: 'default'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: "Check shared test utilities"
+    runs-on: [ code-linux ]
+    container:
+      image: tizen-nui-docker-local.bart.sec.samsung.net/dali-ci-env:ubuntu22.04-v1
+      credentials:
+        username: ${{ secrets.BART_USERNAME }}
+        password: ${{ secrets.BART_IDENTITY_TOKEN }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Run only the trusted checker. PR and Gerrit sources are comparison data.
+    - name: Checkout checker from trusted revision
+      uses: code-actions/checkout@v4
+      with:
+        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.base.sha || github.sha }}
+        path: automation
+        persist-credentials: false
+        sparse-checkout: .github/scripts
+
+    - name: Checkout dali-ui sources
+      uses: code-actions/checkout@v4
+      with:
+        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.base.ref || github.sha }}
+        path: dali-ui
+        fetch-depth: 0
+
+    - name: Preserve committed line endings
+      working-directory: dali-ui
+      run: |
+        set -euo pipefail
+
+        git config --local core.autocrlf false
+        git checkout-index --all --force
+
+    - name: Merge PR into latest target branch
+      if: github.event_name == 'pull_request_target'
+      working-directory: dali-ui
+      env:
+        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      run: |
+        set -euo pipefail
+
+        git fetch origin "$PR_HEAD_SHA"
+        git -c user.name='GitHub Actions' \
+          -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+          merge --no-ff --no-edit FETCH_HEAD
+
+    - name: Setup SSH
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Clone and resolve DALi dependencies
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+        DALI_CORE_CHANGE_INPUT: ${{ github.event.inputs.dali_core_change }}
+        DALI_ADAPTOR_CHANGE_INPUT: ${{ github.event.inputs.dali_adaptor_change }}
+        DALI_TOOLKIT_CHANGE_INPUT: ${{ github.event.inputs.dali_toolkit_change }}
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      run: |
+        set -euo pipefail
+
+        KNOWN_HOSTS_FILE="$RUNNER_TEMP/review-tizen-known-hosts"
+        printf '%s\n' "$SSH_KNOWN_HOSTS" > "$KNOWN_HOSTS_FILE"
+        chmod 0600 "$KNOWN_HOSTS_FILE"
+
+        export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=$KNOWN_HOSTS_FILE -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=yes"
+
+        git clone --config core.autocrlf=false --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        git clone --config core.autocrlf=false --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+        git clone --config core.autocrlf=false --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-toolkit.git
+
+        extract_dependency_value() {
+          local name=$1
+          local value
+          local count
+
+          value=$(printf '%s\n' "$PR_BODY" | awk '
+            /^##[[:space:]]+Test Dependencies \(optional\)[[:space:]]*$/ {
+              inDependencies = 1
+              next
+            }
+            inDependencies && /^##[[:space:]]/ {
+              exit
+            }
+            inDependencies {
+              print
+            }
+          ' | sed -nE "s/^[[:space:]]*-[[:space:]]*${name}:[[:space:]]*([^[:space:]]+)[[:space:]]*$/\1/p")
+          count=$(printf '%s\n' "$value" | sed '/^$/d' | wc -l)
+
+          if [ "$count" -eq 0 ]; then
+            printf '%s\n' 'default'
+          elif [ "$count" -eq 1 ]; then
+            printf '%s\n' "$value"
+          else
+            echo "::error::PR description contains multiple ${name} dependency values." >&2
+            exit 1
+          fi
+        }
+
+        resolve_dependency() {
+          local name=$1
+          local directory=$2
+          local repository=$3
+          local change=$4
+          local bucket
+          local ref
+          local patchset
+          local commit
+
+          if [ "$change" = 'default' ]; then
+            commit=$(git -C "$directory" rev-parse HEAD)
+            result="- ${name}: devel/master latest, change default, patch set default, commit $commit"
+            echo "$result"
+            echo "$result" >> "$GITHUB_STEP_SUMMARY"
+            return
+          fi
+
+          if ! [[ "$change" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::${name} dependency must be 'default' or a positive Gerrit change number, got '$change'."
+            exit 1
+          fi
+
+          bucket=$(printf '%02d' "$((10#$change % 100))")
+          ref=$(git ls-remote "$repository" "refs/changes/$bucket/$change/*" | awk '{print $2}' | sort -t/ -k5,5n | tail -n 1)
+
+          if [ -z "$ref" ]; then
+            echo "::error::Unable to find Gerrit change $change for ${name}."
+            exit 1
+          fi
+
+          patchset=${ref##*/}
+          git -C "$directory" fetch origin "$ref"
+          git -C "$directory" checkout --detach FETCH_HEAD
+          commit=$(git -C "$directory" rev-parse HEAD)
+
+          result="- ${name}: change $change, patch set $patchset, commit $commit"
+          echo "$result"
+          echo "$result" >> "$GITHUB_STEP_SUMMARY"
+        }
+
+        if [ "$GITHUB_EVENT_NAME" = 'pull_request_target' ]; then
+          DALI_CORE_CHANGE=$(extract_dependency_value 'dali-core')
+          DALI_ADAPTOR_CHANGE=$(extract_dependency_value 'dali-adaptor')
+          DALI_TOOLKIT_CHANGE=$(extract_dependency_value 'dali-toolkit')
+        else
+          DALI_CORE_CHANGE=${DALI_CORE_CHANGE_INPUT:-default}
+          DALI_ADAPTOR_CHANGE=${DALI_ADAPTOR_CHANGE_INPUT:-default}
+          DALI_TOOLKIT_CHANGE=${DALI_TOOLKIT_CHANGE_INPUT:-default}
+        fi
+
+        echo '## Test dependencies' >> "$GITHUB_STEP_SUMMARY"
+
+        resolve_dependency \
+          'dali-core' \
+          'dali-core' \
+          'ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git' \
+          "$DALI_CORE_CHANGE"
+        resolve_dependency \
+          'dali-adaptor' \
+          'dali-adaptor' \
+          'ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git' \
+          "$DALI_ADAPTOR_CHANGE"
+
+        resolve_dependency \
+          'dali-toolkit' \
+          'dali-toolkit' \
+          'ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-toolkit.git' \
+          "$DALI_TOOLKIT_CHANGE"
+
+    - name: Reject symbolic links in compared paths
+      run: |
+        set -euo pipefail
+
+        # Prevent source-controlled links from exposing files outside checkouts.
+        python3 -I - <<'PY'
+        import runpy
+        from pathlib import Path
+
+        checker = runpy.run_path("automation/.github/scripts/check-test-utils-sync.py")
+        for repository, relative in checker["TEST_UTILS_PATHS"].items():
+            directory = Path(f"dali-{repository}") / relative
+            paths = [directory, *directory.parents]
+            if directory.is_dir():
+                paths.extend(directory.iterdir())
+            for path in paths:
+                if path.is_symlink():
+                    raise SystemExit(f"ERROR: Symbolic link in test utility paths: {path}")
+        PY
+
+    - name: Check shared test utilities
+      run: |
+        set -euo pipefail
+
+        python3 -I automation/.github/scripts/check-test-utils-sync.py \
+          --core dali-core \
+          --adaptor dali-adaptor \
+          --toolkit dali-toolkit \
+          --ui dali-ui

@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/internal/gl-view/gl-view-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/lifecycle-controller.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
@@ -237,7 +236,7 @@ void GlViewImpl::OnInitialize()
   // Apply a rendering mode that may have been set before the backend was attached.
   SetRenderingMode(mRenderingMode);
 
-  Dali::DevelActor::OnSceneVisibilityChangedSignal(Self()).Connect(this, &GlViewImpl::OnSceneVisibilityChanged);
+  Self().OnSceneVisibilityChangedSignal().Connect(this, &GlViewImpl::OnSceneVisibilityChanged);
 }
 
 LayoutRect GlViewImpl::OnArrange(const LayoutRect& bounds)
@@ -334,7 +333,7 @@ void GlViewImpl::UpdateVisibility()
 {
   // Both have to hold: a view can be visible in the actor tree while the window it
   // is on is hidden, and nothing is produced for a hidden window.
-  const bool visible = Dali::DevelActor::IsOnSceneVisible(Self()) &&
+  const bool visible = Self().IsOnSceneVisible() &&
                        mPlacementWindow && mPlacementWindow.IsVisible();
 
   mBackend->OnVisibilityChanged(visible);

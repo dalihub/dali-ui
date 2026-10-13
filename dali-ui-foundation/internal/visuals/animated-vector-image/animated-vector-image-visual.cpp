@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/animated-vector-image-visual.h>
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
@@ -647,7 +646,7 @@ void AnimatedVectorImageVisual::DoSetOnScene(Actor& actor)
 
   // Hold the weak handle of the placement actor and delay the adding of renderer until the rasterization is finished.
   mPlacementActor = actor;
-  Dali::DevelActor::OnSceneVisibilityChangedSignal(actor).Connect(this, &AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged);
+  actor.OnSceneVisibilityChangedSignal().Connect(this, &AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged);
   EnsureLoading();
 
   if(mLoadState == LoadState::FAILED)
@@ -706,7 +705,7 @@ void AnimatedVectorImageVisual::DoSetOffScene(Actor& actor)
   actor.RemovePropertyNotification(mScaleNotification);
   actor.RemovePropertyNotification(mSizeNotification);
 
-  Dali::DevelActor::OnSceneVisibilityChangedSignal(actor).Disconnect(this, &AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged);
+  actor.OnSceneVisibilityChangedSignal().Disconnect(this, &AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged);
 
   mPlacementActor.Reset();
 
@@ -982,7 +981,7 @@ void AnimatedVectorImageVisual::EnsureLoading()
     return;
   }
   Actor actor = mPlacementActor.GetHandle();
-  if(mLoadPolicy != Ui::Image::LoadPolicy::IMMEDIATE && (!actor || !DevelActor::IsOnSceneVisible(actor)))
+  if(mLoadPolicy != Ui::Image::LoadPolicy::IMMEDIATE && (!actor || !actor.IsOnSceneVisible()))
   {
     return;
   }

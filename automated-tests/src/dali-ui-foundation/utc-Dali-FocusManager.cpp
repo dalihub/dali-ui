@@ -160,6 +160,49 @@ Dali::Integration::HoverEvent GenerateFocusManagerHover(PointState::Type state, 
 }
 } // namespace
 
+int UtcDaliFocusManagerNavigationDoesNotRetainWindowP(void)
+{
+  UiTestApplication application;
+  FocusManager      manager = FocusManager::Get();
+  for(bool keyboardNavigation : {false, true})
+  {
+    Window window = Window::New(PositionSize(0, 0, 480, 800), "focus-window-lifetime");
+    View   first  = AddWindowFocusTarget(window);
+    View   second = AddWindowFocusTarget(window);
+    first.SetProperty(View::Property::RIGHT_FOCUSABLE_VIEW_ID, second.GetProperty<int>(Actor::Property::ID));
+    application.GetWindow().Lower();
+    window.Raise();
+    DALI_TEST_CHECK(manager.SetCurrentFocusView(first));
+
+    if(keyboardNavigation)
+    {
+      SendWindowFocusRightKey(window);
+    }
+    else
+    {
+      DALI_TEST_CHECK(manager.MoveFocus(window, FocusDirection::RIGHT));
+    }
+    DALI_TEST_CHECK(manager.GetCurrentFocusView() == second);
+    DALI_TEST_CHECK(second.GetState().Contains(ViewState::FOCUSED));
+
+    WindowFocusRecorder recorder;
+    manager.FocusChangedSignal().Connect(&recorder, &WindowFocusRecorder::OnChanged);
+    WeakHandle<Window> weakWindow(window);
+    window.Reset();
+
+    DALI_TEST_CHECK(!weakWindow.GetHandle());
+    DALI_TEST_CHECK(!first.IsConnectedToScene());
+    DALI_TEST_CHECK(!second.IsConnectedToScene());
+    DALI_TEST_CHECK(!manager.GetCurrentFocusView());
+    DALI_TEST_CHECK(!second.GetState().Contains(ViewState::FOCUSED));
+    DALI_TEST_CHECK(!UiExtension::FocusManager::IsKeyInputTarget(second));
+    DALI_TEST_EQUALS(recorder.changes.size(), 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(!recorder.changes.empty() && recorder.changes.back().first == second);
+    DALI_TEST_CHECK(!recorder.changes.empty() && !recorder.changes.back().second);
+  }
+  END_TEST;
+}
+
 int UtcDaliFocusManagerInactiveWindowSetStoresWithoutStealingP(void)
 {
   UiTestApplication application;

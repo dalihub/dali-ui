@@ -17,10 +17,12 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/devel-api/common/singleton-service.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -51,6 +53,41 @@ void utc_dali_focusmanager_internal_startup(void)
 void utc_dali_focusmanager_internal_cleanup(void)
 {
   test_return_value = TET_PASS;
+}
+
+int UtcDaliFocusManagerFocusLossAfterSingletonCleanupInternalP(void)
+{
+  UiTestApplication application;
+  FocusManager      manager = FocusManager::Get();
+  View              view    = View::New();
+  view.SetFocusable(true);
+  application.GetWindow().Add(view);
+  IntrusivePtr<Dali::Ui::Internal::KeyInputFocusManagerImpl> keyManager(new Dali::Ui::Internal::KeyInputFocusManagerImpl());
+  ConnectionTracker                                          tracker;
+  uint32_t                                                   focusLossCount = 0u;
+  view.FocusChangedSignal().Connect(&tracker, [&focusLossCount](View, bool focused)
+  {
+    if(!focused)
+    {
+      ++focusLossCount;
+    }
+  });
+
+  keyManager->SetFocus(view);
+  DALI_TEST_CHECK(view.GetState().Contains(ViewState::FOCUSED));
+  keyManager->RemoveFocus(view);
+  DALI_TEST_CHECK(!keyManager->GetCurrentFocusView());
+  DALI_TEST_CHECK(!view.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_EQUALS(focusLossCount, 1u, TEST_LOCATION);
+
+  keyManager->SetFocus(view);
+  DALI_TEST_CHECK(keyManager->GetCurrentFocusView() == view);
+  SingletonService::Get().UnregisterAll();
+  DALI_TEST_CHECK(!FocusManager::Get());
+  keyManager->RemoveFocus(view);
+  DALI_TEST_CHECK(!keyManager->GetCurrentFocusView());
+  DALI_TEST_EQUALS(focusLossCount, 1u, TEST_LOCATION);
+  END_TEST;
 }
 
 int UtcDaliFocusManagerFallbackRunsWithDefaultAlgorithmDisabledInternalP(void)

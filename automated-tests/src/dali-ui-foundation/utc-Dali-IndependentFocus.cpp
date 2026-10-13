@@ -533,7 +533,7 @@ int UtcDaliIndependentFocusBackwardKeepsReentrantTargetP(void)
   END_TEST;
 }
 
-int UtcDaliIndependentFocusBackwardSkipsPolicyRejectedHistoryP(void)
+int UtcDaliIndependentFocusBackwardAllowsPolicyHiddenHistoryP(void)
 {
   UiConfig config = UiConfig::New();
   GetImpl(config).SetFocusIndicationPolicy(&HideFocusCandidate);
@@ -549,7 +549,8 @@ int UtcDaliIndependentFocusBackwardSkipsPolicyRejectedHistoryP(void)
   s.manager.MoveFocusBackward(s.sub);
   gHiddenByPolicyTarget.Reset();
   DALI_TEST_CHECK(!second.IsEffectivelyVisible());
-  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == second);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(second));
   DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
   END_TEST;
 }
@@ -562,7 +563,6 @@ int UtcDaliIndependentFocusHideAndDisableClearOnlySubP(void)
   DALI_TEST_CHECK(!s.manager.GetCurrentFocusView(s.sub));
   DALI_TEST_CHECK(!s.subA.GetState().Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
-  DALI_TEST_CHECK(!s.manager.SetCurrentFocusView(s.subA));
   s.sub.Show();
   DALI_TEST_CHECK(!s.manager.GetCurrentFocusView(s.sub));
   DALI_TEST_CHECK(s.manager.SetCurrentFocusView(s.subA));
@@ -572,6 +572,43 @@ int UtcDaliIndependentFocusHideAndDisableClearOnlySubP(void)
   DALI_TEST_CHECK(s.mainView.GetState().Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(s.manager.SetIndependentFocusEnabled(s.sub, true));
   DALI_TEST_CHECK(!s.manager.GetCurrentFocusView(s.sub));
+  END_TEST;
+}
+
+int UtcDaliIndependentFocusSetBeforeWindowShowP(void)
+{
+  FocusScenario s;
+  DALI_TEST_CHECK(s.Enable());
+  s.sub.Hide();
+  DALI_TEST_CHECK(!s.sub.IsVisible());
+  FocusRecorder recorder;
+  s.subA.FocusChangedSignal().Connect(&recorder, &FocusRecorder::OnView);
+  DALI_TEST_CHECK(s.manager.SetCurrentFocusView(s.subA));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subA));
+  DALI_TEST_CHECK(s.subA.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
+  s.sub.Show();
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subA));
+  DALI_TEST_EQUALS(recorder.gained, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.lost, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliIndependentFocusSetHiddenViewP(void)
+{
+  FocusScenario s;
+  DALI_TEST_CHECK(s.Enable());
+  s.subB.SetVisible(false);
+  DALI_TEST_CHECK(s.manager.SetCurrentFocusView(s.subB));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subB);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subB));
+  DALI_TEST_CHECK(s.subB.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
+  s.subB.SetVisible(true);
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subB);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subB));
   END_TEST;
 }
 
@@ -600,22 +637,49 @@ int UtcDaliIndependentFocusInvalidationCancelsActualP(void)
 int UtcDaliIndependentFocusNativePromotionDoesNotRefocusP(void)
 {
   FocusScenario s;
-  DALI_TEST_CHECK(s.Enable());
-  FocusRecorder recorder;
-  s.subA.FocusChangedSignal().Connect(&recorder, &FocusRecorder::OnView);
-  s.sub.Raise();
-  DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.subA);
-  DALI_TEST_CHECK(!s.mainView.GetState().Contains(ViewState::FOCUSED));
-  s.main.Lower();
-  DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.subA);
-  s.sub.Lower();
-  s.main.Raise();
-  DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
-  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
-  DALI_TEST_CHECK(s.mainView.GetState().Contains(ViewState::FOCUSED));
-  DALI_TEST_CHECK(s.subA.GetState().Contains(ViewState::FOCUSED));
-  DALI_TEST_EQUALS(recorder.gained, 0, TEST_LOCATION);
-  DALI_TEST_EQUALS(recorder.lost, 0, TEST_LOCATION);
+  for(bool visible : {true, false})
+  {
+    s.subA.SetVisible(visible);
+    DALI_TEST_CHECK(s.Enable());
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
+    DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subA));
+
+    FocusRecorder recorder;
+    s.subA.FocusChangedSignal().Connect(&recorder, &FocusRecorder::OnView);
+    s.manager.FocusChangedSignal().Connect(&recorder, &FocusRecorder::OnGlobal);
+    s.sub.Raise();
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.subA);
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
+    DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subA));
+    DALI_TEST_CHECK(s.subA.GetState().Contains(ViewState::FOCUSED));
+    DALI_TEST_CHECK(!s.mainView.GetState().Contains(ViewState::FOCUSED));
+    DALI_TEST_EQUALS(recorder.globalChanges, 1, TEST_LOCATION);
+    DALI_TEST_EQUALS(recorder.gained, 0, TEST_LOCATION);
+    DALI_TEST_EQUALS(recorder.lost, 0, TEST_LOCATION);
+
+    s.subA.SetVisible(true);
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.subA);
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
+    DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subA));
+    DALI_TEST_CHECK(s.subA.GetState().Contains(ViewState::FOCUSED));
+    DALI_TEST_EQUALS(recorder.globalChanges, 1, TEST_LOCATION);
+    DALI_TEST_EQUALS(recorder.gained, 0, TEST_LOCATION);
+    DALI_TEST_EQUALS(recorder.lost, 0, TEST_LOCATION);
+
+    s.main.Lower();
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.subA);
+    s.sub.Lower();
+    s.main.Raise();
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView() == s.mainView);
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
+    DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subA));
+    DALI_TEST_CHECK(s.mainView.GetState().Contains(ViewState::FOCUSED));
+    DALI_TEST_CHECK(s.subA.GetState().Contains(ViewState::FOCUSED));
+    DALI_TEST_EQUALS(recorder.globalChanges, 2, TEST_LOCATION);
+    DALI_TEST_EQUALS(recorder.gained, 0, TEST_LOCATION);
+    DALI_TEST_EQUALS(recorder.lost, 0, TEST_LOCATION);
+  }
   END_TEST;
 }
 
@@ -863,7 +927,7 @@ int UtcDaliIndependentFocusHideShowNavigationP(void)
   END_TEST;
 }
 
-int UtcDaliIndependentFocusRejectsHiddenAncestorsN(void)
+int UtcDaliIndependentFocusSetHiddenAncestorsP(void)
 {
   FocusScenario s;
   DALI_TEST_CHECK(s.Enable());
@@ -876,13 +940,14 @@ int UtcDaliIndependentFocusRejectsHiddenAncestorsN(void)
   {
     ancestor.SetVisible(false);
     DALI_TEST_CHECK(target.IsVisible() && !target.IsEffectivelyVisible());
-    DALI_TEST_CHECK(!s.manager.SetCurrentFocusView(target));
-    DALI_TEST_CHECK(!KeyFocus::SetKeyInputTarget(target));
-    DALI_TEST_CHECK(!s.manager.RequestFocus(parent));
-    DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
-    DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subA));
-    DALI_TEST_CHECK(!target.GetState().Contains(ViewState::FOCUSED));
+    DALI_TEST_CHECK(s.manager.SetCurrentFocusView(target));
+    DALI_TEST_CHECK(KeyFocus::SetKeyInputTarget(target));
+    DALI_TEST_CHECK(s.manager.RequestFocus(parent));
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == target);
+    DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(target));
+    DALI_TEST_CHECK(target.GetState().Contains(ViewState::FOCUSED));
     ancestor.SetVisible(true);
+    DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == target);
   }
   DALI_TEST_CHECK(s.manager.RequestFocus(parent));
   DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == target);
@@ -890,7 +955,7 @@ int UtcDaliIndependentFocusRejectsHiddenAncestorsN(void)
   END_TEST;
 }
 
-int UtcDaliIndependentFocusRejectsAncestorHiddenByPolicyN(void)
+int UtcDaliIndependentFocusSetAncestorHiddenByPolicyP(void)
 {
   UiConfig config = UiConfig::New();
   GetImpl(config).SetFocusIndicationPolicy(&HideFocusCandidate);
@@ -902,10 +967,10 @@ int UtcDaliIndependentFocusRejectsAncestorHiddenByPolicyN(void)
   gHiddenByPolicyTarget = target;
   const bool accepted   = s.manager.SetCurrentFocusView(target);
   gHiddenByPolicyTarget.Reset();
-  DALI_TEST_CHECK(!accepted);
+  DALI_TEST_CHECK(accepted);
   DALI_TEST_CHECK(!target.IsEffectivelyVisible());
-  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == s.subA);
-  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(s.subA));
+  DALI_TEST_CHECK(s.manager.GetCurrentFocusView(s.sub) == target);
+  DALI_TEST_CHECK(KeyFocus::IsKeyInputTarget(target));
   DALI_TEST_CHECK(s.mainView.GetState().Contains(ViewState::FOCUSED));
   END_TEST;
 }

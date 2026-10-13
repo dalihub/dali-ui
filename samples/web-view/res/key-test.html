@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TV remote WebView focus test</title>
+<style>
+  * { box-sizing: border-box; }
+  html { height: 100%; }
+  body { margin: 0; height: 100%; padding: 12px 24px; display: flex; flex-direction: column;
+    background: #18202c; color: #edf2f7; font: 20px sans-serif; }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  p { margin: 4px 0; }
+  #grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);
+    gap: 10px; margin: 8px 0; flex: 1; min-height: 120px; }
+  button { padding: 8px; background: #29384d; color: white; border: 4px solid transparent; font: inherit; }
+  button:focus { border-color: #69788d; outline: none; }
+  .page-focused button:focus { border-color: #ffdf6b; background: #425675; }
+  #log { white-space: pre-wrap; word-wrap: break-word; height: 20vh; min-height: 60px;
+    max-height: 160px; overflow: auto; background: #101722; padding: 8px;
+    margin: 6px 0 0; font-size: 16px; flex-shrink: 0; }
+  @media (min-height: 700px) {
+    body { padding: 24px 36px; font-size: 24px; }
+    h1 { font-size: 30px; }
+    #grid { gap: 14px; }
+    #log { font-size: 20px; }
+  }
+  @media (max-height: 500px) {
+    body { padding: 8px 16px; font-size: 18px; }
+    h1 { font-size: 22px; }
+    #grid { min-height: 100px; gap: 8px; }
+    button { padding: 6px; }
+    #log { height: 16vh; max-height: 80px; }
+  }
+</style>
+</head>
+<body>
+<h1>TV 리모컨 WebView 포커스 테스트 (오프라인)</h1>
+<p>방향키: 이동 · Enter/확인: 선택 · 2/N: 네이티브 포커스 · 1/W: WebView 복귀</p>
+<p id="status">DOM keys: 0 | waiting</p>
+<div id="grid">
+  <button id="item0" type="button">항목 1</button>
+  <button id="item1" type="button">항목 2</button>
+  <button id="item2" type="button">항목 3</button>
+  <button id="item3" type="button">항목 4</button>
+  <button id="item4" type="button">항목 5</button>
+  <button id="item5" type="button">항목 6</button>
+</div>
+<p id="result">선택 결과: 아직 없음</p>
+<pre id="log"></pre>
+<script>
+(function () {
+  var buttons = document.querySelectorAll('#grid button');
+  var selected = 0;
+  var count = 0;
+  var downs = 0;
+  var ups = 0;
+  var activations = 0;
+  var enterDown = false;
+  var lines = [];
+  var log = document.getElementById('log');
+  var status = document.getElementById('status');
+  function append(message) {
+    lines.push(message);
+    if (lines.length > 50) lines.shift();
+    log.textContent = lines.join('\n');
+    log.scrollTop = log.scrollHeight;
+  }
+  function updateStatus() {
+    var focused = document.hasFocus();
+    document.body.className = focused ? 'page-focused' : 'page-blurred';
+    status.textContent = 'DOM keys: ' + count + ' (DOWN=' + downs + ' UP=' + ups + ') | document.hasFocus=' + focused +
+      ' | activeElement=' + (document.activeElement ? document.activeElement.id : 'none');
+  }
+  function focusItem(index) {
+    selected = index;
+    buttons[selected].focus();
+    updateStatus();
+  }
+  function activate(index) {
+    activations++;
+    document.getElementById('result').textContent = '선택 결과: 항목 ' + (index + 1) + ' | 확인 횟수: ' + activations;
+    append('ACTIVATE item=' + (index + 1));
+  }
+  for (var i = 0; i < buttons.length; i++) {
+    (function (index) {
+      buttons[index].addEventListener('focus', function () { selected = index; updateStatus(); });
+      buttons[index].addEventListener('click', function () { activate(index); });
+    }(i));
+  }
+  function direction(event) {
+    var key = event.key;
+    var code = event.keyCode;
+    if (key === 'ArrowLeft' || key === 'Left' || code === 37) return 'left';
+    if (key === 'ArrowUp' || key === 'Up' || code === 38) return 'up';
+    if (key === 'ArrowRight' || key === 'Right' || code === 39) return 'right';
+    if (key === 'ArrowDown' || key === 'Down' || code === 40) return 'down';
+    return '';
+  }
+  function onKey(event) {
+    count++;
+    if (event.type === 'keydown') downs++;
+    else ups++;
+    append(event.type + ' key=' + JSON.stringify(event.key) + ' code=' + event.code +
+      ' keyCode=' + event.keyCode + ' repeat=' + Boolean(event.repeat));
+    var move = direction(event);
+    var enter = event.key === 'Enter' || event.key === 'Return' || event.key === 'Select' ||
+      event.key === 'Accept' || event.code === 'NumpadEnter' || event.keyCode === 13;
+    if (move || enter) {
+      // Define deterministic navigation without relying on browser spatial navigation.
+      event.preventDefault();
+      if (event.type === 'keydown') {
+        var next = selected;
+        if (move === 'left' && selected % 3 > 0) next--;
+        if (move === 'right' && selected % 3 < 2) next++;
+        if (move === 'up' && selected >= 3) next -= 3;
+        if (move === 'down' && selected < 3) next += 3;
+        if (move) focusItem(next);
+        if (enter) {
+          // Older engines may omit KeyboardEvent.repeat. A held OK key still
+          // activates once, until keyup or page blur releases the latch.
+          if (!enterDown && !event.repeat) buttons[selected].click();
+          enterDown = true;
+        }
+      } else if (enter) {
+        enterDown = false;
+      }
+    }
+    updateStatus();
+  }
+  document.addEventListener('keydown', onKey, true);
+  document.addEventListener('keyup', onKey, true);
+  window.addEventListener('focus', function () {
+    append('window focus');
+    // Restore only the DOM selection when the engine reports real page focus.
+    // This never requests native Window/View focus or injects a key event.
+    focusItem(selected);
+    setTimeout(updateStatus, 0);
+  });
+  window.addEventListener('blur', function () {
+    enterDown = false;
+    append('window blur');
+    updateStatus();
+    setTimeout(updateStatus, 0);
+  });
+  focusItem(0);
+  append('Ready: arrows / Enter; 2/N leaves WebView, 1/W returns. No network resources.');
+}());
+</script>
+</body>
+</html>

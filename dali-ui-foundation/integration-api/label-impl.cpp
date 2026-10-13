@@ -2158,7 +2158,7 @@ void LabelImpl::OnInitialize()
   // Enable the text ellipsis.
   mController->SetTextElideEnabled(true);
 
-  Dali::DevelActor::OnSceneVisibilityChangedSignal(self).Connect(this, &LabelImpl::OnViewEffectiveVisibilityChanged);
+  self.OnSceneVisibilityChangedSignal().Connect(this, &LabelImpl::OnViewEffectiveVisibilityChanged);
   self.LayoutDirectionChangedSignal().Connect(this, &LabelImpl::OnLayoutDirectionChanged);
 
   if(Dali::Adaptor::IsAvailable())
@@ -3975,7 +3975,7 @@ bool LabelImpl::IsVisible()
 {
   if(!mIsVisibleInitialized)
   {
-    mIsVisible            = Dali::DevelActor::IsOnSceneVisible(Self());
+    mIsVisible            = Self().IsOnSceneVisible();
     mIsVisibleInitialized = true;
   }
   return mIsVisible;

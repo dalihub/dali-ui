@@ -609,10 +609,12 @@ void WebViewImpl::OnFrameRendered()
     return;
   }
 
-  auto nativeImagePtr = mWebEngine.GetNativeImage();
+  // A plugin rendering through a native image queue hands the queue over here,
+  // so the visual acquires and releases its buffers on the render thread.
+  auto nativeImagePtr = mWebEngine.GetNativeImageInterface();
   if(!nativeImagePtr)
   {
-    DALI_LOG_ERROR("[WebViewImpl] GetNativeImage() returned null\n");
+    DALI_LOG_ERROR("[WebViewImpl] GetNativeImageInterface() returned null\n");
     return;
   }
 
@@ -1442,6 +1444,16 @@ bool WebViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
     return mWebEngine.SendKeyEvent(event);
   }
   return false;
+}
+
+void WebViewImpl::OnFocusChanged(bool focused)
+{
+  if(mWebEngine)
+  {
+    mWebEngine.SetFocus(focused);
+  }
+
+  ViewImpl::OnFocusChanged(focused);
 }
 
 bool WebViewImpl::HasIntrinsicTouchHandling() const

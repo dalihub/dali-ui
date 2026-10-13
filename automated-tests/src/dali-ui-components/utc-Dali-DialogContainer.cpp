@@ -487,7 +487,6 @@ int UtcDaliDialogContainerDerivedInitializationUsesDefaultStyleP(void)
   END_TEST;
 }
 
-#include <dali/devel-api/actors/actor-devel.h>
 
 int UtcDaliDialogContainerModalSceneCallbackCanClearP(void)
 {
@@ -495,7 +494,7 @@ int UtcDaliDialogContainerModalSceneCallbackCanClearP(void)
   DialogContainer container = DialogContainer::New();
   application.GetScene().Add(container);
   View content = View::New();
-  DevelActor::OnSceneVisibilityChangedSignal(content).Connect(&application, [&](Actor, bool visible)
+  content.OnSceneVisibilityChangedSignal().Connect(&application, [&](Actor, bool visible)
   {
     if(visible)
     {
@@ -518,7 +517,7 @@ int UtcDaliDialogContainerModalRemovalCallbackCanReplaceP(void)
   View replacement = View::New();
   View callbackContent = View::New();
   container.SetModalContent(first);
-  DevelActor::OnSceneVisibilityChangedSignal(first).Connect(&application, [&](Actor, bool visible)
+  first.OnSceneVisibilityChangedSignal().Connect(&application, [&](Actor, bool visible)
   {
     if(!visible)
     {
@@ -590,7 +589,7 @@ int UtcDaliDialogContainerDisconnectionCallbackTransfersOwnedModalP(void)
   View content = View::New();
   first.SetModalContent(content);
   bool transferred = false;
-  DevelActor::OnSceneVisibilityChangedSignal(content).Connect(&application, [&](Actor, bool visible)
+  content.OnSceneVisibilityChangedSignal().Connect(&application, [&](Actor, bool visible)
   {
     if(!visible && !transferred)
     {

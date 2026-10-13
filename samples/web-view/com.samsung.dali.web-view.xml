@@ -13,6 +13,10 @@
         <icon>/usr/share/icons/com.samsung.dali-demo.png</icon>
         <label>DALi UI Web Browser sample</label>
 	</ui-application>
+    <ui-application appid="web-view-key-test.example" exec="/usr/apps/com.samsung.dali.web-view/bin/web-view-key-test.example" type="c++app" multiple="false" taskmanage="true" nodisplay="false">
+        <icon>/usr/share/icons/com.samsung.dali-demo.png</icon>
+        <label>DALi UI WebView TV Key Focus Test</label>
+    </ui-application>
 	<privileges>
 		<privilege>http://tizen.org/privilege/appmanager.launch</privilege>
 		<privilege>http://tizen.org/privilege/mediastorage</privilege>

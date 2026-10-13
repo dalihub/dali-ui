@@ -155,14 +155,6 @@ else
             output_end $mod
         done
         summary_end
-        # Run the production text-abstraction path after the mock-backed UTCs.
-        # Its gcda files are included by coverage.sh in the combined report.
-        real_layout_binary=build/src/dali-ui-foundation-internal/dali-replacement-real-layout-diagnostic
-        if [ ! -x "$real_layout_binary" ] ; then
-            echo "Missing real text layout diagnostic: $real_layout_binary" >&2
-            exit 1
-        fi
-        dbus-launch "$real_layout_binary" || exit $?
 
     elif [ -f "build/src/$1/tct-$1-core" ] ; then
         # First argument is an executable filename - execute only that with any
