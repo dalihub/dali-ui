@@ -1,5 +1,5 @@
-#ifndef MANUAL_TEST_LAYOUT_TRANSITION_EXIT_PROBE_H
-#define MANUAL_TEST_LAYOUT_TRANSITION_EXIT_PROBE_H
+#ifndef MANUAL_TEST_LAYOUT_TRANSITION_PROBE_H
+#define MANUAL_TEST_LAYOUT_TRANSITION_PROBE_H
 
 /* Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -24,40 +24,42 @@
 #include <string>
 
 /**
- * Prints what an EXIT transition does to the leaving child, one line per tick,
- * on stdout (dlog tag STDOUT on Tizen):
+ * Prints what an ENTER / EXIT transition does to the added / leaving child, one
+ * line per tick, on stdout (dlog tag STDOUT on Tizen):
  *
  *   [TC78][EXIT] t=0.016 h=79.2 opacity=0.991 scene=1
  *   ...
  *   [TC78][EXIT][END] samples=50
  *
- * t is seconds since the EXIT touch; h and opacity are the rendered (current)
+ * t is seconds since the touch; h and opacity are the rendered (current)
  * values, scene is CONNECTED_TO_SCENE. The probe only reads — it changes
  * nothing about the transition.
  *
- * Why: an automated check reading the accessibility tree cannot see EXIT on a
- * slow target — the first tree read after the child leaves takes ~1 s there,
- * longer than the whole 0.4 s transition — and opacity is not in the tree at
- * all. The leaving child is held by this probe for the sampling window only.
+ * Why: an automated check reading the accessibility tree cannot see a 0.4 s
+ * transition on a slow target — the first tree read after the change takes
+ * ~0.5-2 s there — and opacity is not in the tree at all. The child is held by
+ * this probe for the sampling window only.
  */
-class LayoutTransitionExitProbe : public Dali::ConnectionTracker
+class LayoutTransitionProbe : public Dali::ConnectionTracker
 {
 public:
-  explicit LayoutTransitionExitProbe(std::string tag)
+  explicit LayoutTransitionProbe(std::string tag)
   : mTag(std::move(tag))
   {
   }
 
-  /// Call right BEFORE the remove, so the first line is the pre-EXIT state.
-  void Start(Dali::Actor leaving)
+  /// EXIT: call right BEFORE the remove, so the first line is the pre-EXIT state.
+  /// ENTER: call right AFTER the add.
+  void Start(Dali::Actor actor, std::string phase)
   {
     Stop();
-    mActor   = leaving;
+    mActor   = actor;
+    mPhase   = std::move(phase);
     mStart   = Clock::now();
     mSamples = 0u;
     Sample();
     mTimer = Dali::Timer::New(TICK_MS);
-    mTimer.TickSignal().Connect(this, &LayoutTransitionExitProbe::OnTick);
+    mTimer.TickSignal().Connect(this, &LayoutTransitionProbe::OnTick);
     mTimer.Start();
   }
 
@@ -88,8 +90,8 @@ private:
     const float         opacity = mActor.GetCurrentProperty<float>(Dali::Actor::Property::OPACITY);
     const bool          scene   = mActor.GetProperty<bool>(Dali::Actor::Property::CONNECTED_TO_SCENE);
     char                line[128];
-    std::snprintf(line, sizeof(line), "[%s][EXIT] t=%.3f h=%.1f opacity=%.3f scene=%d",
-                  mTag.c_str(), Elapsed(), size.height, opacity, scene ? 1 : 0);
+    std::snprintf(line, sizeof(line), "[%s][%s] t=%.3f h=%.1f opacity=%.3f scene=%d",
+                  mTag.c_str(), mPhase.c_str(), Elapsed(), size.height, opacity, scene ? 1 : 0);
     std::cout << line << std::endl;
     ++mSamples;
   }
@@ -105,16 +107,17 @@ private:
     {
       return true;
     }
-    std::cout << "[" << mTag << "][EXIT][END] samples=" << mSamples << std::endl;
+    std::cout << "[" << mTag << "][" << mPhase << "][END] samples=" << mSamples << std::endl;
     mActor.Reset();
     return false;
   }
 
   std::string       mTag;
+  std::string       mPhase;
   Dali::Actor       mActor;
   Dali::Timer       mTimer;
   Clock::time_point mStart{};
   unsigned int      mSamples{0u};
 };
 
-#endif // MANUAL_TEST_LAYOUT_TRANSITION_EXIT_PROBE_H
+#endif // MANUAL_TEST_LAYOUT_TRANSITION_PROBE_H
