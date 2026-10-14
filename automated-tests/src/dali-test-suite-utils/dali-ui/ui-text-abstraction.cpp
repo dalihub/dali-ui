@@ -16,6 +16,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui/test-font-glyph-constants.h>
+#include <dali-ui/ui-text-abstraction.h>
 #include <dali/devel-api/common/singleton-service.h>
 #include <dali/devel-api/text-abstraction/bidirectional-support.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
@@ -67,7 +68,16 @@ float GetMockFontPixelSize(FontId fontId)
 {
   return static_cast<float>(fontId > 0u ? fontId : DEFAULT_POINT_SIZE_26DOT6) / 64.0f;
 }
+// Tests install and restore callbacks on the thread performing synchronous layout.
+thread_local TestReorderCallback testReorderCallback = nullptr;
 } // namespace
+
+TestReorderCallback SetTestReorderCallback(TestReorderCallback callback)
+{
+  const auto previous = testReorderCallback;
+  testReorderCallback = callback;
+  return previous;
+}
 
 namespace Internal
 {
@@ -121,6 +131,10 @@ public:
 
   void Reorder(BidiInfoIndex bidiInfoIndex, CharacterIndex firstCharacterIndex, Length numberOfCharacters, CharacterIndex* visualToLogicalMap)
   {
+    if(testReorderCallback)
+    {
+      testReorderCallback(bidiInfoIndex, firstCharacterIndex, numberOfCharacters, visualToLogicalMap);
+    }
   }
 
   bool GetMirroredText(Character* text, CharacterDirection* directions, Length numberOfCharacters)

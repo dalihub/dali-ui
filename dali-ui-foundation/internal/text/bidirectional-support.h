@@ -57,17 +57,32 @@ void SetBidirectionalInfo(TextAbstraction::BidirectionalSupport& bidirectionalSu
                           Dali::LayoutDirection::Type layoutDirection = LayoutDirection::LEFT_TO_RIGHT);
 
 /**
- * @brief Sets the visual to logical map table for a given line.
+ * @brief Inserts a line-relative visual-to-logical character map.
  *
- * @param[in] bidirectionalSupport BidirectionalSupport to use in this function.
- * @param[in] bidirectionalParagraphInfo The paragraph's bidirectional info.
- * @param[out] lineInfoRuns Line runs with the visual to logical conversion maps.
- * @param[in] bidiLineIndex Index to the line's bidirectional info.
- * @param[in] startIndex The character from where the bidirectional info is set.
- * @param[in] numberOfCharacters The number of characters.
- * @param[in] direction The direction of the line.
+ * Line and paragraph ranges are absolute source character ranges within the
+ * logical model's text. Their ends must not exceed its character count, and
+ * paragraphs must be ordered and nonoverlapping. A contained line uses the hint
+ * directly. Otherwise each paragraph intersection is reordered independently;
+ * intersection-relative results are translated to line-relative indices and
+ * LTR gaps remain identity. Identity maps avoid unnecessary glyph relayout.
+ *
+ * The logical model owns the inserted malloc-allocated map and frees it when
+ * the line is replaced, cleared or destroyed. Empty lines have a null map.
+ *
+ * @param[in] bidirectionalSupport Bidirectional support instance.
+ * @param[in] bidirectionalParagraphInfo Paragraph hint; need not contain the line.
+ * @param[in] paragraphs Ordered bidi paragraph metadata for the source text.
+ * @param[in,out] lineInfoRuns Existing line runs receiving the new map.
+ * @param[in] bidiLineIndex Insertion index, no greater than lineInfoRuns.Count().
+ * @param[in] startIndex Absolute source character index of the line start.
+ * @param[in] numberOfCharacters Number of source characters in the line.
+ * @param[in] direction Resolved direction of the line.
  */
-void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport, const BidirectionalParagraphInfoRun& bidirectionalParagraphInfo, Vector<BidirectionalLineInfoRun>& lineInfoRuns, BidirectionalLineRunIndex bidiLineIndex, CharacterIndex startIndex, Length numberOfCharacters, CharacterDirection direction);
+void ReorderLine(TextAbstraction::BidirectionalSupport&       bidirectionalSupport,
+                 const BidirectionalParagraphInfoRun&         bidirectionalParagraphInfo,
+                 const Vector<BidirectionalParagraphInfoRun>& paragraphs,
+                 Vector<BidirectionalLineInfoRun>& lineInfoRuns, BidirectionalLineRunIndex bidiLineIndex,
+                 CharacterIndex startIndex, Length numberOfCharacters, CharacterDirection direction);
 
 /**
  * @brief Replaces any character in the right to left paragraphs which could be mirrored.

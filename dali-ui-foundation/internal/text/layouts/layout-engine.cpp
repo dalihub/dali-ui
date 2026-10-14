@@ -829,7 +829,7 @@ struct Engine::Impl
 
     const BidirectionalParagraphInfoRun& bidirectionalParagraphInfo =
       bidirectionalParagraphsInfo[bidiParameters.bidiParagraphIndex];
-    if((lineLayout.characterIndex >= bidirectionalParagraphInfo.characterRun.characterIndex) &&
+    if((lineLayout.characterIndex + lineLayout.numberOfCharacters > bidirectionalParagraphInfo.characterRun.characterIndex) &&
        (lineLayout.characterIndex < bidirectionalParagraphInfo.characterRun.characterIndex +
                                       bidirectionalParagraphInfo.characterRun.numberOfCharacters))
     {
@@ -839,7 +839,7 @@ struct Engine::Impl
       TextAbstraction::BidirectionalSupport bidirectionalSupport = parameters.bidirectionalSupport;
 
       // Sets the visual to logical map tables needed to reorder the text.
-      ReorderLine(bidirectionalSupport, bidirectionalParagraphInfo, bidirectionalLinesInfo,
+      ReorderLine(bidirectionalSupport, bidirectionalParagraphInfo, bidirectionalParagraphsInfo, bidirectionalLinesInfo,
                   bidiParameters.bidiLineIndex, lineLayout.characterIndex, lineLayout.numberOfCharacters,
                   bidiParameters.paragraphDirection);
 
@@ -908,19 +908,27 @@ struct Engine::Impl
     }
   }
 
+  /**
+   * @brief Replaces the current line map after shortening a bidi candidate.
+   * @param[in] parameters Layout model owning the line maps.
+   * @param[in,out] bidiParameters Current line index and direction.
+   * @param[in] bidirectionalParagraphInfo Paragraph hint for the shortened line.
+   * @param[in,out] lineLayout Shortened source range whose width is recalculated.
+   */
   void AdjustLayout(const Parameters& parameters, LayoutBidiParameters& bidiParameters,
                     const BidirectionalParagraphInfoRun& bidirectionalParagraphInfo, LineLayout& lineLayout)
   {
     Vector<BidirectionalLineInfoRun>& bidirectionalLinesInfo =
       parameters.textModel->mLogicalModel->mBidirectionalLineInfo;
 
-    // Remove current reordered line.
+    // Erase does not destroy the raw map owned by the logical model.
+    free(bidirectionalLinesInfo[bidiParameters.bidiLineIndex].visualToLogicalMap);
     bidirectionalLinesInfo.Erase(bidirectionalLinesInfo.Begin() + bidiParameters.bidiLineIndex);
 
     TextAbstraction::BidirectionalSupport bidirectionalSupport = parameters.bidirectionalSupport;
 
     // Re-build the conversion table without the removed glyphs.
-    ReorderLine(bidirectionalSupport, bidirectionalParagraphInfo, bidirectionalLinesInfo, bidiParameters.bidiLineIndex,
+    ReorderLine(bidirectionalSupport, bidirectionalParagraphInfo, parameters.textModel->mLogicalModel->mBidirectionalParagraphInfo, bidirectionalLinesInfo, bidiParameters.bidiLineIndex,
                 lineLayout.characterIndex, lineLayout.numberOfCharacters, bidiParameters.paragraphDirection);
 
     const BidirectionalLineInfoRun& bidirectionalLineInfo =
@@ -2021,6 +2029,13 @@ struct Engine::Impl
           {
             layoutBidiParameters.paragraphDirection = run.direction;
             layoutBidiParameters.isBidirectional    = true;
+          }
+
+          else if(mLayout == SINGLE_LINE_BOX)
+          {
+            // Single-line layout keeps explicit newlines on the same visual
+            // line, so a later bidi paragraph also needs a conversion map.
+            layoutBidiParameters.isBidirectional = true;
           }
 
           // Has already been found.
