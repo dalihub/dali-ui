@@ -28,8 +28,9 @@
 #undef protected
 #undef private
 
-#include <cstdio>
+#include <filesystem>
 #include <fstream>
+#include <random>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -47,8 +48,44 @@ void utc_dali_mesh_visual_internal_cleanup(void)
 
 namespace
 {
-const char* OBJECT_PATH = "/tmp/dali-ui-mesh-visual-utc.obj";
-const char* MATERIAL_PATH = "/tmp/dali-ui-mesh-visual-utc.mtl";
+class ScopedTestFile
+{
+public:
+  explicit ScopedTestFile(const char* name)
+  {
+    std::random_device random;
+    for(unsigned int attempt = 0; attempt < 32u; ++attempt)
+    {
+      auto directory = std::filesystem::temp_directory_path() / ("dali-ui-mesh-visual-utc-" + std::to_string(random()));
+      // Atomically reserve a directory so parallel test processes cannot share fixtures.
+      if(std::filesystem::create_directory(directory))
+      {
+        mDirectory = directory;
+        break;
+      }
+    }
+    DALI_TEST_CHECK(!mDirectory.empty());
+    mPath = (mDirectory / name).string();
+  }
+
+  ~ScopedTestFile()
+  {
+    std::error_code error;
+    std::filesystem::remove_all(mDirectory, error);
+  }
+
+  ScopedTestFile(const ScopedTestFile&) = delete;
+  ScopedTestFile& operator=(const ScopedTestFile&) = delete;
+
+  const std::string& GetPath() const
+  {
+    return mPath;
+  }
+
+private:
+  std::filesystem::path mDirectory;
+  std::string mPath;
+};
 
 VisualFactoryCache& GetMeshFactoryCache()
 {
@@ -61,10 +98,13 @@ MeshVisualPtr CreateMeshVisual()
   return MeshVisualPtr(new MeshVisual(GetMeshFactoryCache()));
 }
 
-void WriteFile(const char* path, const char* contents)
+void WriteFile(const std::string& path, const char* contents)
 {
   std::ofstream stream(path);
+  DALI_TEST_CHECK(stream.is_open());
   stream << contents;
+  stream.close();
+  DALI_TEST_CHECK(!stream.fail());
 }
 } // namespace
 
@@ -137,7 +177,8 @@ int UtcDaliMeshVisualInvalidPropertiesAndGeometryFailureP(void)
 int UtcDaliMeshVisualLoadsTexturelessObjectP(void)
 {
   UiTestApplication application;
-  WriteFile(OBJECT_PATH,
+  ScopedTestFile objectFile("model.obj");
+  WriteFile(objectFile.GetPath(),
             "v 0 0 0\n"
             "v 1 0 0\n"
             "v 0 1 0\n"
@@ -145,7 +186,7 @@ int UtcDaliMeshVisualLoadsTexturelessObjectP(void)
             "f 1//1 2//1 3//1\n");
 
   auto fileVisual = CreateMeshVisual();
-  fileVisual->mObjectUrl = OBJECT_PATH;
+  fileVisual->mObjectUrl = objectFile.GetPath();
   DALI_TEST_CHECK(fileVisual->LoadGeometry());
 
   auto visual = CreateMeshVisual();
@@ -177,21 +218,21 @@ int UtcDaliMeshVisualLoadsTexturelessObjectP(void)
   visual->UpdateShaderUniforms(Vector2(480.0f, 800.0f));
   DALI_TEST_CHECK(visual->mLightPosition != Vector3::ZERO);
 
-  std::remove(OBJECT_PATH);
   END_TEST;
 }
 
 int UtcDaliMeshVisualMaterialAndTextureFailuresP(void)
 {
   UiTestApplication application;
-  WriteFile(MATERIAL_PATH,
+  ScopedTestFile materialFile("model.mtl");
+  WriteFile(materialFile.GetPath(),
             "newmtl material\n"
             "map_Kd missing-diffuse.png\n"
             "bump missing-normal.png\n"
             "map_Ks missing-gloss.png\n");
 
   auto visual = CreateMeshVisual();
-  visual->mMaterialUrl = MATERIAL_PATH;
+  visual->mMaterialUrl = materialFile.GetPath();
   DALI_TEST_CHECK(visual->LoadMaterial());
   DALI_TEST_EQUALS(visual->mDiffuseTextureUrl, std::string("missing-diffuse.png"), TEST_LOCATION);
 
@@ -219,14 +260,14 @@ int UtcDaliMeshVisualMaterialAndTextureFailuresP(void)
   DALI_TEST_CHECK(visual->mTextureSet.GetTexture(0u));
   DALI_TEST_CHECK(visual->mTextureSet.GetTexture(1u));
   DALI_TEST_CHECK(visual->mTextureSet.GetTexture(2u));
-  std::remove(MATERIAL_PATH);
   END_TEST;
 }
 
 int UtcDaliMeshVisualInitializeAndShaderFallbacksP(void)
 {
   UiTestApplication application;
-  WriteFile(OBJECT_PATH,
+  ScopedTestFile objectFile("model.obj");
+  WriteFile(objectFile.GetPath(),
             "\n"
             "v 0 0 0\n"
             "v 1 0 0\n"
@@ -234,7 +275,7 @@ int UtcDaliMeshVisualInitializeAndShaderFallbacksP(void)
             "f 1 2 3\n");
 
   auto visual = CreateMeshVisual();
-  visual->mObjectUrl = OBJECT_PATH;
+  visual->mObjectUrl = objectFile.GetPath();
   visual->mUseTexture = false;
   visual->mUseSoftNormals = false;
   visual->OnInitialize();
@@ -252,13 +293,12 @@ int UtcDaliMeshVisualInitializeAndShaderFallbacksP(void)
   visual->UpdateShaderUniforms(Vector2(100.0f, 100.0f));
 
   auto missingMaterial = CreateMeshVisual();
-  missingMaterial->mObjectUrl = OBJECT_PATH;
+  missingMaterial->mObjectUrl = objectFile.GetPath();
   missingMaterial->mMaterialUrl = "/tmp/dali-ui-missing-material.mtl";
   missingMaterial->mUseTexture = true;
   missingMaterial->mUseSoftNormals = false;
   missingMaterial->OnInitialize();
   DALI_TEST_CHECK(missingMaterial->mImpl->mRenderer);
 
-  std::remove(OBJECT_PATH);
   END_TEST;
 }
