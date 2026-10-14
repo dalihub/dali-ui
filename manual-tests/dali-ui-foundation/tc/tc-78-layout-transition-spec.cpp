@@ -14,6 +14,7 @@
  */
 
 #include "manual-test-case.h"
+#include "layout-transition-exit-probe.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/public-api/adaptor-framework/ui-context.h>
@@ -31,7 +32,9 @@ using namespace Dali::Ui;
  * existing children when their requested height changes.
  *
  *   - Tap "Click to ENTER": append a new colored child.
- *   - Tap "Click to EXIT": remove the last child.
+ *   - Tap "Click to EXIT": remove the last child. The leaving child's
+ *     height/opacity are printed per tick ([TC78][EXIT] lines, see
+ *     layout-transition-exit-probe.h) for automated checks.
  *   - Tap "Click to CHANGE": toggle every child's requested
  *     height between 80 and 160.
  */
@@ -177,6 +180,7 @@ public:
     // logical child is the last live item. Use View::Remove so the EXIT slot
     // is honoured (deferred-remove).
     View last = mStack.GetChildViewAt(count - 1u);
+    mExitProbe.Start(last);
     mStack.Remove(last, RemovePolicy::ANIMATE_EXIT);
   }
 
@@ -218,6 +222,7 @@ public:
 
   void OnExit() override
   {
+    mExitProbe.Stop();
     DisconnectAll();
     mStack.Reset();
     mEnterButton.Reset();
@@ -232,6 +237,7 @@ private:
   Label        mChangeButton;
   uint32_t     mNextColorIndex;
   bool         mExpanded;
+  LayoutTransitionExitProbe mExitProbe{"TC78"};
 };
 
 REGISTER_MANUAL_TEST(TcLayoutTransitionSpec)
