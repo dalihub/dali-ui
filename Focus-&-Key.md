@@ -79,6 +79,13 @@ Use `RequestFocus()` for normal application focus requests. It resolves the requ
 
 Use `SetCurrentFocusView()` when you intentionally want to focus exactly that View with no child delegation. If the View itself is not focusable, the call fails even if it has focusable children.
 
+Once focus application begins, focus notification callbacks may request another
+View, clear focus, or remove the target. `SetCurrentFocusView()` and
+`RequestFocus()` still return `true` for the accepted request and preserve the
+callback's result. A successful return does not guarantee that the requested
+View remains focused; use `GetCurrentFocusView(window)` to inspect the result.
+Requests rejected by target validation still return `false`.
+
 ```cpp
 // Delegates to the first focusable child if layout itself is not focusable.
 focusMgr.RequestFocus(layout);
