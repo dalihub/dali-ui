@@ -6,7 +6,6 @@
 - 작업 타입: feedback backend 분리, build/package dependency 정책
 - 관련 영역:
   - Switch를 포함한 interactive component의 입력 feedback
-  - `dali-ui-foundation/internal/feedback/feedback-style.*`
   - `dali-adaptor`의 `FeedbackPlayer`
   - Tizen native multimedia sound API와 해당 shared object
 - 목표: SoundFeedback이 필요한 제품에는 native sound를 제공하되, 필요하지 않은
@@ -19,9 +18,10 @@ component 또는 foundation의 필수 link dependency로 즉시 추가해서는 
 
 ## 현재 확인된 구조
 
-기존 `FeedbackStyle`은 `Dali::FeedbackPlayer`를 통해 sound pattern과 sound file을
-재생한다. 따라서 새로운 SoundFeedback 요구사항을 구현하기 전에 다음을 먼저 결정해야
-한다.
+`dali-adaptor`의 `Dali::FeedbackPlayer`는 sound pattern과 sound file 재생을
+devel-api로 제공하며, 실제 backend는 별도 package인 `dali2-feedback-plugin`을
+runtime에 load하는 구조다. 따라서 새로운 SoundFeedback 요구사항을 구현하기 전에
+다음을 먼저 결정해야 한다.
 
 1. 기존 adaptor `FeedbackPlayer` 계약을 확장하여 사용할 수 있는가?
 2. 요구하는 system sound 기능이 adaptor 계약으로 표현되지 않아 dali-ui가 native
