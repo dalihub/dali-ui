@@ -77,6 +77,13 @@ focusMgr.ClearFocus();
 
 `SetCurrentFocusView()`는 child delegation 없이 정확히 그 View 자체에 focus를 설정하고 싶을 때 사용합니다. 해당 View 자체가 focusable이 아니면, focusable child를 가지고 있어도 실패합니다.
 
+포커스 적용이 시작된 뒤 포커스 알림 콜백이 다른 View로 이동하거나 포커스를 해제하고,
+대상을 제거할 수 있습니다. 이 경우에도 `SetCurrentFocusView()`와 `RequestFocus()`는
+이미 수락한 요청에 대해 `true`를 반환하며 콜백이 결정한 결과를 보존합니다.
+성공 반환이 요청한 View의 포커스 유지를 보장하지는 않으므로,
+최종 상태는 `GetCurrentFocusView(window)`로 확인하세요.
+대상 검증에서 거절된 요청은 계속 `false`를 반환합니다.
+
 ```cpp
 // layout 자신이 focusable하지 않아도 첫 번째 focusable child로 위임될 수 있습니다.
 focusMgr.RequestFocus(layout);

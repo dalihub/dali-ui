@@ -160,6 +160,86 @@ Dali::Integration::HoverEvent GenerateFocusManagerHover(PointState::Type state, 
 }
 } // namespace
 
+int UtcDaliFocusManagerReentrantRestorePreservesCallbackP(void)
+{
+  UiTestApplication application;
+  FocusManager      manager = FocusManager::Get();
+  Window            window  = application.GetWindow();
+  enum class CallbackAction
+  {
+    REDIRECT,
+    CLEAR,
+    REMOVE
+  };
+  for(bool clearOnLoss : {false, true})
+  {
+    for(CallbackAction action : {CallbackAction::REDIRECT, CallbackAction::CLEAR, CallbackAction::REMOVE})
+    {
+      manager.SetClearFocusOnWindowFocusLost(clearOnLoss);
+      View previous  = AddWindowFocusTarget(window);
+      View requested = AddWindowFocusTarget(window);
+      View latest    = AddWindowFocusTarget(window);
+      DALI_TEST_CHECK(manager.SetCurrentFocusView(previous));
+      window.Lower();
+      DALI_TEST_CHECK(manager.SetCurrentFocusView(requested));
+
+      WindowFocusRecorder recorder;
+      manager.FocusChangedSignal().Connect(&recorder, &WindowFocusRecorder::OnChanged);
+      bool              reentered       = false;
+      bool              nestedSucceeded = false;
+      ConnectionTracker tracker;
+      requested.FocusChangedSignal().Connect(&tracker, [&](View, bool focused)
+      {
+        if(focused && !reentered)
+        {
+          reentered = true;
+          switch(action)
+          {
+            case CallbackAction::REDIRECT:
+            {
+              nestedSucceeded = manager.SetCurrentFocusView(latest);
+              break;
+            }
+            case CallbackAction::CLEAR:
+            {
+              manager.ClearFocus(window);
+              break;
+            }
+            case CallbackAction::REMOVE:
+            {
+              requested.Unparent();
+              break;
+            }
+          }
+        }
+      });
+
+      window.Raise();
+      DALI_TEST_CHECK(reentered);
+      DALI_TEST_CHECK(!UiExtension::FocusManager::IsKeyInputTarget(requested));
+      DALI_TEST_CHECK(!requested.GetState().Contains(ViewState::FOCUSED));
+      for(const auto& change : recorder.changes)
+      {
+        DALI_TEST_CHECK(change.second != requested);
+      }
+      if(action == CallbackAction::REDIRECT)
+      {
+        DALI_TEST_CHECK(nestedSucceeded);
+        DALI_TEST_CHECK(manager.GetCurrentFocusView() == latest);
+        DALI_TEST_CHECK(manager.GetCurrentFocusView(window) == latest);
+        DALI_TEST_CHECK(UiExtension::FocusManager::IsKeyInputTarget(latest));
+        DALI_TEST_CHECK(latest.GetState().Contains(ViewState::FOCUSED));
+      }
+      else
+      {
+        DALI_TEST_CHECK(!manager.GetCurrentFocusView());
+        DALI_TEST_CHECK(!manager.GetCurrentFocusView(window));
+      }
+    }
+  }
+  END_TEST;
+}
+
 int UtcDaliFocusManagerNavigationDoesNotRetainWindowP(void)
 {
   UiTestApplication application;

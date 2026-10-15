@@ -413,7 +413,12 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
     keyManager.RemoveFocus(previousLocal);
     DisconnectFocusViewIfUnused(previousLocal);
   }
-  if(GetCurrentFocusView(window) != view || (independent && !CanSetKeyInputFocus(view)))
+  if(GetCurrentFocusView(window) != view)
+  {
+    // Focus-loss callbacks may replace or clear this accepted request.
+    return true;
+  }
+  if(independent && !CanSetKeyInputFocus(view))
   {
     return false;
   }
@@ -441,7 +446,8 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
   }
   if(GetCurrentFocusView(window) != view)
   {
-    return false;
+    // Preserve the result of reentrant key-focus notifications as a success.
+    return true;
   }
   RefreshFocusIndicator(view);
   if(global && previousWindow && previousWindow != window && previousGlobal && !retainPreviousGlobal)

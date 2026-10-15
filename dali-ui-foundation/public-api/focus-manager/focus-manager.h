@@ -96,6 +96,10 @@ public:
    * with the View's Window to query the actual result in that scope.
    * Removing or disabling a stored target cancels its reservation. Reattaching
    * or re-enabling it does not restore that reservation without a new request.
+   * Once focus application begins, focus notification callbacks may move or
+   * clear focus, including by removing the target. Such changes do not reject
+   * the accepted request: it still returns true and preserves the callback's
+   * result. Query GetCurrentFocusView(Window) to inspect the resulting focus.
    *
    * For example, if mainView is the global target and the visible subWindow
    * allows independent focus, a successful request for subView has these results:
@@ -106,7 +110,7 @@ public:
    * @endcode
    *
    * @param[in] view The target View, which also determines the Window to update
-   * @return true if the target was applied or stored for later activation, false
+   * @return true if the request was accepted for application or storage, false
    *         if the request was rejected. Success alone does not guarantee actual focus.
    * @pre The FocusManager has been initialized.
    * @pre The View has been initialized.
@@ -125,9 +129,13 @@ public:
    * An inactive Window normally stores the resolved target without changing
    * actual focus. The independent option applies the resolved target within its
    * Window, as with SetCurrentFocusView().
+   * Once focus application begins, notification callbacks may replace or clear
+   * the resolved focus without making the accepted request fail. Query
+   * GetCurrentFocusView(Window) to inspect the resulting focus.
    *
    * @param view The view to request focus on
-   * @return true if the resolved target was applied or stored for later activation
+   * @return true if the resolved request was accepted for application or storage,
+   *         false if it was rejected
    * @pre The FocusManager has been initialized.
    * @pre The View has been initialized.
    */
