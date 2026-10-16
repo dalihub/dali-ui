@@ -115,6 +115,8 @@ public:
   static void ApplyScaleXBy(Animation& animation, View view, const Entry& entry);
   static void ApplyScaleYTo(Animation& animation, View view, const Entry& entry);
   static void ApplyScaleYBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyColorMultiplierTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyColorMultiplierBy(Animation& animation, View view, const Entry& entry);
   static void ApplyColorTo(Animation& animation, View view, const Entry& entry);
   static void ApplyColorBy(Animation& animation, View view, const Entry& entry);
   static void ApplyOpacityTo(Animation& animation, View view, const Entry& entry);

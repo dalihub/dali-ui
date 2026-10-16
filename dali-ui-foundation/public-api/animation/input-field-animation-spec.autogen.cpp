@@ -245,6 +245,18 @@ InputFieldAnimationSpec& InputFieldAnimationSpec::ScaleYBy(float relative, Durat
   return *this;
 }
 
+InputFieldAnimationSpec& InputFieldAnimationSpec::ColorMultiplier(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ColorMultiplier(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::ColorMultiplierBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ColorMultiplierBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputFieldAnimationSpec& InputFieldAnimationSpec::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::Color(target, duration, alpha, delay);

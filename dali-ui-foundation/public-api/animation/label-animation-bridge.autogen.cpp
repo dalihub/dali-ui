@@ -192,6 +192,18 @@ LabelAnimationBridge& LabelAnimationBridge::ScaleYBy(float relative, Duration du
   return *this;
 }
 
+LabelAnimationBridge& LabelAnimationBridge::ColorMultiplier(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ColorMultiplier(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::ColorMultiplierBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ColorMultiplierBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationBridge& LabelAnimationBridge::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::Color(target, duration, alpha, delay);

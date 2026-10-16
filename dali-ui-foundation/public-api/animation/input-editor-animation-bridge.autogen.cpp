@@ -192,6 +192,18 @@ InputEditorAnimationBridge& InputEditorAnimationBridge::ScaleYBy(float relative,
   return *this;
 }
 
+InputEditorAnimationBridge& InputEditorAnimationBridge::ColorMultiplier(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ColorMultiplier(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::ColorMultiplierBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ColorMultiplierBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputEditorAnimationBridge& InputEditorAnimationBridge::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::Color(target, duration, alpha, delay);

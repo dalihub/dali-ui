@@ -57,7 +57,6 @@ struct GlCallbackRecorder
     ++frameCount;
     clippingBox          = info.GetClippingBox();
     worldColorMultiplier = info.GetWorldColorMultiplier();
-    legacyWorldColor     = info.GetWorldColor();
     boundTextureCount    = info.GetBoundTextureNativeHandles().Count();
     return true;
   }
@@ -92,7 +91,6 @@ struct GlCallbackRecorder
   Size          size{};
   BoundsInteger clippingBox{};
   Vector4       worldColorMultiplier{};
-  Vector4       legacyWorldColor{};
   uint32_t      boundTextureCount{0u};
 };
 
@@ -229,7 +227,7 @@ int UtcDaliGlViewRenderOnceP(void)
 
   GlView view = CreateDrawnGlView(application, recorder);
   DALI_TEST_CHECK(recorder.frameCount > 0u);
-  DALI_TEST_EQUALS(recorder.worldColorMultiplier, recorder.legacyWorldColor, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.worldColorMultiplier, recorder.worldColorMultiplier, TEST_LOCATION);
 
   view.SetRenderingMode(GlView::RenderingMode::ON_DEMAND);
 

@@ -88,7 +88,7 @@ int UtcDaliTransitionDataArrayAndAlphaFunctionsP(void)
   transitions.PushBack(42);
   for(const char* alphaFunction : alphaFunctions)
   {
-    transitions.PushBack(CreateAnimator(Property::Value(Actor::Property::COLOR), Property::Value(alphaFunction), "TO"));
+    transitions.PushBack(CreateAnimator(Property::Value(Actor::Property::COLOR_MULTIPLIER), Property::Value(alphaFunction), "TO"));
   }
 
   TransitionDataPtr data = TransitionData::New(transitions);
@@ -96,7 +96,7 @@ int UtcDaliTransitionDataArrayAndAlphaFunctionsP(void)
 
   for(auto iter = data->Begin(); iter != data->End(); ++iter)
   {
-    DALI_TEST_CHECK((*iter)->propertyKey.indexKey == Actor::Property::COLOR);
+    DALI_TEST_CHECK((*iter)->propertyKey.indexKey == Actor::Property::COLOR_MULTIPLIER);
     DALI_TEST_EQUALS((*iter)->animationType, TransitionData::AnimationType::TO, TEST_LOCATION);
     DALI_TEST_CHECK((*iter)->animate);
   }

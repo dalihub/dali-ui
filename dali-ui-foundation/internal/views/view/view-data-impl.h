@@ -200,9 +200,9 @@ public:
   void               SetBackgroundColor(const UiColor& color);
   void               SetBackgroundImage(const Dali::String& url);
   void               SetBackgroundGradient(const Gradient::Base& gradient);
-  UiColor            GetColor() const;
-  void               SetColor(const UiColor& color);
-  UiColor            GetCurrentColor() const;
+  UiColor            GetColorMultiplier() const;
+  void               SetColorMultiplier(const UiColor& multiplier);
+  UiColor            GetCurrentColorMultiplier() const;
   Vector4            GetCornerRadius() const;
   void               SetCornerRadius(const Vector4& radius);
   CornerRadiusPolicy GetCornerRadiusPolicy() const;
@@ -605,7 +605,7 @@ public:
   void SetBackgroundColorInternal(const Vector4& color);
   void SetBackgroundGradientInternal(const Gradient::Base& gradient);
   void SetBorderlineColorInternal(const Vector4& color);
-  void SetColorInternal(const Vector4& color);
+  void SetColorMultiplierInternal(const Vector4& multiplier);
 
   /**
    * @brief Returns this impl's private VisualData context, creating it on first use.

@@ -516,6 +516,7 @@ public: // Properties
   // @ANIMATABLE_MANUAL(Scale, Vector3)
   // @ANIMATABLE_MANUAL(ScaleX, float)
   // @ANIMATABLE_MANUAL(ScaleY, float)
+  // @ANIMATABLE_MANUAL(ColorMultiplier, Vector4)
   // @ANIMATABLE_MANUAL(Color, Vector4)
   // @ANIMATABLE_MANUAL(Opacity, float)
 
@@ -991,14 +992,6 @@ public:
   UiColor GetColorMultiplier() const;
 
   /**
-   * @brief Gets the color.
-   *
-   * @deprecated Use GetColorMultiplier() instead.
-   * @return The color
-   */
-  UiColor GetColor() const;
-
-  /**
    * @brief Sets the component-wise color multiplier for this View's rendered content.
    *
    * This does not draw content or change the background. The resolved red, green, blue,
@@ -1021,27 +1014,11 @@ public:
   void SetColorMultiplier(const UiColor& multiplier);
 
   /**
-   * @brief Sets the color.
-   *
-   * @deprecated Use SetColorMultiplier() instead.
-   * @param[in] color The color to set
-   */
-  void SetColor(const UiColor& color);
-
-  /**
    * @brief Gets the current component-wise color multiplier from the previous update.
    *
    * @return The current color multiplier
    */
   UiColor GetCurrentColorMultiplier() const;
-
-  /**
-   * @brief Gets the current color.
-   *
-   * @deprecated Use GetCurrentColorMultiplier() instead.
-   * @return The current color
-   */
-  UiColor GetCurrentColor() const;
 
   /**
    * @brief Gets the corner radius of the view.

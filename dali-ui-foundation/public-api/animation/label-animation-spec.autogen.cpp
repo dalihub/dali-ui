@@ -281,6 +281,18 @@ LabelAnimationSpec& LabelAnimationSpec::ScaleYBy(float relative, Duration durati
   return *this;
 }
 
+LabelAnimationSpec& LabelAnimationSpec::ColorMultiplier(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ColorMultiplier(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::ColorMultiplierBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ColorMultiplierBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationSpec& LabelAnimationSpec::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::Color(target, duration, alpha, delay);

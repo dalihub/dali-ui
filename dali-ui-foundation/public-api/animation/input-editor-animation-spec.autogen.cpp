@@ -245,6 +245,18 @@ InputEditorAnimationSpec& InputEditorAnimationSpec::ScaleYBy(float relative, Dur
   return *this;
 }
 
+InputEditorAnimationSpec& InputEditorAnimationSpec::ColorMultiplier(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ColorMultiplier(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::ColorMultiplierBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ColorMultiplierBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputEditorAnimationSpec& InputEditorAnimationSpec::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::Color(target, duration, alpha, delay);

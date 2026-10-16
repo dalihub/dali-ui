@@ -302,29 +302,14 @@ public: // Non-virtual API (safe to reorder / extend)
   UiColor GetColorMultiplier() const;
 
   /**
-   * @copydoc Ui::View::GetColor()
-   */
-  UiColor GetColor() const;
-
-  /**
    * @copydoc Ui::View::SetColorMultiplier()
    */
   void SetColorMultiplier(const UiColor& multiplier);
 
   /**
-   * @copydoc Ui::View::SetColor()
-   */
-  void SetColor(const UiColor& color);
-
-  /**
    * @copydoc Ui::View::GetCurrentColorMultiplier()
    */
   UiColor GetCurrentColorMultiplier() const;
-
-  /**
-   * @copydoc Ui::View::GetCurrentColor()
-   */
-  UiColor GetCurrentColor() const;
 
   /**
    * @copydoc Ui::View::GetCornerRadius()

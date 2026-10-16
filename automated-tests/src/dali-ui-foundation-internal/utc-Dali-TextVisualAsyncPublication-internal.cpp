@@ -1329,7 +1329,7 @@ int UtcDaliTextVisualAsyncRevealPendingOpacityCompositionP(void)
   PublishDirect(rendered, parameters, loader.RenderText(parameters, false, Size::ZERO));
   auto renderer = rendered.view.GetRendererAt(0u);
   renderer.SetProperty(DevelRenderer::Property::OPACITY, 0.5f);
-  rendered.view.SetProperty(Actor::Property::COLOR_ALPHA, 0.5f);
+  rendered.view.SetProperty(Actor::Property::COLOR_MULTIPLIER_ALPHA, 0.5f);
   const auto progress  = rendered.view.RegisterProperty("testRevealProgress", 0.5f);
   const auto reference = rendered.view.RegisterProperty("referenceOpacity", 0.5f);
   Animation  animation = Animation::New(1.0f);
@@ -1342,7 +1342,7 @@ int UtcDaliTextVisualAsyncRevealPendingOpacityCompositionP(void)
     application.SendNotification();
     application.Render(16);
     DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(DevelRenderer::Property::OPACITY), 0.25f, 0.0001f, TEST_LOCATION);
-    DALI_TEST_EQUALS(rendered.view.GetCurrentProperty<Vector4>(Actor::Property::COLOR).a, 0.5f, TEST_LOCATION);
+    DALI_TEST_EQUALS(rendered.view.GetCurrentProperty<Vector4>(Actor::Property::COLOR_MULTIPLIER).a, 0.5f, TEST_LOCATION);
   }
   animation.Play();
   for(int frame = 0; frame < 6; ++frame)

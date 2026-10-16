@@ -146,13 +146,6 @@ public:
   const Vector4& GetWorldColorMultiplier() const;
 
   /**
-   * @brief Returns the inherited world color.
-   * @deprecated Use GetWorldColorMultiplier() instead.
-   * @return The inherited world color
-   */
-  const Vector4& GetWorldColor() const;
-
-  /**
    * @brief Returns the native handles (GL texture names) of the bound textures.
    *
    * The handles are in the order the textures were passed to

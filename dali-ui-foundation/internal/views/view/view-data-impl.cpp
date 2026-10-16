@@ -151,7 +151,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VIE
 
 constexpr char BACKGROUND_COLOR_BINDING_ID[]          = "BackgroundColor";
 constexpr char BACKGROUND_GRADIENT_BINDING_ID[]       = "BackgroundGradient";
-constexpr char COLOR_BINDING_ID[]                     = "Color";
+constexpr char COLOR_MULTIPLIER_BINDING_ID[]          = "ColorMultiplier";
 constexpr char ACCESSIBILITY_NAME_BINDING_ID[]        = "Ui.View.AccessibilityName";
 constexpr char ACCESSIBILITY_DESCRIPTION_BINDING_ID[] = "Ui.View.AccessibilityDescription";
 constexpr char INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-highlight";
@@ -2635,26 +2635,26 @@ void ViewDataImpl::SetBackgroundGradient(const Gradient::Base& gradient)
   SetBackgroundGradientInternal(gradient);
 }
 
-UiColor ViewDataImpl::GetColor() const
+UiColor ViewDataImpl::GetColorMultiplier() const
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(mViewImpl.Self(), COLOR_BINDING_ID, outColor))
+  if(UiColorManager::Get().GetBindingColor(mViewImpl.Self(), COLOR_MULTIPLIER_BINDING_ID, outColor))
   {
     return outColor;
   }
   return UiColor(mViewImpl.Self().GetProperty<Vector4>(Actor::Property::COLOR_MULTIPLIER));
 }
 
-void ViewDataImpl::SetColor(const UiColor& color)
+void ViewDataImpl::SetColorMultiplier(const UiColor& multiplier)
 {
-  if(!UpdateColorBindingInternal(COLOR_BINDING_ID, color))
+  if(!UpdateColorBindingInternal(COLOR_MULTIPLIER_BINDING_ID, multiplier))
   {
-    SetColorBindingInternal(COLOR_BINDING_ID, color, ColorCallback::New(this, &ViewDataImpl::SetColorInternal));
+    SetColorBindingInternal(COLOR_MULTIPLIER_BINDING_ID, multiplier, ColorCallback::New(this, &ViewDataImpl::SetColorMultiplierInternal));
   }
-  SetColorInternal(color.GetRgba());
+  SetColorMultiplierInternal(multiplier.GetRgba());
 }
 
-UiColor ViewDataImpl::GetCurrentColor() const
+UiColor ViewDataImpl::GetCurrentColorMultiplier() const
 {
   return UiColor(mViewImpl.Self().GetCurrentProperty<Vector4>(Actor::Property::COLOR_MULTIPLIER));
 }
@@ -5929,9 +5929,9 @@ void ViewDataImpl::SetBackgroundGradientInternal(const Gradient::Base& gradient)
   SetBackground(Internal::CreateGradientVisualPropertyMap(gradient));
 }
 
-void ViewDataImpl::SetColorInternal(const Vector4& color)
+void ViewDataImpl::SetColorMultiplierInternal(const Vector4& multiplier)
 {
-  mViewImpl.Self().SetProperty(Actor::Property::COLOR_MULTIPLIER, color);
+  mViewImpl.Self().SetProperty(Actor::Property::COLOR_MULTIPLIER, multiplier);
 }
 
 void ViewDataImpl::SetBorderlineColorInternal(const Vector4& color)

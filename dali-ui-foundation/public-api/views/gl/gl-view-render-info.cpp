@@ -76,11 +76,6 @@ const Vector4& GlViewRenderInfo::GetWorldColorMultiplier() const
   return mImpl->input ? mImpl->input->worldColorMultiplier : Vector4::ONE;
 }
 
-const Vector4& GlViewRenderInfo::GetWorldColor() const
-{
-  return GetWorldColorMultiplier();
-}
-
 const Dali::Vector<uint32_t>& GlViewRenderInfo::GetBoundTextureNativeHandles() const
 {
   return mImpl->input ? mImpl->input->textureBindings : EMPTY_TEXTURE_BINDINGS;
