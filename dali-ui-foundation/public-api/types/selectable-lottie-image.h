@@ -23,7 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/image/lottie-animation-frame-range.h>
+#include <dali-ui-foundation/public-api/types/frame-range.h>
 
 namespace DALI_NAMESPACE
 {
@@ -53,8 +53,8 @@ namespace Ui
  * @code
  *   // url + select segment [0,19] + deselect segment [20,38] + inner-fill recolour key path
  *   SelectableLottieImage image("checkbox.json",
- *                               LottieAnimation::FrameRange(0, 19),
- *                               LottieAnimation::FrameRange(20, 38),
+ *                               FrameRange(0, 19),
+ *                               FrameRange(20, 38),
  *                               "check_box .inner_fill.color");
  * @endcode
  */
@@ -73,10 +73,10 @@ public:
    * @param[in] innerFillKeyPath The asset key path of the inner fill recoloured with the state
    *                             colours; an empty string keeps the renderer's generic default
    */
-  SelectableLottieImage(const Dali::String&                url,
-                        const LottieAnimation::FrameRange& selectRange,
-                        const LottieAnimation::FrameRange& deselectRange,
-                        const Dali::String&                innerFillKeyPath = Dali::String());
+  SelectableLottieImage(const Dali::String& url,
+                        const FrameRange&   selectRange,
+                        const FrameRange&   deselectRange,
+                        const Dali::String& innerFillKeyPath = Dali::String());
 
   /**
    * @brief Deleted default constructor: a url is inseparable from both frame ranges.
@@ -110,14 +110,14 @@ public:
    *
    * @return The select frame range
    */
-  LottieAnimation::FrameRange GetSelectRange() const;
+  FrameRange GetSelectRange() const;
 
   /**
    * @brief Returns the frame segment played when the control becomes deselected.
    *
    * @return The deselect frame range
    */
-  LottieAnimation::FrameRange GetDeselectRange() const;
+  FrameRange GetDeselectRange() const;
 
   /**
    * @brief Returns the asset key path of the inner fill recoloured with the state colours.

@@ -27,20 +27,17 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
-namespace LottieAnimation
-{
 
 /**
  * @brief An inclusive integer frame span [startFrame, endFrame].
  *
  * This fixed-size value stores the supplied frame numbers without normalizing or
- * clamping them. The consumer applies the rules appropriate to playback or color
- * binding. The two-int32_t layout is fixed; no virtual functions or data members
+ * clamping them. The consumer applies the rules appropriate to the animation or media
+ * format. The two-int32_t layout is fixed; no virtual functions or data members
  * may be added.
  */
-class DALI_UI_API FrameRange
+struct DALI_UI_API FrameRange
 {
-public:
   /**
    * @brief Creates a frame range [0, 0].
    */
@@ -52,34 +49,14 @@ public:
    * @param[in] end The last frame of the segment
    */
   constexpr FrameRange(int32_t start, int32_t end)
-  : mStartFrame(start),
-    mEndFrame(end)
+  : startFrame(start),
+    endFrame(end)
   {
   }
 
-  /**
-   * @brief Returns the first frame of the segment.
-   * @return The start frame
-   */
-  constexpr int32_t GetStartFrame() const
-  {
-    return mStartFrame;
-  }
-
-  /**
-   * @brief Returns the last frame of the segment.
-   * @return The end frame
-   */
-  constexpr int32_t GetEndFrame() const
-  {
-    return mEndFrame;
-  }
-
-private:
-  int32_t mStartFrame{0};
-  int32_t mEndFrame{0};
+  int32_t startFrame{0}; ///< The first frame of the segment
+  int32_t endFrame{0};   ///< The last frame of the segment
 };
 
-} // namespace LottieAnimation
 } // namespace Ui
 } //namespace DALI_NAMESPACE

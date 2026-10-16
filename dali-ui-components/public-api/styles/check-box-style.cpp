@@ -56,8 +56,8 @@ Dali::String DefaultIconUrl()
 SelectableImageInterface MakeDefaultCheckBoxIcon()
 {
   return SelectableLottieAnimationView::New(SelectableLottieImage(DefaultIconUrl(),
-                                                                  LottieAnimation::FrameRange(0, 19),
-                                                                  LottieAnimation::FrameRange(20, 38),
+                                                                  FrameRange(0, 19),
+                                                                  FrameRange(20, 38),
                                                                   "check_box .inner_fill.color"));
 }
 } // namespace

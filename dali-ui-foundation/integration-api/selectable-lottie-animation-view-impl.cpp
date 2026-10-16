@@ -172,10 +172,10 @@ Ui::View SelectableLottieAnimationViewImpl::GetView() const
 
 void SelectableLottieAnimationViewImpl::SetFrameRanges(const FrameRange& selectRange, const FrameRange& deselectRange)
 {
-  mSelectStart   = selectRange.GetStartFrame();
-  mSelectEnd     = selectRange.GetEndFrame();
-  mDeselectStart = deselectRange.GetStartFrame();
-  mDeselectEnd   = deselectRange.GetEndFrame();
+  mSelectStart   = selectRange.startFrame;
+  mSelectEnd     = selectRange.endFrame;
+  mDeselectStart = deselectRange.startFrame;
+  mDeselectEnd   = deselectRange.endFrame;
 }
 
 void SelectableLottieAnimationViewImpl::SetStateColors(const Vector4& deselected, const Vector4& selected)
@@ -259,8 +259,8 @@ void SelectableLottieAnimationViewImpl::SetColorBindings(const SelectableLottieC
     mColorBindings.push_back(ColorBindingData{binding.GetKeyPath(),
                                               binding.GetProperty(),
                                               binding.GetColorPolicy(),
-                                              selectedColorRange.GetStartFrame(),
-                                              selectedColorRange.GetEndFrame(),
+                                              selectedColorRange.startFrame,
+                                              selectedColorRange.endFrame,
                                               AllocateDynamicPropertyId()});
   }
 }

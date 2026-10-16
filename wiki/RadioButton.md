@@ -236,7 +236,6 @@ SelectableImageInterface MakePaymentRadioIcon()
 {
   using Binding     = SelectableLottieColorBinding;
   using ColorPolicy = Binding::ColorPolicy;
-  using FrameRange  = LottieAnimation::FrameRange;
 
   SelectableLottieColorBindings bindings;
   bindings.PushBack(Binding("payment_radio.inner_fill.color",

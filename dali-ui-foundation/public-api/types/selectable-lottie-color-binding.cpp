@@ -29,29 +29,29 @@ namespace DALI_NAMESPACE::Ui
 
 struct SelectableLottieColorBinding::Impl
 {
-  Impl(Dali::StringView                   bindingKeyPath,
-       LottieAnimation::ContentProperty   bindingProperty,
-       ColorPolicy                        bindingColorPolicy,
-       const LottieAnimation::FrameRange& bindingSelectedColorRange)
+  Impl(Dali::StringView                 bindingKeyPath,
+       LottieAnimation::ContentProperty bindingProperty,
+       ColorPolicy                      bindingColorPolicy,
+       const FrameRange&                bindingSelectedColorRange)
   : keyPath(bindingKeyPath),
     property(bindingProperty),
     colorPolicy(bindingColorPolicy),
-    selectedColorRange(std::min(bindingSelectedColorRange.GetStartFrame(), bindingSelectedColorRange.GetEndFrame()),
-                       std::max(bindingSelectedColorRange.GetStartFrame(), bindingSelectedColorRange.GetEndFrame()))
+    selectedColorRange(std::min(bindingSelectedColorRange.startFrame, bindingSelectedColorRange.endFrame),
+                       std::max(bindingSelectedColorRange.startFrame, bindingSelectedColorRange.endFrame))
   {
   }
 
   Dali::String                     keyPath;
   LottieAnimation::ContentProperty property;
   ColorPolicy                      colorPolicy;
-  LottieAnimation::FrameRange      selectedColorRange;
+  FrameRange                       selectedColorRange;
 };
 
 SelectableLottieColorBinding::SelectableLottieColorBinding(
-  Dali::StringView                   keyPath,
-  LottieAnimation::ContentProperty   property,
-  ColorPolicy                        colorPolicy,
-  const LottieAnimation::FrameRange& selectedColorRange)
+  Dali::StringView                 keyPath,
+  LottieAnimation::ContentProperty property,
+  ColorPolicy                      colorPolicy,
+  const FrameRange&                selectedColorRange)
 : mImpl(nullptr)
 {
   DALI_ASSERT_ALWAYS(!keyPath.Empty() && "SelectableLottieColorBinding key path must not be empty");
@@ -102,7 +102,7 @@ SelectableLottieColorBinding::ColorPolicy SelectableLottieColorBinding::GetColor
   return mImpl->colorPolicy;
 }
 
-LottieAnimation::FrameRange SelectableLottieColorBinding::GetSelectedColorRange() const
+FrameRange SelectableLottieColorBinding::GetSelectedColorRange() const
 {
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_COLOR_BINDING(mImpl);
   return mImpl->selectedColorRange;

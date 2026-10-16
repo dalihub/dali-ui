@@ -26,7 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
-#include <dali-ui-foundation/public-api/image/lottie-animation-frame-range.h>
+#include <dali-ui-foundation/public-api/types/frame-range.h>
 
 namespace DALI_NAMESPACE
 {
@@ -82,10 +82,10 @@ public:
    * LottieAnimation::ContentProperty::STROKE_COLOR.
    */
   SelectableLottieColorBinding(
-    Dali::StringView                   keyPath,
-    LottieAnimation::ContentProperty   property,
-    ColorPolicy                        colorPolicy,
-    const LottieAnimation::FrameRange& selectedColorRange = {});
+    Dali::StringView                 keyPath,
+    LottieAnimation::ContentProperty property,
+    ColorPolicy                      colorPolicy,
+    const FrameRange&                selectedColorRange = {});
 
   /**
    * @brief Copy constructor.
@@ -144,7 +144,7 @@ public:
    *
    * @return The frame range
    */
-  LottieAnimation::FrameRange GetSelectedColorRange() const;
+  FrameRange GetSelectedColorRange() const;
 
 private:
   struct Impl;

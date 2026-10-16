@@ -53,7 +53,6 @@ SelectableImageInterface MakeDefaultRadioButtonIcon()
 {
   using Binding     = SelectableLottieColorBinding;
   using ColorPolicy = Binding::ColorPolicy;
-  using FrameRange  = LottieAnimation::FrameRange;
 
   SelectableLottieColorBindings colorBindings;
   colorBindings.PushBack(Binding("radio_inner.inner_fill.color",

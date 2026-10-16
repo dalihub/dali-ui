@@ -31,10 +31,10 @@ namespace Ui
 
 struct SelectableLottieImage::Impl
 {
-  Impl(const Dali::String&                url,
-       const LottieAnimation::FrameRange& selectRange,
-       const LottieAnimation::FrameRange& deselectRange,
-       const Dali::String&                innerFillKeyPath)
+  Impl(const Dali::String& url,
+       const FrameRange&   selectRange,
+       const FrameRange&   deselectRange,
+       const Dali::String& innerFillKeyPath)
   : mUrl(url),
     mSelectRange(selectRange),
     mDeselectRange(deselectRange),
@@ -42,16 +42,16 @@ struct SelectableLottieImage::Impl
   {
   }
 
-  Dali::String                mUrl;
-  LottieAnimation::FrameRange mSelectRange;
-  LottieAnimation::FrameRange mDeselectRange;
-  Dali::String                mInnerFillKeyPath;
+  Dali::String mUrl;
+  FrameRange   mSelectRange;
+  FrameRange   mDeselectRange;
+  Dali::String mInnerFillKeyPath;
 };
 
-SelectableLottieImage::SelectableLottieImage(const Dali::String&                url,
-                                             const LottieAnimation::FrameRange& selectRange,
-                                             const LottieAnimation::FrameRange& deselectRange,
-                                             const Dali::String&                innerFillKeyPath)
+SelectableLottieImage::SelectableLottieImage(const Dali::String& url,
+                                             const FrameRange&   selectRange,
+                                             const FrameRange&   deselectRange,
+                                             const Dali::String& innerFillKeyPath)
 : mImpl(Dali::MakeUnique<Impl>(url, selectRange, deselectRange, innerFillKeyPath))
 {
 }
@@ -85,13 +85,13 @@ const Dali::String& SelectableLottieImage::GetUrl() const
   return mImpl->mUrl;
 }
 
-LottieAnimation::FrameRange SelectableLottieImage::GetSelectRange() const
+FrameRange SelectableLottieImage::GetSelectRange() const
 {
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_IMAGE(mImpl);
   return mImpl->mSelectRange;
 }
 
-LottieAnimation::FrameRange SelectableLottieImage::GetDeselectRange() const
+FrameRange SelectableLottieImage::GetDeselectRange() const
 {
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_IMAGE(mImpl);
   return mImpl->mDeselectRange;

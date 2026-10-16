@@ -19,7 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/selectable-image-interface-impl.h>
-#include <dali-ui-foundation/public-api/image/lottie-animation-frame-range.h>
+#include <dali-ui-foundation/public-api/types/frame-range.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-color-binding.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 
@@ -51,7 +51,7 @@ namespace Integration
 class SelectableLottieAnimationViewImpl : public SelectableImageInterfaceImpl
 {
 public:
-  using FrameRange = Ui::LottieAnimation::FrameRange;
+  using FrameRange = Ui::FrameRange;
 
   /**
    * @brief Creates a new SelectableLottieAnimationViewImpl.

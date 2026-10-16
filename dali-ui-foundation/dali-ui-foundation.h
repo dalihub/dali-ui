@@ -35,7 +35,6 @@
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
-#include <dali-ui-foundation/public-api/image/lottie-animation-frame-range.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
@@ -43,6 +42,7 @@
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/types/cutout-policy.h>
+#include <dali-ui-foundation/public-api/types/frame-range.h>
 #include <dali-ui-foundation/public-api/types/inner-shadow.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-color-binding.h>

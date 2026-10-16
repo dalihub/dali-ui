@@ -38,8 +38,8 @@ SelectableImageInterface MakeRadioButtonTestIcon()
 {
   return SelectableLottieAnimationView::New(
     SelectableLottieImage("test-radio-button.json",
-                          LottieAnimation::FrameRange(0, 19),
-                          LottieAnimation::FrameRange(20, 38)));
+                          FrameRange(0, 19),
+                          FrameRange(20, 38)));
 }
 
 UiStyle CreateRadioButtonStyleOverride()
