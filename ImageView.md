@@ -271,24 +271,24 @@ bool cropToMask = imageView.IsCropToMask();
 
 ---
 
-### 5.2 Masking Mode
+### 5.2 Masking Policy
 
 Control when masking is applied.
 
 ```cpp
 // Apply mask during rendering (default)
-imageView.SetMaskingMode(Image::MaskingType::MASKING_ON_RENDERING);
+imageView.SetMaskingPolicy(Image::MaskingPolicy::ON_RENDERING);
 
 // Apply mask during image loading
-imageView.SetMaskingMode(Image::MaskingType::MASKING_ON_LOADING);
+imageView.SetMaskingPolicy(Image::MaskingPolicy::ON_LOADING);
 
-Image::MaskingType mode = imageView.GetMaskingMode();
+Image::MaskingPolicy policy = imageView.GetMaskingPolicy();
 ```
 
 | Value | Behavior |
 |---|---|
-| `MASKING_ON_RENDERING` | Masking applied in rendering phase. Default. |
-| `MASKING_ON_LOADING` | Masking applied during loading (more efficient). |
+| `ON_RENDERING` | Masking applied in rendering phase. Default. |
+| `ON_LOADING` | Masking applied during loading (more efficient). |
 
 ---
 
@@ -483,7 +483,7 @@ imageView.ResourceReadySignal().Connect(&handler, &MyImageHandler::OnImageReady)
 | `ReleasePolicy` | `DETACHED` |
 | `PreMultipliedAlpha` | `true` |
 | `CropToMask` | `false` |
-| `MaskingMode` | `MASKING_ON_RENDERING` |
+| `MaskingPolicy` | `ON_RENDERING` |
 | `NPatchBorder` | `(0.0, 0.0, 0.0, 0.0)` |
 | `NPatchBorderOnly` | `false` |
 

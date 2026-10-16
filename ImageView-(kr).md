@@ -272,24 +272,24 @@ bool cropToMask = imageView.IsCropToMask();
 
 ---
 
-### 5.2 마스킹 모드
+### 5.2 마스킹 정책
 
 마스킹이 적용되는 시점을 제어합니다.
 
 ```cpp
 // 렌더링 단계에서 마스킹 적용 (기본값)
-imageView.SetMaskingMode(Image::MaskingType::MASKING_ON_RENDERING);
+imageView.SetMaskingPolicy(Image::MaskingPolicy::ON_RENDERING);
 
 // 이미지 로딩 단계에서 마스킹 적용
-imageView.SetMaskingMode(Image::MaskingType::MASKING_ON_LOADING);
+imageView.SetMaskingPolicy(Image::MaskingPolicy::ON_LOADING);
 
-Image::MaskingType mode = imageView.GetMaskingMode();
+Image::MaskingPolicy policy = imageView.GetMaskingPolicy();
 ```
 
 | 값 | 동작 |
 |---|---|
-| `MASKING_ON_RENDERING` | 렌더링 단계에서 마스킹 적용. 기본값. |
-| `MASKING_ON_LOADING` | 로딩 단계에서 마스킹 적용 (더 효율적). |
+| `ON_RENDERING` | 렌더링 단계에서 마스킹 적용. 기본값. |
+| `ON_LOADING` | 로딩 단계에서 마스킹 적용 (더 효율적). |
 
 ---
 
@@ -503,7 +503,7 @@ imageView
 | `ReleasePolicy` | `DETACHED` |
 | `PreMultipliedAlpha` | `true` |
 | `CropToMask` | `false` |
-| `MaskingMode` | `MASKING_ON_RENDERING` |
+| `MaskingPolicy` | `ON_RENDERING` |
 | `NPatchBorder` | `(0.0, 0.0, 0.0, 0.0)` |
 | `NPatchBorderOnly` | `false` |
 
