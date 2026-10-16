@@ -62,6 +62,7 @@ class WebViewImpl;
  * @endcode
  * @SINCE_3_0.0
  */
+/** Engine callbacks are canceled when the WebView is destroyed. */
 class DALI_UI_API WebView : public View
 {
 public: // Callback types
@@ -146,8 +147,11 @@ public: // Creation & Destruction
 
   /**
    * @brief Creates an initialized WebView.
+   *
+   * LWE uses direct rendering; Chromium uses a native image.
+   * Direct rendering requires a window target and GLES resource-context support.
    * @SINCE_3_0.0
-   * @return A handle to a newly allocated Dali resource
+   * @return A new handle, or an empty handle when engine initialization fails.
    */
   static WebView New();
 
@@ -155,7 +159,7 @@ public: // Creation & Destruction
    * @brief Creates an initialized WebView and immediately loads the given URL.
    * @SINCE_3_0.0
    * @param[in] url The URL to load
-   * @return A handle to a newly allocated Dali resource
+   * @return A new handle, or an empty handle when engine initialization fails.
    */
   static WebView New(const Dali::String& url);
 
@@ -967,6 +971,7 @@ public: // Additional APIs
 
   /**
    * @brief Creates a view using the specified profile, retained for the view's lifetime.
+   * Uses the same automatic rendering selection as New().
    * @SINCE_3_0.1
    * @param[in] profile An initialized profile; an empty handle is an assertion error
    * @return The new view, or an empty handle on backend failure; no default fallback

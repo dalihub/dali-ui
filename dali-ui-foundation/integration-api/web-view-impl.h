@@ -32,6 +32,8 @@
 #include <dali/public-api/signals/callback.h>
 #include <functional>
 #include <memory>
+#include <type_traits>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
@@ -586,6 +588,31 @@ private: // From CustomActorImpl
    */
   bool OnTouchEvent(const Dali::TouchEvent& touch) override;
 
+private:
+  // Engine notifications are delivered on the event thread. Keep the view alive
+  // across application code, but cancel queued notifications once it is released.
+  template<typename Function>
+  auto GuardCallback(Function function)
+  {
+    return [this, lifetime = std::weak_ptr<int>(mCallbackLifetime), function = std::move(function)](auto&&... args) mutable
+    {
+      using Result = std::invoke_result_t<Function&, decltype(args)...>;
+      if(lifetime.expired())
+      {
+        if constexpr(!std::is_void_v<Result>)
+        {
+          return Result{};
+        }
+        else
+        {
+          return;
+        }
+      }
+      auto owner = Self();
+      return function(std::forward<decltype(args)>(args)...);
+    };
+  }
+
 private: // Internal rendering callbacks
   /**
    * @brief Called by the web engine each time a new frame is ready.
@@ -674,17 +701,19 @@ private:
   WebViewImpl& operator=(const WebViewImpl&) = delete;
   WebViewImpl& operator=(WebViewImpl&&)      = delete;
 
-private:                                                        // Data — Rendering
-  Ui::ImageUrl                  mNativeImageUrl;                ///< Keeps the external texture registered while the visual uses it.
-  Ui::Integration::Visual::Base mVisual;                        ///< Current image visual showing the web content
-  Dali::Size                    mWebViewSize;                   ///< Current web view size (width, height)
-  Dali::BoundsInteger           mWebViewArea;                   ///< Last known display area in screen coordinates
-  uint32_t                      mLastRenderedNativeImageWidth;  ///< Width of the last uploaded NativeImage texture
-  uint32_t                      mLastRenderedNativeImageHeight; ///< Height of the last uploaded NativeImage texture
-  bool                          mVisualChangeRequired;          ///< True when the visual must be re-created on next frame
-  bool                          mVideoHoleEnabled;              ///< Video hole rendering enabled
-  bool                          mMouseEventsEnabled;            ///< Mouse events forwarded to web content
-  bool                          mKeyEventsEnabled;              ///< Key events forwarded to web content
+private:                                                                                                           // Data — Rendering
+  std::shared_ptr<int>                     mCallbackLifetime{std::make_shared<int>(0)};                            ///< Cancels callbacks after view destruction.
+  Dali::WebEngineDirectRenderingConnection mDirectConnection;                                                      ///< Owns the adaptor output connection.
+  Ui::ImageUrl                             mNativeImageUrl;                                                        ///< Keeps the external texture registered while the visual uses it.
+  Ui::Integration::Visual::Base            mVisual;                                                                ///< Current image visual showing the web content
+  Dali::Size                               mWebViewSize;                                                           ///< Current web view size (width, height)
+  Dali::BoundsInteger                      mWebViewArea;                                                           ///< Last known display area in screen coordinates
+  uint32_t                                 mLastRenderedNativeImageWidth;                                          ///< Width of the last uploaded NativeImage texture
+  uint32_t                                 mLastRenderedNativeImageHeight;                                         ///< Height of the last uploaded NativeImage texture
+  bool                                     mVisualChangeRequired;                                                  ///< True when the visual must be re-created on next frame
+  bool                                     mVideoHoleEnabled;                                                      ///< Video hole rendering enabled
+  bool                                     mMouseEventsEnabled;                                                    ///< Mouse events forwarded to web content
+  bool                                     mKeyEventsEnabled;                                                      ///< Key events forwarded to web content
 
   // Display-area update notifications
   Dali::PropertyNotification mPositionUpdateNotification; ///< Fires on world-position change

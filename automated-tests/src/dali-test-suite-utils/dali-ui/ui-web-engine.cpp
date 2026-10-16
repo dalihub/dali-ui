@@ -53,12 +53,35 @@
 
 using Dali::Integration::ToDaliString;
 
+namespace
+{
+bool gDirectRenderingSupported{false};
+bool gCreationEnabled{true};
+bool gNativeImageInitializationResult{true};
+}
+
 namespace DALI_NAMESPACE
 {
 namespace Internal
 {
 namespace Adaptor
 {
+class WebEngineDirectRenderingConnection : public BaseObject
+{
+public:
+  WebEngineDirectRenderingConnection()
+  {
+    auto geometry = Dali::Geometry::New();
+    auto shader = Dali::Shader::New("", "");
+    renderer = Dali::Renderer::New(geometry, shader);
+  }
+
+  Dali::Renderer renderer;
+  std::function<void()> request;
+  std::function<void()> submitted;
+  bool closed{false};
+};
+
 class WebEngine;
 class MockWebEngineContext;
 class MockWebEngineCookieManager;
@@ -1219,6 +1242,22 @@ public:
   void Create(uint32_t width, uint32_t height, uint32_t argc, char** argv) override
   {
   }
+  bool InitializeNativeImageRendering(uint32_t, uint32_t, const std::string&, const std::string&) override
+  {
+    return true;
+  }
+  bool InitializeNativeImageRendering(uint32_t, uint32_t, uint32_t, char**) override
+  {
+    return true;
+  }
+  WebEngineDirectRenderingSessionPtr InitializeDirectRendering(uint32_t, uint32_t, const std::string&, const std::string&) override
+  {
+    return {};
+  }
+  WebEngineDirectRenderingSessionPtr InitializeDirectRendering(uint32_t, uint32_t, uint32_t, char**) override
+  {
+    return {};
+  }
   void Destroy() override
   {
   }
@@ -2288,6 +2327,8 @@ public:
   Dali::Devel::Accessibility::Address mAccessibilityAddress{};
 
   std::vector<Dali::WebEnginePlugin::JavaScriptMessageHandlerCallback> mResultCallbacks;
+  std::function<void(const std::string&)> mMessageCallback;
+  std::function<void(const std::string&, const std::string&)> mEntireMessageCallback;
 
   Dali::WebEnginePlugin::WebEnginePageLoadCallback                   mPageLoadStartedCallback;
   Dali::WebEnginePlugin::WebEnginePageLoadCallback                   mPageLoadInProgressCallback;
@@ -2756,6 +2797,10 @@ WebEngine WebEngine::New()
 WebEngine WebEngine::New(int32_t type)
 {
   //type is used for actual target
+  if(!gCreationEnabled)
+  {
+    return {};
+  }
   Internal::Adaptor::WebEngine* baseObject = new Internal::Adaptor::WebEngine();
 
   return WebEngine(baseObject);
@@ -2785,6 +2830,55 @@ WebEngine& WebEngine::operator=(const WebEngine& webEngine)
 WebEngine WebEngine::DownCast(BaseHandle handle)
 {
   return WebEngine(dynamic_cast<Internal::Adaptor::WebEngine*>(handle.GetObjectPtr()));
+}
+
+bool WebEngine::InitializeNativeImageRendering(uint32_t width, uint32_t height, const std::string& locale, const std::string& timezoneId)
+{
+  Create(width, height, locale, timezoneId);
+  return gNativeImageInitializationResult;
+}
+
+bool WebEngine::InitializeNativeImageRendering(uint32_t width, uint32_t height, uint32_t argc, char** argv)
+{
+  Create(width, height, argc, argv);
+  return gNativeImageInitializationResult;
+}
+
+WebEngineDirectRenderingConnection WebEngine::InitializeDirectRendering(uint32_t, uint32_t, const std::string&, const std::string&)
+{
+  return gDirectRenderingSupported ? WebEngineDirectRenderingConnection(new Internal::Adaptor::WebEngineDirectRenderingConnection()) : WebEngineDirectRenderingConnection{};
+}
+
+WebEngineDirectRenderingConnection WebEngine::InitializeDirectRendering(uint32_t, uint32_t, uint32_t, char**)
+{
+  return gDirectRenderingSupported ? WebEngineDirectRenderingConnection(new Internal::Adaptor::WebEngineDirectRenderingConnection()) : WebEngineDirectRenderingConnection{};
+}
+
+WebEngineDirectRenderingConnection::WebEngineDirectRenderingConnection() = default;
+WebEngineDirectRenderingConnection::~WebEngineDirectRenderingConnection() = default;
+WebEngineDirectRenderingConnection::WebEngineDirectRenderingConnection(Internal::Adaptor::WebEngineDirectRenderingConnection* implementation)
+: BaseHandle(implementation)
+{
+}
+
+Renderer WebEngineDirectRenderingConnection::GetRenderer() const
+{
+  return static_cast<const Internal::Adaptor::WebEngineDirectRenderingConnection&>(GetBaseObject()).renderer;
+}
+
+void WebEngineDirectRenderingConnection::SetCallbacks(std::function<void()> request, std::function<void()> submitted)
+{
+  auto& impl = static_cast<Internal::Adaptor::WebEngineDirectRenderingConnection&>(GetBaseObject());
+  impl.request = std::move(request);
+  impl.submitted = std::move(submitted);
+}
+
+void WebEngineDirectRenderingConnection::Close()
+{
+  auto& impl = static_cast<Internal::Adaptor::WebEngineDirectRenderingConnection&>(GetBaseObject());
+  impl.closed = true;
+  impl.request = {};
+  impl.submitted = {};
 }
 
 void WebEngine::Create(uint32_t width, uint32_t height, const std::string& locale, const std::string& timezoneId)
@@ -2944,6 +3038,7 @@ void WebEngine::EvaluateJavaScript(const std::string& script, std::function<void
 
 void WebEngine::AddJavaScriptMessageHandler(const std::string& exposedObjectName, std::function<void(const std::string&)> handler)
 {
+  Internal::Adaptor::GetImplementation(*this).mMessageCallback = std::move(handler);
 }
 void WebEngine::RemoveJavaScriptMessageHandler(const std::string& exposedObjectName)
 {
@@ -2952,6 +3047,7 @@ void WebEngine::RemoveJavaScriptMessageHandler(const std::string& exposedObjectN
 
 void WebEngine::AddJavaScriptEntireMessageHandler(const std::string& exposedObjectName, std::function<void(const std::string&, const std::string&)> handler)
 {
+  Internal::Adaptor::GetImplementation(*this).mEntireMessageCallback = std::move(handler);
 }
 
 void WebEngine::RegisterJavaScriptAlertCallback(Dali::WebEnginePlugin::JavaScriptAlertCallback callback)
@@ -3394,6 +3490,99 @@ void WebEngine::RegisterPlaybackVideoPausedCallback(Dali::WebEnginePlugin::WebEn
 
 namespace Test::WebEngine
 {
+Dali::WebEnginePlugin::WebEnginePageLoadCallback GetPageLoadStartedCallback(Dali::WebEngine engine)
+{
+  return Dali::Internal::Adaptor::GetImplementation(engine).mPageLoadStartedCallback;
+}
+
+void SetCreationEnabled(bool enabled)
+{
+  gCreationEnabled = enabled;
+}
+
+void SetNativeImageInitializationResult(bool success)
+{
+  gNativeImageInitializationResult = success;
+}
+
+std::function<bool()> CaptureViewCallbacks(Dali::WebEngine engine)
+{
+  auto& impl = Dali::Internal::Adaptor::GetImplementation(engine);
+  // Copy queued notifications without retaining the engine or its owning View.
+  std::vector<std::function<void()>> notifications;
+  notifications.emplace_back([callback = impl.mFrameRenderedCallback]() { callback(); });
+  notifications.emplace_back([callback = impl.mPageLoadStartedCallback]() { callback("url"); });
+  notifications.emplace_back([callback = impl.mPageLoadInProgressCallback]() { callback("url"); });
+  notifications.emplace_back([callback = impl.mPageLoadFinishedCallback]() { callback("url"); });
+  notifications.emplace_back([callback = impl.mPageLoadErrorCallback]() { callback(std::make_unique<Dali::Internal::Adaptor::MockWebEngineLoadError>("url")); });
+  notifications.emplace_back([callback = impl.mUrlChangedCallback]() { callback("url"); });
+  notifications.emplace_back([callback = impl.mScrollEdgeReachedCallback]() { callback(Dali::WebEnginePlugin::ScrollEdge::BOTTOM); });
+  notifications.emplace_back([callback = impl.mOverScrolledCallback]() { callback(Dali::WebEnginePlugin::OverScrolled::BOTTOM); });
+  notifications.emplace_back([callback = impl.mFullscreenEnteredCallback]() { callback(); });
+  notifications.emplace_back([callback = impl.mFullscreenExitedCallback]() { callback(); });
+  notifications.emplace_back([callback = impl.mTextFoundCallback]() { callback(1u); });
+  notifications.emplace_back([callback = impl.mWebProcessCrashedCallback]() { callback(); });
+  if(impl.mScreenshotCapturedCallback)
+  {
+    notifications.emplace_back([callback = impl.mScreenshotCapturedCallback]()
+    {
+      auto* pixels = new uint8_t[4]{255u, 255u, 255u, 255u};
+      callback(Dali::PixelData::New(pixels, 4u, 1u, 1u, Dali::Pixel::Format::RGBA8888, Dali::PixelData::ReleaseFunction::DELETE_ARRAY));
+    });
+  }
+  return [notifications = std::move(notifications), permission = impl.mGeolocationPermissionCallback]()
+  {
+    for(const auto& notification : notifications)
+    {
+      notification();
+    }
+    return permission("host", "https");
+  };
+}
+
+std::function<bool()> CaptureApplicationCallbacks(Dali::WebEngine engine)
+{
+  auto& impl = Dali::Internal::Adaptor::GetImplementation(engine);
+  return [results = impl.mResultCallbacks, message = impl.mMessageCallback,
+          entireMessage = impl.mEntireMessageCallback, alert = impl.mJavaScriptAlertCallback,
+          confirm = impl.mJavaScriptConfirmCallback, prompt = impl.mJavaScriptPromptCallback,
+          plainText = impl.mPlainTextReceivedCallback, video = impl.mVideoPlayingCallback]()
+  {
+    for(const auto& result : results)
+    {
+      result("result");
+    }
+    message("message");
+    entireMessage("object", "message");
+    plainText("text");
+    video(true);
+    bool alertResult = alert("alert");
+    bool confirmResult = confirm("confirm");
+    bool promptResult = prompt("prompt", "default");
+    return alertResult || confirmResult || promptResult;
+  };
+}
+
+void SetDirectRenderingSupported(bool supported)
+{
+  gDirectRenderingSupported = supported;
+}
+
+std::function<void()> GetDirectFrameRequest(Dali::WebEngineDirectRenderingConnection connection)
+{
+  return static_cast<Dali::Internal::Adaptor::WebEngineDirectRenderingConnection&>(connection.GetBaseObject()).request;
+}
+
+std::function<void()> GetDirectFrameSubmitted(Dali::WebEngineDirectRenderingConnection connection)
+{
+  return static_cast<Dali::Internal::Adaptor::WebEngineDirectRenderingConnection&>(connection.GetBaseObject()).submitted;
+}
+
+bool IsDirectConnectionClosed(Dali::WebEngineDirectRenderingConnection connection)
+{
+  return static_cast<Dali::Internal::Adaptor::WebEngineDirectRenderingConnection&>(connection.GetBaseObject()).closed;
+}
+
 void SetNativeImageInterface(Dali::WebEngine engine, Dali::NativeImageInterfacePtr nativeImage)
 {
   Dali::Internal::Adaptor::GetImplementation(engine).mNativeImageInterface = nativeImage;
@@ -3567,7 +3756,7 @@ WebEngineProfilePtr WebEngineRuntime::CreateProfile(bool incognito, const char* 
 bool WebEngineRuntime::CreateView(WebEngine engine, const WebEngineProfilePtr& profile, uint32_t, uint32_t)
 {
   auto& state = Test::WebEngine::GetRuntimeState();
-  if(!engine || !profile || !profile->GetContext() || state.failView)
+  if(!engine || !profile || !profile->GetContext() || state.failView || !gNativeImageInitializationResult)
   {
     return false;
   }
@@ -3577,5 +3766,19 @@ bool WebEngineRuntime::CreateView(WebEngine engine, const WebEngineProfilePtr& p
   state.lastViewContext = profile->GetContext();
   ++state.viewCreates;
   return true;
+}
+WebEngineDirectRenderingConnection WebEngineRuntime::CreateDirectRenderingView(WebEngine engine, const WebEngineProfilePtr& profile, uint32_t, uint32_t)
+{
+  auto& state = Test::WebEngine::GetRuntimeState();
+  if(!engine || !profile || !profile->GetContext() || state.failView || !gDirectRenderingSupported)
+  {
+    return {};
+  }
+  auto& impl = Internal::Adaptor::GetImplementation(engine);
+  impl.mRuntimeProfile = profile;
+  impl.mIncognito = std::static_pointer_cast<MockRuntimeProfile>(profile)->incognito;
+  state.lastViewContext = profile->GetContext();
+  ++state.viewCreates;
+  return WebEngineDirectRenderingConnection(new Internal::Adaptor::WebEngineDirectRenderingConnection());
 }
 } // namespace DALI_NAMESPACE
